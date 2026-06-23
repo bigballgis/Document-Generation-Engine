@@ -1,6 +1,9 @@
 package com.bank.docgen.sharedkernel.api;
 
 import com.bank.docgen.authorization.management.service.InvalidCredentialsException;
+import com.bank.docgen.authorization.management.service.ManagementConflictException;
+import com.bank.docgen.authorization.management.service.ManagementForbiddenException;
+import com.bank.docgen.authorization.management.service.ManagementNotFoundException;
 import com.bank.docgen.authorization.management.service.SessionExpiredException;
 import com.bank.docgen.apimgmt.service.ApiManagementAccessDeniedException;
 import com.bank.docgen.apimgmt.service.ApiManagementNotFoundException;
@@ -8,6 +11,7 @@ import com.bank.docgen.audit.service.AuditAccessDeniedException;
 import com.bank.docgen.audit.service.AuditValidationException;
 import com.bank.docgen.runtime.service.AsyncTaskCancellationNotAllowedException;
 import com.bank.docgen.runtime.service.AsyncTaskNotFoundException;
+import com.bank.docgen.runtime.service.IdempotencyConflictException;
 import com.bank.docgen.runtime.service.RuntimeAccessDeniedException;
 import com.bank.docgen.runtime.service.RuntimeBatchValidationException;
 import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
@@ -289,6 +293,20 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(IdempotencyConflictException.class)
+    public ResponseEntity<ErrorEnvelope> handleIdempotencyConflict(
+            HttpServletRequest request,
+            IdempotencyConflictException ex
+    ) {
+        return domainError(
+                request,
+                HttpStatus.CONFLICT,
+                ApiErrorCodes.IDEMPOTENCY_KEY_CONFLICT,
+                ApiErrorCategories.RUNTIME,
+                ex.messageKey()
+        );
+    }
+
     @ExceptionHandler(AsyncTaskNotFoundException.class)
     public ResponseEntity<ErrorEnvelope> handleAsyncTaskNotFound(HttpServletRequest request) {
         return domainError(
@@ -336,6 +354,48 @@ public class GlobalExceptionHandler {
                 ApiErrorCodes.ENCRYPTION_FAILED,
                 ApiErrorCategories.ENCRYPTION,
                 "api.error.encryption.encryptionFailed"
+        );
+    }
+
+    @ExceptionHandler(ManagementNotFoundException.class)
+    public ResponseEntity<ErrorEnvelope> handleManagementNotFound(
+            HttpServletRequest request,
+            ManagementNotFoundException ex
+    ) {
+        return domainError(
+                request,
+                HttpStatus.NOT_FOUND,
+                ex.errorCode(),
+                ApiErrorCategories.NOT_FOUND,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(ManagementConflictException.class)
+    public ResponseEntity<ErrorEnvelope> handleManagementConflict(
+            HttpServletRequest request,
+            ManagementConflictException ex
+    ) {
+        return domainError(
+                request,
+                HttpStatus.CONFLICT,
+                ex.errorCode(),
+                ApiErrorCategories.CONFLICT,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(ManagementForbiddenException.class)
+    public ResponseEntity<ErrorEnvelope> handleManagementForbidden(
+            HttpServletRequest request,
+            ManagementForbiddenException ex
+    ) {
+        return domainError(
+                request,
+                HttpStatus.FORBIDDEN,
+                ex.errorCode(),
+                ApiErrorCategories.AUTHORIZATION,
+                ex.messageKey()
         );
     }
 

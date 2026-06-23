@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,14 +28,21 @@ public class IdempotencyService {
 
     @Transactional
     public Optional<GenerationIdempotencyEntity> findExisting(String idempotencyKey, UUID templateId, String requestHash) {
-        String cacheKey = cacheKey(templateId, idempotencyKey);
-        Optional<String> cachedHash = idempotencyCachePort.findRequestHash(cacheKey);
-        if (cachedHash.isPresent() && !cachedHash.get().equals(requestHash)) {
+        // The database record is authoritative for conflict detection. A still-live
+        // record with a different request hash is an idempotency conflict (ADR 0004),
+        // not a "no record" signal — returning empty here previously caused begin() to
+        // hit the unique constraint and surface a 500.
+        Optional<GenerationIdempotencyEntity> live = repository
+                .findByIdempotencyKeyAndTemplateId(idempotencyKey, templateId)
+                .filter(record -> record.getExpiresAt().isAfter(Instant.now()));
+        if (live.isEmpty()) {
             return Optional.empty();
         }
-        return repository.findByIdempotencyKeyAndTemplateId(idempotencyKey, templateId)
-                .filter(record -> record.getExpiresAt().isAfter(Instant.now()))
-                .filter(record -> record.getRequestHash().equals(requestHash));
+        GenerationIdempotencyEntity record = live.get();
+        if (!record.getRequestHash().equals(requestHash)) {
+            throw new IdempotencyConflictException(idempotencyKey);
+        }
+        return Optional.of(record);
     }
 
     @Transactional
@@ -47,7 +55,20 @@ public class IdempotencyService {
                 "IN_PROGRESS",
                 Instant.now().plusSeconds(86400)
         );
-        GenerationIdempotencyEntity saved = repository.save(entity);
+        GenerationIdempotencyEntity saved;
+        try {
+            saved = repository.saveAndFlush(entity);
+        } catch (DataIntegrityViolationException ex) {
+            // Concurrent begin() for the same (idempotencyKey, templateId): re-read the
+            // winning record. Same semantics -> replay it; different semantics -> conflict.
+            GenerationIdempotencyEntity existing = repository
+                    .findByIdempotencyKeyAndTemplateId(idempotencyKey, templateId)
+                    .orElseThrow(() -> ex);
+            if (!existing.getRequestHash().equals(requestHash)) {
+                throw new IdempotencyConflictException(idempotencyKey);
+            }
+            return existing;
+        }
         idempotencyCachePort.remember(cacheKey(templateId, idempotencyKey), requestHash, saved.getExpiresAt());
         return saved;
     }

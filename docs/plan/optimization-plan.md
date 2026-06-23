@@ -99,7 +99,7 @@ Priority: **H/M/L**. All start `Not Started`.
 
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
-| E1 | H | Idempotency conflict → 409 not 500 | `IdempotencyService.begin` L41–52 no `DataIntegrityViolationException` handling; unique `(key, template_id)` `V8__idempotency.sql` L13 | Concurrent same-key returns deterministic conflict error per OpenAPI envelope; regression test | Not Started |
+| E1 | H | Idempotency conflict → 409 not 500 | `IdempotencyService` now DB-authoritative + handles `DataIntegrityViolationException` | **Done** (Wave 2): same key + different request hash → `IdempotencyConflictException` → 409 `IDEMPOTENCY_KEY_CONFLICT` (contract-aligned) + messageKey; concurrent-insert race re-reads winner; 5 regression tests in `IdempotencyServiceConflictTest`; full gates green (114 tests) |
 | E2 | H | Runtime auth error envelope compliance | `ApiCredentialAuthenticationFilter` L75–77 emits `{error:{code,messageKey}}` only | Errors include `metadata`, `message`, `category`, `retryable` per OpenAPI; messageKey present | Not Started |
 | E3 | H | Audit fail-open JSON parsing | silent `catch(Exception){return List.of();}` in `ApiCredentialAuthenticationFilter` L157–159, `RuntimeGenerationService` L227–229, `ContractAssemblyService` L172–174 | Parse failures fail closed (deny) and are logged; not silently treated as empty allow-lists | Not Started |
 | E4 | M | Close `listCallableVersions` access check gap | `RuntimeGenerationService.listCallableVersionsResult` L103–108 lacks `assertTemplateAccess` (cf. L117) | Access asserted consistently; test proves no cross-credential leakage | Not Started |
@@ -198,5 +198,5 @@ once Wave 1 exit criteria are met.
 | Wave | Scope | Status |
 | --- | --- | --- |
 | Wave 1 | OPT-A + OPT-B (incl. B5) | **In Progress** — OPT-B (B1–B4) Done; B5 + OPT-A reconciliation remaining |
-| Wave 2 | OPT-C + OPT-E + OPT-D (start) | Not Started |
+| Wave 2 | OPT-C + OPT-E + OPT-D (start) | In Progress — OPT-E1 (idempotency 409) Done; OPT-C test coverage next |
 | Wave 3 | OPT-D (finish) + OPT-F + OPT-G | Not Started |

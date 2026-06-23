@@ -25,11 +25,20 @@ public final class ApiErrorCodes {
     public static final String BATCH_LIMIT_EXCEEDED = "BATCH_LIMIT_EXCEEDED";
     public static final String ITEM_ID_DUPLICATED = "ITEM_ID_DUPLICATED";
     public static final String OUTPUT_MODE_NOT_ALLOWED = "OUTPUT_MODE_NOT_ALLOWED";
+    public static final String IDEMPOTENCY_KEY_CONFLICT = "IDEMPOTENCY_KEY_CONFLICT";
     public static final String ASYNC_TASK_NOT_FOUND = "ASYNC_TASK_NOT_FOUND";
     public static final String ASYNC_TASK_CANCELLATION_NOT_ALLOWED = "ASYNC_TASK_CANCELLATION_NOT_ALLOWED";
     public static final String ENCRYPTION_PARAMETER_INVALID = "ENCRYPTION_PARAMETER_INVALID";
     public static final String ENCRYPTION_NOT_ALLOWED = "ENCRYPTION_NOT_ALLOWED";
     public static final String ENCRYPTION_FAILED = "ENCRYPTION_FAILED";
+    public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
+    public static final String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
+    public static final String USERNAME_ALREADY_EXISTS = "USERNAME_ALREADY_EXISTS";
+    public static final String GROUP_CODE_ALREADY_EXISTS = "GROUP_CODE_ALREADY_EXISTS";
+    public static final String GROUP_SCOPE_OUT_OF_RANGE = "GROUP_SCOPE_OUT_OF_RANGE";
+    public static final String ROLE_ASSIGNMENT_NOT_ALLOWED = "ROLE_ASSIGNMENT_NOT_ALLOWED";
+    public static final String USER_DELETE_NOT_ALLOWED = "USER_DELETE_NOT_ALLOWED";
+    public static final String GROUP_MANAGEMENT_NOT_ALLOWED = "GROUP_MANAGEMENT_NOT_ALLOWED";
 
     private ApiErrorCodes() {
     }

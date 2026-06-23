@@ -71,7 +71,6 @@ class TemplatePlatformSliceTest {
     private ManagementSessionClaims globalAdmin;
     private ManagementSessionClaims tester;
     private ManagementSessionClaims approver;
-    private ManagementSessionClaims apiAdmin;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -84,9 +83,8 @@ class TemplatePlatformSliceTest {
         groupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL", "CORP"));
         templateAuthor = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
         globalAdmin = session("10000001", List.of("GLOBAL_ADMIN"), List.of("*"));
-        tester = session("10000005", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
-        approver = session("10000006", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
-        apiAdmin = session("10000007", List.of("API_ADMIN"), List.of("RETAIL"));
+        tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
+        approver = session("10000007", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
     }
 
     @Test
@@ -137,7 +135,37 @@ class TemplatePlatformSliceTest {
     }
 
     @Test
-    void runtimeRejectsUnauthorizedAdGroup() throws Exception {
+    void savesCompositionRulesAndReturnsThemOnTemplateDetail() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+
+        mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/rules")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "rules":[
+                                    {
+                                      "ruleId":"rule-1",
+                                      "conditionExpression":"${customerName} != null",
+                                      "targetAnchorId":"HEADER",
+                                      "trueBranchRuleId":"",
+                                      "falseBranchRuleId":""
+                                    }
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result[0].ruleId").value("rule-1"));
+
+        mockMvc.perform(get("/api/management/v1/templates/" + templateId)
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.rules[0].targetAnchorId").value("HEADER"));
+    }
+
+    @Test
+    void runtimeGenerateDeniedForUnauthorizedAccessAccount() throws Exception {
         String masterId = uploadAndApproveMaster();
         String templateId = createTemplate(masterId);
         configureTemplate(templateId);
@@ -333,7 +361,7 @@ class TemplatePlatformSliceTest {
         configureTemplate(templateId);
         runLifecycle(templateId);
         mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
-                        .with(authentication(new ManagementAuthentication(apiAdmin)))
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -349,7 +377,7 @@ class TemplatePlatformSliceTest {
                                 """))
                 .andExpect(status().isOk());
         MvcResult credentialResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/api/credentials")
-                        .with(authentication(new ManagementAuthentication(apiAdmin))))
+                        .with(authentication(new ManagementAuthentication(groupAdmin))))
                 .andExpect(status().isCreated())
                 .andReturn();
         JsonNode body = objectMapper.readTree(credentialResult.getResponse().getContentAsString()).path("result");
@@ -381,7 +409,7 @@ class TemplatePlatformSliceTest {
         configureTemplate(templateId);
         runLifecycle(templateId);
         mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
-                        .with(authentication(new ManagementAuthentication(apiAdmin)))
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -397,7 +425,7 @@ class TemplatePlatformSliceTest {
                                 """))
                 .andExpect(status().isOk());
         MvcResult credentialResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/api/credentials")
-                        .with(authentication(new ManagementAuthentication(apiAdmin))))
+                        .with(authentication(new ManagementAuthentication(groupAdmin))))
                 .andExpect(status().isCreated())
                 .andReturn();
         JsonNode body = objectMapper.readTree(credentialResult.getResponse().getContentAsString()).path("result");
@@ -471,7 +499,7 @@ class TemplatePlatformSliceTest {
         configureTemplate(templateId);
         runLifecycle(templateId);
         mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
-                        .with(authentication(new ManagementAuthentication(apiAdmin)))
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -487,7 +515,7 @@ class TemplatePlatformSliceTest {
                                 """))
                 .andExpect(status().isOk());
         MvcResult credentialResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/api/credentials")
-                        .with(authentication(new ManagementAuthentication(apiAdmin))))
+                        .with(authentication(new ManagementAuthentication(groupAdmin))))
                 .andExpect(status().isCreated())
                 .andReturn();
         JsonNode body = objectMapper.readTree(credentialResult.getResponse().getContentAsString()).path("result");
@@ -514,7 +542,7 @@ class TemplatePlatformSliceTest {
 
         mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/api/contract")
                         .param("environment", "dev")
-                        .with(authentication(new ManagementAuthentication(apiAdmin))))
+                        .with(authentication(new ManagementAuthentication(groupAdmin))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.templateId").value("TPL-RETAIL-LETTER"))
                 .andExpect(jsonPath("$.result.paths[0]").value("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract"))
@@ -676,7 +704,7 @@ class TemplatePlatformSliceTest {
 
     private CredentialBundle configureApiAndCredential(String templateId) throws Exception {
         mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
-                        .with(authentication(new ManagementAuthentication(apiAdmin)))
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -694,7 +722,7 @@ class TemplatePlatformSliceTest {
                 .andExpect(jsonPath("$.result.policyVersion").value(1));
 
         MvcResult credentialResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/api/credentials")
-                        .with(authentication(new ManagementAuthentication(apiAdmin))))
+                        .with(authentication(new ManagementAuthentication(groupAdmin))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.result.secret").isNotEmpty())
                 .andReturn();
@@ -704,7 +732,7 @@ class TemplatePlatformSliceTest {
 
     private CredentialBundle configureBatchApiAndCredential(String templateId) throws Exception {
         mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
-                        .with(authentication(new ManagementAuthentication(apiAdmin)))
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -722,7 +750,7 @@ class TemplatePlatformSliceTest {
                 .andExpect(jsonPath("$.result.policyVersion").value(1));
 
         MvcResult credentialResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/api/credentials")
-                        .with(authentication(new ManagementAuthentication(apiAdmin))))
+                        .with(authentication(new ManagementAuthentication(groupAdmin))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.result.secret").isNotEmpty())
                 .andReturn();
