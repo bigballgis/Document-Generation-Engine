@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SpotBugs exclusion filter (OPT-B ratchet). Each exclusion is justified and is a
+  documented debt item to be removed as the ratchet tightens.
+-->
+<FindBugsFilter>
+    <!-- Test sources are out of scope for this gate. -->
+    <Match>
+        <Class name="~.*Test$"/>
+    </Match>
+
+    <!-- DEFERRED (immutability pass): EI_EXPOSE_REP / EI_EXPOSE_REP2 are pervasive
+         across DTOs/entities (166 instances). Tracked as a dedicated defensive-copy
+         pass; excluded now to let the gate enforce higher-signal detectors. -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!-- DEFERRED to OPT-E3 (fail-open hardening, Wave 2): broad catch(Exception)
+         cases are being reworked to fail-closed with logging; tracked there. -->
+    <Match>
+        <Bug pattern="REC_CATCH_EXCEPTION"/>
+    </Match>
+
+    <!-- Spring AbstractAuthenticationToken subclasses throw in ctor by framework
+         convention; serialization not used for these tokens. -->
+    <Match>
+        <Bug pattern="CT_CONSTRUCTOR_THROW,SE_BAD_FIELD"/>
+    </Match>
+</FindBugsFilter>

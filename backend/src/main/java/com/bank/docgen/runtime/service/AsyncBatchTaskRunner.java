@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -109,7 +110,7 @@ public class AsyncBatchTaskRunner {
     }
 
     private String taskBatchId() {
-        return "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        return "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
     }
 
     private String writeBatchResult(BatchResultView batchResult) {

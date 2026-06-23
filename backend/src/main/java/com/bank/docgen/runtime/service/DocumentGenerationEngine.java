@@ -17,6 +17,7 @@ import com.bank.docgen.template.service.TemplateValidationException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -75,7 +76,7 @@ public class DocumentGenerationEngine {
                 outputFormat,
                 encryption
         );
-        String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         String storageKey = "generated/" + documentId + "/" + artifact.storageFileName();
         objectStoragePort.put(
                 storageKey,

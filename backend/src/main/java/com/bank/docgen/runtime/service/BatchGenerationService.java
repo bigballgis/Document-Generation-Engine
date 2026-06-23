@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -120,8 +121,8 @@ public class BatchGenerationService {
             return new AsyncAcceptedResultView(toTaskSummary(existing.get(), template.getExternalId(), environment));
         }
 
-        String taskId = "TASK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        String batchId = "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String taskId = "TASK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
+        String batchId = "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         GenerationAsyncTaskEntity task = new GenerationAsyncTaskEntity(
                 UUID.randomUUID(),
                 taskId,
@@ -186,7 +187,7 @@ public class BatchGenerationService {
             String releaseVersion,
             BatchGenerateRequestBody request
     ) {
-        String batchId = "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String batchId = "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         List<BatchResultItemView> items = new ArrayList<>();
         for (BatchGenerateRequestBody.BatchGenerateItemBody item : request.items()) {
             OutputOptionsView output = item.output() != null ? item.output() : request.output();

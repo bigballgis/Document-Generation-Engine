@@ -6,12 +6,10 @@ import com.bank.docgen.apimgmt.api.ApiPolicyView;
 import com.bank.docgen.apimgmt.api.RotateCredentialResponse;
 import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
 import com.bank.docgen.apimgmt.domain.ApiCredentialStatus;
-import com.bank.docgen.apimgmt.domain.ApiCredentialStatus;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
-import com.bank.docgen.apimgmt.service.ApiManagementNotFoundException;
 import com.bank.docgen.runtime.api.ContractResultView;
 import com.bank.docgen.runtime.api.RuntimeCredentialSummaryView;
 import com.bank.docgen.runtime.service.ContractAssemblyService;
@@ -30,6 +28,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -166,7 +165,7 @@ public class ApiManagementService {
     public ApiCredentialCreatedView createCredential(UUID templateId, ManagementSessionClaims session) {
         TemplateEntity template = requireApiAdmin(templateId, session);
         apiPolicyRepository.findByTemplateId(templateId).orElseThrow(ApiManagementNotFoundException::new);
-        String externalId = "CRED-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String externalId = "CRED-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         String secret = generateSecret();
         ApiCredentialEntity credential = new ApiCredentialEntity(
                 UUID.randomUUID(),

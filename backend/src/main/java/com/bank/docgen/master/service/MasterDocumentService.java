@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -233,7 +234,7 @@ public class MasterDocumentService {
             throw new MasterValidationException("api.error.master.docxRequired");
         }
         String filename = docxFile.getOriginalFilename();
-        if (filename == null || !filename.toLowerCase().endsWith(".docx")) {
+        if (filename == null || !filename.toLowerCase(Locale.ROOT).endsWith(".docx")) {
             throw new MasterValidationException("api.error.master.docxRequired");
         }
     }

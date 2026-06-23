@@ -14,7 +14,6 @@ import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
-import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -89,6 +88,7 @@ public class TemplateRuleValidationService {
                 case MISSING_ANCHOR -> missingAnchor++;
                 case INVALID_BRANCH_REFERENCE -> invalidBranch++;
                 case MALFORMED_RULE -> malformed++;
+                default -> { }
             }
         }
 

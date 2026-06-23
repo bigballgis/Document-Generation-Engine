@@ -58,19 +58,19 @@ Source-of-truth boundary:
 | Backend testing | JUnit 5 + Mockito + Testcontainers + RestAssured | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Backend build tool | Maven | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Database migration tool | Flyway | ADR Accepted | ADR 0028 | 2026-06-08 |
-| Backend ORM / data access | Spring Data JPA + QueryDSL | ADR Accepted | ADR 0028 | 2026-06-08 |
+| Backend ORM / data access | Spring Data JPA (+ QueryDSL recommended, incremental) | ADR Accepted (amended) | ADR 0028, ADR 0037 | 2026-06-23 |
 | Backend auth framework | Spring Security + JWT | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Backend observability | Micrometer + Prometheus + Grafana + OpenTelemetry | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Logging stack | Logback + JSON structured logs | ADR Accepted | ADR 0028 | 2026-06-08 |
 | API docs and debug tooling | springdoc-openapi + Swagger UI | ADR Accepted | ADR 0028 | 2026-06-08 |
 | JSON serialization | Jackson | ADR Accepted | ADR 0028 | 2026-06-08 |
-| Object mapping | MapStruct | ADR Accepted | ADR 0028 | 2026-06-08 |
+| Object mapping | MapStruct (recommended, incremental; hand-written mapping interim) | ADR Accepted (amended) | ADR 0028, ADR 0037 | 2026-06-23 |
 | Input validation | Jakarta Bean Validation (Hibernate Validator) | ADR Accepted | ADR 0028 | 2026-06-08 |
-| Distributed lock | Redis (Redisson) | ADR Accepted | ADR 0028 | 2026-06-08 |
+| Distributed lock | Redis (Redisson) — mandated, **pending implementation** (transitional gap, OPT-F8) | ADR Accepted | ADR 0028, ADR 0037 | 2026-06-23 |
 | Task scheduling | Quartz | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Cache serialization | Jackson JSON | ADR Accepted | ADR 0028 | 2026-06-08 |
 | HTTP client | Spring WebClient | ADR Accepted | ADR 0028 | 2026-06-08 |
-| Resilience and retry | Resilience4j | ADR Accepted | ADR 0028 | 2026-06-08 |
+| Resilience and retry | Resilience4j — mandated, **pending implementation** (transitional gap, OPT-F2) | ADR Accepted | ADR 0028, ADR 0037 | 2026-06-23 |
 | Message consumption concurrency model | Kafka consumer group + partition concurrency | ADR Accepted | ADR 0033 | 2026-06-08 |
 | Message deserialization format | JSON | ADR Accepted | ADR 0033 | 2026-06-08 |
 | Kafka topic naming convention | business-domain.event-type.v1 | ADR Accepted | ADR 0033 | 2026-06-08 |
@@ -79,7 +79,7 @@ Source-of-truth boundary:
 | Object storage SDK | MinIO Java SDK | ADR Accepted | ADR 0034 | 2026-06-08 |
 | File anti-virus scanning | File type and size checks only, no virus scan | ADR Accepted | ADR 0034 | 2026-06-08 |
 | Database connection pool | HikariCP | ADR Accepted | ADR 0034 | 2026-06-08 |
-| Rate limiting | Bucket4j | ADR Accepted | ADR 0034 | 2026-06-08 |
+| Rate limiting | Bucket4j — mandated, **pending implementation** (transitional gap, OPT-F1) | ADR Accepted | ADR 0034, ADR 0037 | 2026-06-23 |
 | Configuration management | Spring Profiles + environment variables | ADR Accepted | ADR 0034 | 2026-06-08 |
 | Database audit field auto-fill | Spring Data Auditing | ADR Accepted | ADR 0034 | 2026-06-08 |
 | Database soft delete strategy | Logical delete field + global query filter | ADR Accepted | ADR 0034 | 2026-06-08 |

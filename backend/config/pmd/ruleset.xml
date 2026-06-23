@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<ruleset name="docgen-backend"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+    <description>
+        Lean, high-signal PMD ruleset for the docgen backend (OPT-B / B1 ratchet).
+        Focus on likely defects and error-prone constructs; expand over time.
+    </description>
+
+    <rule ref="category/java/errorprone.xml">
+        <!-- Noisy / opinionated rules excluded for the initial ratchet -->
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="AvoidFieldNameMatchingMethodName"/>
+        <exclude name="AvoidDuplicateLiterals"/>
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <exclude name="NullAssignment"/>
+        <exclude name="AvoidCatchingThrowable"/>
+        <exclude name="MissingSerialVersionUID"/>
+        <exclude name="BeanMembersShouldSerialize"/>
+        <exclude name="CompareObjectsWithEquals"/>
+        <!-- False positive on main-source classes named Test* (e.g. TestDataSetEntity) -->
+        <exclude name="TestClassWithoutTestCases"/>
+        <!-- Spring AbstractAuthenticationToken subclasses: intentionally non-serializable
+             and call setAuthenticated(...) in ctor by framework convention -->
+        <exclude name="NonSerializableClass"/>
+        <exclude name="ConstructorCallsOverridableMethod"/>
+    </rule>
+
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="GuardLogStatement"/>
+        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+        <exclude name="UseVarargs"/>
+        <exclude name="AbstractClassWithoutAbstractMethod"/>
+        <exclude name="LooseCoupling"/>
+        <exclude name="PreserveStackTrace"/>
+        <!-- False positive: domain classes named Test*/...TestData... are not JUnit tests -->
+        <exclude name="JUnitTestsShouldIncludeAssert"/>
+    </rule>
+
+    <rule ref="category/java/multithreading.xml">
+        <exclude name="UseConcurrentHashMap"/>
+        <exclude name="DoNotUseThreads"/>
+    </rule>
+</ruleset>

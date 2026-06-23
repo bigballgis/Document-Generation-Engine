@@ -12,9 +12,7 @@ import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.rendering.domain.FidelityWarningCode;
 import com.bank.docgen.runtime.api.CallableVersionsResultView;
 import com.bank.docgen.runtime.api.ContractResultView;
-import com.bank.docgen.runtime.api.EncryptionOptionsView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
-import com.bank.docgen.runtime.api.OutputOptionsView;
 import com.bank.docgen.runtime.api.RuntimeCredentialSummaryView;
 import com.bank.docgen.runtime.api.SyncGenerateResult;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
@@ -32,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -172,7 +171,7 @@ public class RuntimeGenerationService {
                 request.output().format(),
                 request.encryption()
         );
-        String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         String storageKey = "generated/" + documentId + "/" + artifact.storageFileName();
         objectStoragePort.put(
                 storageKey,

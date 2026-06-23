@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ public class TestDataSetService {
     @Transactional
     public TestDataSetView create(UUID templateId, UpsertTestDataSetRequest request, ManagementSessionClaims session) {
         templateService.requireReadableTemplate(templateId, session);
-        String externalId = "TDS-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String externalId = "TDS-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         TestDataSetEntity entity = new TestDataSetEntity(
                 UUID.randomUUID(),
                 templateId,
