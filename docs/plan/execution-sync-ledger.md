@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-23 (OPT-D2 unified generation + OPT-F1 rate limit + OPT-F2 resilience)  
+**Last synced:** 2026-06-23 (OPT-E8/F3 streaming + OPT-G1/G2 HTTP error envelope)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,10 +18,10 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Backend | `mvn -B -ntp -f backend/pom.xml verify` | Green (184 tests, 2026-06-23). Wave 2–3: D2 sync→`DocumentGenerationEngine`; F1 Bucket4j 429; F2 Resilience4j on MinIO/PDF. |
+| Backend | `mvn -B -ntp -f backend/pom.xml verify` | Green (189 tests, 2026-06-23). E8 Content-Type from storage key; F3 streamed download + sync replay. |
 | Frontend lint | `pnpm -C frontend lint` | Green |
 | Frontend type-check | `pnpm -C frontend type-check` | Green |
-| Frontend test | `pnpm -C frontend test` | Green (40 tests) |
+| Frontend test | `pnpm -C frontend test` | Green — includes `errorEnvelope.test.ts`, `http.test.ts`, session envelope mapping |
 | Frontend build | `pnpm -C frontend build` | Green |
 
 ## Phase status (plan layer)

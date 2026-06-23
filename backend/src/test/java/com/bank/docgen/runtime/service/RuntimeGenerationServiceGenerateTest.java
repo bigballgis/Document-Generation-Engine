@@ -28,6 +28,8 @@ import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -110,8 +112,36 @@ class RuntimeGenerationServiceGenerateTest {
 
         assertThat(result.idempotencyStatus()).isEqualTo("REPLAYED");
         assertThat(result.documentId()).isEqualTo("DOC-REPLAY");
-        assertThat(result.artifactBytes()).containsExactly(9, 8, 7);
+        assertThat(result.artifactBytes()).isNull();
+        assertThat(result.artifactStream()).isNotNull();
+        assertThat(result.artifactStream().readAllBytes()).containsExactly(9, 8, 7);
         verify(documentGenerationEngine, never()).generate(any(), anyString(), any(), anyString(), any());
+    }
+
+    @Test
+    void generateSync_replayReturnsStorageStreamWithoutEagerLoad() throws Exception {
+        GenerationIdempotencyEntity existing = completedIdempotency(TEMPLATE_ID);
+        TemplateVersionEntity version = publishedVersion(VERSION_ID, TEMPLATE_ID);
+        TrackingInputStream stream = new TrackingInputStream();
+        when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, RELEASE_VERSION))
+                .thenReturn(Optional.of(version));
+        doNothing().when(encryptionParameterValidator).validate(any(), any(), anyString());
+        when(idempotencyService.hashRequest(anyString())).thenReturn("hash-a");
+        when(idempotencyService.findExisting("idem-replay-stream", TEMPLATE_ID, "hash-a"))
+                .thenReturn(Optional.of(existing));
+        when(objectStoragePort.get("storage/replay.docx")).thenReturn(stream);
+
+        SyncGenerateResult result = service.generateSync(
+                template,
+                session,
+                RELEASE_VERSION,
+                generateRequest("idem-replay-stream", "DOCX")
+        );
+
+        assertThat(result.artifactStream()).isSameAs(stream);
+        assertThat(stream.readCount()).isZero();
+        assertThat(result.artifactBytes()).isNull();
     }
 
     @Test
@@ -152,6 +182,7 @@ class RuntimeGenerationServiceGenerateTest {
 
         assertThat(result.idempotencyStatus()).isEqualTo("CREATED");
         assertThat(result.artifactBytes()).containsExactly(4, 5, 6);
+        assertThat(result.artifactStream()).isNull();
         assertThat(result.resolvedReleaseVersion()).isEqualTo(RELEASE_VERSION);
         verify(idempotencyService).complete(pending, "generated/DOC-NEW/output.docx", "DOC-NEW");
     }
@@ -208,7 +239,22 @@ class RuntimeGenerationServiceGenerateTest {
                 generateRequest("idem-5", "DOCX")
         ))
                 .isInstanceOf(TemplateValidationException.class)
-                .hasMessage("api.error.runtime.versionNotCallable");
+                .hasMessage("api.error.runtime.versionNotCallable"        );
+    }
+
+    private static final class TrackingInputStream extends InputStream {
+
+        private int readCount;
+
+        @Override
+        public int read() throws IOException {
+            readCount++;
+            return -1;
+        }
+
+        int readCount() {
+            return readCount;
+        }
     }
 
     private GenerateRequestBody generateRequest(String idempotencyKey, String format) {

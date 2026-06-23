@@ -7,6 +7,7 @@ import com.bank.docgen.runtime.persistence.GenerationIdempotencyRepository;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import org.springframework.stereotype.Service;
@@ -57,25 +58,33 @@ public class DocumentDownloadService {
                 traceId
         );
 
-        try (InputStream stream = objectStoragePort.get(record.getResponseStorageKey())) {
+        try {
+            InputStream stream = objectStoragePort.get(record.getResponseStorageKey());
             return new DownloadArtifact(
-                    stream.readAllBytes(),
+                    stream,
+                    ArtifactContentTypes.fromStorageKey(record.getResponseStorageKey()),
                     documentId,
                     auditId,
                     traceId,
                     record.getDownloadExpiresAt()
             );
-        } catch (java.io.IOException ex) {
+        } catch (RuntimeException ex) {
             throw new RuntimeDocumentNotFoundException();
         }
     }
 
     public record DownloadArtifact(
-            byte[] content,
+            InputStream contentStream,
+            String contentType,
             String documentId,
             String auditId,
             String traceId,
             Instant downloadExpiresAt
-    ) {
+    ) implements AutoCloseable {
+
+        @Override
+        public void close() throws IOException {
+            contentStream.close();
+        }
     }
 }

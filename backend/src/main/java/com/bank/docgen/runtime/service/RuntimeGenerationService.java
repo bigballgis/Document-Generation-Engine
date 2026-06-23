@@ -120,14 +120,10 @@ public class RuntimeGenerationService {
                 requestHash
         );
         if (existing.isPresent() && existing.get().getResponseStorageKey() != null) {
-            byte[] cached;
-            try (InputStream stream = objectStoragePort.get(existing.get().getResponseStorageKey())) {
-                cached = stream.readAllBytes();
-            } catch (java.io.IOException ex) {
-                throw new TemplateValidationException("api.error.rendering.generationFailed");
-            }
+            InputStream replayStream = objectStoragePort.get(existing.get().getResponseStorageKey());
             return new SyncGenerateResult(
-                    cached,
+                    null,
+                    replayStream,
                     contentTypeForFormat(request.output().format()),
                     existing.get().getDocumentId(),
                     resolvedVersion,
@@ -147,6 +143,7 @@ public class RuntimeGenerationService {
         idempotencyService.complete(idempotency, generated.storageKey(), generated.documentId());
         return new SyncGenerateResult(
                 generated.artifactBytes(),
+                null,
                 generated.contentType(),
                 generated.documentId(),
                 resolvedVersion,

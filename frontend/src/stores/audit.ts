@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import * as auditApi from '@/api/audit'
-import { isApiError } from '@/api/http'
+import { resolveApiErrorMessageKey } from '@/api/http'
 import { isGroupScopedAuditRole, resolveAuditActorRole } from '@/auth/roles'
 import type {
   AuditQueryFilters,
@@ -36,13 +36,6 @@ export const useAuditStore = defineStore('audit', () => {
   })
 
   const requiresGroupScope = computed(() => isGroupScopedAuditRole(actorRole.value))
-
-  function resolveErrorMessageKey(error: unknown, fallbackKey: string): string {
-    if (isApiError(error) && error.response?.data.error?.messageKey) {
-      return error.response.data.error.messageKey
-    }
-    return fallbackKey
-  }
 
   function buildQueryFilters(): AuditQueryFilters {
     const role = actorRole.value
@@ -89,7 +82,7 @@ export const useAuditStore = defineStore('audit', () => {
     try {
       managementEvents.value = await auditApi.listManagementEvents(buildQueryFilters())
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'audit.error.loadManagement')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'audit.error.loadManagement')
       throw error
     } finally {
       loadingManagement.value = false
@@ -102,7 +95,7 @@ export const useAuditStore = defineStore('audit', () => {
     try {
       lifecycleEvents.value = await auditApi.listLifecycleEvents(buildQueryFilters())
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'audit.error.loadLifecycle')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'audit.error.loadLifecycle')
       throw error
     } finally {
       loadingLifecycle.value = false
@@ -116,7 +109,7 @@ export const useAuditStore = defineStore('audit', () => {
       exportResult.value = await auditApi.exportManagementEvents(buildQueryFilters())
       return exportResult.value as ManagementAuditExportResult
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'audit.error.export')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'audit.error.export')
       throw error
     } finally {
       exporting.value = false
@@ -130,7 +123,7 @@ export const useAuditStore = defineStore('audit', () => {
       exportResult.value = await auditApi.exportLifecycleEvents(buildQueryFilters())
       return exportResult.value as LifecycleAuditExportResult
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'audit.error.exportLifecycle')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'audit.error.exportLifecycle')
       throw error
     } finally {
       exporting.value = false

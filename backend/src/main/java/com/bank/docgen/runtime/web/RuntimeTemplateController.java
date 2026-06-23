@@ -194,6 +194,12 @@ public class RuntimeTemplateController {
         response.setHeader("output.mode", body.output().mode());
         response.setHeader("fidelityWarningCount", String.valueOf(result.fidelityWarningCodes().size()));
         response.setHeader("fidelityWarningCodes", String.join(",", result.fidelityWarningCodes()));
+        if (result.artifactStream() != null) {
+            try (var artifactStream = result.artifactStream()) {
+                artifactStream.transferTo(response.getOutputStream());
+            }
+            return;
+        }
         response.getOutputStream().write(result.artifactBytes());
     }
 

@@ -14,6 +14,8 @@ import com.bank.docgen.runtime.persistence.GenerationIdempotencyRepository;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -62,7 +64,7 @@ class DocumentDownloadServiceTest {
 
     @Test
     void crossTemplateAccessDenied() {
-        GenerationIdempotencyEntity record = completedRecord(UUID.randomUUID());
+        GenerationIdempotencyEntity record = completedRecord(UUID.randomUUID(), "generated/DOC-1/output.docx");
         when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
 
         assertThatThrownBy(() -> service.resolveDownload(DOCUMENT_ID, session, request))
@@ -71,7 +73,7 @@ class DocumentDownloadServiceTest {
 
     @Test
     void expiredDownloadRejected() {
-        GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID);
+        GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID, "generated/DOC-1/output.docx");
         record.markDownloadExpired(Instant.now().minusSeconds(30));
         when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
 
@@ -80,17 +82,22 @@ class DocumentDownloadServiceTest {
     }
 
     @Test
-    void validDownloadReturnsArtifactAndRecordsAudit() throws Exception {
-        GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID);
+    void validDownloadReturnsStreamMetadataAndRecordsAudit() throws Exception {
+        GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID, "generated/DOC-1/output.docx");
+        ByteArrayInputStream stream = new ByteArrayInputStream(new byte[]{1, 2, 3});
         when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
-        when(objectStoragePort.get("storage/key")).thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
+        when(objectStoragePort.get("generated/DOC-1/output.docx")).thenReturn(stream);
 
-        DocumentDownloadService.DownloadArtifact artifact =
-                service.resolveDownload(DOCUMENT_ID, session, request);
+        try (DocumentDownloadService.DownloadArtifact artifact =
+                service.resolveDownload(DOCUMENT_ID, session, request)) {
+            assertThat(artifact.contentStream()).isSameAs(stream);
+            assertThat(artifact.contentStream().readAllBytes()).containsExactly(1, 2, 3);
+            assertThat(artifact.contentType())
+                    .isEqualTo("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            assertThat(artifact.documentId()).isEqualTo(DOCUMENT_ID);
+            assertThat(artifact.auditId()).startsWith("AUD-");
+        }
 
-        assertThat(artifact.content()).containsExactly(1, 2, 3);
-        assertThat(artifact.documentId()).isEqualTo(DOCUMENT_ID);
-        assertThat(artifact.auditId()).startsWith("AUD-");
         verify(securityAuditSummaryService).recordDocumentDownload(
                 eq("CRED-1"),
                 eq("svc-caller"),
@@ -101,7 +108,33 @@ class DocumentDownloadServiceTest {
         );
     }
 
-    private GenerationIdempotencyEntity completedRecord(UUID templateId) {
+    @Test
+    void pdfDownloadUsesPdfContentType() throws Exception {
+        GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID, "generated/DOC-1/output.pdf");
+        when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
+        when(objectStoragePort.get("generated/DOC-1/output.pdf")).thenReturn(new ByteArrayInputStream(new byte[]{9}));
+
+        try (DocumentDownloadService.DownloadArtifact artifact =
+                service.resolveDownload(DOCUMENT_ID, session, request)) {
+            assertThat(artifact.contentType()).isEqualTo("application/pdf");
+        }
+    }
+
+    @Test
+    void resolveDownloadDoesNotLoadEntireArtifactBeforeReturning() throws Exception {
+        GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID, "generated/DOC-1/output.pdf");
+        TrackingInputStream stream = new TrackingInputStream();
+        when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
+        when(objectStoragePort.get("generated/DOC-1/output.pdf")).thenReturn(stream);
+
+        try (DocumentDownloadService.DownloadArtifact artifact =
+                service.resolveDownload(DOCUMENT_ID, session, request)) {
+            assertThat(artifact.contentStream()).isSameAs(stream);
+            assertThat(stream.readCount()).isZero();
+        }
+    }
+
+    private GenerationIdempotencyEntity completedRecord(UUID templateId, String storageKey) {
         GenerationIdempotencyEntity record = new GenerationIdempotencyEntity(
                 UUID.randomUUID(),
                 "idem-key",
@@ -110,7 +143,22 @@ class DocumentDownloadServiceTest {
                 "COMPLETED",
                 Instant.now().plusSeconds(3600)
         );
-        record.complete("storage/key", DOCUMENT_ID);
+        record.complete(storageKey, DOCUMENT_ID);
         return record;
+    }
+
+    private static final class TrackingInputStream extends InputStream {
+
+        private int readCount;
+
+        @Override
+        public int read() throws IOException {
+            readCount++;
+            return -1;
+        }
+
+        int readCount() {
+            return readCount;
+        }
     }
 }

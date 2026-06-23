@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import * as authApi from '@/api/auth'
-import { isApiError, TOKEN_STORAGE_KEY } from '@/api/http'
+import { resolveApiErrorMessageKey, TOKEN_STORAGE_KEY } from '@/api/http'
 import { pathForRouteKey } from '@/routing/routeKeys'
 import type { ManagementSession } from '@/types/session'
 
@@ -81,10 +81,7 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   function loginErrorMessageKey(error: unknown): string {
-    if (isApiError(error) && error.response?.data.error?.messageKey) {
-      return error.response.data.error.messageKey
-    }
-    return 'login.errorGeneric'
+    return resolveApiErrorMessageKey(error, 'login.errorGeneric')
   }
 
   function recordRouteDenial(traceId: string | null) {

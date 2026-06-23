@@ -106,7 +106,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | E5 | M | Bean-validation messages via messageKey | `GlobalExceptionHandler` maps constraint codes → message keys | **Done** (Wave 2): field errors use `field`/`reason`/resolved `message`; `GlobalExceptionHandlerTest` |
 | E6 | M | Remove hardcoded user-facing strings | `ContractAssemblyService`, `TemplateLifecycleService` publish audit | **Done** (Wave 2, scoped): contract AD-group summaries + publish lifecycle reason via `messages_en.properties` |
 | E7 | M | Handle uncovered exceptions in `GlobalExceptionHandler` | `ObjectStorageException`, `DocxAssemblyException`, `IllegalStateException` | **Done** (Wave 2): mapped to envelope with stable message keys |
-| E8 | M | Fix download Content-Type | `RuntimeDocumentController` L35 hardcoded DOCX MIME | Content-Type derived from artifact format (DOCX/PDF) | Not Started |
+| E8 | M | Fix download Content-Type | `RuntimeDocumentController` L35 hardcoded DOCX MIME | **Done** (Wave 3): Content-Type derived from storage key via `ArtifactContentTypes`; PDF/DOCX covered in `DocumentDownloadServiceTest` |
 | E9 | L | Idempotency hash failure should not fall back to raw payload | `IdempotencyService` L88–90 returns payload on digest error | Digest failure is a hard error, not weakened key | Not Started |
 
 ### OPT-F Backend performance & resilience
@@ -115,7 +115,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | --- | --- | --- | --- | --- | --- |
 | F1 | H | Add rate limiting (Bucket4j or gateway) | no rate limiting anywhere; `BatchLimitsView` is contract-only | **Done** (Wave 3): Bucket4j per `credentialId:accessAccount`; 429 + `Retry-After` + `RATE_LIMIT_EXCEEDED`; `RuntimeRateLimitFilterTest` |
 | F2 | H | Add resilience around external calls | no Resilience4j; LibreOffice/MinIO/Kafka unguarded | **Done** (Wave 3): Resilience4j circuit-breaker + retry on MinIO put/get/delete and PDF conversion; `serviceUnavailable` mapping; `ResilienceFailureMapperTest` |
-| F3 | H | Stream large artifacts instead of `readAllBytes` | `DocumentDownloadService` L60–62, `RuntimeGenerationService` L138–139 | Streamed download/replay; bounded memory; large-file test | Not Started |
+| F3 | H | Stream large artifacts instead of `readAllBytes` | `DocumentDownloadService` L60–62, `RuntimeGenerationService` L138–139 | **Done** (Wave 3): download + sync replay stream from object storage; lazy-load tests in `DocumentDownloadServiceTest` / `RuntimeGenerationServiceGenerateTest` |
 | F4 | M | Paginate list/audit queries | `TemplateRepository.findBy...`, `ManagementAuditEventRepository.search` return `List` | Pageable endpoints; default page size; tests | Not Started |
 | F5 | M | Fix EAGER anchors fetch | `MasterDocumentEntity` L62 `@OneToMany(EAGER)` | LAZY + explicit fetch-join where needed; no N+1 on list | Not Started |
 | F6 | M | Offload synchronous LibreOffice from request thread | `RuntimeGenerationService`→`finalizeArtifact` runs PDF conversion inline | Conversion async/bounded pool with timeout; request not blocked unduly | Not Started |
@@ -126,8 +126,8 @@ Priority: **H/M/L**. All start `Not Started`.
 
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
-| G1 | H | Add axios response interceptor (401/403 + envelope) | `api/http.ts` request-only interceptor; `en.ts` L17–18 `sessionExpired` unused | 401 → session expiry redirect; centralized envelope/error parsing | Not Started |
-| G2 | H | Align `ApiEnvelope.error` with OpenAPI | `types/session.ts` L25–29 lacks `category`, `retryable` | Error type matches contract; stores read structured fields | Not Started |
+| G1 | H | Add axios response interceptor (401/403 + envelope) | `api/http.ts` request-only interceptor; `en.ts` L17–18 `sessionExpired` unused | **Done** (Wave 3): 401 clears session + `sessionExpired` login redirect; 403 → forbidden with server `traceId`; `http.test.ts` |
+| G2 | H | Align `ApiEnvelope.error` with OpenAPI | `types/session.ts` L25–29 lacks `category`, `retryable` | **Done** (Wave 3): contract-aligned `ApiErrorDetail`; centralized `resolveApiError*` helpers; stores use structured parsing |
 | G3 | H | Split `TemplateDetailView.vue` (550 L) | single file holds lifecycle+authoring+preview+policy+contract | Decomposed into subviews/composables; tested | Not Started |
 | G4 | M | Extract shared `unwrap`/`resolveApiError`/list patterns | duplicated in 5 api modules + 4 stores + 3 list views | Shared composables/util; duplication removed | Not Started |
 | G5 | M | Route client-side role checks + tests | `stores/session.ts` L35–47 only checks master/template/audit; api-policy/home rely on backend `visibleRoutes` | Symmetric client checks + router integration tests | Not Started |

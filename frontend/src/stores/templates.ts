@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import * as apiPolicyApi from '@/api/apiPolicy'
 import * as templatesApi from '@/api/templates'
-import { isApiError } from '@/api/http'
+import { resolveApiErrorMessageKey } from '@/api/http'
 import type {
   ApiCredentialCreated,
   ApiCredentialSummary,
@@ -54,20 +54,13 @@ export const useTemplatesStore = defineStore('templates', () => {
     return grouped
   })
 
-  function resolveErrorMessageKey(error: unknown, fallbackKey: string): string {
-    if (isApiError(error) && error.response?.data.error?.messageKey) {
-      return error.response.data.error.messageKey
-    }
-    return fallbackKey
-  }
-
   async function fetchTemplates(): Promise<void> {
     loadingList.value = true
     lastErrorMessageKey.value = null
     try {
       templates.value = await templatesApi.listTemplates()
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.loadList')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.loadList')
       throw error
     } finally {
       loadingList.value = false
@@ -80,7 +73,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     try {
       selectedTemplate.value = await templatesApi.getTemplate(templateId)
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.loadDetail')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.loadDetail')
       throw error
     } finally {
       loadingDetail.value = false
@@ -93,7 +86,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     try {
       apiPolicy.value = await apiPolicyApi.getApiPolicy(templateId)
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.loadPolicy')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.loadPolicy')
       throw error
     } finally {
       loadingPolicy.value = false
@@ -105,7 +98,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     try {
       credentials.value = await apiPolicyApi.listCredentials(templateId)
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.loadCredentials')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.loadCredentials')
       throw error
     }
   }
@@ -120,7 +113,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       apiPolicy.value = await apiPolicyApi.upsertApiPolicy(templateId, payload)
       return apiPolicy.value
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.savePolicy')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
       throw error
     } finally {
       submitting.value = false
@@ -136,7 +129,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     try {
       return await apiPolicyApi.fetchApiPolicyImpactPreview(templateId, payload)
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.previewPolicyImpact')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.previewPolicyImpact')
       throw error
     } finally {
       submitting.value = false
@@ -152,7 +145,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       await fetchCredentials(templateId)
       return lastCreatedCredential.value
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.createCredential')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.createCredential')
       throw error
     } finally {
       submitting.value = false
@@ -173,7 +166,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       await fetchCredentials(templateId)
       return rotated
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.rotateCredential')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.rotateCredential')
       throw error
     } finally {
       submitting.value = false
@@ -187,7 +180,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       await apiPolicyApi.revokeCredential(templateId, credentialId)
       await fetchCredentials(templateId)
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.revokeCredential')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.revokeCredential')
       throw error
     } finally {
       submitting.value = false
@@ -203,7 +196,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       selectedTemplate.value = created
       return created
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.create')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.create')
       throw error
     } finally {
       submitting.value = false
@@ -220,7 +213,7 @@ export const useTemplatesStore = defineStore('templates', () => {
         selectedTemplate.value = null
       }
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.delete')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.delete')
       throw error
     } finally {
       submitting.value = false
@@ -267,7 +260,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     try {
       return await templatesApi.fetchLifecycleImpactPreview(templateId, payload)
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.lifecycle')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.lifecycle')
       throw error
     }
   }
@@ -303,7 +296,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       applyUpdatedTemplate(updated)
       return updated
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.updateMetadata')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.updateMetadata')
       throw error
     } finally {
       submitting.value = false
@@ -316,7 +309,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     try {
       return await templatesApi.testGenerate(templateId, payload)
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.testGenerate')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.testGenerate')
       throw error
     } finally {
       submitting.value = false
@@ -339,7 +332,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       applyUpdatedTemplate(updated)
       return updated
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.lifecycle')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.lifecycle')
       throw error
     } finally {
       submitting.value = false
@@ -358,7 +351,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       await fetchTemplate(templateId)
       return selectedTemplate.value!
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.saveVariable')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.saveVariable')
       throw error
     } finally {
       submitting.value = false
@@ -373,7 +366,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       await fetchTemplate(templateId)
       return selectedTemplate.value!
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.deleteVariable')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.deleteVariable')
       throw error
     } finally {
       submitting.value = false
@@ -392,7 +385,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       await fetchTemplate(templateId)
       return selectedTemplate.value!
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.saveBinding')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.saveBinding')
       throw error
     } finally {
       submitting.value = false
@@ -407,7 +400,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       await fetchTemplate(templateId)
       return selectedTemplate.value!
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.saveRules')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.saveRules')
       throw error
     } finally {
       submitting.value = false

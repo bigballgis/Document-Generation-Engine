@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useSessionStore } from '@/stores/session'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
+import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 
 describe('session store', () => {
   beforeEach(() => {
@@ -54,5 +55,17 @@ describe('session store', () => {
 
     expect(store.authenticated).toBe(false)
     expect(localStorage.getItem('docgen.accessToken')).toBeNull()
+  })
+
+  it('maps login failures from structured api envelope errors', () => {
+    const store = useSessionStore()
+    const error = axiosEnvelopeError(
+      401,
+      'api.error.authentication.authenticationFailed',
+      { code: 'AUTHENTICATION_FAILED', category: 'AUTHENTICATION', message: 'Authentication failed.' },
+      { traceId: 'TRC-LOGIN' },
+    )
+
+    expect(store.loginErrorMessageKey(error)).toBe('api.error.authentication.authenticationFailed')
   })
 })

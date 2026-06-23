@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as identityApi from '@/api/identity'
 import { useIdentityStore } from '@/stores/identity'
+import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 import type { BusinessGroupView, ManagementUserView } from '@/types/identity'
 
 vi.mock('@/api/identity', () => ({
@@ -70,10 +71,13 @@ describe('identity store', () => {
   })
 
   it('records backend error message key on user load failure', async () => {
-    vi.mocked(identityApi.listUsers).mockRejectedValue({
-      isAxiosError: true,
-      response: { data: { error: { messageKey: 'api.error.forbidden.userManagementNotAllowed' } } },
-    })
+    vi.mocked(identityApi.listUsers).mockRejectedValue(
+      axiosEnvelopeError(
+        403,
+        'api.error.forbidden.userManagementNotAllowed',
+        { code: 'ACCESS_DENIED', category: 'AUTHORIZATION', message: 'Not allowed.' },
+      ),
+    )
     const store = useIdentityStore()
 
     await expect(store.fetchUsers()).rejects.toBeTruthy()
@@ -143,10 +147,13 @@ describe('identity store', () => {
   })
 
   it('records group error message key on failure', async () => {
-    vi.mocked(identityApi.createGroup).mockRejectedValue({
-      isAxiosError: true,
-      response: { data: { error: { messageKey: 'api.error.conflict.groupCodeAlreadyExists' } } },
-    })
+    vi.mocked(identityApi.createGroup).mockRejectedValue(
+      axiosEnvelopeError(
+        409,
+        'api.error.conflict.groupCodeAlreadyExists',
+        { code: 'CONFLICT', category: 'CONFLICT', message: 'Group already exists.' },
+      ),
+    )
     const store = useIdentityStore()
 
     await expect(

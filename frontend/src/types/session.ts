@@ -1,3 +1,29 @@
+export interface ApiFieldError {
+  field: string
+  reason: string
+  message: string
+}
+
+export interface ApiErrorDetail {
+  code: string
+  category: string
+  message: string
+  messageKey: string
+  retryable: boolean
+  fieldErrors?: ApiFieldError[]
+}
+
+export interface ApiMetadata {
+  auditId?: string
+  traceId?: string
+}
+
+export interface ApiEnvelope<T> {
+  metadata: ApiMetadata
+  result?: T
+  error?: ApiErrorDetail
+}
+
 export interface ManagementCapabilities {
   manageMasters: boolean
   reviewMasters: boolean
@@ -29,17 +55,4 @@ export interface LoginResult {
   accessToken: string
   tokenType: string
   session: ManagementSession
-}
-
-export interface ApiEnvelope<T> {
-  metadata: {
-    auditId?: string
-    traceId?: string
-  }
-  result?: T
-  error?: {
-    code: string
-    message: string
-    messageKey: string
-  }
 }

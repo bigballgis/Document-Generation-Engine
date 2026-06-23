@@ -30,13 +30,14 @@ public class RuntimeDocumentController {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
-        DownloadArtifact artifact = documentDownloadService.resolveDownload(documentId, session, request);
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        response.setHeader("documentId", artifact.documentId());
-        response.setHeader("auditId", artifact.auditId());
-        response.setHeader("traceId", artifact.traceId());
-        response.setHeader("download.expiresAt", artifact.downloadExpiresAt().toString());
-        response.getOutputStream().write(artifact.content());
+        try (DownloadArtifact artifact = documentDownloadService.resolveDownload(documentId, session, request)) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType(artifact.contentType());
+            response.setHeader("documentId", artifact.documentId());
+            response.setHeader("auditId", artifact.auditId());
+            response.setHeader("traceId", artifact.traceId());
+            response.setHeader("download.expiresAt", artifact.downloadExpiresAt().toString());
+            artifact.contentStream().transferTo(response.getOutputStream());
+        }
     }
 }

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import * as mastersApi from '@/api/masters'
-import { isApiError } from '@/api/http'
+import { resolveApiErrorMessageKey } from '@/api/http'
 import type {
   CreateMasterPayload,
   DecideMasterReviewPayload,
@@ -31,20 +31,13 @@ export const useMastersStore = defineStore('masters', () => {
     return grouped
   })
 
-  function resolveErrorMessageKey(error: unknown, fallbackKey: string): string {
-    if (isApiError(error) && error.response?.data.error?.messageKey) {
-      return error.response.data.error.messageKey
-    }
-    return fallbackKey
-  }
-
   async function fetchMasters(): Promise<void> {
     loadingList.value = true
     lastErrorMessageKey.value = null
     try {
       masters.value = await mastersApi.listMasters()
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'masters.error.loadList')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.loadList')
       throw error
     } finally {
       loadingList.value = false
@@ -57,7 +50,7 @@ export const useMastersStore = defineStore('masters', () => {
     try {
       selectedMaster.value = await mastersApi.getMaster(masterId)
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'masters.error.loadDetail')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.loadDetail')
       throw error
     } finally {
       loadingDetail.value = false
@@ -69,7 +62,7 @@ export const useMastersStore = defineStore('masters', () => {
     try {
       impactAnalysis.value = await mastersApi.getMasterImpactAnalysis(masterId)
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'masters.error.loadImpact')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.loadImpact')
       throw error
     }
   }
@@ -83,7 +76,7 @@ export const useMastersStore = defineStore('masters', () => {
       selectedMaster.value = created
       return created
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'masters.error.upload')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.upload')
       throw error
     } finally {
       submitting.value = false
@@ -101,7 +94,7 @@ export const useMastersStore = defineStore('masters', () => {
       applyUpdatedMaster(updated)
       return updated
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'masters.error.submitReview')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.submitReview')
       throw error
     } finally {
       submitting.value = false
@@ -119,7 +112,7 @@ export const useMastersStore = defineStore('masters', () => {
       applyUpdatedMaster(updated)
       return updated
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'masters.error.decideReview')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.decideReview')
       throw error
     } finally {
       submitting.value = false
@@ -137,7 +130,7 @@ export const useMastersStore = defineStore('masters', () => {
       applyUpdatedMaster(updated)
       return updated
     } catch (error) {
-      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'masters.error.updateMetadata')
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.updateMetadata')
       throw error
     } finally {
       submitting.value = false

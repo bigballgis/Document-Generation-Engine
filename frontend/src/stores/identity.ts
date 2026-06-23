@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import * as identityApi from '@/api/identity'
-import { isApiError } from '@/api/http'
+import { resolveApiErrorMessageKey } from '@/api/http'
 import type {
   BusinessGroupView,
   CreateGroupRequest,
@@ -29,13 +29,6 @@ export const useIdentityStore = defineStore('identity', () => {
   const lastUserErrorMessageKey = ref<string | null>(null)
   const lastGroupErrorMessageKey = ref<string | null>(null)
 
-  function resolveErrorMessageKey(error: unknown, fallbackKey: string): string {
-    if (isApiError(error) && error.response?.data.error?.messageKey) {
-      return error.response.data.error.messageKey
-    }
-    return fallbackKey
-  }
-
   function applyUpdatedUser(updated: ManagementUserView) {
     users.value = users.value.map((item) => (item.id === updated.id ? updated : item))
   }
@@ -53,7 +46,7 @@ export const useIdentityStore = defineStore('identity', () => {
       users.value = page.content
       usersTotal.value = page.totalElements
     } catch (error) {
-      lastUserErrorMessageKey.value = resolveErrorMessageKey(error, 'identity.error.loadUsers')
+      lastUserErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.loadUsers')
       throw error
     } finally {
       loadingUsers.value = false
@@ -69,7 +62,7 @@ export const useIdentityStore = defineStore('identity', () => {
       usersTotal.value += 1
       return created
     } catch (error) {
-      lastUserErrorMessageKey.value = resolveErrorMessageKey(error, 'identity.error.createUser')
+      lastUserErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.createUser')
       throw error
     } finally {
       submitting.value = false
@@ -84,7 +77,7 @@ export const useIdentityStore = defineStore('identity', () => {
       applyUpdatedUser(updated)
       return updated
     } catch (error) {
-      lastUserErrorMessageKey.value = resolveErrorMessageKey(error, 'identity.error.updateUser')
+      lastUserErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.updateUser')
       throw error
     } finally {
       submitting.value = false
@@ -99,7 +92,7 @@ export const useIdentityStore = defineStore('identity', () => {
       applyUpdatedUser(updated)
       return updated
     } catch (error) {
-      lastUserErrorMessageKey.value = resolveErrorMessageKey(error, 'identity.error.updateUser')
+      lastUserErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.updateUser')
       throw error
     } finally {
       submitting.value = false
@@ -114,7 +107,7 @@ export const useIdentityStore = defineStore('identity', () => {
       applyUpdatedUser(updated)
       return updated
     } catch (error) {
-      lastUserErrorMessageKey.value = resolveErrorMessageKey(error, 'identity.error.resetPassword')
+      lastUserErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.resetPassword')
       throw error
     } finally {
       submitting.value = false
@@ -129,7 +122,7 @@ export const useIdentityStore = defineStore('identity', () => {
       users.value = users.value.filter((item) => item.id !== id)
       usersTotal.value = Math.max(0, usersTotal.value - 1)
     } catch (error) {
-      lastUserErrorMessageKey.value = resolveErrorMessageKey(error, 'identity.error.deleteUser')
+      lastUserErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.deleteUser')
       throw error
     } finally {
       submitting.value = false
@@ -145,7 +138,7 @@ export const useIdentityStore = defineStore('identity', () => {
       groups.value = page.content
       groupsTotal.value = page.totalElements
     } catch (error) {
-      lastGroupErrorMessageKey.value = resolveErrorMessageKey(error, 'identity.error.loadGroups')
+      lastGroupErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.loadGroups')
       throw error
     } finally {
       loadingGroups.value = false
@@ -161,7 +154,7 @@ export const useIdentityStore = defineStore('identity', () => {
       groupsTotal.value += 1
       return created
     } catch (error) {
-      lastGroupErrorMessageKey.value = resolveErrorMessageKey(error, 'identity.error.createGroup')
+      lastGroupErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.createGroup')
       throw error
     } finally {
       submitting.value = false
@@ -176,7 +169,7 @@ export const useIdentityStore = defineStore('identity', () => {
       applyUpdatedGroup(updated)
       return updated
     } catch (error) {
-      lastGroupErrorMessageKey.value = resolveErrorMessageKey(error, 'identity.error.updateGroup')
+      lastGroupErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.updateGroup')
       throw error
     } finally {
       submitting.value = false
@@ -193,7 +186,7 @@ export const useIdentityStore = defineStore('identity', () => {
       applyUpdatedGroup(updated)
       return updated
     } catch (error) {
-      lastGroupErrorMessageKey.value = resolveErrorMessageKey(error, 'identity.error.updateGroup')
+      lastGroupErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.updateGroup')
       throw error
     } finally {
       submitting.value = false

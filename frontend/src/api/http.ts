@@ -1,5 +1,7 @@
 import axios, { type AxiosError } from 'axios'
+import type { RouteLocationRaw } from 'vue-router'
 import type { ApiEnvelope } from '@/types/session'
+import { resolveApiError } from './errorEnvelope'
 
 const TOKEN_STORAGE_KEY = 'docgen.accessToken'
 
@@ -18,34 +20,66 @@ http.interceptors.request.use((config) => {
   return config
 })
 
+export interface AuthHttpErrorHandlerDeps {
+  clearSession: () => void
+  recordDeny: (traceId: string | null) => void
+  getCurrentRouteName: () => string | symbol | null | undefined
+  push: (location: RouteLocationRaw) => Promise<unknown>
+}
+
+export async function handleAuthHttpError(
+  error: AxiosError<ApiEnvelope<unknown>>,
+  deps: AuthHttpErrorHandlerDeps,
+): Promise<void> {
+  const status = error.response?.status
+  if (status === 401) {
+    deps.clearSession()
+    if (deps.getCurrentRouteName() !== 'login') {
+      await deps.push({ name: 'login', query: { sessionExpired: '1' } })
+    }
+    return
+  }
+  if (status === 403) {
+    const resolved = resolveApiError(error)
+    const traceId = resolved?.metadata.traceId ?? null
+    deps.recordDeny(traceId)
+    if (deps.getCurrentRouteName() !== 'forbidden') {
+      await deps.push({
+        name: 'forbidden',
+        query: traceId ? { traceId } : undefined,
+      })
+    }
+  }
+}
+
 http.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiEnvelope<unknown>>) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem(TOKEN_STORAGE_KEY)
-      void import('@/router').then(({ default: routerInstance }) => {
-        const currentRoute = routerInstance.currentRoute.value
-        if (currentRoute.name !== 'login') {
-          void routerInstance.push({
-            name: 'login',
-            query: { sessionExpired: '1' },
-          })
-        }
-      })
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      void (async () => {
+        const [{ default: routerInstance }, { useSessionStore }] = await Promise.all([
+          import('@/router'),
+          import('@/stores/session'),
+        ])
+        const sessionStore = useSessionStore()
+        await handleAuthHttpError(error, {
+          clearSession: () => sessionStore.clearSession(),
+          recordDeny: (traceId) => sessionStore.recordRouteDeny(traceId),
+          getCurrentRouteName: () => routerInstance.currentRoute.value.name,
+          push: (location) => routerInstance.push(location),
+        })
+      })()
     }
     return Promise.reject(error)
   },
 )
 
-export function isApiError(error: unknown): error is AxiosError<ApiEnvelope<unknown>> {
-  return axios.isAxiosError(error)
-}
-
-export function envelopeErrorMessageKey(error: unknown): string | null {
-  if (isApiError(error) && error.response?.data.error?.messageKey) {
-    return error.response.data.error.messageKey
-  }
-  return null
-}
+export {
+  isApiError,
+  parseApiEnvelopeError,
+  resolveApiError,
+  resolveApiErrorMessageKey,
+  type ResolvedApiError,
+} from './errorEnvelope'
 
 export { TOKEN_STORAGE_KEY }
