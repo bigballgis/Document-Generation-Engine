@@ -25,6 +25,27 @@ docker-compose.yml Local PostgreSQL, Redis, Kafka, MinIO
 
 ## Quick start
 
+### Docker-only validation (required for manual testing)
+
+All manual / acceptance testing runs in Docker. **Do not use** `pnpm dev` or `spring-boot:run` unless you are debugging locally.
+
+```powershell
+copy .env.example .env   # if .env does not exist
+.\scripts\docker-deploy.ps1
+```
+
+| Service | URL |
+| --- | --- |
+| Management UI | http://localhost:4173 |
+| Backend health | http://localhost:8080/healthz |
+| Login | `10000001` / `ChangeMe123!` |
+
+Rebuild after code changes: run `.\scripts\docker-deploy.ps1` again.
+
+Restart without recompiling (uses existing images): `.\scripts\docker-deploy.ps1 -SkipBuild`.
+
+Docker only **re-downloads** base images from the registry when the image is missing locally or when you use `--pull` / `ForceRebuild`. Routine deploys use **`build --pull=false`** and reuse cached layers; you still see compile steps (`pnpm build`, `mvn package`) when source code changed — that is rebuild, not re-download.
+
 ### 1. Environment
 
 ```powershell
@@ -43,7 +64,7 @@ LibreOffice sidecar (PDF rendering, later phases):
 docker compose --profile rendering up -d docgen-libreoffice
 ```
 
-### 3. Backend
+### 3. Backend (optional local dev only)
 
 ```powershell
 cd backend
@@ -58,7 +79,7 @@ Optional runtime integration (see `.env.example`):
 - `IDEMPOTENCY_CACHE=redis` — Redis + DB dual-write (default for non-test profiles)
 - `ASYNC_TRANSPORT=kafka` — publish async batch tasks to Kafka (`generation.async-batch-task.v1`); default is in-process `@Async`
 
-### 4. Frontend
+### 4. Frontend (optional local dev only)
 
 ```powershell
 cd frontend
@@ -66,7 +87,7 @@ pnpm install
 pnpm dev
 ```
 
-App: `http://localhost:5173`
+App: `http://localhost:5173` — **not** used for acceptance testing; use Docker UI on port 4173.
 
 ### 5. Sign in (P1)
 

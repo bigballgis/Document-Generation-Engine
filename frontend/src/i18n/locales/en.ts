@@ -32,6 +32,25 @@ export default {
     login: 'Login',
     logout: 'Sign out',
     managementNavigation: 'Management navigation',
+    groups: {
+      overview: 'Overview',
+      entitlement: 'Access & identity',
+      versionCatalog: 'Version catalog',
+      content: 'Document content',
+      apiAccess: 'API access',
+      security: 'Security & audit',
+    },
+    items: {
+      dashboard: 'My tasks',
+      users: 'Users',
+      groups: 'Groups',
+      masters: 'Master documents',
+      templates: 'Templates',
+      masterVersions: 'Master versions',
+      templateVersions: 'Template versions',
+      apiPolicies: 'API policies',
+      audit: 'Audit log',
+    },
     routes: {
       globalGovernance: 'Global governance',
       groupGovernance: 'Group governance',
@@ -102,6 +121,104 @@ export default {
       loadError: 'Unable to load dashboard statistics.',
     },
   },
+  dashboard: {
+    title: 'My tasks',
+    description: 'Workflow actions for version changes, plus a snapshot of your version catalog.',
+    loadError: 'Unable to load your task list.',
+    stats: {
+      sectionTitle: 'Version & workflow snapshot',
+      sectionDescription: 'Catalog counts reflect registered masters and templates; workflow counts reflect in-flight version changes.',
+      pendingActions: {
+        title: 'Actions assigned to you',
+        description: 'Open items waiting for your test, approval, publish, or review decision.',
+        action: 'Review task list',
+      },
+      masterPendingReview: {
+        title: 'Master versions awaiting review',
+        description: 'Uploaded master documents pending an approve/reject decision.',
+        action: 'Open master versions',
+      },
+      masterVersionsInProgress: {
+        title: 'Master versions in progress',
+        description: 'Draft or rejected masters that still need upload fixes or resubmission.',
+        action: 'Open master versions',
+      },
+      templateVersionsInWorkflow: {
+        title: 'Template versions in workflow',
+        description: 'Templates in draft, testing, approval, or pending release.',
+        action: 'Open template versions',
+      },
+      publishedVersions: {
+        title: 'Published release versions',
+        description: 'Templates with a live release version callable at runtime.',
+        action: 'Open template versions',
+      },
+      stoppedVersions: {
+        title: 'Stopped release versions',
+        description: 'Published templates temporarily blocked from runtime use.',
+        action: 'Open template versions',
+      },
+      catalogMasters: {
+        title: 'Master versions in catalog',
+        description: 'Registered master documents across your authorized groups.',
+        action: 'Browse master catalog',
+      },
+      catalogTemplates: {
+        title: 'Template lines in catalog',
+        description: 'Registered template definitions (each tracks its own release versions).',
+        action: 'Browse template catalog',
+      },
+    },
+    tasks: {
+      title: 'Pending actions',
+      description: 'Complete these items in the linked master or template detail pages.',
+      empty: 'You have no pending actions right now.',
+      columns: {
+        action: 'Action',
+        item: 'Item',
+        group: 'Group',
+        hint: 'What to do',
+      },
+      masterReview: {
+        title: 'Review master document',
+        description: 'Approve or reject the uploaded master before templates can use it.',
+      },
+      templateTest: {
+        title: 'Complete test decision',
+        description: 'Run test generation and pass or fail the template in testing.',
+      },
+      templateApproval: {
+        title: 'Complete approval decision',
+        description: 'Approve or reject the template after testing.',
+      },
+      templatePublish: {
+        title: 'Publish template',
+        description: 'Release the approved template to the selected environment.',
+      },
+      templateDraft: {
+        title: 'Continue template authoring',
+        description: 'Finish bindings, rules, and submit the draft for testing.',
+      },
+    },
+    quickLinks: {
+      title: 'Version catalogs',
+      templates: 'Template version catalog',
+      masters: 'Master version catalog',
+      apiPolicies: 'API policies',
+    },
+  },
+  versionCatalog: {
+    master: {
+      noticeTitle: 'This page is a version catalog, not a workflow queue',
+      noticeDescription:
+        'Each row is a master document version line. Uploading a new DOCX or editing metadata starts a review workflow; approved versions become available for template authoring.',
+    },
+    template: {
+      noticeTitle: 'This page is a version catalog, not a workflow queue',
+      noticeDescription:
+        'Each row is a template definition that owns release versions. Creating a template or changing bindings triggers the test → approval → publish version workflow shown in My tasks.',
+    },
+  },
   workbench: {
     tester: {
       title: 'Tester workbench',
@@ -116,20 +233,20 @@ export default {
   },
   masters: {
     list: {
-      title: 'Master documents',
-      description: 'Browse group-scoped DOCX masters and their review status.',
+      title: 'Master version catalog',
+      description: 'Browse registered master documents. Uploading or revising a master starts a version review workflow.',
       groupSection: 'Group: {groupCode}',
-      empty: 'No master documents yet.',
+      empty: 'No master versions in the catalog yet.',
       columns: {
-        name: 'Name',
-        status: 'Status',
+        name: 'Master name',
+        status: 'Version status',
         filename: 'Source file',
         anchors: 'Anchors',
         updatedAt: 'Updated',
       },
     },
     detail: {
-      backToList: 'Back to master list',
+      backToList: 'Back to master catalog',
       loadingTitle: 'Loading master…',
       groupLabel: 'Group: {groupCode}',
       summaryTitle: 'Summary',
@@ -151,8 +268,20 @@ export default {
       APPROVED: 'Approved',
       REJECTED: 'Rejected',
     },
+    workflow: {
+      actionRequired: 'Version workflow — action required',
+      useReviewPanel: 'Use the review actions in the page header to complete this master version step.',
+      submitReview: {
+        title: 'Submit master version for review',
+        description: 'Finish metadata and upload fixes, then submit this master version for approval.',
+      },
+      reviewDecision: {
+        title: 'Review master version',
+        description: 'Approve or reject this master version so templates can reference it.',
+      },
+    },
     upload: {
-      open: 'Upload master',
+      open: 'Upload new master version',
       title: 'Upload DOCX master',
       groupCode: 'Group',
       groupCodePlaceholder: 'Select authorized group',
@@ -271,7 +400,7 @@ export default {
   },
   templates: {
     create: {
-      open: 'Create template',
+      open: 'New template version line',
       title: 'Create template',
       groupCode: 'Group',
       groupCodePlaceholder: 'Select authorized group',
@@ -287,20 +416,26 @@ export default {
       success: 'Template created successfully.',
     },
     list: {
-      title: 'Templates',
-      description: 'Browse group-scoped templates and their lifecycle status.',
+      title: 'Template version catalog',
+      description: 'Browse template definitions and their current release version. Authoring changes start the version workflow.',
       groupSection: 'Group: {groupCode}',
-      empty: 'No templates yet.',
+      empty: 'No templates in the catalog yet.',
       columns: {
-        name: 'Name',
+        name: 'Template name',
         externalId: 'External ID',
-        status: 'Status',
-        releaseVersion: 'Release version',
+        status: 'Version workflow status',
+        releaseVersion: 'Current release version',
         updatedAt: 'Updated',
       },
     },
     detail: {
-      backToList: 'Back to template list',
+      backToList: 'Back to template catalog',
+      tabs: {
+        overview: 'Overview & workflow',
+        authoring: 'Version authoring',
+        releaseVersions: 'Release version history',
+        apiAccess: 'API access',
+      },
       summaryTitle: 'Summary',
       externalId: 'External ID',
       masterId: 'Master ID',
@@ -309,6 +444,10 @@ export default {
       updatedAt: 'Last updated',
       noDescription: 'No description provided.',
       groupLabel: 'Group: {groupCode}',
+    },
+    workflow: {
+      actionRequired: 'Release version workflow — action required',
+      useLifecyclePanel: 'Use the lifecycle actions panel below to advance this template release version.',
     },
     status: {
       DRAFT: 'Draft',
@@ -377,10 +516,19 @@ export default {
       },
     },
     versions: {
-      title: 'Published release versions',
-      description: 'Deactivate or restore individual release versions while the template remains published.',
+      title: 'Release version history',
+      description: 'Every published release version for this template. Deactivate or restore individual versions while the template remains published.',
+      workflowHintTitle: 'Version workflow in progress',
+      workflowHintDescription:
+        'A new release version appears here after you complete test, approval, and publish in the Overview & workflow tab.',
+      loadError: 'Unable to load release version history.',
       releaseVersion: 'Release version',
+      devVersionNumber: 'Dev version',
       status: 'Version status',
+      defaultRoute: 'Default route',
+      defaultRouteYes: 'Default',
+      defaultRouteNo: '—',
+      updatedAt: 'Last updated',
       actions: 'Actions',
       deactivate: 'Deactivate version',
       restore: 'Restore version',
@@ -647,6 +795,10 @@ export default {
   identity: {
     title: 'Identity & group administration',
     description: 'Manage management accounts and business groups within your authorized scope.',
+    usersPageTitle: 'User management',
+    usersPageDescription: 'Create and maintain management user accounts and role assignments.',
+    groupsPageTitle: 'Group management',
+    groupsPageDescription: 'Create business groups and manage membership within your scope.',
     tabs: {
       users: 'User management',
       groups: 'Group management',

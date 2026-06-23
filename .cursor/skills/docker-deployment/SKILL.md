@@ -16,27 +16,33 @@ Deployment releases an already-green slice. Never use it to bypass gates; never 
 
 ## Preconditions (block if unmet)
 
-- Backend: `mvn -B -ntp -f backend/pom.xml verify` green.
-- Frontend: `pnpm -C frontend lint && type-check && test && build` green.
+- Prefer verifying inside Docker after image build (see Workflow). Local gates optional for CI:
+  - Backend: `mvn -B -ntp -f backend/pom.xml verify`
+  - Frontend: `pnpm -C frontend lint && type-check && test && build`
 - E2E functional + UIUX evidence present for user-facing changes.
 - No secrets in images / compose / committed env; inject via runtime env.
 
-## Workflow
+## Workflow (canonical — user tests only here)
+
+```powershell
+# From repo root — builds inside Docker; does not re-pull base images from registry
+.\scripts\docker-deploy.ps1
+
+# Restart only (no compile)
+.\scripts\docker-deploy.ps1 -SkipBuild
+```
+
+Equivalent manual steps:
 
 ```bash
-# 1. Build images
-docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod build
-
-# 2. Start dependencies, wait for healthy
 docker compose up -d docgen-postgres docgen-redis docgen-minio
-
-# 3. Roll out app stack (health-gated)
-docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d
-
-# 4. Verify health
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod build --pull=false docgen-backend docgen-frontend
+docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d docgen-backend docgen-frontend
 curl -f http://localhost:8080/healthz
-# frontend on FRONTEND_PORT (default 4173)
+# UI: http://localhost:4173 (NOT Vite dev port 5173)
 ```
+
+**Rebuild vs re-download:** `build` recompiles changed app layers using local cache. Registry pull happens only for missing base images or when `--pull` is set. Log lines like `load metadata` / `resolve` are registry metadata checks, not always a full download.
 
 ## Evidence (capture)
 

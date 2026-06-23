@@ -115,22 +115,56 @@ public class AuditQueryService {
             String groupScope
     ) {
         validateTimeWindow(eventAtFrom, eventAtTo);
-        if (templateId == null) {
-            throw new AuditValidationException(
-                    ApiErrorCodes.AUDIT_SCOPE_REQUIRED,
-                    "api.error.audit.scopeRequired"
-            );
+        if (!groupAccessService.canReadAudit(session)) {
+            throw new AuditAccessDeniedException();
         }
-        resolveGroupFilter(session, actorRole, templateId, groupScope);
-        TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
-        List<LifecycleAuditEventView> events = lifecycleRecordRepository
-                .findByTemplateIdOrderByCreatedAtDesc(template.getId()).stream()
+        validateActorRole(session, actorRole);
+
+        if (actorRole == AuditReadActorRole.GROUP_ADMIN) {
+            resolveGroupFilter(session, actorRole, templateId, groupScope);
+            TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
+            return new LifecycleAuditQueryResult(filterLifecycleRecords(
+                    lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(template.getId()),
+                    template.getId(),
+                    eventType,
+                    eventAtFrom,
+                    eventAtTo
+            ));
+        }
+
+        if (templateId != null) {
+            TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
+            return new LifecycleAuditQueryResult(filterLifecycleRecords(
+                    lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(template.getId()),
+                    template.getId(),
+                    eventType,
+                    eventAtFrom,
+                    eventAtTo
+            ));
+        }
+
+        return new LifecycleAuditQueryResult(filterLifecycleRecords(
+                lifecycleRecordRepository.findAllByOrderByCreatedAtDesc(),
+                null,
+                eventType,
+                eventAtFrom,
+                eventAtTo
+        ));
+    }
+
+    private List<LifecycleAuditEventView> filterLifecycleRecords(
+            List<TemplateLifecycleRecordEntity> records,
+            UUID templateId,
+            String eventType,
+            Instant eventAtFrom,
+            Instant eventAtTo
+    ) {
+        return records.stream()
                 .filter(record -> eventType == null || record.getAction().name().equals(eventType))
                 .filter(record -> eventAtFrom == null || !record.getCreatedAt().isBefore(eventAtFrom))
                 .filter(record -> eventAtTo == null || !record.getCreatedAt().isAfter(eventAtTo))
-                .map(record -> toLifecycleView(template.getId(), record))
+                .map(record -> toLifecycleView(templateId != null ? templateId : record.getTemplateId(), record))
                 .toList();
-        return new LifecycleAuditQueryResult(events);
     }
 
     @Transactional(readOnly = true)

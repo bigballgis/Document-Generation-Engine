@@ -1,6 +1,7 @@
 package com.bank.docgen.authorization.management.domain;
 
 public enum ManagementRoute {
+    DASHBOARD_HOME("route.dashboard-home"),
     GLOBAL_GOVERNANCE_HOME("route.global-governance-home"),
     GROUP_GOVERNANCE_HOME("route.group-governance-home"),
     TEMPLATE_AUTHORING_HOME("route.template-authoring-home"),

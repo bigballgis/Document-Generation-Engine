@@ -1,0 +1,34 @@
+---
+description: Hard constraint — all integration and manual validation runs in Docker; never rely on local Spring Boot or Vite dev servers for user testing.
+alwaysApply: true
+---
+
+# Docker-Only Validation
+
+The product owner validates **only inside Docker**. Treat local `mvn spring-boot:run`,
+`pnpm dev`, and host-port testing as optional developer shortcuts — **not** the delivery target.
+
+## Non-negotiables
+
+1. **Done requires Docker deploy** — After behavior-changing frontend/backend work, build and
+   roll out the `prod` compose profile and verify `/healthz` plus the management UI on
+   `FRONTEND_PORT` (default **4173**), not Vite **5173**.
+2. **Use the canonical script** — From repo root: `.\scripts\docker-deploy.ps1` (or equivalent
+   `docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d --build`).
+3. **Images must be self-contained** — Backend image builds with Maven inside Docker
+   (`backend/Dockerfile` multi-stage). Do not require a pre-built `backend/target/*.jar` on the host.
+4. **Report Docker URLs** — When handing off to the user, always cite
+   `http://localhost:4173` (or `FRONTEND_PORT`) and `http://localhost:8080/healthz` (or `BACKEND_PORT`).
+5. **No secrets in images** — Use `.env` at runtime; never commit credentials.
+
+## Forbidden
+
+- Claiming Done without a successful Docker rebuild/restart after code changes.
+- Telling the user to test on `localhost:5173` or a local JVM process unless they explicitly opt in.
+- Skipping `--build` when application code changed.
+
+## Reference
+
+- `scripts/docker-deploy.ps1`
+- `docker-compose.yml` + `docker-compose.prod.yml` (`prod` profile)
+- `.cursor/skills/docker-deployment/SKILL.md`

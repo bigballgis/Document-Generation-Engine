@@ -3,7 +3,7 @@ import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import IdentityAdministrationView from '@/views/identity/IdentityAdministrationView.vue'
+import GroupManagementView from '@/views/identity/GroupManagementView.vue'
 import en from '@/i18n/locales/en'
 import * as identityApi from '@/api/identity'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
@@ -31,11 +31,10 @@ function emptyPage() {
   return { content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 }
 }
 
-describe('IdentityAdministrationView', () => {
+describe('GroupManagementView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
-    vi.mocked(identityApi.listUsers).mockResolvedValue(emptyPage())
     vi.mocked(identityApi.listGroups).mockResolvedValue(emptyPage())
 
     const sessionStore = useSessionStore()
@@ -53,15 +52,14 @@ describe('IdentityAdministrationView', () => {
     sessionStore.$patch({ accessToken: 'token', session })
   })
 
-  it('renders both administration tabs', async () => {
+  it('renders group management without user tabs', async () => {
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
-    const wrapper = mount(IdentityAdministrationView, {
+    const wrapper = mount(GroupManagementView, {
       global: { plugins: [i18n, ElementPlus] },
     })
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Identity & group administration')
-    expect(wrapper.text()).toContain('User management')
     expect(wrapper.text()).toContain('Group management')
+    expect(wrapper.text()).not.toContain('User management')
   })
 })

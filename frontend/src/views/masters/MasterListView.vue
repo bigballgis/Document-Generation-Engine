@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import VersionCatalogNotice from '@/components/catalog/VersionCatalogNotice.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterUploadDialog from '@/components/masters/MasterUploadDialog.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
@@ -92,6 +93,8 @@ async function handleUpload(payload: {
         {{ t('masters.upload.open') }}
       </el-button>
     </header>
+
+    <VersionCatalogNotice kind="master" />
 
     <el-alert
       v-if="errorMessage"

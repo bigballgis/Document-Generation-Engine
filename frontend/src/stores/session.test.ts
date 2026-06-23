@@ -21,16 +21,17 @@ describe('session store', () => {
         authSource: 'LOCAL',
         roles: ['TEMPLATE_AUTHOR'],
         authorizedGroupCodes: ['RETAIL'],
-        defaultRoute: ROUTE_KEYS.templateAuthoringHome,
-        visibleRoutes: [ROUTE_KEYS.templateAuthoringHome],
+        defaultRoute: ROUTE_KEYS.dashboardHome,
+        visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.templateManagement],
         expiresAt: new Date().toISOString(),
       },
     })
 
-    expect(store.canAccessRoute(ROUTE_KEYS.templateAuthoringHome)).toBe(true)
+    expect(store.canAccessRoute(ROUTE_KEYS.dashboardHome)).toBe(true)
+    expect(store.canAccessRoute(ROUTE_KEYS.templateManagement)).toBe(true)
     expect(store.canAccessRoute(ROUTE_KEYS.globalGovernanceHome)).toBe(false)
     expect(store.canAccessRoute(ROUTE_KEYS.masterManagement)).toBe(false)
-    expect(store.defaultHomePath()).toBe('/home/template-authoring')
+    expect(store.defaultHomePath()).toBe('/dashboard')
   })
 
   it('clears persisted token on logout', async () => {

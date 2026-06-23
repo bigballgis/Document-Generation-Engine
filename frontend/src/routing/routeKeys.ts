@@ -1,4 +1,5 @@
 export const ROUTE_KEYS = {
+  dashboardHome: 'route.dashboard-home',
   globalGovernanceHome: 'route.global-governance-home',
   groupGovernanceHome: 'route.group-governance-home',
   templateAuthoringHome: 'route.template-authoring-home',
@@ -13,37 +14,52 @@ export const ROUTE_KEYS = {
 
 export type RouteKey = (typeof ROUTE_KEYS)[keyof typeof ROUTE_KEYS]
 
+/** Legacy route keys from older sessions map to current landing paths. */
+export const LEGACY_ROUTE_PATH_REDIRECT: Partial<Record<string, string>> = {
+  [ROUTE_KEYS.globalGovernanceHome]: '/dashboard',
+  [ROUTE_KEYS.groupGovernanceHome]: '/dashboard',
+  [ROUTE_KEYS.templateAuthoringHome]: '/dashboard',
+  [ROUTE_KEYS.testerWorkbench]: '/dashboard',
+  [ROUTE_KEYS.approverWorkbench]: '/dashboard',
+}
+
 export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
-  [ROUTE_KEYS.globalGovernanceHome]: '/home/global-governance',
-  [ROUTE_KEYS.groupGovernanceHome]: '/home/group-governance',
-  [ROUTE_KEYS.templateAuthoringHome]: '/home/template-authoring',
-  [ROUTE_KEYS.apiPolicyManagement]: '/home/api-policy',
-  [ROUTE_KEYS.auditConsole]: '/home/audit',
+  [ROUTE_KEYS.dashboardHome]: '/dashboard',
+  [ROUTE_KEYS.globalGovernanceHome]: '/dashboard',
+  [ROUTE_KEYS.groupGovernanceHome]: '/dashboard',
+  [ROUTE_KEYS.templateAuthoringHome]: '/dashboard',
+  [ROUTE_KEYS.apiPolicyManagement]: '/api/policies',
+  [ROUTE_KEYS.auditConsole]: '/audit',
   [ROUTE_KEYS.masterManagement]: '/masters',
   [ROUTE_KEYS.templateManagement]: '/templates',
-  [ROUTE_KEYS.testerWorkbench]: '/home/tester-workbench',
-  [ROUTE_KEYS.approverWorkbench]: '/home/approver-workbench',
-  [ROUTE_KEYS.identityAdministration]: '/home/identity',
+  [ROUTE_KEYS.testerWorkbench]: '/dashboard',
+  [ROUTE_KEYS.approverWorkbench]: '/dashboard',
+  [ROUTE_KEYS.identityAdministration]: '/entitlement/users',
 }
 
 export const ROUTE_NAV_LABEL_KEY: Record<RouteKey, string> = {
-  [ROUTE_KEYS.globalGovernanceHome]: 'nav.routes.globalGovernance',
-  [ROUTE_KEYS.groupGovernanceHome]: 'nav.routes.groupGovernance',
-  [ROUTE_KEYS.templateAuthoringHome]: 'nav.routes.templateAuthoring',
-  [ROUTE_KEYS.apiPolicyManagement]: 'nav.routes.apiPolicy',
-  [ROUTE_KEYS.auditConsole]: 'nav.routes.audit',
-  [ROUTE_KEYS.masterManagement]: 'nav.routes.masters',
-  [ROUTE_KEYS.templateManagement]: 'nav.routes.templates',
-  [ROUTE_KEYS.testerWorkbench]: 'nav.routes.testerWorkbench',
-  [ROUTE_KEYS.approverWorkbench]: 'nav.routes.approverWorkbench',
-  [ROUTE_KEYS.identityAdministration]: 'nav.routes.identityAdministration',
+  [ROUTE_KEYS.dashboardHome]: 'nav.items.dashboard',
+  [ROUTE_KEYS.globalGovernanceHome]: 'nav.items.dashboard',
+  [ROUTE_KEYS.groupGovernanceHome]: 'nav.items.dashboard',
+  [ROUTE_KEYS.templateAuthoringHome]: 'nav.items.dashboard',
+  [ROUTE_KEYS.apiPolicyManagement]: 'nav.items.apiPolicies',
+  [ROUTE_KEYS.auditConsole]: 'nav.items.audit',
+  [ROUTE_KEYS.masterManagement]: 'nav.items.masterVersions',
+  [ROUTE_KEYS.templateManagement]: 'nav.items.templateVersions',
+  [ROUTE_KEYS.testerWorkbench]: 'nav.items.dashboard',
+  [ROUTE_KEYS.approverWorkbench]: 'nav.items.dashboard',
+  [ROUTE_KEYS.identityAdministration]: 'nav.items.users',
 }
 
 export const MASTER_DETAIL_PATH_PREFIX = '/masters/'
 export const TEMPLATE_DETAIL_PATH_PREFIX = '/templates/'
 
 export function pathForRouteKey(routeKey: string): string {
-  return ROUTE_PATH_BY_KEY[routeKey as RouteKey] ?? '/forbidden'
+  return (
+    LEGACY_ROUTE_PATH_REDIRECT[routeKey] ??
+    ROUTE_PATH_BY_KEY[routeKey as RouteKey] ??
+    '/forbidden'
+  )
 }
 
 export function routeKeyForPath(path: string): RouteKey | undefined {

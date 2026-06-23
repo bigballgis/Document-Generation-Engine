@@ -49,7 +49,7 @@ class ManagementAuthControllerTest {
                 .andExpect(jsonPath("$.result.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.result.session.username").value("10000001"))
                 .andExpect(jsonPath("$.result.session.defaultRoute")
-                        .value(ManagementRoute.GLOBAL_GOVERNANCE_HOME.routeKey()))
+                        .value(ManagementRoute.DASHBOARD_HOME.routeKey()))
                 .andReturn();
 
         String token = readAccessToken(result);
@@ -121,7 +121,7 @@ class ManagementAuthControllerTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.session.defaultRoute")
-                        .value(ManagementRoute.TEMPLATE_AUTHORING_HOME.routeKey()))
+                        .value(ManagementRoute.DASHBOARD_HOME.routeKey()))
                 .andExpect(jsonPath("$.result.session.visibleRoutes.length()").value(2));
     }
 

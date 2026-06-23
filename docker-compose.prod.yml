@@ -6,6 +6,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      pull_policy: if_not_present
     container_name: docgen-backend
     profiles:
       - prod
@@ -16,6 +17,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-docgen}
       POSTGRES_USER: ${POSTGRES_USER:-docgen}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docgen_local_pwd}
+      REDIS_HOST: docgen-redis
+      REDIS_PORT: 6379
       MINIO_ENDPOINT: http://docgen-minio:9000
       JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}
       APP_ENVIRONMENT: prod
@@ -23,6 +26,8 @@ services:
       - "${BACKEND_PORT:-8080}:8080"
     depends_on:
       docgen-postgres:
+        condition: service_healthy
+      docgen-redis:
         condition: service_healthy
       docgen-minio:
         condition: service_healthy
@@ -36,6 +41,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      pull_policy: if_not_present
     container_name: docgen-frontend
     profiles:
       - prod

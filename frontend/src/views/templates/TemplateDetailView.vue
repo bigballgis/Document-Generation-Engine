@@ -11,6 +11,8 @@ import TemplateRuleConfigurator from '@/components/templates/TemplateRuleConfigu
 import TemplatePreviewPanel from '@/components/templates/TemplatePreviewPanel.vue'
 import TemplateTestDataSetPanel from '@/components/templates/TemplateTestDataSetPanel.vue'
 import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
+import TemplateReleaseVersionHistoryPanel from '@/components/templates/TemplateReleaseVersionHistoryPanel.vue'
+import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
@@ -22,7 +24,6 @@ import type {
   DeleteTemplatePayload,
   LifecycleGovernanceAction,
   PreviewRecord,
-  TemplateLifecycleStatus,
   UpsertApiPolicyPayload,
 } from '@/types/template'
 
@@ -37,7 +38,6 @@ const {
   publishTemplates,
   stopTemplates,
   restoreOrDeprecateTemplates,
-  manageReleaseVersionState,
   manageApiPolicy,
   deleteTemplates,
 } = useCapabilities()
@@ -54,7 +54,7 @@ const bindingGateResult = ref<BindingValidationResult | null>(null)
 const loadingPublishGate = ref(false)
 const metadataEditOpen = ref(false)
 const loadFailed = ref(false)
-const versionStatuses = ref<Record<string, TemplateLifecycleStatus>>({})
+const activeDetailTab = ref('overview')
 const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
 
 const policyOutputFormatOptions = ['DOCX', 'PDF']
@@ -137,24 +137,6 @@ const showMetadataEdit = computed(() => {
 const showDeleteTemplateAction = computed(
   () => deleteTemplates.value && template.value?.lifecycleStatus !== 'DELETED',
 )
-const showVersionsSection = computed(
-  () =>
-    manageReleaseVersionState.value &&
-    template.value?.lifecycleStatus === 'PUBLISHED' &&
-    Boolean(template.value.releaseVersion),
-)
-const publishedVersions = computed(() => {
-  const releaseVersion = template.value?.releaseVersion
-  if (!releaseVersion) {
-    return []
-  }
-  return [
-    {
-      releaseVersion,
-      lifecycleStatus: versionStatuses.value[releaseVersion] ?? 'PUBLISHED',
-    },
-  ]
-})
 
 const publishGateItems = computed(() => [
   {
@@ -245,47 +227,15 @@ watch(
   { immediate: true },
 )
 
-async function syncVersionStatusFromPreview(releaseVersion: string) {
-  try {
-    const preview = await templatesStore.fetchLifecycleImpactPreview(templateId.value, {
-      action: 'DEACTIVATE_VERSION',
-      releaseVersion,
-    })
-    versionStatuses.value = {
-      ...versionStatuses.value,
-      [releaseVersion]: preview.callableReleaseVersions.includes(releaseVersion)
-        ? 'PUBLISHED'
-        : 'STOPPED',
-    }
-  } catch {
-    // Keep local optimistic state when preview fails.
-  }
-}
-
 async function loadTemplate() {
   loadFailed.value = false
   try {
     await templatesStore.fetchTemplate(templateId.value)
-    syncVersionStatuses()
-    const releaseVersion = template.value?.releaseVersion
-    if (template.value?.lifecycleStatus === 'PUBLISHED' && releaseVersion) {
-      await syncVersionStatusFromPreview(releaseVersion)
-    }
     if (showPolicyPanel.value) {
       await loadPolicyData()
     }
   } catch {
     loadFailed.value = true
-  }
-}
-
-function syncVersionStatuses() {
-  const releaseVersion = template.value?.releaseVersion
-  if (template.value?.lifecycleStatus === 'PUBLISHED' && releaseVersion) {
-    versionStatuses.value = {
-      ...versionStatuses.value,
-      [releaseVersion]: versionStatuses.value[releaseVersion] ?? 'PUBLISHED',
-    }
   }
 }
 
@@ -402,7 +352,8 @@ async function handlePublish() {
     await templatesStore.publishTemplate(templateId.value, {
       releaseVersion: publishVersion.value,
     })
-    await loadPolicyData()
+    await loadTemplate()
+    activeDetailTab.value = 'releaseVersions'
     ElMessage.success(t('templates.lifecycle.publishSuccess'))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
@@ -512,82 +463,6 @@ async function handleGovernanceAction(action: GovernanceAction) {
       await templatesStore.deprecateTemplate(templateId.value, payload)
     }
     ElMessage.success(t(config.successKey))
-  } catch {
-    ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
-  }
-}
-
-async function handleVersionAction(
-  releaseVersion: string,
-  action: 'deactivate' | 'restore',
-) {
-  const previewAction: LifecycleGovernanceAction =
-    action === 'deactivate' ? 'DEACTIVATE_VERSION' : 'RESTORE_VERSION'
-  const reasonKey =
-    action === 'deactivate'
-      ? 'templates.versions.deactivateReasonPrompt'
-      : 'templates.versions.restoreReasonPrompt'
-  const titleKey =
-    action === 'deactivate'
-      ? 'templates.versions.deactivateTitle'
-      : 'templates.versions.restoreTitle'
-  const confirmTitleKey =
-    action === 'deactivate'
-      ? 'templates.versions.confirmDeactivateTitle'
-      : 'templates.versions.confirmRestoreTitle'
-  const confirmMessageKey =
-    action === 'deactivate'
-      ? 'templates.versions.confirmDeactivateMessage'
-      : 'templates.versions.confirmRestoreMessage'
-  const successKey =
-    action === 'deactivate'
-      ? 'templates.versions.deactivateSuccess'
-      : 'templates.versions.restoreSuccess'
-
-  let reason = ''
-  try {
-    const result = await ElMessageBox.prompt(t(reasonKey), t(titleKey), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      inputValidator: (value) =>
-        value.trim().length > 0 ? true : t('templates.lifecycle.reasonRequired'),
-    })
-    reason = result.value.trim()
-  } catch {
-    return
-  }
-
-  try {
-    const impactMessage = await buildImpactPreviewMessage(previewAction, releaseVersion)
-    await ElMessageBox.confirm(impactMessage, t('templates.governance.impactPreviewTitle'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning',
-    })
-  } catch {
-    return
-  }
-
-  const confirmed = await confirmAction({
-    titleKey: confirmTitleKey,
-    messageKey: confirmMessageKey,
-    type: 'warning',
-  })
-  if (!confirmed) {
-    return
-  }
-
-  const payload = { reason, confirmed: true }
-  try {
-    if (action === 'deactivate') {
-      await templatesStore.deactivateTemplateVersion(templateId.value, releaseVersion, payload)
-      versionStatuses.value = { ...versionStatuses.value, [releaseVersion]: 'STOPPED' }
-    } else {
-      await templatesStore.restoreTemplateVersion(templateId.value, releaseVersion, payload)
-      versionStatuses.value = { ...versionStatuses.value, [releaseVersion]: 'PUBLISHED' }
-    }
-    await syncVersionStatusFromPreview(releaseVersion)
-    ElMessage.success(t(successKey))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
   }
@@ -774,6 +649,10 @@ async function handleDeleteTemplate() {
     />
 
     <template v-else-if="template">
+      <TemplateWorkflowBanner :template="template" />
+
+      <el-tabs v-model="activeDetailTab" class="detail-tabs">
+        <el-tab-pane :label="t('templates.detail.tabs.overview')" name="overview">
       <el-card shadow="never" class="section-card">
         <h2>{{ t('templates.detail.summaryTitle') }}</h2>
         <dl class="summary-grid">
@@ -940,50 +819,14 @@ async function handleDeleteTemplate() {
           </el-button>
         </div>
       </el-card>
+        </el-tab-pane>
 
-      <el-card v-if="showVersionsSection" shadow="never" class="section-card">
-        <h2>{{ t('templates.versions.title') }}</h2>
-        <p class="governance-description">{{ t('templates.versions.description') }}</p>
-        <el-table :data="publishedVersions" stripe empty-text="">
-          <template #empty>
-            <el-empty :description="t('templates.versions.empty')" />
-          </template>
-          <el-table-column
-            prop="releaseVersion"
-            :label="t('templates.versions.releaseVersion')"
-            min-width="160"
-          />
-          <el-table-column :label="t('templates.versions.status')" width="160">
-            <template #default="{ row }">
-              <TemplateStatusBadge :status="row.lifecycleStatus" />
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('templates.versions.actions')" min-width="220">
-            <template #default="{ row }">
-              <el-button
-                v-if="row.lifecycleStatus === 'PUBLISHED'"
-                link
-                type="warning"
-                :loading="templatesStore.submitting"
-                @click="handleVersionAction(row.releaseVersion, 'deactivate')"
-              >
-                {{ t('templates.versions.deactivate') }}
-              </el-button>
-              <el-button
-                v-if="row.lifecycleStatus === 'STOPPED'"
-                link
-                type="primary"
-                :loading="templatesStore.submitting"
-                @click="handleVersionAction(row.releaseVersion, 'restore')"
-              >
-                {{ t('templates.versions.restore') }}
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
-
-      <el-card v-if="showAuthoringSection" shadow="never" class="section-card">
+        <el-tab-pane
+          v-if="showAuthoringSection"
+          :label="t('templates.detail.tabs.authoring')"
+          name="authoring"
+        >
+      <el-card shadow="never" class="section-card">
         <h2>{{ t('templates.authoring.title') }}</h2>
         <TemplateAuthoringPanel
           :template-id="templateId"
@@ -1011,8 +854,22 @@ async function handleDeleteTemplate() {
           :preview="lastPreview"
         />
       </el-card>
+        </el-tab-pane>
 
-      <el-card v-if="showPolicyPanel" shadow="never" class="section-card">
+        <el-tab-pane :label="t('templates.detail.tabs.releaseVersions')" name="releaseVersions">
+          <TemplateReleaseVersionHistoryPanel
+            :template-id="templateId"
+            :template-lifecycle-status="template.lifecycleStatus"
+            @changed="loadTemplate"
+          />
+        </el-tab-pane>
+
+        <el-tab-pane
+          v-if="showPolicyPanel"
+          :label="t('templates.detail.tabs.apiAccess')"
+          name="apiAccess"
+        >
+      <el-card shadow="never" class="section-card">
         <h2>{{ t('templates.policy.title') }}</h2>
         <el-skeleton v-if="templatesStore.loadingPolicy" :rows="4" animated />
         <template v-else>
@@ -1121,6 +978,8 @@ async function handleDeleteTemplate() {
           @update:environment="selectedContractEnvironment = $event"
         />
       </el-card>
+        </el-tab-pane>
+      </el-tabs>
     </template>
 
     <TemplateMetadataEditDialog
@@ -1162,6 +1021,10 @@ async function handleDeleteTemplate() {
 
 .page-header {
   margin-bottom: 1.5rem;
+}
+
+.detail-tabs {
+  margin-top: 0.25rem;
 }
 
 .header-content {

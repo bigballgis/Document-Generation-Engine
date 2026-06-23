@@ -12,20 +12,16 @@ class RouteVisibilityServiceTest {
     private final RouteVisibilityService routeVisibilityService = new RouteVisibilityService();
 
     @Test
-    void globalAdminSeesAllRoutesAndLandsOnGlobalHome() {
+    void globalAdminSeesOrganizedConsoleRoutesAndLandsOnDashboard() {
         Set<ManagementRole> roles = Set.of(ManagementRole.GLOBAL_ADMIN);
 
         assertThat(routeVisibilityService.resolveDefaultRoute(roles))
-                .isEqualTo(ManagementRoute.GLOBAL_GOVERNANCE_HOME.routeKey());
+                .isEqualTo(ManagementRoute.DASHBOARD_HOME.routeKey());
         assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
                 .containsExactly(
-                        ManagementRoute.GLOBAL_GOVERNANCE_HOME.routeKey(),
-                        ManagementRoute.GROUP_GOVERNANCE_HOME.routeKey(),
-                        ManagementRoute.TEMPLATE_AUTHORING_HOME.routeKey(),
+                        ManagementRoute.DASHBOARD_HOME.routeKey(),
                         ManagementRoute.MASTER_MANAGEMENT.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
-                        ManagementRoute.TESTER_WORKBENCH.routeKey(),
-                        ManagementRoute.APPROVER_WORKBENCH.routeKey(),
                         ManagementRoute.API_POLICY_MANAGEMENT.routeKey(),
                         ManagementRoute.AUDIT_CONSOLE.routeKey(),
                         ManagementRoute.IDENTITY_ADMINISTRATION.routeKey()
@@ -37,11 +33,10 @@ class RouteVisibilityServiceTest {
         Set<ManagementRole> roles = Set.of(ManagementRole.GROUP_ADMIN);
 
         assertThat(routeVisibilityService.resolveDefaultRoute(roles))
-                .isEqualTo(ManagementRoute.GROUP_GOVERNANCE_HOME.routeKey());
+                .isEqualTo(ManagementRoute.DASHBOARD_HOME.routeKey());
         assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
                 .containsExactly(
-                        ManagementRoute.GROUP_GOVERNANCE_HOME.routeKey(),
-                        ManagementRoute.TEMPLATE_AUTHORING_HOME.routeKey(),
+                        ManagementRoute.DASHBOARD_HOME.routeKey(),
                         ManagementRoute.MASTER_MANAGEMENT.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey(),
                         ManagementRoute.API_POLICY_MANAGEMENT.routeKey(),
@@ -51,54 +46,54 @@ class RouteVisibilityServiceTest {
     }
 
     @Test
-    void templateAuthorSeesAuthoringAndTemplateManagement() {
+    void templateAuthorSeesDashboardAndTemplateManagement() {
         Set<ManagementRole> roles = Set.of(ManagementRole.TEMPLATE_AUTHOR);
 
         assertThat(routeVisibilityService.resolveDefaultRoute(roles))
-                .isEqualTo(ManagementRoute.TEMPLATE_AUTHORING_HOME.routeKey());
+                .isEqualTo(ManagementRoute.DASHBOARD_HOME.routeKey());
         assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
                 .containsExactly(
-                        ManagementRoute.TEMPLATE_AUTHORING_HOME.routeKey(),
+                        ManagementRoute.DASHBOARD_HOME.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey()
                 );
     }
 
     @Test
-    void masterDesignerLandsOnAuthoringHomeWithMasterAndTemplateManagement() {
+    void masterDesignerLandsOnDashboardWithMasterAndTemplateManagement() {
         Set<ManagementRole> roles = Set.of(ManagementRole.MASTER_DESIGNER);
 
         assertThat(routeVisibilityService.resolveDefaultRoute(roles))
-                .isEqualTo(ManagementRoute.TEMPLATE_AUTHORING_HOME.routeKey());
+                .isEqualTo(ManagementRoute.DASHBOARD_HOME.routeKey());
         assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
                 .containsExactly(
-                        ManagementRoute.TEMPLATE_AUTHORING_HOME.routeKey(),
+                        ManagementRoute.DASHBOARD_HOME.routeKey(),
                         ManagementRoute.MASTER_MANAGEMENT.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey()
                 );
     }
 
     @Test
-    void templateTesterLandsOnTesterWorkbench() {
+    void templateTesterLandsOnDashboardWithTemplateManagement() {
         Set<ManagementRole> roles = Set.of(ManagementRole.TEMPLATE_TESTER);
 
         assertThat(routeVisibilityService.resolveDefaultRoute(roles))
-                .isEqualTo(ManagementRoute.TESTER_WORKBENCH.routeKey());
+                .isEqualTo(ManagementRoute.DASHBOARD_HOME.routeKey());
         assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
                 .containsExactly(
-                        ManagementRoute.TESTER_WORKBENCH.routeKey(),
+                        ManagementRoute.DASHBOARD_HOME.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey()
                 );
     }
 
     @Test
-    void templateApproverLandsOnApproverWorkbench() {
+    void templateApproverLandsOnDashboardWithTemplateManagement() {
         Set<ManagementRole> roles = Set.of(ManagementRole.TEMPLATE_APPROVER);
 
         assertThat(routeVisibilityService.resolveDefaultRoute(roles))
-                .isEqualTo(ManagementRoute.APPROVER_WORKBENCH.routeKey());
+                .isEqualTo(ManagementRoute.DASHBOARD_HOME.routeKey());
         assertThat(routeVisibilityService.resolveVisibleRoutes(roles))
                 .containsExactly(
-                        ManagementRoute.APPROVER_WORKBENCH.routeKey(),
+                        ManagementRoute.DASHBOARD_HOME.routeKey(),
                         ManagementRoute.TEMPLATE_MANAGEMENT.routeKey()
                 );
     }

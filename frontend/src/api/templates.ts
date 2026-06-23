@@ -15,6 +15,7 @@ import type {
   PublishTemplatePayload,
   RuleValidationResult,
   TemplateDetail,
+  TemplateReleaseVersion,
   TemplateSummary,
   TestDataSet,
   TestGeneratePayload,
@@ -149,6 +150,13 @@ export async function fetchLifecycleImpactPreview(
   const response = await http.post<ApiEnvelope<LifecycleImpactPreview>>(
     `/templates/${templateId}/lifecycle/impact-preview`,
     payload,
+  )
+  return unwrap(response.data)
+}
+
+export async function fetchReleaseVersions(templateId: string): Promise<TemplateReleaseVersion[]> {
+  const response = await http.get<ApiEnvelope<TemplateReleaseVersion[]>>(
+    `/templates/${templateId}/release-versions`,
   )
   return unwrap(response.data)
 }

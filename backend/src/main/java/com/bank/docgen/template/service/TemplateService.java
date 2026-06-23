@@ -1,5 +1,7 @@
 package com.bank.docgen.template.service;
 
+import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
+import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.master.domain.MasterDocumentStatus;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
@@ -12,6 +14,7 @@ import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
+import com.bank.docgen.template.api.TemplateReleaseVersionView;
 import com.bank.docgen.template.api.TemplateSummaryView;
 import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
@@ -58,6 +61,7 @@ public class TemplateService {
     private final AnchorBindingRepository anchorBindingRepository;
     private final MasterDocumentRepository masterDocumentRepository;
     private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
+    private final ApiPolicyRepository apiPolicyRepository;
     private final GroupAccessService groupAccessService;
     private final ObjectMapper objectMapper;
 
@@ -68,6 +72,7 @@ public class TemplateService {
             AnchorBindingRepository anchorBindingRepository,
             MasterDocumentRepository masterDocumentRepository,
             TemplateLifecycleRecordRepository lifecycleRecordRepository,
+            ApiPolicyRepository apiPolicyRepository,
             GroupAccessService groupAccessService,
             ObjectMapper objectMapper
     ) {
@@ -77,6 +82,7 @@ public class TemplateService {
         this.anchorBindingRepository = anchorBindingRepository;
         this.masterDocumentRepository = masterDocumentRepository;
         this.lifecycleRecordRepository = lifecycleRecordRepository;
+        this.apiPolicyRepository = apiPolicyRepository;
         this.groupAccessService = groupAccessService;
         this.objectMapper = objectMapper;
     }
@@ -99,6 +105,24 @@ public class TemplateService {
     public TemplateDetailView get(UUID templateId, ManagementSessionClaims session) {
         TemplateEntity template = requireReadableTemplate(templateId, session);
         return toDetail(template);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TemplateReleaseVersionView> listReleaseVersions(UUID templateId, ManagementSessionClaims session) {
+        TemplateEntity template = requireReadableTemplate(templateId, session);
+        String defaultRoute = apiPolicyRepository.findByTemplateId(templateId)
+                .map(ApiPolicyEntity::getDefaultRouteReleaseVersion)
+                .orElse(null);
+        return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(template.getId()).stream()
+                .filter(version -> version.getReleaseVersion() != null && !version.getReleaseVersion().isBlank())
+                .map(version -> new TemplateReleaseVersionView(
+                        version.getReleaseVersion(),
+                        version.getDevVersionNumber(),
+                        version.getLifecycleStatus(),
+                        version.getUpdatedAt(),
+                        defaultRoute != null && defaultRoute.equals(version.getReleaseVersion())
+                ))
+                .toList();
     }
 
     @Transactional

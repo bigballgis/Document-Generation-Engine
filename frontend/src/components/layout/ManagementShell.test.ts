@@ -11,7 +11,7 @@ import { useSessionStore } from '@/stores/session'
 const routerPush = vi.fn()
 
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ path: '/home/audit' }),
+  useRoute: () => ({ path: '/audit' }),
   useRouter: () => ({ push: routerPush }),
 }))
 
@@ -21,7 +21,7 @@ describe('ManagementShell', () => {
     routerPush.mockReset()
   })
 
-  it('renders navigation from visible routes and user header', async () => {
+  it('renders grouped navigation from visible routes and user header', async () => {
     const pinia = createPinia()
     setActivePinia(pinia)
     const sessionStore = useSessionStore()
@@ -34,11 +34,14 @@ describe('ManagementShell', () => {
         authSource: 'LOCAL',
         roles: ['GLOBAL_ADMIN'],
         authorizedGroupCodes: ['*'],
-        defaultRoute: ROUTE_KEYS.globalGovernanceHome,
+        defaultRoute: ROUTE_KEYS.dashboardHome,
         visibleRoutes: [
-          ROUTE_KEYS.globalGovernanceHome,
+          ROUTE_KEYS.dashboardHome,
+          ROUTE_KEYS.masterManagement,
+          ROUTE_KEYS.templateManagement,
+          ROUTE_KEYS.apiPolicyManagement,
           ROUTE_KEYS.auditConsole,
-          ROUTE_KEYS.templateAuthoringHome,
+          ROUTE_KEYS.identityAdministration,
         ],
         expiresAt: new Date().toISOString(),
       },
@@ -60,7 +63,9 @@ describe('ManagementShell', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Global Admin')
-    expect(wrapper.text()).toContain('Audit console')
+    expect(wrapper.text()).toContain('Version catalog')
+    expect(wrapper.text()).toContain('Master versions')
+    expect(wrapper.text()).toContain('Audit log')
     expect(wrapper.text()).toContain('Page content')
   })
 })

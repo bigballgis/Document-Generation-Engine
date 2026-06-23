@@ -6,6 +6,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "management_audit_event")
@@ -35,6 +37,7 @@ public class ManagementAuditEventEntity {
     @Column(name = "policy_version")
     private Integer policyVersion;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "changed_areas", nullable = false)
     private String changedAreasJson;
 
@@ -56,6 +59,7 @@ public class ManagementAuditEventEntity {
     @Column(name = "status_summary", length = 512)
     private String statusSummary;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "warning_codes", nullable = false)
     private String warningCodesJson;
 

@@ -3,14 +3,15 @@ import { pathForRouteKey, ROUTE_KEYS, templateDetailPath } from '@/routing/route
 
 describe('routeKeys', () => {
   it('maps product logical routes to frontend paths', () => {
-    expect(pathForRouteKey(ROUTE_KEYS.globalGovernanceHome)).toBe('/home/global-governance')
-    expect(pathForRouteKey(ROUTE_KEYS.templateAuthoringHome)).toBe('/home/template-authoring')
+    expect(pathForRouteKey(ROUTE_KEYS.dashboardHome)).toBe('/dashboard')
+    expect(pathForRouteKey(ROUTE_KEYS.globalGovernanceHome)).toBe('/dashboard')
     expect(pathForRouteKey(ROUTE_KEYS.masterManagement)).toBe('/masters')
     expect(pathForRouteKey(ROUTE_KEYS.templateManagement)).toBe('/templates')
-    expect(pathForRouteKey(ROUTE_KEYS.auditConsole)).toBe('/home/audit')
-    expect(pathForRouteKey(ROUTE_KEYS.testerWorkbench)).toBe('/home/tester-workbench')
-    expect(pathForRouteKey(ROUTE_KEYS.approverWorkbench)).toBe('/home/approver-workbench')
-    expect(pathForRouteKey(ROUTE_KEYS.identityAdministration)).toBe('/home/identity')
+    expect(pathForRouteKey(ROUTE_KEYS.auditConsole)).toBe('/audit')
+    expect(pathForRouteKey(ROUTE_KEYS.apiPolicyManagement)).toBe('/api/policies')
+    expect(pathForRouteKey(ROUTE_KEYS.identityAdministration)).toBe('/entitlement/users')
+    expect(pathForRouteKey(ROUTE_KEYS.testerWorkbench)).toBe('/dashboard')
+    expect(pathForRouteKey(ROUTE_KEYS.approverWorkbench)).toBe('/dashboard')
   })
 
   it('builds template detail paths', () => {

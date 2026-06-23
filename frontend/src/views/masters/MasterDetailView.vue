@@ -7,6 +7,7 @@ import MasterReviewDialog from '@/components/masters/MasterReviewDialog.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
 import MasterMetadataEditDialog from '@/components/masters/MasterMetadataEditDialog.vue'
+import MasterWorkflowBanner from '@/components/masters/MasterWorkflowBanner.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import { canReviewMasters, sessionContext } from '@/auth/roles'
@@ -175,6 +176,8 @@ function formatReviewAction(action: string): string {
     />
 
     <template v-else-if="master">
+      <MasterWorkflowBanner :master="master" />
+
       <section class="detail-grid">
         <el-card shadow="never">
           <template #header>

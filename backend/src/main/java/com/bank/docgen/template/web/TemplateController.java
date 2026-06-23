@@ -15,6 +15,7 @@ import com.bank.docgen.template.api.LifecycleImpactPreviewRequest;
 import com.bank.docgen.template.api.LifecycleImpactPreviewView;
 import com.bank.docgen.template.api.PublishTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
+import com.bank.docgen.template.api.TemplateReleaseVersionView;
 import com.bank.docgen.template.api.TemplateSummaryView;
 import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
@@ -82,6 +83,15 @@ public class TemplateController {
             HttpServletRequest request
     ) {
         return envelope(request, templateService.get(templateId, session));
+    }
+
+    @GetMapping("/{templateId}/release-versions")
+    public SuccessEnvelope<List<TemplateReleaseVersionView>> listReleaseVersions(
+            @PathVariable UUID templateId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateService.listReleaseVersions(templateId, session));
     }
 
     @PostMapping

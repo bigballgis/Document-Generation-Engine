@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import VersionCatalogNotice from '@/components/catalog/VersionCatalogNotice.vue'
 import TemplateCreateDialog from '@/components/templates/TemplateCreateDialog.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
@@ -70,6 +71,8 @@ function handleCreated(templateId: string) {
         {{ t('templates.create.open') }}
       </el-button>
     </header>
+
+    <VersionCatalogNotice kind="template" />
 
     <el-alert
       v-if="errorMessage"

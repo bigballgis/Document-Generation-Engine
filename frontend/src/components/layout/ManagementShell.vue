@@ -5,11 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { BRAND_REGISTRY } from '@/config/brands'
 import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
 import { BRAND_THEMES } from '@/theme/tokens'
-import {
-  pathForRouteKey,
-  ROUTE_NAV_LABEL_KEY,
-  type RouteKey,
-} from '@/routing/routeKeys'
+import { buildVisibleNavGroups } from '@/navigation/navStructure'
 import { useAppStore } from '@/stores/app'
 import { useSessionStore } from '@/stores/session'
 
@@ -31,25 +27,12 @@ const localeOptions = computed(() =>
   })),
 )
 
-interface NavItem {
-  routeKey: RouteKey
-  path: string
-  labelKey: string
-}
-
-const navItems = computed<NavItem[]>(() => {
+const navGroups = computed(() => {
   const session = sessionStore.session
   if (!session) {
     return []
   }
-
-  return session.visibleRoutes
-    .filter((key): key is RouteKey => key in ROUTE_NAV_LABEL_KEY)
-    .map((routeKey) => ({
-      routeKey,
-      path: pathForRouteKey(routeKey),
-      labelKey: ROUTE_NAV_LABEL_KEY[routeKey],
-    }))
+  return buildVisibleNavGroups(session.visibleRoutes)
 })
 
 function isActive(path: string): boolean {
@@ -105,16 +88,23 @@ function handleLocaleChange(locale: string) {
     <div class="shell-body">
       <aside class="shell-nav">
         <nav :aria-label="t('nav.managementNavigation')">
-          <button
-            v-for="item in navItems"
-            :key="item.routeKey"
-            type="button"
-            class="nav-item"
-            :class="{ active: isActive(item.path) }"
-            @click="navigate(item.path)"
+          <section
+            v-for="group in navGroups"
+            :key="group.id"
+            class="nav-group"
           >
-            {{ t(item.labelKey) }}
-          </button>
+            <h2 class="nav-group-label">{{ t(group.labelKey) }}</h2>
+            <button
+              v-for="item in group.items"
+              :key="item.id"
+              type="button"
+              class="nav-item"
+              :class="{ active: isActive(item.path) }"
+              @click="navigate(item.path)"
+            >
+              {{ t(item.labelKey) }}
+            </button>
+          </section>
         </nav>
       </aside>
 
@@ -186,7 +176,7 @@ function handleLocaleChange(locale: string) {
 }
 
 .shell-nav {
-  width: 240px;
+  width: 260px;
   flex-shrink: 0;
   padding: 1rem 0;
   border-right: 1px solid var(--border-color);
@@ -196,8 +186,17 @@ function handleLocaleChange(locale: string) {
 nav {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 1.25rem;
   padding: 0 0.75rem;
+}
+
+.nav-group-label {
+  margin: 0 0 0.35rem 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .nav-item {

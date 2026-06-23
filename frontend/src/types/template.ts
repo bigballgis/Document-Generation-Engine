@@ -23,6 +23,14 @@ export interface TemplateSummary {
   updatedAt: string
 }
 
+export interface TemplateReleaseVersion {
+  releaseVersion: string
+  devVersionNumber: number
+  lifecycleStatus: TemplateLifecycleStatus
+  updatedAt: string
+  defaultRouteTarget: boolean
+}
+
 export interface VariableSchema {
   variableKey: string
   variableType: string
