@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-24 (COR-1/COR-3 sprint: B03/B06/B10, F01/F03/F06/F07/F10)  
+**Last synced:** 2026-06-24 (COR-B04/B05 batch lifecycle + COR-F02/F09 UX)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,16 +18,17 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **198 tests**, 2026-06-24 | COR-B03 IN_PROGRESS fail-fast; COR-B06 OutputModePolicyValidator |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **200 tests**, 2026-06-24 | COR-B04/B05 BatchExecutionService, async EXPIRED, sync error.items |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
-| Frontend test | `pnpm -C frontend test` | Green | **106 tests**, 2026-06-24 — COR-F03/F06/F07/F01/F10 |
+| Frontend test | `pnpm -C frontend test` | Green | **108 tests**, 2026-06-24 — COR-F02 breadcrumb, COR-F09 group pagination |
 | Frontend build | `pnpm -C frontend build` | Green | |
 
 **Test count progression (not conflicting runs):** P13 slice verify **114** backend tests (2026-06-23);
 Wave C UX **161** backend / **88** frontend; post OPT-E8/F3 full verify **189** backend;
 COR-B02/F05 Batch B slice **193** backend / **104** frontend (2026-06-24);
-COR-1/COR-3 sprint **198** backend / **106** frontend (2026-06-24).
+COR-1/COR-3 sprint **198** backend / **106** frontend (2026-06-24);
+COR-B04/B05 + COR-F02/F09 **200** backend / **108** frontend (2026-06-24).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)

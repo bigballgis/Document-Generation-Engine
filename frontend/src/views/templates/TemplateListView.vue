@@ -8,6 +8,7 @@ import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateCreateDialog from '@/components/templates/TemplateCreateDialog.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useGroupedCatalogPagination } from '@/composables/useGroupedCatalogPagination'
 import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { templateDetailPath } from '@/routing/routeKeys'
@@ -34,19 +35,12 @@ const { filters: columnFilters, filteredRows: filteredTemplates, hasActiveFilter
     { key: 'releaseVersion', getValue: (row) => row.releaseVersion ?? '' },
     { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
   ])
-const paginatedTemplates = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  return filteredTemplates.value.slice(start, start + pageSize)
-})
-const groupedTemplates = computed(() => {
-  const grouped = new Map<string, TemplateSummary[]>()
-  for (const template of paginatedTemplates.value) {
-    const existing = grouped.get(template.groupCode) ?? []
-    existing.push(template)
-    grouped.set(template.groupCode, existing)
-  }
-  return [...grouped.entries()]
-})
+const { paginatedGroups: groupedTemplates, totalGroups: totalTemplateGroups } = useGroupedCatalogPagination(
+  filteredTemplates,
+  (row) => row.groupCode,
+  currentPage,
+  pageSize,
+)
 const errorMessage = computed(() => {
   const key = templatesStore.lastErrorMessageKey
   if (!key) {
@@ -174,12 +168,12 @@ const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
     <el-empty v-else :description="t('templates.list.empty')" />
 
     <el-pagination
-      v-if="filteredTemplates.length > pageSize"
+      v-if="totalTemplateGroups > pageSize"
       v-model:current-page="currentPage"
       class="list-pagination"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="filteredTemplates.length"
+      :total="totalTemplateGroups"
     />
 
     <TemplateCreateDialog v-model="createDialogOpen" @created="handleCreated" />

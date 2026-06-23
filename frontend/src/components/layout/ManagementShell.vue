@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import BrandLogo from '@/components/branding/BrandLogo.vue'
+import AppBreadcrumb from '@/components/layout/AppBreadcrumb.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { BRAND_REGISTRY } from '@/config/brands'
 import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
@@ -134,6 +135,7 @@ function handleBrandChange(brand: BrandPreset) {
       </aside>
 
       <main class="shell-content">
+        <AppBreadcrumb />
         <slot />
       </main>
     </div>

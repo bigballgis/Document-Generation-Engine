@@ -80,8 +80,8 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | COR-B01 | H | De-scope runtime v1 `SYNC_DOWNLOAD_URL` | ADR 0038; reject at sync validate | Enum retained; runtime rejects with outputModeUnsupported; ADR 0038 | **Done** (2026-06-24) | P7 |
 | COR-B02 | H | Idempotency semantics alignment | 86400s TTL vs domain 7d; hash excludes encryption; headers CREATED vs IDEMPOTENCY_* | 7d TTL; hash includes encryption; IDEMPOTENCY_NEW/REPLAYED headers; conflict summary | **Done** (2026-06-24) | OPT-E, P7 |
 | COR-B03 | H | Idempotency IN_PROGRESS race | Re-entrant generate without storage key re-runs engine | Second concurrent request waits or returns consistent conflict; test proves no double generate | **Done** (2026-06-24) | OPT-E |
-| COR-B04 | H | Async task FAILED/PARTIAL/EXPIRED lifecycle | Enum exists; runner no try/catch; summary always all SUCCEEDED | Tasks transition on failure; cancel/query reflect real status | Not Started | P11 |
-| COR-B05 | H | Sync batch partial failure envelope | Whole batch 500 on one item failure | Structured per-item status + error per domain-model | Not Started | P11 |
+| COR-B04 | H | Async task FAILED/PARTIAL/EXPIRED lifecycle | Enum exists; runner no try/catch; summary always all SUCCEEDED | Tasks transition on failure; cancel/query reflect real status | **Done** (2026-06-24) | P11 |
+| COR-B05 | H | Sync batch partial failure envelope | Whole batch 500 on one item failure | Structured per-item status + error per domain-model | **Done** (2026-06-24) | P11 |
 | COR-B06 | M | Sync generate output.mode policy check | Batch path validates mode; sync path does not | Same policy gate on sync and batch | **Done** (2026-06-24) | P6 |
 | COR-B07 | M | Runtime generation audit persistence | Download SLF4J only; no sync/batch/async audit rows | Standard audit summary persisted per domain-model | Not Started | P8 |
 | COR-B08 | M | Audit query pagination | Unbounded list; GLOBAL_ADMIN lifecycle findAll | Pageable API + default page size; tests | Not Started | OPT-F4 |
@@ -133,7 +133,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-F01 | H | In-shell brand switch (REDBC/GREENBC) | Brand only on login | Top bar brand switch; both presets verified | **Done** (2026-06-24) | P20, OA skill |
-| COR-F02 | H | Breadcrumb / page context | No el-breadcrumb; entitlement URLs ambiguous | Unified breadcrumb from navStructure | Not Started | E11/E12 |
+| COR-F02 | H | Breadcrumb / page context | No el-breadcrumb; entitlement URLs ambiguous | Unified breadcrumb from navStructure | **Done** (2026-06-24) | E11/E12 |
 | COR-F03 | H | 401 redirect preserves destination | http.ts 401 → login without redirect query | Post-login return to expired page | **Done** (2026-06-24) | OPT-G1 |
 | COR-F04 | M | Page layout primitive | Dashboard max-width 1200px; others full bleed | Shared layout: header + max-width + spacing scale | Not Started | OA skill |
 
@@ -150,7 +150,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-F09 | H | List pagination vs group sections | slice(0,10) then group by groupCode | Pagination preserves group semantics (design A or B) | Not Started | — |
+| COR-F09 | H | List pagination vs group sections | slice(0,10) then group by groupCode | Pagination preserves group semantics (design A or B) | **Done** (2026-06-24; group-first pagination) | — |
 | COR-F10 | M | Template detail tab deep linking | activeDetailTab local only | Query/hash sync; workflow links to lifecycle tab | **Done** (2026-06-24) | COR-T11 |
 | COR-F11 | M | Workflow banner action anchor | Banner text only | CTA scrolls/opens lifecycle/review panel | Not Started | COR-T14 |
 | COR-F12 | M | Template create dialog validation | Silent empty submit; errors not shown in dialog | el-form rules + inline/API errors | Not Started | OPT-G8 |
@@ -307,4 +307,4 @@ When completing any COR-* task:
 4. Append gate evidence to [execution-sync-ledger.md](./execution-sync-ledger.md).
 5. Run post-task doc sync per `.cursor/skills/post-task-doc-sync/SKILL.md`.
 
-**Last reviewed:** 2026-06-24 (COR-B03/B06/B10, COR-T07, COR-F01/F03/F06/F07/F10 Done).
+**Last reviewed:** 2026-06-24 (COR-B04/B05, COR-F02/F09 Done).

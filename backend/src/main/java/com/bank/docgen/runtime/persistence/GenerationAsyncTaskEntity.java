@@ -164,6 +164,28 @@ public class GenerationAsyncTaskEntity {
         this.updatedAt = Instant.now();
     }
 
+    public void markPartialSucceeded(String batchResultJson) {
+        this.status = TaskStatus.PARTIAL_SUCCEEDED;
+        this.batchResultJson = batchResultJson;
+        this.updatedAt = Instant.now();
+    }
+
+    public void markFailed(String batchResultJson) {
+        this.status = TaskStatus.FAILED;
+        this.batchResultJson = batchResultJson;
+        this.updatedAt = Instant.now();
+    }
+
+    public void markFailed() {
+        this.status = TaskStatus.FAILED;
+        this.updatedAt = Instant.now();
+    }
+
+    public void markExpired() {
+        this.status = TaskStatus.EXPIRED;
+        this.updatedAt = Instant.now();
+    }
+
     public void markCancelled() {
         this.status = TaskStatus.CANCELLED;
         this.updatedAt = Instant.now();

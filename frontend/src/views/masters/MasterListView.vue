@@ -8,6 +8,7 @@ import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterUploadDialog from '@/components/masters/MasterUploadDialog.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useGroupedCatalogPagination } from '@/composables/useGroupedCatalogPagination'
 import { useMasterStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { MASTER_DETAIL_PATH_PREFIX } from '@/routing/routeKeys'
@@ -35,19 +36,12 @@ const { filters: columnFilters, filteredRows: filteredMasters, hasActiveFilters,
     { key: 'anchorCount', getValue: (row) => String(row.anchorCount) },
     { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
   ])
-const paginatedMasters = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  return filteredMasters.value.slice(start, start + pageSize)
-})
-const groupedMasters = computed(() => {
-  const grouped = new Map<string, MasterDocumentSummary[]>()
-  for (const master of paginatedMasters.value) {
-    const existing = grouped.get(master.groupCode) ?? []
-    existing.push(master)
-    grouped.set(master.groupCode, existing)
-  }
-  return [...grouped.entries()]
-})
+const { paginatedGroups: groupedMasters, totalGroups: totalMasterGroups } = useGroupedCatalogPagination(
+  filteredMasters,
+  (row) => row.groupCode,
+  currentPage,
+  pageSize,
+)
 const { manageMasters } = useCapabilities()
 const canUpload = computed(() => manageMasters.value)
 const errorMessage = computed(() => {
@@ -202,12 +196,12 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
     <el-empty v-else :description="t('masters.list.empty')" />
 
     <el-pagination
-      v-if="filteredMasters.length > pageSize"
+      v-if="totalMasterGroups > pageSize"
       v-model:current-page="currentPage"
       class="list-pagination"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="filteredMasters.length"
+      :total="totalMasterGroups"
     />
 
     <MasterUploadDialog

@@ -28,6 +28,8 @@ public final class ApiErrorCodes {
     public static final String IDEMPOTENCY_KEY_CONFLICT = "IDEMPOTENCY_KEY_CONFLICT";
     public static final String ASYNC_TASK_NOT_FOUND = "ASYNC_TASK_NOT_FOUND";
     public static final String ASYNC_TASK_CANCELLATION_NOT_ALLOWED = "ASYNC_TASK_CANCELLATION_NOT_ALLOWED";
+    public static final String ASYNC_TASK_EXPIRED = "ASYNC_TASK_EXPIRED";
+    public static final String BATCH_PROCESSING_FAILED = "BATCH_PROCESSING_FAILED";
     public static final String ENCRYPTION_PARAMETER_INVALID = "ENCRYPTION_PARAMETER_INVALID";
     public static final String ENCRYPTION_NOT_ALLOWED = "ENCRYPTION_NOT_ALLOWED";
     public static final String ENCRYPTION_FAILED = "ENCRYPTION_FAILED";

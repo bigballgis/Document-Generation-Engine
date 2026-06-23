@@ -63,6 +63,11 @@ export default {
       approverWorkbench: 'Approver workbench',
       identityAdministration: 'Identity & groups',
     },
+    breadcrumb: {
+      ariaLabel: 'Breadcrumb',
+      home: 'Home',
+      detail: 'Detail',
+    },
   },
   brand: {
     redbc: 'REDBC',

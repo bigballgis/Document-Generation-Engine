@@ -1,12 +1,6 @@
 package com.bank.docgen.runtime.service;
 
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
-import com.bank.docgen.runtime.api.BatchResultItemView;
-import com.bank.docgen.runtime.api.BatchResultView;
-import com.bank.docgen.runtime.api.BatchSummaryView;
-import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
-import com.bank.docgen.runtime.api.EncryptionSummaryView;
-import com.bank.docgen.runtime.api.OutputOptionsView;
 import com.bank.docgen.runtime.domain.TaskStatus;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskEntity;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskRepository;
@@ -16,9 +10,6 @@ import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -29,21 +20,18 @@ public class AsyncBatchTaskRunner {
 
     private final GenerationAsyncTaskRepository asyncTaskRepository;
     private final TemplateRepository templateRepository;
-    private final DocumentGenerationEngine documentGenerationEngine;
-    private final IdempotencyService idempotencyService;
+    private final BatchExecutionService batchExecutionService;
     private final ObjectMapper objectMapper;
 
     public AsyncBatchTaskRunner(
             GenerationAsyncTaskRepository asyncTaskRepository,
             TemplateRepository templateRepository,
-            DocumentGenerationEngine documentGenerationEngine,
-            IdempotencyService idempotencyService,
+            BatchExecutionService batchExecutionService,
             ObjectMapper objectMapper
     ) {
         this.asyncTaskRepository = asyncTaskRepository;
         this.templateRepository = templateRepository;
-        this.documentGenerationEngine = documentGenerationEngine;
-        this.idempotencyService = idempotencyService;
+        this.batchExecutionService = batchExecutionService;
         this.objectMapper = objectMapper;
     }
 
@@ -58,62 +46,48 @@ public class AsyncBatchTaskRunner {
         if (task.getStatus() == TaskStatus.CANCELLED) {
             return;
         }
-        if (task.getStatus() == TaskStatus.SUCCEEDED || task.getStatus() == TaskStatus.PROCESSING) {
+        if (isTerminalStatus(task.getStatus())) {
             return;
         }
         task.markProcessing();
         asyncTaskRepository.save(task);
-        TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNull(task.getTemplateId())
-                .orElseThrow(TemplateNotFoundException::new);
-        BatchGenerateRequestBody request = readRequestPayload(task.getRequestPayloadJson());
-        BatchResultView batchResult = executeBatch(template, task.getReleaseVersion(), request);
-        task.markSucceeded(writeBatchResult(batchResult));
-        asyncTaskRepository.save(task);
-    }
-
-    private BatchResultView executeBatch(
-            TemplateEntity template,
-            String releaseVersion,
-            BatchGenerateRequestBody request
-    ) {
-        String batchId = taskBatchId();
-        List<BatchResultItemView> items = new ArrayList<>();
-        for (BatchGenerateRequestBody.BatchGenerateItemBody item : request.items()) {
-            OutputOptionsView output = item.output() != null ? item.output() : request.output();
-            EncryptionOptionsView encryption = item.encryption() != null ? item.encryption() : request.encryption();
-            DocumentGenerationEngine.GeneratedDocument generated = documentGenerationEngine.generate(
+        try {
+            TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNull(task.getTemplateId())
+                    .orElseThrow(TemplateNotFoundException::new);
+            BatchGenerateRequestBody request = readRequestPayload(task.getRequestPayloadJson());
+            BatchExecutionService.BatchExecutionOutcome outcome = batchExecutionService.execute(
                     template,
-                    releaseVersion,
-                    item.variables(),
-                    output.format(),
-                    encryption
+                    task.getReleaseVersion(),
+                    request,
+                    task.getBatchExternalId(),
+                    true
             );
-            idempotencyService.registerDownloadableDocument(
-                    template.getId(),
-                    generated.documentId(),
-                    generated.storageKey()
-            );
-            items.add(new BatchResultItemView(
-                    item.itemId(),
-                    "SUCCEEDED",
-                    output,
-                    EncryptionSummaryView.fromRequest(output.format(), encryption),
-                    generated.documentId(),
-                    generated.fidelityWarningCodes()
-            ));
+            applyOutcome(task, outcome);
+            asyncTaskRepository.save(task);
+        } catch (RuntimeException ex) {
+            task.markFailed();
+            asyncTaskRepository.save(task);
         }
-        return new BatchResultView(
-                batchId,
-                new BatchSummaryView(items.size(), items.size(), items.size(), 0, 0),
-                items
-        );
     }
 
-    private String taskBatchId() {
-        return "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
+    private boolean isTerminalStatus(TaskStatus status) {
+        return status == TaskStatus.SUCCEEDED
+                || status == TaskStatus.FAILED
+                || status == TaskStatus.PARTIAL_SUCCEEDED
+                || status == TaskStatus.EXPIRED
+                || status == TaskStatus.PROCESSING;
     }
 
-    private String writeBatchResult(BatchResultView batchResult) {
+    private void applyOutcome(GenerationAsyncTaskEntity task, BatchExecutionService.BatchExecutionOutcome outcome) {
+        String batchResultJson = writeBatchResult(outcome.batchResult());
+        switch (outcome.taskStatus()) {
+            case PARTIAL_SUCCEEDED -> task.markPartialSucceeded(batchResultJson);
+            case FAILED -> task.markFailed(batchResultJson);
+            default -> task.markSucceeded(batchResultJson);
+        }
+    }
+
+    private String writeBatchResult(com.bank.docgen.runtime.api.BatchResultView batchResult) {
         try {
             return objectMapper.writeValueAsString(batchResult);
         } catch (JsonProcessingException ex) {

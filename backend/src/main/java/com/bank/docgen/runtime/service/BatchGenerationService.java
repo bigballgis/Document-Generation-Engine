@@ -5,13 +5,9 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.runtime.api.AsyncAcceptedResultView;
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
 import com.bank.docgen.runtime.api.BatchGenerateResultView;
-import com.bank.docgen.runtime.api.BatchResultItemView;
 import com.bank.docgen.runtime.api.BatchResultView;
-import com.bank.docgen.runtime.api.BatchSummaryView;
 import com.bank.docgen.runtime.api.CancelledTaskResultView;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
-import com.bank.docgen.runtime.api.EncryptionSummaryView;
-import com.bank.docgen.runtime.api.OutputOptionsView;
 import com.bank.docgen.runtime.api.TaskQueryResultView;
 import com.bank.docgen.runtime.api.TaskSummaryView;
 import com.bank.docgen.runtime.domain.TaskStatus;
@@ -29,7 +25,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -44,31 +39,31 @@ public class BatchGenerationService {
 
     private final ApiPolicyRepository apiPolicyRepository;
     private final GenerationAsyncTaskRepository asyncTaskRepository;
-    private final DocumentGenerationEngine documentGenerationEngine;
     private final IdempotencyService idempotencyService;
     private final AsyncBatchTaskDispatcher asyncBatchTaskDispatcher;
     private final EncryptionParameterValidator encryptionParameterValidator;
     private final ObjectMapper objectMapper;
     private final TemplateVersionRepository templateVersionRepository;
+    private final BatchExecutionService batchExecutionService;
 
     public BatchGenerationService(
             ApiPolicyRepository apiPolicyRepository,
             GenerationAsyncTaskRepository asyncTaskRepository,
-            DocumentGenerationEngine documentGenerationEngine,
             IdempotencyService idempotencyService,
             AsyncBatchTaskDispatcher asyncBatchTaskDispatcher,
             EncryptionParameterValidator encryptionParameterValidator,
             ObjectMapper objectMapper,
-            TemplateVersionRepository templateVersionRepository
+            TemplateVersionRepository templateVersionRepository,
+            BatchExecutionService batchExecutionService
     ) {
         this.apiPolicyRepository = apiPolicyRepository;
         this.asyncTaskRepository = asyncTaskRepository;
-        this.documentGenerationEngine = documentGenerationEngine;
         this.idempotencyService = idempotencyService;
         this.asyncBatchTaskDispatcher = asyncBatchTaskDispatcher;
         this.encryptionParameterValidator = encryptionParameterValidator;
         this.objectMapper = objectMapper;
         this.templateVersionRepository = templateVersionRepository;
+        this.batchExecutionService = batchExecutionService;
     }
 
     @Transactional
@@ -87,23 +82,50 @@ public class BatchGenerationService {
 
         String requestHash = idempotencyService.hashRequest(writeRequest(request, resolvedVersion));
         Optional<GenerationAsyncTaskEntity> existing = findReplayTask(request, template.getId(), requestHash);
-        if (existing.isPresent() && existing.get().getBatchResultJson() != null) {
-            return new BatchGenerateResultView(readBatchResult(existing.get().getBatchResultJson()));
+        if (existing.isPresent()) {
+            GenerationAsyncTaskEntity replay = existing.get();
+            if (replay.getStatus() == TaskStatus.FAILED && replay.getBatchResultJson() != null) {
+                throw new SyncBatchFailureException(readBatchResult(replay.getBatchResultJson()));
+            }
+            if (replay.getBatchResultJson() != null) {
+                return new BatchGenerateResultView(readBatchResult(replay.getBatchResultJson()));
+            }
         }
 
-        BatchResultView batchResult = executeBatch(template, resolvedVersion, request);
-        persistBatchTask(
-                template.getId(),
-                null,
-                batchResult.batchId(),
-                TaskStatus.SUCCEEDED,
-                routeType,
-                resolvedVersion,
-                request,
-                requestHash,
-                batchResult
-        );
-        return new BatchGenerateResultView(batchResult);
+        try {
+            BatchExecutionService.BatchExecutionOutcome outcome = batchExecutionService.execute(
+                    template,
+                    resolvedVersion,
+                    request,
+                    "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT),
+                    false
+            );
+            persistBatchTask(
+                    template.getId(),
+                    null,
+                    outcome.batchResult().batchId(),
+                    TaskStatus.SUCCEEDED,
+                    routeType,
+                    resolvedVersion,
+                    request,
+                    requestHash,
+                    outcome.batchResult()
+            );
+            return new BatchGenerateResultView(outcome.batchResult());
+        } catch (SyncBatchFailureException ex) {
+            persistBatchTask(
+                    template.getId(),
+                    null,
+                    ex.batchResult().batchId(),
+                    TaskStatus.FAILED,
+                    routeType,
+                    resolvedVersion,
+                    request,
+                    requestHash,
+                    ex.batchResult()
+            );
+            throw ex;
+        }
     }
 
     @Transactional
@@ -149,7 +171,7 @@ public class BatchGenerationService {
         return new AsyncAcceptedResultView(toTaskSummary(refreshed, template.getExternalId(), environment));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public TaskQueryResultView getTask(
             TemplateEntity template,
             RuntimeSessionClaims session,
@@ -160,6 +182,7 @@ public class BatchGenerationService {
         GenerationAsyncTaskEntity task = asyncTaskRepository
                 .findByTaskExternalIdAndTemplateId(taskId, template.getId())
                 .orElseThrow(AsyncTaskNotFoundException::new);
+        ensureTaskQueryable(task);
         BatchResultView batch = task.getBatchResultJson() == null
                 ? null
                 : readBatchResult(task.getBatchResultJson());
@@ -179,6 +202,7 @@ public class BatchGenerationService {
                 .orElseThrow(AsyncTaskNotFoundException::new);
         if (task.getStatus() == TaskStatus.SUCCEEDED
                 || task.getStatus() == TaskStatus.FAILED
+                || task.getStatus() == TaskStatus.PARTIAL_SUCCEEDED
                 || task.getStatus() == TaskStatus.CANCELLED
                 || task.getStatus() == TaskStatus.EXPIRED) {
             throw new AsyncTaskCancellationNotAllowedException();
@@ -188,45 +212,18 @@ public class BatchGenerationService {
         return new CancelledTaskResultView(toTaskSummary(task, template.getExternalId(), environment));
     }
 
-    private BatchResultView executeBatch(
-            TemplateEntity template,
-            String releaseVersion,
-            BatchGenerateRequestBody request
-    ) {
-        String batchId = "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
-        List<BatchResultItemView> items = new ArrayList<>();
-        for (BatchGenerateRequestBody.BatchGenerateItemBody item : request.items()) {
-            OutputOptionsView output = item.output() != null ? item.output() : request.output();
-            EncryptionOptionsView encryption = item.encryption() != null ? item.encryption() : request.encryption();
-            DocumentGenerationEngine.GeneratedDocument generated = documentGenerationEngine.generate(
-                    template,
-                    releaseVersion,
-                    item.variables(),
-                    output.format(),
-                    encryption
-            );
-            idempotencyService.registerDownloadableDocument(
-                    template.getId(),
-                    generated.documentId(),
-                    generated.storageKey()
-            );
-            items.add(new BatchResultItemView(
-                    item.itemId(),
-                    "SUCCEEDED",
-                    output,
-                    EncryptionSummaryView.fromRequest(output.format(), encryption),
-                    generated.documentId(),
-                    generated.fidelityWarningCodes()
-            ));
+    private void ensureTaskQueryable(GenerationAsyncTaskEntity task) {
+        if (task.getStatus() == TaskStatus.EXPIRED) {
+            throw new AsyncTaskExpiredException();
         }
-        BatchSummaryView summary = new BatchSummaryView(
-                items.size(),
-                items.size(),
-                items.size(),
-                0,
-                0
-        );
-        return new BatchResultView(batchId, summary, items);
+        if (task.getExpiresAt().isAfter(Instant.now())) {
+            return;
+        }
+        if (task.getStatus() == TaskStatus.ACCEPTED || task.getStatus() == TaskStatus.PROCESSING) {
+            task.markExpired();
+            asyncTaskRepository.save(task);
+            throw new AsyncTaskExpiredException();
+        }
     }
 
     private void persistBatchTask(
@@ -254,7 +251,12 @@ public class BatchGenerationService {
                 writeRequestPayload(request),
                 Instant.now().plusSeconds(IdempotencyConstants.RETENTION_SECONDS)
         );
-        entity.markSucceeded(writeBatchResult(batchResult));
+        String batchResultJson = writeBatchResult(batchResult);
+        if (status == TaskStatus.FAILED) {
+            entity.markFailed(batchResultJson);
+        } else {
+            entity.markSucceeded(batchResultJson);
+        }
         asyncTaskRepository.save(entity);
     }
 

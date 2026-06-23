@@ -10,7 +10,9 @@ import com.bank.docgen.apimgmt.service.ApiManagementNotFoundException;
 import com.bank.docgen.audit.service.AuditAccessDeniedException;
 import com.bank.docgen.audit.service.AuditValidationException;
 import com.bank.docgen.runtime.service.AsyncTaskCancellationNotAllowedException;
+import com.bank.docgen.runtime.service.AsyncTaskExpiredException;
 import com.bank.docgen.runtime.service.AsyncTaskNotFoundException;
+import com.bank.docgen.runtime.service.SyncBatchFailureException;
 import com.bank.docgen.runtime.service.IdempotencyConflictException;
 import com.bank.docgen.runtime.service.RuntimeAccessDeniedException;
 import com.bank.docgen.runtime.service.RuntimeBatchValidationException;
@@ -337,6 +339,42 @@ public class GlobalExceptionHandler {
                 ApiErrorCategories.RUNTIME,
                 "api.error.runtime.asyncTaskCancellationNotAllowed"
         );
+    }
+
+    @ExceptionHandler(AsyncTaskExpiredException.class)
+    public ResponseEntity<ErrorEnvelope> handleAsyncTaskExpired(HttpServletRequest request) {
+        return domainError(
+                request,
+                HttpStatus.GONE,
+                ApiErrorCodes.ASYNC_TASK_EXPIRED,
+                ApiErrorCategories.RUNTIME,
+                "api.error.runtime.asyncTaskExpired"
+        );
+    }
+
+    @ExceptionHandler(SyncBatchFailureException.class)
+    public ResponseEntity<ErrorEnvelope> handleSyncBatchFailure(
+            HttpServletRequest request,
+            SyncBatchFailureException ex
+    ) {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        String messageKey = ex.messageKey();
+        List<BatchErrorItemView> errorItems = ex.batchResult().items().stream()
+                .map(item -> new BatchErrorItemView(item.itemId(), item.status(), item.error()))
+                .toList();
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.BATCH_PROCESSING_FAILED,
+                ApiErrorCategories.RUNTIME,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                false,
+                null,
+                null,
+                errorItems
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 
     @ExceptionHandler(RuntimeEncryptionValidationException.class)

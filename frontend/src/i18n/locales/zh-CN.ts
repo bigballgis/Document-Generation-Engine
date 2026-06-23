@@ -76,6 +76,16 @@ export default {
 
     },
 
+    breadcrumb: {
+
+      ariaLabel: '面包屑导航',
+
+      home: '首页',
+
+      detail: '详情',
+
+    },
+
   },
 
   table: {

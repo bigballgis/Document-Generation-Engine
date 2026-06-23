@@ -11,7 +11,8 @@ public record ErrorDetail(
         String messageKey,
         boolean retryable,
         List<FieldError> fieldErrors,
-        java.util.Map<String, Object> idempotencyConflict
+        java.util.Map<String, Object> idempotencyConflict,
+        List<BatchErrorItemView> items
 ) {
     public ErrorDetail(
             String code,
@@ -21,6 +22,18 @@ public record ErrorDetail(
             boolean retryable,
             List<FieldError> fieldErrors
     ) {
-        this(code, category, message, messageKey, retryable, fieldErrors, null);
+        this(code, category, message, messageKey, retryable, fieldErrors, null, null);
+    }
+
+    public ErrorDetail(
+            String code,
+            String category,
+            String message,
+            String messageKey,
+            boolean retryable,
+            List<FieldError> fieldErrors,
+            java.util.Map<String, Object> idempotencyConflict
+    ) {
+        this(code, category, message, messageKey, retryable, fieldErrors, idempotencyConflict, null);
     }
 }
