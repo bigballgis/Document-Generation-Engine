@@ -77,7 +77,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
 | C1 | H | Test `apimgmt` module (currently 0 tests) | `ApiManagementServiceAuthorizationTest` added | In Progress (Wave 2): API-policy authorization gate (deny non-admin / no persistence touch / admin not-found) covered; remaining service methods pending |
-| C2 | H | Test authorization core | `GroupAccessServiceTest` + `ManagementAuthServiceTest` | **Done** (Wave 2): RBAC/group isolation + login fail-closed/success paths covered; `JwtAuthenticationFilter` deferred (management filter covered via controller slice) |
+| C2 | H | Test authorization core | `GroupAccessServiceTest`, `ManagementAuthServiceTest`, `JwtAuthenticationFilterTest` | **Done** (Wave 2): RBAC/group isolation, login fail-closed/success, JWT filter context install/clear paths covered |
 | C3 | H | Test runtime security/generation | `ApiCredentialAuthenticationFilterTest`, `IdempotencyServiceConflictTest`, `RuntimeGenerationServiceAccessTest` | In Progress (Wave 2): auth filter envelope + fail-closed + access check covered; `DocumentDownloadService`/`RuntimeGenerationService` generation paths pending |
 | C4 | M | Test rendering PDF paths | `LibreOfficePdfConversionService`, `DockerExecPdfConversionService`, `DocumentArtifactPipeline` untested | Conversion success/timeout/cleanup covered (mock process where needed) | Not Started |
 | C5 | M | Test audit query/recorder | `AuditQueryService` (264 L), `ManagementAuditRecorder` (146 L) untested | Group-scoped filtering incl. GLOBAL_ADMIN unbounded path covered | Not Started |
