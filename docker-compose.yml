@@ -1,0 +1,79 @@
+# Local development dependencies for Document Generation Platform.
+# Requires Docker Desktop (or compatible engine). Copy .env.example to .env to override ports.
+
+services:
+  docgen-postgres:
+    image: postgres:16-alpine
+    container_name: docgen-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-docgen}
+      POSTGRES_USER: ${POSTGRES_USER:-docgen}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docgen_local_pwd}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - docgen-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docgen} -d ${POSTGRES_DB:-docgen}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  docgen-redis:
+    image: redis:7-alpine
+    container_name: docgen-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  docgen-kafka:
+    image: bitnami/kafka:3.7
+    container_name: docgen-kafka
+    environment:
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_LISTENERS_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@docgen-kafka:9093
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:${KAFKA_PORT:-9092}
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports:
+      - "${KAFKA_PORT:-9092}:9092"
+
+  docgen-minio:
+    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
+    container_name: docgen-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-docgen}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-docgen_local_pwd}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - docgen-minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  docgen-libreoffice:
+    image: linuxserver/libreoffice:latest
+    container_name: docgen-libreoffice
+    environment:
+      PUID: 1000
+      PGID: 1000
+    ports:
+      - "3000:3000"
+    profiles:
+      - rendering
+
+volumes:
+  docgen-postgres-data:
+  docgen-minio-data:

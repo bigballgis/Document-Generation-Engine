@@ -1,0 +1,46 @@
+# Production-style compose profile for release candidate validation.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d
+
+services:
+  docgen-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: docgen-backend
+    profiles:
+      - prod
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      POSTGRES_HOST: docgen-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-docgen}
+      POSTGRES_USER: ${POSTGRES_USER:-docgen}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docgen_local_pwd}
+      MINIO_ENDPOINT: http://docgen-minio:9000
+      JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}
+      APP_ENVIRONMENT: prod
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      docgen-postgres:
+        condition: service_healthy
+      docgen-minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  docgen-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: docgen-frontend
+    profiles:
+      - prod
+    ports:
+      - "${FRONTEND_PORT:-4173}:80"
+    depends_on:
+      docgen-backend:
+        condition: service_healthy
