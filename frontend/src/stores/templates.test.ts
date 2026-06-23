@@ -1,0 +1,54 @@
+import { createPinia, setActivePinia } from 'pinia'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import * as templatesApi from '@/api/templates'
+import { useTemplatesStore } from '@/stores/templates'
+
+vi.mock('@/api/templates', () => ({
+  listTemplates: vi.fn(),
+  getTemplate: vi.fn(),
+  submitForTest: vi.fn(),
+  recordTestDecision: vi.fn(),
+  submitForApproval: vi.fn(),
+  recordApprovalDecision: vi.fn(),
+  publishTemplate: vi.fn(),
+  testGenerate: vi.fn(),
+  getPreview: vi.fn(),
+}))
+
+describe('templates store', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    vi.mocked(templatesApi.listTemplates).mockReset()
+  })
+
+  it('filters published templates for API policy home', async () => {
+    vi.mocked(templatesApi.listTemplates).mockResolvedValue([
+      {
+        id: 'tpl-1',
+        externalId: 'TPL-A',
+        groupCode: 'RETAIL',
+        name: 'Draft template',
+        lifecycleStatus: 'DRAFT',
+        releaseVersion: null,
+        masterId: 'master-1',
+        updatedAt: '2026-06-23T10:00:00Z',
+      },
+      {
+        id: 'tpl-2',
+        externalId: 'TPL-B',
+        groupCode: 'RETAIL',
+        name: 'Published template',
+        lifecycleStatus: 'PUBLISHED',
+        releaseVersion: '1.0.0',
+        masterId: 'master-2',
+        updatedAt: '2026-06-23T11:00:00Z',
+      },
+    ])
+
+    const store = useTemplatesStore()
+    await store.fetchTemplates()
+
+    expect(store.publishedTemplates).toHaveLength(1)
+    expect(store.publishedTemplates[0]?.name).toBe('Published template')
+  })
+})
