@@ -1,0 +1,52 @@
+{
+  "validated": true,
+  "bindings": [
+    {
+      "anchorId": "ANC-BODY",
+      "declaredContentType": "RICH_TEXT",
+      "expectedContentType": "RICH_TEXT",
+      "status": "DUPLICATE_BINDING",
+      "structuredContentTree": {
+        "nodes": [
+          {
+            "type": "paragraph"
+          }
+        ]
+      }
+    },
+    {
+      "anchorId": "ANC-BODY",
+      "declaredContentType": "RICH_TEXT",
+      "expectedContentType": "RICH_TEXT",
+      "status": "DUPLICATE_BINDING",
+      "structuredContentTree": {
+        "nodes": [
+          {
+            "type": "paragraph"
+          }
+        ]
+      }
+    },
+    {
+      "anchorId": "ANC-MISSING",
+      "declaredContentType": "TEXT",
+      "expectedContentType": "UNSPECIFIED",
+      "status": "MISSING_ANCHOR",
+      "structuredContentTree": {
+        "nodes": [
+          {
+            "type": "paragraph"
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "blocking": true,
+    "totalBindings": 3,
+    "validCount": 0,
+    "missingAnchorCount": 1,
+    "duplicateBindingCount": 2,
+    "incompatibleContentTypeCount": 0
+  }
+}

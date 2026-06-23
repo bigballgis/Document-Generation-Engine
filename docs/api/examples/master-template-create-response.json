@@ -1,0 +1,17 @@
+{
+  "created": true,
+  "snapshot": {
+    "templateId": "TMP-000001",
+    "templateName": "Loan Offer Template",
+    "groupId": "GROUP-RETAIL-CN",
+    "sourceLock": {
+      "sourceMasterId": "MST-LOAN-BASE",
+      "sourceAnchorCatalogVersion": "v1",
+      "lockCreatedAt": "2026-06-12T09:10:00Z",
+      "lockCreatedBy": "author-001"
+    },
+    "createdAt": "2026-06-12T09:10:00Z",
+    "createdBy": "author-001",
+    "changeDescription": "baseline template from approved master"
+  }
+}

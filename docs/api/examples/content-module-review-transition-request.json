@@ -1,0 +1,6 @@
+{
+  "operation": "SUBMIT_FOR_REVIEW",
+  "actorRole": "TEMPLATE_AUTHOR",
+  "actorId": "author-a",
+  "changeDescription": "updated clause wording for release readiness"
+}

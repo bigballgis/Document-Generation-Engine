@@ -1,0 +1,74 @@
+{
+  "metadata": {
+    "auditId": "AUD-6Q7M9K1N",
+    "traceId": "TRACE-20260604-005",
+    "requestId": "REQ-20260604-0003",
+    "idempotencyKey": "IDEMP-20260604-0003",
+    "idempotencyStatus": "IDEMPOTENCY_NEW",
+    "templateId": "TPL-LOAN-NOTICE",
+    "routeType": "EXPLICIT_VERSION",
+    "resolvedReleaseVersion": "1.0.0",
+    "output": {
+      "format": "PDF",
+      "mode": "SYNC_DOWNLOAD_URL"
+    }
+  },
+  "result": {
+    "batch": {
+      "batchId": "BATCH-7K3M9Q2R",
+      "summary": {
+        "totalCount": 2,
+        "processedCount": 2,
+        "successCount": 2,
+        "failureCount": 0,
+        "skippedCount": 0
+      },
+      "items": [
+        {
+          "itemId": "ITEM-001",
+          "status": "SUCCEEDED",
+          "output": {
+            "format": "PDF",
+            "mode": "SYNC_DOWNLOAD_URL"
+          },
+          "encryptionSummary": {
+            "enabled": true,
+            "outputFormat": "PDF",
+            "openPasswordProvided": true,
+            "ownerPasswordProvided": true,
+            "permissions": ["ALLOW_PRINT"]
+          },
+          "documentId": "DOC-8F2N6P4Q",
+          "fidelityWarnings": [
+            {
+              "warningCode": "CONTROLLED_STYLE_FALLBACK",
+              "messageKey": "generation.warning.fidelity.controlledStyleFallback",
+              "message": "Generated output used an approved controlled style fallback.",
+              "locationSummary": "section=customer-notice; style=BodyTextFallback",
+              "detectedSummary": "The fallback style is approved and does not change document meaning, header/footer behavior, or signature area placement.",
+              "recommendation": "Review the affected section if exact typography is business critical.",
+              "sensitiveDataExcluded": true
+            }
+          ]
+        },
+        {
+          "itemId": "ITEM-002",
+          "status": "SUCCEEDED",
+          "output": {
+            "format": "PDF",
+            "mode": "SYNC_DOWNLOAD_URL"
+          },
+          "encryptionSummary": {
+            "enabled": true,
+            "outputFormat": "PDF",
+            "openPasswordProvided": true,
+            "ownerPasswordProvided": true,
+            "permissions": ["ALLOW_PRINT"]
+          },
+          "documentId": "DOC-5H8N2Q6R",
+          "fidelityWarnings": []
+        }
+      ]
+    }
+  }
+}

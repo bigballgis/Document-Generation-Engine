@@ -1,0 +1,18 @@
+{
+  "actorRole": "TEMPLATE_AUTHOR",
+  "actorId": "template-author-a",
+  "previewId": "PREVIEW-000001",
+  "testDataSetId": "TDS-001",
+  "variablesHash": "sha256:preview-variables-example",
+  "renderProfileVersion": "rp-v1",
+  "evidencePointers": [
+    {
+      "pointerType": "PREVIEW_RECORD",
+      "pointerRef": "PREVIEW-000001"
+    },
+    {
+      "pointerType": "TEST_DATASET",
+      "pointerRef": "TDS-001"
+    }
+  ]
+}

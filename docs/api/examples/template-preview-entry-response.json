@@ -1,0 +1,22 @@
+{
+  "accepted": true,
+  "errorCode": null,
+  "errorMessage": null,
+  "previewRecord": {
+    "previewId": "PREVIEW-000001",
+    "testDataSetId": "TDS-001",
+    "variablesHash": "sha256:preview-variables-example",
+    "outputFormat": "PDF",
+    "renderProfileVersion": "rp-v1",
+    "status": "ACCEPTED",
+    "documentId": null,
+    "previewReference": "preview://TMP-000001/TDS-001",
+    "finalArtifactReference": null,
+    "warningSummary": "warnings=0",
+    "blockingSummary": "blocking=0",
+    "comparisonSummary": "comparison=baseline",
+    "nonSensitiveSummary": "nonSensitiveSummary=v1",
+    "createdAt": "2026-06-12T10:00:00Z",
+    "updatedAt": "2026-06-12T10:00:00Z"
+  }
+}

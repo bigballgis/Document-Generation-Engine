@@ -1,0 +1,52 @@
+{
+  "validated": true,
+  "definitions": [
+    {
+      "variableKey": "customerName",
+      "type": "TEXT",
+      "status": "VALID",
+      "required": true,
+      "format": null,
+      "hasDefaultValue": true,
+      "defaultValueHash": "sha256:6a8dc95f06f0ce57e55c724f7ed6f343f8779bbf7ed93f6d66f3f6be88f8496c",
+      "ruleCodes": [
+        "REGEX"
+      ]
+    },
+    {
+      "variableKey": "riskTier",
+      "type": "ENUM",
+      "status": "VALID",
+      "required": false,
+      "format": null,
+      "hasDefaultValue": true,
+      "defaultValueHash": "sha256:559aead08264d5795d3909718cdd05abd49572e84fe55590eef31a88a08fdffd",
+      "ruleCodes": [
+        "ALLOWED_VALUES"
+      ]
+    }
+  ],
+  "summary": {
+    "blocking": false,
+    "totalDefinitions": 2,
+    "validCount": 2,
+    "keyMissingCount": 0,
+    "duplicateKeyCount": 0,
+    "typeUnsupportedCount": 0,
+    "requiredDefaultMissingCount": 0,
+    "defaultTypeMismatchCount": 0,
+    "formatInvalidCount": 0,
+    "ruleInvalidCount": 0
+  },
+  "auditSummary": {
+    "eventType": "TEMPLATE_VARIABLES_VALIDATED",
+    "templateId": "TMP-000001",
+    "actorId": "template-author-a",
+    "actorRole": "TEMPLATE_AUTHOR",
+    "variableCount": 2,
+    "blocking": false,
+    "variablesHash": "sha256:4fef8b651cf20810e9efa356d82f63b9c14fe78ef02653a37f0174f8f7b203f6",
+    "rulesHash": "sha256:352ebe8848af13f3a6b3bb7ba0e4bbd6726780db1775b2bcf172117c1366d219",
+    "defaultValueHash": "sha256:6ca13d52ca70c883e0f0bb101e425a89e8624de51db2d23925f8f34f85f65da2"
+  }
+}

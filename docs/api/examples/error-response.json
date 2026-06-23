@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "auditId": "AUD-3Q7M9K1N",
+    "traceId": "TRACE-20260604-006",
+    "requestId": "REQ-20260604-0004",
+    "idempotencyKey": "IDEMP-20260604-0004",
+    "templateId": "TPL-LOAN-NOTICE"
+  },
+  "error": {
+    "code": "REQUEST_BODY_INVALID",
+    "category": "VALIDATION",
+    "message": "Request body is invalid.",
+    "messageKey": "api.error.validation.requestBodyInvalid",
+    "retryable": false,
+    "fieldErrors": [
+      {
+        "field": "context.customerName",
+        "reason": "UNKNOWN_FIELD",
+        "message": "Unknown field is not allowed."
+      }
+    ]
+  }
+}

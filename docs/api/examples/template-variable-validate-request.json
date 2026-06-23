@@ -1,0 +1,30 @@
+{
+  "actorRole": "TEMPLATE_AUTHOR",
+  "actorId": "template-author-a",
+  "definitions": [
+    {
+      "variableKey": "customerName",
+      "type": "TEXT",
+      "required": true,
+      "defaultValue": "customer-name-redacted",
+      "rules": [
+        {
+          "code": "REGEX",
+          "operand": "^[A-Za-z0-9-]{1,64}$"
+        }
+      ]
+    },
+    {
+      "variableKey": "riskTier",
+      "type": "ENUM",
+      "required": false,
+      "defaultValue": "A",
+      "rules": [
+        {
+          "code": "ALLOWED_VALUES",
+          "operand": "A,B,C"
+        }
+      ]
+    }
+  ]
+}

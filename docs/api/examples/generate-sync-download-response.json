@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "auditId": "AUD-9Q2M7K4N",
+    "traceId": "TRACE-20260604-003",
+    "requestId": "REQ-20260604-0001",
+    "idempotencyKey": "IDEMP-20260604-0001",
+    "idempotencyStatus": "IDEMPOTENCY_REPLAYED",
+    "originalRequestAt": "2026-06-04T10:10:00+08:00",
+    "templateId": "TPL-LOAN-NOTICE",
+    "routeType": "EXPLICIT_VERSION",
+    "resolvedReleaseVersion": "1.0.0",
+    "output": {
+      "format": "PDF",
+      "mode": "SYNC_DOWNLOAD_URL"
+    }
+  },
+  "result": {
+    "download": {
+      "url": "/api/prod/v1/documents/DOC-8F2N6P4Q/download?...masked...",
+      "expiresAt": "2026-06-04T10:45:00+08:00",
+      "requiresAuthorization": true,
+      "oneTime": false
+    },
+    "documentId": "DOC-8F2N6P4Q",
+    "fidelityWarnings": [
+      {
+        "warningCode": "LOW_RISK_PAGINATION_DIFFERENCE",
+        "messageKey": "generation.warning.fidelity.lowRiskPaginationDifference",
+        "message": "Preview and generated output have a low-risk pagination difference.",
+        "locationSummary": "section=repayment-schedule; output=PDF",
+        "detectedSummary": "Pagination differs without changing clause meaning, signature placement, attachment completeness, or table readability.",
+        "recommendation": "Review the generated output before using the document.",
+        "sensitiveDataExcluded": true
+      }
+    ]
+  }
+}

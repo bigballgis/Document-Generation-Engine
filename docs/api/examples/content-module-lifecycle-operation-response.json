@@ -1,0 +1,17 @@
+{
+  "applied": true,
+  "impactSummary": {
+    "referenceTemplateCount": 2,
+    "referenceTemplateListHint": "TPL-LOAN-NOTICE,TPL-RENEWAL-NOTICE",
+    "impactedReleaseVersionsHint": "v1.0.0,v1.1.0",
+    "defaultRouteAffected": true,
+    "recentCallSummary": "recentCalls=12/7d",
+    "remediationHint": "migrate callers to MOD-LOAN-DISCLOSURE-V3"
+  },
+  "snapshot": {
+    "moduleId": "MOD-LOAN-DISCLOSURE",
+    "state": "STOPPED",
+    "updatedAt": "2026-06-11T10:20:00+08:00",
+    "updatedBy": "group-admin-a"
+  }
+}

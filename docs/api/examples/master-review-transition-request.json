@@ -1,0 +1,7 @@
+{
+  "operation": "SUBMIT_FOR_REVIEW",
+  "actorRole": "MASTER_DESIGNER",
+  "actorId": "designer-a",
+  "changeDescription": "aligned approved anchor set for loan offer pack",
+  "anchorValidationPassed": true
+}

@@ -1,0 +1,8 @@
+{
+  "actorRole": "TEMPLATE_AUTHOR",
+  "actorId": "template-author-a",
+  "testDataSetId": "TDS-001",
+  "variablesHash": "sha256:preview-variables-example",
+  "outputFormat": "PDF",
+  "renderProfileVersion": "rp-v1"
+}

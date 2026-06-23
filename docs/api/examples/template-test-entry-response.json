@@ -1,0 +1,24 @@
+{
+  "triggered": true,
+  "errorCode": null,
+  "errorMessage": null,
+  "testEntryRecord": {
+    "testEntryId": "TEST-ENTRY-000001",
+    "previewId": "PREVIEW-000001",
+    "testDataSetId": "TDS-001",
+    "variablesHash": "sha256:preview-variables-example",
+    "renderProfileVersion": "rp-v1",
+    "handoffStatus": "E01_HANDOFF_READY",
+    "evidencePointers": [
+      {
+        "pointerType": "PREVIEW_RECORD",
+        "pointerRef": "PREVIEW-000001"
+      },
+      {
+        "pointerType": "TEST_DATASET",
+        "pointerRef": "TDS-001"
+      }
+    ],
+    "triggeredAt": "2026-06-12T10:01:00Z"
+  }
+}

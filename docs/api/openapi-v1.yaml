@@ -1,0 +1,4305 @@
+openapi: 3.1.0
+info:
+  title: Document Generation Dynamic API
+  version: 1.0.0
+  summary: Enterprise financial letter document generation API contract
+  description: >-
+    Formal v1 OpenAPI contract for template-based document generation. Template
+    variables are constrained by each released template version contract.
+servers:
+  - url: /
+    description: Deployment root. Paths include /api/{environment}/v1.
+tags:
+  - name: Contract
+    description: Contract discovery and callable version visibility.
+  - name: Generation
+    description: Single and batch document generation.
+  - name: Task
+    description: Async task query and cancellation.
+  - name: Download
+    description: Generated document download.
+  - name: Admin
+    description: API management, credential lifecycle administration, template lifecycle governance, and content-module governance.
+security:
+  - ApiCredentialId: []
+    ApiCredentialSecret: []
+    AccessAccount: []
+paths:
+  /api/{environment}/v1/templates/{templateId}/contract:
+    get:
+      tags: [Contract]
+      operationId: getTemplateApiContract
+      summary: Get template API contract summary
+      description: Returns the current authorized contract summary, policy summary, callable versions, error code summary, and example index. The response does not embed this full OpenAPI YAML file.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Contract summary returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '410':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ErrorResponse'
+        '504':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/templates/{templateId}/versions:
+    get:
+      tags: [Contract]
+      operationId: listCallableVersions
+      summary: List callable release versions
+      description: Returns release versions currently callable from the caller's authorization view. This is not a back-office version management list.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Callable release versions returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallableVersionsResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '410':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ErrorResponse'
+        '504':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/templates/{templateId}/versions/{releaseVersion}/generate:
+    post:
+      tags: [Generation]
+      operationId: generateDocumentByVersion
+      summary: Generate a document by explicit release version
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/ReleaseVersion'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+      responses:
+        '200':
+          description: Synchronous generation completed.
+          headers:
+            auditId:
+              $ref: '#/components/headers/AuditId'
+            traceId:
+              $ref: '#/components/headers/TraceId'
+            requestId:
+              $ref: '#/components/headers/RequestId'
+            idempotencyKey:
+              $ref: '#/components/headers/IdempotencyKey'
+            idempotencyStatus:
+              $ref: '#/components/headers/IdempotencyStatus'
+            documentId:
+              $ref: '#/components/headers/DocumentId'
+            templateId:
+              $ref: '#/components/headers/TemplateId'
+            routeType:
+              $ref: '#/components/headers/RouteType'
+            resolvedReleaseVersion:
+              $ref: '#/components/headers/ResolvedReleaseVersion'
+            output.format:
+              $ref: '#/components/headers/OutputFormat'
+            output.mode:
+              $ref: '#/components/headers/OutputMode'
+            fidelityWarningCount:
+              $ref: '#/components/headers/FidelityWarningCount'
+            fidelityWarningCodes:
+              $ref: '#/components/headers/FidelityWarningCodes'
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadUrlResponse'
+        '202':
+          $ref: '#/components/responses/AsyncAccepted'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '410':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ErrorResponse'
+        '504':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/templates/{templateId}/default/generate:
+    post:
+      tags: [Generation]
+      operationId: generateDocumentByDefaultRoute
+      summary: Generate a document through the default route
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+      responses:
+        '200':
+          description: Synchronous generation completed.
+          headers:
+            auditId:
+              $ref: '#/components/headers/AuditId'
+            traceId:
+              $ref: '#/components/headers/TraceId'
+            requestId:
+              $ref: '#/components/headers/RequestId'
+            idempotencyKey:
+              $ref: '#/components/headers/IdempotencyKey'
+            idempotencyStatus:
+              $ref: '#/components/headers/IdempotencyStatus'
+            documentId:
+              $ref: '#/components/headers/DocumentId'
+            templateId:
+              $ref: '#/components/headers/TemplateId'
+            routeType:
+              $ref: '#/components/headers/RouteType'
+            resolvedReleaseVersion:
+              $ref: '#/components/headers/ResolvedReleaseVersion'
+            output.format:
+              $ref: '#/components/headers/OutputFormat'
+            output.mode:
+              $ref: '#/components/headers/OutputMode'
+            fidelityWarningCount:
+              $ref: '#/components/headers/FidelityWarningCount'
+            fidelityWarningCodes:
+              $ref: '#/components/headers/FidelityWarningCodes'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DownloadUrlResponse'
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '202':
+          $ref: '#/components/responses/AsyncAccepted'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '410':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ErrorResponse'
+        '504':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/templates/{templateId}/versions/{releaseVersion}/batch-generate:
+    post:
+      tags: [Generation]
+      operationId: batchGenerateByVersion
+      summary: Batch generate documents by explicit release version
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/ReleaseVersion'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchGenerateRequest'
+      responses:
+        '200':
+          description: Synchronous batch result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponse'
+        '202':
+          $ref: '#/components/responses/AsyncAccepted'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '410':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ErrorResponse'
+        '504':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/templates/{templateId}/default/batch-generate:
+    post:
+      tags: [Generation]
+      operationId: batchGenerateByDefaultRoute
+      summary: Batch generate documents through the default route
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchGenerateRequest'
+      responses:
+        '200':
+          description: Synchronous batch result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponse'
+        '202':
+          $ref: '#/components/responses/AsyncAccepted'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '410':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ErrorResponse'
+        '504':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/templates/{templateId}/tasks/{taskId}:
+    get:
+      tags: [Task]
+      operationId: getAsyncTask
+      summary: Query async task status and result
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TaskId'
+        - $ref: '#/components/parameters/TaskQueryRequestId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Async task state returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '410':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ErrorResponse'
+        '504':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/templates/{templateId}/tasks/{taskId}/cancel:
+    post:
+      tags: [Task]
+      operationId: cancelAsyncTask
+      summary: Cancel an active async task
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TaskId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Task cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskCancelledResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '410':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ErrorResponse'
+        '504':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/api-credentials:
+    get:
+      tags: [Admin]
+      operationId: listApiCredentials
+      summary: List API credentials for admin UI
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - name: operator
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Masked API credential list returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialListView'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      tags: [Admin]
+      operationId: createApiCredential
+      summary: Create API credential
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredentialCreateRequest'
+      responses:
+        '200':
+          description: API credential created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialCreationResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/api-credentials/{credentialId}:
+    get:
+      tags: [Admin]
+      operationId: getApiCredentialDetail
+      summary: Get API credential detail for admin UI
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/CredentialId'
+        - name: operator
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Masked API credential detail returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialDetailView'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/api-credentials/{credentialId}/rotate:
+    post:
+      tags: [Admin]
+      operationId: rotateApiCredential
+      summary: Rotate API credential
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/CredentialId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredentialRotateRequest'
+      responses:
+        '200':
+          description: API credential rotated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialRotationResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/api-credentials/{credentialId}/revoke:
+    post:
+      tags: [Admin]
+      operationId: revokeApiCredential
+      summary: Revoke API credential
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/CredentialId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredentialRevokeRequest'
+      responses:
+        '200':
+          description: API credential revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialRevocationResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/api-credentials/{credentialId}/history:
+    get:
+      tags: [Admin]
+      operationId: getApiCredentialHistory
+      summary: Get API credential history for admin UI
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/CredentialId'
+        - name: operator
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Masked credential lifecycle history returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CredentialHistoryEntry'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/api-credentials/{credentialId}/summary:
+    get:
+      tags: [Admin]
+      operationId: getApiCredentialSummary
+      summary: Get API credential summary
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/CredentialId'
+        - name: operator
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: API credential summary returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialSummaryView'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/api-policy:
+    get:
+      tags: [Admin]
+      operationId: getTemplateApiPolicyReadModel
+      summary: Get API policy admin read model
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Non-sensitive API policy read model returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiPolicyAdminReadModel'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/api-policy/history:
+    get:
+      tags: [Admin]
+      operationId: getTemplateApiPolicyHistory
+      summary: Get API policy audit history for admin UI
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: API policy history returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiPolicyAuditEntry'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/api-policy/ad-groups/search:
+    get:
+      tags: [Admin]
+      operationId: searchMaskedApiPolicyAdGroups
+      summary: Search masked AD-group selector options
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Masked AD-group selector results returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaskedAdGroupSearchResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/lifecycle/review/transition:
+    post:
+      tags: [Admin]
+      operationId: transitionTemplateLifecycleReview
+      summary: Apply a template lifecycle review transition
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewTransitionRequest'
+      responses:
+        '200':
+          description: Review transition applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewTransitionResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/lifecycle/release-gate/evaluate:
+    post:
+      tags: [Admin]
+      operationId: evaluateTemplateLifecycleReleaseGate
+      summary: Evaluate a template lifecycle release gate
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReleaseGateEvaluateRequest'
+      responses:
+        '200':
+          description: Release gate evaluation completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseGateResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/lifecycle/operation/apply:
+    post:
+      tags: [Admin]
+      operationId: applyTemplateLifecycleOperation
+      summary: Apply a template lifecycle governance operation
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LifecycleOperationApplyRequest'
+      responses:
+        '200':
+          description: Lifecycle operation applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifecycleOperationResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/lifecycle/journey/transition:
+    post:
+      tags: [Admin]
+      operationId: transitionTemplateLifecycleJourney
+      summary: Apply end-to-end template lifecycle journey transition
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LifecycleJourneyTransitionRequest'
+      responses:
+        '200':
+          description: Lifecycle journey transition applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifecycleJourneyTransitionResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/bindings/validate:
+    post:
+      tags: [Admin]
+      operationId: validateTemplateBindings
+      summary: Validate structured content-tree bindings against reviewed anchor catalog snapshot
+      description: >-
+        Validates release-candidate bindings for one template using the
+        reviewed anchor catalog snapshot locked by sourceAnchorCatalogVersion.
+        Duplicate binding means the same anchorId appears more than once in one
+        payload. Returned per-binding status values are strictly limited to
+        VALID, MISSING_ANCHOR, DUPLICATE_BINDING, and
+        INCOMPATIBLE_CONTENT_TYPE.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateBindingValidationRequest'
+      responses:
+        '200':
+          description: Binding validation completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateBindingValidationResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/variables/validate:
+    post:
+      tags: [Admin]
+      operationId: validateTemplateVariables
+      summary: Validate template variable definitions and rules with non-sensitive audit summary
+      description: >-
+        Validates one template variable-definition payload for authoring-time
+        required/type/format/rule constraints and returns deterministic variable-level
+        statuses plus non-sensitive audit summary hashes. Raw default values are never
+        echoed in response fields.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateVariableValidationRequest'
+      responses:
+        '200':
+          description: Variable validation completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVariableValidationResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/rules/validate:
+    post:
+      tags: [Admin]
+      operationId: validateTemplateCompositionRules
+      summary: Validate template composition-rule references against variables, anchors, and branch links
+      description: >-
+        Validates one composition-rule payload for variable references,
+        target anchor references, and branch target references. Returned
+        statuses are strictly limited to VALID, MISSING_VARIABLE,
+        MISSING_ANCHOR, INVALID_BRANCH_REFERENCE, and MALFORMED_RULE.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateRuleValidationRequest'
+      responses:
+        '200':
+          description: Rule validation completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateRuleValidationResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/preview/entries:
+    post:
+      tags: [Admin]
+      operationId: createTemplatePreviewEntry
+      summary: Create preview generation entry and project baseline preview record
+      description: >-
+        Creates one traceable preview entry record using non-sensitive
+        projection fields only. Baseline preview status starts at ACCEPTED.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplatePreviewEntryRequest'
+      responses:
+        '200':
+          description: Preview entry accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplatePreviewEntryResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/templates/{templateId}/test-entries:
+    post:
+      tags: [Admin]
+      operationId: triggerTemplateTestEntry
+      summary: Trigger baseline test-entry linkage from preview and test dataset references
+      description: >-
+        Triggers test-entry orchestration baseline without lifecycle closure.
+        Request must include preview linkage, dataset linkage, variable hash,
+        and evidence pointers for E02 handoff.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateTestEntryRequest'
+      responses:
+        '200':
+          description: Test-entry linkage triggered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateTestEntryResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/content-modules/{moduleId}/review/transition:
+    post:
+      tags: [Admin]
+      operationId: transitionContentModuleReview
+      summary: Apply a content module review transition
+      description: >-
+        Applies content-module review workflow transitions. Validation and
+        governance semantics are operation-aware: SUBMIT_FOR_REVIEW requires
+        changeDescription, REJECT_REVIEW requires rejectionReason, and actorRole
+        must satisfy role boundaries for the requested operation. Error
+        semantics: 422 for malformed or validation failures, 403 for role
+        boundary denial, and 409 for workflow state precondition denial.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentModuleReviewTransitionRequest'
+      responses:
+        '200':
+          description: Review transition applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleReviewTransitionResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/content-modules/{moduleId}/lifecycle/operation/apply:
+    post:
+      tags: [Admin]
+      operationId: applyContentModuleLifecycleOperation
+      summary: Apply a content module lifecycle governance operation
+      description: >-
+        Applies content-module lifecycle governance operations. Only
+        administrative roles are allowed. STOP_USE, RECOVER, and DEPRECATE
+        require impactSummaryViewed and secondConfirmation. STOP_USE and
+        DEPRECATE additionally require a structured impactSummary payload. Error
+        semantics: 422 for malformed or validation failures, 403 for role
+        boundary denial, and 409 for transition or governance precondition
+        denial.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentModuleLifecycleOperationApplyRequest'
+      responses:
+        '200':
+          description: Lifecycle operation applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleLifecycleOperationResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/masters:
+    post:
+      tags: [Admin]
+      operationId: createMasterDocument
+      summary: Create or upload a master document baseline snapshot
+      description: >-
+        Creates a master document baseline entry and persists non-sensitive upload
+        metadata. The endpoint is fail-closed for non-admin and non-master-designer
+        roles. Error semantics: 422 for malformed or validation failures and 403
+        for role boundary denial.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MasterCreateRequest'
+      responses:
+        '200':
+          description: Master baseline snapshot created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterCreateResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/masters/{masterId}/review/transition:
+    post:
+      tags: [Admin]
+      operationId: transitionMasterReview
+      summary: Apply a master review transition
+      description: >-
+        Applies master review workflow transitions. SUBMIT_FOR_REVIEW requires
+        anchorValidationPassed=true and a non-empty changeDescription.
+        REJECT_REVIEW requires rejectionReason. A rejected master returns its
+        current state to DRAFT while preserving rejection history. Error
+        semantics: 422 for malformed requests, 403 for role denial, and 409
+        for workflow or submission guard precondition denial.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MasterReviewTransitionRequest'
+      responses:
+        '200':
+          description: Master review transition applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterReviewTransitionResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/masters/{masterId}/anchor-catalogs:
+    post:
+      tags: [Admin]
+      operationId: createMasterAnchorCatalogSnapshot
+      summary: Create reviewed master anchor catalog snapshot
+      description: >-
+        Creates a versioned reviewed master anchor catalog snapshot with stable
+        anchorId values derived from canonical anchor key and declared content
+        type. Only GROUP_ADMIN and GLOBAL_ADMIN are allowed. Error semantics:
+        403 for role denial, 409 for master path mismatch or review precondition
+        denial, and 422 for malformed payloads.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MasterAnchorCatalogCreateRequest'
+      responses:
+        '200':
+          description: Reviewed master anchor catalog snapshot created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterAnchorCatalogCreateResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/masters/{masterId}/anchor-catalogs/{catalogVersion}:
+    get:
+      tags: [Admin]
+      operationId: getMasterAnchorCatalogSnapshot
+      summary: Retrieve reviewed master anchor catalog snapshot
+      description: >-
+        Retrieves a reviewed master anchor catalog snapshot by masterId and
+        catalogVersion.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: catalogVersion
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Reviewed master anchor catalog snapshot found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterAnchorCatalogLookupResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/masters/{masterId}/templates:
+    post:
+      tags: [Admin]
+      operationId: createTemplateFromMaster
+      summary: Create a template from approved master and reviewed anchor catalog
+      description: >-
+        Creates a template snapshot from an approved master and a reviewed anchor
+        catalog version. The created template persists immutable source lock fields:
+        sourceMasterId, sourceAnchorCatalogVersion, lockCreatedAt, and
+        lockCreatedBy. Error semantics: 403 for role denial, 409 for master review
+        or catalog precondition conflicts, and 422 for malformed payloads.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MasterTemplateCreateRequest'
+      responses:
+        '200':
+          description: Template snapshot created from approved master.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterTemplateCreateResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/audit/management-events:
+    get:
+      tags: [Admin]
+      operationId: getManagementAuditEvents
+      summary: Query standardized management audit events
+      description: >-
+        Returns standardized management audit events with optional filters.
+        Effective actorRole options are AUDIT_ADMIN, GLOBAL_ADMIN, and GROUP_ADMIN.
+        When actorRole is GROUP_ADMIN, both groupScope and templateId are required;
+        missing scope inputs are rejected with 422 validation errors.
+        eventAtFrom and eventAtTo must be valid ISO-8601 timestamps when provided,
+        and eventAtFrom must be less than or equal to eventAtTo.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateIdQuery'
+        - $ref: '#/components/parameters/EventTypeQuery'
+        - $ref: '#/components/parameters/CredentialIdQuery'
+        - $ref: '#/components/parameters/EventAtFromQuery'
+        - $ref: '#/components/parameters/EventAtToQuery'
+        - $ref: '#/components/parameters/AuditActorRoleQuery'
+        - $ref: '#/components/parameters/GroupScopeQuery'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Management audit events returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementAuditResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/audit/management-events/export:
+    get:
+      tags: [Admin]
+      operationId: exportManagementAuditEvents
+      summary: Export deterministic masked management audit events
+      description: >-
+        Returns deterministic masked management audit export payload.
+        Effective actorRole options are AUDIT_ADMIN, GLOBAL_ADMIN, and GROUP_ADMIN.
+        When actorRole is GROUP_ADMIN, both groupScope and templateId are required;
+        missing scope inputs are rejected with 422 validation errors.
+        Successful exports always return format management-audit-export-v1-json,
+        with masked actor and credential fingerprint summaries.
+        eventAtFrom and eventAtTo must be valid ISO-8601 timestamps when provided,
+        and eventAtFrom must be less than or equal to eventAtTo.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateIdQuery'
+        - $ref: '#/components/parameters/EventTypeQuery'
+        - $ref: '#/components/parameters/CredentialIdQuery'
+        - $ref: '#/components/parameters/EventAtFromQuery'
+        - $ref: '#/components/parameters/EventAtToQuery'
+        - $ref: '#/components/parameters/AuditActorRoleQuery'
+        - $ref: '#/components/parameters/GroupScopeQuery'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Masked management audit export returned in deterministic format management-audit-export-v1-json.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagementAuditExportResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/admin/audit/lifecycle-events:
+    get:
+      tags: [Admin]
+      operationId: getLifecycleAuditEvents
+      summary: Query standardized lifecycle audit events
+      description: >-
+        Returns standardized lifecycle audit events with optional filters.
+        Effective actorRole options are AUDIT_ADMIN, GLOBAL_ADMIN, and GROUP_ADMIN.
+        When actorRole is GROUP_ADMIN, both groupScope and templateId are required;
+        missing scope inputs are rejected with 422 validation errors.
+        eventAtFrom and eventAtTo must be valid ISO-8601 timestamps when provided,
+        and eventAtFrom must be less than or equal to eventAtTo.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateIdQuery'
+        - $ref: '#/components/parameters/EventTypeQuery'
+        - $ref: '#/components/parameters/EventAtFromQuery'
+        - $ref: '#/components/parameters/EventAtToQuery'
+        - $ref: '#/components/parameters/AuditActorRoleQuery'
+        - $ref: '#/components/parameters/GroupScopeQuery'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Lifecycle audit events returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LifecycleAuditResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/documents/{documentId}/download:
+    get:
+      tags: [Download]
+      operationId: downloadDocument
+      summary: Download generated document content
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/DocumentId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Generated document stream.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '410':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+        '503':
+          $ref: '#/components/responses/ErrorResponse'
+        '504':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+components:
+  securitySchemes:
+    ApiCredentialId:
+      type: apiKey
+      in: header
+      name: X-Api-Credential-Id
+      description: Non-secret API credential identifier.
+    ApiCredentialSecret:
+      type: apiKey
+      in: header
+      name: X-Api-Credential-Secret
+      description: API credential secret. It must not be logged, audited, returned, or displayed after submission.
+    AccessAccount:
+      type: apiKey
+      in: header
+      name: X-Access-Account
+      description: User or service account whose AD Group membership is evaluated.
+  parameters:
+    Environment:
+      name: environment
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    TemplateId:
+      name: templateId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^TPL-[A-Za-z0-9-]+$'
+      example: TPL-LOAN-NOTICE
+    ReleaseVersion:
+      name: releaseVersion
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+      example: 1.0.0
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^TASK-[A-Za-z0-9]+$'
+      example: TASK-7K3M9Q2R
+    TaskQueryRequestId:
+      name: requestId
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      description: Optional caller request tracking ID for task query. Audited for tracing only and not used for task lookup or idempotency.
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^DOC-[A-Za-z0-9]+$'
+      example: DOC-8F2N6P4Q
+    CredentialId:
+      name: credentialId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    TemplateIdQuery:
+      name: templateId
+      in: query
+      required: false
+      schema:
+        type: string
+        pattern: '^TPL-[A-Za-z0-9-]+$'
+      example: TPL-LOAN-NOTICE
+    EventTypeQuery:
+      name: eventType
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+    CredentialIdQuery:
+      name: credentialId
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+    EventAtFromQuery:
+      name: eventAtFrom
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: Inclusive lower bound of event timestamp filter in ISO-8601 format. When both eventAtFrom and eventAtTo are provided, eventAtFrom must be less than or equal to eventAtTo.
+    EventAtToQuery:
+      name: eventAtTo
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: Inclusive upper bound of event timestamp filter in ISO-8601 format. When both eventAtFrom and eventAtTo are provided, eventAtFrom must be less than or equal to eventAtTo.
+    AuditActorRoleQuery:
+      name: actorRole
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/AuditReadActorRole'
+      description: >-
+        Audit read actor role for admin audit read/export endpoints.
+        Allowed values: AUDIT_ADMIN, GLOBAL_ADMIN, GROUP_ADMIN.
+        GROUP_ADMIN requires both groupScope and templateId.
+    GroupScopeQuery:
+      name: groupScope
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      description: Required when actorRole is GROUP_ADMIN for management audit read, management audit export, and lifecycle audit read; GROUP_ADMIN requests must provide both groupScope and templateId.
+    TraceIdHeader:
+      name: X-Trace-Id
+      in: header
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      description: Optional caller trace ID. If omitted, the platform generates traceId.
+  headers:
+    AuditId:
+      schema:
+        type: string
+    TraceId:
+      schema:
+        type: string
+    RequestId:
+      schema:
+        type: string
+    IdempotencyKey:
+      schema:
+        type: string
+    IdempotencyStatus:
+      schema:
+        $ref: '#/components/schemas/IdempotencyStatus'
+    DocumentId:
+      schema:
+        type: string
+    TemplateId:
+      schema:
+        type: string
+    RouteType:
+      schema:
+        $ref: '#/components/schemas/RouteType'
+    ResolvedReleaseVersion:
+      schema:
+        type: string
+    OutputFormat:
+      schema:
+        $ref: '#/components/schemas/OutputFormat'
+    OutputMode:
+      schema:
+        $ref: '#/components/schemas/OutputMode'
+    FidelityWarningCount:
+      schema:
+        type: integer
+        minimum: 0
+    FidelityWarningCodes:
+      schema:
+        type: string
+  responses:
+    AsyncAccepted:
+      description: Async task accepted.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AsyncAcceptedResponse'
+    ErrorResponse:
+      description: Error response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  schemas:
+    OutputFormat:
+      type: string
+      enum: [DOCX, PDF]
+    OutputMode:
+      type: string
+      enum: [SYNC_STREAM, SYNC_DOWNLOAD_URL, ASYNC_TASK]
+    RouteType:
+      type: string
+      enum: [EXPLICIT_VERSION, DEFAULT_ROUTE]
+    FidelityWarningCode:
+      type: string
+      enum: [OPTIONAL_CONTENT_EMPTY, LOW_RISK_PAGINATION_DIFFERENCE, LOW_RISK_TABLE_PAGE_BREAK, CONTROLLED_STYLE_FALLBACK, IMAGE_SCALING_ADJUSTED]
+    IdempotencyStatus:
+      type: string
+      enum: [IDEMPOTENCY_NEW, IDEMPOTENCY_REPLAYED, IDEMPOTENCY_CONFLICTED]
+    TaskStatus:
+      type: string
+      enum: [ACCEPTED, PROCESSING, SUCCEEDED, FAILED, PARTIAL_SUCCEEDED, EXPIRED, CANCELLED]
+    BatchItemStatus:
+      type: string
+      enum: [SUCCEEDED, FAILED, SKIPPED]
+    Permission:
+      type: string
+      enum: [ALLOW_PRINT, ALLOW_COPY, ALLOW_EDIT, ALLOW_ANNOTATE, ALLOW_FORM_FILL]
+    Context:
+      type: object
+      additionalProperties: false
+      properties:
+        sourceSystem:
+          type: string
+        channel:
+          type: string
+        businessRequestId:
+          type: string
+        upstreamTraceId:
+          type: string
+        scenario:
+          type: string
+        locale:
+          type: string
+    OutputOptions:
+      type: object
+      additionalProperties: false
+      required: [format, mode]
+      properties:
+        format:
+          $ref: '#/components/schemas/OutputFormat'
+        mode:
+          $ref: '#/components/schemas/OutputMode'
+    EncryptionOptions:
+      type: object
+      description: >-
+        Dynamic encryption options. When enabled is true, openPassword is
+        required. When permissions are provided, ownerPassword is required.
+        When enabled is false, openPassword, ownerPassword, and permissions are
+        not allowed. openPassword and ownerPassword must be different when both
+        are present.
+      additionalProperties: false
+      required: [enabled]
+      allOf:
+        - if:
+            properties:
+              enabled:
+                const: true
+            required: [enabled]
+          then:
+            required: [openPassword]
+        - if:
+            properties:
+              enabled:
+                const: false
+            required: [enabled]
+          then:
+            not:
+              anyOf:
+                - required: [openPassword]
+                - required: [ownerPassword]
+                - required: [permissions]
+        - if:
+            required: [permissions]
+          then:
+            required: [ownerPassword]
+      properties:
+        enabled:
+          type: boolean
+        openPassword:
+          type: string
+          minLength: 12
+          maxLength: 128
+          writeOnly: true
+        ownerPassword:
+          type: string
+          minLength: 12
+          maxLength: 128
+          writeOnly: true
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+          uniqueItems: true
+    Variables:
+      type: object
+      description: Template variables constrained by the selected release version variable schema.
+      additionalProperties: true
+    GenerateRequest:
+      type: object
+      additionalProperties: false
+      required: [output, variables, requestId, idempotencyKey]
+      properties:
+        output:
+          $ref: '#/components/schemas/OutputOptions'
+        variables:
+          $ref: '#/components/schemas/Variables'
+        encryption:
+          $ref: '#/components/schemas/EncryptionOptions'
+        requestId:
+          type: string
+        idempotencyKey:
+          type: string
+        context:
+          $ref: '#/components/schemas/Context'
+    BatchGenerateRequest:
+      type: object
+      additionalProperties: false
+      required: [output, items, requestId, idempotencyKey]
+      properties:
+        output:
+          $ref: '#/components/schemas/OutputOptions'
+        encryption:
+          $ref: '#/components/schemas/EncryptionOptions'
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/BatchGenerateItem'
+        requestId:
+          type: string
+        idempotencyKey:
+          type: string
+        originalBatchId:
+          type: string
+          pattern: '^BATCH-[A-Za-z0-9]+$'
+        context:
+          $ref: '#/components/schemas/Context'
+    BatchGenerateItem:
+      type: object
+      additionalProperties: false
+      required: [itemId, variables]
+      properties:
+        itemId:
+          type: string
+        variables:
+          $ref: '#/components/schemas/Variables'
+        output:
+          $ref: '#/components/schemas/OutputOptions'
+        encryption:
+          $ref: '#/components/schemas/EncryptionOptions'
+    Metadata:
+      type: object
+      additionalProperties: false
+      required: [auditId, traceId]
+      properties:
+        auditId:
+          type: string
+        traceId:
+          type: string
+        requestId:
+          type: string
+        idempotencyKey:
+          type: string
+          description: Echoed for generation success and generation error responses.
+        idempotencyStatus:
+          $ref: '#/components/schemas/IdempotencyStatus'
+        originalRequestAt:
+          type: string
+          format: date-time
+          description: Always returned for successful idempotent replay responses and for idempotency conflict safe summaries.
+        templateId:
+          type: string
+        routeType:
+          $ref: '#/components/schemas/RouteType'
+        resolvedReleaseVersion:
+          type: string
+        output:
+          $ref: '#/components/schemas/OutputOptions'
+    DownloadUrlResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [download, documentId]
+          properties:
+            download:
+              $ref: '#/components/schemas/DownloadInfo'
+            documentId:
+              type: string
+            fidelityWarnings:
+              type: array
+              items:
+                $ref: '#/components/schemas/FidelityWarning'
+    DownloadInfo:
+      type: object
+      additionalProperties: false
+      required: [url, expiresAt, requiresAuthorization, oneTime]
+      properties:
+        url:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        requiresAuthorization:
+          type: boolean
+          const: true
+        oneTime:
+          type: boolean
+          const: false
+    AsyncAcceptedResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [task]
+          properties:
+            task:
+              $ref: '#/components/schemas/TaskSummary'
+    TaskResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [task]
+          properties:
+            task:
+              $ref: '#/components/schemas/TaskSummary'
+            download:
+              $ref: '#/components/schemas/DownloadInfo'
+            documentId:
+              type: string
+            fidelityWarnings:
+              type: array
+              items:
+                $ref: '#/components/schemas/FidelityWarning'
+            batch:
+              $ref: '#/components/schemas/BatchResult'
+            error:
+              $ref: '#/components/schemas/ErrorDetail'
+    TaskCancelledResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [task]
+          properties:
+            task:
+              $ref: '#/components/schemas/CancelledTaskSummary'
+    CancelledTaskSummary:
+      type: object
+      additionalProperties: false
+      required: [taskId, status, queryPath]
+      properties:
+        taskId:
+          type: string
+          pattern: '^TASK-[A-Za-z0-9]+$'
+        status:
+          type: string
+          const: CANCELLED
+        queryPath:
+          type: string
+        acceptedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+    TaskSummary:
+      type: object
+      additionalProperties: false
+      required: [taskId, status, queryPath]
+      properties:
+        taskId:
+          type: string
+          pattern: '^TASK-[A-Za-z0-9]+$'
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        queryPath:
+          type: string
+        acceptedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+    BatchResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [batch]
+          properties:
+            batch:
+              $ref: '#/components/schemas/BatchResult'
+    BatchResult:
+      type: object
+      additionalProperties: false
+      required: [batchId, summary, items]
+      properties:
+        batchId:
+          type: string
+          pattern: '^BATCH-[A-Za-z0-9]+$'
+        originalBatchId:
+          type: string
+          pattern: '^BATCH-[A-Za-z0-9]+$'
+        summary:
+          type: object
+          additionalProperties: false
+          required: [totalCount, processedCount, successCount, failureCount, skippedCount]
+          properties:
+            totalCount:
+              type: integer
+              minimum: 0
+            processedCount:
+              type: integer
+              minimum: 0
+            successCount:
+              type: integer
+              minimum: 0
+            failureCount:
+              type: integer
+              minimum: 0
+            skippedCount:
+              type: integer
+              minimum: 0
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchResultItem'
+    BatchResultItem:
+      type: object
+      additionalProperties: false
+      required: [itemId, status, output, encryptionSummary]
+      properties:
+        itemId:
+          type: string
+        status:
+          $ref: '#/components/schemas/BatchItemStatus'
+        output:
+          $ref: '#/components/schemas/OutputOptions'
+        encryptionSummary:
+          $ref: '#/components/schemas/EncryptionSummary'
+        documentId:
+          type: string
+        download:
+          $ref: '#/components/schemas/DownloadInfo'
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+        fidelityWarnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/FidelityWarning'
+    AuditContextLinkage:
+      type: object
+      additionalProperties: false
+      properties:
+        requestId:
+          type: string
+        taskId:
+          type: string
+          pattern: '^TASK-[A-Za-z0-9]+$'
+        batchId:
+          type: string
+          pattern: '^BATCH-[A-Za-z0-9]+$'
+        itemId:
+          type: string
+    FidelityWarning:
+      type: object
+      additionalProperties: false
+      required: [warningCode, messageKey, message, locationSummary, detectedSummary, recommendation, sensitiveDataExcluded]
+      properties:
+        warningCode:
+          $ref: '#/components/schemas/FidelityWarningCode'
+        messageKey:
+          type: string
+        message:
+          type: string
+        locationSummary:
+          type: string
+        detectedSummary:
+          type: string
+        recommendation:
+          type: string
+        sensitiveDataExcluded:
+          type: boolean
+          const: true
+    EncryptionSummary:
+      type: object
+      additionalProperties: false
+      required: [enabled, outputFormat, openPasswordProvided, ownerPasswordProvided, permissions]
+      properties:
+        enabled:
+          type: boolean
+        outputFormat:
+          $ref: '#/components/schemas/OutputFormat'
+        openPasswordProvided:
+          type: boolean
+        ownerPasswordProvided:
+          type: boolean
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+    ContractResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [templateId, paths, apiPolicy, callableVersions, schemas, errorCodes, examples]
+          properties:
+            templateId:
+              type: string
+            paths:
+              type: array
+              items:
+                type: string
+            defaultRoute:
+              $ref: '#/components/schemas/DefaultRouteSummary'
+            apiPolicy:
+              $ref: '#/components/schemas/ApiPolicySummary'
+            callableVersions:
+              type: array
+              items:
+                $ref: '#/components/schemas/CallableVersion'
+            schemas:
+              type: array
+              items:
+                type: string
+            errorCodes:
+              type: array
+              items:
+                $ref: '#/components/schemas/ErrorCodeSummary'
+            examples:
+              type: array
+              items:
+                type: string
+    CallableVersionsResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [templateId, versions]
+          properties:
+            templateId:
+              type: string
+            versions:
+              type: array
+              items:
+                $ref: '#/components/schemas/CallableVersion'
+    CallableVersion:
+      type: object
+      additionalProperties: false
+      required: [releaseVersion, explicitVersionUrl]
+      properties:
+        releaseVersion:
+          type: string
+        explicitVersionUrl:
+          type: string
+    DefaultRouteSummary:
+      type: object
+      additionalProperties: false
+      required: [url, currentTargetReleaseVersion, currentTargetStatus, updatedAt, updatedBy, explicitVersionUrl]
+      properties:
+        url:
+          type: string
+        currentTargetReleaseVersion:
+          type: string
+        currentTargetStatus:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        explicitVersionUrl:
+          type: string
+    ApiPolicySummary:
+      type: object
+      additionalProperties: false
+      required: [policyVersion, updatedAt, updatedBy, allowedOutputFormats, allowedOutputModes, batchLimits, encryptionCapabilities, adGroupAuthorizationSummary, credentialSummary]
+      properties:
+        policyVersion:
+          type: integer
+          minimum: 1
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        allowedOutputFormats:
+          type: array
+          items:
+            $ref: '#/components/schemas/OutputFormat'
+        allowedOutputModes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OutputMode'
+        batchLimits:
+          type: object
+          additionalProperties: false
+          required: [syncMaxItems, asyncMaxItems]
+          properties:
+            syncMaxItems:
+              type: integer
+              minimum: 1
+            asyncMaxItems:
+              type: integer
+              minimum: 1
+        encryptionCapabilities:
+          type: object
+          additionalProperties: false
+          properties:
+            docxEnabled:
+              type: boolean
+            pdfEnabled:
+              type: boolean
+            permissions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Permission'
+        adGroupAuthorizationSummary:
+          $ref: '#/components/schemas/AdGroupAuthorizationSummary'
+        credentialSummary:
+          $ref: '#/components/schemas/CredentialSummary'
+    AdGroupAuthorizationSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        authorized:
+          type: boolean
+        cacheTtlSeconds:
+          type: integer
+          minimum: 0
+        authorizationScopeSummary:
+          type: string
+        effectivePolicyDescription:
+          type: string
+    ApiPolicyAdminReadModel:
+      type: object
+      additionalProperties: false
+      required: [templateId, policyVersion, updatedAt, updatedBy, allowedOutputFormats, allowedOutputModes, syncMaxItems, asyncMaxItems, docxEncryptionEnabled, pdfEncryptionEnabled, encryptionPermissions, authorizedAdGroupCount, adGroupAuthorizationSummary]
+      properties:
+        templateId:
+          type: string
+        policyVersion:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        allowedOutputFormats:
+          type: array
+          items:
+            type: string
+        allowedOutputModes:
+          type: array
+          items:
+            type: string
+        syncMaxItems:
+          type: integer
+        asyncMaxItems:
+          type: integer
+        docxEncryptionEnabled:
+          type: boolean
+        pdfEncryptionEnabled:
+          type: boolean
+        encryptionPermissions:
+          type: array
+          items:
+            type: string
+        authorizedAdGroupCount:
+          type: integer
+        adGroupAuthorizationSummary:
+          $ref: '#/components/schemas/AdGroupAuthorizationSummaryView'
+    AdGroupAuthorizationSummaryView:
+      type: object
+      additionalProperties: false
+      required: [authorizedGroupCount, maskedGroupDisplay, selectedGroupKeys, membershipSummaryMasked]
+      properties:
+        authorizedGroupCount:
+          type: integer
+        maskedGroupDisplay:
+          type: string
+        selectedGroupKeys:
+          type: array
+          items:
+            type: string
+        membershipSummaryMasked:
+          type: string
+          const: masked selector only
+    ApiPolicyAuditEntry:
+      type: object
+      additionalProperties: false
+      required: [eventAt, eventType, templateId, previousPolicyVersion, policyVersion, changedAreas, hardBlockers, warnings, warningConfirmed]
+      properties:
+        eventAt:
+          type: string
+          format: date-time
+        eventType:
+          type: string
+        templateId:
+          type: string
+        previousPolicyVersion:
+          type: integer
+        policyVersion:
+          type: integer
+        changedAreas:
+          type: array
+          items:
+            type: string
+        hardBlockers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiPolicyImpactFinding'
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiPolicyImpactFinding'
+        warningConfirmed:
+          type: boolean
+    ApiPolicyImpactFinding:
+      type: object
+      additionalProperties: false
+      required: [reason, impact, handling, expectedErrorCode]
+      properties:
+        reason:
+          type: string
+        impact:
+          type: string
+        handling:
+          type: string
+        expectedErrorCode:
+          type: string
+    CredentialSummary:
+      type: object
+      additionalProperties: false
+      properties:
+        credentialId:
+          type: string
+        status:
+          $ref: '#/components/schemas/CredentialStatus'
+        expiresAt:
+          type: string
+          format: date-time
+        fingerprintSummary:
+          type: string
+        authorizedTemplateSummary:
+          type: string
+        rotationGracePeriodEndsAt:
+          type: string
+          format: date-time
+    CredentialStatus:
+      type: string
+      enum: [ACTIVE, EXPIRING_SOON, EXPIRED, REVOKED]
+    CredentialCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [operator, callerId]
+      properties:
+        operator:
+          type: string
+          minLength: 1
+        callerId:
+          type: string
+          minLength: 1
+        expiryDays:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+    CredentialRotateRequest:
+      type: object
+      additionalProperties: false
+      required: [operator]
+      properties:
+        operator:
+          type: string
+          minLength: 1
+        reason:
+          type: string
+    CredentialRevokeRequest:
+      type: object
+      additionalProperties: false
+      required: [operator]
+      properties:
+        operator:
+          type: string
+          minLength: 1
+        reason:
+          type: string
+    CredentialSummaryView:
+      type: object
+      additionalProperties: false
+      required: [credentialId, callerId, status, summaryViewed]
+      properties:
+        credentialId:
+          type: string
+        callerId:
+          type: string
+        status:
+          $ref: '#/components/schemas/CredentialStatus'
+        expiresAt:
+          type: string
+          format: date-time
+        fingerprint:
+          type: string
+        summaryViewed:
+          type: boolean
+        previousSecretGraceExpiresAt:
+          type: string
+          format: date-time
+    CredentialListView:
+      type: object
+      additionalProperties: false
+      required: [credentials]
+      properties:
+        credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/CredentialListItem'
+    CredentialListItem:
+      type: object
+      additionalProperties: false
+      required: [credentialId, callerIdMasked, status, expiresAt, fingerprintMasked]
+      properties:
+        credentialId:
+          type: string
+        callerIdMasked:
+          type: string
+        status:
+          $ref: '#/components/schemas/CredentialStatus'
+        expiresAt:
+          type: string
+          format: date-time
+        fingerprintMasked:
+          type: string
+    CredentialDetailView:
+      type: object
+      additionalProperties: false
+      required: [credentialId, callerIdMasked, status, expiresAt, fingerprintMasked, summaryViewed]
+      properties:
+        credentialId:
+          type: string
+        callerIdMasked:
+          type: string
+        status:
+          $ref: '#/components/schemas/CredentialStatus'
+        expiresAt:
+          type: string
+          format: date-time
+        fingerprintMasked:
+          type: string
+        summaryViewed:
+          type: boolean
+        previousSecretGraceExpiresAt:
+          type: string
+          format: date-time
+    CredentialHistoryEntry:
+      type: object
+      additionalProperties: false
+      required: [eventAt, eventType, credentialId, operator, status, expiresAt, fingerprintMasked]
+      properties:
+        eventAt:
+          type: string
+          format: date-time
+        eventType:
+          type: string
+        credentialId:
+          type: string
+        operator:
+          type: string
+        status:
+          $ref: '#/components/schemas/CredentialStatus'
+        expiresAt:
+          type: string
+          format: date-time
+        fingerprintMasked:
+          type: string
+        reason:
+          type: string
+    MaskedAdGroupSearchResponse:
+      type: object
+      additionalProperties: false
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaskedAdGroupOption'
+    MaskedAdGroupOption:
+      type: object
+      additionalProperties: false
+      required: [groupKey, displayNameMasked, membershipSummaryMasked]
+      properties:
+        groupKey:
+          type: string
+        displayNameMasked:
+          type: string
+        membershipSummaryMasked:
+          type: string
+          const: members hidden
+    CredentialCreationResult:
+      type: object
+      additionalProperties: false
+      required: [created]
+      properties:
+        created:
+          type: boolean
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        credentialId:
+          type: string
+        oneTimeSecret:
+          type: string
+        summary:
+          $ref: '#/components/schemas/CredentialSummaryView'
+    CredentialRotationResult:
+      type: object
+      additionalProperties: false
+      required: [rotated]
+      properties:
+        rotated:
+          type: boolean
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        oneTimeSecret:
+          type: string
+        summary:
+          $ref: '#/components/schemas/CredentialSummaryView'
+    CredentialRevocationResult:
+      type: object
+      additionalProperties: false
+      required: [revoked]
+      properties:
+        revoked:
+          type: boolean
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        summary:
+          $ref: '#/components/schemas/CredentialSummaryView'
+    LifecycleGovernanceActorRole:
+      type: string
+      enum: [GLOBAL_ADMIN, GROUP_ADMIN, APPROVER, TEMPLATE_AUTHOR, MASTER_DESIGNER]
+    AuditReadActorRole:
+      type: string
+      enum: [AUDIT_ADMIN, GLOBAL_ADMIN, GROUP_ADMIN]
+    ManagementAuditResponse:
+      type: object
+      additionalProperties: false
+      required: [events]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagementAuditEvent'
+    ManagementAuditEvent:
+      type: object
+      additionalProperties: false
+      required: [eventAt, eventType, changedAreas, rollback, warningCodes]
+      properties:
+        eventAt:
+          type: string
+          format: date-time
+        eventType:
+          type: string
+        templateId:
+          type: string
+        credentialId:
+          type: string
+        previousPolicyVersion:
+          type: integer
+        policyVersion:
+          type: integer
+        changedAreas:
+          type: array
+          items:
+            type: string
+        rollback:
+          type: boolean
+        rollbackSourcePolicyVersion:
+          type: integer
+        actorSummary:
+          type: string
+        credentialFingerprint:
+          type: string
+        statusSummary:
+          type: string
+        warningCodes:
+          type: array
+          items:
+            type: string
+    LifecycleAuditResponse:
+      type: object
+      additionalProperties: false
+      required: [events]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/LifecycleAuditEvent'
+    LifecycleAuditEvent:
+      type: object
+      additionalProperties: false
+      required: [eventAt, eventType, warningCodes]
+      properties:
+        eventAt:
+          type: string
+          format: date-time
+        eventType:
+          type: string
+        templateId:
+          type: string
+        operation:
+          type: string
+        fromState:
+          type: string
+        toState:
+          type: string
+        actorId:
+          type: string
+        summary:
+          type: string
+        warningCodes:
+          type: array
+          items:
+            type: string
+    ManagementAuditExportResponse:
+      type: object
+      additionalProperties: false
+      required: [format, events]
+      properties:
+        format:
+          type: string
+          const: management-audit-export-v1-json
+          description: Deterministic export format identifier for management audit export responses.
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagementAuditExportEvent'
+          description: Exported audit events with masked actor and credential fingerprint summaries.
+    ManagementAuditExportEvent:
+      type: object
+      additionalProperties: false
+      required: [eventAt, eventType, changedAreas, rollback, warningCodes]
+      properties:
+        eventAt:
+          type: string
+          format: date-time
+        eventType:
+          type: string
+        templateId:
+          type: string
+        credentialId:
+          type: string
+        previousPolicyVersion:
+          type: integer
+        policyVersion:
+          type: integer
+        changedAreas:
+          type: array
+          items:
+            type: string
+        rollback:
+          type: boolean
+        rollbackSourcePolicyVersion:
+          type: integer
+        actorSummaryMasked:
+          type: string
+        credentialFingerprintMasked:
+          type: string
+        statusSummary:
+          type: string
+        warningCodes:
+          type: array
+          items:
+            type: string
+    MasterCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [masterName, groupId, sourceFileName, sourceChecksum, uploadReference, actorRole, actorId]
+      properties:
+        masterName:
+          type: string
+          minLength: 1
+        groupId:
+          type: string
+          minLength: 1
+        sourceFileName:
+          type: string
+          minLength: 1
+        sourceChecksum:
+          type: string
+          minLength: 1
+        uploadReference:
+          type: string
+          minLength: 1
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        actorId:
+          type: string
+          minLength: 1
+        changeDescription:
+          type: string
+    MasterSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        [masterId, masterName, groupId, sourceFileName, sourceChecksum, uploadReference, createdAt, actorRole, createdBy]
+      properties:
+        masterId:
+          type: string
+        masterName:
+          type: string
+        groupId:
+          type: string
+        sourceFileName:
+          type: string
+        sourceChecksum:
+          type: string
+        uploadReference:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        createdBy:
+          type: string
+        changeDescription:
+          type: string
+    MasterCreateResult:
+      type: object
+      additionalProperties: false
+      required: [created]
+      properties:
+        created:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - MASTER_CREATE_REQUEST_REQUIRED
+            - MASTER_CREATE_REQUEST_INVALID
+            - MASTER_CREATE_ROLE_DENIED
+            - ACTOR_ID_REQUIRED
+        errorMessage:
+          type: string
+        snapshot:
+          $ref: '#/components/schemas/MasterSnapshot'
+    ReviewTargetType:
+      type: string
+      enum: [TEMPLATE, MASTER]
+    ReviewOperation:
+      type: string
+      enum: [SUBMIT_FOR_REVIEW, APPROVE_REVIEW, REJECT_REVIEW]
+    MasterReviewState:
+      type: string
+      enum: [DRAFT, SUBMITTED, APPROVED]
+    ReviewState:
+      type: string
+      enum: [DRAFT, SUBMITTED, APPROVED, REJECTED]
+    MasterReviewTransitionRequest:
+      type: object
+      additionalProperties: false
+      required: [operation, actorRole, actorId, anchorValidationPassed]
+      properties:
+        operation:
+          $ref: '#/components/schemas/ReviewOperation'
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        actorId:
+          type: string
+          minLength: 1
+        changeDescription:
+          description: Required when operation is SUBMIT_FOR_REVIEW.
+          type: string
+        anchorValidationPassed:
+          description: Must be true when operation is SUBMIT_FOR_REVIEW.
+          type: boolean
+        rejectionReason:
+          description: Required when operation is REJECT_REVIEW.
+          type: string
+    MasterReviewSnapshot:
+      type: object
+      additionalProperties: false
+      required: [targetId, targetType, state, updatedAt, updatedBy]
+      properties:
+        targetId:
+          type: string
+        targetType:
+          type: string
+          enum: [MASTER]
+        state:
+          $ref: '#/components/schemas/MasterReviewState'
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        rejectionReason:
+          type: string
+    MasterReviewTransitionResult:
+      type: object
+      additionalProperties: false
+      required: [applied]
+      properties:
+        applied:
+          type: boolean
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        snapshot:
+          $ref: '#/components/schemas/MasterReviewSnapshot'
+    MasterAnchorContentType:
+      type: string
+      enum: [TEXT, RICH_TEXT, TABLE, IMAGE, CLAUSE, STAMP, BARCODE, ATTACHMENT_LIST, UNSPECIFIED]
+    MasterSourceAnchorDescriptor:
+      type: object
+      additionalProperties: false
+      required: [sourceAnchorKey, declaredContentType, expectedContentType, anchorPresentInMaster]
+      properties:
+        sourceAnchorKey:
+          type: string
+        declaredContentType:
+          $ref: '#/components/schemas/MasterAnchorContentType'
+        expectedContentType:
+          $ref: '#/components/schemas/MasterAnchorContentType'
+        anchorPresentInMaster:
+          type: boolean
+    MasterAnchorValidationCode:
+      type: string
+      enum: [DUPLICATE_ANCHOR_ID, MISSING_ANCHOR, INCOMPATIBLE_CONTENT_TYPE]
+    MasterAnchorCatalogValidationIssue:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          $ref: '#/components/schemas/MasterAnchorValidationCode'
+        anchorId:
+          type: string
+        sourceAnchorKey:
+          type: string
+        message:
+          type: string
+    MasterAnchorCatalogValidationSummary:
+      type: object
+      additionalProperties: false
+      required: [blocking, totalAnchors, blockingIssueCount, issues]
+      properties:
+        blocking:
+          type: boolean
+        totalAnchors:
+          type: integer
+          minimum: 0
+        blockingIssueCount:
+          type: integer
+          minimum: 0
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/MasterAnchorCatalogValidationIssue'
+    MasterAnchorCatalogEntry:
+      type: object
+      additionalProperties: false
+      required:
+        [anchorId, sourceAnchorKey, declaredContentType, expectedContentType, anchorPresentInMaster, missingAnchor, incompatibleContentType]
+      properties:
+        anchorId:
+          type: string
+        sourceAnchorKey:
+          type: string
+        declaredContentType:
+          $ref: '#/components/schemas/MasterAnchorContentType'
+        expectedContentType:
+          $ref: '#/components/schemas/MasterAnchorContentType'
+        anchorPresentInMaster:
+          type: boolean
+        missingAnchor:
+          type: boolean
+        incompatibleContentType:
+          type: boolean
+    MasterAnchorCatalogSnapshot:
+      type: object
+      additionalProperties: false
+      required: [masterId, catalogVersion, createdAt, anchors, validationSummary]
+      properties:
+        masterId:
+          type: string
+        catalogVersion:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        anchors:
+          type: array
+          items:
+            $ref: '#/components/schemas/MasterAnchorCatalogEntry'
+        validationSummary:
+          $ref: '#/components/schemas/MasterAnchorCatalogValidationSummary'
+    MasterAnchorCatalogCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [masterSnapshot, reviewSnapshot, sourceAnchors, catalogVersion, actorRole]
+      properties:
+        masterSnapshot:
+          $ref: '#/components/schemas/MasterSnapshot'
+        reviewSnapshot:
+          $ref: '#/components/schemas/ReviewSnapshot'
+        sourceAnchors:
+          type: array
+          items:
+            $ref: '#/components/schemas/MasterSourceAnchorDescriptor'
+        catalogVersion:
+          type: string
+          minLength: 1
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+      examples:
+        - masterSnapshot:
+            masterId: MST-LOAN-BASE
+            masterName: Loan Offer Base
+            groupId: GROUP-RETAIL-CN
+            sourceFileName: loan-offer-v1.docx
+            sourceChecksum: sha256:abc123
+            uploadReference: upload-ref-001
+            createdAt: '2026-06-12T07:00:00Z'
+            actorRole: MASTER_DESIGNER
+            createdBy: designer-a
+            changeDescription: baseline upload
+          reviewSnapshot:
+            targetId: MST-LOAN-BASE
+            targetType: MASTER
+            state: APPROVED
+            updatedAt: '2026-06-12T08:00:00Z'
+            updatedBy: group-admin-a
+          sourceAnchors:
+            - sourceAnchorKey: body
+              declaredContentType: RICH_TEXT
+              expectedContentType: RICH_TEXT
+              anchorPresentInMaster: true
+          catalogVersion: v1
+          actorRole: GROUP_ADMIN
+    MasterAnchorCatalogCreateResponse:
+      type: object
+      additionalProperties: false
+      required: [created]
+      properties:
+        created:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - ANCHOR_CATALOG_ROLE_DENIED
+            - MASTER_ID_PATH_MISMATCH
+            - MASTER_REVIEW_NOT_APPROVED
+            - MASTER_REVIEW_TARGET_MISMATCH
+            - MASTER_REVIEW_TARGET_INVALID
+            - ANCHOR_CATALOG_REQUEST_REQUIRED
+            - ANCHOR_CATALOG_REQUEST_INVALID
+        errorMessage:
+          type: string
+        snapshot:
+          $ref: '#/components/schemas/MasterAnchorCatalogSnapshot'
+    MasterAnchorCatalogLookupResponse:
+      type: object
+      additionalProperties: false
+      required: [found]
+      properties:
+        found:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - ANCHOR_CATALOG_NOT_FOUND
+        errorMessage:
+          type: string
+        snapshot:
+          $ref: '#/components/schemas/MasterAnchorCatalogSnapshot'
+    MasterTemplateCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [templateName, sourceAnchorCatalogVersion, actorRole, actorId]
+      properties:
+        templateName:
+          type: string
+          minLength: 1
+        sourceAnchorCatalogVersion:
+          type: string
+          minLength: 1
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        actorId:
+          type: string
+          minLength: 1
+        changeDescription:
+          type: string
+    TemplateSourceLockSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        [sourceMasterId, sourceAnchorCatalogVersion, lockCreatedAt, lockCreatedBy]
+      properties:
+        sourceMasterId:
+          type: string
+        sourceAnchorCatalogVersion:
+          type: string
+        lockCreatedAt:
+          type: string
+          format: date-time
+        lockCreatedBy:
+          type: string
+    TemplateFromMasterSnapshot:
+      type: object
+      additionalProperties: false
+      required: [templateId, templateName, groupId, sourceLock, createdAt, createdBy]
+      properties:
+        templateId:
+          type: string
+        templateName:
+          type: string
+        groupId:
+          type: string
+        sourceLock:
+          $ref: '#/components/schemas/TemplateSourceLockSnapshot'
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        changeDescription:
+          type: string
+    MasterTemplateCreateResponse:
+      type: object
+      additionalProperties: false
+      required: [created]
+      properties:
+        created:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - TEMPLATE_CREATE_REQUEST_REQUIRED
+            - TEMPLATE_CREATE_REQUEST_INVALID
+            - TEMPLATE_CREATE_ROLE_DENIED
+            - ACTOR_ID_REQUIRED
+            - MASTER_NOT_FOUND
+            - MASTER_REVIEW_NOT_APPROVED
+            - MASTER_REVIEW_TARGET_INVALID
+            - MASTER_REVIEW_TARGET_MISMATCH
+            - ANCHOR_CATALOG_NOT_FOUND
+            - ANCHOR_CATALOG_MASTER_MISMATCH
+        errorMessage:
+          type: string
+        snapshot:
+          $ref: '#/components/schemas/TemplateFromMasterSnapshot'
+    TemplateBindingValidationRequest:
+      type: object
+      additionalProperties: false
+      required: [actorRole, sourceAnchorCatalogVersion, bindings]
+      properties:
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        sourceAnchorCatalogVersion:
+          type: string
+          minLength: 1
+        bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateBindingValidationItemRequest'
+      examples:
+        - actorRole: TEMPLATE_AUTHOR
+          sourceAnchorCatalogVersion: v1
+          bindings:
+            - anchorId: ANC-BODY
+              declaredContentType: RICH_TEXT
+              structuredContentTree:
+                nodes:
+                  - type: paragraph
+                    children:
+                      - type: text
+                        value: Loan details
+            - anchorId: ANC-BODY
+              declaredContentType: RICH_TEXT
+              structuredContentTree:
+                nodes:
+                  - type: paragraph
+                    children:
+                      - type: text
+                        value: Duplicate entry for validation demo
+    TemplateBindingValidationItemRequest:
+      type: object
+      additionalProperties: false
+      required: [anchorId, declaredContentType, structuredContentTree]
+      properties:
+        anchorId:
+          type: string
+          minLength: 1
+        declaredContentType:
+          $ref: '#/components/schemas/MasterAnchorContentType'
+        expectedContentType:
+          $ref: '#/components/schemas/MasterAnchorContentType'
+        structuredContentTree:
+          type: object
+          additionalProperties: true
+    BindingValidationStatus:
+      type: string
+      enum: [VALID, MISSING_ANCHOR, DUPLICATE_BINDING, INCOMPATIBLE_CONTENT_TYPE]
+    TemplateBindingValidationItemResponse:
+      type: object
+      additionalProperties: false
+      required:
+        [anchorId, declaredContentType, expectedContentType, status, structuredContentTree]
+      properties:
+        anchorId:
+          type: string
+        declaredContentType:
+          $ref: '#/components/schemas/MasterAnchorContentType'
+        expectedContentType:
+          $ref: '#/components/schemas/MasterAnchorContentType'
+        status:
+          $ref: '#/components/schemas/BindingValidationStatus'
+        structuredContentTree:
+          type: object
+          additionalProperties: true
+    TemplateBindingValidationSummary:
+      type: object
+      additionalProperties: false
+      required:
+        [blocking, totalBindings, validCount, missingAnchorCount, duplicateBindingCount, incompatibleContentTypeCount]
+      properties:
+        blocking:
+          type: boolean
+        totalBindings:
+          type: integer
+          minimum: 0
+        validCount:
+          type: integer
+          minimum: 0
+        missingAnchorCount:
+          type: integer
+          minimum: 0
+        duplicateBindingCount:
+          type: integer
+          minimum: 0
+        incompatibleContentTypeCount:
+          type: integer
+          minimum: 0
+    TemplateBindingValidationResponse:
+      type: object
+      additionalProperties: false
+      required: [validated, bindings]
+      properties:
+        validated:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - BINDING_VALIDATION_ROLE_DENIED
+            - BINDING_VALIDATION_REQUEST_INVALID
+            - SOURCE_ANCHOR_CATALOG_VERSION_MISMATCH
+            - ANCHOR_CATALOG_NOT_FOUND
+            - TEMPLATE_NOT_FOUND
+        errorMessage:
+          type: string
+        bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateBindingValidationItemResponse'
+        summary:
+          $ref: '#/components/schemas/TemplateBindingValidationSummary'
+    VariableValidationStatus:
+      type: string
+      enum:
+        - VALID
+        - KEY_MISSING
+        - DUPLICATE_KEY
+        - TYPE_UNSUPPORTED
+        - REQUIRED_DEFAULT_MISSING
+        - DEFAULT_TYPE_MISMATCH
+        - FORMAT_INVALID
+        - RULE_INVALID
+    VariableValidationType:
+      type: string
+      enum: [TEXT, NUMBER, AMOUNT, DATE, ENUM, BOOLEAN, ARRAY, OBJECT]
+    TemplateVariableRuleRequest:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          minLength: 1
+        operand:
+          type: string
+    TemplateVariableDefinitionRequest:
+      type: object
+      additionalProperties: false
+      required: [variableKey, type, required]
+      properties:
+        variableKey:
+          type: string
+          minLength: 1
+        type:
+          $ref: '#/components/schemas/VariableValidationType'
+        required:
+          type: boolean
+        format:
+          type: string
+        defaultValue:
+          description: Variable default value input. Raw values are never echoed back in response.
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateVariableRuleRequest'
+    TemplateVariableValidationRequest:
+      type: object
+      additionalProperties: false
+      required: [actorRole, actorId, definitions]
+      properties:
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        actorId:
+          type: string
+          minLength: 1
+        definitions:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/TemplateVariableDefinitionRequest'
+      examples:
+        - actorRole: TEMPLATE_AUTHOR
+          actorId: template-author-a
+          definitions:
+            - variableKey: customerName
+              type: TEXT
+              required: true
+              defaultValue: customer-name-redacted
+              rules:
+                - code: REGEX
+                  operand: ^[A-Za-z0-9-]{1,64}$
+            - variableKey: riskTier
+              type: ENUM
+              required: false
+              defaultValue: A
+              rules:
+                - code: ALLOWED_VALUES
+                  operand: A,B,C
+    TemplateVariableValidationDefinitionResponse:
+      type: object
+      additionalProperties: false
+      required:
+        [variableKey, type, status, required, hasDefaultValue, ruleCodes]
+      properties:
+        variableKey:
+          type: string
+        type:
+          $ref: '#/components/schemas/VariableValidationType'
+        status:
+          $ref: '#/components/schemas/VariableValidationStatus'
+        required:
+          type: boolean
+        format:
+          type: string
+        hasDefaultValue:
+          type: boolean
+        defaultValueHash:
+          type: string
+        ruleCodes:
+          type: array
+          items:
+            type: string
+    TemplateVariableValidationSummary:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          blocking,
+          totalDefinitions,
+          validCount,
+          keyMissingCount,
+          duplicateKeyCount,
+          typeUnsupportedCount,
+          requiredDefaultMissingCount,
+          defaultTypeMismatchCount,
+          formatInvalidCount,
+          ruleInvalidCount
+        ]
+      properties:
+        blocking:
+          type: boolean
+        totalDefinitions:
+          type: integer
+          minimum: 0
+        validCount:
+          type: integer
+          minimum: 0
+        keyMissingCount:
+          type: integer
+          minimum: 0
+        duplicateKeyCount:
+          type: integer
+          minimum: 0
+        typeUnsupportedCount:
+          type: integer
+          minimum: 0
+        requiredDefaultMissingCount:
+          type: integer
+          minimum: 0
+        defaultTypeMismatchCount:
+          type: integer
+          minimum: 0
+        formatInvalidCount:
+          type: integer
+          minimum: 0
+        ruleInvalidCount:
+          type: integer
+          minimum: 0
+    TemplateVariableValidationAuditSummary:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          eventType,
+          templateId,
+          actorId,
+          actorRole,
+          variableCount,
+          blocking,
+          variablesHash,
+          rulesHash,
+          defaultValueHash
+        ]
+      properties:
+        eventType:
+          type: string
+        templateId:
+          type: string
+        actorId:
+          type: string
+        actorRole:
+          type: string
+        variableCount:
+          type: integer
+          minimum: 0
+        blocking:
+          type: boolean
+        variablesHash:
+          type: string
+        rulesHash:
+          type: string
+        defaultValueHash:
+          type: string
+    TemplateVariableValidationResponse:
+      type: object
+      additionalProperties: false
+      required: [validated, definitions]
+      properties:
+        validated:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - VARIABLE_VALIDATION_ROLE_DENIED
+            - VARIABLE_VALIDATION_REQUEST_INVALID
+            - TEMPLATE_NOT_FOUND
+        errorMessage:
+          type: string
+        definitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateVariableValidationDefinitionResponse'
+        summary:
+          $ref: '#/components/schemas/TemplateVariableValidationSummary'
+        auditSummary:
+          $ref: '#/components/schemas/TemplateVariableValidationAuditSummary'
+    TemplateRuleValidationItemRequest:
+      type: object
+      additionalProperties: false
+      required: [ruleId, conditionExpression, targetAnchorId]
+      properties:
+        ruleId:
+          type: string
+          minLength: 1
+        conditionExpression:
+          type: string
+          minLength: 1
+        targetAnchorId:
+          type: string
+          minLength: 1
+        trueBranchRuleId:
+          type: string
+        falseBranchRuleId:
+          type: string
+    TemplateRuleValidationRequest:
+      type: object
+      additionalProperties: false
+      required: [actorRole, sourceAnchorCatalogVersion, rules]
+      properties:
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        sourceAnchorCatalogVersion:
+          type: string
+          minLength: 1
+        rules:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/TemplateRuleValidationItemRequest'
+    RuleValidationStatus:
+      type: string
+      enum: [VALID, MISSING_VARIABLE, MISSING_ANCHOR, INVALID_BRANCH_REFERENCE, MALFORMED_RULE]
+    TemplateRuleValidationItemResponse:
+      type: object
+      additionalProperties: false
+      required:
+        [ruleId, conditionExpression, targetAnchorId, status]
+      properties:
+        ruleId:
+          type: string
+        conditionExpression:
+          type: string
+        targetAnchorId:
+          type: string
+        trueBranchRuleId:
+          type: string
+        falseBranchRuleId:
+          type: string
+        status:
+          $ref: '#/components/schemas/RuleValidationStatus'
+    TemplateRuleValidationSummary:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          blocking,
+          totalRules,
+          validCount,
+          missingVariableCount,
+          missingAnchorCount,
+          invalidBranchReferenceCount,
+          malformedRuleCount
+        ]
+      properties:
+        blocking:
+          type: boolean
+        totalRules:
+          type: integer
+          minimum: 0
+        validCount:
+          type: integer
+          minimum: 0
+        missingVariableCount:
+          type: integer
+          minimum: 0
+        missingAnchorCount:
+          type: integer
+          minimum: 0
+        invalidBranchReferenceCount:
+          type: integer
+          minimum: 0
+        malformedRuleCount:
+          type: integer
+          minimum: 0
+    TemplateRuleValidationResponse:
+      type: object
+      additionalProperties: false
+      required: [validated, rules]
+      properties:
+        validated:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - RULE_VALIDATION_ROLE_DENIED
+            - RULE_VALIDATION_REQUEST_INVALID
+            - SOURCE_ANCHOR_CATALOG_VERSION_MISMATCH
+            - TEMPLATE_NOT_FOUND
+        errorMessage:
+          type: string
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateRuleValidationItemResponse'
+        summary:
+          $ref: '#/components/schemas/TemplateRuleValidationSummary'
+    PreviewStatus:
+      type: string
+      enum: [ACCEPTED, PROCESSING, SUCCEEDED, FAILED, EXPIRED]
+    TemplatePreviewEntryRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [actorRole, actorId, testDataSetId, variablesHash, outputFormat, renderProfileVersion]
+      properties:
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        actorId:
+          type: string
+          minLength: 1
+        testDataSetId:
+          type: string
+          minLength: 1
+        variablesHash:
+          type: string
+          minLength: 1
+        outputFormat:
+          type: string
+          minLength: 1
+        renderProfileVersion:
+          type: string
+          minLength: 1
+    TemplatePreviewRecord:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          previewId,
+          testDataSetId,
+          variablesHash,
+          outputFormat,
+          renderProfileVersion,
+          status,
+          previewReference,
+          warningSummary,
+          blockingSummary,
+          comparisonSummary,
+          nonSensitiveSummary,
+          createdAt,
+          updatedAt
+        ]
+      properties:
+        previewId:
+          type: string
+        testDataSetId:
+          type: string
+        variablesHash:
+          type: string
+        outputFormat:
+          type: string
+        renderProfileVersion:
+          type: string
+        status:
+          $ref: '#/components/schemas/PreviewStatus'
+        documentId:
+          type: string
+        previewReference:
+          type: string
+        finalArtifactReference:
+          type: string
+        warningSummary:
+          type: string
+        blockingSummary:
+          type: string
+        comparisonSummary:
+          type: string
+        nonSensitiveSummary:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TemplatePreviewEntryResponse:
+      type: object
+      additionalProperties: false
+      required: [accepted]
+      properties:
+        accepted:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - PREVIEW_ENTRY_ROLE_DENIED
+            - PREVIEW_ENTRY_REQUEST_INVALID
+            - TEMPLATE_NOT_FOUND
+        errorMessage:
+          type: string
+        previewRecord:
+          $ref: '#/components/schemas/TemplatePreviewRecord'
+    TestEntryEvidencePointer:
+      type: object
+      additionalProperties: false
+      required: [pointerType, pointerRef]
+      properties:
+        pointerType:
+          type: string
+          minLength: 1
+        pointerRef:
+          type: string
+          minLength: 1
+    TemplateTestEntryRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          actorRole,
+          actorId,
+          previewId,
+          testDataSetId,
+          variablesHash,
+          renderProfileVersion,
+          evidencePointers
+        ]
+      properties:
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        actorId:
+          type: string
+          minLength: 1
+        previewId:
+          type: string
+          minLength: 1
+        testDataSetId:
+          type: string
+          minLength: 1
+        variablesHash:
+          type: string
+          minLength: 1
+        renderProfileVersion:
+          type: string
+        evidencePointers:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/TestEntryEvidencePointer'
+    TemplateTestEntryRecord:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          testEntryId,
+          previewId,
+          testDataSetId,
+          variablesHash,
+          handoffStatus,
+          evidencePointers,
+          triggeredAt
+        ]
+      properties:
+        testEntryId:
+          type: string
+        previewId:
+          type: string
+        testDataSetId:
+          type: string
+        variablesHash:
+          type: string
+        renderProfileVersion:
+          type: string
+        handoffStatus:
+          type: string
+        evidencePointers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestEntryEvidencePointer'
+        triggeredAt:
+          type: string
+          format: date-time
+    TemplateTestEntryResponse:
+      type: object
+      additionalProperties: false
+      required: [triggered]
+      properties:
+        triggered:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - TEST_ENTRY_ROLE_DENIED
+            - TEST_ENTRY_REQUEST_INVALID
+            - PREVIEW_RECORD_NOT_FOUND
+            - TEMPLATE_NOT_FOUND
+        errorMessage:
+          type: string
+        testEntryRecord:
+          $ref: '#/components/schemas/TemplateTestEntryRecord'
+    ReviewTransitionRequest:
+      type: object
+      additionalProperties: false
+      required: [operation, actorRole, actorId, anchorValidationPassed]
+      properties:
+        operation:
+          $ref: '#/components/schemas/ReviewOperation'
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        actorId:
+          type: string
+          minLength: 1
+        changeDescription:
+          type: string
+        anchorValidationPassed:
+          type: boolean
+        rejectionReason:
+          type: string
+    ReviewSnapshot:
+      type: object
+      additionalProperties: false
+      required: [targetId, targetType, state, updatedAt, updatedBy]
+      properties:
+        targetId:
+          type: string
+        targetType:
+          $ref: '#/components/schemas/ReviewTargetType'
+        state:
+          $ref: '#/components/schemas/ReviewState'
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        rejectionReason:
+          type: string
+    ReviewTransitionResult:
+      type: object
+      additionalProperties: false
+      required: [applied]
+      properties:
+        applied:
+          type: boolean
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        snapshot:
+          $ref: '#/components/schemas/ReviewSnapshot'
+    ContentModuleReviewTransitionRequest:
+      type: object
+      additionalProperties: false
+      required: [operation, actorRole, actorId]
+      properties:
+        operation:
+          $ref: '#/components/schemas/ReviewOperation'
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        actorId:
+          type: string
+          minLength: 1
+        changeDescription:
+          description: Required when operation is SUBMIT_FOR_REVIEW.
+          type: string
+        rejectionReason:
+          description: Required when operation is REJECT_REVIEW.
+          type: string
+    ContentModuleReviewSnapshot:
+      type: object
+      additionalProperties: false
+      required: [moduleId, state, updatedAt, updatedBy]
+      properties:
+        moduleId:
+          type: string
+        state:
+          $ref: '#/components/schemas/ReviewState'
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        rejectionReason:
+          type: string
+    ContentModuleReviewTransitionResult:
+      type: object
+      additionalProperties: false
+      required: [applied]
+      properties:
+        applied:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - MODULE_REVIEW_REQUEST_INVALID
+            - MODULE_REVIEW_REQUEST_REQUIRED
+            - MODULE_ID_REQUIRED
+            - ACTOR_ID_REQUIRED
+            - MODULE_CHANGE_DESCRIPTION_REQUIRED
+            - MODULE_REJECTION_REASON_REQUIRED
+            - MODULE_REVIEW_ROLE_DENIED
+            - MODULE_REVIEW_STATE_TRANSITION_DENIED
+        errorMessage:
+          type: string
+        snapshot:
+          $ref: '#/components/schemas/ContentModuleReviewSnapshot'
+    ReleaseRiskSeverity:
+      type: string
+      enum: [BLOCKER, WARNING]
+    ReleaseGateEvaluateRequest:
+      type: object
+      additionalProperties: false
+      required: [warningSummaryViewed, warningAcknowledged, confirmedBy]
+      properties:
+        riskCodes:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        warningSummaryViewed:
+          type: boolean
+        warningAcknowledged:
+          type: boolean
+        confirmedBy:
+          type: string
+          minLength: 1
+    ReleaseRiskFinding:
+      type: object
+      additionalProperties: false
+      required: [riskCode, severity, summary]
+      properties:
+        riskCode:
+          type: string
+        severity:
+          $ref: '#/components/schemas/ReleaseRiskSeverity'
+        summary:
+          type: string
+    ReleaseSummary:
+      type: object
+      additionalProperties: false
+      required: [templateId, confirmedAt, confirmedBy, warningCount]
+      properties:
+        templateId:
+          type: string
+        confirmedAt:
+          type: string
+          format: date-time
+        confirmedBy:
+          type: string
+        warningCount:
+          type: integer
+          minimum: 0
+    ReleaseGateResult:
+      type: object
+      additionalProperties: false
+      required: [allowed, blockers, warnings]
+      properties:
+        allowed:
+          type: boolean
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        blockers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReleaseRiskFinding'
+        warnings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReleaseRiskFinding'
+        summary:
+          $ref: '#/components/schemas/ReleaseSummary'
+    LifecycleResourceScope:
+      type: string
+      enum: [TEMPLATE, RELEASE_VERSION]
+    LifecycleOperationType:
+      type: string
+      enum: [STOP_USE, RECOVER, DEPRECATE, IMPORT_WITH_CONFLICT]
+    LifecycleState:
+      type: string
+      enum: [ACTIVE, STOPPED, DEPRECATED]
+    ImportConflictPolicy:
+      type: string
+      enum: [KEEP_TEMPLATE_ID, REJECT_IMPORT]
+    LifecycleOperationApplyRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [scope, operationType, actorRole, actorId, impactSummaryViewed, secondConfirmation, hasCallableVersions]
+      properties:
+        scope:
+          $ref: '#/components/schemas/LifecycleResourceScope'
+        operationType:
+          $ref: '#/components/schemas/LifecycleOperationType'
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        actorId:
+          type: string
+          minLength: 1
+        impactSummaryViewed:
+          type: boolean
+        secondConfirmation:
+          type: boolean
+        hasCallableVersions:
+          type: boolean
+        importConflictPolicy:
+          $ref: '#/components/schemas/ImportConflictPolicy'
+        importBatchId:
+          type: string
+    LifecycleSnapshot:
+      type: object
+      additionalProperties: false
+      required: [targetId, scope, state, updatedAt, updatedBy]
+      properties:
+        targetId:
+          type: string
+        scope:
+          $ref: '#/components/schemas/LifecycleResourceScope'
+        state:
+          $ref: '#/components/schemas/LifecycleState'
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+    ImportSummary:
+      type: object
+      additionalProperties: false
+      required: [resolvedTemplateId, newDevelopmentVersion, importBatchId]
+      properties:
+        resolvedTemplateId:
+          type: string
+        newDevelopmentVersion:
+          type: string
+        importBatchId:
+          type: string
+    LifecycleOperationResult:
+      type: object
+      additionalProperties: false
+      required: [applied]
+      properties:
+        applied:
+          type: boolean
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        snapshot:
+          $ref: '#/components/schemas/LifecycleSnapshot'
+        importSummary:
+          $ref: '#/components/schemas/ImportSummary'
+    LifecycleJourneyTransitionRequest:
+      type: object
+      additionalProperties: false
+      required: [action, actorRole, actorId]
+      properties:
+        action:
+          type: string
+          enum:
+            [SUBMIT_FOR_TEST, RECORD_TEST_DECISION, SUBMIT_FOR_APPROVAL, RECORD_APPROVAL_DECISION, MARK_PENDING_RELEASE, PUBLISH, STOP_USE, RESTORE, DEPRECATE, RECORD_EXPORT_GOVERNANCE_DECISION, EVALUATE_TIMEOUT_ESCALATION]
+        actorRole:
+          type: string
+          enum: [GLOBAL_ADMIN, GROUP_ADMIN, TEMPLATE_AUTHOR, TESTER, APPROVER]
+        actorId:
+          type: string
+          minLength: 1
+        decisionOutcome:
+          type: string
+          enum: [PASS, FAIL, APPROVE, REJECT]
+        comment:
+          type: string
+        secondConfirmation:
+          type: boolean
+        reasonCode:
+          type: string
+        exportFallbackDecisionRecorded:
+          type: boolean
+        timeoutStage:
+          type: string
+          enum: [TEST, APPROVAL, PENDING_RELEASE, REMEDIATION]
+        timeoutThresholdHours:
+          type: integer
+          minimum: 0
+        elapsedHours:
+          type: integer
+          minimum: 0
+    LifecycleJourneyTransitionResult:
+      type: object
+      additionalProperties: false
+      properties:
+        applied:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            [JOURNEY_REQUEST_REQUIRED, TEMPLATE_ID_REQUIRED, JOURNEY_REQUEST_INVALID, JOURNEY_ROLE_DENIED, JOURNEY_STATE_TRANSITION_DENIED, EXPORT_GOVERNANCE_DECISION_REQUIRED, TIMEOUT_EVALUATION_REQUEST_INVALID]
+        errorMessage:
+          type: string
+        snapshot:
+          type: object
+          additionalProperties: false
+          properties:
+            templateId:
+              type: string
+            state:
+              type: string
+              enum: [DRAFT, TEST_SUBMITTED, TEST_PASSED, APPROVAL_SUBMITTED, APPROVED, PENDING_RELEASE, PUBLISHED, STOPPED, DEPRECATED]
+            updatedAt:
+              type: string
+              format: date-time
+            updatedBy:
+              type: string
+        exportDecision:
+          type: object
+          additionalProperties: false
+          properties:
+            templateId:
+              type: string
+            decidedBy:
+              type: string
+            decidedAt:
+              type: string
+              format: date-time
+            fallbackDecisionRecorded:
+              type: boolean
+            decisionSource:
+              type: string
+        timeoutEvaluation:
+          type: object
+          additionalProperties: false
+          properties:
+            stage:
+              type: string
+              enum: [TEST, APPROVAL, PENDING_RELEASE, REMEDIATION]
+            timeoutThresholdHours:
+              type: integer
+            elapsedHours:
+              type: integer
+            escalated:
+              type: boolean
+            severity:
+              type: string
+              enum: [NONE, WARNING, CRITICAL]
+      required: [applied]
+    ContentModuleLifecycleOperationType:
+      type: string
+      enum: [STOP_USE, RECOVER, DEPRECATE]
+    ContentModuleLifecycleOperationApplyRequest:
+      type: object
+      additionalProperties: false
+      required: [operationType, actorRole, actorId, impactSummaryViewed, secondConfirmation]
+      properties:
+        operationType:
+          $ref: '#/components/schemas/ContentModuleLifecycleOperationType'
+        actorRole:
+          $ref: '#/components/schemas/LifecycleGovernanceActorRole'
+        actorId:
+          type: string
+          minLength: 1
+        impactSummaryViewed:
+          description: Must be true for all lifecycle operations.
+          type: boolean
+        secondConfirmation:
+          description: Must be true for all lifecycle operations.
+          type: boolean
+        impactSummary:
+          description: Required for STOP_USE and DEPRECATE operations.
+          $ref: '#/components/schemas/ContentModuleLifecycleImpactSummary'
+    ContentModuleLifecycleImpactSummary:
+      type: object
+      additionalProperties: false
+      required:
+        [referenceTemplateCount, referenceTemplateListHint, impactedReleaseVersionsHint, defaultRouteAffected, recentCallSummary, remediationHint]
+      properties:
+        referenceTemplateCount:
+          type: integer
+          minimum: 0
+        referenceTemplateListHint:
+          type: string
+          minLength: 1
+        impactedReleaseVersionsHint:
+          type: string
+          minLength: 1
+        defaultRouteAffected:
+          type: boolean
+        recentCallSummary:
+          type: string
+          minLength: 1
+        remediationHint:
+          type: string
+          minLength: 1
+    ContentModuleLifecycleSnapshot:
+      type: object
+      additionalProperties: false
+      required: [moduleId, state, updatedAt, updatedBy]
+      properties:
+        moduleId:
+          type: string
+        state:
+          $ref: '#/components/schemas/LifecycleState'
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+    ContentModuleLifecycleOperationResult:
+      type: object
+      additionalProperties: false
+      required: [applied]
+      properties:
+        applied:
+          type: boolean
+        errorCode:
+          type: string
+          enum:
+            - CONTENT_MODULE_REQUEST_INVALID
+            - CONTENT_MODULE_REQUEST_REQUIRED
+            - MODULE_ID_REQUIRED
+            - ACTOR_ID_REQUIRED
+            - CONTENT_MODULE_IMPACT_CONFIRMATION_REQUIRED
+            - CONTENT_MODULE_ROLE_DENIED
+            - CONTENT_MODULE_STATE_TRANSITION_DENIED
+            - CONTENT_MODULE_OPERATION_UNSUPPORTED
+        errorMessage:
+          type: string
+        snapshot:
+          $ref: '#/components/schemas/ContentModuleLifecycleSnapshot'
+        impactSummary:
+          $ref: '#/components/schemas/ContentModuleLifecycleImpactSummary'
+    ErrorCodeSummary:
+      type: object
+      additionalProperties: false
+      required: [category, code, messageKey, retryable, message]
+      properties:
+        category:
+          $ref: '#/components/schemas/ErrorCategory'
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        messageKey:
+          type: string
+        retryable:
+          type: boolean
+        message:
+          type: string
+    ErrorEnvelope:
+      type: object
+      additionalProperties: false
+      required: [metadata, error]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+    ErrorDetail:
+      type: object
+      additionalProperties: false
+      required: [code, category, message, messageKey, retryable]
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        category:
+          $ref: '#/components/schemas/ErrorCategory'
+        message:
+          type: string
+        messageKey:
+          type: string
+        retryable:
+          type: boolean
+        fieldErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+        idempotencyConflict:
+          type: object
+          additionalProperties: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchResultItem'
+    FieldError:
+      type: object
+      additionalProperties: false
+      required: [field, reason, message]
+      properties:
+        field:
+          type: string
+        reason:
+          type: string
+          enum: [REQUIRED, INVALID_TYPE, INVALID_FORMAT, OUT_OF_RANGE, TOO_LONG, TOO_SHORT, ENUM_NOT_ALLOWED, PATTERN_MISMATCH, RULE_FAILED, DUPLICATED, UNKNOWN_FIELD]
+        message:
+          type: string
+    ErrorCategory:
+      type: string
+      enum: [AUTHENTICATION, AUTHORIZATION, VERSION_ROUTING, API_POLICY, IDEMPOTENCY, VALIDATION, TEMPLATE_CONTRACT, GENERATION, ENCRYPTION, BATCH]
+    ErrorCode:
+      type: string
+      enum:
+        - API_CREDENTIAL_REQUIRED
+        - API_CREDENTIAL_INVALID
+        - API_CREDENTIAL_EXPIRED
+        - API_CREDENTIAL_REVOKED
+        - ACCESS_ACCOUNT_REQUIRED
+        - AD_GROUP_RESOLUTION_FAILED
+        - AD_GROUP_NOT_AUTHORIZED
+        - TEMPLATE_ACCESS_DENIED
+        - ENVIRONMENT_MISMATCH
+        - RELEASE_VERSION_REQUIRED
+        - RELEASE_VERSION_FORMAT_INVALID
+        - RELEASE_VERSION_NOT_FOUND
+        - RELEASE_VERSION_DISABLED
+        - DEFAULT_ROUTE_NOT_CONFIGURED
+        - DEFAULT_ROUTE_TARGET_UNAVAILABLE
+        - TEMPLATE_DISABLED
+        - TEMPLATE_DEPRECATED
+        - OUTPUT_FORMAT_NOT_ALLOWED
+        - OUTPUT_MODE_NOT_ALLOWED
+        - BATCH_LIMIT_EXCEEDED
+        - ENCRYPTION_NOT_ALLOWED
+        - DOWNLOAD_URL_EXPIRED
+        - RESULT_RETENTION_EXPIRED
+        - IDEMPOTENCY_KEY_REQUIRED
+        - IDEMPOTENCY_KEY_CONFLICT
+        - IDEMPOTENCY_RETRY_NOT_ALLOWED
+        - IDEMPOTENCY_STORE_UNAVAILABLE
+        - REQUEST_BODY_INVALID
+        - REQUEST_ID_REQUIRED
+        - OUTPUT_FORMAT_REQUIRED
+        - OUTPUT_MODE_REQUIRED
+        - VARIABLES_REQUIRED
+        - VARIABLE_REQUIRED
+        - VARIABLE_TYPE_INVALID
+        - VARIABLE_FORMAT_INVALID
+        - VARIABLE_RULE_FAILED
+        - TEMPLATE_CONTRACT_INVALID
+        - TEMPLATE_ANCHOR_MISSING
+        - DOCX_GENERATION_FAILED
+        - PDF_CONVERSION_FAILED
+        - GENERATION_TIMEOUT
+        - GENERATION_SERVICE_UNAVAILABLE
+        - ASYNC_TASK_NOT_FOUND
+        - ASYNC_TASK_EXPIRED
+        - ASYNC_TASK_CANCELLATION_NOT_ALLOWED
+        - DOCUMENT_NOT_FOUND
+        - ENCRYPTION_PARAMETER_INVALID
+        - ENCRYPTION_FAILED
+        - BATCH_ITEMS_REQUIRED
+        - BATCH_ITEM_COUNT_INVALID
+        - ITEM_ID_REQUIRED
+        - ITEM_ID_DUPLICATED
+        - BATCH_PARTIAL_FAILED
+        - BATCH_PROCESSING_FAILED

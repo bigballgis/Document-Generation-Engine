@@ -1,0 +1,13 @@
+{
+  "action": "SUBMIT_FOR_TEST",
+  "actorRole": "TEMPLATE_AUTHOR",
+  "actorId": "author-1",
+  "decisionOutcome": null,
+  "comment": "submit for testing",
+  "secondConfirmation": false,
+  "reasonCode": null,
+  "exportFallbackDecisionRecorded": false,
+  "timeoutStage": null,
+  "timeoutThresholdHours": null,
+  "elapsedHours": null
+}

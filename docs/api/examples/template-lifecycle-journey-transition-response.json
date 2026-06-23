@@ -1,0 +1,13 @@
+{
+  "applied": true,
+  "errorCode": null,
+  "errorMessage": null,
+  "snapshot": {
+    "templateId": "TPL-LOAN-NOTICE",
+    "state": "TEST_SUBMITTED",
+    "updatedAt": "2026-06-12T09:30:00Z",
+    "updatedBy": "author-1"
+  },
+  "exportDecision": null,
+  "timeoutEvaluation": null
+}

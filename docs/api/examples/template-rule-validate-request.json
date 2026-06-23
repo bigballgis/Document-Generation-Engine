@@ -1,0 +1,20 @@
+{
+  "actorRole": "TEMPLATE_AUTHOR",
+  "sourceAnchorCatalogVersion": "v1",
+  "rules": [
+    {
+      "ruleId": "RULE-001",
+      "conditionExpression": "var.customerName",
+      "targetAnchorId": "ANC-BODY",
+      "trueBranchRuleId": null,
+      "falseBranchRuleId": null
+    },
+    {
+      "ruleId": "RULE-002",
+      "conditionExpression": "var.riskTier",
+      "targetAnchorId": "ANC-BODY",
+      "trueBranchRuleId": "RULE-001",
+      "falseBranchRuleId": null
+    }
+  ]
+}

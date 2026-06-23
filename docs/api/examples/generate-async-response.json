@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "auditId": "AUD-2Q7M9K4N",
+    "traceId": "TRACE-20260604-004",
+    "requestId": "REQ-20260604-0002",
+    "idempotencyKey": "IDEMP-20260604-0002",
+    "idempotencyStatus": "IDEMPOTENCY_REPLAYED",
+    "originalRequestAt": "2026-06-04T10:20:00+08:00",
+    "templateId": "TPL-LOAN-NOTICE",
+    "routeType": "DEFAULT_ROUTE",
+    "resolvedReleaseVersion": "1.0.0",
+    "output": {
+      "format": "PDF",
+      "mode": "ASYNC_TASK"
+    }
+  },
+  "result": {
+    "task": {
+      "taskId": "TASK-7K3M9Q2R",
+      "status": "ACCEPTED",
+      "queryPath": "/api/prod/v1/templates/TPL-LOAN-NOTICE/tasks/TASK-7K3M9Q2R",
+      "acceptedAt": "2026-06-04T10:30:00+08:00",
+      "updatedAt": "2026-06-04T10:30:00+08:00",
+      "expiresAt": "2026-06-11T10:30:00+08:00"
+    }
+  }
+}

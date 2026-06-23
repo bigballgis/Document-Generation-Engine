@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "auditId": "AUD-4K8N2P7Q",
+    "traceId": "TRACE-20260604-001",
+    "templateId": "TPL-LOAN-NOTICE"
+  },
+  "result": {
+    "templateId": "TPL-LOAN-NOTICE",
+    "paths": [
+      "/api/prod/v1/templates/TPL-LOAN-NOTICE/contract",
+      "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions",
+      "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/{releaseVersion}/generate",
+      "/api/prod/v1/templates/TPL-LOAN-NOTICE/default/generate",
+      "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/{releaseVersion}/batch-generate",
+      "/api/prod/v1/templates/TPL-LOAN-NOTICE/default/batch-generate",
+      "/api/prod/v1/templates/TPL-LOAN-NOTICE/tasks/{taskId}",
+      "/api/prod/v1/templates/TPL-LOAN-NOTICE/tasks/{taskId}/cancel",
+      "/api/prod/v1/documents/{documentId}/download"
+    ],
+    "defaultRoute": {
+      "url": "/api/prod/v1/templates/TPL-LOAN-NOTICE/default/generate",
+      "currentTargetReleaseVersion": "1.0.0",
+      "currentTargetStatus": "CALLABLE",
+      "updatedAt": "2026-06-04T10:30:00+08:00",
+      "updatedBy": "admin-summary",
+      "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.0.0/generate"
+    },
+    "apiPolicy": {
+      "policyVersion": 12,
+      "updatedAt": "2026-06-04T10:30:00+08:00",
+      "updatedBy": "admin-summary",
+      "allowedOutputFormats": ["DOCX", "PDF"],
+      "allowedOutputModes": ["SYNC_DOWNLOAD_URL", "ASYNC_TASK"],
+      "batchLimits": {
+        "syncMaxItems": 100,
+        "asyncMaxItems": 10000
+      },
+      "encryptionCapabilities": {
+        "docxEnabled": true,
+        "pdfEnabled": true,
+        "permissions": ["ALLOW_PRINT", "ALLOW_COPY"]
+      },
+      "adGroupAuthorizationSummary": {
+        "authorized": true,
+        "cacheTtlSeconds": 300
+      },
+      "credentialSummary": {
+        "status": "ACTIVE",
+        "expiresAt": "2026-12-01T00:00:00+08:00"
+      }
+    },
+    "callableVersions": [
+      {
+        "releaseVersion": "1.0.0",
+        "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.0.0/generate"
+      },
+      {
+        "releaseVersion": "1.1.0",
+        "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.1.0/generate"
+      }
+    ],
+    "schemas": ["GenerateRequest", "BatchGenerateRequest", "FidelityWarning", "ErrorEnvelope"],
+    "errorCodes": [
+      {
+        "category": "AUTHENTICATION",
+        "code": "API_CREDENTIAL_REQUIRED",
+        "messageKey": "api.error.authentication.apiCredentialRequired",
+        "retryable": false,
+        "message": "API credential is required."
+      }
+    ],
+    "examples": [
+      "examples/contract-response.json",
+      "examples/callable-versions-response.json",
+      "examples/generate-sync-download-request.json",
+      "examples/generate-sync-download-response.json",
+      "examples/generate-async-response.json",
+      "examples/batch-response.json",
+      "examples/content-module-review-transition-request.json",
+      "examples/content-module-review-transition-response.json",
+      "examples/content-module-lifecycle-operation-request.json",
+      "examples/content-module-lifecycle-operation-response.json",
+      "examples/error-response.json"
+    ]
+  }
+}

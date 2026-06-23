@@ -1,0 +1,26 @@
+{
+  "output": {
+    "format": "PDF",
+    "mode": "SYNC_DOWNLOAD_URL"
+  },
+  "variables": {
+    "customerDisplayName": "MASKED_CUSTOMER",
+    "noticeType": "LOAN_REPAYMENT_NOTICE"
+  },
+  "encryption": {
+    "enabled": true,
+    "openPassword": "example-open-password",
+    "ownerPassword": "example-owner-password",
+    "permissions": ["ALLOW_PRINT"]
+  },
+  "requestId": "REQ-20260604-0001",
+  "idempotencyKey": "IDEMP-20260604-0001",
+  "context": {
+    "sourceSystem": "loan-crm",
+    "channel": "branch",
+    "businessRequestId": "BR-20260604-0001",
+    "upstreamTraceId": "TRACE-UPSTREAM-001",
+    "scenario": "loan-notice",
+    "locale": "zh-CN"
+  }
+}

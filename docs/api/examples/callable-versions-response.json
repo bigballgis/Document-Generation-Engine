@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "auditId": "AUD-5M8N2P1Q",
+    "traceId": "TRACE-20260604-002",
+    "templateId": "TPL-LOAN-NOTICE"
+  },
+  "result": {
+    "templateId": "TPL-LOAN-NOTICE",
+    "versions": [
+      {
+        "releaseVersion": "1.0.0",
+        "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.0.0/generate"
+      },
+      {
+        "releaseVersion": "1.1.0",
+        "explicitVersionUrl": "/api/prod/v1/templates/TPL-LOAN-NOTICE/versions/1.1.0/generate"
+      }
+    ]
+  }
+}

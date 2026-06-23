@@ -1,0 +1,57 @@
+{
+  "actorRole": "TEMPLATE_AUTHOR",
+  "sourceAnchorCatalogVersion": "v1",
+  "bindings": [
+    {
+      "anchorId": "ANC-BODY",
+      "declaredContentType": "RICH_TEXT",
+      "structuredContentTree": {
+        "nodes": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "Loan details"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "anchorId": "ANC-BODY",
+      "declaredContentType": "RICH_TEXT",
+      "structuredContentTree": {
+        "nodes": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "Duplicate candidate for validation"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "anchorId": "ANC-MISSING",
+      "declaredContentType": "TEXT",
+      "structuredContentTree": {
+        "nodes": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "value": "Unknown anchor"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

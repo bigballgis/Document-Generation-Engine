@@ -1,0 +1,15 @@
+{
+  "operationType": "STOP_USE",
+  "actorRole": "GROUP_ADMIN",
+  "actorId": "group-admin-a",
+  "impactSummaryViewed": true,
+  "secondConfirmation": true,
+  "impactSummary": {
+    "referenceTemplateCount": 2,
+    "referenceTemplateListHint": "TPL-LOAN-NOTICE,TPL-RENEWAL-NOTICE",
+    "impactedReleaseVersionsHint": "v1.0.0,v1.1.0",
+    "defaultRouteAffected": true,
+    "recentCallSummary": "recentCalls=12/7d",
+    "remediationHint": "migrate callers to MOD-LOAN-DISCLOSURE-V3"
+  }
+}
