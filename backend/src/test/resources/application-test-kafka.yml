@@ -1,0 +1,14 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+  datasource:
+    url: jdbc:h2:mem:docgen-kafka-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+
+docgen:
+  async:
+    transport: kafka
+    kafka:
+      async-batch-topic: generation.async-batch-task.v1
+      dead-letter-topic: generation.async-batch-task.v1.dlt
+      consumer-group: docgen-async-batch-worker-it

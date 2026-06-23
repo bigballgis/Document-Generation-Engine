@@ -1,0 +1,40 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+  datasource:
+    url: jdbc:h2:mem:docgen-test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      connection-test-query: SELECT 1
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+
+docgen:
+  idempotency:
+    cache: memory
+  async:
+    transport: in-process
+  jwt:
+    secret: test-jwt-secret-at-least-32-bytes-long!!
+    access-token-ttl: PT5M
+  storage:
+    provider: filesystem
+    bucket: docgen-test
+    minio:
+      endpoint: http://localhost:9000
+      access-key: test
+      secret-key: test-secret-key
+  ad-group-resolver:
+    type: config
+    account-groups:
+      svc-caller:
+        - RETAIL_API
+      svc-denied:
+        - OTHER_API
