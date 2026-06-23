@@ -263,6 +263,25 @@ class TemplatePlatformSliceTest {
     }
 
     @Test
+    void deleteTemplateLogicalDeleteExcludesTemplateFromList() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+
+        mockMvc.perform(delete("/api/management/v1/templates/" + templateId)
+                        .with(authentication(new ManagementAuthentication(globalAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"reason":"Template retired","confirmed":true}
+                                """))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/management/v1/templates")
+                        .with(authentication(new ManagementAuthentication(globalAdmin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.length()").value(0));
+    }
+
+    @Test
     void runtimeGenerateDeniedForUnauthorizedAccessAccount() throws Exception {
         String masterId = uploadAndApproveMaster();
         String templateId = createTemplate(masterId);
@@ -276,7 +295,10 @@ class TemplatePlatformSliceTest {
                         .header("X-Access-Account", "svc-denied")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(generateBody("idem-denied-1")))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"))
+                .andExpect(jsonPath("$.error.category").value("AUTHORIZATION"))
+                .andExpect(jsonPath("$.metadata.auditId").isNotEmpty());
     }
 
     @Test

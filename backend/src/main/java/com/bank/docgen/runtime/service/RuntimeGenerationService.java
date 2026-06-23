@@ -226,7 +226,7 @@ public class RuntimeGenerationService {
             return objectMapper.readValue(json, new TypeReference<>() {
             });
         } catch (Exception ex) {
-            return List.of();
+            throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
         }
     }
 
