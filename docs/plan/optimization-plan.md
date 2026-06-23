@@ -89,7 +89,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
 | D1 | H | Fix rendering→runtime reverse dependency | `EncryptionOptionsView` moved to `sharedkernel.api`; rendering throws `EncryptionFailedException` | **Done** (Wave 2): rendering module no longer imports `runtime.api` or `runtime.service` |
-| D2 | H | Unify generation path | `DocumentGenerationEngine` vs `RuntimeGenerationService` L152–191 duplicate assembly | Sync path reuses the engine; duplication removed; tests green | Not Started |
+| D2 | H | Unify generation path | `DocumentGenerationEngine` vs `RuntimeGenerationService` duplicate assembly | **Done** (Wave 2–3): sync path delegates to `DocumentGenerationEngine`; `RuntimeGenerationServiceGenerateTest` updated; gates green (184 tests) |
 | D3 | M | Introduce MapStruct mappers | hand-written `toSummary`/`toDetail`/`toPolicyView` (e.g. `TemplateService` L341–404) | Mappers via MapStruct (ADR); services slimmed; behavior unchanged | Not Started |
 | D4 | M | Introduce QueryDSL for complex queries | `ManagementAuditEventRepository` JPQL, in-memory filtering | Audit/list queries type-safe + pageable via QueryDSL | Not Started |
 | D5 | M | Split god services | `TemplateService` 405 L, `BatchGenerationService` 403 L, `ApiManagementService` 326 L | Responsibilities separated (validation/mapping/authz extracted); each class focused | Not Started |
@@ -113,8 +113,8 @@ Priority: **H/M/L**. All start `Not Started`.
 
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
-| F1 | H | Add rate limiting (Bucket4j or gateway) | no rate limiting anywhere; `BatchLimitsView` is contract-only | Runtime API rate-limited per credential/policy; tests | Not Started |
-| F2 | H | Add resilience around external calls | no Resilience4j; LibreOffice/MinIO/Kafka unguarded | Circuit-breaker/timeout/retry on LibreOffice + MinIO; graceful degradation | Not Started |
+| F1 | H | Add rate limiting (Bucket4j or gateway) | no rate limiting anywhere; `BatchLimitsView` is contract-only | **Done** (Wave 3): Bucket4j per `credentialId:accessAccount`; 429 + `Retry-After` + `RATE_LIMIT_EXCEEDED`; `RuntimeRateLimitFilterTest` |
+| F2 | H | Add resilience around external calls | no Resilience4j; LibreOffice/MinIO/Kafka unguarded | **Done** (Wave 3): Resilience4j circuit-breaker + retry on MinIO put/get/delete and PDF conversion; `serviceUnavailable` mapping; `ResilienceFailureMapperTest` |
 | F3 | H | Stream large artifacts instead of `readAllBytes` | `DocumentDownloadService` L60–62, `RuntimeGenerationService` L138–139 | Streamed download/replay; bounded memory; large-file test | Not Started |
 | F4 | M | Paginate list/audit queries | `TemplateRepository.findBy...`, `ManagementAuditEventRepository.search` return `List` | Pageable endpoints; default page size; tests | Not Started |
 | F5 | M | Fix EAGER anchors fetch | `MasterDocumentEntity` L62 `@OneToMany(EAGER)` | LAZY + explicit fetch-join where needed; no N+1 on list | Not Started |

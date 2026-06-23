@@ -9,12 +9,8 @@ import static org.mockito.Mockito.when;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
-import com.bank.docgen.master.persistence.MasterDocumentRepository;
-import com.bank.docgen.rendering.DocumentArtifactPipeline;
-import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.runtime.api.CallableVersionsResultView;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
-import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateValidationException;
@@ -38,16 +34,13 @@ class RuntimeGenerationServiceAccessTest {
     private RuntimeGenerationService newService() {
         return new RuntimeGenerationService(
                 mock(TemplateVersionRepository.class),
-                mock(AnchorBindingRepository.class),
-                mock(MasterDocumentRepository.class),
                 mock(ApiPolicyRepository.class),
                 mock(ApiCredentialRepository.class),
                 mock(ObjectStoragePort.class),
-                mock(DocxAssembler.class),
-                mock(DocumentArtifactPipeline.class),
                 mock(IdempotencyService.class),
                 mock(EncryptionParameterValidator.class),
                 contractAssemblyService,
+                mock(DocumentGenerationEngine.class),
                 new ObjectMapper()
         );
     }

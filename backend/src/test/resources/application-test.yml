@@ -17,6 +17,9 @@ spring:
     enabled: false
 
 docgen:
+  runtime:
+    rate-limit:
+      enabled: false
   idempotency:
     cache: memory
   async:

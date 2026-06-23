@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-23 (P16 template delete + API policy impact preview Done; Wave 2 OPT-E/C slice)  
+**Last synced:** 2026-06-23 (OPT-D2 unified generation + OPT-F1 rate limit + OPT-F2 resilience)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,7 +18,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Backend | `mvn -B -ntp -f backend/pom.xml verify` | Green (177 tests, 2026-06-23). Wave 2: C3 sync-generation tests + D1 rendering boundary fix included. |
+| Backend | `mvn -B -ntp -f backend/pom.xml verify` | Green (184 tests, 2026-06-23). Wave 2–3: D2 sync→`DocumentGenerationEngine`; F1 Bucket4j 429; F2 Resilience4j on MinIO/PDF. |
 | Frontend lint | `pnpm -C frontend lint` | Green |
 | Frontend type-check | `pnpm -C frontend type-check` | Green |
 | Frontend test | `pnpm -C frontend test` | Green (40 tests) |

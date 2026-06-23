@@ -3,7 +3,6 @@ package com.bank.docgen.runtime.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -15,10 +14,7 @@ import static org.mockito.Mockito.when;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
-import com.bank.docgen.master.persistence.MasterDocumentEntity;
-import com.bank.docgen.master.persistence.MasterDocumentRepository;
-import com.bank.docgen.rendering.DocumentArtifactPipeline;
-import com.bank.docgen.rendering.DocxAssembler;
+import com.bank.docgen.rendering.domain.FidelityWarningCode;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.api.OutputOptionsView;
@@ -26,7 +22,6 @@ import com.bank.docgen.runtime.api.SyncGenerateResult;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
-import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
@@ -48,28 +43,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class RuntimeGenerationServiceGenerateTest {
 
     private static final UUID TEMPLATE_ID = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-    private static final UUID MASTER_ID = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
     private static final UUID VERSION_ID = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
     private static final String RELEASE_VERSION = "1.0.0";
 
     @Mock
     private TemplateVersionRepository templateVersionRepository;
     @Mock
-    private AnchorBindingRepository anchorBindingRepository;
-    @Mock
-    private MasterDocumentRepository masterDocumentRepository;
-    @Mock
     private ApiPolicyRepository apiPolicyRepository;
     @Mock
     private ObjectStoragePort objectStoragePort;
     @Mock
-    private DocxAssembler docxAssembler;
-    @Mock
-    private DocumentArtifactPipeline documentArtifactPipeline;
-    @Mock
     private IdempotencyService idempotencyService;
     @Mock
     private EncryptionParameterValidator encryptionParameterValidator;
+    @Mock
+    private DocumentGenerationEngine documentGenerationEngine;
 
     private RuntimeGenerationService service;
     private TemplateEntity template;
@@ -80,16 +68,13 @@ class RuntimeGenerationServiceGenerateTest {
     void setUp() {
         service = new RuntimeGenerationService(
                 templateVersionRepository,
-                anchorBindingRepository,
-                masterDocumentRepository,
                 apiPolicyRepository,
                 mock(com.bank.docgen.apimgmt.persistence.ApiCredentialRepository.class),
                 objectStoragePort,
-                docxAssembler,
-                documentArtifactPipeline,
                 idempotencyService,
                 encryptionParameterValidator,
                 mock(ContractAssemblyService.class),
+                documentGenerationEngine,
                 new ObjectMapper()
         );
         template = publishedTemplate(TEMPLATE_ID);
@@ -126,16 +111,22 @@ class RuntimeGenerationServiceGenerateTest {
         assertThat(result.idempotencyStatus()).isEqualTo("REPLAYED");
         assertThat(result.documentId()).isEqualTo("DOC-REPLAY");
         assertThat(result.artifactBytes()).containsExactly(9, 8, 7);
-        verify(docxAssembler, never()).assemble(any(), any());
+        verify(documentGenerationEngine, never()).generate(any(), anyString(), any(), anyString(), any());
     }
 
     @Test
     void generateSync_createsArtifactAndCompletesIdempotency() throws Exception {
         TemplateVersionEntity version = publishedVersion(VERSION_ID, TEMPLATE_ID);
-        MasterDocumentEntity master = masterDocument(MASTER_ID);
         GenerationIdempotencyEntity pending = pendingIdempotency(TEMPLATE_ID);
-        byte[] docxBytes = new byte[]{1, 2, 3};
         byte[] finalBytes = new byte[]{4, 5, 6};
+        DocumentGenerationEngine.GeneratedDocument generated = new DocumentGenerationEngine.GeneratedDocument(
+                "DOC-NEW",
+                "generated/DOC-NEW/output.docx",
+                finalBytes,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "DOCX",
+                List.of(FidelityWarningCode.CONTROLLED_STYLE_FALLBACK.name())
+        );
 
         when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
         when(idempotencyService.hashRequest(anyString())).thenReturn("hash-a");
@@ -143,17 +134,13 @@ class RuntimeGenerationServiceGenerateTest {
         when(idempotencyService.begin("idem-2", TEMPLATE_ID, "hash-a")).thenReturn(pending);
         when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, RELEASE_VERSION))
                 .thenReturn(Optional.of(version));
-        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(MASTER_ID)).thenReturn(Optional.of(master));
-        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(VERSION_ID)).thenReturn(List.of());
-        when(objectStoragePort.get(master.getStorageKey())).thenReturn(new ByteArrayInputStream(docxBytes));
-        when(docxAssembler.buildAnchorReplacements(any(), any())).thenReturn(Map.of());
-        when(docxAssembler.assemble(any(), any())).thenReturn(docxBytes);
-        when(documentArtifactPipeline.finalizeArtifact(eq(docxBytes), eq("DOCX"), any()))
-                .thenReturn(new DocumentArtifactPipeline.GeneratedArtifact(
-                        finalBytes,
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        "output.docx"
-                ));
+        when(documentGenerationEngine.generate(
+                eq(template),
+                eq(RELEASE_VERSION),
+                any(),
+                eq("DOCX"),
+                any()
+        )).thenReturn(generated);
         doNothing().when(encryptionParameterValidator).validate(any(), any(), anyString());
 
         SyncGenerateResult result = service.generateSync(
@@ -166,8 +153,7 @@ class RuntimeGenerationServiceGenerateTest {
         assertThat(result.idempotencyStatus()).isEqualTo("CREATED");
         assertThat(result.artifactBytes()).containsExactly(4, 5, 6);
         assertThat(result.resolvedReleaseVersion()).isEqualTo(RELEASE_VERSION);
-        verify(objectStoragePort).put(anyString(), any(), eq((long) finalBytes.length), anyString());
-        verify(idempotencyService).complete(eq(pending), anyString(), anyString());
+        verify(idempotencyService).complete(pending, "generated/DOC-NEW/output.docx", "DOC-NEW");
     }
 
     @Test
@@ -237,7 +223,14 @@ class RuntimeGenerationServiceGenerateTest {
 
     private TemplateEntity publishedTemplate(UUID templateId) {
         TemplateEntity entity = new TemplateEntity(
-                templateId, "TPL-001", "RETAIL", "Sample", null, MASTER_ID, "10000001");
+                templateId,
+                "TPL-001",
+                "RETAIL",
+                "Sample",
+                null,
+                UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                "10000001"
+        );
         entity.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
         entity.setReleaseVersion(RELEASE_VERSION);
         return entity;
@@ -264,18 +257,6 @@ class RuntimeGenerationServiceGenerateTest {
                 "10000001"
         );
         return entity;
-    }
-
-    private MasterDocumentEntity masterDocument(UUID masterId) {
-        return new MasterDocumentEntity(
-                masterId,
-                "RETAIL",
-                "Master",
-                null,
-                "masters/master.docx",
-                "master.docx",
-                "10000001"
-        );
     }
 
     private GenerationIdempotencyEntity completedIdempotency(UUID templateId) {

@@ -1,15 +1,8 @@
 package com.bank.docgen.runtime.service;
 
-import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
-import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
-import com.bank.docgen.master.persistence.MasterDocumentEntity;
-import com.bank.docgen.master.persistence.MasterDocumentRepository;
-import com.bank.docgen.rendering.DocxAssembler;
-import com.bank.docgen.rendering.DocumentArtifactPipeline;
-import com.bank.docgen.rendering.domain.FidelityWarningCode;
 import com.bank.docgen.runtime.api.CallableVersionsResultView;
 import com.bank.docgen.runtime.api.ContractResultView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
@@ -17,8 +10,9 @@ import com.bank.docgen.runtime.api.RuntimeCredentialSummaryView;
 import com.bank.docgen.runtime.api.SyncGenerateResult;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
-import com.bank.docgen.template.persistence.AnchorBindingEntity;
-import com.bank.docgen.template.persistence.AnchorBindingRepository;
+import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
+import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
+import com.bank.docgen.rendering.domain.FidelityWarningCode;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
@@ -28,12 +22,9 @@ import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,43 +32,34 @@ import org.springframework.transaction.annotation.Transactional;
 public class RuntimeGenerationService {
 
     private final TemplateVersionRepository templateVersionRepository;
-    private final AnchorBindingRepository anchorBindingRepository;
-    private final MasterDocumentRepository masterDocumentRepository;
     private final ApiPolicyRepository apiPolicyRepository;
     private final ApiCredentialRepository apiCredentialRepository;
     private final ObjectStoragePort objectStoragePort;
-    private final DocxAssembler docxAssembler;
-    private final DocumentArtifactPipeline documentArtifactPipeline;
     private final IdempotencyService idempotencyService;
     private final EncryptionParameterValidator encryptionParameterValidator;
     private final ContractAssemblyService contractAssemblyService;
+    private final DocumentGenerationEngine documentGenerationEngine;
     private final ObjectMapper objectMapper;
 
     public RuntimeGenerationService(
             TemplateVersionRepository templateVersionRepository,
-            AnchorBindingRepository anchorBindingRepository,
-            MasterDocumentRepository masterDocumentRepository,
             ApiPolicyRepository apiPolicyRepository,
             ApiCredentialRepository apiCredentialRepository,
             ObjectStoragePort objectStoragePort,
-            DocxAssembler docxAssembler,
-            DocumentArtifactPipeline documentArtifactPipeline,
             IdempotencyService idempotencyService,
             EncryptionParameterValidator encryptionParameterValidator,
             ContractAssemblyService contractAssemblyService,
+            DocumentGenerationEngine documentGenerationEngine,
             ObjectMapper objectMapper
     ) {
         this.templateVersionRepository = templateVersionRepository;
-        this.anchorBindingRepository = anchorBindingRepository;
-        this.masterDocumentRepository = masterDocumentRepository;
         this.apiPolicyRepository = apiPolicyRepository;
         this.apiCredentialRepository = apiCredentialRepository;
         this.objectStoragePort = objectStoragePort;
-        this.docxAssembler = docxAssembler;
-        this.documentArtifactPipeline = documentArtifactPipeline;
         this.idempotencyService = idempotencyService;
         this.encryptionParameterValidator = encryptionParameterValidator;
         this.contractAssemblyService = contractAssemblyService;
+        this.documentGenerationEngine = documentGenerationEngine;
         this.objectMapper = objectMapper;
     }
 
@@ -155,39 +137,20 @@ public class RuntimeGenerationService {
         }
         GenerationIdempotencyEntity idempotency = existing.orElseGet(() ->
                 idempotencyService.begin(request.idempotencyKey(), template.getId(), requestHash));
-        MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.getMasterId())
-                .orElseThrow(TemplateNotFoundException::new);
-        List<AnchorBindingEntity> bindings = anchorBindingRepository
-                .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
-        Map<String, String> bindingJson = new LinkedHashMap<>();
-        bindings.forEach(binding -> bindingJson.put(binding.getAnchorId(), binding.getStructuredContentJson()));
-        Map<String, String> anchorContent = docxAssembler.buildAnchorReplacements(bindingJson, request.variables());
-        byte[] docx;
-        try (InputStream masterStream = objectStoragePort.get(master.getStorageKey())) {
-            docx = docxAssembler.assemble(masterStream, anchorContent);
-        } catch (Exception ex) {
-            throw new TemplateValidationException("api.error.rendering.generationFailed");
-        }
-        DocumentArtifactPipeline.GeneratedArtifact artifact = documentArtifactPipeline.finalizeArtifact(
-                docx,
+        DocumentGenerationEngine.GeneratedDocument generated = documentGenerationEngine.generate(
+                template,
+                resolvedVersion,
+                request.variables(),
                 request.output().format(),
                 request.encryption()
         );
-        String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
-        String storageKey = "generated/" + documentId + "/" + artifact.storageFileName();
-        objectStoragePort.put(
-                storageKey,
-                new java.io.ByteArrayInputStream(artifact.bytes()),
-                artifact.bytes().length,
-                artifact.contentType()
-        );
-        idempotencyService.complete(idempotency, storageKey, documentId);
+        idempotencyService.complete(idempotency, generated.storageKey(), generated.documentId());
         return new SyncGenerateResult(
-                artifact.bytes(),
-                artifact.contentType(),
-                documentId,
+                generated.artifactBytes(),
+                generated.contentType(),
+                generated.documentId(),
                 resolvedVersion,
-                List.of(FidelityWarningCode.CONTROLLED_STYLE_FALLBACK.name()),
+                generated.fidelityWarningCodes(),
                 "CREATED"
         );
     }

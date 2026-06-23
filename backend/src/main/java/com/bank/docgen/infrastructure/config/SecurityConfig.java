@@ -2,6 +2,7 @@ package com.bank.docgen.infrastructure.config;
 
 import com.bank.docgen.authorization.management.web.JwtAuthenticationFilter;
 import com.bank.docgen.runtime.security.ApiCredentialAuthenticationFilter;
+import com.bank.docgen.runtime.security.RuntimeRateLimitFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -18,6 +19,7 @@ public class SecurityConfig {
     @Order(1)
     SecurityFilterChain runtimeSecurityFilterChain(
             HttpSecurity http,
+            RuntimeRateLimitFilter runtimeRateLimitFilter,
             ApiCredentialAuthenticationFilter apiCredentialAuthenticationFilter,
             ManagementSecurityHandlers managementSecurityHandlers
     ) throws Exception {
@@ -31,6 +33,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(managementSecurityHandlers)
                         .accessDeniedHandler(managementSecurityHandlers))
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .addFilterBefore(runtimeRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(apiCredentialAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

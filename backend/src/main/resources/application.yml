@@ -31,6 +31,11 @@ spring:
 
 docgen:
   environment: ${APP_ENVIRONMENT:dev}
+  runtime:
+    rate-limit:
+      enabled: ${RUNTIME_RATE_LIMIT_ENABLED:true}
+      requests-per-minute: ${RUNTIME_RATE_LIMIT_RPM:120}
+      burst-capacity: ${RUNTIME_RATE_LIMIT_BURST:120}
   idempotency:
     cache: ${IDEMPOTENCY_CACHE:redis}
     redis-key-prefix: "docgen:idempotency:"
@@ -71,6 +76,28 @@ management:
     tags:
       application: ${spring.application.name}
       environment: ${docgen.environment}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      objectStorage:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+      pdfConversion:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 60s
+        permitted-number-of-calls-in-half-open-state: 2
+  retry:
+    instances:
+      objectStorage:
+        max-attempts: 3
+        wait-duration: 200ms
+      pdfConversion:
+        max-attempts: 2
+        wait-duration: 500ms
 
 server:
   port: ${BACKEND_PORT:8080}

@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
         AdGroupResolverProperties.class,
         DocgenIdempotencyProperties.class,
         DocgenAsyncProperties.class,
-        DocgenRenderingProperties.class
+        DocgenRenderingProperties.class,
+        RuntimeRateLimitProperties.class
 })
 public class DocgenPropertiesConfig {
 }

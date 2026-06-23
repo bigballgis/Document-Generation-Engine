@@ -30,7 +30,7 @@ public class IdempotencyService {
     public Optional<GenerationIdempotencyEntity> findExisting(String idempotencyKey, UUID templateId, String requestHash) {
         // The database record is authoritative for conflict detection. A still-live
         // record with a different request hash is an idempotency conflict (ADR 0004),
-        // not a "no record" signal â€?returning empty here previously caused begin() to
+        // not a "no record" signal -- returning empty here previously caused begin() to
         // hit the unique constraint and surface a 500.
         Optional<GenerationIdempotencyEntity> live = repository
                 .findByIdempotencyKeyAndTemplateId(idempotencyKey, templateId)
