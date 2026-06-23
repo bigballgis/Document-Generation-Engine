@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleGovernanceRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
@@ -45,6 +46,8 @@ class TemplateLifecycleGovernanceServiceTest {
     private GroupAccessService groupAccessService;
     @Mock
     private LifecycleImpactPreviewService lifecycleImpactPreviewService;
+    @Mock
+    private MessageResolver messageResolver;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -60,7 +63,8 @@ class TemplateLifecycleGovernanceServiceTest {
                 templateVersionRepository,
                 lifecycleRecordRepository,
                 groupAccessService,
-                lifecycleImpactPreviewService
+                lifecycleImpactPreviewService,
+                messageResolver
         );
         groupAdmin = session(List.of("GROUP_ADMIN"), List.of("RETAIL"));
         templateId = UUID.randomUUID();

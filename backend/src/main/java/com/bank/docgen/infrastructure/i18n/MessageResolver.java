@@ -15,8 +15,12 @@ public class MessageResolver {
     }
 
     public String resolve(String messageKey) {
+        return resolve(messageKey, new Object[0]);
+    }
+
+    public String resolve(String messageKey, Object... args) {
         Locale locale = LocaleContextHolder.getLocale();
-        return messageSource.getMessage(messageKey, null, locale);
+        return messageSource.getMessage(messageKey, args, locale);
     }
 
     public String resolveOrDefault(String messageKey, String defaultMessage) {

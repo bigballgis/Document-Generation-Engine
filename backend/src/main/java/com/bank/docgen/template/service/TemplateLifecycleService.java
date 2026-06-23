@@ -2,6 +2,7 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
 import com.bank.docgen.template.api.LifecycleGovernanceRequest;
@@ -31,6 +32,7 @@ public class TemplateLifecycleService {
     private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
     private final GroupAccessService groupAccessService;
     private final LifecycleImpactPreviewService lifecycleImpactPreviewService;
+    private final MessageResolver messageResolver;
 
     public TemplateLifecycleService(
             TemplateService templateService,
@@ -38,7 +40,8 @@ public class TemplateLifecycleService {
             TemplateVersionRepository templateVersionRepository,
             TemplateLifecycleRecordRepository lifecycleRecordRepository,
             GroupAccessService groupAccessService,
-            LifecycleImpactPreviewService lifecycleImpactPreviewService
+            LifecycleImpactPreviewService lifecycleImpactPreviewService,
+            MessageResolver messageResolver
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -46,6 +49,7 @@ public class TemplateLifecycleService {
         this.lifecycleRecordRepository = lifecycleRecordRepository;
         this.groupAccessService = groupAccessService;
         this.lifecycleImpactPreviewService = lifecycleImpactPreviewService;
+        this.messageResolver = messageResolver;
     }
 
     @Transactional
@@ -115,7 +119,8 @@ public class TemplateLifecycleService {
         version.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
         templateVersionRepository.save(version);
         recordLifecycle(template, LifecycleAction.PUBLISH, TemplateLifecycleStatus.PENDING_RELEASE,
-                TemplateLifecycleStatus.PUBLISHED, null, "Published release " + request.releaseVersion(),
+                TemplateLifecycleStatus.PUBLISHED, null,
+                messageResolver.resolve("api.audit.lifecycle.publishedRelease", request.releaseVersion()),
                 request.releaseVersion(), session);
         return templateService.toDetail(template);
     }

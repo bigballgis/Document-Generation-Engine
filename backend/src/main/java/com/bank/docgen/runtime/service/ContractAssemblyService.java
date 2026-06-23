@@ -15,6 +15,7 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -118,8 +119,8 @@ public class ContractAssemblyService {
                 new AdGroupAuthorizationSummaryView(
                         !allowedGroups.isEmpty(),
                         300,
-                        allowedGroups.size() + " authorized AD groups configured",
-                        "Fail-closed AD Group authorization is enforced for runtime calls"
+                        messageResolver.resolve("api.contract.adGroupsConfigured", allowedGroups.size()),
+                        messageResolver.resolve("api.contract.adGroupFailClosedEnforced")
                 ),
                 credentialSummary
         );
@@ -170,7 +171,7 @@ public class ContractAssemblyService {
             return objectMapper.readValue(json, new TypeReference<List<String>>() {
             });
         } catch (JsonProcessingException ex) {
-            return List.of();
+            throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
         }
     }
 }
