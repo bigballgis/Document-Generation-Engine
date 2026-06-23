@@ -9,7 +9,7 @@ import com.bank.docgen.runtime.api.BatchResultItemView;
 import com.bank.docgen.runtime.api.BatchResultView;
 import com.bank.docgen.runtime.api.BatchSummaryView;
 import com.bank.docgen.runtime.api.CancelledTaskResultView;
-import com.bank.docgen.runtime.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.runtime.api.EncryptionSummaryView;
 import com.bank.docgen.runtime.api.OutputOptionsView;
 import com.bank.docgen.runtime.api.TaskQueryResultView;

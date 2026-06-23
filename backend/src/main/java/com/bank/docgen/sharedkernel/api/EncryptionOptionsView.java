@@ -1,4 +1,4 @@
-package com.bank.docgen.runtime.api;
+package com.bank.docgen.sharedkernel.api;
 
 import java.util.List;
 

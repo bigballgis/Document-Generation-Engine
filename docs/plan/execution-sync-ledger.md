@@ -18,7 +18,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Backend | `mvn -B -ntp -f backend/pom.xml verify` | Green (172 tests, 2026-06-23). Checkstyle + PMD + SpotBugs + JaCoCo ratchet (LINE ≥0.70 / BRANCH ≥0.45). Wave 2 OPT-E5–E7 + C3 download tests + P16 lifecycle/apimgmt tests included. |
+| Backend | `mvn -B -ntp -f backend/pom.xml verify` | Green (177 tests, 2026-06-23). Wave 2: C3 sync-generation tests + D1 rendering boundary fix included. |
 | Frontend lint | `pnpm -C frontend lint` | Green |
 | Frontend type-check | `pnpm -C frontend type-check` | Green |
 | Frontend test | `pnpm -C frontend test` | Green (40 tests) |

@@ -1,5 +1,6 @@
 package com.bank.docgen.runtime.api;
 
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

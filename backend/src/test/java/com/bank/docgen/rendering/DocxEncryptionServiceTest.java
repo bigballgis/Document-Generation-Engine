@@ -3,7 +3,7 @@ package com.bank.docgen.rendering;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.bank.docgen.runtime.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import java.io.ByteArrayInputStream;
 import org.apache.poi.poifs.crypt.Decryptor;
 import org.apache.poi.poifs.crypt.EncryptionInfo;

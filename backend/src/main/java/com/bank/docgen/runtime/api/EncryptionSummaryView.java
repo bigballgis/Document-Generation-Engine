@@ -1,5 +1,6 @@
 package com.bank.docgen.runtime.api;
 
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import java.util.List;
 
 public record EncryptionSummaryView(

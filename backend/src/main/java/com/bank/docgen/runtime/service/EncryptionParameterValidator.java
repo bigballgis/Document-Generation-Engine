@@ -1,7 +1,7 @@
 package com.bank.docgen.runtime.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
-import com.bank.docgen.runtime.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import java.util.List;
 import org.springframework.stereotype.Component;
 

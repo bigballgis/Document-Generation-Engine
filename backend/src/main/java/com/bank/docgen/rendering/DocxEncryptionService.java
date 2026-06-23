@@ -1,7 +1,6 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.runtime.api.EncryptionOptionsView;
-import com.bank.docgen.runtime.service.RuntimeEncryptionFailedException;
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -33,7 +32,7 @@ public class DocxEncryptionService {
                 return output.toByteArray();
             }
         } catch (Exception ex) {
-            throw new RuntimeEncryptionFailedException();
+            throw new EncryptionFailedException();
         }
     }
 }

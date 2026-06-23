@@ -6,7 +6,7 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.rendering.domain.FidelityWarningCode;
-import com.bank.docgen.runtime.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;

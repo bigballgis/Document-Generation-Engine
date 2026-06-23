@@ -1,6 +1,6 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.runtime.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import org.springframework.stereotype.Service;
 
 @Service

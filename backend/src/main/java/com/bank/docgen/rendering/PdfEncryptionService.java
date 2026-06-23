@@ -1,7 +1,6 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.runtime.api.EncryptionOptionsView;
-import com.bank.docgen.runtime.service.RuntimeEncryptionFailedException;
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 import org.apache.pdfbox.Loader;
@@ -34,7 +33,7 @@ public class PdfEncryptionService {
                 return output.toByteArray();
             }
         } catch (Exception ex) {
-            throw new RuntimeEncryptionFailedException();
+            throw new EncryptionFailedException();
         }
     }
 

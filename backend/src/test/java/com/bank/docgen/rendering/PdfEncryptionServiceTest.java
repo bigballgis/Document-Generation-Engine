@@ -3,7 +3,7 @@ package com.bank.docgen.rendering;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.bank.docgen.runtime.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 import org.apache.pdfbox.Loader;

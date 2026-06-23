@@ -16,7 +16,7 @@ import com.bank.docgen.runtime.service.RuntimeAccessDeniedException;
 import com.bank.docgen.runtime.service.RuntimeBatchValidationException;
 import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
 import com.bank.docgen.runtime.service.RuntimeDownloadExpiredException;
-import com.bank.docgen.runtime.service.RuntimeEncryptionFailedException;
+import com.bank.docgen.rendering.EncryptionFailedException;
 import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
 import com.bank.docgen.rendering.service.PreviewGenerationException;
 import com.bank.docgen.rendering.service.PreviewNotFoundException;
@@ -345,14 +345,17 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(RuntimeEncryptionFailedException.class)
-    public ResponseEntity<ErrorEnvelope> handleRuntimeEncryptionFailed(HttpServletRequest request) {
+    @ExceptionHandler(EncryptionFailedException.class)
+    public ResponseEntity<ErrorEnvelope> handleEncryptionFailed(
+            HttpServletRequest request,
+            EncryptionFailedException ex
+    ) {
         return domainError(
                 request,
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 ApiErrorCodes.ENCRYPTION_FAILED,
                 ApiErrorCategories.ENCRYPTION,
-                "api.error.encryption.encryptionFailed"
+                ex.messageKey()
         );
     }
 
