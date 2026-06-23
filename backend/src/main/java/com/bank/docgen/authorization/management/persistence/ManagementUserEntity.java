@@ -89,6 +89,51 @@ public class ManagementUserEntity {
         this.authorizedGroupCodes = new LinkedHashSet<>(authorizedGroupCodes);
     }
 
+    public void updateProfile(String newDisplayName, String newEmail) {
+        this.displayName = newDisplayName;
+        this.email = newEmail;
+        touch();
+    }
+
+    public void assignRoles(Set<ManagementRole> newRoles) {
+        this.roles = new LinkedHashSet<>(newRoles);
+        touch();
+    }
+
+    public void assignGroupScope(Set<String> newGroupCodes) {
+        this.authorizedGroupCodes = new LinkedHashSet<>(newGroupCodes);
+        touch();
+    }
+
+    public void disable() {
+        this.enabled = false;
+        touch();
+    }
+
+    public void enable() {
+        this.enabled = true;
+        touch();
+    }
+
+    public void resetPassword(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
+        touch();
+    }
+
+    public void markDeleted() {
+        this.deletedAt = Instant.now();
+        this.enabled = false;
+        touch();
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    private void touch() {
+        this.updatedAt = Instant.now();
+    }
+
     public UUID getId() {
         return id;
     }
@@ -123,5 +168,13 @@ public class ManagementUserEntity {
 
     public Set<String> getAuthorizedGroupCodes() {
         return Set.copyOf(authorizedGroupCodes);
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 }

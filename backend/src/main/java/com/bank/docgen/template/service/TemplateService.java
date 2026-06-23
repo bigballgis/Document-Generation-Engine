@@ -9,24 +9,31 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.AnchorBindingView;
 import com.bank.docgen.template.api.BindingValidationSummaryView;
 import com.bank.docgen.template.api.BindingValidationView;
+import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateSummaryView;
 import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
+import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.AnchorContentType;
 import com.bank.docgen.template.domain.BindingValidationStatus;
+import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.domain.VariableType;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
+import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -49,6 +56,7 @@ public class TemplateService {
     private final VariableSchemaRepository variableSchemaRepository;
     private final AnchorBindingRepository anchorBindingRepository;
     private final MasterDocumentRepository masterDocumentRepository;
+    private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
     private final GroupAccessService groupAccessService;
     private final ObjectMapper objectMapper;
 
@@ -58,6 +66,7 @@ public class TemplateService {
             VariableSchemaRepository variableSchemaRepository,
             AnchorBindingRepository anchorBindingRepository,
             MasterDocumentRepository masterDocumentRepository,
+            TemplateLifecycleRecordRepository lifecycleRecordRepository,
             GroupAccessService groupAccessService,
             ObjectMapper objectMapper
     ) {
@@ -66,6 +75,7 @@ public class TemplateService {
         this.variableSchemaRepository = variableSchemaRepository;
         this.anchorBindingRepository = anchorBindingRepository;
         this.masterDocumentRepository = masterDocumentRepository;
+        this.lifecycleRecordRepository = lifecycleRecordRepository;
         this.groupAccessService = groupAccessService;
         this.objectMapper = objectMapper;
     }
@@ -207,6 +217,24 @@ public class TemplateService {
         }
         anchorBindingRepository.save(entity);
         return toBindingView(entity);
+    }
+
+    @Transactional
+    public List<CompositionRuleView> saveRules(
+            UUID templateId,
+            List<CompositionRuleView> rules,
+            ManagementSessionClaims session
+    ) {
+        TemplateEntity template = requireWritableTemplate(templateId, session);
+        assertDraft(template);
+        TemplateVersionEntity version = currentDevVersion(templateId);
+        try {
+            version.setRulesJson(objectMapper.writeValueAsString(rules));
+        } catch (JsonProcessingException exception) {
+            throw new TemplateValidationException("api.error.template.invalidRulesJson");
+        }
+        templateVersionRepository.save(version);
+        return loadRules(version);
     }
 
     @Transactional(readOnly = true)
@@ -371,14 +399,31 @@ public class TemplateService {
                 template.getDescription(),
                 template.getMasterId().toString(),
                 template.getLifecycleStatus(),
+                resolveApprovalSubState(template),
                 template.getReleaseVersion(),
                 version.getId().toString(),
                 version.getDevVersionNumber(),
                 variables,
                 bindings,
+                loadRules(version),
                 template.getCreatedAt(),
                 template.getUpdatedAt()
         );
+    }
+
+    List<CompositionRuleView> loadRules(TemplateVersionEntity version) {
+        if (version.getRulesJson() == null || version.getRulesJson().isBlank()) {
+            return List.of();
+        }
+        try {
+            return objectMapper.readValue(
+                    version.getRulesJson(),
+                    new TypeReference<List<CompositionRuleView>>() {
+                    }
+            );
+        } catch (JsonProcessingException exception) {
+            throw new TemplateValidationException("api.error.template.invalidRulesJson");
+        }
     }
 
     private VariableSchemaView toVariableView(VariableSchemaEntity entity) {
@@ -401,5 +446,23 @@ public class TemplateService {
                 entity.getStructuredContentJson(),
                 entity.getValidationStatus()
         );
+    }
+
+    private ApprovalSubState resolveApprovalSubState(TemplateEntity template) {
+        if (template.getLifecycleStatus() != TemplateLifecycleStatus.APPROVAL) {
+            return null;
+        }
+        List<TemplateLifecycleRecordEntity> records =
+                lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(template.getId());
+        for (TemplateLifecycleRecordEntity record : records) {
+            if (record.getAction() == LifecycleAction.SUBMIT_FOR_APPROVAL) {
+                return ApprovalSubState.PENDING_DECISION;
+            }
+            if (record.getAction() == LifecycleAction.RECORD_TEST_DECISION
+                    && record.getToStatus() == TemplateLifecycleStatus.APPROVAL) {
+                return ApprovalSubState.PENDING_SUBMIT;
+            }
+        }
+        return ApprovalSubState.PENDING_SUBMIT;
     }
 }

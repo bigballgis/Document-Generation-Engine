@@ -12,6 +12,7 @@ public record ManagementSessionView(
         List<String> authorizedGroupCodes,
         String defaultRoute,
         List<String> visibleRoutes,
+        ManagementCapabilitiesView capabilities,
         Instant expiresAt
 ) {
 }

@@ -28,7 +28,7 @@ describe('session store', () => {
 
     expect(store.canAccessRoute(ROUTE_KEYS.templateAuthoringHome)).toBe(true)
     expect(store.canAccessRoute(ROUTE_KEYS.globalGovernanceHome)).toBe(false)
-    expect(store.canAccessRoute(ROUTE_KEYS.masterManagement)).toBe(true)
+    expect(store.canAccessRoute(ROUTE_KEYS.masterManagement)).toBe(false)
     expect(store.defaultHomePath()).toBe('/home/template-authoring')
   })
 

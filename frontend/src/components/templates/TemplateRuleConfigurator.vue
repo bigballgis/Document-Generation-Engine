@@ -1,27 +1,45 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import * as templatesApi from '@/api/templates'
-import type { CompositionRuleInput, RuleValidationResult } from '@/types/template'
+import { useTemplatesStore } from '@/stores/templates'
+import type { CompositionRule, CompositionRuleInput, RuleValidationResult } from '@/types/template'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps<{
   templateId: string
+  initialRules: CompositionRule[]
+}>()
+
+const emit = defineEmits<{
+  updated: []
 }>()
 
 const { t } = useI18n()
+const templatesStore = useTemplatesStore()
+
 const validating = ref(false)
+const saving = ref(false)
 const validationResult = ref<RuleValidationResult | null>(null)
 
-const rules = reactive<CompositionRuleInput[]>([
-  {
-    ruleId: 'rule-1',
-    conditionExpression: '${customerName} != null',
-    targetAnchorId: '',
-    trueBranchRuleId: '',
-    falseBranchRuleId: '',
+const rules = reactive<CompositionRuleInput[]>([])
+
+watch(
+  () => props.initialRules,
+  (nextRules) => {
+    rules.splice(
+      0,
+      rules.length,
+      ...nextRules.map((rule) => ({
+        ruleId: rule.ruleId,
+        conditionExpression: rule.conditionExpression,
+        targetAnchorId: rule.targetAnchorId,
+        trueBranchRuleId: rule.trueBranchRuleId ?? undefined,
+        falseBranchRuleId: rule.falseBranchRuleId ?? undefined,
+      })),
+    )
   },
-])
+  { immediate: true, deep: true },
+)
 
 function addRule() {
   rules.push({
@@ -35,17 +53,33 @@ function statusTagType(status: string) {
   return status === 'VALID' ? 'success' : 'danger'
 }
 
+function toPayload(): CompositionRuleInput[] {
+  return rules.map((rule) => ({
+    ruleId: rule.ruleId,
+    conditionExpression: rule.conditionExpression,
+    targetAnchorId: rule.targetAnchorId,
+    trueBranchRuleId: rule.trueBranchRuleId || undefined,
+    falseBranchRuleId: rule.falseBranchRuleId || undefined,
+  }))
+}
+
+async function handleSaveRules() {
+  saving.value = true
+  try {
+    await templatesStore.saveRules(props.templateId, toPayload())
+    ElMessage.success(t('templates.rules.saveSuccess'))
+    emit('updated')
+  } catch {
+    ElMessage.error(t('templates.error.saveRules'))
+  } finally {
+    saving.value = false
+  }
+}
+
 async function handleValidateRules() {
   validating.value = true
   try {
-    const payload = rules.map((rule) => ({
-      ruleId: rule.ruleId,
-      conditionExpression: rule.conditionExpression,
-      targetAnchorId: rule.targetAnchorId,
-      trueBranchRuleId: rule.trueBranchRuleId || undefined,
-      falseBranchRuleId: rule.falseBranchRuleId || undefined,
-    }))
-    validationResult.value = await templatesApi.validateRules(props.templateId, payload)
+    validationResult.value = await templatesStore.validateRules(props.templateId, toPayload())
     if (validationResult.value.summary.blocking) {
       ElMessage.warning(t('templates.rules.validationBlocking'))
     } else {
@@ -82,6 +116,9 @@ async function handleValidateRules() {
 
     <div class="action-row">
       <el-button @click="addRule">{{ t('templates.rules.addRule') }}</el-button>
+      <el-button type="primary" plain :loading="saving" @click="handleSaveRules">
+        {{ t('templates.rules.save') }}
+      </el-button>
       <el-button type="primary" :loading="validating" @click="handleValidateRules">
         {{ t('templates.rules.validate') }}
       </el-button>
@@ -100,6 +137,8 @@ async function handleValidateRules() {
 
 <style scoped lang="scss">
 .rule-configurator {
+  margin-top: 1.5rem;
+
   p {
     margin: 0 0 1rem;
     color: var(--text-muted);

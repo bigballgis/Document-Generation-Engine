@@ -26,7 +26,10 @@ public class FileSystemObjectStorage implements ObjectStoragePort {
     public void put(String objectKey, InputStream content, long contentLength, String contentType) {
         Path target = resolve(objectKey);
         try {
-            Files.createDirectories(target.getParent());
+            Path parent = target.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
             Files.copy(content, target);
         } catch (IOException ex) {
             throw new ObjectStorageException("Failed to store object", ex);

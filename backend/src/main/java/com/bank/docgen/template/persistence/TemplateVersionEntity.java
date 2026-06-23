@@ -33,6 +33,9 @@ public class TemplateVersionEntity {
     @Column(name = "master_catalog_version", nullable = false, length = 32)
     private String masterCatalogVersion;
 
+    @Column(name = "rules_json")
+    private String rulesJson;
+
     @Column(name = "created_by", nullable = false, length = 8)
     private String createdBy;
 
@@ -79,6 +82,15 @@ public class TemplateVersionEntity {
 
     public String getMasterCatalogVersion() {
         return masterCatalogVersion;
+    }
+
+    public String getRulesJson() {
+        return rulesJson;
+    }
+
+    public void setRulesJson(String rulesJson) {
+        this.rulesJson = rulesJson;
+        this.updatedAt = Instant.now();
     }
 
     public String getCreatedBy() {

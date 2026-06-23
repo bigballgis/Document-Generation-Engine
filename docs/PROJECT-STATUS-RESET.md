@@ -11,7 +11,9 @@ real, durable, verifiable behavior and green quality gates.
 ## Re-earned progress (2026-06-23)
 
 Phases **P0–P11** have been re-earned **Done** with implementation in `backend/`
-and `frontend/`, green quality gates, and updated plan detail docs.
+and `frontend/`, green quality gates, and updated plan detail docs. **P13** (identity &
+group administration) was subsequently delivered and marked **Done** (2026-06-23) with the
+same gate bar (backend `mvn verify` 114 tests green / JaCoCo met; frontend lint/type-check/test/build green).
 
 | Evidence | Location |
 | --- | --- |
@@ -20,7 +22,8 @@ and `frontend/`, green quality gates, and updated plan detail docs.
 | Epic/milestone mirror | [docs/plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md) |
 | Gate logs | Backend `mvn verify`; frontend lint/type-check/test/build (2026-06-23) |
 
-**Active phase:** P12 (deferred enhancements).  
+**Active phase:** None — no single active phase slice (P13 completed Done 2026-06-23).
+P12 (deferred enhancements) is the non-active catch-all.  
 **Still open:** external deployment validation (E05-T06), intranet SCA (M9-T02), M10–M11.
 
 ## What is preserved

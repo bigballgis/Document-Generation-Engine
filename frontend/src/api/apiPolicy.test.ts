@@ -99,4 +99,43 @@ describe('apiPolicy API', () => {
     expect(http.post).toHaveBeenCalledWith('/templates/tpl-1/api/credentials')
     expect(credential.externalId).toBe('EXT-001')
   })
+
+  it('rotates API credential', async () => {
+    vi.mocked(http.post).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          credentialId: 'cred-1',
+          externalId: 'EXT-001',
+          secret: 'new-secret',
+          rotatedAt: '2026-06-23T12:00:00Z',
+        },
+      },
+    })
+
+    const rotated = await apiPolicyApi.rotateCredential('tpl-1', 'cred-1')
+
+    expect(http.post).toHaveBeenCalledWith('/templates/tpl-1/api/credentials/cred-1/rotate')
+    expect(rotated.secret).toBe('new-secret')
+  })
+
+  it('revokes API credential', async () => {
+    vi.mocked(http.post).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          credentialId: 'cred-1',
+          externalId: 'EXT-001',
+          status: 'REVOKED',
+          createdAt: '2026-06-23T10:00:00Z',
+          revokedAt: '2026-06-23T12:00:00Z',
+        },
+      },
+    })
+
+    const revoked = await apiPolicyApi.revokeCredential('tpl-1', 'cred-1')
+
+    expect(http.post).toHaveBeenCalledWith('/templates/tpl-1/api/credentials/cred-1/revoke')
+    expect(revoked.status).toBe('REVOKED')
+  })
 })

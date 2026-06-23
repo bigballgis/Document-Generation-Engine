@@ -6,7 +6,7 @@ import MasterImpactPanel from '@/components/masters/MasterImpactPanel.vue'
 import MasterReviewDialog from '@/components/masters/MasterReviewDialog.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
-import { canReviewMasters } from '@/auth/roles'
+import { canReviewMasters, sessionContext } from '@/auth/roles'
 import { ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
@@ -25,7 +25,7 @@ const reviewMode = ref<MasterReviewDecision>('APPROVED')
 
 const masterId = computed(() => String(route.params.masterId ?? ''))
 const master = computed(() => mastersStore.selectedMaster)
-const canReview = computed(() => canReviewMasters(sessionStore.session?.roles ?? []))
+const canReview = computed(() => canReviewMasters(sessionContext(sessionStore.session)))
 const canSubmitForReview = computed(
   () => master.value?.status === 'DRAFT' || master.value?.status === 'REJECTED',
 )

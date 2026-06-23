@@ -23,6 +23,7 @@ public class ManagementAuthService {
     private final PasswordHashService passwordHashService;
     private final JwtTokenService jwtTokenService;
     private final RouteVisibilityService routeVisibilityService;
+    private final ManagementCapabilitiesService managementCapabilitiesService;
     private final SecurityAuditSummaryService securityAuditSummaryService;
 
     public ManagementAuthService(
@@ -30,12 +31,14 @@ public class ManagementAuthService {
             PasswordHashService passwordHashService,
             JwtTokenService jwtTokenService,
             RouteVisibilityService routeVisibilityService,
+            ManagementCapabilitiesService managementCapabilitiesService,
             SecurityAuditSummaryService securityAuditSummaryService
     ) {
         this.managementUserRepository = managementUserRepository;
         this.passwordHashService = passwordHashService;
         this.jwtTokenService = jwtTokenService;
         this.routeVisibilityService = routeVisibilityService;
+        this.managementCapabilitiesService = managementCapabilitiesService;
         this.securityAuditSummaryService = securityAuditSummaryService;
     }
 
@@ -85,6 +88,7 @@ public class ManagementAuthService {
                 groupCodes,
                 routeVisibilityService.resolveDefaultRoute(roles),
                 routeVisibilityService.resolveVisibleRoutes(roles),
+                managementCapabilitiesService.resolve(roles),
                 expiresAt
         );
     }

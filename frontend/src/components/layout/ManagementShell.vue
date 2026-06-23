@@ -5,7 +5,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { BRAND_THEMES } from '@/theme/tokens'
 import {
   pathForRouteKey,
-  ROUTE_KEYS,
   ROUTE_NAV_LABEL_KEY,
   type RouteKey,
 } from '@/routing/routeKeys'
@@ -33,15 +32,7 @@ const navItems = computed<NavItem[]>(() => {
     return []
   }
 
-  const keys = new Set<string>(session.visibleRoutes)
-  if (sessionStore.canAccessRoute(ROUTE_KEYS.masterManagement)) {
-    keys.add(ROUTE_KEYS.masterManagement)
-  }
-  if (sessionStore.canAccessRoute(ROUTE_KEYS.templateManagement)) {
-    keys.add(ROUTE_KEYS.templateManagement)
-  }
-
-  return [...keys]
+  return session.visibleRoutes
     .filter((key): key is RouteKey => key in ROUTE_NAV_LABEL_KEY)
     .map((routeKey) => ({
       routeKey,
@@ -84,7 +75,7 @@ function navigate(path: string) {
 
     <div class="shell-body">
       <aside class="shell-nav">
-        <nav aria-label="Management navigation">
+        <nav :aria-label="t('nav.managementNavigation')">
           <button
             v-for="item in navItems"
             :key="item.routeKey"

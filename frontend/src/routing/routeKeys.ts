@@ -6,6 +6,9 @@ export const ROUTE_KEYS = {
   auditConsole: 'route.audit-console',
   masterManagement: 'route.master-management',
   templateManagement: 'route.template-management',
+  testerWorkbench: 'route.tester-workbench',
+  approverWorkbench: 'route.approver-workbench',
+  identityAdministration: 'route.identity-administration',
 } as const
 
 export type RouteKey = (typeof ROUTE_KEYS)[keyof typeof ROUTE_KEYS]
@@ -18,6 +21,9 @@ export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.auditConsole]: '/home/audit',
   [ROUTE_KEYS.masterManagement]: '/masters',
   [ROUTE_KEYS.templateManagement]: '/templates',
+  [ROUTE_KEYS.testerWorkbench]: '/home/tester-workbench',
+  [ROUTE_KEYS.approverWorkbench]: '/home/approver-workbench',
+  [ROUTE_KEYS.identityAdministration]: '/home/identity',
 }
 
 export const ROUTE_NAV_LABEL_KEY: Record<RouteKey, string> = {
@@ -28,6 +34,9 @@ export const ROUTE_NAV_LABEL_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.auditConsole]: 'nav.routes.audit',
   [ROUTE_KEYS.masterManagement]: 'nav.routes.masters',
   [ROUTE_KEYS.templateManagement]: 'nav.routes.templates',
+  [ROUTE_KEYS.testerWorkbench]: 'nav.routes.testerWorkbench',
+  [ROUTE_KEYS.approverWorkbench]: 'nav.routes.approverWorkbench',
+  [ROUTE_KEYS.identityAdministration]: 'nav.routes.identityAdministration',
 }
 
 export const MASTER_DETAIL_PATH_PREFIX = '/masters/'

@@ -1,6 +1,7 @@
 import { http } from '@/api/http'
 import type { ApiEnvelope } from '@/types/session'
 import type {
+  AnchorBinding,
   BindingValidationResult,
   CompositionRuleInput,
   CreateTemplatePayload,
@@ -13,7 +14,10 @@ import type {
   TemplateSummary,
   TestDataSet,
   TestGeneratePayload,
+  UpsertBindingPayload,
   UpsertTestDataSetPayload,
+  UpsertVariablePayload,
+  VariableSchema,
 } from '@/types/template'
 
 function unwrap<T>(envelope: ApiEnvelope<T>): T {
@@ -125,6 +129,45 @@ export async function validateRules(
   const response = await http.post<ApiEnvelope<RuleValidationResult>>(
     `/templates/${templateId}/rules/validate`,
     { rules },
+  )
+  return unwrap(response.data)
+}
+
+export async function saveRules(
+  templateId: string,
+  rules: CompositionRuleInput[],
+): Promise<CompositionRuleInput[]> {
+  const response = await http.put<ApiEnvelope<CompositionRuleInput[]>>(
+    `/templates/${templateId}/rules`,
+    { rules },
+  )
+  return unwrap(response.data)
+}
+
+export async function upsertVariable(
+  templateId: string,
+  variableKey: string,
+  payload: UpsertVariablePayload,
+): Promise<VariableSchema> {
+  const response = await http.put<ApiEnvelope<VariableSchema>>(
+    `/templates/${templateId}/variables/${encodeURIComponent(variableKey)}`,
+    payload,
+  )
+  return unwrap(response.data)
+}
+
+export async function deleteVariable(templateId: string, variableKey: string): Promise<void> {
+  await http.delete(`/templates/${templateId}/variables/${encodeURIComponent(variableKey)}`)
+}
+
+export async function upsertBinding(
+  templateId: string,
+  anchorId: string,
+  payload: UpsertBindingPayload,
+): Promise<AnchorBinding> {
+  const response = await http.put<ApiEnvelope<AnchorBinding>>(
+    `/templates/${templateId}/bindings/${encodeURIComponent(anchorId)}`,
+    payload,
   )
   return unwrap(response.data)
 }

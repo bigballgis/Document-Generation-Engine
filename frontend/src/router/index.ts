@@ -58,6 +58,24 @@ const router = createRouter({
       meta: { logicalRoute: ROUTE_KEYS.templateAuthoringHome },
     },
     {
+      path: '/home/tester-workbench',
+      name: 'tester-workbench',
+      component: () => import('@/views/tester/TesterWorkbenchView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.testerWorkbench },
+    },
+    {
+      path: '/home/approver-workbench',
+      name: 'approver-workbench',
+      component: () => import('@/views/approver/ApproverWorkbenchView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.approverWorkbench },
+    },
+    {
+      path: '/home/identity',
+      name: 'identity-administration',
+      component: () => import('@/views/identity/IdentityAdministrationView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.identityAdministration },
+    },
+    {
       path: '/home/api-policy',
       name: 'api-policy-management',
       component: () => import('@/views/api/ApiPolicyHomeView.vue'),

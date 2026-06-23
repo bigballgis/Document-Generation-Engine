@@ -18,8 +18,34 @@ http.interceptors.request.use((config) => {
   return config
 })
 
+http.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError<ApiEnvelope<unknown>>) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem(TOKEN_STORAGE_KEY)
+      void import('@/router').then(({ default: routerInstance }) => {
+        const currentRoute = routerInstance.currentRoute.value
+        if (currentRoute.name !== 'login') {
+          void routerInstance.push({
+            name: 'login',
+            query: { sessionExpired: '1' },
+          })
+        }
+      })
+    }
+    return Promise.reject(error)
+  },
+)
+
 export function isApiError(error: unknown): error is AxiosError<ApiEnvelope<unknown>> {
   return axios.isAxiosError(error)
+}
+
+export function envelopeErrorMessageKey(error: unknown): string | null {
+  if (isApiError(error) && error.response?.data.error?.messageKey) {
+    return error.response.data.error.messageKey
+  }
+  return null
 }
 
 export { TOKEN_STORAGE_KEY }

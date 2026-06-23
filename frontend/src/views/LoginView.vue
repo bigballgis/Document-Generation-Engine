@@ -25,7 +25,12 @@ const brandOptions = computed(() => [
   { value: 'GREENBC' as BrandPreset, label: t('brand.greenbc') },
 ])
 
+const sessionExpired = computed(() => route.query.sessionExpired === '1')
+
 const errorMessage = computed(() => {
+  if (sessionExpired.value) {
+    return t('api.error.authentication.sessionExpired')
+  }
   if (!errorMessageKey.value) {
     return ''
   }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { templateDetailPath } from '@/routing/routeKeys'
 import type { MasterImpactAnalysis } from '@/types/master'
 
 defineProps<{
@@ -27,7 +28,9 @@ const { t } = useI18n()
         <p class="list-label">{{ t('masters.impact.referencedTemplates') }}</p>
         <ul>
           <li v-for="templateId in impact.referencedTemplateIds" :key="templateId">
-            {{ templateId }}
+            <router-link :to="templateDetailPath(templateId)">
+              {{ templateId }}
+            </router-link>
           </li>
         </ul>
       </div>

@@ -548,6 +548,88 @@
 - “角色关键任务完成时间”的量化目标值、统计窗口和分环境门槛。
 - 无权访问页面文案细节与交互按钮策略（返回上一页、回到首页或联系管理员）。
 
+## 已确认：身份与分组管理（用户管理与分组管理）
+
+整套权限模型（角色 + 被授权组范围 + 按组隔离）依赖“用户被分配角色/组范围”和“分组是可运营对象”两个前提。以下条目把用户管理与分组管理固化为已确认需求，使隔离模型在没有 SSO 的情况下可落地，并取代原先靠改 SQL 迁移并重新部署的临时做法。
+
+### 范围：用户全生命周期
+
+- 用户管理覆盖用户全生命周期：创建、编辑（显示名、邮箱）、分配角色、分配被授权组范围、停用/启用、逻辑删除、重置密码。
+- 用户口令只允许以 Argon2id 哈希持久化，不保存明文。
+- 重置密码采用“管理员传入新口令”模式：管理员提交新口令，平台只存哈希，不返回一次性临时口令，也不在响应、日志或审计中回显口令明文或口令哈希。
+- 逻辑删除采用 `deleted_at` 标记（逻辑删除），不物理删除；已逻辑删除用户不再可登录、不再参与授权判定。
+
+### 范围：分组全生命周期（分组升级为一等对象）
+
+- 分组从 Flyway 种子表升级为一等可运营对象。
+- 分组带维度 `dimension`，取值为 `BUSINESS_LINE`（业务条线）或 `DEPARTMENT`（部门）；该维度与已确认的“混合隔离模型（业务条线、部门/团队）”措辞保持一致。
+- 分组支持创建、编辑（仅显示名）、停用/启用；分组不提供逻辑删除或物理删除。
+- 分组编码（`group_code`）在创建时确定，全局唯一，创建后不可修改；分组维度在创建时确定，编辑操作只修改显示名。
+- 已停用分组不可作为新的用户被授权组范围分配目标，也不可作为新的母版/模板归属组使用；停用不影响已锁定的发布版本与历史审计。
+
+### 越权防护基线（fail-closed）：分组管理员在被授权组范围内管理用户
+
+分组管理员可在“被授权组范围内”管理用户。这是权限矩阵此前没有的新权限点，必须显式写入并强制审计，并遵循以下 fail-closed 防护基线：
+
+- 分组管理员只能创建/编辑其 `authorizedGroupCodes` 子集范围内的用户；为用户分配的组范围必须 ⊆ 分组管理员自身被授权组范围。越权分配组范围返回 `403 GROUP_SCOPE_OUT_OF_RANGE`。
+- 分组管理员只能分配运营类角色：`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_TESTER`、`TEMPLATE_APPROVER`；不得分配 `GLOBAL_ADMIN`、`AUDIT_ADMIN`、`GROUP_ADMIN` 等全局或管理员类角色（防止提权）。分配禁止角色返回 `403 ROLE_ASSIGNMENT_NOT_ALLOWED`。
+- 用户逻辑删除仅全局管理员可执行（分组管理员不可逻辑删除用户），越权返回 `403 USER_DELETE_NOT_ALLOWED`。
+- 分组的创建、编辑、停用/启用仅全局管理员可执行；分组管理员对分组为只读，且只可见被授权组范围内的分组，越权返回 `403 GROUP_MANAGEMENT_NOT_ALLOWED`。
+- 分组管理员可在被授权组范围内执行用户停用/启用与重置密码。
+- 任何越权请求一律 fail-closed，返回统一安全错误码与通用安全消息，不泄露未授权资源是否存在、未授权组详情或敏感明文（口令、口令哈希等）。
+
+### 与未来 SSO 的关系
+
+- 本地账户库长期作为“授权权威源”：用户的角色集合与被授权组范围始终保留在本地用户/分组管理中。
+- 未来 SSO 仅负责认证（authN），不负责角色与组范围映射；SSO 不创建、修改或删除角色与被授权组范围。
+- 该决策记录为 [ADR 0036](../adr/authorization-security/0036-local-account-store-authorization-authority.md)（topic: authorization-security）。
+
+### 审计要求
+
+- 用户创建、编辑（含角色变更、组范围变更）、停用/启用、逻辑删除、重置密码必须纳入审计。
+- 分组创建、编辑、停用/启用必须纳入审计。
+- 分组管理员管理用户的操作需额外记录“被授权组范围摘要”（`actorAuthorizedGroupScopeSummary`）。
+- 审计不得记录口令明文或口令哈希。
+
+### 已确认：管理面 API 契约（管理平面）
+
+管理面接口属于管理平面，不属于 OpenAPI v1 运行时契约，但沿用统一 envelope（`metadata`/`result`/`error`）、`UPPER_SNAKE_CASE` 枚举、英文优先 i18n `messageKey`，以及错误模型（`error.code` + `error.category` + `error.retryable` + 英文 `error.message` + `error.messageKey`）。管理面接口统一前缀为 `/api/management/v1`。
+
+用户接口：
+
+- `GET /users`：用户列表，可按 group/role 过滤，分页；全局管理员看全部，分组管理员只看被授权组范围内用户。
+- `POST /users`：创建用户。
+- `GET /users/{id}`：用户详情。
+- `PUT /users/{id}`：编辑用户（显示名、邮箱、角色、被授权组范围）。
+- `POST /users/{id}/disable`：停用用户。
+- `POST /users/{id}/enable`：启用用户。
+- `POST /users/{id}/reset-password`：重置密码（管理员传入新口令，平台只存 Argon2id 哈希）。
+- `DELETE /users/{id}`：逻辑删除用户，仅全局管理员。
+
+分组接口：
+
+- `GET /groups`：分组列表/分页。
+- `POST /groups`：创建分组，仅全局管理员。
+- `GET /groups/{id}`：分组详情。
+- `PUT /groups/{id}`：编辑分组（仅显示名），仅全局管理员。
+- `POST /groups/{id}/disable`：停用分组，仅全局管理员。
+- `POST /groups/{id}/enable`：启用分组，仅全局管理员。
+
+管理面错误码基线（与现有错误模型风格一致，`messageKey` 采用 `api.error.<category>.<camelCaseCode>`）：
+
+| `error.code` | HTTP | `error.category` | 说明 |
+| --- | --- | --- | --- |
+| `USER_NOT_FOUND` | 404 | `NOT_FOUND` | 用户不存在或不在请求方可见范围内（不泄露存在性）。 |
+| `USERNAME_ALREADY_EXISTS` | 409 | `CONFLICT` | 用户名已存在（用户名全局唯一）。 |
+| `GROUP_NOT_FOUND` | 404 | `NOT_FOUND` | 分组不存在或不在请求方可见范围内（不泄露存在性）。 |
+| `GROUP_CODE_ALREADY_EXISTS` | 409 | `CONFLICT` | 分组编码已存在（`group_code` 全局唯一）。 |
+| `GROUP_SCOPE_OUT_OF_RANGE` | 403 | `AUTHORIZATION` | 分组管理员越权分配了自身被授权组范围之外的组范围。 |
+| `ROLE_ASSIGNMENT_NOT_ALLOWED` | 403 | `AUTHORIZATION` | 分组管理员分配了禁止的全局/管理员类角色。 |
+| `USER_DELETE_NOT_ALLOWED` | 403 | `AUTHORIZATION` | 逻辑删除用户仅全局管理员可执行。 |
+| `GROUP_MANAGEMENT_NOT_ALLOWED` | 403 | `AUTHORIZATION` | 分组创建/编辑/停用/启用仅全局管理员可执行。 |
+
+注：管理平面引入 `NOT_FOUND` 与 `CONFLICT` 两个错误类别，仅用于 `/api/management/v1` 管理面；这两个类别不并入运行时动态 API v1 的 10 类固定错误类别集合。
+
 ## 待确认：设计优化议题
 
 以下议题来自文档一致性、可行性和可用性审查，不作为已确认需求。

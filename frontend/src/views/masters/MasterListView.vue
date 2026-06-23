@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterUploadDialog from '@/components/masters/MasterUploadDialog.vue'
-import { canUploadMasters } from '@/auth/roles'
+import { useCapabilities } from '@/composables/useCapabilities'
 import { MASTER_DETAIL_PATH_PREFIX } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
@@ -18,7 +18,8 @@ const sessionStore = useSessionStore()
 
 const uploadDialogOpen = ref(false)
 
-const canUpload = computed(() => canUploadMasters(sessionStore.session?.roles ?? []))
+const { manageMasters } = useCapabilities()
+const canUpload = computed(() => manageMasters.value)
 const groupedMasters = computed(() => [...mastersStore.mastersByGroup.entries()])
 const errorMessage = computed(() => {
   const key = mastersStore.lastErrorMessageKey

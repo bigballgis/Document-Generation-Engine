@@ -54,8 +54,7 @@ public class GroupAccessService {
 
     public boolean canManageApiPolicy(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
-                || session.roles().contains("GROUP_ADMIN")
-                || session.roles().contains("API_ADMIN");
+                || session.roles().contains("GROUP_ADMIN");
     }
 
     public boolean canReadAudit(ManagementSessionClaims session) {

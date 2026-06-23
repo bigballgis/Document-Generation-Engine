@@ -1,3 +1,14 @@
+export interface ManagementCapabilities {
+  manageMasters: boolean
+  reviewMasters: boolean
+  authorTemplates: boolean
+  decideTests: boolean
+  decideApprovals: boolean
+  publishTemplates: boolean
+  manageApiPolicy: boolean
+  readAudit: boolean
+}
+
 export interface ManagementSession {
   username: string
   displayName: string
@@ -7,6 +18,7 @@ export interface ManagementSession {
   authorizedGroupCodes: string[]
   defaultRoute: string
   visibleRoutes: string[]
+  capabilities?: ManagementCapabilities
   expiresAt: string
 }
 

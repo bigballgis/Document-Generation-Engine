@@ -35,6 +35,15 @@ export interface AnchorBinding {
   anchorId: string
   declaredContentType: string
   structuredContentJson: string | null
+  validationStatus?: string
+}
+
+export interface CompositionRule {
+  ruleId: string
+  conditionExpression: string
+  targetAnchorId: string
+  trueBranchRuleId?: string | null
+  falseBranchRuleId?: string | null
 }
 
 export interface TemplateDetail {
@@ -46,12 +55,29 @@ export interface TemplateDetail {
   masterId: string
   lifecycleStatus: TemplateLifecycleStatus
   releaseVersion: string | null
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION'
   devVersionId: string
   devVersionNumber: number
   variables: VariableSchema[]
   bindings: AnchorBinding[]
+  rules: CompositionRule[]
   createdAt: string
   updatedAt: string
+}
+
+export interface UpsertVariablePayload {
+  variableKey: string
+  variableType: string
+  required: boolean
+  defaultValue?: string | null
+  enumValues?: string | null
+  description?: string | null
+}
+
+export interface UpsertBindingPayload {
+  anchorId: string
+  declaredContentType: string
+  structuredContentJson: string
 }
 
 export interface CreateTemplatePayload {

@@ -56,7 +56,7 @@ model, permissions, API docs, and ADRs.
 | E06 | P1 | No | Management UI product shell: login-first, OA layout, dual-brand | Done | E01–E05 slices |
 | E07 | P2 | No | Production readiness: gates, observability, deployment evidence | Done (local gates) | E01–E06 |
 | E11 | P1 | No | Role-journey navigation after login (GLOBAL/GROUP/TEMPLATE_AUTHOR) | Done | P1 login |
-| E12 | P1 | No | Frontend role-operation journey UI continuation | Done (thin slice) | E11 |
+| E12 | P1 | No | Frontend role-operation journey UI continuation | Done (thin slice); UX Wave A/B extension in progress — see [e12-phase3-task-sheet.md](../architecture/e12-phase3-task-sheet.md) | E11 |
 
 ## Active epic rule
 

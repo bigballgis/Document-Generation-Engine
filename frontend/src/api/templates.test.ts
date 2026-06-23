@@ -57,6 +57,7 @@ describe('templates API', () => {
           devVersionNumber: 1,
           variables: [],
           bindings: [],
+          rules: [],
           createdAt: '2026-06-23T10:00:00Z',
           updatedAt: '2026-06-23T10:05:00Z',
         },

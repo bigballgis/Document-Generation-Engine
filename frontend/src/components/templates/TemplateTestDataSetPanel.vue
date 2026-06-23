@@ -2,6 +2,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import * as templatesApi from '@/api/templates'
+import { useConfirmAction } from '@/composables/useConfirmAction'
 import type { TestDataSet } from '@/types/template'
 import { ElMessage } from 'element-plus'
 
@@ -14,6 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const { confirmAction } = useConfirmAction()
 const loading = ref(false)
 const saving = ref(false)
 const dataSets = ref<TestDataSet[]>([])
@@ -102,6 +104,14 @@ async function handleSave() {
 }
 
 async function handleDelete(testDataSetId: string) {
+  const confirmed = await confirmAction({
+    titleKey: 'templates.testDataSets.confirmDeleteTitle',
+    messageKey: 'templates.testDataSets.confirmDeleteMessage',
+    type: 'warning',
+  })
+  if (!confirmed) {
+    return
+  }
   try {
     await templatesApi.deleteTestDataSet(props.templateId, testDataSetId)
     if (selectedId.value === testDataSetId) {

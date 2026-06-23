@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import TemplateCreateDialog from '@/components/templates/TemplateCreateDialog.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import { useCapabilities } from '@/composables/useCapabilities'
 import { templateDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateSummary } from '@/types/template'
+import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
+const { authorTemplates } = useCapabilities()
+
+const createDialogOpen = ref(false)
 
 const groupedTemplates = computed(() => [...templatesStore.templatesByGroup.entries()])
 const errorMessage = computed(() => {
@@ -31,6 +37,11 @@ onMounted(async () => {
 function openTemplate(templateId: string) {
   router.push(templateDetailPath(templateId))
 }
+
+function handleCreated(templateId: string) {
+  ElMessage.success(t('templates.create.success'))
+  router.push(templateDetailPath(templateId))
+}
 </script>
 
 <template>
@@ -40,6 +51,9 @@ function openTemplate(templateId: string) {
         <h1>{{ t('templates.list.title') }}</h1>
         <p>{{ t('templates.list.description') }}</p>
       </div>
+      <el-button v-if="authorTemplates" type="primary" @click="createDialogOpen = true">
+        {{ t('templates.create.open') }}
+      </el-button>
     </header>
 
     <el-alert
@@ -79,6 +93,8 @@ function openTemplate(templateId: string) {
     </template>
 
     <el-empty v-else :description="t('templates.list.empty')" />
+
+    <TemplateCreateDialog v-model="createDialogOpen" @created="handleCreated" />
   </div>
 </template>
 
@@ -88,6 +104,10 @@ function openTemplate(templateId: string) {
 }
 
 .page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1.5rem;
 
   h1 {

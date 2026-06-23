@@ -7,6 +7,8 @@ import type {
   ApiCredentialCreated,
   ApiCredentialSummary,
   ApiPolicy,
+  CompositionRuleInput,
+  CreateTemplatePayload,
   LifecycleCommentPayload,
   LifecycleDecisionPayload,
   PublishTemplatePayload,
@@ -14,6 +16,8 @@ import type {
   TemplateSummary,
   TestGeneratePayload,
   UpsertApiPolicyPayload,
+  UpsertBindingPayload,
+  UpsertVariablePayload,
 } from '@/types/template'
 
 export const useTemplatesStore = defineStore('templates', () => {
@@ -22,6 +26,9 @@ export const useTemplatesStore = defineStore('templates', () => {
   const apiPolicy = ref<ApiPolicy | null>(null)
   const credentials = ref<ApiCredentialSummary[]>([])
   const lastCreatedCredential = ref<ApiCredentialCreated | null>(null)
+  const lastRotatedCredential = ref<{ credentialId: string; externalId: string; secret: string } | null>(
+    null,
+  )
   const loadingList = ref(false)
   const loadingDetail = ref(false)
   const loadingPolicy = ref(false)
@@ -120,10 +127,62 @@ export const useTemplatesStore = defineStore('templates', () => {
     lastErrorMessageKey.value = null
     try {
       lastCreatedCredential.value = await apiPolicyApi.createCredential(templateId)
+      lastRotatedCredential.value = null
       await fetchCredentials(templateId)
       return lastCreatedCredential.value
     } catch (error) {
       lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.createCredential')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function rotateCredential(templateId: string, credentialId: string) {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      const rotated = await apiPolicyApi.rotateCredential(templateId, credentialId)
+      lastRotatedCredential.value = {
+        credentialId: rotated.credentialId,
+        externalId: rotated.externalId,
+        secret: rotated.secret,
+      }
+      lastCreatedCredential.value = null
+      await fetchCredentials(templateId)
+      return rotated
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.rotateCredential')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function revokeCredential(templateId: string, credentialId: string) {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      await apiPolicyApi.revokeCredential(templateId, credentialId)
+      await fetchCredentials(templateId)
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.revokeCredential')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function createTemplate(payload: CreateTemplatePayload): Promise<TemplateDetail> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      const created = await templatesApi.createTemplate(payload)
+      templates.value = [toSummary(created), ...templates.value]
+      selectedTemplate.value = created
+      return created
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.create')
       throw error
     } finally {
       submitting.value = false
@@ -163,6 +222,14 @@ export const useTemplatesStore = defineStore('templates', () => {
     }
   }
 
+  async function validateBindings(templateId: string) {
+    return templatesApi.validateBindings(templateId)
+  }
+
+  async function validateRules(templateId: string, rules: CompositionRuleInput[]) {
+    return templatesApi.validateRules(templateId, rules)
+  }
+
   async function runLifecycleAction(action: () => Promise<TemplateDetail>) {
     submitting.value = true
     lastErrorMessageKey.value = null
@@ -172,6 +239,74 @@ export const useTemplatesStore = defineStore('templates', () => {
       return updated
     } catch (error) {
       lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.lifecycle')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function upsertVariable(
+    templateId: string,
+    variableKey: string,
+    payload: UpsertVariablePayload,
+  ): Promise<TemplateDetail> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      await templatesApi.upsertVariable(templateId, variableKey, payload)
+      await fetchTemplate(templateId)
+      return selectedTemplate.value!
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.saveVariable')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function deleteVariable(templateId: string, variableKey: string): Promise<TemplateDetail> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      await templatesApi.deleteVariable(templateId, variableKey)
+      await fetchTemplate(templateId)
+      return selectedTemplate.value!
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.deleteVariable')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function upsertBinding(
+    templateId: string,
+    anchorId: string,
+    payload: UpsertBindingPayload,
+  ): Promise<TemplateDetail> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      await templatesApi.upsertBinding(templateId, anchorId, payload)
+      await fetchTemplate(templateId)
+      return selectedTemplate.value!
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.saveBinding')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function saveRules(templateId: string, rules: CompositionRuleInput[]): Promise<TemplateDetail> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      await templatesApi.saveRules(templateId, rules)
+      await fetchTemplate(templateId)
+      return selectedTemplate.value!
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.saveRules')
       throw error
     } finally {
       submitting.value = false
@@ -203,6 +338,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     apiPolicy.value = null
     credentials.value = []
     lastCreatedCredential.value = null
+    lastRotatedCredential.value = null
   }
 
   return {
@@ -211,6 +347,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     apiPolicy,
     credentials,
     lastCreatedCredential,
+    lastRotatedCredential,
     loadingList,
     loadingDetail,
     loadingPolicy,
@@ -224,12 +361,21 @@ export const useTemplatesStore = defineStore('templates', () => {
     fetchCredentials,
     saveApiPolicy,
     createCredential,
+    rotateCredential,
+    revokeCredential,
+    createTemplate,
     submitForTest,
     recordTestDecision,
     submitForApproval,
     recordApprovalDecision,
     publishTemplate,
     testGenerate,
+    validateBindings,
+    validateRules,
+    upsertVariable,
+    deleteVariable,
+    upsertBinding,
+    saveRules,
     clearSelected,
   }
 })

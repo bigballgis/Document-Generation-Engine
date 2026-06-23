@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
@@ -8,24 +8,35 @@ import TemplateAuthoringPanel from '@/components/templates/TemplateAuthoringPane
 import TemplateRuleConfigurator from '@/components/templates/TemplateRuleConfigurator.vue'
 import TemplatePreviewPanel from '@/components/templates/TemplatePreviewPanel.vue'
 import TemplateTestDataSetPanel from '@/components/templates/TemplateTestDataSetPanel.vue'
-import { canManageApiPolicy, canManageTemplateLifecycle } from '@/auth/roles'
-import { ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
-import { useSessionStore } from '@/stores/session'
+import { useCapabilities } from '@/composables/useCapabilities'
+import { useConfirmAction } from '@/composables/useConfirmAction'
+import { MASTER_DETAIL_PATH_PREFIX, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
-import type { PreviewRecord, UpsertApiPolicyPayload } from '@/types/template'
+import type { BindingValidationResult, PreviewRecord, UpsertApiPolicyPayload } from '@/types/template'
 import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
-const sessionStore = useSessionStore()
+const {
+  authorTemplates,
+  decideTests,
+  decideApprovals,
+  publishTemplates,
+  manageApiPolicy,
+} = useCapabilities()
+const { confirmAction } = useConfirmAction()
 
 const lifecycleComment = ref('')
 const publishVersion = ref('1.0.0')
-const showCredentialSecret = ref(false)
+const credentialSecretDialogVisible = ref(false)
+const credentialSecretValue = ref('')
+const credentialSecretExternalId = ref('')
 const lastPreview = ref<PreviewRecord | null>(null)
 const selectedTestDataSetId = ref<string | null>(null)
+const bindingGateResult = ref<BindingValidationResult | null>(null)
+const loadingPublishGate = ref(false)
 
 const policyForm = reactive<UpsertApiPolicyPayload>({
   allowedAdGroups: [],
@@ -40,10 +51,7 @@ const policyForm = reactive<UpsertApiPolicyPayload>({
 
 const templateId = computed(() => route.params.templateId as string)
 const template = computed(() => templatesStore.selectedTemplate)
-const canLifecycle = computed(() =>
-  canManageTemplateLifecycle(sessionStore.session?.roles ?? []),
-)
-const canPolicy = computed(() => canManageApiPolicy(sessionStore.session?.roles ?? []))
+const canPolicy = computed(() => manageApiPolicy.value)
 
 const errorMessage = computed(() => {
   const key = templatesStore.lastErrorMessageKey
@@ -53,17 +61,127 @@ const errorMessage = computed(() => {
   return te(key) ? t(key) : t('templates.error.loadDetail')
 })
 
-const showDraftActions = computed(() => template.value?.lifecycleStatus === 'DRAFT')
-const showTestingActions = computed(() => template.value?.lifecycleStatus === 'TESTING')
-const showApprovalActions = computed(() => template.value?.lifecycleStatus === 'APPROVAL')
-const showPublishActions = computed(() => template.value?.lifecycleStatus === 'PENDING_RELEASE')
+const approvalSubState = computed(() => template.value?.approvalSubState)
+
+const showDraftActions = computed(
+  () => template.value?.lifecycleStatus === 'DRAFT' && authorTemplates.value,
+)
+const showTestingDecisionActions = computed(
+  () => template.value?.lifecycleStatus === 'TESTING' && decideTests.value,
+)
+const showSubmitForApproval = computed(() => {
+  if (template.value?.lifecycleStatus !== 'APPROVAL' || !authorTemplates.value) {
+    return false
+  }
+  if (approvalSubState.value === 'PENDING_DECISION') {
+    return false
+  }
+  if (decideApprovals.value && !authorTemplates.value) {
+    return false
+  }
+  return true
+})
+const showApprovalDecisionActions = computed(() => {
+  if (template.value?.lifecycleStatus !== 'APPROVAL' || !decideApprovals.value) {
+    return false
+  }
+  if (approvalSubState.value === 'PENDING_SUBMIT') {
+    return false
+  }
+  return true
+})
+const showPublishActions = computed(
+  () => template.value?.lifecycleStatus === 'PENDING_RELEASE' && publishTemplates.value,
+)
+
+const publishGateItems = computed(() => [
+  {
+    key: 'lifecycle',
+    label: t('templates.publishGate.lifecycleReady'),
+    ready: template.value?.lifecycleStatus === 'PENDING_RELEASE',
+    informational: false,
+  },
+  {
+    key: 'releaseVersion',
+    label: t('templates.publishGate.releaseVersionProvided'),
+    ready: Boolean(publishVersion.value.trim()),
+    informational: false,
+  },
+  {
+    key: 'bindings',
+    label: t('templates.publishGate.bindingsValid'),
+    ready: Boolean(bindingGateResult.value && !bindingGateResult.value.summary.blocking),
+    informational: false,
+  },
+  {
+    key: 'apiPolicy',
+    label: t('templates.publishGate.apiPolicyConfigured'),
+    ready: true,
+    informational: true,
+  },
+])
+
+const publishGateReady = computed(() =>
+  publishGateItems.value.filter((item) => !item.informational).every((item) => item.ready),
+)
+
 const showPolicyPanel = computed(
   () => template.value?.lifecycleStatus === 'PUBLISHED' && canPolicy.value,
 )
+const showLifecycleSection = computed(
+  () =>
+    showDraftActions.value ||
+    showTestingDecisionActions.value ||
+    showSubmitForApproval.value ||
+    showApprovalDecisionActions.value ||
+    showPublishActions.value ||
+    (authorTemplates.value &&
+      (template.value?.lifecycleStatus === 'DRAFT' ||
+        template.value?.lifecycleStatus === 'TESTING')),
+)
+const showAuthoringSection = computed(
+  () =>
+    authorTemplates.value &&
+    template.value?.lifecycleStatus !== 'PUBLISHED' &&
+    template.value?.lifecycleStatus !== 'STOPPED' &&
+    template.value?.lifecycleStatus !== 'DEPRECATED',
+)
+const showTestGenerate = computed(
+  () =>
+    authorTemplates.value &&
+    (template.value?.lifecycleStatus === 'DRAFT' ||
+      template.value?.lifecycleStatus === 'TESTING'),
+)
+
+const displayedCredentialSecret = computed(() => {
+  if (templatesStore.lastCreatedCredential?.secret) {
+    return templatesStore.lastCreatedCredential.secret
+  }
+  return templatesStore.lastRotatedCredential?.secret ?? ''
+})
 
 onMounted(async () => {
   await loadTemplate()
 })
+
+watch(
+  showPublishActions,
+  async (active) => {
+    if (!active) {
+      bindingGateResult.value = null
+      return
+    }
+    loadingPublishGate.value = true
+    try {
+      bindingGateResult.value = await templatesStore.validateBindings(templateId.value)
+    } catch {
+      bindingGateResult.value = null
+    } finally {
+      loadingPublishGate.value = false
+    }
+  },
+  { immediate: true },
+)
 
 async function loadTemplate() {
   try {
@@ -95,6 +213,12 @@ async function loadPolicyData() {
 
 function backToList() {
   router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
+}
+
+function openCredentialSecretDialog(externalId: string, secret: string) {
+  credentialSecretExternalId.value = externalId
+  credentialSecretValue.value = secret
+  credentialSecretDialogVisible.value = true
 }
 
 async function handleTestGenerate() {
@@ -145,6 +269,16 @@ async function handleSubmitForApproval() {
 }
 
 async function handleApprovalDecision(decision: 'APPROVED' | 'REJECTED') {
+  if (decision === 'REJECTED') {
+    const confirmed = await confirmAction({
+      titleKey: 'templates.lifecycle.confirmRejectTitle',
+      messageKey: 'templates.lifecycle.confirmRejectMessage',
+      type: 'warning',
+    })
+    if (!confirmed) {
+      return
+    }
+  }
   try {
     await templatesStore.recordApprovalDecision(templateId.value, {
       decision,
@@ -158,6 +292,17 @@ async function handleApprovalDecision(decision: 'APPROVED' | 'REJECTED') {
 }
 
 async function handlePublish() {
+  if (!publishGateReady.value) {
+    return
+  }
+  const confirmed = await confirmAction({
+    titleKey: 'templates.lifecycle.confirmPublishTitle',
+    messageKey: 'templates.lifecycle.confirmPublishMessage',
+    type: 'warning',
+  })
+  if (!confirmed) {
+    return
+  }
   try {
     await templatesStore.publishTemplate(templateId.value, {
       releaseVersion: publishVersion.value,
@@ -180,12 +325,46 @@ async function handleSavePolicy() {
 
 async function handleCreateCredential() {
   try {
-    showCredentialSecret.value = true
-    await templatesStore.createCredential(templateId.value)
+    const created = await templatesStore.createCredential(templateId.value)
+    openCredentialSecretDialog(created.externalId, created.secret)
     ElMessage.success(t('templates.policy.createCredentialSuccess'))
   } catch {
-    showCredentialSecret.value = false
     ElMessage.error(errorMessage.value || t('templates.error.createCredential'))
+  }
+}
+
+async function handleRotateCredential(credentialId: string, externalId: string) {
+  const confirmed = await confirmAction({
+    titleKey: 'templates.policy.confirmRotateTitle',
+    messageKey: 'templates.policy.confirmRotateMessage',
+    type: 'warning',
+  })
+  if (!confirmed) {
+    return
+  }
+  try {
+    const rotated = await templatesStore.rotateCredential(templateId.value, credentialId)
+    openCredentialSecretDialog(externalId, rotated.secret)
+    ElMessage.success(t('templates.policy.rotateCredentialSuccess'))
+  } catch {
+    ElMessage.error(errorMessage.value || t('templates.error.rotateCredential'))
+  }
+}
+
+async function handleRevokeCredential(credentialId: string) {
+  const confirmed = await confirmAction({
+    titleKey: 'templates.policy.confirmRevokeTitle',
+    messageKey: 'templates.policy.confirmRevokeMessage',
+    type: 'warning',
+  })
+  if (!confirmed) {
+    return
+  }
+  try {
+    await templatesStore.revokeCredential(templateId.value, credentialId)
+    ElMessage.success(t('templates.policy.revokeCredentialSuccess'))
+  } catch {
+    ElMessage.error(errorMessage.value || t('templates.error.revokeCredential'))
   }
 }
 </script>
@@ -226,7 +405,11 @@ async function handleCreateCredential() {
           </div>
           <div>
             <dt>{{ t('templates.detail.masterId') }}</dt>
-            <dd>{{ template.masterId }}</dd>
+            <dd>
+              <router-link :to="`${MASTER_DETAIL_PATH_PREFIX}${template.masterId}`">
+                {{ template.masterId }}
+              </router-link>
+            </dd>
           </div>
           <div>
             <dt>{{ t('templates.detail.releaseVersion') }}</dt>
@@ -242,7 +425,7 @@ async function handleCreateCredential() {
         </p>
       </el-card>
 
-      <el-card v-if="canLifecycle" shadow="never" class="section-card">
+      <el-card v-if="showLifecycleSection" shadow="never" class="section-card">
         <h2>{{ t('templates.lifecycle.title') }}</h2>
         <el-input
           v-model="lifecycleComment"
@@ -260,7 +443,7 @@ async function handleCreateCredential() {
           >
             {{ t('templates.lifecycle.submitTest') }}
           </el-button>
-          <template v-if="showTestingActions">
+          <template v-if="showTestingDecisionActions">
             <el-button
               type="success"
               :loading="templatesStore.submitting"
@@ -277,14 +460,14 @@ async function handleCreateCredential() {
             </el-button>
           </template>
           <el-button
-            v-if="showApprovalActions"
+            v-if="showSubmitForApproval"
             type="primary"
             :loading="templatesStore.submitting"
             @click="handleSubmitForApproval"
           >
             {{ t('templates.lifecycle.submitApproval') }}
           </el-button>
-          <template v-if="showApprovalActions">
+          <template v-if="showApprovalDecisionActions">
             <el-button
               type="success"
               :loading="templatesStore.submitting"
@@ -304,10 +487,25 @@ async function handleCreateCredential() {
             <el-card shadow="never" class="publish-gate-card">
               <h3>{{ t('templates.publishGate.title') }}</h3>
               <p>{{ t('templates.publishGate.description') }}</p>
-              <ul class="publish-gate-list">
-                <li>{{ t('templates.publishGate.lifecycleReady') }}</li>
-                <li>{{ t('templates.publishGate.releaseVersionProvided') }} — {{ publishVersion || t('templates.publishGate.pending') }}</li>
-                <li>{{ t('templates.publishGate.apiPolicyConfigured') }}</li>
+              <el-skeleton v-if="loadingPublishGate" :rows="3" animated />
+              <ul v-else class="publish-gate-list">
+                <li v-for="item in publishGateItems" :key="item.key">
+                  <span>{{ item.label }}</span>
+                  <el-tag
+                    v-if="item.informational"
+                    type="info"
+                    size="small"
+                  >
+                    {{ t('templates.publishGate.informational') }}
+                  </el-tag>
+                  <el-tag
+                    v-else
+                    :type="item.ready ? 'success' : 'warning'"
+                    size="small"
+                  >
+                    {{ item.ready ? t('templates.publishGate.ready') : t('templates.publishGate.pending') }}
+                  </el-tag>
+                </li>
               </ul>
             </el-card>
             <el-input
@@ -318,12 +516,14 @@ async function handleCreateCredential() {
             <el-button
               type="primary"
               :loading="templatesStore.submitting"
+              :disabled="!publishGateReady"
               @click="handlePublish"
             >
               {{ t('templates.lifecycle.publish') }}
             </el-button>
           </template>
           <el-button
+            v-if="showTestGenerate"
             :loading="templatesStore.submitting"
             @click="handleTestGenerate"
           >
@@ -332,14 +532,19 @@ async function handleCreateCredential() {
         </div>
       </el-card>
 
-      <el-card v-if="canLifecycle" shadow="never" class="section-card">
+      <el-card v-if="showAuthoringSection" shadow="never" class="section-card">
         <h2>{{ t('templates.authoring.title') }}</h2>
         <TemplateAuthoringPanel
           :template-id="templateId"
           :variables="template.variables"
           :bindings="template.bindings"
+          @updated="loadTemplate"
         />
-        <TemplateRuleConfigurator :template-id="templateId" />
+        <TemplateRuleConfigurator
+          :template-id="templateId"
+          :initial-rules="template.rules ?? []"
+          @updated="loadTemplate"
+        />
         <h3>{{ t('templates.testDataSets.title') }}</h3>
         <TemplateTestDataSetPanel
           :template-id="templateId"
@@ -347,7 +552,7 @@ async function handleCreateCredential() {
         />
       </el-card>
 
-      <el-card v-if="canLifecycle" shadow="never" class="section-card">
+      <el-card v-if="showAuthoringSection" shadow="never" class="section-card">
         <h2>{{ t('templates.preview.title') }}</h2>
         <TemplatePreviewPanel
           :template-id="templateId"
@@ -392,17 +597,6 @@ async function handleCreateCredential() {
               {{ t('templates.policy.createCredential') }}
             </el-button>
           </div>
-          <el-alert
-            v-if="showCredentialSecret && templatesStore.lastCreatedCredential"
-            type="warning"
-            :title="t('templates.policy.credentialCreatedTitle')"
-            :closable="false"
-            show-icon
-            class="credential-alert"
-          >
-            <p>{{ t('templates.policy.credentialExternalId') }}: {{ templatesStore.lastCreatedCredential.externalId }}</p>
-            <p>{{ t('templates.policy.credentialSecretHint') }}</p>
-          </el-alert>
           <h3>{{ t('templates.policy.credentialsTitle') }}</h3>
           <el-table :data="templatesStore.credentials" stripe empty-text="">
             <template #empty>
@@ -415,6 +609,26 @@ async function handleCreateCredential() {
                 {{ new Date(row.createdAt).toLocaleString() }}
               </template>
             </el-table-column>
+            <el-table-column :label="t('templates.policy.credentialActions')" min-width="200">
+              <template #default="{ row }">
+                <el-button
+                  v-if="row.status === 'ACTIVE'"
+                  link
+                  type="primary"
+                  @click="handleRotateCredential(row.credentialId, row.externalId)"
+                >
+                  {{ t('templates.policy.rotateCredential') }}
+                </el-button>
+                <el-button
+                  v-if="row.status === 'ACTIVE'"
+                  link
+                  type="danger"
+                  @click="handleRevokeCredential(row.credentialId)"
+                >
+                  {{ t('templates.policy.revokeCredential') }}
+                </el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </template>
       </el-card>
@@ -424,6 +638,27 @@ async function handleCreateCredential() {
         <TemplateCallerContractPanel :template-id="templateId" environment="dev" />
       </el-card>
     </template>
+
+    <el-dialog
+      v-model="credentialSecretDialogVisible"
+      :title="t('templates.policy.credentialSecretDialogTitle')"
+      width="480px"
+      :close-on-click-modal="false"
+    >
+      <p>{{ t('templates.policy.credentialSecretHint') }}</p>
+      <p>{{ t('templates.policy.credentialExternalId') }}: {{ credentialSecretExternalId }}</p>
+      <el-input
+        :model-value="displayedCredentialSecret || credentialSecretValue"
+        readonly
+        type="textarea"
+        :rows="3"
+      />
+      <template #footer>
+        <el-button type="primary" @click="credentialSecretDialogVisible = false">
+          {{ t('common.confirm') }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -538,13 +773,5 @@ async function handleCreateCredential() {
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 0.75rem 1rem;
   margin-bottom: 1rem;
-}
-
-.credential-alert {
-  margin: 1rem 0;
-
-  p {
-    margin: 0.25rem 0;
-  }
 }
 </style>

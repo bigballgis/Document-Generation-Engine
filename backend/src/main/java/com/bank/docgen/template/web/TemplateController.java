@@ -6,6 +6,7 @@ import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.AnchorBindingView;
 import com.bank.docgen.template.api.BindingValidationView;
+import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
@@ -136,6 +137,25 @@ public class TemplateController {
             HttpServletRequest request
     ) {
         return envelope(request, templateService.validateBindings(templateId, session));
+    }
+
+    @PutMapping("/{templateId}/rules")
+    public SuccessEnvelope<List<CompositionRuleView>> saveRules(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody TemplateRuleValidationRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        List<CompositionRuleView> rules = body.rules().stream()
+                .map(rule -> new CompositionRuleView(
+                        rule.ruleId(),
+                        rule.conditionExpression(),
+                        rule.targetAnchorId(),
+                        rule.trueBranchRuleId(),
+                        rule.falseBranchRuleId()
+                ))
+                .toList();
+        return envelope(request, templateService.saveRules(templateId, rules, session));
     }
 
     @PostMapping("/{templateId}/rules/validate")

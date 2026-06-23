@@ -1,7 +1,8 @@
 # Documentation Index
 
-**Project baseline:** Restart from zero (2026-06-23); **P0–P11 re-earned Done** with
-implementation in `backend/` and `frontend/`. See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
+**Project baseline:** Restart from zero (2026-06-23); **P0–P11 re-earned Done** and **P13
+(identity & group administration) Done** (2026-06-23) with implementation in `backend/` and
+`frontend/`. See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
 and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 ## Start here
@@ -33,6 +34,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Plan index](./plan/README.md) | Layer rules and phase links |
 | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone ↔ phase mapping + evidence |
 | [Master plan](./plan/master-plan.md) | P0–P11 phases — see phase detail plans for status |
+| [Optimization plan & backlog](./plan/optimization-plan.md) | Evidence-backed optimization backlog (docs drift, gates, backend, frontend) |
+| [UX & upgradeability optimization plan](./plan/ux-upgradeability-optimization-plan.md) | User-interaction completeness + extensibility — **Wave A Done**, **Wave B In Progress** (2026-06-23) |
 | [P0 Foundation](./plan/detail/P0-foundation.md) | Scaffold, compose, gates |
 | [P1 Login & session](./plan/detail/P1-login-session.md) | Local auth, role landing |
 | [P2 Master management](./plan/detail/P2-master-management.md) | DOCX master, anchors, review |
@@ -44,6 +47,9 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [P8 Audit & contract](./plan/detail/P8-audit-contract.md) | Audit console, caller view |
 | [P9 Production readiness](./plan/detail/P9-production-readiness.md) | Gates, observability, deploy |
 | [P10 Runtime download](./plan/detail/P10-runtime-download.md) | Secure document download |
+| [P11 Batch & async generation](./plan/detail/P11-batch-async.md) | Sync batch, async task query/cancel |
+| [P13 Identity & group administration](./plan/detail/P13-identity-group-administration.md) | User + group management plane, fail-closed escalation guard, audit (Done 2026-06-23) |
+| [P14 Confirmed large domains](./plan/detail/P14-confirmed-large-domains.md) | Clause modules, collaboration to-dos, export/import |
 
 ## Architecture
 

@@ -2,8 +2,10 @@
 
 Execution truth for this project lives here.
 
-**Current baseline:** P0–P11 re-earned **Done** (2026-06-23). Active phase: **P12**
-(deferred enhancements). See [execution-sync-ledger.md](./execution-sync-ledger.md).
+**Current baseline:** P0–P11 re-earned **Done** (2026-06-23); **P13** (identity & group
+administration) completed **Done** (2026-06-23). Active phase: **none — no single active
+phase slice**; P12 is the non-active deferred-enhancements catch-all. See
+[execution-sync-ledger.md](./execution-sync-ledger.md).
 
 ## Layer model
 
@@ -44,14 +46,37 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P9 | Production readiness | [detail/P9-production-readiness.md](detail/P9-production-readiness.md) | Done |
 | P10 | Runtime document download | [detail/P10-runtime-download.md](detail/P10-runtime-download.md) | Done |
 | P11 | Batch & async generation | [detail/P11-batch-async.md](detail/P11-batch-async.md) | Done |
+| P12 | Deferred enhancements | [master-plan.md](./master-plan.md) (catch-all, non-active) | Not Started |
+| P13 | Identity & group administration | [detail/P13-identity-group-administration.md](detail/P13-identity-group-administration.md) | Done |
+| P14 | Confirmed large domains | [detail/P14-confirmed-large-domains.md](detail/P14-confirmed-large-domains.md) | Not Started |
+| P15 | Kubernetes deployment & container hardening | [detail/P15-kubernetes-deployment-container-hardening.md](detail/P15-kubernetes-deployment-container-hardening.md) | Not Started |
+| P16 | Template & version lifecycle governance completeness | [detail/P16-lifecycle-version-governance.md](detail/P16-lifecycle-version-governance.md) | Not Started |
+| P17 | Per-domain API policy governance | [detail/P17-api-policy-domain-governance.md](detail/P17-api-policy-domain-governance.md) | Not Started |
+| P18 | Structured authoring & rendering-fidelity engine | [detail/P18-structured-authoring-fidelity-engine.md](detail/P18-structured-authoring-fidelity-engine.md) | Not Started |
+| P19 | Template verifiability, publish gate & decision forms | [detail/P19-verifiability-publish-gate.md](detail/P19-verifiability-publish-gate.md) | Not Started |
+| P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | Not Started |
 
 ## First delivery target (thin vertical slice) — achieved
 
 Login → upload approved master → create template → test → approve → publish →
 call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** — Done.
 
-## Next focus (P12)
+## Next focus
 
-Deferred/post-MVP enhancements without a single active slice. See
-[master-plan.md](./master-plan.md) deferred section and outstanding items in
-[execution-sync-ledger.md](./execution-sync-ledger.md).
+P13 (identity & group administration) is **Done** (2026-06-23) — GLOBAL/GROUP admins manage
+users and business groups through the management API + UI, with fail-closed privilege-escalation
+protection, audit, and green quality gates (local account store is the authorization authority,
+ADR 0036). See [detail/P13-identity-group-administration.md](detail/P13-identity-group-administration.md).
+There is currently **no single active phase slice**. P12 (deferred enhancements) remains a
+non-active catch-all; P14 (confirmed large domains) is the next planned large slice. **P16–P20**
+were added 2026-06-23 from a deep functional-gap
+review — lifecycle/version governance (P16), per-domain API policy governance (P17),
+structured authoring & fidelity engine (P18), verifiability/publish-gate + decision forms
+(P19), and i18n multi-locale + UI upgradeability (P20); all `Not Started`.
+
+## Optimization backlogs
+
+| Backlog | Lens |
+| --- | --- |
+| [optimization-plan.md](./optimization-plan.md) | Technical debt: quality gates, coverage, backend architecture/security/performance |
+| [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimization-plan.md) | User-interaction completeness + upgradeability/extensibility — **Wave A Done**, **Wave B In Progress** (2026-06-23) |

@@ -72,9 +72,8 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
             org.springframework.security.core.context.SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("""
-                    {"error":{"code":"%s","messageKey":"%s"}}
-                    """.formatted(ex.code(), ex.messageKey()));
+            response.getWriter().write(
+                    "{\"error\":{\"code\":\"%s\",\"messageKey\":\"%s\"}}".formatted(ex.code(), ex.messageKey()));
         }
     }
 

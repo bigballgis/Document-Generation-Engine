@@ -8,6 +8,9 @@ describe('routeKeys', () => {
     expect(pathForRouteKey(ROUTE_KEYS.masterManagement)).toBe('/masters')
     expect(pathForRouteKey(ROUTE_KEYS.templateManagement)).toBe('/templates')
     expect(pathForRouteKey(ROUTE_KEYS.auditConsole)).toBe('/home/audit')
+    expect(pathForRouteKey(ROUTE_KEYS.testerWorkbench)).toBe('/home/tester-workbench')
+    expect(pathForRouteKey(ROUTE_KEYS.approverWorkbench)).toBe('/home/approver-workbench')
+    expect(pathForRouteKey(ROUTE_KEYS.identityAdministration)).toBe('/home/identity')
   })
 
   it('builds template detail paths', () => {

@@ -100,6 +100,7 @@ Start at [docs/README.md](docs/README.md) and [docs/plan/master-plan.md](docs/pl
 
 ## Active phase
 
-**P12 — Deferred enhancements** (no single active slice). MVP vertical slice P0–P11
-is complete with green local quality gates. Outstanding: external deployment validation
-(E05-T06), intranet SCA (M9-T02).
+**None — no single active phase slice.** MVP vertical slice P0–P11 is complete with green
+local quality gates, and **P13 (identity & group administration)** completed **Done**
+(2026-06-23). P12 (deferred enhancements) remains the non-active catch-all. Outstanding:
+external deployment validation (E05-T06), intranet SCA (M9-T02).

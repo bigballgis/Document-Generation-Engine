@@ -7,6 +7,13 @@ import type {
   UpsertApiPolicyPayload,
 } from '@/types/template'
 
+export interface RotatedCredential {
+  credentialId: string
+  externalId: string
+  secret: string
+  rotatedAt: string
+}
+
 function unwrap<T>(envelope: ApiEnvelope<T>): T {
   if (!envelope.result) {
     throw new Error('API response missing result')
@@ -40,6 +47,26 @@ export async function listCredentials(templateId: string): Promise<ApiCredential
 export async function createCredential(templateId: string): Promise<ApiCredentialCreated> {
   const response = await http.post<ApiEnvelope<ApiCredentialCreated>>(
     `/templates/${templateId}/api/credentials`,
+  )
+  return unwrap(response.data)
+}
+
+export async function rotateCredential(
+  templateId: string,
+  credentialId: string,
+): Promise<RotatedCredential> {
+  const response = await http.post<ApiEnvelope<RotatedCredential>>(
+    `/templates/${templateId}/api/credentials/${credentialId}/rotate`,
+  )
+  return unwrap(response.data)
+}
+
+export async function revokeCredential(
+  templateId: string,
+  credentialId: string,
+): Promise<ApiCredentialSummary> {
+  const response = await http.post<ApiEnvelope<ApiCredentialSummary>>(
+    `/templates/${templateId}/api/credentials/${credentialId}/revoke`,
   )
   return unwrap(response.data)
 }
