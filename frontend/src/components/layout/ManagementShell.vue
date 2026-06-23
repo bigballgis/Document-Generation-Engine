@@ -3,11 +3,13 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import BrandLogo from '@/components/branding/BrandLogo.vue'
+import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { BRAND_REGISTRY } from '@/config/brands'
 import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
 import { buildVisibleNavGroups } from '@/navigation/navStructure'
 import { useAppStore } from '@/stores/app'
 import { useSessionStore } from '@/stores/session'
+import type { BrandPreset } from '@/theme/tokens'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -22,6 +24,12 @@ const brandLabel = computed(() => t(brandConfig.value.labelKey))
 const localeOptions = computed(() =>
   LOCALE_REGISTRY.map((entry) => ({
     value: entry.code,
+    label: t(entry.labelKey),
+  })),
+)
+const brandOptions = computed(() =>
+  BRAND_REGISTRY.map((entry) => ({
+    value: entry.code as BrandPreset,
     label: t(entry.labelKey),
   })),
 )
@@ -53,6 +61,10 @@ function navigate(path: string) {
 function handleLocaleChange(locale: string) {
   void appStore.setLocale(resolveAppLocale(locale))
 }
+
+function handleBrandChange(brand: BrandPreset) {
+  appStore.setBrand(brand)
+}
 </script>
 
 <template>
@@ -70,6 +82,13 @@ function handleLocaleChange(locale: string) {
         </div>
       </div>
       <div class="header-actions">
+        <AppSearchSelect
+          class="brand-switcher"
+          :model-value="appStore.brand"
+          :options="brandOptions"
+          :aria-label="t('login.brandLabel')"
+          @update:model-value="handleBrandChange"
+        />
         <el-select
           class="locale-switcher"
           size="small"

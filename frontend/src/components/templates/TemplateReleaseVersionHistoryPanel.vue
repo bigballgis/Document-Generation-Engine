@@ -6,6 +6,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import * as templatesApi from '@/api/templates'
@@ -26,6 +27,11 @@ const emit = defineEmits<{
 }>()
 
 const { t, te } = useI18n()
+const lifecycleStatusFilterOptions = useLifecycleStatusFilterOptions()
+const defaultRouteFilterOptions = computed(() => [
+  { value: t('templates.versions.defaultRouteYes'), label: t('templates.versions.defaultRouteYes') },
+  { value: t('templates.versions.defaultRouteNo'), label: t('templates.versions.defaultRouteNo') },
+])
 const templatesStore = useTemplatesStore()
 const { manageReleaseVersionState } = useCapabilities()
 const { confirmAction } = useConfirmAction()
@@ -39,11 +45,12 @@ const { filters: columnFilters, filteredRows: filteredVersions, hasActiveFilters
   useDataTableFilters(versionsSource, [
     { key: 'releaseVersion', getValue: (row) => row.releaseVersion },
     { key: 'devVersionNumber', getValue: (row) => String(row.devVersionNumber) },
-    { key: 'status', getValue: (row) => row.lifecycleStatus },
+    { key: 'status', getValue: (row) => row.lifecycleStatus, matchMode: 'exact' },
     {
       key: 'defaultRoute',
       getValue: (row) =>
         row.defaultRouteTarget ? t('templates.versions.defaultRouteYes') : t('templates.versions.defaultRouteNo'),
+      matchMode: 'exact',
     },
     { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
   ])
@@ -264,6 +271,8 @@ const sortByUpdatedAt = rowSortMethod<TemplateReleaseVersion>((row) => row.updat
             <TableColumnHeader
               :label="t('templates.versions.status')"
               v-model="columnFilters.status"
+              filter-type="select"
+              :options="lifecycleStatusFilterOptions"
             />
           </template>
           <template #default="{ row }">
@@ -275,6 +284,8 @@ const sortByUpdatedAt = rowSortMethod<TemplateReleaseVersion>((row) => row.updat
             <TableColumnHeader
               :label="t('templates.versions.defaultRoute')"
               v-model="columnFilters.defaultRoute"
+              filter-type="select"
+              :options="defaultRouteFilterOptions"
             />
           </template>
           <template #default="{ row }">

@@ -13,6 +13,7 @@ vi.mock('vue-i18n', () => ({
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: vi.fn() }),
+  useRoute: () => ({ hash: '', path: '/dashboard', query: {} }),
 }))
 
 describe('DashboardView', () => {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import type { DashboardStatCard } from '@/composables/useDashboardStats'
 
 defineProps<{
@@ -9,9 +9,19 @@ defineProps<{
 }>()
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 
 function navigate(path: string) {
+  const hashIndex = path.indexOf('#')
+  if (hashIndex >= 0) {
+    const basePath = path.slice(0, hashIndex)
+    const hash = path.slice(hashIndex)
+    if (route.path === basePath) {
+      document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      return
+    }
+  }
   router.push(path)
 }
 </script>

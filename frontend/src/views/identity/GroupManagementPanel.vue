@@ -6,6 +6,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useEnabledStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { canManageGroups } from '@/auth/identityRoles'
 import { useIdentityStore } from '@/stores/identity'
 import { useSessionStore } from '@/stores/session'
@@ -39,13 +40,22 @@ const { filters: columnFilters, filteredRows: filteredGroups, hasActiveFilters, 
   useDataTableFilters(groupsSource, [
     { key: 'groupCode', getValue: (row) => row.groupCode },
     { key: 'displayName', getValue: (row) => row.displayName },
-    { key: 'dimension', getValue: (row) => dimensionLabel(row.dimension) },
+    { key: 'dimension', getValue: (row) => dimensionLabel(row.dimension), matchMode: 'exact' },
     {
       key: 'status',
       getValue: (row) =>
         row.enabled ? t('identity.status.enabled') : t('identity.status.disabled'),
+      matchMode: 'exact',
     },
   ])
+
+const enabledStatusFilterOptions = useEnabledStatusFilterOptions()
+const dimensionFilterOptions = computed(() =>
+  dimensionOptions.map((dimension) => ({
+    value: dimensionLabel(dimension),
+    label: dimensionLabel(dimension),
+  })),
+)
 
 const errorMessage = computed(() => {
   const key = identityStore.lastGroupErrorMessageKey
@@ -206,6 +216,8 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
             <TableColumnHeader
               :label="t('identity.groups.columns.dimension')"
               v-model="columnFilters.dimension"
+              filter-type="select"
+              :options="dimensionFilterOptions"
             />
           </template>
           <template #default="{ row }">
@@ -221,6 +233,8 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
             <TableColumnHeader
               :label="t('identity.groups.columns.status')"
               v-model="columnFilters.status"
+              filter-type="select"
+              :options="enabledStatusFilterOptions"
             />
           </template>
           <template #default="{ row }">

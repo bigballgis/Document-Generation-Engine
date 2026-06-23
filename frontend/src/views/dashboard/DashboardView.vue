@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
@@ -14,12 +14,14 @@ import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const sessionStore = useSessionStore()
 const mastersStore = useMastersStore()
 const templatesStore = useTemplatesStore()
 const { tasks } = useWorkflowTasks()
-const { stats } = useDashboardStats()
+const visibleRoutes = computed(() => sessionStore.session?.visibleRoutes ?? [])
+const { stats } = useDashboardStats(visibleRoutes)
 const { filters: taskColumnFilters, filteredRows: filteredTasks } = useDataTableFilters(tasks, [
   {
     key: 'action',
@@ -74,7 +76,23 @@ async function loadDashboardData() {
 
 onMounted(() => {
   void loadDashboardData()
+  void scrollToTasksIfRequested()
 })
+
+watch(
+  () => route.hash,
+  () => {
+    void scrollToTasksIfRequested()
+  },
+)
+
+async function scrollToTasksIfRequested() {
+  if (route.hash !== '#tasks-section') {
+    return
+  }
+  await nextTick()
+  document.getElementById('tasks-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 
 function openTask(path: string) {
   router.push(path)

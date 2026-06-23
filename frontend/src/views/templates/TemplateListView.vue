@@ -8,6 +8,7 @@ import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateCreateDialog from '@/components/templates/TemplateCreateDialog.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { templateDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
@@ -15,6 +16,7 @@ import type { TemplateSummary } from '@/types/template'
 import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
+const lifecycleStatusFilterOptions = useLifecycleStatusFilterOptions()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
 const { authorTemplates } = useCapabilities()
@@ -28,7 +30,7 @@ const { filters: columnFilters, filteredRows: filteredTemplates, hasActiveFilter
   useDataTableFilters(allTemplates, [
     { key: 'name', getValue: (row) => row.name },
     { key: 'externalId', getValue: (row) => row.externalId },
-    { key: 'status', getValue: (row) => row.lifecycleStatus },
+    { key: 'status', getValue: (row) => row.lifecycleStatus, matchMode: 'exact' },
     { key: 'releaseVersion', getValue: (row) => row.releaseVersion ?? '' },
     { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
   ])
@@ -134,6 +136,8 @@ const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
               <TableColumnHeader
                 :label="t('templates.list.columns.status')"
                 v-model="columnFilters.status"
+                filter-type="select"
+                :options="lifecycleStatusFilterOptions"
               />
             </template>
             <template #default="{ row }">

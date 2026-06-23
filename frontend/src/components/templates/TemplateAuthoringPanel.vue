@@ -5,6 +5,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useYesNoFilterOptions } from '@/composables/useTableFilterOptions'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useTemplatesStore } from '@/stores/templates'
 import type { AnchorBinding, UpsertBindingPayload, UpsertVariablePayload, VariableSchema } from '@/types/template'
@@ -54,20 +55,29 @@ const { filters: variableColumnFilters, filteredRows: filteredVariables } = useD
   variablesSource,
   [
     { key: 'variableKey', getValue: (row) => row.variableKey },
-    { key: 'variableType', getValue: (row) => row.variableType },
+    { key: 'variableType', getValue: (row) => row.variableType, matchMode: 'exact' },
     {
       key: 'required',
       getValue: (row) => (row.required ? t('common.yes') : t('common.no')),
+      matchMode: 'exact',
     },
   ],
 )
+
+const variableTypeFilterOptions = computed(() =>
+  variableTypes.map((type) => ({ value: type, label: type })),
+)
+const contentTypeFilterOptions = computed(() =>
+  contentTypes.map((type) => ({ value: type, label: type })),
+)
+const yesNoFilterOptions = useYesNoFilterOptions()
 
 const bindingsSource = computed(() => props.bindings)
 const { filters: bindingColumnFilters, filteredRows: filteredBindings } = useDataTableFilters(
   bindingsSource,
   [
     { key: 'anchorId', getValue: (row) => row.anchorId },
-    { key: 'declaredContentType', getValue: (row) => row.declaredContentType },
+    { key: 'declaredContentType', getValue: (row) => row.declaredContentType, matchMode: 'exact' },
   ],
 )
 
@@ -208,6 +218,8 @@ const sortVariablesByRequired = rowSortMethod<VariableSchema>((row) => row.requi
           <TableColumnHeader
             :label="t('templates.authoring.variableType')"
             v-model="variableColumnFilters.variableType"
+            filter-type="select"
+            :options="variableTypeFilterOptions"
           />
         </template>
       </el-table-column>
@@ -219,6 +231,8 @@ const sortVariablesByRequired = rowSortMethod<VariableSchema>((row) => row.requi
           <TableColumnHeader
             :label="t('templates.authoring.required')"
             v-model="variableColumnFilters.required"
+            filter-type="select"
+            :options="yesNoFilterOptions"
           />
         </template>
         <template #default="{ row }">
@@ -260,6 +274,8 @@ const sortVariablesByRequired = rowSortMethod<VariableSchema>((row) => row.requi
           <TableColumnHeader
             :label="t('templates.authoring.contentType')"
             v-model="bindingColumnFilters.declaredContentType"
+            filter-type="select"
+            :options="contentTypeFilterOptions"
           />
         </template>
       </el-table-column>

@@ -3,6 +3,7 @@ import { computed, reactive, type ComputedRef, type Ref } from 'vue'
 export interface DataTableColumnFilter<T> {
   key: string
   getValue: (row: T) => string
+  matchMode?: 'contains' | 'exact'
 }
 
 export function useDataTableFilters<T>(
@@ -23,7 +24,11 @@ export function useDataTableFilters<T>(
       for (const column of activeFilters) {
         const needle = filters[column.key].trim().toLowerCase()
         const haystack = column.getValue(row).toLowerCase()
-        if (!haystack.includes(needle)) {
+        if (column.matchMode === 'exact') {
+          if (haystack !== needle) {
+            return false
+          }
+        } else if (!haystack.includes(needle)) {
           return false
         }
       }

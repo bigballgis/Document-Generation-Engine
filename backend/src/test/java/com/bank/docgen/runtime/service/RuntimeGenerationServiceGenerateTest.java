@@ -261,6 +261,61 @@ class RuntimeGenerationServiceGenerateTest {
     }
 
     @Test
+    void generateSync_rejectsAsyncTaskModeOnSyncEndpoint() {
+        ApiPolicyEntity multiModePolicy = policyForTemplate(TEMPLATE_ID);
+        multiModePolicy.replaceConfiguration(
+                "[\"grp-a\"]",
+                RELEASE_VERSION,
+                "[\"DOCX\"]",
+                "[\"SYNC_STREAM\", \"ASYNC_TASK\"]",
+                false,
+                10,
+                false,
+                false,
+                "10000001"
+        );
+        when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(multiModePolicy));
+
+        GenerateRequestBody request = new GenerateRequestBody(
+                new OutputOptionsView("DOCX", "ASYNC_TASK"),
+                Map.of("customerName", "Alice"),
+                new EncryptionOptionsView(false, null, null, List.of()),
+                "req-1",
+                "idem-async-on-sync"
+        );
+
+        assertThatThrownBy(() -> service.generateSync(template, session, RELEASE_VERSION, request))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasMessage("api.error.runtime.outputModeUnsupported");
+    }
+
+    @Test
+    void generateSync_rejectsInProgressIdempotencyWithoutRerunningEngine() {
+        TemplateVersionEntity version = publishedVersion(VERSION_ID, TEMPLATE_ID);
+        GenerationIdempotencyEntity inProgress = pendingIdempotency(TEMPLATE_ID);
+        when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, RELEASE_VERSION))
+                .thenReturn(Optional.of(version));
+        doNothing().when(encryptionParameterValidator).validate(any(), any(), anyString());
+        when(idempotencyService.hashRequest(anyString())).thenReturn("hash-a");
+        when(idempotencyService.findExisting("idem-in-flight", TEMPLATE_ID, "hash-a"))
+                .thenReturn(Optional.of(inProgress));
+
+        assertThatThrownBy(() -> service.generateSync(
+                template,
+                session,
+                RELEASE_VERSION,
+                generateRequest("idem-in-flight", "DOCX")
+        ))
+                .isInstanceOf(IdempotencyConflictException.class)
+                .satisfies(ex -> assertThat(((IdempotencyConflictException) ex).conflictType())
+                        .isEqualTo(IdempotencyConflictException.REQUEST_IN_PROGRESS));
+
+        verify(documentGenerationEngine, never()).generate(any(), anyString(), any(), anyString(), any());
+        verify(idempotencyService, never()).begin(anyString(), any(), anyString());
+    }
+
+    @Test
     void generateSync_hashesEncryptionInIdempotencyPayload() {
         TemplateVersionEntity version = publishedVersion(VERSION_ID, TEMPLATE_ID);
         when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));

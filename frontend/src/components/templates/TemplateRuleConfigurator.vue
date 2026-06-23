@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useRuleValidationStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useTemplatesStore } from '@/stores/templates'
 import type { CompositionRule, CompositionRuleInput, RuleValidationResult } from '@/types/template'
 import { ElMessage } from 'element-plus'
@@ -55,8 +56,10 @@ const validationRulesSource = computed(() => validationResult.value?.rules ?? []
 const { filters: validationColumnFilters, filteredRows: filteredValidationRules } =
   useDataTableFilters(validationRulesSource, [
     { key: 'ruleId', getValue: (row) => row.ruleId },
-    { key: 'status', getValue: (row) => row.status },
+    { key: 'status', getValue: (row) => row.status, matchMode: 'exact' },
   ])
+
+const validationStatusFilterOptions = useRuleValidationStatusFilterOptions()
 
 function addRule() {
   rules.push({
@@ -173,6 +176,8 @@ async function handleValidateRules() {
           <TableColumnHeader
             :label="t('templates.rules.status')"
             v-model="validationColumnFilters.status"
+            filter-type="select"
+            :options="validationStatusFilterOptions"
           />
         </template>
         <template #default="{ row }">

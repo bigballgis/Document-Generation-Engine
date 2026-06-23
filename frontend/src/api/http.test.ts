@@ -19,12 +19,16 @@ describe('handleAuthHttpError', () => {
         clearSession,
         recordDeny,
         getCurrentRouteName: () => 'master-list',
+        getCurrentFullPath: () => '/masters?filter=pending',
         push,
       },
     )
 
     expect(clearSession).toHaveBeenCalledOnce()
-    expect(push).toHaveBeenCalledWith({ name: 'login', query: { sessionExpired: '1' } })
+    expect(push).toHaveBeenCalledWith({
+      name: 'login',
+      query: { sessionExpired: '1', redirect: '/masters?filter=pending' },
+    })
     expect(recordDeny).not.toHaveBeenCalled()
   })
 
@@ -41,6 +45,7 @@ describe('handleAuthHttpError', () => {
         clearSession: vi.fn(),
         recordDeny: vi.fn(),
         getCurrentRouteName: () => 'login',
+        getCurrentFullPath: () => '/login',
         push,
       },
     )
@@ -63,6 +68,7 @@ describe('handleAuthHttpError', () => {
         clearSession: vi.fn(),
         recordDeny,
         getCurrentRouteName: () => 'template-list',
+        getCurrentFullPath: () => '/templates',
         push,
       },
     )

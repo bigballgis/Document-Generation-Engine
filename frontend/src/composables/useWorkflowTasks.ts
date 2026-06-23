@@ -88,7 +88,7 @@ function templateTestTask(template: TemplateSummary): WorkflowTask {
     kind: 'template-test',
     titleKey: 'dashboard.tasks.templateTest.title',
     descriptionKey: 'dashboard.tasks.templateTest.description',
-    path: templateDetailPath(template.id),
+    path: templateDetailPath(template.id, 'overview'),
     groupCode: template.groupCode,
     entityName: template.name,
   }
@@ -100,7 +100,7 @@ function templateApprovalTask(template: TemplateSummary): WorkflowTask {
     kind: 'template-approval',
     titleKey: 'dashboard.tasks.templateApproval.title',
     descriptionKey: 'dashboard.tasks.templateApproval.description',
-    path: templateDetailPath(template.id),
+    path: templateDetailPath(template.id, 'overview'),
     groupCode: template.groupCode,
     entityName: template.name,
   }
@@ -112,7 +112,7 @@ function templatePublishTask(template: TemplateSummary): WorkflowTask {
     kind: 'template-publish',
     titleKey: 'dashboard.tasks.templatePublish.title',
     descriptionKey: 'dashboard.tasks.templatePublish.description',
-    path: templateDetailPath(template.id),
+    path: templateDetailPath(template.id, 'overview'),
     groupCode: template.groupCode,
     entityName: template.name,
   }
@@ -124,7 +124,7 @@ function templateDraftTask(template: TemplateSummary): WorkflowTask {
     kind: 'template-author-draft',
     titleKey: 'dashboard.tasks.templateDraft.title',
     descriptionKey: 'dashboard.tasks.templateDraft.description',
-    path: templateDetailPath(template.id),
+    path: templateDetailPath(template.id, 'overview'),
     groupCode: template.groupCode,
     entityName: template.name,
   }

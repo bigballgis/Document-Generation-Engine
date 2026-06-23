@@ -24,6 +24,7 @@ export interface AuthHttpErrorHandlerDeps {
   clearSession: () => void
   recordDeny: (traceId: string | null) => void
   getCurrentRouteName: () => string | symbol | null | undefined
+  getCurrentFullPath: () => string
   push: (location: RouteLocationRaw) => Promise<unknown>
 }
 
@@ -35,7 +36,13 @@ export async function handleAuthHttpError(
   if (status === 401) {
     deps.clearSession()
     if (deps.getCurrentRouteName() !== 'login') {
-      await deps.push({ name: 'login', query: { sessionExpired: '1' } })
+      await deps.push({
+        name: 'login',
+        query: {
+          sessionExpired: '1',
+          redirect: deps.getCurrentFullPath(),
+        },
+      })
     }
     return
   }
@@ -66,6 +73,7 @@ http.interceptors.response.use(
           clearSession: () => sessionStore.clearSession(),
           recordDeny: (traceId) => sessionStore.recordRouteDeny(traceId),
           getCurrentRouteName: () => routerInstance.currentRoute.value.name,
+          getCurrentFullPath: () => routerInstance.currentRoute.value.fullPath,
           push: (location) => routerInstance.push(location),
         })
       })()

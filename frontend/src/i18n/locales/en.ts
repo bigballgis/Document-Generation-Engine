@@ -764,6 +764,7 @@ export default {
   },
   table: {
     filterPlaceholder: 'Filter…',
+    filterAll: 'All',
     clearFilters: 'Clear column filters',
   },
   common: {

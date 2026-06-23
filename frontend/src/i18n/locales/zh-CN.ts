@@ -82,6 +82,8 @@ export default {
 
     filterPlaceholder: '筛选…',
 
+    filterAll: '全部',
+
     clearFilters: '清除列筛选',
 
   },

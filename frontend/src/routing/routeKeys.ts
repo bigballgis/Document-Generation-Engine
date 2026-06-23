@@ -67,6 +67,10 @@ export function routeKeyForPath(path: string): RouteKey | undefined {
   return entry?.[0] as RouteKey | undefined
 }
 
-export function templateDetailPath(templateId: string): string {
-  return `${TEMPLATE_DETAIL_PATH_PREFIX}${templateId}`
+export function templateDetailPath(templateId: string, tab?: string): string {
+  const base = `${TEMPLATE_DETAIL_PATH_PREFIX}${templateId}`
+  if (!tab) {
+    return base
+  }
+  return `${base}?tab=${encodeURIComponent(tab)}`
 }

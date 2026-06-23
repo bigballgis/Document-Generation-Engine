@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-24 (COR-0 doc reconciliation + COR-B02/COR-F05 Batch B slice)  
+**Last synced:** 2026-06-24 (COR-1/COR-3 sprint: B03/B06/B10, F01/F03/F06/F07/F10)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,15 +18,16 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **193 tests**, 2026-06-24 | COR-B02 idempotency alignment, ADR 0038 SYNC_DOWNLOAD_URL de-scope, `IdempotencyServiceRetentionTest` |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **198 tests**, 2026-06-24 | COR-B03 IN_PROGRESS fail-fast; COR-B06 OutputModePolicyValidator |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
-| Frontend test | `pnpm -C frontend test` | Green | **104 tests**, 2026-06-24 — COR-F05 dashboard error panel, COR-T11 workbench removal, `useWorkflowTasks.test.ts` |
+| Frontend test | `pnpm -C frontend test` | Green | **106 tests**, 2026-06-24 — COR-F03/F06/F07/F01/F10 |
 | Frontend build | `pnpm -C frontend build` | Green | |
 
 **Test count progression (not conflicting runs):** P13 slice verify **114** backend tests (2026-06-23);
 Wave C UX **161** backend / **88** frontend; post OPT-E8/F3 full verify **189** backend;
-COR-B02/F05 Batch B slice **193** backend / **104** frontend (2026-06-24).
+COR-B02/F05 Batch B slice **193** backend / **104** frontend (2026-06-24);
+COR-1/COR-3 sprint **198** backend / **106** frontend (2026-06-24).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)
@@ -144,7 +145,8 @@ Each row lists exit criteria; remove from this index when closed.
 | Security forbidden-route audit | Log-only in some paths | Durable security audit event per matrix §13.3 | COR-P06 |
 | QueryDSL / MapStruct / Redisson | Plain JPA + hand mappers + Lettuce | ADR-0037 scheduled items implemented or ADR amended | OPT-D, COR-P05 |
 | Publish gate checklist | UI checklist + binding validation; API policy item partly static | Server-side live gate blocks publish (P19) | COR-T01, P19 |
-| Workbench vs Dashboard | Workbench views exist; routes redirect to `/dashboard` | COR-T11 decision recorded; dead code removed or queues restored | COR-T11 |
+| Runtime rate limit | Process-local Bucket4j; requests without credential headers bypass filter (auth layer rejects later) | Shared Redis limiter or documented fail-closed at filter; ADR 0031 alignment | COR-B10, OPT-F8 |
+| Workbench vs Dashboard | **Done** — dead workbench views removed; routes redirect to `/dashboard` | COR-T11 decision recorded | COR-T11 |
 | zh-CN / `api.error` catalog | `en` ~939 lines vs `zh-CN` ~184; sparse `api.error` keys | P20-T06 complete; locale switch without mass English fallback | COR-F19, P20-T06 |
 
 ## Sync maintenance

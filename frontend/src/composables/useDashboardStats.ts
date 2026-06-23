@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, type Ref } from 'vue'
 import { pathForRouteKey, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
 import { useTemplatesStore } from '@/stores/templates'
@@ -13,12 +13,27 @@ export interface DashboardStatCard {
   path: string
 }
 
-export function useDashboardStats() {
+const MASTER_STAT_KEYS = new Set([
+  'masterPendingReview',
+  'masterVersionsInProgress',
+  'catalogMasters',
+])
+
+const TEMPLATE_STAT_KEYS = new Set([
+  'templateVersionsInWorkflow',
+  'publishedVersions',
+  'stoppedVersions',
+  'catalogTemplates',
+])
+
+export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) {
   const mastersStore = useMastersStore()
   const templatesStore = useTemplatesStore()
   const { tasks } = useWorkflowTasks()
 
   const stats = computed<DashboardStatCard[]>(() => {
+    const routes = Array.isArray(visibleRoutes) ? visibleRoutes : visibleRoutes.value
+    const allowed = new Set(routes)
     const masters = mastersStore.masters
     const templates = templatesStore.templates
 
@@ -32,14 +47,14 @@ export function useDashboardStats() {
     const publishedVersions = templates.filter((item) => item.lifecycleStatus === 'PUBLISHED').length
     const stoppedVersions = templates.filter((item) => item.lifecycleStatus === 'STOPPED').length
 
-    return [
+    const allStats: DashboardStatCard[] = [
       {
         key: 'pendingActions',
         count: tasks.value.length,
         titleKey: 'dashboard.stats.pendingActions.title',
         descriptionKey: 'dashboard.stats.pendingActions.description',
         actionKey: 'dashboard.stats.pendingActions.action',
-        path: '/dashboard',
+        path: '/dashboard#tasks-section',
       },
       {
         key: 'masterPendingReview',
@@ -98,6 +113,19 @@ export function useDashboardStats() {
         path: pathForRouteKey(ROUTE_KEYS.templateManagement),
       },
     ]
+
+    return allStats.filter((stat) => {
+      if (stat.key === 'pendingActions') {
+        return true
+      }
+      if (MASTER_STAT_KEYS.has(stat.key)) {
+        return allowed.has(ROUTE_KEYS.masterManagement)
+      }
+      if (TEMPLATE_STAT_KEYS.has(stat.key)) {
+        return allowed.has(ROUTE_KEYS.templateManagement)
+      }
+      return true
+    })
   })
 
   return { stats }

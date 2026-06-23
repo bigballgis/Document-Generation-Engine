@@ -8,6 +8,7 @@ import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterUploadDialog from '@/components/masters/MasterUploadDialog.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useMasterStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { MASTER_DETAIL_PATH_PREFIX } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
@@ -16,6 +17,7 @@ import type { MasterDocumentSummary } from '@/types/master'
 import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
+const masterStatusFilterOptions = useMasterStatusFilterOptions()
 const router = useRouter()
 const mastersStore = useMastersStore()
 const sessionStore = useSessionStore()
@@ -28,7 +30,7 @@ const allMasters = computed(() => mastersStore.masters)
 const { filters: columnFilters, filteredRows: filteredMasters, hasActiveFilters, clearFilters } =
   useDataTableFilters(allMasters, [
     { key: 'name', getValue: (row) => row.name },
-    { key: 'status', getValue: (row) => row.status },
+    { key: 'status', getValue: (row) => row.status, matchMode: 'exact' },
     { key: 'originalFilename', getValue: (row) => row.originalFilename },
     { key: 'anchorCount', getValue: (row) => String(row.anchorCount) },
     { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
@@ -149,6 +151,8 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
               <TableColumnHeader
                 :label="t('masters.list.columns.status')"
                 v-model="columnFilters.status"
+                filter-type="select"
+                :options="masterStatusFilterOptions"
               />
             </template>
             <template #default="{ row }">

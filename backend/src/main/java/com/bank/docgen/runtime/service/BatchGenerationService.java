@@ -81,7 +81,7 @@ public class BatchGenerationService {
     ) {
         assertTemplateAccess(template, session);
         ApiPolicyEntity policy = requireBatchPolicy(template, request);
-        requireSyncMode(request);
+        requireSyncMode(request, policy);
         String resolvedVersion = resolveVersion(template, policy, releaseVersion);
         validateBatchRequest(request, policy);
 
@@ -117,7 +117,7 @@ public class BatchGenerationService {
     ) {
         assertTemplateAccess(template, session);
         ApiPolicyEntity policy = requireBatchPolicy(template, request);
-        requireAsyncMode(request);
+        requireAsyncMode(request, policy);
         String resolvedVersion = resolveVersion(template, policy, releaseVersion);
         validateBatchRequest(request, policy);
 
@@ -273,10 +273,6 @@ public class BatchGenerationService {
         if (!"DOCX".equalsIgnoreCase(format) && !"PDF".equalsIgnoreCase(format)) {
             throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
         }
-        if (!"SYNC_STREAM".equalsIgnoreCase(request.output().mode())
-                && !"ASYNC_TASK".equalsIgnoreCase(request.output().mode())) {
-            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
-        }
         ApiPolicyEntity policy = apiPolicyRepository.findByTemplateId(template.getId())
                 .orElseThrow(() -> new TemplateValidationException("api.error.runtime.policyNotConfigured"));
         if (readStringList(policy.getOutputFormatsJson()).stream().noneMatch(item -> item.equalsIgnoreCase(format))) {
@@ -300,16 +296,20 @@ public class BatchGenerationService {
         }
     }
 
-    private void requireSyncMode(BatchGenerateRequestBody request) {
-        if (!"SYNC_STREAM".equalsIgnoreCase(request.output().mode())) {
-            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
-        }
+    private void requireSyncMode(BatchGenerateRequestBody request, ApiPolicyEntity policy) {
+        OutputModePolicyValidator.validateBatchEndpoint(
+                request.output().mode(),
+                readStringList(policy.getOutputModesJson()),
+                true
+        );
     }
 
-    private void requireAsyncMode(BatchGenerateRequestBody request) {
-        if (!"ASYNC_TASK".equalsIgnoreCase(request.output().mode())) {
-            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
-        }
+    private void requireAsyncMode(BatchGenerateRequestBody request, ApiPolicyEntity policy) {
+        OutputModePolicyValidator.validateBatchEndpoint(
+                request.output().mode(),
+                readStringList(policy.getOutputModesJson()),
+                false
+        );
     }
 
     private void validateBatchRequest(BatchGenerateRequestBody request, ApiPolicyEntity policy) {

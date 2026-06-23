@@ -16,6 +16,7 @@ describe('routeKeys', () => {
 
   it('builds template detail paths', () => {
     expect(templateDetailPath('tpl-1')).toBe('/templates/tpl-1')
+    expect(templateDetailPath('tpl-1', 'overview')).toBe('/templates/tpl-1?tab=overview')
   })
 
   it('falls back to forbidden for unknown route keys', () => {

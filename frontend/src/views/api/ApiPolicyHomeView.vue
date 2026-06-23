@@ -6,11 +6,13 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { templateDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateSummary } from '@/types/template'
 
 const { t, te } = useI18n()
+const lifecycleStatusFilterOptions = useLifecycleStatusFilterOptions()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
 
@@ -21,7 +23,7 @@ const { filters: columnFilters, filteredRows, hasActiveFilters, clearFilters } =
     { key: 'name', getValue: (row) => row.name },
     { key: 'externalId', getValue: (row) => row.externalId },
     { key: 'groupCode', getValue: (row) => row.groupCode },
-    { key: 'status', getValue: (row) => row.lifecycleStatus },
+    { key: 'status', getValue: (row) => row.lifecycleStatus, matchMode: 'exact' },
     { key: 'releaseVersion', getValue: (row) => row.releaseVersion ?? '' },
   ],
 )
@@ -113,6 +115,8 @@ const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecy
             <TableColumnHeader
               :label="t('templates.list.columns.status')"
               v-model="columnFilters.status"
+              filter-type="select"
+              :options="lifecycleStatusFilterOptions"
             />
           </template>
           <template #default="{ row }">

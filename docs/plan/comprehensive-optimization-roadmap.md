@@ -44,9 +44,9 @@ Recommended sequencing: **Wave COR-0 (docs truth)** → **COR-1 (API contract)**
 | Wave | Scope | Status |
 | --- | --- | --- |
 | COR-0 | Documentation & plan-layer reconciliation | **Done** (2026-06-24; COR-D01–D09) |
-| COR-1 | Runtime API contract & correctness | Not Started |
-| COR-2 | Template lifecycle, workflow & governance | Not Started |
-| COR-3 | Frontend workflow & operation experience | Not Started |
+| COR-1 | Runtime API contract & correctness | **In Progress** (COR-B03/B06/B10 Done 2026-06-24) |
+| COR-2 | Template lifecycle, workflow & governance | **In Progress** (COR-T07 Done 2026-06-24) |
+| COR-3 | Frontend workflow & operation experience | **In Progress** (COR-F01/F03/F06/F07/F10 Done 2026-06-24) |
 | COR-4 | Performance, resilience & architecture | Not Started |
 | COR-5 | Test coverage & E2E journeys | Not Started |
 | COR-6 | Confirmed large domains (P14/P18+) | Not Started |
@@ -79,14 +79,14 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-B01 | H | De-scope runtime v1 `SYNC_DOWNLOAD_URL` | ADR 0038; reject at sync validate | Enum retained; runtime rejects with outputModeUnsupported; ADR 0038 | **Done** (2026-06-24) | P7 |
 | COR-B02 | H | Idempotency semantics alignment | 86400s TTL vs domain 7d; hash excludes encryption; headers CREATED vs IDEMPOTENCY_* | 7d TTL; hash includes encryption; IDEMPOTENCY_NEW/REPLAYED headers; conflict summary | **Done** (2026-06-24) | OPT-E, P7 |
-| COR-B03 | H | Idempotency IN_PROGRESS race | Re-entrant generate without storage key re-runs engine | Second concurrent request waits or returns consistent conflict; test proves no double generate | Not Started | OPT-E |
+| COR-B03 | H | Idempotency IN_PROGRESS race | Re-entrant generate without storage key re-runs engine | Second concurrent request waits or returns consistent conflict; test proves no double generate | **Done** (2026-06-24) | OPT-E |
 | COR-B04 | H | Async task FAILED/PARTIAL/EXPIRED lifecycle | Enum exists; runner no try/catch; summary always all SUCCEEDED | Tasks transition on failure; cancel/query reflect real status | Not Started | P11 |
 | COR-B05 | H | Sync batch partial failure envelope | Whole batch 500 on one item failure | Structured per-item status + error per domain-model | Not Started | P11 |
-| COR-B06 | M | Sync generate output.mode policy check | Batch path validates mode; sync path does not | Same policy gate on sync and batch | Not Started | P6 |
+| COR-B06 | M | Sync generate output.mode policy check | Batch path validates mode; sync path does not | Same policy gate on sync and batch | **Done** (2026-06-24) | P6 |
 | COR-B07 | M | Runtime generation audit persistence | Download SLF4J only; no sync/batch/async audit rows | Standard audit summary persisted per domain-model | Not Started | P8 |
 | COR-B08 | M | Audit query pagination | Unbounded list; GLOBAL_ADMIN lifecycle findAll | Pageable API + default page size; tests | Not Started | OPT-F4 |
 | COR-B09 | M | Redis idempotency read path | Cache written but findExisting DB-only | Hot path uses cache with DB fallback; test | Not Started | OPT-F |
-| COR-B10 | M | Rate limit multi-instance + missing credential | Process-local Bucket; bypass without credential headers | Document single-instance limit or add shared limiter; fail-closed default documented | Not Started | OPT-F1 |
+| COR-B10 | M | Rate limit multi-instance + missing credential | Process-local Bucket; bypass without credential headers | Document single-instance limit or add shared limiter; fail-closed default documented | **Done** (2026-06-24; doc seam) | OPT-F1 |
 | COR-B11 | L | Download response `oneTime` field | OpenAPI DownloadInfo.oneTime | Field present per contract or OpenAPI trimmed | Not Started | P10 |
 | COR-B12 | L | Route type header EXPLICIT vs EXPLICIT_VERSION | Controller uses shortened enum | Align with OpenAPI or document mapping | Not Started | P7 |
 
@@ -106,7 +106,7 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | COR-T04 | H | Collaboration work items + optional timeout | PRD §7 668–672; no WorkItem entity | Role/group queue to-dos; timeout escalation without auto state change | Not Started | P14/P19, domain §2.9.4 |
 | COR-T05 | M | Publish not hard-bound to dev version 1 | `findByTemplateIdAndDevVersionNumber(..., 1)` | Publish selects release candidate dev version; tests for multi-version | Not Started | P16 |
 | COR-T06 | M | Multi release version callability | TemplateCallabilitySupport single release constraint | Per-version callable list matches deactivate/restore; runtime tests | Not Started | P16, P7 |
-| COR-T07 | M | Publish permission doc + code alignment | Domain model says author can publish; code admin-only | Confirmed matrix entry; code matches decision | Not Started | COR-D02 |
+| COR-T07 | M | Publish permission doc + code alignment | Domain model says author can publish; code admin-only | Confirmed matrix entry; code matches decision | **Done** (2026-06-24; Batch B ADR) | COR-D02 |
 | COR-T08 | M | Batch test + coverage thresholds | PRD §6.5; P19-T02/T03 Not Started | Multi-sample batch test + threshold blockers | Not Started | P19 |
 | COR-T09 | M | Lifecycle panel context on detail | Approver cannot see test record summary inline | Integrated evidence panel (test, preview, diff, checklist) per role | Not Started | P19-T10 |
 | COR-T10 | L | Semver publish UX | Manual text field default 1.0.0 | Level picker + conflict validation | Not Started | PRD §7 |
@@ -132,9 +132,9 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-F01 | H | In-shell brand switch (REDBC/GREENBC) | Brand only on login | Top bar brand switch; both presets verified | Not Started | P20, OA skill |
+| COR-F01 | H | In-shell brand switch (REDBC/GREENBC) | Brand only on login | Top bar brand switch; both presets verified | **Done** (2026-06-24) | P20, OA skill |
 | COR-F02 | H | Breadcrumb / page context | No el-breadcrumb; entitlement URLs ambiguous | Unified breadcrumb from navStructure | Not Started | E11/E12 |
-| COR-F03 | H | 401 redirect preserves destination | http.ts 401 → login without redirect query | Post-login return to expired page | Not Started | OPT-G1 |
+| COR-F03 | H | 401 redirect preserves destination | http.ts 401 → login without redirect query | Post-login return to expired page | **Done** (2026-06-24) | OPT-G1 |
 | COR-F04 | M | Page layout primitive | Dashboard max-width 1200px; others full bleed | Shared layout: header + max-width + spacing scale | Not Started | OA skill |
 
 ### 5.2 Dashboard & work queues
@@ -142,8 +142,8 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-F05 | H | Dashboard load error recoverable | el-alert only; stats may show stale zeros | LoadErrorPanel + retry; hide stats on failure | **Done** (2026-06-24) | — |
-| COR-F06 | M | Stat cards permission-aware | 8 cards always; quick links filtered | Cards match visibleRoutes | Not Started | — |
-| COR-F07 | M | Pending-actions card navigates to tasks | path `/dashboard` self-loop | Scroll/focus #tasks-section or filter table | Not Started | — |
+| COR-F06 | M | Stat cards permission-aware | 8 cards always; quick links filtered | Cards match visibleRoutes | **Done** (2026-06-24) | — |
+| COR-F07 | M | Pending-actions card navigates to tasks | path `/dashboard` self-loop | Scroll/focus #tasks-section or filter table | **Done** (2026-06-24) | — |
 | COR-F08 | M | Dashboard task table UX | No sort/sticky/keyboard row nav | Sort + sticky header + Enter opens detail | Not Started | OA skill |
 
 ### 5.3 Template & master journeys
@@ -151,7 +151,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-F09 | H | List pagination vs group sections | slice(0,10) then group by groupCode | Pagination preserves group semantics (design A or B) | Not Started | — |
-| COR-F10 | M | Template detail tab deep linking | activeDetailTab local only | Query/hash sync; workflow links to lifecycle tab | Not Started | COR-T11 |
+| COR-F10 | M | Template detail tab deep linking | activeDetailTab local only | Query/hash sync; workflow links to lifecycle tab | **Done** (2026-06-24) | COR-T11 |
 | COR-F11 | M | Workflow banner action anchor | Banner text only | CTA scrolls/opens lifecycle/review panel | Not Started | COR-T14 |
 | COR-F12 | M | Template create dialog validation | Silent empty submit; errors not shown in dialog | el-form rules + inline/API errors | Not Started | OPT-G8 |
 | COR-F13 | M | Governance triple-dialog simplification | prompt → impact → confirm ×3 | ≤2 steps with reason + impact inline | Not Started | — |
@@ -206,7 +206,7 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 | COR-E02 | H | Role journey E2E minimum set | Only login a11y smoke | login→dashboard; forbidden; identity read; template lifecycle smoke | Not Started | OPT-C7, E06 |
 | COR-E03 | M | AuditQueryService tests | 264 lines untested | Group scope + GLOBAL_ADMIN paths | Not Started | OPT-C5 |
 | COR-E04 | M | Rendering PDF path tests | LibreOffice/DockerExec untested | Success/timeout/cleanup mocked | Not Started | OPT-C4 |
-| COR-E05 | M | Frontend: DashboardView + tab router tests | No tests for new surfaces | Vitest for tasks, load error, tab query sync | Not Started | OPT-C6 |
+| COR-E05 | M | Frontend: DashboardView + tab router tests | No tests for new surfaces | Vitest for tasks, load error, tab query sync | **Partial** (2026-06-24; dashboard stats/http/tab path tests) | OPT-C6 |
 | COR-E06 | M | messageKey → UI mapping tests | errorEnvelope without e2e UI | Store/view tests for catalog keys | Not Started | P20-T06 |
 
 ---
@@ -307,4 +307,4 @@ When completing any COR-* task:
 4. Append gate evidence to [execution-sync-ledger.md](./execution-sync-ledger.md).
 5. Run post-task doc sync per `.cursor/skills/post-task-doc-sync/SKILL.md`.
 
-**Last reviewed:** 2026-06-24 (COR-0 Done; COR-B01/B02, COR-T11, COR-F05 Done).
+**Last reviewed:** 2026-06-24 (COR-B03/B06/B10, COR-T07, COR-F01/F03/F06/F07/F10 Done).

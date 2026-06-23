@@ -6,6 +6,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useEnabledStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { assignableGroupCodes, assignableRoles, canDeleteUsers } from '@/auth/identityRoles'
 import { useIdentityStore } from '@/stores/identity'
 import { useSessionStore } from '@/stores/session'
@@ -74,8 +75,17 @@ const { filters: columnFilters, filteredRows: filteredUsers, hasActiveFilters, c
       key: 'status',
       getValue: (row) =>
         row.enabled ? t('identity.status.enabled') : t('identity.status.disabled'),
+      matchMode: 'exact',
     },
   ])
+
+const enabledStatusFilterOptions = useEnabledStatusFilterOptions()
+const roleFilterOptions = computed(() =>
+  roleOptions.value.map((role) => ({
+    value: roleLabel(role),
+    label: roleLabel(role),
+  })),
+)
 
 const errorMessage = computed(() => {
   const key = identityStore.lastUserErrorMessageKey
@@ -365,6 +375,8 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
           <TableColumnHeader
             :label="t('identity.users.columns.roles')"
             v-model="columnFilters.roles"
+            filter-type="select"
+            :options="roleFilterOptions"
           />
         </template>
         <template #default="{ row }">
@@ -393,6 +405,8 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
           <TableColumnHeader
             :label="t('identity.users.columns.status')"
             v-model="columnFilters.status"
+            filter-type="select"
+            :options="enabledStatusFilterOptions"
           />
         </template>
         <template #default="{ row }">

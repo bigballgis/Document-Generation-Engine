@@ -118,17 +118,23 @@ public class RuntimeGenerationService {
                 template.getId(),
                 requestHash
         );
-        if (existing.isPresent() && existing.get().getResponseStorageKey() != null) {
-            InputStream replayStream = objectStoragePort.get(existing.get().getResponseStorageKey());
-            return new SyncGenerateResult(
-                    null,
-                    replayStream,
-                    contentTypeForFormat(request.output().format()),
-                    existing.get().getDocumentId(),
-                    resolvedVersion,
-                    List.of(FidelityWarningCode.CONTROLLED_STYLE_FALLBACK.name()),
-                    IdempotencyConstants.STATUS_REPLAYED
-            );
+        if (existing.isPresent()) {
+            GenerationIdempotencyEntity existingRecord = existing.get();
+            if (existingRecord.getResponseStorageKey() != null) {
+                InputStream replayStream = objectStoragePort.get(existingRecord.getResponseStorageKey());
+                return new SyncGenerateResult(
+                        null,
+                        replayStream,
+                        contentTypeForFormat(request.output().format()),
+                        existingRecord.getDocumentId(),
+                        resolvedVersion,
+                        List.of(FidelityWarningCode.CONTROLLED_STYLE_FALLBACK.name()),
+                        IdempotencyConstants.STATUS_REPLAYED
+                );
+            }
+            if ("IN_PROGRESS".equals(existingRecord.getStatus())) {
+                throw IdempotencyConflictException.requestInProgress(request.idempotencyKey());
+            }
         }
         GenerationIdempotencyEntity idempotency = existing.orElseGet(() ->
                 idempotencyService.begin(request.idempotencyKey(), template.getId(), requestHash));
@@ -178,20 +184,10 @@ public class RuntimeGenerationService {
         if (request.idempotencyKey() == null || request.idempotencyKey().isBlank()) {
             throw new TemplateValidationException("api.error.runtime.idempotencyKeyRequired");
         }
-        validateOutputMode(request.output().mode(), policy);
-    }
-
-    private void validateOutputMode(String mode, ApiPolicyEntity policy) {
-        if (mode == null || mode.isBlank()) {
-            throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
-        }
-        if ("SYNC_DOWNLOAD_URL".equalsIgnoreCase(mode)) {
-            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
-        }
-        List<String> allowedModes = readStringList(policy.getOutputModesJson());
-        if (allowedModes.stream().noneMatch(item -> item.equalsIgnoreCase(mode))) {
-            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
-        }
+        OutputModePolicyValidator.validateSyncGenerate(
+                request.output().mode(),
+                readStringList(policy.getOutputModesJson())
+        );
     }
 
     private List<String> readStringList(String json) {

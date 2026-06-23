@@ -21,6 +21,7 @@ import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { MASTER_DETAIL_PATH_PREFIX, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type {
@@ -59,7 +60,17 @@ const bindingGateResult = ref<BindingValidationResult | null>(null)
 const loadingPublishGate = ref(false)
 const metadataEditOpen = ref(false)
 const loadFailed = ref(false)
-const activeDetailTab = ref('overview')
+const DETAIL_TABS = ['overview', 'authoring', 'releaseVersions', 'apiAccess'] as const
+type DetailTab = (typeof DETAIL_TABS)[number]
+
+function resolveDetailTab(value: unknown): DetailTab {
+  if (typeof value === 'string' && (DETAIL_TABS as readonly string[]).includes(value)) {
+    return value as DetailTab
+  }
+  return 'overview'
+}
+
+const activeDetailTab = ref<DetailTab>(resolveDetailTab(route.query.tab))
 const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
 
 const policyOutputFormatOptions = ['DOCX', 'PDF']
@@ -83,11 +94,12 @@ const { filters: credentialColumnFilters, filteredRows: filteredCredentials } = 
   credentialsSource,
   [
     { key: 'externalId', getValue: (row) => row.externalId },
-    { key: 'status', getValue: (row) => row.status },
+    { key: 'status', getValue: (row) => row.status, matchMode: 'exact' },
     { key: 'createdAt', getValue: (row) => new Date(row.createdAt).toLocaleString() },
   ],
 )
 const sortCredentialsByCreatedAt = rowSortMethod<ApiCredentialSummary>((row) => row.createdAt)
+const credentialStatusFilterOptions = useCredentialStatusFilterOptions()
 const template = computed(() => templatesStore.selectedTemplate)
 const canPolicy = computed(() => manageApiPolicy.value)
 
@@ -222,6 +234,23 @@ const displayedCredentialSecret = computed(() => {
 
 onMounted(async () => {
   await loadTemplate()
+})
+
+watch(
+  () => route.query.tab,
+  (tab) => {
+    const resolved = resolveDetailTab(tab)
+    if (activeDetailTab.value !== resolved) {
+      activeDetailTab.value = resolved
+    }
+  },
+)
+
+watch(activeDetailTab, (tab) => {
+  if (resolveDetailTab(route.query.tab) === tab) {
+    return
+  }
+  router.replace({ query: { ...route.query, tab } })
 })
 
 watch(
@@ -968,6 +997,8 @@ async function handleDeleteTemplate() {
                 <TableColumnHeader
                   :label="t('templates.policy.credentialStatus')"
                   v-model="credentialColumnFilters.status"
+                  filter-type="select"
+                  :options="credentialStatusFilterOptions"
                 />
               </template>
             </el-table-column>

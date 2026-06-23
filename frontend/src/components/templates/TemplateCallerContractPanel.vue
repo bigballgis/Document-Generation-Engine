@@ -5,6 +5,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useYesNoFilterOptions } from '@/composables/useTableFilterOptions'
 import { getCallerContract } from '@/api/contract'
 import {
   ALLOWED_ENVIRONMENTS,
@@ -57,8 +58,11 @@ const { filters: versionColumnFilters, filteredRows: filteredVersionComparison }
       key: 'defaultRoute',
       getValue: (row) =>
         row.isDefaultRouteTarget ? t('common.yes') : t('common.no'),
+      matchMode: 'exact',
     },
   ])
+
+const yesNoFilterOptions = useYesNoFilterOptions()
 
 const errorCodesSource = computed(() => contract.value?.errorCodes ?? [])
 const { filters: errorColumnFilters, filteredRows: filteredErrorCodes } = useDataTableFilters(
@@ -70,6 +74,7 @@ const { filters: errorColumnFilters, filteredRows: filteredErrorCodes } = useDat
     {
       key: 'retryable',
       getValue: (row) => (row.retryable ? t('common.yes') : t('common.no')),
+      matchMode: 'exact',
     },
   ],
 )
@@ -181,6 +186,8 @@ function errorMessage(key: string | null): string {
             <TableColumnHeader
               :label="t('templates.contract.columns.defaultRouteTarget')"
               v-model="versionColumnFilters.defaultRoute"
+              filter-type="select"
+              :options="yesNoFilterOptions"
             />
           </template>
           <template #default="{ row }">
@@ -243,6 +250,8 @@ function errorMessage(key: string | null): string {
             <TableColumnHeader
               :label="t('templates.contract.columns.retryable')"
               v-model="errorColumnFilters.retryable"
+              filter-type="select"
+              :options="yesNoFilterOptions"
             />
           </template>
           <template #default="{ row }">
