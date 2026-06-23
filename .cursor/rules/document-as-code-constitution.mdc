@@ -1,0 +1,32 @@
+---
+description: Project constitution — documentation is the durable, rebuildable source of truth; code is a replaceable realization.
+alwaysApply: true
+---
+
+# Document-as-Code Constitution
+
+This project treats documentation as software: structured, versioned, validated,
+indexed, traceable. The system must remain rebuildable from documentation alone,
+even if all code is discarded.
+
+## Non-negotiables
+
+- Update documentation BEFORE or WITH any change to behavior, architecture, API
+  contracts, permissions, security, data handling, or deployment assumptions.
+- Keep confirmed requirements separate from pending questions. Never promote an
+  assumption, recommendation, or common pattern into a confirmed requirement.
+- Source-of-truth order on conflict: latest explicit user confirmation >
+  `docs/requirements/requirements-plan.md` > `docs/product/PRD.md` >
+  `docs/domain/domain-model.md` > `docs/security/permission-matrix.md` > ADRs.
+  Never silently pick a side; surface the conflict and confirm.
+- Durable decisions are ADRs. Do NOT edit accepted ADR decisions to reflect
+  implementation progress — ADR status records a decision, not task completion.
+- Completion claims must reflect real, durable, verifiable behavior — never
+  demo-only, in-memory-only, or mock-only. Mark temporary seams as transitional.
+- Every active document is reachable from `docs/README.md`; update index and
+  cross-links in the same change.
+- Execution truth lives in `docs/plan/`. Re-earned progress is recorded in
+  `docs/PROJECT-STATUS-RESET.md` and `docs/plan/execution-sync-ledger.md`.
+- **Post-task doc sync is mandatory before Done** — see
+  `.cursor/rules/post-task-doc-sync-constitution.mdc`.
+- Prefer small, reviewable, diff-friendly documentation changes.

@@ -1,0 +1,31 @@
+---
+description: Project constitution — the system is multi-language capable with English as the primary/base language; user-facing strings are never hardcoded.
+alwaysApply: true
+---
+
+# Internationalization Constitution (English-First)
+
+The platform supports multiple languages. English is the primary and default
+language and the base bundle for every user-facing string.
+
+## Non-negotiables
+
+- Never hardcode user-facing strings in code. Always reference a message key.
+- English base bundle must exist for every key; other locales are additive and
+  fall back to English when a key is missing.
+- Keys are stable and meaningful; never encode runtime data into keys.
+- Locale switching must not change information architecture, layout, or components.
+
+## Backend
+
+- API errors return `error.code`, `error.category`, `error.retryable`, an English
+  `error.message`, and `error.messageKey` (`api.error.<category>.<camelCaseCode>`).
+- One stable, safe English message per `error.code`; do not vary it per scenario.
+- Base bundle: `backend/src/main/resources/i18n/messages_en.properties`.
+
+## Frontend
+
+- Use the i18n catalog with `en` as default and source of truth.
+- Add the English key first; components reference keys, never literals.
+
+Detailed workflow: `.cursor/skills/i18n-english-first/SKILL.md`.

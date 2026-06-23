@@ -1,0 +1,36 @@
+---
+description: Accepted technology stack guardrails (ADRs 0022/0028/0029/0030/0031/0032/0033/0034/0035). Do not switch baseline tech without explicit user reopening.
+alwaysApply: true
+---
+
+# Technology Stack Guardrails
+
+Accepted ADRs are authoritative. Do not make ad-hoc framework/runtime/dependency
+switches; confirm with the user before changing a baseline choice.
+
+## Backend (`backend/`)
+
+- Java 21 (compile `release 21`) + Spring Boot 3.x + Maven.
+- PostgreSQL + Flyway + Spring Data JPA + QueryDSL. UUID PKs, UTC times, logical delete.
+- Redis (Redisson): cache, distributed lock, idempotency. Kafka: async (at-least-once, retry + DLT).
+- MinIO (Java SDK) object storage. LibreOffice headless for PDF. DOCX template engine for rendering.
+- Spring Security + JWT; Argon2id hashing; fail-closed authorization.
+- Jackson, MapStruct, Hibernate Validator, Resilience4j, Bucket4j, springdoc-openapi.
+- Package layout: module-first under `com.bank.docgen.<module>`; rendering isolated from
+  lifecycle/authorization/API-governance.
+
+## Frontend (`frontend/`)
+
+- Vue 3 + TypeScript + Vite + Element Plus + Pinia + Vue Router 4 + Axios.
+- pnpm only (direct `pnpm` or shared resolver; never `corepack pnpm` in scripts).
+- SCSS + CSS Modules; Vitest + Vue Test Utils + Playwright.
+
+## API contract
+
+- Match OpenAPI v1: unified envelope (`metadata`/`result`/`error`), error model
+  (code + category + retryable + messageKey), enums in `UPPER_SNAKE_CASE`, idempotency rules.
+
+## Dependency policy
+
+- Verify version availability in company-approved repositories first; stay within the
+  accepted baseline. Quarantine of a version is normal governance, not a reason to switch stacks.

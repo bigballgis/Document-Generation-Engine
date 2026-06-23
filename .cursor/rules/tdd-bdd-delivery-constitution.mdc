@@ -1,0 +1,38 @@
+---
+description: Project constitution — behavior-driven planning and test-first delivery; nothing is Done without real behavior and green quality gates.
+alwaysApply: true
+---
+
+# BDD + TDD Delivery Constitution
+
+Behavior drives the plan; tests drive the code.
+
+## Behavior first
+
+- Behavior-changing work starts from an explicit behavior spec: actor/role, goal,
+  trigger, preconditions, steps, system responses, acceptance scenarios (Given/When/Then),
+  boundary/exception behavior, observable evidence, and traceability to source docs.
+- If a request is too unclear to write a behavior spec, ask the user before planning or coding.
+- Persist confirmed behavior into the owning requirement/product/domain/permission/API/ADR
+  document before implementation-ready tasks.
+
+## Test first
+
+- Write a failing test before implementation; implement the smallest change to pass; refactor green.
+- Add a regression test for every bug fix.
+
+## Quality gates (must be green before Done)
+
+- Backend: `mvn -B -ntp -f backend/pom.xml verify` (Checkstyle + PMD + SpotBugs + JaCoCo).
+  Coverage: changed lines >= 85%; security-critical / core domain >= 90%.
+- Frontend: `pnpm -C frontend lint`, `type-check`, `test`, `build`.
+
+## Done definition
+
+- Real, durable, verifiable behavior + green gates + updated docs/plan status.
+- **Post-task doc sync mandatory** (`.cursor/agents/post-task-doc-sync.md`) in the same change set.
+- Status vocabulary: `Not Started`, `In Progress`, `Blocked`, `Done`.
+- Exactly one plan phase may be `In Progress` at a time (see `docs/plan/`).
+
+Detailed loop: `.cursor/skills/tdd-feature-delivery/SKILL.md`.
+Post-task sync: `.cursor/skills/post-task-doc-sync/SKILL.md`.

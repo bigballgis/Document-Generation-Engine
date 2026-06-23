@@ -1,0 +1,36 @@
+---
+description: Hard constraint — mandatory post-task documentation sync before any Done claim or task completion handoff.
+alwaysApply: true
+---
+
+# Post-Task Documentation Sync Constitution
+
+Every behavior-changing task **must** complete documentation sync **before** the
+agent reports Done, closes a slice, or handoffs to the user.
+
+## Non-negotiables
+
+1. **No Done without sync** — A task, phase, epic, or milestone may be marked
+   `Done` only after post-task doc sync completes in the **same change set**.
+2. **Invoke the sync agent** — Use `.cursor/agents/post-task-doc-sync.md` (or follow
+   its checklist verbatim inline). Skill: `.cursor/skills/post-task-doc-sync/SKILL.md`.
+3. **Minimum doc updates** when status changes:
+   - `docs/plan/detail/<phase>.md` (task rows)
+   - `docs/plan/master-plan.md` (if phase status changes)
+   - `docs/plan/execution-sync-ledger.md` (epic/milestone mirror + evidence)
+   - Owning `docs/architecture/*task-sheet*.md` or orchestration/implementation plans
+4. **Gate evidence required** — Record which commands passed (backend `mvn verify`,
+   frontend lint/type-check/test/build) in the sync report or ledger.
+5. **Single active phase** — After sync, verify only one phase is `In Progress`.
+6. **Implementer agents must delegate** — `backend-engineer` and `frontend-engineer`
+   finish with post-task-doc-sync; `plan-orchestrator` owns phase transitions.
+
+## Forbidden
+
+- Claiming Done while plan docs still show `Not Started` for completed work.
+- Skipping sync for "small" or "docs-only follow-up" changes after behavior changed.
+- Marking epic/milestone Done in task sheets without updating execution-sync-ledger.
+
+## Done definition (extends TDD constitution)
+
+Behavior is Done only when: durable code + green gates + **post-task doc sync** + updated plan status.
