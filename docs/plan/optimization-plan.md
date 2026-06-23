@@ -88,7 +88,7 @@ Priority: **H/M/L**. All start `Not Started`.
 
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
-| D1 | H | Fix rendering→runtime reverse dependency | `DocumentArtifactPipeline.java` L3, `PdfEncryptionService.java` L3–4 import `runtime.api`/`runtime.service` | Shared types moved to `sharedkernel`/`rendering.api`; rendering no longer imports runtime | Not Started |
+| D1 | H | Fix rendering→runtime reverse dependency | `EncryptionOptionsView` moved to `sharedkernel.api`; rendering throws `EncryptionFailedException` | **Done** (Wave 2): rendering module no longer imports `runtime.api` or `runtime.service` |
 | D2 | H | Unify generation path | `DocumentGenerationEngine` vs `RuntimeGenerationService` L152–191 duplicate assembly | Sync path reuses the engine; duplication removed; tests green | Not Started |
 | D3 | M | Introduce MapStruct mappers | hand-written `toSummary`/`toDetail`/`toPolicyView` (e.g. `TemplateService` L341–404) | Mappers via MapStruct (ADR); services slimmed; behavior unchanged | Not Started |
 | D4 | M | Introduce QueryDSL for complex queries | `ManagementAuditEventRepository` JPQL, in-memory filtering | Audit/list queries type-safe + pageable via QueryDSL | Not Started |
@@ -198,5 +198,5 @@ once Wave 1 exit criteria are met.
 | Wave | Scope | Status |
 | --- | --- | --- |
 | Wave 1 | OPT-A + OPT-B (incl. B5) | **In Progress** — OPT-B (B1–B4) Done; B5 + OPT-A reconciliation remaining |
-| Wave 2 | OPT-C + OPT-E + OPT-D (start) | **In Progress** — E1–E7 Done; C1/C2 Done; C3 partial (generation paths); D1–D6 not started |
+| Wave 2 | OPT-C + OPT-E + OPT-D (start) | **In Progress** — OPT-C/E Done; D1 Done; D2–D6 + C4–C7 remain |
 | Wave 3 | OPT-D (finish) + OPT-F + OPT-G | Not Started — Bucket4j/Resilience4j/Redisson, rendering dependency fix, frontend HTTP 401 |
