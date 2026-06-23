@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
@@ -127,7 +128,7 @@ async function handleSubmit() {
   >
     <el-form label-position="top">
       <el-form-item :label="t('templates.create.groupCode')">
-        <el-select
+        <AppSearchSelect
           v-if="!useGroupInput"
           v-model="form.groupCode"
           :placeholder="t('templates.create.groupCodePlaceholder')"
@@ -138,7 +139,7 @@ async function handleSubmit() {
             :label="option.label"
             :value="option.value"
           />
-        </el-select>
+        </AppSearchSelect>
         <el-input
           v-else
           v-model="form.groupCode"
@@ -146,9 +147,8 @@ async function handleSubmit() {
         />
       </el-form-item>
       <el-form-item :label="t('templates.create.master')">
-        <el-select
+        <AppSearchSelect
           v-model="form.masterId"
-          filterable
           :placeholder="t('templates.create.masterPlaceholder')"
           :disabled="!form.groupCode"
         >
@@ -158,7 +158,7 @@ async function handleSubmit() {
             :label="option.label"
             :value="option.value"
           />
-        </el-select>
+        </AppSearchSelect>
       </el-form-item>
       <el-form-item :label="t('templates.create.externalId')">
         <el-input v-model="form.externalId" :placeholder="t('templates.create.externalIdPlaceholder')" />

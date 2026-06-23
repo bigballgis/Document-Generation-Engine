@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { useSessionStore } from '@/stores/session'
 
 const props = defineProps<{
@@ -111,7 +112,7 @@ const canSubmit = computed(
           maxlength="64"
           :placeholder="t('masters.upload.groupCodeManualPlaceholder')"
         />
-        <el-select
+        <AppSearchSelect
           v-else
           v-model="form.groupCode"
           :placeholder="t('masters.upload.groupCodePlaceholder')"
@@ -122,7 +123,7 @@ const canSubmit = computed(
             :label="option.label"
             :value="option.value"
           />
-        </el-select>
+        </AppSearchSelect>
       </el-form-item>
       <el-form-item :label="t('masters.upload.name')" required>
         <el-input v-model="form.name" maxlength="256" />

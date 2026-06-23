@@ -1,0 +1,5 @@
+# Runtime image — copies pre-built frontend/dist (see scripts/docker-deploy.ps1).
+FROM nginx:1.27-alpine
+COPY dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80

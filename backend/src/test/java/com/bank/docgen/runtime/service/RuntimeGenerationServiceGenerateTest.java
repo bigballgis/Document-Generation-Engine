@@ -38,6 +38,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -110,7 +111,7 @@ class RuntimeGenerationServiceGenerateTest {
                 generateRequest("idem-1", "DOCX")
         );
 
-        assertThat(result.idempotencyStatus()).isEqualTo("REPLAYED");
+        assertThat(result.idempotencyStatus()).isEqualTo(IdempotencyConstants.STATUS_REPLAYED);
         assertThat(result.documentId()).isEqualTo("DOC-REPLAY");
         assertThat(result.artifactBytes()).isNull();
         assertThat(result.artifactStream()).isNotNull();
@@ -180,7 +181,7 @@ class RuntimeGenerationServiceGenerateTest {
                 generateRequest("idem-2", "DOCX")
         );
 
-        assertThat(result.idempotencyStatus()).isEqualTo("CREATED");
+        assertThat(result.idempotencyStatus()).isEqualTo(IdempotencyConstants.STATUS_NEW);
         assertThat(result.artifactBytes()).containsExactly(4, 5, 6);
         assertThat(result.artifactStream()).isNull();
         assertThat(result.resolvedReleaseVersion()).isEqualTo(RELEASE_VERSION);
@@ -240,6 +241,57 @@ class RuntimeGenerationServiceGenerateTest {
         ))
                 .isInstanceOf(TemplateValidationException.class)
                 .hasMessage("api.error.runtime.versionNotCallable"        );
+    }
+
+    @Test
+    void generateSync_rejectsSyncDownloadUrlMode() {
+        when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
+
+        GenerateRequestBody request = new GenerateRequestBody(
+                new OutputOptionsView("DOCX", "SYNC_DOWNLOAD_URL"),
+                Map.of("customerName", "Alice"),
+                new EncryptionOptionsView(false, null, null, List.of()),
+                "req-1",
+                "idem-download-url"
+        );
+
+        assertThatThrownBy(() -> service.generateSync(template, session, RELEASE_VERSION, request))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasMessage("api.error.runtime.outputModeUnsupported");
+    }
+
+    @Test
+    void generateSync_hashesEncryptionInIdempotencyPayload() {
+        TemplateVersionEntity version = publishedVersion(VERSION_ID, TEMPLATE_ID);
+        when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, RELEASE_VERSION))
+                .thenReturn(Optional.of(version));
+        doNothing().when(encryptionParameterValidator).validate(any(), any(), anyString());
+        ArgumentCaptor<String> payloadCaptor = ArgumentCaptor.forClass(String.class);
+        when(idempotencyService.hashRequest(payloadCaptor.capture())).thenReturn("hash-a");
+        when(idempotencyService.findExisting(any(), any(), any())).thenReturn(Optional.empty());
+        when(idempotencyService.begin(any(), any(), any())).thenReturn(pendingIdempotency(TEMPLATE_ID));
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any()))
+                .thenReturn(new DocumentGenerationEngine.GeneratedDocument(
+                        "DOC-1",
+                        "storage/doc.docx",
+                        new byte[]{1},
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        "DOCX",
+                        List.of()
+                ));
+
+        GenerateRequestBody request = new GenerateRequestBody(
+                new OutputOptionsView("DOCX", "SYNC_STREAM"),
+                Map.of("customerName", "Alice"),
+                new EncryptionOptionsView(true, "user", null, List.of("OPEN_PASSWORD")),
+                "req-enc",
+                "idem-enc"
+        );
+
+        service.generateSync(template, session, RELEASE_VERSION, request);
+
+        assertThat(payloadCaptor.getValue()).contains("\"encryption\"");
     }
 
     private static final class TrackingInputStream extends InputStream {

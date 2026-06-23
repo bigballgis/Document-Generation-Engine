@@ -1,34 +1,30 @@
 ---
-description: Hard constraint — all integration and manual validation runs in Docker; never rely on local Spring Boot or Vite dev servers for user testing.
+description: Host build + Docker runtime — compile with local Maven/pnpm, test only in Docker containers.
 alwaysApply: true
 ---
 
-# Docker-Only Validation
+# Docker Runtime Validation
 
-The product owner validates **only inside Docker**. Treat local `mvn spring-boot:run`,
-`pnpm dev`, and host-port testing as optional developer shortcuts — **not** the delivery target.
+Manual acceptance testing runs in Docker containers. **Compilation happens on the host**
+(local Maven / pnpm using your `~/.m2` and `node_modules`), then artifacts are copied into
+runtime images — no Maven/npm compile inside `docker build`.
 
 ## Non-negotiables
 
-1. **Done requires Docker deploy** — After behavior-changing frontend/backend work, build and
-   roll out the `prod` compose profile and verify `/healthz` plus the management UI on
-   `FRONTEND_PORT` (default **4173**), not Vite **5173**.
-2. **Use the canonical script** — From repo root: `.\scripts\docker-deploy.ps1` (or equivalent
-   `docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d --build`).
-3. **Images must be self-contained** — Backend image builds with Maven inside Docker
-   (`backend/Dockerfile` multi-stage). Do not require a pre-built `backend/target/*.jar` on the host.
-4. **Report Docker URLs** — When handing off to the user, always cite
-   `http://localhost:4173` (or `FRONTEND_PORT`) and `http://localhost:8080/healthz` (or `BACKEND_PORT`).
-5. **No secrets in images** — Use `.env` at runtime; never commit credentials.
+1. **Deploy script** — `.\scripts\docker-deploy.ps1` from repo root:
+   - `mvn -f backend/pom.xml package -DskipTests`
+   - `pnpm -C frontend build`
+   - `docker compose ... build` (copies `backend/target/*.jar` + `frontend/dist`)
+   - `docker compose ... up -d`
+2. **Test URLs** — UI `http://localhost:4173`, health `http://localhost:8080/healthz`.
+3. **After code changes** — rerun the deploy script (not `pnpm dev` / `spring-boot:run` for acceptance).
 
 ## Forbidden
 
-- Claiming Done without a successful Docker rebuild/restart after code changes.
-- Telling the user to test on `localhost:5173` or a local JVM process unless they explicitly opt in.
-- Skipping `--build` when application code changed.
+- Claiming Done without redeploying containers after behavior changes.
+- Long-running Maven inside Docker BuildKit for routine deploys (use host Maven instead).
 
 ## Reference
 
+- `backend/Dockerfile.packaged`, `frontend/Dockerfile.packaged`
 - `scripts/docker-deploy.ps1`
-- `docker-compose.yml` + `docker-compose.prod.yml` (`prod` profile)
-- `.cursor/skills/docker-deployment/SKILL.md`

@@ -23,7 +23,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,7 +127,7 @@ public class RuntimeGenerationService {
                     existing.get().getDocumentId(),
                     resolvedVersion,
                     List.of(FidelityWarningCode.CONTROLLED_STYLE_FALLBACK.name()),
-                    "REPLAYED"
+                    IdempotencyConstants.STATUS_REPLAYED
             );
         }
         GenerationIdempotencyEntity idempotency = existing.orElseGet(() ->
@@ -148,7 +147,7 @@ public class RuntimeGenerationService {
                 generated.documentId(),
                 resolvedVersion,
                 generated.fidelityWarningCodes(),
-                "CREATED"
+                IdempotencyConstants.STATUS_NEW
         );
     }
 
@@ -179,6 +178,20 @@ public class RuntimeGenerationService {
         if (request.idempotencyKey() == null || request.idempotencyKey().isBlank()) {
             throw new TemplateValidationException("api.error.runtime.idempotencyKeyRequired");
         }
+        validateOutputMode(request.output().mode(), policy);
+    }
+
+    private void validateOutputMode(String mode, ApiPolicyEntity policy) {
+        if (mode == null || mode.isBlank()) {
+            throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
+        }
+        if ("SYNC_DOWNLOAD_URL".equalsIgnoreCase(mode)) {
+            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
+        }
+        List<String> allowedModes = readStringList(policy.getOutputModesJson());
+        if (allowedModes.stream().noneMatch(item -> item.equalsIgnoreCase(mode))) {
+            throw new TemplateValidationException("api.error.runtime.outputModeUnsupported");
+        }
     }
 
     private List<String> readStringList(String json) {
@@ -192,11 +205,12 @@ public class RuntimeGenerationService {
 
     private String writeRequest(GenerateRequestBody request, String releaseVersion) {
         try {
-            return objectMapper.writeValueAsString(Map.of(
-                    "releaseVersion", releaseVersion,
-                    "variables", request.variables(),
-                    "output", request.output()
-            ));
+            java.util.LinkedHashMap<String, Object> payload = new java.util.LinkedHashMap<>();
+            payload.put("releaseVersion", releaseVersion);
+            payload.put("variables", request.variables());
+            payload.put("output", request.output());
+            payload.put("encryption", request.encryption());
+            return objectMapper.writeValueAsString(payload);
         } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
             return releaseVersion;
         }

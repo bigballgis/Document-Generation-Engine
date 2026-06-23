@@ -54,7 +54,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P17 | Per-domain API policy governance | [detail/P17-api-policy-domain-governance.md](detail/P17-api-policy-domain-governance.md) | Not Started |
 | P18 | Structured authoring & rendering-fidelity engine | [detail/P18-structured-authoring-fidelity-engine.md](detail/P18-structured-authoring-fidelity-engine.md) | Not Started |
 | P19 | Template verifiability, publish gate & decision forms | [detail/P19-verifiability-publish-gate.md](detail/P19-verifiability-publish-gate.md) | Not Started |
-| P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | Not Started |
+| P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | In Progress (T06 open) |
 
 ## First delivery target (thin vertical slice) — achieved
 
@@ -78,5 +78,6 @@ structured authoring & fidelity engine (P18), verifiability/publish-gate + decis
 
 | Backlog | Lens |
 | --- | --- |
-| [optimization-plan.md](./optimization-plan.md) | Technical debt: quality gates, coverage, backend architecture/security/performance |
-| [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimization-plan.md) | User-interaction completeness + upgradeability/extensibility — **Wave A Done**, **Wave B In Progress** (2026-06-23) |
+| **[comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)** | **Unified prioritized map (COR-0…6): docs sync, API contract, template workflow, frontend UX, performance, E2E, P14–P20 — start here (2026-06-23)** |
+| [optimization-plan.md](./optimization-plan.md) | Technical debt detail: quality gates, coverage, backend architecture/security/performance (OPT-A…G) |
+| [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimization-plan.md) | Historical UX waves (UX-A…G); verify Done claims against comprehensive roadmap |

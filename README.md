@@ -27,12 +27,15 @@ docker-compose.yml Local PostgreSQL, Redis, Kafka, MinIO
 
 ### Docker-only validation (required for manual testing)
 
-All manual / acceptance testing runs in Docker. **Do not use** `pnpm dev` or `spring-boot:run` unless you are debugging locally.
+Compile on your machine (Maven / pnpm use local caches), run in Docker:
 
 ```powershell
 copy .env.example .env   # if .env does not exist
 .\scripts\docker-deploy.ps1
 ```
+
+This runs local `mvn package` + `pnpm build`, then builds slim images that **only copy**
+`backend/target/*.jar` and `frontend/dist` — no dependency download inside Docker build.
 
 | Service | URL |
 | --- | --- |
@@ -40,11 +43,7 @@ copy .env.example .env   # if .env does not exist
 | Backend health | http://localhost:8080/healthz |
 | Login | `10000001` / `ChangeMe123!` |
 
-Rebuild after code changes: run `.\scripts\docker-deploy.ps1` again.
-
-Restart without recompiling (uses existing images): `.\scripts\docker-deploy.ps1 -SkipBuild`.
-
-Docker only **re-downloads** base images from the registry when the image is missing locally or when you use `--pull` / `ForceRebuild`. Routine deploys use **`build --pull=false`** and reuse cached layers; you still see compile steps (`pnpm build`, `mvn package`) when source code changed — that is rebuild, not re-download.
+Restart without recompiling: `.\scripts\docker-deploy.ps1 -SkipBuild`.
 
 ### 1. Environment
 

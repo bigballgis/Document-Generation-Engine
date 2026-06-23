@@ -28,7 +28,7 @@ describe('locale registry', () => {
     await ensureLocaleMessages(i18n, 'zh-CN')
     ;(i18n.global.locale as unknown as { value: string }).value = 'zh-CN'
 
-    expect(i18n.global.t('app.title')).toBe('文档生成平台')
-    expect(i18n.global.t('templates.list.title')).toBe('Templates')
+    expect(i18n.global.t('app.title')).toBe('文档生成系统')
+    expect(i18n.global.t('templates.list.title')).toBe('Template version catalog')
   })
 })

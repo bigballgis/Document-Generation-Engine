@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import * as templatesApi from '@/api/templates'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import type { TestDataSet } from '@/types/template'
@@ -19,6 +22,16 @@ const { confirmAction } = useConfirmAction()
 const loading = ref(false)
 const saving = ref(false)
 const dataSets = ref<TestDataSet[]>([])
+const dataSetsSource = computed(() => dataSets.value)
+const { filters: columnFilters, filteredRows: filteredDataSets } = useDataTableFilters(
+  dataSetsSource,
+  [
+    { key: 'name', getValue: (row) => row.name },
+    { key: 'testDataSetId', getValue: (row) => row.testDataSetId },
+    { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
+  ],
+)
+const sortByUpdatedAt = rowSortMethod<TestDataSet>((row) => row.updatedAt)
 const selectedId = ref<string | null>(null)
 const dialogVisible = ref(false)
 const editingId = ref<string | null>(null)
@@ -143,17 +156,36 @@ onMounted(() => {
         {{ t('templates.testDataSets.create') }}
       </el-button>
     </div>
-    <el-table
+    <AppDataTable
       v-loading="loading"
-      :data="dataSets"
-      stripe
+      :data="filteredDataSets"
       highlight-current-row
       :empty-text="t('templates.testDataSets.empty')"
       @row-click="(row: TestDataSet) => handleSelect(row.testDataSetId)"
     >
-      <el-table-column prop="name" :label="t('templates.testDataSets.name')" min-width="160" />
-      <el-table-column prop="testDataSetId" :label="t('templates.testDataSets.id')" min-width="140" />
-      <el-table-column :label="t('templates.testDataSets.updatedAt')" min-width="180">
+      <el-table-column prop="name" sortable min-width="160">
+        <template #header>
+          <TableColumnHeader
+            :label="t('templates.testDataSets.name')"
+            v-model="columnFilters.name"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column prop="testDataSetId" sortable min-width="140">
+        <template #header>
+          <TableColumnHeader
+            :label="t('templates.testDataSets.id')"
+            v-model="columnFilters.testDataSetId"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column sortable :sort-method="sortByUpdatedAt" min-width="180">
+        <template #header>
+          <TableColumnHeader
+            :label="t('templates.testDataSets.updatedAt')"
+            v-model="columnFilters.updatedAt"
+          />
+        </template>
         <template #default="{ row }">
           {{ new Date(row.updatedAt).toLocaleString() }}
         </template>
@@ -168,7 +200,7 @@ onMounted(() => {
           </el-button>
         </template>
       </el-table-column>
-    </el-table>
+    </AppDataTable>
     <p v-if="selectedId" class="selection-hint">
       {{ t('templates.testDataSets.selectedHint', { testDataSetId: selectedId }) }}
     </p>

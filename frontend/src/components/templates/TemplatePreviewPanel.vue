@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import * as templatesApi from '@/api/templates'
 import type { AnchorBinding, PreviewRecord } from '@/types/template'
 
@@ -27,6 +30,15 @@ const comparisonRows = computed(() =>
     bindingType: binding.declaredContentType,
     previewStatus: latestPreview.value?.status ?? '—',
   })),
+)
+const comparisonSource = computed(() => comparisonRows.value)
+const { filters: comparisonColumnFilters, filteredRows: filteredComparisonRows } = useDataTableFilters(
+  comparisonSource,
+  [
+    { key: 'anchorId', getValue: (row) => row.anchorId },
+    { key: 'bindingType', getValue: (row) => row.bindingType },
+    { key: 'previewStatus', getValue: (row) => row.previewStatus },
+  ],
 )
 
 async function refreshPreview() {
@@ -76,11 +88,32 @@ function warningLabel(messageKey: string) {
       </el-button>
 
       <h3>{{ t('templates.preview.comparisonTitle') }}</h3>
-      <el-table :data="comparisonRows" stripe>
-        <el-table-column prop="anchorId" :label="t('templates.authoring.anchorId')" />
-        <el-table-column prop="bindingType" :label="t('templates.authoring.contentType')" />
-        <el-table-column prop="previewStatus" :label="t('templates.preview.previewStatusColumn')" />
-      </el-table>
+      <AppDataTable :data="filteredComparisonRows">
+        <el-table-column prop="anchorId" sortable>
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.authoring.anchorId')"
+              v-model="comparisonColumnFilters.anchorId"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="bindingType" sortable>
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.authoring.contentType')"
+              v-model="comparisonColumnFilters.bindingType"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="previewStatus" sortable>
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.preview.previewStatusColumn')"
+              v-model="comparisonColumnFilters.previewStatus"
+            />
+          </template>
+        </el-table-column>
+      </AppDataTable>
 
       <h3>{{ t('templates.preview.warningsTitle') }}</h3>
       <el-empty

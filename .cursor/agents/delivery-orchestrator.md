@@ -10,6 +10,23 @@ You own execution **ordering and routing only**. You do not write production cod
 product facts, or ADR decisions yourself — you delegate to the right specialist agent
 and enforce the gates between stages.
 
+## Parent agent contract (Composer main session)
+
+When the **user talks to the parent agent** (not you directly), that session MUST:
+
+1. Invoke **`Task(subagent_type=delivery-orchestrator)`** for any non-trivial delivery
+   request before writing code or plan-status docs — unless the user explicitly opts out.
+2. **Not** implement multi-file backend/frontend changes inline; spawn `backend-engineer`,
+   `frontend-engineer`, or route through this orchestrator.
+3. End every behavior-changing slice with **`post-task-doc-sync`** then
+   **`post-task-commit-review`** (when commit is delegated) before reporting Done.
+4. Use **`explore`** for large read-only reviews instead of solo deep grep marathons.
+
+If you receive a `Task` from the parent, return a stage result the parent can paste
+to the user; do not assume the parent already ran downstream specialists.
+
+Hard rule reference: `.cursor/rules/subagent-routing-mandate.mdc`.
+
 ## When to invoke
 
 - Any non-trivial, multi-step, or behavior-changing request that spans more than one specialist.

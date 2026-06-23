@@ -1,6 +1,13 @@
 # P5 — Lifecycle Governance (Detailed Plan)
 
-**Phase status:** Done | **Depends on:** P4
+**Phase status:** Done (thin slice) | **Depends on:** P4
+
+> **P5 vs P19 boundary (2026-06-24):** P5 **Done** covers the lifecycle **state machine**,
+> basic lifecycle UI, in-app transition actions, and a **thin-slice** publish-gate checklist
+> panel in `TemplateDetailView`. It does **not** include P19 scope: live server-side publish
+> gate blocking, multi-sample batch test + coverage thresholds, controlled test/approval
+> opinion forms, structured risk prompts, or full publish-summary dialog content. Those gaps
+> are tracked in [P19](./P19-verifiability-publish-gate.md) and COR-T01–T04.
 
 ## Behavior goal
 

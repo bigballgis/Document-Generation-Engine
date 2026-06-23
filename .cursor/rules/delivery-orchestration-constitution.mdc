@@ -12,6 +12,14 @@ pipeline. Specialists own their stage; nobody jumps the order.
 
 - Route multi-step or behavior-changing requests through `delivery-orchestrator`.
 - A single narrow change may call one specialist directly, but still respects gate order.
+- **Parent agent:** see `subagent-routing-mandate.mdc` — default is **delegate via `Task`**, not inline multi-file implementation.
+
+## Parent agent obligation
+
+Before the first repository write in a turn, classify the request and invoke the
+matching specialist (`delivery-orchestrator` when in doubt). The parent session
+**must not** own production code, plan-status updates, or Done claims for delivery
+work — only orchestration, user communication, and synthesis of subagent outputs.
 
 ## Fixed pipeline order
 
@@ -43,6 +51,8 @@ behavior-spec-author → plan-orchestrator → doc-keeper(if docs change)
 - Claiming frontend Done without E2E functional + UIUX evidence.
 - Deploying on red gates, or baking secrets/credentials into images or compose.
 - Reordering or skipping the end gates (doc sync, commit review).
+- **Parent agent implementing delivery slices inline** when a named specialist or
+  orchestrator exists (see `subagent-routing-mandate.mdc`).
 
 ## Done definition (extends TDD + doc-sync + commit-review constitutions)
 

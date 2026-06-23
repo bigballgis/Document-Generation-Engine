@@ -15,11 +15,16 @@ import TemplateReleaseVersionHistoryPanel from '@/components/templates/TemplateR
 import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
+import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { MASTER_DETAIL_PATH_PREFIX, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type {
+  ApiCredentialSummary,
   BindingValidationResult,
   DeleteTemplatePayload,
   LifecycleGovernanceAction,
@@ -72,6 +77,17 @@ const policyForm = reactive<UpsertApiPolicyPayload>({
 })
 
 const templateId = computed(() => route.params.templateId as string)
+
+const credentialsSource = computed(() => templatesStore.credentials)
+const { filters: credentialColumnFilters, filteredRows: filteredCredentials } = useDataTableFilters(
+  credentialsSource,
+  [
+    { key: 'externalId', getValue: (row) => row.externalId },
+    { key: 'status', getValue: (row) => row.status },
+    { key: 'createdAt', getValue: (row) => new Date(row.createdAt).toLocaleString() },
+  ],
+)
+const sortCredentialsByCreatedAt = rowSortMethod<ApiCredentialSummary>((row) => row.createdAt)
 const template = computed(() => templatesStore.selectedTemplate)
 const canPolicy = computed(() => manageApiPolicy.value)
 
@@ -884,7 +900,7 @@ async function handleDeleteTemplate() {
               <el-input v-model="policyForm.defaultRouteReleaseVersion" />
             </el-form-item>
             <el-form-item :label="t('templates.policy.allowedAdGroups')">
-              <el-select
+              <AppSearchSelect
                 v-model="policyForm.allowedAdGroups"
                 multiple
                 filterable
@@ -894,24 +910,24 @@ async function handleDeleteTemplate() {
               />
             </el-form-item>
             <el-form-item :label="t('templates.policy.outputFormats')">
-              <el-select v-model="policyForm.outputFormats" multiple filterable allow-create>
+              <AppSearchSelect v-model="policyForm.outputFormats" multiple filterable allow-create>
                 <el-option
                   v-for="format in policyOutputFormatOptions"
                   :key="format"
                   :label="format"
                   :value="format"
                 />
-              </el-select>
+              </AppSearchSelect>
             </el-form-item>
             <el-form-item :label="t('templates.policy.outputModes')">
-              <el-select v-model="policyForm.outputModes" multiple filterable allow-create>
+              <AppSearchSelect v-model="policyForm.outputModes" multiple filterable allow-create>
                 <el-option
                   v-for="mode in policyOutputModeOptions"
                   :key="mode"
                   :label="mode"
                   :value="mode"
                 />
-              </el-select>
+              </AppSearchSelect>
             </el-form-item>
             <el-form-item :label="t('templates.policy.batchEnabled')">
               <el-switch v-model="policyForm.batchEnabled" />
@@ -935,13 +951,33 @@ async function handleDeleteTemplate() {
             </el-button>
           </div>
           <h3>{{ t('templates.policy.credentialsTitle') }}</h3>
-          <el-table :data="templatesStore.credentials" stripe empty-text="">
+          <AppDataTable :data="filteredCredentials" empty-text="">
             <template #empty>
               <el-empty :description="t('templates.policy.noCredentials')" />
             </template>
-            <el-table-column prop="externalId" :label="t('templates.policy.credentialExternalId')" />
-            <el-table-column prop="status" :label="t('templates.policy.credentialStatus')" />
-            <el-table-column :label="t('templates.policy.credentialCreatedAt')" min-width="180">
+            <el-table-column prop="externalId" sortable>
+              <template #header>
+                <TableColumnHeader
+                  :label="t('templates.policy.credentialExternalId')"
+                  v-model="credentialColumnFilters.externalId"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" sortable>
+              <template #header>
+                <TableColumnHeader
+                  :label="t('templates.policy.credentialStatus')"
+                  v-model="credentialColumnFilters.status"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column sortable :sort-method="sortCredentialsByCreatedAt" min-width="180">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('templates.policy.credentialCreatedAt')"
+                  v-model="credentialColumnFilters.createdAt"
+                />
+              </template>
               <template #default="{ row }">
                 {{ new Date(row.createdAt).toLocaleString() }}
               </template>
@@ -966,7 +1002,7 @@ async function handleDeleteTemplate() {
                 </el-button>
               </template>
             </el-table-column>
-          </el-table>
+          </AppDataTable>
         </template>
       </el-card>
 

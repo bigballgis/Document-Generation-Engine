@@ -141,7 +141,7 @@ public class BatchGenerationService {
                 request.idempotencyKey(),
                 requestHash,
                 writeRequestPayload(request),
-                Instant.now().plusSeconds(86400)
+                Instant.now().plusSeconds(IdempotencyConstants.RETENTION_SECONDS)
         );
         asyncTaskRepository.save(task);
         asyncBatchTaskDispatcher.dispatch(task.getId());
@@ -252,7 +252,7 @@ public class BatchGenerationService {
                 request.idempotencyKey(),
                 requestHash,
                 writeRequestPayload(request),
-                Instant.now().plusSeconds(86400)
+                Instant.now().plusSeconds(IdempotencyConstants.RETENTION_SECONDS)
         );
         entity.markSucceeded(writeBatchResult(batchResult));
         asyncTaskRepository.save(entity);
@@ -389,11 +389,12 @@ public class BatchGenerationService {
 
     private String writeRequest(BatchGenerateRequestBody request, String releaseVersion) {
         try {
-            return objectMapper.writeValueAsString(java.util.Map.of(
-                    "releaseVersion", releaseVersion,
-                    "items", request.items(),
-                    "output", request.output()
-            ));
+            java.util.LinkedHashMap<String, Object> payload = new java.util.LinkedHashMap<>();
+            payload.put("releaseVersion", releaseVersion);
+            payload.put("items", request.items());
+            payload.put("output", request.output());
+            payload.put("encryption", request.encryption());
+            return objectMapper.writeValueAsString(payload);
         } catch (JsonProcessingException ex) {
             return releaseVersion;
         }

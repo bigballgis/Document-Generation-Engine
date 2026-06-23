@@ -2,6 +2,8 @@
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import BrandLogo from '@/components/branding/BrandLogo.vue'
+import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { BRAND_REGISTRY } from '@/config/brands'
 import { useAppStore } from '@/stores/app'
 import { useSessionStore } from '@/stores/session'
@@ -58,9 +60,12 @@ async function submitLogin() {
 <template>
   <div class="login-page">
     <header class="login-header">
-      <div class="brand-slot" :aria-label="t('login.brandAriaLabel')">
-        {{ appStore.brand }}
-      </div>
+      <BrandLogo
+        :brand="appStore.brand"
+        :size="52"
+        show-wordmark
+        :aria-label="t('login.brandAriaLabel')"
+      />
       <h1>{{ t('app.title') }}</h1>
       <p>{{ t('login.subtitle') }}</p>
     </header>
@@ -95,7 +100,7 @@ async function submitLogin() {
           />
         </el-form-item>
         <el-form-item :label="t('login.brandLabel')">
-          <el-select
+          <AppSearchSelect
             :model-value="appStore.brand"
             @update:model-value="appStore.setBrand($event as BrandPreset)"
           >
@@ -105,7 +110,7 @@ async function submitLogin() {
               :label="option.label"
               :value="option.value"
             />
-          </el-select>
+          </AppSearchSelect>
         </el-form-item>
         <el-button
           type="primary"
@@ -129,43 +134,44 @@ async function submitLogin() {
   justify-content: center;
   gap: 1.5rem;
   padding: 2rem;
-  background: var(--surface-bg);
+  background:
+    radial-gradient(
+      circle at 12% 8%,
+      color-mix(in srgb, var(--brand-primary) 12%, transparent) 0%,
+      transparent 42%
+    ),
+    linear-gradient(165deg, var(--brand-header-bg) 0%, var(--surface-bg) 48%, #eef2f6 100%);
 }
 
 .login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 
   h1 {
-    margin: 0.5rem 0 0;
+    margin: 0.85rem 0 0;
     font-size: 1.75rem;
-    font-weight: 600;
+    font-weight: 650;
+    letter-spacing: -0.02em;
   }
 
   p {
-    margin: 0.25rem 0 0;
+    margin: 0.35rem 0 0;
+    font-size: 0.9375rem;
     color: var(--text-muted);
   }
 }
 
-.brand-slot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 7rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-weight: 700;
-  color: var(--brand-primary);
-  background: var(--brand-header-bg);
-}
-
 .login-card {
   width: min(420px, 100%);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
 
   h2 {
     margin: 0 0 1rem;
-    font-size: 1.25rem;
+    font-size: 1.2rem;
+    font-weight: 650;
   }
 }
 

@@ -297,13 +297,24 @@ public class GlobalExceptionHandler {
             HttpServletRequest request,
             IdempotencyConflictException ex
     ) {
-        return domainError(
-                request,
-                HttpStatus.CONFLICT,
-                ApiErrorCodes.IDEMPOTENCY_KEY_CONFLICT,
-                ApiErrorCategories.RUNTIME,
-                ex.messageKey()
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        String messageKey = ex.messageKey();
+        java.util.Map<String, Object> conflictSummary = java.util.Map.of(
+                "idempotencyKey", ex.idempotencyKey(),
+                "conflictType", ex.conflictType()
         );
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.IDEMPOTENCY_KEY_CONFLICT,
+                ApiErrorCategories.IDEMPOTENCY,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                false,
+                null,
+                conflictSummary
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 
     @ExceptionHandler(AsyncTaskNotFoundException.class)

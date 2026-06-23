@@ -2,9 +2,9 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import BrandLogo from '@/components/branding/BrandLogo.vue'
 import { BRAND_REGISTRY } from '@/config/brands'
 import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
-import { BRAND_THEMES } from '@/theme/tokens'
 import { buildVisibleNavGroups } from '@/navigation/navStructure'
 import { useAppStore } from '@/stores/app'
 import { useSessionStore } from '@/stores/session'
@@ -19,7 +19,6 @@ const brandConfig = computed(
   () => BRAND_REGISTRY.find((entry) => entry.code === appStore.brand) ?? BRAND_REGISTRY[0],
 )
 const brandLabel = computed(() => t(brandConfig.value.labelKey))
-const logoLabel = computed(() => BRAND_THEMES[appStore.brand].logoSlotLabel)
 const localeOptions = computed(() =>
   LOCALE_REGISTRY.map((entry) => ({
     value: entry.code,
@@ -60,8 +59,15 @@ function handleLocaleChange(locale: string) {
   <div class="management-shell">
     <header class="shell-header">
       <div class="header-brand">
-        <div class="brand-slot" :aria-label="brandLabel">{{ logoLabel }}</div>
-        <h1 class="app-title">{{ t('app.title') }}</h1>
+        <BrandLogo
+          :brand="appStore.brand"
+          :size="40"
+          show-wordmark
+          :aria-label="brandLabel"
+        />
+        <div class="title-block">
+          <h1 class="app-title">{{ t('app.title') }}</h1>
+        </div>
       </div>
       <div class="header-actions">
         <el-select
@@ -124,45 +130,68 @@ function handleLocaleChange(locale: string) {
 }
 
 .shell-header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--brand-header-bg);
+  padding: 0.65rem 1.5rem;
+  border-bottom: 1px solid var(--brand-header-border);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-header-bg) 88%, white) 0%,
+    var(--brand-header-bg) 100%
+  );
+  box-shadow: var(--shadow-soft);
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      var(--brand-primary) 0%,
+      color-mix(in srgb, var(--brand-primary) 35%, transparent) 42%,
+      transparent 72%
+    );
+    opacity: 0.85;
+    pointer-events: none;
+  }
 }
 
 .header-brand {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
-.brand-slot {
-  display: inline-flex;
-  padding: 0.35rem 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-weight: 600;
-  color: var(--brand-primary);
+.title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
 }
 
 .app-title {
   margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.0625rem;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .user-label {
+  font-size: 0.875rem;
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .locale-switcher {
@@ -180,7 +209,7 @@ function handleLocaleChange(locale: string) {
   flex-shrink: 0;
   padding: 1rem 0;
   border-right: 1px solid var(--border-color);
-  background: #fafbfc;
+  background: var(--nav-surface-bg);
 }
 
 nav {
@@ -192,9 +221,9 @@ nav {
 
 .nav-group-label {
   margin: 0 0 0.35rem 0.85rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -202,23 +231,29 @@ nav {
 .nav-item {
   display: block;
   width: 100%;
-  padding: 0.65rem 0.85rem;
+  padding: 0.6rem 0.85rem;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: transparent;
   text-align: left;
   font: inherit;
-  color: #1a1a1a;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-primary);
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 
   &:hover {
-    background: #eef1f4;
+    background: color-mix(in srgb, var(--brand-accent-soft) 55%, white);
   }
 
   &.active {
-    background: color-mix(in srgb, var(--brand-primary) 12%, white);
+    background: color-mix(in srgb, var(--brand-primary) 11%, white);
     color: var(--brand-primary);
-    font-weight: 600;
+    font-weight: 650;
+    box-shadow: inset 3px 0 0 var(--brand-primary);
   }
 }
 

@@ -1,8 +1,8 @@
-# Canonical Docker-only deployment for local validation.
+# Canonical deployment: compile on host, run in Docker (no Maven inside image build).
 # Usage (from repo root):
-#   .\scripts\docker-deploy.ps1              # rebuild app images (use local cache, no registry pull)
-#   .\scripts\docker-deploy.ps1 -SkipBuild   # restart containers only, no compile
-#   .\scripts\docker-deploy.ps1 -ForceRebuild # full rebuild without layer cache
+#   .\scripts\docker-deploy.ps1              # local mvn + pnpm build, then docker images
+#   .\scripts\docker-deploy.ps1 -SkipBuild   # restart containers only
+#   .\scripts\docker-deploy.ps1 -ForceRebuild # docker build --no-cache
 
 param(
     [switch]$SkipBuild,
@@ -12,6 +12,9 @@ param(
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $RepoRoot
+
+$env:DOCKER_BUILDKIT = "1"
+$env:COMPOSE_DOCKER_CLI_BUILD = "1"
 
 if (-not (Test-Path ".env")) {
     Copy-Item ".env.example" ".env"
@@ -24,14 +27,11 @@ $composeArgs = @(
     "--profile", "prod"
 )
 
-# Backend multi-stage build needs these base images once; skip pull if already local.
-$baseImages = @(
-    "maven:3.9.9-eclipse-temurin-21-alpine",
+$runtimeImages = @(
     "eclipse-temurin:21-jre-alpine",
-    "node:22-alpine",
     "nginx:1.27-alpine"
 )
-foreach ($image in $baseImages) {
+foreach ($image in $runtimeImages) {
     $imageId = docker images -q $image
     if (-not $imageId) {
         Write-Host "==> First-time pull: $image"
@@ -45,7 +45,36 @@ docker compose up -d docgen-postgres docgen-redis docgen-minio
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 if (-not $SkipBuild) {
-    Write-Host "==> Building application images (local layer cache; --pull=false skips registry re-download)..."
+    Write-Host "==> Building backend JAR locally (uses your ~/.m2 cache)..."
+    mvn -B -ntp -f backend/pom.xml package "-Dmaven.test.skip=true"
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+    $jar = Get-ChildItem -Path "backend/target/docgen-backend-*.jar" -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -notmatch 'original' } |
+        Select-Object -First 1
+    if (-not $jar) {
+        Write-Error "Backend JAR not found under backend/target after Maven package."
+        exit 1
+    }
+    Write-Host "    JAR: $($jar.FullName)"
+
+    Write-Host "==> Building frontend assets locally..."
+    Push-Location frontend
+    try {
+        pnpm install --frozen-lockfile
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        pnpm build
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    } finally {
+        Pop-Location
+    }
+
+    if (-not (Test-Path "frontend/dist/index.html")) {
+        Write-Error "frontend/dist not found after pnpm build."
+        exit 1
+    }
+
+    Write-Host "==> Packaging Docker images (copy pre-built artifacts only; --pull=false)..."
     $buildArgs = @("compose") + $composeArgs + @("build", "--pull=false")
     if ($ForceRebuild) {
         $buildArgs += "--no-cache"
@@ -54,7 +83,7 @@ if (-not $SkipBuild) {
     docker @buildArgs
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 } else {
-    Write-Host "==> Skipping image build (-SkipBuild). Restarting existing images only."
+    Write-Host "==> Skipping compile and image build (-SkipBuild). Restarting existing images only."
 }
 
 Write-Host "==> Starting application containers..."

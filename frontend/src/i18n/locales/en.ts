@@ -1,10 +1,10 @@
 export default {
   app: {
-    title: 'Document Generation Platform',
+    title: 'Document Generation System',
   },
   login: {
     title: 'Sign in',
-    subtitle: 'Management console',
+    subtitle: 'Sign in to continue',
     username: 'Username',
     password: 'Password',
     submit: 'Sign in',
@@ -761,6 +761,10 @@ export default {
       notFoundTitle: 'Template not found',
       notFoundDescription: 'The requested template could not be loaded.',
     },
+  },
+  table: {
+    filterPlaceholder: 'Filter…',
+    clearFilters: 'Clear column filters',
   },
   common: {
     yes: 'Yes',

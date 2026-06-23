@@ -17,6 +17,7 @@ import com.bank.docgen.authorization.management.web.ManagementAuthentication;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskRepository;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyRepository;
+import com.bank.docgen.runtime.service.IdempotencyConstants;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
@@ -918,7 +919,7 @@ class TemplatePlatformSliceTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("documentId", org.hamcrest.Matchers.not(org.hamcrest.Matchers.emptyString())))
                 .andExpect(header().string("fidelityWarningCodes", "CONTROLLED_STYLE_FALLBACK"))
-                .andExpect(header().string("idempotencyStatus", "CREATED"));
+                .andExpect(header().string("idempotencyStatus", IdempotencyConstants.STATUS_NEW));
 
         mockMvc.perform(post("/api/dev/v1/templates/TPL-RETAIL-LETTER/default/generate")
                         .header("X-Api-Credential-Id", credential.externalId())
@@ -927,7 +928,7 @@ class TemplatePlatformSliceTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(generateBody("idem-runtime-1")))
                 .andExpect(status().isOk())
-                .andExpect(header().string("idempotencyStatus", "REPLAYED"));
+                .andExpect(header().string("idempotencyStatus", IdempotencyConstants.STATUS_REPLAYED));
     }
 
     private String generateBody(String idempotencyKey) {

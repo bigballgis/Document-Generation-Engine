@@ -1,0 +1,11 @@
+# Runtime image — copies pre-built JAR from backend/target (see scripts/docker-deploy.ps1).
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+RUN apk add --no-cache curl \
+    && addgroup -S docgen && adduser -S docgen -G docgen
+COPY target/docgen-backend-*.jar app.jar
+USER docgen
+EXPOSE 8080
+HEALTHCHECK --interval=15s --timeout=5s --retries=10 \
+  CMD curl -f http://localhost:8080/healthz || exit 1
+ENTRYPOINT ["java", "-jar", "app.jar"]

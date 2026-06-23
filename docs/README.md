@@ -11,7 +11,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | --- | --- | --- |
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
 | 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P11) |
-| 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence |
+| 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
 | 3 | [Orchestration high-level plan](./architecture/orchestration-high-level-plan.md) | Epic ordering and active epic rules |
 | 4 | [Implementation task plan](./architecture/implementation-task-plan.md) | Technical waves M1–M14 |
 | 5 | [Requirements plan](./requirements/requirements-plan.md) | Confirmed requirements + pending questions |
@@ -32,10 +32,11 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | Document | Purpose |
 | --- | --- |
 | [Plan index](./plan/README.md) | Layer rules and phase links |
-| [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone ↔ phase mapping + evidence |
+| [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone ↔ phase mapping + gate evidence + transitional seams index |
 | [Master plan](./plan/master-plan.md) | P0–P11 phases — see phase detail plans for status |
-| [Optimization plan & backlog](./plan/optimization-plan.md) | Evidence-backed optimization backlog (docs drift, gates, backend, frontend) |
-| [UX & upgradeability optimization plan](./plan/ux-upgradeability-optimization-plan.md) | User-interaction completeness + extensibility — **Wave A Done**, **Wave B In Progress** (2026-06-23) |
+| [Comprehensive optimization roadmap](./plan/comprehensive-optimization-roadmap.md) | **Unified execution map** — docs, API contract, template workflow, frontend UX, performance, E2E (COR-0…6, 2026-06-23) |
+| [Optimization plan & backlog](./plan/optimization-plan.md) | Technical debt detail (OPT-A…G): gates, coverage, backend architecture |
+| [UX & upgradeability optimization plan](./plan/ux-upgradeability-optimization-plan.md) | Historical UX waves (UX-A…G); cross-check against comprehensive roadmap |
 | [P0 Foundation](./plan/detail/P0-foundation.md) | Scaffold, compose, gates |
 | [P1 Login & session](./plan/detail/P1-login-session.md) | Local auth, role landing |
 | [P2 Master management](./plan/detail/P2-master-management.md) | DOCX master, anchors, review |
@@ -135,6 +136,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | `.cursor/skills/i18n-english-first/` | English-first i18n skill |
 | `.cursor/skills/plan-status-tracking/` | Plan status skill |
 | `.cursor/rules/*.mdc` | Project constitutions (always apply) |
+| `.cursor/rules/subagent-routing-mandate.mdc` | **Parent agent must delegate via Task/subagent_type** (always apply) |
 | `.cursor/hooks.json` | Auto-chain commit review after doc-sync subagent |
 
 ## Source-of-truth order (on conflict)

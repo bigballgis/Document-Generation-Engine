@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="greenbc-mark" x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00A19A"/>
+      <stop offset="1" stop-color="#006A66"/>
+    </linearGradient>
+    <linearGradient id="greenbc-sheet" x1="14" y1="12" x2="34" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E4F5F4"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="13" fill="url(#greenbc-mark)"/>
+  <path
+    d="M13.5 13.5h15.2L35 19.3v22.2a2.2 2.2 0 0 1-2.2 2.2H13.5a2.2 2.2 0 0 1-2.2-2.2V15.7a2.2 2.2 0 0 1 2.2-2.2Z"
+    fill="url(#greenbc-sheet)"
+  />
+  <path d="M28.7 13.5v5.8h5.8" stroke="#00847F" stroke-opacity="0.25" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M16.5 23h14" stroke="#00847F" stroke-opacity="0.55" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M16.5 27.2h11.5" stroke="#00847F" stroke-opacity="0.38" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M16.5 31.4h9" stroke="#00847F" stroke-opacity="0.28" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="36.5" cy="12.5" r="3.2" fill="#B8E8E5"/>
+  <path d="M35.2 12.5h2.6M36.5 11.2v2.6" stroke="#006A66" stroke-width="1.1" stroke-linecap="round"/>
+</svg>

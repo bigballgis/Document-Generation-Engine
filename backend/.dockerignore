@@ -1,4 +1,6 @@
-target/
+# Exclude build noise but keep packaged JAR for Dockerfile.packaged
+target/**
+!target/docgen-backend-*.jar
 .git/
 .idea/
 *.iml

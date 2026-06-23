@@ -3,8 +3,11 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import VersionCatalogNotice from '@/components/catalog/VersionCatalogNotice.vue'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterUploadDialog from '@/components/masters/MasterUploadDialog.vue'
+import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { MASTER_DETAIL_PATH_PREFIX } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
@@ -22,9 +25,17 @@ const currentPage = ref(1)
 const pageSize = 10
 
 const allMasters = computed(() => mastersStore.masters)
+const { filters: columnFilters, filteredRows: filteredMasters, hasActiveFilters, clearFilters } =
+  useDataTableFilters(allMasters, [
+    { key: 'name', getValue: (row) => row.name },
+    { key: 'status', getValue: (row) => row.status },
+    { key: 'originalFilename', getValue: (row) => row.originalFilename },
+    { key: 'anchorCount', getValue: (row) => String(row.anchorCount) },
+    { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
+  ])
 const paginatedMasters = computed(() => {
   const start = (currentPage.value - 1) * pageSize
-  return allMasters.value.slice(start, start + pageSize)
+  return filteredMasters.value.slice(start, start + pageSize)
 })
 const groupedMasters = computed(() => {
   const grouped = new Map<string, MasterDocumentSummary[]>()
@@ -79,6 +90,10 @@ async function handleUpload(payload: {
     ElMessage.error(errorMessage.value || t('masters.error.upload'))
   }
 }
+
+const sortByStatus = rowSortMethod<MasterDocumentSummary>((row) => row.status)
+const sortByAnchorCount = rowSortMethod<MasterDocumentSummary>((row) => row.anchorCount)
+const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.updatedAt)
 </script>
 
 <template>
@@ -108,47 +123,87 @@ async function handleUpload(payload: {
     <el-skeleton v-if="mastersStore.loadingList" :rows="6" animated />
 
     <template v-else-if="groupedMasters.length > 0">
+      <div v-if="hasActiveFilters" class="table-toolbar">
+        <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
+      </div>
       <section v-for="[groupCode, items] in groupedMasters" :key="groupCode" class="group-section">
         <h2>{{ t('masters.list.groupSection', { groupCode }) }}</h2>
-        <el-table
+        <AppDataTable
           :data="items"
-          stripe
           @row-click="(row: MasterDocumentSummary) => openMaster(row.id)"
         >
-          <el-table-column prop="name" :label="t('masters.list.columns.name')" min-width="220" />
-          <el-table-column :label="t('masters.list.columns.status')" width="160">
+          <el-table-column prop="name" sortable min-width="220">
+            <template #header>
+              <TableColumnHeader
+                :label="t('masters.list.columns.name')"
+                v-model="columnFilters.name"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column
+            sortable
+            :sort-method="sortByStatus"
+            width="160"
+          >
+            <template #header>
+              <TableColumnHeader
+                :label="t('masters.list.columns.status')"
+                v-model="columnFilters.status"
+              />
+            </template>
             <template #default="{ row }">
               <MasterStatusBadge :status="row.status" />
             </template>
           </el-table-column>
-          <el-table-column
-            prop="originalFilename"
-            :label="t('masters.list.columns.filename')"
-            min-width="180"
-          />
+          <el-table-column prop="originalFilename" sortable min-width="180">
+            <template #header>
+              <TableColumnHeader
+                :label="t('masters.list.columns.filename')"
+                v-model="columnFilters.originalFilename"
+              />
+            </template>
+          </el-table-column>
           <el-table-column
             prop="anchorCount"
-            :label="t('masters.list.columns.anchors')"
+            sortable
             width="100"
-          />
-          <el-table-column :label="t('masters.list.columns.updatedAt')" min-width="180">
+            :sort-method="sortByAnchorCount"
+          >
+            <template #header>
+              <TableColumnHeader
+                :label="t('masters.list.columns.anchors')"
+                v-model="columnFilters.anchorCount"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column
+            sortable
+            :sort-method="sortByUpdatedAt"
+            min-width="180"
+          >
+            <template #header>
+              <TableColumnHeader
+                :label="t('masters.list.columns.updatedAt')"
+                v-model="columnFilters.updatedAt"
+              />
+            </template>
             <template #default="{ row }">
               {{ new Date(row.updatedAt).toLocaleString() }}
             </template>
           </el-table-column>
-        </el-table>
+        </AppDataTable>
       </section>
     </template>
 
     <el-empty v-else :description="t('masters.list.empty')" />
 
     <el-pagination
-      v-if="allMasters.length > pageSize"
+      v-if="filteredMasters.length > pageSize"
       v-model:current-page="currentPage"
       class="list-pagination"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="allMasters.length"
+      :total="filteredMasters.length"
     />
 
     <MasterUploadDialog
@@ -203,6 +258,10 @@ async function handleUpload(payload: {
     margin: 0 0 0.75rem;
     font-size: 1.125rem;
   }
+}
+
+.table-toolbar {
+  margin-bottom: 0.75rem;
 }
 
 :deep(.el-table__row) {

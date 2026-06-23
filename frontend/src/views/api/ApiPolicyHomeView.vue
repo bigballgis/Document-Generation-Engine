@@ -2,7 +2,10 @@
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { templateDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateSummary } from '@/types/template'
@@ -12,6 +15,17 @@ const router = useRouter()
 const templatesStore = useTemplatesStore()
 
 const publishedTemplates = computed(() => templatesStore.publishedTemplates)
+const { filters: columnFilters, filteredRows, hasActiveFilters, clearFilters } = useDataTableFilters(
+  publishedTemplates,
+  [
+    { key: 'name', getValue: (row) => row.name },
+    { key: 'externalId', getValue: (row) => row.externalId },
+    { key: 'groupCode', getValue: (row) => row.groupCode },
+    { key: 'status', getValue: (row) => row.lifecycleStatus },
+    { key: 'releaseVersion', getValue: (row) => row.releaseVersion ?? '' },
+  ],
+)
+
 const errorMessage = computed(() => {
   const key = templatesStore.lastErrorMessageKey
   if (!key) {
@@ -31,6 +45,8 @@ onMounted(async () => {
 function openTemplate(templateId: string) {
   router.push(templateDetailPath(templateId))
 }
+
+const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecycleStatus)
 </script>
 
 <template>
@@ -53,25 +69,66 @@ function openTemplate(templateId: string) {
 
     <el-skeleton v-if="templatesStore.loadingList" :rows="5" animated />
 
-    <el-table
-      v-else
-      :data="publishedTemplates"
-      stripe
-      @row-click="(row: TemplateSummary) => openTemplate(row.id)"
-    >
-      <template #empty>
-        <el-empty :description="t('apiPolicy.home.empty')" />
-      </template>
-      <el-table-column prop="name" :label="t('templates.list.columns.name')" min-width="220" />
-      <el-table-column prop="externalId" :label="t('templates.list.columns.externalId')" min-width="180" />
-      <el-table-column prop="groupCode" :label="t('apiPolicy.home.groupCode')" width="140" />
-      <el-table-column :label="t('templates.list.columns.status')" width="140">
-        <template #default="{ row }">
-          <TemplateStatusBadge :status="row.lifecycleStatus" />
+    <template v-else>
+      <div v-if="hasActiveFilters" class="table-toolbar">
+        <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
+      </div>
+      <AppDataTable
+        :data="filteredRows"
+        @row-click="(row: TemplateSummary) => openTemplate(row.id)"
+      >
+        <template #empty>
+          <el-empty :description="t('apiPolicy.home.empty')" />
         </template>
-      </el-table-column>
-      <el-table-column prop="releaseVersion" :label="t('templates.list.columns.releaseVersion')" width="140" />
-    </el-table>
+        <el-table-column prop="name" sortable min-width="220">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.name')"
+              v-model="columnFilters.name"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="externalId" sortable min-width="180">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.externalId')"
+              v-model="columnFilters.externalId"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="groupCode" sortable width="140">
+          <template #header>
+            <TableColumnHeader
+              :label="t('apiPolicy.home.groupCode')"
+              v-model="columnFilters.groupCode"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          sortable
+          :sort-method="sortByLifecycleStatus"
+          width="140"
+        >
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.status')"
+              v-model="columnFilters.status"
+            />
+          </template>
+          <template #default="{ row }">
+            <TemplateStatusBadge :status="row.lifecycleStatus" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="releaseVersion" sortable width="140">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.releaseVersion')"
+              v-model="columnFilters.releaseVersion"
+            />
+          </template>
+        </el-table-column>
+      </AppDataTable>
+    </template>
   </div>
 </template>
 
@@ -96,6 +153,10 @@ function openTemplate(templateId: string) {
 
 .page-alert {
   margin-bottom: 1rem;
+}
+
+.table-toolbar {
+  margin-bottom: 0.75rem;
 }
 
 :deep(.el-table__row) {

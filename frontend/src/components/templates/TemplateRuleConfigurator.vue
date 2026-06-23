@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useTemplatesStore } from '@/stores/templates'
 import type { CompositionRule, CompositionRuleInput, RuleValidationResult } from '@/types/template'
 import { ElMessage } from 'element-plus'
@@ -40,6 +43,20 @@ watch(
   },
   { immediate: true, deep: true },
 )
+
+const rulesSource = computed(() => rules)
+const { filters: ruleColumnFilters, filteredRows: filteredRules } = useDataTableFilters(rulesSource, [
+  { key: 'ruleId', getValue: (row) => row.ruleId },
+  { key: 'conditionExpression', getValue: (row) => row.conditionExpression },
+  { key: 'targetAnchorId', getValue: (row) => row.targetAnchorId },
+])
+
+const validationRulesSource = computed(() => validationResult.value?.rules ?? [])
+const { filters: validationColumnFilters, filteredRows: filteredValidationRules } =
+  useDataTableFilters(validationRulesSource, [
+    { key: 'ruleId', getValue: (row) => row.ruleId },
+    { key: 'status', getValue: (row) => row.status },
+  ])
 
 function addRule() {
   rules.push({
@@ -96,23 +113,41 @@ async function handleValidateRules() {
 <template>
   <div class="rule-configurator">
     <p>{{ t('templates.rules.description') }}</p>
-    <el-table :data="rules" stripe>
-      <el-table-column :label="t('templates.rules.ruleId')" min-width="120">
+    <AppDataTable :data="filteredRules">
+      <el-table-column sortable prop="ruleId" min-width="120">
+        <template #header>
+          <TableColumnHeader
+            :label="t('templates.rules.ruleId')"
+            v-model="ruleColumnFilters.ruleId"
+          />
+        </template>
         <template #default="{ row }">
           <el-input v-model="row.ruleId" />
         </template>
       </el-table-column>
-      <el-table-column :label="t('templates.rules.conditionExpression')" min-width="220">
+      <el-table-column min-width="220">
+        <template #header>
+          <TableColumnHeader
+            :label="t('templates.rules.conditionExpression')"
+            v-model="ruleColumnFilters.conditionExpression"
+          />
+        </template>
         <template #default="{ row }">
           <el-input v-model="row.conditionExpression" />
         </template>
       </el-table-column>
-      <el-table-column :label="t('templates.rules.targetAnchorId')" min-width="160">
+      <el-table-column min-width="160">
+        <template #header>
+          <TableColumnHeader
+            :label="t('templates.rules.targetAnchorId')"
+            v-model="ruleColumnFilters.targetAnchorId"
+          />
+        </template>
         <template #default="{ row }">
           <el-input v-model="row.targetAnchorId" />
         </template>
       </el-table-column>
-    </el-table>
+    </AppDataTable>
 
     <div class="action-row">
       <el-button @click="addRule">{{ t('templates.rules.addRule') }}</el-button>
@@ -124,14 +159,27 @@ async function handleValidateRules() {
       </el-button>
     </div>
 
-    <el-table v-if="validationResult" :data="validationResult.rules" stripe class="result-table">
-      <el-table-column prop="ruleId" :label="t('templates.rules.ruleId')" />
-      <el-table-column prop="status" :label="t('templates.rules.status')">
+    <AppDataTable v-if="validationResult" :data="filteredValidationRules" class="result-table">
+      <el-table-column prop="ruleId" sortable>
+        <template #header>
+          <TableColumnHeader
+            :label="t('templates.rules.ruleId')"
+            v-model="validationColumnFilters.ruleId"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column prop="status" sortable>
+        <template #header>
+          <TableColumnHeader
+            :label="t('templates.rules.status')"
+            v-model="validationColumnFilters.status"
+          />
+        </template>
         <template #default="{ row }">
           <el-tag :type="statusTagType(row.status)">{{ row.status }}</el-tag>
         </template>
       </el-table-column>
-    </el-table>
+    </AppDataTable>
   </div>
 </template>
 

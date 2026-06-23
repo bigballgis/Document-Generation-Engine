@@ -930,6 +930,27 @@ Sensitive Data Classification -- constrains --> API Response / Audit Log / Manag
 - 已停用。
 - 已废弃。
 
+### 4.1 产品状态 ↔ 实现映射（2026-06-24）
+
+PRD §7 使用中文产品状态名；运行时 `TemplateLifecycleStatus` 枚举与 API
+`approvalSubState` 字段实现如下映射。**不得**将 PRD 产品状态静默重命名；实现通过
+子状态表达 PRD「测试通过」与「待审批」两阶段。
+
+| PRD 产品状态 | `TemplateLifecycleStatus` | `approvalSubState` | 说明 |
+| --- | --- | --- | --- |
+| 草稿 | `DRAFT` | — | |
+| 测试中 | `TESTING` | — | |
+| 测试通过 | `APPROVAL` | `PENDING_SUBMIT` | 测试判定通过后进入；等待具备权限角色提交审批 |
+| 待审批 | `APPROVAL` | `PENDING_DECISION` | `SUBMIT_FOR_APPROVAL` 之后；等待审批判定 |
+| 待发布 | `PENDING_RELEASE` | — | 审批通过后 |
+| 已发布 | `PUBLISHED` | — | |
+| 已停用 | `STOPPED` | — | |
+| 已废弃 | `DEPRECATED` | — | |
+
+实现类：`TemplateLifecycleService`、`TemplateService.resolveApprovalSubState`、
+`TemplateDetailView.approvalSubState`。完整发布门禁、受控意见表单与覆盖率阈值仍属
+P19 范围（见 [P5 薄切片边界](../plan/detail/P5-lifecycle-governance.md)）。
+
 已确认状态规则：
 
 - v1 不新增发布前或发布后中间状态；发布前检查、生成预览、测试生成、渲染任务、阻断项和失败原因通过 Template Test Record、Preview Artifact、Pre-release Checklist、Release Summary 和 Audit Summary 表达，不升级为 Template Lifecycle Status。

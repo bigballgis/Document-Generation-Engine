@@ -6,6 +6,9 @@ export interface BrandRegistryEntry {
     primary: string
     primaryHover: string
     headerBg: string
+    headerBorder: string
+    navBg: string
+    accentSoft: string
   }
 }
 
@@ -17,7 +20,10 @@ export const BRAND_REGISTRY = [
     tokens: {
       primary: '#DB0011',
       primaryHover: '#AF0010',
-      headerBg: '#FFFFFF',
+      headerBg: '#FDF3F4',
+      headerBorder: '#F0D4D8',
+      navBg: '#FBF8F8',
+      accentSoft: '#FCE8EB',
     },
   },
   {
@@ -27,7 +33,10 @@ export const BRAND_REGISTRY = [
     tokens: {
       primary: '#00847F',
       primaryHover: '#006A66',
-      headerBg: '#FFFFFF',
+      headerBg: '#EFF7F7',
+      headerBorder: '#C9E8E6',
+      navBg: '#F6FBFB',
+      accentSoft: '#E4F5F4',
     },
   },
 ] as const satisfies readonly BrandRegistryEntry[]

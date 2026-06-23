@@ -5,8 +5,7 @@ services:
   docgen-backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
-      pull_policy: if_not_present
+      dockerfile: Dockerfile.packaged
     container_name: docgen-backend
     profiles:
       - prod
@@ -40,8 +39,7 @@ services:
   docgen-frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-      pull_policy: if_not_present
+      dockerfile: Dockerfile.packaged
     container_name: docgen-frontend
     profiles:
       - prod

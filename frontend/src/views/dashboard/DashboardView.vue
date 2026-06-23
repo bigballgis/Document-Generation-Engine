@@ -2,7 +2,11 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import DashboardStatCards from '@/components/dashboard/DashboardStatCards.vue'
+import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import { dashboardQuickLinks, useWorkflowTasks, type WorkflowTask } from '@/composables/useWorkflowTasks'
 import { useMastersStore } from '@/stores/masters'
@@ -16,6 +20,18 @@ const mastersStore = useMastersStore()
 const templatesStore = useTemplatesStore()
 const { tasks } = useWorkflowTasks()
 const { stats } = useDashboardStats()
+const { filters: taskColumnFilters, filteredRows: filteredTasks } = useDataTableFilters(tasks, [
+  {
+    key: 'action',
+    getValue: (row) => t(row.titleKey),
+  },
+  { key: 'item', getValue: (row) => row.entityName },
+  { key: 'group', getValue: (row) => row.groupCode ?? '' },
+  {
+    key: 'hint',
+    getValue: (row) => t(row.descriptionKey),
+  },
+])
 
 const loading = ref(false)
 const loadError = ref(false)
@@ -35,7 +51,9 @@ const authorizedGroupsSummary = computed(() => {
   return groups.join(', ')
 })
 
-onMounted(async () => {
+const showDataSections = computed(() => !loadError.value)
+
+async function loadDashboardData() {
   loading.value = true
   loadError.value = false
   try {
@@ -52,6 +70,10 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  void loadDashboardData()
 })
 
 function openTask(path: string) {
@@ -61,6 +83,10 @@ function openTask(path: string) {
 function openQuickLink(path: string) {
   router.push(path)
 }
+
+const sortTasksByTitle = rowSortMethod<WorkflowTask>((row) => t(row.titleKey))
+const sortTasksByGroup = rowSortMethod<WorkflowTask>((row) => row.groupCode ?? '')
+const sortTasksByHint = rowSortMethod<WorkflowTask>((row) => t(row.descriptionKey))
 </script>
 
 <template>
@@ -84,18 +110,15 @@ function openQuickLink(path: string) {
       </dl>
     </el-card>
 
-    <el-alert
+    <LoadErrorPanel
       v-if="loadError"
-      type="error"
-      :title="t('dashboard.loadError')"
-      show-icon
-      :closable="false"
-      class="page-alert"
+      message-key="dashboard.loadError"
+      @retry="loadDashboardData"
     />
 
-    <DashboardStatCards :stats="stats" :loading="loading" />
+    <DashboardStatCards v-if="showDataSections" :stats="stats" :loading="loading" />
 
-    <section class="tasks-section">
+    <section v-if="showDataSections" id="tasks-section" class="tasks-section">
       <header class="section-header">
         <h2>{{ t('dashboard.tasks.title') }}</h2>
         <p>{{ t('dashboard.tasks.description') }}</p>
@@ -104,41 +127,76 @@ function openQuickLink(path: string) {
       <el-skeleton v-if="loading" :rows="5" animated />
 
       <el-empty
-        v-else-if="tasks.length === 0"
+        v-else-if="filteredTasks.length === 0"
         :description="t('dashboard.tasks.empty')"
       />
 
-      <el-table
+      <AppDataTable
         v-else
-        :data="tasks"
-        stripe
+        :data="filteredTasks"
         class="tasks-table"
         @row-click="(row: WorkflowTask) => openTask(row.path)"
       >
-        <el-table-column :label="t('dashboard.tasks.columns.action')" min-width="200">
+        <el-table-column
+          sortable
+          :sort-method="sortTasksByTitle"
+          min-width="200"
+        >
+          <template #header>
+            <TableColumnHeader
+              :label="t('dashboard.tasks.columns.action')"
+              v-model="taskColumnFilters.action"
+            />
+          </template>
           <template #default="{ row }">
             <strong>{{ t(row.titleKey) }}</strong>
           </template>
         </el-table-column>
-        <el-table-column :label="t('dashboard.tasks.columns.item')" min-width="220">
+        <el-table-column prop="entityName" sortable min-width="220">
+          <template #header>
+            <TableColumnHeader
+              :label="t('dashboard.tasks.columns.item')"
+              v-model="taskColumnFilters.item"
+            />
+          </template>
           <template #default="{ row }">
             {{ row.entityName }}
           </template>
         </el-table-column>
-        <el-table-column :label="t('dashboard.tasks.columns.group')" width="140">
+        <el-table-column
+          sortable
+          :sort-method="sortTasksByGroup"
+          width="140"
+        >
+          <template #header>
+            <TableColumnHeader
+              :label="t('dashboard.tasks.columns.group')"
+              v-model="taskColumnFilters.group"
+            />
+          </template>
           <template #default="{ row }">
             {{ row.groupCode ?? '—' }}
           </template>
         </el-table-column>
-        <el-table-column :label="t('dashboard.tasks.columns.hint')" min-width="260">
+        <el-table-column
+          sortable
+          :sort-method="sortTasksByHint"
+          min-width="260"
+        >
+          <template #header>
+            <TableColumnHeader
+              :label="t('dashboard.tasks.columns.hint')"
+              v-model="taskColumnFilters.hint"
+            />
+          </template>
           <template #default="{ row }">
             {{ t(row.descriptionKey) }}
           </template>
         </el-table-column>
-      </el-table>
+      </AppDataTable>
     </section>
 
-    <section v-if="quickLinks.length > 0" class="quick-links">
+    <section v-if="showDataSections && quickLinks.length > 0" class="quick-links">
       <h2>{{ t('dashboard.quickLinks.title') }}</h2>
       <div class="quick-link-grid">
         <el-button
@@ -199,10 +257,6 @@ function openQuickLink(path: string) {
     margin: 0;
     font-weight: 600;
   }
-}
-
-.page-alert {
-  margin-bottom: 1rem;
 }
 
 .tasks-section {

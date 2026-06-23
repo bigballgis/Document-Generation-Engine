@@ -2,7 +2,10 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import * as templatesApi from '@/api/templates'
@@ -30,6 +33,20 @@ const { confirmAction } = useConfirmAction()
 const loading = ref(false)
 const loadError = ref(false)
 const versions = ref<TemplateReleaseVersion[]>([])
+
+const versionsSource = computed(() => versions.value)
+const { filters: columnFilters, filteredRows: filteredVersions, hasActiveFilters, clearFilters } =
+  useDataTableFilters(versionsSource, [
+    { key: 'releaseVersion', getValue: (row) => row.releaseVersion },
+    { key: 'devVersionNumber', getValue: (row) => String(row.devVersionNumber) },
+    { key: 'status', getValue: (row) => row.lifecycleStatus },
+    {
+      key: 'defaultRoute',
+      getValue: (row) =>
+        row.defaultRouteTarget ? t('templates.versions.defaultRouteYes') : t('templates.versions.defaultRouteNo'),
+    },
+    { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
+  ])
 
 const canManageVersions = computed(
   () =>
@@ -176,6 +193,10 @@ async function handleVersionAction(
     ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
   }
 }
+
+const sortByDevVersion = rowSortMethod<TemplateReleaseVersion>((row) => row.devVersionNumber)
+const sortByLifecycleStatus = rowSortMethod<TemplateReleaseVersion>((row) => row.lifecycleStatus)
+const sortByUpdatedAt = rowSortMethod<TemplateReleaseVersion>((row) => row.updatedAt)
 </script>
 
 <template>
@@ -205,65 +226,107 @@ async function handleVersionAction(
 
     <el-skeleton v-else-if="loading" :rows="4" animated />
 
-    <el-table v-else :data="versions" stripe>
-      <template #empty>
-        <el-empty :description="t('templates.versions.empty')" />
-      </template>
-      <el-table-column
-        prop="releaseVersion"
-        :label="t('templates.versions.releaseVersion')"
-        min-width="140"
-      />
-      <el-table-column
-        prop="devVersionNumber"
-        :label="t('templates.versions.devVersionNumber')"
-        width="120"
-      />
-      <el-table-column :label="t('templates.versions.status')" width="160">
-        <template #default="{ row }">
-          <TemplateStatusBadge :status="row.lifecycleStatus" />
+    <template v-else>
+      <div v-if="hasActiveFilters" class="table-toolbar">
+        <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
+      </div>
+      <AppDataTable :data="filteredVersions">
+        <template #empty>
+          <el-empty :description="t('templates.versions.empty')" />
         </template>
-      </el-table-column>
-      <el-table-column :label="t('templates.versions.defaultRoute')" width="140">
-        <template #default="{ row }">
-          <el-tag v-if="row.defaultRouteTarget" type="success" size="small">
-            {{ t('templates.versions.defaultRouteYes') }}
-          </el-tag>
-          <span v-else>{{ t('templates.versions.defaultRouteNo') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('templates.versions.updatedAt')" min-width="180">
-        <template #default="{ row }">
-          {{ new Date(row.updatedAt).toLocaleString() }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        v-if="canManageVersions"
-        :label="t('templates.versions.actions')"
-        min-width="220"
-      >
-        <template #default="{ row }">
-          <el-button
-            v-if="row.lifecycleStatus === 'PUBLISHED'"
-            link
-            type="warning"
-            :loading="templatesStore.submitting"
-            @click="handleVersionAction(row.releaseVersion, 'deactivate')"
-          >
-            {{ t('templates.versions.deactivate') }}
-          </el-button>
-          <el-button
-            v-if="row.lifecycleStatus === 'STOPPED'"
-            link
-            type="primary"
-            :loading="templatesStore.submitting"
-            @click="handleVersionAction(row.releaseVersion, 'restore')"
-          >
-            {{ t('templates.versions.restore') }}
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+        <el-table-column prop="releaseVersion" sortable min-width="140">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.versions.releaseVersion')"
+              v-model="columnFilters.releaseVersion"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="devVersionNumber"
+          sortable
+          width="120"
+          :sort-method="sortByDevVersion"
+        >
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.versions.devVersionNumber')"
+              v-model="columnFilters.devVersionNumber"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          sortable
+          :sort-method="sortByLifecycleStatus"
+          width="160"
+        >
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.versions.status')"
+              v-model="columnFilters.status"
+            />
+          </template>
+          <template #default="{ row }">
+            <TemplateStatusBadge :status="row.lifecycleStatus" />
+          </template>
+        </el-table-column>
+        <el-table-column width="140">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.versions.defaultRoute')"
+              v-model="columnFilters.defaultRoute"
+            />
+          </template>
+          <template #default="{ row }">
+            <el-tag v-if="row.defaultRouteTarget" type="success" size="small">
+              {{ t('templates.versions.defaultRouteYes') }}
+            </el-tag>
+            <span v-else>{{ t('templates.versions.defaultRouteNo') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          sortable
+          :sort-method="sortByUpdatedAt"
+          min-width="180"
+        >
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.versions.updatedAt')"
+              v-model="columnFilters.updatedAt"
+            />
+          </template>
+          <template #default="{ row }">
+            {{ new Date(row.updatedAt).toLocaleString() }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          v-if="canManageVersions"
+          :label="t('templates.versions.actions')"
+          min-width="220"
+        >
+          <template #default="{ row }">
+            <el-button
+              v-if="row.lifecycleStatus === 'PUBLISHED'"
+              link
+              type="warning"
+              :loading="templatesStore.submitting"
+              @click="handleVersionAction(row.releaseVersion, 'deactivate')"
+            >
+              {{ t('templates.versions.deactivate') }}
+            </el-button>
+            <el-button
+              v-if="row.lifecycleStatus === 'STOPPED'"
+              link
+              type="primary"
+              :loading="templatesStore.submitting"
+              @click="handleVersionAction(row.releaseVersion, 'restore')"
+            >
+              {{ t('templates.versions.restore') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </AppDataTable>
+    </template>
   </div>
 </template>
 
@@ -288,5 +351,9 @@ async function handleVersionAction(
 
 .workflow-hint {
   margin-bottom: 1rem;
+}
+
+.table-toolbar {
+  margin-bottom: 0.75rem;
 }
 </style>

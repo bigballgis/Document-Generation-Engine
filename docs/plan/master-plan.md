@@ -43,7 +43,7 @@ upstream systems invoke the dynamic API.
 | P2 | Master management | P1 | Upload DOCX master, anchor catalog, lightweight review, group isolation | Done |
 | P3 | Template authoring | P2 | Create template from approved master, variables, structured content, rules | Done |
 | P4 | Rendering & preview | P3 | DOCX/PDF render, fidelity warnings/blockers, preview records | Done |
-| P5 | Lifecycle governance | P4 | Test → approve → publish with audit; publish gate checklist | Done |
+| P5 | Lifecycle governance | P4 | Test → approve → publish with audit; **thin-slice** publish gate checklist (live gates → P19) | Done |
 | P6 | API management | P5 | Credentials, AD Group policy, output/batch/encryption/default route | Done |
 | P7 | Runtime dynamic API | P5, P6 | OpenAPI v1 operations callable with auth, idempotency, sync/async/batch | Done |
 | P8 | Audit & contract visibility | P5, P6, P7 | Role-scoped audit console; caller contract view | Done |
@@ -58,7 +58,7 @@ upstream systems invoke the dynamic API.
 | P17 | Per-domain API policy governance | P6 | Config-domain save (AD group/output/batch/encryption/default-route), impact preview (hard-block vs warning), policyVersion lineage, rollback, default-route governance, API_POLICY_UPDATED audit (gap G2) | In Progress (impact-preview seam Done; per-domain save/rollback open) |
 | P18 | Structured authoring & rendering-fidelity engine | P3, P4 | Controlled node matrix, master style catalog + limited direct format, table component, seal/QR/attachment nodes, controlled numbering, Word/HTML paste cleaning, publish-locked renderProfile, fidelity blockers/warnings (gap G3) | Not Started |
 | P19 | Template verifiability, publish gate & decision forms | P3, P4, P5 | Multi-sample coverage thresholds, batch test, change-diff, preview comparison, live publish-gate checklist, controlled test/approval opinion forms + risk prompts + exception markers (gaps G4, G5) | Not Started |
-| P20 | i18n multi-locale readiness & UI upgradeability | P1 | Locale registry/switcher/fallback + html lang, config-driven brand theming, environment selector (gap G6, i18n constitution) | Done (2026-06-23; Wave C) |
+| P20 | i18n multi-locale readiness & UI upgradeability | P1 | Locale registry/switcher/fallback + html lang, config-driven brand theming, environment selector (gap G6, i18n constitution) | In Progress (2026-06-24; T06 open) |
 
 ## Thin vertical slice (MVP chain)
 

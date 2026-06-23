@@ -10,6 +10,17 @@ public record ErrorDetail(
         String message,
         String messageKey,
         boolean retryable,
-        List<FieldError> fieldErrors
+        List<FieldError> fieldErrors,
+        java.util.Map<String, Object> idempotencyConflict
 ) {
+    public ErrorDetail(
+            String code,
+            String category,
+            String message,
+            String messageKey,
+            boolean retryable,
+            List<FieldError> fieldErrors
+    ) {
+        this(code, category, message, messageKey, retryable, fieldErrors, null);
+    }
 }

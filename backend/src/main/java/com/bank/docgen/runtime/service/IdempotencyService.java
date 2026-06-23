@@ -53,7 +53,7 @@ public class IdempotencyService {
                 templateId,
                 requestHash,
                 "IN_PROGRESS",
-                Instant.now().plusSeconds(86400)
+                Instant.now().plusSeconds(IdempotencyConstants.RETENTION_SECONDS)
         );
         GenerationIdempotencyEntity saved;
         try {
@@ -96,7 +96,7 @@ public class IdempotencyService {
                 templateId,
                 idempotencyKey,
                 "COMPLETED",
-                Instant.now().plusSeconds(86400)
+                Instant.now().plusSeconds(IdempotencyConstants.RETENTION_SECONDS)
         );
         entity.complete(storageKey, documentId);
         repository.save(entity);

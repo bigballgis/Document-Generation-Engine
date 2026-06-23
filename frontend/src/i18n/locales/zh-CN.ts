@@ -2,7 +2,7 @@ export default {
 
   app: {
 
-    title: '文档生成平台',
+    title: '文档生成系统',
 
   },
 
@@ -75,6 +75,14 @@ export default {
       identityAdministration: '身份与分组',
 
     },
+
+  },
+
+  table: {
+
+    filterPlaceholder: '筛选…',
+
+    clearFilters: '清除列筛选',
 
   },
 

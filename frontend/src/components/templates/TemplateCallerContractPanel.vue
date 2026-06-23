@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import { getCallerContract } from '@/api/contract'
 import {
   ALLOWED_ENVIRONMENTS,
@@ -43,6 +47,32 @@ const versionComparison = computed(() => {
     isDefaultRouteTarget: version.releaseVersion === defaultVersion,
   }))
 })
+
+const versionComparisonSource = computed(() => versionComparison.value)
+const { filters: versionColumnFilters, filteredRows: filteredVersionComparison } =
+  useDataTableFilters(versionComparisonSource, [
+    { key: 'releaseVersion', getValue: (row) => row.releaseVersion },
+    { key: 'explicitVersionUrl', getValue: (row) => row.explicitVersionUrl },
+    {
+      key: 'defaultRoute',
+      getValue: (row) =>
+        row.isDefaultRouteTarget ? t('common.yes') : t('common.no'),
+    },
+  ])
+
+const errorCodesSource = computed(() => contract.value?.errorCodes ?? [])
+const { filters: errorColumnFilters, filteredRows: filteredErrorCodes } = useDataTableFilters(
+  errorCodesSource,
+  [
+    { key: 'code', getValue: (row) => row.code },
+    { key: 'category', getValue: (row) => row.category },
+    { key: 'message', getValue: (row) => row.message },
+    {
+      key: 'retryable',
+      getValue: (row) => (row.retryable ? t('common.yes') : t('common.no')),
+    },
+  ],
+)
 
 async function loadContract() {
   loading.value = true
@@ -105,14 +135,14 @@ function errorMessage(key: string | null): string {
     <template v-else-if="contract">
       <div class="toolbar">
         <el-form-item :label="t('templates.contract.environment')">
-          <el-select v-model="selectedEnvironment" class="environment-select">
+          <AppSearchSelect v-model="selectedEnvironment" class="environment-select">
             <el-option
               v-for="option in environmentOptions"
               :key="option.value"
               :label="option.label"
               :value="option.value"
             />
-          </el-select>
+          </AppSearchSelect>
         </el-form-item>
       </div>
 
@@ -126,14 +156,33 @@ function errorMessage(key: string | null): string {
       </ul>
 
       <h3>{{ t('templates.contract.sections.versions') }}</h3>
-      <el-table :data="versionComparison" stripe>
-        <el-table-column prop="releaseVersion" :label="t('templates.contract.columns.releaseVersion')" />
-        <el-table-column prop="explicitVersionUrl" :label="t('templates.contract.columns.generateUrl')" min-width="280">
+      <AppDataTable :data="filteredVersionComparison">
+        <el-table-column prop="releaseVersion" sortable>
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.contract.columns.releaseVersion')"
+              v-model="versionColumnFilters.releaseVersion"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="explicitVersionUrl" sortable min-width="280">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.contract.columns.generateUrl')"
+              v-model="versionColumnFilters.explicitVersionUrl"
+            />
+          </template>
           <template #default="{ row }">
             <code>{{ row.explicitVersionUrl }}</code>
           </template>
         </el-table-column>
-        <el-table-column :label="t('templates.contract.columns.defaultRouteTarget')" width="160">
+        <el-table-column width="160">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.contract.columns.defaultRouteTarget')"
+              v-model="versionColumnFilters.defaultRoute"
+            />
+          </template>
           <template #default="{ row }">
             <el-tag v-if="row.isDefaultRouteTarget" type="success" size="small">
               {{ t('templates.contract.defaultRouteTargetYes') }}
@@ -141,7 +190,7 @@ function errorMessage(key: string | null): string {
             <span v-else>{{ t('templates.contract.defaultRouteTargetNo') }}</span>
           </template>
         </el-table-column>
-      </el-table>
+      </AppDataTable>
 
       <h3>{{ t('templates.contract.sections.policy') }}</h3>
       <dl class="summary-grid">
@@ -164,16 +213,43 @@ function errorMessage(key: string | null): string {
       </dl>
 
       <h3>{{ t('templates.contract.sections.errorCodes') }}</h3>
-      <el-table :data="contract.errorCodes" stripe>
-        <el-table-column prop="code" :label="t('templates.contract.columns.errorCode')" width="240" />
-        <el-table-column prop="category" :label="t('templates.contract.columns.category')" width="140" />
-        <el-table-column prop="message" :label="t('templates.contract.columns.message')" min-width="240" />
-        <el-table-column :label="t('templates.contract.columns.retryable')" width="120">
+      <AppDataTable :data="filteredErrorCodes">
+        <el-table-column prop="code" sortable width="240">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.contract.columns.errorCode')"
+              v-model="errorColumnFilters.code"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="category" sortable width="140">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.contract.columns.category')"
+              v-model="errorColumnFilters.category"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="message" sortable min-width="240">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.contract.columns.message')"
+              v-model="errorColumnFilters.message"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column width="120">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.contract.columns.retryable')"
+              v-model="errorColumnFilters.retryable"
+            />
+          </template>
           <template #default="{ row }">
             {{ row.retryable ? t('common.yes') : t('common.no') }}
           </template>
         </el-table-column>
-      </el-table>
+      </AppDataTable>
 
       <h3>{{ t('templates.contract.sections.examples') }}</h3>
       <ul class="example-list">

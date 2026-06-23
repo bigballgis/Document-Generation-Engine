@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { isGroupScopedAuditRole } from '@/auth/roles'
 import { useAuditStore } from '@/stores/audit'
 import { useSessionStore } from '@/stores/session'
@@ -30,15 +34,56 @@ const errorMessage = computed(() => {
 const showGroupFilters = computed(() => isGroupScopedAuditRole(auditStore.actorRole))
 const groupOptions = computed(() => sessionStore.session?.authorizedGroupCodes ?? [])
 
+const managementSource = computed(() => auditStore.managementEvents)
+const {
+  filters: managementColumnFilters,
+  filteredRows: filteredManagementEvents,
+  hasActiveFilters: hasManagementColumnFilters,
+  clearFilters: clearManagementColumnFilters,
+} = useDataTableFilters(managementSource, [
+  { key: 'eventAt', getValue: (row) => formatDate(row.eventAt) },
+  { key: 'eventType', getValue: (row) => row.eventType ?? '' },
+  { key: 'templateId', getValue: (row) => row.templateId ?? '' },
+  { key: 'actorSummary', getValue: (row) => row.actorSummary ?? '' },
+  { key: 'statusSummary', getValue: (row) => row.statusSummary ?? '' },
+])
+
+const lifecycleSource = computed(() => auditStore.lifecycleEvents)
+const {
+  filters: lifecycleColumnFilters,
+  filteredRows: filteredLifecycleEvents,
+  hasActiveFilters: hasLifecycleColumnFilters,
+  clearFilters: clearLifecycleColumnFilters,
+} = useDataTableFilters(lifecycleSource, [
+  { key: 'eventAt', getValue: (row) => formatDate(row.eventAt) },
+  { key: 'eventType', getValue: (row) => row.eventType ?? '' },
+  { key: 'templateId', getValue: (row) => row.templateId ?? '' },
+  { key: 'fromState', getValue: (row) => formatLifecycleState(row.fromState) },
+  { key: 'toState', getValue: (row) => formatLifecycleState(row.toState) },
+  { key: 'summary', getValue: (row) => row.summary ?? '' },
+])
+
 const paginatedManagementEvents = computed(() => {
   const start = (managementPage.value - 1) * PAGE_SIZE
-  return auditStore.managementEvents.slice(start, start + PAGE_SIZE)
+  return filteredManagementEvents.value.slice(start, start + PAGE_SIZE)
 })
 
 const paginatedLifecycleEvents = computed(() => {
   const start = (lifecyclePage.value - 1) * PAGE_SIZE
-  return auditStore.lifecycleEvents.slice(start, start + PAGE_SIZE)
+  return filteredLifecycleEvents.value.slice(start, start + PAGE_SIZE)
 })
+
+function formatLifecycleState(state?: string) {
+  if (!state) {
+    return '—'
+  }
+  const key = `templates.status.${state as TemplateLifecycleStatus}`
+  return te(key) ? t(key) : state
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleString()
+}
 
 onMounted(async () => {
   auditStore.initializeFiltersFromSession()
@@ -89,17 +134,14 @@ async function handleExport() {
   }
 }
 
-function formatLifecycleState(state?: string) {
-  if (!state) {
-    return '—'
-  }
-  const key = `templates.status.${state as TemplateLifecycleStatus}`
-  return te(key) ? t(key) : state
-}
-
-function formatDate(value: string) {
-  return new Date(value).toLocaleString()
-}
+const sortManagementByEventAt = rowSortMethod<ManagementAuditEvent>((row) => row.eventAt)
+const sortLifecycleByEventAt = rowSortMethod<LifecycleAuditEvent>((row) => row.eventAt)
+const sortLifecycleFromState = rowSortMethod<LifecycleAuditEvent>((row) =>
+  formatLifecycleState(row.fromState),
+)
+const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
+  formatLifecycleState(row.toState),
+)
 </script>
 
 <template>
@@ -155,14 +197,14 @@ function formatDate(value: string) {
           />
         </el-form-item>
         <el-form-item v-if="showGroupFilters" :label="t('audit.filters.groupScope')">
-          <el-select v-model="auditStore.filters.groupScope" clearable>
+          <AppSearchSelect v-model="auditStore.filters.groupScope" clearable>
             <el-option
               v-for="group in groupOptions"
               :key="group"
               :label="group"
               :value="group"
             />
-          </el-select>
+          </AppSearchSelect>
         </el-form-item>
         <el-form-item v-if="showGroupFilters" :label="t('audit.filters.templateId')">
           <el-input
@@ -182,73 +224,166 @@ function formatDate(value: string) {
     <el-tabs :model-value="activeTab" @tab-change="handleTabChange">
       <el-tab-pane :label="t('audit.tabs.management')" name="management">
         <el-skeleton v-if="auditStore.loadingManagement" :rows="6" animated />
-        <el-table
-          v-else
-          :data="paginatedManagementEvents"
-          stripe
-          empty-text=""
-        >
-          <template #empty>
-            <el-empty :description="t('audit.empty.management')" />
-          </template>
-          <el-table-column :label="t('audit.columns.eventAt')" min-width="180">
-            <template #default="{ row }: { row: ManagementAuditEvent }">
-              {{ formatDate(row.eventAt) }}
+        <template v-else>
+          <div v-if="hasManagementColumnFilters" class="table-toolbar">
+            <el-button size="small" text @click="clearManagementColumnFilters">
+              {{ t('table.clearFilters') }}
+            </el-button>
+          </div>
+          <AppDataTable :data="paginatedManagementEvents" empty-text="">
+            <template #empty>
+              <el-empty :description="t('audit.empty.management')" />
             </template>
-          </el-table-column>
-          <el-table-column prop="eventType" :label="t('audit.columns.eventType')" min-width="160" />
-          <el-table-column prop="templateId" :label="t('audit.columns.templateId')" min-width="200" />
-          <el-table-column prop="actorSummary" :label="t('audit.columns.actorSummary')" min-width="160" />
-          <el-table-column prop="statusSummary" :label="t('audit.columns.statusSummary')" min-width="160" />
-        </el-table>
-        <el-pagination
-          v-if="auditStore.managementEvents.length > PAGE_SIZE"
-          v-model:current-page="managementPage"
-          class="table-pagination"
-          layout="prev, pager, next"
-          :page-size="PAGE_SIZE"
-          :total="auditStore.managementEvents.length"
-        />
+            <el-table-column
+              sortable
+              :sort-method="sortManagementByEventAt"
+              min-width="180"
+            >
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.eventAt')"
+                  v-model="managementColumnFilters.eventAt"
+                />
+              </template>
+              <template #default="{ row }: { row: ManagementAuditEvent }">
+                {{ formatDate(row.eventAt) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="eventType" sortable min-width="160">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.eventType')"
+                  v-model="managementColumnFilters.eventType"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="templateId" sortable min-width="200">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.templateId')"
+                  v-model="managementColumnFilters.templateId"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="actorSummary" sortable min-width="160">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.actorSummary')"
+                  v-model="managementColumnFilters.actorSummary"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="statusSummary" sortable min-width="160">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.statusSummary')"
+                  v-model="managementColumnFilters.statusSummary"
+                />
+              </template>
+            </el-table-column>
+          </AppDataTable>
+          <el-pagination
+            v-if="filteredManagementEvents.length > PAGE_SIZE"
+            v-model:current-page="managementPage"
+            class="table-pagination"
+            layout="prev, pager, next"
+            :page-size="PAGE_SIZE"
+            :total="filteredManagementEvents.length"
+          />
+        </template>
       </el-tab-pane>
 
       <el-tab-pane :label="t('audit.tabs.lifecycle')" name="lifecycle">
         <el-skeleton v-if="auditStore.loadingLifecycle" :rows="6" animated />
-        <el-table
-          v-else
-          :data="paginatedLifecycleEvents"
-          stripe
-          empty-text=""
-        >
-          <template #empty>
-            <el-empty :description="t('audit.empty.lifecycle')" />
-          </template>
-          <el-table-column :label="t('audit.columns.eventAt')" min-width="180">
-            <template #default="{ row }: { row: LifecycleAuditEvent }">
-              {{ formatDate(row.eventAt) }}
+        <template v-else>
+          <div v-if="hasLifecycleColumnFilters" class="table-toolbar">
+            <el-button size="small" text @click="clearLifecycleColumnFilters">
+              {{ t('table.clearFilters') }}
+            </el-button>
+          </div>
+          <AppDataTable :data="paginatedLifecycleEvents" empty-text="">
+            <template #empty>
+              <el-empty :description="t('audit.empty.lifecycle')" />
             </template>
-          </el-table-column>
-          <el-table-column prop="eventType" :label="t('audit.columns.eventType')" min-width="160" />
-          <el-table-column prop="templateId" :label="t('audit.columns.templateId')" min-width="200" />
-          <el-table-column prop="fromState" :label="t('audit.columns.fromState')" width="140">
-            <template #default="{ row }: { row: LifecycleAuditEvent }">
-              {{ formatLifecycleState(row.fromState) }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="toState" :label="t('audit.columns.toState')" width="140">
-            <template #default="{ row }: { row: LifecycleAuditEvent }">
-              {{ formatLifecycleState(row.toState) }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="summary" :label="t('audit.columns.summary')" min-width="200" />
-        </el-table>
-        <el-pagination
-          v-if="auditStore.lifecycleEvents.length > PAGE_SIZE"
-          v-model:current-page="lifecyclePage"
-          class="table-pagination"
-          layout="prev, pager, next"
-          :page-size="PAGE_SIZE"
-          :total="auditStore.lifecycleEvents.length"
-        />
+            <el-table-column
+              sortable
+              :sort-method="sortLifecycleByEventAt"
+              min-width="180"
+            >
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.eventAt')"
+                  v-model="lifecycleColumnFilters.eventAt"
+                />
+              </template>
+              <template #default="{ row }: { row: LifecycleAuditEvent }">
+                {{ formatDate(row.eventAt) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="eventType" sortable min-width="160">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.eventType')"
+                  v-model="lifecycleColumnFilters.eventType"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="templateId" sortable min-width="200">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.templateId')"
+                  v-model="lifecycleColumnFilters.templateId"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column
+              sortable
+              :sort-method="sortLifecycleFromState"
+              width="140"
+            >
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.fromState')"
+                  v-model="lifecycleColumnFilters.fromState"
+                />
+              </template>
+              <template #default="{ row }: { row: LifecycleAuditEvent }">
+                {{ formatLifecycleState(row.fromState) }}
+              </template>
+            </el-table-column>
+            <el-table-column
+              sortable
+              :sort-method="sortLifecycleToState"
+              width="140"
+            >
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.toState')"
+                  v-model="lifecycleColumnFilters.toState"
+                />
+              </template>
+              <template #default="{ row }: { row: LifecycleAuditEvent }">
+                {{ formatLifecycleState(row.toState) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="summary" sortable min-width="200">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.summary')"
+                  v-model="lifecycleColumnFilters.summary"
+                />
+              </template>
+            </el-table-column>
+          </AppDataTable>
+          <el-pagination
+            v-if="filteredLifecycleEvents.length > PAGE_SIZE"
+            v-model:current-page="lifecyclePage"
+            class="table-pagination"
+            layout="prev, pager, next"
+            :page-size="PAGE_SIZE"
+            :total="filteredLifecycleEvents.length"
+          />
+        </template>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -301,5 +436,9 @@ function formatDate(value: string) {
 .table-pagination {
   margin-top: 1rem;
   justify-content: flex-end;
+}
+
+.table-toolbar {
+  margin-bottom: 0.75rem;
 }
 </style>

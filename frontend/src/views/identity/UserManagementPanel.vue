@@ -2,6 +2,10 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { assignableGroupCodes, assignableRoles, canDeleteUsers } from '@/auth/identityRoles'
 import { useIdentityStore } from '@/stores/identity'
 import { useSessionStore } from '@/stores/session'
@@ -50,6 +54,28 @@ const canDelete = computed(() => canDeleteUsers(actorRoles.value))
 const roleOptions = computed(() => assignableRoles(actorRoles.value))
 const groupCatalog = computed(() => identityStore.groups.map((group) => group.groupCode))
 const groupOptions = computed(() => assignableGroupCodes(sessionStore.session, groupCatalog.value))
+
+function roleLabel(role: string): string {
+  return te(`identity.roles.${role}`) ? t(`identity.roles.${role}`) : role
+}
+
+const usersSource = computed(() => identityStore.users)
+const { filters: columnFilters, filteredRows: filteredUsers, hasActiveFilters, clearFilters } =
+  useDataTableFilters(usersSource, [
+    { key: 'username', getValue: (row) => row.username },
+    { key: 'displayName', getValue: (row) => row.displayName },
+    { key: 'email', getValue: (row) => row.email },
+    { key: 'roles', getValue: (row) => row.roles.map((role) => roleLabel(role)).join(', ') },
+    {
+      key: 'groups',
+      getValue: (row) => row.authorizedGroupCodes.join(', '),
+    },
+    {
+      key: 'status',
+      getValue: (row) =>
+        row.enabled ? t('identity.status.enabled') : t('identity.status.disabled'),
+    },
+  ])
 
 const errorMessage = computed(() => {
   const key = identityStore.lastUserErrorMessageKey
@@ -132,10 +158,6 @@ function resetFilters() {
   filterGroup.value = ''
   filterRole.value = ''
   void reload()
-}
-
-function roleLabel(role: string): string {
-  return te(`identity.roles.${role}`) ? t(`identity.roles.${role}`) : role
 }
 
 function openCreate() {
@@ -257,13 +279,15 @@ async function confirmDelete(user: ManagementUserView) {
     ElMessage.error(errorMessage.value || t('identity.error.deleteUser'))
   }
 }
+
+const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enabled)
 </script>
 
 <template>
   <section class="user-panel">
     <header class="panel-header">
       <form class="filters" @submit.prevent="reload">
-        <el-select
+        <AppSearchSelect
           v-model="filterGroup"
           class="filter-control"
           clearable
@@ -275,8 +299,8 @@ async function confirmDelete(user: ManagementUserView) {
             :label="code"
             :value="code"
           />
-        </el-select>
-        <el-select
+        </AppSearchSelect>
+        <AppSearchSelect
           v-model="filterRole"
           class="filter-control"
           clearable
@@ -288,7 +312,7 @@ async function confirmDelete(user: ManagementUserView) {
             :label="roleLabel(role)"
             :value="role"
           />
-        </el-select>
+        </AppSearchSelect>
         <el-button native-type="submit">{{ t('identity.users.filters.apply') }}</el-button>
         <el-button text @click="resetFilters">{{ t('identity.users.filters.reset') }}</el-button>
       </form>
@@ -306,23 +330,71 @@ async function confirmDelete(user: ManagementUserView) {
 
     <el-skeleton v-if="identityStore.loadingUsers" :rows="6" animated />
 
-    <el-table v-else-if="identityStore.users.length > 0" :data="identityStore.users" stripe>
-      <el-table-column prop="username" :label="t('identity.users.columns.username')" width="140" />
-      <el-table-column prop="displayName" :label="t('identity.users.columns.displayName')" min-width="160" />
-      <el-table-column prop="email" :label="t('identity.users.columns.email')" min-width="200" />
-      <el-table-column :label="t('identity.users.columns.roles')" min-width="200">
+    <template v-else>
+      <div v-if="hasActiveFilters && filteredUsers.length > 0" class="table-toolbar">
+        <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
+      </div>
+
+      <AppDataTable v-if="filteredUsers.length > 0" :data="filteredUsers">
+      <el-table-column prop="username" sortable width="140">
+        <template #header>
+          <TableColumnHeader
+            :label="t('identity.users.columns.username')"
+            v-model="columnFilters.username"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column prop="displayName" sortable min-width="160">
+        <template #header>
+          <TableColumnHeader
+            :label="t('identity.users.columns.displayName')"
+            v-model="columnFilters.displayName"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column prop="email" sortable min-width="200">
+        <template #header>
+          <TableColumnHeader
+            :label="t('identity.users.columns.email')"
+            v-model="columnFilters.email"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column min-width="200">
+        <template #header>
+          <TableColumnHeader
+            :label="t('identity.users.columns.roles')"
+            v-model="columnFilters.roles"
+          />
+        </template>
         <template #default="{ row }">
           <el-tag v-for="role in row.roles" :key="role" class="role-tag" size="small">
             {{ roleLabel(role) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="t('identity.users.columns.groups')" min-width="160">
+      <el-table-column min-width="160">
+        <template #header>
+          <TableColumnHeader
+            :label="t('identity.users.columns.groups')"
+            v-model="columnFilters.groups"
+          />
+        </template>
         <template #default="{ row }">
           {{ row.authorizedGroupCodes.join(', ') }}
         </template>
       </el-table-column>
-      <el-table-column :label="t('identity.users.columns.status')" width="120">
+      <el-table-column
+        sortable
+        :sort-method="sortUsersByEnabled"
+        width="120"
+      >
+        <template #header>
+          <TableColumnHeader
+            :label="t('identity.users.columns.status')"
+            v-model="columnFilters.status"
+          />
+        </template>
         <template #default="{ row }">
           <el-tag :type="row.enabled ? 'success' : 'info'" size="small">
             {{ row.enabled ? t('identity.status.enabled') : t('identity.status.disabled') }}
@@ -352,9 +424,10 @@ async function confirmDelete(user: ManagementUserView) {
           </el-button>
         </template>
       </el-table-column>
-    </el-table>
+      </AppDataTable>
 
-    <el-empty v-else :description="t('identity.users.empty')" />
+      <el-empty v-else :description="t('identity.users.empty')" />
+    </template>
 
     <el-dialog
       v-model="dialogVisible"
@@ -394,7 +467,7 @@ async function confirmDelete(user: ManagementUserView) {
           <div class="field-hint">{{ t('identity.users.form.passwordHint') }}</div>
         </el-form-item>
         <el-form-item :label="t('identity.users.form.roles')" prop="roles">
-          <el-select
+          <AppSearchSelect
             v-model="form.roles"
             multiple
             class="full-width"
@@ -406,13 +479,13 @@ async function confirmDelete(user: ManagementUserView) {
               :label="roleLabel(role)"
               :value="role"
             />
-          </el-select>
+          </AppSearchSelect>
         </el-form-item>
         <el-form-item
           :label="t('identity.users.form.authorizedGroupCodes')"
           prop="authorizedGroupCodes"
         >
-          <el-select
+          <AppSearchSelect
             v-model="form.authorizedGroupCodes"
             multiple
             class="full-width"
@@ -424,7 +497,7 @@ async function confirmDelete(user: ManagementUserView) {
               :label="code"
               :value="code"
             />
-          </el-select>
+          </AppSearchSelect>
         </el-form-item>
       </el-form>
       <template #footer>

@@ -3,6 +3,10 @@
 **Created:** 2026-06-23
 **Scope:** Repository-wide optimization backlog (documentation drift, quality gates,
 backend architecture/security/performance, frontend quality/UX).
+
+> **Unified execution map:** Prioritized waves and cross-cutting frontend workflow items
+> live in [comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)
+> (COR-0…6). Use this file for OPT-* task detail; use the roadmap for sequencing.
 **Status model:** `Not Started` | `In Progress` | `Blocked` | `Done`
 **Rule:** Only one optimization wave may be `In Progress` at a time; each task must
 land with a behavior spec (if behavior-changing), a failing-test-first loop, green
@@ -20,7 +24,7 @@ gates, and updated owning docs.
 | --- | --- | --- |
 | F1 | **Documentation drift**: `docs/README.md`, `docs/plan/README.md`, `docs/PROJECT-STATUS-RESET.md` declare *"no implementation code yet / restart from zero"*, but the repo has **234 backend main classes + ~20 test classes + 66 frontend src files**, and `master-plan.md` marks **P0–P11 all `Done`**. Plan layer and reality contradict each other. | High |
 | F2 | **Quality gates not enforced (and claimed green)**: TDD constitution requires `mvn verify` to run Checkstyle + PMD + SpotBugs + JaCoCo thresholds, but `backend/pom.xml` (L160–186) has **only a JaCoCo report — no coverage rules and no static-analysis plugins**, and no `checkstyle/pmd/spotbugs` config files exist. Yet `docs/plan/execution-sync-ledger.md` L21 records backend `mvn verify` = **Green** and L80 claims *"P9 Checkstyle/PMD/SpotBugs in verify"*. The ledger's green-gate evidence is **unbacked**. No `Done` claim can currently be backed by real green gates. | High |
-| F3 | **Stack drift vs ADR/guardrails**: ADRs mandate QueryDSL, MapStruct, Resilience4j, Bucket4j, Redisson; the actual build uses none of these (plain Spring Data JPA, hand-written mappers, no circuit breaker, no rate limiting, Lettuce instead of Redisson). Argon2id, JWT, Flyway, MinIO **are** implemented. | High |
+| F3 | **Stack drift vs ADR/guardrails (partially closed 2026-06-23):** QueryDSL, MapStruct, Redisson still absent; **Bucket4j** (OPT-F1), **Resilience4j** (OPT-F2), and streaming (OPT-F3) are implemented. Plain Spring Data JPA + hand-written mappers + Lettuce remain. Argon2id, JWT, Flyway, MinIO **are** implemented. | High |
 | F4 | **Test coverage is thin for a TDD-mandated project**: backend main:test ≈ 11.7:1; `apimgmt` and `infrastructure` have **zero** tests; core security/runtime classes lack focused tests. Frontend ≈ 38% of source files have tests; only 1 e2e (login a11y smoke). | High |
 | F5 | **Module boundary violation**: `rendering` imports `runtime.api` / `runtime.service` (reverse dependency), breaking the ADR rule that rendering stays isolated from lifecycle/authorization/API-governance. | Medium |
 | F6 | **Git baseline**: branch `main` has **no commits yet**; the entire codebase is uncommitted. First commit + baseline tag is a prerequisite for any auditable optimization history. | Medium |
@@ -199,4 +203,4 @@ once Wave 1 exit criteria are met.
 | --- | --- | --- |
 | Wave 1 | OPT-A + OPT-B (incl. B5) | **In Progress** — OPT-B (B1–B4) Done; B5 + OPT-A reconciliation remaining |
 | Wave 2 | OPT-C + OPT-E + OPT-D (start) | **In Progress** — OPT-C/E Done; D1 Done; D2–D6 + C4–C7 remain |
-| Wave 3 | OPT-D (finish) + OPT-F + OPT-G | Not Started — Bucket4j/Resilience4j/Redisson, rendering dependency fix, frontend HTTP 401 |
+| Wave 3 | OPT-D (finish) + OPT-F + OPT-G | **In Progress** — F1/F2/F3, G1/G2, E8 **Done** (2026-06-23); D2–D6, Redisson/QueryDSL/MapStruct remain |

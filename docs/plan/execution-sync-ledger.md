@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-23 (OPT-E8/F3 streaming + OPT-G1/G2 HTTP error envelope)  
+**Last synced:** 2026-06-24 (COR-0 doc reconciliation + COR-B02/COR-F05 Batch B slice)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -14,15 +14,20 @@
 
 On conflict between this ledger and a stale task-sheet row, **plan layer wins** until the task sheet is refreshed.
 
-## Quality gate evidence (2026-06-23)
+## Quality gate evidence (authoritative row)
 
-| Gate | Command | Result |
-| --- | --- | --- |
-| Backend | `mvn -B -ntp -f backend/pom.xml verify` | Green (189 tests, 2026-06-23). E8 Content-Type from storage key; F3 streamed download + sync replay. |
-| Frontend lint | `pnpm -C frontend lint` | Green |
-| Frontend type-check | `pnpm -C frontend type-check` | Green |
-| Frontend test | `pnpm -C frontend test` | Green — includes `errorEnvelope.test.ts`, `http.test.ts`, session envelope mapping |
-| Frontend build | `pnpm -C frontend build` | Green |
+| Gate | Command | Result | Notes |
+| --- | --- | --- | --- |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **193 tests**, 2026-06-24 | COR-B02 idempotency alignment, ADR 0038 SYNC_DOWNLOAD_URL de-scope, `IdempotencyServiceRetentionTest` |
+| Frontend lint | `pnpm -C frontend lint` | Green | |
+| Frontend type-check | `pnpm -C frontend type-check` | Green | |
+| Frontend test | `pnpm -C frontend test` | Green | **104 tests**, 2026-06-24 — COR-F05 dashboard error panel, COR-T11 workbench removal, `useWorkflowTasks.test.ts` |
+| Frontend build | `pnpm -C frontend build` | Green | |
+
+**Test count progression (not conflicting runs):** P13 slice verify **114** backend tests (2026-06-23);
+Wave C UX **161** backend / **88** frontend; post OPT-E8/F3 full verify **189** backend;
+COR-B02/F05 Batch B slice **193** backend / **104** frontend (2026-06-24).
+Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)
 
@@ -33,7 +38,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 | P2 | Done | Master APIs + list/detail UI (`MasterListView`, `MasterDetailView`) |
 | P3 | Done | Template wizard, variables, rules, test data sets |
 | P4 | Done | DOCX/PDF render, preview records, comparison panel |
-| P5 | Done | Lifecycle + publish gate UI (thin slice checklist) |
+| P5 | Done | Lifecycle + publish gate UI (**thin slice** — state machine + checklist UI; live gates → P19) |
 | P6 | Done | API policy, credentials, caller contract view |
 | P7 | Done | Runtime sync/batch/async, idempotency, encryption |
 | P8 | Done | Audit console, masked export |
@@ -46,7 +51,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 | P15 | Not Started | Kubernetes deployment & container hardening — implements unrealized ADR-0030 K8s/container rows; _evidence pending_ (manifests/Helm, hardened images, CI `kubeconform`/`helm lint`) |
 | P16 | Done (2026-06-23) | Template lifecycle governance + logical delete (T01–T08); gates: `mvn verify` 161 tests |
 | P17 | In Progress | Impact-preview seam Done (T03/T09 partial); per-domain save/rollback open |
-| P20 | Done (2026-06-23) | i18n multi-locale + UI upgradeability (Wave C UXF1/4/5); gates: frontend 88 tests + backend verify where touched |
+| P20 | In Progress (2026-06-24) | Wave C UXF1/4/5 Done; **P20-T06** (zh-CN + `api.error` catalog parity) open — see [P20 detail](./detail/P20-i18n-ui-upgradeability.md) |
 | P18 | Not Started | Structured authoring & rendering-fidelity engine (gap G3: node matrix, style catalog, paste cleaning, render profile); _evidence pending_ |
 | P19 | Not Started | Template verifiability, publish gate & decision forms (gaps G4/G5: coverage thresholds, batch test, live checklist, opinion forms, risk prompts); _evidence pending_ |
 
@@ -65,7 +70,7 @@ P12 remains the non-active deferred-enhancements catch-all.
 | E06 | Done | P1, P5, P6, P8 | `ManagementShell`, dual-brand tokens, role homes |
 | E07 | Done (local gates) | P9 | `scripts/` release gate; external deploy evidence pending |
 | E11 | Done | P1 | `routeKeys.ts`, `RoleHomeView`, `ForbiddenView`, router guards |
-| E12 | Done (thin slice); UX Wave A/B extension in progress | P1, E11 | `useCapabilities`, `TesterWorkbenchView`, `ApproverWorkbenchView`, `TemplateCreateDialog`, credential rotate/revoke UI; see [e12-phase3-task-sheet.md](../architecture/e12-phase3-task-sheet.md) |
+| E12 | Done (thin slice); Dashboard consolidation (2026-06-24) | P1, E11 | `useCapabilities`, `DashboardView` (`/dashboard`, `route.dashboard-home`), workflow tasks on dashboard; legacy workbench views redirect to dashboard — **COR-T11 decision pending**; see [e12-phase3-task-sheet.md](../architecture/e12-phase3-task-sheet.md) |
 | E13 | Done | P13 | Identity & group administration (local account store as authorization authority, ADR 0036); `BusinessGroupService`, `UserManagementService`, `GroupManagementController` (`/api/management/v1/groups`), `UserManagementController` (`/api/management/v1/users`), fail-closed escalation guards, `IdentityAdministrationView`; green gates 2026-06-23 — see P13 mirror block |
 
 ### E05 / E07 outstanding (not blocking MVP Done)
@@ -100,9 +105,9 @@ P12 remains the non-active deferred-enhancements catch-all.
 
 | Item | Status | Evidence (2026-06-23) |
 | --- | --- | --- |
-| Epic E13 (identity & group administration) | Done | `GroupDimension`, `BusinessGroupEntity`/`BusinessGroupRepository`, mutable `ManagementUserEntity` + extended repository, `BusinessGroupService`, `UserManagementService`, `GroupManagementController` (`/api/management/v1/groups`), `UserManagementController` (`/api/management/v1/users`); migrations `V14__management_role_seeds.sql` + `V15__business_group_management.sql`; frontend `IdentityAdministrationView` + `UserManagementPanel`/`GroupManagementPanel`, route `/home/identity` |
+| Epic E13 (identity & group administration) | Done | `GroupDimension`, `BusinessGroupEntity`/`BusinessGroupRepository`, mutable `ManagementUserEntity` + extended repository, `BusinessGroupService`, `UserManagementService`, `GroupManagementController` (`/api/management/v1/groups`), `UserManagementController` (`/api/management/v1/users`); migrations `V14__management_role_seeds.sql` + `V15__business_group_management.sql`; frontend **`UserManagementView`** / **`GroupManagementPanel`** at **`/entitlement/users`** and **`/entitlement/groups`** (`route.identity-administration`); legacy `/home/identity` redirects to `/entitlement/users` |
 | Behavior + escalation guard | Done | Fail-closed `GROUP_SCOPE_OUT_OF_RANGE` / `ROLE_ASSIGNMENT_NOT_ALLOWED` / `USER_DELETE_NOT_ALLOWED` / `GROUP_MANAGEMENT_NOT_ALLOWED` (+ management-only `NOT_FOUND`/`CONFLICT`) wired via `GlobalExceptionHandler`/`ApiErrorCodes`; `ManagementRoute.IDENTITY_ADMINISTRATION` exposed to GLOBAL_ADMIN/GROUP_ADMIN by `RouteVisibilityService`; audit recorded; covered by `BusinessGroupServiceTest` (8), `UserManagementServiceTest` (12), `IdentityGroupAdministrationSliceTest` (17), `RouteVisibilityServiceTest` (7), `ManagementCapabilitiesServiceTest` (6) |
-| Backend gate | Green | `mvn -B -ntp -f backend/pom.xml verify` = BUILD SUCCESS; Tests run: 114, Failures: 0, Errors: 0, Skipped: 1; JaCoCo "All coverage checks have been met"; Checkstyle 0 violations; SpotBugs no warnings |
+| Backend gate | Green | P13 slice: `mvn verify` — **114** tests (point-in-time snapshot, 2026-06-23); latest full verify **189** — see authoritative gate row |
 | Frontend lint | Green | `pnpm -C frontend lint` — 0 errors |
 | Frontend type-check | Green | `pnpm -C frontend type-check` — pass |
 | Frontend test | Green | `pnpm -C frontend test` — 24 files / 81 tests passed (43 identity-related all green) |
@@ -125,6 +130,22 @@ Source: [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimizatio
 **Backend gate evidence (UX Wave A/B, 2026-06-23):** `mvn -B -ntp -f backend/pom.xml verify "-Dspring-boot.repackage.skip=true"` — 134 tests green (1 skipped); includes `TemplateLifecycleGovernanceServiceTest`, `TemplatePlatformSliceTest#stopRestoreAndDeprecatePublishedTemplate`.
 
 **Frontend gate evidence (UX Wave A/B, 2026-06-23):** `pnpm -C frontend lint` / `type-check` / `test` (81) / `build` — all green.
+
+## Transitional implementation seams (2026-06-24)
+
+Known gaps between ADR/guardrails and current code — **not** production-complete closure.
+Each row lists exit criteria; remove from this index when closed.
+
+| Seam | Current behavior | Exit criteria | Tracked in |
+| --- | --- | --- | --- |
+| AD Group resolution | `ConfigAdGroupResolver` — config-file stub, fail-closed | Production LDAP/AD adapter + integration tests | E05-T06, P6 |
+| Async batch transport | Default in-process `@Async`; Kafka optional via `ASYNC_TRANSPORT=kafka` | Production profile uses Kafka + DLT; in-process dev-only documented | P11, M14 |
+| Runtime generation audit | Download path SLF4J-only; sync/batch/async audit rows incomplete | Standard audit summary persisted per domain-model §2.15 | COR-B07 |
+| Security forbidden-route audit | Log-only in some paths | Durable security audit event per matrix §13.3 | COR-P06 |
+| QueryDSL / MapStruct / Redisson | Plain JPA + hand mappers + Lettuce | ADR-0037 scheduled items implemented or ADR amended | OPT-D, COR-P05 |
+| Publish gate checklist | UI checklist + binding validation; API policy item partly static | Server-side live gate blocks publish (P19) | COR-T01, P19 |
+| Workbench vs Dashboard | Workbench views exist; routes redirect to `/dashboard` | COR-T11 decision recorded; dead code removed or queues restored | COR-T11 |
+| zh-CN / `api.error` catalog | `en` ~939 lines vs `zh-CN` ~184; sparse `api.error` keys | P20-T06 complete; locale switch without mass English fallback | COR-F19, P20-T06 |
 
 ## Sync maintenance
 

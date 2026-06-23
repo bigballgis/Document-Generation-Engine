@@ -3,10 +3,10 @@
 **Created:** 2026-06-23
 **Lens:** End-user usage & interaction completeness + system upgradeability/extensibility.
 **Relationship to other plans:** Complements `optimization-plan.md` (which covers
-technical debt: gates, coverage, backend architecture). This plan focuses on what a
-real human operator (per role) can and cannot do through the UI, and on how cheaply
-the system can grow (new roles, locales, brands, policy domains, environments,
-content modules).
+technical debt: gates, coverage, backend architecture). **For prioritized sequencing
+across docs, API, template workflow, and frontend UX, see
+[comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)
+(COR-0…6, 2026-06-23).** Verify Wave A/B Done claims in this file against that roadmap.
 **Status model:** `Not Started` | `In Progress` | `Blocked` | `Done`
 **Rule:** Behavior-changing tasks land with a behavior spec, failing-test-first loop,
 green gates, and synced owning docs (per the delivery + doc-sync constitutions).
@@ -96,7 +96,7 @@ Each task: `ID | Pri | Title | Evidence | Acceptance | Status`. Priority **H/M/L
 
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
-| UXC1 | M | Live publish-gate checklist | publish gate "API policy" is static text | Each gate item reflects real readiness (policy configured, tests passed, bindings valid); publish disabled until satisfied; reasons shown | Done |
+| UXC1 | M | Live publish-gate checklist | publish gate "API policy" is static text | Each gate item reflects real readiness (policy configured, tests passed, bindings valid); publish disabled until satisfied; reasons shown | **Partial** — binding-validation gate live; API policy item still informational (→ COR-T01 / P19) |
 | UXC2 | M | Disambiguate `APPROVAL` stage actions | both submit + decide render together | UI distinguishes "awaiting approval submission" vs "awaiting approval decision" (split status or stage flag); only the valid action shows per role | Done |
 | UXC3 | M | Stop/Deprecate/Restore + version deactivate/restore (versioning + logical delete, §4.3) | matrix §5 confirms; no backend endpoints or UI | Backend lifecycle endpoints + UI actions with confirm + audit; STOPPED/DEPRECATED actionable; removal is logical delete only (no hard delete) **(needs backend work)** | Done |
 | UXC4 | L | Master/template metadata edit via versioning (Confirmed §4.3) | only PATCH metadata exists; no re-upload; no delete | Metadata edit UI; content changes create new versions (no in-place re-upload); removal = logical delete; no hard-delete UI | Done |
@@ -107,8 +107,8 @@ Each task: `ID | Pri | Title | Evidence | Acceptance | Status`. Priority **H/M/L
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
 | UXD0 | H | Seed users + landing/visibleRoutes for all 7 roles (Confirmed §4.4) | no seed users for TESTER/APPROVER/MASTER_DESIGNER/AUDIT_ADMIN; `RouteVisibilityService` missing entries | Seed account per role; backend `defaultRoute` + `visibleRoutes` defined for each; login lands correctly; prerequisite for UXD1–UXD3 | Done |
-| UXD1 | M | Tester workbench (TEMPLATE_TESTER) | role exists, no UI/landing | "My test queue" view: templates awaiting test, test-generate, pass/fail decision with comment; gated by `canDecideTests` | Done |
-| UXD2 | M | Approver workbench (TEMPLATE_APPROVER) | role exists, no UI/landing | "My approval queue" view: templates awaiting approval, approve/reject with comment; gated by `canDecideApprovals` | Done |
+| UXD1 | M | Tester workbench (TEMPLATE_TESTER) | role exists, no UI/landing | "My test queue" view: templates awaiting test, test-generate, pass/fail decision with comment; gated by `canDecideTests` | **Partial** — `TesterWorkbenchView` built; **`route.tester-workbench` redirects to `/dashboard`**; queues on Dashboard (COR-T11 pending) |
+| UXD2 | M | Approver workbench (TEMPLATE_APPROVER) | role exists, no UI/landing | "My approval queue" view: templates awaiting approval, approve/reject with comment; gated by `canDecideApprovals` | **Partial** — `ApproverWorkbenchView` built; **`route.approver-workbench` redirects to `/dashboard`**; queues on Dashboard (COR-T11 pending) |
 | UXD3 | M | Master-designer journey (MASTER_DESIGNER) | backend authorizes, no nav | Landing + nav for `MASTER_DESIGNER`; access to master + template authoring per matrix §4–5 | Done |
 | UXD4 | L | Replace governance role-home placeholders with real dashboards | `RoleHomeView` placeholders | Global/Group governance homes show actionable summaries (pending reviews, awaiting publish, recent audit) instead of placeholder cards | Done |
 
@@ -203,7 +203,7 @@ Frontend gates green: `pnpm -C frontend lint` / `type-check` / `test` (81 tests)
 | Session capabilities | `ManagementCapabilities` types, `useCapabilities` composable, `ManagementSessionView` wiring |
 | Route gating | `canAccessRoute` uses `visibleRoutes` only; `ManagementShell` nav from session routes |
 | Role helpers | `roles.ts` — `API_ADMIN` removed; capability-based helpers with role fallback |
-| Workbenches | `route.tester-workbench` → `TesterWorkbenchView`; `route.approver-workbench` → `ApproverWorkbenchView` |
+| Workbenches | **Transitional (2026-06-24):** `TesterWorkbenchView` / `ApproverWorkbenchView` exist; **`route.tester-workbench` / `route.approver-workbench` redirect to `/dashboard`**; default landing is `route.dashboard-home` → `DashboardView`. Final disposition → COR-T11. |
 | Template authoring | `TemplateCreateDialog` + create button on `TemplateListView`; granular gates on `TemplateDetailView` |
 | API credentials | `apiPolicy.rotateCredential` / `revokeCredential`; rotate/revoke UI with confirm |
 | Session expiry | `http.ts` 401 interceptor → login redirect with `sessionExpired` |

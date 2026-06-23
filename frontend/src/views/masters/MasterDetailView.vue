@@ -9,6 +9,9 @@ import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDia
 import MasterMetadataEditDialog from '@/components/masters/MasterMetadataEditDialog.vue'
 import MasterWorkflowBanner from '@/components/masters/MasterWorkflowBanner.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import { canReviewMasters, sessionContext } from '@/auth/roles'
 import { ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
@@ -33,6 +36,14 @@ const loadFailed = ref(false)
 
 const masterId = computed(() => String(route.params.masterId ?? ''))
 const master = computed(() => mastersStore.selectedMaster)
+const anchorsSource = computed(() => master.value?.anchors ?? [])
+const { filters: anchorColumnFilters, filteredRows: filteredAnchors } = useDataTableFilters(
+  anchorsSource,
+  [
+    { key: 'anchorId', getValue: (row) => row.anchorId },
+    { key: 'displayLabel', getValue: (row) => row.displayLabel },
+  ],
+)
 const canReview = computed(() => canReviewMasters(sessionContext(sessionStore.session)))
 const canSubmitForReview = computed(
   () => master.value?.status === 'DRAFT' || master.value?.status === 'REJECTED',
@@ -203,14 +214,24 @@ function formatReviewAction(action: string): string {
           <template #header>
             <span>{{ t('masters.detail.anchorsTitle') }}</span>
           </template>
-          <el-table v-if="master.anchors.length > 0" :data="master.anchors" stripe>
-            <el-table-column prop="anchorId" :label="t('masters.detail.anchorId')" min-width="160" />
-            <el-table-column
-              prop="displayLabel"
-              :label="t('masters.detail.anchorLabel')"
-              min-width="220"
-            />
-          </el-table>
+          <AppDataTable v-if="filteredAnchors.length > 0" :data="filteredAnchors">
+            <el-table-column prop="anchorId" sortable min-width="160">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('masters.detail.anchorId')"
+                  v-model="anchorColumnFilters.anchorId"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="displayLabel" sortable min-width="220">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('masters.detail.anchorLabel')"
+                  v-model="anchorColumnFilters.displayLabel"
+                />
+              </template>
+            </el-table-column>
+          </AppDataTable>
           <el-empty v-else :description="t('masters.detail.noAnchors')" />
         </el-card>
       </section>

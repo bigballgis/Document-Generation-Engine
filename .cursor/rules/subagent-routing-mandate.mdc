@@ -1,0 +1,65 @@
+---
+description: Hard constraint — parent agent MUST delegate via Task/subagent_type; inline work allowed only for narrow read-only or explicit exceptions.
+alwaysApply: true
+---
+
+# Subagent Routing Mandate (Parent Agent)
+
+The **parent agent** (main Composer session) orchestrates; **specialist subagents**
+implement. Do not substitute "I'll do it faster inline" for the pipeline in
+`.cursor/agents/` and `.cursor/rules/delivery-orchestration-constitution.mdc`.
+
+## Mandatory first action (before edits)
+
+Classify the user request, then **invoke `Task` immediately** when matched:
+
+| Request class | First `subagent_type` | Notes |
+| --- | --- | --- |
+| Multi-step, full-stack, or ambiguous delivery | `delivery-orchestrator` | Single entry; orchestrator routes the rest |
+| Backend behavior / Java / Flyway / runtime API | `backend-engineer` | After behavior spec if behavior-changing |
+| Frontend behavior / Vue / Pinia / Playwright | `frontend-engineer` | Bank OA + i18n; E2E/UIUX gates follow |
+| Behavior unclear or acceptance missing | `behavior-spec-author` | Blocks implementation until confirmed |
+| Plan phase / COR-* / master-plan status | `plan-orchestrator` | Single active phase invariant |
+| Requirements, PRD, matrix, API contract docs | `doc-keeper` | Before or with behavior code |
+| Deep read-only audit (repo-wide, drift, review) | `explore` | Parallel OK; parent synthesizes |
+| Docker deploy / compose / prod validation | `deploy-engineer` | After green gates |
+| Task slice complete (behavior landed) | `post-task-doc-sync` | **Before** Done |
+| After doc sync (when commit delegated) | `post-task-commit-review` | **Before** Done |
+
+If multiple rows apply, start with **`delivery-orchestrator`** unless the user
+named exactly one specialist.
+
+## Parent agent MAY work inline (no Task) only when
+
+1. **Read-only** answer — no file writes (explain code, compare options, status Q&A).
+2. **Single mechanical edit** explicitly named by user (one typo, one line) with **no**
+   behavior, API, permission, plan-status, or doc-source-of-truth change.
+3. User **opts out in the same message** (e.g. "不要子 agent，只解释").
+
+Everything else → **Task**, not inline implementation.
+
+## Forbidden (parent agent)
+
+- Implementing multi-file backend/frontend slices without `backend-engineer` /
+  `frontend-engineer` (or orchestrator delegation).
+- Updating `docs/plan/**` status, ledger, COR-* Done, permission matrix, or PRD
+  without `doc-keeper` or `post-task-doc-sync`.
+- Claiming **Done** without `post-task-doc-sync` (+ `post-task-commit-review` when
+  commit is in scope per user/rules).
+- Claiming frontend **Done** without `e2e-test-engineer` + `e2e-uiux-reviewer`.
+- Large "deep review" via ad-hoc grep/read instead of `explore` subagent(s).
+- Using `generalPurpose` when a named project specialist exists for the stage.
+
+## Self-check (state in one line before first tool write)
+
+`[routing] class=<…> → subagent=<…> → reason=<…>`
+
+If `subagent=inline`, state the exception (read-only / single-line / user opt-out).
+
+## Relation to other rules
+
+- Pipeline order: `delivery-orchestration-constitution.mdc`
+- TDD/BDD gates: `tdd-bdd-delivery-constitution.mdc`
+- Doc sync / commit: `post-task-doc-sync-constitution.mdc`, `post-task-commit-review-constitution.mdc`
+
+Agent definitions: `.cursor/agents/*.md` — read the target agent file before `Task`.

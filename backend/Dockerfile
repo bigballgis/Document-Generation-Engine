@@ -1,10 +1,11 @@
-# Multi-stage build: compile inside Docker (no local Maven required for image build).
+# Optional all-in-one build (slow inside BuildKit). Prefer Dockerfile.packaged + deploy script.
 FROM maven:3.9.9-eclipse-temurin-21-alpine AS build
 WORKDIR /app
+COPY docker/maven-settings.xml /root/.m2/settings.xml
 COPY pom.xml .
-RUN mvn -B -ntp dependency:go-offline
 COPY src ./src
-RUN mvn -B -ntp package -DskipTests
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -B package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine AS runtime
 WORKDIR /app

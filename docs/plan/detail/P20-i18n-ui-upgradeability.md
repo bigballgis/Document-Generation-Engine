@@ -3,7 +3,8 @@
 **Phase status:** Done (2026-06-23) | **Depends on:** P1, E06 (management shell)
 **Confirmed:** 2026-06-23 (deep-review gap G6 — i18n constitution + UXF1/UXF4/UXF5)
 
-> Single-active-phase invariant: P20 completed **Done** (2026-06-23) via Wave C UXF1/UXF4/UXF5.
+> Single-active-phase invariant: P20 is **In Progress** (2026-06-24) — Wave C UXF1/UXF4/UXF5
+> and T01–T05/T07 **Done**; **P20-T06** (zh-CN parity + frontend `api.error.*` catalog) **Not Started**.
 
 ## Source-of-truth & traceability
 

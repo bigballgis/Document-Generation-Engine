@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
 import com.bank.docgen.rendering.DocxAssemblyException;
+import com.bank.docgen.runtime.service.IdempotencyConflictException;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +64,23 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().error().fieldErrors().getFirst().reason()).isEqualTo("REQUIRED");
         assertThat(response.getBody().error().fieldErrors().getFirst().message())
                 .isEqualTo("This field is required.");
+    }
+
+    @Test
+    void idempotencyConflictIncludesSafeSummary() {
+        when(messageResolver.resolve("api.error.runtime.idempotencyConflict"))
+                .thenReturn("The idempotency key was already used with a different request.");
+
+        ResponseEntity<ErrorEnvelope> response = handler.handleIdempotencyConflict(
+                request,
+                new IdempotencyConflictException("idem-conflict-1")
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.IDEMPOTENCY);
+        assertThat(response.getBody().error().idempotencyConflict())
+                .containsEntry("idempotencyKey", "idem-conflict-1")
+                .containsEntry("conflictType", IdempotencyConflictException.REQUEST_SEMANTICS_MISMATCH);
     }
 
     @Test

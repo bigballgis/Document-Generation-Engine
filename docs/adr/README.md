@@ -93,5 +93,6 @@ Create an ADR when a decision affects future design or implementation, including
 | [0035-implementation-realization-and-quality-gate-baseline.md](./technology-stack/0035-implementation-realization-and-quality-gate-baseline.md) | Accepted | Implementation realization and quality gate baseline |
 | [0036-local-account-store-authorization-authority.md](./authorization-security/0036-local-account-store-authorization-authority.md) | Accepted | Local account store as authorization authority, SSO authentication-only |
 | [0037-backend-dependency-realization-sequencing.md](./technology-stack/0037-backend-dependency-realization-sequencing.md) | Accepted | Backend dependency realization sequencing (amends ADR 0028: defer MapStruct/QueryDSL; reaffirm + schedule Resilience4j/Bucket4j/Redisson) |
+| [0038-sync-download-url-runtime-deferred.md](./api/0038-sync-download-url-runtime-deferred.md) | Accepted | Defer `SYNC_DOWNLOAD_URL` runtime delivery until secure download URL contract is ready (COR-B01) |
 
 Use [0000-template.md](./0000-template.md) when creating new ADRs. Place new numbered ADRs in the directory matching their `topic` frontmatter.

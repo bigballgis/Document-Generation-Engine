@@ -646,6 +646,11 @@ API 需要支持批量生成。
 - 已停用。
 - 已废弃。
 
+**实现映射（2026-06-24）：** 运行时以 `TemplateLifecycleStatus` +
+`approvalSubState` 表达上述产品状态；「测试通过」与「待审批」在实现中合并为
+`APPROVAL` 状态，由 `approvalSubState`（`PENDING_SUBMIT` /
+`PENDING_DECISION`）区分。详见 [domain-model §4.1](../domain/domain-model.md#41-产品状态--实现映射2026-06-24)。
+
 v1 不新增发布前或发布后中间状态。发布前检查、生成预览、测试生成、渲染任务、阻断项和失败原因通过测试记录、预览记录、发布前检查清单、发布摘要和审计摘要表达，不升级为模板生命周期状态。
 
 模板必须经过测试人员测试和审批人员审批。
