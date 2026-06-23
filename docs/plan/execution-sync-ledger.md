@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-23 (P13 identity & group administration Done; backend Wave A foundation + UX Wave A/B)  
+**Last synced:** 2026-06-23 (P16 template delete + API policy impact preview Done; Wave 2 OPT-E/C slice)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,7 +18,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result |
 | --- | --- | --- |
-| Backend | `mvn -B -ntp -f backend/pom.xml verify` | Green (71 tests, 2026-06-23). Now includes real Checkstyle + PMD + SpotBugs + JaCoCo `check` gates (OPT-B/B1–B2): 0 Checkstyle / PMD / SpotBugs violations; JaCoCo ratchet floors LINE ≥0.70 / BRANCH ≥0.45 (actual 0.746 / 0.473). Config under `backend/config/`; documented ratchet debts in `config/spotbugs/exclude.xml`. |
+| Backend | `mvn -B -ntp -f backend/pom.xml verify` | Green (172 tests, 2026-06-23). Checkstyle + PMD + SpotBugs + JaCoCo ratchet (LINE ≥0.70 / BRANCH ≥0.45). Wave 2 OPT-E5–E7 + C3 download tests + P16 lifecycle/apimgmt tests included. |
 | Frontend lint | `pnpm -C frontend lint` | Green |
 | Frontend type-check | `pnpm -C frontend type-check` | Green |
 | Frontend test | `pnpm -C frontend test` | Green (40 tests) |

@@ -76,9 +76,9 @@ Priority: **H/M/L**. All start `Not Started`.
 
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
-| C1 | H | Test `apimgmt` module (currently 0 tests) | `ApiManagementServiceAuthorizationTest` added | In Progress (Wave 2): API-policy authorization gate (deny non-admin / no persistence touch / admin not-found) covered; remaining service methods pending |
+| C1 | H | Test `apimgmt` module (currently 0 tests) | `ApiManagementServiceAuthorizationTest`, `ApiPolicyImpactPreviewServiceTest` | **Done** (Wave 2): authorization gate + policy impact preview blocking/default-route paths covered |
 | C2 | H | Test authorization core | `GroupAccessServiceTest`, `ManagementAuthServiceTest`, `JwtAuthenticationFilterTest` | **Done** (Wave 2): RBAC/group isolation, login fail-closed/success, JWT filter context install/clear paths covered |
-| C3 | H | Test runtime security/generation | `ApiCredentialAuthenticationFilterTest`, `IdempotencyServiceConflictTest`, `RuntimeGenerationServiceAccessTest` | In Progress (Wave 2): auth filter envelope + fail-closed + access check covered; `DocumentDownloadService`/`RuntimeGenerationService` generation paths pending |
+| C3 | H | Test runtime security/generation | `ApiCredentialAuthenticationFilterTest`, `IdempotencyServiceConflictTest`, `RuntimeGenerationServiceAccessTest`, `DocumentDownloadServiceTest` | In Progress (Wave 2): download access/expiry/audit covered; sync generation happy-path tests remain |
 | C4 | M | Test rendering PDF paths | `LibreOfficePdfConversionService`, `DockerExecPdfConversionService`, `DocumentArtifactPipeline` untested | Conversion success/timeout/cleanup covered (mock process where needed) | Not Started |
 | C5 | M | Test audit query/recorder | `AuditQueryService` (264 L), `ManagementAuditRecorder` (146 L) untested | Group-scoped filtering incl. GLOBAL_ADMIN unbounded path covered | Not Started |
 | C6 | M | Frontend: test `TemplateDetailView`, router, `http`/`auth` | `views/templates/TemplateDetailView.vue` (550 L), `router/index.ts`, `api/http.ts`, `api/auth.ts` untested | Unit/integration tests incl. guard redirects + 401 handling | Not Started |
@@ -101,11 +101,11 @@ Priority: **H/M/L**. All start `Not Started`.
 | --- | --- | --- | --- | --- | --- |
 | E1 | H | Idempotency conflict → 409 not 500 | `IdempotencyService` now DB-authoritative + handles `DataIntegrityViolationException` | **Done** (Wave 2): same key + different request hash → `IdempotencyConflictException` → 409 `IDEMPOTENCY_KEY_CONFLICT` (contract-aligned) + messageKey; concurrent-insert race re-reads winner; 5 regression tests in `IdempotencyServiceConflictTest`; full gates green (114 tests) |
 | E2 | H | Runtime auth error envelope compliance | `ApiCredentialAuthenticationFilter` now writes full `ErrorEnvelope` | **Done** (Wave 2): metadata + message + category + retryable; ACCESS_DENIED → 403 AUTHORIZATION; slice test updated |
-| E3 | H | Audit fail-open JSON parsing | filter `readGroups` + runtime/batch `readStringList` | **Done** (Wave 2, scoped): malformed policy/output JSON now fail-closed (deny/validation error); `ContractAssemblyService` deferred |
+| E3 | H | Audit fail-open JSON parsing | filter `readGroups` + runtime/batch/contract `readStringList` | **Done** (Wave 2): malformed policy/output JSON now fail-closed (deny/validation error) |
 | E4 | M | Close `listCallableVersions` access check gap | `listCallableVersionsResult` + `TemplateCallabilitySupport` | **Done** (Wave 2): controller passes session; `RuntimeGenerationServiceAccessTest` proves cross-credential listing is denied |
-| E5 | M | Bean-validation messages via messageKey | `GlobalExceptionHandler` L54–58 uses `getDefaultMessage()` (raw English) | Field errors carry stable messageKey; English base bundle has keys | Not Started |
-| E6 | M | Remove hardcoded user-facing strings | `ContractAssemblyService` L116/121–122, `TemplateLifecycleService` L112, `Minio/FileSystemObjectStorage` messages | Strings referenced via message keys; `messages_en.properties` updated | Not Started |
-| E7 | M | Handle uncovered exceptions in `GlobalExceptionHandler` | missing `ObjectStorageException`, `DocxAssemblyException`, `IllegalStateException` | All thrown domain exceptions map to envelope; no leaked stack/500 generic where avoidable | Not Started |
+| E5 | M | Bean-validation messages via messageKey | `GlobalExceptionHandler` maps constraint codes → message keys | **Done** (Wave 2): field errors use `field`/`reason`/resolved `message`; `GlobalExceptionHandlerTest` |
+| E6 | M | Remove hardcoded user-facing strings | `ContractAssemblyService`, `TemplateLifecycleService` publish audit | **Done** (Wave 2, scoped): contract AD-group summaries + publish lifecycle reason via `messages_en.properties` |
+| E7 | M | Handle uncovered exceptions in `GlobalExceptionHandler` | `ObjectStorageException`, `DocxAssemblyException`, `IllegalStateException` | **Done** (Wave 2): mapped to envelope with stable message keys |
 | E8 | M | Fix download Content-Type | `RuntimeDocumentController` L35 hardcoded DOCX MIME | Content-Type derived from artifact format (DOCX/PDF) | Not Started |
 | E9 | L | Idempotency hash failure should not fall back to raw payload | `IdempotencyService` L88–90 returns payload on digest error | Digest failure is a hard error, not weakened key | Not Started |
 
@@ -198,5 +198,5 @@ once Wave 1 exit criteria are met.
 | Wave | Scope | Status |
 | --- | --- | --- |
 | Wave 1 | OPT-A + OPT-B (incl. B5) | **In Progress** — OPT-B (B1–B4) Done; B5 + OPT-A reconciliation remaining |
-| Wave 2 | OPT-C + OPT-E + OPT-D (start) | In Progress — E1/E2/E3/E4 Done; C2 Done; C3 partial; apimgmt/generation tests remain |
-| Wave 3 | OPT-D (finish) + OPT-F + OPT-G | Not Started |
+| Wave 2 | OPT-C + OPT-E + OPT-D (start) | **In Progress** — E1–E7 Done; C1/C2 Done; C3 partial (generation paths); D1–D6 not started |
+| Wave 3 | OPT-D (finish) + OPT-F + OPT-G | Not Started — Bucket4j/Resilience4j/Redisson, rendering dependency fix, frontend HTTP 401 |
