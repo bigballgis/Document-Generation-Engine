@@ -17,12 +17,12 @@ import com.bank.docgen.runtime.api.RuntimeCredentialSummaryView;
 import com.bank.docgen.runtime.api.SyncGenerateResult;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
-import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.service.TemplateCallabilitySupport;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -99,7 +99,12 @@ public class RuntimeGenerationService {
     }
 
     @Transactional(readOnly = true)
-    public CallableVersionsResultView listCallableVersionsResult(TemplateEntity template, String environment) {
+    public CallableVersionsResultView listCallableVersionsResult(
+            TemplateEntity template,
+            RuntimeSessionClaims session,
+            String environment
+    ) {
+        assertTemplateAccess(template, session);
         return new CallableVersionsResultView(
                 template.getExternalId(),
                 contractAssemblyService.listCallableVersions(template, environment)
@@ -122,10 +127,10 @@ public class RuntimeGenerationService {
         if (resolvedVersion == null) {
             throw new TemplateValidationException("api.error.runtime.releaseVersionRequired");
         }
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED
-                || !resolvedVersion.equals(template.getReleaseVersion())) {
-            throw new TemplateValidationException("api.error.runtime.versionNotCallable");
-        }
+        TemplateVersionEntity version = templateVersionRepository
+                .findByTemplateIdAndReleaseVersion(template.getId(), resolvedVersion)
+                .orElseThrow(TemplateNotFoundException::new);
+        TemplateCallabilitySupport.assertReleaseVersionCallable(template, version, resolvedVersion);
         String requestHash = idempotencyService.hashRequest(writeRequest(request, resolvedVersion));
         Optional<GenerationIdempotencyEntity> existing = idempotencyService.findExisting(
                 request.idempotencyKey(),
@@ -150,9 +155,6 @@ public class RuntimeGenerationService {
         }
         GenerationIdempotencyEntity idempotency = existing.orElseGet(() ->
                 idempotencyService.begin(request.idempotencyKey(), template.getId(), requestHash));
-        TemplateVersionEntity version = templateVersionRepository
-                .findByTemplateIdAndReleaseVersion(template.getId(), resolvedVersion)
-                .orElseThrow(TemplateNotFoundException::new);
         MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.getMasterId())
                 .orElseThrow(TemplateNotFoundException::new);
         List<AnchorBindingEntity> bindings = anchorBindingRepository

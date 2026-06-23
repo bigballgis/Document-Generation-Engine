@@ -62,3 +62,8 @@ export interface DecideMasterReviewPayload {
   decision: MasterReviewDecision
   commentSummary?: string
 }
+
+export interface UpdateMasterMetadataPayload {
+  name?: string
+  description?: string
+}

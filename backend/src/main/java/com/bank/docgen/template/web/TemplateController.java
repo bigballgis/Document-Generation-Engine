@@ -10,6 +10,9 @@ import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
+import com.bank.docgen.template.api.LifecycleGovernanceRequest;
+import com.bank.docgen.template.api.LifecycleImpactPreviewRequest;
+import com.bank.docgen.template.api.LifecycleImpactPreviewView;
 import com.bank.docgen.template.api.PublishTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateSummaryView;
@@ -18,6 +21,7 @@ import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
 import com.bank.docgen.template.api.TemplateRuleValidationRequest;
 import com.bank.docgen.template.api.TemplateRuleValidationView;
+import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.template.service.TemplateLifecycleService;
 import com.bank.docgen.template.service.TemplateRuleValidationService;
 import com.bank.docgen.template.service.TemplateService;
@@ -29,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -83,6 +88,16 @@ public class TemplateController {
             HttpServletRequest request
     ) {
         return envelope(request, templateService.create(body, session));
+    }
+
+    @PatchMapping("/{templateId}")
+    public SuccessEnvelope<TemplateDetailView> updateMetadata(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody UpdateTemplateRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateService.updateMetadata(templateId, body, session));
     }
 
     @PutMapping("/{templateId}/variables/{variableKey}")
@@ -216,6 +231,70 @@ public class TemplateController {
             HttpServletRequest request
     ) {
         return envelope(request, templateLifecycleService.publish(templateId, body, session));
+    }
+
+    @PostMapping("/{templateId}/lifecycle/stop")
+    public SuccessEnvelope<TemplateDetailView> stop(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody LifecycleGovernanceRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateLifecycleService.stop(templateId, body, session));
+    }
+
+    @PostMapping("/{templateId}/lifecycle/restore")
+    public SuccessEnvelope<TemplateDetailView> restore(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody LifecycleGovernanceRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateLifecycleService.restore(templateId, body, session));
+    }
+
+    @PostMapping("/{templateId}/lifecycle/deprecate")
+    public SuccessEnvelope<TemplateDetailView> deprecate(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody LifecycleGovernanceRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateLifecycleService.deprecate(templateId, body, session));
+    }
+
+    @PostMapping("/{templateId}/lifecycle/impact-preview")
+    public SuccessEnvelope<LifecycleImpactPreviewView> impactPreview(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody LifecycleImpactPreviewRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateLifecycleService.previewImpact(templateId, body, session));
+    }
+
+    @PostMapping("/{templateId}/versions/{releaseVersion}/deactivate")
+    public SuccessEnvelope<TemplateDetailView> deactivateVersion(
+            @PathVariable UUID templateId,
+            @PathVariable String releaseVersion,
+            @Valid @RequestBody LifecycleGovernanceRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateLifecycleService.deactivateVersion(
+                templateId, releaseVersion, body, session));
+    }
+
+    @PostMapping("/{templateId}/versions/{releaseVersion}/restore")
+    public SuccessEnvelope<TemplateDetailView> restoreVersion(
+            @PathVariable UUID templateId,
+            @PathVariable String releaseVersion,
+            @Valid @RequestBody LifecycleGovernanceRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateLifecycleService.restoreVersion(
+                templateId, releaseVersion, body, session));
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

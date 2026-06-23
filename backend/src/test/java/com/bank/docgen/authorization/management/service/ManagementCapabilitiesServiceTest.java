@@ -21,6 +21,8 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.decideTests()).isTrue();
         assertThat(capabilities.decideApprovals()).isTrue();
         assertThat(capabilities.publishTemplates()).isTrue();
+        assertThat(capabilities.stopTemplates()).isTrue();
+        assertThat(capabilities.restoreOrDeprecateTemplates()).isTrue();
         assertThat(capabilities.manageApiPolicy()).isTrue();
         assertThat(capabilities.readAudit()).isTrue();
     }
@@ -39,6 +41,8 @@ class ManagementCapabilitiesServiceTest {
         var capabilities = service.resolve(Set.of(ManagementRole.MASTER_DESIGNER));
 
         assertThat(capabilities.authorTemplates()).isTrue();
+        assertThat(capabilities.stopTemplates()).isTrue();
+        assertThat(capabilities.restoreOrDeprecateTemplates()).isFalse();
         assertThat(capabilities.manageMasters()).isFalse();
         assertThat(capabilities.manageApiPolicy()).isFalse();
         assertThat(capabilities.decideTests()).isFalse();

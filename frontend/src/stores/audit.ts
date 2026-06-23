@@ -6,6 +6,7 @@ import { isGroupScopedAuditRole, resolveAuditActorRole } from '@/auth/roles'
 import type {
   AuditQueryFilters,
   LifecycleAuditEvent,
+  LifecycleAuditExportResult,
   ManagementAuditEvent,
   ManagementAuditExportResult,
 } from '@/types/audit'
@@ -14,7 +15,7 @@ import { useSessionStore } from '@/stores/session'
 export const useAuditStore = defineStore('audit', () => {
   const managementEvents = ref<ManagementAuditEvent[]>([])
   const lifecycleEvents = ref<LifecycleAuditEvent[]>([])
-  const exportResult = ref<ManagementAuditExportResult | null>(null)
+  const exportResult = ref<ManagementAuditExportResult | LifecycleAuditExportResult | null>(null)
   const loadingManagement = ref(false)
   const loadingLifecycle = ref(false)
   const exporting = ref(false)
@@ -113,9 +114,23 @@ export const useAuditStore = defineStore('audit', () => {
     lastErrorMessageKey.value = null
     try {
       exportResult.value = await auditApi.exportManagementEvents(buildQueryFilters())
-      return exportResult.value
+      return exportResult.value as ManagementAuditExportResult
     } catch (error) {
       lastErrorMessageKey.value = resolveErrorMessageKey(error, 'audit.error.export')
+      throw error
+    } finally {
+      exporting.value = false
+    }
+  }
+
+  async function exportLifecycleEvents(): Promise<LifecycleAuditExportResult> {
+    exporting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      exportResult.value = await auditApi.exportLifecycleEvents(buildQueryFilters())
+      return exportResult.value as LifecycleAuditExportResult
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'audit.error.exportLifecycle')
       throw error
     } finally {
       exporting.value = false
@@ -137,5 +152,6 @@ export const useAuditStore = defineStore('audit', () => {
     fetchManagementEvents,
     fetchLifecycleEvents,
     exportManagementEvents,
+    exportLifecycleEvents,
   }
 })

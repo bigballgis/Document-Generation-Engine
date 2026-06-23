@@ -31,8 +31,10 @@ Behavior drives the plan; tests drive the code.
 
 - Real, durable, verifiable behavior + green gates + updated docs/plan status.
 - **Post-task doc sync mandatory** (`.cursor/agents/post-task-doc-sync.md`) in the same change set.
+- **Post-task commit review mandatory** (`.cursor/agents/post-task-commit-review.md`) after doc sync when commit is delegated.
 - Status vocabulary: `Not Started`, `In Progress`, `Blocked`, `Done`.
 - Exactly one plan phase may be `In Progress` at a time (see `docs/plan/`).
 
 Detailed loop: `.cursor/skills/tdd-feature-delivery/SKILL.md`.
 Post-task sync: `.cursor/skills/post-task-doc-sync/SKILL.md`.
+Post-task commit: `.cursor/skills/post-task-commit-review/SKILL.md`.

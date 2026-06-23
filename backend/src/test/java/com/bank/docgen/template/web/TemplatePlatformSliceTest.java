@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -162,6 +163,103 @@ class TemplatePlatformSliceTest {
                         .with(authentication(new ManagementAuthentication(templateAuthor))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.rules[0].targetAnchorId").value("HEADER"));
+    }
+
+    @Test
+    void stopRestoreAndDeprecatePublishedTemplate() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+        configureTemplate(templateId);
+        runLifecycle(templateId);
+        CredentialBundle credential = configureApiAndCredential(templateId);
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/stop")
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"reason":"Maintenance window","confirmed":true}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.lifecycleStatus").value("STOPPED"));
+
+        mockMvc.perform(post("/api/dev/v1/templates/TPL-RETAIL-LETTER/versions/1.0.0/generate")
+                        .header("X-Api-Credential-Id", credential.externalId())
+                        .header("X-Api-Credential-Secret", credential.secret())
+                        .header("X-Access-Account", "svc-caller")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(generateBody("idem-stopped-1")))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.error.messageKey").value("api.error.runtime.versionNotCallable"));
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/restore")
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"reason":"Restore service","confirmed":true}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.lifecycleStatus").value("PUBLISHED"));
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/stop")
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"reason":"Maintenance window","confirmed":true}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.lifecycleStatus").value("STOPPED"));
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/deprecate")
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"reason":"End of life","confirmed":true}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.lifecycleStatus").value("DEPRECATED"));
+    }
+
+    @Test
+    void deactivateVersionBlocksRuntimeWhileTemplateStaysPublished() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+        configureTemplate(templateId);
+        runLifecycle(templateId);
+        CredentialBundle credential = configureApiAndCredential(templateId);
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/versions/1.0.0/deactivate")
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"reason":"Deactivate version only","confirmed":true}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.lifecycleStatus").value("PUBLISHED"));
+
+        mockMvc.perform(post("/api/dev/v1/templates/TPL-RETAIL-LETTER/versions/1.0.0/generate")
+                        .header("X-Api-Credential-Id", credential.externalId())
+                        .header("X-Api-Credential-Secret", credential.secret())
+                        .header("X-Access-Account", "svc-caller")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(generateBody("idem-version-stopped-1")))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.error.messageKey").value("api.error.runtime.versionNotCallable"));
+    }
+
+    @Test
+    void patchMetadataUpdatesDraftTemplate() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+
+        mockMvc.perform(patch("/api/management/v1/templates/" + templateId)
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name":"Updated Letter","description":"Updated description"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.name").value("Updated Letter"))
+                .andExpect(jsonPath("$.result.description").value("Updated description"));
     }
 
     @Test

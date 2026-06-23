@@ -65,6 +65,15 @@ class AuditControllerTest {
     }
 
     @Test
+    void exportLifecycleEventsRequiresTemplateScope() throws Exception {
+        mockMvc.perform(get("/api/management/v1/admin/audit/lifecycle-events/export")
+                        .param("actorRole", "GLOBAL_ADMIN")
+                        .with(authentication(new ManagementAuthentication(globalAdmin()))))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.error.code").value("AUDIT_SCOPE_REQUIRED"));
+    }
+
+    @Test
     void templateAuthorCannotQueryAuditEvents() throws Exception {
         mockMvc.perform(get("/api/management/v1/admin/audit/management-events")
                         .param("actorRole", "GLOBAL_ADMIN")

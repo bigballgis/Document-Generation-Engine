@@ -27,7 +27,9 @@ Implement backend behavior test-first, traceable to source-of-truth documents.
 4. Keep the unified error envelope and response metadata consistent with OpenAPI v1.
 5. Run gates: `mvn -B -ntp verify` (Checkstyle + PMD + SpotBugs + JaCoCo).
 6. Coverage gate: changed lines >= 85%, security-critical/core domain >= 90%.
-7. **Post-task doc sync** — invoke `post-task-doc-sync` before claiming Done.
+7. **Deploy (if release-relevant)** — hand off to `deploy-engineer` for Docker rollout + health.
+8. **Post-task doc sync** — invoke `post-task-doc-sync` after gates pass.
+9. **Post-task commit review** — invoke `post-task-commit-review` after doc sync; then claim Done.
 
 ## Non-negotiables
 

@@ -5,6 +5,8 @@ export interface ManagementCapabilities {
   decideTests: boolean
   decideApprovals: boolean
   publishTemplates: boolean
+  stopTemplates: boolean
+  restoreOrDeprecateTemplates: boolean
   manageApiPolicy: boolean
   readAudit: boolean
 }

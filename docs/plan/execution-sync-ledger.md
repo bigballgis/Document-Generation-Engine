@@ -118,11 +118,11 @@ Source: [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimizatio
 | Wave | Scope | Status | Evidence |
 | --- | --- | --- | --- |
 | UX Wave A | UX-A + UX-B (role gating, half-built interactions) | Done | Backend: `ManagementCapabilitiesService`, `RouteVisibilityService`, `V14` seeds; Frontend: `useCapabilities`, `roles.ts`, `TemplateCreateDialog`, `apiPolicy` rotate/revoke, `http.ts` 401/403, `useConfirmAction`, authoring persist (UXB5) |
-| UX Wave B | UX-C + UX-D + UX-E (lifecycle, workbenches, polish) | In Progress (UXC3–UXC4, UXD4, UXE2–UXE4 open) | `TesterWorkbenchView`, `ApproverWorkbenchView`, live publish gate (UXC1), cross-links (UXC5), `V15` rules persist, `TemplateAuthoringPanel` / `TemplateRuleConfigurator` |
+| UX Wave B | UX-C + UX-D + UX-E (lifecycle, workbenches, polish) | In Progress (UXC4, UXD4, UXE2–UXE4 open) | Template governance stop/restore/deprecate (UXC3), publish gate, cross-links, authoring persist |
 | UX Wave C | UX-F (upgradeability foundations) | Not Started | — |
 | UX Wave D | UX-G → P14 confirmed large domains | Not Started | — |
 
-**Backend gate evidence (UX Wave A/B, 2026-06-23):** `mvn -B -ntp -f backend/pom.xml verify "-Dspring-boot.repackage.skip=true"` — 114 tests green (1 skipped); includes `TemplatePlatformSliceTest#savesCompositionRulesAndReturnsThemOnTemplateDetail`, `ManagementCapabilitiesServiceTest`, `RouteVisibilityServiceTest`.
+**Backend gate evidence (UX Wave A/B, 2026-06-23):** `mvn -B -ntp -f backend/pom.xml verify "-Dspring-boot.repackage.skip=true"` — 134 tests green (1 skipped); includes `TemplateLifecycleGovernanceServiceTest`, `TemplatePlatformSliceTest#stopRestoreAndDeprecatePublishedTemplate`.
 
 **Frontend gate evidence (UX Wave A/B, 2026-06-23):** `pnpm -C frontend lint` / `type-check` / `test` (81) / `build` — all green.
 

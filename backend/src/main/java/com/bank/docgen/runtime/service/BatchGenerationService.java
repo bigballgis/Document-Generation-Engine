@@ -19,8 +19,11 @@ import com.bank.docgen.runtime.persistence.GenerationAsyncTaskEntity;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskRepository;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
-import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
+import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.service.TemplateCallabilitySupport;
+import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -46,6 +49,7 @@ public class BatchGenerationService {
     private final AsyncBatchTaskDispatcher asyncBatchTaskDispatcher;
     private final EncryptionParameterValidator encryptionParameterValidator;
     private final ObjectMapper objectMapper;
+    private final TemplateVersionRepository templateVersionRepository;
 
     public BatchGenerationService(
             ApiPolicyRepository apiPolicyRepository,
@@ -54,7 +58,8 @@ public class BatchGenerationService {
             IdempotencyService idempotencyService,
             AsyncBatchTaskDispatcher asyncBatchTaskDispatcher,
             EncryptionParameterValidator encryptionParameterValidator,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            TemplateVersionRepository templateVersionRepository
     ) {
         this.apiPolicyRepository = apiPolicyRepository;
         this.asyncTaskRepository = asyncTaskRepository;
@@ -63,6 +68,7 @@ public class BatchGenerationService {
         this.asyncBatchTaskDispatcher = asyncBatchTaskDispatcher;
         this.encryptionParameterValidator = encryptionParameterValidator;
         this.objectMapper = objectMapper;
+        this.templateVersionRepository = templateVersionRepository;
     }
 
     @Transactional
@@ -335,10 +341,10 @@ public class BatchGenerationService {
         if (resolvedVersion == null) {
             throw new TemplateValidationException("api.error.runtime.releaseVersionRequired");
         }
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED
-                || !resolvedVersion.equals(template.getReleaseVersion())) {
-            throw new TemplateValidationException("api.error.runtime.versionNotCallable");
-        }
+        TemplateVersionEntity version = templateVersionRepository
+                .findByTemplateIdAndReleaseVersion(template.getId(), resolvedVersion)
+                .orElseThrow(TemplateNotFoundException::new);
+        TemplateCallabilitySupport.assertReleaseVersionCallable(template, version, resolvedVersion);
         return resolvedVersion;
     }
 

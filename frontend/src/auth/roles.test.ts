@@ -21,6 +21,8 @@ const globalAdminCapabilities: ManagementCapabilities = {
   decideTests: true,
   decideApprovals: true,
   publishTemplates: true,
+  stopTemplates: true,
+  restoreOrDeprecateTemplates: true,
   manageApiPolicy: true,
   readAudit: true,
 }
@@ -32,6 +34,8 @@ const testerCapabilities: ManagementCapabilities = {
   decideTests: true,
   decideApprovals: false,
   publishTemplates: false,
+  stopTemplates: false,
+  restoreOrDeprecateTemplates: false,
   manageApiPolicy: false,
   readAudit: false,
 }

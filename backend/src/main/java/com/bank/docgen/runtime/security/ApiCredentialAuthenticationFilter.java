@@ -6,7 +6,13 @@ import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.apimgmt.service.ConfigAdGroupResolver;
+import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
+import com.bank.docgen.sharedkernel.api.ErrorDetail;
+import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
+import com.bank.docgen.sharedkernel.api.Metadata;
+import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.PasswordHashService;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
@@ -34,6 +40,8 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
     private final PasswordHashService passwordHashService;
     private final ConfigAdGroupResolver adGroupResolver;
     private final ObjectMapper objectMapper;
+    private final TraceIdProvider traceIdProvider;
+    private final MessageResolver messageResolver;
 
     public ApiCredentialAuthenticationFilter(
             ApiCredentialRepository apiCredentialRepository,
@@ -41,7 +49,9 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
             TemplateRepository templateRepository,
             PasswordHashService passwordHashService,
             ConfigAdGroupResolver adGroupResolver,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            TraceIdProvider traceIdProvider,
+            MessageResolver messageResolver
     ) {
         this.apiCredentialRepository = apiCredentialRepository;
         this.apiPolicyRepository = apiPolicyRepository;
@@ -49,6 +59,8 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
         this.passwordHashService = passwordHashService;
         this.adGroupResolver = adGroupResolver;
         this.objectMapper = objectMapper;
+        this.traceIdProvider = traceIdProvider;
+        this.messageResolver = messageResolver;
     }
 
     @Override
@@ -70,11 +82,48 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (RuntimeAuthenticationException ex) {
             org.springframework.security.core.context.SecurityContextHolder.clearContext();
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write(
-                    "{\"error\":{\"code\":\"%s\",\"messageKey\":\"%s\"}}".formatted(ex.code(), ex.messageKey()));
+            writeErrorResponse(request, response, ex);
         }
+    }
+
+    private void writeErrorResponse(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            RuntimeAuthenticationException ex
+    ) throws IOException {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        ErrorDetail error = new ErrorDetail(
+                ex.code(),
+                categoryFor(ex.code()),
+                messageResolver.resolve(ex.messageKey()),
+                ex.messageKey(),
+                false,
+                null
+        );
+        response.setStatus(statusFor(ex.code()));
+        response.setContentType("application/json");
+        objectMapper.writeValue(response.getWriter(), new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
+    }
+
+    private static int statusFor(String code) {
+        if (ApiErrorCodes.ACCESS_DENIED.equals(code)) {
+            return HttpServletResponse.SC_FORBIDDEN;
+        }
+        return HttpServletResponse.SC_UNAUTHORIZED;
+    }
+
+    private static String categoryFor(String code) {
+        if (ApiErrorCodes.INVALID_CREDENTIALS.equals(code)) {
+            return ApiErrorCategories.AUTHENTICATION;
+        }
+        if (ApiErrorCodes.REQUEST_BODY_INVALID.equals(code)) {
+            return ApiErrorCategories.VALIDATION;
+        }
+        if (ApiErrorCodes.ACCESS_DENIED.equals(code)) {
+            return ApiErrorCategories.AUTHORIZATION;
+        }
+        return ApiErrorCategories.RUNTIME;
     }
 
     RuntimeSessionClaims authenticate(HttpServletRequest request) {
@@ -154,7 +203,10 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
             return objectMapper.readValue(json, new TypeReference<List<String>>() {
             });
         } catch (Exception ex) {
-            return List.of();
+            throw new RuntimeAuthenticationException(
+                    ApiErrorCodes.ACCESS_DENIED,
+                    "api.error.runtime.policyNotConfigured"
+            );
         }
     }
 }

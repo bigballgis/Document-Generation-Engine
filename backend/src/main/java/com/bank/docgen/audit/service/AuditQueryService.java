@@ -1,5 +1,6 @@
 package com.bank.docgen.audit.service;
 
+import com.bank.docgen.audit.api.LifecycleAuditExportResult;
 import com.bank.docgen.audit.api.LifecycleAuditEventView;
 import com.bank.docgen.audit.api.LifecycleAuditQueryResult;
 import com.bank.docgen.audit.api.ManagementAuditEventView;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuditQueryService {
 
     public static final String EXPORT_FORMAT = "management-audit-export-v1-json";
+    public static final String LIFECYCLE_EXPORT_FORMAT = "lifecycle-audit-export-v1-json";
 
     private final ManagementAuditEventRepository managementAuditEventRepository;
     private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
@@ -129,6 +131,28 @@ public class AuditQueryService {
                 .map(record -> toLifecycleView(template.getId(), record))
                 .toList();
         return new LifecycleAuditQueryResult(events);
+    }
+
+    @Transactional(readOnly = true)
+    public LifecycleAuditExportResult exportLifecycleEvents(
+            ManagementSessionClaims session,
+            AuditReadActorRole actorRole,
+            UUID templateId,
+            String eventType,
+            Instant eventAtFrom,
+            Instant eventAtTo,
+            String groupScope
+    ) {
+        LifecycleAuditQueryResult queryResult = queryLifecycleEvents(
+                session,
+                actorRole,
+                templateId,
+                eventType,
+                eventAtFrom,
+                eventAtTo,
+                groupScope
+        );
+        return new LifecycleAuditExportResult(LIFECYCLE_EXPORT_FORMAT, queryResult.events());
     }
 
     private String resolveGroupFilter(

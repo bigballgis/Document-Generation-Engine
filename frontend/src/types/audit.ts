@@ -38,6 +38,11 @@ export interface ManagementAuditExportResult {
   >
 }
 
+export interface LifecycleAuditExportResult {
+  format: string
+  events: LifecycleAuditEvent[]
+}
+
 export interface AuditQueryFilters {
   actorRole: AuditReadActorRole
   templateId?: string

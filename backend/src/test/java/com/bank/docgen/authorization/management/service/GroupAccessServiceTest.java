@@ -79,6 +79,13 @@ class GroupAccessServiceTest {
     }
 
     @Test
+    void manageReleaseVersionStateRequiresAdminRoles() {
+        assertThat(service.canManageReleaseVersionState(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isFalse();
+        assertThat(service.canManageReleaseVersionState(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
+        assertThat(service.canManageReleaseVersionState(session(List.of("GLOBAL_ADMIN"), List.of()))).isTrue();
+    }
+
+    @Test
     void auditReadRequiresAuditOrAdminRoles() {
         assertThat(service.canReadAudit(session(List.of("AUDIT_ADMIN"), List.of()))).isTrue();
         assertThat(service.canReadAudit(session(List.of("GLOBAL_ADMIN"), List.of()))).isTrue();

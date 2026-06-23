@@ -27,6 +27,8 @@ public class ManagementCapabilitiesService {
                 groupAccessService.canDecideTemplateTests(session),
                 groupAccessService.canDecideTemplateApprovals(session),
                 groupAccessService.canPublishTemplates(session),
+                groupAccessService.canStopTemplates(session),
+                groupAccessService.canRestoreOrDeprecateTemplates(session),
                 groupAccessService.canManageApiPolicy(session),
                 groupAccessService.canReadAudit(session)
         );

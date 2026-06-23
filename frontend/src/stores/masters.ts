@@ -9,6 +9,7 @@ import type {
   MasterDocumentSummary,
   MasterImpactAnalysis,
   SubmitMasterReviewPayload,
+  UpdateMasterMetadataPayload,
 } from '@/types/master'
 
 export const useMastersStore = defineStore('masters', () => {
@@ -125,6 +126,24 @@ export const useMastersStore = defineStore('masters', () => {
     }
   }
 
+  async function updateMasterMetadata(
+    masterId: string,
+    payload: UpdateMasterMetadataPayload,
+  ): Promise<MasterDocumentDetail> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      const updated = await mastersApi.updateMasterMetadata(masterId, payload)
+      applyUpdatedMaster(updated)
+      return updated
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'masters.error.updateMetadata')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
   function applyUpdatedMaster(updated: MasterDocumentDetail) {
     selectedMaster.value = updated
     masters.value = masters.value.map((item) => (item.id === updated.id ? toSummary(updated) : item))
@@ -162,6 +181,7 @@ export const useMastersStore = defineStore('masters', () => {
     uploadMaster,
     submitReview,
     decideReview,
+    updateMasterMetadata,
     clearSelected,
   }
 })

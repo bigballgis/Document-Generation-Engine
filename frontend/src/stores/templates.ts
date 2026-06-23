@@ -11,10 +11,13 @@ import type {
   CreateTemplatePayload,
   LifecycleCommentPayload,
   LifecycleDecisionPayload,
+  LifecycleGovernancePayload,
+  LifecycleImpactPreviewRequest,
   PublishTemplatePayload,
   TemplateDetail,
   TemplateSummary,
   TestGeneratePayload,
+  UpdateTemplateMetadataPayload,
   UpsertApiPolicyPayload,
   UpsertBindingPayload,
   UpsertVariablePayload,
@@ -209,6 +212,69 @@ export const useTemplatesStore = defineStore('templates', () => {
     return runLifecycleAction(() => templatesApi.publishTemplate(templateId, payload))
   }
 
+  async function stopTemplate(templateId: string, payload: LifecycleGovernancePayload) {
+    return runLifecycleAction(() => templatesApi.stopTemplate(templateId, payload))
+  }
+
+  async function restoreTemplate(templateId: string, payload: LifecycleGovernancePayload) {
+    return runLifecycleAction(() => templatesApi.restoreTemplate(templateId, payload))
+  }
+
+  async function deprecateTemplate(templateId: string, payload: LifecycleGovernancePayload) {
+    return runLifecycleAction(() => templatesApi.deprecateTemplate(templateId, payload))
+  }
+
+  async function fetchLifecycleImpactPreview(
+    templateId: string,
+    payload: LifecycleImpactPreviewRequest,
+  ) {
+    lastErrorMessageKey.value = null
+    try {
+      return await templatesApi.fetchLifecycleImpactPreview(templateId, payload)
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.lifecycle')
+      throw error
+    }
+  }
+
+  async function deactivateTemplateVersion(
+    templateId: string,
+    releaseVersion: string,
+    payload: LifecycleGovernancePayload,
+  ) {
+    return runLifecycleAction(() =>
+      templatesApi.deactivateTemplateVersion(templateId, releaseVersion, payload),
+    )
+  }
+
+  async function restoreTemplateVersion(
+    templateId: string,
+    releaseVersion: string,
+    payload: LifecycleGovernancePayload,
+  ) {
+    return runLifecycleAction(() =>
+      templatesApi.restoreTemplateVersion(templateId, releaseVersion, payload),
+    )
+  }
+
+  async function updateTemplateMetadata(
+    templateId: string,
+    payload: UpdateTemplateMetadataPayload,
+  ): Promise<TemplateDetail> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      const updated = await templatesApi.updateTemplateMetadata(templateId, payload)
+      applyUpdatedTemplate(updated)
+      return updated
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.updateMetadata')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
   async function testGenerate(templateId: string, payload: TestGeneratePayload = {}) {
     submitting.value = true
     lastErrorMessageKey.value = null
@@ -369,6 +435,13 @@ export const useTemplatesStore = defineStore('templates', () => {
     submitForApproval,
     recordApprovalDecision,
     publishTemplate,
+    stopTemplate,
+    restoreTemplate,
+    deprecateTemplate,
+    fetchLifecycleImpactPreview,
+    deactivateTemplateVersion,
+    restoreTemplateVersion,
+    updateTemplateMetadata,
     testGenerate,
     validateBindings,
     validateRules,

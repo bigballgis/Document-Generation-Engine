@@ -19,7 +19,8 @@ real behavior and green gates.
 - [ ] 5. Refactor with tests green
 - [ ] 6. Run quality gates
 - [ ] 7. Post-task doc sync (`.cursor/skills/post-task-doc-sync/SKILL.md`)
-- [ ] 8. Update plan status, execution-sync-ledger, and affected docs
+- [ ] 8. Post-task commit review (`.cursor/skills/post-task-commit-review/SKILL.md`)
+- [ ] 9. Update plan status, execution-sync-ledger, and affected docs (if not done in step 7)
 ```
 
 ## Backend gates
@@ -45,7 +46,7 @@ pnpm -C frontend build
 ## Done definition
 
 - Tests green, gates green, docs updated, behavior is durable and verifiable.
-- Post-task doc sync completed (same change set as code).
+- Post-task doc sync and post-task commit review completed (same change set as code).
 - No secrets / passwords / raw variable values / full request bodies / full download
   URLs / full AD Group membership in logs, audit, UI, or contract output.
 - Temporary in-memory/stub seams are explicitly marked transitional, not "Done".

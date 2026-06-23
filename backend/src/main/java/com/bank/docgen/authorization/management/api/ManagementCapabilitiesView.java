@@ -7,6 +7,8 @@ public record ManagementCapabilitiesView(
         boolean decideTests,
         boolean decideApprovals,
         boolean publishTemplates,
+        boolean stopTemplates,
+        boolean restoreOrDeprecateTemplates,
         boolean manageApiPolicy,
         boolean readAudit
 ) {

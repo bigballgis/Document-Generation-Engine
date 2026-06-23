@@ -92,6 +92,37 @@ export interface LifecycleCommentPayload {
   commentSummary: string
 }
 
+export interface LifecycleGovernancePayload {
+  reason: string
+  confirmed: boolean
+}
+
+export type LifecycleGovernanceAction =
+  | 'STOP'
+  | 'RESTORE'
+  | 'DEPRECATE'
+  | 'DEACTIVATE_VERSION'
+  | 'RESTORE_VERSION'
+
+export interface LifecycleImpactPreviewRequest {
+  action: LifecycleGovernanceAction
+  releaseVersion?: string
+}
+
+export interface LifecycleImpactPreview {
+  action: LifecycleGovernanceAction
+  releaseVersion: string | null
+  callableReleaseVersions: string[]
+  defaultRouteReleaseVersion: string | null
+  defaultRouteImpacted: boolean
+  summaryMessageKey: string
+}
+
+export interface UpdateTemplateMetadataPayload {
+  name?: string
+  description?: string
+}
+
 export interface LifecycleDecisionPayload {
   decision: LifecycleDecision
   commentSummary?: string

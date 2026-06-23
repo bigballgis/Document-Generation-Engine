@@ -1,0 +1,35 @@
+---
+description: Hard constraint — mandatory post-task commit review and commit before any Done claim when parent delegated end-of-task commit.
+alwaysApply: true
+---
+
+# Post-Task Commit Review Constitution
+
+Every behavior-changing task **must** complete commit review **after** doc sync **before** the
+agent reports Done, closes a slice, or handoffs to the user — when the parent workflow
+delegated end-of-task commit (default for implementer agents).
+
+## Non-negotiables
+
+1. **No Done without commit gate** — After doc sync, invoke `post-task-commit-review`
+   (or follow its checklist verbatim inline) before claiming Done.
+2. **Order** — Gates green → `post-task-doc-sync` → `post-task-commit-review` → Done.
+3. **Review before commit** — Block commit on 🔴 Critical findings; escalate to
+   `security-review`, `bugbot`, or `architecture-reviewer` when appropriate.
+4. **Commit scope** — One coherent commit per task slice: code + docs from the same change set.
+5. **Push by default** — After commit, push to the tracked remote unless the user explicitly opted out in the same session.
+6. **Implementer agents must delegate** — `backend-engineer`, `frontend-engineer`, and
+   `plan-orchestrator` finish with `post-task-commit-review` after doc sync.
+
+## Forbidden
+
+- Claiming Done with uncommitted task changes when commit was delegated.
+- Staging `.env`, credentials, or private keys.
+- Skipping review for “small” changes.
+- Skipping push without user opt-out when commit was delegated.
+- `--no-verify`, force push, or git config changes unless user explicitly requests.
+
+## Done definition (extends post-task-doc-sync constitution)
+
+Behavior is Done only when: durable code + green gates + post-task doc sync +
+**post-task commit review (committed or verified nothing to commit)** + updated plan status.

@@ -1,5 +1,6 @@
 package com.bank.docgen.audit.web;
 
+import com.bank.docgen.audit.api.LifecycleAuditExportResult;
 import com.bank.docgen.audit.api.LifecycleAuditQueryResult;
 import com.bank.docgen.audit.api.ManagementAuditExportResult;
 import com.bank.docgen.audit.api.ManagementAuditQueryResult;
@@ -90,6 +91,28 @@ public class AuditController {
             HttpServletRequest request
     ) {
         return envelope(request, auditQueryService.queryLifecycleEvents(
+                session,
+                actorRole,
+                templateId,
+                eventType,
+                eventAtFrom,
+                eventAtTo,
+                groupScope
+        ));
+    }
+
+    @GetMapping("/lifecycle-events/export")
+    public SuccessEnvelope<LifecycleAuditExportResult> exportLifecycleEvents(
+            @RequestParam AuditReadActorRole actorRole,
+            @RequestParam(required = false) UUID templateId,
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) Instant eventAtFrom,
+            @RequestParam(required = false) Instant eventAtTo,
+            @RequestParam(required = false) String groupScope,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, auditQueryService.exportLifecycleEvents(
                 session,
                 actorRole,
                 templateId,

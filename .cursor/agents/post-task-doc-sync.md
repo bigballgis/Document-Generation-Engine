@@ -71,3 +71,9 @@ Return a short sync report:
 - Files changed
 - Gates cited
 - Outstanding items (if any remain Not Started in scope)
+
+## Next step (mandatory when commit delegated)
+
+After emitting the sync report, **delegate to `post-task-commit-review`** before any Done claim.
+Pass: task IDs, behavior summary, gate evidence, and confirmation that this sync completed.
+Skill: `.cursor/skills/post-task-commit-review/SKILL.md`.

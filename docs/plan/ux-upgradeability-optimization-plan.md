@@ -98,7 +98,7 @@ Each task: `ID | Pri | Title | Evidence | Acceptance | Status`. Priority **H/M/L
 | --- | --- | --- | --- | --- | --- |
 | UXC1 | M | Live publish-gate checklist | publish gate "API policy" is static text | Each gate item reflects real readiness (policy configured, tests passed, bindings valid); publish disabled until satisfied; reasons shown | Done |
 | UXC2 | M | Disambiguate `APPROVAL` stage actions | both submit + decide render together | UI distinguishes "awaiting approval submission" vs "awaiting approval decision" (split status or stage flag); only the valid action shows per role | Done |
-| UXC3 | M | Stop/Deprecate/Restore + version deactivate/restore (versioning + logical delete, §4.3) | matrix §5 confirms; no backend endpoints or UI | Backend lifecycle endpoints + UI actions with confirm + audit; STOPPED/DEPRECATED actionable; removal is logical delete only (no hard delete) **(needs backend work)** | Not Started |
+| UXC3 | M | Stop/Deprecate/Restore + version deactivate/restore (versioning + logical delete, §4.3) | matrix §5 confirms; no backend endpoints or UI | Backend lifecycle endpoints + UI actions with confirm + audit; STOPPED/DEPRECATED actionable; removal is logical delete only (no hard delete) **(needs backend work)** | Done (template stop/restore/deprecate; version deactivate + impact preview → P16-T02/T03) |
 | UXC4 | L | Master/template metadata edit via versioning (Confirmed §4.3) | only PATCH metadata exists; no re-upload; no delete | Metadata edit UI; content changes create new versions (no in-place re-upload); removal = logical delete; no hard-delete UI | Not Started |
 | UXC5 | L | Cross-navigation links | `masterId` text not clickable; impact IDs plain | Template summary `masterId` links to master detail; impact-analysis template IDs link to template detail | Done |
 
@@ -185,13 +185,13 @@ catalog, relevant ADRs) during each task's post-task doc sync — not silently.
 | Wave | Scope | Status |
 | --- | --- | --- |
 | Wave A | UX-A + UX-B | Done |
-| Wave B | UX-C + UX-D + UX-E | In Progress (UXC3–UXC4, UXD4, UXE2–UXE4 open; UXB5/UXC1/UXC5/UXD3 Done) |
+| Wave B | UX-C + UX-D + UX-E | In Progress (UXC4, UXD4, UXE2–UXE4 open; UXC3 template governance Done) |
 | Wave C | UX-F | Not Started |
 | Wave D | UX-G (clause modules, collaboration to-dos, export/import) — own phase | Not Started |
 
 ### 5.1 Wave A/B delivery evidence (2026-06-23)
 
-Backend gates green: `mvn -B -ntp -f backend/pom.xml verify "-Dspring-boot.repackage.skip=true"` (114 tests, 1 skipped, 2026-06-23).
+Backend gates green: `mvn -B -ntp -f backend/pom.xml verify "-Dspring-boot.repackage.skip=true"` (134 tests, 1 skipped, 2026-06-23).
 
 Frontend gates green: `pnpm -C frontend lint` / `type-check` / `test` (81 tests) / `build`.
 
@@ -212,5 +212,6 @@ Frontend gates green: `pnpm -C frontend lint` / `type-check` / `test` (81 tests)
 | Authoring persist | `V15__template_version_rules.sql`; `PUT /templates/{id}/rules`; `TemplateAuthoringPanel` variable/binding CRUD; `TemplateRuleConfigurator` save/validate; `TemplatePlatformSliceTest#savesCompositionRulesAndReturnsThemOnTemplateDetail` |
 | Publish gate | `TemplateDetailView` live binding-validation gate before publish |
 | Cross-links | Template `masterId` → master detail; `MasterImpactPanel` template IDs → template detail |
+| Template governance | `POST .../lifecycle/stop|restore|deprecate`; `TemplateCallabilitySupport`; runtime honors STOPPED/DEPRECATED/version STOPPED; `TemplateDetailView` governance panel |
 | Shell a11y | `ManagementShell` nav `aria-label` i18n key |
 | i18n | New keys in `frontend/src/i18n/locales/en.ts` (authoring, rules, publishGate, common) |

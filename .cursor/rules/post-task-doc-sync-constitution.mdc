@@ -23,14 +23,16 @@ agent reports Done, closes a slice, or handoffs to the user.
    frontend lint/type-check/test/build) in the sync report or ledger.
 5. **Single active phase** — After sync, verify only one phase is `In Progress`.
 6. **Implementer agents must delegate** — `backend-engineer` and `frontend-engineer`
-   finish with post-task-doc-sync; `plan-orchestrator` owns phase transitions.
+   finish with `post-task-doc-sync` then `post-task-commit-review` before finishing.
 
 ## Forbidden
 
 - Claiming Done while plan docs still show `Not Started` for completed work.
 - Skipping sync for "small" or "docs-only follow-up" changes after behavior changed.
 - Marking epic/milestone Done in task sheets without updating execution-sync-ledger.
+- Claiming Done with uncommitted task changes when commit was delegated.
 
 ## Done definition (extends TDD constitution)
 
-Behavior is Done only when: durable code + green gates + **post-task doc sync** + updated plan status.
+Behavior is Done only when: durable code + green gates + **post-task doc sync** +
+**post-task commit review** + updated plan status.

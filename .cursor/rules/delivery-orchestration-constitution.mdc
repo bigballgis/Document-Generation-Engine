@@ -1,0 +1,50 @@
+---
+description: Hard constraint — single-entry delivery orchestration and fixed BDD→TDD→E2E→deploy→doc-sync→commit pipeline order for behavior-changing work.
+alwaysApply: true
+---
+
+# Delivery Orchestration Constitution
+
+Non-trivial, behavior-changing work is scheduled through one orchestrator and a fixed
+pipeline. Specialists own their stage; nobody jumps the order.
+
+## Single entry
+
+- Route multi-step or behavior-changing requests through `delivery-orchestrator`.
+- A single narrow change may call one specialist directly, but still respects gate order.
+
+## Fixed pipeline order
+
+```
+behavior-spec-author → plan-orchestrator → doc-keeper(if docs change)
+  → backend-engineer / frontend-engineer (TDD)
+  → e2e-test-engineer (functional) → e2e-uiux-reviewer (UIUX, frontend)
+  → architecture-reviewer → deploy-engineer (release-relevant)
+  → post-task-doc-sync → post-task-commit-review → Done
+```
+
+## Non-negotiables
+
+1. **BDD first** — No tests or code before a behavior spec exists, or BDD readiness is
+   explicitly `not-applicable`. Unclear behavior blocks for user confirmation.
+2. **TDD always** — Failing test before implementation; smallest change to green; refactor.
+3. **Frontend E2E mandatory** — User-facing frontend changes require `e2e-test-engineer`
+   functional journeys AND `e2e-uiux-reviewer` evidence before Done.
+4. **Bank OA style lock** — Frontend surfaces meet `.cursor/skills/frontend-oa-design/SKILL.md`;
+   token-based, dual-brand (REDBC/GREENBC), no overflow/overlap, a11y green.
+5. **Docker deploy is gated** — `deploy-engineer` only deploys on green gates + evidence;
+   no secrets in images; rollback readiness recorded.
+6. **End gates** — `post-task-doc-sync` then `post-task-commit-review` before any Done claim.
+7. **Single active phase** — Exactly one plan phase `In Progress` (see `plan-orchestrator`).
+
+## Forbidden
+
+- Skipping the behavior spec for behavior-changing work.
+- Claiming frontend Done without E2E functional + UIUX evidence.
+- Deploying on red gates, or baking secrets/credentials into images or compose.
+- Reordering or skipping the end gates (doc sync, commit review).
+
+## Done definition (extends TDD + doc-sync + commit-review constitutions)
+
+Done = durable behavior + green gates + (frontend) E2E functional + UIUX evidence +
+post-task doc sync + post-task commit review + updated plan status.

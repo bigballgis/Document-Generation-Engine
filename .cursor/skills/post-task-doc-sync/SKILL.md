@@ -18,7 +18,8 @@ Any of: feature slice, bug fix with regression test, phase completion, epic/mile
 2. Run post-task-doc-sync agent checklist (or inline if same session)
 3. Update plan detail → master plan → execution-sync-ledger → architecture task sheets
 4. Refresh indexes (docs/README.md, plan/README.md, root README if active phase changed)
-5. Emit sync report; only then mark Done
+5. Emit sync report
+6. Invoke post-task-commit-review (`.cursor/skills/post-task-commit-review/SKILL.md`); only then mark Done
 ```
 
 ## Files (in order)
@@ -35,7 +36,7 @@ Any of: feature slice, bug fix with regression test, phase completion, epic/mile
 
 ## Hard rules
 
-- Do not claim Done without completing this sync in the same change set.
+- Do not claim Done without completing this sync and post-task-commit-review in the same change set.
 - Do not edit accepted ADR decisions for progress tracking.
 - Exactly one phase `In Progress` at a time.
 - Use agent: `.cursor/agents/post-task-doc-sync.md` for full checklist.

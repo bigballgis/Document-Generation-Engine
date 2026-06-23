@@ -69,7 +69,8 @@ public class RuntimeTemplateController {
             HttpServletRequest request
     ) {
         TemplateEntity template = templateService.requireTemplateByExternalId(templateExternalId);
-        CallableVersionsResultView versions = runtimeGenerationService.listCallableVersionsResult(template, environment);
+        CallableVersionsResultView versions =
+                runtimeGenerationService.listCallableVersionsResult(template, session, environment);
         return envelope(request, versions);
     }
 

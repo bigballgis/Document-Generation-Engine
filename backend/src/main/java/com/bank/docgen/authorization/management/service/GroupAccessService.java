@@ -52,6 +52,23 @@ public class GroupAccessService {
         return session.roles().contains("GLOBAL_ADMIN") || session.roles().contains("GROUP_ADMIN");
     }
 
+    public boolean canStopTemplates(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("MASTER_DESIGNER")
+                || session.roles().contains("TEMPLATE_AUTHOR");
+    }
+
+    public boolean canRestoreOrDeprecateTemplates(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN");
+    }
+
+    public boolean canManageReleaseVersionState(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN");
+    }
+
     public boolean canManageApiPolicy(ManagementSessionClaims session) {
         return session.roles().contains("GLOBAL_ADMIN")
                 || session.roles().contains("GROUP_ADMIN");

@@ -39,4 +39,5 @@ Use only: `Not Started`, `In Progress`, `Blocked`, `Done`.
 - Re-check index linkage and cross-references.
 - Confirm confirmed-vs-pending separation is intact.
 - Prefer small, reviewable, diff-friendly documentation changes.
-- **Delegate to `post-task-doc-sync`** (or run its checklist) before any Done claim.
+- **Delegate to `post-task-doc-sync`** then **`post-task-commit-review`** (or run both checklists)
+  before any Done claim when commit is delegated.

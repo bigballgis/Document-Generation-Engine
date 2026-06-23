@@ -113,18 +113,29 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 | Asset | Purpose |
 | --- | --- |
+| `.cursor/agents/delivery-orchestrator.md` | Single-entry pipeline scheduler / router |
+| `.cursor/agents/behavior-spec-author.md` | BDD behavior spec (Given/When/Then) gate |
+| `.cursor/agents/plan-orchestrator.md` | Plan layer maintenance |
 | `.cursor/agents/doc-keeper.md` | Documentation-as-code guardian |
 | `.cursor/agents/backend-engineer.md` | Backend TDD implementer |
-| `.cursor/agents/frontend-engineer.md` | Frontend TDD implementer |
+| `.cursor/agents/frontend-engineer.md` | Frontend TDD implementer (bank OA style lock) |
+| `.cursor/agents/e2e-test-engineer.md` | Playwright functional E2E journeys |
+| `.cursor/agents/e2e-uiux-reviewer.md` | Visual/responsive/a11y/brand UIUX evidence |
+| `.cursor/agents/deploy-engineer.md` | Automated Docker build/deploy/rollback |
 | `.cursor/agents/architecture-reviewer.md` | Read-only architecture review |
-| `.cursor/agents/plan-orchestrator.md` | Plan layer maintenance |
 | `.cursor/agents/post-task-doc-sync.md` | Mandatory end-of-task documentation sync |
+| `.cursor/agents/post-task-commit-review.md` | Mandatory end-of-task commit review and commit |
 | `.cursor/skills/document-as-code/` | Doc workflow skill |
-| `.cursor/skills/post-task-doc-sync/` | Post-task doc sync workflow |
 | `.cursor/skills/tdd-feature-delivery/` | TDD loop skill |
+| `.cursor/skills/frontend-oa-design/` | Bank OA design-system lock skill |
+| `.cursor/skills/e2e-frontend-testing/` | Playwright E2E (functional + UIUX) workflow |
+| `.cursor/skills/docker-deployment/` | Docker build/deploy/rollback workflow |
+| `.cursor/skills/post-task-doc-sync/` | Post-task doc sync workflow |
+| `.cursor/skills/post-task-commit-review/` | Post-task commit review workflow |
 | `.cursor/skills/i18n-english-first/` | English-first i18n skill |
 | `.cursor/skills/plan-status-tracking/` | Plan status skill |
 | `.cursor/rules/*.mdc` | Project constitutions (always apply) |
+| `.cursor/hooks.json` | Auto-chain commit review after doc-sync subagent |
 
 ## Source-of-truth order (on conflict)
 

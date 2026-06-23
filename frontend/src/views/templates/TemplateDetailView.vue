@@ -13,7 +13,7 @@ import { useConfirmAction } from '@/composables/useConfirmAction'
 import { MASTER_DETAIL_PATH_PREFIX, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { BindingValidationResult, PreviewRecord, UpsertApiPolicyPayload } from '@/types/template'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const { t, te } = useI18n()
 const route = useRoute()
@@ -24,6 +24,8 @@ const {
   decideTests,
   decideApprovals,
   publishTemplates,
+  stopTemplates,
+  restoreOrDeprecateTemplates,
   manageApiPolicy,
 } = useCapabilities()
 const { confirmAction } = useConfirmAction()
@@ -92,6 +94,18 @@ const showApprovalDecisionActions = computed(() => {
 })
 const showPublishActions = computed(
   () => template.value?.lifecycleStatus === 'PENDING_RELEASE' && publishTemplates.value,
+)
+const showStopAction = computed(
+  () => template.value?.lifecycleStatus === 'PUBLISHED' && stopTemplates.value,
+)
+const showRestoreAction = computed(
+  () => template.value?.lifecycleStatus === 'STOPPED' && restoreOrDeprecateTemplates.value,
+)
+const showDeprecateAction = computed(
+  () => template.value?.lifecycleStatus === 'STOPPED' && restoreOrDeprecateTemplates.value,
+)
+const showGovernanceSection = computed(
+  () => showStopAction.value || showRestoreAction.value || showDeprecateAction.value,
 )
 
 const publishGateItems = computed(() => [
@@ -314,6 +328,64 @@ async function handlePublish() {
   }
 }
 
+type GovernanceAction = 'stop' | 'restore' | 'deprecate'
+
+async function handleGovernanceAction(action: GovernanceAction) {
+  let reason = ''
+  try {
+    const result = await ElMessageBox.prompt(
+      t(`templates.lifecycle.${action}ReasonPrompt`),
+      t(`templates.lifecycle.${action}Title`),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        inputValidator: (value) =>
+          value.trim().length > 0 ? true : t('templates.lifecycle.reasonRequired'),
+      },
+    )
+    reason = result.value.trim()
+  } catch {
+    return
+  }
+
+  const confirmKeys = {
+    stop: {
+      titleKey: 'templates.lifecycle.confirmStopTitle',
+      messageKey: 'templates.lifecycle.confirmStopMessage',
+    },
+    restore: {
+      titleKey: 'templates.lifecycle.confirmRestoreTitle',
+      messageKey: 'templates.lifecycle.confirmRestoreMessage',
+    },
+    deprecate: {
+      titleKey: 'templates.lifecycle.confirmDeprecateTitle',
+      messageKey: 'templates.lifecycle.confirmDeprecateMessage',
+    },
+  } as const
+
+  const confirmed = await confirmAction({
+    ...confirmKeys[action],
+    type: 'warning',
+  })
+  if (!confirmed) {
+    return
+  }
+
+  const payload = { reason, confirmed: true }
+  try {
+    if (action === 'stop') {
+      await templatesStore.stopTemplate(templateId.value, payload)
+    } else if (action === 'restore') {
+      await templatesStore.restoreTemplate(templateId.value, payload)
+    } else {
+      await templatesStore.deprecateTemplate(templateId.value, payload)
+    }
+    ElMessage.success(t(`templates.lifecycle.${action}Success`))
+  } catch {
+    ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
+  }
+}
+
 async function handleSavePolicy() {
   try {
     await templatesStore.saveApiPolicy(templateId.value, { ...policyForm })
@@ -528,6 +600,37 @@ async function handleRevokeCredential(credentialId: string) {
             @click="handleTestGenerate"
           >
             {{ t('templates.testGenerate.action') }}
+          </el-button>
+        </div>
+      </el-card>
+
+      <el-card v-if="showGovernanceSection" shadow="never" class="section-card">
+        <h2>{{ t('templates.governance.title') }}</h2>
+        <p class="governance-description">{{ t('templates.governance.description') }}</p>
+        <div class="action-row">
+          <el-button
+            v-if="showStopAction"
+            type="warning"
+            :loading="templatesStore.submitting"
+            @click="handleGovernanceAction('stop')"
+          >
+            {{ t('templates.governance.stop') }}
+          </el-button>
+          <el-button
+            v-if="showRestoreAction"
+            type="primary"
+            :loading="templatesStore.submitting"
+            @click="handleGovernanceAction('restore')"
+          >
+            {{ t('templates.governance.restore') }}
+          </el-button>
+          <el-button
+            v-if="showDeprecateAction"
+            type="danger"
+            :loading="templatesStore.submitting"
+            @click="handleGovernanceAction('deprecate')"
+          >
+            {{ t('templates.governance.deprecate') }}
           </el-button>
         </div>
       </el-card>

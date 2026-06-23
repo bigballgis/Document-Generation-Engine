@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "subagentStop": [
+      {
+        "command": ".cursor/hooks/chain-commit-review.sh",
+        "matcher": "post-task-doc-sync"
+      }
+    ]
+  }
+}

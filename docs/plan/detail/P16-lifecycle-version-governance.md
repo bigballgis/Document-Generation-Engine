@@ -59,13 +59,13 @@ and audit. Logical-delete only (no hard delete), consistent with matrix §13.
 
 | ID | Task | Status |
 | --- | --- | --- |
-| P16-T01 | Extend `LifecycleAction` + transitions: STOP / RESTORE / DEPRECATE (template) | Not Started |
+| P16-T01 | Extend `LifecycleAction` + transitions: STOP / RESTORE / DEPRECATE (template) | Done |
 | P16-T02 | Release-version deactivate / restore (version-scoped state + repository) | Not Started |
 | P16-T03 | Recovery / deprecate / version impact-preview service (affected callers, AD-group scope, default-route impact, callable-version delta, recent-call summary) | Not Started |
-| P16-T04 | Management endpoints with reason + secondary-confirm contract + group-scoped authorization (fail-closed) | Not Started |
+| P16-T04 | Management endpoints with reason + secondary-confirm contract + group-scoped authorization (fail-closed) | Done (template stop/restore/deprecate) |
 | P16-T05 | Audit events (stop/restore/deprecate/version-deactivate/version-restore) with reason + scope summary | Not Started |
-| P16-T06 | Runtime callable-version resolution honors stopped/deprecated/version states (regression tests) | Not Started |
-| P16-T07 | UI: lifecycle actions on `TemplateDetailView` (impact preview modal, confirm, audit link); version list deactivate/restore | Not Started |
+| P16-T06 | Runtime callable-version resolution honors stopped/deprecated/version states (regression tests) | Done (template + version lifecycle check) |
+| P16-T07 | UI: lifecycle actions on `TemplateDetailView` (impact preview modal, confirm, audit link); version list deactivate/restore | Done (governance panel; impact preview deferred to T03) |
 | P16-T08 | Logical-delete template (GLOBAL only) + no hard-delete enforcement | Not Started |
 
 ## Exit criteria (phase)

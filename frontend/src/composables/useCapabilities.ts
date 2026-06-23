@@ -5,7 +5,10 @@ import {
   canDecideTests,
   canManageApiPolicy,
   canPublishTemplates,
+  canManageReleaseVersionState,
+  canRestoreOrDeprecateTemplates,
   canReviewMasters,
+  canStopTemplates,
   canUploadMasters,
   sessionContext,
 } from '@/auth/roles'
@@ -22,6 +25,9 @@ export function useCapabilities() {
   const decideTests = computed(() => canDecideTests(context.value))
   const decideApprovals = computed(() => canDecideApprovals(context.value))
   const publishTemplates = computed(() => canPublishTemplates(context.value))
+  const stopTemplates = computed(() => canStopTemplates(context.value))
+  const restoreOrDeprecateTemplates = computed(() => canRestoreOrDeprecateTemplates(context.value))
+  const manageReleaseVersionState = computed(() => canManageReleaseVersionState(context.value))
   const manageApiPolicy = computed(() => canManageApiPolicy(context.value))
 
   return {
@@ -32,6 +38,9 @@ export function useCapabilities() {
     decideTests,
     decideApprovals,
     publishTemplates,
+    stopTemplates,
+    restoreOrDeprecateTemplates,
+    manageReleaseVersionState,
     manageApiPolicy,
   }
 }

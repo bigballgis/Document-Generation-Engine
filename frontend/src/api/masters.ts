@@ -7,6 +7,7 @@ import type {
   MasterDocumentSummary,
   MasterImpactAnalysis,
   SubmitMasterReviewPayload,
+  UpdateMasterMetadataPayload,
 } from '@/types/master'
 
 function unwrap<T>(envelope: ApiEnvelope<T>): T {
@@ -69,6 +70,17 @@ export async function decideMasterReview(
 export async function getMasterImpactAnalysis(masterId: string): Promise<MasterImpactAnalysis> {
   const response = await http.get<ApiEnvelope<MasterImpactAnalysis>>(
     `/masters/${masterId}/impact-analysis`,
+  )
+  return unwrap(response.data)
+}
+
+export async function updateMasterMetadata(
+  masterId: string,
+  payload: UpdateMasterMetadataPayload,
+): Promise<MasterDocumentDetail> {
+  const response = await http.patch<ApiEnvelope<MasterDocumentDetail>>(
+    `/masters/${masterId}`,
+    payload,
   )
   return unwrap(response.data)
 }

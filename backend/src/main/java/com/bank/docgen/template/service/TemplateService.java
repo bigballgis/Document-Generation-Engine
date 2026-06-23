@@ -13,6 +13,7 @@ import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateSummaryView;
+import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
@@ -131,6 +132,29 @@ public class TemplateService {
         templateRepository.save(template);
         TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), templateId, session.username());
         templateVersionRepository.save(version);
+        return toDetail(template);
+    }
+
+    @Transactional
+    public TemplateDetailView updateMetadata(
+            UUID templateId,
+            UpdateTemplateRequest request,
+            ManagementSessionClaims session
+    ) {
+        TemplateEntity template = requireWritableTemplate(templateId, session);
+        if (template.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED
+                || template.getLifecycleStatus() == TemplateLifecycleStatus.STOPPED
+                || template.getLifecycleStatus() == TemplateLifecycleStatus.DEPRECATED) {
+            throw new TemplateValidationException("api.error.template.invalidState");
+        }
+        if (request.name() != null && !request.name().isBlank()) {
+            template.setName(request.name());
+        }
+        if (request.description() != null) {
+            template.setDescription(request.description());
+        }
+        template.setUpdatedBy(session.username());
+        templateRepository.save(template);
         return toDetail(template);
     }
 

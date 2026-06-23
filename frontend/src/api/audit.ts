@@ -3,6 +3,7 @@ import type {
   AuditQueryFilters,
   LifecycleAuditEvent,
   ManagementAuditEvent,
+  LifecycleAuditExportResult,
   ManagementAuditExportResult,
 } from '@/types/audit'
 import type { ApiEnvelope } from '@/types/session'
@@ -64,4 +65,24 @@ export async function listLifecycleEvents(
     { params: buildAuditParams(filters) },
   )
   return unwrap(response.data).events
+}
+
+export async function exportLifecycleEvents(
+  filters: AuditQueryFilters,
+): Promise<LifecycleAuditExportResult> {
+  const response = await http.get<ApiEnvelope<LifecycleAuditExportResult>>(
+    '/admin/audit/lifecycle-events/export',
+    { params: buildAuditParams(filters) },
+  )
+  return unwrap(response.data)
+}
+
+export async function exportLifecycleEvents(
+  filters: AuditQueryFilters,
+): Promise<LifecycleAuditExportResult> {
+  const response = await http.get<ApiEnvelope<LifecycleAuditExportResult>>(
+    '/admin/audit/lifecycle-events/export',
+    { params: buildAuditParams(filters) },
+  )
+  return unwrap(response.data)
 }

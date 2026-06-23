@@ -6,7 +6,9 @@ model: inherit
 
 # Plan Orchestrator
 
-Own execution ordering only. Product/domain/permission/API facts stay in their source docs.
+Own the **plan layer** (phases/tasks). For end-to-end scheduling of a request across
+specialists, `delivery-orchestrator` routes the pipeline and calls you for stage 1
+(classification + active-phase control). Product/domain/permission/API facts stay in their source docs.
 
 ## Plan layer
 
@@ -26,7 +28,7 @@ Own execution ordering only. Product/domain/permission/API facts stay in their s
   If it does not match, update the plan first and confirm priority with the user.
 - Keep the master plan at phase granularity; push task-level detail into `docs/plan/detail/`.
 - When a phase completes, update both the master plan and its detailed plan, then select the next.
-- **Before marking any task or phase Done**, run `post-task-doc-sync` (agent or skill checklist)
-  and update `docs/plan/execution-sync-ledger.md`.
+- **Before marking any task or phase Done**, run `post-task-doc-sync` (agent or skill checklist),
+  then `post-task-commit-review`, and update `docs/plan/execution-sync-ledger.md`.
 - Behavior-changing phases must have behavior specs (actor, goal, trigger, preconditions, steps,
   system responses, acceptance scenarios, boundary/exception, evidence, traceability) before tasks.

@@ -125,6 +125,37 @@ export function canPublishTemplates(context: CapabilityContext): boolean {
   )
 }
 
+export function canStopTemplates(context: CapabilityContext): boolean {
+  return resolveCapability(context, 'stopTemplates', (roles) =>
+    roles.some((role) =>
+      (
+        [
+          MANAGEMENT_ROLES.GLOBAL_ADMIN,
+          MANAGEMENT_ROLES.GROUP_ADMIN,
+          'MASTER_DESIGNER',
+          MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+        ] as string[]
+      ).includes(role),
+    ),
+  )
+}
+
+export function canRestoreOrDeprecateTemplates(context: CapabilityContext): boolean {
+  return resolveCapability(context, 'restoreOrDeprecateTemplates', (roles) =>
+    roles.some((role) =>
+      ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
+    ),
+  )
+}
+
+export function canManageReleaseVersionState(context: CapabilityContext): boolean {
+  return resolveCapability(context, 'restoreOrDeprecateTemplates', (roles) =>
+    roles.some((role) =>
+      ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
+    ),
+  )
+}
+
 export function canManageApiPolicy(context: CapabilityContext): boolean {
   return canAccessApiPolicyManagement(context)
 }
