@@ -16,8 +16,23 @@ const templatesStore = useTemplatesStore()
 const { authorTemplates } = useCapabilities()
 
 const createDialogOpen = ref(false)
+const currentPage = ref(1)
+const pageSize = 10
 
-const groupedTemplates = computed(() => [...templatesStore.templatesByGroup.entries()])
+const allTemplates = computed(() => templatesStore.templates)
+const paginatedTemplates = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return allTemplates.value.slice(start, start + pageSize)
+})
+const groupedTemplates = computed(() => {
+  const grouped = new Map<string, TemplateSummary[]>()
+  for (const template of paginatedTemplates.value) {
+    const existing = grouped.get(template.groupCode) ?? []
+    existing.push(template)
+    grouped.set(template.groupCode, existing)
+  }
+  return [...grouped.entries()]
+})
 const errorMessage = computed(() => {
   const key = templatesStore.lastErrorMessageKey
   if (!key) {
@@ -94,6 +109,15 @@ function handleCreated(templateId: string) {
 
     <el-empty v-else :description="t('templates.list.empty')" />
 
+    <el-pagination
+      v-if="allTemplates.length > pageSize"
+      v-model:current-page="currentPage"
+      class="list-pagination"
+      layout="prev, pager, next"
+      :page-size="pageSize"
+      :total="allTemplates.length"
+    />
+
     <TemplateCreateDialog v-model="createDialogOpen" @created="handleCreated" />
   </div>
 </template>
@@ -136,5 +160,10 @@ function handleCreated(templateId: string) {
 
 :deep(.el-table__row) {
   cursor: pointer;
+}
+
+.list-pagination {
+  margin-top: 1rem;
+  justify-content: flex-end;
 }
 </style>

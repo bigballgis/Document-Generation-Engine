@@ -1,10 +1,12 @@
 package com.bank.docgen.apimgmt.web;
 
 import com.bank.docgen.apimgmt.api.ApiCredentialCreatedView;
+import com.bank.docgen.apimgmt.api.ApiPolicyImpactPreviewView;
 import com.bank.docgen.apimgmt.api.ApiCredentialSummaryView;
 import com.bank.docgen.apimgmt.api.ApiPolicyView;
 import com.bank.docgen.apimgmt.api.RotateCredentialResponse;
 import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
+import com.bank.docgen.apimgmt.service.ApiPolicyImpactPreviewService;
 import com.bank.docgen.apimgmt.service.ApiManagementService;
 import com.bank.docgen.runtime.api.ContractResultView;
 import com.bank.docgen.sharedkernel.api.Metadata;
@@ -32,10 +34,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApiManagementController {
 
     private final ApiManagementService apiManagementService;
+    private final ApiPolicyImpactPreviewService apiPolicyImpactPreviewService;
     private final TraceIdProvider traceIdProvider;
 
-    public ApiManagementController(ApiManagementService apiManagementService, TraceIdProvider traceIdProvider) {
+    public ApiManagementController(
+            ApiManagementService apiManagementService,
+            ApiPolicyImpactPreviewService apiPolicyImpactPreviewService,
+            TraceIdProvider traceIdProvider
+    ) {
         this.apiManagementService = apiManagementService;
+        this.apiPolicyImpactPreviewService = apiPolicyImpactPreviewService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -66,6 +74,16 @@ public class ApiManagementController {
             HttpServletRequest request
     ) {
         return envelope(request, apiManagementService.upsertPolicy(templateId, body, session));
+    }
+
+    @PostMapping("/policy/impact-preview")
+    public SuccessEnvelope<ApiPolicyImpactPreviewView> impactPreview(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody UpsertApiPolicyRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, apiPolicyImpactPreviewService.preview(templateId, body, session));
     }
 
     @GetMapping("/credentials")

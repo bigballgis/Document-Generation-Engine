@@ -5,13 +5,19 @@ import { isGroupScopedAuditRole } from '@/auth/roles'
 import { useAuditStore } from '@/stores/audit'
 import { useSessionStore } from '@/stores/session'
 import type { LifecycleAuditEvent, ManagementAuditEvent } from '@/types/audit'
+import type { TemplateLifecycleStatus } from '@/types/template'
+import { downloadJsonExport } from '@/utils/downloadExport'
 import { ElMessage } from 'element-plus'
+
+const PAGE_SIZE = 10
 
 const { t, te } = useI18n()
 const auditStore = useAuditStore()
 const sessionStore = useSessionStore()
 
 const activeTab = ref<'management' | 'lifecycle'>('management')
+const managementPage = ref(1)
+const lifecyclePage = ref(1)
 
 const errorMessage = computed(() => {
   const key = auditStore.lastErrorMessageKey
@@ -23,6 +29,16 @@ const errorMessage = computed(() => {
 
 const showGroupFilters = computed(() => isGroupScopedAuditRole(auditStore.actorRole))
 const groupOptions = computed(() => sessionStore.session?.authorizedGroupCodes ?? [])
+
+const paginatedManagementEvents = computed(() => {
+  const start = (managementPage.value - 1) * PAGE_SIZE
+  return auditStore.managementEvents.slice(start, start + PAGE_SIZE)
+})
+
+const paginatedLifecycleEvents = computed(() => {
+  const start = (lifecyclePage.value - 1) * PAGE_SIZE
+  return auditStore.lifecycleEvents.slice(start, start + PAGE_SIZE)
+})
 
 onMounted(async () => {
   auditStore.initializeFiltersFromSession()
@@ -47,23 +63,38 @@ async function handleTabChange(tab: string | number | boolean) {
 }
 
 async function applyFilters() {
+  managementPage.value = 1
+  lifecyclePage.value = 1
   await refreshActiveTab()
 }
 
 async function handleExport() {
   try {
-    const result = await auditStore.exportManagementEvents()
-    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const anchor = document.createElement('a')
-    anchor.href = url
-    anchor.download = 'management-audit-export.json'
-    anchor.click()
-    URL.revokeObjectURL(url)
-    ElMessage.success(t('audit.export.success'))
+    const isManagement = activeTab.value === 'management'
+    const result = isManagement
+      ? await auditStore.exportManagementEvents()
+      : await auditStore.exportLifecycleEvents()
+    downloadJsonExport(
+      t(isManagement ? 'audit.export.managementFilename' : 'audit.export.lifecycleFilename'),
+      result,
+    )
+    ElMessage.success(
+      t(isManagement ? 'audit.export.success' : 'audit.export.lifecycleSuccess'),
+    )
   } catch {
-    ElMessage.error(errorMessage.value || t('audit.error.export'))
+    ElMessage.error(
+      errorMessage.value ||
+        t(activeTab.value === 'management' ? 'audit.error.export' : 'audit.error.exportLifecycle'),
+    )
   }
+}
+
+function formatLifecycleState(state?: string) {
+  if (!state) {
+    return '—'
+  }
+  const key = `templates.status.${state as TemplateLifecycleStatus}`
+  return te(key) ? t(key) : state
 }
 
 function formatDate(value: string) {
@@ -79,7 +110,6 @@ function formatDate(value: string) {
         <p>{{ t('audit.description') }}</p>
       </div>
       <el-button
-        v-if="activeTab === 'management'"
         type="primary"
         :loading="auditStore.exporting"
         @click="handleExport"
@@ -154,7 +184,7 @@ function formatDate(value: string) {
         <el-skeleton v-if="auditStore.loadingManagement" :rows="6" animated />
         <el-table
           v-else
-          :data="auditStore.managementEvents"
+          :data="paginatedManagementEvents"
           stripe
           empty-text=""
         >
@@ -171,13 +201,21 @@ function formatDate(value: string) {
           <el-table-column prop="actorSummary" :label="t('audit.columns.actorSummary')" min-width="160" />
           <el-table-column prop="statusSummary" :label="t('audit.columns.statusSummary')" min-width="160" />
         </el-table>
+        <el-pagination
+          v-if="auditStore.managementEvents.length > PAGE_SIZE"
+          v-model:current-page="managementPage"
+          class="table-pagination"
+          layout="prev, pager, next"
+          :page-size="PAGE_SIZE"
+          :total="auditStore.managementEvents.length"
+        />
       </el-tab-pane>
 
       <el-tab-pane :label="t('audit.tabs.lifecycle')" name="lifecycle">
         <el-skeleton v-if="auditStore.loadingLifecycle" :rows="6" animated />
         <el-table
           v-else
-          :data="auditStore.lifecycleEvents"
+          :data="paginatedLifecycleEvents"
           stripe
           empty-text=""
         >
@@ -191,10 +229,26 @@ function formatDate(value: string) {
           </el-table-column>
           <el-table-column prop="eventType" :label="t('audit.columns.eventType')" min-width="160" />
           <el-table-column prop="templateId" :label="t('audit.columns.templateId')" min-width="200" />
-          <el-table-column prop="fromState" :label="t('audit.columns.fromState')" width="140" />
-          <el-table-column prop="toState" :label="t('audit.columns.toState')" width="140" />
+          <el-table-column prop="fromState" :label="t('audit.columns.fromState')" width="140">
+            <template #default="{ row }: { row: LifecycleAuditEvent }">
+              {{ formatLifecycleState(row.fromState) }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="toState" :label="t('audit.columns.toState')" width="140">
+            <template #default="{ row }: { row: LifecycleAuditEvent }">
+              {{ formatLifecycleState(row.toState) }}
+            </template>
+          </el-table-column>
           <el-table-column prop="summary" :label="t('audit.columns.summary')" min-width="200" />
         </el-table>
+        <el-pagination
+          v-if="auditStore.lifecycleEvents.length > PAGE_SIZE"
+          v-model:current-page="lifecyclePage"
+          class="table-pagination"
+          layout="prev, pager, next"
+          :page-size="PAGE_SIZE"
+          :total="auditStore.lifecycleEvents.length"
+        />
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -242,5 +296,10 @@ function formatDate(value: string) {
   display: flex;
   align-items: flex-end;
   padding-bottom: 4px;
+}
+
+.table-pagination {
+  margin-top: 1rem;
+  justify-content: flex-end;
 }
 </style>

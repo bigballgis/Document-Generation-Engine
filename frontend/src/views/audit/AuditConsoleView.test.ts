@@ -13,6 +13,7 @@ vi.mock('@/api/audit', () => ({
   listManagementEvents: vi.fn(),
   listLifecycleEvents: vi.fn(),
   exportManagementEvents: vi.fn(),
+  exportLifecycleEvents: vi.fn(),
 }))
 
 describe('AuditConsoleView', () => {

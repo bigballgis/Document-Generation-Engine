@@ -7,6 +7,7 @@ export interface ManagementCapabilities {
   publishTemplates: boolean
   stopTemplates: boolean
   restoreOrDeprecateTemplates: boolean
+  deleteTemplates: boolean
   manageApiPolicy: boolean
   readAudit: boolean
 }

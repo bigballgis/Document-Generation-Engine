@@ -2,6 +2,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { BRAND_REGISTRY } from '@/config/brands'
+import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
 import { BRAND_THEMES } from '@/theme/tokens'
 import {
   pathForRouteKey,
@@ -17,8 +19,17 @@ const router = useRouter()
 const appStore = useAppStore()
 const sessionStore = useSessionStore()
 
-const brandLabel = computed(() => t(`brand.${appStore.brand.toLowerCase()}`))
+const brandConfig = computed(
+  () => BRAND_REGISTRY.find((entry) => entry.code === appStore.brand) ?? BRAND_REGISTRY[0],
+)
+const brandLabel = computed(() => t(brandConfig.value.labelKey))
 const logoLabel = computed(() => BRAND_THEMES[appStore.brand].logoSlotLabel)
+const localeOptions = computed(() =>
+  LOCALE_REGISTRY.map((entry) => ({
+    value: entry.code,
+    label: t(entry.labelKey),
+  })),
+)
 
 interface NavItem {
   routeKey: RouteKey
@@ -56,6 +67,10 @@ async function handleLogout() {
 function navigate(path: string) {
   router.push(path)
 }
+
+function handleLocaleChange(locale: string) {
+  void appStore.setLocale(resolveAppLocale(locale))
+}
 </script>
 
 <template>
@@ -66,6 +81,20 @@ function navigate(path: string) {
         <h1 class="app-title">{{ t('app.title') }}</h1>
       </div>
       <div class="header-actions">
+        <el-select
+          class="locale-switcher"
+          size="small"
+          :model-value="appStore.locale"
+          :aria-label="t('common.language')"
+          @update:model-value="handleLocaleChange"
+        >
+          <el-option
+            v-for="option in localeOptions"
+            :key="option.value"
+            :label="option.label"
+            :value="option.value"
+          />
+        </el-select>
         <span class="user-label">{{ sessionStore.session?.displayName }}</span>
         <el-button type="primary" plain @click="handleLogout">
           {{ t('nav.logout') }}
@@ -144,6 +173,10 @@ function navigate(path: string) {
 .user-label {
   color: var(--text-muted);
   font-weight: 500;
+}
+
+.locale-switcher {
+  width: 140px;
 }
 
 .shell-body {

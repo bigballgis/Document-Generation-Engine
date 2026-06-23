@@ -6,10 +6,14 @@ import MasterImpactPanel from '@/components/masters/MasterImpactPanel.vue'
 import MasterReviewDialog from '@/components/masters/MasterReviewDialog.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
+import MasterMetadataEditDialog from '@/components/masters/MasterMetadataEditDialog.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import { canReviewMasters, sessionContext } from '@/auth/roles'
 import { ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
+import { useCapabilities } from '@/composables/useCapabilities'
 import type { MasterReviewDecision } from '@/types/master'
 import { ElMessage } from 'element-plus'
 
@@ -18,10 +22,13 @@ const route = useRoute()
 const router = useRouter()
 const mastersStore = useMastersStore()
 const sessionStore = useSessionStore()
+const { manageMasters } = useCapabilities()
 
 const submitReviewOpen = ref(false)
 const reviewDialogOpen = ref(false)
 const reviewMode = ref<MasterReviewDecision>('APPROVED')
+const metadataEditOpen = ref(false)
+const loadFailed = ref(false)
 
 const masterId = computed(() => String(route.params.masterId ?? ''))
 const master = computed(() => mastersStore.selectedMaster)
@@ -32,6 +39,16 @@ const canSubmitForReview = computed(
 const canDecideReview = computed(
   () => canReview.value && master.value?.status === 'PENDING_REVIEW',
 )
+const canEditMetadata = computed(() => {
+  if (!manageMasters.value || !master.value) {
+    return false
+  }
+  return (
+    master.value.status === 'DRAFT' ||
+    master.value.status === 'REJECTED' ||
+    master.value.status === 'APPROVED'
+  )
+})
 const errorMessage = computed(() => {
   const key = mastersStore.lastErrorMessageKey
   if (!key) {
@@ -41,13 +58,18 @@ const errorMessage = computed(() => {
 })
 
 onMounted(async () => {
+  await reloadMaster()
+})
+
+async function reloadMaster() {
+  loadFailed.value = false
   try {
     await mastersStore.fetchMaster(masterId.value)
     await mastersStore.fetchImpactAnalysis(masterId.value)
   } catch {
-    // Error surfaced via store message key.
+    loadFailed.value = true
   }
-})
+}
 
 onUnmounted(() => {
   mastersStore.clearSelected()
@@ -90,6 +112,16 @@ async function handleReviewDecision(payload: {
   }
 }
 
+async function handleMetadataUpdate(payload: { name: string; description: string | null }) {
+  try {
+    await mastersStore.updateMasterMetadata(masterId.value, payload)
+    metadataEditOpen.value = false
+    ElMessage.success(t('masters.metadata.success'))
+  } catch {
+    ElMessage.error(errorMessage.value || t('masters.error.updateMetadata'))
+  }
+}
+
 function formatReviewAction(action: string): string {
   const key = `masters.reviewHistory.action.${action}`
   return te(key) ? t(key) : action
@@ -111,6 +143,9 @@ function formatReviewAction(action: string): string {
       </div>
       <div v-if="master" class="header-actions">
         <MasterStatusBadge :status="master.status" />
+        <el-button v-if="canEditMetadata" @click="metadataEditOpen = true">
+          {{ t('masters.metadata.edit') }}
+        </el-button>
         <el-button v-if="canSubmitForReview" type="primary" @click="submitReviewOpen = true">
           {{ t('masters.submitReview.open') }}
         </el-button>
@@ -125,16 +160,19 @@ function formatReviewAction(action: string): string {
       </div>
     </header>
 
-    <el-alert
-      v-if="errorMessage"
-      class="page-alert"
-      type="error"
-      :title="errorMessage"
-      show-icon
-      :closable="false"
+    <LoadErrorPanel
+      v-if="loadFailed"
+      :message-key="mastersStore.lastErrorMessageKey ?? 'masters.error.loadDetail'"
+      @retry="reloadMaster"
     />
 
-    <el-skeleton v-if="mastersStore.loadingDetail" :rows="8" animated />
+    <el-skeleton v-else-if="mastersStore.loadingDetail" :rows="8" animated />
+
+    <EmptyStatePanel
+      v-else-if="!master"
+      title-key="masters.empty.notFoundTitle"
+      description-key="masters.empty.notFoundDescription"
+    />
 
     <template v-else-if="master">
       <section class="detail-grid">
@@ -207,6 +245,14 @@ function formatReviewAction(action: string): string {
       v-model="reviewDialogOpen"
       :mode="reviewMode"
       @submit="handleReviewDecision"
+    />
+    <MasterMetadataEditDialog
+      v-if="master"
+      v-model="metadataEditOpen"
+      :initial-name="master.name"
+      :initial-description="master.description"
+      :loading="mastersStore.submitting"
+      @submit="handleMetadataUpdate"
     />
   </div>
 </template>

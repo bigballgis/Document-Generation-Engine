@@ -5,7 +5,9 @@ import {
   canAccessTemplateManagement,
   canDecideApprovals,
   canDecideTests,
+  canDeleteTemplates,
   canManageApiPolicy,
+  canManageReleaseVersionState,
   canReviewMasters,
   canUploadMasters,
   isGroupScopedAuditRole,
@@ -23,6 +25,7 @@ const globalAdminCapabilities: ManagementCapabilities = {
   publishTemplates: true,
   stopTemplates: true,
   restoreOrDeprecateTemplates: true,
+  deleteTemplates: true,
   manageApiPolicy: true,
   readAudit: true,
 }
@@ -36,6 +39,7 @@ const testerCapabilities: ManagementCapabilities = {
   publishTemplates: false,
   stopTemplates: false,
   restoreOrDeprecateTemplates: false,
+  deleteTemplates: false,
   manageApiPolicy: false,
   readAudit: false,
 }
@@ -80,10 +84,21 @@ describe('management roles', () => {
     expect(canDecideApprovals({ roles: [], capabilities: testerCapabilities })).toBe(false)
   })
 
+  it('restricts release version governance to admin roles via fallback', () => {
+    expect(canManageReleaseVersionState({ roles: [MANAGEMENT_ROLES.GROUP_ADMIN] })).toBe(true)
+    expect(canManageReleaseVersionState({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(false)
+  })
+
   it('allows audit console for audit and admin roles via fallback', () => {
     expect(canAccessAuditConsole({ roles: [MANAGEMENT_ROLES.AUDIT_ADMIN] })).toBe(true)
     expect(canAccessAuditConsole({ roles: [MANAGEMENT_ROLES.GLOBAL_ADMIN] })).toBe(true)
     expect(canAccessAuditConsole({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(false)
+  })
+
+  it('allows template deletion only for global admins by fallback', () => {
+    expect(canDeleteTemplates({ roles: [MANAGEMENT_ROLES.GLOBAL_ADMIN] })).toBe(true)
+    expect(canDeleteTemplates({ roles: [MANAGEMENT_ROLES.GROUP_ADMIN] })).toBe(false)
+    expect(canDeleteTemplates({ roles: [], capabilities: globalAdminCapabilities })).toBe(true)
   })
 
   it('resolves audit actor role with audit admin precedence', () => {

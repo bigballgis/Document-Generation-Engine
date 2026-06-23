@@ -65,5 +65,5 @@ export interface DecideMasterReviewPayload {
 
 export interface UpdateMasterMetadataPayload {
   name?: string
-  description?: string
+  description?: string | null
 }

@@ -6,9 +6,11 @@ import { isApiError } from '@/api/http'
 import type {
   ApiCredentialCreated,
   ApiCredentialSummary,
+  ApiPolicyImpactPreview,
   ApiPolicy,
   CompositionRuleInput,
   CreateTemplatePayload,
+  DeleteTemplatePayload,
   LifecycleCommentPayload,
   LifecycleDecisionPayload,
   LifecycleGovernancePayload,
@@ -125,6 +127,22 @@ export const useTemplatesStore = defineStore('templates', () => {
     }
   }
 
+  async function previewApiPolicyImpact(
+    templateId: string,
+    payload: UpsertApiPolicyPayload,
+  ): Promise<ApiPolicyImpactPreview> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      return await apiPolicyApi.fetchApiPolicyImpactPreview(templateId, payload)
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.previewPolicyImpact')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
   async function createCredential(templateId: string): Promise<ApiCredentialCreated> {
     submitting.value = true
     lastErrorMessageKey.value = null
@@ -186,6 +204,23 @@ export const useTemplatesStore = defineStore('templates', () => {
       return created
     } catch (error) {
       lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.create')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function deleteTemplate(templateId: string, payload: DeleteTemplatePayload): Promise<void> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      await templatesApi.deleteTemplate(templateId, payload)
+      templates.value = templates.value.filter((item) => item.id !== templateId)
+      if (selectedTemplate.value?.id === templateId) {
+        selectedTemplate.value = null
+      }
+    } catch (error) {
+      lastErrorMessageKey.value = resolveErrorMessageKey(error, 'templates.error.delete')
       throw error
     } finally {
       submitting.value = false
@@ -426,10 +461,12 @@ export const useTemplatesStore = defineStore('templates', () => {
     fetchApiPolicy,
     fetchCredentials,
     saveApiPolicy,
+    previewApiPolicyImpact,
     createCredential,
     rotateCredential,
     revokeCredential,
     createTemplate,
+    deleteTemplate,
     submitForTest,
     recordTestDecision,
     submitForApproval,

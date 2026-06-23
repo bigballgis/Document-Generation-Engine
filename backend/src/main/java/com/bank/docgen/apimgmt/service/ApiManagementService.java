@@ -25,11 +25,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -102,18 +100,26 @@ public class ApiManagementService {
             throw new TemplateValidationException("api.error.apimgmt.templateNotPublished");
         }
         String allowedJson = writeJson(request.allowedAdGroups());
+        String outputFormatsJson = writeJson(request.outputFormats());
+        String outputModesJson = writeJson(request.outputModes());
         Optional<ApiPolicyEntity> existing = apiPolicyRepository.findByTemplateId(templateId);
         int previousVersion = existing.map(ApiPolicyEntity::getPolicyVersion).orElse(0);
         ApiPolicyEntity policy;
         List<String> changedAreas;
         if (existing.isPresent()) {
             policy = existing.get();
-            changedAreas = detectChangedAreas(policy, request, allowedJson);
+            changedAreas = ApiPolicyChangeAreaResolver.detectChangedAreas(
+                    policy,
+                    request,
+                    allowedJson,
+                    outputFormatsJson,
+                    outputModesJson
+            );
             policy.update(
                     allowedJson,
                     request.defaultRouteReleaseVersion(),
-                    writeJson(request.outputFormats()),
-                    writeJson(request.outputModes()),
+                    outputFormatsJson,
+                    outputModesJson,
                     request.batchEnabled(),
                     request.maxBatchSize(),
                     request.docxEncryptionEnabled(),
@@ -125,20 +131,15 @@ public class ApiManagementService {
             policy.replaceConfiguration(
                     allowedJson,
                     request.defaultRouteReleaseVersion(),
-                    writeJson(request.outputFormats()),
-                    writeJson(request.outputModes()),
+                    outputFormatsJson,
+                    outputModesJson,
                     request.batchEnabled(),
                     request.maxBatchSize(),
                     request.docxEncryptionEnabled(),
                     request.pdfEncryptionEnabled(),
                     session.username()
             );
-            changedAreas = List.of(
-                    "AD_GROUP_AUTHORIZATION",
-                    "OUTPUT_POLICY",
-                    "BATCH_LIMIT",
-                    "DEFAULT_ROUTE_TARGET"
-            );
+            changedAreas = ApiPolicyChangeAreaResolver.initialChangedAreas();
         }
         apiPolicyRepository.save(policy);
         managementAuditRecorder.recordPolicyUpdated(
@@ -256,35 +257,6 @@ public class ApiManagementService {
 
     private String actorSummary(ManagementSessionClaims session) {
         return session.displayName() + " (" + session.username() + ")";
-    }
-
-    private List<String> detectChangedAreas(
-            ApiPolicyEntity existing,
-            UpsertApiPolicyRequest request,
-            String allowedJson
-    ) {
-        List<String> changedAreas = new ArrayList<>();
-        if (!Objects.equals(existing.getAllowedAdGroupsJson(), allowedJson)) {
-            changedAreas.add("AD_GROUP_AUTHORIZATION");
-        }
-        if (!Objects.equals(existing.getOutputFormatsJson(), writeJson(request.outputFormats()))
-                || !Objects.equals(existing.getOutputModesJson(), writeJson(request.outputModes()))) {
-            changedAreas.add("OUTPUT_POLICY");
-        }
-        if (existing.isBatchEnabled() != request.batchEnabled() || existing.getMaxBatchSize() != request.maxBatchSize()) {
-            changedAreas.add("BATCH_LIMIT");
-        }
-        if (existing.isDocxEncryptionEnabled() != request.docxEncryptionEnabled()
-                || existing.isPdfEncryptionEnabled() != request.pdfEncryptionEnabled()) {
-            changedAreas.add("ENCRYPTION_POLICY");
-        }
-        if (!Objects.equals(existing.getDefaultRouteReleaseVersion(), request.defaultRouteReleaseVersion())) {
-            changedAreas.add("DEFAULT_ROUTE_TARGET");
-        }
-        if (changedAreas.isEmpty()) {
-            changedAreas.add("OUTPUT_POLICY");
-        }
-        return changedAreas;
     }
 
     private ApiPolicyView toPolicyView(ApiPolicyEntity policy) {

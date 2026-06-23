@@ -30,6 +30,7 @@ public class ManagementCapabilitiesService {
                 groupAccessService.canStopTemplates(session),
                 groupAccessService.canRestoreOrDeprecateTemplates(session),
                 groupAccessService.canManageApiPolicy(session),
+                groupAccessService.canDeleteTemplate(session),
                 groupAccessService.canReadAudit(session)
         );
     }

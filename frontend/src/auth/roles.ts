@@ -25,7 +25,10 @@ function resolveCapability(
   roleFallback: (roles: string[]) => boolean,
 ): boolean {
   if (context.capabilities) {
-    return context.capabilities[capabilityKey]
+    const capability = context.capabilities[capabilityKey]
+    if (typeof capability === 'boolean') {
+      return capability
+    }
   }
   return roleFallback(context.roles)
 }
@@ -158,6 +161,12 @@ export function canManageReleaseVersionState(context: CapabilityContext): boolea
 
 export function canManageApiPolicy(context: CapabilityContext): boolean {
   return canAccessApiPolicyManagement(context)
+}
+
+export function canDeleteTemplates(context: CapabilityContext): boolean {
+  return resolveCapability(context, 'deleteTemplates', (roles) =>
+    roles.includes(MANAGEMENT_ROLES.GLOBAL_ADMIN),
+  )
 }
 
 /** @deprecated Use granular capability helpers instead. */

@@ -1,10 +1,9 @@
 # P20 — i18n Multi-Locale Readiness & UI Upgradeability (Detailed Plan)
 
-**Phase status:** Not Started | **Depends on:** P1, E06 (management shell)
+**Phase status:** Done (2026-06-23) | **Depends on:** P1, E06 (management shell)
 **Confirmed:** 2026-06-23 (deep-review gap G6 — i18n constitution + UXF1/UXF4/UXF5)
 
-> Single-active-phase invariant: P13 completed **Done** (2026-06-23); there is currently no
-> single active phase. P20 stays `Not Started` until selected as the next active phase.
+> Single-active-phase invariant: P20 completed **Done** (2026-06-23) via Wave C UXF1/UXF4/UXF5.
 
 ## Source-of-truth & traceability
 
@@ -52,13 +51,13 @@ background, classic-OA desktop-first layout, dual-brand theming):
 
 | ID | Task | Status |
 | --- | --- | --- |
-| P20-T01 | Locale registry + additive bundle loader + `en` fallback strategy | Not Started |
-| P20-T02 | Locale switcher in shell + `html lang` wiring + locale-aware date/number formatting | Not Started |
-| P20-T03 | Sweep + i18n-ize remaining hardcoded strings (login, shell aria, export filenames, status enums) | Not Started |
-| P20-T04 | Config/data-driven brand theming (tokens + logo asset slots) — add-a-brand without code | Not Started |
-| P20-T05 | Environment selector from an allowed list for contract/runtime views (remove hardcoded `dev`) | Not Started |
+| P20-T01 | Locale registry + additive bundle loader + `en` fallback strategy | Done |
+| P20-T02 | Locale switcher in shell + `html lang` wiring + locale-aware date/number formatting | Done |
+| P20-T03 | Sweep + i18n-ize remaining hardcoded strings (login, shell aria, export filenames, status enums) | Done (Wave B UXE2 baseline + Wave C) |
+| P20-T04 | Config/data-driven brand theming (tokens + logo asset slots) — add-a-brand without code | Done |
+| P20-T05 | Environment selector from an allowed list for contract/runtime views (remove hardcoded `dev`) | Done |
 | P20-T06 | Frontend message catalog aligned with backend `api.error.*` messageKeys + fallback | Not Started |
-| P20-T07 | Tests: fallback behavior, switcher, brand config, environment selection; frontend coverage gate | Not Started |
+| P20-T07 | Tests: fallback behavior, switcher, brand config, environment selection; frontend coverage gate | Done |
 
 ## Exit criteria (phase)
 

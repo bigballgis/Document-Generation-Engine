@@ -93,12 +93,20 @@ class GroupAccessServiceTest {
     }
 
     @Test
+    void deleteTemplateRequiresGlobalAdminOnly() {
+        assertThat(service.canDeleteTemplate(session(List.of("GLOBAL_ADMIN"), List.of()))).isTrue();
+        assertThat(service.canDeleteTemplate(session(List.of("GROUP_ADMIN"), List.of()))).isFalse();
+        assertThat(service.canDeleteTemplate(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isFalse();
+    }
+
+    @Test
     void emptyRolesFailClosedEverywhere() {
         ManagementSessionClaims none = session(List.of(), List.of());
         assertThat(service.canReviewMasters(none)).isFalse();
         assertThat(service.canAuthorTemplates(none)).isFalse();
         assertThat(service.canPublishTemplates(none)).isFalse();
         assertThat(service.canManageApiPolicy(none)).isFalse();
+        assertThat(service.canDeleteTemplate(none)).isFalse();
         assertThat(service.canReadAudit(none)).isFalse();
         assertThat(service.canAccessGroup(none, "G1")).isFalse();
     }

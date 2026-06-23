@@ -98,8 +98,8 @@ Each task: `ID | Pri | Title | Evidence | Acceptance | Status`. Priority **H/M/L
 | --- | --- | --- | --- | --- | --- |
 | UXC1 | M | Live publish-gate checklist | publish gate "API policy" is static text | Each gate item reflects real readiness (policy configured, tests passed, bindings valid); publish disabled until satisfied; reasons shown | Done |
 | UXC2 | M | Disambiguate `APPROVAL` stage actions | both submit + decide render together | UI distinguishes "awaiting approval submission" vs "awaiting approval decision" (split status or stage flag); only the valid action shows per role | Done |
-| UXC3 | M | Stop/Deprecate/Restore + version deactivate/restore (versioning + logical delete, §4.3) | matrix §5 confirms; no backend endpoints or UI | Backend lifecycle endpoints + UI actions with confirm + audit; STOPPED/DEPRECATED actionable; removal is logical delete only (no hard delete) **(needs backend work)** | Done (template stop/restore/deprecate; version deactivate + impact preview → P16-T02/T03) |
-| UXC4 | L | Master/template metadata edit via versioning (Confirmed §4.3) | only PATCH metadata exists; no re-upload; no delete | Metadata edit UI; content changes create new versions (no in-place re-upload); removal = logical delete; no hard-delete UI | Not Started |
+| UXC3 | M | Stop/Deprecate/Restore + version deactivate/restore (versioning + logical delete, §4.3) | matrix §5 confirms; no backend endpoints or UI | Backend lifecycle endpoints + UI actions with confirm + audit; STOPPED/DEPRECATED actionable; removal is logical delete only (no hard delete) **(needs backend work)** | Done |
+| UXC4 | L | Master/template metadata edit via versioning (Confirmed §4.3) | only PATCH metadata exists; no re-upload; no delete | Metadata edit UI; content changes create new versions (no in-place re-upload); removal = logical delete; no hard-delete UI | Done |
 | UXC5 | L | Cross-navigation links | `masterId` text not clickable; impact IDs plain | Template summary `masterId` links to master detail; impact-analysis template IDs link to template detail | Done |
 
 ### UX-D Role workbenches
@@ -110,26 +110,26 @@ Each task: `ID | Pri | Title | Evidence | Acceptance | Status`. Priority **H/M/L
 | UXD1 | M | Tester workbench (TEMPLATE_TESTER) | role exists, no UI/landing | "My test queue" view: templates awaiting test, test-generate, pass/fail decision with comment; gated by `canDecideTests` | Done |
 | UXD2 | M | Approver workbench (TEMPLATE_APPROVER) | role exists, no UI/landing | "My approval queue" view: templates awaiting approval, approve/reject with comment; gated by `canDecideApprovals` | Done |
 | UXD3 | M | Master-designer journey (MASTER_DESIGNER) | backend authorizes, no nav | Landing + nav for `MASTER_DESIGNER`; access to master + template authoring per matrix §4–5 | Done |
-| UXD4 | L | Replace governance role-home placeholders with real dashboards | `RoleHomeView` placeholders | Global/Group governance homes show actionable summaries (pending reviews, awaiting publish, recent audit) instead of placeholder cards | In Progress |
+| UXD4 | L | Replace governance role-home placeholders with real dashboards | `RoleHomeView` placeholders | Global/Group governance homes show actionable summaries (pending reviews, awaiting publish, recent audit) instead of placeholder cards | Done |
 
 ### UX-E Polish: placeholders, leakage, states, i18n strings
 
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
 | UXE1 | M | Remove internal-identifier leakage in Role-home | `RoleHomeView.vue` L44, L62 show routeKey/path | No raw route keys or URLs shown to users; replace with human labels | Done |
-| UXE2 | M | i18n-ize remaining hardcoded strings | `LoginView` placeholder/aria, `ManagementShell` aria, export filename, raw status enums | All user-facing strings via message keys; status enums mapped to localized labels | In Progress |
-| UXE3 | M | Standard empty/error/not-found states | detail views blank on load failure; no pagination | Shared not-found + load-error components for master/template detail; pagination on audit + lists | Not Started |
-| UXE4 | L | Lifecycle audit export + parity | only management events export | Lifecycle tab gets export; consistent filenames via i18n | Not Started |
+| UXE2 | M | i18n-ize remaining hardcoded strings | `LoginView` placeholder/aria, `ManagementShell` aria, export filename, raw status enums | All user-facing strings via message keys; status enums mapped to localized labels | Done |
+| UXE3 | M | Standard empty/error/not-found states | detail views blank on load failure; no pagination | Shared not-found + load-error components for master/template detail; pagination on audit + lists | Done |
+| UXE4 | L | Lifecycle audit export + parity | only management events export | Lifecycle tab gets export; consistent filenames via i18n | Done |
 
 ### UX-F Upgradeability foundations
 
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
-| UXF1 | H | Make i18n truly multi-locale-ready | only `en` registered; no switcher | Locale registry supports additive bundles + fallback to `en`; locale switcher in shell; `html lang` wired; date/number via i18n; adding a locale = drop-in bundle, no component edits | Not Started |
+| UXF1 | H | Make i18n truly multi-locale-ready | only `en` registered; no switcher | Locale registry supports additive bundles + fallback to `en`; locale switcher in shell; `html lang` wired; date/number via i18n; adding a locale = drop-in bundle, no component edits | Done |
 | UXF2 | M | Config-driven navigation from a single capability source | X2 | Nav + route guards derive from one backend-provided capability/route map; adding a route/role needs no frontend role-list edit | Done |
-| UXF3 | M | Per-domain API policy save + impact preview + policyVersion | X3; matrix §7 | Policy edited/saved per domain (AD group, output, batch, encryption, default route) with impact preview and version; surfaces all fields currently submitted silently (outputFormats/modes/pdfEncryption) | Not Started |
-| UXF4 | L | Config-driven brand theming | X4 | Brands defined in config/data, not hardcoded tokens; adding a brand = config entry + assets | Not Started |
-| UXF5 | L | Environment selector for contract/runtime views | X5; `environment="dev"` hardcoded | Environment chosen from allowed list (not hardcoded); used by caller-contract and future export/import | Not Started |
+| UXF3 | M | Per-domain API policy save + impact preview + policyVersion | X3; matrix §7 | Policy edited/saved per domain (AD group, output, batch, encryption, default route) with impact preview and version; surfaces all fields currently submitted silently (outputFormats/modes/pdfEncryption) | Done (monolithic save + impact preview + full field UI; per-domain PUT → P17-T02) |
+| UXF4 | L | Config-driven brand theming | X4 | Brands defined in config/data, not hardcoded tokens; adding a brand = config entry + assets | Done |
+| UXF5 | L | Environment selector for contract/runtime views | X5; `environment="dev"` hardcoded | Environment chosen from allowed list (not hardcoded); used by caller-contract and future export/import | Done |
 
 ### UX-G Confirmed large domains — scheduled as the next phase (Wave D, §4.5)
 
@@ -138,9 +138,9 @@ Each is behavior-spec-first and gets its own slice plan under `docs/plan/detail/
 
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
-| UXG1 | H | Clause / content module lifecycle | matrix §5.1; no module | Behavior spec + phase plan; backend module + UI for clause draft→approve→deprecate with group/share scope | Not Started |
-| UXG2 | M | Collaboration to-dos + timeout escalation | matrix §5; no API | Behavior spec + phase plan; to-do queue, timeout thresholds, escalation (no auto-decision) | Not Started |
-| UXG3 | M | Template export / import across environments | requirements §; no API | Behavior spec + phase plan; export approved template, import → restart from draft | Not Started |
+| UXG1 | H | Clause / content module lifecycle | matrix §5.1; no module | Behavior spec + phase plan; backend module + UI for clause draft→approve→deprecate with group/share scope | Done (spec: P14-T01; implementation → P14) |
+| UXG2 | M | Collaboration to-dos + timeout escalation | matrix §5; no API | Behavior spec + phase plan; to-do queue, timeout thresholds, escalation (no auto-decision) | Done (spec: P14-T02; implementation → P14) |
+| UXG3 | M | Template export / import across environments | requirements §; no API | Behavior spec + phase plan; export approved template, import → restart from draft | Done (spec: P14-T03; implementation → P14) |
 
 ---
 
@@ -185,9 +185,9 @@ catalog, relevant ADRs) during each task's post-task doc sync — not silently.
 | Wave | Scope | Status |
 | --- | --- | --- |
 | Wave A | UX-A + UX-B | Done |
-| Wave B | UX-C + UX-D + UX-E | In Progress (UXC4, UXD4, UXE2–UXE4 open; UXC3 template governance Done) |
-| Wave C | UX-F | Not Started |
-| Wave D | UX-G (clause modules, collaboration to-dos, export/import) — own phase | Not Started |
+| Wave B | UX-C + UX-D + UX-E | Done (2026-06-23; gates: backend `mvn verify`, frontend lint/type-check/test/build) |
+| Wave C | UX-F | Done (2026-06-23; UXF1/3/4/5 + P16-T08 + P17 impact-preview seam) |
+| Wave D | UX-G (clause modules, collaboration to-dos, export/import) — spec in P14 | Spec Done (2026-06-23); implementation → P14 phase |
 
 ### 5.1 Wave A/B delivery evidence (2026-06-23)
 
@@ -215,3 +215,18 @@ Frontend gates green: `pnpm -C frontend lint` / `type-check` / `test` (81 tests)
 | Template governance | `POST .../lifecycle/stop|restore|deprecate`; `TemplateCallabilitySupport`; runtime honors STOPPED/DEPRECATED/version STOPPED; `TemplateDetailView` governance panel |
 | Shell a11y | `ManagementShell` nav `aria-label` i18n key |
 | i18n | New keys in `frontend/src/i18n/locales/en.ts` (authoring, rules, publishGate, common) |
+
+### 5.2 Wave C/D delivery evidence (2026-06-23)
+
+Backend gates: `mvn -B -ntp -f backend/pom.xml verify "-Dspring-boot.repackage.skip=true"` — 161 tests.
+
+Frontend gates: `pnpm -C frontend lint` / `type-check` / `test` (88) / `build`.
+
+| Module | Evidence |
+| --- | --- |
+| P16-T08 logical delete | `TemplateDeleteService`; `DELETE /templates/{id}`; `deleteTemplates` capability; excluded from lists/runtime |
+| UXF3 policy preview | `ApiPolicyImpactPreviewService`; `POST .../api/policy/impact-preview`; full policy form + preview dialog |
+| UXF1 locale | `localeRegistry.ts`; `zh-CN` bundle; shell switcher; `html lang` |
+| UXF4 brand | `config/brands.ts`; registry-driven tokens |
+| UXF5 environment | `config/environments.ts`; contract panel selector |
+| Wave D spec | P14 behavior specs confirmed; UXG1–3 → implementation deferred to P14 activation |

@@ -5,22 +5,22 @@ import type {
   BindingValidationResult,
   CompositionRuleInput,
   CreateTemplatePayload,
+  DeleteTemplatePayload,
   LifecycleCommentPayload,
   LifecycleDecisionPayload,
   LifecycleGovernancePayload,
   LifecycleImpactPreview,
   LifecycleImpactPreviewRequest,
   PreviewRecord,
-  UpdateTemplateMetadataPayload,
   PublishTemplatePayload,
   RuleValidationResult,
   TemplateDetail,
   TemplateSummary,
   TestDataSet,
   TestGeneratePayload,
+  UpdateTemplateMetadataPayload,
   UpsertBindingPayload,
   UpsertTestDataSetPayload,
-  UpdateTemplateMetadataPayload,
   UpsertVariablePayload,
   VariableSchema,
 } from '@/types/template'
@@ -45,6 +45,13 @@ export async function getTemplate(templateId: string): Promise<TemplateDetail> {
 export async function createTemplate(payload: CreateTemplatePayload): Promise<TemplateDetail> {
   const response = await http.post<ApiEnvelope<TemplateDetail>>('/templates', payload)
   return unwrap(response.data)
+}
+
+export async function deleteTemplate(
+  templateId: string,
+  payload: DeleteTemplatePayload,
+): Promise<void> {
+  await http.delete(`/templates/${templateId}`, { data: payload })
 }
 
 export async function submitForTest(
@@ -175,52 +182,6 @@ export async function updateTemplateMetadata(
   payload: UpdateTemplateMetadataPayload,
 ): Promise<TemplateDetail> {
   const response = await http.patch<ApiEnvelope<TemplateDetail>>(`/templates/${templateId}`, payload)
-  return unwrap(response.data)
-}
-
-export async function fetchLifecycleImpactPreview(
-  templateId: string,
-  payload: LifecycleImpactPreviewRequest,
-): Promise<LifecycleImpactPreview> {
-  const response = await http.post<ApiEnvelope<LifecycleImpactPreview>>(
-    `/templates/${templateId}/lifecycle/impact-preview`,
-    payload,
-  )
-  return unwrap(response.data)
-}
-
-export async function deactivateTemplateVersion(
-  templateId: string,
-  releaseVersion: string,
-  payload: LifecycleGovernancePayload,
-): Promise<TemplateDetail> {
-  const response = await http.post<ApiEnvelope<TemplateDetail>>(
-    `/templates/${templateId}/versions/${encodeURIComponent(releaseVersion)}/deactivate`,
-    payload,
-  )
-  return unwrap(response.data)
-}
-
-export async function restoreTemplateVersion(
-  templateId: string,
-  releaseVersion: string,
-  payload: LifecycleGovernancePayload,
-): Promise<TemplateDetail> {
-  const response = await http.post<ApiEnvelope<TemplateDetail>>(
-    `/templates/${templateId}/versions/${encodeURIComponent(releaseVersion)}/restore`,
-    payload,
-  )
-  return unwrap(response.data)
-}
-
-export async function updateTemplateMetadata(
-  templateId: string,
-  payload: UpdateTemplateMetadataPayload,
-): Promise<TemplateDetail> {
-  const response = await http.patch<ApiEnvelope<TemplateDetail>>(
-    `/templates/${templateId}`,
-    payload,
-  )
   return unwrap(response.data)
 }
 

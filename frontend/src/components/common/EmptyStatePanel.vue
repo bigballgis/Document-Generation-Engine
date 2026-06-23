@@ -1,8 +1,18 @@
 <script setup lang="ts">
-defineProps<{
-  title: string
-  description?: string
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const props = defineProps<{
+  titleKey: string
+  descriptionKey?: string
 }>()
+
+const { t, te } = useI18n()
+
+const title = computed(() => (te(props.titleKey) ? t(props.titleKey) : props.titleKey))
+const description = computed(() =>
+  props.descriptionKey && te(props.descriptionKey) ? t(props.descriptionKey) : '',
+)
 </script>
 
 <template>

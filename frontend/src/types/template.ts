@@ -5,6 +5,7 @@ export type TemplateLifecycleStatus =
   | 'PENDING_RELEASE'
   | 'PUBLISHED'
   | 'STOPPED'
+  | 'DELETED'
   | 'DEPRECATED'
 
 export type LifecycleDecision = 'PASSED' | 'FAILED' | 'APPROVED' | 'REJECTED'
@@ -120,7 +121,7 @@ export interface LifecycleImpactPreview {
 
 export interface UpdateTemplateMetadataPayload {
   name?: string
-  description?: string
+  description?: string | null
 }
 
 export interface LifecycleDecisionPayload {
@@ -245,6 +246,12 @@ export interface UpsertApiPolicyPayload {
   pdfEncryptionEnabled: boolean
 }
 
+export interface ApiPolicyImpactPreview {
+  currentPolicyVersion: number | null
+  nextPolicyVersion: number | null
+  changedFields: string[]
+}
+
 export interface ApiCredentialSummary {
   credentialId: string
   externalId: string
@@ -259,4 +266,8 @@ export interface ApiCredentialCreated {
   secret: string
   status: string
   createdAt: string
+}
+
+export interface DeleteTemplatePayload {
+  reason: string
 }

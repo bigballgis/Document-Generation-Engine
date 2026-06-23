@@ -152,4 +152,8 @@ public class TemplateEntity {
         this.updatedBy = updatedBy;
         this.updatedAt = Instant.now();
     }
+
+    public void setDeletedAt(Instant deletedAt) {
+        this.deletedAt = deletedAt;
+    }
 }

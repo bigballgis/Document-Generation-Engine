@@ -9,6 +9,7 @@ public enum LifecycleAction {
     STOP,
     RESTORE,
     DEPRECATE,
+    DELETE,
     DEACTIVATE_VERSION,
     RESTORE_VERSION
 }

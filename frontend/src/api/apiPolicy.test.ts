@@ -80,6 +80,34 @@ describe('apiPolicy API', () => {
     expect(policy.policyVersion).toBe(2)
   })
 
+  it('loads API policy impact preview', async () => {
+    vi.mocked(http.post).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          currentPolicyVersion: 2,
+          nextPolicyVersion: 3,
+          changedFields: ['outputFormats', 'pdfEncryptionEnabled'],
+        },
+      },
+    })
+
+    const payload = {
+      allowedAdGroups: ['APP-DOCGEN-RETAIL'],
+      defaultRouteReleaseVersion: '1.0.0',
+      outputFormats: ['DOCX', 'PDF'],
+      outputModes: ['SYNC_STREAM'],
+      batchEnabled: true,
+      maxBatchSize: 25,
+      docxEncryptionEnabled: true,
+      pdfEncryptionEnabled: true,
+    }
+    const preview = await apiPolicyApi.fetchApiPolicyImpactPreview('tpl-1', payload)
+
+    expect(http.post).toHaveBeenCalledWith('/templates/tpl-1/api/policy/impact-preview', payload)
+    expect(preview.nextPolicyVersion).toBe(3)
+  })
+
   it('creates API credential', async () => {
     vi.mocked(http.post).mockResolvedValue({
       data: {

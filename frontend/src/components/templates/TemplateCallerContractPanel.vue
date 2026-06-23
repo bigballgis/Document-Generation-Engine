@@ -1,12 +1,21 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getCallerContract } from '@/api/contract'
+import {
+  ALLOWED_ENVIRONMENTS,
+  ENVIRONMENT_LABEL_KEY,
+  resolveRuntimeEnvironment,
+  type RuntimeEnvironment,
+} from '@/config/environments'
 import type { CallerContract } from '@/types/contract'
 
 const props = defineProps<{
   templateId: string
-  environment?: string
+  environment?: RuntimeEnvironment
+}>()
+const emit = defineEmits<{
+  'update:environment': [environment: RuntimeEnvironment]
 }>()
 
 const { t, te } = useI18n()
@@ -14,7 +23,14 @@ const loading = ref(false)
 const errorMessageKey = ref<string | null>(null)
 const contract = ref<CallerContract | null>(null)
 
-const environment = computed(() => props.environment ?? 'dev')
+const selectedEnvironment = ref<RuntimeEnvironment>(resolveRuntimeEnvironment(props.environment))
+const environmentOptions = computed(() =>
+  ALLOWED_ENVIRONMENTS.map((environment) => ({
+    value: environment,
+    label: t(ENVIRONMENT_LABEL_KEY[environment]),
+  })),
+)
+const currentEnvironment = computed(() => selectedEnvironment.value)
 
 const versionComparison = computed(() => {
   if (!contract.value) {
@@ -28,17 +44,43 @@ const versionComparison = computed(() => {
   }))
 })
 
-onMounted(async () => {
+async function loadContract() {
   loading.value = true
   errorMessageKey.value = null
   try {
-    contract.value = await getCallerContract(props.templateId, environment.value)
+    contract.value = await getCallerContract(props.templateId, currentEnvironment.value)
   } catch {
     errorMessageKey.value = 'templates.contract.error.load'
   } finally {
     loading.value = false
   }
-})
+}
+
+watch(
+  () => props.environment,
+  (value) => {
+    const resolved = resolveRuntimeEnvironment(value)
+    if (selectedEnvironment.value !== resolved) {
+      selectedEnvironment.value = resolved
+    }
+  },
+  { immediate: true },
+)
+
+watch(
+  selectedEnvironment,
+  (value) => {
+    emit('update:environment', value)
+  },
+)
+
+watch(
+  [() => props.templateId, currentEnvironment],
+  () => {
+    void loadContract()
+  },
+  { immediate: true },
+)
 
 function errorMessage(key: string | null): string {
   if (!key) {
@@ -61,6 +103,19 @@ function errorMessage(key: string | null): string {
     />
 
     <template v-else-if="contract">
+      <div class="toolbar">
+        <el-form-item :label="t('templates.contract.environment')">
+          <el-select v-model="selectedEnvironment" class="environment-select">
+            <el-option
+              v-for="option in environmentOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
+        </el-form-item>
+      </div>
+
       <p class="panel-description">{{ t('templates.contract.description') }}</p>
 
       <h3>{{ t('templates.contract.sections.paths') }}</h3>
@@ -141,6 +196,14 @@ function errorMessage(key: string | null): string {
 .panel-description {
   margin: 0 0 1rem;
   color: var(--text-muted);
+}
+
+.toolbar {
+  margin-bottom: 1rem;
+}
+
+.environment-select {
+  width: 180px;
 }
 
 .path-list,

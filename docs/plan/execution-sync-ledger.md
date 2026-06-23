@@ -42,13 +42,13 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 | P11 | Done | Batch + async task lifecycle |
 | P12 | Not Started | Deferred enhancements catch-all (non-active, no single active slice) |
 | P13 | Done | Identity & group administration (user + group management plane); green gates 2026-06-23 — see P13 mirror block |
-| P14 | Not Started | Confirmed large domains (renumbered from P13) |
+| P14 | Spec Done (2026-06-23) | Confirmed large domains — behavior specs in P14; implementation Not Started |
 | P15 | Not Started | Kubernetes deployment & container hardening — implements unrealized ADR-0030 K8s/container rows; _evidence pending_ (manifests/Helm, hardened images, CI `kubeconform`/`helm lint`) |
-| P16 | Not Started | Template & version lifecycle governance completeness (gap G1: stop/restore/deprecate + version deactivate/restore + impact preview); _evidence pending_ |
-| P17 | Not Started | Per-domain API policy governance (gap G2: config-domain save + impact preview + policyVersion + rollback); _evidence pending_ |
+| P16 | Done (2026-06-23) | Template lifecycle governance + logical delete (T01–T08); gates: `mvn verify` 161 tests |
+| P17 | In Progress | Impact-preview seam Done (T03/T09 partial); per-domain save/rollback open |
+| P20 | Done (2026-06-23) | i18n multi-locale + UI upgradeability (Wave C UXF1/4/5); gates: frontend 88 tests + backend verify where touched |
 | P18 | Not Started | Structured authoring & rendering-fidelity engine (gap G3: node matrix, style catalog, paste cleaning, render profile); _evidence pending_ |
 | P19 | Not Started | Template verifiability, publish gate & decision forms (gaps G4/G5: coverage thresholds, batch test, live checklist, opinion forms, risk prompts); _evidence pending_ |
-| P20 | Not Started | i18n multi-locale readiness & UI upgradeability (gap G6: locale registry/switcher/fallback, config-driven brand, environment selector); _evidence pending_ |
 
 **Active phase:** None — no single active phase slice (P13 completed Done 2026-06-23).
 P12 remains the non-active deferred-enhancements catch-all.
@@ -118,9 +118,9 @@ Source: [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimizatio
 | Wave | Scope | Status | Evidence |
 | --- | --- | --- | --- |
 | UX Wave A | UX-A + UX-B (role gating, half-built interactions) | Done | Backend: `ManagementCapabilitiesService`, `RouteVisibilityService`, `V14` seeds; Frontend: `useCapabilities`, `roles.ts`, `TemplateCreateDialog`, `apiPolicy` rotate/revoke, `http.ts` 401/403, `useConfirmAction`, authoring persist (UXB5) |
-| UX Wave B | UX-C + UX-D + UX-E (lifecycle, workbenches, polish) | In Progress (UXC4, UXD4, UXE2–UXE4 open) | Template governance stop/restore/deprecate (UXC3), publish gate, cross-links, authoring persist |
-| UX Wave C | UX-F (upgradeability foundations) | Not Started | — |
-| UX Wave D | UX-G → P14 confirmed large domains | Not Started | — |
+| UX Wave B | UX-C + UX-D + UX-E (lifecycle, workbenches, polish) | Done (2026-06-23) | UXC3–UXC5, UXC4 metadata edit, UXD4 governance dashboard, UXE2–UXE4 polish; gates: `mvn verify`, `pnpm lint/type-check/test/build` |
+| UX Wave C | UX-F (upgradeability foundations) | Done (2026-06-23) | UXF1/4/5 + P16-T08 delete + P17 impact-preview seam; backend 161 tests, frontend 88 tests |
+| UX Wave D | UX-G → P14 confirmed large domains | Spec Done (2026-06-23) | Behavior specs in P14 + matrix + ADR-0019; zero implementation until P14 activation |
 
 **Backend gate evidence (UX Wave A/B, 2026-06-23):** `mvn -B -ntp -f backend/pom.xml verify "-Dspring-boot.repackage.skip=true"` — 134 tests green (1 skipped); includes `TemplateLifecycleGovernanceServiceTest`, `TemplatePlatformSliceTest#stopRestoreAndDeprecatePublishedTemplate`.
 

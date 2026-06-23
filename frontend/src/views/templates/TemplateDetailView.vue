@@ -2,18 +2,29 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environments'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import TemplateCallerContractPanel from '@/components/templates/TemplateCallerContractPanel.vue'
 import TemplateAuthoringPanel from '@/components/templates/TemplateAuthoringPanel.vue'
 import TemplateRuleConfigurator from '@/components/templates/TemplateRuleConfigurator.vue'
 import TemplatePreviewPanel from '@/components/templates/TemplatePreviewPanel.vue'
 import TemplateTestDataSetPanel from '@/components/templates/TemplateTestDataSetPanel.vue'
+import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { MASTER_DETAIL_PATH_PREFIX, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
-import type { BindingValidationResult, PreviewRecord, UpsertApiPolicyPayload } from '@/types/template'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import type {
+  BindingValidationResult,
+  DeleteTemplatePayload,
+  LifecycleGovernanceAction,
+  PreviewRecord,
+  TemplateLifecycleStatus,
+  UpsertApiPolicyPayload,
+} from '@/types/template'
 
 const { t, te } = useI18n()
 const route = useRoute()
@@ -26,7 +37,9 @@ const {
   publishTemplates,
   stopTemplates,
   restoreOrDeprecateTemplates,
+  manageReleaseVersionState,
   manageApiPolicy,
+  deleteTemplates,
 } = useCapabilities()
 const { confirmAction } = useConfirmAction()
 
@@ -39,6 +52,13 @@ const lastPreview = ref<PreviewRecord | null>(null)
 const selectedTestDataSetId = ref<string | null>(null)
 const bindingGateResult = ref<BindingValidationResult | null>(null)
 const loadingPublishGate = ref(false)
+const metadataEditOpen = ref(false)
+const loadFailed = ref(false)
+const versionStatuses = ref<Record<string, TemplateLifecycleStatus>>({})
+const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
+
+const policyOutputFormatOptions = ['DOCX', 'PDF']
+const policyOutputModeOptions = ['SYNC_STREAM', 'ASYNC_CALLBACK', 'INLINE']
 
 const policyForm = reactive<UpsertApiPolicyPayload>({
   allowedAdGroups: [],
@@ -107,6 +127,34 @@ const showDeprecateAction = computed(
 const showGovernanceSection = computed(
   () => showStopAction.value || showRestoreAction.value || showDeprecateAction.value,
 )
+const showMetadataEdit = computed(() => {
+  const status = template.value?.lifecycleStatus
+  if (!status || !authorTemplates.value) {
+    return false
+  }
+  return status !== 'PUBLISHED' && status !== 'STOPPED' && status !== 'DEPRECATED'
+})
+const showDeleteTemplateAction = computed(
+  () => deleteTemplates.value && template.value?.lifecycleStatus !== 'DELETED',
+)
+const showVersionsSection = computed(
+  () =>
+    manageReleaseVersionState.value &&
+    template.value?.lifecycleStatus === 'PUBLISHED' &&
+    Boolean(template.value.releaseVersion),
+)
+const publishedVersions = computed(() => {
+  const releaseVersion = template.value?.releaseVersion
+  if (!releaseVersion) {
+    return []
+  }
+  return [
+    {
+      releaseVersion,
+      lifecycleStatus: versionStatuses.value[releaseVersion] ?? 'PUBLISHED',
+    },
+  ]
+})
 
 const publishGateItems = computed(() => [
   {
@@ -197,14 +245,47 @@ watch(
   { immediate: true },
 )
 
+async function syncVersionStatusFromPreview(releaseVersion: string) {
+  try {
+    const preview = await templatesStore.fetchLifecycleImpactPreview(templateId.value, {
+      action: 'DEACTIVATE_VERSION',
+      releaseVersion,
+    })
+    versionStatuses.value = {
+      ...versionStatuses.value,
+      [releaseVersion]: preview.callableReleaseVersions.includes(releaseVersion)
+        ? 'PUBLISHED'
+        : 'STOPPED',
+    }
+  } catch {
+    // Keep local optimistic state when preview fails.
+  }
+}
+
 async function loadTemplate() {
+  loadFailed.value = false
   try {
     await templatesStore.fetchTemplate(templateId.value)
+    syncVersionStatuses()
+    const releaseVersion = template.value?.releaseVersion
+    if (template.value?.lifecycleStatus === 'PUBLISHED' && releaseVersion) {
+      await syncVersionStatusFromPreview(releaseVersion)
+    }
     if (showPolicyPanel.value) {
       await loadPolicyData()
     }
   } catch {
-    // Error surfaced via store message key.
+    loadFailed.value = true
+  }
+}
+
+function syncVersionStatuses() {
+  const releaseVersion = template.value?.releaseVersion
+  if (template.value?.lifecycleStatus === 'PUBLISHED' && releaseVersion) {
+    versionStatuses.value = {
+      ...versionStatuses.value,
+      [releaseVersion]: versionStatuses.value[releaseVersion] ?? 'PUBLISHED',
+    }
   }
 }
 
@@ -330,41 +411,91 @@ async function handlePublish() {
 
 type GovernanceAction = 'stop' | 'restore' | 'deprecate'
 
+const governanceActionConfig = {
+  stop: {
+    previewAction: 'STOP' as LifecycleGovernanceAction,
+    titleKey: 'templates.lifecycle.stopTitle',
+    reasonKey: 'templates.lifecycle.stopReasonPrompt',
+    confirmTitleKey: 'templates.lifecycle.confirmStopTitle',
+    confirmMessageKey: 'templates.lifecycle.confirmStopMessage',
+    successKey: 'templates.lifecycle.stopSuccess',
+  },
+  restore: {
+    previewAction: 'RESTORE' as LifecycleGovernanceAction,
+    titleKey: 'templates.lifecycle.restoreTitle',
+    reasonKey: 'templates.lifecycle.restoreReasonPrompt',
+    confirmTitleKey: 'templates.lifecycle.confirmRestoreTitle',
+    confirmMessageKey: 'templates.lifecycle.confirmRestoreMessage',
+    successKey: 'templates.lifecycle.restoreSuccess',
+  },
+  deprecate: {
+    previewAction: 'DEPRECATE' as LifecycleGovernanceAction,
+    titleKey: 'templates.lifecycle.deprecateTitle',
+    reasonKey: 'templates.lifecycle.deprecateReasonPrompt',
+    confirmTitleKey: 'templates.lifecycle.confirmDeprecateTitle',
+    confirmMessageKey: 'templates.lifecycle.confirmDeprecateMessage',
+    successKey: 'templates.lifecycle.deprecateSuccess',
+  },
+} as const
+
+async function buildImpactPreviewMessage(
+  action: LifecycleGovernanceAction,
+  releaseVersion?: string,
+): Promise<string> {
+  const preview = await templatesStore.fetchLifecycleImpactPreview(templateId.value, {
+    action,
+    releaseVersion,
+  })
+  const summary = te(preview.summaryMessageKey)
+    ? t(preview.summaryMessageKey)
+    : t(`templates.governance.impactSummary.${action}`)
+  const callable = preview.callableReleaseVersions.length
+    ? t('templates.governance.impactCallableVersions', {
+        versions: preview.callableReleaseVersions.join(', '),
+      })
+    : t('templates.governance.impactNoCallableVersions')
+  const defaultRoute = preview.defaultRouteReleaseVersion
+    ? t('templates.governance.impactDefaultRoute', {
+        version: preview.defaultRouteReleaseVersion,
+      })
+    : ''
+  const routeImpact = preview.defaultRouteImpacted
+    ? t('templates.governance.impactDefaultRouteAffected')
+    : ''
+  return [summary, callable, defaultRoute, routeImpact, t('templates.governance.impactConfirmPrompt')]
+    .filter(Boolean)
+    .join('\n\n')
+}
+
 async function handleGovernanceAction(action: GovernanceAction) {
+  const config = governanceActionConfig[action]
   let reason = ''
   try {
-    const result = await ElMessageBox.prompt(
-      t(`templates.lifecycle.${action}ReasonPrompt`),
-      t(`templates.lifecycle.${action}Title`),
-      {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        inputValidator: (value) =>
-          value.trim().length > 0 ? true : t('templates.lifecycle.reasonRequired'),
-      },
-    )
+    const result = await ElMessageBox.prompt(t(config.reasonKey), t(config.titleKey), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
+      inputValidator: (value) =>
+        value.trim().length > 0 ? true : t('templates.lifecycle.reasonRequired'),
+    })
     reason = result.value.trim()
   } catch {
     return
   }
 
-  const confirmKeys = {
-    stop: {
-      titleKey: 'templates.lifecycle.confirmStopTitle',
-      messageKey: 'templates.lifecycle.confirmStopMessage',
-    },
-    restore: {
-      titleKey: 'templates.lifecycle.confirmRestoreTitle',
-      messageKey: 'templates.lifecycle.confirmRestoreMessage',
-    },
-    deprecate: {
-      titleKey: 'templates.lifecycle.confirmDeprecateTitle',
-      messageKey: 'templates.lifecycle.confirmDeprecateMessage',
-    },
-  } as const
+  try {
+    const impactMessage = await buildImpactPreviewMessage(config.previewAction)
+    await ElMessageBox.confirm(impactMessage, t('templates.governance.impactPreviewTitle'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning',
+    })
+  } catch {
+    return
+  }
 
   const confirmed = await confirmAction({
-    ...confirmKeys[action],
+    titleKey: config.confirmTitleKey,
+    messageKey: config.confirmMessageKey,
     type: 'warning',
   })
   if (!confirmed) {
@@ -380,18 +511,139 @@ async function handleGovernanceAction(action: GovernanceAction) {
     } else {
       await templatesStore.deprecateTemplate(templateId.value, payload)
     }
-    ElMessage.success(t(`templates.lifecycle.${action}Success`))
+    ElMessage.success(t(config.successKey))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
   }
 }
 
-async function handleSavePolicy() {
+async function handleVersionAction(
+  releaseVersion: string,
+  action: 'deactivate' | 'restore',
+) {
+  const previewAction: LifecycleGovernanceAction =
+    action === 'deactivate' ? 'DEACTIVATE_VERSION' : 'RESTORE_VERSION'
+  const reasonKey =
+    action === 'deactivate'
+      ? 'templates.versions.deactivateReasonPrompt'
+      : 'templates.versions.restoreReasonPrompt'
+  const titleKey =
+    action === 'deactivate'
+      ? 'templates.versions.deactivateTitle'
+      : 'templates.versions.restoreTitle'
+  const confirmTitleKey =
+    action === 'deactivate'
+      ? 'templates.versions.confirmDeactivateTitle'
+      : 'templates.versions.confirmRestoreTitle'
+  const confirmMessageKey =
+    action === 'deactivate'
+      ? 'templates.versions.confirmDeactivateMessage'
+      : 'templates.versions.confirmRestoreMessage'
+  const successKey =
+    action === 'deactivate'
+      ? 'templates.versions.deactivateSuccess'
+      : 'templates.versions.restoreSuccess'
+
+  let reason = ''
   try {
-    await templatesStore.saveApiPolicy(templateId.value, { ...policyForm })
+    const result = await ElMessageBox.prompt(t(reasonKey), t(titleKey), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
+      inputValidator: (value) =>
+        value.trim().length > 0 ? true : t('templates.lifecycle.reasonRequired'),
+    })
+    reason = result.value.trim()
+  } catch {
+    return
+  }
+
+  try {
+    const impactMessage = await buildImpactPreviewMessage(previewAction, releaseVersion)
+    await ElMessageBox.confirm(impactMessage, t('templates.governance.impactPreviewTitle'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning',
+    })
+  } catch {
+    return
+  }
+
+  const confirmed = await confirmAction({
+    titleKey: confirmTitleKey,
+    messageKey: confirmMessageKey,
+    type: 'warning',
+  })
+  if (!confirmed) {
+    return
+  }
+
+  const payload = { reason, confirmed: true }
+  try {
+    if (action === 'deactivate') {
+      await templatesStore.deactivateTemplateVersion(templateId.value, releaseVersion, payload)
+      versionStatuses.value = { ...versionStatuses.value, [releaseVersion]: 'STOPPED' }
+    } else {
+      await templatesStore.restoreTemplateVersion(templateId.value, releaseVersion, payload)
+      versionStatuses.value = { ...versionStatuses.value, [releaseVersion]: 'PUBLISHED' }
+    }
+    await syncVersionStatusFromPreview(releaseVersion)
+    ElMessage.success(t(successKey))
+  } catch {
+    ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
+  }
+}
+
+async function handleMetadataUpdate(payload: { name: string; description: string | null }) {
+  try {
+    await templatesStore.updateTemplateMetadata(templateId.value, payload)
+    metadataEditOpen.value = false
+    ElMessage.success(t('templates.metadata.success'))
+  } catch {
+    ElMessage.error(errorMessage.value || t('templates.error.updateMetadata'))
+  }
+}
+
+async function handleSavePolicy() {
+  const payload = { ...policyForm }
+  try {
+    const impactMessage = await buildPolicyImpactPreviewMessage(payload)
+    await ElMessageBox.confirm(impactMessage, t('templates.policy.impact.title'), {
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning',
+    })
+  } catch {
+    return
+  }
+
+  try {
+    await templatesStore.saveApiPolicy(templateId.value, payload)
     ElMessage.success(t('templates.policy.saveSuccess'))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.savePolicy'))
+  }
+}
+
+async function buildPolicyImpactPreviewMessage(payload: UpsertApiPolicyPayload): Promise<string> {
+  try {
+    const impact = await templatesStore.previewApiPolicyImpact(templateId.value, payload)
+    const currentVersion = impact.currentPolicyVersion ?? templatesStore.apiPolicy?.policyVersion ?? 0
+    const nextVersion = impact.nextPolicyVersion ?? currentVersion + 1
+    const fields =
+      impact.changedFields.length > 0
+        ? impact.changedFields.join(', ')
+        : t('templates.policy.impact.noFieldChange')
+    return [
+      t('templates.policy.impact.versionChange', {
+        currentVersion,
+        nextVersion,
+      }),
+      t('templates.policy.impact.changedFields', { fields }),
+      t('templates.policy.impact.confirmPrompt'),
+    ].join('\n\n')
+  } catch {
+    ElMessage.error(errorMessage.value || t('templates.error.previewPolicyImpact'))
+    throw new Error('policy-impact-preview-failed')
   }
 }
 
@@ -439,6 +691,43 @@ async function handleRevokeCredential(credentialId: string) {
     ElMessage.error(errorMessage.value || t('templates.error.revokeCredential'))
   }
 }
+
+async function handleDeleteTemplate() {
+  let reason = ''
+  try {
+    const result = await ElMessageBox.prompt(
+      t('templates.deleteAction.reasonPrompt'),
+      t('templates.deleteAction.title'),
+      {
+        confirmButtonText: t('common.confirm'),
+        cancelButtonText: t('common.cancel'),
+        inputValidator: (value) =>
+          value.trim().length > 0 ? true : t('templates.deleteAction.reasonRequired'),
+      },
+    )
+    reason = result.value.trim()
+  } catch {
+    return
+  }
+
+  const confirmed = await confirmAction({
+    titleKey: 'templates.deleteAction.confirmTitle',
+    messageKey: 'templates.deleteAction.confirmMessage',
+    type: 'warning',
+  })
+  if (!confirmed) {
+    return
+  }
+
+  try {
+    const payload: DeleteTemplatePayload = { reason }
+    await templatesStore.deleteTemplate(templateId.value, payload)
+    ElMessage.success(t('templates.deleteAction.success'))
+    router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
+  } catch {
+    ElMessage.error(errorMessage.value || t('templates.error.delete'))
+  }
+}
 </script>
 
 <template>
@@ -452,20 +741,37 @@ async function handleRevokeCredential(credentialId: string) {
           <h1>{{ template.name }}</h1>
           <p>{{ t('templates.detail.groupLabel', { groupCode: template.groupCode }) }}</p>
         </div>
-        <TemplateStatusBadge :status="template.lifecycleStatus" />
+        <div class="header-actions">
+          <el-button
+            v-if="showDeleteTemplateAction"
+            type="danger"
+            plain
+            :loading="templatesStore.submitting"
+            @click="handleDeleteTemplate"
+          >
+            {{ t('templates.deleteAction.button') }}
+          </el-button>
+          <el-button v-if="showMetadataEdit" @click="metadataEditOpen = true">
+            {{ t('templates.metadata.edit') }}
+          </el-button>
+          <TemplateStatusBadge :status="template.lifecycleStatus" />
+        </div>
       </div>
     </header>
 
-    <el-alert
-      v-if="errorMessage"
-      class="page-alert"
-      type="error"
-      :title="errorMessage"
-      show-icon
-      :closable="false"
+    <LoadErrorPanel
+      v-if="loadFailed"
+      :message-key="templatesStore.lastErrorMessageKey ?? 'templates.error.loadDetail'"
+      @retry="loadTemplate"
     />
 
-    <el-skeleton v-if="templatesStore.loadingDetail" :rows="8" animated />
+    <el-skeleton v-else-if="templatesStore.loadingDetail" :rows="8" animated />
+
+    <EmptyStatePanel
+      v-else-if="!template"
+      title-key="templates.empty.notFoundTitle"
+      description-key="templates.empty.notFoundDescription"
+    />
 
     <template v-else-if="template">
       <el-card shadow="never" class="section-card">
@@ -635,6 +941,48 @@ async function handleRevokeCredential(credentialId: string) {
         </div>
       </el-card>
 
+      <el-card v-if="showVersionsSection" shadow="never" class="section-card">
+        <h2>{{ t('templates.versions.title') }}</h2>
+        <p class="governance-description">{{ t('templates.versions.description') }}</p>
+        <el-table :data="publishedVersions" stripe empty-text="">
+          <template #empty>
+            <el-empty :description="t('templates.versions.empty')" />
+          </template>
+          <el-table-column
+            prop="releaseVersion"
+            :label="t('templates.versions.releaseVersion')"
+            min-width="160"
+          />
+          <el-table-column :label="t('templates.versions.status')" width="160">
+            <template #default="{ row }">
+              <TemplateStatusBadge :status="row.lifecycleStatus" />
+            </template>
+          </el-table-column>
+          <el-table-column :label="t('templates.versions.actions')" min-width="220">
+            <template #default="{ row }">
+              <el-button
+                v-if="row.lifecycleStatus === 'PUBLISHED'"
+                link
+                type="warning"
+                :loading="templatesStore.submitting"
+                @click="handleVersionAction(row.releaseVersion, 'deactivate')"
+              >
+                {{ t('templates.versions.deactivate') }}
+              </el-button>
+              <el-button
+                v-if="row.lifecycleStatus === 'STOPPED'"
+                link
+                type="primary"
+                :loading="templatesStore.submitting"
+                @click="handleVersionAction(row.releaseVersion, 'restore')"
+              >
+                {{ t('templates.versions.restore') }}
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-card>
+
       <el-card v-if="showAuthoringSection" shadow="never" class="section-card">
         <h2>{{ t('templates.authoring.title') }}</h2>
         <TemplateAuthoringPanel
@@ -669,6 +1017,12 @@ async function handleRevokeCredential(credentialId: string) {
         <el-skeleton v-if="templatesStore.loadingPolicy" :rows="4" animated />
         <template v-else>
           <div class="policy-form">
+            <el-form-item
+              v-if="templatesStore.apiPolicy"
+              :label="t('templates.policy.policyVersion')"
+            >
+              <el-input :model-value="String(templatesStore.apiPolicy.policyVersion)" readonly />
+            </el-form-item>
             <el-form-item :label="t('templates.policy.defaultRouteReleaseVersion')">
               <el-input v-model="policyForm.defaultRouteReleaseVersion" />
             </el-form-item>
@@ -682,6 +1036,26 @@ async function handleRevokeCredential(credentialId: string) {
                 :placeholder="t('templates.policy.allowedAdGroupsPlaceholder')"
               />
             </el-form-item>
+            <el-form-item :label="t('templates.policy.outputFormats')">
+              <el-select v-model="policyForm.outputFormats" multiple filterable allow-create>
+                <el-option
+                  v-for="format in policyOutputFormatOptions"
+                  :key="format"
+                  :label="format"
+                  :value="format"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item :label="t('templates.policy.outputModes')">
+              <el-select v-model="policyForm.outputModes" multiple filterable allow-create>
+                <el-option
+                  v-for="mode in policyOutputModeOptions"
+                  :key="mode"
+                  :label="mode"
+                  :value="mode"
+                />
+              </el-select>
+            </el-form-item>
             <el-form-item :label="t('templates.policy.batchEnabled')">
               <el-switch v-model="policyForm.batchEnabled" />
             </el-form-item>
@@ -690,6 +1064,9 @@ async function handleRevokeCredential(credentialId: string) {
             </el-form-item>
             <el-form-item :label="t('templates.policy.docxEncryptionEnabled')">
               <el-switch v-model="policyForm.docxEncryptionEnabled" />
+            </el-form-item>
+            <el-form-item :label="t('templates.policy.pdfEncryptionEnabled')">
+              <el-switch v-model="policyForm.pdfEncryptionEnabled" />
             </el-form-item>
           </div>
           <div class="action-row">
@@ -738,9 +1115,22 @@ async function handleRevokeCredential(credentialId: string) {
 
       <el-card v-if="showPolicyPanel" shadow="never" class="section-card">
         <h2>{{ t('templates.contract.title') }}</h2>
-        <TemplateCallerContractPanel :template-id="templateId" environment="dev" />
+        <TemplateCallerContractPanel
+          :template-id="templateId"
+          :environment="selectedContractEnvironment"
+          @update:environment="selectedContractEnvironment = $event"
+        />
       </el-card>
     </template>
+
+    <TemplateMetadataEditDialog
+      v-if="template"
+      v-model="metadataEditOpen"
+      :initial-name="template.name"
+      :initial-description="template.description"
+      :loading="templatesStore.submitting"
+      @submit="handleMetadataUpdate"
+    />
 
     <el-dialog
       v-model="credentialSecretDialogVisible"
@@ -790,6 +1180,18 @@ async function handleRevokeCredential(credentialId: string) {
     margin: 0;
     color: var(--text-muted);
   }
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.governance-description {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
 }
 
 .page-alert {

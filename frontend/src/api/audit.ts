@@ -76,13 +76,3 @@ export async function exportLifecycleEvents(
   )
   return unwrap(response.data)
 }
-
-export async function exportLifecycleEvents(
-  filters: AuditQueryFilters,
-): Promise<LifecycleAuditExportResult> {
-  const response = await http.get<ApiEnvelope<LifecycleAuditExportResult>>(
-    '/admin/audit/lifecycle-events/export',
-    { params: buildAuditParams(filters) },
-  )
-  return unwrap(response.data)
-}

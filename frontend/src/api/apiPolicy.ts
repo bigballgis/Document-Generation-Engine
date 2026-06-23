@@ -3,6 +3,7 @@ import type { ApiEnvelope } from '@/types/session'
 import type {
   ApiCredentialCreated,
   ApiCredentialSummary,
+  ApiPolicyImpactPreview,
   ApiPolicy,
   UpsertApiPolicyPayload,
 } from '@/types/template'
@@ -32,6 +33,17 @@ export async function upsertApiPolicy(
 ): Promise<ApiPolicy> {
   const response = await http.put<ApiEnvelope<ApiPolicy>>(
     `/templates/${templateId}/api/policy`,
+    payload,
+  )
+  return unwrap(response.data)
+}
+
+export async function fetchApiPolicyImpactPreview(
+  templateId: string,
+  payload: UpsertApiPolicyPayload,
+): Promise<ApiPolicyImpactPreview> {
+  const response = await http.post<ApiEnvelope<ApiPolicyImpactPreview>>(
+    `/templates/${templateId}/api/policy/impact-preview`,
     payload,
   )
   return unwrap(response.data)

@@ -24,6 +24,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.stopTemplates()).isTrue();
         assertThat(capabilities.restoreOrDeprecateTemplates()).isTrue();
         assertThat(capabilities.manageApiPolicy()).isTrue();
+        assertThat(capabilities.deleteTemplates()).isTrue();
         assertThat(capabilities.readAudit()).isTrue();
     }
 
@@ -32,6 +33,7 @@ class ManagementCapabilitiesServiceTest {
         var capabilities = service.resolve(Set.of(ManagementRole.GROUP_ADMIN));
 
         assertThat(capabilities.manageApiPolicy()).isTrue();
+        assertThat(capabilities.deleteTemplates()).isFalse();
         assertThat(capabilities.manageMasters()).isTrue();
         assertThat(capabilities.readAudit()).isTrue();
     }
@@ -45,6 +47,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.restoreOrDeprecateTemplates()).isFalse();
         assertThat(capabilities.manageMasters()).isFalse();
         assertThat(capabilities.manageApiPolicy()).isFalse();
+        assertThat(capabilities.deleteTemplates()).isFalse();
         assertThat(capabilities.decideTests()).isFalse();
         assertThat(capabilities.decideApprovals()).isFalse();
     }
@@ -56,6 +59,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.decideTests()).isTrue();
         assertThat(capabilities.authorTemplates()).isFalse();
         assertThat(capabilities.manageApiPolicy()).isFalse();
+        assertThat(capabilities.deleteTemplates()).isFalse();
     }
 
     @Test
@@ -65,6 +69,7 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.decideApprovals()).isTrue();
         assertThat(capabilities.authorTemplates()).isFalse();
         assertThat(capabilities.manageApiPolicy()).isFalse();
+        assertThat(capabilities.deleteTemplates()).isFalse();
     }
 
     @Test
@@ -74,5 +79,6 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.readAudit()).isTrue();
         assertThat(capabilities.manageMasters()).isFalse();
         assertThat(capabilities.manageApiPolicy()).isFalse();
+        assertThat(capabilities.deleteTemplates()).isFalse();
     }
 }

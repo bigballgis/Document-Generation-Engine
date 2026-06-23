@@ -17,10 +17,25 @@ const mastersStore = useMastersStore()
 const sessionStore = useSessionStore()
 
 const uploadDialogOpen = ref(false)
+const currentPage = ref(1)
+const pageSize = 10
 
+const allMasters = computed(() => mastersStore.masters)
+const paginatedMasters = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return allMasters.value.slice(start, start + pageSize)
+})
+const groupedMasters = computed(() => {
+  const grouped = new Map<string, MasterDocumentSummary[]>()
+  for (const master of paginatedMasters.value) {
+    const existing = grouped.get(master.groupCode) ?? []
+    existing.push(master)
+    grouped.set(master.groupCode, existing)
+  }
+  return [...grouped.entries()]
+})
 const { manageMasters } = useCapabilities()
 const canUpload = computed(() => manageMasters.value)
-const groupedMasters = computed(() => [...mastersStore.mastersByGroup.entries()])
 const errorMessage = computed(() => {
   const key = mastersStore.lastErrorMessageKey
   if (!key) {
@@ -124,6 +139,15 @@ async function handleUpload(payload: {
 
     <el-empty v-else :description="t('masters.list.empty')" />
 
+    <el-pagination
+      v-if="allMasters.length > pageSize"
+      v-model:current-page="currentPage"
+      class="list-pagination"
+      layout="prev, pager, next"
+      :page-size="pageSize"
+      :total="allMasters.length"
+    />
+
     <MasterUploadDialog
       v-model="uploadDialogOpen"
       @submit="handleUpload"
@@ -180,5 +204,10 @@ async function handleUpload(payload: {
 
 :deep(.el-table__row) {
   cursor: pointer;
+}
+
+.list-pagination {
+  margin-top: 1rem;
+  justify-content: flex-end;
 }
 </style>

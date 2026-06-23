@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { BRAND_REGISTRY } from '@/config/brands'
 import { useAppStore } from '@/stores/app'
 import { useSessionStore } from '@/stores/session'
 import type { BrandPreset } from '@/theme/tokens'
@@ -21,8 +22,10 @@ const errorMessageKey = ref<string | null>(null)
 const submitting = ref(false)
 
 const brandOptions = computed(() => [
-  { value: 'REDBC' as BrandPreset, label: t('brand.redbc') },
-  { value: 'GREENBC' as BrandPreset, label: t('brand.greenbc') },
+  ...BRAND_REGISTRY.map((entry) => ({
+    value: entry.code as BrandPreset,
+    label: t(entry.labelKey),
+  })),
 ])
 
 const sessionExpired = computed(() => route.query.sessionExpired === '1')
@@ -55,7 +58,7 @@ async function submitLogin() {
 <template>
   <div class="login-page">
     <header class="login-header">
-      <div class="brand-slot" :aria-label="appStore.brand">
+      <div class="brand-slot" :aria-label="t('login.brandAriaLabel')">
         {{ appStore.brand }}
       </div>
       <h1>{{ t('app.title') }}</h1>
@@ -78,7 +81,8 @@ async function submitLogin() {
             v-model="form.username"
             autocomplete="username"
             maxlength="8"
-            placeholder="10000001"
+            :placeholder="t('login.usernamePlaceholder')"
+            :aria-label="t('login.username')"
           />
         </el-form-item>
         <el-form-item :label="t('login.password')">
@@ -87,6 +91,7 @@ async function submitLogin() {
             type="password"
             autocomplete="current-password"
             show-password
+            :aria-label="t('login.password')"
           />
         </el-form-item>
         <el-form-item :label="t('login.brandLabel')">

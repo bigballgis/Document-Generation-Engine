@@ -3,6 +3,7 @@ import {
   canAuthorTemplates,
   canDecideApprovals,
   canDecideTests,
+  canDeleteTemplates,
   canManageApiPolicy,
   canPublishTemplates,
   canManageReleaseVersionState,
@@ -29,6 +30,7 @@ export function useCapabilities() {
   const restoreOrDeprecateTemplates = computed(() => canRestoreOrDeprecateTemplates(context.value))
   const manageReleaseVersionState = computed(() => canManageReleaseVersionState(context.value))
   const manageApiPolicy = computed(() => canManageApiPolicy(context.value))
+  const deleteTemplates = computed(() => canDeleteTemplates(context.value))
 
   return {
     context,
@@ -42,5 +44,6 @@ export function useCapabilities() {
     restoreOrDeprecateTemplates,
     manageReleaseVersionState,
     manageApiPolicy,
+    deleteTemplates,
   }
 }

@@ -1,8 +1,7 @@
 # P14 — Confirmed Large Domains (Detailed Plan)
 
-**Phase status:** Not Started | **Depends on:** P2–P8  
-**Confirmed:** 2026-06-23 (maintainer decision — promoted from UX-G backlog)  
-**Renumbered:** 2026-06-23 (was P13; P13 reassigned to Identity & group administration)
+**Phase status:** Spec Done (2026-06-23) | **Depends on:** P2–P8  
+**Implementation status:** Not Started — behavior specs confirmed in this plan + `permission-matrix.md` §5/§5.1 + ADR-0019; zero backend/UI code until P14 activation.
 
 ## Behavior goal
 

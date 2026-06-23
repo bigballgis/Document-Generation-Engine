@@ -10,6 +10,7 @@ public record ManagementCapabilitiesView(
         boolean stopTemplates,
         boolean restoreOrDeprecateTemplates,
         boolean manageApiPolicy,
+        boolean deleteTemplates,
         boolean readAudit
 ) {
 }

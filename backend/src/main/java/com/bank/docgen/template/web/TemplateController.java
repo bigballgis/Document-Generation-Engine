@@ -23,6 +23,7 @@ import com.bank.docgen.template.api.TemplateRuleValidationRequest;
 import com.bank.docgen.template.api.TemplateRuleValidationView;
 import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.template.service.TemplateLifecycleService;
+import com.bank.docgen.template.service.TemplateDeleteService;
 import com.bank.docgen.template.service.TemplateRuleValidationService;
 import com.bank.docgen.template.service.TemplateService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,17 +49,20 @@ public class TemplateController {
 
     private final TemplateService templateService;
     private final TemplateLifecycleService templateLifecycleService;
+    private final TemplateDeleteService templateDeleteService;
     private final TemplateRuleValidationService templateRuleValidationService;
     private final TraceIdProvider traceIdProvider;
 
     public TemplateController(
             TemplateService templateService,
             TemplateLifecycleService templateLifecycleService,
+            TemplateDeleteService templateDeleteService,
             TemplateRuleValidationService templateRuleValidationService,
             TraceIdProvider traceIdProvider
     ) {
         this.templateService = templateService;
         this.templateLifecycleService = templateLifecycleService;
+        this.templateDeleteService = templateDeleteService;
         this.templateRuleValidationService = templateRuleValidationService;
         this.traceIdProvider = traceIdProvider;
     }
@@ -127,6 +131,16 @@ public class TemplateController {
             @AuthenticationPrincipal ManagementSessionClaims session
     ) {
         templateService.deleteVariable(templateId, variableKey, session);
+    }
+
+    @DeleteMapping("/{templateId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTemplate(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody LifecycleGovernanceRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session
+    ) {
+        templateDeleteService.deleteTemplate(templateId, body, session);
     }
 
     @PutMapping("/{templateId}/bindings/{anchorId}")
