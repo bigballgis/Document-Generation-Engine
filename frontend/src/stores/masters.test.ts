@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useMastersStore } from '@/stores/masters'
 import * as mastersApi from '@/api/masters'
+import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 
 vi.mock('@/api/masters', () => ({
   listMasters: vi.fn(),
@@ -22,6 +23,8 @@ const sampleDetail = {
   changeSummary: null,
   anchors: [{ anchorId: 'HEADER', displayLabel: 'Header block' }],
   reviewHistory: [],
+  createdBy: '10000001',
+  updatedBy: '10000001',
   createdAt: '2026-06-23T10:00:00Z',
   updatedAt: '2026-06-23T10:00:00Z',
 }
@@ -42,6 +45,7 @@ describe('masters store', () => {
         status: 'DRAFT',
         originalFilename: 'letterhead.docx',
         anchorCount: 1,
+        updatedBy: '10000001',
         updatedAt: '2026-06-23T10:00:00Z',
       },
       {
@@ -51,6 +55,7 @@ describe('masters store', () => {
         status: 'APPROVED',
         originalFilename: 'corp.docx',
         anchorCount: 3,
+        updatedBy: '10000002',
         updatedAt: '2026-06-23T11:00:00Z',
       },
     ])
@@ -89,5 +94,19 @@ describe('masters store', () => {
 
     expect(store.selectedMaster?.status).toBe('PENDING_REVIEW')
     expect(store.masters[0]?.status).toBe('PENDING_REVIEW')
+  })
+
+  it('records api error message key on list load failure', async () => {
+    vi.mocked(mastersApi.listMasters).mockRejectedValue(
+      axiosEnvelopeError(500, 'api.error.storage.operationFailed', {
+        code: 'STORAGE_OPERATION_FAILED',
+        category: 'STORAGE',
+        message: 'Object storage operation failed.',
+      }),
+    )
+    const store = useMastersStore()
+
+    await expect(store.fetchMasters()).rejects.toBeTruthy()
+    expect(store.lastErrorMessageKey).toBe('api.error.storage.operationFailed')
   })
 })

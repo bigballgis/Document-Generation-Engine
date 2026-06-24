@@ -13,6 +13,7 @@ import TemplateTestDataSetPanel from '@/components/templates/TemplateTestDataSet
 import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
 import TemplateReleaseVersionHistoryPanel from '@/components/templates/TemplateReleaseVersionHistoryPanel.vue'
 import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
+import TemplatePublishSummaryDialog from '@/components/templates/TemplatePublishSummaryDialog.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
@@ -20,10 +21,13 @@ import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
+import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { MASTER_DETAIL_PATH_PREFIX, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
+import * as templatesApi from '@/api/templates'
+import { conflictsWithExisting, suggestNextVersions, type SemverBumpLevel } from '@/utils/semver'
 import { resolveTemplateDetailTab, type TemplateDetailTab } from '@/views/templates/templateDetailTabs'
 import type {
   ApiCredentialSummary,
@@ -35,6 +39,7 @@ import type {
 } from '@/types/template'
 
 const { t, te } = useI18n()
+const { formatDateTime } = useLocaleFormatters()
 const route = useRoute()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
@@ -51,7 +56,10 @@ const {
 const { confirmAction } = useConfirmAction()
 
 const lifecycleComment = ref('')
+const publishBumpLevel = ref<SemverBumpLevel>('patch')
 const publishVersion = ref('1.0.0')
+const publishSummaryOpen = ref(false)
+const publishedReleaseVersions = ref<string[]>([])
 const credentialSecretDialogVisible = ref(false)
 const credentialSecretValue = ref('')
 const credentialSecretExternalId = ref('')
@@ -92,7 +100,7 @@ const { filters: credentialColumnFilters, filteredRows: filteredCredentials } = 
   [
     { key: 'externalId', getValue: (row) => row.externalId },
     { key: 'status', getValue: (row) => row.status, matchMode: 'exact' },
-    { key: 'createdAt', getValue: (row) => new Date(row.createdAt).toLocaleString() },
+    { key: 'createdAt', getValue: (row) => formatDateTime(row.createdAt) },
   ],
 )
 const sortCredentialsByCreatedAt = rowSortMethod<ApiCredentialSummary>((row) => row.createdAt)
@@ -185,14 +193,41 @@ const publishGateItems = computed(() => [
   {
     key: 'apiPolicy',
     label: t('templates.publishGate.apiPolicyConfigured'),
-    ready: true,
-    informational: true,
+    ready: Boolean(templatesStore.apiPolicy),
+    informational: false,
   },
 ])
 
-const publishGateReady = computed(() =>
-  publishGateItems.value.filter((item) => !item.informational).every((item) => item.ready),
+const suggestedVersions = computed(() =>
+  suggestNextVersions(template.value?.releaseVersion ?? null),
 )
+
+const publishVersionConflict = computed(() =>
+  conflictsWithExisting(publishVersion.value, publishedReleaseVersions.value),
+)
+
+const publishGateReady = computed(() =>
+  publishGateItems.value.filter((item) => !item.informational).every((item) => item.ready) &&
+  !publishVersionConflict.value,
+)
+
+const publishBumpOptions = computed(() => [
+  {
+    level: 'major' as SemverBumpLevel,
+    label: t('templates.lifecycle.bumpMajor'),
+    version: suggestedVersions.value.major,
+  },
+  {
+    level: 'minor' as SemverBumpLevel,
+    label: t('templates.lifecycle.bumpMinor'),
+    version: suggestedVersions.value.minor,
+  },
+  {
+    level: 'patch' as SemverBumpLevel,
+    label: t('templates.lifecycle.bumpPatch'),
+    version: suggestedVersions.value.patch,
+  },
+])
 
 const showPolicyPanel = computed(
   () => template.value?.lifecycleStatus === 'PUBLISHED' && canPolicy.value,
@@ -255,19 +290,34 @@ watch(
   async (active) => {
     if (!active) {
       bindingGateResult.value = null
+      publishedReleaseVersions.value = []
       return
     }
+    publishBumpLevel.value = 'patch'
+    publishVersion.value = suggestedVersions.value.patch
     loadingPublishGate.value = true
     try {
+      await templatesStore.fetchApiPolicy(templateId.value)
       bindingGateResult.value = await templatesStore.validateBindings(templateId.value)
+      const versions = await templatesApi.fetchReleaseVersions(templateId.value)
+      publishedReleaseVersions.value = versions.map((entry) => entry.releaseVersion)
     } catch {
       bindingGateResult.value = null
+      publishedReleaseVersions.value = []
     } finally {
       loadingPublishGate.value = false
     }
   },
   { immediate: true },
 )
+
+watch(publishBumpLevel, (level) => {
+  publishVersion.value = suggestedVersions.value[level]
+})
+
+watch(suggestedVersions, (versions) => {
+  publishVersion.value = versions[publishBumpLevel.value]
+})
 
 async function loadTemplate() {
   loadFailed.value = false
@@ -392,14 +442,11 @@ async function handlePublish() {
   if (!publishGateReady.value) {
     return
   }
-  const confirmed = await confirmAction({
-    titleKey: 'templates.lifecycle.confirmPublishTitle',
-    messageKey: 'templates.lifecycle.confirmPublishMessage',
-    type: 'warning',
-  })
-  if (!confirmed) {
-    return
-  }
+  publishSummaryOpen.value = true
+}
+
+async function confirmPublishFromSummary() {
+  publishSummaryOpen.value = false
   try {
     await templatesStore.publishTemplate(templateId.value, {
       releaseVersion: publishVersion.value,
@@ -696,6 +743,14 @@ async function handleDeleteTemplate() {
       <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />
 
       <el-tabs v-model="activeDetailTab" class="detail-tabs">
+        <el-tab-pane :label="t('templates.detail.tabs.releaseVersions')" name="releaseVersions">
+          <TemplateReleaseVersionHistoryPanel
+            :template-id="templateId"
+            :template-lifecycle-status="template.lifecycleStatus"
+            @changed="loadTemplate"
+          />
+        </el-tab-pane>
+
         <el-tab-pane :label="t('templates.detail.tabs.overview')" name="overview">
       <el-card shadow="never" class="section-card">
         <h2>{{ t('templates.detail.summaryTitle') }}</h2>
@@ -718,7 +773,7 @@ async function handleDeleteTemplate() {
           </div>
           <div>
             <dt>{{ t('templates.detail.updatedAt') }}</dt>
-            <dd>{{ new Date(template.updatedAt).toLocaleString() }}</dd>
+            <dd>{{ formatDateTime(template.updatedAt) }}</dd>
           </div>
         </dl>
         <p class="description">
@@ -814,10 +869,22 @@ async function handleDeleteTemplate() {
                 </li>
               </ul>
             </el-card>
-            <el-input
-              v-model="publishVersion"
-              :placeholder="t('templates.lifecycle.releaseVersionPlaceholder')"
-              class="publish-input"
+            <el-radio-group v-model="publishBumpLevel" class="publish-bump-picker">
+              <el-radio-button
+                v-for="option in publishBumpOptions"
+                :key="option.level"
+                :value="option.level"
+              >
+                {{ option.label }} ({{ option.version }})
+              </el-radio-button>
+            </el-radio-group>
+            <el-alert
+              v-if="publishVersionConflict"
+              class="publish-conflict-alert"
+              type="warning"
+              :title="t('templates.lifecycle.releaseVersionConflict')"
+              show-icon
+              :closable="false"
             />
             <el-button
               type="primary"
@@ -903,14 +970,6 @@ async function handleDeleteTemplate() {
           :preview="lastPreview"
         />
       </el-card>
-        </el-tab-pane>
-
-        <el-tab-pane :label="t('templates.detail.tabs.releaseVersions')" name="releaseVersions">
-          <TemplateReleaseVersionHistoryPanel
-            :template-id="templateId"
-            :template-lifecycle-status="template.lifecycleStatus"
-            @changed="loadTemplate"
-          />
         </el-tab-pane>
 
         <el-tab-pane
@@ -1014,7 +1073,7 @@ async function handleDeleteTemplate() {
                 />
               </template>
               <template #default="{ row }">
-                {{ new Date(row.createdAt).toLocaleString() }}
+                {{ formatDateTime(row.createdAt) }}
               </template>
             </el-table-column>
             <el-table-column :label="t('templates.policy.credentialActions')" min-width="200">
@@ -1060,6 +1119,17 @@ async function handleDeleteTemplate() {
       :initial-description="template.description"
       :loading="templatesStore.submitting"
       @submit="handleMetadataUpdate"
+    />
+
+    <TemplatePublishSummaryDialog
+      v-if="template"
+      v-model="publishSummaryOpen"
+      :template-name="template.name"
+      :release-version="publishVersion"
+      :gate-items="publishGateItems"
+      :bindings-ready="Boolean(bindingGateResult && !bindingGateResult.summary.blocking)"
+      :loading="templatesStore.submitting"
+      @confirm="confirmPublishFromSummary"
     />
 
     <el-dialog
@@ -1180,8 +1250,12 @@ async function handleDeleteTemplate() {
   align-items: center;
 }
 
-.publish-input {
-  width: 160px;
+.publish-bump-picker {
+  width: 100%;
+}
+
+.publish-conflict-alert {
+  width: 100%;
 }
 
 .publish-gate-card {

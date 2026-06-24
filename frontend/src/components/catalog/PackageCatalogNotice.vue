@@ -10,13 +10,13 @@ const { t } = useI18n()
 
 const titleKey = computed(() =>
   props.kind === 'master'
-    ? 'versionCatalog.master.noticeTitle'
-    : 'versionCatalog.template.noticeTitle',
+    ? 'packageCatalog.master.noticeTitle'
+    : 'packageCatalog.template.noticeTitle',
 )
 const descriptionKey = computed(() =>
   props.kind === 'master'
-    ? 'versionCatalog.master.noticeDescription'
-    : 'versionCatalog.template.noticeDescription',
+    ? 'packageCatalog.master.noticeDescription'
+    : 'packageCatalog.template.noticeDescription',
 )
 </script>
 

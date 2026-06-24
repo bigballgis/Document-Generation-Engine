@@ -40,6 +40,11 @@ const adminCapabilities: ManagementCapabilities = {
   publishTemplates: true,
 }
 
+const managerCapabilities: ManagementCapabilities = {
+  ...testerCapabilities,
+  manageMasters: true,
+}
+
 describe('useWorkflowTasks', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -133,7 +138,52 @@ describe('useWorkflowTasks', () => {
     expect(tasks.value.some((task) => task.kind === 'template-publish')).toBe(true)
   })
 
-  it('builds draft tasks for authors on draft templates', () => {
+  it('builds master rework tasks for rejected masters when upload is allowed', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      ...sessionStore.session,
+      capabilities: managerCapabilities,
+    } as never
+
+    const mastersStore = useMastersStore()
+    mastersStore.masters = [
+      {
+        id: 'm2',
+        name: 'Rejected Master',
+        groupCode: 'RETAIL',
+        status: 'REJECTED',
+      } as never,
+    ]
+
+    const { tasks } = useWorkflowTasks()
+    expect(tasks.value.some((task) => task.kind === 'master-rework')).toBe(true)
+  })
+
+  it('builds template rework tasks for draft templates with a prior release', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      ...sessionStore.session,
+      capabilities: authorCapabilities,
+    } as never
+
+    const templatesStore = useTemplatesStore()
+    templatesStore.templates = [
+      {
+        id: 't5',
+        name: 'Rework Letter',
+        externalId: 'TPL-5',
+        groupCode: 'RETAIL',
+        lifecycleStatus: 'DRAFT',
+        releaseVersion: '1.0.0',
+      } as never,
+    ]
+
+    const { tasks } = useWorkflowTasks()
+    expect(tasks.value.some((task) => task.kind === 'template-rework')).toBe(true)
+    expect(tasks.value.some((task) => task.kind === 'template-author-draft')).toBe(false)
+  })
+
+  it('builds draft tasks for authors on new draft templates', () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       ...sessionStore.session,

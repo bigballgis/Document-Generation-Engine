@@ -246,6 +246,16 @@ export default {
 
       empty: '当前没有待办事项。',
 
+      masterRework: {
+        title: '修订被驳回的母版',
+        description: '更新母版文件或元数据后重新提交审核。',
+      },
+
+      templateRework: {
+        title: '修订被驳回的模板',
+        description: '根据审核反馈修改后重新提交测试。',
+      },
+
     },
 
     quickLinks: {
@@ -262,25 +272,23 @@ export default {
 
   },
 
-  versionCatalog: {
+  packageCatalog: {
 
     master: {
 
-      noticeTitle: '这是版本目录，不是待办队列',
+      noticeTitle: '母版包',
 
       noticeDescription:
-
-        '每一行代表一条母版版本线。上传新 DOCX 或修改元数据会启动审核工作流；审核通过后才可用于模板编排。',
+        '每一行是一个母版包。进入包内可管理当前修订线、审核流程和锚点目录。',
 
     },
 
     template: {
 
-      noticeTitle: '这是版本目录，不是待办队列',
+      noticeTitle: '模板包',
 
       noticeDescription:
-
-        '每一行代表一个模板定义及其发布版本。新建或修改模板会触发测试→审批→发布流程，待办显示在「我的任务」中。',
+        '每一行是一个模板包。进入包内可查看发布版本线、工作流状态和编排内容。',
 
     },
 

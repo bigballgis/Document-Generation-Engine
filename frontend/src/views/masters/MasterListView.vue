@@ -2,13 +2,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import VersionCatalogNotice from '@/components/catalog/VersionCatalogNotice.vue'
+import PackageCatalogNotice from '@/components/catalog/PackageCatalogNotice.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterUploadDialog from '@/components/masters/MasterUploadDialog.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useGroupedCatalogPagination } from '@/composables/useGroupedCatalogPagination'
+import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
+import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useMasterStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { MASTER_DETAIL_PATH_PREFIX } from '@/routing/routeKeys'
@@ -18,6 +20,7 @@ import type { MasterDocumentSummary } from '@/types/master'
 import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
+const { formatDateTime } = useLocaleFormatters()
 const masterStatusFilterOptions = useMasterStatusFilterOptions()
 const router = useRouter()
 const mastersStore = useMastersStore()
@@ -32,9 +35,9 @@ const { filters: columnFilters, filteredRows: filteredMasters, hasActiveFilters,
   useDataTableFilters(allMasters, [
     { key: 'name', getValue: (row) => row.name },
     { key: 'status', getValue: (row) => row.status, matchMode: 'exact' },
-    { key: 'originalFilename', getValue: (row) => row.originalFilename },
     { key: 'anchorCount', getValue: (row) => String(row.anchorCount) },
-    { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
+    { key: 'updatedBy', getValue: (row) => row.updatedBy },
+    { key: 'updatedAt', getValue: (row) => formatDateTime(row.updatedAt) },
   ])
 const { paginatedGroups: groupedMasters, totalGroups: totalMasterGroups } = useGroupedCatalogPagination(
   filteredMasters,
@@ -67,6 +70,10 @@ async function reloadMasters() {
 function openMaster(masterId: string) {
   router.push(`${MASTER_DETAIL_PATH_PREFIX}${masterId}`)
 }
+
+const { onRowClick: activateMasterRow } = useActivatableTableRow<MasterDocumentSummary>((row) =>
+  openMaster(row.id),
+)
 
 async function handleUpload(payload: {
   groupCode: string
@@ -109,7 +116,7 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
       </el-button>
     </header>
 
-    <VersionCatalogNotice kind="master" />
+    <PackageCatalogNotice kind="master" />
 
     <el-alert
       v-if="errorMessage"
@@ -133,8 +140,9 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
       <section v-for="[groupCode, items] in groupedMasters" :key="groupCode" class="group-section">
         <h2>{{ t('masters.list.groupSection', { groupCode }) }}</h2>
         <AppDataTable
+          activatable
           :data="items"
-          @row-click="(row: MasterDocumentSummary) => openMaster(row.id)"
+          @row-click="activateMasterRow"
         >
           <el-table-column prop="name" sortable min-width="220">
             <template #header>
@@ -161,14 +169,6 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
               <MasterStatusBadge :status="row.status" />
             </template>
           </el-table-column>
-          <el-table-column prop="originalFilename" sortable min-width="180">
-            <template #header>
-              <TableColumnHeader
-                :label="t('masters.list.columns.filename')"
-                v-model="columnFilters.originalFilename"
-              />
-            </template>
-          </el-table-column>
           <el-table-column
             prop="anchorCount"
             sortable
@@ -179,6 +179,14 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
               <TableColumnHeader
                 :label="t('masters.list.columns.anchors')"
                 v-model="columnFilters.anchorCount"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column prop="updatedBy" sortable min-width="120">
+            <template #header>
+              <TableColumnHeader
+                :label="t('masters.list.columns.updatedBy')"
+                v-model="columnFilters.updatedBy"
               />
             </template>
           </el-table-column>
@@ -194,7 +202,7 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
               />
             </template>
             <template #default="{ row }">
-              {{ new Date(row.updatedAt).toLocaleString() }}
+              {{ formatDateTime(row.updatedAt) }}
             </template>
           </el-table-column>
         </AppDataTable>
@@ -268,10 +276,6 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
 
 .table-toolbar {
   margin-bottom: 0.75rem;
-}
-
-:deep(.el-table__row) {
-  cursor: pointer;
 }
 
 .list-pagination {

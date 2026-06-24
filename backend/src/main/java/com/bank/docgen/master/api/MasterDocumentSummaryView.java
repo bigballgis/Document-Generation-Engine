@@ -9,6 +9,7 @@ public record MasterDocumentSummaryView(
         String status,
         String originalFilename,
         int anchorCount,
+        String updatedBy,
         Instant updatedAt
 ) {
 }

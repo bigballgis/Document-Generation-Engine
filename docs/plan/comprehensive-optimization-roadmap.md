@@ -47,8 +47,8 @@ Recommended sequencing: **Wave COR-0 (docs truth)** → **COR-1 (API contract)**
 | COR-1 | Runtime API contract & correctness | **In Progress** (COR-B03/B06/B10 Done 2026-06-24) |
 | COR-2 | Template lifecycle, workflow & governance | **In Progress** (COR-T07 Done 2026-06-24) |
 | COR-3 | Frontend workflow & operation experience | **In Progress** (COR-F01/F03/F06/F07/F10 Done 2026-06-24) |
-| COR-4 | Performance, resilience & architecture | Not Started |
-| COR-5 | Test coverage & E2E journeys | Not Started |
+| COR-4 | Performance, resilience & architecture | **In Progress** (COR-P03/P05/P06 Done 2026-06-24) |
+| COR-5 | Test coverage & E2E journeys | **In Progress** (COR-E06 Partial 2026-06-24) |
 | COR-6 | Confirmed large domains (P14/P18+) | Not Started |
 
 ---
@@ -100,7 +100,7 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-T01 | H | Live publish gate (P19 core) | UI gate static; apiPolicy always ready | Server-side checklist blocks publish; UI reflects real blockers | **Partial** (2026-06-24; server binding gate blocks publish) | P19-T06 |
+| COR-T01 | H | Live publish gate (P19 core) | UI gate static; apiPolicy always ready | Server-side checklist blocks publish; UI reflects real blockers | **Partial** (2026-06-24; binding + apiPolicy server gate; UI fetches policy on publish panel) | P19-T06 |
 | COR-T02 | H | Controlled test/approval opinion forms | Free-text commentSummary only | Structured forms per PRD §7; audit fields; fail returns to DRAFT | Not Started | P19-T07 |
 | COR-T03 | H | GROUP_ADMIN exception intervention path | GROUP_ADMIN always canDecideTests/Approvals | Normal vs exception flows; reason + secondary confirm + audit marker | Not Started | PRD §7, permission-matrix |
 | COR-T04 | H | Collaboration work items + optional timeout | PRD §7 668–672; no WorkItem entity | Role/group queue to-dos; timeout escalation without auto state change | Not Started | P14/P19, domain §2.9.4 |
@@ -109,16 +109,16 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | COR-T07 | M | Publish permission doc + code alignment | Domain model says author can publish; code admin-only | Confirmed matrix entry; code matches decision | **Done** (2026-06-24; Batch B ADR) | COR-D02 |
 | COR-T08 | M | Batch test + coverage thresholds | PRD §6.5; P19-T02/T03 Not Started | Multi-sample batch test + threshold blockers | Not Started | P19 |
 | COR-T09 | M | Lifecycle panel context on detail | Approver cannot see test record summary inline | Integrated evidence panel (test, preview, diff, checklist) per role | Not Started | P19-T10 |
-| COR-T10 | L | Semver publish UX | Manual text field default 1.0.0 | Level picker + conflict validation | Not Started | PRD §7 |
+| COR-T10 | L | Semver publish UX | Manual text field default 1.0.0 | Level picker + conflict validation | **Done** (2026-06-24; major/minor/patch picker + semver utils) | PRD §7 |
 
 ### 4.2 Workflow routing & queues (backend + frontend)
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-T11 | H | Workbench vs Dashboard decision | Dashboard consolidation (Batch B default) | Decision ADR `decisions/2026-06-23-batch-b-workflow-defaults.md`; dead workbench views removed | **Done** (2026-06-24) | COR-D01 |
-| COR-T12 | M | Dashboard rework tasks | No "return to author" tasks after reject | Task kinds cover draft rework + group filter/sort | Not Started | PRD §7 |
-| COR-T13 | M | Template list workflow filters | No "awaiting my test/approval/publish" filters | Filter chips or saved views per capability | Not Started | — |
-| COR-T14 | M | Publish summary dialog | Confirm only; no release summary content | Dialog shows checklist + diff/test/coverage summaries per PRD | Not Started | P19 |
+| COR-T12 | M | Dashboard rework tasks | No "return to author" tasks after reject | Task kinds cover draft rework + group filter/sort | **Done** (2026-06-24; master-rework + template-rework tasks) | PRD §7 |
+| COR-T13 | M | Template list workflow filters | No "awaiting my test/approval/publish" filters | Filter chips or saved views per capability | **Done** (2026-06-24; workflow filter chips) | — |
+| COR-T14 | M | Publish summary dialog | Confirm only; no release summary content | Dialog shows checklist + diff/test/coverage summaries per PRD | **Partial** (2026-06-24; publish summary dialog thin slice; full P19 evidence pending) | P19 |
 
 **Exit:** Template can progress with auditable decisions; publish blocked by real gates; operator queues match PRD role model.
 
@@ -135,7 +135,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 | COR-F01 | H | In-shell brand switch (REDBC/GREENBC) | Brand only on login | Top bar brand switch; both presets verified | **Done** (2026-06-24) | P20, OA skill |
 | COR-F02 | H | Breadcrumb / page context | No el-breadcrumb; entitlement URLs ambiguous | Unified breadcrumb from navStructure | **Done** (2026-06-24) | E11/E12 |
 | COR-F03 | H | 401 redirect preserves destination | http.ts 401 → login without redirect query | Post-login return to expired page | **Done** (2026-06-24) | OPT-G1 |
-| COR-F04 | M | Page layout primitive | Dashboard max-width 1200px; others full bleed | Shared layout: header + max-width + spacing scale | Not Started | OA skill |
+| COR-F04 | M | Page layout primitive | Dashboard max-width 1200px; others full bleed | Shared layout: header + max-width + spacing scale | **Done** (2026-06-24; `AppPageLayout` + dashboard/api policy migration) | OA skill |
 
 ### 5.2 Dashboard & work queues
 
@@ -170,12 +170,12 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-F19 | H | zh-CN parity + api.error catalog | en 939 lines vs zh-CN 184; 2 api.error keys | P20-T06 complete; locale switch no mass English fallback | Not Started | P20-T06, OPT-G7 |
-| COR-F20 | M | Locale-aware date/number formatting | toLocaleString() without app locale | Shared format helpers bound to i18n locale | Not Started | P20 |
-| COR-F21 | M | Table a11y baseline | row-click only navigation | Focus rings, keyboard row activation, sortable columns | **Partial** (2026-06-23; AppDataTable focus/activatable rows + composable) | OPT-B4 |
-| COR-F22 | M | Design token cleanup in shell | Hardcoded hex in ManagementShell | CSS variables only; dual-brand check | Not Started | P20 |
-| COR-F23 | L | Forbidden / error traceId copy | traceId text only | Copy reference control | Not Started | — |
-| COR-F24 | L | Login locale + client validation | No locale on login; no username format check | Locale switch + inline validation | Not Started | P1 |
+| COR-F19 | H | zh-CN parity + api.error catalog | en 939 lines vs zh-CN 184; 2 api.error keys | P20-T06 complete; locale switch no mass English fallback | **Partial** (2026-06-24; en `api.error` catalog merged; zh-CN parity open) | P20-T06, OPT-G7 |
+| COR-F20 | M | Locale-aware date/number formatting | toLocaleString() without app locale | Shared format helpers bound to i18n locale | **Done** (2026-06-24; `useLocaleFormatters` + audit/template detail) | P20 |
+| COR-F21 | M | Table a11y baseline | row-click only navigation | Focus rings, keyboard row activation, sortable columns | **Done** (2026-06-24; AppDataTable + master/template list activatable rows) | OPT-B4 |
+| COR-F22 | M | Design token cleanup in shell | Hardcoded hex in ManagementShell | CSS variables only; dual-brand check | **Partial** (2026-06-24; login gradient tokens; shell remainder open) | P20 |
+| COR-F23 | L | Forbidden / error traceId copy | traceId text only | Copy reference control | **Done** (2026-06-24) | — |
+| COR-F24 | L | Login locale + client validation | No locale on login; no username format check | Locale switch + inline validation | **Done** (2026-06-24) | P1 |
 
 **Exit:** Role journeys meet OA skill state completeness; Docker 4173 smoke covers login → dashboard → template lifecycle tab.
 
@@ -189,10 +189,10 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-P01 | M | Stream new sync artifact generation | New path still byte[] | Stream from storage on create path | Not Started | OPT-F3 |
 | COR-P02 | M | Offload LibreOffice from request thread | Inline PDF in request | Bounded pool + timeout | Not Started | OPT-F6 |
-| COR-P03 | L | LibreOffice temp dir cleanup | No finally on temp dirs | No leak under load test | Not Started | OPT-F7 |
+| COR-P03 | L | LibreOffice temp dir cleanup | No finally on temp dirs | No leak under load test | **Done** (2026-06-24; try/finally temp dir cleanup + test) | OPT-F7 |
 | COR-P04 | M | EAGER fetch on master anchors | MasterDocumentEntity EAGER | LAZY + fetch join where needed | Not Started | OPT-F5 |
-| COR-P05 | L | Redisson lock evaluation | Multi-instance idempotency/async owner | ADR decision + implementation if multi-instance | Not Started | OPT-F8 |
-| COR-P06 | M | Declarative route authorization | RouteVisibilityService not enforced on API | Filter or documented service-layer pattern + gap test | Not Started | OPT-D6 |
+| COR-P05 | L | Redisson lock evaluation | Multi-instance idempotency/async owner | ADR decision + implementation if multi-instance | **Done** (2026-06-24; ADR-0039 evaluation) | OPT-F8 |
+| COR-P06 | M | Declarative route authorization | RouteVisibilityService not enforced on API | Filter or documented service-layer pattern + gap test | **Done** (2026-06-24; ADR + ManagementAuthorizationContractTest) | OPT-D6 |
 | COR-P07 | M | QueryDSL for audit/complex lists | JPQL + in-memory filter | Type-safe pageable queries | Not Started | OPT-D4 |
 | COR-P08 | L | MapStruct opportunistic adoption | Hand-written mappers | MapStruct on touched services only | Not Started | OPT-D3 |
 
@@ -207,7 +207,7 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 | COR-E03 | M | AuditQueryService tests | 264 lines untested | Group scope + GLOBAL_ADMIN paths | **Done** (2026-06-24; AuditQueryServiceTest) | OPT-C5 |
 | COR-E04 | M | Rendering PDF path tests | LibreOffice/DockerExec untested | Success/timeout/cleanup mocked | **Done** (2026-06-24; pipeline + LibreOffice tests) | OPT-C4 |
 | COR-E05 | M | Frontend: DashboardView + tab router tests | No tests for new surfaces | Vitest for tasks, load error, tab query sync | **Done** (2026-06-23; dashboard tasks + `templateDetailTabs` + load error) | OPT-C6 |
-| COR-E06 | M | messageKey → UI mapping tests | errorEnvelope without e2e UI | Store/view tests for catalog keys | **Partial** (2026-06-23; templates create/publish + audit scopeRequired store) | P20-T06 |
+| COR-E06 | M | messageKey → UI mapping tests | errorEnvelope without e2e UI | Store/view tests for catalog keys | **Partial** (2026-06-24; identity/masters/templates/audit store + create dialog catalog keys) | P20-T06 |
 
 ---
 

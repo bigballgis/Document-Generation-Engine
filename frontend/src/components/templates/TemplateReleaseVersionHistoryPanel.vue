@@ -52,6 +52,7 @@ const { filters: columnFilters, filteredRows: filteredVersions, hasActiveFilters
       matchMode: 'exact',
     },
     { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
+    { key: 'updatedBy', getValue: (row) => row.updatedBy },
   ])
 
 const canManageVersions = computed(
@@ -282,6 +283,14 @@ const sortByUpdatedAt = rowSortMethod<TemplateReleaseVersion>((row) => row.updat
               {{ t('templates.versions.defaultRouteYes') }}
             </el-tag>
             <span v-else>{{ t('templates.versions.defaultRouteNo') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="updatedBy" sortable min-width="120">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.versions.updatedBy')"
+              v-model="columnFilters.updatedBy"
+            />
           </template>
         </el-table-column>
         <el-table-column

@@ -96,7 +96,8 @@ public class ApiManagementService {
     @Transactional
     public ApiPolicyView upsertPolicy(UUID templateId, UpsertApiPolicyRequest request, ManagementSessionClaims session) {
         TemplateEntity template = requireApiAdmin(templateId, session);
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED) {
+        if (template.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED
+                && template.getLifecycleStatus() != TemplateLifecycleStatus.PENDING_RELEASE) {
             throw new TemplateValidationException("api.error.apimgmt.templateNotPublished");
         }
         String allowedJson = writeJson(request.allowedAdGroups());

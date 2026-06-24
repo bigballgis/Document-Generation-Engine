@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
+import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
@@ -21,6 +23,7 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +48,8 @@ class TemplateLifecyclePublishVersionSelectionTest {
     private LifecycleImpactPreviewService lifecycleImpactPreviewService;
     @Mock
     private MessageResolver messageResolver;
+    @Mock
+    private ApiPolicyRepository apiPolicyRepository;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -60,7 +65,8 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 lifecycleRecordRepository,
                 groupAccessService,
                 lifecycleImpactPreviewService,
-                messageResolver
+                messageResolver,
+                apiPolicyRepository
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",
@@ -94,6 +100,8 @@ class TemplateLifecyclePublishVersionSelectionTest {
         when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
         when(templateService.validateBindings(templateId, groupAdmin)).thenReturn(nonBlockingBindings());
+        when(apiPolicyRepository.findByTemplateId(templateId))
+                .thenReturn(Optional.of(new ApiPolicyEntity(UUID.randomUUID(), templateId, "[]", "10000002")));
         when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
                 .thenReturn(List.of(candidateVersion, publishedVersion));
         when(templateService.toDetail(template)).thenReturn(detail());

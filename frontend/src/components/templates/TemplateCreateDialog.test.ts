@@ -117,6 +117,6 @@ describe('TemplateCreateDialog', () => {
     await flushPromises()
 
     expect(templatesStore.lastErrorMessageKey).toBe('api.error.template.externalIdExists')
-    expect(wrapper.text()).toContain('Unable to create template.')
+    expect(wrapper.text()).toContain('A template with this external identifier already exists.')
   })
 })

@@ -3,6 +3,7 @@ package com.bank.docgen.template.service;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
@@ -17,6 +18,7 @@ import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +43,8 @@ class TemplateLifecyclePublishGateTest {
     private LifecycleImpactPreviewService lifecycleImpactPreviewService;
     @Mock
     private MessageResolver messageResolver;
+    @Mock
+    private ApiPolicyRepository apiPolicyRepository;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -56,7 +60,8 @@ class TemplateLifecyclePublishGateTest {
                 lifecycleRecordRepository,
                 groupAccessService,
                 lifecycleImpactPreviewService,
-                messageResolver
+                messageResolver,
+                apiPolicyRepository
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",
@@ -91,6 +96,25 @@ class TemplateLifecyclePublishGateTest {
         assertThatThrownBy(() -> service.publish(templateId, new PublishTemplateRequest("1.0.0"), groupAdmin))
                 .isInstanceOf(TemplateValidationException.class)
                 .hasFieldOrPropertyWithValue("messageKey", "api.error.template.publishGateBlocked");
+    }
+
+    @Test
+    void publishBlockedWhenApiPolicyMissing() {
+        when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
+        when(templateService.validateBindings(templateId, groupAdmin)).thenReturn(nonBlockingBindings());
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.publish(templateId, new PublishTemplateRequest("1.0.0"), groupAdmin))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasFieldOrPropertyWithValue("messageKey", "api.error.runtime.policyNotConfigured");
+    }
+
+    private BindingValidationView nonBlockingBindings() {
+        return new BindingValidationView(
+                List.of(),
+                new BindingValidationSummaryView(false, 0, 0, 0, 0, 0)
+        );
     }
 
     private BindingValidationView blockingBindings() {

@@ -8,6 +8,7 @@ public record TemplateReleaseVersionView(
         int devVersionNumber,
         TemplateLifecycleStatus lifecycleStatus,
         Instant updatedAt,
+        String updatedBy,
         boolean defaultRouteTarget
 ) {
 }

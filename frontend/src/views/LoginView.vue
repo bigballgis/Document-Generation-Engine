@@ -2,9 +2,11 @@
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import type { FormInstance, FormRules } from 'element-plus'
 import BrandLogo from '@/components/branding/BrandLogo.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { BRAND_REGISTRY } from '@/config/brands'
+import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
 import { useAppStore } from '@/stores/app'
 import { useSessionStore } from '@/stores/session'
 import type { BrandPreset } from '@/theme/tokens'
@@ -15,6 +17,7 @@ const router = useRouter()
 const appStore = useAppStore()
 const sessionStore = useSessionStore()
 
+const formRef = ref<FormInstance>()
 const form = reactive({
   username: '',
   password: '',
@@ -30,6 +33,35 @@ const brandOptions = computed(() => [
   })),
 ])
 
+const localeOptions = computed(() =>
+  LOCALE_REGISTRY.map((entry) => ({
+    value: entry.code,
+    label: t(entry.labelKey),
+  })),
+)
+
+const rules = computed<FormRules>(() => ({
+  username: [
+    {
+      required: true,
+      message: t('login.validation.usernameRequired'),
+      trigger: 'blur',
+    },
+    {
+      pattern: /^\d{8}$/,
+      message: t('login.validation.usernameFormat'),
+      trigger: 'blur',
+    },
+  ],
+  password: [
+    {
+      required: true,
+      message: t('login.validation.passwordRequired'),
+      trigger: 'blur',
+    },
+  ],
+}))
+
 const sessionExpired = computed(() => route.query.sessionExpired === '1')
 
 const errorMessage = computed(() => {
@@ -42,8 +74,17 @@ const errorMessage = computed(() => {
   return te(errorMessageKey.value) ? t(errorMessageKey.value) : t('login.errorGeneric')
 })
 
+function handleLocaleChange(locale: string) {
+  void appStore.setLocale(resolveAppLocale(locale))
+}
+
 async function submitLogin() {
   errorMessageKey.value = null
+  const valid = await formRef.value?.validate().catch(() => false)
+  if (!valid) {
+    return
+  }
+
   submitting.value = true
   try {
     await sessionStore.login(form.username.trim(), form.password)
@@ -71,7 +112,23 @@ async function submitLogin() {
     </header>
 
     <el-card class="login-card" shadow="never">
-      <h2>{{ t('login.title') }}</h2>
+      <div class="login-card-header">
+        <h2>{{ t('login.title') }}</h2>
+        <el-select
+          class="locale-switcher"
+          size="small"
+          :model-value="appStore.locale"
+          :aria-label="t('common.language')"
+          @update:model-value="handleLocaleChange"
+        >
+          <el-option
+            v-for="option in localeOptions"
+            :key="option.value"
+            :label="option.label"
+            :value="option.value"
+          />
+        </el-select>
+      </div>
       <el-alert
         v-if="errorMessage"
         class="login-alert"
@@ -80,8 +137,14 @@ async function submitLogin() {
         show-icon
         :closable="false"
       />
-      <el-form label-position="top" @submit.prevent="submitLogin">
-        <el-form-item :label="t('login.username')">
+      <el-form
+        ref="formRef"
+        :model="form"
+        :rules="rules"
+        label-position="top"
+        @submit.prevent="submitLogin"
+      >
+        <el-form-item :label="t('login.username')" prop="username">
           <el-input
             v-model="form.username"
             autocomplete="username"
@@ -90,7 +153,7 @@ async function submitLogin() {
             :aria-label="t('login.username')"
           />
         </el-form-item>
-        <el-form-item :label="t('login.password')">
+        <el-form-item :label="t('login.password')" prop="password">
           <el-input
             v-model="form.password"
             type="password"
@@ -140,7 +203,12 @@ async function submitLogin() {
       color-mix(in srgb, var(--brand-primary) 12%, transparent) 0%,
       transparent 42%
     ),
-    linear-gradient(165deg, var(--brand-header-bg) 0%, var(--surface-bg) 48%, #eef2f6 100%);
+    linear-gradient(
+      165deg,
+      var(--brand-header-bg) 0%,
+      var(--surface-bg) 48%,
+      var(--surface-gradient-end) 100%
+    );
 }
 
 .login-header {
@@ -169,10 +237,22 @@ async function submitLogin() {
   box-shadow: var(--shadow-card);
 
   h2 {
-    margin: 0 0 1rem;
+    margin: 0;
     font-size: 1.2rem;
     font-weight: 650;
   }
+}
+
+.login-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.locale-switcher {
+  width: 9rem;
 }
 
 .login-alert {

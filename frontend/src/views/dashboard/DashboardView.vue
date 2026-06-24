@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import DashboardStatCards from '@/components/dashboard/DashboardStatCards.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
@@ -123,7 +124,7 @@ function onTasksTableKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="dashboard-page">
+  <AppPageLayout class="dashboard-page" max-width="1200px">
     <header class="page-header">
       <h1>{{ t('dashboard.title') }}</h1>
       <p>{{ t('dashboard.description') }}</p>
@@ -250,15 +251,10 @@ function onTasksTableKeydown(event: KeyboardEvent) {
         </el-button>
       </div>
     </section>
-  </div>
+  </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.dashboard-page {
-  padding: 2rem;
-  max-width: 1200px;
-}
-
 .page-header {
   margin-bottom: 1.5rem;
 

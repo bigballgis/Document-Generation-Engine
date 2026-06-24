@@ -46,20 +46,20 @@ export const NAV_GROUPS: NavGroupDefinition[] = [
     ],
   },
   {
-    id: 'versionCatalog',
-    labelKey: 'nav.groups.versionCatalog',
+    id: 'documentContent',
+    labelKey: 'nav.groups.content',
     items: [
       {
-        id: 'master-versions',
+        id: 'masters',
         routeKey: ROUTE_KEYS.masterManagement,
         path: '/masters',
-        labelKey: 'nav.items.masterVersions',
+        labelKey: 'nav.items.masters',
       },
       {
-        id: 'template-versions',
+        id: 'templates',
         routeKey: ROUTE_KEYS.templateManagement,
         path: '/templates',
-        labelKey: 'nav.items.templateVersions',
+        labelKey: 'nav.items.templates',
       },
     ],
   },

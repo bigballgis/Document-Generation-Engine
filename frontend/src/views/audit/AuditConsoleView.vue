@@ -6,6 +6,7 @@ import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { isGroupScopedAuditRole } from '@/auth/roles'
 import { useAuditStore } from '@/stores/audit'
@@ -16,6 +17,7 @@ import { validateGroupAdminAuditFilters } from '@/views/audit/auditFilterValidat
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const { t, te } = useI18n()
+const { formatDateTime } = useLocaleFormatters()
 const auditStore = useAuditStore()
 
 const activeTab = ref<'management' | 'lifecycle'>('management')
@@ -94,7 +96,7 @@ function formatLifecycleState(state?: string) {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleString()
+  return formatDateTime(value)
 }
 
 function exportScopeSummary(): string {

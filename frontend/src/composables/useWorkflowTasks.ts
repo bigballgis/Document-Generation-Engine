@@ -8,10 +8,12 @@ import type { TemplateSummary } from '@/types/template'
 
 export type WorkflowTaskKind =
   | 'master-review'
+  | 'master-rework'
   | 'template-test'
   | 'template-approval'
   | 'template-publish'
   | 'template-author-draft'
+  | 'template-rework'
 
 export interface WorkflowTask {
   id: string
@@ -27,6 +29,7 @@ export function useWorkflowTasks() {
   const mastersStore = useMastersStore()
   const templatesStore = useTemplatesStore()
   const {
+    manageMasters,
     reviewMasters,
     decideTests,
     decideApprovals,
@@ -46,6 +49,15 @@ export function useWorkflowTasks() {
       }
     }
 
+    if (manageMasters.value) {
+      for (const master of mastersStore.masters) {
+        if (master.status !== 'REJECTED') {
+          continue
+        }
+        items.push(masterReworkTask(master))
+      }
+    }
+
     for (const template of templatesStore.templates) {
       if (decideTests.value && template.lifecycleStatus === 'TESTING') {
         items.push(templateTestTask(template))
@@ -56,11 +68,12 @@ export function useWorkflowTasks() {
       if (publishTemplates.value && template.lifecycleStatus === 'PENDING_RELEASE') {
         items.push(templatePublishTask(template))
       }
-      if (
-        authorTemplates.value &&
-        template.lifecycleStatus === 'DRAFT'
-      ) {
-        items.push(templateDraftTask(template))
+      if (authorTemplates.value && template.lifecycleStatus === 'DRAFT') {
+        if (template.releaseVersion) {
+          items.push(templateReworkTask(template))
+        } else {
+          items.push(templateDraftTask(template))
+        }
       }
     }
 
@@ -68,6 +81,18 @@ export function useWorkflowTasks() {
   })
 
   return { tasks }
+}
+
+function masterReworkTask(master: MasterDocumentSummary): WorkflowTask {
+  return {
+    id: `master-rework-${master.id}`,
+    kind: 'master-rework',
+    titleKey: 'dashboard.tasks.masterRework.title',
+    descriptionKey: 'dashboard.tasks.masterRework.description',
+    path: `/masters/${master.id}`,
+    groupCode: master.groupCode,
+    entityName: master.name,
+  }
 }
 
 function masterReviewTask(master: MasterDocumentSummary): WorkflowTask {
@@ -112,6 +137,18 @@ function templatePublishTask(template: TemplateSummary): WorkflowTask {
     kind: 'template-publish',
     titleKey: 'dashboard.tasks.templatePublish.title',
     descriptionKey: 'dashboard.tasks.templatePublish.description',
+    path: templateDetailPath(template.id, 'overview'),
+    groupCode: template.groupCode,
+    entityName: template.name,
+  }
+}
+
+function templateReworkTask(template: TemplateSummary): WorkflowTask {
+  return {
+    id: `template-rework-${template.id}`,
+    kind: 'template-rework',
+    titleKey: 'dashboard.tasks.templateRework.title',
+    descriptionKey: 'dashboard.tasks.templateRework.description',
     path: templateDetailPath(template.id, 'overview'),
     groupCode: template.groupCode,
     entityName: template.name,

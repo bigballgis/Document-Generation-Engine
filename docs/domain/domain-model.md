@@ -214,6 +214,8 @@ AD Group 用于 API 调用授权。
 
 母版是 DOCX 格式的基础文档框架。
 
+**管理 UI 导航（2026-06-24）：** 侧栏为 **Masters** / **Templates** 包列表；包详情内展示修订线/版本线。见 `docs/product/catalog-navigation-ux.md`。母版在 v1 数据模型中为单资产 + 轻量审核状态，非模板式多发布版本实体。
+
 已确认属性：
 
 - DOCX 文件。

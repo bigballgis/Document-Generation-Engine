@@ -11,6 +11,7 @@ export interface MasterDocumentSummary {
   status: MasterDocumentStatus
   originalFilename: string
   anchorCount: number
+  updatedBy: string
   updatedAt: string
 }
 
@@ -38,6 +39,8 @@ export interface MasterDocumentDetail {
   changeSummary: string | null
   anchors: MasterAnchor[]
   reviewHistory: MasterReviewRecord[]
+  createdBy: string
+  updatedBy: string
   createdAt: string
   updatedAt: string
 }

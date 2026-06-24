@@ -55,15 +55,34 @@ class LibreOfficePdfConversionServiceTest {
     }
 
     @Test
-    void convertsDocxUsingConfiguredCommand() {
+    void convertsDocxUsingConfiguredCommand() throws IOException {
         properties.setLibreOfficeCommand(fakeLibreOfficeScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();
+        long tempDirsBefore = countDocgenPdfTempDirs();
 
         byte[] pdf = service.convert(new byte[]{1, 2, 3});
 
         assertThat(pdf).isNotEmpty();
         assertThat(new String(pdf)).contains("%PDF");
+        assertThat(countDocgenPdfTempDirs()).isEqualTo(tempDirsBefore);
+    }
+
+    @Test
+    void removesTempDirectoryAfterFailedConversion() throws URISyntaxException, IOException {
+        Path failScript = Path.of(
+                LibreOfficePdfConversionServiceTest.class
+                        .getResource("/scripts/fake-libreoffice-fail.cmd")
+                        .toURI()
+        );
+        properties.setLibreOfficeCommand(failScript.toString());
+        properties.setConversionTimeoutSeconds(30);
+        LibreOfficePdfConversionService service = service();
+        long tempDirsBefore = countDocgenPdfTempDirs();
+
+        assertThatThrownBy(() -> service.convert(new byte[]{1}))
+                .isInstanceOf(TemplateValidationException.class);
+        assertThat(countDocgenPdfTempDirs()).isEqualTo(tempDirsBefore);
     }
 
     @Test
@@ -97,5 +116,12 @@ class LibreOfficePdfConversionServiceTest {
                 CircuitBreakerRegistry.ofDefaults(),
                 RetryRegistry.ofDefaults()
         );
+    }
+
+    private long countDocgenPdfTempDirs() throws IOException {
+        Path tempRoot = Path.of(System.getProperty("java.io.tmpdir"));
+        try (Stream<Path> paths = Files.list(tempRoot)) {
+            return paths.filter(path -> path.getFileName().toString().startsWith("docgen-pdf-")).count();
+        }
     }
 }

@@ -6,5 +6,5 @@ export function resolveTemplateDetailTab(value: unknown): TemplateDetailTab {
   if (typeof value === 'string' && (TEMPLATE_DETAIL_TABS as readonly string[]).includes(value)) {
     return value as TemplateDetailTab
   }
-  return 'overview'
+  return 'releaseVersions'
 }

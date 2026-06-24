@@ -9,14 +9,14 @@ const DETAIL_PREFIXES: Array<{ prefix: string; listPath: string; listLabelKey: s
   {
     prefix: '/masters/',
     listPath: '/masters',
-    listLabelKey: 'nav.items.masterVersions',
-    groupLabelKey: 'nav.groups.versionCatalog',
+    listLabelKey: 'nav.items.masters',
+    groupLabelKey: 'nav.groups.content',
   },
   {
     prefix: '/templates/',
     listPath: '/templates',
-    listLabelKey: 'nav.items.templateVersions',
-    groupLabelKey: 'nav.groups.versionCatalog',
+    listLabelKey: 'nav.items.templates',
+    groupLabelKey: 'nav.groups.content',
   },
 ]
 

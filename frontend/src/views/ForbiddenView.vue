@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { useSessionStore } from '@/stores/session'
 
 const { t } = useI18n()
@@ -24,15 +25,32 @@ function goHome() {
   }
   router.push('/login')
 }
+
+async function copyReference() {
+  if (!traceId.value) {
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(traceId.value)
+    ElMessage.success(t('forbidden.copyReferenceSuccess'))
+  } catch {
+    ElMessage.error(t('forbidden.copyReferenceError'))
+  }
+}
 </script>
 
 <template>
   <div class="forbidden-page">
     <el-result icon="warning" :title="t('forbidden.title')" :sub-title="t('forbidden.message')">
       <template #extra>
-        <p v-if="traceId" class="trace-id">
-          {{ t('forbidden.referenceLabel') }}: {{ traceId }}
-        </p>
+        <div v-if="traceId" class="trace-id-row">
+          <p class="trace-id">
+            {{ t('forbidden.referenceLabel') }}: {{ traceId }}
+          </p>
+          <el-button size="small" @click="copyReference">
+            {{ t('forbidden.copyReference') }}
+          </el-button>
+        </div>
         <el-button type="primary" @click="goHome">
           {{ t('forbidden.backToHome') }}
         </el-button>
@@ -50,8 +68,17 @@ function goHome() {
   background: var(--surface-bg);
 }
 
+.trace-id-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
 .trace-id {
-  margin: 0 0 1rem;
+  margin: 0;
   color: var(--text-muted);
   font-family: monospace;
 }

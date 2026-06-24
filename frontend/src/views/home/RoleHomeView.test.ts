@@ -41,6 +41,7 @@ describe('RoleHomeView', () => {
         status: 'PENDING_REVIEW',
         originalFilename: 'letterhead.docx',
         anchorCount: 2,
+        updatedBy: '10000001',
         updatedAt: '2026-06-23T10:00:00Z',
       },
     ])
@@ -52,7 +53,9 @@ describe('RoleHomeView', () => {
         name: 'Retail letter',
         lifecycleStatus: 'TESTING',
         releaseVersion: null,
+        releaseVersionCount: 0,
         masterId: 'master-1',
+        updatedBy: '10000001',
         updatedAt: '2026-06-23T10:00:00Z',
       },
       {
@@ -62,7 +65,9 @@ describe('RoleHomeView', () => {
         name: 'Retail notice',
         lifecycleStatus: 'PUBLISHED',
         releaseVersion: '1.0.0',
+        releaseVersionCount: 1,
         masterId: 'master-1',
+        updatedBy: '10000001',
         updatedAt: '2026-06-23T10:00:00Z',
       },
     ])

@@ -8,6 +8,7 @@ import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
 import MasterMetadataEditDialog from '@/components/masters/MasterMetadataEditDialog.vue'
 import MasterReplaceFileDialog from '@/components/masters/MasterReplaceFileDialog.vue'
+import MasterRevisionLinesPanel from '@/components/masters/MasterRevisionLinesPanel.vue'
 import MasterWorkflowBanner from '@/components/masters/MasterWorkflowBanner.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
@@ -226,6 +227,8 @@ function formatReviewAction(action: string): string {
 
     <template v-else-if="master">
       <MasterWorkflowBanner :master="master" />
+
+      <MasterRevisionLinesPanel :master="master" />
 
       <section class="detail-grid">
         <el-card shadow="never">

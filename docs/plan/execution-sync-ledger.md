@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-23 (COR-T06 callability + COR-F21/E06 partial)  
+**Last synced:** 2026-06-24 (COR final batch: catalog UX + P03/P05/P06 + F04/F19–F24 + T10/T12–T14)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,10 +18,10 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **227 tests**, 2026-06-23 | COR-T06 multi-version callability |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **238 tests**, 2026-06-24 | COR-P03/P05/P06 + COR-T01 apiPolicy gate |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
-| Frontend test | `pnpm -C frontend test` | Green | **131 tests**, 2026-06-23 |
+| Frontend test | `pnpm -C frontend test` | Green | **139 tests**, 2026-06-24 |
 | Frontend build | `pnpm -C frontend build` | Green | |
 | E2E Docker (4173) | `pnpm -C frontend test:e2e:docker` | Green — **6 tests**, 2026-06-24 | `catalog.spec.ts` + `role-journeys.spec.ts` |
 
@@ -37,7 +37,8 @@ COR-E03/E04 + master file replace **222** backend / **114** frontend (2026-06-24
 COR-F12/E05/E06 template create validation + dashboard/tab/messageKey tests **121** frontend (2026-06-23);
 COR-F11/F13 workflow banner CTA + governance 2-step confirm + publish messageKey tests **125** frontend (2026-06-23);
 COR-F14/F16 LoadErrorPanel + audit filter validation + COR-T05 publish candidate **223** backend / **129** frontend (2026-06-23);
-COR-T06/F21/E06 multi-version callability + table a11y baseline + audit messageKey **227** backend / **131** frontend (2026-06-23).
+COR-T06/F21/E06 multi-version callability + table a11y baseline + audit messageKey **227** backend / **131** frontend (2026-06-23);
+COR final batch (catalog package UX + publish gate apiPolicy + workflow filters + i18n/a11y polish) **238** backend / **139** frontend (2026-06-24).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)
@@ -153,10 +154,12 @@ Each row lists exit criteria; remove from this index when closed.
 | Async batch transport | Default in-process `@Async`; Kafka optional via `ASYNC_TRANSPORT=kafka` | Production profile uses Kafka + DLT; in-process dev-only documented | P11, M14 |
 | Security forbidden-route audit | Log-only in some paths | Durable security audit event per matrix §13.3 | COR-P06 |
 | QueryDSL / MapStruct / Redisson | Plain JPA + hand mappers + Lettuce | ADR-0037 scheduled items implemented or ADR amended | OPT-D, COR-P05 |
-| Publish gate checklist | UI checklist + binding validation; API policy item partly static | Server-side live gate blocks publish (P19) — **binding gate enforced server-side (2026-06-24)**; API policy + full checklist remain | COR-T01, P19 |
+| Publish gate checklist | UI checklist + binding validation; API policy item partly static | Server-side live gate blocks publish (P19) — **binding + apiPolicy enforced server-side (2026-06-24)**; full P19 checklist remains | COR-T01, P19 |
 | Runtime rate limit | Process-local Bucket4j; requests without credential headers bypass filter (auth layer rejects later) | Shared Redis limiter or documented fail-closed at filter; ADR 0031 alignment | COR-B10, OPT-F8 |
 | Workbench vs Dashboard | **Done** — dead workbench views removed; routes redirect to `/dashboard` | COR-T11 decision recorded | COR-T11 |
-| zh-CN / `api.error` catalog | `en` ~939 lines vs `zh-CN` ~184; sparse `api.error` keys | P20-T06 complete; locale switch without mass English fallback | COR-F19, P20-T06 |
+| zh-CN / `api.error` catalog | `en` full `api.error` catalog merged (2026-06-24); `zh-CN` still sparse | P20-T06 complete; locale switch without mass English fallback | COR-F19, P20-T06 |
+| Service-layer authorization | Route visibility not enforced at API filter | **Documented pattern + contract test (2026-06-24)** — ADR-0001 | COR-P06 |
+| Redisson multi-instance locks | Lettuce cache only | **ADR-0039 evaluation recorded (2026-06-24)**; implement when multi-instance | COR-P05 |
 
 ## Sync maintenance
 

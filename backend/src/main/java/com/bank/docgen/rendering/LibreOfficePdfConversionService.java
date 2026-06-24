@@ -42,8 +42,9 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
     }
 
     private byte[] convertInternal(byte[] docxBytes) {
+        Path tempDir = null;
         try {
-            Path tempDir = Files.createTempDirectory("docgen-pdf-");
+            tempDir = Files.createTempDirectory("docgen-pdf-");
             Path inputDocx = tempDir.resolve("input.docx");
             Files.write(inputDocx, docxBytes);
             ProcessBuilder processBuilder = new ProcessBuilder(
@@ -69,9 +70,21 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
                 throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
             }
             return Files.readAllBytes(outputPdf);
-        } catch (IOException | InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+        } catch (IOException ex) {
+            throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+        } finally {
+            if (tempDir != null) {
+                try {
+                    Files.deleteIfExists(tempDir.resolve("input.docx"));
+                    Files.deleteIfExists(tempDir.resolve("input.pdf"));
+                    Files.deleteIfExists(tempDir);
+                } catch (IOException ignored) {
+                    // Best-effort temp cleanup.
+                }
+            }
         }
     }
 }

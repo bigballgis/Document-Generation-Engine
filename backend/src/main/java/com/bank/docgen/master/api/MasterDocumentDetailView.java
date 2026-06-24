@@ -13,6 +13,8 @@ public record MasterDocumentDetailView(
         String changeSummary,
         List<MasterAnchorView> anchors,
         List<MasterReviewRecordView> reviewHistory,
+        String createdBy,
+        String updatedBy,
         Instant createdAt,
         Instant updatedAt
 ) {

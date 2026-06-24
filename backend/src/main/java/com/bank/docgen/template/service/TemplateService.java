@@ -120,6 +120,7 @@ public class TemplateService {
                         version.getDevVersionNumber(),
                         version.getLifecycleStatus(),
                         version.getUpdatedAt(),
+                        version.getCreatedBy(),
                         defaultRoute != null && defaultRoute.equals(version.getReleaseVersion())
                 ))
                 .toList();
@@ -415,6 +416,11 @@ public class TemplateService {
     }
 
     private TemplateSummaryView toSummary(TemplateEntity template) {
+        int releaseVersionCount = (int) templateVersionRepository
+                .findByTemplateIdOrderByDevVersionNumberDesc(template.getId())
+                .stream()
+                .filter(version -> version.getReleaseVersion() != null && !version.getReleaseVersion().isBlank())
+                .count();
         return new TemplateSummaryView(
                 template.getId().toString(),
                 template.getExternalId(),
@@ -422,7 +428,9 @@ public class TemplateService {
                 template.getName(),
                 template.getLifecycleStatus(),
                 template.getReleaseVersion(),
+                releaseVersionCount,
                 template.getMasterId().toString(),
+                template.getUpdatedBy(),
                 template.getUpdatedAt()
         );
     }

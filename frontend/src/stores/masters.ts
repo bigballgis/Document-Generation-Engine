@@ -177,6 +177,7 @@ export const useMastersStore = defineStore('masters', () => {
       status: detail.status,
       originalFilename: detail.originalFilename,
       anchorCount: detail.anchors.length,
+      updatedBy: detail.updatedBy,
       updatedAt: detail.updatedAt,
     }
   }

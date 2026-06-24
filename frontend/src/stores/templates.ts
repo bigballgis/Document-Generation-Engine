@@ -415,6 +415,9 @@ export const useTemplatesStore = defineStore('templates', () => {
   }
 
   function toSummary(detail: TemplateDetail): TemplateSummary {
+    const existing = templates.value.find((item) => item.id === detail.id)
+    const releaseVersionCount =
+      existing?.releaseVersionCount ?? (detail.releaseVersion ? 1 : 0)
     return {
       id: detail.id,
       externalId: detail.externalId,
@@ -422,7 +425,9 @@ export const useTemplatesStore = defineStore('templates', () => {
       name: detail.name,
       lifecycleStatus: detail.lifecycleStatus,
       releaseVersion: detail.releaseVersion,
+      releaseVersionCount,
       masterId: detail.masterId,
+      updatedBy: existing?.updatedBy ?? '',
       updatedAt: detail.updatedAt,
     }
   }

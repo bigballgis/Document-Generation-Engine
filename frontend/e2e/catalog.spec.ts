@@ -6,7 +6,7 @@ import {
   loginAsGlobalAdmin,
 } from './helpers/auth'
 
-test.describe('version catalog (demo seed)', () => {
+test.describe('document catalogs (demo seed)', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsGlobalAdmin(page)
   })
@@ -15,7 +15,7 @@ test.describe('version catalog (demo seed)', () => {
     await page.goto('/masters')
 
     await expect(page.getByText(/unable to load master documents/i)).not.toBeVisible()
-    await expect(page.getByRole('heading', { name: /master version catalog/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /^masters$/i })).toBeVisible()
     await expect(page.getByText(DEMO_MASTER_NAME)).toBeVisible()
     await expect(page.getByRole('heading', { name: `Group: ${DEMO_GROUP_CODE}` })).toBeVisible()
   })
@@ -24,7 +24,7 @@ test.describe('version catalog (demo seed)', () => {
     await page.goto('/templates')
 
     await expect(page.getByText(/unable to load templates/i)).not.toBeVisible()
-    await expect(page.getByRole('heading', { name: /template version catalog/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /^templates$/i })).toBeVisible()
     await expect(page.getByText(DEMO_TEMPLATE_EXTERNAL_ID)).toBeVisible()
   })
 })

@@ -19,7 +19,9 @@ export interface TemplateSummary {
   name: string
   lifecycleStatus: TemplateLifecycleStatus
   releaseVersion: string | null
+  releaseVersionCount: number
   masterId: string
+  updatedBy: string
   updatedAt: string
 }
 
@@ -28,6 +30,7 @@ export interface TemplateReleaseVersion {
   devVersionNumber: number
   lifecycleStatus: TemplateLifecycleStatus
   updatedAt: string
+  updatedBy: string
   defaultRouteTarget: boolean
 }
 

@@ -670,7 +670,7 @@ class TemplatePlatformSliceTest {
                 .andExpect(jsonPath("$.result.paths[0]").value("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract"))
                 .andExpect(jsonPath("$.result.callableVersions[0].releaseVersion").value("1.0.0"))
                 .andExpect(jsonPath("$.result.errorCodes[?(@.code=='BATCH_LIMIT_EXCEEDED')]").exists())
-                .andExpect(jsonPath("$.result.apiPolicy.policyVersion").value(1));
+                .andExpect(jsonPath("$.result.apiPolicy.policyVersion").value(2));
     }
 
     private CredentialBundle preparePublishedTemplateWithBatchPolicy() throws Exception {
@@ -813,6 +813,8 @@ class TemplatePlatformSliceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.lifecycleStatus").value("PENDING_RELEASE"));
 
+        configurePublishApiPolicy(templateId);
+
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/publish")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -822,6 +824,26 @@ class TemplatePlatformSliceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.lifecycleStatus").value("PUBLISHED"))
                 .andExpect(jsonPath("$.result.releaseVersion").value("1.0.0"));
+    }
+
+    private void configurePublishApiPolicy(String templateId) throws Exception {
+        mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "allowedAdGroups":["RETAIL_API"],
+                                  "defaultRouteReleaseVersion":"1.0.0",
+                                  "outputFormats":["DOCX"],
+                                  "outputModes":["SYNC_STREAM"],
+                                  "batchEnabled":false,
+                                  "maxBatchSize":10,
+                                  "docxEncryptionEnabled":false,
+                                  "pdfEncryptionEnabled":false
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.policyVersion").value(1));
     }
 
     private CredentialBundle configureApiAndCredential(String templateId) throws Exception {
@@ -841,7 +863,7 @@ class TemplatePlatformSliceTest {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.policyVersion").value(1));
+                .andExpect(jsonPath("$.result.policyVersion").value(2));
 
         MvcResult credentialResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/api/credentials")
                         .with(authentication(new ManagementAuthentication(groupAdmin))))
@@ -869,7 +891,7 @@ class TemplatePlatformSliceTest {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.policyVersion").value(1));
+                .andExpect(jsonPath("$.result.policyVersion").value(2));
 
         MvcResult credentialResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/api/credentials")
                         .with(authentication(new ManagementAuthentication(groupAdmin))))

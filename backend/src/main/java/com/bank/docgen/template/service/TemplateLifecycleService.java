@@ -1,5 +1,6 @@
 package com.bank.docgen.template.service;
 
+import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
@@ -34,6 +35,7 @@ public class TemplateLifecycleService {
     private final GroupAccessService groupAccessService;
     private final LifecycleImpactPreviewService lifecycleImpactPreviewService;
     private final MessageResolver messageResolver;
+    private final ApiPolicyRepository apiPolicyRepository;
 
     public TemplateLifecycleService(
             TemplateService templateService,
@@ -42,7 +44,8 @@ public class TemplateLifecycleService {
             TemplateLifecycleRecordRepository lifecycleRecordRepository,
             GroupAccessService groupAccessService,
             LifecycleImpactPreviewService lifecycleImpactPreviewService,
-            MessageResolver messageResolver
+            MessageResolver messageResolver,
+            ApiPolicyRepository apiPolicyRepository
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -51,6 +54,7 @@ public class TemplateLifecycleService {
         this.groupAccessService = groupAccessService;
         this.lifecycleImpactPreviewService = lifecycleImpactPreviewService;
         this.messageResolver = messageResolver;
+        this.apiPolicyRepository = apiPolicyRepository;
     }
 
     @Transactional
@@ -337,6 +341,9 @@ public class TemplateLifecycleService {
         BindingValidationView bindings = templateService.validateBindings(templateId, session);
         if (bindings.summary().blocking()) {
             throw new TemplateValidationException("api.error.template.publishGateBlocked");
+        }
+        if (apiPolicyRepository.findByTemplateId(templateId).isEmpty()) {
+            throw new TemplateValidationException("api.error.runtime.policyNotConfigured");
         }
     }
 

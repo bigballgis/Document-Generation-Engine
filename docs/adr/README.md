@@ -94,5 +94,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0036-local-account-store-authorization-authority.md](./authorization-security/0036-local-account-store-authorization-authority.md) | Accepted | Local account store as authorization authority, SSO authentication-only |
 | [0037-backend-dependency-realization-sequencing.md](./technology-stack/0037-backend-dependency-realization-sequencing.md) | Accepted | Backend dependency realization sequencing (amends ADR 0028: defer MapStruct/QueryDSL; reaffirm + schedule Resilience4j/Bucket4j/Redisson) |
 | [0038-sync-download-url-runtime-deferred.md](./api/0038-sync-download-url-runtime-deferred.md) | Accepted | Defer `SYNC_DOWNLOAD_URL` runtime delivery until secure download URL contract is ready (COR-B01) |
+| [0039-redisson-lock-evaluation.md](./technology-stack/0039-redisson-lock-evaluation.md) | Accepted | Redisson distributed lock evaluation — accepted single-instance risk; mandatory before multi-instance (COR-P05) |
+| [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
 Use [0000-template.md](./0000-template.md) when creating new ADRs. Place new numbered ADRs in the directory matching their `topic` frontmatter.

@@ -10,7 +10,9 @@ public record TemplateSummaryView(
         String name,
         TemplateLifecycleStatus lifecycleStatus,
         String releaseVersion,
+        int releaseVersionCount,
         String masterId,
+        String updatedBy,
         Instant updatedAt
 ) {
 }

@@ -21,5 +21,7 @@ Group isolation enforced.
 
 **Exit:** Approved master with stable `anchorId` catalog usable by template authoring.
 
+**Management UI (2026-06-24):** Navigation uses **Masters** / **Templates** package lists; detail shows revision/version lines. See `docs/product/catalog-navigation-ux.md`.
+
 **Evidence:** `MasterDocumentService`, `MasterListView.vue`, `MasterDetailView.vue`,
 `MasterListView.test.ts`, Flyway V3/V4, `mvn verify` green.

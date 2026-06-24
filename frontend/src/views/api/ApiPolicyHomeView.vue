@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
@@ -57,7 +58,7 @@ const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecy
 </script>
 
 <template>
-  <div class="api-policy-page">
+  <AppPageLayout>
     <header class="page-header">
       <div>
         <h1>{{ t('apiPolicy.home.title') }}</h1>
@@ -139,14 +140,10 @@ const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecy
         </el-table-column>
       </AppDataTable>
     </template>
-  </div>
+  </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.api-policy-page {
-  padding: 2rem;
-}
-
 .page-header {
   margin-bottom: 1.5rem;
 
@@ -167,9 +164,5 @@ const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecy
 
 .table-toolbar {
   margin-bottom: 0.75rem;
-}
-
-:deep(.el-table__row) {
-  cursor: pointer;
 }
 </style>

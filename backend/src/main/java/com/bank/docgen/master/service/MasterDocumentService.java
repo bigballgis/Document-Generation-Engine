@@ -315,6 +315,7 @@ public class MasterDocumentService {
                 master.getStatus().name(),
                 master.getOriginalFilename(),
                 master.getAnchors().size(),
+                master.getUpdatedBy(),
                 master.getUpdatedAt()
         );
     }
@@ -342,6 +343,8 @@ public class MasterDocumentService {
                                 record.getActorUsername(),
                                 record.getCreatedAt()))
                         .toList(),
+                master.getCreatedBy(),
+                master.getUpdatedBy(),
                 master.getCreatedAt(),
                 master.getUpdatedAt()
         );

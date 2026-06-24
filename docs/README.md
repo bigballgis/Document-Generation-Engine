@@ -24,6 +24,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Requirements plan](./requirements/requirements-plan.md) | Raw confirmed requirements |
 | [Non-functional requirements](./requirements/non-functional-requirements.md) | Quality, security, reliability constraints |
 | [PRD](./product/PRD.md) | Product-facing behavior |
+| [Catalog navigation UX](./product/catalog-navigation-ux.md) | Master/template package catalog IA and navigation behavior |
 | [Domain model](./domain/domain-model.md) | Objects, states, invariants |
 | [Permission matrix](./security/permission-matrix.md) | Roles, groups, authorization |
 

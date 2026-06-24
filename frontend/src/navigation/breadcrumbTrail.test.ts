@@ -16,8 +16,8 @@ describe('buildBreadcrumbTrail', () => {
     const trail = buildBreadcrumbTrail('/templates/tpl-1')
 
     expect(trail.map((segment) => segment.labelKey)).toEqual([
-      'nav.groups.versionCatalog',
-      'nav.items.templateVersions',
+      'nav.groups.content',
+      'nav.items.templates',
       'nav.breadcrumb.detail',
     ])
     expect(trail[1]?.path).toBe('/templates')

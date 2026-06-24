@@ -41,7 +41,9 @@ describe('TemplateListView', () => {
         name: 'Retail letter',
         lifecycleStatus: 'DRAFT',
         releaseVersion: null,
+        releaseVersionCount: 0,
         masterId: 'master-1',
+        updatedBy: '10000001',
         updatedAt: '2026-06-23T10:00:00Z',
       },
     ])

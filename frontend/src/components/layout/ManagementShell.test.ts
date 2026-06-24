@@ -63,8 +63,9 @@ describe('ManagementShell', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Global Admin')
-    expect(wrapper.text()).toContain('Version catalog')
-    expect(wrapper.text()).toContain('Master versions')
+    expect(wrapper.text()).toContain('Document content')
+    expect(wrapper.text()).toContain('Master documents')
+    expect(wrapper.text()).toContain('Templates')
     expect(wrapper.text()).toContain('Audit log')
     expect(wrapper.text()).toContain('Page content')
   })
