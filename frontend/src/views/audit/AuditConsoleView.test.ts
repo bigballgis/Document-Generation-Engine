@@ -76,4 +76,47 @@ describe('AuditConsoleView', () => {
     expect(wrapper.text()).toContain('API_POLICY_UPDATED')
     expect(wrapper.text()).toContain('Audit console')
   })
+
+  it('blocks group admin filter apply until template id is provided', async () => {
+    vi.mocked(auditApi.listManagementEvents).mockResolvedValue({
+      events: [],
+      page: 0,
+      size: 20,
+      totalElements: 0,
+      totalPages: 0,
+    })
+
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      accessToken: 'token',
+      session: {
+        username: '10000002',
+        displayName: 'Group Admin',
+        email: 'group.admin@example.com',
+        authSource: 'LOCAL',
+        roles: ['GROUP_ADMIN'],
+        authorizedGroupCodes: ['RETAIL'],
+        defaultRoute: ROUTE_KEYS.auditConsole,
+        visibleRoutes: [ROUTE_KEYS.auditConsole],
+        expiresAt: new Date().toISOString(),
+      },
+    })
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(AuditConsoleView, {
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Enter a template ID before querying audit events.')
+    expect(auditApi.listManagementEvents).not.toHaveBeenCalled()
+  })
 })

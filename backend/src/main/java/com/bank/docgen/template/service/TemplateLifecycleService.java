@@ -115,8 +115,7 @@ public class TemplateLifecycleService {
         template.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
         template.setUpdatedBy(session.username());
         templateRepository.save(template);
-        TemplateVersionEntity version = templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
-                .orElseThrow(TemplateNotFoundException::new);
+        TemplateVersionEntity version = requireReleaseCandidateVersion(templateId);
         version.setReleaseVersion(request.releaseVersion());
         version.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
         templateVersionRepository.save(version);
@@ -339,6 +338,13 @@ public class TemplateLifecycleService {
         if (bindings.summary().blocking()) {
             throw new TemplateValidationException("api.error.template.publishGateBlocked");
         }
+    }
+
+    private TemplateVersionEntity requireReleaseCandidateVersion(UUID templateId) {
+        return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId).stream()
+                .filter(version -> version.getReleaseVersion() == null || version.getReleaseVersion().isBlank())
+                .findFirst()
+                .orElseThrow(TemplateNotFoundException::new);
     }
 
     private TemplateEntity requireStopEligibleTemplate(UUID templateId, ManagementSessionClaims session) {

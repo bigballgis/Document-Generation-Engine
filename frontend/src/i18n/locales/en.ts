@@ -388,6 +388,8 @@ export default {
       templateId: 'Template ID',
       templateIdPlaceholder: 'UUID of the template',
       groupScope: 'Group scope',
+      groupScopeRequired: 'Select a group scope before querying audit events.',
+      templateIdRequired: 'Enter a template ID before querying audit events.',
       apply: 'Apply filters',
       reset: 'Reset filters',
     },

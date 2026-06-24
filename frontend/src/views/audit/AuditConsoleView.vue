@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
@@ -11,12 +12,24 @@ import { useAuditStore } from '@/stores/audit'
 import type { LifecycleAuditEvent, ManagementAuditEvent } from '@/types/audit'
 import type { TemplateLifecycleStatus } from '@/types/template'
 import { downloadJsonExport } from '@/utils/downloadExport'
+import { validateGroupAdminAuditFilters } from '@/views/audit/auditFilterValidation'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const { t, te } = useI18n()
 const auditStore = useAuditStore()
 
 const activeTab = ref<'management' | 'lifecycle'>('management')
+const loadFailed = ref(false)
+const filterValidationKey = ref<string | null>(null)
+
+const loadErrorMessageKey = computed(() => {
+  if (auditStore.lastErrorMessageKey) {
+    return auditStore.lastErrorMessageKey
+  }
+  return activeTab.value === 'management'
+    ? 'audit.error.loadManagement'
+    : 'audit.error.loadLifecycle'
+})
 
 const errorMessage = computed(() => {
   const key = auditStore.lastErrorMessageKey
@@ -117,6 +130,16 @@ watch(activeTab, () => {
 })
 
 async function refreshActiveTab() {
+  if (showGroupFilters.value) {
+    filterValidationKey.value = validateGroupAdminAuditFilters(auditStore.filters)
+    if (filterValidationKey.value) {
+      return
+    }
+  } else {
+    filterValidationKey.value = null
+  }
+
+  loadFailed.value = false
   try {
     if (activeTab.value === 'management') {
       await auditStore.fetchManagementEvents(auditStore.managementPage)
@@ -124,7 +147,7 @@ async function refreshActiveTab() {
       await auditStore.fetchLifecycleEvents(auditStore.lifecyclePage)
     }
   } catch {
-    // Error surfaced via store message key.
+    loadFailed.value = true
   }
 }
 
@@ -133,15 +156,30 @@ async function handleTabChange(tab: string | number | boolean) {
 }
 
 async function applyFilters() {
-  if (activeTab.value === 'management') {
-    await auditStore.fetchManagementEvents(0)
+  if (showGroupFilters.value) {
+    filterValidationKey.value = validateGroupAdminAuditFilters(auditStore.filters)
+    if (filterValidationKey.value) {
+      return
+    }
   } else {
-    await auditStore.fetchLifecycleEvents(0)
+    filterValidationKey.value = null
+  }
+
+  loadFailed.value = false
+  try {
+    if (activeTab.value === 'management') {
+      await auditStore.fetchManagementEvents(0)
+    } else {
+      await auditStore.fetchLifecycleEvents(0)
+    }
+  } catch {
+    loadFailed.value = true
   }
 }
 
 async function resetFilters() {
   auditStore.resetFilters()
+  filterValidationKey.value = null
   await applyFilters()
 }
 
@@ -202,14 +240,21 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
     </header>
 
     <el-alert
-      v-if="errorMessage"
+      v-if="filterValidationKey"
       class="page-alert"
-      type="error"
-      :title="errorMessage"
+      type="warning"
+      :title="t(filterValidationKey)"
       show-icon
       :closable="false"
     />
 
+    <LoadErrorPanel
+      v-if="loadFailed"
+      :message-key="loadErrorMessageKey"
+      @retry="refreshActiveTab"
+    />
+
+    <template v-else>
     <el-card shadow="never" class="filters-card">
       <div class="filters-grid">
         <el-form-item :label="t('audit.filters.eventType')">
@@ -426,6 +471,7 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
         </template>
       </el-tab-pane>
     </el-tabs>
+    </template>
   </div>
 </template>
 

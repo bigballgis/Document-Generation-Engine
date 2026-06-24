@@ -72,6 +72,10 @@ public class TemplateVersionEntity {
         return devVersionNumber;
     }
 
+    public void setDevVersionNumber(int devVersionNumber) {
+        this.devVersionNumber = devVersionNumber;
+    }
+
     public String getReleaseVersion() {
         return releaseVersion;
     }

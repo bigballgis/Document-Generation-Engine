@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
@@ -213,12 +214,10 @@ const sortByUpdatedAt = rowSortMethod<TemplateReleaseVersion>((row) => row.updat
       class="workflow-hint"
     />
 
-    <el-alert
+    <LoadErrorPanel
       v-if="loadError"
-      type="error"
-      :title="t('templates.versions.loadError')"
-      show-icon
-      :closable="false"
+      message-key="templates.versions.loadError"
+      @retry="loadVersions"
     />
 
     <el-skeleton v-else-if="loading" :rows="4" animated />

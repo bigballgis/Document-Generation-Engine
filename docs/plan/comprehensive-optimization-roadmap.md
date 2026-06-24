@@ -104,7 +104,7 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | COR-T02 | H | Controlled test/approval opinion forms | Free-text commentSummary only | Structured forms per PRD §7; audit fields; fail returns to DRAFT | Not Started | P19-T07 |
 | COR-T03 | H | GROUP_ADMIN exception intervention path | GROUP_ADMIN always canDecideTests/Approvals | Normal vs exception flows; reason + secondary confirm + audit marker | Not Started | PRD §7, permission-matrix |
 | COR-T04 | H | Collaboration work items + optional timeout | PRD §7 668–672; no WorkItem entity | Role/group queue to-dos; timeout escalation without auto state change | Not Started | P14/P19, domain §2.9.4 |
-| COR-T05 | M | Publish not hard-bound to dev version 1 | `findByTemplateIdAndDevVersionNumber(..., 1)` | Publish selects release candidate dev version; tests for multi-version | Not Started | P16 |
+| COR-T05 | M | Publish not hard-bound to dev version 1 | `findByTemplateIdAndDevVersionNumber(..., 1)` | Publish selects release candidate dev version; tests for multi-version | **Done** (2026-06-23; `requireReleaseCandidateVersion` + selection test) | P16 |
 | COR-T06 | M | Multi release version callability | TemplateCallabilitySupport single release constraint | Per-version callable list matches deactivate/restore; runtime tests | Not Started | P16, P7 |
 | COR-T07 | M | Publish permission doc + code alignment | Domain model says author can publish; code admin-only | Confirmed matrix entry; code matches decision | **Done** (2026-06-24; Batch B ADR) | COR-D02 |
 | COR-T08 | M | Batch test + coverage thresholds | PRD §6.5; P19-T02/T03 Not Started | Multi-sample batch test + threshold blockers | Not Started | P19 |
@@ -155,14 +155,14 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 | COR-F11 | M | Workflow banner action anchor | Banner text only | CTA scrolls/opens lifecycle/review panel | **Done** (2026-06-23; banner CTA + lifecycle panel scroll) | COR-T14 |
 | COR-F12 | M | Template create dialog validation | Silent empty submit; errors not shown in dialog | el-form rules + inline/API errors | **Done** (2026-06-23; `TemplateCreateDialog` rules + alert + Vitest) | OPT-G8 |
 | COR-F13 | M | Governance triple-dialog simplification | prompt → impact → confirm ×3 | ≤2 steps with reason + impact inline | **Done** (2026-06-23; governance + version actions merged to 2 steps) | — |
-| COR-F14 | M | Unified recoverable errors | Lists/audit/release history use el-alert | LoadErrorPanel pattern everywhere async | Not Started | — |
+| COR-F14 | M | Unified recoverable errors | Lists/audit/release history use el-alert | LoadErrorPanel pattern everywhere async | **Done** (2026-06-23; audit, release history, governance home) | — |
 
 ### 5.4 Identity, audit, API policy
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-F15 | H | Identity list pagination UI | API page/size; UI always page 0 | el-pagination + total; E2E page 2 | **Done** (2026-06-24; users + groups panels) | P13 |
-| COR-F16 | M | GROUP_ADMIN audit filter validation | Missing templateId → 422 at API | Proactive UI validation + message | Not Started | P8 |
+| COR-F16 | M | GROUP_ADMIN audit filter validation | Missing templateId → 422 at API | Proactive UI validation + message | **Done** (2026-06-23; client filter gate + Vitest) | P8 |
 | COR-F17 | M | Audit console UX | No filter reset; client slice pagination | Reset + export scope dialog; server pagination plan | **Done** (2026-06-24; server page + reset + export confirm) | OPT-F4 |
 | COR-F18 | M | API policy per-domain UI | Monolithic form in TemplateDetailView | Domain nav + save per P17/matrix §7 | Not Started | P17 |
 

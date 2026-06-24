@@ -10,6 +10,7 @@ import {
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 
 const props = defineProps<{
   routeKey: string
@@ -170,6 +171,10 @@ onMounted(async () => {
   if (!isGovernanceHome.value) {
     return
   }
+  await loadDashboardStats()
+})
+
+async function loadDashboardStats() {
   dashboardLoading.value = true
   dashboardError.value = false
   try {
@@ -179,7 +184,7 @@ onMounted(async () => {
   } finally {
     dashboardLoading.value = false
   }
-})
+}
 
 function navigate(path: string) {
   router.push(path)
@@ -212,13 +217,10 @@ function navigate(path: string) {
     </el-card>
 
     <template v-if="isGovernanceHome">
-      <el-alert
+      <LoadErrorPanel
         v-if="dashboardError"
-        class="dashboard-alert"
-        type="error"
-        :title="t('home.dashboard.loadError')"
-        show-icon
-        :closable="false"
+        message-key="home.dashboard.loadError"
+        @retry="loadDashboardStats"
       />
 
       <section v-else class="dashboard-section">
