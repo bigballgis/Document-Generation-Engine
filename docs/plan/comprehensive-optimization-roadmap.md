@@ -152,9 +152,9 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-F09 | H | List pagination vs group sections | slice(0,10) then group by groupCode | Pagination preserves group semantics (design A or B) | **Done** (2026-06-24; group-first pagination) | — |
 | COR-F10 | M | Template detail tab deep linking | activeDetailTab local only | Query/hash sync; workflow links to lifecycle tab | **Done** (2026-06-24) | COR-T11 |
-| COR-F11 | M | Workflow banner action anchor | Banner text only | CTA scrolls/opens lifecycle/review panel | Not Started | COR-T14 |
+| COR-F11 | M | Workflow banner action anchor | Banner text only | CTA scrolls/opens lifecycle/review panel | **Done** (2026-06-23; banner CTA + lifecycle panel scroll) | COR-T14 |
 | COR-F12 | M | Template create dialog validation | Silent empty submit; errors not shown in dialog | el-form rules + inline/API errors | **Done** (2026-06-23; `TemplateCreateDialog` rules + alert + Vitest) | OPT-G8 |
-| COR-F13 | M | Governance triple-dialog simplification | prompt → impact → confirm ×3 | ≤2 steps with reason + impact inline | Not Started | — |
+| COR-F13 | M | Governance triple-dialog simplification | prompt → impact → confirm ×3 | ≤2 steps with reason + impact inline | **Done** (2026-06-23; governance + version actions merged to 2 steps) | — |
 | COR-F14 | M | Unified recoverable errors | Lists/audit/release history use el-alert | LoadErrorPanel pattern everywhere async | Not Started | — |
 
 ### 5.4 Identity, audit, API policy
@@ -207,7 +207,7 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 | COR-E03 | M | AuditQueryService tests | 264 lines untested | Group scope + GLOBAL_ADMIN paths | **Done** (2026-06-24; AuditQueryServiceTest) | OPT-C5 |
 | COR-E04 | M | Rendering PDF path tests | LibreOffice/DockerExec untested | Success/timeout/cleanup mocked | **Done** (2026-06-24; pipeline + LibreOffice tests) | OPT-C4 |
 | COR-E05 | M | Frontend: DashboardView + tab router tests | No tests for new surfaces | Vitest for tasks, load error, tab query sync | **Done** (2026-06-23; dashboard tasks + `templateDetailTabs` + load error) | OPT-C6 |
-| COR-E06 | M | messageKey → UI mapping tests | errorEnvelope without e2e UI | Store/view tests for catalog keys | **Partial** (2026-06-23; templates store + create dialog messageKey) | P20-T06 |
+| COR-E06 | M | messageKey → UI mapping tests | errorEnvelope without e2e UI | Store/view tests for catalog keys | **Partial** (2026-06-23; create + publish gate messageKey in templates store) | P20-T06 |
 
 ---
 

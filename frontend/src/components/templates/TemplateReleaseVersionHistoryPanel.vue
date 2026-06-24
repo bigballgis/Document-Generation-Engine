@@ -8,7 +8,6 @@ import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
-import { useConfirmAction } from '@/composables/useConfirmAction'
 import * as templatesApi from '@/api/templates'
 import { useTemplatesStore } from '@/stores/templates'
 import type {
@@ -34,7 +33,6 @@ const defaultRouteFilterOptions = computed(() => [
 ])
 const templatesStore = useTemplatesStore()
 const { manageReleaseVersionState } = useCapabilities()
-const { confirmAction } = useConfirmAction()
 
 const loading = ref(false)
 const loadError = ref(false)
@@ -168,21 +166,13 @@ async function handleVersionAction(
 
   try {
     const impactMessage = await buildImpactPreviewMessage(previewAction, releaseVersion)
-    await ElMessageBox.confirm(impactMessage, t('templates.governance.impactPreviewTitle'), {
+    const confirmBody = [impactMessage, t(confirmMessageKey)].join('\n\n')
+    await ElMessageBox.confirm(confirmBody, t(confirmTitleKey), {
       confirmButtonText: t('common.confirm'),
       cancelButtonText: t('common.cancel'),
       type: 'warning',
     })
   } catch {
-    return
-  }
-
-  const confirmed = await confirmAction({
-    titleKey: confirmTitleKey,
-    messageKey: confirmMessageKey,
-    type: 'warning',
-  })
-  if (!confirmed) {
     return
   }
 

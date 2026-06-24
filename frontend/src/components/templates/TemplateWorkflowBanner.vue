@@ -8,6 +8,10 @@ const props = defineProps<{
   template: TemplateDetail
 }>()
 
+const emit = defineEmits<{
+  openLifecycle: []
+}>()
+
 const { t } = useI18n()
 const {
   authorTemplates,
@@ -59,7 +63,9 @@ const banner = computed(() => {
     </template>
     <p class="workflow-banner__title">{{ t(banner.titleKey) }}</p>
     <p class="workflow-banner__description">{{ t(banner.descriptionKey) }}</p>
-    <p class="workflow-banner__hint">{{ t('templates.workflow.useLifecyclePanel') }}</p>
+    <el-button type="primary" link class="workflow-banner__cta" @click="emit('openLifecycle')">
+      {{ t('templates.workflow.openLifecyclePanel') }}
+    </el-button>
   </el-alert>
 </template>
 
@@ -74,8 +80,11 @@ const banner = computed(() => {
 }
 
 .workflow-banner__description,
-.workflow-banner__hint {
+.workflow-banner__cta {
   margin: 0.35rem 0 0;
+}
+
+.workflow-banner__description {
   color: var(--text-muted);
 }
 </style>

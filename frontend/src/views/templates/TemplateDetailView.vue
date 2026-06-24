@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -281,6 +281,16 @@ async function loadTemplate() {
   }
 }
 
+function openLifecyclePanel() {
+  activeDetailTab.value = 'overview'
+  void nextTick(() => {
+    document.getElementById('template-lifecycle-panel')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  })
+}
+
 async function loadPolicyData() {
   await Promise.all([
     templatesStore.fetchApiPolicy(templateId.value),
@@ -477,21 +487,13 @@ async function handleGovernanceAction(action: GovernanceAction) {
 
   try {
     const impactMessage = await buildImpactPreviewMessage(config.previewAction)
-    await ElMessageBox.confirm(impactMessage, t('templates.governance.impactPreviewTitle'), {
+    const confirmBody = [impactMessage, t(config.confirmMessageKey)].join('\n\n')
+    await ElMessageBox.confirm(confirmBody, t(config.confirmTitleKey), {
       confirmButtonText: t('common.confirm'),
       cancelButtonText: t('common.cancel'),
       type: 'warning',
     })
   } catch {
-    return
-  }
-
-  const confirmed = await confirmAction({
-    titleKey: config.confirmTitleKey,
-    messageKey: config.confirmMessageKey,
-    type: 'warning',
-  })
-  if (!confirmed) {
     return
   }
 
@@ -691,7 +693,7 @@ async function handleDeleteTemplate() {
     />
 
     <template v-else-if="template">
-      <TemplateWorkflowBanner :template="template" />
+      <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />
 
       <el-tabs v-model="activeDetailTab" class="detail-tabs">
         <el-tab-pane :label="t('templates.detail.tabs.overview')" name="overview">
@@ -724,7 +726,12 @@ async function handleDeleteTemplate() {
         </p>
       </el-card>
 
-      <el-card v-if="showLifecycleSection" shadow="never" class="section-card">
+      <el-card
+        v-if="showLifecycleSection"
+        id="template-lifecycle-panel"
+        shadow="never"
+        class="section-card"
+      >
         <h2>{{ t('templates.lifecycle.title') }}</h2>
         <el-input
           v-model="lifecycleComment"

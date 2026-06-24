@@ -95,4 +95,28 @@ describe('templates store', () => {
 
     expect(store.lastErrorMessageKey).toBe('templates.error.create')
   })
+
+  it('stores api error message key when publish fails with publish gate envelope', async () => {
+    vi.mocked(templatesApi.publishTemplate).mockRejectedValue(
+      axiosEnvelopeError(422, 'api.error.template.publishGateBlocked', {
+        code: 'TEMPLATE_VALIDATION_FAILED',
+        category: 'TEMPLATE',
+        message: 'Publish gate blocked.',
+      }),
+    )
+
+    const store = useTemplatesStore()
+    await expect(store.publishTemplate('tpl-1', { releaseVersion: '1.0.0' })).rejects.toBeTruthy()
+
+    expect(store.lastErrorMessageKey).toBe('api.error.template.publishGateBlocked')
+  })
+
+  it('falls back to templates.error.lifecycle when publish fails without envelope', async () => {
+    vi.mocked(templatesApi.publishTemplate).mockRejectedValue(new Error('network'))
+
+    const store = useTemplatesStore()
+    await expect(store.publishTemplate('tpl-1', { releaseVersion: '1.0.0' })).rejects.toBeTruthy()
+
+    expect(store.lastErrorMessageKey).toBe('templates.error.lifecycle')
+  })
 })

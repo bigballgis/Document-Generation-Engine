@@ -480,6 +480,7 @@ export default {
     workflow: {
       actionRequired: 'Release version workflow — action required',
       useLifecyclePanel: 'Use the lifecycle actions panel below to advance this template release version.',
+      openLifecyclePanel: 'Open lifecycle panel',
     },
     status: {
       DRAFT: 'Draft',
