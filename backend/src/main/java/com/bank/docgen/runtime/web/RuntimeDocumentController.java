@@ -30,7 +30,12 @@ public class RuntimeDocumentController {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
-        try (DownloadArtifact artifact = documentDownloadService.resolveDownload(documentId, session, request)) {
+        try (DownloadArtifact artifact = documentDownloadService.resolveDownload(
+                documentId,
+                environment,
+                session,
+                request
+        )) {
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType(artifact.contentType());
             response.setHeader("documentId", artifact.documentId());

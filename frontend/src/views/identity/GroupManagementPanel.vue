@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import AppDataTable from '@/components/common/AppDataTable.vue'
@@ -28,6 +28,8 @@ const form = reactive<{ groupCode: string; displayName: string; dimension: Group
   displayName: '',
   dimension: '',
 })
+
+const currentPage = ref(1)
 
 const dimensionOptions: GroupDimension[] = ['BUSINESS_LINE', 'DEPARTMENT']
 
@@ -86,7 +88,14 @@ onMounted(() => {
   void reload()
 })
 
+watch(currentPage, (page) => {
+  void identityStore.fetchGroups({ page: page - 1, size: identityStore.groupFilters.size }).catch(() => {
+    // Surfaced via store error key.
+  })
+})
+
 async function reload() {
+  currentPage.value = 1
   try {
     await identityStore.fetchGroups({ page: 0 })
   } catch {
@@ -190,7 +199,8 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
         <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
       </div>
 
-      <AppDataTable v-if="filteredGroups.length > 0" :data="filteredGroups">
+      <template v-if="filteredGroups.length > 0">
+        <AppDataTable :data="filteredGroups">
         <el-table-column prop="groupCode" sortable min-width="160">
           <template #header>
             <TableColumnHeader
@@ -254,6 +264,16 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
           </template>
         </el-table-column>
       </AppDataTable>
+
+        <el-pagination
+          v-if="identityStore.groupsTotal > (identityStore.groupFilters.size ?? 20)"
+          v-model:current-page="currentPage"
+          class="list-pagination"
+          layout="total, prev, pager, next"
+          :page-size="identityStore.groupFilters.size ?? 20"
+          :total="identityStore.groupsTotal"
+        />
+      </template>
 
       <el-empty v-else :description="t('identity.groups.empty')" />
     </template>
@@ -327,5 +347,10 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
 
 .full-width {
   width: 100%;
+}
+
+.list-pagination {
+  margin-top: 1rem;
+  justify-content: flex-end;
 }
 </style>

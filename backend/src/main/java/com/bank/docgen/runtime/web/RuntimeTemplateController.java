@@ -9,6 +9,8 @@ import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.api.SyncGenerateResult;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.runtime.service.BatchGenerationService;
+import com.bank.docgen.runtime.service.IdempotencyConstants;
+import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.runtime.service.RuntimeGenerationService;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
@@ -36,17 +38,20 @@ public class RuntimeTemplateController {
     private final RuntimeGenerationService runtimeGenerationService;
     private final BatchGenerationService batchGenerationService;
     private final TraceIdProvider traceIdProvider;
+    private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
 
     public RuntimeTemplateController(
             TemplateService templateService,
             RuntimeGenerationService runtimeGenerationService,
             BatchGenerationService batchGenerationService,
-            TraceIdProvider traceIdProvider
+            TraceIdProvider traceIdProvider,
+            RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder
     ) {
         this.templateService = templateService;
         this.runtimeGenerationService = runtimeGenerationService;
         this.batchGenerationService = batchGenerationService;
         this.traceIdProvider = traceIdProvider;
+        this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
     }
 
     @GetMapping("/contract")
@@ -91,6 +96,24 @@ public class RuntimeTemplateController {
                 releaseVersion,
                 body
         );
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        runtimeGenerationAuditRecorder.recordSyncGeneration(
+                template,
+                session,
+                environment,
+                releaseVersion == null ? "DEFAULT" : "EXPLICIT",
+                result.resolvedReleaseVersion(),
+                body.output().format(),
+                body.output().mode(),
+                body.requestId(),
+                body.idempotencyKey(),
+                result.idempotencyStatus(),
+                result.documentId(),
+                IdempotencyConstants.STATUS_REPLAYED.equals(result.idempotencyStatus())
+                        ? RuntimeGenerationAuditRecorder.OUTCOME_REPLAYED
+                        : RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
+                traceId
+        );
         writeSyncResponse(request, response, templateExternalId, releaseVersion, body, result);
     }
 
@@ -118,9 +141,11 @@ public class RuntimeTemplateController {
         BatchGenerateResultView result = batchGenerationService.batchGenerateSync(
                 template,
                 session,
+                environment,
                 releaseVersion,
                 "EXPLICIT",
-                body
+                body,
+                traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"))
         );
         return ResponseEntity.ok(envelope(request, result));
     }
@@ -148,9 +173,11 @@ public class RuntimeTemplateController {
         BatchGenerateResultView result = batchGenerationService.batchGenerateSync(
                 template,
                 session,
+                environment,
                 null,
                 "DEFAULT",
-                body
+                body,
+                traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"))
         );
         return ResponseEntity.ok(envelope(request, result));
     }
@@ -166,6 +193,24 @@ public class RuntimeTemplateController {
     ) throws java.io.IOException {
         TemplateEntity template = templateService.requireTemplateByExternalId(templateExternalId);
         SyncGenerateResult result = runtimeGenerationService.generateSync(template, session, null, body);
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        runtimeGenerationAuditRecorder.recordSyncGeneration(
+                template,
+                session,
+                environment,
+                "DEFAULT",
+                result.resolvedReleaseVersion(),
+                body.output().format(),
+                body.output().mode(),
+                body.requestId(),
+                body.idempotencyKey(),
+                result.idempotencyStatus(),
+                result.documentId(),
+                IdempotencyConstants.STATUS_REPLAYED.equals(result.idempotencyStatus())
+                        ? RuntimeGenerationAuditRecorder.OUTCOME_REPLAYED
+                        : RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
+                traceId
+        );
         writeSyncResponse(request, response, templateExternalId, result.resolvedReleaseVersion(), body, result);
     }
 

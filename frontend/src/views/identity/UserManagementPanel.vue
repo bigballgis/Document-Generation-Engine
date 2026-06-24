@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { useEnabledStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { assignableGroupCodes, assignableRoles, canDeleteUsers } from '@/auth/identityRoles'
 import { useIdentityStore } from '@/stores/identity'
@@ -33,6 +35,7 @@ const resetFormRef = ref<FormInstance>()
 
 const filterGroup = ref('')
 const filterRole = ref('')
+const currentPage = ref(1)
 
 const form = reactive<{
   username: string
@@ -55,6 +58,11 @@ const canDelete = computed(() => canDeleteUsers(actorRoles.value))
 const roleOptions = computed(() => assignableRoles(actorRoles.value))
 const groupCatalog = computed(() => identityStore.groups.map((group) => group.groupCode))
 const groupOptions = computed(() => assignableGroupCodes(sessionStore.session, groupCatalog.value))
+const {
+  isGroupLocked: isFilterGroupLocked,
+  resolveDefaultGroupCode,
+  ensureGroupCatalog,
+} = useScopedGroupOptions()
 
 function roleLabel(role: string): string {
   return te(`identity.roles.${role}`) ? t(`identity.roles.${role}`) : role
@@ -149,10 +157,28 @@ const resetRules = computed<FormRules>(() => ({
 }))
 
 onMounted(() => {
-  void reload()
+  void initializePanel()
+})
+
+async function initializePanel() {
+  await ensureGroupCatalog()
+  filterGroup.value = resolveDefaultGroupCode(filterGroup.value)
+  await reload()
+}
+
+watch(currentPage, (page) => {
+  void identityStore.fetchUsers({
+    group: filterGroup.value || undefined,
+    role: filterRole.value || undefined,
+    page: page - 1,
+    size: identityStore.userFilters.size,
+  }).catch(() => {
+    // Surfaced via store error key.
+  })
 })
 
 async function reload() {
+  currentPage.value = 1
   try {
     await identityStore.fetchUsers({
       group: filterGroup.value || undefined,
@@ -165,7 +191,7 @@ async function reload() {
 }
 
 function resetFilters() {
-  filterGroup.value = ''
+  filterGroup.value = isFilterGroupLocked.value ? resolveDefaultGroupCode() : ''
   filterRole.value = ''
   void reload()
 }
@@ -297,19 +323,12 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
   <section class="user-panel">
     <header class="panel-header">
       <form class="filters" @submit.prevent="reload">
-        <AppSearchSelect
+        <ScopedGroupSelect
           v-model="filterGroup"
           class="filter-control"
-          clearable
+          :clearable="!isFilterGroupLocked"
           :placeholder="t('identity.users.filters.groupPlaceholder')"
-        >
-          <el-option
-            v-for="code in groupCatalog"
-            :key="code"
-            :label="code"
-            :value="code"
-          />
-        </AppSearchSelect>
+        />
         <AppSearchSelect
           v-model="filterRole"
           class="filter-control"
@@ -345,7 +364,8 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
         <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
       </div>
 
-      <AppDataTable v-if="filteredUsers.length > 0" :data="filteredUsers">
+      <template v-if="filteredUsers.length > 0">
+        <AppDataTable :data="filteredUsers">
       <el-table-column prop="username" sortable width="140">
         <template #header>
           <TableColumnHeader
@@ -439,6 +459,16 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
         </template>
       </el-table-column>
       </AppDataTable>
+
+        <el-pagination
+          v-if="identityStore.usersTotal > (identityStore.userFilters.size ?? 20)"
+          v-model:current-page="currentPage"
+          class="list-pagination"
+          layout="total, prev, pager, next"
+          :page-size="identityStore.userFilters.size ?? 20"
+          :total="identityStore.usersTotal"
+        />
+      </template>
 
       <el-empty v-else :description="t('identity.users.empty')" />
     </template>
@@ -591,5 +621,10 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
   margin-top: 0.35rem;
   color: var(--text-muted);
   font-size: 0.8125rem;
+}
+
+.list-pagination {
+  margin-top: 1rem;
+  justify-content: flex-end;
 }
 </style>

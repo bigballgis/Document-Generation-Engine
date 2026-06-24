@@ -374,6 +374,7 @@ export default {
       templateIdPlaceholder: 'UUID of the template',
       groupScope: 'Group scope',
       apply: 'Apply filters',
+      reset: 'Reset filters',
     },
     columns: {
       eventAt: 'Event time',
@@ -391,6 +392,10 @@ export default {
     },
     export: {
       action: 'Export',
+      confirmTitle: 'Export audit events',
+      confirmAction: 'Download export',
+      cancelAction: 'Cancel',
+      scopeAll: 'Export all events matching your authorized scope (no additional filters).',
       success: 'Management audit export downloaded.',
       lifecycleSuccess: 'Lifecycle audit export downloaded.',
       managementFilename: 'management-audit-export.json',

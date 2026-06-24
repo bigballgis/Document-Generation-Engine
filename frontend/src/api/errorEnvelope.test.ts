@@ -3,6 +3,7 @@ import {
   parseApiEnvelopeError,
   resolveApiError,
   resolveApiErrorMessageKey,
+  resolveStoreErrorMessageKey,
 } from '@/api/errorEnvelope'
 import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 
@@ -68,5 +69,18 @@ describe('errorEnvelope', () => {
     expect(resolveApiErrorMessageKey(new Error('network'), 'templates.error.loadList')).toBe(
       'templates.error.loadList',
     )
+  })
+
+  it('skips store error keys for auth failures', () => {
+    const axiosError = axiosEnvelopeError(
+      401,
+      'api.error.authentication.sessionExpired',
+      {
+        code: 'SESSION_EXPIRED',
+        category: 'AUTHENTICATION',
+        message: 'Session expired.',
+      },
+    )
+    expect(resolveStoreErrorMessageKey(axiosError, 'masters.error.loadList')).toBeNull()
   })
 })

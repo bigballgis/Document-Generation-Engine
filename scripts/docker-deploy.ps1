@@ -113,6 +113,22 @@ if (-not $healthy) {
     exit 1
 }
 
+try {
+    $loginBody = '{"username":"10000001","password":"ChangeMe123!"}'
+    $login = Invoke-RestMethod -Uri "http://localhost:$backendPort/api/management/v1/auth/login" -Method POST -ContentType "application/json" -Body $loginBody
+    $token = $login.result.accessToken
+    $masters = Invoke-RestMethod -Uri "http://localhost:$backendPort/api/management/v1/masters" -Headers @{ Authorization = "Bearer $token" }
+    $templates = Invoke-RestMethod -Uri "http://localhost:$backendPort/api/management/v1/templates" -Headers @{ Authorization = "Bearer $token" }
+    $masterCount = @($masters.result).Count
+    $templateCount = @($templates.result).Count
+    Write-Host "  Catalog: $masterCount master(s), $templateCount template(s)"
+    if ($masterCount -eq 0) {
+        Write-Host "  Warning: catalog is empty. Set DOCGEN_SEED_DEMO_CATALOG=true and recreate docgen-backend."
+    }
+} catch {
+    Write-Host "  Warning: could not verify catalog via API: $($_.Exception.Message)"
+}
+
 Write-Host ""
 Write-Host "Deployment ready."
 Write-Host "  Frontend: http://localhost:$frontendPort"

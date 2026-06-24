@@ -53,12 +53,16 @@ const errorMessage = computed(() => {
 })
 
 onMounted(async () => {
+  await reloadMasters()
+})
+
+async function reloadMasters() {
   try {
     await mastersStore.fetchMasters()
   } catch {
     // Error surfaced via store message key.
   }
-})
+}
 
 function openMaster(masterId: string) {
   router.push(`${MASTER_DETAIL_PATH_PREFIX}${masterId}`)
@@ -114,11 +118,15 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
       :title="errorMessage"
       show-icon
       :closable="false"
-    />
+    >
+      <el-button size="small" type="primary" @click="reloadMasters">
+        {{ t('common.retry') }}
+      </el-button>
+    </el-alert>
 
     <el-skeleton v-if="mastersStore.loadingList" :rows="6" animated />
 
-    <template v-else-if="groupedMasters.length > 0">
+    <template v-else-if="!errorMessage && groupedMasters.length > 0">
       <div v-if="hasActiveFilters" class="table-toolbar">
         <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
       </div>
@@ -193,7 +201,7 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
       </section>
     </template>
 
-    <el-empty v-else :description="t('masters.list.empty')" />
+    <el-empty v-else-if="!errorMessage" :description="t('masters.list.empty')" />
 
     <el-pagination
       v-if="totalMasterGroups > pageSize"

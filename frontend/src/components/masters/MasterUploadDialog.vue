@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
-import { useSessionStore } from '@/stores/session'
+import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
+import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 
 const props = defineProps<{
   modelValue: boolean
@@ -14,7 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const sessionStore = useSessionStore()
+const { resolveDefaultGroupCode, ensureGroupCatalog } = useScopedGroupOptions()
 
 const visible = computed({
   get: () => props.modelValue,
@@ -30,29 +30,14 @@ const form = reactive({
 const selectedFile = ref<File | null>(null)
 const fileList = ref<{ name: string }[]>([])
 
-const groupOptions = computed(() =>
-  (sessionStore.session?.authorizedGroupCodes ?? [])
-    .filter((code) => code !== '*')
-    .map((code) => ({ value: code, label: code })),
-)
-
-const hasWildcardGroupScope = computed(() =>
-  (sessionStore.session?.authorizedGroupCodes ?? []).includes('*'),
-)
-
-const useGroupInput = computed(
-  () => groupOptions.value.length === 0 && hasWildcardGroupScope.value,
-)
-
 watch(
   () => props.modelValue,
-  (open) => {
+  async (open) => {
     if (!open) {
       return
     }
-    if (!form.groupCode && groupOptions.value.length === 1) {
-      form.groupCode = groupOptions.value[0]?.value ?? ''
-    }
+    await ensureGroupCatalog()
+    form.groupCode = resolveDefaultGroupCode()
   },
 )
 
@@ -67,7 +52,7 @@ function onFileRemove() {
 }
 
 function resetForm() {
-  form.groupCode = groupOptions.value.length === 1 ? (groupOptions.value[0]?.value ?? '') : ''
+  form.groupCode = resolveDefaultGroupCode()
   form.name = ''
   form.description = ''
   selectedFile.value = null
@@ -106,24 +91,10 @@ const canSubmit = computed(
   >
     <el-form label-position="top">
       <el-form-item :label="t('masters.upload.groupCode')" required>
-        <el-input
-          v-if="useGroupInput"
-          v-model="form.groupCode"
-          maxlength="64"
-          :placeholder="t('masters.upload.groupCodeManualPlaceholder')"
-        />
-        <AppSearchSelect
-          v-else
+        <ScopedGroupSelect
           v-model="form.groupCode"
           :placeholder="t('masters.upload.groupCodePlaceholder')"
-        >
-          <el-option
-            v-for="option in groupOptions"
-            :key="option.value"
-            :label="option.label"
-            :value="option.value"
-          />
-        </AppSearchSelect>
+        />
       </el-form-item>
       <el-form-item :label="t('masters.upload.name')" required>
         <el-input v-model="form.name" maxlength="256" />

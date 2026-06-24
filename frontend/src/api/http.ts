@@ -87,6 +87,8 @@ export {
   parseApiEnvelopeError,
   resolveApiError,
   resolveApiErrorMessageKey,
+  resolveStoreErrorMessageKey,
+  isAuthHttpError,
   type ResolvedApiError,
 } from './errorEnvelope'
 

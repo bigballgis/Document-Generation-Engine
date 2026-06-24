@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-24 (COR-B04/B05 batch lifecycle + COR-F02/F09 UX)  
+**Last synced:** 2026-06-24 (COR-B07/B08/B09 audit + COR-F08/F15/F17 UX)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,17 +18,19 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **200 tests**, 2026-06-24 | COR-B04/B05 BatchExecutionService, async EXPIRED, sync error.items |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **205 tests**, 2026-06-24 | COR-B07/B08/B09 audit persistence, pagination, Redis read path |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
-| Frontend test | `pnpm -C frontend test` | Green | **108 tests**, 2026-06-24 — COR-F02 breadcrumb, COR-F09 group pagination |
+| Frontend test | `pnpm -C frontend test` | Green | **114 tests**, 2026-06-24 — COR-F08/F15/F17 audit console UX |
 | Frontend build | `pnpm -C frontend build` | Green | |
 
 **Test count progression (not conflicting runs):** P13 slice verify **114** backend tests (2026-06-23);
 Wave C UX **161** backend / **88** frontend; post OPT-E8/F3 full verify **189** backend;
 COR-B02/F05 Batch B slice **193** backend / **104** frontend (2026-06-24);
 COR-1/COR-3 sprint **198** backend / **106** frontend (2026-06-24);
-COR-B04/B05 + COR-F02/F09 **200** backend / **108** frontend (2026-06-24).
+COR-B04/B05 + COR-F02/F09 **200** backend / **108** frontend (2026-06-24);
+COR-B07/B08 + COR-F08/F15 **201** backend / **112** frontend (2026-06-24);
+COR-B09 + COR-F17 + prior uncommitted slice **205** backend / **114** frontend (2026-06-24).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)
@@ -142,7 +144,6 @@ Each row lists exit criteria; remove from this index when closed.
 | --- | --- | --- | --- |
 | AD Group resolution | `ConfigAdGroupResolver` — config-file stub, fail-closed | Production LDAP/AD adapter + integration tests | E05-T06, P6 |
 | Async batch transport | Default in-process `@Async`; Kafka optional via `ASYNC_TRANSPORT=kafka` | Production profile uses Kafka + DLT; in-process dev-only documented | P11, M14 |
-| Runtime generation audit | Download path SLF4J-only; sync/batch/async audit rows incomplete | Standard audit summary persisted per domain-model §2.15 | COR-B07 |
 | Security forbidden-route audit | Log-only in some paths | Durable security audit event per matrix §13.3 | COR-P06 |
 | QueryDSL / MapStruct / Redisson | Plain JPA + hand mappers + Lettuce | ADR-0037 scheduled items implemented or ADR amended | OPT-D, COR-P05 |
 | Publish gate checklist | UI checklist + binding validation; API policy item partly static | Server-side live gate blocks publish (P19) | COR-T01, P19 |

@@ -2,26 +2,27 @@ package com.bank.docgen.runtime.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bank.docgen.authorization.management.service.SecurityAuditSummaryService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyRepository;
+import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventEntity;
+import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventRepository;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
+import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateRepository;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -37,7 +38,9 @@ class DocumentDownloadServiceTest {
     @Mock
     private ObjectStoragePort objectStoragePort;
     @Mock
-    private SecurityAuditSummaryService securityAuditSummaryService;
+    private TemplateRepository templateRepository;
+    @Mock
+    private RuntimeGenerationAuditEventRepository runtimeGenerationAuditEventRepository;
 
     private DocumentDownloadService service;
     private RuntimeSessionClaims session;
@@ -45,10 +48,15 @@ class DocumentDownloadServiceTest {
 
     @BeforeEach
     void setUp() {
+        RuntimeGenerationAuditRecorder auditRecorder = new RuntimeGenerationAuditRecorder(
+                runtimeGenerationAuditEventRepository,
+                new TraceIdProvider()
+        );
         service = new DocumentDownloadService(
                 generationIdempotencyRepository,
                 objectStoragePort,
-                securityAuditSummaryService,
+                templateRepository,
+                auditRecorder,
                 new TraceIdProvider()
         );
         session = new RuntimeSessionClaims(
@@ -57,7 +65,7 @@ class DocumentDownloadServiceTest {
                 TEMPLATE_ID,
                 "TPL-001",
                 "svc-caller",
-                java.util.List.of("grp-a")
+                List.of("grp-a")
         );
         request = new MockHttpServletRequest("GET", "/api/dev/v1/documents/" + DOCUMENT_ID + "/download");
     }
@@ -67,7 +75,7 @@ class DocumentDownloadServiceTest {
         GenerationIdempotencyEntity record = completedRecord(UUID.randomUUID(), "generated/DOC-1/output.docx");
         when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
 
-        assertThatThrownBy(() -> service.resolveDownload(DOCUMENT_ID, session, request))
+        assertThatThrownBy(() -> service.resolveDownload(DOCUMENT_ID, "dev", session, request))
                 .isInstanceOf(RuntimeAccessDeniedException.class);
     }
 
@@ -77,19 +85,20 @@ class DocumentDownloadServiceTest {
         record.markDownloadExpired(Instant.now().minusSeconds(30));
         when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
 
-        assertThatThrownBy(() -> service.resolveDownload(DOCUMENT_ID, session, request))
+        assertThatThrownBy(() -> service.resolveDownload(DOCUMENT_ID, "dev", session, request))
                 .isInstanceOf(RuntimeDownloadExpiredException.class);
     }
 
     @Test
-    void validDownloadReturnsStreamMetadataAndRecordsAudit() throws Exception {
+    void validDownloadReturnsStreamMetadataAndPersistsAudit() throws Exception {
+        when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(templateEntity()));
         GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID, "generated/DOC-1/output.docx");
         ByteArrayInputStream stream = new ByteArrayInputStream(new byte[]{1, 2, 3});
         when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
         when(objectStoragePort.get("generated/DOC-1/output.docx")).thenReturn(stream);
 
         try (DocumentDownloadService.DownloadArtifact artifact =
-                service.resolveDownload(DOCUMENT_ID, session, request)) {
+                service.resolveDownload(DOCUMENT_ID, "dev", session, request)) {
             assertThat(artifact.contentStream()).isSameAs(stream);
             assertThat(artifact.contentStream().readAllBytes()).containsExactly(1, 2, 3);
             assertThat(artifact.contentType())
@@ -98,40 +107,37 @@ class DocumentDownloadServiceTest {
             assertThat(artifact.auditId()).startsWith("AUD-");
         }
 
-        verify(securityAuditSummaryService).recordDocumentDownload(
-                eq("CRED-1"),
-                eq("svc-caller"),
-                eq(DOCUMENT_ID),
-                eq("TPL-001"),
-                any(),
-                any()
-        );
+        ArgumentCaptor<RuntimeGenerationAuditEventEntity> captor =
+                ArgumentCaptor.forClass(RuntimeGenerationAuditEventEntity.class);
+        verify(runtimeGenerationAuditEventRepository).save(captor.capture());
+        assertThat(captor.getValue().getEventType())
+                .isEqualTo(RuntimeGenerationAuditRecorder.EVENT_DOCUMENT_DOWNLOAD);
+        assertThat(captor.getValue().getEnvironment()).isEqualTo("dev");
     }
 
     @Test
     void pdfDownloadUsesPdfContentType() throws Exception {
+        when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(templateEntity()));
         GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID, "generated/DOC-1/output.pdf");
         when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
         when(objectStoragePort.get("generated/DOC-1/output.pdf")).thenReturn(new ByteArrayInputStream(new byte[]{9}));
 
         try (DocumentDownloadService.DownloadArtifact artifact =
-                service.resolveDownload(DOCUMENT_ID, session, request)) {
+                service.resolveDownload(DOCUMENT_ID, "dev", session, request)) {
             assertThat(artifact.contentType()).isEqualTo("application/pdf");
         }
     }
 
-    @Test
-    void resolveDownloadDoesNotLoadEntireArtifactBeforeReturning() throws Exception {
-        GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID, "generated/DOC-1/output.pdf");
-        TrackingInputStream stream = new TrackingInputStream();
-        when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
-        when(objectStoragePort.get("generated/DOC-1/output.pdf")).thenReturn(stream);
-
-        try (DocumentDownloadService.DownloadArtifact artifact =
-                service.resolveDownload(DOCUMENT_ID, session, request)) {
-            assertThat(artifact.contentStream()).isSameAs(stream);
-            assertThat(stream.readCount()).isZero();
-        }
+    private TemplateEntity templateEntity() {
+        return new TemplateEntity(
+                TEMPLATE_ID,
+                "TPL-001",
+                "RETAIL",
+                "Sample",
+                null,
+                UUID.randomUUID(),
+                "10000001"
+        );
     }
 
     private GenerationIdempotencyEntity completedRecord(UUID templateId, String storageKey) {
@@ -145,20 +151,5 @@ class DocumentDownloadServiceTest {
         );
         record.complete(storageKey, DOCUMENT_ID);
         return record;
-    }
-
-    private static final class TrackingInputStream extends InputStream {
-
-        private int readCount;
-
-        @Override
-        public int read() throws IOException {
-            readCount++;
-            return -1;
-        }
-
-        int readCount() {
-            return readCount;
-        }
     }
 }

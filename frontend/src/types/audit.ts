@@ -50,4 +50,14 @@ export interface AuditQueryFilters {
   eventAtFrom?: string
   eventAtTo?: string
   groupScope?: string
+  page?: number
+  size?: number
+}
+
+export interface AuditPagedResult<T> {
+  events: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
 }

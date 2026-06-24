@@ -32,6 +32,12 @@ public class IdempotencyService {
         // record with a different request hash is an idempotency conflict (ADR 0004),
         // not a "no record" signal -- returning empty here previously caused begin() to
         // hit the unique constraint and surface a 500.
+        String cacheLookupKey = cacheKey(templateId, idempotencyKey);
+        Optional<String> cachedRequestHash = idempotencyCachePort.findRequestHash(cacheLookupKey);
+        if (cachedRequestHash.isPresent() && !cachedRequestHash.get().equals(requestHash)) {
+            throw new IdempotencyConflictException(idempotencyKey);
+        }
+
         Optional<GenerationIdempotencyEntity> live = repository
                 .findByIdempotencyKeyAndTemplateId(idempotencyKey, templateId)
                 .filter(record -> record.getExpiresAt().isAfter(Instant.now()));
@@ -41,6 +47,9 @@ public class IdempotencyService {
         GenerationIdempotencyEntity record = live.get();
         if (!record.getRequestHash().equals(requestHash)) {
             throw new IdempotencyConflictException(idempotencyKey);
+        }
+        if (cachedRequestHash.isEmpty()) {
+            idempotencyCachePort.remember(cacheLookupKey, requestHash, record.getExpiresAt());
         }
         return Optional.of(record);
     }

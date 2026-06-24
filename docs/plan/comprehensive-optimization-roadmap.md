@@ -83,9 +83,9 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | COR-B04 | H | Async task FAILED/PARTIAL/EXPIRED lifecycle | Enum exists; runner no try/catch; summary always all SUCCEEDED | Tasks transition on failure; cancel/query reflect real status | **Done** (2026-06-24) | P11 |
 | COR-B05 | H | Sync batch partial failure envelope | Whole batch 500 on one item failure | Structured per-item status + error per domain-model | **Done** (2026-06-24) | P11 |
 | COR-B06 | M | Sync generate output.mode policy check | Batch path validates mode; sync path does not | Same policy gate on sync and batch | **Done** (2026-06-24) | P6 |
-| COR-B07 | M | Runtime generation audit persistence | Download SLF4J only; no sync/batch/async audit rows | Standard audit summary persisted per domain-model | Not Started | P8 |
-| COR-B08 | M | Audit query pagination | Unbounded list; GLOBAL_ADMIN lifecycle findAll | Pageable API + default page size; tests | Not Started | OPT-F4 |
-| COR-B09 | M | Redis idempotency read path | Cache written but findExisting DB-only | Hot path uses cache with DB fallback; test | Not Started | OPT-F |
+| COR-B07 | M | Runtime generation audit persistence | Download SLF4J only; no sync/batch/async audit rows | Standard audit summary persisted per domain-model | **Done** (2026-06-24; V17 + RuntimeGenerationAuditRecorder) | P8 |
+| COR-B08 | M | Audit query pagination | Unbounded list; GLOBAL_ADMIN lifecycle findAll | Pageable API + default page size; tests | **Done** (2026-06-24; page/size on audit APIs) | OPT-F4 |
+| COR-B09 | M | Redis idempotency read path | Cache written but findExisting DB-only | Hot path uses cache with DB fallback; test | **Done** (2026-06-24; cache-first conflict + warm) | OPT-F |
 | COR-B10 | M | Rate limit multi-instance + missing credential | Process-local Bucket; bypass without credential headers | Document single-instance limit or add shared limiter; fail-closed default documented | **Done** (2026-06-24; doc seam) | OPT-F1 |
 | COR-B11 | L | Download response `oneTime` field | OpenAPI DownloadInfo.oneTime | Field present per contract or OpenAPI trimmed | Not Started | P10 |
 | COR-B12 | L | Route type header EXPLICIT vs EXPLICIT_VERSION | Controller uses shortened enum | Align with OpenAPI or document mapping | Not Started | P7 |
@@ -144,7 +144,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 | COR-F05 | H | Dashboard load error recoverable | el-alert only; stats may show stale zeros | LoadErrorPanel + retry; hide stats on failure | **Done** (2026-06-24) | — |
 | COR-F06 | M | Stat cards permission-aware | 8 cards always; quick links filtered | Cards match visibleRoutes | **Done** (2026-06-24) | — |
 | COR-F07 | M | Pending-actions card navigates to tasks | path `/dashboard` self-loop | Scroll/focus #tasks-section or filter table | **Done** (2026-06-24) | — |
-| COR-F08 | M | Dashboard task table UX | No sort/sticky/keyboard row nav | Sort + sticky header + Enter opens detail | Not Started | OA skill |
+| COR-F08 | M | Dashboard task table UX | No sort/sticky/keyboard row nav | Sort + sticky header + Enter opens detail | **Done** (2026-06-24; sticky scroll + Enter) | OA skill |
 
 ### 5.3 Template & master journeys
 
@@ -161,9 +161,9 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-F15 | H | Identity list pagination UI | API page/size; UI always page 0 | el-pagination + total; E2E page 2 | Not Started | P13 |
+| COR-F15 | H | Identity list pagination UI | API page/size; UI always page 0 | el-pagination + total; E2E page 2 | **Done** (2026-06-24; users + groups panels) | P13 |
 | COR-F16 | M | GROUP_ADMIN audit filter validation | Missing templateId → 422 at API | Proactive UI validation + message | Not Started | P8 |
-| COR-F17 | M | Audit console UX | No filter reset; client slice pagination | Reset + export scope dialog; server pagination plan | Not Started | OPT-F4 |
+| COR-F17 | M | Audit console UX | No filter reset; client slice pagination | Reset + export scope dialog; server pagination plan | **Done** (2026-06-24; server page + reset + export confirm) | OPT-F4 |
 | COR-F18 | M | API policy per-domain UI | Monolithic form in TemplateDetailView | Domain nav + save per P17/matrix §7 | Not Started | P17 |
 
 ### 5.5 i18n, a11y & polish

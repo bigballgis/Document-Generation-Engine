@@ -21,17 +21,20 @@ public class AsyncBatchTaskRunner {
     private final GenerationAsyncTaskRepository asyncTaskRepository;
     private final TemplateRepository templateRepository;
     private final BatchExecutionService batchExecutionService;
+    private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
     private final ObjectMapper objectMapper;
 
     public AsyncBatchTaskRunner(
             GenerationAsyncTaskRepository asyncTaskRepository,
             TemplateRepository templateRepository,
             BatchExecutionService batchExecutionService,
+            RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder,
             ObjectMapper objectMapper
     ) {
         this.asyncTaskRepository = asyncTaskRepository;
         this.templateRepository = templateRepository;
         this.batchExecutionService = batchExecutionService;
+        this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
         this.objectMapper = objectMapper;
     }
 
@@ -62,11 +65,23 @@ public class AsyncBatchTaskRunner {
                     task.getBatchExternalId(),
                     true
             );
-            applyOutcome(task, outcome);
+            applyOutcome(task, template, request, outcome);
             asyncTaskRepository.save(task);
         } catch (RuntimeException ex) {
             task.markFailed();
             asyncTaskRepository.save(task);
+            TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNull(task.getTemplateId()).orElse(null);
+            if (template != null) {
+                BatchGenerateRequestBody request = readRequestPayload(task.getRequestPayloadJson());
+                runtimeGenerationAuditRecorder.recordBatchAsyncCompletedFromTask(
+                        template,
+                        task,
+                        request,
+                        RuntimeGenerationAuditRecorder.OUTCOME_FAILURE,
+                        null,
+                        summarizeFailure(ex)
+                );
+            }
         }
     }
 
@@ -78,13 +93,43 @@ public class AsyncBatchTaskRunner {
                 || status == TaskStatus.PROCESSING;
     }
 
-    private void applyOutcome(GenerationAsyncTaskEntity task, BatchExecutionService.BatchExecutionOutcome outcome) {
+    private void applyOutcome(
+            GenerationAsyncTaskEntity task,
+            TemplateEntity template,
+            BatchGenerateRequestBody request,
+            BatchExecutionService.BatchExecutionOutcome outcome
+    ) {
         String batchResultJson = writeBatchResult(outcome.batchResult());
+        String outcomeLabel;
         switch (outcome.taskStatus()) {
-            case PARTIAL_SUCCEEDED -> task.markPartialSucceeded(batchResultJson);
-            case FAILED -> task.markFailed(batchResultJson);
-            default -> task.markSucceeded(batchResultJson);
+            case PARTIAL_SUCCEEDED -> {
+                task.markPartialSucceeded(batchResultJson);
+                outcomeLabel = RuntimeGenerationAuditRecorder.OUTCOME_FAILURE;
+            }
+            case FAILED -> {
+                task.markFailed(batchResultJson);
+                outcomeLabel = RuntimeGenerationAuditRecorder.OUTCOME_FAILURE;
+            }
+            default -> {
+                task.markSucceeded(batchResultJson);
+                outcomeLabel = RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS;
+            }
         }
+        runtimeGenerationAuditRecorder.recordBatchAsyncCompletedFromTask(
+                template,
+                task,
+                request,
+                outcomeLabel,
+                "Batch " + outcome.taskStatus().name(),
+                RuntimeGenerationAuditRecorder.OUTCOME_FAILURE.equals(outcomeLabel)
+                        ? outcome.taskStatus().name()
+                        : null
+        );
+    }
+
+    private String summarizeFailure(RuntimeException ex) {
+        String message = ex.getMessage();
+        return message == null ? ex.getClass().getSimpleName() : message;
     }
 
     private String writeBatchResult(com.bank.docgen.runtime.api.BatchResultView batchResult) {

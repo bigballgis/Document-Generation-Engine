@@ -15,6 +15,7 @@ import com.bank.docgen.runtime.persistence.GenerationAsyncTaskEntity;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskRepository;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
+import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
@@ -45,6 +46,8 @@ public class BatchGenerationService {
     private final ObjectMapper objectMapper;
     private final TemplateVersionRepository templateVersionRepository;
     private final BatchExecutionService batchExecutionService;
+    private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
+    private final TraceIdProvider traceIdProvider;
 
     public BatchGenerationService(
             ApiPolicyRepository apiPolicyRepository,
@@ -54,7 +57,9 @@ public class BatchGenerationService {
             EncryptionParameterValidator encryptionParameterValidator,
             ObjectMapper objectMapper,
             TemplateVersionRepository templateVersionRepository,
-            BatchExecutionService batchExecutionService
+            BatchExecutionService batchExecutionService,
+            RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder,
+            TraceIdProvider traceIdProvider
     ) {
         this.apiPolicyRepository = apiPolicyRepository;
         this.asyncTaskRepository = asyncTaskRepository;
@@ -64,15 +69,19 @@ public class BatchGenerationService {
         this.objectMapper = objectMapper;
         this.templateVersionRepository = templateVersionRepository;
         this.batchExecutionService = batchExecutionService;
+        this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
+        this.traceIdProvider = traceIdProvider;
     }
 
     @Transactional
     public BatchGenerateResultView batchGenerateSync(
             TemplateEntity template,
             RuntimeSessionClaims session,
+            String environment,
             String releaseVersion,
             String routeType,
-            BatchGenerateRequestBody request
+            BatchGenerateRequestBody request,
+            String traceId
     ) {
         assertTemplateAccess(template, session);
         ApiPolicyEntity policy = requireBatchPolicy(template, request);
@@ -111,6 +120,22 @@ public class BatchGenerationService {
                     requestHash,
                     outcome.batchResult()
             );
+            runtimeGenerationAuditRecorder.recordBatchSync(
+                    template,
+                    session,
+                    environment,
+                    routeType,
+                    resolvedVersion,
+                    request.output().format(),
+                    request.output().mode(),
+                    request.requestId(),
+                    request.idempotencyKey(),
+                    outcome.batchResult().batchId(),
+                    RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
+                    "Batch succeeded",
+                    null,
+                    traceId
+            );
             return new BatchGenerateResultView(outcome.batchResult());
         } catch (SyncBatchFailureException ex) {
             persistBatchTask(
@@ -123,6 +148,22 @@ public class BatchGenerationService {
                     request,
                     requestHash,
                     ex.batchResult()
+            );
+            runtimeGenerationAuditRecorder.recordBatchSync(
+                    template,
+                    session,
+                    environment,
+                    routeType,
+                    resolvedVersion,
+                    request.output().format(),
+                    request.output().mode(),
+                    request.requestId(),
+                    request.idempotencyKey(),
+                    ex.batchResult().batchId(),
+                    RuntimeGenerationAuditRecorder.OUTCOME_FAILURE,
+                    "Batch failed",
+                    ex.batchResult().batchId(),
+                    traceId
             );
             throw ex;
         }
@@ -167,6 +208,20 @@ public class BatchGenerationService {
         );
         asyncTaskRepository.save(task);
         asyncBatchTaskDispatcher.dispatch(task.getId());
+        runtimeGenerationAuditRecorder.recordBatchAsyncAccepted(
+                template,
+                session,
+                environment,
+                routeType,
+                resolvedVersion,
+                request.output().format(),
+                request.output().mode(),
+                request.requestId(),
+                request.idempotencyKey(),
+                taskId,
+                batchId,
+                traceIdProvider.currentOrNew(null)
+        );
         GenerationAsyncTaskEntity refreshed = asyncTaskRepository.findById(task.getId()).orElseThrow();
         return new AsyncAcceptedResultView(toTaskSummary(refreshed, template.getExternalId(), environment));
     }

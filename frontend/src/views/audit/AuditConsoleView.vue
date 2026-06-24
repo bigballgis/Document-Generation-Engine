@@ -1,27 +1,22 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
-import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { isGroupScopedAuditRole } from '@/auth/roles'
 import { useAuditStore } from '@/stores/audit'
-import { useSessionStore } from '@/stores/session'
 import type { LifecycleAuditEvent, ManagementAuditEvent } from '@/types/audit'
 import type { TemplateLifecycleStatus } from '@/types/template'
 import { downloadJsonExport } from '@/utils/downloadExport'
-import { ElMessage } from 'element-plus'
-
-const PAGE_SIZE = 10
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const { t, te } = useI18n()
 const auditStore = useAuditStore()
-const sessionStore = useSessionStore()
 
 const activeTab = ref<'management' | 'lifecycle'>('management')
-const managementPage = ref(1)
-const lifecyclePage = ref(1)
 
 const errorMessage = computed(() => {
   const key = auditStore.lastErrorMessageKey
@@ -32,7 +27,7 @@ const errorMessage = computed(() => {
 })
 
 const showGroupFilters = computed(() => isGroupScopedAuditRole(auditStore.actorRole))
-const groupOptions = computed(() => sessionStore.session?.authorizedGroupCodes ?? [])
+const { isGroupLocked: isAuditGroupLocked } = useScopedGroupOptions()
 
 const managementSource = computed(() => auditStore.managementEvents)
 const {
@@ -63,14 +58,18 @@ const {
   { key: 'summary', getValue: (row) => row.summary ?? '' },
 ])
 
-const paginatedManagementEvents = computed(() => {
-  const start = (managementPage.value - 1) * PAGE_SIZE
-  return filteredManagementEvents.value.slice(start, start + PAGE_SIZE)
+const managementUiPage = computed({
+  get: () => auditStore.managementPage + 1,
+  set: (page: number) => {
+    void auditStore.fetchManagementEvents(page - 1)
+  },
 })
 
-const paginatedLifecycleEvents = computed(() => {
-  const start = (lifecyclePage.value - 1) * PAGE_SIZE
-  return filteredLifecycleEvents.value.slice(start, start + PAGE_SIZE)
+const lifecycleUiPage = computed({
+  get: () => auditStore.lifecyclePage + 1,
+  set: (page: number) => {
+    void auditStore.fetchLifecycleEvents(page - 1)
+  },
 })
 
 function formatLifecycleState(state?: string) {
@@ -85,17 +84,44 @@ function formatDate(value: string) {
   return new Date(value).toLocaleString()
 }
 
+function exportScopeSummary(): string {
+  const parts: string[] = []
+  if (auditStore.filters.eventType?.trim()) {
+    parts.push(`${t('audit.filters.eventType')}: ${auditStore.filters.eventType.trim()}`)
+  }
+  if (auditStore.filters.eventAtFrom?.trim()) {
+    parts.push(`${t('audit.filters.eventAtFrom')}: ${auditStore.filters.eventAtFrom.trim()}`)
+  }
+  if (auditStore.filters.eventAtTo?.trim()) {
+    parts.push(`${t('audit.filters.eventAtTo')}: ${auditStore.filters.eventAtTo.trim()}`)
+  }
+  if (auditStore.filters.groupScope?.trim()) {
+    parts.push(`${t('audit.filters.groupScope')}: ${auditStore.filters.groupScope.trim()}`)
+  }
+  if (auditStore.filters.templateId?.trim()) {
+    parts.push(`${t('audit.filters.templateId')}: ${auditStore.filters.templateId.trim()}`)
+  }
+  if (parts.length === 0) {
+    return t('audit.export.scopeAll')
+  }
+  return parts.join('\n')
+}
+
 onMounted(async () => {
   auditStore.initializeFiltersFromSession()
   await refreshActiveTab()
 })
 
+watch(activeTab, () => {
+  void refreshActiveTab()
+})
+
 async function refreshActiveTab() {
   try {
     if (activeTab.value === 'management') {
-      await auditStore.fetchManagementEvents()
+      await auditStore.fetchManagementEvents(auditStore.managementPage)
     } else {
-      await auditStore.fetchLifecycleEvents()
+      await auditStore.fetchLifecycleEvents(auditStore.lifecyclePage)
     }
   } catch {
     // Error surfaced via store message key.
@@ -104,18 +130,33 @@ async function refreshActiveTab() {
 
 async function handleTabChange(tab: string | number | boolean) {
   activeTab.value = tab as 'management' | 'lifecycle'
-  await refreshActiveTab()
 }
 
 async function applyFilters() {
-  managementPage.value = 1
-  lifecyclePage.value = 1
-  await refreshActiveTab()
+  if (activeTab.value === 'management') {
+    await auditStore.fetchManagementEvents(0)
+  } else {
+    await auditStore.fetchLifecycleEvents(0)
+  }
+}
+
+async function resetFilters() {
+  auditStore.resetFilters()
+  await applyFilters()
 }
 
 async function handleExport() {
+  const isManagement = activeTab.value === 'management'
   try {
-    const isManagement = activeTab.value === 'management'
+    await ElMessageBox.confirm(exportScopeSummary(), t('audit.export.confirmTitle'), {
+      type: 'info',
+      confirmButtonText: t('audit.export.confirmAction'),
+      cancelButtonText: t('audit.export.cancelAction'),
+    })
+  } catch {
+    return
+  }
+  try {
     const result = isManagement
       ? await auditStore.exportManagementEvents()
       : await auditStore.exportLifecycleEvents()
@@ -129,7 +170,7 @@ async function handleExport() {
   } catch {
     ElMessage.error(
       errorMessage.value ||
-        t(activeTab.value === 'management' ? 'audit.error.export' : 'audit.error.exportLifecycle'),
+        t(isManagement ? 'audit.error.export' : 'audit.error.exportLifecycle'),
     )
   }
 }
@@ -197,14 +238,10 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
           />
         </el-form-item>
         <el-form-item v-if="showGroupFilters" :label="t('audit.filters.groupScope')">
-          <AppSearchSelect v-model="auditStore.filters.groupScope" clearable>
-            <el-option
-              v-for="group in groupOptions"
-              :key="group"
-              :label="group"
-              :value="group"
-            />
-          </AppSearchSelect>
+          <ScopedGroupSelect
+            v-model="auditStore.filters.groupScope"
+            :clearable="!isAuditGroupLocked"
+          />
         </el-form-item>
         <el-form-item v-if="showGroupFilters" :label="t('audit.filters.templateId')">
           <el-input
@@ -216,6 +253,9 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
         <div class="filters-actions">
           <el-button type="primary" @click="applyFilters">
             {{ t('audit.filters.apply') }}
+          </el-button>
+          <el-button text @click="resetFilters">
+            {{ t('audit.filters.reset') }}
           </el-button>
         </div>
       </div>
@@ -230,7 +270,7 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
               {{ t('table.clearFilters') }}
             </el-button>
           </div>
-          <AppDataTable :data="paginatedManagementEvents" empty-text="">
+          <AppDataTable :data="filteredManagementEvents" empty-text="">
             <template #empty>
               <el-empty :description="t('audit.empty.management')" />
             </template>
@@ -283,12 +323,12 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
             </el-table-column>
           </AppDataTable>
           <el-pagination
-            v-if="filteredManagementEvents.length > PAGE_SIZE"
-            v-model:current-page="managementPage"
+            v-if="auditStore.managementTotalElements > auditStore.pageSize"
+            v-model:current-page="managementUiPage"
             class="table-pagination"
-            layout="prev, pager, next"
-            :page-size="PAGE_SIZE"
-            :total="filteredManagementEvents.length"
+            layout="total, prev, pager, next"
+            :page-size="auditStore.pageSize"
+            :total="auditStore.managementTotalElements"
           />
         </template>
       </el-tab-pane>
@@ -301,7 +341,7 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
               {{ t('table.clearFilters') }}
             </el-button>
           </div>
-          <AppDataTable :data="paginatedLifecycleEvents" empty-text="">
+          <AppDataTable :data="filteredLifecycleEvents" empty-text="">
             <template #empty>
               <el-empty :description="t('audit.empty.lifecycle')" />
             </template>
@@ -376,12 +416,12 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
             </el-table-column>
           </AppDataTable>
           <el-pagination
-            v-if="filteredLifecycleEvents.length > PAGE_SIZE"
-            v-model:current-page="lifecyclePage"
+            v-if="auditStore.lifecycleTotalElements > auditStore.pageSize"
+            v-model:current-page="lifecycleUiPage"
             class="table-pagination"
-            layout="prev, pager, next"
-            :page-size="PAGE_SIZE"
-            :total="filteredLifecycleEvents.length"
+            layout="total, prev, pager, next"
+            :page-size="auditStore.pageSize"
+            :total="auditStore.lifecycleTotalElements"
           />
         </template>
       </el-tab-pane>

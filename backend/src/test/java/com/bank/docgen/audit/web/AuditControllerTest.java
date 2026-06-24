@@ -29,9 +29,13 @@ class AuditControllerTest {
     void globalAdminQueriesManagementAuditEvents() throws Exception {
         mockMvc.perform(get("/api/management/v1/admin/audit/management-events")
                         .param("actorRole", "GLOBAL_ADMIN")
+                        .param("page", "0")
+                        .param("size", "20")
                         .with(authentication(new ManagementAuthentication(globalAdmin()))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.events").isArray());
+                .andExpect(jsonPath("$.result.events").isArray())
+                .andExpect(jsonPath("$.result.page").value(0))
+                .andExpect(jsonPath("$.result.size").value(20));
     }
 
     @Test

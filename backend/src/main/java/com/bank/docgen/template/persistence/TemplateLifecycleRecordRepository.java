@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TemplateLifecycleRecordRepository extends JpaRepository<TemplateLifecycleRecordEntity, UUID> {
+public interface TemplateLifecycleRecordRepository
+        extends JpaRepository<TemplateLifecycleRecordEntity, UUID>, TemplateLifecycleRecordRepositoryCustom {
 
     List<TemplateLifecycleRecordEntity> findByTemplateIdOrderByCreatedAtDesc(UUID templateId);
 

@@ -40,6 +40,8 @@ public class AuditController {
             @RequestParam(required = false) Instant eventAtFrom,
             @RequestParam(required = false) Instant eventAtTo,
             @RequestParam(required = false) String groupScope,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
@@ -51,7 +53,9 @@ public class AuditController {
                 credentialId,
                 eventAtFrom,
                 eventAtTo,
-                groupScope
+                groupScope,
+                page,
+                size
         ));
     }
 
@@ -87,6 +91,8 @@ public class AuditController {
             @RequestParam(required = false) Instant eventAtFrom,
             @RequestParam(required = false) Instant eventAtTo,
             @RequestParam(required = false) String groupScope,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
@@ -97,7 +103,9 @@ public class AuditController {
                 eventType,
                 eventAtFrom,
                 eventAtTo,
-                groupScope
+                groupScope,
+                page,
+                size
         ));
     }
 

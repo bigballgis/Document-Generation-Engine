@@ -34,7 +34,13 @@ describe('audit store', () => {
       },
     })
 
-    vi.mocked(auditApi.listManagementEvents).mockResolvedValue([])
+    vi.mocked(auditApi.listManagementEvents).mockResolvedValue({
+      events: [],
+      page: 0,
+      size: 20,
+      totalElements: 0,
+      totalPages: 0,
+    })
 
     const store = useAuditStore()
     store.initializeFiltersFromSession()

@@ -1,5 +1,6 @@
 import { http } from '@/api/http'
 import type {
+  AuditPagedResult,
   AuditQueryFilters,
   LifecycleAuditEvent,
   ManagementAuditEvent,
@@ -8,6 +9,8 @@ import type {
 } from '@/types/audit'
 import type { ApiEnvelope } from '@/types/session'
 
+const DEFAULT_PAGE_SIZE = 20
+
 function unwrap<T>(envelope: ApiEnvelope<T>): T {
   if (!envelope.result) {
     throw new Error('API response missing result')
@@ -15,9 +18,11 @@ function unwrap<T>(envelope: ApiEnvelope<T>): T {
   return envelope.result
 }
 
-function buildAuditParams(filters: AuditQueryFilters): Record<string, string> {
-  const params: Record<string, string> = {
+function buildAuditParams(filters: AuditQueryFilters): Record<string, string | number> {
+  const params: Record<string, string | number> = {
     actorRole: filters.actorRole,
+    page: filters.page ?? 0,
+    size: filters.size ?? DEFAULT_PAGE_SIZE,
   }
   if (filters.templateId) {
     params.templateId = filters.templateId
@@ -39,12 +44,12 @@ function buildAuditParams(filters: AuditQueryFilters): Record<string, string> {
 
 export async function listManagementEvents(
   filters: AuditQueryFilters,
-): Promise<ManagementAuditEvent[]> {
-  const response = await http.get<ApiEnvelope<{ events: ManagementAuditEvent[] }>>(
+): Promise<AuditPagedResult<ManagementAuditEvent>> {
+  const response = await http.get<ApiEnvelope<AuditPagedResult<ManagementAuditEvent>>>(
     '/admin/audit/management-events',
     { params: buildAuditParams(filters) },
   )
-  return unwrap(response.data).events
+  return unwrap(response.data)
 }
 
 export async function exportManagementEvents(
@@ -52,19 +57,19 @@ export async function exportManagementEvents(
 ): Promise<ManagementAuditExportResult> {
   const response = await http.get<ApiEnvelope<ManagementAuditExportResult>>(
     '/admin/audit/management-events/export',
-    { params: buildAuditParams(filters) },
+    { params: buildExportParams(filters) },
   )
   return unwrap(response.data)
 }
 
 export async function listLifecycleEvents(
   filters: AuditQueryFilters,
-): Promise<LifecycleAuditEvent[]> {
-  const response = await http.get<ApiEnvelope<{ events: LifecycleAuditEvent[] }>>(
+): Promise<AuditPagedResult<LifecycleAuditEvent>> {
+  const response = await http.get<ApiEnvelope<AuditPagedResult<LifecycleAuditEvent>>>(
     '/admin/audit/lifecycle-events',
     { params: buildAuditParams(filters) },
   )
-  return unwrap(response.data).events
+  return unwrap(response.data)
 }
 
 export async function exportLifecycleEvents(
@@ -72,7 +77,29 @@ export async function exportLifecycleEvents(
 ): Promise<LifecycleAuditExportResult> {
   const response = await http.get<ApiEnvelope<LifecycleAuditExportResult>>(
     '/admin/audit/lifecycle-events/export',
-    { params: buildAuditParams(filters) },
+    { params: buildExportParams(filters) },
   )
   return unwrap(response.data)
+}
+
+function buildExportParams(filters: AuditQueryFilters): Record<string, string> {
+  const params: Record<string, string> = {
+    actorRole: filters.actorRole,
+  }
+  if (filters.templateId) {
+    params.templateId = filters.templateId
+  }
+  if (filters.eventType) {
+    params.eventType = filters.eventType
+  }
+  if (filters.eventAtFrom) {
+    params.eventAtFrom = filters.eventAtFrom
+  }
+  if (filters.eventAtTo) {
+    params.eventAtTo = filters.eventAtTo
+  }
+  if (filters.groupScope) {
+    params.groupScope = filters.groupScope
+  }
+  return params
 }

@@ -58,20 +58,23 @@ const showDataSections = computed(() => !loadError.value)
 async function loadDashboardData() {
   loading.value = true
   loadError.value = false
-  try {
-    const jobs: Promise<void>[] = []
-    if (sessionStore.canAccessRoute('route.master-management')) {
-      jobs.push(mastersStore.fetchMasters())
-    }
-    if (sessionStore.canAccessRoute('route.template-management')) {
-      jobs.push(templatesStore.fetchTemplates())
-    }
-    await Promise.all(jobs)
-  } catch {
-    loadError.value = true
-  } finally {
-    loading.value = false
+  const jobs: Promise<unknown>[] = []
+  if (sessionStore.canAccessRoute('route.master-management')) {
+    jobs.push(
+      mastersStore.fetchMasters().catch(() => {
+        loadError.value = true
+      }),
+    )
   }
+  if (sessionStore.canAccessRoute('route.template-management')) {
+    jobs.push(
+      templatesStore.fetchTemplates().catch(() => {
+        loadError.value = true
+      }),
+    )
+  }
+  await Promise.all(jobs)
+  loading.value = false
 }
 
 onMounted(() => {
@@ -105,6 +108,18 @@ function openQuickLink(path: string) {
 const sortTasksByTitle = rowSortMethod<WorkflowTask>((row) => t(row.titleKey))
 const sortTasksByGroup = rowSortMethod<WorkflowTask>((row) => row.groupCode ?? '')
 const sortTasksByHint = rowSortMethod<WorkflowTask>((row) => t(row.descriptionKey))
+
+const selectedTask = ref<WorkflowTask | null>(null)
+
+function onTaskCurrentChange(row: WorkflowTask | undefined) {
+  selectedTask.value = row ?? null
+}
+
+function onTasksTableKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter' && selectedTask.value) {
+    openTask(selectedTask.value.path)
+  }
+}
 </script>
 
 <template>
@@ -149,12 +164,17 @@ const sortTasksByHint = rowSortMethod<WorkflowTask>((row) => t(row.descriptionKe
         :description="t('dashboard.tasks.empty')"
       />
 
-      <AppDataTable
-        v-else
-        :data="filteredTasks"
-        class="tasks-table"
-        @row-click="(row: WorkflowTask) => openTask(row.path)"
-      >
+      <div v-else class="tasks-table-scroll">
+        <AppDataTable
+          :data="filteredTasks"
+          class="tasks-table"
+          highlight-current-row
+          tabindex="0"
+          default-sort="{ prop: 'entityName', order: 'ascending' }"
+          @row-click="(row: WorkflowTask) => openTask(row.path)"
+          @current-change="onTaskCurrentChange"
+          @keydown="onTasksTableKeydown"
+        >
         <el-table-column
           sortable
           :sort-method="sortTasksByTitle"
@@ -211,7 +231,8 @@ const sortTasksByHint = rowSortMethod<WorkflowTask>((row) => t(row.descriptionKe
             {{ t(row.descriptionKey) }}
           </template>
         </el-table-column>
-      </AppDataTable>
+        </AppDataTable>
+      </div>
     </section>
 
     <section v-if="showDataSections && quickLinks.length > 0" class="quick-links">
@@ -297,6 +318,18 @@ const sortTasksByHint = rowSortMethod<WorkflowTask>((row) => t(row.descriptionKe
 
 .tasks-table {
   cursor: pointer;
+}
+
+.tasks-table-scroll {
+  max-height: 28rem;
+  overflow: auto;
+  outline: none;
+
+  :deep(.el-table__header-wrapper) {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
 }
 
 .quick-links {

@@ -59,4 +59,25 @@ describe('MasterListView', () => {
     expect(wrapper.text()).toContain('Retail letterhead')
     expect(wrapper.text()).toContain('RETAIL')
   })
+
+  it('shows load error with retry when list fails', async () => {
+    vi.mocked(mastersApi.listMasters).mockRejectedValue(new Error('network'))
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(MasterListView, {
+      global: {
+        plugins: [createPinia(), i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Unable to load master documents')
+    expect(wrapper.text()).toContain('Retry')
+  })
 })

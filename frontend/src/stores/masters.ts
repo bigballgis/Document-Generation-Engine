@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import * as mastersApi from '@/api/masters'
-import { resolveApiErrorMessageKey } from '@/api/http'
+import { resolveApiErrorMessageKey, resolveStoreErrorMessageKey } from '@/api/http'
 import type {
   CreateMasterPayload,
   DecideMasterReviewPayload,
@@ -37,7 +37,7 @@ export const useMastersStore = defineStore('masters', () => {
     try {
       masters.value = await mastersApi.listMasters()
     } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.loadList')
+      lastErrorMessageKey.value = resolveStoreErrorMessageKey(error, 'masters.error.loadList')
       throw error
     } finally {
       loadingList.value = false
@@ -50,7 +50,7 @@ export const useMastersStore = defineStore('masters', () => {
     try {
       selectedMaster.value = await mastersApi.getMaster(masterId)
     } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.loadDetail')
+      lastErrorMessageKey.value = resolveStoreErrorMessageKey(error, 'masters.error.loadDetail')
       throw error
     } finally {
       loadingDetail.value = false
@@ -159,6 +159,10 @@ export const useMastersStore = defineStore('masters', () => {
     impactAnalysis.value = null
   }
 
+  function clearListError() {
+    lastErrorMessageKey.value = null
+  }
+
   return {
     masters,
     selectedMaster,
@@ -176,5 +180,6 @@ export const useMastersStore = defineStore('masters', () => {
     decideReview,
     updateMasterMetadata,
     clearSelected,
+    clearListError,
   }
 })

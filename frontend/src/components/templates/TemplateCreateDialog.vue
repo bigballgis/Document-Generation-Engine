@@ -2,8 +2,9 @@
 import { computed, reactive, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
+import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { useMastersStore } from '@/stores/masters'
-import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
 
 const props = defineProps<{
@@ -16,9 +17,9 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const sessionStore = useSessionStore()
 const mastersStore = useMastersStore()
 const templatesStore = useTemplatesStore()
+const { resolveDefaultGroupCode, ensureGroupCatalog } = useScopedGroupOptions()
 
 const visible = computed({
   get: () => props.modelValue,
@@ -32,20 +33,6 @@ const form = reactive({
   name: '',
   description: '',
 })
-
-const groupOptions = computed(() =>
-  (sessionStore.session?.authorizedGroupCodes ?? [])
-    .filter((code) => code !== '*')
-    .map((code) => ({ value: code, label: code })),
-)
-
-const hasWildcardGroupScope = computed(() =>
-  (sessionStore.session?.authorizedGroupCodes ?? []).includes('*'),
-)
-
-const useGroupInput = computed(
-  () => groupOptions.value.length === 0 && hasWildcardGroupScope.value,
-)
 
 const approvedMasters = computed(() =>
   mastersStore.masters.filter(
@@ -68,17 +55,8 @@ watch(
     if (!open) {
       return
     }
+    await ensureGroupCatalog()
     resetForm()
-    if (mastersStore.masters.length === 0) {
-      try {
-        await mastersStore.fetchMasters()
-      } catch {
-        // Parent surfaces errors via store.
-      }
-    }
-    if (!form.groupCode && groupOptions.value.length === 1) {
-      form.groupCode = groupOptions.value[0]?.value ?? ''
-    }
   },
 )
 
@@ -92,7 +70,7 @@ watch(
 )
 
 function resetForm() {
-  form.groupCode = groupOptions.value.length === 1 ? (groupOptions.value[0]?.value ?? '') : ''
+  form.groupCode = resolveDefaultGroupCode()
   form.masterId = ''
   form.externalId = ''
   form.name = ''
@@ -128,22 +106,9 @@ async function handleSubmit() {
   >
     <el-form label-position="top">
       <el-form-item :label="t('templates.create.groupCode')">
-        <AppSearchSelect
-          v-if="!useGroupInput"
+        <ScopedGroupSelect
           v-model="form.groupCode"
           :placeholder="t('templates.create.groupCodePlaceholder')"
-        >
-          <el-option
-            v-for="option in groupOptions"
-            :key="option.value"
-            :label="option.label"
-            :value="option.value"
-          />
-        </AppSearchSelect>
-        <el-input
-          v-else
-          v-model="form.groupCode"
-          :placeholder="t('templates.create.groupCodeManualPlaceholder')"
         />
       </el-form-item>
       <el-form-item :label="t('templates.create.master')">

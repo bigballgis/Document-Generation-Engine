@@ -1,13 +1,15 @@
 package com.bank.docgen.audit.service;
 
+import com.bank.docgen.audit.api.AuditPagedResult;
 import com.bank.docgen.audit.api.LifecycleAuditExportResult;
-import com.bank.docgen.audit.api.LifecycleAuditEventView;
 import com.bank.docgen.audit.api.LifecycleAuditQueryResult;
 import com.bank.docgen.audit.api.ManagementAuditEventView;
 import com.bank.docgen.audit.api.ManagementAuditExportEventView;
 import com.bank.docgen.audit.api.ManagementAuditExportResult;
 import com.bank.docgen.audit.api.ManagementAuditQueryResult;
 import com.bank.docgen.audit.domain.AuditReadActorRole;
+import com.bank.docgen.audit.api.LifecycleAuditEventView;
+import com.bank.docgen.audit.persistence.AuditSearchPage;
 import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
 import com.bank.docgen.audit.persistence.ManagementAuditEventRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
@@ -65,19 +67,32 @@ public class AuditQueryService {
             UUID credentialId,
             Instant eventAtFrom,
             Instant eventAtTo,
-            String groupScope
+            String groupScope,
+            Integer page,
+            Integer size
     ) {
         validateTimeWindow(eventAtFrom, eventAtTo);
         String groupFilter = resolveGroupFilter(session, actorRole, templateId, groupScope);
-        List<ManagementAuditEventView> events = managementAuditEventRepository.search(
+        int safePage = AuditPagedResult.normalizePage(page);
+        int safeSize = AuditPagedResult.normalizeSize(size);
+        AuditSearchPage<ManagementAuditEventEntity> searchPage = managementAuditEventRepository.searchPaged(
                 templateId,
                 eventType,
                 credentialId,
                 eventAtFrom,
                 eventAtTo,
-                groupFilter
-        ).stream().map(this::toManagementView).toList();
-        return new ManagementAuditQueryResult(events);
+                groupFilter,
+                safePage,
+                safeSize
+        );
+        List<ManagementAuditEventView> events = searchPage.content().stream().map(this::toManagementView).toList();
+        return new ManagementAuditQueryResult(
+                events,
+                safePage,
+                safeSize,
+                searchPage.totalElements(),
+                searchPage.totalPages()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -112,7 +127,9 @@ public class AuditQueryService {
             String eventType,
             Instant eventAtFrom,
             Instant eventAtTo,
-            String groupScope
+            String groupScope,
+            Integer page,
+            Integer size
     ) {
         validateTimeWindow(eventAtFrom, eventAtTo);
         if (!groupAccessService.canReadAudit(session)) {
@@ -120,50 +137,65 @@ public class AuditQueryService {
         }
         validateActorRole(session, actorRole);
 
+        int safePage = AuditPagedResult.normalizePage(page);
+        int safeSize = AuditPagedResult.normalizeSize(size);
+        UUID scopedTemplateId = resolveLifecycleTemplateId(session, actorRole, templateId, groupScope);
+        AuditSearchPage<TemplateLifecycleRecordEntity> searchPage = lifecycleRecordRepository.searchPaged(
+                scopedTemplateId,
+                eventType,
+                eventAtFrom,
+                eventAtTo,
+                safePage,
+                safeSize
+        );
+        List<LifecycleAuditEventView> events = searchPage.content().stream()
+                .map(record -> toLifecycleView(record.getTemplateId(), record))
+                .toList();
+        return new LifecycleAuditQueryResult(
+                events,
+                safePage,
+                safeSize,
+                searchPage.totalElements(),
+                searchPage.totalPages()
+        );
+    }
+
+    private UUID resolveLifecycleTemplateId(
+            ManagementSessionClaims session,
+            AuditReadActorRole actorRole,
+            UUID templateId,
+            String groupScope
+    ) {
         if (actorRole == AuditReadActorRole.GROUP_ADMIN) {
             resolveGroupFilter(session, actorRole, templateId, groupScope);
             TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
-            return new LifecycleAuditQueryResult(filterLifecycleRecords(
-                    lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(template.getId()),
-                    template.getId(),
-                    eventType,
-                    eventAtFrom,
-                    eventAtTo
-            ));
+            return template.getId();
         }
-
         if (templateId != null) {
             TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
-            return new LifecycleAuditQueryResult(filterLifecycleRecords(
-                    lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(template.getId()),
-                    template.getId(),
-                    eventType,
-                    eventAtFrom,
-                    eventAtTo
-            ));
+            return template.getId();
         }
-
-        return new LifecycleAuditQueryResult(filterLifecycleRecords(
-                lifecycleRecordRepository.findAllByOrderByCreatedAtDesc(),
-                null,
-                eventType,
-                eventAtFrom,
-                eventAtTo
-        ));
+        return null;
     }
 
-    private List<LifecycleAuditEventView> filterLifecycleRecords(
-            List<TemplateLifecycleRecordEntity> records,
+    private List<LifecycleAuditEventView> queryAllLifecycleEvents(
+            ManagementSessionClaims session,
+            AuditReadActorRole actorRole,
             UUID templateId,
             String eventType,
             Instant eventAtFrom,
-            Instant eventAtTo
+            Instant eventAtTo,
+            String groupScope
     ) {
+        UUID scopedTemplateId = resolveLifecycleTemplateId(session, actorRole, templateId, groupScope);
+        List<TemplateLifecycleRecordEntity> records = scopedTemplateId != null
+                ? lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(scopedTemplateId)
+                : lifecycleRecordRepository.findAllByOrderByCreatedAtDesc();
         return records.stream()
                 .filter(record -> eventType == null || record.getAction().name().equals(eventType))
                 .filter(record -> eventAtFrom == null || !record.getCreatedAt().isBefore(eventAtFrom))
                 .filter(record -> eventAtTo == null || !record.getCreatedAt().isAfter(eventAtTo))
-                .map(record -> toLifecycleView(templateId != null ? templateId : record.getTemplateId(), record))
+                .map(record -> toLifecycleView(record.getTemplateId(), record))
                 .toList();
     }
 
@@ -177,7 +209,12 @@ public class AuditQueryService {
             Instant eventAtTo,
             String groupScope
     ) {
-        LifecycleAuditQueryResult queryResult = queryLifecycleEvents(
+        validateTimeWindow(eventAtFrom, eventAtTo);
+        if (!groupAccessService.canReadAudit(session)) {
+            throw new AuditAccessDeniedException();
+        }
+        validateActorRole(session, actorRole);
+        List<LifecycleAuditEventView> events = queryAllLifecycleEvents(
                 session,
                 actorRole,
                 templateId,
@@ -186,7 +223,7 @@ public class AuditQueryService {
                 eventAtTo,
                 groupScope
         );
-        return new LifecycleAuditExportResult(LIFECYCLE_EXPORT_FORMAT, queryResult.events());
+        return new LifecycleAuditExportResult(LIFECYCLE_EXPORT_FORMAT, events);
     }
 
     private String resolveGroupFilter(

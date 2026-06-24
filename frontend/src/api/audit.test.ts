@@ -27,11 +27,15 @@ describe('audit API', () => {
               warningCodes: [],
             },
           ],
+          page: 0,
+          size: 20,
+          totalElements: 1,
+          totalPages: 1,
         },
       },
     })
 
-    const events = await auditApi.listManagementEvents({
+    const page = await auditApi.listManagementEvents({
       actorRole: 'GLOBAL_ADMIN',
       eventType: 'API_POLICY_UPDATED',
     })
@@ -40,9 +44,12 @@ describe('audit API', () => {
       params: {
         actorRole: 'GLOBAL_ADMIN',
         eventType: 'API_POLICY_UPDATED',
+        page: 0,
+        size: 20,
       },
     })
-    expect(events).toHaveLength(1)
+    expect(page.events).toHaveLength(1)
+    expect(page.totalElements).toBe(1)
   })
 
   it('exports management audit events', async () => {
@@ -76,11 +83,15 @@ describe('audit API', () => {
               warningCodes: [],
             },
           ],
+          page: 0,
+          size: 20,
+          totalElements: 1,
+          totalPages: 1,
         },
       },
     })
 
-    const events = await auditApi.listLifecycleEvents({
+    const page = await auditApi.listLifecycleEvents({
       actorRole: 'GROUP_ADMIN',
       groupScope: 'RETAIL',
       templateId: 'tpl-1',
@@ -91,8 +102,10 @@ describe('audit API', () => {
         actorRole: 'GROUP_ADMIN',
         groupScope: 'RETAIL',
         templateId: 'tpl-1',
+        page: 0,
+        size: 20,
       },
     })
-    expect(events).toHaveLength(1)
+    expect(page.events).toHaveLength(1)
   })
 })

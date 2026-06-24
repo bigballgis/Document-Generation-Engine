@@ -48,6 +48,8 @@ export const useSessionStore = defineStore('session', () => {
       const result = await authApi.login(username, password)
       persistToken(result.accessToken)
       session.value = result.session
+      const { useMastersStore } = await import('@/stores/masters')
+      useMastersStore().clearListError()
     } finally {
       loading.value = false
     }

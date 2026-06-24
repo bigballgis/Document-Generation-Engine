@@ -1,7 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const port = Number(process.env.FRONTEND_PORT ?? 5173)
-const baseURL = `http://127.0.0.1:${port}`
+const dockerTarget =
+  process.env.E2E_TARGET === 'docker' || process.env.FRONTEND_PORT === '4173'
+const port = Number(process.env.FRONTEND_PORT ?? (dockerTarget ? 4173 : 5173))
+const baseURL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${port}`
 
 export default defineConfig({
   testDir: './e2e',
@@ -19,12 +21,14 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'pnpm dev',
-    url: baseURL,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  webServer: dockerTarget
+    ? undefined
+    : {
+        command: 'pnpm dev',
+        url: baseURL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+        stdout: 'pipe',
+        stderr: 'pipe',
+      },
 })

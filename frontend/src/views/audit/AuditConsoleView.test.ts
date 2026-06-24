@@ -24,18 +24,24 @@ describe('AuditConsoleView', () => {
   })
 
   it('renders management audit events after load', async () => {
-    vi.mocked(auditApi.listManagementEvents).mockResolvedValue([
-      {
-        eventAt: '2026-06-23T10:00:00Z',
-        eventType: 'API_POLICY_UPDATED',
-        templateId: 'tpl-1',
-        changedAreas: ['POLICY'],
-        rollback: false,
-        warningCodes: [],
-        actorSummary: 'admin@example.com',
-        statusSummary: 'Updated',
-      },
-    ])
+    vi.mocked(auditApi.listManagementEvents).mockResolvedValue({
+      events: [
+        {
+          eventAt: '2026-06-23T10:00:00Z',
+          eventType: 'API_POLICY_UPDATED',
+          templateId: 'tpl-1',
+          changedAreas: ['POLICY'],
+          rollback: false,
+          warningCodes: [],
+          actorSummary: 'admin@example.com',
+          statusSummary: 'Updated',
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
 
     const pinia = createPinia()
     setActivePinia(pinia)

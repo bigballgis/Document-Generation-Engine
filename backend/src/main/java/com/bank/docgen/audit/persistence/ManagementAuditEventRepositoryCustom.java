@@ -14,4 +14,15 @@ public interface ManagementAuditEventRepositoryCustom {
             Instant eventAtTo,
             String groupCode
     );
+
+    AuditSearchPage<ManagementAuditEventEntity> searchPaged(
+            UUID templateId,
+            String eventType,
+            UUID credentialId,
+            Instant eventAtFrom,
+            Instant eventAtTo,
+            String groupCode,
+            int page,
+            int size
+    );
 }

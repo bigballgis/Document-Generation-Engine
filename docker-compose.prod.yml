@@ -21,6 +21,7 @@ services:
       MINIO_ENDPOINT: http://docgen-minio:9000
       JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}
       APP_ENVIRONMENT: prod
+      DOCGEN_SEED_DEMO_CATALOG: ${DOCGEN_SEED_DEMO_CATALOG:-true}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     depends_on:

@@ -82,3 +82,19 @@ export function resolveApiError(error: unknown): ResolvedApiError | null {
 export function resolveApiErrorMessageKey(error: unknown, fallbackKey: string): string {
   return resolveApiError(error)?.error.messageKey ?? fallbackKey
 }
+
+export function isAuthHttpError(error: unknown): boolean {
+  if (!isApiError(error)) {
+    return false
+  }
+  const status = error.response?.status
+  return status === 401 || status === 403
+}
+
+/** Skip surfacing store errors for auth failures handled by the HTTP interceptor. */
+export function resolveStoreErrorMessageKey(error: unknown, fallbackKey: string): string | null {
+  if (isAuthHttpError(error)) {
+    return null
+  }
+  return resolveApiErrorMessageKey(error, fallbackKey)
+}
