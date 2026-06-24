@@ -90,4 +90,59 @@ describe('DashboardView', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(2)
     expect(wrapper.find('.retry-btn').exists()).toBe(false)
   })
+
+  it('renders tasks section after dashboard data loads', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Author',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_AUTHOR'],
+      capabilities: {
+        authorTemplates: true,
+      },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    templatesStore.$patch({
+      templates: [
+        {
+          id: 'tpl-1',
+          externalId: 'TPL-RETAIL-LETTER',
+          groupCode: 'RETAIL',
+          name: 'Retail letter',
+          lifecycleStatus: 'DRAFT',
+          releaseVersion: null,
+          masterId: 'master-1',
+          updatedAt: '2026-06-23T10:00:00Z',
+        },
+      ],
+    })
+
+    const wrapper = mount(DashboardView, {
+      global: {
+        stubs: {
+          DashboardStatCards: true,
+          LoadErrorPanel: true,
+          AppDataTable: { template: '<div class="tasks-table-stub"><slot /></div>' },
+          TableColumnHeader: true,
+          ElCard: { template: '<div><slot /></div>' },
+          ElSkeleton: true,
+          ElEmpty: true,
+          ElTable: true,
+          ElTableColumn: true,
+          ElButton: true,
+        },
+      },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.find('#tasks-section').exists()).toBe(true)
+    expect(wrapper.find('.tasks-table-stub').exists()).toBe(true)
+  })
 })

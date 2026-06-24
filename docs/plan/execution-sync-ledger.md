@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-24 (COR-E03/E04 test coverage + master file replace)  
+**Last synced:** 2026-06-23 (COR-F12/E05/E06 frontend validation + tests)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -21,7 +21,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 | Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **222 tests**, 2026-06-24 | COR-E03 AuditQueryServiceTest; COR-E04 PDF pipeline tests; master replace |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
-| Frontend test | `pnpm -C frontend test` | Green | **114 tests**, 2026-06-24 |
+| Frontend test | `pnpm -C frontend test` | Green | **121 tests**, 2026-06-23 |
 | Frontend build | `pnpm -C frontend build` | Green | |
 | E2E Docker (4173) | `pnpm -C frontend test:e2e:docker` | Green — **6 tests**, 2026-06-24 | `catalog.spec.ts` + `role-journeys.spec.ts` |
 
@@ -33,7 +33,8 @@ COR-B04/B05 + COR-F02/F09 **200** backend / **108** frontend (2026-06-24);
 COR-B07/B08 + COR-F08/F15 **201** backend / **112** frontend (2026-06-24);
 COR-B09 + COR-F17 + prior uncommitted slice **205** backend / **114** frontend (2026-06-24);
 COR-B11/B12 + COR-T01 binding gate + COR-E02 E2E **206** backend / **114** frontend (2026-06-24);
-COR-E03/E04 + master file replace **222** backend / **114** frontend (2026-06-24).
+COR-E03/E04 + master file replace **222** backend / **114** frontend (2026-06-24);
+COR-F12/E05/E06 template create validation + dashboard/tab/messageKey tests **121** frontend (2026-06-23).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)

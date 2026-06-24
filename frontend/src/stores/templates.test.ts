@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as templatesApi from '@/api/templates'
 import { useTemplatesStore } from '@/stores/templates'
+import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 
 vi.mock('@/api/templates', () => ({
   listTemplates: vi.fn(),
@@ -13,6 +14,7 @@ vi.mock('@/api/templates', () => ({
   publishTemplate: vi.fn(),
   testGenerate: vi.fn(),
   getPreview: vi.fn(),
+  createTemplate: vi.fn(),
 }))
 
 describe('templates store', () => {
@@ -50,5 +52,47 @@ describe('templates store', () => {
 
     expect(store.publishedTemplates).toHaveLength(1)
     expect(store.publishedTemplates[0]?.name).toBe('Published template')
+  })
+
+  it('stores api error message key when create fails with envelope', async () => {
+    vi.mocked(templatesApi.createTemplate).mockRejectedValue(
+      axiosEnvelopeError(
+        422,
+        'api.error.template.externalIdExists',
+        {
+          code: 'TEMPLATE_VALIDATION_FAILED',
+          category: 'TEMPLATE',
+          message: 'External ID already exists.',
+        },
+      ),
+    )
+
+    const store = useTemplatesStore()
+    await expect(
+      store.createTemplate({
+        groupCode: 'RETAIL',
+        masterId: 'master-1',
+        externalId: 'TPL-DUP',
+        name: 'Duplicate',
+      }),
+    ).rejects.toBeTruthy()
+
+    expect(store.lastErrorMessageKey).toBe('api.error.template.externalIdExists')
+  })
+
+  it('falls back to templates.error.create when create fails without envelope', async () => {
+    vi.mocked(templatesApi.createTemplate).mockRejectedValue(new Error('network'))
+
+    const store = useTemplatesStore()
+    await expect(
+      store.createTemplate({
+        groupCode: 'RETAIL',
+        masterId: 'master-1',
+        externalId: 'TPL-NEW',
+        name: 'New template',
+      }),
+    ).rejects.toBeTruthy()
+
+    expect(store.lastErrorMessageKey).toBe('templates.error.create')
   })
 })

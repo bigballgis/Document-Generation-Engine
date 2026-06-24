@@ -439,6 +439,13 @@ export default {
       submit: 'Create',
       cancel: 'Cancel',
       success: 'Template created successfully.',
+      validation: {
+        groupCodeRequired: 'Select an authorized group.',
+        masterRequired: 'Select an approved master document.',
+        externalIdRequired: 'External ID is required.',
+        externalIdPattern: 'Use uppercase letters, numbers, dashes, or underscores (max 128 characters).',
+        nameRequired: 'Template name is required.',
+      },
     },
     list: {
       title: 'Template version catalog',

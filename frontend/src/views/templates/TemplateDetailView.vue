@@ -24,6 +24,7 @@ import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFi
 import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { MASTER_DETAIL_PATH_PREFIX, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
+import { resolveTemplateDetailTab, type TemplateDetailTab } from '@/views/templates/templateDetailTabs'
 import type {
   ApiCredentialSummary,
   BindingValidationResult,
@@ -60,14 +61,10 @@ const bindingGateResult = ref<BindingValidationResult | null>(null)
 const loadingPublishGate = ref(false)
 const metadataEditOpen = ref(false)
 const loadFailed = ref(false)
-const DETAIL_TABS = ['overview', 'authoring', 'releaseVersions', 'apiAccess'] as const
-type DetailTab = (typeof DETAIL_TABS)[number]
+type DetailTab = TemplateDetailTab
 
 function resolveDetailTab(value: unknown): DetailTab {
-  if (typeof value === 'string' && (DETAIL_TABS as readonly string[]).includes(value)) {
-    return value as DetailTab
-  }
-  return 'overview'
+  return resolveTemplateDetailTab(value)
 }
 
 const activeDetailTab = ref<DetailTab>(resolveDetailTab(route.query.tab))

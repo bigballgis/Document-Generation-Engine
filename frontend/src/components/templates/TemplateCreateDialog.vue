@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { type FormInstance, type FormRules } from 'element-plus'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
@@ -16,10 +17,12 @@ const emit = defineEmits<{
   created: [templateId: string]
 }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const mastersStore = useMastersStore()
 const templatesStore = useTemplatesStore()
 const { resolveDefaultGroupCode, ensureGroupCatalog } = useScopedGroupOptions()
+
+const formRef = ref<FormInstance>()
 
 const visible = computed({
   get: () => props.modelValue,
@@ -32,6 +35,34 @@ const form = reactive({
   externalId: '',
   name: '',
   description: '',
+})
+
+const formRules = computed<FormRules>(() => ({
+  groupCode: [
+    { required: true, message: t('templates.create.validation.groupCodeRequired'), trigger: 'change' },
+  ],
+  masterId: [
+    { required: true, message: t('templates.create.validation.masterRequired'), trigger: 'change' },
+  ],
+  externalId: [
+    { required: true, message: t('templates.create.validation.externalIdRequired'), trigger: 'blur' },
+    {
+      pattern: /^[A-Z0-9][A-Z0-9_-]{0,127}$/,
+      message: t('templates.create.validation.externalIdPattern'),
+      trigger: 'blur',
+    },
+  ],
+  name: [
+    { required: true, message: t('templates.create.validation.nameRequired'), trigger: 'blur' },
+  ],
+}))
+
+const apiErrorMessage = computed(() => {
+  const key = templatesStore.lastErrorMessageKey
+  if (!key) {
+    return ''
+  }
+  return te(key) ? t(key) : t('templates.error.create')
 })
 
 const approvedMasters = computed(() =>
@@ -55,6 +86,7 @@ watch(
     if (!open) {
       return
     }
+    templatesStore.lastErrorMessageKey = null
     await ensureGroupCatalog()
     resetForm()
   },
@@ -75,10 +107,16 @@ function resetForm() {
   form.externalId = ''
   form.name = ''
   form.description = ''
+  formRef.value?.clearValidate()
 }
 
 async function handleSubmit() {
-  if (!form.groupCode.trim() || !form.masterId || !form.externalId.trim() || !form.name.trim()) {
+  if (!formRef.value) {
+    return
+  }
+  try {
+    await formRef.value.validate()
+  } catch {
     return
   }
   try {
@@ -92,7 +130,7 @@ async function handleSubmit() {
     visible.value = false
     emit('created', created.id)
   } catch {
-    // Parent surfaces errors via store message key.
+    // Inline alert surfaces store message key.
   }
 }
 </script>
@@ -104,14 +142,22 @@ async function handleSubmit() {
     width="560px"
     destroy-on-close
   >
-    <el-form label-position="top">
-      <el-form-item :label="t('templates.create.groupCode')">
+    <el-alert
+      v-if="apiErrorMessage"
+      type="error"
+      :closable="false"
+      show-icon
+      class="create-error"
+      :title="apiErrorMessage"
+    />
+    <el-form ref="formRef" :model="form" :rules="formRules" label-position="top">
+      <el-form-item :label="t('templates.create.groupCode')" prop="groupCode">
         <ScopedGroupSelect
           v-model="form.groupCode"
           :placeholder="t('templates.create.groupCodePlaceholder')"
         />
       </el-form-item>
-      <el-form-item :label="t('templates.create.master')">
+      <el-form-item :label="t('templates.create.master')" prop="masterId">
         <AppSearchSelect
           v-model="form.masterId"
           :placeholder="t('templates.create.masterPlaceholder')"
@@ -125,10 +171,10 @@ async function handleSubmit() {
           />
         </AppSearchSelect>
       </el-form-item>
-      <el-form-item :label="t('templates.create.externalId')">
+      <el-form-item :label="t('templates.create.externalId')" prop="externalId">
         <el-input v-model="form.externalId" :placeholder="t('templates.create.externalIdPlaceholder')" />
       </el-form-item>
-      <el-form-item :label="t('templates.create.name')">
+      <el-form-item :label="t('templates.create.name')" prop="name">
         <el-input v-model="form.name" />
       </el-form-item>
       <el-form-item :label="t('templates.create.description')">
@@ -143,3 +189,9 @@ async function handleSubmit() {
     </template>
   </el-dialog>
 </template>
+
+<style scoped lang="scss">
+.create-error {
+  margin-bottom: 1rem;
+}
+</style>
