@@ -14,6 +14,9 @@ import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataE
 import TemplateReleaseVersionHistoryPanel from '@/components/templates/TemplateReleaseVersionHistoryPanel.vue'
 import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
 import TemplatePublishSummaryDialog from '@/components/templates/TemplatePublishSummaryDialog.vue'
+import TemplateLifecycleDecisionDialog, {
+  type LifecycleDecisionDialogMode,
+} from '@/components/templates/TemplateLifecycleDecisionDialog.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
@@ -56,6 +59,8 @@ const {
 const { confirmAction } = useConfirmAction()
 
 const lifecycleComment = ref('')
+const decisionDialogOpen = ref(false)
+const decisionDialogMode = ref<LifecycleDecisionDialogMode>('test-fail')
 const publishBumpLevel = ref<SemverBumpLevel>('patch')
 const publishVersion = ref('1.0.0')
 const publishSummaryOpen = ref(false)
@@ -391,6 +396,11 @@ async function handleSubmitForTest() {
 }
 
 async function handleTestDecision(decision: 'PASSED' | 'FAILED') {
+  if (decision === 'FAILED') {
+    decisionDialogMode.value = 'test-fail'
+    decisionDialogOpen.value = true
+    return
+  }
   try {
     await templatesStore.recordTestDecision(templateId.value, {
       decision,
@@ -398,6 +408,42 @@ async function handleTestDecision(decision: 'PASSED' | 'FAILED') {
     })
     lifecycleComment.value = ''
     ElMessage.success(t('templates.lifecycle.testDecisionSuccess'))
+  } catch {
+    ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
+  }
+}
+
+function openApprovalRejectDialog() {
+  decisionDialogMode.value = 'approval-reject'
+  decisionDialogOpen.value = true
+}
+
+async function submitNegativeLifecycleDecision(payload: {
+  reasonCategory: string
+  impactSummary: string
+  commentSummary?: string
+}) {
+  const isTestFail = decisionDialogMode.value === 'test-fail'
+  try {
+    if (isTestFail) {
+      await templatesStore.recordTestDecision(templateId.value, {
+        decision: 'FAILED',
+        reasonCategory: payload.reasonCategory,
+        impactSummary: payload.impactSummary,
+        commentSummary: payload.commentSummary,
+      })
+      ElMessage.success(t('templates.lifecycle.testDecisionSuccess'))
+    } else {
+      await templatesStore.recordApprovalDecision(templateId.value, {
+        decision: 'REJECTED',
+        reasonCategory: payload.reasonCategory,
+        impactSummary: payload.impactSummary,
+        commentSummary: payload.commentSummary,
+      })
+      ElMessage.success(t('templates.lifecycle.approvalDecisionSuccess'))
+    }
+    decisionDialogOpen.value = false
+    lifecycleComment.value = ''
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
   }
@@ -417,14 +463,8 @@ async function handleSubmitForApproval() {
 
 async function handleApprovalDecision(decision: 'APPROVED' | 'REJECTED') {
   if (decision === 'REJECTED') {
-    const confirmed = await confirmAction({
-      titleKey: 'templates.lifecycle.confirmRejectTitle',
-      messageKey: 'templates.lifecycle.confirmRejectMessage',
-      type: 'warning',
-    })
-    if (!confirmed) {
-      return
-    }
+    openApprovalRejectDialog()
+    return
   }
   try {
     await templatesStore.recordApprovalDecision(templateId.value, {
@@ -1130,6 +1170,14 @@ async function handleDeleteTemplate() {
       :bindings-ready="Boolean(bindingGateResult && !bindingGateResult.summary.blocking)"
       :loading="templatesStore.submitting"
       @confirm="confirmPublishFromSummary"
+    />
+
+    <TemplateLifecycleDecisionDialog
+      v-model="decisionDialogOpen"
+      :mode="decisionDialogMode"
+      :loading="templatesStore.submitting"
+      :initial-comment="lifecycleComment"
+      @submit="submitNegativeLifecycleDecision"
     />
 
     <el-dialog

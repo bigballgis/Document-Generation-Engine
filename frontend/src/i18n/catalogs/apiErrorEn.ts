@@ -51,7 +51,9 @@ export const apiErrorEn = {
     "variableTypeUnsupported": "The variable type is not supported.",
     "enumValuesRequired": "Enum variables require enum values.",
     "structuredContentInvalid": "The structured content definition is invalid.",
-    "publishGateBlocked": "Publish is blocked until binding validation passes."
+    "publishGateBlocked": "Publish is blocked until binding validation passes.",
+    "decisionReasonCategoryRequired": "A reason category is required for failed or rejected decisions.",
+    "decisionImpactSummaryRequired": "An impact summary is required for failed or rejected decisions."
   },
   "rendering": {
     "previewNotFound": "The preview record was not found.",

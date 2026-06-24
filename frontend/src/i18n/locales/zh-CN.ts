@@ -1,385 +1,730 @@
 import { apiErrorZhCn } from '@/i18n/catalogs/apiErrorZhCn'
 
 export default {
-
   app: {
-
     title: '文档生成系统',
-
   },
-
+  login: {
+    title: '登录',
+    subtitle: '登录以继续',
+    username: '用户名',
+    password: '密码',
+    submit: '登录',
+    brandLabel: '品牌主题',
+    usernamePlaceholder: '10000001',
+    brandAriaLabel: '已选品牌主题',
+    errorGeneric: '无法登录，请重试。',
+    sessionExpired: '会话已过期，请重新登录。',
+    validation: {
+      usernameRequired: '用户名为必填项。',
+      usernameFormat: '用户名必须为 8 位数字。',
+      passwordRequired: '密码为必填项。',
+    },
+  },
   api: {
     error: apiErrorZhCn,
   },
-
+  forbidden: {
+    title: '访问被拒绝',
+    message: '您无权查看此页面。',
+    backToHome: '返回首页',
+    referenceLabel: '参考编号',
+    copyReference: '复制参考编号',
+    copyReferenceSuccess: '参考编号已复制到剪贴板。',
+    copyReferenceError: '无法复制参考编号，请手动复制。',
+  },
   nav: {
-
     login: '登录',
-
     logout: '退出登录',
-
     managementNavigation: '管理导航',
-
     groups: {
-
       overview: '概览',
-
       entitlement: '访问与身份',
-
-      versionCatalog: '版本目录',
-
       content: '文档内容',
-
       apiAccess: 'API 访问',
-
       security: '安全与审计',
-
     },
-
     items: {
-
       dashboard: '我的任务',
-
       users: '用户管理',
-
       groups: '组管理',
-
       masters: '主文档',
-
       templates: '模板',
-
       masterVersions: '母版版本',
-
       templateVersions: '模板版本',
-
       apiPolicies: 'API 策略',
-
       audit: '审计日志',
-
     },
-
     routes: {
-
       globalGovernance: '全局治理',
-
       groupGovernance: '分组治理',
-
       templateAuthoring: '模板编排',
-
       apiPolicy: 'API 策略',
-
       audit: '审计控制台',
-
       masters: '主文档',
-
       templates: '模板',
-
       testerWorkbench: '测试工作台',
-
       approverWorkbench: '审批工作台',
-
       identityAdministration: '身份与分组',
-
     },
-
     breadcrumb: {
-
       ariaLabel: '面包屑导航',
-
       home: '首页',
-
       detail: '详情',
-
     },
-
   },
-
-  table: {
-
-    filterPlaceholder: '筛选…',
-
-    filterAll: '全部',
-
-    clearFilters: '清除列筛选',
-
+  brand: {
+    redbc: 'REDBC',
+    greenbc: 'GREENBC',
   },
-
-  common: {
-
-    yes: '是',
-
-    no: '否',
-
-    confirm: '确定',
-
-    cancel: '取消',
-
-    save: '保存',
-
-    edit: '编辑',
-
-    delete: '删除',
-
-    actions: '操作',
-
-    retry: '重试',
-
-    loadError: '页面加载失败。',
-
-    language: '语言',
-
-    locales: {
-
-      en: 'English',
-
-      zhCN: '简体中文',
-
+  home: {
+    summary: {
+      title: '工作区概览',
+      displayName: '当前登录',
+      authorizedGroups: '授权分组',
+      allGroups: '全部分组',
+      noGroups: '未分配分组',
+      workspaceCount: '其他工作区',
+      openWorkspace: '打开工作区',
     },
-
-    environments: {
-
-      dev: '开发',
-
-      uat: '测试',
-
-      prod: '生产',
-
+    nav: {
+      masters: '主文档',
+      mastersDescription: '上传 DOCX 主文档、查看锚点目录并提交审核。',
+      templates: '模板',
+      templatesDescription: '浏览模板、执行生命周期操作并管理测试生成。',
     },
-
+    globalGovernance: {
+      title: '全局治理',
+      description: '开始全局 API 策略与平台治理任务。',
+    },
+    groupGovernance: {
+      title: '分组治理',
+      description: '管理授权分组范围及组级治理任务。',
+    },
+    templateAuthoring: {
+      title: '模板编排',
+      description: '在授权分组内创建并编排模板。',
+    },
+    apiPolicy: {
+      title: 'API 策略管理',
+      description: '在授权范围内管理 API 凭据与策略。',
+    },
+    audit: {
+      title: '审计控制台',
+      description: '在授权范围内查看审计摘要。',
+    },
+    dashboard: {
+      title: '治理概览',
+      pendingMasterReviews: '待审核主文档',
+      pendingMasterReviewsDescription: '等待审批决策的主文档。',
+      pendingTemplateLifecycle: '工作流中的模板',
+      pendingTemplateLifecycleDescription: '处于测试、审批或待发布阶段的模板。',
+      publishedTemplates: '已发布模板',
+      publishedTemplatesDescription: '当前已发布且可调用的模板。',
+      stoppedTemplates: '已停用模板',
+      stoppedTemplatesDescription: '已暂停运行时调用的模板。',
+      viewMasters: '查看主文档',
+      viewTemplates: '查看模板',
+      viewTesterWorkbench: '打开测试工作台',
+      viewApproverWorkbench: '打开审批工作台',
+      loadError: '无法加载仪表盘统计数据。',
+    },
   },
-
   dashboard: {
-
     title: '我的任务',
-
-    description: '版本变更相关的工作流待办，以及版本目录概览。',
-
+    description: '进行中的变更工作流待办，以及主文档与模板目录快照。',
     loadError: '无法加载任务列表。',
-
     stats: {
-
-      sectionTitle: '版本与工作流概览',
-
-      sectionDescription: '目录数量为已登记母版/模板；工作流数量为进行中的版本变更。',
-
+      sectionTitle: '目录与工作流快照',
+      sectionDescription:
+        '目录数量统计已登记的主文档与模板；工作流数量反映进行中的审核或生命周期操作。',
       pendingActions: {
-
-        title: '待我处理',
-
-        description: '等待您测试、审批、发布或审核的事项。',
-
+        title: '分配给我的操作',
+        description: '等待您完成测试、审批、发布或审核的待办事项。',
         action: '查看任务列表',
-
       },
-
       masterPendingReview: {
-
-        title: '待审核母版版本',
-
-        description: '已上传、等待批准或驳回的母版。',
-
-        action: '打开母版版本',
-
+        title: '待审核主文档',
+        description: '修订线已上传、等待批准或驳回的主文档。',
+        action: '打开主文档',
       },
-
       masterVersionsInProgress: {
-
-        title: '进行中的母版版本',
-
-        description: '草稿或被驳回、仍需修改或重新提交的母版。',
-
-        action: '打开母版版本',
-
+        title: '进行中的主文档',
+        description: '草稿状态、仍需补充文件或元数据后重新提交的主文档。',
+        action: '打开主文档',
       },
-
       templateVersionsInWorkflow: {
-
-        title: '工作流中的模板版本',
-
+        title: '工作流中的模板',
         description: '处于草稿、测试、审批或待发布阶段的模板。',
-
-        action: '打开模板版本',
-
+        action: '打开模板',
       },
-
       publishedVersions: {
-
-        title: '已发布版本',
-
-        description: '已有可调用发布版本的模板。',
-
-        action: '打开模板版本',
-
+        title: '已发布模板',
+        description: '已有可调用发布版本的模板包。',
+        action: '打开模板',
       },
-
       stoppedVersions: {
-
-        title: '已停用的发布版本',
-
+        title: '已停用模板',
         description: '已发布但被暂停运行时调用的模板。',
-
-        action: '打开模板版本',
-
+        action: '打开模板',
       },
-
       catalogMasters: {
-
-        title: '母版目录条目',
-
-        description: '授权范围内已登记的母版文档。',
-
-        action: '浏览母版目录',
-
+        title: '目录中的主文档',
+        description: '授权范围内已登记的主文档包。',
+        action: '浏览主文档',
       },
-
       catalogTemplates: {
-
-        title: '模板目录条目',
-
-        description: '已登记的模板定义（各自管理发布版本）。',
-
-        action: '浏览模板目录',
-
+        title: '目录中的模板',
+        description: '已登记的模板包（各自管理发布版本线）。',
+        action: '浏览模板',
       },
-
     },
-
     tasks: {
-
       title: '待办事项',
-
-      description: '在对应母版或模板详情页完成以下版本工作流步骤。',
-
+      description: '请在链接的主文档或模板详情页完成以下步骤。',
       empty: '当前没有待办事项。',
-
-      masterRework: {
-        title: '修订被驳回的母版',
-        description: '更新母版文件或元数据后重新提交审核。',
+      columns: {
+        action: '操作',
+        item: '对象',
+        group: '分组',
+        hint: '说明',
       },
-
+      masterReview: {
+        title: '审核主文档',
+        description: '在模板引用前批准或驳回已上传的主文档。',
+      },
+      templateTest: {
+        title: '完成测试决策',
+        description: '执行测试生成并对测试中的模板做出通过或不通过决定。',
+      },
+      templateApproval: {
+        title: '完成审批决策',
+        description: '测试完成后批准或驳回模板。',
+      },
+      templatePublish: {
+        title: '发布模板',
+        description: '将已审批模板发布到指定环境。',
+      },
+      templateDraft: {
+        title: '继续模板编排',
+        description: '完善绑定与规则后提交草稿进入测试。',
+      },
+      masterRework: {
+        title: '修订被驳回的主文档',
+        description: '更新主文档文件或元数据后重新提交审核。',
+      },
       templateRework: {
         title: '修订被驳回的模板',
         description: '根据审核反馈修改后重新提交测试。',
       },
-
     },
-
     quickLinks: {
-
-      title: '版本目录',
-
-      templates: '模板版本目录',
-
-      masters: '母版版本目录',
-
+      title: '文档目录',
+      templates: '模板',
+      masters: '主文档',
       apiPolicies: 'API 策略',
-
     },
-
   },
-
   packageCatalog: {
-
     master: {
-
-      noticeTitle: '母版包',
-
+      noticeTitle: '主文档包',
       noticeDescription:
-        '每一行是一个母版包。进入包内可管理当前修订线、审核流程和锚点目录。',
-
+        '每一行是一个主文档包。进入包内可管理修订线、审核流程和锚点目录。',
     },
-
     template: {
-
       noticeTitle: '模板包',
-
       noticeDescription:
         '每一行是一个模板包。进入包内可查看发布版本线、工作流状态和编排内容。',
-
     },
-
   },
-
-  identity: {
-
-    usersPageTitle: '用户管理',
-
-    usersPageDescription: '在授权范围内创建和维护管理用户及角色分配。',
-
-    groupsPageTitle: '组管理',
-
-    groupsPageDescription: '在授权范围内创建业务组并管理成员。',
-
+  workbench: {
+    tester: {
+      title: '测试工作台',
+      description: '查看等待测试决策的模板。',
+      empty: '当前没有处于测试阶段的模板。',
+    },
+    approver: {
+      title: '审批工作台',
+      description: '查看等待审批决策的模板。',
+      empty: '当前没有等待审批的模板。',
+    },
   },
-
-  templates: {
-
-    detail: {
-      tabs: {
-        overview: '概览与工作流',
-        authoring: '版本编排',
-        releaseVersions: '发布版本历史',
-        apiAccess: 'API 访问',
+  masters: {
+    list: {
+      title: '主文档',
+      description: '按名称浏览主文档包。进入包内可管理修订线、锚点及审核流程。',
+      groupSection: '分组：{groupCode}',
+      empty: '暂无主文档包。',
+      columns: {
+        name: '主文档名称',
+        status: '工作流状态',
+        anchors: '锚点',
+        updatedBy: '最后更新人',
+        updatedAt: '最后更新时间',
       },
     },
-
+    detail: {
+      backToList: '返回主文档列表',
+      loadingTitle: '正在加载主文档…',
+      groupLabel: '分组：{groupCode}',
+      summaryTitle: '包摘要',
+      description: '描述',
+      noDescription: '未提供描述。',
+      changeSummary: '变更摘要',
+      updatedAt: '最后更新时间',
+      revisionLinesTitle: '修订线',
+      revisionLinesHint: '主文档仅保留一条当前 DOCX 修订线。替换文件会更新此线并可能重置审核状态。',
+      revisionLines: {
+        line: '修订线',
+        currentLine: '当前修订',
+        status: '状态',
+        sourceFile: '源文件',
+        anchors: '锚点',
+        updatedAt: '最后更新时间',
+        updatedBy: '最后更新人',
+      },
+      anchorsTitle: '锚点目录',
+      anchorId: '锚点 ID',
+      anchorLabel: '显示名称',
+      noAnchors: '尚未提取锚点。',
+      reviewHistoryTitle: '审核历史',
+      noReviewHistory: '暂无审核记录。',
+      actorLabel: '操作人 {username}',
+    },
+    status: {
+      DRAFT: '草稿',
+      PENDING_REVIEW: '待审核',
+      APPROVED: '已批准',
+      REJECTED: '已驳回',
+    },
+    workflow: {
+      actionRequired: '审核工作流 — 需要操作',
+      useReviewPanel: '请使用页头审核操作完成此主文档审核步骤。',
+      submitReview: {
+        title: '提交主文档审核',
+        description: '完善元数据与文件后提交审核。',
+      },
+      reviewDecision: {
+        title: '审核主文档',
+        description: '批准或驳回主文档，以便模板引用。',
+      },
+    },
+    upload: {
+      open: '新建主文档包',
+      title: '上传 DOCX 主文档',
+      groupCode: '分组',
+      groupCodePlaceholder: '选择授权分组',
+      groupCodeManualPlaceholder: '输入目标分组代码',
+      name: '主文档名称',
+      description: '描述',
+      file: 'DOCX 文件',
+      chooseFile: '选择文件',
+      fileHint: '上传 .docx 主文档，锚点将在服务端提取。',
+      submit: '上传',
+      success: '主文档上传成功。',
+    },
+    submitReview: {
+      open: '提交审核',
+      title: '提交主文档审核',
+      changeSummary: '变更摘要',
+      changeSummaryPlaceholder: '描述本次主文档修订的变更内容。',
+      submit: '提交',
+      success: '主文档已提交审核。',
+    },
+    review: {
+      approve: '批准',
+      reject: '驳回',
+      approveTitle: '批准主文档',
+      rejectTitle: '驳回主文档',
+      commentSummary: '审核意见',
+      commentSummaryPlaceholder: '可选，写入审计记录。',
+      approveSuccess: '主文档已批准。',
+      rejectSuccess: '主文档已驳回并退回草稿。',
+    },
+    reviewHistory: {
+      action: {
+        SUBMITTED: '已提交审核',
+        APPROVED: '已批准',
+        REJECTED: '已驳回',
+      },
+    },
+    impact: {
+      title: '影响分析',
+      retestRequired: '主文档变更后，引用的模板可能需要重新测试。',
+      retestNotRequired: '根据当前影响摘要，无需提示重新测试。',
+      referencedTemplates: '引用的模板',
+      noReferencedTemplates: '当前没有模板引用此主文档。',
+      unavailable: '影响分析暂不可用。',
+    },
+    metadata: {
+      edit: '编辑元数据',
+      editTitle: '编辑主文档元数据',
+      name: '主文档名称',
+      description: '描述',
+      descriptionPlaceholder: '此主文档的可选描述。',
+      save: '保存元数据',
+      success: '主文档元数据已更新。',
+    },
+    download: {
+      action: '下载 DOCX',
+      success: '主文档文件已下载。',
+    },
+    replaceFile: {
+      open: '替换 DOCX 文件',
+      title: '替换主文档 DOCX',
+      description:
+        '上传修订后的 DOCX。锚点将在服务端重新提取。已批准的主文档将退回草稿并需重新审核。',
+      currentFile: '当前文件：{filename}',
+      submit: '替换文件',
+      success: '主文档文件已替换。提交审核前请检查锚点。',
+    },
+    actions: {
+      cancel: '取消',
+    },
+    error: {
+      loadList: '无法加载主文档列表。',
+      loadDetail: '无法加载主文档详情。',
+      loadImpact: '无法加载影响分析。',
+      upload: '无法上传主文档。',
+      download: '无法下载主文档文件。',
+      replaceFile: '无法替换主文档文件。',
+      submitReview: '无法提交主文档审核。',
+      decideReview: '无法记录审核决策。',
+      updateMetadata: '无法更新主文档元数据。',
+    },
+    empty: {
+      notFoundTitle: '未找到主文档',
+      notFoundDescription: '无法加载请求的主文档。',
+    },
+  },
+  audit: {
+    title: '审计控制台',
+    description: '在授权范围内查看管理与生命周期审计事件。',
+    tabs: {
+      management: '管理事件',
+      lifecycle: '生命周期事件',
+    },
+    filters: {
+      eventType: '事件类型',
+      eventTypePlaceholder: '按事件类型筛选',
+      eventAtFrom: '起始时间',
+      eventAtTo: '结束时间',
+      templateId: '模板 ID',
+      templateIdPlaceholder: '模板的 UUID',
+      groupScope: '分组范围',
+      groupScopeRequired: '查询审计事件前请选择分组范围。',
+      templateIdRequired: '查询审计事件前请输入模板 ID。',
+      apply: '应用筛选',
+      reset: '重置筛选',
+    },
+    columns: {
+      eventAt: '事件时间',
+      eventType: '事件类型',
+      templateId: '模板 ID',
+      actorSummary: '操作人',
+      statusSummary: '状态',
+      fromState: '原状态',
+      toState: '目标状态',
+      summary: '摘要',
+    },
+    empty: {
+      management: '没有符合当前筛选条件的管理审计事件。',
+      lifecycle: '没有符合当前筛选条件的生命周期审计事件。',
+    },
+    export: {
+      action: '导出',
+      confirmTitle: '导出审计事件',
+      confirmAction: '下载导出文件',
+      cancelAction: '取消',
+      scopeAll: '导出授权范围内所有匹配事件（无额外筛选）。',
+      success: '管理审计导出已下载。',
+      lifecycleSuccess: '生命周期审计导出已下载。',
+      managementFilename: 'management-audit-export.json',
+      lifecycleFilename: 'lifecycle-audit-export.json',
+    },
+    error: {
+      loadManagement: '无法加载管理审计事件。',
+      loadLifecycle: '无法加载生命周期审计事件。',
+      export: '无法导出管理审计事件。',
+      exportLifecycle: '无法导出生命周期审计事件。',
+    },
+  },
+  templates: {
+    list: {
+      title: '模板',
+      description: '按名称浏览模板包。进入包内可查看发布版本线并执行生命周期工作流。',
+      groupSection: '分组：{groupCode}',
+      empty: '暂无模板包。',
+      columns: {
+        name: '模板名称',
+        externalId: '外部 ID',
+        status: '工作流状态',
+        releaseVersion: '当前发布版本',
+        releaseVersionCount: '发布版本数',
+        updatedBy: '最后更新人',
+        updatedAt: '最后更新时间',
+      },
+      workflowFilters: {
+        all: '全部模板',
+        awaitingTest: '待我测试',
+        awaitingApproval: '待我审批',
+        awaitingPublish: '待我发布',
+      },
+    },
+    detail: {
+      backToList: '返回模板列表',
+      tabs: {
+        overview: '概览与工作流',
+        authoring: '编排',
+        releaseVersions: '版本',
+        apiAccess: 'API 访问',
+      },
+      summaryTitle: '摘要',
+      externalId: '外部 ID',
+      masterId: '主文档 ID',
+      releaseVersion: '发布版本',
+      noReleaseVersion: '未发布',
+      updatedAt: '最后更新时间',
+      noDescription: '未提供描述。',
+      groupLabel: '分组：{groupCode}',
+    },
+    lifecycle: {
+      decisionForm: {
+        failTestTitle: '记录测试不通过',
+        rejectTitle: '驳回模板',
+        reasonCategory: '原因类别',
+        reasonCategoryPlaceholder: '请选择原因类别',
+        impactSummary: '影响摘要',
+        impactSummaryPlaceholder: '描述影响范围及建议的整改措施。',
+        optionalComment: '可选备注',
+        submit: '提交决策',
+        validation: {
+          reasonCategoryRequired: '请选择原因类别。',
+          impactSummaryRequired: '请填写影响摘要。',
+        },
+        reasonCategories: {
+          BINDING_ISSUE: '绑定或锚点问题',
+          VARIABLE_SCHEMA_ISSUE: '变量架构问题',
+          RULE_VALIDATION_ISSUE: '规则校验问题',
+          FIDELITY_WARNING: '保真度警告',
+          COVERAGE_BELOW_THRESHOLD: '覆盖率低于阈值',
+          PREVIEW_COMPARISON_DIFF: '预览对比差异',
+          CONTRACT_SCOPE_CHANGE: '合约或范围变更',
+          OTHER: '其他',
+        },
+      },
+    },
     versions: {
-      workflowHintTitle: '版本工作流进行中',
+      workflowHintTitle: '工作流进行中',
       workflowHintDescription:
-        '完成「概览与工作流」中的测试、审批和发布后，新版本会出现在此列表。',
-      loadError: '无法加载发布版本历史。',
+        '在「概览与工作流」中完成测试、审批和发布后，新版本将出现在此列表。',
+      loadError: '无法加载版本线。',
       devVersionNumber: '开发版本号',
       defaultRoute: '默认路由',
       defaultRouteYes: '默认',
       defaultRouteNo: '—',
-      updatedAt: '更新时间',
+      updatedAt: '最后更新时间',
     },
-
     contract: {
-
       environment: '环境',
-
     },
-
     policy: {
-
       policyVersion: '策略版本',
-
       outputFormats: '输出格式',
-
       outputModes: '输出模式',
-
       pdfEncryptionEnabled: 'PDF 加密',
-
       impact: {
-
         title: '策略影响预览',
-
         confirmPrompt: '请确认策略影响后再保存。',
-
       },
-
     },
-
     deleteAction: {
-
       button: '删除模板',
-
       title: '删除模板',
-
       reasonPrompt: '请填写删除原因（审计必填）。',
-
       reasonRequired: '删除原因不能为空。',
-
       confirmTitle: '确认删除模板',
-
       confirmMessage: '删除后模板将不再出现在编排与运行时列表中，是否继续？',
-
       success: '模板已删除。',
-
     },
-
   },
-
+  table: {
+    filterPlaceholder: '筛选…',
+    filterAll: '全部',
+    clearFilters: '清除列筛选',
+  },
+  common: {
+    yes: '是',
+    no: '否',
+    confirm: '确定',
+    cancel: '取消',
+    save: '保存',
+    edit: '编辑',
+    delete: '删除',
+    actions: '操作',
+    retry: '重试',
+    loadError: '页面加载失败。',
+    language: '语言',
+    locales: {
+      en: 'English',
+      zhCN: '简体中文',
+    },
+    environments: {
+      dev: '开发',
+      uat: '测试',
+      prod: '生产',
+    },
+  },
+  apiPolicy: {
+    home: {
+      title: 'API 策略管理',
+      description: '选择已发布模板以管理 API 策略与凭据。',
+      empty: '授权范围内暂无已发布模板。',
+      groupCode: '分组',
+    },
+  },
+  identity: {
+    title: '身份与分组管理',
+    description: '在授权范围内管理管理账户与业务分组。',
+    usersPageTitle: '用户管理',
+    usersPageDescription: '在授权范围内创建和维护管理用户及角色分配。',
+    groupsPageTitle: '组管理',
+    groupsPageDescription: '在授权范围内创建业务组并管理成员。',
+    tabs: {
+      users: '用户管理',
+      groups: '组管理',
+    },
+    roles: {
+      GLOBAL_ADMIN: '全局管理员',
+      GROUP_ADMIN: '分组管理员',
+      MASTER_DESIGNER: '主文档设计员',
+      TEMPLATE_AUTHOR: '模板作者',
+      TEMPLATE_TESTER: '模板测试员',
+      TEMPLATE_APPROVER: '模板审批员',
+      AUDIT_ADMIN: '审计管理员',
+    },
+    dimensions: {
+      BUSINESS_LINE: '业务线',
+      DEPARTMENT: '部门',
+    },
+    status: {
+      enabled: '已启用',
+      disabled: '已禁用',
+    },
+    users: {
+      filters: {
+        group: '分组',
+        groupPlaceholder: '按分组筛选',
+        role: '角色',
+        rolePlaceholder: '按角色筛选',
+        all: '全部',
+        apply: '应用筛选',
+        reset: '重置',
+      },
+      columns: {
+        username: '员工号',
+        displayName: '显示名称',
+        email: '邮箱',
+        roles: '角色',
+        groups: '授权分组',
+        status: '状态',
+        actions: '操作',
+      },
+      empty: '没有符合当前筛选条件的用户。',
+      create: '创建用户',
+      edit: '编辑',
+      enable: '启用',
+      disable: '禁用',
+      resetPassword: '重置密码',
+      delete: '删除',
+      createTitle: '创建用户',
+      editTitle: '编辑用户',
+      resetPasswordTitle: '重置密码',
+      form: {
+        username: '员工号',
+        usernamePlaceholder: '8 位员工号',
+        displayName: '显示名称',
+        email: '邮箱',
+        initialPassword: '初始密码',
+        newPassword: '新密码',
+        passwordHint: '密码长度须为 12 至 128 个字符。',
+        roles: '角色',
+        rolesPlaceholder: '选择角色',
+        authorizedGroupCodes: '授权分组',
+        authorizedGroupCodesPlaceholder: '选择授权分组',
+      },
+      validation: {
+        usernameRequired: '员工号为必填项。',
+        usernamePattern: '员工号必须为 8 位数字。',
+        displayNameRequired: '显示名称为必填项。',
+        emailRequired: '邮箱为必填项。',
+        emailInvalid: '请输入有效的邮箱地址。',
+        passwordRequired: '密码为必填项。',
+        passwordLength: '密码长度须为 12 至 128 个字符。',
+        rolesRequired: '请至少选择一个角色。',
+        groupsRequired: '请至少选择一个授权分组。',
+      },
+      confirmDeleteTitle: '删除用户',
+      confirmDeleteMessage: '将逻辑删除用户 {username}，是否继续？',
+      confirmDisableTitle: '禁用用户',
+      confirmDisableMessage: '禁用后 {username} 将无法登录，是否继续？',
+      createSuccess: '用户已创建。',
+      updateSuccess: '用户已更新。',
+      enableSuccess: '用户已启用。',
+      disableSuccess: '用户已禁用。',
+      resetPasswordSuccess: '密码已重置。',
+      deleteSuccess: '用户已删除。',
+    },
+    groups: {
+      readOnlyHint: '您可查看授权范围内的分组。分组变更需全局管理员权限。',
+      columns: {
+        groupCode: '分组代码',
+        displayName: '显示名称',
+        dimension: '维度',
+        status: '状态',
+        actions: '操作',
+      },
+      empty: '暂无可用分组。',
+      create: '创建分组',
+      edit: '编辑',
+      enable: '启用',
+      disable: '禁用',
+      createTitle: '创建分组',
+      editTitle: '编辑分组显示名称',
+      form: {
+        groupCode: '分组代码',
+        groupCodePlaceholder: '大写字母、数字和下划线',
+        displayName: '显示名称',
+        dimension: '维度',
+        dimensionPlaceholder: '选择维度',
+      },
+      validation: {
+        groupCodeRequired: '分组代码为必填项。',
+        groupCodePattern: '请使用大写字母、数字和下划线（最多 64 个字符）。',
+        displayNameRequired: '显示名称为必填项。',
+        dimensionRequired: '维度为必填项。',
+      },
+      confirmDisableTitle: '禁用分组',
+      confirmDisableMessage: '禁用后 {groupCode} 将不再可用于新分配，是否继续？',
+      createSuccess: '分组已创建。',
+      updateSuccess: '分组已更新。',
+      enableSuccess: '分组已启用。',
+      disableSuccess: '分组已禁用。',
+    },
+    actions: {
+      cancel: '取消',
+      save: '保存',
+      confirm: '确认',
+    },
+    error: {
+      loadUsers: '无法加载用户列表。',
+      createUser: '无法创建用户。',
+      updateUser: '无法更新用户。',
+      resetPassword: '无法重置密码。',
+      deleteUser: '无法删除用户。',
+      loadGroups: '无法加载分组列表。',
+      createGroup: '无法创建分组。',
+      updateGroup: '无法更新分组。',
+    },
+  },
 } as const
-

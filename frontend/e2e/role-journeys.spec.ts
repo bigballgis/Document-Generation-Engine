@@ -37,8 +37,10 @@ test.describe('role journey smoke (COR-E02)', () => {
     await page.goto('/templates')
 
     await expect(page.getByText(DEMO_TEMPLATE_EXTERNAL_ID)).toBeVisible()
-    await page.getByText(DEMO_TEMPLATE_EXTERNAL_ID).click()
+    await page.getByRole('row', { name: new RegExp(DEMO_TEMPLATE_EXTERNAL_ID) }).click()
+    await expect(page).toHaveURL(/\/templates\/[^/?]+/)
 
+    await page.getByRole('tab', { name: /overview/i }).click()
     await expect(page.getByText(/draft/i).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: /lifecycle actions/i })).toBeVisible()
   })

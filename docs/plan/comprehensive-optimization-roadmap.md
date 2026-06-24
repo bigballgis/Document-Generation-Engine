@@ -45,8 +45,8 @@ Recommended sequencing: **Wave COR-0 (docs truth)** → **COR-1 (API contract)**
 | --- | --- | --- |
 | COR-0 | Documentation & plan-layer reconciliation | **Done** (2026-06-24; COR-D01–D09) |
 | COR-1 | Runtime API contract & correctness | **Done** (2026-06-25; COR-B01–B12) |
-| COR-2 | Template lifecycle, workflow & governance | **In Progress** — thin slices Done; **P19 backlog deferred** to COR-L03 |
-| COR-3 | Frontend workflow & operation experience | **In Progress** — F18 deferred to COR-L04; F19 api.error Done, UI parity Partial |
+| COR-2 | Template lifecycle, workflow & governance | **In Progress** — P19 active; thin slices Done (T05/T06 partial/T07 partial/T10–T14) |
+| COR-3 | Frontend workflow & operation experience | **Done** (2026-06-25; F18 deferred to COR-L04) |
 | COR-4 | Performance, resilience & architecture | **In Progress** (COR-P03/P04/P05/P06 Done 2026-06-25; P01/P02/P07/P08 open) |
 | COR-5 | Test coverage & E2E journeys | **Done** (2026-06-25; COR-E01–E06) |
 | COR-6 | Confirmed large domains (P14/P18+) | **Deferred** — activate one formal phase at a time (see §8) |
@@ -101,7 +101,7 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-T01 | H | Live publish gate (P19 core) | UI gate static; apiPolicy always ready | Server-side checklist blocks publish; UI reflects real blockers | **Partial** (2026-06-24; binding + apiPolicy server gate; UI fetches policy on publish panel) | P19-T06 |
-| COR-T02 | H | Controlled test/approval opinion forms | Free-text commentSummary only | Structured forms per PRD §7; audit fields; fail returns to DRAFT | Not Started | P19-T07 |
+| COR-T02 | H | Controlled test/approval opinion forms | Free-text commentSummary only | Structured forms per PRD §7; audit fields; fail returns to DRAFT | **Partial** (2026-06-25; fail/reject require reasonCategory + impactSummary + UI dialog) | P19-T07 |
 | COR-T03 | H | GROUP_ADMIN exception intervention path | GROUP_ADMIN always canDecideTests/Approvals | Normal vs exception flows; reason + secondary confirm + audit marker | Not Started | PRD §7, permission-matrix |
 | COR-T04 | H | Collaboration work items + optional timeout | PRD §7 668–672; no WorkItem entity | Role/group queue to-dos; timeout escalation without auto state change | Not Started | P14/P19, domain §2.9.4 |
 | COR-T05 | M | Publish not hard-bound to dev version 1 | `findByTemplateIdAndDevVersionNumber(..., 1)` | Publish selects release candidate dev version; tests for multi-version | **Done** (2026-06-23; `requireReleaseCandidateVersion` + selection test) | P16 |
@@ -170,7 +170,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-F19 | H | zh-CN parity + api.error catalog | en 939 lines vs zh-CN 184; 2 api.error keys | P20-T06 complete; locale switch no mass English fallback | **Partial** (2026-06-25; en/zh `api.error` catalogs complete; general UI keys still en-fallback) | P20-T06, OPT-G7 |
+| COR-F19 | H | zh-CN parity + api.error catalog | en 939 lines vs zh-CN 184; 2 api.error keys | P20-T06 complete; locale switch no mass English fallback | **Done** (2026-06-25; api.error en/zh + primary journey zh-CN bundles) | P20-T06, OPT-G7 |
 | COR-F20 | M | Locale-aware date/number formatting | toLocaleString() without app locale | Shared format helpers bound to i18n locale | **Done** (2026-06-24; `useLocaleFormatters` + audit/template detail) | P20 |
 | COR-F21 | M | Table a11y baseline | row-click only navigation | Focus rings, keyboard row activation, sortable columns | **Done** (2026-06-24; AppDataTable + master/template list activatable rows) | OPT-B4 |
 | COR-F22 | M | Design token cleanup in shell | Hardcoded hex in ManagementShell | CSS variables only; dual-brand check | **Done** (2026-06-25; shell/layout use design tokens only) | P20 |

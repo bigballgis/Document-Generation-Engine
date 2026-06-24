@@ -52,6 +52,8 @@ export const apiErrorZhCn = {
     enumValuesRequired: '枚举变量需要枚举值。',
     structuredContentInvalid: '结构化内容定义无效。',
     publishGateBlocked: '绑定校验通过前无法发布。',
+    decisionReasonCategoryRequired: '测试不通过或审批驳回时必须选择原因类别。',
+    decisionImpactSummaryRequired: '测试不通过或审批驳回时必须填写影响摘要。',
   },
   rendering: {
     previewNotFound: '未找到预览记录。',

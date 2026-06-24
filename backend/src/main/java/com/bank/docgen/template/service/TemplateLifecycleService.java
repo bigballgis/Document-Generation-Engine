@@ -21,12 +21,19 @@ import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TemplateLifecycleService {
+
+    private static final String STRUCTURED_OPINION_PREFIX = "[STRUCTURED_OPINION]";
+    private static final ObjectMapper STRUCTURED_OPINION_MAPPER = new ObjectMapper();
 
     private final TemplateService templateService;
     private final TemplateRepository templateRepository;
@@ -73,12 +80,13 @@ public class TemplateLifecycleService {
     ) {
         TemplateEntity template = requireTestableTemplate(templateId, session);
         requireStatus(template, TemplateLifecycleStatus.TESTING);
+        String persistedComment = resolveDecisionComment(request);
         if (request.decision() == LifecycleDecision.PASSED) {
             transition(template, TemplateLifecycleStatus.APPROVAL, LifecycleAction.RECORD_TEST_DECISION,
-                    request.decision(), request.commentSummary(), session);
+                    request.decision(), persistedComment, session);
         } else {
             transition(template, TemplateLifecycleStatus.DRAFT, LifecycleAction.RECORD_TEST_DECISION,
-                    request.decision(), request.commentSummary(), session);
+                    request.decision(), persistedComment, session);
         }
         return templateService.toDetail(template);
     }
@@ -100,12 +108,13 @@ public class TemplateLifecycleService {
     ) {
         TemplateEntity template = requireApprovableTemplate(templateId, session);
         requireStatus(template, TemplateLifecycleStatus.APPROVAL);
+        String persistedComment = resolveDecisionComment(request);
         if (request.decision() == LifecycleDecision.APPROVED) {
             transition(template, TemplateLifecycleStatus.PENDING_RELEASE, LifecycleAction.RECORD_APPROVAL_DECISION,
-                    request.decision(), request.commentSummary(), session);
+                    request.decision(), persistedComment, session);
         } else {
             transition(template, TemplateLifecycleStatus.DRAFT, LifecycleAction.RECORD_APPROVAL_DECISION,
-                    request.decision(), request.commentSummary(), session);
+                    request.decision(), persistedComment, session);
         }
         return templateService.toDetail(template);
     }
@@ -238,6 +247,46 @@ public class TemplateLifecycleService {
         if (!request.confirmed()) {
             throw new TemplateValidationException("api.error.template.confirmationRequired");
         }
+    }
+
+    private String resolveDecisionComment(LifecycleDecisionRequest request) {
+        if (requiresStructuredNegativeOpinion(request.decision())) {
+            requireStructuredNegativeOpinion(request);
+            return formatStructuredDecisionComment(request);
+        }
+        return request.commentSummary();
+    }
+
+    private boolean requiresStructuredNegativeOpinion(LifecycleDecision decision) {
+        return decision == LifecycleDecision.FAILED || decision == LifecycleDecision.REJECTED;
+    }
+
+    private void requireStructuredNegativeOpinion(LifecycleDecisionRequest request) {
+        if (isBlank(request.reasonCategory())) {
+            throw new TemplateValidationException("api.error.template.decisionReasonCategoryRequired");
+        }
+        if (isBlank(request.impactSummary())) {
+            throw new TemplateValidationException("api.error.template.decisionImpactSummaryRequired");
+        }
+    }
+
+    private String formatStructuredDecisionComment(LifecycleDecisionRequest request) {
+        Map<String, String> structured = new LinkedHashMap<>();
+        structured.put("reasonCategory", request.reasonCategory().trim());
+        structured.put("impactSummary", request.impactSummary().trim());
+        try {
+            String structuredBlock = STRUCTURED_OPINION_PREFIX + STRUCTURED_OPINION_MAPPER.writeValueAsString(structured);
+            if (request.commentSummary() != null && !request.commentSummary().isBlank()) {
+                return request.commentSummary().trim() + "\n" + structuredBlock;
+            }
+            return structuredBlock;
+        } catch (JsonProcessingException ex) {
+            throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     private void syncPublishedVersionsToStopped(UUID templateId) {

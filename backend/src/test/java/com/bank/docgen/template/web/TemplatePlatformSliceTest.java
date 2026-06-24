@@ -90,6 +90,31 @@ class TemplatePlatformSliceTest {
     }
 
     @Test
+    void testFailDecisionWithoutStructuredFieldsReturns422() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+        configureTemplate(templateId);
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/submit-test")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"commentSummary":"Ready for test"}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/test-decision")
+                        .with(authentication(new ManagementAuthentication(tester)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"decision":"FAILED","commentSummary":"Binding issues"}
+                                """))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.error.code").value("TEMPLATE_VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.error.messageKey").value("api.error.template.decisionReasonCategoryRequired"));
+    }
+
+    @Test
     void fullTemplateLifecyclePreviewAndRuntimeGeneration() throws Exception {
         String masterId = uploadAndApproveMaster();
         String templateId = createTemplate(masterId);

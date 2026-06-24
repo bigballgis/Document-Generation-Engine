@@ -1,8 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active phase:** None — no single active phase slice (P13 Identity & group administration
-completed **Done** 2026-06-23). P12 remains the non-active deferred-enhancements catch-all.  
+**Active phase:** P19 — Template verifiability, publish gate & decision forms (**In Progress**, 2026-06-25). P20 i18n **Done** (2026-06-25).  
 **Next planned phase (P14, renumbered 2026-06-23):** Confirmed large domains — clause/
 content module lifecycle, collaboration to-dos + timeout escalation, and template
 export/import. See UX-G in

@@ -1,10 +1,10 @@
 # P19 — Template Verifiability, Publish Gate & Decision Forms (Detailed Plan)
 
-**Phase status:** Not Started | **Depends on:** P3, P4, P5 (and P18 for fidelity inputs)
+**Phase status:** In Progress (2026-06-25) | **Depends on:** P3, P4, P5 (and P18 for fidelity inputs)
 **Confirmed:** 2026-06-23 (deep-review gaps G4 + G5)
 
-> Single-active-phase invariant: P13 completed **Done** (2026-06-23); there is currently no
-> single active phase. P19 stays `Not Started` until selected as the next active phase.
+> Single-active-phase invariant: **P19 is the active phase** (2026-06-25). P13 Done; P20
+> primary-journey i18n closed same batch. Full verifiability (T01–T05, T08–T10) remains open.
 
 ## Source-of-truth & traceability
 
@@ -64,8 +64,8 @@ and mark group-admin exception interventions with reason + secondary confirm + s
 | P19-T03 | Sample + template coverage computation (variables/required, condition/loop/rule branches, anchors/sections, table components, DOCX/PDF) + configurable thresholds | Not Started |
 | P19-T04 | Change-diff summary (content, anchors, variables, rules, release-candidate contract summary) | Not Started |
 | P19-T05 | Preview-vs-final side-by-side comparison (page/anchor/section/component diff → warning or blocker) | Not Started |
-| P19-T06 | Live publish-gate checklist (anchor integrity, variable schema, rule bounds, test results, preview, change-diff, approval summary, blocker status) — blocks publish | Not Started |
-| P19-T07 | Controlled test/approval opinion forms (structured result + comment), not rich-text editor | Not Started |
+| P19-T06 | Live publish-gate checklist (anchor integrity, variable schema, rule bounds, test results, preview, change-diff, approval summary, blocker status) — blocks publish | **Partial** (2026-06-25; binding + apiPolicy server gate + UI checklist thin slice) |
+| P19-T07 | Controlled test/approval opinion forms (structured result + comment), not rich-text editor | **Partial** (2026-06-25; fail/reject require reasonCategory + impactSummary; structured audit prefix) |
 | P19-T08 | Risk-prompt copy + reason-category configuration (global default + group override) with audit | Not Started |
 | P19-T09 | Group-admin exception intervention: reason + secondary confirm + separate audit marker | Not Started |
 | P19-T10 | UI: verifiability panels, coverage/threshold display, live checklist, decision forms, risk-prompt config | Not Started |

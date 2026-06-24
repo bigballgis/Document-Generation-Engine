@@ -1,10 +1,11 @@
 # P20 — i18n Multi-Locale Readiness & UI Upgradeability (Detailed Plan)
 
-**Phase status:** Done (2026-06-23) | **Depends on:** P1, E06 (management shell)
+**Phase status:** Done (2026-06-25) | **Depends on:** P1, E06 (management shell)
 **Confirmed:** 2026-06-23 (deep-review gap G6 — i18n constitution + UXF1/UXF4/UXF5)
 
-> Single-active-phase invariant: P20 is **In Progress** (2026-06-24) — Wave C UXF1/UXF4/UXF5
-> and T01–T05/T07 **Done**; **P20-T06** (zh-CN parity + frontend `api.error.*` catalog) **Not Started**.
+> Single-active-phase invariant: P20 **Done** (2026-06-25). T01–T07 complete including T06
+> (`api.error.*` en/zh catalogs + primary journey zh-CN bundles). Residual en-fallback keys
+> outside primary journeys are acceptable additive gaps until touched.
 
 ## Source-of-truth & traceability
 
@@ -57,7 +58,7 @@ background, classic-OA desktop-first layout, dual-brand theming):
 | P20-T03 | Sweep + i18n-ize remaining hardcoded strings (login, shell aria, export filenames, status enums) | Done (Wave B UXE2 baseline + Wave C) |
 | P20-T04 | Config/data-driven brand theming (tokens + logo asset slots) — add-a-brand without code | Done |
 | P20-T05 | Environment selector from an allowed list for contract/runtime views (remove hardcoded `dev`) | Done |
-| P20-T06 | Frontend message catalog aligned with backend `api.error.*` messageKeys + fallback | Not Started |
+| P20-T06 | Frontend message catalog aligned with backend `api.error.*` messageKeys + fallback | **Done** (2026-06-25; en/zh catalogs + primary journey zh-CN + catalog tests) |
 | P20-T07 | Tests: fallback behavior, switcher, brand config, environment selection; frontend coverage gate | Done |
 
 ## Exit criteria (phase)

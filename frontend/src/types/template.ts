@@ -138,6 +138,8 @@ export interface UpdateTemplateMetadataPayload {
 export interface LifecycleDecisionPayload {
   decision: LifecycleDecision
   commentSummary?: string
+  reasonCategory?: string
+  impactSummary?: string
 }
 
 export interface PublishTemplatePayload {
