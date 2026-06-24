@@ -18,10 +18,10 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **238 tests**, 2026-06-24 | COR-P03/P05/P06 + COR-T01 apiPolicy gate |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **238 tests**, 2026-06-25 | COR-P04 LAZY anchors + batch count |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
-| Frontend test | `pnpm -C frontend test` | Green | **139 tests**, 2026-06-24 |
+| Frontend test | `pnpm -C frontend test` | Green | **144 tests**, 2026-06-25 |
 | Frontend build | `pnpm -C frontend build` | Green | |
 | E2E Docker (4173) | `pnpm -C frontend test:e2e:docker` | Green — **6 tests**, 2026-06-24 | `catalog.spec.ts` + `role-journeys.spec.ts` |
 
