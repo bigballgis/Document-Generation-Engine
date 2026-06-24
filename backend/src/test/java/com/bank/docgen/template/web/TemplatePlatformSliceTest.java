@@ -317,6 +317,7 @@ class TemplatePlatformSliceTest {
                         .header("X-Access-Account", "svc-caller"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("documentId", documentId))
+                .andExpect(header().string("download.oneTime", "false"))
                 .andExpect(content().contentType(
                         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
     }
@@ -919,7 +920,8 @@ class TemplatePlatformSliceTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string("documentId", org.hamcrest.Matchers.not(org.hamcrest.Matchers.emptyString())))
                 .andExpect(header().string("fidelityWarningCodes", "CONTROLLED_STYLE_FALLBACK"))
-                .andExpect(header().string("idempotencyStatus", IdempotencyConstants.STATUS_NEW));
+                .andExpect(header().string("idempotencyStatus", IdempotencyConstants.STATUS_NEW))
+                .andExpect(header().string("routeType", "EXPLICIT_VERSION"));
 
         mockMvc.perform(post("/api/dev/v1/templates/TPL-RETAIL-LETTER/default/generate")
                         .header("X-Api-Credential-Id", credential.externalId())
@@ -928,7 +930,8 @@ class TemplatePlatformSliceTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(generateBody("idem-runtime-1")))
                 .andExpect(status().isOk())
-                .andExpect(header().string("idempotencyStatus", IdempotencyConstants.STATUS_REPLAYED));
+                .andExpect(header().string("idempotencyStatus", IdempotencyConstants.STATUS_REPLAYED))
+                .andExpect(header().string("routeType", "DEFAULT_ROUTE"));
     }
 
     private String generateBody(String idempotencyKey) {

@@ -17,7 +17,7 @@ test.describe('version catalog (demo seed)', () => {
     await expect(page.getByText(/unable to load master documents/i)).not.toBeVisible()
     await expect(page.getByRole('heading', { name: /master version catalog/i })).toBeVisible()
     await expect(page.getByText(DEMO_MASTER_NAME)).toBeVisible()
-    await expect(page.getByText(DEMO_GROUP_CODE)).toBeVisible()
+    await expect(page.getByRole('heading', { name: `Group: ${DEMO_GROUP_CODE}` })).toBeVisible()
   })
 
   test('template catalog loads and shows demo template', async ({ page }) => {

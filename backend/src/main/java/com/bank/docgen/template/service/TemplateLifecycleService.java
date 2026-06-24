@@ -3,6 +3,7 @@ package com.bank.docgen.template.service;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
 import com.bank.docgen.template.api.LifecycleGovernanceRequest;
@@ -109,6 +110,7 @@ public class TemplateLifecycleService {
     public TemplateDetailView publish(UUID templateId, PublishTemplateRequest request, ManagementSessionClaims session) {
         TemplateEntity template = requirePublishableTemplate(templateId, session);
         requireStatus(template, TemplateLifecycleStatus.PENDING_RELEASE);
+        assertPublishGateReady(templateId, session);
         template.setReleaseVersion(request.releaseVersion());
         template.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
         template.setUpdatedBy(session.username());
@@ -330,6 +332,13 @@ public class TemplateLifecycleService {
             throw new TemplateAccessDeniedException();
         }
         return templateService.requireReadableTemplate(templateId, session);
+    }
+
+    private void assertPublishGateReady(UUID templateId, ManagementSessionClaims session) {
+        BindingValidationView bindings = templateService.validateBindings(templateId, session);
+        if (bindings.summary().blocking()) {
+            throw new TemplateValidationException("api.error.template.publishGateBlocked");
+        }
     }
 
     private TemplateEntity requireStopEligibleTemplate(UUID templateId, ManagementSessionClaims session) {

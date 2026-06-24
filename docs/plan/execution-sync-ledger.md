@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-24 (COR-B07/B08/B09 audit + COR-F08/F15/F17 UX)  
+**Last synced:** 2026-06-24 (COR-B11/B12 contract + COR-T01 binding gate + COR-E01/E02 E2E)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,11 +18,12 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **205 tests**, 2026-06-24 | COR-B07/B08/B09 audit persistence, pagination, Redis read path |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **206 tests**, 2026-06-24 | COR-B11/B12 routeType + download.oneTime; COR-T01 publish binding gate |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
-| Frontend test | `pnpm -C frontend test` | Green | **114 tests**, 2026-06-24 — COR-F08/F15/F17 audit console UX |
+| Frontend test | `pnpm -C frontend test` | Green | **114 tests**, 2026-06-24 |
 | Frontend build | `pnpm -C frontend build` | Green | |
+| E2E Docker (4173) | `pnpm -C frontend test:e2e:docker` | Green — **6 tests**, 2026-06-24 | `catalog.spec.ts` + `role-journeys.spec.ts` |
 
 **Test count progression (not conflicting runs):** P13 slice verify **114** backend tests (2026-06-23);
 Wave C UX **161** backend / **88** frontend; post OPT-E8/F3 full verify **189** backend;
@@ -30,7 +31,8 @@ COR-B02/F05 Batch B slice **193** backend / **104** frontend (2026-06-24);
 COR-1/COR-3 sprint **198** backend / **106** frontend (2026-06-24);
 COR-B04/B05 + COR-F02/F09 **200** backend / **108** frontend (2026-06-24);
 COR-B07/B08 + COR-F08/F15 **201** backend / **112** frontend (2026-06-24);
-COR-B09 + COR-F17 + prior uncommitted slice **205** backend / **114** frontend (2026-06-24).
+COR-B09 + COR-F17 + prior uncommitted slice **205** backend / **114** frontend (2026-06-24);
+COR-B11/B12 + COR-T01 binding gate + COR-E02 E2E **206** backend / **114** frontend (2026-06-24).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)
@@ -146,7 +148,7 @@ Each row lists exit criteria; remove from this index when closed.
 | Async batch transport | Default in-process `@Async`; Kafka optional via `ASYNC_TRANSPORT=kafka` | Production profile uses Kafka + DLT; in-process dev-only documented | P11, M14 |
 | Security forbidden-route audit | Log-only in some paths | Durable security audit event per matrix §13.3 | COR-P06 |
 | QueryDSL / MapStruct / Redisson | Plain JPA + hand mappers + Lettuce | ADR-0037 scheduled items implemented or ADR amended | OPT-D, COR-P05 |
-| Publish gate checklist | UI checklist + binding validation; API policy item partly static | Server-side live gate blocks publish (P19) | COR-T01, P19 |
+| Publish gate checklist | UI checklist + binding validation; API policy item partly static | Server-side live gate blocks publish (P19) — **binding gate enforced server-side (2026-06-24)**; API policy + full checklist remain | COR-T01, P19 |
 | Runtime rate limit | Process-local Bucket4j; requests without credential headers bypass filter (auth layer rejects later) | Shared Redis limiter or documented fail-closed at filter; ADR 0031 alignment | COR-B10, OPT-F8 |
 | Workbench vs Dashboard | **Done** — dead workbench views removed; routes redirect to `/dashboard` | COR-T11 decision recorded | COR-T11 |
 | zh-CN / `api.error` catalog | `en` ~939 lines vs `zh-CN` ~184; sparse `api.error` keys | P20-T06 complete; locale switch without mass English fallback | COR-F19, P20-T06 |

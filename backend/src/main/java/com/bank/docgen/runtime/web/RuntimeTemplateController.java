@@ -13,6 +13,7 @@ import com.bank.docgen.runtime.service.IdempotencyConstants;
 import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.runtime.service.RuntimeGenerationService;
 import com.bank.docgen.sharedkernel.api.Metadata;
+import com.bank.docgen.sharedkernel.api.RouteType;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.template.persistence.TemplateEntity;
@@ -101,7 +102,7 @@ public class RuntimeTemplateController {
                 template,
                 session,
                 environment,
-                releaseVersion == null ? "DEFAULT" : "EXPLICIT",
+                RouteType.EXPLICIT_VERSION,
                 result.resolvedReleaseVersion(),
                 body.output().format(),
                 body.output().mode(),
@@ -114,7 +115,7 @@ public class RuntimeTemplateController {
                         : RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
                 traceId
         );
-        writeSyncResponse(request, response, templateExternalId, releaseVersion, body, result);
+        writeSyncResponse(request, response, templateExternalId, RouteType.EXPLICIT_VERSION, body, result);
     }
 
     @PostMapping("/versions/{releaseVersion}/batch-generate")
@@ -132,7 +133,7 @@ public class RuntimeTemplateController {
                     template,
                     session,
                     releaseVersion,
-                    "EXPLICIT",
+                    RouteType.EXPLICIT_VERSION,
                     body,
                     environment
             );
@@ -143,7 +144,7 @@ public class RuntimeTemplateController {
                 session,
                 environment,
                 releaseVersion,
-                "EXPLICIT",
+                RouteType.EXPLICIT_VERSION,
                 body,
                 traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"))
         );
@@ -164,7 +165,7 @@ public class RuntimeTemplateController {
                     template,
                     session,
                     null,
-                    "DEFAULT",
+                    RouteType.DEFAULT_ROUTE,
                     body,
                     environment
             );
@@ -175,7 +176,7 @@ public class RuntimeTemplateController {
                 session,
                 environment,
                 null,
-                "DEFAULT",
+                RouteType.DEFAULT_ROUTE,
                 body,
                 traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"))
         );
@@ -198,7 +199,7 @@ public class RuntimeTemplateController {
                 template,
                 session,
                 environment,
-                "DEFAULT",
+                RouteType.DEFAULT_ROUTE,
                 result.resolvedReleaseVersion(),
                 body.output().format(),
                 body.output().mode(),
@@ -211,14 +212,14 @@ public class RuntimeTemplateController {
                         : RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
                 traceId
         );
-        writeSyncResponse(request, response, templateExternalId, result.resolvedReleaseVersion(), body, result);
+        writeSyncResponse(request, response, templateExternalId, RouteType.DEFAULT_ROUTE, body, result);
     }
 
     private void writeSyncResponse(
             HttpServletRequest request,
             HttpServletResponse response,
             String templateExternalId,
-            String releaseVersion,
+            String routeType,
             GenerateRequestBody body,
             SyncGenerateResult result
     ) throws java.io.IOException {
@@ -233,7 +234,7 @@ public class RuntimeTemplateController {
         response.setHeader("idempotencyStatus", result.idempotencyStatus());
         response.setHeader("documentId", result.documentId());
         response.setHeader("templateId", templateExternalId);
-        response.setHeader("routeType", releaseVersion == null ? "DEFAULT" : "EXPLICIT");
+        response.setHeader("routeType", routeType);
         response.setHeader("resolvedReleaseVersion", result.resolvedReleaseVersion());
         response.setHeader("output.format", body.output().format());
         response.setHeader("output.mode", body.output().mode());

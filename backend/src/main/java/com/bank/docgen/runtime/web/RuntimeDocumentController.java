@@ -42,6 +42,7 @@ public class RuntimeDocumentController {
             response.setHeader("auditId", artifact.auditId());
             response.setHeader("traceId", artifact.traceId());
             response.setHeader("download.expiresAt", artifact.downloadExpiresAt().toString());
+            response.setHeader("download.oneTime", "false");
             artifact.contentStream().transferTo(response.getOutputStream());
         }
     }

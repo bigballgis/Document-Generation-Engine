@@ -87,8 +87,8 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | COR-B08 | M | Audit query pagination | Unbounded list; GLOBAL_ADMIN lifecycle findAll | Pageable API + default page size; tests | **Done** (2026-06-24; page/size on audit APIs) | OPT-F4 |
 | COR-B09 | M | Redis idempotency read path | Cache written but findExisting DB-only | Hot path uses cache with DB fallback; test | **Done** (2026-06-24; cache-first conflict + warm) | OPT-F |
 | COR-B10 | M | Rate limit multi-instance + missing credential | Process-local Bucket; bypass without credential headers | Document single-instance limit or add shared limiter; fail-closed default documented | **Done** (2026-06-24; doc seam) | OPT-F1 |
-| COR-B11 | L | Download response `oneTime` field | OpenAPI DownloadInfo.oneTime | Field present per contract or OpenAPI trimmed | Not Started | P10 |
-| COR-B12 | L | Route type header EXPLICIT vs EXPLICIT_VERSION | Controller uses shortened enum | Align with OpenAPI or document mapping | Not Started | P7 |
+| COR-B11 | L | Download response `oneTime` field | OpenAPI DownloadInfo.oneTime | Field present per contract or OpenAPI trimmed | **Done** (2026-06-24; `download.oneTime=false` header) | P10 |
+| COR-B12 | L | Route type header EXPLICIT vs EXPLICIT_VERSION | Controller uses shortened enum | Align with OpenAPI or document mapping | **Done** (2026-06-24; `RouteType` constants + sync/batch/audit) | P7 |
 
 **Exit:** OpenAPI contract test extended beyond operationId presence; critical enum/TTL behaviors green in `mvn verify`.
 
@@ -100,7 +100,7 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-T01 | H | Live publish gate (P19 core) | UI gate static; apiPolicy always ready | Server-side checklist blocks publish; UI reflects real blockers | Not Started | P19-T06 |
+| COR-T01 | H | Live publish gate (P19 core) | UI gate static; apiPolicy always ready | Server-side checklist blocks publish; UI reflects real blockers | **Partial** (2026-06-24; server binding gate blocks publish) | P19-T06 |
 | COR-T02 | H | Controlled test/approval opinion forms | Free-text commentSummary only | Structured forms per PRD §7; audit fields; fail returns to DRAFT | Not Started | P19-T07 |
 | COR-T03 | H | GROUP_ADMIN exception intervention path | GROUP_ADMIN always canDecideTests/Approvals | Normal vs exception flows; reason + secondary confirm + audit marker | Not Started | PRD §7, permission-matrix |
 | COR-T04 | H | Collaboration work items + optional timeout | PRD §7 668–672; no WorkItem entity | Role/group queue to-dos; timeout escalation without auto state change | Not Started | P14/P19, domain §2.9.4 |
@@ -202,8 +202,8 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-E01 | H | Docker-target Playwright journeys | playwright.config → 5173 dev | CI/local job against 4173 prod profile | Not Started | OPT-C7 |
-| COR-E02 | H | Role journey E2E minimum set | Only login a11y smoke | login→dashboard; forbidden; identity read; template lifecycle smoke | Not Started | OPT-C7, E06 |
+| COR-E01 | H | Docker-target Playwright journeys | playwright.config → 5173 dev | CI/local job against 4173 prod profile | **Done** (2026-06-24; `playwright.docker.config.ts` + `test:e2e:docker`) | OPT-C7 |
+| COR-E02 | H | Role journey E2E minimum set | Only login a11y smoke | login→dashboard; forbidden; identity read; template lifecycle smoke | **Done** (2026-06-24; `role-journeys.spec.ts`) | OPT-C7, E06 |
 | COR-E03 | M | AuditQueryService tests | 264 lines untested | Group scope + GLOBAL_ADMIN paths | Not Started | OPT-C5 |
 | COR-E04 | M | Rendering PDF path tests | LibreOffice/DockerExec untested | Success/timeout/cleanup mocked | Not Started | OPT-C4 |
 | COR-E05 | M | Frontend: DashboardView + tab router tests | No tests for new surfaces | Vitest for tasks, load error, tab query sync | **Partial** (2026-06-24; dashboard stats/http/tab path tests) | OPT-C6 |
