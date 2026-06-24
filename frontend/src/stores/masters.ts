@@ -137,6 +137,33 @@ export const useMastersStore = defineStore('masters', () => {
     }
   }
 
+  async function downloadMasterFile(masterId: string): Promise<void> {
+    lastErrorMessageKey.value = null
+    try {
+      const { downloadBlobExport } = await import('@/utils/downloadExport')
+      const { blob, filename } = await mastersApi.downloadMasterFile(masterId)
+      downloadBlobExport(filename, blob)
+    } catch (error) {
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.download')
+      throw error
+    }
+  }
+
+  async function replaceMasterFile(masterId: string, file: File): Promise<MasterDocumentDetail> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      const updated = await mastersApi.replaceMasterFile(masterId, file)
+      applyUpdatedMaster(updated)
+      return updated
+    } catch (error) {
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.replaceFile')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
   function applyUpdatedMaster(updated: MasterDocumentDetail) {
     selectedMaster.value = updated
     masters.value = masters.value.map((item) => (item.id === updated.id ? toSummary(updated) : item))
@@ -179,6 +206,8 @@ export const useMastersStore = defineStore('masters', () => {
     submitReview,
     decideReview,
     updateMasterMetadata,
+    downloadMasterFile,
+    replaceMasterFile,
     clearSelected,
     clearListError,
   }

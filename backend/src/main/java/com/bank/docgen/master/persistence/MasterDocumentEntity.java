@@ -156,6 +156,14 @@ public class MasterDocumentEntity {
         this.status = status;
     }
 
+    public void setStorageKey(String storageKey) {
+        this.storageKey = storageKey;
+    }
+
+    public void setOriginalFilename(String originalFilename) {
+        this.originalFilename = originalFilename;
+    }
+
     public void setChangeSummary(String changeSummary) {
         this.changeSummary = changeSummary;
     }

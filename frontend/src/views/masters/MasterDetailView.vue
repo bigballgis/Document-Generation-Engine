@@ -7,6 +7,7 @@ import MasterReviewDialog from '@/components/masters/MasterReviewDialog.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
 import MasterMetadataEditDialog from '@/components/masters/MasterMetadataEditDialog.vue'
+import MasterReplaceFileDialog from '@/components/masters/MasterReplaceFileDialog.vue'
 import MasterWorkflowBanner from '@/components/masters/MasterWorkflowBanner.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
@@ -32,7 +33,9 @@ const submitReviewOpen = ref(false)
 const reviewDialogOpen = ref(false)
 const reviewMode = ref<MasterReviewDecision>('APPROVED')
 const metadataEditOpen = ref(false)
+const replaceFileOpen = ref(false)
 const loadFailed = ref(false)
+const downloading = ref(false)
 
 const masterId = computed(() => String(route.params.masterId ?? ''))
 const master = computed(() => mastersStore.selectedMaster)
@@ -60,6 +63,12 @@ const canEditMetadata = computed(() => {
     master.value.status === 'REJECTED' ||
     master.value.status === 'APPROVED'
   )
+})
+const canReplaceFile = computed(() => {
+  if (!manageMasters.value || !master.value) {
+    return false
+  }
+  return master.value.status !== 'PENDING_REVIEW'
 })
 const errorMessage = computed(() => {
   const key = mastersStore.lastErrorMessageKey
@@ -134,6 +143,29 @@ async function handleMetadataUpdate(payload: { name: string; description: string
   }
 }
 
+async function handleDownload() {
+  downloading.value = true
+  try {
+    await mastersStore.downloadMasterFile(masterId.value)
+    ElMessage.success(t('masters.download.success'))
+  } catch {
+    ElMessage.error(errorMessage.value || t('masters.error.download'))
+  } finally {
+    downloading.value = false
+  }
+}
+
+async function handleReplaceFile(file: File) {
+  try {
+    await mastersStore.replaceMasterFile(masterId.value, file)
+    replaceFileOpen.value = false
+    await mastersStore.fetchImpactAnalysis(masterId.value)
+    ElMessage.success(t('masters.replaceFile.success'))
+  } catch {
+    ElMessage.error(errorMessage.value || t('masters.error.replaceFile'))
+  }
+}
+
 function formatReviewAction(action: string): string {
   const key = `masters.reviewHistory.action.${action}`
   return te(key) ? t(key) : action
@@ -155,6 +187,12 @@ function formatReviewAction(action: string): string {
       </div>
       <div v-if="master" class="header-actions">
         <MasterStatusBadge :status="master.status" />
+        <el-button :loading="downloading" @click="handleDownload">
+          {{ t('masters.download.action') }}
+        </el-button>
+        <el-button v-if="canReplaceFile" @click="replaceFileOpen = true">
+          {{ t('masters.replaceFile.open') }}
+        </el-button>
         <el-button v-if="canEditMetadata" @click="metadataEditOpen = true">
           {{ t('masters.metadata.edit') }}
         </el-button>
@@ -277,6 +315,13 @@ function formatReviewAction(action: string): string {
       :initial-description="master.description"
       :loading="mastersStore.submitting"
       @submit="handleMetadataUpdate"
+    />
+    <MasterReplaceFileDialog
+      v-if="master"
+      v-model="replaceFileOpen"
+      :current-filename="master.originalFilename"
+      :loading="mastersStore.submitting"
+      @submit="handleReplaceFile"
     />
   </div>
 </template>

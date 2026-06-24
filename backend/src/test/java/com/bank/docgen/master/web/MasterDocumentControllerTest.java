@@ -4,6 +4,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -134,6 +136,82 @@ class MasterDocumentControllerTest {
                         .with(authentication(new ManagementAuthentication(templateAuthor))))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void downloadMasterReturnsDocxFile() throws Exception {
+        String masterId = uploadMaster(retailGroupAdmin);
+
+        mockMvc.perform(get("/api/management/v1/masters/" + masterId + "/download")
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", MediaType.parseMediaType(
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document").toString()))
+                .andExpect(header().string("Content-Disposition", "attachment; filename=\"master.docx\""));
+    }
+
+    @Test
+    void replaceMasterFileUpdatesAnchorsAndReturnsToDraftWhenApproved() throws Exception {
+        String masterId = uploadMaster(retailGroupAdmin);
+
+        mockMvc.perform(post("/api/management/v1/masters/" + masterId + "/submit-review")
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"changeSummary":"Initial"}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/management/v1/masters/" + masterId + "/review")
+                        .with(authentication(new ManagementAuthentication(globalAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"decision":"APPROVED","commentSummary":"ok"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.status").value("APPROVED"));
+
+        byte[] revisedDocx = buildSampleDocx("{{anchor:HEADER}} {{anchor:FOOTER}}");
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "revised-master.docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                revisedDocx
+        );
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/management/v1/masters/" + masterId + "/file")
+                        .file(file)
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.status").value("DRAFT"))
+                .andExpect(jsonPath("$.result.originalFilename").value("revised-master.docx"))
+                .andExpect(jsonPath("$.result.anchors.length()").value(2));
+    }
+
+    @Test
+    void replaceMasterFileRejectedWhilePendingReview() throws Exception {
+        String masterId = uploadMaster(retailGroupAdmin);
+
+        mockMvc.perform(post("/api/management/v1/masters/" + masterId + "/submit-review")
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"changeSummary":"Pending"}
+                                """))
+                .andExpect(status().isOk());
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "master.docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                sampleDocx
+        );
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/management/v1/masters/" + masterId + "/file")
+                        .file(file)
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.error.code").value("MASTER_VALIDATION_FAILED"));
     }
 
     @Test

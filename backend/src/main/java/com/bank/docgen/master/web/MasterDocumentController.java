@@ -12,16 +12,20 @@ import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.master.service.MasterDocumentService.MasterDownloadArtifact;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -101,6 +105,33 @@ public class MasterDocumentController {
         return envelope(request, masterDocumentService.decideReview(masterId, body, session));
     }
 
+    @GetMapping("/{masterId}/download")
+    public void download(
+            @PathVariable UUID masterId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletResponse response
+    ) throws java.io.IOException {
+        try (MasterDownloadArtifact artifact = masterDocumentService.openDownload(masterId, session)) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType(artifact.contentType());
+            response.setHeader(
+                    HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + sanitizeDownloadFilename(artifact.filename()) + "\""
+            );
+            artifact.contentStream().transferTo(response.getOutputStream());
+        }
+    }
+
+    @PutMapping(value = "/{masterId}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public SuccessEnvelope<MasterDocumentDetailView> replaceFile(
+            @PathVariable UUID masterId,
+            @RequestPart("file") MultipartFile file,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, masterDocumentService.replaceFile(masterId, file, session));
+    }
+
     @GetMapping("/{masterId}/impact-analysis")
     public SuccessEnvelope<MasterImpactAnalysisView> impactAnalysis(
             @PathVariable UUID masterId,
@@ -114,5 +145,12 @@ public class MasterDocumentController {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();
         return new SuccessEnvelope<>(Metadata.minimal(auditId, traceId), result);
+    }
+
+    private String sanitizeDownloadFilename(String filename) {
+        if (filename == null || filename.isBlank()) {
+            return "master.docx";
+        }
+        return filename.replaceAll("[\\r\\n\"]", "_");
     }
 }

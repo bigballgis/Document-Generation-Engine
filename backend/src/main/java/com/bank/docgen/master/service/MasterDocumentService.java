@@ -78,6 +78,47 @@ public class MasterDocumentService {
         return toDetail(master);
     }
 
+    @Transactional(readOnly = true)
+    public MasterDownloadArtifact openDownload(UUID masterId, ManagementSessionClaims session) {
+        MasterDocumentEntity master = requireReadableMaster(masterId, session);
+        try {
+            InputStream stream = objectStoragePort.get(master.getStorageKey());
+            return new MasterDownloadArtifact(stream, master.getOriginalFilename(), DOCX_CONTENT_TYPE);
+        } catch (Exception ex) {
+            throw new MasterValidationException("api.error.master.downloadFailed");
+        }
+    }
+
+    @Transactional
+    public MasterDocumentDetailView replaceFile(
+            UUID masterId,
+            MultipartFile docxFile,
+            ManagementSessionClaims session
+    ) {
+        MasterDocumentEntity master = requireWritableMaster(masterId, session);
+        if (master.getStatus() == MasterDocumentStatus.PENDING_REVIEW) {
+            throw new MasterValidationException("api.error.master.invalidState");
+        }
+        validateDocxFile(docxFile);
+        String storageKey = "masters/" + masterId + "/" + sanitizeFilename(docxFile.getOriginalFilename());
+        storeDocx(storageKey, docxFile);
+        Set<String> anchorIds = extractAnchors(docxFile);
+        if (anchorIds.isEmpty()) {
+            throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
+        }
+        master.setStorageKey(storageKey);
+        master.setOriginalFilename(docxFile.getOriginalFilename());
+        master.replaceAnchors(toAnchorEntities(masterId, anchorIds));
+        master.getAnchors().forEach(anchor -> anchor.setMaster(master));
+        if (master.getStatus() != MasterDocumentStatus.DRAFT) {
+            master.setStatus(MasterDocumentStatus.DRAFT);
+            master.setChangeSummary(null);
+        }
+        master.setUpdatedBy(session.username());
+        masterDocumentRepository.save(master);
+        return toDetail(master);
+    }
+
     @Transactional
     public MasterDocumentDetailView create(
             CreateMasterRequest request,
@@ -308,5 +349,13 @@ public class MasterDocumentService {
 
     private String sanitizeFilename(String filename) {
         return filename == null ? "master.docx" : filename.replaceAll("[^A-Za-z0-9._-]", "_");
+    }
+
+    public record MasterDownloadArtifact(InputStream contentStream, String filename, String contentType)
+            implements AutoCloseable {
+        @Override
+        public void close() throws java.io.IOException {
+            contentStream.close();
+        }
     }
 }

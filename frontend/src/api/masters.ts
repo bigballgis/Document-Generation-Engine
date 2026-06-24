@@ -84,3 +84,27 @@ export async function updateMasterMetadata(
   )
   return unwrap(response.data)
 }
+
+export async function downloadMasterFile(masterId: string): Promise<{ blob: Blob; filename: string }> {
+  const response = await http.get<Blob>(`/masters/${masterId}/download`, {
+    responseType: 'blob',
+  })
+  const disposition = response.headers['content-disposition'] ?? ''
+  const filenameMatch = /filename="([^"]+)"/i.exec(disposition)
+  const filename = filenameMatch?.[1] ?? 'master.docx'
+  return { blob: response.data, filename }
+}
+
+export async function replaceMasterFile(masterId: string, file: File): Promise<MasterDocumentDetail> {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await http.put<ApiEnvelope<MasterDocumentDetail>>(
+    `/masters/${masterId}/file`,
+    formData,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    },
+  )
+  return unwrap(response.data)
+}

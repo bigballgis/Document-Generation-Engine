@@ -341,6 +341,19 @@ export default {
       save: 'Save metadata',
       success: 'Master metadata updated.',
     },
+    download: {
+      action: 'Download DOCX',
+      success: 'Master file downloaded.',
+    },
+    replaceFile: {
+      open: 'Replace DOCX file',
+      title: 'Replace master DOCX',
+      description:
+        'Upload a revised DOCX for this master. Anchors are re-extracted on the server. Approved masters return to draft and require re-review.',
+      currentFile: 'Current file: {filename}',
+      submit: 'Replace file',
+      success: 'Master file replaced. Review anchors before submitting for review.',
+    },
     actions: {
       cancel: 'Cancel',
     },
@@ -349,6 +362,8 @@ export default {
       loadDetail: 'Unable to load master details.',
       loadImpact: 'Unable to load impact analysis.',
       upload: 'Unable to upload master document.',
+      download: 'Unable to download master document.',
+      replaceFile: 'Unable to replace master document file.',
       submitReview: 'Unable to submit master for review.',
       decideReview: 'Unable to record the review decision.',
       updateMetadata: 'Unable to update master metadata.',
