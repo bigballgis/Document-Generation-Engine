@@ -204,8 +204,8 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-E01 | H | Docker-target Playwright journeys | playwright.config → 5173 dev | CI/local job against 4173 prod profile | **Done** (2026-06-24; `playwright.docker.config.ts` + `test:e2e:docker`) | OPT-C7 |
 | COR-E02 | H | Role journey E2E minimum set | Only login a11y smoke | login→dashboard; forbidden; identity read; template lifecycle smoke | **Done** (2026-06-24; `role-journeys.spec.ts`) | OPT-C7, E06 |
-| COR-E03 | M | AuditQueryService tests | 264 lines untested | Group scope + GLOBAL_ADMIN paths | Not Started | OPT-C5 |
-| COR-E04 | M | Rendering PDF path tests | LibreOffice/DockerExec untested | Success/timeout/cleanup mocked | Not Started | OPT-C4 |
+| COR-E03 | M | AuditQueryService tests | 264 lines untested | Group scope + GLOBAL_ADMIN paths | **Done** (2026-06-24; AuditQueryServiceTest) | OPT-C5 |
+| COR-E04 | M | Rendering PDF path tests | LibreOffice/DockerExec untested | Success/timeout/cleanup mocked | **Done** (2026-06-24; pipeline + LibreOffice tests) | OPT-C4 |
 | COR-E05 | M | Frontend: DashboardView + tab router tests | No tests for new surfaces | Vitest for tasks, load error, tab query sync | **Partial** (2026-06-24; dashboard stats/http/tab path tests) | OPT-C6 |
 | COR-E06 | M | messageKey → UI mapping tests | errorEnvelope without e2e UI | Store/view tests for catalog keys | Not Started | P20-T06 |
 
