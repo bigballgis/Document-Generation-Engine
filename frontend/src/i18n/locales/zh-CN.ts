@@ -1,9 +1,15 @@
+import { apiErrorZhCn } from '@/i18n/catalogs/apiErrorZhCn'
+
 export default {
 
   app: {
 
     title: '文档生成系统',
 
+  },
+
+  api: {
+    error: apiErrorZhCn,
   },
 
   nav: {

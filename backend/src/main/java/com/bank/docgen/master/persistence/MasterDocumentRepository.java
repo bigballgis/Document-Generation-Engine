@@ -3,6 +3,7 @@ package com.bank.docgen.master.persistence;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MasterDocumentRepository extends JpaRepository<MasterDocumentEntity, UUID> {
@@ -12,4 +13,7 @@ public interface MasterDocumentRepository extends JpaRepository<MasterDocumentEn
     List<MasterDocumentEntity> findByDeletedAtIsNullOrderByUpdatedAtDesc();
 
     Optional<MasterDocumentEntity> findByIdAndDeletedAtIsNull(UUID id);
+
+    @EntityGraph(attributePaths = "anchors")
+    Optional<MasterDocumentEntity> findWithAnchorsByIdAndDeletedAtIsNull(UUID id);
 }

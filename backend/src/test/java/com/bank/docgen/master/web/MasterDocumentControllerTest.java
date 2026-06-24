@@ -113,7 +113,8 @@ class MasterDocumentControllerTest {
 
         mockMvc.perform(get("/api/management/v1/masters").with(authentication(new ManagementAuthentication(retailGroupAdmin))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.length()").value(1));
+                .andExpect(jsonPath("$.result.length()").value(1))
+                .andExpect(jsonPath("$.result[0].anchorCount").value(1));
 
         ManagementSessionClaims corpOnlyAdmin = session("10000004", List.of("GROUP_ADMIN"), List.of("CORP"));
         mockMvc.perform(get("/api/management/v1/masters").with(authentication(new ManagementAuthentication(corpOnlyAdmin))))

@@ -14,6 +14,7 @@ import com.bank.docgen.master.api.UpdateMasterRequest;
 import com.bank.docgen.master.domain.MasterDocumentStatus;
 import com.bank.docgen.master.domain.MasterReviewAction;
 import com.bank.docgen.master.persistence.MasterAnchorEntity;
+import com.bank.docgen.master.persistence.MasterAnchorRepository;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterReviewRecordEntity;
@@ -26,8 +27,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +42,7 @@ public class MasterDocumentService {
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
     private final MasterDocumentRepository masterDocumentRepository;
+    private final MasterAnchorRepository masterAnchorRepository;
     private final MasterReviewRecordRepository masterReviewRecordRepository;
     private final ObjectStoragePort objectStoragePort;
     private final DocxAnchorExtractor docxAnchorExtractor;
@@ -46,12 +50,14 @@ public class MasterDocumentService {
 
     public MasterDocumentService(
             MasterDocumentRepository masterDocumentRepository,
+            MasterAnchorRepository masterAnchorRepository,
             MasterReviewRecordRepository masterReviewRecordRepository,
             ObjectStoragePort objectStoragePort,
             DocxAnchorExtractor docxAnchorExtractor,
             GroupAccessService groupAccessService
     ) {
         this.masterDocumentRepository = masterDocumentRepository;
+        this.masterAnchorRepository = masterAnchorRepository;
         this.masterReviewRecordRepository = masterReviewRecordRepository;
         this.objectStoragePort = objectStoragePort;
         this.docxAnchorExtractor = docxAnchorExtractor;
@@ -69,12 +75,15 @@ public class MasterDocumentService {
         } else {
             masters = masterDocumentRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(groupCodes);
         }
-        return masters.stream().map(this::toSummary).toList();
+        Map<UUID, Long> anchorCounts = loadAnchorCounts(masters);
+        return masters.stream()
+                .map(master -> toSummary(master, anchorCounts.getOrDefault(master.getId(), 0L)))
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public MasterDocumentDetailView get(UUID masterId, ManagementSessionClaims session) {
-        MasterDocumentEntity master = requireReadableMaster(masterId, session);
+        MasterDocumentEntity master = requireReadableMasterWithAnchors(masterId, session);
         return toDetail(master);
     }
 
@@ -155,7 +164,7 @@ public class MasterDocumentService {
             UpdateMasterRequest request,
             ManagementSessionClaims session
     ) {
-        MasterDocumentEntity master = requireWritableMaster(masterId, session);
+        MasterDocumentEntity master = requireWritableMasterWithAnchors(masterId, session);
         if (request.name() != null && !request.name().isBlank()) {
             master.setName(request.name());
         }
@@ -172,7 +181,7 @@ public class MasterDocumentService {
             SubmitMasterReviewRequest request,
             ManagementSessionClaims session
     ) {
-        MasterDocumentEntity master = requireWritableMaster(masterId, session);
+        MasterDocumentEntity master = requireWritableMasterWithAnchors(masterId, session);
         if (master.getStatus() != MasterDocumentStatus.DRAFT) {
             throw new MasterValidationException("api.error.master.invalidReviewTransition");
         }
@@ -201,7 +210,7 @@ public class MasterDocumentService {
         if (!groupAccessService.canReviewMasters(session)) {
             throw new MasterAccessDeniedException();
         }
-        MasterDocumentEntity master = requireReadableMaster(masterId, session);
+        MasterDocumentEntity master = requireReadableMasterWithAnchors(masterId, session);
         if (master.getStatus() != MasterDocumentStatus.PENDING_REVIEW) {
             throw new MasterValidationException("api.error.master.invalidReviewTransition");
         }
@@ -237,8 +246,25 @@ public class MasterDocumentService {
         return master;
     }
 
+    private MasterDocumentEntity requireReadableMasterWithAnchors(UUID masterId, ManagementSessionClaims session) {
+        MasterDocumentEntity master = masterDocumentRepository.findWithAnchorsByIdAndDeletedAtIsNull(masterId)
+                .orElseThrow(MasterNotFoundException::new);
+        if (!groupAccessService.canAccessGroup(session, master.getGroupCode())) {
+            throw new MasterAccessDeniedException();
+        }
+        return master;
+    }
+
     private MasterDocumentEntity requireWritableMaster(UUID masterId, ManagementSessionClaims session) {
         MasterDocumentEntity master = requireReadableMaster(masterId, session);
+        if (!groupAccessService.canManageMasters(session)) {
+            throw new MasterAccessDeniedException();
+        }
+        return master;
+    }
+
+    private MasterDocumentEntity requireWritableMasterWithAnchors(UUID masterId, ManagementSessionClaims session) {
+        MasterDocumentEntity master = requireReadableMasterWithAnchors(masterId, session);
         if (!groupAccessService.canManageMasters(session)) {
             throw new MasterAccessDeniedException();
         }
@@ -307,17 +333,26 @@ public class MasterDocumentService {
         return anchors;
     }
 
-    private MasterDocumentSummaryView toSummary(MasterDocumentEntity master) {
+    private MasterDocumentSummaryView toSummary(MasterDocumentEntity master, long anchorCount) {
         return new MasterDocumentSummaryView(
                 master.getId().toString(),
                 master.getGroupCode(),
                 master.getName(),
                 master.getStatus().name(),
                 master.getOriginalFilename(),
-                master.getAnchors().size(),
+                Math.toIntExact(anchorCount),
                 master.getUpdatedBy(),
                 master.getUpdatedAt()
         );
+    }
+
+    private Map<UUID, Long> loadAnchorCounts(List<MasterDocumentEntity> masters) {
+        if (masters.isEmpty()) {
+            return Map.of();
+        }
+        List<UUID> masterIds = masters.stream().map(MasterDocumentEntity::getId).toList();
+        return masterAnchorRepository.countByMasterIdIn(masterIds).stream()
+                .collect(Collectors.toMap(row -> (UUID) row[0], row -> (Long) row[1]));
     }
 
     private MasterDocumentDetailView toDetail(MasterDocumentEntity master) {

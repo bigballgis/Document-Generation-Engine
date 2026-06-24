@@ -59,7 +59,7 @@ public class MasterDocumentEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-    @OneToMany(mappedBy = "master", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "master", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<MasterAnchorEntity> anchors = new ArrayList<>();
 
     protected MasterDocumentEntity() {

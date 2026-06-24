@@ -44,12 +44,12 @@ Recommended sequencing: **Wave COR-0 (docs truth)** → **COR-1 (API contract)**
 | Wave | Scope | Status |
 | --- | --- | --- |
 | COR-0 | Documentation & plan-layer reconciliation | **Done** (2026-06-24; COR-D01–D09) |
-| COR-1 | Runtime API contract & correctness | **In Progress** (COR-B03/B06/B10 Done 2026-06-24) |
-| COR-2 | Template lifecycle, workflow & governance | **In Progress** (COR-T07 Done 2026-06-24) |
-| COR-3 | Frontend workflow & operation experience | **In Progress** (COR-F01/F03/F06/F07/F10 Done 2026-06-24) |
-| COR-4 | Performance, resilience & architecture | **In Progress** (COR-P03/P05/P06 Done 2026-06-24) |
-| COR-5 | Test coverage & E2E journeys | **In Progress** (COR-E06 Partial 2026-06-24) |
-| COR-6 | Confirmed large domains (P14/P18+) | Not Started |
+| COR-1 | Runtime API contract & correctness | **Done** (2026-06-25; COR-B01–B12) |
+| COR-2 | Template lifecycle, workflow & governance | **In Progress** — thin slices Done; **P19 backlog deferred** to COR-L03 |
+| COR-3 | Frontend workflow & operation experience | **In Progress** — F18 deferred to COR-L04; F19 api.error Done, UI parity Partial |
+| COR-4 | Performance, resilience & architecture | **In Progress** (COR-P03/P04/P05/P06 Done 2026-06-25; P01/P02/P07/P08 open) |
+| COR-5 | Test coverage & E2E journeys | **Done** (2026-06-25; COR-E01–E06) |
+| COR-6 | Confirmed large domains (P14/P18+) | **Deferred** — activate one formal phase at a time (see §8) |
 
 ---
 
@@ -170,10 +170,10 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-F19 | H | zh-CN parity + api.error catalog | en 939 lines vs zh-CN 184; 2 api.error keys | P20-T06 complete; locale switch no mass English fallback | **Partial** (2026-06-24; en `api.error` catalog merged; zh-CN parity open) | P20-T06, OPT-G7 |
+| COR-F19 | H | zh-CN parity + api.error catalog | en 939 lines vs zh-CN 184; 2 api.error keys | P20-T06 complete; locale switch no mass English fallback | **Partial** (2026-06-25; en/zh `api.error` catalogs complete; general UI keys still en-fallback) | P20-T06, OPT-G7 |
 | COR-F20 | M | Locale-aware date/number formatting | toLocaleString() without app locale | Shared format helpers bound to i18n locale | **Done** (2026-06-24; `useLocaleFormatters` + audit/template detail) | P20 |
 | COR-F21 | M | Table a11y baseline | row-click only navigation | Focus rings, keyboard row activation, sortable columns | **Done** (2026-06-24; AppDataTable + master/template list activatable rows) | OPT-B4 |
-| COR-F22 | M | Design token cleanup in shell | Hardcoded hex in ManagementShell | CSS variables only; dual-brand check | **Partial** (2026-06-24; login gradient tokens; shell remainder open) | P20 |
+| COR-F22 | M | Design token cleanup in shell | Hardcoded hex in ManagementShell | CSS variables only; dual-brand check | **Done** (2026-06-25; shell/layout use design tokens only) | P20 |
 | COR-F23 | L | Forbidden / error traceId copy | traceId text only | Copy reference control | **Done** (2026-06-24) | — |
 | COR-F24 | L | Login locale + client validation | No locale on login; no username format check | Locale switch + inline validation | **Done** (2026-06-24) | P1 |
 
@@ -190,7 +190,7 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 | COR-P01 | M | Stream new sync artifact generation | New path still byte[] | Stream from storage on create path | Not Started | OPT-F3 |
 | COR-P02 | M | Offload LibreOffice from request thread | Inline PDF in request | Bounded pool + timeout | Not Started | OPT-F6 |
 | COR-P03 | L | LibreOffice temp dir cleanup | No finally on temp dirs | No leak under load test | **Done** (2026-06-24; try/finally temp dir cleanup + test) | OPT-F7 |
-| COR-P04 | M | EAGER fetch on master anchors | MasterDocumentEntity EAGER | LAZY + fetch join where needed | Not Started | OPT-F5 |
+| COR-P04 | M | EAGER fetch on master anchors | MasterDocumentEntity EAGER | LAZY + fetch join where needed | **Done** (2026-06-25; LAZY + batch count + EntityGraph detail) | OPT-F5 |
 | COR-P05 | L | Redisson lock evaluation | Multi-instance idempotency/async owner | ADR decision + implementation if multi-instance | **Done** (2026-06-24; ADR-0039 evaluation) | OPT-F8 |
 | COR-P06 | M | Declarative route authorization | RouteVisibilityService not enforced on API | Filter or documented service-layer pattern + gap test | **Done** (2026-06-24; ADR + ManagementAuthorizationContractTest) | OPT-D6 |
 | COR-P07 | M | QueryDSL for audit/complex lists | JPQL + in-memory filter | Type-safe pageable queries | Not Started | OPT-D4 |
@@ -207,22 +207,22 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 | COR-E03 | M | AuditQueryService tests | 264 lines untested | Group scope + GLOBAL_ADMIN paths | **Done** (2026-06-24; AuditQueryServiceTest) | OPT-C5 |
 | COR-E04 | M | Rendering PDF path tests | LibreOffice/DockerExec untested | Success/timeout/cleanup mocked | **Done** (2026-06-24; pipeline + LibreOffice tests) | OPT-C4 |
 | COR-E05 | M | Frontend: DashboardView + tab router tests | No tests for new surfaces | Vitest for tasks, load error, tab query sync | **Done** (2026-06-23; dashboard tasks + `templateDetailTabs` + load error) | OPT-C6 |
-| COR-E06 | M | messageKey → UI mapping tests | errorEnvelope without e2e UI | Store/view tests for catalog keys | **Partial** (2026-06-24; identity/masters/templates/audit store + create dialog catalog keys) | P20-T06 |
+| COR-E06 | M | messageKey → UI mapping tests | errorEnvelope without e2e UI | Store/view tests for catalog keys | **Done** (2026-06-25; store + catalog + ForbiddenView tests) | P20-T06 |
 
 ---
 
 ## 8. Wave COR-6 — Confirmed large domains (phase-aligned)
 
-Execute as formal phases when selected; do not mark Done without full P14/P18/P19 exit criteria.
+Execute as formal phases when selected; **do not mark Done without full P14/P18/P19 exit criteria**. Remaining COR-2/3 rows mapped here stay `Not Started` until the owning phase is activated.
 
 | ID | Phase | Title | Status | Detail plan |
 | --- | --- | --- | --- | --- |
-| COR-L01 | P14 | Clause/content module lifecycle | Not Started | [P14](./detail/P14-confirmed-large-domains.md) |
-| COR-L02 | P18 | Structured authoring & fidelity engine | Not Started | [P18](./detail/P18-structured-authoring-fidelity-engine.md) |
-| COR-L03 | P19 | Full verifiability + publish gate + decision forms | Not Started | [P19](./detail/P19-verifiability-publish-gate.md) |
-| COR-L04 | P17 | Per-domain API policy save/rollback | Not Started | [P17](./detail/P17-api-policy-domain-governance.md) |
-| COR-L05 | P16 | Lifecycle/version governance completeness | Not Started | [P16](./detail/P16-lifecycle-version-governance.md) |
-| COR-L06 | P15 | Kubernetes & container hardening | Not Started | [P15](./detail/P15-kubernetes-deployment-container-hardening.md) |
+| COR-L01 | P14 | Clause/content module lifecycle | **Deferred** | [P14](./detail/P14-confirmed-large-domains.md) |
+| COR-L02 | P18 | Structured authoring & fidelity engine | **Deferred** | [P18](./detail/P18-structured-authoring-fidelity-engine.md) |
+| COR-L03 | P19 | Full verifiability + publish gate + decision forms | **Deferred** | [P19](./detail/P19-verifiability-publish-gate.md) — owns COR-T01/T02/T03/T04/T08/T09/T14 remainder |
+| COR-L04 | P17 | Per-domain API policy save/rollback | **Deferred** | [P17](./detail/P17-api-policy-domain-governance.md) — owns COR-F18 |
+| COR-L05 | P16 | Lifecycle/version governance completeness | **Deferred** | [P16](./detail/P16-lifecycle-version-governance.md) |
+| COR-L06 | P15 | Kubernetes & container hardening | **Deferred** | [P15](./detail/P15-kubernetes-deployment-container-hardening.md) |
 
 ---
 
@@ -307,4 +307,4 @@ When completing any COR-* task:
 4. Append gate evidence to [execution-sync-ledger.md](./execution-sync-ledger.md).
 5. Run post-task doc sync per `.cursor/skills/post-task-doc-sync/SKILL.md`.
 
-**Last reviewed:** 2026-06-24 (COR-B04/B05, COR-F02/F09 Done).
+**Last reviewed:** 2026-06-25 (COR-P04, COR-F19 api.error zh-CN, COR-F22, COR-E06 Done; COR-1/COR-5 waves closed).

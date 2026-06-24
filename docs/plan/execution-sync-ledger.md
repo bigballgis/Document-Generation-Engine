@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-24 (COR final batch: catalog UX + P03/P05/P06 + F04/F19–F24 + T10/T12–T14)  
+**Last synced:** 2026-06-25 (COR-P04 LAZY anchors + COR-F19 zh-CN api.error + COR-E06/F22)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -38,7 +38,8 @@ COR-F12/E05/E06 template create validation + dashboard/tab/messageKey tests **12
 COR-F11/F13 workflow banner CTA + governance 2-step confirm + publish messageKey tests **125** frontend (2026-06-23);
 COR-F14/F16 LoadErrorPanel + audit filter validation + COR-T05 publish candidate **223** backend / **129** frontend (2026-06-23);
 COR-T06/F21/E06 multi-version callability + table a11y baseline + audit messageKey **227** backend / **131** frontend (2026-06-23);
-COR final batch (catalog package UX + publish gate apiPolicy + workflow filters + i18n/a11y polish) **238** backend / **139** frontend (2026-06-24).
+COR final batch (catalog package UX + publish gate apiPolicy + workflow filters + i18n/a11y polish) **238** backend / **139** frontend (2026-06-24);
+COR-P04 + zh-CN api.error catalog + E06/F22 **238** backend / **144** frontend (2026-06-25).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)
@@ -157,7 +158,7 @@ Each row lists exit criteria; remove from this index when closed.
 | Publish gate checklist | UI checklist + binding validation; API policy item partly static | Server-side live gate blocks publish (P19) — **binding + apiPolicy enforced server-side (2026-06-24)**; full P19 checklist remains | COR-T01, P19 |
 | Runtime rate limit | Process-local Bucket4j; requests without credential headers bypass filter (auth layer rejects later) | Shared Redis limiter or documented fail-closed at filter; ADR 0031 alignment | COR-B10, OPT-F8 |
 | Workbench vs Dashboard | **Done** — dead workbench views removed; routes redirect to `/dashboard` | COR-T11 decision recorded | COR-T11 |
-| zh-CN / `api.error` catalog | `en` full `api.error` catalog merged (2026-06-24); `zh-CN` still sparse | P20-T06 complete; locale switch without mass English fallback | COR-F19, P20-T06 |
+| zh-CN / `api.error` catalog | **en + zh-CN `api.error` catalogs complete (2026-06-25)**; general UI keys still en-fallback | P20-T06 full UI parity; locale switch without mass English fallback on primary journeys | COR-F19, P20-T06 |
 | Service-layer authorization | Route visibility not enforced at API filter | **Documented pattern + contract test (2026-06-24)** — ADR-0001 | COR-P06 |
 | Redisson multi-instance locks | Lettuce cache only | **ADR-0039 evaluation recorded (2026-06-24)**; implement when multi-instance | COR-P05 |
 
