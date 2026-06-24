@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-23 (COR-F14/F16 UX + COR-T05 publish candidate)  
+**Last synced:** 2026-06-23 (COR-T06 callability + COR-F21/E06 partial)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,10 +18,10 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **223 tests**, 2026-06-23 | COR-T05 release candidate publish selection |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **227 tests**, 2026-06-23 | COR-T06 multi-version callability |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
-| Frontend test | `pnpm -C frontend test` | Green | **125 tests**, 2026-06-23 |
+| Frontend test | `pnpm -C frontend test` | Green | **131 tests**, 2026-06-23 |
 | Frontend build | `pnpm -C frontend build` | Green | |
 | E2E Docker (4173) | `pnpm -C frontend test:e2e:docker` | Green — **6 tests**, 2026-06-24 | `catalog.spec.ts` + `role-journeys.spec.ts` |
 
@@ -36,7 +36,8 @@ COR-B11/B12 + COR-T01 binding gate + COR-E02 E2E **206** backend / **114** front
 COR-E03/E04 + master file replace **222** backend / **114** frontend (2026-06-24);
 COR-F12/E05/E06 template create validation + dashboard/tab/messageKey tests **121** frontend (2026-06-23);
 COR-F11/F13 workflow banner CTA + governance 2-step confirm + publish messageKey tests **125** frontend (2026-06-23);
-COR-F14/F16 LoadErrorPanel + audit filter validation + COR-T05 publish candidate **223** backend / **129** frontend (2026-06-23).
+COR-F14/F16 LoadErrorPanel + audit filter validation + COR-T05 publish candidate **223** backend / **129** frontend (2026-06-23);
+COR-T06/F21/E06 multi-version callability + table a11y baseline + audit messageKey **227** backend / **131** frontend (2026-06-23).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)

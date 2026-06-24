@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { templateDetailPath } from '@/routing/routeKeys'
@@ -48,6 +49,10 @@ function openTemplate(templateId: string) {
   router.push(templateDetailPath(templateId))
 }
 
+const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSummary>((row) =>
+  openTemplate(row.id),
+)
+
 const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecycleStatus)
 </script>
 
@@ -76,8 +81,9 @@ const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecy
         <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
       </div>
       <AppDataTable
+        activatable
         :data="filteredRows"
-        @row-click="(row: TemplateSummary) => openTemplate(row.id)"
+        @row-click="activateTemplateRow"
       >
         <template #empty>
           <el-empty :description="t('apiPolicy.home.empty')" />

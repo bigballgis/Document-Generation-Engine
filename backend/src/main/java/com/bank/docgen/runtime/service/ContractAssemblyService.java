@@ -15,6 +15,7 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -27,10 +28,16 @@ public class ContractAssemblyService {
 
     private final MessageResolver messageResolver;
     private final ObjectMapper objectMapper;
+    private final TemplateVersionRepository templateVersionRepository;
 
-    public ContractAssemblyService(MessageResolver messageResolver, ObjectMapper objectMapper) {
+    public ContractAssemblyService(
+            MessageResolver messageResolver,
+            ObjectMapper objectMapper,
+            TemplateVersionRepository templateVersionRepository
+    ) {
         this.messageResolver = messageResolver;
         this.objectMapper = objectMapper;
+        this.templateVersionRepository = templateVersionRepository;
     }
 
     public ContractResultView assemble(
@@ -71,13 +78,19 @@ public class ContractAssemblyService {
     }
 
     private List<CallableVersionView> buildCallableVersions(TemplateEntity template, String environment) {
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED
-                || template.getReleaseVersion() == null) {
+        if (template.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED) {
             return List.of();
         }
-        String base = "/api/" + environment + "/v1/templates/" + template.getExternalId() + "/versions/"
-                + template.getReleaseVersion() + "/generate";
-        return List.of(new CallableVersionView(template.getReleaseVersion(), base));
+        String base = "/api/" + environment + "/v1/templates/" + template.getExternalId() + "/versions/";
+        return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(template.getId()).stream()
+                .filter(version -> version.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED
+                        && version.getReleaseVersion() != null
+                        && !version.getReleaseVersion().isBlank())
+                .map(version -> new CallableVersionView(
+                        version.getReleaseVersion(),
+                        base + version.getReleaseVersion() + "/generate"
+                ))
+                .toList();
     }
 
     private DefaultRouteSummaryView buildDefaultRoute(

@@ -1,6 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as auditApi from '@/api/audit'
+import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useAuditStore } from '@/stores/audit'
 import { useSessionStore } from '@/stores/session'
@@ -49,5 +50,39 @@ describe('audit store', () => {
     expect(auditApi.listManagementEvents).toHaveBeenCalledWith(
       expect.objectContaining({ actorRole: 'GLOBAL_ADMIN' }),
     )
+  })
+
+  it('stores api error message key when group-scoped fetch fails with scope envelope', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      accessToken: 'token',
+      session: {
+        username: '10000002',
+        displayName: 'Group Admin',
+        email: 'group.admin@example.com',
+        authSource: 'LOCAL',
+        roles: ['GROUP_ADMIN'],
+        authorizedGroupCodes: ['RETAIL'],
+        defaultRoute: ROUTE_KEYS.auditConsole,
+        visibleRoutes: [ROUTE_KEYS.auditConsole],
+        expiresAt: new Date().toISOString(),
+      },
+    })
+
+    vi.mocked(auditApi.listManagementEvents).mockRejectedValue(
+      axiosEnvelopeError(422, 'api.error.audit.scopeRequired', {
+        code: 'AUDIT_SCOPE_REQUIRED',
+        category: 'VALIDATION',
+        message: 'Group scope and template identifier are required for group-scoped audit queries.',
+      }),
+    )
+
+    const store = useAuditStore()
+    store.initializeFiltersFromSession()
+    store.filters.groupScope = 'RETAIL'
+
+    await expect(store.fetchManagementEvents()).rejects.toBeTruthy()
+
+    expect(store.lastErrorMessageKey).toBe('api.error.audit.scopeRequired')
   })
 })

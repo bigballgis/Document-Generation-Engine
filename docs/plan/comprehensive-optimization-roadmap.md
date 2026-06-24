@@ -105,7 +105,7 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | COR-T03 | H | GROUP_ADMIN exception intervention path | GROUP_ADMIN always canDecideTests/Approvals | Normal vs exception flows; reason + secondary confirm + audit marker | Not Started | PRD §7, permission-matrix |
 | COR-T04 | H | Collaboration work items + optional timeout | PRD §7 668–672; no WorkItem entity | Role/group queue to-dos; timeout escalation without auto state change | Not Started | P14/P19, domain §2.9.4 |
 | COR-T05 | M | Publish not hard-bound to dev version 1 | `findByTemplateIdAndDevVersionNumber(..., 1)` | Publish selects release candidate dev version; tests for multi-version | **Done** (2026-06-23; `requireReleaseCandidateVersion` + selection test) | P16 |
-| COR-T06 | M | Multi release version callability | TemplateCallabilitySupport single release constraint | Per-version callable list matches deactivate/restore; runtime tests | Not Started | P16, P7 |
+| COR-T06 | M | Multi release version callability | TemplateCallabilitySupport single release constraint | Per-version callable list matches deactivate/restore; runtime tests | **Done** (2026-06-23; per-version callability + contract list) | P16, P7 |
 | COR-T07 | M | Publish permission doc + code alignment | Domain model says author can publish; code admin-only | Confirmed matrix entry; code matches decision | **Done** (2026-06-24; Batch B ADR) | COR-D02 |
 | COR-T08 | M | Batch test + coverage thresholds | PRD §6.5; P19-T02/T03 Not Started | Multi-sample batch test + threshold blockers | Not Started | P19 |
 | COR-T09 | M | Lifecycle panel context on detail | Approver cannot see test record summary inline | Integrated evidence panel (test, preview, diff, checklist) per role | Not Started | P19-T10 |
@@ -172,7 +172,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-F19 | H | zh-CN parity + api.error catalog | en 939 lines vs zh-CN 184; 2 api.error keys | P20-T06 complete; locale switch no mass English fallback | Not Started | P20-T06, OPT-G7 |
 | COR-F20 | M | Locale-aware date/number formatting | toLocaleString() without app locale | Shared format helpers bound to i18n locale | Not Started | P20 |
-| COR-F21 | M | Table a11y baseline | row-click only navigation | Focus rings, keyboard row activation, sortable columns | Not Started | OPT-B4 |
+| COR-F21 | M | Table a11y baseline | row-click only navigation | Focus rings, keyboard row activation, sortable columns | **Partial** (2026-06-23; AppDataTable focus/activatable rows + composable) | OPT-B4 |
 | COR-F22 | M | Design token cleanup in shell | Hardcoded hex in ManagementShell | CSS variables only; dual-brand check | Not Started | P20 |
 | COR-F23 | L | Forbidden / error traceId copy | traceId text only | Copy reference control | Not Started | — |
 | COR-F24 | L | Login locale + client validation | No locale on login; no username format check | Locale switch + inline validation | Not Started | P1 |
@@ -207,7 +207,7 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 | COR-E03 | M | AuditQueryService tests | 264 lines untested | Group scope + GLOBAL_ADMIN paths | **Done** (2026-06-24; AuditQueryServiceTest) | OPT-C5 |
 | COR-E04 | M | Rendering PDF path tests | LibreOffice/DockerExec untested | Success/timeout/cleanup mocked | **Done** (2026-06-24; pipeline + LibreOffice tests) | OPT-C4 |
 | COR-E05 | M | Frontend: DashboardView + tab router tests | No tests for new surfaces | Vitest for tasks, load error, tab query sync | **Done** (2026-06-23; dashboard tasks + `templateDetailTabs` + load error) | OPT-C6 |
-| COR-E06 | M | messageKey → UI mapping tests | errorEnvelope without e2e UI | Store/view tests for catalog keys | **Partial** (2026-06-23; create + publish gate messageKey in templates store) | P20-T06 |
+| COR-E06 | M | messageKey → UI mapping tests | errorEnvelope without e2e UI | Store/view tests for catalog keys | **Partial** (2026-06-23; templates create/publish + audit scopeRequired store) | P20-T06 |
 
 ---
 

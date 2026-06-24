@@ -14,11 +14,12 @@ public final class TemplateCallabilitySupport {
             TemplateVersionEntity version,
             String resolvedVersion
     ) {
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED
-                || !resolvedVersion.equals(template.getReleaseVersion())) {
+        if (template.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED) {
             throw new TemplateValidationException("api.error.runtime.versionNotCallable");
         }
         if (version.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED
+                || version.getReleaseVersion() == null
+                || version.getReleaseVersion().isBlank()
                 || !resolvedVersion.equals(version.getReleaseVersion())) {
             throw new TemplateValidationException("api.error.runtime.versionNotCallable");
         }

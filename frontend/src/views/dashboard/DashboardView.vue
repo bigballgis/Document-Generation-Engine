@@ -166,6 +166,7 @@ function onTasksTableKeydown(event: KeyboardEvent) {
 
       <div v-else class="tasks-table-scroll">
         <AppDataTable
+          activatable
           :data="filteredTasks"
           class="tasks-table"
           highlight-current-row
