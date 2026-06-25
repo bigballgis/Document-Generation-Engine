@@ -690,6 +690,46 @@ class TemplatePlatformSliceTest {
     }
 
     @Test
+    void batchTestOverThreeSamplesCreatesSummary() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+        configureTemplate(templateId);
+
+        String id1 = createTestDataSet(templateId, "Sample A");
+        String id2 = createTestDataSet(templateId, "Sample B");
+        String id3 = createTestDataSet(templateId, "Sample C");
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/batch-test")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"testDataSetIds":["%s","%s","%s"]}
+                                """.formatted(id1, id2, id3)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.totalSamples").value(3))
+                .andExpect(jsonPath("$.result.succeededCount").value(3))
+                .andExpect(jsonPath("$.result.failedCount").value(0))
+                .andExpect(jsonPath("$.result.warningCount").value(3))
+                .andExpect(jsonPath("$.result.samples.length()").value(3));
+    }
+
+    private String createTestDataSet(String templateId, String name) throws Exception {
+        MvcResult createResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/test-data-sets")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name":"%s",
+                                  "variables":{"customerName":"DatasetCustomer"}
+                                }
+                                """.formatted(name)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readTree(createResult.getResponse().getContentAsString())
+                .path("result").path("testDataSetId").asText();
+    }
+
+    @Test
     void runtimeSyncBatchGenerateAppliesPdfEncryptionWhenEnabled() throws Exception {
         String masterId = uploadAndApproveMaster();
         String templateId = createTemplate(masterId);

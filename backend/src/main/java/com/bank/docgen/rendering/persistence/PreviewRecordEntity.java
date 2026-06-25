@@ -42,6 +42,9 @@ public class PreviewRecordEntity {
     @Column(name = "test_data_set_external_id", length = 64)
     private String testDataSetExternalId;
 
+    @Column(name = "batch_test_run_id")
+    private UUID batchTestRunId;
+
     @Column(name = "created_by", nullable = false, length = 8)
     private String createdBy;
 
@@ -61,7 +64,8 @@ public class PreviewRecordEntity {
             String outputFormat,
             String variablesHash,
             String createdBy,
-            String testDataSetExternalId
+            String testDataSetExternalId,
+            UUID batchTestRunId
     ) {
         this.id = id;
         this.templateId = templateId;
@@ -70,6 +74,7 @@ public class PreviewRecordEntity {
         this.outputFormat = outputFormat;
         this.variablesHash = variablesHash;
         this.testDataSetExternalId = testDataSetExternalId;
+        this.batchTestRunId = batchTestRunId;
         this.createdBy = createdBy;
         Instant now = Instant.now();
         this.createdAt = now;
@@ -110,6 +115,10 @@ public class PreviewRecordEntity {
 
     public String getTestDataSetExternalId() {
         return testDataSetExternalId;
+    }
+
+    public UUID getBatchTestRunId() {
+        return batchTestRunId;
     }
 
     public String getCreatedBy() {

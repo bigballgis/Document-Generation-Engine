@@ -509,6 +509,8 @@ export default {
       locked: '已锁定',
       derive: '复制为新版本',
       deriveSuccess: '已从锁定数据集派生可编辑副本。',
+      batchTest: '对所有样本运行批量测试',
+      batchSuccess: '批量测试完成：成功 {succeeded}，失败 {failed}，保真警告 {warnings} 条。',
       updatedAt: '更新时间',
       actions: '操作',
       empty: '暂无测试数据集。',
@@ -523,6 +525,8 @@ export default {
         save: '无法保存测试数据集。',
         delete: '无法删除测试数据集。',
         invalidForm: '请填写名称并提供有效的变量 JSON 对象。',
+        noDataSetsForBatch: '请先创建至少一个测试数据集再运行批量测试。',
+        batch: '无法运行批量测试。',
       },
     },
     lifecycle: {

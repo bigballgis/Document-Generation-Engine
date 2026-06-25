@@ -73,6 +73,32 @@ public class PreviewGenerationService {
             TestGenerateRequest request,
             ManagementSessionClaims session
     ) {
+        return runTestGenerate(templateId, request, null, session, true);
+    }
+
+    @Transactional
+    public PreviewRecordView runTestGenerateForBatch(
+            UUID templateId,
+            String testDataSetId,
+            UUID batchTestRunId,
+            ManagementSessionClaims session
+    ) {
+        return runTestGenerate(
+                templateId,
+                new TestGenerateRequest(null, testDataSetId),
+                batchTestRunId,
+                session,
+                false
+        );
+    }
+
+    private PreviewRecordView runTestGenerate(
+            UUID templateId,
+            TestGenerateRequest request,
+            UUID batchTestRunId,
+            ManagementSessionClaims session,
+            boolean throwOnFailure
+    ) {
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
         Map<String, Object> variables = resolveVariables(templateId, request, session);
         TemplateVersionEntity version = templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
@@ -85,7 +111,8 @@ public class PreviewGenerationService {
                 "DOCX",
                 variablesHash,
                 session.username(),
-                request.testDataSetId()
+                request.testDataSetId(),
+                batchTestRunId
         );
         preview.markProcessing();
         previewRecordRepository.save(preview);
@@ -123,7 +150,10 @@ public class PreviewGenerationService {
         } catch (Exception ex) {
             preview.markFailed();
             previewRecordRepository.save(preview);
-            throw new PreviewGenerationException("api.error.rendering.generationFailed", ex);
+            if (throwOnFailure) {
+                throw new PreviewGenerationException("api.error.rendering.generationFailed", ex);
+            }
+            return toView(preview, List.of(), 0);
         }
     }
 

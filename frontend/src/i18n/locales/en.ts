@@ -755,6 +755,9 @@ export default {
       locked: 'Locked',
       derive: 'Copy to new version',
       deriveSuccess: 'Derived an editable copy of the locked data set.',
+      batchTest: 'Run batch test on all samples',
+      batchSuccess:
+        'Batch test finished: {succeeded} succeeded, {failed} failed, {warnings} fidelity warnings.',
       updatedAt: 'Updated',
       actions: 'Actions',
       empty: 'No test data sets yet.',
@@ -769,6 +772,8 @@ export default {
         save: 'Unable to save test data set.',
         delete: 'Unable to delete test data set.',
         invalidForm: 'Provide a name and valid variables JSON object.',
+        noDataSetsForBatch: 'Create at least one test data set before running a batch test.',
+        batch: 'Unable to run batch test.',
       },
     },
     policy: {

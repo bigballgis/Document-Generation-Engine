@@ -6,7 +6,7 @@ import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import * as templatesApi from '@/api/templates'
 import { useConfirmAction } from '@/composables/useConfirmAction'
-import type { TestDataSet } from '@/types/template'
+import type { BatchTestSummary, TestDataSet } from '@/types/template'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps<{
@@ -15,12 +15,14 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   selected: [testDataSetId: string | null]
+  'batch-complete': [summary: BatchTestSummary]
 }>()
 
 const { t } = useI18n()
 const { confirmAction } = useConfirmAction()
 const loading = ref(false)
 const saving = ref(false)
+const batchTesting = ref(false)
 const dataSets = ref<TestDataSet[]>([])
 const dataSetsSource = computed(() => dataSets.value)
 const { filters: columnFilters, filteredRows: filteredDataSets } = useDataTableFilters(
@@ -184,6 +186,32 @@ function handleSelect(testDataSetId: string) {
   emit('selected', testDataSetId)
 }
 
+async function handleBatchTest() {
+  if (dataSets.value.length === 0) {
+    ElMessage.warning(t('templates.testDataSets.error.noDataSetsForBatch'))
+    return
+  }
+  batchTesting.value = true
+  try {
+    const summary = await templatesApi.batchTestGenerate(props.templateId, {
+      testDataSetIds: dataSets.value.map((row) => row.testDataSetId),
+    })
+    emit('batch-complete', summary)
+    ElMessage.success(
+      t('templates.testDataSets.batchSuccess', {
+        succeeded: summary.succeededCount,
+        failed: summary.failedCount,
+        warnings: summary.warningCount,
+      }),
+    )
+    await loadDataSets()
+  } catch {
+    ElMessage.error(t('templates.testDataSets.error.batch'))
+  } finally {
+    batchTesting.value = false
+  }
+}
+
 onMounted(() => {
   void loadDataSets()
 })
@@ -195,6 +223,9 @@ onMounted(() => {
     <div class="action-row">
       <el-button type="primary" @click="openCreateDialog">
         {{ t('templates.testDataSets.create') }}
+      </el-button>
+      <el-button :loading="batchTesting" :disabled="dataSets.length === 0" @click="handleBatchTest">
+        {{ t('templates.testDataSets.batchTest') }}
       </el-button>
     </div>
     <AppDataTable
@@ -307,6 +338,9 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   margin-bottom: 1rem;
 }
 

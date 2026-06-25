@@ -1,7 +1,10 @@
 package com.bank.docgen.rendering.web;
 
+import com.bank.docgen.rendering.api.BatchTestGenerateRequest;
+import com.bank.docgen.rendering.api.BatchTestSummaryView;
 import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.api.TestGenerateRequest;
+import com.bank.docgen.rendering.service.BatchTestGenerationService;
 import com.bank.docgen.rendering.service.PreviewGenerationService;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
@@ -23,10 +26,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class PreviewController {
 
     private final PreviewGenerationService previewGenerationService;
+    private final BatchTestGenerationService batchTestGenerationService;
     private final TraceIdProvider traceIdProvider;
 
-    public PreviewController(PreviewGenerationService previewGenerationService, TraceIdProvider traceIdProvider) {
+    public PreviewController(
+            PreviewGenerationService previewGenerationService,
+            BatchTestGenerationService batchTestGenerationService,
+            TraceIdProvider traceIdProvider
+    ) {
         this.previewGenerationService = previewGenerationService;
+        this.batchTestGenerationService = batchTestGenerationService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -38,6 +47,17 @@ public class PreviewController {
             HttpServletRequest request
     ) {
         PreviewRecordView result = previewGenerationService.testGenerate(templateId, body, session);
+        return envelope(request, result);
+    }
+
+    @PostMapping("/batch-test")
+    public SuccessEnvelope<BatchTestSummaryView> batchTest(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody BatchTestGenerateRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        BatchTestSummaryView result = batchTestGenerationService.runBatch(templateId, body, session);
         return envelope(request, result);
     }
 

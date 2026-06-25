@@ -218,6 +218,30 @@ export interface TestGeneratePayload {
   testDataSetId?: string
 }
 
+export interface BatchTestGeneratePayload {
+  testDataSetIds: string[]
+}
+
+export interface BatchTestSampleResult {
+  testDataSetId: string
+  previewId: string
+  status: PreviewStatus
+  warningCount: number
+  blockerCount: number
+}
+
+export interface BatchTestSummary {
+  batchTestRunId: string
+  templateId: string
+  totalSamples: number
+  succeededCount: number
+  failedCount: number
+  warningCount: number
+  blockerCount: number
+  samples: BatchTestSampleResult[]
+  createdAt: string
+}
+
 export interface TestDataSet {
   testDataSetId: string
   templateId: string

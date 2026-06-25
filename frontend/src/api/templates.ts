@@ -3,6 +3,8 @@ import type { ApiEnvelope } from '@/types/session'
 import type {
   AnchorBinding,
   BindingValidationResult,
+  BatchTestGeneratePayload,
+  BatchTestSummary,
   CompositionRuleInput,
   CreateTemplatePayload,
   DeleteTemplatePayload,
@@ -199,6 +201,17 @@ export async function testGenerate(
 ): Promise<PreviewRecord> {
   const response = await http.post<ApiEnvelope<PreviewRecord>>(
     `/templates/${templateId}/previews/test-generate`,
+    payload,
+  )
+  return unwrap(response.data)
+}
+
+export async function batchTestGenerate(
+  templateId: string,
+  payload: BatchTestGeneratePayload,
+): Promise<BatchTestSummary> {
+  const response = await http.post<ApiEnvelope<BatchTestSummary>>(
+    `/templates/${templateId}/previews/batch-test`,
     payload,
   )
   return unwrap(response.data)
