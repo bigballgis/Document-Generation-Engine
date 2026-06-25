@@ -10,6 +10,7 @@ import TemplateAuthoringPanel from '@/components/templates/TemplateAuthoringPane
 import TemplateRuleConfigurator from '@/components/templates/TemplateRuleConfigurator.vue'
 import TemplatePreviewPanel from '@/components/templates/TemplatePreviewPanel.vue'
 import TemplateTestDataSetPanel from '@/components/templates/TemplateTestDataSetPanel.vue'
+import TemplateCoveragePanel from '@/components/templates/TemplateCoveragePanel.vue'
 import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
 import TemplateReleaseVersionHistoryPanel from '@/components/templates/TemplateReleaseVersionHistoryPanel.vue'
 import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
@@ -70,6 +71,7 @@ const credentialSecretValue = ref('')
 const credentialSecretExternalId = ref('')
 const lastPreview = ref<PreviewRecord | null>(null)
 const selectedTestDataSetId = ref<string | null>(null)
+const coverageRefreshToken = ref(0)
 const bindingGateResult = ref<BindingValidationResult | null>(null)
 const loadingPublishGate = ref(false)
 const metadataEditOpen = ref(false)
@@ -999,6 +1001,11 @@ async function handleDeleteTemplate() {
         <TemplateTestDataSetPanel
           :template-id="templateId"
           @selected="(id) => { selectedTestDataSetId = id }"
+          @batch-complete="() => { coverageRefreshToken += 1 }"
+        />
+        <TemplateCoveragePanel
+          :template-id="templateId"
+          :refresh-token="coverageRefreshToken"
         />
       </el-card>
 

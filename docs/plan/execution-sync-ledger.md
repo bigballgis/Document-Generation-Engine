@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-25 (P19-T02 batch test generation)  
+**Last synced:** 2026-06-25 (P19-T03 coverage computation + thresholds)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,7 +18,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **252 tests**, 2026-06-25 | P19-T02 batch test generation |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **256 tests**, 2026-06-25 | P19-T03 coverage + thresholds |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
 | Frontend test | `pnpm -C frontend test` | Green | **149 tests**, 2026-06-25 |
@@ -43,6 +43,7 @@ COR-P04 + zh-CN api.error catalog + E06/F22 **238** backend / **144** frontend (
 P19-T07 + P20 primary zh-CN + Docker E2E **243** backend / **149** frontend (2026-06-25);
 P19-T01 test data set governance **248** backend / **149** frontend (2026-06-25).
 P19-T02 batch test generation **252** backend / **149** frontend (2026-06-25).
+P19-T03 coverage computation + thresholds **256** backend / **149** frontend (2026-06-25).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)

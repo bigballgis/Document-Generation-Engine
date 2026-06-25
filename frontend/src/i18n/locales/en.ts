@@ -776,6 +776,34 @@ export default {
         batch: 'Unable to run batch test.',
       },
     },
+    coverage: {
+      title: 'Coverage summary',
+      description: 'Compare exercised samples, required variables, and anchor bindings against configured thresholds.',
+      refresh: 'Refresh',
+      thresholdHint:
+        'Applied threshold ({scope}): required variables {variablePct}%, required samples {samplePct}%, anchor bindings {anchorPct}%.',
+      status: {
+        meetsThreshold: 'Aggregate coverage meets thresholds ({percentage}%).',
+        belowThreshold: 'Aggregate coverage is below threshold ({percentage}%).',
+      },
+      table: {
+        dimension: 'Dimension',
+        exercised: 'Exercised',
+        percentage: 'Coverage',
+        threshold: 'Threshold',
+        status: 'Status',
+        meetsThreshold: 'Meets',
+        belowThreshold: 'Below',
+      },
+      dimensions: {
+        requiredVariables: 'Required variables',
+        requiredSamples: 'Required samples',
+        anchorBindings: 'Anchor bindings',
+      },
+      error: {
+        load: 'Unable to load coverage summary.',
+      },
+    },
     policy: {
       title: 'API policy',
       policyVersion: 'Policy version',

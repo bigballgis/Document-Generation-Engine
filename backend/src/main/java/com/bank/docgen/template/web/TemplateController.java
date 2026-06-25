@@ -7,6 +7,7 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.AnchorBindingView;
 import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.CompositionRuleView;
+import com.bank.docgen.template.api.CoverageSummaryView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
@@ -23,6 +24,7 @@ import com.bank.docgen.template.api.VariableSchemaView;
 import com.bank.docgen.template.api.TemplateRuleValidationRequest;
 import com.bank.docgen.template.api.TemplateRuleValidationView;
 import com.bank.docgen.template.api.UpdateTemplateRequest;
+import com.bank.docgen.template.service.CoverageComputationService;
 import com.bank.docgen.template.service.TemplateLifecycleService;
 import com.bank.docgen.template.service.TemplateDeleteService;
 import com.bank.docgen.template.service.TemplateRuleValidationService;
@@ -52,6 +54,7 @@ public class TemplateController {
     private final TemplateLifecycleService templateLifecycleService;
     private final TemplateDeleteService templateDeleteService;
     private final TemplateRuleValidationService templateRuleValidationService;
+    private final CoverageComputationService coverageComputationService;
     private final TraceIdProvider traceIdProvider;
 
     public TemplateController(
@@ -59,12 +62,14 @@ public class TemplateController {
             TemplateLifecycleService templateLifecycleService,
             TemplateDeleteService templateDeleteService,
             TemplateRuleValidationService templateRuleValidationService,
+            CoverageComputationService coverageComputationService,
             TraceIdProvider traceIdProvider
     ) {
         this.templateService = templateService;
         this.templateLifecycleService = templateLifecycleService;
         this.templateDeleteService = templateDeleteService;
         this.templateRuleValidationService = templateRuleValidationService;
+        this.coverageComputationService = coverageComputationService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -83,6 +88,15 @@ public class TemplateController {
             HttpServletRequest request
     ) {
         return envelope(request, templateService.get(templateId, session));
+    }
+
+    @GetMapping("/{templateId}/coverage")
+    public SuccessEnvelope<CoverageSummaryView> coverage(
+            @PathVariable UUID templateId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, coverageComputationService.compute(templateId, session));
     }
 
     @GetMapping("/{templateId}/release-versions")

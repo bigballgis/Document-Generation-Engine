@@ -242,6 +242,32 @@ export interface BatchTestSummary {
   createdAt: string
 }
 
+export interface CoverageDimension {
+  dimensionCode: string
+  totalCount: number
+  exercisedCount: number
+  percentage: number
+  thresholdPercentage: number
+  belowThreshold: boolean
+}
+
+export interface CoverageThreshold {
+  scopeType: string
+  groupCode: string | null
+  minRequiredVariablePct: number
+  minRequiredSamplePct: number
+  minAnchorBindingPct: number
+}
+
+export interface CoverageSummary {
+  templateId: string
+  aggregatePercentage: number
+  belowThreshold: boolean
+  blockerCodes: string[]
+  dimensions: CoverageDimension[]
+  appliedThreshold: CoverageThreshold
+}
+
 export interface TestDataSet {
   testDataSetId: string
   templateId: string

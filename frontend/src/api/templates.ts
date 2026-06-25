@@ -6,6 +6,7 @@ import type {
   BatchTestGeneratePayload,
   BatchTestSummary,
   CompositionRuleInput,
+  CoverageSummary,
   CreateTemplatePayload,
   DeleteTemplatePayload,
   LifecycleCommentPayload,
@@ -214,6 +215,11 @@ export async function batchTestGenerate(
     `/templates/${templateId}/previews/batch-test`,
     payload,
   )
+  return unwrap(response.data)
+}
+
+export async function getTemplateCoverage(templateId: string): Promise<CoverageSummary> {
+  const response = await http.get<ApiEnvelope<CoverageSummary>>(`/templates/${templateId}/coverage`)
   return unwrap(response.data)
 }
 

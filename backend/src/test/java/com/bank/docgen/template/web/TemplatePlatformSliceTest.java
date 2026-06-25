@@ -713,6 +713,20 @@ class TemplatePlatformSliceTest {
                 .andExpect(jsonPath("$.result.samples.length()").value(3));
     }
 
+    @Test
+    void coverageSummaryReturnsDimensionsWithoutVariablePlaintext() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+        configureTemplate(templateId);
+
+        mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/coverage")
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.templateId").value(templateId))
+                .andExpect(jsonPath("$.result.dimensions.length()").value(3))
+                .andExpect(jsonPath("$.result.appliedThreshold.scopeType").value("GLOBAL"));
+    }
+
     private String createTestDataSet(String templateId, String name) throws Exception {
         MvcResult createResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/test-data-sets")
                         .with(authentication(new ManagementAuthentication(templateAuthor)))

@@ -529,6 +529,34 @@ export default {
         batch: '无法运行批量测试。',
       },
     },
+    coverage: {
+      title: '覆盖率摘要',
+      description: '将已执行的样本、必填变量与锚点绑定与配置的阈值进行对比。',
+      refresh: '刷新',
+      thresholdHint:
+        '当前阈值（{scope}）：必填变量 {variablePct}%、必填样本 {samplePct}%、锚点绑定 {anchorPct}%。',
+      status: {
+        meetsThreshold: '综合覆盖率已达到阈值（{percentage}%）。',
+        belowThreshold: '综合覆盖率低于阈值（{percentage}%）。',
+      },
+      table: {
+        dimension: '维度',
+        exercised: '已覆盖',
+        percentage: '覆盖率',
+        threshold: '阈值',
+        status: '状态',
+        meetsThreshold: '达标',
+        belowThreshold: '未达标',
+      },
+      dimensions: {
+        requiredVariables: '必填变量',
+        requiredSamples: '必填样本',
+        anchorBindings: '锚点绑定',
+      },
+      error: {
+        load: '无法加载覆盖率摘要。',
+      },
+    },
     lifecycle: {
       decisionForm: {
         failTestTitle: '记录测试不通过',
