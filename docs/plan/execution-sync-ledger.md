@@ -24,6 +24,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 | Frontend test | `pnpm -C frontend test` | Green | **149 tests**, 2026-06-25 |
 | Frontend build | `pnpm -C frontend build` | Green | |
 | E2E Docker (4173) | `pnpm -C frontend test:e2e:docker` | Green — **6 tests**, 2026-06-25 | post P19/P20 batch + role-journeys row-click fix |
+| Docker manual smoke (4173) | `scripts/docker-deploy.ps1` + author UI | Green — 2026-06-25 | P19-T02/T03: batch test button + coverage panel on template authoring tab |
 
 **Test count progression (not conflicting runs):** P13 slice verify **114** backend tests (2026-06-23);
 Wave C UX **161** backend / **88** frontend; post OPT-E8/F3 full verify **189** backend;
