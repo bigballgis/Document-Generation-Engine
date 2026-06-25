@@ -224,6 +224,12 @@ export interface TestDataSet {
   name: string
   description: string | null
   variables: Record<string, unknown>
+  required: boolean
+  scenarioName: string | null
+  coverageTags: string[]
+  datasetVersion: number
+  locked: boolean
+  derivedFromId: string | null
   createdAt: string
   updatedAt: string
 }
@@ -232,6 +238,9 @@ export interface UpsertTestDataSetPayload {
   name: string
   description?: string
   variables: Record<string, unknown>
+  required?: boolean
+  scenarioName?: string
+  coverageTags?: string[]
 }
 
 export interface ApiPolicy {

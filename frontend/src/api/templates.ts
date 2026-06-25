@@ -301,3 +301,13 @@ export async function updateTestDataSet(
 export async function deleteTestDataSet(templateId: string, testDataSetId: string): Promise<void> {
   await http.delete(`/templates/${templateId}/test-data-sets/${testDataSetId}`)
 }
+
+export async function deriveTestDataSet(
+  templateId: string,
+  testDataSetId: string,
+): Promise<TestDataSet> {
+  const response = await http.post<ApiEnvelope<TestDataSet>>(
+    `/templates/${templateId}/test-data-sets/${testDataSetId}/derive`,
+  )
+  return unwrap(response.data)
+}

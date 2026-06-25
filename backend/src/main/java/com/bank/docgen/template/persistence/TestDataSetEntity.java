@@ -29,6 +29,24 @@ public class TestDataSetEntity {
     @Column(name = "variables_json", nullable = false, columnDefinition = "TEXT")
     private String variablesJson;
 
+    @Column(nullable = false)
+    private boolean required;
+
+    @Column(name = "scenario_name", length = 256)
+    private String scenarioName;
+
+    @Column(name = "coverage_tags_json", nullable = false, columnDefinition = "TEXT")
+    private String coverageTagsJson;
+
+    @Column(name = "dataset_version", nullable = false)
+    private int datasetVersion;
+
+    @Column(nullable = false)
+    private boolean locked;
+
+    @Column(name = "derived_from_id")
+    private UUID derivedFromId;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -44,7 +62,13 @@ public class TestDataSetEntity {
             String externalId,
             String name,
             String description,
-            String variablesJson
+            String variablesJson,
+            boolean required,
+            String scenarioName,
+            String coverageTagsJson,
+            int datasetVersion,
+            boolean locked,
+            UUID derivedFromId
     ) {
         this.id = id;
         this.templateId = templateId;
@@ -52,6 +76,12 @@ public class TestDataSetEntity {
         this.name = name;
         this.description = description;
         this.variablesJson = variablesJson;
+        this.required = required;
+        this.scenarioName = scenarioName;
+        this.coverageTagsJson = coverageTagsJson;
+        this.datasetVersion = datasetVersion;
+        this.locked = locked;
+        this.derivedFromId = derivedFromId;
         Instant now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
@@ -81,6 +111,30 @@ public class TestDataSetEntity {
         return variablesJson;
     }
 
+    public boolean isRequired() {
+        return required;
+    }
+
+    public String getScenarioName() {
+        return scenarioName;
+    }
+
+    public String getCoverageTagsJson() {
+        return coverageTagsJson;
+    }
+
+    public int getDatasetVersion() {
+        return datasetVersion;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public UUID getDerivedFromId() {
+        return derivedFromId;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -89,10 +143,25 @@ public class TestDataSetEntity {
         return updatedAt;
     }
 
-    public void update(String name, String description, String variablesJson) {
+    public void update(
+            String name,
+            String description,
+            String variablesJson,
+            boolean required,
+            String scenarioName,
+            String coverageTagsJson
+    ) {
         this.name = name;
         this.description = description;
         this.variablesJson = variablesJson;
+        this.required = required;
+        this.scenarioName = scenarioName;
+        this.coverageTagsJson = coverageTagsJson;
+        this.updatedAt = Instant.now();
+    }
+
+    public void lockForEvidence() {
+        this.locked = true;
         this.updatedAt = Instant.now();
     }
 }

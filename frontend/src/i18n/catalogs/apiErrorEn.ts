@@ -48,6 +48,7 @@ export const apiErrorEn = {
     "masterNotApproved": "Templates can only be created from approved master documents.",
     "masterGroupMismatch": "The master document group does not match the template group.",
     "externalIdExists": "A template with this external identifier already exists.",
+    "testDataSetLocked": "The test data set is locked by test evidence and cannot be modified.",
     "variableTypeUnsupported": "The variable type is not supported.",
     "enumValuesRequired": "Enum variables require enum values.",
     "structuredContentInvalid": "The structured content definition is invalid.",

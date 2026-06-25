@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-25 (P19-T07 structured decisions + P20-T06 zh-CN + Docker 4173 E2E green)  
+**Last synced:** 2026-06-25 (P19-T01 test data set governance)  
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,7 +18,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **243 tests**, 2026-06-25 | P19-T07 structured lifecycle decisions |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **248 tests**, 2026-06-25 | P19-T01 test data set governance |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
 | Frontend test | `pnpm -C frontend test` | Green | **149 tests**, 2026-06-25 |
@@ -40,7 +40,8 @@ COR-F14/F16 LoadErrorPanel + audit filter validation + COR-T05 publish candidate
 COR-T06/F21/E06 multi-version callability + table a11y baseline + audit messageKey **227** backend / **131** frontend (2026-06-23);
 COR final batch (catalog package UX + publish gate apiPolicy + workflow filters + i18n/a11y polish) **238** backend / **139** frontend (2026-06-24);
 COR-P04 + zh-CN api.error catalog + E06/F22 **238** backend / **144** frontend (2026-06-25);
-P19-T07 + P20 primary zh-CN + Docker E2E **243** backend / **149** frontend (2026-06-25).
+P19-T07 + P20 primary zh-CN + Docker E2E **243** backend / **149** frontend (2026-06-25);
+P19-T01 test data set governance **248** backend / **149** frontend (2026-06-25).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)

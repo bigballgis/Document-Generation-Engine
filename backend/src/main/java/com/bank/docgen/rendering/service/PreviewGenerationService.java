@@ -116,6 +116,9 @@ public class PreviewGenerationService {
             );
             preview.markSucceeded(storageKey, writeWarnings(warnings));
             previewRecordRepository.save(preview);
+            if (request.testDataSetId() != null && !request.testDataSetId().isBlank()) {
+                testDataSetService.lockForEvidence(templateId, request.testDataSetId());
+            }
             return toView(preview, warnings, bindings.size());
         } catch (Exception ex) {
             preview.markFailed();

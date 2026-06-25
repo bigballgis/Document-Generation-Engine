@@ -39,14 +39,27 @@ const editingId = ref<string | null>(null)
 const form = reactive({
   name: '',
   description: '',
+  required: false,
+  scenarioName: '',
 })
 const variablesJson = ref('{\n  "customerName": "Sample"\n}')
+const coverageTagsText = ref('')
 
 function resetForm() {
   form.name = ''
   form.description = ''
+  form.required = false
+  form.scenarioName = ''
   variablesJson.value = '{\n  "customerName": "Sample"\n}'
+  coverageTagsText.value = ''
   editingId.value = null
+}
+
+function parseCoverageTags(): string[] {
+  return coverageTagsText.value
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0)
 }
 
 async function loadDataSets() {
@@ -66,10 +79,16 @@ function openCreateDialog() {
 }
 
 function openEditDialog(row: TestDataSet) {
+  if (row.locked) {
+    return
+  }
   editingId.value = row.testDataSetId
   form.name = row.name
   form.description = row.description ?? ''
+  form.required = row.required
+  form.scenarioName = row.scenarioName ?? ''
   variablesJson.value = JSON.stringify(row.variables, null, 2)
+  coverageTagsText.value = row.coverageTags.join(', ')
   dialogVisible.value = true
 }
 
@@ -85,19 +104,29 @@ function parseVariables(): Record<string, unknown> | null {
   }
 }
 
-async function handleSave() {
+function buildPayload() {
   const variables = parseVariables()
   if (!form.name.trim() || variables === null) {
+    return null
+  }
+  return {
+    name: form.name.trim(),
+    description: form.description.trim() || undefined,
+    variables,
+    required: form.required,
+    scenarioName: form.scenarioName.trim() || undefined,
+    coverageTags: parseCoverageTags(),
+  }
+}
+
+async function handleSave() {
+  const payload = buildPayload()
+  if (!payload) {
     ElMessage.error(t('templates.testDataSets.error.invalidForm'))
     return
   }
   saving.value = true
   try {
-    const payload = {
-      name: form.name.trim(),
-      description: form.description.trim() || undefined,
-      variables,
-    }
     if (editingId.value) {
       await templatesApi.updateTestDataSet(props.templateId, editingId.value, payload)
       ElMessage.success(t('templates.testDataSets.updateSuccess'))
@@ -113,6 +142,18 @@ async function handleSave() {
     ElMessage.error(t('templates.testDataSets.error.save'))
   } finally {
     saving.value = false
+  }
+}
+
+async function handleDerive(testDataSetId: string) {
+  try {
+    const derived = await templatesApi.deriveTestDataSet(props.templateId, testDataSetId)
+    selectedId.value = derived.testDataSetId
+    emit('selected', derived.testDataSetId)
+    ElMessage.success(t('templates.testDataSets.deriveSuccess'))
+    await loadDataSets()
+  } catch {
+    ElMessage.error(t('templates.testDataSets.error.save'))
   }
 }
 
@@ -170,6 +211,12 @@ onMounted(() => {
             v-model="columnFilters.name"
           />
         </template>
+        <template #default="{ row }">
+          <span>{{ row.name }}</span>
+          <el-tag v-if="row.locked" size="small" type="info" class="locked-tag">
+            {{ t('templates.testDataSets.locked') }}
+          </el-tag>
+        </template>
       </el-table-column>
       <el-table-column prop="testDataSetId" sortable min-width="140">
         <template #header>
@@ -177,6 +224,11 @@ onMounted(() => {
             :label="t('templates.testDataSets.id')"
             v-model="columnFilters.testDataSetId"
           />
+        </template>
+      </el-table-column>
+      <el-table-column prop="datasetVersion" width="90">
+        <template #header>
+          {{ t('templates.testDataSets.datasetVersion') }}
         </template>
       </el-table-column>
       <el-table-column sortable :sort-method="sortByUpdatedAt" min-width="180">
@@ -190,12 +242,25 @@ onMounted(() => {
           {{ new Date(row.updatedAt).toLocaleString() }}
         </template>
       </el-table-column>
-      <el-table-column :label="t('templates.testDataSets.actions')" min-width="180">
+      <el-table-column :label="t('templates.testDataSets.actions')" min-width="220">
         <template #default="{ row }">
-          <el-button link type="primary" @click.stop="openEditDialog(row)">
+          <el-button link type="primary" :disabled="row.locked" @click.stop="openEditDialog(row)">
             {{ t('templates.testDataSets.edit') }}
           </el-button>
-          <el-button link type="danger" @click.stop="handleDelete(row.testDataSetId)">
+          <el-button
+            v-if="row.locked"
+            link
+            type="primary"
+            @click.stop="handleDerive(row.testDataSetId)"
+          >
+            {{ t('templates.testDataSets.derive') }}
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            :disabled="row.locked"
+            @click.stop="handleDelete(row.testDataSetId)"
+          >
             {{ t('templates.testDataSets.delete') }}
           </el-button>
         </template>
@@ -217,6 +282,15 @@ onMounted(() => {
         <el-form-item :label="t('templates.testDataSets.descriptionLabel')">
           <el-input v-model="form.description" type="textarea" :rows="2" />
         </el-form-item>
+        <el-form-item :label="t('templates.testDataSets.scenarioName')">
+          <el-input v-model="form.scenarioName" />
+        </el-form-item>
+        <el-form-item :label="t('templates.testDataSets.coverageTags')">
+          <el-input v-model="coverageTagsText" />
+        </el-form-item>
+        <el-form-item :label="t('templates.testDataSets.required')">
+          <el-switch v-model="form.required" />
+        </el-form-item>
         <el-form-item :label="t('templates.testDataSets.variablesJson')">
           <el-input v-model="variablesJson" type="textarea" :rows="8" />
         </el-form-item>
@@ -234,6 +308,10 @@ onMounted(() => {
 <style scoped lang="scss">
 .action-row {
   margin-bottom: 1rem;
+}
+
+.locked-tag {
+  margin-left: 0.5rem;
 }
 
 .selection-hint {

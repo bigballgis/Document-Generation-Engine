@@ -634,9 +634,59 @@ class TemplatePlatformSliceTest {
                 .andExpect(jsonPath("$.result.status").value("SUCCEEDED"))
                 .andExpect(jsonPath("$.result.testDataSetId").value(testDataSetId));
 
+        mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/test-data-sets")
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result[0].locked").value(true))
+                .andExpect(jsonPath("$.result[0].datasetVersion").value(1));
+
+        mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/test-data-sets/" + testDataSetId)
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name":"Updated sample",
+                                  "variables":{"customerName":"Updated"}
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.messageKey").value("api.error.template.testDataSetLocked"));
+
+        MvcResult deriveResult = mockMvc.perform(
+                        post("/api/management/v1/templates/" + templateId + "/test-data-sets/" + testDataSetId + "/derive")
+                                .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.result.locked").value(false))
+                .andExpect(jsonPath("$.result.datasetVersion").value(2))
+                .andReturn();
+        String derivedId = objectMapper.readTree(deriveResult.getResponse().getContentAsString())
+                .path("result").path("testDataSetId").asText();
+
         mockMvc.perform(delete("/api/management/v1/templates/" + templateId + "/test-data-sets/" + testDataSetId)
                         .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isConflict());
+
+        mockMvc.perform(delete("/api/management/v1/templates/" + templateId + "/test-data-sets/" + derivedId)
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void testDataSetMaintenanceDeniedForTesterRole() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+        configureTemplate(templateId);
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/test-data-sets")
+                        .with(authentication(new ManagementAuthentication(tester)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name":"Tester sample",
+                                  "variables":{"customerName":"Tester"}
+                                }
+                                """))
+                .andExpect(status().isForbidden());
     }
 
     @Test

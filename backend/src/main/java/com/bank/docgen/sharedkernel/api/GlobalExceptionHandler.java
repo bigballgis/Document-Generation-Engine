@@ -26,6 +26,7 @@ import com.bank.docgen.rendering.DocxAssemblyException;
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
 import com.bank.docgen.template.service.TemplateAccessDeniedException;
 import com.bank.docgen.template.service.TemplateNotFoundException;
+import com.bank.docgen.template.service.TestDataSetImmutableException;
 import com.bank.docgen.template.service.TestDataSetNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.bank.docgen.master.service.MasterAccessDeniedException;
@@ -147,6 +148,20 @@ public class GlobalExceptionHandler {
                 ApiErrorCodes.TEST_DATA_SET_NOT_FOUND,
                 ApiErrorCategories.TEMPLATE,
                 "api.error.template.testDataSetNotFound"
+        );
+    }
+
+    @ExceptionHandler(TestDataSetImmutableException.class)
+    public ResponseEntity<ErrorEnvelope> handleTestDataSetImmutable(
+            HttpServletRequest request,
+            TestDataSetImmutableException ex
+    ) {
+        return domainError(
+                request,
+                HttpStatus.CONFLICT,
+                ApiErrorCodes.TEMPLATE_VALIDATION_FAILED,
+                ApiErrorCategories.TEMPLATE,
+                ex.messageKey()
         );
     }
 

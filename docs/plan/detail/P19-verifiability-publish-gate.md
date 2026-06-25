@@ -59,7 +59,7 @@ and mark group-admin exception interventions with reason + secondary confirm + s
 
 | ID | Task | Status |
 | --- | --- | --- |
-| P19-T01 | Multi-sample test data sets: required/optional flags, scenario name, coverage tags, dataset version; lock-on-evidence + copy/derive | Not Started |
+| P19-T01 | Multi-sample test data sets: required/optional flags, scenario name, coverage tags, dataset version; lock-on-evidence + copy/derive | **Done** (2026-06-25; V18 + lock on preview + derive API + author-only maintenance) |
 | P19-T02 | Batch test generation (multi-sample) → per-sample records + batch test summary | Not Started |
 | P19-T03 | Sample + template coverage computation (variables/required, condition/loop/rule branches, anchors/sections, table components, DOCX/PDF) + configurable thresholds | Not Started |
 | P19-T04 | Change-diff summary (content, anchors, variables, rules, release-candidate contract summary) | Not Started |

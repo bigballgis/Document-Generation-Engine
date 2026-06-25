@@ -76,6 +76,17 @@ public class TestDataSetController {
         return envelope(request, testDataSetService.update(templateId, testDataSetId, body, session));
     }
 
+    @PostMapping("/{testDataSetId}/derive")
+    @ResponseStatus(HttpStatus.CREATED)
+    public SuccessEnvelope<TestDataSetView> derive(
+            @PathVariable UUID templateId,
+            @PathVariable String testDataSetId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, testDataSetService.derive(templateId, testDataSetId, session));
+    }
+
     @DeleteMapping("/{testDataSetId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(

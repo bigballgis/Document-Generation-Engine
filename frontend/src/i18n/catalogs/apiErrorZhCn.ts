@@ -48,6 +48,7 @@ export const apiErrorZhCn = {
     masterNotApproved: '仅可从已批准的主文档创建模板。',
     masterGroupMismatch: '主文档组与模板组不匹配。',
     externalIdExists: '具有此外部标识符的模板已存在。',
+    testDataSetLocked: '测试数据集已被测试证据锁定，无法修改。',
     variableTypeUnsupported: '不支持该变量类型。',
     enumValuesRequired: '枚举变量需要枚举值。',
     structuredContentInvalid: '结构化内容定义无效。',

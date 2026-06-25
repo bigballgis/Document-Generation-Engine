@@ -107,7 +107,7 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | COR-T05 | M | Publish not hard-bound to dev version 1 | `findByTemplateIdAndDevVersionNumber(..., 1)` | Publish selects release candidate dev version; tests for multi-version | **Done** (2026-06-23; `requireReleaseCandidateVersion` + selection test) | P16 |
 | COR-T06 | M | Multi release version callability | TemplateCallabilitySupport single release constraint | Per-version callable list matches deactivate/restore; runtime tests | **Done** (2026-06-23; per-version callability + contract list) | P16, P7 |
 | COR-T07 | M | Publish permission doc + code alignment | Domain model says author can publish; code admin-only | Confirmed matrix entry; code matches decision | **Done** (2026-06-24; Batch B ADR) | COR-D02 |
-| COR-T08 | M | Batch test + coverage thresholds | PRD §6.5; P19-T02/T03 Not Started | Multi-sample batch test + threshold blockers | Not Started | P19 |
+| COR-T08 | M | Batch test + coverage thresholds | PRD §6.5; P19-T02/T03 Not Started | Multi-sample batch test + threshold blockers | **Partial** (2026-06-25; P19-T01 dataset governance Done; batch/coverage pending) | P19 |
 | COR-T09 | M | Lifecycle panel context on detail | Approver cannot see test record summary inline | Integrated evidence panel (test, preview, diff, checklist) per role | Not Started | P19-T10 |
 | COR-T10 | L | Semver publish UX | Manual text field default 1.0.0 | Level picker + conflict validation | **Done** (2026-06-24; major/minor/patch picker + semver utils) | PRD §7 |
 
