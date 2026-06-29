@@ -13,6 +13,8 @@ P12 remains the non-active deferred-enhancements catch-all (no single active sli
 P17 per-domain API policy **Done** (2026-06-25; Wave 3; T01–T09 + COR-F18);
 P18 structured authoring **Done** (2026-06-28; T01–T10); **P19 verifiability/publish-gate Done**
 (2026-06-25); P20 i18n **Done** (2026-06-25).
+**P21 role-journey frontend redesign & business-friendly terminology registered (2026-06-29) —
+Not Started** (ready to activate; single-active-phase selection required).
 
 ## Product goal
 
@@ -53,6 +55,12 @@ upstream systems invoke the dynamic API.
 | P18 | Structured authoring & rendering-fidelity engine | P3, P4 | Controlled node matrix, master style catalog + limited direct format, table component, seal/QR/attachment nodes, controlled numbering, Word/HTML paste cleaning, publish-locked renderProfile, fidelity blockers/warnings (gap G3) | Done (2026-06-28; P18-T01–T10) |
 | P19 | Template verifiability, publish gate & decision forms | P3, P4, P5 | Multi-sample coverage thresholds, batch test, change-diff, preview comparison, live publish-gate checklist, controlled test/approval opinion forms + risk prompts + exception markers (gaps G4, G5) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | P1 | Locale registry/switcher/fallback + html lang, config-driven brand theming, environment selector (gap G6, i18n constitution) | Done (2026-06-25) |
+| P21 | Role-journey frontend redesign & business-friendly terminology | P13, P14, P19, P20 | Hybrid IA (single task hub authoritative + behavior-typed "my to-dos" entries + per-role `RoleJourneyTimeline`), task-hub queue partitioning + restored fields + inline open actions, 6 collaboration-trigger backend completeness (+ `RESOLVED`), foreign-bank non-IT persona business-friendly L1 copy (en/zh, keys stable); **plus code-grounded audit remediation** — permission single-source/fail-closed, template-detail bug fixes (focus/tab, stale id), APPROVAL dual-substate, i18n parity, a11y focus ring, capability/route/OpenAPI drift; ADR Batch B / COR-T11 not violated | Not Started |
+
+> **P21 vs P12:** P21 is a confirmed, scoped role-journey/terminology phase (clusters ①→②→③→④
+> by workflow timeline); P12 remains the non-active deferred-enhancements catch-all. Activating
+> P21 requires plan-orchestrator selection (single-active-phase rule). Detail:
+> [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 
 ## Thin vertical slice (MVP chain)
 

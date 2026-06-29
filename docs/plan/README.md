@@ -58,6 +58,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P18 | Structured authoring & rendering-fidelity engine | [detail/P18-structured-authoring-fidelity-engine.md](detail/P18-structured-authoring-fidelity-engine.md) | Done (2026-06-28; T01–T10) |
 | P19 | Template verifiability, publish gate & decision forms | [detail/P19-verifiability-publish-gate.md](detail/P19-verifiability-publish-gate.md) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | Done (2026-06-25) |
+| P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | Not Started |
 
 ## First delivery target (thin vertical slice) — achieved
 
@@ -76,6 +77,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 
 **Open backlog (no single active phase):**
 
+- **P21** — role-journey frontend redesign & business-friendly terminology (registered 2026-06-29; Not Started; ready to activate) — see [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md)
 - **P12** — deferred enhancements (pick one slice when activating)
 - **OPT-D / M9** — architecture/security debt (Redisson, QueryDSL expansion, intranet SCA) — see [optimization-plan.md](./optimization-plan.md)
 - **Phase B** — multi-revision master history API — see [catalog-navigation-ux.md](../product/catalog-navigation-ux.md)

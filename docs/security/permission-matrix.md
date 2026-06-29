@@ -428,6 +428,32 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 决策：`docs/adr/decisions/2026-06-23-batch-b-workflow-defaults.md`；dead workbench 视图已移除。
 文档层以 §13.1 表格为准；不得将上表中的过渡键记为当前默认 landing。
 
+### 13.1.2 行为型导航入口可见性（P21，确认设计 / 实现 Not Started）
+
+**状态：** 确认设计（2026-06-29）；实现归 [P21](../plan/detail/P21-role-journey-frontend-redesign.md)。
+决策：[behavior-typed IA + business terminology](../adr/decisions/2026-06-29-behavior-typed-ia-business-terminology.md)
+（扩展 Batch B / COR-T11；单一任务台仍为权威入口）。
+
+行为型入口是 **任务台（`/dashboard`）的按队列过滤视图**，不是独立 workbench 页；可见性对齐
+协作工作项队列可见性（`CollaborationWorkItemAccessSupport`）。入口标签使用业务用语
+（见 [business-terminology-guide.md](../product/business-terminology-guide.md)），i18n key 保持稳定。
+
+| 行为型入口 | 来源队列 | GLOBAL | GROUP | MASTER_DESIGNER | TEMPLATE_AUTHOR | TEMPLATE_TESTER | TEMPLATE_APPROVER | AUDIT_ADMIN |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 待我测试（Waiting on my testing） | TEST | ✓ | ✓ | — | — | ✓ | — | — |
+| 待我审批（Waiting on my approval） | APPROVAL | ✓ | ✓ | — | — | — | ✓ | — |
+| 待我修改（Waiting on my fixes） | REMEDIATION | ✓ | ✓ | — | ✓ | — | — | — |
+| 待确认上线（Waiting to confirm go-live） | PENDING_RELEASE | ✓ | ✓ | — | — | — | — | — |
+| 超时待跟进（Overdue to follow up） | ESCALATION | ✓ | ✓ | — | — | — | — | — |
+| 待审核母版（Masters to review） | master review（非协作队列） | ✓ | ✓ | (本人返工) | — | — | — | — |
+
+说明：
+
+- 展示行为型入口 **不授予** 额外编辑/判定/发布权限；处置仍在模板/母版详情的受控决策表单完成。
+- `ESCALATION/超时提醒` 仅管理员（GLOBAL/GROUP）可见；交互强调"可见性提醒"，不代为完成、不改变模板状态。
+- 编排人员走到 `PENDING_RELEASE` 显示"等待组长确认上线"，无发布主按钮（COR-T07 重申）。
+- 前置依赖：后端需补齐全部 6 种协作触发的发射与 `RESOLVED` 关闭（当前仅 `SUBMIT_FOR_TEST`），否则对应入口为空壳。
+
 ### 13.2 会话 capabilities（后端下发）
 
 | capability | 角色 |

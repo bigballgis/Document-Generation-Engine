@@ -1,6 +1,17 @@
 # Execution Sync Ledger
 
 **Last synced:** 2026-06-29 (doc-consistency pass 2 — ledger P14-T02/COR-T11, stack ledger Bucket4j/Resilience4j, UXC1, active phase)
+**Registration note (2026-06-29):** **P21 registered — Not Started** (role-journey frontend
+redesign & business-friendly terminology; hybrid IA, 4 role clusters ①→②→③→④, foreign-bank
+non-IT persona; ADR Batch B / COR-T11 not violated). No gate evidence yet — this is a planning
+container awaiting activation (single-active-phase selection). Detail:
+[detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
+**Audit backlog folded in (2026-06-29):** code-grounded read-only audit (4 lenses) appended to
+P21 §11 as findings AUD-A/P/H/B/Q/D with `file:line` evidence + severity, mapped to tasks
+P21-T06a/T06b and cross-cutting P21-X03..X06 (permission single-source/fail-closed, backend
+capability+route+OpenAPI completeness, UI/a11y fixes, i18n parity). Companion docs created:
+`business-terminology-guide.md`, ADR `2026-06-29-behavior-typed-ia-business-terminology.md`;
+`catalog-navigation-ux.md` + `permission-matrix.md` §13.1.2 updated.
 **Orchestration note (2026-06-28):** **P18 Done** — **P18-T01–T10 Done**.
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 

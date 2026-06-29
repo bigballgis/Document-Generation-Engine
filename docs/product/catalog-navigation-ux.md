@@ -88,11 +88,55 @@ Default tab: **Versions** (release version lines). Other tabs: overview & workfl
 | Version catalog | Masters / Templates (under Document content) |
 | Version status (on package list) | Workflow status |
 
+## Hybrid IA — resource-typed + behavior-typed navigation (P21)
+
+**Status:** Confirmed design (2026-06-29) | **Implementation:** Not Started — delivered under
+[P21](../plan/detail/P21-role-journey-frontend-redesign.md). Decision:
+[behavior-typed IA + business terminology](../adr/decisions/2026-06-29-behavior-typed-ia-business-terminology.md)
+(extends Batch B / COR-T11; single task hub stays authoritative).
+
+The package-first catalog above remains the **resource-typed** navigation. P21 adds a
+**behavior-typed** group so non-IT users can find work by "what is waiting on me", while the
+single `/dashboard` task hub remains the one authoritative work entry (behavior entries are
+**filtered views of the task hub**, not standalone workbench pages).
+
+```text
+Left navigation IA
+├── Resource-typed (business functions)
+│     Users & permissions · Letterhead templates (Masters) · Templates ·
+│     External services (API management) · Activity log (Audit)
+└── Behavior-typed (my to-dos) — filtered task-hub views
+      Waiting on my testing · Waiting on my approval · Waiting on my fixes ·
+      Waiting to confirm go-live · Masters to review · Overdue to follow up
+```
+
+- Behavior-typed entries are capability/queue-driven and role-aware (visibility per
+  [permission matrix §13.3](../security/permission-matrix.md)); no-permission entries are hidden.
+- Labels follow the [business terminology guide](./business-terminology-guide.md) (L1 business
+  language; no `policy`/`credential`/`lifecycle`/`gate` as primary labels). i18n keys stay stable;
+  only message values change.
+- Each role also gets a guided `RoleJourneyTimeline` (current step, available actions, waiting
+  items) reachable from the task hub.
+
+### Navigation terminology (business-friendly, P21)
+
+| Avoid on L1 (current) | Prefer (en) | zh-CN |
+| --- | --- | --- |
+| API policy / API access | API management / External services | API 管理 / 对外服务 |
+| Access & identity | Users & permissions | 用户与权限 |
+| Audit log / console | Activity log | 操作记录 |
+| Lifecycle (tab) | Workflow status / Approval progress | 流转进度 |
+
+Full mapping: [business-terminology-guide.md](./business-terminology-guide.md).
+
 ## Related docs
 
 - `docs/domain/domain-model.md` §2.5 (master), §2.10–2.11 (template versions)
+- `docs/product/business-terminology-guide.md` (business-friendly terminology SSOT)
 - `docs/plan/detail/P2-master-management.md`
 - `docs/plan/detail/P16-lifecycle-version-governance.md`
+- `docs/plan/detail/P21-role-journey-frontend-redesign.md`
+- `docs/adr/decisions/2026-06-29-behavior-typed-ia-business-terminology.md`
 
 ## Pending (out of scope for Phase A)
 

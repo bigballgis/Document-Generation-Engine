@@ -1,8 +1,9 @@
 # Documentation Index
 
 **Project baseline:** Restart from zero (2026-06-23); **P0–P20 Done** except **P12** (deferred
-catch-all, non-active). Latest gates: backend **524** tests, frontend **250** Vitest
-(2026-06-29). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
+catch-all, non-active); **P21** registered 2026-06-29 (role-journey frontend redesign &
+business-friendly terminology — Not Started). Latest gates: backend **524** tests, frontend
+**250** Vitest (2026-06-29). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
 and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 ## Start here
@@ -25,7 +26,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Requirements plan](./requirements/requirements-plan.md) | Raw confirmed requirements |
 | [Non-functional requirements](./requirements/non-functional-requirements.md) | Quality, security, reliability constraints |
 | [PRD](./product/PRD.md) | Product-facing behavior |
-| [Catalog navigation UX](./product/catalog-navigation-ux.md) | Master/template package catalog IA and navigation behavior |
+| [Catalog navigation UX](./product/catalog-navigation-ux.md) | Master/template package catalog IA + hybrid behavior-typed navigation (P21) |
+| [Business terminology guide](./product/business-terminology-guide.md) | Business-friendly L1 label SSOT for non-IT bank users (P21) |
 | [Domain model](./domain/domain-model.md) | Objects, states, invariants |
 | [Permission matrix](./security/permission-matrix.md) | Roles, groups, authorization |
 
@@ -59,6 +61,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [P18 Structured authoring & fidelity](./plan/detail/P18-structured-authoring-fidelity-engine.md) | Controlled editor, paste cleaning, renderProfile (Done 2026-06-28) |
 | [P19 Verifiability & publish gate](./plan/detail/P19-verifiability-publish-gate.md) | Batch test, coverage, live publish gate, decision forms (Done 2026-06-25) |
 | [P20 i18n & UI upgradeability](./plan/detail/P20-i18n-ui-upgradeability.md) | Locale registry, brand theming, zh-CN primary journey (Done 2026-06-25) |
+| [P21 Role-journey frontend redesign](./plan/detail/P21-role-journey-frontend-redesign.md) | Hybrid IA, behavior-typed to-dos, per-role journeys, business-friendly terminology (Not Started; registered 2026-06-29) |
 | **[Deployment guide](../deploy/README.md)** | **Canonical operator guide** — prerequisites, install/upgrade/cutover/rollback/secrets; indexes all `deploy/*.md` topic docs |
 
 ## Architecture
