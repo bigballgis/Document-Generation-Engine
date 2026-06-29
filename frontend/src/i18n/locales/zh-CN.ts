@@ -210,8 +210,8 @@ export default {
         open: '打开',
       },
       masterReview: {
-        title: '审核母版文档',
-        description: '在模板引用前批准或驳回已上传的主文档。',
+        title: '审核母版',
+        description: '在模板引用前批准或驳回已上传的母版。',
       },
       templateTest: {
         title: '记录测试结果',
@@ -230,8 +230,9 @@ export default {
         description: '完善绑定与规则后提交草稿进入测试。',
       },
       masterRework: {
-        title: '修订被驳回的主文档',
-        description: '更新主文档文件或元数据后重新提交审核。',
+        title: '待修改母版',
+        itemTitle: '修改母版并重新提交',
+        description: '更新文件或版式占位符后，重新提交审核。',
       },
       templateRework: {
         title: '修订被驳回的模板',
@@ -1031,22 +1032,33 @@ export default {
         empty: {
           guidance: '上传母版文档开始设计流程，然后按下方步骤推进。',
         },
+        waitingReview: {
+          guidance: '母版已提交审核，请等待审核结果。',
+        },
+        complete: {
+          guidance: '该母版已审核通过，可随时查看或下载。',
+          cta: '查看母版',
+        },
         steps: {
           upload: {
             label: '上传母版文档',
             guidance: '上传母版文档以开始设计。',
+            cta: '上传母版',
           },
           placeholders: {
             label: '设置版式占位符',
             guidance: '为动态内容区域设置版式占位符。',
+            cta: '检查版式占位符',
           },
           submitReview: {
             label: '提交审核',
             guidance: '设计完成后提交审核。',
+            cta: '提交审核',
           },
           rework: {
             label: '修改后重新提交',
             guidance: '根据审核意见修改并重新提交母版。',
+            cta: '更新并重新提交',
           },
         },
       },

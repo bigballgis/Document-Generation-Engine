@@ -129,9 +129,7 @@ blue-green cutover in [deploy/blue-green-runbook.md](deploy/blue-green-runbook.m
 **P14-T01** clause/content module lifecycle (T01a–T01e; backend **469**; frontend **224**; architecture re-review **PASS**);
 **P14-T02** collaboration to-dos + timeout escalation (T02a–T02d; E2E **3/3**; backend **481**; frontend **235**);
 **P14-T03** template export/import (T03a–T03c; OpenAPI contract; E2E **2/2**; backend **481**; frontend **235+**).
-**Active phase:** **P21** (**In Progress**). **Sub-phase A foundation Done** (T01/T01a/T01b/T01c/T02).
-**P21-T01c** (2026-06-30) — dead-code cleanup: RoleHomeView removed, workbench keys stripped,
-AUD-D01..D03 resolved; Playwright legacy redirect **4/4**. Next **P21-T03** (Master designer journey).
+**Active phase:** **P21** (**In Progress**). **P21-T03 Done** (2026-06-30) — Master designer journey with lifecycle-mapped `RoleJourneyTimeline` on hub/revision/dashboard; Playwright **5/5**. Next **P21-T04** (Orchestrator journey).
 MVP P0–P11 complete;
 **P13** Done (2026-06-23); **P14** Done (2026-06-27); **P15** Done (2026-06-27; T01–T10);
 **P17** Done (2026-06-25); **P18** Done (2026-06-28); **P19** Done (2026-06-25);

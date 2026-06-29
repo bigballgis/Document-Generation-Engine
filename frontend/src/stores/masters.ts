@@ -10,6 +10,7 @@ import type {
   MasterImpactAnalysis,
   MasterRevisionLineDetail,
   MasterRevisionLinePage,
+  MasterReviewRecord,
   SubmitMasterReviewPayload,
   UpdateMasterMetadataPayload,
 } from '@/types/master'
@@ -26,6 +27,7 @@ export const useMastersStore = defineStore('masters', () => {
   const loadingRevisionLine = ref(false)
   const submitting = ref(false)
   const lastErrorMessageKey = ref<string | null>(null)
+  const draftReviewHistoryByMasterId = ref<Record<string, MasterReviewRecord[]>>({})
 
   const mastersByGroup = computed(() => {
     const grouped = new Map<string, MasterDocumentSummary[]>()
@@ -250,6 +252,30 @@ export const useMastersStore = defineStore('masters', () => {
     lastErrorMessageKey.value = null
   }
 
+  function getDraftReviewHistory(masterId: string): MasterReviewRecord[] | undefined {
+    return draftReviewHistoryByMasterId.value[masterId]
+  }
+
+  async function enrichDraftMasterReviewHistory(): Promise<void> {
+    draftReviewHistoryByMasterId.value = {}
+    const candidates = masters.value.filter((master) => master.status === 'DRAFT')
+    await Promise.all(
+      candidates.map(async (master) => {
+        try {
+          const page = await mastersApi.listMasterRevisionLines(master.id, 0, 5)
+          const current = page.content.find((line) => line.current) ?? page.content[0]
+          if (!current) {
+            return
+          }
+          const detail = await mastersApi.getMasterRevisionLine(master.id, current.id)
+          draftReviewHistoryByMasterId.value[master.id] = detail.reviewHistory
+        } catch {
+          /* degrade to summary-only mapping */
+        }
+      }),
+    )
+  }
+
   return {
     masters,
     selectedMaster,
@@ -262,6 +288,7 @@ export const useMastersStore = defineStore('masters', () => {
     loadingRevisionLine,
     submitting,
     lastErrorMessageKey,
+    draftReviewHistoryByMasterId,
     mastersByGroup,
     fetchMasters,
     fetchMaster,
@@ -277,5 +304,7 @@ export const useMastersStore = defineStore('masters', () => {
     replaceMasterFile,
     clearSelected,
     clearListError,
+    getDraftReviewHistory,
+    enrichDraftMasterReviewHistory,
   }
 })

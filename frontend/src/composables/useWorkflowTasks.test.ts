@@ -111,6 +111,48 @@ describe('useWorkflowTasks', () => {
 
     const { tasks } = useWorkflowTasks()
     expect(tasks.value.some((task) => task.kind === 'master-rework')).toBe(true)
+    const reworkTask = tasks.value.find((task) => task.kind === 'master-rework')
+    expect(reworkTask?.titleKey).toBe('dashboard.tasks.masterRework.itemTitle')
+  })
+
+  it('builds master rework tasks for DRAFT masters with rejected review history', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      ...sessionStore.session,
+      roles: ['MASTER_DESIGNER'],
+      capabilities: managerCapabilities,
+    } as never
+
+    const mastersStore = useMastersStore()
+    mastersStore.masters = [
+      {
+        id: 'm3',
+        name: 'Draft rework',
+        groupCode: 'RETAIL',
+        status: 'DRAFT',
+        originalFilename: 'letterhead.docx',
+        anchorCount: 2,
+        updatedBy: '10000005',
+        updatedAt: '2026-06-26T10:00:00Z',
+      } as never,
+    ]
+    mastersStore.draftReviewHistoryByMasterId = {
+      m3: [
+        {
+          action: 'REJECTED',
+          decision: 'REJECTED',
+          changeSummary: null,
+          commentSummary: 'Fix layout',
+          actorUsername: '10000001',
+          createdAt: '2026-06-25T10:00:00Z',
+        },
+      ],
+    }
+
+    const { tasks } = useWorkflowTasks()
+    expect(tasks.value.some((task) => task.kind === 'master-rework' && task.id === 'master-rework-m3')).toBe(
+      true,
+    )
   })
 
   it('filters quick links by visible routes without legacy workbench shortcuts', () => {

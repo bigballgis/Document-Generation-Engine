@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import MasterPackageHubView from '@/views/masters/MasterPackageHubView.vue'
 import en from '@/i18n/locales/en'
 import * as mastersApi from '@/api/masters'
+import { useSessionStore } from '@/stores/session'
 
 vi.mock('@/api/masters', () => ({
   listMasters: vi.fn(),
@@ -23,8 +24,18 @@ vi.mock('vue-router', () => ({
 }))
 
 describe('MasterPackageHubView', () => {
+  let pinia: ReturnType<typeof createPinia>
+
   beforeEach(() => {
-    setActivePinia(createPinia())
+    pinia = createPinia()
+    setActivePinia(pinia)
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      roles: ['MASTER_DESIGNER'],
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.master-management'],
+      capabilities: { manageMasters: true },
+    } as never
     routerPush.mockReset()
     vi.mocked(mastersApi.getMaster).mockReset()
     vi.mocked(mastersApi.getMasterImpactAnalysis).mockReset()
@@ -79,7 +90,7 @@ describe('MasterPackageHubView', () => {
 
     const wrapper = mount(MasterPackageHubView, {
       global: {
-        plugins: [createPinia(), i18n, ElementPlus],
+        plugins: [pinia, i18n, ElementPlus],
       },
     })
 
@@ -89,5 +100,55 @@ describe('MasterPackageHubView', () => {
     expect(wrapper.text()).toContain('Revision lines')
     expect(wrapper.text()).toContain('Current revision')
     expect(wrapper.text()).toContain('Impact analysis')
+  })
+
+  it('renders designer journey at upload step when no file is uploaded', async () => {
+    vi.mocked(mastersApi.getMaster).mockResolvedValue({
+      id: 'master-1',
+      groupCode: 'RETAIL',
+      name: 'New letterhead',
+      description: null,
+      status: 'DRAFT',
+      originalFilename: '',
+      changeSummary: null,
+      anchors: [],
+      reviewHistory: [],
+      createdBy: '10000005',
+      updatedBy: '10000005',
+      createdAt: '2026-06-23T10:00:00Z',
+      updatedAt: '2026-06-23T10:00:00Z',
+    })
+    vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
+      masterId: 'master-1',
+      referencedTemplateIds: [],
+      retestRequired: false,
+    })
+    vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
+      content: [],
+      page: 0,
+      size: 20,
+      totalElements: 0,
+      totalPages: 0,
+    })
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(MasterPackageHubView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.find('[data-journey-timeline]').exists()).toBe(true)
+    expect(wrapper.find('[data-journey-guidance]').text()).toContain(
+      'Upload your letterhead document to get started.',
+    )
+    expect(wrapper.find('[data-master-journey-cta]').text()).toBe('Upload letterhead')
   })
 })

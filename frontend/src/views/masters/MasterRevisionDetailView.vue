@@ -6,6 +6,7 @@ import MasterReviewDialog from '@/components/masters/MasterReviewDialog.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
 import MasterWorkflowBanner from '@/components/masters/MasterWorkflowBanner.vue'
+import MasterDesignerJourneyBlock from '@/components/journey/MasterDesignerJourneyBlock.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
@@ -15,6 +16,8 @@ import { canReviewMasters, sessionContext } from '@/auth/roles'
 import { masterDetailPath } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
+import { useCapabilities } from '@/composables/useCapabilities'
+import { shouldShowMasterDesignerJourney } from '@/utils/masterDesignerJourney'
 import type { MasterDocumentDetail, MasterReviewDecision } from '@/types/master'
 import { ElMessage } from 'element-plus'
 
@@ -23,6 +26,7 @@ const route = useRoute()
 const router = useRouter()
 const mastersStore = useMastersStore()
 const sessionStore = useSessionStore()
+const { manageMasters, reviewMasters } = useCapabilities()
 
 const submitReviewOpen = ref(false)
 const reviewDialogOpen = ref(false)
@@ -70,6 +74,42 @@ const canSubmitForReview = computed(
 const canDecideReview = computed(
   () => canReview.value && isCurrentRevision.value && revisionLine.value?.status === 'PENDING_REVIEW',
 )
+
+const showDesignerJourney = computed(() => {
+  if (!workflowMaster.value) {
+    return false
+  }
+  return shouldShowMasterDesignerJourney({
+    roles: sessionStore.session?.roles ?? [],
+    manageMasters: manageMasters.value,
+    reviewMasters: reviewMasters.value,
+    status: workflowMaster.value.status,
+  })
+})
+
+const journeyContext = computed(() => {
+  if (!workflowMaster.value) {
+    return null
+  }
+  return {
+    status: workflowMaster.value.status,
+    originalFilename: workflowMaster.value.originalFilename,
+    anchorsLength: workflowMaster.value.anchors.length,
+    reviewHistory: workflowMaster.value.reviewHistory,
+  }
+})
+
+const canWriteJourney = computed(
+  () =>
+    Boolean(
+      manageMasters.value &&
+        isCurrentRevision.value &&
+        workflowMaster.value &&
+        workflowMaster.value.status !== 'PENDING_REVIEW',
+    ),
+)
+
+const anchorsPanelRef = ref<HTMLElement | null>(null)
 
 const errorMessage = computed(() => {
   const key = mastersStore.lastErrorMessageKey
@@ -159,6 +199,10 @@ function formatReviewAction(action: string): string {
   const key = `masters.reviewHistory.action.${action}`
   return te(key) ? t(key) : action
 }
+
+function handleJourneyFocusAnchors() {
+  anchorsPanelRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 </script>
 
 <template>
@@ -209,6 +253,18 @@ function formatReviewAction(action: string): string {
     />
 
     <template v-else>
+      <MasterDesignerJourneyBlock
+        v-if="showDesignerJourney && journeyContext"
+        :journey-context="journeyContext"
+        :master-id="masterId"
+        :current-revision-line-id="revisionLineId"
+        :can-write="canWriteJourney"
+        :is-current-revision="isCurrentRevision"
+        @upload="router.push(masterDetailPath(masterId))"
+        @submit-review="submitReviewOpen = true"
+        @focus-anchors="handleJourneyFocusAnchors"
+      />
+
       <MasterWorkflowBanner v-if="workflowMaster" :master="workflowMaster" />
 
       <section class="detail-grid">
@@ -232,6 +288,7 @@ function formatReviewAction(action: string): string {
           </dl>
         </el-card>
 
+        <section id="anchors-panel" ref="anchorsPanelRef">
         <el-card shadow="never">
           <template #header>
             <span>{{ t('masters.revision.anchorsTitle') }}</span>
@@ -256,6 +313,7 @@ function formatReviewAction(action: string): string {
           </AppDataTable>
           <el-empty v-else :description="t('masters.revision.noAnchors')" />
         </el-card>
+        </section>
       </section>
 
       <el-card shadow="never" class="history-card">

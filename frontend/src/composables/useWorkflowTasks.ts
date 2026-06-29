@@ -17,7 +17,8 @@ import type {
   CollaborationWorkItemTriggerType,
 } from '@/types/collaboration'
 import type { CapabilityContext } from '@/auth/roles'
-import type { MasterDocumentSummary } from '@/types/master'
+import { isMasterReworkState } from '@/utils/masterDesignerJourney'
+import type { MasterDocumentSummary, MasterReviewRecord } from '@/types/master'
 
 export type WorkflowTaskKind =
   | 'master-review'
@@ -256,7 +257,7 @@ export function useWorkflowTasks() {
 
     if (manageMasters.value) {
       for (const master of mastersStore.masters) {
-        if (master.status !== 'REJECTED') {
+        if (!isMasterReworkCandidate(master, mastersStore.getDraftReviewHistory(master.id))) {
           continue
         }
         items.push(masterReworkTask(master))
@@ -275,11 +276,18 @@ export function useWorkflowTasks() {
   return { tasks }
 }
 
+function isMasterReworkCandidate(
+  master: MasterDocumentSummary,
+  reviewHistory?: MasterReviewRecord[],
+): boolean {
+  return isMasterReworkState(master.status, reviewHistory)
+}
+
 function masterReworkTask(master: MasterDocumentSummary): WorkflowTask {
   return {
     id: `master-rework-${master.id}`,
     kind: 'master-rework',
-    titleKey: 'dashboard.tasks.masterRework.title',
+    titleKey: 'dashboard.tasks.masterRework.itemTitle',
     descriptionKey: 'dashboard.tasks.masterRework.description',
     path: `/masters/${master.id}`,
     groupCode: master.groupCode,

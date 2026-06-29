@@ -77,3 +77,9 @@ export function stepGuidanceKeyFromLabel(labelKey: string): string {
 export function emptyGuidanceKeyFromStepLabel(labelKey: string): string {
   return labelKey.replace(/\.steps\.[^.]+\.label$/, '.empty.guidance')
 }
+
+export {
+  isMasterReworkState,
+  resolveMasterDesignerDashboardJourneyIndex,
+  resolveMasterDesignerJourneyIndex,
+} from '@/utils/masterDesignerJourney'

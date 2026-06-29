@@ -6,6 +6,7 @@ import DashboardView from '@/views/dashboard/DashboardView.vue'
 import { useTemplatesStore } from '@/stores/templates'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useSessionStore } from '@/stores/session'
+import { useMastersStore } from '@/stores/masters'
 import {
   masterDesignerJourneySteps,
   templateAuthorJourneySteps,
@@ -43,9 +44,9 @@ vi.mock('@/api/collaboration', () => ({
 
 const journeyTimelineStub = {
   name: 'RoleJourneyTimeline',
-  props: ['steps', 'currentStepIndex', 'titleKey'],
+  props: ['steps', 'currentStepIndex', 'guidanceKey', 'titleKey'],
   template:
-    '<div class="journey-timeline-stub" :data-step-count="steps.length" :data-current-index="currentStepIndex">{{ titleKey }}</div>',
+    '<div class="journey-timeline-stub" :data-step-count="steps.length" :data-current-index="currentStepIndex" :data-guidance-key="guidanceKey">{{ titleKey }}</div>',
 }
 
 function mountDashboard(extraStubs: Record<string, unknown> = {}) {
@@ -362,6 +363,148 @@ describe('DashboardView', () => {
     )
     expect(wrapper.find('.journey-timeline-stub').text()).toBe(
       'journey.roles.MASTER_DESIGNER.title',
+    )
+  })
+
+  it('sets master designer journey index 0 when catalog is empty', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Designer',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.master-management'],
+      roles: ['MASTER_DESIGNER'],
+      capabilities: { manageMasters: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
+
+    const mastersStore = useMastersStore()
+    vi.spyOn(mastersStore, 'fetchMasters').mockImplementation(async () => {
+      mastersStore.masters = []
+    })
+    vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('0')
+  })
+
+  it('sets master designer journey index 2 for ready draft master', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Designer',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.master-management'],
+      roles: ['MASTER_DESIGNER'],
+      capabilities: { manageMasters: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
+
+    const mastersStore = useMastersStore()
+    vi.spyOn(mastersStore, 'fetchMasters').mockImplementation(async () => {
+      mastersStore.masters = [
+        {
+          id: 'm1',
+          groupCode: 'RETAIL',
+          name: 'Letterhead',
+          status: 'DRAFT',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 2,
+          updatedBy: '10000005',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ]
+    })
+    vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('2')
+  })
+
+  it('sets master designer journey index 3 when draft has rejected review history', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Designer',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.master-management'],
+      roles: ['MASTER_DESIGNER'],
+      capabilities: { manageMasters: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
+
+    const mastersStore = useMastersStore()
+    vi.spyOn(mastersStore, 'fetchMasters').mockImplementation(async () => {
+      mastersStore.masters = [
+        {
+          id: 'm1',
+          groupCode: 'RETAIL',
+          name: 'Letterhead',
+          status: 'DRAFT',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 2,
+          updatedBy: '10000005',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ]
+    })
+    vi.spyOn(mastersStore, 'getDraftReviewHistory').mockImplementation((masterId) =>
+      masterId === 'm1'
+        ? [
+            {
+              action: 'REJECTED',
+              decision: 'REJECTED',
+              changeSummary: null,
+              commentSummary: 'Fix header',
+              actorUsername: '10000001',
+              createdAt: '2026-06-25T10:00:00Z',
+            },
+          ]
+        : undefined,
+    )
+    vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('3')
+  })
+
+  it('sets master designer journey waiting guidance when only pending review masters exist', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Designer',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.master-management'],
+      roles: ['MASTER_DESIGNER'],
+      capabilities: { manageMasters: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
+
+    const mastersStore = useMastersStore()
+    vi.spyOn(mastersStore, 'fetchMasters').mockImplementation(async () => {
+      mastersStore.masters = [
+        {
+          id: 'm1',
+          groupCode: 'RETAIL',
+          name: 'Letterhead',
+          status: 'PENDING_REVIEW',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 2,
+          updatedBy: '10000005',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ]
+    })
+    vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBeUndefined()
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-guidance-key')).toBe(
+      'journey.roles.MASTER_DESIGNER.waitingReview.guidance',
     )
   })
 

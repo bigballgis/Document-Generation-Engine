@@ -12,6 +12,10 @@ import {
   resolvePrimaryClusterOneRole,
   roleJourneyTitleKey,
 } from '@/constants/roleJourneyDefinitions'
+import {
+  resolveMasterDesignerDashboardJourneyIndex,
+  type MasterDesignerDashboardMaster,
+} from '@/utils/masterDesignerJourney'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import {
   buildTaskPartitions,
@@ -110,6 +114,31 @@ const journeyTitleKey = computed(() =>
     ? roleJourneyTitleKey(primaryClusterOneRole.value)
     : undefined,
 )
+
+const masterDesignerJourneyResolution = computed(() => {
+  if (primaryClusterOneRole.value !== 'MASTER_DESIGNER') {
+    return null
+  }
+  const enrichedMasters: MasterDesignerDashboardMaster[] = mastersStore.masters.map((master) => ({
+    ...master,
+    reviewHistory: mastersStore.getDraftReviewHistory(master.id),
+  }))
+  return resolveMasterDesignerDashboardJourneyIndex(enrichedMasters)
+})
+
+const journeyCurrentStepIndex = computed(() => {
+  if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
+    return masterDesignerJourneyResolution.value?.currentStepIndex ?? null
+  }
+  return null
+})
+
+const journeyGuidanceKey = computed(() => {
+  if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
+    return masterDesignerJourneyResolution.value?.guidanceKey
+  }
+  return undefined
+})
 
 const collaborationLoadErrorKey = computed(
   () => collaborationStore.workItemsErrorMessageKey ?? 'collaboration.workItems.error.load',
@@ -211,6 +240,15 @@ async function loadDashboardData() {
   }
 
   await Promise.all(jobs)
+  if (
+    primaryClusterOneRole.value === 'MASTER_DESIGNER' &&
+    sessionStore.canAccessRoute('route.master-management') &&
+    !mastersLoadError.value
+  ) {
+    await mastersStore.enrichDraftMasterReviewHistory().catch(() => {
+      /* degrade to summary-only journey mapping */
+    })
+  }
   loading.value = false
 }
 
@@ -298,7 +336,8 @@ function openQuickLink(path: string) {
     <section v-if="primaryClusterOneRole" id="journey-section" class="journey-section">
       <RoleJourneyTimeline
         :steps="journeySteps"
-        :current-step-index="null"
+        :current-step-index="journeyCurrentStepIndex"
+        :guidance-key="journeyGuidanceKey"
         :title-key="journeyTitleKey"
       />
     </section>

@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **P21-T01/T01a/T01b/T01c/T02 Done**; sub-phase A foundation complete; next **P21-T03 Not Started** — Master designer journey) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **sub-phase A Done** — T01/T01a/T01b/T01c/T02; **P21-T03 Done** 2026-06-30 — Master designer journey; next **P21-T04 Not Started** — Orchestrator journey) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -171,7 +171,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | P21-T01c | Dead-code cleanup: remove `RoleHomeView.vue` (+test); remove residual workbench logical keys | `routeKeys.ts`, `auth/roles.ts`, `useWorkflowTasks.ts`, i18n | n/a (refactor) | Done (2026-06-30) |
 | P21-T01d | Companion terminology guide created (SSOT) + en/zh value sweep round 1 | `docs/product/business-terminology-guide.md`, `en.ts`, `zh-CN.ts` | n/a (doc) | Not Started |
 | P21-T02 | A1 backend: emit `TEST_FAILURE → REMEDIATION`; write `RESOLVED` on test decision; allow resubmit-for-test from "test passed" | `backend/.../collaboration/**`, `TemplateLifecycleService`, `ApprovalSubStateResolver` (new) | Required (§12.1 ready) | Done (2026-06-29) |
-| P21-T03 | A2 Master designer journey: upload → layout placeholders → submit review → rework timeline + "master review / master to fix" behavior entries (business titles) | `TemplateDetailView.vue` split, masters views, `RoleJourneyTimeline` | Required | Not Started |
+| P21-T03 | A2 Master designer journey: upload → layout placeholders → submit review → rework timeline + "master review / master to fix" behavior entries (business titles) | `MasterPackageHubView.vue`, `MasterRevisionDetailView.vue`, `masterDesignerJourney.ts`, `RoleJourneyTimeline`, `DashboardView.vue` | Required (§12.5) | Done (2026-06-30) |
 | P21-T04 | A3 Orchestrator journey: create → design content → trial generate → submit test → submit approval; "waiting on my fixes" entry; PENDING_RELEASE shows "awaiting team-lead go-live" | template views, lifecycle panel | Required | Not Started |
 | P21-T05 | A4 Tester journey: "waiting on my test" entry + guided test-confirm form (business field labels) + read-only evidence review (batch results / coverage / preview / output check) | lifecycle panel, decision form components | Required | Not Started |
 | P21-T06 | OPT-G3: split `TemplateDetailView.vue`; business-renamed tabs (releaseVersions → "Published versions", lifecycle → "Workflow status", apiAccess → "External access") | `TemplateDetailView.vue`, `templateDetailTabs.ts` | n/a (refactor) | Not Started |
@@ -1385,3 +1385,289 @@ demo route.
 - Do **not** add cluster ②③④ journey definitions (**P21-T08+**).
 - Do **not** remove `RoleHomeView` / workbench keys (**P21-T01c**).
 - Do **not** change task hub partition logic (**P21-T01a** regression guard).
+
+### 12.5 P21-T03 — A2 Master designer journey (timeline + behavior titles)
+
+**BDD readiness:** `ready` (confirmed against §4 cluster ①, §12.4 `masterDesignerJourneySteps`,
+domain §2.5 master review states, ADR-0018, permission matrix §13.1.2, business-terminology-guide
+§4.1/§4.3; no blocking pending questions).
+
+**Implementation status:** **Done** (2026-06-30) — `masterDesignerJourney.ts` mappers,
+`MasterDesignerJourneyBlock`, Hub/Revision/Dashboard integration, Spec C i18n, master-rework producer fix.
+Gates: Vitest 336+; Playwright T03 **5/5** + UIUX manifest **PASS**.
+
+**Scope boundary (this slice only):**
+
+- **In:** embed `RoleJourneyTimeline` on **master package hub** (`MasterPackageHubView`) and **current
+  revision detail** (`MasterRevisionDetailView`); map master/revision `status` (+ anchor/file
+  context) → `currentStepIndex` on the four-step `masterDesignerJourneySteps` catalog; per-step
+  business guidance + primary CTA via `after` slot (non-IT copy); align behavior-type entry labels
+  and dashboard master-review / master-rework partition headings + task row titles with
+  `nav.behaviorItems.masterReview` semantics; derive dashboard `#journey-section`
+  `currentStepIndex` for `MASTER_DESIGNER` from aggregated masters catalog context (fixed mapping
+  table below); shared pure helpers in `roleJourneyDefinitions.ts` (or adjacent util) + unit tests.
+- **Out:** `TemplateDetailView` split (**P21-T06**); orchestrator/tester journey wiring
+  (**P21-T04/T05**); backend API/status model changes; `MasterWorkflowBanner` admin decision forms;
+  permission single-source remediation (**P21-X03**); new routes or standalone workbench pages.
+
+**Traceability:**
+
+- Plan — this doc §4 cluster ① (`MASTER_DESIGNER`), §6 P21-T03 row, §12.4 Spec B step catalog +
+  component API.
+- Domain — `docs/domain/domain-model.md` §2.5 (母版轻量审核状态：草稿 / 待审核 / 审核通过 /
+  审核不通过; 提交前锚点完整性校验; 审核不通过后回到草稿并保留记录).
+- ADR — `docs/adr/template-lifecycle/0018-master-review-state-and-impact-analysis.md` (draft /
+  pending review / approved / rejected semantics; rejection returns to draft with history retained).
+- Terminology — `docs/product/business-terminology-guide.md` §3–§4 (L1 business copy; layout
+  placeholders not "anchor"; behavior entry **Masters to review** / 待审核母版).
+- Permission — `docs/security/permission-matrix.md` §13.1.2 (`behavior-master-review` visibility:
+  GLOBAL/GROUP reviewers + `MASTER_DESIGNER` with master-management route for own rework queue;
+  display ≠ extra decide rights).
+- Navigation — `docs/product/catalog-navigation-ux.md` (Hybrid B: task hub → journey → master detail).
+- Code under change — `MasterPackageHubView.vue`, `MasterRevisionDetailView.vue`,
+  `MasterWorkflowBanner.vue` (coexistence only), `roleJourneyDefinitions.ts`,
+  `useWorkflowTasks.ts` (master-rework predicate alignment), `DashboardView.vue`,
+  `navStructure.ts` / i18n `nav.behaviorItems.*`, `dashboard.tasks.masterReview|masterRework.*`,
+  `journey.roles.MASTER_DESIGNER.*`.
+
+#### Domain context — master review `status` (API field `status`)
+
+| `status` | Business meaning (L1) | Designer journey position |
+| --- | --- | --- |
+| `DRAFT` | Drafting | Depends on file / placeholders / rework (see mapping table) |
+| `PENDING_REVIEW` | Awaiting review | Designer actions complete — waiting on admin |
+| `APPROVED` | Review approved | Journey complete for this letterhead |
+| `REJECTED` | Review rejected (enum; may also present as `DRAFT` + rejection history per ADR-0018) | Rework step |
+
+**Post-rejection detection (frontend SSOT for this slice):** treat as **rework** when
+`status === 'REJECTED'` **or** (`status === 'DRAFT'` and the most recent `reviewHistory` record has
+`decision === 'REJECTED'`). Align `useWorkflowTasks` master-rework task producer with this same
+predicate (replace `status === 'REJECTED'`-only check).
+
+**Anchor / upload readiness:** `originalFilename` present **and** `anchorCount > 0` ⇒ placeholders
+step satisfied for journey indexing (matches submit-review precondition that anchor integrity passes;
+detailed integrity errors remain on submit action, not journey index).
+
+#### Spec A — Entity-level journey on master detail surfaces
+
+- **Actor / role:** `MASTER_DESIGNER` (primary) or GLOBAL/GROUP admin with master-management access
+  acting as designer on own letterheads; group scope enforced by existing master APIs.
+- **Goal:** While viewing a letterhead package or its current revision, see where they are in the
+  four-step design workflow and what to do next in plain business language.
+- **Trigger:** navigate to `/masters/:masterId` (hub) or `/masters/:masterId/revisions/:revisionLineId`
+  (current revision detail).
+- **Preconditions:** viewer may access the master route; master/revision loaded or skeleton shown.
+- **Primary journey:** page loads → resolve entity context (hub uses package-level master summary;
+  revision detail uses **current revision line** fields per existing `workflowMaster` pattern) →
+  compute `currentStepIndex` via **Entity mapping table** → render `RoleJourneyTimeline` with
+  `steps={masterDesignerJourneySteps}` below page header / back link and **above**
+  `MasterWorkflowBanner` + main panels → guidance from step `journey.roles.MASTER_DESIGNER.steps.*.guidance`
+  (or role-level waiting/complete keys) → optional primary CTA in `after` slot.
+- **System responses (success):** stepper shows completed/current/upcoming states per §12.4 Spec A;
+  guidance line updates when `status`/file/anchors change after reload; CTAs hidden when viewer lacks
+  write capability or action not applicable; no routing/API inside the stepper component itself.
+
+**Visibility rule:** render designer journey block when viewer is `MASTER_DESIGNER` **or**
+`manageMasters`/`canUploadMasters` is true for the session (designer-primary; admins may see it on
+masters they manage). Hide for `reviewMasters`-only viewers landing on someone else's pending master
+(approver uses banner/decision panel, not designer journey). `AUDIT_ADMIN`-only: hidden.
+
+**Entity mapping table (`currentStepIndex`) — evaluated top-to-bottom, first match wins:**
+
+| Priority | Condition (entity) | `currentStepIndex` | Active step `id` |
+| ---: | --- | ---: | --- |
+| 1 | No uploaded DOCX (`!originalFilename` or empty filename) | `0` | `upload` |
+| 2 | File present and (`anchorCount === 0` or anchors list empty on revision detail) | `1` | `placeholders` |
+| 3 | Rework predicate true (see above) | `3` | `rework` |
+| 4 | `status === 'DRAFT'` and placeholders satisfied | `2` | `submitReview` |
+| 5 | `status === 'PENDING_REVIEW'` | `null` | _(waiting — use `journey.roles.MASTER_DESIGNER.waitingReview.guidance`)_ |
+| 6 | `status === 'APPROVED'` | `null` | _(complete — use `journey.roles.MASTER_DESIGNER.complete.guidance`)_ |
+
+When `currentStepIndex === null` for waiting/complete, pass explicit `guidanceKey` to the timeline;
+do not mark any step `aria-current`.
+
+**Per-step primary CTA (`after` slot — new i18n `journey.roles.MASTER_DESIGNER.steps.<id>.cta`):**
+
+| Step | CTA label (en exemplar) | Action (viewer must have write access) |
+| --- | --- | --- |
+| `upload` | Upload letterhead | Open replace-file dialog (hub) or navigate to hub from revision |
+| `placeholders` | Check layout placeholders | Scroll/focus anchors panel on revision detail (or open current revision) |
+| `submitReview` | Submit for review | Open existing submit-review dialog when `canSubmitForReview` |
+| `rework` | Update and resubmit | Open replace-file and/or submit-review when eligible |
+| waiting | _(no primary CTA)_ | Guidance only |
+| complete | View letterhead | Download or navigate catalog (secondary link OK) |
+
+#### Spec B — Dashboard aggregated journey for `MASTER_DESIGNER`
+
+- **Actor / role:** session with role `MASTER_DESIGNER` (and `route.dashboard-home` visible).
+- **Goal:** On `/dashboard`, the `#journey-section` stepper reflects the designer's **most urgent**
+  in-flight letterhead work, not onboarding `null` (T01b default).
+- **Trigger:** unfiltered or filtered dashboard load after masters catalog fetch (existing
+  `mastersStore.masters` on dashboard).
+- **Preconditions:** `primaryClusterOneRole === 'MASTER_DESIGNER'`; masters list loaded (empty list
+  is valid).
+- **Primary journey:** resolve aggregated context from visible masters in viewer group scope →
+  optionally enrich DRAFT masters with **current revision line** summary via existing revision-lines
+  list API (frontend-only prefetch; no backend change) when rejection history is not on catalog row →
+  apply **Dashboard mapping table** → pass result as `:current-step-index` to `#journey-section`
+  `RoleJourneyTimeline`.
+- **System responses (success):** index updates when catalog reloads; filtered queue views (`?queue=`,
+  `?filter=master-review`) still show journey section (T01b regression) with the **same** aggregated
+  index (journey is role-global, not queue-local).
+
+**Dashboard mapping table — highest-priority master wins across catalog:**
+
+| Priority | Aggregated condition (any master in scope) | `currentStepIndex` | Guidance |
+| ---: | --- | ---: | --- |
+| 1 | Zero masters | `0` | step-0 guidance |
+| 2 | Rework predicate true | `3` | step-3 guidance |
+| 3 | `status === 'DRAFT'`, file present, placeholders satisfied | `2` | step-2 guidance |
+| 4 | File present, placeholders not satisfied | `1` | step-1 guidance |
+| 5 | No file on any in-progress master | `0` | step-0 guidance |
+| 6 | Only `PENDING_REVIEW` (no draft/rework) | `null` | `waitingReview.guidance` |
+| 7 | All `APPROVED` (no draft/pending/rework) | `null` | `empty.guidance` (existing onboarding) |
+
+**Tie-break within same priority:** pick master with most recent `updatedAt` to choose guidance/CTA
+target link in optional `after` slot ("Continue with {name}").
+
+#### Spec C — Behavior-type titles alignment (nav + dashboard partitions)
+
+- **Actor / role:** all roles that see `behavior-master-review` or master task partitions.
+- **Goal:** One business mental model — **letterhead review queue** — without IT terms ("master
+  document", "revision", "credential") on L1 surfaces.
+- **Trigger:** render nav item, filtered dashboard `<h1>`, partition heading, or task row title.
+- **Preconditions:** i18n keys stable; only values change/additions allowed per P21-D05.
+
+**Canonical L1 labels (en / zh-CN):**
+
+| Surface | Key | en | zh-CN | Audience |
+| --- | --- | --- | --- | --- |
+| Behavior nav | `nav.behaviorItems.masterReview` | Masters to review | 待审核母版 | unchanged (T01) |
+| Filtered dashboard `<h1>` | same as nav when `?filter=master-review` | Masters to review | 待审核母版 | all |
+| Admin partition heading | `dashboard.tasks.masterReview.title` | Review letterhead | 审核母版 | GLOBAL/GROUP (`reviewMasters`) |
+| Designer rework partition heading | `dashboard.tasks.masterRework.title` | Letterheads to fix | 待修改母版 | `MASTER_DESIGNER` / `manageMasters` |
+| Admin task row | `dashboard.tasks.masterReview.title` | Review letterhead | 审核母版 | `PENDING_REVIEW` items |
+| Designer task row | `dashboard.tasks.masterRework.title` | Fix letterhead and resubmit | 修改母版并重新提交 | rework predicate items |
+| Designer task description | `dashboard.tasks.masterRework.description` | Update the file or placeholders, then submit again for review. | 更新文件或版式占位符后，重新提交审核。 | rework rows |
+
+**Nav ↔ partition consistency:** `behavior-master-review` deep link (`/dashboard?filter=master-review#tasks-section`)
+shows admin **Review letterhead** section when `reviewMasters`; shows **Letterheads to fix** section
+when viewer is `MASTER_DESIGNER` with master-management route (rework). Both may appear for
+GLOBAL/GROUP admins. MASTER_DESIGNER-only sessions never see admin review rows (no `reviewMasters`).
+
+#### Spec D — Coexistence with `MasterWorkflowBanner`
+
+- **Actor / role:** same as Spec A.
+- **Goal:** Avoid duplicate conflicting instructions.
+- **Trigger:** master detail renders both banner and journey.
+- **Preconditions:** existing banner rules unchanged for admin review decision prompts.
+- **Primary journey:** for **designer** viewers, journey block is primary guidance; banner remains
+  for **admin** `reviewMasters` on `PENDING_REVIEW` (decision required). When both would show for
+  GROUP/GLOBAL admin who is also designer on own draft, prefer journey for own draft (`DRAFT`/rework)
+  and banner for `PENDING_REVIEW` on others' masters.
+- **System responses:** designer never sees IT-heavy "use review panel" hint without business reword
+  (optional: hide banner hint line for designer-only sessions — value change under `masters.workflow.*`).
+
+#### Acceptance scenarios (Given / When / Then)
+
+**Entity timeline — hub**
+
+- **(New letterhead — upload step)** Given a `DRAFT` master with no `originalFilename`, When the
+  designer opens `/masters/:id`, Then `RoleJourneyTimeline` shows 4 steps with `currentStepIndex=0`
+  And guidance key `journey.roles.MASTER_DESIGNER.steps.upload.guidance` And primary CTA opens
+  replace-file dialog.
+- **(Placeholders step)** Given a master with a file and `anchorCount=0`, When the hub renders,
+  Then `currentStepIndex=1` And CTA navigates/opens current revision anchors context.
+- **(Submit step)** Given `DRAFT`, file present, `anchorCount>0`, no rejection history, When the hub
+  renders, Then `currentStepIndex=2` And submit CTA visible when write-capable.
+- **(Rework after rejection)** Given `DRAFT` whose latest review record is `REJECTED`, When the hub
+  renders, Then `currentStepIndex=3` (not 2) And rework CTA copy shown.
+- **(Waiting on admin)** Given `PENDING_REVIEW`, When a designer views the hub, Then
+  `currentStepIndex=null` And `waitingReview.guidance` is shown And no submit CTA.
+
+**Entity timeline — revision detail**
+
+- **(Revision line status drives index)** Given current revision line `DRAFT` with anchors populated,
+  When `/masters/:id/revisions/:lineId` loads, Then step index matches entity mapping using revision
+  line fields (same as hub for current line).
+- **(Non-current revision)** Given a non-current revision line, When viewing its detail, Then journey
+  still renders but CTAs are suppressed or secondary (read-only history); `currentStepIndex` reflects
+  that line's status for audit context.
+
+**Dashboard aggregation**
+
+- **(No masters)** Given `MASTER_DESIGNER` with empty masters catalog, When `/dashboard` loads, Then
+  `#journey-section` shows `currentStepIndex=0` with upload guidance.
+- **(Draft awaiting submit)** Given one `DRAFT` master with file and anchors, no rejection, When
+  dashboard loads, Then `currentStepIndex=2`.
+- **(Rejected rework wins)** Given one `DRAFT` with rejection history and one `DRAFT` ready to submit,
+  When dashboard loads, Then `currentStepIndex=3` (rework priority).
+- **(Pending review only)** Given all masters `PENDING_REVIEW` or `APPROVED` without drafts, When
+  dashboard loads, Then `currentStepIndex=null` And waiting/empty guidance applies.
+- **(Filtered deep link)** Given `MASTER_DESIGNER` on `/dashboard?filter=master-review#tasks-section`,
+  Then journey section still visible with aggregated index And task partition heading uses
+  **Letterheads to fix** / 待修改母版.
+
+**Behavior titles**
+
+- **(Admin partition copy)** Given `GROUP_ADMIN` with `reviewMasters` on unfiltered dashboard, When
+  a `PENDING_REVIEW` master exists, Then master-review partition heading is **Review letterhead**
+  (not "Review master document").
+- **(Designer partition copy)** Given `MASTER_DESIGNER` with a rework master, When task hub renders,
+  Then rework row title is **Fix letterhead and resubmit** And description is business-language (no
+  "rejected master" IT phrasing).
+- **(Nav label stable)** Given any session, When behavior nav renders master-review item, Then label
+  remains **Masters to review** / 待审核母版 (`nav.behaviorItems.masterReview`).
+
+**Regression**
+
+- **(T01b component API)** Given journey embed, When props change, Then no breaking changes to
+  `RoleJourneyTimeline` public props/slots from §12.4.
+- **(T01a task hub)** Given journey index wired, When tasks load, Then queue partitions unchanged.
+- **(Fail-closed)** Given viewer without master write access, When timeline renders, Then CTAs absent
+  And stepper remains informational.
+
+#### Boundary & exception behavior
+
+- **Catalog/revision load error:** hide journey block or show inline error; do not block master panels.
+- **`currentStepIndex` out of range:** component clamps per §12.4 (defensive).
+- **Historical `REJECTED` status enum:** treat as rework even if backend prefers `DRAFT` post-rejection
+  (ADR-0018); both paths must map to step 3.
+- **Approved master opened for metadata edit:** `currentStepIndex=null`, complete guidance; no submit CTA.
+- **Admin reviewer without designer role:** no designer journey on masters they only review (banner only).
+- **Locale switch:** labels/guidance re-render; index unchanged.
+- **No backend/status changes:** do not add API fields; optional revision-line prefetch uses existing
+  list/detail endpoints only.
+
+#### Observable evidence
+
+- **Unit:** `roleJourneyDefinitions.test.ts` — entity + dashboard mapping tables, rework predicate,
+  priority tie-break; `useWorkflowTasks.test.ts` — master-rework uses rejection predicate.
+- **Component:** `MasterPackageHubView.test.ts` / `MasterRevisionDetailView.test.ts` — timeline
+  mounted, index/guidance/CTA per status fixtures.
+- **Integration:** `DashboardView.test.ts` — `MASTER_DESIGNER` journey index 0/2/3/null scenarios.
+- **E2E (P21-T03 slice):** login as master designer → dashboard journey reflects catalog → open master
+  → detail journey matches status → behavior nav → filtered hub titles → open task row.
+- **UIUX:** dual-brand evidence for hub + revision detail journey band (desktop 1280 / 1440).
+- **Grep:** new/changed L1 values exclude forbidden tokens (§2.2).
+
+#### Decided defaults (non-blocking)
+
+1. **Rejection on `DRAFT`:** use review history for rework detection (ADR-0018 aligned); fix
+   master-rework task producer to match (frontend-only).
+2. **Placeholder readiness:** `anchorCount > 0` on summary/revision line (v1); finer integrity gating
+   stays on submit action.
+3. **Dashboard enrichment:** prefetch current revision lines for DRAFT masters when catalog row lacks
+   history (existing API); if prefetch fails, fall back to summary-only mapping (may show step 2 instead
+   of 3 until detail visit — acceptable degrade).
+4. **Journey placement:** above `MasterWorkflowBanner` on both hub and revision detail.
+5. **New i18n keys:** `journey.roles.MASTER_DESIGNER.waitingReview.guidance`,
+   `complete.guidance`, `steps.<id>.cta`; updated `dashboard.tasks.masterRework.*` values per Spec C.
+6. **Admin+dual hat:** banner for others' pending review; journey for own drafts.
+
+#### Out of scope reminders for implementer
+
+- Do **not** split or refactor `TemplateDetailView.vue` (**P21-T06**).
+- Do **not** wire template author/tester journey indices (**P21-T04/T05**).
+- Do **not** change backend master status transitions or capabilities (**P21-X03/X04**).
+- Do **not** add step-node navigation links inside the stepper (CTAs live in `after` slot only).

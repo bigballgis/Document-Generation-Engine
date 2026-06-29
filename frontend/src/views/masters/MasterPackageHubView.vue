@@ -12,11 +12,15 @@ import MasterMetadataEditDialog from '@/components/masters/MasterMetadataEditDia
 
 import MasterReplaceFileDialog from '@/components/masters/MasterReplaceFileDialog.vue'
 
+import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
+
 import MasterRevisionLinesPanel from '@/components/masters/MasterRevisionLinesPanel.vue'
 
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 
 import MasterWorkflowBanner from '@/components/masters/MasterWorkflowBanner.vue'
+
+import MasterDesignerJourneyBlock from '@/components/journey/MasterDesignerJourneyBlock.vue'
 
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 
@@ -26,7 +30,11 @@ import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, masterRevisionDetailPath } from '@/routi
 
 import { useMastersStore } from '@/stores/masters'
 
+import { useSessionStore } from '@/stores/session'
+
 import { useCapabilities } from '@/composables/useCapabilities'
+
+import { shouldShowMasterDesignerJourney } from '@/utils/masterDesignerJourney'
 
 import { ElMessage } from 'element-plus'
 
@@ -42,7 +50,9 @@ const router = useRouter()
 
 const mastersStore = useMastersStore()
 
-const { manageMasters } = useCapabilities()
+const sessionStore = useSessionStore()
+
+const { manageMasters, reviewMasters } = useCapabilities()
 
 
 
@@ -50,9 +60,13 @@ const metadataEditOpen = ref(false)
 
 const replaceFileOpen = ref(false)
 
+const submitReviewOpen = ref(false)
+
 const loadFailed = ref(false)
 
 const downloading = ref(false)
+
+const currentRevisionLineId = ref<string | undefined>(undefined)
 
 const revisionLinesPanelRef = ref<ComponentPublicInstance<{ reload: () => Promise<void> }> | null>(
 
@@ -100,6 +114,56 @@ const canReplaceFile = computed(() => {
 
 })
 
+const showDesignerJourney = computed(() => {
+
+  if (!master.value) {
+
+    return false
+
+  }
+
+  return shouldShowMasterDesignerJourney({
+
+    roles: sessionStore.session?.roles ?? [],
+
+    manageMasters: manageMasters.value,
+
+    reviewMasters: reviewMasters.value,
+
+    status: master.value.status,
+
+  })
+
+})
+
+const journeyContext = computed(() => {
+
+  if (!master.value) {
+
+    return null
+
+  }
+
+  return {
+
+    status: master.value.status,
+
+    originalFilename: master.value.originalFilename,
+
+    anchorCount: master.value.anchors.length,
+
+    reviewHistory: master.value.reviewHistory,
+
+  }
+
+})
+
+const canWriteJourney = computed(
+
+  () => Boolean(manageMasters.value && master.value && master.value.status !== 'PENDING_REVIEW'),
+
+)
+
 const errorMessage = computed(() => {
 
   const key = mastersStore.lastErrorMessageKey
@@ -135,6 +199,12 @@ async function reloadMaster() {
     await mastersStore.fetchImpactAnalysis(masterId.value)
 
     await revisionLinesPanelRef.value?.reload()
+
+    const page = await mastersStore.fetchRevisionLines(masterId.value, 0, 5)
+
+    const currentLine = page.content.find((line) => line.current) ?? page.content[0]
+
+    currentRevisionLineId.value = currentLine?.id
 
   } catch {
 
@@ -238,6 +308,40 @@ async function handleReplaceFile(file: File) {
 
 }
 
+
+
+async function handleSubmitReview(payload: { changeSummary: string }) {
+
+  try {
+
+    await mastersStore.submitReview(masterId.value, payload)
+
+    submitReviewOpen.value = false
+
+    ElMessage.success(t('masters.submitReview.success'))
+
+    await reloadMaster()
+
+  } catch {
+
+    ElMessage.error(errorMessage.value || t('masters.error.submitReview'))
+
+  }
+
+}
+
+
+
+function handleJourneyFocusAnchors() {
+
+  if (currentRevisionLineId.value) {
+
+    router.push(masterRevisionDetailPath(masterId.value, currentRevisionLineId.value))
+
+  }
+
+}
+
 </script>
 
 
@@ -330,6 +434,28 @@ async function handleReplaceFile(file: File) {
 
     <template v-else-if="master">
 
+      <MasterDesignerJourneyBlock
+
+        v-if="showDesignerJourney && journeyContext"
+
+        :journey-context="journeyContext"
+
+        :master-id="masterId"
+
+        :current-revision-line-id="currentRevisionLineId"
+
+        :can-write="canWriteJourney"
+
+        @upload="replaceFileOpen = true"
+
+        @submit-review="submitReviewOpen = true"
+
+        @focus-anchors="handleJourneyFocusAnchors"
+
+      />
+
+
+
       <MasterWorkflowBanner :master="master" />
 
 
@@ -373,6 +499,8 @@ async function handleReplaceFile(file: File) {
       @submit="handleReplaceFile"
 
     />
+
+    <MasterSubmitReviewDialog v-model="submitReviewOpen" @submit="handleSubmitReview" />
 
   </div>
 

@@ -214,8 +214,8 @@ export default {
         open: 'Open',
       },
       masterReview: {
-        title: 'Review letterhead template',
-        description: 'Approve or reject the uploaded master before templates can use it.',
+        title: 'Review letterhead',
+        description: 'Approve or reject the uploaded letterhead before templates can use it.',
       },
       templateTest: {
         title: 'Record test result',
@@ -234,8 +234,10 @@ export default {
         description: 'Finish bindings, rules, and submit the draft for testing.',
       },
       masterRework: {
-        title: 'Revise rejected master',
-        description: 'Update the master file or metadata and resubmit for review.',
+        title: 'Letterheads to fix',
+        itemTitle: 'Fix letterhead and resubmit',
+        description:
+          'Update the file or placeholders, then submit again for review.',
       },
       templateRework: {
         title: 'Revise rejected template',
@@ -1555,22 +1557,34 @@ export default {
           guidance:
             'Upload a letterhead document to begin your design workflow, then follow each step below.',
         },
+        waitingReview: {
+          guidance:
+            'Your letterhead is with the review team. You will be notified when a decision is recorded.',
+        },
+        complete: {
+          guidance: 'This letterhead is approved. You can view or download it anytime.',
+          cta: 'View letterhead',
+        },
         steps: {
           upload: {
             label: 'Upload letterhead',
             guidance: 'Upload your letterhead document to get started.',
+            cta: 'Upload letterhead',
           },
           placeholders: {
             label: 'Set layout placeholders',
             guidance: 'Define layout placeholders for dynamic content areas.',
+            cta: 'Check layout placeholders',
           },
           submitReview: {
             label: 'Submit for review',
             guidance: 'Submit your letterhead design for review when ready.',
+            cta: 'Submit for review',
           },
           rework: {
             label: 'Fix and resubmit',
             guidance: 'Address review feedback and resubmit your letterhead.',
+            cta: 'Update and resubmit',
           },
         },
       },
