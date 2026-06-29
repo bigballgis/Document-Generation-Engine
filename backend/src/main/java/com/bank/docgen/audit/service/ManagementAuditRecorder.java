@@ -3,6 +3,7 @@ package com.bank.docgen.audit.service;
 import com.bank.docgen.audit.api.ContentModuleLifecycleAuditDetail;
 import com.bank.docgen.audit.api.PolicyUpdateAuditDetail;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
+import com.bank.docgen.collaboration.domain.CollaborationWorkItemTriggerType;
 import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
 import com.bank.docgen.audit.persistence.ManagementAuditEventRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,6 +37,8 @@ public class ManagementAuditRecorder {
     public static final String RISK_PROMPT_CONFIG_UPDATED = "RISK_PROMPT_CONFIG_UPDATED";
     public static final String COLLABORATION_TIMEOUT_CONFIG_UPDATED = "COLLABORATION_TIMEOUT_CONFIG_UPDATED";
     public static final String COLLABORATION_TIMEOUT_ESCALATION = "COLLABORATION_TIMEOUT_ESCALATION";
+    public static final String COLLABORATION_WORK_ITEM_CREATED = "COLLABORATION_WORK_ITEM_CREATED";
+    public static final String COLLABORATION_WORK_ITEM_RESOLVED = "COLLABORATION_WORK_ITEM_RESOLVED";
     public static final String COLLABORATION_ESCALATION_ACTOR_USERNAME = "00000000";
     public static final String COLLABORATION_ESCALATION_ACTOR_SUMMARY = "Collaboration escalation scheduler";
     public static final String CONTENT_MODULE_CREATED = "CONTENT_MODULE_CREATED";
@@ -299,6 +302,65 @@ public class ManagementAuditRecorder {
                 COLLABORATION_ESCALATION_ACTOR_SUMMARY,
                 null,
                 truncate(statusSummary),
+                writeJson(List.of())
+        ));
+    }
+
+    @Transactional
+    public void recordCollaborationWorkItemCreated(
+            UUID templateId,
+            String groupCode,
+            UUID workItemId,
+            CollaborationWorkItemQueue queue,
+            CollaborationWorkItemTriggerType triggerType,
+            String actorUsername,
+            String actorSummary
+    ) {
+        repository.save(new ManagementAuditEventEntity(
+                UUID.randomUUID(),
+                Instant.now(),
+                COLLABORATION_WORK_ITEM_CREATED,
+                templateId,
+                groupCode,
+                null,
+                null,
+                null,
+                writeJson(List.of(queue.name(), triggerType.name(), workItemId.toString())),
+                false,
+                null,
+                actorUsername,
+                actorSummary,
+                null,
+                truncate("Collaboration work item created: " + queue.name() + "/" + triggerType.name()),
+                writeJson(List.of())
+        ));
+    }
+
+    @Transactional
+    public void recordCollaborationWorkItemResolved(
+            UUID templateId,
+            String groupCode,
+            UUID workItemId,
+            CollaborationWorkItemQueue queue,
+            String actorUsername,
+            String actorSummary
+    ) {
+        repository.save(new ManagementAuditEventEntity(
+                UUID.randomUUID(),
+                Instant.now(),
+                COLLABORATION_WORK_ITEM_RESOLVED,
+                templateId,
+                groupCode,
+                null,
+                null,
+                null,
+                writeJson(List.of(queue.name(), workItemId.toString())),
+                false,
+                null,
+                actorUsername,
+                actorSummary,
+                null,
+                truncate("Collaboration work item resolved: " + queue.name()),
                 writeJson(List.of())
         ));
     }

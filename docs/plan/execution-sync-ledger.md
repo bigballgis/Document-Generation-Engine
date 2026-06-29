@@ -1,6 +1,28 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-29 (doc-consistency pass 2 — ledger P14-T02/COR-T11, stack ledger Bucket4j/Resilience4j, UXC1, active phase)
+**Last synced:** 2026-06-29 (P21-T02 Done — A1 backend collaboration work-item closed loop)
+**P21-T02 completion note (2026-06-29):** **P21-T02 Done** — A1 backend collaboration work-item
+closed loop. `recordTestDecision(PASSED|FAILED)` resolves OPEN TEST work items (`RESOLVED` +
+`resolvedAt`) in the same transaction; FAILED→DRAFT upserts one OPEN REMEDIATION
+(`triggerType=TEST_FAILURE_OR_RETURN_TO_DRAFT`, orchestrator-targeted, dedup/idempotent);
+`submitForTest` accepts DRAFT or APPROVAL+PENDING_SUBMIT (PENDING_DECISION fail-closed);
+dedicated non-sensitive create/resolve audit added; `ApprovalSubStateResolver` extracted as the
+`approvalSubState` single source of truth (refactor); +1 English i18n key
+`api.collaboration.workItem.remediation.summary`. **Gate:** `mvn -B -ntp -f backend/pom.xml verify`
+→ BUILD SUCCESS (Surefire all pass, JaCoCo met, Checkstyle/PMD/SpotBugs 0). **Audit findings:**
+AUD-A01 resolved for the TEST path (APPROVAL/PUBLISH `RESOLVED` → P21-T07); AUD-A02 partially
+resolved (REMEDIATION emitted; `SUBMIT_FOR_APPROVAL`/`APPROVAL_FAILURE`/`APPROVAL_PENDING_RELEASE`
+→ P21-T07). Backend-only slice — no frontend/E2E/UIUX gate required. P21 remains In Progress
+(phase not complete). Detail:
+[detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
+**Activation note (2026-06-29):** (P21 activation — phase In Progress, first slice P21-T02)
+**Activation note (2026-06-29):** **P21 activated → In Progress** (single-active-phase selection
+by `plan-orchestrator`; user approved start of P21). No other formal phase is In Progress — all
+P0–P11, P13–P20 remain Done; P12 deferred catch-all stays non-active. First slice **P21-T02**
+(A1 backend collaboration work-item closed loop) set **In Progress**: behavior spec §12.1 is
+`ready` → entering backend-engineer TDD. **No gate evidence yet** (no implementation, no `mvn
+verify` for this slice); all other P21 tasks remain Not Started. Detail:
+[detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 **Registration note (2026-06-29):** **P21 registered — Not Started** (role-journey frontend
 redesign & business-friendly terminology; hybrid IA, 4 role clusters ①→②→③→④, foreign-bank
 non-IT persona; ADR Batch B / COR-T11 not violated). No gate evidence yet — this is a planning
@@ -31,7 +53,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
 | Frontend (latest full gates) | `pnpm -C frontend lint`, `type-check`, `test`, `build` | Green — **250** Vitest tests (2026-06-24) | P18 polish: fidelity filter empty state, paste dialog cancel/undo split, style catalog i18n labels; flaky test timeout fix |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **524** tests (1 skipped), BUILD SUCCESS (2026-06-29) | OPT-D5 slice 2: `TemplateStructuredAuthoringService` extracted from `TemplateService`; +3 unit tests |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — BUILD SUCCESS (2026-06-29) | P21-T02 A1 collaboration closed loop — Surefire all pass, JaCoCo met, Checkstyle/PMD/SpotBugs **0** (new `ApprovalSubStateResolverTest` + collaboration/lifecycle/audit tests; slice count not separately captured). Prior snapshot: **524** tests (1 skipped) at OPT-D5 slice 2 |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
 | Frontend test | `pnpm -C frontend test` / `vitest run` | Green | **235 tests**, 2026-06-27 (P14-T02 E2E remediation — `roles.ts` workbench guards) |
@@ -124,6 +146,7 @@ P18-T09 fidelity warning surfacing — `FidelityValidationService` aggregates T0
 P18-T10 controlled authoring UI — `ControlledStructuredContentEditor`, `PasteCleaningSummaryDialog`, `FidelityWarningList`; management APIs `GET /api/management/v1/templates/{templateId}/master-style-catalog`, `POST .../paste-clean`; extended `FidelityWarningView` (`location`, `artifact`, `viewed`); wired into `TemplateAuthoringPanel` + `TemplatePreviewPanel`; Vitest structuredContentNodes/pasteSummary/fidelityFilters tests (2026-06-28); Playwright functional E2E **5/5** + UIUX evidence **1/1** (12 screenshots, manifest PASS, Docker 4173, 2026-06-29).
 OPT-D5 slice 1 — `TemplateViewMapper` extracted from `TemplateService`; backend verify **521** (+7 from 514; `TemplateViewMapperTest` 7/7); `TemplateService` 651→547 L (2026-06-24).
 OPT-D5 slice 2 — `TemplateStructuredAuthoringService` extracted (`getMasterStyleCatalog`, `pasteClean` + view mappers); backend verify **524** (+3 from 521; `TemplateStructuredAuthoringServiceTest` 3/3); `TemplateService` 547→495 L (2026-06-29).
+P21-T02 A1 backend collaboration work-item closed loop — `CollaborationWorkItemWriter.resolveOpenTestWorkItems` + `upsertRemediationWorkItem`; `TemplateLifecycleService.recordTestDecision` resolves OPEN TEST + emits REMEDIATION on FAILED→DRAFT; `submitForTest` accepts DRAFT or APPROVAL+PENDING_SUBMIT (PENDING_DECISION fail-closed); `ApprovalSubStateResolver` extracted as `approvalSubState` SSOT; non-sensitive create/resolve audit (`ManagementAuditRecorder.recordCollaborationWorkItem*`); +1 i18n key `api.collaboration.workItem.remediation.summary`; `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (Surefire all pass, JaCoCo met, Checkstyle/PMD/SpotBugs 0); AUD-A01 (TEST path) resolved, AUD-A02 partial — approval-path closure → P21-T07 (2026-06-29).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)
@@ -151,8 +174,9 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P20 | Done (2026-06-25) | T01–T07 complete incl. T06 (`api.error` en/zh + primary journey zh-CN); gates green — see [P20 detail](./detail/P20-i18n-ui-upgradeability.md) |
 | P18 | Done (2026-06-28) | **P18-T01–T10 Done** — controlled authoring UI + management paste/catalog APIs — see [P18 detail](./detail/P18-structured-authoring-fidelity-engine.md) |
 | P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
+| P21 | In Progress (2026-06-29) | Role-journey frontend redesign & business-friendly terminology — activated 2026-06-29; first slice **P21-T02 Done** (2026-06-29; A1 backend collaboration closed loop — TEST `RESOLVED`, REMEDIATION emit, resubmit eligibility, create/resolve audit, `ApprovalSubStateResolver` SSOT; `mvn verify` BUILD SUCCESS; AUD-A01 TEST-path / AUD-A02 partial resolved); remaining tasks Not Started (approval-path closure → P21-T07) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
-**Active phase:** **None** (2026-06-29). All formal phases P0–P11, P13–P20 **Done** except P12 (deferred catch-all, non-active).
+**Active phase:** **P21** (activated 2026-06-29; first slice P21-T02 In Progress). All other formal phases P0–P11, P13–P20 **Done** except P12 (deferred catch-all, non-active).
 
 ## Epic ↔ phase mapping
 

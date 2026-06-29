@@ -100,11 +100,18 @@ public interface CollaborationWorkItemRepository extends JpaRepository<Collabora
             UUID templateId,
             CollaborationWorkItemQueue queue
     ) {
-        List<CollaborationWorkItemEntity> items = findAllByTemplateIdAndQueueAndStatusInternal(
+        List<CollaborationWorkItemEntity> items = findAllOpenByTemplateIdAndQueue(templateId, queue);
+        return items.isEmpty() ? Optional.empty() : Optional.of(items.getFirst());
+    }
+
+    default List<CollaborationWorkItemEntity> findAllOpenByTemplateIdAndQueue(
+            UUID templateId,
+            CollaborationWorkItemQueue queue
+    ) {
+        return findAllByTemplateIdAndQueueAndStatusInternal(
                 templateId,
                 queue,
                 CollaborationWorkItemStatus.OPEN
         );
-        return items.isEmpty() ? Optional.empty() : Optional.of(items.getFirst());
     }
 }

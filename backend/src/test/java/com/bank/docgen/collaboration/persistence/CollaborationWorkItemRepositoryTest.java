@@ -125,6 +125,21 @@ class CollaborationWorkItemRepositoryTest {
                 .isEqualTo(UUID.fromString("22222222-2222-2222-2222-222222222222"));
     }
 
+    @Test
+    void findAllOpenByTemplateIdAndQueue_returnsAllOpenItemsForDrift() {
+        // Seed already contains two OPEN TEST items for TEMPLATE_ID (RETAIL + CORP) plus one RESOLVED.
+        List<CollaborationWorkItemEntity> openTestItems =
+                repository.findAllOpenByTemplateIdAndQueue(TEMPLATE_ID, CollaborationWorkItemQueue.TEST);
+
+        assertThat(openTestItems).hasSize(2);
+        assertThat(openTestItems).extracting(CollaborationWorkItemEntity::getStatus)
+                .containsOnly(CollaborationWorkItemStatus.OPEN);
+        assertThat(openTestItems).extracting(CollaborationWorkItemEntity::getTemplateId)
+                .containsOnly(TEMPLATE_ID);
+        assertThat(openTestItems).extracting(CollaborationWorkItemEntity::getId)
+                .doesNotContain(UUID.fromString("44444444-4444-4444-4444-444444444444"));
+    }
+
     private CollaborationWorkItemEntity openItem(UUID id, String groupCode, CollaborationWorkItemQueue queue) {
         return openItem(id, TEMPLATE_ID, groupCode, queue);
     }

@@ -54,6 +54,8 @@ class ExceptionInterventionTest {
     private CollaborationWorkItemWriter collaborationWorkItemWriter;
     @Mock
     private com.bank.docgen.authoring.structured.RenderProfileService renderProfileService;
+    @Mock
+    private ApprovalSubStateResolver approvalSubStateResolver;
 
     private DecisionFormService decisionFormService;
     private TemplateLifecycleService lifecycleService;
@@ -77,7 +79,8 @@ class ExceptionInterventionTest {
                 decisionFormService,
                 contentModuleReferenceService,
                 collaborationWorkItemWriter,
-                renderProfileService
+                renderProfileService,
+                approvalSubStateResolver
         );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(

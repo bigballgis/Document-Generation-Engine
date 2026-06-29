@@ -53,6 +53,8 @@ class TemplateLifecyclePublishGateTest {
     private CollaborationWorkItemWriter collaborationWorkItemWriter;
     @Mock
     private com.bank.docgen.authoring.structured.RenderProfileService renderProfileService;
+    @Mock
+    private ApprovalSubStateResolver approvalSubStateResolver;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -75,7 +77,8 @@ class TemplateLifecyclePublishGateTest {
                 decisionFormService,
                 contentModuleReferenceService,
                 collaborationWorkItemWriter,
-                renderProfileService
+                renderProfileService,
+                approvalSubStateResolver
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",

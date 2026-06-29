@@ -1,10 +1,10 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** Not Started (registered 2026-06-29) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; first slice **P21-T02 Done** 2026-06-29 — backend collaboration closed loop) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
-> Single-active-phase invariant: there is currently **No active formal phase**. Activating P21
-> requires `plan-orchestrator` selection. Within P21, run sub-phases in order A → B → C → D, and
+> Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
+> `plan-orchestrator` selection; no other phase is In Progress). Within P21, run sub-phases in order A → B → C → D, and
 > within each sub-phase land the **backend collaboration-work-item contract** before the
 > behavior-driven IA, otherwise behavior queues are empty shells.
 
@@ -170,7 +170,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | P21-T01b | New `RoleJourneyTimeline` reusable stepper (business-language steps, empty/guidance states) | `frontend/src/components/**` (new) | Required | Not Started |
 | P21-T01c | Dead-code cleanup: remove `RoleHomeView.vue` (+test); remove residual workbench logical keys | `views/home/RoleHomeView.vue`, `routeKeys.ts`, `auth/roles.ts` | n/a (refactor) | Not Started |
 | P21-T01d | Companion terminology guide created (SSOT) + en/zh value sweep round 1 | `docs/product/business-terminology-guide.md`, `en.ts`, `zh-CN.ts` | n/a (doc) | Not Started |
-| P21-T02 | A1 backend: emit `TEST_FAILURE → REMEDIATION`; write `RESOLVED` on test decision; allow resubmit-for-test from "test passed" | `backend/.../collaboration/**`, `TemplateLifecycleService` | Required | Not Started |
+| P21-T02 | A1 backend: emit `TEST_FAILURE → REMEDIATION`; write `RESOLVED` on test decision; allow resubmit-for-test from "test passed" | `backend/.../collaboration/**`, `TemplateLifecycleService`, `ApprovalSubStateResolver` (new) | Required (§12.1 ready) | Done (2026-06-29) |
 | P21-T03 | A2 Master designer journey: upload → layout placeholders → submit review → rework timeline + "master review / master to fix" behavior entries (business titles) | `TemplateDetailView.vue` split, masters views, `RoleJourneyTimeline` | Required | Not Started |
 | P21-T04 | A3 Orchestrator journey: create → design content → trial generate → submit test → submit approval; "waiting on my fixes" entry; PENDING_RELEASE shows "awaiting team-lead go-live" | template views, lifecycle panel | Required | Not Started |
 | P21-T05 | A4 Tester journey: "waiting on my test" entry + guided test-confirm form (business field labels) + read-only evidence review (batch results / coverage / preview / output check) | lifecycle panel, decision form components | Required | Not Started |
@@ -281,8 +281,8 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 
 | ID | Sev | Finding | Evidence | Owner task |
 | --- | --- | --- | --- | --- |
-| AUD-A01 | 🔴 | Backend never writes `RESOLVED` → completed to-dos never leave the task hub; `pendingActions` inflated; list API only queries `OPEN` | `CollaborationWorkItemWriter.java:32-82`; `TemplateLifecycleService.java:88-135`; `CollaborationWorkItemRepository.java:39-44` | P21-T02, P21-T07 |
-| AUD-A02 | 🔴 | Writer emits only `SUBMIT_FOR_TEST` → 5/6 behavior queues empty in production (APPROVAL/REMEDIATION/PENDING_RELEASE never created; ESCALATION only via scheduler) | `CollaborationWorkItemWriter.java:33-43`; `TemplateLifecycleService.java:84,88-134`; `CollaborationWorkItemTriggerType.java:3-9` | P21-T02, P21-T07 |
+| AUD-A01 | 🔴 | Backend never writes `RESOLVED` → completed to-dos never leave the task hub; `pendingActions` inflated; list API only queries `OPEN` | `CollaborationWorkItemWriter.java:32-82`; `TemplateLifecycleService.java:88-135`; `CollaborationWorkItemRepository.java:39-44` | **TEST path Resolved → P21-T02** (2026-06-29); APPROVAL/PUBLISH `RESOLVED` → P21-T07 |
+| AUD-A02 | 🔴 | Writer emits only `SUBMIT_FOR_TEST` → 5/6 behavior queues empty in production (APPROVAL/REMEDIATION/PENDING_RELEASE never created; ESCALATION only via scheduler) | `CollaborationWorkItemWriter.java:33-43`; `TemplateLifecycleService.java:84,88-134`; `CollaborationWorkItemTriggerType.java:3-9` | **REMEDIATION emitted → P21-T02** (2026-06-29, partial); APPROVAL/PENDING_RELEASE → P21-T07 |
 | AUD-P01 | 🔴 | `manageMasters` role fallback wrongly grants `TEMPLATE_AUTHOR`; unit test asserts the wrong behavior | `auth/roles.ts:36-44,56-57`; `roles.test.ts:79`; backend `GroupAccessService.java:28-30` | P21-X03 |
 | AUD-P02 | 🔴 | Content-module route bypasses backend `visibleRoutes` (not in `RouteVisibilityService`/`ManagementRoute`/matrix); `session.canAccessRoute` returns false while router admits | `auth/roles.ts:241-253`; `router/index.ts:95-104,145-149`; `RouteVisibilityService.java:30-70` | P21-X03, P21-X04 |
 | AUD-P03 | 🔴 | Dual route-guard APIs (`canAccessLogicalRoute` vs `session.canAccessRoute`) can disagree for the same routeKey | `router/index.ts:145-149`; `stores/session.ts:30-32`; `auth/roles.ts:292-310` | P21-X03 |
@@ -335,6 +335,12 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 ### 11.5 Remediation order (audit-driven)
 
 1. **P0 backend** — AUD-A01/A02: emit all triggers + write `RESOLVED` (P21-T02 then P21-T07).
+   **P21-T02 Done (2026-06-29):** TEST path closed loop — `recordTestDecision` resolves OPEN TEST
+   to-dos (`RESOLVED`+`resolvedAt`); FAILED→DRAFT upserts one OPEN REMEDIATION
+   (`TEST_FAILURE_OR_RETURN_TO_DRAFT`, dedup/idempotent); `submitForTest` accepts DRAFT or
+   APPROVAL+PENDING_SUBMIT (PENDING_DECISION fail-closed); dedicated create/resolve audit;
+   `ApprovalSubStateResolver` extracted as `approvalSubState` SSOT. **Remaining → P21-T07:**
+   APPROVAL/PUBLISH `RESOLVED` + `SUBMIT_FOR_APPROVAL`/`APPROVAL_FAILURE`/`APPROVAL_PENDING_RELEASE`.
 2. **P0 security** — AUD-P01..P05: permission single-source + fail-closed (P21-X03).
 3. **P0 bugs** — AUD-B01/B02: focus/tab lockup + stale templateId (P21-T06a).
 4. **P0 i18n/a11y** — AUD-Q04 zh-CN parity, AUD-Q01 focus ring (P21-X06, P21-X05).
@@ -343,3 +349,128 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 6. **P2** — decision/governance forms (AUD-B05/B10); detail state completeness (AUD-B06/B07);
    OpenAPI contract (AUD-C05).
 7. **P3** — dead code + component split + role constants (AUD-D01..D03, AUD-M02, AUD-B09).
+
+## 12. Behavior specifications (BDD)
+
+Executable behavior specs for behavior-changing P21 slices. Each spec is the source for the
+TDD Red tests and must stay traceable to the owning source-of-truth documents. Specs are added
+per slice as the slice enters its behavior-spec stage.
+
+### 12.1 P21-T02 — Backend collaboration work-item closed loop (A1)
+
+**BDD readiness:** `ready` (core behavior confirmed in source-of-truth docs; design defaults
+below flagged for confirmation are non-blocking).
+
+**Traceability:**
+
+- Domain — `docs/domain/domain-model.md` §2.9.4 (Template Collaboration Work Item): trigger types
+  include 提交测试 / 测试不通过或回到草稿; 退回草稿生成提交人或模板编排人员整改待办;
+  协作待办创建、解决、超时升级必须记录审计; 待办按模板所属组和角色队列分配,展示仅非敏感摘要.
+- Permission — `docs/security/permission-matrix.md` §5 (提交测试: 仅草稿状态或测试通过状态可提交测试;
+  测试通过 → 测试通过状态; 测试不通过 → 回到草稿), §10 (审计范围: 协作待办创建、解决), §13.1.2
+  (行为型入口: TEST / REMEDIATION 队列可见性; 前置依赖: 后端补齐 6 种触发的发射与 `RESOLVED` 关闭).
+- Plan — this doc §5 (cross-phase backend contract prerequisites), §6 P21-T02 row, §11.1 AUD-A01/AUD-A02.
+- Code under change — `TemplateLifecycleService.recordTestDecision` / `submitForTest`,
+  `collaboration/service/CollaborationWorkItemWriter`, `CollaborationWorkItemRepository`.
+
+**Lifecycle model context (current code):** `DRAFT → submitForTest → TESTING`;
+`TESTING → recordTestDecision(PASSED) → APPROVAL` (with `approvalSubState=PENDING_SUBMIT`, the
+business "test passed / awaiting submit-for-approval" state); `TESTING → recordTestDecision(FAILED) → DRAFT`;
+`APPROVAL(PENDING_SUBMIT) → submitForApproval → APPROVAL(PENDING_DECISION)`. There is **no** distinct
+`TEST_PASSED` enum; "测试通过" = `APPROVAL` + `PENDING_SUBMIT`.
+
+#### Spec A — Resolve TEST work item on test decision
+
+- **Actor / role:** TEMPLATE_TESTER (normal) or GLOBAL/GROUP admin (exception intervention), within
+  the template's owning group scope.
+- **Goal:** Record a test pass/fail decision and have the corresponding open TEST to-do leave the hub.
+- **Trigger:** `recordTestDecision(PASSED|FAILED)` on a template in `TESTING`.
+- **Preconditions:** Template in `TESTING`; an OPEN `TEST` work item exists for the template
+  (created by `submitForTest`); caller passes `requireTestableTemplate` authorization (role +
+  group scope; admin exception requires reason + secondary confirm + separate audit marker per §5).
+- **Primary journey:** authz → validate decision form → transition status → resolve OPEN `TEST`
+  work item(s) for the template (`status=RESOLVED`, `resolvedAt=now`, `updatedAt=now`) → return detail.
+- **System responses (success):** TEST decision transition recorded (PASSED→APPROVAL, FAILED→DRAFT);
+  the open TEST work item is closed so `GET /collaboration-work-items?queue=TEST` no longer returns it.
+
+#### Spec B — Emit REMEDIATION on test failure (FAILED → DRAFT)
+
+- **Actor / role:** same as Spec A; the produced to-do targets the orchestration queue.
+- **Goal:** When a test is rejected, surface a "Waiting on my fixes" to-do to the orchestrator.
+- **Trigger:** `recordTestDecision(FAILED)`.
+- **Preconditions:** as Spec A; template returns to `DRAFT`.
+- **Primary journey:** Spec A resolution + upsert one OPEN `REMEDIATION` work item
+  (`triggerType=TEST_FAILURE_OR_RETURN_TO_DRAFT`, `queue=REMEDIATION`, `groupCode=template group`,
+  non-sensitive `summaryText` via message key, `submitterUserId`=carried-forward orchestrator).
+- **System responses (success):** REMEDIATION to-do visible to TEMPLATE_AUTHOR (REMEDIATION queue)
+  and admins within the owning group; invisible to other groups/roles.
+
+#### Spec C — Allow resubmit-for-test from "test passed"
+
+- **Actor / role:** TEMPLATE_AUTHOR / MASTER_DESIGNER / GLOBAL / GROUP (writable-template authz).
+- **Goal:** Re-run testing after a template already passed test but before submit-for-approval.
+- **Trigger:** `submitForTest` on a template in `APPROVAL` with `approvalSubState=PENDING_SUBMIT`.
+- **Preconditions:** `requireWritableTemplate` passes; status is `DRAFT` **or** (`APPROVAL` and
+  `PENDING_SUBMIT`). Status `APPROVAL` + `PENDING_DECISION` (already submitted for approval) is **not** eligible.
+- **Primary journey:** authz → status guard accepts DRAFT or APPROVAL/PENDING_SUBMIT → transition to
+  `TESTING` → upsert OPEN `TEST` work item (`SUBMIT_FOR_TEST`).
+- **System responses (success):** status `TESTING`; a fresh OPEN TEST to-do present; any prior
+  RESOLVED TEST to-do remains resolved.
+
+#### Acceptance scenarios (Given / When / Then)
+
+- **(Test passed resolves TEST to-do)** Given a template in `TESTING` with one OPEN `TEST` work item,
+  When a tester records `PASSED`, Then the status becomes `APPROVAL` (`PENDING_SUBMIT`) **and** that
+  TEST work item becomes `RESOLVED` with `resolvedAt` set, and the TEST queue no longer returns it.
+- **(Test failed resolves TEST + creates REMEDIATION)** Given a template in `TESTING` with one OPEN
+  `TEST` work item, When a tester records `FAILED`, Then the status returns to `DRAFT`, the TEST work
+  item becomes `RESOLVED` (`resolvedAt` set), **and** exactly one OPEN `REMEDIATION` work item exists
+  with `triggerType=TEST_FAILURE_OR_RETURN_TO_DRAFT`, `queue=REMEDIATION`, and the template's `groupCode`.
+- **(REMEDIATION dedup / idempotent)** Given an OPEN `REMEDIATION` work item already exists for the
+  template, When another `FAILED` decision occurs on a later test cycle, Then the existing OPEN
+  REMEDIATION is refreshed (not duplicated) — at most one OPEN REMEDIATION per template.
+- **(Resubmit from test passed)** Given a template in `APPROVAL` with `approvalSubState=PENDING_SUBMIT`,
+  When an author calls `submitForTest`, Then the status becomes `TESTING` and an OPEN `TEST` work item exists.
+- **(Resubmit blocked once in approval decision)** Given a template in `APPROVAL` with
+  `approvalSubState=PENDING_DECISION`, When `submitForTest` is attempted, Then it is rejected
+  (invalid state / fail-closed), status unchanged, no new TEST work item created.
+- **(Group isolation)** Given a tester/author authorized only for group A, When they act on a template
+  owned by group B, Then the action is denied (fail-closed) and no work-item state changes; a created
+  REMEDIATION is only visible within the template's owning group.
+- **(Audit trail)** Given any of the above decisions, When the work item is resolved or a REMEDIATION
+  is created, Then an audit summary is recorded for the work-item resolution and creation (per domain
+  §2.9.4 / §10), carrying only non-sensitive summary fields (no variable values, customer data, full
+  generated content, or plaintext).
+
+#### Boundary & exception behavior
+
+- **No open TEST work item at decision time:** resolution is a no-op (idempotent); the decision still
+  succeeds (defensive against data drift).
+- **Multiple OPEN TEST work items (drift):** resolve all OPEN TEST work items for the template.
+- **Unauthorized actor / out-of-scope group:** fail-closed; unified safe error; no work-item writes;
+  no leakage of out-of-scope template/work-item existence.
+- **Admin exception test decision:** still requires reason + secondary confirmation + separate audit
+  marker (§5); the resolve/emit behavior is identical.
+- **Resubmit from any non-eligible status** (`TESTING`, `PENDING_RELEASE`, `PUBLISHED`, `STOPPED`,
+  `DEPRECATED`, or `APPROVAL`+`PENDING_DECISION`): rejected, status unchanged.
+
+#### Observable evidence
+
+- Work-item rows: `status` transitions OPEN→RESOLVED with `resolvedAt`; new REMEDIATION row with the
+  expected `queue` / `triggerType` / `groupCode`.
+- API: `GET /collaboration-work-items?queue=TEST|REMEDIATION` reflects closed TEST and new REMEDIATION
+  scoped to the owning group and the viewer's visible queues.
+- Lifecycle: `TemplateDetailView.lifecycleStatus` / `approvalSubState` reflect transitions.
+- Audit: collaboration work-item resolve + create audit summaries (non-sensitive) present.
+
+#### Decided defaults (confirm if different — non-blocking)
+
+1. **Audit granularity:** add dedicated collaboration work-item create + resolve audit summaries
+   (domain §2.9.4 + §10 mandate auditing 创建/解决). Alternative would be to rely solely on the
+   lifecycle decision audit; chosen default honors the domain mandate.
+2. **Resubmit eligibility:** `APPROVAL` is resubmit-eligible **only** when `approvalSubState=PENDING_SUBMIT`
+   ("测试通过"); `PENDING_DECISION` ("待审批") is not. Matches permission-matrix §5 "测试通过状态".
+3. **REMEDIATION uniqueness:** at most one OPEN REMEDIATION per template (upsert/refresh), mirroring the
+   existing `SUBMIT_FOR_TEST` upsert pattern.
+4. **REMEDIATION `submitterUserId`:** carry forward the orchestrator who submitted for test (so the
+   "Waiting on my fixes" to-do points back to the owner), not the tester who rejected.

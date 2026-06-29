@@ -11,18 +11,16 @@ import com.bank.docgen.template.api.VariableSchemaView;
 import com.bank.docgen.template.domain.AnchorContentType;
 import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.BindingValidationStatus;
-import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.domain.VariableType;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
-import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
-import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
+import com.bank.docgen.template.service.ApprovalSubStateResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +41,7 @@ class TemplateViewMapperTest {
     @Mock
     private AnchorBindingRepository anchorBindingRepository;
     @Mock
-    private TemplateLifecycleRecordRepository lifecycleRecordRepository;
+    private ApprovalSubStateResolver approvalSubStateResolver;
 
     private TemplateViewMapper mapper;
     private ObjectMapper objectMapper;
@@ -55,7 +53,7 @@ class TemplateViewMapperTest {
                 templateVersionRepository,
                 variableSchemaRepository,
                 anchorBindingRepository,
-                lifecycleRecordRepository,
+                approvalSubStateResolver,
                 objectMapper
         );
     }
@@ -206,25 +204,14 @@ class TemplateViewMapperTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
         UUID versionId = UUID.randomUUID();
         TemplateVersionEntity version = new TemplateVersionEntity(versionId, templateId, "10000003");
-        TemplateLifecycleRecordEntity record = new TemplateLifecycleRecordEntity(
-                UUID.randomUUID(),
-                templateId,
-                LifecycleAction.SUBMIT_FOR_APPROVAL,
-                TemplateLifecycleStatus.TESTING,
-                TemplateLifecycleStatus.APPROVAL,
-                null,
-                null,
-                null,
-                "10000003"
-        );
         when(templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1))
                 .thenReturn(Optional.of(version));
         when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
                 .thenReturn(List.of());
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
                 .thenReturn(List.of());
-        when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
-                .thenReturn(List.of(record));
+        when(approvalSubStateResolver.resolve(template))
+                .thenReturn(ApprovalSubState.PENDING_DECISION);
 
         TemplateDetailView detail = mapper.toDetail(template);
 

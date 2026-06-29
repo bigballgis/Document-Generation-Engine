@@ -73,7 +73,7 @@ class TemplateServiceMetadataTest {
                 templateVersionRepository,
                 variableSchemaRepository,
                 anchorBindingRepository,
-                lifecycleRecordRepository,
+                new ApprovalSubStateResolver(lifecycleRecordRepository),
                 objectMapper
         );
         service = new TemplateService(

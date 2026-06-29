@@ -5,14 +5,10 @@ import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateSummaryView;
 import com.bank.docgen.template.api.VariableSchemaView;
-import com.bank.docgen.template.domain.ApprovalSubState;
-import com.bank.docgen.template.domain.LifecycleAction;
-import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
-import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
-import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
+import com.bank.docgen.template.service.ApprovalSubStateResolver;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
@@ -32,20 +28,20 @@ public class TemplateViewMapper {
     private final TemplateVersionRepository templateVersionRepository;
     private final VariableSchemaRepository variableSchemaRepository;
     private final AnchorBindingRepository anchorBindingRepository;
-    private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
+    private final ApprovalSubStateResolver approvalSubStateResolver;
     private final ObjectMapper objectMapper;
 
     public TemplateViewMapper(
             TemplateVersionRepository templateVersionRepository,
             VariableSchemaRepository variableSchemaRepository,
             AnchorBindingRepository anchorBindingRepository,
-            TemplateLifecycleRecordRepository lifecycleRecordRepository,
+            ApprovalSubStateResolver approvalSubStateResolver,
             ObjectMapper objectMapper
     ) {
         this.templateVersionRepository = templateVersionRepository;
         this.variableSchemaRepository = variableSchemaRepository;
         this.anchorBindingRepository = anchorBindingRepository;
-        this.lifecycleRecordRepository = lifecycleRecordRepository;
+        this.approvalSubStateResolver = approvalSubStateResolver;
         this.objectMapper = objectMapper;
     }
 
@@ -89,7 +85,7 @@ public class TemplateViewMapper {
                 template.getDescription(),
                 template.getMasterId().toString(),
                 template.getLifecycleStatus(),
-                resolveApprovalSubState(template),
+                approvalSubStateResolver.resolve(template),
                 template.getReleaseVersion(),
                 version.getId().toString(),
                 version.getDevVersionNumber(),
@@ -141,23 +137,5 @@ public class TemplateViewMapper {
     private TemplateVersionEntity currentDevVersion(UUID templateId) {
         return templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
                 .orElseThrow(TemplateNotFoundException::new);
-    }
-
-    private ApprovalSubState resolveApprovalSubState(TemplateEntity template) {
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.APPROVAL) {
-            return null;
-        }
-        List<TemplateLifecycleRecordEntity> records =
-                lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(template.getId());
-        for (TemplateLifecycleRecordEntity record : records) {
-            if (record.getAction() == LifecycleAction.SUBMIT_FOR_APPROVAL) {
-                return ApprovalSubState.PENDING_DECISION;
-            }
-            if (record.getAction() == LifecycleAction.RECORD_TEST_DECISION
-                    && record.getToStatus() == TemplateLifecycleStatus.APPROVAL) {
-                return ApprovalSubState.PENDING_SUBMIT;
-            }
-        }
-        return ApprovalSubState.PENDING_SUBMIT;
     }
 }

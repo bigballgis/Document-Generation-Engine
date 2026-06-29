@@ -12,6 +12,7 @@ import com.bank.docgen.template.api.LifecycleImpactPreviewRequest;
 import com.bank.docgen.template.api.LifecycleImpactPreviewView;
 import com.bank.docgen.template.api.PublishTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
+import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
@@ -47,6 +48,7 @@ public class TemplateLifecycleService {
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final CollaborationWorkItemWriter collaborationWorkItemWriter;
     private final RenderProfileService renderProfileService;
+    private final ApprovalSubStateResolver approvalSubStateResolver;
 
     public TemplateLifecycleService(
             TemplateService templateService,
@@ -60,7 +62,8 @@ public class TemplateLifecycleService {
             DecisionFormService decisionFormService,
             TemplateContentModuleReferenceService contentModuleReferenceService,
             CollaborationWorkItemWriter collaborationWorkItemWriter,
-            RenderProfileService renderProfileService
+            RenderProfileService renderProfileService,
+            ApprovalSubStateResolver approvalSubStateResolver
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -74,12 +77,13 @@ public class TemplateLifecycleService {
         this.contentModuleReferenceService = contentModuleReferenceService;
         this.collaborationWorkItemWriter = collaborationWorkItemWriter;
         this.renderProfileService = renderProfileService;
+        this.approvalSubStateResolver = approvalSubStateResolver;
     }
 
     @Transactional
     public TemplateDetailView submitForTest(UUID templateId, LifecycleCommentRequest request, ManagementSessionClaims session) {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
-        requireStatus(template, TemplateLifecycleStatus.DRAFT);
+        requireResubmitForTestEligible(template);
         transition(template, TemplateLifecycleStatus.TESTING, LifecycleAction.SUBMIT_FOR_TEST, null, request.commentSummary(), session);
         collaborationWorkItemWriter.upsertSubmitForTestWorkItem(template, session);
         return templateService.toDetail(template);
@@ -98,9 +102,13 @@ public class TemplateLifecycleService {
         if (request.decision() == LifecycleDecision.PASSED) {
             transition(template, TemplateLifecycleStatus.APPROVAL, LifecycleAction.RECORD_TEST_DECISION,
                     request.decision(), persistedComment, session);
+            collaborationWorkItemWriter.resolveOpenTestWorkItems(template, session);
         } else {
             transition(template, TemplateLifecycleStatus.DRAFT, LifecycleAction.RECORD_TEST_DECISION,
                     request.decision(), persistedComment, session);
+            String orchestrator = collaborationWorkItemWriter.resolveOpenTestWorkItems(template, session)
+                    .orElseGet(template::getCreatedBy);
+            collaborationWorkItemWriter.upsertRemediationWorkItem(template, orchestrator, session);
         }
         return templateService.toDetail(template);
     }
@@ -419,6 +427,23 @@ public class TemplateLifecycleService {
         if (template.getLifecycleStatus() != expected) {
             throw new TemplateValidationException("api.error.template.invalidState");
         }
+    }
+
+    /**
+     * Submit-for-test is allowed from DRAFT or from "test passed"
+     * (APPROVAL + {@link ApprovalSubState#PENDING_SUBMIT}). Once submitted for approval
+     * (APPROVAL + PENDING_DECISION) it is no longer eligible; any other status is rejected (fail-closed).
+     */
+    private void requireResubmitForTestEligible(TemplateEntity template) {
+        TemplateLifecycleStatus status = template.getLifecycleStatus();
+        if (status == TemplateLifecycleStatus.DRAFT) {
+            return;
+        }
+        if (status == TemplateLifecycleStatus.APPROVAL
+                && approvalSubStateResolver.resolve(template) == ApprovalSubState.PENDING_SUBMIT) {
+            return;
+        }
+        throw new TemplateValidationException("api.error.template.invalidState");
     }
 
     private TemplateEntity requireTestableTemplate(UUID templateId, ManagementSessionClaims session) {

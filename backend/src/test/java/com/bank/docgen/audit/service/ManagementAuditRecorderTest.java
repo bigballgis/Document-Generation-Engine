@@ -8,6 +8,8 @@ import com.bank.docgen.audit.api.ContentModuleLifecycleAuditDetail;
 import com.bank.docgen.audit.api.PolicyUpdateAuditDetail;
 import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
 import com.bank.docgen.audit.persistence.ManagementAuditEventRepository;
+import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
+import com.bank.docgen.collaboration.domain.CollaborationWorkItemTriggerType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -186,5 +188,58 @@ class ManagementAuditRecorderTest {
         assertThat(payload.get("recentCallSummary").asText()).isEqualTo("recentCalls=12/7d");
         assertThat(payload.get("templateStopRequired").asBoolean()).isTrue();
         assertThat(payload.get("releaseStopRequired").asBoolean()).isTrue();
+    }
+
+    @Test
+    void collaborationWorkItemCreated_recordsNonSensitiveSummary() {
+        UUID templateId = UUID.randomUUID();
+        UUID workItemId = UUID.randomUUID();
+
+        recorder.recordCollaborationWorkItemCreated(
+                templateId,
+                "RETAIL",
+                workItemId,
+                CollaborationWorkItemQueue.REMEDIATION,
+                CollaborationWorkItemTriggerType.TEST_FAILURE_OR_RETURN_TO_DRAFT,
+                "10000003",
+                "Tester (10000003)"
+        );
+
+        ArgumentCaptor<ManagementAuditEventEntity> captor = ArgumentCaptor.forClass(ManagementAuditEventEntity.class);
+        verify(repository).save(captor.capture());
+        ManagementAuditEventEntity saved = captor.getValue();
+
+        assertThat(saved.getEventType()).isEqualTo(ManagementAuditRecorder.COLLABORATION_WORK_ITEM_CREATED);
+        assertThat(saved.getTemplateId()).isEqualTo(templateId);
+        assertThat(saved.getGroupCode()).isEqualTo("RETAIL");
+        assertThat(saved.getActorUsername()).isEqualTo("10000003");
+        assertThat(saved.getStatusSummary()).contains("REMEDIATION");
+        assertThat(saved.getStatusSummary()).contains("TEST_FAILURE_OR_RETURN_TO_DRAFT");
+        assertThat(saved.getChangedAreasJson()).contains(workItemId.toString());
+    }
+
+    @Test
+    void collaborationWorkItemResolved_recordsNonSensitiveSummary() {
+        UUID templateId = UUID.randomUUID();
+        UUID workItemId = UUID.randomUUID();
+
+        recorder.recordCollaborationWorkItemResolved(
+                templateId,
+                "RETAIL",
+                workItemId,
+                CollaborationWorkItemQueue.TEST,
+                "10000003",
+                "Tester (10000003)"
+        );
+
+        ArgumentCaptor<ManagementAuditEventEntity> captor = ArgumentCaptor.forClass(ManagementAuditEventEntity.class);
+        verify(repository).save(captor.capture());
+        ManagementAuditEventEntity saved = captor.getValue();
+
+        assertThat(saved.getEventType()).isEqualTo(ManagementAuditRecorder.COLLABORATION_WORK_ITEM_RESOLVED);
+        assertThat(saved.getTemplateId()).isEqualTo(templateId);
+        assertThat(saved.getGroupCode()).isEqualTo("RETAIL");
+        assertThat(saved.getStatusSummary()).contains("TEST");
+        assertThat(saved.getChangedAreasJson()).contains(workItemId.toString());
     }
 }

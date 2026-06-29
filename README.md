@@ -129,8 +129,14 @@ blue-green cutover in [deploy/blue-green-runbook.md](deploy/blue-green-runbook.m
 **P14-T01** clause/content module lifecycle (T01a–T01e; backend **469**; frontend **224**; architecture re-review **PASS**);
 **P14-T02** collaboration to-dos + timeout escalation (T02a–T02d; E2E **3/3**; backend **481**; frontend **235**);
 **P14-T03** template export/import (T03a–T03c; OpenAPI contract; E2E **2/2**; backend **481**; frontend **235+**).
-**Active phase:** **P15** Kubernetes deployment & container hardening (**In Progress**; **P15-T01 Done** T01a–T01c; **P15-T02 Done** re-earned; **P15-T03 Done** re-earned; **P15-T04 Done** re-earned; **P15-T05 Done** re-earned; **P15-T06 Done** re-earned; **P15-T07 Done** re-earned; **P15-T08 Done** re-earned; **P15-T09 Done** re-earned; **next P15-T10** deployment docs + phase close). **P18 Not Started** (queued after P15).
+**Active phase:** **P21** Role-journey frontend redesign & business-friendly terminology
+(**In Progress**; activated 2026-06-29). First slice **P21-T02 Done** (2026-06-29) — A1 backend
+collaboration work-item closed loop: `recordTestDecision` resolves OPEN TEST to-dos + emits a
+REMEDIATION on FAILED→DRAFT; resubmit-for-test eligibility (DRAFT or APPROVAL+PENDING_SUBMIT);
+create/resolve audit; `ApprovalSubStateResolver` SSOT; `mvn verify` BUILD SUCCESS (AUD-A01 TEST
+path / AUD-A02 partial resolved; approval-path closure → P21-T07). Remaining P21 tasks Not Started.
 MVP P0–P11 complete;
-**P13** Done (2026-06-23); **P17** Done (2026-06-25); **P19** Done (2026-06-25);
+**P13** Done (2026-06-23); **P14** Done (2026-06-27); **P15** Done (2026-06-27; T01–T10);
+**P17** Done (2026-06-25); **P18** Done (2026-06-28); **P19** Done (2026-06-25);
 **P20** Done (2026-06-25). P12 (deferred enhancements) is the non-active catch-all.
 Outstanding: external deployment validation (E05-T06), intranet SCA (M9-T02).

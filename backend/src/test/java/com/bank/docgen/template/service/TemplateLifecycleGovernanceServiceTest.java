@@ -59,6 +59,8 @@ class TemplateLifecycleGovernanceServiceTest {
     private CollaborationWorkItemWriter collaborationWorkItemWriter;
     @Mock
     private com.bank.docgen.authoring.structured.RenderProfileService renderProfileService;
+    @Mock
+    private ApprovalSubStateResolver approvalSubStateResolver;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -80,7 +82,8 @@ class TemplateLifecycleGovernanceServiceTest {
                 decisionFormService,
                 contentModuleReferenceService,
                 collaborationWorkItemWriter,
-                renderProfileService
+                renderProfileService,
+                approvalSubStateResolver
         );
         groupAdmin = session(List.of("GROUP_ADMIN"), List.of("RETAIL"));
         templateId = UUID.randomUUID();
