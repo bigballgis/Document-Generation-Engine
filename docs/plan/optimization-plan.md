@@ -96,7 +96,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | D2 | H | Unify generation path | `DocumentGenerationEngine` vs `RuntimeGenerationService` duplicate assembly | **Done** (Wave 2–3): sync path delegates to `DocumentGenerationEngine`; `RuntimeGenerationServiceGenerateTest` updated; gates green (184 tests) |
 | D3 | M | Introduce MapStruct mappers | hand-written `toSummary`/`toDetail`/`toPolicyView` (e.g. `TemplateService` L341–404) | Mappers via MapStruct (ADR); services slimmed; behavior unchanged | **Done** (2026-06-25; COR-P08 apimgmt `ApiPolicyViewMapper`; opportunistic expansion ongoing) |
 | D4 | M | Introduce QueryDSL for complex queries | `ManagementAuditEventRepository` JPQL, in-memory filtering | Audit/list queries type-safe + pageable via QueryDSL | **Done** (2026-06-25; COR-P07; `ManagementAuditEventRepositoryQuerydslTest` 5/5; verify 319 tests) |
-| D5 | M | Split god services | `TemplateService` 405 L, `BatchGenerationService` 403 L, `ApiManagementService` 326 L | Responsibilities separated (validation/mapping/authz extracted); each class focused | Not Started |
+| D5 | M | Split god services | `TemplateService` ~547 L (was ~651), `BatchGenerationService` 403 L, `ApiManagementService` 326 L | Responsibilities separated (validation/mapping/authz extracted); each class focused | **In Progress** — slice 1: `TemplateViewMapper` extracted (summary/detail/variable/binding/rules mapping); `TemplateService` delegates |
 | D6 | L | Evaluate declarative authorization | no `@PreAuthorize`; authz all manual in services | Decision recorded; if adopted, consistent enforcement reduces missed-endpoint risk | Not Started |
 
 ### OPT-E Backend security & correctness hardening

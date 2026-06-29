@@ -38,24 +38,20 @@ import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
-import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.AnchorContentType;
 import com.bank.docgen.template.domain.BindingValidationStatus;
-import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.domain.VariableType;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
-import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
-import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
+import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,7 +74,6 @@ public class TemplateService {
     private final VariableSchemaRepository variableSchemaRepository;
     private final AnchorBindingRepository anchorBindingRepository;
     private final MasterDocumentRepository masterDocumentRepository;
-    private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
     private final ApiPolicyRepository apiPolicyRepository;
     private final GroupAccessService groupAccessService;
     private final ObjectMapper objectMapper;
@@ -89,6 +84,7 @@ public class TemplateService {
     private final ReferenceNodeService referenceNodeService;
     private final NumberingService numberingService;
     private final PasteCleaningService pasteCleaningService;
+    private final TemplateViewMapper templateViewMapper;
 
     public TemplateService(
             TemplateRepository templateRepository,
@@ -96,7 +92,6 @@ public class TemplateService {
             VariableSchemaRepository variableSchemaRepository,
             AnchorBindingRepository anchorBindingRepository,
             MasterDocumentRepository masterDocumentRepository,
-            TemplateLifecycleRecordRepository lifecycleRecordRepository,
             ApiPolicyRepository apiPolicyRepository,
             GroupAccessService groupAccessService,
             ObjectMapper objectMapper,
@@ -106,14 +101,14 @@ public class TemplateService {
             TableComponentService tableComponentService,
             ReferenceNodeService referenceNodeService,
             NumberingService numberingService,
-            PasteCleaningService pasteCleaningService
+            PasteCleaningService pasteCleaningService,
+            TemplateViewMapper templateViewMapper
     ) {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
         this.variableSchemaRepository = variableSchemaRepository;
         this.anchorBindingRepository = anchorBindingRepository;
         this.masterDocumentRepository = masterDocumentRepository;
-        this.lifecycleRecordRepository = lifecycleRecordRepository;
         this.apiPolicyRepository = apiPolicyRepository;
         this.groupAccessService = groupAccessService;
         this.objectMapper = objectMapper;
@@ -124,6 +119,7 @@ public class TemplateService {
         this.referenceNodeService = referenceNodeService;
         this.numberingService = numberingService;
         this.pasteCleaningService = pasteCleaningService;
+        this.templateViewMapper = templateViewMapper;
     }
 
     @Transactional(readOnly = true)
@@ -137,13 +133,13 @@ public class TemplateService {
         } else {
             templates = templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(groupCodes);
         }
-        return templates.stream().map(this::toSummary).toList();
+        return templates.stream().map(templateViewMapper::toSummary).toList();
     }
 
     @Transactional(readOnly = true)
     public TemplateDetailView get(UUID templateId, ManagementSessionClaims session) {
         TemplateEntity template = requireReadableTemplate(templateId, session);
-        return toDetail(template);
+        return templateViewMapper.toDetail(template);
     }
 
     @Transactional(readOnly = true)
@@ -196,7 +192,7 @@ public class TemplateService {
         templateRepository.save(template);
         TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), templateId, session.username());
         templateVersionRepository.save(version);
-        return toDetail(template);
+        return templateViewMapper.toDetail(template);
     }
 
     @Transactional
@@ -219,7 +215,7 @@ public class TemplateService {
         }
         template.setUpdatedBy(session.username());
         templateRepository.save(template);
-        return toDetail(template);
+        return templateViewMapper.toDetail(template);
     }
 
     @Transactional
@@ -256,7 +252,7 @@ public class TemplateService {
             );
         }
         variableSchemaRepository.save(entity);
-        return toVariableView(entity);
+        return templateViewMapper.toVariableView(entity);
     }
 
     @Transactional
@@ -308,7 +304,7 @@ public class TemplateService {
             );
         }
         anchorBindingRepository.save(entity);
-        return toBindingView(entity);
+        return templateViewMapper.toBindingView(entity);
     }
 
     @Transactional
@@ -326,7 +322,7 @@ public class TemplateService {
             throw new TemplateValidationException("api.error.template.invalidRulesJson");
         }
         templateVersionRepository.save(version);
-        return loadRules(version);
+        return templateViewMapper.loadRules(version);
     }
 
     @Transactional(readOnly = true)
@@ -361,7 +357,7 @@ public class TemplateService {
                 binding.update(binding.getDeclaredContentType(), binding.getStructuredContentJson(), status);
                 anchorBindingRepository.save(binding);
             }
-            views.add(toBindingView(binding));
+            views.add(templateViewMapper.toBindingView(binding));
             switch (status) {
                 case VALID -> valid++;
                 case MISSING_ANCHOR -> missing++;
@@ -541,110 +537,11 @@ public class TemplateService {
                 .orElseThrow(TemplateNotFoundException::new);
     }
 
-    private TemplateSummaryView toSummary(TemplateEntity template) {
-        int releaseVersionCount = (int) templateVersionRepository
-                .findByTemplateIdOrderByDevVersionNumberDesc(template.getId())
-                .stream()
-                .filter(version -> version.getReleaseVersion() != null && !version.getReleaseVersion().isBlank())
-                .count();
-        return new TemplateSummaryView(
-                template.getId().toString(),
-                template.getExternalId(),
-                template.getGroupCode(),
-                template.getName(),
-                template.getLifecycleStatus(),
-                template.getReleaseVersion(),
-                releaseVersionCount,
-                template.getMasterId().toString(),
-                template.getUpdatedBy(),
-                template.getUpdatedAt()
-        );
-    }
-
     TemplateDetailView toDetail(TemplateEntity template) {
-        TemplateVersionEntity version = currentDevVersion(template.getId());
-        List<VariableSchemaView> variables = variableSchemaRepository
-                .findByTemplateVersionIdOrderByVariableKeyAsc(version.getId())
-                .stream()
-                .map(this::toVariableView)
-                .toList();
-        List<AnchorBindingView> bindings = anchorBindingRepository
-                .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId())
-                .stream()
-                .map(this::toBindingView)
-                .toList();
-        return new TemplateDetailView(
-                template.getId().toString(),
-                template.getExternalId(),
-                template.getGroupCode(),
-                template.getName(),
-                template.getDescription(),
-                template.getMasterId().toString(),
-                template.getLifecycleStatus(),
-                resolveApprovalSubState(template),
-                template.getReleaseVersion(),
-                version.getId().toString(),
-                version.getDevVersionNumber(),
-                variables,
-                bindings,
-                loadRules(version),
-                template.getCreatedAt(),
-                template.getUpdatedAt()
-        );
+        return templateViewMapper.toDetail(template);
     }
 
     List<CompositionRuleView> loadRules(TemplateVersionEntity version) {
-        if (version.getRulesJson() == null || version.getRulesJson().isBlank()) {
-            return List.of();
-        }
-        try {
-            return objectMapper.readValue(
-                    version.getRulesJson(),
-                    new TypeReference<List<CompositionRuleView>>() {
-                    }
-            );
-        } catch (JsonProcessingException exception) {
-            throw new TemplateValidationException("api.error.template.invalidRulesJson");
-        }
-    }
-
-    private VariableSchemaView toVariableView(VariableSchemaEntity entity) {
-        return new VariableSchemaView(
-                entity.getId().toString(),
-                entity.getVariableKey(),
-                entity.getVariableType(),
-                entity.isRequired(),
-                entity.getDefaultValue(),
-                entity.getEnumValues(),
-                entity.getDescription()
-        );
-    }
-
-    private AnchorBindingView toBindingView(AnchorBindingEntity entity) {
-        return new AnchorBindingView(
-                entity.getId().toString(),
-                entity.getAnchorId(),
-                entity.getDeclaredContentType().name(),
-                entity.getStructuredContentJson(),
-                entity.getValidationStatus()
-        );
-    }
-
-    private ApprovalSubState resolveApprovalSubState(TemplateEntity template) {
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.APPROVAL) {
-            return null;
-        }
-        List<TemplateLifecycleRecordEntity> records =
-                lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(template.getId());
-        for (TemplateLifecycleRecordEntity record : records) {
-            if (record.getAction() == LifecycleAction.SUBMIT_FOR_APPROVAL) {
-                return ApprovalSubState.PENDING_DECISION;
-            }
-            if (record.getAction() == LifecycleAction.RECORD_TEST_DECISION
-                    && record.getToStatus() == TemplateLifecycleStatus.APPROVAL) {
-                return ApprovalSubState.PENDING_SUBMIT;
-            }
-        }
-        return ApprovalSubState.PENDING_SUBMIT;
+        return templateViewMapper.loadRules(version);
     }
 }

@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-24 (P18 UI polish + plan layer alignment; frontend **250** Vitest green)
+**Last synced:** 2026-06-24 (OPT-D5 slice 1 — `TemplateViewMapper`; backend **521** tests)
 **Orchestration note (2026-06-28):** **P18 Done** — **P18-T01–T10 Done**.
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
@@ -20,7 +20,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
 | Frontend (latest full gates) | `pnpm -C frontend lint`, `type-check`, `test`, `build` | Green — **250** Vitest tests (2026-06-24) | P18 polish: fidelity filter empty state, paste dialog cancel/undo split, style catalog i18n labels; flaky test timeout fix |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **514** tests (1 skipped), BUILD SUCCESS (2026-06-28) | P18-T10 management APIs + `FidelityWarningView` extension (+1 slice test) |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **521** tests (1 skipped), BUILD SUCCESS (2026-06-24) | OPT-D5 slice 1: `TemplateViewMapper` extracted from `TemplateService`; +7 unit tests |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
 | Frontend test | `pnpm -C frontend test` / `vitest run` | Green | **235 tests**, 2026-06-27 (P14-T02 E2E remediation — `roles.ts` workbench guards) |
@@ -111,6 +111,7 @@ P18-T08 publish-locked render profile — `RenderProfileService`, `RenderProfile
 P18-T09 fidelity warning surfacing — `FidelityValidationService` aggregates T02–T06 warnings across anchor bindings; wired into `PreviewGenerationService`, `DocumentGenerationEngine`, `RuntimeGenerationService` (incl. idempotency replay recompute); removed hardcoded `CONTROLLED_STYLE_FALLBACK` stub; `FidelityValidationServiceTest` **3/3**; `TemplatePlatformSliceTest` `preview_emitsRealWarnings_fromValidationEngine`, `runtimeSuccess_includesFidelityWarnings`, `noHardcodedWarning_whenContentClean` (2026-06-28).
 
 P18-T10 controlled authoring UI — `ControlledStructuredContentEditor`, `PasteCleaningSummaryDialog`, `FidelityWarningList`; management APIs `GET /api/management/v1/templates/{templateId}/master-style-catalog`, `POST .../paste-clean`; extended `FidelityWarningView` (`location`, `artifact`, `viewed`); wired into `TemplateAuthoringPanel` + `TemplatePreviewPanel`; Vitest structuredContentNodes/pasteSummary/fidelityFilters tests (2026-06-28); Playwright functional E2E **5/5** + UIUX evidence **1/1** (12 screenshots, manifest PASS, Docker 4173, 2026-06-29).
+OPT-D5 slice 1 — `TemplateViewMapper` extracted from `TemplateService`; backend verify **521** (+7 from 514; `TemplateViewMapperTest` 7/7); `TemplateService` 651→547 L (2026-06-24).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)

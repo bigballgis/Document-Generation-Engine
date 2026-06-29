@@ -21,6 +21,7 @@ import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
+import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
@@ -67,23 +68,31 @@ class TemplateServiceMetadataTest {
 
     @BeforeEach
     void setUp() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        TemplateViewMapper viewMapper = new TemplateViewMapper(
+                templateVersionRepository,
+                variableSchemaRepository,
+                anchorBindingRepository,
+                lifecycleRecordRepository,
+                objectMapper
+        );
         service = new TemplateService(
                 templateRepository,
                 templateVersionRepository,
                 variableSchemaRepository,
                 anchorBindingRepository,
                 masterDocumentRepository,
-                lifecycleRecordRepository,
                 apiPolicyRepository,
                 groupAccessService,
-                new ObjectMapper(),
-                new StructuredContentSchemaValidator(new ObjectMapper()),
-                new NodeMatrixValidationService(new ObjectMapper()),
-                new MasterStyleCatalogService(new ObjectMapper()),
-                new TableComponentService(new ObjectMapper()),
-                new ReferenceNodeService(new ObjectMapper()),
-                new NumberingService(new ObjectMapper()),
-                new PasteCleaningService(new ObjectMapper())
+                objectMapper,
+                new StructuredContentSchemaValidator(objectMapper),
+                new NodeMatrixValidationService(objectMapper),
+                new MasterStyleCatalogService(objectMapper),
+                new TableComponentService(objectMapper),
+                new ReferenceNodeService(objectMapper),
+                new NumberingService(objectMapper),
+                new PasteCleaningService(objectMapper),
+                viewMapper
         );
         author = new ManagementSessionClaims(
                 "10000003",
