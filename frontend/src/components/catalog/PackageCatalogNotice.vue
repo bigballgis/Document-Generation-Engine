@@ -3,21 +3,29 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
-  kind: 'master' | 'template'
+  kind: 'master' | 'template' | 'contentModule'
 }>()
 
 const { t } = useI18n()
 
-const titleKey = computed(() =>
-  props.kind === 'master'
-    ? 'packageCatalog.master.noticeTitle'
-    : 'packageCatalog.template.noticeTitle',
-)
-const descriptionKey = computed(() =>
-  props.kind === 'master'
-    ? 'packageCatalog.master.noticeDescription'
-    : 'packageCatalog.template.noticeDescription',
-)
+const titleKey = computed(() => {
+  if (props.kind === 'master') {
+    return 'packageCatalog.master.noticeTitle'
+  }
+  if (props.kind === 'contentModule') {
+    return 'packageCatalog.contentModule.noticeTitle'
+  }
+  return 'packageCatalog.template.noticeTitle'
+})
+const descriptionKey = computed(() => {
+  if (props.kind === 'master') {
+    return 'packageCatalog.master.noticeDescription'
+  }
+  if (props.kind === 'contentModule') {
+    return 'packageCatalog.contentModule.noticeDescription'
+  }
+  return 'packageCatalog.template.noticeDescription'
+})
 </script>
 
 <template>

@@ -19,8 +19,24 @@ export const E2E_TEMPLATE_AUTHOR = {
   password: 'ChangeMe123!',
 }
 
+export const E2E_MASTER_DESIGNER = {
+  username: '10000005',
+  password: 'ChangeMe123!',
+}
+
+export const E2E_TEMPLATE_TESTER = {
+  username: '10000006',
+  password: 'ChangeMe123!',
+}
+
+export const E2E_TEMPLATE_APPROVER = {
+  username: '10000007',
+  password: 'ChangeMe123!',
+}
+
 export async function loginAs(page: Page, credentials: { username: string; password: string }) {
-  await page.goto('/login')
+  await page.goto('/login', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByPlaceholder('10000001')).toBeVisible()
   await page.getByPlaceholder('10000001').fill(credentials.username)
   await page.locator('input[type="password"]').fill(credentials.password)
   await page.getByRole('button', { name: /sign in/i }).click()

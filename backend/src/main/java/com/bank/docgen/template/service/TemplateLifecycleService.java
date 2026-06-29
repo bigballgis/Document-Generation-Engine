@@ -1,10 +1,10 @@
 package com.bank.docgen.template.service;
 
-import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
-import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.authoring.structured.RenderProfileService;
+import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
-import com.bank.docgen.template.api.BindingValidationView;
+import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
 import com.bank.docgen.template.api.LifecycleGovernanceRequest;
@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TemplateLifecycleService {
 
-    private static final String STRUCTURED_OPINION_PREFIX = "[STRUCTURED_OPINION]";
+    private static final String STRUCTURED_OPINION_PREFIX = DecisionFormService.STRUCTURED_OPINION_PREFIX;
     private static final ObjectMapper STRUCTURED_OPINION_MAPPER = new ObjectMapper();
 
     private final TemplateService templateService;
@@ -42,7 +42,11 @@ public class TemplateLifecycleService {
     private final GroupAccessService groupAccessService;
     private final LifecycleImpactPreviewService lifecycleImpactPreviewService;
     private final MessageResolver messageResolver;
-    private final ApiPolicyRepository apiPolicyRepository;
+    private final PublishGateService publishGateService;
+    private final DecisionFormService decisionFormService;
+    private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final CollaborationWorkItemWriter collaborationWorkItemWriter;
+    private final RenderProfileService renderProfileService;
 
     public TemplateLifecycleService(
             TemplateService templateService,
@@ -52,7 +56,11 @@ public class TemplateLifecycleService {
             GroupAccessService groupAccessService,
             LifecycleImpactPreviewService lifecycleImpactPreviewService,
             MessageResolver messageResolver,
-            ApiPolicyRepository apiPolicyRepository
+            PublishGateService publishGateService,
+            DecisionFormService decisionFormService,
+            TemplateContentModuleReferenceService contentModuleReferenceService,
+            CollaborationWorkItemWriter collaborationWorkItemWriter,
+            RenderProfileService renderProfileService
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -61,7 +69,11 @@ public class TemplateLifecycleService {
         this.groupAccessService = groupAccessService;
         this.lifecycleImpactPreviewService = lifecycleImpactPreviewService;
         this.messageResolver = messageResolver;
-        this.apiPolicyRepository = apiPolicyRepository;
+        this.publishGateService = publishGateService;
+        this.decisionFormService = decisionFormService;
+        this.contentModuleReferenceService = contentModuleReferenceService;
+        this.collaborationWorkItemWriter = collaborationWorkItemWriter;
+        this.renderProfileService = renderProfileService;
     }
 
     @Transactional
@@ -69,6 +81,7 @@ public class TemplateLifecycleService {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
         requireStatus(template, TemplateLifecycleStatus.DRAFT);
         transition(template, TemplateLifecycleStatus.TESTING, LifecycleAction.SUBMIT_FOR_TEST, null, request.commentSummary(), session);
+        collaborationWorkItemWriter.upsertSubmitForTestWorkItem(template, session);
         return templateService.toDetail(template);
     }
 
@@ -80,7 +93,8 @@ public class TemplateLifecycleService {
     ) {
         TemplateEntity template = requireTestableTemplate(templateId, session);
         requireStatus(template, TemplateLifecycleStatus.TESTING);
-        String persistedComment = resolveDecisionComment(request);
+        decisionFormService.validateTestDecision(request, session);
+        String persistedComment = formatDecisionComment(request, session);
         if (request.decision() == LifecycleDecision.PASSED) {
             transition(template, TemplateLifecycleStatus.APPROVAL, LifecycleAction.RECORD_TEST_DECISION,
                     request.decision(), persistedComment, session);
@@ -108,7 +122,8 @@ public class TemplateLifecycleService {
     ) {
         TemplateEntity template = requireApprovableTemplate(templateId, session);
         requireStatus(template, TemplateLifecycleStatus.APPROVAL);
-        String persistedComment = resolveDecisionComment(request);
+        decisionFormService.validateApprovalDecision(request, session);
+        String persistedComment = formatDecisionComment(request, session);
         if (request.decision() == LifecycleDecision.APPROVED) {
             transition(template, TemplateLifecycleStatus.PENDING_RELEASE, LifecycleAction.RECORD_APPROVAL_DECISION,
                     request.decision(), persistedComment, session);
@@ -123,7 +138,7 @@ public class TemplateLifecycleService {
     public TemplateDetailView publish(UUID templateId, PublishTemplateRequest request, ManagementSessionClaims session) {
         TemplateEntity template = requirePublishableTemplate(templateId, session);
         requireStatus(template, TemplateLifecycleStatus.PENDING_RELEASE);
-        assertPublishGateReady(templateId, session);
+        publishGateService.assertReady(templateId, session);
         template.setReleaseVersion(request.releaseVersion());
         template.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
         template.setUpdatedBy(session.username());
@@ -131,7 +146,9 @@ public class TemplateLifecycleService {
         TemplateVersionEntity version = requireReleaseCandidateVersion(templateId);
         version.setReleaseVersion(request.releaseVersion());
         version.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
+        renderProfileService.lockForPublish(version);
         templateVersionRepository.save(version);
+        contentModuleReferenceService.lockReferencesForPublish(version.getId());
         recordLifecycle(template, LifecycleAction.PUBLISH, TemplateLifecycleStatus.PENDING_RELEASE,
                 TemplateLifecycleStatus.PUBLISHED, null,
                 messageResolver.resolve("api.audit.lifecycle.publishedRelease", request.releaseVersion()),
@@ -249,25 +266,23 @@ public class TemplateLifecycleService {
         }
     }
 
-    private String resolveDecisionComment(LifecycleDecisionRequest request) {
+    private String formatDecisionComment(LifecycleDecisionRequest request, ManagementSessionClaims session) {
+        String comment = request.commentSummary();
         if (requiresStructuredNegativeOpinion(request.decision())) {
-            requireStructuredNegativeOpinion(request);
-            return formatStructuredDecisionComment(request);
+            comment = appendBlock(comment, formatStructuredDecisionComment(request));
         }
-        return request.commentSummary();
+        if (request.decision() == LifecycleDecision.REJECTED) {
+            comment = appendBlock(comment, formatRemediationLinks(request));
+        }
+        String exceptionMarker = formatExceptionMarker(request, session);
+        if (exceptionMarker != null) {
+            comment = appendBlock(comment, exceptionMarker);
+        }
+        return comment;
     }
 
     private boolean requiresStructuredNegativeOpinion(LifecycleDecision decision) {
         return decision == LifecycleDecision.FAILED || decision == LifecycleDecision.REJECTED;
-    }
-
-    private void requireStructuredNegativeOpinion(LifecycleDecisionRequest request) {
-        if (isBlank(request.reasonCategory())) {
-            throw new TemplateValidationException("api.error.template.decisionReasonCategoryRequired");
-        }
-        if (isBlank(request.impactSummary())) {
-            throw new TemplateValidationException("api.error.template.decisionImpactSummaryRequired");
-        }
     }
 
     private String formatStructuredDecisionComment(LifecycleDecisionRequest request) {
@@ -275,14 +290,55 @@ public class TemplateLifecycleService {
         structured.put("reasonCategory", request.reasonCategory().trim());
         structured.put("impactSummary", request.impactSummary().trim());
         try {
-            String structuredBlock = STRUCTURED_OPINION_PREFIX + STRUCTURED_OPINION_MAPPER.writeValueAsString(structured);
-            if (request.commentSummary() != null && !request.commentSummary().isBlank()) {
-                return request.commentSummary().trim() + "\n" + structuredBlock;
-            }
-            return structuredBlock;
+            return STRUCTURED_OPINION_PREFIX + STRUCTURED_OPINION_MAPPER.writeValueAsString(structured);
         } catch (JsonProcessingException ex) {
             throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
         }
+    }
+
+    private String formatRemediationLinks(LifecycleDecisionRequest request) {
+        Map<String, String> remediation = new LinkedHashMap<>();
+        if (!isBlank(request.remediationTestRecordId())) {
+            remediation.put("testRecordId", request.remediationTestRecordId().trim());
+        }
+        if (!isBlank(request.remediationChangeDiffRef())) {
+            remediation.put("changeDiffRef", request.remediationChangeDiffRef().trim());
+        }
+        if (!isBlank(request.remediationChecklistCode())) {
+            remediation.put("checklistCode", request.remediationChecklistCode().trim());
+        }
+        if (remediation.isEmpty()) {
+            return null;
+        }
+        try {
+            return STRUCTURED_OPINION_PREFIX + STRUCTURED_OPINION_MAPPER.writeValueAsString(remediation);
+        } catch (JsonProcessingException ex) {
+            throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
+        }
+    }
+
+    private String formatExceptionMarker(LifecycleDecisionRequest request, ManagementSessionClaims session) {
+        if (!decisionFormService.isGroupAdminException(request, session)) {
+            return null;
+        }
+        Map<String, String> marker = new LinkedHashMap<>();
+        marker.put("exceptionReason", request.exceptionReason().trim());
+        try {
+            return DecisionFormService.EXCEPTION_INTERVENTION_PREFIX
+                    + STRUCTURED_OPINION_MAPPER.writeValueAsString(marker);
+        } catch (JsonProcessingException ex) {
+            throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
+        }
+    }
+
+    private String appendBlock(String comment, String block) {
+        if (block == null || block.isBlank()) {
+            return comment;
+        }
+        if (comment != null && !comment.isBlank()) {
+            return comment.trim() + "\n" + block;
+        }
+        return block;
     }
 
     private boolean isBlank(String value) {
@@ -384,16 +440,6 @@ public class TemplateLifecycleService {
             throw new TemplateAccessDeniedException();
         }
         return templateService.requireReadableTemplate(templateId, session);
-    }
-
-    private void assertPublishGateReady(UUID templateId, ManagementSessionClaims session) {
-        BindingValidationView bindings = templateService.validateBindings(templateId, session);
-        if (bindings.summary().blocking()) {
-            throw new TemplateValidationException("api.error.template.publishGateBlocked");
-        }
-        if (apiPolicyRepository.findByTemplateId(templateId).isEmpty()) {
-            throw new TemplateValidationException("api.error.runtime.policyNotConfigured");
-        }
     }
 
     private TemplateVersionEntity requireReleaseCandidateVersion(UUID templateId) {

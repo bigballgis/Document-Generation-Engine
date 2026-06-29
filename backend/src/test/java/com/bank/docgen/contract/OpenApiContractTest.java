@@ -28,6 +28,10 @@ class OpenApiContractTest {
             "exportManagementAuditEvents",
             "getLifecycleAuditEvents");
 
+    private static final Set<String> REQUIRED_COLLABORATION_TIMEOUT_OPERATIONS = Set.of(
+            "getCollaborationTimeoutConfig",
+            "upsertCollaborationTimeoutConfig");
+
     @Test
     void openapiV1ParsesAndContainsRuntimeOperations() {
         Path contractPath = Path.of("..", "docs", "api", "openapi-v1.yaml").normalize();
@@ -49,5 +53,6 @@ class OpenApiContractTest {
 
         assertThat(operationIds).containsAll(REQUIRED_RUNTIME_OPERATIONS);
         assertThat(operationIds).containsAll(REQUIRED_ADMIN_AUDIT_OPERATIONS);
+        assertThat(operationIds).containsAll(REQUIRED_COLLABORATION_TIMEOUT_OPERATIONS);
     }
 }

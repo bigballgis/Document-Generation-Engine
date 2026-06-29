@@ -1,0 +1,41 @@
+{{- if and .Values.frontend.enabled .Values.autoscaling.frontend.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "docgen.frontend.fullname" . }}
+  labels:
+    {{- include "docgen.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ if .Values.blueGreen.enabled }}{{ include "docgen.frontend.color.fullname" (dict "root" . "color" .Values.blueGreen.activeColor) }}{{ else }}{{ include "docgen.frontend.fullname" . }}{{ end }}
+  minReplicas: {{ .Values.autoscaling.frontend.minReplicas }}
+  maxReplicas: {{ .Values.autoscaling.frontend.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.frontend.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.autoscaling.frontend.targetMemoryUtilizationPercentage }}
+    {{- if .Values.autoscaling.frontend.customMetric.enabled }}
+    # Custom metric requires Prometheus Adapter (or equivalent) per ADR-0030.
+    - type: Pods
+      pods:
+        metric:
+          name: {{ .Values.autoscaling.frontend.customMetric.name }}
+        target:
+          type: {{ .Values.autoscaling.frontend.customMetric.targetType }}
+          {{- if eq .Values.autoscaling.frontend.customMetric.targetType "AverageValue" }}
+          averageValue: {{ .Values.autoscaling.frontend.customMetric.averageValue | quote }}
+          {{- end }}
+    {{- end }}
+{{- end }}

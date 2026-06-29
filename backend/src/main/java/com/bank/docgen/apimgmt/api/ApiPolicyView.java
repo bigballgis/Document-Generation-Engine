@@ -12,6 +12,8 @@ public record ApiPolicyView(
         List<String> outputModes,
         boolean batchEnabled,
         int maxBatchSize,
+        int batchSyncMaxItems,
+        int batchAsyncMaxItems,
         boolean docxEncryptionEnabled,
         boolean pdfEncryptionEnabled,
         Instant updatedAt

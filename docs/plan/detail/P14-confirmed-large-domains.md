@@ -1,7 +1,7 @@
 # P14 — Confirmed Large Domains (Detailed Plan)
 
-**Phase status:** Spec Done (2026-06-23) | **Depends on:** P2–P8  
-**Implementation status:** Not Started — behavior specs confirmed in this plan + `permission-matrix.md` §5/§5.1 + ADR-0019; zero backend/UI code until P14 activation.
+**Phase status:** **Done** (2026-06-27) | **Depends on:** P2–P8  
+**Implementation status:** **P14-T01 Done** (2026-06-26; vertical slice T01a–T01e + architecture remediation); **P14-T02 Done** (2026-06-27; vertical slice T02a–T02d); **P14-T03 Done** (2026-06-27; vertical slice T03a–T03c + E2E **2/2**). All exit criteria met.
 
 ## Behavior goal
 
@@ -18,6 +18,8 @@ and green gates before marking Done.
 
 ## P14-T01 Clause / content module lifecycle
 
+**Slice status:** **Done** (2026-06-26) — T01a domain + Flyway, T01b management REST + governance, T01c template reference + impact, T01d management UI, T01e architecture remediation; backend verify **469** tests; frontend lint/type-check/test (**224**) / build green; architecture re-review **PASS** (2026-06-26).
+
 ### Actor / roles
 
 | Action | GLOBAL | GROUP | MASTER_DESIGNER | TEMPLATE_AUTHOR | TESTER | APPROVER |
@@ -31,6 +33,9 @@ and green gates before marking Done.
 
 `DRAFT` → `PENDING_APPROVAL` → `APPROVED` → `STOPPED` / `DEPRECATED` (logical delete).
 
+Implementation mapping (`reviewState` + `lifecycleState`, API `SUBMITTED` / `ACTIVE`): see
+[`domain-model.md` §2.9.2.1](../../domain/domain-model.md#2921-产品状态--实现映射p14-t01).
+
 ### Acceptance scenarios
 
 - **Given** an approved clause module v1.0 in group RETAIL, **When** author references it
@@ -42,16 +47,19 @@ and green gates before marking Done.
 
 ### Tasks
 
-| ID | Task | Status |
-| --- | --- | --- |
-| P14-T01a | Domain model + Flyway + repository | Not Started |
-| P14-T01b | Management REST CRUD + lifecycle transitions | Not Started |
-| P14-T01c | Template reference + impact analysis integration | Not Started |
-| P14-T01d | Management UI (list, detail, lifecycle) | Not Started |
+| ID | Task | Status | Doc / API traceability |
+| --- | --- | --- | --- |
+| P14-T01a | Domain model + Flyway + repository | Done (2026-06-26) | [`domain-model.md` §2.9.2 / §2.9.2.1](../../domain/domain-model.md#292-条款或内容模块-clause-or-content-module); [`permission-matrix.md` §5.1](../../security/permission-matrix.md#51-条款或内容模块权限矩阵); [ADR-0019](../../adr/rendering-authoring/0019-structured-authoring-and-rendering-boundary.md); no REST in this slice. **Evidence:** `com.bank.docgen.contentmodule` — `ContentModuleEntity`, `ContentModuleVersionEntity`, `ContentModuleReviewState`, `ContentModuleLifecycleState`, `ContentModuleRepository`, `ContentModuleVersionRepository`; Flyway `V25__content_module.sql`; `ContentModuleRepositoryTest` (7 `@DataJpaTest`); gate `mvn -B -ntp -f backend/pom.xml verify` — **330** tests (+7 from 323 baseline) |
+| P14-T01b | Management REST CRUD + lifecycle transitions | Done (2026-06-26) | [`contract-outline.md` §内容模块治理](../../api/contract-outline.md#条款或内容模块治理契约); [OpenAPI v1](../../api/openapi-v1.yaml) — management CRUD (`/api/management/v1/content-modules` list/create/detail, version CRUD) + review/lifecycle governance routes; examples under [`docs/api/examples/content-module-*.json`](../../api/examples/README.md). **Evidence:** `com.bank.docgen.contentmodule` — `ContentModuleController`, `ContentModuleService`, `ContentModuleReviewService`, `ContentModuleLifecycleService`, `ContentModuleAccessSupport`; `GroupAccessService` group scoping; `ManagementAuditRecorder` — 5 `recordContentModule*` events; i18n `api.error` keys in `messages_en.properties`; tests — `ContentModuleControllerTest` (6), `ContentModuleServiceTest` (16), `ContentModuleAccessSupportTest` (15), `ContentModuleReviewServiceTest` (8), `ContentModuleLifecycleServiceTest` (8) = **60** T01b tests; plus T01a `ContentModuleRepositoryTest` (7) = **61** contentmodule tests; gate `mvn -B -ntp -f backend/pom.xml verify` — **456** tests BUILD SUCCESS (2026-06-26) |
+| P14-T01c | Template reference + impact analysis integration | Done (2026-06-26) | PRD §6.4.1 reference + lock rules; publish gate blocker «模块引用缺失» in `domain-model.md` §2.9.3; lifecycle `impactSummary` fields in [`content-module-lifecycle-operation-request.json`](../../api/examples/content-module-lifecycle-operation-request.json). **Evidence:** Flyway `V27__template_content_module_reference.sql`; `TemplateContentModuleReferenceEntity` / `TemplateContentModuleReferenceRepository`, `TemplateContentModuleReferenceService` (GET/PUT template content-module-references; publish locks references; `resolvePinnedContentStructures` for generation); `ContentModuleLifecycleImpactService` + `ContentModuleLifecycleImpactSummaryView` (GET lifecycle impact preview); `PublishGateCheckCode.CONTENT_MODULE_REFERENCES` in `PublishGateService`; `DocxAssembler` `contentModuleRef` node + pinned resolve wired in `DocumentGenerationEngine` / `PreviewGenerationService`; tests — `TemplateContentModuleReferenceRepositoryTest` (2), `TemplateContentModuleReferenceServiceTest` (10 incl. `resolvePinnedContentStructures`), `ContentModuleLifecycleImpactServiceTest` (1), `DocxAssemblerTest` `rendersPinnedContentModuleReferenceFromLockedVersion`, `PublishGateServiceTest` CONTENT_MODULE_REFERENCES case; gate `mvn -B -ntp -f backend/pom.xml verify` — **461** tests BUILD SUCCESS (+5 from 456 T01b baseline) |
+| P14-T01d | Management UI (list, detail, lifecycle) | Done (2026-06-26) | [`permission-matrix.md` §5.1](../../security/permission-matrix.md#51-条款或内容模块权限矩阵); Bank OA list/detail + lifecycle dialogs. **Evidence:** `ContentModuleListView`, `ContentModuleDetailView`, `ContentModuleLifecycleImpactDialog`, `ContentModuleCreateDialog`, `ContentModuleVersionDialog`, `ContentModuleStatusBadge`, `TemplateContentModuleReferencesPanel`; `contentModules` store/API + `routeKeys` nav/breadcrumb; Vitest — `ContentModuleListView.test.ts` (2), `ContentModuleDetailView.test.ts` (2), `contentModules.test.ts` (4); gates `pnpm -C frontend lint` / `type-check` / `test` (**224**) / `build` green; backend `mvn -B -ntp -f backend/pom.xml verify` — **461** tests (T01a–c baseline) |
+| P14-T01e | Architecture critical remediation | Done (2026-06-26) | Architecture review BLOCK follow-up — 4 Critical fixes per `permission-matrix.md` §5.1 + fail-closed. **Evidence:** `GroupAccessService.canBrowseContentModuleCatalog` / `canViewContentModuleStructure`; `ContentModuleService.assertCatalogBrowseAllowed` on list/get (TESTER 403); `ContentModuleVersionView.contentStructureJson` role-gated; list merges shared-into-group modules; `ContentModuleLifecycleImpactService` — `RuntimeGenerationAuditEventRepository` 7d call counts, `templateStopRequired`/`releaseStopRequired`; `ContentModuleLifecycleAuditDetail` + `ManagementAuditRecorder.recordContentModuleLifecycleOperation` impact persistence; tests — `ContentModuleServiceTest` (+3), `ContentModuleControllerTest` (+3), `ContentModuleLifecycleImpactServiceTest` (+1), `GroupAccessServiceTest` (+1); gate `mvn -B -ntp -f backend/pom.xml verify` — **469** tests BUILD SUCCESS (+8 from 461); architecture re-review **PASS** (2026-06-26) |
 
 ---
 
 ## P14-T02 Collaboration to-dos + timeout escalation
+
+**Slice status:** **Done** (2026-06-27) — T02a work item entity + role-queue API, T02b timeout config API, T02c escalation scheduler (notification-only), T02d management UI (workbench panels + admin config), E2E **3/3** (`collaboration-todos.spec.ts`); backend verify **481** tests; frontend lint/type-check/test (**235**) / build green.
 
 ### Behavior (confirmed)
 
@@ -72,14 +80,17 @@ and green gates before marking Done.
 
 | ID | Task | Status |
 | --- | --- | --- |
-| P14-T02a | To-do entity + query API by role queue | Not Started |
-| P14-T02b | Timeout config API (global + group override) | Not Started |
-| P14-T02c | Escalation scheduler (no state mutation) | Not Started |
-| P14-T02d | UI: to-do panels on workbenches + admin config | Not Started |
+| P14-T02a | To-do entity + query API by role queue | Done (2026-06-26) | Flyway `V28__collaboration_work_item.sql`; `CollaborationWorkItemEntity` / `CollaborationWorkItemRepository` / `CollaborationWorkItemService` / `CollaborationWorkItemController`; `GET /api/management/v1/collaboration-work-items` with role queue filtering; `CollaborationWorkItem*Test` **18**; `mvn -B -ntp -f backend/pom.xml verify` — **471** BUILD SUCCESS (2026-06-26) |
+| P14-T02b | Timeout config API (global + group override) | Done (2026-06-26) | Flyway `V29__collaboration_timeout_config.sql`; `CollaborationTimeoutConfigEntity` / `CollaborationTimeoutConfigRepository` / `CollaborationTimeoutConfigService` / `CollaborationTimeoutConfigController`; GET/PUT `/api/management/v1/collaboration-timeout-config` (global + group override); `CollaborationTimeoutResolver`; `GroupAccessService.canMaintainCollaborationTimeoutConfig`; OpenAPI v1 extended; `CollaborationTimeoutConfigServiceTest` (6), `CollaborationTimeoutConfigControllerTest` (4), `GroupAccessServiceTest` collaborationTimeout (1) = **11** T02b tests; `mvn -B -ntp -f backend/pom.xml verify` — **471** BUILD SUCCESS (2026-06-26) |
+| P14-T02c | Escalation scheduler (no state mutation) | Done (2026-06-26) | Flyway `V30__collaboration_work_item_escalation_source.sql`; `CollaborationEscalationService` / `CollaborationEscalationScheduler` / `CollaborationSchedulingConfig`; `source_work_item_id` dedup + `findOpenEscalationCandidates` / `existsOpenEscalationForSource`; notification-only escalation (no source state mutation); `ManagementAuditRecorder.recordCollaborationTimeoutEscalation`; `CollaborationEscalationServiceTest` (5), `CollaborationEscalationServiceDataJpaTest` (3), `CollaborationEscalationSchedulerTest` (1), `CollaborationWorkItemRepositoryTest` escalation queries (2) = **11** T02c tests; full `mvn -B -ntp -f backend/pom.xml verify` — **475** BUILD SUCCESS (2026-06-27; environment fix `TEMP`→`D:\temp`, no code change) |
+| P14-T02d | UI: to-do panels on workbenches + admin config | Done (2026-06-27) | `CollaborationWorkItemPanel` on `TesterWorkbenchView`, `ApproverWorkbenchView`, `EscalationWorkbenchView`; `CollaborationTimeoutConfigPanel` on `DashboardView` (GLOBAL/GROUP admin); `collaboration` store/API/types + `useWorkflowTasks`; Vitest — `CollaborationWorkItemPanel.test.ts` (2), `CollaborationTimeoutConfigPanel.test.ts` (2), `collaboration.test.ts` api (3) + store (2), `TesterWorkbenchView.test.ts` (1), `ApproverWorkbenchView.test.ts` (1), `EscalationWorkbenchView.test.ts` (1), `DashboardView.test.ts` timeout panel stub; gates `pnpm -C frontend lint` / `type-check` / `test` (**232**) / `build` green (2026-06-27); backend verify **475** (T02a–c baseline) |
+| P14-T02 E2E | Collaboration to-do functional journeys | Done (2026-06-27) | `frontend/e2e/collaboration-todos.spec.ts` **3/3** Docker 4173; report `playwright-report/docker/index.html`. **Remediation:** backend — `BatchTestRunEntity` FK alignment, `CollaborationWorkItemWriter` submit-for-test upsert (`mvn verify` **481**); frontend — `roles.ts` `canAccessTesterWorkbench` / `canAccessApproverWorkbench` / `canAccessCollaborationEscalationWorkbench` / `canAccessLogicalRoute` workbench guards (`pnpm test` **235**) |
 
 ---
 
 ## P14-T03 Template export / import
+
+**Slice status:** **Done** (2026-06-27) — T03a export service + endpoint, T03b import service + DRAFT landing, T03c management UI; OpenAPI v1 + `contract-outline.md` export/import contract; E2E **2/2** (`P14-T03-template-export-import.spec.ts`); backend verify **481** tests; frontend lint/type-check/test (**235+**) / build green.
 
 ### Behavior (confirmed)
 
@@ -98,9 +109,10 @@ and green gates before marking Done.
 
 | ID | Task | Status |
 | --- | --- | --- |
-| P14-T03a | Export service + management endpoint | Not Started |
-| P14-T03b | Import service + validation + DRAFT landing | Not Started |
-| P14-T03c | UI export/import on template detail + admin bulk | Not Started |
+| P14-T03a | Export service + management endpoint | Done (2026-06-26) | `TemplateExportService` + GET export JSON/ZIP; `TemplateExport*Test` **15**; verify **443** |
+| P14-T03b | Import service + validation + DRAFT landing | Done (2026-06-26) | `POST /templates/import`; `TemplateImport*Test` **13**; verify **456** |
+| P14-T03c | UI export/import on template detail + admin bulk | Done (2026-06-27) | `TemplateExportActions`, `TemplateImportDialog`; **+14** Vitest; frontend **235+** tests |
+| P14-T03 E2E | Template export/import functional journeys | Done (2026-06-27) | `frontend/e2e/P14-T03-template-export-import.spec.ts` **2/2** Docker 4173; JSON + ZIP export, staging import → DRAFT, no secrets in bundle; backend **481** verify |
 
 ---
 

@@ -16,21 +16,37 @@ public class IdempotencyConflictException extends RuntimeException {
     /** Same key and hash still in flight; caller must retry without re-running generation. */
     public static final String REQUEST_IN_PROGRESS = "REQUEST_IN_PROGRESS";
 
+    /** Default-route target changed since the original idempotent request. */
+    public static final String DEFAULT_ROUTE_CHANGED = "DEFAULT_ROUTE_CHANGED";
+
     private final String idempotencyKey;
     private final String conflictType;
+    private final String originalResolvedReleaseVersion;
 
     public IdempotencyConflictException(String idempotencyKey) {
-        this(idempotencyKey, REQUEST_SEMANTICS_MISMATCH);
+        this(idempotencyKey, REQUEST_SEMANTICS_MISMATCH, null);
     }
 
     public static IdempotencyConflictException requestInProgress(String idempotencyKey) {
-        return new IdempotencyConflictException(idempotencyKey, REQUEST_IN_PROGRESS);
+        return new IdempotencyConflictException(idempotencyKey, REQUEST_IN_PROGRESS, null);
     }
 
-    private IdempotencyConflictException(String idempotencyKey, String conflictType) {
+    public static IdempotencyConflictException defaultRouteChanged(
+            String idempotencyKey,
+            String originalResolvedReleaseVersion
+    ) {
+        return new IdempotencyConflictException(
+                idempotencyKey,
+                DEFAULT_ROUTE_CHANGED,
+                originalResolvedReleaseVersion
+        );
+    }
+
+    private IdempotencyConflictException(String idempotencyKey, String conflictType, String originalResolvedReleaseVersion) {
         super("Idempotency conflict for key " + idempotencyKey);
         this.idempotencyKey = idempotencyKey;
         this.conflictType = conflictType;
+        this.originalResolvedReleaseVersion = originalResolvedReleaseVersion;
     }
 
     public String idempotencyKey() {
@@ -43,5 +59,9 @@ public class IdempotencyConflictException extends RuntimeException {
 
     public String messageKey() {
         return "api.error.runtime.idempotencyConflict";
+    }
+
+    public String originalResolvedReleaseVersion() {
+        return originalResolvedReleaseVersion;
     }
 }

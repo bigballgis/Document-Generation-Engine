@@ -1,0 +1,43 @@
+# P15-T09a/b — blocking K8s manifest gates (ADR-0030)
+# helm lint + helm template (all env profiles) + kubeconform on rendered manifests.
+name: K8s Manifest Gates
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'deploy/**'
+      - 'scripts/helm-validate.ps1'
+      - 'scripts/ci-k8s-manifest-gates.ps1'
+  pull_request:
+    paths:
+      - 'deploy/**'
+      - 'scripts/helm-validate.ps1'
+      - 'scripts/ci-k8s-manifest-gates.ps1'
+
+concurrency:
+  group: k8s-manifest-gates-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  k8s-manifest-gates:
+    name: Helm lint/template + kubeconform
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure Docker (helm/kubeconform fallback)
+        run: docker version
+
+      - name: Pre-pull validation tool images
+        run: |
+          docker pull alpine/helm:3.14.4
+          docker pull yannh/kubeconform:v0.6.7
+
+      - name: Run blocking K8s manifest gates
+        shell: pwsh
+        run: ./scripts/ci-k8s-manifest-gates.ps1

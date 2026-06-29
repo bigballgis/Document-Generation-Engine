@@ -1,0 +1,71 @@
+{{- if and .Values.frontend.enabled .Values.blueGreen.enabled }}
+{{- range $color := list "blue" "green" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "docgen.frontend.color.fullname" (dict "root" $ "color" $color) }}
+  labels:
+    {{- include "docgen.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: frontend
+    docgen.io/deployment-color: {{ $color }}
+spec:
+  replicas: {{ include "docgen.frontend.replicas" $ }}
+  selector:
+    matchLabels:
+      {{- include "docgen.frontend.color.selectorLabels" (dict "root" $ "color" $color) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "docgen.frontend.color.selectorLabels" (dict "root" $ "color" $color) | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        {{- include "docgen.podSecurityContext" $ | nindent 8 }}
+        fsGroup: {{ $.Values.frontend.podSecurityContext.fsGroup }}
+        fsGroupChangePolicy: {{ $.Values.frontend.podSecurityContext.fsGroupChangePolicy }}
+      containers:
+        - name: frontend
+          image: {{ include "docgen.frontend.color.image" (dict "root" $ "color" $color) | quote }}
+          imagePullPolicy: {{ $.Values.frontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $.Values.frontend.port }}
+              protocol: TCP
+          securityContext:
+            {{- include "docgen.containerSecurityContext" $ | nindent 12 }}
+            runAsUser: {{ $.Values.frontend.securityContext.runAsUser }}
+            runAsGroup: {{ $.Values.frontend.securityContext.runAsGroup }}
+          resources:
+            {{- toYaml $.Values.frontend.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: {{ $.Values.frontend.probes.liveness.path }}
+              port: http
+            initialDelaySeconds: {{ $.Values.frontend.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.frontend.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ $.Values.frontend.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ $.Values.frontend.probes.liveness.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ $.Values.frontend.probes.readiness.path }}
+              port: http
+            initialDelaySeconds: {{ $.Values.frontend.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.frontend.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ $.Values.frontend.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ $.Values.frontend.probes.readiness.failureThreshold }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx-conf-d
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: {{ $.Values.frontend.tmpfs.sizeLimit }}
+        - name: nginx-conf-d
+          configMap:
+            name: {{ include "docgen.frontend.nginxConfigMapName" $ }}
+{{- end }}
+{{- end }}

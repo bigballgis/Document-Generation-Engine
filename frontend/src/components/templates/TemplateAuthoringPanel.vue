@@ -3,9 +3,14 @@ import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
+import { DEFAULT_STRUCTURED_CONTENT_JSON } from '@/utils/structuredContentNodes'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useYesNoFilterOptions } from '@/composables/useTableFilterOptions'
+import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useTemplatesStore } from '@/stores/templates'
 import type { AnchorBinding, UpsertBindingPayload, UpsertVariablePayload, VariableSchema } from '@/types/template'
@@ -45,7 +50,7 @@ const variableForm = reactive<UpsertVariablePayload>({
 const bindingForm = reactive<UpsertBindingPayload>({
   anchorId: '',
   declaredContentType: 'TEXT',
-  structuredContentJson: '{"nodes":[{"type":"paragraph","children":[{"type":"text","text":""}]}]}',
+  structuredContentJson: DEFAULT_STRUCTURED_CONTENT_JSON,
 })
 
 const hasBindings = computed(() => props.bindings.length > 0)
@@ -64,6 +69,13 @@ const { filters: variableColumnFilters, filteredRows: filteredVariables } = useD
   ],
 )
 
+const variablesCurrentPage = ref(1)
+const { paginatedRows: paginatedVariables, totalRows: totalVariableRows } = useCatalogPagination(
+  filteredVariables,
+  variablesCurrentPage,
+  CLIENT_TABLE_PAGE_SIZE,
+)
+
 const variableTypeFilterOptions = computed(() =>
   variableTypes.map((type) => ({ value: type, label: type })),
 )
@@ -79,6 +91,13 @@ const { filters: bindingColumnFilters, filteredRows: filteredBindings } = useDat
     { key: 'anchorId', getValue: (row) => row.anchorId },
     { key: 'declaredContentType', getValue: (row) => row.declaredContentType, matchMode: 'exact' },
   ],
+)
+
+const bindingsCurrentPage = ref(1)
+const { paginatedRows: paginatedBindings, totalRows: totalBindingRows } = useCatalogPagination(
+  filteredBindings,
+  bindingsCurrentPage,
+  CLIENT_TABLE_PAGE_SIZE,
 )
 
 function resetVariableForm() {
@@ -108,8 +127,7 @@ function openEditVariable(variable: VariableSchema) {
 function resetBindingForm() {
   bindingForm.anchorId = ''
   bindingForm.declaredContentType = 'TEXT'
-  bindingForm.structuredContentJson =
-    '{"nodes":[{"type":"paragraph","children":[{"type":"text","text":""}]}]}'
+  bindingForm.structuredContentJson = DEFAULT_STRUCTURED_CONTENT_JSON
   editingAnchorId.value = null
 }
 
@@ -123,8 +141,7 @@ function openEditBinding(binding: AnchorBinding) {
   bindingForm.anchorId = binding.anchorId
   bindingForm.declaredContentType = binding.declaredContentType
   bindingForm.structuredContentJson =
-    binding.structuredContentJson ??
-    '{"nodes":[{"type":"paragraph","children":[{"type":"text","text":""}]}]}'
+    binding.structuredContentJson ?? DEFAULT_STRUCTURED_CONTENT_JSON
   bindingDialogOpen.value = true
 }
 
@@ -201,7 +218,7 @@ const sortVariablesByRequired = rowSortMethod<VariableSchema>((row) => row.requi
         {{ t('templates.authoring.addVariable') }}
       </el-button>
     </div>
-    <AppDataTable :data="filteredVariables" empty-text="">
+    <AppDataTable :data="paginatedVariables" empty-text="">
       <template #empty>
         <el-empty :description="t('templates.authoring.noVariables')" />
       </template>
@@ -250,6 +267,11 @@ const sortVariablesByRequired = rowSortMethod<VariableSchema>((row) => row.requi
         </template>
       </el-table-column>
     </AppDataTable>
+    <AppTablePagination
+      v-model:current-page="variablesCurrentPage"
+      :page-size="CLIENT_TABLE_PAGE_SIZE"
+      :total="totalVariableRows"
+    />
 
     <div class="section-header">
       <h3>{{ t('templates.authoring.bindingsTitle') }}</h3>
@@ -257,7 +279,7 @@ const sortVariablesByRequired = rowSortMethod<VariableSchema>((row) => row.requi
         {{ t('templates.authoring.addBinding') }}
       </el-button>
     </div>
-    <AppDataTable :data="filteredBindings" empty-text="">
+    <AppDataTable :data="paginatedBindings" empty-text="">
       <template #empty>
         <el-empty :description="t('templates.authoring.noBindings')" />
       </template>
@@ -287,6 +309,11 @@ const sortVariablesByRequired = rowSortMethod<VariableSchema>((row) => row.requi
         </template>
       </el-table-column>
     </AppDataTable>
+    <AppTablePagination
+      v-model:current-page="bindingsCurrentPage"
+      :page-size="CLIENT_TABLE_PAGE_SIZE"
+      :total="totalBindingRows"
+    />
 
     <div class="action-row">
       <el-button
@@ -334,7 +361,7 @@ const sortVariablesByRequired = rowSortMethod<VariableSchema>((row) => row.requi
     <el-dialog
       v-model="bindingDialogOpen"
       :title="editingAnchorId ? t('templates.authoring.editBinding') : t('templates.authoring.addBinding')"
-      width="640px"
+      width="760px"
     >
       <el-form label-position="top">
         <el-form-item :label="t('templates.authoring.anchorId')">
@@ -345,8 +372,12 @@ const sortVariablesByRequired = rowSortMethod<VariableSchema>((row) => row.requi
             <el-option v-for="type in contentTypes" :key="type" :label="type" :value="type" />
           </AppSearchSelect>
         </el-form-item>
-        <el-form-item :label="t('templates.authoring.structuredContent')">
-          <el-input v-model="bindingForm.structuredContentJson" type="textarea" :rows="8" />
+        <el-form-item :label="t('templates.authoring.structuredContentEditor')">
+          <ControlledStructuredContentEditor
+            v-model="bindingForm.structuredContentJson"
+            :template-id="templateId"
+            :variable-keys="variables.map((variable) => variable.variableKey)"
+          />
         </el-form-item>
       </el-form>
       <template #footer>

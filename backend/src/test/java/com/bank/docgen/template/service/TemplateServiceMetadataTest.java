@@ -7,6 +7,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.authoring.structured.MasterStyleCatalogService;
+import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
+import com.bank.docgen.authoring.structured.NumberingService;
+import com.bank.docgen.authoring.structured.PasteCleaningService;
+import com.bank.docgen.authoring.structured.ReferenceNodeService;
+import com.bank.docgen.authoring.structured.TableComponentService;
+import com.bank.docgen.authoring.structured.StructuredContentSchemaValidator;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -69,7 +76,14 @@ class TemplateServiceMetadataTest {
                 lifecycleRecordRepository,
                 apiPolicyRepository,
                 groupAccessService,
-                new ObjectMapper()
+                new ObjectMapper(),
+                new StructuredContentSchemaValidator(new ObjectMapper()),
+                new NodeMatrixValidationService(new ObjectMapper()),
+                new MasterStyleCatalogService(new ObjectMapper()),
+                new TableComponentService(new ObjectMapper()),
+                new ReferenceNodeService(new ObjectMapper()),
+                new NumberingService(new ObjectMapper()),
+                new PasteCleaningService(new ObjectMapper())
         );
         author = new ManagementSessionClaims(
                 "10000003",

@@ -10,6 +10,20 @@ vi.mock('@/api/http', () => ({
   },
 }))
 
+const samplePolicy = {
+  templateId: 'tpl-1',
+  policyVersion: 2,
+  allowedAdGroups: ['APP-DOCGEN-RETAIL'],
+  defaultRouteReleaseVersion: '1.0.0',
+  outputFormats: ['PDF'],
+  outputModes: ['INLINE'],
+  batchEnabled: true,
+  maxBatchSize: 25,
+  docxEncryptionEnabled: true,
+  pdfEncryptionEnabled: false,
+  updatedAt: '2026-06-23T11:00:00Z',
+}
+
 describe('apiPolicy API', () => {
   beforeEach(() => {
     vi.mocked(http.get).mockReset()
@@ -22,17 +36,11 @@ describe('apiPolicy API', () => {
       data: {
         metadata: {},
         result: {
-          templateId: 'tpl-1',
+          ...samplePolicy,
           policyVersion: 1,
-          allowedAdGroups: ['APP-DOCGEN-RETAIL'],
-          defaultRouteReleaseVersion: '1.0.0',
-          outputFormats: ['PDF'],
-          outputModes: ['INLINE'],
           batchEnabled: false,
           maxBatchSize: 10,
           docxEncryptionEnabled: false,
-          pdfEncryptionEnabled: false,
-          updatedAt: '2026-06-23T10:00:00Z',
         },
       },
     })
@@ -47,19 +55,7 @@ describe('apiPolicy API', () => {
     vi.mocked(http.put).mockResolvedValue({
       data: {
         metadata: {},
-        result: {
-          templateId: 'tpl-1',
-          policyVersion: 2,
-          allowedAdGroups: ['APP-DOCGEN-RETAIL'],
-          defaultRouteReleaseVersion: '1.0.0',
-          outputFormats: ['PDF'],
-          outputModes: ['INLINE'],
-          batchEnabled: true,
-          maxBatchSize: 25,
-          docxEncryptionEnabled: true,
-          pdfEncryptionEnabled: false,
-          updatedAt: '2026-06-23T11:00:00Z',
-        },
+        result: samplePolicy,
       },
     })
 
@@ -80,14 +76,120 @@ describe('apiPolicy API', () => {
     expect(policy.policyVersion).toBe(2)
   })
 
+  it('saves AD group authorization domain', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: { metadata: {}, result: samplePolicy },
+    })
+
+    await apiPolicyApi.saveAdGroupsDomain('tpl-1', {
+      allowedAdGroups: ['APP-DOCGEN-WHOLESALE'],
+    })
+
+    expect(http.put).toHaveBeenCalledWith('/templates/tpl-1/api/policy/ad-groups', {
+      allowedAdGroups: ['APP-DOCGEN-WHOLESALE'],
+      confirmed: true,
+    })
+  })
+
+  it('saves output policy domain', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: { metadata: {}, result: samplePolicy },
+    })
+
+    await apiPolicyApi.saveOutputDomain('tpl-1', {
+      outputFormats: ['DOCX', 'PDF'],
+      outputModes: ['SYNC_STREAM'],
+    })
+
+    expect(http.put).toHaveBeenCalledWith('/templates/tpl-1/api/policy/output', {
+      outputFormats: ['DOCX', 'PDF'],
+      outputModes: ['SYNC_STREAM'],
+      confirmed: true,
+    })
+  })
+
+  it('saves batch limits domain', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: { metadata: {}, result: samplePolicy },
+    })
+
+    await apiPolicyApi.saveBatchLimitsDomain('tpl-1', {
+      batchEnabled: true,
+      syncMaxItems: 50,
+      asyncMaxItems: 8000,
+    })
+
+    expect(http.put).toHaveBeenCalledWith('/templates/tpl-1/api/policy/batch-limits', {
+      batchEnabled: true,
+      syncMaxItems: 50,
+      asyncMaxItems: 8000,
+      confirmed: true,
+    })
+  })
+
+  it('saves encryption capability domain', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: { metadata: {}, result: samplePolicy },
+    })
+
+    await apiPolicyApi.saveEncryptionDomain('tpl-1', {
+      docxEncryptionEnabled: true,
+      pdfEncryptionEnabled: true,
+    })
+
+    expect(http.put).toHaveBeenCalledWith('/templates/tpl-1/api/policy/encryption', {
+      docxEncryptionEnabled: true,
+      pdfEncryptionEnabled: true,
+      confirmed: true,
+    })
+  })
+
+  it('saves default route domain', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: { metadata: {}, result: samplePolicy },
+    })
+
+    await apiPolicyApi.saveDefaultRouteDomain('tpl-1', {
+      defaultRouteReleaseVersion: '2.0.0',
+    })
+
+    expect(http.put).toHaveBeenCalledWith('/templates/tpl-1/api/policy/default-route', {
+      defaultRouteReleaseVersion: '2.0.0',
+      confirmed: true,
+    })
+  })
+
+  it('routes saveApiPolicyDomain to the matching endpoint', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: { metadata: {}, result: samplePolicy },
+    })
+
+    await apiPolicyApi.saveApiPolicyDomain('tpl-1', 'ENCRYPTION_CAPABILITY', {
+      docxEncryptionEnabled: false,
+      pdfEncryptionEnabled: true,
+    })
+
+    expect(http.put).toHaveBeenCalledWith('/templates/tpl-1/api/policy/encryption', {
+      docxEncryptionEnabled: false,
+      pdfEncryptionEnabled: true,
+      confirmed: true,
+    })
+  })
+
   it('loads API policy impact preview', async () => {
     vi.mocked(http.post).mockResolvedValue({
       data: {
         metadata: {},
         result: {
+          changedAreas: ['OUTPUT_POLICY'],
+          blocking: false,
+          warnings: ['api.apimgmt.policyImpact.defaultRouteChanged'],
+          defaultRouteImpacted: false,
           currentPolicyVersion: 2,
           nextPolicyVersion: 3,
-          changedFields: ['outputFormats', 'pdfEncryptionEnabled'],
+          summaryMessageKey: 'api.apimgmt.policyImpact.warning',
+          contractDiffSummary: null,
+          idempotencyImpactSummary: null,
         },
       },
     })
@@ -106,6 +208,7 @@ describe('apiPolicy API', () => {
 
     expect(http.post).toHaveBeenCalledWith('/templates/tpl-1/api/policy/impact-preview', payload)
     expect(preview.nextPolicyVersion).toBe(3)
+    expect(preview.blocking).toBe(false)
   })
 
   it('creates API credential', async () => {

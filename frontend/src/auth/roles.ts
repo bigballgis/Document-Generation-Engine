@@ -112,12 +112,44 @@ export function canAuthorTemplates(context: CapabilityContext): boolean {
   return resolveCapability(context, 'authorTemplates', canAccessTemplateManagement)
 }
 
+export function canExportTemplates(context: CapabilityContext): boolean {
+  return context.roles.some((role) =>
+    (
+      [
+        MANAGEMENT_ROLES.GLOBAL_ADMIN,
+        MANAGEMENT_ROLES.GROUP_ADMIN,
+        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+      ] as string[]
+    ).includes(role),
+  )
+}
+
 export function canDecideTests(context: CapabilityContext): boolean {
-  return resolveCapability(context, 'decideTests', () => false)
+  return resolveCapability(context, 'decideTests', (roles) =>
+    roles.some((role) =>
+      (
+        [
+          MANAGEMENT_ROLES.GLOBAL_ADMIN,
+          MANAGEMENT_ROLES.GROUP_ADMIN,
+          'TEMPLATE_TESTER',
+        ] as string[]
+      ).includes(role),
+    ),
+  )
 }
 
 export function canDecideApprovals(context: CapabilityContext): boolean {
-  return resolveCapability(context, 'decideApprovals', () => false)
+  return resolveCapability(context, 'decideApprovals', (roles) =>
+    roles.some((role) =>
+      (
+        [
+          MANAGEMENT_ROLES.GLOBAL_ADMIN,
+          MANAGEMENT_ROLES.GROUP_ADMIN,
+          'TEMPLATE_APPROVER',
+        ] as string[]
+      ).includes(role),
+    ),
+  )
 }
 
 export function canPublishTemplates(context: CapabilityContext): boolean {
@@ -167,6 +199,114 @@ export function canDeleteTemplates(context: CapabilityContext): boolean {
   return resolveCapability(context, 'deleteTemplates', (roles) =>
     roles.includes(MANAGEMENT_ROLES.GLOBAL_ADMIN),
   )
+}
+
+export function canAuthorContentModules(context: CapabilityContext): boolean {
+  return resolveCapability(context, 'authorTemplates', (roles) =>
+    roles.some((role) =>
+      (
+        [
+          MANAGEMENT_ROLES.GLOBAL_ADMIN,
+          MANAGEMENT_ROLES.GROUP_ADMIN,
+          'MASTER_DESIGNER',
+          MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+        ] as string[]
+      ).includes(role),
+    ),
+  )
+}
+
+export function canDecideContentModuleReviews(context: CapabilityContext): boolean {
+  return resolveCapability(context, 'decideApprovals', (roles) =>
+    roles.some((role) =>
+      (
+        [
+          MANAGEMENT_ROLES.GLOBAL_ADMIN,
+          MANAGEMENT_ROLES.GROUP_ADMIN,
+          'TEMPLATE_APPROVER',
+        ] as string[]
+      ).includes(role),
+    ),
+  )
+}
+
+export function canManageContentModuleLifecycle(context: CapabilityContext): boolean {
+  return resolveCapability(context, 'restoreOrDeprecateTemplates', (roles) =>
+    roles.some((role) =>
+      ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
+    ),
+  )
+}
+
+export function canAccessContentModuleManagement(roles: string[]): boolean {
+  return roles.some((role) =>
+    (
+      [
+        MANAGEMENT_ROLES.GLOBAL_ADMIN,
+        MANAGEMENT_ROLES.GROUP_ADMIN,
+        'MASTER_DESIGNER',
+        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+        'TEMPLATE_APPROVER',
+      ] as string[]
+    ).includes(role),
+  )
+}
+
+export function canViewCollaborationWorkItems(roles: string[]): boolean {
+  return roles.some((role) =>
+    (
+      [
+        MANAGEMENT_ROLES.GLOBAL_ADMIN,
+        MANAGEMENT_ROLES.GROUP_ADMIN,
+        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+        'TEMPLATE_TESTER',
+        'TEMPLATE_APPROVER',
+      ] as string[]
+    ).includes(role),
+  )
+}
+
+export function canMaintainCollaborationTimeoutConfig(context: CapabilityContext): boolean {
+  return context.roles.some((role) =>
+    ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
+  )
+}
+
+export function canAccessCollaborationEscalationWorkbench(context: CapabilityContext): boolean {
+  return (
+    canViewCollaborationWorkItems(context.roles) &&
+    context.roles.some((role) =>
+      ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
+    )
+  )
+}
+
+export function canAccessTesterWorkbench(context: CapabilityContext): boolean {
+  return canViewCollaborationWorkItems(context.roles) && canDecideTests(context)
+}
+
+export function canAccessApproverWorkbench(context: CapabilityContext): boolean {
+  return canViewCollaborationWorkItems(context.roles) && canDecideApprovals(context)
+}
+
+export function canAccessLogicalRoute(
+  routeKey: string,
+  context: CapabilityContext,
+  visibleRoutes: string[],
+): boolean {
+  if (routeKey === 'route.tester-workbench') {
+    return canAccessTesterWorkbench(context)
+  }
+  if (routeKey === 'route.approver-workbench') {
+    return canAccessApproverWorkbench(context)
+  }
+  if (routeKey === 'route.escalation-workbench') {
+    return canAccessCollaborationEscalationWorkbench(context)
+  }
+  if (routeKey === 'route.content-module-management') {
+    return visibleRoutes.includes(routeKey) || canAccessContentModuleManagement(context.roles)
+  }
+  return visibleRoutes.includes(routeKey)
 }
 
 /** @deprecated Use granular capability helpers instead. */

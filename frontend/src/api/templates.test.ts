@@ -6,6 +6,7 @@ vi.mock('@/api/http', () => ({
   http: {
     get: vi.fn(),
     post: vi.fn(),
+    put: vi.fn(),
   },
 }))
 
@@ -13,6 +14,7 @@ describe('templates API', () => {
   beforeEach(() => {
     vi.mocked(http.get).mockReset()
     vi.mocked(http.post).mockReset()
+    vi.mocked(http.put).mockReset()
   })
 
   it('lists templates from the management endpoint', async () => {
@@ -84,6 +86,8 @@ describe('templates API', () => {
           outputFormat: 'PDF',
           artifactStorageKey: null,
           fidelityWarnings: [],
+          previewComparison: null,
+          testDataSetId: null,
           createdAt: '2026-06-23T10:00:00Z',
         },
       },
@@ -93,5 +97,83 @@ describe('templates API', () => {
 
     expect(http.post).toHaveBeenCalledWith('/templates/tpl-1/previews/test-generate', {})
     expect(preview.previewId).toBe('preview-1')
+  })
+
+  it('fetches live publish gate checklist', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          templateId: 'tpl-1',
+          ready: false,
+          blockerCount: 1,
+          items: [
+            {
+              checkCode: 'ANCHOR_INTEGRITY',
+              ready: false,
+              blocker: true,
+              messageKey: 'api.publishGate.anchorIntegrity.blocked',
+              summary: 'Anchor binding validation has blocking issues.',
+            },
+          ],
+        },
+      },
+    })
+
+    const checklist = await templatesApi.fetchPublishGate('tpl-1')
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/publish-gate')
+    expect(checklist.blockerCount).toBe(1)
+  })
+
+  it('lists template content module references', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: [
+          {
+            referenceKey: 'LOAN_DISCLOSURE',
+            moduleId: 'MOD-LOAN-DISCLOSURE',
+            semanticVersion: '1.0.0',
+            locked: false,
+          },
+        ],
+      },
+    })
+
+    const references = await templatesApi.listTemplateContentModuleReferences('tpl-1')
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/content-module-references')
+    expect(references[0]?.referenceKey).toBe('LOAN_DISCLOSURE')
+  })
+
+  it('upserts a template content module reference', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          referenceKey: 'LOAN_DISCLOSURE',
+          moduleId: 'MOD-LOAN-DISCLOSURE',
+          semanticVersion: '1.1.0',
+          locked: false,
+        },
+      },
+    })
+
+    const saved = await templatesApi.upsertTemplateContentModuleReference('tpl-1', 'LOAN_DISCLOSURE', {
+      referenceKey: 'LOAN_DISCLOSURE',
+      moduleId: 'MOD-LOAN-DISCLOSURE',
+      semanticVersion: '1.1.0',
+    })
+
+    expect(http.put).toHaveBeenCalledWith(
+      '/templates/tpl-1/content-module-references/LOAN_DISCLOSURE',
+      {
+        referenceKey: 'LOAN_DISCLOSURE',
+        moduleId: 'MOD-LOAN-DISCLOSURE',
+        semanticVersion: '1.1.0',
+      },
+    )
+    expect(saved.semanticVersion).toBe('1.1.0')
   })
 })

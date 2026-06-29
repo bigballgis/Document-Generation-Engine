@@ -59,6 +59,9 @@ public class MasterDocumentEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    @Column(name = "current_revision_line_id", nullable = false)
+    private UUID currentRevisionLineId;
+
     @OneToMany(mappedBy = "master", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<MasterAnchorEntity> anchors = new ArrayList<>();
 
@@ -81,6 +84,7 @@ public class MasterDocumentEntity {
         this.status = MasterDocumentStatus.DRAFT;
         this.storageKey = storageKey;
         this.originalFilename = originalFilename;
+        this.currentRevisionLineId = UUID.randomUUID();
         this.createdBy = createdBy;
         this.updatedBy = createdBy;
         Instant now = Instant.now();
@@ -138,6 +142,10 @@ public class MasterDocumentEntity {
 
     public Instant getDeletedAt() {
         return deletedAt;
+    }
+
+    public UUID getCurrentRevisionLineId() {
+        return currentRevisionLineId;
     }
 
     public List<MasterAnchorEntity> getAnchors() {

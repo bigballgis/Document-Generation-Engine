@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
   canAccessAuditConsole,
+  canAccessLogicalRoute,
   canAccessMasterManagement,
   canAccessTemplateManagement,
+  canAccessCollaborationEscalationWorkbench,
+  canAccessTesterWorkbench,
+  canAccessApproverWorkbench,
+  canExportTemplates,
+  canAccessContentModuleManagement,
   canDecideApprovals,
   canDecideTests,
   canDeleteTemplates,
@@ -73,10 +79,24 @@ describe('management roles', () => {
     expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(true)
   })
 
+  it('allows template export/import for admin and author roles', () => {
+    expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.GLOBAL_ADMIN] })).toBe(true)
+    expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.GROUP_ADMIN] })).toBe(true)
+    expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(true)
+    expect(canExportTemplates({ roles: ['TEMPLATE_TESTER'] })).toBe(false)
+  })
+
   it('allows template management for authoring and admin roles via fallback', () => {
     expect(canAccessTemplateManagement([MANAGEMENT_ROLES.TEMPLATE_AUTHOR])).toBe(true)
     expect(canAccessTemplateManagement([MANAGEMENT_ROLES.GROUP_ADMIN])).toBe(true)
     expect(canAccessTemplateManagement(['AUDIT_ADMIN'])).toBe(false)
+  })
+
+  it('allows content module management for authoring, approver, and admin roles', () => {
+    expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.TEMPLATE_AUTHOR])).toBe(true)
+    expect(canAccessContentModuleManagement(['TEMPLATE_APPROVER'])).toBe(true)
+    expect(canAccessContentModuleManagement(['MASTER_DESIGNER'])).toBe(true)
+    expect(canAccessContentModuleManagement(['TEMPLATE_TESTER'])).toBe(false)
   })
 
   it('maps granular template capabilities from session capabilities', () => {
@@ -107,5 +127,34 @@ describe('management roles', () => {
       'AUDIT_ADMIN',
     )
     expect(isGroupScopedAuditRole('GROUP_ADMIN')).toBe(true)
+  })
+
+  it('gates workbench routes by collaboration role capabilities', () => {
+    const testerContext = { roles: ['TEMPLATE_TESTER'], capabilities: testerCapabilities }
+    const approverContext = { roles: ['TEMPLATE_APPROVER'], capabilities: { ...testerCapabilities, decideTests: false, decideApprovals: true } }
+    const groupAdminContext = { roles: [MANAGEMENT_ROLES.GROUP_ADMIN], capabilities: globalAdminCapabilities }
+
+    expect(canAccessTesterWorkbench(testerContext)).toBe(true)
+    expect(canAccessApproverWorkbench(testerContext)).toBe(false)
+    expect(canAccessCollaborationEscalationWorkbench(testerContext)).toBe(false)
+    expect(canAccessCollaborationEscalationWorkbench(groupAdminContext)).toBe(true)
+    expect(canAccessLogicalRoute('route.tester-workbench', testerContext, [])).toBe(true)
+    expect(canAccessLogicalRoute('route.approver-workbench', approverContext, [])).toBe(true)
+    expect(canAccessLogicalRoute('route.escalation-workbench', groupAdminContext, [])).toBe(true)
+  })
+
+  it('allows workbench routes from roles when session capabilities are absent', () => {
+    const testerContext = { roles: ['TEMPLATE_TESTER'] }
+    const approverContext = { roles: ['TEMPLATE_APPROVER'] }
+    const groupAdminContext = { roles: [MANAGEMENT_ROLES.GROUP_ADMIN] }
+
+    expect(canDecideTests(testerContext)).toBe(true)
+    expect(canDecideApprovals(approverContext)).toBe(true)
+    expect(canAccessTesterWorkbench(testerContext)).toBe(true)
+    expect(canAccessApproverWorkbench(approverContext)).toBe(true)
+    expect(canAccessCollaborationEscalationWorkbench(groupAdminContext)).toBe(true)
+    expect(canAccessLogicalRoute('route.tester-workbench', testerContext, [])).toBe(true)
+    expect(canAccessLogicalRoute('route.approver-workbench', approverContext, [])).toBe(true)
+    expect(canAccessLogicalRoute('route.escalation-workbench', groupAdminContext, [])).toBe(true)
   })
 })

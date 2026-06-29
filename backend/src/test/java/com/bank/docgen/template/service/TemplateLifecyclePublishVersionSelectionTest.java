@@ -5,14 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
-import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.api.BindingValidationSummaryView;
-import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.PublishTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
@@ -20,10 +16,10 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
+import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +45,15 @@ class TemplateLifecyclePublishVersionSelectionTest {
     @Mock
     private MessageResolver messageResolver;
     @Mock
-    private ApiPolicyRepository apiPolicyRepository;
+    private PublishGateService publishGateService;
+    @Mock
+    private DecisionFormService decisionFormService;
+    @Mock
+    private TemplateContentModuleReferenceService contentModuleReferenceService;
+    @Mock
+    private CollaborationWorkItemWriter collaborationWorkItemWriter;
+    @Mock
+    private com.bank.docgen.authoring.structured.RenderProfileService renderProfileService;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -66,7 +70,11 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 groupAccessService,
                 lifecycleImpactPreviewService,
                 messageResolver,
-                apiPolicyRepository
+                publishGateService,
+                decisionFormService,
+                contentModuleReferenceService,
+                collaborationWorkItemWriter,
+                renderProfileService
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",
@@ -99,9 +107,7 @@ class TemplateLifecyclePublishVersionSelectionTest {
 
         when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
-        when(templateService.validateBindings(templateId, groupAdmin)).thenReturn(nonBlockingBindings());
-        when(apiPolicyRepository.findByTemplateId(templateId))
-                .thenReturn(Optional.of(new ApiPolicyEntity(UUID.randomUUID(), templateId, "[]", "10000002")));
+        org.mockito.Mockito.doNothing().when(publishGateService).assertReady(templateId, groupAdmin);
         when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
                 .thenReturn(List.of(candidateVersion, publishedVersion));
         when(templateService.toDetail(template)).thenReturn(detail());
@@ -113,6 +119,8 @@ class TemplateLifecyclePublishVersionSelectionTest {
         assertThat(candidateVersion.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
         assertThat(publishedVersion.getReleaseVersion()).isEqualTo("1.0.0");
         verify(templateVersionRepository).save(candidateVersion);
+        verify(contentModuleReferenceService).lockReferencesForPublish(candidateVersion.getId());
+        verify(renderProfileService).lockForPublish(candidateVersion);
     }
 
     private TemplateVersionEntity version(
@@ -125,13 +133,6 @@ class TemplateLifecyclePublishVersionSelectionTest {
         version.setReleaseVersion(releaseVersion);
         version.setLifecycleStatus(lifecycleStatus);
         return version;
-    }
-
-    private BindingValidationView nonBlockingBindings() {
-        return new BindingValidationView(
-                List.of(),
-                new BindingValidationSummaryView(false, 0, 0, 0, 0, 0)
-        );
     }
 
     private TemplateDetailView detail() {

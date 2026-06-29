@@ -6,6 +6,8 @@ import type {
   MasterDocumentDetail,
   MasterDocumentSummary,
   MasterImpactAnalysis,
+  MasterRevisionLineDetail,
+  MasterRevisionLinePage,
   SubmitMasterReviewPayload,
   UpdateMasterMetadataPayload,
 } from '@/types/master'
@@ -89,6 +91,42 @@ export async function downloadMasterFile(masterId: string): Promise<{ blob: Blob
   const response = await http.get<Blob>(`/masters/${masterId}/download`, {
     responseType: 'blob',
   })
+  const disposition = response.headers['content-disposition'] ?? ''
+  const filenameMatch = /filename="([^"]+)"/i.exec(disposition)
+  const filename = filenameMatch?.[1] ?? 'master.docx'
+  return { blob: response.data, filename }
+}
+
+export async function listMasterRevisionLines(
+  masterId: string,
+  page = 0,
+  size = 20,
+): Promise<MasterRevisionLinePage> {
+  const response = await http.get<ApiEnvelope<MasterRevisionLinePage>>(
+    `/masters/${masterId}/revision-lines`,
+    { params: { page, size } },
+  )
+  return unwrap(response.data)
+}
+
+export async function getMasterRevisionLine(
+  masterId: string,
+  revisionLineId: string,
+): Promise<MasterRevisionLineDetail> {
+  const response = await http.get<ApiEnvelope<MasterRevisionLineDetail>>(
+    `/masters/${masterId}/revision-lines/${revisionLineId}`,
+  )
+  return unwrap(response.data)
+}
+
+export async function downloadMasterRevisionLineFile(
+  masterId: string,
+  revisionLineId: string,
+): Promise<{ blob: Blob; filename: string }> {
+  const response = await http.get<Blob>(
+    `/masters/${masterId}/revision-lines/${revisionLineId}/download`,
+    { responseType: 'blob' },
+  )
   const disposition = response.headers['content-disposition'] ?? ''
   const filenameMatch = /filename="([^"]+)"/i.exec(disposition)
   const filename = filenameMatch?.[1] ?? 'master.docx'

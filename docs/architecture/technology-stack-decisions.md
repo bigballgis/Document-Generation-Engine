@@ -64,7 +64,7 @@ Source-of-truth boundary:
 | Logging stack | Logback + JSON structured logs | ADR Accepted | ADR 0028 | 2026-06-08 |
 | API docs and debug tooling | springdoc-openapi + Swagger UI | ADR Accepted | ADR 0028 | 2026-06-08 |
 | JSON serialization | Jackson | ADR Accepted | ADR 0028 | 2026-06-08 |
-| Object mapping | MapStruct (recommended, incremental; hand-written mapping interim) | ADR Accepted (amended) | ADR 0028, ADR 0037 | 2026-06-23 |
+| Object mapping | MapStruct (incremental; apimgmt `ApiPolicyViewMapper` landed 2026-06-25) | ADR Accepted (amended) | ADR 0028, ADR 0037 | 2026-06-25 |
 | Input validation | Jakarta Bean Validation (Hibernate Validator) | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Distributed lock | Redis (Redisson) — mandated, **pending implementation** (transitional gap, OPT-F8) | ADR Accepted | ADR 0028, ADR 0037 | 2026-06-23 |
 | Task scheduling | Quartz | ADR Accepted | ADR 0028 | 2026-06-08 |

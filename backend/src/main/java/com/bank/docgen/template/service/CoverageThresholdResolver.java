@@ -23,14 +23,14 @@ public class CoverageThresholdResolver {
     public CoverageThresholdView resolveForTemplate(TemplateEntity template) {
         return coverageThresholdConfigRepository
                 .findByScopeTypeAndGroupCode(CoverageThresholdScope.GROUP, template.getGroupCode())
-                .map(this::toView)
-                .orElseGet(this::globalOrDefault);
+                .map(entity -> toView(entity))
+                .orElseGet(() -> globalOrDefault());
     }
 
     private CoverageThresholdView globalOrDefault() {
         return coverageThresholdConfigRepository
                 .findByScopeTypeAndGroupCode(CoverageThresholdScope.GLOBAL, null)
-                .map(this::toView)
+                .map(entity -> toView(entity))
                 .orElse(new CoverageThresholdView(
                         CoverageThresholdScope.GLOBAL.name(),
                         null,

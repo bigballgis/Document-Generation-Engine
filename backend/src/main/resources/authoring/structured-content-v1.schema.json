@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docgen.bank/schemas/structured-content-v1.json",
+  "title": "StructuredContentDocumentV1",
+  "description": "Confirmed v1 node matrix for anchor_binding.structured_content_json (ADR-0019 / P18-T01).",
+  "type": "object",
+  "required": ["nodes"],
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" }
+    }
+  },
+  "$defs": {
+    "nodeType": {
+      "type": "string",
+      "enum": [
+        "sectionHeading",
+        "paragraph",
+        "list",
+        "conditionBlock",
+        "loopBlock",
+        "tableComponentRef",
+        "textRun",
+        "text",
+        "variable",
+        "emphasis",
+        "underline",
+        "lineBreak",
+        "contentModuleRef",
+        "imageRef",
+        "qrBarcodeRef",
+        "sealRef",
+        "attachmentListRef",
+        "styleRef"
+      ]
+    },
+    "node": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": true,
+      "properties": {
+        "type": { "$ref": "#/$defs/nodeType" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/node" }
+        },
+        "value": { "type": "string" },
+        "key": { "type": "string" },
+        "referenceKey": { "type": "string" },
+        "styleRef": { "type": "string" },
+        "imageRef": { "type": "string" },
+        "tableComponentRef": { "type": "string" }
+      }
+    }
+  }
+}

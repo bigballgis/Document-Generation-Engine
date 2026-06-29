@@ -45,6 +45,9 @@ public class PreviewRecordEntity {
     @Column(name = "batch_test_run_id")
     private UUID batchTestRunId;
 
+    @Column(name = "render_profile_version", length = 32)
+    private String renderProfileVersion;
+
     @Column(name = "created_by", nullable = false, length = 8)
     private String createdBy;
 
@@ -119,6 +122,15 @@ public class PreviewRecordEntity {
 
     public UUID getBatchTestRunId() {
         return batchTestRunId;
+    }
+
+    public String getRenderProfileVersion() {
+        return renderProfileVersion;
+    }
+
+    public void setRenderProfileVersion(String renderProfileVersion) {
+        this.renderProfileVersion = renderProfileVersion;
+        this.updatedAt = Instant.now();
     }
 
     public String getCreatedBy() {

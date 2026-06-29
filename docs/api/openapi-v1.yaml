@@ -19,7 +19,9 @@ tags:
   - name: Download
     description: Generated document download.
   - name: Admin
-    description: API management, credential lifecycle administration, template lifecycle governance, and content-module governance.
+    description: API management, credential lifecycle administration, template lifecycle governance, template export/import, content-module governance, and collaboration timeout configuration.
+  - name: Collaboration
+    description: Collaboration work-item queues and timeout threshold administration.
 security:
   - ApiCredentialId: []
     ApiCredentialSecret: []
@@ -1140,6 +1142,7 @@ paths:
           schema:
             type: string
             minLength: 1
+          description: Business module code (e.g. MOD-LOAN-DISCLOSURE) or module UUID.
         - $ref: '#/components/parameters/TraceIdHeader'
       requestBody:
         required: true
@@ -1161,6 +1164,411 @@ paths:
         '404':
           $ref: '#/components/responses/ErrorResponse'
         '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/content-modules:
+    get:
+      tags: [Admin]
+      operationId: listContentModules
+      summary: List content modules scoped by group
+      description: >-
+        Lists non-deleted content modules for the requested group code. Requires
+        group-scoped read access per permission matrix §5.1.
+      parameters:
+        - name: groupCode
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Content modules listed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleSummaryListResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      tags: [Admin]
+      operationId: createContentModule
+      summary: Create a content module with an initial draft version
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContentModuleRequest'
+      responses:
+        '200':
+          description: Content module created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleDetailResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/content-modules/{moduleId}:
+    get:
+      tags: [Admin]
+      operationId: getContentModule
+      summary: Get content module detail with versions
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Content module detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleDetailResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/content-modules/{moduleId}/versions:
+    post:
+      tags: [Admin]
+      operationId: createContentModuleVersion
+      summary: Create a new draft content module version
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContentModuleVersionRequest'
+      responses:
+        '200':
+          description: Version created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleDetailResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/content-modules/{moduleId}/versions/{semanticVersion}:
+    put:
+      tags: [Admin]
+      operationId: updateContentModuleDraftVersion
+      summary: Update draft version content structure
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: semanticVersion
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContentModuleVersionRequest'
+      responses:
+        '200':
+          description: Draft version updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleDetailResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/content-modules/{moduleId}/review/transition:
+    post:
+      tags: [Admin]
+      operationId: transitionContentModuleReviewManagement
+      summary: Apply a content module review transition (management path)
+      description: >-
+        Management JWT path equivalent to
+        `/api/{environment}/v1/admin/content-modules/{moduleId}/review/transition`.
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentModuleReviewTransitionRequest'
+      responses:
+        '200':
+          description: Review transition applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleReviewTransitionResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/content-modules/{moduleId}/lifecycle/operation/apply:
+    post:
+      tags: [Admin]
+      operationId: applyContentModuleLifecycleOperationManagement
+      summary: Apply a content module lifecycle operation (management path)
+      description: >-
+        Management JWT path equivalent to
+        `/api/{environment}/v1/admin/content-modules/{moduleId}/lifecycle/operation/apply`.
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentModuleLifecycleOperationApplyRequest'
+      responses:
+        '200':
+          description: Lifecycle operation applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleLifecycleOperationResult'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '409':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/collaboration-timeout-config:
+    get:
+      tags: [Collaboration, Admin]
+      operationId: getCollaborationTimeoutConfig
+      summary: Get collaboration timeout thresholds
+      description: >-
+        Returns timeout threshold hours per work-item queue type. Without
+        `groupCode`, returns the global configuration (GLOBAL_ADMIN only). With
+        `groupCode`, returns the group override when present or falls back to
+        global defaults (GROUP_ADMIN or GLOBAL_ADMIN within group scope).
+      parameters:
+        - name: groupCode
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 64
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Timeout configuration returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationTimeoutConfigResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+    put:
+      tags: [Collaboration, Admin]
+      operationId: upsertCollaborationTimeoutConfig
+      summary: Upsert collaboration timeout thresholds
+      description: >-
+        Creates or updates timeout threshold hours for GLOBAL scope
+        (GLOBAL_ADMIN only) or GROUP scope (GROUP_ADMIN within group scope).
+        Thresholds apply to TEST, APPROVAL, PENDING_RELEASE, and REMEDIATION
+        queues; escalation uses these thresholds for notification-only alerts.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCollaborationTimeoutConfigRequest'
+      responses:
+        '200':
+          description: Timeout configuration saved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationTimeoutConfigResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/export:
+    get:
+      tags: [Admin]
+      operationId: exportTemplateBundle
+      summary: Export a template as JSON or ZIP bundle
+      description: >-
+        Exports an eligible template (`PENDING_RELEASE`, `PUBLISHED`, `STOPPED`,
+        or `DEPRECATED`) as `template-export-bundle-v1-json`. JSON responses use
+        the management success envelope; ZIP responses (`format=zip`) return a
+        single `application/zip` attachment containing
+        `template-export-bundle.json`. Bundle includes metadata, variables,
+        bindings, composition rules, content-module references, and API policy
+        snapshot. Export omits secrets, API credential material, and runtime
+        credentials. Permission boundary per permission-matrix section 5:
+        `GLOBAL_ADMIN` (all templates), `GROUP_ADMIN` (authorized groups),
+        `TEMPLATE_AUTHOR` (own templates only). Export actions are audited.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          description: Internal template resource UUID (management path).
+          schema:
+            type: string
+            format: uuid
+        - name: format
+          in: query
+          required: false
+          description: When `zip`, returns a ZIP attachment instead of the JSON envelope.
+          schema:
+            type: string
+            enum: [zip]
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Template export bundle (JSON envelope) or ZIP attachment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateExportResponse'
+            application/zip:
+              schema:
+                type: string
+                format: binary
+              description: >-
+                ZIP archive with entry `template-export-bundle.json` containing
+                the same bundle structure as JSON export.
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/import:
+    post:
+      tags: [Admin]
+      operationId: importTemplateBundle
+      summary: Import a template export bundle into DRAFT
+      description: >-
+        Imports a validated `template-export-bundle-v1-json` bundle. Imported
+        templates land in `DRAFT` and must re-run test, approval, and publish
+        in the target environment. `masterId` must reference an `APPROVED`
+        master in the same `groupCode` as bundle metadata.
+        `importConflictPolicy` defaults to `REJECT_IMPORT` when omitted.
+        `KEEP_TEMPLATE_ID` applies only when the internal template UUID in
+        bundle metadata already exists; conflicting `externalId` always rejects
+        import. Permission boundary per permission-matrix section 5 matches
+        export. Import actions are audited and return `importBatchId`.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportTemplateRequest'
+      responses:
+        '201':
+          description: Template imported; lands in DRAFT.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateImportResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
           $ref: '#/components/responses/ErrorResponse'
         '422':
           $ref: '#/components/responses/ErrorResponse'
@@ -3819,6 +4227,614 @@ components:
         rejectionReason:
           description: Required when operation is REJECT_REVIEW.
           type: string
+    CreateContentModuleRequest:
+      type: object
+      additionalProperties: false
+      required: [moduleCode, groupCode, name, semanticVersion, contentStructureJson]
+      properties:
+        moduleCode:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Stable business identifier (e.g. MOD-LOAN-DISCLOSURE).
+        groupCode:
+          type: string
+          minLength: 1
+          maxLength: 64
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+        description:
+          type: string
+          maxLength: 1024
+        sharedGroupCodes:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
+        semanticVersion:
+          type: string
+          minLength: 1
+          maxLength: 32
+        contentStructureJson:
+          type: string
+          minLength: 1
+        changeDescription:
+          type: string
+          maxLength: 2048
+    CreateContentModuleVersionRequest:
+      type: object
+      additionalProperties: false
+      required: [semanticVersion, contentStructureJson]
+      properties:
+        semanticVersion:
+          type: string
+          minLength: 1
+          maxLength: 32
+        contentStructureJson:
+          type: string
+          minLength: 1
+        changeDescription:
+          type: string
+          maxLength: 2048
+    UpdateContentModuleVersionRequest:
+      type: object
+      additionalProperties: false
+      required: [contentStructureJson]
+      properties:
+        contentStructureJson:
+          type: string
+          minLength: 1
+        changeDescription:
+          type: string
+          maxLength: 2048
+    ContentModuleVersionView:
+      type: object
+      additionalProperties: false
+      required: [versionId, semanticVersion, reviewState, createdAt, updatedAt]
+      properties:
+        versionId:
+          type: string
+        semanticVersion:
+          type: string
+        reviewState:
+          type: string
+          enum: [DRAFT, SUBMITTED, APPROVED]
+        lifecycleState:
+          type: string
+          enum: [ACTIVE, STOPPED, DEPRECATED]
+        changeDescription:
+          type: string
+        contentStructureJson:
+          type: string
+          description: >
+            Module content structure JSON. Optional on read responses; populated only when the
+            caller holds structure-view permission per permission-matrix section 5.1
+            (GLOBAL_ADMIN, GROUP_ADMIN, MASTER_DESIGNER, TEMPLATE_AUTHOR, or TEMPLATE_APPROVER).
+            Omitted or null when the caller may browse the catalog but lacks structure-view
+            permission (fail-closed). TEMPLATE_TESTER receives 403 on catalog list/detail and
+            never receives this field.
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ContentModuleSummaryView:
+      type: object
+      additionalProperties: false
+      required: [moduleId, moduleCode, groupCode, name, createdAt, updatedAt]
+      properties:
+        moduleId:
+          type: string
+          description: Business module code returned as the public module identifier.
+        moduleCode:
+          type: string
+        groupCode:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        sharedGroupCodes:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ContentModuleDetailView:
+      type: object
+      additionalProperties: false
+      required: [moduleId, moduleCode, groupCode, name, versions]
+      properties:
+        moduleId:
+          type: string
+        moduleCode:
+          type: string
+        groupCode:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        sharedGroupCodes:
+          type: array
+          items:
+            type: string
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentModuleVersionView'
+    ContentModuleSummaryListResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentModuleSummaryView'
+    ContentModuleDetailResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/ContentModuleDetailView'
+    CollaborationTimeoutScopeType:
+      type: string
+      enum: [GLOBAL, GROUP]
+    CollaborationTimeoutConfigView:
+      type: object
+      additionalProperties: false
+      required:
+        - scopeType
+        - testThresholdHours
+        - approvalThresholdHours
+        - pendingReleaseThresholdHours
+        - remediationThresholdHours
+      properties:
+        scopeType:
+          $ref: '#/components/schemas/CollaborationTimeoutScopeType'
+        groupCode:
+          type: string
+          maxLength: 64
+          nullable: true
+        testThresholdHours:
+          type: integer
+          minimum: 1
+          maximum: 8760
+          description: Timeout hours for the TEST work-item queue.
+        approvalThresholdHours:
+          type: integer
+          minimum: 1
+          maximum: 8760
+          description: Timeout hours for the APPROVAL work-item queue.
+        pendingReleaseThresholdHours:
+          type: integer
+          minimum: 1
+          maximum: 8760
+          description: Timeout hours for the PENDING_RELEASE work-item queue.
+        remediationThresholdHours:
+          type: integer
+          minimum: 1
+          maximum: 8760
+          description: Timeout hours for the REMEDIATION work-item queue.
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+    UpsertCollaborationTimeoutConfigRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - scopeType
+        - testThresholdHours
+        - approvalThresholdHours
+        - pendingReleaseThresholdHours
+        - remediationThresholdHours
+      properties:
+        scopeType:
+          $ref: '#/components/schemas/CollaborationTimeoutScopeType'
+        groupCode:
+          type: string
+          maxLength: 64
+          nullable: true
+          description: Required when scopeType is GROUP; must be null for GLOBAL.
+        testThresholdHours:
+          type: integer
+          minimum: 1
+          maximum: 8760
+        approvalThresholdHours:
+          type: integer
+          minimum: 1
+          maximum: 8760
+        pendingReleaseThresholdHours:
+          type: integer
+          minimum: 1
+          maximum: 8760
+        remediationThresholdHours:
+          type: integer
+          minimum: 1
+          maximum: 8760
+    CollaborationTimeoutConfigResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/CollaborationTimeoutConfigView'
+    TemplateLifecycleStatus:
+      type: string
+      enum:
+        - DRAFT
+        - TESTING
+        - APPROVAL
+        - PENDING_RELEASE
+        - PUBLISHED
+        - STOPPED
+        - DEPRECATED
+    TemplateVariableType:
+      type: string
+      enum: [TEXT, NUMBER, AMOUNT, DATE, ENUM, BOOLEAN, LIST, OBJECT]
+    TemplateImportConflictPolicy:
+      type: string
+      enum: [KEEP_TEMPLATE_ID, REJECT_IMPORT]
+      description: >-
+        Conflict resolution when bundle metadata `templateId` (internal UUID)
+        already exists. Defaults to `REJECT_IMPORT` when omitted. Conflicting
+        `externalId` always rejects import regardless of policy.
+    TemplateExportMetadataView:
+      type: object
+      additionalProperties: false
+      required:
+        - templateId
+        - externalId
+        - groupCode
+        - name
+        - masterId
+        - lifecycleStatus
+        - devVersionId
+        - devVersionNumber
+        - exportedAt
+      properties:
+        templateId:
+          type: string
+          format: uuid
+          description: Internal template UUID from the source environment.
+        externalId:
+          type: string
+        groupCode:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        masterId:
+          type: string
+          format: uuid
+        lifecycleStatus:
+          $ref: '#/components/schemas/TemplateLifecycleStatus'
+        releaseVersion:
+          type: string
+          nullable: true
+        devVersionId:
+          type: string
+          format: uuid
+        devVersionNumber:
+          type: integer
+          minimum: 1
+        exportedAt:
+          type: string
+          format: date-time
+    TemplateExportVariableSchemaView:
+      type: object
+      additionalProperties: false
+      required:
+        - variableKey
+        - variableType
+        - required
+      properties:
+        id:
+          type: string
+        variableKey:
+          type: string
+        variableType:
+          $ref: '#/components/schemas/TemplateVariableType'
+        required:
+          type: boolean
+        defaultValue:
+          type: string
+          nullable: true
+        enumValues:
+          type: string
+          nullable: true
+          description: Serialized enum values for ENUM variables.
+        description:
+          type: string
+          nullable: true
+    TemplateExportAnchorBindingView:
+      type: object
+      additionalProperties: false
+      required: [anchorId, declaredContentType]
+      properties:
+        id:
+          type: string
+        anchorId:
+          type: string
+        declaredContentType:
+          type: string
+        structuredContentJson:
+          type: string
+          nullable: true
+        validationStatus:
+          type: string
+          enum: [VALID, MISSING_ANCHOR, DUPLICATE_BINDING, INCOMPATIBLE_CONTENT_TYPE]
+    TemplateExportCompositionRuleView:
+      type: object
+      additionalProperties: false
+      required: [ruleId, conditionExpression, targetAnchorId]
+      properties:
+        ruleId:
+          type: string
+        conditionExpression:
+          type: string
+        targetAnchorId:
+          type: string
+        trueBranchRuleId:
+          type: string
+          nullable: true
+        falseBranchRuleId:
+          type: string
+          nullable: true
+    TemplateExportContentModuleReferenceView:
+      type: object
+      additionalProperties: false
+      required: [referenceKey, moduleId, semanticVersion, locked]
+      properties:
+        referenceKey:
+          type: string
+        moduleId:
+          type: string
+        semanticVersion:
+          type: string
+        locked:
+          type: boolean
+          description: Locked references from published templates are preserved but not re-applied on import.
+    TemplateExportApiPolicySnapshot:
+      type: object
+      additionalProperties: false
+      required:
+        - templateId
+        - policyVersion
+        - allowedAdGroups
+        - outputFormats
+        - outputModes
+        - batchEnabled
+        - maxBatchSize
+        - batchSyncMaxItems
+        - batchAsyncMaxItems
+        - docxEncryptionEnabled
+        - pdfEncryptionEnabled
+        - updatedAt
+      properties:
+        templateId:
+          type: string
+        policyVersion:
+          type: integer
+          minimum: 1
+        allowedAdGroups:
+          type: array
+          items:
+            type: string
+          description: AD Group identifiers only; no credential secrets.
+        defaultRouteReleaseVersion:
+          type: string
+          nullable: true
+        outputFormats:
+          type: array
+          items:
+            type: string
+        outputModes:
+          type: array
+          items:
+            type: string
+        batchEnabled:
+          type: boolean
+        maxBatchSize:
+          type: integer
+          minimum: 0
+        batchSyncMaxItems:
+          type: integer
+          minimum: 0
+        batchAsyncMaxItems:
+          type: integer
+          minimum: 0
+        docxEncryptionEnabled:
+          type: boolean
+        pdfEncryptionEnabled:
+          type: boolean
+        updatedAt:
+          type: string
+          format: date-time
+    TemplateExportBundleView:
+      type: object
+      additionalProperties: false
+      required:
+        - format
+        - metadata
+        - variables
+        - bindings
+        - rules
+        - contentModuleReferences
+      properties:
+        format:
+          type: string
+          const: template-export-bundle-v1-json
+        metadata:
+          $ref: '#/components/schemas/TemplateExportMetadataView'
+        variables:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateExportVariableSchemaView'
+        bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateExportAnchorBindingView'
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateExportCompositionRuleView'
+        contentModuleReferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateExportContentModuleReferenceView'
+        policySnapshot:
+          $ref: '#/components/schemas/TemplateExportApiPolicySnapshot'
+          nullable: true
+    TemplateExportResult:
+      type: object
+      additionalProperties: false
+      required: [format, bundle]
+      properties:
+        format:
+          type: string
+          const: template-export-bundle-v1-json
+        bundle:
+          $ref: '#/components/schemas/TemplateExportBundleView'
+    TemplateExportResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/TemplateExportResult'
+    ImportTemplateRequest:
+      type: object
+      additionalProperties: false
+      required: [masterId, bundle]
+      properties:
+        masterId:
+          type: string
+          format: uuid
+          description: Target environment master document UUID; must be APPROVED and group-compatible.
+        bundle:
+          $ref: '#/components/schemas/TemplateExportBundleView'
+        importConflictPolicy:
+          $ref: '#/components/schemas/TemplateImportConflictPolicy'
+    TemplateImportSummaryView:
+      type: object
+      additionalProperties: false
+      required: [resolvedTemplateId, newDevelopmentVersion, importBatchId]
+      properties:
+        resolvedTemplateId:
+          type: string
+          format: uuid
+        newDevelopmentVersion:
+          type: integer
+          minimum: 1
+        importBatchId:
+          type: string
+          format: uuid
+    TemplateDetailView:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - externalId
+        - groupCode
+        - name
+        - masterId
+        - lifecycleStatus
+        - devVersionId
+        - devVersionNumber
+        - variables
+        - bindings
+        - rules
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        externalId:
+          type: string
+        groupCode:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        masterId:
+          type: string
+          format: uuid
+        lifecycleStatus:
+          $ref: '#/components/schemas/TemplateLifecycleStatus'
+        approvalSubState:
+          type: string
+          enum: [PENDING_SUBMIT, PENDING_DECISION]
+          nullable: true
+        releaseVersion:
+          type: string
+          nullable: true
+        devVersionId:
+          type: string
+          format: uuid
+        devVersionNumber:
+          type: integer
+          minimum: 1
+        variables:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateExportVariableSchemaView'
+        bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateExportAnchorBindingView'
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateExportCompositionRuleView'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TemplateImportResult:
+      type: object
+      additionalProperties: false
+      required: [importSummary, template]
+      properties:
+        importSummary:
+          $ref: '#/components/schemas/TemplateImportSummaryView'
+        template:
+          $ref: '#/components/schemas/TemplateDetailView'
+    TemplateImportResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/TemplateImportResult'
     ContentModuleReviewSnapshot:
       type: object
       additionalProperties: false
@@ -4124,7 +5140,14 @@ components:
       type: object
       additionalProperties: false
       required:
-        [referenceTemplateCount, referenceTemplateListHint, impactedReleaseVersionsHint, defaultRouteAffected, recentCallSummary, remediationHint]
+        - referenceTemplateCount
+        - referenceTemplateListHint
+        - impactedReleaseVersionsHint
+        - defaultRouteAffected
+        - recentCallSummary
+        - remediationHint
+        - templateStopRequired
+        - releaseStopRequired
       properties:
         referenceTemplateCount:
           type: integer
@@ -4143,6 +5166,19 @@ components:
         remediationHint:
           type: string
           minLength: 1
+        templateStopRequired:
+          type: boolean
+          description: >
+            True when referenced published templates exist and a blocking condition applies
+            (recent runtime generation calls within 7 days or default-route impact). Signals
+            that administrators should stop affected templates to immediately block generation.
+        releaseStopRequired:
+          type: boolean
+          description: >
+            True when referenced release versions exist and a blocking condition applies
+            (recent runtime generation calls within 7 days or default-route impact). Signals
+            that administrators should stop affected release versions to immediately block
+            generation.
     ContentModuleLifecycleSnapshot:
       type: object
       additionalProperties: false

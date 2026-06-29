@@ -7,6 +7,12 @@ import {
   ROUTE_KEYS,
   type RouteKey,
 } from '@/routing/routeKeys'
+import {
+  canAccessApproverWorkbench,
+  canAccessCollaborationEscalationWorkbench,
+  canAccessTesterWorkbench,
+  sessionContext,
+} from '@/auth/roles'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
@@ -50,6 +56,10 @@ const QUICK_LINK_META: Partial<Record<RouteKey, { titleKey: string; descriptionK
   'route.approver-workbench': {
     titleKey: 'workbench.approver.title',
     descriptionKey: 'workbench.approver.description',
+  },
+  'route.escalation-workbench': {
+    titleKey: 'workbench.escalation.title',
+    descriptionKey: 'workbench.escalation.description',
   },
   'route.api-policy-management': {
     titleKey: 'home.apiPolicy.title',
@@ -151,17 +161,24 @@ const workbenchLinks = computed(() => {
   if (!session) {
     return []
   }
+  const context = sessionContext(session)
   const links: Array<{ titleKey: string; path: string }> = []
-  if (session.visibleRoutes.includes(ROUTE_KEYS.testerWorkbench)) {
+  if (canAccessTesterWorkbench(context)) {
     links.push({
       titleKey: 'home.dashboard.viewTesterWorkbench',
       path: pathForRouteKey(ROUTE_KEYS.testerWorkbench),
     })
   }
-  if (session.visibleRoutes.includes(ROUTE_KEYS.approverWorkbench)) {
+  if (canAccessApproverWorkbench(context)) {
     links.push({
       titleKey: 'home.dashboard.viewApproverWorkbench',
       path: pathForRouteKey(ROUTE_KEYS.approverWorkbench),
+    })
+  }
+  if (canAccessCollaborationEscalationWorkbench(context)) {
+    links.push({
+      titleKey: 'home.dashboard.viewEscalationWorkbench',
+      path: pathForRouteKey(ROUTE_KEYS.escalationWorkbench),
     })
   }
   return links

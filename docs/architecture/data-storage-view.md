@@ -47,6 +47,21 @@ This view defines storage responsibility boundaries for durable data, cache data
 - Authorization caches must fail closed when dependencies are unavailable and no valid cache exists.
 - During E05 integration hardening, temporary in-memory storage seams may remain for local/test usage only and must be replaced or explicitly fail-closed for production paths.
 
+## External data services in Kubernetes (P15 / ADR-0030)
+
+PostgreSQL, Redis, Kafka, and MinIO are **not** deployed by the application Helm chart. Operators
+provision them outside the release namespace; the chart exposes host/port/bucket settings via
+ConfigMap and credentials via Secret keys (`POSTGRES_*`, `MINIO_*`, etc.). Encryption-at-rest and
+KMS-managed keys follow ADR-0030; in-transit protection uses TLS 1.2+ to external endpoints and
+at the Ingress.
+
+| Topic | Guide |
+| --- | --- |
+| Operational baseline (backup, DR, encryption) | [ADR-0030](../adr/operations/0030-operational-platform-baseline.md) |
+| Canonical deployment guide | [deploy/README.md](../../deploy/README.md) |
+| ConfigMap / Secret wiring | [k8s-config-secrets.md](../../deploy/k8s-config-secrets.md) |
+| Service DNS and external endpoints | [k8s-ingress-tls.md](../../deploy/k8s-ingress-tls.md) |
+
 ## Pending Questions
 
 - Whether any template test data may be stored after masking or must always be synthetic.

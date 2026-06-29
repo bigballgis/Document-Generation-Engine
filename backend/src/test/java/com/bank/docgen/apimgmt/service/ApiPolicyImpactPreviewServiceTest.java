@@ -63,8 +63,8 @@ class ApiPolicyImpactPreviewServiceTest {
     void preview_blocksWhenDefaultRouteNotCallable() {
         when(groupAccessService.canManageApiPolicy(groupAdmin)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
-        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "1.0.0"))
-                .thenReturn(Optional.of(callableVersion));
+        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
+                .thenReturn(List.of(callableVersion));
         when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(existingPolicy(templateId, 3)));
 
         ApiPolicyImpactPreviewView preview = service.preview(
@@ -93,8 +93,8 @@ class ApiPolicyImpactPreviewServiceTest {
     void preview_nonBlockingWhenDefaultRouteRemainsCallable() {
         when(groupAccessService.canManageApiPolicy(groupAdmin)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
-        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "1.0.0"))
-                .thenReturn(Optional.of(callableVersion));
+        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
+                .thenReturn(List.of(callableVersion));
         when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(existingPolicy(templateId, 1)));
 
         ApiPolicyImpactPreviewView preview = service.preview(
@@ -122,8 +122,8 @@ class ApiPolicyImpactPreviewServiceTest {
     void preview_newPolicyStartsFromVersionOne() {
         when(groupAccessService.canManageApiPolicy(groupAdmin)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
-        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "1.0.0"))
-                .thenReturn(Optional.of(callableVersion));
+        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
+                .thenReturn(List.of(callableVersion));
         when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.empty());
 
         ApiPolicyImpactPreviewView preview = service.preview(

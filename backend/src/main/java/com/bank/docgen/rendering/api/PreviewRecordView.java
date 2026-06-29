@@ -10,9 +10,10 @@ public record PreviewRecordView(
         String templateVersionId,
         PreviewStatus status,
         String outputFormat,
+        String renderProfileVersion,
         String artifactStorageKey,
         List<FidelityWarningView> fidelityWarnings,
-        String comparisonSummary,
+        PreviewComparisonView previewComparison,
         String testDataSetId,
         Instant createdAt
 ) {

@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { dashboardQuickLinks, useWorkflowTasks } from '@/composables/useWorkflowTasks'
-import { useTemplatesStore } from '@/stores/templates'
+import { useCollaborationStore } from '@/stores/collaboration'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import type { ManagementCapabilities } from '@/types/session'
@@ -25,21 +25,6 @@ const reviewerCapabilities: ManagementCapabilities = {
   reviewMasters: true,
 }
 
-const authorCapabilities: ManagementCapabilities = {
-  ...testerCapabilities,
-  authorTemplates: true,
-}
-
-const approverCapabilities: ManagementCapabilities = {
-  ...testerCapabilities,
-  decideApprovals: true,
-}
-
-const adminCapabilities: ManagementCapabilities = {
-  ...testerCapabilities,
-  publishTemplates: true,
-}
-
 const managerCapabilities: ManagementCapabilities = {
   ...testerCapabilities,
   manageMasters: true,
@@ -50,33 +35,39 @@ describe('useWorkflowTasks', () => {
     setActivePinia(createPinia())
     const sessionStore = useSessionStore()
     sessionStore.session = {
-      roles: ['GLOBAL_ADMIN'],
+      roles: ['TEMPLATE_TESTER'],
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management', 'route.master-management'],
       capabilities: testerCapabilities,
     } as never
   })
 
-  it('builds template test tasks for testing lifecycle status', () => {
-    const templatesStore = useTemplatesStore()
-    templatesStore.templates = [
+  it('builds collaboration test tasks from backend work items', () => {
+    const collaborationStore = useCollaborationStore()
+    collaborationStore.workItems = [
       {
-        id: 't1',
-        name: 'Letter',
-        externalId: 'TPL-1',
+        workItemId: 'wi-1',
+        templateId: 't1',
+        templateName: 'Letter',
         groupCode: 'RETAIL',
-        lifecycleStatus: 'TESTING',
-      } as never,
+        queue: 'TEST',
+        triggerType: 'SUBMIT_FOR_TEST',
+        submitterUserId: '10000003',
+        summaryText: 'Template submitted for testing',
+        createdAt: '2026-06-26T10:00:00Z',
+        ageSeconds: 120,
+      },
     ]
 
     const { tasks } = useWorkflowTasks()
-    expect(tasks.value.some((task) => task.kind === 'template-test')).toBe(true)
+    expect(tasks.value.some((task) => task.kind === 'template-test' && task.source === 'collaboration')).toBe(true)
   })
 
   it('builds master review tasks for pending review masters', () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       ...sessionStore.session,
+      roles: ['GLOBAL_ADMIN'],
       capabilities: reviewerCapabilities,
     } as never
 
@@ -94,54 +85,11 @@ describe('useWorkflowTasks', () => {
     expect(tasks.value.some((task) => task.kind === 'master-review')).toBe(true)
   })
 
-  it('builds template approval tasks when approval capability is granted', () => {
-    const sessionStore = useSessionStore()
-    sessionStore.session = {
-      ...sessionStore.session,
-      capabilities: approverCapabilities,
-    } as never
-
-    const templatesStore = useTemplatesStore()
-    templatesStore.templates = [
-      {
-        id: 't2',
-        name: 'Approval Letter',
-        externalId: 'TPL-2',
-        groupCode: 'RETAIL',
-        lifecycleStatus: 'APPROVAL',
-      } as never,
-    ]
-
-    const { tasks } = useWorkflowTasks()
-    expect(tasks.value.some((task) => task.kind === 'template-approval')).toBe(true)
-  })
-
-  it('builds template publish tasks for admins on pending release', () => {
-    const sessionStore = useSessionStore()
-    sessionStore.session = {
-      ...sessionStore.session,
-      capabilities: adminCapabilities,
-    } as never
-
-    const templatesStore = useTemplatesStore()
-    templatesStore.templates = [
-      {
-        id: 't3',
-        name: 'Release Letter',
-        externalId: 'TPL-3',
-        groupCode: 'RETAIL',
-        lifecycleStatus: 'PENDING_RELEASE',
-      } as never,
-    ]
-
-    const { tasks } = useWorkflowTasks()
-    expect(tasks.value.some((task) => task.kind === 'template-publish')).toBe(true)
-  })
-
   it('builds master rework tasks for rejected masters when upload is allowed', () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       ...sessionStore.session,
+      roles: ['GLOBAL_ADMIN'],
       capabilities: managerCapabilities,
     } as never
 
@@ -159,55 +107,12 @@ describe('useWorkflowTasks', () => {
     expect(tasks.value.some((task) => task.kind === 'master-rework')).toBe(true)
   })
 
-  it('builds template rework tasks for draft templates with a prior release', () => {
-    const sessionStore = useSessionStore()
-    sessionStore.session = {
-      ...sessionStore.session,
-      capabilities: authorCapabilities,
-    } as never
-
-    const templatesStore = useTemplatesStore()
-    templatesStore.templates = [
-      {
-        id: 't5',
-        name: 'Rework Letter',
-        externalId: 'TPL-5',
-        groupCode: 'RETAIL',
-        lifecycleStatus: 'DRAFT',
-        releaseVersion: '1.0.0',
-      } as never,
-    ]
-
-    const { tasks } = useWorkflowTasks()
-    expect(tasks.value.some((task) => task.kind === 'template-rework')).toBe(true)
-    expect(tasks.value.some((task) => task.kind === 'template-author-draft')).toBe(false)
-  })
-
-  it('builds draft tasks for authors on new draft templates', () => {
-    const sessionStore = useSessionStore()
-    sessionStore.session = {
-      ...sessionStore.session,
-      capabilities: authorCapabilities,
-    } as never
-
-    const templatesStore = useTemplatesStore()
-    templatesStore.templates = [
-      {
-        id: 't4',
-        name: 'Draft Letter',
-        externalId: 'TPL-4',
-        groupCode: 'RETAIL',
-        lifecycleStatus: 'DRAFT',
-      } as never,
-    ]
-
-    const { tasks } = useWorkflowTasks()
-    expect(tasks.value.some((task) => task.kind === 'template-author-draft')).toBe(true)
-  })
-
   it('filters quick links by visible routes', () => {
-    const links = dashboardQuickLinks(['route.template-management'])
-    expect(links).toHaveLength(1)
-    expect(links[0]?.labelKey).toBe('dashboard.quickLinks.templates')
+    const links = dashboardQuickLinks(['route.template-management'], {
+      roles: ['TEMPLATE_TESTER'],
+      capabilities: testerCapabilities,
+    })
+    expect(links.some((link) => link.labelKey === 'dashboard.quickLinks.templates')).toBe(true)
+    expect(links.some((link) => link.labelKey === 'dashboard.quickLinks.testerWorkbench')).toBe(true)
   })
 })

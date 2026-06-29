@@ -1,5 +1,7 @@
 package com.bank.docgen.rendering.service;
 
+import com.bank.docgen.authoring.structured.FidelityValidationService;
+import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
@@ -8,7 +10,6 @@ import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.api.FidelityWarningView;
 import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.api.TestGenerateRequest;
-import com.bank.docgen.rendering.domain.FidelityWarningCode;
 import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
 import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -17,6 +18,7 @@ import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateService;
 import com.bank.docgen.template.service.TestDataSetService;
@@ -44,6 +46,10 @@ public class PreviewGenerationService {
     private final ObjectStoragePort objectStoragePort;
     private final DocxAssembler docxAssembler;
     private final ObjectMapper objectMapper;
+    private final PreviewComparisonService previewComparisonService;
+    private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final RenderProfileService renderProfileService;
+    private final FidelityValidationService fidelityValidationService;
 
     public PreviewGenerationService(
             TemplateService templateService,
@@ -54,7 +60,11 @@ public class PreviewGenerationService {
             PreviewRecordRepository previewRecordRepository,
             ObjectStoragePort objectStoragePort,
             DocxAssembler docxAssembler,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            PreviewComparisonService previewComparisonService,
+            TemplateContentModuleReferenceService contentModuleReferenceService,
+            RenderProfileService renderProfileService,
+            FidelityValidationService fidelityValidationService
     ) {
         this.templateService = templateService;
         this.testDataSetService = testDataSetService;
@@ -65,6 +75,10 @@ public class PreviewGenerationService {
         this.objectStoragePort = objectStoragePort;
         this.docxAssembler = docxAssembler;
         this.objectMapper = objectMapper;
+        this.previewComparisonService = previewComparisonService;
+        this.contentModuleReferenceService = contentModuleReferenceService;
+        this.renderProfileService = renderProfileService;
+        this.fidelityValidationService = fidelityValidationService;
     }
 
     @Transactional
@@ -115,6 +129,7 @@ public class PreviewGenerationService {
                 batchTestRunId
         );
         preview.markProcessing();
+        renderProfileService.applyPreviewRenderProfileVersion(preview, version);
         previewRecordRepository.save(preview);
         try {
             MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.getMasterId())
@@ -123,7 +138,13 @@ public class PreviewGenerationService {
                     .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
             Map<String, String> bindingJson = new LinkedHashMap<>();
             bindings.forEach(binding -> bindingJson.put(binding.getAnchorId(), binding.getStructuredContentJson()));
-            Map<String, String> anchorContent = docxAssembler.buildAnchorReplacements(bindingJson, variables);
+            Map<String, String> pinnedModuleStructures =
+                    contentModuleReferenceService.resolvePinnedContentStructures(version.getId());
+            Map<String, String> anchorContent = docxAssembler.buildAnchorReplacements(
+                    bindingJson,
+                    variables,
+                    pinnedModuleStructures
+            );
             byte[] docx;
             try (InputStream masterStream = objectStoragePort.get(master.getStorageKey())) {
                 docx = docxAssembler.assemble(masterStream, anchorContent);
@@ -135,25 +156,23 @@ public class PreviewGenerationService {
                     docx.length,
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             );
-            List<FidelityWarningView> warnings = List.of(
-                    new FidelityWarningView(
-                            FidelityWarningCode.CONTROLLED_STYLE_FALLBACK.name(),
-                            "generation.warning.fidelity.controlledStyleFallback"
-                    )
+            List<FidelityWarningView> warnings = fidelityValidationService.collectWarningsForVersion(
+                    version.getId(),
+                    template.getMasterId()
             );
             preview.markSucceeded(storageKey, writeWarnings(warnings));
             previewRecordRepository.save(preview);
             if (request.testDataSetId() != null && !request.testDataSetId().isBlank()) {
                 testDataSetService.lockForEvidence(templateId, request.testDataSetId());
             }
-            return toView(preview, warnings, bindings.size());
+            return toView(preview, warnings, bindings);
         } catch (Exception ex) {
             preview.markFailed();
             previewRecordRepository.save(preview);
             if (throwOnFailure) {
                 throw new PreviewGenerationException("api.error.rendering.generationFailed", ex);
             }
-            return toView(preview, List.of(), 0);
+            return toView(preview, List.of(), List.of());
         }
     }
 
@@ -165,23 +184,27 @@ public class PreviewGenerationService {
         if (!preview.getTemplateId().equals(templateId)) {
             throw new PreviewNotFoundException();
         }
-        int bindingCount = anchorBindingRepository
-                .findByTemplateVersionIdOrderByAnchorIdAsc(preview.getTemplateVersionId())
-                .size();
-        return toView(preview, readWarnings(preview.getFidelityWarningsJson()), bindingCount);
+        List<AnchorBindingEntity> bindings = anchorBindingRepository
+                .findByTemplateVersionIdOrderByAnchorIdAsc(preview.getTemplateVersionId());
+        return toView(preview, readWarnings(preview.getFidelityWarningsJson()), bindings);
     }
 
-    private PreviewRecordView toView(PreviewRecordEntity preview, List<FidelityWarningView> warnings, int bindingCount) {
-        String comparisonSummary = "anchorsConfigured=" + bindingCount + ";warnings=" + warnings.size();
+    private PreviewRecordView toView(
+            PreviewRecordEntity preview,
+            List<FidelityWarningView> warnings,
+            List<AnchorBindingEntity> bindings
+    ) {
+        var comparison = previewComparisonService.compare(bindings, warnings);
         return new PreviewRecordView(
                 preview.getId().toString(),
                 preview.getTemplateId().toString(),
                 preview.getTemplateVersionId().toString(),
                 preview.getStatus(),
                 preview.getOutputFormat(),
+                preview.getRenderProfileVersion(),
                 preview.getArtifactStorageKey(),
                 warnings,
-                comparisonSummary,
+                comparison,
                 preview.getTestDataSetExternalId(),
                 preview.getCreatedAt()
         );
@@ -225,12 +248,32 @@ public class PreviewGenerationService {
             return List.of();
         }
         try {
-            return objectMapper.readValue(
-                    json,
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, FidelityWarningView.class)
-            );
+            com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(json);
+            if (!root.isArray()) {
+                return List.of();
+            }
+            List<FidelityWarningView> warnings = new java.util.ArrayList<>();
+            for (com.fasterxml.jackson.databind.JsonNode node : root) {
+                warnings.add(new FidelityWarningView(
+                        node.path("code").asText(""),
+                        node.path("messageKey").asText(""),
+                        textOrNull(node, "location"),
+                        textOrNull(node, "artifact"),
+                        Boolean.valueOf(node.path("viewed").asBoolean(false))
+                ));
+            }
+            return List.copyOf(warnings);
         } catch (JsonProcessingException ex) {
             return List.of();
         }
+    }
+
+    private static String textOrNull(com.fasterxml.jackson.databind.JsonNode node, String field) {
+        com.fasterxml.jackson.databind.JsonNode value = node.get(field);
+        if (value == null || value.isNull()) {
+            return null;
+        }
+        String text = value.asText();
+        return text.isBlank() ? null : text;
     }
 }

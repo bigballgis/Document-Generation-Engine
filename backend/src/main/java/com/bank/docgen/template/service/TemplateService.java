@@ -2,6 +2,18 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.authoring.structured.MasterStyleCatalog;
+import com.bank.docgen.authoring.structured.MasterStyleCatalogService;
+import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
+import com.bank.docgen.authoring.structured.NumberingService;
+import com.bank.docgen.authoring.structured.PasteCleaningResult;
+import com.bank.docgen.authoring.structured.PasteCleaningService;
+import com.bank.docgen.authoring.structured.PasteCleaningSummary;
+import com.bank.docgen.authoring.structured.PasteCleaningSummaryItem;
+import com.bank.docgen.authoring.structured.ReferenceNodeService;
+import com.bank.docgen.authoring.structured.TableComponentService;
+import com.bank.docgen.authoring.structured.StructuredContentSchemaException;
+import com.bank.docgen.authoring.structured.StructuredContentSchemaValidator;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.master.domain.MasterDocumentStatus;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
@@ -13,6 +25,12 @@ import com.bank.docgen.template.api.BindingValidationSummaryView;
 import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
+import com.bank.docgen.template.api.MasterStyleCatalogEntryView;
+import com.bank.docgen.template.api.MasterStyleCatalogView;
+import com.bank.docgen.template.api.PasteCleanRequest;
+import com.bank.docgen.template.api.PasteCleanResultView;
+import com.bank.docgen.template.api.PasteCleaningSummaryItemView;
+import com.bank.docgen.template.api.PasteCleaningSummaryView;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateReleaseVersionView;
 import com.bank.docgen.template.api.TemplateSummaryView;
@@ -38,7 +56,6 @@ import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +82,13 @@ public class TemplateService {
     private final ApiPolicyRepository apiPolicyRepository;
     private final GroupAccessService groupAccessService;
     private final ObjectMapper objectMapper;
+    private final StructuredContentSchemaValidator structuredContentSchemaValidator;
+    private final NodeMatrixValidationService nodeMatrixValidationService;
+    private final MasterStyleCatalogService masterStyleCatalogService;
+    private final TableComponentService tableComponentService;
+    private final ReferenceNodeService referenceNodeService;
+    private final NumberingService numberingService;
+    private final PasteCleaningService pasteCleaningService;
 
     public TemplateService(
             TemplateRepository templateRepository,
@@ -74,7 +99,14 @@ public class TemplateService {
             TemplateLifecycleRecordRepository lifecycleRecordRepository,
             ApiPolicyRepository apiPolicyRepository,
             GroupAccessService groupAccessService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            StructuredContentSchemaValidator structuredContentSchemaValidator,
+            NodeMatrixValidationService nodeMatrixValidationService,
+            MasterStyleCatalogService masterStyleCatalogService,
+            TableComponentService tableComponentService,
+            ReferenceNodeService referenceNodeService,
+            NumberingService numberingService,
+            PasteCleaningService pasteCleaningService
     ) {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
@@ -85,6 +117,13 @@ public class TemplateService {
         this.apiPolicyRepository = apiPolicyRepository;
         this.groupAccessService = groupAccessService;
         this.objectMapper = objectMapper;
+        this.structuredContentSchemaValidator = structuredContentSchemaValidator;
+        this.nodeMatrixValidationService = nodeMatrixValidationService;
+        this.masterStyleCatalogService = masterStyleCatalogService;
+        this.tableComponentService = tableComponentService;
+        this.referenceNodeService = referenceNodeService;
+        this.numberingService = numberingService;
+        this.pasteCleaningService = pasteCleaningService;
     }
 
     @Transactional(readOnly = true)
@@ -243,11 +282,15 @@ public class TemplateService {
                 .orElseThrow(MasterNotFoundException::new);
         Set<String> masterAnchors = new HashSet<>();
         master.getAnchors().forEach(anchor -> masterAnchors.add(anchor.getAnchorId()));
+        Set<String> declaredVariableKeys = loadDeclaredVariableKeys(version.getId());
         BindingValidationStatus status = computeBindingStatus(
                 request.anchorId(),
                 request.declaredContentType(),
                 masterAnchors,
-                List.of()
+                List.of(),
+                request.structuredContentJson(),
+                declaredVariableKeys,
+                template.getMasterId()
         );
         var existing = anchorBindingRepository.findByTemplateVersionIdAndAnchorId(version.getId(), request.anchorId());
         AnchorBindingEntity entity;
@@ -303,12 +346,16 @@ public class TemplateService {
         int missing = 0;
         int duplicate = 0;
         int incompatible = 0;
+        Set<String> declaredVariableKeys = loadDeclaredVariableKeys(version.getId());
         for (AnchorBindingEntity binding : bindings) {
             BindingValidationStatus status = computeBindingStatus(
                     binding.getAnchorId(),
                     binding.getDeclaredContentType(),
                     masterAnchors,
-                    bindings.stream().map(AnchorBindingEntity::getAnchorId).toList()
+                    bindings.stream().map(AnchorBindingEntity::getAnchorId).toList(),
+                    binding.getStructuredContentJson(),
+                    declaredVariableKeys,
+                    template.getMasterId()
             );
             if (status != binding.getValidationStatus()) {
                 binding.update(binding.getDeclaredContentType(), binding.getStructuredContentJson(), status);
@@ -336,11 +383,74 @@ public class TemplateService {
         return new BindingValidationView(views, summary);
     }
 
+    @Transactional(readOnly = true)
+    public MasterStyleCatalogView getMasterStyleCatalog(UUID templateId, ManagementSessionClaims session) {
+        TemplateEntity template = requireReadableTemplate(templateId, session);
+        return toCatalogView(masterStyleCatalogService.loadForMaster(template.getMasterId()));
+    }
+
+    @Transactional(readOnly = true)
+    public PasteCleanResultView pasteClean(
+            UUID templateId,
+            PasteCleanRequest request,
+            ManagementSessionClaims session
+    ) {
+        requireWritableTemplate(templateId, session);
+        PasteCleaningResult result = pasteCleaningService.cleanPaste(
+                request.sourceHtml(),
+                request.prePasteStructuredContentJson()
+        );
+        return toPasteCleanView(result);
+    }
+
+    private MasterStyleCatalogView toCatalogView(MasterStyleCatalog catalog) {
+        List<MasterStyleCatalogEntryView> entries = catalog.stylesByKey().values().stream()
+                .map(entry -> new MasterStyleCatalogEntryView(
+                        entry.styleKey(),
+                        entry.applicableNodeTypes(),
+                        entry.renderPurpose()
+                ))
+                .sorted(java.util.Comparator.comparing(MasterStyleCatalogEntryView::styleKey))
+                .toList();
+        return new MasterStyleCatalogView(catalog.catalogVersion(), entries);
+    }
+
+    private PasteCleanResultView toPasteCleanView(PasteCleaningResult result) {
+        PasteCleaningSummary summary = result.summary();
+        List<PasteCleaningSummaryItemView> items = summary.items().stream()
+                .map(this::toPasteSummaryItemView)
+                .toList();
+        PasteCleaningSummaryView summaryView = new PasteCleaningSummaryView(
+                items,
+                summary.transformedCount(),
+                summary.removedCount(),
+                summary.warningCount(),
+                summary.blockedCount()
+        );
+        return new PasteCleanResultView(
+                result.blocked(),
+                result.cleanedStructuredContentJson(),
+                summaryView,
+                result.prePasteSnapshotJson()
+        );
+    }
+
+    private PasteCleaningSummaryItemView toPasteSummaryItemView(PasteCleaningSummaryItem item) {
+        return new PasteCleaningSummaryItemView(
+                item.category(),
+                item.messageKey(),
+                item.detectionSummary()
+        );
+    }
+
     private BindingValidationStatus computeBindingStatus(
             String anchorId,
             AnchorContentType declaredContentType,
             Set<String> masterAnchors,
-            List<String> allAnchorIds
+            List<String> allAnchorIds,
+            String structuredContentJson,
+            Set<String> declaredVariableKeys,
+            UUID masterId
     ) {
         if (!masterAnchors.contains(anchorId)) {
             return BindingValidationStatus.MISSING_ANCHOR;
@@ -352,7 +462,28 @@ public class TemplateService {
         if (declaredContentType == AnchorContentType.IMAGE && anchorId.contains("TEXT")) {
             return BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE;
         }
+        if (structuredContentJson != null && !structuredContentJson.isBlank()) {
+            var fidelity = nodeMatrixValidationService.validate(structuredContentJson, declaredVariableKeys);
+            var styleCatalog = masterStyleCatalogService.loadForMaster(masterId);
+            var styleFidelity = masterStyleCatalogService.validate(structuredContentJson, styleCatalog);
+            var tableFidelity = tableComponentService.validateStructuredContent(structuredContentJson);
+            var referenceFidelity = referenceNodeService.validateStructuredContent(structuredContentJson);
+            var numberingFidelity = numberingService.validateStructuredContent(structuredContentJson);
+            if (fidelity.hasBlockers()
+                    || styleFidelity.hasBlockers()
+                    || tableFidelity.hasBlockers()
+                    || referenceFidelity.fidelity().hasBlockers()
+                    || numberingFidelity.fidelity().hasBlockers()) {
+                return BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE;
+            }
+        }
         return BindingValidationStatus.VALID;
+    }
+
+    private Set<String> loadDeclaredVariableKeys(UUID templateVersionId) {
+        return variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(templateVersionId).stream()
+                .map(VariableSchemaEntity::getVariableKey)
+                .collect(Collectors.toSet());
     }
 
     private void validateVariableRequest(UpsertVariableSchemaRequest request) {
@@ -367,14 +498,9 @@ public class TemplateService {
 
     private void validateStructuredContent(String json) {
         try {
-            JsonNode node = objectMapper.readTree(json);
-            if (!node.has("nodes")) {
-                throw new TemplateValidationException("api.error.template.structuredContentInvalid");
-            }
-        } catch (TemplateValidationException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            throw new TemplateValidationException("api.error.template.structuredContentInvalid");
+            structuredContentSchemaValidator.validate(json);
+        } catch (StructuredContentSchemaException ex) {
+            throw new TemplateValidationException(ex.messageKey());
         }
     }
 

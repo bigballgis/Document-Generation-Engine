@@ -38,6 +38,12 @@ public class ApiPolicyEntity {
     @Column(name = "max_batch_size", nullable = false)
     private int maxBatchSize;
 
+    @Column(name = "batch_sync_max_items", nullable = false)
+    private int batchSyncMaxItems = 100;
+
+    @Column(name = "batch_async_max_items", nullable = false)
+    private int batchAsyncMaxItems = 10000;
+
     @Column(name = "docx_encryption_enabled", nullable = false)
     private boolean docxEncryptionEnabled;
 
@@ -109,6 +115,14 @@ public class ApiPolicyEntity {
         return maxBatchSize;
     }
 
+    public int getBatchSyncMaxItems() {
+        return batchSyncMaxItems;
+    }
+
+    public int getBatchAsyncMaxItems() {
+        return batchAsyncMaxItems;
+    }
+
     public boolean isDocxEncryptionEnabled() {
         return docxEncryptionEnabled;
     }
@@ -175,9 +189,80 @@ public class ApiPolicyEntity {
         this.outputModesJson = outputModesJson;
         this.batchEnabled = batchEnabled;
         this.maxBatchSize = maxBatchSize;
+        this.batchSyncMaxItems = maxBatchSize;
         this.docxEncryptionEnabled = docxEncryptionEnabled;
         this.pdfEncryptionEnabled = pdfEncryptionEnabled;
         this.updatedBy = updatedBy;
         this.updatedAt = Instant.now();
+    }
+
+    public void updateAdGroupsDomain(String allowedAdGroupsJson, String updatedBy) {
+        this.allowedAdGroupsJson = allowedAdGroupsJson;
+        bumpVersion(updatedBy);
+    }
+
+    public void updateOutputDomain(String outputFormatsJson, String outputModesJson, String updatedBy) {
+        this.outputFormatsJson = outputFormatsJson;
+        this.outputModesJson = outputModesJson;
+        bumpVersion(updatedBy);
+    }
+
+    public void updateBatchLimitsDomain(
+            boolean batchEnabled,
+            int syncMaxItems,
+            int asyncMaxItems,
+            String updatedBy
+    ) {
+        this.batchEnabled = batchEnabled;
+        this.batchSyncMaxItems = syncMaxItems;
+        this.batchAsyncMaxItems = asyncMaxItems;
+        this.maxBatchSize = syncMaxItems;
+        bumpVersion(updatedBy);
+    }
+
+    public void updateEncryptionDomain(
+            boolean docxEncryptionEnabled,
+            boolean pdfEncryptionEnabled,
+            String updatedBy
+    ) {
+        this.docxEncryptionEnabled = docxEncryptionEnabled;
+        this.pdfEncryptionEnabled = pdfEncryptionEnabled;
+        bumpVersion(updatedBy);
+    }
+
+    public void updateDefaultRouteDomain(String defaultRouteReleaseVersion, String updatedBy) {
+        this.defaultRouteReleaseVersion = defaultRouteReleaseVersion;
+        bumpVersion(updatedBy);
+    }
+
+    public void applyRollbackConfiguration(
+            String allowedAdGroupsJson,
+            String defaultRouteReleaseVersion,
+            String outputFormatsJson,
+            String outputModesJson,
+            boolean batchEnabled,
+            int batchSyncMaxItems,
+            int batchAsyncMaxItems,
+            boolean docxEncryptionEnabled,
+            boolean pdfEncryptionEnabled,
+            String updatedBy
+    ) {
+        this.allowedAdGroupsJson = allowedAdGroupsJson;
+        this.defaultRouteReleaseVersion = defaultRouteReleaseVersion;
+        this.outputFormatsJson = outputFormatsJson;
+        this.outputModesJson = outputModesJson;
+        this.batchEnabled = batchEnabled;
+        this.batchSyncMaxItems = batchSyncMaxItems;
+        this.batchAsyncMaxItems = batchAsyncMaxItems;
+        this.maxBatchSize = batchSyncMaxItems;
+        this.docxEncryptionEnabled = docxEncryptionEnabled;
+        this.pdfEncryptionEnabled = pdfEncryptionEnabled;
+        bumpVersion(updatedBy);
+    }
+
+    private void bumpVersion(String updatedBy) {
+        this.updatedBy = updatedBy;
+        this.updatedAt = Instant.now();
+        this.policyVersion += 1;
     }
 }

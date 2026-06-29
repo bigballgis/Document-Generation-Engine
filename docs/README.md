@@ -12,6 +12,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
 | 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P11) |
 | 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
+| 2c | **[Deployment guide](../deploy/README.md)** | **Canonical** install/upgrade/cutover/rollback — Docker Compose + Kubernetes (ADR-0030) |
 | 3 | [Orchestration high-level plan](./architecture/orchestration-high-level-plan.md) | Epic ordering and active epic rules |
 | 4 | [Implementation task plan](./architecture/implementation-task-plan.md) | Technical waves M1–M14 |
 | 5 | [Requirements plan](./requirements/requirements-plan.md) | Confirmed requirements + pending questions |
@@ -52,6 +53,9 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [P11 Batch & async generation](./plan/detail/P11-batch-async.md) | Sync batch, async task query/cancel |
 | [P13 Identity & group administration](./plan/detail/P13-identity-group-administration.md) | User + group management plane, fail-closed escalation guard, audit (Done 2026-06-23) |
 | [P14 Confirmed large domains](./plan/detail/P14-confirmed-large-domains.md) | Clause modules, collaboration to-dos, export/import |
+| [P15 Kubernetes deployment](./plan/detail/P15-kubernetes-deployment-container-hardening.md) | Phase plan — Helm, hardening, blue-green, CI gates (ADR-0030) |
+| [P18 Structured authoring & fidelity](./plan/detail/P18-structured-authoring-fidelity-engine.md) | Controlled node matrix, style catalog, paste cleaning, renderProfile (gap G3) |
+| **[Deployment guide](../deploy/README.md)** | **Canonical operator guide** — prerequisites, install/upgrade/cutover/rollback/secrets; indexes all `deploy/*.md` topic docs |
 
 ## Architecture
 
@@ -89,11 +93,15 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Contract outline](./api/contract-outline.md) | Narrative companion |
 | [Examples](./api/examples/README.md) | Request/response examples |
 
-## Operations
+## Deployment & operations
 
 | Document | Purpose |
 | --- | --- |
-| [Production runbook](./operations/runbook.md) | Release gate, prod compose profile, observability |
+| **[Deployment guide](../deploy/README.md)** | **Start here for operators** — Docker Compose + Kubernetes install, upgrade, blue-green cutover, rollback, secrets (ADR-0030 / P15) |
+| [Container hardening](../deploy/container-hardening.md) | Non-root, read-only root FS, minimal base images |
+| [Helm chart README](../deploy/helm/docgen/README.md) | Chart values, lint/template, per-env profiles |
+| [Production runbook](./operations/runbook.md) | Release gate, local prod compose profile, observability |
+| [ADR-0030 Operational Platform Baseline](./adr/operations/0030-operational-platform-baseline.md) | Accepted CD, hardening, backup, and observability decisions |
 
 ## ADRs
 

@@ -1,4 +1,8 @@
+import type { PageView } from '@/types/identity'
+
 export type MasterDocumentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED'
+
+export type MasterRevisionLineLabel = 'CURRENT'
 
 export type MasterReviewAction = 'SUBMITTED' | 'APPROVED' | 'REJECTED'
 
@@ -70,3 +74,32 @@ export interface UpdateMasterMetadataPayload {
   name?: string
   description?: string | null
 }
+
+export interface MasterRevisionLineSummary {
+  id: string
+  lineLabel: MasterRevisionLineLabel
+  status: MasterDocumentStatus
+  originalFilename: string
+  anchorCount: number
+  updatedAt: string
+  updatedBy: string
+  current: boolean
+}
+
+export interface MasterRevisionLineDetail {
+  id: string
+  masterId: string
+  lineLabel: MasterRevisionLineLabel
+  status: MasterDocumentStatus
+  originalFilename: string
+  changeSummary: string | null
+  current: boolean
+  anchors: MasterAnchor[]
+  reviewHistory: MasterReviewRecord[]
+  createdBy: string
+  updatedBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type MasterRevisionLinePage = PageView<MasterRevisionLineSummary>

@@ -54,6 +54,19 @@ public class BatchTestGenerationService {
         }
 
         UUID batchRunId = UUID.randomUUID();
+        BatchTestRunEntity run = new BatchTestRunEntity(
+                batchRunId,
+                templateId,
+                session.username(),
+                request.testDataSetIds().size(),
+                0,
+                0,
+                0,
+                0,
+                "[]"
+        );
+        batchTestRunRepository.save(run);
+
         List<BatchTestSampleResultView> samples = new ArrayList<>();
         int succeededCount = 0;
         int failedCount = 0;
@@ -85,10 +98,7 @@ public class BatchTestGenerationService {
             ));
         }
 
-        BatchTestRunEntity run = new BatchTestRunEntity(
-                batchRunId,
-                templateId,
-                session.username(),
+        run.updateSummary(
                 samples.size(),
                 succeededCount,
                 failedCount,

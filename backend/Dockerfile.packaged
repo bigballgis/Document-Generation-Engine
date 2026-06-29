@@ -1,11 +1,12 @@
 # Runtime image — copies pre-built JAR from backend/target (see scripts/docker-deploy.ps1).
+# ADR-0030 / P15-T01: minimal non-root JRE (UID 65532, matches distroless nonroot); mount /tmp tmpfs with read-only root FS.
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-RUN apk add --no-cache curl \
-    && addgroup -S docgen && adduser -S docgen -G docgen
-COPY target/docgen-backend-*.jar app.jar
-USER docgen
+RUN addgroup -g 65532 -S nonroot \
+    && adduser -S -u 65532 -G nonroot nonroot \
+    && chown -R nonroot:nonroot /app
+COPY --chown=nonroot:nonroot target/docgen-backend-*.jar app.jar
+USER 65532:65532
 EXPOSE 8080
-HEALTHCHECK --interval=15s --timeout=5s --retries=10 \
-  CMD curl -f http://localhost:8080/healthz || exit 1
+ENV JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=/tmp"
 ENTRYPOINT ["java", "-jar", "app.jar"]

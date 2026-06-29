@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "docgen.configMapName" . }}
+  labels:
+    {{- include "docgen.labels" . | nindent 4 }}
+    app.kubernetes.io/component: config
+data:
+  SPRING_PROFILES_ACTIVE: {{ .Values.config.springProfilesActive | quote }}
+  APP_ENVIRONMENT: {{ .Values.config.appEnvironment | quote }}
+  POSTGRES_HOST: {{ required "externalServices.postgres.host is required" .Values.externalServices.postgres.host | quote }}
+  POSTGRES_PORT: {{ .Values.externalServices.postgres.port | toString | quote }}
+  POSTGRES_DB: {{ .Values.externalServices.postgres.database | quote }}
+  REDIS_HOST: {{ required "externalServices.redis.host is required" .Values.externalServices.redis.host | quote }}
+  REDIS_PORT: {{ .Values.externalServices.redis.port | toString | quote }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ required "externalServices.kafka.bootstrapServers is required" .Values.externalServices.kafka.bootstrapServers | quote }}
+  MINIO_ENDPOINT: {{ required "externalServices.minio.endpoint is required" .Values.externalServices.minio.endpoint | quote }}
+  STORAGE_PROVIDER: {{ .Values.config.storageProvider | quote }}
+  STORAGE_BUCKET: {{ .Values.config.storageBucket | quote }}
+  DOCGEN_SEED_DEMO_CATALOG: {{ .Values.config.seedDemoCatalog | toString | quote }}
+  JAVA_TOOL_OPTIONS: {{ .Values.config.javaToolOptions | quote }}
+  BACKEND_PORT: {{ .Values.backend.port | toString | quote }}

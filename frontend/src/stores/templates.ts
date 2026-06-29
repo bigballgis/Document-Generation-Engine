@@ -11,12 +11,14 @@ import type {
   CompositionRuleInput,
   CreateTemplatePayload,
   DeleteTemplatePayload,
+  ImportTemplatePayload,
   LifecycleCommentPayload,
   LifecycleDecisionPayload,
   LifecycleGovernancePayload,
   LifecycleImpactPreviewRequest,
   PublishTemplatePayload,
   TemplateDetail,
+  TemplateImportResult,
   TemplateSummary,
   TestGeneratePayload,
   UpdateTemplateMetadataPayload,
@@ -24,6 +26,7 @@ import type {
   UpsertBindingPayload,
   UpsertVariablePayload,
 } from '@/types/template'
+import type { ApiPolicyDomain, ApiPolicyDomainFormMap } from '@/types/apiPolicyDomain'
 
 export const useTemplatesStore = defineStore('templates', () => {
   const templates = ref<TemplateSummary[]>([])
@@ -136,6 +139,25 @@ export const useTemplatesStore = defineStore('templates', () => {
     }
   }
 
+  async function saveApiPolicyDomain<D extends ApiPolicyDomain>(
+    templateId: string,
+    domain: D,
+    payload: ApiPolicyDomainFormMap[D],
+    confirmed = true,
+  ): Promise<ApiPolicy> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      apiPolicy.value = await apiPolicyApi.saveApiPolicyDomain(templateId, domain, payload, confirmed)
+      return apiPolicy.value
+    } catch (error) {
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
   async function createCredential(templateId: string): Promise<ApiCredentialCreated> {
     submitting.value = true
     lastErrorMessageKey.value = null
@@ -197,6 +219,22 @@ export const useTemplatesStore = defineStore('templates', () => {
       return created
     } catch (error) {
       lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.create')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function importTemplate(payload: ImportTemplatePayload): Promise<TemplateImportResult> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      const result = await templatesApi.importTemplate(payload)
+      templates.value = [toSummary(result.template), ...templates.value.filter((item) => item.id !== result.template.id)]
+      selectedTemplate.value = result.template
+      return result
+    } catch (error) {
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.import')
       throw error
     } finally {
       submitting.value = false
@@ -460,10 +498,12 @@ export const useTemplatesStore = defineStore('templates', () => {
     fetchCredentials,
     saveApiPolicy,
     previewApiPolicyImpact,
+    saveApiPolicyDomain,
     createCredential,
     rotateCredential,
     revokeCredential,
     createTemplate,
+    importTemplate,
     deleteTemplate,
     submitForTest,
     recordTestDecision,

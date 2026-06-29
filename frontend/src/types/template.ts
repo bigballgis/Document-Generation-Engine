@@ -140,10 +140,153 @@ export interface LifecycleDecisionPayload {
   commentSummary?: string
   reasonCategory?: string
   impactSummary?: string
+  fidelityViewedConfirmed?: boolean
+  coverageViewedConfirmed?: boolean
+  previewViewedConfirmed?: boolean
+  keyEvidenceConfirmed?: boolean
+  remediationTestRecordId?: string
+  remediationChangeDiffRef?: string
+  remediationChecklistCode?: string
+  exceptionIntervention?: boolean
+  exceptionReason?: string
+  secondaryConfirmed?: boolean
+}
+
+export type PublishGateCheckCode =
+  | 'ANCHOR_INTEGRITY'
+  | 'VARIABLE_SCHEMA'
+  | 'RULE_BOUNDS'
+  | 'TEST_RESULTS'
+  | 'PREVIEW_PRESENT'
+  | 'CHANGE_DIFF'
+  | 'APPROVAL_SUMMARY'
+  | 'COVERAGE_THRESHOLDS'
+  | 'API_POLICY'
+  | 'BLOCKER_STATUS'
+
+export interface PublishGateItem {
+  checkCode: PublishGateCheckCode
+  ready: boolean
+  blocker: boolean
+  messageKey: string
+  summary: string
+}
+
+export interface PublishGateChecklist {
+  templateId: string
+  ready: boolean
+  blockerCount: number
+  items: PublishGateItem[]
+}
+
+export type ChangeDiffDimensionCode =
+  | 'CONTENT'
+  | 'ANCHORS'
+  | 'VARIABLES'
+  | 'RULES'
+  | 'CONTRACT_SUMMARY'
+
+export interface ChangeDiffModification {
+  key: string
+  changeType: string
+  summary: string
+}
+
+export interface ChangeDiffDimension {
+  dimension: ChangeDiffDimensionCode
+  added: string[]
+  removed: string[]
+  modified: ChangeDiffModification[]
+}
+
+export interface ChangeDiffSummary {
+  templateId: string
+  baselineReleaseVersion: string | null
+  candidateVersionId: string
+  hasChanges: boolean
+  totalChangeCount: number
+  dimensions: ChangeDiffDimension[]
+}
+
+export type PreviewComparisonLocationType = 'PAGE' | 'ANCHOR' | 'SECTION' | 'COMPONENT'
+export type PreviewComparisonSeverity = 'WARNING' | 'BLOCKER'
+
+export interface PreviewComparisonItem {
+  locationType: PreviewComparisonLocationType
+  locationRef: string
+  severity: PreviewComparisonSeverity
+  diffCode: string
+  summary: string
+}
+
+export interface PreviewComparison {
+  totalDiffCount: number
+  blockerCount: number
+  warningCount: number
+  items: PreviewComparisonItem[]
+}
+
+export type RiskPromptScopeType = 'GLOBAL' | 'GROUP'
+
+export interface RiskPromptConfig {
+  scopeType: RiskPromptScopeType
+  groupCode: string | null
+  reasonCategories: string[]
+  riskPromptCopy: Record<string, string>
+  updatedAt: string
+}
+
+export interface UpsertRiskPromptConfigPayload {
+  scopeType: RiskPromptScopeType
+  groupCode?: string | null
+  reasonCategories: string[]
+  riskPromptCopy: Record<string, string>
 }
 
 export interface PublishTemplatePayload {
   releaseVersion: string
+}
+
+export type PasteCleaningCategory = 'TRANSFORMED' | 'REMOVED' | 'WARNING' | 'BLOCKED'
+
+export interface PasteCleaningSummaryItem {
+  category: PasteCleaningCategory
+  messageKey: string
+  detectionSummary: string
+}
+
+export interface PasteCleaningSummary {
+  items: PasteCleaningSummaryItem[]
+  transformedCount: number
+  removedCount: number
+  warningCount: number
+  blockedCount: number
+}
+
+export interface PasteCleanResult {
+  blocked: boolean
+  cleanedStructuredContentJson: string | null
+  summary: PasteCleaningSummary
+  prePasteSnapshotJson: string
+}
+
+export interface MasterStyleCatalogEntry {
+  styleKey: string
+  applicableNodeTypes: string[]
+  renderPurpose: string
+}
+
+export interface MasterStyleCatalog {
+  catalogVersion: string
+  entries: MasterStyleCatalogEntry[]
+}
+
+export interface FidelityWarning {
+  code: string
+  messageKey: string
+  location?: string | null
+  artifact?: string | null
+  viewed?: boolean
 }
 
 export interface PreviewRecord {
@@ -153,8 +296,8 @@ export interface PreviewRecord {
   status: PreviewStatus
   outputFormat: string
   artifactStorageKey: string | null
-  fidelityWarnings: Array<{ messageKey: string }>
-  comparisonSummary: string | null
+  fidelityWarnings: FidelityWarning[]
+  previewComparison: PreviewComparison | null
   testDataSetId: string | null
   createdAt: string
 }
@@ -302,6 +445,8 @@ export interface ApiPolicy {
   outputModes: string[]
   batchEnabled: boolean
   maxBatchSize: number
+  batchSyncMaxItems?: number
+  batchAsyncMaxItems?: number
   docxEncryptionEnabled: boolean
   pdfEncryptionEnabled: boolean
   updatedAt: string
@@ -319,9 +464,15 @@ export interface UpsertApiPolicyPayload {
 }
 
 export interface ApiPolicyImpactPreview {
-  currentPolicyVersion: number | null
-  nextPolicyVersion: number | null
-  changedFields: string[]
+  changedAreas: string[]
+  blocking: boolean
+  warnings: string[]
+  defaultRouteImpacted: boolean
+  currentPolicyVersion: number
+  nextPolicyVersion: number
+  summaryMessageKey: string
+  contractDiffSummary: string | null
+  idempotencyImpactSummary: string | null
 }
 
 export interface ApiCredentialSummary {
@@ -342,4 +493,65 @@ export interface ApiCredentialCreated {
 
 export interface DeleteTemplatePayload {
   reason: string
+}
+
+export type TemplateImportConflictPolicy = 'KEEP_TEMPLATE_ID' | 'REJECT_IMPORT'
+
+export interface TemplateExportMetadata {
+  templateId: string
+  externalId: string
+  groupCode: string
+  name: string
+  description: string | null
+  masterId: string
+  lifecycleStatus: TemplateLifecycleStatus
+  releaseVersion: string | null
+  devVersionId: string
+  devVersionNumber: number
+  exportedAt: string
+}
+
+export interface TemplateContentModuleReference {
+  referenceKey: string
+  moduleId: string
+  semanticVersion: string
+  locked: boolean
+}
+
+export interface UpsertContentModuleReferencePayload {
+  referenceKey: string
+  moduleId: string
+  semanticVersion: string
+}
+
+export interface TemplateExportBundle {
+  format: string
+  metadata: TemplateExportMetadata
+  variables: VariableSchema[]
+  bindings: AnchorBinding[]
+  rules: CompositionRule[]
+  contentModuleReferences: TemplateContentModuleReference[]
+  policySnapshot: ApiPolicy | null
+}
+
+export interface TemplateExportResult {
+  format: string
+  bundle: TemplateExportBundle
+}
+
+export interface TemplateImportSummary {
+  resolvedTemplateId: string
+  newDevelopmentVersion: number
+  importBatchId: string
+}
+
+export interface ImportTemplatePayload {
+  masterId: string
+  bundle: TemplateExportBundle
+  importConflictPolicy?: TemplateImportConflictPolicy
+}
+
+export interface TemplateImportResult {
+  importSummary: TemplateImportSummary
+  template: TemplateDetail
 }

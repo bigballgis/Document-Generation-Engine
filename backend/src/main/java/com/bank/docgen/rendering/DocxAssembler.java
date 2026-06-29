@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,13 +50,21 @@ public class DocxAssembler {
     }
 
     public String renderStructuredContent(String structuredContentJson, Map<String, Object> variables) {
+        return renderStructuredContent(structuredContentJson, variables, Map.of());
+    }
+
+    public String renderStructuredContent(
+            String structuredContentJson,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures
+    ) {
         try {
             JsonNode root = objectMapper.readTree(structuredContentJson);
             JsonNode nodes = root.path("nodes");
             StringBuilder builder = new StringBuilder();
             if (nodes.isArray()) {
                 for (JsonNode node : nodes) {
-                    builder.append(renderNode(node, variables));
+                    builder.append(renderNode(node, variables, pinnedModuleStructures));
                 }
             }
             return builder.toString();
@@ -64,7 +73,11 @@ public class DocxAssembler {
         }
     }
 
-    private String renderNode(JsonNode node, Map<String, Object> variables) {
+    private String renderNode(
+            JsonNode node,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures
+    ) {
         String type = node.path("type").asText("");
         if ("text".equals(type)) {
             return node.path("value").asText("");
@@ -74,12 +87,20 @@ public class DocxAssembler {
             Object value = variables.get(key);
             return value == null ? "" : String.valueOf(value);
         }
+        if ("contentModuleRef".equals(type)) {
+            String referenceKey = node.path("referenceKey").asText("").trim().toUpperCase(Locale.ROOT);
+            String pinnedStructure = pinnedModuleStructures.get(referenceKey);
+            if (pinnedStructure == null || pinnedStructure.isBlank()) {
+                return "";
+            }
+            return renderStructuredContent(pinnedStructure, variables, pinnedModuleStructures);
+        }
         if ("paragraph".equals(type)) {
             StringBuilder paragraph = new StringBuilder();
             JsonNode children = node.path("children");
             if (children.isArray()) {
                 for (JsonNode child : children) {
-                    paragraph.append(renderNode(child, variables));
+                    paragraph.append(renderNode(child, variables, pinnedModuleStructures));
                 }
             }
             return paragraph.toString();
@@ -91,10 +112,18 @@ public class DocxAssembler {
             Map<String, String> bindingJsonByAnchor,
             Map<String, Object> variables
     ) {
+        return buildAnchorReplacements(bindingJsonByAnchor, variables, Map.of());
+    }
+
+    public Map<String, String> buildAnchorReplacements(
+            Map<String, String> bindingJsonByAnchor,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures
+    ) {
         return bindingJsonByAnchor.entrySet().stream()
                 .collect(java.util.stream.Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> renderStructuredContent(entry.getValue(), variables)
+                        entry -> renderStructuredContent(entry.getValue(), variables, pinnedModuleStructures)
                 ));
     }
 

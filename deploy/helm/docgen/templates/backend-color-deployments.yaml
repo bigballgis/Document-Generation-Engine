@@ -1,0 +1,70 @@
+{{- if and .Values.backend.enabled .Values.blueGreen.enabled }}
+{{- range $color := list "blue" "green" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "docgen.backend.color.fullname" (dict "root" $ "color" $color) }}
+  labels:
+    {{- include "docgen.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: backend
+    docgen.io/deployment-color: {{ $color }}
+spec:
+  replicas: {{ include "docgen.backend.replicas" $ }}
+  selector:
+    matchLabels:
+      {{- include "docgen.backend.color.selectorLabels" (dict "root" $ "color" $color) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "docgen.backend.color.selectorLabels" (dict "root" $ "color" $color) | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        {{- include "docgen.podSecurityContext" $ | nindent 8 }}
+        fsGroup: {{ $.Values.backend.podSecurityContext.fsGroup }}
+        fsGroupChangePolicy: {{ $.Values.backend.podSecurityContext.fsGroupChangePolicy }}
+      containers:
+        - name: backend
+          image: {{ include "docgen.backend.color.image" (dict "root" $ "color" $color) | quote }}
+          imagePullPolicy: {{ $.Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $.Values.backend.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "docgen.configMapName" $ }}
+            - secretRef:
+                name: {{ include "docgen.secretName" $ }}
+          securityContext:
+            {{- include "docgen.containerSecurityContext" $ | nindent 12 }}
+            runAsUser: {{ $.Values.backend.securityContext.runAsUser }}
+            runAsGroup: {{ $.Values.backend.securityContext.runAsGroup }}
+          resources:
+            {{- toYaml $.Values.backend.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: {{ $.Values.backend.probes.liveness.path }}
+              port: http
+            initialDelaySeconds: {{ $.Values.backend.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.backend.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ $.Values.backend.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ $.Values.backend.probes.liveness.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ $.Values.backend.probes.readiness.path }}
+              port: http
+            initialDelaySeconds: {{ $.Values.backend.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ $.Values.backend.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ $.Values.backend.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ $.Values.backend.probes.readiness.failureThreshold }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: {{ $.Values.backend.tmpfs.sizeLimit }}
+{{- end }}
+{{- end }}

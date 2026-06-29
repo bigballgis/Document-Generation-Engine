@@ -37,4 +37,19 @@ class DocxAssemblerTest {
             assertThat(document.getParagraphs().getFirst().getText()).contains("World Alice");
         }
     }
+
+    @Test
+    void rendersPinnedContentModuleReferenceFromLockedVersion() {
+        String structured = """
+                {"nodes":[{"type":"contentModuleRef","referenceKey":"CLAUSE-1"}]}
+                """;
+        Map<String, String> pinned = Map.of(
+                "CLAUSE-1",
+                "{\"nodes\":[{\"type\":\"text\",\"value\":\"Locked v1.0 clause\"}]}"
+        );
+
+        String rendered = assembler.renderStructuredContent(structured, Map.of(), pinned);
+
+        assertThat(rendered).isEqualTo("Locked v1.0 clause");
+    }
 }

@@ -17,7 +17,7 @@ test.describe('document catalogs (demo seed)', () => {
     await expect(page.getByText(/unable to load master documents/i)).not.toBeVisible()
     await expect(page.getByRole('heading', { name: /^masters$/i })).toBeVisible()
     await expect(page.getByText(DEMO_MASTER_NAME)).toBeVisible()
-    await expect(page.getByRole('heading', { name: `Group: ${DEMO_GROUP_CODE}` })).toBeVisible()
+    await expect(page.locator('.el-table').getByText(DEMO_GROUP_CODE, { exact: true })).toBeVisible()
   })
 
   test('template catalog loads and shows demo template', async ({ page }) => {

@@ -106,4 +106,20 @@ public class BatchTestRunEntity {
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public void updateSummary(
+            int totalSamples,
+            int succeededCount,
+            int failedCount,
+            int warningCount,
+            int blockerCount,
+            String summaryJson
+    ) {
+        this.totalSamples = totalSamples;
+        this.succeededCount = succeededCount;
+        this.failedCount = failedCount;
+        this.warningCount = warningCount;
+        this.blockerCount = blockerCount;
+        this.summaryJson = summaryJson;
+    }
 }

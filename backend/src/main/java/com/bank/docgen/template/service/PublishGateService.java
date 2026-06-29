@@ -1,0 +1,274 @@
+package com.bank.docgen.template.service;
+
+import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.rendering.domain.PreviewStatus;
+import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
+import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
+import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
+import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.template.api.BindingValidationView;
+import com.bank.docgen.template.api.ChangeDiffView;
+import com.bank.docgen.template.api.CoverageSummaryView;
+import com.bank.docgen.template.api.PublishGateChecklistView;
+import com.bank.docgen.template.api.PublishGateItemView;
+import com.bank.docgen.template.api.TemplateRuleValidationItemRequest;
+import com.bank.docgen.template.api.TemplateRuleValidationRequest;
+import com.bank.docgen.template.api.TemplateRuleValidationView;
+import com.bank.docgen.template.domain.LifecycleAction;
+import com.bank.docgen.template.domain.LifecycleDecision;
+import com.bank.docgen.template.domain.PublishGateCheckCode;
+import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
+import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.persistence.VariableSchemaRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class PublishGateService {
+
+    private final TemplateService templateService;
+    private final TemplateVersionRepository templateVersionRepository;
+    private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
+    private final ApiPolicyRepository apiPolicyRepository;
+    private final PreviewRecordRepository previewRecordRepository;
+    private final BatchTestRunRepository batchTestRunRepository;
+    private final CoverageComputationService coverageComputationService;
+    private final ChangeDiffService changeDiffService;
+    private final TemplateRuleValidationService templateRuleValidationService;
+    private final VariableSchemaRepository variableSchemaRepository;
+    private final TemplateContentModuleReferenceService contentModuleReferenceService;
+
+    public PublishGateService(
+            TemplateService templateService,
+            TemplateVersionRepository templateVersionRepository,
+            TemplateLifecycleRecordRepository lifecycleRecordRepository,
+            ApiPolicyRepository apiPolicyRepository,
+            PreviewRecordRepository previewRecordRepository,
+            BatchTestRunRepository batchTestRunRepository,
+            CoverageComputationService coverageComputationService,
+            ChangeDiffService changeDiffService,
+            TemplateRuleValidationService templateRuleValidationService,
+            VariableSchemaRepository variableSchemaRepository,
+            TemplateContentModuleReferenceService contentModuleReferenceService
+    ) {
+        this.templateService = templateService;
+        this.templateVersionRepository = templateVersionRepository;
+        this.lifecycleRecordRepository = lifecycleRecordRepository;
+        this.apiPolicyRepository = apiPolicyRepository;
+        this.previewRecordRepository = previewRecordRepository;
+        this.batchTestRunRepository = batchTestRunRepository;
+        this.coverageComputationService = coverageComputationService;
+        this.changeDiffService = changeDiffService;
+        this.templateRuleValidationService = templateRuleValidationService;
+        this.variableSchemaRepository = variableSchemaRepository;
+        this.contentModuleReferenceService = contentModuleReferenceService;
+    }
+
+    @Transactional(readOnly = true)
+    public PublishGateChecklistView evaluate(UUID templateId, ManagementSessionClaims session) {
+        templateService.requireReadableTemplate(templateId, session);
+        TemplateVersionEntity version = currentDevVersion(templateId);
+        BindingValidationView bindings = templateService.validateBindings(templateId, session);
+        CoverageSummaryView coverage = coverageComputationService.compute(templateId, session);
+        ChangeDiffView changeDiff = changeDiffService.compute(templateId, session);
+        TemplateRuleValidationView ruleValidation = validateCurrentRules(templateId, version, session);
+
+        List<PublishGateItemView> items = new ArrayList<>();
+        items.add(anchorIntegrityItem(bindings));
+        items.add(variableSchemaItem(version.getId()));
+        items.add(ruleBoundsItem(ruleValidation));
+        items.add(testResultsItem(templateId));
+        items.add(previewPresentItem(templateId, version.getId()));
+        items.add(changeDiffItem(changeDiff));
+        items.add(approvalSummaryItem(templateId));
+        items.add(coverageThresholdsItem(coverage));
+        items.add(apiPolicyItem(templateId));
+        items.add(contentModuleReferencesItem(version.getId()));
+        items.add(blockerStatusItem(templateId, version.getId(), bindings, coverage));
+
+        int blockerCount = (int) items.stream().filter(PublishGateItemView::blocker).count();
+        boolean ready = blockerCount == 0;
+        return new PublishGateChecklistView(templateId.toString(), ready, blockerCount, items);
+    }
+
+    @Transactional(readOnly = true)
+    public void assertReady(UUID templateId, ManagementSessionClaims session) {
+        PublishGateChecklistView checklist = evaluate(templateId, session);
+        if (!checklist.ready()) {
+            throw new TemplateValidationException("api.error.template.publishGateBlocked");
+        }
+    }
+
+    private PublishGateItemView anchorIntegrityItem(BindingValidationView bindings) {
+        boolean blocking = bindings.summary().blocking();
+        return new PublishGateItemView(
+                PublishGateCheckCode.ANCHOR_INTEGRITY,
+                !blocking,
+                blocking,
+                blocking ? "api.publishGate.anchorIntegrity.blocked" : "api.publishGate.anchorIntegrity.ready",
+                "blocking=" + bindings.summary().blocking()
+        );
+    }
+
+    private PublishGateItemView variableSchemaItem(UUID versionId) {
+        int variableCount = variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId).size();
+        boolean ready = variableCount > 0;
+        return new PublishGateItemView(
+                PublishGateCheckCode.VARIABLE_SCHEMA,
+                ready,
+                !ready,
+                ready ? "api.publishGate.variableSchema.ready" : "api.publishGate.variableSchema.missing",
+                "variableCount=" + variableCount
+        );
+    }
+
+    private PublishGateItemView ruleBoundsItem(TemplateRuleValidationView ruleValidation) {
+        boolean blocking = ruleValidation.summary().blocking();
+        return new PublishGateItemView(
+                PublishGateCheckCode.RULE_BOUNDS,
+                !blocking,
+                blocking,
+                blocking ? "api.publishGate.ruleBounds.blocked" : "api.publishGate.ruleBounds.ready",
+                "invalidRules=" + (ruleValidation.summary().totalRules() - ruleValidation.summary().validCount())
+        );
+    }
+
+    private PublishGateItemView testResultsItem(UUID templateId) {
+        List<BatchTestRunEntity> runs = batchTestRunRepository.findByTemplateIdOrderByCreatedAtDesc(templateId);
+        boolean hasRun = !runs.isEmpty();
+        BatchTestRunEntity latest = hasRun ? runs.get(0) : null;
+        boolean blocking = !hasRun || latest.getBlockerCount() > 0;
+        return new PublishGateItemView(
+                PublishGateCheckCode.TEST_RESULTS,
+                hasRun && latest.getBlockerCount() == 0,
+                blocking,
+                hasRun ? "api.publishGate.testResults.ready" : "api.publishGate.testResults.missing",
+                hasRun ? "blockerCount=" + latest.getBlockerCount() : "noBatchRun"
+        );
+    }
+
+    private PublishGateItemView previewPresentItem(UUID templateId, UUID versionId) {
+        int previewCount = previewRecordRepository
+                .findByTemplateIdAndTemplateVersionIdAndStatus(templateId, versionId, PreviewStatus.SUCCEEDED)
+                .size();
+        boolean ready = previewCount > 0;
+        return new PublishGateItemView(
+                PublishGateCheckCode.PREVIEW_PRESENT,
+                ready,
+                !ready,
+                ready ? "api.publishGate.previewPresent.ready" : "api.publishGate.previewPresent.missing",
+                "successfulPreviews=" + previewCount
+        );
+    }
+
+    private PublishGateItemView changeDiffItem(ChangeDiffView changeDiff) {
+        return new PublishGateItemView(
+                PublishGateCheckCode.CHANGE_DIFF,
+                true,
+                false,
+                "api.publishGate.changeDiff.ready",
+                "changeCount=" + changeDiff.totalChangeCount()
+        );
+    }
+
+    private PublishGateItemView approvalSummaryItem(UUID templateId) {
+        boolean approved = lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId).stream()
+                .anyMatch(record -> record.getAction() == LifecycleAction.RECORD_APPROVAL_DECISION
+                        && record.getDecision() == LifecycleDecision.APPROVED);
+        return new PublishGateItemView(
+                PublishGateCheckCode.APPROVAL_SUMMARY,
+                approved,
+                !approved,
+                approved ? "api.publishGate.approvalSummary.ready" : "api.publishGate.approvalSummary.missing",
+                approved ? "approved=true" : "approved=false"
+        );
+    }
+
+    private PublishGateItemView coverageThresholdsItem(CoverageSummaryView coverage) {
+        boolean blocking = coverage.belowThreshold();
+        return new PublishGateItemView(
+                PublishGateCheckCode.COVERAGE_THRESHOLDS,
+                !blocking,
+                blocking,
+                blocking ? "api.publishGate.coverageThresholds.blocked" : "api.publishGate.coverageThresholds.ready",
+                "aggregatePct=" + coverage.aggregatePercentage()
+        );
+    }
+
+    private PublishGateItemView apiPolicyItem(UUID templateId) {
+        boolean configured = apiPolicyRepository.findByTemplateId(templateId).isPresent();
+        return new PublishGateItemView(
+                PublishGateCheckCode.API_POLICY,
+                configured,
+                !configured,
+                configured ? "api.publishGate.apiPolicy.ready" : "api.error.runtime.policyNotConfigured",
+                configured ? "configured=true" : "configured=false"
+        );
+    }
+
+    private PublishGateItemView contentModuleReferencesItem(UUID versionId) {
+        var validation = contentModuleReferenceService.validateReferences(versionId);
+        boolean blocking = validation.blocking();
+        return new PublishGateItemView(
+                PublishGateCheckCode.CONTENT_MODULE_REFERENCES,
+                !blocking,
+                blocking,
+                blocking
+                        ? "api.publishGate.contentModuleReferences.blocked"
+                        : "api.publishGate.contentModuleReferences.ready",
+                "invalidReferences=" + validation.invalidReferences()
+                        + ",totalReferences=" + validation.totalReferences()
+        );
+    }
+
+    private PublishGateItemView blockerStatusItem(
+            UUID templateId,
+            UUID versionId,
+            BindingValidationView bindings,
+            CoverageSummaryView coverage
+    ) {
+        int previewBlockers = previewRecordRepository
+                .findByTemplateIdAndTemplateVersionIdAndStatus(templateId, versionId, PreviewStatus.FAILED)
+                .size();
+        boolean blocking = bindings.summary().blocking()
+                || coverage.belowThreshold()
+                || previewBlockers > 0;
+        return new PublishGateItemView(
+                PublishGateCheckCode.BLOCKER_STATUS,
+                !blocking,
+                blocking,
+                blocking ? "api.publishGate.blockerStatus.blocked" : "api.publishGate.blockerStatus.ready",
+                "previewFailures=" + previewBlockers
+        );
+    }
+
+    private TemplateRuleValidationView validateCurrentRules(
+            UUID templateId,
+            TemplateVersionEntity version,
+            ManagementSessionClaims session
+    ) {
+        List<TemplateRuleValidationItemRequest> rules = templateService.loadRules(version).stream()
+                .map(rule -> new TemplateRuleValidationItemRequest(
+                        rule.ruleId(),
+                        rule.conditionExpression(),
+                        rule.targetAnchorId(),
+                        rule.trueBranchRuleId(),
+                        rule.falseBranchRuleId()
+                ))
+                .toList();
+        return templateRuleValidationService.validateRules(
+                templateId,
+                new TemplateRuleValidationRequest(rules),
+                session
+        );
+    }
+
+    private TemplateVersionEntity currentDevVersion(UUID templateId) {
+        return templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
+                .orElseThrow(TemplateNotFoundException::new);
+    }
+}

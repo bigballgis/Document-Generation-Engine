@@ -4,12 +4,19 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import DashboardStatCards from '@/components/dashboard/DashboardStatCards.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useDashboardStats } from '@/composables/useDashboardStats'
+import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { dashboardQuickLinks, useWorkflowTasks, type WorkflowTask } from '@/composables/useWorkflowTasks'
+import { canMaintainCollaborationTimeoutConfig, canViewCollaborationWorkItems } from '@/auth/roles'
+import { useCapabilities } from '@/composables/useCapabilities'
+import CollaborationTimeoutConfigPanel from '@/components/collaboration/CollaborationTimeoutConfigPanel.vue'
+import { useCollaborationStore } from '@/stores/collaboration'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
@@ -20,6 +27,8 @@ const router = useRouter()
 const sessionStore = useSessionStore()
 const mastersStore = useMastersStore()
 const templatesStore = useTemplatesStore()
+const collaborationStore = useCollaborationStore()
+const { context } = useCapabilities()
 const { tasks } = useWorkflowTasks()
 const visibleRoutes = computed(() => sessionStore.session?.visibleRoutes ?? [])
 const { stats } = useDashboardStats(visibleRoutes)
@@ -36,11 +45,18 @@ const { filters: taskColumnFilters, filteredRows: filteredTasks } = useDataTable
   },
 ])
 
+const tasksCurrentPage = ref(1)
+const { paginatedRows: paginatedTasks, totalRows: totalTaskRows } = useCatalogPagination(
+  filteredTasks,
+  tasksCurrentPage,
+  CLIENT_TABLE_PAGE_SIZE,
+)
+
 const loading = ref(false)
 const loadError = ref(false)
 
 const quickLinks = computed(() =>
-  dashboardQuickLinks(sessionStore.session?.visibleRoutes ?? []),
+  dashboardQuickLinks(sessionStore.session?.visibleRoutes ?? [], context.value),
 )
 
 const authorizedGroupsSummary = computed(() => {
@@ -56,6 +72,12 @@ const authorizedGroupsSummary = computed(() => {
 
 const showDataSections = computed(() => !loadError.value)
 
+const canViewWorkItems = computed(() =>
+  canViewCollaborationWorkItems(sessionStore.session?.roles ?? []),
+)
+
+const showTimeoutConfig = computed(() => canMaintainCollaborationTimeoutConfig(context.value))
+
 async function loadDashboardData() {
   loading.value = true
   loadError.value = false
@@ -70,6 +92,13 @@ async function loadDashboardData() {
   if (sessionStore.canAccessRoute('route.template-management')) {
     jobs.push(
       templatesStore.fetchTemplates().catch(() => {
+        loadError.value = true
+      }),
+    )
+  }
+  if (canViewWorkItems.value) {
+    jobs.push(
+      collaborationStore.fetchWorkItems().catch(() => {
         loadError.value = true
       }),
     )
@@ -165,10 +194,10 @@ function onTasksTableKeydown(event: KeyboardEvent) {
         :description="t('dashboard.tasks.empty')"
       />
 
-      <div v-else class="tasks-table-scroll">
+      <div v-else class="tasks-table-wrap">
         <AppDataTable
           activatable
-          :data="filteredTasks"
+          :data="paginatedTasks"
           class="tasks-table"
           highlight-current-row
           tabindex="0"
@@ -234,6 +263,11 @@ function onTasksTableKeydown(event: KeyboardEvent) {
           </template>
         </el-table-column>
         </AppDataTable>
+        <AppTablePagination
+          v-model:current-page="tasksCurrentPage"
+          :page-size="CLIENT_TABLE_PAGE_SIZE"
+          :total="totalTaskRows"
+        />
       </div>
     </section>
 
@@ -251,6 +285,8 @@ function onTasksTableKeydown(event: KeyboardEvent) {
         </el-button>
       </div>
     </section>
+
+    <CollaborationTimeoutConfigPanel v-if="showDataSections && showTimeoutConfig" />
   </AppPageLayout>
 </template>
 
@@ -317,16 +353,8 @@ function onTasksTableKeydown(event: KeyboardEvent) {
   cursor: pointer;
 }
 
-.tasks-table-scroll {
-  max-height: 28rem;
-  overflow: auto;
+.tasks-table-wrap {
   outline: none;
-
-  :deep(.el-table__header-wrapper) {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
 }
 
 .quick-links {

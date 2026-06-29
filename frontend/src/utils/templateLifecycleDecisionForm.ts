@@ -18,6 +18,23 @@ export interface LifecycleDecisionFormFields {
   commentSummary?: string
 }
 
+export interface LifecyclePositiveDecisionFields {
+  fidelityViewedConfirmed?: boolean
+  coverageViewedConfirmed?: boolean
+  previewViewedConfirmed?: boolean
+  keyEvidenceConfirmed?: boolean
+  commentSummary?: string
+  exceptionIntervention?: boolean
+  exceptionReason?: string
+  secondaryConfirmed?: boolean
+}
+
+export interface LifecycleRejectRemediationFields {
+  remediationTestRecordId?: string
+  remediationChangeDiffRef?: string
+  remediationChecklistCode?: string
+}
+
 export type LifecycleDecisionFormField = 'reasonCategory' | 'impactSummary'
 
 export function invalidLifecycleDecisionFields(
@@ -35,4 +52,82 @@ export function invalidLifecycleDecisionFields(
 
 export function isLifecycleDecisionFormValid(fields: LifecycleDecisionFormFields): boolean {
   return invalidLifecycleDecisionFields(fields).length === 0
+}
+
+export function isTestPassDecisionValid(fields: LifecyclePositiveDecisionFields): boolean {
+  if (fields.exceptionIntervention) {
+    return (
+      Boolean(fields.exceptionReason?.trim()) &&
+      Boolean(fields.secondaryConfirmed) &&
+      Boolean(fields.fidelityViewedConfirmed) &&
+      Boolean(fields.coverageViewedConfirmed) &&
+      Boolean(fields.previewViewedConfirmed)
+    )
+  }
+  return (
+    Boolean(fields.fidelityViewedConfirmed) &&
+    Boolean(fields.coverageViewedConfirmed) &&
+    Boolean(fields.previewViewedConfirmed)
+  )
+}
+
+export function isApprovalPassDecisionValid(fields: LifecyclePositiveDecisionFields): boolean {
+  if (!fields.commentSummary?.trim()) {
+    return false
+  }
+  if (fields.exceptionIntervention) {
+    return (
+      Boolean(fields.keyEvidenceConfirmed) &&
+      Boolean(fields.exceptionReason?.trim()) &&
+      Boolean(fields.secondaryConfirmed)
+    )
+  }
+  return Boolean(fields.keyEvidenceConfirmed)
+}
+
+export function hasRejectRemediationLink(fields: LifecycleRejectRemediationFields): boolean {
+  return Boolean(
+    fields.remediationTestRecordId?.trim() ||
+      fields.remediationChangeDiffRef?.trim() ||
+      fields.remediationChecklistCode?.trim(),
+  )
+}
+
+export function isRejectDecisionValid(
+  fields: LifecycleDecisionFormFields & LifecycleRejectRemediationFields,
+): boolean {
+  return isLifecycleDecisionFormValid(fields) && hasRejectRemediationLink(fields)
+}
+
+export interface PublishGateDisplayItem {
+  key: string
+  label: string
+  ready: boolean
+  informational?: boolean
+  blocker?: boolean
+}
+
+export function mapPublishGateChecklistItems(
+  items: Array<{ checkCode: string; ready: boolean; blocker: boolean; messageKey: string; summary: string }>,
+  resolveLabel: (item: { checkCode: string; messageKey: string; summary: string }) => string,
+): PublishGateDisplayItem[] {
+  return items.map((item) => ({
+    key: item.checkCode,
+    label: resolveLabel(item),
+    ready: item.ready,
+    informational: !item.blocker,
+    blocker: item.blocker,
+  }))
+}
+
+export function isPublishGateReady(params: {
+  checklistReady: boolean
+  releaseVersion: string
+  versionConflict: boolean
+}): boolean {
+  return (
+    params.checklistReady &&
+    Boolean(params.releaseVersion.trim()) &&
+    !params.versionConflict
+  )
 }

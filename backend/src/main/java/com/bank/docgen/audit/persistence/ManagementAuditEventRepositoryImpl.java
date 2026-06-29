@@ -1,21 +1,18 @@
 package com.bank.docgen.audit.persistence;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class ManagementAuditEventRepositoryImpl implements ManagementAuditEventRepositoryCustom {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final JPAQueryFactory queryFactory;
+
+    public ManagementAuditEventRepositoryImpl(JPAQueryFactory queryFactory) {
+        this.queryFactory = queryFactory;
+    }
 
     @Override
     public List<ManagementAuditEventEntity> search(
@@ -26,22 +23,20 @@ public class ManagementAuditEventRepositoryImpl implements ManagementAuditEventR
             Instant eventAtTo,
             String groupCode
     ) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<ManagementAuditEventEntity> criteriaQuery =
-                criteriaBuilder.createQuery(ManagementAuditEventEntity.class);
-        Root<ManagementAuditEventEntity> root = criteriaQuery.from(ManagementAuditEventEntity.class);
-        criteriaQuery.where(buildPredicates(
-                criteriaBuilder,
-                root,
+        QManagementAuditEventEntity event = QManagementAuditEventEntity.managementAuditEventEntity;
+        Predicate where = ManagementAuditEventQueryPredicates.build(
                 templateId,
                 eventType,
                 credentialId,
                 eventAtFrom,
                 eventAtTo,
                 groupCode
-        ));
-        criteriaQuery.orderBy(criteriaBuilder.desc(root.get("eventAt")));
-        return entityManager.createQuery(criteriaQuery).getResultList();
+        );
+        return queryFactory
+                .selectFrom(event)
+                .where(where)
+                .orderBy(event.eventAt.desc())
+                .fetch();
     }
 
     @Override
@@ -55,75 +50,32 @@ public class ManagementAuditEventRepositoryImpl implements ManagementAuditEventR
             int page,
             int size
     ) {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-
-        CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-        Root<ManagementAuditEventEntity> countRoot = countQuery.from(ManagementAuditEventEntity.class);
-        countQuery.select(criteriaBuilder.count(countRoot));
-        countQuery.where(buildPredicates(
-                criteriaBuilder,
-                countRoot,
+        QManagementAuditEventEntity event = QManagementAuditEventEntity.managementAuditEventEntity;
+        Predicate where = ManagementAuditEventQueryPredicates.build(
                 templateId,
                 eventType,
                 credentialId,
                 eventAtFrom,
                 eventAtTo,
                 groupCode
-        ));
-        long totalElements = entityManager.createQuery(countQuery).getSingleResult();
+        );
 
-        CriteriaQuery<ManagementAuditEventEntity> criteriaQuery =
-                criteriaBuilder.createQuery(ManagementAuditEventEntity.class);
-        Root<ManagementAuditEventEntity> dataRoot = criteriaQuery.from(ManagementAuditEventEntity.class);
-        criteriaQuery.where(buildPredicates(
-                criteriaBuilder,
-                dataRoot,
-                templateId,
-                eventType,
-                credentialId,
-                eventAtFrom,
-                eventAtTo,
-                groupCode
-        ));
-        criteriaQuery.orderBy(criteriaBuilder.desc(dataRoot.get("eventAt")));
+        Long totalElementsResult = queryFactory
+                .select(event.count())
+                .from(event)
+                .where(where)
+                .fetchOne();
+        long totalElements = totalElementsResult == null ? 0L : totalElementsResult;
 
-        TypedQuery<ManagementAuditEventEntity> typedQuery = entityManager.createQuery(criteriaQuery);
-        typedQuery.setFirstResult(page * size);
-        typedQuery.setMaxResults(size);
-        List<ManagementAuditEventEntity> content = typedQuery.getResultList();
+        List<ManagementAuditEventEntity> content = queryFactory
+                .selectFrom(event)
+                .where(where)
+                .orderBy(event.eventAt.desc())
+                .offset((long) page * size)
+                .limit(size)
+                .fetch();
+
         int totalPages = size <= 0 ? 0 : (int) Math.ceil((double) totalElements / size);
         return new AuditSearchPage<>(content, totalElements, totalPages);
-    }
-
-    private Predicate[] buildPredicates(
-            CriteriaBuilder criteriaBuilder,
-            Root<ManagementAuditEventEntity> root,
-            UUID templateId,
-            String eventType,
-            UUID credentialId,
-            Instant eventAtFrom,
-            Instant eventAtTo,
-            String groupCode
-    ) {
-        List<Predicate> predicates = new ArrayList<>();
-        if (templateId != null) {
-            predicates.add(criteriaBuilder.equal(root.get("templateId"), templateId));
-        }
-        if (eventType != null) {
-            predicates.add(criteriaBuilder.equal(root.get("eventType"), eventType));
-        }
-        if (credentialId != null) {
-            predicates.add(criteriaBuilder.equal(root.get("credentialId"), credentialId));
-        }
-        if (eventAtFrom != null) {
-            predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("eventAt"), eventAtFrom));
-        }
-        if (eventAtTo != null) {
-            predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("eventAt"), eventAtTo));
-        }
-        if (groupCode != null) {
-            predicates.add(criteriaBuilder.equal(root.get("groupCode"), groupCode));
-        }
-        return predicates.toArray(Predicate[]::new);
     }
 }

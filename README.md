@@ -118,9 +118,19 @@ pnpm -C frontend build
 
 Start at [docs/README.md](docs/README.md) and [docs/plan/master-plan.md](docs/plan/master-plan.md).
 
+Kubernetes deployment (P15): [deploy/README.md](deploy/README.md) — chart validate via
+`.\scripts\helm-validate.ps1`; CI blocking gates via `.\scripts\ci-k8s-manifest-gates.ps1`
+([deploy/ci-k8s-gates.md](deploy/ci-k8s-gates.md)); health probes in [deploy/k8s-health-probes.md](deploy/k8s-health-probes.md);
+blue-green cutover in [deploy/blue-green-runbook.md](deploy/blue-green-runbook.md).
+
 ## Active phase
 
-**None — no single active phase slice.** MVP vertical slice P0–P11 is complete with green
-local quality gates, and **P13 (identity & group administration)** completed **Done**
-(2026-06-23). P12 (deferred enhancements) remains the non-active catch-all. Outstanding:
-external deployment validation (E05-T06), intranet SCA (M9-T02).
+**P14** confirmed large domains **Done** (2026-06-27) — all three vertical slices complete:
+**P14-T01** clause/content module lifecycle (T01a–T01e; backend **469**; frontend **224**; architecture re-review **PASS**);
+**P14-T02** collaboration to-dos + timeout escalation (T02a–T02d; E2E **3/3**; backend **481**; frontend **235**);
+**P14-T03** template export/import (T03a–T03c; OpenAPI contract; E2E **2/2**; backend **481**; frontend **235+**).
+**Active phase:** **P15** Kubernetes deployment & container hardening (**In Progress**; **P15-T01 Done** T01a–T01c; **P15-T02 Done** re-earned; **P15-T03 Done** re-earned; **P15-T04 Done** re-earned; **P15-T05 Done** re-earned; **P15-T06 Done** re-earned; **P15-T07 Done** re-earned; **P15-T08 Done** re-earned; **P15-T09 Done** re-earned; **next P15-T10** deployment docs + phase close). **P18 Not Started** (queued after P15).
+MVP P0–P11 complete;
+**P13** Done (2026-06-23); **P17** Done (2026-06-25); **P19** Done (2026-06-25);
+**P20** Done (2026-06-25). P12 (deferred enhancements) is the non-active catch-all.
+Outstanding: external deployment validation (E05-T06), intranet SCA (M9-T02).

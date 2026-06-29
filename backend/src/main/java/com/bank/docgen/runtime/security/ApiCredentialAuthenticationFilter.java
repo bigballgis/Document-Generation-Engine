@@ -6,6 +6,7 @@ import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.apimgmt.service.ConfigAdGroupResolver;
+import com.bank.docgen.apimgmt.service.TemplateAdGroupAuthorizationCache;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
@@ -39,6 +40,7 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
     private final TemplateRepository templateRepository;
     private final PasswordHashService passwordHashService;
     private final ConfigAdGroupResolver adGroupResolver;
+    private final TemplateAdGroupAuthorizationCache authorizationCache;
     private final ObjectMapper objectMapper;
     private final TraceIdProvider traceIdProvider;
     private final MessageResolver messageResolver;
@@ -49,6 +51,7 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
             TemplateRepository templateRepository,
             PasswordHashService passwordHashService,
             ConfigAdGroupResolver adGroupResolver,
+            TemplateAdGroupAuthorizationCache authorizationCache,
             ObjectMapper objectMapper,
             TraceIdProvider traceIdProvider,
             MessageResolver messageResolver
@@ -58,6 +61,7 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
         this.templateRepository = templateRepository;
         this.passwordHashService = passwordHashService;
         this.adGroupResolver = adGroupResolver;
+        this.authorizationCache = authorizationCache;
         this.objectMapper = objectMapper;
         this.traceIdProvider = traceIdProvider;
         this.messageResolver = messageResolver;
@@ -171,7 +175,12 @@ public class ApiCredentialAuthenticationFilter extends OncePerRequestFilter {
                         ApiErrorCodes.ACCESS_DENIED,
                         "api.error.runtime.policyNotConfigured"
                 ));
-        List<String> allowedGroups = readGroups(policy.getAllowedAdGroupsJson());
+        List<String> allowedGroups = authorizationCache.getAllowedGroups(template.getId())
+                .orElseGet(() -> {
+                    List<String> groups = readGroups(policy.getAllowedAdGroupsJson());
+                    authorizationCache.rememberAllowedGroups(template.getId(), groups);
+                    return groups;
+                });
         if (!adGroupResolver.isAuthorized(accessAccount, allowedGroups)) {
             throw new RuntimeAuthenticationException(
                     ApiErrorCodes.ACCESS_DENIED,

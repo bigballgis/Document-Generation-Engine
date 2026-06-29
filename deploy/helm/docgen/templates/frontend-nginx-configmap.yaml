@@ -1,0 +1,44 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "docgen.frontend.nginxConfigMapName" . }}
+  labels:
+    {{- include "docgen.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+data:
+  default.conf: |
+    upstream docgen_backend {
+        server {{ include "docgen.backend.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.backend.service.port }};
+    }
+
+    server {
+        listen {{ .Values.frontend.port }};
+        server_name _;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        location /healthz {
+            access_log off;
+            default_type text/plain;
+            return 200 'ok\n';
+        }
+
+        location /readyz {
+            access_log off;
+            default_type text/plain;
+            return 200 'ok\n';
+        }
+
+        location /api/ {
+            proxy_pass http://docgen_backend$request_uri;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Trace-Id $request_id;
+        }
+
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+    }
+{{- end }}

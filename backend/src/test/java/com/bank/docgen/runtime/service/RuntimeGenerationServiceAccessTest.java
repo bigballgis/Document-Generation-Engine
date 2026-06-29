@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
+import com.bank.docgen.authoring.structured.FidelityValidationService;
 import com.bank.docgen.runtime.api.CallableVersionsResultView;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.template.persistence.TemplateEntity;
@@ -41,7 +42,8 @@ class RuntimeGenerationServiceAccessTest {
                 mock(EncryptionParameterValidator.class),
                 contractAssemblyService,
                 mock(DocumentGenerationEngine.class),
-                new ObjectMapper()
+                new ObjectMapper(),
+                mock(FidelityValidationService.class)
         );
     }
 

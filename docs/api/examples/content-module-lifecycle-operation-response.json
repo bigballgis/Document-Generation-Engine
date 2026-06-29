@@ -6,7 +6,9 @@
     "impactedReleaseVersionsHint": "v1.0.0,v1.1.0",
     "defaultRouteAffected": true,
     "recentCallSummary": "recentCalls=12/7d",
-    "remediationHint": "migrate callers to MOD-LOAN-DISCLOSURE-V3"
+    "remediationHint": "migrate callers to MOD-LOAN-DISCLOSURE-V3",
+    "templateStopRequired": true,
+    "releaseStopRequired": true
   },
   "snapshot": {
     "moduleId": "MOD-LOAN-DISCLOSURE",

@@ -29,7 +29,7 @@ describe('MasterListView', () => {
     vi.mocked(mastersApi.listMasters).mockReset()
   })
 
-  it('renders grouped masters after load', async () => {
+  it('renders masters in a flat table with group column', async () => {
     vi.mocked(mastersApi.listMasters).mockResolvedValue([
       {
         id: 'master-1',
@@ -59,6 +59,10 @@ describe('MasterListView', () => {
 
     expect(wrapper.text()).toContain('Retail letterhead')
     expect(wrapper.text()).toContain('RETAIL')
+    expect(wrapper.text()).toContain('Group')
+    expect(wrapper.text()).not.toContain('Group: RETAIL')
+    expect(wrapper.find('.group-section').exists()).toBe(false)
+    expect(wrapper.findAll('.el-table').length).toBe(1)
   })
 
   it('shows load error with retry when list fails', async () => {

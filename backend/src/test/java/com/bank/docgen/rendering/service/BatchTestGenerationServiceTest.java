@@ -3,6 +3,7 @@ package com.bank.docgen.rendering.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +12,7 @@ import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.rendering.api.BatchTestGenerateRequest;
 import com.bank.docgen.rendering.api.BatchTestSummaryView;
 import com.bank.docgen.rendering.api.FidelityWarningView;
+import com.bank.docgen.rendering.api.PreviewComparisonView;
 import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -82,6 +85,26 @@ class BatchTestGenerationServiceTest {
     }
 
     @Test
+    void batchTest_persistsBatchRunBeforeCreatingPreviews() {
+        stubPreview("TDS-001", PreviewStatus.SUCCEEDED, 0);
+        stubPreview("TDS-002", PreviewStatus.SUCCEEDED, 0);
+
+        service.runBatch(
+                templateId,
+                new BatchTestGenerateRequest(List.of("TDS-001", "TDS-002")),
+                author
+        );
+
+        InOrder order = inOrder(batchTestRunRepository, previewGenerationService);
+        order.verify(batchTestRunRepository).save(any(BatchTestRunEntity.class));
+        order.verify(previewGenerationService).runTestGenerateForBatch(
+                eq(templateId), eq("TDS-001"), any(UUID.class), eq(author));
+        order.verify(previewGenerationService).runTestGenerateForBatch(
+                eq(templateId), eq("TDS-002"), any(UUID.class), eq(author));
+        order.verify(batchTestRunRepository).save(any(BatchTestRunEntity.class));
+    }
+
+    @Test
     void batchTest_overThreeSamples_createsThreePreviewRecords() {
         stubPreview("TDS-001", PreviewStatus.SUCCEEDED, 1);
         stubPreview("TDS-002", PreviewStatus.SUCCEEDED, 1);
@@ -122,8 +145,8 @@ class BatchTestGenerationServiceTest {
         assertThat(summary.succeededCount()).isEqualTo(2);
 
         ArgumentCaptor<BatchTestRunEntity> captor = ArgumentCaptor.forClass(BatchTestRunEntity.class);
-        verify(batchTestRunRepository).save(captor.capture());
-        assertThat(captor.getValue().getWarningCount()).isEqualTo(3);
+        verify(batchTestRunRepository, org.mockito.Mockito.times(2)).save(captor.capture());
+        assertThat(captor.getAllValues().get(1).getWarningCount()).isEqualTo(3);
     }
 
     @Test
@@ -166,9 +189,10 @@ class BatchTestGenerationServiceTest {
                 UUID.randomUUID().toString(),
                 status,
                 "DOCX",
+                "rp-v1",
                 status == PreviewStatus.SUCCEEDED ? "previews/" + previewId + "/output.docx" : null,
                 warnings,
-                "anchorsConfigured=1;warnings=" + warningCount,
+                new PreviewComparisonView(warningCount, 0, warningCount, List.of()),
                 testDataSetId,
                 Instant.now()
         );

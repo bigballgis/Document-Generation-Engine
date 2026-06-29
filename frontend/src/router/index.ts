@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
+import { canAccessLogicalRoute, sessionContext } from '@/auth/roles'
 import { useSessionStore } from '@/stores/session'
 
 const router = createRouter({
@@ -49,6 +50,12 @@ const router = createRouter({
       meta: { logicalRoute: ROUTE_KEYS.apiPolicyManagement },
     },
     {
+      path: '/api/policies/:templateId',
+      name: 'api-policy-detail',
+      component: () => import('@/views/api/ApiPolicyDetailView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.apiPolicyManagement },
+    },
+    {
       path: '/audit',
       name: 'audit-console',
       component: () => import('@/views/audit/AuditConsoleView.vue'),
@@ -62,8 +69,14 @@ const router = createRouter({
     },
     {
       path: '/masters/:masterId',
-      name: 'master-detail',
-      component: () => import('@/views/masters/MasterDetailView.vue'),
+      name: 'master-package-hub',
+      component: () => import('@/views/masters/MasterPackageHubView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.masterManagement },
+    },
+    {
+      path: '/masters/:masterId/revisions/:revisionLineId',
+      name: 'master-revision-detail',
+      component: () => import('@/views/masters/MasterRevisionDetailView.vue'),
       meta: { logicalRoute: ROUTE_KEYS.masterManagement },
     },
     {
@@ -78,11 +91,42 @@ const router = createRouter({
       component: () => import('@/views/templates/TemplateDetailView.vue'),
       meta: { logicalRoute: ROUTE_KEYS.templateManagement },
     },
+    {
+      path: '/content-modules',
+      name: 'content-module-list',
+      component: () => import('@/views/contentModules/ContentModuleListView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.contentModuleManagement },
+    },
+    {
+      path: '/content-modules/:moduleId',
+      name: 'content-module-detail',
+      component: () => import('@/views/contentModules/ContentModuleDetailView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.contentModuleManagement },
+    },
+    {
+      path: '/workbench/tester',
+      name: 'tester-workbench',
+      component: () => import('@/views/workbench/TesterWorkbenchView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.testerWorkbench },
+    },
+    {
+      path: '/workbench/approver',
+      name: 'approver-workbench',
+      component: () => import('@/views/workbench/ApproverWorkbenchView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.approverWorkbench },
+    },
+    {
+      path: '/workbench/escalation',
+      name: 'escalation-workbench',
+      component: () => import('@/views/workbench/EscalationWorkbenchView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.escalationWorkbench },
+    },
     { path: '/home/global-governance', redirect: '/dashboard' },
     { path: '/home/group-governance', redirect: '/dashboard' },
     { path: '/home/template-authoring', redirect: '/dashboard' },
-    { path: '/home/tester-workbench', redirect: '/dashboard' },
-    { path: '/home/approver-workbench', redirect: '/dashboard' },
+    { path: '/home/tester-workbench', redirect: '/workbench/tester' },
+    { path: '/home/approver-workbench', redirect: '/workbench/approver' },
+    { path: '/home/escalation-workbench', redirect: '/workbench/escalation' },
     { path: '/home/identity', redirect: '/entitlement/users' },
     { path: '/home/api-policy', redirect: '/api/policies' },
     { path: '/home/audit', redirect: '/audit' },
@@ -111,12 +155,20 @@ router.beforeEach(async (to) => {
   }
 
   const logicalRoute = to.meta.logicalRoute
-  if (typeof logicalRoute === 'string' && !sessionStore.canAccessRoute(logicalRoute)) {
-    const traceId = crypto.randomUUID()
-    sessionStore.recordRouteDeny(traceId)
-    return {
-      name: 'forbidden',
-      query: { traceId },
+  if (typeof logicalRoute === 'string') {
+    const context = sessionContext(sessionStore.session)
+    const allowed = canAccessLogicalRoute(
+      logicalRoute,
+      context,
+      sessionStore.session?.visibleRoutes ?? [],
+    )
+    if (!allowed) {
+      const traceId = crypto.randomUUID()
+      sessionStore.recordRouteDeny(traceId)
+      return {
+        name: 'forbidden',
+        query: { traceId },
+      }
     }
   }
 

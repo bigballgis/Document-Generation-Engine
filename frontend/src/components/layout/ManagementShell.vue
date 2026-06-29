@@ -40,7 +40,7 @@ const navGroups = computed(() => {
   if (!session) {
     return []
   }
-  return buildVisibleNavGroups(session.visibleRoutes)
+  return buildVisibleNavGroups(session.visibleRoutes, session.roles, session.capabilities)
 })
 
 function isActive(path: string): boolean {

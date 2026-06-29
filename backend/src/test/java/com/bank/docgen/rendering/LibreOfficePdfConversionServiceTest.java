@@ -12,15 +12,20 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 class LibreOfficePdfConversionServiceTest {
 
     private DocgenRenderingProperties properties;
     private Path fakeLibreOfficeScript;
+    private ThreadPoolTaskExecutor testPool;
 
     @BeforeEach
     void setUp() throws URISyntaxException {
@@ -30,10 +35,14 @@ class LibreOfficePdfConversionServiceTest {
                         .getResource("/scripts/fake-libreoffice.cmd")
                         .toURI()
         );
+        testPool = pdfConversionPool();
     }
 
     @AfterEach
     void tearDown() throws IOException {
+        if (testPool != null) {
+            testPool.shutdown();
+        }
         Path tempRoot = Path.of(System.getProperty("java.io.tmpdir"));
         try (Stream<Path> paths = Files.list(tempRoot)) {
             paths.filter(path -> path.getFileName().toString().startsWith("docgen-pdf-"))
@@ -110,12 +119,53 @@ class LibreOfficePdfConversionServiceTest {
                 .isInstanceOf(TemplateValidationException.class);
     }
 
+    @Test
+    void conversionRunsOffCallingThread() throws IOException {
+        properties.setLibreOfficeCommand(fakeLibreOfficeScript.toString());
+        properties.setConversionTimeoutSeconds(30);
+        Thread callerThread = Thread.currentThread();
+        AtomicReference<Thread> workerThread = new AtomicReference<>();
+        ThreadPoolTaskExecutor pool = pdfConversionPool();
+        try {
+            Executor trackingExecutor = task -> pool.execute(() -> {
+                workerThread.set(Thread.currentThread());
+                task.run();
+            });
+            LibreOfficePdfConversionService service = new LibreOfficePdfConversionService(
+                    properties,
+                    CircuitBreakerRegistry.ofDefaults(),
+                    RetryRegistry.ofDefaults(),
+                    trackingExecutor
+            );
+
+            byte[] pdf = service.convert(new byte[]{1, 2, 3});
+
+            assertThat(pdf).isNotEmpty();
+            assertThat(workerThread.get()).isNotNull();
+            assertThat(workerThread.get()).isNotEqualTo(callerThread);
+        } finally {
+            pool.shutdown();
+        }
+    }
+
     private LibreOfficePdfConversionService service() {
         return new LibreOfficePdfConversionService(
                 properties,
                 CircuitBreakerRegistry.ofDefaults(),
-                RetryRegistry.ofDefaults()
+                RetryRegistry.ofDefaults(),
+                testPool
         );
+    }
+
+    private ThreadPoolTaskExecutor pdfConversionPool() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(1);
+        executor.setQueueCapacity(4);
+        executor.setThreadNamePrefix("pdf-conversion-test-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        executor.initialize();
+        return executor;
     }
 
     private long countDocgenPdfTempDirs() throws IOException {

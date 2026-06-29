@@ -1,4 +1,5 @@
 import { mount, flushPromises } from '@vue/test-utils'
+import { computed, ref } from 'vue'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
@@ -19,6 +20,18 @@ vi.mock('@/api/templates', () => ({
   publishTemplate: vi.fn(),
   testGenerate: vi.fn(),
   getPreview: vi.fn(),
+  importTemplate: vi.fn(),
+}))
+
+vi.mock('@/composables/useCapabilities', () => ({
+  useCapabilities: () => ({
+    context: computed(() => ({ roles: ['GLOBAL_ADMIN'] })),
+    authorTemplates: ref(true),
+    exportTemplates: ref(true),
+    decideTests: ref(false),
+    decideApprovals: ref(false),
+    publishTemplates: ref(false),
+  }),
 }))
 
 vi.mock('vue-router', () => ({
@@ -32,7 +45,7 @@ describe('TemplateListView', () => {
     vi.mocked(templatesApi.listTemplates).mockReset()
   })
 
-  it('renders grouped templates after load', async () => {
+  it('renders templates in a flat table with group column', async () => {
     vi.mocked(templatesApi.listTemplates).mockResolvedValue([
       {
         id: 'tpl-1',
@@ -64,5 +77,28 @@ describe('TemplateListView', () => {
 
     expect(wrapper.text()).toContain('Retail letter')
     expect(wrapper.text()).toContain('RETAIL')
+    expect(wrapper.text()).toContain('Group')
+    expect(wrapper.text()).not.toContain('Group: RETAIL')
+    expect(wrapper.find('.group-section').exists()).toBe(false)
+    expect(wrapper.findAll('.el-table').length).toBe(1)
+  })
+
+  it('shows import action for export-capable users', async () => {
+    vi.mocked(templatesApi.listTemplates).mockResolvedValue([])
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(TemplateListView, {
+      global: {
+        plugins: [createPinia(), i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+    expect(wrapper.text()).toContain('Import template')
   })
 })

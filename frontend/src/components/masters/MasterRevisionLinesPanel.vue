@@ -1,60 +1,161 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
-import type { MasterDocumentDetail } from '@/types/master'
+import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
+import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
+import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
+import { masterRevisionDetailPath } from '@/routing/routeKeys'
+import * as mastersApi from '@/api/masters'
+import type { MasterRevisionLineSummary } from '@/types/master'
 
 const props = defineProps<{
-  master: MasterDocumentDetail
+  masterId: string
 }>()
 
 const { t } = useI18n()
+const { formatDateTime } = useLocaleFormatters()
+const router = useRouter()
 
-const revisionRows = computed(() => [
-  {
-    lineLabel: t('masters.detail.revisionLines.currentLine'),
-    status: props.master.status,
-    originalFilename: props.master.originalFilename,
-    anchorCount: props.master.anchors.length,
-    updatedAt: props.master.updatedAt,
-    updatedBy: props.master.updatedBy,
+const loading = ref(false)
+const loadError = ref(false)
+const currentPage = ref(1)
+const totalElements = ref(0)
+const revisionLines = ref<MasterRevisionLineSummary[]>([])
+
+const pageSize = SERVER_TABLE_PAGE_SIZE
+
+function formatLineLabel(lineLabel: string): string {
+  if (lineLabel === 'CURRENT') {
+    return t('masters.revisionLines.currentLine')
+  }
+  return lineLabel
+}
+
+async function loadRevisionLines() {
+  loading.value = true
+  loadError.value = false
+  try {
+    const page = await mastersApi.listMasterRevisionLines(
+      props.masterId,
+      currentPage.value - 1,
+      pageSize,
+    )
+    revisionLines.value = page.content
+    totalElements.value = page.totalElements
+  } catch {
+    loadError.value = true
+    revisionLines.value = []
+    totalElements.value = 0
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  void loadRevisionLines()
+})
+
+watch(
+  () => props.masterId,
+  () => {
+    currentPage.value = 1
+    void loadRevisionLines()
   },
-])
+)
+
+watch(currentPage, () => {
+  void loadRevisionLines()
+})
+
+function openRevisionDetail(row: MasterRevisionLineSummary) {
+  router.push(masterRevisionDetailPath(props.masterId, row.id))
+}
+
+const { onRowClick } = useActivatableTableRow<MasterRevisionLineSummary>(openRevisionDetail)
+
+const showPagination = computed(() => totalElements.value > pageSize)
+
+defineExpose({
+  reload: loadRevisionLines,
+})
 </script>
 
 <template>
   <el-card shadow="never" class="revision-lines-card">
     <template #header>
       <div class="card-header">
-        <span>{{ t('masters.detail.revisionLinesTitle') }}</span>
-        <p class="card-hint">{{ t('masters.detail.revisionLinesHint') }}</p>
+        <span>{{ t('masters.revisionLines.title') }}</span>
+        <p class="card-hint">{{ t('masters.revisionLines.hint') }}</p>
       </div>
     </template>
-    <AppDataTable :data="revisionRows">
-      <el-table-column prop="lineLabel" min-width="160" :label="t('masters.detail.revisionLines.line')" />
-      <el-table-column min-width="140" :label="t('masters.detail.revisionLines.status')">
-        <template #default="{ row }">
-          <MasterStatusBadge :status="row.status" />
+
+    <LoadErrorPanel
+      v-if="loadError"
+      message-key="masters.revisionLines.loadError"
+      @retry="loadRevisionLines"
+    />
+
+    <el-skeleton v-else-if="loading" :rows="4" animated />
+
+    <template v-else>
+      <AppDataTable
+        activatable
+        :data="revisionLines"
+        @row-click="onRowClick"
+      >
+        <template #empty>
+          <el-empty :description="t('masters.revisionLines.empty')" />
         </template>
-      </el-table-column>
-      <el-table-column
-        prop="originalFilename"
-        min-width="180"
-        :label="t('masters.detail.revisionLines.sourceFile')"
+        <el-table-column min-width="160" :label="t('masters.revisionLines.line')">
+          <template #default="{ row }">
+            <span>{{ formatLineLabel(row.lineLabel) }}</span>
+            <el-tag v-if="row.current" size="small" type="success" class="current-tag">
+              {{ t('masters.revisionLines.currentBadge') }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="140" :label="t('masters.revisionLines.status')">
+          <template #default="{ row }">
+            <MasterStatusBadge :status="row.status" />
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="originalFilename"
+          min-width="180"
+          :label="t('masters.revisionLines.sourceFile')"
+        />
+        <el-table-column
+          prop="anchorCount"
+          width="100"
+          :label="t('masters.revisionLines.anchors')"
+        />
+        <el-table-column min-width="170" :label="t('masters.revisionLines.updatedAt')">
+          <template #default="{ row }">
+            {{ formatDateTime(row.updatedAt) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="updatedBy" min-width="120" :label="t('masters.revisionLines.updatedBy')" />
+        <el-table-column width="120" :label="t('masters.revisionLines.actions')">
+          <template #default="{ row }">
+            <el-button link type="primary" @click.stop="openRevisionDetail(row)">
+              {{ t('masters.revisionLines.viewDetail') }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </AppDataTable>
+
+      <AppTablePagination
+        v-if="showPagination"
+        v-model:current-page="currentPage"
+        :page-size="pageSize"
+        :total="totalElements"
       />
-      <el-table-column
-        prop="anchorCount"
-        width="100"
-        :label="t('masters.detail.revisionLines.anchors')"
-      />
-      <el-table-column min-width="170" :label="t('masters.detail.revisionLines.updatedAt')">
-        <template #default="{ row }">
-          {{ new Date(row.updatedAt).toLocaleString() }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="updatedBy" min-width="120" :label="t('masters.detail.revisionLines.updatedBy')" />
-    </AppDataTable>
+    </template>
   </el-card>
 </template>
 
@@ -73,5 +174,9 @@ const revisionRows = computed(() => [
   margin: 0;
   font-size: 0.875rem;
   color: var(--text-muted);
+}
+
+.current-tag {
+  margin-left: 0.5rem;
 }
 </style>

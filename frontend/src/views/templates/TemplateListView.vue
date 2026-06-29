@@ -4,15 +4,19 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import PackageCatalogNotice from '@/components/catalog/PackageCatalogNotice.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateCreateDialog from '@/components/templates/TemplateCreateDialog.vue'
+import TemplateImportDialog from '@/components/templates/TemplateImportDialog.vue'
+import TemplateRiskPromptConfigPanel from '@/components/templates/TemplateRiskPromptConfigPanel.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
-import { useGroupedCatalogPagination } from '@/composables/useGroupedCatalogPagination'
+import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
+import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { templateDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateSummary, TemplateLifecycleStatus } from '@/types/template'
@@ -23,15 +27,15 @@ const { formatDateTime } = useLocaleFormatters()
 const lifecycleStatusFilterOptions = useLifecycleStatusFilterOptions()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
-const { authorTemplates, decideTests, decideApprovals, publishTemplates } = useCapabilities()
+const { authorTemplates, exportTemplates, decideTests, decideApprovals, publishTemplates } = useCapabilities()
 
 type WorkflowFilterKey = 'awaitingTest' | 'awaitingApproval' | 'awaitingPublish'
 
 const activeWorkflowFilter = ref<WorkflowFilterKey | null>(null)
 
 const createDialogOpen = ref(false)
+const importDialogOpen = ref(false)
 const currentPage = ref(1)
-const pageSize = 10
 
 const workflowFilterChips = computed(() => {
   const chips: Array<{
@@ -79,6 +83,7 @@ const catalogTemplates = computed(() => {
 const allTemplates = computed(() => catalogTemplates.value)
 const { filters: columnFilters, filteredRows: filteredTemplates, hasActiveFilters, clearFilters } =
   useDataTableFilters(allTemplates, [
+    { key: 'groupCode', getValue: (row) => row.groupCode },
     { key: 'name', getValue: (row) => row.name },
     { key: 'externalId', getValue: (row) => row.externalId },
     { key: 'status', getValue: (row) => row.lifecycleStatus, matchMode: 'exact' },
@@ -90,11 +95,10 @@ const { filters: columnFilters, filteredRows: filteredTemplates, hasActiveFilter
     { key: 'updatedBy', getValue: (row) => row.updatedBy },
     { key: 'updatedAt', getValue: (row) => formatDateTime(row.updatedAt) },
   ])
-const { paginatedGroups: groupedTemplates, totalGroups: totalTemplateGroups } = useGroupedCatalogPagination(
+const { paginatedRows: paginatedTemplates, totalRows: totalTemplateRows } = useCatalogPagination(
   filteredTemplates,
-  (row) => row.groupCode,
   currentPage,
-  pageSize,
+  CLIENT_TABLE_PAGE_SIZE,
 )
 const errorMessage = computed(() => {
   const key = templatesStore.lastErrorMessageKey
@@ -135,6 +139,12 @@ function handleCreated(templateId: string) {
   router.push(templateDetailPath(templateId))
 }
 
+function handleImported(templateId: string) {
+  ElMessage.success(t('templates.import.success'))
+  router.push(templateDetailPath(templateId))
+}
+
+const sortByGroupCode = rowSortMethod<TemplateSummary>((row) => row.groupCode)
 const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecycleStatus)
 const sortByReleaseVersionCount = rowSortMethod<TemplateSummary>((row) => row.releaseVersionCount)
 const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
@@ -147,9 +157,14 @@ const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
         <h1>{{ t('templates.list.title') }}</h1>
         <p>{{ t('templates.list.description') }}</p>
       </div>
-      <el-button v-if="authorTemplates" type="primary" @click="createDialogOpen = true">
-        {{ t('templates.create.open') }}
-      </el-button>
+      <div class="header-actions">
+        <el-button v-if="exportTemplates" @click="importDialogOpen = true">
+          {{ t('templates.import.open') }}
+        </el-button>
+        <el-button v-if="authorTemplates" type="primary" @click="createDialogOpen = true">
+          {{ t('templates.create.open') }}
+        </el-button>
+      </div>
     </header>
 
     <PackageCatalogNotice kind="template" />
@@ -182,115 +197,124 @@ const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
 
     <el-skeleton v-if="templatesStore.loadingList" :rows="6" animated />
 
-    <template v-else-if="groupedTemplates.length > 0">
+    <template v-else-if="!errorMessage && filteredTemplates.length > 0">
       <div v-if="hasActiveFilters" class="table-toolbar">
         <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
       </div>
-      <section v-for="[groupCode, items] in groupedTemplates" :key="groupCode" class="group-section">
-        <h2>{{ t('templates.list.groupSection', { groupCode }) }}</h2>
-        <AppDataTable
-          activatable
-          :data="items"
-          @row-click="activateTemplateRow"
+      <AppDataTable
+        activatable
+        :data="paginatedTemplates"
+        @row-click="activateTemplateRow"
+      >
+        <el-table-column
+          prop="groupCode"
+          sortable
+          width="140"
+          :sort-method="sortByGroupCode"
         >
-          <el-table-column prop="name" sortable min-width="220">
-            <template #header>
-              <TableColumnHeader
-                :label="t('templates.list.columns.name')"
-                v-model="columnFilters.name"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column prop="externalId" sortable min-width="180">
-            <template #header>
-              <TableColumnHeader
-                :label="t('templates.list.columns.externalId')"
-                v-model="columnFilters.externalId"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column
-            sortable
-            :sort-method="sortByLifecycleStatus"
-            width="160"
-          >
-            <template #header>
-              <TableColumnHeader
-                :label="t('templates.list.columns.status')"
-                v-model="columnFilters.status"
-                filter-type="select"
-                :options="lifecycleStatusFilterOptions"
-              />
-            </template>
-            <template #default="{ row }">
-              <TemplateStatusBadge :status="row.lifecycleStatus" />
-            </template>
-          </el-table-column>
-          <el-table-column prop="releaseVersion" sortable width="140">
-            <template #header>
-              <TableColumnHeader
-                :label="t('templates.list.columns.releaseVersion')"
-                v-model="columnFilters.releaseVersion"
-              />
-            </template>
-            <template #default="{ row }">
-              {{ row.releaseVersion ?? t('templates.detail.noReleaseVersion') }}
-            </template>
-          </el-table-column>
-          <el-table-column
-            sortable
-            width="120"
-            :sort-method="sortByReleaseVersionCount"
-          >
-            <template #header>
-              <TableColumnHeader
-                :label="t('templates.list.columns.releaseVersionCount')"
-                v-model="columnFilters.releaseVersionCount"
-              />
-            </template>
-            <template #default="{ row }">
-              {{ row.releaseVersionCount }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="updatedBy" sortable min-width="120">
-            <template #header>
-              <TableColumnHeader
-                :label="t('templates.list.columns.updatedBy')"
-                v-model="columnFilters.updatedBy"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column
-            sortable
-            :sort-method="sortByUpdatedAt"
-            min-width="180"
-          >
-            <template #header>
-              <TableColumnHeader
-                :label="t('templates.list.columns.updatedAt')"
-                v-model="columnFilters.updatedAt"
-              />
-            </template>
-            <template #default="{ row }">
-              {{ formatDateTime(row.updatedAt) }}
-            </template>
-          </el-table-column>
-        </AppDataTable>
-      </section>
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.group')"
+              v-model="columnFilters.groupCode"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="name" sortable min-width="220">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.name')"
+              v-model="columnFilters.name"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column prop="externalId" sortable min-width="180">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.externalId')"
+              v-model="columnFilters.externalId"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          sortable
+          :sort-method="sortByLifecycleStatus"
+          width="160"
+        >
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.status')"
+              v-model="columnFilters.status"
+              filter-type="select"
+              :options="lifecycleStatusFilterOptions"
+            />
+          </template>
+          <template #default="{ row }">
+            <TemplateStatusBadge :status="row.lifecycleStatus" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="releaseVersion" sortable width="140">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.releaseVersion')"
+              v-model="columnFilters.releaseVersion"
+            />
+          </template>
+          <template #default="{ row }">
+            {{ row.releaseVersion ?? t('templates.detail.noReleaseVersion') }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          sortable
+          width="120"
+          :sort-method="sortByReleaseVersionCount"
+        >
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.releaseVersionCount')"
+              v-model="columnFilters.releaseVersionCount"
+            />
+          </template>
+          <template #default="{ row }">
+            {{ row.releaseVersionCount }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="updatedBy" sortable min-width="120">
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.updatedBy')"
+              v-model="columnFilters.updatedBy"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          sortable
+          :sort-method="sortByUpdatedAt"
+          min-width="180"
+        >
+          <template #header>
+            <TableColumnHeader
+              :label="t('templates.list.columns.updatedAt')"
+              v-model="columnFilters.updatedAt"
+            />
+          </template>
+          <template #default="{ row }">
+            {{ formatDateTime(row.updatedAt) }}
+          </template>
+        </el-table-column>
+      </AppDataTable>
+      <AppTablePagination
+        v-model:current-page="currentPage"
+        :page-size="CLIENT_TABLE_PAGE_SIZE"
+        :total="totalTemplateRows"
+      />
     </template>
 
-    <el-empty v-else :description="t('templates.list.empty')" />
-
-    <el-pagination
-      v-if="totalTemplateGroups > pageSize"
-      v-model:current-page="currentPage"
-      class="list-pagination"
-      layout="prev, pager, next"
-      :page-size="pageSize"
-      :total="totalTemplateGroups"
-    />
+    <el-empty v-else-if="!errorMessage" :description="t('templates.list.empty')" />
 
     <TemplateCreateDialog v-model="createDialogOpen" @created="handleCreated" />
+    <TemplateImportDialog v-model="importDialogOpen" @imported="handleImported" />
+
+    <TemplateRiskPromptConfigPanel />
   </div>
 </template>
 
@@ -317,6 +341,12 @@ const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
   }
 }
 
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .page-alert {
   margin-bottom: 1rem;
 }
@@ -330,19 +360,5 @@ const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
 
 .table-toolbar {
   margin-bottom: 0.75rem;
-}
-
-.group-section {
-  margin-bottom: 2rem;
-
-  h2 {
-    margin: 0 0 0.75rem;
-    font-size: 1.125rem;
-  }
-}
-
-.list-pagination {
-  margin-top: 1rem;
-  justify-content: flex-end;
 }
 </style>

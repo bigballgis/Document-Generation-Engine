@@ -13,6 +13,8 @@ public class DocgenRenderingProperties {
 
     private int conversionTimeoutSeconds = 120;
 
+    private int conversionPoolSize = 2;
+
     public String getLibreOfficeCommand() {
         return libreOfficeCommand;
     }
@@ -43,5 +45,13 @@ public class DocgenRenderingProperties {
 
     public void setConversionTimeoutSeconds(int conversionTimeoutSeconds) {
         this.conversionTimeoutSeconds = conversionTimeoutSeconds;
+    }
+
+    public int getConversionPoolSize() {
+        return conversionPoolSize;
+    }
+
+    public void setConversionPoolSize(int conversionPoolSize) {
+        this.conversionPoolSize = conversionPoolSize;
     }
 }

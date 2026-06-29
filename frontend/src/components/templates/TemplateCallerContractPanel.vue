@@ -3,9 +3,12 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useYesNoFilterOptions } from '@/composables/useTableFilterOptions'
+import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { getCallerContract } from '@/api/contract'
 import {
   ALLOWED_ENVIRONMENTS,
@@ -62,6 +65,10 @@ const { filters: versionColumnFilters, filteredRows: filteredVersionComparison }
     },
   ])
 
+const versionComparisonCurrentPage = ref(1)
+const { paginatedRows: paginatedVersionComparison, totalRows: totalVersionComparisonRows } =
+  useCatalogPagination(filteredVersionComparison, versionComparisonCurrentPage, CLIENT_TABLE_PAGE_SIZE)
+
 const yesNoFilterOptions = useYesNoFilterOptions()
 
 const errorCodesSource = computed(() => contract.value?.errorCodes ?? [])
@@ -77,6 +84,13 @@ const { filters: errorColumnFilters, filteredRows: filteredErrorCodes } = useDat
       matchMode: 'exact',
     },
   ],
+)
+
+const errorCodesCurrentPage = ref(1)
+const { paginatedRows: paginatedErrorCodes, totalRows: totalErrorCodeRows } = useCatalogPagination(
+  filteredErrorCodes,
+  errorCodesCurrentPage,
+  CLIENT_TABLE_PAGE_SIZE,
 )
 
 async function loadContract() {
@@ -161,7 +175,7 @@ function errorMessage(key: string | null): string {
       </ul>
 
       <h3>{{ t('templates.contract.sections.versions') }}</h3>
-      <AppDataTable :data="filteredVersionComparison">
+      <AppDataTable :data="paginatedVersionComparison">
         <el-table-column prop="releaseVersion" sortable>
           <template #header>
             <TableColumnHeader
@@ -198,6 +212,11 @@ function errorMessage(key: string | null): string {
           </template>
         </el-table-column>
       </AppDataTable>
+      <AppTablePagination
+        v-model:current-page="versionComparisonCurrentPage"
+        :page-size="CLIENT_TABLE_PAGE_SIZE"
+        :total="totalVersionComparisonRows"
+      />
 
       <h3>{{ t('templates.contract.sections.policy') }}</h3>
       <dl class="summary-grid">
@@ -220,7 +239,7 @@ function errorMessage(key: string | null): string {
       </dl>
 
       <h3>{{ t('templates.contract.sections.errorCodes') }}</h3>
-      <AppDataTable :data="filteredErrorCodes">
+      <AppDataTable :data="paginatedErrorCodes">
         <el-table-column prop="code" sortable width="240">
           <template #header>
             <TableColumnHeader
@@ -259,6 +278,11 @@ function errorMessage(key: string | null): string {
           </template>
         </el-table-column>
       </AppDataTable>
+      <AppTablePagination
+        v-model:current-page="errorCodesCurrentPage"
+        :page-size="CLIENT_TABLE_PAGE_SIZE"
+        :total="totalErrorCodeRows"
+      />
 
       <h3>{{ t('templates.contract.sections.examples') }}</h3>
       <ul class="example-list">

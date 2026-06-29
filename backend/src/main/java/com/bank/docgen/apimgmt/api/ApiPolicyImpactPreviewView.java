@@ -9,6 +9,8 @@ public record ApiPolicyImpactPreviewView(
         boolean defaultRouteImpacted,
         int currentPolicyVersion,
         int nextPolicyVersion,
-        String summaryMessageKey
+        String summaryMessageKey,
+        String contractDiffSummary,
+        String idempotencyImpactSummary
 ) {
 }

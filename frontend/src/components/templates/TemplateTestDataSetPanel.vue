@@ -2,8 +2,11 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useCatalogPagination } from '@/composables/useCatalogPagination'
+import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import * as templatesApi from '@/api/templates'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import type { BatchTestSummary, TestDataSet } from '@/types/template'
@@ -32,6 +35,12 @@ const { filters: columnFilters, filteredRows: filteredDataSets } = useDataTableF
     { key: 'testDataSetId', getValue: (row) => row.testDataSetId },
     { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
   ],
+)
+const dataSetsCurrentPage = ref(1)
+const { paginatedRows: paginatedDataSets, totalRows: totalDataSetRows } = useCatalogPagination(
+  filteredDataSets,
+  dataSetsCurrentPage,
+  CLIENT_TABLE_PAGE_SIZE,
 )
 const sortByUpdatedAt = rowSortMethod<TestDataSet>((row) => row.updatedAt)
 const selectedId = ref<string | null>(null)
@@ -230,7 +239,7 @@ onMounted(() => {
     </div>
     <AppDataTable
       v-loading="loading"
-      :data="filteredDataSets"
+      :data="paginatedDataSets"
       highlight-current-row
       :empty-text="t('templates.testDataSets.empty')"
       @row-click="(row: TestDataSet) => handleSelect(row.testDataSetId)"
@@ -297,6 +306,11 @@ onMounted(() => {
         </template>
       </el-table-column>
     </AppDataTable>
+    <AppTablePagination
+      v-model:current-page="dataSetsCurrentPage"
+      :page-size="CLIENT_TABLE_PAGE_SIZE"
+      :total="totalDataSetRows"
+    />
     <p v-if="selectedId" class="selection-hint">
       {{ t('templates.testDataSets.selectedHint', { testDataSetId: selectedId }) }}
     </p>

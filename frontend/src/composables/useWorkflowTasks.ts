@@ -1,10 +1,21 @@
 import { computed } from 'vue'
 import { useCapabilities } from '@/composables/useCapabilities'
-import { templateDetailPath, pathForRouteKey, ROUTE_KEYS } from '@/routing/routeKeys'
+import {
+  canAccessApproverWorkbench,
+  canAccessCollaborationEscalationWorkbench,
+  canAccessTesterWorkbench,
+  canViewCollaborationWorkItems,
+  type CapabilityContext,
+} from '@/auth/roles'
+import { pathForRouteKey, ROUTE_KEYS } from '@/routing/routeKeys'
+import { useCollaborationStore } from '@/stores/collaboration'
 import { useMastersStore } from '@/stores/masters'
-import { useTemplatesStore } from '@/stores/templates'
+import { collaborationWorkItemToTask } from '@/utils/collaborationWorkItems'
+import type {
+  CollaborationWorkItemQueue,
+  CollaborationWorkItemTriggerType,
+} from '@/types/collaboration'
 import type { MasterDocumentSummary } from '@/types/master'
-import type { TemplateSummary } from '@/types/template'
 
 export type WorkflowTaskKind =
   | 'master-review'
@@ -15,6 +26,8 @@ export type WorkflowTaskKind =
   | 'template-author-draft'
   | 'template-rework'
 
+export type WorkflowTaskSource = 'master' | 'collaboration'
+
 export interface WorkflowTask {
   id: string
   kind: WorkflowTaskKind
@@ -23,19 +36,21 @@ export interface WorkflowTask {
   path: string
   groupCode?: string
   entityName: string
+  source?: WorkflowTaskSource
+  workItemId?: string
+  templateId?: string
+  queue?: CollaborationWorkItemQueue
+  triggerType?: CollaborationWorkItemTriggerType
+  submitterUserId?: string
+  summaryText?: string
+  ageSeconds?: number
+  createdAt?: string
 }
 
 export function useWorkflowTasks() {
   const mastersStore = useMastersStore()
-  const templatesStore = useTemplatesStore()
-  const {
-    manageMasters,
-    reviewMasters,
-    decideTests,
-    decideApprovals,
-    publishTemplates,
-    authorTemplates,
-  } = useCapabilities()
+  const collaborationStore = useCollaborationStore()
+  const { manageMasters, reviewMasters, context } = useCapabilities()
 
   const tasks = computed<WorkflowTask[]>(() => {
     const items: WorkflowTask[] = []
@@ -58,22 +73,9 @@ export function useWorkflowTasks() {
       }
     }
 
-    for (const template of templatesStore.templates) {
-      if (decideTests.value && template.lifecycleStatus === 'TESTING') {
-        items.push(templateTestTask(template))
-      }
-      if (decideApprovals.value && template.lifecycleStatus === 'APPROVAL') {
-        items.push(templateApprovalTask(template))
-      }
-      if (publishTemplates.value && template.lifecycleStatus === 'PENDING_RELEASE') {
-        items.push(templatePublishTask(template))
-      }
-      if (authorTemplates.value && template.lifecycleStatus === 'DRAFT') {
-        if (template.releaseVersion) {
-          items.push(templateReworkTask(template))
-        } else {
-          items.push(templateDraftTask(template))
-        }
+    if (canViewCollaborationWorkItems(context.value.roles)) {
+      for (const workItem of collaborationStore.workItems) {
+        items.push(collaborationWorkItemToTask(workItem))
       }
     }
 
@@ -92,6 +94,7 @@ function masterReworkTask(master: MasterDocumentSummary): WorkflowTask {
     path: `/masters/${master.id}`,
     groupCode: master.groupCode,
     entityName: master.name,
+    source: 'master',
   }
 }
 
@@ -104,72 +107,32 @@ function masterReviewTask(master: MasterDocumentSummary): WorkflowTask {
     path: `/masters/${master.id}`,
     groupCode: master.groupCode,
     entityName: master.name,
+    source: 'master',
   }
 }
 
-function templateTestTask(template: TemplateSummary): WorkflowTask {
-  return {
-    id: `template-test-${template.id}`,
-    kind: 'template-test',
-    titleKey: 'dashboard.tasks.templateTest.title',
-    descriptionKey: 'dashboard.tasks.templateTest.description',
-    path: templateDetailPath(template.id, 'overview'),
-    groupCode: template.groupCode,
-    entityName: template.name,
-  }
-}
-
-function templateApprovalTask(template: TemplateSummary): WorkflowTask {
-  return {
-    id: `template-approval-${template.id}`,
-    kind: 'template-approval',
-    titleKey: 'dashboard.tasks.templateApproval.title',
-    descriptionKey: 'dashboard.tasks.templateApproval.description',
-    path: templateDetailPath(template.id, 'overview'),
-    groupCode: template.groupCode,
-    entityName: template.name,
-  }
-}
-
-function templatePublishTask(template: TemplateSummary): WorkflowTask {
-  return {
-    id: `template-publish-${template.id}`,
-    kind: 'template-publish',
-    titleKey: 'dashboard.tasks.templatePublish.title',
-    descriptionKey: 'dashboard.tasks.templatePublish.description',
-    path: templateDetailPath(template.id, 'overview'),
-    groupCode: template.groupCode,
-    entityName: template.name,
-  }
-}
-
-function templateReworkTask(template: TemplateSummary): WorkflowTask {
-  return {
-    id: `template-rework-${template.id}`,
-    kind: 'template-rework',
-    titleKey: 'dashboard.tasks.templateRework.title',
-    descriptionKey: 'dashboard.tasks.templateRework.description',
-    path: templateDetailPath(template.id, 'overview'),
-    groupCode: template.groupCode,
-    entityName: template.name,
-  }
-}
-
-function templateDraftTask(template: TemplateSummary): WorkflowTask {
-  return {
-    id: `template-draft-${template.id}`,
-    kind: 'template-author-draft',
-    titleKey: 'dashboard.tasks.templateDraft.title',
-    descriptionKey: 'dashboard.tasks.templateDraft.description',
-    path: templateDetailPath(template.id, 'overview'),
-    groupCode: template.groupCode,
-    entityName: template.name,
-  }
-}
-
-export function dashboardQuickLinks(visibleRoutes: string[]) {
+export function dashboardQuickLinks(visibleRoutes: string[], context?: CapabilityContext) {
   const allowed = new Set(visibleRoutes)
   const links: Array<{ labelKey: string; path: string }> = []
+
+  if (context && canAccessTesterWorkbench(context)) {
+    links.push({
+      labelKey: 'dashboard.quickLinks.testerWorkbench',
+      path: pathForRouteKey(ROUTE_KEYS.testerWorkbench),
+    })
+  }
+  if (context && canAccessApproverWorkbench(context)) {
+    links.push({
+      labelKey: 'dashboard.quickLinks.approverWorkbench',
+      path: pathForRouteKey(ROUTE_KEYS.approverWorkbench),
+    })
+  }
+  if (context && canAccessCollaborationEscalationWorkbench(context)) {
+    links.push({
+      labelKey: 'dashboard.quickLinks.escalationWorkbench',
+      path: pathForRouteKey(ROUTE_KEYS.escalationWorkbench),
+    })
+  }
 
   if (allowed.has(ROUTE_KEYS.templateManagement)) {
     links.push({

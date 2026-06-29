@@ -124,12 +124,105 @@ class TemplatePlatformSliceTest {
                         .with(authentication(new ManagementAuthentication(templateAuthor))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.status").value("SUCCEEDED"))
-                .andExpect(jsonPath("$.result.fidelityWarnings[0].messageKey")
-                        .value("generation.warning.fidelity.controlledStyleFallback"));
+                .andExpect(jsonPath("$.result.fidelityWarnings").isEmpty());
 
         runLifecycle(templateId);
         CredentialBundle credential = configureApiAndCredential(templateId);
         runtimeGenerate(credential);
+    }
+
+    @Test
+    void preview_emitsRealWarnings_fromValidationEngine() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+        configureTemplateWithImageScalingBinding(templateId);
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/test-generate")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"variables":{"customerName":"Alice"}}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.status").value("SUCCEEDED"))
+                .andExpect(jsonPath("$.result.fidelityWarnings[0].code").value("IMAGE_SCALING_ADJUSTED"))
+                .andExpect(jsonPath("$.result.fidelityWarnings[0].messageKey")
+                        .value("generation.warning.fidelity.imageScalingAdjusted"))
+                .andExpect(jsonPath("$.result.fidelityWarnings[0].artifact").value("HEADER"));
+    }
+
+    @Test
+    void runtimeSuccess_includesFidelityWarnings() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+        configureTemplateWithImageScalingBinding(templateId);
+        runLifecycle(templateId);
+        CredentialBundle credential = configureApiAndCredential(templateId);
+
+        mockMvc.perform(post("/api/dev/v1/templates/TPL-RETAIL-LETTER/versions/1.0.0/generate")
+                        .header("X-Api-Credential-Id", credential.externalId())
+                        .header("X-Api-Credential-Secret", credential.secret())
+                        .header("X-Access-Account", "svc-caller")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(generateBody("idem-fidelity-warn-1")))
+                .andExpect(status().isOk())
+                .andExpect(header().string("fidelityWarningCodes", "IMAGE_SCALING_ADJUSTED"))
+                .andExpect(header().string("fidelityWarningCount", "1"));
+    }
+
+    @Test
+    void noHardcodedWarning_whenContentClean() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+        configureTemplate(templateId);
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/test-generate")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"variables":{"customerName":"Alice"}}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.fidelityWarnings").isEmpty());
+    }
+
+    @Test
+    void structuredAuthoring_exposesMasterStyleCatalogAndPasteClean() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+
+        mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/master-style-catalog")
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.catalogVersion").value("1.0"))
+                .andExpect(jsonPath("$.result.entries[0].styleKey").value("BodyText"));
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/paste-clean")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sourceHtml":"<p>Hello</p>",
+                                  "prePasteStructuredContentJson":"{\\"schemaVersion\\":\\"1.0\\",\\"nodes\\":[]}"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.blocked").value(false))
+                .andExpect(jsonPath("$.result.summary.transformedCount").value(1))
+                .andExpect(jsonPath("$.result.cleanedStructuredContentJson").exists());
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/paste-clean")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "sourceHtml":"<script>alert(1)</script>",
+                                  "prePasteStructuredContentJson":"{\\"schemaVersion\\":\\"1.0\\",\\"nodes\\":[]}"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.blocked").value(true))
+                .andExpect(jsonPath("$.result.summary.blockedCount").value(1));
     }
 
     @Test
@@ -709,7 +802,7 @@ class TemplatePlatformSliceTest {
                 .andExpect(jsonPath("$.result.totalSamples").value(3))
                 .andExpect(jsonPath("$.result.succeededCount").value(3))
                 .andExpect(jsonPath("$.result.failedCount").value(0))
-                .andExpect(jsonPath("$.result.warningCount").value(3))
+                .andExpect(jsonPath("$.result.warningCount").value(0))
                 .andExpect(jsonPath("$.result.samples.length()").value(3));
     }
 
@@ -799,7 +892,42 @@ class TemplatePlatformSliceTest {
                 .andExpect(jsonPath("$.result.paths[0]").value("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract"))
                 .andExpect(jsonPath("$.result.callableVersions[0].releaseVersion").value("1.0.0"))
                 .andExpect(jsonPath("$.result.errorCodes[?(@.code=='BATCH_LIMIT_EXCEEDED')]").exists())
-                .andExpect(jsonPath("$.result.apiPolicy.policyVersion").value(2));
+                .andExpect(jsonPath("$.result.apiPolicy.policyVersion").value(2))
+                .andExpect(jsonPath("$.result.apiPolicy.updatedAt").exists())
+                .andExpect(jsonPath("$.result.apiPolicy.updatedBy").exists())
+                .andExpect(jsonPath("$.result.apiPolicy.allowedOutputFormats[0]").value("DOCX"))
+                .andExpect(jsonPath("$.result.apiPolicy.batchLimits.syncMaxItems").exists())
+                .andExpect(jsonPath("$.result.apiPolicy.adGroupAuthorizationSummary.authorizationScopeSummary").exists())
+                .andExpect(jsonPath("$.result.apiPolicy.credentialSummary.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.result.apiPolicy.credentialSummary.credentialExternalId").exists())
+                .andExpect(jsonPath("$.result.defaultRoute.updatedAt").exists())
+                .andExpect(jsonPath("$.result.defaultRoute.updatedBy").exists());
+    }
+
+    @Test
+    void runtimeCallerContractExcludesManagementDetail() throws Exception {
+        String masterId = uploadAndApproveMaster();
+        String templateId = createTemplate(masterId);
+        configureTemplate(templateId);
+        runLifecycle(templateId);
+        CredentialBundle credential = configureApiAndCredential(templateId);
+
+        mockMvc.perform(get("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract")
+                        .header("X-Api-Credential-Id", credential.externalId())
+                        .header("X-Api-Credential-Secret", credential.secret())
+                        .header("X-Access-Account", "svc-caller"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.apiPolicy.policyVersion").value(2))
+                .andExpect(jsonPath("$.result.apiPolicy.allowedOutputFormats[0]").value("DOCX"))
+                .andExpect(jsonPath("$.result.apiPolicy.updatedAt").doesNotExist())
+                .andExpect(jsonPath("$.result.apiPolicy.updatedBy").doesNotExist())
+                .andExpect(jsonPath("$.result.apiPolicy.adGroupAuthorizationSummary.authorizationScopeSummary")
+                        .doesNotExist())
+                .andExpect(jsonPath("$.result.apiPolicy.credentialSummary.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.result.apiPolicy.credentialSummary.credentialExternalId").doesNotExist())
+                .andExpect(jsonPath("$.result.apiPolicy.credentialSummary.fingerprintSummary").doesNotExist())
+                .andExpect(jsonPath("$.result.defaultRoute.updatedAt").doesNotExist())
+                .andExpect(jsonPath("$.result.defaultRoute.updatedBy").doesNotExist());
     }
 
     private CredentialBundle preparePublishedTemplateWithBatchPolicy() throws Exception {
@@ -901,6 +1029,35 @@ class TemplatePlatformSliceTest {
                 .andExpect(jsonPath("$.result.summary.blocking").value(false));
     }
 
+    private void configureTemplateWithImageScalingBinding(String templateId) throws Exception {
+        mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/variables/customerName")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "variableKey":"customerName",
+                                  "variableType":"TEXT",
+                                  "required":true,
+                                  "defaultValue":"Customer",
+                                  "description":"Customer name"
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/bindings/HEADER")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "anchorId":"HEADER",
+                                  "declaredContentType":"TEXT",
+                                  "structuredContentJson":"{\\"nodes\\":[{\\"type\\":\\"imageRef\\",\\"imageRef\\":\\"IMG-1\\",\\"applyScaling\\":true}]}"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.validationStatus").value("VALID"));
+    }
+
     private String testGenerate(String templateId) throws Exception {
         MvcResult result = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/test-generate")
                         .with(authentication(new ManagementAuthentication(templateAuthor)))
@@ -915,6 +1072,16 @@ class TemplatePlatformSliceTest {
     }
 
     private void runLifecycle(String templateId) throws Exception {
+        String requiredSampleId = createRequiredTestDataSet(templateId);
+        testGenerate(templateId);
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/batch-test")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"testDataSetIds":["%s"]}
+                                """.formatted(requiredSampleId)))
+                .andExpect(status().isOk());
+
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/submit-test")
                         .with(authentication(new ManagementAuthentication(templateAuthor)))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -928,7 +1095,13 @@ class TemplatePlatformSliceTest {
                         .with(authentication(new ManagementAuthentication(tester)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"decision":"PASSED","commentSummary":"Looks good"}
+                                {
+                                  "decision":"PASSED",
+                                  "commentSummary":"Looks good",
+                                  "fidelityViewedConfirmed":true,
+                                  "coverageViewedConfirmed":true,
+                                  "previewViewedConfirmed":true
+                                }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.lifecycleStatus").value("APPROVAL"));
@@ -937,7 +1110,11 @@ class TemplatePlatformSliceTest {
                         .with(authentication(new ManagementAuthentication(approver)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"decision":"APPROVED","commentSummary":"Approved"}
+                                {
+                                  "decision":"APPROVED",
+                                  "commentSummary":"Approved",
+                                  "keyEvidenceConfirmed":true
+                                }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.lifecycleStatus").value("PENDING_RELEASE"));
@@ -953,6 +1130,23 @@ class TemplatePlatformSliceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.lifecycleStatus").value("PUBLISHED"))
                 .andExpect(jsonPath("$.result.releaseVersion").value("1.0.0"));
+    }
+
+    private String createRequiredTestDataSet(String templateId) throws Exception {
+        MvcResult createResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/test-data-sets")
+                        .with(authentication(new ManagementAuthentication(templateAuthor)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name":"Required sample",
+                                  "required":true,
+                                  "variables":{"customerName":"Alice"}
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readTree(createResult.getResponse().getContentAsString())
+                .path("result").path("testDataSetId").asText();
     }
 
     private void configurePublishApiPolicy(String templateId) throws Exception {
@@ -1070,7 +1264,8 @@ class TemplatePlatformSliceTest {
                         .content(generateBody("idem-runtime-1")))
                 .andExpect(status().isOk())
                 .andExpect(header().string("documentId", org.hamcrest.Matchers.not(org.hamcrest.Matchers.emptyString())))
-                .andExpect(header().string("fidelityWarningCodes", "CONTROLLED_STYLE_FALLBACK"))
+                .andExpect(header().string("fidelityWarningCount", "0"))
+                .andExpect(header().string("fidelityWarningCodes", ""))
                 .andExpect(header().string("idempotencyStatus", IdempotencyConstants.STATUS_NEW))
                 .andExpect(header().string("routeType", "EXPLICIT_VERSION"));
 

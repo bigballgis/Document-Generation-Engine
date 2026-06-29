@@ -11,6 +11,9 @@ vi.mock('@/api/masters', () => ({
   submitMasterReview: vi.fn(),
   decideMasterReview: vi.fn(),
   getMasterImpactAnalysis: vi.fn(),
+  listMasterRevisionLines: vi.fn(),
+  getMasterRevisionLine: vi.fn(),
+  downloadMasterRevisionLineFile: vi.fn(),
 }))
 
 const sampleDetail = {
@@ -108,5 +111,56 @@ describe('masters store', () => {
 
     await expect(store.fetchMasters()).rejects.toBeTruthy()
     expect(store.lastErrorMessageKey).toBe('api.error.storage.operationFailed')
+  })
+
+  it('loads revision lines page into store state', async () => {
+    vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
+      content: [
+        {
+          id: 'revision-1',
+          lineLabel: 'CURRENT',
+          status: 'APPROVED',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 1,
+          updatedAt: '2026-06-23T10:00:00Z',
+          updatedBy: '10000001',
+          current: true,
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const store = useMastersStore()
+    const page = await store.fetchRevisionLines('master-1', 0, 20)
+
+    expect(page.content).toHaveLength(1)
+    expect(store.revisionLinesPage?.content[0]?.id).toBe('revision-1')
+  })
+
+  it('loads revision line detail into store state', async () => {
+    vi.mocked(mastersApi.getMasterRevisionLine).mockResolvedValue({
+      id: 'revision-1',
+      masterId: 'master-1',
+      lineLabel: 'CURRENT',
+      status: 'APPROVED',
+      originalFilename: 'letterhead.docx',
+      changeSummary: null,
+      current: true,
+      anchors: [],
+      reviewHistory: [],
+      createdBy: '10000001',
+      updatedBy: '10000001',
+      createdAt: '2026-06-23T10:00:00Z',
+      updatedAt: '2026-06-23T10:00:00Z',
+    })
+
+    const store = useMastersStore()
+    const detail = await store.fetchRevisionLine('master-1', 'revision-1')
+
+    expect(detail.id).toBe('revision-1')
+    expect(store.selectedRevisionLine?.current).toBe(true)
   })
 })

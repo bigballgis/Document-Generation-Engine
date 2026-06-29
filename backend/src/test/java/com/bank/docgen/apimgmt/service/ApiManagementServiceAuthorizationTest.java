@@ -5,8 +5,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.apimgmt.mapping.ApiPolicyViewMapperFactory;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.apimgmt.persistence.ApiPolicyVersionRepository;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
@@ -14,6 +16,7 @@ import com.bank.docgen.runtime.service.ContractAssemblyService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.sharedkernel.security.PasswordHashService;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
@@ -38,6 +41,8 @@ class ApiManagementServiceAuthorizationTest {
     private final ManagementAuditRecorder auditRecorder = mock(ManagementAuditRecorder.class);
     private final ContractAssemblyService contractAssemblyService = mock(ContractAssemblyService.class);
 
+    private final ApiPolicyImpactPreviewService apiPolicyImpactPreviewService = mock(ApiPolicyImpactPreviewService.class);
+
     private final ApiManagementService service = new ApiManagementService(
             templateService,
             apiPolicyRepository,
@@ -46,7 +51,15 @@ class ApiManagementServiceAuthorizationTest {
             passwordHashService,
             auditRecorder,
             contractAssemblyService,
-            new ObjectMapper()
+            new ObjectMapper(),
+            new ApiPolicyVersionSnapshotService(
+                    mock(ApiPolicyVersionRepository.class),
+                    new ObjectMapper()
+            ),
+            mock(TemplateVersionRepository.class),
+            new TemplateAdGroupAuthorizationCache(),
+            apiPolicyImpactPreviewService,
+            ApiPolicyViewMapperFactory.create(new ObjectMapper())
     );
 
     private ManagementSessionClaims session(List<String> roles) {

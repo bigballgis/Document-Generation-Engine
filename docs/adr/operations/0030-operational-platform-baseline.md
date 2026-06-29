@@ -86,6 +86,7 @@ These decisions are accepted as the operational platform foundation. They define
 
 ## Related Documents
 
+- [Deployment Guide](../../../deploy/README.md) — canonical install/upgrade/cutover/rollback guide (P15 / ADR-0030)
 - [Requirements Plan](../../requirements/requirements-plan.md)
 - [PRD](../../product/PRD.md)
 - [Domain Model](../../domain/domain-model.md)

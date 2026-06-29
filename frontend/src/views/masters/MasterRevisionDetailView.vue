@@ -2,13 +2,9 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import MasterImpactPanel from '@/components/masters/MasterImpactPanel.vue'
 import MasterReviewDialog from '@/components/masters/MasterReviewDialog.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
-import MasterMetadataEditDialog from '@/components/masters/MasterMetadataEditDialog.vue'
-import MasterReplaceFileDialog from '@/components/masters/MasterReplaceFileDialog.vue'
-import MasterRevisionLinesPanel from '@/components/masters/MasterRevisionLinesPanel.vue'
 import MasterWorkflowBanner from '@/components/masters/MasterWorkflowBanner.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
@@ -16,11 +12,10 @@ import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import { canReviewMasters, sessionContext } from '@/auth/roles'
-import { ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
+import { masterDetailPath } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
-import { useCapabilities } from '@/composables/useCapabilities'
-import type { MasterReviewDecision } from '@/types/master'
+import type { MasterDocumentDetail, MasterReviewDecision } from '@/types/master'
 import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
@@ -28,19 +23,35 @@ const route = useRoute()
 const router = useRouter()
 const mastersStore = useMastersStore()
 const sessionStore = useSessionStore()
-const { manageMasters } = useCapabilities()
 
 const submitReviewOpen = ref(false)
 const reviewDialogOpen = ref(false)
 const reviewMode = ref<MasterReviewDecision>('APPROVED')
-const metadataEditOpen = ref(false)
-const replaceFileOpen = ref(false)
 const loadFailed = ref(false)
 const downloading = ref(false)
 
 const masterId = computed(() => String(route.params.masterId ?? ''))
+const revisionLineId = computed(() => String(route.params.revisionLineId ?? ''))
 const master = computed(() => mastersStore.selectedMaster)
-const anchorsSource = computed(() => master.value?.anchors ?? [])
+const revisionLine = computed(() => mastersStore.selectedRevisionLine)
+
+const workflowMaster = computed<MasterDocumentDetail | null>(() => {
+  if (!master.value || !revisionLine.value) {
+    return null
+  }
+  return {
+    ...master.value,
+    status: revisionLine.value.status,
+    originalFilename: revisionLine.value.originalFilename,
+    changeSummary: revisionLine.value.changeSummary,
+    anchors: revisionLine.value.anchors,
+    reviewHistory: revisionLine.value.reviewHistory,
+    updatedAt: revisionLine.value.updatedAt,
+    updatedBy: revisionLine.value.updatedBy,
+  }
+})
+
+const anchorsSource = computed(() => revisionLine.value?.anchors ?? [])
 const { filters: anchorColumnFilters, filteredRows: filteredAnchors } = useDataTableFilters(
   anchorsSource,
   [
@@ -48,29 +59,18 @@ const { filters: anchorColumnFilters, filteredRows: filteredAnchors } = useDataT
     { key: 'displayLabel', getValue: (row) => row.displayLabel },
   ],
 )
+
+const isCurrentRevision = computed(() => revisionLine.value?.current === true)
 const canReview = computed(() => canReviewMasters(sessionContext(sessionStore.session)))
 const canSubmitForReview = computed(
-  () => master.value?.status === 'DRAFT' || master.value?.status === 'REJECTED',
+  () =>
+    isCurrentRevision.value &&
+    (revisionLine.value?.status === 'DRAFT' || revisionLine.value?.status === 'REJECTED'),
 )
 const canDecideReview = computed(
-  () => canReview.value && master.value?.status === 'PENDING_REVIEW',
+  () => canReview.value && isCurrentRevision.value && revisionLine.value?.status === 'PENDING_REVIEW',
 )
-const canEditMetadata = computed(() => {
-  if (!manageMasters.value || !master.value) {
-    return false
-  }
-  return (
-    master.value.status === 'DRAFT' ||
-    master.value.status === 'REJECTED' ||
-    master.value.status === 'APPROVED'
-  )
-})
-const canReplaceFile = computed(() => {
-  if (!manageMasters.value || !master.value) {
-    return false
-  }
-  return master.value.status !== 'PENDING_REVIEW'
-})
+
 const errorMessage = computed(() => {
   const key = mastersStore.lastErrorMessageKey
   if (!key) {
@@ -79,26 +79,33 @@ const errorMessage = computed(() => {
   return te(key) ? t(key) : t('masters.error.loadDetail')
 })
 
-onMounted(async () => {
-  await reloadMaster()
-})
-
-async function reloadMaster() {
-  loadFailed.value = false
-  try {
-    await mastersStore.fetchMaster(masterId.value)
-    await mastersStore.fetchImpactAnalysis(masterId.value)
-  } catch {
-    loadFailed.value = true
+function formatLineLabel(lineLabel: string | undefined): string {
+  if (lineLabel === 'CURRENT') {
+    return t('masters.revisionLines.currentLine')
   }
+  return lineLabel ?? ''
 }
+
+onMounted(async () => {
+  await reloadPage()
+})
 
 onUnmounted(() => {
   mastersStore.clearSelected()
 })
 
-function goBack() {
-  router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.masterManagement])
+async function reloadPage() {
+  loadFailed.value = false
+  try {
+    await mastersStore.fetchMaster(masterId.value)
+    await mastersStore.fetchRevisionLine(masterId.value, revisionLineId.value)
+  } catch {
+    loadFailed.value = true
+  }
+}
+
+function goBackToPackage() {
+  router.push(masterDetailPath(masterId.value))
 }
 
 async function handleSubmitReview(payload: { changeSummary: string }) {
@@ -106,6 +113,7 @@ async function handleSubmitReview(payload: { changeSummary: string }) {
     await mastersStore.submitReview(masterId.value, payload)
     submitReviewOpen.value = false
     ElMessage.success(t('masters.submitReview.success'))
+    await reloadPage()
   } catch {
     ElMessage.error(errorMessage.value || t('masters.error.submitReview'))
   }
@@ -129,41 +137,21 @@ async function handleReviewDecision(payload: {
     ElMessage.success(
       t(payload.decision === 'APPROVED' ? 'masters.review.approveSuccess' : 'masters.review.rejectSuccess'),
     )
+    await reloadPage()
   } catch {
     ElMessage.error(errorMessage.value || t('masters.error.decideReview'))
-  }
-}
-
-async function handleMetadataUpdate(payload: { name: string; description: string | null }) {
-  try {
-    await mastersStore.updateMasterMetadata(masterId.value, payload)
-    metadataEditOpen.value = false
-    ElMessage.success(t('masters.metadata.success'))
-  } catch {
-    ElMessage.error(errorMessage.value || t('masters.error.updateMetadata'))
   }
 }
 
 async function handleDownload() {
   downloading.value = true
   try {
-    await mastersStore.downloadMasterFile(masterId.value)
+    await mastersStore.downloadRevisionLineFile(masterId.value, revisionLineId.value)
     ElMessage.success(t('masters.download.success'))
   } catch {
     ElMessage.error(errorMessage.value || t('masters.error.download'))
   } finally {
     downloading.value = false
-  }
-}
-
-async function handleReplaceFile(file: File) {
-  try {
-    await mastersStore.replaceMasterFile(masterId.value, file)
-    replaceFileOpen.value = false
-    await mastersStore.fetchImpactAnalysis(masterId.value)
-    ElMessage.success(t('masters.replaceFile.success'))
-  } catch {
-    ElMessage.error(errorMessage.value || t('masters.error.replaceFile'))
   }
 }
 
@@ -174,28 +162,23 @@ function formatReviewAction(action: string): string {
 </script>
 
 <template>
-  <div class="master-detail-page">
+  <div class="master-revision-detail-page">
     <header class="page-header">
       <div>
-        <el-button link type="primary" @click="goBack">
-          {{ t('masters.detail.backToList') }}
+        <el-button link type="primary" @click="goBackToPackage">
+          {{ t('masters.revision.backToPackage') }}
         </el-button>
-        <h1>{{ master?.name ?? t('masters.detail.loadingTitle') }}</h1>
-        <p v-if="master" class="meta">
-          {{ t('masters.detail.groupLabel', { groupCode: master.groupCode }) }}
-          · {{ master.originalFilename }}
+        <h1>{{ formatLineLabel(revisionLine?.lineLabel) }}</h1>
+        <p v-if="master && revisionLine" class="meta">
+          {{ master.name }}
+          · {{ t('masters.hub.groupLabel', { groupCode: master.groupCode }) }}
+          · {{ revisionLine.originalFilename }}
         </p>
       </div>
-      <div v-if="master" class="header-actions">
-        <MasterStatusBadge :status="master.status" />
+      <div v-if="revisionLine" class="header-actions">
+        <MasterStatusBadge :status="revisionLine.status" />
         <el-button :loading="downloading" @click="handleDownload">
           {{ t('masters.download.action') }}
-        </el-button>
-        <el-button v-if="canReplaceFile" @click="replaceFileOpen = true">
-          {{ t('masters.replaceFile.open') }}
-        </el-button>
-        <el-button v-if="canEditMetadata" @click="metadataEditOpen = true">
-          {{ t('masters.metadata.edit') }}
         </el-button>
         <el-button v-if="canSubmitForReview" type="primary" @click="submitReviewOpen = true">
           {{ t('masters.submitReview.open') }}
@@ -213,53 +196,51 @@ function formatReviewAction(action: string): string {
 
     <LoadErrorPanel
       v-if="loadFailed"
-      :message-key="mastersStore.lastErrorMessageKey ?? 'masters.error.loadDetail'"
-      @retry="reloadMaster"
+      :message-key="mastersStore.lastErrorMessageKey ?? 'masters.revision.loadError'"
+      @retry="reloadPage"
     />
 
-    <el-skeleton v-else-if="mastersStore.loadingDetail" :rows="8" animated />
+    <el-skeleton v-else-if="mastersStore.loadingRevisionLine || mastersStore.loadingDetail" :rows="8" animated />
 
     <EmptyStatePanel
-      v-else-if="!master"
-      title-key="masters.empty.notFoundTitle"
-      description-key="masters.empty.notFoundDescription"
+      v-else-if="!revisionLine || !master"
+      title-key="masters.revision.notFoundTitle"
+      description-key="masters.revision.notFoundDescription"
     />
 
-    <template v-else-if="master">
-      <MasterWorkflowBanner :master="master" />
-
-      <MasterRevisionLinesPanel :master="master" />
+    <template v-else>
+      <MasterWorkflowBanner v-if="workflowMaster" :master="workflowMaster" />
 
       <section class="detail-grid">
         <el-card shadow="never">
           <template #header>
-            <span>{{ t('masters.detail.summaryTitle') }}</span>
+            <span>{{ t('masters.revision.summaryTitle') }}</span>
           </template>
           <dl class="summary-list">
-            <div>
-              <dt>{{ t('masters.detail.description') }}</dt>
-              <dd>{{ master.description || t('masters.detail.noDescription') }}</dd>
-            </div>
-            <div v-if="master.changeSummary">
-              <dt>{{ t('masters.detail.changeSummary') }}</dt>
-              <dd>{{ master.changeSummary }}</dd>
+            <div v-if="revisionLine.changeSummary">
+              <dt>{{ t('masters.revision.changeSummary') }}</dt>
+              <dd>{{ revisionLine.changeSummary }}</dd>
             </div>
             <div>
-              <dt>{{ t('masters.detail.updatedAt') }}</dt>
-              <dd>{{ new Date(master.updatedAt).toLocaleString() }}</dd>
+              <dt>{{ t('masters.revision.updatedAt') }}</dt>
+              <dd>{{ new Date(revisionLine.updatedAt).toLocaleString() }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('masters.revision.updatedBy') }}</dt>
+              <dd>{{ revisionLine.updatedBy }}</dd>
             </div>
           </dl>
         </el-card>
 
         <el-card shadow="never">
           <template #header>
-            <span>{{ t('masters.detail.anchorsTitle') }}</span>
+            <span>{{ t('masters.revision.anchorsTitle') }}</span>
           </template>
           <AppDataTable v-if="filteredAnchors.length > 0" :data="filteredAnchors">
             <el-table-column prop="anchorId" sortable min-width="160">
               <template #header>
                 <TableColumnHeader
-                  :label="t('masters.detail.anchorId')"
+                  :label="t('masters.revision.anchorId')"
                   v-model="anchorColumnFilters.anchorId"
                 />
               </template>
@@ -267,42 +248,40 @@ function formatReviewAction(action: string): string {
             <el-table-column prop="displayLabel" sortable min-width="220">
               <template #header>
                 <TableColumnHeader
-                  :label="t('masters.detail.anchorLabel')"
+                  :label="t('masters.revision.anchorLabel')"
                   v-model="anchorColumnFilters.displayLabel"
                 />
               </template>
             </el-table-column>
           </AppDataTable>
-          <el-empty v-else :description="t('masters.detail.noAnchors')" />
+          <el-empty v-else :description="t('masters.revision.noAnchors')" />
         </el-card>
       </section>
 
       <el-card shadow="never" class="history-card">
         <template #header>
-          <span>{{ t('masters.detail.reviewHistoryTitle') }}</span>
+          <span>{{ t('masters.revision.reviewHistoryTitle') }}</span>
         </template>
-        <el-timeline v-if="master.reviewHistory.length > 0">
+        <el-timeline v-if="revisionLine.reviewHistory.length > 0">
           <el-timeline-item
-            v-for="(record, index) in master.reviewHistory"
+            v-for="(record, index) in revisionLine.reviewHistory"
             :key="`${record.createdAt}-${index}`"
             :timestamp="new Date(record.createdAt).toLocaleString()"
           >
             <p class="history-action">{{ formatReviewAction(record.action) }}</p>
             <p v-if="record.changeSummary" class="history-text">
-              {{ t('masters.detail.changeSummary') }}: {{ record.changeSummary }}
+              {{ t('masters.revision.changeSummary') }}: {{ record.changeSummary }}
             </p>
             <p v-if="record.commentSummary" class="history-text">
               {{ t('masters.review.commentSummary') }}: {{ record.commentSummary }}
             </p>
             <p class="history-actor">
-              {{ t('masters.detail.actorLabel', { username: record.actorUsername }) }}
+              {{ t('masters.revision.actorLabel', { username: record.actorUsername }) }}
             </p>
           </el-timeline-item>
         </el-timeline>
-        <el-empty v-else :description="t('masters.detail.noReviewHistory')" />
+        <el-empty v-else :description="t('masters.revision.noReviewHistory')" />
       </el-card>
-
-      <MasterImpactPanel :impact="mastersStore.impactAnalysis" />
     </template>
 
     <MasterSubmitReviewDialog v-model="submitReviewOpen" @submit="handleSubmitReview" />
@@ -311,26 +290,11 @@ function formatReviewAction(action: string): string {
       :mode="reviewMode"
       @submit="handleReviewDecision"
     />
-    <MasterMetadataEditDialog
-      v-if="master"
-      v-model="metadataEditOpen"
-      :initial-name="master.name"
-      :initial-description="master.description"
-      :loading="mastersStore.submitting"
-      @submit="handleMetadataUpdate"
-    />
-    <MasterReplaceFileDialog
-      v-if="master"
-      v-model="replaceFileOpen"
-      :current-filename="master.originalFilename"
-      :loading="mastersStore.submitting"
-      @submit="handleReplaceFile"
-    />
   </div>
 </template>
 
 <style scoped lang="scss">
-.master-detail-page {
+.master-revision-detail-page {
   min-height: 100vh;
   padding: 2rem;
   background: var(--surface-bg);
@@ -359,10 +323,6 @@ function formatReviewAction(action: string): string {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
-}
-
-.page-alert {
-  margin-bottom: 1rem;
 }
 
 .detail-grid {

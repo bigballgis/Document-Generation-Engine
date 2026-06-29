@@ -3,11 +3,14 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
+import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { useCapabilities } from '@/composables/useCapabilities'
 import * as templatesApi from '@/api/templates'
 import { useTemplatesStore } from '@/stores/templates'
@@ -54,6 +57,12 @@ const { filters: columnFilters, filteredRows: filteredVersions, hasActiveFilters
     { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
     { key: 'updatedBy', getValue: (row) => row.updatedBy },
   ])
+const versionsCurrentPage = ref(1)
+const { paginatedRows: paginatedVersions, totalRows: totalVersionRows } = useCatalogPagination(
+  filteredVersions,
+  versionsCurrentPage,
+  CLIENT_TABLE_PAGE_SIZE,
+)
 
 const canManageVersions = computed(
   () =>
@@ -227,7 +236,7 @@ const sortByUpdatedAt = rowSortMethod<TemplateReleaseVersion>((row) => row.updat
       <div v-if="hasActiveFilters" class="table-toolbar">
         <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
       </div>
-      <AppDataTable :data="filteredVersions">
+      <AppDataTable :data="paginatedVersions">
         <template #empty>
           <el-empty :description="t('templates.versions.empty')" />
         </template>
@@ -335,6 +344,11 @@ const sortByUpdatedAt = rowSortMethod<TemplateReleaseVersion>((row) => row.updat
           </template>
         </el-table-column>
       </AppDataTable>
+      <AppTablePagination
+        v-model:current-page="versionsCurrentPage"
+        :page-size="CLIENT_TABLE_PAGE_SIZE"
+        :total="totalVersionRows"
+      />
     </template>
   </div>
 </template>

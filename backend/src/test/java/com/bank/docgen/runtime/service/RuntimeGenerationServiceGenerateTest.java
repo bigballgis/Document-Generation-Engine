@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
-import com.bank.docgen.rendering.domain.FidelityWarningCode;
+import com.bank.docgen.authoring.structured.FidelityValidationService;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.api.OutputOptionsView;
@@ -61,6 +61,8 @@ class RuntimeGenerationServiceGenerateTest {
     private EncryptionParameterValidator encryptionParameterValidator;
     @Mock
     private DocumentGenerationEngine documentGenerationEngine;
+    @Mock
+    private FidelityValidationService fidelityValidationService;
 
     private RuntimeGenerationService service;
     private TemplateEntity template;
@@ -78,7 +80,8 @@ class RuntimeGenerationServiceGenerateTest {
                 encryptionParameterValidator,
                 mock(ContractAssemblyService.class),
                 documentGenerationEngine,
-                new ObjectMapper()
+                new ObjectMapper(),
+                fidelityValidationService
         );
         template = publishedTemplate(TEMPLATE_ID);
         policy = policyForTemplate(TEMPLATE_ID);
@@ -102,6 +105,8 @@ class RuntimeGenerationServiceGenerateTest {
         doNothing().when(encryptionParameterValidator).validate(any(), any(), anyString());
         when(idempotencyService.hashRequest(anyString())).thenReturn("hash-a");
         when(idempotencyService.findExisting("idem-1", TEMPLATE_ID, "hash-a")).thenReturn(Optional.of(existing));
+        when(fidelityValidationService.collectWarningCodesForVersion(VERSION_ID, template.getMasterId()))
+                .thenReturn(List.of());
         when(objectStoragePort.get("storage/replay.docx")).thenReturn(new ByteArrayInputStream(new byte[]{9, 8, 7}));
 
         SyncGenerateResult result = service.generateSync(
@@ -131,6 +136,8 @@ class RuntimeGenerationServiceGenerateTest {
         when(idempotencyService.hashRequest(anyString())).thenReturn("hash-a");
         when(idempotencyService.findExisting("idem-replay-stream", TEMPLATE_ID, "hash-a"))
                 .thenReturn(Optional.of(existing));
+        when(fidelityValidationService.collectWarningCodesForVersion(VERSION_ID, template.getMasterId()))
+                .thenReturn(List.of());
         when(objectStoragePort.get("storage/replay.docx")).thenReturn(stream);
 
         SyncGenerateResult result = service.generateSync(
@@ -150,13 +157,14 @@ class RuntimeGenerationServiceGenerateTest {
         TemplateVersionEntity version = publishedVersion(VERSION_ID, TEMPLATE_ID);
         GenerationIdempotencyEntity pending = pendingIdempotency(TEMPLATE_ID);
         byte[] finalBytes = new byte[]{4, 5, 6};
+        String storageKey = "generated/DOC-NEW/output.docx";
         DocumentGenerationEngine.GeneratedDocument generated = new DocumentGenerationEngine.GeneratedDocument(
                 "DOC-NEW",
-                "generated/DOC-NEW/output.docx",
+                storageKey,
                 finalBytes,
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 "DOCX",
-                List.of(FidelityWarningCode.CONTROLLED_STYLE_FALLBACK.name())
+                List.of("IMAGE_SCALING_ADJUSTED")
         );
 
         when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
@@ -172,6 +180,7 @@ class RuntimeGenerationServiceGenerateTest {
                 eq("DOCX"),
                 any()
         )).thenReturn(generated);
+        when(objectStoragePort.get(storageKey)).thenReturn(new ByteArrayInputStream(finalBytes));
         doNothing().when(encryptionParameterValidator).validate(any(), any(), anyString());
 
         SyncGenerateResult result = service.generateSync(
@@ -182,10 +191,49 @@ class RuntimeGenerationServiceGenerateTest {
         );
 
         assertThat(result.idempotencyStatus()).isEqualTo(IdempotencyConstants.STATUS_NEW);
-        assertThat(result.artifactBytes()).containsExactly(4, 5, 6);
-        assertThat(result.artifactStream()).isNull();
+        assertThat(result.artifactBytes()).isNull();
+        assertThat(result.artifactStream()).isNotNull();
+        assertThat(result.artifactStream().readAllBytes()).containsExactly(4, 5, 6);
         assertThat(result.resolvedReleaseVersion()).isEqualTo(RELEASE_VERSION);
-        verify(idempotencyService).complete(pending, "generated/DOC-NEW/output.docx", "DOC-NEW");
+        verify(idempotencyService).complete(pending, storageKey, "DOC-NEW");
+        verify(objectStoragePort).get(storageKey);
+    }
+
+    @Test
+    void generateSync_newPathReturnsStorageStreamWithoutEagerLoad() throws Exception {
+        TemplateVersionEntity version = publishedVersion(VERSION_ID, TEMPLATE_ID);
+        GenerationIdempotencyEntity pending = pendingIdempotency(TEMPLATE_ID);
+        String storageKey = "generated/DOC-STREAM/output.docx";
+        TrackingInputStream stream = new TrackingInputStream();
+        DocumentGenerationEngine.GeneratedDocument generated = new DocumentGenerationEngine.GeneratedDocument(
+                "DOC-STREAM",
+                storageKey,
+                new byte[]{1, 2, 3},
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "DOCX",
+                List.of()
+        );
+
+        when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
+        when(idempotencyService.hashRequest(anyString())).thenReturn("hash-a");
+        when(idempotencyService.findExisting("idem-new-stream", TEMPLATE_ID, "hash-a")).thenReturn(Optional.empty());
+        when(idempotencyService.begin("idem-new-stream", TEMPLATE_ID, "hash-a")).thenReturn(pending);
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, RELEASE_VERSION))
+                .thenReturn(Optional.of(version));
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any())).thenReturn(generated);
+        when(objectStoragePort.get(storageKey)).thenReturn(stream);
+        doNothing().when(encryptionParameterValidator).validate(any(), any(), anyString());
+
+        SyncGenerateResult result = service.generateSync(
+                template,
+                session,
+                RELEASE_VERSION,
+                generateRequest("idem-new-stream", "DOCX")
+        );
+
+        assertThat(result.artifactStream()).isSameAs(stream);
+        assertThat(stream.readCount()).isZero();
+        assertThat(result.artifactBytes()).isNull();
     }
 
     @Test

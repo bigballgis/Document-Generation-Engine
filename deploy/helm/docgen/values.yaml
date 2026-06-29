@@ -1,0 +1,244 @@
+# Default values for docgen.
+# Override per environment with values-dev.yaml, values-staging.yaml, or values-prod.yaml.
+
+global:
+  environment: dev
+
+nameOverride: ""
+fullnameOverride: ""
+
+backend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: docgen/backend
+    tag: ""
+    pullPolicy: IfNotPresent
+  port: 8080
+  securityContext:
+    runAsUser: 65532
+    runAsGroup: 65532
+  podSecurityContext:
+    fsGroup: 65532
+    fsGroupChangePolicy: OnRootMismatch
+  tmpfs:
+    sizeLimit: 256Mi
+  resources:
+    requests:
+      cpu: 500m
+      memory: 768Mi
+    limits:
+      cpu: "2"
+      memory: 1536Mi
+  service:
+    type: ClusterIP
+    port: 8080
+  probes:
+    liveness:
+      path: /healthz
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readiness:
+      path: /readyz
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: docgen/frontend
+    tag: ""
+    pullPolicy: IfNotPresent
+  port: 8080
+  securityContext:
+    runAsUser: 101
+    runAsGroup: 101
+  podSecurityContext:
+    fsGroup: 101
+    fsGroupChangePolicy: OnRootMismatch
+  tmpfs:
+    sizeLimit: 64Mi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  service:
+    type: ClusterIP
+    port: 8080
+  probes:
+    liveness:
+      path: /healthz
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
+    readiness:
+      path: /readyz
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 3
+
+# Non-sensitive runtime configuration (rendered into ConfigMap).
+config:
+  springProfilesActive: prod
+  appEnvironment: dev
+  storageProvider: minio
+  storageBucket: docgen-artifacts
+  seedDemoCatalog: false
+  javaToolOptions: "-Djava.io.tmpdir=/tmp"
+
+# Externally managed data services — endpoints only (no credentials in ConfigMap).
+externalServices:
+  postgres:
+    host: postgres.example.internal
+    port: 5432
+    database: docgen
+  redis:
+    host: redis.example.internal
+    port: 6379
+  kafka:
+    bootstrapServers: kafka.example.internal:9092
+  minio:
+    endpoint: https://minio.example.internal
+
+# Credentials and keys — never commit plaintext; supply via cluster Secret or ExternalSecret.
+secrets:
+  create: false
+  existingSecretName: docgen-app-secrets
+  # Expected keys (operator-managed Secret or ExternalSecret target):
+  #   POSTGRES_USER, POSTGRES_PASSWORD, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD, JWT_SECRET
+  # When secrets.create=true, supply values only at install time via --set (never commit):
+  data: {}
+  externalSecret:
+    enabled: false
+    refreshInterval: 1h
+    secretStoreRef:
+      name: vault-backend
+      kind: ClusterSecretStore
+    # Maps remote store properties to Kubernetes Secret keys (no plaintext in chart).
+    data:
+      - secretKey: POSTGRES_USER
+        remoteRef:
+          key: docgen/postgres
+          property: username
+      - secretKey: POSTGRES_PASSWORD
+        remoteRef:
+          key: docgen/postgres
+          property: password
+      - secretKey: MINIO_ROOT_USER
+        remoteRef:
+          key: docgen/minio
+          property: access-key
+      - secretKey: MINIO_ROOT_PASSWORD
+        remoteRef:
+          key: docgen/minio
+          property: secret-key
+      - secretKey: JWT_SECRET
+        remoteRef:
+          key: docgen/jwt
+          property: secret
+
+ingress:
+  enabled: false
+  className: nginx
+  # ADR-0030: TLS 1.2+ in transit — cert-manager issues certs; NGINX enforces protocol floor.
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+  host: docgen.example.com
+  # API traffic routed directly to backend Service; SPA/static to frontend (P15-T04b).
+  apiPath: /api
+  apiPathType: Prefix
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: true
+    secretName: ""
+
+certificate:
+  enabled: false
+  # cert-manager Certificate — pairs with ingress.tls.secretName (P15-T04c).
+  # Issuer must issue TLS 1.2+ compatible certificates (ADR-0030 data-in-transit baseline).
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  secretName: ""
+  # When empty, dnsNames defaults to ingress.host.
+  dnsNames: []
+
+autoscaling:
+  backend:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+    # Requires Prometheus Adapter or equivalent metrics pipeline (ADR-0030).
+    customMetric:
+      enabled: true
+      name: docgen_http_requests_per_second
+      targetType: AverageValue
+      averageValue: "100"
+  frontend:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+    customMetric:
+      enabled: false
+      name: docgen_frontend_http_requests_per_second
+      targetType: AverageValue
+      averageValue: "50"
+
+# Blue-green release (ADR-0030 / P15-T08). When enabled, two color-labelled Deployments
+# per workload run in parallel; the active Service selector routes traffic to activeColor.
+# Production cutover switches activeColor only after manual approval (see deploy/blue-green-runbook.md).
+blueGreen:
+  enabled: false
+  activeColor: blue
+  requireManualApproval: true
+  previewService:
+    enabled: true
+  colors:
+    blue:
+      backendImageTag: ""
+      frontendImageTag: ""
+    green:
+      backendImageTag: ""
+      frontendImageTag: ""
+
+networkPolicy:
+  enabled: true
+  ingressController:
+    namespace: ingress-nginx
+    podLabels:
+      app.kubernetes.io/name: ingress-nginx
+  monitoring:
+    enabled: true
+    namespace: monitoring
+    podLabels: {}
+  dns:
+    namespace: kube-system
+  externalEgress:
+    # Restrict to managed-service CIDRs in production; default allows required ports cluster-wide.
+    cidrs:
+      - 0.0.0.0/0
+    ports:
+      - port: 5432
+        protocol: TCP
+      - port: 6379
+        protocol: TCP
+      - port: 9092
+        protocol: TCP
+      - port: 443
+        protocol: TCP

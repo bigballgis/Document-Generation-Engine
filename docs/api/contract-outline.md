@@ -262,12 +262,23 @@ default 路径目标版本回滚按一次新的受控变更处理：管理员重
 
 已确认内容模块治理接口与模板生命周期管理接口共享同一后台管理员授权边界，但使用独立资源路径和独立请求/响应对象。
 
+**P14-T01 范围说明：** OpenAPI 定义管理 CRUD（list/create/detail、版本 CRUD）及审批流转与治理操作路由（见下表）。
+[P14-T01b](../plan/detail/P14-confirmed-large-domains.md) **Done** (2026-06-26)；持久化状态两轴映射见
+[`domain-model.md` §2.9.2.1](../domain/domain-model.md#2921-产品状态--实现映射p14-t01)。
+[P14-T01c](../plan/detail/P14-confirmed-large-domains.md) **Done** (2026-06-26) — 模板 content-module-references
+GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REFERENCES` 发布阻断项。
+
 | 路由语义 | 用途 | 已确认规则 | 已确认路径 |
 | --- | --- | --- | --- |
 | 内容模块审批流转 | 对条款或内容模块版本执行提交、审批通过或审批不通过。 | 使用独立版本审批生命周期；审批前置条件和角色边界遵循权限矩阵与领域模型。 | `/api/{environment}/v1/admin/content-modules/{moduleId}/review/transition` |
 | 内容模块生命周期操作 | 对条款或内容模块执行停用、恢复或废弃治理操作。 | 停用、恢复和废弃由管理员执行；执行前必须进行影响分析、二次确认并记录审计。 | `/api/{environment}/v1/admin/content-modules/{moduleId}/lifecycle/operation/apply` |
 
 内容模块治理契约的正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准；本文档仅提供索引和语义解释。
+
+### 内容模块治理响应字段语义确认
+
+- `ContentModuleVersionView.contentStructureJson`（[`ContentModuleVersionView`](openapi-v1.yaml)）：可选字段；仅当调用方具备结构查看权限（[权限矩阵 §5.1](../security/permission-matrix.md#51-条款或内容模块权限矩阵) — `GLOBAL_ADMIN`、`GROUP_ADMIN`、`MASTER_DESIGNER`、`TEMPLATE_AUTHOR`、`TEMPLATE_APPROVER`）时在 list/detail 响应中返回；否则省略或为 `null`（fail-closed）。`TEMPLATE_TESTER` 无目录浏览权限（list/get 返回 `403`），不接收该字段。
+- `ContentModuleLifecycleImpactSummary.templateStopRequired` / `releaseStopRequired`（[`ContentModuleLifecycleImpactSummary`](openapi-v1.yaml)）：当存在引用且 blocking 条件成立时（近 7 日 runtime 生成调用 > 0 或 default 路由受影响）分别提示管理员需停用引用模板或发布版本以立即阻断生成；与权限矩阵 §5.1 停用/废弃影响分析要求一致。示例见 [`content-module-lifecycle-operation-request.json`](examples/content-module-lifecycle-operation-request.json)。
 
 ### 内容模块治理校验与错误语义确认
 
@@ -288,6 +299,67 @@ default 路径目标版本回滚按一次新的受控变更处理：管理员重
 - `STOP_USE` 与 `DEPRECATE` 还必须提供结构化 `impactSummary`，否则返回 `409 CONTENT_MODULE_IMPACT_CONFIRMATION_REQUIRED`。
 - 生命周期状态前置条件不满足返回 `409 CONTENT_MODULE_STATE_TRANSITION_DENIED`。
 - 请求体解析失败或必要字段缺失返回 `422 CONTENT_MODULE_REQUEST_INVALID`。
+
+## 模板导出/导入契约
+
+已确认模板跨环境导出/导入接口与 [P14-T03](../plan/detail/P14-confirmed-large-domains.md) 行为一致。正式字段与响应结构以 [OpenAPI v1](openapi-v1.yaml) 为准；本文档提供路由索引、bundle 语义、冲突策略与权限说明。
+
+**P14-T03 范围说明：** OpenAPI 定义管理路径导出（JSON + `format=zip`）与导入（`POST`）；bundle schema、`TemplateImportConflictPolicy` 枚举与权限边界对齐 [权限矩阵 §5](../security/permission-matrix.md#5-模板权限矩阵)。
+
+| 路由语义 | 用途 | 已确认规则 | 已确认路径 |
+| --- | --- | --- | --- |
+| 模板导出（JSON） | 导出已通过审批或已发布模板 bundle（元数据、变量、绑定、规则、内容模块引用、API 策略快照）。 | 仅 `PENDING_RELEASE`、`PUBLISHED`、`STOPPED`、`DEPRECATED` 可导出；bundle 格式固定为 `template-export-bundle-v1-json`；不得包含 secret、API 凭证或运行时凭证；导出动作记录审计。 | `GET /api/management/v1/templates/{templateId}/export` |
+| 模板导出（ZIP） | 与 JSON 相同 bundle，封装为单文件 ZIP 附件。 | ZIP 内仅含条目 `template-export-bundle.json`；响应 `Content-Type: application/zip`；`Content-Disposition` 为 attachment。 | `GET /api/management/v1/templates/{templateId}/export?format=zip` |
+| 模板导入 | 将 bundle 导入目标环境并从草稿重新走流程。 | 导入后模板状态为 `DRAFT`；须重新执行测试→审批→发布；`masterId` 须为同 `groupCode` 下已批准母版；导入动作记录审计并返回 `importBatchId`。 | `POST /api/management/v1/templates/import` |
+
+### 权限边界（对齐权限矩阵 §5）
+
+| 角色 | 导出 | 导入 | 说明 |
+| --- | --- | --- | --- |
+| 全局管理员 | 是（全部模板） | 是（全部模板） | 不受组范围限制。 |
+| 分组管理员 | 是（被授权组范围内） | 是（被授权组范围内） | 须满足 `groupCode` 组访问判定。 |
+| 模板编排人员 | 是（自己负责的模板） | 是（自己负责的模板） | 仅 `createdBy` 与当前会话用户一致时可导出/导入已有模板；新建导入须满足组访问。 |
+| 母版设计人员、测试人员、审批人员、API 调用方 | 否 | 否 | 不因角色本身获得导出/导入权限。 |
+
+导入到生产环境后从草稿阶段重新走完整流程；遇到已有相同内部模板 UUID 时，`KEEP_TEMPLATE_ID` 保留模板 ID 并复位为草稿开发版本，不重新生成模板 ID 或 API 地址（与权限矩阵 §5 导入说明一致）。
+
+### Bundle schema（`TemplateExportBundleView`）
+
+| 字段 | 必需 | 说明 |
+| --- | --- | --- |
+| `format` | 是 | 固定 `template-export-bundle-v1-json`。 |
+| `metadata` | 是 | 源环境快照：`templateId`（内部 UUID）、`externalId`、`groupCode`、`name`、`description`、`masterId`、`lifecycleStatus`、`releaseVersion`、`devVersionId`、`devVersionNumber`、`exportedAt`。 |
+| `variables` | 是 | 变量 Schema 列表（`variableKey`、`variableType`、`required` 等）。 |
+| `bindings` | 是 | 锚点绑定列表。 |
+| `rules` | 是 | 组合规则列表。 |
+| `contentModuleReferences` | 是 | 内容模块引用列表；`locked=true` 的发布锁定引用在导入时不重新写入。 |
+| `policySnapshot` | 否 | 模板级 API 管理策略快照（AD Group、输出/批量/加密/default 路由等）；不含 API 凭证 secret。 |
+
+JSON 导出成功响应 envelope：`metadata` + `result`，其中 `result.format` 与 `result.bundle` 承载上述结构。ZIP 导出不含 envelope，文件内容为 bundle JSON。
+
+### 导入冲突策略（`TemplateImportConflictPolicy`）
+
+| 枚举值 | 语义 |
+| --- | --- |
+| `REJECT_IMPORT` | 默认策略（请求省略 `importConflictPolicy` 时等同此值）。内部 `templateId` 或 `externalId` 与现有模板冲突时拒绝导入。 |
+| `KEEP_TEMPLATE_ID` | 仅当 bundle `metadata.templateId`（内部 UUID）已存在时：保留该 UUID，将模板复位为 `DRAFT` 并应用 bundle 内容；不适用于 `externalId` 冲突（`externalId` 冲突始终拒绝）。 |
+
+### 导入请求与成功响应
+
+- 请求体：`masterId`（目标环境母版 UUID）、`bundle`（完整 bundle）、可选 `importConflictPolicy`。
+- 成功响应（`201`）：`result.importSummary` 含 `resolvedTemplateId`、`newDevelopmentVersion`、`importBatchId`；`result.template` 为导入后 `DRAFT` 模板详情。
+
+### 校验与错误语义确认
+
+- 模板不在可导出生命周期状态时返回 `422`，`messageKey` 为 `api.error.template.exportNotEligible`。
+- 不支持的导出 `format` 查询参数返回 `422`，`messageKey` 为 `api.error.template.exportFormatUnsupported`。
+- bundle 格式非 `template-export-bundle-v1-json` 返回 `422`，`messageKey` 为 `api.error.template.importBundleUnsupportedFormat`。
+- bundle 结构无效或必需字段缺失返回 `422`，`messageKey` 为 `api.error.template.importBundleInvalid`。
+- bundle 含 secret/凭证标记返回 `422`，`messageKey` 为 `api.error.template.importBundleContainsSecrets`。
+- 导入冲突（默认策略或 `externalId` 冲突）返回 `422`，`messageKey` 为 `api.error.template.importConflict`。
+- 目标母版未批准或组不匹配分别返回 `422`，`messageKey` 为 `api.error.template.masterNotApproved` / `api.error.template.masterGroupMismatch`。
+- 角色或对象范围越权返回 `403`，`messageKey` 为 `api.error.template.accessDenied`。
+- 模板或母版不存在返回 `404`（`api.error.template.notFound` 或母版 not-found 等价错误）。
 
 ## 请求语义确认
 

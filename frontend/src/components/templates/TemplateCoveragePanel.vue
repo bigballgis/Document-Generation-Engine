@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
+import { useCatalogPagination } from '@/composables/useCatalogPagination'
+import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import * as templatesApi from '@/api/templates'
 import type { CoverageSummary } from '@/types/template'
 import { ElMessage } from 'element-plus'
@@ -19,6 +23,14 @@ const dimensionLabelKey = computed(() => ({
   REQUIRED_SAMPLES: 'templates.coverage.dimensions.requiredSamples',
   ANCHOR_BINDINGS: 'templates.coverage.dimensions.anchorBindings',
 }))
+
+const dimensionsSource = computed(() => summary.value?.dimensions ?? [])
+const dimensionsCurrentPage = ref(1)
+const { paginatedRows: paginatedDimensions, totalRows: totalDimensionRows } = useCatalogPagination(
+  dimensionsSource,
+  dimensionsCurrentPage,
+  CLIENT_TABLE_PAGE_SIZE,
+)
 
 async function loadCoverage() {
   loading.value = true
@@ -85,7 +97,7 @@ watch(
         }}
       </p>
 
-      <el-table :data="summary.dimensions" size="small" class="coverage-table">
+      <AppDataTable :data="paginatedDimensions" class="coverage-table">
         <el-table-column :label="t('templates.coverage.table.dimension')" min-width="180">
           <template #default="{ row }">
             {{ dimensionLabel(row.dimensionCode) }}
@@ -117,7 +129,12 @@ watch(
             </el-tag>
           </template>
         </el-table-column>
-      </el-table>
+      </AppDataTable>
+      <AppTablePagination
+        v-model:current-page="dimensionsCurrentPage"
+        :page-size="CLIENT_TABLE_PAGE_SIZE"
+        :total="totalDimensionRows"
+      />
     </template>
   </div>
 </template>

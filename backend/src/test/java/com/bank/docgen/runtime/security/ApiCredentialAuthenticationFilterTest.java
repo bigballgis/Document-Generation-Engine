@@ -13,6 +13,7 @@ import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.apimgmt.service.ConfigAdGroupResolver;
+import com.bank.docgen.apimgmt.service.TemplateAdGroupAuthorizationCache;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
@@ -50,6 +51,8 @@ class ApiCredentialAuthenticationFilterTest {
     private ConfigAdGroupResolver adGroupResolver;
     @Mock
     private MessageResolver messageResolver;
+    @Mock
+    private TemplateAdGroupAuthorizationCache authorizationCache;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final TraceIdProvider traceIdProvider = new TraceIdProvider();
@@ -64,6 +67,7 @@ class ApiCredentialAuthenticationFilterTest {
                 templateRepository,
                 passwordHashService,
                 adGroupResolver,
+                authorizationCache,
                 objectMapper,
                 traceIdProvider,
                 messageResolver

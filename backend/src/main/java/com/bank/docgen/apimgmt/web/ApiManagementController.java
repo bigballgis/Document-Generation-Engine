@@ -5,9 +5,16 @@ import com.bank.docgen.apimgmt.api.ApiPolicyImpactPreviewView;
 import com.bank.docgen.apimgmt.api.ApiCredentialSummaryView;
 import com.bank.docgen.apimgmt.api.ApiPolicyView;
 import com.bank.docgen.apimgmt.api.RotateCredentialResponse;
+import com.bank.docgen.apimgmt.api.RollbackApiPolicyRequest;
+import com.bank.docgen.apimgmt.api.SaveAdGroupsRequest;
+import com.bank.docgen.apimgmt.api.SaveBatchLimitsRequest;
+import com.bank.docgen.apimgmt.api.SaveDefaultRouteRequest;
+import com.bank.docgen.apimgmt.api.SaveEncryptionPolicyRequest;
+import com.bank.docgen.apimgmt.api.SaveOutputPolicyRequest;
 import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
-import com.bank.docgen.apimgmt.service.ApiPolicyImpactPreviewService;
 import com.bank.docgen.apimgmt.service.ApiManagementService;
+import com.bank.docgen.apimgmt.service.ApiPolicyImpactPreviewService;
+import com.bank.docgen.apimgmt.service.ApiPolicyRollbackService;
 import com.bank.docgen.runtime.api.ContractResultView;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
@@ -35,15 +42,18 @@ public class ApiManagementController {
 
     private final ApiManagementService apiManagementService;
     private final ApiPolicyImpactPreviewService apiPolicyImpactPreviewService;
+    private final ApiPolicyRollbackService apiPolicyRollbackService;
     private final TraceIdProvider traceIdProvider;
 
     public ApiManagementController(
             ApiManagementService apiManagementService,
             ApiPolicyImpactPreviewService apiPolicyImpactPreviewService,
+            ApiPolicyRollbackService apiPolicyRollbackService,
             TraceIdProvider traceIdProvider
     ) {
         this.apiManagementService = apiManagementService;
         this.apiPolicyImpactPreviewService = apiPolicyImpactPreviewService;
+        this.apiPolicyRollbackService = apiPolicyRollbackService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -76,6 +86,56 @@ public class ApiManagementController {
         return envelope(request, apiManagementService.upsertPolicy(templateId, body, session));
     }
 
+    @PutMapping("/policy/ad-groups")
+    public SuccessEnvelope<ApiPolicyView> saveAdGroupsDomain(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody SaveAdGroupsRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, apiManagementService.saveAdGroupsDomain(templateId, body, session));
+    }
+
+    @PutMapping("/policy/output")
+    public SuccessEnvelope<ApiPolicyView> saveOutputDomain(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody SaveOutputPolicyRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, apiManagementService.saveOutputDomain(templateId, body, session));
+    }
+
+    @PutMapping("/policy/batch-limits")
+    public SuccessEnvelope<ApiPolicyView> saveBatchLimitsDomain(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody SaveBatchLimitsRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, apiManagementService.saveBatchLimitsDomain(templateId, body, session));
+    }
+
+    @PutMapping("/policy/encryption")
+    public SuccessEnvelope<ApiPolicyView> saveEncryptionDomain(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody SaveEncryptionPolicyRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, apiManagementService.saveEncryptionDomain(templateId, body, session));
+    }
+
+    @PutMapping("/policy/default-route")
+    public SuccessEnvelope<ApiPolicyView> saveDefaultRouteDomain(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody SaveDefaultRouteRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, apiManagementService.saveDefaultRouteDomain(templateId, body, session));
+    }
+
     @PostMapping("/policy/impact-preview")
     public SuccessEnvelope<ApiPolicyImpactPreviewView> impactPreview(
             @PathVariable UUID templateId,
@@ -84,6 +144,26 @@ public class ApiManagementController {
             HttpServletRequest request
     ) {
         return envelope(request, apiPolicyImpactPreviewService.preview(templateId, body, session));
+    }
+
+    @PostMapping("/policy/rollback/preview")
+    public SuccessEnvelope<ApiPolicyImpactPreviewView> rollbackPreview(
+            @PathVariable UUID templateId,
+            @RequestParam int policyVersion,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, apiPolicyRollbackService.previewRollback(templateId, policyVersion, session));
+    }
+
+    @PostMapping("/policy/rollback")
+    public SuccessEnvelope<ApiPolicyView> rollbackPolicy(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody RollbackApiPolicyRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, apiPolicyRollbackService.rollback(templateId, body, session));
     }
 
     @GetMapping("/credentials")

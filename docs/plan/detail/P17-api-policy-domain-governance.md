@@ -1,10 +1,10 @@
 # P17 — Per-Domain API Policy Governance (Detailed Plan)
 
-**Phase status:** In Progress (impact-preview seam Done 2026-06-23) | **Depends on:** P6
+**Phase status:** Done (2026-06-25; Wave 3 closed) | **Depends on:** P6
 **Confirmed:** 2026-06-23 (deep-review gap G2 — promoted from UXF3 backlog)
 
-> Single-active-phase invariant: P13 completed **Done** (2026-06-23); there is currently no
-> single active phase. P17 stays `Not Started` until selected as the next active phase.
+> Single-active-phase invariant: **P17 closed Done** (2026-06-25). Next prioritized slice:
+> **COR-4** performance items (COR-P01/P02/P07/P08) per comprehensive roadmap.
 
 ## Source-of-truth & traceability
 
@@ -62,14 +62,14 @@ only; no scheduled/pending changes; no proactive caller notification.
 
 | ID | Task | Status |
 | --- | --- | --- |
-| P17-T01 | `policyVersion` lineage: entity + history table (Flyway), version on each domain save | Not Started |
-| P17-T02 | Per-domain save endpoints (5 domains) replacing monolithic PUT (back-compat seam noted) | Not Started |
+| P17-T01 | `policyVersion` lineage: entity + history table (Flyway), version on each domain save | Done (2026-06-25: `api_policy_version` Flyway V23, snapshot on `upsertPolicy`, `ApiPolicyVersionLineageTest` green) |
+| P17-T02 | Per-domain save endpoints (5 domains) replacing monolithic PUT (back-compat seam noted) | Done (2026-06-25: five domain PUTs on `ApiManagementController`, `Save*Request` DTOs, `ApiPolicyDomainSaveServiceTest` 6/6, Flyway V24 batch limits; monolithic PUT retained as back-compat seam) |
 | P17-T03 | Impact-preview engine: hard-block vs warning, fixed reason/impact/fix structure, expected error codes | Done (minimal seam: `ApiPolicyImpactPreviewService` + UI confirm; full hard-block/warning matrix → follow-up) |
-| P17-T04 | Default-route target governance (preview, immediate effect, idempotency-conflict rule, audit) | Not Started |
-| P17-T05 | Rollback as a new controlled change (historical candidate + preview + audit source version) | Not Started |
-| P17-T06 | AD-group authorization save → immediate authz cache invalidation | Not Started |
-| P17-T07 | Audit `API_POLICY_UPDATED` with `changedAreas`, prev/next `policyVersion`, diff/preview/block/warning summary, rollback flag | Not Started |
-| P17-T08 | Contract view surfaces `policyVersion` + per-role policy summary (no secrets/members) | Not Started |
+| P17-T04 | Default-route target governance (preview, immediate effect, idempotency-conflict rule, audit) | Done (2026-06-25: `DefaultRouteGovernanceTest` 4/4, save gate + audit on default-route domain PUT) |
+| P17-T05 | Rollback as a new controlled change (historical candidate + preview + audit source version) | Done (2026-06-25: `ApiPolicyRollbackService` + `ApiPolicyRollbackServiceTest` 3/3) |
+| P17-T06 | AD-group authorization save → immediate authz cache invalidation | Done (2026-06-25: `AdGroupAuthorizationCacheTest` 2/2; cache invalidate on AD-group domain save) |
+| P17-T07 | Audit `API_POLICY_UPDATED` with `changedAreas`, prev/next `policyVersion`, diff/preview/block/warning summary, rollback flag | Done (2026-06-25: `ManagementAuditRecorderTest` + `PolicyUpdateAuditDetail` on domain save/rollback) |
+| P17-T08 | Contract view surfaces `policyVersion` + per-role policy summary (no secrets/members) | Done (2026-06-25: `ContractAssemblyServicePolicyViewTest` 3/3) |
 | P17-T09 | UI: config-domain navigation + detail (current summary, candidate editor, field hints, preview, hard-block/warning, save confirm, policyVersion, audit entry) | Done (full-field form + policyVersion + impact preview before save; domain nav → P17-T02) |
 
 ## Exit criteria (phase)

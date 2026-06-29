@@ -1,0 +1,33 @@
+global:
+  environment: dev
+
+backend:
+  replicaCount: 1
+  image:
+    tag: dev
+
+frontend:
+  replicaCount: 1
+  image:
+    tag: dev
+
+config:
+  appEnvironment: dev
+  seedDemoCatalog: true
+
+externalServices:
+  postgres:
+    host: postgres.dev.example.internal
+    port: 5432
+    database: docgen
+  redis:
+    host: redis.dev.example.internal
+    port: 6379
+  kafka:
+    bootstrapServers: kafka.dev.example.internal:9092
+  minio:
+    endpoint: https://minio.dev.example.internal
+
+secrets:
+  create: false
+  existingSecretName: docgen-app-secrets-dev

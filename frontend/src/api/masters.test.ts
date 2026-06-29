@@ -76,4 +76,38 @@ describe('masters API', () => {
     )
     expect(created.id).toBe('master-1')
   })
+
+  it('lists revision lines with pagination params', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [
+            {
+              id: 'revision-1',
+              lineLabel: 'CURRENT',
+              status: 'APPROVED',
+              originalFilename: 'letterhead.docx',
+              anchorCount: 1,
+              updatedAt: '2026-06-23T10:00:00Z',
+              updatedBy: '10000001',
+              current: true,
+            },
+          ],
+          page: 0,
+          size: 20,
+          totalElements: 1,
+          totalPages: 1,
+        },
+      },
+    })
+
+    const page = await mastersApi.listMasterRevisionLines('master-1', 0, 20)
+
+    expect(http.get).toHaveBeenCalledWith('/masters/master-1/revision-lines', {
+      params: { page: 0, size: 20 },
+    })
+    expect(page.content).toHaveLength(1)
+    expect(page.content[0]?.current).toBe(true)
+  })
 })

@@ -2,9 +2,12 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useRuleValidationStatusFilterOptions } from '@/composables/useTableFilterOptions'
+import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { useTemplatesStore } from '@/stores/templates'
 import type { CompositionRule, CompositionRuleInput, RuleValidationResult } from '@/types/template'
 import { ElMessage } from 'element-plus'
@@ -52,12 +55,23 @@ const { filters: ruleColumnFilters, filteredRows: filteredRules } = useDataTable
   { key: 'targetAnchorId', getValue: (row) => row.targetAnchorId },
 ])
 
+const rulesCurrentPage = ref(1)
+const { paginatedRows: paginatedRules, totalRows: totalRuleRows } = useCatalogPagination(
+  filteredRules,
+  rulesCurrentPage,
+  CLIENT_TABLE_PAGE_SIZE,
+)
+
 const validationRulesSource = computed(() => validationResult.value?.rules ?? [])
 const { filters: validationColumnFilters, filteredRows: filteredValidationRules } =
   useDataTableFilters(validationRulesSource, [
     { key: 'ruleId', getValue: (row) => row.ruleId },
     { key: 'status', getValue: (row) => row.status, matchMode: 'exact' },
   ])
+
+const validationCurrentPage = ref(1)
+const { paginatedRows: paginatedValidationRules, totalRows: totalValidationRows } =
+  useCatalogPagination(filteredValidationRules, validationCurrentPage, CLIENT_TABLE_PAGE_SIZE)
 
 const validationStatusFilterOptions = useRuleValidationStatusFilterOptions()
 
@@ -116,7 +130,7 @@ async function handleValidateRules() {
 <template>
   <div class="rule-configurator">
     <p>{{ t('templates.rules.description') }}</p>
-    <AppDataTable :data="filteredRules">
+    <AppDataTable :data="paginatedRules">
       <el-table-column sortable prop="ruleId" min-width="120">
         <template #header>
           <TableColumnHeader
@@ -151,6 +165,11 @@ async function handleValidateRules() {
         </template>
       </el-table-column>
     </AppDataTable>
+    <AppTablePagination
+      v-model:current-page="rulesCurrentPage"
+      :page-size="CLIENT_TABLE_PAGE_SIZE"
+      :total="totalRuleRows"
+    />
 
     <div class="action-row">
       <el-button @click="addRule">{{ t('templates.rules.addRule') }}</el-button>
@@ -162,7 +181,7 @@ async function handleValidateRules() {
       </el-button>
     </div>
 
-    <AppDataTable v-if="validationResult" :data="filteredValidationRules" class="result-table">
+    <AppDataTable v-if="validationResult" :data="paginatedValidationRules" class="result-table">
       <el-table-column prop="ruleId" sortable>
         <template #header>
           <TableColumnHeader
@@ -185,6 +204,12 @@ async function handleValidateRules() {
         </template>
       </el-table-column>
     </AppDataTable>
+    <AppTablePagination
+      v-if="validationResult"
+      v-model:current-page="validationCurrentPage"
+      :page-size="CLIENT_TABLE_PAGE_SIZE"
+      :total="totalValidationRows"
+    />
   </div>
 </template>
 

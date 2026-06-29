@@ -100,6 +100,37 @@ class GroupAccessServiceTest {
     }
 
     @Test
+    void contentModuleCatalogBrowseFollowsPermissionMatrix() {
+        assertThat(service.canBrowseContentModuleCatalog(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isTrue();
+        assertThat(service.canBrowseContentModuleCatalog(session(List.of("MASTER_DESIGNER"), List.of()))).isTrue();
+        assertThat(service.canBrowseContentModuleCatalog(session(List.of("TEMPLATE_APPROVER"), List.of()))).isTrue();
+        assertThat(service.canBrowseContentModuleCatalog(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
+        assertThat(service.canBrowseContentModuleCatalog(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();
+        assertThat(service.canViewContentModuleStructure(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();
+        assertThat(service.canViewContentModuleStructure(session(List.of("TEMPLATE_APPROVER"), List.of()))).isTrue();
+    }
+
+    @Test
+    void collaborationTimeoutConfigMaintenanceRequiresAdminRoles() {
+        assertThat(service.canMaintainCollaborationTimeoutConfig(session(List.of("GLOBAL_ADMIN"), List.of()))).isTrue();
+        assertThat(service.canMaintainCollaborationTimeoutConfig(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
+        assertThat(service.canMaintainCollaborationTimeoutConfig(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();
+        assertThat(service.canMaintainCollaborationTimeoutConfig(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isFalse();
+    }
+
+    @Test
+    void collaborationWorkItemVisibilityFollowsPermissionMatrix() {
+        assertThat(service.canViewCollaborationWorkItems(session(List.of("TEMPLATE_AUTHOR"), List.of()))).isTrue();
+        assertThat(service.canViewCollaborationWorkItems(session(List.of("TEMPLATE_TESTER"), List.of()))).isTrue();
+        assertThat(service.canViewCollaborationWorkItems(session(List.of("TEMPLATE_APPROVER"), List.of()))).isTrue();
+        assertThat(service.canViewCollaborationWorkItems(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
+        assertThat(service.canViewCollaborationWorkItems(session(List.of("MASTER_DESIGNER"), List.of()))).isFalse();
+        assertThat(service.canViewCollaborationWorkItems(session(List.of("AUDIT_ADMIN"), List.of()))).isFalse();
+        assertThat(service.hasCollaborationWorkItemAdminVisibility(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
+        assertThat(service.hasCollaborationWorkItemAdminVisibility(session(List.of("TEMPLATE_TESTER"), List.of()))).isFalse();
+    }
+
+    @Test
     void emptyRolesFailClosedEverywhere() {
         ManagementSessionClaims none = session(List.of(), List.of());
         assertThat(service.canReviewMasters(none)).isFalse();
@@ -108,6 +139,7 @@ class GroupAccessServiceTest {
         assertThat(service.canManageApiPolicy(none)).isFalse();
         assertThat(service.canDeleteTemplate(none)).isFalse();
         assertThat(service.canReadAudit(none)).isFalse();
+        assertThat(service.canViewCollaborationWorkItems(none)).isFalse();
         assertThat(service.canAccessGroup(none, "G1")).isFalse();
     }
 }

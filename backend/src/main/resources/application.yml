@@ -50,6 +50,7 @@ docgen:
     conversion-mode: ${LIBREOFFICE_CONVERSION_MODE:cli}
     docker-container-name: ${LIBREOFFICE_DOCKER_CONTAINER:docgen-libreoffice}
     conversion-timeout-seconds: 120
+    conversion-pool-size: ${PDF_CONVERSION_POOL_SIZE:2}
   jwt:
     secret: ${JWT_SECRET:local-dev-only-change-me-please-32bytes-min}
     access-token-ttl: PT30M
@@ -62,6 +63,10 @@ docgen:
       secret-key: ${MINIO_ROOT_PASSWORD:docgen_local_pwd}
   demo-catalog:
     seed-enabled: ${DOCGEN_SEED_DEMO_CATALOG:false}
+  collaboration:
+    escalation:
+      enabled: ${DOCGEN_COLLABORATION_ESCALATION_ENABLED:true}
+      fixed-delay-ms: ${DOCGEN_COLLABORATION_ESCALATION_DELAY_MS:300000}
 
 springdoc:
   api-docs:

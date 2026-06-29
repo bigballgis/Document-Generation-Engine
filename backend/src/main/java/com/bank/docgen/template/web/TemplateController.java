@@ -7,14 +7,21 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.AnchorBindingView;
 import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.CompositionRuleView;
+import com.bank.docgen.template.api.ChangeDiffView;
+import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.api.CoverageSummaryView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
+import com.bank.docgen.template.api.UpsertContentModuleReferenceRequest;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
 import com.bank.docgen.template.api.LifecycleGovernanceRequest;
 import com.bank.docgen.template.api.LifecycleImpactPreviewRequest;
 import com.bank.docgen.template.api.LifecycleImpactPreviewView;
+import com.bank.docgen.template.api.PublishGateChecklistView;
 import com.bank.docgen.template.api.PublishTemplateRequest;
+import com.bank.docgen.template.api.MasterStyleCatalogView;
+import com.bank.docgen.template.api.PasteCleanRequest;
+import com.bank.docgen.template.api.PasteCleanResultView;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateReleaseVersionView;
 import com.bank.docgen.template.api.TemplateSummaryView;
@@ -24,9 +31,12 @@ import com.bank.docgen.template.api.VariableSchemaView;
 import com.bank.docgen.template.api.TemplateRuleValidationRequest;
 import com.bank.docgen.template.api.TemplateRuleValidationView;
 import com.bank.docgen.template.api.UpdateTemplateRequest;
+import com.bank.docgen.template.service.ChangeDiffService;
 import com.bank.docgen.template.service.CoverageComputationService;
-import com.bank.docgen.template.service.TemplateLifecycleService;
+import com.bank.docgen.template.service.PublishGateService;
+import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.TemplateDeleteService;
+import com.bank.docgen.template.service.TemplateLifecycleService;
 import com.bank.docgen.template.service.TemplateRuleValidationService;
 import com.bank.docgen.template.service.TemplateService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,6 +65,9 @@ public class TemplateController {
     private final TemplateDeleteService templateDeleteService;
     private final TemplateRuleValidationService templateRuleValidationService;
     private final CoverageComputationService coverageComputationService;
+    private final ChangeDiffService changeDiffService;
+    private final PublishGateService publishGateService;
+    private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final TraceIdProvider traceIdProvider;
 
     public TemplateController(
@@ -63,6 +76,9 @@ public class TemplateController {
             TemplateDeleteService templateDeleteService,
             TemplateRuleValidationService templateRuleValidationService,
             CoverageComputationService coverageComputationService,
+            ChangeDiffService changeDiffService,
+            PublishGateService publishGateService,
+            TemplateContentModuleReferenceService contentModuleReferenceService,
             TraceIdProvider traceIdProvider
     ) {
         this.templateService = templateService;
@@ -70,6 +86,9 @@ public class TemplateController {
         this.templateDeleteService = templateDeleteService;
         this.templateRuleValidationService = templateRuleValidationService;
         this.coverageComputationService = coverageComputationService;
+        this.changeDiffService = changeDiffService;
+        this.publishGateService = publishGateService;
+        this.contentModuleReferenceService = contentModuleReferenceService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -97,6 +116,24 @@ public class TemplateController {
             HttpServletRequest request
     ) {
         return envelope(request, coverageComputationService.compute(templateId, session));
+    }
+
+    @GetMapping("/{templateId}/change-diff")
+    public SuccessEnvelope<ChangeDiffView> changeDiff(
+            @PathVariable UUID templateId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, changeDiffService.compute(templateId, session));
+    }
+
+    @GetMapping("/{templateId}/publish-gate")
+    public SuccessEnvelope<PublishGateChecklistView> publishGate(
+            @PathVariable UUID templateId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, publishGateService.evaluate(templateId, session));
     }
 
     @GetMapping("/{templateId}/release-versions")
@@ -183,6 +220,31 @@ public class TemplateController {
         return envelope(request, templateService.upsertBinding(templateId, normalized, session));
     }
 
+    @GetMapping("/{templateId}/content-module-references")
+    public SuccessEnvelope<List<ContentModuleReferenceView>> listContentModuleReferences(
+            @PathVariable UUID templateId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, contentModuleReferenceService.listReferences(templateId, session));
+    }
+
+    @PutMapping("/{templateId}/content-module-references/{referenceKey}")
+    public SuccessEnvelope<ContentModuleReferenceView> upsertContentModuleReference(
+            @PathVariable UUID templateId,
+            @PathVariable String referenceKey,
+            @Valid @RequestBody UpsertContentModuleReferenceRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        UpsertContentModuleReferenceRequest normalized = new UpsertContentModuleReferenceRequest(
+                referenceKey,
+                body.moduleId(),
+                body.semanticVersion()
+        );
+        return envelope(request, contentModuleReferenceService.upsertReference(templateId, normalized, session));
+    }
+
     @PostMapping("/{templateId}/bindings/validate")
     public SuccessEnvelope<BindingValidationView> validateBindings(
             @PathVariable UUID templateId,
@@ -190,6 +252,25 @@ public class TemplateController {
             HttpServletRequest request
     ) {
         return envelope(request, templateService.validateBindings(templateId, session));
+    }
+
+    @GetMapping("/{templateId}/master-style-catalog")
+    public SuccessEnvelope<MasterStyleCatalogView> masterStyleCatalog(
+            @PathVariable UUID templateId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateService.getMasterStyleCatalog(templateId, session));
+    }
+
+    @PostMapping("/{templateId}/paste-clean")
+    public SuccessEnvelope<PasteCleanResultView> pasteClean(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody PasteCleanRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateService.pasteClean(templateId, body, session));
     }
 
     @PutMapping("/{templateId}/rules")

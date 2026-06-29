@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
-import { templateDetailPath } from '@/routing/routeKeys'
+import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
+import { apiPolicyDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateSummary } from '@/types/template'
 
@@ -17,6 +20,7 @@ const { t, te } = useI18n()
 const lifecycleStatusFilterOptions = useLifecycleStatusFilterOptions()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
+const currentPage = ref(1)
 
 const publishedTemplates = computed(() => templatesStore.publishedTemplates)
 const { filters: columnFilters, filteredRows, hasActiveFilters, clearFilters } = useDataTableFilters(
@@ -28,6 +32,11 @@ const { filters: columnFilters, filteredRows, hasActiveFilters, clearFilters } =
     { key: 'status', getValue: (row) => row.lifecycleStatus, matchMode: 'exact' },
     { key: 'releaseVersion', getValue: (row) => row.releaseVersion ?? '' },
   ],
+)
+const { paginatedRows: paginatedTemplates, totalRows: totalTemplateRows } = useCatalogPagination(
+  filteredRows,
+  currentPage,
+  CLIENT_TABLE_PAGE_SIZE,
 )
 
 const errorMessage = computed(() => {
@@ -47,7 +56,7 @@ onMounted(async () => {
 })
 
 function openTemplate(templateId: string) {
-  router.push(templateDetailPath(templateId))
+  router.push(apiPolicyDetailPath(templateId))
 }
 
 const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSummary>((row) =>
@@ -83,7 +92,7 @@ const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecy
       </div>
       <AppDataTable
         activatable
-        :data="filteredRows"
+        :data="paginatedTemplates"
         @row-click="activateTemplateRow"
       >
         <template #empty>
@@ -139,6 +148,11 @@ const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecy
           </template>
         </el-table-column>
       </AppDataTable>
+      <AppTablePagination
+        v-model:current-page="currentPage"
+        :page-size="CLIENT_TABLE_PAGE_SIZE"
+        :total="totalTemplateRows"
+      />
     </template>
   </AppPageLayout>
 </template>

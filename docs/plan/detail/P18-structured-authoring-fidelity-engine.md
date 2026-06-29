@@ -1,6 +1,6 @@
 # P18 — Structured Authoring & Rendering-Fidelity Engine (Detailed Plan)
 
-**Phase status:** Not Started | **Depends on:** P3, P4
+**Phase status:** Done (2026-06-28; P18-T01–T10 Done) | **Depends on:** P3, P4
 **Confirmed:** 2026-06-23 (deep-review gap G3 — largest confirmed authoring gap)
 
 > Single-active-phase invariant: P13 completed **Done** (2026-06-23); there is currently no
@@ -69,16 +69,16 @@ surfaced in test/approval/publish materials and the runtime success response per
 
 | ID | Task | Status |
 | --- | --- | --- |
-| P18-T01 | Controlled node-matrix domain model + JSON schema for the structured content tree | Not Started |
-| P18-T02 | Node-matrix validation engine (blockers vs warnings, stable `warningCode`/`messageKey`) | Not Started |
-| P18-T03 | Master style catalog (available styles, applicable node types, render purpose) + limited direct-format whitelist + validation | Not Started |
-| P18-T04 | Structured table-component model (column schema, repeat header, loop rows, totals, controlled widths) + fidelity rules | Not Started |
-| P18-T05 | Seal/stamp, QR/barcode, image, attachment-list reference nodes + placement/visibility blockers | Not Started |
-| P18-T06 | Controlled multi-level numbering with deterministic re-sequencing after condition/loop render | Not Started |
-| P18-T07 | Word/HTML paste cleaning + cleaning summary (transformed/removed/warning/blocked) + cancel/undo | Not Started |
-| P18-T08 | Publish-locked `renderProfile` (+ `renderProfileVersion`) wired through render/preview/runtime | Not Started |
-| P18-T09 | Fidelity warnings/blockers surfaced in test/approval/publish materials + runtime success response (`result.fidelityWarnings[]` / stream headers) | Not Started |
-| P18-T10 | UI: controlled rich-text editor (familiar toolbar, only confirmed nodes), style picker, paste-cleaning summary, fidelity warning list with filters | Not Started |
+| P18-T01 | Controlled node-matrix domain model + JSON schema for the structured content tree | Done (2026-06-27; `StructuredContentNodeType`, `StructuredContentSchemaValidator`, `authoring/structured-content-v1.schema.json`, wired into `TemplateService` upsert binding) |
+| P18-T02 | Node-matrix validation engine (blockers vs warnings, stable `warningCode`/`messageKey`) | Done (2026-06-27; `NodeMatrixValidationService`, `StructuredContentValidationResult`, `NodeMatrixValidationServiceTest` 4/4; wired into `TemplateService.computeBindingStatus` → publish gate via `INCOMPATIBLE_CONTENT_TYPE`) |
+| P18-T03 | Master style catalog (available styles, applicable node types, render purpose) + limited direct-format whitelist + validation | Done (2026-06-27; `MasterStyleCatalogService`, `default-master-style-catalog-v1.json`, `MasterStyleCatalogServiceTest` 4/4; wired into `TemplateService.computeBindingStatus`) |
+| P18-T04 | Structured table-component model (column schema, repeat header, loop rows, totals, controlled widths) + fidelity rules | Done (2026-06-27; `TableComponentService`, `TableComponentRenderModel`, `TableComponentServiceTest` 3/3; inline `tableComponent` validation wired into `TemplateService`) |
+| P18-T05 | Seal/stamp, QR/barcode, image, attachment-list reference nodes + placement/visibility blockers | Done (2026-06-27; `ReferenceNodeService`, `ReferenceNodeServiceTest` 3/3; image scaling moved from `NodeMatrixValidationService`; wired into `TemplateService`) |
+| P18-T06 | Controlled multi-level numbering with deterministic re-sequencing after condition/loop render | Done (2026-06-27; `NumberingService`, `NumberingServiceTest` 3/3; wired into `TemplateService`) |
+| P18-T07 | Word/HTML paste cleaning + cleaning summary (transformed/removed/warning/blocked) + cancel/undo | Done (2026-06-28; `PasteCleaningService`, `PasteCleaningSummary`, `PasteCleaningServiceTest` 4/4; edit-time transform — not wired into `TemplateService.computeBindingStatus`) |
+| P18-T08 | Publish-locked `renderProfile` (+ `renderProfileVersion`) wired through render/preview/runtime | Done (2026-06-28; `RenderProfileService`, `RenderProfile`, `CallerRenderOverride`, Flyway V31, wired into publish/preview/runtime; `RenderProfileServiceTest` 3/3) |
+| P18-T09 | Fidelity warnings/blockers surfaced in test/approval/publish materials + runtime success response (`result.fidelityWarnings[]` / stream headers) | Done (2026-06-28; `FidelityValidationService`; wired into preview/runtime; removed `CONTROLLED_STYLE_FALLBACK` stub; `FidelityValidationServiceTest` 3/3 + `TemplatePlatformSliceTest` preview/runtime fidelity cases) |
+| P18-T10 | UI: controlled rich-text editor (familiar toolbar, only confirmed nodes), style picker, paste-cleaning summary, fidelity warning list with filters | Done (2026-06-28; `ControlledStructuredContentEditor`, `PasteCleaningSummaryDialog`, `FidelityWarningList`; management APIs `GET .../master-style-catalog`, `POST .../paste-clean`; extended `FidelityWarningView` with `location`/`artifact`/`viewed`; Vitest 248/248) |
 
 ## Exit criteria (phase)
 

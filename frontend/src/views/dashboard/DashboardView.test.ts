@@ -3,6 +3,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import DashboardView from '@/views/dashboard/DashboardView.vue'
 import { useTemplatesStore } from '@/stores/templates'
+import { useCollaborationStore } from '@/stores/collaboration'
 import { useSessionStore } from '@/stores/session'
 
 vi.mock('vue-i18n', () => ({
@@ -94,12 +95,12 @@ describe('DashboardView', () => {
   it('renders tasks section after dashboard data loads', async () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
-      displayName: 'Author',
+      displayName: 'Tester',
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
-      roles: ['TEMPLATE_AUTHOR'],
+      roles: ['TEMPLATE_TESTER'],
       capabilities: {
-        authorTemplates: true,
+        decideTests: true,
       },
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
@@ -108,19 +109,23 @@ describe('DashboardView', () => {
 
     const templatesStore = useTemplatesStore()
     vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
-    templatesStore.$patch({
-      templates: [
+
+    const collaborationStore = useCollaborationStore()
+    vi.spyOn(collaborationStore, 'fetchWorkItems').mockImplementation(async () => {
+      collaborationStore.workItems = [
         {
-          id: 'tpl-1',
-          externalId: 'TPL-RETAIL-LETTER',
+          workItemId: 'wi-1',
+          templateId: 'tpl-1',
+          templateName: 'Retail letter',
           groupCode: 'RETAIL',
-          name: 'Retail letter',
-          lifecycleStatus: 'DRAFT',
-          releaseVersion: null,
-          masterId: 'master-1',
-          updatedAt: '2026-06-23T10:00:00Z',
+          queue: 'TEST',
+          triggerType: 'SUBMIT_FOR_TEST',
+          submitterUserId: '10000003',
+          summaryText: 'Template submitted for testing',
+          createdAt: '2026-06-23T10:00:00Z',
+          ageSeconds: 120,
         },
-      ],
+      ]
     })
 
     const wrapper = mount(DashboardView, {
@@ -128,6 +133,7 @@ describe('DashboardView', () => {
         stubs: {
           DashboardStatCards: true,
           LoadErrorPanel: true,
+          CollaborationTimeoutConfigPanel: true,
           AppDataTable: { template: '<div class="tasks-table-stub"><slot /></div>' },
           TableColumnHeader: true,
           ElCard: { template: '<div><slot /></div>' },
@@ -142,6 +148,7 @@ describe('DashboardView', () => {
 
     await flushPromises()
 
+    expect(collaborationStore.fetchWorkItems).toHaveBeenCalled()
     expect(wrapper.find('#tasks-section').exists()).toBe(true)
     expect(wrapper.find('.tasks-table-stub').exists()).toBe(true)
   })

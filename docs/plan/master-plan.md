@@ -1,23 +1,18 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active phase:** P19 — Template verifiability, publish gate & decision forms (**In Progress**, 2026-06-25). P20 i18n **Done** (2026-06-25).  
-**Next planned phase (P14, renumbered 2026-06-23):** Confirmed large domains — clause/
-content module lifecycle, collaboration to-dos + timeout escalation, and template
-export/import. See UX-G in
-[ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimization-plan.md).
+**Active phase:** **P18** completed **Done** (2026-06-28; T01–T10). User sequence: P14 → P15 → P18.
+**P14** confirmed large domains **Done** (2026-06-27).
+**P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
+**P18** structured authoring **Done** (2026-06-28; T01–T10).
 UX-A…UX-F interaction/upgradeability tasks (same plan) run as optimization waves
 against the existing implementation. **UX Wave A** (role gating + half-built interactions)
-re-earned Done on 2026-06-23; **UX Wave B** (workbenches + polish) is In Progress.
-P12 remains the non-active deferred-enhancements
-catch-all (no single active slice). **P15 (Kubernetes deployment & container
-hardening)** is newly planned to implement the unrealized Docker/K8s operational
-baseline from ADR-0030; it is `Not Started` and does not change the active phase (none).
-**P16–P20 (deep-review functional gaps, 2026-06-23)** are newly registered confirmed-but-
-unplanned domains — lifecycle/version governance completeness (G1), per-domain API policy
-governance (G2), structured authoring & fidelity engine (G3), verifiability/publish-gate +
-decision forms (G4/G5), and i18n multi-locale + UI upgradeability (G6). All are `Not Started`
-and do not change the active phase (none — no single active phase slice).
+re-earned Done on 2026-06-23; **UX Wave B** (workbenches + polish) Done (2026-06-23).
+P12 remains the non-active deferred-enhancements catch-all (no single active slice).
+**P16–P20 (deep-review functional gaps, 2026-06-23):** P16 lifecycle governance **Done**;
+P17 per-domain API policy **Done** (2026-06-25; Wave 3; T01–T09 + COR-F18);
+P18 structured authoring **Not Started** (queued after P15); **P19 verifiability/publish-gate Done**
+(2026-06-25); P20 i18n **Done** (2026-06-25).
 
 ## Product goal
 
@@ -51,13 +46,13 @@ upstream systems invoke the dynamic API.
 | P11 | Batch & async generation | P10 | Sync batch, async task query/cancel | Done |
 | P12 | Deferred enhancements | P0–P11 | Catch-all for deferred/post-MVP enhancements (no single active slice) | Not Started |
 | P13 | Identity & group administration | P1 | Global/group admins manage users & groups via management API + UI, with fail-closed escalation protection, audit, and green gates | Done |
-| P14 | Confirmed large domains | P2–P8 | Clause/content modules, collaboration to-dos + timeout escalation, template export/import (UX-G) | Spec Done (2026-06-23); implementation Not Started |
-| P15 | Kubernetes deployment & container hardening | P9 | Distroless non-root read-only containers, Helm/manifests for app workloads, ConfigMap/Secret, NGINX Ingress + cert-manager TLS, default-deny NetworkPolicy, HPA (CPU/mem + custom), /healthz+/readyz probes, blue-green + manual approval/rollback, CI manifest validation (ADR-0030) | Not Started |
+| P14 | Confirmed large domains | P2–P8 | Clause/content modules, collaboration to-dos + timeout escalation, template export/import (UX-G) | Done (2026-06-27; T01–T03 + E2E/UIUX/architecture gates; backend **481**, frontend **235+**) |
+| P15 | Kubernetes deployment & container hardening | P9 | Distroless non-root read-only containers, Helm/manifests for app workloads, ConfigMap/Secret, NGINX Ingress + cert-manager TLS, default-deny NetworkPolicy, HPA (CPU/mem + custom), /healthz+/readyz probes, blue-green + manual approval/rollback, CI manifest validation (ADR-0030) | Done (2026-06-27; T01–T10) |
 | P16 | Template & version lifecycle governance completeness | P5 | Stop/restore/deprecate template + version deactivate/restore, recovery/deprecate impact preview, reason + secondary confirm, logical-delete only, audit (gap G1) | Done (2026-06-23) |
-| P17 | Per-domain API policy governance | P6 | Config-domain save (AD group/output/batch/encryption/default-route), impact preview (hard-block vs warning), policyVersion lineage, rollback, default-route governance, API_POLICY_UPDATED audit (gap G2) | In Progress (impact-preview seam Done; per-domain save/rollback open) |
-| P18 | Structured authoring & rendering-fidelity engine | P3, P4 | Controlled node matrix, master style catalog + limited direct format, table component, seal/QR/attachment nodes, controlled numbering, Word/HTML paste cleaning, publish-locked renderProfile, fidelity blockers/warnings (gap G3) | Not Started |
-| P19 | Template verifiability, publish gate & decision forms | P3, P4, P5 | Multi-sample coverage thresholds, batch test, change-diff, preview comparison, live publish-gate checklist, controlled test/approval opinion forms + risk prompts + exception markers (gaps G4, G5) | Not Started |
-| P20 | i18n multi-locale readiness & UI upgradeability | P1 | Locale registry/switcher/fallback + html lang, config-driven brand theming, environment selector (gap G6, i18n constitution) | In Progress (2026-06-24; T06 open) |
+| P17 | Per-domain API policy governance | P6 | Config-domain save (AD group/output/batch/encryption/default-route), impact preview (hard-block vs warning), policyVersion lineage, rollback, default-route governance, API_POLICY_UPDATED audit (gap G2) | Done (2026-06-25; T01–T09 + COR-F18; 308 backend tests) |
+| P18 | Structured authoring & rendering-fidelity engine | P3, P4 | Controlled node matrix, master style catalog + limited direct format, table component, seal/QR/attachment nodes, controlled numbering, Word/HTML paste cleaning, publish-locked renderProfile, fidelity blockers/warnings (gap G3) | Done (2026-06-28; P18-T01–T10) |
+| P19 | Template verifiability, publish gate & decision forms | P3, P4, P5 | Multi-sample coverage thresholds, batch test, change-diff, preview comparison, live publish-gate checklist, controlled test/approval opinion forms + risk prompts + exception markers (gaps G4, G5) | Done (2026-06-25; T01–T10) |
+| P20 | i18n multi-locale readiness & UI upgradeability | P1 | Locale registry/switcher/fallback + html lang, config-driven brand theming, environment selector (gap G6, i18n constitution) | Done (2026-06-25) |
 
 ## Thin vertical slice (MVP chain)
 

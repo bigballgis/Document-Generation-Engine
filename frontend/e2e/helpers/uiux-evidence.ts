@@ -1,0 +1,137 @@
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { expect, type Locator, type Page } from '@playwright/test'
+
+const E2E_DIR = path.dirname(fileURLToPath(import.meta.url))
+
+export const P14_T01_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P14-T01')
+export const P14_T01_SCREENSHOT_DIR = path.join(P14_T01_EVIDENCE_ROOT, 'screenshots')
+
+export const P14_T02_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P14-T02')
+export const P14_T02_SCREENSHOT_DIR = path.join(P14_T02_EVIDENCE_ROOT, 'screenshots')
+
+export const P14_T03_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P14-T03')
+export const P14_T03_SCREENSHOT_DIR = path.join(P14_T03_EVIDENCE_ROOT, 'screenshots')
+
+export const P18_T10_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P18-T10')
+export const P18_T10_SCREENSHOT_DIR = path.join(P18_T10_EVIDENCE_ROOT, 'screenshots')
+
+export const P14_T01_VIEWPORT = { width: 1440, height: 900 } as const
+export const P14_T02_VIEWPORT = P14_T01_VIEWPORT
+export const P14_T03_VIEWPORT = P14_T01_VIEWPORT
+export const P18_T10_VIEWPORT = P14_T01_VIEWPORT
+
+export type BrandPreset = 'REDBC' | 'GREENBC'
+
+export function ensureP14EvidenceDirs(): void {
+  fs.mkdirSync(P14_T01_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ensureP14T02EvidenceDirs(): void {
+  fs.mkdirSync(P14_T02_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ensureP14T03EvidenceDirs(): void {
+  fs.mkdirSync(P14_T03_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ensureP18T10EvidenceDirs(): void {
+  fs.mkdirSync(P18_T10_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function p14ScreenshotPath(filename: string): string {
+  return path.join(P14_T01_SCREENSHOT_DIR, filename)
+}
+
+export function p14T02ScreenshotPath(filename: string): string {
+  return path.join(P14_T02_SCREENSHOT_DIR, filename)
+}
+
+export function p14T03ScreenshotPath(filename: string): string {
+  return path.join(P14_T03_SCREENSHOT_DIR, filename)
+}
+
+export function p18T10ScreenshotPath(filename: string): string {
+  return path.join(P18_T10_SCREENSHOT_DIR, filename)
+}
+
+export async function captureP14Screenshot(page: Page, filename: string): Promise<string> {
+  ensureP14EvidenceDirs()
+  const target = p14ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureP14LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureP14EvidenceDirs()
+  const target = p14ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export async function switchBrand(page: Page, brand: BrandPreset): Promise<void> {
+  const brandSwitcher = page.locator('.brand-switcher')
+  await brandSwitcher.click()
+  await page.locator('.el-select-dropdown__item').filter({ hasText: brand }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-brand', brand)
+}
+
+export async function captureBrandHeader(page: Page, filename: string): Promise<string> {
+  return captureP14LocatorScreenshot(page.locator('.shell-header .header-brand'), filename)
+}
+
+export async function captureP14T02Screenshot(page: Page, filename: string): Promise<string> {
+  ensureP14T02EvidenceDirs()
+  const target = p14T02ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureP14T02LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureP14T02EvidenceDirs()
+  const target = p14T02ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export async function captureP14T03Screenshot(page: Page, filename: string): Promise<string> {
+  ensureP14T03EvidenceDirs()
+  const target = p14T03ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureP14T03LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureP14T03EvidenceDirs()
+  const target = p14T03ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export async function captureP18T10Screenshot(page: Page, filename: string): Promise<string> {
+  ensureP18T10EvidenceDirs()
+  const target = p18T10ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureP18T10LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureP18T10EvidenceDirs()
+  const target = p18T10ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

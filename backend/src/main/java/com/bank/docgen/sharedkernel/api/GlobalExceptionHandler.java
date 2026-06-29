@@ -29,6 +29,12 @@ import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TestDataSetImmutableException;
 import com.bank.docgen.template.service.TestDataSetNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.collaboration.service.CollaborationWorkItemAccessDeniedException;
+import com.bank.docgen.collaboration.service.CollaborationWorkItemValidationException;
+import com.bank.docgen.contentmodule.service.ContentModuleAccessDeniedException;
+import com.bank.docgen.contentmodule.service.ContentModuleGovernanceException;
+import com.bank.docgen.contentmodule.service.ContentModuleNotFoundException;
+import com.bank.docgen.contentmodule.service.ContentModuleValidationException;
 import com.bank.docgen.master.service.MasterAccessDeniedException;
 import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.master.service.MasterValidationException;
@@ -125,6 +131,81 @@ public class GlobalExceptionHandler {
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 ApiErrorCodes.MASTER_VALIDATION_FAILED,
                 ApiErrorCategories.MASTER,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(CollaborationWorkItemAccessDeniedException.class)
+    public ResponseEntity<ErrorEnvelope> handleCollaborationWorkItemAccessDenied(HttpServletRequest request) {
+        return domainError(
+                request,
+                HttpStatus.FORBIDDEN,
+                ApiErrorCodes.ACCESS_DENIED,
+                ApiErrorCategories.COLLABORATION,
+                "api.error.collaboration.accessDenied"
+        );
+    }
+
+    @ExceptionHandler(CollaborationWorkItemValidationException.class)
+    public ResponseEntity<ErrorEnvelope> handleCollaborationWorkItemValidation(
+            HttpServletRequest request,
+            CollaborationWorkItemValidationException ex
+    ) {
+        return domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorCodes.REQUEST_BODY_INVALID,
+                ApiErrorCategories.COLLABORATION,
+                ex.getMessageKey()
+        );
+    }
+
+    @ExceptionHandler(ContentModuleNotFoundException.class)
+    public ResponseEntity<ErrorEnvelope> handleContentModuleNotFound(HttpServletRequest request) {
+        return domainError(
+                request,
+                HttpStatus.NOT_FOUND,
+                ApiErrorCodes.CONTENT_MODULE_NOT_FOUND,
+                ApiErrorCategories.CONTENT_MODULE,
+                "api.error.contentModule.notFound"
+        );
+    }
+
+    @ExceptionHandler(ContentModuleAccessDeniedException.class)
+    public ResponseEntity<ErrorEnvelope> handleContentModuleAccessDenied(HttpServletRequest request) {
+        return domainError(
+                request,
+                HttpStatus.FORBIDDEN,
+                ApiErrorCodes.ACCESS_DENIED,
+                ApiErrorCategories.CONTENT_MODULE,
+                "api.error.contentModule.accessDenied"
+        );
+    }
+
+    @ExceptionHandler(ContentModuleValidationException.class)
+    public ResponseEntity<ErrorEnvelope> handleContentModuleValidation(
+            HttpServletRequest request,
+            ContentModuleValidationException ex
+    ) {
+        return domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorCodes.CONTENT_MODULE_VALIDATION_FAILED,
+                ApiErrorCategories.CONTENT_MODULE,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(ContentModuleGovernanceException.class)
+    public ResponseEntity<ErrorEnvelope> handleContentModuleGovernance(
+            HttpServletRequest request,
+            ContentModuleGovernanceException ex
+    ) {
+        return domainError(
+                request,
+                ex.httpStatus(),
+                ex.errorCode(),
+                ApiErrorCategories.CONTENT_MODULE,
                 ex.messageKey()
         );
     }
@@ -317,10 +398,12 @@ public class GlobalExceptionHandler {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();
         String messageKey = ex.messageKey();
-        java.util.Map<String, Object> conflictSummary = java.util.Map.of(
-                "idempotencyKey", ex.idempotencyKey(),
-                "conflictType", ex.conflictType()
-        );
+        java.util.Map<String, Object> conflictSummary = new java.util.LinkedHashMap<>();
+        conflictSummary.put("idempotencyKey", ex.idempotencyKey());
+        conflictSummary.put("conflictType", ex.conflictType());
+        if (ex.originalResolvedReleaseVersion() != null) {
+            conflictSummary.put("originalResolvedReleaseVersion", ex.originalResolvedReleaseVersion());
+        }
         ErrorDetail error = new ErrorDetail(
                 ApiErrorCodes.IDEMPOTENCY_KEY_CONFLICT,
                 ApiErrorCategories.IDEMPOTENCY,

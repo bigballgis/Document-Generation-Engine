@@ -1,0 +1,15 @@
+{
+  "catalogVersion": "1.0",
+  "styles": [
+    {
+      "styleKey": "BodyText",
+      "applicableNodeTypes": ["paragraph", "textRun", "emphasis", "underline", "list"],
+      "renderPurpose": "BODY"
+    },
+    {
+      "styleKey": "Heading1",
+      "applicableNodeTypes": ["sectionHeading"],
+      "renderPurpose": "HEADING"
+    }
+  ]
+}

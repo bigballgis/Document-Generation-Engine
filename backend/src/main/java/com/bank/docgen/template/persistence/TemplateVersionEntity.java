@@ -36,6 +36,12 @@ public class TemplateVersionEntity {
     @Column(name = "rules_json")
     private String rulesJson;
 
+    @Column(name = "render_profile_version", length = 32)
+    private String renderProfileVersion;
+
+    @Column(name = "render_profile_json", columnDefinition = "TEXT")
+    private String renderProfileJson;
+
     @Column(name = "created_by", nullable = false, length = 8)
     private String createdBy;
 
@@ -94,6 +100,24 @@ public class TemplateVersionEntity {
 
     public void setRulesJson(String rulesJson) {
         this.rulesJson = rulesJson;
+        this.updatedAt = Instant.now();
+    }
+
+    public String getRenderProfileVersion() {
+        return renderProfileVersion;
+    }
+
+    public String getRenderProfileJson() {
+        return renderProfileJson;
+    }
+
+    public void setRenderProfileVersion(String renderProfileVersion) {
+        this.renderProfileVersion = renderProfileVersion;
+        this.updatedAt = Instant.now();
+    }
+
+    public void setRenderProfileJson(String renderProfileJson) {
+        this.renderProfileJson = renderProfileJson;
         this.updatedAt = Instant.now();
     }
 

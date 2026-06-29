@@ -5,6 +5,7 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.runtime.api.CallableVersionsResultView;
 import com.bank.docgen.runtime.api.ContractResultView;
+import com.bank.docgen.runtime.domain.ContractViewAudience;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.api.RuntimeCredentialSummaryView;
 import com.bank.docgen.runtime.api.SyncGenerateResult;
@@ -12,7 +13,8 @@ import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
-import com.bank.docgen.rendering.domain.FidelityWarningCode;
+import com.bank.docgen.authoring.structured.FidelityValidationService;
+import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
@@ -24,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +42,7 @@ public class RuntimeGenerationService {
     private final ContractAssemblyService contractAssemblyService;
     private final DocumentGenerationEngine documentGenerationEngine;
     private final ObjectMapper objectMapper;
+    private final FidelityValidationService fidelityValidationService;
 
     public RuntimeGenerationService(
             TemplateVersionRepository templateVersionRepository,
@@ -49,7 +53,8 @@ public class RuntimeGenerationService {
             EncryptionParameterValidator encryptionParameterValidator,
             ContractAssemblyService contractAssemblyService,
             DocumentGenerationEngine documentGenerationEngine,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            FidelityValidationService fidelityValidationService
     ) {
         this.templateVersionRepository = templateVersionRepository;
         this.apiPolicyRepository = apiPolicyRepository;
@@ -60,6 +65,7 @@ public class RuntimeGenerationService {
         this.contractAssemblyService = contractAssemblyService;
         this.documentGenerationEngine = documentGenerationEngine;
         this.objectMapper = objectMapper;
+        this.fidelityValidationService = fidelityValidationService;
     }
 
     @Transactional(readOnly = true)
@@ -76,7 +82,13 @@ public class RuntimeGenerationService {
                         credential.getStatus().name(),
                         "fp-" + credential.getExternalId()
                 );
-        return contractAssemblyService.assemble(template, policy, environment, credentialSummary);
+        return contractAssemblyService.assemble(
+                template,
+                policy,
+                environment,
+                credentialSummary,
+                ContractViewAudience.CALLER
+        );
     }
 
     @Transactional(readOnly = true)
@@ -113,9 +125,11 @@ public class RuntimeGenerationService {
                 .orElseThrow(TemplateNotFoundException::new);
         TemplateCallabilitySupport.assertReleaseVersionCallable(template, version, resolvedVersion);
         String requestHash = idempotencyService.hashRequest(writeRequest(request, resolvedVersion));
-        Optional<GenerationIdempotencyEntity> existing = idempotencyService.findExisting(
-                request.idempotencyKey(),
-                template.getId(),
+        Optional<GenerationIdempotencyEntity> existing = findExistingIdempotency(
+                request,
+                template,
+                releaseVersion,
+                resolvedVersion,
                 requestHash
         );
         if (existing.isPresent()) {
@@ -128,7 +142,10 @@ public class RuntimeGenerationService {
                         contentTypeForFormat(request.output().format()),
                         existingRecord.getDocumentId(),
                         resolvedVersion,
-                        List.of(FidelityWarningCode.CONTROLLED_STYLE_FALLBACK.name()),
+                        fidelityValidationService.collectWarningCodesForVersion(
+                                version.getId(),
+                                template.getMasterId()
+                        ),
                         IdempotencyConstants.STATUS_REPLAYED
                 );
             }
@@ -146,15 +163,61 @@ public class RuntimeGenerationService {
                 request.encryption()
         );
         idempotencyService.complete(idempotency, generated.storageKey(), generated.documentId());
+        InputStream artifactStream = objectStoragePort.get(generated.storageKey());
         return new SyncGenerateResult(
-                generated.artifactBytes(),
                 null,
+                artifactStream,
                 generated.contentType(),
                 generated.documentId(),
                 resolvedVersion,
                 generated.fidelityWarningCodes(),
                 IdempotencyConstants.STATUS_NEW
         );
+    }
+
+    private Optional<GenerationIdempotencyEntity> findExistingIdempotency(
+            GenerateRequestBody request,
+            TemplateEntity template,
+            String explicitReleaseVersion,
+            String resolvedVersion,
+            String requestHash
+    ) {
+        try {
+            return idempotencyService.findExisting(request.idempotencyKey(), template.getId(), requestHash);
+        } catch (IdempotencyConflictException ex) {
+            if (explicitReleaseVersion != null) {
+                throw ex;
+            }
+            Optional<GenerationIdempotencyEntity> stored = idempotencyService.findLiveRecord(
+                    request.idempotencyKey(),
+                    template.getId()
+            );
+            if (stored.isPresent()) {
+                String originalVersion = findMatchingReleaseVersion(request, stored.get(), template.getId());
+                if (originalVersion != null && !originalVersion.equals(resolvedVersion)) {
+                    throw IdempotencyConflictException.defaultRouteChanged(
+                            request.idempotencyKey(),
+                            originalVersion
+                    );
+                }
+            }
+            throw ex;
+        }
+    }
+
+    private String findMatchingReleaseVersion(
+            GenerateRequestBody request,
+            GenerationIdempotencyEntity stored,
+            UUID templateId
+    ) {
+        return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId).stream()
+                .filter(version -> version.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED)
+                .map(TemplateVersionEntity::getReleaseVersion)
+                .filter(releaseVersion -> releaseVersion != null && !releaseVersion.isBlank())
+                .filter(releaseVersion -> idempotencyService.hashRequest(writeRequest(request, releaseVersion))
+                        .equals(stored.getRequestHash()))
+                .findFirst()
+                .orElse(null);
     }
 
     private String contentTypeForFormat(String outputFormat) {

@@ -26,6 +26,12 @@ public class IdempotencyService {
         this.idempotencyCachePort = idempotencyCachePort;
     }
 
+    @Transactional(readOnly = true)
+    public Optional<GenerationIdempotencyEntity> findLiveRecord(String idempotencyKey, UUID templateId) {
+        return repository.findByIdempotencyKeyAndTemplateId(idempotencyKey, templateId)
+                .filter(record -> record.getExpiresAt().isAfter(Instant.now()));
+    }
+
     @Transactional
     public Optional<GenerationIdempotencyEntity> findExisting(String idempotencyKey, UUID templateId, String requestHash) {
         // The database record is authoritative for conflict detection. A still-live

@@ -1,0 +1,15 @@
+package com.bank.docgen.template.domain;
+
+public enum PublishGateCheckCode {
+    ANCHOR_INTEGRITY,
+    VARIABLE_SCHEMA,
+    RULE_BOUNDS,
+    TEST_RESULTS,
+    PREVIEW_PRESENT,
+    CHANGE_DIFF,
+    APPROVAL_SUMMARY,
+    COVERAGE_THRESHOLDS,
+    API_POLICY,
+    CONTENT_MODULE_REFERENCES,
+    BLOCKER_STATUS
+}

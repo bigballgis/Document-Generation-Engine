@@ -1,10 +1,10 @@
 # P19 — Template Verifiability, Publish Gate & Decision Forms (Detailed Plan)
 
-**Phase status:** In Progress (2026-06-25) | **Depends on:** P3, P4, P5 (and P18 for fidelity inputs)
+**Phase status:** Done (2026-06-25) | **Depends on:** P3, P4, P5 (and P18 for fidelity inputs)
 **Confirmed:** 2026-06-23 (deep-review gaps G4 + G5)
 
-> Single-active-phase invariant: **P19 is the active phase** (2026-06-25). P13 Done; P20
-> primary-journey i18n closed same batch. Full verifiability (T01–T05, T08–T10) remains open.
+> Single-active-phase invariant: **no active phase** (2026-06-25). P19 Wave 1 closed **Done**
+> (T01–T10); P20 i18n **Done** same batch. P17 unblocked (`Not Started`, ready for activation).
 
 ## Source-of-truth & traceability
 
@@ -62,13 +62,13 @@ and mark group-admin exception interventions with reason + secondary confirm + s
 | P19-T01 | Multi-sample test data sets: required/optional flags, scenario name, coverage tags, dataset version; lock-on-evidence + copy/derive | **Done** (2026-06-25; V18 + lock on preview + derive API + author-only maintenance) |
 | P19-T02 | Batch test generation (multi-sample) → per-sample records + batch test summary | **Done** (2026-06-25; V19 batch run + `POST .../previews/batch-test` + UI trigger + 3 unit + slice tests) |
 | P19-T03 | Sample + template coverage computation (variables/required, condition/loop/rule branches, anchors/sections, table components, DOCX/PDF) + configurable thresholds | **Done** (2026-06-25; V20 threshold config + coverage API + UI panel + 3 unit + slice tests) |
-| P19-T04 | Change-diff summary (content, anchors, variables, rules, release-candidate contract summary) | Not Started |
-| P19-T05 | Preview-vs-final side-by-side comparison (page/anchor/section/component diff → warning or blocker) | Not Started |
-| P19-T06 | Live publish-gate checklist (anchor integrity, variable schema, rule bounds, test results, preview, change-diff, approval summary, blocker status) — blocks publish | **Partial** (2026-06-25; binding + apiPolicy server gate + UI checklist thin slice) |
-| P19-T07 | Controlled test/approval opinion forms (structured result + comment), not rich-text editor | **Partial** (2026-06-25; fail/reject require reasonCategory + impactSummary; structured audit prefix) |
-| P19-T08 | Risk-prompt copy + reason-category configuration (global default + group override) with audit | Not Started |
-| P19-T09 | Group-admin exception intervention: reason + secondary confirm + separate audit marker | Not Started |
-| P19-T10 | UI: verifiability panels, coverage/threshold display, live checklist, decision forms, risk-prompt config | Not Started |
+| P19-T04 | Change-diff summary (content, anchors, variables, rules, release-candidate contract summary) | **Done** (2026-06-25; `ChangeDiffService` + API + `ChangeDiffServiceTest` 3 + `TemplateChangeDiffPanel`) |
+| P19-T05 | Preview-vs-final side-by-side comparison (page/anchor/section/component diff → warning or blocker) | **Done** (2026-06-25; `PreviewComparisonService` + `PreviewComparisonServiceTest` 3 + preview panel comparison UI) |
+| P19-T06 | Live publish-gate checklist (anchor integrity, variable schema, rule bounds, test results, preview, change-diff, approval summary, blocker status) — blocks publish | **Done** (2026-06-25; `PublishGateService` live checklist + `PublishGateServiceTest` 4 + publish blocked on blockers/thresholds + UI checklist) |
+| P19-T07 | Controlled test/approval opinion forms (structured result + comment), not rich-text editor | **Done** (2026-06-25; `DecisionFormService` pass/fail/approve/reject structured fields + `DecisionFormServiceTest` 3 + lifecycle decision dialog) |
+| P19-T08 | Risk-prompt copy + reason-category configuration (global default + group override) with audit | **Done** (2026-06-25; V21 `risk_prompt_config` + `RiskPromptConfigService` + `RiskPromptConfigServiceTest` 3 + config panel) |
+| P19-T09 | Group-admin exception intervention: reason + secondary confirm + separate audit marker | **Done** (2026-06-25; `ExceptionInterventionTest` 3 + separate audit marker in `ManagementAuditRecorder`) |
+| P19-T10 | UI: verifiability panels, coverage/threshold display, live checklist, decision forms, risk-prompt config | **Done** (2026-06-25; verifiability panels + publish summary dialog + Vitest suite + Docker E2E 7/7) |
 
 ## Exit criteria (phase)
 

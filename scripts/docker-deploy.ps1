@@ -134,5 +134,6 @@ Write-Host "Deployment ready."
 Write-Host "  Frontend: http://localhost:$frontendPort"
 Write-Host "  Backend:  http://localhost:$backendPort/healthz"
 Write-Host "  Login:    10000001 / ChangeMe123! (GLOBAL_ADMIN)"
+Write-Host "  Hardening smoke: .\scripts\container-hardening-smoke.ps1 -SkipBuild"
 Write-Host ""
 docker compose @composeArgs ps

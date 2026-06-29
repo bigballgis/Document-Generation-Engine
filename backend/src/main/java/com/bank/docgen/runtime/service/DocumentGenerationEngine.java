@@ -1,17 +1,21 @@
 package com.bank.docgen.runtime.service;
 
+import com.bank.docgen.authoring.structured.CallerRenderOverride;
+import com.bank.docgen.authoring.structured.FidelityValidationService;
+import com.bank.docgen.authoring.structured.RenderProfile;
+import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
-import com.bank.docgen.rendering.domain.FidelityWarningCode;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
 import java.io.InputStream;
@@ -31,6 +35,9 @@ public class DocumentGenerationEngine {
     private final ObjectStoragePort objectStoragePort;
     private final DocxAssembler docxAssembler;
     private final DocumentArtifactPipeline documentArtifactPipeline;
+    private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final RenderProfileService renderProfileService;
+    private final FidelityValidationService fidelityValidationService;
 
     public DocumentGenerationEngine(
             TemplateVersionRepository templateVersionRepository,
@@ -38,7 +45,10 @@ public class DocumentGenerationEngine {
             MasterDocumentRepository masterDocumentRepository,
             ObjectStoragePort objectStoragePort,
             DocxAssembler docxAssembler,
-            DocumentArtifactPipeline documentArtifactPipeline
+            DocumentArtifactPipeline documentArtifactPipeline,
+            TemplateContentModuleReferenceService contentModuleReferenceService,
+            RenderProfileService renderProfileService,
+            FidelityValidationService fidelityValidationService
     ) {
         this.templateVersionRepository = templateVersionRepository;
         this.anchorBindingRepository = anchorBindingRepository;
@@ -46,6 +56,9 @@ public class DocumentGenerationEngine {
         this.objectStoragePort = objectStoragePort;
         this.docxAssembler = docxAssembler;
         this.documentArtifactPipeline = documentArtifactPipeline;
+        this.contentModuleReferenceService = contentModuleReferenceService;
+        this.renderProfileService = renderProfileService;
+        this.fidelityValidationService = fidelityValidationService;
     }
 
     public GeneratedDocument generate(
@@ -55,16 +68,37 @@ public class DocumentGenerationEngine {
             String outputFormat,
             EncryptionOptionsView encryption
     ) {
+        return generate(template, releaseVersion, variables, outputFormat, encryption, CallerRenderOverride.empty());
+    }
+
+    public GeneratedDocument generate(
+            TemplateEntity template,
+            String releaseVersion,
+            Map<String, Object> variables,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            CallerRenderOverride callerRenderOverride
+    ) {
         TemplateVersionEntity version = templateVersionRepository
                 .findByTemplateIdAndReleaseVersion(template.getId(), releaseVersion)
                 .orElseThrow(TemplateNotFoundException::new);
+        RenderProfile renderProfile = renderProfileService.resolveEffectiveProfile(
+                version,
+                callerRenderOverride == null ? CallerRenderOverride.empty() : callerRenderOverride
+        );
         MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.getMasterId())
                 .orElseThrow(TemplateNotFoundException::new);
         List<AnchorBindingEntity> bindings = anchorBindingRepository
                 .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
         Map<String, String> bindingJson = new LinkedHashMap<>();
         bindings.forEach(binding -> bindingJson.put(binding.getAnchorId(), binding.getStructuredContentJson()));
-        Map<String, String> anchorContent = docxAssembler.buildAnchorReplacements(bindingJson, variables);
+        Map<String, String> pinnedModuleStructures =
+                contentModuleReferenceService.resolvePinnedContentStructures(version.getId());
+        Map<String, String> anchorContent = docxAssembler.buildAnchorReplacements(
+                bindingJson,
+                variables,
+                pinnedModuleStructures
+        );
         byte[] docx;
         try (InputStream masterStream = objectStoragePort.get(master.getStorageKey())) {
             docx = docxAssembler.assemble(masterStream, anchorContent);
@@ -74,7 +108,8 @@ public class DocumentGenerationEngine {
         DocumentArtifactPipeline.GeneratedArtifact artifact = documentArtifactPipeline.finalizeArtifact(
                 docx,
                 outputFormat,
-                encryption
+                encryption,
+                renderProfile
         );
         String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         String storageKey = "generated/" + documentId + "/" + artifact.storageFileName();
@@ -90,7 +125,7 @@ public class DocumentGenerationEngine {
                 artifact.bytes(),
                 artifact.contentType(),
                 outputFormat,
-                List.of(FidelityWarningCode.CONTROLLED_STYLE_FALLBACK.name())
+                fidelityValidationService.collectWarningCodesForVersion(version.getId(), template.getMasterId())
         );
     }
 

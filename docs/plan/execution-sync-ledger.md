@@ -1,6 +1,7 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-25 (P19-T03 coverage computation + thresholds)  
+**Last synced:** 2026-06-29 (P18-T10 E2E functional + UIUX evidence)
+**Orchestration note (2026-06-28):** **P18 Done** — **P18-T01–T10 Done**.
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
 ## Authority
@@ -18,13 +19,25 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **256 tests**, 2026-06-25 | P19-T03 coverage + thresholds |
+| Frontend (latest full gates) | `pnpm -C frontend lint`, `type-check`, `test`, `build` | Green — **248** Vitest tests (2026-06-28) | P18-T10 controlled authoring UI + fidelity filters |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **514** tests (1 skipped), BUILD SUCCESS (2026-06-28) | P18-T10 management APIs + `FidelityWarningView` extension (+1 slice test) |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
-| Frontend test | `pnpm -C frontend test` | Green | **149 tests**, 2026-06-25 |
+| Frontend test | `pnpm -C frontend test` / `vitest run` | Green | **235 tests**, 2026-06-27 (P14-T02 E2E remediation — `roles.ts` workbench guards) |
 | Frontend build | `pnpm -C frontend build` | Green | |
-| E2E Docker (4173) | `pnpm -C frontend test:e2e:docker` | Green — **6 tests**, 2026-06-25 | post P19/P20 batch + role-journeys row-click fix |
+| E2E Docker (4173) | `pnpm -C frontend test:e2e:docker` | Green — **7 tests**, 2026-06-25 | post P19 Wave 1 + catalog + master-replace spec fixes |
 | Docker manual smoke (4173) | `scripts/docker-deploy.ps1` + author UI | Green — 2026-06-25 | P19-T02/T03: batch test button + coverage panel on template authoring tab |
+| E2E master revision two-page | `frontend/e2e/master-revision-two-page.spec.ts` (Docker 4173) | Green — **4/4**, 2026-06-25 | P2-T05 Phase A hub + revision detail journeys |
+| E2E P14-T01 UIUX (4173) | `pnpm exec playwright test e2e/P14-T01-uiux-evidence.spec.ts e2e/a11y-smoke.spec.ts --config playwright.docker.config.ts` | Green — **3/3**, 2026-06-26 | P14-T01 content module UI; manifest `frontend/e2e/evidence/P14-T01-uiux-manifest.md` (8 screenshots); e2e-uiux-reviewer **PASS** |
+| E2E P14-T02 collaboration (4173) | `pnpm exec playwright test e2e/collaboration-todos.spec.ts --config playwright.docker.config.ts` | Green — **3/3**, 2026-06-27 | P14-T02 collaboration to-do journeys (tester queue, overdue escalation, admin config); report `playwright-report/docker/index.html`; backend remediation (`BatchTestRunEntity` FK, `CollaborationWorkItemWriter`); frontend remediation (`roles.ts` workbench route guards) |
+| E2E P14-T02 UIUX (4173) | `pnpm exec playwright test e2e/P14-T02-uiux-evidence.spec.ts e2e/a11y-smoke.spec.ts --config playwright.docker.config.ts` | Green — **5/5**, 2026-06-27 | P14-T02 collaboration workbench panels + timeout config UI; manifest `frontend/e2e/evidence/P14-T02-uiux-manifest.md` (8 screenshots @ 1440×900); e2e-uiux-reviewer **PASS** (no critical blockers; 4 suggestions) |
+| E2E P14-T03 export/import (4173) | `pnpm exec playwright test e2e/P14-T03-template-export-import.spec.ts --config playwright.docker.config.ts` | Green — **2/2**, 2026-06-27 | P14-T03 template export JSON/ZIP + staging import → DRAFT; no secrets in bundle; report `playwright-report/docker/index.html` |
+| E2E P14-T03 UIUX (4173) | `pnpm exec playwright test e2e/P14-T03-uiux-evidence.spec.ts e2e/P14-T03-template-export-import.spec.ts e2e/a11y-smoke.spec.ts --config playwright.docker.config.ts` | Green — **7/7**, 2026-06-27 | P14-T03 template export/import surfaces — `TemplateExportActions`, `TemplateImportDialog`; manifest `frontend/e2e/evidence/P14-T03-uiux-manifest.md` (9 screenshots @ 1440×900); e2e-uiux-reviewer **PASS** (no critical blockers; 5 suggestions) |
+| E2E P18-T10 structured authoring (4173) | `pnpm exec playwright test e2e/P18-T10-structured-authoring.spec.ts --config playwright.docker.config.ts` | Green — **5/5**, 2026-06-29 | P18-T10 controlled editor toolbar + disabled reasons; insert paragraph/variable + save binding; paste-clean summary cancel/accept; test-generate fidelity warnings + `filter-warning-code`; clean binding no warnings (no `CONTROLLED_STYLE_FALLBACK` stub); helper `frontend/e2e/helpers/structured-authoring-api.ts`; report `playwright-report/docker/index.html`; requires redeployed Docker stack (4173 + 8080) with P18-T10 UI/API |
+| E2E P18-T10 UIUX evidence (4173) | `pnpm exec playwright test e2e/P18-T10-uiux-evidence.spec.ts --config playwright.docker.config.ts` | Green — **1/1**, 2026-06-29 | 12 screenshots @ 1440×900 REDBC/GREENBC; manifest [`frontend/e2e/evidence/P18-T10-uiux-manifest.md`](../frontend/e2e/evidence/P18-T10-uiux-manifest.md); **PASS** (0 🔴) |
+| Helm validate (P15-T02/T03/T04/T05/T06/T07/T08) | `.\scripts\helm-validate.ps1 -SkipKubeconform` | Green — 2026-06-27 | helm lint **0 failed**; `helm template` default/dev/staging/prod; T03 ConfigMap/Secret assertions (`Assert-T03ConfigSecrets`); T04 Ingress/TLS assertions (`Assert-T04IngressTls`); T05 HPA assertions (`Assert-T05Hpa` — autoscaling/v2, CPU+memory, custom Pods metric); T06 NetworkPolicy assertions (`Assert-T06NetworkPolicy` — default-deny, allow ingress/backend-egress/DNS/metrics); T07 probe assertions (`Assert-T07Probes`); T08 blue-green assertions (`Assert-T08BlueGreen` — dual color Deployments, activeColor selector, preview Services, HPA target); fail-closed missing-secret test; render-only (no cluster deploy); kubeconform step skipped offline |
+| K8s manifest CI gates (P15-T09) | `.\scripts\ci-k8s-manifest-gates.ps1` | Green (local `-SkipKubeconform`) — 2026-06-27 | [`.github/workflows/k8s-manifest-gates.yml`](../.github/workflows/k8s-manifest-gates.yml) — PR + push to `main`, path filters `deploy/**` + gate scripts; helm lint **0 failed** + template default/dev/staging/prod + T03–T08 assertions + blocking kubeconform on CI; [`deploy/ci-k8s-gates.md`](../deploy/ci-k8s-gates.md); local full kubeconform blocked by Docker Hub timeout — CI runner expected green |
+| Helm validate (offline) | `.\scripts\helm-validate.ps1 -SkipKubeconform` | Green — 2026-06-27 | Same lint/template/assertions as CI minus kubeconform; use when registry unavailable |
 
 **Test count progression (not conflicting runs):** P13 slice verify **114** backend tests (2026-06-23);
 Wave C UX **161** backend / **88** frontend; post OPT-E8/F3 full verify **189** backend;
@@ -45,6 +58,59 @@ P19-T07 + P20 primary zh-CN + Docker E2E **243** backend / **149** frontend (202
 P19-T01 test data set governance **248** backend / **149** frontend (2026-06-25).
 P19-T02 batch test generation **252** backend / **149** frontend (2026-06-25).
 P19-T03 coverage computation + thresholds **256** backend / **149** frontend (2026-06-25).
+P19 Wave 1 verifiability (T04–T10) **281** backend / **169** frontend / E2E **7/7** (2026-06-25).
+P17-T01 policyVersion lineage **284** backend (2026-06-25).
+P17-T02 per-domain save endpoints **305** backend (2026-06-25).
+P14-T01a content module domain + Flyway + JPA **330** backend (2026-06-26).
+P14-T01b content module management REST + governance **456** backend verify (2026-06-26; 61 contentmodule tests: T01a 7 + T01b 60).
+P14-T01c template content-module reference + lifecycle impact + DocxAssembler pinned resolve **461** backend (2026-06-26).
+P14-T01d content module management UI + P14-T01 vertical slice close **224** frontend (2026-06-26).
+P14-T01 architecture critical remediation — catalog browse fail-closed, structure readback, shared-module list, real impact + audit persistence **469** backend (+8 from 461, 2026-06-26).
+P14-T01e regression tests (retry delegation) **471** backend (+2 from 469, 2026-06-26).
+P14-T02a collaboration work item entity + role-queue query API **471** backend; `CollaborationWorkItem*Test` **18**; Flyway `V28__collaboration_work_item.sql`; `GET /api/management/v1/collaboration-work-items` (2026-06-26).
+P14-T02b collaboration timeout config API **471** backend; Flyway `V29__collaboration_timeout_config.sql`; GET/PUT `/api/management/v1/collaboration-timeout-config`; `CollaborationTimeoutResolver`; OpenAPI v1 extended; **11** T02b tests (2026-06-26).
+P14-T02c collaboration escalation scheduler — Flyway `V30__collaboration_work_item_escalation_source.sql`; `CollaborationEscalationService` / `CollaborationEscalationScheduler`; notification-only (no source state mutation); **11** T02c tests; full verify **475** BUILD SUCCESS (2026-06-27; environment fix `TEMP`→`D:\temp`, no code change).
+P14-T02d collaboration UI — `CollaborationWorkItemPanel` on tester/approver/escalation workbenches; `CollaborationTimeoutConfigPanel` on dashboard; `collaboration` store/API; **232** frontend tests (+8 from 224, 2026-06-27).
+P14-T02 collaboration vertical slice close — T02a–T02d Done; backend verify **475**; frontend lint/type-check/test/build green (2026-06-27).
+P14-T02 E2E remediation — `collaboration-todos.spec.ts` **3/3** Docker 4173; backend verify **481** (+6 from 475; `BatchTestRunEntity` FK, `CollaborationWorkItemWriter`); frontend **235** (+3 from 232; `roles.ts` workbench guards) (2026-06-27).
+P14-T02 UIUX evidence — `P14-T02-uiux-evidence.spec.ts` + `a11y-smoke.spec.ts` **5/5** Docker 4173; manifest `frontend/e2e/evidence/P14-T02-uiux-manifest.md` (8 screenshots); e2e-uiux-reviewer **PASS** (2026-06-27).
+P14-T03a template export service + management endpoint — `TemplateExportService` + GET export JSON/ZIP; `TemplateExport*Test` **15**; OpenAPI v1 + `contract-outline.md` export contract (2026-06-27).
+P14-T03b template import service + validation + DRAFT landing — `POST /templates/import`; `TemplateImport*Test` **13**; OpenAPI v1 import contract (2026-06-27).
+P14-T03c template export/import UI — `TemplateExportActions`, `TemplateImportDialog`; **+14** Vitest; frontend **235+** (2026-06-27).
+P14-T03 vertical slice close — T03a–T03c Done; E2E `P14-T03-template-export-import.spec.ts` **2/2** Docker 4173; backend verify **481**; frontend lint/type-check/test/build green (2026-06-27).
+P14-T03 UIUX evidence — `P14-T03-uiux-evidence.spec.ts` + `P14-T03-template-export-import.spec.ts` + `a11y-smoke.spec.ts` **7/7** Docker 4173; manifest `frontend/e2e/evidence/P14-T03-uiux-manifest.md` (9 screenshots @ 1440×900); e2e-uiux-reviewer **PASS** (2026-06-27).
+P14 phase close — T01–T03 Done; UX Wave D Done; **P15 activated In Progress** (2026-06-27; first slice P15-T01).
+P15-T01a backend container hardening — `backend/Dockerfile.packaged` alpine JRE UID **65532**; read-only smoke `/healthz` **200**; [`deploy/container-hardening.md`](../deploy/container-hardening.md) writable paths; `scripts/container-hardening-smoke.ps1` PASSED (2026-06-27).
+P15-T01b frontend NGINX hardening — `frontend/Dockerfile.packaged` nginx UID **101** port **8080**; read-only smoke `/healthz` + `/` **200**; [`deploy/container-hardening.md`](../deploy/container-hardening.md) frontend writable paths; `scripts/container-hardening-smoke.ps1` PASSED (backend + frontend) (2026-06-27).
+P15-T01c container hardening documentation + smoke evidence — [`deploy/container-hardening.md`](../deploy/container-hardening.md) writable paths (backend `/tmp`, frontend `/tmp/nginx/*`); P15-T01 smoke evidence section (ReadonlyRootfs, uid **101**, `/healthz` + SPA **200**); `scripts/container-hardening-smoke.ps1` PASSED (backend + frontend); **P15-T01 vertical slice closed** (2026-06-27).
+P15-T02 Helm chart scaffold — `deploy/helm/docgen/` (backend + frontend Deployments/Services; per-env values); pod/container `securityContext` (non-root, read-only root FS, drop ALL caps); CPU/memory requests+limits per ADR-0030; [`deploy/helm/docgen/README.md`](../deploy/helm/docgen/README.md); `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — helm lint **0 failed**, template default/dev/staging/prod, fail-closed secret check; render-only (2026-06-27).
+P15-T03 ConfigMap/Secret + external service wiring — [`deploy/k8s-config-secrets.md`](../deploy/k8s-config-secrets.md); `templates/configmap.yaml` + per-env `externalServices`/`config`; `secrets.create: false` in all env values; `Assert-T03ConfigSecrets` + fail-closed missing-secret test in `scripts/helm-validate.ps1`; no `StatefulSet` in rendered manifests; no plaintext secrets in repo; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03 assertions; render-only (2026-06-27).
+P15-T04 Service + Ingress + cert-manager TLS + K8s DNS — [`deploy/k8s-ingress-tls.md`](../deploy/k8s-ingress-tls.md); `templates/*-service.yaml` ClusterIP port **8080** + `docgen.io/cluster-dns` annotations; `templates/ingress.yaml` NGINX class `/api`→backend `/`→frontend; `templates/certificate.yaml` cert-manager `Certificate` + TLS **1.2+**; `Assert-T04IngressTls` in `scripts/helm-validate.ps1`; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03+T04 assertions; render-only (2026-06-27).
+P15-T05 HPA CPU/memory + custom metric — [`deploy/k8s-hpa-autoscaling.md`](../deploy/k8s-hpa-autoscaling.md); `templates/backend-hpa.yaml` + `templates/frontend-hpa.yaml` — `autoscaling/v2`, CPU + memory Resource metrics, min/max bounds, blue-green `scaleTargetRef`; backend Pods custom metric `docgen_http_requests_per_second` gated by `customMetric.enabled`; `values-staging.yaml` explicit customMetric; `Assert-T05Hpa` in `scripts/helm-validate.ps1`; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03+T04+T05 assertions; render-only (2026-06-27).
+P15-T06 default-deny NetworkPolicy + explicit allow — [`deploy/k8s-network-policy.md`](../deploy/k8s-network-policy.md); `templates/networkpolicy.yaml` — `podSelector: {}` default-deny (Ingress + Egress); allow policies — ingress controller, frontend→backend :8080, backend→external egress (TCP **5432/6379/9092/443**), DNS, metrics scrape gated by `networkPolicy.monitoring.enabled`; `Assert-T06NetworkPolicy` in `scripts/helm-validate.ps1`; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03+T04+T05+T06 assertions; render-only (2026-06-27).
+P15-T07 health probes `/healthz` + `/readyz` — [`deploy/k8s-health-probes.md`](../deploy/k8s-health-probes.md); backend Deployments liveness `/healthz` readiness `/readyz` port **8080**; frontend NGINX `/healthz` + `/readyz`; `ReadinessProbe` Postgres check; `Assert-T07Probes` in `scripts/helm-validate.ps1`; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03+T04+T05+T06+T07 assertions; render-only (2026-06-27).
+P15-T08 blue-green release — [`deploy/blue-green-runbook.md`](../deploy/blue-green-runbook.md); `templates/backend-color-deployments.yaml` + `frontend-color-deployments.yaml` — dual color Deployments; main Services route to `blueGreen.activeColor`; preview Services target inactive color; HPA `scaleTargetRef` on active color; `values-prod.yaml` — `blueGreen.requireManualApproval: true`; manual rollback steps (no Deployment/PVC/data destroy); `Assert-T08BlueGreen` in `scripts/helm-validate.ps1`; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03+T04+T05+T06+T07+T08 assertions; render-only (2026-06-27).
+P15-T09 CI manifest validation gates — [`.github/workflows/k8s-manifest-gates.yml`](../.github/workflows/k8s-manifest-gates.yml); local `.\scripts\ci-k8s-manifest-gates.ps1 -SkipKubeconform` PASSED (2026-06-27).
+P15-T10 deployment docs + phase close — [`deploy/README.md`](../deploy/README.md); architecture cross-links; **P15 phase Done** (2026-06-27).
+P18-T01 structured content v1 node matrix — `com.bank.docgen.authoring.structured` (`StructuredContentNodeType`, `StructuredContentSchemaValidator`); JSON schema `authoring/structured-content-v1.schema.json`; `StructuredContentSchemaTest` **3/3**; wired into `TemplateService.validateStructuredContent` (2026-06-27).
+
+P18-T02 node-matrix fidelity validation — `NodeMatrixValidationService`, `StructuredContentValidationResult`, `StructuredContentFidelityIssue`; `NodeMatrixValidationServiceTest` **4/4**; blockers map to `BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE` → publish gate anchor integrity (2026-06-27).
+
+P18-T03 master style catalog + direct format — `MasterStyleCatalogService`, `default-master-style-catalog-v1.json`; `MasterStyleCatalogServiceTest` **4/4**; style/direct-format blockers wired into `TemplateService.computeBindingStatus` (2026-06-27).
+
+P18-T04 structured table component — `TableComponentService`, `TableComponentRenderModel`; `TableComponentServiceTest` **3/3**; inline table component validation wired into binding status (2026-06-27).
+
+P18-T05 reference nodes — `ReferenceNodeService`, `AttachmentListReferenceModel`; `ReferenceNodeServiceTest` **3/3**; seal placement/scaling blockers + image scaling warning; wired into `TemplateService` (2026-06-27).
+
+P18-T06 controlled numbering — `NumberingService`, deterministic loop re-sequencing; `NumberingServiceTest` **3/3**; duplicate/cross-ref blockers wired into binding status (2026-06-27).
+
+P18-T07 Word/HTML paste cleaning — `PasteCleaningService`, `PasteCleaningSummary`, `PasteCleaningResult`; `PasteCleaningServiceTest` **4/4**; edit-time transform with transformed/removed/warning/blocked summary + `cancelToPrePaste`; i18n `paste.summary.*` (2026-06-28).
+
+P18-T08 publish-locked render profile — `RenderProfileService`, `RenderProfile`, `CallerRenderOverride`, Flyway **V31**; `RenderProfileServiceTest` **3/3**; wired into publish (`TemplateLifecycleService`), preview (`PreviewGenerationService` + `PreviewRecordView.renderProfileVersion`), runtime (`DocumentGenerationEngine` ignores caller override); default `authoring/default-render-profile-v1.json` (`rp-v1`) (2026-06-28).
+
+P18-T09 fidelity warning surfacing — `FidelityValidationService` aggregates T02–T06 warnings across anchor bindings; wired into `PreviewGenerationService`, `DocumentGenerationEngine`, `RuntimeGenerationService` (incl. idempotency replay recompute); removed hardcoded `CONTROLLED_STYLE_FALLBACK` stub; `FidelityValidationServiceTest` **3/3**; `TemplatePlatformSliceTest` `preview_emitsRealWarnings_fromValidationEngine`, `runtimeSuccess_includesFidelityWarnings`, `noHardcodedWarning_whenContentClean` (2026-06-28).
+
+P18-T10 controlled authoring UI — `ControlledStructuredContentEditor`, `PasteCleaningSummaryDialog`, `FidelityWarningList`; management APIs `GET /api/management/v1/templates/{templateId}/master-style-catalog`, `POST .../paste-clean`; extended `FidelityWarningView` (`location`, `artifact`, `viewed`); wired into `TemplateAuthoringPanel` + `TemplatePreviewPanel`; Vitest structuredContentNodes/pasteSummary/fidelityFilters tests (2026-06-28); Playwright functional E2E **5/5** + UIUX evidence **1/1** (12 screenshots, manifest PASS, Docker 4173, 2026-06-29).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)
@@ -53,7 +119,7 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | --- | --- | --- |
 | P0 | Done | Skeleton, compose, CI gates, contract harness |
 | P1 | Done | Local auth, session, role landing, guards |
-| P2 | Done | Master APIs + list/detail UI (`MasterListView`, `MasterDetailView`) |
+| P2 | Done | Master APIs + list UI + **Phase A revision nav** (`MasterPackageHubView`, `MasterRevisionLineController`, V22); P2-T05 Done — hub/revision two-page, E2E 4/4; Phase B full history pending |
 | P3 | Done | Template wizard, variables, rules, test data sets |
 | P4 | Done | DOCX/PDF render, preview records, comparison panel |
 | P5 | Done | Lifecycle + publish gate UI (**thin slice** — state machine + checklist UI; live gates → P19) |
@@ -65,22 +131,21 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P11 | Done | Batch + async task lifecycle |
 | P12 | Not Started | Deferred enhancements catch-all (non-active, no single active slice) |
 | P13 | Done | Identity & group administration (user + group management plane); green gates 2026-06-23 — see P13 mirror block |
-| P14 | Spec Done (2026-06-23) | Confirmed large domains — behavior specs in P14; implementation Not Started |
-| P15 | Not Started | Kubernetes deployment & container hardening — implements unrealized ADR-0030 K8s/container rows; _evidence pending_ (manifests/Helm, hardened images, CI `kubeconform`/`helm lint`) |
+| P14 | Done (2026-06-27) | Confirmed large domains — **P14-T01 Done** (T01a–T01e + architecture remediation); **P14-T02 Done** (T02a–T02d + E2E **3/3** + UIUX **5/5**); **P14-T03 Done** (T03a–T03c + E2E **2/2** + UIUX **7/7**); backend **481**; frontend **235+**; OpenAPI export/import contract; architecture re-review **PASS** (2026-06-26); see [P14 detail](./detail/P14-confirmed-large-domains.md) |
+| P15 | Done (2026-06-27) | Kubernetes deployment & container hardening — T01–T10; [`deploy/README.md`](../deploy/README.md); helm validate + CI gates green — see [P15 detail](./detail/P15-kubernetes-deployment-container-hardening.md) |
 | P16 | Done (2026-06-23) | Template lifecycle governance + logical delete (T01–T08); gates: `mvn verify` 161 tests |
-| P17 | In Progress | Impact-preview seam Done (T03/T09 partial); per-domain save/rollback open |
-| P20 | In Progress (2026-06-24) | Wave C UXF1/4/5 Done; **P20-T06** (zh-CN + `api.error` catalog parity) open — see [P20 detail](./detail/P20-i18n-ui-upgradeability.md) |
-| P18 | Not Started | Structured authoring & rendering-fidelity engine (gap G3: node matrix, style catalog, paste cleaning, render profile); _evidence pending_ |
-| P19 | Not Started | Template verifiability, publish gate & decision forms (gaps G4/G5: coverage thresholds, batch test, live checklist, opinion forms, risk prompts); _evidence pending_ |
+| P17 | Done (2026-06-25; Wave 3) | T01–T09 + COR-F18 Done; backend **308** tests; frontend **189** tests; `ApiPolicyDetailView` domain UI + impact preview |
+| P20 | Done (2026-06-25) | T01–T07 complete incl. T06 (`api.error` en/zh + primary journey zh-CN); gates green — see [P20 detail](./detail/P20-i18n-ui-upgradeability.md) |
+| P18 | Done (2026-06-28) | **P18-T01–T10 Done** — controlled authoring UI + management paste/catalog APIs — see [P18 detail](./detail/P18-structured-authoring-fidelity-engine.md) |
+| P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
 
-**Active phase:** None — no single active phase slice (P13 completed Done 2026-06-23).
-P12 remains the non-active deferred-enhancements catch-all.
+**Active phase:** **P18 Done** (2026-06-28; T01–T10). **P15 Done** (T01–T10). P19/P20 Done; P12 remains the non-active deferred-enhancements catch-all.
 
 ## Epic ↔ phase mapping
 
 | Epic | Status | Maps to | Evidence |
 | --- | --- | --- | --- |
-| E01 | Done | P2, P3, P4 | `MasterDocumentService`, `TemplateService`, `PreviewGenerationService`, frontend template/master views |
+| E01 | Done | P2, P3, P4 | `MasterDocumentService`, `MasterRevisionLineController`, `MasterPackageHubView`, `TemplateService`, `PreviewGenerationService`, frontend template/master views |
 | E02 | Done | P5 | `TemplateLifecycleService`, lifecycle UI in `TemplateDetailView` |
 | E03 | Done | P6 | `ApiManagementService`, `ApiPolicyHomeView`, `TemplateCallerContractPanel` |
 | E04 | Done | P8 | `AuditQueryService`, `AuditConsoleView` |
@@ -143,11 +208,195 @@ Source: [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimizatio
 | UX Wave A | UX-A + UX-B (role gating, half-built interactions) | Done | Backend: `ManagementCapabilitiesService`, `RouteVisibilityService`, `V14` seeds; Frontend: `useCapabilities`, `roles.ts`, `TemplateCreateDialog`, `apiPolicy` rotate/revoke, `http.ts` 401/403, `useConfirmAction`, authoring persist (UXB5) |
 | UX Wave B | UX-C + UX-D + UX-E (lifecycle, workbenches, polish) | Done (2026-06-23) | UXC3–UXC5, UXC4 metadata edit, UXD4 governance dashboard, UXE2–UXE4 polish; gates: `mvn verify`, `pnpm lint/type-check/test/build` |
 | UX Wave C | UX-F (upgradeability foundations) | Done (2026-06-23) | UXF1/4/5 + P16-T08 delete + P17 impact-preview seam; backend 161 tests, frontend 88 tests |
-| UX Wave D | UX-G → P14 confirmed large domains | Spec Done (2026-06-23) | Behavior specs in P14 + matrix + ADR-0019; zero implementation until P14 activation |
+| UX Wave D | UX-G → P14 confirmed large domains | Done (2026-06-27) | P14 **Done** — T01 content modules + T02 collaboration + T03 export/import; E2E T01 **3/3**, T02 **3/3** + UIUX **5/5**, T03 **2/2** + UIUX **7/7**; backend **481**, frontend **235+**; arch re-review **PASS** (2026-06-26) |
 
 **Backend gate evidence (UX Wave A/B, 2026-06-23):** `mvn -B -ntp -f backend/pom.xml verify "-Dspring-boot.repackage.skip=true"` — 134 tests green (1 skipped); includes `TemplateLifecycleGovernanceServiceTest`, `TemplatePlatformSliceTest#stopRestoreAndDeprecatePublishedTemplate`.
 
 **Frontend gate evidence (UX Wave A/B, 2026-06-23):** `pnpm -C frontend lint` / `type-check` / `test` (81) / `build` — all green.
+
+## P2 master revision navigation UX (mirror — 2026-06-25)
+
+| Item | Status | Evidence |
+| --- | --- | --- |
+| P2-T05 Behavior spec traceability | Done | BDD-MASTER-REVISION-NAV-001 → `docs/product/catalog-navigation-ux.md` |
+| P2-T05 Phase A hub + revision detail UI | Done | `MasterPackageHubView`, `MasterRevisionDetailView`, `MasterRevisionLinesPanel`; routes `/masters/:masterId`, `/masters/:masterId/revisions/:revisionLineId`; unit tests green |
+| P2-T05 Phase A revision-lines API | Done | `MasterRevisionLineController`, `MasterRevisionLineService`, `MasterRevisionLineControllerTest`; Flyway `V22__master_current_revision_line_id.sql`; honest single-line pagination |
+| P2-T05 E2E + UIUX | Done | `frontend/e2e/master-revision-two-page.spec.ts` **4/4**; UIUX review pass (minor findings) |
+| Phase B multi-revision history | Not Started | Full persisted revision rows + paginated history API — see `catalog-navigation-ux.md` § phased delivery |
+
+**Gate evidence (P2-T05 slice):** `mvn -B -ntp -f backend/pom.xml verify`; `pnpm -C frontend lint` / `type-check` / `test` / `build`; Playwright `master-revision-two-page.spec.ts` 4/4.
+
+Task row: [detail/P2-master-management.md](./detail/P2-master-management.md).
+
+## P19 verifiability & publish gate (mirror — 2026-06-25)
+
+| Item | Status | Evidence |
+| --- | --- | --- |
+| P19-T04 Change-diff | Done | `ChangeDiffService`, `ChangeDiffServiceTest` (3), `TemplateChangeDiffPanel`, template API |
+| P19-T05 Preview comparison | Done | `PreviewComparisonService`, `PreviewComparisonServiceTest` (3), preview panel comparison UI |
+| P19-T06 Live publish gate | Done | `PublishGateService`, `PublishGateServiceTest` (4), `TemplateLifecycleService.publish` gate |
+| P19-T07 Decision forms | Done | `DecisionFormService`, `DecisionFormServiceTest` (3), `TemplateLifecycleDecisionDialog` |
+| P19-T08 Risk-prompt config | Done | V21 `risk_prompt_config`, `RiskPromptConfigService`, `RiskPromptConfigServiceTest` (3), config panel |
+| P19-T09 Exception intervention | Done | `ExceptionInterventionTest` (3), separate audit marker in `ManagementAuditRecorder` |
+| P19-T10 Verifiability UI | Done | Coverage/change-diff/preview/checklist/decision/risk panels; Vitest; Docker E2E **7/7** |
+| COR-T01/T02/T03/T08/T14 | Done | Live publish gate, structured decision forms, exception path, batch+coverage wiring, publish summary dialog |
+
+**Gate evidence (P19 Wave 1):** `mvn -B -ntp -f backend/pom.xml verify` — **281** tests;
+`pnpm -C frontend lint` / `type-check` / `test` (**169**) / `build`; `pnpm -C frontend test:e2e:docker` — **7/7**.
+
+Task rows: [detail/P19-verifiability-publish-gate.md](./detail/P19-verifiability-publish-gate.md).
+
+## P17 per-domain API policy governance (mirror — 2026-06-25)
+
+| Item | Status | Evidence |
+| --- | --- | --- |
+| P17-T01 policyVersion lineage | Done | Flyway `V23__api_policy_version.sql`; `ApiPolicyVersionEntity`/`ApiPolicyVersionRepository`; `ApiPolicyVersionSnapshotService` snapshot on domain save; `ApiPolicyVersionLineageTest` (3) |
+| P17-T02 Per-domain save endpoints | Done | Five domain PUTs (`/ad-groups`, `/output`, `/batch-limits`, `/encryption`, `/default-route`); `Save*Request` DTOs + `confirmed` gate; Flyway V24 batch limits; `ApiPolicyDomainSaveServiceTest` (8/8); monolithic PUT back-compat seam retained |
+| P17-T03 Impact-preview engine | Done | `ApiPolicyImpactPreviewService` + `ApiPolicySaveGate` hard-block/warning + UI confirm (minimal matrix seam noted for follow-up) |
+| P17-T04 Default-route governance | Done | `DefaultRouteGovernanceTest` (4/4); callable-target validation; immediate effect + audit |
+| P17-T05 Rollback | Done | `ApiPolicyRollbackService` + `ApiPolicyRollbackServiceTest` (3/3) |
+| P17-T06 AD-group cache invalidation | Done | `AdGroupAuthorizationCacheTest` (2/2); invalidate on AD-group domain save |
+| P17-T07 Audit API_POLICY_UPDATED | Done | `ManagementAuditRecorderTest`; `PolicyUpdateAuditDetail` with prev/next `policyVersion`, preview summary |
+| P17-T08 Contract policyVersion view | Done | `ContractAssemblyServicePolicyViewTest` (3/3) |
+| P17-T09 UI config-domain navigation | Done | `ApiPolicyDetailView` + `ApiPolicyDetailView.test.ts` (4/4); domain nav, hard-block, warning confirm, domain save |
+| COR-F18 API policy domain UI | Done | Same as T09; `apiPolicyDomain.test.ts`, `ApiPolicyImpactPreviewPanel` |
+
+**Gate evidence (P17 close):** `mvn -B -ntp -f backend/pom.xml verify` — **308** tests (2026-06-25);
+`pnpm -C frontend lint` / `type-check` / `vitest run` (**189**, 53 files) / `build`.
+
+Task rows: [detail/P17-api-policy-domain-governance.md](./detail/P17-api-policy-domain-governance.md).
+
+## COR-4 performance (mirror — 2026-06-25)
+
+| Item | Status | Evidence |
+| --- | --- | --- |
+| COR-P01 Stream new sync artifact generation | Done | `RuntimeGenerationService.generateSync` new path returns storage stream (aligned with idempotency replay); `RuntimeGenerationServiceGenerateTest` lazy-load assertion |
+| COR-P02 Offload LibreOffice from request thread | Done | `PdfConversionOffloadSupport` + bounded `pdfConversionExecutor`; `LibreOfficePdfConversionService` / `DockerExecPdfConversionService`; +5 tests |
+| COR-P07 QueryDSL audit list queries | Done | `ManagementAuditEventRepositoryImpl` + `ManagementAuditEventQueryPredicates`; `ManagementAuditEventRepositoryQuerydslTest` 5/5 |
+| COR-P08 MapStruct apimgmt mappers | Done | `ApiPolicyViewMapper` + `ApiPolicyViewMapperTest` 4/4; `ApiManagementService` / `ApiPolicyRollbackService` wired |
+
+**Gate evidence (COR-4 close):** `mvn -B -ntp -f backend/pom.xml verify` — **323** tests (2026-06-25).
+
+## P14 confirmed large domains (mirror — 2026-06-26)
+
+| Item | Status | Evidence |
+| --- | --- | --- |
+| P14-T01 Clause / content module lifecycle (vertical slice) | Done | T01a–T01d complete — domain + REST + template references + management UI; backend **461**; frontend **224** |
+| P14-T01a Domain model + Flyway + repository | Done | `contentmodule` package — `ContentModuleEntity`, `ContentModuleVersionEntity`, `ContentModuleReviewState`, `ContentModuleLifecycleState`, `ContentModuleRepository`, `ContentModuleVersionRepository`; Flyway `V25__content_module.sql`; `ContentModuleRepositoryTest` (7 `@DataJpaTest`) |
+| P14-T01b Management REST CRUD + lifecycle transitions | Done | `ContentModuleController`, `ContentModuleService`, `ContentModuleReviewService`, `ContentModuleLifecycleService`, `ContentModuleAccessSupport`; CRUD + governance REST; `GroupAccessService` scoping; `ManagementAuditRecorder` — 5 `recordContentModule*` events; i18n + OpenAPI v1; **61** contentmodule tests (T01a 7 + T01b 60) |
+| P14-T01c Template reference + impact analysis integration | Done | Flyway `V27__template_content_module_reference.sql`; `TemplateContentModuleReferenceService` (reference lock + `resolvePinnedContentStructures`), `ContentModuleLifecycleImpactService`; REST GET/PUT template content-module-references + GET lifecycle impact preview; `PublishGateCheckCode.CONTENT_MODULE_REFERENCES`; `DocxAssembler` `contentModuleRef` + pinned resolve in `DocumentGenerationEngine` / `PreviewGenerationService`; +5 tests (`TemplateContentModuleReferenceServiceTest` pinned resolve, `DocxAssemblerTest`, `TemplateContentModuleReferenceRepositoryTest`, `ContentModuleLifecycleImpactServiceTest`, `PublishGateServiceTest`) |
+| P14-T01d Management UI (list, detail, lifecycle) | Done | `ContentModuleListView`, `ContentModuleDetailView`, `ContentModuleLifecycleImpactDialog`, `ContentModuleCreateDialog`, `ContentModuleVersionDialog`, `ContentModuleStatusBadge`, `TemplateContentModuleReferencesPanel`; `contentModules` store/API + `routeKeys` nav; Vitest `ContentModuleListView.test.ts` (2), `ContentModuleDetailView.test.ts` (2), `contentModules.test.ts` (4); frontend lint/type-check/test (**224**) / build green |
+| P14-T01 E2E + UIUX | Done | `frontend/e2e/P14-T01-uiux-evidence.spec.ts` + `a11y-smoke.spec.ts` **3/3**; manifest `frontend/e2e/evidence/P14-T01-uiux-manifest.md` (8 screenshots @ 1440×900); e2e-uiux-reviewer **PASS** (no critical blockers; 2 suggestions) |
+| P14-T01 architecture critical remediation | Done | 4 Critical fixes from architecture review BLOCK — `GroupAccessService.canBrowseContentModuleCatalog` fail-closed (TESTER 403 on list/get); `contentStructureJson` role-gated in `ContentModuleVersionView`; list merges shared-into-group modules; `ContentModuleLifecycleImpactService` runtime audit counts + `templateStopRequired`/`releaseStopRequired`; `ContentModuleLifecycleAuditDetail` persisted via `ManagementAuditRecorder`; +8 tests (`ContentModuleServiceTest` +3, `ContentModuleControllerTest` +3, `ContentModuleLifecycleImpactServiceTest` +1, `GroupAccessServiceTest` +1); verify **469** (+8 from 461); architecture re-review **PASS** (2026-06-26) |
+| P14-T02a To-do entity + query API by role queue | Done | Flyway `V28__collaboration_work_item.sql`; `com.bank.docgen.collaboration` — `CollaborationWorkItemEntity`, `CollaborationWorkItemRepository`, `CollaborationWorkItemService`, `CollaborationWorkItemController`; `GET /api/management/v1/collaboration-work-items` with role queue filtering; `CollaborationWorkItem*Test` **18** |
+| P14-T02b Timeout config API (global + group override) | Done | Flyway `V29__collaboration_timeout_config.sql`; `CollaborationTimeoutConfigEntity`, `CollaborationTimeoutConfigRepository`, `CollaborationTimeoutConfigService`, `CollaborationTimeoutConfigController`, `CollaborationTimeoutResolver`; GET/PUT `/api/management/v1/collaboration-timeout-config`; `GroupAccessService.canMaintainCollaborationTimeoutConfig`; OpenAPI v1 extended; `CollaborationTimeoutConfigServiceTest` (6), `CollaborationTimeoutConfigControllerTest` (4), `GroupAccessServiceTest` collaborationTimeout (1) = **11** T02b tests |
+| P14-T02c Escalation scheduler (no state mutation) | Done | Flyway `V30__collaboration_work_item_escalation_source.sql`; `CollaborationEscalationService`, `CollaborationEscalationScheduler`, `CollaborationSchedulingConfig`; `source_work_item_id` dedup; `findOpenEscalationCandidates` / `existsOpenEscalationForSource`; `ManagementAuditRecorder.recordCollaborationTimeoutEscalation`; notification-only — source work item status unchanged; `CollaborationEscalationServiceTest` (5), `CollaborationEscalationServiceDataJpaTest` (3), `CollaborationEscalationSchedulerTest` (1), `CollaborationWorkItemRepositoryTest` escalation queries (2) = **11** T02c tests |
+| P14-T02d UI: to-do panels on workbenches + admin config | Done | `CollaborationWorkItemPanel` on `TesterWorkbenchView`, `ApproverWorkbenchView`, `EscalationWorkbenchView`; `CollaborationTimeoutConfigPanel` on `DashboardView`; `collaboration` store/API/types; Vitest collaboration + workbench tests; frontend lint/type-check/test (**232**) / build green (2026-06-27) |
+| P14-T02 Collaboration to-dos + timeout escalation (vertical slice) | Done | T02a–T02d complete — work item API + timeout config + escalation scheduler + management UI; backend verify **481**; frontend **235** (2026-06-27) |
+| P14-T02 E2E + functional | Done | `frontend/e2e/collaboration-todos.spec.ts` **3/3** Docker 4173 (2026-06-27); report `playwright-report/docker/index.html`; remediation — `BatchTestRunEntity` FK alignment, `CollaborationWorkItemWriter` submit-for-test upsert, `roles.ts` `canAccess*Workbench` route guards |
+| P14-T02 E2E + UIUX | Done | `frontend/e2e/P14-T02-uiux-evidence.spec.ts` + `a11y-smoke.spec.ts` **5/5**; manifest `frontend/e2e/evidence/P14-T02-uiux-manifest.md` (8 screenshots @ 1440×900); e2e-uiux-reviewer **PASS** (no critical blockers; 4 suggestions) |
+| P14-T03 Template export / import (vertical slice) | Done | T03a–T03c complete — `TemplateExportService` / `TemplateImportService` + management REST; OpenAPI v1 + `contract-outline.md`; UI `TemplateExportActions` / `TemplateImportDialog`; **28** backend + **14** frontend Vitest; backend verify **481**; frontend **235+** (2026-06-27) |
+| P14-T03a Export service + management endpoint | Done | `TemplateExportService` + GET export JSON/ZIP; `TemplateExport*Test` **15**; OpenAPI v1 export routes |
+| P14-T03b Import service + validation + DRAFT landing | Done | `POST /templates/import`; `TemplateImport*Test` **13**; import lands DRAFT; conflict policy in OpenAPI |
+| P14-T03c UI export/import on template detail + admin bulk | Done | `TemplateExportActions`, `TemplateImportDialog`; **+14** Vitest; frontend lint/type-check/test/build green |
+| P14-T03 E2E + functional | Done | `frontend/e2e/P14-T03-template-export-import.spec.ts` **2/2** Docker 4173 (2026-06-27); JSON + ZIP export, staging import → DRAFT, no secrets in bundle |
+| P14-T03 E2E + UIUX | Done | `frontend/e2e/P14-T03-uiux-evidence.spec.ts` + `P14-T03-template-export-import.spec.ts` + `a11y-smoke.spec.ts` **7/7**; manifest `frontend/e2e/evidence/P14-T03-uiux-manifest.md` (9 screenshots @ 1440×900); e2e-uiux-reviewer **PASS** (no critical blockers; 5 suggestions) |
+
+**Gate evidence (P14-T03 vertical slice):** T03a–T03c Done — `TemplateExportService` / `TemplateImportService`; **28** backend tests (`TemplateExport*Test` 15 + `TemplateImport*Test` 13); OpenAPI v1 + [`contract-outline.md`](../api/contract-outline.md) export/import contract; UI `TemplateExportActions` / `TemplateImportDialog` (+14 Vitest); E2E `P14-T03-template-export-import.spec.ts` **2/2** Docker 4173; UIUX `P14-T03-uiux-evidence.spec.ts` + functional + `a11y-smoke.spec.ts` **7/7**; manifest `frontend/e2e/evidence/P14-T03-uiux-manifest.md` (9 screenshots); e2e-uiux-reviewer **PASS**; backend verify **481**; frontend lint/type-check/test (**235+**) / build green (2026-06-27).
+
+**Gate evidence (P14 phase close):** All P14-T01…T03 tasks Done with real persistence; role-scoped UI for each domain; audit on mutating actions; green gates cited above; UX Wave D **Done**; **P15 activated In Progress** (2026-06-27; first slice P15-T01).
+
+**Gate evidence (P15-T01a slice):** `backend/Dockerfile.packaged` — `eclipse-temurin:21-jre-alpine` non-root UID/GID **65532**; read-only runtime smoke — `docker run --read-only --tmpfs /tmp` serves **`GET /healthz` 200**; writable mount contract — [`deploy/container-hardening.md`](../deploy/container-hardening.md) (`/tmp` tmpfs for backend JVM temp); `scripts/container-hardening-smoke.ps1` PASSED (2026-06-27).
+
+**Gate evidence (P15-T01b slice):** `frontend/Dockerfile.packaged` — `nginx:1.27-alpine` non-root UID **101**, listen **8080**; read-only runtime smoke — `docker run --read-only --user nginx --tmpfs /tmp` serves **`GET /healthz` 200** and **`GET /` 200**; writable mount contract — [`deploy/container-hardening.md`](../deploy/container-hardening.md) (`/tmp/nginx/*` tmpfs for NGINX pid/logs/temp); `scripts/container-hardening-smoke.ps1` PASSED (backend + frontend) (2026-06-27).
+
+**Gate evidence (P15-T01c slice):** [`deploy/container-hardening.md`](../deploy/container-hardening.md) — backend `/tmp` tmpfs + frontend `/tmp/nginx/*` writable paths documented; P15-T01 smoke evidence section (2026-06-27) — `ReadonlyRootfs` **true**, container user uid **101**, `/etc` write blocked, `/healthz` + SPA **200**; `scripts/container-hardening-smoke.ps1` PASSED (backend + frontend) (2026-06-27).
+
+**Gate evidence (P15-T01 vertical slice):** T01a–T01c Done — hardened `backend/Dockerfile.packaged` + `frontend/Dockerfile.packaged`; writable mount contract + smoke evidence in [`deploy/container-hardening.md`](../deploy/container-hardening.md); `scripts/container-hardening-smoke.ps1` PASSED (2026-06-27).
+
+**Gate evidence (P15-T02 slice):** `deploy/helm/docgen/` — Helm chart for backend + frontend workloads; per-env values (`values.yaml`, `values-dev.yaml`, `values-staging.yaml`, `values-prod.yaml`); pod/container `securityContext` — `runAsNonRoot`, `readOnlyRootFilesystem`, `capabilities.drop: [ALL]`; CPU + memory `requests`/`limits` on all containers (ADR-0030); [`deploy/helm/docgen/README.md`](../deploy/helm/docgen/README.md) lint/template commands; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — helm lint **0 failed**, `helm template` default/dev/staging/prod, fail-closed secret check; render-only (not deployed to cluster) (2026-06-27).
+
+**Gate evidence (P15-T03 slice):** [`deploy/k8s-config-secrets.md`](../deploy/k8s-config-secrets.md) — ConfigMap keys for non-sensitive runtime + external service endpoints; Secret refs via `secrets.create: false` + `existingSecretName` (all env values); optional `ExternalSecret` template; no credential keys in ConfigMap; no `StatefulSet` in rendered manifests; backend `envFrom` ConfigMap+Secret; `scripts/helm-validate.ps1` — `Assert-T03ConfigSecrets` + fail-closed missing-secret negative test; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03 assertions; render-only; no plaintext secrets in repo (2026-06-27).
+
+**Gate evidence (P15-T04 slice):** [`deploy/k8s-ingress-tls.md`](../deploy/k8s-ingress-tls.md) — ClusterIP Services on port **8080** with `docgen.io/cluster-dns` FQDN annotations (T04a); `templates/ingress.yaml` — `ingressClassName: nginx`, `/api`→backend, `/`→frontend, cert-manager issuer annotation (T04b); `templates/certificate.yaml` — cert-manager `Certificate`, TLS **1.2+** `ssl-protocols` (T04c); `scripts/helm-validate.ps1` — `Assert-T04IngressTls`; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03+T04 assertions; render-only (2026-06-27).
+
+**Gate evidence (P15-T05 slice):** [`deploy/k8s-hpa-autoscaling.md`](../deploy/k8s-hpa-autoscaling.md) — `templates/backend-hpa.yaml` + `templates/frontend-hpa.yaml` — `autoscaling/v2`, CPU + memory Resource metrics, min/max replica bounds, blue-green active Deployment `scaleTargetRef` (T05a); backend Pods custom metric `docgen_http_requests_per_second` gated by `autoscaling.backend.customMetric.enabled`; `values-staging.yaml` explicit customMetric; Prometheus Adapter prerequisite documented (T05b); `scripts/helm-validate.ps1` — `Assert-T05Hpa`; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03+T04+T05 assertions; render-only (2026-06-27).
+
+**Gate evidence (P15-T06 slice):** [`deploy/k8s-network-policy.md`](../deploy/k8s-network-policy.md) — `templates/networkpolicy.yaml` — `podSelector: {}` default-deny with Ingress + Egress `policyTypes` (T06a); explicit allow policies — ingress controller, frontend→backend :8080, backend→external egress (TCP **5432/6379/9092/443**), DNS, metrics scrape gated by `networkPolicy.monitoring.enabled` (T06b); `scripts/helm-validate.ps1` — `Assert-T06NetworkPolicy`; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03+T04+T05+T06 assertions; render-only (2026-06-27).
+
+**Gate evidence (P15-T07 slice):** [`deploy/k8s-health-probes.md`](../deploy/k8s-health-probes.md) — backend Deployments `httpGet` liveness `/healthz`, readiness `/readyz` on port **8080** (T07a); frontend Deployments + NGINX ConfigMap `/healthz` + `/readyz` (T07b); `HealthController` + `ReadinessProbe` Postgres semantics (T07c); `scripts/helm-validate.ps1` — `Assert-T07Probes`; `.\scripts\helm-validate.ps1 -SkipKubeconform` PASSED — lint **0 failed**, template default/dev/staging/prod, T03+T04+T05+T06+T07 assertions; render-only (2026-06-27).
+
+## P15 Kubernetes deployment & container hardening (mirror — 2026-06-27)
+
+| Task | Status | Evidence |
+| --- | --- | --- |
+| P15-T01a Backend image hardening (distroless/minimal, non-root, read-only root FS) | Done | `backend/Dockerfile.packaged` alpine JRE UID **65532**; read-only smoke `/healthz` **200**; [`deploy/container-hardening.md`](../deploy/container-hardening.md) writable paths |
+| P15-T01b Frontend NGINX hardening (non-root, read-only root FS, unprivileged config) | Done | `frontend/Dockerfile.packaged` nginx UID **101** port **8080**; read-only smoke `/healthz` + `/` **200**; [`deploy/container-hardening.md`](../deploy/container-hardening.md) frontend writable paths; `scripts/container-hardening-smoke.ps1` PASSED |
+| P15-T01c Writable paths documentation + image-run smoke evidence | Done (2026-06-27) | [`deploy/container-hardening.md`](../deploy/container-hardening.md) — backend `/tmp`, frontend `/tmp/nginx/*`; smoke evidence (ReadonlyRootfs, uid **101**, `/healthz` + SPA **200**); `scripts/container-hardening-smoke.ps1` PASSED (backend + frontend) |
+| P15-T01 Container hardening (vertical slice) | Done (2026-06-27) | T01a–T01c complete — distroless/minimal non-root read-only images + documented writable mounts + smoke evidence |
+| P15-T02a Chart scaffold + per-env values (backend/frontend) | Done (re-earned 2026-06-27) | `deploy/helm/docgen/`; [`deploy/helm/docgen/README.md`](../deploy/helm/docgen/README.md); helm-validate PASSED |
+| P15-T02b Deployment + Service with hardened securityContext | Done (re-earned 2026-06-27) | non-root, read-only root FS, drop ALL caps; `deploy/helm/docgen/templates/` |
+| P15-T02c Resource requests + limits (CPU/memory) all containers | Done (re-earned 2026-06-27) | ADR-0030 requests/limits in `values.yaml`; helm-validate fail-closed secret check PASSED |
+| P15-T03a ConfigMap for non-sensitive runtime config (per-env values) | Done (re-earned 2026-06-27) | `templates/configmap.yaml` + per-env `externalServices`/`config`; no credential keys in ConfigMap; [`deploy/k8s-config-secrets.md`](../deploy/k8s-config-secrets.md) |
+| P15-T03b Secret / external-secret references for credentials + KMS-managed keys | Done (re-earned 2026-06-27) | `secrets.create: false` in all env values; `existingSecretName` + fail-closed `docgen.secretName` helper; helm-validate missing-secret negative test PASSED |
+| P15-T03c External managed-service endpoint wiring (no in-cluster StatefulSets) | Done (re-earned 2026-06-27) | External hosts in ConfigMap; credentials in Secret refs; no `StatefulSet` in rendered manifests; backend `envFrom` ConfigMap+Secret |
+| P15-T04a Service definitions (backend/frontend) using K8s DNS naming | Done (re-earned 2026-06-27) | `templates/*-service.yaml` ClusterIP port **8080**; `docgen.io/cluster-dns` + FQDN helpers; [`deploy/k8s-ingress-tls.md`](../deploy/k8s-ingress-tls.md) |
+| P15-T04b NGINX Ingress resource with class + host/path routing | Done (re-earned 2026-06-27) | `templates/ingress.yaml` — `ingressClassName: nginx`, `/api`→backend, `/`→frontend; staging/prod `ingress.enabled: true` |
+| P15-T04c cert-manager Certificate/issuer integration for TLS 1.2+ | Done (re-earned 2026-06-27) | `templates/certificate.yaml`; `nginx.ingress.kubernetes.io/ssl-protocols: TLSv1.2 TLSv1.3`; `Assert-T04IngressTls` PASSED |
+| P15-T04 Service exposure (vertical slice) | Done (re-earned 2026-06-27) | T04a–T04c complete — ClusterIP + K8s DNS, NGINX Ingress routing, cert-manager TLS; helm-validate PASSED; render-only |
+| P15-T05a HPA (CPU + memory) with min/max bounds for backend/frontend | Done (re-earned 2026-06-27) | `templates/backend-hpa.yaml`, `templates/frontend-hpa.yaml` — `autoscaling/v2`, CPU + memory Resource metrics, min/max bounds, blue-green `scaleTargetRef`; [`deploy/k8s-hpa-autoscaling.md`](../deploy/k8s-hpa-autoscaling.md); `Assert-T05Hpa` PASSED |
+| P15-T05b Custom-metric scaling source wiring (metrics adapter documented) | Done (re-earned 2026-06-27) | backend Pods custom metric `docgen_http_requests_per_second` gated by `customMetric.enabled`; `values-staging.yaml` explicit customMetric; Prometheus Adapter prerequisite in [`deploy/k8s-hpa-autoscaling.md`](../deploy/k8s-hpa-autoscaling.md); helm-validate PASSED; render-only |
+| P15-T05 Autoscaling (vertical slice) | Done (re-earned 2026-06-27) | T05a–T05b complete — HPA CPU/memory + custom Pods metric; helm-validate PASSED; render-only |
+| P15-T06a Default-deny ingress+egress NetworkPolicy for app namespace | Done (re-earned 2026-06-27) | `templates/networkpolicy.yaml` — `podSelector: {}` default-deny; [`deploy/k8s-network-policy.md`](../deploy/k8s-network-policy.md); `Assert-T06NetworkPolicy` PASSED |
+| P15-T06b Explicit allow rules (ingress, backend↔external services, DNS, metrics) | Done (re-earned 2026-06-27) | allow policies — ingress controller, frontend→backend, backend external egress, DNS, metrics (`networkPolicy.monitoring.enabled`); helm-validate PASSED; render-only |
+| P15-T06 Network isolation (vertical slice) | Done (re-earned 2026-06-27) | T06a–T06b complete — default-deny + explicit allow; helm-validate PASSED; render-only |
+| P15-T07a Liveness/readiness on backend Deployment | Done (re-earned 2026-06-27) | `templates/backend-deployment.yaml` + color variants — `/healthz` + `/readyz` port **8080**; [`deploy/k8s-health-probes.md`](../deploy/k8s-health-probes.md); `Assert-T07Probes` PASSED |
+| P15-T07b Frontend readiness/liveness probes | Done (re-earned 2026-06-27) | `frontend-nginx-configmap.yaml` NGINX `/healthz` + `/readyz`; frontend Deployments; helm-validate PASSED; render-only |
+| P15-T07c Backend `/healthz` + `/readyz` semantics | Done (re-earned 2026-06-27) | `HealthController` + `ReadinessProbe` — Postgres check on `/readyz`; [`deploy/k8s-health-probes.md`](../deploy/k8s-health-probes.md); helm-validate PASSED; render-only |
+| P15-T07 Health probes (vertical slice) | Done (re-earned 2026-06-27) | T07a–T07c complete — dual-endpoint probes backend+frontend; helm-validate PASSED; render-only |
+| P15-T08a Blue-green deployment manifests/strategy | Done (re-earned 2026-06-27) | dual color Deployments; activeColor Service selector; preview Services; [`deploy/blue-green-runbook.md`](../deploy/blue-green-runbook.md); `Assert-T08BlueGreen` PASSED |
+| P15-T08b Production manual-approval gate | Done (re-earned 2026-06-27) | `values-prod.yaml` — `blueGreen.requireManualApproval: true`; cutover gate in runbook |
+| P15-T08c Manual rollback runbook | Done (re-earned 2026-06-27) | color revert steps; no data destroy; Flyway forward-only note |
+| P15-T08 Blue-green release (vertical slice) | Done (re-earned 2026-06-27) | T08a–T08c complete — helm-validate PASSED; render-only |
+| P15-T09a CI helm lint + template all envs | Done (re-earned 2026-06-27) | [`.github/workflows/k8s-manifest-gates.yml`](../.github/workflows/k8s-manifest-gates.yml); [`scripts/ci-k8s-manifest-gates.ps1`](../scripts/ci-k8s-manifest-gates.ps1); path filters `deploy/**` + gate scripts; local `-SkipKubeconform` PASSED |
+| P15-T09b CI kubeconform blocking gate | Done (re-earned 2026-06-27) | blocking kubeconform K8s **1.29.0**; Docker fallback on CI; [`deploy/ci-k8s-gates.md`](../deploy/ci-k8s-gates.md); full gate on CI runner (local full kubeconform blocked by Docker Hub timeout) |
+| P15-T09 CI manifest validation (vertical slice) | Done (re-earned 2026-06-27) | T09a–T09b complete — ADR-0030 blocking CI gate landed |
+
+Task rows: [detail/P15-kubernetes-deployment-container-hardening.md](./detail/P15-kubernetes-deployment-container-hardening.md).
+
+**Gate evidence (P15-T09 slice):** [`.github/workflows/k8s-manifest-gates.yml`](../.github/workflows/k8s-manifest-gates.yml) — PR + push to `main`, path filters `deploy/**`, `scripts/helm-validate.ps1`, `scripts/ci-k8s-manifest-gates.ps1`; job **Helm lint/template + kubeconform** runs `.\scripts\ci-k8s-manifest-gates.ps1` (helm lint **0 failed**, template default/dev/staging/prod, T03–T08 custom assertions, blocking kubeconform); [`deploy/ci-k8s-gates.md`](../deploy/ci-k8s-gates.md) + [`deploy/README.md`](../deploy/README.md) CI section; local `.\scripts\ci-k8s-manifest-gates.ps1 -SkipKubeconform` PASSED (2026-06-27); full kubeconform expected green on CI runner — local full gate blocked by Docker Hub pull timeout (2026-06-27).
+
+**Gate evidence (P14-T01a slice):** `mvn -B -ntp -f backend/pom.xml verify` — **330** tests (+7 from 323 baseline, 2026-06-26).
+
+**Gate evidence (P14-T01b slice):** `mvn -B -ntp -f backend/pom.xml verify` — **456** tests BUILD SUCCESS (2026-06-26); contentmodule **61** tests (T01a `ContentModuleRepositoryTest` 7 + T01b controller/service/access/review/lifecycle 60).
+
+**Gate evidence (P14-T01c slice):** `mvn -B -ntp -f backend/pom.xml verify` — **461** tests BUILD SUCCESS (+5 from 456 T01b baseline, 2026-06-26).
+
+**Gate evidence (P14-T01d slice):** `pnpm -C frontend lint` / `type-check` / `test` (**224**) / `build` — all green (2026-06-26); `ContentModuleListView`, `ContentModuleDetailView`, `ContentModuleLifecycleImpactDialog`, `TemplateContentModuleReferencesPanel`; backend baseline **461** tests (T01a–c).
+
+**Gate evidence (P14-T01 vertical slice):** T01a–T01d Done — backend **461** + frontend **224**; real persistence + role-scoped management UI + template reference panel; audit on mutating governance actions (T01b).
+
+**Gate evidence (P14-T01 UIUX slice):** `pnpm exec playwright test e2e/P14-T01-uiux-evidence.spec.ts e2e/a11y-smoke.spec.ts --config playwright.docker.config.ts` — **3/3** passed (2026-06-26); e2e-uiux-reviewer **PASS** — manifest `frontend/e2e/evidence/P14-T01-uiux-manifest.md` (8 screenshots: content modules list REDBC/GREENBC, create dialog, draft detail, template references panel, lifecycle impact dialog, brand header both brands); a11y smoke — login heading + form controls, content modules `h1`, primary action visible.
+
+**Gate evidence (P14-T01 architecture remediation slice):** `mvn -B -ntp -f backend/pom.xml verify` — **469** tests BUILD SUCCESS (+8 from 461 T01d baseline, 2026-06-26); Checkstyle/PMD/SpotBugs/JaCoCo green. Fixes: (1) TESTER catalog browse blocked — `canBrowseContentModuleCatalog` + `assertCatalogBrowseAllowed` on list/get; (2) draft `contentStructureJson` readback gated by `canViewContentModuleStructure`; (3) list includes modules shared into query group; (4) real impact analysis — `RuntimeGenerationAuditEventRepository` 7d call counts, `templateStopRequired`/`releaseStopRequired`, `ContentModuleLifecycleAuditDetail` in lifecycle audit. **Architecture re-review:** **PASS** (2026-06-26; agent `16ac320a-56d5-43e7-8094-931ff1540893`; prior BLOCK 4 Critical remediated).
+
+**Gate evidence (P14-T01e regression slice):** `mvn -B -ntp -f backend/pom.xml verify` — **471** tests BUILD SUCCESS (+2 from 469 architecture remediation baseline, 2026-06-26); +3 regression tests from retry delegation; Checkstyle/PMD/SpotBugs/JaCoCo green.
+
+**Gate evidence (P14-T02a slice):** `mvn -B -ntp -f backend/pom.xml verify` — **471** tests BUILD SUCCESS (2026-06-26); Flyway `V28__collaboration_work_item.sql`; `CollaborationWorkItemEntity`, `CollaborationWorkItemRepository`, `CollaborationWorkItemService`, `CollaborationWorkItemController`; `GET /api/management/v1/collaboration-work-items` with role queue filtering; `CollaborationWorkItem*Test` **18** (repository 4, service 6, access 6, controller 2); Checkstyle/PMD/SpotBugs/JaCoCo green.
+
+**Gate evidence (P14-T02b slice):** `mvn -B -ntp -f backend/pom.xml verify` — **471** tests BUILD SUCCESS (2026-06-26); Flyway `V29__collaboration_timeout_config.sql`; `CollaborationTimeoutConfigEntity`, `CollaborationTimeoutConfigRepository`, `CollaborationTimeoutConfigService`, `CollaborationTimeoutConfigController`, `CollaborationTimeoutResolver`; GET/PUT `/api/management/v1/collaboration-timeout-config` (global + group override); `GroupAccessService.canMaintainCollaborationTimeoutConfig`; OpenAPI v1 extended; **11** T02b tests (`CollaborationTimeoutConfigServiceTest` 6, `CollaborationTimeoutConfigControllerTest` 4, `GroupAccessServiceTest` collaborationTimeout 1); Checkstyle/PMD/SpotBugs/JaCoCo green.
+
+**Gate evidence (P14-T02c slice):** P14-T02c targeted tests **11/11** green (2026-06-26) — `CollaborationEscalationServiceTest` (5), `CollaborationEscalationServiceDataJpaTest` (3), `CollaborationEscalationSchedulerTest` (1), `CollaborationWorkItemRepositoryTest` escalation queries (2). Flyway `V30__collaboration_work_item_escalation_source.sql`; `CollaborationEscalationService.processDueEscalations` creates ESCALATION queue notification items linked via `source_work_item_id` (dedup via `existsOpenEscalationForSource`); source work item status/queue unchanged; `ManagementAuditRecorder.recordCollaborationTimeoutEscalation`; `CollaborationEscalationScheduler` `@Scheduled` with `docgen.collaboration.escalation.enabled`. Full `mvn -B -ntp -f backend/pom.xml verify` — **475** tests BUILD SUCCESS (2026-06-27); Checkstyle/PMD/SpotBugs/JaCoCo green. **Environment remediation (no code change):** host `TEMP`/`TMP` redirected to `D:\temp` — prior BUILD FAILURE (2026-06-26) was disk space + `AsyncBatchTaskKafkaConsumerTest` (environment/unrelated).
+
+**Gate evidence (P14-T02d slice):** `pnpm -C frontend lint` / `type-check` / `test` (**232**) / `build` — all green (2026-06-27); `CollaborationWorkItemPanel` on `TesterWorkbenchView`, `ApproverWorkbenchView`, `EscalationWorkbenchView`; `CollaborationTimeoutConfigPanel` on `DashboardView` (GLOBAL/GROUP admin maintain permission); `collaboration` store/API/types + `useWorkflowTasks`; Vitest — `CollaborationWorkItemPanel.test.ts` (2), `CollaborationTimeoutConfigPanel.test.ts` (2), `collaboration.test.ts` api (3) + store (2), workbench view tests (3), `DashboardView.test.ts` timeout panel; backend baseline **475** verify (T02a–c).
+
+**Gate evidence (P14-T02 vertical slice):** T02a–T02d Done — backend work item entity + role-queue API (T02a), timeout config API (T02b), escalation scheduler notification-only (T02c **11** targeted + full verify **475**), management UI workbench panels + admin timeout config (T02d); frontend **232** tests green (2026-06-27).
+
+**Gate evidence (P14-T02 E2E slice):** `pnpm exec playwright test e2e/collaboration-todos.spec.ts --config playwright.docker.config.ts` — **3/3** passed (2026-06-27); report `playwright-report/docker/index.html`. **Backend remediation:** `mvn -B -ntp -f backend/pom.xml verify` — **481** tests BUILD SUCCESS (+6 from 475 T02d baseline); fixes — `BatchTestRunEntity` FK constraint alignment for E2E seed data, `CollaborationWorkItemWriter` open-work-item upsert on submit-for-test. **Frontend remediation:** `pnpm -C frontend lint` / `type-check` / `test` (**235**) / `build` green; `roles.ts` — `canAccessTesterWorkbench`, `canAccessApproverWorkbench`, `canAccessCollaborationEscalationWorkbench`, `canAccessLogicalRoute` workbench guards.
+
+**Gate evidence (P14-T02 UIUX slice):** `pnpm exec playwright test e2e/P14-T02-uiux-evidence.spec.ts e2e/a11y-smoke.spec.ts --config playwright.docker.config.ts` — **5/5** passed (2026-06-27); e2e-uiux-reviewer **PASS** — manifest `frontend/e2e/evidence/P14-T02-uiux-manifest.md` (8 screenshots: tester/approver/escalation workbench REDBC/GREENBC, dashboard `CollaborationTimeoutConfigPanel` both brands); a11y smoke — login heading + form controls, content modules `h1`, tester workbench `h1`, timeout config panel heading; no critical UIUX blockers (4 suggestions: GREENBC nav active tint, E2E fixture noise, `lastUpdated` ISO formatting, empty-state evidence).
+
+Task rows: [detail/P14-confirmed-large-domains.md](./detail/P14-confirmed-large-domains.md).
 
 ## Transitional implementation seams (2026-06-24)
 
@@ -159,12 +408,12 @@ Each row lists exit criteria; remove from this index when closed.
 | AD Group resolution | `ConfigAdGroupResolver` — config-file stub, fail-closed | Production LDAP/AD adapter + integration tests | E05-T06, P6 |
 | Async batch transport | Default in-process `@Async`; Kafka optional via `ASYNC_TRANSPORT=kafka` | Production profile uses Kafka + DLT; in-process dev-only documented | P11, M14 |
 | Security forbidden-route audit | Log-only in some paths | Durable security audit event per matrix §13.3 | COR-P06 |
-| QueryDSL / MapStruct / Redisson | Plain JPA + hand mappers + Lettuce | ADR-0037 scheduled items implemented or ADR amended | OPT-D, COR-P05 |
-| Publish gate checklist | UI checklist + binding validation; API policy item partly static | Server-side live gate blocks publish (P19) — **binding + apiPolicy enforced server-side (2026-06-24)**; full P19 checklist remains | COR-T01, P19 |
+| QueryDSL / MapStruct / Redisson | QueryDSL audit + MapStruct apimgmt Done (2026-06-25); Lettuce | ADR-0037 opportunistic expansion ongoing | OPT-D3/D4 Done; COR-P05 |
+| Publish gate checklist | Server-side live gate blocks publish on blockers/thresholds | **Done** (2026-06-25; `PublishGateService` + UI checklist + publish summary dialog) | COR-T01, P19-T06 |
 | Runtime rate limit | Process-local Bucket4j; requests without credential headers bypass filter (auth layer rejects later) | Shared Redis limiter or documented fail-closed at filter; ADR 0031 alignment | COR-B10, OPT-F8 |
 | Workbench vs Dashboard | **Done** — dead workbench views removed; routes redirect to `/dashboard` | COR-T11 decision recorded | COR-T11 |
 | zh-CN / `api.error` catalog | **Done (2026-06-25)** — en/zh `api.error` + primary journey zh-CN bundles | Residual non-primary keys may en-fallback until touched | P20-T06 Done |
-| P19 verifiability | **In Progress (2026-06-25)** — T06/T07 partial; publish gate binding+apiPolicy | Full batch test/coverage/checklist per P19 exit | P19, COR-L03 |
+| P19 verifiability | **Done (2026-06-25)** — T01–T10: batch test, coverage, change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, UI | Residual fidelity depth remains P18 | P19 Done, COR-L03 Done |
 | Service-layer authorization | Route visibility not enforced at API filter | **Documented pattern + contract test (2026-06-24)** — ADR-0001 | COR-P06 |
 | Redisson multi-instance locks | Lettuce cache only | **ADR-0039 evaluation recorded (2026-06-24)**; implement when multi-instance | COR-P05 |
 

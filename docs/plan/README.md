@@ -2,9 +2,13 @@
 
 Execution truth for this project lives here.
 
-**Current baseline:** P0–P11 re-earned **Done** (2026-06-23); **P13** (identity & group
-administration) completed **Done** (2026-06-23). Active phase: **none — no single active
-phase slice**; P12 is the non-active deferred-enhancements catch-all. See
+**Current baseline:** P0–P11 re-earned **Done** (2026-06-23); **P13** **Done** (2026-06-23);
+**P17** per-domain API policy governance **Done** (2026-06-25; Wave 3); **P19**
+verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
+**P14** confirmed large domains **Done** (2026-06-27). **Active phase:** **P15**
+(Kubernetes deployment & container hardening, **In Progress** — **P15-T01 Done**; **P15-T02 Done** re-earned; **P15-T03 Done** re-earned; **P15-T04 Done** re-earned; **P15-T05 Done** re-earned; **P15-T06 Done** re-earned; **P15-T07 Done** re-earned; **P15-T08 Done** re-earned; **P15-T09 Done** re-earned; **P15-T10** open).
+P12 is the non-active deferred-enhancements catch-all. **P18 Not Started**
+(sequence P14 → P15 → P18). See
 [execution-sync-ledger.md](./execution-sync-ledger.md).
 
 ## Layer model
@@ -48,13 +52,13 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P11 | Batch & async generation | [detail/P11-batch-async.md](detail/P11-batch-async.md) | Done |
 | P12 | Deferred enhancements | [master-plan.md](./master-plan.md) (catch-all, non-active) | Not Started |
 | P13 | Identity & group administration | [detail/P13-identity-group-administration.md](detail/P13-identity-group-administration.md) | Done |
-| P14 | Confirmed large domains | [detail/P14-confirmed-large-domains.md](detail/P14-confirmed-large-domains.md) | Not Started |
-| P15 | Kubernetes deployment & container hardening | [detail/P15-kubernetes-deployment-container-hardening.md](detail/P15-kubernetes-deployment-container-hardening.md) | Not Started |
+| P14 | Confirmed large domains | [detail/P14-confirmed-large-domains.md](detail/P14-confirmed-large-domains.md) | Done (2026-06-27) |
+| P15 | Kubernetes deployment & container hardening | [detail/P15-kubernetes-deployment-container-hardening.md](detail/P15-kubernetes-deployment-container-hardening.md) | In Progress (2026-06-27; P15-T01 + T02 + T03 + T04 + T05 + T06 + T07 + T08 Done) |
 | P16 | Template & version lifecycle governance completeness | [detail/P16-lifecycle-version-governance.md](detail/P16-lifecycle-version-governance.md) | Not Started |
-| P17 | Per-domain API policy governance | [detail/P17-api-policy-domain-governance.md](detail/P17-api-policy-domain-governance.md) | Not Started |
+| P17 | Per-domain API policy governance | [detail/P17-api-policy-domain-governance.md](detail/P17-api-policy-domain-governance.md) | Done (2026-06-25; Wave 3) |
 | P18 | Structured authoring & rendering-fidelity engine | [detail/P18-structured-authoring-fidelity-engine.md](detail/P18-structured-authoring-fidelity-engine.md) | Not Started |
-| P19 | Template verifiability, publish gate & decision forms | [detail/P19-verifiability-publish-gate.md](detail/P19-verifiability-publish-gate.md) | Not Started |
-| P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | In Progress (T06 open) |
+| P19 | Template verifiability, publish gate & decision forms | [detail/P19-verifiability-publish-gate.md](detail/P19-verifiability-publish-gate.md) | Done (2026-06-25; T01–T10) |
+| P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | Done (2026-06-25) |
 
 ## First delivery target (thin vertical slice) — achieved
 
@@ -63,16 +67,16 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 
 ## Next focus
 
-P13 (identity & group administration) is **Done** (2026-06-23) — GLOBAL/GROUP admins manage
-users and business groups through the management API + UI, with fail-closed privilege-escalation
-protection, audit, and green quality gates (local account store is the authorization authority,
-ADR 0036). See [detail/P13-identity-group-administration.md](detail/P13-identity-group-administration.md).
-There is currently **no single active phase slice**. P12 (deferred enhancements) remains a
-non-active catch-all; P14 (confirmed large domains) is the next planned large slice. **P16–P20**
-were added 2026-06-23 from a deep functional-gap
-review — lifecycle/version governance (P16), per-domain API policy governance (P17),
-structured authoring & fidelity engine (P18), verifiability/publish-gate + decision forms
-(P19), and i18n multi-locale + UI upgradeability (P20); all `Not Started`.
+**P14 Done** (2026-06-27) — confirmed large domains all three vertical slices complete:
+**P14-T01** clause/content module (T01a–T01e; backend **469**; frontend **224**; architecture re-review **PASS**);
+**P14-T02** collaboration to-dos + timeout escalation (T02a–T02d; E2E **3/3**; backend **481**; frontend **235**);
+**P14-T03** template export/import (T03a–T03c; OpenAPI contract; E2E **2/2**; backend **481**; frontend **235+**).
+See [detail/P14-confirmed-large-domains.md](detail/P14-confirmed-large-domains.md).
+
+**Active phase:** **P15** (Kubernetes deployment & container hardening, **In Progress**).
+**P15-T01** container hardening — **Done** (T01a–T01c, 2026-06-27). **P15-T02** Helm chart scaffold — **Done** (T02a–T02c, re-earned 2026-06-27). **P15-T03** configuration & secrets — **Done** (T03a–T03c, re-earned 2026-06-27). **P15-T04** Service + Ingress + cert-manager TLS — **Done** (T04a–T04c, re-earned 2026-06-27). **P15-T05** HPA (CPU/memory + custom metrics) — **Done** (T05a–T05b, re-earned 2026-06-27). **P15-T06** default-deny NetworkPolicy + explicit allow — **Done** (T06a–T06b, re-earned 2026-06-27). **P15-T07** health probes (`/healthz` + `/readyz`) — **Done** (T07a–T07c, re-earned 2026-06-27). **P15-T08** blue-green release — **Done** (T08a–T08c, re-earned 2026-06-27). **P15-T09** CI manifest validation — **Done** (T09a–T09b, re-earned 2026-06-27). **Next:** **P15-T10** deployment docs + phase close. **P18** (structured authoring &
+rendering-fidelity engine) **Not Started** — queued after P15. P12 (deferred enhancements)
+remains a non-active catch-all.
 
 ## Optimization backlogs
 

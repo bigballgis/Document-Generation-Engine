@@ -1,6 +1,7 @@
 package com.bank.docgen.apimgmt.service;
 
 import com.bank.docgen.apimgmt.api.ApiPolicyImpactPreviewView;
+import com.bank.docgen.apimgmt.api.SaveDefaultRouteRequest;
 import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
@@ -8,12 +9,14 @@ import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -48,9 +51,7 @@ public class ApiPolicyImpactPreviewService {
             UpsertApiPolicyRequest request,
             ManagementSessionClaims session
     ) {
-        if (!groupAccessService.canManageApiPolicy(session)) {
-            throw new ApiManagementAccessDeniedException();
-        }
+        requireApiAdmin(session);
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
         Optional<ApiPolicyEntity> existing = apiPolicyRepository.findByTemplateId(templateId);
 
@@ -76,6 +77,12 @@ public class ApiPolicyImpactPreviewService {
         boolean blocking = hasCandidateDefaultRoute && !callableReleaseVersions.contains(candidateDefaultRoute);
         boolean defaultRouteImpacted = changedAreas.contains("DEFAULT_ROUTE_TARGET");
         List<String> warnings = buildWarnings(blocking, defaultRouteImpacted);
+        String contractDiffSummary = defaultRouteImpacted
+                ? buildDefaultRouteContractDiff(existing, candidateDefaultRoute)
+                : null;
+        String idempotencyImpactSummary = defaultRouteImpacted
+                ? "api.apimgmt.policyImpact.idempotencyDefaultRouteGuard"
+                : null;
 
         return new ApiPolicyImpactPreviewView(
                 changedAreas,
@@ -84,22 +91,65 @@ public class ApiPolicyImpactPreviewService {
                 defaultRouteImpacted,
                 currentPolicyVersion,
                 nextPolicyVersion,
-                summaryMessageKey(blocking, warnings.isEmpty())
+                summaryMessageKey(blocking, warnings.isEmpty()),
+                contractDiffSummary,
+                idempotencyImpactSummary
         );
+    }
+
+    @Transactional(readOnly = true)
+    public ApiPolicyImpactPreviewView previewDefaultRoute(
+            UUID templateId,
+            SaveDefaultRouteRequest request,
+            ManagementSessionClaims session
+    ) {
+        requireApiAdmin(session);
+        TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
+        Optional<ApiPolicyEntity> existing = apiPolicyRepository.findByTemplateId(templateId);
+        int currentPolicyVersion = existing.map(ApiPolicyEntity::getPolicyVersion).orElse(0);
+        String candidateDefaultRoute = request.defaultRouteReleaseVersion();
+        String currentDefaultRoute = existing.map(ApiPolicyEntity::getDefaultRouteReleaseVersion).orElse(null);
+        boolean defaultRouteImpacted = !Objects.equals(currentDefaultRoute, candidateDefaultRoute);
+        List<String> callableReleaseVersions = resolveCallableReleaseVersions(template);
+        boolean blocking = candidateDefaultRoute != null
+                && !candidateDefaultRoute.isBlank()
+                && !callableReleaseVersions.contains(candidateDefaultRoute);
+        List<String> warnings = buildWarnings(blocking, defaultRouteImpacted);
+
+        return new ApiPolicyImpactPreviewView(
+                List.of("DEFAULT_ROUTE_TARGET"),
+                blocking,
+                warnings,
+                defaultRouteImpacted,
+                currentPolicyVersion,
+                currentPolicyVersion + 1,
+                summaryMessageKey(blocking, warnings.isEmpty()),
+                buildDefaultRouteContractDiff(existing, candidateDefaultRoute),
+                defaultRouteImpacted ? "api.apimgmt.policyImpact.idempotencyDefaultRouteGuard" : null
+        );
+    }
+
+    private void requireApiAdmin(ManagementSessionClaims session) {
+        if (!groupAccessService.canManageApiPolicy(session)) {
+            throw new ApiManagementAccessDeniedException();
+        }
     }
 
     private List<String> resolveCallableReleaseVersions(TemplateEntity template) {
         if (template.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED) {
             return List.of();
         }
-        String releaseVersion = template.getReleaseVersion();
-        if (releaseVersion == null || releaseVersion.isBlank()) {
-            return List.of();
-        }
-        return templateVersionRepository.findByTemplateIdAndReleaseVersion(template.getId(), releaseVersion)
+        return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(template.getId()).stream()
                 .filter(version -> version.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED)
-                .map(version -> List.of(releaseVersion))
-                .orElseGet(List::of);
+                .map(TemplateVersionEntity::getReleaseVersion)
+                .filter(releaseVersion -> releaseVersion != null && !releaseVersion.isBlank())
+                .toList();
+    }
+
+    private String buildDefaultRouteContractDiff(Optional<ApiPolicyEntity> existing, String candidateDefaultRoute) {
+        String currentTarget = existing.map(ApiPolicyEntity::getDefaultRouteReleaseVersion).orElse(null);
+        return "currentTarget=" + (currentTarget == null ? "none" : currentTarget)
+                + ",candidateTarget=" + (candidateDefaultRoute == null ? "none" : candidateDefaultRoute);
     }
 
     private List<String> buildWarnings(boolean blocking, boolean defaultRouteImpacted) {

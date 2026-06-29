@@ -273,6 +273,93 @@ AD Group 用于 API 调用授权。
 - 模板编排负责锚点内容编排。
 - 生成文档时如果母版锚点缺失，则生成失败并提示错误。
 
+#### 2.6.1 结构化内容树 Structured content tree（P18-T01）
+
+锚点绑定（`anchor_binding.structured_content_json`）持久化一棵受控 v1 节点矩阵树，而非任意 HTML/CSS。JSON 根对象包含 `nodes` 数组；每个节点包含 `type` 及类型相关字段。schema 资源：`backend/src/main/resources/authoring/structured-content-v1.schema.json`；运行时校验：`StructuredContentSchemaValidator`（ADR-0019 / [P18](../plan/detail/P18-structured-authoring-fidelity-engine.md)）。
+
+**块级节点：** `sectionHeading`、`paragraph`、`list`、`conditionBlock`、`loopBlock`、`tableComponentRef`
+
+**行内节点：** `textRun`（兼容别名 `text`）、`variable`、`emphasis`、`underline`、`lineBreak`
+
+**引用节点：** `contentModuleRef`、`imageRef`、`qrBarcodeRef`、`sealRef`、`attachmentListRef`、`styleRef`
+
+**禁止：** 未知节点类型；`html`/`rawHtml`/`css` 等原始 HTML 字段；文本中的 script/iframe/javascript/absolute positioning 等构造。
+
+#### 2.6.2 节点矩阵保真校验 Node-matrix fidelity validation（P18-T02）
+
+`NodeMatrixValidationService` 对已解析的内容树进行分级校验，返回 `StructuredContentValidationResult`（`blockers` / `warnings`）。每条 issue 含 `FidelityWarningCode`、`messageKey`、节点 `location`、不含敏感原文的 `detectionSummary` 与 `suggestion`。
+
+**Blocker（阻止发布）：** 未声明变量引用（`UNRESOLVED_VARIABLE`）、不支持节点类型（`UNSUPPORTED_NODE`）等。
+
+**Warning（摘要 + 确认）：** 低风险缩放差异（`IMAGE_SCALING_ADJUSTED`）等。
+
+绑定保存与 `validateBindings` 路径通过 `TemplateService.computeBindingStatus` 合并节点 blockers → `BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE`，进而阻塞 `PublishGateService` 锚点完整性检查项。
+
+#### 2.6.3 母版样式目录与有限直接格式 Master style catalog & direct format（P18-T03）
+
+`MasterStyleCatalogService` 从已批准母版样式目录（v1 过渡实现：`authoring/default-master-style-catalog-v1.json`）加载可用样式（`styleKey`、适用节点类型、渲染用途）。内容树中的 `styleRef` 必须解析到目录条目且适用于当前节点类型；缺失/未批准/不适用 → blocker（`MISSING_STYLE_REFERENCE` / `INAPPLICABLE_STYLE`）。
+
+**有限直接格式白名单：** `fontFamily`、`fontSize`、`textColor`、`lineSpacing`、`spacingBefore`、`spacingAfter`、`firstLineIndent`、`leftIndent`、`rightIndent`。白名单外字段 → `DIRECT_FORMAT_OUT_OF_WHITELIST`；页边距/页眉页脚/纸张/分栏等全局版式字段 → `DIRECT_FORMAT_GLOBAL_LAYOUT`。
+
+#### 2.6.4 结构化表格组件 Structured table component（P18-T04）
+
+`TableComponentService` 校验 v1 表格组件定义（`columnSchema`、表头行、`repeatHeaderAcrossPages`、循环行、合计/页脚行、列宽），并构建 `TableComponentRenderModel` 供渲染路径使用。
+
+**Blocker：** 嵌套表格（`layout.nestedTable`）→ `NESTED_TABLE`；浮动/绝对定位 → `UNRELIABLE_TABLE_LAYOUT`；列 schema/单元格引用无效 → `INVALID_TABLE_COMPONENT`。
+
+内容树中 `tableComponentRef` 节点可内联 `tableComponent` 定义；校验 blockers 经 `TemplateService.computeBindingStatus` 合并进发布门禁。
+
+#### 2.6.5 引用节点 Reference nodes（P18-T05）
+
+`ReferenceNodeService` 校验签章/QR/图片/附件列表引用节点：
+
+- **签章 `sealRef`：** `placement.withinAuthorizedArea=false` → `SEAL_OUTSIDE_AUTHORIZED_AREA` blocker；`applyScaling` → `SEAL_SCALING_NOT_ALLOWED` blocker（签章/QR 不适用图片缩放 warning）
+- **图片 `imageRef`：** `applyScaling` → `IMAGE_SCALING_ADJUSTED` warning（自 T02 迁至本服务）
+- **附件列表 `attachmentListRef`：** 有效 `referenceKey` 解析为 `AttachmentListReferenceModel`
+
+#### 2.6.6 受控多级编号 Controlled numbering（P18-T06）
+
+`NumberingService` 对带 `numbering` 属性的标题节点执行受控多级编号；`loopBlock` 经 `validationIterations` 模拟循环渲染后确定性重排（如 `1` → `1.1` → `1.2`）。
+
+**Blocker：** 重复编号 → `DUPLICATE_NUMBER`；`numberingCrossRef.targetNumber` 无法解析 → `BROKEN_NUMBER_CROSS_REFERENCE`。
+
+#### 2.6.7 Word/HTML 粘贴清洗 Paste cleaning（P18-T07）
+
+`PasteCleaningService` 在编辑时（粘贴前）将 Word/HTML 片段清洗为受控结构化 JSON，并返回 `PasteCleaningResult`（`blocked`、`cleanedStructuredContentJson`、`summary`、`prePasteSnapshotJson`）。
+
+**摘要分类（`PasteCleaningCategory`）：** `TRANSFORMED` / `REMOVED` / `WARNING` / `BLOCKED`；每条 `PasteCleaningSummaryItem` 含 `messageKey`（`paste.summary.*`）与不含源 HTML 敏感明文的 `detectionSummary`。
+
+**v1 转换：** `<p>` → `paragraph` + `textRun`；`<object>` → REMOVED；`position:absolute` → WARNING。
+
+**Blocker（整次粘贴 blocked，无 cleaned JSON）：** `<script>`、`javascript:`、`<iframe>`。
+
+**取消/撤销：** `cancelToPrePaste(result)` 返回 `prePasteSnapshotJson`，恢复粘贴前内容树。
+
+**管理 API（P18-T10）：** `POST /api/management/v1/templates/{templateId}/paste-clean`（`sourceHtml` + `prePasteStructuredContentJson`）；`GET .../master-style-catalog` 只读返回母版样式目录。T10 UI 通过上述 API 展示粘贴摘要并支持 cancel/undo。
+
+#### 2.6.8 发布锁定 Render Profile Publish-locked render profile（P18-T08）
+
+`RenderProfileService` 在模板发布时锁定受控 `renderProfile`（默认 `authoring/default-render-profile-v1.json`，版本 `rp-v1`），持久化至 `template_version.render_profile_version` 与 `render_profile_json`。
+
+**Profile 维度：** 样式映射（`styleMappingPolicy`）、编号（`numberingBehavior`）、表格分页（`tablePaginationPolicy`）、图片缩放（`imageScalingPolicy`）、PDF 转换（`pdfConversionPolicy`）、保真策略（`fidelityPolicy`）。
+
+**锁定规则：** `TemplateLifecycleService.publish` 调用 `lockForPublish`；已锁定版本幂等跳过。运行期 `resolveEffectiveProfile` 忽略 `CallerRenderOverride`（调用方不得覆盖发布配置）；`DocumentGenerationEngine` 与 `DocumentArtifactPipeline` 使用锁定 profile。
+
+**Preview Artifact：** `PreviewGenerationService` 经 `applyPreviewRenderProfileVersion` 写入 `preview_record.render_profile_version`；`PreviewRecordView.renderProfileVersion` 对外暴露。
+
+#### 2.6.9 保真警告聚合与生成面暴露 Fidelity warning aggregation & generation surfacing（P18-T09）
+
+`FidelityValidationService` 在预览/运行期生成路径聚合 T02–T06 校验引擎产出的 **warnings**（不含 blockers；blockers 仍经 `TemplateService.computeBindingStatus` 阻止发布）。
+
+**聚合范围：** 对模板版本全部锚点绑定，依次调用 `NodeMatrixValidationService`、`MasterStyleCatalogService`、`TableComponentService`、`ReferenceNodeService`、`NumberingService`；仅保留 `StructuredContentFidelitySeverity.WARNING` 条目，映射为 `FidelityWarningView`（`code` = `FidelityWarningCode.name()`，`messageKey`，`location`，`artifact` = 锚点 ID，`viewed` 默认 `false`；旧 JSON 仅含 `code`/`messageKey` 时反序列化向后兼容）。
+
+**暴露路径：**
+
+- **预览/批量测试：** `PreviewGenerationService.runTestGenerate` → `PreviewRecordView.fidelityWarnings[]`（持久化至 `preview_record.fidelity_warnings_json`）；`BatchTestGenerationService` 汇总 `warningCount`。
+- **运行期同步生成：** `DocumentGenerationEngine.generate` → `GeneratedDocument.fidelityWarningCodes`；`RuntimeGenerationService` 透传至 `SyncGenerateResult`；`RuntimeTemplateController` 写入响应头 `fidelityWarningCount` / `fidelityWarningCodes`（逗号分隔）。幂等重放路径按当前模板版本重新计算 warnings，不再返回硬编码 stub。
+
+**已移除：** 预览/运行期硬编码 `CONTROLLED_STYLE_FALLBACK` stub；干净内容绑定返回空 warnings 列表。
+
 ### 2.7 模板 Template
 
 模板是基于母版进行锚点内容编排后形成的文档生成资产。
@@ -433,6 +520,39 @@ AD Group 用于 API 调用授权。
 - 条款或内容模块停用或废弃后，已发布且已锁定该模块版本的模板仍按发布时锁定内容生成；模块停用或废弃只阻止后续新的模板发布候选引用该模块版本。
 - 如果业务需要立即停止使用包含问题条款或内容模块的已发布模板，必须通过停用对应模板或发布版本来阻断生成和 API 调用。
 - 条款或内容模块停用或废弃前的影响分析必须覆盖引用模板、引用发布版本、default 路由影响、近期调用摘要、是否需要停用模板或发布版本，以及可替代模块版本建议。
+
+#### 2.9.2.1 产品状态 ↔ 实现映射（P14-T01）
+
+PRD §6.4.2 与 [P14-T01](../plan/detail/P14-confirmed-large-domains.md) 使用产品生命周期：
+`DRAFT` → `PENDING_APPROVAL` → `APPROVED` → `STOPPED` / `DEPRECATED`（逻辑删除，无物理删除）。
+
+持久化采用 **审批状态 + 治理状态** 两轴，与 OpenAPI 内容模块治理契约一致：
+
+| 产品状态（PRD / P14） | `reviewState` | `lifecycleState` | 说明 |
+| --- | --- | --- | --- |
+| 草稿 | `DRAFT` | — | 可编辑；审批不通过后回到此组合。 |
+| 待审批 | `SUBMITTED` | — | 产品名 `PENDING_APPROVAL`；`SUBMIT_FOR_REVIEW` 之后。 |
+| 已批准（可引用） | `APPROVED` | `ACTIVE` | 产品名 `APPROVED`；仅此时可被新的模板发布候选引用。 |
+| 已停用 | `APPROVED` | `STOPPED` | `STOP_USE` 之后；已锁定引用的已发布模板仍按发布版本生成。 |
+| 已废弃 | `APPROVED` | `DEPRECATED` | `DEPRECATE` 之后；终端治理状态，逻辑删除。 |
+
+已确认转换（与 `permission-matrix.md` §5.1、[contract-outline](../api/contract-outline.md) §内容模块治理一致）：
+
+- `DRAFT` →（`SUBMIT_FOR_REVIEW`）→ `SUBMITTED` →（`APPROVE_REVIEW`）→ `APPROVED` + `ACTIVE`。
+- `SUBMITTED` →（`REJECT_REVIEW`）→ `DRAFT`。
+- `APPROVED` + `ACTIVE` →（`STOP_USE`）→ `APPROVED` + `STOPPED` →（`RECOVER`）→ `APPROVED` + `ACTIVE`。
+- `APPROVED` + `STOPPED` →（`DEPRECATE`）→ `APPROVED` + `DEPRECATED`（终端，不可 `RECOVER`）。
+
+实现类：**P14-T01a Done** — `ContentModuleEntity`、`ContentModuleVersionEntity`、
+`ContentModuleReviewState`、`ContentModuleLifecycleState`、
+`ContentModuleRepository`、`ContentModuleVersionRepository`（Flyway `V25__content_module.sql`）。
+**P14-T01b Done** — `ContentModuleController`、`ContentModuleService`、
+`ContentModuleReviewService`、`ContentModuleLifecycleService`、`ContentModuleAccessSupport`
+（OpenAPI 管理 CRUD + 审批/生命周期路由；5 条 `ManagementAuditRecorder.recordContentModule*` 审计事件）。
+**P14-T01c Done** — `TemplateContentModuleReferenceEntity` / `TemplateContentModuleReferenceRepository`、
+`TemplateContentModuleReferenceService`（模板 content-module-references GET/PUT；发布锁定引用）、
+`ContentModuleLifecycleImpactService`（生命周期 impact preview）、
+`PublishGateCheckCode.CONTENT_MODULE_REFERENCES`（Flyway `V27__template_content_module_reference.sql`）。
 
 ### 2.9.3 模板可验证性资产 Template Verifiability Assets
 

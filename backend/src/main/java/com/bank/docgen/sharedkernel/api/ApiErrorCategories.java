@@ -16,6 +16,8 @@ public final class ApiErrorCategories {
     public static final String ENCRYPTION = "ENCRYPTION";
     public static final String NOT_FOUND = "NOT_FOUND";
     public static final String CONFLICT = "CONFLICT";
+    public static final String CONTENT_MODULE = "CONTENT_MODULE";
+    public static final String COLLABORATION = "COLLABORATION";
 
     private ApiErrorCategories() {
     }

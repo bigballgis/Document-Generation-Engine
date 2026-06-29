@@ -28,6 +28,8 @@
         <poi.version>5.3.0</poi.version>
         <commons-io.version>2.18.0</commons-io.version>
         <logstash-logback.version>8.0</logstash-logback.version>
+        <querydsl.version>5.1.0</querydsl.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
         <!-- Quality gates (OPT-B). gate.fail toggles ratchet measure vs enforce. -->
         <gate.fail>true</gate.fail>
         <jacoco.line.min>0.70</jacoco.line.min>
@@ -183,6 +185,24 @@
             <artifactId>resilience4j-retry</artifactId>
             <version>2.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-jpa</artifactId>
+            <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-apt</artifactId>
+            <version>${querydsl.version}</version>
+            <classifier>jakarta</classifier>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -190,6 +210,33 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.querydsl</groupId>
+                            <artifactId>querydsl-apt</artifactId>
+                            <version>${querydsl.version}</version>
+                            <classifier>jakarta</classifier>
+                        </path>
+                        <path>
+                            <groupId>jakarta.persistence</groupId>
+                            <artifactId>jakarta.persistence-api</artifactId>
+                            <version>3.1.0</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-Aquerydsl.includedPackages=com.bank.docgen.audit.persistence</arg>
+                    </compilerArgs>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -250,7 +297,11 @@
                 </dependencies>
                 <configuration>
                     <configLocation>config/checkstyle/checkstyle.xml</configLocation>
+                    <sourceDirectories>
+                        <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                    </sourceDirectories>
                     <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                    <excludes>**/Q*.java</excludes>
                     <violationSeverity>error</violationSeverity>
                     <failOnViolation>${gate.fail}</failOnViolation>
                     <consoleOutput>false</consoleOutput>
@@ -274,6 +325,9 @@
                         <ruleset>config/pmd/ruleset.xml</ruleset>
                     </rulesets>
                     <includeTests>false</includeTests>
+                    <excludeRoots>
+                        <excludeRoot>${project.build.directory}/generated-sources</excludeRoot>
+                    </excludeRoots>
                     <printFailingErrors>true</printFailingErrors>
                     <failOnViolation>${gate.fail}</failOnViolation>
                     <failurePriority>5</failurePriority>
@@ -287,6 +341,14 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <reuseForks>false</reuseForks>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.github.spotbugs</groupId>

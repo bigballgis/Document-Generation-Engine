@@ -83,4 +83,62 @@ public class GroupAccessService {
                 || session.roles().contains("GROUP_ADMIN")
                 || session.roles().contains("AUDIT_ADMIN");
     }
+
+    public boolean canAuthorContentModules(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("TEMPLATE_AUTHOR")
+                || session.roles().contains("MASTER_DESIGNER");
+    }
+
+    /**
+     * Fail-closed catalog browse for management list/detail APIs (permission-matrix §5.1).
+     * Testers may only read referenced modules in test/approval material context, not enumerate.
+     */
+    public boolean canBrowseContentModuleCatalog(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("MASTER_DESIGNER")
+                || session.roles().contains("TEMPLATE_AUTHOR")
+                || session.roles().contains("TEMPLATE_APPROVER");
+    }
+
+    public boolean canViewContentModuleStructure(ManagementSessionClaims session) {
+        return canAuthorContentModules(session) || canDecideContentModuleReviews(session);
+    }
+
+    public boolean canDecideContentModuleReviews(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("TEMPLATE_APPROVER");
+    }
+
+    public boolean canManageContentModuleLifecycle(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN");
+    }
+
+    public boolean canViewCollaborationWorkItems(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("TEMPLATE_AUTHOR")
+                || session.roles().contains("TEMPLATE_TESTER")
+                || session.roles().contains("TEMPLATE_APPROVER");
+    }
+
+    public boolean hasCollaborationWorkItemAdminVisibility(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN");
+    }
+
+    public boolean canMaintainCollaborationTimeoutConfig(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN");
+    }
+
+    public boolean canExportTemplates(ManagementSessionClaims session) {
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("TEMPLATE_AUTHOR");
+    }
 }

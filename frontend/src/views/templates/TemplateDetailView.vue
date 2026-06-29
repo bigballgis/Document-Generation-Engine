@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -11,35 +11,48 @@ import TemplateRuleConfigurator from '@/components/templates/TemplateRuleConfigu
 import TemplatePreviewPanel from '@/components/templates/TemplatePreviewPanel.vue'
 import TemplateTestDataSetPanel from '@/components/templates/TemplateTestDataSetPanel.vue'
 import TemplateCoveragePanel from '@/components/templates/TemplateCoveragePanel.vue'
+import TemplateChangeDiffPanel from '@/components/templates/TemplateChangeDiffPanel.vue'
+import TemplateContentModuleReferencesPanel from '@/components/templates/TemplateContentModuleReferencesPanel.vue'
 import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
 import TemplateReleaseVersionHistoryPanel from '@/components/templates/TemplateReleaseVersionHistoryPanel.vue'
 import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
 import TemplatePublishSummaryDialog from '@/components/templates/TemplatePublishSummaryDialog.vue'
 import TemplateLifecycleDecisionDialog, {
   type LifecycleDecisionDialogMode,
+  type LifecycleDecisionSubmitPayload,
 } from '@/components/templates/TemplateLifecycleDecisionDialog.vue'
+import TemplateExportActions from '@/components/templates/TemplateExportActions.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
-import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
-import { MASTER_DETAIL_PATH_PREFIX, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
+import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
+import { MASTER_DETAIL_PATH_PREFIX, ROUTE_PATH_BY_KEY, ROUTE_KEYS, apiPolicyDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import * as templatesApi from '@/api/templates'
 import { conflictsWithExisting, suggestNextVersions, type SemverBumpLevel } from '@/utils/semver'
 import { resolveTemplateDetailTab, type TemplateDetailTab } from '@/views/templates/templateDetailTabs'
+import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
+import {
+  isPublishGateReady,
+  mapPublishGateChecklistItems,
+} from '@/utils/templateLifecycleDecisionForm'
 import type {
   ApiCredentialSummary,
   BindingValidationResult,
+  ChangeDiffSummary,
+  CoverageSummary,
   DeleteTemplatePayload,
   LifecycleGovernanceAction,
   PreviewRecord,
-  UpsertApiPolicyPayload,
+  PublishGateChecklist,
 } from '@/types/template'
 
 const { t, te } = useI18n()
@@ -56,6 +69,7 @@ const {
   restoreOrDeprecateTemplates,
   manageApiPolicy,
   deleteTemplates,
+  exportTemplates,
 } = useCapabilities()
 const { confirmAction } = useConfirmAction()
 
@@ -73,6 +87,9 @@ const lastPreview = ref<PreviewRecord | null>(null)
 const selectedTestDataSetId = ref<string | null>(null)
 const coverageRefreshToken = ref(0)
 const bindingGateResult = ref<BindingValidationResult | null>(null)
+const publishGateChecklist = ref<PublishGateChecklist | null>(null)
+const publishCoverageSummary = ref<CoverageSummary | null>(null)
+const publishChangeDiffSummary = ref<ChangeDiffSummary | null>(null)
 const loadingPublishGate = ref(false)
 const metadataEditOpen = ref(false)
 const loadFailed = ref(false)
@@ -85,20 +102,6 @@ function resolveDetailTab(value: unknown): DetailTab {
 const activeDetailTab = ref<DetailTab>(resolveDetailTab(route.query.tab))
 const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
 
-const policyOutputFormatOptions = ['DOCX', 'PDF']
-const policyOutputModeOptions = ['SYNC_STREAM', 'ASYNC_CALLBACK', 'INLINE']
-
-const policyForm = reactive<UpsertApiPolicyPayload>({
-  allowedAdGroups: [],
-  defaultRouteReleaseVersion: '1.0.0',
-  outputFormats: ['PDF'],
-  outputModes: ['INLINE'],
-  batchEnabled: false,
-  maxBatchSize: 10,
-  docxEncryptionEnabled: false,
-  pdfEncryptionEnabled: false,
-})
-
 const templateId = computed(() => route.params.templateId as string)
 
 const credentialsSource = computed(() => templatesStore.credentials)
@@ -109,6 +112,12 @@ const { filters: credentialColumnFilters, filteredRows: filteredCredentials } = 
     { key: 'status', getValue: (row) => row.status, matchMode: 'exact' },
     { key: 'createdAt', getValue: (row) => formatDateTime(row.createdAt) },
   ],
+)
+const credentialsCurrentPage = ref(1)
+const { paginatedRows: paginatedCredentials, totalRows: totalCredentialRows } = useCatalogPagination(
+  filteredCredentials,
+  credentialsCurrentPage,
+  CLIENT_TABLE_PAGE_SIZE,
 )
 const sortCredentialsByCreatedAt = rowSortMethod<ApiCredentialSummary>((row) => row.createdAt)
 const credentialStatusFilterOptions = useCredentialStatusFilterOptions()
@@ -177,33 +186,50 @@ const showMetadataEdit = computed(() => {
 const showDeleteTemplateAction = computed(
   () => deleteTemplates.value && template.value?.lifecycleStatus !== 'DELETED',
 )
+const showExportActions = computed(
+  () =>
+    exportTemplates.value &&
+    Boolean(template.value) &&
+    isTemplateExportEligible(template.value!.lifecycleStatus),
+)
 
-const publishGateItems = computed(() => [
-  {
-    key: 'lifecycle',
-    label: t('templates.publishGate.lifecycleReady'),
-    ready: template.value?.lifecycleStatus === 'PENDING_RELEASE',
-    informational: false,
-  },
-  {
-    key: 'releaseVersion',
-    label: t('templates.publishGate.releaseVersionProvided'),
-    ready: Boolean(publishVersion.value.trim()),
-    informational: false,
-  },
-  {
-    key: 'bindings',
-    label: t('templates.publishGate.bindingsValid'),
-    ready: Boolean(bindingGateResult.value && !bindingGateResult.value.summary.blocking),
-    informational: false,
-  },
-  {
-    key: 'apiPolicy',
-    label: t('templates.publishGate.apiPolicyConfigured'),
-    ready: Boolean(templatesStore.apiPolicy),
-    informational: false,
-  },
-])
+function resolvePublishGateItemLabel(item: {
+  checkCode: string
+  messageKey: string
+  summary: string
+}): string {
+  if (te(item.messageKey)) {
+    return t(item.messageKey)
+  }
+  const codeKey = `templates.publishGate.checkCodes.${item.checkCode}`
+  if (te(codeKey)) {
+    return t(codeKey)
+  }
+  return item.summary
+}
+
+const publishGateItems = computed(() => {
+  const apiItems = publishGateChecklist.value
+    ? mapPublishGateChecklistItems(publishGateChecklist.value.items, resolvePublishGateItemLabel)
+    : []
+  return [
+    {
+      key: 'releaseVersion',
+      label: t('templates.publishGate.releaseVersionProvided'),
+      ready: Boolean(publishVersion.value.trim()),
+      informational: false,
+    },
+    ...apiItems,
+  ]
+})
+
+const publishGateReady = computed(() =>
+  isPublishGateReady({
+    checklistReady: Boolean(publishGateChecklist.value?.ready),
+    releaseVersion: publishVersion.value,
+    versionConflict: publishVersionConflict.value,
+  }),
+)
 
 const suggestedVersions = computed(() =>
   suggestNextVersions(template.value?.releaseVersion ?? null),
@@ -211,11 +237,6 @@ const suggestedVersions = computed(() =>
 
 const publishVersionConflict = computed(() =>
   conflictsWithExisting(publishVersion.value, publishedReleaseVersions.value),
-)
-
-const publishGateReady = computed(() =>
-  publishGateItems.value.filter((item) => !item.informational).every((item) => item.ready) &&
-  !publishVersionConflict.value,
 )
 
 const publishBumpOptions = computed(() => [
@@ -257,6 +278,9 @@ const showAuthoringSection = computed(
     template.value?.lifecycleStatus !== 'STOPPED' &&
     template.value?.lifecycleStatus !== 'DEPRECATED',
 )
+const canEditContentModuleReferences = computed(
+  () => authorTemplates.value && template.value?.lifecycleStatus === 'DRAFT',
+)
 const showTestGenerate = computed(
   () =>
     authorTemplates.value &&
@@ -297,6 +321,9 @@ watch(
   async (active) => {
     if (!active) {
       bindingGateResult.value = null
+      publishGateChecklist.value = null
+      publishCoverageSummary.value = null
+      publishChangeDiffSummary.value = null
       publishedReleaseVersions.value = []
       return
     }
@@ -305,11 +332,23 @@ watch(
     loadingPublishGate.value = true
     try {
       await templatesStore.fetchApiPolicy(templateId.value)
-      bindingGateResult.value = await templatesStore.validateBindings(templateId.value)
-      const versions = await templatesApi.fetchReleaseVersions(templateId.value)
+      const [bindings, checklist, coverage, changeDiff, versions] = await Promise.all([
+        templatesStore.validateBindings(templateId.value),
+        templatesApi.fetchPublishGate(templateId.value),
+        templatesApi.getTemplateCoverage(templateId.value),
+        templatesApi.fetchChangeDiff(templateId.value),
+        templatesApi.fetchReleaseVersions(templateId.value),
+      ])
+      bindingGateResult.value = bindings
+      publishGateChecklist.value = checklist
+      publishCoverageSummary.value = coverage
+      publishChangeDiffSummary.value = changeDiff
       publishedReleaseVersions.value = versions.map((entry) => entry.releaseVersion)
     } catch {
       bindingGateResult.value = null
+      publishGateChecklist.value = null
+      publishCoverageSummary.value = null
+      publishChangeDiffSummary.value = null
       publishedReleaseVersions.value = []
     } finally {
       loadingPublishGate.value = false
@@ -353,16 +392,10 @@ async function loadPolicyData() {
     templatesStore.fetchApiPolicy(templateId.value),
     templatesStore.fetchCredentials(templateId.value),
   ])
-  if (templatesStore.apiPolicy) {
-    policyForm.allowedAdGroups = [...templatesStore.apiPolicy.allowedAdGroups]
-    policyForm.defaultRouteReleaseVersion = templatesStore.apiPolicy.defaultRouteReleaseVersion
-    policyForm.outputFormats = [...templatesStore.apiPolicy.outputFormats]
-    policyForm.outputModes = [...templatesStore.apiPolicy.outputModes]
-    policyForm.batchEnabled = templatesStore.apiPolicy.batchEnabled
-    policyForm.maxBatchSize = templatesStore.apiPolicy.maxBatchSize
-    policyForm.docxEncryptionEnabled = templatesStore.apiPolicy.docxEncryptionEnabled
-    policyForm.pdfEncryptionEnabled = templatesStore.apiPolicy.pdfEncryptionEnabled
-  }
+}
+
+function openApiPolicyConsole() {
+  router.push(apiPolicyDetailPath(templateId.value))
 }
 
 function backToList() {
@@ -403,16 +436,8 @@ async function handleTestDecision(decision: 'PASSED' | 'FAILED') {
     decisionDialogOpen.value = true
     return
   }
-  try {
-    await templatesStore.recordTestDecision(templateId.value, {
-      decision,
-      commentSummary: lifecycleComment.value || undefined,
-    })
-    lifecycleComment.value = ''
-    ElMessage.success(t('templates.lifecycle.testDecisionSuccess'))
-  } catch {
-    ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
-  }
+  decisionDialogMode.value = 'test-pass'
+  decisionDialogOpen.value = true
 }
 
 function openApprovalRejectDialog() {
@@ -420,14 +445,10 @@ function openApprovalRejectDialog() {
   decisionDialogOpen.value = true
 }
 
-async function submitNegativeLifecycleDecision(payload: {
-  reasonCategory: string
-  impactSummary: string
-  commentSummary?: string
-}) {
-  const isTestFail = decisionDialogMode.value === 'test-fail'
+async function submitLifecycleDecision(payload: LifecycleDecisionSubmitPayload) {
+  const mode = decisionDialogMode.value
   try {
-    if (isTestFail) {
+    if (mode === 'test-fail') {
       await templatesStore.recordTestDecision(templateId.value, {
         decision: 'FAILED',
         reasonCategory: payload.reasonCategory,
@@ -435,12 +456,37 @@ async function submitNegativeLifecycleDecision(payload: {
         commentSummary: payload.commentSummary,
       })
       ElMessage.success(t('templates.lifecycle.testDecisionSuccess'))
-    } else {
+    } else if (mode === 'test-pass') {
+      await templatesStore.recordTestDecision(templateId.value, {
+        decision: 'PASSED',
+        commentSummary: payload.commentSummary,
+        fidelityViewedConfirmed: payload.fidelityViewedConfirmed,
+        coverageViewedConfirmed: payload.coverageViewedConfirmed,
+        previewViewedConfirmed: payload.previewViewedConfirmed,
+        exceptionIntervention: payload.exceptionIntervention,
+        exceptionReason: payload.exceptionReason,
+        secondaryConfirmed: payload.secondaryConfirmed,
+      })
+      ElMessage.success(t('templates.lifecycle.testDecisionSuccess'))
+    } else if (mode === 'approval-reject') {
       await templatesStore.recordApprovalDecision(templateId.value, {
         decision: 'REJECTED',
         reasonCategory: payload.reasonCategory,
         impactSummary: payload.impactSummary,
         commentSummary: payload.commentSummary,
+        remediationTestRecordId: payload.remediationTestRecordId,
+        remediationChangeDiffRef: payload.remediationChangeDiffRef,
+        remediationChecklistCode: payload.remediationChecklistCode,
+      })
+      ElMessage.success(t('templates.lifecycle.approvalDecisionSuccess'))
+    } else if (mode === 'approval-approve') {
+      await templatesStore.recordApprovalDecision(templateId.value, {
+        decision: 'APPROVED',
+        commentSummary: payload.commentSummary,
+        keyEvidenceConfirmed: payload.keyEvidenceConfirmed,
+        exceptionIntervention: payload.exceptionIntervention,
+        exceptionReason: payload.exceptionReason,
+        secondaryConfirmed: payload.secondaryConfirmed,
       })
       ElMessage.success(t('templates.lifecycle.approvalDecisionSuccess'))
     }
@@ -468,16 +514,8 @@ async function handleApprovalDecision(decision: 'APPROVED' | 'REJECTED') {
     openApprovalRejectDialog()
     return
   }
-  try {
-    await templatesStore.recordApprovalDecision(templateId.value, {
-      decision,
-      commentSummary: lifecycleComment.value || undefined,
-    })
-    lifecycleComment.value = ''
-    ElMessage.success(t('templates.lifecycle.approvalDecisionSuccess'))
-  } catch {
-    ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
-  }
+  decisionDialogMode.value = 'approval-approve'
+  decisionDialogOpen.value = true
 }
 
 async function handlePublish() {
@@ -611,50 +649,6 @@ async function handleMetadataUpdate(payload: { name: string; description: string
   }
 }
 
-async function handleSavePolicy() {
-  const payload = { ...policyForm }
-  try {
-    const impactMessage = await buildPolicyImpactPreviewMessage(payload)
-    await ElMessageBox.confirm(impactMessage, t('templates.policy.impact.title'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning',
-    })
-  } catch {
-    return
-  }
-
-  try {
-    await templatesStore.saveApiPolicy(templateId.value, payload)
-    ElMessage.success(t('templates.policy.saveSuccess'))
-  } catch {
-    ElMessage.error(errorMessage.value || t('templates.error.savePolicy'))
-  }
-}
-
-async function buildPolicyImpactPreviewMessage(payload: UpsertApiPolicyPayload): Promise<string> {
-  try {
-    const impact = await templatesStore.previewApiPolicyImpact(templateId.value, payload)
-    const currentVersion = impact.currentPolicyVersion ?? templatesStore.apiPolicy?.policyVersion ?? 0
-    const nextVersion = impact.nextPolicyVersion ?? currentVersion + 1
-    const fields =
-      impact.changedFields.length > 0
-        ? impact.changedFields.join(', ')
-        : t('templates.policy.impact.noFieldChange')
-    return [
-      t('templates.policy.impact.versionChange', {
-        currentVersion,
-        nextVersion,
-      }),
-      t('templates.policy.impact.changedFields', { fields }),
-      t('templates.policy.impact.confirmPrompt'),
-    ].join('\n\n')
-  } catch {
-    ElMessage.error(errorMessage.value || t('templates.error.previewPolicyImpact'))
-    throw new Error('policy-impact-preview-failed')
-  }
-}
-
 async function handleCreateCredential() {
   try {
     const created = await templatesStore.createCredential(templateId.value)
@@ -750,6 +744,11 @@ async function handleDeleteTemplate() {
           <p>{{ t('templates.detail.groupLabel', { groupCode: template.groupCode }) }}</p>
         </div>
         <div class="header-actions">
+          <TemplateExportActions
+            v-if="showExportActions"
+            :template-id="templateId"
+            :external-id="template.externalId"
+          />
           <el-button
             v-if="showDeleteTemplateAction"
             type="danger"
@@ -997,6 +996,14 @@ async function handleDeleteTemplate() {
           :initial-rules="template.rules ?? []"
           @updated="loadTemplate"
         />
+        <TemplateContentModuleReferencesPanel
+          v-if="template.groupCode"
+          :template-id="templateId"
+          :group-code="template.groupCode"
+          :editable="canEditContentModuleReferences"
+          :refresh-token="coverageRefreshToken"
+          @updated="loadTemplate"
+        />
         <h3>{{ t('templates.testDataSets.title') }}</h3>
         <TemplateTestDataSetPanel
           :template-id="templateId"
@@ -1004,6 +1011,10 @@ async function handleDeleteTemplate() {
           @batch-complete="() => { coverageRefreshToken += 1 }"
         />
         <TemplateCoveragePanel
+          :template-id="templateId"
+          :refresh-token="coverageRefreshToken"
+        />
+        <TemplateChangeDiffPanel
           :template-id="templateId"
           :refresh-token="coverageRefreshToken"
         />
@@ -1027,70 +1038,42 @@ async function handleDeleteTemplate() {
       <el-card shadow="never" class="section-card">
         <h2>{{ t('templates.policy.title') }}</h2>
         <el-skeleton v-if="templatesStore.loadingPolicy" :rows="4" animated />
-        <template v-else>
-          <div class="policy-form">
-            <el-form-item
-              v-if="templatesStore.apiPolicy"
-              :label="t('templates.policy.policyVersion')"
-            >
-              <el-input :model-value="String(templatesStore.apiPolicy.policyVersion)" readonly />
-            </el-form-item>
-            <el-form-item :label="t('templates.policy.defaultRouteReleaseVersion')">
-              <el-input v-model="policyForm.defaultRouteReleaseVersion" />
-            </el-form-item>
-            <el-form-item :label="t('templates.policy.allowedAdGroups')">
-              <AppSearchSelect
-                v-model="policyForm.allowedAdGroups"
-                multiple
-                filterable
-                allow-create
-                default-first-option
-                :placeholder="t('templates.policy.allowedAdGroupsPlaceholder')"
-              />
-            </el-form-item>
-            <el-form-item :label="t('templates.policy.outputFormats')">
-              <AppSearchSelect v-model="policyForm.outputFormats" multiple filterable allow-create>
-                <el-option
-                  v-for="format in policyOutputFormatOptions"
-                  :key="format"
-                  :label="format"
-                  :value="format"
-                />
-              </AppSearchSelect>
-            </el-form-item>
-            <el-form-item :label="t('templates.policy.outputModes')">
-              <AppSearchSelect v-model="policyForm.outputModes" multiple filterable allow-create>
-                <el-option
-                  v-for="mode in policyOutputModeOptions"
-                  :key="mode"
-                  :label="mode"
-                  :value="mode"
-                />
-              </AppSearchSelect>
-            </el-form-item>
-            <el-form-item :label="t('templates.policy.batchEnabled')">
-              <el-switch v-model="policyForm.batchEnabled" />
-            </el-form-item>
-            <el-form-item :label="t('templates.policy.maxBatchSize')">
-              <el-input-number v-model="policyForm.maxBatchSize" :min="1" :max="1000" />
-            </el-form-item>
-            <el-form-item :label="t('templates.policy.docxEncryptionEnabled')">
-              <el-switch v-model="policyForm.docxEncryptionEnabled" />
-            </el-form-item>
-            <el-form-item :label="t('templates.policy.pdfEncryptionEnabled')">
-              <el-switch v-model="policyForm.pdfEncryptionEnabled" />
-            </el-form-item>
-          </div>
+        <template v-else-if="templatesStore.apiPolicy">
+          <dl class="policy-summary">
+            <div>
+              <dt>{{ t('templates.policy.policyVersion') }}</dt>
+              <dd>v{{ templatesStore.apiPolicy.policyVersion }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('templates.policy.defaultRouteReleaseVersion') }}</dt>
+              <dd>{{ templatesStore.apiPolicy.defaultRouteReleaseVersion }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('templates.policy.allowedAdGroups') }}</dt>
+              <dd>{{ templatesStore.apiPolicy.allowedAdGroups.join(', ') || '—' }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('templates.policy.outputFormats') }}</dt>
+              <dd>{{ templatesStore.apiPolicy.outputFormats.join(', ') }}</dd>
+            </div>
+          </dl>
+          <p class="policy-console-hint">{{ t('apiPolicy.detail.templateTabHint') }}</p>
           <div class="action-row">
-            <el-button type="primary" :loading="templatesStore.submitting" @click="handleSavePolicy">
-              {{ t('templates.policy.save') }}
-            </el-button>
-            <el-button :loading="templatesStore.submitting" @click="handleCreateCredential">
-              {{ t('templates.policy.createCredential') }}
+            <el-button type="primary" @click="openApiPolicyConsole">
+              {{ t('apiPolicy.detail.openConsole') }}
             </el-button>
           </div>
-          <h3>{{ t('templates.policy.credentialsTitle') }}</h3>
-          <AppDataTable :data="filteredCredentials" empty-text="">
+        </template>
+      </el-card>
+
+      <el-card shadow="never" class="section-card">
+        <h2>{{ t('templates.policy.credentialsTitle') }}</h2>
+        <div class="action-row action-row--compact">
+          <el-button :loading="templatesStore.submitting" @click="handleCreateCredential">
+            {{ t('templates.policy.createCredential') }}
+          </el-button>
+        </div>
+        <AppDataTable :data="paginatedCredentials" empty-text="">
             <template #empty>
               <el-empty :description="t('templates.policy.noCredentials')" />
             </template>
@@ -1144,7 +1127,11 @@ async function handleDeleteTemplate() {
               </template>
             </el-table-column>
           </AppDataTable>
-        </template>
+        <AppTablePagination
+          v-model:current-page="credentialsCurrentPage"
+          :page-size="CLIENT_TABLE_PAGE_SIZE"
+          :total="totalCredentialRows"
+        />
       </el-card>
 
       <el-card v-if="showPolicyPanel" shadow="never" class="section-card">
@@ -1174,7 +1161,9 @@ async function handleDeleteTemplate() {
       :template-name="template.name"
       :release-version="publishVersion"
       :gate-items="publishGateItems"
-      :bindings-ready="Boolean(bindingGateResult && !bindingGateResult.summary.blocking)"
+      :coverage-summary="publishCoverageSummary"
+      :change-diff-summary="publishChangeDiffSummary"
+      :preview-comparison="lastPreview?.previewComparison ?? null"
       :loading="templatesStore.submitting"
       @confirm="confirmPublishFromSummary"
     />
@@ -1184,7 +1173,7 @@ async function handleDeleteTemplate() {
       :mode="decisionDialogMode"
       :loading="templatesStore.submitting"
       :initial-comment="lifecycleComment"
-      @submit="submitNegativeLifecycleDecision"
+      @submit="submitLifecycleDecision"
     />
 
     <el-dialog
@@ -1336,10 +1325,35 @@ async function handleDeleteTemplate() {
   padding-left: 1.25rem;
 }
 
-.policy-form {
+.policy-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 0.75rem 1rem;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+
+  div {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: 0.75rem;
+  }
+
+  dt {
+    margin: 0;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.policy-console-hint {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.action-row--compact {
   margin-bottom: 1rem;
 }
 </style>

@@ -1,36 +1,28 @@
 package com.bank.docgen.template.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.api.BindingValidationSummaryView;
-import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
 import com.bank.docgen.template.api.PublishTemplateRequest;
-import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
-import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
+import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -52,7 +44,15 @@ class TemplateLifecyclePublishGateTest {
     @Mock
     private MessageResolver messageResolver;
     @Mock
-    private ApiPolicyRepository apiPolicyRepository;
+    private PublishGateService publishGateService;
+    @Mock
+    private DecisionFormService decisionFormService;
+    @Mock
+    private TemplateContentModuleReferenceService contentModuleReferenceService;
+    @Mock
+    private CollaborationWorkItemWriter collaborationWorkItemWriter;
+    @Mock
+    private com.bank.docgen.authoring.structured.RenderProfileService renderProfileService;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -71,7 +71,11 @@ class TemplateLifecyclePublishGateTest {
                 groupAccessService,
                 lifecycleImpactPreviewService,
                 messageResolver,
-                apiPolicyRepository
+                publishGateService,
+                decisionFormService,
+                contentModuleReferenceService,
+                collaborationWorkItemWriter,
+                renderProfileService
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",
@@ -120,10 +124,11 @@ class TemplateLifecyclePublishGateTest {
     }
 
     @Test
-    void publishBlockedWhenBindingsHaveBlockingIssues() {
+    void publishBlockedWhenPublishGateNotReady() {
         when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
-        when(templateService.validateBindings(templateId, groupAdmin)).thenReturn(blockingBindings());
+        org.mockito.Mockito.doThrow(new TemplateValidationException("api.error.template.publishGateBlocked"))
+                .when(publishGateService).assertReady(templateId, groupAdmin);
 
         assertThatThrownBy(() -> service.publish(templateId, new PublishTemplateRequest("1.0.0"), groupAdmin))
                 .isInstanceOf(TemplateValidationException.class)
@@ -135,6 +140,11 @@ class TemplateLifecyclePublishGateTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.TESTING);
         when(groupAccessService.canDecideTemplateTests(tester)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, tester)).thenReturn(template);
+        org.mockito.Mockito.doThrow(new TemplateValidationException("api.error.template.decisionReasonCategoryRequired"))
+                .when(decisionFormService).validateTestDecision(
+                        new LifecycleDecisionRequest(LifecycleDecision.FAILED, "Needs fixes", null, "Binding broken"),
+                        tester
+                );
 
         assertThatThrownBy(() -> service.recordTestDecision(
                 templateId,
@@ -150,6 +160,11 @@ class TemplateLifecyclePublishGateTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.TESTING);
         when(groupAccessService.canDecideTemplateTests(tester)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, tester)).thenReturn(template);
+        org.mockito.Mockito.doThrow(new TemplateValidationException("api.error.template.decisionImpactSummaryRequired"))
+                .when(decisionFormService).validateTestDecision(
+                        new LifecycleDecisionRequest(LifecycleDecision.FAILED, "Needs fixes", "BINDING_ISSUE", null),
+                        tester
+                );
 
         assertThatThrownBy(() -> service.recordTestDecision(
                 templateId,
@@ -165,7 +180,7 @@ class TemplateLifecyclePublishGateTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.TESTING);
         when(groupAccessService.canDecideTemplateTests(tester)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, tester)).thenReturn(template);
-        when(templateRepository.save(any())).thenReturn(template);
+        when(templateRepository.save(org.mockito.ArgumentMatchers.any())).thenReturn(template);
         when(templateService.toDetail(template)).thenReturn(null);
 
         service.recordTestDecision(
@@ -179,16 +194,17 @@ class TemplateLifecyclePublishGateTest {
                 tester
         );
 
-        ArgumentCaptor<TemplateLifecycleRecordEntity> recordCaptor =
-                ArgumentCaptor.forClass(TemplateLifecycleRecordEntity.class);
-        verify(lifecycleRecordRepository).save(recordCaptor.capture());
+        org.mockito.ArgumentCaptor<TemplateLifecycleRecordEntity> recordCaptor =
+                org.mockito.ArgumentCaptor.forClass(TemplateLifecycleRecordEntity.class);
+        org.mockito.Mockito.verify(lifecycleRecordRepository).save(recordCaptor.capture());
         TemplateLifecycleRecordEntity record = recordCaptor.getValue();
-        assertThat(record.getAction()).isEqualTo(LifecycleAction.RECORD_TEST_DECISION);
-        assertThat(record.getDecision()).isEqualTo(LifecycleDecision.FAILED);
-        assertThat(record.getCommentSummary()).contains("[STRUCTURED_OPINION]");
-        assertThat(record.getCommentSummary()).contains("BINDING_ISSUE");
-        assertThat(record.getCommentSummary()).contains("Header binding invalid");
-        assertThat(record.getCommentSummary()).contains("Optional note");
+        org.assertj.core.api.Assertions.assertThat(record.getAction())
+                .isEqualTo(com.bank.docgen.template.domain.LifecycleAction.RECORD_TEST_DECISION);
+        org.assertj.core.api.Assertions.assertThat(record.getDecision()).isEqualTo(LifecycleDecision.FAILED);
+        org.assertj.core.api.Assertions.assertThat(record.getCommentSummary()).contains("[STRUCTURED_OPINION]");
+        org.assertj.core.api.Assertions.assertThat(record.getCommentSummary()).contains("BINDING_ISSUE");
+        org.assertj.core.api.Assertions.assertThat(record.getCommentSummary()).contains("Header binding invalid");
+        org.assertj.core.api.Assertions.assertThat(record.getCommentSummary()).contains("Optional note");
     }
 
     @Test
@@ -196,6 +212,11 @@ class TemplateLifecyclePublishGateTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
         when(groupAccessService.canDecideTemplateApprovals(approver)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
+        org.mockito.Mockito.doThrow(new TemplateValidationException("api.error.template.decisionReasonCategoryRequired"))
+                .when(decisionFormService).validateApprovalDecision(
+                        new LifecycleDecisionRequest(LifecycleDecision.REJECTED, "Not ready", null, "Scope changed"),
+                        approver
+                );
 
         assertThatThrownBy(() -> service.recordApprovalDecision(
                 templateId,
@@ -204,31 +225,5 @@ class TemplateLifecyclePublishGateTest {
         ))
                 .isInstanceOf(TemplateValidationException.class)
                 .hasFieldOrPropertyWithValue("messageKey", "api.error.template.decisionReasonCategoryRequired");
-    }
-
-    @Test
-    void publishBlockedWhenApiPolicyMissing() {
-        when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
-        when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
-        when(templateService.validateBindings(templateId, groupAdmin)).thenReturn(nonBlockingBindings());
-        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.publish(templateId, new PublishTemplateRequest("1.0.0"), groupAdmin))
-                .isInstanceOf(TemplateValidationException.class)
-                .hasFieldOrPropertyWithValue("messageKey", "api.error.runtime.policyNotConfigured");
-    }
-
-    private BindingValidationView nonBlockingBindings() {
-        return new BindingValidationView(
-                List.of(),
-                new BindingValidationSummaryView(false, 0, 0, 0, 0, 0)
-        );
-    }
-
-    private BindingValidationView blockingBindings() {
-        return new BindingValidationView(
-                List.of(),
-                new BindingValidationSummaryView(true, 1, 0, 1, 0, 0)
-        );
     }
 }

@@ -1,20 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-
-export interface PublishGateSummaryItem {
-  key: string
-  label: string
-  ready: boolean
-  informational?: boolean
-}
+import type { ChangeDiffSummary, CoverageSummary, PreviewComparison } from '@/types/template'
+import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
 
 const props = defineProps<{
   modelValue: boolean
   templateName: string
   releaseVersion: string
-  gateItems: PublishGateSummaryItem[]
-  bindingsReady: boolean
+  gateItems: PublishGateDisplayItem[]
+  coverageSummary: CoverageSummary | null
+  changeDiffSummary: ChangeDiffSummary | null
+  previewComparison: PreviewComparison | null
   loading?: boolean
 }>()
 
@@ -30,12 +27,41 @@ const visible = computed({
   set: (value: boolean) => emit('update:modelValue', value),
 })
 
-const readyCount = computed(
-  () => props.gateItems.filter((item) => !item.informational && item.ready).length,
-)
-const requiredCount = computed(
-  () => props.gateItems.filter((item) => !item.informational).length,
-)
+const requiredItems = computed(() => props.gateItems.filter((item) => !item.informational))
+const readyCount = computed(() => requiredItems.value.filter((item) => item.ready).length)
+const requiredCount = computed(() => requiredItems.value.length)
+const hasBlockers = computed(() => requiredItems.value.some((item) => !item.ready))
+
+const coverageStatusKey = computed(() => {
+  if (!props.coverageSummary) {
+    return 'templates.publishSummary.coverageUnavailable'
+  }
+  return props.coverageSummary.belowThreshold
+    ? 'templates.publishSummary.coverageBelowThreshold'
+    : 'templates.publishSummary.coverageMeetsThreshold'
+})
+
+const changeDiffStatusKey = computed(() => {
+  if (!props.changeDiffSummary) {
+    return 'templates.publishSummary.changeDiffUnavailable'
+  }
+  return props.changeDiffSummary.hasChanges
+    ? 'templates.publishSummary.changeDiffHasChanges'
+    : 'templates.publishSummary.changeDiffNoChanges'
+})
+
+const previewComparisonStatusKey = computed(() => {
+  if (!props.previewComparison) {
+    return 'templates.publishSummary.previewComparisonUnavailable'
+  }
+  if (props.previewComparison.blockerCount > 0) {
+    return 'templates.publishSummary.previewComparisonHasBlockers'
+  }
+  if (props.previewComparison.totalDiffCount > 0) {
+    return 'templates.publishSummary.previewComparisonHasWarnings'
+  }
+  return 'templates.publishSummary.previewComparisonClean'
+})
 
 function close() {
   visible.value = false
@@ -50,7 +76,7 @@ function confirm() {
   <el-dialog
     v-model="visible"
     :title="t('templates.publishSummary.title')"
-    width="520px"
+    width="560px"
     :close-on-click-modal="false"
     @close="close"
   >
@@ -85,18 +111,37 @@ function confirm() {
       <h3>{{ t('templates.publishSummary.validationTitle') }}</h3>
       <p>
         {{
-          bindingsReady
-            ? t('templates.publishSummary.bindingsReady')
-            : t('templates.publishSummary.bindingsPending')
+          coverageSummary
+            ? t(coverageStatusKey, { percentage: coverageSummary.aggregatePercentage })
+            : t('templates.publishSummary.coverageUnavailable')
         }}
       </p>
-      <p class="publish-summary-note">{{ t('templates.publishSummary.testCoverageNote') }}</p>
-      <p class="publish-summary-note">{{ t('templates.publishSummary.changeDiffNote') }}</p>
+      <p>
+        {{
+          changeDiffSummary
+            ? t(changeDiffStatusKey, { count: changeDiffSummary.totalChangeCount })
+            : t('templates.publishSummary.changeDiffUnavailable')
+        }}
+      </p>
+      <p>
+        {{
+          previewComparison
+            ? t(previewComparisonStatusKey, {
+                total: previewComparison.totalDiffCount,
+                blockers: previewComparison.blockerCount,
+                warnings: previewComparison.warningCount,
+              })
+            : t('templates.publishSummary.previewComparisonUnavailable')
+        }}
+      </p>
+      <p v-if="hasBlockers" class="publish-summary-note publish-summary-blocker">
+        {{ t('templates.publishSummary.blockersPresent') }}
+      </p>
     </section>
 
     <template #footer>
       <el-button @click="close">{{ t('common.cancel') }}</el-button>
-      <el-button type="primary" :loading="loading" @click="confirm">
+      <el-button type="primary" :loading="loading" :disabled="hasBlockers" @click="confirm">
         {{ t('templates.publishSummary.confirm') }}
       </el-button>
     </template>
@@ -163,5 +208,9 @@ function confirm() {
   margin-top: 0.35rem;
   color: var(--text-muted);
   font-size: 0.875rem;
+}
+
+.publish-summary-blocker {
+  color: var(--color-danger, #c45656);
 }
 </style>

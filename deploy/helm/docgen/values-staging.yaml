@@ -1,0 +1,76 @@
+global:
+  environment: staging
+
+backend:
+  replicaCount: 2
+  image:
+    tag: staging
+  resources:
+    requests:
+      cpu: 500m
+      memory: 768Mi
+    limits:
+      cpu: "2"
+      memory: 1536Mi
+
+frontend:
+  replicaCount: 2
+  image:
+    tag: staging
+
+config:
+  appEnvironment: staging
+  seedDemoCatalog: false
+
+externalServices:
+  postgres:
+    host: postgres.staging.example.internal
+    port: 5432
+    database: docgen
+  redis:
+    host: redis.staging.example.internal
+    port: 6379
+  kafka:
+    bootstrapServers: kafka.staging.example.internal:9092
+  minio:
+    endpoint: https://minio.staging.example.internal
+
+secrets:
+  create: false
+  existingSecretName: docgen-app-secrets-staging
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+  host: docgen.staging.example.com
+  apiPath: /api
+  apiPathType: Prefix
+  tls:
+    enabled: true
+
+certificate:
+  enabled: true
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+
+autoscaling:
+  backend:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    customMetric:
+      enabled: true
+      name: docgen_http_requests_per_second
+      targetType: AverageValue
+      averageValue: "100"
+  frontend:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+
+networkPolicy:
+  enabled: true

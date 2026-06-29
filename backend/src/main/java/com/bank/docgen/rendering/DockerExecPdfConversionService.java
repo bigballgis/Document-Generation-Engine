@@ -10,7 +10,9 @@ import io.github.resilience4j.retry.RetryRegistry;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -25,20 +27,27 @@ public class DockerExecPdfConversionService implements PdfConversionService {
     private final DocgenRenderingProperties renderingProperties;
     private final CircuitBreaker circuitBreaker;
     private final Retry retry;
+    private final Executor pdfConversionExecutor;
 
     public DockerExecPdfConversionService(
             DocgenRenderingProperties renderingProperties,
             CircuitBreakerRegistry circuitBreakerRegistry,
-            RetryRegistry retryRegistry
+            RetryRegistry retryRegistry,
+            @Qualifier("pdfConversionExecutor") Executor pdfConversionExecutor
     ) {
         this.renderingProperties = renderingProperties;
         this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(RESILIENCE_INSTANCE);
         this.retry = retryRegistry.retry(RESILIENCE_INSTANCE);
+        this.pdfConversionExecutor = pdfConversionExecutor;
     }
 
     @Override
     public byte[] convert(byte[] docxBytes) {
-        return ResilienceSupport.execute(circuitBreaker, retry, () -> convertInternal(docxBytes));
+        return ResilienceSupport.execute(circuitBreaker, retry, () -> PdfConversionOffloadSupport.executeOffloaded(
+                pdfConversionExecutor,
+                renderingProperties.getConversionTimeoutSeconds(),
+                () -> convertInternal(docxBytes)
+        ));
     }
 
     private byte[] convertInternal(byte[] docxBytes) {

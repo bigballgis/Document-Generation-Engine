@@ -86,6 +86,21 @@ API caller
 - Generated files and previews use object storage or equivalent file service references.
 - Audit records are durable and queryable; operational logs do not replace audit records.
 
+## Kubernetes deployment (P15 / ADR-0030)
+
+Production and staging application workloads deploy to Kubernetes via the Helm chart under
+`deploy/helm/docgen/`. Stateful data services remain external; the chart wires endpoints through
+ConfigMap and credentials through Secret references only.
+
+| Topic | Guide |
+| --- | --- |
+| Canonical install / upgrade / cutover / rollback | [Deployment guide](../../deploy/README.md) |
+| Operational baseline decisions | [ADR-0030](../adr/operations/0030-operational-platform-baseline.md) |
+| Health probes (`/healthz`, `/readyz`) | [k8s-health-probes.md](../../deploy/k8s-health-probes.md) |
+| HPA autoscaling | [k8s-hpa-autoscaling.md](../../deploy/k8s-hpa-autoscaling.md) |
+| Blue-green production cutover | [blue-green-runbook.md](../../deploy/blue-green-runbook.md) |
+| Local acceptance (Docker Compose) | [Production runbook](../operations/runbook.md), `scripts/docker-deploy.ps1` |
+
 ## Pending Questions
 
 - Whether the first implementation deploys as modular monolith plus worker process, or separate services from the beginning.

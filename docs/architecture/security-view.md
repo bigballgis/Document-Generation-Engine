@@ -54,6 +54,22 @@ This view summarizes architecture-level security boundaries. Detailed permission
 - If policy state cannot be loaded, deny protected operations rather than using stale or assumed policy.
 - If task or document ownership cannot be resolved for query/download, return only safe errors.
 
+## Container and network hardening (P15 / ADR-0030)
+
+Kubernetes deployment implements the ADR-0030 container and network isolation baseline: non-root
+containers, read-only root filesystem, default-deny NetworkPolicy with explicit allow rules, TLS 1.2+
+at the Ingress, and credentials supplied via Secret references — never baked into images or
+committed in plaintext.
+
+| Topic | Guide |
+| --- | --- |
+| Operational baseline decisions | [ADR-0030](../adr/operations/0030-operational-platform-baseline.md) |
+| Canonical deployment guide | [deploy/README.md](../../deploy/README.md) |
+| Container hardening | [container-hardening.md](../../deploy/container-hardening.md) |
+| ConfigMap / Secret / ExternalSecret | [k8s-config-secrets.md](../../deploy/k8s-config-secrets.md) |
+| NetworkPolicy (default deny) | [k8s-network-policy.md](../../deploy/k8s-network-policy.md) |
+| Ingress TLS | [k8s-ingress-tls.md](../../deploy/k8s-ingress-tls.md) |
+
 ## Pending Questions
 
 - Final enterprise SSO/OIDC rollout plan, trust boundary, and cutover criteria for management UI users.

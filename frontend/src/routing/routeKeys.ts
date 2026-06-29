@@ -7,8 +7,10 @@ export const ROUTE_KEYS = {
   auditConsole: 'route.audit-console',
   masterManagement: 'route.master-management',
   templateManagement: 'route.template-management',
+  contentModuleManagement: 'route.content-module-management',
   testerWorkbench: 'route.tester-workbench',
   approverWorkbench: 'route.approver-workbench',
+  escalationWorkbench: 'route.escalation-workbench',
   identityAdministration: 'route.identity-administration',
 } as const
 
@@ -19,8 +21,9 @@ export const LEGACY_ROUTE_PATH_REDIRECT: Partial<Record<string, string>> = {
   [ROUTE_KEYS.globalGovernanceHome]: '/dashboard',
   [ROUTE_KEYS.groupGovernanceHome]: '/dashboard',
   [ROUTE_KEYS.templateAuthoringHome]: '/dashboard',
-  [ROUTE_KEYS.testerWorkbench]: '/dashboard',
-  [ROUTE_KEYS.approverWorkbench]: '/dashboard',
+  [ROUTE_KEYS.testerWorkbench]: '/workbench/tester',
+  [ROUTE_KEYS.approverWorkbench]: '/workbench/approver',
+  [ROUTE_KEYS.escalationWorkbench]: '/workbench/escalation',
 }
 
 export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
@@ -32,8 +35,10 @@ export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.auditConsole]: '/audit',
   [ROUTE_KEYS.masterManagement]: '/masters',
   [ROUTE_KEYS.templateManagement]: '/templates',
-  [ROUTE_KEYS.testerWorkbench]: '/dashboard',
-  [ROUTE_KEYS.approverWorkbench]: '/dashboard',
+  [ROUTE_KEYS.contentModuleManagement]: '/content-modules',
+  [ROUTE_KEYS.testerWorkbench]: '/workbench/tester',
+  [ROUTE_KEYS.approverWorkbench]: '/workbench/approver',
+  [ROUTE_KEYS.escalationWorkbench]: '/workbench/escalation',
   [ROUTE_KEYS.identityAdministration]: '/entitlement/users',
 }
 
@@ -46,13 +51,29 @@ export const ROUTE_NAV_LABEL_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.auditConsole]: 'nav.items.audit',
   [ROUTE_KEYS.masterManagement]: 'nav.items.masters',
   [ROUTE_KEYS.templateManagement]: 'nav.items.templates',
-  [ROUTE_KEYS.testerWorkbench]: 'nav.items.dashboard',
-  [ROUTE_KEYS.approverWorkbench]: 'nav.items.dashboard',
+  [ROUTE_KEYS.contentModuleManagement]: 'nav.items.contentModules',
+  [ROUTE_KEYS.testerWorkbench]: 'nav.items.testerWorkbench',
+  [ROUTE_KEYS.approverWorkbench]: 'nav.items.approverWorkbench',
+  [ROUTE_KEYS.escalationWorkbench]: 'nav.items.escalationWorkbench',
   [ROUTE_KEYS.identityAdministration]: 'nav.items.users',
 }
 
 export const MASTER_DETAIL_PATH_PREFIX = '/masters/'
 export const TEMPLATE_DETAIL_PATH_PREFIX = '/templates/'
+export const CONTENT_MODULE_DETAIL_PATH_PREFIX = '/content-modules/'
+
+export function contentModuleDetailPath(moduleId: string): string {
+  return `${CONTENT_MODULE_DETAIL_PATH_PREFIX}${moduleId}`
+}
+export const API_POLICY_DETAIL_PATH_PREFIX = '/api/policies/'
+
+export function masterDetailPath(masterId: string): string {
+  return `${MASTER_DETAIL_PATH_PREFIX}${masterId}`
+}
+
+export function masterRevisionDetailPath(masterId: string, revisionLineId: string): string {
+  return `${MASTER_DETAIL_PATH_PREFIX}${masterId}/revisions/${revisionLineId}`
+}
 
 export function pathForRouteKey(routeKey: string): string {
   return (
@@ -73,4 +94,12 @@ export function templateDetailPath(templateId: string, tab?: string): string {
     return base
   }
   return `${base}?tab=${encodeURIComponent(tab)}`
+}
+
+export function apiPolicyDetailPath(templateId: string, domain?: string): string {
+  const base = `${API_POLICY_DETAIL_PATH_PREFIX}${templateId}`
+  if (!domain) {
+    return base
+  }
+  return `${base}?domain=${encodeURIComponent(domain)}`
 }

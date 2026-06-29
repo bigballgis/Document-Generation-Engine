@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import AppDataTable from '@/components/common/AppDataTable.vue'
-import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
-import { useDataTableFilters } from '@/composables/useDataTableFilters'
+import FidelityWarningList from '@/components/authoring/FidelityWarningList.vue'
 import * as templatesApi from '@/api/templates'
-import type { AnchorBinding, PreviewRecord } from '@/types/template'
+import type { AnchorBinding, PreviewComparisonItem, PreviewRecord } from '@/types/template'
 
 const props = defineProps<{
   templateId: string
@@ -24,22 +22,21 @@ watch(
   },
 )
 
-const comparisonRows = computed(() =>
-  props.bindings.map((binding) => ({
-    anchorId: binding.anchorId,
-    bindingType: binding.declaredContentType,
-    previewStatus: latestPreview.value?.status ?? '—',
-  })),
+const comparisonItems = computed<PreviewComparisonItem[]>(
+  () => latestPreview.value?.previewComparison?.items ?? [],
 )
-const comparisonSource = computed(() => comparisonRows.value)
-const { filters: comparisonColumnFilters, filteredRows: filteredComparisonRows } = useDataTableFilters(
-  comparisonSource,
-  [
-    { key: 'anchorId', getValue: (row) => row.anchorId },
-    { key: 'bindingType', getValue: (row) => row.bindingType },
-    { key: 'previewStatus', getValue: (row) => row.previewStatus },
-  ],
-)
+
+const comparisonSummary = computed(() => {
+  const comparison = latestPreview.value?.previewComparison
+  if (!comparison) {
+    return null
+  }
+  return t('templates.preview.comparisonCounts', {
+    total: comparison.totalDiffCount,
+    blockers: comparison.blockerCount,
+    warnings: comparison.warningCount,
+  })
+})
 
 async function refreshPreview() {
   if (!latestPreview.value?.previewId) {
@@ -56,9 +53,16 @@ async function refreshPreview() {
   }
 }
 
-function warningLabel(messageKey: string) {
-  return te(messageKey) ? t(messageKey) : messageKey
+function severityTagType(severity: string): 'danger' | 'warning' {
+  return severity === 'BLOCKER' ? 'danger' : 'warning'
 }
+
+function locationLabel(locationType: string): string {
+  const key = `templates.preview.locationTypes.${locationType}`
+  return te(key) ? t(key) : locationType
+}
+
+const previewArtifact = computed(() => latestPreview.value?.artifactStorageKey ?? null)
 </script>
 
 <template>
@@ -75,7 +79,7 @@ function warningLabel(messageKey: string) {
         </div>
         <div>
           <dt>{{ t('templates.preview.comparisonSummary') }}</dt>
-          <dd>{{ latestPreview.comparisonSummary ?? t('templates.preview.noComparison') }}</dd>
+          <dd>{{ comparisonSummary ?? t('templates.preview.noComparison') }}</dd>
         </div>
         <div v-if="latestPreview.testDataSetId">
           <dt>{{ t('templates.preview.testDataSetId') }}</dt>
@@ -88,43 +92,38 @@ function warningLabel(messageKey: string) {
       </el-button>
 
       <h3>{{ t('templates.preview.comparisonTitle') }}</h3>
-      <AppDataTable :data="filteredComparisonRows">
-        <el-table-column prop="anchorId" sortable>
-          <template #header>
-            <TableColumnHeader
-              :label="t('templates.authoring.anchorId')"
-              v-model="comparisonColumnFilters.anchorId"
-            />
+      <el-empty
+        v-if="!comparisonItems.length"
+        :description="t('templates.preview.noComparisonItems')"
+      />
+      <el-table v-else :data="comparisonItems" size="small" class="comparison-table">
+        <el-table-column :label="t('templates.preview.locationType')" min-width="120">
+          <template #default="{ row }">
+            {{ locationLabel(row.locationType) }}
           </template>
         </el-table-column>
-        <el-table-column prop="bindingType" sortable>
-          <template #header>
-            <TableColumnHeader
-              :label="t('templates.authoring.contentType')"
-              v-model="comparisonColumnFilters.bindingType"
-            />
+        <el-table-column prop="locationRef" :label="t('templates.preview.locationRef')" min-width="140" />
+        <el-table-column :label="t('templates.preview.severity')" width="120">
+          <template #default="{ row }">
+            <el-tag :type="severityTagType(row.severity)" size="small">
+              {{ t(`templates.preview.severities.${row.severity}`) }}
+            </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="previewStatus" sortable>
-          <template #header>
-            <TableColumnHeader
-              :label="t('templates.preview.previewStatusColumn')"
-              v-model="comparisonColumnFilters.previewStatus"
-            />
-          </template>
-        </el-table-column>
-      </AppDataTable>
+        <el-table-column prop="diffCode" :label="t('templates.preview.diffCode')" min-width="140" />
+        <el-table-column prop="summary" :label="t('templates.preview.diffSummary')" min-width="220" />
+      </el-table>
 
       <h3>{{ t('templates.preview.warningsTitle') }}</h3>
+      <FidelityWarningList
+        v-if="latestPreview.fidelityWarnings.length"
+        :warnings="latestPreview.fidelityWarnings"
+        :artifact-hint="previewArtifact"
+      />
       <el-empty
-        v-if="!latestPreview.fidelityWarnings.length"
+        v-else
         :description="t('templates.preview.noWarnings')"
       />
-      <ul v-else class="warning-list">
-        <li v-for="warning in latestPreview.fidelityWarnings" :key="warning.messageKey">
-          {{ warningLabel(warning.messageKey) }}
-        </li>
-      </ul>
     </template>
     <el-empty v-else :description="t('templates.preview.empty')" />
   </div>
@@ -154,8 +153,7 @@ h3 {
   font-size: 1rem;
 }
 
-.warning-list {
-  margin: 0;
-  padding-left: 1.25rem;
+.comparison-table {
+  width: 100%;
 }
 </style>

@@ -1,0 +1,2 @@
+export const CLIENT_TABLE_PAGE_SIZE = 10
+export const SERVER_TABLE_PAGE_SIZE = 20

@@ -54,7 +54,15 @@ export const apiErrorEn = {
     "structuredContentInvalid": "The structured content definition is invalid.",
     "publishGateBlocked": "Publish is blocked until binding validation passes.",
     "decisionReasonCategoryRequired": "A reason category is required for failed or rejected decisions.",
-    "decisionImpactSummaryRequired": "An impact summary is required for failed or rejected decisions."
+    "decisionImpactSummaryRequired": "An impact summary is required for failed or rejected decisions.",
+    "exportNotEligible": "Only approved or published templates can be exported.",
+    "exportFormatUnsupported": "The requested export format is not supported.",
+    "exportFailed": "The template export could not be completed.",
+    "importBundleInvalid": "The template import bundle is invalid.",
+    "importBundleUnsupportedFormat": "The template import bundle format is not supported.",
+    "importBundleContainsSecrets": "The template import bundle must not contain secrets or credentials.",
+    "importConflict": "The template import conflicts with an existing template.",
+    "importFailed": "The template import could not be completed."
   },
   "rendering": {
     "previewNotFound": "The preview record was not found.",

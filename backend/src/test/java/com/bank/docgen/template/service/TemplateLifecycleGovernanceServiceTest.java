@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -20,6 +19,7 @@ import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
+import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.time.Instant;
 import java.util.List;
@@ -50,7 +50,15 @@ class TemplateLifecycleGovernanceServiceTest {
     @Mock
     private MessageResolver messageResolver;
     @Mock
-    private ApiPolicyRepository apiPolicyRepository;
+    private PublishGateService publishGateService;
+    @Mock
+    private DecisionFormService decisionFormService;
+    @Mock
+    private TemplateContentModuleReferenceService contentModuleReferenceService;
+    @Mock
+    private CollaborationWorkItemWriter collaborationWorkItemWriter;
+    @Mock
+    private com.bank.docgen.authoring.structured.RenderProfileService renderProfileService;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -68,7 +76,11 @@ class TemplateLifecycleGovernanceServiceTest {
                 groupAccessService,
                 lifecycleImpactPreviewService,
                 messageResolver,
-                apiPolicyRepository
+                publishGateService,
+                decisionFormService,
+                contentModuleReferenceService,
+                collaborationWorkItemWriter,
+                renderProfileService
         );
         groupAdmin = session(List.of("GROUP_ADMIN"), List.of("RETAIL"));
         templateId = UUID.randomUUID();

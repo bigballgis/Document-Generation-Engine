@@ -1,0 +1,98 @@
+global:
+  environment: prod
+
+backend:
+  replicaCount: 3
+  image:
+    tag: prod
+  resources:
+    requests:
+      cpu: "1"
+      memory: 1Gi
+    limits:
+      cpu: "4"
+      memory: 2Gi
+
+frontend:
+  replicaCount: 2
+  image:
+    tag: prod
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+config:
+  appEnvironment: prod
+  seedDemoCatalog: false
+
+externalServices:
+  postgres:
+    host: postgres.prod.example.internal
+    port: 5432
+    database: docgen
+  redis:
+    host: redis.prod.example.internal
+    port: 6379
+  kafka:
+    bootstrapServers: kafka.prod.example.internal:9092
+  minio:
+    endpoint: https://minio.prod.example.internal
+
+secrets:
+  create: false
+  existingSecretName: docgen-app-secrets-prod
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+  host: docgen.prod.example.com
+  apiPath: /api
+  apiPathType: Prefix
+  tls:
+    enabled: true
+
+certificate:
+  enabled: true
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+
+autoscaling:
+  backend:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 12
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+    customMetric:
+      enabled: true
+      name: docgen_http_requests_per_second
+      targetType: AverageValue
+      averageValue: "100"
+  frontend:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: 80
+
+blueGreen:
+  enabled: true
+  activeColor: blue
+  # P15-T08b: pipelines must require human approval before changing activeColor (see blue-green-runbook.md)
+  requireManualApproval: true
+  previewService:
+    enabled: true
+
+networkPolicy:
+  enabled: true
+  externalEgress:
+    cidrs:
+      - 10.64.0.0/16

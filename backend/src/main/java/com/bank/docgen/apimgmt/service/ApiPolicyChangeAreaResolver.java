@@ -26,12 +26,14 @@ final class ApiPolicyChangeAreaResolver {
                 || !Objects.equals(existing.getOutputModesJson(), outputModesJson)) {
             changedAreas.add("OUTPUT_POLICY");
         }
-        if (existing.isBatchEnabled() != request.batchEnabled() || existing.getMaxBatchSize() != request.maxBatchSize()) {
+        if (existing.isBatchEnabled() != request.batchEnabled()
+                || existing.getMaxBatchSize() != request.maxBatchSize()
+                || existing.getBatchSyncMaxItems() != request.maxBatchSize()) {
             changedAreas.add("BATCH_LIMIT");
         }
         if (existing.isDocxEncryptionEnabled() != request.docxEncryptionEnabled()
                 || existing.isPdfEncryptionEnabled() != request.pdfEncryptionEnabled()) {
-            changedAreas.add("ENCRYPTION_POLICY");
+            changedAreas.add("ENCRYPTION_CAPABILITY");
         }
         if (!Objects.equals(existing.getDefaultRouteReleaseVersion(), request.defaultRouteReleaseVersion())) {
             changedAreas.add("DEFAULT_ROUTE_TARGET");

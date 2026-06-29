@@ -32,7 +32,7 @@ consolidation) but three classes of gap remain:
 | --- | --- | --- |
 | **Documentation drift** | High | Permission matrix, PRD IA, ledger, UX plan still describe workbenches / old routes / Done items that code no longer matches |
 | **Contract & runtime correctness** | High | OpenAPI vs implementation (idempotency, output modes, async task states, batch partial failure) |
-| **Product workflow completeness** | High | Template verifiability, publish gate, collaboration to-dos, controlled decision forms — PRD/P19 scope, not yet built |
+| **Product workflow completeness** | Medium | Template verifiability, publish gate, controlled decision forms — **Done (P19, 2026-06-25)**; collaboration to-dos remain P14 |
 | **Frontend workflow & OA UX** | High | Dashboard/workbench merge incomplete, deep links, pagination, error recovery, table/a11y, locale-aware formatting |
 
 Recommended sequencing: **Wave COR-0 (docs truth)** → **COR-1 (API contract)** → **COR-2 (template workflow)** in parallel with **COR-3 (frontend UX)** → **COR-4 (performance/resilience)** → **COR-5 (tests/E2E)** → **COR-6 (P14/P18 large domains)**.
@@ -45,9 +45,9 @@ Recommended sequencing: **Wave COR-0 (docs truth)** → **COR-1 (API contract)**
 | --- | --- | --- |
 | COR-0 | Documentation & plan-layer reconciliation | **Done** (2026-06-24; COR-D01–D09) |
 | COR-1 | Runtime API contract & correctness | **Done** (2026-06-25; COR-B01–B12) |
-| COR-2 | Template lifecycle, workflow & governance | **In Progress** — P19 active; thin slices Done (T05/T06 partial/T07 partial/T10–T14) |
+| COR-2 | Template lifecycle, workflow & governance | **Done (P19 scope, 2026-06-25)** — COR-T01–T03/T05–T14 Done; COR-T04 deferred to P14 |
 | COR-3 | Frontend workflow & operation experience | **Done** (2026-06-25; F18 deferred to COR-L04) |
-| COR-4 | Performance, resilience & architecture | **In Progress** (COR-P03/P04/P05/P06 Done 2026-06-25; P01/P02/P07/P08 open) |
+| COR-4 | Performance, resilience & architecture | **Done** (2026-06-25; COR-P01–P08 all closed; verify **323** tests) |
 | COR-5 | Test coverage & E2E journeys | **Done** (2026-06-25; COR-E01–E06) |
 | COR-6 | Confirmed large domains (P14/P18+) | **Deferred** — activate one formal phase at a time (see §8) |
 
@@ -100,15 +100,15 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-T01 | H | Live publish gate (P19 core) | UI gate static; apiPolicy always ready | Server-side checklist blocks publish; UI reflects real blockers | **Partial** (2026-06-24; binding + apiPolicy server gate; UI fetches policy on publish panel) | P19-T06 |
-| COR-T02 | H | Controlled test/approval opinion forms | Free-text commentSummary only | Structured forms per PRD §7; audit fields; fail returns to DRAFT | **Partial** (2026-06-25; fail/reject require reasonCategory + impactSummary + UI dialog) | P19-T07 |
-| COR-T03 | H | GROUP_ADMIN exception intervention path | GROUP_ADMIN always canDecideTests/Approvals | Normal vs exception flows; reason + secondary confirm + audit marker | Not Started | PRD §7, permission-matrix |
+| COR-T01 | H | Live publish gate (P19 core) | UI gate static; apiPolicy always ready | Server-side checklist blocks publish; UI reflects real blockers | **Done** (2026-06-25; `PublishGateService` live checklist + UI + publish blocked on blockers/thresholds) | P19-T06 |
+| COR-T02 | H | Controlled test/approval opinion forms | Free-text commentSummary only | Structured forms per PRD §7; audit fields; fail returns to DRAFT | **Done** (2026-06-25; `DecisionFormService` + structured lifecycle decision dialog + audit) | P19-T07 |
+| COR-T03 | H | GROUP_ADMIN exception intervention path | GROUP_ADMIN always canDecideTests/Approvals | Normal vs exception flows; reason + secondary confirm + audit marker | **Done** (2026-06-25; `ExceptionInterventionTest` + separate audit marker) | P19-T09 |
 | COR-T04 | H | Collaboration work items + optional timeout | PRD §7 668–672; no WorkItem entity | Role/group queue to-dos; timeout escalation without auto state change | Not Started | P14/P19, domain §2.9.4 |
 | COR-T05 | M | Publish not hard-bound to dev version 1 | `findByTemplateIdAndDevVersionNumber(..., 1)` | Publish selects release candidate dev version; tests for multi-version | **Done** (2026-06-23; `requireReleaseCandidateVersion` + selection test) | P16 |
 | COR-T06 | M | Multi release version callability | TemplateCallabilitySupport single release constraint | Per-version callable list matches deactivate/restore; runtime tests | **Done** (2026-06-23; per-version callability + contract list) | P16, P7 |
 | COR-T07 | M | Publish permission doc + code alignment | Domain model says author can publish; code admin-only | Confirmed matrix entry; code matches decision | **Done** (2026-06-24; Batch B ADR) | COR-D02 |
-| COR-T08 | M | Batch test + coverage thresholds | PRD §6.5; P19-T02/T03 Not Started | Multi-sample batch test + threshold blockers | **Partial** (2026-06-25; P19-T01/T02/T03 Done for batch + coverage slice; publish gate wiring pending in T06) | P19 |
-| COR-T09 | M | Lifecycle panel context on detail | Approver cannot see test record summary inline | Integrated evidence panel (test, preview, diff, checklist) per role | Not Started | P19-T10 |
+| COR-T08 | M | Batch test + coverage thresholds | PRD §6.5; P19-T02/T03 Not Started | Multi-sample batch test + threshold blockers | **Done** (2026-06-25; batch test + coverage thresholds + publish gate wiring in T06) | P19 |
+| COR-T09 | M | Lifecycle panel context on detail | Approver cannot see test record summary inline | Integrated evidence panel (test, preview, diff, checklist) per role | **Done** (2026-06-25; verifiability panels on template detail + P19-T10) | P19-T10 |
 | COR-T10 | L | Semver publish UX | Manual text field default 1.0.0 | Level picker + conflict validation | **Done** (2026-06-24; major/minor/patch picker + semver utils) | PRD §7 |
 
 ### 4.2 Workflow routing & queues (backend + frontend)
@@ -118,7 +118,7 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | COR-T11 | H | Workbench vs Dashboard decision | Dashboard consolidation (Batch B default) | Decision ADR `decisions/2026-06-23-batch-b-workflow-defaults.md`; dead workbench views removed | **Done** (2026-06-24) | COR-D01 |
 | COR-T12 | M | Dashboard rework tasks | No "return to author" tasks after reject | Task kinds cover draft rework + group filter/sort | **Done** (2026-06-24; master-rework + template-rework tasks) | PRD §7 |
 | COR-T13 | M | Template list workflow filters | No "awaiting my test/approval/publish" filters | Filter chips or saved views per capability | **Done** (2026-06-24; workflow filter chips) | — |
-| COR-T14 | M | Publish summary dialog | Confirm only; no release summary content | Dialog shows checklist + diff/test/coverage summaries per PRD | **Partial** (2026-06-24; publish summary dialog thin slice; full P19 evidence pending) | P19 |
+| COR-T14 | M | Publish summary dialog | Confirm only; no release summary content | Dialog shows checklist + diff/test/coverage summaries per PRD | **Done** (2026-06-25; publish summary dialog with checklist + diff/test/coverage evidence) | P19 |
 
 **Exit:** Template can progress with auditable decisions; publish blocked by real gates; operator queues match PRD role model.
 
@@ -164,7 +164,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 | COR-F15 | H | Identity list pagination UI | API page/size; UI always page 0 | el-pagination + total; E2E page 2 | **Done** (2026-06-24; users + groups panels) | P13 |
 | COR-F16 | M | GROUP_ADMIN audit filter validation | Missing templateId → 422 at API | Proactive UI validation + message | **Done** (2026-06-23; client filter gate + Vitest) | P8 |
 | COR-F17 | M | Audit console UX | No filter reset; client slice pagination | Reset + export scope dialog; server pagination plan | **Done** (2026-06-24; server page + reset + export confirm) | OPT-F4 |
-| COR-F18 | M | API policy per-domain UI | Monolithic form in TemplateDetailView | Domain nav + save per P17/matrix §7 | Not Started | P17 |
+| COR-F18 | M | API policy per-domain UI | Monolithic form in TemplateDetailView | Domain nav + save per P17/matrix §7 | Done (2026-06-25; `ApiPolicyDetailView` + 4 Vitest) | P17 |
 
 ### 5.5 i18n, a11y & polish
 
@@ -187,14 +187,14 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-P01 | M | Stream new sync artifact generation | New path still byte[] | Stream from storage on create path | Not Started | OPT-F3 |
-| COR-P02 | M | Offload LibreOffice from request thread | Inline PDF in request | Bounded pool + timeout | Not Started | OPT-F6 |
+| COR-P01 | M | Stream new sync artifact generation | New path still byte[] | Stream from storage on create path | **Done** (2026-06-25; `RuntimeGenerationService` new path streams via `objectStoragePort.get`; `RuntimeGenerationServiceGenerateTest` lazy-load) | OPT-F3 |
+| COR-P02 | M | Offload LibreOffice from request thread | Inline PDF in request | Bounded pool + timeout | **Done** (2026-06-25; `PdfConversionOffloadSupport` + `pdfConversionExecutor` pool; `PdfConversionOffloadSupportTest` + offload thread test) | OPT-F6 |
 | COR-P03 | L | LibreOffice temp dir cleanup | No finally on temp dirs | No leak under load test | **Done** (2026-06-24; try/finally temp dir cleanup + test) | OPT-F7 |
 | COR-P04 | M | EAGER fetch on master anchors | MasterDocumentEntity EAGER | LAZY + fetch join where needed | **Done** (2026-06-25; LAZY + batch count + EntityGraph detail) | OPT-F5 |
 | COR-P05 | L | Redisson lock evaluation | Multi-instance idempotency/async owner | ADR decision + implementation if multi-instance | **Done** (2026-06-24; ADR-0039 evaluation) | OPT-F8 |
 | COR-P06 | M | Declarative route authorization | RouteVisibilityService not enforced on API | Filter or documented service-layer pattern + gap test | **Done** (2026-06-24; ADR + ManagementAuthorizationContractTest) | OPT-D6 |
-| COR-P07 | M | QueryDSL for audit/complex lists | JPQL + in-memory filter | Type-safe pageable queries | Not Started | OPT-D4 |
-| COR-P08 | L | MapStruct opportunistic adoption | Hand-written mappers | MapStruct on touched services only | Not Started | OPT-D3 |
+| COR-P07 | M | QueryDSL for audit/complex lists | JPQL + in-memory filter | Type-safe pageable queries | **Done** (2026-06-25; `ManagementAuditEventRepositoryImpl` + QueryDSL predicates; `ManagementAuditEventRepositoryQuerydslTest` 5/5) | OPT-D4 |
+| COR-P08 | L | MapStruct opportunistic adoption | Hand-written mappers | MapStruct on touched services only | **Done** (2026-06-25; `ApiPolicyViewMapper` apimgmt slice; `ApiPolicyViewMapperTest` 4/4) | OPT-D3 |
 
 ---
 
@@ -217,10 +217,10 @@ Execute as formal phases when selected; **do not mark Done without full P14/P18/
 
 | ID | Phase | Title | Status | Detail plan |
 | --- | --- | --- | --- | --- |
-| COR-L01 | P14 | Clause/content module lifecycle | **Deferred** | [P14](./detail/P14-confirmed-large-domains.md) |
+| COR-L01 | P14 | Clause/content module lifecycle | **Done** (2026-06-26) | [P14](./detail/P14-confirmed-large-domains.md) — **P14-T01 Done** (T01a–T01e incl. architecture remediation); backend **469**, frontend **224**; architecture re-review **PASS** (2026-06-26) |
 | COR-L02 | P18 | Structured authoring & fidelity engine | **Deferred** | [P18](./detail/P18-structured-authoring-fidelity-engine.md) |
-| COR-L03 | P19 | Full verifiability + publish gate + decision forms | **Deferred** | [P19](./detail/P19-verifiability-publish-gate.md) — owns COR-T01/T02/T03/T04/T08/T09/T14 remainder |
-| COR-L04 | P17 | Per-domain API policy save/rollback | **Deferred** | [P17](./detail/P17-api-policy-domain-governance.md) — owns COR-F18 |
+| COR-L03 | P19 | Full verifiability + publish gate + decision forms | **Done** (2026-06-25) | [P19](./detail/P19-verifiability-publish-gate.md) — T01–T10; gates 281 backend / 169 frontend / E2E 7/7 |
+| COR-L04 | P17 | Per-domain API policy save/rollback | **Done** (2026-06-25) | [P17](./detail/P17-api-policy-domain-governance.md) — COR-F18 + T01–T09 |
 | COR-L05 | P16 | Lifecycle/version governance completeness | **Deferred** | [P16](./detail/P16-lifecycle-version-governance.md) |
 | COR-L06 | P15 | Kubernetes & container hardening | **Deferred** | [P15](./detail/P15-kubernetes-deployment-container-hardening.md) |
 

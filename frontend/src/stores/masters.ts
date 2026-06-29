@@ -8,6 +8,8 @@ import type {
   MasterDocumentDetail,
   MasterDocumentSummary,
   MasterImpactAnalysis,
+  MasterRevisionLineDetail,
+  MasterRevisionLinePage,
   SubmitMasterReviewPayload,
   UpdateMasterMetadataPayload,
 } from '@/types/master'
@@ -15,9 +17,13 @@ import type {
 export const useMastersStore = defineStore('masters', () => {
   const masters = ref<MasterDocumentSummary[]>([])
   const selectedMaster = ref<MasterDocumentDetail | null>(null)
+  const selectedRevisionLine = ref<MasterRevisionLineDetail | null>(null)
+  const revisionLinesPage = ref<MasterRevisionLinePage | null>(null)
   const impactAnalysis = ref<MasterImpactAnalysis | null>(null)
   const loadingList = ref(false)
   const loadingDetail = ref(false)
+  const loadingRevisionLines = ref(false)
+  const loadingRevisionLine = ref(false)
   const submitting = ref(false)
   const lastErrorMessageKey = ref<string | null>(null)
 
@@ -149,6 +155,57 @@ export const useMastersStore = defineStore('masters', () => {
     }
   }
 
+  async function fetchRevisionLines(
+    masterId: string,
+    page = 0,
+    size = 20,
+  ): Promise<MasterRevisionLinePage> {
+    loadingRevisionLines.value = true
+    lastErrorMessageKey.value = null
+    try {
+      const pageResult = await mastersApi.listMasterRevisionLines(masterId, page, size)
+      revisionLinesPage.value = pageResult
+      return pageResult
+    } catch (error) {
+      lastErrorMessageKey.value = resolveStoreErrorMessageKey(error, 'masters.revisionLines.loadError')
+      throw error
+    } finally {
+      loadingRevisionLines.value = false
+    }
+  }
+
+  async function fetchRevisionLine(
+    masterId: string,
+    revisionLineId: string,
+  ): Promise<MasterRevisionLineDetail> {
+    loadingRevisionLine.value = true
+    lastErrorMessageKey.value = null
+    try {
+      selectedRevisionLine.value = await mastersApi.getMasterRevisionLine(masterId, revisionLineId)
+      return selectedRevisionLine.value
+    } catch (error) {
+      lastErrorMessageKey.value = resolveStoreErrorMessageKey(error, 'masters.revision.loadError')
+      throw error
+    } finally {
+      loadingRevisionLine.value = false
+    }
+  }
+
+  async function downloadRevisionLineFile(masterId: string, revisionLineId: string): Promise<void> {
+    lastErrorMessageKey.value = null
+    try {
+      const { downloadBlobExport } = await import('@/utils/downloadExport')
+      const { blob, filename } = await mastersApi.downloadMasterRevisionLineFile(
+        masterId,
+        revisionLineId,
+      )
+      downloadBlobExport(filename, blob)
+    } catch (error) {
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.download')
+      throw error
+    }
+  }
+
   async function replaceMasterFile(masterId: string, file: File): Promise<MasterDocumentDetail> {
     submitting.value = true
     lastErrorMessageKey.value = null
@@ -184,6 +241,8 @@ export const useMastersStore = defineStore('masters', () => {
 
   function clearSelected() {
     selectedMaster.value = null
+    selectedRevisionLine.value = null
+    revisionLinesPage.value = null
     impactAnalysis.value = null
   }
 
@@ -194,20 +253,27 @@ export const useMastersStore = defineStore('masters', () => {
   return {
     masters,
     selectedMaster,
+    selectedRevisionLine,
+    revisionLinesPage,
     impactAnalysis,
     loadingList,
     loadingDetail,
+    loadingRevisionLines,
+    loadingRevisionLine,
     submitting,
     lastErrorMessageKey,
     mastersByGroup,
     fetchMasters,
     fetchMaster,
     fetchImpactAnalysis,
+    fetchRevisionLines,
+    fetchRevisionLine,
     uploadMaster,
     submitReview,
     decideReview,
     updateMasterMetadata,
     downloadMasterFile,
+    downloadRevisionLineFile,
     replaceMasterFile,
     clearSelected,
     clearListError,

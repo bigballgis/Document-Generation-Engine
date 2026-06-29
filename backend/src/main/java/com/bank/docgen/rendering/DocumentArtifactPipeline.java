@@ -1,5 +1,6 @@
 package com.bank.docgen.rendering;
 
+import com.bank.docgen.authoring.structured.RenderProfile;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,24 @@ public class DocumentArtifactPipeline {
         this.pdfEncryptionService = pdfEncryptionService;
     }
 
-    public GeneratedArtifact finalizeArtifact(byte[] docxBytes, String outputFormat, EncryptionOptionsView encryption) {
+    public GeneratedArtifact finalizeArtifact(
+            byte[] docxBytes,
+            String outputFormat,
+            EncryptionOptionsView encryption
+    ) {
+        return finalizeArtifact(docxBytes, outputFormat, encryption, null);
+    }
+
+    public GeneratedArtifact finalizeArtifact(
+            byte[] docxBytes,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            RenderProfile renderProfile
+    ) {
+        if ("PDF".equalsIgnoreCase(outputFormat) && renderProfile != null
+                && renderProfile.pdfConversionPolicy() == null) {
+            throw new IllegalStateException("Render profile missing PDF conversion policy");
+        }
         if ("PDF".equalsIgnoreCase(outputFormat)) {
             byte[] pdfBytes = pdfConversionService.convert(docxBytes);
             pdfBytes = pdfEncryptionService.encrypt(pdfBytes, encryption);
