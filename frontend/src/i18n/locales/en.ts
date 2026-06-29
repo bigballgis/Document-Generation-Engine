@@ -94,7 +94,6 @@ export default {
       content: 'Document content',
       apiAccess: 'API access',
       security: 'Security & audit',
-      workbench: 'Workbenches',
     },
     items: {
       dashboard: 'My tasks',
@@ -107,9 +106,6 @@ export default {
       templateVersions: 'Template versions',
       apiPolicies: 'API policies',
       audit: 'Audit log',
-      testerWorkbench: 'Tester workbench',
-      approverWorkbench: 'Approver workbench',
-      escalationWorkbench: 'Escalation workbench',
     },
     routes: {
       globalGovernance: 'Global governance',
@@ -119,9 +115,6 @@ export default {
       audit: 'Audit console',
       masters: 'Master documents',
       templates: 'Templates',
-      testerWorkbench: 'Tester workbench',
-      approverWorkbench: 'Approver workbench',
-      escalationWorkbench: 'Escalation workbench',
       identityAdministration: 'Identity & groups',
     },
     breadcrumb: {
@@ -182,9 +175,6 @@ export default {
       stoppedTemplatesDescription: 'Templates stopped from runtime use.',
       viewMasters: 'View masters',
       viewTemplates: 'View templates',
-      viewTesterWorkbench: 'Open tester workbench',
-      viewApproverWorkbench: 'Open approver workbench',
-      viewEscalationWorkbench: 'Open escalation workbench',
       loadError: 'Unable to load dashboard statistics.',
     },
   },
@@ -281,9 +271,6 @@ export default {
       templates: 'Templates',
       masters: 'Masters',
       apiPolicies: 'API policies',
-      testerWorkbench: 'Open tester workbench',
-      approverWorkbench: 'Open approver workbench',
-      escalationWorkbench: 'Open escalation workbench',
     },
   },
   packageCatalog: {
@@ -668,7 +655,8 @@ export default {
     detail: {
       backToList: 'Back to templates',
       tabs: {
-        overview: 'Overview & workflow',
+        overview: 'Overview',
+        lifecycle: 'Lifecycle workflow',
         authoring: 'Authoring',
         releaseVersions: 'Versions',
         apiAccess: 'API access',
@@ -807,7 +795,7 @@ export default {
         'Release versions published for this template package. Status and last-updated fields reflect each version line.',
       workflowHintTitle: 'Workflow in progress',
       workflowHintDescription:
-        'A new release version appears here after you complete test, approval, and publish in Overview & workflow.',
+        'A new release version appears here after you complete test, approval, and publish in the Lifecycle workflow tab.',
       loadError: 'Unable to load version lines.',
       releaseVersion: 'Release version',
       devVersionNumber: 'Dev version',

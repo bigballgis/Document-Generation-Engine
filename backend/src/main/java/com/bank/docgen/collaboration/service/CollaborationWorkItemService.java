@@ -80,7 +80,7 @@ public class CollaborationWorkItemService {
         long ageSeconds = Math.max(0, Duration.between(entity.getCreatedAt(), now).getSeconds());
         return new CollaborationWorkItemSummaryView(
                 entity.getId().toString(),
-                entity.getTemplateExternalId(),
+                entity.getTemplateId().toString(),
                 entity.getTemplateName(),
                 entity.getGroupCode(),
                 entity.getQueue(),

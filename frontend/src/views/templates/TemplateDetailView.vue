@@ -99,7 +99,14 @@ function resolveDetailTab(value: unknown): DetailTab {
   return resolveTemplateDetailTab(value)
 }
 
-const activeDetailTab = ref<DetailTab>(resolveDetailTab(route.query.tab))
+function resolveDetailTabFromRoute(): DetailTab {
+  if (route.query.focus === 'lifecycle') {
+    return 'lifecycle'
+  }
+  return resolveTemplateDetailTab(route.query.tab)
+}
+
+const activeDetailTab = ref<DetailTab>(resolveDetailTabFromRoute())
 const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
 
 const templateId = computed(() => route.params.templateId as string)
@@ -300,11 +307,14 @@ onMounted(async () => {
 })
 
 watch(
-  () => route.query.tab,
-  (tab) => {
-    const resolved = resolveDetailTab(tab)
+  () => [route.query.tab, route.query.focus] as const,
+  ([tab, focus]) => {
+    const resolved = focus === 'lifecycle' ? 'lifecycle' : resolveDetailTab(tab)
     if (activeDetailTab.value !== resolved) {
       activeDetailTab.value = resolved
+    }
+    if (resolved === 'lifecycle') {
+      scrollToLifecyclePanel()
     }
   },
 )
@@ -377,14 +387,18 @@ async function loadTemplate() {
   }
 }
 
-function openLifecyclePanel() {
-  activeDetailTab.value = 'overview'
+function scrollToLifecyclePanel() {
   void nextTick(() => {
     document.getElementById('template-lifecycle-panel')?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     })
   })
+}
+
+function openLifecyclePanel() {
+  activeDetailTab.value = 'lifecycle'
+  scrollToLifecyclePanel()
 }
 
 async function loadPolicyData() {
@@ -821,7 +835,9 @@ async function handleDeleteTemplate() {
           {{ template.description ?? t('templates.detail.noDescription') }}
         </p>
       </el-card>
+        </el-tab-pane>
 
+        <el-tab-pane :label="t('templates.detail.tabs.lifecycle')" name="lifecycle">
       <el-card
         v-if="showLifecycleSection"
         id="template-lifecycle-panel"

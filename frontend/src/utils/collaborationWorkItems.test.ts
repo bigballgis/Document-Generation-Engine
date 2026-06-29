@@ -21,7 +21,7 @@ describe('collaborationWorkItems utils', () => {
 
     expect(task.source).toBe('collaboration')
     expect(task.kind).toBe('template-test')
-    expect(task.path).toBe('/templates/tpl-1?tab=overview')
+    expect(task.path).toBe('/templates/tpl-1?tab=lifecycle')
     expect(task.submitterUserId).toBe('10000003')
     expect(task.ageSeconds).toBe(7200)
   })

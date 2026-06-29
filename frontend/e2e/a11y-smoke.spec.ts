@@ -22,12 +22,13 @@ test.describe('management shell accessibility smoke', () => {
     await expect(page.getByRole('button', { name: /new content module/i })).toBeVisible()
   })
 
-  test('tester workbench exposes primary h1 after login', async ({ page }) => {
+  test('tester dashboard task hub exposes primary h1 after login', async ({ page }) => {
     await page.setViewportSize(P14_T01_VIEWPORT)
     await loginAs(page, E2E_TEMPLATE_TESTER)
-    await page.goto('/workbench/tester')
+    await page.goto('/dashboard#tasks-section')
 
-    await expect(page.getByRole('heading', { level: 1, name: /tester workbench/i })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /my tasks/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /pending actions/i })).toBeVisible()
   })
 
   test('templates list exposes primary h1 after login', async ({ page }) => {

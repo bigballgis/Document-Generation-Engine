@@ -15,7 +15,7 @@ import {
   seedCollaborationWorkItem,
   seedEscalationFromOverdueSource,
 } from './helpers/collaboration-api'
-import { reLoginAs } from './helpers/ui'
+import { dashboardTaskRow, filterDashboardTasksByItem, reLoginAs } from './helpers/ui'
 import {
   captureP14T02LocatorScreenshot,
   captureP14T02Screenshot,
@@ -35,7 +35,7 @@ test.describe('P14-T02 UIUX evidence', () => {
     await page.setViewportSize(P14_T02_VIEWPORT)
   })
 
-  test('capture workbench panels, timeout config, and dual-brand evidence', async ({
+  test('capture dashboard task hub, lifecycle tab, timeout config, and dual-brand evidence', async ({
     page,
     request,
   }) => {
@@ -60,36 +60,42 @@ test.describe('P14-T02 UIUX evidence', () => {
     seedEscalationFromOverdueSource(sourceWorkItem, escalationTemplate)
 
     await loginAs(page, E2E_TEMPLATE_TESTER)
-    await page.goto('/workbench/tester')
-    await expect(page.getByRole('heading', { name: /tester workbench/i })).toBeVisible()
+    await page.goto('/dashboard#tasks-section')
+    await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /pending actions/i })).toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
-    await expect(page.getByRole('row', { name: new RegExp(testerTemplate.name) })).toBeVisible()
-    await captureP14T02Screenshot(page, '01-tester-workbench-redbc-1440x900.png')
+    await filterDashboardTasksByItem(page, testerTemplate.name)
+    const testerTaskRow = await dashboardTaskRow(page, testerTemplate.name)
+    await expect(testerTaskRow).toBeVisible({ timeout: 30_000 })
+    await captureP14T02Screenshot(page, '01-dashboard-tasks-redbc-1440x900.png')
+
+    await testerTaskRow.click()
+    await expect(page).toHaveURL(/tab=lifecycle/)
+    await expect(page.getByText(/an internal error occurred/i)).not.toBeVisible()
+    await expect(page.locator('#template-lifecycle-panel')).toBeVisible({ timeout: 15_000 })
+    await captureP14T02Screenshot(page, '04-template-lifecycle-tab-redbc-1440x900.png')
 
     await switchBrand(page, 'GREENBC')
-    await captureP14T02Screenshot(page, '02-tester-workbench-greenbc-1440x900.png')
+    await captureP14T02Screenshot(page, '03-template-lifecycle-tab-greenbc-1440x900.png')
+
+    await page.goto('/dashboard#tasks-section')
+    await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
+    await captureP14T02Screenshot(page, '02-dashboard-tasks-greenbc-1440x900.png')
 
     await reLoginAs(page, loginAs, E2E_TEMPLATE_APPROVER)
-    await page.goto('/workbench/approver')
-    await expect(page.getByRole('heading', { name: /approver workbench/i })).toBeVisible()
-    await expect(page.locator('.el-skeleton')).toHaveCount(0)
-    await expect(page.getByRole('row', { name: new RegExp(approvalTemplate.name) })).toBeVisible()
-    await captureP14T02Screenshot(page, '03-approver-workbench-greenbc-1440x900.png')
-
-    await switchBrand(page, 'REDBC')
-    await captureP14T02Screenshot(page, '04-approver-workbench-redbc-1440x900.png')
+    await page.goto('/dashboard#tasks-section')
+    await filterDashboardTasksByItem(page, approvalTemplate.name)
+    await expect(await dashboardTaskRow(page, approvalTemplate.name)).toBeVisible()
+    await captureP14T02Screenshot(page, '05-dashboard-approver-tasks-redbc-1440x900.png')
 
     await reLoginAs(page, loginAs, E2E_GROUP_ADMIN)
-    await page.goto('/workbench/escalation')
-    await expect(page.getByRole('heading', { name: /escalation workbench/i })).toBeVisible()
-    await expect(page.locator('.el-skeleton')).toHaveCount(0)
-    const escalationRow = page.getByRole('row', { name: new RegExp(escalationTemplate.name) })
-    await expect(escalationRow).toBeVisible()
-    await expect(escalationRow.getByText(/exceeded.*threshold/i)).toBeVisible()
-    await captureP14T02Screenshot(page, '05-escalation-workbench-redbc-1440x900.png')
+    await page.goto('/dashboard#tasks-section')
+    await filterDashboardTasksByItem(page, escalationTemplate.name)
+    await expect(await dashboardTaskRow(page, escalationTemplate.name)).toBeVisible()
+    await captureP14T02Screenshot(page, '06-dashboard-escalation-tasks-redbc-1440x900.png')
 
     await switchBrand(page, 'GREENBC')
-    await captureP14T02Screenshot(page, '06-escalation-workbench-greenbc-1440x900.png')
+    await captureP14T02Screenshot(page, '07-dashboard-escalation-tasks-greenbc-1440x900.png')
 
     await reLoginAs(page, loginAs, E2E_ADMIN)
     await page.goto('/dashboard')
@@ -101,13 +107,13 @@ test.describe('P14-T02 UIUX evidence', () => {
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
     await captureP14T02LocatorScreenshot(
       timeoutPanel,
-      '07-dashboard-timeout-config-panel-greenbc-1440x900.png',
+      '08-dashboard-timeout-config-panel-greenbc-1440x900.png',
     )
 
     await switchBrand(page, 'REDBC')
     await captureP14T02LocatorScreenshot(
       timeoutPanel,
-      '08-dashboard-timeout-config-panel-redbc-1440x900.png',
+      '09-dashboard-timeout-config-panel-redbc-1440x900.png',
     )
 
     await expect(timeoutPanel.getByRole('button', { name: /save thresholds/i })).toBeVisible()

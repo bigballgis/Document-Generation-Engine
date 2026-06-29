@@ -1,4 +1,4 @@
-export const TEMPLATE_DETAIL_TABS = ['overview', 'authoring', 'releaseVersions', 'apiAccess'] as const
+export const TEMPLATE_DETAIL_TABS = ['overview', 'lifecycle', 'authoring', 'releaseVersions', 'apiAccess'] as const
 
 export type TemplateDetailTab = (typeof TEMPLATE_DETAIL_TABS)[number]
 

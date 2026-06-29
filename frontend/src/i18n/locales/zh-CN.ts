@@ -93,7 +93,6 @@ export default {
       content: '文档内容',
       apiAccess: 'API 访问',
       security: '安全与审计',
-      workbench: '工作台',
     },
     items: {
       dashboard: '我的任务',
@@ -106,9 +105,6 @@ export default {
       templateVersions: '模板版本',
       apiPolicies: 'API 策略',
       audit: '审计日志',
-      testerWorkbench: '测试工作台',
-      approverWorkbench: '审批工作台',
-      escalationWorkbench: '升级工作台',
     },
     routes: {
       globalGovernance: '全局治理',
@@ -118,8 +114,6 @@ export default {
       audit: '审计控制台',
       masters: '主文档',
       templates: '模板',
-      testerWorkbench: '测试工作台',
-      approverWorkbench: '审批工作台',
       identityAdministration: '身份与分组',
     },
     breadcrumb: {
@@ -180,9 +174,6 @@ export default {
       stoppedTemplatesDescription: '已暂停运行时调用的模板。',
       viewMasters: '查看主文档',
       viewTemplates: '查看模板',
-      viewTesterWorkbench: '打开测试工作台',
-      viewApproverWorkbench: '打开审批工作台',
-      viewEscalationWorkbench: '打开升级工作台',
       loadError: '无法加载仪表盘统计数据。',
     },
   },
@@ -279,9 +270,6 @@ export default {
       templates: '模板',
       masters: '主文档',
       apiPolicies: 'API 策略',
-      testerWorkbench: '打开测试工作台',
-      approverWorkbench: '打开审批工作台',
-      escalationWorkbench: '打开升级工作台',
     },
   },
   packageCatalog: {
@@ -642,7 +630,8 @@ export default {
     detail: {
       backToList: '返回模板列表',
       tabs: {
-        overview: '概览与工作流',
+        overview: '概览',
+        lifecycle: '生命周期工作流',
         authoring: '编排',
         releaseVersions: '版本',
         apiAccess: 'API 访问',
@@ -911,7 +900,7 @@ export default {
     versions: {
       workflowHintTitle: '工作流进行中',
       workflowHintDescription:
-        '在「概览与工作流」中完成测试、审批和发布后，新版本将出现在此列表。',
+        '在「生命周期工作流」页签中完成测试、审批和发布后，新版本将出现在此列表。',
       loadError: '无法加载版本线。',
       devVersionNumber: '开发版本号',
       defaultRoute: '默认路由',

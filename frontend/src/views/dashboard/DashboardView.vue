@@ -56,7 +56,7 @@ const loading = ref(false)
 const loadError = ref(false)
 
 const quickLinks = computed(() =>
-  dashboardQuickLinks(sessionStore.session?.visibleRoutes ?? [], context.value),
+  dashboardQuickLinks(sessionStore.session?.visibleRoutes ?? []),
 )
 
 const authorizedGroupsSummary = computed(() => {

@@ -17,7 +17,7 @@ const globalAdminCapabilities: ManagementCapabilities = {
 }
 
 describe('navStructure', () => {
-  it('includes workbench nav items based on role capabilities', () => {
+  it('does not include standalone workbench navigation', () => {
     const groups = buildVisibleNavGroups(
       ['route.dashboard-home', 'route.template-management'],
       ['TEMPLATE_TESTER'],
@@ -35,38 +35,16 @@ describe('navStructure', () => {
       },
     )
 
-    const workbenchGroup = groups.find((group) => group.id === 'workbench')
-    expect(workbenchGroup?.items.map((item) => item.id)).toEqual(['tester-workbench'])
+    expect(groups.some((group) => group.id === 'workbench')).toBe(false)
   })
 
-  it('includes tester workbench from role when capabilities are absent', () => {
+  it('keeps dashboard as the sole overview entry for collaboration roles', () => {
     const groups = buildVisibleNavGroups(
       ['route.dashboard-home', 'route.template-management'],
       ['TEMPLATE_TESTER'],
     )
 
-    const workbenchGroup = groups.find((group) => group.id === 'workbench')
-    expect(workbenchGroup?.items.map((item) => item.id)).toEqual(['tester-workbench'])
-  })
-
-  it('includes approver workbench from role when capabilities are absent', () => {
-    const groups = buildVisibleNavGroups(
-      ['route.dashboard-home', 'route.template-management'],
-      ['TEMPLATE_APPROVER'],
-    )
-
-    const workbenchGroup = groups.find((group) => group.id === 'workbench')
-    expect(workbenchGroup?.items.map((item) => item.id)).toEqual(['approver-workbench'])
-  })
-
-  it('includes escalation workbench for group admins', () => {
-    const groups = buildVisibleNavGroups(
-      ['route.dashboard-home', 'route.template-management'],
-      ['GROUP_ADMIN'],
-      globalAdminCapabilities,
-    )
-
-    const workbenchGroup = groups.find((group) => group.id === 'workbench')
-    expect(workbenchGroup?.items.some((item) => item.id === 'escalation-workbench')).toBe(true)
+    const overviewGroup = groups.find((group) => group.id === 'overview')
+    expect(overviewGroup?.items.map((item) => item.id)).toEqual(['dashboard'])
   })
 })

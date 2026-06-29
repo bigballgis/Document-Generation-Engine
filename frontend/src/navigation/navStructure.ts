@@ -1,9 +1,6 @@
 import { ROUTE_KEYS, type RouteKey } from '@/routing/routeKeys'
 import {
-  canAccessCollaborationEscalationWorkbench,
-  canAccessApproverWorkbench,
   canAccessContentModuleManagement,
-  canAccessTesterWorkbench,
   type CapabilityContext,
 } from '@/auth/roles'
 
@@ -102,30 +99,6 @@ export const NAV_GROUPS: NavGroupDefinition[] = [
   },
 ]
 
-const WORKBENCH_NAV_ITEMS: Array<NavItemDefinition & { canAccess: (context: CapabilityContext) => boolean }> = [
-  {
-    id: 'tester-workbench',
-    routeKey: ROUTE_KEYS.testerWorkbench,
-    path: '/workbench/tester',
-    labelKey: 'nav.items.testerWorkbench',
-    canAccess: canAccessTesterWorkbench,
-  },
-  {
-    id: 'approver-workbench',
-    routeKey: ROUTE_KEYS.approverWorkbench,
-    path: '/workbench/approver',
-    labelKey: 'nav.items.approverWorkbench',
-    canAccess: canAccessApproverWorkbench,
-  },
-  {
-    id: 'escalation-workbench',
-    routeKey: ROUTE_KEYS.escalationWorkbench,
-    path: '/workbench/escalation',
-    labelKey: 'nav.items.escalationWorkbench',
-    canAccess: canAccessCollaborationEscalationWorkbench,
-  },
-]
-
 export function buildVisibleNavGroups(
   visibleRouteKeys: string[],
   roles: string[] = [],
@@ -134,26 +107,13 @@ export function buildVisibleNavGroups(
   const context: CapabilityContext = { roles, capabilities }
   const allowed = new Set(visibleRouteKeys)
   if (
-    canAccessContentModuleManagement(roles) &&
+    canAccessContentModuleManagement(context.roles) &&
     !allowed.has(ROUTE_KEYS.contentModuleManagement)
   ) {
     allowed.add(ROUTE_KEYS.contentModuleManagement)
   }
-  const groups = NAV_GROUPS.map((group) => ({
+  return NAV_GROUPS.map((group) => ({
     ...group,
     items: group.items.filter((item) => allowed.has(item.routeKey)),
   })).filter((group) => group.items.length > 0)
-
-  const workbenchItems: NavItemDefinition[] = WORKBENCH_NAV_ITEMS.filter((item) =>
-    item.canAccess(context),
-  ).map(({ id, routeKey, path, labelKey }) => ({ id, routeKey, path, labelKey }))
-  if (workbenchItems.length > 0) {
-    groups.push({
-      id: 'workbench',
-      labelKey: 'nav.groups.workbench',
-      items: workbenchItems,
-    })
-  }
-
-  return groups
 }

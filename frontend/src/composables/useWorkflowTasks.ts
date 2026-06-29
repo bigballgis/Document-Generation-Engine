@@ -1,11 +1,7 @@
 import { computed } from 'vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import {
-  canAccessApproverWorkbench,
-  canAccessCollaborationEscalationWorkbench,
-  canAccessTesterWorkbench,
   canViewCollaborationWorkItems,
-  type CapabilityContext,
 } from '@/auth/roles'
 import { pathForRouteKey, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useCollaborationStore } from '@/stores/collaboration'
@@ -47,6 +43,14 @@ export interface WorkflowTask {
   createdAt?: string
 }
 
+function sortTasksNewestFirst(items: WorkflowTask[]): WorkflowTask[] {
+  return [...items].sort((left, right) => {
+    const leftTime = left.createdAt ? Date.parse(left.createdAt) : 0
+    const rightTime = right.createdAt ? Date.parse(right.createdAt) : 0
+    return rightTime - leftTime
+  })
+}
+
 export function useWorkflowTasks() {
   const mastersStore = useMastersStore()
   const collaborationStore = useCollaborationStore()
@@ -79,7 +83,7 @@ export function useWorkflowTasks() {
       }
     }
 
-    return items
+    return sortTasksNewestFirst(items)
   })
 
   return { tasks }
@@ -111,28 +115,9 @@ function masterReviewTask(master: MasterDocumentSummary): WorkflowTask {
   }
 }
 
-export function dashboardQuickLinks(visibleRoutes: string[], context?: CapabilityContext) {
+export function dashboardQuickLinks(visibleRoutes: string[]) {
   const allowed = new Set(visibleRoutes)
   const links: Array<{ labelKey: string; path: string }> = []
-
-  if (context && canAccessTesterWorkbench(context)) {
-    links.push({
-      labelKey: 'dashboard.quickLinks.testerWorkbench',
-      path: pathForRouteKey(ROUTE_KEYS.testerWorkbench),
-    })
-  }
-  if (context && canAccessApproverWorkbench(context)) {
-    links.push({
-      labelKey: 'dashboard.quickLinks.approverWorkbench',
-      path: pathForRouteKey(ROUTE_KEYS.approverWorkbench),
-    })
-  }
-  if (context && canAccessCollaborationEscalationWorkbench(context)) {
-    links.push({
-      labelKey: 'dashboard.quickLinks.escalationWorkbench',
-      path: pathForRouteKey(ROUTE_KEYS.escalationWorkbench),
-    })
-  }
 
   if (allowed.has(ROUTE_KEYS.templateManagement)) {
     links.push({

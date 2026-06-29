@@ -7,12 +7,6 @@ import {
   ROUTE_KEYS,
   type RouteKey,
 } from '@/routing/routeKeys'
-import {
-  canAccessApproverWorkbench,
-  canAccessCollaborationEscalationWorkbench,
-  canAccessTesterWorkbench,
-  sessionContext,
-} from '@/auth/roles'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
@@ -48,18 +42,6 @@ const QUICK_LINK_META: Partial<Record<RouteKey, { titleKey: string; descriptionK
   'route.template-management': {
     titleKey: 'home.nav.templates',
     descriptionKey: 'home.nav.templatesDescription',
-  },
-  'route.tester-workbench': {
-    titleKey: 'workbench.tester.title',
-    descriptionKey: 'workbench.tester.description',
-  },
-  'route.approver-workbench': {
-    titleKey: 'workbench.approver.title',
-    descriptionKey: 'workbench.approver.description',
-  },
-  'route.escalation-workbench': {
-    titleKey: 'workbench.escalation.title',
-    descriptionKey: 'workbench.escalation.description',
   },
   'route.api-policy-management': {
     titleKey: 'home.apiPolicy.title',
@@ -156,34 +138,6 @@ const dashboardStats = computed(() => {
   ]
 })
 
-const workbenchLinks = computed(() => {
-  const session = sessionStore.session
-  if (!session) {
-    return []
-  }
-  const context = sessionContext(session)
-  const links: Array<{ titleKey: string; path: string }> = []
-  if (canAccessTesterWorkbench(context)) {
-    links.push({
-      titleKey: 'home.dashboard.viewTesterWorkbench',
-      path: pathForRouteKey(ROUTE_KEYS.testerWorkbench),
-    })
-  }
-  if (canAccessApproverWorkbench(context)) {
-    links.push({
-      titleKey: 'home.dashboard.viewApproverWorkbench',
-      path: pathForRouteKey(ROUTE_KEYS.approverWorkbench),
-    })
-  }
-  if (canAccessCollaborationEscalationWorkbench(context)) {
-    links.push({
-      titleKey: 'home.dashboard.viewEscalationWorkbench',
-      path: pathForRouteKey(ROUTE_KEYS.escalationWorkbench),
-    })
-  }
-  return links
-})
-
 onMounted(async () => {
   if (!isGovernanceHome.value) {
     return
@@ -257,16 +211,6 @@ function navigate(path: string) {
               {{ t(stat.actionKey) }}
             </el-button>
           </el-card>
-        </div>
-
-        <div v-if="workbenchLinks.length > 0" class="workbench-links">
-          <el-button
-            v-for="link in workbenchLinks"
-            :key="link.path"
-            @click="navigate(link.path)"
-          >
-            {{ t(link.titleKey) }}
-          </el-button>
         </div>
       </section>
     </template>
@@ -364,12 +308,5 @@ function navigate(path: string) {
   font-size: 2rem;
   font-weight: 700;
   color: var(--brand-primary);
-}
-
-.workbench-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
 }
 </style>

@@ -63,6 +63,7 @@ class CollaborationWorkItemServiceTest {
         List<CollaborationWorkItemSummaryView> items = service.listQueue(tester, null, null);
 
         assertThat(items).hasSize(1);
+        assertThat(items.get(0).templateId()).isEqualTo(TEMPLATE_ID.toString());
         assertThat(items.get(0).templateName()).isEqualTo("Loan Notice Template");
         assertThat(items.get(0).queue()).isEqualTo(CollaborationWorkItemQueue.TEST);
         assertThat(items.get(0).submitterUserId()).isEqualTo("10000003");

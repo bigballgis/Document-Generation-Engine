@@ -41,3 +41,17 @@ export async function openDemoTemplateAuthoringTab(page: Page, externalId: strin
 export async function selectElementPlusOption(page: Page, optionText: string | RegExp) {
   await page.locator('.el-select-dropdown__item').filter({ hasText: optionText }).click()
 }
+
+export async function filterDashboardTasksByItem(page: Page, itemName: string) {
+  const tasksSection = page.locator('#tasks-section')
+  await expect(tasksSection).toBeVisible()
+  const itemFilter = tasksSection.getByPlaceholder(/filter/i).nth(1)
+  await itemFilter.fill(itemName)
+}
+
+export async function dashboardTaskRow(page: Page, itemName: string) {
+  return page
+    .locator('#tasks-section .el-table__row.app-data-table__activatable-row')
+    .filter({ hasText: itemName })
+    .first()
+}

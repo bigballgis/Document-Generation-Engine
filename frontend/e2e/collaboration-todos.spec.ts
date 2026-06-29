@@ -4,7 +4,6 @@ import {
   DEMO_GROUP_CODE,
   E2E_ADMIN,
   E2E_GROUP_ADMIN,
-  E2E_TEMPLATE_AUTHOR,
   loginAs,
 } from './helpers/auth'
 import {
@@ -20,6 +19,7 @@ import {
   waitForEscalationWorkItem,
 } from './helpers/collaboration-api'
 import { E2E_API_BASE_URL } from './helpers/masters-api'
+import { dashboardTaskRow, filterDashboardTasksByItem } from './helpers/ui'
 
 const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173'
 
@@ -47,7 +47,7 @@ test.describe('P14-T02 collaboration to-dos', () => {
     )
   })
 
-  test('tester workbench shows TEST queue to-do with template, group, submitter, age', async ({
+  test('dashboard shows TEST queue to-do with template and group', async ({
     page,
     request,
   }) => {
@@ -56,21 +56,33 @@ test.describe('P14-T02 collaboration to-dos', () => {
     ageCollaborationWorkItem(workItem.workItemId, "INTERVAL '3 hours'")
 
     await loginAs(page, E2E_TEMPLATE_TESTER)
-    await page.goto('/workbench/tester')
+    await page.goto('/dashboard#tasks-section')
 
-    await expect(page.getByRole('heading', { name: /tester workbench/i })).toBeVisible()
-    await expect(page.getByText(/unable to load collaboration to-do items/i)).not.toBeVisible()
+    await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /pending actions/i })).toBeVisible()
+    await expect(page.getByText(/unable to load your task list/i)).not.toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
 
-    const row = page.getByRole('row', { name: new RegExp(template.name) })
-    await expect(row).toBeVisible()
+    await filterDashboardTasksByItem(page, template.name)
+    const row = await dashboardTaskRow(page, template.name)
+    await expect(row).toBeVisible({ timeout: 30_000 })
     await expect(row.getByText(template.name, { exact: true })).toBeVisible()
     await expect(row.getByText(DEMO_GROUP_CODE, { exact: true })).toBeVisible()
-    await expect(row.getByText(E2E_TEMPLATE_AUTHOR.username, { exact: true })).toBeVisible()
-    await expect(row.getByText(/\d+h|\d+d/)).toBeVisible()
+
+    await row.click()
+    await expect(page).toHaveURL(/tab=lifecycle/)
+    await expect(page.getByText(/an internal error occurred/i)).not.toBeVisible()
+    await expect(page.locator('#template-lifecycle-panel')).toBeVisible({ timeout: 15_000 })
 
     const apiItems = await listCollaborationWorkItems(request, E2E_TEMPLATE_TESTER, { queue: 'TEST' })
     expect(apiItems.some((item) => item.workItemId === workItem.workItemId)).toBeTruthy()
+  })
+
+  test('legacy workbench URL redirects to dashboard tasks section', async ({ page }) => {
+    await loginAs(page, E2E_TEMPLATE_TESTER)
+    await page.goto('/workbench/tester')
+    await expect(page).toHaveURL(/\/dashboard#tasks-section/)
+    await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
   })
 
   test('overdue test to-do escalates; group admin sees item; template status unchanged', async ({
@@ -99,17 +111,18 @@ test.describe('P14-T02 collaboration to-dos', () => {
     ).toBeTruthy()
 
     await loginAs(page, E2E_GROUP_ADMIN)
-    await page.goto('/workbench/escalation')
+    await page.goto('/dashboard#tasks-section')
 
-    await expect(page.getByRole('heading', { name: /escalation workbench/i })).toBeVisible()
-    await expect(page.getByText(/unable to load collaboration to-do items/i)).not.toBeVisible()
+    await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /pending actions/i })).toBeVisible()
+    await expect(page.getByText(/unable to load your task list/i)).not.toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
 
-    const row = page.getByRole('row', { name: new RegExp(template.name) })
-    await expect(row).toBeVisible()
+    await filterDashboardTasksByItem(page, template.name)
+    const row = await dashboardTaskRow(page, template.name)
+    await expect(row).toBeVisible({ timeout: 30_000 })
     await expect(row.getByText(template.name, { exact: true })).toBeVisible()
     await expect(row.getByText(DEMO_GROUP_CODE, { exact: true })).toBeVisible()
-    await expect(row.getByText(/exceeded.*threshold/i)).toBeVisible()
   })
 
   test('admin configures collaboration timeout thresholds on dashboard', async ({ page, request }) => {

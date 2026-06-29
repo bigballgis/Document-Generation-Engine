@@ -107,12 +107,43 @@ describe('useWorkflowTasks', () => {
     expect(tasks.value.some((task) => task.kind === 'master-rework')).toBe(true)
   })
 
-  it('filters quick links by visible routes', () => {
-    const links = dashboardQuickLinks(['route.template-management'], {
-      roles: ['TEMPLATE_TESTER'],
-      capabilities: testerCapabilities,
-    })
+  it('filters quick links by visible routes without workbench shortcuts', () => {
+    const links = dashboardQuickLinks(['route.template-management'])
     expect(links.some((link) => link.labelKey === 'dashboard.quickLinks.templates')).toBe(true)
-    expect(links.some((link) => link.labelKey === 'dashboard.quickLinks.testerWorkbench')).toBe(true)
+    expect(links.some((link) => link.labelKey === 'dashboard.quickLinks.testerWorkbench')).toBe(false)
+  })
+
+  it('sorts collaboration tasks newest-first by createdAt', () => {
+    const collaborationStore = useCollaborationStore()
+    collaborationStore.workItems = [
+      {
+        workItemId: 'wi-old',
+        templateId: 't-old',
+        templateName: 'Older',
+        groupCode: 'RETAIL',
+        queue: 'TEST',
+        triggerType: 'SUBMIT_FOR_TEST',
+        submitterUserId: '10000003',
+        summaryText: 'Older item',
+        createdAt: '2026-06-20T10:00:00Z',
+        ageSeconds: 120,
+      },
+      {
+        workItemId: 'wi-new',
+        templateId: 't-new',
+        templateName: 'Newer',
+        groupCode: 'RETAIL',
+        queue: 'TEST',
+        triggerType: 'SUBMIT_FOR_TEST',
+        submitterUserId: '10000003',
+        summaryText: 'Newer item',
+        createdAt: '2026-06-26T10:00:00Z',
+        ageSeconds: 60,
+      },
+    ]
+
+    const { tasks } = useWorkflowTasks()
+    expect(tasks.value[0]?.workItemId).toBe('wi-new')
+    expect(tasks.value[1]?.workItemId).toBe('wi-old')
   })
 })

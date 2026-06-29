@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { apiPolicyDetailPath, pathForRouteKey, ROUTE_KEYS, templateDetailPath } from '@/routing/routeKeys'
+import {
+  apiPolicyDetailPath,
+  pathForRouteKey,
+  ROUTE_KEYS,
+  templateDetailPath,
+  templateLifecyclePanelPath,
+} from '@/routing/routeKeys'
 
 describe('routeKeys', () => {
   it('maps product logical routes to frontend paths', () => {
@@ -13,14 +19,15 @@ describe('routeKeys', () => {
       '/api/policies/tpl-1?domain=OUTPUT_POLICY',
     )
     expect(pathForRouteKey(ROUTE_KEYS.identityAdministration)).toBe('/entitlement/users')
-    expect(pathForRouteKey(ROUTE_KEYS.testerWorkbench)).toBe('/workbench/tester')
-    expect(pathForRouteKey(ROUTE_KEYS.approverWorkbench)).toBe('/workbench/approver')
-    expect(pathForRouteKey(ROUTE_KEYS.escalationWorkbench)).toBe('/workbench/escalation')
+    expect(pathForRouteKey(ROUTE_KEYS.testerWorkbench)).toBe('/dashboard#tasks-section')
+    expect(pathForRouteKey(ROUTE_KEYS.approverWorkbench)).toBe('/dashboard#tasks-section')
+    expect(pathForRouteKey(ROUTE_KEYS.escalationWorkbench)).toBe('/dashboard#tasks-section')
   })
 
   it('builds template detail paths', () => {
     expect(templateDetailPath('tpl-1')).toBe('/templates/tpl-1')
     expect(templateDetailPath('tpl-1', 'overview')).toBe('/templates/tpl-1?tab=overview')
+    expect(templateLifecyclePanelPath('tpl-1')).toBe('/templates/tpl-1?tab=lifecycle')
   })
 
   it('falls back to forbidden for unknown route keys', () => {

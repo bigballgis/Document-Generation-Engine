@@ -21,9 +21,9 @@ export const LEGACY_ROUTE_PATH_REDIRECT: Partial<Record<string, string>> = {
   [ROUTE_KEYS.globalGovernanceHome]: '/dashboard',
   [ROUTE_KEYS.groupGovernanceHome]: '/dashboard',
   [ROUTE_KEYS.templateAuthoringHome]: '/dashboard',
-  [ROUTE_KEYS.testerWorkbench]: '/workbench/tester',
-  [ROUTE_KEYS.approverWorkbench]: '/workbench/approver',
-  [ROUTE_KEYS.escalationWorkbench]: '/workbench/escalation',
+  [ROUTE_KEYS.testerWorkbench]: '/dashboard#tasks-section',
+  [ROUTE_KEYS.approverWorkbench]: '/dashboard#tasks-section',
+  [ROUTE_KEYS.escalationWorkbench]: '/dashboard#tasks-section',
 }
 
 export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
@@ -36,9 +36,9 @@ export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.masterManagement]: '/masters',
   [ROUTE_KEYS.templateManagement]: '/templates',
   [ROUTE_KEYS.contentModuleManagement]: '/content-modules',
-  [ROUTE_KEYS.testerWorkbench]: '/workbench/tester',
-  [ROUTE_KEYS.approverWorkbench]: '/workbench/approver',
-  [ROUTE_KEYS.escalationWorkbench]: '/workbench/escalation',
+  [ROUTE_KEYS.testerWorkbench]: '/dashboard#tasks-section',
+  [ROUTE_KEYS.approverWorkbench]: '/dashboard#tasks-section',
+  [ROUTE_KEYS.escalationWorkbench]: '/dashboard#tasks-section',
   [ROUTE_KEYS.identityAdministration]: '/entitlement/users',
 }
 
@@ -52,9 +52,9 @@ export const ROUTE_NAV_LABEL_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.masterManagement]: 'nav.items.masters',
   [ROUTE_KEYS.templateManagement]: 'nav.items.templates',
   [ROUTE_KEYS.contentModuleManagement]: 'nav.items.contentModules',
-  [ROUTE_KEYS.testerWorkbench]: 'nav.items.testerWorkbench',
-  [ROUTE_KEYS.approverWorkbench]: 'nav.items.approverWorkbench',
-  [ROUTE_KEYS.escalationWorkbench]: 'nav.items.escalationWorkbench',
+  [ROUTE_KEYS.testerWorkbench]: 'nav.items.dashboard',
+  [ROUTE_KEYS.approverWorkbench]: 'nav.items.dashboard',
+  [ROUTE_KEYS.escalationWorkbench]: 'nav.items.dashboard',
   [ROUTE_KEYS.identityAdministration]: 'nav.items.users',
 }
 
@@ -94,6 +94,10 @@ export function templateDetailPath(templateId: string, tab?: string): string {
     return base
   }
   return `${base}?tab=${encodeURIComponent(tab)}`
+}
+
+export function templateLifecyclePanelPath(templateId: string): string {
+  return templateDetailPath(templateId, 'lifecycle')
 }
 
 export function apiPolicyDetailPath(templateId: string, domain?: string): string {

@@ -1,4 +1,4 @@
-import { templateDetailPath } from '@/routing/routeKeys'
+import { templateLifecyclePanelPath } from '@/routing/routeKeys'
 import type { WorkflowTask, WorkflowTaskKind } from '@/composables/useWorkflowTasks'
 import type {
   CollaborationWorkItemQueue,
@@ -37,7 +37,7 @@ export function collaborationWorkItemToTask(item: CollaborationWorkItemSummary):
     kind: QUEUE_KIND[item.queue],
     titleKey: QUEUE_TITLE_KEY[item.queue],
     descriptionKey: TRIGGER_DESCRIPTION_KEY[item.triggerType],
-    path: templateDetailPath(item.templateId, 'overview'),
+    path: templateLifecyclePanelPath(item.templateId),
     groupCode: item.groupCode,
     entityName: item.templateName,
     source: 'collaboration',
