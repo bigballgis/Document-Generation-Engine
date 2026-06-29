@@ -2,14 +2,9 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
-import com.bank.docgen.authoring.structured.MasterStyleCatalog;
 import com.bank.docgen.authoring.structured.MasterStyleCatalogService;
 import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
 import com.bank.docgen.authoring.structured.NumberingService;
-import com.bank.docgen.authoring.structured.PasteCleaningResult;
-import com.bank.docgen.authoring.structured.PasteCleaningService;
-import com.bank.docgen.authoring.structured.PasteCleaningSummary;
-import com.bank.docgen.authoring.structured.PasteCleaningSummaryItem;
 import com.bank.docgen.authoring.structured.ReferenceNodeService;
 import com.bank.docgen.authoring.structured.TableComponentService;
 import com.bank.docgen.authoring.structured.StructuredContentSchemaException;
@@ -25,12 +20,9 @@ import com.bank.docgen.template.api.BindingValidationSummaryView;
 import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
-import com.bank.docgen.template.api.MasterStyleCatalogEntryView;
 import com.bank.docgen.template.api.MasterStyleCatalogView;
 import com.bank.docgen.template.api.PasteCleanRequest;
 import com.bank.docgen.template.api.PasteCleanResultView;
-import com.bank.docgen.template.api.PasteCleaningSummaryItemView;
-import com.bank.docgen.template.api.PasteCleaningSummaryView;
 import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateReleaseVersionView;
 import com.bank.docgen.template.api.TemplateSummaryView;
@@ -83,7 +75,7 @@ public class TemplateService {
     private final TableComponentService tableComponentService;
     private final ReferenceNodeService referenceNodeService;
     private final NumberingService numberingService;
-    private final PasteCleaningService pasteCleaningService;
+    private final TemplateStructuredAuthoringService structuredAuthoringService;
     private final TemplateViewMapper templateViewMapper;
 
     public TemplateService(
@@ -101,7 +93,7 @@ public class TemplateService {
             TableComponentService tableComponentService,
             ReferenceNodeService referenceNodeService,
             NumberingService numberingService,
-            PasteCleaningService pasteCleaningService,
+            TemplateStructuredAuthoringService structuredAuthoringService,
             TemplateViewMapper templateViewMapper
     ) {
         this.templateRepository = templateRepository;
@@ -118,7 +110,7 @@ public class TemplateService {
         this.tableComponentService = tableComponentService;
         this.referenceNodeService = referenceNodeService;
         this.numberingService = numberingService;
-        this.pasteCleaningService = pasteCleaningService;
+        this.structuredAuthoringService = structuredAuthoringService;
         this.templateViewMapper = templateViewMapper;
     }
 
@@ -382,7 +374,7 @@ public class TemplateService {
     @Transactional(readOnly = true)
     public MasterStyleCatalogView getMasterStyleCatalog(UUID templateId, ManagementSessionClaims session) {
         TemplateEntity template = requireReadableTemplate(templateId, session);
-        return toCatalogView(masterStyleCatalogService.loadForMaster(template.getMasterId()));
+        return structuredAuthoringService.getMasterStyleCatalog(template.getMasterId());
     }
 
     @Transactional(readOnly = true)
@@ -392,51 +384,7 @@ public class TemplateService {
             ManagementSessionClaims session
     ) {
         requireWritableTemplate(templateId, session);
-        PasteCleaningResult result = pasteCleaningService.cleanPaste(
-                request.sourceHtml(),
-                request.prePasteStructuredContentJson()
-        );
-        return toPasteCleanView(result);
-    }
-
-    private MasterStyleCatalogView toCatalogView(MasterStyleCatalog catalog) {
-        List<MasterStyleCatalogEntryView> entries = catalog.stylesByKey().values().stream()
-                .map(entry -> new MasterStyleCatalogEntryView(
-                        entry.styleKey(),
-                        entry.applicableNodeTypes(),
-                        entry.renderPurpose()
-                ))
-                .sorted(java.util.Comparator.comparing(MasterStyleCatalogEntryView::styleKey))
-                .toList();
-        return new MasterStyleCatalogView(catalog.catalogVersion(), entries);
-    }
-
-    private PasteCleanResultView toPasteCleanView(PasteCleaningResult result) {
-        PasteCleaningSummary summary = result.summary();
-        List<PasteCleaningSummaryItemView> items = summary.items().stream()
-                .map(this::toPasteSummaryItemView)
-                .toList();
-        PasteCleaningSummaryView summaryView = new PasteCleaningSummaryView(
-                items,
-                summary.transformedCount(),
-                summary.removedCount(),
-                summary.warningCount(),
-                summary.blockedCount()
-        );
-        return new PasteCleanResultView(
-                result.blocked(),
-                result.cleanedStructuredContentJson(),
-                summaryView,
-                result.prePasteSnapshotJson()
-        );
-    }
-
-    private PasteCleaningSummaryItemView toPasteSummaryItemView(PasteCleaningSummaryItem item) {
-        return new PasteCleaningSummaryItemView(
-                item.category(),
-                item.messageKey(),
-                item.detectionSummary()
-        );
+        return structuredAuthoringService.pasteClean(request);
     }
 
     private BindingValidationStatus computeBindingStatus(

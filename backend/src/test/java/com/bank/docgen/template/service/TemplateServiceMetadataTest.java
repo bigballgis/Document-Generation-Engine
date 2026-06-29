@@ -91,7 +91,10 @@ class TemplateServiceMetadataTest {
                 new TableComponentService(objectMapper),
                 new ReferenceNodeService(objectMapper),
                 new NumberingService(objectMapper),
-                new PasteCleaningService(objectMapper),
+                new TemplateStructuredAuthoringService(
+                        new MasterStyleCatalogService(objectMapper),
+                        new PasteCleaningService(objectMapper)
+                ),
                 viewMapper
         );
         author = new ManagementSessionClaims(
