@@ -1,6 +1,24 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-29 (P21-T02 Done — A1 backend collaboration work-item closed loop)
+**Last synced:** 2026-06-29 (P21-T01 Done — A0 behavior nav + L1 copy round 1)
+**Completion note (2026-06-29):** **P21-T01 Done** — A0 foundation + terminology baseline.
+Behavior-typed **My to-dos / 我的待办** nav group (`navStructure.ts`, `ManagementShell.vue`) with
+six capability/queue-driven entries + deep-link URL contract (`?queue=` / `?filter=master-review`
++ `#tasks-section`); L1 value rewrites for nav/dashboard/task-hub/breadcrumb per §12.2 Spec B
+(`en.ts`, `zh-CN.ts` — keys stable). **Gate:** `pnpm -C frontend lint`, `type-check`, `test`,
+`build` green (**267+** Vitest); Playwright `P21-T01-behavior-nav.spec.ts` **7/7**,
+`P21-T01-uiux-evidence.spec.ts` **1/1**, `a11y-smoke` + `collaboration-todos` **9/9** (dev :5173 +
+backend :8080); UIUX manifest `frontend/e2e/evidence/P21-T01-uiux-manifest.md` — **PASS** (0 🔴).
+**Audit:** AUD-Q05 in-scope L1 resolved (nav/dashboard/tasks); residual IT jargon on
+`templates.*` / `apiPolicy.*` / `audit.*` → **P21-X01**. P21 phase remains In Progress; next
+recommended slice **P21-T01a Not Started** (task hub deepening). Detail:
+[detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
+**Activation note (2026-06-29):** **P21-T01 activated → In Progress** (A0 foundation + terminology
+baseline — behavior-typed "My to-dos" nav group, L1 business copy for nav/dashboard/tasks/breadcrumb).
+P21 phase remains In Progress; **P21-T02** stays Done (2026-06-29). **No gate evidence yet** for
+P21-T01 (no implementation, no frontend lint/type-check/test/build for this slice); all other P21
+tasks unchanged. Detail:
+[detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 **P21-T02 completion note (2026-06-29):** **P21-T02 Done** — A1 backend collaboration work-item
 closed loop. `recordTestDecision(PASSED|FAILED)` resolves OPEN TEST work items (`RESOLVED` +
 `resolvedAt`) in the same transaction; FAILED→DRAFT upserts one OPEN REMEDIATION
@@ -52,7 +70,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Frontend (latest full gates) | `pnpm -C frontend lint`, `type-check`, `test`, `build` | Green — **250** Vitest tests (2026-06-24) | P18 polish: fidelity filter empty state, paste dialog cancel/undo split, style catalog i18n labels; flaky test timeout fix |
+| Frontend (latest full gates) | `pnpm -C frontend lint`, `type-check`, `test`, `build` | Green — **267+** Vitest tests (2026-06-29) | P21-T01 A0 behavior nav + L1 copy round 1 |
 | Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — BUILD SUCCESS (2026-06-29) | P21-T02 A1 collaboration closed loop — Surefire all pass, JaCoCo met, Checkstyle/PMD/SpotBugs **0** (new `ApprovalSubStateResolverTest` + collaboration/lifecycle/audit tests; slice count not separately captured). Prior snapshot: **524** tests (1 skipped) at OPT-D5 slice 2 |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
@@ -67,7 +85,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 | E2E P14-T03 export/import (4173) | `pnpm exec playwright test e2e/P14-T03-template-export-import.spec.ts --config playwright.docker.config.ts` | Green — **2/2**, 2026-06-27 | P14-T03 template export JSON/ZIP + staging import → DRAFT; no secrets in bundle; report `playwright-report/docker/index.html` |
 | E2E P14-T03 UIUX (4173) | `pnpm exec playwright test e2e/P14-T03-uiux-evidence.spec.ts e2e/P14-T03-template-export-import.spec.ts e2e/a11y-smoke.spec.ts --config playwright.docker.config.ts` | Green — **7/7**, 2026-06-27 | P14-T03 template export/import surfaces — `TemplateExportActions`, `TemplateImportDialog`; manifest `frontend/e2e/evidence/P14-T03-uiux-manifest.md` (9 screenshots @ 1440×900); e2e-uiux-reviewer **PASS** (no critical blockers; 5 suggestions) |
 | E2E P18-T10 structured authoring (4173) | `pnpm exec playwright test e2e/P18-T10-structured-authoring.spec.ts --config playwright.docker.config.ts` | Green — **5/5**, 2026-06-29 | P18-T10 controlled editor toolbar + disabled reasons; insert paragraph/variable + save binding; paste-clean summary cancel/accept; test-generate fidelity warnings + `filter-warning-code`; clean binding no warnings (no `CONTROLLED_STYLE_FALLBACK` stub); helper `frontend/e2e/helpers/structured-authoring-api.ts`; report `playwright-report/docker/index.html`; requires redeployed Docker stack (4173 + 8080) with P18-T10 UI/API |
-| E2E P18-T10 UIUX evidence (4173) | `pnpm exec playwright test e2e/P18-T10-uiux-evidence.spec.ts --config playwright.docker.config.ts` | Green — **1/1**, 2026-06-29 | 12 screenshots @ 1440×900 REDBC/GREENBC; manifest [`frontend/e2e/evidence/P18-T10-uiux-manifest.md`](../frontend/e2e/evidence/P18-T10-uiux-manifest.md); **PASS** (0 🔴) |
+| E2E P21-T01 behavior nav + UIUX (dev 5173) | `pnpm exec playwright test e2e/P21-T01-behavior-nav.spec.ts e2e/P21-T01-uiux-evidence.spec.ts e2e/a11y-smoke.spec.ts e2e/collaboration-todos.spec.ts --workers=1` | Green — **17/17**, 2026-06-29 | P21-T01 behavior-typed My to-dos nav + L1 terminology; manifest `frontend/e2e/evidence/P21-T01-uiux-manifest.md` (8 screenshots @ 1440×900); e2e-uiux-reviewer **PASS** (0 🔴) |
 | Helm validate (P15-T02/T03/T04/T05/T06/T07/T08) | `.\scripts\helm-validate.ps1 -SkipKubeconform` | Green — 2026-06-27 | helm lint **0 failed**; `helm template` default/dev/staging/prod; T03 ConfigMap/Secret assertions (`Assert-T03ConfigSecrets`); T04 Ingress/TLS assertions (`Assert-T04IngressTls`); T05 HPA assertions (`Assert-T05Hpa` — autoscaling/v2, CPU+memory, custom Pods metric); T06 NetworkPolicy assertions (`Assert-T06NetworkPolicy` — default-deny, allow ingress/backend-egress/DNS/metrics); T07 probe assertions (`Assert-T07Probes`); T08 blue-green assertions (`Assert-T08BlueGreen` — dual color Deployments, activeColor selector, preview Services, HPA target); fail-closed missing-secret test; render-only (no cluster deploy); kubeconform step skipped offline |
 | K8s manifest CI gates (P15-T09) | `.\scripts\ci-k8s-manifest-gates.ps1` | Green (local `-SkipKubeconform`) — 2026-06-27 | [`.github/workflows/k8s-manifest-gates.yml`](../.github/workflows/k8s-manifest-gates.yml) — PR + push to `main`, path filters `deploy/**` + gate scripts; helm lint **0 failed** + template default/dev/staging/prod + T03–T08 assertions + blocking kubeconform on CI; [`deploy/ci-k8s-gates.md`](../deploy/ci-k8s-gates.md); local full kubeconform blocked by Docker Hub timeout — CI runner expected green |
 | Helm validate (offline) | `.\scripts\helm-validate.ps1 -SkipKubeconform` | Green — 2026-06-27 | Same lint/template/assertions as CI minus kubeconform; use when registry unavailable |
@@ -147,6 +165,7 @@ P18-T10 controlled authoring UI — `ControlledStructuredContentEditor`, `PasteC
 OPT-D5 slice 1 — `TemplateViewMapper` extracted from `TemplateService`; backend verify **521** (+7 from 514; `TemplateViewMapperTest` 7/7); `TemplateService` 651→547 L (2026-06-24).
 OPT-D5 slice 2 — `TemplateStructuredAuthoringService` extracted (`getMasterStyleCatalog`, `pasteClean` + view mappers); backend verify **524** (+3 from 521; `TemplateStructuredAuthoringServiceTest` 3/3); `TemplateService` 547→495 L (2026-06-29).
 P21-T02 A1 backend collaboration work-item closed loop — `CollaborationWorkItemWriter.resolveOpenTestWorkItems` + `upsertRemediationWorkItem`; `TemplateLifecycleService.recordTestDecision` resolves OPEN TEST + emits REMEDIATION on FAILED→DRAFT; `submitForTest` accepts DRAFT or APPROVAL+PENDING_SUBMIT (PENDING_DECISION fail-closed); `ApprovalSubStateResolver` extracted as `approvalSubState` SSOT; non-sensitive create/resolve audit (`ManagementAuditRecorder.recordCollaborationWorkItem*`); +1 i18n key `api.collaboration.workItem.remediation.summary`; `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (Surefire all pass, JaCoCo met, Checkstyle/PMD/SpotBugs 0); AUD-A01 (TEST path) resolved, AUD-A02 partial — approval-path closure → P21-T07 (2026-06-29).
+P21-T01 A0 behavior nav + L1 copy round 1 — `navStructure.ts` behavior-typed `myTodos` group + six queue-driven entries; `ManagementShell.vue` nav active-state + deep links; L1 rewrites `en.ts`/`zh-CN.ts` (nav/dashboard/tasks/breadcrumb); `navStructure.test.ts`, `ManagementShell.test.ts`; frontend lint/type-check/test/build green (**267+** Vitest); Playwright `P21-T01-behavior-nav.spec.ts` **7/7**, `P21-T01-uiux-evidence.spec.ts` **1/1**, `a11y-smoke` + `collaboration-todos` **9/9** (dev :5173 + backend :8080); manifest `frontend/e2e/evidence/P21-T01-uiux-manifest.md` PASS; AUD-Q05 in-scope L1 resolved — remainder → P21-X01 (2026-06-29).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)
@@ -174,9 +193,10 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P20 | Done (2026-06-25) | T01–T07 complete incl. T06 (`api.error` en/zh + primary journey zh-CN); gates green — see [P20 detail](./detail/P20-i18n-ui-upgradeability.md) |
 | P18 | Done (2026-06-28) | **P18-T01–T10 Done** — controlled authoring UI + management paste/catalog APIs — see [P18 detail](./detail/P18-structured-authoring-fidelity-engine.md) |
 | P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
-| P21 | In Progress (2026-06-29) | Role-journey frontend redesign & business-friendly terminology — activated 2026-06-29; first slice **P21-T02 Done** (2026-06-29; A1 backend collaboration closed loop — TEST `RESOLVED`, REMEDIATION emit, resubmit eligibility, create/resolve audit, `ApprovalSubStateResolver` SSOT; `mvn verify` BUILD SUCCESS; AUD-A01 TEST-path / AUD-A02 partial resolved); remaining tasks Not Started (approval-path closure → P21-T07) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
+| P21 | In Progress (2026-06-29) | Role-journey frontend redesign & business-friendly terminology — activated 2026-06-29; **P21-T01 Done** (2026-06-29; A0 behavior nav + L1 round 1 — `navStructure.ts`, `ManagementShell.vue`, `en.ts`/`zh-CN.ts`; frontend **267+** Vitest; Playwright P21-T01 **7/7** + UIUX **1/1** + regression **9/9**; AUD-Q05 in-scope L1 resolved); **P21-T02 Done** (2026-06-29; A1 backend collaboration closed loop — TEST `RESOLVED`, REMEDIATION emit, resubmit eligibility, create/resolve audit, `ApprovalSubStateResolver` SSOT; `mvn verify` BUILD SUCCESS; AUD-A01 TEST-path / AUD-A02 partial resolved); next **P21-T01a Not Started** (approval-path closure → P21-T07) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
-**Active phase:** **P21** (activated 2026-06-29; first slice P21-T02 In Progress). All other formal phases P0–P11, P13–P20 **Done** except P12 (deferred catch-all, non-active).
+**Active phase:** **P21** (activated 2026-06-29; **P21-T01 Done** 2026-06-29; **P21-T02 Done**;
+next slice **P21-T01a Not Started**). All other formal phases P0–P11, P13–P20 **Done** except P12 (deferred catch-all, non-active).
 
 ## Epic ↔ phase mapping
 

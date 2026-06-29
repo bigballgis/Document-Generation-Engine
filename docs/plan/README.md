@@ -7,10 +7,12 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Active formal phase: P21** (activated 2026-06-29; first slice **P21-T02 Done** 2026-06-29 — A1
-backend collaboration work-item closed loop: TEST `RESOLVED` + REMEDIATION emit + resubmit
-eligibility; `mvn verify` BUILD SUCCESS; AUD-A01 TEST-path / AUD-A02 partial resolved, approval
-path → P21-T07). P12 remains the deferred-enhancements catch-all (non-active). See
+**Active formal phase: P21** (activated 2026-06-29; **P21-T01 Done** 2026-06-29 — A0 behavior
+nav + L1 copy round 1; frontend **267+** Vitest; Playwright P21-T01 **7/7** + UIUX **1/1** +
+regression **9/9**; AUD-Q05 in-scope L1 resolved; **P21-T02 Done** 2026-06-29 — A1 backend
+collaboration work-item closed loop: TEST `RESOLVED` + REMEDIATION emit + resubmit eligibility;
+`mvn verify` BUILD SUCCESS; next slice **P21-T01a Not Started**). P12 remains the
+deferred-enhancements catch-all (non-active). See
 [execution-sync-ledger.md](./execution-sync-ledger.md).
 
 ## Layer model
@@ -61,7 +63,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P18 | Structured authoring & rendering-fidelity engine | [detail/P18-structured-authoring-fidelity-engine.md](detail/P18-structured-authoring-fidelity-engine.md) | Done (2026-06-28; T01–T10) |
 | P19 | Template verifiability, publish gate & decision forms | [detail/P19-verifiability-publish-gate.md](detail/P19-verifiability-publish-gate.md) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | Done (2026-06-25) |
-| P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | In Progress (2026-06-29; P21-T02 Done) |
+| P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | In Progress (2026-06-29; P21-T01 Done; P21-T02 Done; next P21-T01a Not Started) |
 
 ## First delivery target (thin vertical slice) — achieved
 
@@ -79,9 +81,10 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **Active phase: P21** — role-journey frontend redesign & business-friendly terminology
-(activated 2026-06-29; first slice **P21-T02 Done** 2026-06-29 — A1 backend collaboration
-work-item closed loop; `mvn verify` BUILD SUCCESS; remaining tasks Not Started, approval-path
-closure → P21-T07) — see [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md)
+(activated 2026-06-29; **P21-T01 Done** 2026-06-29 — A0 behavior nav + L1 round 1; **P21-T02 Done**
+2026-06-29 — A1 backend collaboration closed loop; `mvn verify` BUILD SUCCESS; next slice
+**P21-T01a Not Started** — task hub deepening) — see
+[detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md)
 
 **Open backlog (non-active):**
 

@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; first slice **P21-T02 Done** 2026-06-29 — backend collaboration closed loop) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **P21-T01 Done** 2026-06-29 — A0 behavior nav + L1 copy round 1; **P21-T02 Done** 2026-06-29 — backend collaboration closed loop; next slice **P21-T01a Not Started**) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -165,7 +165,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 
 | ID | Task | Key files | Behavior spec | Status |
 | --- | --- | --- | --- | --- |
-| P21-T01 | A0 foundation + terminology baseline: behavior-typed "My to-dos" nav group (capability/queue-driven, business copy); rewrite L1 copy for nav/dashboard/tasks/breadcrumb | `navStructure.ts`, `en.ts`, `zh-CN.ts` | Required | Not Started |
+| P21-T01 | A0 foundation + terminology baseline: behavior-typed "My to-dos" nav group (capability/queue-driven, business copy); rewrite L1 copy for nav/dashboard/tasks/breadcrumb | `navStructure.ts`, `ManagementShell.vue`, `en.ts`, `zh-CN.ts` | Required (§12.2 implemented) | Done (2026-06-29) |
 | P21-T01a | Task hub deepening: queue partitioning + restore `triggerType/summaryText/ageSeconds` + SLA/overdue badges + inline open actions | `DashboardView.vue`, `useWorkflowTasks.ts`, `utils/collaborationWorkItems.ts`, `stores/collaboration.ts` | Required | Not Started |
 | P21-T01b | New `RoleJourneyTimeline` reusable stepper (business-language steps, empty/guidance states) | `frontend/src/components/**` (new) | Required | Not Started |
 | P21-T01c | Dead-code cleanup: remove `RoleHomeView.vue` (+test); remove residual workbench logical keys | `views/home/RoleHomeView.vue`, `routeKeys.ts`, `auth/roles.ts` | n/a (refactor) | Not Started |
@@ -323,7 +323,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 | ID | Sev | Finding | Evidence | Owner task |
 | --- | --- | --- | --- | --- |
 | AUD-Q04 | 🔴 | zh-CN primary-journey keys missing at scale (whole `contentModules`; `templates.lifecycle/governance/authoring/...`) → silent English fallback | `zh-CN.ts` (no `contentModules`); `zh-CN.ts:854-899` vs `en.ts:687-771` | P21-X06 |
-| AUD-Q05 | 🔴 | High IT-jargon density on L1 (API policy, Audit console, Lifecycle workflow, Authoring, Publish gate, Anchor catalog, Governance overview, callable) | `en.ts:93,95,107,114,115,659-660,688,874` | P21-T01, P21-X01 |
+| AUD-Q05 | 🟡 | High IT-jargon density on L1 — **T01 resolved in-scope keys** (nav groups/items, dashboard/task-hub L1, collaboration queue labels, breadcrumb routes per §12.2 Spec B); **remaining out-of-scope surfaces** (API policy pages, template-detail tabs, audit page bodies, `templates.*` / `apiPolicy.*` / `audit.*` L1) → **P21-X01** | `en.ts` — in-scope keys rewritten 2026-06-29; residual IT terms at `templates.*`, `apiPolicy.*`, `audit.*` | **P21-T01 Done** (in-scope L1); remainder → P21-X01 |
 | AUD-Q01 | 🔴 | `--color-primary` undefined → table keyboard focus ring invisible | `AppDataTable.vue:72-74,90-92` | P21-X05 |
 | AUD-Q02 | 🟡 | No `:focus-visible` on nav items / breadcrumb links | `ManagementShell.vue:252-278`; `AppBreadcrumb.vue:44-51` | P21-X05 |
 | AUD-Q03 | 🟡 | Brand wordmark shows internal code `REDBC/GREENBC`; bare hex/px and unregistered CSS vars | `BrandLogo.vue:31`; `en.ts:127-128`; `TemplateDetailView.vue:1325` | P21-X05 |
@@ -345,7 +345,8 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 3. **P0 bugs** — AUD-B01/B02: focus/tab lockup + stale templateId (P21-T06a).
 4. **P0 i18n/a11y** — AUD-Q04 zh-CN parity, AUD-Q01 focus ring (P21-X06, P21-X05).
 5. **P1** — task hub depth (AUD-H01..H06, P21-T01a); APPROVAL dual-substate (AUD-B03, P21-T08);
-   L1 terminology (AUD-Q05, P21-T01/X01); matrix/capability drift (AUD-P06, P21-X04).
+   L1 terminology — **AUD-Q05 in-scope L1 → P21-T01 Done** (2026-06-29); full-system sweep → P21-X01;
+   matrix/capability drift (AUD-P06, P21-X04).
 6. **P2** — decision/governance forms (AUD-B05/B10); detail state completeness (AUD-B06/B07);
    OpenAPI contract (AUD-C05).
 7. **P3** — dead code + component split + role constants (AUD-D01..D03, AUD-M02, AUD-B09).
@@ -474,3 +475,267 @@ business "test passed / awaiting submit-for-approval" state); `TESTING → recor
    existing `SUBMIT_FOR_TEST` upsert pattern.
 4. **REMEDIATION `submitterUserId`:** carry forward the orchestrator who submitted for test (so the
    "Waiting on my fixes" to-do points back to the owner), not the tester who rejected.
+
+### 12.2 P21-T01 — A0 foundation + terminology baseline (behavior nav + L1 copy round 1)
+
+**Implementation status:** **Done** (2026-06-29). Behavior-typed `myTodos` nav group + six
+capability/queue-driven entries; deep-link URL contract (`?queue=` / `?filter=master-review`
++ `#tasks-section`); L1 value rewrites per Spec B (keys stable); nav active-state for filtered
+dashboard landing. **Gate evidence:** frontend lint/type-check/test/build green (**267+** Vitest);
+Playwright `P21-T01-behavior-nav.spec.ts` **7/7**, `P21-T01-uiux-evidence.spec.ts` **1/1**,
+`a11y-smoke` + `collaboration-todos` **9/9** (dev :5173 + backend :8080); UIUX manifest
+`frontend/e2e/evidence/P21-T01-uiux-manifest.md` — **PASS** (0 🔴).
+
+**BDD readiness:** `ready` (confirmed in source-of-truth docs; no blocking pending questions).
+
+**Scope boundary (this slice only):**
+
+- **In:** behavior-typed **My to-dos / 我的待办** nav group; capability/queue-driven entry visibility;
+  deep-link URL contract to `/dashboard`; L1 value rewrites for nav groups/items, dashboard
+  page title/description/breadcrumb, and task-hub visible copy (section titles, stat cards, task
+  row titles/descriptions, collaboration queue L1 labels used on dashboard surfaces).
+- **Out (later slices):** queue partitioning / table columns / inline open actions (**P21-T01a**);
+  `RoleJourneyTimeline` (**P21-T01b**); dead-code removal (**P21-T01c**); API-policy / template-detail /
+  audit-console full L1 sweeps (**P21-T09a**, **P21-T11**, **P21-X01**); permission single-source
+  remediation (**P21-X03**); zh-CN parity hardening (**P21-X06**).
+
+**Traceability:**
+
+- Plan — this doc §2 (terminology / three-layer copy), §3 (Hybrid B IA), §6 P21-T01 row, §11 AUD-Q05.
+- Terminology SSOT — `docs/product/business-terminology-guide.md` §3–§4.1, §4.3.
+- Permission — `docs/security/permission-matrix.md` §13.1.2 (behavior-typed entry visibility).
+- Navigation contract — `docs/product/catalog-navigation-ux.md` (Hybrid IA section).
+- ADR — `docs/adr/decisions/2026-06-29-behavior-typed-ia-business-terminology.md` (P21-D01, P21-D05).
+- Code under change — `frontend/src/navigation/navStructure.ts`, `ManagementShell.vue` (nav
+  active-state + navigate), `frontend/src/auth/roles.ts` (visibility helpers), `frontend/src/i18n/locales/en.ts`,
+  `zh-CN.ts`; dashboard shell copy only (`DashboardView.vue` title/breadcrumb bindings, not table
+  partition logic).
+
+#### Spec A — Behavior-typed "My to-dos" navigation group
+
+- **Actor / role:** any authenticated management user; visible behavior entries vary by session
+  `roles` + `capabilities` (role fallback only when capability boolean absent — current seam until
+  **P21-X03**).
+- **Goal:** Find work by "what is waiting on me" from the left nav without opening a separate
+  workbench page.
+- **Trigger:** user opens the management shell after login; left nav renders.
+- **Preconditions:** authenticated session with `visibleRoutes` including `route.dashboard-home`
+  (dashboard remains reachable for all roles that today receive it); Hybrid B / COR-T11 preserved
+  (no standalone workbench routes reintroduced).
+- **Primary journey:** shell loads → `buildVisibleNavGroups` returns resource-typed groups
+  (unchanged group **ids** and item **ids** / **routeKeys** / **paths**) plus a new behavior group
+  → each behavior item deep-links to `/dashboard` with a fixed query contract → user lands on the
+  single authoritative task hub.
+- **System responses (success):** a nav group labeled **My to-dos** (en) / **我的待办** (zh-CN)
+  appears **after** the existing `overview` group and **before** resource groups when at least one
+  behavior entry is visible; each visible entry is a button with a business-friendly label; clicking
+  navigates to `/dashboard?…` (see URL contract below); entries without permission are **omitted**
+  (not disabled, not `aria-disabled` placeholders).
+
+**Behavior group definition (stable ids / keys — new keys allowed for new surfaces):**
+
+| Stable id | Group label key | en value | zh-CN value |
+| --- | --- | --- | --- |
+| `myTodos` | `nav.groups.myTodos` | My to-dos | 我的待办 |
+
+**Behavior entry catalog (visibility + deep link):**
+
+| Stable item id | Label key | en value | zh-CN value | Visibility rule | Deep link |
+| --- | --- | --- | --- | --- | --- |
+| `behavior-testing` | `nav.behaviorItems.testing` | Waiting on my testing | 待我测试 | `decideTests` capability **or** role ∈ {GLOBAL_ADMIN, GROUP_ADMIN, TEMPLATE_TESTER} | `/dashboard?queue=TEST#tasks-section` |
+| `behavior-approval` | `nav.behaviorItems.approval` | Waiting on my approval | 待我审批 | `decideApprovals` **or** role ∈ {GLOBAL_ADMIN, GROUP_ADMIN, TEMPLATE_APPROVER} | `/dashboard?queue=APPROVAL#tasks-section` |
+| `behavior-remediation` | `nav.behaviorItems.remediation` | Waiting on my fixes | 待我修改 | `authorTemplates` **or** role ∈ {GLOBAL_ADMIN, GROUP_ADMIN, TEMPLATE_AUTHOR} | `/dashboard?queue=REMEDIATION#tasks-section` |
+| `behavior-pending-release` | `nav.behaviorItems.pendingRelease` | Waiting to confirm go-live | 待确认上线 | `publishTemplates` **or** role ∈ {GLOBAL_ADMIN, GROUP_ADMIN} | `/dashboard?queue=PENDING_RELEASE#tasks-section` |
+| `behavior-escalation` | `nav.behaviorItems.escalation` | Overdue to follow up | 超时待跟进 | role ∈ {GLOBAL_ADMIN, GROUP_ADMIN} **and** (`viewCollaborationWorkItems` when exposed, else implicit admin) | `/dashboard?queue=ESCALATION#tasks-section` |
+| `behavior-master-review` | `nav.behaviorItems.masterReview` | Masters to review | 待审核母版 | `reviewMasters` **or** role ∈ {GLOBAL_ADMIN, GROUP_ADMIN}; **also** `MASTER_DESIGNER` when session can access master management (own rework queue — item filtering is **P21-T01a**, entry visibility follows matrix §13.1.2) | `/dashboard?filter=master-review#tasks-section` |
+
+**URL contract (fixed for T01a compatibility):**
+
+- **`queue`** — optional query param; values **must** match backend/API enum
+  `CollaborationWorkItemQueue`: `TEST` | `APPROVAL` | `REMEDIATION` | `PENDING_RELEASE` |
+  `ESCALATION`. T01a will pass this to `fetchWorkItems({ queue })` and client-side partition logic.
+- **`filter`** — optional query param for non-collaboration workflow slices; T01 defines
+  `filter=master-review` for master-review tasks derived from masters catalog (not a collaboration
+  queue). Only one of `{queue, filter}` is set by behavior nav links.
+- **`#tasks-section`** — hash scroll target (existing dashboard anchor); T01 must preserve scroll-on-load
+  when hash present (extend current `#tasks-section` behavior to run on query+hash navigation, not
+  only `route.hash` changes from empty).
+- **Unfiltered hub:** existing overview item remains `/dashboard` (no `queue` / `filter`) — authoritative
+  entry per ADR Batch B / P21-D01.
+
+**Nav active state:** when `route.path === '/dashboard'` and `route.query.queue === '<VALUE>'`, the
+matching behavior item is `active`; when path is `/dashboard` with no `queue`/`filter`, the overview
+`dashboard` item is `active`. Resource-typed items keep path-prefix active logic unchanged.
+
+#### Spec B — Resource-typed navigation unchanged structurally (L1 label values only)
+
+- **Actor / role:** same session as Spec A.
+- **Goal:** Resource catalog remains package-first; only user-visible labels become business-friendly.
+- **Trigger:** nav renders.
+- **Preconditions:** `NAV_GROUPS` resource groups keep the same `id`, item `id`, `routeKey`, and
+  `path` values as today (`overview`, `entitlement`, `documentContent`, `api`, `security`).
+- **Primary journey:** visibility still driven by `visibleRoutes` (+ existing content-module seam);
+  only i18n **values** bound to existing keys change per SSOT table below.
+- **System responses (success):** no new resource routes; no workbench route keys; grep audit passes
+  on changed L1 values.
+
+**Round-1 L1 value rewrites (keys stable — values only):**
+
+| Stable key | Current en (IT) | New en (business) | New zh-CN (business) |
+| --- | --- | --- | --- |
+| `nav.groups.entitlement` | Access & identity | Users & permissions | 用户与权限 |
+| `nav.groups.apiAccess` | API access | External services | 对外服务 |
+| `nav.groups.security` | Security & audit | Security & activity | 安全与操作记录 |
+| `nav.items.masters` | Master documents | Letterhead templates | 母版文档 |
+| `nav.items.contentModules` | Content modules | Standard clauses | 标准条款 |
+| `nav.items.apiPolicies` | API policies | API management | API 管理 |
+| `nav.items.audit` | Audit log | Activity log | 操作记录 |
+| `nav.routes.identityAdministration` | Identity & groups | User management | 用户管理 |
+| `nav.routes.audit` | Audit console | Activity log | 操作记录 |
+| `nav.routes.apiPolicy` | API policy | API management | API 管理 |
+| `nav.routes.masters` | Master documents | Letterhead templates | 母版文档 |
+| `nav.routes.templateAuthoring` | Template authoring | Template design | 模板设计 |
+| `home.dashboard.title` | Governance overview | My overview | 工作概览 |
+| `dashboard.title` | My tasks | My tasks | 我的任务 |
+| `dashboard.description` | (contains "lifecycle") | Workflow to-dos for in-flight letter templates, plus a snapshot of your letterheads and templates. | 进行中的信函模板待办，以及母版与模板目录快照。 |
+| `dashboard.stats.sectionTitle` | Catalog & workflow snapshot | Catalog & workflow snapshot | 目录与工作流快照 |
+| `dashboard.stats.sectionDescription` | (contains "lifecycle") | Package counts list registered letterheads and templates; workflow counts reflect in-flight review or approval steps. | 目录数量统计已登记的母版与模板；工作流数量反映进行中的审核或审批步骤。 |
+| `dashboard.stats.pendingActions.title` | Actions assigned to you | To-dos assigned to you | 分配给我的待办 |
+| `dashboard.stats.pendingActions.description` | (contains "publish" as primary actor verb for all) | Open items waiting for your test, approval, go-live confirmation, or review decision. | 等待您完成测试、审批、确认上线或审核的待办事项。 |
+| `dashboard.tasks.title` | Pending actions | My to-dos | 我的待办 |
+| `dashboard.tasks.description` | Complete these items in the linked master or template detail pages. | Open each item from its letterhead or template detail page to complete the next step. | 请从对应的母版或模板详情页打开并完成下一步。 |
+| `dashboard.tasks.masterReview.title` | Review master document | Review letterhead template | 审核母版文档 |
+| `dashboard.tasks.templateTest.title` | Complete test decision | Record test result | 记录测试结果 |
+| `dashboard.tasks.templateApproval.title` | Complete approval decision | Record approval decision | 记录审批结果 |
+| `dashboard.tasks.templatePublish.title` | Publish template | Confirm go-live | 确认上线 |
+| `dashboard.tasks.templateDraft.title` | Continue template authoring | Continue template design | 继续模板设计 |
+| `collaboration.workItem.queue.*.label` | Testing / Approval / Remediation / Pending release / Escalation | In testing / Awaiting approval / Needs fixes / Awaiting go-live / Overdue follow-up | 测试中 / 待审批 / 待修改 / 待上线 / 超时待跟进 |
+| `collaboration.workItem.queue.*.title` | (IT verbs) | Align to behavior entry phrasing (verb + object) per terminology guide §4.3 | 与 §4.3 行为型入口语义对齐 |
+| `collaboration.workItems.empty` | collaboration to-do | to-do | 待办 |
+| `collaboration.timeoutConfig.title` | Collaboration timeout thresholds | Reminder timing | 催办时限设置 |
+
+Keys **not** rewritten in T01 (explicitly deferred): `dashboard.tasks.columns.*` (T01a),
+`templates.*`, `apiPolicy.*`, `audit.*` page bodies, `workbench.*` (dead until T01c), contract/L3
+surfaces.
+
+#### Spec C — Role × visible behavior entries (matrix alignment)
+
+Cross-check with `permission-matrix.md` §13.1.2:
+
+| Role | Visible behavior entries |
+| --- | --- |
+| GLOBAL_ADMIN | all six |
+| GROUP_ADMIN | all six |
+| TEMPLATE_TESTER | testing only |
+| TEMPLATE_APPROVER | approval only |
+| TEMPLATE_AUTHOR | remediation only |
+| MASTER_DESIGNER | master review only (plus resource nav per existing routes; no TEST/APPROVAL/REMEDIATION/PENDING_RELEASE/ESCALATION unless capabilities also grant — should not) |
+| AUDIT_ADMIN | **none** (behavior group hidden entirely) |
+
+Admins with multiple capabilities see the union of entries. Empty behavior group → **omit entire
+group** (do not render "My to-dos" heading with zero items).
+
+#### Acceptance scenarios (Given / When / Then)
+
+**Behavior nav visibility**
+
+- **(Tester sees testing entry)** Given a session with role `TEMPLATE_TESTER` and `decideTests: true`,
+  When the management shell renders, Then nav includes group `myTodos` with exactly
+  `behavior-testing`, and excludes approval/remediation/pending-release/escalation/master-review entries.
+- **(Approver sees approval entry)** Given role `TEMPLATE_APPROVER` and `decideApprovals: true`, When
+  the shell renders, Then only `behavior-approval` appears under `myTodos`.
+- **(Author sees remediation entry)** Given role `TEMPLATE_AUTHOR` and `authorTemplates: true`, When
+  the shell renders, Then only `behavior-remediation` appears under `myTodos`.
+- **(Group admin sees admin queues)** Given role `GROUP_ADMIN` with admin capabilities, When the shell
+  renders, Then `myTodos` includes testing, approval, remediation, pending-release, escalation, and
+  master-review entries (six items).
+- **(Audit admin — no behavior group)** Given role `AUDIT_ADMIN` only (no collaboration roles), When
+  the shell renders, Then no `myTodos` group is present and no behavior items render as disabled stubs.
+- **(No permission — hidden not disabled)** Given role `TEMPLATE_TESTER`, When rendering nav, Then
+  `behavior-approval` DOM node is absent (not a disabled button).
+
+**Deep links**
+
+- **(Testing deep link)** Given a visible `behavior-testing` entry, When the user activates it, Then
+  router navigates to `{ path: '/dashboard', query: { queue: 'TEST' }, hash: '#tasks-section' }`.
+- **(Master review deep link)** Given a visible `behavior-master-review` entry, When activated, Then
+  navigation targets `/dashboard?filter=master-review#tasks-section`.
+- **(Overview hub unchanged)** Given the overview `dashboard` item, When activated, Then navigation
+  targets `/dashboard` with no `queue` or `filter` query params.
+- **(Single task hub — no new route)** Given any behavior entry click, Then no navigation to
+  `/tester-workbench`, `/approver-workbench`, or `/escalation-workbench` occurs (COR-T11).
+
+**L1 terminology / i18n**
+
+- **(Keys stable)** Given the T01 diff, When reviewing i18n changes, Then no stable keys under
+  `nav.*`, `dashboard.*`, `home.dashboard.*`, `collaboration.workItem.queue.*` are renamed or removed;
+  only string values change (plus **new** keys allowed: `nav.groups.myTodos`, `nav.behaviorItems.*`).
+- **(en baseline grep audit — in-scope keys)** Given built en locale for keys listed in Spec B, When
+  grepping primary-journey nav + dashboard task surfaces in scope, Then no matches for forbidden L1
+  nouns: `\bpolicy\b`, `\bcredential`, `\blifecycle\b`, `\bsemver\b`, `\bgate\b`, `\banchor integrity\b`,
+  `\bgovernance overview\b`, `\baudit console\b` (case-insensitive word boundaries on user-visible
+  values only).
+- **(zh-CN semantic alignment)** Given zh-CN values for the same keys, When compared to en baseline,
+  Then wording conveys business intent (e.g. 对外服务 not API 访问; 操作记录 not 审计控制台 on nav L1).
+
+**Resource nav regression**
+
+- **(Structure unchanged)** Given any session, When comparing `NAV_GROUPS` resource entries pre/post
+  T01, Then group ids and item ids/routeKeys/paths are identical; only label values differ.
+- **(Capability-driven resource visibility unchanged)** Given `visibleRoutes` without
+  `route.api-policy-management`, When a tester session renders nav, Then API management item remains
+  hidden exactly as before T01.
+
+#### Boundary & exception behavior
+
+- **Missing `route.dashboard-home` in `visibleRoutes`:** behavior entries are hidden (fail-closed); no
+  orphan behavior links.
+- **Capability absent, role present:** use existing `resolveCapability` role fallback in
+  `auth/roles.ts` (documented seam; **P21-X03** will tighten fail-closed).
+- **Capability explicitly `false`:** entry hidden even if role fallback would grant (capability wins).
+- **Empty queue at runtime (backend not yet emitting — pre-T07):** nav entry still visible when
+  permitted; dashboard may show empty state (T01a improves empty copy/partition). T01 must **not**
+  hide behavior entries solely because queue count is zero.
+- **Direct URL `/dashboard?queue=APPROVAL` without permission:** route guard allows dashboard if
+  `route.dashboard-home` visible; queue param does not grant extra actions (display-only pre-T01a;
+  fail-closed actions remain on detail pages). T01a may add client-side ignore of unauthorized queue
+  filters — out of T01 unless trivial.
+- **Unknown `queue` query value:** dashboard loads unfiltered or ignores invalid param without
+  console errors (defensive; T01a may formalize).
+- **Locale switch:** behavior labels re-render from i18n keys; deep-link query contract unchanged.
+
+#### Observable evidence
+
+- **Unit tests:** `navStructure.test.ts` — per-role visible behavior item ids; group omitted when
+  empty; deep-link paths include correct `queue`/`filter` + hash; resource group structure regression.
+- **Component tests:** `ManagementShell.test.ts` — behavior group renders for tester/admin; absent for
+  audit admin; click emits router navigation with query contract.
+- **i18n tests:** snapshot or explicit assertions on rewritten values; key-parity unchanged except
+  new `nav.groups.myTodos` + `nav.behaviorItems.*` keys added to **both** en and zh-CN.
+- **Grep gate (CI-friendly script or test):** scan in-scope en values for forbidden L1 tokens listed
+  in Spec B acceptance.
+- **Manual / E2E (smoke, optional in T01):** login as tester → left nav shows "Waiting on my testing"
+  → lands on `/dashboard?queue=TEST#tasks-section` with business copy on page title area.
+
+#### Decided defaults (non-blocking)
+
+1. **Behavior group placement:** immediately after `overview`, before `entitlement` — matches
+   "action first" persona journey without displacing the unfiltered hub.
+2. **Query param names:** `queue` for collaboration queues (matches OpenAPI/list API); `filter` for
+   master-review client slice — T01a owns consuming both.
+3. **Scroll target:** retain `#tasks-section` hash on all behavior deep links (AUD-H03 remediation
+   path).
+4. **New i18n keys:** `nav.groups.myTodos` + six `nav.behaviorItems.*` keys are **new stable keys**
+   (allowed); all other changes are value-only on existing keys.
+5. **MASTER_DESIGNER master-review visibility:** show entry when user can access master management;
+   orchestration-only designers without pending review still see the entry (empty state acceptable until
+   T01a).
+6. **Dashboard dynamic title on filtered landing:** optional in T01; if not implemented, static
+   `dashboard.title` ("My tasks") suffices — queue-specific `<h1>` enhancement deferred to T01a.
+
+#### Out of scope reminders for implementer
+
+- Do **not** implement queue partitioning, restored `triggerType/summaryText/ageSeconds` columns, or
+  `fetchWorkItems({ queue })` wiring in T01 (**P21-T01a**).
+- Do **not** remove `RoleHomeView` / workbench keys (**P21-T01c**).
+- Do **not** change backend capabilities exposure (**P21-X04**) in T01.

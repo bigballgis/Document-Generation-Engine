@@ -62,7 +62,7 @@ test.describe('P14-T02 UIUX evidence', () => {
     await loginAs(page, E2E_TEMPLATE_TESTER)
     await page.goto('/dashboard#tasks-section')
     await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
-    await expect(page.getByRole('heading', { name: /pending actions/i })).toBeVisible()
+    await expect(page.locator('#tasks-section').getByRole('heading', { name: /^my to-dos$/i })).toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
     await filterDashboardTasksByItem(page, testerTemplate.name)
     const testerTaskRow = await dashboardTaskRow(page, testerTemplate.name)
@@ -102,7 +102,7 @@ test.describe('P14-T02 UIUX evidence', () => {
     await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
     const timeoutPanel = page.locator('.timeout-config-card')
     await expect(
-      timeoutPanel.getByRole('heading', { name: /collaboration timeout thresholds/i }),
+      timeoutPanel.getByRole('heading', { name: /reminder timing/i }),
     ).toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
     await captureP14T02LocatorScreenshot(

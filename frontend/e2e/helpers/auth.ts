@@ -34,6 +34,11 @@ export const E2E_TEMPLATE_APPROVER = {
   password: 'ChangeMe123!',
 }
 
+export const E2E_AUDIT_ADMIN = {
+  username: '10000004',
+  password: 'ChangeMe123!',
+}
+
 export async function loginAs(page: Page, credentials: { username: string; password: string }) {
   await page.goto('/login', { waitUntil: 'domcontentloaded' })
   await expect(page.getByPlaceholder('10000001')).toBeVisible()

@@ -59,7 +59,7 @@ test.describe('P14-T02 collaboration to-dos', () => {
     await page.goto('/dashboard#tasks-section')
 
     await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
-    await expect(page.getByRole('heading', { name: /pending actions/i })).toBeVisible()
+    await expect(page.locator('#tasks-section').getByRole('heading', { name: /^my to-dos$/i })).toBeVisible()
     await expect(page.getByText(/unable to load your task list/i)).not.toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
 
@@ -114,7 +114,7 @@ test.describe('P14-T02 collaboration to-dos', () => {
     await page.goto('/dashboard#tasks-section')
 
     await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
-    await expect(page.getByRole('heading', { name: /pending actions/i })).toBeVisible()
+    await expect(page.locator('#tasks-section').getByRole('heading', { name: /^my to-dos$/i })).toBeVisible()
     await expect(page.getByText(/unable to load your task list/i)).not.toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
 
@@ -125,7 +125,7 @@ test.describe('P14-T02 collaboration to-dos', () => {
     await expect(row.getByText(DEMO_GROUP_CODE, { exact: true })).toBeVisible()
   })
 
-  test('admin configures collaboration timeout thresholds on dashboard', async ({ page, request }) => {
+  test('admin configures reminder timing on dashboard', async ({ page, request }) => {
     const uniqueHours = 47 + (Date.now() % 10)
 
     await loginAs(page, E2E_ADMIN)
@@ -133,7 +133,7 @@ test.describe('P14-T02 collaboration to-dos', () => {
 
     await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
     const timeoutPanel = page.locator('.timeout-config-card')
-    await expect(timeoutPanel.getByRole('heading', { name: /collaboration timeout thresholds/i })).toBeVisible()
+    await expect(timeoutPanel.getByRole('heading', { name: /reminder timing/i })).toBeVisible()
 
     const testThresholdInput = timeoutPanel
       .locator('.el-form-item')

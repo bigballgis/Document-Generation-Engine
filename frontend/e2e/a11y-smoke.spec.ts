@@ -28,7 +28,7 @@ test.describe('management shell accessibility smoke', () => {
     await page.goto('/dashboard#tasks-section')
 
     await expect(page.getByRole('heading', { level: 1, name: /my tasks/i })).toBeVisible()
-    await expect(page.getByRole('heading', { name: /pending actions/i })).toBeVisible()
+    await expect(page.locator('#tasks-section').getByRole('heading', { name: /^my to-dos$/i })).toBeVisible()
   })
 
   test('templates list exposes primary h1 after login', async ({ page }) => {
@@ -49,7 +49,7 @@ test.describe('management shell accessibility smoke', () => {
     await expect(
       page
         .locator('.timeout-config-card')
-        .getByRole('heading', { name: /collaboration timeout thresholds/i }),
+        .getByRole('heading', { name: /reminder timing/i }),
     ).toBeVisible()
   })
 })

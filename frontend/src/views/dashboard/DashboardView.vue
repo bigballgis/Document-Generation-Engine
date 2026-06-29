@@ -113,7 +113,7 @@ onMounted(() => {
 })
 
 watch(
-  () => route.hash,
+  () => [route.hash, route.query.queue, route.query.filter] as const,
   () => {
     void scrollToTasksIfRequested()
   },

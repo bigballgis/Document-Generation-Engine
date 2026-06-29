@@ -89,32 +89,41 @@ export default {
     managementNavigation: '管理导航',
     groups: {
       overview: '概览',
-      entitlement: '访问与身份',
+      myTodos: '我的待办',
+      entitlement: '用户与权限',
       content: '文档内容',
-      apiAccess: 'API 访问',
-      security: '安全与审计',
+      apiAccess: '对外服务',
+      security: '安全与操作记录',
     },
     items: {
       dashboard: '我的任务',
       users: '用户管理',
       groups: '组管理',
-      masters: '主文档',
+      masters: '母版文档',
       templates: '模板',
-      contentModules: '内容模块',
+      contentModules: '标准条款',
       masterVersions: '母版版本',
       templateVersions: '模板版本',
-      apiPolicies: 'API 策略',
-      audit: '审计日志',
+      apiPolicies: 'API 管理',
+      audit: '操作记录',
+    },
+    behaviorItems: {
+      testing: '待我测试',
+      approval: '待我审批',
+      remediation: '待我修改',
+      pendingRelease: '待确认上线',
+      escalation: '超时待跟进',
+      masterReview: '待审核母版',
     },
     routes: {
       globalGovernance: '全局治理',
       groupGovernance: '分组治理',
-      templateAuthoring: '模板编排',
-      apiPolicy: 'API 策略',
-      audit: '审计控制台',
-      masters: '主文档',
+      templateAuthoring: '模板设计',
+      apiPolicy: 'API 管理',
+      audit: '操作记录',
+      masters: '母版文档',
       templates: '模板',
-      identityAdministration: '身份与分组',
+      identityAdministration: '用户管理',
     },
     breadcrumb: {
       ariaLabel: '面包屑导航',
@@ -163,7 +172,7 @@ export default {
       description: '在授权范围内查看审计摘要。',
     },
     dashboard: {
-      title: '治理概览',
+      title: '工作概览',
       pendingMasterReviews: '待审核主文档',
       pendingMasterReviewsDescription: '等待审批决策的主文档。',
       pendingTemplateLifecycle: '工作流中的模板',
@@ -179,15 +188,15 @@ export default {
   },
   dashboard: {
     title: '我的任务',
-    description: '进行中的变更工作流待办，以及主文档与模板目录快照。',
+    description: '进行中的信函模板待办，以及母版与模板目录快照。',
     loadError: '无法加载任务列表。',
     stats: {
       sectionTitle: '目录与工作流快照',
       sectionDescription:
-        '目录数量统计已登记的主文档与模板；工作流数量反映进行中的审核或生命周期操作。',
+        '目录数量统计已登记的母版与模板；工作流数量反映进行中的审核或审批步骤。',
       pendingActions: {
-        title: '分配给我的操作',
-        description: '等待您完成测试、审批、发布或审核的待办事项。',
+        title: '分配给我的待办',
+        description: '等待您完成测试、审批、确认上线或审核的待办事项。',
         action: '查看任务列表',
       },
       masterPendingReview: {
@@ -227,8 +236,8 @@ export default {
       },
     },
     tasks: {
-      title: '待办事项',
-      description: '请在链接的主文档或模板详情页完成以下步骤。',
+      title: '我的待办',
+      description: '请从对应的母版或模板详情页打开并完成下一步。',
       empty: '当前没有待办事项。',
       columns: {
         action: '操作',
@@ -237,23 +246,23 @@ export default {
         hint: '说明',
       },
       masterReview: {
-        title: '审核主文档',
+        title: '审核母版文档',
         description: '在模板引用前批准或驳回已上传的主文档。',
       },
       templateTest: {
-        title: '完成测试决策',
+        title: '记录测试结果',
         description: '执行测试生成并对测试中的模板做出通过或不通过决定。',
       },
       templateApproval: {
-        title: '完成审批决策',
+        title: '记录审批结果',
         description: '测试完成后批准或驳回模板。',
       },
       templatePublish: {
-        title: '发布模板',
+        title: '确认上线',
         description: '将已审批模板发布到指定环境。',
       },
       templateDraft: {
-        title: '继续模板编排',
+        title: '继续模板设计',
         description: '完善绑定与规则后提交草稿进入测试。',
       },
       masterRework: {
@@ -308,7 +317,7 @@ export default {
   },
   collaboration: {
     workItems: {
-      empty: '当前没有协作待办事项。',
+      empty: '当前没有待办事项。',
       ageValue: '{value}',
       error: {
         load: '无法加载协作待办事项。',
@@ -325,24 +334,24 @@ export default {
     workItem: {
       queue: {
         TEST: {
-          label: '测试',
-          title: '完成测试决策',
+          label: '测试中',
+          title: '待我测试',
         },
         APPROVAL: {
-          label: '审批',
-          title: '完成审批决策',
+          label: '待审批',
+          title: '待我审批',
         },
         REMEDIATION: {
-          label: '整改',
-          title: '修订模板',
+          label: '待修改',
+          title: '待我修改',
         },
         PENDING_RELEASE: {
-          label: '待发布',
-          title: '发布模板',
+          label: '待上线',
+          title: '待确认上线',
         },
         ESCALATION: {
-          label: '超时升级',
-          title: '处理超时升级',
+          label: '超时待跟进',
+          title: '超时待跟进',
         },
       },
       trigger: {
@@ -367,7 +376,7 @@ export default {
       },
     },
     timeoutConfig: {
-      title: '协作超时阈值',
+      title: '催办时限设置',
       description:
         '配置测试、审批、待发布和整改队列的应用内升级阈值。升级仅发送通知，不会自动变更状态。',
       refresh: '刷新',

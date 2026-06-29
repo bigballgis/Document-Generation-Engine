@@ -90,32 +90,41 @@ export default {
     managementNavigation: 'Management navigation',
     groups: {
       overview: 'Overview',
-      entitlement: 'Access & identity',
+      myTodos: 'My to-dos',
+      entitlement: 'Users & permissions',
       content: 'Document content',
-      apiAccess: 'API access',
-      security: 'Security & audit',
+      apiAccess: 'External services',
+      security: 'Security & activity',
     },
     items: {
       dashboard: 'My tasks',
       users: 'Users',
       groups: 'Groups',
-      masters: 'Master documents',
+      masters: 'Letterhead templates',
       templates: 'Templates',
-      contentModules: 'Content modules',
+      contentModules: 'Standard clauses',
       masterVersions: 'Master versions',
       templateVersions: 'Template versions',
-      apiPolicies: 'API policies',
-      audit: 'Audit log',
+      apiPolicies: 'API management',
+      audit: 'Activity log',
+    },
+    behaviorItems: {
+      testing: 'Waiting on my testing',
+      approval: 'Waiting on my approval',
+      remediation: 'Waiting on my fixes',
+      pendingRelease: 'Waiting to confirm go-live',
+      escalation: 'Overdue to follow up',
+      masterReview: 'Masters to review',
     },
     routes: {
       globalGovernance: 'Global governance',
       groupGovernance: 'Group governance',
-      templateAuthoring: 'Template authoring',
-      apiPolicy: 'API policy',
-      audit: 'Audit console',
-      masters: 'Master documents',
+      templateAuthoring: 'Template design',
+      apiPolicy: 'API management',
+      audit: 'Activity log',
+      masters: 'Letterhead templates',
       templates: 'Templates',
-      identityAdministration: 'Identity & groups',
+      identityAdministration: 'User management',
     },
     breadcrumb: {
       ariaLabel: 'Breadcrumb',
@@ -164,7 +173,7 @@ export default {
       description: 'Review audit summaries within your authorized scope.',
     },
     dashboard: {
-      title: 'Governance overview',
+      title: 'My overview',
       pendingMasterReviews: 'Masters pending review',
       pendingMasterReviewsDescription: 'Master documents awaiting an approval decision.',
       pendingTemplateLifecycle: 'Templates in workflow',
@@ -180,15 +189,17 @@ export default {
   },
   dashboard: {
     title: 'My tasks',
-    description: 'Workflow actions for in-flight changes, plus a snapshot of your masters and templates.',
+    description:
+      'Workflow to-dos for in-flight letter templates, plus a snapshot of your letterheads and templates.',
     loadError: 'Unable to load your task list.',
     stats: {
       sectionTitle: 'Catalog & workflow snapshot',
       sectionDescription:
-        'Package counts list registered masters and templates; workflow counts reflect in-flight review or lifecycle actions.',
+        'Package counts list registered letterheads and templates; workflow counts reflect in-flight review or approval steps.',
       pendingActions: {
-        title: 'Actions assigned to you',
-        description: 'Open items waiting for your test, approval, publish, or review decision.',
+        title: 'To-dos assigned to you',
+        description:
+          'Open items waiting for your test, approval, go-live confirmation, or review decision.',
         action: 'Review task list',
       },
       masterPendingReview: {
@@ -228,9 +239,10 @@ export default {
       },
     },
     tasks: {
-      title: 'Pending actions',
-      description: 'Complete these items in the linked master or template detail pages.',
-      empty: 'You have no pending actions right now.',
+      title: 'My to-dos',
+      description:
+        'Open each item from its letterhead or template detail page to complete the next step.',
+      empty: 'You have no to-dos right now.',
       columns: {
         action: 'Action',
         item: 'Item',
@@ -238,23 +250,23 @@ export default {
         hint: 'What to do',
       },
       masterReview: {
-        title: 'Review master document',
+        title: 'Review letterhead template',
         description: 'Approve or reject the uploaded master before templates can use it.',
       },
       templateTest: {
-        title: 'Complete test decision',
+        title: 'Record test result',
         description: 'Run test generation and pass or fail the template in testing.',
       },
       templateApproval: {
-        title: 'Complete approval decision',
+        title: 'Record approval decision',
         description: 'Approve or reject the template after testing.',
       },
       templatePublish: {
-        title: 'Publish template',
+        title: 'Confirm go-live',
         description: 'Release the approved template to the selected environment.',
       },
       templateDraft: {
-        title: 'Continue template authoring',
+        title: 'Continue template design',
         description: 'Finish bindings, rules, and submit the draft for testing.',
       },
       masterRework: {
@@ -309,7 +321,7 @@ export default {
   },
   collaboration: {
     workItems: {
-      empty: 'You have no collaboration to-do items right now.',
+      empty: 'You have no to-do items right now.',
       ageValue: '{value}',
       error: {
         load: 'Unable to load collaboration to-do items.',
@@ -326,24 +338,24 @@ export default {
     workItem: {
       queue: {
         TEST: {
-          label: 'Testing',
-          title: 'Complete test decision',
+          label: 'In testing',
+          title: 'Waiting on my testing',
         },
         APPROVAL: {
-          label: 'Approval',
-          title: 'Complete approval decision',
+          label: 'Awaiting approval',
+          title: 'Waiting on my approval',
         },
         REMEDIATION: {
-          label: 'Remediation',
-          title: 'Revise template',
+          label: 'Needs fixes',
+          title: 'Waiting on my fixes',
         },
         PENDING_RELEASE: {
-          label: 'Pending release',
-          title: 'Publish template',
+          label: 'Awaiting go-live',
+          title: 'Waiting to confirm go-live',
         },
         ESCALATION: {
-          label: 'Escalation',
-          title: 'Review timeout escalation',
+          label: 'Overdue follow-up',
+          title: 'Overdue to follow up',
         },
       },
       trigger: {
@@ -368,7 +380,7 @@ export default {
       },
     },
     timeoutConfig: {
-      title: 'Collaboration timeout thresholds',
+      title: 'Reminder timing',
       description:
         'Configure in-app escalation thresholds for testing, approval, pending release, and remediation queues. Escalation is notification-only.',
       refresh: 'Refresh',

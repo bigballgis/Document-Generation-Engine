@@ -112,7 +112,7 @@ describe('RoleHomeView', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Group governance')
-    expect(wrapper.text()).toContain('Governance overview')
+    expect(wrapper.text()).toContain('My overview')
     expect(wrapper.text()).toContain('Masters pending review')
   })
 })

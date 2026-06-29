@@ -7,7 +7,7 @@ import AppBreadcrumb from '@/components/layout/AppBreadcrumb.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { BRAND_REGISTRY } from '@/config/brands'
 import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
-import { buildVisibleNavGroups } from '@/navigation/navStructure'
+import { buildVisibleNavGroups, resolveNavItemTarget, type NavItemDefinition } from '@/navigation/navStructure'
 import { useAppStore } from '@/stores/app'
 import { useSessionStore } from '@/stores/session'
 import type { BrandPreset } from '@/theme/tokens'
@@ -43,20 +43,31 @@ const navGroups = computed(() => {
   return buildVisibleNavGroups(session.visibleRoutes, session.roles, session.capabilities)
 })
 
-function isActive(path: string): boolean {
-  if (path === route.path) {
+function isNavItemActive(item: NavItemDefinition): boolean {
+  if (item.path === '/dashboard') {
+    if (item.id === 'dashboard') {
+      return route.path === '/dashboard' && !route.query.queue && !route.query.filter
+    }
+    if (item.query?.queue) {
+      return route.path === '/dashboard' && route.query.queue === item.query.queue
+    }
+    if (item.query?.filter) {
+      return route.path === '/dashboard' && route.query.filter === item.query.filter
+    }
+  }
+  if (item.path === route.path) {
     return true
   }
-  return route.path.startsWith(`${path}/`)
+  return route.path.startsWith(`${item.path}/`)
+}
+
+function navigateToItem(item: NavItemDefinition) {
+  router.push(resolveNavItemTarget(item))
 }
 
 async function handleLogout() {
   await sessionStore.logout()
   router.push('/login')
-}
-
-function navigate(path: string) {
-  router.push(path)
 }
 
 function handleLocaleChange(locale: string) {
@@ -125,8 +136,8 @@ function handleBrandChange(brand: BrandPreset) {
               :key="item.id"
               type="button"
               class="nav-item"
-              :class="{ active: isActive(item.path) }"
-              @click="navigate(item.path)"
+              :class="{ active: isNavItemActive(item) }"
+              @click="navigateToItem(item)"
             >
               {{ t(item.labelKey) }}
             </button>
@@ -275,6 +286,11 @@ nav {
     color: var(--brand-primary);
     font-weight: 650;
     box-shadow: inset 3px 0 0 var(--brand-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
   }
 }
 
