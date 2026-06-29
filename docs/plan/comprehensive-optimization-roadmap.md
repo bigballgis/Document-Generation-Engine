@@ -25,17 +25,27 @@ workflow review, frontend workflow & operation-experience review (OA design alig
 
 ## 0. Executive summary
 
-The platform has a **runnable thin vertical slice** (P0–P11, P13, P16 partial, dashboard
-consolidation) but three classes of gap remain:
+**Updated:** 2026-06-29 (doc-consistency sync)
 
-| Class | Severity | Headline |
+The platform has a **feature-complete v1 management + runtime stack**: formal phases **P0–P11,
+P13–P20 Done** (P12 deferred catch-all only). MVP vertical slice and user sequence
+**P14 → P15 → P18** are closed with green gates (backend **524** tests, frontend **250**
+Vitest, domain E2E on Docker 4173).
+
+**COR-0 through COR-6 are Done.** Remaining work is **optimization backlog (OPT-\*)**,
+**enterprise closure** (external validation, intranet SCA), and **transitional production
+seams** (AD Group stub, Kafka default profile, multi-instance rate limit / Redisson).
+
+| Class | Severity | Headline (current) |
 | --- | --- | --- |
-| **Documentation drift** | High | Permission matrix, PRD IA, ledger, UX plan still describe workbenches / old routes / Done items that code no longer matches |
-| **Contract & runtime correctness** | High | OpenAPI vs implementation (idempotency, output modes, async task states, batch partial failure) |
-| **Product workflow completeness** | Medium | Template verifiability, publish gate, controlled decision forms — **Done (P19, 2026-06-25)**; collaboration to-dos remain P14 |
-| **Frontend workflow & OA UX** | High | Dashboard/workbench merge incomplete, deep links, pagination, error recovery, table/a11y, locale-aware formatting |
+| **Documentation drift** | Low (residual) | Periodic sync of ledger, PROJECT-STATUS-RESET, and task sheets after each slice; misfiled `P13-confirmed-large-domains.md` retired |
+| **Contract & runtime correctness** | Closed (COR-1) | Idempotency, async states, batch partial failure aligned — see §3 |
+| **Product workflow completeness** | Closed | P14 collaboration, P19 verifiability/publish gate, P18 structured authoring — all Done |
+| **Frontend workflow & OA UX** | Mostly closed (COR-3) | Dashboard consolidates workflow queues (COR-T11); residual OPT-G (TemplateDetailView split, locale polish) |
+| **Production deploy evidence** | Medium | P15 Helm/manifest CI green; no in-repo real-cluster rollout evidence (E05-T06) |
 
-Recommended sequencing: **Wave COR-0 (docs truth)** → **COR-1 (API contract)** → **COR-2 (template workflow)** in parallel with **COR-3 (frontend UX)** → **COR-4 (performance/resilience)** → **COR-5 (tests/E2E)** → **COR-6 (P14/P18 large domains)**.
+**Next sequencing:** OPT Wave 3 (D5/G*) → pick **P12** slice or enterprise milestones M9–M11.
+Historical recommended order (COR-0 → … → COR-6) is **complete** — see §1.
 
 ---
 
@@ -49,7 +59,7 @@ Recommended sequencing: **Wave COR-0 (docs truth)** → **COR-1 (API contract)**
 | COR-3 | Frontend workflow & operation experience | **Done** (2026-06-25; F18 deferred to COR-L04) |
 | COR-4 | Performance, resilience & architecture | **Done** (2026-06-25; COR-P01–P08 all closed; verify **323** tests) |
 | COR-5 | Test coverage & E2E journeys | **Done** (2026-06-25; COR-E01–E06) |
-| COR-6 | Confirmed large domains (P14/P18+) | **Deferred** — activate one formal phase at a time (see §8) |
+| COR-6 | Confirmed large domains (P14/P18+) | **Done** (2026-06-28; P14/P15/P16/P17/P18/P19 delivered — see §8) |
 
 ---
 
@@ -213,7 +223,8 @@ Consolidates remaining [optimization-plan.md](./optimization-plan.md) items not 
 
 ## 8. Wave COR-6 — Confirmed large domains (phase-aligned)
 
-Execute as formal phases when selected; **do not mark Done without full P14/P18/P19 exit criteria**. Remaining COR-2/3 rows mapped here stay `Not Started` until the owning phase is activated.
+All COR-L rows **Done** — phase exit criteria met with green gates. P12 remains the non-active
+deferred-enhancements catch-all for post-v1 slices.
 
 | ID | Phase | Title | Status | Detail plan |
 | --- | --- | --- | --- | --- |
@@ -221,7 +232,7 @@ Execute as formal phases when selected; **do not mark Done without full P14/P18/
 | COR-L02 | P18 | Structured authoring & fidelity engine | **Done** (2026-06-28) | [P18](./detail/P18-structured-authoring-fidelity-engine.md) — T01–T10; E2E 5/5 + UIUX manifest |
 | COR-L03 | P19 | Full verifiability + publish gate + decision forms | **Done** (2026-06-25) | [P19](./detail/P19-verifiability-publish-gate.md) — T01–T10; gates 281 backend / 169 frontend / E2E 7/7 |
 | COR-L04 | P17 | Per-domain API policy save/rollback | **Done** (2026-06-25) | [P17](./detail/P17-api-policy-domain-governance.md) — COR-F18 + T01–T09 |
-| COR-L05 | P16 | Lifecycle/version governance completeness | **Deferred** | [P16](./detail/P16-lifecycle-version-governance.md) |
+| COR-L05 | P16 | Lifecycle/version governance completeness | **Done** (2026-06-23) | [P16](./detail/P16-lifecycle-version-governance.md) — T01–T08; stop/restore/deprecate + version deactivate |
 | COR-L06 | P15 | Kubernetes & container hardening | **Done** (2026-06-27) | [P15](./detail/P15-kubernetes-deployment-container-hardening.md) — T01–T10 |
 
 ---
@@ -244,21 +255,21 @@ When implementing COR-3, apply these **non-negotiable patterns** across all mana
 
 ## 10. Recommended execution order
 
+> **Historical (2026-06-23):** COR-0…COR-6 sequence below is **complete** as of 2026-06-28.
+> **Current focus:** OPT Wave 3 (see [optimization-plan.md](./optimization-plan.md)) and
+> enterprise milestones E05-T06 / M9–M11.
+
 ```text
-COR-0 (docs)     ──► parallel track A: COR-1 (API contract)
-                 ──► parallel track B: COR-3 P0 (F01–F05, F09, F15, F19)
-COR-2 (template) ──► depends on COR-0 D02/D06; P19 slices COR-T01–T04
-COR-3 remainder  ──► after COR-0 D01 (workbench decision COR-T11)
-COR-4            ──► after COR-1 B02/B04 stable
-COR-5            ──► continuous; E01/E02 gate COR-3 Done claims
-COR-6            ──► single active phase when product selects P16–P19
+COR-0 (docs)     ──► COR-1 (API contract)     ──► COR-2 (template)     [Done]
+COR-3 (frontend UX) + COR-4 (perf) + COR-5 (E2E) + COR-6 (P14/P18)   [Done]
+Next: OPT-D5/G*  ──►  P12 slice (optional)  ──►  M9–M11 / E05-T06
 ```
 
-**Suggested first sprint (2 weeks):**
+**Suggested next sprint:**
 
-1. COR-D01, COR-D03, COR-D06, COR-D07 (documentation)
-2. COR-T11 decision + COR-F05, COR-F10, COR-F11 (dashboard + workflow deep links)
-3. COR-B02 (idempotency TTL/hash) + COR-F19 start (api.error catalog)
+1. OPT-D5 (service split) + OPT-G3 (TemplateDetailView decomposition)
+2. Doc sync after each slice (ledger + PROJECT-STATUS-RESET)
+3. M9-T02 intranet SCA submission when corp network available
 
 ---
 

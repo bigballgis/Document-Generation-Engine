@@ -14,7 +14,7 @@ dependsOn:
 
 # E12 Phase 3 Task Sheet (UX Wave A/B)
 
-> **Sync status (2026-06-23):** Status mirrored in [execution-sync-ledger.md](../plan/execution-sync-ledger.md). Maps to UX-A/UX-B/UX-D tasks in [ux-upgradeability-optimization-plan.md](../plan/ux-upgradeability-optimization-plan.md).
+> **Sync status (2026-06-29):** Status mirrored in [execution-sync-ledger.md](../plan/execution-sync-ledger.md). Maps to UX-A/UX-B/UX-D tasks in [ux-upgradeability-optimization-plan.md](../plan/ux-upgradeability-optimization-plan.md). Workbench routes redirect to Dashboard per COR-T11 (`docs/adr/decisions/2026-06-23-batch-b-workflow-defaults.md`).
 
 ## Purpose
 
@@ -40,14 +40,14 @@ delivered as UX optimization Wave A + Wave B frontend slice.
 | E12-T16 | P0 | Frontend API mgmt | Credential rotate/revoke UI + `apiPolicy` client | Rotate/revoke with confirm; one-time secret reveal; revoked state shown | Done |
 | E12-T17 | P0 | Frontend shell | 401 session-expiry interceptor in `http.ts` | 401 clears session and redirects to login with `sessionExpired` notice | Done |
 | E12-T18 | P0 | Frontend UX | `useConfirmAction` composable | Reusable confirm applied to destructive/irreversible actions | Done |
-| E12-T19 | P0 | Frontend workbench | `TesterWorkbenchView` + `route.tester-workbench` | Test queue, pass/fail gated by `canDecideTests` | Done |
-| E12-T20 | P0 | Frontend workbench | `ApproverWorkbenchView` + `route.approver-workbench` | Approval queue, approve/reject gated by `canDecideApprovals` | Done |
-| E12-T21 | P1 | Frontend home | `RoleHomeView` actionable summary | Governance homes show summaries instead of placeholder cards | In Progress |
-| E12-T22 | P1 | Frontend i18n | Wave A/B message keys in `en.ts` | New user-facing strings via keys; remaining hardcoded strings tracked in UXE2 | In Progress |
+| E12-T19 | P0 | Frontend workbench | Tester queue on Dashboard (COR-T11) | Test queue reachable via `/dashboard#tasks-section`; legacy `/workbench/tester` redirects; gated by `canDecideTests` | Done (2026-06-24; COR-T11) |
+| E12-T20 | P0 | Frontend workbench | Approver queue on Dashboard (COR-T11) | Approval queue on Dashboard tasks section; legacy `/workbench/approver` redirects; gated by `canDecideApprovals` | Done (2026-06-24; COR-T11) |
+| E12-T21 | P1 | Frontend home | `RoleHomeView` actionable summary | Governance homes show summaries instead of placeholder cards | Done (2026-06-25; UXD4 + `RoleHomeView.test.ts`) |
+| E12-T22 | P1 | Frontend i18n | Wave A/B message keys in `en.ts` | New user-facing strings via keys; residual polish tracked in OPT-G6 | Done (2026-06-25; UXE2 + P20 primary journey) |
 
 ## Gate commands
 
-- Frontend: `pnpm -C frontend lint` / `type-check` / `test` / `build` — green (40 tests, 2026-06-23)
+- Frontend: `pnpm -C frontend lint` / `type-check` / `test` / `build` — green (**250** Vitest, 2026-06-24)
 
 ## Evidence
 

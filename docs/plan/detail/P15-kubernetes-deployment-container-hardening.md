@@ -1,11 +1,12 @@
 # P15 — Kubernetes Deployment & Container Hardening (Detailed Plan)
 
 **Phase status:** Done (2026-06-27; T01–T10 complete) | **Depends on:** P9
-**Implementation status:** **P15-T01–T10 Done** (2026-06-27; phase closed). **Next active phase:** P18.
-**Created:** 2026-06-23 (maintainer decision — Docker/K8s operational baseline not yet implemented)
+**Implementation status:** **P15-T01–T10 Done** (2026-06-27; phase closed).
+**Created:** 2026-06-23 (maintainer decision — Docker/K8s operational baseline)
 
-> **Active phase (sole):** P15 per user sequence P14 → P15 → P18. **P18 Not Started** (queued after P15).
-> **Drift note:** A 2026-06-26 doc-sync erroneously marked this phase Done; reconciled 2026-06-27 — phase re-opened **In Progress**; task Done rows from that sync are not authoritative until re-earned with green gates.
+> **Sequence note:** User delivery order P14 → P15 → P18 is **complete** (P18 Done 2026-06-28).
+> Helm/manifest validation is **render-only**; real cluster deploy evidence is tracked under
+> E05-T06 / deploy runbooks, not as a blocker on this phase's Done status.
 
 ## Source-of-truth & traceability
 

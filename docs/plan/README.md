@@ -72,7 +72,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | --- | --- | --- |
 | P14 | Content modules, collaboration, export/import | E2E/UIUX green; see [P14 detail](detail/P14-confirmed-large-domains.md) |
 | P15 | K8s Helm, probes, blue-green, CI gates | [deploy/README.md](../deploy/README.md); helm-validate green |
-| P18 | Structured authoring + fidelity engine + UI | `mvn verify` **514** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
+| P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **Open backlog (no single active phase):**
 

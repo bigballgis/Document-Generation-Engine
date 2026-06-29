@@ -1,8 +1,8 @@
 # Documentation Index
 
-**Project baseline:** Restart from zero (2026-06-23); **P0–P11 re-earned Done** and **P13
-(identity & group administration) Done** (2026-06-23) with implementation in `backend/` and
-`frontend/`. See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
+**Project baseline:** Restart from zero (2026-06-23); **P0–P20 Done** except **P12** (deferred
+catch-all, non-active). Latest gates: backend **524** tests, frontend **250** Vitest
+(2026-06-29). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
 and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 ## Start here
@@ -10,7 +10,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | Order | Document | Purpose |
 | --- | --- | --- |
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
-| 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P11) |
+| 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P20) |
 | 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
 | 2c | **[Deployment guide](../deploy/README.md)** | **Canonical** install/upgrade/cutover/rollback — Docker Compose + Kubernetes (ADR-0030) |
 | 3 | [Orchestration high-level plan](./architecture/orchestration-high-level-plan.md) | Epic ordering and active epic rules |
@@ -35,7 +35,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | --- | --- |
 | [Plan index](./plan/README.md) | Layer rules and phase links |
 | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone ↔ phase mapping + gate evidence + transitional seams index |
-| [Master plan](./plan/master-plan.md) | P0–P11 phases — see phase detail plans for status |
+| [Master plan](./plan/master-plan.md) | P0–P20 phases — see phase detail plans for status |
 | [Comprehensive optimization roadmap](./plan/comprehensive-optimization-roadmap.md) | **Unified execution map** — docs, API contract, template workflow, frontend UX, performance, E2E (COR-0…6, 2026-06-23) |
 | [Optimization plan & backlog](./plan/optimization-plan.md) | Technical debt detail (OPT-A…G): gates, coverage, backend architecture |
 | [UX & upgradeability optimization plan](./plan/ux-upgradeability-optimization-plan.md) | Historical UX waves (UX-A…G); cross-check against comprehensive roadmap |
@@ -51,10 +51,14 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [P9 Production readiness](./plan/detail/P9-production-readiness.md) | Gates, observability, deploy |
 | [P10 Runtime download](./plan/detail/P10-runtime-download.md) | Secure document download |
 | [P11 Batch & async generation](./plan/detail/P11-batch-async.md) | Sync batch, async task query/cancel |
-| [P13 Identity & group administration](./plan/detail/P13-identity-group-administration.md) | User + group management plane, fail-closed escalation guard, audit (Done 2026-06-23) |
-| [P14 Confirmed large domains](./plan/detail/P14-confirmed-large-domains.md) | Clause modules, collaboration to-dos, export/import |
-| [P15 Kubernetes deployment](./plan/detail/P15-kubernetes-deployment-container-hardening.md) | Phase plan — Helm, hardening, blue-green, CI gates (ADR-0030) |
-| [P18 Structured authoring & fidelity](./plan/detail/P18-structured-authoring-fidelity-engine.md) | Controlled node matrix, style catalog, paste cleaning, renderProfile (gap G3) |
+| [P13 Identity & group administration](./plan/detail/P13-identity-group-administration.md) | User + group management plane (Done 2026-06-23) |
+| [P14 Confirmed large domains](./plan/detail/P14-confirmed-large-domains.md) | Content modules, collaboration, export/import (Done 2026-06-27) |
+| [P15 Kubernetes deployment](./plan/detail/P15-kubernetes-deployment-container-hardening.md) | Helm, hardening, blue-green, CI gates (Done 2026-06-27; ADR-0030) |
+| [P16 Lifecycle/version governance](./plan/detail/P16-lifecycle-version-governance.md) | Stop/restore/deprecate, version deactivate (Done 2026-06-23) |
+| [P17 Per-domain API policy](./plan/detail/P17-api-policy-domain-governance.md) | Domain save, impact preview, rollback (Done 2026-06-25) |
+| [P18 Structured authoring & fidelity](./plan/detail/P18-structured-authoring-fidelity-engine.md) | Controlled editor, paste cleaning, renderProfile (Done 2026-06-28) |
+| [P19 Verifiability & publish gate](./plan/detail/P19-verifiability-publish-gate.md) | Batch test, coverage, live publish gate, decision forms (Done 2026-06-25) |
+| [P20 i18n & UI upgradeability](./plan/detail/P20-i18n-ui-upgradeability.md) | Locale registry, brand theming, zh-CN primary journey (Done 2026-06-25) |
 | **[Deployment guide](../deploy/README.md)** | **Canonical operator guide** — prerequisites, install/upgrade/cutover/rollback/secrets; indexes all `deploy/*.md` topic docs |
 
 ## Architecture

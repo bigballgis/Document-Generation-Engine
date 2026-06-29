@@ -96,7 +96,7 @@ Each task: `ID | Pri | Title | Evidence | Acceptance | Status`. Priority **H/M/L
 
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
-| UXC1 | M | Live publish-gate checklist | publish gate "API policy" is static text | Each gate item reflects real readiness (policy configured, tests passed, bindings valid); publish disabled until satisfied; reasons shown | **Partial** — binding-validation gate live; API policy item still informational (→ COR-T01 / P19) |
+| UXC1 | M | Live publish-gate checklist | publish gate "API policy" is static text | Each gate item reflects real readiness (policy configured, tests passed, bindings valid); publish disabled until satisfied; reasons shown | **Done** (2026-06-25) — `PublishGateService` live checklist + UI; COR-T01 / P19-T06 |
 | UXC2 | M | Disambiguate `APPROVAL` stage actions | both submit + decide render together | UI distinguishes "awaiting approval submission" vs "awaiting approval decision" (split status or stage flag); only the valid action shows per role | Done |
 | UXC3 | M | Stop/Deprecate/Restore + version deactivate/restore (versioning + logical delete, §4.3) | matrix §5 confirms; no backend endpoints or UI | Backend lifecycle endpoints + UI actions with confirm + audit; STOPPED/DEPRECATED actionable; removal is logical delete only (no hard delete) **(needs backend work)** | Done |
 | UXC4 | L | Master/template metadata edit via versioning (Confirmed §4.3) | only PATCH metadata exists; no re-upload; no delete | Metadata edit UI; content changes create new versions (no in-place re-upload); removal = logical delete; no hard-delete UI | Done |
@@ -107,8 +107,8 @@ Each task: `ID | Pri | Title | Evidence | Acceptance | Status`. Priority **H/M/L
 | ID | Pri | Title | Evidence | Acceptance | Status |
 | --- | --- | --- | --- | --- | --- |
 | UXD0 | H | Seed users + landing/visibleRoutes for all 7 roles (Confirmed §4.4) | no seed users for TESTER/APPROVER/MASTER_DESIGNER/AUDIT_ADMIN; `RouteVisibilityService` missing entries | Seed account per role; backend `defaultRoute` + `visibleRoutes` defined for each; login lands correctly; prerequisite for UXD1–UXD3 | Done |
-| UXD1 | M | Tester workbench (TEMPLATE_TESTER) | role exists, no UI/landing | "My test queue" view: templates awaiting test, test-generate, pass/fail decision with comment; gated by `canDecideTests` | **Partial** — `TesterWorkbenchView` built; **`route.tester-workbench` redirects to `/dashboard`**; queues on Dashboard (COR-T11 pending) |
-| UXD2 | M | Approver workbench (TEMPLATE_APPROVER) | role exists, no UI/landing | "My approval queue" view: templates awaiting approval, approve/reject with comment; gated by `canDecideApprovals` | **Partial** — `ApproverWorkbenchView` built; **`route.approver-workbench` redirects to `/dashboard`**; queues on Dashboard (COR-T11 pending) |
+| UXD1 | M | Tester workbench (TEMPLATE_TESTER) | role exists, no UI/landing | "My test queue" view: templates awaiting test, test-generate, pass/fail decision with comment; gated by `canDecideTests` | **Done** (2026-06-27) — queues on `DashboardView` tasks section; `route.tester-workbench` → `/dashboard#tasks-section` (COR-T11); P14-T02 collaboration work items |
+| UXD2 | M | Approver workbench (TEMPLATE_APPROVER) | role exists, no UI/landing | "My approval queue" view: templates awaiting approval, approve/reject with comment; gated by `canDecideApprovals` | **Done** (2026-06-27) — same Dashboard consolidation as UXD1; P14-T02 |
 | UXD3 | M | Master-designer journey (MASTER_DESIGNER) | backend authorizes, no nav | Landing + nav for `MASTER_DESIGNER`; access to master + template authoring per matrix §4–5 | Done |
 | UXD4 | L | Replace governance role-home placeholders with real dashboards | `RoleHomeView` placeholders | Global/Group governance homes show actionable summaries (pending reviews, awaiting publish, recent audit) instead of placeholder cards | Done |
 
@@ -203,7 +203,7 @@ Frontend gates green: `pnpm -C frontend lint` / `type-check` / `test` (81 tests)
 | Session capabilities | `ManagementCapabilities` types, `useCapabilities` composable, `ManagementSessionView` wiring |
 | Route gating | `canAccessRoute` uses `visibleRoutes` only; `ManagementShell` nav from session routes |
 | Role helpers | `roles.ts` — `API_ADMIN` removed; capability-based helpers with role fallback |
-| Workbenches | **Transitional (2026-06-24):** `TesterWorkbenchView` / `ApproverWorkbenchView` exist; **`route.tester-workbench` / `route.approver-workbench` redirect to `/dashboard`**; default landing is `route.dashboard-home` → `DashboardView`. Final disposition → COR-T11. |
+| Workbenches | **Done (COR-T11, 2026-06-24):** workflow + collaboration queues on `DashboardView` tasks section; `route.tester-workbench` / `route.approver-workbench` / `route.escalation-workbench` redirect to `/dashboard#tasks-section`; standalone workbench views removed |
 | Template authoring | `TemplateCreateDialog` + create button on `TemplateListView`; granular gates on `TemplateDetailView` |
 | API credentials | `apiPolicy.rotateCredential` / `revokeCredential`; rotate/revoke UI with confirm |
 | Session expiry | `http.ts` 401 interceptor → login redirect with `sessionExpired` |

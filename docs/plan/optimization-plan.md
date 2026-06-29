@@ -20,14 +20,18 @@ gates, and updated owning docs.
 
 ## 0. Headline findings
 
-| # | Finding | Severity |
-| --- | --- | --- |
-| F1 | **Documentation drift**: `docs/README.md`, `docs/plan/README.md`, `docs/PROJECT-STATUS-RESET.md` declare *"no implementation code yet / restart from zero"*, but the repo has **234 backend main classes + ~20 test classes + 66 frontend src files**, and `master-plan.md` marks **P0–P11 all `Done`**. Plan layer and reality contradict each other. | High |
-| F2 | **Quality gates not enforced (and claimed green)**: TDD constitution requires `mvn verify` to run Checkstyle + PMD + SpotBugs + JaCoCo thresholds, but `backend/pom.xml` (L160–186) has **only a JaCoCo report — no coverage rules and no static-analysis plugins**, and no `checkstyle/pmd/spotbugs` config files exist. Yet `docs/plan/execution-sync-ledger.md` L21 records backend `mvn verify` = **Green** and L80 claims *"P9 Checkstyle/PMD/SpotBugs in verify"*. The ledger's green-gate evidence is **unbacked**. No `Done` claim can currently be backed by real green gates. | High |
-| F3 | **Stack drift vs ADR/guardrails (partially closed 2026-06-25):** QueryDSL (audit list) and MapStruct (apimgmt) incrementally landed; Redisson still absent; **Bucket4j** (OPT-F1), **Resilience4j** (OPT-F2), and streaming (OPT-F3) are implemented. Plain Spring Data JPA + hand-written mappers remain elsewhere + Lettuce. Argon2id, JWT, Flyway, MinIO **are** implemented. | High |
-| F4 | **Test coverage is thin for a TDD-mandated project**: backend main:test ≈ 11.7:1; `apimgmt` and `infrastructure` have **zero** tests; core security/runtime classes lack focused tests. Frontend ≈ 38% of source files have tests; only 1 e2e (login a11y smoke). | High |
-| F5 | **Module boundary violation**: `rendering` imports `runtime.api` / `runtime.service` (reverse dependency), breaking the ADR rule that rendering stays isolated from lifecycle/authorization/API-governance. | Medium |
-| F6 | **Git baseline**: branch `main` has **no commits yet**; the entire codebase is uncommitted. First commit + baseline tag is a prerequisite for any auditable optimization history. | Medium |
+> **Audit date:** 2026-06-23. **Reconciliation (2026-06-29):** findings F1–F5 largely closed
+> via OPT-A/B/C and COR waves; F6 partially closed (commits exist; OPT-B5 baseline tag pending).
+> Use [execution-sync-ledger.md](./execution-sync-ledger.md) for authoritative gate evidence.
+
+| # | Finding | Severity | Resolution (2026-06-29) |
+| --- | --- | --- | --- |
+| F1 | **Documentation drift** (plan vs code) | High | **Closed** — plan layer rewritten (OPT-A1–A3, COR-D01–D09); periodic sync still required |
+| F2 | **Quality gates not enforced** | High | **Closed** — OPT-B1–B4: Checkstyle/PMD/SpotBugs/JaCoCo + frontend coverage/a11y in verify |
+| F3 | **Stack drift vs ADR** | High | **Mostly closed** — QueryDSL, MapStruct, Bucket4j, Resilience4j landed; Redisson deferred (ADR-0039) |
+| F4 | **Thin test coverage** | High | **Mostly closed** — COR-C/E + P14/P18 E2E; backend **524**, frontend **250** Vitest, 13 Playwright specs |
+| F5 | **Rendering→runtime reverse dependency** | Medium | **Closed** — OPT-D1 (2026-06-24) |
+| F6 | **Git baseline** | Medium | **Partial** — `main` has commits; OPT-B5 baseline tag still Not Started |
 
 ---
 
@@ -96,7 +100,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | D2 | H | Unify generation path | `DocumentGenerationEngine` vs `RuntimeGenerationService` duplicate assembly | **Done** (Wave 2–3): sync path delegates to `DocumentGenerationEngine`; `RuntimeGenerationServiceGenerateTest` updated; gates green (184 tests) |
 | D3 | M | Introduce MapStruct mappers | hand-written `toSummary`/`toDetail`/`toPolicyView` (e.g. `TemplateService` L341–404) | Mappers via MapStruct (ADR); services slimmed; behavior unchanged | **Done** (2026-06-25; COR-P08 apimgmt `ApiPolicyViewMapper`; opportunistic expansion ongoing) |
 | D4 | M | Introduce QueryDSL for complex queries | `ManagementAuditEventRepository` JPQL, in-memory filtering | Audit/list queries type-safe + pageable via QueryDSL | **Done** (2026-06-25; COR-P07; `ManagementAuditEventRepositoryQuerydslTest` 5/5; verify 319 tests) |
-| D5 | M | Split god services | `TemplateService` ~547 L (was ~651), `BatchGenerationService` 403 L, `ApiManagementService` 326 L | Responsibilities separated (validation/mapping/authz extracted); each class focused | **In Progress** — slice 1: `TemplateViewMapper` extracted (summary/detail/variable/binding/rules mapping); `TemplateService` delegates |
+| D5 | M | Split god services | `TemplateService` ~495 L (was ~651), `BatchGenerationService` 403 L, `ApiManagementService` 326 L | Responsibilities separated (validation/mapping/authz extracted); each class focused | **In Progress** — slice 1: `TemplateViewMapper` extracted; slice 2: `TemplateStructuredAuthoringService` extracted (`getMasterStyleCatalog`, `pasteClean` + catalog/paste view mappers); `TemplateService` delegates |
 | D6 | L | Evaluate declarative authorization | no `@PreAuthorize`; authz all manual in services | Decision recorded; if adopted, consistent enforcement reduces missed-endpoint risk | Not Started |
 
 ### OPT-E Backend security & correctness hardening

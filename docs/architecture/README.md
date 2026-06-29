@@ -26,7 +26,7 @@ related:
 
 # Architecture Documentation
 
-> **Sync status (2026-06-23):** P0–P11 re-earned Done. Epic/milestone mirror:
+> **Sync status (2026-06-29):** P0–P20 Done except P12 (deferred catch-all). Epic/milestone mirror:
 > [execution-sync-ledger.md](../plan/execution-sync-ledger.md). Phase truth:
 > [master-plan.md](../plan/master-plan.md).
 
@@ -73,6 +73,7 @@ Architecture views describe current architectural facts, boundaries, responsibil
 | [E12 Development Plan](e12-frontend-role-journey-development-plan.md) | Role-operation journey UI | Done (thin slice) |
 | [E12 Phase 1 Task Sheet](e12-phase1-task-sheet.md) | E12-T01..T05 | Done |
 | [E12 Phase 2 Task Sheet](e12-phase2-task-sheet.md) | E12-T06..T10 | Done (T10 optional pending) |
+| [E12 Phase 3 Task Sheet](e12-phase3-task-sheet.md) | E12-T11..T22 UX Wave A/B | Done (2026-06-29; COR-T11 Dashboard) |
 | [E05 External Validation Evidence](e05-external-validation-evidence.md) | Deployment-time dependency evidence matrix | Not Started |
 | [E05 External Evidence Execution Log](e05-external-evidence-execution-log.md) | Validation cycle log (empty) | Not Started |
 | [Orchestration High-Level Plan](orchestration-high-level-plan.md) | Epic ordering and active epic rules | Synced 2026-06-23 |

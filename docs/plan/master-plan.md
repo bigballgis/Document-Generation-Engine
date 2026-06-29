@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active phase:** **P18** completed **Done** (2026-06-28; T01–T10). User sequence: P14 → P15 → P18.
+**Active formal phase:** **None** (2026-06-29). User sequence P14 → P15 → P18 **complete**.
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
