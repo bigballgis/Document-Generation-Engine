@@ -71,4 +71,19 @@ describe('FidelityWarningList', () => {
     expect(wrapper.text()).toContain('Unviewed')
     expect(wrapper.text()).not.toContain('UNRESOLVED_VARIABLE')
   })
+
+  it('shows distinct empty copy when filters exclude all warnings', async () => {
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(FidelityWarningList, {
+      props: { warnings },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    const textInputs = wrapper.findAll('input.el-input__inner')
+    await textInputs[0].setValue('NONEXISTENT')
+    await flushPromises()
+
+    expect(wrapper.find('.el-empty').text()).toContain('No warnings match the current filters')
+  })
 })

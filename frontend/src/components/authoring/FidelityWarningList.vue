@@ -44,6 +44,24 @@ const filteredWarnings = computed(() =>
   filterFidelityWarnings(localWarnings.value, filters.value),
 )
 
+const hasActiveFilters = computed(() => {
+  const f = filters.value
+  return (
+    f.warningCode.trim() !== '' ||
+    f.location.trim() !== '' ||
+    f.artifact.trim() !== '' ||
+    f.viewed !== 'all'
+  )
+})
+
+const emptyDescriptionKey = computed(() =>
+  localWarnings.value.length === 0
+    ? 'templates.preview.noWarnings'
+    : hasActiveFilters.value
+      ? 'templates.preview.noMatchingWarnings'
+      : 'templates.preview.noWarnings',
+)
+
 function warningLabel(messageKey: string): string {
   return te(messageKey) ? t(messageKey) : messageKey
 }
@@ -108,7 +126,7 @@ function resetFilters() {
 
     <el-empty
       v-if="!filteredWarnings.length"
-      :description="t('templates.preview.noWarnings')"
+      :description="t(emptyDescriptionKey)"
     />
 
     <el-table v-else :data="filteredWarnings" size="small" class="warning-table">

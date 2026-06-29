@@ -1062,6 +1062,7 @@ export default {
       previewStatusColumn: 'Preview status',
       warningsTitle: 'Fidelity warnings',
       noWarnings: 'No fidelity warnings.',
+      noMatchingWarnings: 'No warnings match the current filters.',
       warningFilters: {
         warningCode: 'Warning code',
         location: 'Location',

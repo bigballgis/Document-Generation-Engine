@@ -11,7 +11,7 @@ re-earned Done on 2026-06-23; **UX Wave B** (workbenches + polish) Done (2026-06
 P12 remains the non-active deferred-enhancements catch-all (no single active slice).
 **P16–P20 (deep-review functional gaps, 2026-06-23):** P16 lifecycle governance **Done**;
 P17 per-domain API policy **Done** (2026-06-25; Wave 3; T01–T09 + COR-F18);
-P18 structured authoring **Not Started** (queued after P15); **P19 verifiability/publish-gate Done**
+P18 structured authoring **Done** (2026-06-28; T01–T10); **P19 verifiability/publish-gate Done**
 (2026-06-25); P20 i18n **Done** (2026-06-25).
 
 ## Product goal

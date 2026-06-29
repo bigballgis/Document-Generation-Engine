@@ -187,7 +187,7 @@ test.describe('P18-T10 controlled structured authoring', () => {
     await expect(warningList).toContainText('IMAGE_SCALING_ADJUSTED')
 
     await page.getByTestId('filter-warning-code').fill('UNRESOLVED_VARIABLE')
-    await expect(page.getByText(/no fidelity warnings/i)).toBeVisible()
+    await expect(page.getByText(/no warnings match the current filters/i)).toBeVisible()
   })
 
   // BDD: Clean binding → no fidelity warnings (no stub).

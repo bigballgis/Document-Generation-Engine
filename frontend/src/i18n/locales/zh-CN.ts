@@ -822,6 +822,7 @@ export default {
       refresh: '刷新预览',
       warningsTitle: '保真警告',
       noWarnings: '暂无保真警告。',
+      noMatchingWarnings: '当前筛选条件下没有匹配的警告。',
       warningFilters: {
         warningCode: '警告代码',
         location: '位置',

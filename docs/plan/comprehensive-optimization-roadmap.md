@@ -218,11 +218,11 @@ Execute as formal phases when selected; **do not mark Done without full P14/P18/
 | ID | Phase | Title | Status | Detail plan |
 | --- | --- | --- | --- | --- |
 | COR-L01 | P14 | Clause/content module lifecycle | **Done** (2026-06-26) | [P14](./detail/P14-confirmed-large-domains.md) — **P14-T01 Done** (T01a–T01e incl. architecture remediation); backend **469**, frontend **224**; architecture re-review **PASS** (2026-06-26) |
-| COR-L02 | P18 | Structured authoring & fidelity engine | **Deferred** | [P18](./detail/P18-structured-authoring-fidelity-engine.md) |
+| COR-L02 | P18 | Structured authoring & fidelity engine | **Done** (2026-06-28) | [P18](./detail/P18-structured-authoring-fidelity-engine.md) — T01–T10; E2E 5/5 + UIUX manifest |
 | COR-L03 | P19 | Full verifiability + publish gate + decision forms | **Done** (2026-06-25) | [P19](./detail/P19-verifiability-publish-gate.md) — T01–T10; gates 281 backend / 169 frontend / E2E 7/7 |
 | COR-L04 | P17 | Per-domain API policy save/rollback | **Done** (2026-06-25) | [P17](./detail/P17-api-policy-domain-governance.md) — COR-F18 + T01–T09 |
 | COR-L05 | P16 | Lifecycle/version governance completeness | **Deferred** | [P16](./detail/P16-lifecycle-version-governance.md) |
-| COR-L06 | P15 | Kubernetes & container hardening | **Deferred** | [P15](./detail/P15-kubernetes-deployment-container-hardening.md) |
+| COR-L06 | P15 | Kubernetes & container hardening | **Done** (2026-06-27) | [P15](./detail/P15-kubernetes-deployment-container-hardening.md) — T01–T10 |
 
 ---
 
