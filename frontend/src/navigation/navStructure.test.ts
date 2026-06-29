@@ -332,7 +332,7 @@ describe('navStructure', () => {
       en.nav.routes.apiPolicy,
       en.nav.routes.masters,
       en.nav.routes.templateAuthoring,
-      en.home.dashboard.title,
+      en.dashboard.title,
       en.dashboard.description,
       en.dashboard.stats.sectionDescription,
       en.dashboard.stats.pendingActions.description,

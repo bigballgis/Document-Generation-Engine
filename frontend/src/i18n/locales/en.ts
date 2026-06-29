@@ -143,47 +143,8 @@ export default {
       authorizedGroups: 'Authorized groups',
       allGroups: 'All groups',
       noGroups: 'No groups assigned',
-      workspaceCount: 'Other workspaces',
-      openWorkspace: 'Open workspace',
-    },
-    nav: {
-      masters: 'Master documents',
-      mastersDescription: 'Upload DOCX masters, review anchor catalogs, and submit for approval.',
-      templates: 'Templates',
-      templatesDescription: 'Browse templates, run lifecycle actions, and manage test generation.',
-    },
-    globalGovernance: {
-      title: 'Global governance',
-      description: 'Start global API policy and platform governance tasks.',
-    },
-    groupGovernance: {
-      title: 'Group governance',
-      description: 'Manage authorized group scope and group-level governance tasks.',
-    },
-    templateAuthoring: {
-      title: 'Template authoring',
-      description: 'Create and orchestrate templates within your authorized groups.',
-    },
-    apiPolicy: {
-      title: 'API policy management',
-      description: 'Manage API credentials and policies within your authorized scope.',
-    },
-    audit: {
-      title: 'Audit console',
-      description: 'Review audit summaries within your authorized scope.',
     },
     dashboard: {
-      title: 'My overview',
-      pendingMasterReviews: 'Masters pending review',
-      pendingMasterReviewsDescription: 'Master documents awaiting an approval decision.',
-      pendingTemplateLifecycle: 'Templates in workflow',
-      pendingTemplateLifecycleDescription: 'Templates in testing, approval, or pending release.',
-      publishedTemplates: 'Published templates',
-      publishedTemplatesDescription: 'Templates currently published and callable.',
-      stoppedTemplates: 'Stopped templates',
-      stoppedTemplatesDescription: 'Templates stopped from runtime use.',
-      viewMasters: 'View masters',
-      viewTemplates: 'View templates',
       loadError: 'Unable to load dashboard statistics.',
     },
   },
@@ -303,23 +264,6 @@ export default {
       noticeTitle: 'Content modules',
       noticeDescription:
         'Each row is one reusable clause or content module. Open a module to manage versions, review workflow, and lifecycle governance.',
-    },
-  },
-  workbench: {
-    tester: {
-      title: 'Tester workbench',
-      description: 'Review templates awaiting test decisions.',
-      empty: 'No templates are currently in testing.',
-    },
-    approver: {
-      title: 'Approver workbench',
-      description: 'Review templates awaiting approval decisions.',
-      empty: 'No templates are currently awaiting approval.',
-    },
-    escalation: {
-      title: 'Escalation workbench',
-      description: 'Review timeout escalations within your authorized groups.',
-      empty: 'No timeout escalations require your attention right now.',
     },
   },
   collaboration: {

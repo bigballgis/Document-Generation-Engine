@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import {
-  canAccessCollaborationEscalationWorkbench,
+  canViewEscalationQueue,
   canAuthorTemplates,
   canDecideApprovals,
   canDecideTests,
@@ -25,7 +25,6 @@ export type WorkflowTaskKind =
   | 'template-test'
   | 'template-approval'
   | 'template-publish'
-  | 'template-author-draft'
   | 'template-rework'
   | 'template-escalation'
 
@@ -116,7 +115,7 @@ export function getVisibleCollaborationQueues(context: CapabilityContext): Colla
   if (canPublishTemplates(context)) {
     queues.push('PENDING_RELEASE')
   }
-  if (canAccessCollaborationEscalationWorkbench(context)) {
+  if (canViewEscalationQueue(context)) {
     queues.push('ESCALATION')
   }
   return queues

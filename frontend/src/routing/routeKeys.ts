@@ -8,9 +8,6 @@ export const ROUTE_KEYS = {
   masterManagement: 'route.master-management',
   templateManagement: 'route.template-management',
   contentModuleManagement: 'route.content-module-management',
-  testerWorkbench: 'route.tester-workbench',
-  approverWorkbench: 'route.approver-workbench',
-  escalationWorkbench: 'route.escalation-workbench',
   identityAdministration: 'route.identity-administration',
 } as const
 
@@ -21,9 +18,9 @@ export const LEGACY_ROUTE_PATH_REDIRECT: Partial<Record<string, string>> = {
   [ROUTE_KEYS.globalGovernanceHome]: '/dashboard',
   [ROUTE_KEYS.groupGovernanceHome]: '/dashboard',
   [ROUTE_KEYS.templateAuthoringHome]: '/dashboard',
-  [ROUTE_KEYS.testerWorkbench]: '/dashboard#tasks-section',
-  [ROUTE_KEYS.approverWorkbench]: '/dashboard#tasks-section',
-  [ROUTE_KEYS.escalationWorkbench]: '/dashboard#tasks-section',
+  'route.tester-workbench': '/dashboard#tasks-section',
+  'route.approver-workbench': '/dashboard#tasks-section',
+  'route.escalation-workbench': '/dashboard#tasks-section',
 }
 
 export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
@@ -36,9 +33,6 @@ export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.masterManagement]: '/masters',
   [ROUTE_KEYS.templateManagement]: '/templates',
   [ROUTE_KEYS.contentModuleManagement]: '/content-modules',
-  [ROUTE_KEYS.testerWorkbench]: '/dashboard#tasks-section',
-  [ROUTE_KEYS.approverWorkbench]: '/dashboard#tasks-section',
-  [ROUTE_KEYS.escalationWorkbench]: '/dashboard#tasks-section',
   [ROUTE_KEYS.identityAdministration]: '/entitlement/users',
 }
 
@@ -52,9 +46,6 @@ export const ROUTE_NAV_LABEL_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.masterManagement]: 'nav.items.masters',
   [ROUTE_KEYS.templateManagement]: 'nav.items.templates',
   [ROUTE_KEYS.contentModuleManagement]: 'nav.items.contentModules',
-  [ROUTE_KEYS.testerWorkbench]: 'nav.items.dashboard',
-  [ROUTE_KEYS.approverWorkbench]: 'nav.items.dashboard',
-  [ROUTE_KEYS.escalationWorkbench]: 'nav.items.dashboard',
   [ROUTE_KEYS.identityAdministration]: 'nav.items.users',
 }
 

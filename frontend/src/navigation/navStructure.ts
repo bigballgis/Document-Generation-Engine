@@ -1,5 +1,5 @@
 import {
-  canAccessCollaborationEscalationWorkbench,
+  canViewEscalationQueue,
   canAuthorTemplates,
   canDecideApprovals,
   canDecideTests,
@@ -101,7 +101,7 @@ export const BEHAVIOR_NAV_ITEM_SPECS: BehaviorNavItemSpec[] = [
     labelKey: 'nav.behaviorItems.escalation',
     query: { queue: 'ESCALATION' },
     hash: '#tasks-section',
-    isVisible: (context) => canAccessCollaborationEscalationWorkbench(context),
+    isVisible: (context) => canViewEscalationQueue(context),
   },
   {
     id: 'behavior-master-review',

@@ -4,9 +4,7 @@ import {
   canAccessLogicalRoute,
   canAccessMasterManagement,
   canAccessTemplateManagement,
-  canAccessCollaborationEscalationWorkbench,
-  canAccessTesterWorkbench,
-  canAccessApproverWorkbench,
+  canViewEscalationQueue,
   canExportTemplates,
   canAccessContentModuleManagement,
   canDecideApprovals,
@@ -129,32 +127,30 @@ describe('management roles', () => {
     expect(isGroupScopedAuditRole('GROUP_ADMIN')).toBe(true)
   })
 
-  it('gates workbench routes by collaboration role capabilities', () => {
+  it('gates escalation queue visibility by admin collaboration roles', () => {
     const testerContext = { roles: ['TEMPLATE_TESTER'], capabilities: testerCapabilities }
-    const approverContext = { roles: ['TEMPLATE_APPROVER'], capabilities: { ...testerCapabilities, decideTests: false, decideApprovals: true } }
     const groupAdminContext = { roles: [MANAGEMENT_ROLES.GROUP_ADMIN], capabilities: globalAdminCapabilities }
 
-    expect(canAccessTesterWorkbench(testerContext)).toBe(true)
-    expect(canAccessApproverWorkbench(testerContext)).toBe(false)
-    expect(canAccessCollaborationEscalationWorkbench(testerContext)).toBe(false)
-    expect(canAccessCollaborationEscalationWorkbench(groupAdminContext)).toBe(true)
-    expect(canAccessLogicalRoute('route.tester-workbench', testerContext, [])).toBe(true)
-    expect(canAccessLogicalRoute('route.approver-workbench', approverContext, [])).toBe(true)
-    expect(canAccessLogicalRoute('route.escalation-workbench', groupAdminContext, [])).toBe(true)
+    expect(canViewEscalationQueue(testerContext)).toBe(false)
+    expect(canViewEscalationQueue(groupAdminContext)).toBe(true)
   })
 
-  it('allows workbench routes from roles when session capabilities are absent', () => {
-    const testerContext = { roles: ['TEMPLATE_TESTER'] }
-    const approverContext = { roles: ['TEMPLATE_APPROVER'] }
+  it('does not special-case legacy workbench route keys in canAccessLogicalRoute', () => {
+    const testerContext = { roles: ['TEMPLATE_TESTER'], capabilities: testerCapabilities }
+    const groupAdminContext = { roles: [MANAGEMENT_ROLES.GROUP_ADMIN], capabilities: globalAdminCapabilities }
+
+    expect(canAccessLogicalRoute('route.tester-workbench', testerContext, [])).toBe(false)
+    expect(canAccessLogicalRoute('route.escalation-workbench', groupAdminContext, [])).toBe(false)
+    expect(
+      canAccessLogicalRoute('route.escalation-workbench', groupAdminContext, [
+        'route.escalation-workbench',
+      ]),
+    ).toBe(true)
+  })
+
+  it('allows escalation queue visibility from roles when session capabilities are absent', () => {
     const groupAdminContext = { roles: [MANAGEMENT_ROLES.GROUP_ADMIN] }
 
-    expect(canDecideTests(testerContext)).toBe(true)
-    expect(canDecideApprovals(approverContext)).toBe(true)
-    expect(canAccessTesterWorkbench(testerContext)).toBe(true)
-    expect(canAccessApproverWorkbench(approverContext)).toBe(true)
-    expect(canAccessCollaborationEscalationWorkbench(groupAdminContext)).toBe(true)
-    expect(canAccessLogicalRoute('route.tester-workbench', testerContext, [])).toBe(true)
-    expect(canAccessLogicalRoute('route.approver-workbench', approverContext, [])).toBe(true)
-    expect(canAccessLogicalRoute('route.escalation-workbench', groupAdminContext, [])).toBe(true)
+    expect(canViewEscalationQueue(groupAdminContext)).toBe(true)
   })
 })

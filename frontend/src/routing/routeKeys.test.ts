@@ -19,9 +19,12 @@ describe('routeKeys', () => {
       '/api/policies/tpl-1?domain=OUTPUT_POLICY',
     )
     expect(pathForRouteKey(ROUTE_KEYS.identityAdministration)).toBe('/entitlement/users')
-    expect(pathForRouteKey(ROUTE_KEYS.testerWorkbench)).toBe('/dashboard#tasks-section')
-    expect(pathForRouteKey(ROUTE_KEYS.approverWorkbench)).toBe('/dashboard#tasks-section')
-    expect(pathForRouteKey(ROUTE_KEYS.escalationWorkbench)).toBe('/dashboard#tasks-section')
+  })
+
+  it('redirects legacy workbench route keys to dashboard tasks section', () => {
+    expect(pathForRouteKey('route.tester-workbench')).toBe('/dashboard#tasks-section')
+    expect(pathForRouteKey('route.approver-workbench')).toBe('/dashboard#tasks-section')
+    expect(pathForRouteKey('route.escalation-workbench')).toBe('/dashboard#tasks-section')
   })
 
   it('builds template detail paths', () => {

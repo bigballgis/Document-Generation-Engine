@@ -272,7 +272,7 @@ export function canMaintainCollaborationTimeoutConfig(context: CapabilityContext
   )
 }
 
-export function canAccessCollaborationEscalationWorkbench(context: CapabilityContext): boolean {
+export function canViewEscalationQueue(context: CapabilityContext): boolean {
   return (
     canViewCollaborationWorkItems(context.roles) &&
     context.roles.some((role) =>
@@ -281,28 +281,11 @@ export function canAccessCollaborationEscalationWorkbench(context: CapabilityCon
   )
 }
 
-export function canAccessTesterWorkbench(context: CapabilityContext): boolean {
-  return canViewCollaborationWorkItems(context.roles) && canDecideTests(context)
-}
-
-export function canAccessApproverWorkbench(context: CapabilityContext): boolean {
-  return canViewCollaborationWorkItems(context.roles) && canDecideApprovals(context)
-}
-
 export function canAccessLogicalRoute(
   routeKey: string,
   context: CapabilityContext,
   visibleRoutes: string[],
 ): boolean {
-  if (routeKey === 'route.tester-workbench') {
-    return canAccessTesterWorkbench(context)
-  }
-  if (routeKey === 'route.approver-workbench') {
-    return canAccessApproverWorkbench(context)
-  }
-  if (routeKey === 'route.escalation-workbench') {
-    return canAccessCollaborationEscalationWorkbench(context)
-  }
   if (routeKey === 'route.content-module-management') {
     return visibleRoutes.includes(routeKey) || canAccessContentModuleManagement(context.roles)
   }

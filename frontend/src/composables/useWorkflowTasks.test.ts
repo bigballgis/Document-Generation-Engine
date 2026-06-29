@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import {
   buildTaskPartitions,
   dashboardQuickLinks,
+  getVisibleCollaborationQueues,
   parseDashboardTaskScope,
   useWorkflowTasks,
 } from '@/composables/useWorkflowTasks'
@@ -112,10 +113,31 @@ describe('useWorkflowTasks', () => {
     expect(tasks.value.some((task) => task.kind === 'master-rework')).toBe(true)
   })
 
-  it('filters quick links by visible routes without workbench shortcuts', () => {
+  it('filters quick links by visible routes without legacy workbench shortcuts', () => {
     const links = dashboardQuickLinks(['route.template-management'])
     expect(links.some((link) => link.labelKey === 'dashboard.quickLinks.templates')).toBe(true)
-    expect(links.some((link) => link.labelKey === 'dashboard.quickLinks.testerWorkbench')).toBe(false)
+    expect(links).toHaveLength(1)
+  })
+
+  it('includes ESCALATION queue for group admin escalation visibility', () => {
+    const adminCapabilities: ManagementCapabilities = {
+      ...testerCapabilities,
+      decideApprovals: true,
+      publishTemplates: true,
+    }
+    const queues = getVisibleCollaborationQueues({
+      roles: ['GROUP_ADMIN'],
+      capabilities: adminCapabilities,
+    })
+    expect(queues).toContain('ESCALATION')
+  })
+
+  it('excludes ESCALATION queue for tester without admin role', () => {
+    const queues = getVisibleCollaborationQueues({
+      roles: ['TEMPLATE_TESTER'],
+      capabilities: testerCapabilities,
+    })
+    expect(queues).not.toContain('ESCALATION')
   })
 
   it('sorts collaboration tasks newest-first by createdAt', () => {

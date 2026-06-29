@@ -142,47 +142,8 @@ export default {
       authorizedGroups: '授权分组',
       allGroups: '全部分组',
       noGroups: '未分配分组',
-      workspaceCount: '其他工作区',
-      openWorkspace: '打开工作区',
-    },
-    nav: {
-      masters: '主文档',
-      mastersDescription: '上传 DOCX 主文档、查看锚点目录并提交审核。',
-      templates: '模板',
-      templatesDescription: '浏览模板、执行生命周期操作并管理测试生成。',
-    },
-    globalGovernance: {
-      title: '全局治理',
-      description: '开始全局 API 策略与平台治理任务。',
-    },
-    groupGovernance: {
-      title: '分组治理',
-      description: '管理授权分组范围及组级治理任务。',
-    },
-    templateAuthoring: {
-      title: '模板编排',
-      description: '在授权分组内创建并编排模板。',
-    },
-    apiPolicy: {
-      title: 'API 策略管理',
-      description: '在授权范围内管理 API 凭据与策略。',
-    },
-    audit: {
-      title: '审计控制台',
-      description: '在授权范围内查看审计摘要。',
     },
     dashboard: {
-      title: '工作概览',
-      pendingMasterReviews: '待审核主文档',
-      pendingMasterReviewsDescription: '等待审批决策的主文档。',
-      pendingTemplateLifecycle: '工作流中的模板',
-      pendingTemplateLifecycleDescription: '处于测试、审批或待发布阶段的模板。',
-      publishedTemplates: '已发布模板',
-      publishedTemplatesDescription: '当前已发布且可调用的模板。',
-      stoppedTemplates: '已停用模板',
-      stoppedTemplatesDescription: '已暂停运行时调用的模板。',
-      viewMasters: '查看主文档',
-      viewTemplates: '查看模板',
       loadError: '无法加载仪表盘统计数据。',
     },
   },
@@ -299,23 +260,6 @@ export default {
       noticeTitle: '内容模块',
       noticeDescription:
         '每一行是一个可复用条款或内容模块。进入模块可管理版本、审批流程和生命周期治理。',
-    },
-  },
-  workbench: {
-    tester: {
-      title: '测试工作台',
-      description: '查看等待测试决策的模板。',
-      empty: '当前没有处于测试阶段的模板。',
-    },
-    approver: {
-      title: '审批工作台',
-      description: '查看等待审批决策的模板。',
-      empty: '当前没有等待审批的模板。',
-    },
-    escalation: {
-      title: '升级工作台',
-      description: '查看授权分组范围内的超时升级事项。',
-      empty: '当前没有需要您处理的超时升级事项。',
     },
   },
   collaboration: {
