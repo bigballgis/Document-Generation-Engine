@@ -128,6 +128,14 @@ export async function findTemplateByExternalId(
   return templates.find((template) => template.externalId === externalId)
 }
 
+export async function demoTemplateDetailPath(request: APIRequestContext): Promise<string> {
+  const demoTemplate = await findTemplateByExternalId(request, DEMO_TEMPLATE_EXTERNAL_ID)
+  if (!demoTemplate) {
+    throw new Error(`Demo template "${DEMO_TEMPLATE_EXTERNAL_ID}" was not found`)
+  }
+  return `/templates/${demoTemplate.id}`
+}
+
 export async function createApprovedContentModule(
   request: APIRequestContext,
   options?: { moduleCode?: string; name?: string; semanticVersion?: string },

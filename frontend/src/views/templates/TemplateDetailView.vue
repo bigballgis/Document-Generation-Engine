@@ -16,6 +16,7 @@ import TemplateContentModuleReferencesPanel from '@/components/templates/Templat
 import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
 import TemplateReleaseVersionHistoryPanel from '@/components/templates/TemplateReleaseVersionHistoryPanel.vue'
 import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
+import TemplateAuthorJourneyBlock from '@/components/journey/TemplateAuthorJourneyBlock.vue'
 import TemplatePublishSummaryDialog from '@/components/templates/TemplatePublishSummaryDialog.vue'
 import TemplateLifecycleDecisionDialog, {
   type LifecycleDecisionDialogMode,
@@ -28,6 +29,14 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
+import { canViewCollaborationWorkItems } from '@/auth/roles'
+import { useCollaborationStore } from '@/stores/collaboration'
+import { useSessionStore } from '@/stores/session'
+import {
+  isTemplateInRemediation,
+  shouldShowTemplateAuthorJourney,
+  type TemplateAuthorJourneyContext,
+} from '@/utils/templateAuthorJourney'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
@@ -60,6 +69,8 @@ const { formatDateTime } = useLocaleFormatters()
 const route = useRoute()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
+const sessionStore = useSessionStore()
+const collaborationStore = useCollaborationStore()
 const {
   authorTemplates,
   decideTests,
@@ -302,8 +313,76 @@ const displayedCredentialSecret = computed(() => {
   return templatesStore.lastRotatedCredential?.secret ?? ''
 })
 
+const openRemediationTemplateIds = computed(() => {
+  const ids = new Set<string>()
+  for (const item of collaborationStore.workItems) {
+    if (item.queue === 'REMEDIATION') {
+      ids.add(item.templateId)
+    }
+  }
+  return ids
+})
+
+const showAuthorJourney = computed(() => {
+  if (!template.value || !shouldShowTemplateAuthorJourney({
+    authorTemplates: authorTemplates.value,
+    roles: sessionStore.session?.roles ?? [],
+  })) {
+    return false
+  }
+  const status = template.value.lifecycleStatus
+  return status !== 'STOPPED' && status !== 'DEPRECATED' && status !== 'DELETED'
+})
+
+const authorJourneyContext = computed((): TemplateAuthorJourneyContext | null => {
+  if (!template.value) {
+    return null
+  }
+  return {
+    lifecycleStatus: template.value.lifecycleStatus,
+    approvalSubState: template.value.approvalSubState,
+    bindingsCount: template.value.bindings.length,
+    hasSuccessfulTrialOutput: lastPreview.value?.status === 'SUCCEEDED',
+    isRemediation: isTemplateInRemediation(template.value.id, openRemediationTemplateIds.value),
+  }
+})
+
+async function loadAuthorRemediationWorkItems() {
+  if (!authorTemplates.value || !canViewCollaborationWorkItems(sessionStore.session?.roles ?? [])) {
+    return
+  }
+  try {
+    await collaborationStore.fetchWorkItems({ queue: 'REMEDIATION' })
+  } catch {
+    /* degrade — remediation flag may be false until work items load */
+  }
+}
+
+function handleJourneyDesign() {
+  activeDetailTab.value = 'authoring'
+}
+
+function handleJourneyCreate() {
+  router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
+}
+
+async function handleJourneyTrialGenerate() {
+  openLifecyclePanel()
+  await handleTestGenerate()
+}
+
+async function handleJourneySubmitForTest() {
+  openLifecyclePanel()
+  await handleSubmitForTest()
+}
+
+async function handleJourneySubmitForApproval() {
+  openLifecyclePanel()
+  await handleSubmitForApproval()
+}
+
 onMounted(async () => {
-  await loadTemplate()
+  await Promise.all([loadTemplate(), loadAuthorRemediationWorkItems()])
 })
 
 watch(
@@ -795,6 +874,18 @@ async function handleDeleteTemplate() {
     />
 
     <template v-else-if="template">
+      <TemplateAuthorJourneyBlock
+        v-if="showAuthorJourney && authorJourneyContext"
+        :journey-context="authorJourneyContext"
+        :template-id="templateId"
+        :can-write="authorTemplates"
+        @create="handleJourneyCreate"
+        @design="handleJourneyDesign"
+        @trial-generate="handleJourneyTrialGenerate"
+        @submit-for-test="handleJourneySubmitForTest"
+        @submit-for-approval="handleJourneySubmitForApproval"
+      />
+
       <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />
 
       <el-tabs v-model="activeDetailTab" class="detail-tabs">

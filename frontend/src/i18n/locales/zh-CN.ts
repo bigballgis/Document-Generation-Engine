@@ -235,8 +235,8 @@ export default {
         description: '更新文件或版式占位符后，重新提交审核。',
       },
       templateRework: {
-        title: '修订被驳回的模板',
-        description: '根据审核反馈修改后重新提交测试。',
+        title: '修改模板并重新提交',
+        description: '根据测试或审批反馈修改后，重新提交测试。',
       },
     },
     quickLinks: {
@@ -1067,26 +1067,47 @@ export default {
         empty: {
           guidance: '创建或打开模板开始编写，然后按下方步骤推进。',
         },
+        waitingTesting: {
+          guidance: '模板已提交测试，请等待测试结果。',
+        },
+        waitingApproval: {
+          guidance: '模板待审批，请等待审批结果。',
+        },
+        complete: {
+          guidance: '该模板已上线，可随时查看已发布版本。',
+          cta: '查看模板',
+        },
+        remediation: {
+          guidance: '根据测试或审批反馈修改模板后重新提交。',
+        },
+        awaitGoLive: {
+          teamLeadGuidance: '待组长确认上线。',
+        },
         steps: {
           create: {
             label: '创建模板',
             guidance: '创建新模板或打开现有草稿。',
+            cta: '创建模板',
           },
           design: {
             label: '设计模板内容',
             guidance: '设计模板内容并按需绑定标准条款。',
+            cta: '设计模板内容',
           },
           trialGenerate: {
             label: '试生成预览',
             guidance: '运行试生成以预览输出文档。',
+            cta: '运行试生成',
           },
           submitTest: {
             label: '提交测试',
             guidance: '内容就绪后提交测试。',
+            cta: '提交测试',
           },
           submitApproval: {
             label: '提交审批',
             guidance: '测试通过后提交审批。',
+            cta: '提交审批',
           },
           awaitGoLive: {
             label: '等待确认上线',

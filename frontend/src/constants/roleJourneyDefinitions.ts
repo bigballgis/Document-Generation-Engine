@@ -83,3 +83,10 @@ export {
   resolveMasterDesignerDashboardJourneyIndex,
   resolveMasterDesignerJourneyIndex,
 } from '@/utils/masterDesignerJourney'
+
+export {
+  buildOpenRemediationTemplateIds,
+  isTemplateInRemediation,
+  resolveTemplateAuthorDashboardJourneyIndex,
+  resolveTemplateAuthorJourneyIndex,
+} from '@/utils/templateAuthorJourney'

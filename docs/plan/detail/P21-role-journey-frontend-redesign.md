@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **sub-phase A Done** — T01/T01a/T01b/T01c/T02; **P21-T03 Done** 2026-06-30 — Master designer journey; next **P21-T04 Not Started** — Orchestrator journey) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **sub-phase A Done** — T01/T01a/T01b/T01c/T02; **P21-T03 Done** 2026-06-30 — Master designer journey; **P21-T04 Done** 2026-06-30 — A3 Orchestrator journey §12.6; active **P21-T05 Not Started** — Tester journey §12.7) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -172,8 +172,8 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | P21-T01d | Companion terminology guide created (SSOT) + en/zh value sweep round 1 | `docs/product/business-terminology-guide.md`, `en.ts`, `zh-CN.ts` | n/a (doc) | Not Started |
 | P21-T02 | A1 backend: emit `TEST_FAILURE → REMEDIATION`; write `RESOLVED` on test decision; allow resubmit-for-test from "test passed" | `backend/.../collaboration/**`, `TemplateLifecycleService`, `ApprovalSubStateResolver` (new) | Required (§12.1 ready) | Done (2026-06-29) |
 | P21-T03 | A2 Master designer journey: upload → layout placeholders → submit review → rework timeline + "master review / master to fix" behavior entries (business titles) | `MasterPackageHubView.vue`, `MasterRevisionDetailView.vue`, `masterDesignerJourney.ts`, `RoleJourneyTimeline`, `DashboardView.vue` | Required (§12.5) | Done (2026-06-30) |
-| P21-T04 | A3 Orchestrator journey: create → design content → trial generate → submit test → submit approval; "waiting on my fixes" entry; PENDING_RELEASE shows "awaiting team-lead go-live" | template views, lifecycle panel | Required | Not Started |
-| P21-T05 | A4 Tester journey: "waiting on my test" entry + guided test-confirm form (business field labels) + read-only evidence review (batch results / coverage / preview / output check) | lifecycle panel, decision form components | Required | Not Started |
+| P21-T04 | A3 Orchestrator journey: create → design content → trial generate → submit test → submit approval; "waiting on my fixes" entry; PENDING_RELEASE shows "awaiting team-lead go-live" | template views, lifecycle panel | Required (§12.6 ready) | Done (2026-06-30) |
+| P21-T05 | A4 Tester journey: "waiting on my test" entry + guided test-confirm form (business field labels) + read-only evidence review (batch results / coverage / preview / output check) | lifecycle panel, decision form components | Required | Not Started (next) |
 | P21-T06 | OPT-G3: split `TemplateDetailView.vue`; business-renamed tabs (releaseVersions → "Published versions", lifecycle → "Workflow status", apiAccess → "External access") | `TemplateDetailView.vue`, `templateDetailTabs.ts` | n/a (refactor) | Not Started |
 | P21-T06a | Template-detail interaction bug fixes (AUD-B01/B02): fix `?focus=/?tab=` two-way sync lockup (clear `focus` after deep-link); add `watch(templateId)` to reload on route reuse (stale-data); resolve default-tab vs `TEMPLATE_DETAIL_TABS[0]` vs DOM order split | `TemplateDetailView.vue`, `templateDetailTabs.ts` | Required (regression) | Not Started |
 | P21-T06b | Template-detail state completeness (AUD-B06/B07): publish-gate/policy/lifecycle loading-error-empty states (no silent catch); render `bindingGateResult`; long-name/AD-group truncation + semver picker responsive layout | `TemplateDetailView.vue`, `components/templates/**` | Required | Not Started |
@@ -1671,3 +1671,344 @@ GLOBAL/GROUP admins. MASTER_DESIGNER-only sessions never see admin review rows (
 - Do **not** wire template author/tester journey indices (**P21-T04/T05**).
 - Do **not** change backend master status transitions or capabilities (**P21-X03/X04**).
 - Do **not** add step-node navigation links inside the stepper (CTAs live in `after` slot only).
+
+### 12.6 P21-T04 — A3 Template author / orchestrator journey (timeline + remediation alignment)
+
+**BDD readiness:** `ready` (confirmed against §4 cluster ①, §12.4 `templateAuthorJourneySteps`,
+domain §4.1 template lifecycle + `approvalSubState`, business-terminology-guide §4.2/§4.3,
+§12.2 Spec C `nav.behaviorItems.remediation`, T03 mapper/block pattern in
+`masterDesignerJourney.ts` / `MasterDesignerJourneyBlock.vue`; no blocking pending questions).
+
+**Scope boundary (this slice only):**
+
+- **In:** new `templateAuthorJourney.ts` pure mappers (`lifecycleStatus` + `approvalSubState` +
+  optional authoring/remediation context → `currentStepIndex` on six-step
+  `templateAuthorJourneySteps`); embed `RoleJourneyTimeline` on **`TemplateDetailView`** (above
+  `TemplateWorkflowBanner` + tabs, visible on all tabs when author-capable) via
+  `TemplateAuthorJourneyBlock` (or equivalent thin wrapper mirroring T03); wire dashboard
+  `#journey-section` aggregated index for `primaryClusterOneRole === 'TEMPLATE_AUTHOR'`; per-step
+  primary CTA in `after` slot **reuses existing lifecycle handlers** (submit test / submit approval /
+  test generate / tab navigation — no new API actions); **PENDING_RELEASE** journey + task copy uses
+  business phrase **"Awaiting team-lead go-live"** / **待组长确认上线** (not enum label); align
+  **"Waiting on my fixes"** nav entry (`nav.behaviorItems.remediation`) with REMEDIATION queue
+  partition heading + task row titles (Spec C); export helpers from `roleJourneyDefinitions.ts` +
+  unit tests.
+- **Out:** `TemplateDetailView` structural split (**P21-T06**); tester journey (**P21-T05**);
+  backend collaboration/lifecycle changes; approver / team-lead publish journey (**P21-T08/T09**);
+  P21-T06a bug fixes unless they block journey embed; permission single-source (**P21-X03**).
+
+**Traceability:**
+
+- Plan — this doc §4 cluster ① (`TEMPLATE_AUTHOR`), §6 P21-T04 row, §12.4 Spec B author step
+  catalog, §12.2 Spec C remediation nav contract.
+- Domain — `docs/domain/domain-model.md` §4.1 (`TemplateLifecycleStatus` ↔ `approvalSubState`;
+  test/approval failure → `DRAFT`; approval pass → `PENDING_RELEASE`; author submits test/approval,
+  team lead publishes).
+- Terminology — `docs/product/business-terminology-guide.md` §4.2 (workflow stages), §4.3
+  (REMEDIATION / PENDING_RELEASE behavior entries); §2 disabled/waiting copy pattern
+  ("Awaiting team-lead go-live").
+- Permission — `authorTemplates` capability + `TEMPLATE_AUTHOR` role for journey visibility/CTAs;
+  `publishTemplates` **not** required for author journey on `PENDING_RELEASE` (author waits; no
+  publish CTA).
+- Navigation — §12.2 `behavior-remediation` → `/dashboard?queue=REMEDIATION#tasks-section`.
+- Code under change — `frontend/src/utils/templateAuthorJourney.ts` (new),
+  `frontend/src/components/journey/TemplateAuthorJourneyBlock.vue` (new),
+  `TemplateDetailView.vue`, `DashboardView.vue`, `roleJourneyDefinitions.ts`,
+  `collaborationWorkItems.ts` / `useWorkflowTasks.ts` (title-key alignment only if needed),
+  `en.ts` / `zh-CN.ts` (`journey.roles.TEMPLATE_AUTHOR.*`, `dashboard.tasks.templateRework.*`,
+  optional `awaitGoLive.teamLeadGuidance`).
+
+#### Domain context — template lifecycle `lifecycleStatus` + `approvalSubState`
+
+| `lifecycleStatus` | `approvalSubState` | Business meaning (L1) | Author journey position |
+| --- | --- | --- | --- |
+| `DRAFT` | — | Drafting | Inner DRAFT mapping (create/design/trial/submitTest) or remediation |
+| `TESTING` | — | In testing | Waiting on tester |
+| `APPROVAL` | `PENDING_SUBMIT` | Ready to submit for approval | Submit approval step |
+| `APPROVAL` | `PENDING_DECISION` | Awaiting approval | Waiting on approver |
+| `PENDING_RELEASE` | — | Awaiting go-live | Awaiting go-live step (team-lead action) |
+| `PUBLISHED` | — | Live | Journey complete |
+| `STOPPED` / `DEPRECATED` | — | Paused / Retired | Out of active author journey (`null` + terminal guidance or hidden) |
+
+**Remediation predicate (frontend SSOT for this slice):** template is in **remediation** when
+`lifecycleStatus === 'DRAFT'` **and** an OPEN collaboration work item exists with
+`queue === 'REMEDIATION'` and matching `templateId` (from `collaborationStore` or optional
+`openRemediationTemplateIds` set passed into mapper). Aligns with P21-T02 backend emission; no new
+backend fields.
+
+**Authoring readiness (DRAFT inner steps):**
+
+| Signal | Source | Meaning |
+| --- | --- | --- |
+| `hasBindings` | `bindings.length > 0` on `TemplateDetail` | Content design started |
+| `hasSuccessfulTrialOutput` | optional context: latest preview/test-generate record with
+  `status === 'SUCCEEDED'`, or session `lastPreview` on detail page | Trial output completed |
+| Remediation | predicate above | Returned from test/approval — fix before resubmit |
+
+When catalog/dashboard rows lack preview history, mapper may omit `hasSuccessfulTrialOutput` →
+treat as `false` (may show `trialGenerate` until detail visit — acceptable degrade, mirrors T03
+revision prefetch fallback).
+
+#### Spec A — Entity-level journey on `TemplateDetailView`
+
+- **Actor / role:** `TEMPLATE_AUTHOR` (primary) or GLOBAL/GROUP admin with `authorTemplates` on
+  templates they may edit; group scope enforced by existing template APIs.
+- **Goal:** While viewing a template package, see the six-step authoring workflow position and the
+  next business-language action.
+- **Trigger:** navigate to `/templates/:templateId` (any tab); journey band remains visible when
+  template loaded.
+- **Preconditions:** viewer has `authorTemplates`; template detail loaded or skeleton; journey hidden
+  for `decideTests`-only / `decideApprovals`-only / `AUDIT_ADMIN`-only sessions without author
+  capability.
+- **Primary journey:** page loads → build `TemplateAuthorJourneyContext` from
+  `template.lifecycleStatus`, `template.approvalSubState`, `template.bindings`, optional remediation
+  flag, optional trial-output flag → compute index via **Entity mapping table** → render
+  `RoleJourneyTimeline` with `steps={templateAuthorJourneySteps}` **below page header / actions** and
+  **above** `TemplateWorkflowBanner` + `el-tabs` → guidance from step keys or role-level
+  waiting/complete/remediation keys → primary CTA in `after` slot delegates to existing handlers.
+- **System responses (success):** stepper states per §12.4 Spec A; CTAs hidden when viewer lacks
+  `authorTemplates` or action not applicable; no routing/API inside stepper component.
+
+**Visibility rule:** render when `authorTemplates === true`. Hide for testers/approvers without
+author capability. GLOBAL/GROUP admin with `authorTemplates` sees journey on editable templates.
+
+**Entity mapping table (`currentStepIndex`) — evaluated top-to-bottom, first match wins:**
+
+| Priority | Condition (entity) | `currentStepIndex` | Active step `id` | Notes |
+| ---: | --- | ---: | --- | --- |
+| 1 | `lifecycleStatus === 'TESTING'` | `null` | — | `waitingTesting.guidance` |
+| 2 | `lifecycleStatus === 'APPROVAL'` && `approvalSubState === 'PENDING_DECISION'` | `null` | — | `waitingApproval.guidance` |
+| 3 | `lifecycleStatus === 'APPROVAL'` && `approvalSubState === 'PENDING_SUBMIT'` | `4` | `submitApproval` | |
+| 4 | `lifecycleStatus === 'PENDING_RELEASE'` | `5` | `awaitGoLive` | team-lead waiting copy (Spec D) |
+| 5 | `lifecycleStatus === 'PUBLISHED'` | `null` | — | `complete.guidance` |
+| 6 | `lifecycleStatus === 'DRAFT'` && remediation predicate | `1` or `3` | `design` or `submitTest` | If `hasBindings` && `hasSuccessfulTrialOutput` → `3`; else → `1` with `remediation.guidance` |
+| 7 | `lifecycleStatus === 'DRAFT'` && !`hasBindings` | `1` | `design` | Template exists; skip create on detail |
+| 8 | `lifecycleStatus === 'DRAFT'` && `hasBindings` && !`hasSuccessfulTrialOutput` | `2` | `trialGenerate` | |
+| 9 | `lifecycleStatus === 'DRAFT'` && `hasBindings` && `hasSuccessfulTrialOutput` | `3` | `submitTest` | |
+| 10 | `STOPPED` / `DEPRECATED` / `DELETED` | `null` | — | hide journey block or terminal guidance |
+
+When `currentStepIndex === null` for waiting/complete, pass explicit `guidanceKey`; no step
+`aria-current`.
+
+**Per-step primary CTA (`after` slot — new i18n `journey.roles.TEMPLATE_AUTHOR.steps.<id>.cta`):**
+
+| Step | CTA label (en exemplar) | Action (requires `authorTemplates`) |
+| --- | --- | --- |
+| `create` | Create template | Navigate to template list create entry (dashboard/list only) |
+| `design` | Design content | Switch to `authoring` tab / focus authoring panel |
+| `trialGenerate` | Run trial output | Invoke existing `handleTestGenerate` (lifecycle panel action) |
+| `submitTest` | Submit for testing | Invoke existing `handleSubmitForTest` |
+| `submitApproval` | Submit for approval | Invoke existing `handleSubmitForApproval` |
+| `awaitGoLive` | _(no primary CTA)_ | Guidance only — author cannot publish |
+| waiting states | _(no primary CTA)_ | Guidance only |
+| complete | View template | Secondary link to overview or published versions tab |
+
+#### Spec B — Dashboard aggregated journey for `TEMPLATE_AUTHOR`
+
+- **Actor / role:** session with role `TEMPLATE_AUTHOR` (or `authorTemplates` with cluster-①
+  resolution yielding `TEMPLATE_AUTHOR`) and dashboard access.
+- **Goal:** On `/dashboard`, `#journey-section` reflects the author's **most urgent** in-flight
+  template work (replaces T01b `currentStepIndex = null` default for this role).
+- **Trigger:** unfiltered or filtered dashboard load after templates catalog + collaboration work
+  items fetch (existing stores).
+- **Preconditions:** `primaryClusterOneRole === 'TEMPLATE_AUTHOR'`; templates list loaded (empty
+  valid); remediation work items available when `viewCollaborationWorkItems`.
+- **Primary journey:** resolve aggregated context from `templatesStore.templates` in group scope +
+  OPEN REMEDIATION work items → apply **Dashboard mapping table** → pass to `#journey-section`
+  `RoleJourneyTimeline` with optional `targetTemplateId` for "Continue with {name}" CTA link.
+- **System responses (success):** index updates on catalog/work-item reload; filtered queue views
+  (`?queue=REMEDIATION`, etc.) still show journey section (T01b/T03 regression) with **same**
+  role-global aggregated index.
+
+**Dashboard mapping table — highest-priority template wins:**
+
+| Priority | Aggregated condition (any template / work item in scope) | `currentStepIndex` | Guidance |
+| ---: | --- | ---: | --- |
+| 1 | Zero templates in catalog | `0` | `steps.create.guidance` |
+| 2 | OPEN `REMEDIATION` work item for any template | `1` or `3` | `remediation.guidance` (tie: newest `updatedAt`) |
+| 3 | Any `DRAFT` ready to submit (`hasBindings` + trial satisfied when known) | `3` | step-3 guidance |
+| 4 | Any `DRAFT` with bindings, trial not satisfied | `2` | step-2 guidance |
+| 5 | Any `DRAFT` without bindings | `1` | step-1 guidance |
+| 6 | Any `APPROVAL` + `PENDING_SUBMIT` | `4` | step-4 guidance |
+| 7 | Any `PENDING_RELEASE` | `5` | `awaitGoLive.teamLeadGuidance` |
+| 8 | Only `TESTING` / `APPROVAL`+`PENDING_DECISION` (no draft/remediation/pending-release) | `null` | `waitingTesting` or `waitingApproval` guidance |
+| 9 | All `PUBLISHED` (no in-flight author work) | `null` | `empty.guidance` |
+
+**Tie-break within same priority:** template (or remediation work item's template) with most recent
+`updatedAt`.
+
+#### Spec C — "Waiting on my fixes" alignment (nav + REMEDIATION partition + task rows)
+
+- **Actor / role:** `TEMPLATE_AUTHOR` with `authorTemplates`; GLOBAL/GROUP with same capability.
+- **Goal:** One business mental model for returned templates — **Waiting on my fixes** — across nav,
+  filtered dashboard `<h1>`, REMEDIATION partition heading, and task row titles.
+- **Trigger:** render nav item, `/dashboard?queue=REMEDIATION`, partition heading, or REMEDIATION
+  task row.
+- **Preconditions:** §12.2 `behavior-remediation` visibility unchanged; i18n keys stable.
+
+**Canonical L1 labels (en / zh-CN) — align to §12.2 + terminology guide §4.3:**
+
+| Surface | Key | en | zh-CN |
+| --- | --- | --- | --- |
+| Behavior nav | `nav.behaviorItems.remediation` | Waiting on my fixes | 待我修改 |
+| Filtered dashboard `<h1>` | `collaboration.workItem.queue.REMEDIATION.title` | Waiting on my fixes | 待我修改 |
+| REMEDIATION partition heading | `collaboration.workItem.queue.REMEDIATION.label` | Needs fixes | 待修改 |
+| REMEDIATION task row title | `dashboard.tasks.templateRework.title` | Fix template and resubmit | 修改模板并重新提交 |
+| REMEDIATION task row description | `dashboard.tasks.templateRework.description` | Address test or approval feedback, then submit for testing again. | 根据测试或审批反馈修改后，重新提交测试。 |
+
+**Nav ↔ partition consistency:** `behavior-remediation` deep link shows REMEDIATION partition with
+heading **Needs fixes** and row title **Fix template and resubmit** (verb-first, no "remediation"
+/ "rejected" IT phrasing on L1).
+
+#### Spec D — PENDING_RELEASE business copy ("awaiting team-lead go-live")
+
+- **Actor / role:** `TEMPLATE_AUTHOR` viewing own template in `PENDING_RELEASE`.
+- **Goal:** Author understands approval is done and **team lead** (GROUP/GLOBAL with publish rights)
+  must confirm go-live — without seeing publish actions or enum codes.
+- **Trigger:** entity or dashboard journey resolves to step `awaitGoLive` (`currentStepIndex = 5`).
+- **Preconditions:** template `lifecycleStatus === 'PENDING_RELEASE'`.
+- **Primary journey:** step label remains **Awaiting go-live** / 等待确认上线 (`steps.awaitGoLive.label`);
+  active guidance uses **`journey.roles.TEMPLATE_AUTHOR.awaitGoLive.teamLeadGuidance`**:
+  en **"Awaiting team-lead go-live."** zh-CN **"待组长确认上线。"** (terminology guide §2 waiting-state
+  pattern); **no** publish CTA for author; optional secondary "View workflow status" opens lifecycle tab.
+- **System responses:** `TemplateWorkflowBanner` for author on `PENDING_RELEASE` may remain but
+  must not contradict journey guidance (author sees waiting copy, not "Confirm go-live" as primary actor).
+
+**Task hub note:** PENDING_RELEASE collaboration queue rows remain team-lead scoped
+(`publishTemplates`); author journey step 6 is informational only. Queue title **Waiting to confirm
+go-live** stays on team-lead surfaces (§12.2); author journey uses team-lead **waiting** phrasing above.
+
+#### Spec E — Coexistence with `TemplateWorkflowBanner`
+
+- **Actor / role:** same as Spec A.
+- **Goal:** Journey band is primary next-action guidance for authors; banner remains for urgent
+  workflow states without duplicate conflicting CTAs.
+- **Trigger:** template detail renders both blocks.
+- **Preconditions:** existing banner rules for TESTING/APPROVAL/PENDING_RELEASE/DRAFT.
+- **Primary journey:** for **author** viewers, journey block leads; banner `openLifecycle` CTA remains
+  valid shortcut to lifecycle tab. When status is `DRAFT` + remediation, journey shows fix guidance;
+  banner may show **Continue template design** — both point to authoring/lifecycle, not conflicting
+  actors.
+- **System responses:** tester/approver/publisher viewers without `authorTemplates` do not see author
+  journey; banner behavior unchanged for their capabilities.
+
+#### Acceptance scenarios (Given / When / Then)
+
+**Entity timeline — template detail**
+
+- **(Design step — no bindings)** Given a `DRAFT` template with `bindings=[]`, When an author opens
+  `/templates/:id`, Then `RoleJourneyTimeline` shows 6 steps with `currentStepIndex=1` And guidance
+  `journey.roles.TEMPLATE_AUTHOR.steps.design.guidance` And CTA switches to authoring tab.
+- **(Trial generate step)** Given `DRAFT` with bindings populated and no successful trial output,
+  When detail renders, Then `currentStepIndex=2` And CTA triggers existing test-generate handler.
+- **(Submit test step)** Given `DRAFT` with bindings and successful trial output, When detail renders,
+  Then `currentStepIndex=3` And submit-for-testing CTA invokes `handleSubmitForTest`.
+- **(Waiting on tester)** Given `TESTING`, When author views detail, Then `currentStepIndex=null`
+  And `waitingTesting.guidance` is shown And no submit CTA.
+- **(Submit approval step)** Given `APPROVAL` with `approvalSubState=PENDING_SUBMIT`, When author
+  views detail, Then `currentStepIndex=4` And submit-for-approval CTA visible when `authorTemplates`.
+- **(Waiting on approver)** Given `APPROVAL` with `approvalSubState=PENDING_DECISION`, When author
+  views detail, Then `currentStepIndex=null` And `waitingApproval.guidance` And no approval decision
+  CTAs for author-only session.
+- **(Awaiting team-lead go-live)** Given `PENDING_RELEASE`, When author views detail, Then
+  `currentStepIndex=5` And guidance contains **Awaiting team-lead go-live** business copy And no
+  publish button in journey `after` slot.
+- **(Remediation after test failure)** Given `DRAFT` and OPEN REMEDIATION work item for the template,
+  When author views detail, Then journey maps to design or submit-test per inner table And
+  `remediation.guidance` is shown And nav **Waiting on my fixes** lists the item under REMEDIATION
+  partition with title **Fix template and resubmit**.
+- **(Published complete)** Given `PUBLISHED`, When author views detail, Then `currentStepIndex=null`
+  And `complete.guidance` And no submit CTAs.
+
+**Dashboard aggregation**
+
+- **(No templates)** Given `TEMPLATE_AUTHOR` with empty templates catalog, When `/dashboard` loads,
+  Then `#journey-section` shows `currentStepIndex=0` with create guidance.
+- **(Draft ready to submit)** Given one `DRAFT` template with bindings and trial satisfied, When
+  dashboard loads, Then `currentStepIndex=3`.
+- **(Remediation wins priority)** Given one OPEN REMEDIATION item and one `DRAFT` ready to submit,
+  When dashboard loads, Then `currentStepIndex=1` or `3` per remediation row (remediation priority).
+- **(Pending release)** Given any in-scope template `PENDING_RELEASE` and no higher-priority rows,
+  When dashboard loads, Then `currentStepIndex=5` And team-lead waiting guidance.
+- **(Testing-only in-flight)** Given all templates `TESTING` or awaiting approver, When dashboard
+  loads, Then `currentStepIndex=null` And appropriate waiting guidance.
+- **(Filtered REMEDIATION deep link)** Given `TEMPLATE_AUTHOR` on
+  `/dashboard?queue=REMEDIATION#tasks-section`, Then `#journey-section` still visible with aggregated
+  index And partition heading **Needs fixes** And row title **Fix template and resubmit**.
+
+**Behavior titles (Spec C)**
+
+- **(Nav label)** Given `TEMPLATE_AUTHOR` with `authorTemplates`, When shell renders, Then
+  `behavior-remediation` label is **Waiting on my fixes** / 待我修改.
+- **(Partition heading)** Given REMEDIATION queue with rows, When task hub renders, Then heading uses
+  `collaboration.workItem.queue.REMEDIATION.label` (**Needs fixes**) And filtered page title uses
+  **Waiting on my fixes**.
+
+**Regression**
+
+- **(T01b component API)** Journey embed does not break `RoleJourneyTimeline` props/slots from §12.4.
+- **(T01a task hub)** Queue partitions and collaboration fetch unchanged.
+- **(T03 master designer)** When `primaryClusterOneRole` is `MASTER_DESIGNER`, author mapper not used.
+- **(Fail-closed)** Given viewer without `authorTemplates`, When template detail loads, Then author
+  journey block hidden; lifecycle panel authorization unchanged.
+
+#### Boundary & exception behavior
+
+- **Template load error:** hide journey block or inline error; do not block tabs/panels.
+- **`currentStepIndex` out of range:** clamp per §12.4 defensive rule.
+- **`approvalSubState` missing on `APPROVAL`:** treat as `PENDING_SUBMIT` if author may submit, else
+  `PENDING_DECISION` waiting (fail-safe: prefer waiting guidance over wrong CTA).
+- **Catalog lacks trial-output signal:** dashboard may show step 2 until detail visit (degrade).
+- **Dual-role admin+author:** journey follows `resolvePrimaryClusterOneRole` (author loses to master
+  designer when both present — upstream-first §12.4).
+- **Locale switch:** labels/guidance re-render; index unchanged.
+- **No backend changes:** use existing template detail fields + collaboration work items only.
+
+#### Observable evidence
+
+- **Unit:** `templateAuthorJourney.test.ts` — entity + dashboard mapping tables, remediation
+  predicate, priority tie-break; extend `roleJourneyDefinitions.test.ts` re-exports.
+- **Component:** `TemplateAuthorJourneyBlock.test.ts` (optional) + `TemplateDetailView.test.ts` —
+  timeline mounted, index/guidance/CTA per status fixtures.
+- **Integration:** `DashboardView.test.ts` — `TEMPLATE_AUTHOR` journey index 0/2/3/5/null scenarios
+  (replace T01b null-only assertion).
+- **E2E (P21-T04 slice):** login as template author → dashboard journey reflects catalog → open
+  template → detail journey matches status → behavior nav **Waiting on my fixes** → REMEDIATION
+  filtered hub → `PENDING_RELEASE` shows team-lead waiting copy.
+- **UIUX:** dual-brand evidence for template detail journey band (desktop 1280 / 1440).
+- **Grep:** new/changed L1 values exclude forbidden tokens (§2.2); no `PENDING_RELEASE` enum exposed
+  as user label.
+
+#### Decided defaults (non-blocking)
+
+1. **Create step on detail:** template always exists on detail route — entity mapper starts at
+   `design` (index 1) minimum; index `0` reserved for dashboard empty catalog / list create flow.
+2. **Trial output signal:** `hasSuccessfulTrialOutput` from preview API when available; session
+   `lastPreview` on detail only; dashboard degrade acceptable.
+3. **Remediation detection:** OPEN REMEDIATION work item match on `templateId` (P21-T02 contract).
+4. **Journey placement:** above `TemplateWorkflowBanner`, below header actions (mirrors T03).
+5. **New i18n keys:** `journey.roles.TEMPLATE_AUTHOR.waitingTesting.guidance`,
+   `waitingApproval.guidance`, `complete.guidance`, `remediation.guidance`,
+   `awaitGoLive.teamLeadGuidance`, `steps.<id>.cta`; update `dashboard.tasks.templateRework.*` per Spec C.
+6. **Implementation location:** `frontend/src/utils/templateAuthorJourney.ts` +
+   `frontend/src/components/journey/TemplateAuthorJourneyBlock.vue`.
+
+#### Out of scope reminders for implementer
+
+- Do **not** split `TemplateDetailView.vue` (**P21-T06**).
+- Do **not** wire tester journey (**P21-T05**) or change tester decision forms.
+- Do **not** add backend lifecycle/collaboration emissions (**P21-T07** scope for additional queues).
+- Do **not** give author publish actions on `PENDING_RELEASE` (team-lead **P21-T09**).
+- Do **not** fix AUD-B01/B02 tab sync unless blocking journey embed (**P21-T06a**).
+
+#### Implementation status (2026-06-30)
+
+**Done.** `templateAuthorJourney.ts` (entity + dashboard mappers, remediation priority),
+`TemplateAuthorJourneyBlock.vue`, journey embed on `TemplateDetailView` (above workflow banner),
+dashboard `#journey-section` wired for `TEMPLATE_AUTHOR`, Spec C copy (`Fix template and resubmit`,
+`Awaiting team-lead go-live`), `demoTemplateDetailPath` E2E helper.
+
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**365** Vitest);
+Playwright `P21-T04-orchestrator-journey.spec.ts` **4/4** + 1 skipped (no PENDING_RELEASE seed),
+`P21-T04-uiux-evidence.spec.ts` **1/1**; UIUX manifest
+`frontend/e2e/evidence/P21-T04-uiux-manifest.md` — **PASS**. Next **P21-T05**.

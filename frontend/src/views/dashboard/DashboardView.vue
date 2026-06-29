@@ -16,6 +16,10 @@ import {
   resolveMasterDesignerDashboardJourneyIndex,
   type MasterDesignerDashboardMaster,
 } from '@/utils/masterDesignerJourney'
+import {
+  resolveTemplateAuthorDashboardJourneyIndex,
+  type TemplateAuthorRemediationItem,
+} from '@/utils/templateAuthorJourney'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import {
   buildTaskPartitions,
@@ -126,9 +130,31 @@ const masterDesignerJourneyResolution = computed(() => {
   return resolveMasterDesignerDashboardJourneyIndex(enrichedMasters)
 })
 
+const templateAuthorRemediationItems = computed((): TemplateAuthorRemediationItem[] =>
+  collaborationStore.workItems
+    .filter((item) => item.queue === 'REMEDIATION')
+    .map((item) => ({
+      templateId: item.templateId,
+      createdAt: item.createdAt,
+    })),
+)
+
+const templateAuthorJourneyResolution = computed(() => {
+  if (primaryClusterOneRole.value !== 'TEMPLATE_AUTHOR') {
+    return null
+  }
+  return resolveTemplateAuthorDashboardJourneyIndex(
+    templatesStore.templates,
+    templateAuthorRemediationItems.value,
+  )
+})
+
 const journeyCurrentStepIndex = computed(() => {
   if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
     return masterDesignerJourneyResolution.value?.currentStepIndex ?? null
+  }
+  if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
+    return templateAuthorJourneyResolution.value?.currentStepIndex ?? null
   }
   return null
 })
@@ -136,6 +162,9 @@ const journeyCurrentStepIndex = computed(() => {
 const journeyGuidanceKey = computed(() => {
   if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
     return masterDesignerJourneyResolution.value?.guidanceKey
+  }
+  if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
+    return templateAuthorJourneyResolution.value?.guidanceKey
   }
   return undefined
 })

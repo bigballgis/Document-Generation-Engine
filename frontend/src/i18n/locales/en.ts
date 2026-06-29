@@ -240,8 +240,9 @@ export default {
           'Update the file or placeholders, then submit again for review.',
       },
       templateRework: {
-        title: 'Revise rejected template',
-        description: 'Address review feedback and resubmit this template for testing.',
+        title: 'Fix template and resubmit',
+        description:
+          'Address test or approval feedback, then submit for testing again.',
       },
     },
     quickLinks: {
@@ -1594,26 +1595,47 @@ export default {
           guidance:
             'Create or open a template to begin authoring, then follow each step below.',
         },
+        waitingTesting: {
+          guidance: 'Your template is with the testing team. You will be notified when a result is recorded.',
+        },
+        waitingApproval: {
+          guidance: 'Your template is awaiting approval. You will be notified when a decision is recorded.',
+        },
+        complete: {
+          guidance: 'This template is live. You can view published versions anytime.',
+          cta: 'View template',
+        },
+        remediation: {
+          guidance: 'Address test or approval feedback, update the template, then resubmit.',
+        },
+        awaitGoLive: {
+          teamLeadGuidance: 'Awaiting team-lead go-live.',
+        },
         steps: {
           create: {
             label: 'Create template',
             guidance: 'Create a new template or open an existing draft.',
+            cta: 'Create template',
           },
           design: {
             label: 'Design content',
             guidance: 'Design template content and bind standard clauses as needed.',
+            cta: 'Design content',
           },
           trialGenerate: {
             label: 'Run trial output',
             guidance: 'Run a trial output to preview the generated document.',
+            cta: 'Run trial output',
           },
           submitTest: {
             label: 'Submit for testing',
             guidance: 'Submit the template for testing when content is ready.',
+            cta: 'Submit for testing',
           },
           submitApproval: {
             label: 'Submit for approval',
             guidance: 'Submit the template for approval after testing passes.',
+            cta: 'Submit for approval',
           },
           awaitGoLive: {
             label: 'Awaiting go-live',

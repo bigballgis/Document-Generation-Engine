@@ -301,7 +301,7 @@ describe('DashboardView', () => {
     )
   })
 
-  it('shows journey section above tasks for TEMPLATE_AUTHOR with onboarding stepper', async () => {
+  it('shows journey section above tasks for TEMPLATE_AUTHOR with six-step stepper', async () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       displayName: 'Author',
@@ -315,7 +315,9 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+      templatesStore.templates = []
+    })
 
     const wrapper = mountDashboard({
       TaskHubPartitionSection: {
@@ -336,8 +338,129 @@ describe('DashboardView', () => {
 
     const stub = wrapper.find('.journey-timeline-stub')
     expect(Number(stub.attributes('data-step-count'))).toBe(templateAuthorJourneySteps.length)
-    expect(stub.attributes('data-current-index')).toBeUndefined()
+    expect(stub.attributes('data-current-index')).toBe('0')
     expect(stub.text()).toBe('journey.roles.TEMPLATE_AUTHOR.title')
+  })
+
+  it('sets template author journey index 3 for draft ready to submit', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Author',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_AUTHOR'],
+      capabilities: { authorTemplates: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+      templatesStore.templates = [
+        {
+          id: 'tpl-1',
+          externalId: 'TPL-001',
+          groupCode: 'RETAIL',
+          name: 'Retail letter',
+          lifecycleStatus: 'DRAFT',
+          releaseVersion: null,
+          releaseVersionCount: 0,
+          masterId: 'master-1',
+          updatedBy: '10000005',
+          updatedAt: '2026-06-26T10:00:00Z',
+          bindingsCount: 2,
+          hasSuccessfulTrialOutput: true,
+        },
+      ] as never
+    })
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('3')
+  })
+
+  it('sets template author journey index 5 with team-lead guidance for pending release', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Author',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_AUTHOR'],
+      capabilities: { authorTemplates: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+      templatesStore.templates = [
+        {
+          id: 'tpl-pending',
+          externalId: 'TPL-PENDING',
+          groupCode: 'RETAIL',
+          name: 'Pending template',
+          lifecycleStatus: 'PENDING_RELEASE',
+          releaseVersion: '1.0.0',
+          releaseVersionCount: 1,
+          masterId: 'master-1',
+          updatedBy: '10000005',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ]
+    })
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    const stub = wrapper.find('.journey-timeline-stub')
+    expect(stub.attributes('data-current-index')).toBe('5')
+    expect(stub.attributes('data-guidance-key')).toBe(
+      'journey.roles.TEMPLATE_AUTHOR.awaitGoLive.teamLeadGuidance',
+    )
+  })
+
+  it('sets template author journey waiting guidance when only testing templates exist', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Author',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_AUTHOR'],
+      capabilities: { authorTemplates: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+      templatesStore.templates = [
+        {
+          id: 'tpl-testing',
+          externalId: 'TPL-TEST',
+          groupCode: 'RETAIL',
+          name: 'Testing template',
+          lifecycleStatus: 'TESTING',
+          releaseVersion: null,
+          releaseVersionCount: 0,
+          masterId: 'master-1',
+          updatedBy: '10000005',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ]
+    })
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    const stub = wrapper.find('.journey-timeline-stub')
+    expect(stub.attributes('data-current-index')).toBeUndefined()
+    expect(stub.attributes('data-guidance-key')).toBe(
+      'journey.roles.TEMPLATE_AUTHOR.waitingTesting.guidance',
+    )
   })
 
   it('shows master designer journey with 4 steps on unfiltered dashboard', async () => {
