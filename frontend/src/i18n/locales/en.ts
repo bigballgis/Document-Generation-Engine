@@ -249,6 +249,9 @@ export default {
         group: 'Group',
         hint: 'What to do',
       },
+      actions: {
+        open: 'Open',
+      },
       masterReview: {
         title: 'Review letterhead template',
         description: 'Approve or reject the uploaded master before templates can use it.',
@@ -323,6 +326,9 @@ export default {
     workItems: {
       empty: 'You have no to-do items right now.',
       ageValue: '{value}',
+      badge: {
+        overdue: 'Overdue reminder',
+      },
       error: {
         load: 'Unable to load collaboration to-do items.',
       },
@@ -330,9 +336,10 @@ export default {
         template: 'Template',
         group: 'Group',
         submitter: 'Submitter',
-        age: 'Age',
+        age: 'Waiting',
         queue: 'Queue',
         summary: 'Summary',
+        trigger: 'Stage',
       },
     },
     workItem: {

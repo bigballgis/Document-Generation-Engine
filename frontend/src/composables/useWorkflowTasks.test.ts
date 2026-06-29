@@ -1,6 +1,11 @@
 import { describe, expect, it, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import { dashboardQuickLinks, useWorkflowTasks } from '@/composables/useWorkflowTasks'
+import {
+  buildTaskPartitions,
+  dashboardQuickLinks,
+  parseDashboardTaskScope,
+  useWorkflowTasks,
+} from '@/composables/useWorkflowTasks'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
@@ -145,5 +150,137 @@ describe('useWorkflowTasks', () => {
     const { tasks } = useWorkflowTasks()
     expect(tasks.value[0]?.workItemId).toBe('wi-new')
     expect(tasks.value[1]?.workItemId).toBe('wi-old')
+  })
+
+  it('sorts master review tasks by updatedAt surrogate newest-first', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      ...sessionStore.session,
+      roles: ['GLOBAL_ADMIN'],
+      capabilities: reviewerCapabilities,
+    } as never
+
+    const mastersStore = useMastersStore()
+    mastersStore.masters = [
+      {
+        id: 'm-old',
+        name: 'Older master',
+        groupCode: 'RETAIL',
+        status: 'PENDING_REVIEW',
+        updatedAt: '2026-06-01T10:00:00Z',
+      } as never,
+      {
+        id: 'm-new',
+        name: 'Newer master',
+        groupCode: 'RETAIL',
+        status: 'PENDING_REVIEW',
+        updatedAt: '2026-06-20T10:00:00Z',
+      } as never,
+    ]
+
+    const scope = parseDashboardTaskScope(
+      { filter: 'master-review' },
+      { reviewMasters: true, manageMasters: false },
+    )
+    const { tasks } = useWorkflowTasks()
+    const partitions = buildTaskPartitions(scope, tasks.value, {
+      roles: ['GLOBAL_ADMIN'],
+      capabilities: reviewerCapabilities,
+    })
+
+    expect(partitions).toHaveLength(1)
+    expect(partitions[0]?.tasks[0]?.id).toBe('master-review-m-new')
+  })
+
+  it('parseDashboardTaskScope maps queue deep link to queue filter', () => {
+    const scope = parseDashboardTaskScope(
+      { queue: 'TEST' },
+      { reviewMasters: false, manageMasters: false },
+    )
+    expect(scope.pageTitleKey).toBe('collaboration.workItem.queue.TEST.title')
+    expect(scope.mode).toBe('queue')
+    expect(scope.queueFilter).toBe('TEST')
+    expect(scope.fetchCollaboration).toBe(true)
+  })
+
+  it('parseDashboardTaskScope ignores invalid queue and falls back to unfiltered hub', () => {
+    const scope = parseDashboardTaskScope(
+      { queue: 'NOT_A_QUEUE' },
+      { reviewMasters: true, manageMasters: false },
+    )
+    expect(scope.pageTitleKey).toBe('dashboard.title')
+    expect(scope.mode).toBe('unfiltered')
+    expect(scope.queueFilter).toBeNull()
+  })
+
+  it('parseDashboardTaskScope maps master-review filter without collaboration fetch', () => {
+    const scope = parseDashboardTaskScope(
+      { filter: 'master-review' },
+      { reviewMasters: true, manageMasters: true },
+    )
+    expect(scope.pageTitleKey).toBe('nav.behaviorItems.masterReview')
+    expect(scope.fetchCollaboration).toBe(false)
+    expect(scope.mode).toBe('master-review')
+  })
+
+  it('buildTaskPartitions keeps TEST and ESCALATION rows in separate sections', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      roles: ['GLOBAL_ADMIN'],
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      capabilities: {
+        ...testerCapabilities,
+        decideApprovals: true,
+        publishTemplates: true,
+      },
+    } as never
+
+    const collaborationStore = useCollaborationStore()
+    collaborationStore.workItems = [
+      {
+        workItemId: 'wi-test',
+        templateId: 'tpl-x',
+        templateName: 'Template X',
+        groupCode: 'RETAIL',
+        queue: 'TEST',
+        triggerType: 'SUBMIT_FOR_TEST',
+        submitterUserId: '10000003',
+        summaryText: 'Test item',
+        createdAt: '2026-06-26T10:00:00Z',
+        ageSeconds: 120,
+      },
+      {
+        workItemId: 'wi-esc',
+        templateId: 'tpl-x',
+        templateName: 'Template X',
+        groupCode: 'RETAIL',
+        queue: 'ESCALATION',
+        triggerType: 'TIMEOUT_ESCALATION',
+        submitterUserId: '10000003',
+        summaryText: 'Escalation item',
+        createdAt: '2026-06-26T11:00:00Z',
+        ageSeconds: 3600,
+      },
+    ]
+
+    const scope = parseDashboardTaskScope({}, { reviewMasters: false, manageMasters: false })
+    const { tasks } = useWorkflowTasks()
+    const adminCapabilities: ManagementCapabilities = {
+      ...testerCapabilities,
+      decideApprovals: true,
+      publishTemplates: true,
+    }
+    const partitions = buildTaskPartitions(scope, tasks.value, {
+      roles: ['GLOBAL_ADMIN'],
+      capabilities: adminCapabilities,
+    })
+
+    const testPartition = partitions.find((partition) => partition.queue === 'TEST')
+    const escalationPartition = partitions.find((partition) => partition.queue === 'ESCALATION')
+    expect(testPartition?.tasks).toHaveLength(1)
+    expect(escalationPartition?.tasks).toHaveLength(1)
+    expect(testPartition?.tasks[0]?.kind).toBe('template-test')
+    expect(escalationPartition?.tasks[0]?.kind).toBe('template-escalation')
   })
 })

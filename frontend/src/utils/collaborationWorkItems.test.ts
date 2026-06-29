@@ -26,6 +26,24 @@ describe('collaborationWorkItems utils', () => {
     expect(task.ageSeconds).toBe(7200)
   })
 
+  it('maps ESCALATION queue to template-escalation kind', () => {
+    const task = collaborationWorkItemToTask({
+      workItemId: 'wi-esc',
+      templateId: 'tpl-esc',
+      templateName: 'Escalated',
+      groupCode: 'RETAIL',
+      queue: 'ESCALATION',
+      triggerType: 'TIMEOUT_ESCALATION',
+      submitterUserId: '10000001',
+      summaryText: 'Overdue follow-up',
+      createdAt: '2026-06-26T10:00:00Z',
+      ageSeconds: 120,
+    })
+
+    expect(task.kind).toBe('template-escalation')
+    expect(task.queue).toBe('ESCALATION')
+  })
+
   it('formats age seconds into compact units', () => {
     expect(formatCollaborationAgeSeconds(30)).toBe('0m')
     expect(formatCollaborationAgeSeconds(120)).toBe('2m')

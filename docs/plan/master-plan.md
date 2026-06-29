@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **P21** (activated 2026-06-29; **P21-T01 Done** 2026-06-29 — A0 behavior nav + L1 copy round 1; **P21-T02 Done** 2026-06-29 — backend collaboration closed loop; next slice **P21-T01a Not Started**). User sequence P14 → P15 → P18 **complete**.
+**Active formal phase:** **P21** (activated 2026-06-29; **P21-T01 Done** 2026-06-29; **P21-T01a Done** 2026-06-29 — task hub deepening; **P21-T02 Done** 2026-06-29 — backend collaboration closed loop; next slice **P21-T01b Not Started**). User sequence P14 → P15 → P18 **complete**.
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
@@ -18,8 +18,8 @@ P18 structured authoring **Done** (2026-06-28; T01–T10); **P19 verifiability/p
 behavior-typed "My to-dos" nav + L1 copy round 1; frontend lint/type-check/test/build green
 267+; Playwright P21-T01 **7/7** + UIUX **1/1** + regression **9/9**; AUD-Q05 in-scope L1 resolved;
 **P21-T02 Done** 2026-06-29 — A1 backend collaboration work-item closed loop: TEST `RESOLVED` +
-REMEDIATION emit + resubmit eligibility; `mvn verify` BUILD SUCCESS; next slice **P21-T01a Not
-Started**; remaining approval-path closure → P21-T07).
+REMEDIATION emit + resubmit eligibility; `mvn verify` BUILD SUCCESS; active slice **P21-T01a In
+Progress** (task hub deepening); remaining approval-path closure → P21-T07).
 
 ## Product goal
 
@@ -60,7 +60,7 @@ upstream systems invoke the dynamic API.
 | P18 | Structured authoring & rendering-fidelity engine | P3, P4 | Controlled node matrix, master style catalog + limited direct format, table component, seal/QR/attachment nodes, controlled numbering, Word/HTML paste cleaning, publish-locked renderProfile, fidelity blockers/warnings (gap G3) | Done (2026-06-28; P18-T01–T10) |
 | P19 | Template verifiability, publish gate & decision forms | P3, P4, P5 | Multi-sample coverage thresholds, batch test, change-diff, preview comparison, live publish-gate checklist, controlled test/approval opinion forms + risk prompts + exception markers (gaps G4, G5) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | P1 | Locale registry/switcher/fallback + html lang, config-driven brand theming, environment selector (gap G6, i18n constitution) | Done (2026-06-25) |
-| P21 | Role-journey frontend redesign & business-friendly terminology | P13, P14, P19, P20 | Hybrid IA (single task hub authoritative + behavior-typed "my to-dos" entries + per-role `RoleJourneyTimeline`), task-hub queue partitioning + restored fields + inline open actions, 6 collaboration-trigger backend completeness (+ `RESOLVED`), foreign-bank non-IT persona business-friendly L1 copy (en/zh, keys stable); **plus code-grounded audit remediation** — permission single-source/fail-closed, template-detail bug fixes (focus/tab, stale id), APPROVAL dual-substate, i18n parity, a11y focus ring, capability/route/OpenAPI drift; ADR Batch B / COR-T11 not violated | In Progress (2026-06-29; **P21-T01 Done** 2026-06-29 — A0 behavior nav + L1 round 1; **P21-T02 Done** 2026-06-29 — A1 backend collaboration closed loop; next **P21-T01a Not Started**) |
+| P21 | Role-journey frontend redesign & business-friendly terminology | P13, P14, P19, P20 | Hybrid IA (single task hub authoritative + behavior-typed "my to-dos" entries + per-role `RoleJourneyTimeline`), task-hub queue partitioning + restored fields + inline open actions, 6 collaboration-trigger backend completeness (+ `RESOLVED`), foreign-bank non-IT persona business-friendly L1 copy (en/zh, keys stable); **plus code-grounded audit remediation** — permission single-source/fail-closed, template-detail bug fixes (focus/tab, stale id), APPROVAL dual-substate, i18n parity, a11y focus ring, capability/route/OpenAPI drift; ADR Batch B / COR-T11 not violated | In Progress (2026-06-29; **P21-T01 Done**; **P21-T01a Done** 2026-06-29 — task hub deepening; **P21-T02 Done**; next **P21-T01b Not Started**) |
 
 > **P21 vs P12:** P21 is a confirmed, scoped role-journey/terminology phase (clusters ①→②→③→④
 > by workflow timeline); P12 remains the non-active deferred-enhancements catch-all. Activating

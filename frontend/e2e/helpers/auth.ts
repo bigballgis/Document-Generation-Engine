@@ -1,5 +1,7 @@
 import { expect, type Page } from '@playwright/test'
 
+import { managementNav } from './nav'
+
 export const DEMO_MASTER_NAME = 'Demo Retail Letterhead'
 export const DEMO_TEMPLATE_EXTERNAL_ID = 'DEMO-RETAIL-LETTER'
 export const DEMO_GROUP_CODE = 'RETAIL'
@@ -45,7 +47,9 @@ export async function loginAs(page: Page, credentials: { username: string; passw
   await page.getByPlaceholder('10000001').fill(credentials.username)
   await page.locator('input[type="password"]').fill(credentials.password)
   await page.getByRole('button', { name: /sign in/i }).click()
-  await expect(page).not.toHaveURL(/\/login/)
+  await expect(page).not.toHaveURL(/\/login/, { timeout: 15_000 })
+  await expect(page).not.toHaveURL(/\/forbidden/)
+  await expect(managementNav(page)).toBeVisible()
 }
 
 export async function loginAsGlobalAdmin(page: Page) {

@@ -55,7 +55,7 @@ test.describe('P21-T01 behavior nav + L1 terminology (§12.2)', () => {
     await myTodosNavSection(page).getByRole('button', { name: BEHAVIOR_NAV_LABELS.testing }).click()
     await expect(page).toHaveURL(/\/dashboard\?queue=TEST/)
     expect(new URL(page.url()).hash).toBe('#tasks-section')
-    await expect(page.getByRole('heading', { level: 1, name: /my tasks/i })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /waiting on my testing/i })).toBeVisible()
     await expect(page.locator('#tasks-section')).toBeVisible()
   })
 

@@ -21,7 +21,10 @@ import {
 import { E2E_API_BASE_URL } from './helpers/masters-api'
 import { dashboardTaskRow, filterDashboardTasksByItem } from './helpers/ui'
 
-const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173'
+const dockerTarget =
+  process.env.E2E_TARGET === 'docker' || process.env.FRONTEND_PORT === '4173'
+const defaultPort = dockerTarget ? 4173 : 5173
+const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${defaultPort}`
 
 test.describe('P14-T02 collaboration to-dos', () => {
   test.describe.configure({ mode: 'serial', timeout: 360_000 })
@@ -60,7 +63,7 @@ test.describe('P14-T02 collaboration to-dos', () => {
 
     await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
     await expect(page.locator('#tasks-section').getByRole('heading', { name: /^my to-dos$/i })).toBeVisible()
-    await expect(page.getByText(/unable to load your task list/i)).not.toBeVisible()
+    await expect(page.getByText(/unable to load collaboration to-do items/i)).not.toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
 
     await filterDashboardTasksByItem(page, template.name)
@@ -68,8 +71,9 @@ test.describe('P14-T02 collaboration to-dos', () => {
     await expect(row).toBeVisible({ timeout: 30_000 })
     await expect(row.getByText(template.name, { exact: true })).toBeVisible()
     await expect(row.getByText(DEMO_GROUP_CODE, { exact: true })).toBeVisible()
+    await expect(row.getByRole('button', { name: /^open$/i })).toBeVisible()
 
-    await row.click()
+    await row.getByRole('button', { name: /^open$/i }).click()
     await expect(page).toHaveURL(/tab=lifecycle/)
     await expect(page.getByText(/an internal error occurred/i)).not.toBeVisible()
     await expect(page.locator('#template-lifecycle-panel')).toBeVisible({ timeout: 15_000 })
@@ -111,11 +115,11 @@ test.describe('P14-T02 collaboration to-dos', () => {
     ).toBeTruthy()
 
     await loginAs(page, E2E_GROUP_ADMIN)
-    await page.goto('/dashboard#tasks-section')
+    await page.goto('/dashboard?queue=ESCALATION#tasks-section')
 
-    await expect(page.getByRole('heading', { name: /my tasks/i })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /overdue to follow up/i })).toBeVisible()
     await expect(page.locator('#tasks-section').getByRole('heading', { name: /^my to-dos$/i })).toBeVisible()
-    await expect(page.getByText(/unable to load your task list/i)).not.toBeVisible()
+    await expect(page.getByText(/unable to load collaboration to-do items/i)).not.toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
 
     await filterDashboardTasksByItem(page, template.name)
@@ -123,6 +127,7 @@ test.describe('P14-T02 collaboration to-dos', () => {
     await expect(row).toBeVisible({ timeout: 30_000 })
     await expect(row.getByText(template.name, { exact: true })).toBeVisible()
     await expect(row.getByText(DEMO_GROUP_CODE, { exact: true })).toBeVisible()
+    await expect(row.getByText(/overdue reminder/i)).toBeVisible()
   })
 
   test('admin configures reminder timing on dashboard', async ({ page, request }) => {

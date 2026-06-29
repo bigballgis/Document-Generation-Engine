@@ -45,8 +45,21 @@ export async function selectElementPlusOption(page: Page, optionText: string | R
 export async function filterDashboardTasksByItem(page: Page, itemName: string) {
   const tasksSection = page.locator('#tasks-section')
   await expect(tasksSection).toBeVisible()
-  const itemFilter = tasksSection.getByPlaceholder(/filter/i).nth(1)
+  await expect(tasksSection.locator('.el-skeleton')).toHaveCount(0)
+
+  const itemFilter = tasksSection
+    .locator('.task-partition')
+    .first()
+    .locator('.table-column-header')
+    .filter({ has: page.getByText('Item', { exact: true }) })
+    .locator('input')
+    .first()
+
   await itemFilter.fill(itemName)
+}
+
+export async function expectDashboardPartitionHeading(page: Page, heading: string | RegExp) {
+  await expect(page.locator('#tasks-section').getByRole('heading', { level: 3, name: heading })).toBeVisible()
 }
 
 export async function dashboardTaskRow(page: Page, itemName: string) {

@@ -1,25 +1,27 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
-import AppDataTable from '@/components/common/AppDataTable.vue'
-import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
-import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import DashboardStatCards from '@/components/dashboard/DashboardStatCards.vue'
-import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
+import TaskHubPartitionSection from '@/components/dashboard/TaskHubPartitionSection.vue'
 import { useDashboardStats } from '@/composables/useDashboardStats'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import { dashboardQuickLinks, useWorkflowTasks, type WorkflowTask } from '@/composables/useWorkflowTasks'
+import {
+  buildTaskPartitions,
+  dashboardQuickLinks,
+  parseDashboardTaskScope,
+  useWorkflowTasks,
+} from '@/composables/useWorkflowTasks'
 import { canMaintainCollaborationTimeoutConfig, canViewCollaborationWorkItems } from '@/auth/roles'
 import { useCapabilities } from '@/composables/useCapabilities'
 import CollaborationTimeoutConfigPanel from '@/components/collaboration/CollaborationTimeoutConfigPanel.vue'
+import * as collaborationApi from '@/api/collaboration'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
+import type { CollaborationTimeoutConfig, CollaborationWorkItemQueue } from '@/types/collaboration'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -28,32 +30,17 @@ const sessionStore = useSessionStore()
 const mastersStore = useMastersStore()
 const templatesStore = useTemplatesStore()
 const collaborationStore = useCollaborationStore()
-const { context } = useCapabilities()
+const { context, reviewMasters, manageMasters } = useCapabilities()
 const { tasks } = useWorkflowTasks()
 const visibleRoutes = computed(() => sessionStore.session?.visibleRoutes ?? [])
 const { stats } = useDashboardStats(visibleRoutes)
-const { filters: taskColumnFilters, filteredRows: filteredTasks } = useDataTableFilters(tasks, [
-  {
-    key: 'action',
-    getValue: (row) => t(row.titleKey),
-  },
-  { key: 'item', getValue: (row) => row.entityName },
-  { key: 'group', getValue: (row) => row.groupCode ?? '' },
-  {
-    key: 'hint',
-    getValue: (row) => t(row.descriptionKey),
-  },
-])
-
-const tasksCurrentPage = ref(1)
-const { paginatedRows: paginatedTasks, totalRows: totalTaskRows } = useCatalogPagination(
-  filteredTasks,
-  tasksCurrentPage,
-  CLIENT_TABLE_PAGE_SIZE,
-)
 
 const loading = ref(false)
-const loadError = ref(false)
+const mastersLoadError = ref(false)
+const templatesLoadError = ref(false)
+
+const globalTimeoutConfig = ref<CollaborationTimeoutConfig | null>(null)
+const groupTimeoutConfigs = reactive<Record<string, CollaborationTimeoutConfig | null>>({})
 
 const quickLinks = computed(() =>
   dashboardQuickLinks(sessionStore.session?.visibleRoutes ?? []),
@@ -70,41 +57,147 @@ const authorizedGroupsSummary = computed(() => {
   return groups.join(', ')
 })
 
-const showDataSections = computed(() => !loadError.value)
-
 const canViewWorkItems = computed(() =>
   canViewCollaborationWorkItems(sessionStore.session?.roles ?? []),
 )
 
 const showTimeoutConfig = computed(() => canMaintainCollaborationTimeoutConfig(context.value))
 
+const taskScope = computed(() =>
+  parseDashboardTaskScope(route.query, {
+    reviewMasters: reviewMasters.value,
+    manageMasters: manageMasters.value,
+  }),
+)
+
+const partitions = computed(() =>
+  buildTaskPartitions(taskScope.value, tasks.value, context.value),
+)
+
+const collaborationFetchFailed = computed(
+  () =>
+    taskScope.value.fetchCollaboration &&
+    Boolean(collaborationStore.workItemsErrorMessageKey),
+)
+
+const visiblePartitions = computed(() => {
+  if (collaborationFetchFailed.value) {
+    return partitions.value.filter((partition) => partition.kind !== 'collaboration')
+  }
+  return partitions.value
+})
+
+const showStatsSection = computed(() => !mastersLoadError.value && !templatesLoadError.value)
+
+const collaborationLoadErrorKey = computed(
+  () => collaborationStore.workItemsErrorMessageKey ?? 'collaboration.workItems.error.load',
+)
+
+const showCollaborationLoading = computed(
+  () => taskScope.value.fetchCollaboration && collaborationStore.loadingWorkItems,
+)
+
+function resolveCollaborationFetchParams():
+  | { queue: CollaborationWorkItemQueue }
+  | undefined {
+  if (!taskScope.value.fetchCollaboration) {
+    return undefined
+  }
+  if (taskScope.value.queueFilter) {
+    return { queue: taskScope.value.queueFilter }
+  }
+  return undefined
+}
+
+async function loadTimeoutConfigsForWorkItems() {
+  if (!canViewWorkItems.value || !taskScope.value.fetchCollaboration) {
+    globalTimeoutConfig.value = null
+    return
+  }
+
+  if (sessionStore.hasRole('GLOBAL_ADMIN')) {
+    try {
+      globalTimeoutConfig.value = await collaborationApi.getCollaborationTimeoutConfig()
+    } catch {
+      globalTimeoutConfig.value = null
+    }
+  } else {
+    globalTimeoutConfig.value = null
+  }
+
+  if (!showTimeoutConfig.value) {
+    return
+  }
+
+  const groupCodes = [
+    ...new Set(
+      collaborationStore.workItems
+        .map((item) => item.groupCode)
+        .filter((code): code is string => Boolean(code)),
+    ),
+  ]
+
+  await Promise.all(
+    groupCodes.map(async (groupCode) => {
+      if (groupCode in groupTimeoutConfigs) {
+        return
+      }
+      try {
+        groupTimeoutConfigs[groupCode] = await collaborationApi.getCollaborationTimeoutConfig(groupCode)
+      } catch {
+        groupTimeoutConfigs[groupCode] = null
+      }
+    }),
+  )
+}
+
+async function fetchCollaborationWorkItems() {
+  if (!canViewWorkItems.value || !taskScope.value.fetchCollaboration) {
+    return
+  }
+  const params = resolveCollaborationFetchParams()
+  await collaborationStore.fetchWorkItems(params)
+  await loadTimeoutConfigsForWorkItems()
+}
+
 async function loadDashboardData() {
   loading.value = true
-  loadError.value = false
+  mastersLoadError.value = false
+  templatesLoadError.value = false
+
   const jobs: Promise<unknown>[] = []
   if (sessionStore.canAccessRoute('route.master-management')) {
     jobs.push(
       mastersStore.fetchMasters().catch(() => {
-        loadError.value = true
+        mastersLoadError.value = true
       }),
     )
   }
   if (sessionStore.canAccessRoute('route.template-management')) {
     jobs.push(
       templatesStore.fetchTemplates().catch(() => {
-        loadError.value = true
+        templatesLoadError.value = true
       }),
     )
   }
-  if (canViewWorkItems.value) {
+  if (canViewWorkItems.value && taskScope.value.fetchCollaboration) {
     jobs.push(
-      collaborationStore.fetchWorkItems().catch(() => {
-        loadError.value = true
+      fetchCollaborationWorkItems().catch(() => {
+        /* error captured in collaboration store */
       }),
     )
   }
+
   await Promise.all(jobs)
   loading.value = false
+}
+
+async function retryCollaborationLoad() {
+  try {
+    await fetchCollaborationWorkItems()
+  } catch {
+    /* error captured in collaboration store */
+  }
 }
 
 onMounted(() => {
@@ -116,6 +209,15 @@ watch(
   () => [route.hash, route.query.queue, route.query.filter] as const,
   () => {
     void scrollToTasksIfRequested()
+  },
+)
+
+watch(
+  () => [route.query.queue, route.query.filter] as const,
+  () => {
+    void fetchCollaborationWorkItems().catch(() => {
+      /* error captured in collaboration store */
+    })
   },
 )
 
@@ -134,29 +236,13 @@ function openTask(path: string) {
 function openQuickLink(path: string) {
   router.push(path)
 }
-
-const sortTasksByTitle = rowSortMethod<WorkflowTask>((row) => t(row.titleKey))
-const sortTasksByGroup = rowSortMethod<WorkflowTask>((row) => row.groupCode ?? '')
-const sortTasksByHint = rowSortMethod<WorkflowTask>((row) => t(row.descriptionKey))
-
-const selectedTask = ref<WorkflowTask | null>(null)
-
-function onTaskCurrentChange(row: WorkflowTask | undefined) {
-  selectedTask.value = row ?? null
-}
-
-function onTasksTableKeydown(event: KeyboardEvent) {
-  if (event.key === 'Enter' && selectedTask.value) {
-    openTask(selectedTask.value.path)
-  }
-}
 </script>
 
 <template>
   <AppPageLayout class="dashboard-page" max-width="1200px">
     <header class="page-header">
-      <h1>{{ t('dashboard.title') }}</h1>
-      <p>{{ t('dashboard.description') }}</p>
+      <h1>{{ t(taskScope.pageTitleKey) }}</h1>
+      <p>{{ t(taskScope.pageDescriptionKey) }}</p>
     </header>
 
     <el-card shadow="never" class="summary-card">
@@ -174,104 +260,51 @@ function onTasksTableKeydown(event: KeyboardEvent) {
     </el-card>
 
     <LoadErrorPanel
-      v-if="loadError"
+      v-if="mastersLoadError"
+      message-key="home.dashboard.loadError"
+      @retry="loadDashboardData"
+    />
+
+    <LoadErrorPanel
+      v-if="templatesLoadError"
       message-key="dashboard.loadError"
       @retry="loadDashboardData"
     />
 
-    <DashboardStatCards v-if="showDataSections" :stats="stats" :loading="loading" />
+    <DashboardStatCards v-if="showStatsSection" :stats="stats" :loading="loading" />
 
-    <section v-if="showDataSections" id="tasks-section" class="tasks-section">
+    <section id="tasks-section" class="tasks-section">
       <header class="section-header">
         <h2>{{ t('dashboard.tasks.title') }}</h2>
         <p>{{ t('dashboard.tasks.description') }}</p>
       </header>
 
-      <el-skeleton v-if="loading" :rows="5" animated />
+      <el-skeleton v-if="loading || showCollaborationLoading" :rows="5" animated />
 
-      <el-empty
-        v-else-if="filteredTasks.length === 0"
-        :description="t('dashboard.tasks.empty')"
+      <LoadErrorPanel
+        v-if="collaborationFetchFailed"
+        :message-key="collaborationLoadErrorKey"
+        @retry="retryCollaborationLoad"
       />
 
-      <div v-else class="tasks-table-wrap">
-        <AppDataTable
-          activatable
-          :data="paginatedTasks"
-          class="tasks-table"
-          highlight-current-row
-          tabindex="0"
-          default-sort="{ prop: 'entityName', order: 'ascending' }"
-          @row-click="(row: WorkflowTask) => openTask(row.path)"
-          @current-change="onTaskCurrentChange"
-          @keydown="onTasksTableKeydown"
-        >
-        <el-table-column
-          sortable
-          :sort-method="sortTasksByTitle"
-          min-width="200"
-        >
-          <template #header>
-            <TableColumnHeader
-              :label="t('dashboard.tasks.columns.action')"
-              v-model="taskColumnFilters.action"
-            />
-          </template>
-          <template #default="{ row }">
-            <strong>{{ t(row.titleKey) }}</strong>
-          </template>
-        </el-table-column>
-        <el-table-column prop="entityName" sortable min-width="220">
-          <template #header>
-            <TableColumnHeader
-              :label="t('dashboard.tasks.columns.item')"
-              v-model="taskColumnFilters.item"
-            />
-          </template>
-          <template #default="{ row }">
-            {{ row.entityName }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          sortable
-          :sort-method="sortTasksByGroup"
-          width="140"
-        >
-          <template #header>
-            <TableColumnHeader
-              :label="t('dashboard.tasks.columns.group')"
-              v-model="taskColumnFilters.group"
-            />
-          </template>
-          <template #default="{ row }">
-            {{ row.groupCode ?? '—' }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          sortable
-          :sort-method="sortTasksByHint"
-          min-width="260"
-        >
-          <template #header>
-            <TableColumnHeader
-              :label="t('dashboard.tasks.columns.hint')"
-              v-model="taskColumnFilters.hint"
-            />
-          </template>
-          <template #default="{ row }">
-            {{ t(row.descriptionKey) }}
-          </template>
-        </el-table-column>
-        </AppDataTable>
-        <AppTablePagination
-          v-model:current-page="tasksCurrentPage"
-          :page-size="CLIENT_TABLE_PAGE_SIZE"
-          :total="totalTaskRows"
+      <template v-if="!loading && !showCollaborationLoading">
+        <el-empty
+          v-if="visiblePartitions.length === 0 && !collaborationFetchFailed"
+          :description="t('dashboard.tasks.empty')"
         />
-      </div>
+
+        <TaskHubPartitionSection
+          v-for="partition in visiblePartitions"
+          :key="partition.id"
+          :partition="partition"
+          :global-timeout-config="globalTimeoutConfig"
+          :group-timeout-configs="groupTimeoutConfigs"
+          @open="openTask"
+        />
+      </template>
     </section>
 
-    <section v-if="showDataSections && quickLinks.length > 0" class="quick-links">
+    <section v-if="quickLinks.length > 0" class="quick-links">
       <h2>{{ t('dashboard.quickLinks.title') }}</h2>
       <div class="quick-link-grid">
         <el-button
@@ -286,7 +319,7 @@ function onTasksTableKeydown(event: KeyboardEvent) {
       </div>
     </section>
 
-    <CollaborationTimeoutConfigPanel v-if="showDataSections && showTimeoutConfig" />
+    <CollaborationTimeoutConfigPanel v-if="showTimeoutConfig" />
   </AppPageLayout>
 </template>
 
@@ -347,14 +380,6 @@ function onTasksTableKeydown(event: KeyboardEvent) {
     margin: 0;
     color: var(--text-muted);
   }
-}
-
-.tasks-table {
-  cursor: pointer;
-}
-
-.tasks-table-wrap {
-  outline: none;
 }
 
 .quick-links {

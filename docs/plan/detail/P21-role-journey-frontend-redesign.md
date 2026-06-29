@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **P21-T01 Done** 2026-06-29 — A0 behavior nav + L1 copy round 1; **P21-T02 Done** 2026-06-29 — backend collaboration closed loop; next slice **P21-T01a Not Started**) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **P21-T01 Done** 2026-06-29 — A0 behavior nav + L1 copy round 1; **P21-T01a Done** 2026-06-29 — task hub deepening; **P21-T02 Done** 2026-06-29 — backend collaboration closed loop; next slice **P21-T01b Not Started** — RoleJourneyTimeline) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -166,7 +166,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | ID | Task | Key files | Behavior spec | Status |
 | --- | --- | --- | --- | --- |
 | P21-T01 | A0 foundation + terminology baseline: behavior-typed "My to-dos" nav group (capability/queue-driven, business copy); rewrite L1 copy for nav/dashboard/tasks/breadcrumb | `navStructure.ts`, `ManagementShell.vue`, `en.ts`, `zh-CN.ts` | Required (§12.2 implemented) | Done (2026-06-29) |
-| P21-T01a | Task hub deepening: queue partitioning + restore `triggerType/summaryText/ageSeconds` + SLA/overdue badges + inline open actions | `DashboardView.vue`, `useWorkflowTasks.ts`, `utils/collaborationWorkItems.ts`, `stores/collaboration.ts` | Required | Not Started |
+| P21-T01a | Task hub deepening: queue partitioning + restore `triggerType/summaryText/ageSeconds` + SLA/overdue badges + inline open actions | `DashboardView.vue`, `useWorkflowTasks.ts`, `utils/collaborationWorkItems.ts`, `stores/collaboration.ts`, `TaskHubPartitionSection.vue` | Required (§12.3) | Done (2026-06-29) |
 | P21-T01b | New `RoleJourneyTimeline` reusable stepper (business-language steps, empty/guidance states) | `frontend/src/components/**` (new) | Required | Not Started |
 | P21-T01c | Dead-code cleanup: remove `RoleHomeView.vue` (+test); remove residual workbench logical keys | `views/home/RoleHomeView.vue`, `routeKeys.ts`, `auth/roles.ts` | n/a (refactor) | Not Started |
 | P21-T01d | Companion terminology guide created (SSOT) + en/zh value sweep round 1 | `docs/product/business-terminology-guide.md`, `en.ts`, `zh-CN.ts` | n/a (doc) | Not Started |
@@ -294,13 +294,13 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 
 | ID | Sev | Finding | Evidence | Owner task |
 | --- | --- | --- | --- | --- |
-| AUD-H01 | 🟡 | Mapped fields `summaryText/ageSeconds/triggerType/queue/submitter` dropped — table renders 4 columns; i18n column keys dangling | `DashboardView.vue:209-264`; `collaborationWorkItems.ts:34-52`; `en.ts:317-324` | P21-T01a |
-| AUD-H02 | 🟡 | Single mixed table, no queue partitioning | `useWorkflowTasks.ts:59-87`; `DashboardView.vue:184-271` | P21-T01a |
-| AUD-H03 | 🟡 | Legacy workbench redirects carry no `?queue=`; `fetchWorkItems()` called with no args → behavior entries unfiltered | `router/index.ts:106-114`; `DashboardView.vue:101` | P21-T01a |
-| AUD-H04 | 🟡 | Sorting conflict: master items lack `createdAt` (sink); table re-sorts by name, overriding newest-first | `useWorkflowTasks.ts:46-52,92-115`; `DashboardView.vue:204` | P21-T01a |
-| AUD-H05 | 🟡 | Same template can appear twice (TEST + ESCALATION); escalation maps to `template-test` kind | `CollaborationEscalationService.java:69-90`; `collaborationWorkItems.ts:9-15` | P21-T01a |
-| AUD-H06 | 🟡 | Coarse load/error: any fetch failure hides all sections; `workItemsErrorMessageKey` unconsumed | `DashboardView.vue:81-107`; `stores/collaboration.ts:20-25` | P21-T01a |
-| AUD-H07 | 🟢 | collaboration store thin (list only; no queue param applied, no claim/resolve, client-side paging only) | `stores/collaboration.ts:10-42`; `CollaborationWorkItemService.java:58-60` | P21-T01a |
+| AUD-H01 | 🟡 | Mapped fields `summaryText/ageSeconds/triggerType/queue/submitter` dropped — table renders 4 columns; i18n column keys dangling | `DashboardView.vue:209-264`; `collaborationWorkItems.ts:34-52`; `en.ts:317-324` | **Resolved → P21-T01a Done** (2026-06-29) |
+| AUD-H02 | 🟡 | Single mixed table, no queue partitioning | `useWorkflowTasks.ts:59-87`; `DashboardView.vue:184-271` | **Resolved → P21-T01a Done** (2026-06-29) |
+| AUD-H03 | 🟡 | Legacy workbench redirects carry no `?queue=`; `fetchWorkItems()` called with no args → behavior entries unfiltered | `router/index.ts:106-114`; `DashboardView.vue:101` | **Resolved → P21-T01a Done** (2026-06-29) — `fetchWorkItems({ queue })` wired |
+| AUD-H04 | 🟡 | Sorting conflict: master items lack `createdAt` (sink); table re-sorts by name, overriding newest-first | `useWorkflowTasks.ts:46-52,92-115`; `DashboardView.vue:204` | **Resolved → P21-T01a Done** (2026-06-29) |
+| AUD-H05 | 🟡 | Same template can appear twice (TEST + ESCALATION); escalation maps to `template-test` kind | `CollaborationEscalationService.java:69-90`; `collaborationWorkItems.ts:9-15` | **Resolved → P21-T01a Done** (2026-06-29) — `template-escalation` kind |
+| AUD-H06 | 🟡 | Coarse load/error: any fetch failure hides all sections; `workItemsErrorMessageKey` unconsumed | `DashboardView.vue:81-107`; `stores/collaboration.ts:20-25` | **Resolved → P21-T01a Done** (2026-06-29) |
+| AUD-H07 | 🟢 | collaboration store thin (list only; no queue param applied, no claim/resolve, client-side paging only) | `stores/collaboration.ts:10-42`; `CollaborationWorkItemService.java:58-60` | **Resolved → P21-T01a Done** (2026-06-29) — queue param applied |
 | AUD-C05 | 🟢 | OpenAPI missing `GET /collaboration-work-items` (frontend already calls it) | `api/collaboration.ts:17-24`; `openapi-v1.yaml:1416+` | P21-X04 |
 
 ### 11.3 Template detail × lifecycle
@@ -739,3 +739,337 @@ group** (do not render "My to-dos" heading with zero items).
   `fetchWorkItems({ queue })` wiring in T01 (**P21-T01a**).
 - Do **not** remove `RoleHomeView` / workbench keys (**P21-T01c**).
 - Do **not** change backend capabilities exposure (**P21-X04**) in T01.
+
+### 12.3 P21-T01a — Task hub deepening (queue partition + fields + SLA badges + open actions)
+
+**BDD readiness:** `ready` (confirmed against domain §2.9.4, permission matrix §13.1.2, T01 URL
+contract §12.2, and audit findings AUD-H01..H07; no blocking pending questions).
+
+**Implementation status:** **Done** (2026-06-29) — `TaskHubPartitionSection.vue`, queue partitions,
+`fetchWorkItems({ queue })`, restored columns, overdue badges, Open actions, segmented errors;
+AUD-H01..H07 closed. Gates: Vitest **280+**; Playwright T01a **6/6** + UIUX manifest **PASS**.
+
+**Scope boundary (this slice only):**
+
+- **In:** consume T01 deep-link URL contract (`?queue=` / `?filter=master-review` + `#tasks-section`);
+  dynamic landing `<h1>`; queue-partitioned task sections (non-mixed tables); wire
+  `fetchWorkItems({ queue })`; restore collaboration table fields (`triggerType`, `summaryText`,
+  `ageSeconds`, submitter display); SLA aging display + overdue badges; per-row inline **Open** action
+  (navigate to template lifecycle panel or master detail); remediate AUD-H02..H06 (+ H01 field drop,
+  H03/H07 store/API queue param, H05 escalation kind).
+- **Out:** `RoleJourneyTimeline` stepper (**P21-T01b**); dead-code / workbench key removal
+  (**P21-T01c**); in-list pass/reject/publish decisions (remain on controlled detail forms); backend
+  emit of additional trigger types beyond what P21-T02/T07 already land (**P21-T07** for
+  APPROVAL/PENDING_RELEASE); OpenAPI registration (**P21-X04**); permission single-source
+  (**P21-X03**); zh-CN parity hardening (**P21-X06**).
+
+**Traceability:**
+
+- Domain — `docs/domain/domain-model.md` §2.9.4: collaboration work items are in-app to-dos by
+  template group + role queue; display is non-sensitive summary only; timeout escalation is
+  notification-only (no auto decision / no status change); create/resolve/escalation audited.
+- Permission — `docs/security/permission-matrix.md` §13.1.2 (queue visibility per role; display does
+  not grant extra edit/decide/publish rights); §13.3 fail-closed unauthorized access.
+- Plan — this doc §3 (task hub deepening), §6 P21-T01a row, §11.2 AUD-H01..H07, §12.2 URL contract.
+- Terminology — `docs/product/business-terminology-guide.md` §4.1/§4.3 (`Escalation` → **Overdue
+  reminder** / 超时提醒 on L1; SLA badge copy avoids IT "escalation" as primary label).
+- Navigation — `docs/product/catalog-navigation-ux.md` (behavior entries = filtered task-hub views).
+- Code under change — `DashboardView.vue`, `useWorkflowTasks.ts`, `utils/collaborationWorkItems.ts`,
+  `stores/collaboration.ts`, `api/collaboration.ts` (params only), i18n `dashboard.tasks.*` /
+  `collaboration.workItems.*` column/action keys.
+
+#### Spec A — URL-driven landing title and queue scope
+
+- **Actor / role:** any authenticated user with `route.dashboard-home` visible; effective queue/filter
+  scope further constrained by role capabilities (§13.1.2).
+- **Goal:** Land from a behavior nav deep link (or bookmark) and immediately see the correct queue
+  context in page title and task section(s).
+- **Trigger:** navigation to `/dashboard` with optional query params per §12.2 URL contract.
+- **Preconditions:** T01 behavior nav + `#tasks-section` scroll contract already shipped; session
+  authenticated.
+- **Primary journey:** route resolves → dashboard reads `route.query.queue` and/or
+  `route.query.filter` → sets page `<h1>` and task-hub scope → scrolls to `#tasks-section` when hash
+  present (extend existing watcher on `queue`/`filter`/`hash`).
+- **System responses (success):**
+
+| Route query | Page `<h1>` i18n key (en exemplar) | Task-hub scope |
+| --- | --- | --- |
+| _(none)_ | `dashboard.title` — "My tasks" | **Unfiltered hub:** all visible queue partitions + master sections (Spec B) |
+| `queue=TEST` | `collaboration.workItem.queue.TEST.title` — "Waiting on my testing" | Single TEST partition only |
+| `queue=APPROVAL` | `collaboration.workItem.queue.APPROVAL.title` | Single APPROVAL partition only |
+| `queue=REMEDIATION` | `collaboration.workItem.queue.REMEDIATION.title` | Single REMEDIATION partition only |
+| `queue=PENDING_RELEASE` | `collaboration.workItem.queue.PENDING_RELEASE.title` | Single PENDING_RELEASE partition only |
+| `queue=ESCALATION` | `collaboration.workItem.queue.ESCALATION.title` — "Overdue to follow up" | Single ESCALATION partition only |
+| `filter=master-review` | `nav.behaviorItems.masterReview` — "Masters to review" | Master review (+ rework when `manageMasters`, Spec B) only — no collaboration partitions |
+
+- **Mutual exclusion:** when `filter=master-review` is set, `queue` is ignored for scope (T01 nav
+  never sets both). Description paragraph under `<h1>` may use queue-specific copy when filtered; when
+  unfiltered, retain `dashboard.description`.
+
+#### Spec B — Queue-partitioned sections (non-mixed tables)
+
+- **Actor / role:** same as Spec A.
+- **Goal:** Scan work by queue/stage without a single mixed table (AUD-H02).
+- **Trigger:** task hub renders after data load.
+- **Preconditions:** catalog fetch (masters/templates) and collaboration fetch complete or failed
+  independently (Spec F).
+- **Primary journey (unfiltered hub):** for each collaboration queue the viewer may see (per
+  `CollaborationWorkItemAccessSupport` / matrix §13.1.2), render a **dedicated section** with:
+  - section heading = `collaboration.workItem.queue.<QUEUE>.label` (business stage chip text);
+  - its own `AppDataTable` (or equivalent) containing **only** items for that queue;
+  - section-level empty state when the partition has zero rows (`collaboration.workItems.empty` or
+    queue-specific empty key if added);
+  - sections with zero rows **and** no visibility may be omitted; sections the role may view but
+    that are empty show empty state (do not hide solely because count is zero — T01 §12.2 default).
+  Master-derived tasks render in separate section(s):
+  - **Letterhead review** (`master-review` kind) when `reviewMasters`;
+  - **Letterhead rework** (`master-rework` kind) when `manageMasters` (includes MASTER_DESIGNER
+    rework per matrix §13.1.2 note).
+- **Primary journey (filtered by `queue`):** render **one** collaboration section for that queue
+  only; omit other collaboration partitions; master sections hidden unless `filter=master-review`.
+- **Primary journey (filtered by `filter=master-review`):** render master review (+ rework when
+  applicable) section(s) only; **do not** call `fetchWorkItems` for collaboration queues (or ignore
+  collaboration rows in UI).
+- **System responses (success):** no mixed collaboration+master table; same template may appear in
+  two partitions (e.g. TEST source + ESCALATION follow-up) without deduplication — each row stays in
+  its queue section (AUD-H05).
+
+#### Spec C — `fetchWorkItems({ queue })` wiring (AUD-H03, AUD-H07)
+
+- **Actor / role:** user with `canViewCollaborationWorkItems` (role-based today; capability when
+  exposed in P21-X04).
+- **Goal:** Deep-linked queue views load server-filtered items; unfiltered hub loads all visible
+  queues in one call.
+- **Trigger:** `DashboardView` mount and on `route.query.queue` change (when collaboration visible).
+- **Preconditions:** viewer authorized for requested queue (backend enforces; frontend passes param
+  faithfully).
+- **Primary journey:**
+  - `queue=<VALID>` and viewer has queue visibility →
+    `collaborationStore.fetchWorkItems({ queue })` → API `GET /collaboration-work-items?queue=…`.
+  - no `queue` param (unfiltered) → `fetchWorkItems()` with **no** queue filter → API returns all
+    visible queues for authorized groups.
+  - `filter=master-review` → skip collaboration fetch unless stats elsewhere need it (task sections
+    do not).
+- **System responses (success):** store `workItems` reflects server filter; `loadingWorkItems` drives
+  skeleton for collaboration section(s) only; on failure `workItemsErrorMessageKey` set and thrown
+  error handled per Spec F (not global dashboard failure).
+
+#### Spec D — Restored row fields and columns (AUD-H01)
+
+- **Actor / role:** collaboration queue viewer.
+- **Goal:** See actionable context (what happened, how long waiting, who submitted) without opening
+  detail first.
+- **Trigger:** collaboration partition renders rows mapped by `collaborationWorkItemToTask`.
+- **Preconditions:** API returns `triggerType`, `summaryText`, `ageSeconds`, `submitterUserId`,
+  `createdAt` (already on `CollaborationWorkItemSummary`).
+- **Primary journey:** table columns (L1 business labels — use/extend existing keys):
+
+| Column | Source field | Display rule |
+| --- | --- | --- |
+| Action | `titleKey` (queue-driven) | existing |
+| Item | `entityName` (`templateName`) | existing |
+| Group | `groupCode` | existing |
+| Stage / trigger | `triggerType` | i18n `collaboration.workItem.trigger.<TYPE>.description` (L1 business copy) |
+| Summary | `summaryText` | API non-sensitive summary verbatim (truncate with ellipsis + title tooltip if long) |
+| Waiting | `ageSeconds` | `formatCollaborationAgeSeconds(ageSeconds)` + optional SLA badge (Spec E) |
+| Submitter | `submitterUserId` | display as provided (opaque id; no PII expansion in v1) |
+| Open | — | inline primary action (Spec G) |
+
+- **System responses (success):** mapped fields no longer dropped between `collaborationWorkItems.ts`
+  and `DashboardView`; master partitions retain simpler columns (action, item, group, hint) without
+  collaboration-only fields.
+
+#### Spec E — SLA aging and overdue badges
+
+- **Actor / role:** collaboration queue viewer; timeout thresholds readable for badge computation
+  (load global default + resolve per-item group thresholds the same way backend escalation does).
+- **Goal:** Visually distinguish items approaching/exceeding reminder timing without implying auto
+  action (domain §2.9.4 notification-only).
+- **Trigger:** row render for collaboration source tasks.
+- **Preconditions:** timeout config fetch succeeds or degrades gracefully (badge suppressed on config
+  error, age text still shown).
+- **Primary journey:** for each collaboration row, compare `ageSeconds` against resolved threshold
+  hours for `(item.queue, item.groupCode)`:
+  - `ESCALATION` queue rows **always** show overdue badge (`collaboration.workItems.badge.overdue`
+    — en **Overdue reminder**, zh-CN **超时提醒**);
+  - `TEST` / `APPROVAL` / `REMEDIATION` / `PENDING_RELEASE` rows show overdue badge when
+    `ageSeconds >= thresholdHours * 3600`;
+  - optionally show neutral age chip without badge when under threshold (no "approaching" badge in
+    v1 unless implementer adds `badge.approaching` — **deferred**, non-blocking).
+- **System responses (success):** badge is visual only; does not enable extra actions; template
+  lifecycle status unchanged from badge display.
+
+#### Spec F — Segmented load / error (AUD-H06)
+
+- **Actor / role:** any dashboard viewer.
+- **Goal:** Catalog snapshot or collaboration list failure must not hide unrelated sections.
+- **Trigger:** any parallel dashboard fetch fails.
+- **Preconditions:** `loadDashboardData` orchestrates masters, templates, collaboration independently.
+- **Primary journey:**
+  - masters fetch fail → show `LoadErrorPanel` (or inline error) **only** in masters-dependent stats;
+    task hub still renders if collaboration/masters-for-tasks succeeded.
+  - templates fetch fail → same pattern for template stats.
+  - collaboration fetch fail → show `LoadErrorPanel` with `collaborationStore.workItemsErrorMessageKey`
+    (fallback `collaboration.workItems.error.load`) **inside** `#tasks-section`; stats cards and
+    timeout config panel remain when their data loaded.
+  - retry actions scoped per segment (collaboration retry re-invokes `fetchWorkItems` with current
+    route queue param).
+- **System responses (success):** global `loadError` no longer suppresses entire `#tasks-section` and
+  quick links when only one fetch fails; `workItemsErrorMessageKey` consumed.
+
+#### Spec G — Inline open actions (jump to detail)
+
+- **Actor / role:** user who can see the row (visibility ≠ permission to decide).
+- **Goal:** Open the correct detail/lifecycle panel in one click from the task hub.
+- **Trigger:** user activates row **Open** control or activates row (keyboard Enter retained).
+- **Preconditions:** row `path` already computed (`templateLifecyclePanelPath(templateId)` for
+  collaboration; `/masters/:id` for master tasks).
+- **Primary journey:** **Open** button/link per row (i18n `dashboard.tasks.actions.open` — en
+  **Open**, zh-CN **打开**) calls `router.push(path)`; does **not** submit lifecycle decisions.
+- **System responses (success):** navigation lands on template detail lifecycle tab or master detail;
+  no new permissions granted.
+
+#### Spec H — Sorting and master timestamp (AUD-H04)
+
+- **Actor / role:** any dashboard viewer.
+- **Goal:** Newest waiting items surface first; master tasks do not sink to bottom.
+- **Trigger:** partition row list computed.
+- **Preconditions:** collaboration rows have `createdAt`; master rows gain surrogate `createdAt` from
+  `master.updatedAt` when present, else `0`.
+- **Primary journey:** each partition sorted **newest-first** by `createdAt` before pagination;
+  table `default-sort` must **not** override to `entityName` ascending — align default with
+  `createdAt` descending or disable conflicting client re-sort.
+- **System responses (success):** master review/rework rows interleave correctly by recency within
+  their master section; collaboration sort stable across filtered/unfiltered views.
+
+#### Spec I — Escalation task kind mapping (AUD-H05)
+
+- **Actor / role:** GROUP/GLOBAL admin viewing ESCALATION partition.
+- **Goal:** Escalation rows distinct from TEST rows for styling, title, and future journey hooks.
+- **Trigger:** `collaborationWorkItemToTask` for `queue=ESCALATION`.
+- **Preconditions:** backend emits `TIMEOUT_ESCALATION` trigger (scheduler or test seed).
+- **Primary journey:** map `ESCALATION` → new `WorkflowTaskKind` **`template-escalation`** (not
+  `template-test`); `titleKey` remains `collaboration.workItem.queue.ESCALATION.title`; path still
+  template lifecycle panel for admin follow-up visibility.
+- **System responses (success):** same template may appear once under TEST (or other source queue
+  in unfiltered view) and once under ESCALATION with distinct kind/badge.
+
+#### Acceptance scenarios (Given / When / Then)
+
+**URL landing title & scope**
+
+- **(TEST deep link title)** Given a tester session, When navigating to
+  `/dashboard?queue=TEST#tasks-section`, Then `<h1>` shows "Waiting on my testing" (key
+  `collaboration.workItem.queue.TEST.title`) And only the TEST partition renders And
+  `fetchWorkItems` was called with `{ queue: 'TEST' }`.
+- **(Master review filter)** Given a GROUP_ADMIN session, When navigating to
+  `/dashboard?filter=master-review#tasks-section`, Then `<h1>` shows "Masters to review" And only
+  master review/rework sections render And no collaboration queue sections render.
+- **(Unfiltered hub title)** Given any session on `/dashboard` without query params, Then `<h1>` shows
+  "My tasks" (`dashboard.title`) And all visible queue partitions render (Spec B).
+- **(Unknown queue ignored)** Given `/dashboard?queue=NOT_A_QUEUE`, When the page loads, Then no
+  console error And hub falls back to unfiltered scope (or treats as empty invalid — **default:
+  unfiltered hub**) And `<h1>` is `dashboard.title`.
+- **(Unauthorized queue — fail-closed display)** Given a TEMPLATE_TESTER session, When navigating
+  to `/dashboard?queue=ESCALATION`, Then collaboration section shows access-safe empty or error
+  (backend deny or empty list) And no ESCALATION rows from other groups leak.
+
+**Queue partitioning**
+
+- **(Non-mixed tables)** Given a GROUP_ADMIN with OPEN items in TEST and APPROVAL queues, When viewing
+  unfiltered `/dashboard`, Then TEST rows appear only under the TEST section heading And APPROVAL rows
+  appear only under the APPROVAL section And there is no single table mixing both queues.
+- **(Duplicate template across partitions)** Given template X has OPEN TEST and OPEN ESCALATION work
+  items, When viewing unfiltered hub, Then template X appears once in TEST section and once in
+  ESCALATION section with distinct kinds `template-test` and `template-escalation`.
+- **(Filtered single partition)** Given `/dashboard?queue=REMEDIATION`, When data loads, Then only the
+  REMEDIATION section is present And rows are exclusively `queue=REMEDIATION`.
+
+**Fields & sorting**
+
+- **(Restored columns visible)** Given a TEST work item with `summaryText`, `ageSeconds=7200`,
+  `triggerType=SUBMIT_FOR_TEST`, When the TEST partition renders, Then the row shows summary text,
+  formatted age "2h", and trigger description copy And submitter id column is populated.
+- **(Newest first within partition)** Given two TEST items with different `createdAt`, When the TEST
+  section renders, Then the newer `createdAt` row appears before the older regardless of template name.
+- **(Master sort surrogate)** Given two `PENDING_REVIEW` masters with different `updatedAt`, When the
+  master-review section renders, Then the more recently updated master appears first.
+
+**SLA / overdue badges**
+
+- **(Overdue badge on aged TEST item)** Given TEST threshold 24h and a TEST item with `ageSeconds >=
+  86400`, When the row renders, Then an "Overdue reminder" badge is visible And template status is
+  unchanged.
+- **(ESCALATION always badged)** Given an ESCALATION queue item regardless of age, When the row
+  renders, Then the overdue badge is shown.
+- **(Under threshold — age only)** Given TEST item with age below threshold, When rendered, Then age
+  text shows without overdue badge.
+
+**Inline open & segmented error**
+
+- **(Open action navigates)** Given a visible collaboration row for template T, When the user clicks
+  **Open**, Then router navigates to `/templates/T?tab=lifecycle` (lifecycle panel path).
+- **(Collaboration load error isolated)** Given masters/templates loaded successfully but
+  `fetchWorkItems` fails, When dashboard renders, Then stat cards remain visible And `#tasks-section`
+  shows collaboration load error with retry And the error message key is not swallowed.
+- **(Masters fail — tasks persist)** Given collaboration loaded but masters catalog fetch fails, When
+  dashboard renders, Then collaboration partitions still render And global page is not entirely
+  replaced by a single error panel.
+
+**Regression (T01 contract preserved)**
+
+- **(Hash scroll)** Given any behavior deep link with `#tasks-section`, When navigation completes,
+  Then the tasks section scrolls into view.
+- **(No workbench routes)** Given inline open from task hub, Then navigation never targets
+  `/workbench/*` paths.
+
+#### Boundary & exception behavior
+
+- **Empty queue (backend not yet emitting):** permitted nav entry (T01) still lands on filtered view
+  with queue-specific title and section empty state — not 404, not hidden section.
+- **Collaboration viewer false:** collaboration sections omitted entirely; master sections still shown
+  when capabilities allow; no fetch attempted.
+- **Timeout config unavailable:** render age text; suppress overdue badge (no fail-closed deny of task
+  list).
+- **Pagination:** client-side paging **per partition** (existing `CLIENT_TABLE_PAGE_SIZE`); filters
+  apply within partition.
+- **Row click vs Open:** both navigate; Open is accessible name for assistive tech; row click retained
+  for power users.
+- **Legacy workbench redirect:** `/workbench/*` → `/dashboard#tasks-section` still works but does not
+  carry `?queue=` (acceptable; user may use behavior nav for filtered view — optional enhancement out
+  of scope unless trivial).
+
+#### Observable evidence
+
+- **Unit:** `collaborationWorkItems.test.ts` — `ESCALATION` → `template-escalation` kind;
+  `useWorkflowTasks.test.ts` — partition helpers, master `createdAt` surrogate, queue-filtered task
+  subsets; new tests for overdue badge helper if extracted.
+- **Component:** `DashboardView` / task partition component tests — filtered `<h1>`, section count per
+  route query, column headers include summary/age/trigger, segmented error panels.
+- **Store:** `collaboration` store test — `fetchWorkItems({ queue: 'TEST' })` passes param to API
+  mock.
+- **E2E:** extend `P21-T01-behavior-nav.spec.ts` (filtered title + single partition) and
+  `collaboration-todos.spec.ts` (restored columns, Open action, overdue badge on seeded escalation);
+  new `P21-T01a-task-hub.spec.ts` optional.
+- **UIUX:** dual-brand evidence for filtered TEST landing + overdue badge row (follow
+  `frontend/e2e/helpers/uiux-evidence.ts` pattern).
+
+#### Decided defaults (non-blocking)
+
+1. **Unfiltered invalid `queue`:** fall back to full hub (not error page).
+2. **Section headings:** use `collaboration.workItem.queue.*.label` (stage chip), not IT enum names.
+3. **Open action label:** new stable key `dashboard.tasks.actions.open` (+ zh-CN).
+4. **Overdue badge key:** new `collaboration.workItems.badge.overdue` (+ zh-CN **超时提醒**).
+5. **Master `createdAt` surrogate:** `master.updatedAt` ISO string; missing → sort last.
+6. **Threshold source for badges:** reuse `GET /collaboration-timeout-config` global default +
+  group override resolution mirroring backend `CollaborationTimeoutResolver` semantics client-side
+  (group override when present for item's `groupCode`).
+7. **No in-list decisions:** Open only; controlled forms unchanged on detail pages (permission matrix
+   §13.1.2).
+
+#### Out of scope reminders for implementer
+
+- Do **not** implement `RoleJourneyTimeline` (**P21-T01b**).
+- Do **not** add pass/reject/publish buttons in list rows.
+- Do **not** change backend work-item writer/emission (**P21-T07** for remaining triggers).
+- Do **not** register OpenAPI or change authorization model (**P21-X03**, **P21-X04**).

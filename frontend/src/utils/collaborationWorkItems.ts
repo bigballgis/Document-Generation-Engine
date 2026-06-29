@@ -11,7 +11,7 @@ const QUEUE_KIND: Record<CollaborationWorkItemQueue, WorkflowTaskKind> = {
   APPROVAL: 'template-approval',
   REMEDIATION: 'template-rework',
   PENDING_RELEASE: 'template-publish',
-  ESCALATION: 'template-test',
+  ESCALATION: 'template-escalation',
 }
 
 const QUEUE_TITLE_KEY: Record<CollaborationWorkItemQueue, string> = {

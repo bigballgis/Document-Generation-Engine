@@ -245,6 +245,9 @@ export default {
         group: '分组',
         hint: '说明',
       },
+      actions: {
+        open: '打开',
+      },
       masterReview: {
         title: '审核母版文档',
         description: '在模板引用前批准或驳回已上传的主文档。',
@@ -319,6 +322,9 @@ export default {
     workItems: {
       empty: '当前没有待办事项。',
       ageValue: '{value}',
+      badge: {
+        overdue: '超时提醒',
+      },
       error: {
         load: '无法加载协作待办事项。',
       },
@@ -329,6 +335,7 @@ export default {
         age: '等待时长',
         queue: '队列',
         summary: '摘要',
+        trigger: '阶段',
       },
     },
     workItem: {
