@@ -83,10 +83,10 @@ Priority: **H/M/L**. All start `Not Started`.
 | C1 | H | Test `apimgmt` module (currently 0 tests) | `ApiManagementServiceAuthorizationTest`, `ApiPolicyImpactPreviewServiceTest` | **Done** (Wave 2): authorization gate + policy impact preview blocking/default-route paths covered |
 | C2 | H | Test authorization core | `GroupAccessServiceTest`, `ManagementAuthServiceTest`, `JwtAuthenticationFilterTest` | **Done** (Wave 2): RBAC/group isolation, login fail-closed/success, JWT filter context install/clear paths covered |
 | C3 | H | Test runtime security/generation | `RuntimeGenerationServiceGenerateTest`, `DocumentDownloadServiceTest`, auth/idempotency/access tests | **Done** (Wave 2): sync replay/create, policy/format guards, download access/expiry covered |
-| C4 | M | Test rendering PDF paths | `LibreOfficePdfConversionService`, `DockerExecPdfConversionService`, `DocumentArtifactPipeline` untested | Conversion success/timeout/cleanup covered (mock process where needed) | Not Started |
-| C5 | M | Test audit query/recorder | `AuditQueryService` (264 L), `ManagementAuditRecorder` (146 L) untested | Group-scoped filtering incl. GLOBAL_ADMIN unbounded path covered | Not Started |
-| C6 | M | Frontend: test `TemplateDetailView`, router, `http`/`auth` | `views/templates/TemplateDetailView.vue` (550 L), `router/index.ts`, `api/http.ts`, `api/auth.ts` untested | Unit/integration tests incl. guard redirects + 401 handling | Not Started |
-| C7 | M | Expand e2e beyond a11y smoke | only `e2e/a11y-smoke.spec.ts` | Role-journey e2e: login→landing, 403, master & template flow | Not Started |
+| C4 | M | Test rendering PDF paths | `LibreOfficePdfConversionService`, `DockerExecPdfConversionService`, `DocumentArtifactPipeline` | Conversion success/timeout/cleanup covered | **Done** (2026-06-24; COR-E04) |
+| C5 | M | Test audit query/recorder | `AuditQueryService`, `ManagementAuditRecorder` | Group-scoped filtering incl. GLOBAL_ADMIN path covered | **Done** (2026-06-24; COR-E03/E04) |
+| C6 | M | Frontend: dashboard/tabs/router tests | Template detail decomposed; dashboard + tab router tests | Vitest for tasks, load error, tab query sync | **Done** (2026-06-23; COR-E05) |
+| C7 | M | Expand e2e beyond a11y smoke | Playwright docker config + role journeys + P14/P18 slices | Role-journey + domain E2E green on 4173 | **Done** (2026-06-29; COR-E01/E02 + P14/P18 specs) |
 
 ### OPT-D Backend architecture & stack alignment
 
@@ -201,6 +201,6 @@ once Wave 1 exit criteria are met.
 
 | Wave | Scope | Status |
 | --- | --- | --- |
-| Wave 1 | OPT-A + OPT-B (incl. B5) | **In Progress** — OPT-B (B1–B4) Done; B5 + OPT-A reconciliation remaining |
-| Wave 2 | OPT-C + OPT-E + OPT-D (start) | **In Progress** — OPT-C/E Done; D1 Done; D2–D6 + C4–C7 remain |
-| Wave 3 | OPT-D (finish) + OPT-F + OPT-G | **In Progress** — F1/F2/F3, G1/G2, E8 **Done** (2026-06-23); D2–D6, Redisson/QueryDSL/MapStruct remain |
+| Wave 1 | OPT-A + OPT-B (incl. B5) | **Done** — B1–B4 green; B5 baseline tag optional |
+| Wave 2 | OPT-C + OPT-E + OPT-D (start) | **Done** — OPT-C/E complete; D1–D4 Done; D5–D6 open |
+| Wave 3 | OPT-D (finish) + OPT-F + OPT-G | **In Progress** — F1/F2/F3, G1/G2, E8 **Done**; D5–D6, F4–F8, G3–G9 remain |

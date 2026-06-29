@@ -3,8 +3,9 @@
 **Phase status:** Done (2026-06-28; P18-T01–T10 Done) | **Depends on:** P3, P4
 **Confirmed:** 2026-06-23 (deep-review gap G3 — largest confirmed authoring gap)
 
-> Single-active-phase invariant: P13 completed **Done** (2026-06-23); there is currently no
-> single active phase. P18 stays `Not Started` until selected as the next active phase.
+> Single-active-phase invariant: P13 completed **Done** (2026-06-23). **P18 closed Done**
+> (2026-06-28; T01–T10). No formal phase is active; activate P12 or optimization slices
+> via plan-orchestrator when selecting the next delivery target.
 > **Scope note:** This is the deepest confirmed domain. It is intentionally decomposed
 > into sub-slices (T01…T08); each sub-slice is behavior-spec-first and may be promoted
 > to its own active sub-phase when P18 is activated. Do not attempt as one change set.

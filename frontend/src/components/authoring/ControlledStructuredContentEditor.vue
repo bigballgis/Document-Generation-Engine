@@ -53,6 +53,11 @@ const blockNodeTypes: ConfirmedNodeType[] = [
 
 const styleOptions = computed(() => styleCatalog.value?.entries ?? [])
 
+function styleLabel(styleKey: string): string {
+  const key = `templates.structuredEditor.styleCatalog.keys.${styleKey}`
+  return te(key) ? t(key) : styleKey
+}
+
 watch(
   () => props.modelValue,
   (value) => {
@@ -206,7 +211,7 @@ function insertInline(type: ConfirmedNodeType) {
           <el-option
             v-for="entry in styleOptions"
             :key="entry.styleKey"
-            :label="entry.styleKey"
+            :label="styleLabel(entry.styleKey)"
             :value="entry.styleKey"
           />
         </el-select>

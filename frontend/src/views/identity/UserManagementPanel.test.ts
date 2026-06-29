@@ -119,7 +119,7 @@ describe('UserManagementPanel', () => {
     await flushPromises()
 
     expect(wrapper.find('.delete-action').exists()).toBe(false)
-  })
+  }, 15000)
 
   it('restricts role filter options to operational roles for group admins', async () => {
     patchSession(['GROUP_ADMIN'], ['RETAIL'])

@@ -53,13 +53,13 @@ _None._
 
 ### 🟡 Suggestion (should improve)
 
-1. **Fidelity filter empty-result copy** — When filters exclude all rows, UI still shows “No fidelity warnings.” Consider a distinct “No matching warnings” message. _Rule: state completeness._
+1. **Fidelity filter empty-result copy** — **Fixed** (2026-06-29): distinct `noMatchingWarnings` i18n key when filters exclude all rows.
 
-2. **Style picker shows raw `styleKey`** — Options display catalog keys (e.g. `BodyText`) rather than human-friendly labels. _Rule: form polish._
+2. **Style picker shows raw `styleKey`** — **Fixed** (2026-06-29): i18n labels via `templates.structuredEditor.styleCatalog.keys.*` with fallback.
 
-3. **Paste summary Cancel vs Undo** — Footer exposes both actions with similar dismiss semantics; consolidate or differentiate labels. _Rule: dialog action hierarchy._
+3. **Paste summary Cancel vs Undo** — **Fixed** (2026-06-29): separate handlers — Cancel emits `cancel`, Undo emits `undo`.
 
-4. **Extend a11y smoke** — Add template authoring binding dialog heading and fidelity warning list region to `a11y-smoke.spec.ts`. _Rule: accessibility smoke._
+4. **Extend a11y smoke** — **Partial** (2026-06-29): templates list `h1` added to `a11y-smoke.spec.ts`; binding dialog heading deferred.
 
 5. **GREENBC nav active tint** — Same cross-phase note as P14-T03; sidebar active highlight may remain red-tinted on GREENBC. _Rule: dual-brand theming._
 

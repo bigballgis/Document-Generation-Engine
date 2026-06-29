@@ -34,6 +34,10 @@ function itemLabel(messageKey: string): string {
 
 function handleCancel() {
   emit('cancel')
+  visible.value = false
+}
+
+function handleUndo() {
   emit('undo')
   visible.value = false
 }
@@ -99,7 +103,7 @@ function handleAccept() {
       <el-button data-testid="paste-summary-cancel" @click="handleCancel">
         {{ t('templates.structuredEditor.pasteSummary.cancel') }}
       </el-button>
-      <el-button data-testid="paste-summary-undo" @click="handleCancel">
+      <el-button data-testid="paste-summary-undo" @click="handleUndo">
         {{ t('templates.structuredEditor.pasteSummary.undo') }}
       </el-button>
       <el-button

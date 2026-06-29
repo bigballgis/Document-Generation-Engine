@@ -30,6 +30,15 @@ test.describe('management shell accessibility smoke', () => {
     await expect(page.getByRole('heading', { level: 1, name: /tester workbench/i })).toBeVisible()
   })
 
+  test('templates list exposes primary h1 after login', async ({ page }) => {
+    await page.setViewportSize(P14_T01_VIEWPORT)
+    await loginAs(page, E2E_TEMPLATE_AUTHOR)
+    await page.goto('/templates')
+
+    await expect(page.getByRole('heading', { name: /^templates$/i })).toBeVisible()
+    await expect(page.getByText(/unable to load templates/i)).not.toBeVisible()
+  })
+
   test('dashboard timeout config panel exposes heading for global admin', async ({ page }) => {
     await page.setViewportSize(P14_T01_VIEWPORT)
     await loginAs(page, E2E_ADMIN)

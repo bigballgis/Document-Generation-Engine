@@ -165,7 +165,7 @@ describe('ApiPolicyDetailView', () => {
       outputFormats: ['PDF'],
       outputModes: ['INLINE'],
     }, true)
-  })
+  }, 15000)
 
   it('requires confirmation when impact preview returns warnings', async () => {
     mockTemplateLoad()

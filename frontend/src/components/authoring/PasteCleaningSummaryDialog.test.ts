@@ -38,8 +38,28 @@ describe('PasteCleaningSummaryDialog', () => {
     await wrapper.get('[data-testid="paste-summary-cancel"]').trigger('click')
 
     expect(wrapper.emitted('cancel')).toBeTruthy()
-    expect(wrapper.emitted('undo')).toBeTruthy()
+    expect(wrapper.emitted('undo')).toBeFalsy()
     expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([false])
+  })
+
+  it('emits undo when undo control is used', async () => {
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(PasteCleaningSummaryDialog, {
+      props: {
+        modelValue: true,
+        summary,
+        blocked: false,
+      },
+      attachTo: document.body,
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+
+    await wrapper.get('[data-testid="paste-summary-undo"]').trigger('click')
+
+    expect(wrapper.emitted('undo')).toBeTruthy()
+    expect(wrapper.emitted('cancel')).toBeFalsy()
   })
 
   it('accepts cleaned paste when not blocked', async () => {

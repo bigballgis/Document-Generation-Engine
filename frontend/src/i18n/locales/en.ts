@@ -999,6 +999,12 @@ export default {
         placeholder: 'Select master style',
         apply: 'Apply style',
       },
+      styleCatalog: {
+        keys: {
+          BodyText: 'Body text',
+          Heading1: 'Heading 1',
+        },
+      },
       editorSurface: 'Structured content editor — paste Word or HTML here',
       emptyDocument: 'Insert a block node to begin authoring.',
       jsonPreview: 'Structured JSON preview',

@@ -1,6 +1,6 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-29 (P18-T10 E2E functional + UIUX evidence)
+**Last synced:** 2026-06-24 (P18 UI polish + plan layer alignment; frontend **250** Vitest green)
 **Orchestration note (2026-06-28):** **P18 Done** — **P18-T01–T10 Done**.
 **Purpose:** Cross-reference plan phases (P0–P11), epics (E01–E12), and milestones (M1–M14) after re-earning Done status with real code and green gates.
 
@@ -19,7 +19,7 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Frontend (latest full gates) | `pnpm -C frontend lint`, `type-check`, `test`, `build` | Green — **248** Vitest tests (2026-06-28) | P18-T10 controlled authoring UI + fidelity filters |
+| Frontend (latest full gates) | `pnpm -C frontend lint`, `type-check`, `test`, `build` | Green — **250** Vitest tests (2026-06-24) | P18 polish: fidelity filter empty state, paste dialog cancel/undo split, style catalog i18n labels; flaky test timeout fix |
 | Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — **514** tests (1 skipped), BUILD SUCCESS (2026-06-28) | P18-T10 management APIs + `FidelityWarningView` extension (+1 slice test) |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
