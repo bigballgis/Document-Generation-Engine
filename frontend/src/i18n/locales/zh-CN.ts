@@ -1074,6 +1074,92 @@ export default {
       },
     },
   },
+  journey: {
+    timeline: {
+      ariaLabel: '角色工作流程进度',
+    },
+    custom: {
+      demo: '自定义演示引导',
+    },
+    roles: {
+      MASTER_DESIGNER: {
+        title: '母版设计流程',
+        empty: {
+          guidance: '上传母版文档开始设计流程，然后按下方步骤推进。',
+        },
+        steps: {
+          upload: {
+            label: '上传母版文档',
+            guidance: '上传母版文档以开始设计。',
+          },
+          placeholders: {
+            label: '设置版式占位符',
+            guidance: '为动态内容区域设置版式占位符。',
+          },
+          submitReview: {
+            label: '提交审核',
+            guidance: '设计完成后提交审核。',
+          },
+          rework: {
+            label: '修改后重新提交',
+            guidance: '根据审核意见修改并重新提交母版。',
+          },
+        },
+      },
+      TEMPLATE_AUTHOR: {
+        title: '模板编写流程',
+        empty: {
+          guidance: '创建或打开模板开始编写，然后按下方步骤推进。',
+        },
+        steps: {
+          create: {
+            label: '创建模板',
+            guidance: '创建新模板或打开现有草稿。',
+          },
+          design: {
+            label: '设计模板内容',
+            guidance: '设计模板内容并按需绑定标准条款。',
+          },
+          trialGenerate: {
+            label: '试生成预览',
+            guidance: '运行试生成以预览输出文档。',
+          },
+          submitTest: {
+            label: '提交测试',
+            guidance: '内容就绪后提交测试。',
+          },
+          submitApproval: {
+            label: '提交审批',
+            guidance: '测试通过后提交审批。',
+          },
+          awaitGoLive: {
+            label: '等待确认上线',
+            guidance: '审批通过后等待确认上线。',
+          },
+        },
+      },
+      TEMPLATE_TESTER: {
+        title: '模板测试流程',
+        empty: {
+          guidance: '从任务列表打开测试任务，然后按下方步骤推进。',
+        },
+        steps: {
+          reviewRequest: {
+            label: '查看测试任务',
+            guidance: '打开测试任务并查看提交摘要。',
+          },
+          checkEvidence: {
+            label: '核对输出效果',
+            guidance: '核对输出样例与预期效果。',
+          },
+          recordResult: {
+            label: '记录测试结果',
+            guidance: '记录测试结果以便作者继续推进。',
+          },
+        },
+      },
+    },
+  },
   identity: {
     title: '身份与分组管理',
     description: '在授权范围内管理管理账户与业务分组。',

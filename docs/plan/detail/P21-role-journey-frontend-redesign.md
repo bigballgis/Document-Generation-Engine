@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **P21-T01 Done** 2026-06-29 — A0 behavior nav + L1 copy round 1; **P21-T01a Done** 2026-06-29 — task hub deepening; **P21-T02 Done** 2026-06-29 — backend collaboration closed loop; next slice **P21-T01b Not Started** — RoleJourneyTimeline) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **P21-T01 Done**; **P21-T01a Done**; **P21-T01b Done** 2026-06-30 — RoleJourneyTimeline; **P21-T02 Done**; next slice **P21-T01c Not Started** — dead-code cleanup) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -167,7 +167,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | --- | --- | --- | --- | --- |
 | P21-T01 | A0 foundation + terminology baseline: behavior-typed "My to-dos" nav group (capability/queue-driven, business copy); rewrite L1 copy for nav/dashboard/tasks/breadcrumb | `navStructure.ts`, `ManagementShell.vue`, `en.ts`, `zh-CN.ts` | Required (§12.2 implemented) | Done (2026-06-29) |
 | P21-T01a | Task hub deepening: queue partitioning + restore `triggerType/summaryText/ageSeconds` + SLA/overdue badges + inline open actions | `DashboardView.vue`, `useWorkflowTasks.ts`, `utils/collaborationWorkItems.ts`, `stores/collaboration.ts`, `TaskHubPartitionSection.vue` | Required (§12.3) | Done (2026-06-29) |
-| P21-T01b | New `RoleJourneyTimeline` reusable stepper (business-language steps, empty/guidance states) | `frontend/src/components/**` (new) | Required | Not Started |
+| P21-T01b | New `RoleJourneyTimeline` reusable stepper (business-language steps, empty/guidance states) | `frontend/src/components/journey/**`, `roleJourneyDefinitions.ts`, `DashboardView.vue` | Required (§12.4) | Done (2026-06-30) |
 | P21-T01c | Dead-code cleanup: remove `RoleHomeView.vue` (+test); remove residual workbench logical keys | `views/home/RoleHomeView.vue`, `routeKeys.ts`, `auth/roles.ts` | n/a (refactor) | Not Started |
 | P21-T01d | Companion terminology guide created (SSOT) + en/zh value sweep round 1 | `docs/product/business-terminology-guide.md`, `en.ts`, `zh-CN.ts` | n/a (doc) | Not Started |
 | P21-T02 | A1 backend: emit `TEST_FAILURE → REMEDIATION`; write `RESOLVED` on test decision; allow resubmit-for-test from "test passed" | `backend/.../collaboration/**`, `TemplateLifecycleService`, `ApprovalSubStateResolver` (new) | Required (§12.1 ready) | Done (2026-06-29) |
@@ -1073,3 +1073,315 @@ AUD-H01..H07 closed. Gates: Vitest **280+**; Playwright T01a **6/6** + UIUX mani
 - Do **not** add pass/reject/publish buttons in list rows.
 - Do **not** change backend work-item writer/emission (**P21-T07** for remaining triggers).
 - Do **not** register OpenAPI or change authorization model (**P21-X03**, **P21-X04**).
+
+### 12.4 P21-T01b — `RoleJourneyTimeline` reusable stepper (cluster ① foundation)
+
+**BDD readiness:** `ready` (confirmed against §2 terminology, §3 Hybrid B journey layer, ADR P21-D02,
+catalog-navigation-ux hybrid IA, and cluster ① task rows P21-T03/T04/T05; no blocking pending
+questions).
+
+**Implementation status:** **Done** (2026-06-30) — `RoleJourneyTimeline.vue`, cluster-① journey
+definitions, Dashboard `#journey-section` reference integration (onboarding `currentStepIndex=null`);
+Gates: Vitest green; Playwright T01b **4/4** + UIUX manifest **PASS**.
+
+**Scope boundary (this slice only):**
+
+- **In:** new reusable **`RoleJourneyTimeline`** Vue component (horizontal stepper / steps bar);
+  typed props + optional slots for guidance and per-step extras; three **cluster ①** static journey
+  definition exports (`MASTER_DESIGNER`, `TEMPLATE_AUTHOR`, `TEMPLATE_TESTER`) with L1 business
+  step labels via new stable i18n keys under `journey.*`; step visual states (**completed** /
+  **current** / **upcoming**); empty/onboarding guidance copy ("what to do next"); keyboard
+  navigation + `aria-current="step"`; **one fixed reference integration** on the dashboard task hub
+  (see Spec C); unit/component tests + Vitest a11y assertions.
+- **Out:** wiring current step from template/master lifecycle entity state (**P21-T03/T04/T05**);
+  embedding in `TemplateDetailView` / master detail pages (**P21-T03+**); cluster ②③④ journey
+  definitions (**P21-T08/T09/T10/T11**); dead-code removal (**P21-T01c**); backend/API changes;
+  permission-model changes (**P21-X03**).
+
+**Traceability:**
+
+- Plan — this doc §2 (L1 terminology / three-layer copy), §3 (Hybrid B — `taskHub → journey →
+  detail`), §4 cluster ①, §6 P21-T01b row.
+- ADR — `docs/adr/decisions/2026-06-29-behavior-typed-ia-business-terminology.md` P21-D02 (per-role
+  guided journey), P21-D04 (business language), P21-D05 (keys stable, values business).
+- Terminology SSOT — `docs/product/business-terminology-guide.md` §3–§4 (phrasing rules; workflow
+  stages; forbidden L1 tokens).
+- Navigation — `docs/product/catalog-navigation-ux.md` (Hybrid IA — journey reachable from task hub).
+- Downstream consumers (definitions only in T01b; integration in later slices) — P21-T03 (master
+  designer), P21-T04 (orchestrator/author), P21-T05 (tester), P21-T08/T09/T10/T11.
+- Code under change — new `frontend/src/components/journey/RoleJourneyTimeline.vue`, new
+  `frontend/src/constants/roleJourneyDefinitions.ts` (or equivalent), `frontend/src/i18n/locales/en.ts`,
+  `zh-CN.ts`; reference touch `frontend/src/views/dashboard/DashboardView.vue` (+ tests).
+
+#### Spec A — Reusable `RoleJourneyTimeline` component
+
+- **Actor / role:** any authenticated management user; parent view supplies steps and current position
+  (T01b does **not** infer lifecycle state from backend).
+- **Goal:** See a guided, business-language workflow timeline showing where they are in a role journey
+  and what to do next (one-line guidance).
+- **Trigger:** parent view renders the component with `steps` + `currentStepIndex` (+ optional
+  guidance override).
+- **Preconditions:** `steps.length >= 1`; each step has stable `id` + i18n `labelKey` (and optional
+  `descriptionKey` for L1 subline); all keys exist in en baseline with zh-CN parity.
+- **Primary journey:** component renders a horizontal stepper (bank OA tokens — no raw hex/px) → for
+  each step index `i`:
+  - `i < currentStepIndex` → **completed** (check icon or filled node; not IT enum text);
+  - `i === currentStepIndex` → **current** (brand emphasis + `aria-current="step"`);
+  - `i > currentStepIndex` → **upcoming** (muted);
+  - when `currentStepIndex === null` → no step marked current; all steps **upcoming** unless parent
+    passes explicit per-step `status` override (optional advanced prop — **deferred**; v1 uses index
+    only).
+- **Guidance panel:** below (or adjacent to) the stepper, render one line of guidance:
+  - if `guidanceKey` prop set → `t(guidanceKey)`;
+  - else if `currentStepIndex !== null` → `journey.roles.<ROLE>.steps.<stepId>.guidance` resolved from
+    current step;
+  - else → `journey.roles.<ROLE>.empty.guidance` (onboarding / no active workflow context).
+- **System responses (success):** step labels are L1 business language; no forbidden tokens on stepper
+  or guidance (`policy`, `credential`, `lifecycle`, `gate`, `semver`, `anchor`, `escalation` as
+  primary nouns); component is presentational — **no routing, no API calls, no permission checks**
+  inside the component.
+
+**Component API (v1 — must remain backward-compatible for P21-T03+):**
+
+| Prop | Type | Required | Rule |
+| --- | --- | --- | --- |
+| `steps` | `RoleJourneyStep[]` | yes | Ordered journey steps from definition export or custom array |
+| `currentStepIndex` | `number \| null` | yes | `null` = empty/onboarding (no current step) |
+| `guidanceKey` | `string` | no | Overrides auto guidance resolution |
+| `ariaLabelKey` | `string` | no | Default `journey.timeline.ariaLabel` |
+| `titleKey` | `string` | no | Optional section heading above stepper (e.g. role journey title) |
+
+```typescript
+interface RoleJourneyStep {
+  id: string           // stable machine id, e.g. 'upload', 'submitReview'
+  labelKey: string     // L1 step name, e.g. 'journey.roles.MASTER_DESIGNER.steps.upload.label'
+  descriptionKey?: string  // optional short L1 subline under label (hidden on narrow view OK)
+}
+```
+
+**Slots (optional, v1):**
+
+| Slot | Purpose |
+| --- | --- |
+| `guidance` | Replace default guidance paragraph (parent-owned actions/links) |
+| `step-extra` | `{ step, index, status }` — icon/badge/action beside a step (later slices) |
+| `after` | Content below guidance (CTA buttons — parent supplies) |
+
+**Emits:** none required in v1 (presentational). Click-to-navigate on steps is **out of scope** for
+T01b unless parent wraps via `step-extra`; step nodes are not links by default.
+
+#### Spec B — Cluster ① journey definition exports (static catalogs)
+
+Three exported constants (names illustrative; implementer may use `ROLE_JOURNEY_DEFINITIONS` map):
+
+| Role constant | Export key | Step count | Source intent |
+| --- | --- | --- | --- |
+| `MASTER_DESIGNER` | `masterDesignerJourneySteps` | 4 | P21-T03: upload → placeholders → submit review → rework |
+| `TEMPLATE_AUTHOR` | `templateAuthorJourneySteps` | 6 | P21-T04: create → design → trial → submit test → submit approval → awaiting go-live |
+| `TEMPLATE_TESTER` | `templateTesterJourneySteps` | 3 | P21-T05: review request → check evidence → record result |
+
+**Step catalog — stable ids + i18n keys (en exemplar values; zh-CN business-aligned):**
+
+**MASTER_DESIGNER**
+
+| Step `id` | `labelKey` suffix | en (business) | zh-CN (business) |
+| --- | --- | --- | --- |
+| `upload` | `.steps.upload.label` | Upload letterhead | 上传母版文档 |
+| `placeholders` | `.steps.placeholders.label` | Set layout placeholders | 设置版式占位符 |
+| `submitReview` | `.steps.submitReview.label` | Submit for review | 提交审核 |
+| `rework` | `.steps.rework.label` | Fix and resubmit | 修改后重新提交 |
+
+**TEMPLATE_AUTHOR**
+
+| Step `id` | `labelKey` suffix | en (business) | zh-CN (business) |
+| --- | --- | --- | --- |
+| `create` | `.steps.create.label` | Create template | 创建模板 |
+| `design` | `.steps.design.label` | Design content | 设计模板内容 |
+| `trialGenerate` | `.steps.trialGenerate.label` | Run trial output | 试生成预览 |
+| `submitTest` | `.steps.submitTest.label` | Submit for testing | 提交测试 |
+| `submitApproval` | `.steps.submitApproval.label` | Submit for approval | 提交审批 |
+| `awaitGoLive` | `.steps.awaitGoLive.label` | Awaiting go-live | 等待确认上线 |
+
+**TEMPLATE_TESTER**
+
+| Step `id` | `labelKey` suffix | en (business) | zh-CN (business) |
+| --- | --- | --- | --- |
+| `reviewRequest` | `.steps.reviewRequest.label` | Review test request | 查看测试任务 |
+| `checkEvidence` | `.steps.checkEvidence.label` | Check output evidence | 核对输出效果 |
+| `recordResult` | `.steps.recordResult.label` | Record test result | 记录测试结果 |
+
+Full keys: `journey.roles.<ROLE>.steps.<id>.label` and `.guidance` (one-line next-action copy per
+step); role-level `journey.roles.<ROLE>.title` and `journey.roles.<ROLE>.empty.guidance`.
+
+Helper export (recommended):
+
+```typescript
+function resolveClusterOneJourney(role: 'MASTER_DESIGNER' | 'TEMPLATE_AUTHOR' | 'TEMPLATE_TESTER'): RoleJourneyStep[]
+function resolvePrimaryClusterOneRole(roles: string[]): 'MASTER_DESIGNER' | 'TEMPLATE_AUTHOR' | 'TEMPLATE_TESTER' | null
+```
+
+**Role resolution priority** when session holds multiple cluster-① roles: `MASTER_DESIGNER` →
+`TEMPLATE_AUTHOR` → `TEMPLATE_TESTER` (upstream-first, matches §4 delivery order within cluster).
+
+#### Spec C — Fixed reference integration (dashboard task hub — acceptance anchor)
+
+- **Actor / role:** authenticated user whose session includes **at least one** of
+  `MASTER_DESIGNER`, `TEMPLATE_AUTHOR`, `TEMPLATE_TESTER` (and `route.dashboard-home` visible).
+- **Goal:** On the dashboard, preview the role journey stepper without opening a detail page — proves
+  the component is embeddable and i18n/a11y work end-to-end.
+- **Trigger:** navigate to unfiltered `/dashboard` (no `queue` / `filter` query params).
+- **Preconditions:** P21-T01a task hub already shipped; user is not `AUDIT_ADMIN`-only.
+- **Primary journey:** dashboard resolves `primaryRole = resolvePrimaryClusterOneRole(session.roles)`
+  → if non-null, render **`RoleJourneyTimeline`** in a dedicated block **`#journey-section`**
+  placed **immediately above** `#tasks-section` (after stat cards / load errors, before task partition
+  header):
+  - `steps` = journey definition for `primaryRole`;
+  - `currentStepIndex = null` (no entity context in T01b — onboarding empty state);
+  - `titleKey` = `journey.roles.<ROLE>.title`;
+  - guidance falls back to `journey.roles.<ROLE>.empty.guidance`.
+- **System responses (success):** section visible only when `primaryRole !== null`; hidden for roles
+  outside cluster ① (e.g. `TEMPLATE_APPROVER`-only, `AUDIT_ADMIN`-only, approver-only sessions);
+  GROUP/GLOBAL admins **without** cluster-① roles do not see `#journey-section`; admins **with**
+  cluster-① role see the timeline for their resolved primary role; task hub partitions below are
+  unchanged (T01a regression).
+
+**Why this integration point (decided):** minimal diff, matches §3 diagram (`taskHub → journey`),
+testable in Vitest + Playwright on `/dashboard` without template/master fixtures; avoids a throwaway
+demo route.
+
+#### Spec D — i18n (`journey.*` namespace)
+
+- **Actor / role:** all locales.
+- **Goal:** Stable keys, business L1 values, en baseline + zh-CN parity.
+- **Trigger:** component or dashboard renders journey copy.
+- **Preconditions:** i18n english-first constitution; keys are **new** (no renames of existing keys).
+- **Primary journey:** add keys to `en.ts` first, mirror in `zh-CN.ts`:
+
+| Key pattern | Purpose |
+| --- | --- |
+| `journey.timeline.ariaLabel` | Nav accessible name — en "Role workflow progress" |
+| `journey.roles.<ROLE>.title` | Section heading — e.g. en "Letterhead design workflow" / zh "母版设计流程" |
+| `journey.roles.<ROLE>.empty.guidance` | Onboarding when `currentStepIndex === null` |
+| `journey.roles.<ROLE>.steps.<id>.label` | Step title (L1) |
+| `journey.roles.<ROLE>.steps.<id>.guidance` | One-line next action for that step |
+
+- **System responses (success):** no hardcoded user-visible strings in component or definitions file;
+  grep of new en values passes forbidden L1 token audit (§2.2); zh-CN conveys business intent (not
+  literal IT translation).
+
+#### Spec E — Accessibility (stepper keyboard + ARIA)
+
+- **Actor / role:** keyboard and screen-reader users.
+- **Goal:** Perceive current step and traverse steps without mouse.
+- **Trigger:** focus enters the stepper (`role="navigation"` wrapper with `aria-label` from
+  `ariaLabelKey`).
+- **Preconditions:** component mounted with `steps.length >= 1`.
+- **Primary journey:**
+  - completed/upcoming/current states exposed in DOM (not color-only);
+  - current step element has `aria-current="step"`;
+  - step list items are focusable (`tabindex="0"` on each step **or** roving `tabindex` on a single
+    tab stop with Left/Right arrow movement — implementer choice; must pass component test);
+  - Left/Right (and Home/End optional) move focus between steps; focus ring visible (`:focus-visible`,
+    design tokens);
+  - guidance text associated via `aria-describedby` on the current step or the navigation region.
+- **System responses (success):** Vitest + `axe` or manual a11y assertions on reference integration;
+  no violation for missing labels on step nodes.
+
+#### Acceptance scenarios (Given / When / Then)
+
+**Component rendering**
+
+- **(Completed / current / upcoming)** Given `steps` of length 4 and `currentStepIndex = 2`, When
+  `RoleJourneyTimeline` renders, Then steps 0–1 show completed styling, step 2 is current with
+  `aria-current="step"`, steps 3+ show upcoming styling, And guidance shows
+  `journey.roles.*.steps.<stepId>.guidance` for step index 2.
+- **(Empty / onboarding)** Given `currentStepIndex = null`, When the component renders, Then no step
+  has `aria-current="step"`, And guidance shows `journey.roles.<ROLE>.empty.guidance` (or `guidanceKey`
+  override).
+- **(Guidance override)** Given `guidanceKey='journey.custom.demo'`, When rendered, Then that key is
+  used regardless of `currentStepIndex`.
+- **(L1 grep — step labels)** Given en locale for all cluster-① step `labelKey`s, When grepping values,
+  Then no forbidden L1 nouns appear (§2.2 list).
+
+**Journey definitions**
+
+- **(Master designer catalog)** When importing `masterDesignerJourneySteps`, Then there are exactly 4
+  steps with ids `upload`, `placeholders`, `submitReview`, `rework` in order, And each `labelKey`
+  resolves to non-empty en/zh-CN strings.
+- **(Author catalog)** When importing `templateAuthorJourneySteps`, Then 6 steps match Spec B table order.
+- **(Tester catalog)** When importing `templateTesterJourneySteps`, Then 3 steps match Spec B table order.
+- **(Primary role resolution)** Given roles `['TEMPLATE_AUTHOR', 'TEMPLATE_TESTER']`, When
+  `resolvePrimaryClusterOneRole` runs, Then it returns `TEMPLATE_AUTHOR`.
+
+**Dashboard reference integration**
+
+- **(Author sees journey above tasks)** Given a session with role `TEMPLATE_AUTHOR` and dashboard access,
+  When navigating to `/dashboard`, Then `#journey-section` is visible above `#tasks-section`, And
+  stepper shows 6 author steps with onboarding guidance (`currentStepIndex null`), And task partitions
+  still render per T01a.
+- **(Master designer journey)** Given role `MASTER_DESIGNER`, When on unfiltered `/dashboard`, Then
+  stepper shows 4 master-designer steps with `journey.roles.MASTER_DESIGNER.title`.
+- **(Tester journey)** Given role `TEMPLATE_TESTER` only, When on `/dashboard`, Then stepper shows 3
+  tester steps.
+- **(Approver-only — hidden)** Given role `TEMPLATE_APPROVER` only (no cluster-① role), When on
+  `/dashboard`, Then `#journey-section` is absent And task hub unchanged.
+- **(Filtered queue deep link — journey still shown)** Given `TEMPLATE_TESTER` on
+  `/dashboard?queue=TEST#tasks-section`, Then `#journey-section` still renders (journey is not
+  queue-specific in T01b) And filtered task scope per T01a is preserved below.
+- **(i18n — no literals)** Given the component source, When scanned, Then no hardcoded user-facing
+  strings outside i18n keys / test fixtures.
+
+**Accessibility**
+
+- **(aria-current)** Given `currentStepIndex = 1`, When rendered, Then exactly one step node has
+  `aria-current="step"`.
+- **(Keyboard traverse)** Given focus on step 1, When user presses ArrowRight, Then focus moves to step
+  2 And focus ring is visible.
+- **(Navigation landmark)** When rendered, Then a `role="navigation"` (or `<nav>`) wraps the stepper
+  with accessible name from `journey.timeline.ariaLabel`.
+
+#### Boundary & exception behavior
+
+- **`steps` empty array:** component renders nothing (or `EmptyStatePanel` with
+  `journey.timeline.error.noSteps` — **optional** key; parent should not pass empty; defensive no-op
+  acceptable).
+- **`currentStepIndex` out of range:** treat as `null` (fail-safe onboarding) or clamp — **default:
+  clamp to `[0, steps.length - 1]`** with dev-only console warn in non-production.
+- **Unknown role in helper:** `resolvePrimaryClusterOneRole` returns `null`; dashboard hides section.
+- **Multi-role admin with cluster-① role:** show one timeline (priority resolution); do not stack
+  multiple timelines in T01b.
+- **Locale switch:** step labels and guidance re-render from i18n; step indices unchanged.
+- **No permission change:** timeline is informational; fail-closed actions remain on detail pages.
+
+#### Observable evidence
+
+- **Unit:** `roleJourneyDefinitions.test.ts` — step counts, ids, key suffixes, role resolution priority.
+- **Component:** `RoleJourneyTimeline.test.ts` — completed/current/upcoming DOM, guidance keys,
+  `aria-current`, keyboard focus move (simulate keydown).
+- **Integration:** `DashboardView.test.ts` — `#journey-section` visible/hidden per role; stub stepper
+  receives expected `steps` length.
+- **E2E (smoke, optional in T01b):** extend dashboard spec — login as author → `#journey-section`
+  visible with 6 steps; approver-only → absent.
+- **i18n:** new keys present in both `en.ts` and `zh-CN.ts`; key-parity test updated if present.
+
+#### Decided defaults (non-blocking)
+
+1. **i18n namespace:** `journey.*` (not `roleJourney.*`) — shorter, matches plan §3 label "Role journey
+   timeline view".
+2. **Reference integration placement:** `#journey-section` immediately **above** `#tasks-section` on
+   unfiltered and filtered dashboard routes (fixed for acceptance).
+3. **T01b dashboard `currentStepIndex`:** always `null` — real lifecycle mapping deferred to P21-T03/T04/T05.
+4. **Step click:** non-interactive in v1 (no navigation); later slices add CTAs via `after` slot or
+   `step-extra`.
+5. **Implementation location:** `frontend/src/components/journey/RoleJourneyTimeline.vue` +
+   `frontend/src/constants/roleJourneyDefinitions.ts`.
+6. **Element Plus:** may use `el-steps` styled with OA tokens **or** custom markup — visual must meet
+   `frontend-oa-design` SKILL (dual brand, no overflow).
+
+#### Out of scope reminders for implementer
+
+- Do **not** map `currentStepIndex` from template/master `lifecycleStatus` in T01b (**P21-T03+**).
+- Do **not** embed in `TemplateDetailView` / master hub in T01b (**P21-T03+**).
+- Do **not** add cluster ②③④ journey definitions (**P21-T08+**).
+- Do **not** remove `RoleHomeView` / workbench keys (**P21-T01c**).
+- Do **not** change task hub partition logic (**P21-T01a** regression guard).

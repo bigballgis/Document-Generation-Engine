@@ -1597,6 +1597,95 @@ export default {
       lifecycle: 'Unable to apply lifecycle operation.',
     },
   },
+  journey: {
+    timeline: {
+      ariaLabel: 'Role workflow progress',
+    },
+    custom: {
+      demo: 'Custom demo guidance',
+    },
+    roles: {
+      MASTER_DESIGNER: {
+        title: 'Letterhead design workflow',
+        empty: {
+          guidance:
+            'Upload a letterhead document to begin your design workflow, then follow each step below.',
+        },
+        steps: {
+          upload: {
+            label: 'Upload letterhead',
+            guidance: 'Upload your letterhead document to get started.',
+          },
+          placeholders: {
+            label: 'Set layout placeholders',
+            guidance: 'Define layout placeholders for dynamic content areas.',
+          },
+          submitReview: {
+            label: 'Submit for review',
+            guidance: 'Submit your letterhead design for review when ready.',
+          },
+          rework: {
+            label: 'Fix and resubmit',
+            guidance: 'Address review feedback and resubmit your letterhead.',
+          },
+        },
+      },
+      TEMPLATE_AUTHOR: {
+        title: 'Template authoring workflow',
+        empty: {
+          guidance:
+            'Create or open a template to begin authoring, then follow each step below.',
+        },
+        steps: {
+          create: {
+            label: 'Create template',
+            guidance: 'Create a new template or open an existing draft.',
+          },
+          design: {
+            label: 'Design content',
+            guidance: 'Design template content and bind standard clauses as needed.',
+          },
+          trialGenerate: {
+            label: 'Run trial output',
+            guidance: 'Run a trial output to preview the generated document.',
+          },
+          submitTest: {
+            label: 'Submit for testing',
+            guidance: 'Submit the template for testing when content is ready.',
+          },
+          submitApproval: {
+            label: 'Submit for approval',
+            guidance: 'Submit the template for approval after testing passes.',
+          },
+          awaitGoLive: {
+            label: 'Awaiting go-live',
+            guidance: 'Wait for go-live confirmation after approval.',
+          },
+        },
+      },
+      TEMPLATE_TESTER: {
+        title: 'Template testing workflow',
+        empty: {
+          guidance:
+            'Open a test request from your task list, then follow each step below.',
+        },
+        steps: {
+          reviewRequest: {
+            label: 'Review test request',
+            guidance: 'Open the test request and review the submission summary.',
+          },
+          checkEvidence: {
+            label: 'Check output evidence',
+            guidance: 'Check output samples and evidence against expectations.',
+          },
+          recordResult: {
+            label: 'Record test result',
+            guidance: 'Record your test result so the author can proceed.',
+          },
+        },
+      },
+    },
+  },
   identity: {
     title: 'Identity & group administration',
     description: 'Manage management accounts and business groups within your authorized scope.',

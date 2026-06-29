@@ -6,6 +6,11 @@ import DashboardView from '@/views/dashboard/DashboardView.vue'
 import { useTemplatesStore } from '@/stores/templates'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useSessionStore } from '@/stores/session'
+import {
+  masterDesignerJourneySteps,
+  templateAuthorJourneySteps,
+  templateTesterJourneySteps,
+} from '@/constants/roleJourneyDefinitions'
 
 const routeRef = ref({
   hash: '',
@@ -35,6 +40,32 @@ vi.mock('@/api/collaboration', () => ({
     updatedAt: '2026-06-01T00:00:00Z',
   }),
 }))
+
+const journeyTimelineStub = {
+  name: 'RoleJourneyTimeline',
+  props: ['steps', 'currentStepIndex', 'titleKey'],
+  template:
+    '<div class="journey-timeline-stub" :data-step-count="steps.length" :data-current-index="currentStepIndex">{{ titleKey }}</div>',
+}
+
+function mountDashboard(extraStubs: Record<string, unknown> = {}) {
+  return mount(DashboardView, {
+    global: {
+      stubs: {
+        DashboardStatCards: true,
+        LoadErrorPanel: true,
+        CollaborationTimeoutConfigPanel: true,
+        TaskHubPartitionSection: true,
+        RoleJourneyTimeline: journeyTimelineStub,
+        ElCard: { template: '<div><slot /></div>' },
+        ElSkeleton: true,
+        ElEmpty: true,
+        ElButton: true,
+        ...extraStubs,
+      },
+    },
+  })
+}
 
 describe('DashboardView', () => {
   beforeEach(() => {
@@ -267,5 +298,146 @@ describe('DashboardView', () => {
     expect(wrapper.find('#tasks-section .load-error-stub').text()).toBe(
       'collaboration.workItems.error.load',
     )
+  })
+
+  it('shows journey section above tasks for TEMPLATE_AUTHOR with onboarding stepper', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Author',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_AUTHOR'],
+      capabilities: { authorTemplates: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard({
+      TaskHubPartitionSection: {
+        props: ['partition'],
+        template: '<div class="partition-stub">{{ partition.id }}</div>',
+      },
+    })
+    await flushPromises()
+
+    const journeySection = wrapper.find('#journey-section')
+    const tasksSection = wrapper.find('#tasks-section')
+    expect(journeySection.exists()).toBe(true)
+    expect(tasksSection.exists()).toBe(true)
+    expect(
+      journeySection.element.compareDocumentPosition(tasksSection.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+
+    const stub = wrapper.find('.journey-timeline-stub')
+    expect(Number(stub.attributes('data-step-count'))).toBe(templateAuthorJourneySteps.length)
+    expect(stub.attributes('data-current-index')).toBeUndefined()
+    expect(stub.text()).toBe('journey.roles.TEMPLATE_AUTHOR.title')
+  })
+
+  it('shows master designer journey with 4 steps on unfiltered dashboard', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Designer',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.master-management', 'route.template-management'],
+      roles: ['MASTER_DESIGNER'],
+      capabilities: { manageMasters: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('#journey-section').exists()).toBe(true)
+    expect(Number(wrapper.find('.journey-timeline-stub').attributes('data-step-count'))).toBe(
+      masterDesignerJourneySteps.length,
+    )
+    expect(wrapper.find('.journey-timeline-stub').text()).toBe(
+      'journey.roles.MASTER_DESIGNER.title',
+    )
+  })
+
+  it('shows tester journey with 3 steps when TEMPLATE_TESTER only', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Tester',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_TESTER'],
+      capabilities: { decideTests: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(Number(wrapper.find('.journey-timeline-stub').attributes('data-step-count'))).toBe(
+      templateTesterJourneySteps.length,
+    )
+  })
+
+  it('hides journey section for TEMPLATE_APPROVER-only sessions', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Approver',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_APPROVER'],
+      capabilities: { decideApprovals: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('#journey-section').exists()).toBe(false)
+    expect(wrapper.find('#tasks-section').exists()).toBe(true)
+  })
+
+  it('still shows journey section on filtered queue deep links', async () => {
+    routeRef.value.query = { queue: 'TEST' }
+    routeRef.value.hash = '#tasks-section'
+
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Tester',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_TESTER'],
+      capabilities: { decideTests: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+
+    const collaborationStore = useCollaborationStore()
+    vi.spyOn(collaborationStore, 'fetchWorkItems').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('#journey-section').exists()).toBe(true)
+    expect(wrapper.find('h1').text()).toBe('collaboration.workItem.queue.TEST.title')
   })
 })

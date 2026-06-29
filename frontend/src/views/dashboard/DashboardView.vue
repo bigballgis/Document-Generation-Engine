@@ -6,6 +6,12 @@ import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import DashboardStatCards from '@/components/dashboard/DashboardStatCards.vue'
 import TaskHubPartitionSection from '@/components/dashboard/TaskHubPartitionSection.vue'
+import RoleJourneyTimeline from '@/components/journey/RoleJourneyTimeline.vue'
+import {
+  resolveClusterOneJourney,
+  resolvePrimaryClusterOneRole,
+  roleJourneyTitleKey,
+} from '@/constants/roleJourneyDefinitions'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import {
   buildTaskPartitions,
@@ -88,6 +94,22 @@ const visiblePartitions = computed(() => {
 })
 
 const showStatsSection = computed(() => !mastersLoadError.value && !templatesLoadError.value)
+
+const primaryClusterOneRole = computed(() =>
+  resolvePrimaryClusterOneRole(sessionStore.session?.roles ?? []),
+)
+
+const journeySteps = computed(() =>
+  primaryClusterOneRole.value
+    ? resolveClusterOneJourney(primaryClusterOneRole.value)
+    : [],
+)
+
+const journeyTitleKey = computed(() =>
+  primaryClusterOneRole.value
+    ? roleJourneyTitleKey(primaryClusterOneRole.value)
+    : undefined,
+)
 
 const collaborationLoadErrorKey = computed(
   () => collaborationStore.workItemsErrorMessageKey ?? 'collaboration.workItems.error.load',
@@ -273,6 +295,14 @@ function openQuickLink(path: string) {
 
     <DashboardStatCards v-if="showStatsSection" :stats="stats" :loading="loading" />
 
+    <section v-if="primaryClusterOneRole" id="journey-section" class="journey-section">
+      <RoleJourneyTimeline
+        :steps="journeySteps"
+        :current-step-index="null"
+        :title-key="journeyTitleKey"
+      />
+    </section>
+
     <section id="tasks-section" class="tasks-section">
       <header class="section-header">
         <h2>{{ t('dashboard.tasks.title') }}</h2>
@@ -365,6 +395,10 @@ function openQuickLink(path: string) {
 }
 
 .tasks-section {
+  margin-bottom: 2rem;
+}
+
+.journey-section {
   margin-bottom: 2rem;
 }
 

@@ -1,0 +1,304 @@
+<script setup lang="ts">
+import { computed, ref, useId } from 'vue'
+import { useI18n } from 'vue-i18n'
+import {
+  emptyGuidanceKeyFromStepLabel,
+  stepGuidanceKeyFromLabel,
+  type RoleJourneyStep,
+} from '@/constants/roleJourneyDefinitions'
+
+const props = withDefaults(
+  defineProps<{
+    steps: RoleJourneyStep[]
+    currentStepIndex: number | null
+    guidanceKey?: string
+    ariaLabelKey?: string
+    titleKey?: string
+  }>(),
+  {
+    ariaLabelKey: 'journey.timeline.ariaLabel',
+  },
+)
+
+const { t } = useI18n()
+const guidanceId = useId()
+const stepRefs = ref<(HTMLElement | null)[]>([])
+
+const effectiveCurrentIndex = computed<number | null>(() => {
+  if (props.steps.length === 0) {
+    return null
+  }
+  if (props.currentStepIndex === null) {
+    return null
+  }
+  if (props.currentStepIndex < 0 || props.currentStepIndex >= props.steps.length) {
+    if (import.meta.env.DEV) {
+      console.warn(
+        `[RoleJourneyTimeline] currentStepIndex ${props.currentStepIndex} out of range; clamped.`,
+      )
+    }
+    return Math.min(Math.max(props.currentStepIndex, 0), props.steps.length - 1)
+  }
+  return props.currentStepIndex
+})
+
+type StepVisualStatus = 'completed' | 'current' | 'upcoming'
+
+function stepStatus(index: number): StepVisualStatus {
+  const current = effectiveCurrentIndex.value
+  if (current === null) {
+    return 'upcoming'
+  }
+  if (index < current) {
+    return 'completed'
+  }
+  if (index === current) {
+    return 'current'
+  }
+  return 'upcoming'
+}
+
+const resolvedGuidanceKey = computed(() => {
+  if (props.guidanceKey) {
+    return props.guidanceKey
+  }
+  const current = effectiveCurrentIndex.value
+  if (current !== null) {
+    const currentStep = props.steps[current]
+    if (currentStep) {
+      return stepGuidanceKeyFromLabel(currentStep.labelKey)
+    }
+  }
+  const firstStep = props.steps[0]
+  if (firstStep) {
+    return emptyGuidanceKeyFromStepLabel(firstStep.labelKey)
+  }
+  return ''
+})
+
+function focusStep(index: number) {
+  stepRefs.value[index]?.focus()
+}
+
+function onStepKeydown(event: KeyboardEvent, index: number) {
+  let targetIndex: number | null = null
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+    targetIndex = Math.min(index + 1, props.steps.length - 1)
+  } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+    targetIndex = Math.max(index - 1, 0)
+  } else if (event.key === 'Home') {
+    targetIndex = 0
+  } else if (event.key === 'End') {
+    targetIndex = props.steps.length - 1
+  }
+
+  if (targetIndex === null || targetIndex === index) {
+    return
+  }
+
+  event.preventDefault()
+  focusStep(targetIndex)
+}
+</script>
+
+<template>
+  <section v-if="steps.length > 0" class="role-journey-timeline" data-journey-timeline>
+    <h2 v-if="titleKey" class="role-journey-timeline__title" data-journey-title>
+      {{ t(titleKey) }}
+    </h2>
+
+    <nav
+      class="role-journey-timeline__nav"
+      role="navigation"
+      :aria-label="t(ariaLabelKey)"
+      :aria-describedby="guidanceId"
+    >
+      <ol class="role-journey-timeline__steps">
+        <li
+          v-for="(step, index) in steps"
+          :key="step.id"
+          class="role-journey-timeline__step-item"
+        >
+          <button
+            :ref="(el) => { stepRefs[index] = el as HTMLElement | null }"
+            type="button"
+            class="role-journey-timeline__step"
+            :class="{
+              'is-completed': stepStatus(index) === 'completed',
+              'is-current': stepStatus(index) === 'current',
+              'is-upcoming': stepStatus(index) === 'upcoming',
+            }"
+            data-journey-step
+            :aria-current="stepStatus(index) === 'current' ? 'step' : undefined"
+            @keydown="onStepKeydown($event, index)"
+          >
+            <span class="role-journey-timeline__marker" aria-hidden="true">
+              <span v-if="stepStatus(index) === 'completed'" class="role-journey-timeline__check">✓</span>
+              <span v-else class="role-journey-timeline__dot" />
+            </span>
+            <span class="role-journey-timeline__content">
+              <span class="role-journey-timeline__label">{{ t(step.labelKey) }}</span>
+              <span v-if="step.descriptionKey" class="role-journey-timeline__description">
+                {{ t(step.descriptionKey) }}
+              </span>
+            </span>
+          </button>
+          <slot name="step-extra" :step="step" :index="index" :status="stepStatus(index)" />
+        </li>
+      </ol>
+    </nav>
+
+    <slot name="guidance">
+      <p
+        v-if="resolvedGuidanceKey"
+        :id="guidanceId"
+        class="role-journey-timeline__guidance"
+        data-journey-guidance
+      >
+        {{ t(resolvedGuidanceKey) }}
+      </p>
+    </slot>
+
+    <slot name="after" />
+  </section>
+</template>
+
+<style scoped lang="scss">
+.role-journey-timeline {
+  margin-bottom: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.role-journey-timeline__title {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.role-journey-timeline__steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.role-journey-timeline__step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+.role-journey-timeline__step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: default;
+  font: inherit;
+  color: inherit;
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--surface-elevated), 0 0 0 4px var(--brand-primary);
+  }
+
+  &.is-completed {
+    .role-journey-timeline__marker {
+      background: var(--brand-accent-soft);
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
+    }
+
+    .role-journey-timeline__label {
+      color: var(--text-primary);
+    }
+  }
+
+  &.is-current {
+    background: var(--brand-accent-soft);
+
+    .role-journey-timeline__marker {
+      background: var(--brand-primary);
+      border-color: var(--brand-primary);
+      color: #fff;
+    }
+
+    .role-journey-timeline__label {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+  }
+
+  &.is-upcoming {
+    .role-journey-timeline__marker {
+      background: var(--surface-elevated);
+      border-color: var(--border-color);
+    }
+
+    .role-journey-timeline__label {
+      color: var(--text-muted);
+    }
+  }
+}
+
+.role-journey-timeline__marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.role-journey-timeline__dot {
+  display: block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--border-color);
+}
+
+.role-journey-timeline__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.role-journey-timeline__label {
+  font-size: 0.9rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.role-journey-timeline__description {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.role-journey-timeline__guidance {
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+</style>

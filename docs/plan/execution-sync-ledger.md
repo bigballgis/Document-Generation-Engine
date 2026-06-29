@@ -1,6 +1,20 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-29 (P21-T01a Done — task hub deepening)
+**Last synced:** 2026-06-30 (P21-T01b Done — RoleJourneyTimeline)
+**Completion note (2026-06-30):** **P21-T01b Done** — `RoleJourneyTimeline` reusable stepper +
+cluster-① journey definitions (MASTER_DESIGNER/TEMPLATE_AUTHOR/TEMPLATE_TESTER); Dashboard
+`#journey-section` reference integration (onboarding guidance, above `#tasks-section`). **Gate:**
+`pnpm -C frontend lint`, `type-check`, `test`, `build` green; Playwright
+`P21-T01b-journey-timeline.spec.ts` **3/3**, `P21-T01b-uiux-evidence.spec.ts` **1/1** (dev :5173 +
+backend :8080); UIUX manifest `frontend/e2e/evidence/P21-T01b-uiux-manifest.md` — **PASS** (0 🔴).
+P21 phase remains In Progress; next recommended slice **P21-T01c Not Started** (dead-code cleanup).
+Detail: [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
+**Activation note (2026-06-30):** **P21-T01b activated → In Progress** (RoleJourneyTimeline reusable
+stepper — business-language steps, empty/guidance states; `frontend/src/components/**`). P21 phase
+remains In Progress; **P21-T01**, **P21-T01a**, **P21-T02** stay Done (2026-06-29). **No gate
+evidence yet** for P21-T01b (no implementation, no frontend lint/type-check/test/build for this
+slice); all other P21 tasks unchanged. Detail:
+[detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 **Completion note (2026-06-29):** **P21-T01a Done** — task hub deepening. Queue-partitioned task hub
 (`TaskHubPartitionSection.vue`, `useWorkflowTasks.buildTaskPartitions`); URL-driven landing titles;
 `fetchWorkItems({ queue })`; restored columns (trigger/summary/age/submitter/Open); overdue badges;
@@ -8,8 +22,8 @@ segmented collaboration load/error; ESCALATION → `template-escalation` kind. *
 frontend lint`, `type-check`, `test`, `build` green (**280+** Vitest); Playwright
 `P21-T01a-task-hub.spec.ts` **5/5**, `P21-T01a-uiux-evidence.spec.ts` **1/1**, regression **11/11**
 (dev :5173 + backend :8080); UIUX manifest `frontend/e2e/evidence/P21-T01a-uiux-manifest.md` —
-**PASS** (0 🔴). **Audit:** AUD-H01..H07 **resolved**. P21 phase remains In Progress; next
-recommended slice **P21-T01b Not Started** (RoleJourneyTimeline). Detail:
+**PASS** (0 🔴). **Audit:** AUD-H01..H07 **resolved**. P21 phase remains In Progress; active
+slice **P21-T01b In Progress** (2026-06-30 — RoleJourneyTimeline). Detail:
 [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 **Activation note (2026-06-29):** **P21-T01a activated → In Progress** (task hub deepening — queue
 partitioning + restore `triggerType/summaryText/ageSeconds` + SLA/overdue badges + inline open actions;
@@ -209,10 +223,11 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P20 | Done (2026-06-25) | T01–T07 complete incl. T06 (`api.error` en/zh + primary journey zh-CN); gates green — see [P20 detail](./detail/P20-i18n-ui-upgradeability.md) |
 | P18 | Done (2026-06-28) | **P18-T01–T10 Done** — controlled authoring UI + management paste/catalog APIs — see [P18 detail](./detail/P18-structured-authoring-fidelity-engine.md) |
 | P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
-| P21 | In Progress (2026-06-29) | Role-journey frontend redesign & business-friendly terminology — activated 2026-06-29; **P21-T01 Done** (2026-06-29; A0 behavior nav + L1 round 1 — `navStructure.ts`, `ManagementShell.vue`, `en.ts`/`zh-CN.ts`; frontend **267+** Vitest; Playwright P21-T01 **7/7** + UIUX **1/1** + regression **9/9**; AUD-Q05 in-scope L1 resolved); **P21-T02 Done** (2026-06-29; A1 backend collaboration closed loop — TEST `RESOLVED`, REMEDIATION emit, resubmit eligibility, create/resolve audit, `ApprovalSubStateResolver` SSOT; `mvn verify` BUILD SUCCESS; AUD-A01 TEST-path / AUD-A02 partial resolved); active **P21-T01a In Progress** (2026-06-29; task hub deepening — AUD-H01..H07; approval-path closure remains → P21-T07) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
+| P21 | In Progress (2026-06-29) | Role-journey frontend redesign & business-friendly terminology — activated 2026-06-29; **P21-T01 Done** (2026-06-29; A0 behavior nav + L1 round 1 — `navStructure.ts`, `ManagementShell.vue`, `en.ts`/`zh-CN.ts`; frontend **267+** Vitest; Playwright P21-T01 **7/7** + UIUX **1/1** + regression **9/9**; AUD-Q05 in-scope L1 resolved); **P21-T01a Done** (2026-06-29; task hub deepening — AUD-H01..H07 resolved; frontend **280+** Vitest; Playwright P21-T01a **5/5** + UIUX **1/1**); **P21-T02 Done** (2026-06-29; A1 backend collaboration closed loop — TEST `RESOLVED`, REMEDIATION emit, resubmit eligibility, create/resolve audit, `ApprovalSubStateResolver` SSOT; `mvn verify` BUILD SUCCESS; AUD-A01 TEST-path / AUD-A02 partial resolved); active **P21-T01b In Progress** (2026-06-30; RoleJourneyTimeline reusable stepper; approval-path closure remains → P21-T07) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
-**Active phase:** **P21** (activated 2026-06-29; **P21-T01 Done** 2026-06-29; **P21-T02 Done**;
-active slice **P21-T01a In Progress**). All other formal phases P0–P11, P13–P20 **Done** except P12 (deferred catch-all, non-active).
+**Active phase:** **P21** (activated 2026-06-29; **P21-T01 Done** 2026-06-29; **P21-T01a Done**
+2026-06-29; **P21-T02 Done**; active slice **P21-T01b In Progress** 2026-06-30). All other formal
+phases P0–P11, P13–P20 **Done** except P12 (deferred catch-all, non-active).
 
 ## Epic ↔ phase mapping
 

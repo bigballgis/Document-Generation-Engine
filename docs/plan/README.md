@@ -11,7 +11,7 @@ verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06
 nav + L1 copy round 1; frontend **267+** Vitest; Playwright P21-T01 **7/7** + UIUX **1/1** +
 regression **9/9**; AUD-Q05 in-scope L1 resolved; **P21-T02 Done** 2026-06-29 — A1 backend
 collaboration work-item closed loop: TEST `RESOLVED` + REMEDIATION emit + resubmit eligibility;
-`mvn verify` BUILD SUCCESS; **P21-T01a Done** 2026-06-29 — task hub deepening; next **P21-T01b Not Started**). P12 remains the
+`mvn verify` BUILD SUCCESS; **P21-T01b Done** 2026-06-30 — RoleJourneyTimeline; next **P21-T01c Not Started**). P12 remains the
 deferred-enhancements catch-all (non-active). See
 [execution-sync-ledger.md](./execution-sync-ledger.md).
 
@@ -63,7 +63,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P18 | Structured authoring & rendering-fidelity engine | [detail/P18-structured-authoring-fidelity-engine.md](detail/P18-structured-authoring-fidelity-engine.md) | Done (2026-06-28; T01–T10) |
 | P19 | Template verifiability, publish gate & decision forms | [detail/P19-verifiability-publish-gate.md](detail/P19-verifiability-publish-gate.md) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | Done (2026-06-25) |
-| P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | In Progress (2026-06-29; P21-T01 Done; P21-T01a Done; P21-T02 Done; next P21-T01b) |
+| P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | In Progress (2026-06-29; T01/T01a/T01b/T02 Done; next T01c) |
 
 ## First delivery target (thin vertical slice) — achieved
 
@@ -81,9 +81,9 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **Active phase: P21** — role-journey frontend redesign & business-friendly terminology
-(activated 2026-06-29; **P21-T01 Done** 2026-06-29 — A0 behavior nav + L1 round 1; **P21-T02 Done**
-2026-06-29 — A1 backend collaboration closed loop; `mvn verify` BUILD SUCCESS; active slice
-**P21-T01a Done** — task hub deepening; next **P21-T01b Not Started** — RoleJourneyTimeline) — see
+(activated 2026-06-29; **P21-T01 Done** 2026-06-29 — A0 behavior nav + L1 round 1; **P21-T01a Done**
+2026-06-29 — task hub deepening; **P21-T02 Done** 2026-06-29 — A1 backend collaboration closed loop;
+**P21-T01b Done** — RoleJourneyTimeline; next **P21-T01c Not Started** — dead-code cleanup) — see
 [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md)
 
 **Open backlog (non-active):**
