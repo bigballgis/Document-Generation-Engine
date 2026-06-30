@@ -826,6 +826,17 @@ export default {
         BLOCKER: '阻塞',
       },
     },
+    status: {
+      DRAFT: '草稿',
+      TESTING: '测试中',
+      APPROVAL: '审批',
+      approvalPendingSubmit: '待提交审批',
+      approvalPendingDecision: '待审批决定',
+      PENDING_RELEASE: '待发布',
+      PUBLISHED: '已发布',
+      STOPPED: '已停用',
+      DEPRECATED: '已废弃',
+    },
     lifecycle: {
       decisionForm: {
         failTestTitle: '记录测试不通过',
@@ -1160,6 +1171,29 @@ export default {
             label: '记录测试结果',
             guidance: '记录测试结果以便作者继续推进。',
             cta: '记录测试结果',
+          },
+        },
+      },
+      TEMPLATE_APPROVER: {
+        title: '模板审批流程',
+        empty: {
+          guidance: '从任务列表打开审批任务，然后按下方步骤推进。',
+        },
+        steps: {
+          reviewRequest: {
+            label: '查看审批任务',
+            guidance: '打开审批任务并查看提交原因。',
+            cta: '查看审批任务',
+          },
+          reviewSubmission: {
+            label: '审阅提交材料',
+            guidance: '审阅提交摘要与支撑证据。',
+            cta: '审阅提交材料',
+          },
+          recordDecision: {
+            label: '记录审批决定',
+            guidance: '记录审批决定以便作者继续推进。',
+            cta: '记录审批决定',
           },
         },
       },

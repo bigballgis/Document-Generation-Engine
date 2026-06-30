@@ -29,19 +29,45 @@ describe('templateWorkflowBannerContext', () => {
     )
   })
 
+  it('returns approval banner when APPROVAL PENDING_DECISION and decideApprovals', () => {
+    const context = resolveTemplateWorkflowBannerContext(
+      'APPROVAL',
+      {
+        ...allFalse,
+        decideApprovals: true,
+      },
+      'PENDING_DECISION',
+    )
+
+    expect(context).toEqual({
+      titleKey: 'dashboard.tasks.templateApproval.title',
+      descriptionKey: 'dashboard.tasks.templateApproval.description',
+    })
+    expect(
+      resolveWorkflowBannerActionKind('APPROVAL', { ...allFalse, decideApprovals: true }, 'PENDING_DECISION'),
+    ).toBe('approval')
+  })
+
+  it('returns null approval banner when APPROVAL is PENDING_SUBMIT', () => {
+    expect(
+      resolveTemplateWorkflowBannerContext(
+        'APPROVAL',
+        { ...allFalse, decideApprovals: true },
+        'PENDING_SUBMIT',
+      ),
+    ).toBeNull()
+    expect(
+      resolveWorkflowBannerActionKind('APPROVAL', { ...allFalse, decideApprovals: true }, 'PENDING_SUBMIT'),
+    ).toBeNull()
+  })
+
   it('returns approval banner when APPROVAL and decideApprovals', () => {
     const context = resolveTemplateWorkflowBannerContext('APPROVAL', {
       ...allFalse,
       decideApprovals: true,
     })
 
-    expect(context).toEqual({
-      titleKey: 'dashboard.tasks.templateApproval.title',
-      descriptionKey: 'dashboard.tasks.templateApproval.description',
-    })
-    expect(resolveWorkflowBannerActionKind('APPROVAL', { ...allFalse, decideApprovals: true })).toBe(
-      'approval',
-    )
+    expect(context).toBeNull()
   })
 
   it('returns publish banner when PENDING_RELEASE and publishTemplates', () => {
@@ -100,7 +126,8 @@ describe('templateWorkflowBannerContext', () => {
     'maps %s workflow action visibility to banner kind',
     (status, capabilityKey) => {
       const caps = { ...allFalse, [capabilityKey]: true }
-      expect(resolveWorkflowBannerActionKind(status, caps)).not.toBeNull()
+      const approvalSubState = status === 'APPROVAL' ? 'PENDING_DECISION' : null
+      expect(resolveWorkflowBannerActionKind(status, caps, approvalSubState)).not.toBeNull()
     },
   )
 })

@@ -11,6 +11,7 @@ import {
   resolveClusterOneJourney,
   resolvePrimaryClusterOneRole,
   roleJourneyTitleKey,
+  templateApproverJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
 import {
   resolveMasterDesignerDashboardJourneyIndex,
@@ -24,6 +25,11 @@ import {
   resolveTemplateTesterDashboardJourneyIndex,
   type TemplateTesterTestWorkItem,
 } from '@/utils/templateTesterJourney'
+import {
+  resolveTemplateApproverDashboardJourneyIndex,
+  shouldShowTemplateApproverJourney,
+  type TemplateApproverApprovalWorkItem,
+} from '@/utils/templateApproverJourney'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import {
   buildTaskPartitions,
@@ -48,7 +54,7 @@ const sessionStore = useSessionStore()
 const mastersStore = useMastersStore()
 const templatesStore = useTemplatesStore()
 const collaborationStore = useCollaborationStore()
-const { context, reviewMasters, manageMasters } = useCapabilities()
+const { context, reviewMasters, manageMasters, decideApprovals } = useCapabilities()
 const { tasks } = useWorkflowTasks()
 const visibleRoutes = computed(() => sessionStore.session?.visibleRoutes ?? [])
 const { stats } = useDashboardStats(visibleRoutes)
@@ -111,17 +117,35 @@ const primaryClusterOneRole = computed(() =>
   resolvePrimaryClusterOneRole(sessionStore.session?.roles ?? []),
 )
 
-const journeySteps = computed(() =>
-  primaryClusterOneRole.value
-    ? resolveClusterOneJourney(primaryClusterOneRole.value)
-    : [],
+const showApproverJourney = computed(
+  () =>
+    !primaryClusterOneRole.value &&
+    shouldShowTemplateApproverJourney({ decideApprovals: decideApprovals.value }),
 )
 
-const journeyTitleKey = computed(() =>
-  primaryClusterOneRole.value
-    ? roleJourneyTitleKey(primaryClusterOneRole.value)
-    : undefined,
+const showJourneySection = computed(
+  () => Boolean(primaryClusterOneRole.value || showApproverJourney.value),
 )
+
+const journeySteps = computed(() => {
+  if (primaryClusterOneRole.value) {
+    return resolveClusterOneJourney(primaryClusterOneRole.value)
+  }
+  if (showApproverJourney.value) {
+    return templateApproverJourneySteps
+  }
+  return []
+})
+
+const journeyTitleKey = computed(() => {
+  if (primaryClusterOneRole.value) {
+    return roleJourneyTitleKey(primaryClusterOneRole.value)
+  }
+  if (showApproverJourney.value) {
+    return roleJourneyTitleKey('TEMPLATE_APPROVER')
+  }
+  return undefined
+})
 
 const masterDesignerJourneyResolution = computed(() => {
   if (primaryClusterOneRole.value !== 'MASTER_DESIGNER') {
@@ -172,6 +196,25 @@ const templateTesterJourneyResolution = computed(() => {
   )
 })
 
+const templateApproverApprovalWorkItems = computed((): TemplateApproverApprovalWorkItem[] =>
+  collaborationStore.workItems
+    .filter((item) => item.queue === 'APPROVAL')
+    .map((item) => ({
+      templateId: item.templateId,
+      createdAt: item.createdAt,
+    })),
+)
+
+const templateApproverJourneyResolution = computed(() => {
+  if (!showApproverJourney.value) {
+    return null
+  }
+  return resolveTemplateApproverDashboardJourneyIndex(
+    templatesStore.templates,
+    templateApproverApprovalWorkItems.value,
+  )
+})
+
 const journeyCurrentStepIndex = computed(() => {
   if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
     return masterDesignerJourneyResolution.value?.currentStepIndex ?? null
@@ -181,6 +224,9 @@ const journeyCurrentStepIndex = computed(() => {
   }
   if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
     return templateTesterJourneyResolution.value?.currentStepIndex ?? null
+  }
+  if (showApproverJourney.value) {
+    return templateApproverJourneyResolution.value?.currentStepIndex ?? null
   }
   return null
 })
@@ -194,6 +240,9 @@ const journeyGuidanceKey = computed(() => {
   }
   if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
     return templateTesterJourneyResolution.value?.guidanceKey
+  }
+  if (showApproverJourney.value) {
+    return templateApproverJourneyResolution.value?.guidanceKey
   }
   return undefined
 })
@@ -391,7 +440,7 @@ function openQuickLink(path: string) {
 
     <DashboardStatCards v-if="showStatsSection" :stats="stats" :loading="loading" />
 
-    <section v-if="primaryClusterOneRole" id="journey-section" class="journey-section">
+    <section v-if="showJourneySection" id="journey-section" class="journey-section">
       <RoleJourneyTimeline
         :steps="journeySteps"
         :current-step-index="journeyCurrentStepIndex"

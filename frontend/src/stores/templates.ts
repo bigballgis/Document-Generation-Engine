@@ -462,6 +462,7 @@ export const useTemplatesStore = defineStore('templates', () => {
       groupCode: detail.groupCode,
       name: detail.name,
       lifecycleStatus: detail.lifecycleStatus,
+      approvalSubState: detail.approvalSubState,
       releaseVersion: detail.releaseVersion,
       releaseVersionCount,
       masterId: detail.masterId,

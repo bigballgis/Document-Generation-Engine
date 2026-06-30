@@ -10,6 +10,7 @@ import { useMastersStore } from '@/stores/masters'
 import {
   masterDesignerJourneySteps,
   templateAuthorJourneySteps,
+  templateApproverJourneySteps,
   templateTesterJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
 
@@ -745,7 +746,7 @@ describe('DashboardView', () => {
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('1')
   })
 
-  it('hides journey section for TEMPLATE_APPROVER-only sessions', async () => {
+  it('shows approver journey with 3 steps for TEMPLATE_APPROVER-only sessions', async () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       displayName: 'Approver',
@@ -764,8 +765,51 @@ describe('DashboardView', () => {
     const wrapper = mountDashboard()
     await flushPromises()
 
-    expect(wrapper.find('#journey-section').exists()).toBe(false)
-    expect(wrapper.find('#tasks-section').exists()).toBe(true)
+    expect(wrapper.find('#journey-section').exists()).toBe(true)
+    expect(Number(wrapper.find('.journey-timeline-stub').attributes('data-step-count'))).toBe(
+      templateApproverJourneySteps.length,
+    )
+    expect(wrapper.find('.journey-timeline-stub').text()).toBe(
+      'journey.roles.TEMPLATE_APPROVER.title',
+    )
+  })
+
+  it('sets template approver journey index 0 for newest OPEN APPROVAL work item', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Approver',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_APPROVER'],
+      capabilities: { decideApprovals: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+
+    const collaborationStore = useCollaborationStore()
+    collaborationStore.workItems = [
+      {
+        workItemId: 'wi-approval',
+        templateId: 'tpl-approval',
+        templateName: 'Approval template',
+        queue: 'APPROVAL',
+        triggerType: 'SUBMIT_FOR_APPROVAL',
+        groupCode: 'RETAIL',
+        submitterUserId: '10000003',
+        summaryText: 'Ready for approval',
+        ageSeconds: 3600,
+        createdAt: '2026-06-26T10:00:00Z',
+      },
+    ]
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('0')
   })
 
   it('still shows journey section on filtered queue deep links', async () => {

@@ -645,6 +645,8 @@ export default {
       DRAFT: 'Draft',
       TESTING: 'Testing',
       APPROVAL: 'Approval',
+      approvalPendingSubmit: 'Awaiting submit for approval',
+      approvalPendingDecision: 'Awaiting approval decision',
       PENDING_RELEASE: 'Pending release',
       PUBLISHED: 'Published',
       STOPPED: 'Stopped',
@@ -1682,6 +1684,30 @@ export default {
             label: 'Record test result',
             guidance: 'Record your test result so the author can proceed.',
             cta: 'Record test result',
+          },
+        },
+      },
+      TEMPLATE_APPROVER: {
+        title: 'Template approval workflow',
+        empty: {
+          guidance:
+            'Open an approval request from your task list, then follow each step below.',
+        },
+        steps: {
+          reviewRequest: {
+            label: 'Review approval request',
+            guidance: 'Open the approval request and review why it was submitted.',
+            cta: 'Review approval request',
+          },
+          reviewSubmission: {
+            label: 'Review submission package',
+            guidance: 'Review the submission summary and supporting evidence.',
+            cta: 'Review submission package',
+          },
+          recordDecision: {
+            label: 'Record approval decision',
+            guidance: 'Record your approval decision so the author can proceed.',
+            cta: 'Record approval decision',
           },
         },
       },

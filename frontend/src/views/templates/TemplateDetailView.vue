@@ -8,6 +8,7 @@ import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
 import TemplateAuthorJourneyBlock from '@/components/journey/TemplateAuthorJourneyBlock.vue'
 import TemplateTesterJourneyBlock from '@/components/journey/TemplateTesterJourneyBlock.vue'
+import TemplateApproverJourneyBlock from '@/components/journey/TemplateApproverJourneyBlock.vue'
 import TemplatePublishSummaryDialog from '@/components/templates/TemplatePublishSummaryDialog.vue'
 import TemplateLifecycleDecisionDialog, {
   type LifecycleDecisionDialogMode,
@@ -35,6 +36,10 @@ import {
   shouldShowTemplateTesterJourney,
   type TemplateTesterJourneyContext,
 } from '@/utils/templateTesterJourney'
+import {
+  shouldShowTemplateApproverJourney,
+  type TemplateApproverJourneyContext,
+} from '@/utils/templateApproverJourney'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
@@ -105,6 +110,10 @@ const testerEvidenceViewed = ref({
   fidelityViewedConfirmed: false,
   coverageViewedConfirmed: false,
   previewViewedConfirmed: false,
+})
+const approverEvidenceViewed = ref({
+  submissionReviewedConfirmed: false,
+  keyEvidenceViewedConfirmed: false,
 })
 const selectedTestDataSetId = ref<string | null>(null)
 const coverageRefreshToken = ref(0)
@@ -183,7 +192,11 @@ const workflowBannerActionKind = computed(() => {
   if (!status) {
     return null
   }
-  return resolveWorkflowBannerActionKind(status, workflowBannerCapabilities.value)
+  return resolveWorkflowBannerActionKind(
+    status,
+    workflowBannerCapabilities.value,
+    template.value?.approvalSubState ?? null,
+  )
 })
 
 const showDraftActions = computed(() => workflowBannerActionKind.value === 'draft')
@@ -399,6 +412,34 @@ const testerJourneyContext = computed((): TemplateTesterJourneyContext | null =>
   }
 })
 
+const showApproverJourney = computed(() => {
+  if (
+    !template.value ||
+    !shouldShowTemplateApproverJourney({ decideApprovals: decideApprovals.value }) ||
+    template.value.lifecycleStatus !== 'APPROVAL' ||
+    template.value.approvalSubState !== 'PENDING_DECISION'
+  ) {
+    return false
+  }
+  return true
+})
+
+const approverJourneyContext = computed((): TemplateApproverJourneyContext | null => {
+  if (
+    !template.value ||
+    template.value.lifecycleStatus !== 'APPROVAL' ||
+    template.value.approvalSubState !== 'PENDING_DECISION'
+  ) {
+    return null
+  }
+  return {
+    lifecycleStatus: 'APPROVAL',
+    approvalSubState: 'PENDING_DECISION',
+    submissionReviewedConfirmed: approverEvidenceViewed.value.submissionReviewedConfirmed,
+    keyEvidenceViewedConfirmed: approverEvidenceViewed.value.keyEvidenceViewedConfirmed,
+  }
+})
+
 async function loadAuthorRemediationWorkItems() {
   if (!authorTemplates.value || !canViewCollaborationWorkItems(sessionStore.session?.roles ?? [])) {
     return
@@ -455,11 +496,35 @@ function handleJourneyRecordResult() {
   }
 }
 
+function handleJourneyApproverReviewRequest() {
+  openLifecyclePanel()
+}
+
+function handleJourneyApproverReviewSubmission() {
+  openLifecyclePanel()
+  approverEvidenceViewed.value = {
+    ...approverEvidenceViewed.value,
+    submissionReviewedConfirmed: true,
+  }
+}
+
+function handleJourneyApproverRecordDecision() {
+  openLifecyclePanel()
+  approverEvidenceViewed.value = {
+    submissionReviewedConfirmed: true,
+    keyEvidenceViewedConfirmed: true,
+  }
+}
+
 function resetTransientDetailState() {
   testerEvidenceViewed.value = {
     fidelityViewedConfirmed: false,
     coverageViewedConfirmed: false,
     previewViewedConfirmed: false,
+  }
+  approverEvidenceViewed.value = {
+    submissionReviewedConfirmed: false,
+    keyEvidenceViewedConfirmed: false,
   }
   lifecycleComment.value = ''
   lastPreview.value = null
@@ -988,7 +1053,10 @@ async function handleDeleteTemplate() {
           <el-button v-if="showMetadataEdit" @click="metadataEditOpen = true">
             {{ t('templates.metadata.edit') }}
           </el-button>
-          <TemplateStatusBadge :status="template.lifecycleStatus" />
+          <TemplateStatusBadge
+            :status="template.lifecycleStatus"
+            :approval-sub-state="template.approvalSubState"
+          />
         </div>
       </div>
     </header>
@@ -1027,6 +1095,15 @@ async function handleDeleteTemplate() {
         @review-request="handleJourneyReviewRequest"
         @check-evidence="handleJourneyCheckEvidence"
         @record-result="handleJourneyRecordResult"
+      />
+
+      <TemplateApproverJourneyBlock
+        v-if="showApproverJourney && approverJourneyContext"
+        :journey-context="approverJourneyContext"
+        :can-decide="decideApprovals"
+        @review-request="handleJourneyApproverReviewRequest"
+        @review-submission="handleJourneyApproverReviewSubmission"
+        @record-decision="handleJourneyApproverRecordDecision"
       />
 
       <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />

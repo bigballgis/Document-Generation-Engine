@@ -26,6 +26,7 @@ interface TemplateSummary {
   id: string
   externalId: string
   lifecycleStatus: string
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
   groupCode: string
   updatedAt?: string
 }
@@ -211,6 +212,101 @@ export async function demoTestingTemplateDetailPath(request: APIRequestContext):
   }
 
   return `/templates/${refreshed.id}`
+}
+
+async function ensureDemoTemplatePendingApprovalDecision(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<void> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const testerToken = await apiLogin(request, E2E_TEMPLATE_TESTER)
+
+  const detail = await authorizedGet<{ lifecycleStatus: string; approvalSubState?: string }>(
+    request,
+    authorToken,
+    `/templates/${templateId}`,
+  )
+
+  if (
+    detail.lifecycleStatus === 'APPROVAL' &&
+    detail.approvalSubState === 'PENDING_DECISION'
+  ) {
+    return
+  }
+
+  if (detail.lifecycleStatus !== 'TESTING' && detail.lifecycleStatus !== 'APPROVAL') {
+    await ensureDemoTemplateSubmittedForTest(request, templateId)
+  }
+
+  const afterSubmit = await authorizedGet<{ lifecycleStatus: string; approvalSubState?: string }>(
+    request,
+    authorToken,
+    `/templates/${templateId}`,
+  )
+
+  if (afterSubmit.lifecycleStatus === 'TESTING') {
+    await authorizedPost(request, testerToken, `/templates/${templateId}/lifecycle/test-decision`, {
+      decision: 'PASSED',
+      commentSummary: 'E2E test passed for approver journey',
+      fidelityViewedConfirmed: true,
+      coverageViewedConfirmed: true,
+      previewViewedConfirmed: true,
+    })
+  }
+
+  const afterTest = await authorizedGet<{ lifecycleStatus: string; approvalSubState?: string }>(
+    request,
+    authorToken,
+    `/templates/${templateId}`,
+  )
+
+  if (
+    afterTest.lifecycleStatus === 'APPROVAL' &&
+    afterTest.approvalSubState === 'PENDING_SUBMIT'
+  ) {
+    await authorizedPost(request, authorToken, `/templates/${templateId}/lifecycle/submit-approval`, {
+      commentSummary: 'E2E ready for approver journey',
+    })
+  }
+}
+
+export async function demoApprovalTemplateDetailPath(request: APIRequestContext): Promise<string> {
+  const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
+  const templates = await authorizedGet<TemplateSummary[]>(request, approverToken, '/templates')
+  const pendingDecisionTemplates = templates
+    .filter(
+      (template) =>
+        template.lifecycleStatus === 'APPROVAL' &&
+        template.approvalSubState === 'PENDING_DECISION',
+    )
+    .sort((left, right) => Date.parse(right.updatedAt ?? '') - Date.parse(left.updatedAt ?? ''))
+
+  if (pendingDecisionTemplates.length > 0) {
+    return `/templates/${pendingDecisionTemplates[0].id}`
+  }
+
+  const demoTemplate = await findTemplateByExternalId(request, DEMO_TEMPLATE_EXTERNAL_ID)
+  if (!demoTemplate) {
+    throw new Error(`Demo template "${DEMO_TEMPLATE_EXTERNAL_ID}" was not found`)
+  }
+
+  await ensureDemoTemplatePendingApprovalDecision(request, demoTemplate.id)
+
+  const refreshed = await authorizedGet<{ lifecycleStatus: string; approvalSubState?: string }>(
+    request,
+    approverToken,
+    `/templates/${demoTemplate.id}`,
+  )
+  if (
+    refreshed.lifecycleStatus !== 'APPROVAL' ||
+    refreshed.approvalSubState !== 'PENDING_DECISION'
+  ) {
+    throw new Error(
+      `Failed to prepare APPROVAL PENDING_DECISION template for E2E (status=${refreshed.lifecycleStatus}, subState=${refreshed.approvalSubState})`,
+    )
+  }
+
+  return `/templates/${demoTemplate.id}`
 }
 
 export async function createApprovedContentModule(

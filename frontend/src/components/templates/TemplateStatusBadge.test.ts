@@ -11,18 +11,39 @@ describe('TemplateStatusBadge', () => {
     setActivePinia(createPinia())
   })
 
-  it('renders lifecycle status label', () => {
+  function mountBadge(
+    props: { status: 'PUBLISHED' | 'APPROVAL'; approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' },
+  ) {
     const i18n = createI18n({
       legacy: false,
       locale: 'en',
       messages: { en },
     })
 
-    const wrapper = mount(TemplateStatusBadge, {
-      props: { status: 'PUBLISHED' },
+    return mount(TemplateStatusBadge, {
+      props,
       global: { plugins: [i18n, ElementPlus] },
     })
+  }
 
+  it('renders lifecycle status label', () => {
+    const wrapper = mountBadge({ status: 'PUBLISHED' })
     expect(wrapper.text()).toContain('Published')
+  })
+
+  it('surfaces approval PENDING_SUBMIT substate', () => {
+    const wrapper = mountBadge({
+      status: 'APPROVAL',
+      approvalSubState: 'PENDING_SUBMIT',
+    })
+    expect(wrapper.text()).toContain('Awaiting submit for approval')
+  })
+
+  it('surfaces approval PENDING_DECISION substate', () => {
+    const wrapper = mountBadge({
+      status: 'APPROVAL',
+      approvalSubState: 'PENDING_DECISION',
+    })
+    expect(wrapper.text()).toContain('Awaiting approval decision')
   })
 })

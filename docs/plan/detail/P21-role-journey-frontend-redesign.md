@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **P21-T07 Done** 2026-06-30 — sub-phase B backend approval-path collaboration closure; next **P21-T08 Not Started** — Approver journey) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **P21-T08 Done** 2026-06-30 — cluster ② B1 Approver journey frontend + AUD-B03 dual-substate UI; next **P21-T09 Not Started** — Team-lead / API management journey) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -183,7 +183,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | ID | Task | Key files | Behavior spec | Status |
 | --- | --- | --- | --- | --- |
 | P21-T07 | B0 backend: emit `SUBMIT_FOR_APPROVAL`, `APPROVAL_FAILURE → REMEDIATION`, `APPROVAL_PENDING_RELEASE`, `TIMEOUT_ESCALATION`; write `RESOLVED` on approval/publish decisions | `backend/.../collaboration/**`, `TemplateLifecycleService`, escalation scheduler | Required | Done (2026-06-30) |
-| P21-T08 | B1 Approver journey: "waiting on my approval" entry + controlled approval decision + `approvalSubState` (PENDING_SUBMIT vs PENDING_DECISION) dual-substate UI | lifecycle panel, decision forms | Required | Not Started |
+| P21-T08 | B1 Approver journey: "waiting on my approval" entry + controlled approval decision + `approvalSubState` (PENDING_SUBMIT vs PENDING_DECISION) dual-substate UI | lifecycle panel, decision forms | Required | Done (2026-06-30) |
 | P21-T09 | B2 Team-lead / API management journey: master review tasks; "waiting to confirm go-live" entry + pre-release checks + go-live summary confirm | lifecycle panel, dashboard | Required | Not Started |
 | P21-T09a | API management / access-keys journey: full L1 copy replacement of API policy/credential surfaces | `ApiPolicyDetailView`, api policy components, `en.ts`, `zh-CN.ts` | Required | Not Started |
 | P21-T09b | Reminder timing config + overdue-reminder queue visibility + exception handling ("confirm on behalf" + audit trail copy, not "exception intervention") | `CollaborationTimeoutConfigPanel`, dashboard | Required | Not Started |
@@ -309,7 +309,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 | --- | --- | --- | --- | --- |
 | AUD-B01 | 🔴 | `?focus=lifecycle` overrides `?tab=` and is never cleared → locked on lifecycle tab | `TemplateDetailView.vue:102-107,309-327` | **Resolved (P21-T06a)** |
 | AUD-B02 | 🔴 | No `watch(templateId)` → component reuse shows stale template | `TemplateDetailView.vue:305-307,112` | **Resolved (P21-T06a)** |
-| AUD-B03 | 🔴 | APPROVAL dual-substate not surfaced: Badge has no substate; Banner ignores `approvalSubState`; list filter on `APPROVAL` but `TemplateSummary` lacks `approvalSubState` | `TemplateStatusBadge.vue:12-31`; `TemplateWorkflowBanner.vue:31-35`; `TemplateListView.vue:53-58`; `types/template.ts:15-26` | P21-T08 |
+| AUD-B03 | 🔴 | APPROVAL dual-substate not surfaced: Badge has no substate; Banner ignores `approvalSubState`; list filter on `APPROVAL` but `TemplateSummary` lacks `approvalSubState` | `TemplateStatusBadge.vue:12-31`; `TemplateWorkflowBanner.vue:31-35`; `TemplateListView.vue:53-58`; `types/template.ts:15-26` | **Resolved → P21-T08** (2026-06-30) |
 | AUD-B04 | 🔴 | `showMetadataEdit` uses `authorTemplates` but matrix limits metadata edit to GLOBAL/GROUP (fail-open UI) | `TemplateDetailView.vue:186-192`; `permission-matrix.md` | P21-X03 |
 | AUD-B05 | 🔴 | `test-fail` decision has no remediation fields (only `approval-reject` does) | `TemplateLifecycleDecisionDialog.vue:276-331`; `domain-model.md` §4.1 | **Resolved (P21-T05)** |
 | AUD-B06 | 🟡 | Publish-gate parallel load failure silent-caught → publish disabled with no reason; `bindingGateResult` fetched but never rendered | `TemplateDetailView.vue:329-365,89,904-927` | **Resolved (P21-T06b)** |
@@ -345,7 +345,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 2. **P0 security** — AUD-P01..P05: permission single-source + fail-closed (P21-X03).
 3. **P0 bugs** — AUD-B01/B02: focus/tab lockup + stale templateId (P21-T06a).
 4. **P0 i18n/a11y** — AUD-Q04 zh-CN parity, AUD-Q01 focus ring (P21-X06, P21-X05).
-5. **P1** — task hub depth (AUD-H01..H06, P21-T01a); APPROVAL dual-substate (AUD-B03, P21-T08);
+5. **P1** — task hub depth (AUD-H01..H06, P21-T01a); APPROVAL dual-substate (**AUD-B03 resolved → P21-T08**, 2026-06-30);
    L1 terminology — **AUD-Q05 in-scope L1 → P21-T01 Done** (2026-06-29); full-system sweep → P21-X01;
    matrix/capability drift (AUD-P06, P21-X04).
 6. **P2** — decision/governance forms (AUD-B05/B10); detail state completeness (AUD-B06/B07);
@@ -2063,4 +2063,20 @@ for TEST/APPROVAL/PENDING_RELEASE. `TemplateLifecycleService` wired on
 (`submitForApproval`, `approvalFailureRemediation`, `pendingRelease` summaries).
 
 **Gate:** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (Surefire all pass, JaCoCo met,
-Checkstyle/PMD/SpotBugs 0). **Audit:** AUD-A01/A02 **resolved** (approval/publish path). Next **P21-T08**.
+Checkstyle/PMD/SpotBugs 0). **Audit:** AUD-A01/A02 **resolved** (approval/publish path). Next **P21-T08** (now Done).
+
+#### Implementation status (2026-06-30) — P21-T08
+
+**Done.** `templateApproverJourney.ts` (3 steps: `reviewRequest`, `reviewSubmission`, `recordDecision`) +
+tests; `TemplateApproverJourneyBlock.vue`; `roleJourneyDefinitions` cluster-② `TEMPLATE_APPROVER` +
+`templateApproverJourneySteps`; Dashboard approver-only `#journey-section` with dynamic step index;
+`TemplateDetailView` approver journey block when `decideApprovals && APPROVAL && PENDING_DECISION`;
+i18n en+zh-CN for `journey.roles.TEMPLATE_APPROVER.*` and
+`templates.status.approvalPendingSubmit` / `approvalPendingDecision`. **AUD-B03:** `TemplateStatusBadge`
+substate, `templateWorkflowBannerContext` `PENDING_DECISION` gate, `TemplateListView` `awaitingApproval`
+filter; backend `TemplateSummaryView.approvalSubState` + `TemplateViewMapper.toSummary` + test.
+
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green; Playwright
+`P21-T08-approver-journey.spec.ts` + `P21-T08-uiux-evidence.spec.ts`; `P21-T01b` updated; UIUX manifest
+`frontend/e2e/evidence/P21-T08-uiux-manifest.md` — **PASS**. Backend:
+`TemplateViewMapperTest` **8/8** BUILD SUCCESS. **Audit:** AUD-B03 **resolved**. Next **P21-T09**.

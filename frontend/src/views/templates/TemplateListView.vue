@@ -20,6 +20,7 @@ import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { templateDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateSummary, TemplateLifecycleStatus } from '@/types/template'
+import { isAwaitingApproverDecision } from '@/utils/templateApproverJourney'
 import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
@@ -70,6 +71,9 @@ const workflowFilterChips = computed(() => {
 const catalogTemplates = computed(() => {
   if (!activeWorkflowFilter.value) {
     return templatesStore.templates
+  }
+  if (activeWorkflowFilter.value === 'awaitingApproval') {
+    return templatesStore.templates.filter(isAwaitingApproverDecision)
   }
   const chip = workflowFilterChips.value.find((entry) => entry.key === activeWorkflowFilter.value)
   if (!chip) {
@@ -249,7 +253,10 @@ const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
             />
           </template>
           <template #default="{ row }">
-            <TemplateStatusBadge :status="row.lifecycleStatus" />
+            <TemplateStatusBadge
+              :status="row.lifecycleStatus"
+              :approval-sub-state="row.approvalSubState"
+            />
           </template>
         </el-table-column>
         <el-table-column prop="releaseVersion" sortable width="140">

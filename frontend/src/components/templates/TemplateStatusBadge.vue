@@ -5,11 +5,21 @@ import type { TemplateLifecycleStatus } from '@/types/template'
 
 const props = defineProps<{
   status: TemplateLifecycleStatus
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION'
 }>()
 
 const { t } = useI18n()
 
-const label = computed(() => t(`templates.status.${props.status}`))
+const label = computed(() => {
+  if (props.status === 'APPROVAL' && props.approvalSubState === 'PENDING_SUBMIT') {
+    return t('templates.status.approvalPendingSubmit')
+  }
+  if (props.status === 'APPROVAL' && props.approvalSubState === 'PENDING_DECISION') {
+    return t('templates.status.approvalPendingDecision')
+  }
+  return t(`templates.status.${props.status}`)
+})
+
 const tagType = computed(() => {
   switch (props.status) {
     case 'PUBLISHED':

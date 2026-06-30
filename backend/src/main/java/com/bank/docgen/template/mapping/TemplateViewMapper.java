@@ -57,6 +57,7 @@ public class TemplateViewMapper {
                 template.getGroupCode(),
                 template.getName(),
                 template.getLifecycleStatus(),
+                approvalSubStateResolver.resolve(template),
                 template.getReleaseVersion(),
                 releaseVersionCount,
                 template.getMasterId().toString(),

@@ -18,6 +18,7 @@ export interface TemplateSummary {
   groupCode: string
   name: string
   lifecycleStatus: TemplateLifecycleStatus
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION'
   releaseVersion: string | null
   releaseVersionCount: number
   masterId: string

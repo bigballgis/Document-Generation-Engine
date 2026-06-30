@@ -17,12 +17,16 @@ const { t } = useI18n()
 const { authorTemplates, decideTests, decideApprovals, publishTemplates } = useCapabilities()
 
 const banner = computed(() =>
-  resolveTemplateWorkflowBannerContext(props.template.lifecycleStatus, {
-    authorTemplates: authorTemplates.value,
-    decideTests: decideTests.value,
-    decideApprovals: decideApprovals.value,
-    publishTemplates: publishTemplates.value,
-  }),
+  resolveTemplateWorkflowBannerContext(
+    props.template.lifecycleStatus,
+    {
+      authorTemplates: authorTemplates.value,
+      decideTests: decideTests.value,
+      decideApprovals: decideApprovals.value,
+      publishTemplates: publishTemplates.value,
+    },
+    props.template.approvalSubState ?? null,
+  ),
 )
 </script>
 

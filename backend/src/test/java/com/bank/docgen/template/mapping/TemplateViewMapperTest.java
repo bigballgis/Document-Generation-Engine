@@ -123,6 +123,7 @@ class TemplateViewMapperTest {
         TemplateVersionEntity withoutRelease = new TemplateVersionEntity(UUID.randomUUID(), templateId, "10000001");
         when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
                 .thenReturn(List.of(withRelease, withoutRelease));
+        when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_SUBMIT);
 
         TemplateSummaryView view = mapper.toSummary(template);
 
@@ -130,6 +131,30 @@ class TemplateViewMapperTest {
         assertThat(view.externalId()).isEqualTo("TPL-001");
         assertThat(view.releaseVersionCount()).isEqualTo(1);
         assertThat(view.releaseVersion()).isEqualTo("v1.0.0");
+    }
+
+    @Test
+    void toSummary_resolvesApprovalSubStateWhenPendingDecision() {
+        UUID templateId = UUID.randomUUID();
+        TemplateEntity template = new TemplateEntity(
+                templateId,
+                "TPL-004",
+                "RETAIL",
+                "Approval summary template",
+                null,
+                UUID.randomUUID(),
+                "10000004"
+        );
+        template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
+        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
+                .thenReturn(List.of());
+        when(approvalSubStateResolver.resolve(template))
+                .thenReturn(ApprovalSubState.PENDING_DECISION);
+
+        TemplateSummaryView view = mapper.toSummary(template);
+
+        assertThat(view.lifecycleStatus()).isEqualTo(TemplateLifecycleStatus.APPROVAL);
+        assertThat(view.approvalSubState()).isEqualTo(ApprovalSubState.PENDING_DECISION);
     }
 
     @Test

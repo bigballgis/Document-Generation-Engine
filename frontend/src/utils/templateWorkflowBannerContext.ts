@@ -14,6 +14,11 @@ export type TemplateWorkflowBannerContext = {
 
 export type WorkflowBannerActionKind = 'testing' | 'approval' | 'publish' | 'draft'
 
+export type TemplateWorkflowBannerLifecycleContext = {
+  lifecycleStatus: TemplateLifecycleStatus
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+}
+
 type BannerRule = {
   kind: WorkflowBannerActionKind
   status: TemplateLifecycleStatus
@@ -53,12 +58,31 @@ const WORKFLOW_BANNER_RULES: readonly BannerRule[] = [
   },
 ] as const
 
+function matchesBannerRule(
+  rule: BannerRule,
+  lifecycle: TemplateWorkflowBannerLifecycleContext,
+  capabilities: TemplateWorkflowBannerCapabilities,
+): boolean {
+  if (lifecycle.lifecycleStatus !== rule.status || !capabilities[rule.capability]) {
+    return false
+  }
+  if (rule.kind === 'approval') {
+    return lifecycle.approvalSubState === 'PENDING_DECISION'
+  }
+  return true
+}
+
 export function resolveWorkflowBannerActionKind(
   lifecycleStatus: TemplateLifecycleStatus,
   capabilities: TemplateWorkflowBannerCapabilities,
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null,
 ): WorkflowBannerActionKind | null {
-  const rule = WORKFLOW_BANNER_RULES.find(
-    (entry) => entry.status === lifecycleStatus && capabilities[entry.capability],
+  const lifecycle: TemplateWorkflowBannerLifecycleContext = {
+    lifecycleStatus,
+    approvalSubState,
+  }
+  const rule = WORKFLOW_BANNER_RULES.find((entry) =>
+    matchesBannerRule(entry, lifecycle, capabilities),
   )
   return rule?.kind ?? null
 }
@@ -66,9 +90,14 @@ export function resolveWorkflowBannerActionKind(
 export function resolveTemplateWorkflowBannerContext(
   lifecycleStatus: TemplateLifecycleStatus,
   capabilities: TemplateWorkflowBannerCapabilities,
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null,
 ): TemplateWorkflowBannerContext | null {
-  const rule = WORKFLOW_BANNER_RULES.find(
-    (entry) => entry.status === lifecycleStatus && capabilities[entry.capability],
+  const lifecycle: TemplateWorkflowBannerLifecycleContext = {
+    lifecycleStatus,
+    approvalSubState,
+  }
+  const rule = WORKFLOW_BANNER_RULES.find((entry) =>
+    matchesBannerRule(entry, lifecycle, capabilities),
   )
   if (!rule) {
     return null
@@ -82,6 +111,9 @@ export function resolveTemplateWorkflowBannerContext(
 export function hasWorkflowBannerAction(
   lifecycleStatus: TemplateLifecycleStatus,
   capabilities: TemplateWorkflowBannerCapabilities,
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null,
 ): boolean {
-  return resolveWorkflowBannerActionKind(lifecycleStatus, capabilities) !== null
+  return (
+    resolveWorkflowBannerActionKind(lifecycleStatus, capabilities, approvalSubState) !== null
+  )
 }

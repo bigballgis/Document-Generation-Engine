@@ -1,5 +1,6 @@
 package com.bank.docgen.template.api;
 
+import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import java.time.Instant;
 
@@ -9,6 +10,7 @@ public record TemplateSummaryView(
         String groupCode,
         String name,
         TemplateLifecycleStatus lifecycleStatus,
+        ApprovalSubState approvalSubState,
         String releaseVersion,
         int releaseVersionCount,
         String masterId,

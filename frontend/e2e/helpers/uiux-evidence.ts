@@ -276,3 +276,21 @@ export async function captureP21T05LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+export const P21_T08_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T08')
+export const P21_T08_SCREENSHOT_DIR = path.join(P21_T08_EVIDENCE_ROOT, 'screenshots')
+export const P21_T08_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureP21T08EvidenceDirs(): void {
+  fs.mkdirSync(P21_T08_SCREENSHOT_DIR, { recursive: true })
+}
+
+export async function captureP21T08LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureP21T08EvidenceDirs()
+  const target = path.join(P21_T08_SCREENSHOT_DIR, filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

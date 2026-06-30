@@ -46,11 +46,13 @@ test.describe('P21-T01b RoleJourneyTimeline (§12.4)', () => {
     await expect(journeySection.locator('[data-journey-step]')).toHaveCount(6)
   })
 
-  test('approver-only session does not render journey section', async ({ page }) => {
+  test('approver-only session renders journey section with three steps', async ({ page }) => {
     await loginAs(page, E2E_TEMPLATE_APPROVER)
     await page.goto('/dashboard')
 
-    await expect(page.locator('#journey-section')).toHaveCount(0)
+    const journeySection = page.locator('#journey-section')
+    await expect(journeySection).toBeVisible()
+    await expect(journeySection.locator('[data-journey-step]')).toHaveCount(3)
     await expect(page.locator('#tasks-section')).toBeVisible()
   })
 
