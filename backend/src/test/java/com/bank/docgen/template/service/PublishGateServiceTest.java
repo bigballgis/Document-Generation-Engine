@@ -26,6 +26,7 @@ import com.bank.docgen.template.api.TemplateRuleValidationView;
 import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.PublishGateCheckCode;
+import com.bank.docgen.template.domain.PublishGatePhase;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
@@ -201,6 +202,47 @@ class PublishGateServiceTest {
                         && item.summary().contains("noBatchRun")
                         && item.blocker()))
                 .isTrue();
+    }
+
+    @Test
+    void submitForApproval_excludesApprovalSummaryAndApiPolicy() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
+                .thenReturn(List.of());
+        when(apiPolicyRepository.findByTemplateId(templateId))
+                .thenReturn(Optional.empty());
+
+        PublishGateChecklistView publishChecklist = service.evaluate(templateId, admin);
+        PublishGateChecklistView submitChecklist = service.evaluate(
+                templateId, admin, PublishGatePhase.SUBMIT_FOR_APPROVAL);
+
+        assertThat(publishChecklist.ready()).isFalse();
+        assertThat(submitChecklist.ready()).isTrue();
+        assertThat(submitChecklist.items()).noneMatch(item ->
+                item.checkCode() == PublishGateCheckCode.APPROVAL_SUMMARY
+                        || item.checkCode() == PublishGateCheckCode.API_POLICY);
+    }
+
+    @Test
+    void submitForApproval_withHardBlocker_rejectedWithSubmitGateMessageKey() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(blockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+
+        assertThatThrownBy(() -> service.assertReady(templateId, admin, PublishGatePhase.SUBMIT_FOR_APPROVAL))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasFieldOrPropertyWithValue("messageKey", "api.error.template.submitForApprovalGateBlocked");
+    }
+
+    @Test
+    void submitForApproval_allGreen_succeeds() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin, PublishGatePhase.SUBMIT_FOR_APPROVAL);
+
+        assertThat(checklist.ready()).isTrue();
+        service.assertReadyForSubmitForApproval(templateId, admin);
     }
 
     @Test

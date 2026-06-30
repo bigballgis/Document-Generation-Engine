@@ -1,20 +1,20 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **None** (P21 **Done** 2026-06-30; no formal phase `In Progress` until user activates next via `plan-orchestrator`; P12 deferred catch-all remains non-active). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
+**Active formal phase:** **None** (2026-07-01 — P12-AUD-B10 **Done**; P12 catch-all **Not Started**). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
 UX-A…UX-F interaction/upgradeability tasks (same plan) run as optimization waves
 against the existing implementation. **UX Wave A** (role gating + half-built interactions)
 re-earned Done on 2026-06-23; **UX Wave B** (workbenches + polish) Done (2026-06-23).
-P12 remains the non-active deferred-enhancements catch-all (no single active slice).
+**P12 Not Started** (catch-all idle) — last slice **P12-AUD-B10 Done** (2026-07-01; AUD-B10 submit-for-approval evidence checklist gate).
 **P16–P20 (deep-review functional gaps, 2026-06-23):** P16 lifecycle governance **Done**;
 P17 per-domain API policy **Done** (2026-06-25; Wave 3; T01–T09 + COR-F18);
 P18 structured authoring **Done** (2026-06-28; T01–T10); **P19 verifiability/publish-gate Done**
 (2026-06-25); P20 i18n **Done** (2026-06-25).
 **P21 role-journey frontend redesign & business-friendly terminology — Done**
-(activated 2026-06-29; closed 2026-06-30; T01–T11 + X01–X06 + **X02** governance close; backend **553**, frontend **511** Vitest; **AUD-B10 partial** documented as known gap).
+(activated 2026-06-29; closed 2026-06-30; T01–T11 + X01–X06 + **X02** governance close; backend **553**, frontend **511** Vitest; **AUD-B10 resolved** via **P12-AUD-B10 Done** 2026-07-01).
 
 ## Product goal
 
@@ -46,7 +46,7 @@ upstream systems invoke the dynamic API.
 | P9 | Production readiness | P0–P8 | Security scans, observability, deployment evidence, release gates | Done |
 | P10 | Runtime document download | P9 | Secure download with secondary auth and 15-minute expiry | Done |
 | P11 | Batch & async generation | P10 | Sync batch, async task query/cancel | Done |
-| P12 | Deferred enhancements | P0–P11 | Catch-all for deferred/post-MVP enhancements (no single active slice) | Not Started |
+| P12 | Deferred enhancements | P0–P11 | Catch-all for deferred/post-MVP enhancements; last slice **P12-AUD-B10 Done** (submit-for-approval evidence checklist gate) | Not Started (P12-AUD-B10 Done 2026-07-01) |
 | P13 | Identity & group administration | P1 | Global/group admins manage users & groups via management API + UI, with fail-closed escalation protection, audit, and green gates | Done |
 | P14 | Confirmed large domains | P2–P8 | Clause/content modules, collaboration to-dos + timeout escalation, template export/import (UX-G) | Done (2026-06-27; T01–T03 + E2E/UIUX/architecture gates; backend **481**, frontend **235+**) |
 | P15 | Kubernetes deployment & container hardening | P9 | Distroless non-root read-only containers, Helm/manifests for app workloads, ConfigMap/Secret, NGINX Ingress + cert-manager TLS, default-deny NetworkPolicy, HPA (CPU/mem + custom), /healthz+/readyz probes, blue-green + manual approval/rollback, CI manifest validation (ADR-0030) | Done (2026-06-27; T01–T10) |
@@ -55,11 +55,12 @@ upstream systems invoke the dynamic API.
 | P18 | Structured authoring & rendering-fidelity engine | P3, P4 | Controlled node matrix, master style catalog + limited direct format, table component, seal/QR/attachment nodes, controlled numbering, Word/HTML paste cleaning, publish-locked renderProfile, fidelity blockers/warnings (gap G3) | Done (2026-06-28; P18-T01–T10) |
 | P19 | Template verifiability, publish gate & decision forms | P3, P4, P5 | Multi-sample coverage thresholds, batch test, change-diff, preview comparison, live publish-gate checklist, controlled test/approval opinion forms + risk prompts + exception markers (gaps G4, G5) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | P1 | Locale registry/switcher/fallback + html lang, config-driven brand theming, environment selector (gap G6, i18n constitution) | Done (2026-06-25) |
-| P21 | Role-journey frontend redesign & business-friendly terminology | P13, P14, P19, P20 | Hybrid IA (single task hub authoritative + behavior-typed "my to-dos" entries + per-role `RoleJourneyTimeline`), task-hub queue partitioning + restored fields + inline open actions, 6 collaboration-trigger backend completeness (+ `RESOLVED`), foreign-bank non-IT persona business-friendly L1 copy (en/zh, keys stable); **plus code-grounded audit remediation** — permission single-source/fail-closed, template-detail bug fixes (focus/tab, stale id), APPROVAL dual-substate, i18n parity, a11y focus ring, capability/route/OpenAPI drift; ADR Batch B / COR-T11 not violated | Done (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest; AUD-B10 partial) |
+| P21 | Role-journey frontend redesign & business-friendly terminology | P13, P14, P19, P20 | Hybrid IA (single task hub authoritative + behavior-typed "my to-dos" entries + per-role `RoleJourneyTimeline`), task-hub queue partitioning + restored fields + inline open actions, 6 collaboration-trigger backend completeness (+ `RESOLVED`), foreign-bank non-IT persona business-friendly L1 copy (en/zh, keys stable); **plus code-grounded audit remediation** — permission single-source/fail-closed, template-detail bug fixes (focus/tab, stale id), APPROVAL dual-substate, i18n parity, a11y focus ring, capability/route/OpenAPI drift; ADR Batch B / COR-T11 not violated | Done (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest; **AUD-B10 resolved** P12-AUD-B10 Done 2026-07-01) |
 
-> **P21 vs P12:** P21 is a confirmed, scoped role-journey/terminology phase (clusters ①→②→③→④
-> by workflow timeline); P12 remains the non-active deferred-enhancements catch-all. Activating
-> P21 requires plan-orchestrator selection (single-active-phase rule). Detail:
+> **P21 vs P12:** P21 is **Done** (2026-06-30). AUD-B10 evidence-checklist gap **resolved**
+> under **P12-AUD-B10 Done** (2026-07-01); P12 catch-all **Not Started** (idle). Do not reopen
+> P21 phase status. Detail:
+> [detail/P12-deferred-enhancements.md](./detail/P12-deferred-enhancements.md),
 > [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 
 ## Thin vertical slice (MVP chain)

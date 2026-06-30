@@ -32,6 +32,10 @@ const baseProps = {
   submitting: false,
   bindingGateResult: null as BindingValidationResult | null,
   publishGateLoadError: null as string | null,
+  submitGateItems: [{ key: 'ANCHOR_INTEGRITY', label: 'Layout placeholder check', ready: true }],
+  loadingSubmitGate: false,
+  submitGateReady: true,
+  submitGateLoadError: null as string | null,
 }
 
 function mountTab(props: Partial<typeof baseProps> = {}) {
@@ -81,5 +85,30 @@ describe('TemplateDetailLifecycleTab', () => {
   it('wraps semver picker for narrow layouts', () => {
     const wrapper = mountTab()
     expect(wrapper.find('.publish-bump-picker').classes()).toContain('publish-bump-picker--wrap')
+  })
+
+  it('disables submit-for-approval when submit gate is not ready', () => {
+    const wrapper = mountTab({
+      showPublishActions: false,
+      showSubmitForApproval: true,
+      submitGateReady: false,
+    })
+
+    const submitButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Submit for approval'))
+
+    expect(submitButton?.attributes('disabled')).toBeDefined()
+  })
+
+  it('renders submit gate card with submit-specific copy', () => {
+    const wrapper = mountTab({
+      showPublishActions: false,
+      showSubmitForApproval: true,
+    })
+
+    expect(wrapper.text()).toContain('Submission readiness checks')
+    expect(wrapper.text()).toContain('Confirm these items before submitting the template for approval.')
+    expect(wrapper.text()).not.toContain('Confirm these items before going live with a release version.')
   })
 })

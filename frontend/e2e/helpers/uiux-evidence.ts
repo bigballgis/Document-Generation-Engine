@@ -98,10 +98,15 @@ export async function captureP14LocatorScreenshot(
   return filename
 }
 
+const BRAND_OPTION_NAME: Record<BrandPreset, RegExp> = {
+  REDBC: /^retail bank$/i,
+  GREENBC: /^green bank$/i,
+}
+
 export async function switchBrand(page: Page, brand: BrandPreset): Promise<void> {
   const brandSwitcher = page.locator('.brand-switcher')
   await brandSwitcher.click()
-  await page.locator('.el-select-dropdown__item').filter({ hasText: brand }).click()
+  await page.getByRole('option', { name: BRAND_OPTION_NAME[brand] }).click()
   await expect(page.locator('html')).toHaveAttribute('data-brand', brand)
 }
 
@@ -309,6 +314,35 @@ export async function captureP21T09LocatorScreenshot(
 ): Promise<string> {
   ensureP21T09EvidenceDirs()
   const target = path.join(P21_T09_SCREENSHOT_DIR, filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export const P12_AUD_B10_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P12-AUD-B10')
+export const P12_AUD_B10_SCREENSHOT_DIR = path.join(P12_AUD_B10_EVIDENCE_ROOT, 'screenshots')
+export const P12_AUD_B10_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureP12AudB10EvidenceDirs(): void {
+  fs.mkdirSync(P12_AUD_B10_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function p12AudB10ScreenshotPath(filename: string): string {
+  return path.join(P12_AUD_B10_SCREENSHOT_DIR, filename)
+}
+
+export async function captureP12AudB10Screenshot(page: Page, filename: string): Promise<string> {
+  ensureP12AudB10EvidenceDirs()
+  const target = p12AudB10ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureP12AudB10LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureP12AudB10EvidenceDirs()
+  const target = p12AudB10ScreenshotPath(filename)
   await locator.screenshot({ path: target })
   return filename
 }

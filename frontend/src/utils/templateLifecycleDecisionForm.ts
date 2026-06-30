@@ -131,3 +131,7 @@ export function isPublishGateReady(params: {
     !params.versionConflict
   )
 }
+
+export function isSubmitGateReady(params: { checklistReady: boolean }): boolean {
+  return params.checklistReady
+}

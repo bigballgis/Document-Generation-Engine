@@ -42,6 +42,6 @@ decisions. Evidence: hybrid IA + behavior-typed nav (P21-T01/T01a); per-role
 `RoleJourneyTimeline` (P21-T01b, T03–T11); task-hub deepening (P21-T01a); six collaboration
 triggers + `RESOLVED` closed loop (P21-T02/T07); L1 terminology + i18n parity (P21-X01/X06);
 permission fail-closed + capability/route/OpenAPI alignment (P21-X03/X04); companion docs synced
-(P21-X02). **Known gap (non-blocking):** AUD-B10 partial — confirm-on-behalf UI delivered
-(P21-T09b); evidence checklist gate remains open. Phase closed per
+(P21-X02). **AUD-B10 resolved** (2026-07-01): confirm-on-behalf UI (P21-T09b) + submit-for-approval
+evidence checklist gate (P12-AUD-B10 Done). Phase closed per
 [P21 detail plan §7](../../plan/detail/P21-role-journey-frontend-redesign.md).

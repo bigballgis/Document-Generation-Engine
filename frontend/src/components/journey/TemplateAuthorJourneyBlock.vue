@@ -16,9 +16,11 @@ const props = withDefaults(
     journeyContext: TemplateAuthorJourneyContext
     templateId: string
     canWrite?: boolean
+    primaryCtaDisabled?: boolean
   }>(),
   {
     canWrite: false,
+    primaryCtaDisabled: false,
   },
 )
 
@@ -92,6 +94,7 @@ function openOverviewTab() {
         v-if="showPrimaryCta && ctaKey"
         type="primary"
         data-template-journey-cta
+        :disabled="primaryCtaDisabled"
         @click="handleCtaClick"
       >
         {{ t(ctaKey) }}

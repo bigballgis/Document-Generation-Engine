@@ -31,6 +31,7 @@ import com.bank.docgen.template.api.VariableSchemaView;
 import com.bank.docgen.template.api.TemplateRuleValidationRequest;
 import com.bank.docgen.template.api.TemplateRuleValidationView;
 import com.bank.docgen.template.api.UpdateTemplateRequest;
+import com.bank.docgen.template.domain.PublishGatePhase;
 import com.bank.docgen.template.service.ChangeDiffService;
 import com.bank.docgen.template.service.CoverageComputationService;
 import com.bank.docgen.template.service.PublishGateService;
@@ -53,6 +54,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -130,10 +132,12 @@ public class TemplateController {
     @GetMapping("/{templateId}/publish-gate")
     public SuccessEnvelope<PublishGateChecklistView> publishGate(
             @PathVariable UUID templateId,
+            @RequestParam(required = false) PublishGatePhase phase,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        return envelope(request, publishGateService.evaluate(templateId, session));
+        PublishGatePhase effectivePhase = phase != null ? phase : PublishGatePhase.PUBLISH;
+        return envelope(request, publishGateService.evaluate(templateId, session, effectivePhase));
     }
 
     @GetMapping("/{templateId}/release-versions")

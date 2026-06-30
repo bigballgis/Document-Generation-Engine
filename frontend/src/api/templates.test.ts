@@ -122,8 +122,29 @@ describe('templates API', () => {
 
     const checklist = await templatesApi.fetchPublishGate('tpl-1')
 
-    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/publish-gate')
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/publish-gate', undefined)
     expect(checklist.blockerCount).toBe(1)
+  })
+
+  it('fetches submit-for-approval gate checklist with phase param', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          templateId: 'tpl-1',
+          ready: true,
+          blockerCount: 0,
+          items: [],
+        },
+      },
+    })
+
+    const checklist = await templatesApi.fetchPublishGate('tpl-1', 'SUBMIT_FOR_APPROVAL')
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/publish-gate', {
+      params: { phase: 'SUBMIT_FOR_APPROVAL' },
+    })
+    expect(checklist.ready).toBe(true)
   })
 
   it('lists template content module references', async () => {

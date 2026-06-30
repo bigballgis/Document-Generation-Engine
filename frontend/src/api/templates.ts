@@ -232,9 +232,15 @@ export async function getTemplateCoverage(templateId: string): Promise<CoverageS
   return unwrap(response.data)
 }
 
-export async function fetchPublishGate(templateId: string): Promise<PublishGateChecklist> {
+export type PublishGatePhase = 'PUBLISH' | 'SUBMIT_FOR_APPROVAL'
+
+export async function fetchPublishGate(
+  templateId: string,
+  phase?: PublishGatePhase,
+): Promise<PublishGateChecklist> {
   const response = await http.get<ApiEnvelope<PublishGateChecklist>>(
     `/templates/${templateId}/publish-gate`,
+    phase ? { params: { phase } } : undefined,
   )
   return unwrap(response.data)
 }

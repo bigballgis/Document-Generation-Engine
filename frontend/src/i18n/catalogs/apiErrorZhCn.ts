@@ -53,6 +53,7 @@ export const apiErrorZhCn = {
     enumValuesRequired: '枚举变量需要枚举值。',
     structuredContentInvalid: '结构化内容定义无效。',
     publishGateBlocked: '绑定校验通过前无法发布。',
+    submitForApprovalGateBlocked: '检查通过前无法提交审批。',
     decisionReasonCategoryRequired: '测试不通过或审批驳回时必须选择原因类别。',
     decisionImpactSummaryRequired: '测试不通过或审批驳回时必须填写影响摘要。',
     exportNotEligible: '仅已批准或已发布的模板可导出。',

@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** **Done** (2026-06-30; activated 2026-06-29; T01–T11 + X01 + X03–X06 + **X02** governance close; **all four role clusters complete**; §7 exit criteria met — **AUD-B10 partial** remains open as known gap) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** **Done** (2026-06-30; activated 2026-06-29; T01–T11 + X01 + X03–X06 + **X02** governance close; **all four role clusters complete**; §7 exit criteria met; **AUD-B10 resolved** via **P12-AUD-B10** 2026-07-01) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 closed Done 2026-06-30** — no formal phase is `In Progress`
@@ -247,7 +247,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | Green gates (backend + frontend + E2E/UIUX per sub-phase) | All T + X slices | Backend **`mvn verify` 553** (X04); frontend **511 Vitest** (X01); Playwright/UIUX per slice |
 | Companion docs + ledger synced | **P21-X02** | This close-out; `permission-matrix` §13.1.2, `catalog-navigation-ux`, ADR footer, ledger |
 
-**Known gap (non-blocking):** AUD-B10 **partial** — confirm-on-behalf UI fixed (P21-T09b); evidence checklist gate still open.
+**Audit closure:** AUD-B10 **resolved** (2026-07-01) — confirm-on-behalf UI (P21-T09b) + submit-for-approval evidence checklist gate (**P12-AUD-B10 Done**; [P12 detail](./P12-deferred-enhancements.md)).
 
 ## 8. Companion documents
 
@@ -334,7 +334,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 | AUD-B07 | 🟡 | Policy/lifecycle panels lack error/empty states; long name/AD-group no truncation; semver picker responsive break | `TemplateDetailView.vue:1056-1082,755-758,929-936` | **Resolved (P21-T06b)** |
 | AUD-B08 | 🟡 | Default-tab model split: `TEMPLATE_DETAIL_TABS[0]='overview'` vs fallback `releaseVersions` vs DOM order | `templateDetailTabs.ts:1,9`; `TemplateDetailView.vue:800-807` | **Resolved (P21-T06a)** |
 | AUD-B09 | 🟡 | Banner and Detail each maintain a separate capability×status matrix (drift risk) | `TemplateWorkflowBanner.vue:23-49`; `TemplateDetailView.vue:144-181` | **Resolved (P21-T06)** — `templateWorkflowBannerContext.ts` SSOT |
-| AUD-B10 | 🟡 | Submit-for-approval has no evidence checklist gate (**still open**); exception UI **partial fix (P21-T09b)** — GLOBAL_ADMIN + GROUP_ADMIN see "confirm on behalf" in `TemplateLifecycleDecisionDialog` (business copy, not "exception intervention") | `TemplateDetailView.vue:848-854`; `TemplateLifecycleDecisionDialog.vue:333-361` | P21-T09 / **T09b partial** |
+| AUD-B10 | 🟢 | Submit-for-approval evidence checklist gate **resolved (P12-AUD-B10 Done 2026-07-01)** — `PublishGatePhase.SUBMIT_FOR_APPROVAL`, pre-submit summary dialog, API fail-closed; confirm-on-behalf UI retained (P21-T09b) | `PublishGateService.java`; `TemplateSubmitForApprovalSummaryDialog.vue`; `TemplateDetailLifecycleTab.vue` | **Resolved → P12-AUD-B10 Done** (2026-07-01) |
 
 ### 11.4 Terminology / UI quality / dead code
 
@@ -2236,8 +2236,8 @@ footnote); `docs/product/catalog-navigation-ux.md` (Hybrid IA Implementation Don
 **Gate:** Docs-only slice — cites existing green gates: backend `mvn verify` **553** (P21-X04);
 frontend **511** Vitest (P21-X01). No code re-run.
 
-**Audit:** Companion doc drift **resolved**. **Known gap retained:** AUD-B10 **partial**
-(confirm-on-behalf evidence checklist — non-blocking for phase close).
+**Audit:** Companion doc drift **resolved**. AUD-B10 evidence checklist gate closed under
+**P12-AUD-B10 Done** (2026-07-01) — non-blocking for P21 close retained at phase closure time.
 
 ### P21 phase closure (2026-06-30)
 
@@ -2249,4 +2249,5 @@ activates next via `plan-orchestrator` (P12 deferred catch-all remains non-activ
 Surefire, P21-X04); frontend `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**511**
 Vitest, P21-X01). Playwright/UIUX evidence accumulated per sub-phase (T01–T11, X05).
 
-**Outstanding (documented, non-blocking):** AUD-B10 partial.
+**Post-close remediation (Done):** AUD-B10 evidence checklist gate → **P12-AUD-B10 Done**
+(2026-07-01; [P12 detail](./P12-deferred-enhancements.md)).

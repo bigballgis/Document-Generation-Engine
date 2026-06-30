@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { E2E_ADMIN, E2E_TEMPLATE_AUTHOR, E2E_TEMPLATE_TESTER, loginAs } from './helpers/auth'
+import { prepareTemplatePendingSubmitReady } from './helpers/submit-approval-gate-api'
 import { openContentModulesList } from './helpers/ui'
 import { P14_T01_VIEWPORT } from './helpers/uiux-evidence'
 
@@ -50,6 +51,25 @@ test.describe('management shell accessibility smoke', () => {
       page
         .locator('.timeout-config-card')
         .getByRole('heading', { name: /reminder timing/i }),
+    ).toBeVisible()
+  })
+
+  test('template lifecycle submit gate exposes checklist heading after author login', async ({
+    page,
+    request,
+  }) => {
+    await page.setViewportSize(P14_T01_VIEWPORT)
+    const template = await prepareTemplatePendingSubmitReady(request)
+    await loginAs(page, E2E_TEMPLATE_AUTHOR)
+    await page.goto(`/templates/${template.templateId}?tab=lifecycle`)
+
+    const lifecyclePanel = page.locator('#template-lifecycle-panel')
+    await expect(lifecyclePanel).toBeVisible({ timeout: 30_000 })
+    await expect(lifecyclePanel.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
+    await expect(
+      lifecyclePanel
+        .locator('.submit-gate-card')
+        .getByRole('heading', { name: /^submission readiness checks$/i }),
     ).toBeVisible()
   })
 })

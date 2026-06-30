@@ -38,6 +38,10 @@ const props = defineProps<{
   publishVersionConflict: boolean
   publishGateReady: boolean
   publishBumpOptions: PublishBumpOption[]
+  submitGateItems: PublishGateDisplayItem[]
+  loadingSubmitGate: boolean
+  submitGateReady: boolean
+  submitGateLoadError: string | null
   submitting: boolean
   bindingGateResult: BindingValidationResult | null
   publishGateLoadError: string | null
@@ -54,6 +58,7 @@ const emit = defineEmits<{
   testGenerate: []
   governanceAction: [action: GovernanceAction]
   retryPublishGate: []
+  retrySubmitGate: []
 }>()
 
 const { t, te } = useI18n()
@@ -122,14 +127,40 @@ function resolveBindingStatusLabel(status: string | undefined): string {
           {{ t('templates.lifecycle.failTest') }}
         </el-button>
       </template>
-      <el-button
-        v-if="showSubmitForApproval"
-        type="primary"
-        :loading="submitting"
-        @click="emit('submitForApproval')"
-      >
-        {{ t('templates.lifecycle.submitApproval') }}
-      </el-button>
+      <template v-if="showSubmitForApproval">
+        <LoadErrorPanel
+          v-if="submitGateLoadError"
+          :message-key="submitGateLoadError"
+          class="submit-gate-error"
+          @retry="emit('retrySubmitGate')"
+        />
+        <template v-else>
+          <el-card shadow="never" class="submit-gate-card">
+            <h3>{{ t('templates.submitGate.title') }}</h3>
+            <p>{{ t('templates.submitGate.description') }}</p>
+            <el-skeleton v-if="loadingSubmitGate" :rows="3" animated />
+            <ul v-else class="submit-gate-list">
+              <li v-for="item in submitGateItems" :key="item.key">
+                <span>{{ item.label }}</span>
+                <el-tag v-if="item.informational" type="info" size="small">
+                  {{ t('templates.submitGate.informational') }}
+                </el-tag>
+                <el-tag v-else :type="item.ready ? 'success' : 'warning'" size="small">
+                  {{ item.ready ? t('templates.submitGate.ready') : t('templates.submitGate.pending') }}
+                </el-tag>
+              </li>
+            </ul>
+          </el-card>
+          <el-button
+            type="primary"
+            :loading="submitting"
+            :disabled="!submitGateReady || loadingSubmitGate"
+            @click="emit('submitForApproval')"
+          >
+            {{ t('templates.lifecycle.submitApproval') }}
+          </el-button>
+        </template>
+      </template>
       <template v-if="showApprovalDecisionActions">
         <el-button
           type="success"
@@ -326,8 +357,13 @@ function resolveBindingStatusLabel(status: string | undefined): string {
   width: 100%;
 }
 
+.submit-gate-error {
+  width: 100%;
+}
+
 .binding-gate-card,
-.publish-gate-card {
+.publish-gate-card,
+.submit-gate-card {
   width: 100%;
   margin-bottom: 1rem;
   padding: 1rem;
@@ -346,6 +382,7 @@ function resolveBindingStatusLabel(status: string | undefined): string {
 }
 
 .publish-gate-list,
+.submit-gate-list,
 .binding-gate-issues,
 .binding-gate-invalid-list {
   margin: 0 0 0.75rem;

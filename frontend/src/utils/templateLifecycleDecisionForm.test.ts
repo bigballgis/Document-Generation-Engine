@@ -5,6 +5,7 @@ import {
   isApprovalPassDecisionValid,
   isLifecycleDecisionFormValid,
   isPublishGateReady,
+  isSubmitGateReady,
   isRejectDecisionValid,
   isTestPassDecisionValid,
 } from '@/utils/templateLifecycleDecisionForm'
@@ -107,5 +108,10 @@ describe('templateLifecycleDecisionForm', () => {
         versionConflict: true,
       }),
     ).toBe(false)
+  })
+
+  it('blocks submit-for-approval when submit-phase checklist is not ready', () => {
+    expect(isSubmitGateReady({ checklistReady: true })).toBe(true)
+    expect(isSubmitGateReady({ checklistReady: false })).toBe(false)
   })
 })

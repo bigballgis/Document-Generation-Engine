@@ -17,6 +17,7 @@ import com.bank.docgen.template.api.TemplateRuleValidationView;
 import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.PublishGateCheckCode;
+import com.bank.docgen.template.domain.PublishGatePhase;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
@@ -70,6 +71,15 @@ public class PublishGateService {
 
     @Transactional(readOnly = true)
     public PublishGateChecklistView evaluate(UUID templateId, ManagementSessionClaims session) {
+        return evaluate(templateId, session, PublishGatePhase.PUBLISH);
+    }
+
+    @Transactional(readOnly = true)
+    public PublishGateChecklistView evaluate(
+            UUID templateId,
+            ManagementSessionClaims session,
+            PublishGatePhase phase
+    ) {
         templateService.requireReadableTemplate(templateId, session);
         TemplateVersionEntity version = currentDevVersion(templateId);
         BindingValidationView bindings = templateService.validateBindings(templateId, session);
@@ -90,17 +100,41 @@ public class PublishGateService {
         items.add(contentModuleReferencesItem(version.getId()));
         items.add(blockerStatusItem(templateId, version.getId(), bindings, coverage));
 
-        int blockerCount = (int) items.stream().filter(PublishGateItemView::blocker).count();
+        List<PublishGateItemView> phaseItems = filterForPhase(items, phase);
+        int blockerCount = (int) phaseItems.stream().filter(PublishGateItemView::blocker).count();
         boolean ready = blockerCount == 0;
-        return new PublishGateChecklistView(templateId.toString(), ready, blockerCount, items);
+        return new PublishGateChecklistView(templateId.toString(), ready, blockerCount, phaseItems);
     }
 
     @Transactional(readOnly = true)
     public void assertReady(UUID templateId, ManagementSessionClaims session) {
-        PublishGateChecklistView checklist = evaluate(templateId, session);
+        assertReady(templateId, session, PublishGatePhase.PUBLISH);
+    }
+
+    @Transactional(readOnly = true)
+    public void assertReady(UUID templateId, ManagementSessionClaims session, PublishGatePhase phase) {
+        PublishGateChecklistView checklist = evaluate(templateId, session, phase);
         if (!checklist.ready()) {
-            throw new TemplateValidationException("api.error.template.publishGateBlocked");
+            String messageKey = phase == PublishGatePhase.SUBMIT_FOR_APPROVAL
+                    ? "api.error.template.submitForApprovalGateBlocked"
+                    : "api.error.template.publishGateBlocked";
+            throw new TemplateValidationException(messageKey);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public void assertReadyForSubmitForApproval(UUID templateId, ManagementSessionClaims session) {
+        assertReady(templateId, session, PublishGatePhase.SUBMIT_FOR_APPROVAL);
+    }
+
+    private List<PublishGateItemView> filterForPhase(List<PublishGateItemView> items, PublishGatePhase phase) {
+        if (phase == PublishGatePhase.PUBLISH) {
+            return items;
+        }
+        return items.stream()
+                .filter(item -> item.checkCode() != PublishGateCheckCode.APPROVAL_SUMMARY
+                        && item.checkCode() != PublishGateCheckCode.API_POLICY)
+                .toList();
     }
 
     private PublishGateItemView anchorIntegrityItem(BindingValidationView bindings) {

@@ -1,7 +1,23 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-30 (P21 **Done** — X02 governance close + phase closure)
-**Completion note (2026-06-30):** **P21 Done** — role-journey frontend redesign & business-friendly terminology phase closed. **P21-X02 Done** — governance & docs wrap-up: companion docs aligned to **Done** (`permission-matrix` §13.1.2, `catalog-navigation-ux`, `business-terminology-guide`, ADR implementation note); plan layer closed (master-plan, detail §7 evidence map, ledger, index READMEs). **Final gates cited:** backend `mvn verify` **553** (X04); frontend **511** Vitest (X01). **Known gap:** AUD-B10 **partial** (non-blocking). **Single-active-phase:** **None** — activate next via `plan-orchestrator`. Detail: [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
+**Last synced:** 2026-07-01 (P12-AUD-B10 **Done** — P12 catch-all back to **Not Started**)
+**Completion note (2026-07-01):** **P12-AUD-B10 Done** — submit-for-approval evidence checklist gate
+(AUD-B10 remediation): `PublishGatePhase.SUBMIT_FOR_APPROVAL`, `PublishGateService.assertReadyForSubmitForApproval`,
+`TemplateLifecycleService` PENDING_SUBMIT guard; `TemplateSubmitForApprovalSummaryDialog`, `submitGateReady` SSOT,
+lifecycle tab + author journey CTA; i18n en/zh + `api.error.template.submitForApprovalGateBlocked`.
+**Gate:** backend `mvn verify` BUILD SUCCESS (**558** Surefire); frontend lint/type-check/test/build green
+(**520+** Vitest); Playwright `P12-AUD-B10-submit-approval-gate.spec.ts` **3/3**; UIUX evidence **6** screenshots +
+manifest **PASS** (`frontend/e2e/evidence/P12-AUD-B10-uiux-manifest.md`). **Audit:** AUD-B10 **resolved** (🟢) in
+P21 §11.3. **P12 phase → Not Started** (catch-all idle; no active slice). **P21 remains Done** — do not reopen.
+Detail: [detail/P12-deferred-enhancements.md](./detail/P12-deferred-enhancements.md).
+**Activation note (2026-06-30):** **P12 activated → In Progress** (single-active-phase selection
+by `plan-orchestrator`; user constraint — do **not** reopen P21). Active slice **P12-AUD-B10**
+(AUD-B10 remediation — submit-for-approval evidence checklist gate): server-side gate on
+`submitForApproval` mirroring `PublishGateService`; frontend pre-submit summary dialog; BDD + TDD +
+E2E. **P21 remains Done** — confirm-on-behalf UI delivered P21-T09b; checklist gap tracked here.
+**No gate evidence yet** for P12-AUD-B10. Detail:
+[detail/P12-deferred-enhancements.md](./detail/P12-deferred-enhancements.md). *(Superseded by completion note 2026-07-01 above.)*
+**Completion note (2026-06-30):** **P21 Done** — role-journey frontend redesign & business-friendly terminology phase closed. **P21-X02 Done** — governance & docs wrap-up: companion docs aligned to **Done** (`permission-matrix` §13.1.2, `catalog-navigation-ux`, `business-terminology-guide`, ADR implementation note); plan layer closed (master-plan, detail §7 evidence map, ledger, index READMEs). **Final gates cited:** backend `mvn verify` **553** (X04); frontend **511** Vitest (X01). **Known gap:** AUD-B10 **partial** → remediated under **P12-AUD-B10** (non-blocking for P21 close). Detail: [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 **Completion note (2026-06-30):** **P21-X02 Done** — governance & docs wrap-up: `permission-matrix.md` §13.1.2 implementation **Done** + T02/T07 closed-loop footnote; `catalog-navigation-ux.md` Hybrid IA Implementation **Done**; `business-terminology-guide.md` P21 complete header; ADR `2026-06-29-behavior-typed-ia-business-terminology.md` implementation note footer (decisions unchanged); P21 detail §7 evidence map + phase closure sections. **Gate:** docs-only — cites backend **553**, frontend **511** Vitest. Detail: [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 **Completion note (2026-06-30):** **P21-X01 Done** — full-system L1 terminology sweep (AUD-Q05): business-friendly L1 copy across `templates.*`, `audit.*`, `contentModules.*`, `packageCatalog.*`, and nav routes; IT terms restricted to L2/L3 surfaces. **Deliverables:** `i18n/locales/en.ts`, `i18n/locales/zh-CN.ts`; `docs/product/business-terminology-guide.md` (P21-X01 mapping table); Vitest (`TemplateStatusBadge.test.ts`, `TemplatePublishSummaryDialog.test.ts`, `TemplateDetailLifecycleTab.test.ts`, `navStructure.test.ts`). **Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**511** Vitest). Backend unchanged. **Audit:** AUD-Q05 **resolved**. P21 phase **wrap-up** — next **P21-X02** only per §11.5. Detail: [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 **Completion note (2026-06-30):** **P21-X06 Done** — i18n parity hardening (AUD-Q04): ~368 zh-CN leaf keys added for primary journeys (`contentModules.*`, `templates.lifecycle/governance/authoring/rules/create/error`, `paste.*`); `collectLeafKeys` utility + en→zh-CN key-parity regression test in `localeRegistry.test.ts` blocks silent English fallback. **Deliverables:** `i18n/collectLeafKeys.ts`, `i18n/localeRegistry.test.ts`, `i18n/locales/zh-CN.ts`. **Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green. Backend unchanged. **Audit:** AUD-Q04 **resolved**. P21 phase **wrap-up** — next **P21-X01** per §11.5. Detail: [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
@@ -250,7 +266,7 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P9 | Done | Observability, local security gates, prod compose profile |
 | P10 | Done | Secure download with expiry |
 | P11 | Done | Batch + async task lifecycle |
-| P12 | Not Started | Deferred enhancements catch-all (non-active, no single active slice) |
+| P12 | Not Started (P12-AUD-B10 Done 2026-07-01) | Deferred enhancements catch-all idle — submit-for-approval evidence checklist gate **Done** (AUD-B10 **resolved**); see [P12 detail](./detail/P12-deferred-enhancements.md) |
 | P13 | Done | Identity & group administration (user + group management plane); green gates 2026-06-23 — see P13 mirror block |
 | P14 | Done (2026-06-27) | Confirmed large domains — **P14-T01 Done** (T01a–T01e + architecture remediation); **P14-T02 Done** (T02a–T02d + E2E **3/3** + UIUX **5/5**); **P14-T03 Done** (T03a–T03c + E2E **2/2** + UIUX **7/7**); backend **481**; frontend **235+**; OpenAPI export/import contract; architecture re-review **PASS** (2026-06-26); see [P14 detail](./detail/P14-confirmed-large-domains.md) |
 | P15 | Done (2026-06-27) | Kubernetes deployment & container hardening — T01–T10; [`deploy/README.md`](../deploy/README.md); helm validate + CI gates green — see [P15 detail](./detail/P15-kubernetes-deployment-container-hardening.md) |
@@ -259,11 +275,10 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P20 | Done (2026-06-25) | T01–T07 complete incl. T06 (`api.error` en/zh + primary journey zh-CN); gates green — see [P20 detail](./detail/P20-i18n-ui-upgradeability.md) |
 | P18 | Done (2026-06-28) | **P18-T01–T10 Done** — controlled authoring UI + management paste/catalog APIs — see [P18 detail](./detail/P18-structured-authoring-fidelity-engine.md) |
 | P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
-| P21 | Done (2026-06-30) | Role-journey frontend redesign — T01–T11 + X01–X06 + **X02** governance close; backend **`mvn verify` 553**; frontend **511** Vitest; Playwright/UIUX per sub-phase; **AUD-B10 partial** (known gap) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
+| P21 | Done (2026-06-30) | Role-journey frontend redesign — T01–T11 + X01–X06 + **X02** governance close; backend **`mvn verify` 553**; frontend **511** Vitest; Playwright/UIUX per sub-phase; **AUD-B10 resolved** (P12-AUD-B10 Done 2026-07-01) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
-**Active phase:** **None** (P21 **Done** 2026-06-30; no formal phase `In Progress` until user
-activates next via `plan-orchestrator`). All formal phases P0–P11, P13–P21 **Done** except P12
-(deferred catch-all, non-active).
+**Active phase:** **None** (2026-07-01 — P12-AUD-B10 **Done**; P12 catch-all **Not Started**).
+**P21 Done** — do not reopen. All formal phases P0–P11, P13–P21 **Done**; P12 catch-all idle.
 
 ## Epic ↔ phase mapping
 

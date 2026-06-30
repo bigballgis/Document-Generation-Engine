@@ -249,11 +249,53 @@ class TemplateLifecycleServiceTest {
     void submitForApproval_createsApprovalCollaborationWorkItem() {
         template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
         when(templateService.requireWritableTemplate(templateId, author)).thenReturn(template);
+        when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_SUBMIT);
         when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.APPROVAL));
+        org.mockito.Mockito.doNothing()
+                .when(publishGateService).assertReadyForSubmitForApproval(templateId, author);
 
         service.submitForApproval(templateId, new LifecycleCommentRequest("Ready for approval"), author);
 
+        verify(publishGateService).assertReadyForSubmitForApproval(templateId, author);
         verify(collaborationWorkItemWriter).upsertSubmitForApprovalWorkItem(template, author);
+    }
+
+    @Test
+    void submitForApproval_fromApprovalPendingDecision_isRejectedFailClosed() {
+        template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
+        when(templateService.requireWritableTemplate(templateId, author)).thenReturn(template);
+        when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_DECISION);
+
+        assertThatThrownBy(() -> service.submitForApproval(
+                templateId,
+                new LifecycleCommentRequest("Ready for approval"),
+                author
+        ))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasFieldOrPropertyWithValue("messageKey", "api.error.template.invalidState");
+
+        assertThat(template.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.APPROVAL);
+        verify(publishGateService, never()).assertReadyForSubmitForApproval(any(), any());
+        verify(collaborationWorkItemWriter, never()).upsertSubmitForApprovalWorkItem(any(), any());
+    }
+
+    @Test
+    void submitForApproval_blockedWhenSubmitGateNotReady() {
+        template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
+        when(templateService.requireWritableTemplate(templateId, author)).thenReturn(template);
+        when(approvalSubStateResolver.resolve(template)).thenReturn(ApprovalSubState.PENDING_SUBMIT);
+        org.mockito.Mockito.doThrow(new TemplateValidationException("api.error.template.submitForApprovalGateBlocked"))
+                .when(publishGateService).assertReadyForSubmitForApproval(templateId, author);
+
+        assertThatThrownBy(() -> service.submitForApproval(
+                templateId,
+                new LifecycleCommentRequest("Ready for approval"),
+                author
+        ))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasFieldOrPropertyWithValue("messageKey", "api.error.template.submitForApprovalGateBlocked");
+
+        verify(collaborationWorkItemWriter, never()).upsertSubmitForApprovalWorkItem(any(), any());
     }
 
     @Test

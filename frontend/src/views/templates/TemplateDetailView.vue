@@ -11,6 +11,7 @@ import TemplateTesterJourneyBlock from '@/components/journey/TemplateTesterJourn
 import TemplateApproverJourneyBlock from '@/components/journey/TemplateApproverJourneyBlock.vue'
 import TemplateTeamLeadJourneyBlock from '@/components/journey/TemplateTeamLeadJourneyBlock.vue'
 import TemplatePublishSummaryDialog from '@/components/templates/TemplatePublishSummaryDialog.vue'
+import TemplateSubmitForApprovalSummaryDialog from '@/components/templates/TemplateSubmitForApprovalSummaryDialog.vue'
 import TemplateLifecycleDecisionDialog, {
   type LifecycleDecisionDialogMode,
   type LifecycleDecisionSubmitPayload,
@@ -66,6 +67,7 @@ import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
 import { resolveWorkflowBannerActionKind } from '@/utils/templateWorkflowBannerContext'
 import {
   isPublishGateReady,
+  isSubmitGateReady,
   mapPublishGateChecklistItems,
 } from '@/utils/templateLifecycleDecisionForm'
 import { resolvePublishGateLoadErrorKey } from '@/utils/templateBindingGateDisplay'
@@ -109,6 +111,7 @@ const decisionDialogMode = ref<LifecycleDecisionDialogMode>('test-fail')
 const publishBumpLevel = ref<SemverBumpLevel>('patch')
 const publishVersion = ref('1.0.0')
 const publishSummaryOpen = ref(false)
+const submitSummaryOpen = ref(false)
 const publishedReleaseVersions = ref<string[]>([])
 const credentialSecretDialogVisible = ref(false)
 const credentialSecretValue = ref('')
@@ -131,10 +134,15 @@ const selectedTestDataSetId = ref<string | null>(null)
 const coverageRefreshToken = ref(0)
 const bindingGateResult = ref<BindingValidationResult | null>(null)
 const publishGateChecklist = ref<PublishGateChecklist | null>(null)
+const submitGateChecklist = ref<PublishGateChecklist | null>(null)
 const publishCoverageSummary = ref<CoverageSummary | null>(null)
+const submitCoverageSummary = ref<CoverageSummary | null>(null)
 const publishChangeDiffSummary = ref<ChangeDiffSummary | null>(null)
+const submitChangeDiffSummary = ref<ChangeDiffSummary | null>(null)
 const loadingPublishGate = ref(false)
+const loadingSubmitGate = ref(false)
 const publishGateLoadError = ref<string | null>(null)
+const submitGateLoadError = ref<string | null>(null)
 const policyLoadFailed = ref(false)
 const metadataEditOpen = ref(false)
 const loadFailed = ref(false)
@@ -300,6 +308,28 @@ const publishGateReady = computed(() =>
     releaseVersion: publishVersion.value,
     versionConflict: publishVersionConflict.value,
   }),
+)
+
+const submitGateItems = computed(() => {
+  if (!submitGateChecklist.value) {
+    return []
+  }
+  return mapPublishGateChecklistItems(
+    submitGateChecklist.value.items,
+    resolvePublishGateItemLabel,
+  )
+})
+
+const submitGateReady = computed(() =>
+  isSubmitGateReady({
+    checklistReady: Boolean(submitGateChecklist.value?.ready),
+  }),
+)
+
+const authorJourneyPrimaryCtaDisabled = computed(
+  () =>
+    showSubmitForApproval.value &&
+    (loadingSubmitGate.value || !submitGateReady.value || Boolean(submitGateLoadError.value)),
 )
 
 const suggestedVersions = computed(() =>
@@ -609,11 +639,16 @@ function resetTransientDetailState() {
   lastPreview.value = null
   bindingGateResult.value = null
   publishGateChecklist.value = null
+  submitGateChecklist.value = null
   publishCoverageSummary.value = null
+  submitCoverageSummary.value = null
   publishChangeDiffSummary.value = null
+  submitChangeDiffSummary.value = null
   publishedReleaseVersions.value = []
   loadingPublishGate.value = false
+  loadingSubmitGate.value = false
   publishGateLoadError.value = null
+  submitGateLoadError.value = null
   policyLoadFailed.value = false
 }
 
@@ -685,6 +720,21 @@ watch(
   { immediate: true },
 )
 
+watch(
+  showSubmitForApproval,
+  async (active) => {
+    if (!active) {
+      submitGateChecklist.value = null
+      submitCoverageSummary.value = null
+      submitChangeDiffSummary.value = null
+      submitGateLoadError.value = null
+      return
+    }
+    await loadSubmitGateData()
+  },
+  { immediate: true },
+)
+
 watch(publishBumpLevel, (level) => {
   publishVersion.value = suggestedVersions.value[level]
 })
@@ -717,6 +767,28 @@ function scrollToLifecyclePanel() {
 function openLifecyclePanel() {
   activeDetailTab.value = 'lifecycle'
   scrollToLifecyclePanel()
+}
+
+async function loadSubmitGateData() {
+  submitGateLoadError.value = null
+  loadingSubmitGate.value = true
+  try {
+    const [checklist, coverage, changeDiff] = await Promise.all([
+      templatesApi.fetchPublishGate(templateId.value, 'SUBMIT_FOR_APPROVAL'),
+      templatesApi.getTemplateCoverage(templateId.value),
+      templatesApi.fetchChangeDiff(templateId.value),
+    ])
+    submitGateChecklist.value = checklist
+    submitCoverageSummary.value = coverage
+    submitChangeDiffSummary.value = changeDiff
+  } catch {
+    submitGateLoadError.value = resolvePublishGateLoadErrorKey(templatesStore.lastErrorMessageKey)
+    submitGateChecklist.value = null
+    submitCoverageSummary.value = null
+    submitChangeDiffSummary.value = null
+  } finally {
+    loadingSubmitGate.value = false
+  }
 }
 
 async function loadPublishGateData() {
@@ -867,6 +939,22 @@ async function submitLifecycleDecision(payload: LifecycleDecisionSubmitPayload) 
 }
 
 async function handleSubmitForApproval() {
+  if (submitGateLoadError.value) {
+    ElMessage.error(t('templates.submitGate.loadError'))
+    return
+  }
+  if (loadingSubmitGate.value) {
+    return
+  }
+  if (!submitGateReady.value) {
+    ElMessage.warning(t('templates.lifecycle.submitGateBlocked'))
+    return
+  }
+  submitSummaryOpen.value = true
+}
+
+async function confirmSubmitFromSummary() {
+  submitSummaryOpen.value = false
   try {
     await templatesStore.submitForApproval(templateId.value, {
       commentSummary: lifecycleComment.value,
@@ -1160,6 +1248,7 @@ async function handleDeleteTemplate() {
         :journey-context="authorJourneyContext"
         :template-id="templateId"
         :can-write="authorTemplates"
+        :primary-cta-disabled="authorJourneyPrimaryCtaDisabled"
         @create="handleJourneyCreate"
         @design="handleJourneyDesign"
         @trial-generate="handleJourneyTrialGenerate"
@@ -1223,6 +1312,10 @@ async function handleDeleteTemplate() {
             :publish-bump-options="publishBumpOptions"
             :binding-gate-result="bindingGateResult"
             :publish-gate-load-error="publishGateLoadError"
+            :submit-gate-items="submitGateItems"
+            :loading-submit-gate="loadingSubmitGate"
+            :submit-gate-ready="submitGateReady"
+            :submit-gate-load-error="submitGateLoadError"
             :submitting="templatesStore.submitting"
             @update:lifecycle-comment="lifecycleComment = $event"
             @update:publish-bump-level="publishBumpLevel = $event"
@@ -1234,6 +1327,7 @@ async function handleDeleteTemplate() {
             @test-generate="handleTestGenerate"
             @governance-action="handleGovernanceAction"
             @retry-publish-gate="loadPublishGateData"
+            @retry-submit-gate="loadSubmitGateData"
           />
         </el-tab-pane>
 
@@ -1317,6 +1411,18 @@ async function handleDeleteTemplate() {
       :preview-comparison="lastPreview?.previewComparison ?? null"
       :loading="templatesStore.submitting"
       @confirm="confirmPublishFromSummary"
+    />
+
+    <TemplateSubmitForApprovalSummaryDialog
+      v-if="template"
+      v-model="submitSummaryOpen"
+      :template-name="template.name"
+      :gate-items="submitGateItems"
+      :coverage-summary="submitCoverageSummary"
+      :change-diff-summary="submitChangeDiffSummary"
+      :preview-comparison="lastPreview?.previewComparison ?? null"
+      :loading="templatesStore.submitting"
+      @confirm="confirmSubmitFromSummary"
     />
 
     <TemplateLifecycleDecisionDialog

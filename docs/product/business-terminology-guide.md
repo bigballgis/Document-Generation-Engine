@@ -112,6 +112,8 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | Group governance | Group administration | 分组管理 | `nav.routes.groupGovernance` | P21-X01 |
 | Lifecycle actions | Workflow actions | 工作流操作 | `templates.lifecycle.title` | P21-X01 |
 | Publish gate checklist | Pre-release checks | 上线前检查 | `templates.publishGate.title` | P21-X01 |
+| Submit-for-approval summary | Review before submit for approval | 提交审批前确认 | `templates.submitApprovalSummary.title` | P12-AUD-B10 |
+| Submit gate blocked (API L1) | Submit blocked until checks pass | 检查通过前无法提交审批 | `api.error.template.submitForApprovalGateBlocked` | P12-AUD-B10 |
 | Post-publish governance | Post-publish controls | 上线后管控 | `templates.governance.title` | P21-X01 |
 | Anchor bindings / integrity | Layout placeholder bindings / check | 版式占位符绑定 / 检查 | `templates.authoring.bindingsTitle`, `templates.publishGate.checkCodes.ANCHOR_INTEGRITY` | P21-X01 |
 | Content modules (list) | Standard clauses | 标准条款 | `contentModules.list.title`, `packageCatalog.contentModule.noticeTitle` | P21-X01 |

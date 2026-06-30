@@ -117,6 +117,8 @@ public class TemplateLifecycleService {
     public TemplateDetailView submitForApproval(UUID templateId, LifecycleCommentRequest request, ManagementSessionClaims session) {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
         requireStatus(template, TemplateLifecycleStatus.APPROVAL);
+        requirePendingSubmitForApproval(template);
+        publishGateService.assertReadyForSubmitForApproval(templateId, session);
         transition(template, TemplateLifecycleStatus.APPROVAL, LifecycleAction.SUBMIT_FOR_APPROVAL,
                 null, request.commentSummary(), session);
         collaborationWorkItemWriter.upsertSubmitForApprovalWorkItem(template, session);
@@ -452,6 +454,16 @@ public class TemplateLifecycleService {
             return;
         }
         throw new TemplateValidationException("api.error.template.invalidState");
+    }
+
+    /**
+     * Submit-for-approval requires {@code APPROVAL} + {@link ApprovalSubState#PENDING_SUBMIT}.
+     * Once awaiting decision ({@link ApprovalSubState#PENDING_DECISION}) re-submit is rejected (fail-closed).
+     */
+    private void requirePendingSubmitForApproval(TemplateEntity template) {
+        if (approvalSubStateResolver.resolve(template) != ApprovalSubState.PENDING_SUBMIT) {
+            throw new TemplateValidationException("api.error.template.invalidState");
+        }
     }
 
     private TemplateEntity requireTestableTemplate(UUID templateId, ManagementSessionClaims session) {

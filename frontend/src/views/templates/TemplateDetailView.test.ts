@@ -4,6 +4,8 @@ import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplateDetailView from '@/views/templates/TemplateDetailView.vue'
+import TemplateDetailLifecycleTab from '@/views/templates/detail/TemplateDetailLifecycleTab.vue'
+import TemplateSubmitForApprovalSummaryDialog from '@/components/templates/TemplateSubmitForApprovalSummaryDialog.vue'
 import en from '@/i18n/locales/en'
 import * as templatesApi from '@/api/templates'
 import { useSessionStore } from '@/stores/session'
@@ -15,6 +17,7 @@ vi.mock('@/api/templates', () => ({
   getTemplateCoverage: vi.fn(),
   fetchChangeDiff: vi.fn(),
   fetchReleaseVersions: vi.fn(),
+  submitForApproval: vi.fn(),
 }))
 
 vi.mock('@/stores/collaboration', () => ({
@@ -86,9 +89,13 @@ describe('TemplateDetailView', () => {
     routeState.query = {}
     routerReplace.mockReset()
     vi.mocked(templatesApi.getTemplate).mockReset()
+    vi.mocked(templatesApi.fetchPublishGate).mockReset()
+    vi.mocked(templatesApi.getTemplateCoverage).mockReset()
+    vi.mocked(templatesApi.fetchChangeDiff).mockReset()
+    vi.mocked(templatesApi.submitForApproval).mockReset()
   })
 
-  function mountView() {
+  function mountView(stubLifecycleTab = true) {
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     return mount(TemplateDetailView, {
       global: {
@@ -100,7 +107,7 @@ describe('TemplateDetailView', () => {
           TemplateTeamLeadJourneyBlock: true,
           TemplateWorkflowBanner: true,
           TemplateDetailOverviewTab: true,
-          TemplateDetailLifecycleTab: true,
+          TemplateDetailLifecycleTab: stubLifecycleTab,
           TemplateDetailAuthoringTab: true,
           TemplateDetailReleaseVersionsTab: true,
           TemplateDetailApiAccessTab: true,
@@ -215,5 +222,89 @@ describe('TemplateDetailView', () => {
     await flushPromises()
 
     expect(wrapper.findComponent({ name: 'TemplateTeamLeadJourneyBlock' }).exists()).toBe(true)
+  })
+
+  it('loads submit gate with SUBMIT_FOR_APPROVAL phase for pending submit templates', async () => {
+    vi.mocked(templatesApi.getTemplate).mockResolvedValue({
+      ...makeTemplate('tpl-b', 'Pending Submit Template'),
+      lifecycleStatus: 'APPROVAL',
+      approvalSubState: 'PENDING_SUBMIT',
+    } as never)
+    vi.mocked(templatesApi.fetchPublishGate).mockResolvedValue({
+      ready: true,
+      items: [{ checkCode: 'ANCHOR_INTEGRITY', ready: true, blocker: true, messageKey: '', summary: '' }],
+    } as never)
+    vi.mocked(templatesApi.getTemplateCoverage).mockResolvedValue({} as never)
+    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({} as never)
+
+    mountView()
+    await flushPromises()
+
+    expect(templatesApi.fetchPublishGate).toHaveBeenCalledWith('tpl-b', 'SUBMIT_FOR_APPROVAL')
+  })
+
+  it('opens submit summary dialog before calling submitForApproval API', async () => {
+    routeState.query = { tab: 'lifecycle' }
+    vi.mocked(templatesApi.getTemplate).mockResolvedValue({
+      ...makeTemplate('tpl-b', 'Pending Submit Template'),
+      lifecycleStatus: 'APPROVAL',
+      approvalSubState: 'PENDING_SUBMIT',
+    } as never)
+    vi.mocked(templatesApi.fetchPublishGate).mockResolvedValue({
+      ready: true,
+      items: [{ checkCode: 'ANCHOR_INTEGRITY', ready: true, blocker: true, messageKey: '', summary: '' }],
+    } as never)
+    vi.mocked(templatesApi.getTemplateCoverage).mockResolvedValue({} as never)
+    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({} as never)
+
+    const wrapper = mountView(false)
+    await flushPromises()
+
+    const lifecycleTab = wrapper.findComponent(TemplateDetailLifecycleTab)
+    const submitButton = lifecycleTab
+      .findAll('button')
+      .find((button) => button.text().includes('Submit for approval'))
+    await submitButton!.trigger('click')
+    await flushPromises()
+
+    const summaryDialog = wrapper.findComponent(TemplateSubmitForApprovalSummaryDialog)
+    expect(summaryDialog.props('modelValue')).toBe(true)
+    expect(templatesApi.submitForApproval).not.toHaveBeenCalled()
+  })
+
+  it('calls submitForApproval after summary dialog confirm', async () => {
+    routeState.query = { tab: 'lifecycle' }
+    vi.mocked(templatesApi.getTemplate).mockResolvedValue({
+      ...makeTemplate('tpl-b', 'Pending Submit Template'),
+      lifecycleStatus: 'APPROVAL',
+      approvalSubState: 'PENDING_SUBMIT',
+    } as never)
+    vi.mocked(templatesApi.fetchPublishGate).mockResolvedValue({
+      ready: true,
+      items: [{ checkCode: 'ANCHOR_INTEGRITY', ready: true, blocker: true, messageKey: '', summary: '' }],
+    } as never)
+    vi.mocked(templatesApi.getTemplateCoverage).mockResolvedValue({} as never)
+    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({} as never)
+    vi.mocked(templatesApi.submitForApproval).mockResolvedValue({
+      ...makeTemplate('tpl-b', 'Pending Submit Template'),
+      lifecycleStatus: 'APPROVAL',
+      approvalSubState: 'PENDING_DECISION',
+    } as never)
+
+    const wrapper = mountView(false)
+    await flushPromises()
+
+    const lifecycleTab = wrapper.findComponent(TemplateDetailLifecycleTab)
+    const submitButton = lifecycleTab
+      .findAll('button')
+      .find((button) => button.text().includes('Submit for approval'))
+    await submitButton!.trigger('click')
+    await flushPromises()
+
+    const summaryDialog = wrapper.findComponent(TemplateSubmitForApprovalSummaryDialog)
+    await summaryDialog.vm.$emit('confirm')
+    await flushPromises()
+
+    expect(templatesApi.submitForApproval).toHaveBeenCalledWith('tpl-b', { commentSummary: '' })
   })
 })

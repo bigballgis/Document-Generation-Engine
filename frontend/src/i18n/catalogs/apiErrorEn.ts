@@ -53,6 +53,7 @@ export const apiErrorEn = {
     "enumValuesRequired": "Enum variables require enum values.",
     "structuredContentInvalid": "The structured content definition is invalid.",
     "publishGateBlocked": "Publish is blocked until binding validation passes.",
+    "submitForApprovalGateBlocked": "Submit for approval is blocked until pre-release checks pass.",
     "decisionReasonCategoryRequired": "A reason category is required for failed or rejected decisions.",
     "decisionImpactSummaryRequired": "An impact summary is required for failed or rejected decisions.",
     "exportNotEligible": "Only approved or published templates can be exported.",
