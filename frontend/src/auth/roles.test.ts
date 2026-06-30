@@ -65,7 +65,7 @@ describe('management roles', () => {
     expect(canAccessMasterManagement([MANAGEMENT_ROLES.TEMPLATE_AUTHOR])).toBe(true)
     expect(canAccessMasterManagement([MANAGEMENT_ROLES.GROUP_ADMIN])).toBe(true)
     expect(canAccessMasterManagement([MANAGEMENT_ROLES.GLOBAL_ADMIN])).toBe(true)
-    expect(canAccessMasterManagement(['AUDIT_ADMIN'])).toBe(false)
+    expect(canAccessMasterManagement([MANAGEMENT_ROLES.AUDIT_ADMIN])).toBe(false)
   })
 
   it('restricts review actions to admin roles via fallback', () => {
@@ -102,13 +102,13 @@ describe('management roles', () => {
     expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.GLOBAL_ADMIN] })).toBe(true)
     expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.GROUP_ADMIN] })).toBe(true)
     expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(true)
-    expect(canExportTemplates({ roles: ['TEMPLATE_TESTER'] })).toBe(false)
+    expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.TEMPLATE_TESTER] })).toBe(false)
   })
 
   it('denies export when exportTemplates is false even if authorTemplates is true (AUD-P05)', () => {
     expect(
       canExportTemplates({
-        roles: ['TEMPLATE_TESTER'],
+        roles: [MANAGEMENT_ROLES.TEMPLATE_TESTER],
         capabilities: { ...testerCapabilities, authorTemplates: true, exportTemplates: false },
       }),
     ).toBe(false)
@@ -126,14 +126,14 @@ describe('management roles', () => {
   it('allows template management for authoring and admin roles via fallback', () => {
     expect(canAccessTemplateManagement([MANAGEMENT_ROLES.TEMPLATE_AUTHOR])).toBe(true)
     expect(canAccessTemplateManagement([MANAGEMENT_ROLES.GROUP_ADMIN])).toBe(true)
-    expect(canAccessTemplateManagement(['AUDIT_ADMIN'])).toBe(false)
+    expect(canAccessTemplateManagement([MANAGEMENT_ROLES.AUDIT_ADMIN])).toBe(false)
   })
 
   it('allows content module management for authoring, approver, and admin roles', () => {
     expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.TEMPLATE_AUTHOR])).toBe(true)
-    expect(canAccessContentModuleManagement(['TEMPLATE_APPROVER'])).toBe(true)
-    expect(canAccessContentModuleManagement(['MASTER_DESIGNER'])).toBe(true)
-    expect(canAccessContentModuleManagement(['TEMPLATE_TESTER'])).toBe(false)
+    expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.TEMPLATE_APPROVER])).toBe(true)
+    expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.MASTER_DESIGNER])).toBe(true)
+    expect(canAccessContentModuleManagement([MANAGEMENT_ROLES.TEMPLATE_TESTER])).toBe(false)
   })
 
   it('maps granular template capabilities from session capabilities', () => {
@@ -167,7 +167,7 @@ describe('management roles', () => {
   })
 
   it('gates escalation queue visibility by admin collaboration roles', () => {
-    const testerContext = { roles: ['TEMPLATE_TESTER'], capabilities: testerCapabilities }
+    const testerContext = { roles: [MANAGEMENT_ROLES.TEMPLATE_TESTER], capabilities: testerCapabilities }
     const groupAdminContext = { roles: [MANAGEMENT_ROLES.GROUP_ADMIN], capabilities: globalAdminCapabilities }
 
     expect(canViewEscalationQueue(testerContext)).toBe(false)
@@ -175,7 +175,7 @@ describe('management roles', () => {
   })
 
   it('does not special-case legacy workbench route keys in canAccessLogicalRoute', () => {
-    const testerContext = { roles: ['TEMPLATE_TESTER'], capabilities: testerCapabilities }
+    const testerContext = { roles: [MANAGEMENT_ROLES.TEMPLATE_TESTER], capabilities: testerCapabilities }
     const groupAdminContext = { roles: [MANAGEMENT_ROLES.GROUP_ADMIN], capabilities: globalAdminCapabilities }
 
     expect(canAccessLogicalRoute('route.tester-workbench', testerContext, [])).toBe(false)

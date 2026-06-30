@@ -5,6 +5,7 @@ import {
   canDeleteUsers,
   canManageGroups,
 } from '@/auth/identityRoles'
+import { MANAGEMENT_ROLES } from '@/auth/roles'
 import type { ManagementSession } from '@/types/session'
 
 function session(partial: Partial<ManagementSession>): ManagementSession {
@@ -24,46 +25,46 @@ function session(partial: Partial<ManagementSession>): ManagementSession {
 
 describe('identityRoles', () => {
   it('only global admins may delete users', () => {
-    expect(canDeleteUsers(['GLOBAL_ADMIN'])).toBe(true)
-    expect(canDeleteUsers(['GROUP_ADMIN'])).toBe(false)
+    expect(canDeleteUsers([MANAGEMENT_ROLES.GLOBAL_ADMIN])).toBe(true)
+    expect(canDeleteUsers([MANAGEMENT_ROLES.GROUP_ADMIN])).toBe(false)
     expect(canDeleteUsers([])).toBe(false)
   })
 
   it('only global admins may write groups', () => {
-    expect(canManageGroups(['GLOBAL_ADMIN'])).toBe(true)
-    expect(canManageGroups(['GROUP_ADMIN'])).toBe(false)
+    expect(canManageGroups([MANAGEMENT_ROLES.GLOBAL_ADMIN])).toBe(true)
+    expect(canManageGroups([MANAGEMENT_ROLES.GROUP_ADMIN])).toBe(false)
   })
 
   it('exposes every role to global admins', () => {
-    expect(assignableRoles(['GLOBAL_ADMIN'])).toContain('GLOBAL_ADMIN')
-    expect(assignableRoles(['GLOBAL_ADMIN'])).toContain('AUDIT_ADMIN')
-    expect(assignableRoles(['GLOBAL_ADMIN'])).toContain('GROUP_ADMIN')
+    expect(assignableRoles([MANAGEMENT_ROLES.GLOBAL_ADMIN])).toContain(MANAGEMENT_ROLES.GLOBAL_ADMIN)
+    expect(assignableRoles([MANAGEMENT_ROLES.GLOBAL_ADMIN])).toContain(MANAGEMENT_ROLES.AUDIT_ADMIN)
+    expect(assignableRoles([MANAGEMENT_ROLES.GLOBAL_ADMIN])).toContain(MANAGEMENT_ROLES.GROUP_ADMIN)
   })
 
   it('limits group admins to operational roles only', () => {
-    const roles = assignableRoles(['GROUP_ADMIN'])
+    const roles = assignableRoles([MANAGEMENT_ROLES.GROUP_ADMIN])
     expect(roles).toEqual([
-      'MASTER_DESIGNER',
-      'TEMPLATE_AUTHOR',
-      'TEMPLATE_TESTER',
-      'TEMPLATE_APPROVER',
+      MANAGEMENT_ROLES.MASTER_DESIGNER,
+      MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+      MANAGEMENT_ROLES.TEMPLATE_TESTER,
+      MANAGEMENT_ROLES.TEMPLATE_APPROVER,
     ])
-    expect(roles).not.toContain('GLOBAL_ADMIN')
-    expect(roles).not.toContain('GROUP_ADMIN')
-    expect(roles).not.toContain('AUDIT_ADMIN')
+    expect(roles).not.toContain(MANAGEMENT_ROLES.GLOBAL_ADMIN)
+    expect(roles).not.toContain(MANAGEMENT_ROLES.GROUP_ADMIN)
+    expect(roles).not.toContain(MANAGEMENT_ROLES.AUDIT_ADMIN)
   })
 
   it('gives global admins the full known group catalog as scope options', () => {
-    const codes = assignableGroupCodes(session({ roles: ['GLOBAL_ADMIN'], authorizedGroupCodes: ['*'] }), [
-      'RETAIL',
-      'CORPORATE',
-    ])
+    const codes = assignableGroupCodes(
+      session({ roles: [MANAGEMENT_ROLES.GLOBAL_ADMIN], authorizedGroupCodes: ['*'] }),
+      ['RETAIL', 'CORPORATE'],
+    )
     expect(codes).toEqual(['RETAIL', 'CORPORATE'])
   })
 
   it('limits group admins to their own authorized scope', () => {
     const codes = assignableGroupCodes(
-      session({ roles: ['GROUP_ADMIN'], authorizedGroupCodes: ['RETAIL'] }),
+      session({ roles: [MANAGEMENT_ROLES.GROUP_ADMIN], authorizedGroupCodes: ['RETAIL'] }),
       ['RETAIL', 'CORPORATE'],
     )
     expect(codes).toEqual(['RETAIL'])
@@ -71,7 +72,7 @@ describe('identityRoles', () => {
 
   it('drops the wildcard marker from group admin scope', () => {
     const codes = assignableGroupCodes(
-      session({ roles: ['GROUP_ADMIN'], authorizedGroupCodes: ['*', 'RETAIL'] }),
+      session({ roles: [MANAGEMENT_ROLES.GROUP_ADMIN], authorizedGroupCodes: ['*', 'RETAIL'] }),
       ['RETAIL'],
     )
     expect(codes).toEqual(['RETAIL'])

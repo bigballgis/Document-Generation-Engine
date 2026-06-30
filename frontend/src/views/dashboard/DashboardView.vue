@@ -49,7 +49,7 @@ import {
   parseDashboardTaskScope,
   useWorkflowTasks,
 } from '@/composables/useWorkflowTasks'
-import { canMaintainCollaborationTimeoutConfig, canViewCollaborationWorkItems } from '@/auth/roles'
+import { canMaintainCollaborationTimeoutConfig, canViewCollaborationWorkItems, MANAGEMENT_ROLES } from '@/auth/roles'
 import { useCapabilities } from '@/composables/useCapabilities'
 import CollaborationTimeoutConfigPanel from '@/components/collaboration/CollaborationTimeoutConfigPanel.vue'
 import * as collaborationApi from '@/api/collaboration'
@@ -131,7 +131,7 @@ const primaryClusterOneRole = computed(() =>
 const showApproverJourney = computed(
   () =>
     !primaryClusterOneRole.value &&
-    (sessionStore.session?.roles ?? []).includes('TEMPLATE_APPROVER') &&
+    (sessionStore.session?.roles ?? []).includes(MANAGEMENT_ROLES.TEMPLATE_APPROVER) &&
     shouldShowTemplateApproverJourney({ decideApprovals: decideApprovals.value }),
 )
 
@@ -147,7 +147,7 @@ const showTeamLeadJourney = computed(
     !primaryClusterOneRole.value &&
     !showApproverJourney.value &&
     !showGlobalAdminJourney.value &&
-    (sessionStore.session?.roles ?? []).includes('GROUP_ADMIN') &&
+    (sessionStore.session?.roles ?? []).includes(MANAGEMENT_ROLES.GROUP_ADMIN) &&
     shouldShowTemplateTeamLeadJourney({
       publishTemplates: publishTemplates.value,
       reviewMasters: reviewMasters.value,
@@ -376,7 +376,7 @@ async function loadTimeoutConfigsForWorkItems() {
     return
   }
 
-  if (sessionStore.hasRole('GLOBAL_ADMIN')) {
+  if (sessionStore.hasRole(MANAGEMENT_ROLES.GLOBAL_ADMIN)) {
     try {
       globalTimeoutConfig.value = await collaborationApi.getCollaborationTimeoutConfig()
     } catch {

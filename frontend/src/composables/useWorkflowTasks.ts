@@ -7,6 +7,7 @@ import {
   canDecideTests,
   canPublishTemplates,
   canViewCollaborationWorkItems,
+  MANAGEMENT_ROLES,
 } from '@/auth/roles'
 import { pathForRouteKey, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useCollaborationStore } from '@/stores/collaboration'
@@ -90,7 +91,13 @@ function sortTasksNewestFirst(items: WorkflowTask[]): WorkflowTask[] {
 
 function canSeeBehaviorRemediation(context: CapabilityContext): boolean {
   const hasEligibleRole = context.roles.some((role) =>
-    (['GLOBAL_ADMIN', 'GROUP_ADMIN', 'TEMPLATE_AUTHOR'] as string[]).includes(role),
+    (
+      [
+        MANAGEMENT_ROLES.GLOBAL_ADMIN,
+        MANAGEMENT_ROLES.GROUP_ADMIN,
+        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+      ] as string[]
+    ).includes(role),
   )
   if (!hasEligibleRole) {
     return false

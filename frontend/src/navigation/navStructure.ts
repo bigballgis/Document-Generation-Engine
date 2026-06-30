@@ -6,6 +6,7 @@ import {
   canPublishTemplates,
   canReviewMasters,
   canAccessContentModuleManagement,
+  MANAGEMENT_ROLES,
   type CapabilityContext,
 } from '@/auth/roles'
 import { ROUTE_KEYS, type RouteKey } from '@/routing/routeKeys'
@@ -47,7 +48,7 @@ function canSeeBehaviorMasterReview(
     return true
   }
   return (
-    context.roles.includes('MASTER_DESIGNER') &&
+    context.roles.includes(MANAGEMENT_ROLES.MASTER_DESIGNER) &&
     visibleRoutes.includes(ROUTE_KEYS.masterManagement)
   )
 }
@@ -58,7 +59,13 @@ function hasDashboardHomeAccess(visibleRoutes: string[]): boolean {
 
 function canSeeBehaviorRemediation(context: CapabilityContext): boolean {
   const hasEligibleRole = context.roles.some((role) =>
-    (['GLOBAL_ADMIN', 'GROUP_ADMIN', 'TEMPLATE_AUTHOR'] as string[]).includes(role),
+    (
+      [
+        MANAGEMENT_ROLES.GLOBAL_ADMIN,
+        MANAGEMENT_ROLES.GROUP_ADMIN,
+        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+      ] as string[]
+    ).includes(role),
   )
   if (!hasEligibleRole) {
     return false

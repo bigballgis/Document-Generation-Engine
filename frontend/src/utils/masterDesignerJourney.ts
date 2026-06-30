@@ -3,6 +3,7 @@ import type {
   MasterDocumentSummary,
   MasterReviewRecord,
 } from '@/types/master'
+import { MANAGEMENT_ROLES } from '@/auth/roles'
 
 export interface MasterDesignerJourneyContext {
   status: MasterDocumentStatus
@@ -185,12 +186,12 @@ export function shouldShowMasterDesignerJourney(options: {
   status?: MasterDocumentStatus
 }): boolean {
   const { roles, manageMasters, reviewMasters, status } = options
-  const isMasterDesigner = roles.includes('MASTER_DESIGNER')
+  const isMasterDesigner = roles.includes(MANAGEMENT_ROLES.MASTER_DESIGNER)
   const isAuditOnly =
-    roles.includes('AUDIT_ADMIN') &&
+    roles.includes(MANAGEMENT_ROLES.AUDIT_ADMIN) &&
     !isMasterDesigner &&
     !manageMasters &&
-    roles.every((role) => role === 'AUDIT_ADMIN')
+    roles.every((role) => role === MANAGEMENT_ROLES.AUDIT_ADMIN)
 
   if (isAuditOnly) {
     return false

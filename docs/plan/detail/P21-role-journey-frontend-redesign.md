@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** **Done** (2026-06-30; activated 2026-06-29; T01–T11 + X01 + X03–X06 + **X02** governance close; **all four role clusters complete**; §7 exit criteria met; **AUD-B10 resolved** via **P12-AUD-B10** 2026-07-01) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** **Done** (2026-06-30; activated 2026-06-29; T01–T11 + X01 + X03–X06 + **X02** governance close; **all four role clusters complete**; §7 exit criteria met; **AUD-B10 resolved** via **P12-AUD-B10** 2026-07-01; **AUD-M02 resolved** via **P12-AUD-M02** 2026-07-01) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 closed Done 2026-06-30** — no formal phase is `In Progress`
@@ -247,7 +247,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | Green gates (backend + frontend + E2E/UIUX per sub-phase) | All T + X slices | Backend **`mvn verify` 553** (X04); frontend **511 Vitest** (X01); Playwright/UIUX per slice |
 | Companion docs + ledger synced | **P21-X02** | This close-out; `permission-matrix` §13.1.2, `catalog-navigation-ux`, ADR footer, ledger |
 
-**Audit closure:** AUD-B10 **resolved** (2026-07-01) — confirm-on-behalf UI (P21-T09b) + submit-for-approval evidence checklist gate (**P12-AUD-B10 Done**; [P12 detail](./P12-deferred-enhancements.md)).
+**Audit closure:** AUD-B10 **resolved** (2026-07-01) — confirm-on-behalf UI (P21-T09b) + submit-for-approval evidence checklist gate (**P12-AUD-B10 Done**; [P12 detail](./P12-deferred-enhancements.md)). AUD-M02 **resolved** (2026-07-01) — role constants single-source (**P12-AUD-M02 Done**; [P12 detail](./P12-deferred-enhancements.md)).
 
 ## 8. Companion documents
 
@@ -348,7 +348,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 | AUD-D01 | 🟡 | Dead code: `RoleHomeView.vue` orphaned (only its own test); duplicates Dashboard stats/summary/quicklinks | `RoleHomeView.vue`; `RoleHomeView.test.ts:6` | **Resolved → P21-T01c Done** (2026-06-30) |
 | AUD-D02 | 🟡 | Workbench dead logic: routeKeys + `canAccess*Workbench` + `canAccessLogicalRoute` branches + `workbench.*` i18n; test asserts unreachable branch | `routeKeys.ts:11-13`; `auth/roles.ts:275-305`; `roles.test.ts:141-158`; `en.ts:293+` | **Resolved → P21-T01c Done** (2026-06-30); legacy redirects retained in router |
 | AUD-D03 | 🟢 | `template-author-draft` task kind has no producer; `home.*Governance*` copy referenced only by dead code | `useWorkflowTasks.ts:16-23`; `en.ts:146-165,256-258` | **Resolved → P21-T01c Done** (2026-06-30) |
-| AUD-M02 | 🟢 | Role constants split: `MANAGEMENT_ROLES` only 4; TESTER/APPROVER/MASTER_DESIGNER as bare strings | `auth/roles.ts:3-8`; `types/identity.ts:1-9` | P21-X03 |
+| AUD-M02 | 🟢 | Role constants single-source **resolved (P12-AUD-M02 Done 2026-07-01)** — `MANAGEMENT_ROLES` derived from `MANAGEMENT_ROLE_VALUES` SSOT; bare role string literals replaced in capability-check paths | `auth/roles.ts`; `types/identity.ts`; `auth/identityRoles.ts` | **Resolved → P12-AUD-M02 Done** (2026-07-01) |
 
 ### 11.5 Remediation order (audit-driven)
 
@@ -368,7 +368,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
    matrix/capability drift (**AUD-P06 resolved → P21-X04 Done**, 2026-06-30).
 6. **P2** — decision/governance forms (AUD-B05/B10); detail state completeness (AUD-B06/B07);
    OpenAPI contract (**AUD-C05 resolved → P21-X04 Done**, 2026-06-30).
-7. **P3** — dead code + component split + role constants (AUD-D01..D03, AUD-M02, AUD-B09).
+7. **P3** — dead code + component split + role constants (AUD-D01..D03, **AUD-M02 resolved → P12-AUD-M02 Done** 2026-07-01, AUD-B09).
 
 ## 12. Behavior specifications (BDD)
 
@@ -2250,4 +2250,5 @@ Surefire, P21-X04); frontend `pnpm -C frontend lint`, `type-check`, `test`, `bui
 Vitest, P21-X01). Playwright/UIUX evidence accumulated per sub-phase (T01–T11, X05).
 
 **Post-close remediation (Done):** AUD-B10 evidence checklist gate → **P12-AUD-B10 Done**
-(2026-07-01; [P12 detail](./P12-deferred-enhancements.md)).
+(2026-07-01; [P12 detail](./P12-deferred-enhancements.md)). AUD-M02 role constants single-source →
+**P12-AUD-M02 Done** (2026-07-01; [P12 detail](./P12-deferred-enhancements.md)).

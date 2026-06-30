@@ -1,17 +1,16 @@
 import { MANAGEMENT_ROLE_VALUES, type ManagementRole } from '@/types/identity'
 import type { ManagementSession } from '@/types/session'
-
-const GLOBAL_ADMIN = 'GLOBAL_ADMIN'
+import { MANAGEMENT_ROLES } from '@/auth/roles'
 
 const OPERATIONAL_ROLES: ManagementRole[] = [
-  'MASTER_DESIGNER',
-  'TEMPLATE_AUTHOR',
-  'TEMPLATE_TESTER',
-  'TEMPLATE_APPROVER',
+  MANAGEMENT_ROLES.MASTER_DESIGNER,
+  MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+  MANAGEMENT_ROLES.TEMPLATE_TESTER,
+  MANAGEMENT_ROLES.TEMPLATE_APPROVER,
 ]
 
 export function isGlobalAdmin(roles: string[]): boolean {
-  return roles.includes(GLOBAL_ADMIN)
+  return roles.includes(MANAGEMENT_ROLES.GLOBAL_ADMIN)
 }
 
 export function canDeleteUsers(roles: string[]): boolean {

@@ -1,11 +1,14 @@
+import { MANAGEMENT_ROLE_VALUES, type ManagementRole } from '@/types/identity'
 import type { ManagementCapabilities, ManagementSession } from '@/types/session'
 
-export const MANAGEMENT_ROLES = {
-  GLOBAL_ADMIN: 'GLOBAL_ADMIN',
-  GROUP_ADMIN: 'GROUP_ADMIN',
-  TEMPLATE_AUTHOR: 'TEMPLATE_AUTHOR',
-  AUDIT_ADMIN: 'AUDIT_ADMIN',
-} as const
+/** Derived from {@link MANAGEMENT_ROLE_VALUES} — single source of truth for role string literals. */
+export const MANAGEMENT_ROLES = MANAGEMENT_ROLE_VALUES.reduce(
+  (roles, role) => {
+    roles[role] = role
+    return roles
+  },
+  {} as Record<ManagementRole, ManagementRole>,
+)
 
 export interface CapabilityContext {
   roles: string[]
@@ -145,7 +148,7 @@ export function canDecideTests(context: CapabilityContext): boolean {
         [
           MANAGEMENT_ROLES.GLOBAL_ADMIN,
           MANAGEMENT_ROLES.GROUP_ADMIN,
-          'TEMPLATE_TESTER',
+          MANAGEMENT_ROLES.TEMPLATE_TESTER,
         ] as string[]
       ).includes(role),
     ),
@@ -159,7 +162,7 @@ export function canDecideApprovals(context: CapabilityContext): boolean {
         [
           MANAGEMENT_ROLES.GLOBAL_ADMIN,
           MANAGEMENT_ROLES.GROUP_ADMIN,
-          'TEMPLATE_APPROVER',
+          MANAGEMENT_ROLES.TEMPLATE_APPROVER,
         ] as string[]
       ).includes(role),
     ),
@@ -181,7 +184,7 @@ export function canStopTemplates(context: CapabilityContext): boolean {
         [
           MANAGEMENT_ROLES.GLOBAL_ADMIN,
           MANAGEMENT_ROLES.GROUP_ADMIN,
-          'MASTER_DESIGNER',
+          MANAGEMENT_ROLES.MASTER_DESIGNER,
           MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
         ] as string[]
       ).includes(role),
@@ -226,7 +229,7 @@ export function canAuthorContentModules(context: CapabilityContext): boolean {
         [
           MANAGEMENT_ROLES.GLOBAL_ADMIN,
           MANAGEMENT_ROLES.GROUP_ADMIN,
-          'MASTER_DESIGNER',
+          MANAGEMENT_ROLES.MASTER_DESIGNER,
           MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
         ] as string[]
       ).includes(role),
@@ -241,7 +244,7 @@ export function canDecideContentModuleReviews(context: CapabilityContext): boole
         [
           MANAGEMENT_ROLES.GLOBAL_ADMIN,
           MANAGEMENT_ROLES.GROUP_ADMIN,
-          'TEMPLATE_APPROVER',
+          MANAGEMENT_ROLES.TEMPLATE_APPROVER,
         ] as string[]
       ).includes(role),
     ),
@@ -262,9 +265,9 @@ export function canAccessContentModuleManagement(roles: string[]): boolean {
       [
         MANAGEMENT_ROLES.GLOBAL_ADMIN,
         MANAGEMENT_ROLES.GROUP_ADMIN,
-        'MASTER_DESIGNER',
+        MANAGEMENT_ROLES.MASTER_DESIGNER,
         MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
-        'TEMPLATE_APPROVER',
+        MANAGEMENT_ROLES.TEMPLATE_APPROVER,
       ] as string[]
     ).includes(role),
   )
@@ -278,8 +281,8 @@ export function canViewCollaborationWorkItems(context: CapabilityContext): boole
           MANAGEMENT_ROLES.GLOBAL_ADMIN,
           MANAGEMENT_ROLES.GROUP_ADMIN,
           MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
-          'TEMPLATE_TESTER',
-          'TEMPLATE_APPROVER',
+          MANAGEMENT_ROLES.TEMPLATE_TESTER,
+          MANAGEMENT_ROLES.TEMPLATE_APPROVER,
         ] as string[]
       ).includes(role),
     ),

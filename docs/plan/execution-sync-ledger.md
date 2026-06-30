@@ -1,6 +1,15 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-07-01 (P12-AUD-B10 **Done** — P12 catch-all back to **Not Started**)
+**Last synced:** 2026-07-01 (P12-AUD-M02 **Done** — P12 catch-all back to **Not Started**)
+**Completion note (2026-07-01):** **P12-AUD-M02 Done** — role constants single-source refactor
+(AUD-M02 remediation): `MANAGEMENT_ROLES` derived from `MANAGEMENT_ROLE_VALUES` SSOT in
+`types/identity.ts`; bare role string literals replaced in `auth/roles.ts`, `auth/identityRoles.ts`,
+`auth/contentModuleRoles.ts`, `navigation/navStructure.ts`, `composables/useWorkflowTasks.ts`,
+journey utilities, `DashboardView.vue`; `roles.test.ts`, `identityRoles.test.ts` updated.
+**Gate:** frontend `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**521** Vitest,
+92 files); BDD `not-applicable` (refactor only). **Audit:** AUD-M02 **resolved** (🟢) in
+P21 §11.4. **P12 phase → Not Started** (catch-all idle; no active slice). **P21 remains Done** — do not reopen.
+Detail: [detail/P12-deferred-enhancements.md](./detail/P12-deferred-enhancements.md).
 **Completion note (2026-07-01):** **P12-AUD-B10 Done** — submit-for-approval evidence checklist gate
 (AUD-B10 remediation): `PublishGatePhase.SUBMIT_FOR_APPROVAL`, `PublishGateService.assertReadyForSubmitForApproval`,
 `TemplateLifecycleService` PENDING_SUBMIT guard; `TemplateSubmitForApprovalSummaryDialog`, `submitGateReady` SSOT,
@@ -266,7 +275,7 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P9 | Done | Observability, local security gates, prod compose profile |
 | P10 | Done | Secure download with expiry |
 | P11 | Done | Batch + async task lifecycle |
-| P12 | Not Started (P12-AUD-B10 Done 2026-07-01) | Deferred enhancements catch-all idle — submit-for-approval evidence checklist gate **Done** (AUD-B10 **resolved**); see [P12 detail](./detail/P12-deferred-enhancements.md) |
+| P12 | Not Started (P12-AUD-M02 Done 2026-07-01) | Deferred enhancements catch-all idle — role constants single-source **Done** (AUD-M02 **resolved**); submit-for-approval evidence checklist gate **Done** (AUD-B10 **resolved**); see [P12 detail](./detail/P12-deferred-enhancements.md) |
 | P13 | Done | Identity & group administration (user + group management plane); green gates 2026-06-23 — see P13 mirror block |
 | P14 | Done (2026-06-27) | Confirmed large domains — **P14-T01 Done** (T01a–T01e + architecture remediation); **P14-T02 Done** (T02a–T02d + E2E **3/3** + UIUX **5/5**); **P14-T03 Done** (T03a–T03c + E2E **2/2** + UIUX **7/7**); backend **481**; frontend **235+**; OpenAPI export/import contract; architecture re-review **PASS** (2026-06-26); see [P14 detail](./detail/P14-confirmed-large-domains.md) |
 | P15 | Done (2026-06-27) | Kubernetes deployment & container hardening — T01–T10; [`deploy/README.md`](../deploy/README.md); helm validate + CI gates green — see [P15 detail](./detail/P15-kubernetes-deployment-container-hardening.md) |
@@ -275,9 +284,9 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P20 | Done (2026-06-25) | T01–T07 complete incl. T06 (`api.error` en/zh + primary journey zh-CN); gates green — see [P20 detail](./detail/P20-i18n-ui-upgradeability.md) |
 | P18 | Done (2026-06-28) | **P18-T01–T10 Done** — controlled authoring UI + management paste/catalog APIs — see [P18 detail](./detail/P18-structured-authoring-fidelity-engine.md) |
 | P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
-| P21 | Done (2026-06-30) | Role-journey frontend redesign — T01–T11 + X01–X06 + **X02** governance close; backend **`mvn verify` 553**; frontend **511** Vitest; Playwright/UIUX per sub-phase; **AUD-B10 resolved** (P12-AUD-B10 Done 2026-07-01) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
+| P21 | Done (2026-06-30) | Role-journey frontend redesign — T01–T11 + X01–X06 + **X02** governance close; backend **`mvn verify` 553**; frontend **511** Vitest; Playwright/UIUX per sub-phase; **AUD-B10 resolved** (P12-AUD-B10 Done 2026-07-01); **AUD-M02 resolved** (P12-AUD-M02 Done 2026-07-01) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
-**Active phase:** **None** (2026-07-01 — P12-AUD-B10 **Done**; P12 catch-all **Not Started**).
+**Active phase:** **None** (2026-07-01 — P12-AUD-M02 **Done**; P12 catch-all **Not Started**).
 **P21 Done** — do not reopen. All formal phases P0–P11, P13–P21 **Done**; P12 catch-all idle.
 
 ## Epic ↔ phase mapping

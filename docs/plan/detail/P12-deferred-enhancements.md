@@ -1,10 +1,10 @@
 # P12 — Deferred Enhancements (Detailed Plan)
 
-**Phase status:** **Not Started** (2026-07-01; catch-all idle — last slice **P12-AUD-B10 Done**) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
+**Phase status:** **Not Started** (2026-07-01; catch-all idle — no active slice) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
 
-> Single-active-phase invariant: **No formal phase `In Progress`** after P12-AUD-B10 close
-> (2026-07-01). **P21 remains Done** — do not reopen P21 phase status; AUD-B10 **resolved**
-> via this slice (cross-reference P21 §11.3).
+> Single-active-phase invariant: **No formal phase `In Progress`** — no active P12 slice (2026-07-01).
+> **P21 remains Done** — do not reopen P21 phase status; AUD-M02 **resolved** via **P12-AUD-M02 Done**
+> (cross-reference P21 §11.4).
 
 ## 1. Purpose
 
@@ -17,8 +17,51 @@ Each slice is activated individually via `plan-orchestrator`; only one slice sho
 | ID | Task | Status | Traceability |
 | --- | --- | --- | --- |
 | **P12-AUD-B10** | Submit-for-approval evidence checklist gate (AUD-B10 remediation) | **Done** (2026-07-01) | P21 audit finding AUD-B10 **resolved**; P21-T09b confirm-on-behalf UI retained |
+| **P12-AUD-M02** | Role constants single-source (AUD-M02 remediation) | **Done** (2026-07-01) | P21 audit finding AUD-M02 **resolved**; P21 §11.4 |
 
-**Active slice:** none — activate next deferred item via `plan-orchestrator` when prioritized.
+**Active slice:** **None** (2026-07-01) — **P12-AUD-M02** closed **Done**; **P21 remains Done**.
+
+### P12-AUD-M02 — Role constants single-source
+
+**Origin:** Code-grounded audit **AUD-M02** (🟢 minor) — `MANAGEMENT_ROLES` in `auth/roles.ts`
+defines only four roles while `MANAGEMENT_ROLE_VALUES` in `types/identity.ts` is the eight-role
+SSOT; `TEMPLATE_TESTER`, `TEMPLATE_APPROVER`, and `MASTER_DESIGNER` appear as bare string
+literals across capability-check and identity-assignment paths.
+
+**Depends on:** P21 (`auth/roles.ts`, `auth/identityRoles.ts`, `types/identity.ts`, capability
+composables and journey utilities established during role-journey redesign).
+
+**Scope (confirmed 2026-07-01):**
+
+1. **Refactor (TDD):** Extend `MANAGEMENT_ROLES` in `frontend/src/auth/roles.ts` to all eight
+   management roles **or** derive role constants from `MANAGEMENT_ROLE_VALUES` SSOT in
+   `frontend/src/types/identity.ts` — one authoritative source, no duplicate role string literals.
+2. **Replace bare strings:** Update `roles.ts`, `identityRoles.ts`, and other frontend
+   capability-check files that compare roles via raw `'MASTER_DESIGNER'`, `'TEMPLATE_TESTER'`,
+   `'TEMPLATE_APPROVER'`, etc., to use the SSOT constants.
+3. **Tests:** Update `roles.test.ts` (and affected unit tests) to assert against SSOT constants;
+   no new user-facing surfaces.
+4. **BDD:** `not-applicable` — refactor only; no behavior, API, permission, or L1 copy change.
+
+**Exit criteria (slice):**
+
+- All eight management roles reachable from a single SSOT (`MANAGEMENT_ROLES` or
+  `MANAGEMENT_ROLE_VALUES` derivation); no bare role string literals in capability-check paths
+  covered by this slice.
+- `roles.test.ts` and related unit tests green; frontend lint/type-check/test/build pass.
+- AUD-M02 **resolved** in P21 audit table (cross-reference); evidence recorded in ledger on close.
+- No user-visible behavior change.
+- P21 phase status unchanged (**Done**).
+
+**Status:** **Done** (2026-07-01).
+
+**Gate evidence:** frontend `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**521** Vitest,
+92 files); BDD `not-applicable` (refactor only; no behavior change).
+
+**Deliverables:** `MANAGEMENT_ROLES` derived from `MANAGEMENT_ROLE_VALUES` SSOT in `types/identity.ts`;
+`auth/roles.ts`, `auth/identityRoles.ts`, `auth/contentModuleRoles.ts`, `navigation/navStructure.ts`,
+`composables/useWorkflowTasks.ts`, journey utilities (`masterDesignerJourney.ts`, `globalAdminJourney.ts`,
+`auditAdminJourney.ts`), `DashboardView.vue`; `roles.test.ts`, `identityRoles.test.ts` updated.
 
 ### P12-AUD-B10 — Submit-for-approval evidence checklist gate
 
@@ -78,8 +121,8 @@ Playwright `P12-AUD-B10-submit-approval-gate.spec.ts` **3/3**; UIUX
 
 ## 4. Phase exit criteria
 
-P12 phase is **Not Started** (catch-all idle) when no slice is active. **P12-AUD-B10** closed
-**Done** 2026-07-01; activate the next deferred slice per user priority when ready.
+P12 phase is **Not Started** (catch-all idle) while individual slices run under `plan-orchestrator`.
+**P12-AUD-M02** closed **Done** 2026-07-01. **P12-AUD-B10** closed **Done** 2026-07-01.
 
 ## 5. Behavior specification (BDD) — P12-AUD-B10
 

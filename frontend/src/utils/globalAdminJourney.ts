@@ -1,6 +1,7 @@
 import type { MasterDocumentSummary } from '@/types/master'
 import type { TemplateSummary } from '@/types/template'
 import type { CollaborationWorkItemQueue } from '@/types/collaboration'
+import { MANAGEMENT_ROLES } from '@/auth/roles'
 
 export interface GlobalAdminCollaborationWorkItem {
   queue: CollaborationWorkItemQueue
@@ -110,5 +111,5 @@ export function globalAdminStepCtaKey(stepId: string): string {
 }
 
 export function shouldShowGlobalAdminJourney(options: { roles: string[] }): boolean {
-  return options.roles.includes('GLOBAL_ADMIN')
+  return options.roles.includes(MANAGEMENT_ROLES.GLOBAL_ADMIN)
 }

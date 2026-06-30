@@ -1,3 +1,5 @@
+import { MANAGEMENT_ROLES } from '@/auth/roles'
+
 export interface AuditAdminJourneyFilters {
   eventType?: string
   eventAtFrom?: string
@@ -80,5 +82,5 @@ export function auditAdminStepCtaKey(stepId: string): string {
 }
 
 export function shouldShowAuditAdminJourney(options: { roles: string[] }): boolean {
-  return options.roles.includes('AUDIT_ADMIN')
+  return options.roles.includes(MANAGEMENT_ROLES.AUDIT_ADMIN)
 }
