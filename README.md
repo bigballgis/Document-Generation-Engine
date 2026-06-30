@@ -129,9 +129,9 @@ blue-green cutover in [deploy/blue-green-runbook.md](deploy/blue-green-runbook.m
 **P14-T01** clause/content module lifecycle (T01a–T01e; backend **469**; frontend **224**; architecture re-review **PASS**);
 **P14-T02** collaboration to-dos + timeout escalation (T02a–T02d; E2E **3/3**; backend **481**; frontend **235**);
 **P14-T03** template export/import (T03a–T03c; OpenAPI contract; E2E **2/2**; backend **481**; frontend **235+**).
-**Active phase:** **P21** (**In Progress**). **P21-X01 Done** (2026-06-30) — full-system L1 terminology sweep; AUD-Q05 resolved; frontend gates green (**511** Vitest). **P21-X06 Done** (2026-06-30) — i18n parity AUD-Q04 (~368 zh-CN keys, `collectLeafKeys` + parity test). **P21-X05 Done** (2026-06-30) — UI/a11y AUD-Q01..Q03 (`--color-primary`, nav/breadcrumb `:focus-visible`, brand wordmark i18n, token cleanup). **P21-X03 Done** (2026-06-30) — permission fail-closed + unified route guard; AUD-P01..P05 + AUD-B04 resolved. **All four role clusters complete** — phase **wrap-up**; next **P21-X02** only.
+**Active phase:** **None** (P21 **Done** 2026-06-30 — role-journey frontend redesign & business-friendly terminology; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest; **AUD-B10 partial** documented). Activate next phase via `plan-orchestrator`.
 MVP P0–P11 complete;
 **P13** Done (2026-06-23); **P14** Done (2026-06-27); **P15** Done (2026-06-27; T01–T10);
 **P17** Done (2026-06-25); **P18** Done (2026-06-28); **P19** Done (2026-06-25);
-**P20** Done (2026-06-25). P12 (deferred enhancements) is the non-active catch-all.
+**P20** Done (2026-06-25); **P21** Done (2026-06-30). P12 (deferred enhancements) is the non-active catch-all.
 Outstanding: external deployment validation (E05-T06), intranet SCA (M9-T02).

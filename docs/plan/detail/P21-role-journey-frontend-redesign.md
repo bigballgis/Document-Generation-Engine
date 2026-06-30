@@ -1,10 +1,10 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **sub-phase D cluster ④ Done** — T11; **P21-X03 Done** 2026-06-30 — permission fail-closed + unified route guard; **P21-X04 Done** 2026-06-30 — backend capability + route + OpenAPI completeness; **P21-X05 Done** 2026-06-30 — UI quality & a11y (AUD-Q01..Q03); **P21-X06 Done** 2026-06-30 — i18n parity hardening (AUD-Q04); **P21-X01 Done** 2026-06-30 — full-system L1 terminology sweep (AUD-Q05); **all four role clusters complete**; phase **wrap-up** — next **P21-X02** only) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** **Done** (2026-06-30; activated 2026-06-29; T01–T11 + X01 + X03–X06 + **X02** governance close; **all four role clusters complete**; §7 exit criteria met — **AUD-B10 partial** remains open as known gap) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
-> Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
-> `plan-orchestrator` selection; no other phase is In Progress). Within P21, run sub-phases in order A → B → C → D, and
+> Single-active-phase invariant: **P21 closed Done 2026-06-30** — no formal phase is `In Progress`
+> until the user activates the next phase via `plan-orchestrator`. Within P21, sub-phases ran in order A → B → C → D, and
 > within each sub-phase land the **backend collaboration-work-item contract** before the
 > behavior-driven IA, otherwise behavior queues are empty shells.
 
@@ -205,7 +205,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | ID | Task | Key files | Status |
 | --- | --- | --- | --- |
 | P21-X01 | Business terminology system upheld across all sub-phases: audit + rewrite nav/tasks/journey/detail/forms/error fallback copy (en baseline + zh-CN); IT terms only in API/code/audit fields | `en.ts`, `zh-CN.ts`, `messages_en.properties` | Done (2026-06-30) |
-| P21-X02 | Governance & docs: register P21, update permission-matrix + catalog-navigation-ux, add ADR extending Batch B, maintain terminology guide; per sub-phase BDD → TDD → E2E + UIUX → doc-sync → commit-review | docs/** | In Progress (registration + companion docs done 2026-06-29; per-slice sync pending) |
+| P21-X02 | Governance & docs: register P21, update permission-matrix + catalog-navigation-ux, add ADR extending Batch B, maintain terminology guide; per sub-phase BDD → TDD → E2E + UIUX → doc-sync → commit-review | docs/** | Done (2026-06-30) |
 | P21-X03 | **Permission single-source & fail-closed remediation** (AUD-P01..P05, AUD-B04): unify route guard to one `canAccessRoute` reading only `visibleRoutes`; strict `resolveCapability` (missing capability fail-closed); `canExportTemplates` via `authorTemplates`; `canUploadMasters` fix; `showMetadataEdit` admin-only; fix `roles.test.ts` assertions | `auth/roles.ts`, `router/index.ts`, `stores/session.ts`, `composables/useCapabilities.ts`, `TemplateDetailView.vue` | Required | Done (2026-06-30) |
 | P21-X04 | **Backend capability + route + contract completeness** (AUD-P02/P05/P09, AUD-C05): register `route.content-module-management` in `RouteVisibilityService` + `ManagementRoute` + matrix §13.1; expose `exportTemplates` / `viewCollaborationWorkItems` / `maintainCollaborationTimeoutConfig` / content-module capabilities in `ManagementCapabilitiesView`; add `GET /collaboration-work-items` to OpenAPI v1 | `backend/.../authorization/**`, `backend/.../collaboration/**`, `docs/api/openapi-v1.yaml`, `permission-matrix.md` | Required | Done (2026-06-30) |
 | P21-X05 | **UI quality & a11y fixes** (AUD-Q01..Q03): define/alias `--color-primary` (table focus ring); add `:focus-visible` to nav items + breadcrumb links; replace bare hex/px with design tokens; brand wordmark shows bank display name not `REDBC/GREENBC` | `AppDataTable.vue`, `ManagementShell.vue`, `AppBreadcrumb.vue`, `BrandLogo.vue`, `theme/tokens.ts`, `styles/global.scss` | n/a (UI) | Done (2026-06-30) |
@@ -231,6 +231,24 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
   UIUX dual-brand evidence per user-facing sub-phase.
 - Companion docs updated; ledger evidence recorded; exactly one phase In Progress while active.
 
+### §7 exit criteria — evidence map (phase close 2026-06-30)
+
+| §7 criterion | Delivered slice(s) | Gate / evidence |
+| --- | --- | --- |
+| Behavior-typed IA + 6 trigger types; task hub partitioned with restored fields + inline open | P21-T01, T01a, T02, T07 | Playwright P21-T01 **7/7**, P21-T01a **5/5**; Vitest **267+** → **511** |
+| Work items `RESOLVED` on decision/publish (no ever-growing hub) | P21-T02, T07 | `mvn verify` BUILD SUCCESS (T02, T07); AUD-A01 **resolved** |
+| One `RoleJourneyTimeline` per role cluster; business-language steps | P21-T01b, T03–T05, T08–T11 | Playwright per cluster (e.g. T11 **3/3**, T10 **4/4**); Vitest journey tests |
+| Publish/orchestration separation; controlled decision forms retained | P21-T04, T07, T09, T09b | COR-T07 reaffirmed; Playwright T09 **4/4** |
+| L1 free of IT jargon; non-IT readability | P21-T01, X01 | AUD-Q05 **resolved**; `navStructure.test.ts` grep audit |
+| Permission single-source; missing capability fail-closed | P21-X03, X04 | Vitest **503** → **504**; `mvn verify` **553** |
+| i18n parity; key-parity test green | P21-X06 | `collectLeafKeys` + `localeRegistry.test.ts`; ~368 zh-CN keys |
+| a11y: focus ring on tables/nav/breadcrumb | P21-X05 | AUD-Q01..Q03 **resolved**; Vitest **508** |
+| Single task hub authoritative (no standalone workbenches) | P21-T01c, ADR Batch B | AUD-D01..D03 **resolved**; COR-T11 not violated |
+| Green gates (backend + frontend + E2E/UIUX per sub-phase) | All T + X slices | Backend **`mvn verify` 553** (X04); frontend **511 Vitest** (X01); Playwright/UIUX per slice |
+| Companion docs + ledger synced | **P21-X02** | This close-out; `permission-matrix` §13.1.2, `catalog-navigation-ux`, ADR footer, ledger |
+
+**Known gap (non-blocking):** AUD-B10 **partial** — confirm-on-behalf UI fixed (P21-T09b); evidence checklist gate still open.
+
 ## 8. Companion documents
 
 Created at registration (2026-06-29):
@@ -241,7 +259,7 @@ Created at registration (2026-06-29):
 - `docs/product/catalog-navigation-ux.md` — hybrid IA + business-terminology navigation contract
   section. **Updated.**
 - `docs/security/permission-matrix.md` §13.1.2 — behavior-typed entry visibility per role.
-  **Updated.**
+  **Updated; implementation Done (2026-06-30, P21-X02).**
 
 Produced/extended during P21 execution:
 
@@ -2201,3 +2219,34 @@ in-scope keys).
 **Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**511** Vitest). Backend unchanged.
 **Audit:** AUD-Q05 **resolved** (full-system L1 sweep complete). P21 phase **wrap-up** — next
 **P21-X02** only; phase exit criteria (§7) still open on X02 (In Progress).
+
+### P21-X02 completion (2026-06-30)
+
+**Scope:** Governance & docs wrap-up — align companion docs to **Done** implementation status;
+close plan layer (this detail doc, master-plan, ledger, index READMEs); add §7 exit-criteria
+evidence map; ADR implementation note footer (no decision change).
+
+**Deliverables:** `docs/security/permission-matrix.md` §13.1.2 (implementation Done + T02/T07
+footnote); `docs/product/catalog-navigation-ux.md` (Hybrid IA Implementation Done);
+`docs/product/business-terminology-guide.md` (P21 phase complete header);
+`docs/adr/decisions/2026-06-29-behavior-typed-ia-business-terminology.md` (implementation note);
+`docs/plan/master-plan.md`, `docs/plan/execution-sync-ledger.md`, `docs/plan/README.md`,
+`docs/README.md`, root `README.md`.
+
+**Gate:** Docs-only slice — cites existing green gates: backend `mvn verify` **553** (P21-X04);
+frontend **511** Vitest (P21-X01). No code re-run.
+
+**Audit:** Companion doc drift **resolved**. **Known gap retained:** AUD-B10 **partial**
+(confirm-on-behalf evidence checklist — non-blocking for phase close).
+
+### P21 phase closure (2026-06-30)
+
+**Exit criteria:** §7 checklist met per evidence map (§7 table above); all task rows T01–T11 +
+X01–X06 + X02 **Done**. **Single-active-phase:** no formal phase `In Progress` until user
+activates next via `plan-orchestrator` (P12 deferred catch-all remains non-active).
+
+**Final gate summary:** backend `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (**553**
+Surefire, P21-X04); frontend `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**511**
+Vitest, P21-X01). Playwright/UIUX evidence accumulated per sub-phase (T01–T11, X05).
+
+**Outstanding (documented, non-blocking):** AUD-B10 partial.

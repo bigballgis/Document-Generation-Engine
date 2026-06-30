@@ -7,7 +7,7 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Active formal phase: P21** (activated 2026-06-29; **P21-X06 Done** 2026-06-30; **P21-X05 Done** 2026-06-30; **P21-X04 Done** 2026-06-30; **P21-X03 Done** 2026-06-30; **P21-X01 Done** 2026-06-30; **all four role clusters complete**; phase **wrap-up** — next **P21-X02** only). P12 remains the deferred-enhancements
+**Active formal phase: None** (P21 **Done** 2026-06-30; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest; activate next via `plan-orchestrator`). P12 remains the deferred-enhancements
 catch-all (non-active). See [execution-sync-ledger.md](./execution-sync-ledger.md).
 
 ## Layer model
@@ -58,7 +58,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P18 | Structured authoring & rendering-fidelity engine | [detail/P18-structured-authoring-fidelity-engine.md](detail/P18-structured-authoring-fidelity-engine.md) | Done (2026-06-28; T01–T10) |
 | P19 | Template verifiability, publish gate & decision forms | [detail/P19-verifiability-publish-gate.md](detail/P19-verifiability-publish-gate.md) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | Done (2026-06-25) |
-| P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | In Progress (2026-06-29; clusters ①→④ Done; **P21-X03 Done**; **P21-X04 Done**; **P21-X05 Done**; **P21-X06 Done**; **P21-X01 Done**; wrap-up — next P21-X02 only) |
+| P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | Done (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest) |
 
 ## First delivery target (thin vertical slice) — achieved
 
@@ -75,9 +75,8 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P15 | K8s Helm, probes, blue-green, CI gates | [deploy/README.md](../deploy/README.md); helm-validate green |
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
-**Active phase: P21** — role-journey frontend redesign & business-friendly terminology
-(activated 2026-06-29; **P21-X01 Done** 2026-06-30 — full-system L1 terminology sweep AUD-Q05; frontend **511** Vitest); **P21-X06 Done** 2026-06-30 — i18n parity AUD-Q04 (~368 zh-CN keys + `collectLeafKeys` parity test); **P21-X05 Done** 2026-06-30 — UI/a11y AUD-Q01..Q03; **P21-X04 Done** 2026-06-30 — backend capability + route + OpenAPI; **P21-X03 Done** 2026-06-30 — permission fail-closed + unified route guard; **all four role clusters complete**; phase **wrap-up** — next **P21-X02** only) — see
-[detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md)
+**Active phase: None** (P21 **Done** 2026-06-30). Activate next via `plan-orchestrator` — see
+[detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) for closure evidence.
 
 **Open backlog (non-active):**
 

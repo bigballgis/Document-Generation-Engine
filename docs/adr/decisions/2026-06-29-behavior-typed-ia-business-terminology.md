@@ -2,7 +2,7 @@
 
 **Status:** Accepted (user-confirmed, two rounds, 2026-06-29)
 **Extends (does not supersede):** [Batch B — workflow defaults](./2026-06-23-batch-b-workflow-defaults.md) (COR-T11)
-**Implementation:** Not Started — delivered under [P21](../../plan/detail/P21-role-journey-frontend-redesign.md).
+**Implementation:** **Done** (2026-06-30) — delivered under [P21](../../plan/detail/P21-role-journey-frontend-redesign.md) (T01–T11, X01, X03–X06, X02 governance close).
 
 These decisions record the confirmed direction for the role-journey frontend redesign. They are
 durable for plan/docs sync; reopen only via explicit user confirmation.
@@ -32,3 +32,16 @@ durable for plan/docs sync; reopen only via explicit user confirmation.
 - [Catalog navigation UX](../../product/catalog-navigation-ux.md)
 - [Permission matrix §13.3](../../security/permission-matrix.md)
 - [Batch B workflow defaults](./2026-06-23-batch-b-workflow-defaults.md)
+
+---
+
+## Implementation note (2026-06-30)
+
+All eight decisions (P21-D01..D08) are implemented without changing this ADR's accepted
+decisions. Evidence: hybrid IA + behavior-typed nav (P21-T01/T01a); per-role
+`RoleJourneyTimeline` (P21-T01b, T03–T11); task-hub deepening (P21-T01a); six collaboration
+triggers + `RESOLVED` closed loop (P21-T02/T07); L1 terminology + i18n parity (P21-X01/X06);
+permission fail-closed + capability/route/OpenAPI alignment (P21-X03/X04); companion docs synced
+(P21-X02). **Known gap (non-blocking):** AUD-B10 partial — confirm-on-behalf UI delivered
+(P21-T09b); evidence checklist gate remains open. Phase closed per
+[P21 detail plan §7](../../plan/detail/P21-role-journey-frontend-redesign.md).

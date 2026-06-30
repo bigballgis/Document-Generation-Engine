@@ -1,9 +1,9 @@
 # Documentation Index
 
-**Project baseline:** Restart from zero (2026-06-23); **P0–P20 Done** except **P12** (deferred
-catch-all, non-active); **P21** registered 2026-06-29 (role-journey frontend redesign &
-business-friendly terminology — **In Progress**; **P21-X01 Done** 2026-06-30; next **P21-X02**). Latest gates: frontend
-lint/type-check/test/build green (**511** Vitest, 2026-06-30). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
+**Project baseline:** Restart from zero (2026-06-23); **P0–P21 Done** except **P12** (deferred
+catch-all, non-active). **Active formal phase: None** (P21 **Done** 2026-06-30). **P21** closed — role-journey frontend redesign &
+business-friendly terminology (**Done** 2026-06-30; T01–T11 + X01–X06 + X02). Latest gates: backend
+`mvn verify` **553**; frontend lint/type-check/test/build green (**511** Vitest, 2026-06-30). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
 and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 ## Start here
@@ -61,7 +61,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [P18 Structured authoring & fidelity](./plan/detail/P18-structured-authoring-fidelity-engine.md) | Controlled editor, paste cleaning, renderProfile (Done 2026-06-28) |
 | [P19 Verifiability & publish gate](./plan/detail/P19-verifiability-publish-gate.md) | Batch test, coverage, live publish gate, decision forms (Done 2026-06-25) |
 | [P20 i18n & UI upgradeability](./plan/detail/P20-i18n-ui-upgradeability.md) | Locale registry, brand theming, zh-CN primary journey (Done 2026-06-25) |
-| [P21 Role-journey frontend redesign](./plan/detail/P21-role-journey-frontend-redesign.md) | Hybrid IA, behavior-typed to-dos, per-role journeys, business-friendly terminology (**In Progress**; **P21-X01 Done** 2026-06-30; next **P21-X02**) |
+| [P21 Role-journey frontend redesign](./plan/detail/P21-role-journey-frontend-redesign.md) | Hybrid IA, behavior-typed to-dos, per-role journeys, business-friendly terminology (**Done** 2026-06-30) |
 | **[Deployment guide](../deploy/README.md)** | **Canonical operator guide** — prerequisites, install/upgrade/cutover/rollback/secrets; indexes all `deploy/*.md` topic docs |
 
 ## Architecture

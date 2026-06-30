@@ -1,7 +1,7 @@
 # Business-Friendly Terminology Guide (English-first)
 
-**Status:** Confirmed design (user, 2026-06-29) | **Implementation:** P21-X01 Done (2026-06-30)
-**Owner phase:** [P21 — Role-journey frontend redesign & business-friendly terminology](../plan/detail/P21-role-journey-frontend-redesign.md)
+**Status:** Confirmed design (user, 2026-06-29) | **Implementation:** **Done** — P21 phase complete (2026-06-30); P21-X01 L1 sweep + **P21-X02** governance/docs wrap-up landed
+**Owner phase:** [P21 — Role-journey frontend redesign & business-friendly terminology](../plan/detail/P21-role-journey-frontend-redesign.md) (**Done** 2026-06-30)
 **Primary persona source:** user confirmation 2026-06-29 (two rounds).
 
 > This guide is the **single source of truth (SSOT)** for user-facing label wording on L1

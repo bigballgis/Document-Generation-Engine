@@ -429,9 +429,9 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 决策：`docs/adr/decisions/2026-06-23-batch-b-workflow-defaults.md`；dead workbench 视图已移除。
 文档层以 §13.1 表格为准；不得将上表中的过渡键记为当前默认 landing。
 
-### 13.1.2 行为型导航入口可见性（P21，确认设计 / 实现 Not Started）
+### 13.1.2 行为型导航入口可见性（P21，确认设计 / 实现 Done）
 
-**状态：** 确认设计（2026-06-29）；实现归 [P21](../plan/detail/P21-role-journey-frontend-redesign.md)。
+**状态：** 确认设计（2026-06-29）；实现 **Done**（2026-06-30）— [P21](../plan/detail/P21-role-journey-frontend-redesign.md) T01/T01a + X02 治理收尾。
 决策：[behavior-typed IA + business terminology](../adr/decisions/2026-06-29-behavior-typed-ia-business-terminology.md)
 （扩展 Batch B / COR-T11；单一任务台仍为权威入口）。
 
@@ -453,7 +453,7 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - 展示行为型入口 **不授予** 额外编辑/判定/发布权限；处置仍在模板/母版详情的受控决策表单完成。
 - `ESCALATION/超时提醒` 仅管理员（GLOBAL/GROUP）可见；交互强调"可见性提醒"，不代为完成、不改变模板状态。
 - 编排人员走到 `PENDING_RELEASE` 显示"等待组长确认上线"，无发布主按钮（COR-T07 重申）。
-- 前置依赖：后端需补齐全部 6 种协作触发的发射与 `RESOLVED` 关闭（当前仅 `SUBMIT_FOR_TEST`），否则对应入口为空壳。
+- **实现说明（2026-06-30）：** 全部 6 种协作触发均已发射工作项，决策/发布路径写入 `RESOLVED` 关闭环 — **P21-T02**（TEST 路径 + REMEDIATION 发射）、**P21-T07**（APPROVAL / PENDING_RELEASE / publish 路径）。行为型入口由真实队列支撑，非空壳。
 
 ### 13.2 会话 capabilities（后端下发）
 

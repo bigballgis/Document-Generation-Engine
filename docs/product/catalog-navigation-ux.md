@@ -90,8 +90,8 @@ Default tab: **Versions** (release version lines). Other tabs: overview & workfl
 
 ## Hybrid IA — resource-typed + behavior-typed navigation (P21)
 
-**Status:** Confirmed design (2026-06-29) | **Implementation:** Not Started — delivered under
-[P21](../plan/detail/P21-role-journey-frontend-redesign.md). Decision:
+**Status:** Confirmed design (2026-06-29) | **Implementation:** **Done** (2026-06-30) — delivered under
+[P21](../plan/detail/P21-role-journey-frontend-redesign.md) (T01/T01a behavior nav + task hub; X02 governance close). Decision:
 [behavior-typed IA + business terminology](../adr/decisions/2026-06-29-behavior-typed-ia-business-terminology.md)
 (extends Batch B / COR-T11; single task hub stays authoritative).
 
@@ -111,7 +111,7 @@ Left navigation IA
 ```
 
 - Behavior-typed entries are capability/queue-driven and role-aware (visibility per
-  [permission matrix §13.3](../security/permission-matrix.md)); no-permission entries are hidden.
+  [permission matrix §13.1.2](../security/permission-matrix.md)); no-permission entries are hidden.
 - Labels follow the [business terminology guide](./business-terminology-guide.md) (L1 business
   language; no `policy`/`credential`/`lifecycle`/`gate` as primary labels). i18n keys stay stable;
   only message values change.
