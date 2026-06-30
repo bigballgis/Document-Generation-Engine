@@ -1124,14 +1124,17 @@ export default {
           reviewRequest: {
             label: '查看测试任务',
             guidance: '打开测试任务并查看提交摘要。',
+            cta: '查看测试任务',
           },
           checkEvidence: {
             label: '核对输出效果',
             guidance: '核对输出样例与预期效果。',
+            cta: '核对输出效果',
           },
           recordResult: {
             label: '记录测试结果',
             guidance: '记录测试结果以便作者继续推进。',
+            cta: '记录测试结果',
           },
         },
       },

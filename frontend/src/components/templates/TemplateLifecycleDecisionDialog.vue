@@ -133,7 +133,7 @@ const submitDisabled = computed(() => {
   if (isApprovalPassMode.value) {
     return !isApprovalPassDecisionValid(form)
   }
-  if (props.mode === 'approval-reject') {
+  if (props.mode === 'approval-reject' || props.mode === 'test-fail') {
     return !isRejectDecisionValid(form)
   }
   return !isLifecycleDecisionFormValid(form)
@@ -307,7 +307,7 @@ async function submitForm() {
             :placeholder="t('templates.lifecycle.decisionForm.impactSummaryPlaceholder')"
           />
         </el-form-item>
-        <template v-if="mode === 'approval-reject'">
+        <template v-if="mode === 'approval-reject' || mode === 'test-fail'">
           <p class="decision-intro">{{ t('templates.lifecycle.decisionForm.remediationIntro') }}</p>
           <el-form-item :label="t('templates.lifecycle.decisionForm.remediationTestRecordId')">
             <el-input v-model="form.remediationTestRecordId" maxlength="64" />

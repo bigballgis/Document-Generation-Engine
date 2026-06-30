@@ -1653,14 +1653,17 @@ export default {
           reviewRequest: {
             label: 'Review test request',
             guidance: 'Open the test request and review the submission summary.',
+            cta: 'Review test request',
           },
           checkEvidence: {
             label: 'Check output evidence',
             guidance: 'Check output samples and evidence against expectations.',
+            cta: 'Check output evidence',
           },
           recordResult: {
             label: 'Record test result',
             guidance: 'Record your test result so the author can proceed.',
+            cta: 'Record test result',
           },
         },
       },

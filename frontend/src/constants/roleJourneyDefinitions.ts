@@ -90,3 +90,13 @@ export {
   resolveTemplateAuthorDashboardJourneyIndex,
   resolveTemplateAuthorJourneyIndex,
 } from '@/utils/templateAuthorJourney'
+
+export {
+  hasAllEvidenceViewed,
+  hasAnyEvidenceViewed,
+  hasTemplatePreviewArtifact,
+  resolveTemplateTesterDashboardJourneyIndex,
+  resolveTemplateTesterJourneyIndex,
+  shouldShowTemplateTesterJourney,
+  templateTesterStepCtaKey,
+} from '@/utils/templateTesterJourney'

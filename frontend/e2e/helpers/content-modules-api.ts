@@ -27,6 +27,7 @@ interface TemplateSummary {
   externalId: string
   lifecycleStatus: string
   groupCode: string
+  updatedAt?: string
 }
 
 interface TemplateContentModuleReference {
@@ -134,6 +135,82 @@ export async function demoTemplateDetailPath(request: APIRequestContext): Promis
     throw new Error(`Demo template "${DEMO_TEMPLATE_EXTERNAL_ID}" was not found`)
   }
   return `/templates/${demoTemplate.id}`
+}
+
+async function ensureDemoTemplateSubmittedForTest(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<void> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+
+  await authorizedPut(request, authorToken, `/templates/${templateId}/variables/customerName`, {
+    variableKey: 'customerName',
+    variableType: 'TEXT',
+    required: true,
+    defaultValue: 'Customer',
+    description: 'Customer name',
+  })
+
+  await authorizedPut(request, authorToken, `/templates/${templateId}/bindings/HEADER`, {
+    anchorId: 'HEADER',
+    declaredContentType: 'TEXT',
+    structuredContentJson:
+      '{"nodes":[{"type":"paragraph","children":[{"type":"variable","key":"customerName"}]}]}',
+  })
+
+  await authorizedPost(request, authorToken, `/templates/${templateId}/bindings/validate`, {})
+
+  const testDataSet = await authorizedPost<{ testDataSetId: string }>(
+    request,
+    authorToken,
+    `/templates/${templateId}/test-data-sets`,
+    {
+      name: 'E2E tester journey sample',
+      required: true,
+      variables: { customerName: 'Alice' },
+    },
+    201,
+  )
+
+  await authorizedPost(request, authorToken, `/templates/${templateId}/previews/test-generate`, {
+    variables: { customerName: 'Alice' },
+  })
+
+  await authorizedPost(request, authorToken, `/templates/${templateId}/previews/batch-test`, {
+    testDataSetIds: [testDataSet.testDataSetId],
+  })
+
+  await authorizedPost(request, authorToken, `/templates/${templateId}/lifecycle/submit-test`, {
+    commentSummary: 'E2E ready for tester journey',
+  })
+}
+
+export async function demoTestingTemplateDetailPath(request: APIRequestContext): Promise<string> {
+  const testerToken = await apiLogin(request, E2E_TEMPLATE_TESTER)
+  const templates = await authorizedGet<TemplateSummary[]>(request, testerToken, '/templates')
+  const testingTemplates = templates
+    .filter((template) => template.lifecycleStatus === 'TESTING')
+    .sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt))
+
+  if (testingTemplates.length > 0) {
+    return `/templates/${testingTemplates[0].id}`
+  }
+
+  const demoTemplate = await findTemplateByExternalId(request, DEMO_TEMPLATE_EXTERNAL_ID)
+  if (!demoTemplate) {
+    throw new Error(`Demo template "${DEMO_TEMPLATE_EXTERNAL_ID}" was not found`)
+  }
+
+  if (demoTemplate.lifecycleStatus !== 'TESTING') {
+    await ensureDemoTemplateSubmittedForTest(request, demoTemplate.id)
+  }
+
+  const refreshed = await findTemplateByExternalId(request, DEMO_TEMPLATE_EXTERNAL_ID)
+  if (!refreshed || refreshed.lifecycleStatus !== 'TESTING') {
+    throw new Error(`Failed to prepare TESTING template for E2E (status=${refreshed?.lifecycleStatus})`)
+  }
+
+  return `/templates/${refreshed.id}`
 }
 
 export async function createApprovedContentModule(

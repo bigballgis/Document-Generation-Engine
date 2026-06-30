@@ -655,6 +655,96 @@ describe('DashboardView', () => {
     )
   })
 
+  it('sets template tester journey index 0 for newest OPEN TEST work item', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Tester',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_TESTER'],
+      capabilities: { decideTests: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+      templatesStore.templates = [
+        {
+          id: 'tpl-testing',
+          externalId: 'TPL-TEST',
+          groupCode: 'RETAIL',
+          name: 'Testing template',
+          lifecycleStatus: 'TESTING',
+          releaseVersion: null,
+          releaseVersionCount: 0,
+          masterId: 'master-1',
+          updatedBy: '10000003',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ] as never
+    })
+
+    const collaborationStore = useCollaborationStore()
+    collaborationStore.workItems = [
+      {
+        workItemId: 'wi-1',
+        templateId: 'tpl-testing',
+        templateName: 'Testing template',
+        queue: 'TEST',
+        triggerType: 'SUBMIT_FOR_TEST',
+        groupCode: 'RETAIL',
+        submitterUserId: '10000003',
+        summaryText: 'Ready for test',
+        ageSeconds: 3600,
+        createdAt: '2026-06-26T10:00:00Z',
+      },
+    ]
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('0')
+  })
+
+  it('sets template tester journey index 1 for TESTING template without work items', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Tester',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_TESTER'],
+      capabilities: { decideTests: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+      templatesStore.templates = [
+        {
+          id: 'tpl-testing',
+          externalId: 'TPL-TEST',
+          groupCode: 'RETAIL',
+          name: 'Testing template',
+          lifecycleStatus: 'TESTING',
+          releaseVersion: null,
+          releaseVersionCount: 0,
+          masterId: 'master-1',
+          updatedBy: '10000003',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ] as never
+    })
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('1')
+  })
+
   it('hides journey section for TEMPLATE_APPROVER-only sessions', async () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {

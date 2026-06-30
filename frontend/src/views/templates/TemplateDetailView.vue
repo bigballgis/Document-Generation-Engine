@@ -17,6 +17,7 @@ import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataE
 import TemplateReleaseVersionHistoryPanel from '@/components/templates/TemplateReleaseVersionHistoryPanel.vue'
 import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
 import TemplateAuthorJourneyBlock from '@/components/journey/TemplateAuthorJourneyBlock.vue'
+import TemplateTesterJourneyBlock from '@/components/journey/TemplateTesterJourneyBlock.vue'
 import TemplatePublishSummaryDialog from '@/components/templates/TemplatePublishSummaryDialog.vue'
 import TemplateLifecycleDecisionDialog, {
   type LifecycleDecisionDialogMode,
@@ -37,6 +38,10 @@ import {
   shouldShowTemplateAuthorJourney,
   type TemplateAuthorJourneyContext,
 } from '@/utils/templateAuthorJourney'
+import {
+  shouldShowTemplateTesterJourney,
+  type TemplateTesterJourneyContext,
+} from '@/utils/templateTesterJourney'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
@@ -95,6 +100,11 @@ const credentialSecretDialogVisible = ref(false)
 const credentialSecretValue = ref('')
 const credentialSecretExternalId = ref('')
 const lastPreview = ref<PreviewRecord | null>(null)
+const testerEvidenceViewed = ref({
+  fidelityViewedConfirmed: false,
+  coverageViewedConfirmed: false,
+  previewViewedConfirmed: false,
+})
 const selectedTestDataSetId = ref<string | null>(null)
 const coverageRefreshToken = ref(0)
 const bindingGateResult = ref<BindingValidationResult | null>(null)
@@ -347,6 +357,30 @@ const authorJourneyContext = computed((): TemplateAuthorJourneyContext | null =>
   }
 })
 
+const showTesterJourney = computed(() => {
+  if (
+    !template.value ||
+    !shouldShowTemplateTesterJourney({ decideTests: decideTests.value }) ||
+    template.value.lifecycleStatus !== 'TESTING'
+  ) {
+    return false
+  }
+  return true
+})
+
+const testerJourneyContext = computed((): TemplateTesterJourneyContext | null => {
+  if (!template.value || template.value.lifecycleStatus !== 'TESTING') {
+    return null
+  }
+  return {
+    lifecycleStatus: 'TESTING',
+    hasPreviewArtifact: lastPreview.value?.status === 'SUCCEEDED',
+    fidelityViewedConfirmed: testerEvidenceViewed.value.fidelityViewedConfirmed,
+    coverageViewedConfirmed: testerEvidenceViewed.value.coverageViewedConfirmed,
+    previewViewedConfirmed: testerEvidenceViewed.value.previewViewedConfirmed,
+  }
+})
+
 async function loadAuthorRemediationWorkItems() {
   if (!authorTemplates.value || !canViewCollaborationWorkItems(sessionStore.session?.roles ?? [])) {
     return
@@ -381,9 +415,43 @@ async function handleJourneySubmitForApproval() {
   await handleSubmitForApproval()
 }
 
+function handleJourneyReviewRequest() {
+  openLifecyclePanel()
+}
+
+function handleJourneyCheckEvidence() {
+  openLifecyclePanel()
+  testerEvidenceViewed.value = {
+    fidelityViewedConfirmed: true,
+    coverageViewedConfirmed: true,
+    previewViewedConfirmed: false,
+  }
+}
+
+function handleJourneyRecordResult() {
+  openLifecyclePanel()
+  testerEvidenceViewed.value = {
+    fidelityViewedConfirmed: true,
+    coverageViewedConfirmed: true,
+    previewViewedConfirmed: true,
+  }
+}
+
 onMounted(async () => {
   await Promise.all([loadTemplate(), loadAuthorRemediationWorkItems()])
 })
+
+watch(
+  () => templateId.value,
+  () => {
+    testerEvidenceViewed.value = {
+      fidelityViewedConfirmed: false,
+      coverageViewedConfirmed: false,
+      previewViewedConfirmed: false,
+    }
+    void loadTemplate()
+  },
+)
 
 watch(
   () => [route.query.tab, route.query.focus] as const,
@@ -547,6 +615,9 @@ async function submitLifecycleDecision(payload: LifecycleDecisionSubmitPayload) 
         reasonCategory: payload.reasonCategory,
         impactSummary: payload.impactSummary,
         commentSummary: payload.commentSummary,
+        remediationTestRecordId: payload.remediationTestRecordId,
+        remediationChangeDiffRef: payload.remediationChangeDiffRef,
+        remediationChecklistCode: payload.remediationChecklistCode,
       })
       ElMessage.success(t('templates.lifecycle.testDecisionSuccess'))
     } else if (mode === 'test-pass') {
@@ -884,6 +955,15 @@ async function handleDeleteTemplate() {
         @trial-generate="handleJourneyTrialGenerate"
         @submit-for-test="handleJourneySubmitForTest"
         @submit-for-approval="handleJourneySubmitForApproval"
+      />
+
+      <TemplateTesterJourneyBlock
+        v-if="showTesterJourney && testerJourneyContext"
+        :journey-context="testerJourneyContext"
+        :can-decide="decideTests"
+        @review-request="handleJourneyReviewRequest"
+        @check-evidence="handleJourneyCheckEvidence"
+        @record-result="handleJourneyRecordResult"
       />
 
       <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />

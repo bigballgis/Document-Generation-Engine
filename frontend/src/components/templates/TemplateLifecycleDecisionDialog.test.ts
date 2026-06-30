@@ -92,6 +92,38 @@ describe('TemplateLifecycleDecisionDialog', () => {
     expect(wrapper.text()).toContain('Remediation change diff reference')
   })
 
+  it('shows remediation fields for test-fail mode (AUD-B05)', async () => {
+    const wrapper = mountDialog('test-fail')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Remediation test record ID')
+    expect(wrapper.text()).toContain('Remediation change diff reference')
+  })
+
+  it('keeps test-fail submit disabled until remediation link is provided (AUD-B05)', async () => {
+    const wrapper = mountDialog('test-fail')
+    await flushPromises()
+
+    const submitButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Submit decision'))
+    expect(submitButton?.attributes('disabled')).toBeDefined()
+
+    const selects = wrapper.findAllComponents({ name: 'ElSelect' })
+    await selects[0]?.setValue('BINDING_ISSUE')
+    const textareas = wrapper.findAll('textarea')
+    await textareas[0]?.setValue('Preview output mismatch.')
+    await wrapper.find('input[maxlength="64"]').setValue('PREVIEW_DIFF')
+    await flushPromises()
+
+    expect(
+      wrapper
+        .findAll('button')
+        .find((button) => button.text().includes('Submit decision'))
+        ?.attributes('disabled'),
+    ).toBeUndefined()
+  })
+
   it('requires approval rationale and key evidence before enabling submit', async () => {
     const wrapper = mountDialog('approval-approve')
     await flushPromises()

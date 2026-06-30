@@ -20,6 +20,10 @@ import {
   resolveTemplateAuthorDashboardJourneyIndex,
   type TemplateAuthorRemediationItem,
 } from '@/utils/templateAuthorJourney'
+import {
+  resolveTemplateTesterDashboardJourneyIndex,
+  type TemplateTesterTestWorkItem,
+} from '@/utils/templateTesterJourney'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import {
   buildTaskPartitions,
@@ -149,12 +153,34 @@ const templateAuthorJourneyResolution = computed(() => {
   )
 })
 
+const templateTesterTestWorkItems = computed((): TemplateTesterTestWorkItem[] =>
+  collaborationStore.workItems
+    .filter((item) => item.queue === 'TEST')
+    .map((item) => ({
+      templateId: item.templateId,
+      createdAt: item.createdAt,
+    })),
+)
+
+const templateTesterJourneyResolution = computed(() => {
+  if (primaryClusterOneRole.value !== 'TEMPLATE_TESTER') {
+    return null
+  }
+  return resolveTemplateTesterDashboardJourneyIndex(
+    templatesStore.templates,
+    templateTesterTestWorkItems.value,
+  )
+})
+
 const journeyCurrentStepIndex = computed(() => {
   if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
     return masterDesignerJourneyResolution.value?.currentStepIndex ?? null
   }
   if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
     return templateAuthorJourneyResolution.value?.currentStepIndex ?? null
+  }
+  if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
+    return templateTesterJourneyResolution.value?.currentStepIndex ?? null
   }
   return null
 })
@@ -165,6 +191,9 @@ const journeyGuidanceKey = computed(() => {
   }
   if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
     return templateAuthorJourneyResolution.value?.guidanceKey
+  }
+  if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
+    return templateTesterJourneyResolution.value?.guidanceKey
   }
   return undefined
 })
