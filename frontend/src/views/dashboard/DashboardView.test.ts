@@ -11,6 +11,7 @@ import {
   masterDesignerJourneySteps,
   templateAuthorJourneySteps,
   templateApproverJourneySteps,
+  templateTeamLeadJourneySteps,
   templateTesterJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
 
@@ -839,5 +840,105 @@ describe('DashboardView', () => {
 
     expect(wrapper.find('#journey-section').exists()).toBe(true)
     expect(wrapper.find('h1').text()).toBe('collaboration.workItem.queue.TEST.title')
+  })
+
+  it('shows team-lead journey with 4 steps for GROUP_ADMIN-only sessions', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Group Admin',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management', 'route.master-management'],
+      roles: ['GROUP_ADMIN'],
+      capabilities: { publishTemplates: true, reviewMasters: true, decideApprovals: false },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    const mastersStore = useMastersStore()
+    vi.spyOn(mastersStore, 'fetchMasters').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('#journey-section').exists()).toBe(true)
+    expect(Number(wrapper.find('.journey-timeline-stub').attributes('data-step-count'))).toBe(
+      templateTeamLeadJourneySteps.length,
+    )
+    expect(wrapper.find('.journey-timeline-stub').text()).toBe('journey.roles.GROUP_ADMIN.title')
+  })
+
+  it('sets team-lead journey index 0 when PENDING_REVIEW masters exist', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Group Admin',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.master-management', 'route.template-management'],
+      roles: ['GROUP_ADMIN'],
+      capabilities: { publishTemplates: true, reviewMasters: true, decideApprovals: false },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
+
+    const mastersStore = useMastersStore()
+    vi.spyOn(mastersStore, 'fetchMasters').mockImplementation(async () => {
+      mastersStore.masters = [
+        {
+          id: 'm-pending',
+          groupCode: 'RETAIL',
+          name: 'Letterhead',
+          status: 'PENDING_REVIEW',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 2,
+          updatedBy: '10000005',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ]
+    })
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('0')
+  })
+
+  it('sets team-lead journey index 1 for newest OPEN PENDING_RELEASE work item', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Group Admin',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['GROUP_ADMIN'],
+      capabilities: { publishTemplates: true, reviewMasters: true, decideApprovals: false },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+
+    const collaborationStore = useCollaborationStore()
+    collaborationStore.workItems = [
+      {
+        workItemId: 'wi-pending-release',
+        templateId: 'tpl-pending-release',
+        templateName: 'Pending release template',
+        queue: 'PENDING_RELEASE',
+        triggerType: 'APPROVAL_PENDING_RELEASE',
+        groupCode: 'RETAIL',
+        submitterUserId: '10000003',
+        summaryText: 'Ready for go-live',
+        ageSeconds: 3600,
+        createdAt: '2026-06-26T10:00:00Z',
+      },
+    ]
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('1')
   })
 })

@@ -309,6 +309,94 @@ export async function demoApprovalTemplateDetailPath(request: APIRequestContext)
   return `/templates/${demoTemplate.id}`
 }
 
+async function ensureDemoTemplatePendingRelease(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<void> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
+
+  const detail = await authorizedGet<{ lifecycleStatus: string; approvalSubState?: string }>(
+    request,
+    authorToken,
+    `/templates/${templateId}`,
+  )
+
+  if (detail.lifecycleStatus === 'PENDING_RELEASE') {
+    return
+  }
+
+  if (
+    detail.lifecycleStatus !== 'APPROVAL' ||
+    detail.approvalSubState !== 'PENDING_DECISION'
+  ) {
+    await ensureDemoTemplatePendingApprovalDecision(request, templateId)
+  }
+
+  const beforeApproval = await authorizedGet<{ lifecycleStatus: string; approvalSubState?: string }>(
+    request,
+    approverToken,
+    `/templates/${templateId}`,
+  )
+
+  if (
+    beforeApproval.lifecycleStatus === 'APPROVAL' &&
+    beforeApproval.approvalSubState === 'PENDING_DECISION'
+  ) {
+    await authorizedPost(request, approverToken, `/templates/${templateId}/lifecycle/approval-decision`, {
+      decision: 'APPROVED',
+      commentSummary: 'E2E approved for team-lead go-live journey',
+      keyEvidenceConfirmed: true,
+    })
+  }
+
+  const afterApproval = await authorizedGet<{ lifecycleStatus: string }>(
+    request,
+    approverToken,
+    `/templates/${templateId}`,
+  )
+
+  if (afterApproval.lifecycleStatus !== 'PENDING_RELEASE') {
+    throw new Error(
+      `Failed to prepare PENDING_RELEASE template for E2E (status=${afterApproval.lifecycleStatus})`,
+    )
+  }
+}
+
+export async function demoPendingReleaseTemplateDetailPath(
+  request: APIRequestContext,
+): Promise<string> {
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  const templates = await authorizedGet<TemplateSummary[]>(request, groupAdminToken, '/templates')
+  const pendingReleaseTemplates = templates
+    .filter((template) => template.lifecycleStatus === 'PENDING_RELEASE')
+    .sort((left, right) => Date.parse(right.updatedAt ?? '') - Date.parse(left.updatedAt ?? ''))
+
+  if (pendingReleaseTemplates.length > 0) {
+    return `/templates/${pendingReleaseTemplates[0].id}`
+  }
+
+  const demoTemplate = await findTemplateByExternalId(request, DEMO_TEMPLATE_EXTERNAL_ID)
+  if (!demoTemplate) {
+    throw new Error(`Demo template "${DEMO_TEMPLATE_EXTERNAL_ID}" was not found`)
+  }
+
+  await ensureDemoTemplatePendingRelease(request, demoTemplate.id)
+
+  const refreshed = await authorizedGet<{ lifecycleStatus: string }>(
+    request,
+    groupAdminToken,
+    `/templates/${demoTemplate.id}`,
+  )
+  if (refreshed.lifecycleStatus !== 'PENDING_RELEASE') {
+    throw new Error(
+      `Failed to prepare PENDING_RELEASE template for E2E (status=${refreshed.lifecycleStatus})`,
+    )
+  }
+
+  return `/templates/${demoTemplate.id}`
+}
+
 export async function createApprovedContentModule(
   request: APIRequestContext,
   options?: { moduleCode?: string; name?: string; semanticVersion?: string },

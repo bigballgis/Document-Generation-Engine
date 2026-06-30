@@ -1711,6 +1711,35 @@ export default {
           },
         },
       },
+      GROUP_ADMIN: {
+        title: 'Team-lead go-live workflow',
+        empty: {
+          guidance:
+            'Open a letterhead review or go-live request from your task list, then follow each step below.',
+        },
+        steps: {
+          reviewLetterhead: {
+            label: 'Review letterhead',
+            guidance: 'Review uploaded letterheads waiting for your approval.',
+            cta: 'Review letterhead',
+          },
+          reviewGoLiveRequest: {
+            label: 'Review go-live request',
+            guidance: 'Open the approved template and review why it is ready for go-live.',
+            cta: 'Review go-live request',
+          },
+          runPreReleaseChecks: {
+            label: 'Pre-release checks',
+            guidance: 'Review pre-release checks and resolve any issues before go-live.',
+            cta: 'View pre-release checks',
+          },
+          confirmGoLive: {
+            label: 'Confirm go-live',
+            guidance: 'Confirm the release summary and put the template live.',
+            cta: 'Confirm go-live',
+          },
+        },
+      },
     },
   },
   identity: {

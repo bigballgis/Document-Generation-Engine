@@ -12,6 +12,7 @@ import {
   resolvePrimaryClusterOneRole,
   roleJourneyTitleKey,
   templateApproverJourneySteps,
+  templateTeamLeadJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
 import {
   resolveMasterDesignerDashboardJourneyIndex,
@@ -30,6 +31,11 @@ import {
   shouldShowTemplateApproverJourney,
   type TemplateApproverApprovalWorkItem,
 } from '@/utils/templateApproverJourney'
+import {
+  resolveTemplateTeamLeadDashboardJourneyIndex,
+  shouldShowTemplateTeamLeadJourney,
+  type TemplateTeamLeadPendingReleaseWorkItem,
+} from '@/utils/templateTeamLeadJourney'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import {
   buildTaskPartitions,
@@ -54,7 +60,7 @@ const sessionStore = useSessionStore()
 const mastersStore = useMastersStore()
 const templatesStore = useTemplatesStore()
 const collaborationStore = useCollaborationStore()
-const { context, reviewMasters, manageMasters, decideApprovals } = useCapabilities()
+const { context, reviewMasters, manageMasters, decideApprovals, publishTemplates } = useCapabilities()
 const { tasks } = useWorkflowTasks()
 const visibleRoutes = computed(() => sessionStore.session?.visibleRoutes ?? [])
 const { stats } = useDashboardStats(visibleRoutes)
@@ -120,11 +126,23 @@ const primaryClusterOneRole = computed(() =>
 const showApproverJourney = computed(
   () =>
     !primaryClusterOneRole.value &&
+    (sessionStore.session?.roles ?? []).includes('TEMPLATE_APPROVER') &&
     shouldShowTemplateApproverJourney({ decideApprovals: decideApprovals.value }),
 )
 
+const showTeamLeadJourney = computed(
+  () =>
+    !primaryClusterOneRole.value &&
+    !showApproverJourney.value &&
+    shouldShowTemplateTeamLeadJourney({
+      publishTemplates: publishTemplates.value,
+      reviewMasters: reviewMasters.value,
+    }),
+)
+
 const showJourneySection = computed(
-  () => Boolean(primaryClusterOneRole.value || showApproverJourney.value),
+  () =>
+    Boolean(primaryClusterOneRole.value || showApproverJourney.value || showTeamLeadJourney.value),
 )
 
 const journeySteps = computed(() => {
@@ -133,6 +151,9 @@ const journeySteps = computed(() => {
   }
   if (showApproverJourney.value) {
     return templateApproverJourneySteps
+  }
+  if (showTeamLeadJourney.value) {
+    return templateTeamLeadJourneySteps
   }
   return []
 })
@@ -143,6 +164,9 @@ const journeyTitleKey = computed(() => {
   }
   if (showApproverJourney.value) {
     return roleJourneyTitleKey('TEMPLATE_APPROVER')
+  }
+  if (showTeamLeadJourney.value) {
+    return roleJourneyTitleKey('GROUP_ADMIN')
   }
   return undefined
 })
@@ -215,6 +239,26 @@ const templateApproverJourneyResolution = computed(() => {
   )
 })
 
+const templateTeamLeadPendingReleaseWorkItems = computed((): TemplateTeamLeadPendingReleaseWorkItem[] =>
+  collaborationStore.workItems
+    .filter((item) => item.queue === 'PENDING_RELEASE')
+    .map((item) => ({
+      templateId: item.templateId,
+      createdAt: item.createdAt,
+    })),
+)
+
+const templateTeamLeadJourneyResolution = computed(() => {
+  if (!showTeamLeadJourney.value) {
+    return null
+  }
+  return resolveTemplateTeamLeadDashboardJourneyIndex(
+    mastersStore.masters,
+    templatesStore.templates,
+    templateTeamLeadPendingReleaseWorkItems.value,
+  )
+})
+
 const journeyCurrentStepIndex = computed(() => {
   if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
     return masterDesignerJourneyResolution.value?.currentStepIndex ?? null
@@ -227,6 +271,9 @@ const journeyCurrentStepIndex = computed(() => {
   }
   if (showApproverJourney.value) {
     return templateApproverJourneyResolution.value?.currentStepIndex ?? null
+  }
+  if (showTeamLeadJourney.value) {
+    return templateTeamLeadJourneyResolution.value?.currentStepIndex ?? null
   }
   return null
 })
@@ -243,6 +290,9 @@ const journeyGuidanceKey = computed(() => {
   }
   if (showApproverJourney.value) {
     return templateApproverJourneyResolution.value?.guidanceKey
+  }
+  if (showTeamLeadJourney.value) {
+    return templateTeamLeadJourneyResolution.value?.guidanceKey
   }
   return undefined
 })

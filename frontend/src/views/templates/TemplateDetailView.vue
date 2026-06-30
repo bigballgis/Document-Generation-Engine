@@ -9,6 +9,7 @@ import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanne
 import TemplateAuthorJourneyBlock from '@/components/journey/TemplateAuthorJourneyBlock.vue'
 import TemplateTesterJourneyBlock from '@/components/journey/TemplateTesterJourneyBlock.vue'
 import TemplateApproverJourneyBlock from '@/components/journey/TemplateApproverJourneyBlock.vue'
+import TemplateTeamLeadJourneyBlock from '@/components/journey/TemplateTeamLeadJourneyBlock.vue'
 import TemplatePublishSummaryDialog from '@/components/templates/TemplatePublishSummaryDialog.vue'
 import TemplateLifecycleDecisionDialog, {
   type LifecycleDecisionDialogMode,
@@ -40,6 +41,10 @@ import {
   shouldShowTemplateApproverJourney,
   type TemplateApproverJourneyContext,
 } from '@/utils/templateApproverJourney'
+import {
+  shouldShowTemplateTeamLeadJourney,
+  type TemplateTeamLeadJourneyContext,
+} from '@/utils/templateTeamLeadJourney'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
@@ -87,6 +92,7 @@ const {
   decideTests,
   decideApprovals,
   publishTemplates,
+  reviewMasters,
   stopTemplates,
   restoreOrDeprecateTemplates,
   manageApiPolicy,
@@ -114,6 +120,10 @@ const testerEvidenceViewed = ref({
 const approverEvidenceViewed = ref({
   submissionReviewedConfirmed: false,
   keyEvidenceViewedConfirmed: false,
+})
+const teamLeadGoLiveViewed = ref({
+  goLiveRequestReviewedConfirmed: false,
+  preReleaseChecksViewed: false,
 })
 const selectedTestDataSetId = ref<string | null>(null)
 const coverageRefreshToken = ref(0)
@@ -372,6 +382,16 @@ const showAuthorJourney = computed(() => {
     return false
   }
   const status = template.value.lifecycleStatus
+  if (
+    status === 'PENDING_RELEASE' &&
+    publishTemplates.value &&
+    shouldShowTemplateTeamLeadJourney({
+      publishTemplates: publishTemplates.value,
+      reviewMasters: reviewMasters.value,
+    })
+  ) {
+    return false
+  }
   return status !== 'STOPPED' && status !== 'DEPRECATED' && status !== 'DELETED'
 })
 
@@ -437,6 +457,32 @@ const approverJourneyContext = computed((): TemplateApproverJourneyContext | nul
     approvalSubState: 'PENDING_DECISION',
     submissionReviewedConfirmed: approverEvidenceViewed.value.submissionReviewedConfirmed,
     keyEvidenceViewedConfirmed: approverEvidenceViewed.value.keyEvidenceViewedConfirmed,
+  }
+})
+
+const showTeamLeadJourney = computed(() => {
+  if (
+    !template.value ||
+    !publishTemplates.value ||
+    template.value.lifecycleStatus !== 'PENDING_RELEASE'
+  ) {
+    return false
+  }
+  return shouldShowTemplateTeamLeadJourney({
+    publishTemplates: publishTemplates.value,
+    reviewMasters: reviewMasters.value,
+  })
+})
+
+const teamLeadJourneyContext = computed((): TemplateTeamLeadJourneyContext | null => {
+  if (!template.value || template.value.lifecycleStatus !== 'PENDING_RELEASE') {
+    return null
+  }
+  return {
+    lifecycleStatus: 'PENDING_RELEASE',
+    goLiveRequestReviewedConfirmed: teamLeadGoLiveViewed.value.goLiveRequestReviewedConfirmed,
+    preReleaseChecksViewed: teamLeadGoLiveViewed.value.preReleaseChecksViewed,
+    publishGateReady: publishGateReady.value,
   }
 })
 
@@ -516,6 +562,33 @@ function handleJourneyApproverRecordDecision() {
   }
 }
 
+function handleJourneyTeamLeadReviewGoLiveRequest() {
+  openLifecyclePanel()
+  teamLeadGoLiveViewed.value = {
+    ...teamLeadGoLiveViewed.value,
+    goLiveRequestReviewedConfirmed: true,
+  }
+}
+
+async function handleJourneyTeamLeadRunPreReleaseChecks() {
+  openLifecyclePanel()
+  await loadPublishGateData()
+  teamLeadGoLiveViewed.value = {
+    ...teamLeadGoLiveViewed.value,
+    goLiveRequestReviewedConfirmed: true,
+    preReleaseChecksViewed: true,
+  }
+}
+
+async function handleJourneyTeamLeadConfirmGoLive() {
+  openLifecyclePanel()
+  teamLeadGoLiveViewed.value = {
+    goLiveRequestReviewedConfirmed: true,
+    preReleaseChecksViewed: true,
+  }
+  await handlePublish()
+}
+
 function resetTransientDetailState() {
   testerEvidenceViewed.value = {
     fidelityViewedConfirmed: false,
@@ -525,6 +598,10 @@ function resetTransientDetailState() {
   approverEvidenceViewed.value = {
     submissionReviewedConfirmed: false,
     keyEvidenceViewedConfirmed: false,
+  }
+  teamLeadGoLiveViewed.value = {
+    goLiveRequestReviewedConfirmed: false,
+    preReleaseChecksViewed: false,
   }
   lifecycleComment.value = ''
   lastPreview.value = null
@@ -1104,6 +1181,15 @@ async function handleDeleteTemplate() {
         @review-request="handleJourneyApproverReviewRequest"
         @review-submission="handleJourneyApproverReviewSubmission"
         @record-decision="handleJourneyApproverRecordDecision"
+      />
+
+      <TemplateTeamLeadJourneyBlock
+        v-if="showTeamLeadJourney && teamLeadJourneyContext"
+        :journey-context="teamLeadJourneyContext"
+        :can-publish="publishTemplates"
+        @review-go-live-request="handleJourneyTeamLeadReviewGoLiveRequest"
+        @run-pre-release-checks="handleJourneyTeamLeadRunPreReleaseChecks"
+        @confirm-go-live="handleJourneyTeamLeadConfirmGoLive"
       />
 
       <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />

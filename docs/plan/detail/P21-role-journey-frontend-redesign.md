@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **P21-T08 Done** 2026-06-30 — cluster ② B1 Approver journey frontend + AUD-B03 dual-substate UI; next **P21-T09 Not Started** — Team-lead / API management journey) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **P21-T09 Done** 2026-06-30 — cluster ② B2 Team-lead go-live journey; next **P21-T09a Not Started** — API management L1 copy) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -184,7 +184,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | --- | --- | --- | --- | --- |
 | P21-T07 | B0 backend: emit `SUBMIT_FOR_APPROVAL`, `APPROVAL_FAILURE → REMEDIATION`, `APPROVAL_PENDING_RELEASE`, `TIMEOUT_ESCALATION`; write `RESOLVED` on approval/publish decisions | `backend/.../collaboration/**`, `TemplateLifecycleService`, escalation scheduler | Required | Done (2026-06-30) |
 | P21-T08 | B1 Approver journey: "waiting on my approval" entry + controlled approval decision + `approvalSubState` (PENDING_SUBMIT vs PENDING_DECISION) dual-substate UI | lifecycle panel, decision forms | Required | Done (2026-06-30) |
-| P21-T09 | B2 Team-lead / API management journey: master review tasks; "waiting to confirm go-live" entry + pre-release checks + go-live summary confirm | lifecycle panel, dashboard | Required | Not Started |
+| P21-T09 | B2 Team-lead / API management journey: master review tasks; "waiting to confirm go-live" entry + pre-release checks + go-live summary confirm | lifecycle panel, dashboard | Required | Done (2026-06-30) |
 | P21-T09a | API management / access-keys journey: full L1 copy replacement of API policy/credential surfaces | `ApiPolicyDetailView`, api policy components, `en.ts`, `zh-CN.ts` | Required | Not Started |
 | P21-T09b | Reminder timing config + overdue-reminder queue visibility + exception handling ("confirm on behalf" + audit trail copy, not "exception intervention") | `CollaborationTimeoutConfigPanel`, dashboard | Required | Not Started |
 
@@ -2080,3 +2080,17 @@ filter; backend `TemplateSummaryView.approvalSubState` + `TemplateViewMapper.toS
 `P21-T08-approver-journey.spec.ts` + `P21-T08-uiux-evidence.spec.ts`; `P21-T01b` updated; UIUX manifest
 `frontend/e2e/evidence/P21-T08-uiux-manifest.md` — **PASS**. Backend:
 `TemplateViewMapperTest` **8/8** BUILD SUCCESS. **Audit:** AUD-B03 **resolved**. Next **P21-T09**.
+
+#### Implementation status (2026-06-30) — P21-T09
+
+**Done.** `templateTeamLeadJourney.ts` (4 steps: `reviewLetterhead`, `reviewGoLiveRequest`, `runPreReleaseChecks`, `confirmGoLive`) +
+tests; `TemplateTeamLeadJourneyBlock.vue`; `roleJourneyDefinitions` cluster-② `GROUP_ADMIN` +
+`templateTeamLeadJourneySteps`; Dashboard team-lead `#journey-section` (PENDING_REVIEW master priority,
+PENDING_RELEASE work items); `TemplateDetailView` team-lead block when `publishTemplates &&
+PENDING_RELEASE` (author journey suppressed on same surface); publish gate / confirm go-live CTA handlers
+reuse existing lifecycle panel; i18n en+zh-CN `journey.roles.GROUP_ADMIN.*`; `demoPendingReleaseTemplateDetailPath`
+E2E helper.
+
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**451** Vitest); Playwright
+`P21-T09-team-lead-journey.spec.ts` **4/4** + `P21-T09-uiux-evidence.spec.ts` **1/1**; UIUX manifest
+`frontend/e2e/evidence/P21-T09-uiux-manifest.md` — **PASS**. Backend unchanged. Next **P21-T09a**.

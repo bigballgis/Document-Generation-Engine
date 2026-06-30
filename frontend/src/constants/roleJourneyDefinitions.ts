@@ -6,7 +6,7 @@ export interface RoleJourneyStep {
 
 export type ClusterOneRole = 'MASTER_DESIGNER' | 'TEMPLATE_AUTHOR' | 'TEMPLATE_TESTER'
 
-export type ClusterTwoRole = 'TEMPLATE_APPROVER'
+export type ClusterTwoRole = 'TEMPLATE_APPROVER' | 'GROUP_ADMIN'
 
 export type JourneyRole = ClusterOneRole | ClusterTwoRole
 
@@ -52,6 +52,13 @@ export const templateApproverJourneySteps: RoleJourneyStep[] = [
   clusterTwoStep('TEMPLATE_APPROVER', 'reviewRequest'),
   clusterTwoStep('TEMPLATE_APPROVER', 'reviewSubmission'),
   clusterTwoStep('TEMPLATE_APPROVER', 'recordDecision'),
+]
+
+export const templateTeamLeadJourneySteps: RoleJourneyStep[] = [
+  clusterTwoStep('GROUP_ADMIN', 'reviewLetterhead'),
+  clusterTwoStep('GROUP_ADMIN', 'reviewGoLiveRequest'),
+  clusterTwoStep('GROUP_ADMIN', 'runPreReleaseChecks'),
+  clusterTwoStep('GROUP_ADMIN', 'confirmGoLive'),
 ]
 
 export const ROLE_JOURNEY_DEFINITIONS: Record<ClusterOneRole, RoleJourneyStep[]> = {
@@ -125,3 +132,12 @@ export {
   shouldShowTemplateApproverJourney,
   templateApproverStepCtaKey,
 } from '@/utils/templateApproverJourney'
+
+export {
+  isPendingReleaseTemplate,
+  isPendingReviewMaster,
+  resolveTemplateTeamLeadDashboardJourneyIndex,
+  resolveTemplateTeamLeadJourneyIndex,
+  shouldShowTemplateTeamLeadJourney,
+  templateTeamLeadStepCtaKey,
+} from '@/utils/templateTeamLeadJourney'

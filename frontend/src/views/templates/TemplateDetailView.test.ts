@@ -96,6 +96,8 @@ describe('TemplateDetailView', () => {
         stubs: {
           TemplateAuthorJourneyBlock: true,
           TemplateTesterJourneyBlock: true,
+          TemplateApproverJourneyBlock: true,
+          TemplateTeamLeadJourneyBlock: true,
           TemplateWorkflowBanner: true,
           TemplateDetailOverviewTab: true,
           TemplateDetailLifecycleTab: true,
@@ -137,5 +139,44 @@ describe('TemplateDetailView', () => {
     expect(routerReplace).toHaveBeenCalledWith({
       query: { queue: 'REMEDIATION', tab: 'lifecycle' },
     })
+  })
+
+  it('shows team-lead journey block for GROUP_ADMIN on PENDING_RELEASE template', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      session: {
+        username: '10000002',
+        displayName: 'Group Admin',
+        email: 'admin@example.com',
+        authSource: 'LOCAL',
+        roles: ['GROUP_ADMIN'],
+        authorizedGroupCodes: ['RETAIL'],
+        defaultRoute: 'route.dashboard-home',
+        visibleRoutes: ['route.dashboard-home', 'route.template-management'],
+        expiresAt: '2099-01-01T00:00:00Z',
+        capabilities: {
+          publishTemplates: true,
+          reviewMasters: true,
+        },
+      },
+    })
+
+    vi.mocked(templatesApi.getTemplate).mockResolvedValue({
+      ...makeTemplate('tpl-b', 'Pending Release Template'),
+      lifecycleStatus: 'PENDING_RELEASE',
+      releaseVersion: '1.0.0',
+    } as never)
+    vi.mocked(templatesApi.fetchPublishGate).mockResolvedValue({
+      ready: true,
+      items: [],
+    } as never)
+    vi.mocked(templatesApi.getTemplateCoverage).mockResolvedValue({} as never)
+    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({} as never)
+    vi.mocked(templatesApi.fetchReleaseVersions).mockResolvedValue([])
+
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(wrapper.findComponent({ name: 'TemplateTeamLeadJourneyBlock' }).exists()).toBe(true)
   })
 })

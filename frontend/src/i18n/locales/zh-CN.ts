@@ -1197,6 +1197,34 @@ export default {
           },
         },
       },
+      GROUP_ADMIN: {
+        title: '组长上线确认流程',
+        empty: {
+          guidance: '从任务列表打开母版审核或上线确认任务，然后按下方步骤推进。',
+        },
+        steps: {
+          reviewLetterhead: {
+            label: '审核母版',
+            guidance: '审阅等待您确认的已上传母版。',
+            cta: '审核母版',
+          },
+          reviewGoLiveRequest: {
+            label: '查看上线申请',
+            guidance: '打开已审批模板并查看为何可以上线。',
+            cta: '查看上线申请',
+          },
+          runPreReleaseChecks: {
+            label: '上线前检查',
+            guidance: '查看上线前检查项并在上线前处理待办问题。',
+            cta: '查看上线前检查',
+          },
+          confirmGoLive: {
+            label: '确认上线',
+            guidance: '确认发布摘要并将模板上架。',
+            cta: '确认上线',
+          },
+        },
+      },
     },
   },
   identity: {
