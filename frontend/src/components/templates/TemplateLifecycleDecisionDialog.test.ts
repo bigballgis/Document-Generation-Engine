@@ -5,6 +5,7 @@ import ElementPlus from 'element-plus'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import TemplateLifecycleDecisionDialog from '@/components/templates/TemplateLifecycleDecisionDialog.vue'
 import en from '@/i18n/locales/en'
+import { useSessionStore } from '@/stores/session'
 
 describe('TemplateLifecycleDecisionDialog', () => {
   let pinia: Pinia
@@ -18,7 +19,30 @@ describe('TemplateLifecycleDecisionDialog', () => {
     document.body.innerHTML = ''
   })
 
-  function mountDialog(mode: 'test-fail' | 'test-pass' | 'approval-reject' | 'approval-approve' = 'test-fail') {
+  function patchSessionRoles(roles: string[]) {
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      accessToken: 'token',
+      session: {
+        username: '10000002',
+        displayName: 'Admin',
+        email: 'admin@example.com',
+        authSource: 'LOCAL',
+        roles,
+        authorizedGroupCodes: ['RETAIL'],
+        defaultRoute: 'route.dashboard-home',
+        visibleRoutes: ['route.dashboard-home'],
+        expiresAt: '2099-01-01T00:00:00Z',
+      },
+    })
+  }
+
+  function mountDialog(
+    mode: 'test-fail' | 'test-pass' | 'approval-reject' | 'approval-approve' = 'test-fail',
+    roles: string[] = ['TEMPLATE_TESTER'],
+  ) {
+    patchSessionRoles(roles)
+
     const i18n = createI18n({
       legacy: false,
       locale: 'en',
@@ -144,6 +168,34 @@ describe('TemplateLifecycleDecisionDialog', () => {
         .find((button) => button.text().includes('Submit decision'))
         ?.attributes('disabled'),
     ).toBeUndefined()
+  })
+
+  it('shows confirm-on-behalf block for GROUP_ADMIN on test pass', async () => {
+    const wrapper = mountDialog('test-pass', ['GROUP_ADMIN'])
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Confirm on behalf')
+    expect(wrapper.text()).not.toContain('Record exception intervention')
+  })
+
+  it('shows confirm-on-behalf block for GLOBAL_ADMIN on test pass and approval approve', async () => {
+    const testPassWrapper = mountDialog('test-pass', ['GLOBAL_ADMIN'])
+    await flushPromises()
+    expect(testPassWrapper.text()).toContain('Confirm on behalf')
+
+    testPassWrapper.unmount()
+    document.body.innerHTML = ''
+
+    const approvalWrapper = mountDialog('approval-approve', ['GLOBAL_ADMIN'])
+    await flushPromises()
+    expect(approvalWrapper.text()).toContain('Confirm on behalf')
+  })
+
+  it('hides confirm-on-behalf block for non-admin roles on test pass', async () => {
+    const wrapper = mountDialog('test-pass', ['TEMPLATE_TESTER'])
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('Confirm on behalf')
   })
 
   it('keeps reject submit disabled until remediation link is provided', async () => {

@@ -1,15 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { createI18n } from 'vue-i18n'
+import ElementPlus from 'element-plus'
 import CollaborationTimeoutConfigPanel from '@/components/collaboration/CollaborationTimeoutConfigPanel.vue'
 import * as collaborationApi from '@/api/collaboration'
 import { useSessionStore } from '@/stores/session'
-
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: (key: string) => key,
-  }),
-}))
+import en from '@/i18n/locales/en'
 
 vi.mock('@/api/collaboration', () => ({
   getCollaborationTimeoutConfig: vi.fn(),
@@ -44,6 +41,10 @@ describe('CollaborationTimeoutConfigPanel', () => {
 
     const wrapper = mount(CollaborationTimeoutConfigPanel, {
       global: {
+        plugins: [
+          createI18n({ legacy: false, locale: 'en', messages: { en } }),
+          ElementPlus,
+        ],
         stubs: {
           ElCard: { template: '<div class="timeout-card"><slot /></div>' },
           ElButton: { template: '<button><slot /></button>' },
@@ -61,7 +62,12 @@ describe('CollaborationTimeoutConfigPanel', () => {
 
     expect(collaborationApi.getCollaborationTimeoutConfig).toHaveBeenCalled()
     expect(wrapper.find('.timeout-card').exists()).toBe(true)
-    expect(wrapper.text()).toContain('collaboration.timeoutConfig.title')
+    expect(wrapper.text()).toContain('Reminder timing')
+  })
+
+  it('uses business-friendly save success copy', () => {
+    expect(en.collaboration.timeoutConfig.saveSuccess).toBe('Reminder timing saved.')
+    expect(en.collaboration.timeoutConfig.saveSuccess).not.toMatch(/threshold/i)
   })
 
   it('does not render for users without maintain permission', async () => {
@@ -75,6 +81,10 @@ describe('CollaborationTimeoutConfigPanel', () => {
 
     const wrapper = mount(CollaborationTimeoutConfigPanel, {
       global: {
+        plugins: [
+          createI18n({ legacy: false, locale: 'en', messages: { en } }),
+          ElementPlus,
+        ],
         stubs: {
           ElCard: { template: '<div class="timeout-card"><slot /></div>' },
         },

@@ -55,7 +55,11 @@ const visible = computed({
   set: (value: boolean) => emit('update:modelValue', value),
 })
 
-const isGroupAdmin = computed(() => context.value.roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN))
+const canConfirmOnBehalf = computed(
+  () =>
+    context.value.roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN) ||
+    context.value.roles.includes(MANAGEMENT_ROLES.GLOBAL_ADMIN),
+)
 const isNegativeMode = computed(
   () => props.mode === 'test-fail' || props.mode === 'approval-reject',
 )
@@ -330,7 +334,7 @@ async function submitForm() {
         </el-form-item>
       </template>
 
-      <template v-if="(isTestPassMode || isApprovalPassMode) && isGroupAdmin">
+      <template v-if="(isTestPassMode || isApprovalPassMode) && canConfirmOnBehalf">
         <el-divider />
         <p class="decision-intro">{{ t('templates.lifecycle.decisionForm.exceptionIntro') }}</p>
         <el-form-item>

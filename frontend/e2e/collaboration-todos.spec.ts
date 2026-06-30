@@ -142,12 +142,12 @@ test.describe('P14-T02 collaboration to-dos', () => {
 
     const testThresholdInput = timeoutPanel
       .locator('.el-form-item')
-      .filter({ hasText: /testing threshold/i })
+      .filter({ hasText: /testing reminder after/i })
       .locator('.el-input-number input')
     await testThresholdInput.fill(String(uniqueHours))
-    await timeoutPanel.getByRole('button', { name: /save thresholds/i }).click()
+    await timeoutPanel.getByRole('button', { name: /save reminder timing/i }).click()
 
-    await expect(page.locator('.el-message').getByText(/timeout thresholds saved/i)).toBeVisible()
+    await expect(page.locator('.el-message').getByText(/reminder timing saved/i)).toBeVisible()
 
     const saved = await getCollaborationTimeoutConfig(request, E2E_ADMIN)
     expect(saved.testThresholdHours).toBe(uniqueHours)

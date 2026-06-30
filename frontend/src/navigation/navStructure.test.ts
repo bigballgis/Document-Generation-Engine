@@ -405,5 +405,34 @@ describe('navStructure', () => {
       expect(zhCN.apiPolicy.home.title).toBe('API 接入管理')
       expect(zhCN.templates.policy.credentialsTitle).toBe('接入账号')
     })
+
+    it('passes forbidden L1 token grep on reminder timing + confirm-on-behalf copy (P21-T09b)', () => {
+      const reminderExceptionL1Values = [
+        en.collaboration.timeoutConfig.title,
+        en.collaboration.timeoutConfig.description,
+        en.collaboration.timeoutConfig.save,
+        en.collaboration.timeoutConfig.saveSuccess,
+        en.collaboration.timeoutConfig.testThresholdHours,
+        en.collaboration.timeoutConfig.approvalThresholdHours,
+        en.collaboration.timeoutConfig.pendingReleaseThresholdHours,
+        en.collaboration.timeoutConfig.remediationThresholdHours,
+        en.collaboration.timeoutConfig.error.load,
+        en.collaboration.timeoutConfig.error.save,
+        en.collaboration.workItem.trigger.TIMEOUT_ESCALATION.description,
+        en.templates.lifecycle.decisionForm.exceptionIntro,
+        en.templates.lifecycle.decisionForm.exceptionIntervention,
+        en.templates.lifecycle.decisionForm.exceptionReason,
+        en.templates.lifecycle.decisionForm.exceptionSecondaryConfirm,
+      ]
+
+      for (const value of reminderExceptionL1Values) {
+        expect(value).not.toMatch(forbiddenPattern)
+        expect(value.toLowerCase()).not.toMatch(/\bescalation\b/)
+      }
+
+      expect(en.collaboration.timeoutConfig.saveSuccess).toBe('Reminder timing saved.')
+      expect(en.templates.lifecycle.decisionForm.exceptionIntervention).toBe('Confirm on behalf')
+      expect(zhCN.templates.lifecycle.decisionForm.exceptionIntervention).toBe('代为确认')
+    })
   })
 })
