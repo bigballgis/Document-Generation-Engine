@@ -10,7 +10,9 @@ export type ClusterTwoRole = 'TEMPLATE_APPROVER' | 'GROUP_ADMIN'
 
 export type ClusterThreeRole = 'GLOBAL_ADMIN'
 
-export type JourneyRole = ClusterOneRole | ClusterTwoRole | ClusterThreeRole
+export type ClusterFourRole = 'AUDIT_ADMIN'
+
+export type JourneyRole = ClusterOneRole | ClusterTwoRole | ClusterThreeRole | ClusterFourRole
 
 const ROLE_PREFIX = 'journey.roles'
 
@@ -77,6 +79,21 @@ export const globalAdminJourneySteps: RoleJourneyStep[] = [
   clusterThreeStep('GLOBAL_ADMIN', 'setReminderDefaults'),
   clusterThreeStep('GLOBAL_ADMIN', 'monitorOverdue'),
   clusterThreeStep('GLOBAL_ADMIN', 'reviewAllTodos'),
+]
+
+function clusterFourStep(role: ClusterFourRole, id: string): RoleJourneyStep {
+  return {
+    id,
+    labelKey: `${ROLE_PREFIX}.${role}.steps.${id}.label`,
+  }
+}
+
+export const auditAdminJourneySteps: RoleJourneyStep[] = [
+  clusterFourStep('AUDIT_ADMIN', 'openActivityLog'),
+  clusterFourStep('AUDIT_ADMIN', 'searchAndFilter'),
+  clusterFourStep('AUDIT_ADMIN', 'reviewEntries'),
+  clusterFourStep('AUDIT_ADMIN', 'exportRecords'),
+  clusterFourStep('AUDIT_ADMIN', 'viewOnlyMode'),
 ]
 
 export const ROLE_JOURNEY_DEFINITIONS: Record<ClusterOneRole, RoleJourneyStep[]> = {
@@ -165,3 +182,9 @@ export {
   resolveGlobalAdminDashboardJourneyIndex,
   shouldShowGlobalAdminJourney,
 } from '@/utils/globalAdminJourney'
+
+export {
+  auditAdminStepCtaKey,
+  resolveAuditAdminJourneyIndex,
+  shouldShowAuditAdminJourney,
+} from '@/utils/auditAdminJourney'

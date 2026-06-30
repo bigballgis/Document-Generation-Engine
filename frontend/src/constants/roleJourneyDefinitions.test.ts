@@ -3,6 +3,7 @@ import { createI18n } from 'vue-i18n'
 import en from '@/i18n/locales/en'
 import zhCn from '@/i18n/locales/zh-CN'
 import {
+  auditAdminJourneySteps,
   globalAdminJourneySteps,
   masterDesignerJourneySteps,
   resolveClusterOneJourney,
@@ -69,6 +70,17 @@ describe('roleJourneyDefinitions', () => {
       'setReminderDefaults',
       'monitorOverdue',
       'reviewAllTodos',
+    ])
+  })
+
+  it('auditAdminJourneySteps has exactly 5 steps in Spec B order', () => {
+    expect(auditAdminJourneySteps).toHaveLength(5)
+    expect(auditAdminJourneySteps.map((step) => step.id)).toEqual([
+      'openActivityLog',
+      'searchAndFilter',
+      'reviewEntries',
+      'exportRecords',
+      'viewOnlyMode',
     ])
   })
 
@@ -154,6 +166,24 @@ describe('roleJourneyDefinitions', () => {
 
   it('GLOBAL_ADMIN step label en values avoid forbidden L1 nouns', () => {
     for (const step of globalAdminJourneySteps) {
+      const value = tEn(step.labelKey).toLowerCase()
+      for (const noun of FORBIDDEN_L1_NOUNS) {
+        expect(value).not.toMatch(new RegExp(`\\b${noun}\\b`))
+      }
+    }
+  })
+
+  it('resolves non-empty en and zh-CN strings for every AUDIT_ADMIN step labelKey', () => {
+    for (const step of auditAdminJourneySteps) {
+      expect(tEn(step.labelKey)).not.toBe(step.labelKey)
+      expect(tEn(step.labelKey).length).toBeGreaterThan(0)
+      expect(tZh(step.labelKey)).not.toBe(step.labelKey)
+      expect(tZh(step.labelKey).length).toBeGreaterThan(0)
+    }
+  })
+
+  it('AUDIT_ADMIN step label en values avoid forbidden L1 nouns', () => {
+    for (const step of auditAdminJourneySteps) {
       const value = tEn(step.labelKey).toLowerCase()
       for (const noun of FORBIDDEN_L1_NOUNS) {
         expect(value).not.toMatch(new RegExp(`\\b${noun}\\b`))

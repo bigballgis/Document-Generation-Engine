@@ -5,24 +5,67 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import RoleJourneyTimeline from '@/components/journey/RoleJourneyTimeline.vue'
+import {
+  auditAdminJourneySteps,
+  roleJourneyTitleKey,
+} from '@/constants/roleJourneyDefinitions'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { isGroupScopedAuditRole } from '@/auth/roles'
 import { useAuditStore } from '@/stores/audit'
+import { useSessionStore } from '@/stores/session'
 import type { LifecycleAuditEvent, ManagementAuditEvent } from '@/types/audit'
 import type { TemplateLifecycleStatus } from '@/types/template'
 import { downloadJsonExport } from '@/utils/downloadExport'
+import {
+  resolveAuditAdminJourneyIndex,
+  shouldShowAuditAdminJourney,
+} from '@/utils/auditAdminJourney'
+import { formatAuditEventType } from '@/utils/auditEventLabels'
 import { validateGroupAdminAuditFilters } from '@/views/audit/auditFilterValidation'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const { t, te } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
 const auditStore = useAuditStore()
+const sessionStore = useSessionStore()
 
 const activeTab = ref<'management' | 'lifecycle'>('management')
 const loadFailed = ref(false)
 const filterValidationKey = ref<string | null>(null)
+const exportJustCompleted = ref(false)
+
+const showAuditAdminJourney = computed(() =>
+  shouldShowAuditAdminJourney({ roles: sessionStore.session?.roles ?? [] }),
+)
+
+const auditAdminJourneyResolution = computed(() => {
+  if (!showAuditAdminJourney.value) {
+    return null
+  }
+  return resolveAuditAdminJourneyIndex({
+    filters: auditStore.filters,
+    managementEventCount: auditStore.managementEvents.length,
+    lifecycleEventCount: auditStore.lifecycleEvents.length,
+    exportInProgress: auditStore.exporting,
+    exportJustCompleted: exportJustCompleted.value,
+  })
+})
+
+const auditJourneyCurrentStepIndex = computed(
+  () => auditAdminJourneyResolution.value?.currentStepIndex ?? null,
+)
+
+const auditJourneyGuidanceKey = computed(
+  () => auditAdminJourneyResolution.value?.guidanceKey,
+)
+
+const eventLabelTranslator = computed(() => ({
+  translate: t,
+  hasKey: te,
+}))
 
 const loadErrorMessageKey = computed(() => {
   if (auditStore.lastErrorMessageKey) {
@@ -97,6 +140,17 @@ function formatLifecycleState(state?: string) {
 
 function formatDate(value: string) {
   return formatDateTime(value)
+}
+
+function formatEventType(eventType?: string) {
+  if (!eventType) {
+    return '—'
+  }
+  return formatAuditEventType(eventType, eventLabelTranslator.value)
+}
+
+function formatActor(value?: string) {
+  return value?.trim() ? value : '—'
 }
 
 function exportScopeSummary(): string {
@@ -204,6 +258,7 @@ async function handleExport() {
       t(isManagement ? 'audit.export.managementFilename' : 'audit.export.lifecycleFilename'),
       result,
     )
+    exportJustCompleted.value = true
     ElMessage.success(
       t(isManagement ? 'audit.export.success' : 'audit.export.lifecycleSuccess'),
     )
@@ -215,7 +270,21 @@ async function handleExport() {
   }
 }
 
+watch(
+  () => auditStore.filters,
+  () => {
+    exportJustCompleted.value = false
+  },
+  { deep: true },
+)
+
+const sortManagementByEventType = rowSortMethod<ManagementAuditEvent>((row) =>
+  formatEventType(row.eventType),
+)
 const sortManagementByEventAt = rowSortMethod<ManagementAuditEvent>((row) => row.eventAt)
+const sortLifecycleByEventType = rowSortMethod<LifecycleAuditEvent>((row) =>
+  formatEventType(row.eventType),
+)
 const sortLifecycleByEventAt = rowSortMethod<LifecycleAuditEvent>((row) => row.eventAt)
 const sortLifecycleFromState = rowSortMethod<LifecycleAuditEvent>((row) =>
   formatLifecycleState(row.fromState),
@@ -227,6 +296,15 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
 
 <template>
   <div class="audit-page">
+    <section v-if="showAuditAdminJourney" id="journey-section" class="journey-section">
+      <RoleJourneyTimeline
+        :steps="auditAdminJourneySteps"
+        :current-step-index="auditJourneyCurrentStepIndex"
+        :guidance-key="auditJourneyGuidanceKey"
+        :title-key="roleJourneyTitleKey('AUDIT_ADMIN')"
+      />
+    </section>
+
     <header class="page-header">
       <div>
         <h1>{{ t('audit.title') }}</h1>
@@ -240,6 +318,16 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
         {{ t('audit.export.action') }}
       </el-button>
     </header>
+
+    <el-alert
+      v-if="showAuditAdminJourney"
+      class="page-alert view-only-banner"
+      type="info"
+      :title="t('audit.viewOnly.banner')"
+      :description="t('audit.viewOnly.description')"
+      show-icon
+      :closable="false"
+    />
 
     <el-alert
       v-if="filterValidationKey"
@@ -321,6 +409,41 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
             <template #empty>
               <el-empty :description="t('audit.empty.management')" />
             </template>
+            <el-table-column prop="actorSummary" sortable min-width="160">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.actorSummary')"
+                  v-model="managementColumnFilters.actorSummary"
+                />
+              </template>
+              <template #default="{ row }: { row: ManagementAuditEvent }">
+                {{ formatActor(row.actorSummary) }}
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="eventType"
+              sortable
+              :sort-method="sortManagementByEventType"
+              min-width="180"
+            >
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.eventType')"
+                  v-model="managementColumnFilters.eventType"
+                />
+              </template>
+              <template #default="{ row }: { row: ManagementAuditEvent }">
+                {{ formatEventType(row.eventType) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="templateId" sortable min-width="200">
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.templateId')"
+                  v-model="managementColumnFilters.templateId"
+                />
+              </template>
+            </el-table-column>
             <el-table-column
               sortable
               :sort-method="sortManagementByEventAt"
@@ -334,30 +457,6 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
               </template>
               <template #default="{ row }: { row: ManagementAuditEvent }">
                 {{ formatDate(row.eventAt) }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="eventType" sortable min-width="160">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('audit.columns.eventType')"
-                  v-model="managementColumnFilters.eventType"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column prop="templateId" sortable min-width="200">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('audit.columns.templateId')"
-                  v-model="managementColumnFilters.templateId"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column prop="actorSummary" sortable min-width="160">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('audit.columns.actorSummary')"
-                  v-model="managementColumnFilters.actorSummary"
-                />
               </template>
             </el-table-column>
             <el-table-column prop="statusSummary" sortable min-width="160">
@@ -392,27 +491,30 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
             <template #empty>
               <el-empty :description="t('audit.empty.lifecycle')" />
             </template>
-            <el-table-column
-              sortable
-              :sort-method="sortLifecycleByEventAt"
-              min-width="180"
-            >
+            <el-table-column prop="actorId" sortable min-width="140">
               <template #header>
                 <TableColumnHeader
-                  :label="t('audit.columns.eventAt')"
-                  v-model="lifecycleColumnFilters.eventAt"
+                  :label="t('audit.columns.actorSummary')"
                 />
               </template>
               <template #default="{ row }: { row: LifecycleAuditEvent }">
-                {{ formatDate(row.eventAt) }}
+                {{ formatActor(row.actorId) }}
               </template>
             </el-table-column>
-            <el-table-column prop="eventType" sortable min-width="160">
+            <el-table-column
+              prop="eventType"
+              sortable
+              :sort-method="sortLifecycleByEventType"
+              min-width="180"
+            >
               <template #header>
                 <TableColumnHeader
                   :label="t('audit.columns.eventType')"
                   v-model="lifecycleColumnFilters.eventType"
                 />
+              </template>
+              <template #default="{ row }: { row: LifecycleAuditEvent }">
+                {{ formatEventType(row.eventType) }}
               </template>
             </el-table-column>
             <el-table-column prop="templateId" sortable min-width="200">
@@ -459,6 +561,21 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
                   :label="t('audit.columns.summary')"
                   v-model="lifecycleColumnFilters.summary"
                 />
+              </template>
+            </el-table-column>
+            <el-table-column
+              sortable
+              :sort-method="sortLifecycleByEventAt"
+              min-width="180"
+            >
+              <template #header>
+                <TableColumnHeader
+                  :label="t('audit.columns.eventAt')"
+                  v-model="lifecycleColumnFilters.eventAt"
+                />
+              </template>
+              <template #default="{ row }: { row: LifecycleAuditEvent }">
+                {{ formatDate(row.eventAt) }}
               </template>
             </el-table-column>
           </AppDataTable>
@@ -528,5 +645,13 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
 
 .table-toolbar {
   margin-bottom: 0.75rem;
+}
+
+.journey-section {
+  margin-bottom: 1.5rem;
+}
+
+.view-only-banner {
+  margin-bottom: 1rem;
 }
 </style>

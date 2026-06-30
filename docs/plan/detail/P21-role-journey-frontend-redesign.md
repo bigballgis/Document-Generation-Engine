@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **sub-phase C cluster ③ Done** — T10; **P21-T10 Done** 2026-06-30 — 6-step bank-wide global admin journey + DashboardView journey gating fix; next **P21-T11 Not Started** — cluster ④ Audit) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **sub-phase D cluster ④ Done** — T11; **P21-T11 Done** 2026-06-30 — audit-admin 5-step journey + AuditConsole view-only + business columns + event-type labels; **all four role clusters complete**; phase **wrap-up** — next cross-cutting **P21-X03** (P0 permission fail-closed) or **P21-X01/X05/X06** per §11.5) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -198,7 +198,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 
 | ID | Task | Key files | Behavior spec | Status |
 | --- | --- | --- | --- | --- |
-| P21-T11 | Activity-log-first landing, query/export journey, read-only "view only, cannot act" model, business-named columns (who / did what / on which template / when); verify new actions (go-live / approval / confirm-on-behalf / overdue) are audit-readable | audit views, `en.ts`, `zh-CN.ts` | Required | Not Started |
+| P21-T11 | Activity-log-first landing, query/export journey, read-only "view only, cannot act" model, business-named columns (who / did what / on which template / when); verify new actions (go-live / approval / confirm-on-behalf / overdue) are audit-readable | audit views, `en.ts`, `zh-CN.ts` | Required | Done (2026-06-30) |
 
 ### Cross-cutting
 
@@ -2117,4 +2117,12 @@ E2E helper.
 
 **Deliverables:** `globalAdminJourney.ts` (+ Vitest), `globalAdminJourneySteps` in `roleJourneyDefinitions.ts` (+ test), `DashboardView.vue` journey resolution (global-admin checked before team-lead); i18n `journey.roles.GLOBAL_ADMIN.*` + identity L1 values in `en.ts` / `zh-CN.ts`; Playwright `P21-T10-global-admin-journey.spec.ts` **4/4**.
 
-**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**478** Vitest); Playwright P21-T10 **4/4**. Backend unchanged. **Sub-phase C cluster ③ complete** (T10). Next **P21-T11** (cluster ④ Audit).
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**478** Vitest); Playwright P21-T10 **4/4**. Backend unchanged. **Sub-phase C cluster ③ complete** (T10). Next **P21-T11** (now Done).
+
+### P21-T11 completion (2026-06-30)
+
+**Scope:** Cluster ④ Audit — activity-log-first landing on `AuditConsoleView`; 5-step audit-admin journey; read-only "view only, cannot act" banner; business-named table columns (who / did what / on which template / when); business-readable audit event type labels.
+
+**Deliverables:** `auditAdminJourney.ts` (+ Vitest), `auditAdminJourneySteps` in `roleJourneyDefinitions.ts` (+ test); `AuditConsoleView.vue` journey timeline + view-only model + business column headers; `auditEventLabels.ts` (+ Vitest); i18n `journey.roles.AUDIT_ADMIN.*` + `audit.*` L1 values in `en.ts` / `zh-CN.ts`; Playwright `P21-T11-audit-journey.spec.ts` **3/3**.
+
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**498** Vitest); Playwright P21-T11 **3/3**. Backend unchanged. **Sub-phase D cluster ④ complete** (T11); **all four role clusters (①→④) complete**. P21 phase **wrap-up** — next cross-cutting **P21-X03** (permission single-source/fail-closed, P0) or **P21-X01** / **P21-X05** / **P21-X06** per §11.5 remediation order; phase exit criteria (§7) still open on X03–X06.

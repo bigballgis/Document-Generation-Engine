@@ -521,11 +521,17 @@ export default {
     },
   },
   audit: {
-    title: 'Audit console',
-    description: 'Review management and lifecycle audit events within your authorized scope.',
+    title: 'Activity log',
+    description:
+      'Search and review who did what on which template and when. Export records for your authorized scope.',
+    viewOnly: {
+      banner: 'View only — no actions',
+      description:
+        'You can search, review, and export activity records from this page. You cannot change templates, users, or workflow decisions here.',
+    },
     tabs: {
-      management: 'Management events',
-      lifecycle: 'Lifecycle events',
+      management: 'Management activity',
+      lifecycle: 'Template workflow activity',
     },
     filters: {
       eventType: 'Event type',
@@ -541,18 +547,28 @@ export default {
       reset: 'Reset filters',
     },
     columns: {
-      eventAt: 'Event time',
-      eventType: 'Event type',
-      templateId: 'Template ID',
-      actorSummary: 'Actor',
+      eventAt: 'When',
+      eventType: 'What happened',
+      templateId: 'Template',
+      actorSummary: 'Who',
       statusSummary: 'Status',
       fromState: 'From state',
       toState: 'To state',
-      summary: 'Summary',
+      summary: 'What happened',
+    },
+    eventTypes: {
+      PUBLISH: 'Template go-live',
+      RECORD_APPROVAL_DECISION: 'Approval decision recorded',
+      SUBMIT_FOR_APPROVAL: 'Submitted for approval',
+      RECORD_TEST_DECISION: 'Test decision recorded',
+      SUBMIT_FOR_TEST: 'Submitted for testing',
+      COLLABORATION_TIMEOUT_ESCALATION: 'Overdue reminder sent',
     },
     empty: {
-      management: 'No management audit events match the current filters.',
-      lifecycle: 'No lifecycle audit events match the current filters.',
+      management:
+        'No management activity matches the current filters. This page is view-only — you can search and export records but cannot change templates or users here.',
+      lifecycle:
+        'No template workflow activity matches the current filters. This page is view-only — you can search and export records but cannot change templates or users here.',
     },
     export: {
       action: 'Export',
@@ -1778,6 +1794,40 @@ export default {
             label: 'Review all to-dos',
             guidance: 'Work through open items across queues from the bank-wide task hub.',
             cta: 'Review task hub',
+          },
+        },
+      },
+      AUDIT_ADMIN: {
+        title: 'Activity log workflow',
+        empty: {
+          guidance:
+            'Open the activity log below, apply filters to find records, and export when needed. This page is view-only — you cannot change templates or users here.',
+        },
+        steps: {
+          openActivityLog: {
+            label: 'Open activity log',
+            guidance: 'Review management and template workflow activity within your authorized scope.',
+            cta: 'Open activity log',
+          },
+          searchAndFilter: {
+            label: 'Search and filter records',
+            guidance: 'Narrow results by event type, date range, or template.',
+            cta: 'Apply filters',
+          },
+          reviewEntries: {
+            label: 'Review who did what',
+            guidance: 'Read who performed each action, what happened, on which template, and when.',
+            cta: 'Review entries',
+          },
+          exportRecords: {
+            label: 'Export records',
+            guidance: 'Download matching activity records for offline review or compliance.',
+            cta: 'Export records',
+          },
+          viewOnlyMode: {
+            label: 'View only — no actions',
+            guidance: 'You can search and export from this page but cannot modify templates, users, or decisions.',
+            cta: 'View activity log',
           },
         },
       },

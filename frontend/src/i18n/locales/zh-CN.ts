@@ -514,11 +514,16 @@ export default {
     },
   },
   audit: {
-    title: '审计控制台',
-    description: '在授权范围内查看管理与生命周期审计事件。',
+    title: '操作记录',
+    description: '查询并查看谁在何时对哪个模板做了什么，可在授权范围内导出记录。',
+    viewOnly: {
+      banner: '仅查看 — 不可操作',
+      description:
+        '您可在此页搜索、查看并导出活动记录，但无法在此修改模板、用户或工作流决策。',
+    },
     tabs: {
-      management: '管理事件',
-      lifecycle: '生命周期事件',
+      management: '管理活动',
+      lifecycle: '模板工作流活动',
     },
     filters: {
       eventType: '事件类型',
@@ -534,18 +539,28 @@ export default {
       reset: '重置筛选',
     },
     columns: {
-      eventAt: '事件时间',
-      eventType: '事件类型',
-      templateId: '模板 ID',
+      eventAt: '时间',
+      eventType: '发生了什么',
+      templateId: '模板',
       actorSummary: '操作人',
       statusSummary: '状态',
       fromState: '原状态',
       toState: '目标状态',
-      summary: '摘要',
+      summary: '发生了什么',
+    },
+    eventTypes: {
+      PUBLISH: '模板上架',
+      RECORD_APPROVAL_DECISION: '已记录审批决定',
+      SUBMIT_FOR_APPROVAL: '已提交审批',
+      RECORD_TEST_DECISION: '已记录测试决定',
+      SUBMIT_FOR_TEST: '已提交测试',
+      COLLABORATION_TIMEOUT_ESCALATION: '已发送逾期提醒',
     },
     empty: {
-      management: '没有符合当前筛选条件的管理审计事件。',
-      lifecycle: '没有符合当前筛选条件的生命周期审计事件。',
+      management:
+        '没有符合当前筛选条件的管理活动。本页仅可查看 — 您可搜索并导出记录，但无法在此修改模板或用户。',
+      lifecycle:
+        '没有符合当前筛选条件的模板工作流活动。本页仅可查看 — 您可搜索并导出记录，但无法在此修改模板或用户。',
     },
     export: {
       action: '导出',
@@ -1293,6 +1308,40 @@ export default {
             label: '查看全部待办',
             guidance: '在全行任务中心处理各队列中的待办事项。',
             cta: '查看任务中心',
+          },
+        },
+      },
+      AUDIT_ADMIN: {
+        title: '操作记录工作流程',
+        empty: {
+          guidance:
+            '在下方打开操作记录，使用筛选查找条目，需要时可导出。本页仅可查看 — 您无法在此修改模板或用户。',
+        },
+        steps: {
+          openActivityLog: {
+            label: '打开操作记录',
+            guidance: '在授权范围内查看管理与模板工作流活动。',
+            cta: '打开操作记录',
+          },
+          searchAndFilter: {
+            label: '搜索并筛选记录',
+            guidance: '按事件类型、时间范围或模板缩小结果范围。',
+            cta: '应用筛选',
+          },
+          reviewEntries: {
+            label: '查看谁做了什么',
+            guidance: '阅读每条记录的操作人、发生了什么、涉及哪个模板以及时间。',
+            cta: '查看条目',
+          },
+          exportRecords: {
+            label: '导出记录',
+            guidance: '下载匹配的活动记录，便于离线查阅或合规存档。',
+            cta: '导出记录',
+          },
+          viewOnlyMode: {
+            label: '仅查看 — 不可操作',
+            guidance: '您可在此搜索并导出，但无法修改模板、用户或决策。',
+            cta: '查看操作记录',
           },
         },
       },

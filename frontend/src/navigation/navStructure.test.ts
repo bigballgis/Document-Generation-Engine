@@ -333,6 +333,8 @@ describe('navStructure', () => {
       en.nav.routes.apiPolicy,
       en.nav.routes.masters,
       en.nav.routes.templateAuthoring,
+      en.audit.title,
+      en.audit.description,
       en.dashboard.title,
       en.dashboard.description,
       en.dashboard.stats.sectionDescription,

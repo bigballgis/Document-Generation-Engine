@@ -55,3 +55,7 @@ export async function loginAs(page: Page, credentials: { username: string; passw
 export async function loginAsGlobalAdmin(page: Page) {
   await loginAs(page, E2E_ADMIN)
 }
+
+export async function loginAsAuditAdmin(page: Page) {
+  await loginAs(page, E2E_AUDIT_ADMIN)
+}
