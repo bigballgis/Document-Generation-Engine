@@ -1413,6 +1413,44 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/collaboration-work-items:
+    get:
+      tags: [Collaboration, Admin]
+      operationId: listCollaborationWorkItems
+      summary: List collaboration work items for management queues
+      description: >-
+        Returns non-sensitive work-item summaries for the caller's authorized
+        groups. Optional `groupCode` narrows to one group; optional `queue`
+        filters by collaboration queue type. Requires
+        `viewCollaborationWorkItems` capability (fail-closed 403 otherwise).
+      parameters:
+        - name: groupCode
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 64
+        - name: queue
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/CollaborationWorkItemQueue'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Work-item summaries returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationWorkItemListResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/collaboration-timeout-config:
     get:
       tags: [Collaboration, Admin]
@@ -4394,6 +4432,70 @@ components:
     CollaborationTimeoutScopeType:
       type: string
       enum: [GLOBAL, GROUP]
+    CollaborationWorkItemQueue:
+      type: string
+      enum: [TEST, APPROVAL, REMEDIATION, PENDING_RELEASE, ESCALATION]
+    CollaborationWorkItemTriggerType:
+      type: string
+      enum:
+        - SUBMIT_FOR_TEST
+        - TEST_FAILURE_OR_RETURN_TO_DRAFT
+        - SUBMIT_FOR_APPROVAL
+        - APPROVAL_FAILURE_OR_RETURN_TO_DRAFT
+        - APPROVAL_PENDING_RELEASE
+        - TIMEOUT_ESCALATION
+    CollaborationWorkItemSummaryView:
+      type: object
+      additionalProperties: false
+      required:
+        - workItemId
+        - templateId
+        - templateName
+        - groupCode
+        - queue
+        - triggerType
+        - submitterUserId
+        - summaryText
+        - createdAt
+        - ageSeconds
+      properties:
+        workItemId:
+          type: string
+          format: uuid
+        templateId:
+          type: string
+          format: uuid
+        templateName:
+          type: string
+        groupCode:
+          type: string
+          maxLength: 64
+        queue:
+          $ref: '#/components/schemas/CollaborationWorkItemQueue'
+        triggerType:
+          $ref: '#/components/schemas/CollaborationWorkItemTriggerType'
+        submitterUserId:
+          type: string
+        summaryText:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        ageSeconds:
+          type: integer
+          format: int64
+          minimum: 0
+    CollaborationWorkItemListResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollaborationWorkItemSummaryView'
     CollaborationTimeoutConfigView:
       type: object
       additionalProperties: false

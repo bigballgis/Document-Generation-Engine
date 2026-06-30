@@ -24,6 +24,12 @@ const globalAdminCapabilities: ManagementCapabilities = {
   stopTemplates: true,
   restoreOrDeprecateTemplates: true,
   deleteTemplates: true,
+  exportTemplates: true,
+  viewCollaborationWorkItems: true,
+  maintainCollaborationTimeoutConfig: true,
+  authorContentModules: true,
+  decideContentModuleReviews: true,
+  manageContentModuleLifecycle: true,
   manageApiPolicy: true,
   readAudit: true,
 }
@@ -39,6 +45,11 @@ const testerCapabilities: ManagementCapabilities = {
   stopTemplates: false,
   restoreOrDeprecateTemplates: false,
   deleteTemplates: false,
+  exportTemplates: false,
+  maintainCollaborationTimeoutConfig: false,
+  authorContentModules: false,
+  decideContentModuleReviews: false,
+  manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
 }
@@ -47,18 +58,22 @@ const approverCapabilities: ManagementCapabilities = {
   ...testerCapabilities,
   decideTests: false,
   decideApprovals: true,
+  decideContentModuleReviews: true,
 }
 
 const authorCapabilities: ManagementCapabilities = {
   ...testerCapabilities,
   decideTests: false,
   authorTemplates: true,
+  exportTemplates: true,
+  authorContentModules: true,
 }
 
 const masterDesignerCapabilities: ManagementCapabilities = {
   ...testerCapabilities,
   decideTests: false,
   authorTemplates: true,
+  authorContentModules: true,
   manageMasters: true,
 }
 
@@ -207,6 +222,7 @@ describe('navStructure', () => {
         [dashboardRoute, ROUTE_KEYS.auditConsole],
         ['AUDIT_ADMIN'],
         {
+          ...globalAdminCapabilities,
           manageMasters: false,
           reviewMasters: false,
           authorTemplates: false,
@@ -216,6 +232,12 @@ describe('navStructure', () => {
           stopTemplates: false,
           restoreOrDeprecateTemplates: false,
           deleteTemplates: false,
+          exportTemplates: false,
+          viewCollaborationWorkItems: false,
+          maintainCollaborationTimeoutConfig: false,
+          authorContentModules: false,
+          decideContentModuleReviews: false,
+          manageContentModuleLifecycle: false,
           manageApiPolicy: false,
           readAudit: true,
         },

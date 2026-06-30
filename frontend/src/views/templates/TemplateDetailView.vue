@@ -99,6 +99,7 @@ const {
   deleteTemplates,
   exportTemplates,
   editTemplateMetadata,
+  context,
 } = useCapabilities()
 const { confirmAction } = useConfirmAction()
 
@@ -488,7 +489,7 @@ const teamLeadJourneyContext = computed((): TemplateTeamLeadJourneyContext | nul
 })
 
 async function loadAuthorRemediationWorkItems() {
-  if (!authorTemplates.value || !canViewCollaborationWorkItems(sessionStore.session?.roles ?? [])) {
+  if (!authorTemplates.value || !canViewCollaborationWorkItems(context.value)) {
     return
   }
   try {

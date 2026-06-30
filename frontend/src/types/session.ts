@@ -34,6 +34,12 @@ export interface ManagementCapabilities {
   stopTemplates: boolean
   restoreOrDeprecateTemplates: boolean
   deleteTemplates: boolean
+  exportTemplates: boolean
+  viewCollaborationWorkItems: boolean
+  maintainCollaborationTimeoutConfig: boolean
+  authorContentModules: boolean
+  decideContentModuleReviews: boolean
+  manageContentModuleLifecycle: boolean
   manageApiPolicy: boolean
   readAudit: boolean
 }

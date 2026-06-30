@@ -30,6 +30,12 @@ const globalAdminCapabilities: ManagementCapabilities = {
   stopTemplates: true,
   restoreOrDeprecateTemplates: true,
   deleteTemplates: true,
+  exportTemplates: true,
+  viewCollaborationWorkItems: true,
+  maintainCollaborationTimeoutConfig: true,
+  authorContentModules: true,
+  decideContentModuleReviews: true,
+  manageContentModuleLifecycle: true,
   manageApiPolicy: true,
   readAudit: true,
 }
@@ -44,6 +50,12 @@ const testerCapabilities: ManagementCapabilities = {
   stopTemplates: false,
   restoreOrDeprecateTemplates: false,
   deleteTemplates: false,
+  exportTemplates: false,
+  viewCollaborationWorkItems: true,
+  maintainCollaborationTimeoutConfig: false,
+  authorContentModules: false,
+  decideContentModuleReviews: false,
+  manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
 }
@@ -93,11 +105,20 @@ describe('management roles', () => {
     expect(canExportTemplates({ roles: ['TEMPLATE_TESTER'] })).toBe(false)
   })
 
-  it('denies export when authorTemplates true but role is not in export row (AUD-P05)', () => {
+  it('denies export when exportTemplates is false even if authorTemplates is true (AUD-P05)', () => {
     expect(
       canExportTemplates({
         roles: ['TEMPLATE_TESTER'],
-        capabilities: { ...testerCapabilities, authorTemplates: true },
+        capabilities: { ...testerCapabilities, authorTemplates: true, exportTemplates: false },
+      }),
+    ).toBe(false)
+  })
+
+  it('prefers exportTemplates capability when present', () => {
+    expect(
+      canExportTemplates({
+        roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR],
+        capabilities: { ...globalAdminCapabilities, exportTemplates: false, authorTemplates: true },
       }),
     ).toBe(false)
   })

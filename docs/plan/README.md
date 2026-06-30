@@ -7,7 +7,7 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Active formal phase: P21** (activated 2026-06-29; **P21-X03 Done** 2026-06-30; **all four role clusters complete**; phase **wrap-up** — next **P21-X01/X04/X05/X06**). P12 remains the deferred-enhancements
+**Active formal phase: P21** (activated 2026-06-29; **P21-X04 Done** 2026-06-30; **P21-X03 Done** 2026-06-30; **all four role clusters complete**; phase **wrap-up** — next **P21-X01/X05/X06**). P12 remains the deferred-enhancements
 catch-all (non-active). See [execution-sync-ledger.md](./execution-sync-ledger.md).
 
 ## Layer model
@@ -58,7 +58,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P18 | Structured authoring & rendering-fidelity engine | [detail/P18-structured-authoring-fidelity-engine.md](detail/P18-structured-authoring-fidelity-engine.md) | Done (2026-06-28; T01–T10) |
 | P19 | Template verifiability, publish gate & decision forms | [detail/P19-verifiability-publish-gate.md](detail/P19-verifiability-publish-gate.md) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | Done (2026-06-25) |
-| P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | In Progress (2026-06-29; clusters ①→④ Done; **P21-X03 Done**; wrap-up — next P21-X01/X04/X05/X06) |
+| P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | In Progress (2026-06-29; clusters ①→④ Done; **P21-X03 Done**; **P21-X04 Done**; wrap-up — next P21-X01/X05/X06) |
 
 ## First delivery target (thin vertical slice) — achieved
 
@@ -76,7 +76,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **Active phase: P21** — role-journey frontend redesign & business-friendly terminology
-(activated 2026-06-29; **P21-X03 Done** 2026-06-30 — permission fail-closed + unified route guard; **all four role clusters complete**; phase **wrap-up** — next **P21-X01/X04/X05/X06**) — see
+(activated 2026-06-29; **P21-X04 Done** 2026-06-30 — backend capability + route + OpenAPI; **P21-X03 Done** 2026-06-30 — permission fail-closed + unified route guard; **all four role clusters complete**; phase **wrap-up** — next **P21-X01/X05/X06**) — see
 [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md)
 
 **Open backlog (non-active):**

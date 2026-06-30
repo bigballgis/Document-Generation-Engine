@@ -94,9 +94,7 @@ const authorizedGroupsSummary = computed(() => {
   return groups.join(', ')
 })
 
-const canViewWorkItems = computed(() =>
-  canViewCollaborationWorkItems(sessionStore.session?.roles ?? []),
-)
+const canViewWorkItems = computed(() => canViewCollaborationWorkItems(context.value))
 
 const showTimeoutConfig = computed(() => canMaintainCollaborationTimeoutConfig(context.value))
 

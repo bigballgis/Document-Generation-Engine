@@ -7,6 +7,7 @@ public enum ManagementRoute {
     TEMPLATE_AUTHORING_HOME("route.template-authoring-home"),
     MASTER_MANAGEMENT("route.master-management"),
     TEMPLATE_MANAGEMENT("route.template-management"),
+    CONTENT_MODULE_MANAGEMENT("route.content-module-management"),
     TESTER_WORKBENCH("route.tester-workbench"),
     APPROVER_WORKBENCH("route.approver-workbench"),
     API_POLICY_MANAGEMENT("route.api-policy-management"),

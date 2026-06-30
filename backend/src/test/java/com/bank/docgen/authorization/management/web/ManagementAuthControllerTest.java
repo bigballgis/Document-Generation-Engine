@@ -122,7 +122,9 @@ class ManagementAuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.session.defaultRoute")
                         .value(ManagementRoute.DASHBOARD_HOME.routeKey()))
-                .andExpect(jsonPath("$.result.session.visibleRoutes.length()").value(2));
+                .andExpect(jsonPath("$.result.session.visibleRoutes.length()").value(3))
+                .andExpect(jsonPath("$.result.session.visibleRoutes[2]")
+                        .value(ManagementRoute.CONTENT_MODULE_MANAGEMENT.routeKey()));
     }
 
     private String loginAndGetToken(String username, String password) throws Exception {

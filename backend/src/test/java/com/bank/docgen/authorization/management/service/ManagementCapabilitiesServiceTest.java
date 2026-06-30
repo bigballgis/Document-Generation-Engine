@@ -25,6 +25,12 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.restoreOrDeprecateTemplates()).isTrue();
         assertThat(capabilities.manageApiPolicy()).isTrue();
         assertThat(capabilities.deleteTemplates()).isTrue();
+        assertThat(capabilities.exportTemplates()).isTrue();
+        assertThat(capabilities.viewCollaborationWorkItems()).isTrue();
+        assertThat(capabilities.maintainCollaborationTimeoutConfig()).isTrue();
+        assertThat(capabilities.authorContentModules()).isTrue();
+        assertThat(capabilities.decideContentModuleReviews()).isTrue();
+        assertThat(capabilities.manageContentModuleLifecycle()).isTrue();
         assertThat(capabilities.readAudit()).isTrue();
     }
 
@@ -36,6 +42,12 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.deleteTemplates()).isFalse();
         assertThat(capabilities.manageMasters()).isTrue();
         assertThat(capabilities.readAudit()).isTrue();
+        assertThat(capabilities.exportTemplates()).isTrue();
+        assertThat(capabilities.viewCollaborationWorkItems()).isTrue();
+        assertThat(capabilities.maintainCollaborationTimeoutConfig()).isTrue();
+        assertThat(capabilities.authorContentModules()).isTrue();
+        assertThat(capabilities.decideContentModuleReviews()).isTrue();
+        assertThat(capabilities.manageContentModuleLifecycle()).isTrue();
     }
 
     @Test
@@ -50,6 +62,27 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.deleteTemplates()).isFalse();
         assertThat(capabilities.decideTests()).isFalse();
         assertThat(capabilities.decideApprovals()).isFalse();
+        assertThat(capabilities.exportTemplates()).isFalse();
+        assertThat(capabilities.viewCollaborationWorkItems()).isFalse();
+        assertThat(capabilities.maintainCollaborationTimeoutConfig()).isFalse();
+        assertThat(capabilities.authorContentModules()).isTrue();
+        assertThat(capabilities.decideContentModuleReviews()).isFalse();
+        assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
+    }
+
+    @Test
+    void templateAuthorCanAuthorAndExportWithoutLifecycleGovernance() {
+        var capabilities = service.resolve(Set.of(ManagementRole.TEMPLATE_AUTHOR));
+
+        assertThat(capabilities.authorTemplates()).isTrue();
+        assertThat(capabilities.exportTemplates()).isTrue();
+        assertThat(capabilities.viewCollaborationWorkItems()).isTrue();
+        assertThat(capabilities.authorContentModules()).isTrue();
+        assertThat(capabilities.maintainCollaborationTimeoutConfig()).isFalse();
+        assertThat(capabilities.decideContentModuleReviews()).isFalse();
+        assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
+        assertThat(capabilities.manageApiPolicy()).isFalse();
+        assertThat(capabilities.deleteTemplates()).isFalse();
     }
 
     @Test
@@ -60,6 +93,12 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.authorTemplates()).isFalse();
         assertThat(capabilities.manageApiPolicy()).isFalse();
         assertThat(capabilities.deleteTemplates()).isFalse();
+        assertThat(capabilities.exportTemplates()).isFalse();
+        assertThat(capabilities.viewCollaborationWorkItems()).isTrue();
+        assertThat(capabilities.maintainCollaborationTimeoutConfig()).isFalse();
+        assertThat(capabilities.authorContentModules()).isFalse();
+        assertThat(capabilities.decideContentModuleReviews()).isFalse();
+        assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
     }
 
     @Test
@@ -70,6 +109,11 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.authorTemplates()).isFalse();
         assertThat(capabilities.manageApiPolicy()).isFalse();
         assertThat(capabilities.deleteTemplates()).isFalse();
+        assertThat(capabilities.exportTemplates()).isFalse();
+        assertThat(capabilities.viewCollaborationWorkItems()).isTrue();
+        assertThat(capabilities.decideContentModuleReviews()).isTrue();
+        assertThat(capabilities.authorContentModules()).isFalse();
+        assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
     }
 
     @Test
@@ -80,5 +124,11 @@ class ManagementCapabilitiesServiceTest {
         assertThat(capabilities.manageMasters()).isFalse();
         assertThat(capabilities.manageApiPolicy()).isFalse();
         assertThat(capabilities.deleteTemplates()).isFalse();
+        assertThat(capabilities.exportTemplates()).isFalse();
+        assertThat(capabilities.viewCollaborationWorkItems()).isFalse();
+        assertThat(capabilities.maintainCollaborationTimeoutConfig()).isFalse();
+        assertThat(capabilities.authorContentModules()).isFalse();
+        assertThat(capabilities.decideContentModuleReviews()).isFalse();
+        assertThat(capabilities.manageContentModuleLifecycle()).isFalse();
     }
 }

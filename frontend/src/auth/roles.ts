@@ -122,10 +122,20 @@ export function canAuthorTemplates(context: CapabilityContext): boolean {
 }
 
 export function canExportTemplates(context: CapabilityContext): boolean {
-  if (!canAccessTemplateManagement(context.roles)) {
-    return false
-  }
-  return resolveCapability(context, 'authorTemplates', canAccessTemplateManagement)
+  return resolveCapability(context, 'exportTemplates', (roles) => {
+    if (!canAccessTemplateManagement(roles)) {
+      return false
+    }
+    return roles.some((role) =>
+      (
+        [
+          MANAGEMENT_ROLES.GLOBAL_ADMIN,
+          MANAGEMENT_ROLES.GROUP_ADMIN,
+          MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+        ] as string[]
+      ).includes(role),
+    )
+  })
 }
 
 export function canDecideTests(context: CapabilityContext): boolean {
@@ -210,7 +220,7 @@ export function canDeleteTemplates(context: CapabilityContext): boolean {
 }
 
 export function canAuthorContentModules(context: CapabilityContext): boolean {
-  return resolveCapability(context, 'authorTemplates', (roles) =>
+  return resolveCapability(context, 'authorContentModules', (roles) =>
     roles.some((role) =>
       (
         [
@@ -225,7 +235,7 @@ export function canAuthorContentModules(context: CapabilityContext): boolean {
 }
 
 export function canDecideContentModuleReviews(context: CapabilityContext): boolean {
-  return resolveCapability(context, 'decideApprovals', (roles) =>
+  return resolveCapability(context, 'decideContentModuleReviews', (roles) =>
     roles.some((role) =>
       (
         [
@@ -239,7 +249,7 @@ export function canDecideContentModuleReviews(context: CapabilityContext): boole
 }
 
 export function canManageContentModuleLifecycle(context: CapabilityContext): boolean {
-  return resolveCapability(context, 'restoreOrDeprecateTemplates', (roles) =>
+  return resolveCapability(context, 'manageContentModuleLifecycle', (roles) =>
     roles.some((role) =>
       ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
     ),
@@ -260,29 +270,33 @@ export function canAccessContentModuleManagement(roles: string[]): boolean {
   )
 }
 
-export function canViewCollaborationWorkItems(roles: string[]): boolean {
-  return roles.some((role) =>
-    (
-      [
-        MANAGEMENT_ROLES.GLOBAL_ADMIN,
-        MANAGEMENT_ROLES.GROUP_ADMIN,
-        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
-        'TEMPLATE_TESTER',
-        'TEMPLATE_APPROVER',
-      ] as string[]
-    ).includes(role),
+export function canViewCollaborationWorkItems(context: CapabilityContext): boolean {
+  return resolveCapability(context, 'viewCollaborationWorkItems', (roles) =>
+    roles.some((role) =>
+      (
+        [
+          MANAGEMENT_ROLES.GLOBAL_ADMIN,
+          MANAGEMENT_ROLES.GROUP_ADMIN,
+          MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
+          'TEMPLATE_TESTER',
+          'TEMPLATE_APPROVER',
+        ] as string[]
+      ).includes(role),
+    ),
   )
 }
 
 export function canMaintainCollaborationTimeoutConfig(context: CapabilityContext): boolean {
-  return context.roles.some((role) =>
-    ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
+  return resolveCapability(context, 'maintainCollaborationTimeoutConfig', (roles) =>
+    roles.some((role) =>
+      ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
+    ),
   )
 }
 
 export function canViewEscalationQueue(context: CapabilityContext): boolean {
   return (
-    canViewCollaborationWorkItems(context.roles) &&
+    canViewCollaborationWorkItems(context) &&
     context.roles.some((role) =>
       ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
     )

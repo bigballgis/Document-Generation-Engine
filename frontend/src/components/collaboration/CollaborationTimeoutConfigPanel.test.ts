@@ -24,7 +24,6 @@ describe('CollaborationTimeoutConfigPanel', () => {
       roles: ['GLOBAL_ADMIN'],
       authorizedGroupCodes: ['*'],
       visibleRoutes: [],
-      capabilities: {},
     } as never
   })
 
@@ -76,7 +75,6 @@ describe('CollaborationTimeoutConfigPanel', () => {
       roles: ['TEMPLATE_TESTER'],
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: [],
-      capabilities: {},
     } as never
 
     const wrapper = mount(CollaborationTimeoutConfigPanel, {

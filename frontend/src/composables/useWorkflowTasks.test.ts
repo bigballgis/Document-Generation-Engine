@@ -22,6 +22,12 @@ const testerCapabilities: ManagementCapabilities = {
   stopTemplates: false,
   restoreOrDeprecateTemplates: false,
   deleteTemplates: false,
+  exportTemplates: false,
+  viewCollaborationWorkItems: true,
+  maintainCollaborationTimeoutConfig: false,
+  authorContentModules: false,
+  decideContentModuleReviews: false,
+  manageContentModuleLifecycle: false,
   manageApiPolicy: false,
   readAudit: false,
 }

@@ -31,6 +31,12 @@ public class ManagementCapabilitiesService {
                 groupAccessService.canRestoreOrDeprecateTemplates(session),
                 groupAccessService.canManageApiPolicy(session),
                 groupAccessService.canDeleteTemplate(session),
+                groupAccessService.canExportTemplates(session),
+                groupAccessService.canViewCollaborationWorkItems(session),
+                groupAccessService.canMaintainCollaborationTimeoutConfig(session),
+                groupAccessService.canAuthorContentModules(session),
+                groupAccessService.canDecideContentModuleReviews(session),
+                groupAccessService.canManageContentModuleLifecycle(session),
                 groupAccessService.canReadAudit(session)
         );
     }

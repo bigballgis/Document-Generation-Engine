@@ -11,6 +11,12 @@ public record ManagementCapabilitiesView(
         boolean restoreOrDeprecateTemplates,
         boolean manageApiPolicy,
         boolean deleteTemplates,
+        boolean exportTemplates,
+        boolean viewCollaborationWorkItems,
+        boolean maintainCollaborationTimeoutConfig,
+        boolean authorContentModules,
+        boolean decideContentModuleReviews,
+        boolean manageContentModuleLifecycle,
         boolean readAudit
 ) {
 }

@@ -264,7 +264,7 @@ export function useWorkflowTasks() {
       }
     }
 
-    if (canViewCollaborationWorkItems(context.value.roles)) {
+    if (canViewCollaborationWorkItems(context.value)) {
       for (const workItem of collaborationStore.workItems) {
         items.push(collaborationWorkItemToTask(workItem))
       }

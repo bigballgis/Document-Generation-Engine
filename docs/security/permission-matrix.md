@@ -405,6 +405,7 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 | `route.identity-administration` | ✓ | ✓ | — | — | — | — | — |
 | `route.master-management` | ✓ | ✓ | ✓ | — | — | — | — |
 | `route.template-management` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — |
+| `route.content-module-management` | ✓ | ✓ | ✓ | ✓ | — | ✓ | — |
 | `route.api-policy-management` | ✓ | ✓ | — | — | — | — | — |
 | `route.audit-console` | ✓ | ✓ | — | — | — | — | ✓ default |
 
@@ -464,6 +465,12 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 | `decideTests` | GLOBAL, GROUP, TEMPLATE_TESTER |
 | `decideApprovals` | GLOBAL, GROUP, TEMPLATE_APPROVER |
 | `publishTemplates` | GLOBAL, GROUP only (Batch B default; authors submit for release, admins publish) |
+| `exportTemplates` | GLOBAL, GROUP, TEMPLATE_AUTHOR |
+| `viewCollaborationWorkItems` | GLOBAL, GROUP, TEMPLATE_AUTHOR, TEMPLATE_TESTER, TEMPLATE_APPROVER |
+| `maintainCollaborationTimeoutConfig` | GLOBAL, GROUP |
+| `authorContentModules` | GLOBAL, GROUP, MASTER_DESIGNER, TEMPLATE_AUTHOR |
+| `decideContentModuleReviews` | GLOBAL, GROUP, TEMPLATE_APPROVER |
+| `manageContentModuleLifecycle` | GLOBAL, GROUP |
 | `manageApiPolicy` | GLOBAL, GROUP |
 | `readAudit` | GLOBAL, GROUP, AUDIT_ADMIN |
 

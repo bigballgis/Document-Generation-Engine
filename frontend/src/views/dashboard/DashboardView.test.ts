@@ -15,6 +15,31 @@ import {
   templateTeamLeadJourneySteps,
   templateTesterJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
+import type { ManagementCapabilities } from '@/types/session'
+
+const BASE_CAPABILITIES: ManagementCapabilities = {
+  manageMasters: false,
+  reviewMasters: false,
+  authorTemplates: false,
+  decideTests: false,
+  decideApprovals: false,
+  publishTemplates: false,
+  stopTemplates: false,
+  restoreOrDeprecateTemplates: false,
+  deleteTemplates: false,
+  exportTemplates: false,
+  viewCollaborationWorkItems: false,
+  maintainCollaborationTimeoutConfig: false,
+  authorContentModules: false,
+  decideContentModuleReviews: false,
+  manageContentModuleLifecycle: false,
+  manageApiPolicy: false,
+  readAudit: false,
+}
+
+function caps(overrides: Partial<ManagementCapabilities> = {}): ManagementCapabilities {
+  return { ...BASE_CAPABILITIES, ...overrides }
+}
 
 const routeRef = ref({
   hash: '',
@@ -80,7 +105,6 @@ describe('DashboardView', () => {
       displayName: 'Admin',
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
-      capabilities: {},
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -155,9 +179,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_TESTER'],
-      capabilities: {
-        decideTests: true,
-      },
+      capabilities: caps({ decideTests: true, viewCollaborationWorkItems: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -218,10 +240,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management', 'route.master-management'],
       roles: ['GLOBAL_ADMIN'],
-      capabilities: {
-        reviewMasters: true,
-        manageMasters: true,
-      },
+      capabilities: caps({ reviewMasters: true, manageMasters: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
@@ -259,9 +278,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_TESTER'],
-      capabilities: {
-        decideTests: true,
-      },
+      capabilities: caps({ decideTests: true, viewCollaborationWorkItems: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -311,7 +328,12 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_AUTHOR'],
-      capabilities: { authorTemplates: true },
+      capabilities: caps({
+        authorTemplates: true,
+        viewCollaborationWorkItems: true,
+        exportTemplates: true,
+        authorContentModules: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -352,7 +374,12 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_AUTHOR'],
-      capabilities: { authorTemplates: true },
+      capabilities: caps({
+        authorTemplates: true,
+        viewCollaborationWorkItems: true,
+        exportTemplates: true,
+        authorContentModules: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -391,7 +418,12 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_AUTHOR'],
-      capabilities: { authorTemplates: true },
+      capabilities: caps({
+        authorTemplates: true,
+        viewCollaborationWorkItems: true,
+        exportTemplates: true,
+        authorContentModules: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -432,7 +464,12 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_AUTHOR'],
-      capabilities: { authorTemplates: true },
+      capabilities: caps({
+        authorTemplates: true,
+        viewCollaborationWorkItems: true,
+        exportTemplates: true,
+        authorContentModules: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -473,7 +510,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.master-management', 'route.template-management'],
       roles: ['MASTER_DESIGNER'],
-      capabilities: { manageMasters: true },
+      capabilities: caps({ manageMasters: true, authorTemplates: true, authorContentModules: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
@@ -499,7 +536,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.master-management'],
       roles: ['MASTER_DESIGNER'],
-      capabilities: { manageMasters: true },
+      capabilities: caps({ manageMasters: true, authorTemplates: true, authorContentModules: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
@@ -522,7 +559,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.master-management'],
       roles: ['MASTER_DESIGNER'],
-      capabilities: { manageMasters: true },
+      capabilities: caps({ manageMasters: true, authorTemplates: true, authorContentModules: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
@@ -556,7 +593,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.master-management'],
       roles: ['MASTER_DESIGNER'],
-      capabilities: { manageMasters: true },
+      capabilities: caps({ manageMasters: true, authorTemplates: true, authorContentModules: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
@@ -604,7 +641,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.master-management'],
       roles: ['MASTER_DESIGNER'],
-      capabilities: { manageMasters: true },
+      capabilities: caps({ manageMasters: true, authorTemplates: true, authorContentModules: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
@@ -641,7 +678,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_TESTER'],
-      capabilities: { decideTests: true },
+      capabilities: caps({ decideTests: true, viewCollaborationWorkItems: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -665,7 +702,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_TESTER'],
-      capabilities: { decideTests: true },
+      capabilities: caps({ decideTests: true, viewCollaborationWorkItems: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -718,7 +755,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_TESTER'],
-      capabilities: { decideTests: true },
+      capabilities: caps({ decideTests: true, viewCollaborationWorkItems: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -755,7 +792,11 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_APPROVER'],
-      capabilities: { decideApprovals: true },
+      capabilities: caps({
+        decideApprovals: true,
+        viewCollaborationWorkItems: true,
+        decideContentModuleReviews: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -783,7 +824,11 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_APPROVER'],
-      capabilities: { decideApprovals: true },
+      capabilities: caps({
+        decideApprovals: true,
+        viewCollaborationWorkItems: true,
+        decideContentModuleReviews: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -824,7 +869,7 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['TEMPLATE_TESTER'],
-      capabilities: { decideTests: true },
+      capabilities: caps({ decideTests: true, viewCollaborationWorkItems: true }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -850,7 +895,13 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management', 'route.master-management'],
       roles: ['GROUP_ADMIN'],
-      capabilities: { publishTemplates: true, reviewMasters: true, decideApprovals: false },
+      capabilities: caps({
+        publishTemplates: true,
+        reviewMasters: true,
+        decideApprovals: false,
+        viewCollaborationWorkItems: true,
+        maintainCollaborationTimeoutConfig: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
@@ -876,7 +927,13 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.master-management', 'route.template-management'],
       roles: ['GROUP_ADMIN'],
-      capabilities: { publishTemplates: true, reviewMasters: true, decideApprovals: false },
+      capabilities: caps({
+        publishTemplates: true,
+        reviewMasters: true,
+        decideApprovals: false,
+        viewCollaborationWorkItems: true,
+        maintainCollaborationTimeoutConfig: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
@@ -912,7 +969,13 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['RETAIL'],
       visibleRoutes: ['route.template-management'],
       roles: ['GROUP_ADMIN'],
-      capabilities: { publishTemplates: true, reviewMasters: true, decideApprovals: false },
+      capabilities: caps({
+        publishTemplates: true,
+        reviewMasters: true,
+        decideApprovals: false,
+        viewCollaborationWorkItems: true,
+        maintainCollaborationTimeoutConfig: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
@@ -954,12 +1017,14 @@ describe('DashboardView', () => {
         'route.identity-administration',
       ],
       roles: ['GLOBAL_ADMIN'],
-      capabilities: {
+      capabilities: caps({
         publishTemplates: true,
         reviewMasters: true,
         deleteTemplates: true,
         decideApprovals: true,
-      },
+        viewCollaborationWorkItems: true,
+        maintainCollaborationTimeoutConfig: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
@@ -985,7 +1050,13 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['*'],
       visibleRoutes: ['route.template-management', 'route.master-management'],
       roles: ['GLOBAL_ADMIN'],
-      capabilities: { publishTemplates: true, reviewMasters: true, decideApprovals: false },
+      capabilities: caps({
+        publishTemplates: true,
+        reviewMasters: true,
+        decideApprovals: false,
+        viewCollaborationWorkItems: true,
+        maintainCollaborationTimeoutConfig: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
@@ -1008,7 +1079,13 @@ describe('DashboardView', () => {
       authorizedGroupCodes: ['*'],
       visibleRoutes: ['route.template-management'],
       roles: ['GLOBAL_ADMIN'],
-      capabilities: { publishTemplates: true, reviewMasters: true, deleteTemplates: true },
+      capabilities: caps({
+        publishTemplates: true,
+        reviewMasters: true,
+        deleteTemplates: true,
+        viewCollaborationWorkItems: true,
+        maintainCollaborationTimeoutConfig: true,
+      }),
     } as never
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
       (routeKey: string) => routeKey === 'route.template-management',
