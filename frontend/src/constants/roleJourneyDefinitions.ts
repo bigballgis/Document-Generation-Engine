@@ -8,7 +8,9 @@ export type ClusterOneRole = 'MASTER_DESIGNER' | 'TEMPLATE_AUTHOR' | 'TEMPLATE_T
 
 export type ClusterTwoRole = 'TEMPLATE_APPROVER' | 'GROUP_ADMIN'
 
-export type JourneyRole = ClusterOneRole | ClusterTwoRole
+export type ClusterThreeRole = 'GLOBAL_ADMIN'
+
+export type JourneyRole = ClusterOneRole | ClusterTwoRole | ClusterThreeRole
 
 const ROLE_PREFIX = 'journey.roles'
 
@@ -59,6 +61,22 @@ export const templateTeamLeadJourneySteps: RoleJourneyStep[] = [
   clusterTwoStep('GROUP_ADMIN', 'reviewGoLiveRequest'),
   clusterTwoStep('GROUP_ADMIN', 'runPreReleaseChecks'),
   clusterTwoStep('GROUP_ADMIN', 'confirmGoLive'),
+]
+
+function clusterThreeStep(role: ClusterThreeRole, id: string): RoleJourneyStep {
+  return {
+    id,
+    labelKey: `${ROLE_PREFIX}.${role}.steps.${id}.label`,
+  }
+}
+
+export const globalAdminJourneySteps: RoleJourneyStep[] = [
+  clusterThreeStep('GLOBAL_ADMIN', 'reviewOverview'),
+  clusterThreeStep('GLOBAL_ADMIN', 'manageUsersGroups'),
+  clusterThreeStep('GLOBAL_ADMIN', 'removeTemplates'),
+  clusterThreeStep('GLOBAL_ADMIN', 'setReminderDefaults'),
+  clusterThreeStep('GLOBAL_ADMIN', 'monitorOverdue'),
+  clusterThreeStep('GLOBAL_ADMIN', 'reviewAllTodos'),
 ]
 
 export const ROLE_JOURNEY_DEFINITIONS: Record<ClusterOneRole, RoleJourneyStep[]> = {
@@ -141,3 +159,9 @@ export {
   shouldShowTemplateTeamLeadJourney,
   templateTeamLeadStepCtaKey,
 } from '@/utils/templateTeamLeadJourney'
+
+export {
+  globalAdminStepCtaKey,
+  resolveGlobalAdminDashboardJourneyIndex,
+  shouldShowGlobalAdminJourney,
+} from '@/utils/globalAdminJourney'

@@ -1742,11 +1742,50 @@ export default {
           },
         },
       },
+      GLOBAL_ADMIN: {
+        title: 'Bank-wide administration workflow',
+        empty: {
+          guidance:
+            'Review the bank-wide overview below, then use the task hub and quick links to manage users, templates, and reminder timing.',
+        },
+        steps: {
+          reviewOverview: {
+            label: 'Review bank-wide overview',
+            guidance: 'Scan summary cards and open tasks to see what needs attention across the bank.',
+            cta: 'Review overview',
+          },
+          manageUsersGroups: {
+            label: 'Manage users and groups',
+            guidance: 'Create and maintain user accounts and business groups within your scope.',
+            cta: 'Manage users and groups',
+          },
+          removeTemplates: {
+            label: 'Remove templates',
+            guidance: 'Remove templates that are no longer needed from the template list.',
+            cta: 'Open template list',
+          },
+          setReminderDefaults: {
+            label: 'Set bank-wide reminder timing',
+            guidance: 'Set default reminder timing for testing, approval, and go-live queues bank-wide.',
+            cta: 'Set reminder timing',
+          },
+          monitorOverdue: {
+            label: 'Monitor overdue reminders',
+            guidance: 'Follow up on overdue reminders from the task hub before they affect delivery.',
+            cta: 'View overdue to follow up',
+          },
+          reviewAllTodos: {
+            label: 'Review all to-dos',
+            guidance: 'Work through open items across queues from the bank-wide task hub.',
+            cta: 'Review task hub',
+          },
+        },
+      },
     },
   },
   identity: {
-    title: 'Identity & group administration',
-    description: 'Manage management accounts and business groups within your authorized scope.',
+    title: 'Users & permissions',
+    description: 'Manage user accounts and business groups within your authorized scope.',
     usersPageTitle: 'User management',
     usersPageDescription: 'Create and maintain management user accounts and role assignments.',
     groupsPageTitle: 'Group management',

@@ -11,6 +11,7 @@ import {
   resolveClusterOneJourney,
   resolvePrimaryClusterOneRole,
   roleJourneyTitleKey,
+  globalAdminJourneySteps,
   templateApproverJourneySteps,
   templateTeamLeadJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
@@ -36,6 +37,11 @@ import {
   shouldShowTemplateTeamLeadJourney,
   type TemplateTeamLeadPendingReleaseWorkItem,
 } from '@/utils/templateTeamLeadJourney'
+import {
+  resolveGlobalAdminDashboardJourneyIndex,
+  shouldShowGlobalAdminJourney,
+  type GlobalAdminCollaborationWorkItem,
+} from '@/utils/globalAdminJourney'
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import {
   buildTaskPartitions,
@@ -60,7 +66,8 @@ const sessionStore = useSessionStore()
 const mastersStore = useMastersStore()
 const templatesStore = useTemplatesStore()
 const collaborationStore = useCollaborationStore()
-const { context, reviewMasters, manageMasters, decideApprovals, publishTemplates } = useCapabilities()
+const { context, reviewMasters, manageMasters, decideApprovals, publishTemplates, deleteTemplates } =
+  useCapabilities()
 const { tasks } = useWorkflowTasks()
 const visibleRoutes = computed(() => sessionStore.session?.visibleRoutes ?? [])
 const { stats } = useDashboardStats(visibleRoutes)
@@ -130,10 +137,19 @@ const showApproverJourney = computed(
     shouldShowTemplateApproverJourney({ decideApprovals: decideApprovals.value }),
 )
 
+const showGlobalAdminJourney = computed(
+  () =>
+    !primaryClusterOneRole.value &&
+    !showApproverJourney.value &&
+    shouldShowGlobalAdminJourney({ roles: sessionStore.session?.roles ?? [] }),
+)
+
 const showTeamLeadJourney = computed(
   () =>
     !primaryClusterOneRole.value &&
     !showApproverJourney.value &&
+    !showGlobalAdminJourney.value &&
+    (sessionStore.session?.roles ?? []).includes('GROUP_ADMIN') &&
     shouldShowTemplateTeamLeadJourney({
       publishTemplates: publishTemplates.value,
       reviewMasters: reviewMasters.value,
@@ -142,7 +158,12 @@ const showTeamLeadJourney = computed(
 
 const showJourneySection = computed(
   () =>
-    Boolean(primaryClusterOneRole.value || showApproverJourney.value || showTeamLeadJourney.value),
+    Boolean(
+      primaryClusterOneRole.value ||
+        showApproverJourney.value ||
+        showGlobalAdminJourney.value ||
+        showTeamLeadJourney.value,
+    ),
 )
 
 const journeySteps = computed(() => {
@@ -151,6 +172,9 @@ const journeySteps = computed(() => {
   }
   if (showApproverJourney.value) {
     return templateApproverJourneySteps
+  }
+  if (showGlobalAdminJourney.value) {
+    return globalAdminJourneySteps
   }
   if (showTeamLeadJourney.value) {
     return templateTeamLeadJourneySteps
@@ -164,6 +188,9 @@ const journeyTitleKey = computed(() => {
   }
   if (showApproverJourney.value) {
     return roleJourneyTitleKey('TEMPLATE_APPROVER')
+  }
+  if (showGlobalAdminJourney.value) {
+    return roleJourneyTitleKey('GLOBAL_ADMIN')
   }
   if (showTeamLeadJourney.value) {
     return roleJourneyTitleKey('GROUP_ADMIN')
@@ -259,6 +286,28 @@ const templateTeamLeadJourneyResolution = computed(() => {
   )
 })
 
+const globalAdminCollaborationWorkItems = computed((): GlobalAdminCollaborationWorkItem[] =>
+  collaborationStore.workItems.map((item) => ({
+    queue: item.queue,
+    createdAt: item.createdAt,
+  })),
+)
+
+const globalAdminJourneyResolution = computed(() => {
+  if (!showGlobalAdminJourney.value) {
+    return null
+  }
+  return resolveGlobalAdminDashboardJourneyIndex(
+    mastersStore.masters,
+    templatesStore.templates,
+    globalAdminCollaborationWorkItems.value,
+    {
+      deleteTemplates: deleteTemplates.value,
+      canMaintainCollaborationTimeoutConfig: showTimeoutConfig.value,
+    },
+  )
+})
+
 const journeyCurrentStepIndex = computed(() => {
   if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
     return masterDesignerJourneyResolution.value?.currentStepIndex ?? null
@@ -271,6 +320,9 @@ const journeyCurrentStepIndex = computed(() => {
   }
   if (showApproverJourney.value) {
     return templateApproverJourneyResolution.value?.currentStepIndex ?? null
+  }
+  if (showGlobalAdminJourney.value) {
+    return globalAdminJourneyResolution.value?.currentStepIndex ?? null
   }
   if (showTeamLeadJourney.value) {
     return templateTeamLeadJourneyResolution.value?.currentStepIndex ?? null
@@ -290,6 +342,9 @@ const journeyGuidanceKey = computed(() => {
   }
   if (showApproverJourney.value) {
     return templateApproverJourneyResolution.value?.guidanceKey
+  }
+  if (showGlobalAdminJourney.value) {
+    return globalAdminJourneyResolution.value?.guidanceKey
   }
   if (showTeamLeadJourney.value) {
     return templateTeamLeadJourneyResolution.value?.guidanceKey

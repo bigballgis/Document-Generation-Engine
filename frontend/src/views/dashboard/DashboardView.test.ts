@@ -8,6 +8,7 @@ import { useCollaborationStore } from '@/stores/collaboration'
 import { useSessionStore } from '@/stores/session'
 import { useMastersStore } from '@/stores/masters'
 import {
+  globalAdminJourneySteps,
   masterDesignerJourneySteps,
   templateAuthorJourneySteps,
   templateApproverJourneySteps,
@@ -940,5 +941,103 @@ describe('DashboardView', () => {
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('1')
+  })
+
+  it('shows global admin journey with 6 steps for GLOBAL_ADMIN sessions', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Global Admin',
+      authorizedGroupCodes: ['*'],
+      visibleRoutes: [
+        'route.template-management',
+        'route.master-management',
+        'route.identity-administration',
+      ],
+      roles: ['GLOBAL_ADMIN'],
+      capabilities: {
+        publishTemplates: true,
+        reviewMasters: true,
+        deleteTemplates: true,
+        decideApprovals: true,
+      },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    const mastersStore = useMastersStore()
+    vi.spyOn(mastersStore, 'fetchMasters').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('#journey-section').exists()).toBe(true)
+    expect(Number(wrapper.find('.journey-timeline-stub').attributes('data-step-count'))).toBe(
+      globalAdminJourneySteps.length,
+    )
+    expect(wrapper.find('.journey-timeline-stub').text()).toBe('journey.roles.GLOBAL_ADMIN.title')
+  })
+
+  it('does not show team-lead journey for GLOBAL_ADMIN with team-lead capabilities', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Global Admin',
+      authorizedGroupCodes: ['*'],
+      visibleRoutes: ['route.template-management', 'route.master-management'],
+      roles: ['GLOBAL_ADMIN'],
+      capabilities: { publishTemplates: true, reviewMasters: true, decideApprovals: false },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    const mastersStore = useMastersStore()
+    vi.spyOn(mastersStore, 'fetchMasters').mockResolvedValue(undefined)
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').text()).toBe('journey.roles.GLOBAL_ADMIN.title')
+    expect(wrapper.find('.journey-timeline-stub').text()).not.toBe('journey.roles.GROUP_ADMIN.title')
+  })
+
+  it('sets global admin journey index 4 when ESCALATION work items exist', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Global Admin',
+      authorizedGroupCodes: ['*'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['GLOBAL_ADMIN'],
+      capabilities: { publishTemplates: true, reviewMasters: true, deleteTemplates: true },
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+
+    const collaborationStore = useCollaborationStore()
+    vi.spyOn(collaborationStore, 'fetchWorkItems').mockImplementation(async () => {
+      collaborationStore.workItems = [
+        {
+          workItemId: 'wi-escalation',
+          templateId: 'tpl-escalation',
+          templateName: 'Overdue template',
+          queue: 'ESCALATION',
+          triggerType: 'TIMEOUT_ESCALATION',
+          groupCode: 'RETAIL',
+          submitterUserId: '10000003',
+          summaryText: 'Overdue reminder',
+          ageSeconds: 7200,
+          createdAt: '2026-06-26T10:00:00Z',
+        },
+      ]
+    })
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('4')
   })
 })

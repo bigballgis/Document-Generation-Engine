@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **sub-phase B cluster ② Done** — T07–T09b; **P21-T09b Done** 2026-06-30 — reminder timing L1 + overdue queue + confirm-on-behalf copy; next **P21-T10 Not Started** — cluster ③ Global admin) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **sub-phase C cluster ③ Done** — T10; **P21-T10 Done** 2026-06-30 — 6-step bank-wide global admin journey + DashboardView journey gating fix; next **P21-T11 Not Started** — cluster ④ Audit) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -192,7 +192,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 
 | ID | Task | Key files | Behavior spec | Status |
 | --- | --- | --- | --- | --- |
-| P21-T10 | Bank-wide overview, users & groups management, template deletion, bank-wide reminder defaults, bank-wide overdue monitoring, global to-do view; reuse/extend cluster ② components; copy avoids governance/platform jargon | entitlement views, dashboard | Required | Not Started |
+| P21-T10 | Bank-wide overview, users & groups management, template deletion, bank-wide reminder defaults, bank-wide overdue monitoring, global to-do view; reuse/extend cluster ② components; copy avoids governance/platform jargon | entitlement views, dashboard | Required | Done (2026-06-30) |
 
 ### Sub-phase D — Cluster ④ Audit
 
@@ -2109,4 +2109,12 @@ E2E helper.
 
 **Deliverables:** `en.ts` + `zh-CN.ts` (reminder timing / overdue / confirm-on-behalf L1 values); `TemplateLifecycleDecisionDialog.vue` (+ Vitest); `CollaborationTimeoutConfigPanel.test.ts`; `navStructure.test.ts` grep audit; Playwright `P21-T09b-reminder-exception-l1.spec.ts` + updated `collaboration-todos.spec.ts`.
 
-**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**457** Vitest); Playwright P21-T09b + collaboration-todos **7/7**. Backend unchanged. **Audit:** AUD-B10 **partial** — confirm-on-behalf UI fixed for GLOBAL + GROUP; evidence checklist gate on submit-for-approval **still open**. **Sub-phase B cluster ② complete** (T07–T09b). Next **P21-T10** (cluster ③ Global admin).
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**457** Vitest); Playwright P21-T09b + collaboration-todos **7/7**. Backend unchanged. **Audit:** AUD-B10 **partial** — confirm-on-behalf UI fixed for GLOBAL + GROUP; evidence checklist gate on submit-for-approval **still open**. **Sub-phase B cluster ② complete** (T07–T09b). Next **P21-T10** (now Done).
+
+### P21-T10 completion (2026-06-30)
+
+**Scope:** Cluster ③ Global admin — 6-step bank-wide administration workflow on Dashboard `#journey-section`; journey gating fix so `GLOBAL_ADMIN` no longer falls through to team-lead journey; identity/entitlement L1 copy sweep (en + zh-CN, keys stable).
+
+**Deliverables:** `globalAdminJourney.ts` (+ Vitest), `globalAdminJourneySteps` in `roleJourneyDefinitions.ts` (+ test), `DashboardView.vue` journey resolution (global-admin checked before team-lead); i18n `journey.roles.GLOBAL_ADMIN.*` + identity L1 values in `en.ts` / `zh-CN.ts`; Playwright `P21-T10-global-admin-journey.spec.ts` **4/4**.
+
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**478** Vitest); Playwright P21-T10 **4/4**. Backend unchanged. **Sub-phase C cluster ③ complete** (T10). Next **P21-T11** (cluster ④ Audit).

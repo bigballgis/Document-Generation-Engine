@@ -9,6 +9,7 @@ import {
   resolveNavItemTarget,
 } from '@/navigation/navStructure'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
+import { globalAdminJourneySteps } from '@/constants/roleJourneyDefinitions'
 import type { ManagementCapabilities } from '@/types/session'
 
 const dashboardRoute = ROUTE_KEYS.dashboardHome
@@ -433,6 +434,27 @@ describe('navStructure', () => {
       expect(en.collaboration.timeoutConfig.saveSuccess).toBe('Reminder timing saved.')
       expect(en.templates.lifecycle.decisionForm.exceptionIntervention).toBe('Confirm on behalf')
       expect(zhCN.templates.lifecycle.decisionForm.exceptionIntervention).toBe('代为确认')
+    })
+
+    it('passes forbidden L1 token grep on global admin journey copy (P21-T10)', () => {
+      const globalAdminL1Values = [
+        en.journey.roles.GLOBAL_ADMIN.title,
+        en.journey.roles.GLOBAL_ADMIN.empty.guidance,
+        ...globalAdminJourneySteps.flatMap((step) => {
+          const stepKey = step.id as keyof typeof en.journey.roles.GLOBAL_ADMIN.steps
+          const stepCopy = en.journey.roles.GLOBAL_ADMIN.steps[stepKey]
+          return [stepCopy.label, stepCopy.guidance, stepCopy.cta]
+        }),
+        en.identity.title,
+        en.identity.description,
+      ]
+
+      for (const value of globalAdminL1Values) {
+        expect(value).not.toMatch(forbiddenPattern)
+        expect(value.toLowerCase()).not.toMatch(/\b(governance|entitlement|console|escalation)\b/)
+      }
+
+      expect(en.journey.roles.GLOBAL_ADMIN.title).toBe('Bank-wide administration workflow')
     })
   })
 })

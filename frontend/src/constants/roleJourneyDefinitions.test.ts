@@ -3,10 +3,13 @@ import { createI18n } from 'vue-i18n'
 import en from '@/i18n/locales/en'
 import zhCn from '@/i18n/locales/zh-CN'
 import {
+  globalAdminJourneySteps,
   masterDesignerJourneySteps,
   resolveClusterOneJourney,
   resolvePrimaryClusterOneRole,
   templateAuthorJourneySteps,
+  templateApproverJourneySteps,
+  templateTeamLeadJourneySteps,
   templateTesterJourneySteps,
 } from '@/constants/roleJourneyDefinitions'
 
@@ -57,6 +60,37 @@ describe('roleJourneyDefinitions', () => {
     ])
   })
 
+  it('globalAdminJourneySteps has exactly 6 steps in Spec B order', () => {
+    expect(globalAdminJourneySteps).toHaveLength(6)
+    expect(globalAdminJourneySteps.map((step) => step.id)).toEqual([
+      'reviewOverview',
+      'manageUsersGroups',
+      'removeTemplates',
+      'setReminderDefaults',
+      'monitorOverdue',
+      'reviewAllTodos',
+    ])
+  })
+
+  it('templateApproverJourneySteps has exactly 3 steps in Spec B order', () => {
+    expect(templateApproverJourneySteps).toHaveLength(3)
+    expect(templateApproverJourneySteps.map((step) => step.id)).toEqual([
+      'reviewRequest',
+      'reviewSubmission',
+      'recordDecision',
+    ])
+  })
+
+  it('templateTeamLeadJourneySteps has exactly 4 steps in Spec B order', () => {
+    expect(templateTeamLeadJourneySteps).toHaveLength(4)
+    expect(templateTeamLeadJourneySteps.map((step) => step.id)).toEqual([
+      'reviewLetterhead',
+      'reviewGoLiveRequest',
+      'runPreReleaseChecks',
+      'confirmGoLive',
+    ])
+  })
+
   it('resolves non-empty en and zh-CN strings for every cluster-① step labelKey', () => {
     const allSteps = [
       ...masterDesignerJourneySteps,
@@ -102,6 +136,24 @@ describe('roleJourneyDefinitions', () => {
       ...templateTesterJourneySteps,
     ]
     for (const step of allSteps) {
+      const value = tEn(step.labelKey).toLowerCase()
+      for (const noun of FORBIDDEN_L1_NOUNS) {
+        expect(value).not.toMatch(new RegExp(`\\b${noun}\\b`))
+      }
+    }
+  })
+
+  it('resolves non-empty en and zh-CN strings for every GLOBAL_ADMIN step labelKey', () => {
+    for (const step of globalAdminJourneySteps) {
+      expect(tEn(step.labelKey)).not.toBe(step.labelKey)
+      expect(tEn(step.labelKey).length).toBeGreaterThan(0)
+      expect(tZh(step.labelKey)).not.toBe(step.labelKey)
+      expect(tZh(step.labelKey).length).toBeGreaterThan(0)
+    }
+  })
+
+  it('GLOBAL_ADMIN step label en values avoid forbidden L1 nouns', () => {
+    for (const step of globalAdminJourneySteps) {
       const value = tEn(step.labelKey).toLowerCase()
       for (const noun of FORBIDDEN_L1_NOUNS) {
         expect(value).not.toMatch(new RegExp(`\\b${noun}\\b`))

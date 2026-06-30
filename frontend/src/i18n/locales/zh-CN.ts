@@ -1258,11 +1258,49 @@ export default {
           },
         },
       },
+      GLOBAL_ADMIN: {
+        title: '全行管理工作流程',
+        empty: {
+          guidance: '先查看下方全行概览，再通过任务中心与快捷入口管理用户、模板与提醒时限。',
+        },
+        steps: {
+          reviewOverview: {
+            label: '查看全行概览',
+            guidance: '浏览汇总卡片与待办，了解全行需要跟进的事项。',
+            cta: '查看概览',
+          },
+          manageUsersGroups: {
+            label: '管理用户与分组',
+            guidance: '在授权范围内创建和维护用户账户与业务分组。',
+            cta: '管理用户与分组',
+          },
+          removeTemplates: {
+            label: '移除模板',
+            guidance: '在模板列表中移除不再需要的模板。',
+            cta: '打开模板列表',
+          },
+          setReminderDefaults: {
+            label: '设置全行提醒时限',
+            guidance: '为测试、审批与上线队列设置全行默认提醒时限。',
+            cta: '设置提醒时限',
+          },
+          monitorOverdue: {
+            label: '跟进逾期提醒',
+            guidance: '在任务中心跟进逾期提醒，避免影响交付进度。',
+            cta: '查看待跟进逾期',
+          },
+          reviewAllTodos: {
+            label: '查看全部待办',
+            guidance: '在全行任务中心处理各队列中的待办事项。',
+            cta: '查看任务中心',
+          },
+        },
+      },
     },
   },
   identity: {
-    title: '身份与分组管理',
-    description: '在授权范围内管理管理账户与业务分组。',
+    title: '用户与权限',
+    description: '在授权范围内管理用户账户与业务分组。',
     usersPageTitle: '用户管理',
     usersPageDescription: '在授权范围内创建和维护管理用户及角色分配。',
     groupsPageTitle: '组管理',
