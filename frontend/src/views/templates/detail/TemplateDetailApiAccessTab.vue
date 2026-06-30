@@ -1,17 +1,22 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environments'
 import TemplateCallerContractPanel from '@/components/templates/TemplateCallerContractPanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import type { ApiCredentialSummary, ApiPolicy } from '@/types/template'
 
-defineProps<{
+const props = defineProps<{
   templateId: string
   showPolicyPanel: boolean
   loadingPolicy: boolean
   apiPolicy: ApiPolicy | null
+  policyLoadFailed: boolean
+  policyLoadErrorKey: string | null
   paginatedCredentials: ApiCredentialSummary[]
   credentialStatusFilterOptions: Array<{ label: string; value: string }>
   pageSize: number
@@ -35,16 +40,29 @@ const emit = defineEmits<{
   createCredential: []
   rotateCredential: [credentialId: string, externalId: string]
   revokeCredential: [credentialId: string]
+  retryPolicyLoad: []
 }>()
 
 const { t } = useI18n()
+
+const allowedAdGroupsText = computed(() => props.apiPolicy?.allowedAdGroups.join(', ') ?? '')
 </script>
 
 <template>
   <el-card shadow="never" class="section-card">
     <h2>{{ t('templates.policy.title') }}</h2>
     <el-skeleton v-if="loadingPolicy" :rows="4" animated />
-    <template v-else-if="apiPolicy">
+    <LoadErrorPanel
+      v-else-if="policyLoadFailed"
+      :message-key="policyLoadErrorKey ?? 'templates.error.loadPolicy'"
+      @retry="emit('retryPolicyLoad')"
+    />
+    <EmptyStatePanel
+      v-else-if="!apiPolicy"
+      title-key="templates.policy.notConfiguredTitle"
+      description-key="templates.policy.notConfiguredDescription"
+    />
+    <template v-else>
       <dl class="policy-summary">
         <div>
           <dt>{{ t('templates.policy.policyVersion') }}</dt>
@@ -56,7 +74,18 @@ const { t } = useI18n()
         </div>
         <div>
           <dt>{{ t('templates.policy.allowedAdGroups') }}</dt>
-          <dd>{{ apiPolicy.allowedAdGroups.join(', ') || '—' }}</dd>
+          <dd>
+            <el-tooltip
+              v-if="allowedAdGroupsText"
+              :content="allowedAdGroupsText"
+              placement="top"
+            >
+              <span class="policy-value policy-value--truncate policy-ad-groups">
+                {{ allowedAdGroupsText }}
+              </span>
+            </el-tooltip>
+            <span v-else>—</span>
+          </dd>
         </div>
         <div>
           <dt>{{ t('templates.policy.outputFormats') }}</dt>
@@ -178,8 +207,9 @@ const { t } = useI18n()
 
   div {
     display: grid;
-    grid-template-columns: 12rem 1fr;
+    grid-template-columns: 12rem minmax(0, 1fr);
     gap: 0.75rem;
+    align-items: start;
   }
 
   dt {
@@ -190,7 +220,16 @@ const { t } = useI18n()
 
   dd {
     margin: 0;
+    min-width: 0;
   }
+}
+
+.policy-value--truncate {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .policy-console-hint {

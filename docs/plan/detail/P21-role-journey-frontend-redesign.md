@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **sub-phase A cluster ① Done** — T01/T01a/T01b/T01c/T02 + T03/T04/T05; **P21-T06a Done** 2026-06-30 — tab sync + stale-data fixes; next **P21-T06b Not Started**) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **P21-T06b Done** 2026-06-30 — detail state completeness AUD-B06/B07; next **P21-T07 Not Started** — sub-phase B backend) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -176,7 +176,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | P21-T05 | A4 Tester journey: "waiting on my test" entry + guided test-confirm form (business field labels) + read-only evidence review (batch results / coverage / preview / output check) | lifecycle panel, decision form components | Required | Done (2026-06-30) |
 | P21-T06 | OPT-G3: split `TemplateDetailView.vue`; business-renamed tabs (releaseVersions → "Published versions", lifecycle → "Workflow status", apiAccess → "External access") | `TemplateDetailView.vue`, `templateDetailTabs.ts` | n/a (refactor) | Done (2026-06-30) |
 | P21-T06a | Template-detail interaction bug fixes (AUD-B01/B02): fix `?focus=/?tab=` two-way sync lockup (clear `focus` after deep-link); add `watch(templateId)` to reload on route reuse (stale-data); resolve default-tab vs `TEMPLATE_DETAIL_TABS[0]` vs DOM order split | `TemplateDetailView.vue`, `templateDetailTabs.ts` | Required (regression) | Done (2026-06-30) |
-| P21-T06b | Template-detail state completeness (AUD-B06/B07): publish-gate/policy/lifecycle loading-error-empty states (no silent catch); render `bindingGateResult`; long-name/AD-group truncation + semver picker responsive layout | `TemplateDetailView.vue`, `components/templates/**` | Required | Not Started (next) |
+| P21-T06b | Template-detail state completeness (AUD-B06/B07): publish-gate/policy/lifecycle loading-error-empty states (no silent catch); render `bindingGateResult`; long-name/AD-group truncation + semver picker responsive layout | `TemplateDetailView.vue`, `components/templates/**` | Required | Done (2026-06-30) |
 
 ### Sub-phase B — Cluster ② Approval + team lead / API management
 
@@ -312,8 +312,8 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 | AUD-B03 | 🔴 | APPROVAL dual-substate not surfaced: Badge has no substate; Banner ignores `approvalSubState`; list filter on `APPROVAL` but `TemplateSummary` lacks `approvalSubState` | `TemplateStatusBadge.vue:12-31`; `TemplateWorkflowBanner.vue:31-35`; `TemplateListView.vue:53-58`; `types/template.ts:15-26` | P21-T08 |
 | AUD-B04 | 🔴 | `showMetadataEdit` uses `authorTemplates` but matrix limits metadata edit to GLOBAL/GROUP (fail-open UI) | `TemplateDetailView.vue:186-192`; `permission-matrix.md` | P21-X03 |
 | AUD-B05 | 🔴 | `test-fail` decision has no remediation fields (only `approval-reject` does) | `TemplateLifecycleDecisionDialog.vue:276-331`; `domain-model.md` §4.1 | **Resolved (P21-T05)** |
-| AUD-B06 | 🟡 | Publish-gate parallel load failure silent-caught → publish disabled with no reason; `bindingGateResult` fetched but never rendered | `TemplateDetailView.vue:329-365,89,904-927` | P21-T06b |
-| AUD-B07 | 🟡 | Policy/lifecycle panels lack error/empty states; long name/AD-group no truncation; semver picker responsive break | `TemplateDetailView.vue:1056-1082,755-758,929-936` | P21-T06b |
+| AUD-B06 | 🟡 | Publish-gate parallel load failure silent-caught → publish disabled with no reason; `bindingGateResult` fetched but never rendered | `TemplateDetailView.vue:329-365,89,904-927` | **Resolved (P21-T06b)** |
+| AUD-B07 | 🟡 | Policy/lifecycle panels lack error/empty states; long name/AD-group no truncation; semver picker responsive break | `TemplateDetailView.vue:1056-1082,755-758,929-936` | **Resolved (P21-T06b)** |
 | AUD-B08 | 🟡 | Default-tab model split: `TEMPLATE_DETAIL_TABS[0]='overview'` vs fallback `releaseVersions` vs DOM order | `templateDetailTabs.ts:1,9`; `TemplateDetailView.vue:800-807` | **Resolved (P21-T06a)** |
 | AUD-B09 | 🟡 | Banner and Detail each maintain a separate capability×status matrix (drift risk) | `TemplateWorkflowBanner.vue:23-49`; `TemplateDetailView.vue:144-181` | **Resolved (P21-T06)** — `templateWorkflowBannerContext.ts` SSOT |
 | AUD-B10 | 🟡 | Submit-for-approval has no evidence checklist gate; exception UI only GROUP (not GLOBAL) | `TemplateDetailView.vue:848-854`; `TemplateLifecycleDecisionDialog.vue:333-361` | P21-T09 |
@@ -2042,3 +2042,12 @@ with `TEMPLATE_DETAIL_TABS`; `DEFAULT_TEMPLATE_DETAIL_TAB='overview'`; stale-tem
 
 **Gate:** pnpm lint/type-check/test/build green (**404** Vitest); Playwright **2/2**. **Audit:** AUD-B01,
 AUD-B02, AUD-B08 **resolved**. Next **P21-T06b**.
+
+#### Implementation status (2026-06-30) — P21-T06b
+
+**Done.** `templateBindingGateDisplay.ts`; publish gate load error + retry + binding summary in
+lifecycle tab; policy load error/empty in ApiAccess tab; header name + AD group truncation;
+responsive semver picker.
+
+**Gate:** pnpm lint/type-check/test/build green (**414** Vitest); Playwright **1/1**. **Audit:**
+AUD-B06, AUD-B07 **resolved**. Next **P21-T07** (sub-phase B backend).

@@ -1,7 +1,15 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import type { SemverBumpLevel } from '@/utils/semver'
+import {
+  listInvalidBindings,
+  mapBindingGateIssueItems,
+  type BindingGateIssueItem,
+} from '@/utils/templateBindingGateDisplay'
 import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
+import type { BindingValidationResult } from '@/types/template'
 
 type PublishBumpOption = {
   level: SemverBumpLevel
@@ -11,7 +19,7 @@ type PublishBumpOption = {
 
 type GovernanceAction = 'stop' | 'restore' | 'deprecate'
 
-defineProps<{
+const props = defineProps<{
   showLifecycleSection: boolean
   showGovernanceSection: boolean
   lifecycleComment: string
@@ -31,6 +39,8 @@ defineProps<{
   publishGateReady: boolean
   publishBumpOptions: PublishBumpOption[]
   submitting: boolean
+  bindingGateResult: BindingValidationResult | null
+  publishGateLoadError: string | null
 }>()
 
 const emit = defineEmits<{
@@ -43,9 +53,32 @@ const emit = defineEmits<{
   publish: []
   testGenerate: []
   governanceAction: [action: GovernanceAction]
+  retryPublishGate: []
 }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
+
+const bindingGateIssues = computed(() =>
+  props.bindingGateResult ? mapBindingGateIssueItems(props.bindingGateResult.summary) : [],
+)
+
+const bindingGateIssueMessageKey: Record<BindingGateIssueItem['issueKey'], string> = {
+  missingAnchor: 'templates.bindingGate.issueMissingAnchor',
+  duplicateBinding: 'templates.bindingGate.issueDuplicateBinding',
+  incompatibleContentType: 'templates.bindingGate.issueIncompatibleContentType',
+}
+
+const invalidBindings = computed(() =>
+  props.bindingGateResult ? listInvalidBindings(props.bindingGateResult.bindings) : [],
+)
+
+function resolveBindingStatusLabel(status: string | undefined): string {
+  if (!status) {
+    return status ?? ''
+  }
+  const key = `templates.bindingGate.status.${status}`
+  return te(key) ? t(key) : status
+}
 </script>
 
 <template>
@@ -114,51 +147,92 @@ const { t } = useI18n()
         </el-button>
       </template>
       <template v-if="showPublishActions">
-        <el-card shadow="never" class="publish-gate-card">
-          <h3>{{ t('templates.publishGate.title') }}</h3>
-          <p>{{ t('templates.publishGate.description') }}</p>
-          <el-skeleton v-if="loadingPublishGate" :rows="3" animated />
-          <ul v-else class="publish-gate-list">
-            <li v-for="item in publishGateItems" :key="item.key">
-              <span>{{ item.label }}</span>
-              <el-tag v-if="item.informational" type="info" size="small">
-                {{ t('templates.publishGate.informational') }}
-              </el-tag>
-              <el-tag v-else :type="item.ready ? 'success' : 'warning'" size="small">
-                {{ item.ready ? t('templates.publishGate.ready') : t('templates.publishGate.pending') }}
-              </el-tag>
-            </li>
-          </ul>
-        </el-card>
-        <el-radio-group
-          :model-value="publishBumpLevel"
-          class="publish-bump-picker"
-          @update:model-value="emit('update:publishBumpLevel', $event)"
-        >
-          <el-radio-button
-            v-for="option in publishBumpOptions"
-            :key="option.level"
-            :value="option.level"
-          >
-            {{ option.label }} ({{ option.version }})
-          </el-radio-button>
-        </el-radio-group>
-        <el-alert
-          v-if="publishVersionConflict"
-          class="publish-conflict-alert"
-          type="warning"
-          :title="t('templates.lifecycle.releaseVersionConflict')"
-          show-icon
-          :closable="false"
+        <LoadErrorPanel
+          v-if="publishGateLoadError"
+          :message-key="publishGateLoadError"
+          class="publish-gate-error"
+          @retry="emit('retryPublishGate')"
         />
-        <el-button
-          type="primary"
-          :loading="submitting"
-          :disabled="!publishGateReady"
-          @click="emit('publish')"
-        >
-          {{ t('templates.lifecycle.publish') }}
-        </el-button>
+        <template v-else>
+          <el-card v-if="bindingGateResult" shadow="never" class="binding-gate-card">
+            <h3>{{ t('templates.bindingGate.title') }}</h3>
+            <p>
+              {{
+                t('templates.bindingGate.summary', {
+                  valid: bindingGateResult.summary.validCount,
+                  total: bindingGateResult.summary.totalBindings,
+                })
+              }}
+            </p>
+            <ul v-if="bindingGateIssues.length" class="binding-gate-issues">
+              <li v-for="issue in bindingGateIssues" :key="issue.issueKey">
+                {{ t(bindingGateIssueMessageKey[issue.issueKey], { count: issue.count }) }}
+              </li>
+            </ul>
+            <ul v-if="invalidBindings.length" class="binding-gate-invalid-list">
+              <li v-for="binding in invalidBindings" :key="`${binding.anchorId}-${binding.validationStatus}`">
+                {{
+                  t('templates.bindingGate.invalidBindingLine', {
+                    anchorId: binding.anchorId,
+                    statusLabel: resolveBindingStatusLabel(binding.validationStatus),
+                  })
+                }}
+              </li>
+            </ul>
+            <el-alert
+              v-if="bindingGateResult.summary.blocking"
+              type="warning"
+              :title="t('templates.authoring.bindingValidationBlocking')"
+              show-icon
+              :closable="false"
+            />
+          </el-card>
+          <el-card shadow="never" class="publish-gate-card">
+            <h3>{{ t('templates.publishGate.title') }}</h3>
+            <p>{{ t('templates.publishGate.description') }}</p>
+            <el-skeleton v-if="loadingPublishGate" :rows="3" animated />
+            <ul v-else class="publish-gate-list">
+              <li v-for="item in publishGateItems" :key="item.key">
+                <span>{{ item.label }}</span>
+                <el-tag v-if="item.informational" type="info" size="small">
+                  {{ t('templates.publishGate.informational') }}
+                </el-tag>
+                <el-tag v-else :type="item.ready ? 'success' : 'warning'" size="small">
+                  {{ item.ready ? t('templates.publishGate.ready') : t('templates.publishGate.pending') }}
+                </el-tag>
+              </li>
+            </ul>
+          </el-card>
+          <el-radio-group
+            :model-value="publishBumpLevel"
+            class="publish-bump-picker publish-bump-picker--wrap"
+            @update:model-value="emit('update:publishBumpLevel', $event)"
+          >
+            <el-radio-button
+              v-for="option in publishBumpOptions"
+              :key="option.level"
+              :value="option.level"
+            >
+              {{ option.label }} ({{ option.version }})
+            </el-radio-button>
+          </el-radio-group>
+          <el-alert
+            v-if="publishVersionConflict"
+            class="publish-conflict-alert"
+            type="warning"
+            :title="t('templates.lifecycle.releaseVersionConflict')"
+            show-icon
+            :closable="false"
+          />
+          <el-button
+            type="primary"
+            :loading="submitting"
+            :disabled="!publishGateReady || loadingPublishGate"
+            @click="emit('publish')"
+          >
+            {{ t('templates.lifecycle.publish') }}
+          </el-button>
+        </template>
       </template>
       <el-button v-if="showTestGenerate" :loading="submitting" @click="emit('testGenerate')">
         {{ t('templates.testGenerate.action') }}
@@ -228,10 +302,31 @@ const { t } = useI18n()
   width: 100%;
 }
 
+.publish-bump-picker--wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  height: auto;
+
+  :deep(.el-radio-button) {
+    margin-left: 0;
+  }
+
+  :deep(.el-radio-button__inner) {
+    border-left: 1px solid var(--el-border-color);
+    border-radius: var(--el-border-radius-base);
+  }
+}
+
 .publish-conflict-alert {
   width: 100%;
 }
 
+.publish-gate-error {
+  width: 100%;
+}
+
+.binding-gate-card,
 .publish-gate-card {
   width: 100%;
   margin-bottom: 1rem;
@@ -250,8 +345,10 @@ const { t } = useI18n()
   }
 }
 
-.publish-gate-list {
-  margin: 0;
+.publish-gate-list,
+.binding-gate-issues,
+.binding-gate-invalid-list {
+  margin: 0 0 0.75rem;
   padding-left: 1.25rem;
 }
 </style>

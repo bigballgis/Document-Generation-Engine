@@ -722,9 +722,23 @@ export default {
         save: '无法保存风险提示配置。',
       },
     },
+    bindingGate: {
+      title: '绑定校验',
+      summary: '{valid}/{total} 个绑定有效',
+      issueMissingAnchor: '{count} 个缺失锚点',
+      issueDuplicateBinding: '{count} 个重复绑定',
+      issueIncompatibleContentType: '{count} 个内容类型不兼容',
+      invalidBindingLine: '{anchorId}：{statusLabel}',
+      status: {
+        MISSING_ANCHOR: '缺失锚点',
+        DUPLICATE_BINDING: '重复绑定',
+        INCOMPATIBLE_CONTENT_TYPE: '内容类型不兼容',
+      },
+    },
     publishGate: {
       title: '发布门禁清单',
       description: '发布前请确认以下项目。',
+      loadError: '无法加载发布门禁清单。',
       releaseVersionProvided: '已指定发布版本。',
       ready: '就绪',
       pending: '待完成',
@@ -873,10 +887,17 @@ export default {
       environment: '环境',
     },
     policy: {
+      title: 'API 策略',
       policyVersion: '策略版本',
+      defaultRouteReleaseVersion: '默认路由发布版本',
+      allowedAdGroups: '允许的 AD 组',
       outputFormats: '输出格式',
       outputModes: '输出模式',
       pdfEncryptionEnabled: 'PDF 加密',
+      credentialsTitle: '凭据',
+      noCredentials: '暂无凭据。',
+      notConfiguredTitle: '未配置 API 策略',
+      notConfiguredDescription: '此模板尚未配置运行时 API 访问策略。',
       impact: {
         title: '策略影响预览',
         confirmPrompt: '请确认策略影响后再保存。',
@@ -931,6 +952,10 @@ export default {
       confirmTitle: '确认删除模板',
       confirmMessage: '删除后模板将不再出现在编排与运行时列表中，是否继续？',
       success: '模板已删除。',
+    },
+    error: {
+      loadPolicy: '无法加载 API 策略。',
+      loadPublishGate: '无法加载发布门禁清单。',
     },
   },
   table: {

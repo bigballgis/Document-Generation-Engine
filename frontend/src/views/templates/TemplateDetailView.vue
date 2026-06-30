@@ -58,6 +58,7 @@ import {
   isPublishGateReady,
   mapPublishGateChecklistItems,
 } from '@/utils/templateLifecycleDecisionForm'
+import { resolvePublishGateLoadErrorKey } from '@/utils/templateBindingGateDisplay'
 import type {
   ApiCredentialSummary,
   BindingValidationResult,
@@ -112,6 +113,8 @@ const publishGateChecklist = ref<PublishGateChecklist | null>(null)
 const publishCoverageSummary = ref<CoverageSummary | null>(null)
 const publishChangeDiffSummary = ref<ChangeDiffSummary | null>(null)
 const loadingPublishGate = ref(false)
+const publishGateLoadError = ref<string | null>(null)
+const policyLoadFailed = ref(false)
 const metadataEditOpen = ref(false)
 const loadFailed = ref(false)
 type DetailTab = TemplateDetailTab
@@ -466,6 +469,8 @@ function resetTransientDetailState() {
   publishChangeDiffSummary.value = null
   publishedReleaseVersions.value = []
   loadingPublishGate.value = false
+  publishGateLoadError.value = null
+  policyLoadFailed.value = false
 }
 
 function syncTabFromRoute() {
@@ -526,34 +531,12 @@ watch(
       publishCoverageSummary.value = null
       publishChangeDiffSummary.value = null
       publishedReleaseVersions.value = []
+      publishGateLoadError.value = null
       return
     }
     publishBumpLevel.value = 'patch'
     publishVersion.value = suggestedVersions.value.patch
-    loadingPublishGate.value = true
-    try {
-      await templatesStore.fetchApiPolicy(templateId.value)
-      const [bindings, checklist, coverage, changeDiff, versions] = await Promise.all([
-        templatesStore.validateBindings(templateId.value),
-        templatesApi.fetchPublishGate(templateId.value),
-        templatesApi.getTemplateCoverage(templateId.value),
-        templatesApi.fetchChangeDiff(templateId.value),
-        templatesApi.fetchReleaseVersions(templateId.value),
-      ])
-      bindingGateResult.value = bindings
-      publishGateChecklist.value = checklist
-      publishCoverageSummary.value = coverage
-      publishChangeDiffSummary.value = changeDiff
-      publishedReleaseVersions.value = versions.map((entry) => entry.releaseVersion)
-    } catch {
-      bindingGateResult.value = null
-      publishGateChecklist.value = null
-      publishCoverageSummary.value = null
-      publishChangeDiffSummary.value = null
-      publishedReleaseVersions.value = []
-    } finally {
-      loadingPublishGate.value = false
-    }
+    await loadPublishGateData()
   },
   { immediate: true },
 )
@@ -592,11 +575,45 @@ function openLifecyclePanel() {
   scrollToLifecyclePanel()
 }
 
+async function loadPublishGateData() {
+  publishGateLoadError.value = null
+  loadingPublishGate.value = true
+  try {
+    await templatesStore.fetchApiPolicy(templateId.value)
+    const [bindings, checklist, coverage, changeDiff, versions] = await Promise.all([
+      templatesStore.validateBindings(templateId.value),
+      templatesApi.fetchPublishGate(templateId.value),
+      templatesApi.getTemplateCoverage(templateId.value),
+      templatesApi.fetchChangeDiff(templateId.value),
+      templatesApi.fetchReleaseVersions(templateId.value),
+    ])
+    bindingGateResult.value = bindings
+    publishGateChecklist.value = checklist
+    publishCoverageSummary.value = coverage
+    publishChangeDiffSummary.value = changeDiff
+    publishedReleaseVersions.value = versions.map((entry) => entry.releaseVersion)
+  } catch {
+    publishGateLoadError.value = resolvePublishGateLoadErrorKey(templatesStore.lastErrorMessageKey)
+    bindingGateResult.value = null
+    publishGateChecklist.value = null
+    publishCoverageSummary.value = null
+    publishChangeDiffSummary.value = null
+    publishedReleaseVersions.value = []
+  } finally {
+    loadingPublishGate.value = false
+  }
+}
+
 async function loadPolicyData() {
-  await Promise.all([
-    templatesStore.fetchApiPolicy(templateId.value),
-    templatesStore.fetchCredentials(templateId.value),
-  ])
+  policyLoadFailed.value = false
+  try {
+    await Promise.all([
+      templatesStore.fetchApiPolicy(templateId.value),
+      templatesStore.fetchCredentials(templateId.value),
+    ])
+  } catch {
+    policyLoadFailed.value = true
+  }
 }
 
 function openApiPolicyConsole() {
@@ -947,8 +964,10 @@ async function handleDeleteTemplate() {
         {{ t('templates.detail.backToList') }}
       </el-button>
       <div v-if="template" class="header-content">
-        <div>
-          <h1>{{ template.name }}</h1>
+        <div class="header-title-block">
+          <el-tooltip :content="template.name" placement="top">
+            <h1 class="template-name">{{ template.name }}</h1>
+          </el-tooltip>
           <p>{{ t('templates.detail.groupLabel', { groupCode: template.groupCode }) }}</p>
         </div>
         <div class="header-actions">
@@ -1037,6 +1056,8 @@ async function handleDeleteTemplate() {
             :publish-version-conflict="publishVersionConflict"
             :publish-gate-ready="publishGateReady"
             :publish-bump-options="publishBumpOptions"
+            :binding-gate-result="bindingGateResult"
+            :publish-gate-load-error="publishGateLoadError"
             :submitting="templatesStore.submitting"
             @update:lifecycle-comment="lifecycleComment = $event"
             @update:publish-bump-level="publishBumpLevel = $event"
@@ -1047,6 +1068,7 @@ async function handleDeleteTemplate() {
             @publish="handlePublish"
             @test-generate="handleTestGenerate"
             @governance-action="handleGovernanceAction"
+            @retry-publish-gate="loadPublishGateData"
           />
         </el-tab-pane>
 
@@ -1091,6 +1113,8 @@ async function handleDeleteTemplate() {
             :show-policy-panel="showPolicyPanel"
             :loading-policy="templatesStore.loadingPolicy"
             :api-policy="templatesStore.apiPolicy"
+            :policy-load-failed="policyLoadFailed"
+            :policy-load-error-key="templatesStore.lastErrorMessageKey"
             :paginated-credentials="paginatedCredentials"
             :credential-status-filter-options="credentialStatusFilterOptions"
             :page-size="CLIENT_TABLE_PAGE_SIZE"
@@ -1102,6 +1126,7 @@ async function handleDeleteTemplate() {
             @create-credential="handleCreateCredential"
             @rotate-credential="handleRotateCredential"
             @revoke-credential="handleRevokeCredential"
+            @retry-policy-load="loadPolicyData"
           />
         </el-tab-pane>
       </el-tabs>
@@ -1179,16 +1204,25 @@ async function handleDeleteTemplate() {
   justify-content: space-between;
   gap: 1rem;
   margin-top: 0.5rem;
+}
 
-  h1 {
-    margin: 0 0 0.25rem;
-    font-size: 1.75rem;
-  }
+.header-title-block {
+  min-width: 0;
+  flex: 1 1 auto;
+}
 
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
+.template-name {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.header-title-block p {
+  margin: 0;
+  color: var(--text-muted);
 }
 
 .header-actions {
