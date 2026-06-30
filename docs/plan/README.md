@@ -7,7 +7,7 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Active formal phase: P21** (activated 2026-06-29; **P21-T09 Done**; next **P21-T09a** API management L1 copy). P12 remains the deferred-enhancements
+**Active formal phase: P21** (activated 2026-06-29; **P21-T09a Done**; next **P21-T09b** reminder timing config). P12 remains the deferred-enhancements
 catch-all (non-active). See [execution-sync-ledger.md](./execution-sync-ledger.md).
 
 ## Layer model
@@ -76,7 +76,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **Active phase: P21** — role-journey frontend redesign & business-friendly terminology
-(activated 2026-06-29; **P21-T09 Done**; next **P21-T09a** — API management L1 copy) — see
+(activated 2026-06-29; **P21-T09a Done**; next **P21-T09b** — reminder timing config) — see
 [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md)
 
 **Open backlog (non-active):**

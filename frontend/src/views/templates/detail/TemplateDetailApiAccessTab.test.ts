@@ -42,14 +42,14 @@ describe('TemplateDetailApiAccessTab', () => {
       policyLoadFailed: true,
       policyLoadErrorKey: 'templates.error.loadPolicy',
     })
-    expect(wrapper.text()).toContain('Unable to load API policy.')
+    expect(wrapper.text()).toContain('Unable to load access settings.')
     await wrapper.find('.el-button--primary').trigger('click')
     expect(wrapper.emitted('retryPolicyLoad')).toHaveLength(1)
   })
 
   it('shows empty state when no policy is configured', () => {
     const wrapper = mountTab({ apiPolicy: null, policyLoadFailed: false, loadingPolicy: false })
-    expect(wrapper.text()).toContain('No API policy configured')
+    expect(wrapper.text()).toContain('API access not configured')
   })
 
   it('truncates long AD group lists with tooltip content', () => {

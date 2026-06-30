@@ -373,5 +373,37 @@ describe('navStructure', () => {
       expect(zhCN.nav.items.audit).toBe('操作记录')
       expect(zhCN.nav.routes.audit).not.toContain('审计控制台')
     })
+
+    it('passes forbidden L1 token grep on API management copy (P21-T09a)', () => {
+      const apiManagementL1Values = [
+        en.apiPolicy.home.title,
+        en.apiPolicy.home.description,
+        en.apiPolicy.detail.title,
+        en.apiPolicy.detail.openConsole,
+        en.apiPolicy.detail.templateTabHint,
+        en.apiPolicy.detail.saveSuccess,
+        en.apiPolicy.detail.domains.OUTPUT_POLICY,
+        en.apiPolicy.detail.impact.confirmTitle,
+        en.templates.policy.title,
+        en.templates.policy.credentialsTitle,
+        en.templates.policy.createCredential,
+        en.templates.policy.notConfiguredTitle,
+        en.templates.policy.impact.title,
+        en.templates.error.loadPolicy,
+        en.templates.error.loadCredentials,
+        en.templates.publishGate.checkCodes.API_POLICY,
+        en.api.apimgmt.policyImpact.blocking,
+        en.api.apimgmt.policyImpact.safe,
+        en.dashboard.quickLinks.apiPolicies,
+      ]
+
+      for (const value of apiManagementL1Values) {
+        expect(value).not.toMatch(forbiddenPattern)
+      }
+
+      expect(en.apiPolicy.home.title).toBe('Manage API access')
+      expect(zhCN.apiPolicy.home.title).toBe('API 接入管理')
+      expect(zhCN.templates.policy.credentialsTitle).toBe('接入账号')
+    })
   })
 })

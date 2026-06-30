@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **P21-T09 Done** 2026-06-30 — cluster ② B2 Team-lead go-live journey; next **P21-T09a Not Started** — API management L1 copy) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **P21-T09a Done** 2026-06-30 — API management L1 copy; next **P21-T09b Not Started** — reminder timing config) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -185,7 +185,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | P21-T07 | B0 backend: emit `SUBMIT_FOR_APPROVAL`, `APPROVAL_FAILURE → REMEDIATION`, `APPROVAL_PENDING_RELEASE`, `TIMEOUT_ESCALATION`; write `RESOLVED` on approval/publish decisions | `backend/.../collaboration/**`, `TemplateLifecycleService`, escalation scheduler | Required | Done (2026-06-30) |
 | P21-T08 | B1 Approver journey: "waiting on my approval" entry + controlled approval decision + `approvalSubState` (PENDING_SUBMIT vs PENDING_DECISION) dual-substate UI | lifecycle panel, decision forms | Required | Done (2026-06-30) |
 | P21-T09 | B2 Team-lead / API management journey: master review tasks; "waiting to confirm go-live" entry + pre-release checks + go-live summary confirm | lifecycle panel, dashboard | Required | Done (2026-06-30) |
-| P21-T09a | API management / access-keys journey: full L1 copy replacement of API policy/credential surfaces | `ApiPolicyDetailView`, api policy components, `en.ts`, `zh-CN.ts` | Required | Not Started |
+| P21-T09a | API management / access-keys journey: full L1 copy replacement of API policy/credential surfaces | `ApiPolicyDetailView`, api policy components, `en.ts`, `zh-CN.ts` | Required | Done (2026-06-30) |
 | P21-T09b | Reminder timing config + overdue-reminder queue visibility + exception handling ("confirm on behalf" + audit trail copy, not "exception intervention") | `CollaborationTimeoutConfigPanel`, dashboard | Required | Not Started |
 
 ### Sub-phase C — Cluster ③ Global admin
@@ -2093,4 +2093,12 @@ E2E helper.
 
 **Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**451** Vitest); Playwright
 `P21-T09-team-lead-journey.spec.ts` **4/4** + `P21-T09-uiux-evidence.spec.ts` **1/1**; UIUX manifest
-`frontend/e2e/evidence/P21-T09-uiux-manifest.md` — **PASS**. Backend unchanged. Next **P21-T09a**.
+`frontend/e2e/evidence/P21-T09-uiux-manifest.md` — **PASS**. Backend unchanged. Next **P21-T09a** (now Done).
+
+### P21-T09a completion (2026-06-30)
+
+**Scope:** L1 value-only i18n sweep for API management / access-keys surfaces — stable keys unchanged.
+
+**Deliverables:** `en.ts` + `zh-CN.ts` (`apiPolicy.*`, `templates.policy.*`, `templates.error.*`, publish gate `API_POLICY`, `api.apimgmt.policyImpact.*`, governance restore copy, dashboard quick link); Vitest updates (`ApiPolicyDetailView.test.ts`, `TemplateDetailApiAccessTab.test.ts`, `navStructure.test.ts` P21-T09a grep audit); Playwright `P21-T09a-api-management-l1.spec.ts` **2/2**.
+
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**452** Vitest); Playwright P21-T09a **2/2**. Backend unchanged. Next **P21-T09b**.

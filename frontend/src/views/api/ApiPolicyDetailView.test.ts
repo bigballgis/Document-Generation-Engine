@@ -105,7 +105,7 @@ describe('ApiPolicyDetailView', () => {
     const wrapper = mountView()
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Output policy')
+    expect(wrapper.text()).toContain('Output settings')
     expect(wrapper.text()).toContain('v2')
     expect(wrapper.text()).toContain('AD group authorization')
   })

@@ -1,6 +1,6 @@
 # Business-Friendly Terminology Guide (English-first)
 
-**Status:** Confirmed design (user, 2026-06-29) | **Implementation:** Not Started (delivered under **P21**)
+**Status:** Confirmed design (user, 2026-06-29) | **Implementation:** In Progress (P21-T09a landed 2026-06-30)
 **Owner phase:** [P21 — Role-journey frontend redesign & business-friendly terminology](../plan/detail/P21-role-journey-frontend-redesign.md)
 **Primary persona source:** user confirmation 2026-06-29 (two rounds).
 
