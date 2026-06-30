@@ -83,22 +83,22 @@ describe('TemplatePublishSummaryDialog', () => {
 
   it('disables confirm when required gate items are pending', async () => {
     const wrapper = mountDialog([
-      { key: 'ANCHOR_INTEGRITY', label: 'Anchor integrity', ready: false },
+      { key: 'ANCHOR_INTEGRITY', label: 'Layout placeholder check', ready: false },
       { key: 'COVERAGE_THRESHOLDS', label: 'Coverage thresholds', ready: true },
     ])
     await flushPromises()
 
     const confirmButton = wrapper
       .findAll('button')
-      .find((button) => button.text().includes('Confirm publish'))
+      .find((button) => button.text().includes('Confirm go-live'))
 
     expect(confirmButton?.attributes('disabled')).toBeDefined()
-    expect(wrapper.text()).toContain('Resolve publish gate blockers')
+    expect(wrapper.text()).toContain('Resolve pre-release blockers')
   })
 
   it('shows coverage and change diff summaries when provided', async () => {
     const wrapper = mountDialog(
-      [{ key: 'ANCHOR_INTEGRITY', label: 'Anchor integrity', ready: true }],
+      [{ key: 'ANCHOR_INTEGRITY', label: 'Layout placeholder check', ready: true }],
       { coverageBelowThreshold: false, changeDiffHasChanges: true },
     )
     await flushPromises()
@@ -109,7 +109,7 @@ describe('TemplatePublishSummaryDialog', () => {
 
   it('shows preview comparison summary when provided', async () => {
     const wrapper = mountDialog(
-      [{ key: 'ANCHOR_INTEGRITY', label: 'Anchor integrity', ready: true }],
+      [{ key: 'ANCHOR_INTEGRITY', label: 'Layout placeholder check', ready: true }],
       {
         previewComparison: { totalDiffCount: 2, blockerCount: 0, warningCount: 2 },
       },
@@ -121,14 +121,14 @@ describe('TemplatePublishSummaryDialog', () => {
 
   it('enables confirm when all required gate items are ready', async () => {
     const wrapper = mountDialog([
-      { key: 'ANCHOR_INTEGRITY', label: 'Anchor integrity', ready: true },
+      { key: 'ANCHOR_INTEGRITY', label: 'Layout placeholder check', ready: true },
       { key: 'COVERAGE_THRESHOLDS', label: 'Coverage thresholds', ready: true },
     ])
     await flushPromises()
 
     const confirmButton = wrapper
       .findAll('button')
-      .find((button) => button.text().includes('Confirm publish'))
+      .find((button) => button.text().includes('Confirm go-live'))
 
     expect(confirmButton?.attributes('disabled')).toBeUndefined()
   })

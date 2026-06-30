@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **sub-phase D cluster ④ Done** — T11; **P21-X03 Done** 2026-06-30 — permission fail-closed + unified route guard; **P21-X04 Done** 2026-06-30 — backend capability + route + OpenAPI completeness; **P21-X05 Done** 2026-06-30 — UI quality & a11y (AUD-Q01..Q03); **P21-X06 Done** 2026-06-30 — i18n parity hardening (AUD-Q04); **all four role clusters complete**; phase **wrap-up** — next cross-cutting **P21-X01** per §11.5) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **sub-phase D cluster ④ Done** — T11; **P21-X03 Done** 2026-06-30 — permission fail-closed + unified route guard; **P21-X04 Done** 2026-06-30 — backend capability + route + OpenAPI completeness; **P21-X05 Done** 2026-06-30 — UI quality & a11y (AUD-Q01..Q03); **P21-X06 Done** 2026-06-30 — i18n parity hardening (AUD-Q04); **P21-X01 Done** 2026-06-30 — full-system L1 terminology sweep (AUD-Q05); **all four role clusters complete**; phase **wrap-up** — next **P21-X02** only) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -169,7 +169,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | P21-T01a | Task hub deepening: queue partitioning + restore `triggerType/summaryText/ageSeconds` + SLA/overdue badges + inline open actions | `DashboardView.vue`, `useWorkflowTasks.ts`, `utils/collaborationWorkItems.ts`, `stores/collaboration.ts`, `TaskHubPartitionSection.vue` | Required (§12.3) | Done (2026-06-29) |
 | P21-T01b | New `RoleJourneyTimeline` reusable stepper (business-language steps, empty/guidance states) | `frontend/src/components/journey/**`, `roleJourneyDefinitions.ts`, `DashboardView.vue` | Required (§12.4) | Done (2026-06-30) |
 | P21-T01c | Dead-code cleanup: remove `RoleHomeView.vue` (+test); remove residual workbench logical keys | `routeKeys.ts`, `auth/roles.ts`, `useWorkflowTasks.ts`, i18n | n/a (refactor) | Done (2026-06-30) |
-| P21-T01d | Companion terminology guide created (SSOT) + en/zh value sweep round 1 | `docs/product/business-terminology-guide.md`, `en.ts`, `zh-CN.ts` | n/a (doc) | Not Started |
+| P21-T01d | Companion terminology guide created (SSOT) + en/zh value sweep round 1 | `docs/product/business-terminology-guide.md`, `en.ts`, `zh-CN.ts` | n/a (doc) | Done (2026-06-30; guide at registration + full sweep via P21-X01) |
 | P21-T02 | A1 backend: emit `TEST_FAILURE → REMEDIATION`; write `RESOLVED` on test decision; allow resubmit-for-test from "test passed" | `backend/.../collaboration/**`, `TemplateLifecycleService`, `ApprovalSubStateResolver` (new) | Required (§12.1 ready) | Done (2026-06-29) |
 | P21-T03 | A2 Master designer journey: upload → layout placeholders → submit review → rework timeline + "master review / master to fix" behavior entries (business titles) | `MasterPackageHubView.vue`, `MasterRevisionDetailView.vue`, `masterDesignerJourney.ts`, `RoleJourneyTimeline`, `DashboardView.vue` | Required (§12.5) | Done (2026-06-30) |
 | P21-T04 | A3 Orchestrator journey: create → design content → trial generate → submit test → submit approval; "waiting on my fixes" entry; PENDING_RELEASE shows "awaiting team-lead go-live" | template views, lifecycle panel | Required (§12.6 ready) | Done (2026-06-30) |
@@ -204,7 +204,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 
 | ID | Task | Key files | Status |
 | --- | --- | --- | --- |
-| P21-X01 | Business terminology system upheld across all sub-phases: audit + rewrite nav/tasks/journey/detail/forms/error fallback copy (en baseline + zh-CN); IT terms only in API/code/audit fields | `en.ts`, `zh-CN.ts`, `messages_en.properties` | Not Started |
+| P21-X01 | Business terminology system upheld across all sub-phases: audit + rewrite nav/tasks/journey/detail/forms/error fallback copy (en baseline + zh-CN); IT terms only in API/code/audit fields | `en.ts`, `zh-CN.ts`, `messages_en.properties` | Done (2026-06-30) |
 | P21-X02 | Governance & docs: register P21, update permission-matrix + catalog-navigation-ux, add ADR extending Batch B, maintain terminology guide; per sub-phase BDD → TDD → E2E + UIUX → doc-sync → commit-review | docs/** | In Progress (registration + companion docs done 2026-06-29; per-slice sync pending) |
 | P21-X03 | **Permission single-source & fail-closed remediation** (AUD-P01..P05, AUD-B04): unify route guard to one `canAccessRoute` reading only `visibleRoutes`; strict `resolveCapability` (missing capability fail-closed); `canExportTemplates` via `authorTemplates`; `canUploadMasters` fix; `showMetadataEdit` admin-only; fix `roles.test.ts` assertions | `auth/roles.ts`, `router/index.ts`, `stores/session.ts`, `composables/useCapabilities.ts`, `TemplateDetailView.vue` | Required | Done (2026-06-30) |
 | P21-X04 | **Backend capability + route + contract completeness** (AUD-P02/P05/P09, AUD-C05): register `route.content-module-management` in `RouteVisibilityService` + `ManagementRoute` + matrix §13.1; expose `exportTemplates` / `viewCollaborationWorkItems` / `maintainCollaborationTimeoutConfig` / content-module capabilities in `ManagementCapabilitiesView`; add `GET /collaboration-work-items` to OpenAPI v1 | `backend/.../authorization/**`, `backend/.../collaboration/**`, `docs/api/openapi-v1.yaml`, `permission-matrix.md` | Required | Done (2026-06-30) |
@@ -323,7 +323,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 | ID | Sev | Finding | Evidence | Owner task |
 | --- | --- | --- | --- | --- |
 | AUD-Q04 | 🔴 | zh-CN primary-journey keys missing at scale (whole `contentModules`; `templates.lifecycle/governance/authoring/...`) → silent English fallback | `zh-CN.ts` (no `contentModules`); `zh-CN.ts:854-899` vs `en.ts:687-771` | **Resolved → P21-X06 Done** (2026-06-30) |
-| AUD-Q05 | 🟡 | High IT-jargon density on L1 — **T01 resolved in-scope keys** (nav groups/items, dashboard/task-hub L1, collaboration queue labels, breadcrumb routes per §12.2 Spec B); **remaining out-of-scope surfaces** (API policy pages, template-detail tabs, audit page bodies, `templates.*` / `apiPolicy.*` / `audit.*` L1) → **P21-X01** | `en.ts` — in-scope keys rewritten 2026-06-29; residual IT terms at `templates.*`, `apiPolicy.*`, `audit.*` | **P21-T01 Done** (in-scope L1); remainder → P21-X01 |
+| AUD-Q05 | 🟢 | High IT-jargon density on L1 — **T01 resolved in-scope keys** (nav groups/items, dashboard/task-hub L1, collaboration queue labels, breadcrumb routes per §12.2 Spec B); **full-system sweep** (`templates.*`, `audit.*`, `contentModules.*`, `packageCatalog.*`, nav routes) → **P21-X01 Done** (2026-06-30) | `en.ts`, `zh-CN.ts`, `business-terminology-guide.md` | **Resolved → P21-X01 Done** (2026-06-30) |
 | AUD-Q01 | 🔴 | `--color-primary` undefined → table keyboard focus ring invisible | `AppDataTable.vue:72-74,90-92` | **Resolved → P21-X05 Done** (2026-06-30) |
 | AUD-Q02 | 🟡 | No `:focus-visible` on nav items / breadcrumb links | `ManagementShell.vue:252-278`; `AppBreadcrumb.vue:44-51` | **Resolved → P21-X05 Done** (2026-06-30) |
 | AUD-Q03 | 🟡 | Brand wordmark shows internal code `REDBC/GREENBC`; bare hex/px and unregistered CSS vars | `BrandLogo.vue:31`; `en.ts:127-128`; `TemplateDetailView.vue:1325` | **Resolved → P21-X05 Done** (2026-06-30) |
@@ -346,7 +346,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 3. **P0 bugs** — AUD-B01/B02: focus/tab lockup + stale templateId (P21-T06a).
 4. **P0 i18n/a11y** — AUD-Q04 zh-CN parity (**P21-X06 Done**, 2026-06-30); AUD-Q01 focus ring + AUD-Q02/Q03 UI/a11y (**P21-X05 Done**, 2026-06-30).
 5. **P1** — task hub depth (AUD-H01..H06, P21-T01a); APPROVAL dual-substate (**AUD-B03 resolved → P21-T08**, 2026-06-30);
-   L1 terminology — **AUD-Q05 in-scope L1 → P21-T01 Done** (2026-06-29); full-system sweep → P21-X01;
+   L1 terminology — **AUD-Q05 resolved → P21-X01 Done** (2026-06-30; T01 in-scope 2026-06-29 + full-system sweep);
    matrix/capability drift (**AUD-P06 resolved → P21-X04 Done**, 2026-06-30).
 6. **P2** — decision/governance forms (AUD-B05/B10); detail state completeness (AUD-B06/B07);
    OpenAPI contract (**AUD-C05 resolved → P21-X04 Done**, 2026-06-30).
@@ -2171,7 +2171,7 @@ i18n `en.ts` / `zh-CN.ts` (`branding.*` display names).
 **Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**508** Vitest). Backend unchanged.
 **Audit:** AUD-Q01 **resolved** (`--color-primary` defined); AUD-Q02 **resolved** (nav + breadcrumb
 `:focus-visible`); AUD-Q03 **resolved** (brand wordmark i18n + token cleanup). P21 phase **wrap-up** —
-next **P21-X01** per §11.5; phase exit criteria (§7) still open on X01 (X02 In Progress).
+next **P21-X01** → **P21-X01 Done** (2026-06-30); phase exit criteria (§7) still open on X02 (In Progress).
 
 ### P21-X06 completion (2026-06-30)
 
@@ -2185,4 +2185,19 @@ unit tests); `i18n/locales/zh-CN.ts` (~368 keys added).
 
 **Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green. Backend unchanged.
 **Audit:** AUD-Q04 **resolved** (zh-CN covers all en leaf keys; parity test green). P21 phase
-**wrap-up** — next **P21-X01** per §11.5; phase exit criteria (§7) still open on X01 (X02 In Progress).
+**wrap-up** — next **P21-X02** only; phase exit criteria (§7) still open on X02 (In Progress).
+
+### P21-X01 completion (2026-06-30)
+
+**Scope:** Cross-cutting full-system L1 terminology sweep — business-friendly copy across
+`templates.*`, `audit.*`, `contentModules.*`, `packageCatalog.*`, and nav routes; IT terms
+restricted to L2 help / L3 contract-audit fields. Resolves AUD-Q05 (remainder after P21-T01
+in-scope keys).
+
+**Deliverables:** `i18n/locales/en.ts`, `i18n/locales/zh-CN.ts`; `docs/product/business-terminology-guide.md`
+(P21-X01 mapping table); Vitest coverage (`TemplateStatusBadge.test.ts`,
+`TemplatePublishSummaryDialog.test.ts`, `TemplateDetailLifecycleTab.test.ts`, `navStructure.test.ts`).
+
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**511** Vitest). Backend unchanged.
+**Audit:** AUD-Q05 **resolved** (full-system L1 sweep complete). P21 phase **wrap-up** — next
+**P21-X02** only; phase exit criteria (§7) still open on X02 (In Progress).

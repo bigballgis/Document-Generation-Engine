@@ -45,7 +45,7 @@ function mountTab(props: Partial<typeof baseProps> = {}) {
 describe('TemplateDetailLifecycleTab', () => {
   it('shows publish gate load error with retry', async () => {
     const wrapper = mountTab({ publishGateLoadError: 'templates.error.loadPublishGate' })
-    expect(wrapper.text()).toContain('Unable to load publish gate checklist.')
+    expect(wrapper.text()).toContain('Unable to load pre-release checks.')
     await wrapper.find('.el-button--primary').trigger('click')
     expect(wrapper.emitted('retryPublishGate')).toHaveLength(1)
   })
@@ -74,7 +74,7 @@ describe('TemplateDetailLifecycleTab', () => {
 
     expect(wrapper.text()).toContain('Binding validation')
     expect(wrapper.text()).toContain('0 of 1 bindings valid')
-    expect(wrapper.text()).toContain('1 missing anchor(s)')
+    expect(wrapper.text()).toContain('1 missing layout placeholder(s)')
     expect(wrapper.text()).toContain('ANC-MISSING')
   })
 

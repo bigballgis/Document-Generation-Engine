@@ -28,7 +28,7 @@ describe('TemplateStatusBadge', () => {
 
   it('renders lifecycle status label', () => {
     const wrapper = mountBadge({ status: 'PUBLISHED' })
-    expect(wrapper.text()).toContain('Published')
+    expect(wrapper.text()).toContain('Live')
   })
 
   it('surfaces approval PENDING_SUBMIT substate', () => {
@@ -36,7 +36,7 @@ describe('TemplateStatusBadge', () => {
       status: 'APPROVAL',
       approvalSubState: 'PENDING_SUBMIT',
     })
-    expect(wrapper.text()).toContain('Awaiting submit for approval')
+    expect(wrapper.text()).toContain('Ready to submit for approval')
   })
 
   it('surfaces approval PENDING_DECISION substate', () => {
@@ -44,6 +44,6 @@ describe('TemplateStatusBadge', () => {
       status: 'APPROVAL',
       approvalSubState: 'PENDING_DECISION',
     })
-    expect(wrapper.text()).toContain('Awaiting approval decision')
+    expect(wrapper.text()).toContain('Awaiting approval')
   })
 })

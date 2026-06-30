@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { collectLeafKeys, resolveLeafValue } from '@/i18n/collectLeafKeys'
 import en from '@/i18n/locales/en'
 import zhCN from '@/i18n/locales/zh-CN'
 import {
@@ -479,6 +480,45 @@ describe('navStructure', () => {
       }
 
       expect(en.journey.roles.GLOBAL_ADMIN.title).toBe('Bank-wide administration workflow')
+    })
+
+    it('passes forbidden L1 token grep on residual template/audit/contentModule copy (P21-X01)', () => {
+      const p21ForbiddenPattern =
+        /\b(policy|credential|lifecycle|semver|gate|governance|console|orchestrate|entitlement|anchor integrity|\banchor\b)\b/i
+
+      function collectStringLeaves(
+        root: Record<string, unknown>,
+        excludedPrefixes: string[] = [],
+      ): string[] {
+        return collectLeafKeys(root)
+          .filter((key) => !excludedPrefixes.some((prefix) => key.startsWith(prefix)))
+          .map((key) => resolveLeafValue(root, key))
+          .filter((value): value is string => typeof value === 'string')
+      }
+
+      const templateValues = collectStringLeaves(en.templates as Record<string, unknown>, [
+        'contract.',
+        'bindingGate.invalidBindingLine',
+      ])
+      const auditValues = collectStringLeaves(en.audit as Record<string, unknown>, [
+        'eventTypes.',
+        'export.managementFilename',
+        'export.lifecycleFilename',
+      ])
+      const contentModuleValues = collectStringLeaves(en.contentModules as Record<string, unknown>)
+
+      const residualL1Values = [...templateValues, ...auditValues, ...contentModuleValues]
+
+      for (const value of residualL1Values) {
+        expect(value).not.toMatch(p21ForbiddenPattern)
+        expect(value.toLowerCase()).not.toMatch(/\bescalation\b/)
+      }
+
+      expect(en.templates.lifecycle.title).toBe('Workflow actions')
+      expect(en.templates.publishGate.title).toBe('Pre-release checks')
+      expect(en.templates.governance.title).toBe('Post-publish controls')
+      expect(en.contentModules.list.title).toBe('Standard clauses')
+      expect(en.nav.routes.globalGovernance).toBe('Bank-wide administration')
     })
   })
 })

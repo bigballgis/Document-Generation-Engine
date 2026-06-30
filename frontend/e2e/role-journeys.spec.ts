@@ -42,6 +42,6 @@ test.describe('role journey smoke (COR-E02)', () => {
 
     await page.getByRole('tab', { name: /overview/i }).click()
     await expect(page.getByText(/draft/i).first()).toBeVisible()
-    await expect(page.getByRole('heading', { name: /lifecycle actions/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /workflow actions/i })).toBeVisible()
   })
 })

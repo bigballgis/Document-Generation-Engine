@@ -25,8 +25,8 @@ export default {
     error: apiErrorZhCn,
     publishGate: {
       anchorIntegrity: {
-        ready: '锚点绑定有效。',
-        blocked: '锚点绑定校验存在阻塞项。',
+        ready: '版式占位符绑定有效。',
+        blocked: '版式占位符绑定校验存在阻塞项。',
       },
       variableSchema: {
         ready: '变量架构已配置。',
@@ -116,8 +116,8 @@ export default {
       masterReview: '待审核母版',
     },
     routes: {
-      globalGovernance: '全局治理',
-      groupGovernance: '分组治理',
+      globalGovernance: '全行管理',
+      groupGovernance: '分组管理',
       templateAuthoring: '模板设计',
       apiPolicy: 'API 管理',
       audit: '操作记录',
@@ -250,17 +250,17 @@ export default {
     master: {
       noticeTitle: '主文档包',
       noticeDescription:
-        '每一行是一个主文档包。进入包内可管理修订线、审核流程和锚点目录。',
+        '每一行是一个主文档包。进入包内可管理修订线、审核流程和版式占位符。',
     },
     template: {
       noticeTitle: '模板包',
       noticeDescription:
-        '每一行是一个模板包。进入包内可查看发布版本线、工作流状态和编排内容。',
+        '每一行是一个模板包。进入包内可查看发布版本线、工作流状态并进行模板设计。',
     },
     contentModule: {
-      noticeTitle: '内容模块',
+      noticeTitle: '标准条款',
       noticeDescription:
-        '每一行是一个可复用条款或内容模块。进入模块可管理版本、审批流程和生命周期治理。',
+        '每一行是一条可复用标准条款。进入条款可管理版本、审批流程和上线后管控。',
     },
   },
   collaboration: {
@@ -545,7 +545,7 @@ export default {
       actorSummary: '操作人',
       statusSummary: '状态',
       fromState: '原状态',
-      toState: '目标状态',
+      toState: '新状态',
       summary: '发生了什么',
     },
     eventTypes: {
@@ -564,20 +564,20 @@ export default {
     },
     export: {
       action: '导出',
-      confirmTitle: '导出审计事件',
+      confirmTitle: '导出活动记录',
       confirmAction: '下载导出文件',
       cancelAction: '取消',
       scopeAll: '导出授权范围内所有匹配事件（无额外筛选）。',
-      success: '管理审计导出已下载。',
-      lifecycleSuccess: '生命周期审计导出已下载。',
+      success: '管理活动导出已下载。',
+      lifecycleSuccess: '模板工作流导出已下载。',
       managementFilename: 'management-audit-export.json',
       lifecycleFilename: 'lifecycle-audit-export.json',
     },
     error: {
-      loadManagement: '无法加载管理审计事件。',
-      loadLifecycle: '无法加载生命周期审计事件。',
-      export: '无法导出管理审计事件。',
-      exportLifecycle: '无法导出生命周期审计事件。',
+      loadManagement: '无法加载管理活动。',
+      loadLifecycle: '无法加载模板工作流活动。',
+      export: '无法导出管理活动。',
+      exportLifecycle: '无法导出模板工作流活动。',
     },
   },
   templates: {
@@ -606,7 +606,7 @@ export default {
     },
     list: {
       title: '模板',
-      description: '按名称浏览模板包。进入包内可查看发布版本线并执行生命周期工作流。',
+      description: '按名称浏览模板包。进入包内可查看发布版本线并执行测试、审批与上线流程。',
       groupSection: '分组：{groupCode}',
       empty: '暂无模板包。',
       columns: {
@@ -631,7 +631,7 @@ export default {
       tabs: {
         overview: '概览',
         lifecycle: '流程状态',
-        authoring: '编排',
+        authoring: '模板设计',
         releaseVersions: '已发布版本',
         apiAccess: '对外服务',
       },
@@ -646,8 +646,8 @@ export default {
     },
     workflow: {
       actionRequired: '发布版本工作流 — 需要操作',
-      useLifecyclePanel: '请使用下方流转操作面板推进此模板发布版本。',
-      openLifecyclePanel: '打开流转面板',
+      useLifecyclePanel: '请使用下方工作流操作面板推进此模板发布版本。',
+      openLifecyclePanel: '打开工作流面板',
     },
     testDataSets: {
       title: '测试数据集',
@@ -692,10 +692,10 @@ export default {
     },
     coverage: {
       title: '覆盖率摘要',
-      description: '将已执行的样本、必填变量与锚点绑定与配置的阈值进行对比。',
+      description: '将已执行的样本、必填变量与版式占位符绑定和配置的阈值进行对比。',
       refresh: '刷新',
       thresholdHint:
-        '当前阈值（{scope}）：必填变量 {variablePct}%、必填样本 {samplePct}%、锚点绑定 {anchorPct}%。',
+        '当前阈值（{scope}）：必填变量 {variablePct}%、必填样本 {samplePct}%、版式占位符绑定 {anchorPct}%。',
       status: {
         meetsThreshold: '综合覆盖率已达到阈值（{percentage}%）。',
         belowThreshold: '综合覆盖率低于阈值（{percentage}%）。',
@@ -712,7 +712,7 @@ export default {
       dimensions: {
         requiredVariables: '必填变量',
         requiredSamples: '必填样本',
-        anchorBindings: '锚点绑定',
+        anchorBindings: '版式占位符绑定',
       },
       error: {
         load: '无法加载覆盖率摘要。',
@@ -772,7 +772,7 @@ export default {
       noDimensionChanges: '该维度无变更。',
       dimensions: {
         content: '内容',
-        anchors: '锚点',
+        anchors: '版式占位符',
         variables: '变量',
         rules: '规则',
         contractSummary: '合约摘要',
@@ -783,7 +783,7 @@ export default {
     },
     riskPrompt: {
       title: '风险提示配置',
-      description: '为结构化生命周期决策配置原因类别与风险提示文案。',
+      description: '为结构化工作流决策配置原因类别与风险提示文案。',
       refresh: '刷新',
       scopeType: '作用域',
       scopeGlobal: '全局默认',
@@ -806,12 +806,12 @@ export default {
     bindingGate: {
       title: '绑定校验',
       summary: '{valid}/{total} 个绑定有效',
-      issueMissingAnchor: '{count} 个缺失锚点',
+      issueMissingAnchor: '{count} 个缺失版式占位符',
       issueDuplicateBinding: '{count} 个重复绑定',
       issueIncompatibleContentType: '{count} 个内容类型不兼容',
       invalidBindingLine: '{anchorId}：{statusLabel}',
       status: {
-        MISSING_ANCHOR: '缺失锚点',
+        MISSING_ANCHOR: '缺失版式占位符',
         DUPLICATE_BINDING: '重复绑定',
         INCOMPATIBLE_CONTENT_TYPE: '内容类型不兼容',
       },
@@ -828,7 +828,7 @@ export default {
       pending: '待完成',
       informational: '参考项',
       checkCodes: {
-        ANCHOR_INTEGRITY: '锚点完整性',
+        ANCHOR_INTEGRITY: '版式占位符检查',
         VARIABLE_SCHEMA: '变量架构',
         RULE_BOUNDS: '规则边界',
         TEST_RESULTS: '批量测试结果',
@@ -841,10 +841,10 @@ export default {
       },
     },
     publishSummary: {
-      title: '发布摘要',
-      description: '确认发布 {name} 前请复核清单。',
+      title: '上线摘要',
+      description: '确认 {name} 上线前请复核检查清单。',
       releaseVersion: '发布版本',
-      checklistTitle: '发布门禁清单',
+      checklistTitle: '上线前检查',
       checklistProgress: '必填项 {ready}/{total} 已就绪',
       validationTitle: '校验摘要',
       coverageMeetsThreshold: '覆盖率达标（{percentage}%）。',
@@ -858,8 +858,8 @@ export default {
       previewComparisonHasWarnings:
         '预览对比报告 {total} 处差异（警告 {warnings}，阻塞 {blockers}）。',
       previewComparisonHasBlockers: '预览对比在 {total} 处差异中包含 {blockers} 个阻塞项。',
-      blockersPresent: '请先解决发布门禁阻塞项再确认发布。',
-      confirm: '确认发布',
+      blockersPresent: '请先解决上线前阻塞项再确认上线。',
+      confirm: '确认上线',
     },
     testGenerate: {
       action: '测试生成',
@@ -1023,7 +1023,7 @@ export default {
       diffSummary: '摘要',
       locationTypes: {
         PAGE: '页面',
-        ANCHOR: '锚点',
+        ANCHOR: '版式占位符',
         SECTION: '章节',
         COMPONENT: '组件',
       },
@@ -1033,18 +1033,18 @@ export default {
       },
     },
     status: {
-      DRAFT: '草稿',
+      DRAFT: '编写中',
       TESTING: '测试中',
       APPROVAL: '审批',
       approvalPendingSubmit: '待提交审批',
-      approvalPendingDecision: '待审批决定',
-      PENDING_RELEASE: '待发布',
-      PUBLISHED: '已发布',
+      approvalPendingDecision: '待审批',
+      PENDING_RELEASE: '待上线',
+      PUBLISHED: '已上线',
       STOPPED: '已停用',
       DEPRECATED: '已废弃',
     },
     lifecycle: {
-      title: '流转操作',
+      title: '工作流操作',
       commentPlaceholder: '可选备注（记入操作记录）',
       submitTest: '提交测试',
       passTest: '确认测试通过',
@@ -1118,7 +1118,7 @@ export default {
           rationaleRequired: '请填写审批理由。',
         },
         reasonCategories: {
-          BINDING_ISSUE: '绑定或锚点问题',
+          BINDING_ISSUE: '绑定或版式占位符问题',
           VARIABLE_SCHEMA_ISSUE: '变量架构问题',
           RULE_VALIDATION_ISSUE: '规则校验问题',
           FIDELITY_WARNING: '保真度警告',
@@ -1130,7 +1130,7 @@ export default {
       },
     },
     governance: {
-      title: '上线后管理',
+      title: '上线后管控',
       description: '停用、恢复或永久废弃已上线模板。每项操作均需填写原因并记入操作记录。',
       stop: '停用模板',
       restore: '恢复模板',
@@ -1154,7 +1154,7 @@ export default {
       description: '本模板包已发布的版本线。状态与最后更新时间反映各版本线当前情况。',
       workflowHintTitle: '工作流进行中',
       workflowHintDescription:
-        '在「生命周期工作流」页签中完成测试、审批和发布后，新版本将出现在此列表。',
+        '在「流程状态」页签中完成测试、审批和上线后，新版本将出现在此列表。',
       loadError: '无法加载版本线。',
       releaseVersion: '发布版本',
       devVersionNumber: '开发版本号',
@@ -1286,7 +1286,7 @@ export default {
       bundleSourceTemplateId: '源模板 ID',
       master: '目标主文档',
       masterPlaceholder: '请选择目标分组内已批准的主文档',
-      conflictPolicy: '冲突策略',
+      conflictPolicy: '模板已存在时',
       conflictReject: '模板 ID 已存在时拒绝导入',
       conflictKeepId: '保留模板 ID 并创建新的开发版本',
       conflictHint:
@@ -1333,7 +1333,7 @@ export default {
       deleteVariable: '无法删除变量。',
       saveBinding: '无法保存绑定。',
       saveRules: '无法保存规则。',
-      lifecycle: '无法完成流转操作。',
+      lifecycle: '无法完成工作流操作。',
       updateMetadata: '无法更新模板基本信息。',
       delete: '无法删除模板。',
       export: '无法导出模板包。',
@@ -1444,7 +1444,7 @@ export default {
     list: {
       title: '标准条款',
       description:
-        '浏览授权分组内可复用的条款与内容模块。按分组筛选后打开模块以管理版本与状态。',
+        '浏览授权分组内可复用的标准条款。按分组筛选后打开条款以管理版本与审批流程。',
       groupFilter: '分组',
       groupFilterPlaceholder: '选择分组',
       selectGroupTitle: '选择分组',
@@ -1486,7 +1486,7 @@ export default {
       stopDescription: '停用后将阻止新模板引用，已上线模板仍保留锁定版本。',
       recoverDescription: '恢复后将重新启用已批准模块版本供新模板引用。',
       deprecateDescription: '废弃将在影响审阅后逻辑退役已停用的模块版本。',
-      impactTitle: '状态变更影响预览',
+      impactTitle: '影响预览',
       impact: {
         referenceTemplates: '引用模板',
         templateList: '模板列表',
@@ -1513,7 +1513,7 @@ export default {
       moduleCodePlaceholder: 'MOD-LOAN-DISCLOSURE',
       name: '名称',
       description: '描述',
-      semanticVersion: '初始版本',
+      semanticVersion: '初始版本号',
       contentStructureJson: '内容结构（JSON）',
       changeDescription: '变更说明',
       submit: '创建模块',
@@ -1523,7 +1523,7 @@ export default {
         moduleCodeRequired: '模块代码为必填项。',
         moduleCodePattern: '请使用大写字母、数字、下划线或连字符。',
         nameRequired: '名称为必填项。',
-        semanticVersionRequired: '语义版本为必填项。',
+        semanticVersionRequired: '版本号为必填项。',
         contentStructureRequired: '内容结构 JSON 为必填项。',
       },
     },
@@ -1532,12 +1532,12 @@ export default {
       editDraft: '编辑草稿',
       createTitle: '创建草稿版本',
       editTitle: '编辑草稿 {version}',
-      semanticVersion: '语义版本',
+      semanticVersion: '版本号',
       contentStructureJson: '内容结构（JSON）',
       changeDescription: '变更说明',
       saveSuccess: '版本已保存。',
       validation: {
-        semanticVersionRequired: '语义版本为必填项。',
+        semanticVersionRequired: '版本号为必填项。',
         contentStructureRequired: '内容结构 JSON 为必填项。',
       },
     },
@@ -1564,7 +1564,7 @@ export default {
       createVersion: '无法创建模块版本。',
       updateVersion: '无法更新草稿版本。',
       reviewTransition: '无法应用审阅流转。',
-      loadImpactPreview: '无法加载状态变更影响预览。',
+      loadImpactPreview: '无法加载影响预览。',
       lifecycle: '无法应用状态操作。',
     },
   },

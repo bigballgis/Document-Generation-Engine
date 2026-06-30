@@ -1,6 +1,6 @@
 # Business-Friendly Terminology Guide (English-first)
 
-**Status:** Confirmed design (user, 2026-06-29) | **Implementation:** In Progress (P21-T09a landed 2026-06-30)
+**Status:** Confirmed design (user, 2026-06-29) | **Implementation:** P21-X01 Done (2026-06-30)
 **Owner phase:** [P21 — Role-journey frontend redesign & business-friendly terminology](../plan/detail/P21-role-journey-frontend-redesign.md)
 **Primary persona source:** user confirmation 2026-06-29 (two rounds).
 
@@ -108,7 +108,16 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | Anchor catalog / anchor integrity | Layout placeholders / Placeholder check | 版式占位符 | "anchor" help text only |
 | Render profile / fidelity | Output format check | 输出效果检查 | expandable L2 help |
 | Orchestrate | Configure / Set up | 配置 | |
-| Callable / runtime callers | Available to channel systems | 可供渠道系统调用 | |
+| Global governance | Bank-wide administration | 全行管理 | `nav.routes.globalGovernance` | P21-X01 |
+| Group governance | Group administration | 分组管理 | `nav.routes.groupGovernance` | P21-X01 |
+| Lifecycle actions | Workflow actions | 工作流操作 | `templates.lifecycle.title` | P21-X01 |
+| Publish gate checklist | Pre-release checks | 上线前检查 | `templates.publishGate.title` | P21-X01 |
+| Post-publish governance | Post-publish controls | 上线后管控 | `templates.governance.title` | P21-X01 |
+| Anchor bindings / integrity | Layout placeholder bindings / check | 版式占位符绑定 / 检查 | `templates.authoring.bindingsTitle`, `templates.publishGate.checkCodes.ANCHOR_INTEGRITY` | P21-X01 |
+| Content modules (list) | Standard clauses | 标准条款 | `contentModules.list.title`, `packageCatalog.contentModule.noticeTitle` | P21-X01 |
+| Lifecycle impact preview | Impact preview | 影响预览 | `contentModules.lifecycle.impactTitle` | P21-X01 |
+| Semantic version (L1 label) | Version number | 版本号 | `contentModules.version.semanticVersion` | hide semver concept |
+| Audit lifecycle tab export | Template workflow export | 模板工作流导出 | `audit.export.lifecycleSuccess` | P21-X01 |
 
 ## 5. Acceptance (per P21 sub-phase)
 

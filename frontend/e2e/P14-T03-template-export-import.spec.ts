@@ -136,7 +136,7 @@ test.describe('P14-T03 template export / import', () => {
 
     await page.getByRole('tab', { name: /overview/i }).click()
     const lifecyclePanel = page.locator('#template-lifecycle-panel')
-    await expect(lifecyclePanel.getByRole('heading', { name: /lifecycle actions/i })).toBeVisible()
+    await expect(lifecyclePanel.getByRole('heading', { name: /workflow actions/i })).toBeVisible()
     await expect(lifecyclePanel.getByRole('button', { name: /submit for test/i })).toBeVisible()
 
     await reLoginAs(page, loginAs, E2E_TEMPLATE_AUTHOR)
@@ -144,7 +144,7 @@ test.describe('P14-T03 template export / import', () => {
     await expect(page.getByRole('heading', { level: 1, name: /staging import/i })).toBeVisible()
     await expect(page.getByText(/^draft$/i).first()).toBeVisible()
     await page.getByRole('tab', { name: /overview/i }).click()
-    await expect(lifecyclePanel.getByRole('heading', { name: /lifecycle actions/i })).toBeVisible()
+    await expect(lifecyclePanel.getByRole('heading', { name: /workflow actions/i })).toBeVisible()
     await expect(lifecyclePanel.getByRole('button', { name: /submit for test/i })).toBeVisible()
 
     await reLoginAs(page, loginAs, E2E_TEMPLATE_TESTER)
