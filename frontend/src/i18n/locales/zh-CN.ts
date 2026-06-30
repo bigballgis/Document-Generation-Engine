@@ -132,8 +132,8 @@ export default {
     },
   },
   brand: {
-    redbc: 'REDBC',
-    greenbc: 'GREENBC',
+    redbc: '零售银行',
+    greenbc: '绿色银行',
   },
   home: {
     summary: {

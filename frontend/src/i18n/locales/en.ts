@@ -133,8 +133,8 @@ export default {
     },
   },
   brand: {
-    redbc: 'REDBC',
-    greenbc: 'GREENBC',
+    redbc: 'Retail Bank',
+    greenbc: 'Green Bank',
   },
   home: {
     summary: {

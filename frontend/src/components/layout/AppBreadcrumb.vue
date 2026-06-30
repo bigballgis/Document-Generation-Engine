@@ -48,5 +48,10 @@ function navigate(path: string) {
   color: var(--brand-primary);
   cursor: pointer;
   font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: 2px;
+  }
 }
 </style>

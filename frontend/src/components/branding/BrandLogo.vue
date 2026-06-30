@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { BrandPreset } from '@/config/brands'
+import { useI18n } from 'vue-i18n'
+import { BRAND_REGISTRY, type BrandPreset } from '@/config/brands'
 import greenbcLogo from '@/assets/brands/greenbc-logo.svg'
 import redbcLogo from '@/assets/brands/redbc-logo.svg'
 
@@ -16,7 +17,14 @@ const props = withDefaults(
   },
 )
 
+const { t } = useI18n()
+
 const logoSrc = computed(() => (props.brand === 'REDBC' ? redbcLogo : greenbcLogo))
+
+const wordmarkLabel = computed(() => {
+  const entry = BRAND_REGISTRY.find((item) => item.code === props.brand)
+  return entry ? t(entry.labelKey) : props.brand
+})
 </script>
 
 <template>
@@ -28,7 +36,7 @@ const logoSrc = computed(() => (props.brand === 'REDBC' ? redbcLogo : greenbcLog
       :height="size"
       alt=""
     />
-    <span v-if="showWordmark" class="brand-logo__wordmark">{{ brand }}</span>
+    <span v-if="showWordmark" class="brand-logo__wordmark">{{ wordmarkLabel }}</span>
   </div>
 </template>
 
@@ -51,8 +59,7 @@ const logoSrc = computed(() => (props.brand === 'REDBC' ? redbcLogo : greenbcLog
 .brand-logo__wordmark {
   font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--brand-primary);
 }
 </style>

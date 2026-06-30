@@ -33,6 +33,7 @@ export function applyBrandTheme(preset: BrandPreset): void {
   const root = document.documentElement
   root.dataset.brand = preset
   root.style.setProperty('--brand-primary', theme.primary)
+  root.style.setProperty('--color-primary', theme.primary)
   root.style.setProperty('--brand-primary-hover', theme.primaryHover)
   root.style.setProperty('--brand-header-bg', theme.headerBg)
   root.style.setProperty('--brand-header-border', theme.headerBorder)

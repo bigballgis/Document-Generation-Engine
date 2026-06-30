@@ -331,8 +331,8 @@ function resolveBindingStatusLabel(status: string | undefined): string {
   width: 100%;
   margin-bottom: 1rem;
   padding: 1rem;
-  border: 1px solid var(--border-subtle, #e5e7eb);
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
 
   h3 {
     margin: 0 0 0.5rem;
