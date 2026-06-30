@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **sub-phase D cluster ④ Done** — T11; **P21-X03 Done** 2026-06-30 — permission fail-closed + unified route guard; **P21-X04 Done** 2026-06-30 — backend capability + route + OpenAPI completeness; **P21-X05 Done** 2026-06-30 — UI quality & a11y (AUD-Q01..Q03); **all four role clusters complete**; phase **wrap-up** — next cross-cutting **P21-X01/X06** per §11.5) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **sub-phase D cluster ④ Done** — T11; **P21-X03 Done** 2026-06-30 — permission fail-closed + unified route guard; **P21-X04 Done** 2026-06-30 — backend capability + route + OpenAPI completeness; **P21-X05 Done** 2026-06-30 — UI quality & a11y (AUD-Q01..Q03); **P21-X06 Done** 2026-06-30 — i18n parity hardening (AUD-Q04); **all four role clusters complete**; phase **wrap-up** — next cross-cutting **P21-X01** per §11.5) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -209,7 +209,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | P21-X03 | **Permission single-source & fail-closed remediation** (AUD-P01..P05, AUD-B04): unify route guard to one `canAccessRoute` reading only `visibleRoutes`; strict `resolveCapability` (missing capability fail-closed); `canExportTemplates` via `authorTemplates`; `canUploadMasters` fix; `showMetadataEdit` admin-only; fix `roles.test.ts` assertions | `auth/roles.ts`, `router/index.ts`, `stores/session.ts`, `composables/useCapabilities.ts`, `TemplateDetailView.vue` | Required | Done (2026-06-30) |
 | P21-X04 | **Backend capability + route + contract completeness** (AUD-P02/P05/P09, AUD-C05): register `route.content-module-management` in `RouteVisibilityService` + `ManagementRoute` + matrix §13.1; expose `exportTemplates` / `viewCollaborationWorkItems` / `maintainCollaborationTimeoutConfig` / content-module capabilities in `ManagementCapabilitiesView`; add `GET /collaboration-work-items` to OpenAPI v1 | `backend/.../authorization/**`, `backend/.../collaboration/**`, `docs/api/openapi-v1.yaml`, `permission-matrix.md` | Required | Done (2026-06-30) |
 | P21-X05 | **UI quality & a11y fixes** (AUD-Q01..Q03): define/alias `--color-primary` (table focus ring); add `:focus-visible` to nav items + breadcrumb links; replace bare hex/px with design tokens; brand wordmark shows bank display name not `REDBC/GREENBC` | `AppDataTable.vue`, `ManagementShell.vue`, `AppBreadcrumb.vue`, `BrandLogo.vue`, `theme/tokens.ts`, `styles/global.scss` | n/a (UI) | Done (2026-06-30) |
-| P21-X06 | **i18n parity hardening** (AUD-Q04): fill zh-CN gaps (whole `contentModules`, `templates.lifecycle/governance/authoring/rules/create/error`, `paste`); add layered locale key-parity test to block silent en-fallback | `zh-CN.ts`, `i18n/localeRegistry.test.ts` | n/a (i18n) | Not Started |
+| P21-X06 | **i18n parity hardening** (AUD-Q04): fill zh-CN gaps (whole `contentModules`, `templates.lifecycle/governance/authoring/rules/create/error`, `paste`); add layered locale key-parity test to block silent en-fallback | `zh-CN.ts`, `collectLeafKeys.ts`, `i18n/localeRegistry.test.ts` | n/a (i18n) | Done (2026-06-30) |
 
 ## 7. Exit criteria (phase)
 
@@ -322,7 +322,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 
 | ID | Sev | Finding | Evidence | Owner task |
 | --- | --- | --- | --- | --- |
-| AUD-Q04 | 🔴 | zh-CN primary-journey keys missing at scale (whole `contentModules`; `templates.lifecycle/governance/authoring/...`) → silent English fallback | `zh-CN.ts` (no `contentModules`); `zh-CN.ts:854-899` vs `en.ts:687-771` | P21-X06 |
+| AUD-Q04 | 🔴 | zh-CN primary-journey keys missing at scale (whole `contentModules`; `templates.lifecycle/governance/authoring/...`) → silent English fallback | `zh-CN.ts` (no `contentModules`); `zh-CN.ts:854-899` vs `en.ts:687-771` | **Resolved → P21-X06 Done** (2026-06-30) |
 | AUD-Q05 | 🟡 | High IT-jargon density on L1 — **T01 resolved in-scope keys** (nav groups/items, dashboard/task-hub L1, collaboration queue labels, breadcrumb routes per §12.2 Spec B); **remaining out-of-scope surfaces** (API policy pages, template-detail tabs, audit page bodies, `templates.*` / `apiPolicy.*` / `audit.*` L1) → **P21-X01** | `en.ts` — in-scope keys rewritten 2026-06-29; residual IT terms at `templates.*`, `apiPolicy.*`, `audit.*` | **P21-T01 Done** (in-scope L1); remainder → P21-X01 |
 | AUD-Q01 | 🔴 | `--color-primary` undefined → table keyboard focus ring invisible | `AppDataTable.vue:72-74,90-92` | **Resolved → P21-X05 Done** (2026-06-30) |
 | AUD-Q02 | 🟡 | No `:focus-visible` on nav items / breadcrumb links | `ManagementShell.vue:252-278`; `AppBreadcrumb.vue:44-51` | **Resolved → P21-X05 Done** (2026-06-30) |
@@ -344,7 +344,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
    emission wired in `TemplateLifecycleService`; TIMEOUT_ESCALATION unchanged (existing scheduler).
 2. **P0 security** — AUD-P01..P05: permission single-source + fail-closed (**P21-X03 Done**, 2026-06-30; AUD-B04 resolved same slice).
 3. **P0 bugs** — AUD-B01/B02: focus/tab lockup + stale templateId (P21-T06a).
-4. **P0 i18n/a11y** — AUD-Q04 zh-CN parity (**P21-X06**); AUD-Q01 focus ring + AUD-Q02/Q03 UI/a11y (**P21-X05 Done**, 2026-06-30).
+4. **P0 i18n/a11y** — AUD-Q04 zh-CN parity (**P21-X06 Done**, 2026-06-30); AUD-Q01 focus ring + AUD-Q02/Q03 UI/a11y (**P21-X05 Done**, 2026-06-30).
 5. **P1** — task hub depth (AUD-H01..H06, P21-T01a); APPROVAL dual-substate (**AUD-B03 resolved → P21-T08**, 2026-06-30);
    L1 terminology — **AUD-Q05 in-scope L1 → P21-T01 Done** (2026-06-29); full-system sweep → P21-X01;
    matrix/capability drift (**AUD-P06 resolved → P21-X04 Done**, 2026-06-30).
@@ -498,7 +498,7 @@ Playwright `P21-T01-behavior-nav.spec.ts` **7/7**, `P21-T01-uiux-evidence.spec.t
 - **Out (later slices):** queue partitioning / table columns / inline open actions (**P21-T01a**);
   `RoleJourneyTimeline` (**P21-T01b**); dead-code removal (**P21-T01c**); API-policy / template-detail /
   audit-console full L1 sweeps (**P21-T09a**, **P21-T11**, **P21-X01**); permission single-source
-  remediation (**P21-X03**); zh-CN parity hardening (**P21-X06**).
+  remediation (**P21-X03**); zh-CN parity hardening (**P21-X06 Done**, 2026-06-30).
 
 **Traceability:**
 
@@ -762,7 +762,7 @@ AUD-H01..H07 closed. Gates: Vitest **280+**; Playwright T01a **6/6** + UIUX mani
   (**P21-T01c**); in-list pass/reject/publish decisions (remain on controlled detail forms); backend
   emit of additional trigger types beyond what P21-T02/T07 already land (**P21-T07** for
   APPROVAL/PENDING_RELEASE); OpenAPI registration (**P21-X04**); permission single-source
-  (**P21-X03**); zh-CN parity hardening (**P21-X06**).
+  (**P21-X03**); zh-CN parity hardening (**P21-X06 Done**, 2026-06-30).
 
 **Traceability:**
 
@@ -2171,4 +2171,18 @@ i18n `en.ts` / `zh-CN.ts` (`branding.*` display names).
 **Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**508** Vitest). Backend unchanged.
 **Audit:** AUD-Q01 **resolved** (`--color-primary` defined); AUD-Q02 **resolved** (nav + breadcrumb
 `:focus-visible`); AUD-Q03 **resolved** (brand wordmark i18n + token cleanup). P21 phase **wrap-up** —
-next **P21-X01** / **P21-X06** per §11.5; phase exit criteria (§7) still open on X01/X06 (X02 In Progress).
+next **P21-X01** per §11.5; phase exit criteria (§7) still open on X01 (X02 In Progress).
+
+### P21-X06 completion (2026-06-30)
+
+**Scope:** Cross-cutting i18n parity hardening — fill ~368 missing zh-CN leaf keys for primary journeys
+(`contentModules.*`, `templates.lifecycle/governance/authoring/rules/create/error`, `paste.*`);
+add `collectLeafKeys` utility + layered en→zh-CN key-parity regression test to block silent
+English fallback. Resolves AUD-Q04.
+
+**Deliverables:** `i18n/collectLeafKeys.ts`; `i18n/localeRegistry.test.ts` (parity + `collectLeafKeys`
+unit tests); `i18n/locales/zh-CN.ts` (~368 keys added).
+
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green. Backend unchanged.
+**Audit:** AUD-Q04 **resolved** (zh-CN covers all en leaf keys; parity test green). P21 phase
+**wrap-up** — next **P21-X01** per §11.5; phase exit criteria (§7) still open on X01 (X02 In Progress).
