@@ -1,6 +1,7 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-30 (P21-T06 Done — TemplateDetailView split)
+**Last synced:** 2026-06-30 (P21-T06a Done — template detail tab sync fixes)
+**Completion note (2026-06-30):** **P21-T06a Done** — AUD-B01/B02/B08: `normalizeTemplateDetailQuery` clears `focus=lifecycle`; stale-template skeleton guard; default tab `overview` + DOM order aligned. **Gate:** pnpm lint/type-check/test/build green (**404**); Playwright **2/2**. Next **P21-T06b**. Detail: [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 **Completion note (2026-06-30):** **P21-T06 Done** — OPT-G3: split `TemplateDetailView` into 5 tab components under `views/templates/detail/`; business L1 tab labels; `templateWorkflowBannerContext.ts` SSOT (AUD-B09 resolved). **Gate:** pnpm lint/type-check/test/build green (**398**). Next **P21-T06a**. Detail: [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 **Completion note (2026-06-30):** **P21-T05 Done** — template tester journey: `templateTesterJourney.ts`, `TemplateTesterJourneyBlock`, dashboard + detail wiring, AUD-B05 test-fail remediation fields. **Gate:** pnpm lint/type-check/test/build green (**385**); Playwright **4/4** + UIUX **1/1** PASS; AUD-B05 **resolved**. Cluster ① journeys complete (T03–T05). Next **P21-T06**. Detail: [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 **Completion note (2026-06-30):** **P21-T04 Done** — template author journey: `templateAuthorJourney.ts` mappers, `TemplateAuthorJourneyBlock`, timeline on `TemplateDetailView` + dashboard, Spec C remediation copy, team-lead go-live guidance. **Gate:** pnpm lint/type-check/test/build green (**365**); Playwright **4/4** + 1 skipped + UIUX **1/1** PASS. Next **P21-T05**. Detail: [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
@@ -243,10 +244,10 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P20 | Done (2026-06-25) | T01–T07 complete incl. T06 (`api.error` en/zh + primary journey zh-CN); gates green — see [P20 detail](./detail/P20-i18n-ui-upgradeability.md) |
 | P18 | Done (2026-06-28) | **P18-T01–T10 Done** — controlled authoring UI + management paste/catalog APIs — see [P18 detail](./detail/P18-structured-authoring-fidelity-engine.md) |
 | P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
-| P21 | In Progress (2026-06-29) | Role-journey frontend redesign & business-friendly terminology — **P21-T06 Done** (2026-06-30; OPT-G3 split + tab L1 + AUD-B09 SSOT; frontend **398+** Vitest); next **P21-T06a Not Started** (approval-path closure remains → P21-T07) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
+| P21 | In Progress (2026-06-29) | Role-journey frontend redesign & business-friendly terminology — **P21-T06a Done** (2026-06-30; AUD-B01/B02/B08; frontend **404+** Vitest; Playwright **2/2**); next **P21-T06b Not Started** — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
-**Active phase:** **P21** (activated 2026-06-29; **T06 Done**; next slice
-**P21-T06a Not Started**). All other formal phases P0–P11, P13–P20 **Done** except P12
+**Active phase:** **P21** (activated 2026-06-29; **T06a Done**; next slice
+**P21-T06b Not Started**). All other formal phases P0–P11, P13–P20 **Done** except P12
 (deferred catch-all, non-active).
 
 ## Epic ↔ phase mapping

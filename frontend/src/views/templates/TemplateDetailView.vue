@@ -45,7 +45,13 @@ import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, apiPolicyDetailPath } from '@/routing/ro
 import { useTemplatesStore } from '@/stores/templates'
 import * as templatesApi from '@/api/templates'
 import { conflictsWithExisting, suggestNextVersions, type SemverBumpLevel } from '@/utils/semver'
-import { resolveTemplateDetailTab, templateDetailTabLabelKey, type TemplateDetailTab } from '@/views/templates/templateDetailTabs'
+import {
+  normalizeTemplateDetailQuery,
+  resolveTemplateDetailTab,
+  resolveTemplateDetailTabFromQuery,
+  templateDetailTabLabelKey,
+  type TemplateDetailTab,
+} from '@/views/templates/templateDetailTabs'
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
 import { resolveWorkflowBannerActionKind } from '@/utils/templateWorkflowBannerContext'
 import {
@@ -110,18 +116,7 @@ const metadataEditOpen = ref(false)
 const loadFailed = ref(false)
 type DetailTab = TemplateDetailTab
 
-function resolveDetailTab(value: unknown): DetailTab {
-  return resolveTemplateDetailTab(value)
-}
-
-function resolveDetailTabFromRoute(): DetailTab {
-  if (route.query.focus === 'lifecycle') {
-    return 'lifecycle'
-  }
-  return resolveTemplateDetailTab(route.query.tab)
-}
-
-const activeDetailTab = ref<DetailTab>(resolveDetailTabFromRoute())
+const activeDetailTab = ref<DetailTab>(resolveTemplateDetailTabFromQuery(route.query))
 const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
 
 const templateId = computed(() => route.params.templateId as string)
@@ -143,7 +138,24 @@ const { paginatedRows: paginatedCredentials, totalRows: totalCredentialRows } = 
 )
 const sortCredentialsByCreatedAt = rowSortMethod<ApiCredentialSummary>((row) => row.createdAt)
 const credentialStatusFilterOptions = useCredentialStatusFilterOptions()
-const template = computed(() => templatesStore.selectedTemplate)
+const templateMatchesRoute = computed(
+  () => templatesStore.selectedTemplate?.id === templateId.value,
+)
+
+const template = computed(() => {
+  if (!templateMatchesRoute.value) {
+    return null
+  }
+  return templatesStore.selectedTemplate
+})
+
+const showDetailSkeleton = computed(() => {
+  if (templatesStore.loadingDetail) {
+    return true
+  }
+  const selected = templatesStore.selectedTemplate
+  return selected !== null && selected.id !== templateId.value
+})
 const canPolicy = computed(() => manageApiPolicy.value)
 
 const errorMessage = computed(() => {
@@ -440,40 +452,69 @@ function handleJourneyRecordResult() {
   }
 }
 
+function resetTransientDetailState() {
+  testerEvidenceViewed.value = {
+    fidelityViewedConfirmed: false,
+    coverageViewedConfirmed: false,
+    previewViewedConfirmed: false,
+  }
+  lifecycleComment.value = ''
+  lastPreview.value = null
+  bindingGateResult.value = null
+  publishGateChecklist.value = null
+  publishCoverageSummary.value = null
+  publishChangeDiffSummary.value = null
+  publishedReleaseVersions.value = []
+  loadingPublishGate.value = false
+}
+
+function syncTabFromRoute() {
+  const normalized = normalizeTemplateDetailQuery(route.query)
+  if (normalized) {
+    activeDetailTab.value = normalized.tab
+    scrollToLifecyclePanel()
+    void router.replace({ query: normalized.query })
+    return
+  }
+
+  const tab = resolveTemplateDetailTabFromQuery(route.query)
+  if (activeDetailTab.value !== tab) {
+    activeDetailTab.value = tab
+  }
+}
+
 onMounted(async () => {
+  syncTabFromRoute()
   await Promise.all([loadTemplate(), loadAuthorRemediationWorkItems()])
 })
 
 watch(
   () => templateId.value,
   () => {
-    testerEvidenceViewed.value = {
-      fidelityViewedConfirmed: false,
-      coverageViewedConfirmed: false,
-      previewViewedConfirmed: false,
-    }
+    resetTransientDetailState()
+    activeDetailTab.value = resolveTemplateDetailTabFromQuery(route.query)
     void loadTemplate()
   },
 )
 
 watch(
-  () => [route.query.tab, route.query.focus] as const,
-  ([tab, focus]) => {
-    const resolved = focus === 'lifecycle' ? 'lifecycle' : resolveDetailTab(tab)
-    if (activeDetailTab.value !== resolved) {
-      activeDetailTab.value = resolved
-    }
-    if (resolved === 'lifecycle') {
-      scrollToLifecyclePanel()
-    }
+  () => route.query,
+  () => {
+    syncTabFromRoute()
   },
+  { deep: true },
 )
 
 watch(activeDetailTab, (tab) => {
-  if (resolveDetailTab(route.query.tab) === tab) {
+  if (route.query.focus === 'lifecycle') {
     return
   }
-  router.replace({ query: { ...route.query, tab } })
+  if (resolveTemplateDetailTab(route.query.tab) === tab) {
+    return
+  }
+  const query = { ...route.query }
+  delete query.focus
+  router.replace({ query: { ...query, tab } })
 })
 
 watch(
@@ -939,7 +980,7 @@ async function handleDeleteTemplate() {
       @retry="loadTemplate"
     />
 
-    <el-skeleton v-else-if="templatesStore.loadingDetail" :rows="8" animated />
+    <el-skeleton v-else-if="showDetailSkeleton" :rows="8" animated />
 
     <EmptyStatePanel
       v-else-if="!template"
@@ -972,14 +1013,6 @@ async function handleDeleteTemplate() {
       <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />
 
       <el-tabs v-model="activeDetailTab" class="detail-tabs">
-        <el-tab-pane :label="t(templateDetailTabLabelKey('releaseVersions'))" name="releaseVersions">
-          <TemplateDetailReleaseVersionsTab
-            :template-id="templateId"
-            :template-lifecycle-status="template.lifecycleStatus"
-            @changed="loadTemplate"
-          />
-        </el-tab-pane>
-
         <el-tab-pane :label="t(templateDetailTabLabelKey('overview'))" name="overview">
           <TemplateDetailOverviewTab :template="template" :format-date-time="formatDateTime" />
         </el-tab-pane>
@@ -1034,6 +1067,14 @@ async function handleDeleteTemplate() {
             @updated="loadTemplate"
             @selected-test-data-set="selectedTestDataSetId = $event"
             @batch-complete="coverageRefreshToken += 1"
+          />
+        </el-tab-pane>
+
+        <el-tab-pane :label="t(templateDetailTabLabelKey('releaseVersions'))" name="releaseVersions">
+          <TemplateDetailReleaseVersionsTab
+            :template-id="templateId"
+            :template-lifecycle-status="template.lifecycleStatus"
+            @changed="loadTemplate"
           />
         </el-tab-pane>
 
