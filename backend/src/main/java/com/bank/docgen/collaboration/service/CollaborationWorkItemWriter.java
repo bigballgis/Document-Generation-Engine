@@ -21,6 +21,10 @@ public class CollaborationWorkItemWriter {
 
     static final String SUBMIT_FOR_TEST_SUMMARY_KEY = "api.collaboration.workItem.submitForTest.summary";
     static final String REMEDIATION_SUMMARY_KEY = "api.collaboration.workItem.remediation.summary";
+    static final String SUBMIT_FOR_APPROVAL_SUMMARY_KEY = "api.collaboration.workItem.submitForApproval.summary";
+    static final String APPROVAL_FAILURE_REMEDIATION_SUMMARY_KEY =
+            "api.collaboration.workItem.approvalFailureRemediation.summary";
+    static final String PENDING_RELEASE_SUMMARY_KEY = "api.collaboration.workItem.pendingRelease.summary";
 
     private final CollaborationWorkItemRepository workItemRepository;
     private final MessageResolver messageResolver;
@@ -59,28 +63,7 @@ public class CollaborationWorkItemWriter {
             TemplateEntity template,
             ManagementSessionClaims session
     ) {
-        List<CollaborationWorkItemEntity> openItems = workItemRepository
-                .findAllOpenByTemplateIdAndQueue(template.getId(), CollaborationWorkItemQueue.TEST);
-        Instant now = Instant.now();
-        String carriedForwardSubmitter = null;
-        for (CollaborationWorkItemEntity item : openItems) {
-            if (carriedForwardSubmitter == null) {
-                carriedForwardSubmitter = item.getSubmitterUserId();
-            }
-            item.setStatus(CollaborationWorkItemStatus.RESOLVED);
-            item.setResolvedAt(now);
-            item.setUpdatedAt(now);
-            workItemRepository.save(item);
-            auditRecorder.recordCollaborationWorkItemResolved(
-                    template.getId(),
-                    template.getGroupCode(),
-                    item.getId(),
-                    CollaborationWorkItemQueue.TEST,
-                    session.username(),
-                    actorSummary(session)
-            );
-        }
-        return Optional.ofNullable(carriedForwardSubmitter);
+        return resolveOpenWorkItems(template, session, CollaborationWorkItemQueue.TEST);
     }
 
     /**
@@ -97,8 +80,122 @@ public class CollaborationWorkItemWriter {
         Instant now = Instant.now();
         return workItemRepository
                 .findOpenByTemplateIdAndQueue(template.getId(), CollaborationWorkItemQueue.REMEDIATION)
-                .map(existing -> refreshRemediation(existing, template, submitterUserId, summary, now))
-                .orElseGet(() -> createRemediation(template, submitterUserId, session, summary, now));
+                .map(existing -> refreshRemediation(
+                        existing,
+                        template,
+                        submitterUserId,
+                        summary,
+                        CollaborationWorkItemTriggerType.TEST_FAILURE_OR_RETURN_TO_DRAFT,
+                        now))
+                .orElseGet(() -> createRemediation(
+                        template,
+                        submitterUserId,
+                        session,
+                        summary,
+                        CollaborationWorkItemTriggerType.TEST_FAILURE_OR_RETURN_TO_DRAFT,
+                        now));
+    }
+
+    @Transactional
+    public CollaborationWorkItemEntity upsertSubmitForApprovalWorkItem(
+            TemplateEntity template,
+            ManagementSessionClaims session
+    ) {
+        String summary = messageResolver.resolve(SUBMIT_FOR_APPROVAL_SUMMARY_KEY);
+        Instant now = Instant.now();
+        return workItemRepository
+                .findOpenByTemplateIdAndQueue(template.getId(), CollaborationWorkItemQueue.APPROVAL)
+                .map(existing -> refreshSubmitForApproval(existing, template, session, summary, now))
+                .orElseGet(() -> createSubmitForApproval(template, session, summary, now));
+    }
+
+    /**
+     * Resolves every OPEN APPROVAL work item for the template. Idempotent no-op when none exist.
+     * Returns the carried-forward orchestrator for downstream remediation / pending-release routing.
+     */
+    @Transactional
+    public Optional<String> resolveOpenApprovalWorkItems(
+            TemplateEntity template,
+            ManagementSessionClaims session
+    ) {
+        return resolveOpenWorkItems(template, session, CollaborationWorkItemQueue.APPROVAL);
+    }
+
+    @Transactional
+    public CollaborationWorkItemEntity upsertApprovalFailureRemediationWorkItem(
+            TemplateEntity template,
+            String submitterUserId,
+            ManagementSessionClaims session
+    ) {
+        String summary = messageResolver.resolve(APPROVAL_FAILURE_REMEDIATION_SUMMARY_KEY);
+        Instant now = Instant.now();
+        return workItemRepository
+                .findOpenByTemplateIdAndQueue(template.getId(), CollaborationWorkItemQueue.REMEDIATION)
+                .map(existing -> refreshRemediation(
+                        existing,
+                        template,
+                        submitterUserId,
+                        summary,
+                        CollaborationWorkItemTriggerType.APPROVAL_FAILURE_OR_RETURN_TO_DRAFT,
+                        now))
+                .orElseGet(() -> createRemediation(
+                        template,
+                        submitterUserId,
+                        session,
+                        summary,
+                        CollaborationWorkItemTriggerType.APPROVAL_FAILURE_OR_RETURN_TO_DRAFT,
+                        now));
+    }
+
+    @Transactional
+    public CollaborationWorkItemEntity upsertPendingReleaseWorkItem(
+            TemplateEntity template,
+            String submitterUserId,
+            ManagementSessionClaims session
+    ) {
+        String summary = messageResolver.resolve(PENDING_RELEASE_SUMMARY_KEY);
+        Instant now = Instant.now();
+        return workItemRepository
+                .findOpenByTemplateIdAndQueue(template.getId(), CollaborationWorkItemQueue.PENDING_RELEASE)
+                .map(existing -> refreshPendingRelease(existing, template, submitterUserId, summary, now))
+                .orElseGet(() -> createPendingRelease(template, submitterUserId, session, summary, now));
+    }
+
+    @Transactional
+    public void resolveOpenPendingReleaseWorkItems(
+            TemplateEntity template,
+            ManagementSessionClaims session
+    ) {
+        resolveOpenWorkItems(template, session, CollaborationWorkItemQueue.PENDING_RELEASE);
+    }
+
+    private Optional<String> resolveOpenWorkItems(
+            TemplateEntity template,
+            ManagementSessionClaims session,
+            CollaborationWorkItemQueue queue
+    ) {
+        List<CollaborationWorkItemEntity> openItems = workItemRepository
+                .findAllOpenByTemplateIdAndQueue(template.getId(), queue);
+        Instant now = Instant.now();
+        String carriedForwardSubmitter = null;
+        for (CollaborationWorkItemEntity item : openItems) {
+            if (carriedForwardSubmitter == null) {
+                carriedForwardSubmitter = item.getSubmitterUserId();
+            }
+            item.setStatus(CollaborationWorkItemStatus.RESOLVED);
+            item.setResolvedAt(now);
+            item.setUpdatedAt(now);
+            workItemRepository.save(item);
+            auditRecorder.recordCollaborationWorkItemResolved(
+                    template.getId(),
+                    template.getGroupCode(),
+                    item.getId(),
+                    queue,
+                    session.username(),
+                    actorSummary(session)
+            );
+        }
+        return Optional.ofNullable(carriedForwardSubmitter);
     }
 
     private CollaborationWorkItemEntity refreshSubmitForTest(
@@ -150,24 +247,24 @@ public class CollaborationWorkItemWriter {
         return saved;
     }
 
-    private CollaborationWorkItemEntity refreshRemediation(
+    private CollaborationWorkItemEntity refreshSubmitForApproval(
             CollaborationWorkItemEntity existing,
             TemplateEntity template,
-            String submitterUserId,
+            ManagementSessionClaims session,
             String summary,
             Instant now
     ) {
         existing.setTemplateName(template.getName());
-        existing.setSubmitterUserId(submitterUserId);
+        existing.setSubmitterUserId(session.username());
         existing.setSummaryText(summary);
-        existing.setTriggerType(CollaborationWorkItemTriggerType.TEST_FAILURE_OR_RETURN_TO_DRAFT);
+        existing.setTriggerType(CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL);
+        existing.setCreatedAt(now);
         existing.setUpdatedAt(now);
         return workItemRepository.save(existing);
     }
 
-    private CollaborationWorkItemEntity createRemediation(
+    private CollaborationWorkItemEntity createSubmitForApproval(
             TemplateEntity template,
-            String submitterUserId,
             ManagementSessionClaims session,
             String summary,
             Instant now
@@ -178,8 +275,59 @@ public class CollaborationWorkItemWriter {
                 template.getExternalId(),
                 template.getName(),
                 template.getGroupCode(),
+                CollaborationWorkItemQueue.APPROVAL,
+                CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL,
+                CollaborationWorkItemStatus.OPEN,
+                session.username(),
+                summary
+        );
+        created.setCreatedAt(now);
+        created.setUpdatedAt(now);
+        CollaborationWorkItemEntity saved = workItemRepository.save(created);
+        auditRecorder.recordCollaborationWorkItemCreated(
+                template.getId(),
+                template.getGroupCode(),
+                saved.getId(),
+                CollaborationWorkItemQueue.APPROVAL,
+                CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL,
+                session.username(),
+                actorSummary(session)
+        );
+        return saved;
+    }
+
+    private CollaborationWorkItemEntity refreshRemediation(
+            CollaborationWorkItemEntity existing,
+            TemplateEntity template,
+            String submitterUserId,
+            String summary,
+            CollaborationWorkItemTriggerType triggerType,
+            Instant now
+    ) {
+        existing.setTemplateName(template.getName());
+        existing.setSubmitterUserId(submitterUserId);
+        existing.setSummaryText(summary);
+        existing.setTriggerType(triggerType);
+        existing.setUpdatedAt(now);
+        return workItemRepository.save(existing);
+    }
+
+    private CollaborationWorkItemEntity createRemediation(
+            TemplateEntity template,
+            String submitterUserId,
+            ManagementSessionClaims session,
+            String summary,
+            CollaborationWorkItemTriggerType triggerType,
+            Instant now
+    ) {
+        CollaborationWorkItemEntity created = new CollaborationWorkItemEntity(
+                UUID.randomUUID(),
+                template.getId(),
+                template.getExternalId(),
+                template.getName(),
+                template.getGroupCode(),
                 CollaborationWorkItemQueue.REMEDIATION,
-                CollaborationWorkItemTriggerType.TEST_FAILURE_OR_RETURN_TO_DRAFT,
+                triggerType,
                 CollaborationWorkItemStatus.OPEN,
                 submitterUserId,
                 summary
@@ -192,7 +340,56 @@ public class CollaborationWorkItemWriter {
                 template.getGroupCode(),
                 saved.getId(),
                 CollaborationWorkItemQueue.REMEDIATION,
-                CollaborationWorkItemTriggerType.TEST_FAILURE_OR_RETURN_TO_DRAFT,
+                triggerType,
+                session.username(),
+                actorSummary(session)
+        );
+        return saved;
+    }
+
+    private CollaborationWorkItemEntity refreshPendingRelease(
+            CollaborationWorkItemEntity existing,
+            TemplateEntity template,
+            String submitterUserId,
+            String summary,
+            Instant now
+    ) {
+        existing.setTemplateName(template.getName());
+        existing.setSubmitterUserId(submitterUserId);
+        existing.setSummaryText(summary);
+        existing.setTriggerType(CollaborationWorkItemTriggerType.APPROVAL_PENDING_RELEASE);
+        existing.setUpdatedAt(now);
+        return workItemRepository.save(existing);
+    }
+
+    private CollaborationWorkItemEntity createPendingRelease(
+            TemplateEntity template,
+            String submitterUserId,
+            ManagementSessionClaims session,
+            String summary,
+            Instant now
+    ) {
+        CollaborationWorkItemEntity created = new CollaborationWorkItemEntity(
+                UUID.randomUUID(),
+                template.getId(),
+                template.getExternalId(),
+                template.getName(),
+                template.getGroupCode(),
+                CollaborationWorkItemQueue.PENDING_RELEASE,
+                CollaborationWorkItemTriggerType.APPROVAL_PENDING_RELEASE,
+                CollaborationWorkItemStatus.OPEN,
+                submitterUserId,
+                summary
+        );
+        created.setCreatedAt(now);
+        created.setUpdatedAt(now);
+        CollaborationWorkItemEntity saved = workItemRepository.save(created);
+        auditRecorder.recordCollaborationWorkItemCreated(
+                template.getId(),
+                template.getGroupCode(),
+                saved.getId(),
+                CollaborationWorkItemQueue.PENDING_RELEASE,
+                CollaborationWorkItemTriggerType.APPROVAL_PENDING_RELEASE,
                 session.username(),
                 actorSummary(session)
         );

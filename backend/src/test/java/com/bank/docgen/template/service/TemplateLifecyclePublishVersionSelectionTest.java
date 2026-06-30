@@ -124,6 +124,7 @@ class TemplateLifecyclePublishVersionSelectionTest {
         verify(templateVersionRepository).save(candidateVersion);
         verify(contentModuleReferenceService).lockReferencesForPublish(candidateVersion.getId());
         verify(renderProfileService).lockForPublish(candidateVersion);
+        verify(collaborationWorkItemWriter).resolveOpenPendingReleaseWorkItems(template, groupAdmin);
     }
 
     private TemplateVersionEntity version(

@@ -37,6 +37,9 @@ class CollaborationWorkItemWriterTest {
     private static final UUID WORK_ITEM_ID = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static final String SUMMARY = "Template submitted for testing";
     private static final String REMEDIATION_SUMMARY = "Template returned to drafting for fixes after test";
+    private static final String APPROVAL_SUMMARY = "Template submitted for approval";
+    private static final String APPROVAL_FAILURE_SUMMARY = "Template returned to drafting after rejected approval";
+    private static final String PENDING_RELEASE_SUMMARY = "Template approved and awaiting go-live";
 
     @Mock
     private CollaborationWorkItemRepository workItemRepository;
@@ -66,6 +69,12 @@ class CollaborationWorkItemWriterTest {
                 .thenReturn(SUMMARY);
         lenient().when(messageResolver.resolve(CollaborationWorkItemWriter.REMEDIATION_SUMMARY_KEY))
                 .thenReturn(REMEDIATION_SUMMARY);
+        lenient().when(messageResolver.resolve(CollaborationWorkItemWriter.SUBMIT_FOR_APPROVAL_SUMMARY_KEY))
+                .thenReturn(APPROVAL_SUMMARY);
+        lenient().when(messageResolver.resolve(CollaborationWorkItemWriter.APPROVAL_FAILURE_REMEDIATION_SUMMARY_KEY))
+                .thenReturn(APPROVAL_FAILURE_SUMMARY);
+        lenient().when(messageResolver.resolve(CollaborationWorkItemWriter.PENDING_RELEASE_SUMMARY_KEY))
+                .thenReturn(PENDING_RELEASE_SUMMARY);
     }
 
     @Test
@@ -235,6 +244,128 @@ class CollaborationWorkItemWriterTest {
 
         assertThat(captor.getValue().getSummaryText()).isEqualTo(SUMMARY);
         assertThat(captor.getValue().getSummaryText()).doesNotContain("Ready for test");
+    }
+
+    @Test
+    void upsertSubmitForApprovalWorkItem_createsOpenApprovalQueueItem() {
+        TemplateEntity template = draftTemplate();
+        when(workItemRepository.findOpenByTemplateIdAndQueue(TEMPLATE_ID, CollaborationWorkItemQueue.APPROVAL))
+                .thenReturn(Optional.empty());
+        when(workItemRepository.save(any(CollaborationWorkItemEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        CollaborationWorkItemEntity saved = writer.upsertSubmitForApprovalWorkItem(template, author);
+
+        assertThat(saved.getQueue()).isEqualTo(CollaborationWorkItemQueue.APPROVAL);
+        assertThat(saved.getTriggerType()).isEqualTo(CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL);
+        assertThat(saved.getStatus()).isEqualTo(CollaborationWorkItemStatus.OPEN);
+        assertThat(saved.getSummaryText()).isEqualTo(APPROVAL_SUMMARY);
+        verify(auditRecorder).recordCollaborationWorkItemCreated(
+                eq(TEMPLATE_ID), eq("RETAIL"), any(UUID.class), eq(CollaborationWorkItemQueue.APPROVAL),
+                eq(CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL), eq("10000003"), any());
+    }
+
+    @Test
+    void resolveOpenApprovalWorkItems_resolvesAllOpenItemsAndRecordsResolveAudit() {
+        TemplateEntity template = draftTemplate();
+        CollaborationWorkItemEntity item = openApprovalItem(
+                UUID.fromString("33333333-3333-3333-3333-333333333333"), "10000005");
+        when(workItemRepository.findAllOpenByTemplateIdAndQueue(TEMPLATE_ID, CollaborationWorkItemQueue.APPROVAL))
+                .thenReturn(List.of(item));
+        when(workItemRepository.save(any(CollaborationWorkItemEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Optional<String> carriedSubmitter = writer.resolveOpenApprovalWorkItems(template, author);
+
+        assertThat(carriedSubmitter).contains("10000005");
+        assertThat(item.getStatus()).isEqualTo(CollaborationWorkItemStatus.RESOLVED);
+        verify(auditRecorder).recordCollaborationWorkItemResolved(
+                eq(TEMPLATE_ID), eq("RETAIL"), any(UUID.class), eq(CollaborationWorkItemQueue.APPROVAL),
+                eq("10000003"), any());
+    }
+
+    @Test
+    void upsertApprovalFailureRemediationWorkItem_createsOpenRemediationWithApprovalFailureTrigger() {
+        TemplateEntity template = draftTemplate();
+        when(workItemRepository.findOpenByTemplateIdAndQueue(TEMPLATE_ID, CollaborationWorkItemQueue.REMEDIATION))
+                .thenReturn(Optional.empty());
+        when(workItemRepository.save(any(CollaborationWorkItemEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        CollaborationWorkItemEntity saved =
+                writer.upsertApprovalFailureRemediationWorkItem(template, "10000005", author);
+
+        assertThat(saved.getQueue()).isEqualTo(CollaborationWorkItemQueue.REMEDIATION);
+        assertThat(saved.getTriggerType())
+                .isEqualTo(CollaborationWorkItemTriggerType.APPROVAL_FAILURE_OR_RETURN_TO_DRAFT);
+        assertThat(saved.getSubmitterUserId()).isEqualTo("10000005");
+        assertThat(saved.getSummaryText()).isEqualTo(APPROVAL_FAILURE_SUMMARY);
+    }
+
+    @Test
+    void upsertPendingReleaseWorkItem_createsOpenPendingReleaseQueueItem() {
+        TemplateEntity template = draftTemplate();
+        when(workItemRepository.findOpenByTemplateIdAndQueue(TEMPLATE_ID, CollaborationWorkItemQueue.PENDING_RELEASE))
+                .thenReturn(Optional.empty());
+        when(workItemRepository.save(any(CollaborationWorkItemEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        CollaborationWorkItemEntity saved =
+                writer.upsertPendingReleaseWorkItem(template, "10000005", author);
+
+        assertThat(saved.getQueue()).isEqualTo(CollaborationWorkItemQueue.PENDING_RELEASE);
+        assertThat(saved.getTriggerType()).isEqualTo(CollaborationWorkItemTriggerType.APPROVAL_PENDING_RELEASE);
+        assertThat(saved.getSubmitterUserId()).isEqualTo("10000005");
+        assertThat(saved.getSummaryText()).isEqualTo(PENDING_RELEASE_SUMMARY);
+    }
+
+    @Test
+    void resolveOpenPendingReleaseWorkItems_resolvesAllOpenItems() {
+        TemplateEntity template = draftTemplate();
+        CollaborationWorkItemEntity item = openPendingReleaseItem(
+                UUID.fromString("44444444-4444-4444-4444-444444444444"), "10000005");
+        when(workItemRepository.findAllOpenByTemplateIdAndQueue(
+                TEMPLATE_ID, CollaborationWorkItemQueue.PENDING_RELEASE))
+                .thenReturn(List.of(item));
+        when(workItemRepository.save(any(CollaborationWorkItemEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        writer.resolveOpenPendingReleaseWorkItems(template, author);
+
+        assertThat(item.getStatus()).isEqualTo(CollaborationWorkItemStatus.RESOLVED);
+        verify(auditRecorder).recordCollaborationWorkItemResolved(
+                eq(TEMPLATE_ID), eq("RETAIL"), any(UUID.class), eq(CollaborationWorkItemQueue.PENDING_RELEASE),
+                eq("10000003"), any());
+    }
+
+    private CollaborationWorkItemEntity openApprovalItem(UUID id, String submitter) {
+        return new CollaborationWorkItemEntity(
+                id,
+                TEMPLATE_ID,
+                "TPL-LOAN-NOTICE",
+                "Loan Notice Template",
+                "RETAIL",
+                CollaborationWorkItemQueue.APPROVAL,
+                CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL,
+                CollaborationWorkItemStatus.OPEN,
+                submitter,
+                "Approval summary"
+        );
+    }
+
+    private CollaborationWorkItemEntity openPendingReleaseItem(UUID id, String submitter) {
+        return new CollaborationWorkItemEntity(
+                id,
+                TEMPLATE_ID,
+                "TPL-LOAN-NOTICE",
+                "Loan Notice Template",
+                "RETAIL",
+                CollaborationWorkItemQueue.PENDING_RELEASE,
+                CollaborationWorkItemTriggerType.APPROVAL_PENDING_RELEASE,
+                CollaborationWorkItemStatus.OPEN,
+                submitter,
+                "Pending release summary"
+        );
     }
 
     private TemplateEntity draftTemplate() {

@@ -245,6 +245,98 @@ class TemplateLifecycleServiceTest {
         verify(collaborationWorkItemWriter, never()).upsertRemediationWorkItem(any(), any(), any());
     }
 
+    @Test
+    void submitForApproval_createsApprovalCollaborationWorkItem() {
+        template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
+        when(templateService.requireWritableTemplate(templateId, author)).thenReturn(template);
+        when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.APPROVAL));
+
+        service.submitForApproval(templateId, new LifecycleCommentRequest("Ready for approval"), author);
+
+        verify(collaborationWorkItemWriter).upsertSubmitForApprovalWorkItem(template, author);
+    }
+
+    @Test
+    void recordApprovalDecision_approved_resolvesApprovalAndUpsertsPendingRelease() {
+        ManagementSessionClaims approver = new ManagementSessionClaims(
+                "10000004",
+                "Approver",
+                "approver@example.com",
+                AuthSource.LOCAL,
+                List.of("TEMPLATE_APPROVER"),
+                List.of("RETAIL"),
+                "route.template-approver-home",
+                List.of("route.template-approver-home"),
+                Instant.now().plusSeconds(3600)
+        );
+        template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
+        when(groupAccessService.canDecideTemplateApprovals(approver)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
+        when(collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, approver))
+                .thenReturn(Optional.of("10000005"));
+        when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.PENDING_RELEASE));
+
+        service.recordApprovalDecision(templateId, decision(LifecycleDecision.APPROVED), approver);
+
+        assertThat(template.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PENDING_RELEASE);
+        verify(collaborationWorkItemWriter).resolveOpenApprovalWorkItems(template, approver);
+        verify(collaborationWorkItemWriter).upsertPendingReleaseWorkItem(template, "10000005", approver);
+        verify(collaborationWorkItemWriter, never()).upsertApprovalFailureRemediationWorkItem(any(), any(), any());
+    }
+
+    @Test
+    void recordApprovalDecision_rejected_resolvesApprovalAndUpsertsApprovalFailureRemediation() {
+        ManagementSessionClaims approver = new ManagementSessionClaims(
+                "10000004",
+                "Approver",
+                "approver@example.com",
+                AuthSource.LOCAL,
+                List.of("TEMPLATE_APPROVER"),
+                List.of("RETAIL"),
+                "route.template-approver-home",
+                List.of("route.template-approver-home"),
+                Instant.now().plusSeconds(3600)
+        );
+        template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
+        when(groupAccessService.canDecideTemplateApprovals(approver)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
+        when(collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, approver))
+                .thenReturn(Optional.of("10000005"));
+        when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.DRAFT));
+
+        service.recordApprovalDecision(templateId, decision(LifecycleDecision.REJECTED), approver);
+
+        assertThat(template.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.DRAFT);
+        verify(collaborationWorkItemWriter).resolveOpenApprovalWorkItems(template, approver);
+        verify(collaborationWorkItemWriter).upsertApprovalFailureRemediationWorkItem(template, "10000005", approver);
+        verify(collaborationWorkItemWriter, never()).upsertPendingReleaseWorkItem(any(), any(), any());
+    }
+
+    @Test
+    void recordApprovalDecision_rejected_noOpenApproval_fallsBackToTemplateOwner() {
+        ManagementSessionClaims approver = new ManagementSessionClaims(
+                "10000004",
+                "Approver",
+                "approver@example.com",
+                AuthSource.LOCAL,
+                List.of("TEMPLATE_APPROVER"),
+                List.of("RETAIL"),
+                "route.template-approver-home",
+                List.of("route.template-approver-home"),
+                Instant.now().plusSeconds(3600)
+        );
+        template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
+        when(groupAccessService.canDecideTemplateApprovals(approver)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
+        when(collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, approver))
+                .thenReturn(Optional.empty());
+        when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.DRAFT));
+
+        service.recordApprovalDecision(templateId, decision(LifecycleDecision.REJECTED), approver);
+
+        verify(collaborationWorkItemWriter).upsertApprovalFailureRemediationWorkItem(template, "10000003", approver);
+    }
+
     private LifecycleDecisionRequest decision(LifecycleDecision decision) {
         return new LifecycleDecisionRequest(
                 decision,

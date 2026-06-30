@@ -119,6 +119,7 @@ public class TemplateLifecycleService {
         requireStatus(template, TemplateLifecycleStatus.APPROVAL);
         transition(template, TemplateLifecycleStatus.APPROVAL, LifecycleAction.SUBMIT_FOR_APPROVAL,
                 null, request.commentSummary(), session);
+        collaborationWorkItemWriter.upsertSubmitForApprovalWorkItem(template, session);
         return templateService.toDetail(template);
     }
 
@@ -135,9 +136,15 @@ public class TemplateLifecycleService {
         if (request.decision() == LifecycleDecision.APPROVED) {
             transition(template, TemplateLifecycleStatus.PENDING_RELEASE, LifecycleAction.RECORD_APPROVAL_DECISION,
                     request.decision(), persistedComment, session);
+            String orchestrator = collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, session)
+                    .orElseGet(template::getCreatedBy);
+            collaborationWorkItemWriter.upsertPendingReleaseWorkItem(template, orchestrator, session);
         } else {
             transition(template, TemplateLifecycleStatus.DRAFT, LifecycleAction.RECORD_APPROVAL_DECISION,
                     request.decision(), persistedComment, session);
+            String orchestrator = collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, session)
+                    .orElseGet(template::getCreatedBy);
+            collaborationWorkItemWriter.upsertApprovalFailureRemediationWorkItem(template, orchestrator, session);
         }
         return templateService.toDetail(template);
     }
@@ -161,6 +168,7 @@ public class TemplateLifecycleService {
                 TemplateLifecycleStatus.PUBLISHED, null,
                 messageResolver.resolve("api.audit.lifecycle.publishedRelease", request.releaseVersion()),
                 request.releaseVersion(), session);
+        collaborationWorkItemWriter.resolveOpenPendingReleaseWorkItems(template, session);
         return templateService.toDetail(template);
     }
 

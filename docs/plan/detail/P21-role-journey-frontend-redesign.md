@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **P21-T06b Done** 2026-06-30 — detail state completeness AUD-B06/B07; next **P21-T07 Not Started** — sub-phase B backend) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **P21-T07 Done** 2026-06-30 — sub-phase B backend approval-path collaboration closure; next **P21-T08 Not Started** — Approver journey) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -182,7 +182,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 
 | ID | Task | Key files | Behavior spec | Status |
 | --- | --- | --- | --- | --- |
-| P21-T07 | B0 backend: emit `SUBMIT_FOR_APPROVAL`, `APPROVAL_FAILURE → REMEDIATION`, `APPROVAL_PENDING_RELEASE`, `TIMEOUT_ESCALATION`; write `RESOLVED` on approval/publish decisions | `backend/.../collaboration/**`, `TemplateLifecycleService`, escalation scheduler | Required | Not Started |
+| P21-T07 | B0 backend: emit `SUBMIT_FOR_APPROVAL`, `APPROVAL_FAILURE → REMEDIATION`, `APPROVAL_PENDING_RELEASE`, `TIMEOUT_ESCALATION`; write `RESOLVED` on approval/publish decisions | `backend/.../collaboration/**`, `TemplateLifecycleService`, escalation scheduler | Required | Done (2026-06-30) |
 | P21-T08 | B1 Approver journey: "waiting on my approval" entry + controlled approval decision + `approvalSubState` (PENDING_SUBMIT vs PENDING_DECISION) dual-substate UI | lifecycle panel, decision forms | Required | Not Started |
 | P21-T09 | B2 Team-lead / API management journey: master review tasks; "waiting to confirm go-live" entry + pre-release checks + go-live summary confirm | lifecycle panel, dashboard | Required | Not Started |
 | P21-T09a | API management / access-keys journey: full L1 copy replacement of API policy/credential surfaces | `ApiPolicyDetailView`, api policy components, `en.ts`, `zh-CN.ts` | Required | Not Started |
@@ -281,8 +281,8 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 
 | ID | Sev | Finding | Evidence | Owner task |
 | --- | --- | --- | --- | --- |
-| AUD-A01 | 🔴 | Backend never writes `RESOLVED` → completed to-dos never leave the task hub; `pendingActions` inflated; list API only queries `OPEN` | `CollaborationWorkItemWriter.java:32-82`; `TemplateLifecycleService.java:88-135`; `CollaborationWorkItemRepository.java:39-44` | **TEST path Resolved → P21-T02** (2026-06-29); APPROVAL/PUBLISH `RESOLVED` → P21-T07 |
-| AUD-A02 | 🔴 | Writer emits only `SUBMIT_FOR_TEST` → 5/6 behavior queues empty in production (APPROVAL/REMEDIATION/PENDING_RELEASE never created; ESCALATION only via scheduler) | `CollaborationWorkItemWriter.java:33-43`; `TemplateLifecycleService.java:84,88-134`; `CollaborationWorkItemTriggerType.java:3-9` | **REMEDIATION emitted → P21-T02** (2026-06-29, partial); APPROVAL/PENDING_RELEASE → P21-T07 |
+| AUD-A01 | 🔴 | Backend never writes `RESOLVED` → completed to-dos never leave the task hub; `pendingActions` inflated; list API only queries `OPEN` | `CollaborationWorkItemWriter.java:32-82`; `TemplateLifecycleService.java:88-135`; `CollaborationWorkItemRepository.java:39-44` | **Resolved → P21-T02** (TEST path, 2026-06-29) + **P21-T07** (APPROVAL/PUBLISH path, 2026-06-30) |
+| AUD-A02 | 🔴 | Writer emits only `SUBMIT_FOR_TEST` → 5/6 behavior queues empty in production (APPROVAL/REMEDIATION/PENDING_RELEASE never created; ESCALATION only via scheduler) | `CollaborationWorkItemWriter.java:33-43`; `TemplateLifecycleService.java:84,88-134`; `CollaborationWorkItemTriggerType.java:3-9` | **Resolved → P21-T02** (TEST REMEDIATION, 2026-06-29) + **P21-T07** (APPROVAL/PENDING_RELEASE/APPROVAL_FAILURE, 2026-06-30); TIMEOUT_ESCALATION via existing scheduler |
 | AUD-P01 | 🔴 | `manageMasters` role fallback wrongly grants `TEMPLATE_AUTHOR`; unit test asserts the wrong behavior | `auth/roles.ts:36-44,56-57`; `roles.test.ts:79`; backend `GroupAccessService.java:28-30` | P21-X03 |
 | AUD-P02 | 🔴 | Content-module route bypasses backend `visibleRoutes` (not in `RouteVisibilityService`/`ManagementRoute`/matrix); `session.canAccessRoute` returns false while router admits | `auth/roles.ts:241-253`; `router/index.ts:95-104,145-149`; `RouteVisibilityService.java:30-70` | P21-X03, P21-X04 |
 | AUD-P03 | 🔴 | Dual route-guard APIs (`canAccessLogicalRoute` vs `session.canAccessRoute`) can disagree for the same routeKey | `router/index.ts:145-149`; `stores/session.ts:30-32`; `auth/roles.ts:292-310` | P21-X03 |
@@ -339,8 +339,9 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
    to-dos (`RESOLVED`+`resolvedAt`); FAILED→DRAFT upserts one OPEN REMEDIATION
    (`TEST_FAILURE_OR_RETURN_TO_DRAFT`, dedup/idempotent); `submitForTest` accepts DRAFT or
    APPROVAL+PENDING_SUBMIT (PENDING_DECISION fail-closed); dedicated create/resolve audit;
-   `ApprovalSubStateResolver` extracted as `approvalSubState` SSOT. **Remaining → P21-T07:**
-   APPROVAL/PUBLISH `RESOLVED` + `SUBMIT_FOR_APPROVAL`/`APPROVAL_FAILURE`/`APPROVAL_PENDING_RELEASE`.
+   `ApprovalSubStateResolver` extracted as `approvalSubState` SSOT. **P21-T07 Done (2026-06-30):**
+   APPROVAL/PUBLISH `RESOLVED` + `SUBMIT_FOR_APPROVAL`/`APPROVAL_FAILURE`/`APPROVAL_PENDING_RELEASE`
+   emission wired in `TemplateLifecycleService`; TIMEOUT_ESCALATION unchanged (existing scheduler).
 2. **P0 security** — AUD-P01..P05: permission single-source + fail-closed (P21-X03).
 3. **P0 bugs** — AUD-B01/B02: focus/tab lockup + stale templateId (P21-T06a).
 4. **P0 i18n/a11y** — AUD-Q04 zh-CN parity, AUD-Q01 focus ring (P21-X06, P21-X05).
@@ -2050,4 +2051,16 @@ lifecycle tab; policy load error/empty in ApiAccess tab; header name + AD group 
 responsive semver picker.
 
 **Gate:** pnpm lint/type-check/test/build green (**414** Vitest); Playwright **1/1**. **Audit:**
-AUD-B06, AUD-B07 **resolved**. Next **P21-T07** (sub-phase B backend).
+AUD-B06, AUD-B07 **resolved**. Next **P21-T08** (Approver journey frontend).
+
+#### Implementation status (2026-06-30) — P21-T07
+
+**Done.** `CollaborationWorkItemWriter` extended: `upsertSubmitForApprovalWorkItem`,
+`resolveOpenApprovalWorkItems`, `upsertApprovalFailureRemediationWorkItem`,
+`upsertPendingReleaseWorkItem`, `resolveOpenPendingReleaseWorkItems`; shared `resolveOpenWorkItems`
+for TEST/APPROVAL/PENDING_RELEASE. `TemplateLifecycleService` wired on
+`submitForApproval` / `recordApprovalDecision` / `publish`. +3 i18n keys
+(`submitForApproval`, `approvalFailureRemediation`, `pendingRelease` summaries).
+
+**Gate:** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (Surefire all pass, JaCoCo met,
+Checkstyle/PMD/SpotBugs 0). **Audit:** AUD-A01/A02 **resolved** (approval/publish path). Next **P21-T08**.
