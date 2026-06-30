@@ -1,6 +1,6 @@
 # P21 — Role-Journey Frontend Redesign & Business-Friendly Terminology (Detailed Plan)
 
-**Phase status:** In Progress (activated 2026-06-29; **sub-phase D cluster ④ Done** — T11; **P21-T11 Done** 2026-06-30 — audit-admin 5-step journey + AuditConsole view-only + business columns + event-type labels; **all four role clusters complete**; phase **wrap-up** — next cross-cutting **P21-X03** (P0 permission fail-closed) or **P21-X01/X05/X06** per §11.5) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
+**Phase status:** In Progress (activated 2026-06-29; **sub-phase D cluster ④ Done** — T11; **P21-X03 Done** 2026-06-30 — permission fail-closed + unified route guard; **all four role clusters complete**; phase **wrap-up** — next cross-cutting **P21-X01/X05/X06** per §11.5) | **Depends on:** P13, P14, P19, P20 (management shell, dashboard task hub, collaboration work items, i18n registry)
 **Confirmed (user, 2 rounds, 2026-06-29):** Hybrid architecture (B) + 4 role clusters by workflow timeline + primary persona = foreign-bank front/middle-office non-IT staff with business-friendly terminology.
 
 > Single-active-phase invariant: **P21 is the active formal phase** (activated 2026-06-29 by
@@ -206,7 +206,7 @@ Status vocabulary: `Not Started` | `In Progress` | `Blocked` | `Done`. All rows 
 | --- | --- | --- | --- |
 | P21-X01 | Business terminology system upheld across all sub-phases: audit + rewrite nav/tasks/journey/detail/forms/error fallback copy (en baseline + zh-CN); IT terms only in API/code/audit fields | `en.ts`, `zh-CN.ts`, `messages_en.properties` | Not Started |
 | P21-X02 | Governance & docs: register P21, update permission-matrix + catalog-navigation-ux, add ADR extending Batch B, maintain terminology guide; per sub-phase BDD → TDD → E2E + UIUX → doc-sync → commit-review | docs/** | In Progress (registration + companion docs done 2026-06-29; per-slice sync pending) |
-| P21-X03 | **Permission single-source & fail-closed remediation** (AUD-P01..P05): unify route guard to one `canAccessRoute` reading only `visibleRoutes`; remove role fallbacks in `resolveCapability` that widen permissions (master/export/author); make missing-capability fail-closed; fix `roles.test.ts` assertions | `auth/roles.ts`, `router/index.ts`, `stores/session.ts`, `composables/useCapabilities.ts` | Required | Not Started |
+| P21-X03 | **Permission single-source & fail-closed remediation** (AUD-P01..P05, AUD-B04): unify route guard to one `canAccessRoute` reading only `visibleRoutes`; strict `resolveCapability` (missing capability fail-closed); `canExportTemplates` via `authorTemplates`; `canUploadMasters` fix; `showMetadataEdit` admin-only; fix `roles.test.ts` assertions | `auth/roles.ts`, `router/index.ts`, `stores/session.ts`, `composables/useCapabilities.ts`, `TemplateDetailView.vue` | Required | Done (2026-06-30) |
 | P21-X04 | **Backend capability + route + contract completeness** (AUD-P02/P05/P09, AUD-C05): register `route.content-module-management` in `RouteVisibilityService` + `ManagementRoute` + matrix §13.1; expose `exportTemplates` / `viewCollaborationWorkItems` / `maintainCollaborationTimeoutConfig` / content-module capabilities in `ManagementCapabilitiesView`; add `GET /collaboration-work-items` to OpenAPI v1 | `backend/.../authorization/**`, `backend/.../collaboration/**`, `docs/api/openapi-v1.yaml`, `permission-matrix.md` | Required | Not Started |
 | P21-X05 | **UI quality & a11y fixes** (AUD-Q01..Q03): define/alias `--color-primary` (table focus ring); add `:focus-visible` to nav items + breadcrumb links; replace bare hex/px with design tokens; brand wordmark shows bank display name not `REDBC/GREENBC` | `AppDataTable.vue`, `ManagementShell.vue`, `AppBreadcrumb.vue`, `BrandLogo.vue`, `theme/tokens.ts`, `styles/global.scss` | n/a (UI) | Not Started |
 | P21-X06 | **i18n parity hardening** (AUD-Q04): fill zh-CN gaps (whole `contentModules`, `templates.lifecycle/governance/authoring/rules/create/error`, `paste`); add layered locale key-parity test to block silent en-fallback | `zh-CN.ts`, `i18n/localeRegistry.test.ts` | n/a (i18n) | Not Started |
@@ -283,11 +283,11 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 | --- | --- | --- | --- | --- |
 | AUD-A01 | 🔴 | Backend never writes `RESOLVED` → completed to-dos never leave the task hub; `pendingActions` inflated; list API only queries `OPEN` | `CollaborationWorkItemWriter.java:32-82`; `TemplateLifecycleService.java:88-135`; `CollaborationWorkItemRepository.java:39-44` | **Resolved → P21-T02** (TEST path, 2026-06-29) + **P21-T07** (APPROVAL/PUBLISH path, 2026-06-30) |
 | AUD-A02 | 🔴 | Writer emits only `SUBMIT_FOR_TEST` → 5/6 behavior queues empty in production (APPROVAL/REMEDIATION/PENDING_RELEASE never created; ESCALATION only via scheduler) | `CollaborationWorkItemWriter.java:33-43`; `TemplateLifecycleService.java:84,88-134`; `CollaborationWorkItemTriggerType.java:3-9` | **Resolved → P21-T02** (TEST REMEDIATION, 2026-06-29) + **P21-T07** (APPROVAL/PENDING_RELEASE/APPROVAL_FAILURE, 2026-06-30); TIMEOUT_ESCALATION via existing scheduler |
-| AUD-P01 | 🔴 | `manageMasters` role fallback wrongly grants `TEMPLATE_AUTHOR`; unit test asserts the wrong behavior | `auth/roles.ts:36-44,56-57`; `roles.test.ts:79`; backend `GroupAccessService.java:28-30` | P21-X03 |
-| AUD-P02 | 🔴 | Content-module route bypasses backend `visibleRoutes` (not in `RouteVisibilityService`/`ManagementRoute`/matrix); `session.canAccessRoute` returns false while router admits | `auth/roles.ts:241-253`; `router/index.ts:95-104,145-149`; `RouteVisibilityService.java:30-70` | P21-X03, P21-X04 |
-| AUD-P03 | 🔴 | Dual route-guard APIs (`canAccessLogicalRoute` vs `session.canAccessRoute`) can disagree for the same routeKey | `router/index.ts:145-149`; `stores/session.ts:30-32`; `auth/roles.ts:292-310` | P21-X03 |
-| AUD-P04 | 🔴 | `resolveCapability` role fallback widens permissions when capabilities missing (not fail-closed) | `auth/roles.ts:22-34,48-202` | P21-X03 |
-| AUD-P05 | 🔴 | `canExportTemplates` bypasses session capabilities (pure roles); backend never exposes `exportTemplates` | `auth/roles.ts:115-125`; `ManagementCapabilitiesView.java:3-15` | P21-X03, P21-X04 |
+| AUD-P01 | 🔴 | `manageMasters` role fallback wrongly grants `TEMPLATE_AUTHOR`; unit test asserts the wrong behavior | `auth/roles.ts:36-44,56-57`; `roles.test.ts:79`; backend `GroupAccessService.java:28-30` | **Resolved → P21-X03 Done** (2026-06-30) |
+| AUD-P02 | 🔴 | Content-module route bypasses backend `visibleRoutes` (not in `RouteVisibilityService`/`ManagementRoute`/matrix); `session.canAccessRoute` returns false while router admits | `auth/roles.ts:241-253`; `router/index.ts:95-104,145-149`; `RouteVisibilityService.java:30-70` | **Resolved → P21-X03 Done** (2026-06-30); backend registration → P21-X04 |
+| AUD-P03 | 🔴 | Dual route-guard APIs (`canAccessLogicalRoute` vs `session.canAccessRoute`) can disagree for the same routeKey | `router/index.ts:145-149`; `stores/session.ts:30-32`; `auth/roles.ts:292-310` | **Resolved → P21-X03 Done** (2026-06-30) |
+| AUD-P04 | 🔴 | `resolveCapability` role fallback widens permissions when capabilities missing (not fail-closed) | `auth/roles.ts:22-34,48-202` | **Resolved → P21-X03 Done** (2026-06-30) |
+| AUD-P05 | 🔴 | `canExportTemplates` bypasses session capabilities (pure roles); backend never exposes `exportTemplates` | `auth/roles.ts:115-125`; `ManagementCapabilitiesView.java:3-15` | **Resolved → P21-X03 Done** (2026-06-30); backend `exportTemplates` exposure → P21-X04 |
 | AUD-P06 | 🟡 | Permission-matrix §13.1/§13.2 vs code drift (workbench redirect target, content-module route, missing capability rows) | `permission-matrix.md:402-426,457-468`; `ManagementCapabilitiesView.java:3-15` | P21-X04 |
 
 ### 11.2 Task hub × collaboration
@@ -310,7 +310,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
 | AUD-B01 | 🔴 | `?focus=lifecycle` overrides `?tab=` and is never cleared → locked on lifecycle tab | `TemplateDetailView.vue:102-107,309-327` | **Resolved (P21-T06a)** |
 | AUD-B02 | 🔴 | No `watch(templateId)` → component reuse shows stale template | `TemplateDetailView.vue:305-307,112` | **Resolved (P21-T06a)** |
 | AUD-B03 | 🔴 | APPROVAL dual-substate not surfaced: Badge has no substate; Banner ignores `approvalSubState`; list filter on `APPROVAL` but `TemplateSummary` lacks `approvalSubState` | `TemplateStatusBadge.vue:12-31`; `TemplateWorkflowBanner.vue:31-35`; `TemplateListView.vue:53-58`; `types/template.ts:15-26` | **Resolved → P21-T08** (2026-06-30) |
-| AUD-B04 | 🔴 | `showMetadataEdit` uses `authorTemplates` but matrix limits metadata edit to GLOBAL/GROUP (fail-open UI) | `TemplateDetailView.vue:186-192`; `permission-matrix.md` | P21-X03 |
+| AUD-B04 | 🔴 | `showMetadataEdit` uses `authorTemplates` but matrix limits metadata edit to GLOBAL/GROUP (fail-open UI) | `TemplateDetailView.vue:186-192`; `permission-matrix.md` | **Resolved → P21-X03 Done** (2026-06-30) |
 | AUD-B05 | 🔴 | `test-fail` decision has no remediation fields (only `approval-reject` does) | `TemplateLifecycleDecisionDialog.vue:276-331`; `domain-model.md` §4.1 | **Resolved (P21-T05)** |
 | AUD-B06 | 🟡 | Publish-gate parallel load failure silent-caught → publish disabled with no reason; `bindingGateResult` fetched but never rendered | `TemplateDetailView.vue:329-365,89,904-927` | **Resolved (P21-T06b)** |
 | AUD-B07 | 🟡 | Policy/lifecycle panels lack error/empty states; long name/AD-group no truncation; semver picker responsive break | `TemplateDetailView.vue:1056-1082,755-758,929-936` | **Resolved (P21-T06b)** |
@@ -342,7 +342,7 @@ the owning P21 task. Severity: 🔴 critical / 🟡 medium / 🟢 minor.
    `ApprovalSubStateResolver` extracted as `approvalSubState` SSOT. **P21-T07 Done (2026-06-30):**
    APPROVAL/PUBLISH `RESOLVED` + `SUBMIT_FOR_APPROVAL`/`APPROVAL_FAILURE`/`APPROVAL_PENDING_RELEASE`
    emission wired in `TemplateLifecycleService`; TIMEOUT_ESCALATION unchanged (existing scheduler).
-2. **P0 security** — AUD-P01..P05: permission single-source + fail-closed (P21-X03).
+2. **P0 security** — AUD-P01..P05: permission single-source + fail-closed (**P21-X03 Done**, 2026-06-30; AUD-B04 resolved same slice).
 3. **P0 bugs** — AUD-B01/B02: focus/tab lockup + stale templateId (P21-T06a).
 4. **P0 i18n/a11y** — AUD-Q04 zh-CN parity, AUD-Q01 focus ring (P21-X06, P21-X05).
 5. **P1** — task hub depth (AUD-H01..H06, P21-T01a); APPROVAL dual-substate (**AUD-B03 resolved → P21-T08**, 2026-06-30);
@@ -2126,3 +2126,11 @@ E2E helper.
 **Deliverables:** `auditAdminJourney.ts` (+ Vitest), `auditAdminJourneySteps` in `roleJourneyDefinitions.ts` (+ test); `AuditConsoleView.vue` journey timeline + view-only model + business column headers; `auditEventLabels.ts` (+ Vitest); i18n `journey.roles.AUDIT_ADMIN.*` + `audit.*` L1 values in `en.ts` / `zh-CN.ts`; Playwright `P21-T11-audit-journey.spec.ts` **3/3**.
 
 **Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**498** Vitest); Playwright P21-T11 **3/3**. Backend unchanged. **Sub-phase D cluster ④ complete** (T11); **all four role clusters (①→④) complete**. P21 phase **wrap-up** — next cross-cutting **P21-X03** (permission single-source/fail-closed, P0) or **P21-X01** / **P21-X05** / **P21-X06** per §11.5 remediation order; phase exit criteria (§7) still open on X03–X06.
+
+### P21-X03 completion (2026-06-30)
+
+**Scope:** Cross-cutting P0 permission fail-closed — strict `resolveCapability` (missing capability → deny); unified route guard via single `canAccessRoute` reading `visibleRoutes` only; `canExportTemplates` aligned to `authorTemplates`; `canUploadMasters` fix; `showMetadataEdit` admin-only (GLOBAL/GROUP). Resolves AUD-P01..P05 + AUD-B04.
+
+**Deliverables:** `auth/roles.ts` (+ `roles.test.ts`), `router/index.ts`, `stores/session.ts`, `composables/useCapabilities.ts`, `TemplateDetailView.vue` (+ `TemplateDetailView.test.ts`).
+
+**Gate:** `pnpm -C frontend lint`, `type-check`, `test`, `build` green (**503** Vitest). Backend unchanged. **Audit:** AUD-P01..P05 **resolved**; AUD-B04 **resolved**. P21 phase **wrap-up** — next **P21-X01** / **P21-X04** / **P21-X05** / **P21-X06** per §11.5; phase exit criteria (§7) still open on X01/X04–X06.

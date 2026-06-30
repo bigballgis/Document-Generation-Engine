@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
-import { canAccessLogicalRoute, sessionContext } from '@/auth/roles'
 import { useSessionStore } from '@/stores/session'
 
 const router = createRouter({
@@ -141,13 +140,7 @@ router.beforeEach(async (to) => {
 
   const logicalRoute = to.meta.logicalRoute
   if (typeof logicalRoute === 'string') {
-    const context = sessionContext(sessionStore.session)
-    const allowed = canAccessLogicalRoute(
-      logicalRoute,
-      context,
-      sessionStore.session?.visibleRoutes ?? [],
-    )
-    if (!allowed) {
+    if (!sessionStore.canAccessRoute(logicalRoute)) {
       const traceId = crypto.randomUUID()
       sessionStore.recordRouteDeny(traceId)
       return {

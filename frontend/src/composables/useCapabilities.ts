@@ -6,6 +6,7 @@ import {
   canDecideContentModuleReviews,
   canDecideTests,
   canDeleteTemplates,
+  canEditTemplateMetadata,
   canExportTemplates,
   canManageApiPolicy,
   canManageContentModuleLifecycle,
@@ -36,6 +37,7 @@ export function useCapabilities() {
   const manageReleaseVersionState = computed(() => canManageReleaseVersionState(context.value))
   const manageApiPolicy = computed(() => canManageApiPolicy(context.value))
   const deleteTemplates = computed(() => canDeleteTemplates(context.value))
+  const editTemplateMetadata = computed(() => canEditTemplateMetadata(context.value))
   const authorContentModules = computed(() => canAuthorContentModules(context.value))
   const decideContentModuleReviews = computed(() => canDecideContentModuleReviews(context.value))
   const manageContentModuleLifecycle = computed(() => canManageContentModuleLifecycle(context.value))
@@ -54,6 +56,7 @@ export function useCapabilities() {
     manageReleaseVersionState,
     manageApiPolicy,
     deleteTemplates,
+    editTemplateMetadata,
     authorContentModules,
     decideContentModuleReviews,
     manageContentModuleLifecycle,

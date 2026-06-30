@@ -73,15 +73,33 @@ describe('management roles', () => {
     ).toBe(true)
   })
 
-  it('allows upload for master management roles via fallback', () => {
-    expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(true)
+  it('denies upload for template author via fallback (AUD-P01)', () => {
+    expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(false)
   })
 
-  it('allows template export/import for admin and author roles', () => {
+  it('denies upload when manageMasters capability is explicitly false (AUD-P01)', () => {
+    expect(
+      canUploadMasters({
+        roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR],
+        capabilities: { ...testerCapabilities, manageMasters: false },
+      }),
+    ).toBe(false)
+  })
+
+  it('allows template export/import for admin and author roles via authorTemplates fallback', () => {
     expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.GLOBAL_ADMIN] })).toBe(true)
     expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.GROUP_ADMIN] })).toBe(true)
     expect(canExportTemplates({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(true)
     expect(canExportTemplates({ roles: ['TEMPLATE_TESTER'] })).toBe(false)
+  })
+
+  it('denies export when authorTemplates true but role is not in export row (AUD-P05)', () => {
+    expect(
+      canExportTemplates({
+        roles: ['TEMPLATE_TESTER'],
+        capabilities: { ...testerCapabilities, authorTemplates: true },
+      }),
+    ).toBe(false)
   })
 
   it('allows template management for authoring and admin roles via fallback', () => {
@@ -148,9 +166,24 @@ describe('management roles', () => {
     ).toBe(true)
   })
 
-  it('allows escalation queue visibility from roles when session capabilities are absent', () => {
-    const groupAdminContext = { roles: [MANAGEMENT_ROLES.GROUP_ADMIN] }
+  it('denies content-module route when not in visibleRoutes even if role would allow (AUD-P02)', () => {
+    const authorContext = { roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR], capabilities: globalAdminCapabilities }
 
-    expect(canViewEscalationQueue(groupAdminContext)).toBe(true)
+    expect(
+      canAccessLogicalRoute('route.content-module-management', authorContext, []),
+    ).toBe(false)
+    expect(
+      canAccessLogicalRoute('route.content-module-management', authorContext, [
+        'route.content-module-management',
+      ]),
+    ).toBe(true)
+  })
+
+  it('fail-closes capability checks when session capabilities object is present but key missing', () => {
+    const partialCapabilities = { authorTemplates: true } as ManagementCapabilities
+
+    expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.GLOBAL_ADMIN], capabilities: partialCapabilities })).toBe(
+      false,
+    )
   })
 })

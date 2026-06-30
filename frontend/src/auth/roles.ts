@@ -29,7 +29,10 @@ function resolveCapability(
     if (typeof capability === 'boolean') {
       return capability
     }
+    // Fail-closed: missing or non-boolean values deny; no role fallback widening.
+    return false
   }
+  // Legacy/tests: matrix-aligned role fallback when session capabilities are absent.
   return roleFallback(context.roles)
 }
 
@@ -53,8 +56,14 @@ export function canReviewMasters(context: CapabilityContext): boolean {
   )
 }
 
+function canManageMastersByRole(roles: string[]): boolean {
+  return roles.some((role) =>
+    ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
+  )
+}
+
 export function canUploadMasters(context: CapabilityContext): boolean {
-  return resolveCapability(context, 'manageMasters', canAccessMasterManagement)
+  return resolveCapability(context, 'manageMasters', canManageMastersByRole)
 }
 
 export function canAccessTemplateManagement(roles: string[]): boolean {
@@ -113,15 +122,10 @@ export function canAuthorTemplates(context: CapabilityContext): boolean {
 }
 
 export function canExportTemplates(context: CapabilityContext): boolean {
-  return context.roles.some((role) =>
-    (
-      [
-        MANAGEMENT_ROLES.GLOBAL_ADMIN,
-        MANAGEMENT_ROLES.GROUP_ADMIN,
-        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
-      ] as string[]
-    ).includes(role),
-  )
+  if (!canAccessTemplateManagement(context.roles)) {
+    return false
+  }
+  return resolveCapability(context, 'authorTemplates', canAccessTemplateManagement)
 }
 
 export function canDecideTests(context: CapabilityContext): boolean {
@@ -181,6 +185,10 @@ export function canRestoreOrDeprecateTemplates(context: CapabilityContext): bool
       ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
     ),
   )
+}
+
+export function canEditTemplateMetadata(context: CapabilityContext): boolean {
+  return canPublishTemplates(context) || canRestoreOrDeprecateTemplates(context)
 }
 
 export function canManageReleaseVersionState(context: CapabilityContext): boolean {
@@ -281,14 +289,12 @@ export function canViewEscalationQueue(context: CapabilityContext): boolean {
   )
 }
 
+/** @deprecated Use sessionStore.canAccessRoute for route guards. */
 export function canAccessLogicalRoute(
   routeKey: string,
-  context: CapabilityContext,
+  _context: CapabilityContext,
   visibleRoutes: string[],
 ): boolean {
-  if (routeKey === 'route.content-module-management') {
-    return visibleRoutes.includes(routeKey) || canAccessContentModuleManagement(context.roles)
-  }
   return visibleRoutes.includes(routeKey)
 }
 

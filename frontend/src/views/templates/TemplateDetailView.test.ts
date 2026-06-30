@@ -141,6 +141,43 @@ describe('TemplateDetailView', () => {
     })
   })
 
+  it('does not show metadata edit for TEMPLATE_AUTHOR (AUD-B04)', async () => {
+    vi.mocked(templatesApi.getTemplate).mockResolvedValue(makeTemplate('tpl-b', 'Draft Template') as never)
+
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('Edit metadata')
+  })
+
+  it('shows metadata edit for GROUP_ADMIN on editable lifecycle status (AUD-B04)', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      session: {
+        username: '10000002',
+        displayName: 'Group Admin',
+        email: 'admin@example.com',
+        authSource: 'LOCAL',
+        roles: ['GROUP_ADMIN'],
+        authorizedGroupCodes: ['RETAIL'],
+        defaultRoute: 'route.dashboard-home',
+        visibleRoutes: ['route.dashboard-home', 'route.template-management'],
+        expiresAt: '2099-01-01T00:00:00Z',
+        capabilities: {
+          publishTemplates: true,
+          authorTemplates: true,
+        },
+      },
+    })
+
+    vi.mocked(templatesApi.getTemplate).mockResolvedValue(makeTemplate('tpl-b', 'Draft Template') as never)
+
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Edit metadata')
+  })
+
   it('shows team-lead journey block for GROUP_ADMIN on PENDING_RELEASE template', async () => {
     const sessionStore = useSessionStore()
     sessionStore.$patch({

@@ -98,6 +98,7 @@ const {
   manageApiPolicy,
   deleteTemplates,
   exportTemplates,
+  editTemplateMetadata,
 } = useCapabilities()
 const { confirmAction } = useConfirmAction()
 
@@ -247,7 +248,7 @@ const showGovernanceSection = computed(
 )
 const showMetadataEdit = computed(() => {
   const status = template.value?.lifecycleStatus
-  if (!status || !authorTemplates.value) {
+  if (!status || !editTemplateMetadata.value) {
     return false
   }
   return status !== 'PUBLISHED' && status !== 'STOPPED' && status !== 'DEPRECATED'
