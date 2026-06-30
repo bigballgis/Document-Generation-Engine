@@ -42,6 +42,7 @@ describe('MasterRevisionDetailView', () => {
       visibleRoutes: ['route.master-management'],
       capabilities: { manageMasters: true },
     } as never
+    routerPush.mockReset()
     vi.mocked(mastersApi.getMaster).mockReset()
     vi.mocked(mastersApi.getMasterRevisionLine).mockReset()
   })
@@ -65,11 +66,12 @@ describe('MasterRevisionDetailView', () => {
     vi.mocked(mastersApi.getMasterRevisionLine).mockResolvedValue({
       id: 'revision-1',
       masterId: 'master-1',
-      lineLabel: 'CURRENT',
+      lineLabel: 'HISTORICAL',
       status: 'APPROVED',
-      originalFilename: 'letterhead-v2.docx',
-      changeSummary: 'Updated header',
+      originalFilename: 'letterhead-v1.docx',
+      changeSummary: 'Initial upload',
       current: false,
+      revisionSequence: 1,
       anchors: [{ anchorId: 'HEADER', displayLabel: 'Header block' }],
       reviewHistory: [],
       createdBy: '10000001',
@@ -93,9 +95,64 @@ describe('MasterRevisionDetailView', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Revision overview')
+    expect(wrapper.text()).toContain('Revision 1')
+    expect(wrapper.text()).toContain('Historical')
     expect(wrapper.text()).toContain('Anchor catalog')
+    expect(wrapper.text()).toContain('Header block')
     expect(wrapper.find('.header-actions').text()).not.toContain('Submit for review')
     expect(wrapper.find('[data-master-journey-cta]').exists()).toBe(false)
+  })
+
+  it('navigates back to package hub from historical revision detail', async () => {
+    vi.mocked(mastersApi.getMaster).mockResolvedValue({
+      id: 'master-1',
+      groupCode: 'RETAIL',
+      name: 'Retail letterhead',
+      description: null,
+      status: 'APPROVED',
+      originalFilename: 'letterhead-v2.docx',
+      changeSummary: null,
+      anchors: [],
+      reviewHistory: [],
+      createdBy: '10000001',
+      updatedBy: '10000001',
+      createdAt: '2026-06-23T10:00:00Z',
+      updatedAt: '2026-06-23T10:00:00Z',
+    })
+    vi.mocked(mastersApi.getMasterRevisionLine).mockResolvedValue({
+      id: 'revision-1',
+      masterId: 'master-1',
+      lineLabel: 'HISTORICAL',
+      status: 'APPROVED',
+      originalFilename: 'letterhead-v1.docx',
+      changeSummary: null,
+      current: false,
+      revisionSequence: 1,
+      anchors: [],
+      reviewHistory: [],
+      createdBy: '10000001',
+      updatedBy: '10000001',
+      createdAt: '2026-06-23T10:00:00Z',
+      updatedAt: '2026-06-23T11:00:00Z',
+    })
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(MasterRevisionDetailView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+
+    await wrapper.find('.page-header .el-button--primary.is-link').trigger('click')
+
+    expect(routerPush).toHaveBeenCalledWith('/masters/master-1')
   })
 
   it('renders designer journey submit step for current draft with anchors', async () => {

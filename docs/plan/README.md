@@ -8,9 +8,10 @@ verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
 **Active formal phase: None** (2026-07-01 — P12-AUD-M02 **Done**; P12 catch-all **Not Started**).
+**Active slice: None** (2026-07-01 — **P2-T06 Done**; Phase B full master revision history closed; P2 phase **Done**).
 **P21 Done** (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**,
-frontend **511** Vitest; **AUD-B10 resolved** via P12-AUD-B10; **AUD-M02 resolved** via P12-AUD-M02). Latest gates: backend **558**,
-frontend **521** Vitest (2026-07-01). See
+frontend **511** Vitest; **AUD-B10 resolved** via P12-AUD-B10; **AUD-M02 resolved** via P12-AUD-M02). Latest gates: backend **564**,
+frontend **528** Vitest (2026-07-01). See
 [execution-sync-ledger.md](./execution-sync-ledger.md).
 
 ## Layer model
@@ -78,12 +79,12 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P15 | K8s Helm, probes, blue-green, CI gates | [deploy/README.md](../deploy/README.md); helm-validate green |
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
-**Active phase: None** (2026-07-01 — P12-AUD-M02 **Done**; AUD-M02 role constants single-source **resolved**). **P21 Done** — closure evidence in
+**Active phase: None** (2026-07-01 — P12-AUD-M02 **Done**; AUD-M02 role constants single-source **resolved**). **Active slice: None** (2026-07-01 — **P2-T06 Done**; Phase B master revision history closed). **P21 Done** — closure evidence in
 [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 
 **Open backlog (non-active slices):**
 - **OPT-D / M9** — architecture/security debt (Redisson, QueryDSL expansion, intranet SCA) — see [optimization-plan.md](./optimization-plan.md)
-- **Phase B** — multi-revision master history API — see [catalog-navigation-ux.md](../product/catalog-navigation-ux.md)
+- ~~**Phase B** — multi-revision master history API~~ → **Done (P2-T06, 2026-07-01)** — see [P2 detail](detail/P2-master-management.md) § P2-T06 and [catalog-navigation-ux.md](../product/catalog-navigation-ux.md)
 
 ## Optimization backlogs
 

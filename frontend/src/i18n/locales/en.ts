@@ -382,10 +382,13 @@ export default {
     revisionLines: {
       title: 'Revision lines',
       hint:
-        'Masters use a single current DOCX revision line. Replacing the file updates this line and may reset review status.',
+        'Each file upload or replace creates an immutable revision line. Open any line to view its anchor snapshot and download the DOCX from that point in time.',
       line: 'Line',
       currentLine: 'Current revision',
+      historicalLine: 'Historical revision',
       currentBadge: 'Current',
+      historicalBadge: 'Historical',
+      revisionSequence: 'Revision {sequence}',
       status: 'Status',
       sourceFile: 'Source file',
       anchors: 'Anchors',
@@ -399,6 +402,7 @@ export default {
     revision: {
       backToPackage: 'Back to master package',
       breadcrumbLabel: 'Revision line',
+      historicalReadOnlyHint: 'This is a historical revision line. Workflow actions apply only to the current line.',
       loadError: 'Unable to load revision line detail.',
       notFoundTitle: 'Revision line not found',
       notFoundDescription: 'This revision line may have been removed or is outside your group scope.',

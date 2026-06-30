@@ -56,7 +56,7 @@ OPT Wave 3 **In Progress** (OPT-D5 service split, OPT-G frontend polish) — see
 
 **Still open (not blocking MVP Done):** external deployment validation (E05-T06),
 role-journey release evidence (E06), intranet SCA (M9-T02), M10–M11 security closure,
-P2 Phase B multi-revision master history, real K8s cluster deploy evidence (P15 render-only).
+real K8s cluster deploy evidence (P15 render-only).
 
 ## What is preserved
 

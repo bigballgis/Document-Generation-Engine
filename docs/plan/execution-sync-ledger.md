@@ -1,6 +1,27 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-07-01 (P12-AUD-M02 **Done** — P12 catch-all back to **Not Started**)
+**Last synced:** 2026-07-01 (**P2-T06 Done** — Phase B full master revision history)
+**Completion note (2026-07-01):** **P2-T06 Done** — Phase B full master revision history:
+each file replace persisted as revision row; full paginated history on hub; revision detail
+deep-links to any historical line; download historical DOCX. **Backend:** Flyway
+`V32__master_revision_line.sql`, `MasterRevisionLineEntity`/`MasterRevisionLineAnchorEntity`,
+`MasterRevisionLineService` (append on create/replace, list/get/download all lines),
+`MasterDocumentService` (`revisionSequence`, live status for current line); architecture review
+M1/M2 remediated. **Frontend:** multi-row `MasterRevisionLinesPanel`, historical read-only
+`MasterRevisionDetailView`, `masterRevisionLineLabel.ts` i18n en+zh-CN. **Gate:** backend
+`mvn verify` BUILD SUCCESS (**564** Surefire); frontend lint/type-check/test/build green
+(**528** Vitest); Playwright `master-revision-two-page.spec.ts` **7/7**; UIUX evidence
+`P2-T06-uiux-evidence.spec.ts` **6** screenshots @ 1440×900. **P2 phase remains Done** — do
+not reopen. **No active slice.** Traceability: `docs/product/catalog-navigation-ux.md` § Master
+revision history — phased delivery **Phase B Done**. Detail:
+[detail/P2-master-management.md](./detail/P2-master-management.md).
+**Activation note (2026-07-01):** **P2-T06 activated → In Progress** (Phase B full master revision
+history — each file replace persisted as revision row; full paginated history on hub; revision
+detail deep-links to any historical line; download historical DOCX). **P2 phase remains Done** — do
+**not** reopen P2 as formal `In Progress` phase (P2-T06 sub-slice pattern, analogous to
+P12-AUD-B10 catch-all activation). User constraint — single active slice only. **No gate evidence
+yet** for P2-T06. Traceability: `docs/product/catalog-navigation-ux.md` § Master revision history
+— phased delivery **Phase B**. Detail: [detail/P2-master-management.md](./detail/P2-master-management.md).
 **Completion note (2026-07-01):** **P12-AUD-M02 Done** — role constants single-source refactor
 (AUD-M02 remediation): `MANAGEMENT_ROLES` derived from `MANAGEMENT_ROLE_VALUES` SSOT in
 `types/identity.ts`; bare role string literals replaced in `auth/roles.ts`, `auth/identityRoles.ts`,
@@ -160,15 +181,17 @@ On conflict between this ledger and a stale task-sheet row, **plan layer wins** 
 
 | Gate | Command | Result | Notes |
 | --- | --- | --- | --- |
-| Frontend (latest full gates) | `pnpm -C frontend lint`, `type-check`, `test`, `build` | Green — **511** Vitest tests (2026-06-30) | P21-X01 full-system L1 terminology sweep + P21 phase close (X02) |
-| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — BUILD SUCCESS (**553** Surefire, 2026-06-30) | P21-X04 backend capability + route + OpenAPI completeness |
+| Frontend (latest full gates) | `pnpm -C frontend lint`, `type-check`, `test`, `build` | Green — **528** Vitest tests (2026-07-01) | P2-T06 Phase B full master revision history |
+| Backend (latest full verify) | `mvn -B -ntp -f backend/pom.xml verify` | Green — BUILD SUCCESS (**564** Surefire, 2026-07-01) | P2-T06 Phase B — V32 migration, revision-line entity + service |
 | Frontend lint | `pnpm -C frontend lint` | Green | |
 | Frontend type-check | `pnpm -C frontend type-check` | Green | |
 | Frontend test | `pnpm -C frontend test` / `vitest run` | Green | **235 tests**, 2026-06-27 (P14-T02 E2E remediation — `roles.ts` workbench guards) |
 | Frontend build | `pnpm -C frontend build` | Green | |
 | E2E Docker (4173) | `pnpm -C frontend test:e2e:docker` | Green — **7 tests**, 2026-06-25 | post P19 Wave 1 + catalog + master-replace spec fixes |
 | Docker manual smoke (4173) | `scripts/docker-deploy.ps1` + author UI | Green — 2026-06-25 | P19-T02/T03: batch test button + coverage panel on template authoring tab |
-| E2E master revision two-page | `frontend/e2e/master-revision-two-page.spec.ts` (Docker 4173) | Green — **4/4**, 2026-06-25 | P2-T05 Phase A hub + revision detail journeys |
+| E2E master revision two-page | `frontend/e2e/master-revision-two-page.spec.ts` (Docker 4173) | Green — **7/7**, 2026-07-01 | P2-T06 Phase B multi-row hub, historical deep-link, download |
+| E2E P2-T06 UIUX (4173) | `pnpm exec playwright test e2e/P2-T06-uiux-evidence.spec.ts --config playwright.docker.config.ts` | Green — **6** screenshots @ 1440×900, 2026-07-01 | P2-T06 hub + historical revision detail — REDBC/GREENBC + zh-CN; evidence `frontend/e2e/evidence/P2-T06/screenshots/` |
+| E2E master revision two-page (Phase A) | `frontend/e2e/master-revision-two-page.spec.ts` (Docker 4173) | Green — **4/4**, 2026-06-25 | P2-T05 Phase A hub + revision detail journeys (superseded count by Phase B 7/7) |
 | E2E P14-T01 UIUX (4173) | `pnpm exec playwright test e2e/P14-T01-uiux-evidence.spec.ts e2e/a11y-smoke.spec.ts --config playwright.docker.config.ts` | Green — **3/3**, 2026-06-26 | P14-T01 content module UI; manifest `frontend/e2e/evidence/P14-T01-uiux-manifest.md` (8 screenshots); e2e-uiux-reviewer **PASS** |
 | E2E P14-T02 collaboration (4173) | `pnpm exec playwright test e2e/collaboration-todos.spec.ts --config playwright.docker.config.ts` | Green — **3/3**, 2026-06-27 | P14-T02 collaboration to-do journeys (tester queue, overdue escalation, admin config); report `playwright-report/docker/index.html`; backend remediation (`BatchTestRunEntity` FK, `CollaborationWorkItemWriter`); frontend remediation (`roles.ts` workbench route guards) |
 | E2E P14-T02 UIUX (4173) | `pnpm exec playwright test e2e/P14-T02-uiux-evidence.spec.ts e2e/a11y-smoke.spec.ts --config playwright.docker.config.ts` | Green — **5/5**, 2026-06-27 | P14-T02 Dashboard collaboration tasks + timeout config UI (COR-T11); manifest `frontend/e2e/evidence/P14-T02-uiux-manifest.md` (8 screenshots @ 1440×900); e2e-uiux-reviewer **PASS** |
@@ -257,6 +280,7 @@ OPT-D5 slice 2 — `TemplateStructuredAuthoringService` extracted (`getMasterSty
 P21-T02 A1 backend collaboration work-item closed loop — `CollaborationWorkItemWriter.resolveOpenTestWorkItems` + `upsertRemediationWorkItem`; `TemplateLifecycleService.recordTestDecision` resolves OPEN TEST + emits REMEDIATION on FAILED→DRAFT; `submitForTest` accepts DRAFT or APPROVAL+PENDING_SUBMIT (PENDING_DECISION fail-closed); `ApprovalSubStateResolver` extracted as `approvalSubState` SSOT; non-sensitive create/resolve audit (`ManagementAuditRecorder.recordCollaborationWorkItem*`); +1 i18n key `api.collaboration.workItem.remediation.summary`; `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (Surefire all pass, JaCoCo met, Checkstyle/PMD/SpotBugs 0); AUD-A01 (TEST path) resolved, AUD-A02 partial — approval-path closure → P21-T07 (2026-06-29).
 P21-T01 A0 behavior nav + L1 copy round 1 — `navStructure.ts` behavior-typed `myTodos` group + six queue-driven entries; `ManagementShell.vue` nav active-state + deep links; L1 rewrites `en.ts`/`zh-CN.ts` (nav/dashboard/tasks/breadcrumb); `navStructure.test.ts`, `ManagementShell.test.ts`; frontend lint/type-check/test/build green (**267+** Vitest); Playwright `P21-T01-behavior-nav.spec.ts` **7/7**, `P21-T01-uiux-evidence.spec.ts` **1/1**, `a11y-smoke` + `collaboration-todos` **9/9** (dev :5173 + backend :8080); manifest `frontend/e2e/evidence/P21-T01-uiux-manifest.md` PASS; AUD-Q05 in-scope L1 resolved — remainder → P21-X01 (2026-06-29).
 P21-X01 full-system L1 terminology sweep — `en.ts`/`zh-CN.ts` business copy across `templates.*`/`audit.*`/`contentModules.*`/`packageCatalog.*`/nav routes; `business-terminology-guide.md` P21-X01 mapping table; Vitest **511** (`navStructure.test.ts`, `TemplateStatusBadge.test.ts`, `TemplatePublishSummaryDialog.test.ts`, `TemplateDetailLifecycleTab.test.ts`); frontend lint/type-check/test/build green; AUD-Q05 **resolved** (2026-06-30).
+P2-T06 Phase B full master revision history — Flyway V32 `master_revision_line` + anchor snapshot backfill; `MasterRevisionLineService` append/list/get/download; hub multi-row UI + historical read-only detail; E2E **7/7** + UIUX **6** screenshots; backend verify **564**; frontend **528** Vitest (2026-07-01).
 Use the latest full-verify row above for gate claims; milestone blocks below are point-in-time snapshots.
 
 ## Phase status (plan layer)
@@ -265,7 +289,7 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | --- | --- | --- |
 | P0 | Done | Skeleton, compose, CI gates, contract harness |
 | P1 | Done | Local auth, session, role landing, guards |
-| P2 | Done | Master APIs + list UI + **Phase A revision nav** (`MasterPackageHubView`, `MasterRevisionLineController`, V22); P2-T05 Done — hub/revision two-page, E2E 4/4; Phase B full history pending |
+| P2 | Done | Master APIs + list UI + **Phase A revision nav** (`MasterPackageHubView`, `MasterRevisionLineController`, V22); P2-T05 Done — hub/revision two-page, E2E 4/4; **P2-T06 Done** — Phase B full revision history (V32, multi-row hub, historical download, E2E 7/7) |
 | P3 | Done | Template wizard, variables, rules, test data sets |
 | P4 | Done | DOCX/PDF render, preview records, comparison panel |
 | P5 | Done | Lifecycle + publish gate UI (**thin slice** — state machine + checklist UI; live gates → P19) |
@@ -286,7 +310,8 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
 | P21 | Done (2026-06-30) | Role-journey frontend redesign — T01–T11 + X01–X06 + **X02** governance close; backend **`mvn verify` 553**; frontend **511** Vitest; Playwright/UIUX per sub-phase; **AUD-B10 resolved** (P12-AUD-B10 Done 2026-07-01); **AUD-M02 resolved** (P12-AUD-M02 Done 2026-07-01) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
-**Active phase:** **None** (2026-07-01 — P12-AUD-M02 **Done**; P12 catch-all **Not Started**).
+**Active phase:** **None** (2026-07-01 — no formal phase `In Progress`).
+**Active slice:** **None** (2026-07-01 — **P2-T06 Done**; Phase B full master revision history closed).
 **P21 Done** — do not reopen. All formal phases P0–P11, P13–P21 **Done**; P12 catch-all idle.
 
 ## Epic ↔ phase mapping
@@ -370,9 +395,12 @@ Source: [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimizatio
 | P2-T05 Phase A hub + revision detail UI | Done | `MasterPackageHubView`, `MasterRevisionDetailView`, `MasterRevisionLinesPanel`; routes `/masters/:masterId`, `/masters/:masterId/revisions/:revisionLineId`; unit tests green |
 | P2-T05 Phase A revision-lines API | Done | `MasterRevisionLineController`, `MasterRevisionLineService`, `MasterRevisionLineControllerTest`; Flyway `V22__master_current_revision_line_id.sql`; honest single-line pagination |
 | P2-T05 E2E + UIUX | Done | `frontend/e2e/master-revision-two-page.spec.ts` **4/4**; UIUX review pass (minor findings) |
-| Phase B multi-revision history | Not Started | Full persisted revision rows + paginated history API — see `catalog-navigation-ux.md` § phased delivery |
+| P2-T06 Phase B full revision history | Done (2026-07-01) | Flyway V32, `MasterRevisionLineEntity`/`MasterRevisionLineService`, multi-row hub UI, historical read-only detail + download; E2E **7/7** + UIUX **6** screenshots; backend **564**, frontend **528** Vitest |
+| Phase B multi-revision history | Done (P2-T06, 2026-07-01) | Full persisted revision rows + paginated history API + historical deep-link/download — see `catalog-navigation-ux.md` § phased delivery |
 
-**Gate evidence (P2-T05 slice):** `mvn -B -ntp -f backend/pom.xml verify`; `pnpm -C frontend lint` / `type-check` / `test` / `build`; Playwright `master-revision-two-page.spec.ts` 4/4.
+**Gate evidence (P2-T06 slice):** `mvn -B -ntp -f backend/pom.xml verify` — **564** tests; `pnpm -C frontend lint` / `type-check` / `test` (**528**) / `build`; Playwright `master-revision-two-page.spec.ts` **7/7**; UIUX `P2-T06-uiux-evidence.spec.ts` **6** screenshots @ 1440×900.
+
+**Gate evidence (P2-T05 slice):** `mvn -B -ntp -f backend/pom.xml verify`; `pnpm -C frontend lint` / `type-check` / `test` / `build`; Playwright `master-revision-two-page.spec.ts` 4/4 (Phase A baseline; extended to 7/7 in P2-T06).
 
 Task row: [detail/P2-master-management.md](./detail/P2-master-management.md).
 

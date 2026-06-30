@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+
 import { expect, test } from '@playwright/test'
 
 import {
@@ -8,7 +10,16 @@ import {
   loginAs,
   loginAsGlobalAdmin,
 } from './helpers/auth'
-import { demoMasterRevisionDetailPath, restoreDemoMasterToApproved } from './helpers/masters-api'
+import {
+  DEMO_SEED_DOCX_FILENAME,
+  REPLACEMENT_DOCX_FILENAME,
+  REPLACEMENT_DOCX_PATH,
+  demoMasterRevisionDetailPath,
+  prepareDemoMasterWithReplaceHistory,
+  restoreDemoMasterToApproved,
+} from './helpers/masters-api'
+
+const hasReplacementFixture = fs.existsSync(REPLACEMENT_DOCX_PATH)
 
 async function openDemoMasterHub(page: import('@playwright/test').Page) {
   await page.goto('/masters')
@@ -62,8 +73,35 @@ function breadcrumb(page: import('@playwright/test').Page) {
   return page.locator('nav.app-breadcrumb')
 }
 
-test.describe('master revision two-page UX (Phase A)', () => {
+function revisionLineRows(page: import('@playwright/test').Page) {
+  return page.locator('.revision-lines-card .el-table__body-wrapper tbody tr')
+}
+
+function historicalRevisionRow(page: import('@playwright/test').Page) {
+  return revisionLineRows(page).filter({
+    has: page.locator('.line-tag').filter({ hasText: /^historical$/i }),
+  })
+}
+
+function currentRevisionRow(page: import('@playwright/test').Page) {
+  return revisionLineRows(page).filter({
+    has: page.locator('.line-tag').filter({ hasText: /^current$/i }),
+  })
+}
+
+function approvedHistoricalSeedRow(page: import('@playwright/test').Page) {
+  return page.locator('.revision-lines-card').getByRole('row', {
+    name: new RegExp(
+      `historical.*approved.*${DEMO_SEED_DOCX_FILENAME.replace('.', '\\.')}`,
+      'i',
+    ),
+  })
+}
+
+test.describe('master revision two-page UX', () => {
   test.describe.configure({ mode: 'serial' })
+
+test.describe('Phase A', () => {
 
   test.beforeAll(async ({ request }) => {
     await restoreDemoMasterToApproved(request)
@@ -75,7 +113,7 @@ test.describe('master revision two-page UX (Phase A)', () => {
     await assertHubRevisionLinesTable(page)
 
     await expect(breadcrumb(page)).toBeVisible()
-    await expect(breadcrumb(page)).toContainText(/master documents/i)
+    await expect(breadcrumb(page)).toContainText(/letterhead templates/i)
     await expect(breadcrumb(page)).toContainText(/package/i)
 
     await openCurrentRevisionFromHub(page)
@@ -93,7 +131,7 @@ test.describe('master revision two-page UX (Phase A)', () => {
     await expect(page.getByRole('heading', { level: 1, name: DEMO_MASTER_NAME })).toBeVisible()
 
     await openCurrentRevisionFromHub(page)
-    await breadcrumb(page).getByRole('button', { name: /^master documents$/i }).click()
+    await breadcrumb(page).getByRole('button', { name: /^letterhead templates$/i }).click()
     await expect(page).toHaveURL(/\/masters\/?$/)
     await expect(page.getByRole('heading', { name: /^masters$/i })).toBeVisible()
   })
@@ -126,4 +164,79 @@ test.describe('master revision two-page UX (Phase A)', () => {
     await page.goto(detailPath)
     await assertRevisionDetailSections(page)
   })
+})
+
+test.describe('Phase B — revision history', () => {
+
+  let historicalRevisionPath = ''
+
+  test.beforeAll(async ({ request }) => {
+    test.skip(
+      !hasReplacementFixture,
+      'Replacement DOCX fixture missing — run: mvn -f backend/pom.xml -Dtest=E2eDocxFixtureGeneratorTest test',
+    )
+
+    const seeded = await prepareDemoMasterWithReplaceHistory(request)
+    historicalRevisionPath = seeded.historicalRevisionPath
+  })
+
+  test.afterAll(async ({ request }) => {
+    if (hasReplacementFixture) {
+      await restoreDemoMasterToApproved(request)
+    }
+  })
+
+  test('hub revision lines table shows current and historical rows after replace', async ({
+    page,
+  }) => {
+    await loginAs(page, E2E_GROUP_ADMIN)
+    await openDemoMasterHub(page)
+    await assertHubRevisionLinesTable(page)
+
+    const revisionRows = revisionLineRows(page)
+    expect(await revisionRows.count()).toBeGreaterThanOrEqual(2)
+
+    const currentRow = currentRevisionRow(page).first()
+    await expect(currentRow).toBeVisible()
+    await expect(currentRow).toContainText(REPLACEMENT_DOCX_FILENAME)
+
+    const historicalRow = approvedHistoricalSeedRow(page).first()
+    await expect(historicalRow).toBeVisible()
+    await expect(historicalRow).toContainText(DEMO_SEED_DOCX_FILENAME)
+  })
+
+  test('click historical row navigates to historical revision detail', async ({ page }) => {
+    await loginAs(page, E2E_GROUP_ADMIN)
+    await openDemoMasterHub(page)
+    await assertHubRevisionLinesTable(page)
+
+    const historicalRow = approvedHistoricalSeedRow(page).first()
+    await historicalRow.click()
+
+    await expect(page).toHaveURL(new RegExp(`${historicalRevisionPath.replace(/\//g, '\\/')}$`))
+    await assertRevisionDetailSections(page)
+
+    await expect(page.locator('.historical-hint')).toContainText(/historical revision line/i)
+    await expect(page.locator('.header-actions').getByText(/^historical$/i)).toBeVisible()
+    await expect(page.locator('.meta')).toContainText(DEMO_SEED_DOCX_FILENAME)
+    await expect(page.locator('.header-actions').getByRole('button', { name: /submit for review/i })).toHaveCount(0)
+  })
+
+  test('download historical DOCX from revision detail', async ({ page }) => {
+    await loginAs(page, E2E_GROUP_ADMIN)
+    await page.goto(historicalRevisionPath)
+    await assertRevisionDetailSections(page)
+    await expect(page.locator('.meta')).toContainText(DEMO_SEED_DOCX_FILENAME)
+
+    const downloadPromise = page.waitForEvent('download')
+    await page.getByRole('button', { name: /^download docx$/i }).click()
+    const download = await downloadPromise
+
+    await expect(page.locator('.el-message').getByText(/master file downloaded/i)).toBeVisible()
+
+    const suggestedFilename = download.suggestedFilename()
+    expect(suggestedFilename.toLowerCase()).toMatch(/\.docx$/)
+    expect(suggestedFilename).toContain('demo-retail-letterhead')
+  })
+})
 })

@@ -11,6 +11,7 @@ public record MasterRevisionLineDetailView(
         String originalFilename,
         String changeSummary,
         boolean current,
+        int revisionSequence,
         List<MasterAnchorView> anchors,
         List<MasterReviewRecordView> reviewHistory,
         String createdBy,

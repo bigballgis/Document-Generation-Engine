@@ -39,3 +39,11 @@ Content-module governance routes currently documented in this folder include:
 
 - `POST /api/{environment}/v1/admin/content-modules/{moduleId}/review/transition`
 - `POST /api/{environment}/v1/admin/content-modules/{moduleId}/lifecycle/operation/apply`
+
+Master revision-line read routes (management UI — P2-T05 Phase A / P2-T06 Phase B):
+
+- `GET /api/management/v1/masters/{masterId}/revision-lines` — paginated list (Phase A may return current line only; Phase B full history)
+- `GET /api/management/v1/masters/{masterId}/revision-lines/{revisionLineId}` — revision line detail (any line belonging to master in Phase B)
+- `GET /api/management/v1/masters/{masterId}/revision-lines/{revisionLineId}/download` — historical or current DOCX bytes
+
+Traceability: BDD-MASTER-REVISION-NAV-001 — [catalog-navigation-ux.md](../product/catalog-navigation-ux.md).

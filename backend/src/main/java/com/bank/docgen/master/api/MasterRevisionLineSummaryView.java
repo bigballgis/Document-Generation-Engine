@@ -10,6 +10,7 @@ public record MasterRevisionLineSummaryView(
         int anchorCount,
         Instant updatedAt,
         String updatedBy,
-        boolean current
+        boolean current,
+        int revisionSequence
 ) {
 }

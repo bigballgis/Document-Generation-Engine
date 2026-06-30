@@ -227,6 +227,7 @@ AD Group 用于 API 调用授权。
 - 审核记录。
 - 变更说明。
 - 影响分析摘要。
+- 当前修订线标识（`current_revision_line_id`，指向 `MasterRevisionLine.id`）。
 
 已确认规则：
 
@@ -250,6 +251,69 @@ AD Group 用于 API 调用授权。
 - 母版审核通过后形成可供模板引用的 DOCX 母版样式目录。
 - 母版样式目录需要标明可用样式名称、适用节点类型和渲染用途。
 - 母版样式目录变更后，不自动影响已发布模板；模板升级母版样式目录或调整样式映射时，必须执行影响分析，并重新经过测试、审批和发布流程。
+
+已确认修订线导航规则（P2-T05 Phase A + P2-T06 Phase B，见 [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) § Master revision history）：
+
+- 母版包采用 **hub + revision detail** 两页信息架构；修订线列表 API 路径为 `GET /api/management/v1/masters/{masterId}/revision-lines`（分页）。
+- **Phase A（Done）：** `master_document.current_revision_line_id` 为当前修订线标识；列表 API 可仅返回当前行（诚实分页，`totalElements: 1`），不伪造历史行。
+- **Phase B（Done，P2-T06，2026-07-01）：** 每次初始上传或 **Replace file** 持久化一条不可变 **MasterRevisionLine** 行；替换时 advance `current_revision_line_id`，先前行的 DOCX 对象键与锚点快照保留；列表 API 返回全部修订行，按时间倒序（当前行优先）。
+
+### 2.5.1 母版修订线 MasterRevisionLine（P2-T06 Phase B）
+
+MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可变修订快照。一条母版可拥有多条修订线；恰好一条为当前线。
+
+**Traceability:** BDD-MASTER-REVISION-NAV-001 Phase B — `docs/product/catalog-navigation-ux.md`.
+
+已确认属性：
+
+| 属性 | 说明 |
+| --- | --- |
+| `id` | 修订线 UUID 主键（`revisionLineId`）。 |
+| `master_id` | 外键，所属 `MasterDocument`。 |
+| `storage_key` | MinIO 对象键；该修订线 DOCX 制品的不可变存储位置。 |
+| `original_filename` | 上传时的原始文件名快照。 |
+| `anchor_count` | 该修订线锚点数量快照（与锚点目录行数一致）。 |
+| `status_snapshot` | 修订线创建或替换时刻的母版审核状态快照（`DRAFT` / `PENDING_REVIEW` / `APPROVED` / `REJECTED`）。历史线 API `status` 返回此快照；当前线 API `status` 返回母版 live `master_document.status`。 |
+| `revision_sequence` | 母版内单调递增序号（从 1 起；首次上传为 1，每次 replace +1）。 |
+| `line_label` | 展示标签枚举：`CURRENT`（当前线）或 `HISTORICAL`（历史线）；与 `is_current` 派生一致，供 API/UI i18n 映射。 |
+| `is_current` | 是否为当前修订线；同一 `master_id` 下恰好一条为 `true`，其余为 `false`（等价于 superseded / 非当前）。 |
+| `change_summary` | 可选变更说明快照（来自 replace 或创建上下文）。 |
+| `created_at` / `created_by` | 修订线创建时间与操作者（八位工号）。 |
+| `updated_at` / `updated_by` | 修订线最后更新时间/操作者（创建时与 `created_*` 相同；历史线创建后不可变，与 `created_*` 保持一致）。 |
+
+已确认锚点快照（修订线范围）：
+
+- 每条修订线拥有不可变 **锚点目录快照**（稳定 `anchorId`、显示标签、内容类型等），与 Phase A 当前线锚点解析语义一致，但历史线读取快照而非 live `master_document` 锚点集合。
+- 修订线 detail API 的 `anchors[]` 返回该线的快照。
+
+已确认与 MasterDocument 的关系：
+
+- `MasterDocument.current_revision_line_id` → 指向 `is_current = true` 的修订线 `id`。
+- 初始创建母版：插入 revision line 1，设置 `current_revision_line_id`。
+- Replace file：插入新 revision line，`is_current = true`；先前当前线 `is_current = false`；更新 `current_revision_line_id`；包级 `master_document.storage_key` / `original_filename` / live 锚点集合与当前线保持同步（实现便利，不改变修订线不可变语义）。
+
+已确认生命周期与规则：
+
+- 修订线 **不提供** 逻辑删除或物理删除；历史线只读。
+- 列表 API 分页诚实：`totalElements` = 持久化修订行总数；`page` 超出末页返回空 `content[]` 且 `totalElements` 不变。
+- 排序：默认按 `created_at` 降序（当前线通常排第一）。
+- Detail 与 download API 对属于该母版的 **任意** `revisionLineId` 可读（含历史线）；跨母版或未知 id → `404`（不泄露存在性）。
+- Download 返回该修订线 `storage_key` 对应 DOCX 字节；`Content-Disposition` 使用 `original_filename`。
+- 分组隔离：list / get / download 均经 `GroupAccessService` fail-closed；未授权组 → `403 ACCESS_DENIED`。
+- 历史修订线 detail 上，仅适用于 **当前线** 的工作流动作（replace、提交审核等）在 UI 禁用或隐藏；API write 路径仍按包级状态机校验。
+
+已确认实现映射（Phase A 基线 → Phase B 目标）：
+
+| 阶段 | 持久化 | 列表行为 |
+| --- | --- | --- |
+| Phase A（Done） | 仅 `master_document.current_revision_line_id`（Flyway V22）；replace 原地覆盖 | 仅当前行 |
+| Phase B（P2-T06 Done） | `master_revision_line` 表 + 每 replace 新行；Flyway V32 将 Phase A 当前线 backfill 为 revision line 1 | 全量分页历史 |
+
+已确认实现决策（P2-T06，2026-07-01）：
+
+- **Backfill：** Flyway V32 将 Phase A 已有母版的 `current_revision_line_id` backfill 为 `revision_sequence = 1` 的首条修订线，并复制 live 锚点目录至 `master_revision_line_anchor` 快照。
+- **审核历史 scope：** `master_review_record` **不新增** `revision_line_id` 外键；detail API 在查询层按修订线 `created_at` 与下一条修订线 `created_at` 之间的时间窗口过滤审核记录（`MasterRevisionLineService`）。
+- **UI 序号展示：** API 暴露 `revisionSequence`；前端通过 i18n 键 `masters.revisionLines.revisionSequence` 展示为「Revision {sequence}」/「修订 {sequence}」（`masterRevisionLineLabel.ts`）；`line_label` 枚举 `CURRENT`/`HISTORICAL` 仍供 current 标记与 fallback。
 
 ### 2.6 锚点 Anchor
 
@@ -978,7 +1042,11 @@ User/API Access Account -- evaluated by --> Authorization Decision
 Group -- contains/isolates --> Master Document
 Group -- contains/isolates --> Template
 
-Master Document -- defines --> Anchor
+Master Document -- owns --> Master Revision Line
+Master Document -- current --> Master Revision Line (via current_revision_line_id)
+Master Revision Line -- snapshots --> Anchor catalog (immutable per line)
+
+Master Document -- defines --> Anchor (live; current line sync)
 Template -- based on --> Master Document
 Template -- composes --> Anchor Content
 Template -- defines --> Template Variable

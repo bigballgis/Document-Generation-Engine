@@ -19,6 +19,9 @@ import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterReviewRecordEntity;
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
+import com.bank.docgen.master.persistence.MasterRevisionLineAnchorEntity;
+import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
+import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.io.ByteArrayInputStream;
@@ -44,6 +47,7 @@ public class MasterDocumentService {
     private final MasterDocumentRepository masterDocumentRepository;
     private final MasterAnchorRepository masterAnchorRepository;
     private final MasterReviewRecordRepository masterReviewRecordRepository;
+    private final MasterRevisionLineRepository masterRevisionLineRepository;
     private final ObjectStoragePort objectStoragePort;
     private final DocxAnchorExtractor docxAnchorExtractor;
     private final GroupAccessService groupAccessService;
@@ -52,6 +56,7 @@ public class MasterDocumentService {
             MasterDocumentRepository masterDocumentRepository,
             MasterAnchorRepository masterAnchorRepository,
             MasterReviewRecordRepository masterReviewRecordRepository,
+            MasterRevisionLineRepository masterRevisionLineRepository,
             ObjectStoragePort objectStoragePort,
             DocxAnchorExtractor docxAnchorExtractor,
             GroupAccessService groupAccessService
@@ -59,6 +64,7 @@ public class MasterDocumentService {
         this.masterDocumentRepository = masterDocumentRepository;
         this.masterAnchorRepository = masterAnchorRepository;
         this.masterReviewRecordRepository = masterReviewRecordRepository;
+        this.masterRevisionLineRepository = masterRevisionLineRepository;
         this.objectStoragePort = objectStoragePort;
         this.docxAnchorExtractor = docxAnchorExtractor;
         this.groupAccessService = groupAccessService;
@@ -109,16 +115,38 @@ public class MasterDocumentService {
             throw new MasterValidationException("api.error.master.invalidState");
         }
         validateDocxFile(docxFile);
-        String storageKey = "masters/" + masterId + "/" + sanitizeFilename(docxFile.getOriginalFilename());
-        storeDocx(storageKey, docxFile);
         Set<String> anchorIds = extractAnchors(docxFile);
         if (anchorIds.isEmpty()) {
             throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
         }
-        master.setStorageKey(storageKey);
+        masterRevisionLineRepository.findByMasterIdAndCurrentTrueAndDeletedAtIsNull(masterId)
+                .ifPresent(previousLine -> {
+                    previousLine.markSuperseded();
+                    masterRevisionLineRepository.save(previousLine);
+                });
+        MasterDocumentStatus statusSnapshot = master.getStatus();
+        UUID revisionLineId = UUID.randomUUID();
+        String revisionStorageKey = revisionStorageKey(masterId, revisionLineId, docxFile.getOriginalFilename());
+        storeDocx(revisionStorageKey, docxFile);
+        int nextSequence = masterRevisionLineRepository.findMaxRevisionSequence(masterId) + 1;
+        List<MasterAnchorEntity> anchorEntities = toAnchorEntities(masterId, anchorIds);
+        MasterRevisionLineEntity currentLine = persistRevisionLine(
+                revisionLineId,
+                masterId,
+                revisionStorageKey,
+                docxFile.getOriginalFilename(),
+                anchorEntities,
+                statusSnapshot,
+                nextSequence,
+                true,
+                master.getChangeSummary(),
+                session.username()
+        );
+        master.setStorageKey(revisionStorageKey);
         master.setOriginalFilename(docxFile.getOriginalFilename());
-        master.replaceAnchors(toAnchorEntities(masterId, anchorIds));
+        master.replaceAnchors(anchorEntities);
         master.getAnchors().forEach(anchor -> anchor.setMaster(master));
+        master.setCurrentRevisionLineId(currentLine.getId());
         if (master.getStatus() != MasterDocumentStatus.DRAFT) {
             master.setStatus(MasterDocumentStatus.DRAFT);
             master.setChangeSummary(null);
@@ -137,24 +165,39 @@ public class MasterDocumentService {
         assertGroupWritable(session, request.groupCode());
         validateDocxFile(docxFile);
         UUID masterId = UUID.randomUUID();
-        String storageKey = "masters/" + masterId + "/" + sanitizeFilename(docxFile.getOriginalFilename());
-        storeDocx(storageKey, docxFile);
+        UUID revisionLineId = UUID.randomUUID();
+        String revisionStorageKey = revisionStorageKey(masterId, revisionLineId, docxFile.getOriginalFilename());
+        storeDocx(revisionStorageKey, docxFile);
         Set<String> anchorIds = extractAnchors(docxFile);
         if (anchorIds.isEmpty()) {
             throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
         }
+        List<MasterAnchorEntity> anchorEntities = toAnchorEntities(masterId, anchorIds);
         MasterDocumentEntity master = new MasterDocumentEntity(
                 masterId,
                 request.groupCode(),
                 request.name(),
                 request.description(),
-                storageKey,
+                revisionStorageKey,
                 docxFile.getOriginalFilename(),
                 session.username()
         );
-        master.replaceAnchors(toAnchorEntities(masterId, anchorIds));
+        master.setCurrentRevisionLineId(revisionLineId);
+        master.replaceAnchors(anchorEntities);
         master.getAnchors().forEach(anchor -> anchor.setMaster(master));
         masterDocumentRepository.save(master);
+        persistRevisionLine(
+                revisionLineId,
+                masterId,
+                revisionStorageKey,
+                docxFile.getOriginalFilename(),
+                anchorEntities,
+                MasterDocumentStatus.DRAFT,
+                1,
+                true,
+                null,
+                session.username()
+        );
         return toDetail(master);
     }
 
@@ -387,6 +430,44 @@ public class MasterDocumentService {
 
     private String sanitizeFilename(String filename) {
         return filename == null ? "master.docx" : filename.replaceAll("[^A-Za-z0-9._-]", "_");
+    }
+
+    private String revisionStorageKey(UUID masterId, UUID revisionLineId, String originalFilename) {
+        return "masters/" + masterId + "/revisions/" + revisionLineId + "/"
+                + sanitizeFilename(originalFilename);
+    }
+
+    private MasterRevisionLineEntity persistRevisionLine(
+            UUID revisionLineId,
+            UUID masterId,
+            String storageKey,
+            String originalFilename,
+            List<MasterAnchorEntity> anchors,
+            MasterDocumentStatus statusSnapshot,
+            int revisionSequence,
+            boolean current,
+            String changeSummary,
+            String actor
+    ) {
+        MasterRevisionLineEntity line = new MasterRevisionLineEntity(
+                revisionLineId,
+                masterId,
+                storageKey,
+                originalFilename,
+                anchors.size(),
+                statusSnapshot,
+                revisionSequence,
+                current,
+                changeSummary,
+                actor
+        );
+        List<MasterRevisionLineAnchorEntity> snapshotAnchors = anchors.stream()
+                .map(anchor -> new MasterRevisionLineAnchorEntity(
+                        revisionLineId, anchor.getAnchorId(), anchor.getDisplayLabel()))
+                .toList();
+        line.replaceAnchors(snapshotAnchors);
+        line.getAnchors().forEach(anchor -> anchor.setRevisionLine(line));
+        return masterRevisionLineRepository.save(line);
     }
 
     public record MasterDownloadArtifact(InputStream contentStream, String filename, String contentType)

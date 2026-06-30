@@ -2,7 +2,7 @@ import type { PageView } from '@/types/identity'
 
 export type MasterDocumentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED'
 
-export type MasterRevisionLineLabel = 'CURRENT'
+export type MasterRevisionLineLabel = 'CURRENT' | 'HISTORICAL'
 
 export type MasterReviewAction = 'SUBMITTED' | 'APPROVED' | 'REJECTED'
 
@@ -84,6 +84,7 @@ export interface MasterRevisionLineSummary {
   updatedAt: string
   updatedBy: string
   current: boolean
+  revisionSequence?: number
 }
 
 export interface MasterRevisionLineDetail {
@@ -94,6 +95,7 @@ export interface MasterRevisionLineDetail {
   originalFilename: string
   changeSummary: string | null
   current: boolean
+  revisionSequence?: number
   anchors: MasterAnchor[]
   reviewHistory: MasterReviewRecord[]
   createdBy: string

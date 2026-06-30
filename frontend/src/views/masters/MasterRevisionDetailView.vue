@@ -19,6 +19,7 @@ import { useSessionStore } from '@/stores/session'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { shouldShowMasterDesignerJourney } from '@/utils/masterDesignerJourney'
 import type { MasterDocumentDetail, MasterReviewDecision } from '@/types/master'
+import { formatMasterRevisionLineLabel } from '@/utils/masterRevisionLineLabel'
 import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
@@ -119,12 +120,13 @@ const errorMessage = computed(() => {
   return te(key) ? t(key) : t('masters.error.loadDetail')
 })
 
-function formatLineLabel(lineLabel: string | undefined): string {
-  if (lineLabel === 'CURRENT') {
-    return t('masters.revisionLines.currentLine')
-  }
-  return lineLabel ?? ''
-}
+const revisionLineTitle = computed(() =>
+  formatMasterRevisionLineLabel(
+    t,
+    revisionLine.value?.lineLabel,
+    revisionLine.value?.revisionSequence,
+  ),
+)
 
 onMounted(async () => {
   await reloadPage()
@@ -212,15 +214,24 @@ function handleJourneyFocusAnchors() {
         <el-button link type="primary" @click="goBackToPackage">
           {{ t('masters.revision.backToPackage') }}
         </el-button>
-        <h1>{{ formatLineLabel(revisionLine?.lineLabel) }}</h1>
+        <h1>{{ revisionLineTitle }}</h1>
         <p v-if="master && revisionLine" class="meta">
           {{ master.name }}
           · {{ t('masters.hub.groupLabel', { groupCode: master.groupCode }) }}
           · {{ revisionLine.originalFilename }}
         </p>
+        <p v-if="!isCurrentRevision" class="historical-hint">
+          {{ t('masters.revision.historicalReadOnlyHint') }}
+        </p>
       </div>
       <div v-if="revisionLine" class="header-actions">
         <MasterStatusBadge :status="revisionLine.status" />
+        <el-tag v-if="isCurrentRevision" size="small" type="success">
+          {{ t('masters.revisionLines.currentBadge') }}
+        </el-tag>
+        <el-tag v-else size="small" type="info">
+          {{ t('masters.revisionLines.historicalBadge') }}
+        </el-tag>
         <el-button :loading="downloading" @click="handleDownload">
           {{ t('masters.download.action') }}
         </el-button>
@@ -373,6 +384,12 @@ function handleJourneyFocusAnchors() {
 
 .meta {
   margin: 0;
+  color: var(--text-muted);
+}
+
+.historical-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
   color: var(--text-muted);
 }
 

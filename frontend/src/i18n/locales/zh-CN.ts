@@ -375,10 +375,13 @@ export default {
     },
     revisionLines: {
       title: '修订线',
-      hint: '主文档仅保留一条当前 DOCX 修订线。替换文件会更新此线并可能重置审核状态。',
+      hint: '每次上传或替换文件都会生成一条不可变的修订线。可打开任意修订线查看当时的锚点快照并下载对应 DOCX。',
       line: '修订线',
       currentLine: '当前修订',
+      historicalLine: '历史修订',
       currentBadge: '当前',
+      historicalBadge: '历史',
+      revisionSequence: '第 {sequence} 次修订',
       status: '状态',
       sourceFile: '源文件',
       anchors: '锚点',
@@ -392,6 +395,7 @@ export default {
     revision: {
       backToPackage: '返回主文档包',
       breadcrumbLabel: '修订线',
+      historicalReadOnlyHint: '此为历史修订线。工作流操作仅适用于当前修订线。',
       loadError: '无法加载修订线详情。',
       notFoundTitle: '未找到修订线',
       notFoundDescription: '该修订线可能已被移除，或不在您的分组权限范围内。',

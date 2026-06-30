@@ -11,10 +11,16 @@ import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterReviewRecordEntity;
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
+import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
+import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,22 +28,26 @@ import org.springframework.transaction.annotation.Transactional;
 public class MasterRevisionLineService {
 
     static final String CURRENT_LINE_LABEL = "CURRENT";
+    static final String HISTORICAL_LINE_LABEL = "HISTORICAL";
 
     private static final String DOCX_CONTENT_TYPE =
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
     private final MasterDocumentRepository masterDocumentRepository;
+    private final MasterRevisionLineRepository masterRevisionLineRepository;
     private final MasterReviewRecordRepository masterReviewRecordRepository;
     private final ObjectStoragePort objectStoragePort;
     private final GroupAccessService groupAccessService;
 
     public MasterRevisionLineService(
             MasterDocumentRepository masterDocumentRepository,
+            MasterRevisionLineRepository masterRevisionLineRepository,
             MasterReviewRecordRepository masterReviewRecordRepository,
             ObjectStoragePort objectStoragePort,
             GroupAccessService groupAccessService
     ) {
         this.masterDocumentRepository = masterDocumentRepository;
+        this.masterRevisionLineRepository = masterRevisionLineRepository;
         this.masterReviewRecordRepository = masterReviewRecordRepository;
         this.objectStoragePort = objectStoragePort;
         this.groupAccessService = groupAccessService;
@@ -50,9 +60,17 @@ public class MasterRevisionLineService {
             int size,
             ManagementSessionClaims session
     ) {
-        MasterDocumentEntity master = requireReadableMasterWithAnchors(masterId, session);
-        MasterRevisionLineSummaryView currentLine = toSummary(master);
-        return PageView.of(List.of(currentLine), page, size);
+        MasterDocumentEntity master = requireReadableMaster(masterId, session);
+        Pageable pageable = PageRequest.of(Math.max(page, 0), size <= 0 ? 20 : size);
+        Page<MasterRevisionLineEntity> lines = masterRevisionLineRepository
+                .findByMasterIdAndDeletedAtIsNullOrderByCurrentDescCreatedAtDesc(masterId, pageable);
+        return new PageView<>(
+                lines.getContent().stream().map(line -> toSummary(line, master)).toList(),
+                lines.getNumber(),
+                lines.getSize(),
+                lines.getTotalElements(),
+                lines.getTotalPages()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -61,9 +79,9 @@ public class MasterRevisionLineService {
             UUID revisionLineId,
             ManagementSessionClaims session
     ) {
-        MasterDocumentEntity master = requireReadableMasterWithAnchors(masterId, session);
-        requireCurrentRevisionLine(master, revisionLineId);
-        return toDetail(master);
+        MasterDocumentEntity master = requireReadableMaster(masterId, session);
+        MasterRevisionLineEntity line = requireRevisionLine(masterId, revisionLineId);
+        return toDetail(line, master);
     }
 
     @Transactional(readOnly = true)
@@ -72,13 +90,13 @@ public class MasterRevisionLineService {
             UUID revisionLineId,
             ManagementSessionClaims session
     ) {
-        MasterDocumentEntity master = requireReadableMaster(masterId, session);
-        requireCurrentRevisionLine(master, revisionLineId);
+        requireReadableMaster(masterId, session);
+        MasterRevisionLineEntity line = requireRevisionLine(masterId, revisionLineId);
         try {
-            InputStream stream = objectStoragePort.get(master.getStorageKey());
+            InputStream stream = objectStoragePort.get(line.getStorageKey());
             return new MasterDocumentService.MasterDownloadArtifact(
                     stream,
-                    master.getOriginalFilename(),
+                    line.getOriginalFilename(),
                     DOCX_CONTENT_TYPE
             );
         } catch (Exception ex) {
@@ -95,61 +113,66 @@ public class MasterRevisionLineService {
         return master;
     }
 
-    private MasterDocumentEntity requireReadableMasterWithAnchors(UUID masterId, ManagementSessionClaims session) {
-        MasterDocumentEntity master = masterDocumentRepository.findWithAnchorsByIdAndDeletedAtIsNull(masterId)
+    private MasterRevisionLineEntity requireRevisionLine(UUID masterId, UUID revisionLineId) {
+        return masterRevisionLineRepository.findByIdAndMasterIdAndDeletedAtIsNull(revisionLineId, masterId)
                 .orElseThrow(MasterNotFoundException::new);
-        if (!groupAccessService.canAccessGroup(session, master.getGroupCode())) {
-            throw new MasterAccessDeniedException();
-        }
-        return master;
     }
 
-    private void requireCurrentRevisionLine(MasterDocumentEntity master, UUID revisionLineId) {
-        if (!master.getCurrentRevisionLineId().equals(revisionLineId)) {
-            throw new MasterNotFoundException();
-        }
-    }
-
-    private MasterRevisionLineSummaryView toSummary(MasterDocumentEntity master) {
+    private MasterRevisionLineSummaryView toSummary(MasterRevisionLineEntity line, MasterDocumentEntity master) {
+        String status = line.isCurrent() ? master.getStatus().name() : line.getStatusSnapshot().name();
         return new MasterRevisionLineSummaryView(
-                master.getCurrentRevisionLineId().toString(),
-                CURRENT_LINE_LABEL,
-                master.getStatus().name(),
-                master.getOriginalFilename(),
-                master.getAnchors().size(),
-                master.getUpdatedAt(),
-                master.getUpdatedBy(),
-                true
+                line.getId().toString(),
+                line.isCurrent() ? CURRENT_LINE_LABEL : HISTORICAL_LINE_LABEL,
+                status,
+                line.getOriginalFilename(),
+                line.getAnchorCount(),
+                line.getUpdatedAt(),
+                line.getUpdatedBy(),
+                line.isCurrent(),
+                line.getRevisionSequence()
         );
     }
 
-    private MasterRevisionLineDetailView toDetail(MasterDocumentEntity master) {
+    private MasterRevisionLineDetailView toDetail(MasterRevisionLineEntity line, MasterDocumentEntity master) {
+        String status = line.isCurrent() ? master.getStatus().name() : line.getStatusSnapshot().name();
+        String changeSummary = line.isCurrent() ? master.getChangeSummary() : line.getChangeSummary();
         List<MasterReviewRecordEntity> reviewRecords =
                 masterReviewRecordRepository.findByMasterIdOrderByCreatedAtDesc(master.getId());
+        Instant reviewUpperBound = nextRevisionCreatedAt(master.getId(), line.getRevisionSequence());
+        List<MasterReviewRecordView> scopedHistory = reviewRecords.stream()
+                .filter(record -> !record.getCreatedAt().isBefore(line.getCreatedAt()))
+                .filter(record -> reviewUpperBound == null || record.getCreatedAt().isBefore(reviewUpperBound))
+                .map(record -> new MasterReviewRecordView(
+                        record.getAction().name(),
+                        record.getDecision(),
+                        record.getChangeSummary(),
+                        record.getCommentSummary(),
+                        record.getActorUsername(),
+                        record.getCreatedAt()))
+                .toList();
         return new MasterRevisionLineDetailView(
-                master.getCurrentRevisionLineId().toString(),
+                line.getId().toString(),
                 master.getId().toString(),
-                CURRENT_LINE_LABEL,
-                master.getStatus().name(),
-                master.getOriginalFilename(),
-                master.getChangeSummary(),
-                true,
-                master.getAnchors().stream()
+                line.isCurrent() ? CURRENT_LINE_LABEL : HISTORICAL_LINE_LABEL,
+                status,
+                line.getOriginalFilename(),
+                changeSummary,
+                line.isCurrent(),
+                line.getRevisionSequence(),
+                line.getAnchors().stream()
                         .map(anchor -> new MasterAnchorView(anchor.getAnchorId(), anchor.getDisplayLabel()))
                         .toList(),
-                reviewRecords.stream()
-                        .map(record -> new MasterReviewRecordView(
-                                record.getAction().name(),
-                                record.getDecision(),
-                                record.getChangeSummary(),
-                                record.getCommentSummary(),
-                                record.getActorUsername(),
-                                record.getCreatedAt()))
-                        .toList(),
-                master.getCreatedBy(),
-                master.getUpdatedBy(),
-                master.getCreatedAt(),
-                master.getUpdatedAt()
+                scopedHistory,
+                line.getCreatedBy(),
+                line.getUpdatedBy(),
+                line.getCreatedAt(),
+                line.getUpdatedAt()
         );
+    }
+
+    private Instant nextRevisionCreatedAt(UUID masterId, int revisionSequence) {
+        return masterRevisionLineRepository
+                .findCreatedAtByMasterIdAndRevisionSequence(masterId, revisionSequence + 1)
+                .orElse(null);
     }
 }

@@ -129,7 +129,7 @@ blue-green cutover in [deploy/blue-green-runbook.md](deploy/blue-green-runbook.m
 **P14-T01** clause/content module lifecycle (T01a–T01e; backend **469**; frontend **224**; architecture re-review **PASS**);
 **P14-T02** collaboration to-dos + timeout escalation (T02a–T02d; E2E **3/3**; backend **481**; frontend **235**);
 **P14-T03** template export/import (T03a–T03c; OpenAPI contract; E2E **2/2**; backend **481**; frontend **235+**).
-**Active phase:** **None** (P21 **Done** 2026-06-30 — role-journey frontend redesign & business-friendly terminology; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest; **AUD-B10 resolved** via P12-AUD-B10 Done 2026-07-01). Activate next phase via `plan-orchestrator`.
+**Active phase:** **None** (P21 **Done** 2026-06-30 — role-journey frontend redesign & business-friendly terminology; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest; **AUD-B10 resolved** via P12-AUD-B10 Done 2026-07-01). **P2-T06 Done** (2026-07-01 — Phase B full master revision history; backend **564**, frontend **528** Vitest). Activate next phase via `plan-orchestrator`.
 MVP P0–P11 complete;
 **P13** Done (2026-06-23); **P14** Done (2026-06-27); **P15** Done (2026-06-27; T01–T10);
 **P17** Done (2026-06-25); **P18** Done (2026-06-28); **P19** Done (2026-06-25);

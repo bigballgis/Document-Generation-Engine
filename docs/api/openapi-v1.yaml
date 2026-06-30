@@ -19,7 +19,7 @@ tags:
   - name: Download
     description: Generated document download.
   - name: Admin
-    description: API management, credential lifecycle administration, template lifecycle governance, template export/import, content-module governance, and collaboration timeout configuration.
+    description: API management, credential lifecycle administration, template lifecycle governance, template export/import, master revision-line read paths, content-module governance, and collaboration timeout configuration.
   - name: Collaboration
     description: Collaboration work-item queues and timeout threshold administration.
 security:
@@ -1609,6 +1609,150 @@ paths:
         '404':
           $ref: '#/components/responses/ErrorResponse'
         '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/masters/{masterId}/revision-lines:
+    get:
+      tags: [Admin]
+      operationId: listMasterRevisionLines
+      summary: List paginated master revision lines
+      description: >-
+        Returns revision lines for a master package ordered by recency (current
+        line first). **Phase A (Done):** may return only the current line with
+        honest pagination (`totalElements: 1`). **Phase B (P2-T06):** each file
+        replace persists an immutable row; this endpoint returns the full history
+        with honest `totalElements`, `totalPages`, and `content[]` slicing.
+        Requires group-scoped read access (`MASTER_DESIGNER`, `GLOBAL_ADMIN`,
+        or other roles with master read per permission matrix); fail-closed
+        `403 ACCESS_DENIED` when the master is outside authorized groups.
+        Traceability: BDD-MASTER-REVISION-NAV-001 Phase B.
+      parameters:
+        - name: masterId
+          in: path
+          required: true
+          description: Master document resource UUID.
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          required: false
+          description: Zero-based page index.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          description: Page size (default 20).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Paginated revision line summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterRevisionLinePageResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/masters/{masterId}/revision-lines/{revisionLineId}:
+    get:
+      tags: [Admin]
+      operationId: getMasterRevisionLine
+      summary: Get master revision line detail
+      description: >-
+        Returns overview, anchor catalog snapshot, and review history for a
+        revision line belonging to the master. **Phase A:** only the current
+        `revisionLineId` (matching `current_revision_line_id`) succeeds.
+        **Phase B:** any historical or current line id belonging to the master
+        succeeds. Unknown id or id belonging to another master returns `404`
+        without cross-master leakage. Historical lines expose read-only detail;
+        workflow mutations remain on package-level routes.
+      parameters:
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: revisionLineId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Revision line detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterRevisionLineDetailResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/masters/{masterId}/revision-lines/{revisionLineId}/download:
+    get:
+      tags: [Admin]
+      operationId: downloadMasterRevisionLineDocx
+      summary: Download DOCX bytes for a master revision line
+      description: >-
+        Streams the stored DOCX artifact for the given revision line. Response
+        uses `Content-Disposition: attachment` with the line's
+        `originalFilename`. **Phase B:** historical lines return superseded file
+        bytes, not the current package file. Same authorization and 404 semantics
+        as revision line detail. Not wrapped in the JSON success envelope.
+      parameters:
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: revisionLineId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: DOCX file attachment for the revision line.
+          headers:
+            Content-Disposition:
+              description: Attachment filename from revision line originalFilename.
+              schema:
+                type: string
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -3333,6 +3477,193 @@ components:
           type: string
         snapshot:
           $ref: '#/components/schemas/MasterReviewSnapshot'
+    MasterDocumentReviewStatus:
+      type: string
+      description: Master package review status snapshot stored on each revision line.
+      enum: [DRAFT, PENDING_REVIEW, APPROVED, REJECTED]
+    MasterRevisionLineLabel:
+      type: string
+      description: >-
+        Display label for revision line recency role. Maps to i18n keys; not
+        hardcoded UI copy. Derived from isCurrent — CURRENT when true,
+        HISTORICAL when false.
+      enum: [CURRENT, HISTORICAL]
+    PageView:
+      type: object
+      additionalProperties: false
+      description: >-
+        Standard management pagination wrapper. totalElements counts all persisted
+        rows for the query, not the current page length. Requesting page beyond
+        the last page returns empty content with unchanged totalElements.
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items: {}
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+        totalElements:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+    MasterRevisionLineSummaryView:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - lineLabel
+        - status
+        - originalFilename
+        - anchorCount
+        - updatedAt
+        - updatedBy
+        - current
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Revision line identifier (revisionLineId).
+        lineLabel:
+          $ref: '#/components/schemas/MasterRevisionLineLabel'
+        status:
+          $ref: '#/components/schemas/MasterDocumentReviewStatus'
+          description: Status snapshot for this revision line.
+        originalFilename:
+          type: string
+        anchorCount:
+          type: integer
+          minimum: 0
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+          description: Eight-digit operator username.
+        current:
+          type: boolean
+          description: True for exactly one line per master; false for superseded lines.
+        revisionSequence:
+          type: integer
+          minimum: 1
+          description: Monotonic sequence within the master (Phase B). Omitted in Phase A single-line responses.
+    MasterAnchorSummaryView:
+      type: object
+      additionalProperties: false
+      required: [anchorId, displayLabel]
+      properties:
+        anchorId:
+          type: string
+        displayLabel:
+          type: string
+    MasterReviewRecordView:
+      type: object
+      additionalProperties: false
+      required: [action, actorUsername, createdAt]
+      properties:
+        action:
+          type: string
+        decision:
+          type: string
+        changeSummary:
+          type: string
+        commentSummary:
+          type: string
+        actorUsername:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    MasterRevisionLineDetailView:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - masterId
+        - lineLabel
+        - status
+        - originalFilename
+        - current
+        - anchors
+        - reviewHistory
+        - createdBy
+        - updatedBy
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        masterId:
+          type: string
+          format: uuid
+        lineLabel:
+          $ref: '#/components/schemas/MasterRevisionLineLabel'
+        status:
+          $ref: '#/components/schemas/MasterDocumentReviewStatus'
+        originalFilename:
+          type: string
+        changeSummary:
+          type: string
+        current:
+          type: boolean
+        revisionSequence:
+          type: integer
+          minimum: 1
+        anchors:
+          type: array
+          items:
+            $ref: '#/components/schemas/MasterAnchorSummaryView'
+          description: Immutable anchor catalog snapshot for this revision line.
+        reviewHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/MasterReviewRecordView'
+          description: >-
+            Review audit entries scoped to this revision line (Phase B). Phase A
+            may return package-level history for the current line only.
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    MasterRevisionLinePageResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageView'
+            - type: object
+              additionalProperties: false
+              required: [content]
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/MasterRevisionLineSummaryView'
+    MasterRevisionLineDetailResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/MasterRevisionLineDetailView'
     MasterAnchorContentType:
       type: string
       enum: [TEXT, RICH_TEXT, TABLE, IMAGE, CLAUSE, STAMP, BARCODE, ATTACHMENT_LIST, UNSPECIFIED]

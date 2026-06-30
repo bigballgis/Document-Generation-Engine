@@ -32,6 +32,9 @@ interface MasterRevisionLineSummary {
   id: string
   lineLabel: string
   current: boolean
+  status?: string
+  originalFilename?: string
+  updatedAt?: string
 }
 
 interface PagedRevisionLines {
@@ -149,7 +152,79 @@ export async function demoMasterRevisionDetailPath(request: APIRequestContext): 
   return `/masters/${masterId}/revisions/${currentLine.id}`
 }
 
-export async function restoreDemoMasterToApproved(request: APIRequestContext): Promise<void> {
+export async function replaceDemoMasterFileViaApi(
+  request: APIRequestContext,
+  filePath: string = REPLACEMENT_DOCX_PATH,
+  uploadFilename: string = REPLACEMENT_DOCX_FILENAME,
+): Promise<MasterDetail> {
+  const token = await apiLogin(request, E2E_GROUP_ADMIN)
+  const master = await findMasterByName(request, token, DEMO_MASTER_NAME)
+  if (!master) {
+    throw new Error(`Demo master "${DEMO_MASTER_NAME}" was not found`)
+  }
+  return replaceMasterFile(request, token, master.id, filePath, uploadFilename)
+}
+
+export async function listDemoMasterRevisionLines(
+  request: APIRequestContext,
+): Promise<PagedRevisionLines> {
+  const hubPath = await demoMasterDetailPath(request)
+  const masterId = hubPath.replace('/masters/', '')
+  const token = await apiLogin(request, E2E_GROUP_ADMIN)
+  return authorizedGet<PagedRevisionLines>(
+    request,
+    token,
+    `/masters/${masterId}/revision-lines?page=0&size=20`,
+  )
+}
+
+export async function prepareDemoMasterWithReplaceHistory(
+  request: APIRequestContext,
+): Promise<{
+  masterId: string
+  hubPath: string
+  currentRevisionPath: string
+  historicalRevisionPath: string
+}> {
+  await restoreDemoMasterToApproved(request, { force: true })
+  await replaceDemoMasterFileViaApi(request)
+
+  const hubPath = await demoMasterDetailPath(request)
+  const masterId = hubPath.replace('/masters/', '')
+  const page = await listDemoMasterRevisionLines(request)
+
+  if (page.totalElements < 2) {
+    throw new Error(
+      `Expected at least 2 revision lines after replace, got ${page.totalElements}`,
+    )
+  }
+
+  const currentLine = page.content.find((line) => line.current)
+  const historicalCandidates = page.content.filter(
+    (line) =>
+      !line.current &&
+      line.originalFilename === DEMO_SEED_DOCX_FILENAME &&
+      line.status === 'APPROVED',
+  )
+  const historicalLine = historicalCandidates.sort(
+    (left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt),
+  )[0]
+  if (!currentLine || !historicalLine) {
+    throw new Error('Expected current replacement line and historical seed line after replace')
+  }
+
+  return {
+    masterId,
+    hubPath,
+    currentRevisionPath: `/masters/${masterId}/revisions/${currentLine.id}`,
+    historicalRevisionPath: `/masters/${masterId}/revisions/${historicalLine.id}`,
+  }
+}
+
+export async function restoreDemoMasterToApproved(
+  request: APIRequestContext,
+  options?: { force?: boolean },
+): Promise<void> {
   if (!fs.existsSync(DEMO_SEED_DOCX_PATH)) {
     throw new Error(
       `Missing seed fixture ${DEMO_SEED_DOCX_PATH}. Run: mvn -f backend/pom.xml -Dtest=E2eDocxFixtureGeneratorTest test`,
@@ -163,6 +238,7 @@ export async function restoreDemoMasterToApproved(request: APIRequestContext): P
   }
 
   if (
+    !options?.force &&
     master.status === 'APPROVED' &&
     master.originalFilename === DEMO_SEED_DOCX_FILENAME
   ) {

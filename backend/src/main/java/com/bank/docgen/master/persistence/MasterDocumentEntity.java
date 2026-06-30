@@ -148,6 +148,10 @@ public class MasterDocumentEntity {
         return currentRevisionLineId;
     }
 
+    public void setCurrentRevisionLineId(UUID currentRevisionLineId) {
+        this.currentRevisionLineId = currentRevisionLineId;
+    }
+
     public List<MasterAnchorEntity> getAnchors() {
         return anchors;
     }

@@ -12,6 +12,7 @@ import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { masterRevisionDetailPath } from '@/routing/routeKeys'
 import * as mastersApi from '@/api/masters'
 import type { MasterRevisionLineSummary } from '@/types/master'
+import { formatMasterRevisionLineLabel } from '@/utils/masterRevisionLineLabel'
 
 const props = defineProps<{
   masterId: string
@@ -25,15 +26,13 @@ const loading = ref(false)
 const loadError = ref(false)
 const currentPage = ref(1)
 const totalElements = ref(0)
+const totalPages = ref(0)
 const revisionLines = ref<MasterRevisionLineSummary[]>([])
 
 const pageSize = SERVER_TABLE_PAGE_SIZE
 
-function formatLineLabel(lineLabel: string): string {
-  if (lineLabel === 'CURRENT') {
-    return t('masters.revisionLines.currentLine')
-  }
-  return lineLabel
+function lineDisplayLabel(row: MasterRevisionLineSummary): string {
+  return formatMasterRevisionLineLabel(t, row.lineLabel, row.revisionSequence)
 }
 
 async function loadRevisionLines() {
@@ -47,10 +46,12 @@ async function loadRevisionLines() {
     )
     revisionLines.value = page.content
     totalElements.value = page.totalElements
+    totalPages.value = page.totalPages
   } catch {
     loadError.value = true
     revisionLines.value = []
     totalElements.value = 0
+    totalPages.value = 0
   } finally {
     loading.value = false
   }
@@ -78,7 +79,7 @@ function openRevisionDetail(row: MasterRevisionLineSummary) {
 
 const { onRowClick } = useActivatableTableRow<MasterRevisionLineSummary>(openRevisionDetail)
 
-const showPagination = computed(() => totalElements.value > pageSize)
+const showPagination = computed(() => totalPages.value > 1)
 
 defineExpose({
   reload: loadRevisionLines,
@@ -111,11 +112,14 @@ defineExpose({
         <template #empty>
           <el-empty :description="t('masters.revisionLines.empty')" />
         </template>
-        <el-table-column min-width="160" :label="t('masters.revisionLines.line')">
+        <el-table-column min-width="180" :label="t('masters.revisionLines.line')">
           <template #default="{ row }">
-            <span>{{ formatLineLabel(row.lineLabel) }}</span>
-            <el-tag v-if="row.current" size="small" type="success" class="current-tag">
+            <span>{{ lineDisplayLabel(row) }}</span>
+            <el-tag v-if="row.current" size="small" type="success" class="line-tag">
               {{ t('masters.revisionLines.currentBadge') }}
+            </el-tag>
+            <el-tag v-else size="small" type="info" class="line-tag">
+              {{ t('masters.revisionLines.historicalBadge') }}
             </el-tag>
           </template>
         </el-table-column>
@@ -176,7 +180,7 @@ defineExpose({
   color: var(--text-muted);
 }
 
-.current-tag {
+.line-tag {
   margin-left: 0.5rem;
 }
 </style>

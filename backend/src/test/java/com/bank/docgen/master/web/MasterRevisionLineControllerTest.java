@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -79,7 +80,40 @@ class MasterRevisionLineControllerTest {
                 .andExpect(jsonPath("$.result.content[0].originalFilename").value("master.docx"))
                 .andExpect(jsonPath("$.result.content[0].anchorCount").value(1))
                 .andExpect(jsonPath("$.result.content[0].updatedBy").value("10000002"))
-                .andExpect(jsonPath("$.result.content[0].current").value(true));
+                .andExpect(jsonPath("$.result.content[0].current").value(true))
+                .andExpect(jsonPath("$.result.content[0].revisionSequence").value(1));
+    }
+
+    @Test
+    void listRevisionLinesShowsLiveStatusForCurrentLineAfterApprove() throws Exception {
+        String masterId = uploadMaster(retailGroupAdmin);
+        String revisionLineId = currentRevisionLineId(masterId);
+
+        mockMvc.perform(post("/api/management/v1/masters/" + masterId + "/submit-review")
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"changeSummary":"Initial anchor catalog"}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/management/v1/masters/" + masterId + "/review")
+                        .with(authentication(new ManagementAuthentication(globalAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"decision":"APPROVED","commentSummary":"Looks good"}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/management/v1/masters/" + masterId + "/revision-lines")
+                        .param("page", "0")
+                        .param("size", "20")
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.content[0].id").value(revisionLineId))
+                .andExpect(jsonPath("$.result.content[0].current").value(true))
+                .andExpect(jsonPath("$.result.content[0].status").value("APPROVED"))
+                .andExpect(jsonPath("$.result.content[0].revisionSequence").value(1));
     }
 
     @Test
@@ -124,6 +158,7 @@ class MasterRevisionLineControllerTest {
                 .andExpect(jsonPath("$.result.originalFilename").value("master.docx"))
                 .andExpect(jsonPath("$.result.changeSummary").value("Initial anchor catalog"))
                 .andExpect(jsonPath("$.result.current").value(true))
+                .andExpect(jsonPath("$.result.revisionSequence").value(1))
                 .andExpect(jsonPath("$.result.anchors[0].anchorId").value("HEADER"))
                 .andExpect(jsonPath("$.result.reviewHistory.length()").value(2))
                 .andExpect(jsonPath("$.result.reviewHistory[0].decision").value("APPROVED"));
@@ -162,6 +197,118 @@ class MasterRevisionLineControllerTest {
                         .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error.code").value("MASTER_NOT_FOUND"));
+    }
+
+    @Test
+    void listRevisionLinesAfterReplaceReturnsHistoricalAndCurrentRows() throws Exception {
+        String masterId = uploadMaster(retailGroupAdmin);
+        String historicalLineId = currentRevisionLineId(masterId);
+        replaceMasterFile(masterId, "file-b.docx", "{{anchor:HEADER}} {{anchor:FOOTER}} revised");
+        String currentLineId = currentRevisionLineId(masterId);
+
+        mockMvc.perform(get("/api/management/v1/masters/" + masterId + "/revision-lines")
+                        .param("page", "0")
+                        .param("size", "20")
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.totalElements").value(2))
+                .andExpect(jsonPath("$.result.content.length()").value(2))
+                .andExpect(jsonPath("$.result.content[0].id").value(currentLineId))
+                .andExpect(jsonPath("$.result.content[0].lineLabel").value("CURRENT"))
+                .andExpect(jsonPath("$.result.content[0].originalFilename").value("file-b.docx"))
+                .andExpect(jsonPath("$.result.content[0].current").value(true))
+                .andExpect(jsonPath("$.result.content[0].revisionSequence").value(2))
+                .andExpect(jsonPath("$.result.content[1].id").value(historicalLineId))
+                .andExpect(jsonPath("$.result.content[1].lineLabel").value("HISTORICAL"))
+                .andExpect(jsonPath("$.result.content[1].originalFilename").value("master.docx"))
+                .andExpect(jsonPath("$.result.content[1].current").value(false))
+                .andExpect(jsonPath("$.result.content[1].revisionSequence").value(1));
+    }
+
+    @Test
+    void getHistoricalRevisionLineDetailReturnsSnapshotAnchors() throws Exception {
+        String masterId = uploadMaster(retailGroupAdmin);
+        String historicalLineId = currentRevisionLineId(masterId);
+        replaceMasterFile(masterId, "file-b.docx", "{{anchor:HEADER}} {{anchor:FOOTER}} revised");
+
+        mockMvc.perform(get("/api/management/v1/masters/" + masterId + "/revision-lines/" + historicalLineId)
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.id").value(historicalLineId))
+                .andExpect(jsonPath("$.result.lineLabel").value("HISTORICAL"))
+                .andExpect(jsonPath("$.result.current").value(false))
+                .andExpect(jsonPath("$.result.revisionSequence").value(1))
+                .andExpect(jsonPath("$.result.originalFilename").value("master.docx"))
+                .andExpect(jsonPath("$.result.anchors.length()").value(1))
+                .andExpect(jsonPath("$.result.anchors[0].anchorId").value("HEADER"));
+    }
+
+    @Test
+    void downloadHistoricalRevisionLineReturnsSupersededFilename() throws Exception {
+        String masterId = uploadMaster(retailGroupAdmin);
+        String historicalLineId = currentRevisionLineId(masterId);
+        replaceMasterFile(masterId, "file-b.docx", "{{anchor:HEADER}} {{anchor:FOOTER}} revised");
+
+        mockMvc.perform(get("/api/management/v1/masters/" + masterId + "/revision-lines/" + historicalLineId + "/download")
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", "attachment; filename=\"master.docx\""));
+    }
+
+    @Test
+    void getHistoricalRevisionLineIsGroupScoped() throws Exception {
+        String masterId = uploadMaster(retailGroupAdmin);
+        String historicalLineId = currentRevisionLineId(masterId);
+        replaceMasterFile(masterId, "file-b.docx", "{{anchor:HEADER}} {{anchor:FOOTER}} revised");
+        ManagementSessionClaims corpOnlyAdmin = session("10000004", List.of("GROUP_ADMIN"), List.of("CORP"));
+
+        mockMvc.perform(get("/api/management/v1/masters/" + masterId + "/revision-lines/" + historicalLineId)
+                        .with(authentication(new ManagementAuthentication(corpOnlyAdmin))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+
+        mockMvc.perform(get("/api/management/v1/masters/" + masterId + "/revision-lines/" + historicalLineId + "/download")
+                        .with(authentication(new ManagementAuthentication(corpOnlyAdmin))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+    }
+
+    @Test
+    void listRevisionLinesSupportsPagination() throws Exception {
+        String masterId = uploadMaster(retailGroupAdmin);
+        for (int index = 0; index < 24; index++) {
+            replaceMasterFile(masterId, "file-" + index + ".docx", "{{anchor:HEADER}} body " + index);
+        }
+
+        mockMvc.perform(get("/api/management/v1/masters/" + masterId + "/revision-lines")
+                        .param("page", "0")
+                        .param("size", "20")
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.totalElements").value(25))
+                .andExpect(jsonPath("$.result.totalPages").value(2))
+                .andExpect(jsonPath("$.result.content.length()").value(20));
+
+        mockMvc.perform(get("/api/management/v1/masters/" + masterId + "/revision-lines")
+                        .param("page", "1")
+                        .param("size", "20")
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.totalElements").value(25))
+                .andExpect(jsonPath("$.result.content.length()").value(5));
+    }
+
+    private void replaceMasterFile(String masterId, String filename, String docxText) throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                filename,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                buildSampleDocx(docxText)
+        );
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/management/v1/masters/" + masterId + "/file")
+                        .file(file)
+                        .with(authentication(new ManagementAuthentication(retailGroupAdmin))))
+                .andExpect(status().isOk());
     }
 
     private String currentRevisionLineId(String masterId) {

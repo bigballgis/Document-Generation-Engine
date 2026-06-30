@@ -151,4 +151,75 @@ describe('MasterPackageHubView', () => {
     )
     expect(wrapper.find('[data-master-journey-cta]').text()).toBe('Upload letterhead')
   })
+
+  it('renders multiple revision lines from paginated history API', async () => {
+    vi.mocked(mastersApi.getMaster).mockResolvedValue({
+      id: 'master-1',
+      groupCode: 'RETAIL',
+      name: 'Retail letterhead',
+      description: 'Header master',
+      status: 'DRAFT',
+      originalFilename: 'letterhead-v2.docx',
+      changeSummary: null,
+      anchors: [],
+      reviewHistory: [],
+      createdBy: '10000001',
+      updatedBy: '10000001',
+      createdAt: '2026-06-23T10:00:00Z',
+      updatedAt: '2026-06-24T10:00:00Z',
+    })
+    vi.mocked(mastersApi.getMasterImpactAnalysis).mockResolvedValue({
+      masterId: 'master-1',
+      referencedTemplateIds: [],
+      retestRequired: false,
+    })
+    vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
+      content: [
+        {
+          id: 'revision-2',
+          lineLabel: 'CURRENT',
+          status: 'DRAFT',
+          originalFilename: 'letterhead-v2.docx',
+          anchorCount: 2,
+          updatedAt: '2026-06-24T10:00:00Z',
+          updatedBy: '10000001',
+          current: true,
+          revisionSequence: 2,
+        },
+        {
+          id: 'revision-1',
+          lineLabel: 'HISTORICAL',
+          status: 'APPROVED',
+          originalFilename: 'letterhead-v1.docx',
+          anchorCount: 1,
+          updatedAt: '2026-06-23T10:00:00Z',
+          updatedBy: '10000001',
+          current: false,
+          revisionSequence: 1,
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 2,
+      totalPages: 1,
+    })
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(MasterPackageHubView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('letterhead-v2.docx')
+    expect(wrapper.text()).toContain('letterhead-v1.docx')
+    expect(wrapper.text()).toContain('Update Master DOCX')
+  })
 })

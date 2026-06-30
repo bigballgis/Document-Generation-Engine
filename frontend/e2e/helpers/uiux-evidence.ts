@@ -346,3 +346,36 @@ export async function captureP12AudB10LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+export const P2_T06_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P2-T06')
+export const P2_T06_SCREENSHOT_DIR = path.join(P2_T06_EVIDENCE_ROOT, 'screenshots')
+export const P2_T06_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureP2T06EvidenceDirs(): void {
+  fs.mkdirSync(P2_T06_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function p2T06ScreenshotPath(filename: string): string {
+  return path.join(P2_T06_SCREENSHOT_DIR, filename)
+}
+
+export async function captureP2T06Screenshot(page: Page, filename: string): Promise<string> {
+  ensureP2T06EvidenceDirs()
+  const target = p2T06ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export type AppLocale = 'en' | 'zh-CN'
+
+const LOCALE_OPTION_NAME: Record<AppLocale, RegExp> = {
+  en: /^english$/i,
+  'zh-CN': /^(chinese \(simplified\)|简体中文)$/i,
+}
+
+export async function switchLocale(page: Page, locale: AppLocale): Promise<void> {
+  const localeSwitcher = page.locator('.locale-switcher')
+  await localeSwitcher.click()
+  await page.getByRole('option', { name: LOCALE_OPTION_NAME[locale] }).click()
+  await expect(page.locator('html')).toHaveAttribute('lang', locale)
+}
