@@ -5,16 +5,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environments'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
-import TemplateCallerContractPanel from '@/components/templates/TemplateCallerContractPanel.vue'
-import TemplateAuthoringPanel from '@/components/templates/TemplateAuthoringPanel.vue'
-import TemplateRuleConfigurator from '@/components/templates/TemplateRuleConfigurator.vue'
-import TemplatePreviewPanel from '@/components/templates/TemplatePreviewPanel.vue'
-import TemplateTestDataSetPanel from '@/components/templates/TemplateTestDataSetPanel.vue'
-import TemplateCoveragePanel from '@/components/templates/TemplateCoveragePanel.vue'
-import TemplateChangeDiffPanel from '@/components/templates/TemplateChangeDiffPanel.vue'
-import TemplateContentModuleReferencesPanel from '@/components/templates/TemplateContentModuleReferencesPanel.vue'
-import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
-import TemplateReleaseVersionHistoryPanel from '@/components/templates/TemplateReleaseVersionHistoryPanel.vue'
 import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
 import TemplateAuthorJourneyBlock from '@/components/journey/TemplateAuthorJourneyBlock.vue'
 import TemplateTesterJourneyBlock from '@/components/journey/TemplateTesterJourneyBlock.vue'
@@ -24,11 +14,14 @@ import TemplateLifecycleDecisionDialog, {
   type LifecycleDecisionSubmitPayload,
 } from '@/components/templates/TemplateLifecycleDecisionDialog.vue'
 import TemplateExportActions from '@/components/templates/TemplateExportActions.vue'
+import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
+import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
+import TemplateDetailLifecycleTab from '@/views/templates/detail/TemplateDetailLifecycleTab.vue'
+import TemplateDetailAuthoringTab from '@/views/templates/detail/TemplateDetailAuthoringTab.vue'
+import TemplateDetailReleaseVersionsTab from '@/views/templates/detail/TemplateDetailReleaseVersionsTab.vue'
+import TemplateDetailApiAccessTab from '@/views/templates/detail/TemplateDetailApiAccessTab.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
-import AppDataTable from '@/components/common/AppDataTable.vue'
-import AppTablePagination from '@/components/common/AppTablePagination.vue'
-import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { canViewCollaborationWorkItems } from '@/auth/roles'
 import { useCollaborationStore } from '@/stores/collaboration'
@@ -48,12 +41,13 @@ import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFi
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import { MASTER_DETAIL_PATH_PREFIX, ROUTE_PATH_BY_KEY, ROUTE_KEYS, apiPolicyDetailPath } from '@/routing/routeKeys'
+import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, apiPolicyDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import * as templatesApi from '@/api/templates'
 import { conflictsWithExisting, suggestNextVersions, type SemverBumpLevel } from '@/utils/semver'
-import { resolveTemplateDetailTab, type TemplateDetailTab } from '@/views/templates/templateDetailTabs'
+import { resolveTemplateDetailTab, templateDetailTabLabelKey, type TemplateDetailTab } from '@/views/templates/templateDetailTabs'
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
+import { resolveWorkflowBannerActionKind } from '@/utils/templateWorkflowBannerContext'
 import {
   isPublishGateReady,
   mapPublishGateChecklistItems,
@@ -162,12 +156,23 @@ const errorMessage = computed(() => {
 
 const approvalSubState = computed(() => template.value?.approvalSubState)
 
-const showDraftActions = computed(
-  () => template.value?.lifecycleStatus === 'DRAFT' && authorTemplates.value,
-)
-const showTestingDecisionActions = computed(
-  () => template.value?.lifecycleStatus === 'TESTING' && decideTests.value,
-)
+const workflowBannerCapabilities = computed(() => ({
+  authorTemplates: authorTemplates.value,
+  decideTests: decideTests.value,
+  decideApprovals: decideApprovals.value,
+  publishTemplates: publishTemplates.value,
+}))
+
+const workflowBannerActionKind = computed(() => {
+  const status = template.value?.lifecycleStatus
+  if (!status) {
+    return null
+  }
+  return resolveWorkflowBannerActionKind(status, workflowBannerCapabilities.value)
+})
+
+const showDraftActions = computed(() => workflowBannerActionKind.value === 'draft')
+const showTestingDecisionActions = computed(() => workflowBannerActionKind.value === 'testing')
 const showSubmitForApproval = computed(() => {
   if (template.value?.lifecycleStatus !== 'APPROVAL' || !authorTemplates.value) {
     return false
@@ -189,9 +194,7 @@ const showApprovalDecisionActions = computed(() => {
   }
   return true
 })
-const showPublishActions = computed(
-  () => template.value?.lifecycleStatus === 'PENDING_RELEASE' && publishTemplates.value,
-)
+const showPublishActions = computed(() => workflowBannerActionKind.value === 'publish')
 const showStopAction = computed(
   () => template.value?.lifecycleStatus === 'PUBLISHED' && stopTemplates.value,
 )
@@ -969,366 +972,96 @@ async function handleDeleteTemplate() {
       <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />
 
       <el-tabs v-model="activeDetailTab" class="detail-tabs">
-        <el-tab-pane :label="t('templates.detail.tabs.releaseVersions')" name="releaseVersions">
-          <TemplateReleaseVersionHistoryPanel
+        <el-tab-pane :label="t(templateDetailTabLabelKey('releaseVersions'))" name="releaseVersions">
+          <TemplateDetailReleaseVersionsTab
             :template-id="templateId"
             :template-lifecycle-status="template.lifecycleStatus"
             @changed="loadTemplate"
           />
         </el-tab-pane>
 
-        <el-tab-pane :label="t('templates.detail.tabs.overview')" name="overview">
-      <el-card shadow="never" class="section-card">
-        <h2>{{ t('templates.detail.summaryTitle') }}</h2>
-        <dl class="summary-grid">
-          <div>
-            <dt>{{ t('templates.detail.externalId') }}</dt>
-            <dd>{{ template.externalId }}</dd>
-          </div>
-          <div>
-            <dt>{{ t('templates.detail.masterId') }}</dt>
-            <dd>
-              <router-link :to="`${MASTER_DETAIL_PATH_PREFIX}${template.masterId}`">
-                {{ template.masterId }}
-              </router-link>
-            </dd>
-          </div>
-          <div>
-            <dt>{{ t('templates.detail.releaseVersion') }}</dt>
-            <dd>{{ template.releaseVersion ?? t('templates.detail.noReleaseVersion') }}</dd>
-          </div>
-          <div>
-            <dt>{{ t('templates.detail.updatedAt') }}</dt>
-            <dd>{{ formatDateTime(template.updatedAt) }}</dd>
-          </div>
-        </dl>
-        <p class="description">
-          {{ template.description ?? t('templates.detail.noDescription') }}
-        </p>
-      </el-card>
+        <el-tab-pane :label="t(templateDetailTabLabelKey('overview'))" name="overview">
+          <TemplateDetailOverviewTab :template="template" :format-date-time="formatDateTime" />
         </el-tab-pane>
 
-        <el-tab-pane :label="t('templates.detail.tabs.lifecycle')" name="lifecycle">
-      <el-card
-        v-if="showLifecycleSection"
-        id="template-lifecycle-panel"
-        shadow="never"
-        class="section-card"
-      >
-        <h2>{{ t('templates.lifecycle.title') }}</h2>
-        <el-input
-          v-model="lifecycleComment"
-          type="textarea"
-          :rows="2"
-          :placeholder="t('templates.lifecycle.commentPlaceholder')"
-          class="lifecycle-comment"
-        />
-        <div class="action-row">
-          <el-button
-            v-if="showDraftActions"
-            type="primary"
-            :loading="templatesStore.submitting"
-            @click="handleSubmitForTest"
-          >
-            {{ t('templates.lifecycle.submitTest') }}
-          </el-button>
-          <template v-if="showTestingDecisionActions">
-            <el-button
-              type="success"
-              :loading="templatesStore.submitting"
-              @click="handleTestDecision('PASSED')"
-            >
-              {{ t('templates.lifecycle.passTest') }}
-            </el-button>
-            <el-button
-              type="danger"
-              :loading="templatesStore.submitting"
-              @click="handleTestDecision('FAILED')"
-            >
-              {{ t('templates.lifecycle.failTest') }}
-            </el-button>
-          </template>
-          <el-button
-            v-if="showSubmitForApproval"
-            type="primary"
-            :loading="templatesStore.submitting"
-            @click="handleSubmitForApproval"
-          >
-            {{ t('templates.lifecycle.submitApproval') }}
-          </el-button>
-          <template v-if="showApprovalDecisionActions">
-            <el-button
-              type="success"
-              :loading="templatesStore.submitting"
-              @click="handleApprovalDecision('APPROVED')"
-            >
-              {{ t('templates.lifecycle.approve') }}
-            </el-button>
-            <el-button
-              type="danger"
-              :loading="templatesStore.submitting"
-              @click="handleApprovalDecision('REJECTED')"
-            >
-              {{ t('templates.lifecycle.reject') }}
-            </el-button>
-          </template>
-          <template v-if="showPublishActions">
-            <el-card shadow="never" class="publish-gate-card">
-              <h3>{{ t('templates.publishGate.title') }}</h3>
-              <p>{{ t('templates.publishGate.description') }}</p>
-              <el-skeleton v-if="loadingPublishGate" :rows="3" animated />
-              <ul v-else class="publish-gate-list">
-                <li v-for="item in publishGateItems" :key="item.key">
-                  <span>{{ item.label }}</span>
-                  <el-tag
-                    v-if="item.informational"
-                    type="info"
-                    size="small"
-                  >
-                    {{ t('templates.publishGate.informational') }}
-                  </el-tag>
-                  <el-tag
-                    v-else
-                    :type="item.ready ? 'success' : 'warning'"
-                    size="small"
-                  >
-                    {{ item.ready ? t('templates.publishGate.ready') : t('templates.publishGate.pending') }}
-                  </el-tag>
-                </li>
-              </ul>
-            </el-card>
-            <el-radio-group v-model="publishBumpLevel" class="publish-bump-picker">
-              <el-radio-button
-                v-for="option in publishBumpOptions"
-                :key="option.level"
-                :value="option.level"
-              >
-                {{ option.label }} ({{ option.version }})
-              </el-radio-button>
-            </el-radio-group>
-            <el-alert
-              v-if="publishVersionConflict"
-              class="publish-conflict-alert"
-              type="warning"
-              :title="t('templates.lifecycle.releaseVersionConflict')"
-              show-icon
-              :closable="false"
-            />
-            <el-button
-              type="primary"
-              :loading="templatesStore.submitting"
-              :disabled="!publishGateReady"
-              @click="handlePublish"
-            >
-              {{ t('templates.lifecycle.publish') }}
-            </el-button>
-          </template>
-          <el-button
-            v-if="showTestGenerate"
-            :loading="templatesStore.submitting"
-            @click="handleTestGenerate"
-          >
-            {{ t('templates.testGenerate.action') }}
-          </el-button>
-        </div>
-      </el-card>
-
-      <el-card v-if="showGovernanceSection" shadow="never" class="section-card">
-        <h2>{{ t('templates.governance.title') }}</h2>
-        <p class="governance-description">{{ t('templates.governance.description') }}</p>
-        <div class="action-row">
-          <el-button
-            v-if="showStopAction"
-            type="warning"
-            :loading="templatesStore.submitting"
-            @click="handleGovernanceAction('stop')"
-          >
-            {{ t('templates.governance.stop') }}
-          </el-button>
-          <el-button
-            v-if="showRestoreAction"
-            type="primary"
-            :loading="templatesStore.submitting"
-            @click="handleGovernanceAction('restore')"
-          >
-            {{ t('templates.governance.restore') }}
-          </el-button>
-          <el-button
-            v-if="showDeprecateAction"
-            type="danger"
-            :loading="templatesStore.submitting"
-            @click="handleGovernanceAction('deprecate')"
-          >
-            {{ t('templates.governance.deprecate') }}
-          </el-button>
-        </div>
-      </el-card>
+        <el-tab-pane :label="t(templateDetailTabLabelKey('lifecycle'))" name="lifecycle">
+          <TemplateDetailLifecycleTab
+            :show-lifecycle-section="showLifecycleSection"
+            :show-governance-section="showGovernanceSection"
+            :lifecycle-comment="lifecycleComment"
+            :show-draft-actions="showDraftActions"
+            :show-testing-decision-actions="showTestingDecisionActions"
+            :show-submit-for-approval="showSubmitForApproval"
+            :show-approval-decision-actions="showApprovalDecisionActions"
+            :show-publish-actions="showPublishActions"
+            :show-test-generate="showTestGenerate"
+            :show-stop-action="showStopAction"
+            :show-restore-action="showRestoreAction"
+            :show-deprecate-action="showDeprecateAction"
+            :publish-gate-items="publishGateItems"
+            :loading-publish-gate="loadingPublishGate"
+            :publish-bump-level="publishBumpLevel"
+            :publish-version-conflict="publishVersionConflict"
+            :publish-gate-ready="publishGateReady"
+            :publish-bump-options="publishBumpOptions"
+            :submitting="templatesStore.submitting"
+            @update:lifecycle-comment="lifecycleComment = $event"
+            @update:publish-bump-level="publishBumpLevel = $event"
+            @submit-for-test="handleSubmitForTest"
+            @test-decision="handleTestDecision"
+            @submit-for-approval="handleSubmitForApproval"
+            @approval-decision="handleApprovalDecision"
+            @publish="handlePublish"
+            @test-generate="handleTestGenerate"
+            @governance-action="handleGovernanceAction"
+          />
         </el-tab-pane>
 
         <el-tab-pane
           v-if="showAuthoringSection"
-          :label="t('templates.detail.tabs.authoring')"
+          :label="t(templateDetailTabLabelKey('authoring'))"
           name="authoring"
         >
-      <el-card shadow="never" class="section-card">
-        <h2>{{ t('templates.authoring.title') }}</h2>
-        <TemplateAuthoringPanel
-          :template-id="templateId"
-          :variables="template.variables"
-          :bindings="template.bindings"
-          @updated="loadTemplate"
-        />
-        <TemplateRuleConfigurator
-          :template-id="templateId"
-          :initial-rules="template.rules ?? []"
-          @updated="loadTemplate"
-        />
-        <TemplateContentModuleReferencesPanel
-          v-if="template.groupCode"
-          :template-id="templateId"
-          :group-code="template.groupCode"
-          :editable="canEditContentModuleReferences"
-          :refresh-token="coverageRefreshToken"
-          @updated="loadTemplate"
-        />
-        <h3>{{ t('templates.testDataSets.title') }}</h3>
-        <TemplateTestDataSetPanel
-          :template-id="templateId"
-          @selected="(id) => { selectedTestDataSetId = id }"
-          @batch-complete="() => { coverageRefreshToken += 1 }"
-        />
-        <TemplateCoveragePanel
-          :template-id="templateId"
-          :refresh-token="coverageRefreshToken"
-        />
-        <TemplateChangeDiffPanel
-          :template-id="templateId"
-          :refresh-token="coverageRefreshToken"
-        />
-      </el-card>
-
-      <el-card v-if="showAuthoringSection" shadow="never" class="section-card">
-        <h2>{{ t('templates.preview.title') }}</h2>
-        <TemplatePreviewPanel
-          :template-id="templateId"
-          :bindings="template.bindings"
-          :preview="lastPreview"
-        />
-      </el-card>
+          <TemplateDetailAuthoringTab
+            :template-id="templateId"
+            :variables="template.variables"
+            :bindings="template.bindings"
+            :rules="template.rules"
+            :group-code="template.groupCode"
+            :can-edit-content-module-references="canEditContentModuleReferences"
+            :coverage-refresh-token="coverageRefreshToken"
+            :last-preview="lastPreview"
+            @updated="loadTemplate"
+            @selected-test-data-set="selectedTestDataSetId = $event"
+            @batch-complete="coverageRefreshToken += 1"
+          />
         </el-tab-pane>
 
         <el-tab-pane
           v-if="showPolicyPanel"
-          :label="t('templates.detail.tabs.apiAccess')"
+          :label="t(templateDetailTabLabelKey('apiAccess'))"
           name="apiAccess"
         >
-      <el-card shadow="never" class="section-card">
-        <h2>{{ t('templates.policy.title') }}</h2>
-        <el-skeleton v-if="templatesStore.loadingPolicy" :rows="4" animated />
-        <template v-else-if="templatesStore.apiPolicy">
-          <dl class="policy-summary">
-            <div>
-              <dt>{{ t('templates.policy.policyVersion') }}</dt>
-              <dd>v{{ templatesStore.apiPolicy.policyVersion }}</dd>
-            </div>
-            <div>
-              <dt>{{ t('templates.policy.defaultRouteReleaseVersion') }}</dt>
-              <dd>{{ templatesStore.apiPolicy.defaultRouteReleaseVersion }}</dd>
-            </div>
-            <div>
-              <dt>{{ t('templates.policy.allowedAdGroups') }}</dt>
-              <dd>{{ templatesStore.apiPolicy.allowedAdGroups.join(', ') || '—' }}</dd>
-            </div>
-            <div>
-              <dt>{{ t('templates.policy.outputFormats') }}</dt>
-              <dd>{{ templatesStore.apiPolicy.outputFormats.join(', ') }}</dd>
-            </div>
-          </dl>
-          <p class="policy-console-hint">{{ t('apiPolicy.detail.templateTabHint') }}</p>
-          <div class="action-row">
-            <el-button type="primary" @click="openApiPolicyConsole">
-              {{ t('apiPolicy.detail.openConsole') }}
-            </el-button>
-          </div>
-        </template>
-      </el-card>
-
-      <el-card shadow="never" class="section-card">
-        <h2>{{ t('templates.policy.credentialsTitle') }}</h2>
-        <div class="action-row action-row--compact">
-          <el-button :loading="templatesStore.submitting" @click="handleCreateCredential">
-            {{ t('templates.policy.createCredential') }}
-          </el-button>
-        </div>
-        <AppDataTable :data="paginatedCredentials" empty-text="">
-            <template #empty>
-              <el-empty :description="t('templates.policy.noCredentials')" />
-            </template>
-            <el-table-column prop="externalId" sortable>
-              <template #header>
-                <TableColumnHeader
-                  :label="t('templates.policy.credentialExternalId')"
-                  v-model="credentialColumnFilters.externalId"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column prop="status" sortable>
-              <template #header>
-                <TableColumnHeader
-                  :label="t('templates.policy.credentialStatus')"
-                  v-model="credentialColumnFilters.status"
-                  filter-type="select"
-                  :options="credentialStatusFilterOptions"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column sortable :sort-method="sortCredentialsByCreatedAt" min-width="180">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('templates.policy.credentialCreatedAt')"
-                  v-model="credentialColumnFilters.createdAt"
-                />
-              </template>
-              <template #default="{ row }">
-                {{ formatDateTime(row.createdAt) }}
-              </template>
-            </el-table-column>
-            <el-table-column :label="t('templates.policy.credentialActions')" min-width="200">
-              <template #default="{ row }">
-                <el-button
-                  v-if="row.status === 'ACTIVE'"
-                  link
-                  type="primary"
-                  @click="handleRotateCredential(row.credentialId, row.externalId)"
-                >
-                  {{ t('templates.policy.rotateCredential') }}
-                </el-button>
-                <el-button
-                  v-if="row.status === 'ACTIVE'"
-                  link
-                  type="danger"
-                  @click="handleRevokeCredential(row.credentialId)"
-                >
-                  {{ t('templates.policy.revokeCredential') }}
-                </el-button>
-              </template>
-            </el-table-column>
-          </AppDataTable>
-        <AppTablePagination
-          v-model:current-page="credentialsCurrentPage"
-          :page-size="CLIENT_TABLE_PAGE_SIZE"
-          :total="totalCredentialRows"
-        />
-      </el-card>
-
-      <el-card v-if="showPolicyPanel" shadow="never" class="section-card">
-        <h2>{{ t('templates.contract.title') }}</h2>
-        <TemplateCallerContractPanel
-          :template-id="templateId"
-          :environment="selectedContractEnvironment"
-          @update:environment="selectedContractEnvironment = $event"
-        />
-      </el-card>
+          <TemplateDetailApiAccessTab
+            v-model:credential-column-filters="credentialColumnFilters"
+            v-model:credentials-current-page="credentialsCurrentPage"
+            v-model:selected-contract-environment="selectedContractEnvironment"
+            :template-id="templateId"
+            :show-policy-panel="showPolicyPanel"
+            :loading-policy="templatesStore.loadingPolicy"
+            :api-policy="templatesStore.apiPolicy"
+            :paginated-credentials="paginatedCredentials"
+            :credential-status-filter-options="credentialStatusFilterOptions"
+            :page-size="CLIENT_TABLE_PAGE_SIZE"
+            :total-credential-rows="totalCredentialRows"
+            :submitting="templatesStore.submitting"
+            :format-date-time="formatDateTime"
+            :sort-credentials-by-created-at="sortCredentialsByCreatedAt"
+            @open-api-policy-console="openApiPolicyConsole"
+            @create-credential="handleCreateCredential"
+            @rotate-credential="handleRotateCredential"
+            @revoke-credential="handleRevokeCredential"
+          />
         </el-tab-pane>
       </el-tabs>
     </template>
@@ -1422,125 +1155,5 @@ async function handleDeleteTemplate() {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
-}
-
-.governance-description {
-  margin: 0 0 1rem;
-  color: var(--text-muted);
-}
-
-.page-alert {
-  margin-bottom: 1rem;
-}
-
-.section-card {
-  margin-bottom: 1.5rem;
-
-  h2 {
-    margin: 0 0 1rem;
-    font-size: 1.125rem;
-  }
-
-  h3 {
-    margin: 1.5rem 0 0.75rem;
-    font-size: 1rem;
-  }
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin: 0 0 1rem;
-
-  dt {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
-
-  dd {
-    margin: 0.25rem 0 0;
-    font-weight: 500;
-  }
-}
-
-.description {
-  margin: 0;
-  color: var(--text-muted);
-}
-
-.lifecycle-comment {
-  margin-bottom: 1rem;
-}
-
-.action-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.publish-bump-picker {
-  width: 100%;
-}
-
-.publish-conflict-alert {
-  width: 100%;
-}
-
-.publish-gate-card {
-  width: 100%;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--border-subtle, #e5e7eb);
-  border-radius: 8px;
-
-  h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1rem;
-  }
-
-  p {
-    margin: 0 0 0.75rem;
-    color: var(--text-muted);
-  }
-}
-
-.publish-gate-list {
-  margin: 0;
-  padding-left: 1.25rem;
-}
-
-.policy-summary {
-  display: grid;
-  gap: 0.75rem;
-  margin: 0 0 1rem;
-
-  div {
-    display: grid;
-    grid-template-columns: 12rem 1fr;
-    gap: 0.75rem;
-  }
-
-  dt {
-    margin: 0;
-    color: var(--text-muted);
-    font-weight: 500;
-  }
-
-  dd {
-    margin: 0;
-  }
-}
-
-.policy-console-hint {
-  margin: 0 0 1rem;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-
-.action-row--compact {
-  margin-bottom: 1rem;
 }
 </style>

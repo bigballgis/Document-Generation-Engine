@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCapabilities } from '@/composables/useCapabilities'
+import { resolveTemplateWorkflowBannerContext } from '@/utils/templateWorkflowBannerContext'
 import type { TemplateDetail } from '@/types/template'
 
 const props = defineProps<{
@@ -13,41 +14,16 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const {
-  authorTemplates,
-  decideTests,
-  decideApprovals,
-  publishTemplates,
-} = useCapabilities()
+const { authorTemplates, decideTests, decideApprovals, publishTemplates } = useCapabilities()
 
-const banner = computed(() => {
-  const status = props.template.lifecycleStatus
-  if (status === 'TESTING' && decideTests.value) {
-    return {
-      titleKey: 'dashboard.tasks.templateTest.title',
-      descriptionKey: 'dashboard.tasks.templateTest.description',
-    }
-  }
-  if (status === 'APPROVAL' && decideApprovals.value) {
-    return {
-      titleKey: 'dashboard.tasks.templateApproval.title',
-      descriptionKey: 'dashboard.tasks.templateApproval.description',
-    }
-  }
-  if (status === 'PENDING_RELEASE' && publishTemplates.value) {
-    return {
-      titleKey: 'dashboard.tasks.templatePublish.title',
-      descriptionKey: 'dashboard.tasks.templatePublish.description',
-    }
-  }
-  if (status === 'DRAFT' && authorTemplates.value) {
-    return {
-      titleKey: 'dashboard.tasks.templateDraft.title',
-      descriptionKey: 'dashboard.tasks.templateDraft.description',
-    }
-  }
-  return null
-})
+const banner = computed(() =>
+  resolveTemplateWorkflowBannerContext(props.template.lifecycleStatus, {
+    authorTemplates: authorTemplates.value,
+    decideTests: decideTests.value,
+    decideApprovals: decideApprovals.value,
+    publishTemplates: publishTemplates.value,
+  }),
+)
 </script>
 
 <template>

@@ -592,10 +592,10 @@ export default {
       backToList: '返回模板列表',
       tabs: {
         overview: '概览',
-        lifecycle: '生命周期工作流',
+        lifecycle: '流程状态',
         authoring: '编排',
-        releaseVersions: '版本',
-        apiAccess: 'API 访问',
+        releaseVersions: '已发布版本',
+        apiAccess: '对外服务',
       },
       summaryTitle: '摘要',
       externalId: '外部 ID',

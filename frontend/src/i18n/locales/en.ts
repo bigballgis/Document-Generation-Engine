@@ -622,10 +622,10 @@ export default {
       backToList: 'Back to templates',
       tabs: {
         overview: 'Overview',
-        lifecycle: 'Lifecycle workflow',
+        lifecycle: 'Workflow status',
         authoring: 'Authoring',
-        releaseVersions: 'Versions',
-        apiAccess: 'API access',
+        releaseVersions: 'Published versions',
+        apiAccess: 'External access',
       },
       summaryTitle: 'Summary',
       externalId: 'External ID',
