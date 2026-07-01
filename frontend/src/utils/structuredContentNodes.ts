@@ -75,16 +75,19 @@ export function isConfirmedNodeType(type: string): type is ConfirmedNodeType {
   return (CONFIRMED_V1_NODE_TYPES as readonly string[]).includes(type)
 }
 
+import { normalizeLegacyStructuredContent } from '@/utils/structuredContentCompat'
+
 export function parseStructuredContent(json: string): StructuredContentDocument {
   try {
-    const parsed = JSON.parse(json) as StructuredContentDocument
-    if (!parsed || !Array.isArray(parsed.nodes)) {
-      return JSON.parse(DEFAULT_STRUCTURED_CONTENT_JSON) as StructuredContentDocument
+    const parsed = JSON.parse(json)
+    const normalized = normalizeLegacyStructuredContent(parsed)
+    if (!normalized.nodes.length && parsed && typeof parsed === 'object') {
+      const legacy = parsed as { nodes?: unknown; blocks?: unknown }
+      if (!Array.isArray(legacy.nodes) && !Array.isArray(legacy.blocks)) {
+        return JSON.parse(DEFAULT_STRUCTURED_CONTENT_JSON) as StructuredContentDocument
+      }
     }
-    return {
-      schemaVersion: parsed.schemaVersion ?? '1.0',
-      nodes: parsed.nodes,
-    }
+    return normalized
   } catch {
     return JSON.parse(DEFAULT_STRUCTURED_CONTENT_JSON) as StructuredContentDocument
   }

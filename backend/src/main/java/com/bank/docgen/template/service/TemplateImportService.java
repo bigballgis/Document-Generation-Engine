@@ -209,7 +209,8 @@ public class TemplateImportService {
                             variable.required(),
                             variable.defaultValue(),
                             variable.enumValues(),
-                            variable.description()
+                            variable.description(),
+                            variable.computeExpression()
                     ),
                     session
             );

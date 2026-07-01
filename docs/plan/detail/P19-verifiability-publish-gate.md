@@ -228,3 +228,21 @@ and mark group-admin exception interventions with reason + secondary confirm + s
 - Suggested order: T01 → T02 → T03 → T05 → T04 → T06 (gate) → T07 → T09 → T08 → T10.
 - Publish gating + decision capture are core → JaCoCo changed-line ≥90%; evidence/audit must
   never persist variable/customer plaintext (store hashes + non-sensitive summaries only).
+
+---
+
+## Residual corrective slice (2026-07-02)
+
+**Phase status unchanged:** P19 remains **Done** (2026-06-25). The following corrective work
+supersedes portions of the original P19-T08/T10 delivery without reopening the P19 phase.
+
+| Residual ID | Supersedes | Corrective scope | Active slice |
+| --- | --- | --- | --- |
+| **P19-T08R** | P19-T08 group override | Template-scoped override API + resolve chain; deprecate GROUP user-facing upsert | **P12-BDD-RISK-PROMPT-UX-001-T01/T02** |
+| **P19-T10R** | P19-T10 list-view panel + hardcoded decision categories | Remove list-view panel; create/detail UX relocation; wire `TemplateLifecycleDecisionDialog` | **P12-BDD-RISK-PROMPT-UX-001-T03/T04/T05** |
+
+**BDD:** `BDD-TEMPLATE-RISK-PROMPT-UX-001` (READY 2026-07-02) — see
+`docs/requirements/requirements-plan.md`, PRD §7, ADR-0021 consequences update.
+
+**Activation vehicle:** [P12-BDD-RISK-PROMPT-UX-001](./P12-deferred-enhancements.md) (catch-all slice;
+formal P12 phase stays **Not Started**). **COR mirror:** COR-T15.

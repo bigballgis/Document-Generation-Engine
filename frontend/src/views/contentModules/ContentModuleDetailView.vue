@@ -8,6 +8,7 @@ import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import ContentModuleLifecycleImpactDialog from '@/components/contentModules/ContentModuleLifecycleImpactDialog.vue'
 import ContentModuleStatusBadge from '@/components/contentModules/ContentModuleStatusBadge.vue'
 import ContentModuleVersionDialog from '@/components/contentModules/ContentModuleVersionDialog.vue'
+import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
 import {
   hasApprovedActiveVersion,
   hasApprovedStoppedVersion,
@@ -26,6 +27,8 @@ import type {
   ContentModuleLifecycleOperation,
   ContentModuleVersion,
 } from '@/types/contentModule'
+import { DEFAULT_STRUCTURED_CONTENT_JSON, serializeStructuredContent } from '@/utils/structuredContentNodes'
+import { normalizeStructuredContentJson } from '@/utils/structuredContentCompat'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const { t, te } = useI18n()
@@ -75,6 +78,37 @@ const canRecover = computed(
   () => manageContentModuleLifecycle.value && hasApprovedStoppedVersion(versions.value),
 )
 const canDeprecate = canRecover
+
+const previewVersion = computed(() => {
+  const draft = latestDraftVersion(versions.value)
+  if (draft) {
+    return draft as ContentModuleVersion
+  }
+  return (
+    versions.value.find(
+      (version) =>
+        version.reviewState === 'APPROVED' && (version.lifecycleState ?? 'ACTIVE') === 'ACTIVE',
+    ) ?? null
+  )
+})
+
+const previewContentJson = computed(() => {
+  const version = previewVersion.value
+  if (!version?.contentStructureJson) {
+    return DEFAULT_STRUCTURED_CONTENT_JSON
+  }
+  return serializeStructuredContent(normalizeStructuredContentJson(version.contentStructureJson))
+})
+
+const previewVersionLabel = computed(() => {
+  if (!previewVersion.value) {
+    return ''
+  }
+  return t('contentModules.detail.contentPreviewVersion', {
+    version: previewVersion.value.semanticVersion,
+    state: previewVersion.value.reviewState,
+  })
+})
 
 const errorMessage = computed(() => {
   const key = contentModulesStore.lastErrorMessageKey
@@ -347,6 +381,15 @@ async function handleVersionSaved() {
           description-key="contentModules.detail.noVersionsDescription"
         />
       </section>
+
+      <section v-if="previewVersion" class="content-preview-section">
+        <h2>{{ t('contentModules.detail.contentPreviewTitle') }}</h2>
+        <p class="preview-meta">{{ previewVersionLabel }}</p>
+        <ControlledStructuredContentEditor
+          :model-value="previewContentJson"
+          readonly
+        />
+      </section>
     </template>
 
     <ContentModuleVersionDialog
@@ -405,5 +448,21 @@ async function handleVersionSaved() {
     font-size: 1.0625rem;
     font-weight: 650;
   }
+}
+
+.content-preview-section {
+  margin-top: 2rem;
+
+  h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.0625rem;
+    font-weight: 650;
+  }
+}
+
+.preview-meta {
+  margin: 0 0 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }
 </style>

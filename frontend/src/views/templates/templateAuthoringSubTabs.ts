@@ -1,8 +1,7 @@
 export const TEMPLATE_AUTHORING_SUB_TABS = [
   'variables',
-  'bindings',
-  'rules',
   'contentModules',
+  'bindings',
   'testPreview',
 ] as const
 
@@ -12,9 +11,8 @@ export const DEFAULT_TEMPLATE_AUTHORING_SUB_TAB: TemplateAuthoringSubTab = 'vari
 
 export const TEMPLATE_AUTHORING_SUB_TAB_LABEL_KEYS: Record<TemplateAuthoringSubTab, string> = {
   variables: 'templates.authoring.subTabs.variables',
-  bindings: 'templates.authoring.subTabs.bindings',
-  rules: 'templates.authoring.subTabs.rules',
   contentModules: 'templates.authoring.subTabs.contentModules',
+  bindings: 'templates.authoring.subTabs.bindings',
   testPreview: 'templates.authoring.subTabs.testPreview',
 }
 

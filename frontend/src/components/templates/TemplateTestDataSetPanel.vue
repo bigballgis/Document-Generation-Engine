@@ -1,31 +1,34 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
+import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import * as templatesApi from '@/api/templates'
 import { useConfirmAction } from '@/composables/useConfirmAction'
-import type { BatchTestSummary, TestDataSet } from '@/types/template'
+import type { TestDataSet } from '@/types/template'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps<{
   templateId: string
+  generatingPreviewId?: string | null
+  refreshToken?: number
 }>()
 
 const emit = defineEmits<{
   selected: [testDataSetId: string | null]
-  'batch-complete': [summary: BatchTestSummary]
+  'test-generate': [testDataSetId: string]
+  loaded: [count: number]
 }>()
 
 const { t } = useI18n()
 const { confirmAction } = useConfirmAction()
 const loading = ref(false)
 const saving = ref(false)
-const batchTesting = ref(false)
 const dataSets = ref<TestDataSet[]>([])
 const dataSetsSource = computed(() => dataSets.value)
 const { filters: columnFilters, filteredRows: filteredDataSets } = useDataTableFilters(
@@ -77,12 +80,22 @@ async function loadDataSets() {
   loading.value = true
   try {
     dataSets.value = await templatesApi.listTestDataSets(props.templateId)
+    emit('loaded', dataSets.value.length)
   } catch {
     ElMessage.error(t('templates.testDataSets.error.load'))
   } finally {
     loading.value = false
   }
 }
+
+watch(
+  () => props.refreshToken,
+  () => {
+    void loadDataSets()
+  },
+)
+
+defineExpose({ reload: loadDataSets, dataSets })
 
 function openCreateDialog() {
   resetForm()
@@ -195,52 +208,39 @@ function handleSelect(testDataSetId: string) {
   emit('selected', testDataSetId)
 }
 
-async function handleBatchTest() {
-  if (dataSets.value.length === 0) {
-    ElMessage.warning(t('templates.testDataSets.error.noDataSetsForBatch'))
-    return
-  }
-  batchTesting.value = true
-  try {
-    const summary = await templatesApi.batchTestGenerate(props.templateId, {
-      testDataSetIds: dataSets.value.map((row) => row.testDataSetId),
-    })
-    emit('batch-complete', summary)
-    ElMessage.success(
-      t('templates.testDataSets.batchSuccess', {
-        succeeded: summary.succeededCount,
-        failed: summary.failedCount,
-        warnings: summary.warningCount,
-      }),
-    )
-    await loadDataSets()
-  } catch {
-    ElMessage.error(t('templates.testDataSets.error.batch'))
-  } finally {
-    batchTesting.value = false
-  }
+function handleRunPreview(row: TestDataSet) {
+  selectedId.value = row.testDataSetId
+  emit('selected', row.testDataSetId)
+  emit('test-generate', row.testDataSetId)
 }
 
 onMounted(() => {
   void loadDataSets()
 })
+function rowClassName({ row }: { row: TestDataSet }): string {
+  return row.testDataSetId === selectedId.value ? 'is-selected-row' : ''
+}
 </script>
 
 <template>
   <div class="test-data-set-panel">
-    <p>{{ t('templates.testDataSets.description') }}</p>
-    <div class="action-row">
-      <el-button type="primary" @click="openCreateDialog">
-        {{ t('templates.testDataSets.create') }}
-      </el-button>
-      <el-button :loading="batchTesting" :disabled="dataSets.length === 0" @click="handleBatchTest">
-        {{ t('templates.testDataSets.batchTest') }}
-      </el-button>
-    </div>
+    <SectionPanelHeader
+      :title="t('templates.testDataSets.title')"
+      :help-title="t('templates.testDataSets.helpTitle')"
+      :help-content="t('templates.testDataSets.helpContent')"
+    >
+      <template #actions>
+        <el-button type="primary" @click="openCreateDialog">
+          {{ t('templates.testDataSets.create') }}
+        </el-button>
+      </template>
+    </SectionPanelHeader>
+
     <AppDataTable
       v-loading="loading"
       :data="paginatedDataSets"
       highlight-current-row
+      :row-class-name="rowClassName"
       :empty-text="t('templates.testDataSets.empty')"
       @row-click="(row: TestDataSet) => handleSelect(row.testDataSetId)"
     >
@@ -253,25 +253,23 @@ onMounted(() => {
         </template>
         <template #default="{ row }">
           <span>{{ row.name }}</span>
-          <el-tag v-if="row.locked" size="small" type="info" class="locked-tag">
+          <el-tag v-if="row.required" size="small" type="warning" class="meta-tag">
+            {{ t('templates.testDataSets.requiredTag') }}
+          </el-tag>
+          <el-tag v-if="row.locked" size="small" type="info" class="meta-tag">
             {{ t('templates.testDataSets.locked') }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="testDataSetId" sortable min-width="140">
+      <el-table-column prop="scenarioName" min-width="140">
         <template #header>
-          <TableColumnHeader
-            :label="t('templates.testDataSets.id')"
-            v-model="columnFilters.testDataSetId"
-          />
+          {{ t('templates.testDataSets.scenarioName') }}
+        </template>
+        <template #default="{ row }">
+          {{ row.scenarioName || '—' }}
         </template>
       </el-table-column>
-      <el-table-column prop="datasetVersion" width="90">
-        <template #header>
-          {{ t('templates.testDataSets.datasetVersion') }}
-        </template>
-      </el-table-column>
-      <el-table-column sortable :sort-method="sortByUpdatedAt" min-width="180">
+      <el-table-column sortable :sort-method="sortByUpdatedAt" min-width="160">
         <template #header>
           <TableColumnHeader
             :label="t('templates.testDataSets.updatedAt')"
@@ -282,8 +280,16 @@ onMounted(() => {
           {{ new Date(row.updatedAt).toLocaleString() }}
         </template>
       </el-table-column>
-      <el-table-column :label="t('templates.testDataSets.actions')" min-width="220">
+      <el-table-column :label="t('common.actions')" min-width="280" fixed="right">
         <template #default="{ row }">
+          <el-button
+            link
+            type="primary"
+            :loading="generatingPreviewId === row.testDataSetId"
+            @click.stop="handleRunPreview(row)"
+          >
+            {{ t('templates.testDataSets.runPreview') }}
+          </el-button>
           <el-button link type="primary" :disabled="row.locked" @click.stop="openEditDialog(row)">
             {{ t('templates.testDataSets.edit') }}
           </el-button>
@@ -311,9 +317,6 @@ onMounted(() => {
       :page-size="CLIENT_TABLE_PAGE_SIZE"
       :total="totalDataSetRows"
     />
-    <p v-if="selectedId" class="selection-hint">
-      {{ t('templates.testDataSets.selectedHint', { testDataSetId: selectedId }) }}
-    </p>
 
     <el-dialog
       v-model="dialogVisible"
@@ -351,19 +354,11 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-.action-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+.meta-tag {
+  margin-left: 0.35rem;
 }
 
-.locked-tag {
-  margin-left: 0.5rem;
-}
-
-.selection-hint {
-  margin: 0.75rem 0 0;
-  color: var(--text-muted);
+:deep(.is-selected-row) {
+  background-color: var(--el-color-primary-light-9);
 }
 </style>

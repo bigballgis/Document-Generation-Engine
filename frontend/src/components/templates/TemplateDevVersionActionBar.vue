@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
 import type { SemverBumpLevel } from '@/utils/semver'
 import {
   listInvalidBindings,
@@ -21,12 +22,10 @@ type GovernanceAction = 'stop' | 'restore' | 'deprecate'
 
 const props = defineProps<{
   lifecycleComment: string
-  showDraftActions: boolean
-  showTestingDecisionActions: boolean
   showSubmitForApproval: boolean
   showApprovalDecisionActions: boolean
   showPublishActions: boolean
-  showTestGenerate: boolean
+  showTestWorkflowRedirect: boolean
   showStopAction: boolean
   showRestoreAction: boolean
   showDeprecateAction: boolean
@@ -49,12 +48,10 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:lifecycleComment': [value: string]
   'update:publishBumpLevel': [value: SemverBumpLevel]
-  submitForTest: []
-  testDecision: [decision: 'PASSED' | 'FAILED']
   submitForApproval: []
   approvalDecision: [decision: 'APPROVED' | 'REJECTED']
   publish: []
-  testGenerate: []
+  openTestPreviewTab: []
   governanceAction: [action: GovernanceAction]
   retryPublishGate: []
   retrySubmitGate: []
@@ -62,14 +59,11 @@ const emit = defineEmits<{
 
 const { t, te } = useI18n()
 
-const hasWorkflowActions = computed(
+const hasReleaseWorkflowActions = computed(
   () =>
-    props.showDraftActions ||
-    props.showTestingDecisionActions ||
     props.showSubmitForApproval ||
     props.showApprovalDecisionActions ||
-    props.showPublishActions ||
-    props.showTestGenerate,
+    props.showPublishActions,
 )
 
 const bindingGateIssues = computed(() =>
@@ -96,15 +90,28 @@ function resolveBindingStatusLabel(status: string | undefined): string {
 </script>
 
 <template>
-  <section
-    v-if="hasWorkflowActions || showGovernanceSection"
-    id="dev-version-actions"
-    class="dev-version-actions"
-  >
-    <div v-if="hasWorkflowActions" class="dev-version-actions__primary">
-      <p class="dev-version-actions__hint">{{ t('templates.devEditor.actionsHint') }}</p>
+  <section id="dev-version-actions" class="dev-version-actions">
+    <div v-if="showTestWorkflowRedirect" class="dev-version-actions__redirect">
+      <el-button type="primary" plain @click="emit('openTestPreviewTab')">
+        {{ t('templates.devEditor.openTestPreviewTab') }}
+      </el-button>
+      <ContextHelpTrigger
+        :title="t('templates.devEditor.testWorkflowRedirectHelpTitle')"
+        :content="t('templates.devEditor.testWorkflowRedirectHelpContent')"
+      />
+    </div>
+
+    <div v-if="hasReleaseWorkflowActions" class="dev-version-actions__primary">
+      <div class="dev-version-actions__primary-header">
+        <span class="dev-version-actions__label">{{ t('templates.devEditor.releaseWorkflowTitle') }}</span>
+        <ContextHelpTrigger
+          :title="t('templates.devEditor.releaseWorkflowHelpTitle')"
+          :content="t('templates.devEditor.releaseWorkflowHelpContent')"
+        />
+      </div>
       <div class="dev-version-actions__row">
         <el-input
+          v-if="showSubmitForApproval || showApprovalDecisionActions"
           :model-value="lifecycleComment"
           type="textarea"
           :rows="1"
@@ -115,31 +122,14 @@ function resolveBindingStatusLabel(status: string | undefined): string {
         />
         <div class="dev-version-actions__buttons">
           <el-button
-            v-if="showDraftActions"
+            v-if="showSubmitForApproval"
             type="primary"
             :loading="submitting"
-            @click="emit('submitForTest')"
+            :disabled="!submitGateReady || loadingSubmitGate || Boolean(submitGateLoadError)"
+            @click="emit('submitForApproval')"
           >
-            {{ t('templates.lifecycle.submitTest') }}
+            {{ t('templates.lifecycle.submitApproval') }}
           </el-button>
-          <template v-if="showTestingDecisionActions">
-            <el-button type="success" :loading="submitting" @click="emit('testDecision', 'PASSED')">
-              {{ t('templates.lifecycle.passTest') }}
-            </el-button>
-            <el-button type="danger" :loading="submitting" @click="emit('testDecision', 'FAILED')">
-              {{ t('templates.lifecycle.failTest') }}
-            </el-button>
-          </template>
-          <template v-if="showSubmitForApproval">
-            <el-button
-              type="primary"
-              :loading="submitting"
-              :disabled="!submitGateReady || loadingSubmitGate || Boolean(submitGateLoadError)"
-              @click="emit('submitForApproval')"
-            >
-              {{ t('templates.lifecycle.submitApproval') }}
-            </el-button>
-          </template>
           <template v-if="showApprovalDecisionActions">
             <el-button type="success" :loading="submitting" @click="emit('approvalDecision', 'APPROVED')">
               {{ t('templates.lifecycle.approve') }}
@@ -148,18 +138,14 @@ function resolveBindingStatusLabel(status: string | undefined): string {
               {{ t('templates.lifecycle.reject') }}
             </el-button>
           </template>
-          <template v-if="showPublishActions">
-            <el-button
-              type="primary"
-              :loading="submitting"
-              :disabled="!publishGateReady || loadingPublishGate"
-              @click="emit('publish')"
-            >
-              {{ t('templates.lifecycle.publish') }}
-            </el-button>
-          </template>
-          <el-button v-if="showTestGenerate" :loading="submitting" @click="emit('testGenerate')">
-            {{ t('templates.testGenerate.action') }}
+          <el-button
+            v-if="showPublishActions"
+            type="primary"
+            :loading="submitting"
+            :disabled="!publishGateReady || loadingPublishGate"
+            @click="emit('publish')"
+          >
+            {{ t('templates.lifecycle.publish') }}
           </el-button>
         </div>
       </div>
@@ -281,10 +267,26 @@ function resolveBindingStatusLabel(status: string | undefined): string {
   background: var(--surface-muted, #fafbfc);
 }
 
-.dev-version-actions__hint {
-  margin: 0 0 0.75rem;
-  color: var(--text-muted);
-  font-size: 0.875rem;
+.dev-version-actions__redirect {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dev-version-actions__primary-header {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.dev-version-actions__label {
+  font-weight: 650;
+  font-size: 0.9375rem;
 }
 
 .dev-version-actions__row {

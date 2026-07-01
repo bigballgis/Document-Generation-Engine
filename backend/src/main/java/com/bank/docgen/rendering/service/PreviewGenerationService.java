@@ -1,17 +1,23 @@
 package com.bank.docgen.rendering.service;
 
+import com.bank.docgen.authoring.structured.CallerRenderOverride;
 import com.bank.docgen.authoring.structured.FidelityValidationService;
+import com.bank.docgen.authoring.structured.RenderProfile;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.rendering.DocxAssembler;
+import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.rendering.api.FidelityWarningView;
 import com.bank.docgen.rendering.api.PreviewRecordView;
+import com.bank.docgen.rendering.api.PreviewSummaryView;
 import com.bank.docgen.rendering.api.TestGenerateRequest;
+import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
 import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
@@ -37,6 +43,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PreviewGenerationService {
 
+    private static final EncryptionOptionsView NO_ENCRYPTION =
+            new EncryptionOptionsView(false, null, null, null);
+    private static final int PREVIEW_HISTORY_LIMIT = 50;
+
     private final TemplateService templateService;
     private final TestDataSetService testDataSetService;
     private final TemplateVersionRepository templateVersionRepository;
@@ -45,6 +55,7 @@ public class PreviewGenerationService {
     private final PreviewRecordRepository previewRecordRepository;
     private final ObjectStoragePort objectStoragePort;
     private final DocxAssembler docxAssembler;
+    private final DocumentArtifactPipeline documentArtifactPipeline;
     private final ObjectMapper objectMapper;
     private final PreviewComparisonService previewComparisonService;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
@@ -61,6 +72,7 @@ public class PreviewGenerationService {
             PreviewRecordRepository previewRecordRepository,
             ObjectStoragePort objectStoragePort,
             DocxAssembler docxAssembler,
+            DocumentArtifactPipeline documentArtifactPipeline,
             ObjectMapper objectMapper,
             PreviewComparisonService previewComparisonService,
             TemplateContentModuleReferenceService contentModuleReferenceService,
@@ -76,6 +88,7 @@ public class PreviewGenerationService {
         this.previewRecordRepository = previewRecordRepository;
         this.objectStoragePort = objectStoragePort;
         this.docxAssembler = docxAssembler;
+        this.documentArtifactPipeline = documentArtifactPipeline;
         this.objectMapper = objectMapper;
         this.previewComparisonService = previewComparisonService;
         this.contentModuleReferenceService = contentModuleReferenceService;
@@ -158,11 +171,28 @@ public class PreviewGenerationService {
                     docx.length,
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             );
+            RenderProfile renderProfile = renderProfileService.resolveEffectiveProfile(
+                    version,
+                    CallerRenderOverride.empty()
+            );
+            DocumentArtifactPipeline.GeneratedArtifact pdfArtifact = documentArtifactPipeline.finalizeArtifact(
+                    docx,
+                    "PDF",
+                    NO_ENCRYPTION,
+                    renderProfile
+            );
+            String pdfStorageKey = "previews/" + preview.getId() + "/output.pdf";
+            objectStoragePort.put(
+                    pdfStorageKey,
+                    new java.io.ByteArrayInputStream(pdfArtifact.bytes()),
+                    pdfArtifact.bytes().length,
+                    pdfArtifact.contentType()
+            );
             List<FidelityWarningView> warnings = fidelityValidationService.collectWarningsForVersion(
                     version.getId(),
                     template.getMasterId()
             );
-            preview.markSucceeded(storageKey, writeWarnings(warnings));
+            preview.markSucceeded(storageKey, pdfStorageKey, writeWarnings(warnings));
             previewRecordRepository.save(preview);
             if (request.testDataSetId() != null && !request.testDataSetId().isBlank()) {
                 testDataSetService.lockForEvidence(templateId, request.testDataSetId());
@@ -176,6 +206,15 @@ public class PreviewGenerationService {
             }
             return toView(preview, List.of(), List.of());
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<PreviewSummaryView> listPreviews(UUID templateId, ManagementSessionClaims session) {
+        templateService.requireReadableTemplate(templateId, session);
+        return previewRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId).stream()
+                .limit(PREVIEW_HISTORY_LIMIT)
+                .map(this::toSummaryView)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -205,10 +244,38 @@ public class PreviewGenerationService {
                 preview.getOutputFormat(),
                 preview.getRenderProfileVersion(),
                 preview.getArtifactStorageKey(),
+                preview.getPdfArtifactStorageKey(),
                 warnings,
                 comparison,
                 preview.getTestDataSetExternalId(),
                 preview.getCreatedAt()
+        );
+    }
+
+    private PreviewSummaryView toSummaryView(PreviewRecordEntity preview) {
+        List<FidelityWarningView> warnings = readWarnings(preview.getFidelityWarningsJson());
+        var comparison = previewComparisonService.compare(
+                anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(preview.getTemplateVersionId()),
+                warnings
+        );
+        return new PreviewSummaryView(
+                preview.getId().toString(),
+                preview.getTemplateVersionId().toString(),
+                preview.getStatus(),
+                preview.getTestDataSetExternalId(),
+                preview.getCreatedAt(),
+                preview.getCreatedBy(),
+                warnings.size(),
+                comparison.blockerCount(),
+                comparison.warningCount(),
+                preview.getStatus() == PreviewStatus.SUCCEEDED
+                        && preview.getArtifactStorageKey() != null
+                        && !preview.getArtifactStorageKey().isBlank(),
+                preview.getStatus() == PreviewStatus.SUCCEEDED
+                        && ((preview.getPdfArtifactStorageKey() != null
+                                && !preview.getPdfArtifactStorageKey().isBlank())
+                        || (preview.getArtifactStorageKey() != null
+                                && !preview.getArtifactStorageKey().isBlank()))
         );
     }
 

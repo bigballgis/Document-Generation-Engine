@@ -1,6 +1,20 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-07-01 (**P3-T06 BDD S6 complete** — 8/8 scenarios, `template-package-nav` 9/9)
+**Last synced:** 2026-07-02 (**P12-BDD-RISK-PROMPT-UX-001 T01–T04 landed** — template-scoped risk-prompt backend + frontend wiring; T05 E2E pending)
+**Progress note (2026-07-02):** **P12-BDD-RISK-PROMPT-UX-001** remains **In Progress** — T01–T04 **Done**
+(template override Flyway V37/V38, template-scoped GET/PUT API, decision effective-config by
+`templateId`, panel refactor + list-view removal, `TemplateLifecycleDecisionDialog` wired to
+`getDecisionFormConfig`). **T05** (Playwright BDD S1–S7, S11–S12 + UIUX manifest) **Not Started**.
+**Gate:** backend `mvn verify` BUILD SUCCESS (**609** Surefire); frontend lint/type-check/test/build
+green (**569** Vitest). **No Playwright slice evidence yet.** **Single active slice:**
+P12-BDD-RISK-PROMPT-UX-001 only.
+**Activation note (2026-07-02):** **P12-BDD-RISK-PROMPT-UX-001 activated → In Progress** (BDD
+**BDD-TEMPLATE-RISK-PROMPT-UX-001** READY; supersedes P19-T08 group override + P19-T10 list-view
+panel + hardcoded decision categories). **No formal phase `In Progress`** — P19/P21/P12 catch-all
+phase rows unchanged (**Done** / **Not Started**). **Single active slice:** P12-BDD-RISK-PROMPT-UX-001
+only. Traceability: [P12 detail](./detail/P12-deferred-enhancements.md) § P12-BDD-RISK-PROMPT-UX-001;
+[P19 detail](./detail/P19-verifiability-publish-gate.md) § Residual; **COR-T15**.
+**Last synced (prior):** 2026-07-01 (**P3-T06 BDD S6 complete** — 8/8 scenarios, `template-package-nav` 9/9)
 **Completion note (2026-07-01):** **P3-T06 BDD S6 cross-group isolation** — Flyway `V34__corp_only_template_author_seed.sql` adds CORP-only template author `10000008`; E2E `assertCrossGroupVersionLineAccessDenied` covers version-lines / dev / release / clone `403 ACCESS_DENIED`. **BDD-TEMPLATE-PACKAGE-NAV-001 all 8 scenarios covered** in Playwright. `template-package-nav.spec.ts` **9/9** Docker. Detail: [detail/P3-template-authoring.md](./detail/P3-template-authoring.md).
 **Last synced (prior):** 2026-07-01 (**P3-T06 BDD S5/S7/S8** — boundary E2E + cloneable UI)
 **Completion note (2026-07-01):** **P3-T06 BDD boundary scenarios** — `TemplateVersionLinesPanel` respects API `cloneable`; E2E helper `template-version-lines-api.ts`; Playwright **S5** immutable `403`, **S7** clone blocked (`409` + hidden button), **S8** global admin clone. `template-package-nav.spec.ts` **8/8** Docker. Detail: [detail/P3-template-authoring.md](./detail/P3-template-authoring.md).
@@ -326,8 +340,8 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
 | P21 | Done (2026-06-30) | Role-journey frontend redesign — T01–T11 + X01–X06 + **X02** governance close; backend **`mvn verify` 553**; frontend **511** Vitest; Playwright/UIUX per sub-phase; **AUD-B10 resolved** (P12-AUD-B10 Done 2026-07-01); **AUD-M02 resolved** (P12-AUD-M02 Done 2026-07-01) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
-**Active phase:** **None** (2026-07-01 — no formal phase `In Progress`).
-**Active slice:** **None** (2026-07-01 — **OPT-D5-slice-3 Done**; **P3-T06 Done**).
+**Active phase:** **None** (2026-07-02 — no formal phase `In Progress`).
+**Active slice:** **P12-BDD-RISK-PROMPT-UX-001** (2026-07-02 — **In Progress**; BDD-TEMPLATE-RISK-PROMPT-UX-001; P19-T08R/T10R residual).
 **Completion note (2026-07-01):** **OPT-D5-slice-3 Done** — extract `TemplateBindingConfigurationService` from `TemplateService` (variable schema CRUD, anchor bindings, composition rules, binding validation); `TemplateService` 495→**250** L; BDD `not-applicable`. **Gate:** `mvn verify` **588** Surefire; frontend **543** Vitest. Detail: [optimization-plan.md](./optimization-plan.md) OPT-D5 row.
 **P21 Done** — do not reopen. All formal phases P0–P11, P13–P21 **Done**; P12 catch-all idle.
 
@@ -438,6 +452,24 @@ Task row: [detail/P2-master-management.md](./detail/P2-master-management.md).
 `pnpm -C frontend lint` / `type-check` / `test` (**169**) / `build`; `pnpm -C frontend test:e2e:docker` — **7/7**.
 
 Task rows: [detail/P19-verifiability-publish-gate.md](./detail/P19-verifiability-publish-gate.md).
+
+## P12-BDD-RISK-PROMPT-UX-001 — template risk-prompt UX (mirror — 2026-07-02)
+
+**BDD:** `BDD-TEMPLATE-RISK-PROMPT-UX-001` (READY). **Residual:** P19-T08R / P19-T10R. **COR:** COR-T15.
+
+| Sub-task | Owner | Status | Scope summary |
+| --- | --- | --- | --- |
+| P12-BDD-RISK-PROMPT-UX-001-T01 | backend-engineer | Done | Template override Flyway V37/V38 + GET/PUT API; GLOBAL-only global config; resolve chain; audit; auth |
+| P12-BDD-RISK-PROMPT-UX-001-T02 | backend-engineer | Done | Decision effective-config by `templateId`; TEST_FAIL / APPROVAL_REJECT wiring |
+| P12-BDD-RISK-PROMPT-UX-001-T03 | frontend-engineer | Done | Panel refactor; remove list view; create collapse + detail section; i18n |
+| P12-BDD-RISK-PROMPT-UX-001-T04 | frontend-engineer | Done | `TemplateLifecycleDecisionDialog` resolved categories via `getDecisionFormConfig` |
+| P12-BDD-RISK-PROMPT-UX-001-T05 | e2e-test-engineer + e2e-uiux-reviewer | Not Started | Playwright BDD S1–S7, S11–S12; UIUX manifest |
+
+**Gate evidence:** backend `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (**609** Surefire);
+frontend `pnpm -C frontend lint`, `type-check`, `test` (**569** Vitest), `build` green.
+Playwright/UIUX slice **pending** (T05).
+
+Task rows: [detail/P12-deferred-enhancements.md](./detail/P12-deferred-enhancements.md) § P12-BDD-RISK-PROMPT-UX-001.
 
 ## P17 per-domain API policy governance (mirror — 2026-06-25)
 

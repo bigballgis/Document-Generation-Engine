@@ -660,6 +660,15 @@ export default {
     devEditor: {
       actionsHint: '以下操作针对当前在途开发版本线。',
       breadcrumbLabel: '开发编辑器',
+      testWorkflowRedirect: '试生成与提交测试已移至「测试与预览」子标签。',
+      openTestPreviewTab: '打开测试与预览',
+      testWorkflowRedirectHelpTitle: '在哪里测试',
+      testWorkflowRedirectHelpContent:
+        '在「模板设计 → 测试与预览」中对每条数据集运行预览、批量试生成，并提交测试。模板处于测试中时可在此记录通过/失败。',
+      releaseWorkflowTitle: '发布工作流',
+      releaseWorkflowHelpTitle: '审批与上线',
+      releaseWorkflowHelpContent:
+        '测试完成后在此提交审批、记录审批决策并确认上线。提交前就绪门禁须全部为绿。',
     },
     versionLines: {
       title: '版本线',
@@ -717,8 +726,12 @@ export default {
     },
     testDataSets: {
       title: '测试数据集',
-      description: '维护用于可重复预览运行的合成或脱敏变量数据。',
+      helpTitle: '测试数据集',
+      helpContent:
+        '每一行是一套命名变量载荷，用于预览试生成。点击「运行预览」对该样本生成 DOCX/PDF。已锁定数据集不可改——请「复制为新版本」后再编辑。',
       create: '新建数据集',
+      runPreview: '运行预览',
+      requiredTag: '必填',
       createTitle: '新建测试数据集',
       editTitle: '编辑测试数据集',
       edit: '编辑',
@@ -758,6 +771,9 @@ export default {
     },
     coverage: {
       title: '覆盖率摘要',
+      helpTitle: '覆盖率摘要',
+      helpContent:
+        '将已执行的样本、必填变量与版式占位符绑定和配置的阈值进行对比。刷新后可在状态提示中查看阈值范围与百分比要求。',
       description: '将已执行的样本、必填变量与版式占位符绑定和配置的阈值进行对比。',
       refresh: '刷新',
       thresholdHint:
@@ -822,8 +838,62 @@ export default {
         save: '无法保存标准条款引用。',
       },
     },
+    clauseAuthoring: {
+      title: '条款引用',
+      helpTitle: '条款引用',
+      helpContent:
+        '注册 referenceKey → 已批准模块版本；在此预览条款正文，草稿可内联编辑。在绑定中用 contentModuleRef 插入已注册的 key。',
+      description: '固定已批准的标准条款版本，预览内容，并在此模板中编辑草稿条款正文。',
+      addReference: '添加引用',
+      addReferenceTitle: '添加条款引用',
+      editReferenceTitle: '编辑引用 {referenceKey}',
+      editPin: '编辑固定',
+      editClause: '编辑条款',
+      editClauseTitle: '编辑条款内容',
+      preview: '预览',
+      previewTitle: '条款内容预览',
+      saveReference: '保存引用',
+      saveReferenceSuccess: '条款引用已保存。',
+      saveClause: '保存条款',
+      saveClauseSuccess: '条款内容已保存。',
+      readOnlyHint: '模板非编写中状态时，条款引用为只读。',
+      approvedReadonlyHint: '该条款修订已批准。请在标准条款工作区创建新草稿后再编辑内容。',
+      lockedYes: '已锁定',
+      lockedNo: '未锁定',
+      empty: '尚未配置条款引用。',
+      emptyDescription: '添加已批准的标准条款版本，以在本模板中绑定可复用条款内容。',
+      noContentStructure: '该版本尚无结构化内容。',
+      versionNotFound: '未找到引用的模块版本。',
+      columns: {
+        referenceKey: '引用键',
+        moduleName: '条款模块',
+        semanticVersion: '版本',
+        locked: '锁定状态',
+        actions: '操作',
+      },
+      form: {
+        referenceKey: '引用键',
+        referenceKeyPlaceholder: 'LOAN_DISCLOSURE',
+        moduleId: '标准条款',
+        moduleIdPlaceholder: '选择已批准条款',
+        semanticVersion: '语义版本',
+        semanticVersionPlaceholder: '选择已批准版本',
+      },
+      validation: {
+        required: '引用键、条款模块与已批准版本均为必填项。',
+      },
+      error: {
+        load: '无法加载条款引用。',
+        saveReference: '无法保存条款引用。',
+        loadContent: '无法加载条款内容。',
+        saveClause: '无法保存条款内容。',
+      },
+    },
     changeDiff: {
       title: '变更差异',
+      helpTitle: '变更差异',
+      helpContent:
+        '按维度（内容、占位符、变量、规则、契约摘要）对比候选草稿与基线发布版本。展开各维度可查看新增、删除与修改项。',
       description: '按维度对比候选草稿与基线发布版本。',
       refresh: '刷新',
       baselineHint: '基线发布版本：{version}',
@@ -848,25 +918,45 @@ export default {
       },
     },
     riskPrompt: {
-      title: '风险提示配置',
-      description: '为结构化工作流决策配置原因类别与风险提示文案。',
-      refresh: '刷新',
-      scopeType: '作用域',
-      scopeGlobal: '全局默认',
-      scopeGroup: '分组覆盖',
-      groupCode: '分组代码',
-      groupCodePlaceholder: '例如 RETAIL',
-      reasonCategories: '启用的原因类别',
-      promptCopyFor: '{category} 的提示文案',
+      title: '测试与审批退回原因',
+      description:
+        '配置测试不通过或审批退回时，操作者可选择的原因类型及提示说明。未自定义时继承系统默认（全部启用）。',
+      helpTitle: '这项配置做什么？',
+      helpContent:
+        '仅影响测试人员标记「不通过」或审批人员「退回」时的原因选项，不替代绑定校验、覆盖率等提交前检查。检查未通过时，系统仍会阻止提交审批或发布。',
+      gateNote: '此项不控制能否提交审批；绑定校验等门槛未通过时，系统仍会阻止继续流转。',
+      customizeForTemplate: '为本模板自定义退回原因（不勾选则使用系统默认）',
+      reasonCategories: '可选退回原因',
+      promptCopyLabel: '{label} — 提示说明',
+      inheritGlobalHint: '当前使用系统默认：全部退回原因可用。',
       lastUpdated: '最后更新：{updatedAt}',
       save: '保存配置',
-      saveSuccess: '风险提示配置已保存。',
+      saveSuccess: '退回原因配置已保存。',
+      createSectionTitle: '测试与审批退回原因（可选）',
       validation: {
-        categoriesRequired: '请至少选择一个原因类别。',
+        categoriesRequired: '自定义时请至少保留一个退回原因。',
       },
       error: {
-        load: '无法加载风险提示配置。',
-        save: '无法保存风险提示配置。',
+        load: '无法加载退回原因配置。',
+        save: '无法保存退回原因配置。',
+      },
+      categoryHelp: {
+        BINDING_ISSUE:
+          '用于退回时说明模板绑定或版式占位符存在问题。\n\n不影响提交审批：绑定校验未通过时，系统仍会阻止提交审批。\n\n启用：退回时可选择此项。\n不启用：退回时无法选择此项。',
+        VARIABLE_SCHEMA_ISSUE:
+          '用于退回时说明变量定义、类型或约束存在问题。\n\n启用：退回时可选择此项。\n不启用：退回时无法选择此项。',
+        RULE_VALIDATION_ISSUE:
+          '用于退回时说明条件/循环等业务规则校验未通过。\n\n启用：退回时可选择此项。\n不启用：退回时无法选择此项。',
+        FIDELITY_WARNING:
+          '用于退回时说明渲染结果与模板预期存在格式或样式差异。\n\n启用：退回时可选择此项。\n不启用：退回时无法选择此项。',
+        COVERAGE_BELOW_THRESHOLD:
+          '用于退回时说明变量覆盖率低于配置阈值。\n\n启用：退回时可选择此项。\n不启用：退回时无法选择此项。',
+        PREVIEW_COMPARISON_DIFF:
+          '用于退回时说明预览结果与最终模板存在差异。\n\n启用：退回时可选择此项。\n不启用：退回时无法选择此项。',
+        CONTRACT_SCOPE_CHANGE:
+          '用于退回时说明 API 契约或影响范围发生变化。\n\n启用：退回时可选择此项。\n不启用：退回时无法选择此项。',
+        OTHER:
+          '用于退回时说明其他未归类的问题。\n\n启用：退回时可选择此项。\n不启用：退回时无法选择此项。',
       },
     },
     bindingGate: {
@@ -959,11 +1049,44 @@ export default {
       action: '测试生成',
       success: '测试生成已启动（预览 {previewId}）。',
     },
+    testPreview: {
+      workflow: {
+        title: '测试工作流',
+        helpTitle: '测试怎么用',
+        helpContent:
+          '1）选择或新建测试数据集；\n2）对单行运行预览，或批量试生成全部；\n3）在下方查看覆盖率与预览产物；\n4）就绪后提交测试（草稿）或记录通过/失败（测试中）。\n\n提示：「试生成（已选）」需先选中一行，也可直接点击某一行的「运行预览」。',
+        status: '流程状态',
+        runSelected: '试生成（已选）',
+        runAll: '批量试生成全部',
+        submitDialogTitle: '提交测试',
+        submitDialogMessage: '将当前草稿提交给测试人员。可填写可选备注写入操作记录。',
+      },
+    },
     authoring: {
       title: '模板设计',
+      helpTitle: '模板设计概览',
+      helpContent:
+        '按从左到右顺序：配置变量 → 注册条款引用 → 绑定母版占位符 → 测试与预览。通常沿 Tab 顺序完成即可。',
       variablesTitle: '变量',
+      variablesHelpTitle: '变量',
+      variablesHelpContent:
+        '定义 API 入参 Schema：类型、必填、LIST/OBJECT 结构，以及 COMPUTED 计算表达式。',
       bindingsTitle: '版式占位符绑定',
-      bindingsDescription: '将已审批母版上的每个版式占位符映射到结构化内容与变量引用。',
+      bindingsDescription:
+        '每一行将已审批母版上的一个版式占位符（锚点 ID）映射到结构化内容——文本、变量、条款、表格或循环。',
+      bindingsHelpTitle: '占位符绑定怎么用',
+      bindingsHelpDescription:
+        '列表顺序与母版占位符一致。点击「配置/编辑」进入表单面板：选择内容类型，再编排结构化块（段落、内联变量、条款引用、表格、条件、循环）。请先在「条款引用」Tab 注册 referenceKey，再在绑定内容的 contentModuleRef 节点中引用。',
+      bindingEditorSubtitle: '为该母版占位符编排结构化内容',
+      anchorDisplayLabel: '母版标签',
+      bindingStatus: '状态',
+      bindingConfigured: '已配置',
+      bindingNotConfigured: '未配置',
+      configureBinding: '配置',
+      noMasterAnchors: '关联母版中尚未提取到占位符。',
+      masterAnchorsLoadFailed: '无法加载母版占位符目录。',
+      validationStatus: '校验状态',
+      validationUnknown: '未校验',
       variableKey: '变量键',
       variableType: '类型',
       required: '必填',
@@ -990,20 +1113,40 @@ export default {
       confirmDeleteVariableMessage: '是否从模板草稿中移除此变量？',
       variableTreeSearchPlaceholder: '按变量键或描述搜索',
       variableTreeCount: '共 {count} 个变量',
+      computeExpression: '计算表达式',
+      computeExpressionPlaceholder: '例如 ${loanAmount} * ${rate}',
+      visibilityCondition: {
+        title: '可见性条件',
+        description: '可选：仅当表达式为真时显示此占位符。',
+        enable: '启用条件可见性',
+        expression: '条件表达式',
+        expressionPlaceholder: '例如 ${includeSyndication} == true',
+      },
       subTabs: {
         variables: '变量',
         bindings: '绑定',
-        rules: '规则',
         contentModules: '条款引用',
         testPreview: '测试与预览',
       },
     },
     structuredEditor: {
+      bindingHint: '在此编排填充该母版占位符的内容：添加块、内联插入变量，或引用标准条款。',
+      readonlyHint: '结构化内容只读预览。',
+      textPlaceholder: '静态文本',
+      variablePlaceholder: '选择变量',
+      conditionPlaceholder: '例如 ${includeSyndication} == true',
+      loopVariablePlaceholder: '选择 LIST 变量',
+      tableRefPlaceholder: '表格组件键（如 FOL-TBL-CP-CHECKLIST）',
+      clauseRefPlaceholder: '内容模块引用键',
+      addText: '添加文本',
+      addVariable: '添加变量',
+      pasteFromFile: '导入 HTML',
       toolbar: {
         label: '结构化内容工具栏',
         blocks: '块',
         inline: '行内',
         style: '样式',
+        paste: '导入',
         unavailable: '不可用',
         arbitraryHtml: '自定义 HTML',
         wordTable: 'Word 表格',
@@ -1089,6 +1232,10 @@ export default {
     },
     preview: {
       title: '预览与对比',
+      detailTitle: '运行对比详情',
+      helpTitle: '预览产物',
+      helpContent:
+        '对测试数据集运行预览后，可在此查看预览 ID、结构化对比差异与保真警告。点击「刷新预览」可从服务端重新加载最新状态。',
       previewId: '预览 ID',
       status: '状态',
       comparisonSummary: '对比摘要',
@@ -1114,7 +1261,7 @@ export default {
           unviewed: '未查看',
         },
       },
-      empty: '运行测试生成以创建预览记录。',
+      empty: '对测试数据集运行预览后，可下载 DOCX 与 PDF 产物。',
       previewStatusColumn: '预览状态',
       comparisonCounts: '共 {total} 处差异：阻塞 {blockers}，警告 {warnings}',
       noComparison: '暂无对比摘要。',
@@ -1134,6 +1281,37 @@ export default {
       severities: {
         WARNING: '警告',
         BLOCKER: '阻塞',
+      },
+    },
+    previewHistory: {
+      title: '预览运行历史',
+      helpTitle: '预览运行历史',
+      helpContent:
+        '每次预览运行都会保存生成的 DOCX 与 PDF。可在列表中直接下载，或打开对比详情查看警告与结构化差异。',
+      refresh: '刷新列表',
+      empty: '尚无预览运行记录。请对测试数据集点击「运行预览」生成文档。',
+      adhocRun: '临时运行',
+      downloadDocx: '下载 DOCX',
+      downloadPdf: '下载 PDF',
+      viewDetails: '查看详情',
+      columns: {
+        runAt: '运行时间',
+        dataSet: '数据集',
+        status: '状态',
+        warnings: '警告数',
+        actions: '操作',
+      },
+      status: {
+        ACCEPTED: '排队中',
+        PROCESSING: '生成中',
+        SUCCEEDED: '成功',
+        FAILED: '失败',
+        EXPIRED: '已过期',
+      },
+      error: {
+        load: '无法加载预览运行历史。',
+        loadDetail: '无法加载预览详情。',
+        download: '无法下载预览产物。',
       },
     },
     status: {
@@ -1467,6 +1645,10 @@ export default {
     no: '否',
     confirm: '确定',
     cancel: '取消',
+    back: '返回',
+    contextHelp: {
+      triggerLabel: '查看帮助',
+    },
     save: '保存',
     edit: '编辑',
     delete: '删除',
@@ -1569,6 +1751,8 @@ export default {
       versionsTitle: '版本',
       noVersions: '暂无版本',
       noVersionsDescription: '创建草稿版本以开始编写模块内容。',
+      contentPreviewTitle: '内容预览',
+      contentPreviewVersion: '当前展示版本 {version}（{state}）',
       columns: {
         version: '版本',
         status: '状态',
@@ -1639,6 +1823,7 @@ export default {
       editTitle: '编辑草稿 {version}',
       semanticVersion: '版本号',
       contentStructureJson: '内容结构（JSON）',
+      contentStructure: '内容结构',
       changeDescription: '变更说明',
       saveSuccess: '版本已保存。',
       validation: {

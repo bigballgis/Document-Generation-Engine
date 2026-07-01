@@ -8,7 +8,6 @@ import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateCreateDialog from '@/components/templates/TemplateCreateDialog.vue'
 import TemplateImportDialog from '@/components/templates/TemplateImportDialog.vue'
-import TemplateRiskPromptConfigPanel from '@/components/templates/TemplateRiskPromptConfigPanel.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
@@ -320,8 +319,6 @@ const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
 
     <TemplateCreateDialog v-model="createDialogOpen" @created="handleCreated" />
     <TemplateImportDialog v-model="importDialogOpen" @imported="handleImported" />
-
-    <TemplateRiskPromptConfigPanel />
   </div>
 </template>
 

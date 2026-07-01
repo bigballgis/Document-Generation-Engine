@@ -23,6 +23,21 @@ const LIST_FIELD_PREFIXES: Record<string, string[]> = {
   facilityParticulars: ['particular'],
   hedgeProviders: ['hedgeProvider'],
   esgKpis: ['esgKpi'],
+  pricingTiers: ['pricingTier'],
+  milestones: ['milestoneDate'],
+  parties: ['party'],
+  covenants: ['covenant'],
+  securedAssets: ['securedAsset'],
+  legalReferences: ['legalClauseRef', 'legalDefinedTerm'],
+  definedTerms: ['definedTerm'],
+  representations: ['representation'],
+  infoUndertakings: ['infoUndertaking'],
+  eodTriggers: ['eodTrigger'],
+  noticeParties: ['noticeParty'],
+  benchmarkFallbacks: ['benchmarkFallback'],
+  insurancePolicies: ['insurancePolicy'],
+  obligors: ['obligor'],
+  prepaymentEvents: ['prepaymentEvent'],
 }
 
 export function splitVariableKeySegments(variableKey: string): string[] {

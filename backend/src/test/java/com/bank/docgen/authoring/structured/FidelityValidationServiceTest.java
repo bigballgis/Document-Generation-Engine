@@ -144,7 +144,8 @@ class FidelityValidationServiceTest {
                 true,
                 "default",
                 null,
-                "desc"
+                "desc",
+                null
         );
     }
 }

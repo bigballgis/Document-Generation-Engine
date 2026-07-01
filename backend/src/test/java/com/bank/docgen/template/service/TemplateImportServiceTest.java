@@ -231,7 +231,8 @@ class TemplateImportServiceTest {
                         true,
                         "Customer",
                         null,
-                        "Customer name"
+                        "Customer name",
+                        null
                 )),
                 List.of(),
                 List.of(),

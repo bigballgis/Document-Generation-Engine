@@ -97,7 +97,8 @@ class TemplateBindingConfigurationServiceTest {
                 true,
                 null,
                 null,
-                "Amount field"
+                "Amount field",
+                null
         );
 
         assertThatThrownBy(() -> service.validateVariableRequest(request))
@@ -114,7 +115,8 @@ class TemplateBindingConfigurationServiceTest {
                 true,
                 null,
                 null,
-                "Status field"
+                "Status field",
+                null
         );
 
         assertThatThrownBy(() -> service.validateVariableRequest(request))
@@ -214,7 +216,8 @@ class TemplateBindingConfigurationServiceTest {
                 true,
                 null,
                 null,
-                "Customer name"
+                "Customer name",
+                null
         );
         when(variableSchemaRepository.findByTemplateVersionIdAndVariableKey(versionId, "customerName"))
                 .thenReturn(Optional.empty());
@@ -225,7 +228,8 @@ class TemplateBindingConfigurationServiceTest {
                 true,
                 null,
                 null,
-                "Customer name"
+                "Customer name",
+                null
         );
         when(templateViewMapper.toVariableView(any(VariableSchemaEntity.class))).thenReturn(expectedView);
 
@@ -251,7 +255,8 @@ class TemplateBindingConfigurationServiceTest {
                 false,
                 "old",
                 null,
-                "Old description"
+                "Old description",
+                null
         );
         UpsertVariableSchemaRequest request = new UpsertVariableSchemaRequest(
                 "customerName",
@@ -259,7 +264,8 @@ class TemplateBindingConfigurationServiceTest {
                 true,
                 "default",
                 null,
-                "Updated description"
+                "Updated description",
+                null
         );
         when(variableSchemaRepository.findByTemplateVersionIdAndVariableKey(versionId, "customerName"))
                 .thenReturn(Optional.of(existing));
@@ -270,7 +276,8 @@ class TemplateBindingConfigurationServiceTest {
                 true,
                 "default",
                 null,
-                "Updated description"
+                "Updated description",
+                null
         );
         when(templateViewMapper.toVariableView(existing)).thenReturn(expectedView);
 

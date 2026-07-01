@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **None** (2026-07-01 — P12-AUD-M02 **Done**; P12 catch-all **Not Started**). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
+**Active formal phase:** **None** (2026-07-01 — P12-AUD-M02 **Done**; P12 catch-all **Not Started**). **Active slice:** **P12-BDD-RISK-PROMPT-UX-001 → In Progress** (2026-07-02; BDD-TEMPLATE-RISK-PROMPT-UX-001; P19 residual — no formal phase reopen). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
@@ -46,7 +46,7 @@ upstream systems invoke the dynamic API.
 | P9 | Production readiness | P0–P8 | Security scans, observability, deployment evidence, release gates | Done |
 | P10 | Runtime document download | P9 | Secure download with secondary auth and 15-minute expiry | Done |
 | P11 | Batch & async generation | P10 | Sync batch, async task query/cancel | Done |
-| P12 | Deferred enhancements | P0–P11 | Catch-all for deferred/post-MVP enhancements; last slice **P12-AUD-M02 Done** (role constants single-source refactor) | Not Started (P12-AUD-M02 Done 2026-07-01) |
+| P12 | Deferred enhancements | P0–P11 | Catch-all for deferred/post-MVP enhancements; active slice **P12-BDD-RISK-PROMPT-UX-001 In Progress** (2026-07-02); last closed **P12-AUD-M02 Done** | Not Started (P12-AUD-M02 Done 2026-07-01; slice P12-BDD-RISK-PROMPT-UX-001 In Progress) |
 | P13 | Identity & group administration | P1 | Global/group admins manage users & groups via management API + UI, with fail-closed escalation protection, audit, and green gates | Done |
 | P14 | Confirmed large domains | P2–P8 | Clause/content modules, collaboration to-dos + timeout escalation, template export/import (UX-G) | Done (2026-06-27; T01–T03 + E2E/UIUX/architecture gates; backend **481**, frontend **235+**) |
 | P15 | Kubernetes deployment & container hardening | P9 | Distroless non-root read-only containers, Helm/manifests for app workloads, ConfigMap/Secret, NGINX Ingress + cert-manager TLS, default-deny NetworkPolicy, HPA (CPU/mem + custom), /healthz+/readyz probes, blue-green + manual approval/rollback, CI manifest validation (ADR-0030) | Done (2026-06-27; T01–T10) |

@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCapabilities } from '@/composables/useCapabilities'
+import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
 import { resolveTemplateWorkflowBannerContext } from '@/utils/templateWorkflowBannerContext'
 import type { TemplateDetail } from '@/types/template'
 
@@ -33,16 +34,20 @@ const banner = computed(() =>
 <template>
   <el-alert
     v-if="banner"
-    class="workflow-banner"
+    class="workflow-banner workflow-banner--compact"
     type="warning"
     :closable="false"
     show-icon
   >
     <template #title>
-      {{ t('templates.workflow.actionRequired') }}
+      <span class="workflow-banner__title-row">
+        <span>{{ t(banner.titleKey) }}</span>
+        <ContextHelpTrigger
+          :title="t(banner.titleKey)"
+          :content="t(banner.descriptionKey)"
+        />
+      </span>
     </template>
-    <p class="workflow-banner__title">{{ t(banner.titleKey) }}</p>
-    <p class="workflow-banner__description">{{ t(banner.descriptionKey) }}</p>
     <el-button type="primary" link class="workflow-banner__cta" @click="emit('openLifecycle')">
       {{ t('templates.workflow.openLifecyclePanel') }}
     </el-button>
@@ -51,20 +56,27 @@ const banner = computed(() =>
 
 <style scoped lang="scss">
 .workflow-banner {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+
+  &--compact {
+    :deep(.el-alert__content) {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+  }
 }
 
-.workflow-banner__title {
-  margin: 0.25rem 0 0;
-  font-weight: 600;
+.workflow-banner__title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-.workflow-banner__description,
 .workflow-banner__cta {
-  margin: 0.35rem 0 0;
-}
-
-.workflow-banner__description {
-  color: var(--text-muted);
+  margin: 0;
+  padding: 0;
 }
 </style>

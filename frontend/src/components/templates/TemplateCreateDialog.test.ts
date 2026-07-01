@@ -15,6 +15,16 @@ vi.mock('@/api/templates', () => ({
   listTemplates: vi.fn(),
 }))
 
+vi.mock('@/api/riskPromptConfig', () => ({
+  getGlobalRiskPromptConfig: vi.fn().mockResolvedValue({
+    scopeType: 'GLOBAL',
+    groupCode: null,
+    reasonCategories: ['BINDING_ISSUE', 'FIDELITY_WARNING'],
+    riskPromptCopy: {},
+    updatedAt: '2026-07-02T00:00:00Z',
+  }),
+}))
+
 vi.mock('@/composables/useScopedGroupOptions', () => ({
   useScopedGroupOptions: () => ({
     resolveDefaultGroupCode: () => 'RETAIL',
@@ -68,6 +78,7 @@ describe('TemplateCreateDialog', () => {
         stubs: {
           ScopedGroupSelect: selectStub,
           AppSearchSelect: selectStub,
+          TemplateRiskPromptConfigPanel: true,
         },
       },
     })

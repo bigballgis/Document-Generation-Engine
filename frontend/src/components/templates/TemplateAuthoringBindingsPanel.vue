@@ -1,344 +1,873 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+
+import { computed, onMounted, reactive, ref } from 'vue'
+
 import { useI18n } from 'vue-i18n'
+
+import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
-import AppTablePagination from '@/components/common/AppTablePagination.vue'
+
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+
 import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
+
+import { getMaster } from '@/api/masters'
+
 import { DEFAULT_STRUCTURED_CONTENT_JSON } from '@/utils/structuredContentNodes'
+
+import { buildMasterAnchorBindingRows, type MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
+
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
+
 import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
+
 import { useTemplatesStore } from '@/stores/templates'
-import type { AnchorBinding, BindingValidationResult, UpsertBindingPayload, VariableSchema } from '@/types/template'
+
+import type {
+
+  AnchorBinding,
+
+  BindingValidationResult,
+
+  CompositionRule,
+
+  CompositionRuleInput,
+
+  TemplateContentModuleReference,
+
+  UpsertBindingPayload,
+
+  VariableSchema,
+
+} from '@/types/template'
+
+import type { MasterAnchor } from '@/types/master'
+
 import { ElMessage } from 'element-plus'
 
+
+
 const props = defineProps<{
+
   templateId: string
+
+  masterId: string
+
   variables: VariableSchema[]
+
   bindings: AnchorBinding[]
+
+  rules: CompositionRule[] | null
+
+  contentModuleReferences: TemplateContentModuleReference[]
+
 }>()
+
+
 
 const emit = defineEmits<{
+
   updated: []
+
 }>()
 
+
+
 const { t, te } = useI18n()
+
 const templatesStore = useTemplatesStore()
 
+
+
+type PanelMode = 'list' | 'edit'
+
+
+
+const panelMode = ref<PanelMode>('list')
+
+const masterAnchors = ref<MasterAnchor[]>([])
+
+const loadingMaster = ref(false)
+
 const validating = ref(false)
-const bindingDialogOpen = ref(false)
+
 const editingAnchorId = ref<string | null>(null)
-const selectedAnchorId = ref<string | null>(null)
+
 const validationResult = ref<BindingValidationResult | null>(null)
+
+const visibilityEnabled = ref(false)
+
+const visibilityExpression = ref('')
+
+
 
 const contentTypes = ['TEXT', 'RICH_TEXT', 'TABLE', 'IMAGE', 'CLAUSE', 'SEAL', 'QR_CODE', 'ATTACHMENT_LIST']
 
+
+
 const bindingForm = reactive<UpsertBindingPayload>({
+
   anchorId: '',
+
   declaredContentType: 'TEXT',
+
   structuredContentJson: DEFAULT_STRUCTURED_CONTENT_JSON,
+
 })
 
-const hasBindings = computed(() => props.bindings.length > 0)
 
-const selectedBinding = computed(() =>
-  props.bindings.find((binding) => binding.anchorId === selectedAnchorId.value) ?? null,
+
+const anchorRowsSource = computed(() =>
+
+  buildMasterAnchorBindingRows(masterAnchors.value, props.bindings),
+
 )
 
-const bindingsSource = computed(() => props.bindings)
-const { filters: bindingColumnFilters, filteredRows: filteredBindings } = useDataTableFilters(
-  bindingsSource,
+
+
+const contentModuleReferenceKeys = computed(() =>
+
+  props.contentModuleReferences.map((reference) => reference.referenceKey),
+
+)
+
+
+
+const { filters: bindingColumnFilters, filteredRows: filteredAnchorRows } = useDataTableFilters(
+
+  anchorRowsSource,
+
   [
+
     { key: 'anchorId', getValue: (row) => row.anchorId },
-    { key: 'declaredContentType', getValue: (row) => row.declaredContentType, matchMode: 'exact' },
+
+    { key: 'displayLabel', getValue: (row) => row.displayLabel },
+
+    {
+
+      key: 'declaredContentType',
+
+      getValue: (row) => row.declaredContentType ?? '',
+
+      matchMode: 'exact',
+
+    },
+
     { key: 'validationStatus', getValue: (row) => row.validationStatus ?? '' },
+
   ],
+
 )
 
-const bindingsCurrentPage = ref(1)
-const { paginatedRows: paginatedBindings, totalRows: totalBindingRows } = useCatalogPagination(
-  filteredBindings,
-  bindingsCurrentPage,
-  CLIENT_TABLE_PAGE_SIZE,
-)
+
 
 const contentTypeFilterOptions = computed(() =>
+
   contentTypes.map((type) => ({ value: type, label: type })),
+
 )
 
-watch(
-  () => props.bindings,
-  (bindings) => {
-    if (selectedAnchorId.value && bindings.some((binding) => binding.anchorId === selectedAnchorId.value)) {
-      return
-    }
-    selectedAnchorId.value = bindings[0]?.anchorId ?? null
-  },
-  { immediate: true },
+
+
+const configuredBindingCount = computed(() => props.bindings.length)
+
+
+
+const editingRow = computed(() =>
+
+  anchorRowsSource.value.find((row) => row.anchorId === editingAnchorId.value) ?? null,
+
 )
 
-watch(selectedBinding, (binding) => {
-  if (!binding) {
-    return
+
+
+function toRuleInput(rule: CompositionRule): CompositionRuleInput {
+
+  return {
+
+    ruleId: rule.ruleId,
+
+    conditionExpression: rule.conditionExpression,
+
+    targetAnchorId: rule.targetAnchorId,
+
+    trueBranchRuleId: rule.trueBranchRuleId ?? undefined,
+
+    falseBranchRuleId: rule.falseBranchRuleId ?? undefined,
+
   }
-  bindingForm.anchorId = binding.anchorId
-  bindingForm.declaredContentType = binding.declaredContentType
-  bindingForm.structuredContentJson = binding.structuredContentJson ?? DEFAULT_STRUCTURED_CONTENT_JSON
-  editingAnchorId.value = binding.anchorId
+
+}
+
+
+
+function mergeAnchorVisibilityRule(
+
+  existingRules: CompositionRule[],
+
+  anchorId: string,
+
+  enabled: boolean,
+
+  expression: string,
+
+): CompositionRuleInput[] {
+
+  const others = existingRules.filter((rule) => rule.targetAnchorId !== anchorId)
+
+  if (!enabled || !expression.trim()) {
+
+    return others.map(toRuleInput)
+
+  }
+
+  const existing = existingRules.find((rule) => rule.targetAnchorId === anchorId)
+
+  return [
+
+    ...others.map(toRuleInput),
+
+    {
+
+      ruleId: existing?.ruleId ?? `visibility-${anchorId}`,
+
+      conditionExpression: expression.trim(),
+
+      targetAnchorId: anchorId,
+
+    },
+
+  ]
+
+}
+
+
+
+onMounted(async () => {
+
+  loadingMaster.value = true
+
+  try {
+
+    const master = await getMaster(props.masterId)
+
+    masterAnchors.value = master.anchors
+
+  } catch {
+
+    ElMessage.error(t('templates.authoring.masterAnchorsLoadFailed'))
+
+  } finally {
+
+    loadingMaster.value = false
+
+  }
+
 })
 
-function resetBindingForm() {
-  bindingForm.anchorId = ''
-  bindingForm.declaredContentType = 'TEXT'
-  bindingForm.structuredContentJson = DEFAULT_STRUCTURED_CONTENT_JSON
-  editingAnchorId.value = null
-}
 
-function openAddBinding() {
-  resetBindingForm()
-  bindingDialogOpen.value = true
-}
 
-function selectBinding(binding: AnchorBinding) {
-  selectedAnchorId.value = binding.anchorId
-}
+function resolveValidationStatusLabel(status: string | undefined | null): string {
 
-function resolveValidationStatusLabel(status: string | undefined): string {
   if (!status) {
+
     return t('templates.authoring.validationUnknown')
+
   }
+
   const key = `templates.bindingGate.status.${status}`
+
   return te(key) ? t(key) : status
+
 }
+
+
+
+function resolveConfiguredLabel(row: MasterAnchorBindingRow): string {
+
+  return row.configured
+
+    ? t('templates.authoring.bindingConfigured')
+
+    : t('templates.authoring.bindingNotConfigured')
+
+}
+
+
+
+function loadVisibilityRuleForAnchor(anchorId: string) {
+
+  const rule = (props.rules ?? []).find((item) => item.targetAnchorId === anchorId)
+
+  if (rule) {
+
+    visibilityEnabled.value = true
+
+    visibilityExpression.value = rule.conditionExpression
+
+  } else {
+
+    visibilityEnabled.value = false
+
+    visibilityExpression.value = ''
+
+  }
+
+}
+
+
+
+function openEditPanel(row: MasterAnchorBindingRow) {
+
+  editingAnchorId.value = row.anchorId
+
+  bindingForm.anchorId = row.anchorId
+
+  if (row.binding) {
+
+    bindingForm.declaredContentType = row.binding.declaredContentType
+
+    bindingForm.structuredContentJson = row.binding.structuredContentJson ?? DEFAULT_STRUCTURED_CONTENT_JSON
+
+  } else {
+
+    bindingForm.declaredContentType = 'TEXT'
+
+    bindingForm.structuredContentJson = DEFAULT_STRUCTURED_CONTENT_JSON
+
+  }
+
+  loadVisibilityRuleForAnchor(row.anchorId)
+
+  panelMode.value = 'edit'
+
+}
+
+
+
+function backToList() {
+
+  panelMode.value = 'list'
+
+  editingAnchorId.value = null
+
+}
+
+
 
 async function handleSaveBinding() {
+
   try {
+
     await templatesStore.upsertBinding(props.templateId, bindingForm.anchorId, { ...bindingForm })
-    if (bindingDialogOpen.value) {
-      bindingDialogOpen.value = false
-    }
-    selectedAnchorId.value = bindingForm.anchorId
+
+    const mergedRules = mergeAnchorVisibilityRule(
+
+      props.rules ?? [],
+
+      bindingForm.anchorId,
+
+      visibilityEnabled.value,
+
+      visibilityExpression.value,
+
+    )
+
+    await templatesStore.saveRules(props.templateId, mergedRules)
+
     ElMessage.success(t('templates.authoring.saveBindingSuccess'))
+
     emit('updated')
+
+    backToList()
+
   } catch {
+
     ElMessage.error(t('templates.error.saveBinding'))
+
   }
+
 }
+
+
 
 async function handleValidateBindings() {
+
   validating.value = true
+
   validationResult.value = null
+
   try {
+
     const result = await templatesStore.validateBindings(props.templateId)
+
     validationResult.value = result
+
     emit('updated')
+
     if (result.summary.blocking) {
+
       ElMessage.warning(t('templates.authoring.bindingValidationBlocking'))
+
     } else {
+
       ElMessage.success(t('templates.authoring.bindingValidationSuccess'))
+
     }
+
   } catch (error) {
+
     const messageKey = resolveApiErrorMessageKey(error, 'templates.error.bindingValidation')
+
     ElMessage.error(te(messageKey) ? t(messageKey) : t('templates.error.bindingValidation'))
+
   } finally {
+
     validating.value = false
+
   }
+
 }
+
 </script>
 
+
+
 <template>
+
   <div class="bindings-panel authoring-panel">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="bindings-help"
-      :title="t('templates.authoring.bindingsHelpTitle')"
-      :description="t('templates.authoring.bindingsHelpDescription')"
-    />
-
-    <div class="section-header">
-      <p class="section-description">{{ t('templates.authoring.bindingsDescription') }}</p>
-      <el-button type="primary" plain @click="openAddBinding">
-        {{ t('templates.authoring.addBinding') }}
-      </el-button>
-    </div>
-
-    <AppDataTable
-      activatable
-      :data="paginatedBindings"
-      empty-text=""
-      highlight-current-row
-      @row-click="selectBinding"
-    >
-      <template #empty>
-        <el-empty :description="t('templates.authoring.noBindings')" />
-      </template>
-      <el-table-column prop="anchorId" sortable>
-        <template #header>
-          <TableColumnHeader
-            :label="t('templates.authoring.anchorId')"
-            v-model="bindingColumnFilters.anchorId"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column prop="declaredContentType" sortable width="140">
-        <template #header>
-          <TableColumnHeader
-            :label="t('templates.authoring.contentType')"
-            v-model="bindingColumnFilters.declaredContentType"
-            filter-type="select"
-            :options="contentTypeFilterOptions"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column prop="validationStatus" width="160">
-        <template #header>
-          <TableColumnHeader
-            :label="t('templates.authoring.validationStatus')"
-            v-model="bindingColumnFilters.validationStatus"
-          />
-        </template>
-        <template #default="{ row }">
-          {{ resolveValidationStatusLabel(row.validationStatus) }}
-        </template>
-      </el-table-column>
-    </AppDataTable>
-    <AppTablePagination
-      v-model:current-page="bindingsCurrentPage"
-      :page-size="CLIENT_TABLE_PAGE_SIZE"
-      :total="totalBindingRows"
-    />
-
-    <div class="action-row">
-      <el-button
-        type="primary"
-        :loading="validating"
-        :disabled="!hasBindings"
-        @click="handleValidateBindings"
+    <template v-if="panelMode === 'list'">
+      <SectionPanelHeader
+        :title="t('templates.authoring.bindingsTitle')"
+        :help-title="t('templates.authoring.bindingsHelpTitle')"
+        :help-content="t('templates.authoring.bindingsHelpDescription')"
       >
-        {{ t('templates.authoring.validateBindings') }}
-      </el-button>
-    </div>
-
-    <el-alert
-      v-if="validationResult"
-      class="validation-summary"
-      :type="validationResult.summary.blocking ? 'warning' : 'success'"
-      :closable="false"
-      show-icon
-      :title="
-        t('templates.authoring.bindingValidationSummary', {
-          valid: validationResult.summary.validCount,
-          total: validationResult.summary.totalBindings,
-        })
-      "
-    />
-
-    <el-card v-if="selectedBinding" shadow="never" class="binding-editor-card">
-      <template #header>
-        <div class="binding-editor-card__header">
-          <div>
-            <strong>{{ selectedBinding.anchorId }}</strong>
-            <span class="binding-editor-card__subtitle">
-              {{ t('templates.authoring.bindingEditorSubtitle') }}
-            </span>
-          </div>
-          <el-button type="primary" :loading="templatesStore.submitting" @click="handleSaveBinding">
-            {{ t('common.save') }}
+        <template #actions>
+          <el-button
+            type="primary"
+            :loading="validating"
+            :disabled="configuredBindingCount === 0"
+            @click="handleValidateBindings"
+          >
+            {{ t('templates.authoring.validateBindings') }}
           </el-button>
+        </template>
+      </SectionPanelHeader>
+
+
+
+      <AppDataTable v-loading="loadingMaster" :data="filteredAnchorRows" empty-text="">
+
+        <template #empty>
+
+          <el-empty :description="t('templates.authoring.noMasterAnchors')" />
+
+        </template>
+
+        <el-table-column prop="anchorId" width="160">
+
+          <template #header>
+
+            <TableColumnHeader
+
+              :label="t('templates.authoring.anchorId')"
+
+              v-model="bindingColumnFilters.anchorId"
+
+            />
+
+          </template>
+
+        </el-table-column>
+
+        <el-table-column prop="displayLabel" min-width="200">
+
+          <template #header>
+
+            <TableColumnHeader
+
+              :label="t('templates.authoring.anchorDisplayLabel')"
+
+              v-model="bindingColumnFilters.displayLabel"
+
+            />
+
+          </template>
+
+        </el-table-column>
+
+        <el-table-column prop="declaredContentType" width="140">
+
+          <template #header>
+
+            <TableColumnHeader
+
+              :label="t('templates.authoring.contentType')"
+
+              v-model="bindingColumnFilters.declaredContentType"
+
+              filter-type="select"
+
+              :options="contentTypeFilterOptions"
+
+            />
+
+          </template>
+
+          <template #default="{ row }">
+
+            {{ row.declaredContentType ?? '—' }}
+
+          </template>
+
+        </el-table-column>
+
+        <el-table-column prop="validationStatus" width="140">
+
+          <template #header>
+
+            <TableColumnHeader
+
+              :label="t('templates.authoring.validationStatus')"
+
+              v-model="bindingColumnFilters.validationStatus"
+
+            />
+
+          </template>
+
+          <template #default="{ row }">
+
+            {{ row.configured ? resolveValidationStatusLabel(row.validationStatus) : '—' }}
+
+          </template>
+
+        </el-table-column>
+
+        <el-table-column width="120">
+
+          <template #header>
+
+            <span>{{ t('templates.authoring.bindingStatus') }}</span>
+
+          </template>
+
+          <template #default="{ row }">
+
+            <el-tag :type="row.configured ? 'success' : 'info'" size="small">
+
+              {{ resolveConfiguredLabel(row) }}
+
+            </el-tag>
+
+          </template>
+
+        </el-table-column>
+
+        <el-table-column width="120" fixed="right" :label="t('common.actions')">
+
+          <template #default="{ row }">
+
+            <el-button link type="primary" @click="openEditPanel(row)">
+
+              {{ row.configured ? t('common.edit') : t('templates.authoring.configureBinding') }}
+
+            </el-button>
+
+          </template>
+
+        </el-table-column>
+
+      </AppDataTable>
+
+
+
+      <el-alert
+
+        v-if="validationResult"
+
+        class="validation-summary"
+
+        :type="validationResult.summary.blocking ? 'warning' : 'success'"
+
+        :closable="false"
+
+        show-icon
+
+        :title="
+
+          t('templates.authoring.bindingValidationSummary', {
+
+            valid: validationResult.summary.validCount,
+
+            total: validationResult.summary.totalBindings,
+
+          })
+
+        "
+
+      />
+
+    </template>
+
+
+
+    <template v-else>
+
+      <div class="binding-editor">
+
+        <div class="binding-editor__toolbar">
+
+          <el-button @click="backToList">{{ t('common.back') }}</el-button>
+
+          <div class="binding-editor__title">
+
+            <strong>{{ editingRow?.anchorId }}</strong>
+
+            <span v-if="editingRow?.displayLabel" class="binding-editor__subtitle">
+
+              {{ editingRow.displayLabel }}
+
+            </span>
+
+          </div>
+
+          <el-button type="primary" :loading="templatesStore.submitting" @click="handleSaveBinding">
+
+            {{ t('common.save') }}
+
+          </el-button>
+
         </div>
-      </template>
 
-      <el-form label-position="top" class="binding-form">
-        <el-form-item :label="t('templates.authoring.contentType')">
-          <AppSearchSelect v-model="bindingForm.declaredContentType" style="width: 100%">
-            <el-option v-for="type in contentTypes" :key="type" :label="type" :value="type" />
-          </AppSearchSelect>
-        </el-form-item>
-        <el-form-item :label="t('templates.authoring.structuredContentEditor')">
-          <ControlledStructuredContentEditor
-            v-model="bindingForm.structuredContentJson"
-            :template-id="templateId"
-            :variables="variables"
-          />
-        </el-form-item>
-      </el-form>
-    </el-card>
 
-    <el-dialog
-      v-model="bindingDialogOpen"
-      :title="t('templates.authoring.addBinding')"
-      width="760px"
-    >
-      <el-form label-position="top">
-        <el-form-item :label="t('templates.authoring.anchorId')">
-          <el-input v-model="bindingForm.anchorId" />
-        </el-form-item>
-        <el-form-item :label="t('templates.authoring.contentType')">
-          <AppSearchSelect v-model="bindingForm.declaredContentType" style="width: 100%">
-            <el-option v-for="type in contentTypes" :key="type" :label="type" :value="type" />
-          </AppSearchSelect>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="bindingDialogOpen = false">{{ t('common.cancel') }}</el-button>
-        <el-button type="primary" :loading="templatesStore.submitting" @click="handleSaveBinding">
-          {{ t('common.save') }}
-        </el-button>
-      </template>
-    </el-dialog>
+
+        <p class="binding-editor__hint">{{ t('templates.authoring.bindingEditorSubtitle') }}</p>
+
+
+
+        <el-form label-position="top" class="binding-form">
+
+          <el-form-item :label="t('templates.authoring.contentType')">
+
+            <AppSearchSelect v-model="bindingForm.declaredContentType" style="width: 100%">
+
+              <el-option v-for="type in contentTypes" :key="type" :label="type" :value="type" />
+
+            </AppSearchSelect>
+
+          </el-form-item>
+
+
+
+          <div class="visibility-section">
+
+            <h4>{{ t('templates.authoring.visibilityCondition.title') }}</h4>
+
+            <p class="visibility-section__hint">{{ t('templates.authoring.visibilityCondition.description') }}</p>
+
+            <el-form-item>
+
+              <el-checkbox v-model="visibilityEnabled">
+
+                {{ t('templates.authoring.visibilityCondition.enable') }}
+
+              </el-checkbox>
+
+            </el-form-item>
+
+            <el-form-item
+
+              v-if="visibilityEnabled"
+
+              :label="t('templates.authoring.visibilityCondition.expression')"
+
+            >
+
+              <el-input
+
+                v-model="visibilityExpression"
+
+                :placeholder="t('templates.authoring.visibilityCondition.expressionPlaceholder')"
+
+              />
+
+            </el-form-item>
+
+          </div>
+
+
+
+          <el-form-item :label="t('templates.authoring.structuredContentEditor')">
+
+            <ControlledStructuredContentEditor
+
+              v-model="bindingForm.structuredContentJson"
+
+              :template-id="templateId"
+
+              :variables="variables"
+
+              :content-module-reference-keys="contentModuleReferenceKeys"
+
+            />
+
+          </el-form-item>
+
+        </el-form>
+
+      </div>
+
+    </template>
+
   </div>
+
 </template>
 
+
+
 <style scoped lang="scss">
+
 .bindings-panel {
+
   .section-header {
+
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
+
     gap: 1rem;
+
     margin-bottom: 0.75rem;
+
   }
+
+
 
   .section-description {
+
     margin: 0;
+
     color: var(--text-muted);
+
     max-width: 40rem;
+
   }
+
 }
+
+
 
 .bindings-help {
+
   margin-bottom: 1rem;
+
 }
 
-.action-row {
-  margin-top: 1rem;
-}
+
 
 .validation-summary {
+
   margin-top: 1rem;
+
 }
 
-.binding-editor-card {
-  margin-top: 1.25rem;
 
-  &__header {
+
+.binding-editor {
+
+  &__toolbar {
+
     display: flex;
+
     align-items: center;
-    justify-content: space-between;
+
     gap: 1rem;
+
+    margin-bottom: 0.75rem;
+
   }
+
+
+
+  &__title {
+
+    flex: 1;
+
+    min-width: 0;
+
+  }
+
+
 
   &__subtitle {
+
     display: block;
+
     margin-top: 0.25rem;
+
     color: var(--text-muted);
+
     font-size: 0.875rem;
+
     font-weight: normal;
+
   }
+
+
+
+  &__hint {
+
+    margin: 0 0 1rem;
+
+    color: var(--text-muted);
+
+  }
+
 }
+
+
+
+.visibility-section {
+
+  margin-bottom: 1rem;
+
+  padding: 0.75rem;
+
+  border: 1px solid var(--border-color);
+
+  border-radius: var(--radius-md);
+
+  background: var(--surface-muted);
+
+
+
+  h4 {
+
+    margin: 0 0 0.25rem;
+
+    font-size: 0.9375rem;
+
+    font-weight: 650;
+
+  }
+
+
+
+  &__hint {
+
+    margin: 0 0 0.75rem;
+
+    color: var(--text-muted);
+
+    font-size: 0.875rem;
+
+  }
+
+}
+
 </style>
+

@@ -145,7 +145,8 @@ public class TemplateViewMapper {
                 entity.isRequired(),
                 entity.getDefaultValue(),
                 entity.getEnumValues(),
-                entity.getDescription()
+                entity.getDescription(),
+                entity.getComputeExpression()
         );
     }
 

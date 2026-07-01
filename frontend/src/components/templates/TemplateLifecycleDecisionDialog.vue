@@ -4,6 +4,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { MANAGEMENT_ROLES } from '@/auth/roles'
+import * as templateRiskPromptApi from '@/api/templateRiskPromptConfig'
 import {
   TEMPLATE_DECISION_REASON_CATEGORIES,
   isApprovalPassDecisionValid,
@@ -37,6 +38,7 @@ export interface LifecycleDecisionSubmitPayload {
 const props = defineProps<{
   modelValue: boolean
   mode: LifecycleDecisionDialogMode
+  templateId?: string
   loading?: boolean
   initialComment?: string
 }>()
@@ -49,6 +51,16 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const { context } = useCapabilities()
 const formRef = ref<FormInstance>()
+const availableReasonCategories = ref<string[]>([...TEMPLATE_DECISION_REASON_CATEGORIES])
+const reasonPromptCopy = ref<Record<string, string>>({})
+const loadingConfig = ref(false)
+
+const selectedReasonPrompt = computed(() => {
+  if (!form.reasonCategory) {
+    return ''
+  }
+  return reasonPromptCopy.value[form.reasonCategory] ?? ''
+})
 
 const visible = computed({
   get: () => props.modelValue,
@@ -161,9 +173,32 @@ watch(
       form.exceptionReason = ''
       form.secondaryConfirmed = false
       formRef.value?.clearValidate()
+      void loadDecisionFormConfig()
     }
   },
 )
+
+async function loadDecisionFormConfig() {
+  if (!props.templateId) {
+    availableReasonCategories.value = [...TEMPLATE_DECISION_REASON_CATEGORIES]
+    reasonPromptCopy.value = {}
+    return
+  }
+  loadingConfig.value = true
+  try {
+    const config = await templateRiskPromptApi.getDecisionFormConfig(props.templateId)
+    availableReasonCategories.value =
+      config.reasonCategories.length > 0
+        ? config.reasonCategories
+        : [...TEMPLATE_DECISION_REASON_CATEGORIES]
+    reasonPromptCopy.value = config.riskPromptCopy ?? {}
+  } catch {
+    availableReasonCategories.value = [...TEMPLATE_DECISION_REASON_CATEGORIES]
+    reasonPromptCopy.value = {}
+  } finally {
+    loadingConfig.value = false
+  }
+}
 
 function closeDialog() {
   visible.value = false
@@ -234,6 +269,7 @@ async function submitForm() {
     destroy-on-close
     :close-on-click-modal="false"
   >
+    <div v-loading="loadingConfig">
     <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
       <template v-if="isTestPassMode">
         <p class="decision-intro">{{ t('templates.lifecycle.decisionForm.passTestIntro') }}</p>
@@ -290,13 +326,14 @@ async function submitForm() {
             style="width: 100%"
           >
             <el-option
-              v-for="category in TEMPLATE_DECISION_REASON_CATEGORIES"
+              v-for="category in availableReasonCategories"
               :key="category"
               :label="t(`templates.lifecycle.decisionForm.reasonCategories.${category}`)"
               :value="category"
             />
           </el-select>
         </el-form-item>
+        <p v-if="selectedReasonPrompt" class="decision-intro">{{ selectedReasonPrompt }}</p>
         <el-form-item
           :label="t('templates.lifecycle.decisionForm.impactSummary')"
           prop="impactSummary"
@@ -364,6 +401,7 @@ async function submitForm() {
         </template>
       </template>
     </el-form>
+    </div>
     <template #footer>
       <el-button @click="closeDialog">{{ t('common.cancel') }}</el-button>
       <el-button type="primary" :loading="loading" :disabled="submitDisabled" @click="submitForm">

@@ -2,8 +2,11 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { type FormInstance, type FormRules } from 'element-plus'
+import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
 import type { ContentModuleVersion } from '@/types/contentModule'
 import { useContentModulesStore } from '@/stores/contentModules'
+import { DEFAULT_STRUCTURED_CONTENT_JSON, serializeStructuredContent } from '@/utils/structuredContentNodes'
+import { normalizeStructuredContentJson } from '@/utils/structuredContentCompat'
 
 const props = defineProps<{
   modelValue: boolean
@@ -26,37 +29,17 @@ const visible = computed({
   set: (value: boolean) => emit('update:modelValue', value),
 })
 
-const DEFAULT_CONTENT_STRUCTURE_JSON = '{\n  "blocks": []\n}'
-
 const form = reactive({
   semanticVersion: '',
-  contentStructureJson: DEFAULT_CONTENT_STRUCTURE_JSON,
+  contentStructureJson: DEFAULT_STRUCTURED_CONTENT_JSON,
   changeDescription: '',
 })
-
-function formatContentStructureJson(raw: string | null | undefined): string {
-  if (raw == null || raw.trim() === '') {
-    return ''
-  }
-  try {
-    return JSON.stringify(JSON.parse(raw), null, 2)
-  } catch {
-    return raw
-  }
-}
 
 const formRules = computed<FormRules>(() => ({
   semanticVersion: [
     {
       required: props.mode === 'create',
       message: t('contentModules.version.validation.semanticVersionRequired'),
-      trigger: 'blur',
-    },
-  ],
-  contentStructureJson: [
-    {
-      required: true,
-      message: t('contentModules.version.validation.contentStructureRequired'),
       trigger: 'blur',
     },
   ],
@@ -76,6 +59,13 @@ const apiErrorMessage = computed(() => {
   return te(key) ? t(key) : t('contentModules.error.updateVersion')
 })
 
+function normalizeContentJson(raw: string | null | undefined): string {
+  if (raw == null || raw.trim() === '') {
+    return DEFAULT_STRUCTURED_CONTENT_JSON
+  }
+  return serializeStructuredContent(normalizeStructuredContentJson(raw))
+}
+
 watch(visible, (open) => {
   if (!open) {
     return
@@ -83,10 +73,10 @@ watch(visible, (open) => {
   if (props.mode === 'edit' && props.version) {
     form.semanticVersion = props.version.semanticVersion
     form.changeDescription = props.version.changeDescription ?? ''
-    form.contentStructureJson = formatContentStructureJson(props.version.contentStructureJson)
+    form.contentStructureJson = normalizeContentJson(props.version.contentStructureJson)
   } else {
     form.semanticVersion = ''
-    form.contentStructureJson = DEFAULT_CONTENT_STRUCTURE_JSON
+    form.contentStructureJson = DEFAULT_STRUCTURED_CONTENT_JSON
     form.changeDescription = ''
   }
 }, { immediate: true })
@@ -94,11 +84,6 @@ watch(visible, (open) => {
 async function handleSubmit() {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) {
-    return
-  }
-  try {
-    JSON.parse(form.contentStructureJson)
-  } catch {
     return
   }
   try {
@@ -123,7 +108,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <el-dialog v-model="visible" :title="dialogTitle" width="640px" destroy-on-close>
+  <el-dialog v-model="visible" :title="dialogTitle" width="900px" destroy-on-close>
     <el-alert
       v-if="apiErrorMessage"
       class="dialog-alert"
@@ -140,8 +125,8 @@ async function handleSubmit() {
       >
         <el-input v-model="form.semanticVersion" />
       </el-form-item>
-      <el-form-item :label="t('contentModules.version.contentStructureJson')" prop="contentStructureJson">
-        <el-input v-model="form.contentStructureJson" type="textarea" :rows="8" />
+      <el-form-item :label="t('contentModules.version.contentStructure')">
+        <ControlledStructuredContentEditor v-model="form.contentStructureJson" />
       </el-form-item>
       <el-form-item :label="t('contentModules.version.changeDescription')" prop="changeDescription">
         <el-input v-model="form.changeDescription" type="textarea" :rows="2" />

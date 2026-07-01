@@ -10,6 +10,7 @@ public record UpsertVariableSchemaRequest(
         boolean required,
         String defaultValue,
         String enumValues,
-        String description
+        String description,
+        String computeExpression
 ) {
 }

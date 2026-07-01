@@ -104,7 +104,8 @@ public class TemplateBindingConfigurationService {
                     request.required(),
                     request.defaultValue(),
                     request.enumValues(),
-                    request.description()
+                    request.description(),
+                    request.computeExpression()
             );
         } else {
             entity = new VariableSchemaEntity(
@@ -115,7 +116,8 @@ public class TemplateBindingConfigurationService {
                     request.required(),
                     request.defaultValue(),
                     request.enumValues(),
-                    request.description()
+                    request.description(),
+                    request.computeExpression()
             );
         }
         variableSchemaRepository.save(entity);

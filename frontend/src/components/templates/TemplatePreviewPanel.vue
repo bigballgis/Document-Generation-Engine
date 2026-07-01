@@ -1,18 +1,27 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { ElMessage } from 'element-plus'
 import FidelityWarningList from '@/components/authoring/FidelityWarningList.vue'
 import * as templatesApi from '@/api/templates'
+import { downloadBlobExport } from '@/utils/downloadExport'
 import type { AnchorBinding, PreviewComparisonItem, PreviewRecord } from '@/types/template'
 
-const props = defineProps<{
-  templateId: string
-  bindings: AnchorBinding[]
-  preview: PreviewRecord | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    templateId: string
+    bindings: AnchorBinding[]
+    preview: PreviewRecord | null
+    compact?: boolean
+  }>(),
+  {
+    compact: false,
+  },
+)
 
 const { t, te } = useI18n()
 const loading = ref(false)
+const downloadingFormat = ref<'docx' | 'pdf' | null>(null)
 const latestPreview = ref<PreviewRecord | null>(props.preview)
 
 watch(
@@ -63,6 +72,34 @@ function locationLabel(locationType: string): string {
 }
 
 const previewArtifact = computed(() => latestPreview.value?.artifactStorageKey ?? null)
+
+const canDownloadDocx = computed(
+  () => latestPreview.value?.status === 'SUCCEEDED' && Boolean(latestPreview.value?.artifactStorageKey),
+)
+const canDownloadPdf = computed(
+  () =>
+    latestPreview.value?.status === 'SUCCEEDED'
+    && (Boolean(latestPreview.value?.pdfArtifactStorageKey) || Boolean(latestPreview.value?.artifactStorageKey)),
+)
+
+async function downloadArtifact(format: 'docx' | 'pdf') {
+  if (!latestPreview.value?.previewId) {
+    return
+  }
+  downloadingFormat.value = format
+  try {
+    const { blob, filename } = await templatesApi.downloadPreviewArtifact(
+      props.templateId,
+      latestPreview.value.previewId,
+      format,
+    )
+    downloadBlobExport(filename, blob)
+  } catch {
+    ElMessage.error(t('templates.previewHistory.error.download'))
+  } finally {
+    downloadingFormat.value = null
+  }
+}
 </script>
 
 <template>
@@ -86,6 +123,23 @@ const previewArtifact = computed(() => latestPreview.value?.artifactStorageKey ?
           <dd>{{ latestPreview.testDataSetId }}</dd>
         </div>
       </dl>
+
+      <div v-if="canDownloadDocx || canDownloadPdf" class="preview-downloads">
+        <el-button
+          v-if="canDownloadDocx"
+          :loading="downloadingFormat === 'docx'"
+          @click="downloadArtifact('docx')"
+        >
+          {{ t('templates.previewHistory.downloadDocx') }}
+        </el-button>
+        <el-button
+          v-if="canDownloadPdf"
+          :loading="downloadingFormat === 'pdf'"
+          @click="downloadArtifact('pdf')"
+        >
+          {{ t('templates.previewHistory.downloadPdf') }}
+        </el-button>
+      </div>
 
       <el-button :loading="loading" @click="refreshPreview">
         {{ t('templates.preview.refresh') }}
@@ -155,5 +209,12 @@ h3 {
 
 .comparison-table {
   width: 100%;
+}
+
+.preview-downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 </style>

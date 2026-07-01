@@ -1,6 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import { describe, expect, it } from 'vitest'
+import ElementPlus from 'element-plus'
 import RoleJourneyTimeline from '@/components/journey/RoleJourneyTimeline.vue'
 import en from '@/i18n/locales/en'
 import { masterDesignerJourneySteps } from '@/constants/roleJourneyDefinitions'
@@ -12,6 +13,7 @@ function mountTimeline(
     guidanceKey?: string
     ariaLabelKey?: string
     titleKey?: string
+    inlineHelp?: boolean
   },
 ) {
   const i18n = createI18n({
@@ -27,14 +29,14 @@ function mountTimeline(
       ...props,
     },
     global: {
-      plugins: [i18n],
+      plugins: [i18n, ElementPlus],
     },
   })
 }
 
 describe('RoleJourneyTimeline', () => {
   it('renders completed, current, and upcoming step states when currentStepIndex is 2', async () => {
-    const wrapper = mountTimeline({ currentStepIndex: 2 })
+    const wrapper = mountTimeline({ currentStepIndex: 2, inlineHelp: true })
     await flushPromises()
 
     const steps = wrapper.findAll('[data-journey-step]')
@@ -51,7 +53,7 @@ describe('RoleJourneyTimeline', () => {
   })
 
   it('shows onboarding guidance and no aria-current when currentStepIndex is null', async () => {
-    const wrapper = mountTimeline({ currentStepIndex: null })
+    const wrapper = mountTimeline({ currentStepIndex: null, inlineHelp: true })
     await flushPromises()
 
     expect(wrapper.findAll('[aria-current="step"]')).toHaveLength(0)
@@ -67,6 +69,7 @@ describe('RoleJourneyTimeline', () => {
     const wrapper = mountTimeline({
       currentStepIndex: 2,
       guidanceKey: 'journey.custom.demo',
+      inlineHelp: true,
     })
     await flushPromises()
 
@@ -133,5 +136,17 @@ describe('RoleJourneyTimeline', () => {
     expect(wrapper.find('[data-journey-title]').text()).toBe(
       en.journey.roles.MASTER_DESIGNER.title,
     )
+  })
+
+  it('shows context help instead of inline guidance when inlineHelp is false', async () => {
+    const wrapper = mountTimeline({
+      currentStepIndex: 2,
+      titleKey: 'journey.roles.MASTER_DESIGNER.title',
+      inlineHelp: false,
+    })
+    await flushPromises()
+
+    expect(wrapper.find('[data-journey-guidance]').exists()).toBe(false)
+    expect(wrapper.find('.context-help-trigger').exists()).toBe(true)
   })
 })

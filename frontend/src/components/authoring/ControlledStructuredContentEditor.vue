@@ -6,10 +6,9 @@ import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import PasteCleaningSummaryDialog from '@/components/authoring/PasteCleaningSummaryDialog.vue'
 import * as templatesApi from '@/api/templates'
 import type { MasterStyleCatalog, PasteCleaningSummary, VariableSchema } from '@/types/template'
-import { buildVariableOptionLabel, humanizeCamelCase } from '@/utils/variableDisplayName'
+import { buildVariableOptionLabel } from '@/utils/variableDisplayName'
 import {
   DEFAULT_STRUCTURED_CONTENT_JSON,
-  DISABLED_TOOLBAR_CAPABILITIES,
   applyStyleToParagraphs,
   createNodeTemplate,
   insertBlockNode,
@@ -22,9 +21,11 @@ import {
 
 const props = defineProps<{
   modelValue: string
-  templateId: string
+  templateId?: string
   variableKeys?: string[]
   variables?: VariableSchema[]
+  contentModuleReferenceKeys?: string[]
+  readonly?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -57,6 +58,15 @@ const blockNodeTypes: ConfirmedNodeType[] = [
 ]
 
 const styleOptions = computed(() => styleCatalog.value?.entries ?? [])
+
+const clauseReferenceOptions = computed(() =>
+  (props.contentModuleReferenceKeys ?? []).map((referenceKey) => ({
+    value: referenceKey,
+    label: referenceKey,
+  })),
+)
+
+const isReadonly = computed(() => props.readonly === true)
 
 const variableCatalog = computed(() => {
   if (props.variables?.length) {
@@ -103,10 +113,26 @@ watch(
 )
 
 watch(documentModel, (value) => {
+  if (isReadonly.value) {
+    return
+  }
   emit('update:modelValue', serializeStructuredContent(value))
 }, { deep: true })
 
+const DEFAULT_STYLE_CATALOG: MasterStyleCatalog = {
+  catalogVersion: '1.0',
+  entries: [
+    { styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' },
+    { styleKey: 'Heading1', applicableNodeTypes: ['sectionHeading'], renderPurpose: 'HEADING' },
+  ],
+}
+
 onMounted(async () => {
+  if (!props.templateId) {
+    styleCatalog.value = DEFAULT_STYLE_CATALOG
+    selectedStyleKey.value = DEFAULT_STYLE_CATALOG.entries[0]?.styleKey ?? 'BodyText'
+    return
+  }
   loadingCatalog.value = true
   try {
     styleCatalog.value = await templatesApi.getMasterStyleCatalog(props.templateId)
@@ -124,11 +150,14 @@ function nodeLabel(type: ConfirmedNodeType | string): string {
 }
 
 function insertBlock(type: ConfirmedNodeType) {
+  if (isReadonly.value) {
+    return
+  }
   documentModel.value = insertBlockNode(documentModel.value, type, selectedStyleKey.value)
 }
 
 function applySelectedStyle() {
-  if (!selectedStyleKey.value) {
+  if (!selectedStyleKey.value || isReadonly.value) {
     return
   }
   documentModel.value = applyStyleToParagraphs(documentModel.value, selectedStyleKey.value)
@@ -168,6 +197,9 @@ function addInlineToBlock(blockIndex: number, type: ConfirmedNodeType) {
 }
 
 function removeBlock(index: number) {
+  if (isReadonly.value) {
+    return
+  }
   documentModel.value = {
     ...documentModel.value,
     nodes: documentModel.value.nodes.filter((_, nodeIndex) => nodeIndex !== index),
@@ -194,7 +226,7 @@ async function handlePasteFile(event: Event) {
 }
 
 async function runPasteClean(html: string) {
-  if (!html.trim()) {
+  if (!html.trim() || isReadonly.value || !props.templateId) {
     return
   }
   prePasteSnapshot.value = serializeStructuredContent(documentModel.value)
@@ -226,6 +258,9 @@ function cancelPaste() {
 }
 
 function insertInline(type: ConfirmedNodeType) {
+  if (isReadonly.value) {
+    return
+  }
   const nodes = [...documentModel.value.nodes]
   if (!nodes.length) {
     nodes.push(createNodeTemplate('paragraph', selectedStyleKey.value))
@@ -239,21 +274,19 @@ function insertInline(type: ConfirmedNodeType) {
   nodes[lastIndex] = { ...target, children }
   documentModel.value = { ...documentModel.value, nodes }
 }
-
-function variableLabel(key: string): string {
-  const variable = variableCatalog.value.find((entry) => entry.variableKey === key)
-  if (variable) {
-    return buildVariableOptionLabel(variable)
-  }
-  return humanizeCamelCase(key)
-}
 </script>
 
 <template>
   <div class="structured-editor" data-testid="controlled-structured-content-editor">
-    <p class="editor-hint">{{ t('templates.structuredEditor.bindingHint') }}</p>
+    <p v-if="!isReadonly" class="editor-hint">{{ t('templates.structuredEditor.bindingHint') }}</p>
+    <p v-else class="editor-hint">{{ t('templates.structuredEditor.readonlyHint') }}</p>
 
-    <div class="toolbar" role="toolbar" :aria-label="t('templates.structuredEditor.toolbar.label')">
+    <div
+      v-if="!isReadonly"
+      class="toolbar"
+      role="toolbar"
+      :aria-label="t('templates.structuredEditor.toolbar.label')"
+    >
       <div class="toolbar-group">
         <span class="group-label">{{ t('templates.structuredEditor.toolbar.blocks') }}</span>
         <el-button
@@ -303,7 +336,14 @@ function variableLabel(key: string): string {
 
       <div class="toolbar-group">
         <span class="group-label">{{ t('templates.structuredEditor.toolbar.paste') }}</span>
-        <input ref="pasteInputRef" type="file" accept=".html,.htm,.txt" hidden @change="handlePasteFile" />
+        <input
+          ref="pasteInputRef"
+          type="file"
+          accept=".html,.htm,.txt"
+          hidden
+          :aria-label="t('templates.structuredEditor.pasteFromFile')"
+          @change="handlePasteFile"
+        />
         <el-button size="small" @click="pasteInputRef?.click()">
           {{ t('templates.structuredEditor.pasteFromFile') }}
         </el-button>
@@ -318,7 +358,7 @@ function variableLabel(key: string): string {
       >
         <header class="block-card__header">
           <el-tag size="small" type="info">{{ nodeLabel(node.type) }}</el-tag>
-          <el-button link type="danger" size="small" @click="removeBlock(index)">
+          <el-button v-if="!isReadonly" link type="danger" size="small" @click="removeBlock(index)">
             {{ t('common.delete') }}
           </el-button>
         </header>
@@ -334,6 +374,7 @@ function variableLabel(key: string): string {
                 v-if="child.type === 'textRun' || child.type === 'text'"
                 :model-value="child.value ?? ''"
                 data-testid="paragraph-input"
+                :readonly="isReadonly"
                 :placeholder="t('templates.structuredEditor.textPlaceholder')"
                 @update:model-value="(value: string) => updateInlineChild(index, childIndex, { ...child, type: 'textRun', value })"
               />
@@ -341,6 +382,7 @@ function variableLabel(key: string): string {
                 v-else-if="child.type === 'variable'"
                 :model-value="child.key ?? ''"
                 filterable
+                :disabled="isReadonly"
                 :placeholder="t('templates.structuredEditor.variablePlaceholder')"
                 @update:model-value="(value: string) => updateInlineChild(index, childIndex, { ...child, type: 'variable', key: value })"
               >
@@ -353,10 +395,10 @@ function variableLabel(key: string): string {
               </AppSearchSelect>
               <el-tag v-else size="small">{{ nodeLabel(child.type) }}</el-tag>
             </div>
-            <el-button size="small" plain @click="addInlineToBlock(index, 'textRun')">
+            <el-button v-if="!isReadonly" size="small" plain @click="addInlineToBlock(index, 'textRun')">
               {{ t('templates.structuredEditor.addText') }}
             </el-button>
-            <el-button size="small" plain @click="addInlineToBlock(index, 'variable')">
+            <el-button v-if="!isReadonly" size="small" plain @click="addInlineToBlock(index, 'variable')">
               {{ t('templates.structuredEditor.addVariable') }}
             </el-button>
           </div>
@@ -365,6 +407,7 @@ function variableLabel(key: string): string {
         <template v-else-if="node.type === 'conditionBlock'">
           <el-input
             :model-value="conditionExpression(node)"
+            :readonly="isReadonly"
             :placeholder="t('templates.structuredEditor.conditionPlaceholder')"
             @update:model-value="(value: string) => updateBlockField(index, 'conditionExpression', value)"
           />
@@ -374,6 +417,7 @@ function variableLabel(key: string): string {
           <AppSearchSelect
             :model-value="loopVariable(node)"
             filterable
+            :disabled="isReadonly"
             :placeholder="t('templates.structuredEditor.loopVariablePlaceholder')"
             @update:model-value="(value: string) => updateBlockField(index, 'loopVariable', value)"
           >
@@ -389,14 +433,32 @@ function variableLabel(key: string): string {
         <template v-else-if="node.type === 'tableComponentRef'">
           <el-input
             :model-value="node.tableComponentRef ?? ''"
+            :readonly="isReadonly"
             :placeholder="t('templates.structuredEditor.tableRefPlaceholder')"
             @update:model-value="(value: string) => updateBlockField(index, 'tableComponentRef', value)"
           />
         </template>
 
         <template v-else-if="node.type === 'contentModuleRef'">
-          <el-input
+          <AppSearchSelect
+            v-if="clauseReferenceOptions.length"
             :model-value="node.referenceKey ?? ''"
+            filterable
+            :disabled="isReadonly"
+            :placeholder="t('templates.structuredEditor.clauseRefPlaceholder')"
+            @update:model-value="(value: string) => updateBlockField(index, 'referenceKey', value)"
+          >
+            <el-option
+              v-for="option in clauseReferenceOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </AppSearchSelect>
+          <el-input
+            v-else
+            :model-value="node.referenceKey ?? ''"
+            :readonly="isReadonly"
             :placeholder="t('templates.structuredEditor.clauseRefPlaceholder')"
             @update:model-value="(value: string) => updateBlockField(index, 'referenceKey', value)"
           />
@@ -411,7 +473,7 @@ function variableLabel(key: string): string {
       />
     </div>
 
-    <details class="json-preview">
+    <details v-if="!isReadonly" class="json-preview">
       <summary>{{ t('templates.structuredEditor.jsonPreview') }}</summary>
       <pre>{{ serializeStructuredContent(documentModel) }}</pre>
     </details>

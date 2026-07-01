@@ -191,6 +191,7 @@ class BatchTestGenerationServiceTest {
                 "DOCX",
                 "rp-v1",
                 status == PreviewStatus.SUCCEEDED ? "previews/" + previewId + "/output.docx" : null,
+                status == PreviewStatus.SUCCEEDED ? "previews/" + previewId + "/output.pdf" : null,
                 warnings,
                 new PreviewComparisonView(warningCount, 0, warningCount, List.of()),
                 testDataSetId,

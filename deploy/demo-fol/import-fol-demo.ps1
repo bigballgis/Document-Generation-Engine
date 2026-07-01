@@ -115,6 +115,24 @@ function Merge-ClauseBinding([string]$AnchorId, [string]$ReferenceKey, [object]$
     }
 }
 
+function Remove-StaleCatalogVariables([string]$TemplateId, [string]$Token, [string[]]$CatalogKeys) {
+    $detail = Invoke-Api GET "/templates/$TemplateId" $Token
+    $existing = @($detail.result.variables)
+    $catalogSet = [System.Collections.Generic.HashSet[string]]::new([string[]]$CatalogKeys)
+    $stale = $existing | Where-Object { -not $catalogSet.Contains($_.variableKey) }
+    if ($stale.Count -eq 0) {
+        return
+    }
+    Write-Step "Removing $($stale.Count) stale template variables not in catalog..."
+    foreach ($var in $stale) {
+        try {
+            Invoke-RestMethod -Method DELETE -Uri "$ApiBase/templates/$TemplateId/variables/$($var.variableKey)" -Headers @{ Authorization = "Bearer $Token" } | Out-Null
+        } catch {
+            Write-Warning "  Failed to delete $($var.variableKey): $($_.Exception.Message)"
+        }
+    }
+}
+
 function Upsert-TestDataSet([string]$TemplateId, [string]$Token, [object]$TestDataConfig) {
     $name = $TestDataConfig.name
     $sets = Invoke-Api GET "/templates/$TemplateId/test-data-sets" $Token
@@ -123,6 +141,12 @@ function Upsert-TestDataSet([string]$TemplateId, [string]$Token, [object]$TestDa
         name = $name
         required = [bool]$TestDataConfig.required
         variables = $TestDataConfig.variables
+    }
+    if ($null -ne $TestDataConfig.PSObject.Properties['scenarioName'] -and $TestDataConfig.scenarioName) {
+        $body.scenarioName = [string]$TestDataConfig.scenarioName
+    }
+    if ($null -ne $TestDataConfig.PSObject.Properties['coverageTags'] -and $TestDataConfig.coverageTags) {
+        $body.coverageTags = @($TestDataConfig.coverageTags)
     }
     if (-not $existing) {
         Invoke-Api POST "/templates/$TemplateId/test-data-sets" $Token -Body $body | Out-Null
@@ -233,6 +257,18 @@ if (-not $template) {
     $templateId = $created.result.id
 } else {
     $templateId = $template.id
+    if ($template.masterId -ne $masterId) {
+        Write-Step "Re-linking template to current FOL master (was $($template.masterId))..."
+        $relinkSql = @"
+UPDATE template
+SET master_id = '$masterId'::uuid,
+    updated_at = (NOW() AT TIME ZONE 'UTC')
+WHERE id = '$templateId'::uuid
+  AND deleted_at IS NULL;
+"@
+        $relinkSql | docker exec -i $PostgresContainer psql -U $PostgresUser -d $PostgresDb -v ON_ERROR_STOP=1
+        if ($LASTEXITCODE -ne 0) { throw "Template master re-link failed (exit $LASTEXITCODE)" }
+    }
     if ($template.description -notlike "*$($Config.catalogMarker)*") {
         Invoke-Api PATCH "/templates/$templateId" $AuthorToken -Body @{
             name = $Config.templateName
@@ -241,7 +277,9 @@ if (-not $template) {
     }
 }
 
-# --- Variables (>=500) ---
+# --- Variables ---
+$catalogKeys = @($CatalogVariables | ForEach-Object { $_.key })
+Remove-StaleCatalogVariables -TemplateId $templateId -Token $AuthorToken -CatalogKeys $catalogKeys
 Write-Step "Upserting $($CatalogVariables.Count) template variables..."
 foreach ($var in $CatalogVariables) {
     $body = @{
@@ -319,7 +357,7 @@ Write-Host "  Clauses (SQL):       $($Config.clauseBindings.Count)"
 Write-Host "  UI:                  http://localhost:4173/templates/$templateId"
 Write-Host ""
 
-if ($variableCount -lt 500) { Write-Warning "Variable count $variableCount is below target (500)" }
+if ($variableCount -lt 100) { Write-Warning "Variable count $variableCount is unusually low for FOL demo" }
 if ($ruleCount -lt 10) { Write-Warning "Rule count $ruleCount is below target (10)" }
 if ($features.conditionBlocks -lt 15) { Write-Warning "conditionBlocks $($features.conditionBlocks) below target (15)" }
 if ($features.loopBlocks -lt 8) { Write-Warning "loopBlocks $($features.loopBlocks) below target (8)" }

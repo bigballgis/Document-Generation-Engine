@@ -1,4 +1,4 @@
-# Generates FOL executive demo catalog JSON artefacts (>=500 variables, rules, rich bindings).
+# Generates FOL executive demo catalog JSON artefacts (rich demo variables, rules, rich bindings).
 # Run from repo root: .\deploy\demo-fol\generate-fol-catalog.ps1
 
 $ErrorActionPreference = 'Stop'
@@ -16,6 +16,22 @@ function New-Var([string]$Key, [string]$Type, [bool]$Required = $false, $Default
     if ($null -ne $Default) { $v.defaultValue = [string]$Default }
     if ($null -ne $Enum) { $v.enumValues = $Enum }
     return [pscustomobject]$v
+}
+
+# Adds a LIST container plus its child field variables (DRY helper for array-like demo data).
+function Add-ListWithFields(
+    [System.Collections.Generic.List[object]]$Vars,
+    [string]$ListKey,
+    [string]$ListDesc,
+    [array[]]$Fields
+) {
+    $Vars.Add((New-Var $ListKey 'LIST' $false $null $null $ListDesc))
+    foreach ($f in $Fields) {
+        $key = $f[0]; $type = $f[1]; $desc = $f[2]
+        $default = if ($f.Count -gt 3) { $f[3] } else { $null }
+        $enum = if ($f.Count -gt 4) { $f[4] } else { $null }
+        $Vars.Add((New-Var $key $type $false $default $enum $desc))
+    }
 }
 
 function Build-Variables {
@@ -69,132 +85,122 @@ function Build-Variables {
         $vars.Add((New-Var $f 'BOOLEAN' $false 'false' $null "Feature flag: $f"))
     }
 
-    # --- Pricing / margin grid ---
-    for ($i = 1; $i -le 25; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "pricingTier${n}Label" 'TEXT' $false $null $null "Pricing tier $i label"))
-        $vars.Add((New-Var "pricingTier${n}MarginBps" 'NUMBER' $false $null $null "Pricing tier $i margin (bps)"))
-        $vars.Add((New-Var "pricingTier${n}FloorBps" 'NUMBER' $false $null $null "Pricing tier $i floor (bps)"))
-    }
-
-    # --- Dates ---
-    for ($i = 1; $i -le 15; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "milestoneDate${n}" 'DATE' $false $null $null "Milestone date $i"))
-        $vars.Add((New-Var "milestoneDate${n}Description" 'TEXT' $false $null $null "Milestone date $i description"))
-    }
-
-    # --- Parties ---
-    for ($i = 1; $i -le 15; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "party${n}Role" 'ENUM' $false $null 'LENDER,GUARANTOR,SECURITY_PROVIDER,ARRANGER,AGENT' "Party $i role"))
-        $vars.Add((New-Var "party${n}LegalName" 'TEXT' $false $null $null "Party $i legal name"))
-        $vars.Add((New-Var "party${n}Country" 'TEXT' $false $null $null "Party $i country"))
-    }
-
-    # --- Covenants ---
-    for ($i = 1; $i -le 20; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "covenant${n}Name" 'TEXT' $false $null $null "Financial covenant $i name"))
-        $vars.Add((New-Var "covenant${n}Ratio" 'TEXT' $false $null $null "Financial covenant $i ratio/threshold"))
-        $vars.Add((New-Var "covenant${n}TestFrequency" 'ENUM' $false 'QUARTERLY' 'QUARTERLY,SEMI_ANNUAL,ANNUAL' "Covenant $i test frequency"))
-    }
-
-    # --- Fees ---
-    for ($i = 1; $i -le 15; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "fee${n}Type" 'ENUM' $false $null 'ARRANGEMENT,COMMITMENT,AGENCY,UTILISATION,PREPAYMENT,LEGAL' "Fee $i type"))
-        $vars.Add((New-Var "fee${n}Description" 'TEXT' $false $null $null "Fee $i description"))
-        $vars.Add((New-Var "fee${n}Amount" 'AMOUNT' $false $null $null "Fee $i amount"))
-        $vars.Add((New-Var "fee${n}Currency" 'ENUM' $false 'USD' 'USD,EUR,GBP,HKD' "Fee $i currency"))
-    }
-
-    # --- Security ---
-    for ($i = 1; $i -le 15; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "security${n}AssetClass" 'ENUM' $false $null 'REAL_ESTATE,SHARES,ACCOUNTS,RECEIVABLES,IP,OTHER' "Security asset class $i"))
-        $vars.Add((New-Var "security${n}Description" 'TEXT' $false $null $null "Security asset $i description"))
-        $vars.Add((New-Var "security${n}Jurisdiction" 'TEXT' $false $null $null "Security asset $i jurisdiction"))
-        $vars.Add((New-Var "security${n}PerfectionStatus" 'ENUM' $false 'TO_BE_PERFECTED' 'PERFECTED,TO_BE_PERFECTED,NOT_REQUIRED' "Security perfection status $i"))
-    }
-
-    # --- Legal / misc text ---
-    for ($i = 1; $i -le 10; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "legalClauseRef${n}" 'TEXT' $false $null $null "Cross-reference legal clause $i"))
-        $vars.Add((New-Var "legalDefinedTerm${n}" 'TEXT' $false $null $null "Defined term $i"))
-    }
-
-    # --- LIST / OBJECT (loops & tables) ---
-    $vars.Add((New-Var 'lenders' 'LIST' $false $null $null 'Syndicate lender roster (loop source)'))
-    $vars.Add((New-Var 'tranches' 'LIST' $false $null $null 'Facility tranches (loop source)'))
-    $vars.Add((New-Var 'fees' 'LIST' $false $null $null 'Fee schedule rows (loop source)'))
-    $vars.Add((New-Var 'conditionsPrecedent' 'LIST' $false $null $null 'Conditions precedent checklist (loop source)'))
-    $vars.Add((New-Var 'guarantors' 'LIST' $false $null $null 'Guarantor list (loop source)'))
-    $vars.Add((New-Var 'securityPackages' 'LIST' $false $null $null 'Security package list (loop source)'))
-    $vars.Add((New-Var 'amortisationSchedule' 'LIST' $false $null $null 'Amortisation schedule rows (loop source)'))
-    $vars.Add((New-Var 'facilityParticulars' 'LIST' $false $null $null 'Facility particulars grid rows (loop source)'))
-    $vars.Add((New-Var 'hedgeProviders' 'LIST' $false $null $null 'Hedge provider list (loop source)'))
-    $vars.Add((New-Var 'esgKpis' 'LIST' $false $null $null 'ESG KPI targets (loop source)'))
-
-    # Loop item fields (referenced inside loopBlock children)
-    $loopFields = @(
-        @('lenderName', 'TEXT', 'Lender legal name'), @('lenderCommitment', 'AMOUNT', 'Lender commitment'),
-        @('lenderCommitmentPct', 'NUMBER', 'Lender commitment (%)'), @('lenderCountry', 'TEXT', 'Lender country'),
-        @('trancheName', 'TEXT', 'Tranche name'), @('trancheAmount', 'AMOUNT', 'Tranche amount'),
-        @('trancheCurrency', 'ENUM', 'Tranche currency'), @('trancheMarginBps', 'NUMBER', 'Tranche margin (bps)'),
-        @('feeItemDescription', 'TEXT', 'Fee line description'), @('feeItemAmount', 'AMOUNT', 'Fee line amount'),
-        @('feeItemCurrency', 'ENUM', 'Fee line currency'), @('cpItemDescription', 'TEXT', 'CP item description'),
-        @('cpItemStatus', 'ENUM', 'CP item status'), @('cpItemResponsibleParty', 'TEXT', 'CP responsible party'),
-        @('guarantorName', 'TEXT', 'Guarantor legal name'), @('guarantorJurisdiction', 'TEXT', 'Guarantor jurisdiction'),
-        @('securityPackageName', 'TEXT', 'Security package name'), @('securityPackageType', 'TEXT', 'Security package type'),
-        @('amortDate', 'DATE', 'Amortisation payment date'), @('amortPrincipal', 'AMOUNT', 'Amortisation principal'),
-        @('amortBalance', 'AMOUNT', 'Outstanding balance after payment'),
-        @('particularLabel', 'TEXT', 'Facility particular label'), @('particularValue', 'TEXT', 'Facility particular value'),
-        @('hedgeProviderName', 'TEXT', 'Hedge provider name'), @('esgKpiName', 'TEXT', 'ESG KPI name'),
-        @('esgKpiTarget', 'TEXT', 'ESG KPI target value')
+    # --- LIST containers + child fields (array-like demo data) ---
+    Add-ListWithFields $vars 'pricingTiers' 'Pricing margin grid tiers (loop source)' @(
+        ,@('pricingTierLabel', 'TEXT', 'Pricing tier label')
+        ,@('pricingTierMarginBps', 'NUMBER', 'Pricing tier margin (bps)')
+        ,@('pricingTierFloorBps', 'NUMBER', 'Pricing tier floor (bps)')
     )
-    foreach ($lf in $loopFields) {
-        $enum = if ($lf[1] -eq 'ENUM') { 'USD,EUR,GBP,PENDING,RECEIVED,WAIVED' } else { $null }
-        $vars.Add((New-Var $lf[0] $lf[1] $false $null $enum $lf[2]))
-    }
-
-    # --- LMA-style defined terms (Schedule 1 definitions catalogue) ---
-    for ($i = 1; $i -le 45; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "definedTerm${n}Name" 'TEXT' $false $null $null "Defined term $i name"))
-        $vars.Add((New-Var "definedTerm${n}Meaning" 'TEXT' $false $null $null "Defined term $i meaning / cross-reference"))
-    }
-
-    # --- Representations & warranties checklist ---
-    for ($i = 1; $i -le 25; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "representation${n}Summary" 'TEXT' $false $null $null "Representation $i summary text"))
-        $vars.Add((New-Var "representation${n}Applies" 'BOOLEAN' $false 'true' $null "Representation $i applies (Y/N)"))
-    }
-
-    # --- Information undertakings / reporting ---
-    for ($i = 1; $i -le 20; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "infoUndertaking${n}Description" 'TEXT' $false $null $null "Information undertaking $i"))
-        $vars.Add((New-Var "infoUndertaking${n}DueDays" 'NUMBER' $false $null $null "Information undertaking $i due (days after period end)"))
-    }
-
-    # --- Events of default triggers ---
-    for ($i = 1; $i -le 18; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "eodTrigger${n}Description" 'TEXT' $false $null $null "Event of default trigger $i"))
-        $vars.Add((New-Var "eodTrigger${n}GraceDays" 'NUMBER' $false $null $null "Event of default $i grace period (days)"))
-    }
-
-    # --- Notices (multi-party notice blocks) ---
-    for ($i = 1; $i -le 12; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "noticeParty${n}Name" 'TEXT' $false $null $null "Notice party $i name"))
-        $vars.Add((New-Var "noticeParty${n}Address" 'TEXT' $false $null $null "Notice party $i address"))
-        $vars.Add((New-Var "noticeParty${n}Email" 'TEXT' $false $null $null "Notice party $i email"))
-        $vars.Add((New-Var "noticeParty${n}Attention" 'TEXT' $false $null $null "Notice party $i attention / contact"))
-    }
+    Add-ListWithFields $vars 'milestones' 'Key milestone dates (loop source)' @(
+        ,@('milestoneDate', 'DATE', 'Milestone date')
+        ,@('milestoneDateDescription', 'TEXT', 'Milestone date description')
+    )
+    Add-ListWithFields $vars 'parties' 'Transaction parties roster (loop source)' @(
+        ,@('partyRole', 'ENUM', 'Party role', $null, 'LENDER,GUARANTOR,SECURITY_PROVIDER,ARRANGER,AGENT')
+        ,@('partyLegalName', 'TEXT', 'Party legal name')
+        ,@('partyCountry', 'TEXT', 'Party country')
+    )
+    Add-ListWithFields $vars 'covenants' 'Financial covenant schedule (loop source)' @(
+        ,@('covenantName', 'TEXT', 'Financial covenant name')
+        ,@('covenantRatio', 'TEXT', 'Financial covenant ratio/threshold')
+        ,@('covenantTestFrequency', 'ENUM', 'Covenant test frequency', 'QUARTERLY', 'QUARTERLY,SEMI_ANNUAL,ANNUAL')
+    )
+    Add-ListWithFields $vars 'securedAssets' 'Secured asset register (loop source)' @(
+        ,@('securedAssetClass', 'ENUM', 'Security asset class', $null, 'REAL_ESTATE,SHARES,ACCOUNTS,RECEIVABLES,IP,OTHER')
+        ,@('securedAssetDescription', 'TEXT', 'Security asset description')
+        ,@('securedAssetJurisdiction', 'TEXT', 'Security asset jurisdiction')
+        ,@('securedAssetPerfectionStatus', 'ENUM', 'Security perfection status', 'TO_BE_PERFECTED', 'PERFECTED,TO_BE_PERFECTED,NOT_REQUIRED')
+    )
+    Add-ListWithFields $vars 'legalReferences' 'Legal clause cross-references (loop source)' @(
+        ,@('legalClauseRef', 'TEXT', 'Cross-reference legal clause')
+        ,@('legalDefinedTerm', 'TEXT', 'Defined term reference')
+    )
+    Add-ListWithFields $vars 'lenders' 'Syndicate lender roster (loop source)' @(
+        ,@('lenderName', 'TEXT', 'Lender legal name')
+        ,@('lenderCommitment', 'AMOUNT', 'Lender commitment')
+        ,@('lenderCommitmentPct', 'NUMBER', 'Lender commitment (%)')
+        ,@('lenderCountry', 'TEXT', 'Lender country')
+    )
+    Add-ListWithFields $vars 'tranches' 'Facility tranches (loop source)' @(
+        ,@('trancheName', 'TEXT', 'Tranche name')
+        ,@('trancheAmount', 'AMOUNT', 'Tranche amount')
+        ,@('trancheCurrency', 'ENUM', 'Tranche currency', $null, 'USD,EUR,GBP,HKD')
+        ,@('trancheMarginBps', 'NUMBER', 'Tranche margin (bps)')
+    )
+    Add-ListWithFields $vars 'fees' 'Fee schedule rows (loop source)' @(
+        ,@('feeItemDescription', 'TEXT', 'Fee line description')
+        ,@('feeItemAmount', 'AMOUNT', 'Fee line amount')
+        ,@('feeItemCurrency', 'ENUM', 'Fee line currency', $null, 'USD,EUR,GBP,HKD')
+    )
+    Add-ListWithFields $vars 'conditionsPrecedent' 'Conditions precedent checklist (loop source)' @(
+        ,@('cpItemDescription', 'TEXT', 'CP item description')
+        ,@('cpItemStatus', 'ENUM', 'CP item status', $null, 'PENDING,RECEIVED,WAIVED')
+        ,@('cpItemResponsibleParty', 'TEXT', 'CP responsible party')
+    )
+    Add-ListWithFields $vars 'guarantors' 'Guarantor list (loop source)' @(
+        ,@('guarantorName', 'TEXT', 'Guarantor legal name')
+        ,@('guarantorJurisdiction', 'TEXT', 'Guarantor jurisdiction')
+    )
+    Add-ListWithFields $vars 'securityPackages' 'Security package list (loop source)' @(
+        ,@('securityPackageName', 'TEXT', 'Security package name')
+        ,@('securityPackageType', 'TEXT', 'Security package type')
+    )
+    Add-ListWithFields $vars 'amortisationSchedule' 'Amortisation schedule rows (loop source)' @(
+        ,@('amortDate', 'DATE', 'Amortisation payment date')
+        ,@('amortPrincipal', 'AMOUNT', 'Amortisation principal')
+        ,@('amortBalance', 'AMOUNT', 'Outstanding balance after payment')
+    )
+    Add-ListWithFields $vars 'facilityParticulars' 'Facility particulars grid rows (loop source)' @(
+        ,@('particularLabel', 'TEXT', 'Facility particular label')
+        ,@('particularValue', 'TEXT', 'Facility particular value')
+    )
+    Add-ListWithFields $vars 'hedgeProviders' 'Hedge provider list (loop source)' @(
+        ,@('hedgeProviderName', 'TEXT', 'Hedge provider name')
+    )
+    Add-ListWithFields $vars 'esgKpis' 'ESG KPI targets (loop source)' @(
+        ,@('esgKpiName', 'TEXT', 'ESG KPI name')
+        ,@('esgKpiTarget', 'TEXT', 'ESG KPI target value')
+    )
+    Add-ListWithFields $vars 'definedTerms' 'LMA-style defined terms catalogue (loop source)' @(
+        ,@('definedTermName', 'TEXT', 'Defined term name')
+        ,@('definedTermMeaning', 'TEXT', 'Defined term meaning / cross-reference')
+    )
+    Add-ListWithFields $vars 'representations' 'Representations & warranties checklist (loop source)' @(
+        ,@('representationSummary', 'TEXT', 'Representation summary text')
+        ,@('representationApplies', 'BOOLEAN', 'Representation applies (Y/N)', 'true')
+    )
+    Add-ListWithFields $vars 'infoUndertakings' 'Information undertakings / reporting (loop source)' @(
+        ,@('infoUndertakingDescription', 'TEXT', 'Information undertaking description')
+        ,@('infoUndertakingDueDays', 'NUMBER', 'Information undertaking due (days after period end)')
+    )
+    Add-ListWithFields $vars 'eodTriggers' 'Events of default triggers (loop source)' @(
+        ,@('eodTriggerDescription', 'TEXT', 'Event of default trigger description')
+        ,@('eodTriggerGraceDays', 'NUMBER', 'Event of default grace period (days)')
+    )
+    Add-ListWithFields $vars 'noticeParties' 'Notice party blocks (loop source)' @(
+        ,@('noticePartyName', 'TEXT', 'Notice party name')
+        ,@('noticePartyAddress', 'TEXT', 'Notice party address')
+        ,@('noticePartyEmail', 'TEXT', 'Notice party email')
+        ,@('noticePartyAttention', 'TEXT', 'Notice party attention / contact')
+    )
+    Add-ListWithFields $vars 'benchmarkFallbacks' 'Benchmark / rate fallback scenarios (loop source)' @(
+        ,@('benchmarkFallbackScenario', 'TEXT', 'Benchmark fallback scenario')
+        ,@('benchmarkFallbackRate', 'TEXT', 'Fallback rate description')
+    )
+    Add-ListWithFields $vars 'insurancePolicies' 'Insurance & collateral maintenance (loop source)' @(
+        ,@('insurancePolicyType', 'ENUM', 'Insurance policy type', $null, 'PROPERTY,CASUALTY,LIABILITY,KEY_PERSON,OTHER')
+        ,@('insurancePolicyMinimumCover', 'AMOUNT', 'Insurance policy minimum cover')
+        ,@('insurancePolicyCurrency', 'ENUM', 'Insurance policy currency', 'USD', 'USD,EUR,GBP')
+    )
+    Add-ListWithFields $vars 'obligors' 'Group obligors / subsidiaries (loop source)' @(
+        ,@('obligorLegalName', 'TEXT', 'Obligor legal name')
+        ,@('obligorRole', 'ENUM', 'Obligor role', $null, 'BORROWER,GUARANTOR,SECURITY_PROVIDER,HOLDING')
+        ,@('obligorJurisdiction', 'TEXT', 'Obligor jurisdiction')
+    )
+    Add-ListWithFields $vars 'prepaymentEvents' 'Prepayment / break cost events (loop source)' @(
+        ,@('prepaymentEventDescription', 'TEXT', 'Prepayment event description')
+        ,@('prepaymentEventPenaltyPct', 'NUMBER', 'Prepayment penalty (percent)')
+    )
 
     # --- Tax, withholding & gross-up ---
     $taxFields = @(
@@ -214,36 +220,6 @@ function Build-Variables {
             if ($tf[0] -like '*fatca*') { 'COMPLIANT,NON_COMPLIANT,PENDING' } else { 'USD,EUR,GBP' }
         } else { $null }
         $vars.Add((New-Var $tf[0] $tf[1] $false $null $enum $tf[2]))
-    }
-
-    # --- Benchmark / rate fallback (SOFR transition) ---
-    for ($i = 1; $i -le 12; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "benchmarkFallback${n}Scenario" 'TEXT' $false $null $null "Benchmark fallback scenario $i"))
-        $vars.Add((New-Var "benchmarkFallback${n}Rate" 'TEXT' $false $null $null "Fallback rate description $i"))
-    }
-
-    # --- Insurance & collateral maintenance ---
-    for ($i = 1; $i -le 10; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "insurancePolicy${n}Type" 'ENUM' $false $null 'PROPERTY,CASUALTY,LIABILITY,KEY_PERSON,OTHER' "Insurance policy $i type"))
-        $vars.Add((New-Var "insurancePolicy${n}MinimumCover" 'AMOUNT' $false $null $null "Insurance policy $i minimum cover"))
-        $vars.Add((New-Var "insurancePolicy${n}Currency" 'ENUM' $false 'USD' 'USD,EUR,GBP' "Insurance policy $i currency"))
-    }
-
-    # --- Group obligors / subsidiaries ---
-    for ($i = 1; $i -le 15; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "obligor${n}LegalName" 'TEXT' $false $null $null "Obligor $i legal name"))
-        $vars.Add((New-Var "obligor${n}Role" 'ENUM' $false $null 'BORROWER,GUARANTOR,SECURITY_PROVIDER,HOLDING' "Obligor $i role"))
-        $vars.Add((New-Var "obligor${n}Jurisdiction" 'TEXT' $false $null $null "Obligor $i jurisdiction"))
-    }
-
-    # --- Prepayment / break costs ---
-    for ($i = 1; $i -le 10; $i++) {
-        $n = '{0:D2}' -f $i
-        $vars.Add((New-Var "prepaymentEvent${n}Description" 'TEXT' $false $null $null "Prepayment event $i description"))
-        $vars.Add((New-Var "prepaymentEvent${n}PenaltyPct" 'NUMBER' $false $null $null "Prepayment penalty $i (percent)"))
     }
 
     # Summary totals
@@ -709,6 +685,81 @@ function Build-DemoTestVariables {
             @{ esgKpiName = 'Scope 1 & 2 emissions reduction'; esgKpiTarget = '5% YoY vs baseline' }
             @{ esgKpiName = 'Renewable energy share'; esgKpiTarget = '>= 40% by 2028' }
         )
+        pricingTiers = @(
+            @{ pricingTierLabel = 'Tier 1 (utilisation <= 33%)'; pricingTierMarginBps = '185'; pricingTierFloorBps = '0' }
+            @{ pricingTierLabel = 'Tier 2 (utilisation 33–66%)'; pricingTierMarginBps = '195'; pricingTierFloorBps = '0' }
+            @{ pricingTierLabel = 'Tier 3 (utilisation > 66%)'; pricingTierMarginBps = '205'; pricingTierFloorBps = '0' }
+        )
+        milestones = @(
+            @{ milestoneDate = '2026-09-15'; milestoneDateDescription = 'Target signing date' }
+            @{ milestoneDate = '2026-10-01'; milestoneDateDescription = 'First utilisation date' }
+            @{ milestoneDate = '2027-07-01'; milestoneDateDescription = 'Availability period end' }
+            @{ milestoneDate = '2031-07-01'; milestoneDateDescription = 'Final maturity date' }
+        )
+        parties = @(
+            @{ partyRole = 'AGENT'; partyLegalName = 'Meridian Global Banking Corporation'; partyCountry = 'United Kingdom' }
+            @{ partyRole = 'ARRANGER'; partyLegalName = 'Meridian Global Banking Corporation'; partyCountry = 'United Kingdom' }
+            @{ partyRole = 'LENDER'; partyLegalName = 'Continental Capital Bank AG'; partyCountry = 'Germany' }
+            @{ partyRole = 'LENDER'; partyLegalName = 'Pacific Trade Finance Ltd.'; partyCountry = 'Singapore' }
+            @{ partyRole = 'GUARANTOR'; partyLegalName = 'Pacific Rim Group Holdings Ltd.'; partyCountry = 'Cayman Islands' }
+        )
+        covenants = @(
+            @{ covenantName = 'Net Leverage Ratio'; covenantRatio = '3.50:1.00 maximum'; covenantTestFrequency = 'QUARTERLY' }
+            @{ covenantName = 'Interest Cover Ratio'; covenantRatio = '3.00:1.00 minimum'; covenantTestFrequency = 'QUARTERLY' }
+            @{ covenantName = 'Minimum Liquidity'; covenantRatio = 'USD 10,000,000 minimum'; covenantTestFrequency = 'QUARTERLY' }
+        )
+        securedAssets = @(
+            @{ securedAssetClass = 'SHARES'; securedAssetDescription = '100% shares in Pacific Rim Holdings Ltd.'; securedAssetJurisdiction = 'Cayman Islands'; securedAssetPerfectionStatus = 'TO_BE_PERFECTED' }
+            @{ securedAssetClass = 'ACCOUNTS'; securedAssetDescription = 'Material bank accounts with Agent'; securedAssetJurisdiction = 'Singapore'; securedAssetPerfectionStatus = 'TO_BE_PERFECTED' }
+            @{ securedAssetClass = 'RECEIVABLES'; securedAssetDescription = 'Trade receivables over USD 500,000'; securedAssetJurisdiction = 'Singapore'; securedAssetPerfectionStatus = 'TO_BE_PERFECTED' }
+        )
+        legalReferences = @(
+            @{ legalClauseRef = 'Clause 22.1 (Events of Default)'; legalDefinedTerm = 'Event of Default' }
+            @{ legalClauseRef = 'Clause 19.1 (Financial Covenants)'; legalDefinedTerm = 'Financial Covenant' }
+            @{ legalClauseRef = 'Schedule 1 (Definitions)'; legalDefinedTerm = 'Finance Document' }
+        )
+        definedTerms = @(
+            @{ definedTermName = 'Borrower'; definedTermMeaning = 'Pacific Rim Holdings Ltd., a company incorporated in the Cayman Islands' }
+            @{ definedTermName = 'Finance Documents'; definedTermMeaning = 'This Agreement, the Fee Letters and any other document designated as a Finance Document' }
+            @{ definedTermName = 'Material Adverse Effect'; definedTermMeaning = 'A material adverse effect on the business, assets or financial condition of the Group taken as a whole' }
+        )
+        representations = @(
+            @{ representationSummary = 'Due incorporation and valid existence of the Borrower'; representationApplies = $true }
+            @{ representationSummary = 'No default under existing indebtedness'; representationApplies = $true }
+            @{ representationSummary = 'Sanctions compliance — no Sanctions apply to the Borrower or its subsidiaries'; representationApplies = $true }
+        )
+        infoUndertakings = @(
+            @{ infoUndertakingDescription = 'Annual audited consolidated financial statements'; infoUndertakingDueDays = '120' }
+            @{ infoUndertakingDescription = 'Quarterly management accounts'; infoUndertakingDueDays = '45' }
+            @{ infoUndertakingDescription = 'Compliance certificate with covenant calculations'; infoUndertakingDueDays = '30' }
+        )
+        eodTriggers = @(
+            @{ eodTriggerDescription = 'Non-payment of principal or interest'; eodTriggerGraceDays = '3' }
+            @{ eodTriggerDescription = 'Breach of financial covenant'; eodTriggerGraceDays = '15' }
+            @{ eodTriggerDescription = 'Cross-default under other indebtedness exceeding USD 5m'; eodTriggerGraceDays = '0' }
+        )
+        noticeParties = @(
+            @{ noticePartyName = 'Pacific Rim Holdings Ltd.'; noticePartyAddress = 'PO Box 309, Ugland House, Grand Cayman KY1-1104'; noticePartyEmail = 'legal@pacificrimholdings.com'; noticePartyAttention = 'General Counsel' }
+            @{ noticePartyName = 'Meridian Global Banking Corporation'; noticePartyAddress = '1 Canary Wharf, London E14 5AB'; noticePartyEmail = 'agency@meridianglobal.com'; noticePartyAttention = 'Agency Team' }
+        )
+        benchmarkFallbacks = @(
+            @{ benchmarkFallbackScenario = 'Term SOFR unavailable'; benchmarkFallbackRate = 'Compounded SOFR in arrears plus 0.26161% adjustment' }
+            @{ benchmarkFallbackScenario = 'Benchmark discontinuation'; benchmarkFallbackRate = 'Fallback rate agreed by Majority Lenders and Borrower' }
+        )
+        insurancePolicies = @(
+            @{ insurancePolicyType = 'PROPERTY'; insurancePolicyMinimumCover = '50000000'; insurancePolicyCurrency = 'USD' }
+            @{ insurancePolicyType = 'LIABILITY'; insurancePolicyMinimumCover = '25000000'; insurancePolicyCurrency = 'USD' }
+        )
+        obligors = @(
+            @{ obligorLegalName = 'Pacific Rim Holdings Ltd.'; obligorRole = 'BORROWER'; obligorJurisdiction = 'Cayman Islands' }
+            @{ obligorLegalName = 'Pacific Rim Group Holdings Ltd.'; obligorRole = 'GUARANTOR'; obligorJurisdiction = 'Cayman Islands' }
+            @{ obligorLegalName = 'Pacific Rim Operations Pte. Ltd.'; obligorRole = 'GUARANTOR'; obligorJurisdiction = 'Singapore' }
+        )
+        prepaymentEvents = @(
+            @{ prepaymentEventDescription = 'Voluntary prepayment of Term Loan A'; prepaymentEventPenaltyPct = '1.00' }
+            @{ prepaymentEventDescription = 'Change of control mandatory prepayment'; prepaymentEventPenaltyPct = '1.00' }
+            @{ prepaymentEventDescription = 'Asset sale excess cash sweep'; prepaymentEventPenaltyPct = '0.00' }
+        )
     }
 }
 
@@ -719,8 +770,10 @@ Write-JsonFile (Join-Path $ConfigDir 'fol-variables.json') @{ variables = $varia
 Write-JsonFile (Join-Path $ConfigDir 'fol-composition-rules.json') (Build-CompositionRules)
 Write-JsonFile (Join-Path $ConfigDir 'fol-binding-overlays.json') (Build-BindingOverlays)
 Write-JsonFile (Join-Path $ConfigDir 'fol-demo-test-variables.json') @{
-    name = 'Executive walkthrough — Pacific Rim Holdings'
+    name = 'Executive walkthrough - Pacific Rim Holdings'
+    scenarioName = 'Syndicated term loan - Pacific Rim USD 250m (LMA IG baseline)'
     required = $true
+    coverageTags = @('executive-demo', 'fol', 'syndicated', 'happy-path')
     variables = (Build-DemoTestVariables)
 }
 

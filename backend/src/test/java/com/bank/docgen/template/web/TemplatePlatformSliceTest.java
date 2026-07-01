@@ -120,11 +120,26 @@ class TemplatePlatformSliceTest {
         String templateId = createTemplate(masterId);
         configureTemplate(templateId);
         String previewId = testGenerate(templateId);
+        mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/previews")
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result[0].previewId").value(previewId))
+                .andExpect(jsonPath("$.result[0].docxAvailable").value(true))
+                .andExpect(jsonPath("$.result[0].pdfAvailable").value(true));
         mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/previews/" + previewId)
                         .with(authentication(new ManagementAuthentication(templateAuthor))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.status").value("SUCCEEDED"))
+                .andExpect(jsonPath("$.result.pdfArtifactStorageKey").isNotEmpty())
                 .andExpect(jsonPath("$.result.fidelityWarnings").isEmpty());
+        mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/previews/" + previewId + "/artifacts/docx")
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString(".docx")));
+        mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/previews/" + previewId + "/artifacts/pdf")
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString(".pdf")));
 
         runLifecycle(templateId);
         CredentialBundle credential = configureApiAndCredential(templateId);

@@ -42,4 +42,9 @@ describe('structuredContentNodes', () => {
     const json = serializeStructuredContent(doc)
     expect(JSON.parse(json).nodes[0].children[0].value).toBe('Hello')
   })
+
+  it('normalizes legacy blocks JSON through parseStructuredContent', () => {
+    const doc = parseStructuredContent('{"blocks":[{"type":"paragraph","text":"Legacy"}]}')
+    expect(doc.nodes[0]?.children?.[0]?.value).toBe('Legacy')
+  })
 })

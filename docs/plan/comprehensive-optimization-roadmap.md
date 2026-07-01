@@ -120,6 +120,7 @@ Reconcile docs before large implementation so acceptance criteria stay authorita
 | COR-T08 | M | Batch test + coverage thresholds | PRD §6.5; P19-T02/T03 Not Started | Multi-sample batch test + threshold blockers | **Done** (2026-06-25; batch test + coverage thresholds + publish gate wiring in T06) | P19 |
 | COR-T09 | M | Lifecycle panel context on detail | Approver cannot see test record summary inline | Integrated evidence panel (test, preview, diff, checklist) per role | **Done** (2026-06-25; verifiability panels on template detail + P19-T10) | P19-T10 |
 | COR-T10 | L | Semver publish UX | Manual text field default 1.0.0 | Level picker + conflict validation | **Done** (2026-06-24; major/minor/patch picker + semver utils) | PRD §7 |
+| COR-T15 | M | Template-scoped risk-prompt config UX (P19 residual) | P19-T08 group override on list view; hardcoded decision categories | Global default + optional template override; decision dialog wired to resolve chain; BDD S1–S12 | **In Progress** (2026-07-02; **P12-BDD-RISK-PROMPT-UX-001**) | P19-T08R, P19-T10R |
 
 ### 4.2 Workflow routing & queues (backend + frontend)
 

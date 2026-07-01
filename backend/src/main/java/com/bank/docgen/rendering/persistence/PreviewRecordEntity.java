@@ -36,6 +36,9 @@ public class PreviewRecordEntity {
     @Column(name = "artifact_storage_key", length = 512)
     private String artifactStorageKey;
 
+    @Column(name = "pdf_artifact_storage_key", length = 512)
+    private String pdfArtifactStorageKey;
+
     @Column(name = "fidelity_warnings_json")
     private String fidelityWarningsJson;
 
@@ -112,6 +115,10 @@ public class PreviewRecordEntity {
         return artifactStorageKey;
     }
 
+    public String getPdfArtifactStorageKey() {
+        return pdfArtifactStorageKey;
+    }
+
     public String getFidelityWarningsJson() {
         return fidelityWarningsJson;
     }
@@ -150,10 +157,16 @@ public class PreviewRecordEntity {
         this.updatedAt = Instant.now();
     }
 
-    public void markSucceeded(String artifactStorageKey, String fidelityWarningsJson) {
+    public void markSucceeded(String artifactStorageKey, String pdfArtifactStorageKey, String fidelityWarningsJson) {
         this.status = PreviewStatus.SUCCEEDED;
         this.artifactStorageKey = artifactStorageKey;
+        this.pdfArtifactStorageKey = pdfArtifactStorageKey;
         this.fidelityWarningsJson = fidelityWarningsJson;
+        this.updatedAt = Instant.now();
+    }
+
+    public void setPdfArtifactStorageKey(String pdfArtifactStorageKey) {
+        this.pdfArtifactStorageKey = pdfArtifactStorageKey;
         this.updatedAt = Instant.now();
     }
 

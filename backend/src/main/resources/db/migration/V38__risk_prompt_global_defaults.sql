@@ -1,0 +1,6 @@
+UPDATE risk_prompt_config
+SET reason_categories_json = '["BINDING_ISSUE","VARIABLE_SCHEMA_ISSUE","RULE_VALIDATION_ISSUE","FIDELITY_WARNING","COVERAGE_BELOW_THRESHOLD","PREVIEW_COMPARISON_DIFF","CONTRACT_SCOPE_CHANGE","OTHER"]',
+    risk_prompt_copy_json = '{}',
+    updated_at = CURRENT_TIMESTAMP
+WHERE scope_type = 'GLOBAL'
+  AND group_code IS NULL;

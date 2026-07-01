@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
@@ -9,10 +10,16 @@ import * as templatesApi from '@/api/templates'
 import type { CoverageSummary } from '@/types/template'
 import { ElMessage } from 'element-plus'
 
-const props = defineProps<{
-  templateId: string
-  refreshToken?: number
-}>()
+const props = withDefaults(
+  defineProps<{
+    templateId: string
+    refreshToken?: number
+    compact?: boolean
+  }>(),
+  {
+    compact: false,
+  },
+)
 
 const { t } = useI18n()
 const loading = ref(false)
@@ -62,13 +69,23 @@ watch(
 
 <template>
   <div v-loading="loading" class="coverage-panel">
-    <div class="coverage-header">
-      <h3>{{ t('templates.coverage.title') }}</h3>
+    <SectionPanelHeader
+      v-if="!compact"
+      :title="t('templates.coverage.title')"
+      :help-title="t('templates.coverage.helpTitle')"
+      :help-content="t('templates.coverage.helpContent')"
+    >
+      <template #actions>
+        <el-button link type="primary" @click="loadCoverage">
+          {{ t('templates.coverage.refresh') }}
+        </el-button>
+      </template>
+    </SectionPanelHeader>
+    <div v-else class="coverage-panel__toolbar">
       <el-button link type="primary" @click="loadCoverage">
         {{ t('templates.coverage.refresh') }}
       </el-button>
     </div>
-    <p>{{ t('templates.coverage.description') }}</p>
 
     <template v-if="summary">
       <el-alert
@@ -86,7 +103,7 @@ watch(
         </template>
       </el-alert>
 
-      <p class="threshold-hint">
+      <p v-if="!compact" class="threshold-hint">
         {{
           t('templates.coverage.thresholdHint', {
             scope: summary.appliedThreshold.scopeType,
@@ -140,16 +157,10 @@ watch(
 </template>
 
 <style scoped lang="scss">
-.coverage-header {
+.coverage-panel__toolbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: flex-end;
   margin-bottom: 0.5rem;
-
-  h3 {
-    margin: 0;
-  }
 }
 
 .coverage-alert {

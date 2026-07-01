@@ -186,7 +186,8 @@ class TemplateExportServiceTest {
                         true,
                         "Customer",
                         null,
-                        "Customer name"
+                        "Customer name",
+                        null
                 )),
                 List.of(new AnchorBindingView(
                         UUID.randomUUID().toString(),

@@ -24,6 +24,7 @@ describe('TemplatePreviewPanel', () => {
     status: 'SUCCEEDED',
     outputFormat: 'PDF',
     artifactStorageKey: 'artifacts/prev-1.pdf',
+    pdfArtifactStorageKey: 'artifacts/prev-1.pdf',
     fidelityWarnings: [
       {
         code: 'LAYOUT_SHIFT',
@@ -102,6 +103,6 @@ describe('TemplatePreviewPanel', () => {
 
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Run test generate to create a preview record.')
+    expect(wrapper.text()).toContain('Run preview on a test data set to generate downloadable DOCX and PDF artifacts.')
   })
 })

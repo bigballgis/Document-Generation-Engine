@@ -4,9 +4,12 @@ import { useI18n } from 'vue-i18n'
 import { type FormInstance, type FormRules } from 'element-plus'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
+import TemplateRiskPromptConfigPanel from '@/components/templates/TemplateRiskPromptConfigPanel.vue'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { useMastersStore } from '@/stores/masters'
 import { useTemplatesStore } from '@/stores/templates'
+import * as templateRiskPromptApi from '@/api/templateRiskPromptConfig'
+import type { TemplateRiskPromptFormState } from '@/types/template'
 
 const props = defineProps<{
   modelValue: boolean
@@ -35,6 +38,13 @@ const form = reactive({
   externalId: '',
   name: '',
   description: '',
+})
+
+const advancedSections = ref<string[]>([])
+const riskPromptFormState = ref<TemplateRiskPromptFormState>({
+  customize: false,
+  reasonCategories: [],
+  riskPromptCopy: {},
 })
 
 const formRules = computed<FormRules>(() => ({
@@ -107,7 +117,24 @@ function resetForm() {
   form.externalId = ''
   form.name = ''
   form.description = ''
+  advancedSections.value = []
+  riskPromptFormState.value = {
+    customize: false,
+    reasonCategories: [],
+    riskPromptCopy: {},
+  }
   formRef.value?.clearValidate()
+}
+
+async function saveRiskPromptOverride(templateId: string) {
+  if (!riskPromptFormState.value.customize) {
+    return
+  }
+  await templateRiskPromptApi.upsertTemplateRiskPromptConfig(templateId, {
+    useDefault: false,
+    reasonCategories: riskPromptFormState.value.reasonCategories,
+    riskPromptCopy: riskPromptFormState.value.riskPromptCopy,
+  })
 }
 
 async function handleSubmit() {
@@ -127,6 +154,9 @@ async function handleSubmit() {
       name: form.name.trim(),
       description: form.description.trim() || undefined,
     })
+    if (riskPromptFormState.value.customize) {
+      await saveRiskPromptOverride(created.id)
+    }
     visible.value = false
     emit('created', created.id)
   } catch {
@@ -180,6 +210,16 @@ async function handleSubmit() {
       <el-form-item :label="t('templates.create.description')">
         <el-input v-model="form.description" type="textarea" :rows="3" />
       </el-form-item>
+
+      <el-collapse v-model="advancedSections" class="create-advanced">
+        <el-collapse-item :title="t('templates.riskPrompt.createSectionTitle')" name="riskPrompt">
+          <TemplateRiskPromptConfigPanel
+            v-model:form-state="riskPromptFormState"
+            create-mode
+            :show-save="false"
+          />
+        </el-collapse-item>
+      </el-collapse>
     </el-form>
     <template #footer>
       <el-button @click="visible = false">{{ t('templates.create.cancel') }}</el-button>
@@ -193,5 +233,9 @@ async function handleSubmit() {
 <style scoped lang="scss">
 .create-error {
   margin-bottom: 1rem;
+}
+
+.create-advanced {
+  margin-top: 0.5rem;
 }
 </style>

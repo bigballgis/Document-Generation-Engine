@@ -11,6 +11,7 @@ import com.bank.docgen.template.api.ChangeDiffView;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.api.CoverageSummaryView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
+import com.bank.docgen.template.api.DecisionFormConfigView;
 import com.bank.docgen.template.api.UpsertContentModuleReferenceRequest;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
@@ -35,6 +36,7 @@ import com.bank.docgen.template.domain.PublishGatePhase;
 import com.bank.docgen.template.service.ChangeDiffService;
 import com.bank.docgen.template.service.CoverageComputationService;
 import com.bank.docgen.template.service.PublishGateService;
+import com.bank.docgen.template.service.RiskPromptConfigService;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.TemplateDeleteService;
 import com.bank.docgen.template.service.TemplateLifecycleService;
@@ -70,6 +72,7 @@ public class TemplateController {
     private final ChangeDiffService changeDiffService;
     private final PublishGateService publishGateService;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final RiskPromptConfigService riskPromptConfigService;
     private final TraceIdProvider traceIdProvider;
 
     public TemplateController(
@@ -81,6 +84,7 @@ public class TemplateController {
             ChangeDiffService changeDiffService,
             PublishGateService publishGateService,
             TemplateContentModuleReferenceService contentModuleReferenceService,
+            RiskPromptConfigService riskPromptConfigService,
             TraceIdProvider traceIdProvider
     ) {
         this.templateService = templateService;
@@ -91,6 +95,7 @@ public class TemplateController {
         this.changeDiffService = changeDiffService;
         this.publishGateService = publishGateService;
         this.contentModuleReferenceService = contentModuleReferenceService;
+        this.riskPromptConfigService = riskPromptConfigService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -183,7 +188,8 @@ public class TemplateController {
                 body.required(),
                 body.defaultValue(),
                 body.enumValues(),
-                body.description()
+                body.description(),
+                body.computeExpression()
         );
         return envelope(request, templateService.upsertVariable(templateId, normalized, session));
     }
@@ -304,6 +310,15 @@ public class TemplateController {
             HttpServletRequest request
     ) {
         return envelope(request, templateRuleValidationService.validateRules(templateId, body, session));
+    }
+
+    @GetMapping("/{templateId}/lifecycle/decision-form-config")
+    public SuccessEnvelope<DecisionFormConfigView> decisionFormConfig(
+            @PathVariable UUID templateId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, riskPromptConfigService.resolveDecisionFormConfig(templateId, session));
     }
 
     @PostMapping("/{templateId}/lifecycle/submit-test")

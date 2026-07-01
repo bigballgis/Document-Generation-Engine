@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useTemplatesStore } from '@/stores/templates'
@@ -31,7 +32,7 @@ const variableDialogOpen = ref(false)
 const editingVariableKey = ref<string | null>(null)
 const treeRef = ref<{ filter: (value: string) => void } | null>(null)
 
-const variableTypes = ['TEXT', 'NUMBER', 'AMOUNT', 'DATE', 'ENUM', 'BOOLEAN', 'LIST', 'OBJECT']
+const variableTypes = ['TEXT', 'NUMBER', 'AMOUNT', 'DATE', 'ENUM', 'BOOLEAN', 'LIST', 'OBJECT', 'COMPUTED']
 
 const variableForm = reactive<UpsertVariablePayload>({
   variableKey: '',
@@ -39,6 +40,7 @@ const variableForm = reactive<UpsertVariablePayload>({
   required: true,
   defaultValue: '',
   description: '',
+  computeExpression: '',
 })
 
 const sourceTree = computed(() => buildVariableSchemaTree(props.variables))
@@ -59,6 +61,7 @@ function resetVariableForm() {
   variableForm.required = true
   variableForm.defaultValue = ''
   variableForm.description = ''
+  variableForm.computeExpression = ''
   editingVariableKey.value = null
 }
 
@@ -74,6 +77,7 @@ function openEditVariable(variable: VariableSchema) {
   variableForm.required = variable.required
   variableForm.defaultValue = variable.defaultValue ?? ''
   variableForm.description = variable.description ?? ''
+  variableForm.computeExpression = variable.computeExpression ?? ''
   variableDialogOpen.value = true
 }
 
@@ -85,6 +89,10 @@ async function handleSaveVariable() {
       required: variableForm.required,
       defaultValue: variableForm.defaultValue || null,
       description: variableForm.description || null,
+      computeExpression:
+        variableForm.variableType === 'COMPUTED'
+          ? variableForm.computeExpression?.trim() || null
+          : null,
     })
     variableDialogOpen.value = false
     ElMessage.success(t('templates.authoring.saveVariableSuccess'))
@@ -129,6 +137,18 @@ function filterTreeNode(value: string, data: VariableTreeNode): boolean {
 
 <template>
   <div class="variable-tree-panel">
+    <SectionPanelHeader
+      :title="t('templates.authoring.variablesTitle')"
+      :help-title="t('templates.authoring.variablesHelpTitle')"
+      :help-content="t('templates.authoring.variablesHelpContent')"
+    >
+      <template #actions>
+        <el-button type="primary" plain @click="openAddVariable">
+          {{ t('templates.authoring.addVariable') }}
+        </el-button>
+      </template>
+    </SectionPanelHeader>
+
     <div class="panel-toolbar">
       <el-input
         v-model="searchQuery"
@@ -139,9 +159,6 @@ function filterTreeNode(value: string, data: VariableTreeNode): boolean {
       <span class="variable-count">
         {{ t('templates.authoring.variableTreeCount', { count: totalVariableCount }) }}
       </span>
-      <el-button type="primary" plain @click="openAddVariable">
-        {{ t('templates.authoring.addVariable') }}
-      </el-button>
     </div>
 
     <el-empty
@@ -209,6 +226,15 @@ function filterTreeNode(value: string, data: VariableTreeNode): boolean {
         </el-form-item>
         <el-form-item :label="t('templates.authoring.description')">
           <el-input v-model="variableForm.description" type="textarea" :rows="2" />
+        </el-form-item>
+        <el-form-item
+          v-if="variableForm.variableType === 'COMPUTED'"
+          :label="t('templates.authoring.computeExpression')"
+        >
+          <el-input
+            v-model="variableForm.computeExpression"
+            :placeholder="t('templates.authoring.computeExpressionPlaceholder')"
+          />
         </el-form-item>
       </el-form>
       <template #footer>

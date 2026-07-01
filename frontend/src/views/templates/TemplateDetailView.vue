@@ -129,6 +129,7 @@ const credentialSecretDialogVisible = ref(false)
 const credentialSecretValue = ref('')
 const credentialSecretExternalId = ref('')
 const lastPreview = ref<PreviewRecord | null>(null)
+const selectedPreviewId = ref<string | null>(null)
 const testerEvidenceViewed = ref({
   fidelityViewedConfirmed: false,
   coverageViewedConfirmed: false,
@@ -143,7 +144,11 @@ const teamLeadGoLiveViewed = ref({
   preReleaseChecksViewed: false,
 })
 const selectedTestDataSetId = ref<string | null>(null)
+const generatingPreview = ref(false)
+const generatingPreviewId = ref<string | null>(null)
+const batchTesting = ref(false)
 const coverageRefreshToken = ref(0)
+const submitForTestDialogOpen = ref(false)
 const bindingGateResult = ref<BindingValidationResult | null>(null)
 const publishGateChecklist = ref<PublishGateChecklist | null>(null)
 const submitGateChecklist = ref<PublishGateChecklist | null>(null)
@@ -404,10 +409,19 @@ const showAuthoringSection = computed(
     template.value?.lifecycleStatus !== 'STOPPED' &&
     template.value?.lifecycleStatus !== 'DEPRECATED',
 )
+const showTestWorkflowRedirect = computed(
+  () =>
+    isDevEditor.value &&
+    (template.value?.lifecycleStatus === 'DRAFT' ||
+      template.value?.lifecycleStatus === 'TESTING') &&
+    (authorTemplates.value || decideTests.value),
+)
 const showDevWorkflowBar = computed(
   () =>
     isDevEditor.value &&
-    (showLifecycleSection.value || showGovernanceSection.value),
+    (showLifecycleSection.value ||
+      showGovernanceSection.value ||
+      showTestWorkflowRedirect.value),
 )
 const canEditContentModuleReferences = computed(
   () => authorTemplates.value && template.value?.lifecycleStatus === 'DRAFT',
@@ -573,8 +587,8 @@ async function handleJourneyTrialGenerate() {
 }
 
 async function handleJourneySubmitForTest() {
-  openLifecyclePanel()
-  await handleSubmitForTest()
+  openTestPreviewTab()
+  submitForTestDialogOpen.value = true
 }
 
 async function handleJourneySubmitForApproval() {
@@ -927,21 +941,85 @@ function openCredentialSecretDialog(externalId: string, secret: string) {
   credentialSecretDialogVisible.value = true
 }
 
-async function handleTestGenerate() {
+async function handleTestGenerate(testDataSetId?: string) {
+  const resolvedId = testDataSetId ?? selectedTestDataSetId.value ?? undefined
+  generatingPreview.value = true
+  generatingPreviewId.value = resolvedId ?? null
   try {
     const preview = await templatesStore.testGenerate(templateId.value, {
-      testDataSetId: selectedTestDataSetId.value ?? undefined,
+      testDataSetId: resolvedId,
     })
     lastPreview.value = preview
+    selectedPreviewId.value = preview.previewId
+    if (resolvedId) {
+      selectedTestDataSetId.value = resolvedId
+    }
+    activeDetailTab.value = 'authoring'
+    await router.replace({
+      query: { ...route.query, tab: 'authoring', authoringTab: 'testPreview' },
+    })
     ElMessage.success(t('templates.testGenerate.success', { previewId: preview.previewId }))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.testGenerate'))
+  } finally {
+    generatingPreview.value = false
+    generatingPreviewId.value = null
   }
 }
 
-async function handleSubmitForTest() {
+async function handleBatchTestGenerate() {
+  batchTesting.value = true
   try {
-    await templatesStore.submitForTest(templateId.value, { commentSummary: lifecycleComment.value })
+    const dataSets = await templatesApi.listTestDataSets(templateId.value)
+    if (dataSets.length === 0) {
+      ElMessage.warning(t('templates.testDataSets.error.noDataSetsForBatch'))
+      return
+    }
+    const summary = await templatesApi.batchTestGenerate(templateId.value, {
+      testDataSetIds: dataSets.map((row) => row.testDataSetId),
+    })
+    coverageRefreshToken.value += 1
+    activeDetailTab.value = 'authoring'
+    await router.replace({
+      query: { ...route.query, tab: 'authoring', authoringTab: 'testPreview' },
+    })
+    ElMessage.success(
+      t('templates.testDataSets.batchSuccess', {
+        succeeded: summary.succeededCount,
+        failed: summary.failedCount,
+        warnings: summary.warningCount,
+      }),
+    )
+  } catch {
+    ElMessage.error(t('templates.testDataSets.error.batch'))
+  } finally {
+    batchTesting.value = false
+  }
+}
+
+function openTestPreviewTab() {
+  activeDetailTab.value = 'authoring'
+  void router.replace({
+    query: { ...route.query, tab: 'authoring', authoringTab: 'testPreview' },
+  })
+}
+
+async function handlePreviewSelected(previewId: string | null) {
+  selectedPreviewId.value = previewId
+  if (!previewId) {
+    lastPreview.value = null
+    return
+  }
+  try {
+    lastPreview.value = await templatesApi.getPreview(templateId.value, previewId)
+  } catch {
+    ElMessage.error(errorMessage.value || t('templates.previewHistory.error.loadDetail'))
+  }
+}
+
+async function handleSubmitForTest(comment = '') {
+  try {
+    await templatesStore.submitForTest(templateId.value, { commentSummary: comment })
     lifecycleComment.value = ''
     ElMessage.success(t('templates.lifecycle.submitTestSuccess'))
   } catch {
@@ -1372,17 +1450,19 @@ async function handleDeleteTemplate() {
         @confirm-go-live="handleJourneyTeamLeadConfirmGoLive"
       />
 
-      <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />
+      <TemplateWorkflowBanner
+        v-if="!(isDevEditor && showTestWorkflowRedirect)"
+        :template="template"
+        @open-lifecycle="openLifecyclePanel"
+      />
 
       <TemplateDevVersionActionBar
         v-if="showDevWorkflowBar"
         :lifecycle-comment="lifecycleComment"
-        :show-draft-actions="showDraftActions"
-        :show-testing-decision-actions="showTestingDecisionActions"
         :show-submit-for-approval="showSubmitForApproval"
         :show-approval-decision-actions="showApprovalDecisionActions"
         :show-publish-actions="showPublishActions"
-        :show-test-generate="showTestGenerate"
+        :show-test-workflow-redirect="showTestWorkflowRedirect"
         :show-stop-action="showStopAction"
         :show-restore-action="showRestoreAction"
         :show-deprecate-action="showDeprecateAction"
@@ -1402,12 +1482,10 @@ async function handleDeleteTemplate() {
         :submitting="templatesStore.submitting"
         @update:lifecycle-comment="lifecycleComment = $event"
         @update:publish-bump-level="publishBumpLevel = $event"
-        @submit-for-test="handleSubmitForTest"
-        @test-decision="handleTestDecision"
         @submit-for-approval="handleSubmitForApproval"
         @approval-decision="handleApprovalDecision"
         @publish="handlePublish"
-        @test-generate="handleTestGenerate"
+        @open-test-preview-tab="openTestPreviewTab"
         @governance-action="handleGovernanceAction"
         @retry-publish-gate="loadPublishGateData"
         @retry-submit-gate="loadSubmitGateData"
@@ -1428,6 +1506,7 @@ async function handleDeleteTemplate() {
           name="lifecycle"
         >
           <TemplateDetailLifecycleTab
+            :template-id="templateId"
             :show-lifecycle-section="showLifecycleSection"
             :show-governance-section="showGovernanceSection"
             :lifecycle-comment="lifecycleComment"
@@ -1474,6 +1553,7 @@ async function handleDeleteTemplate() {
         >
           <TemplateDetailAuthoringTab
             :template-id="templateId"
+            :master-id="template.masterId"
             :variables="template.variables"
             :bindings="template.bindings"
             :rules="template.rules"
@@ -1481,8 +1561,25 @@ async function handleDeleteTemplate() {
             :can-edit-content-module-references="canEditContentModuleReferences"
             :coverage-refresh-token="coverageRefreshToken"
             :last-preview="lastPreview"
+            :selected-preview-id="selectedPreviewId"
+            :lifecycle-status="template.lifecycleStatus"
+            :selected-test-data-set-id="selectedTestDataSetId"
+            :show-draft-actions="showDraftActions"
+            :show-testing-decision-actions="showTestingDecisionActions"
+            :show-test-generate="showTestGenerate"
+            :submitting="templatesStore.submitting"
+            :generating-preview="generatingPreview"
+            :generating-preview-id="generatingPreviewId"
+            :batch-testing="batchTesting"
+            :open-submit-for-test-dialog="submitForTestDialogOpen"
             @updated="loadTemplate"
-            @selected-test-data-set="selectedTestDataSetId = $event"
+            @update:selected-test-data-set-id="selectedTestDataSetId = $event"
+            @update:selected-preview-id="handlePreviewSelected"
+            @update:open-submit-for-test-dialog="submitForTestDialogOpen = $event"
+            @test-generate="handleTestGenerate"
+            @test-generate-batch="handleBatchTestGenerate"
+            @submit-for-test="handleSubmitForTest"
+            @test-decision="handleTestDecision"
             @batch-complete="coverageRefreshToken += 1"
           />
         </el-tab-pane>
@@ -1568,6 +1665,7 @@ async function handleDeleteTemplate() {
     <TemplateLifecycleDecisionDialog
       v-model="decisionDialogOpen"
       :mode="decisionDialogMode"
+      :template-id="templateId"
       :loading="templatesStore.submitting"
       :initial-comment="lifecycleComment"
       @submit="submitLifecycleDecision"

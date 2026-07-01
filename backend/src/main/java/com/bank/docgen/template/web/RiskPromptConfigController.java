@@ -5,7 +5,7 @@ import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.RiskPromptConfigView;
-import com.bank.docgen.template.api.UpsertRiskPromptConfigRequest;
+import com.bank.docgen.template.api.UpsertGlobalRiskPromptConfigRequest;
 import com.bank.docgen.template.service.RiskPromptConfigService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -34,20 +33,19 @@ public class RiskPromptConfigController {
 
     @GetMapping
     public SuccessEnvelope<RiskPromptConfigView> get(
-            @RequestParam(required = false) String groupCode,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        return envelope(request, riskPromptConfigService.resolve(groupCode, session));
+        return envelope(request, riskPromptConfigService.getGlobal(session));
     }
 
     @PutMapping
     public SuccessEnvelope<RiskPromptConfigView> upsert(
-            @Valid @RequestBody UpsertRiskPromptConfigRequest body,
+            @Valid @RequestBody UpsertGlobalRiskPromptConfigRequest body,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        return envelope(request, riskPromptConfigService.upsert(body, session));
+        return envelope(request, riskPromptConfigService.upsertGlobal(body, session));
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

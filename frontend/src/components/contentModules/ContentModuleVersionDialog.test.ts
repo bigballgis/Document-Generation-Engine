@@ -24,7 +24,7 @@ describe('ContentModuleVersionDialog', () => {
     vi.mocked(contentModulesApi.updateContentModuleDraftVersion).mockReset()
   })
 
-  it('loads contentStructureJson from the version on edit instead of a blank default', async () => {
+  it('loads legacy block content into the structured editor on edit', async () => {
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(ContentModuleVersionDialog, {
       props: {
@@ -45,14 +45,11 @@ describe('ContentModuleVersionDialog', () => {
 
     await flushPromises()
 
-    const textarea = wrapper.find('textarea')
-    expect(textarea.exists()).toBe(true)
-    expect(textarea.element.value).toContain('"type": "paragraph"')
-    expect(textarea.element.value).toContain('Existing clause')
-    expect(textarea.element.value).not.toBe('{\n  "blocks": []\n}')
+    expect(wrapper.find('[data-testid="controlled-structured-content-editor"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Existing clause')
   })
 
-  it('uses the default empty structure only for create mode', async () => {
+  it('uses the default empty v1 structure for create mode', async () => {
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(ContentModuleVersionDialog, {
       props: {
@@ -66,8 +63,6 @@ describe('ContentModuleVersionDialog', () => {
 
     await flushPromises()
 
-    const textarea = wrapper.find('textarea')
-    expect(textarea.element.value).toContain('"blocks"')
-    expect(textarea.element.value).toContain('[]')
+    expect(wrapper.find('[data-testid="controlled-structured-content-editor"]').exists()).toBe(true)
   })
 })

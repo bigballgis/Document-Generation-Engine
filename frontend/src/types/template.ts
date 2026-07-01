@@ -67,6 +67,7 @@ export interface VariableSchema {
   defaultValue: string | null
   enumValues: string[]
   description: string | null
+  computeExpression?: string | null
 }
 
 export interface AnchorBinding {
@@ -110,6 +111,7 @@ export interface UpsertVariablePayload {
   defaultValue?: string | null
   enumValues?: string | null
   description?: string | null
+  computeExpression?: string | null
 }
 
 export interface UpsertBindingPayload {
@@ -252,19 +254,39 @@ export interface PreviewComparison {
   items: PreviewComparisonItem[]
 }
 
-export type RiskPromptScopeType = 'GLOBAL' | 'GROUP'
-
 export interface RiskPromptConfig {
-  scopeType: RiskPromptScopeType
-  groupCode: string | null
+  scopeType: 'GLOBAL'
+  groupCode: null
   reasonCategories: string[]
   riskPromptCopy: Record<string, string>
   updatedAt: string
 }
 
-export interface UpsertRiskPromptConfigPayload {
-  scopeType: RiskPromptScopeType
-  groupCode?: string | null
+export interface UpsertGlobalRiskPromptConfigPayload {
+  reasonCategories: string[]
+  riskPromptCopy: Record<string, string>
+}
+
+export interface TemplateRiskPromptConfig {
+  useDefault: boolean
+  reasonCategories: string[]
+  riskPromptCopy: Record<string, string>
+  updatedAt: string
+}
+
+export interface UpsertTemplateRiskPromptConfigPayload {
+  useDefault: boolean
+  reasonCategories?: string[]
+  riskPromptCopy?: Record<string, string>
+}
+
+export interface DecisionFormConfig {
+  reasonCategories: string[]
+  riskPromptCopy: Record<string, string>
+}
+
+export interface TemplateRiskPromptFormState {
+  customize: boolean
   reasonCategories: string[]
   riskPromptCopy: Record<string, string>
 }
@@ -322,10 +344,25 @@ export interface PreviewRecord {
   status: PreviewStatus
   outputFormat: string
   artifactStorageKey: string | null
+  pdfArtifactStorageKey: string | null
   fidelityWarnings: FidelityWarning[]
   previewComparison: PreviewComparison | null
   testDataSetId: string | null
   createdAt: string
+}
+
+export interface PreviewRunSummary {
+  previewId: string
+  templateVersionId: string
+  status: PreviewStatus
+  testDataSetId: string | null
+  createdAt: string
+  createdBy: string
+  fidelityWarningCount: number
+  comparisonBlockerCount: number
+  comparisonWarningCount: number
+  docxAvailable: boolean
+  pdfAvailable: boolean
 }
 
 export type RuleValidationStatus =

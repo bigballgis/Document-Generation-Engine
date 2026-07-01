@@ -3,6 +3,7 @@ package com.bank.docgen.demo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
+import com.bank.docgen.rendering.DocxWordCompatibilitySupport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
@@ -31,7 +32,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType;
 class FolMasterDocxAssetGeneratorTest {
 
     /** Bump when page layout / header / footer changes; import script uses this to refresh uploaded masters. */
-    static final String MASTER_LAYOUT_VERSION = "fol-layout-v2-headers-footers-margins";
+    static final String MASTER_LAYOUT_VERSION = "fol-layout-v3-clean-anchors-no-filler";
 
     private static final Path ASSET_PATH = Path.of("..", "deploy", "demo-fol", "assets", "wholesale-fol-master.docx");
 
@@ -133,6 +134,7 @@ class FolMasterDocxAssetGeneratorTest {
                 addSection(document, title, anchorId);
             }
 
+            DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
             document.write(output);
             return output.toByteArray();
         }
@@ -235,16 +237,6 @@ class FolMasterDocxAssetGeneratorTest {
         titleRun.setFontSize(11);
         titleRun.setFontFamily("Calibri");
         titleRun.setText(title);
-
-        XWPFParagraph filler = document.createParagraph();
-        XWPFRun fillerRun = filler.createRun();
-        fillerRun.setFontSize(10);
-        fillerRun.setFontFamily("Calibri");
-        fillerRun.setColor("444444");
-        fillerRun.setText(
-                "Section-level anchor in the master layout container. Long-form clause text is composed "
-                        + "from approved standard modules at template authoring time."
-        );
 
         XWPFParagraph anchorParagraph = document.createParagraph();
         XWPFRun anchorRun = anchorParagraph.createRun();

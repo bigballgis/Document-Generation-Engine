@@ -39,6 +39,9 @@ public class VariableSchemaEntity {
     @Column(length = 512)
     private String description;
 
+    @Column(name = "compute_expression")
+    private String computeExpression;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -56,7 +59,8 @@ public class VariableSchemaEntity {
             boolean required,
             String defaultValue,
             String enumValues,
-            String description
+            String description,
+            String computeExpression
     ) {
         this.id = id;
         this.templateVersionId = templateVersionId;
@@ -66,6 +70,7 @@ public class VariableSchemaEntity {
         this.defaultValue = defaultValue;
         this.enumValues = enumValues;
         this.description = description;
+        this.computeExpression = computeExpression;
         Instant now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
@@ -103,6 +108,10 @@ public class VariableSchemaEntity {
         return description;
     }
 
+    public String getComputeExpression() {
+        return computeExpression;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -116,13 +125,15 @@ public class VariableSchemaEntity {
             boolean required,
             String defaultValue,
             String enumValues,
-            String description
+            String description,
+            String computeExpression
     ) {
         this.variableType = variableType;
         this.required = required;
         this.defaultValue = defaultValue;
         this.enumValues = enumValues;
         this.description = description;
+        this.computeExpression = computeExpression;
         this.updatedAt = Instant.now();
     }
 }

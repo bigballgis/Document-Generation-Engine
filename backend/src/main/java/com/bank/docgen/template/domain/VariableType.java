@@ -8,5 +8,6 @@ public enum VariableType {
     ENUM,
     BOOLEAN,
     LIST,
-    OBJECT
+    OBJECT,
+    COMPUTED
 }

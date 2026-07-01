@@ -73,7 +73,8 @@ public class DockerExecPdfConversionService implements PdfConversionService {
             if (!Files.exists(outputPdf)) {
                 throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
             }
-            return Files.readAllBytes(outputPdf);
+            byte[] converted = Files.readAllBytes(outputPdf);
+            return PdfPageNumberStamper.stampPageNumbers(converted);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new TemplateValidationException("api.error.generation.pdfConversionFailed");

@@ -1,0 +1,45 @@
+import { describe, expect, it } from 'vitest'
+import { buildMasterAnchorBindingRows } from '@/utils/masterAnchorBindingRows'
+import type { AnchorBinding } from '@/types/template'
+import type { MasterAnchor } from '@/types/master'
+
+describe('buildMasterAnchorBindingRows', () => {
+  const masterAnchors: MasterAnchor[] = [
+    { anchorId: 'FOL_SEC_01', displayLabel: 'Section 1' },
+    { anchorId: 'FOL_SEC_02', displayLabel: 'Section 2' },
+    { anchorId: 'FOL_SEC_03', displayLabel: 'Section 3' },
+  ]
+
+  it('preserves master anchor order and marks unconfigured anchors', () => {
+    const bindings: AnchorBinding[] = [
+      {
+        anchorId: 'FOL_SEC_02',
+        declaredContentType: 'TEXT',
+        structuredContentJson: '{"nodes":[]}',
+        validationStatus: 'VALID',
+      },
+    ]
+
+    const rows = buildMasterAnchorBindingRows(masterAnchors, bindings)
+
+    expect(rows.map((row) => row.anchorId)).toEqual(['FOL_SEC_01', 'FOL_SEC_02', 'FOL_SEC_03'])
+    expect(rows[0]?.configured).toBe(false)
+    expect(rows[1]?.configured).toBe(true)
+    expect(rows[1]?.declaredContentType).toBe('TEXT')
+    expect(rows[2]?.configured).toBe(false)
+  })
+
+  it('appends orphan bindings after master anchors', () => {
+    const bindings: AnchorBinding[] = [
+      {
+        anchorId: 'ORPHAN',
+        declaredContentType: 'TEXT',
+        structuredContentJson: '{"nodes":[]}',
+      },
+    ]
+
+    const rows = buildMasterAnchorBindingRows(masterAnchors, bindings)
+
+    expect(rows.at(-1)?.anchorId).toBe('ORPHAN')
+  })
+})

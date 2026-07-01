@@ -73,7 +73,7 @@ test.describe('corporate FOL catalog (demo seed)', () => {
 
     const variableSearch = page.locator('.variable-tree-panel .search-input input')
     await variableSearch.fill('borrowerLegalName')
-    await expect(page.locator('.variable-tree').getByText('LegalName')).toBeVisible({ timeout: 15_000 })
+    await expect(page.locator('.variable-tree').getByText('Borrower legal name')).toBeVisible({ timeout: 15_000 })
 
     await authoringTabs.getByRole('tab', { name: /^bindings$/i }).click()
     const anchorFilter = page.locator('.bindings-panel').getByPlaceholder(/filter/i).first()

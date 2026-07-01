@@ -8,6 +8,7 @@ import en from '@/i18n/locales/en'
 import type { BindingValidationResult } from '@/types/template'
 
 const baseProps = {
+  templateId: 'tpl-1',
   showLifecycleSection: true,
   showGovernanceSection: false,
   lifecycleComment: '',
@@ -42,7 +43,10 @@ function mountTab(props: Partial<typeof baseProps> = {}) {
   const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
   return mount(TemplateDetailLifecycleTab, {
     props: { ...baseProps, ...props },
-    global: { plugins: [i18n, ElementPlus] },
+    global: {
+      plugins: [i18n, ElementPlus],
+      stubs: { TemplateRiskPromptConfigPanel: true },
+    },
   })
 }
 

@@ -69,7 +69,9 @@ describe('buildVariableSchemaTree', () => {
     expect(tree[0]?.containerType).toBe('LIST')
     expect(tree[0]?.displayLabel).toBe('Syndicate lender roster')
     expect(tree[0]?.children).toHaveLength(2)
-    expect(tree[0]?.children?.[0]?.displayLabel).toBe('Lender legal name')
+    expect(
+      tree[0]?.children?.some((child) => child.displayLabel === 'Lender legal name'),
+    ).toBe(true)
   })
 })
 

@@ -163,7 +163,8 @@ class CoverageComputationServiceTest {
                 true,
                 null,
                 null,
-                "Required"
+                "Required",
+                null
         );
     }
 

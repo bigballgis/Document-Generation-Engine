@@ -74,6 +74,13 @@ v1 introduces timeout escalation only as in-platform visibility for delayed work
 - Publish immediately after release-checklist success: rejected because the release action changes callable versions and should have an explicit final confirmation.
 - Multi-person release confirmation: rejected for the confirmed baseline because template approval is already a one-level approval process.
 
+## Consequences update (2026-07-02 — BDD-TEMPLATE-RISK-PROMPT-UX-001)
+
+- **Risk prompt scope:** The originally shipped **group-scoped override** for reason categories and prompt copy is **superseded** by **global default + optional per-template override**. Group override is removed from product/UI/API resolution; template inherits global unless a template override is explicitly saved (`useDefault: false`).
+- **Semantic boundary:** Configured reason categories apply only to **negative** test/approval decisions (fail/reject return reasons), not to submit-for-test, submit-for-approval, or publish gates. Binding and schema validation blockers remain enforced by publish/submit gate checks independently of reason-category toggles.
+- **UX placement:** Configuration moves from template list to template create (collapsed advanced section) and template detail; decision dialogs must resolve effective config by `templateId` instead of hardcoded category lists.
+- **Audit and sensitive-data boundaries** from this ADR remain unchanged: prompt copy stays structured, audited, and free of variable/customer plaintext.
+
 ## Related Documents
 
 - [Requirements Plan](../../requirements/requirements-plan.md)

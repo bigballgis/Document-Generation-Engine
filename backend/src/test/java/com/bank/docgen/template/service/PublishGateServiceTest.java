@@ -135,7 +135,7 @@ class PublishGateServiceTest {
                 .thenReturn(Optional.of(new ApiPolicyEntity(UUID.randomUUID(), templateId, "[]", "10000002")));
         when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
                 .thenReturn(List.of(new VariableSchemaEntity(
-                        UUID.randomUUID(), versionId, "field", VariableType.TEXT, true, null, null, "desc")));
+                        UUID.randomUUID(), versionId, "field", VariableType.TEXT, true, null, null, "desc", null)));
         when(batchTestRunRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
                 .thenReturn(List.of(new BatchTestRunEntity(
                         UUID.randomUUID(), templateId, "10000002", 1, 1, 0, 0, 0, "[]")));
@@ -329,7 +329,7 @@ class PublishGateServiceTest {
                 "TDS-1",
                 null
         );
-        preview.markSucceeded("previews/test/output.docx", "[]");
+        preview.markSucceeded("previews/test/output.docx", "previews/test/output.pdf", "[]");
         return preview;
     }
 }

@@ -454,7 +454,9 @@ public class TemplateVersionLineService {
 
                     variable.getEnumValues(),
 
-                    variable.getDescription()
+                    variable.getDescription(),
+
+                    variable.getComputeExpression()
 
             ));
 

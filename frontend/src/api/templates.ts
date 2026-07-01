@@ -18,6 +18,7 @@ import type {
   LifecycleImpactPreview,
   LifecycleImpactPreviewRequest,
   PreviewRecord,
+  PreviewRunSummary,
   PublishGateChecklist,
   PublishTemplatePayload,
   RuleValidationResult,
@@ -308,6 +309,30 @@ export async function getPreview(templateId: string, previewId: string): Promise
     `/templates/${templateId}/previews/${previewId}`,
   )
   return unwrap(response.data)
+}
+
+export async function listPreviewRuns(templateId: string): Promise<PreviewRunSummary[]> {
+  const response = await http.get<ApiEnvelope<PreviewRunSummary[]>>(
+    `/templates/${templateId}/previews`,
+  )
+  return unwrap(response.data)
+}
+
+export type PreviewArtifactFormat = 'docx' | 'pdf'
+
+export async function downloadPreviewArtifact(
+  templateId: string,
+  previewId: string,
+  format: PreviewArtifactFormat,
+): Promise<{ blob: Blob; filename: string }> {
+  const response = await http.get<Blob>(
+    `/templates/${templateId}/previews/${previewId}/artifacts/${format}`,
+    { responseType: 'blob' },
+  )
+  const disposition = response.headers['content-disposition'] ?? ''
+  const filenameMatch = /filename="([^"]+)"/i.exec(disposition)
+  const fallback = format === 'pdf' ? 'preview.pdf' : 'preview.docx'
+  return { blob: response.data, filename: filenameMatch?.[1] ?? fallback }
 }
 
 export async function validateBindings(templateId: string): Promise<BindingValidationResult> {

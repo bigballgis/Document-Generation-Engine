@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
 import {
   emptyGuidanceKeyFromStepLabel,
   stepGuidanceKeyFromLabel,
@@ -14,9 +15,12 @@ const props = withDefaults(
     guidanceKey?: string
     ariaLabelKey?: string
     titleKey?: string
+    /** When false, step descriptions and guidance paragraph are hidden; use the ? help trigger instead. */
+    inlineHelp?: boolean
   }>(),
   {
     ariaLabelKey: 'journey.timeline.ariaLabel',
+    inlineHelp: false,
   },
 )
 
@@ -103,9 +107,16 @@ function onStepKeydown(event: KeyboardEvent, index: number) {
 
 <template>
   <section v-if="steps.length > 0" class="role-journey-timeline" data-journey-timeline>
-    <h2 v-if="titleKey" class="role-journey-timeline__title" data-journey-title>
-      {{ t(titleKey) }}
-    </h2>
+    <div v-if="titleKey" class="role-journey-timeline__title-row">
+      <h2 class="role-journey-timeline__title" data-journey-title>
+        {{ t(titleKey) }}
+      </h2>
+      <ContextHelpTrigger
+        v-if="!inlineHelp && resolvedGuidanceKey"
+        :title="t(titleKey)"
+        :content="t(resolvedGuidanceKey)"
+      />
+    </div>
 
     <nav
       class="role-journey-timeline__nav"
@@ -138,7 +149,10 @@ function onStepKeydown(event: KeyboardEvent, index: number) {
             </span>
             <span class="role-journey-timeline__content">
               <span class="role-journey-timeline__label">{{ t(step.labelKey) }}</span>
-              <span v-if="step.descriptionKey" class="role-journey-timeline__description">
+              <span
+                v-if="inlineHelp && step.descriptionKey"
+                class="role-journey-timeline__description"
+              >
                 {{ t(step.descriptionKey) }}
               </span>
             </span>
@@ -150,7 +164,7 @@ function onStepKeydown(event: KeyboardEvent, index: number) {
 
     <slot name="guidance">
       <p
-        v-if="resolvedGuidanceKey"
+        v-if="inlineHelp && resolvedGuidanceKey"
         :id="guidanceId"
         class="role-journey-timeline__guidance"
         data-journey-guidance
@@ -165,17 +179,24 @@ function onStepKeydown(event: KeyboardEvent, index: number) {
 
 <style scoped lang="scss">
 .role-journey-timeline {
-  margin-bottom: 2rem;
-  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
   background: var(--surface-elevated);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-soft);
 }
 
+.role-journey-timeline__title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
 .role-journey-timeline__title {
-  margin: 0 0 1rem;
-  font-size: 1.25rem;
+  margin: 0;
+  font-size: 1.125rem;
   font-weight: 600;
 }
 

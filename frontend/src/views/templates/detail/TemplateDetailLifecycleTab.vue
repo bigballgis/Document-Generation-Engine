@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import TemplateRiskPromptConfigPanel from '@/components/templates/TemplateRiskPromptConfigPanel.vue'
 import type { SemverBumpLevel } from '@/utils/semver'
 import {
   listInvalidBindings,
@@ -20,6 +21,7 @@ type PublishBumpOption = {
 type GovernanceAction = 'stop' | 'restore' | 'deprecate'
 
 const props = defineProps<{
+  templateId: string
   showLifecycleSection: boolean
   showGovernanceSection: boolean
   lifecycleComment: string
@@ -269,6 +271,10 @@ function resolveBindingStatusLabel(status: string | undefined): string {
         {{ t('templates.testGenerate.action') }}
       </el-button>
     </div>
+  </el-card>
+
+  <el-card v-if="showLifecycleSection" shadow="never" class="section-card">
+    <TemplateRiskPromptConfigPanel :template-id="templateId" />
   </el-card>
 
   <el-card v-if="showGovernanceSection" shadow="never" class="section-card">

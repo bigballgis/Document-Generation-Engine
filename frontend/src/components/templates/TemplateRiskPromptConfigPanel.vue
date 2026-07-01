@@ -1,68 +1,86 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import * as riskPromptConfigApi from '@/api/riskPromptConfig'
-import { useCapabilities } from '@/composables/useCapabilities'
-import { useSessionStore } from '@/stores/session'
-import { MANAGEMENT_ROLES } from '@/auth/roles'
+import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
+import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
+import * as globalRiskPromptApi from '@/api/riskPromptConfig'
+import * as templateRiskPromptApi from '@/api/templateRiskPromptConfig'
 import {
   TEMPLATE_DECISION_REASON_CATEGORIES,
   type TemplateDecisionReasonCategory,
 } from '@/utils/templateLifecycleDecisionForm'
-import type { RiskPromptConfig, RiskPromptScopeType } from '@/types/template'
+import type { TemplateRiskPromptFormState } from '@/types/template'
 
-const props = defineProps<{
-  groupCode?: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    templateId?: string | null
+    createMode?: boolean
+    showSave?: boolean
+  }>(),
+  {
+    templateId: null,
+    createMode: false,
+    showSave: true,
+  },
+)
+
+const formState = defineModel<TemplateRiskPromptFormState>('formState', {
+  default: () => ({
+    customize: false,
+    reasonCategories: [...TEMPLATE_DECISION_REASON_CATEGORIES],
+    riskPromptCopy: {},
+  }),
+})
 
 const { t } = useI18n()
-const { context } = useCapabilities()
-const sessionStore = useSessionStore()
 
 const loading = ref(false)
 const saving = ref(false)
-const config = ref<RiskPromptConfig | null>(null)
-
-const isGlobalAdmin = computed(() => context.value.roles.includes(MANAGEMENT_ROLES.GLOBAL_ADMIN))
-const isGroupAdmin = computed(() => context.value.roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN))
-const canMaintain = computed(() => isGlobalAdmin.value || isGroupAdmin.value)
-
-const form = reactive({
-  scopeType: 'GROUP' as RiskPromptScopeType,
-  groupCode: props.groupCode ?? '',
-  reasonCategories: [] as string[],
-  riskPromptCopy: {} as Record<string, string>,
-})
+const updatedAt = ref<string | null>(null)
 
 const editableCategories = computed(() =>
   TEMPLATE_DECISION_REASON_CATEGORIES.filter((category) =>
-    form.reasonCategories.includes(category),
+    formState.value.reasonCategories.includes(category),
   ),
 )
 
+function categoryLabel(category: TemplateDecisionReasonCategory): string {
+  return t(`templates.lifecycle.decisionForm.reasonCategories.${category}`)
+}
+
 function initializeCopyDefaults(categories: string[]) {
   for (const category of categories) {
-    if (!form.riskPromptCopy[category]) {
-      form.riskPromptCopy[category] = t(`templates.lifecycle.decisionForm.reasonCategories.${category}`)
+    if (!formState.value.riskPromptCopy[category]) {
+      formState.value.riskPromptCopy[category] = categoryLabel(
+        category as TemplateDecisionReasonCategory,
+      )
     }
   }
 }
 
-async function loadConfig() {
-  if (!canMaintain.value) {
+function applyLoadedConfig(useDefault: boolean, reasonCategories: string[], riskPromptCopy: Record<string, string>) {
+  formState.value.customize = !useDefault
+  formState.value.reasonCategories = [...reasonCategories]
+  formState.value.riskPromptCopy = { ...riskPromptCopy }
+  initializeCopyDefaults(formState.value.reasonCategories)
+}
+
+async function loadGlobalDefaults() {
+  const config = await globalRiskPromptApi.getGlobalRiskPromptConfig()
+  applyLoadedConfig(true, config.reasonCategories, config.riskPromptCopy)
+  updatedAt.value = config.updatedAt
+}
+
+async function loadTemplateConfig() {
+  if (!props.templateId) {
     return
   }
   loading.value = true
   try {
-    const groupCode =
-      form.scopeType === 'GROUP' ? form.groupCode || props.groupCode || undefined : undefined
-    config.value = await riskPromptConfigApi.getRiskPromptConfig(groupCode)
-    form.scopeType = config.value.scopeType
-    form.groupCode = config.value.groupCode ?? form.groupCode
-    form.reasonCategories = [...config.value.reasonCategories]
-    form.riskPromptCopy = { ...config.value.riskPromptCopy }
-    initializeCopyDefaults(form.reasonCategories)
+    const config = await templateRiskPromptApi.getTemplateRiskPromptConfig(props.templateId)
+    applyLoadedConfig(config.useDefault, config.reasonCategories, config.riskPromptCopy)
+    updatedAt.value = config.updatedAt
   } catch {
     ElMessage.error(t('templates.riskPrompt.error.load'))
   } finally {
@@ -70,31 +88,59 @@ async function loadConfig() {
   }
 }
 
+async function loadConfig() {
+  if (props.createMode || !props.templateId) {
+    loading.value = true
+    try {
+      await loadGlobalDefaults()
+    } catch {
+      ElMessage.error(t('templates.riskPrompt.error.load'))
+    } finally {
+      loading.value = false
+    }
+    return
+  }
+  await loadTemplateConfig()
+}
+
 function toggleCategory(category: TemplateDecisionReasonCategory, enabled: boolean) {
   if (enabled) {
-    if (!form.reasonCategories.includes(category)) {
-      form.reasonCategories.push(category)
+    if (!formState.value.reasonCategories.includes(category)) {
+      formState.value.reasonCategories.push(category)
       initializeCopyDefaults([category])
     }
     return
   }
-  form.reasonCategories = form.reasonCategories.filter((entry) => entry !== category)
-  delete form.riskPromptCopy[category]
+  formState.value.reasonCategories = formState.value.reasonCategories.filter(
+    (entry) => entry !== category,
+  )
+  delete formState.value.riskPromptCopy[category]
+}
+
+function handleCustomizeChange(customize: boolean) {
+  formState.value.customize = customize
+  if (!customize) {
+    void loadGlobalDefaults()
+  }
 }
 
 async function saveConfig() {
-  if (!form.reasonCategories.length) {
+  if (!props.templateId) {
+    return
+  }
+  if (formState.value.customize && !formState.value.reasonCategories.length) {
     ElMessage.warning(t('templates.riskPrompt.validation.categoriesRequired'))
     return
   }
   saving.value = true
   try {
-    config.value = await riskPromptConfigApi.upsertRiskPromptConfig({
-      scopeType: form.scopeType,
-      groupCode: form.scopeType === 'GROUP' ? form.groupCode || props.groupCode || null : null,
-      reasonCategories: form.reasonCategories,
-      riskPromptCopy: form.riskPromptCopy,
+    const config = await templateRiskPromptApi.upsertTemplateRiskPromptConfig(props.templateId, {
+      useDefault: !formState.value.customize,
+      reasonCategories: formState.value.customize ? formState.value.reasonCategories : undefined,
+      riskPromptCopy: formState.value.customize ? formState.value.riskPromptCopy : undefined,
     })
+    applyLoadedConfig(config.useDefault, config.reasonCategories, config.riskPromptCopy)
+    updatedAt.value = config.updatedAt
     ElMessage.success(t('templates.riskPrompt.saveSuccess'))
   } catch {
     ElMessage.error(t('templates.riskPrompt.error.save'))
@@ -103,117 +149,138 @@ async function saveConfig() {
   }
 }
 
+watch(
+  () => props.templateId,
+  () => {
+    void loadConfig()
+  },
+)
+
 onMounted(() => {
-  if (isGlobalAdmin.value) {
-    form.scopeType = 'GLOBAL'
-  } else if (props.groupCode) {
-    form.groupCode = props.groupCode
-  } else if (sessionStore.session?.authorizedGroupCodes.length) {
-    form.groupCode = sessionStore.session.authorizedGroupCodes[0] ?? ''
-  }
   void loadConfig()
 })
+
+defineExpose({ loadConfig, saveConfig })
 </script>
 
 <template>
-  <el-card v-if="canMaintain" shadow="never" class="risk-prompt-card">
-    <div class="risk-prompt-header">
-      <div>
-        <h2>{{ t('templates.riskPrompt.title') }}</h2>
-        <p>{{ t('templates.riskPrompt.description') }}</p>
-      </div>
-      <el-button :loading="loading" @click="loadConfig">
-        {{ t('templates.riskPrompt.refresh') }}
-      </el-button>
-    </div>
+  <div v-loading="loading" class="risk-prompt-panel">
+    <SectionPanelHeader
+      :title="t('templates.riskPrompt.title')"
+      :help-title="t('templates.riskPrompt.helpTitle')"
+      :help-content="t('templates.riskPrompt.helpContent')"
+    />
 
-    <div v-loading="loading" class="risk-prompt-body">
-      <el-form label-position="top">
-        <el-form-item v-if="isGlobalAdmin" :label="t('templates.riskPrompt.scopeType')">
-          <el-radio-group v-model="form.scopeType" @change="loadConfig">
-            <el-radio value="GLOBAL">{{ t('templates.riskPrompt.scopeGlobal') }}</el-radio>
-            <el-radio value="GROUP">{{ t('templates.riskPrompt.scopeGroup') }}</el-radio>
-          </el-radio-group>
-        </el-form-item>
+    <p class="risk-prompt-intro">{{ t('templates.riskPrompt.description') }}</p>
+    <el-alert
+      type="info"
+      :closable="false"
+      show-icon
+      class="risk-prompt-note"
+      :title="t('templates.riskPrompt.gateNote')"
+    />
 
-        <el-form-item
-          v-if="form.scopeType === 'GROUP'"
-          :label="t('templates.riskPrompt.groupCode')"
+    <el-form label-position="top" class="risk-prompt-form">
+      <el-form-item>
+        <el-checkbox
+          :model-value="formState.customize"
+          @change="(value: boolean) => handleCustomizeChange(value)"
         >
-          <el-input
-            v-model="form.groupCode"
-            :readonly="!isGlobalAdmin && isGroupAdmin"
-            :placeholder="t('templates.riskPrompt.groupCodePlaceholder')"
-            @change="loadConfig"
-          />
-        </el-form-item>
+          {{ t('templates.riskPrompt.customizeForTemplate') }}
+        </el-checkbox>
+      </el-form-item>
 
+      <template v-if="formState.customize">
         <el-form-item :label="t('templates.riskPrompt.reasonCategories')">
           <div class="category-grid">
-            <el-checkbox
+            <div
               v-for="category in TEMPLATE_DECISION_REASON_CATEGORIES"
               :key="category"
-              :model-value="form.reasonCategories.includes(category)"
-              @change="(value: boolean) => toggleCategory(category, value)"
+              class="category-row"
             >
-              {{ t(`templates.lifecycle.decisionForm.reasonCategories.${category}`) }}
-            </el-checkbox>
+              <el-checkbox
+                :model-value="formState.reasonCategories.includes(category)"
+                @change="(value: boolean) => toggleCategory(category, value)"
+              >
+                {{ categoryLabel(category) }}
+              </el-checkbox>
+              <ContextHelpTrigger
+                :title="categoryLabel(category)"
+                :content="t(`templates.riskPrompt.categoryHelp.${category}`)"
+              />
+            </div>
           </div>
         </el-form-item>
 
         <el-form-item
           v-for="category in editableCategories"
-          :key="category"
-          :label="t('templates.riskPrompt.promptCopyFor', { category })"
+          :key="`${category}-copy`"
+          :label="t('templates.riskPrompt.promptCopyLabel', { label: categoryLabel(category) })"
         >
           <el-input
-            v-model="form.riskPromptCopy[category]"
+            v-model="formState.riskPromptCopy[category]"
             type="textarea"
             :rows="2"
             maxlength="512"
             show-word-limit
           />
         </el-form-item>
-      </el-form>
+      </template>
 
-      <p v-if="config?.updatedAt" class="updated-at">
-        {{ t('templates.riskPrompt.lastUpdated', { updatedAt: config.updatedAt }) }}
-      </p>
+      <p v-else class="inherit-hint">{{ t('templates.riskPrompt.inheritGlobalHint') }}</p>
+    </el-form>
 
-      <el-button type="primary" :loading="saving" @click="saveConfig">
-        {{ t('templates.riskPrompt.save') }}
-      </el-button>
-    </div>
-  </el-card>
+    <p v-if="updatedAt && !createMode" class="updated-at">
+      {{ t('templates.riskPrompt.lastUpdated', { updatedAt }) }}
+    </p>
+
+    <el-button
+      v-if="showSave && templateId && !createMode"
+      type="primary"
+      :loading="saving"
+      @click="saveConfig"
+    >
+      {{ t('templates.riskPrompt.save') }}
+    </el-button>
+  </div>
 </template>
 
 <style scoped lang="scss">
-.risk-prompt-card {
-  margin-top: 1.5rem;
+.risk-prompt-panel {
+  margin-top: 0;
 }
 
-.risk-prompt-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
+.risk-prompt-intro {
+  margin: 0 0 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.risk-prompt-note {
   margin-bottom: 1rem;
+}
 
-  h2 {
-    margin: 0 0 0.35rem;
-    font-size: 1.125rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
+.risk-prompt-form {
+  margin-bottom: 0.5rem;
 }
 
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.35rem 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.category-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.inherit-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }
 
 .updated-at {

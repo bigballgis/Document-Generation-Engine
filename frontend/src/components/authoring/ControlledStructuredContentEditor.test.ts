@@ -38,16 +38,40 @@ describe('ControlledStructuredContentEditor', () => {
     const blockButtons = wrapper.findAll('[data-testid="insert-block-node"]')
     expect(blockButtons.length).toBeGreaterThan(0)
 
-    const disabledButtons = wrapper.findAll('[data-testid="disabled-toolbar-item"]')
-    expect(disabledButtons.length).toBe(3)
-    for (const button of disabledButtons) {
-      expect((button.element as HTMLButtonElement).disabled).toBe(true)
-    }
-
     await blockButtons[0]?.trigger('click')
     const emitted = wrapper.emitted('update:modelValue')
     expect(emitted?.length).toBeGreaterThan(0)
     const latest = emitted?.[emitted.length - 1]?.[0] as string
     expect(latest).toContain('"type":"sectionHeading"')
+  })
+
+  it('skips style catalog API when templateId is absent', async () => {
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: '{"schemaVersion":"1.0","nodes":[]}',
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+
+    expect(templatesApi.getMasterStyleCatalog).not.toHaveBeenCalled()
+  })
+
+  it('hides editing toolbar in readonly mode', async () => {
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: '{"schemaVersion":"1.0","nodes":[{"type":"paragraph","children":[{"type":"textRun","value":"Preview"}]}]}',
+        readonly: true,
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="insert-block-node"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Paragraph')
   })
 })

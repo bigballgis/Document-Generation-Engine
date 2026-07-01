@@ -190,7 +190,8 @@ class ChangeDiffServiceTest {
                 required,
                 null,
                 null,
-                "desc"
+                "desc",
+                null
         );
     }
 

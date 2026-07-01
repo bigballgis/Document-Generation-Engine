@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import * as templatesApi from '@/api/templates'
 import type { ChangeDiffSummary } from '@/types/template'
 import { ElMessage } from 'element-plus'
 
-const props = defineProps<{
-  templateId: string
-  refreshToken?: number
-}>()
+const props = withDefaults(
+  defineProps<{
+    templateId: string
+    refreshToken?: number
+    compact?: boolean
+  }>(),
+  {
+    compact: false,
+  },
+)
 
 const { t } = useI18n()
 const loading = ref(false)
@@ -58,13 +65,23 @@ watch(
 
 <template>
   <div v-loading="loading" class="change-diff-panel">
-    <div class="change-diff-header">
-      <h3>{{ t('templates.changeDiff.title') }}</h3>
+    <SectionPanelHeader
+      v-if="!compact"
+      :title="t('templates.changeDiff.title')"
+      :help-title="t('templates.changeDiff.helpTitle')"
+      :help-content="t('templates.changeDiff.helpContent')"
+    >
+      <template #actions>
+        <el-button link type="primary" @click="loadChangeDiff">
+          {{ t('templates.changeDiff.refresh') }}
+        </el-button>
+      </template>
+    </SectionPanelHeader>
+    <div v-else class="change-diff-panel__toolbar">
       <el-button link type="primary" @click="loadChangeDiff">
         {{ t('templates.changeDiff.refresh') }}
       </el-button>
     </div>
-    <p>{{ t('templates.changeDiff.description') }}</p>
 
     <template v-if="summary">
       <el-alert
@@ -82,7 +99,7 @@ watch(
         </template>
       </el-alert>
 
-      <p v-if="summary.baselineReleaseVersion" class="baseline-hint">
+      <p v-if="summary.baselineReleaseVersion && !compact" class="baseline-hint">
         {{
           t('templates.changeDiff.baselineHint', {
             version: summary.baselineReleaseVersion,
@@ -151,16 +168,10 @@ watch(
 </template>
 
 <style scoped lang="scss">
-.change-diff-header {
+.change-diff-panel__toolbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: flex-end;
   margin-bottom: 0.5rem;
-
-  h3 {
-    margin: 0;
-  }
 }
 
 .change-diff-alert {

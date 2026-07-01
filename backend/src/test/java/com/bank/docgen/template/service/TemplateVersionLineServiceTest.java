@@ -167,7 +167,8 @@ class TemplateVersionLineServiceTest {
                         true,
                         "Acme",
                         null,
-                        "Customer"
+                        "Customer",
+                        null
                 )));
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(sourceId))
                 .thenReturn(List.of(new AnchorBindingEntity(

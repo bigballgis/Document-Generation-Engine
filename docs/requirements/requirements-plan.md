@@ -441,7 +441,7 @@
 - 测试判定需要记录结构化结果和测试意见；测试意见采用受控表单模板，不复用结构化富文本编辑器。测试通过需要确认测试证据摘要、批量测试摘要、覆盖率摘要、生成预览摘要和保真警告摘要，可填写补充说明；测试不通过必须填写原因分类、影响范围和修复建议，并记录关联测试数据集和生成预览摘要。
 - 测试不通过后，模板回到草稿状态。
 - 审批判定需要记录结构化结果和审批意见；审批意见采用受控表单模板，不复用结构化富文本编辑器。审批通过必须填写理由摘要并确认关键证据摘要；审批不通过必须包含退回原因分类、影响范围和整改要求，并关联测试记录、变更差异摘要和发布前检查清单摘要。
-- 测试和审批风险提示由系统默认文案驱动，并允许全局管理员维护全局默认、分组管理员在被授权组范围内维护覆盖文案和原因分类；风险提示至少覆盖未解决阻断项、保真警告、覆盖率低于阈值、预览对比差异、API 契约或影响范围变化和管理员例外干预。风险提示文案配置变更必须记录审计。
+- 测试和审批**负向判定**（测试不通过、审批不通过）的结构化退回原因类别与提示文案，由**全局默认**驱动，并允许**可选的模板级覆盖**；模板未配置覆盖时继承全局默认（约定优于配置：全局默认启用全部原因类别并使用系统文案）。全局管理员维护全局默认；模板编排人员及具备模板维护权限的管理员在模板创建（高级选项）与模板详情中配置可选覆盖。原因类别配置**仅**影响负向判定对话框中可选的退回原因，**不**替代或关闭提交测试/提交审批/发布前检查清单等门禁；绑定校验等阻断项仍通过 publish/submit gate 阻止提交。风险提示文案配置变更必须记录审计。完整 BDD 见下文 **BDD-TEMPLATE-RISK-PROMPT-UX-001**。
 - v1 协作通知采用站内待办和状态提示，不外发邮件或即时通讯消息，不新增通知模板编辑能力。
 - 提交测试生成模板所属组测试人员角色队列待办；测试不通过或回到草稿生成提交人或模板编排人员整改待办；提交审批生成模板所属组审批人员角色队列待办；审批不通过或回到草稿生成提交人或模板编排人员整改待办；审批通过进入待发布后生成具备发布权限角色的发布待办。
 - 协作待办按模板所属组和角色队列分配，不默认指定个人；待办展示不得授予额外模板编辑、测试判定、审批判定或发布权限。
@@ -510,6 +510,116 @@
 - 已发布 release 线支持 **Clone** 为新 `DRAFT` dev 线（`POST …/release-versions/{releaseVersion}/clone`）；进行中 dev 已存在时 clone 返回 `409 TEMPLATE_DEV_LINE_IN_FLIGHT`。
 - 分组隔离 fail-closed：跨组 list/get/clone 返回 `403 ACCESS_DENIED`。
 - v1 每个模板同时最多一条进行中 dev 线（与包级 `devVersionId` 一致）。
+
+## 已确认：模板级退回原因配置 UX 重构（BDD-TEMPLATE-RISK-PROMPT-UX-001，2026-07-02）
+
+**BDD ID:** `BDD-TEMPLATE-RISK-PROMPT-UX-001`  
+**Status:** Confirmed (2026-07-02) — **Not yet implemented** (supersedes P19-T08 group-scoped risk-prompt panel on `TemplateListView`)  
+**Supersedes:** Group-scoped risk prompt override in product/UI/API; disconnected `TemplateRiskPromptConfigPanel` on list view; hardcoded `TEMPLATE_DECISION_REASON_CATEGORIES` in `TemplateLifecycleDecisionDialog`
+
+| Field | Specification |
+| --- | --- |
+| **Actors / roles** | **`GLOBAL_ADMIN`** — maintain global default reason categories and prompt copy (`GET/PUT /api/management/v1/risk-prompt-config` global). **`GROUP_ADMIN`** / **`TEMPLATE_AUTHOR`** — optional per-template override within authorized group(s) at create (advanced section) and in template detail. **`TEMPLATE_TESTER`** / **`TEMPLATE_APPROVER`** — consume effective config in negative decision dialogs (test fail / approval reject); read-only, no config maintenance. Group scope enforced fail-closed via `GroupAccessService`. |
+| **User goal** | Operators configure which **return reason categories** and prompt copy appear when a tester marks a test failed or an approver rejects approval — without confusing these toggles with submit/publish gates. Templates inherit a sensible global default unless an explicit template override is saved. |
+| **Trigger** | (1) Global admin opens global risk-prompt settings and saves. (2) Template author expands **「测试与审批退回原因（可选）」** in create dialog and saves template with override. (3) Template author/admin opens template detail section and saves/clears override. (4) Tester/approver opens `TemplateLifecycleDecisionDialog` for TEST_FAIL or APPROVAL_REJECT. (5) Lifecycle/decision API loads effective categories for a `templateId`. |
+| **Preconditions** | Authenticated management session. Global default seeded (all `TemplateDecisionReasonCategory` values enabled + system copy). Template exists and actor authorized for template `groupCode` when accessing template-scoped APIs/UI. Negative decision context only for category filtering (not TEST_PASS / APPROVAL_PASS forms). |
+| **Primary journey** | 1. **Global default:** Admin ensures global config lists all categories with system i18n copy (convention-over-configuration baseline). 2. **Create template:** Author completes required fields; optional advanced collapse stays collapsed → no template override persisted (`useDefault` effective). 3. **Create with override:** Author expands advanced section, disables some categories and/or edits copy, saves → `PUT …/templates/{templateId}/risk-prompt-config` with `useDefault: false`. 4. **Template detail:** Same panel without scope radio / group code; author toggles **inherit global** or edits override. 5. **Decision:** Tester opens test-fail dialog → UI/API resolves effective config for `templateId` → only enabled categories shown with effective prompt copy; selected category required with impact summary per existing decision form rules. |
+| **System responses (success)** | **Resolution chain:** `resolve(templateId)` → if template override exists with `useDefault: false` use it; else global default. **Global API:** `GET/PUT /api/management/v1/risk-prompt-config` (global only; no `scopeType=GROUP` in user-facing contract). **Template API:** `GET/PUT /api/management/v1/templates/{templateId}/risk-prompt-config` returns `{ useDefault, reasonCategories[], riskPromptCopy{}, updatedAt }`; `useDefault: true` or absent stored row ⇒ inherit global (no override row or logical inherit flag). **Decision load:** lifecycle/decision endpoints or dedicated resolve include `templateId` so frontend decision dialog does not use hardcoded category array. **Create template:** if advanced section not expanded or inherit-global left checked, no override write. **Audit:** global and template override changes emit `RISK_PROMPT_CONFIG_UPDATED` (or template-scoped equivalent) without sensitive plaintext. |
+| **Boundary / exception** | **No template override:** decision dialog shows global categories/copy. **Empty categories on override save:** validation error — at least one category required when `useDefault: false`. **Cross-group template access:** `403 ACCESS_DENIED`. **Unauthorized maintain:** non-admin on global PUT → `403`; actor outside template group on template PUT → `403`. **GROUP legacy API:** `scopeType=GROUP` upsert deprecated/removed from user-facing API; legacy DB rows not used in resolution chain. **Submit/publish gates unchanged:** disabling `BINDING_ISSUE` in return reasons does **not** allow submit when binding gate fails. **Copy semantics:** `BINDING_ISSUE` label/tooltip describes **return reason** for negative decisions, distinct from **绑定校验** gate panel. **Sensitive data:** prompt copy must not embed variable values or customer data. **Immutable published content:** override config is template-scoped metadata, editable per permission matrix regardless of lifecycle state where template metadata edits are allowed. |
+| **Observable evidence** | API: `GET …/templates/{id}/risk-prompt-config` with no override returns `useDefault: true` and mirrors global categories. After override save, `GET` returns `useDefault: false` and custom subset; decision resolve for same template returns matching categories. Decision dialog Vitest/E2E: disabled global category hidden when not in effective config; enabled category shows human-readable label (not raw enum key) and tooltip clarifying negative-decision-only scope. UI: `TemplateListView` has no risk-prompt panel; create dialog shows collapsed `el-collapse`; template detail has dedicated section. Audit trail on save with actor + scope. Backend: Flyway migration adds template override storage; `RiskPromptConfigServiceTest` covers resolution chain. |
+| **Source docs** | This section; `docs/product/PRD.md` §7; `docs/domain/domain-model.md` lifecycle §4; `docs/security/permission-matrix.md` §5; ADR-0021 consequences update; P19-T08/T10 (superseded group UX). |
+
+### 原因类别枚举（与实现对齐）
+
+与 `TEMPLATE_DECISION_REASON_CATEGORIES` 一致：`BINDING_ISSUE`, `VARIABLE_SCHEMA_ISSUE`, `RULE_VALIDATION_ISSUE`, `FIDELITY_WARNING`, `COVERAGE_BELOW_THRESHOLD`, `PREVIEW_COMPARISON_DIFF`, `CONTRACT_SCOPE_CHANGE`, `OTHER`。UI 展示使用可读中文/英文标签；`BINDING_ISSUE` 文案调整为**退回原因**表述（例如「绑定或占位符相关的退回原因」），与「绑定校验」门禁面板区分。
+
+### 前端 UX 要点
+
+- 从 `TemplateListView` **移除** `TemplateRiskPromptConfigPanel`。
+- 重构面板：无 scope 单选、无 groupCode 输入；支持 **inherit global** 开关。
+- `TemplateCreateDialog`：`el-collapse` **「测试与审批退回原因（可选）」** 默认折叠；未展开则不写入 override。
+- 模板详情：同级配置区块/Tab。
+- 每类别：checkbox + `el-tooltip`（启用=负向判定可选退回原因；禁用=对话框隐藏；与 submit gate 无关）。
+- 区块引言说明：仅用于测试不通过/审批不通过；提交测试/审批/发布门禁仍独立生效。
+
+### API 与持久化要点
+
+- 新增 `GET/PUT /api/management/v1/templates/{templateId}/risk-prompt-config`。
+- 保留/简化全局 `GET/PUT /api/management/v1/risk-prompt-config`（仅 GLOBAL）。
+- 废弃面向用户的 GROUP upsert；Flyway 新增模板 override 表/列。
+- 决策表单加载路径传入 `templateId` 并调用 resolve chain。
+
+##### Acceptance scenarios (Given / When / Then)
+
+**S1 — 无模板覆盖时继承全局默认（required）**  
+- **Given** 全局默认启用全部 8 个原因类别且含系统文案，模板 T 未保存任何 override，  
+- **When** 调用 `GET /api/management/v1/templates/{T}/risk-prompt-config` 或 decision resolve(`T`)，  
+- **Then** 响应 `useDefault: true`（或等价语义），`reasonCategories` 与全局一致；测试不通过对话框展示全部 8 类及全局文案。
+
+**S2 — 模板覆盖优先于全局（required）**  
+- **Given** 全局启用全部类别，模板 T 已保存 override `useDefault: false` 且仅启用 `{FIDELITY_WARNING, OTHER}` 及自定义 copy，  
+- **When** decision resolve(`T`) 或 tester 打开测试不通过对话框，  
+- **Then** 仅展示 `FIDELITY_WARNING` 与 `OTHER`；copy 为模板自定义值；全局多出的类别不可选。
+
+**S3 — 创建模板未展开高级区不写 override（required）**  
+- **Given** 模板编排人员打开创建对话框且未展开「测试与审批退回原因（可选）」，  
+- **When** 提交创建模板成功，  
+- **Then** 新模板无 override 持久化行；后续 resolve 走全局链（同 S1）。
+
+**S4 — 创建模板展开并保存 override（required）**  
+- **Given** 创建对话框展开高级区，取消勾选若干类别并编辑 copy，`useDefault: false`，  
+- **When** 创建模板成功并调用 `GET …/risk-prompt-config`，  
+- **Then** 返回与提交一致的 subset 与 copy；审计记录模板级变更。
+
+**S5 — 模板详情 inherit global 清除覆盖（required）**  
+- **Given** 模板 T 已有 override，  
+- **When** 作者在详情页切换为 inherit global 并保存，  
+- **Then** override 行删除或 `useDefault: true`；resolve 恢复全局（S1）。
+
+**S6 — 全局默认 CRUD（required）**  
+- **Given** `GLOBAL_ADMIN`，  
+- **When** `PUT /api/management/v1/risk-prompt-config` 更新全局类别/copy，  
+- **Then** `GET` 返回更新后配置；无 override 的模板决策对话框反映新全局值；审计记录 GLOBAL 变更。
+
+**S7 — 负向判定对话框 wired（required — fixes disconnect）**  
+- **Given** 模板 T 的 effective config 仅含 `COVERAGE_BELOW_THRESHOLD`，  
+- **When** approver 在 `TemplateLifecycleDecisionDialog` 执行审批不通过，  
+- **Then** 原因类别下拉/单选仅含 `COVERAGE_BELOW_THRESHOLD`（可读标签 + tooltip）；不渲染 hardcoded 全量枚举；未选类别时现有校验仍阻止提交。
+
+**S8 — 原因类别与 submit gate 独立（boundary）**  
+- **Given** 模板绑定 gate 未通过（publish/submit checklist 阻断），且 effective config **未**包含 `BINDING_ISSUE`，  
+- **When** 编排人员尝试提交审批，  
+- **Then** submit gate 仍阻断；与对话框是否展示 `BINDING_ISSUE` 无关。
+
+**S9 — 跨组访问 fail-closed（boundary）**  
+- **Given** 模板属于 `RETAIL`，actor 仅授权 `CORP`，  
+- **When** `GET/PUT …/templates/{id}/risk-prompt-config`，  
+- **Then** `403 ACCESS_DENIED`。
+
+**S10 — override 校验：至少一个类别（boundary）**  
+- **Given** 作者保存 template override 且 `useDefault: false`，  
+- **When** `reasonCategories` 为空数组，  
+- **Then** `400` validation error；不持久化。
+
+**S11 — 创建对话框高级区默认折叠（UI required）**  
+- **Given** 模板编排人员打开 `TemplateCreateDialog`，  
+- **When** 对话框初次渲染，  
+- **Then** 「测试与审批退回原因（可选）」collapse 为折叠状态；列表页无 risk-prompt 面板。
+
+**S12 — 标签与 tooltip 语义（UI required）**  
+- **Given** 配置面板或决策对话框渲染类别行，  
+- **When** 用户 hover `BINDING_ISSUE` tooltip 或阅读区块引言，  
+- **Then** 文案说明其为**退回原因**选项，与「绑定校验」gate 区分；标签为人类可读名称而非 enum key。
+
+**Scenario count:** 12 (7 required + 3 boundary + 2 UI).
+
+**TDD Red 测试映射（非穷尽）**
+
+| Layer | Suggested failing tests |
+| --- | --- |
+| Backend | `resolve_withoutTemplateOverride_returnsGlobal`; `resolve_withTemplateOverride_takesPrecedence`; `templateOverride_upsertAndClear`; `createTemplate_withoutAdvancedSection_noOverrideRow`; `globalDefault_update_audited`; `crossGroupGet_returns403`; `override_emptyCategories_validationError` |
+| Frontend unit | `TemplateCreateDialog_advancedSection_collapsedByDefault`; `TemplateRiskPromptConfigPanel_noScopeRadio_inheritGlobal`; `TemplateLifecycleDecisionDialog_usesResolvedCategories_notHardcoded`; `reasonCategoryLabels_humanReadable_tooltips_negativeDecisionOnly` |
+| E2E / UIUX | Create template without expand → decision shows global categories; template override subset → decision filtered; list view has no config panel; BINDING_ISSUE copy distinct from binding gate (constitution gates) |
 
 ## 已确认：环境迁移
 

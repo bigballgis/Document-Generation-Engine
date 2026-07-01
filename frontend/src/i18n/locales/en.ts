@@ -669,6 +669,15 @@ export default {
     devEditor: {
       actionsHint: 'Actions apply to this in-flight dev version line.',
       breadcrumbLabel: 'Dev editor',
+      testWorkflowRedirect: 'Test preview and submit-for-testing live in the Test & Preview tab.',
+      openTestPreviewTab: 'Open Test & Preview',
+      testWorkflowRedirectHelpTitle: 'Where to test',
+      testWorkflowRedirectHelpContent:
+        'Run preview generation per data set, batch-run all samples, and submit for testing from Template design → Test & Preview. Pass/fail test decisions appear there when the template is in testing.',
+      releaseWorkflowTitle: 'Release workflow',
+      releaseWorkflowHelpTitle: 'Approval and go-live',
+      releaseWorkflowHelpContent:
+        'Submit for approval, record approver decisions, and confirm go-live from here once testing is complete. All pre-release checks must pass before submission.',
     },
     versionLines: {
       title: 'Version lines',
@@ -1017,16 +1026,43 @@ export default {
       action: 'Test generate',
       success: 'Test generation started (preview {previewId}).',
     },
+    testPreview: {
+      workflow: {
+        title: 'Test workflow',
+        helpTitle: 'How testing works',
+        helpContent:
+          '1) Select or create a test data set.\n2) Run preview on one row or batch-run all.\n3) Review coverage and preview artifacts below.\n4) When ready, submit for testing (draft) or record pass/fail (testing).\n\nTip: select a row first for “Run preview (selected)”, or use Run preview on a specific row.',
+        status: 'Workflow status',
+        runSelected: 'Run preview (selected)',
+        runAll: 'Batch preview all',
+        submitDialogTitle: 'Submit for testing',
+        submitDialogMessage:
+          'Send this draft to testers. Add an optional note for the audit trail.',
+      },
+    },
     authoring: {
       title: 'Template design',
+      helpTitle: 'Template design overview',
+      helpContent:
+        'Configure variables, register clause references, bind master placeholders, then test and preview. Work through tabs left to right for the usual authoring flow.',
       variablesTitle: 'Variables',
+      variablesHelpTitle: 'Variables',
+      variablesHelpContent:
+        'Define API input schema: types, required flags, LIST/OBJECT structures, and COMPUTED expressions for derived values.',
       bindingsTitle: 'Layout placeholder bindings',
       bindingsDescription:
-        'Each row maps a master layout placeholder (anchor ID from the approved master) to structured content — text, variables, clauses, tables, or loops.',
+        'Each row follows the linked master placeholder order. Configure what structured content fills each placeholder — text, variables, clauses, tables, or loops.',
       bindingsHelpTitle: 'How placeholder bindings work',
       bindingsHelpDescription:
-        'Pick a master anchor (e.g. FOL_SEC_01), choose a content type, then compose structured blocks below: paragraphs with inline variables, clause references (contentModuleRef), tables, conditions, and loops over LIST variables.',
+        'Each master placeholder row follows master document order. Use Configure/Edit to open the form panel: pick content type, then compose structured blocks (paragraphs, inline variables, clause refs, tables, conditions, loops). Register clause refs on the Content modules tab first; insert them inside binding content via contentModuleRef nodes.',
       bindingEditorSubtitle: 'Compose structured content for this master placeholder',
+      anchorDisplayLabel: 'Master label',
+      bindingStatus: 'Status',
+      bindingConfigured: 'Configured',
+      bindingNotConfigured: 'Not configured',
+      configureBinding: 'Configure',
+      noMasterAnchors: 'No layout placeholders found on the linked master.',
+      masterAnchorsLoadFailed: 'Unable to load master placeholder catalog.',
       validationStatus: 'Validation',
       validationUnknown: 'Not validated',
       variableKey: 'Variable key',
@@ -1055,20 +1091,41 @@ export default {
       confirmDeleteVariableMessage: 'Remove this variable from the template draft?',
       variableTreeSearchPlaceholder: 'Search variables by key or description',
       variableTreeCount: '{count} variables',
+      computeExpression: 'Compute expression',
+      computeExpressionPlaceholder: 'e.g. ${loanAmount} * ${rate}',
+      visibilityCondition: {
+        title: 'Visibility condition',
+        description: 'Optionally show this placeholder only when the expression evaluates to true.',
+        enable: 'Enable conditional visibility',
+        expression: 'Condition expression',
+        expressionPlaceholder: 'e.g. ${includeSyndication} == true',
+      },
       subTabs: {
         variables: 'Variables',
         bindings: 'Bindings',
-        rules: 'Rules',
         contentModules: 'Clause references',
         testPreview: 'Test & preview',
       },
     },
     structuredEditor: {
+      bindingHint:
+        'Build the content that fills this master placeholder: add blocks, insert variables inline, or reference standard clauses.',
+      readonlyHint: 'Read-only preview of structured content.',
+      textPlaceholder: 'Static text',
+      variablePlaceholder: 'Select variable',
+      conditionPlaceholder: 'e.g. ${includeSyndication} == true',
+      loopVariablePlaceholder: 'Select LIST variable',
+      tableRefPlaceholder: 'Table component key (e.g. FOL-TBL-CP-CHECKLIST)',
+      clauseRefPlaceholder: 'Content module reference key',
+      addText: 'Add text',
+      addVariable: 'Add variable',
+      pasteFromFile: 'Import HTML',
       toolbar: {
         label: 'Structured content toolbar',
         blocks: 'Blocks',
         inline: 'Inline',
         style: 'Style',
+        paste: 'Import',
         unavailable: 'Unavailable',
         arbitraryHtml: 'Custom HTML',
         wordTable: 'Word table',
@@ -1154,6 +1211,10 @@ export default {
     },
     preview: {
       title: 'Preview & comparison',
+      detailTitle: 'Run comparison detail',
+      helpTitle: 'Preview artifacts',
+      helpContent:
+        'After running preview on a test data set, review the preview ID, structured comparison diffs, and fidelity warnings here. Use Refresh to reload the latest preview status from the server.',
       previewId: 'Preview ID',
       status: 'Status',
       comparisonSummary: 'Comparison summary',
@@ -1189,7 +1250,7 @@ export default {
           unviewed: 'Unviewed',
         },
       },
-      empty: 'Run test generate to create a preview record.',
+      empty: 'Run preview on a test data set to generate downloadable DOCX and PDF artifacts.',
       locationTypes: {
         PAGE: 'Page',
         ANCHOR: 'Layout placeholder',
@@ -1201,10 +1262,45 @@ export default {
         BLOCKER: 'Blocker',
       },
     },
+    previewHistory: {
+      title: 'Preview run history',
+      helpTitle: 'Preview run history',
+      helpContent:
+        'Each preview run stores generated DOCX and PDF files. Download artifacts from the table, or open comparison detail for warnings and structured diffs.',
+      refresh: 'Refresh list',
+      empty: 'No preview runs yet. Use Run preview on a test data set to generate documents.',
+      adhocRun: 'Ad hoc',
+      downloadDocx: 'Download DOCX',
+      downloadPdf: 'Download PDF',
+      viewDetails: 'Details',
+      columns: {
+        runAt: 'Run time',
+        dataSet: 'Data set',
+        status: 'Status',
+        warnings: 'Warnings',
+        actions: 'Actions',
+      },
+      status: {
+        ACCEPTED: 'Queued',
+        PROCESSING: 'Processing',
+        SUCCEEDED: 'Succeeded',
+        FAILED: 'Failed',
+        EXPIRED: 'Expired',
+      },
+      error: {
+        load: 'Unable to load preview run history.',
+        loadDetail: 'Unable to load preview details.',
+        download: 'Unable to download the preview artifact.',
+      },
+    },
     testDataSets: {
       title: 'Test data sets',
-      description: 'Maintain synthetic or desensitized variable payloads for repeatable preview runs.',
+      helpTitle: 'Test data sets',
+      helpContent:
+        'Each row is a named variable payload for preview runs. Use Run preview on a row to generate DOCX/PDF for that sample. Locked sets are immutable — derive a copy to edit.',
       create: 'Create data set',
+      runPreview: 'Run preview',
+      requiredTag: 'Required',
       createTitle: 'Create test data set',
       editTitle: 'Edit test data set',
       edit: 'Edit',
@@ -1245,6 +1341,9 @@ export default {
     },
     coverage: {
       title: 'Coverage summary',
+      helpTitle: 'Coverage summary',
+      helpContent:
+        'Compare exercised samples, required variables, and layout placeholder bindings against configured thresholds. Threshold scope and percentages are shown in the status alert after refresh.',
       description: 'Compare exercised samples, required variables, and layout placeholder bindings against configured thresholds.',
       refresh: 'Refresh',
       thresholdHint:
@@ -1309,8 +1408,64 @@ export default {
         save: 'Unable to save content module reference.',
       },
     },
+    clauseAuthoring: {
+      title: 'Clause references',
+      helpTitle: 'Clause references',
+      helpContent:
+        'Register referenceKey → approved module version. Preview clause bodies here; edit draft content inline. Use contentModuleRef in bindings to insert registered keys.',
+      description:
+        'Pin approved standard clause versions, preview content, and edit draft clause bodies from this template.',
+      addReference: 'Add reference',
+      addReferenceTitle: 'Add clause reference',
+      editReferenceTitle: 'Edit reference {referenceKey}',
+      editPin: 'Edit pin',
+      editClause: 'Edit clause',
+      editClauseTitle: 'Edit clause content',
+      preview: 'Preview',
+      previewTitle: 'Clause content preview',
+      saveReference: 'Save reference',
+      saveReferenceSuccess: 'Clause reference saved.',
+      saveClause: 'Save clause',
+      saveClauseSuccess: 'Clause content saved.',
+      readOnlyHint: 'Clause references are read-only while the template is not in draft status.',
+      approvedReadonlyHint:
+        'This clause revision is approved. Create a new draft in the standard clauses workspace to edit content.',
+      lockedYes: 'Locked',
+      lockedNo: 'Open',
+      empty: 'No clause references configured.',
+      emptyDescription: 'Add approved module versions to bind reusable clause content in this template.',
+      noContentStructure: 'This version has no structured content yet.',
+      versionNotFound: 'Referenced module version was not found.',
+      columns: {
+        referenceKey: 'Reference key',
+        moduleName: 'Module',
+        semanticVersion: 'Version',
+        locked: 'Lock status',
+        actions: 'Actions',
+      },
+      form: {
+        referenceKey: 'Reference key',
+        referenceKeyPlaceholder: 'LOAN_DISCLOSURE',
+        moduleId: 'Content module',
+        moduleIdPlaceholder: 'Select an approved module',
+        semanticVersion: 'Version',
+        semanticVersionPlaceholder: 'Select an approved version',
+      },
+      validation: {
+        required: 'Reference key, module, and approved version are required.',
+      },
+      error: {
+        load: 'Unable to load clause references.',
+        saveReference: 'Unable to save clause reference.',
+        loadContent: 'Unable to load clause content.',
+        saveClause: 'Unable to save clause content.',
+      },
+    },
     changeDiff: {
       title: 'Change diff',
+      helpTitle: 'Change diff',
+      helpContent:
+        'Compare the candidate draft against the baseline release version by dimension (content, placeholders, variables, rules, contract summary). Expand each dimension to review added, removed, and modified items.',
       description: 'Compare the candidate draft against the baseline release version by dimension.',
       refresh: 'Refresh',
       baselineHint: 'Baseline release version: {version}',
@@ -1335,25 +1490,46 @@ export default {
       },
     },
     riskPrompt: {
-      title: 'Risk prompt configuration',
-      description: 'Configure reason categories and risk prompt copy for structured workflow decisions.',
-      refresh: 'Refresh',
-      scopeType: 'Scope',
-      scopeGlobal: 'Global default',
-      scopeGroup: 'Group override',
-      groupCode: 'Group code',
-      groupCodePlaceholder: 'e.g. RETAIL',
-      reasonCategories: 'Enabled reason categories',
-      promptCopyFor: 'Prompt copy for {category}',
+      title: 'Test and approval return reasons',
+      description:
+        'Configure reason types and guidance shown when a tester marks a run as failed or an approver returns a template. When not customized, the system default applies (all reasons enabled).',
+      helpTitle: 'What does this configure?',
+      helpContent:
+        'This only affects reason choices when recording a failed test or rejected approval. It does not replace binding validation, coverage checks, or other submit readiness checks. When those checks fail, submit-for-approval and publish remain blocked.',
+      gateNote:
+        'This does not control whether approval can be submitted. Binding and other readiness checks still block progression when they fail.',
+      customizeForTemplate: 'Customize return reasons for this template (leave unchecked to use system default)',
+      reasonCategories: 'Available return reasons',
+      promptCopyLabel: '{label} — guidance text',
+      inheritGlobalHint: 'Using system default: all return reasons are available.',
       lastUpdated: 'Last updated: {updatedAt}',
       save: 'Save configuration',
-      saveSuccess: 'Risk prompt configuration saved.',
+      saveSuccess: 'Return reason configuration saved.',
+      createSectionTitle: 'Test and approval return reasons (optional)',
       validation: {
-        categoriesRequired: 'Select at least one reason category.',
+        categoriesRequired: 'Select at least one return reason when customizing.',
       },
       error: {
-        load: 'Unable to load risk prompt configuration.',
-        save: 'Unable to save risk prompt configuration.',
+        load: 'Unable to load return reason configuration.',
+        save: 'Unable to save return reason configuration.',
+      },
+      categoryHelp: {
+        BINDING_ISSUE:
+          'Use when returning a template because binding or layout placeholder issues were found.\n\nDoes not affect submit readiness: binding validation failures still block submit-for-approval.\n\nEnabled: selectable as a return reason.\nDisabled: hidden from the return reason list.',
+        VARIABLE_SCHEMA_ISSUE:
+          'Use when variable definitions, types, or constraints are invalid.\n\nEnabled: selectable as a return reason.\nDisabled: hidden from the return reason list.',
+        RULE_VALIDATION_ISSUE:
+          'Use when conditional or loop business rules fail validation.\n\nEnabled: selectable as a return reason.\nDisabled: hidden from the return reason list.',
+        FIDELITY_WARNING:
+          'Use when rendered output differs from the expected template fidelity.\n\nEnabled: selectable as a return reason.\nDisabled: hidden from the return reason list.',
+        COVERAGE_BELOW_THRESHOLD:
+          'Use when variable coverage is below the configured threshold.\n\nEnabled: selectable as a return reason.\nDisabled: hidden from the return reason list.',
+        PREVIEW_COMPARISON_DIFF:
+          'Use when preview output differs from the final template.\n\nEnabled: selectable as a return reason.\nDisabled: hidden from the return reason list.',
+        CONTRACT_SCOPE_CHANGE:
+          'Use when API contract or impact scope changed.\n\nEnabled: selectable as a return reason.\nDisabled: hidden from the return reason list.',
+        OTHER:
+          'Use for uncategorized return reasons.\n\nEnabled: selectable as a return reason.\nDisabled: hidden from the return reason list.',
       },
     },
     policy: {
@@ -1489,6 +1665,10 @@ export default {
     no: 'No',
     confirm: 'OK',
     cancel: 'Cancel',
+    back: 'Back',
+    contextHelp: {
+      triggerLabel: 'Show help',
+    },
     save: 'Save',
     edit: 'Edit',
     delete: 'Delete',
@@ -1593,6 +1773,8 @@ export default {
       versionsTitle: 'Versions',
       noVersions: 'No versions yet',
       noVersionsDescription: 'Create a draft version to begin authoring module content.',
+      contentPreviewTitle: 'Content preview',
+      contentPreviewVersion: 'Showing version {version} ({state})',
       columns: {
         version: 'Version',
         status: 'Status',
@@ -1663,6 +1845,7 @@ export default {
       editTitle: 'Edit draft {version}',
       semanticVersion: 'Version number',
       contentStructureJson: 'Content structure (JSON)',
+      contentStructure: 'Content structure',
       changeDescription: 'Change description',
       saveSuccess: 'Version saved.',
       validation: {

@@ -12,6 +12,7 @@ public record PreviewRecordView(
         String outputFormat,
         String renderProfileVersion,
         String artifactStorageKey,
+        String pdfArtifactStorageKey,
         List<FidelityWarningView> fidelityWarnings,
         PreviewComparisonView previewComparison,
         String testDataSetId,

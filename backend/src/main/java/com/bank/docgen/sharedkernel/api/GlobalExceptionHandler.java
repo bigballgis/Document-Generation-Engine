@@ -20,6 +20,7 @@ import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
 import com.bank.docgen.runtime.service.RuntimeDownloadExpiredException;
 import com.bank.docgen.rendering.EncryptionFailedException;
 import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
+import com.bank.docgen.rendering.service.PreviewArtifactNotAvailableException;
 import com.bank.docgen.rendering.service.PreviewGenerationException;
 import com.bank.docgen.rendering.service.PreviewNotFoundException;
 import com.bank.docgen.rendering.DocxAssemblyException;
@@ -265,6 +266,17 @@ public class GlobalExceptionHandler {
                 ApiErrorCodes.PREVIEW_NOT_FOUND,
                 ApiErrorCategories.RENDERING,
                 "api.error.rendering.previewNotFound"
+        );
+    }
+
+    @ExceptionHandler(PreviewArtifactNotAvailableException.class)
+    public ResponseEntity<ErrorEnvelope> handlePreviewArtifactNotAvailable(HttpServletRequest request) {
+        return domainError(
+                request,
+                HttpStatus.NOT_FOUND,
+                ApiErrorCodes.PREVIEW_NOT_FOUND,
+                ApiErrorCategories.RENDERING,
+                "api.error.rendering.previewArtifactNotAvailable"
         );
     }
 

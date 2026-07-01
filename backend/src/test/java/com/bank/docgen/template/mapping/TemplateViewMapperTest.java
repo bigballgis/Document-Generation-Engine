@@ -75,7 +75,8 @@ class TemplateViewMapperTest {
                 true,
                 "default",
                 null,
-                "Customer display name"
+                "Customer display name",
+                null
         );
 
         VariableSchemaView view = mapper.toVariableView(entity);
@@ -86,6 +87,29 @@ class TemplateViewMapperTest {
         assertThat(view.required()).isTrue();
         assertThat(view.defaultValue()).isEqualTo("default");
         assertThat(view.description()).isEqualTo("Customer display name");
+        assertThat(view.computeExpression()).isNull();
+    }
+
+    @Test
+    void toVariableView_mapsComputeExpression() {
+        UUID variableId = UUID.randomUUID();
+        UUID versionId = UUID.randomUUID();
+        VariableSchemaEntity entity = new VariableSchemaEntity(
+                variableId,
+                versionId,
+                "totalDue",
+                VariableType.COMPUTED,
+                false,
+                null,
+                null,
+                "Computed total",
+                "${principal} + ${interest}"
+        );
+
+        VariableSchemaView view = mapper.toVariableView(entity);
+
+        assertThat(view.variableType()).isEqualTo(VariableType.COMPUTED);
+        assertThat(view.computeExpression()).isEqualTo("${principal} + ${interest}");
     }
 
     @Test
@@ -187,6 +211,7 @@ class TemplateViewMapperTest {
                 "amount",
                 VariableType.NUMBER,
                 false,
+                null,
                 null,
                 null,
                 null
