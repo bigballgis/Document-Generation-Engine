@@ -1,0 +1,1324 @@
+﻿{
+    "bindings":  {
+                     "FOL_SCH_02":  {
+                                        "nodes":  [
+                                                      {
+                                                          "type":  "sectionHeading",
+                                                          "children":  [
+                                                                           {
+                                                                               "value":  "Schedule 2 鈥?Conditions Precedent",
+                                                                               "type":  "text"
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "KYC/AML documentation satisfactory to all Finance Parties.",
+                                                                                                    "type":  "textRun"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeKycCondition} == true"
+                                                      },
+                                                      {
+                                                          "tableComponentRef":  "FOL-TBL-CP-CHECKLIST",
+                                                          "tableComponent":  {
+                                                                                 "componentKey":  "FOL-TBL-CP-CHECKLIST",
+                                                                                 "columnSchema":  [
+                                                                                                      {
+                                                                                                          "columnKey":  "item",
+                                                                                                          "widthPct":  50
+                                                                                                      },
+                                                                                                      {
+                                                                                                          "columnKey":  "status",
+                                                                                                          "widthPct":  20
+                                                                                                      },
+                                                                                                      {
+                                                                                                          "columnKey":  "owner",
+                                                                                                          "widthPct":  30
+                                                                                                      }
+                                                                                                  ],
+                                                                                 "headerRows":  [
+                                                                                                    {
+                                                                                                        "columnKey":  "item",
+                                                                                                        "value":  "Condition Precedent"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "columnKey":  "status",
+                                                                                                        "value":  "Status"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "columnKey":  "owner",
+                                                                                                        "value":  "Responsible Party"
+                                                                                                    }
+                                                                                                ],
+                                                                                 "repeatHeaderAcrossPages":  true,
+                                                                                 "schemaVersion":  "1.0",
+                                                                                 "loopRow":  {
+                                                                                                 "loopVariable":  "conditionsPrecedent",
+                                                                                                 "cells":  [
+                                                                                                               {
+                                                                                                                   "columnKey":  "item",
+                                                                                                                   "variableKey":  "cpItemDescription"
+                                                                                                               },
+                                                                                                               {
+                                                                                                                   "columnKey":  "status",
+                                                                                                                   "variableKey":  "cpItemStatus"
+                                                                                                               },
+                                                                                                               {
+                                                                                                                   "columnKey":  "owner",
+                                                                                                                   "variableKey":  "cpItemResponsibleParty"
+                                                                                                               }
+                                                                                                           ]
+                                                                                             }
+                                                                             },
+                                                          "type":  "tableComponentRef"
+                                                      },
+                                                      {
+                                                          "loopVariable":  "conditionsPrecedent",
+                                                          "type":  "loopBlock",
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "鈥?",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "cpItemDescription",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  " [",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "cpItemStatus",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  "] 鈥?",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "cpItemResponsibleParty",
+                                                                                                    "type":  "variable"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "Syndication: fee letters and lender accession documents from each Lender.",
+                                                                                                    "type":  "textRun"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeSyndication} == true"
+                                                      },
+                                                      {
+                                                          "type":  "contentModuleRef",
+                                                          "referenceKey":  "FOL_SCH_02"
+                                                      }
+                                                  ],
+                                        "schemaVersion":  "1.0"
+                                    },
+                     "FOL_SCH_04":  {
+                                        "nodes":  [
+                                                      {
+                                                          "type":  "sectionHeading",
+                                                          "children":  [
+                                                                           {
+                                                                               "value":  "Schedule 4 鈥?Form of Utilisation Request",
+                                                                               "type":  "text"
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "Requested utilisation date: ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "firstUtilisationDate",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  "; Amount: ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "facilityAmount",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  " ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "facilityCurrency",
+                                                                                                    "type":  "variable"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeUtilisationDate} == true"
+                                                      },
+                                                      {
+                                                          "type":  "contentModuleRef",
+                                                          "referenceKey":  "FOL_SCH_04"
+                                                      }
+                                                  ],
+                                        "schemaVersion":  "1.0"
+                                    },
+                     "FOL_SCH_01":  {
+                                        "nodes":  [
+                                                      {
+                                                          "type":  "sectionHeading",
+                                                          "children":  [
+                                                                           {
+                                                                               "value":  "Schedule 1 鈥?Facility Particulars",
+                                                                               "type":  "text"
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "type":  "paragraph",
+                                                          "children":  [
+                                                                           {
+                                                                               "value":  "Borrower: ",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "key":  "borrowerLegalName",
+                                                                               "type":  "variable"
+                                                                           },
+                                                                           {
+                                                                               "type":  "lineBreak"
+                                                                           },
+                                                                           {
+                                                                               "value":  "Signing Date (target): ",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "key":  "signingDate",
+                                                                               "type":  "variable"
+                                                                           },
+                                                                           {
+                                                                               "type":  "lineBreak"
+                                                                           },
+                                                                           {
+                                                                               "value":  "First Utilisation (target): ",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "key":  "firstUtilisationDate",
+                                                                               "type":  "variable"
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "tableComponentRef":  "FOL-TBL-FACILITY-PARTICULARS",
+                                                          "tableComponent":  {
+                                                                                 "componentKey":  "FOL-TBL-FACILITY-PARTICULARS",
+                                                                                 "columnSchema":  [
+                                                                                                      {
+                                                                                                          "columnKey":  "label",
+                                                                                                          "widthPct":  40
+                                                                                                      },
+                                                                                                      {
+                                                                                                          "columnKey":  "value",
+                                                                                                          "widthPct":  60
+                                                                                                      }
+                                                                                                  ],
+                                                                                 "headerRows":  [
+                                                                                                    {
+                                                                                                        "columnKey":  "label",
+                                                                                                        "value":  "Particular"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "columnKey":  "value",
+                                                                                                        "value":  "Detail"
+                                                                                                    }
+                                                                                                ],
+                                                                                 "repeatHeaderAcrossPages":  true,
+                                                                                 "schemaVersion":  "1.0",
+                                                                                 "loopRow":  {
+                                                                                                 "loopVariable":  "facilityParticulars",
+                                                                                                 "cells":  [
+                                                                                                               {
+                                                                                                                   "columnKey":  "label",
+                                                                                                                   "variableKey":  "particularLabel"
+                                                                                                               },
+                                                                                                               {
+                                                                                                                   "columnKey":  "value",
+                                                                                                                   "variableKey":  "particularValue"
+                                                                                                               }
+                                                                                                           ]
+                                                                                             }
+                                                                             },
+                                                          "type":  "tableComponentRef"
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "Multi-currency utilisations permitted in currencies agreed with the Agent from time to time.",
+                                                                                                    "type":  "textRun"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeMultiCurrency} == true"
+                                                      },
+                                                      {
+                                                          "loopVariable":  "tranches",
+                                                          "type":  "loopBlock",
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "Tranche ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "trancheName",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  ": ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "trancheAmount",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  " ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "trancheCurrency",
+                                                                                                    "type":  "variable"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "type":  "contentModuleRef",
+                                                          "referenceKey":  "FOL_SCH_01"
+                                                      }
+                                                  ],
+                                        "schemaVersion":  "1.0"
+                                    },
+                     "FOL_SCH_06":  {
+                                        "nodes":  [
+                                                      {
+                                                          "type":  "sectionHeading",
+                                                          "children":  [
+                                                                           {
+                                                                               "value":  "Schedule 6 鈥?Security Principles",
+                                                                               "type":  "text"
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "loopVariable":  "securityPackages",
+                                                                               "type":  "loopBlock",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "type":  "paragraph",
+                                                                                                    "children":  [
+                                                                                                                     {
+                                                                                                                         "value":  "Security package: ",
+                                                                                                                         "type":  "textRun"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "key":  "securityPackageName",
+                                                                                                                         "type":  "variable"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "value":  " 鈥?",
+                                                                                                                         "type":  "textRun"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "key":  "securityPackageType",
+                                                                                                                         "type":  "variable"
+                                                                                                                     }
+                                                                                                                 ]
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeSecurityPackage} == true"
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "tableComponentRef":  "FOL-TBL-LENDER-MATRIX",
+                                                                               "tableComponent":  {
+                                                                                                      "componentKey":  "FOL-TBL-LENDER-MATRIX",
+                                                                                                      "columnSchema":  [
+                                                                                                                           {
+                                                                                                                               "columnKey":  "lender",
+                                                                                                                               "widthPct":  45
+                                                                                                                           },
+                                                                                                                           {
+                                                                                                                               "columnKey":  "commitment",
+                                                                                                                               "widthPct":  30
+                                                                                                                           },
+                                                                                                                           {
+                                                                                                                               "columnKey":  "pct",
+                                                                                                                               "widthPct":  25
+                                                                                                                           }
+                                                                                                                       ],
+                                                                                                      "headerRows":  [
+                                                                                                                         {
+                                                                                                                             "columnKey":  "lender",
+                                                                                                                             "value":  "Lender"
+                                                                                                                         },
+                                                                                                                         {
+                                                                                                                             "columnKey":  "commitment",
+                                                                                                                             "value":  "Commitment"
+                                                                                                                         },
+                                                                                                                         {
+                                                                                                                             "columnKey":  "pct",
+                                                                                                                             "value":  "% of Total"
+                                                                                                                         }
+                                                                                                                     ],
+                                                                                                      "repeatHeaderAcrossPages":  true,
+                                                                                                      "footerRows":  [
+                                                                                                                         {
+                                                                                                                             "columnKey":  "lender",
+                                                                                                                             "value":  "Total"
+                                                                                                                         },
+                                                                                                                         {
+                                                                                                                             "columnKey":  "commitment",
+                                                                                                                             "variableKey":  "totalCommitments"
+                                                                                                                         },
+                                                                                                                         {
+                                                                                                                             "columnKey":  "pct",
+                                                                                                                             "value":  "100%"
+                                                                                                                         }
+                                                                                                                     ],
+                                                                                                      "schemaVersion":  "1.0",
+                                                                                                      "loopRow":  {
+                                                                                                                      "loopVariable":  "lenders",
+                                                                                                                      "cells":  [
+                                                                                                                                    {
+                                                                                                                                        "columnKey":  "lender",
+                                                                                                                                        "variableKey":  "lenderName"
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                        "columnKey":  "commitment",
+                                                                                                                                        "variableKey":  "lenderCommitment"
+                                                                                                                                    },
+                                                                                                                                    {
+                                                                                                                                        "columnKey":  "pct",
+                                                                                                                                        "variableKey":  "lenderCommitmentPct"
+                                                                                                                                    }
+                                                                                                                                ]
+                                                                                                                  }
+                                                                                                  },
+                                                                               "type":  "tableComponentRef"
+                                                                           },
+                                                                           {
+                                                                               "loopVariable":  "lenders",
+                                                                               "type":  "loopBlock",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "type":  "paragraph",
+                                                                                                    "children":  [
+                                                                                                                     {
+                                                                                                                         "key":  "lenderName",
+                                                                                                                         "type":  "variable"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "value":  ": ",
+                                                                                                                         "type":  "textRun"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "key":  "lenderCommitment",
+                                                                                                                         "type":  "variable"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "value":  " (",
+                                                                                                                         "type":  "textRun"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "key":  "lenderCommitmentPct",
+                                                                                                                         "type":  "variable"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "value":  "%)",
+                                                                                                                         "type":  "textRun"
+                                                                                                                     }
+                                                                                                                 ]
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeSyndication} == true"
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "loopVariable":  "hedgeProviders",
+                                                                               "type":  "loopBlock",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "type":  "paragraph",
+                                                                                                    "children":  [
+                                                                                                                     {
+                                                                                                                         "value":  "Approved hedge provider: ",
+                                                                                                                         "type":  "textRun"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "key":  "hedgeProviderName",
+                                                                                                                         "type":  "variable"
+                                                                                                                     }
+                                                                                                                 ]
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeHedge} == true"
+                                                      },
+                                                      {
+                                                          "type":  "contentModuleRef",
+                                                          "referenceKey":  "FOL_SCH_06"
+                                                      }
+                                                  ],
+                                        "schemaVersion":  "1.0"
+                                    },
+                     "FOL_SCH_03":  {
+                                        "nodes":  [
+                                                      {
+                                                          "type":  "sectionHeading",
+                                                          "children":  [
+                                                                           {
+                                                                               "value":  "Schedule 3 鈥?Representations",
+                                                                               "type":  "text"
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "Sanctions: no Sanctions apply to the Borrower or its subsidiaries that would prevent utilisation.",
+                                                                                                    "type":  "textRun"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeSanctionsRep} == true"
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "loopVariable":  "guarantors",
+                                                                               "type":  "loopBlock",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "type":  "paragraph",
+                                                                                                    "children":  [
+                                                                                                                     {
+                                                                                                                         "value":  "Guarantor representation 鈥?",
+                                                                                                                         "type":  "textRun"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "key":  "guarantorName",
+                                                                                                                         "type":  "variable"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "value":  " (",
+                                                                                                                         "type":  "textRun"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "key":  "guarantorJurisdiction",
+                                                                                                                         "type":  "variable"
+                                                                                                                     },
+                                                                                                                     {
+                                                                                                                         "value":  ")",
+                                                                                                                         "type":  "textRun"
+                                                                                                                     }
+                                                                                                                 ]
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeGuarantee} == true"
+                                                      },
+                                                      {
+                                                          "type":  "contentModuleRef",
+                                                          "referenceKey":  "FOL_SCH_03"
+                                                      }
+                                                  ],
+                                        "schemaVersion":  "1.0"
+                                    },
+                     "FOL_SCH_05":  {
+                                        "nodes":  [
+                                                      {
+                                                          "type":  "sectionHeading",
+                                                          "children":  [
+                                                                           {
+                                                                               "value":  "Schedule 5 鈥?Fees",
+                                                                               "type":  "text"
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "Commitment fee: ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "commitmentFeeBps",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  " bps on undrawn amounts.",
+                                                                                                    "type":  "textRun"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeCommitmentFee} == true"
+                                                      },
+                                                      {
+                                                          "tableComponentRef":  "FOL-TBL-FEE-SCHEDULE",
+                                                          "tableComponent":  {
+                                                                                 "componentKey":  "FOL-TBL-FEE-SCHEDULE",
+                                                                                 "columnSchema":  [
+                                                                                                      {
+                                                                                                          "columnKey":  "description",
+                                                                                                          "widthPct":  55
+                                                                                                      },
+                                                                                                      {
+                                                                                                          "columnKey":  "amount",
+                                                                                                          "widthPct":  25
+                                                                                                      },
+                                                                                                      {
+                                                                                                          "columnKey":  "currency",
+                                                                                                          "widthPct":  20
+                                                                                                      }
+                                                                                                  ],
+                                                                                 "headerRows":  [
+                                                                                                    {
+                                                                                                        "columnKey":  "description",
+                                                                                                        "value":  "Fee Description"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "columnKey":  "amount",
+                                                                                                        "value":  "Amount"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "columnKey":  "currency",
+                                                                                                        "value":  "Currency"
+                                                                                                    }
+                                                                                                ],
+                                                                                 "repeatHeaderAcrossPages":  true,
+                                                                                 "footerRows":  [
+                                                                                                    {
+                                                                                                        "columnKey":  "description",
+                                                                                                        "value":  "Total Fees"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "columnKey":  "amount",
+                                                                                                        "variableKey":  "totalFees"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "columnKey":  "currency",
+                                                                                                        "variableKey":  "facilityCurrency"
+                                                                                                    }
+                                                                                                ],
+                                                                                 "schemaVersion":  "1.0",
+                                                                                 "loopRow":  {
+                                                                                                 "loopVariable":  "fees",
+                                                                                                 "cells":  [
+                                                                                                               {
+                                                                                                                   "columnKey":  "description",
+                                                                                                                   "variableKey":  "feeItemDescription"
+                                                                                                               },
+                                                                                                               {
+                                                                                                                   "columnKey":  "amount",
+                                                                                                                   "variableKey":  "feeItemAmount"
+                                                                                                               },
+                                                                                                               {
+                                                                                                                   "columnKey":  "currency",
+                                                                                                                   "variableKey":  "feeItemCurrency"
+                                                                                                               }
+                                                                                                           ]
+                                                                                             }
+                                                                             },
+                                                          "type":  "tableComponentRef"
+                                                      },
+                                                      {
+                                                          "loopVariable":  "fees",
+                                                          "type":  "loopBlock",
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "key":  "feeItemDescription",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  ": ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "feeItemAmount",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  " ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "feeItemCurrency",
+                                                                                                    "type":  "variable"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "type":  "contentModuleRef",
+                                                          "referenceKey":  "FOL_SCH_05"
+                                                      }
+                                                  ],
+                                        "schemaVersion":  "1.0"
+                                    },
+                     "FOL_SIG_LENDER":  {
+                                            "nodes":  [
+                                                          {
+                                                              "type":  "paragraph",
+                                                              "children":  [
+                                                                               {
+                                                                                   "value":  "Signed for and on behalf of",
+                                                                                   "type":  "textRun"
+                                                                               },
+                                                                               {
+                                                                                   "type":  "lineBreak"
+                                                                               },
+                                                                               {
+                                                                                   "key":  "agentBank",
+                                                                                   "type":  "variable"
+                                                                               }
+                                                                           ]
+                                                          },
+                                                          {
+                                                              "type":  "paragraph",
+                                                              "children":  [
+                                                                               {
+                                                                                   "value":  "Name: _________________________  Title: Authorised Signatory  Date: _________",
+                                                                                   "type":  "textRun"
+                                                                               }
+                                                                           ]
+                                                          }
+                                                      ],
+                                            "schemaVersion":  "1.0"
+                                        },
+                     "FOL_SIG_BORROWER":  {
+                                              "nodes":  [
+                                                            {
+                                                                "type":  "paragraph",
+                                                                "children":  [
+                                                                                 {
+                                                                                     "value":  "Signed for and on behalf of",
+                                                                                     "type":  "textRun"
+                                                                                 },
+                                                                                 {
+                                                                                     "type":  "lineBreak"
+                                                                                 },
+                                                                                 {
+                                                                                     "key":  "borrowerLegalName",
+                                                                                     "type":  "variable"
+                                                                                 }
+                                                                             ]
+                                                            },
+                                                            {
+                                                                "type":  "paragraph",
+                                                                "children":  [
+                                                                                 {
+                                                                                     "value":  "Name: _________________________  Title: Authorised Signatory  Date: _________",
+                                                                                     "type":  "textRun"
+                                                                                 }
+                                                                             ]
+                                                            }
+                                                        ],
+                                              "schemaVersion":  "1.0"
+                                          },
+                     "FOL_FACILITY_SUMMARY":  {
+                                                  "nodes":  [
+                                                                {
+                                                                    "type":  "sectionHeading",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "value":  "Facility Summary",
+                                                                                         "type":  "text"
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
+                                                                    "type":  "paragraph",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "emphasis",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Borrower: ",
+                                                                                                              "type":  "text"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
+                                                                    "key":  "borrowerLegalName",
+                                                                    "type":  "variable"
+                                                                },
+                                                                {
+                                                                    "type":  "paragraph",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "emphasis",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Group: ",
+                                                                                                              "type":  "text"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
+                                                                    "key":  "groupName",
+                                                                    "type":  "variable"
+                                                                },
+                                                                {
+                                                                    "type":  "paragraph",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "emphasis",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Total Commitments: ",
+                                                                                                              "type":  "text"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
+                                                                    "key":  "facilityAmount",
+                                                                    "type":  "variable"
+                                                                },
+                                                                {
+                                                                    "value":  " ",
+                                                                    "type":  "textRun"
+                                                                },
+                                                                {
+                                                                    "key":  "facilityCurrency",
+                                                                    "type":  "variable"
+                                                                },
+                                                                {
+                                                                    "type":  "paragraph",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "emphasis",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Purpose: ",
+                                                                                                              "type":  "text"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
+                                                                    "key":  "facilityPurpose",
+                                                                    "type":  "variable"
+                                                                },
+                                                                {
+                                                                    "type":  "paragraph",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "emphasis",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Margin: ",
+                                                                                                              "type":  "text"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
+                                                                    "key":  "marginBps",
+                                                                    "type":  "variable"
+                                                                },
+                                                                {
+                                                                    "value":  " bps per annum over ",
+                                                                    "type":  "textRun"
+                                                                },
+                                                                {
+                                                                    "key":  "referenceRate",
+                                                                    "type":  "variable"
+                                                                },
+                                                                {
+                                                                    "type":  "paragraph",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "emphasis",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Final Maturity: ",
+                                                                                                              "type":  "text"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
+                                                                    "key":  "maturityDate",
+                                                                    "type":  "variable"
+                                                                },
+                                                                {
+                                                                    "type":  "paragraph",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "emphasis",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Agent: ",
+                                                                                                              "type":  "text"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
+                                                                    "key":  "agentBank",
+                                                                    "type":  "variable"
+                                                                },
+                                                                {
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "paragraph",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Lead Arranger: ",
+                                                                                                              "type":  "textRun"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "key":  "leadArranger",
+                                                                                                              "type":  "variable"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "type":  "lineBreak"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "value":  "Documentation Agent: ",
+                                                                                                              "type":  "textRun"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "key":  "documentationAgent",
+                                                                                                              "type":  "variable"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ],
+                                                                    "type":  "conditionBlock",
+                                                                    "conditionExpression":  "${includeSyndication} == true"
+                                                                },
+                                                                {
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "paragraph",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Interest rate hedging: Borrower to enter into hedging arrangements with approved providers within 30 days of first utilisation.",
+                                                                                                              "type":  "textRun"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ],
+                                                                    "type":  "conditionBlock",
+                                                                    "conditionExpression":  "${includeHedge} == true"
+                                                                },
+                                                                {
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "paragraph",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Accordion feature: Borrower may request additional commitments up to an agreed accordion cap subject to lender consent.",
+                                                                                                              "type":  "textRun"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ],
+                                                                    "type":  "conditionBlock",
+                                                                    "conditionExpression":  "${includeAccordion} == true"
+                                                                },
+                                                                {
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "paragraph",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Commitment fee: ",
+                                                                                                              "type":  "textRun"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "key":  "commitmentFeeBps",
+                                                                                                              "type":  "variable"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "value":  " bps p.a. on undrawn commitments.",
+                                                                                                              "type":  "textRun"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ],
+                                                                    "type":  "conditionBlock",
+                                                                    "conditionExpression":  "${includeCommitmentFee} == true"
+                                                                },
+                                                                {
+                                                                    "loopVariable":  "tranches",
+                                                                    "type":  "loopBlock",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "paragraph",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Tranche: ",
+                                                                                                              "type":  "textRun"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "key":  "trancheName",
+                                                                                                              "type":  "variable"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "value":  " 鈥?",
+                                                                                                              "type":  "textRun"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "key":  "trancheAmount",
+                                                                                                              "type":  "variable"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "value":  " ",
+                                                                                                              "type":  "textRun"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "key":  "trancheCurrency",
+                                                                                                              "type":  "variable"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "value":  " @ ",
+                                                                                                              "type":  "textRun"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "key":  "trancheMarginBps",
+                                                                                                              "type":  "variable"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "value":  " bps",
+                                                                                                              "type":  "textRun"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "paragraph",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Financial covenants: Net Leverage 鈮?",
+                                                                                                              "type":  "textRun"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "key":  "netLeverageMax",
+                                                                                                              "type":  "variable"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "value":  "; Interest Cover 鈮?",
+                                                                                                              "type":  "textRun"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "key":  "interestCoverMin",
+                                                                                                              "type":  "variable"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "value":  "; Minimum Liquidity USD ",
+                                                                                                              "type":  "textRun"
+                                                                                                          },
+                                                                                                          {
+                                                                                                              "key":  "minimumLiquidity",
+                                                                                                              "type":  "variable"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ],
+                                                                    "type":  "conditionBlock",
+                                                                    "conditionExpression":  "${includeFinancialCovenants} == true"
+                                                                },
+                                                                {
+                                                                    "tableComponentRef":  "FOL-TBL-AMORTISATION",
+                                                                    "tableComponent":  {
+                                                                                           "componentKey":  "FOL-TBL-AMORTISATION",
+                                                                                           "columnSchema":  [
+                                                                                                                {
+                                                                                                                    "columnKey":  "date",
+                                                                                                                    "widthPct":  35
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "columnKey":  "principal",
+                                                                                                                    "widthPct":  35
+                                                                                                                },
+                                                                                                                {
+                                                                                                                    "columnKey":  "balance",
+                                                                                                                    "widthPct":  30
+                                                                                                                }
+                                                                                                            ],
+                                                                                           "headerRows":  [
+                                                                                                              {
+                                                                                                                  "columnKey":  "date",
+                                                                                                                  "value":  "Payment Date"
+                                                                                                              },
+                                                                                                              {
+                                                                                                                  "columnKey":  "principal",
+                                                                                                                  "value":  "Principal"
+                                                                                                              },
+                                                                                                              {
+                                                                                                                  "columnKey":  "balance",
+                                                                                                                  "value":  "Outstanding Balance"
+                                                                                                              }
+                                                                                                          ],
+                                                                                           "repeatHeaderAcrossPages":  true,
+                                                                                           "schemaVersion":  "1.0",
+                                                                                           "loopRow":  {
+                                                                                                           "loopVariable":  "amortisationSchedule",
+                                                                                                           "cells":  [
+                                                                                                                         {
+                                                                                                                             "columnKey":  "date",
+                                                                                                                             "variableKey":  "amortDate"
+                                                                                                                         },
+                                                                                                                         {
+                                                                                                                             "columnKey":  "principal",
+                                                                                                                             "variableKey":  "amortPrincipal"
+                                                                                                                         },
+                                                                                                                         {
+                                                                                                                             "columnKey":  "balance",
+                                                                                                                             "variableKey":  "amortBalance"
+                                                                                                                         }
+                                                                                                                     ]
+                                                                                                       }
+                                                                                       },
+                                                                    "type":  "tableComponentRef"
+                                                                }
+                                                            ],
+                                                  "schemaVersion":  "1.0"
+                                              },
+                     "FOL_HEADER":  {
+                                        "nodes":  [
+                                                      {
+                                                          "type":  "paragraph",
+                                                          "children":  [
+                                                                           {
+                                                                               "value":  "Date: ",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "key":  "offerDate",
+                                                                               "type":  "variable"
+                                                                           },
+                                                                           {
+                                                                               "type":  "lineBreak"
+                                                                           },
+                                                                           {
+                                                                               "value":  "To: ",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "key":  "borrowerLegalName",
+                                                                               "type":  "variable"
+                                                                           },
+                                                                           {
+                                                                               "type":  "lineBreak"
+                                                                           },
+                                                                           {
+                                                                               "value":  "Re: Facility Offer Letter 鈥?",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "key":  "facilityType",
+                                                                               "type":  "variable"
+                                                                           },
+                                                                           {
+                                                                               "value":  " (Confidential)",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "type":  "lineBreak"
+                                                                           },
+                                                                           {
+                                                                               "value":  "Reference: ",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "key":  "borrowerRegistrationNumber",
+                                                                               "type":  "variable"
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "type":  "paragraph",
+                                                          "children":  [
+                                                                           {
+                                                                               "value":  "Dear Sir or Madam,",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "type":  "lineBreak"
+                                                                           },
+                                                                           {
+                                                                               "value":  "Meridian Global Banking Corporation (the Arranger and Agent) is pleased to set out below the indicative terms and conditions of a senior secured term loan facility to be made available to ",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "key":  "borrowerLegalName",
+                                                                               "type":  "variable"
+                                                                           },
+                                                                           {
+                                                                               "value":  " (the Borrower), a company incorporated in ",
+                                                                               "type":  "textRun"
+                                                                           },
+                                                                           {
+                                                                               "key":  "borrowerJurisdiction",
+                                                                               "type":  "variable"
+                                                                           },
+                                                                           {
+                                                                               "value":  ". This letter constitutes a mandate to arrange and does not constitute a commitment to lend until Finance Documents are executed.",
+                                                                               "type":  "textRun"
+                                                                           }
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "Lead Arranger: ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "leadArranger",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "type":  "lineBreak"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  "Bookrunner: ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "bookrunner",
+                                                                                                    "type":  "variable"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeSyndication} == true"
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "This facility supports multi-currency utilisations in: ",
+                                                                                                    "type":  "textRun"
+                                                                                                },
+                                                                                                {
+                                                                                                    "key":  "facilityCurrency",
+                                                                                                    "type":  "variable"
+                                                                                                },
+                                                                                                {
+                                                                                                    "value":  " and alternate currencies as agreed with the Agent.",
+                                                                                                    "type":  "textRun"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeMultiCurrency} == true"
+                                                      },
+                                                      {
+                                                          "children":  [
+                                                                           {
+                                                                               "type":  "paragraph",
+                                                                               "children":  [
+                                                                                                {
+                                                                                                    "value":  "ESG-linked pricing applies subject to achievement of agreed KPIs as set out in Schedule 1.",
+                                                                                                    "type":  "textRun"
+                                                                                                }
+                                                                                            ]
+                                                                           }
+                                                                       ],
+                                                          "type":  "conditionBlock",
+                                                          "conditionExpression":  "${includeESG} == true"
+                                                      }
+                                                  ],
+                                        "schemaVersion":  "1.0"
+                                    }
+                 }
+}

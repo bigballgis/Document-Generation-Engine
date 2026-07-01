@@ -94,6 +94,11 @@ public class TemplateVersionEntity {
         return masterCatalogVersion;
     }
 
+    public void setMasterCatalogVersion(String masterCatalogVersion) {
+        this.masterCatalogVersion = masterCatalogVersion;
+        this.updatedAt = Instant.now();
+    }
+
     public String getRulesJson() {
         return rulesJson;
     }

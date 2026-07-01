@@ -3,17 +3,11 @@ package com.bank.docgen.template.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
-import com.bank.docgen.authoring.structured.MasterStyleCatalogService;
-import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
-import com.bank.docgen.authoring.structured.NumberingService;
-import com.bank.docgen.authoring.structured.PasteCleaningService;
-import com.bank.docgen.authoring.structured.ReferenceNodeService;
-import com.bank.docgen.authoring.structured.TableComponentService;
-import com.bank.docgen.authoring.structured.StructuredContentSchemaValidator;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -22,6 +16,7 @@ import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
+import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
@@ -60,6 +55,12 @@ class TemplateServiceMetadataTest {
 
     @Mock
     private GroupAccessService groupAccessService;
+    @Mock
+    private TemplateStructuredAuthoringService structuredAuthoringService;
+    @Mock
+    private TemplateBindingConfigurationService bindingConfigurationService;
+    @Mock
+    private TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     private TemplateService service;
     private ManagementSessionClaims author;
@@ -74,28 +75,19 @@ class TemplateServiceMetadataTest {
                 variableSchemaRepository,
                 anchorBindingRepository,
                 new ApprovalSubStateResolver(lifecycleRecordRepository),
-                objectMapper
+                objectMapper,
+                templateCurrentVersionResolver
         );
         service = new TemplateService(
                 templateRepository,
                 templateVersionRepository,
-                variableSchemaRepository,
-                anchorBindingRepository,
                 masterDocumentRepository,
                 apiPolicyRepository,
                 groupAccessService,
-                objectMapper,
-                new StructuredContentSchemaValidator(objectMapper),
-                new NodeMatrixValidationService(objectMapper),
-                new MasterStyleCatalogService(objectMapper),
-                new TableComponentService(objectMapper),
-                new ReferenceNodeService(objectMapper),
-                new NumberingService(objectMapper),
-                new TemplateStructuredAuthoringService(
-                        new MasterStyleCatalogService(objectMapper),
-                        new PasteCleaningService(objectMapper)
-                ),
-                viewMapper
+                structuredAuthoringService,
+                bindingConfigurationService,
+                viewMapper,
+                templateCurrentVersionResolver
         );
         author = new ManagementSessionClaims(
                 "10000003",
@@ -127,8 +119,9 @@ class TemplateServiceMetadataTest {
         when(groupAccessService.canAccessGroup(author, "RETAIL")).thenReturn(true);
         when(groupAccessService.canAuthorTemplates(author)).thenReturn(true);
         TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), templateId, "10000003");
-        when(templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1))
+        when(templateCurrentVersionResolver.findInFlightDevVersion(templateId))
                 .thenReturn(Optional.of(version));
+        when(templateCurrentVersionResolver.isInFlight(any())).thenReturn(true);
         when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(version.getId()))
                 .thenReturn(List.of());
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(version.getId()))

@@ -77,12 +77,6 @@ function revisionLineRows(page: import('@playwright/test').Page) {
   return page.locator('.revision-lines-card .el-table__body-wrapper tbody tr')
 }
 
-function historicalRevisionRow(page: import('@playwright/test').Page) {
-  return revisionLineRows(page).filter({
-    has: page.locator('.line-tag').filter({ hasText: /^historical$/i }),
-  })
-}
-
 function currentRevisionRow(page: import('@playwright/test').Page) {
   return revisionLineRows(page).filter({
     has: page.locator('.line-tag').filter({ hasText: /^current$/i }),

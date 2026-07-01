@@ -30,39 +30,45 @@ test.describe('P21-T06a template detail tabs', () => {
     )
   })
 
-  test('overview tab query syncs when switching tabs', async ({ page, request }) => {
+  test('hub workflow status tab redirects to dev editor workflow actions', async ({ page, request }) => {
     await loginAs(page, E2E_TEMPLATE_AUTHOR)
     const detailPath = await demoTemplateDetailPath(request)
     await page.goto(`${detailPath}?tab=overview`, { waitUntil: 'domcontentloaded' })
 
-    const tabs = page.locator('.detail-tabs')
+    const tabs = page.locator('.secondary-tabs')
     await expect(tabs.getByRole('tab', { name: /^overview$/i })).toHaveAttribute('aria-selected', 'true', {
       timeout: 15_000,
     })
 
-    await tabs.getByRole('tab', { name: /^published versions$/i }).click()
-    await expect(page).toHaveURL(/tab=releaseVersions/)
-    await expect(tabs.getByRole('tab', { name: /^published versions$/i })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    )
+    await tabs.getByRole('tab', { name: /^workflow status$/i }).click()
+    await expect(page).toHaveURL(/\/dev\//, { timeout: 15_000 })
+    await expect(page).toHaveURL(/tab=authoring/)
+    await expect(page.locator('#dev-version-actions')).toBeVisible({ timeout: 15_000 })
   })
 
-  test('lifecycle deep-link normalizes and allows switching away', async ({ page, request }) => {
+  test('hub shows version lines as primary surface', async ({ page, request }) => {
+    await loginAs(page, E2E_TEMPLATE_AUTHOR)
+    const detailPath = await demoTemplateDetailPath(request)
+    await page.goto(detailPath, { waitUntil: 'domcontentloaded' })
+
+    await expect(page.locator('.version-lines-card')).toBeVisible()
+    await expect(page.getByText(/version lines/i)).toBeVisible()
+  })
+
+  test('lifecycle deep-link redirects to dev editor workflow actions', async ({ page, request }) => {
     await loginAs(page, E2E_TEMPLATE_AUTHOR)
     const detailPath = await demoTemplateDetailPath(request)
     await page.goto(`${detailPath}?focus=lifecycle`, { waitUntil: 'domcontentloaded' })
 
+    await expect(page).toHaveURL(/\/dev\//)
+    await expect(page).toHaveURL(/tab=authoring/)
+    await expect(page.locator('#dev-version-actions')).toBeVisible({ timeout: 15_000 })
+
     const tabs = page.locator('.detail-tabs')
-    await expect(tabs.getByRole('tab', { name: /^workflow status$/i })).toHaveAttribute(
+    await expect(tabs.getByRole('tab', { name: /^template design$/i })).toHaveAttribute(
       'aria-selected',
       'true',
     )
-    await expect(page).toHaveURL(/tab=lifecycle/)
-    await expect(page).not.toHaveURL(/focus=lifecycle/)
-
-    await tabs.getByRole('tab', { name: /^overview$/i }).click()
-    await expect(page).toHaveURL(/tab=overview/)
-    await expect(tabs.getByRole('tab', { name: /^overview$/i })).toHaveAttribute('aria-selected', 'true')
+    await expect(tabs.getByRole('tab', { name: /^workflow status$/i })).toHaveCount(0)
   })
 })

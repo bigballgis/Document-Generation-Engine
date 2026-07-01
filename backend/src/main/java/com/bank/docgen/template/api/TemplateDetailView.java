@@ -21,6 +21,7 @@ public record TemplateDetailView(
         List<AnchorBindingView> bindings,
         List<CompositionRuleView> rules,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        boolean readOnly
 ) {
 }

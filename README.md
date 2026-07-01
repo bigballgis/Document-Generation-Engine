@@ -41,9 +41,13 @@ This runs local `mvn package` + `pnpm build`, then builds slim images that **onl
 | --- | --- |
 | Management UI | http://localhost:4173 |
 | Backend health | http://localhost:8080/healthz |
+| PDF conversion | LibreOffice headless (embedded in `docgen-backend` image) |
 | Login | `10000001` / `ChangeMe123!` |
 
 Restart without recompiling: `.\scripts\docker-deploy.ps1 -SkipBuild`.
+
+The backend image includes LibreOffice for DOCX→PDF acceptance testing (`LIBREOFFICE_CONVERSION_MODE=cli`).
+No separate LibreOffice sidecar is required for `docker-deploy.ps1`.
 
 ### 1. Environment
 
@@ -57,10 +61,11 @@ copy .env.example .env
 docker compose up -d docgen-postgres docgen-redis docgen-kafka docgen-minio
 ```
 
-LibreOffice sidecar (PDF rendering, later phases):
+Optional LibreOffice sidecar (split deployment / `docker-exec` mode only — not used by `docker-deploy.ps1`):
 
 ```powershell
 docker compose --profile rendering up -d docgen-libreoffice
+# Set LIBREOFFICE_CONVERSION_MODE=docker-exec and mount Docker socket into backend.
 ```
 
 ### 3. Backend (optional local dev only)

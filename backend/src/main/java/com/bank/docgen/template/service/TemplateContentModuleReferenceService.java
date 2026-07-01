@@ -34,6 +34,7 @@ public class TemplateContentModuleReferenceService {
     private final ContentModuleRepository contentModuleRepository;
     private final ContentModuleVersionRepository contentModuleVersionRepository;
     private final ContentModuleAccessSupport contentModuleAccessSupport;
+    private final TemplateCurrentVersionResolver templateVersionSupport;
 
     public TemplateContentModuleReferenceService(
             TemplateService templateService,
@@ -41,7 +42,8 @@ public class TemplateContentModuleReferenceService {
             TemplateContentModuleReferenceRepository referenceRepository,
             ContentModuleRepository contentModuleRepository,
             ContentModuleVersionRepository contentModuleVersionRepository,
-            ContentModuleAccessSupport contentModuleAccessSupport
+            ContentModuleAccessSupport contentModuleAccessSupport,
+            TemplateCurrentVersionResolver templateVersionSupport
     ) {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
@@ -49,12 +51,13 @@ public class TemplateContentModuleReferenceService {
         this.contentModuleRepository = contentModuleRepository;
         this.contentModuleVersionRepository = contentModuleVersionRepository;
         this.contentModuleAccessSupport = contentModuleAccessSupport;
+        this.templateVersionSupport = templateVersionSupport;
     }
 
     @Transactional(readOnly = true)
     public List<ContentModuleReferenceView> listReferences(UUID templateId, ManagementSessionClaims session) {
         templateService.requireReadableTemplate(templateId, session);
-        TemplateVersionEntity version = currentDevVersion(templateId);
+        TemplateVersionEntity version = templateVersionSupport.requireExportableVersion(templateId);
         return referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(version.getId()).stream()
                 .map(this::toView)
                 .toList();
@@ -67,8 +70,8 @@ public class TemplateContentModuleReferenceService {
             ManagementSessionClaims session
     ) {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
+        TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
-        TemplateVersionEntity version = currentDevVersion(templateId);
         String referenceKey = normalizeReferenceKey(request.referenceKey());
         var existing = referenceRepository.findByTemplateVersionIdAndReferenceKey(version.getId(), referenceKey);
         if (existing.isPresent() && existing.get().isLockedFlag()) {
@@ -198,11 +201,6 @@ public class TemplateContentModuleReferenceService {
                 version.getSemanticVersion(),
                 reference.isLockedFlag()
         );
-    }
-
-    private TemplateVersionEntity currentDevVersion(UUID templateId) {
-        return templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
-                .orElseThrow(TemplateNotFoundException::new);
     }
 
     private void assertDraft(TemplateEntity template) {

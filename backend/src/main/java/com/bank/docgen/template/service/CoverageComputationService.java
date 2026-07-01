@@ -46,6 +46,7 @@ public class CoverageComputationService {
     private final AnchorBindingRepository anchorBindingRepository;
     private final CoverageThresholdResolver coverageThresholdResolver;
     private final ObjectMapper objectMapper;
+    private final TemplateCurrentVersionResolver templateVersionSupport;
 
     public CoverageComputationService(
             TemplateService templateService,
@@ -55,7 +56,8 @@ public class CoverageComputationService {
             PreviewRecordRepository previewRecordRepository,
             AnchorBindingRepository anchorBindingRepository,
             CoverageThresholdResolver coverageThresholdResolver,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            TemplateCurrentVersionResolver templateVersionSupport
     ) {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
@@ -65,12 +67,13 @@ public class CoverageComputationService {
         this.anchorBindingRepository = anchorBindingRepository;
         this.coverageThresholdResolver = coverageThresholdResolver;
         this.objectMapper = objectMapper;
+        this.templateVersionSupport = templateVersionSupport;
     }
 
     @Transactional(readOnly = true)
     public CoverageSummaryView compute(UUID templateId, ManagementSessionClaims session) {
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
-        TemplateVersionEntity version = currentDevVersion(templateId);
+        TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
         CoverageThresholdView threshold = coverageThresholdResolver.resolveForTemplate(template);
 
         List<TestDataSetEntity> dataSets = testDataSetRepository.findByTemplateIdOrderByUpdatedAtDesc(templateId);
@@ -214,10 +217,5 @@ public class CoverageComputationService {
             return 100;
         }
         return (int) Math.floor((exercised * 100.0) / total);
-    }
-
-    private TemplateVersionEntity currentDevVersion(UUID templateId) {
-        return templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
-                .orElseThrow(TemplateNotFoundException::new);
     }
 }

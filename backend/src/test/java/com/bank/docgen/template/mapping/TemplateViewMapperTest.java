@@ -1,6 +1,7 @@
 package com.bank.docgen.template.mapping;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.template.api.AnchorBindingView;
@@ -21,6 +22,7 @@ import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.bank.docgen.template.service.ApprovalSubStateResolver;
+import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +44,8 @@ class TemplateViewMapperTest {
     private AnchorBindingRepository anchorBindingRepository;
     @Mock
     private ApprovalSubStateResolver approvalSubStateResolver;
+    @Mock
+    private TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     private TemplateViewMapper mapper;
     private ObjectMapper objectMapper;
@@ -54,7 +58,8 @@ class TemplateViewMapperTest {
                 variableSchemaRepository,
                 anchorBindingRepository,
                 approvalSubStateResolver,
-                objectMapper
+                objectMapper,
+                templateCurrentVersionResolver
         );
     }
 
@@ -194,8 +199,9 @@ class TemplateViewMapperTest {
                 "{}",
                 BindingValidationStatus.VALID
         );
-        when(templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1))
+        when(templateCurrentVersionResolver.findInFlightDevVersion(templateId))
                 .thenReturn(Optional.of(version));
+        when(templateCurrentVersionResolver.isInFlight(any())).thenReturn(true);
         when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
                 .thenReturn(List.of(variable));
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
@@ -229,8 +235,9 @@ class TemplateViewMapperTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
         UUID versionId = UUID.randomUUID();
         TemplateVersionEntity version = new TemplateVersionEntity(versionId, templateId, "10000003");
-        when(templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1))
+        when(templateCurrentVersionResolver.findInFlightDevVersion(templateId))
                 .thenReturn(Optional.of(version));
+        when(templateCurrentVersionResolver.isInFlight(any())).thenReturn(true);
         when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
                 .thenReturn(List.of());
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))

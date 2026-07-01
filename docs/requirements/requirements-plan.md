@@ -501,6 +501,16 @@
 - 模板废弃前必须先停用且无可调用发布版本；废弃需要二次确认、填写原因、影响预览并记录审计，不强制主动通知调用方。
 - 模板废弃由全局管理员和分组管理员执行；全局管理员可废弃全部模板，分组管理员可废弃被授权组范围内模板。
 
+## 已确认：模板包导航 UX（BDD-TEMPLATE-PACKAGE-NAV-001，2026-07-01）
+
+- 管理 UI 模板包详情采用 **hub + dev 编辑 + release 只读** 三路由，与母版 hub + revision detail 对齐；完整 BDD 见 [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) § BDD-TEMPLATE-PACKAGE-NAV-001。
+- `/templates/:templateId` 为模板 **包 hub**；默认主表面为 **版本线表格**（进行中 dev 线 + 已发布 release 线），取代 P21-T06a 默认 `overview` tab。
+- 进行中 dev 线（`DRAFT` / `TESTING` / `APPROVAL` / `PENDING_RELEASE`）行点击 → `/templates/:templateId/dev/:devVersionId` 进入编排/编辑。
+- 已发布 release 线行点击 → `/templates/:templateId/releases/:releaseVersion` 只读详情；已发布内容不可变（变更 API 返回 `403 TEMPLATE_VERSION_IMMUTABLE`）。
+- 已发布 release 线支持 **Clone** 为新 `DRAFT` dev 线（`POST …/release-versions/{releaseVersion}/clone`）；进行中 dev 已存在时 clone 返回 `409 TEMPLATE_DEV_LINE_IN_FLIGHT`。
+- 分组隔离 fail-closed：跨组 list/get/clone 返回 `403 ACCESS_DENIED`。
+- v1 每个模板同时最多一条进行中 dev 线（与包级 `devVersionId` 一致）。
+
 ## 已确认：环境迁移
 
 - 模板可以从测试环境手动导出。

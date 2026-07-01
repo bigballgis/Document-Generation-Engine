@@ -24,6 +24,7 @@ import com.bank.docgen.rendering.service.PreviewGenerationException;
 import com.bank.docgen.rendering.service.PreviewNotFoundException;
 import com.bank.docgen.rendering.DocxAssemblyException;
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
+import com.bank.docgen.template.service.TemplateGovernanceException;
 import com.bank.docgen.template.service.TemplateAccessDeniedException;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TestDataSetImmutableException;
@@ -81,17 +82,18 @@ public class GlobalExceptionHandler {
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ErrorEnvelope> handleInvalidCredentials(HttpServletRequest request) {
-        return authenticationError(
-                request,
-                ApiErrorCodes.INVALID_CREDENTIALS,
-                "api.error.authentication.invalidCredentials"
-        );
-    }
-
-    @ExceptionHandler(SessionExpiredException.class)
-    public ResponseEntity<ErrorEnvelope> handleSessionExpired(HttpServletRequest request) {
+    @ExceptionHandler({InvalidCredentialsException.class, SessionExpiredException.class})
+    public ResponseEntity<ErrorEnvelope> handleAuthenticationFailures(
+            HttpServletRequest request,
+            RuntimeException ex
+    ) {
+        if (ex instanceof InvalidCredentialsException) {
+            return authenticationError(
+                    request,
+                    ApiErrorCodes.INVALID_CREDENTIALS,
+                    "api.error.authentication.invalidCredentials"
+            );
+        }
         return authenticationError(
                 request,
                 ApiErrorCodes.SESSION_EXPIRED,
@@ -212,38 +214,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TemplateNotFoundException.class)
     public ResponseEntity<ErrorEnvelope> handleTemplateNotFound(HttpServletRequest request) {
-        return domainError(
-                request,
-                HttpStatus.NOT_FOUND,
-                ApiErrorCodes.TEMPLATE_NOT_FOUND,
-                ApiErrorCategories.TEMPLATE,
-                "api.error.template.notFound"
-        );
+        return domainError(request, HttpStatus.NOT_FOUND, ApiErrorCodes.TEMPLATE_NOT_FOUND, ApiErrorCategories.TEMPLATE, "api.error.template.notFound");
     }
 
     @ExceptionHandler(TestDataSetNotFoundException.class)
     public ResponseEntity<ErrorEnvelope> handleTestDataSetNotFound(HttpServletRequest request) {
-        return domainError(
-                request,
-                HttpStatus.NOT_FOUND,
-                ApiErrorCodes.TEST_DATA_SET_NOT_FOUND,
-                ApiErrorCategories.TEMPLATE,
-                "api.error.template.testDataSetNotFound"
-        );
+        return domainError(request, HttpStatus.NOT_FOUND, ApiErrorCodes.TEST_DATA_SET_NOT_FOUND, ApiErrorCategories.TEMPLATE, "api.error.template.testDataSetNotFound");
     }
 
     @ExceptionHandler(TestDataSetImmutableException.class)
-    public ResponseEntity<ErrorEnvelope> handleTestDataSetImmutable(
-            HttpServletRequest request,
-            TestDataSetImmutableException ex
-    ) {
-        return domainError(
-                request,
-                HttpStatus.CONFLICT,
-                ApiErrorCodes.TEMPLATE_VALIDATION_FAILED,
-                ApiErrorCategories.TEMPLATE,
-                ex.messageKey()
-        );
+    public ResponseEntity<ErrorEnvelope> handleTestDataSetImmutable(HttpServletRequest request, TestDataSetImmutableException ex) {
+        return domainError(request, HttpStatus.CONFLICT, ApiErrorCodes.TEMPLATE_VALIDATION_FAILED, ApiErrorCategories.TEMPLATE, ex.messageKey());
+    }
+
+    @ExceptionHandler(TemplateGovernanceException.class)
+    public ResponseEntity<ErrorEnvelope> handleTemplateGovernance(HttpServletRequest request, TemplateGovernanceException ex) {
+        return domainError(request, ex.httpStatus(), ex.errorCode(), ApiErrorCategories.TEMPLATE, ex.messageKey());
     }
 
     @ExceptionHandler(TemplateAccessDeniedException.class)

@@ -1,0 +1,24 @@
+package com.bank.docgen.template.api;
+
+import com.bank.docgen.template.domain.ApprovalSubState;
+import com.bank.docgen.template.domain.TemplateLifecycleStatus;
+import com.bank.docgen.template.domain.TemplateVersionLineKind;
+import java.time.Instant;
+import java.util.List;
+
+public record TemplateVersionLineDetailView(
+        String devVersionId,
+        int devVersionNumber,
+        String releaseVersion,
+        TemplateLifecycleStatus lifecycleStatus,
+        ApprovalSubState approvalSubState,
+        TemplateVersionLineKind lineKind,
+        Instant updatedAt,
+        String updatedBy,
+        Boolean defaultRouteTarget,
+        boolean cloneable,
+        List<VariableSchemaView> variables,
+        List<AnchorBindingView> bindings,
+        List<CompositionRuleView> rules
+) {
+}

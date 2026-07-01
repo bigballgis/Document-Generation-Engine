@@ -70,6 +70,8 @@ class PublishGateServiceTest {
     private VariableSchemaRepository variableSchemaRepository;
     @Mock
     private TemplateContentModuleReferenceService contentModuleReferenceService;
+    @Mock
+    private TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     private PublishGateService service;
     private UUID templateId;
@@ -90,7 +92,8 @@ class PublishGateServiceTest {
                 changeDiffService,
                 templateRuleValidationService,
                 variableSchemaRepository,
-                contentModuleReferenceService
+                contentModuleReferenceService,
+                templateCurrentVersionResolver
         );
         templateId = UUID.randomUUID();
         versionId = UUID.randomUUID();
@@ -115,8 +118,8 @@ class PublishGateServiceTest {
                 Instant.now().plusSeconds(3600)
         );
         when(templateService.requireReadableTemplate(templateId, admin)).thenReturn(template);
-        when(templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1))
-                .thenReturn(Optional.of(new TemplateVersionEntity(versionId, templateId, "10000002")));
+        when(templateCurrentVersionResolver.requireInFlightDevVersion(templateId))
+                .thenReturn(new TemplateVersionEntity(versionId, templateId, "10000002"));
         when(templateService.loadRules(any(TemplateVersionEntity.class))).thenReturn(List.of());
         when(templateRuleValidationService.validateRules(
                 org.mockito.ArgumentMatchers.eq(templateId),

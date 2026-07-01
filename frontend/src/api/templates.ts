@@ -1,5 +1,6 @@
 import { http } from '@/api/http'
 import type { ApiEnvelope } from '@/types/session'
+import type { PageView } from '@/types/identity'
 import type {
   AnchorBinding,
   BindingValidationResult,
@@ -22,10 +23,13 @@ import type {
   RuleValidationResult,
   TemplateContentModuleReference,
   TemplateDetail,
+  TemplateDevVersionCreated,
   TemplateExportResult,
   TemplateImportResult,
   TemplateReleaseVersion,
   TemplateSummary,
+  TemplateVersionLineDetail,
+  TemplateVersionLineSummary,
   UpsertContentModuleReferencePayload,
   TestDataSet,
   TestGeneratePayload,
@@ -53,6 +57,53 @@ export async function listTemplates(): Promise<TemplateSummary[]> {
 export async function getTemplate(templateId: string): Promise<TemplateDetail> {
   const response = await http.get<ApiEnvelope<TemplateDetail>>(`/templates/${templateId}`)
   return unwrap(response.data)
+}
+
+export async function listTemplateVersionLines(
+  templateId: string,
+  page: number,
+  size: number,
+): Promise<PageView<TemplateVersionLineSummary>> {
+  const response = await http.get<ApiEnvelope<PageView<TemplateVersionLineSummary>>>(
+    `/templates/${templateId}/version-lines`,
+    { params: { page, size } },
+  )
+  return unwrap(response.data)
+}
+
+export async function fetchDevVersionDetail(
+  templateId: string,
+  devVersionId: string,
+): Promise<TemplateDetail> {
+  const response = await http.get<ApiEnvelope<TemplateDetail>>(
+    `/templates/${templateId}/dev/${devVersionId}`,
+  )
+  return unwrap(response.data)
+}
+
+export async function fetchReleaseVersionDetail(
+  templateId: string,
+  releaseVersion: string,
+): Promise<TemplateVersionLineDetail> {
+  const response = await http.get<ApiEnvelope<TemplateVersionLineDetail>>(
+    `/templates/${templateId}/releases/${encodeURIComponent(releaseVersion)}`,
+  )
+  return unwrap(response.data)
+}
+
+export async function cloneReleaseVersion(
+  templateId: string,
+  releaseVersion: string,
+): Promise<TemplateDevVersionCreated> {
+  const response = await http.post<ApiEnvelope<TemplateVersionLineSummary>>(
+    `/templates/${templateId}/release-versions/${encodeURIComponent(releaseVersion)}/clone`,
+  )
+  const result = unwrap(response.data)
+  return {
+    devVersionId: result.devVersionId,
+    devVersionNumber: result.devVersionNumber,
+    lifecycleStatus: result.lifecycleStatus,
+  }
 }
 
 export async function createTemplate(payload: CreateTemplatePayload): Promise<TemplateDetail> {
@@ -262,6 +313,7 @@ export async function getPreview(templateId: string, previewId: string): Promise
 export async function validateBindings(templateId: string): Promise<BindingValidationResult> {
   const response = await http.post<ApiEnvelope<BindingValidationResult>>(
     `/templates/${templateId}/bindings/validate`,
+    {},
   )
   return unwrap(response.data)
 }

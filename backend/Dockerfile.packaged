@@ -1,12 +1,18 @@
 # Runtime image — copies pre-built JAR from backend/target (see scripts/docker-deploy.ps1).
-# ADR-0030 / P15-T01: minimal non-root JRE (UID 65532, matches distroless nonroot); mount /tmp tmpfs with read-only root FS.
+# ADR-0030 / P15-T01: non-root JRE (UID 65532); mount /tmp tmpfs with read-only root FS.
+# LibreOffice headless is embedded for Docker acceptance PDF conversion (cli mode; ADR-0019).
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-RUN addgroup -g 65532 -S nonroot \
+RUN apk add --no-cache \
+        libreoffice \
+        ttf-dejavu \
+        fontconfig \
+    && addgroup -g 65532 -S nonroot \
     && adduser -S -u 65532 -G nonroot nonroot \
     && chown -R nonroot:nonroot /app
 COPY --chown=nonroot:nonroot target/docgen-backend-*.jar app.jar
 USER 65532:65532
 EXPOSE 8080
+ENV HOME=/tmp
 ENV JAVA_TOOL_OPTIONS="-Djava.io.tmpdir=/tmp"
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -9,6 +9,7 @@ import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.service.ApprovalSubStateResolver;
+import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
@@ -19,7 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,19 +31,22 @@ public class TemplateViewMapper {
     private final AnchorBindingRepository anchorBindingRepository;
     private final ApprovalSubStateResolver approvalSubStateResolver;
     private final ObjectMapper objectMapper;
+    private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     public TemplateViewMapper(
             TemplateVersionRepository templateVersionRepository,
             VariableSchemaRepository variableSchemaRepository,
             AnchorBindingRepository anchorBindingRepository,
             ApprovalSubStateResolver approvalSubStateResolver,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            TemplateCurrentVersionResolver templateCurrentVersionResolver
     ) {
         this.templateVersionRepository = templateVersionRepository;
         this.variableSchemaRepository = variableSchemaRepository;
         this.anchorBindingRepository = anchorBindingRepository;
         this.approvalSubStateResolver = approvalSubStateResolver;
         this.objectMapper = objectMapper;
+        this.templateCurrentVersionResolver = templateCurrentVersionResolver;
     }
 
     public TemplateSummaryView toSummary(TemplateEntity template) {
@@ -67,7 +71,19 @@ public class TemplateViewMapper {
     }
 
     public TemplateDetailView toDetail(TemplateEntity template) {
-        TemplateVersionEntity version = currentDevVersion(template.getId());
+        Optional<TemplateVersionEntity> inFlight = templateCurrentVersionResolver
+                .findInFlightDevVersion(template.getId());
+        TemplateVersionEntity version = inFlight.orElseGet(() -> templateCurrentVersionResolver
+                .findLatestPublishedVersion(template.getId())
+                .orElseThrow(TemplateNotFoundException::new));
+        return toDetailForVersion(template, version, false);
+    }
+
+    public TemplateDetailView toDetailForVersion(
+            TemplateEntity template,
+            TemplateVersionEntity version,
+            boolean readOnly
+    ) {
         List<VariableSchemaView> variables = variableSchemaRepository
                 .findByTemplateVersionIdOrderByVariableKeyAsc(version.getId())
                 .stream()
@@ -78,6 +94,9 @@ public class TemplateViewMapper {
                 .stream()
                 .map(this::toBindingView)
                 .toList();
+        String releaseVersion = templateCurrentVersionResolver.isInFlight(version)
+                ? template.getReleaseVersion()
+                : version.getReleaseVersion();
         return new TemplateDetailView(
                 template.getId().toString(),
                 template.getExternalId(),
@@ -85,16 +104,21 @@ public class TemplateViewMapper {
                 template.getName(),
                 template.getDescription(),
                 template.getMasterId().toString(),
-                template.getLifecycleStatus(),
-                approvalSubStateResolver.resolve(template),
-                template.getReleaseVersion(),
+                readOnly
+                        ? version.getLifecycleStatus()
+                        : template.getLifecycleStatus(),
+                templateCurrentVersionResolver.isInFlight(version)
+                        ? approvalSubStateResolver.resolve(template)
+                        : null,
+                releaseVersion,
                 version.getId().toString(),
                 version.getDevVersionNumber(),
                 variables,
                 bindings,
                 loadRules(version),
                 template.getCreatedAt(),
-                template.getUpdatedAt()
+                template.getUpdatedAt(),
+                readOnly
         );
     }
 
@@ -133,10 +157,5 @@ public class TemplateViewMapper {
                 entity.getStructuredContentJson(),
                 entity.getValidationStatus()
         );
-    }
-
-    private TemplateVersionEntity currentDevVersion(UUID templateId) {
-        return templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
-                .orElseThrow(TemplateNotFoundException::new);
     }
 }

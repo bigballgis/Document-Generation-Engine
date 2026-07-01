@@ -79,7 +79,7 @@ export function routeKeyForPath(path: string): RouteKey | undefined {
   return entry?.[0] as RouteKey | undefined
 }
 
-export function templateDetailPath(templateId: string, tab?: string): string {
+export function templatePackageHubPath(templateId: string, tab?: string): string {
   const base = `${TEMPLATE_DETAIL_PATH_PREFIX}${templateId}`
   if (!tab) {
     return base
@@ -87,8 +87,37 @@ export function templateDetailPath(templateId: string, tab?: string): string {
   return `${base}?tab=${encodeURIComponent(tab)}`
 }
 
+/** @deprecated Use templatePackageHubPath — hub is the default template package surface. */
+export function templateDetailPath(templateId: string, tab?: string): string {
+  return templatePackageHubPath(templateId, tab)
+}
+
+export function templateDevVersionPath(
+  templateId: string,
+  devVersionId: string,
+  tab?: string,
+  extraQuery?: Record<string, string>,
+): string {
+  const base = `${TEMPLATE_DETAIL_PATH_PREFIX}${templateId}/dev/${devVersionId}`
+  const params = new URLSearchParams()
+  if (tab) {
+    params.set('tab', tab)
+  }
+  if (extraQuery) {
+    for (const [key, value] of Object.entries(extraQuery)) {
+      params.set(key, value)
+    }
+  }
+  const query = params.toString()
+  return query ? `${base}?${query}` : base
+}
+
+export function templateReleaseDetailPath(templateId: string, releaseVersion: string): string {
+  return `${TEMPLATE_DETAIL_PATH_PREFIX}${templateId}/releases/${encodeURIComponent(releaseVersion)}`
+}
+
 export function templateLifecyclePanelPath(templateId: string): string {
-  return templateDetailPath(templateId, 'lifecycle')
+  return templatePackageHubPath(templateId, 'lifecycle')
 }
 
 export function apiPolicyDetailPath(templateId: string, domain?: string): string {

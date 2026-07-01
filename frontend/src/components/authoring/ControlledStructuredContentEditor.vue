@@ -2,9 +2,11 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
+import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import PasteCleaningSummaryDialog from '@/components/authoring/PasteCleaningSummaryDialog.vue'
 import * as templatesApi from '@/api/templates'
-import type { MasterStyleCatalog, PasteCleaningSummary } from '@/types/template'
+import type { MasterStyleCatalog, PasteCleaningSummary, VariableSchema } from '@/types/template'
+import { buildVariableOptionLabel, humanizeCamelCase } from '@/utils/variableDisplayName'
 import {
   DEFAULT_STRUCTURED_CONTENT_JSON,
   DISABLED_TOOLBAR_CAPABILITIES,
@@ -15,12 +17,14 @@ import {
   serializeStructuredContent,
   type ConfirmedNodeType,
   type StructuredContentDocument,
+  type StructuredContentNode,
 } from '@/utils/structuredContentNodes'
 
 const props = defineProps<{
   modelValue: string
   templateId: string
   variableKeys?: string[]
+  variables?: VariableSchema[]
 }>()
 
 const emit = defineEmits<{
@@ -40,7 +44,7 @@ const pasteSummary = ref<PasteCleaningSummary | null>(null)
 const pasteBlocked = ref(false)
 const pendingPasteJson = ref<string | null>(null)
 const prePasteSnapshot = ref(props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON)
-const pasteAreaRef = ref<HTMLDivElement | null>(null)
+const pasteInputRef = ref<HTMLInputElement | null>(null)
 
 const blockNodeTypes: ConfirmedNodeType[] = [
   'sectionHeading',
@@ -49,9 +53,42 @@ const blockNodeTypes: ConfirmedNodeType[] = [
   'conditionBlock',
   'loopBlock',
   'tableComponentRef',
+  'contentModuleRef',
 ]
 
 const styleOptions = computed(() => styleCatalog.value?.entries ?? [])
+
+const variableCatalog = computed(() => {
+  if (props.variables?.length) {
+    return props.variables
+  }
+  return (props.variableKeys ?? []).map(
+    (variableKey): VariableSchema => ({
+      variableKey,
+      variableType: 'TEXT',
+      required: false,
+      defaultValue: null,
+      enumValues: [],
+      description: null,
+    }),
+  )
+})
+
+const variableSelectOptions = computed(() =>
+  variableCatalog.value.map((variable) => ({
+    value: variable.variableKey,
+    label: buildVariableOptionLabel(variable),
+  })),
+)
+
+const listVariableOptions = computed(() =>
+  variableCatalog.value
+    .filter((variable) => variable.variableType === 'LIST' || variable.variableType === 'OBJECT')
+    .map((variable) => ({
+      value: variable.variableKey,
+      label: buildVariableOptionLabel(variable),
+    })),
+)
 
 function styleLabel(styleKey: string): string {
   const key = `templates.structuredEditor.styleCatalog.keys.${styleKey}`
@@ -81,7 +118,7 @@ onMounted(async () => {
   }
 })
 
-function nodeLabel(type: ConfirmedNodeType): string {
+function nodeLabel(type: ConfirmedNodeType | string): string {
   const key = `templates.structuredEditor.nodes.${type}`
   return te(key) ? t(key) : type
 }
@@ -97,28 +134,66 @@ function applySelectedStyle() {
   documentModel.value = applyStyleToParagraphs(documentModel.value, selectedStyleKey.value)
 }
 
-function updateParagraphText(index: number, value: string) {
+function replaceBlock(index: number, next: StructuredContentNode) {
   const nodes = [...documentModel.value.nodes]
-  const node = nodes[index]
-  if (!node) {
-    return
-  }
-  const children = node.children ? [...node.children] : [{ type: 'textRun', value: '' }]
-  const textRun = children[0] ?? { type: 'textRun', value: '' }
-  children[0] = { ...textRun, type: 'textRun', value }
-  nodes[index] = { ...node, children }
+  nodes[index] = next
   documentModel.value = { ...documentModel.value, nodes }
 }
 
-function paragraphPreview(nodeIndex: number): string {
-  const node = documentModel.value.nodes[nodeIndex]
-  const textRun = node?.children?.[0]
-  return textRun?.value ?? ''
+function updateBlockField(index: number, field: keyof StructuredContentNode, value: string) {
+  const node = documentModel.value.nodes[index]
+  if (!node) {
+    return
+  }
+  replaceBlock(index, { ...node, [field]: value })
 }
 
-async function handlePaste(event: ClipboardEvent) {
-  event.preventDefault()
-  const html = event.clipboardData?.getData('text/html') ?? event.clipboardData?.getData('text/plain') ?? ''
+function updateInlineChild(blockIndex: number, childIndex: number, nextChild: StructuredContentNode) {
+  const node = documentModel.value.nodes[blockIndex]
+  if (!node) {
+    return
+  }
+  const children = [...(node.children ?? [])]
+  children[childIndex] = nextChild
+  replaceBlock(blockIndex, { ...node, children })
+}
+
+function addInlineToBlock(blockIndex: number, type: ConfirmedNodeType) {
+  const node = documentModel.value.nodes[blockIndex]
+  if (!node) {
+    return
+  }
+  const children = [...(node.children ?? []), createNodeTemplate(type, selectedStyleKey.value)]
+  replaceBlock(blockIndex, { ...node, children })
+}
+
+function removeBlock(index: number) {
+  documentModel.value = {
+    ...documentModel.value,
+    nodes: documentModel.value.nodes.filter((_, nodeIndex) => nodeIndex !== index),
+  }
+}
+
+function conditionExpression(node: StructuredContentNode): string {
+  return node.conditionExpression ?? node.key ?? ''
+}
+
+function loopVariable(node: StructuredContentNode): string {
+  return node.loopVariable ?? node.key ?? ''
+}
+
+async function handlePasteFile(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) {
+    return
+  }
+  const html = await file.text()
+  await runPasteClean(html)
+  input.value = ''
+}
+
+async function runPasteClean(html: string) {
   if (!html.trim()) {
     return
   }
@@ -160,15 +235,24 @@ function insertInline(type: ConfirmedNodeType) {
   if (!target) {
     return
   }
-  const children = [...(target.children ?? [])]
-  children.push(createNodeTemplate(type, selectedStyleKey.value))
+  const children = [...(target.children ?? []), createNodeTemplate(type, selectedStyleKey.value)]
   nodes[lastIndex] = { ...target, children }
   documentModel.value = { ...documentModel.value, nodes }
+}
+
+function variableLabel(key: string): string {
+  const variable = variableCatalog.value.find((entry) => entry.variableKey === key)
+  if (variable) {
+    return buildVariableOptionLabel(variable)
+  }
+  return humanizeCamelCase(key)
 }
 </script>
 
 <template>
   <div class="structured-editor" data-testid="controlled-structured-content-editor">
+    <p class="editor-hint">{{ t('templates.structuredEditor.bindingHint') }}</p>
+
     <div class="toolbar" role="toolbar" :aria-label="t('templates.structuredEditor.toolbar.label')">
       <div class="toolbar-group">
         <span class="group-label">{{ t('templates.structuredEditor.toolbar.blocks') }}</span>
@@ -190,9 +274,6 @@ function insertInline(type: ConfirmedNodeType) {
         </el-button>
         <el-button size="small" @click="insertInline('emphasis')">
           {{ nodeLabel('emphasis') }}
-        </el-button>
-        <el-button size="small" @click="insertInline('underline')">
-          {{ nodeLabel('underline') }}
         </el-button>
         <el-button size="small" @click="insertInline('lineBreak')">
           {{ nodeLabel('lineBreak') }}
@@ -220,42 +301,110 @@ function insertInline(type: ConfirmedNodeType) {
         </el-button>
       </div>
 
-      <div class="toolbar-group disabled-group">
-        <span class="group-label">{{ t('templates.structuredEditor.toolbar.unavailable') }}</span>
-        <el-tooltip
-          v-for="capability in DISABLED_TOOLBAR_CAPABILITIES"
-          :key="capability.id"
-          :content="t(capability.reasonKey)"
-        >
-          <el-button size="small" disabled data-testid="disabled-toolbar-item">
-            {{ t(capability.labelKey) }}
-          </el-button>
-        </el-tooltip>
+      <div class="toolbar-group">
+        <span class="group-label">{{ t('templates.structuredEditor.toolbar.paste') }}</span>
+        <input ref="pasteInputRef" type="file" accept=".html,.htm,.txt" hidden @change="handlePasteFile" />
+        <el-button size="small" @click="pasteInputRef?.click()">
+          {{ t('templates.structuredEditor.pasteFromFile') }}
+        </el-button>
       </div>
     </div>
 
-    <div
-      ref="pasteAreaRef"
-      class="editor-surface"
-      contenteditable="true"
-      data-testid="editor-paste-area"
-      :aria-label="t('templates.structuredEditor.editorSurface')"
-      @paste="handlePaste"
-    >
-      <div
+    <div class="editor-surface" data-testid="editor-paste-area">
+      <article
         v-for="(node, index) in documentModel.nodes"
         :key="`${node.type}-${index}`"
-        class="block-row"
+        class="block-card"
       >
-        <el-tag size="small" type="info">{{ nodeLabel(node.type as ConfirmedNodeType) }}</el-tag>
-        <el-input
-          v-if="node.type === 'paragraph' || node.type === 'sectionHeading'"
-          :model-value="paragraphPreview(index)"
-          data-testid="paragraph-input"
-          @update:model-value="(value: string) => updateParagraphText(index, value)"
-        />
-        <span v-else class="node-meta">{{ node.type }}</span>
-      </div>
+        <header class="block-card__header">
+          <el-tag size="small" type="info">{{ nodeLabel(node.type) }}</el-tag>
+          <el-button link type="danger" size="small" @click="removeBlock(index)">
+            {{ t('common.delete') }}
+          </el-button>
+        </header>
+
+        <template v-if="node.type === 'paragraph' || node.type === 'sectionHeading'">
+          <div class="inline-row">
+            <div
+              v-for="(child, childIndex) in node.children ?? []"
+              :key="`${child.type}-${childIndex}`"
+              class="inline-item"
+            >
+              <el-input
+                v-if="child.type === 'textRun' || child.type === 'text'"
+                :model-value="child.value ?? ''"
+                data-testid="paragraph-input"
+                :placeholder="t('templates.structuredEditor.textPlaceholder')"
+                @update:model-value="(value: string) => updateInlineChild(index, childIndex, { ...child, type: 'textRun', value })"
+              />
+              <AppSearchSelect
+                v-else-if="child.type === 'variable'"
+                :model-value="child.key ?? ''"
+                filterable
+                :placeholder="t('templates.structuredEditor.variablePlaceholder')"
+                @update:model-value="(value: string) => updateInlineChild(index, childIndex, { ...child, type: 'variable', key: value })"
+              >
+                <el-option
+                  v-for="option in variableSelectOptions"
+                  :key="option.value"
+                  :label="option.label"
+                  :value="option.value"
+                />
+              </AppSearchSelect>
+              <el-tag v-else size="small">{{ nodeLabel(child.type) }}</el-tag>
+            </div>
+            <el-button size="small" plain @click="addInlineToBlock(index, 'textRun')">
+              {{ t('templates.structuredEditor.addText') }}
+            </el-button>
+            <el-button size="small" plain @click="addInlineToBlock(index, 'variable')">
+              {{ t('templates.structuredEditor.addVariable') }}
+            </el-button>
+          </div>
+        </template>
+
+        <template v-else-if="node.type === 'conditionBlock'">
+          <el-input
+            :model-value="conditionExpression(node)"
+            :placeholder="t('templates.structuredEditor.conditionPlaceholder')"
+            @update:model-value="(value: string) => updateBlockField(index, 'conditionExpression', value)"
+          />
+        </template>
+
+        <template v-else-if="node.type === 'loopBlock'">
+          <AppSearchSelect
+            :model-value="loopVariable(node)"
+            filterable
+            :placeholder="t('templates.structuredEditor.loopVariablePlaceholder')"
+            @update:model-value="(value: string) => updateBlockField(index, 'loopVariable', value)"
+          >
+            <el-option
+              v-for="option in listVariableOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </AppSearchSelect>
+        </template>
+
+        <template v-else-if="node.type === 'tableComponentRef'">
+          <el-input
+            :model-value="node.tableComponentRef ?? ''"
+            :placeholder="t('templates.structuredEditor.tableRefPlaceholder')"
+            @update:model-value="(value: string) => updateBlockField(index, 'tableComponentRef', value)"
+          />
+        </template>
+
+        <template v-else-if="node.type === 'contentModuleRef'">
+          <el-input
+            :model-value="node.referenceKey ?? ''"
+            :placeholder="t('templates.structuredEditor.clauseRefPlaceholder')"
+            @update:model-value="(value: string) => updateBlockField(index, 'referenceKey', value)"
+          />
+        </template>
+
+        <p v-else class="node-meta">{{ node.type }}</p>
+      </article>
+
       <el-empty
         v-if="!documentModel.nodes.length"
         :description="t('templates.structuredEditor.emptyDocument')"
@@ -283,6 +432,12 @@ function insertInline(type: ConfirmedNodeType) {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.editor-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }
 
 .toolbar {
@@ -316,11 +471,31 @@ function insertInline(type: ConfirmedNodeType) {
   background: var(--surface-color);
 }
 
-.block-row {
+.block-card {
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted, #fafbfc);
+}
+
+.block-card__header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
   margin-bottom: 0.5rem;
+}
+
+.inline-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.inline-item {
+  flex: 1 1 12rem;
+  min-width: 10rem;
 }
 
 .node-meta {

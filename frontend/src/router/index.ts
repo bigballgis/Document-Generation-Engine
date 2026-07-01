@@ -86,8 +86,20 @@ const router = createRouter({
     },
     {
       path: '/templates/:templateId',
-      name: 'template-detail',
-      component: () => import('@/views/templates/TemplateDetailView.vue'),
+      name: 'template-package-hub',
+      component: () => import('@/views/templates/TemplatePackageHubView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.templateManagement },
+    },
+    {
+      path: '/templates/:templateId/dev/:devVersionId',
+      name: 'template-dev-version',
+      component: () => import('@/views/templates/TemplateDevVersionEditorView.vue'),
+      meta: { logicalRoute: ROUTE_KEYS.templateManagement },
+    },
+    {
+      path: '/templates/:templateId/releases/:releaseVersion',
+      name: 'template-release-detail',
+      component: () => import('@/views/templates/TemplateReleaseDetailView.vue'),
       meta: { logicalRoute: ROUTE_KEYS.templateManagement },
     },
     {

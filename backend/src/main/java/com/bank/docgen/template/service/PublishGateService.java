@@ -42,6 +42,7 @@ public class PublishGateService {
     private final TemplateRuleValidationService templateRuleValidationService;
     private final VariableSchemaRepository variableSchemaRepository;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
+    private final TemplateCurrentVersionResolver templateVersionSupport;
 
     public PublishGateService(
             TemplateService templateService,
@@ -54,7 +55,8 @@ public class PublishGateService {
             ChangeDiffService changeDiffService,
             TemplateRuleValidationService templateRuleValidationService,
             VariableSchemaRepository variableSchemaRepository,
-            TemplateContentModuleReferenceService contentModuleReferenceService
+            TemplateContentModuleReferenceService contentModuleReferenceService,
+            TemplateCurrentVersionResolver templateVersionSupport
     ) {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
@@ -67,6 +69,7 @@ public class PublishGateService {
         this.templateRuleValidationService = templateRuleValidationService;
         this.variableSchemaRepository = variableSchemaRepository;
         this.contentModuleReferenceService = contentModuleReferenceService;
+        this.templateVersionSupport = templateVersionSupport;
     }
 
     @Transactional(readOnly = true)
@@ -81,7 +84,7 @@ public class PublishGateService {
             PublishGatePhase phase
     ) {
         templateService.requireReadableTemplate(templateId, session);
-        TemplateVersionEntity version = currentDevVersion(templateId);
+        TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
         BindingValidationView bindings = templateService.validateBindings(templateId, session);
         CoverageSummaryView coverage = coverageComputationService.compute(templateId, session);
         ChangeDiffView changeDiff = changeDiffService.compute(templateId, session);
@@ -299,10 +302,5 @@ public class PublishGateService {
                 new TemplateRuleValidationRequest(rules),
                 session
         );
-    }
-
-    private TemplateVersionEntity currentDevVersion(UUID templateId) {
-        return templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
-                .orElseThrow(TemplateNotFoundException::new);
     }
 }

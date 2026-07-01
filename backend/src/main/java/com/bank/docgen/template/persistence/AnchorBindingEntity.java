@@ -28,7 +28,7 @@ public class AnchorBindingEntity {
     @Column(name = "declared_content_type", nullable = false, length = 64)
     private AnchorContentType declaredContentType;
 
-    @Column(name = "structured_content_json", nullable = false)
+    @Column(name = "structured_content_json", nullable = false, columnDefinition = "TEXT")
     private String structuredContentJson;
 
     @Enumerated(EnumType.STRING)

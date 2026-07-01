@@ -16,6 +16,7 @@ import TemplateLifecycleDecisionDialog, {
   type LifecycleDecisionDialogMode,
   type LifecycleDecisionSubmitPayload,
 } from '@/components/templates/TemplateLifecycleDecisionDialog.vue'
+import TemplateDevVersionActionBar from '@/components/templates/TemplateDevVersionActionBar.vue'
 import TemplateExportActions from '@/components/templates/TemplateExportActions.vue'
 import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
 import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
@@ -52,7 +53,7 @@ import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFi
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, apiPolicyDetailPath } from '@/routing/routeKeys'
+import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, apiPolicyDetailPath, templatePackageHubPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import * as templatesApi from '@/api/templates'
 import { conflictsWithExisting, suggestNextVersions, type SemverBumpLevel } from '@/utils/semver'
@@ -81,6 +82,17 @@ import type {
   PreviewRecord,
   PublishGateChecklist,
 } from '@/types/template'
+
+const props = withDefaults(
+  defineProps<{
+    workspace?: 'legacy' | 'dev-editor'
+  }>(),
+  {
+    workspace: 'legacy',
+  },
+)
+
+const isDevEditor = computed(() => props.workspace === 'dev-editor')
 
 const { t, te } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
@@ -148,10 +160,23 @@ const metadataEditOpen = ref(false)
 const loadFailed = ref(false)
 type DetailTab = TemplateDetailTab
 
-const activeDetailTab = ref<DetailTab>(resolveTemplateDetailTabFromQuery(route.query))
+function resolveDevEditorInitialTab(): DetailTab {
+  const tab = resolveTemplateDetailTabFromQuery(route.query)
+  if (tab === 'overview' || tab === 'lifecycle') {
+    return 'authoring'
+  }
+  return tab
+}
+
+const activeDetailTab = ref<DetailTab>(
+  isDevEditor.value ? resolveDevEditorInitialTab() : resolveTemplateDetailTabFromQuery(route.query),
+)
 const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
 
 const templateId = computed(() => route.params.templateId as string)
+const devVersionId = computed(() =>
+  isDevEditor.value ? String(route.params.devVersionId ?? '') : '',
+)
 
 const credentialsSource = computed(() => templatesStore.credentials)
 const { filters: credentialColumnFilters, filteredRows: filteredCredentials } = useDataTableFilters(
@@ -378,6 +403,11 @@ const showAuthoringSection = computed(
     template.value?.lifecycleStatus !== 'PUBLISHED' &&
     template.value?.lifecycleStatus !== 'STOPPED' &&
     template.value?.lifecycleStatus !== 'DEPRECATED',
+)
+const showDevWorkflowBar = computed(
+  () =>
+    isDevEditor.value &&
+    (showLifecycleSection.value || showGovernanceSection.value),
 )
 const canEditContentModuleReferences = computed(
   () => authorTemplates.value && template.value?.lifecycleStatus === 'DRAFT',
@@ -655,13 +685,26 @@ function resetTransientDetailState() {
 function syncTabFromRoute() {
   const normalized = normalizeTemplateDetailQuery(route.query)
   if (normalized) {
+    if (isDevEditor.value) {
+      activeDetailTab.value = 'authoring'
+      scrollToDevVersionActions()
+      const query = { ...normalized.query, tab: 'authoring', focus: 'workflow' }
+      void router.replace({ query })
+      return
+    }
     activeDetailTab.value = normalized.tab
     scrollToLifecyclePanel()
     void router.replace({ query: normalized.query })
     return
   }
 
-  const tab = resolveTemplateDetailTabFromQuery(route.query)
+  if (isDevEditor.value && route.query.focus === 'workflow') {
+    activeDetailTab.value = 'authoring'
+    scrollToDevVersionActions()
+    return
+  }
+
+  const tab = isDevEditor.value ? resolveDevEditorInitialTab() : resolveTemplateDetailTabFromQuery(route.query)
   if (activeDetailTab.value !== tab) {
     activeDetailTab.value = tab
   }
@@ -673,10 +716,22 @@ onMounted(async () => {
 })
 
 watch(
+  () => devVersionId.value,
+  () => {
+    if (isDevEditor.value) {
+      resetTransientDetailState()
+      void loadTemplate()
+    }
+  },
+)
+
+watch(
   () => templateId.value,
   () => {
     resetTransientDetailState()
-    activeDetailTab.value = resolveTemplateDetailTabFromQuery(route.query)
+    activeDetailTab.value = isDevEditor.value
+      ? resolveDevEditorInitialTab()
+      : resolveTemplateDetailTabFromQuery(route.query)
     void loadTemplate()
   },
 )
@@ -690,7 +745,10 @@ watch(
 )
 
 watch(activeDetailTab, (tab) => {
-  if (route.query.focus === 'lifecycle') {
+  if (route.query.focus === 'lifecycle' || route.query.focus === 'workflow') {
+    return
+  }
+  if (isDevEditor.value && tab === 'lifecycle') {
     return
   }
   if (resolveTemplateDetailTab(route.query.tab) === tab) {
@@ -746,7 +804,12 @@ watch(suggestedVersions, (versions) => {
 async function loadTemplate() {
   loadFailed.value = false
   try {
-    await templatesStore.fetchTemplate(templateId.value)
+    if (isDevEditor.value && devVersionId.value) {
+      const detail = await templatesApi.fetchDevVersionDetail(templateId.value, devVersionId.value)
+      templatesStore.$patch({ selectedTemplate: detail })
+    } else {
+      await templatesStore.fetchTemplate(templateId.value)
+    }
     if (showPolicyPanel.value) {
       await loadPolicyData()
     }
@@ -764,7 +827,21 @@ function scrollToLifecyclePanel() {
   })
 }
 
+function scrollToDevVersionActions() {
+  void nextTick(() => {
+    document.getElementById('dev-version-actions')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  })
+}
+
 function openLifecyclePanel() {
+  if (isDevEditor.value) {
+    activeDetailTab.value = 'authoring'
+    scrollToDevVersionActions()
+    return
+  }
   activeDetailTab.value = 'lifecycle'
   scrollToLifecyclePanel()
 }
@@ -837,6 +914,10 @@ function openApiPolicyConsole() {
 }
 
 function backToList() {
+  if (isDevEditor.value) {
+    router.push(templatePackageHubPath(templateId.value))
+    return
+  }
   router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
 }
 
@@ -989,7 +1070,11 @@ async function confirmPublishFromSummary() {
       releaseVersion: publishVersion.value,
     })
     await loadTemplate()
-    activeDetailTab.value = 'releaseVersions'
+    if (isDevEditor.value) {
+      router.push(templatePackageHubPath(templateId.value))
+    } else {
+      activeDetailTab.value = 'releaseVersions'
+    }
     ElMessage.success(t('templates.lifecycle.publishSuccess'))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
@@ -1193,7 +1278,11 @@ async function handleDeleteTemplate() {
   <div class="template-detail-page">
     <header class="page-header">
       <el-button link type="primary" @click="backToList">
-        {{ t('templates.detail.backToList') }}
+        {{
+          isDevEditor
+            ? t('templates.releaseDetail.backToHub')
+            : t('templates.detail.backToList')
+        }}
       </el-button>
       <div v-if="template" class="header-content">
         <div class="header-title-block">
@@ -1285,12 +1374,59 @@ async function handleDeleteTemplate() {
 
       <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />
 
+      <TemplateDevVersionActionBar
+        v-if="showDevWorkflowBar"
+        :lifecycle-comment="lifecycleComment"
+        :show-draft-actions="showDraftActions"
+        :show-testing-decision-actions="showTestingDecisionActions"
+        :show-submit-for-approval="showSubmitForApproval"
+        :show-approval-decision-actions="showApprovalDecisionActions"
+        :show-publish-actions="showPublishActions"
+        :show-test-generate="showTestGenerate"
+        :show-stop-action="showStopAction"
+        :show-restore-action="showRestoreAction"
+        :show-deprecate-action="showDeprecateAction"
+        :show-governance-section="showGovernanceSection"
+        :publish-gate-items="publishGateItems"
+        :loading-publish-gate="loadingPublishGate"
+        :publish-bump-level="publishBumpLevel"
+        :publish-version-conflict="publishVersionConflict"
+        :publish-gate-ready="publishGateReady"
+        :publish-bump-options="publishBumpOptions"
+        :binding-gate-result="bindingGateResult"
+        :publish-gate-load-error="publishGateLoadError"
+        :submit-gate-items="submitGateItems"
+        :loading-submit-gate="loadingSubmitGate"
+        :submit-gate-ready="submitGateReady"
+        :submit-gate-load-error="submitGateLoadError"
+        :submitting="templatesStore.submitting"
+        @update:lifecycle-comment="lifecycleComment = $event"
+        @update:publish-bump-level="publishBumpLevel = $event"
+        @submit-for-test="handleSubmitForTest"
+        @test-decision="handleTestDecision"
+        @submit-for-approval="handleSubmitForApproval"
+        @approval-decision="handleApprovalDecision"
+        @publish="handlePublish"
+        @test-generate="handleTestGenerate"
+        @governance-action="handleGovernanceAction"
+        @retry-publish-gate="loadPublishGateData"
+        @retry-submit-gate="loadSubmitGateData"
+      />
+
       <el-tabs v-model="activeDetailTab" class="detail-tabs">
-        <el-tab-pane :label="t(templateDetailTabLabelKey('overview'))" name="overview">
+        <el-tab-pane
+          v-if="!isDevEditor"
+          :label="t(templateDetailTabLabelKey('overview'))"
+          name="overview"
+        >
           <TemplateDetailOverviewTab :template="template" :format-date-time="formatDateTime" />
         </el-tab-pane>
 
-        <el-tab-pane :label="t(templateDetailTabLabelKey('lifecycle'))" name="lifecycle">
+        <el-tab-pane
+          v-if="!isDevEditor"
+          :label="t(templateDetailTabLabelKey('lifecycle'))"
+          name="lifecycle"
+        >
           <TemplateDetailLifecycleTab
             :show-lifecycle-section="showLifecycleSection"
             :show-governance-section="showGovernanceSection"
@@ -1351,7 +1487,11 @@ async function handleDeleteTemplate() {
           />
         </el-tab-pane>
 
-        <el-tab-pane :label="t(templateDetailTabLabelKey('releaseVersions'))" name="releaseVersions">
+        <el-tab-pane
+          v-if="!isDevEditor"
+          :label="t(templateDetailTabLabelKey('releaseVersions'))"
+          name="releaseVersions"
+        >
           <TemplateDetailReleaseVersionsTab
             :template-id="templateId"
             :template-lifecycle-status="template.lifecycleStatus"
@@ -1360,7 +1500,7 @@ async function handleDeleteTemplate() {
         </el-tab-pane>
 
         <el-tab-pane
-          v-if="showPolicyPanel"
+          v-if="showPolicyPanel && !isDevEditor"
           :label="t(templateDetailTabLabelKey('apiAccess'))"
           name="apiAccess"
         >

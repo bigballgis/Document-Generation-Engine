@@ -15,6 +15,8 @@ public final class ApiErrorCodes {
     public static final String TEMPLATE_NOT_FOUND = "TEMPLATE_NOT_FOUND";
     public static final String TEST_DATA_SET_NOT_FOUND = "TEST_DATA_SET_NOT_FOUND";
     public static final String TEMPLATE_VALIDATION_FAILED = "TEMPLATE_VALIDATION_FAILED";
+    public static final String TEMPLATE_DEV_LINE_IN_FLIGHT = "TEMPLATE_DEV_LINE_IN_FLIGHT";
+    public static final String TEMPLATE_VERSION_IMMUTABLE = "TEMPLATE_VERSION_IMMUTABLE";
     public static final String PREVIEW_NOT_FOUND = "PREVIEW_NOT_FOUND";
     public static final String RENDERING_FAILED = "RENDERING_FAILED";
     public static final String API_POLICY_NOT_FOUND = "API_POLICY_NOT_FOUND";

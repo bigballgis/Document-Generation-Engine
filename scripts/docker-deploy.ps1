@@ -129,10 +129,20 @@ try {
     Write-Host "  Warning: could not verify catalog via API: $($_.Exception.Message)"
 }
 
+if ($env:DOCGEN_IMPORT_FOL_DEMO -ne 'false') {
+    Write-Host "==> Importing wholesale FOL executive demo (SQL + API)..."
+    & "$RepoRoot/deploy/demo-fol/import-fol-demo.ps1" -BackendUrl "http://localhost:$backendPort"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "FOL demo import failed. See deploy/demo-fol/import-fol-demo.ps1"
+        exit 1
+    }
+}
+
 Write-Host ""
 Write-Host "Deployment ready."
 Write-Host "  Frontend: http://localhost:$frontendPort"
 Write-Host "  Backend:  http://localhost:$backendPort/healthz"
+Write-Host "  PDF:      LibreOffice headless (embedded in backend image; cli mode)"
 Write-Host "  Login:    10000001 / ChangeMe123! (GLOBAL_ADMIN)"
 Write-Host "  Hardening smoke: .\scripts\container-hardening-smoke.ps1 -SkipBuild"
 Write-Host ""

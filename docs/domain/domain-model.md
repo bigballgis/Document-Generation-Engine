@@ -464,6 +464,17 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - 模板编排人员负责测试生成 DOCX/PDF、提交测试/审批、发布/停用模板。
 - 模板编排与 API 管理需要严格区分。AD Group 授权配置和 DOCX/PDF 动态加密配置不属于模板编排或模板提交功能，只在 API 管理中配置。
 
+已确认包导航规则（BDD-TEMPLATE-PACKAGE-NAV-001，见 [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) § Template package hub）：
+
+- 模板包采用 **hub + dev editor + release detail** 三路由信息架构，与母版 hub + revision detail 对齐。
+- 包 hub（`/templates/:templateId`）默认主表面为 **版本线表格**（进行中 dev 线 + 已发布 release 线）；非默认主表面保留工作流摘要、角色旅程等 P21 次要面板。
+- 进行中 dev 线（`DRAFT` / `TESTING` / `APPROVAL` / `PENDING_RELEASE`）行点击 → `/templates/:templateId/dev/:devVersionId` 编排/编辑面。
+- 已发布 release 线行点击 → `/templates/:templateId/releases/:releaseVersion` 只读面；支持 **Clone** 为新的 `DRAFT` dev 线（`POST …/release-versions/{releaseVersion}/clone`）。
+- v1 每个模板同时最多一条 **进行中** dev 线（与包级 `devVersionId` 一致）；已发布 dev 版本不可变（变更返回 `403 TEMPLATE_VERSION_IMMUTABLE`）；进行中 dev 存在时禁止 clone（`409 TEMPLATE_DEV_LINE_IN_FLIGHT`）。
+- 版本线列表 API：`GET /api/management/v1/templates/{templateId}/version-lines`（分页）；取代 hub 上仅列出已发布版本的 `release-versions` 只读列表作为默认导航数据源。
+
+**Traceability:** BDD-TEMPLATE-PACKAGE-NAV-001 — `docs/product/catalog-navigation-ux.md`.
+
 ### 2.8 模板变量 Template Variable
 
 模板变量用于动态填充文档内容或参与规则计算。
@@ -699,14 +710,20 @@ Template Collaboration Work Item 用于站内待办和状态提示，不是 Temp
 
 开发版本用于记录模板变更历史。
 
+**Traceability:** BDD-TEMPLATE-PACKAGE-NAV-001 — in-flight dev line navigation and clone-to-dev — `docs/product/catalog-navigation-ux.md`.
+
 已确认规则：
 
 - 开发版本用于记录 change history。
 - 开发版本不直接锁定 API 服务。
+- 包 hub 版本线表格展示当前进行中 dev 线（`lineKind: IN_FLIGHT`）及历史已发布 dev 线（通过 release 线呈现）。
+- 从已发布 release **Clone** 创建的新 dev 线：`devVersionNumber` 递增、`lifecycleStatus: DRAFT`、`releaseVersion` 为空；复制已发布快照（变量、绑定、规则、结构化内容、render profile 引用）。
 
 ### 2.11 发布版本 Release Version
 
 发布版本用于锁定 API 服务。
+
+**Traceability:** BDD-TEMPLATE-PACKAGE-NAV-001 — release read-only detail + clone source — `docs/product/catalog-navigation-ux.md`.
 
 已确认规则：
 

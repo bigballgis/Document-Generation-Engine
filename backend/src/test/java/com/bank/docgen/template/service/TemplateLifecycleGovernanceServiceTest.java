@@ -279,7 +279,8 @@ class TemplateLifecycleGovernanceServiceTest {
                 List.of(),
                 List.of(),
                 Instant.now(),
-                Instant.now()
+                Instant.now(),
+                false
         );
     }
 }

@@ -3,6 +3,7 @@ package com.bank.docgen.template.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +57,8 @@ class TemplateContentModuleReferenceServiceTest {
     private ContentModuleVersionRepository contentModuleVersionRepository;
     @Mock
     private GroupAccessService groupAccessService;
+    @Mock
+    private TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     private TemplateContentModuleReferenceService service;
     private TemplateEntity template;
@@ -74,7 +77,8 @@ class TemplateContentModuleReferenceServiceTest {
                 referenceRepository,
                 contentModuleRepository,
                 contentModuleVersionRepository,
-                accessSupport
+                accessSupport,
+                templateCurrentVersionResolver
         );
         template = new TemplateEntity(
                 TEMPLATE_ID,
@@ -99,8 +103,10 @@ class TemplateContentModuleReferenceServiceTest {
     }
 
     private void stubDevVersion() {
-        when(templateVersionRepository.findByTemplateIdAndDevVersionNumber(TEMPLATE_ID, 1))
-                .thenReturn(Optional.of(new TemplateVersionEntity(VERSION_ID, TEMPLATE_ID, "10000003")));
+        TemplateVersionEntity version = new TemplateVersionEntity(VERSION_ID, TEMPLATE_ID, "10000003");
+        lenient().when(templateCurrentVersionResolver.requireInFlightDevVersion(TEMPLATE_ID)).thenReturn(version);
+        lenient().when(templateCurrentVersionResolver.requireMutableInFlightDevVersion(TEMPLATE_ID))
+                .thenReturn(version);
     }
 
     @Test

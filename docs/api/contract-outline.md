@@ -311,6 +311,11 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 模板导出（JSON） | 导出已通过审批或已发布模板 bundle（元数据、变量、绑定、规则、内容模块引用、API 策略快照）。 | 仅 `PENDING_RELEASE`、`PUBLISHED`、`STOPPED`、`DEPRECATED` 可导出；bundle 格式固定为 `template-export-bundle-v1-json`；不得包含 secret、API 凭证或运行时凭证；导出动作记录审计。 | `GET /api/management/v1/templates/{templateId}/export` |
 | 模板导出（ZIP） | 与 JSON 相同 bundle，封装为单文件 ZIP 附件。 | ZIP 内仅含条目 `template-export-bundle.json`；响应 `Content-Type: application/zip`；`Content-Disposition` 为 attachment。 | `GET /api/management/v1/templates/{templateId}/export?format=zip` |
 | 模板导入 | 将 bundle 导入目标环境并从草稿重新走流程。 | 导入后模板状态为 `DRAFT`；须重新执行测试→审批→发布；`masterId` 须为同 `groupCode` 下已批准母版；导入动作记录审计并返回 `importBatchId`。 | `POST /api/management/v1/templates/import` |
+| 模板版本线列表 | 分页列出模板包下进行中 dev 行与已发布 release 行，供包 hub 导航。 | 含 `release_version IS NULL` 的当前 dev 行与全部已发布行；跨组 `403 ACCESS_DENIED`；排序为 dev 行优先、再按 dev 版本降序。 | `GET /api/management/v1/templates/{templateId}/version-lines?page=&size=` |
+| 模板版本线详情 | 只读查看指定版本线的变量、绑定与规则快照。 | 版本线须属于该模板；跨组 `403`。 | `GET /api/management/v1/templates/{templateId}/version-lines/{versionLineId}` |
+| 模板 dev 版本详情 | 获取指定 dev 行的编排详情（在途编辑）。 | 已发布 dev 行只读；变更返回 `403 TEMPLATE_VERSION_IMMUTABLE`。 | `GET /api/management/v1/templates/{templateId}/dev/{devVersionId}` |
+| 模板 release 详情 | 获取已发布 release 只读快照。 | 按语义版本 `releaseVersion` 定位；未知版本 `404`。 | `GET /api/management/v1/templates/{templateId}/releases/{releaseVersion}` |
+| 克隆已发布 release | 从已发布 release 复制快照到新的 DRAFT dev 行（`max(dev_version_number)+1`）。 | 存在进行中 dev 行时 `409 TEMPLATE_DEV_LINE_IN_FLIGHT`；成功后模板包状态为 `DRAFT`；记录 lifecycle 审计。 | `POST /api/management/v1/templates/{templateId}/release-versions/{releaseVersion}/clone` |
 
 ### 权限边界（对齐权限矩阵 §5）
 

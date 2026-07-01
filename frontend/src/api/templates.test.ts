@@ -197,4 +197,120 @@ describe('templates API', () => {
     )
     expect(saved.semanticVersion).toBe('1.1.0')
   })
+
+  it('lists paginated template version lines', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [
+            {
+              devVersionId: 'dev-2',
+              devVersionNumber: 2,
+              releaseVersion: null,
+              lifecycleStatus: 'DRAFT',
+              lineKind: 'IN_FLIGHT',
+              updatedAt: '2026-06-24T10:00:00Z',
+              updatedBy: '10000003',
+              defaultRouteTarget: null,
+            },
+          ],
+          page: 0,
+          size: 20,
+          totalElements: 1,
+          totalPages: 1,
+        },
+      },
+    })
+
+    const page = await templatesApi.listTemplateVersionLines('tpl-1', 0, 20)
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/version-lines', {
+      params: { page: 0, size: 20 },
+    })
+    expect(page.content[0]?.devVersionId).toBe('dev-2')
+  })
+
+  it('fetches dev version detail for authoring editor', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          id: 'tpl-1',
+          externalId: 'TPL-RETAIL-LETTER',
+          groupCode: 'RETAIL',
+          name: 'Retail letter',
+          description: null,
+          masterId: 'master-1',
+          lifecycleStatus: 'DRAFT',
+          releaseVersion: null,
+          devVersionId: 'dev-2',
+          devVersionNumber: 2,
+          variables: [],
+          bindings: [],
+          rules: [],
+          createdAt: '2026-06-23T10:00:00Z',
+          updatedAt: '2026-06-24T10:00:00Z',
+        },
+      },
+    })
+
+    const detail = await templatesApi.fetchDevVersionDetail('tpl-1', 'dev-2')
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/dev/dev-2')
+    expect(detail.devVersionId).toBe('dev-2')
+  })
+
+  it('fetches read-only release version detail', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          id: 'dev-1',
+          devVersionNumber: 1,
+          releaseVersion: '1.0.0',
+          lifecycleStatus: 'PUBLISHED',
+          current: false,
+          updatedAt: '2026-06-23T10:00:00Z',
+          updatedBy: '10000003',
+          defaultRouteTarget: true,
+          variables: [],
+          bindings: [],
+          rules: [],
+        },
+      },
+    })
+
+    const detail = await templatesApi.fetchReleaseVersionDetail('tpl-1', '1.0.0')
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/releases/1.0.0')
+    expect(detail.releaseVersion).toBe('1.0.0')
+  })
+
+  it('clones a published release into a new dev line', async () => {
+    vi.mocked(http.post).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          devVersionId: 'dev-3',
+          devVersionNumber: 3,
+          releaseVersion: null,
+          lifecycleStatus: 'DRAFT',
+          lineKind: 'IN_FLIGHT',
+          updatedAt: '2026-06-25T10:00:00Z',
+          updatedBy: '10000003',
+          defaultRouteTarget: null,
+        },
+      },
+    })
+
+    const created = await templatesApi.cloneReleaseVersion('tpl-1', '1.0.0')
+
+    expect(http.post).toHaveBeenCalledWith('/templates/tpl-1/release-versions/1.0.0/clone')
+    expect(created).toEqual({
+      devVersionId: 'dev-3',
+      devVersionNumber: 3,
+      lifecycleStatus: 'DRAFT',
+    })
+  })
 })

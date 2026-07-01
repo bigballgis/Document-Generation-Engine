@@ -4,7 +4,10 @@ import {
   pathForRouteKey,
   ROUTE_KEYS,
   templateDetailPath,
+  templateDevVersionPath,
   templateLifecyclePanelPath,
+  templatePackageHubPath,
+  templateReleaseDetailPath,
 } from '@/routing/routeKeys'
 
 describe('routeKeys', () => {
@@ -27,9 +30,15 @@ describe('routeKeys', () => {
     expect(pathForRouteKey('route.escalation-workbench')).toBe('/dashboard#tasks-section')
   })
 
-  it('builds template detail paths', () => {
+  it('builds template package navigation paths', () => {
+    expect(templatePackageHubPath('tpl-1')).toBe('/templates/tpl-1')
+    expect(templatePackageHubPath('tpl-1', 'overview')).toBe('/templates/tpl-1?tab=overview')
     expect(templateDetailPath('tpl-1')).toBe('/templates/tpl-1')
-    expect(templateDetailPath('tpl-1', 'overview')).toBe('/templates/tpl-1?tab=overview')
+    expect(templateDevVersionPath('tpl-1', 'dev-2')).toBe('/templates/tpl-1/dev/dev-2')
+    expect(templateDevVersionPath('tpl-1', 'dev-2', 'lifecycle')).toBe(
+      '/templates/tpl-1/dev/dev-2?tab=lifecycle',
+    )
+    expect(templateReleaseDetailPath('tpl-1', '1.0.0')).toBe('/templates/tpl-1/releases/1.0.0')
     expect(templateLifecyclePanelPath('tpl-1')).toBe('/templates/tpl-1?tab=lifecycle')
   })
 

@@ -405,7 +405,8 @@ class TemplateLifecycleServiceTest {
                 List.of(),
                 List.of(),
                 Instant.now(),
-                Instant.now()
+                Instant.now(),
+                false
         );
     }
 }

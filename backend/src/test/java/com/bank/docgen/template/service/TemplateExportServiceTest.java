@@ -55,6 +55,8 @@ class TemplateExportServiceTest {
     private ManagementAuditRecorder managementAuditRecorder;
     @Mock
     private TemplateService templateService;
+    @Mock
+    private TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     private TemplateExportService service;
     private UUID templateId;
@@ -73,7 +75,8 @@ class TemplateExportServiceTest {
                 managementAuditRecorder,
                 templateService,
                 new TemplateExportAccessSupport(new GroupAccessService()),
-                new ObjectMapper().findAndRegisterModules()
+                new ObjectMapper().findAndRegisterModules(),
+                templateCurrentVersionResolver
         );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(
@@ -94,8 +97,8 @@ class TemplateExportServiceTest {
     @Test
     void exportJson_buildsBundleWithoutCredentials() {
         stubReadableTemplate();
-        when(templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1))
-                .thenReturn(Optional.of(version));
+        when(templateCurrentVersionResolver.requireExportableVersion(templateId))
+                .thenReturn(version);
         when(templateService.loadRules(version)).thenReturn(List.of(
                 new CompositionRuleView("rule-1", "true", "HEADER", "", "")
         ));
@@ -138,8 +141,8 @@ class TemplateExportServiceTest {
     @Test
     void exportZip_containsBundleJsonEntry() throws Exception {
         stubReadableTemplate();
-        when(templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1))
-                .thenReturn(Optional.of(version));
+        when(templateCurrentVersionResolver.requireExportableVersion(templateId))
+                .thenReturn(version);
         when(templateService.loadRules(version)).thenReturn(List.of());
         when(templateService.toDetail(template)).thenReturn(detailWithArtifacts());
         when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.empty());
@@ -194,7 +197,8 @@ class TemplateExportServiceTest {
                 )),
                 List.of(),
                 Instant.now(),
-                Instant.now()
+                Instant.now(),
+                true
         );
     }
 

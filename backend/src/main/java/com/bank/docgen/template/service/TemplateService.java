@@ -2,13 +2,6 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
-import com.bank.docgen.authoring.structured.MasterStyleCatalogService;
-import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
-import com.bank.docgen.authoring.structured.NumberingService;
-import com.bank.docgen.authoring.structured.ReferenceNodeService;
-import com.bank.docgen.authoring.structured.TableComponentService;
-import com.bank.docgen.authoring.structured.StructuredContentSchemaException;
-import com.bank.docgen.authoring.structured.StructuredContentSchemaValidator;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.master.domain.MasterDocumentStatus;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
@@ -16,7 +9,6 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.AnchorBindingView;
-import com.bank.docgen.template.api.BindingValidationSummaryView;
 import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
@@ -30,88 +22,50 @@ import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
-import com.bank.docgen.template.domain.AnchorContentType;
-import com.bank.docgen.template.domain.BindingValidationStatus;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
-import com.bank.docgen.template.domain.VariableType;
-import com.bank.docgen.template.persistence.AnchorBindingEntity;
-import com.bank.docgen.template.persistence.AnchorBindingRepository;
-import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
+import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
-import com.bank.docgen.template.persistence.VariableSchemaEntity;
-import com.bank.docgen.template.persistence.VariableSchemaRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TemplateService {
 
-    private static final Set<VariableType> SUPPORTED_TYPES = Set.of(VariableType.values());
-
     private final TemplateRepository templateRepository;
     private final TemplateVersionRepository templateVersionRepository;
-    private final VariableSchemaRepository variableSchemaRepository;
-    private final AnchorBindingRepository anchorBindingRepository;
     private final MasterDocumentRepository masterDocumentRepository;
     private final ApiPolicyRepository apiPolicyRepository;
     private final GroupAccessService groupAccessService;
-    private final ObjectMapper objectMapper;
-    private final StructuredContentSchemaValidator structuredContentSchemaValidator;
-    private final NodeMatrixValidationService nodeMatrixValidationService;
-    private final MasterStyleCatalogService masterStyleCatalogService;
-    private final TableComponentService tableComponentService;
-    private final ReferenceNodeService referenceNodeService;
-    private final NumberingService numberingService;
     private final TemplateStructuredAuthoringService structuredAuthoringService;
+    private final TemplateBindingConfigurationService bindingConfigurationService;
     private final TemplateViewMapper templateViewMapper;
+    private final TemplateCurrentVersionResolver templateVersionSupport;
 
     public TemplateService(
             TemplateRepository templateRepository,
             TemplateVersionRepository templateVersionRepository,
-            VariableSchemaRepository variableSchemaRepository,
-            AnchorBindingRepository anchorBindingRepository,
             MasterDocumentRepository masterDocumentRepository,
             ApiPolicyRepository apiPolicyRepository,
             GroupAccessService groupAccessService,
-            ObjectMapper objectMapper,
-            StructuredContentSchemaValidator structuredContentSchemaValidator,
-            NodeMatrixValidationService nodeMatrixValidationService,
-            MasterStyleCatalogService masterStyleCatalogService,
-            TableComponentService tableComponentService,
-            ReferenceNodeService referenceNodeService,
-            NumberingService numberingService,
             TemplateStructuredAuthoringService structuredAuthoringService,
-            TemplateViewMapper templateViewMapper
+            TemplateBindingConfigurationService bindingConfigurationService,
+            TemplateViewMapper templateViewMapper,
+            TemplateCurrentVersionResolver templateVersionSupport
     ) {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
-        this.variableSchemaRepository = variableSchemaRepository;
-        this.anchorBindingRepository = anchorBindingRepository;
         this.masterDocumentRepository = masterDocumentRepository;
         this.apiPolicyRepository = apiPolicyRepository;
         this.groupAccessService = groupAccessService;
-        this.objectMapper = objectMapper;
-        this.structuredContentSchemaValidator = structuredContentSchemaValidator;
-        this.nodeMatrixValidationService = nodeMatrixValidationService;
-        this.masterStyleCatalogService = masterStyleCatalogService;
-        this.tableComponentService = tableComponentService;
-        this.referenceNodeService = referenceNodeService;
-        this.numberingService = numberingService;
         this.structuredAuthoringService = structuredAuthoringService;
+        this.bindingConfigurationService = bindingConfigurationService;
         this.templateViewMapper = templateViewMapper;
+        this.templateVersionSupport = templateVersionSupport;
     }
 
     @Transactional(readOnly = true)
@@ -217,43 +171,17 @@ public class TemplateService {
             ManagementSessionClaims session
     ) {
         TemplateEntity template = requireWritableTemplate(templateId, session);
+        TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
-        validateVariableRequest(request);
-        TemplateVersionEntity version = currentDevVersion(templateId);
-        var existing = variableSchemaRepository.findByTemplateVersionIdAndVariableKey(version.getId(), request.variableKey());
-        VariableSchemaEntity entity;
-        if (existing.isPresent()) {
-            entity = existing.get();
-            entity.update(
-                    request.variableType(),
-                    request.required(),
-                    request.defaultValue(),
-                    request.enumValues(),
-                    request.description()
-            );
-        } else {
-            entity = new VariableSchemaEntity(
-                    UUID.randomUUID(),
-                    version.getId(),
-                    request.variableKey(),
-                    request.variableType(),
-                    request.required(),
-                    request.defaultValue(),
-                    request.enumValues(),
-                    request.description()
-            );
-        }
-        variableSchemaRepository.save(entity);
-        return templateViewMapper.toVariableView(entity);
+        return bindingConfigurationService.upsertVariable(version, request);
     }
 
     @Transactional
     public void deleteVariable(UUID templateId, String variableKey, ManagementSessionClaims session) {
         TemplateEntity template = requireWritableTemplate(templateId, session);
+        TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
-        TemplateVersionEntity version = currentDevVersion(templateId);
-        variableSchemaRepository.findByTemplateVersionIdAndVariableKey(version.getId(), variableKey)
-                .ifPresent(variableSchemaRepository::delete);
+        bindingConfigurationService.deleteVariable(version.getId(), variableKey);
     }
 
     @Transactional
@@ -263,40 +191,9 @@ public class TemplateService {
             ManagementSessionClaims session
     ) {
         TemplateEntity template = requireWritableTemplate(templateId, session);
+        TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
-        validateStructuredContent(request.structuredContentJson());
-        TemplateVersionEntity version = currentDevVersion(templateId);
-        MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.getMasterId())
-                .orElseThrow(MasterNotFoundException::new);
-        Set<String> masterAnchors = new HashSet<>();
-        master.getAnchors().forEach(anchor -> masterAnchors.add(anchor.getAnchorId()));
-        Set<String> declaredVariableKeys = loadDeclaredVariableKeys(version.getId());
-        BindingValidationStatus status = computeBindingStatus(
-                request.anchorId(),
-                request.declaredContentType(),
-                masterAnchors,
-                List.of(),
-                request.structuredContentJson(),
-                declaredVariableKeys,
-                template.getMasterId()
-        );
-        var existing = anchorBindingRepository.findByTemplateVersionIdAndAnchorId(version.getId(), request.anchorId());
-        AnchorBindingEntity entity;
-        if (existing.isPresent()) {
-            entity = existing.get();
-            entity.update(request.declaredContentType(), request.structuredContentJson(), status);
-        } else {
-            entity = new AnchorBindingEntity(
-                    UUID.randomUUID(),
-                    version.getId(),
-                    request.anchorId(),
-                    request.declaredContentType(),
-                    request.structuredContentJson(),
-                    status
-            );
-        }
-        anchorBindingRepository.save(entity);
-        return templateViewMapper.toBindingView(entity);
+        return bindingConfigurationService.upsertBinding(template.getMasterId(), version, request);
     }
 
     @Transactional
@@ -306,69 +203,16 @@ public class TemplateService {
             ManagementSessionClaims session
     ) {
         TemplateEntity template = requireWritableTemplate(templateId, session);
+        TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
-        TemplateVersionEntity version = currentDevVersion(templateId);
-        try {
-            version.setRulesJson(objectMapper.writeValueAsString(rules));
-        } catch (JsonProcessingException exception) {
-            throw new TemplateValidationException("api.error.template.invalidRulesJson");
-        }
-        templateVersionRepository.save(version);
-        return templateViewMapper.loadRules(version);
+        return bindingConfigurationService.saveRules(version, rules);
     }
 
     @Transactional(readOnly = true)
     public BindingValidationView validateBindings(UUID templateId, ManagementSessionClaims session) {
         TemplateEntity template = requireReadableTemplate(templateId, session);
-        TemplateVersionEntity version = currentDevVersion(templateId);
-        MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.getMasterId())
-                .orElseThrow(MasterNotFoundException::new);
-        Set<String> masterAnchors = new HashSet<>();
-        master.getAnchors().forEach(anchor -> masterAnchors.add(anchor.getAnchorId()));
-        List<AnchorBindingEntity> bindings = anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
-        Map<String, Integer> anchorCounts = new HashMap<>();
-        bindings.forEach(binding -> anchorCounts.merge(binding.getAnchorId(), 1, Integer::sum));
-
-        List<AnchorBindingView> views = new ArrayList<>();
-        int valid = 0;
-        int missing = 0;
-        int duplicate = 0;
-        int incompatible = 0;
-        Set<String> declaredVariableKeys = loadDeclaredVariableKeys(version.getId());
-        for (AnchorBindingEntity binding : bindings) {
-            BindingValidationStatus status = computeBindingStatus(
-                    binding.getAnchorId(),
-                    binding.getDeclaredContentType(),
-                    masterAnchors,
-                    bindings.stream().map(AnchorBindingEntity::getAnchorId).toList(),
-                    binding.getStructuredContentJson(),
-                    declaredVariableKeys,
-                    template.getMasterId()
-            );
-            if (status != binding.getValidationStatus()) {
-                binding.update(binding.getDeclaredContentType(), binding.getStructuredContentJson(), status);
-                anchorBindingRepository.save(binding);
-            }
-            views.add(templateViewMapper.toBindingView(binding));
-            switch (status) {
-                case VALID -> valid++;
-                case MISSING_ANCHOR -> missing++;
-                case DUPLICATE_BINDING -> duplicate++;
-                case INCOMPATIBLE_CONTENT_TYPE -> incompatible++;
-                default -> {
-                }
-            }
-        }
-        boolean blocking = missing > 0 || duplicate > 0 || incompatible > 0;
-        BindingValidationSummaryView summary = new BindingValidationSummaryView(
-                blocking,
-                bindings.size(),
-                valid,
-                missing,
-                duplicate,
-                incompatible
-        );
-        return new BindingValidationView(views, summary);
+        TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
+        return bindingConfigurationService.validateBindings(template.getMasterId(), version);
     }
 
     @Transactional(readOnly = true)
@@ -385,72 +229,6 @@ public class TemplateService {
     ) {
         requireWritableTemplate(templateId, session);
         return structuredAuthoringService.pasteClean(request);
-    }
-
-    private BindingValidationStatus computeBindingStatus(
-            String anchorId,
-            AnchorContentType declaredContentType,
-            Set<String> masterAnchors,
-            List<String> allAnchorIds,
-            String structuredContentJson,
-            Set<String> declaredVariableKeys,
-            UUID masterId
-    ) {
-        if (!masterAnchors.contains(anchorId)) {
-            return BindingValidationStatus.MISSING_ANCHOR;
-        }
-        long count = allAnchorIds.stream().filter(id -> id.equals(anchorId)).count();
-        if (count > 1) {
-            return BindingValidationStatus.DUPLICATE_BINDING;
-        }
-        if (declaredContentType == AnchorContentType.IMAGE && anchorId.contains("TEXT")) {
-            return BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE;
-        }
-        if (structuredContentJson != null && !structuredContentJson.isBlank()) {
-            var fidelity = nodeMatrixValidationService.validate(structuredContentJson, declaredVariableKeys);
-            var styleCatalog = masterStyleCatalogService.loadForMaster(masterId);
-            var styleFidelity = masterStyleCatalogService.validate(structuredContentJson, styleCatalog);
-            var tableFidelity = tableComponentService.validateStructuredContent(structuredContentJson);
-            var referenceFidelity = referenceNodeService.validateStructuredContent(structuredContentJson);
-            var numberingFidelity = numberingService.validateStructuredContent(structuredContentJson);
-            if (fidelity.hasBlockers()
-                    || styleFidelity.hasBlockers()
-                    || tableFidelity.hasBlockers()
-                    || referenceFidelity.fidelity().hasBlockers()
-                    || numberingFidelity.fidelity().hasBlockers()) {
-                return BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE;
-            }
-        }
-        return BindingValidationStatus.VALID;
-    }
-
-    private Set<String> loadDeclaredVariableKeys(UUID templateVersionId) {
-        return variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(templateVersionId).stream()
-                .map(VariableSchemaEntity::getVariableKey)
-                .collect(Collectors.toSet());
-    }
-
-    private void validateVariableRequest(UpsertVariableSchemaRequest request) {
-        if (!SUPPORTED_TYPES.contains(request.variableType())) {
-            throw new TemplateValidationException("api.error.template.variableTypeUnsupported");
-        }
-        if (request.variableType() == VariableType.ENUM
-                && (request.enumValues() == null || request.enumValues().isBlank())) {
-            throw new TemplateValidationException("api.error.template.enumValuesRequired");
-        }
-    }
-
-    private void validateStructuredContent(String json) {
-        try {
-            structuredContentSchemaValidator.validate(json);
-        } catch (StructuredContentSchemaException ex) {
-            throw new TemplateValidationException(ex.messageKey());
-        }
-    }
-
-    private TemplateVersionEntity currentDevVersion(UUID templateId) {
-        return templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
-                .orElseThrow(TemplateNotFoundException::new);
     }
 
     private void assertDraft(TemplateEntity template) {

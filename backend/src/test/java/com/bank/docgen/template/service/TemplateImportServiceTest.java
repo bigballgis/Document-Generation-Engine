@@ -58,6 +58,8 @@ class TemplateImportServiceTest {
     private TemplateContentModuleReferenceService contentModuleReferenceService;
     @Mock
     private ManagementAuditRecorder managementAuditRecorder;
+    @Mock
+    private TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     private TemplateImportService service;
     private UUID templateId;
@@ -77,7 +79,8 @@ class TemplateImportServiceTest {
                 managementAuditRecorder,
                 new TemplateExportAccessSupport(new GroupAccessService()),
                 new TemplateImportBundleValidator(new ObjectMapper().findAndRegisterModules()),
-                new ObjectMapper().findAndRegisterModules()
+                new ObjectMapper().findAndRegisterModules(),
+                templateCurrentVersionResolver
         );
         templateId = UUID.randomUUID();
         masterId = UUID.randomUUID();
@@ -131,7 +134,7 @@ class TemplateImportServiceTest {
         when(masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)).thenReturn(Optional.of(approvedMaster()));
         when(templateRepository.findByIdAndDeletedAtIsNull(templateId)).thenReturn(Optional.of(existing));
         when(templateRepository.findByExternalIdAndDeletedAtIsNull("TPL-IMPORT-LETTER")).thenReturn(Optional.of(existing));
-        when(templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)).thenReturn(Optional.of(version));
+        when(templateCurrentVersionResolver.requireLatestVersion(templateId)).thenReturn(version);
         when(templateService.toDetail(existing)).thenReturn(detail(TemplateLifecycleStatus.DRAFT));
 
         TemplateImportResult result = service.importBundle(
@@ -254,7 +257,8 @@ class TemplateImportServiceTest {
                 List.of(),
                 List.of(),
                 Instant.now(),
-                Instant.now()
+                Instant.now(),
+                false
         );
     }
 

@@ -1,6 +1,22 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-07-01 (**P2-T06 Done** — Phase B full master revision history)
+**Last synced:** 2026-07-01 (**P3-T06 BDD S6 complete** — 8/8 scenarios, `template-package-nav` 9/9)
+**Completion note (2026-07-01):** **P3-T06 BDD S6 cross-group isolation** — Flyway `V34__corp_only_template_author_seed.sql` adds CORP-only template author `10000008`; E2E `assertCrossGroupVersionLineAccessDenied` covers version-lines / dev / release / clone `403 ACCESS_DENIED`. **BDD-TEMPLATE-PACKAGE-NAV-001 all 8 scenarios covered** in Playwright. `template-package-nav.spec.ts` **9/9** Docker. Detail: [detail/P3-template-authoring.md](./detail/P3-template-authoring.md).
+**Last synced (prior):** 2026-07-01 (**P3-T06 BDD S5/S7/S8** — boundary E2E + cloneable UI)
+**Completion note (2026-07-01):** **P3-T06 BDD boundary scenarios** — `TemplateVersionLinesPanel` respects API `cloneable`; E2E helper `template-version-lines-api.ts`; Playwright **S5** immutable `403`, **S7** clone blocked (`409` + hidden button), **S8** global admin clone. `template-package-nav.spec.ts` **8/8** Docker. Detail: [detail/P3-template-authoring.md](./detail/P3-template-authoring.md).
+**Last synced (prior):** 2026-07-01 (**P3-T06 OpenAPI + release/clone E2E** — BDD S3/S4 complete)
+**Completion note (2026-07-01):** **P3-T06 follow-up (OpenAPI + release journeys)** — added management paths to `openapi-v1.yaml` (`version-lines`, `version-lines/{id}`, `dev/{devVersionId}`, `releases/{releaseVersion}`, `release-versions/{releaseVersion}/clone`) + schemas; `contract-outline.md` dev/release rows; `catalog-navigation-ux.md` BDD marked **Done**. Playwright `template-package-nav.spec.ts` **5/5** including published read-only detail (S3) and hub clone → dev editor (S4). Detail: [detail/P3-template-authoring.md](./detail/P3-template-authoring.md).
+**Last synced (prior):** 2026-07-01 (**P3-T06 E2E remediation** — version-line `devVersionId` fix + Playwright **11/11** Docker)
+**Completion note (2026-07-01):** **P3-T06 E2E follow-up** — fixed frontend/API mismatch (`TemplateVersionLineSummary.devVersionId` vs stale `id`); clone response mapping; hub secondary tab E2E uses **Workflow status** label + redirect-to-dev-editor behavior; FOL catalog E2E adapted to hub model + 834-variable table filters. **Gate:** frontend `pnpm build` green; Playwright Docker (`E2E_TARGET=docker`) **11/11** — `template-package-nav.spec.ts` **3/3**, `P21-T06a-template-detail-tabs.spec.ts` **3/3**, `fol-corporate-catalog.spec.ts` **5/5**. Detail: [detail/P3-template-authoring.md](./detail/P3-template-authoring.md) P3-T06 row.
+**Last synced (prior):** 2026-07-01 (**OPT-D5-slice-3 activated → In Progress** — OPT-D5 god-service split slice 3)
+**Activation note (2026-07-01):** **OPT-D5-slice-3 activated → In Progress** (extract
+`TemplateBindingConfigurationService` from `TemplateService` — variable schema CRUD, anchor
+bindings, composition rules, binding validation + private helpers; `TemplateService` delegates).
+**OPT-D5** remains **In Progress** (Wave 3); slices 1–2 Done. **No formal phase `In Progress`**
+— active formal phase stays **None** (optimization backlog slice, not a P-phase). BDD
+**`not-applicable`** (refactor only). **No gate evidence yet** for slice 3. Traceability:
+[optimization-plan.md](./optimization-plan.md) OPT-D5 row.
+**Last synced (prior):** 2026-07-01 (**P2-T06 Done** — Phase B full master revision history)
 **Completion note (2026-07-01):** **P2-T06 Done** — Phase B full master revision history:
 each file replace persisted as revision row; full paginated history on hub; revision detail
 deep-links to any historical line; download historical DOCX. **Backend:** Flyway
@@ -311,7 +327,8 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P21 | Done (2026-06-30) | Role-journey frontend redesign — T01–T11 + X01–X06 + **X02** governance close; backend **`mvn verify` 553**; frontend **511** Vitest; Playwright/UIUX per sub-phase; **AUD-B10 resolved** (P12-AUD-B10 Done 2026-07-01); **AUD-M02 resolved** (P12-AUD-M02 Done 2026-07-01) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
 **Active phase:** **None** (2026-07-01 — no formal phase `In Progress`).
-**Active slice:** **None** (2026-07-01 — **P2-T06 Done**; Phase B full master revision history closed).
+**Active slice:** **None** (2026-07-01 — **OPT-D5-slice-3 Done**; **P3-T06 Done**).
+**Completion note (2026-07-01):** **OPT-D5-slice-3 Done** — extract `TemplateBindingConfigurationService` from `TemplateService` (variable schema CRUD, anchor bindings, composition rules, binding validation); `TemplateService` 495→**250** L; BDD `not-applicable`. **Gate:** `mvn verify` **588** Surefire; frontend **543** Vitest. Detail: [optimization-plan.md](./optimization-plan.md) OPT-D5 row.
 **P21 Done** — do not reopen. All formal phases P0–P11, P13–P21 **Done**; P12 catch-all idle.
 
 ## Epic ↔ phase mapping

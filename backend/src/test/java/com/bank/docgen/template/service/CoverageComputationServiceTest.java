@@ -49,6 +49,8 @@ class CoverageComputationServiceTest {
     private AnchorBindingRepository anchorBindingRepository;
     @Mock
     private CoverageThresholdResolver coverageThresholdResolver;
+    @Mock
+    private TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     private CoverageComputationService service;
     private UUID templateId;
@@ -66,7 +68,8 @@ class CoverageComputationServiceTest {
                 previewRecordRepository,
                 anchorBindingRepository,
                 coverageThresholdResolver,
-                new ObjectMapper()
+                new ObjectMapper(),
+                templateCurrentVersionResolver
         );
         templateId = UUID.randomUUID();
         versionId = UUID.randomUUID();
@@ -91,8 +94,8 @@ class CoverageComputationServiceTest {
                 Instant.now().plusSeconds(3600)
         );
         when(templateService.requireReadableTemplate(templateId, author)).thenReturn(template);
-        when(templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1))
-                .thenReturn(java.util.Optional.of(new TemplateVersionEntity(versionId, templateId, "10000003")));
+        when(templateCurrentVersionResolver.requireInFlightDevVersion(templateId))
+                .thenReturn(new TemplateVersionEntity(versionId, templateId, "10000003"));
         when(coverageThresholdResolver.resolveForTemplate(template))
                 .thenReturn(new CoverageThresholdView("GLOBAL", null, 80, 100, 80));
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))

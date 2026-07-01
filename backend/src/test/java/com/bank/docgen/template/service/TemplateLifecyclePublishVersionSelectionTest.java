@@ -156,7 +156,8 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 List.of(),
                 List.of(),
                 Instant.now(),
-                Instant.now()
+                Instant.now(),
+                false
         );
     }
 }

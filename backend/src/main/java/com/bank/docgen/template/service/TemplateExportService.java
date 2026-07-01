@@ -45,6 +45,7 @@ public class TemplateExportService {
     private final TemplateService templateService;
     private final TemplateExportAccessSupport exportAccessSupport;
     private final ObjectMapper objectMapper;
+    private final TemplateCurrentVersionResolver templateVersionSupport;
 
     public TemplateExportService(
             TemplateRepository templateRepository,
@@ -55,7 +56,8 @@ public class TemplateExportService {
             ManagementAuditRecorder managementAuditRecorder,
             TemplateService templateService,
             TemplateExportAccessSupport exportAccessSupport,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            TemplateCurrentVersionResolver templateVersionSupport
     ) {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
@@ -66,6 +68,7 @@ public class TemplateExportService {
         this.templateService = templateService;
         this.exportAccessSupport = exportAccessSupport;
         this.objectMapper = objectMapper;
+        this.templateVersionSupport = templateVersionSupport;
     }
 
     @Transactional(readOnly = true)
@@ -88,7 +91,7 @@ public class TemplateExportService {
         exportAccessSupport.assertCanExport(template, session);
         assertExportEligible(template);
         var detail = templateService.toDetail(template);
-        TemplateVersionEntity version = currentDevVersion(templateId);
+        TemplateVersionEntity version = templateVersionSupport.requireExportableVersion(templateId);
         return new TemplateExportBundleView(
                 EXPORT_FORMAT,
                 new TemplateExportMetadataView(
@@ -118,11 +121,6 @@ public class TemplateExportService {
         if (!EXPORT_ELIGIBLE.contains(template.getLifecycleStatus())) {
             throw new TemplateValidationException("api.error.template.exportNotEligible");
         }
-    }
-
-    private TemplateVersionEntity currentDevVersion(UUID templateId) {
-        return templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
-                .orElseThrow(TemplateNotFoundException::new);
     }
 
     private void recordAudit(TemplateExportBundleView bundle, ManagementSessionClaims session) {

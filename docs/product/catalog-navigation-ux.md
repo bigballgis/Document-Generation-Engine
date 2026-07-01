@@ -4,7 +4,7 @@
 **Phase A implementation:** Done (2026-06-25) — hub + revision detail routes, revision-lines API, E2E 4/4.  
 **Phase B implementation:** Done (2026-07-01) — BDD-MASTER-REVISION-NAV-001 Phase B; delivered as **P2-T06**.  
 **Scope:** Management UI navigation, master/template list and detail pages.  
-**Traceability:** BDD-MASTER-REVISION-NAV-001 (master revision two-page split).
+**Traceability:** BDD-MASTER-REVISION-NAV-001 (master revision two-page split); BDD-TEMPLATE-PACKAGE-NAV-001 (template package hub — **Done, P3-T06 2026-07-01**).
 
 ## Design principle
 
@@ -17,14 +17,15 @@ Masters / Templates (menu)
   └── Package list (one row per logical master or template package, keyed by name)
         └── Package hub (master or template package detail)
               └── Version / revision lines (status, last updated, last actor, …)
-                    └── Revision line detail (master only — anchors, review history)
+                    ├── Master: revision line detail (anchors, review history)
+                    └── Template: dev editor (in-flight) OR release read-only (published)
 ```
 
 | Layer | User sees | Backend reality (v1) |
 | --- | --- | --- |
 | Package list | Master or template **name** (plus group, workflow summary) | One `master_document` or `template` row per package |
-| Package hub — version lines | Paginated table of version/revision lines with status and audit fields | **Template:** `template_version` rows with `release_version`. **Master (Phase B Done):** full immutable revision-line history per replace — paginated `master_revision_line` rows ordered by recency (see § phased delivery) |
-| Revision line detail (master) | Overview, anchor catalog, review history for one revision line | **Master:** keyed by `revisionLineId`; hub retains package-level actions and impact analysis |
+| Package hub — version lines | Paginated table of version/revision lines with status and audit fields | **Template (BDD-TEMPLATE-PACKAGE-NAV-001):** paginated `template_version` rows — current in-flight dev line(s) plus all published release lines. **Master (Phase B Done):** full immutable revision-line history per replace — paginated `master_revision_line` rows ordered by recency (see § phased delivery) |
+| Revision / version line detail | Master: overview, anchor catalog, review history. Template: dev editor or release read-only | **Master:** keyed by `revisionLineId`. **Template:** dev route keyed by `devVersionId`; release route keyed by `releaseVersion` (read-only + clone) |
 
 ## Why this is correct
 
@@ -134,9 +135,95 @@ Phase B introduces a persisted **master revision line** entity (one row per uplo
 
 Columns: name, external ID, in-flight workflow status, current release version, release version count, last updated, last updated by.
 
-### Template package detail
+### Template package hub — `/templates/:templateId`
 
-Default tab: **Versions** (release version lines). Other tabs: overview & workflow, authoring, API access.
+Package-level surface (BDD-TEMPLATE-PACKAGE-NAV-001). **Default primary surface:** paginated **version lines** table (in-flight dev line + published release lines). Row click navigates by line kind; published lines expose a **Clone** action.
+
+1. **Package header** — name, external ID, group, package-level workflow status
+2. **Package actions** — export/import, metadata edit (when permitted), links to external access / API management
+3. **Version lines** — paginated table: dev version number, release version (when published), lifecycle status, approval sub-state (when `APPROVAL`), updated at/by, default-route indicator (published only)
+4. **Secondary panels (hub-retained)** — workflow summary banner, role journey blocks, collaboration hints (unchanged from P21; not the default landing focus)
+
+Does **not** host full authoring (variables, bindings, structured content editor); those live on the dev version route.
+
+### Template dev version editor — `/templates/:templateId/dev/:devVersionId`
+
+Authoring surface for one **in-flight** dev line (`DRAFT`, `TESTING`, `APPROVAL`, `PENDING_RELEASE`).
+
+1. **Dev overview** — status, dev version number, link back to package hub
+2. **Authoring** — variables, anchor bindings, composition rules, structured content (existing P3/P18 authoring scope)
+3. **Workflow actions** — submit test, lifecycle decisions, publish gate (capability-gated; unchanged lifecycle semantics)
+
+### Template release version detail — `/templates/:templateId/releases/:releaseVersion`
+
+Read-only surface for one **published** (or published-then-`STOPPED`) release line.
+
+1. **Release overview** — release version, dev version number at publish time, lifecycle status, updated at/by, link back to package hub
+2. **Read-only binding / variable / rule summary** — published snapshot; no mutation controls
+3. **Clone action** — creates a new dev line in `DRAFT` from this release snapshot (see BDD below)
+
+#### BDD-TEMPLATE-PACKAGE-NAV-001 — template package hub navigation
+
+**BDD ID:** `BDD-TEMPLATE-PACKAGE-NAV-001`  
+**Status:** Confirmed (2026-07-01) — **Not yet implemented** (replaces monolithic `TemplateDetailView` tab-default `overview`)  
+**Parity reference:** BDD-MASTER-REVISION-NAV-001 (hub + detail route split)  
+**Replaces / supersedes:** P21-T06a default tab `overview` on `/templates/:templateId`; `TemplateReleaseVersionHistoryPanel` as published-only list without row navigation or clone
+
+| Field | Specification |
+| --- | --- |
+| **Actors / roles** | **`TEMPLATE_AUTHOR`** — list version lines, open in-flight dev editor, clone published release to new dev line, author within authorized group(s). **`MASTER_DESIGNER`** — same authoring/clone scope as template author (permission matrix §5). **`GLOBAL_ADMIN`** / **`GROUP_ADMIN`** — read hub and release detail across authorized groups; metadata/export where matrix permits; clone when author-capable. **`TEMPLATE_TESTER`** / **`TEMPLATE_APPROVER`** — read hub, open in-flight dev editor in read-only or decision context per existing lifecycle panels (no clone unless also author-capable). All require `route.template-management` capability. Group scope enforced via `GroupAccessService` (fail-closed). |
+| **User goal** | Operators land on a template **package hub** that answers “what dev and release lines exist?”, open the in-flight line for authoring, inspect any published line read-only, and **clone** a published line into a new draft dev line — mirroring master hub + revision detail navigation without losing P21 workflow/journey affordances. |
+| **Trigger** | (1) Package list row click or direct URL `/templates/:templateId`. (2) Version-lines table row click (in-flight → dev editor; published → release detail). (3) **Clone** on published row or release detail. (4) Breadcrumb / back link from dev or release detail to hub. (5) Paginated list fetch on hub load or page change. |
+| **Preconditions** | Template exists and is not logically deleted. Actor session is authenticated with management JWT. Actor's authorized groups include the template's `groupCode` (or actor is global). Monolithic `TemplateDetailView` tabs remain reachable only during migration shim if explicitly flagged — target end state is route split (see Pending). |
+| **Primary journey** | 1. Actor opens `/templates/{templateId}` → hub loads paginated version-lines (`GET …/version-lines`) showing the current in-flight dev line (if any) and all published release lines. 2. Actor clicks an **in-flight** row (`DRAFT` / `TESTING` / `APPROVAL` / `PENDING_RELEASE`) → navigates to `/templates/{templateId}/dev/{devVersionId}` with full authoring. 3. Actor clicks a **published** row → navigates to `/templates/{templateId}/releases/{releaseVersion}` read-only. 4. Actor clicks **Clone** on a published line → `POST …/release-versions/{releaseVersion}/clone` creates dev line `N+1` in `DRAFT`, copies published snapshot (bindings, variables, rules, structured content, render profile reference), sets template active dev pointer, returns `201` with new `devVersionId`; UI navigates to dev editor. 5. Actor uses breadcrumb to return to hub; table reflects new dev row. |
+| **System responses (success)** | `GET …/templates/{templateId}/version-lines` returns `PageView` with `content[]` of `TemplateVersionLineSummaryView`: `devVersionId`, `devVersionNumber`, `releaseVersion` (null when unpublished), `lifecycleStatus`, `approvalSubState` (when `APPROVAL`), `lineKind` (`IN_FLIGHT` \| `PUBLISHED`), `updatedAt`, `updatedBy`, `defaultRouteTarget` (published only), `cloneable` (true for published lines when actor may author). `GET …/templates/{templateId}/dev/{devVersionId}` returns dev-scoped detail for authoring (extends current `TemplateDetailView` fields scoped to that dev version). `GET …/templates/{templateId}/releases/{releaseVersion}` returns read-only release snapshot. `POST …/templates/{templateId}/release-versions/{releaseVersion}/clone` returns `201` + `TemplateDevVersionCreatedView` (`devVersionId`, `devVersionNumber`, `lifecycleStatus: DRAFT`). Hub UI default view is version-lines table (not overview tab). Published rows: no inline edit; clone button visible when `cloneable`. |
+| **Boundary / exception** | **No in-flight line:** hub lists published rows only; `totalElements` equals published count; no fake dev row. **In-flight exists:** exactly one `IN_FLIGHT` row for the template's active dev version (package `devVersionId`); status matches template live lifecycle. **Clone while in-flight dev exists:** `409 TEMPLATE_DEV_LINE_IN_FLIGHT` (`api.error.template.devLineInFlight`) — operator must finish or abandon current dev work before cloning (fail-closed; no silent overwrite). **Mutations on published dev version:** any `PUT`/`PATCH`/`DELETE` authoring or lifecycle transition targeting a published `devVersionId` or published `releaseVersion` content → **`403 TEMPLATE_VERSION_IMMUTABLE`** (`api.error.template.versionImmutable`). **Unknown `devVersionId` / `releaseVersion`:** `404` (`TEMPLATE_NOT_FOUND` or `TEMPLATE_VERSION_NOT_FOUND` — no cross-template leakage). **Cross-group access:** list, get, clone for template in group B by user authorized only for group A → **`403 ACCESS_DENIED`**. **Empty page:** page beyond `totalPages - 1` returns empty `content[]` with correct `totalElements`. **STOPPED release line:** appears in hub and release detail as read-only; clone still permitted when no in-flight dev (creates new DRAFT). **Deprecated template package:** hub read-only; clone and authoring mutations blocked per existing deprecate policy. |
+| **Observable evidence** | API: after clone, `devVersionNumber` increments; new row `lifecycleStatus == DRAFT` and `releaseVersion == null`; published source row unchanged; `GET version-lines` includes both published source and new in-flight row. Mutation on published dev returns `$.error.code == "TEMPLATE_VERSION_IMMUTABLE"`. Cross-group list/get/clone returns `$.error.code == "ACCESS_DENIED"`. UI: hub URL `/templates/{templateId}` shows version-lines table first; in-flight click → URL contains `/dev/{devVersionId}`; published click → URL contains `/releases/{releaseVersion}`; clone success → redirect to new dev URL. Audit: clone records `metadata.auditId` / lifecycle audit with source `releaseVersion` and new `devVersionId`. E2E: Playwright journeys on Docker `:4173`. |
+| **Source docs** | This file § Template package hub; `docs/domain/domain-model.md` §2.7, §2.10–2.11; `docs/security/permission-matrix.md` §5 (模板), §13 (group isolation); `docs/plan/detail/P3-template-authoring.md`; P21 journey/tab components (hub-retained secondary panels). |
+
+##### Acceptance scenarios (Given / When / Then)
+
+**S1 — Hub lists in-flight dev and published release lines (required)**  
+- **Given** a `TEMPLATE_AUTHOR` authorized for group `RETAIL`, a template in `RETAIL` with one published release `1.0.0` (dev version 1) and a current in-flight dev version 2 in `DRAFT`,  
+- **When** the actor opens `/templates/{templateId}` and the hub loads `GET /api/management/v1/templates/{templateId}/version-lines?page=0&size=20`,  
+- **Then** the response contains **≥ 2** rows: one row with `lineKind: IN_FLIGHT`, `devVersionNumber: 2`, `releaseVersion: null`, `lifecycleStatus: DRAFT`; one row with `lineKind: PUBLISHED`, `devVersionNumber: 1`, `releaseVersion: "1.0.0"`, `lifecycleStatus: PUBLISHED`; rows ordered with in-flight first, then published by recency; hub UI shows the version-lines table as the default primary surface (not overview).
+
+**S2 — Click in-flight dev line opens authoring editor (required)**  
+- **Given** a template whose active dev version is `devVersionId` in `TESTING`,  
+- **When** the actor clicks the in-flight row on the hub (or navigates directly to `/templates/{templateId}/dev/{devVersionId}`),  
+- **Then** the dev editor route loads with authoring panels (variables, bindings, rules); workflow banner reflects `TESTING`; breadcrumb links back to package hub; URL contains `/dev/{devVersionId}`.
+
+**S3 — Click published release line opens read-only detail (required)**  
+- **Given** a template with published release `1.0.0` backed by dev version 1,  
+- **When** the actor clicks the published row on the hub (or navigates to `/templates/{templateId}/releases/1.0.0`),  
+- **Then** the release detail page loads read-only overview (release version, status, updated at/by); binding/variable summaries are display-only (no save/delete controls); breadcrumb links back to package hub; URL contains `/releases/1.0.0`.
+
+**S4 — Clone published release creates new DRAFT dev line (required — new API)**  
+- **Given** a template in group `RETAIL` with published release `1.0.0`, package lifecycle `PUBLISHED` (no in-flight dev), and a `TEMPLATE_AUTHOR` authorized for `RETAIL`,  
+- **When** the actor invokes `POST /api/management/v1/templates/{templateId}/release-versions/1.0.0/clone` (UI clone action on hub or release detail),  
+- **Then** the response is `201` with a new `devVersionId`, `devVersionNumber` equal to prior max + 1, `lifecycleStatus: DRAFT`, `releaseVersion: null`; subsequent `GET …/version-lines` includes the new in-flight row plus unchanged published `1.0.0` row; UI navigates to `/templates/{templateId}/dev/{newDevVersionId}`; audit records clone provenance from `1.0.0`.
+
+**S5 — Published version content is immutable (required)**  
+- **Given** a published release `1.0.0` with dev version id `publishedDevId`,  
+- **When** an authorized actor attempts to mutate authoring state (e.g. `PUT …/variables/{key}` or `PUT …/bindings/{anchorId}` scoped to `publishedDevId`, or dev editor save targeting the published dev version),  
+- **Then** the API returns **`403`** with unified error envelope `error.code: TEMPLATE_VERSION_IMMUTABLE` and `error.messageKey: api.error.template.versionImmutable`; no content change is persisted.
+
+**S6 — Group isolation fail-closed (required)**  
+- **Given** a template in group `RETAIL` and a `TEMPLATE_AUTHOR` authorized **only** for group `CORP`,  
+- **When** the actor calls version-lines list, dev get, release get, or clone for that template,  
+- **Then** each call returns **`403`** with `error.code: ACCESS_DENIED`; no version line payload is returned.
+
+**S7 — Clone blocked while in-flight dev exists (boundary)**  
+- **Given** a template with an active in-flight dev version in `DRAFT` and a published release `1.0.0`,  
+- **When** the actor attempts `POST …/release-versions/1.0.0/clone`,  
+- **Then** the API returns **`409`** with `error.code: TEMPLATE_DEV_LINE_IN_FLIGHT`; no new dev version is created; published row unchanged.
+
+**S8 — Global admin cross-group read and clone (actor coverage)**  
+- **Given** a `GLOBAL_ADMIN` and a template in any group with published release `2.0.0` and no in-flight dev,  
+- **When** the admin lists version lines, opens release detail, and clones `2.0.0`,  
+- **Then** all three operations succeed with the same semantics as S1, S3, and S4 (global scope bypasses group restriction only for authorized global role).
+
+**Scenario count:** 8 (6 required + 2 boundary/actor coverage).
 
 ## Terminology (en)
 
@@ -193,6 +280,7 @@ Full mapping: [business-terminology-guide.md](./business-terminology-guide.md).
 - `docs/domain/domain-model.md` §2.5 (master), §2.10–2.11 (template versions)
 - `docs/product/business-terminology-guide.md` (business-friendly terminology SSOT)
 - `docs/plan/detail/P2-master-management.md`
+- `docs/plan/detail/P3-template-authoring.md` (BDD-TEMPLATE-PACKAGE-NAV-001 implementation target)
 - `docs/plan/detail/P16-lifecycle-version-governance.md`
 - `docs/plan/detail/P21-role-journey-frontend-redesign.md`
 - `docs/adr/decisions/2026-06-29-behavior-typed-ia-business-terminology.md`
@@ -201,3 +289,10 @@ Full mapping: [business-terminology-guide.md](./business-terminology-guide.md).
 
 - Master anchor catalog versioning aligned with OpenAPI `anchor-catalogs` admin contract
 - URL rename (`/masters` / `/templates` retained for stability)
+
+### BDD-TEMPLATE-PACKAGE-NAV-001 — pending questions (not confirmed)
+
+- **Hub secondary IA during migration:** Whether overview / workflow / external-access remain as hub tabs, hub secondary panels only, or gain dedicated routes — implementation may ship a temporary redirect from legacy `?tab=` query params to new routes; default landing remains version-lines table once hub ships.
+- **Concurrent in-flight dev lines:** v1 confirmed model is **one active in-flight dev line** per template (package `devVersionId`); historical dev versions that were published remain as immutable published rows only — no second parallel in-flight line without completing or abandoning current dev (clone blocked per S7).
+- **Abandon / discard in-flight dev:** No new “delete dev line” API in this slice; returning to published-only state may require a future lifecycle action (out of scope here).
+- **OpenAPI publication:** `version-lines`, dev get, release get, and `clone` management endpoints added to `openapi-v1.yaml` (P3-T06, 2026-07-01).

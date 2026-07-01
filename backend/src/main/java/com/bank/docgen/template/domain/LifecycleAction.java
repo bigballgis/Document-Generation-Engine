@@ -11,5 +11,6 @@ public enum LifecycleAction {
     DEPRECATE,
     DELETE,
     DEACTIVATE_VERSION,
-    RESTORE_VERSION
+    RESTORE_VERSION,
+    CLONE_FROM_RELEASE
 }

@@ -1,0 +1,88 @@
+﻿{
+    "rules":  [
+                  {
+                      "targetAnchorId":  "FOL_SEC_24",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-syndication-sec24",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeSyndication} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SEC_11",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-hedge-sec11",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeHedge} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SEC_17",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-guarantee-sec17",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeGuarantee} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SEC_21",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-esg-sec21",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeESG} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SCH_01",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-multicurrency-sch01",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeMultiCurrency} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SEC_07",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-accordion-sec07",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeAccordion} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SEC_05",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-swingline-sec05",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeSwingline} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SEC_02",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-lc-subline-sec02",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeLcSubline} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SCH_06",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-security-sch06",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeSecurityPackage} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SEC_26",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-intercreditor-sec26",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeIntercreditor} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SEC_07",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-prepayment-sec07",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includePrepaymentPenalty} == true"
+                  },
+                  {
+                      "targetAnchorId":  "FOL_SEC_20",
+                      "trueBranchRuleId":  "",
+                      "ruleId":  "rule-covenants-sec20",
+                      "falseBranchRuleId":  "",
+                      "conditionExpression":  "${includeFinancialCovenants} == true"
+                  }
+              ]
+}

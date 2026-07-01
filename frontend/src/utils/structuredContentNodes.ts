@@ -28,6 +28,8 @@ export interface StructuredContentNode {
   children?: StructuredContentNode[]
   value?: string
   key?: string
+  conditionExpression?: string
+  loopVariable?: string
   referenceKey?: string
   styleRef?: string
   imageRef?: string
@@ -120,9 +122,9 @@ export function createNodeTemplate(type: ConfirmedNodeType, styleRef?: string): 
         ],
       }
     case 'conditionBlock':
-      return { type, key: 'conditionExpression', children: [] }
+      return { type, conditionExpression: '', children: [] }
     case 'loopBlock':
-      return { type, key: 'collectionVariable', children: [] }
+      return { type, loopVariable: '', children: [] }
     case 'tableComponentRef':
       return { type, tableComponentRef: '' }
     case 'textRun':

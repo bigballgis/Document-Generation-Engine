@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 
 class TemplateRuleValidationServiceLogicTest {
 
-    private final TemplateRuleValidationService service = new TemplateRuleValidationService(null, null, null, null, null);
+    private final TemplateRuleValidationService service =
+            new TemplateRuleValidationService(null, null, null, null, null, null);
 
     @Test
     void detectsMissingVariableInExpression() {

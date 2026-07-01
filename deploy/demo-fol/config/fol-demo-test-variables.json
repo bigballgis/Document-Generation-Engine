@@ -1,0 +1,250 @@
+﻿{
+    "name":  "Executive walkthrough 鈥?Pacific Rim Holdings",
+    "variables":  {
+                      "securityPackages":  [
+                                               {
+                                                   "securityPackageType":  "English law share charge",
+                                                   "securityPackageName":  "Share charge over borrower"
+                                               },
+                                               {
+                                                   "securityPackageType":  "Debenture over material bank accounts",
+                                                   "securityPackageName":  "Account charge"
+                                               },
+                                               {
+                                                   "securityPackageType":  "Assignment of material trade receivables",
+                                                   "securityPackageName":  "Receivables assignment"
+                                               }
+                                           ],
+                      "includeCommitmentFee":  true,
+                      "securityAgent":  "Meridian Global Banking Corporation",
+                      "esgKpis":  [
+                                      {
+                                          "esgKpiTarget":  "5% YoY vs baseline",
+                                          "esgKpiName":  "Scope 1 \u0026 2 emissions reduction"
+                                      },
+                                      {
+                                          "esgKpiTarget":  "\u003e= 40% by 2028",
+                                          "esgKpiName":  "Renewable energy share"
+                                      }
+                                  ],
+                      "minimumLiquidity":  "10000000",
+                      "hedgeProviders":  [
+                                             {
+                                                 "hedgeProviderName":  "Meridian Global Markets Ltd."
+                                             },
+                                             {
+                                                 "hedgeProviderName":  "Continental Capital Bank AG"
+                                             }
+                                         ],
+                      "includeHedge":  true,
+                      "marginBps":  "185",
+                      "firstUtilisationDate":  "2026-10-01",
+                      "includeUtilisationDate":  true,
+                      "includeGreenUseOfProceeds":  false,
+                      "documentationAgent":  "Meridian Global Banking Corporation",
+                      "interestPeriodMonths":  "3",
+                      "conditionsPrecedent":  [
+                                                  {
+                                                      "cpItemStatus":  "PENDING",
+                                                      "cpItemResponsibleParty":  "Borrower / Agent",
+                                                      "cpItemDescription":  "Executed Finance Documents"
+                                                  },
+                                                  {
+                                                      "cpItemStatus":  "PENDING",
+                                                      "cpItemResponsibleParty":  "Borrower",
+                                                      "cpItemDescription":  "Legal opinions (English and local counsel)"
+                                                  },
+                                                  {
+                                                      "cpItemStatus":  "RECEIVED",
+                                                      "cpItemResponsibleParty":  "All Lenders",
+                                                      "cpItemDescription":  "KYC/AML documentation"
+                                                  },
+                                                  {
+                                                      "cpItemStatus":  "PENDING",
+                                                      "cpItemResponsibleParty":  "Security Agent",
+                                                      "cpItemDescription":  "Perfection of security over shares"
+                                                  },
+                                                  {
+                                                      "cpItemStatus":  "PENDING",
+                                                      "cpItemResponsibleParty":  "Borrower",
+                                                      "cpItemDescription":  "Evidence of repayment of existing RCF"
+                                                  }
+                                              ],
+                      "borrowerShortName":  "Pacific Rim Holdings",
+                      "guarantors":  [
+                                         {
+                                             "guarantorJurisdiction":  "Cayman Islands",
+                                             "guarantorName":  "Pacific Rim Group Holdings Ltd."
+                                         },
+                                         {
+                                             "guarantorJurisdiction":  "Singapore",
+                                             "guarantorName":  "Pacific Rim Operations Pte. Ltd."
+                                         }
+                                     ],
+                      "utilisationFeeBps":  "10",
+                      "governingLaw":  "English law",
+                      "offerDate":  "2026-07-01",
+                      "bookrunner":  "Meridian Global Banking Corporation",
+                      "includeSwingline":  false,
+                      "amortisationSchedule":  [
+                                                   {
+                                                       "amortBalance":  "225000000",
+                                                       "amortPrincipal":  "25000000",
+                                                       "amortDate":  "2028-07-01"
+                                                   },
+                                                   {
+                                                       "amortBalance":  "200000000",
+                                                       "amortPrincipal":  "25000000",
+                                                       "amortDate":  "2029-07-01"
+                                                   },
+                                                   {
+                                                       "amortBalance":  "175000000",
+                                                       "amortPrincipal":  "25000000",
+                                                       "amortDate":  "2030-07-01"
+                                                   },
+                                                   {
+                                                       "amortBalance":  "0",
+                                                       "amortPrincipal":  "175000000",
+                                                       "amortDate":  "2031-07-01"
+                                                   }
+                                               ],
+                      "includeIntercreditor":  true,
+                      "borrowerLegalName":  "Pacific Rim Holdings Ltd.",
+                      "agentBank":  "Meridian Global Banking Corporation",
+                      "availabilityPeriodEnd":  "2027-07-01",
+                      "referenceRate":  "SOFR",
+                      "includeSyndication":  true,
+                      "netLeverageMax":  "3.50:1.00",
+                      "lenders":  [
+                                      {
+                                          "lenderCommitment":  "75000000",
+                                          "lenderName":  "Meridian Global Banking Corporation",
+                                          "lenderCommitmentPct":  "30",
+                                          "lenderCountry":  "United Kingdom"
+                                      },
+                                      {
+                                          "lenderCommitment":  "50000000",
+                                          "lenderName":  "Continental Capital Bank AG",
+                                          "lenderCommitmentPct":  "20",
+                                          "lenderCountry":  "Germany"
+                                      },
+                                      {
+                                          "lenderCommitment":  "50000000",
+                                          "lenderName":  "Pacific Trade Finance Ltd.",
+                                          "lenderCommitmentPct":  "20",
+                                          "lenderCountry":  "Singapore"
+                                      },
+                                      {
+                                          "lenderCommitment":  "37500000",
+                                          "lenderName":  "Harbour Street Investments SA",
+                                          "lenderCommitmentPct":  "15",
+                                          "lenderCountry":  "Luxembourg"
+                                      },
+                                      {
+                                          "lenderCommitment":  "37500000",
+                                          "lenderName":  "Summit Lending Partners LP",
+                                          "lenderCommitmentPct":  "15",
+                                          "lenderCountry":  "United States"
+                                      }
+                                  ],
+                      "includeSanctionsRep":  true,
+                      "includeAccordion":  true,
+                      "includeFinancialCovenants":  true,
+                      "includeLcSubline":  false,
+                      "facilityType":  "SYNDICATED",
+                      "commitmentFeeBps":  "35",
+                      "groupName":  "Pacific Rim Group",
+                      "facilityPurpose":  "Refinancing existing external indebtedness and general corporate purposes",
+                      "facilityAmount":  "250000000",
+                      "totalFees":  "3750000",
+                      "borrowerRegisteredAddress":  "PO Box 309, Ugland House, Grand Cayman KY1-1104",
+                      "utilisationFeeThresholdPct":  "33.33",
+                      "borrowerRegistrationNumber":  "CR-284719",
+                      "fees":  [
+                                   {
+                                       "feeItemDescription":  "Arrangement fee",
+                                       "feeItemCurrency":  "USD",
+                                       "feeItemAmount":  "2500000"
+                                   },
+                                   {
+                                       "feeItemDescription":  "Commitment fee (undrawn)",
+                                       "feeItemCurrency":  "USD",
+                                       "feeItemAmount":  "875000"
+                                   },
+                                   {
+                                       "feeItemDescription":  "Agency fee",
+                                       "feeItemCurrency":  "USD",
+                                       "feeItemAmount":  "250000"
+                                   },
+                                   {
+                                       "feeItemDescription":  "Security agent fee",
+                                       "feeItemCurrency":  "USD",
+                                       "feeItemAmount":  "125000"
+                                   }
+                               ],
+                      "interestCoverMin":  "3.00:1.00",
+                      "includeEsgKpi":  true,
+                      "includeESG":  true,
+                      "includeSecurityPackage":  true,
+                      "includeGuarantee":  true,
+                      "includeMultiCurrency":  true,
+                      "parentCompanyName":  "Pacific Rim Group Holdings Ltd.",
+                      "tranches":  [
+                                       {
+                                           "trancheName":  "Tranche A (Term Loan)",
+                                           "trancheMarginBps":  "185",
+                                           "trancheCurrency":  "USD",
+                                           "trancheAmount":  "200000000"
+                                       },
+                                       {
+                                           "trancheName":  "Tranche B (Delayed Draw)",
+                                           "trancheMarginBps":  "195",
+                                           "trancheCurrency":  "USD",
+                                           "trancheAmount":  "50000000"
+                                       }
+                                   ],
+                      "facilityCurrency":  "USD",
+                      "lmaFormReference":  "LMA Single Currency Term Facility (recommended form)",
+                      "dayCountConvention":  "ACT_360",
+                      "jurisdiction":  "Courts of England and Wales",
+                      "totalCommitments":  "250000000",
+                      "defaultInterestMarginPct":  "2.00",
+                      "signingDate":  "2026-09-15",
+                      "borrowerJurisdiction":  "Cayman Islands",
+                      "includePrepaymentPenalty":  true,
+                      "maturityDate":  "2031-07-01",
+                      "includeKycCondition":  true,
+                      "leadArranger":  "Meridian Global Banking Corporation",
+                      "facilityParticulars":  [
+                                                  {
+                                                      "particularLabel":  "Borrower",
+                                                      "particularValue":  "Pacific Rim Holdings Ltd."
+                                                  },
+                                                  {
+                                                      "particularLabel":  "Total Commitments",
+                                                      "particularValue":  "USD 250,000,000"
+                                                  },
+                                                  {
+                                                      "particularLabel":  "Purpose",
+                                                      "particularValue":  "Refinancing and general corporate purposes"
+                                                  },
+                                                  {
+                                                      "particularLabel":  "Margin",
+                                                      "particularValue":  "185 bps over Term SOFR"
+                                                  },
+                                                  {
+                                                      "particularLabel":  "Maturity",
+                                                      "particularValue":  "1 July 2031"
+                                                  },
+                                                  {
+                                                      "particularLabel":  "Repayment",
+                                                      "particularValue":  "Amortising 鈥?see schedule"
+                                                  },
+                                                  {
+                                                      "particularLabel":  "Governing Law",
+                                                      "particularValue":  "English law"
+                                                  }
+                                              ]
+                  },
+    "required":  true
+}

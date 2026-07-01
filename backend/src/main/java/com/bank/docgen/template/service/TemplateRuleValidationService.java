@@ -36,19 +36,22 @@ public class TemplateRuleValidationService {
     private final VariableSchemaRepository variableSchemaRepository;
     private final AnchorBindingRepository anchorBindingRepository;
     private final MasterDocumentRepository masterDocumentRepository;
+    private final TemplateCurrentVersionResolver templateVersionSupport;
 
     public TemplateRuleValidationService(
             TemplateService templateService,
             TemplateVersionRepository templateVersionRepository,
             VariableSchemaRepository variableSchemaRepository,
             AnchorBindingRepository anchorBindingRepository,
-            MasterDocumentRepository masterDocumentRepository
+            MasterDocumentRepository masterDocumentRepository,
+            TemplateCurrentVersionResolver templateVersionSupport
     ) {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
         this.variableSchemaRepository = variableSchemaRepository;
         this.anchorBindingRepository = anchorBindingRepository;
         this.masterDocumentRepository = masterDocumentRepository;
+        this.templateVersionSupport = templateVersionSupport;
     }
 
     @Transactional(readOnly = true)
@@ -58,7 +61,7 @@ public class TemplateRuleValidationService {
             ManagementSessionClaims session
     ) {
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
-        TemplateVersionEntity version = currentDevVersion(templateId);
+        TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
         Set<String> variableKeys = loadVariableKeys(version.getId());
         Set<String> anchorIds = loadAnchorIds(template, version.getId());
         Set<String> ruleIds = request.rules().stream()
@@ -149,11 +152,6 @@ public class TemplateRuleValidationService {
             anchorIds.add(binding.getAnchorId());
         }
         return anchorIds;
-    }
-
-    private TemplateVersionEntity currentDevVersion(java.util.UUID templateId) {
-        return templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
-                .orElseThrow(TemplateNotFoundException::new);
     }
 
     private boolean isBlank(String value) {

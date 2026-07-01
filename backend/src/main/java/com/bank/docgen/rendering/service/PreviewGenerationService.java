@@ -19,7 +19,7 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
-import com.bank.docgen.template.service.TemplateNotFoundException;
+import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
 import com.bank.docgen.template.service.TemplateService;
 import com.bank.docgen.template.service.TestDataSetService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,6 +50,7 @@ public class PreviewGenerationService {
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final RenderProfileService renderProfileService;
     private final FidelityValidationService fidelityValidationService;
+    private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     public PreviewGenerationService(
             TemplateService templateService,
@@ -64,7 +65,8 @@ public class PreviewGenerationService {
             PreviewComparisonService previewComparisonService,
             TemplateContentModuleReferenceService contentModuleReferenceService,
             RenderProfileService renderProfileService,
-            FidelityValidationService fidelityValidationService
+            FidelityValidationService fidelityValidationService,
+            TemplateCurrentVersionResolver templateCurrentVersionResolver
     ) {
         this.templateService = templateService;
         this.testDataSetService = testDataSetService;
@@ -79,6 +81,7 @@ public class PreviewGenerationService {
         this.contentModuleReferenceService = contentModuleReferenceService;
         this.renderProfileService = renderProfileService;
         this.fidelityValidationService = fidelityValidationService;
+        this.templateCurrentVersionResolver = templateCurrentVersionResolver;
     }
 
     @Transactional
@@ -115,8 +118,7 @@ public class PreviewGenerationService {
     ) {
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
         Map<String, Object> variables = resolveVariables(templateId, request, session);
-        TemplateVersionEntity version = templateVersionRepository.findByTemplateIdAndDevVersionNumber(templateId, 1)
-                .orElseThrow(TemplateNotFoundException::new);
+        TemplateVersionEntity version = templateCurrentVersionResolver.requireInFlightDevVersion(templateId);
         String variablesHash = hashVariables(variables);
         PreviewRecordEntity preview = new PreviewRecordEntity(
                 UUID.randomUUID(),

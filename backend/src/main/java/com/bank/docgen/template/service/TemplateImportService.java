@@ -47,6 +47,7 @@ public class TemplateImportService {
     private final TemplateExportAccessSupport importAccessSupport;
     private final TemplateImportBundleValidator bundleValidator;
     private final ObjectMapper objectMapper;
+    private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     public TemplateImportService(
             TemplateRepository templateRepository,
@@ -58,7 +59,8 @@ public class TemplateImportService {
             ManagementAuditRecorder managementAuditRecorder,
             TemplateExportAccessSupport importAccessSupport,
             TemplateImportBundleValidator bundleValidator,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            TemplateCurrentVersionResolver templateCurrentVersionResolver
     ) {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
@@ -70,6 +72,7 @@ public class TemplateImportService {
         this.importAccessSupport = importAccessSupport;
         this.bundleValidator = bundleValidator;
         this.objectMapper = objectMapper;
+        this.templateCurrentVersionResolver = templateCurrentVersionResolver;
     }
 
     @Transactional
@@ -176,9 +179,7 @@ public class TemplateImportService {
         template.setUpdatedBy(session.username());
         templateRepository.save(template);
 
-        TemplateVersionEntity version = templateVersionRepository
-                .findByTemplateIdAndDevVersionNumber(template.getId(), 1)
-                .orElseThrow(TemplateNotFoundException::new);
+        TemplateVersionEntity version = templateCurrentVersionResolver.requireLatestVersion(template.getId());
         version.setLifecycleStatus(TemplateLifecycleStatus.DRAFT);
         version.setReleaseVersion(null);
         templateVersionRepository.save(version);

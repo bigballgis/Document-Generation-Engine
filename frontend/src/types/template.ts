@@ -35,6 +35,31 @@ export interface TemplateReleaseVersion {
   defaultRouteTarget: boolean
 }
 
+export interface TemplateVersionLineSummary {
+  devVersionId: string
+  devVersionNumber: number
+  releaseVersion: string | null
+  lifecycleStatus: TemplateLifecycleStatus
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION'
+  lineKind?: 'IN_FLIGHT' | 'PUBLISHED'
+  updatedAt: string
+  updatedBy: string
+  defaultRouteTarget: boolean | null
+  cloneable?: boolean
+}
+
+export interface TemplateVersionLineDetail extends TemplateVersionLineSummary {
+  variables: VariableSchema[]
+  bindings: AnchorBinding[]
+  rules: CompositionRule[]
+}
+
+export interface TemplateDevVersionCreated {
+  devVersionId: string
+  devVersionNumber: number
+  lifecycleStatus: TemplateLifecycleStatus
+}
+
 export interface VariableSchema {
   variableKey: string
   variableType: string
