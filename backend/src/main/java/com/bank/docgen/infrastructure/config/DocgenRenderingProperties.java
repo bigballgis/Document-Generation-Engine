@@ -15,6 +15,12 @@ public class DocgenRenderingProperties {
 
     private int conversionPoolSize = 2;
 
+    /**
+     * When enabled, strips Word {@code PAGE} fields before LibreOffice conversion and stamps
+     * {@code Page X of Y} onto the PDF. Deferred by default until final PDF fidelity work.
+     */
+    private boolean pdfPageNumberStampingEnabled = false;
+
     public String getLibreOfficeCommand() {
         return libreOfficeCommand;
     }
@@ -53,5 +59,13 @@ public class DocgenRenderingProperties {
 
     public void setConversionPoolSize(int conversionPoolSize) {
         this.conversionPoolSize = conversionPoolSize;
+    }
+
+    public boolean isPdfPageNumberStampingEnabled() {
+        return pdfPageNumberStampingEnabled;
+    }
+
+    public void setPdfPageNumberStampingEnabled(boolean pdfPageNumberStampingEnabled) {
+        this.pdfPageNumberStampingEnabled = pdfPageNumberStampingEnabled;
     }
 }

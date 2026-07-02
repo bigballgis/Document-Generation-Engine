@@ -28,17 +28,20 @@ public class DockerExecPdfConversionService implements PdfConversionService {
     private final CircuitBreaker circuitBreaker;
     private final Retry retry;
     private final Executor pdfConversionExecutor;
+    private final PdfConversionPostProcessor pdfConversionPostProcessor;
 
     public DockerExecPdfConversionService(
             DocgenRenderingProperties renderingProperties,
             CircuitBreakerRegistry circuitBreakerRegistry,
             RetryRegistry retryRegistry,
-            @Qualifier("pdfConversionExecutor") Executor pdfConversionExecutor
+            @Qualifier("pdfConversionExecutor") Executor pdfConversionExecutor,
+            PdfConversionPostProcessor pdfConversionPostProcessor
     ) {
         this.renderingProperties = renderingProperties;
         this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(RESILIENCE_INSTANCE);
         this.retry = retryRegistry.retry(RESILIENCE_INSTANCE);
         this.pdfConversionExecutor = pdfConversionExecutor;
+        this.pdfConversionPostProcessor = pdfConversionPostProcessor;
     }
 
     @Override
@@ -55,7 +58,8 @@ public class DockerExecPdfConversionService implements PdfConversionService {
         try {
             hostDir = Files.createTempDirectory("docgen-docker-pdf-");
             Path inputDocx = hostDir.resolve("input.docx");
-            Files.write(inputDocx, docxBytes);
+            byte[] pdfSourceDocx = pdfConversionPostProcessor.prepareDocxForConversion(docxBytes);
+            Files.write(inputDocx, pdfSourceDocx);
             String container = renderingProperties.getDockerContainerName();
             String containerInput = "/tmp/docgen-input.docx";
 
@@ -74,7 +78,7 @@ public class DockerExecPdfConversionService implements PdfConversionService {
                 throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
             }
             byte[] converted = Files.readAllBytes(outputPdf);
-            return PdfPageNumberStamper.stampPageNumbers(converted);
+            return pdfConversionPostProcessor.finishPdf(converted);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new TemplateValidationException("api.error.generation.pdfConversionFailed");

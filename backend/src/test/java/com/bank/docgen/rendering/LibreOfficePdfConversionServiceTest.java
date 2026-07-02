@@ -70,7 +70,7 @@ class LibreOfficePdfConversionServiceTest {
         LibreOfficePdfConversionService service = service();
         long tempDirsBefore = countDocgenPdfTempDirs();
 
-        byte[] pdf = service.convert(new byte[]{1, 2, 3});
+        byte[] pdf = service.convert(minimalDocxBytes());
 
         assertThat(pdf).isNotEmpty();
         assertThat(new String(pdf)).contains("%PDF");
@@ -89,13 +89,13 @@ class LibreOfficePdfConversionServiceTest {
         LibreOfficePdfConversionService service = service();
         long tempDirsBefore = countDocgenPdfTempDirs();
 
-        assertThatThrownBy(() -> service.convert(new byte[]{1}))
+        assertThatThrownBy(() -> service.convert(minimalDocxBytes()))
                 .isInstanceOf(TemplateValidationException.class);
         assertThat(countDocgenPdfTempDirs()).isEqualTo(tempDirsBefore);
     }
 
     @Test
-    void rejectsNonZeroExitCode() throws URISyntaxException {
+    void rejectsNonZeroExitCode() throws URISyntaxException, IOException {
         Path failScript = Path.of(
                 LibreOfficePdfConversionServiceTest.class
                         .getResource("/scripts/fake-libreoffice-fail.cmd")
@@ -105,17 +105,17 @@ class LibreOfficePdfConversionServiceTest {
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();
 
-        assertThatThrownBy(() -> service.convert(new byte[]{1}))
+        assertThatThrownBy(() -> service.convert(minimalDocxBytes()))
                 .isInstanceOf(TemplateValidationException.class);
     }
 
     @Test
-    void rejectsTimedOutConversion() {
+    void rejectsTimedOutConversion() throws IOException {
         properties.setLibreOfficeCommand("ping");
         properties.setConversionTimeoutSeconds(1);
         LibreOfficePdfConversionService service = service();
 
-        assertThatThrownBy(() -> service.convert(new byte[]{1}))
+        assertThatThrownBy(() -> service.convert(minimalDocxBytes()))
                 .isInstanceOf(TemplateValidationException.class);
     }
 
@@ -135,10 +135,11 @@ class LibreOfficePdfConversionServiceTest {
                     properties,
                     CircuitBreakerRegistry.ofDefaults(),
                     RetryRegistry.ofDefaults(),
-                    trackingExecutor
+                    trackingExecutor,
+                    pdfConversionPostProcessor()
             );
 
-            byte[] pdf = service.convert(new byte[]{1, 2, 3});
+            byte[] pdf = service.convert(minimalDocxBytes());
 
             assertThat(pdf).isNotEmpty();
             assertThat(workerThread.get()).isNotNull();
@@ -153,8 +154,22 @@ class LibreOfficePdfConversionServiceTest {
                 properties,
                 CircuitBreakerRegistry.ofDefaults(),
                 RetryRegistry.ofDefaults(),
-                testPool
+                testPool,
+                pdfConversionPostProcessor()
         );
+    }
+
+    private PdfConversionPostProcessor pdfConversionPostProcessor() {
+        return new PdfConversionPostProcessor(properties, new DocxPdfConversionPreprocessor());
+    }
+
+    private static byte[] minimalDocxBytes() throws IOException {
+        try (org.apache.poi.xwpf.usermodel.XWPFDocument document = new org.apache.poi.xwpf.usermodel.XWPFDocument();
+                java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {
+            document.createParagraph().createRun().setText("Conversion test body");
+            document.write(output);
+            return output.toByteArray();
+        }
     }
 
     private ThreadPoolTaskExecutor pdfConversionPool() {

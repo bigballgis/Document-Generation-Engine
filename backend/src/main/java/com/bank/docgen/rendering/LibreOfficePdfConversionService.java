@@ -28,17 +28,20 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
     private final CircuitBreaker circuitBreaker;
     private final Retry retry;
     private final Executor pdfConversionExecutor;
+    private final PdfConversionPostProcessor pdfConversionPostProcessor;
 
     public LibreOfficePdfConversionService(
             DocgenRenderingProperties renderingProperties,
             CircuitBreakerRegistry circuitBreakerRegistry,
             RetryRegistry retryRegistry,
-            @Qualifier("pdfConversionExecutor") Executor pdfConversionExecutor
+            @Qualifier("pdfConversionExecutor") Executor pdfConversionExecutor,
+            PdfConversionPostProcessor pdfConversionPostProcessor
     ) {
         this.renderingProperties = renderingProperties;
         this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(RESILIENCE_INSTANCE);
         this.retry = retryRegistry.retry(RESILIENCE_INSTANCE);
         this.pdfConversionExecutor = pdfConversionExecutor;
+        this.pdfConversionPostProcessor = pdfConversionPostProcessor;
     }
 
     @Override
@@ -55,7 +58,8 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
         try {
             tempDir = Files.createTempDirectory("docgen-pdf-");
             Path inputDocx = tempDir.resolve("input.docx");
-            Files.write(inputDocx, docxBytes);
+            byte[] pdfSourceDocx = pdfConversionPostProcessor.prepareDocxForConversion(docxBytes);
+            Files.write(inputDocx, pdfSourceDocx);
             ProcessBuilder processBuilder = new ProcessBuilder(
                     renderingProperties.getLibreOfficeCommand(),
                     "--headless",
@@ -79,7 +83,7 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
                 throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
             }
             byte[] converted = Files.readAllBytes(outputPdf);
-            return PdfPageNumberStamper.stampPageNumbers(converted);
+            return pdfConversionPostProcessor.finishPdf(converted);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new TemplateValidationException("api.error.generation.pdfConversionFailed");

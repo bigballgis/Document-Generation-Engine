@@ -32,7 +32,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType;
 class FolMasterDocxAssetGeneratorTest {
 
     /** Bump when page layout / header / footer changes; import script uses this to refresh uploaded masters. */
-    static final String MASTER_LAYOUT_VERSION = "fol-layout-v3-clean-anchors-no-filler";
+    static final String MASTER_LAYOUT_VERSION = "fol-layout-v4-docx-page-field-pdf-stamp";
 
     private static final Path ASSET_PATH = Path.of("..", "deploy", "demo-fol", "assets", "wholesale-fol-master.docx");
 
