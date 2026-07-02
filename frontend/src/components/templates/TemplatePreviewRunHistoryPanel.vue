@@ -212,7 +212,7 @@ defineExpose({ reload: loadRuns })
   }
 
   :deep(.preview-run-row.is-selected > td) {
-    background: var(--brand-accent-soft, #eef6ff);
+    background: var(--brand-accent-soft);
   }
 }
 </style>

@@ -255,7 +255,7 @@ function onStepKeydown(event: KeyboardEvent, index: number) {
     .role-journey-timeline__marker {
       background: var(--brand-primary);
       border-color: var(--brand-primary);
-      color: #fff;
+      color: var(--on-primary);
     }
 
     .role-journey-timeline__label {

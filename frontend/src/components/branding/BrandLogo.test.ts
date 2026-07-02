@@ -20,7 +20,7 @@ function mountLogo(props: { brand: 'REDBC' | 'GREENBC'; showWordmark?: boolean }
 describe('BrandLogo', () => {
   it('shows i18n business name instead of internal brand code for REDBC', () => {
     const wrapper = mountLogo({ brand: 'REDBC' })
-    expect(wrapper.find('.brand-logo__wordmark').text()).toBe('Retail Bank')
+    expect(wrapper.find('.brand-logo__wordmark').text()).toBe('Red Bank')
     expect(wrapper.text()).not.toContain('REDBC')
   })
 

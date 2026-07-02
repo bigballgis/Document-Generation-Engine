@@ -42,7 +42,7 @@ const label = computed(() => {
 </script>
 
 <template>
-  <el-tag :type="tagType" effect="light">
+  <el-tag :type="tagType" effect="light" class="status-badge">
     {{ label }}
   </el-tag>
 </template>

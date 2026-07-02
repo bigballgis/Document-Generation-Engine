@@ -26,7 +26,7 @@ const labelKey = computed(() => `masters.status.${props.status}`)
 </script>
 
 <template>
-  <el-tag :type="tagType" effect="light">
+  <el-tag :type="tagType" effect="light" class="status-badge">
     {{ t(labelKey) }}
   </el-tag>
 </template>

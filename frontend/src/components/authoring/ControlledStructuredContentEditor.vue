@@ -538,7 +538,7 @@ function insertInline(type: ConfirmedNodeType) {
   margin-bottom: 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  background: var(--surface-muted, #fafbfc);
+  background: var(--surface-muted);
 }
 
 .block-card__header {

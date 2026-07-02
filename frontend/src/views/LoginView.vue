@@ -100,155 +100,169 @@ async function submitLogin() {
 
 <template>
   <div class="login-page">
-    <header class="login-header">
-      <BrandLogo
-        :brand="appStore.brand"
-        :size="52"
-        show-wordmark
-        :aria-label="t('login.brandAriaLabel')"
-      />
-      <h1>{{ t('app.title') }}</h1>
-      <p>{{ t('login.subtitle') }}</p>
-    </header>
-
-    <el-card class="login-card" shadow="never">
-      <div class="login-card-header">
-        <h2>{{ t('login.title') }}</h2>
-        <el-select
-          class="locale-switcher"
-          size="small"
-          :model-value="appStore.locale"
-          :aria-label="t('common.language')"
-          @update:model-value="handleLocaleChange"
-        >
-          <el-option
-            v-for="option in localeOptions"
-            :key="option.value"
-            :label="option.label"
-            :value="option.value"
-          />
-        </el-select>
+    <aside class="login-brand-panel" :aria-label="t('login.brandAriaLabel')">
+      <div class="login-brand-panel__content">
+        <BrandLogo
+          :brand="appStore.brand"
+          :size="64"
+          show-wordmark
+          :aria-label="t('login.brandAriaLabel')"
+        />
+        <p class="login-brand-panel__subtitle">{{ t('login.subtitle') }}</p>
       </div>
-      <el-alert
-        v-if="errorMessage"
-        class="login-alert"
-        type="error"
-        :title="errorMessage"
-        show-icon
-        :closable="false"
-      />
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-position="top"
-        @submit.prevent="submitLogin"
-      >
-        <el-form-item :label="t('login.username')" prop="username">
-          <el-input
-            v-model="form.username"
-            autocomplete="username"
-            maxlength="8"
-            :placeholder="t('login.usernamePlaceholder')"
-            :aria-label="t('login.username')"
-          />
-        </el-form-item>
-        <el-form-item :label="t('login.password')" prop="password">
-          <el-input
-            v-model="form.password"
-            type="password"
-            autocomplete="current-password"
-            show-password
-            :aria-label="t('login.password')"
-          />
-        </el-form-item>
-        <el-form-item :label="t('login.brandLabel')">
-          <AppSearchSelect
-            :model-value="appStore.brand"
-            @update:model-value="appStore.setBrand($event as BrandPreset)"
+    </aside>
+
+    <main class="login-form-panel">
+      <div class="login-form-panel__inner">
+        <header class="login-form-header">
+          <h2>{{ t('login.title') }}</h2>
+          <el-select
+            class="locale-switcher"
+            size="small"
+            :model-value="appStore.locale"
+            :aria-label="t('common.language')"
+            @update:model-value="handleLocaleChange"
           >
             <el-option
-              v-for="option in brandOptions"
+              v-for="option in localeOptions"
               :key="option.value"
               :label="option.label"
               :value="option.value"
             />
-          </AppSearchSelect>
-        </el-form-item>
-        <el-button
-          type="primary"
-          native-type="submit"
-          class="submit-btn"
-          :loading="submitting"
+          </el-select>
+        </header>
+
+        <el-alert
+          v-if="errorMessage"
+          class="login-alert"
+          type="error"
+          :title="errorMessage"
+          show-icon
+          :closable="false"
+        />
+
+        <el-form
+          ref="formRef"
+          :model="form"
+          :rules="rules"
+          label-position="top"
+          @submit.prevent="submitLogin"
         >
-          {{ t('login.submit') }}
-        </el-button>
-      </el-form>
-    </el-card>
+          <el-form-item :label="t('login.username')" prop="username">
+            <el-input
+              v-model="form.username"
+              autocomplete="username"
+              maxlength="8"
+              :placeholder="t('login.usernamePlaceholder')"
+              :aria-label="t('login.username')"
+            />
+          </el-form-item>
+          <el-form-item :label="t('login.password')" prop="password">
+            <el-input
+              v-model="form.password"
+              type="password"
+              autocomplete="current-password"
+              show-password
+              :aria-label="t('login.password')"
+            />
+          </el-form-item>
+          <el-form-item :label="t('login.brandLabel')">
+            <AppSearchSelect
+              :model-value="appStore.brand"
+              @update:model-value="appStore.setBrand($event as BrandPreset)"
+            >
+              <el-option
+                v-for="option in brandOptions"
+                :key="option.value"
+                :label="option.label"
+                :value="option.value"
+              />
+            </AppSearchSelect>
+          </el-form-item>
+          <el-button
+            type="primary"
+            native-type="submit"
+            class="submit-btn"
+            :loading="submitting"
+          >
+            {{ t('login.submit') }}
+          </el-button>
+        </el-form>
+      </div>
+    </main>
   </div>
 </template>
 
 <style scoped lang="scss">
 .login-page {
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(320px, 42%) 1fr;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.login-brand-panel {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
-  padding: 2rem;
-  background:
-    radial-gradient(
-      circle at 12% 8%,
-      color-mix(in srgb, var(--brand-primary) 12%, transparent) 0%,
-      transparent 42%
-    ),
-    linear-gradient(
-      165deg,
-      var(--brand-header-bg) 0%,
-      var(--surface-bg) 48%,
-      var(--surface-gradient-end) 100%
-    );
+  padding: var(--space-12) var(--space-8);
+  background: linear-gradient(
+    160deg,
+    var(--brand-primary) 0%,
+    color-mix(in srgb, var(--brand-primary) 82%, var(--gray-900)) 100%
+  );
+  color: var(--on-primary);
+  transition: background var(--transition-base);
+
+  @media (max-width: 900px) {
+    min-height: 240px;
+    padding: var(--space-8) var(--space-6);
+  }
 }
 
-.login-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.login-brand-panel__content {
+  max-width: 22rem;
   text-align: center;
 
-  h1 {
-    margin: 0.85rem 0 0;
-    font-size: 1.75rem;
-    font-weight: 650;
-    letter-spacing: -0.02em;
-  }
-
-  p {
-    margin: 0.35rem 0 0;
-    font-size: 0.9375rem;
-    color: var(--text-muted);
+  :deep(.brand-logo__wordmark) {
+    color: var(--on-primary);
   }
 }
 
-.login-card {
+.login-brand-panel__subtitle {
+  margin: var(--space-6) 0 0;
+  font-size: var(--font-size-base);
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--on-primary) 88%, transparent);
+}
+
+.login-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  background: var(--surface-card);
+}
+
+.login-form-panel__inner {
   width: min(420px, 100%);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-
-  h2 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 650;
-  }
 }
 
-.login-card-header {
+.login-form-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+
+  h2 {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    font-weight: 650;
+  }
 }
 
 .locale-switcher {
@@ -256,11 +270,11 @@ async function submitLogin() {
 }
 
 .login-alert {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .submit-btn {
   width: 100%;
-  margin-top: 0.5rem;
+  margin-top: var(--space-2);
 }
 </style>

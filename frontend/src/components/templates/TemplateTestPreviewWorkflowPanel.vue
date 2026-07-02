@@ -131,7 +131,7 @@ function confirmSubmit(comment: string) {
   padding: 0.875rem 1rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  background: var(--surface-muted, #fafbfc);
+  background: var(--surface-muted);
 
   &__status-row {
     display: flex;

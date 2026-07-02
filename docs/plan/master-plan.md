@@ -1,14 +1,14 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **None** (2026-06-29 — P12-AUD-M02 **Done**; P12 catch-all **Not Started**). **Active slice:** **None** — **P12-BDD-RISK-PROMPT-UX-001 Done** (2026-06-29; BDD-TEMPLATE-RISK-PROMPT-UX-001; P19 residual closed). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
+**Active formal phase:** **None** (2026-07-03 — P12-UIUX-DEEP-REFACTOR **Done**; P12 catch-all **Not Started**). **Active slice:** **None** — **P12-UIUX-DEEP-REFACTOR Done** (2026-07-03; frontend UIUX deep refactor, 14 tasks A–E, **606** Vitest; OPT-G3 resolved). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
 UX-A…UX-F interaction/upgradeability tasks (same plan) run as optimization waves
 against the existing implementation. **UX Wave A** (role gating + half-built interactions)
 re-earned Done on 2026-06-23; **UX Wave B** (workbenches + polish) Done (2026-06-23).
-**P12 Not Started** (catch-all idle) — last slice **P12-AUD-M02 Done** (2026-07-01; AUD-M02 role constants single-source refactor).
+**P12 Not Started** (catch-all idle) — last slice **P12-UIUX-DEEP-REFACTOR Done** (2026-07-03; frontend UIUX deep refactor, 14 tasks A–E; prior: **P12-AUD-M02 Done** 2026-07-01).
 **P16–P20 (deep-review functional gaps, 2026-06-23):** P16 lifecycle governance **Done**;
 P17 per-domain API policy **Done** (2026-06-25; Wave 3; T01–T09 + COR-F18);
 P18 structured authoring **Done** (2026-06-28; T01–T10); **P19 verifiability/publish-gate Done**

@@ -4,7 +4,6 @@ import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplateDetailView from '@/views/templates/TemplateDetailView.vue'
-import TemplateDetailLifecycleTab from '@/views/templates/detail/TemplateDetailLifecycleTab.vue'
 import TemplateDetailAuthoringTab from '@/views/templates/detail/TemplateDetailAuthoringTab.vue'
 import TemplateDetailDevWorkspace from '@/views/templates/detail/TemplateDetailDevWorkspace.vue'
 import TemplateSubmitForApprovalSummaryDialog from '@/components/templates/TemplateSubmitForApprovalSummaryDialog.vue'
@@ -262,11 +261,10 @@ describe('TemplateDetailView', () => {
     vi.mocked(templatesApi.getTemplateCoverage).mockResolvedValue({} as never)
     vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({} as never)
 
-    const wrapper = mountView(false)
+    const wrapper = mountView()
     await flushPromises()
 
-    const lifecycleTab = wrapper.findComponent(TemplateDetailLifecycleTab)
-    const submitButton = lifecycleTab
+    const submitButton = wrapper
       .findAll('button')
       .find((button) => button.text().includes('Submit for approval'))
     await submitButton!.trigger('click')
@@ -296,11 +294,10 @@ describe('TemplateDetailView', () => {
       approvalSubState: 'PENDING_DECISION',
     } as never)
 
-    const wrapper = mountView(false)
+    const wrapper = mountView()
     await flushPromises()
 
-    const lifecycleTab = wrapper.findComponent(TemplateDetailLifecycleTab)
-    const submitButton = lifecycleTab
+    const submitButton = wrapper
       .findAll('button')
       .find((button) => button.text().includes('Submit for approval'))
     await submitButton!.trigger('click')

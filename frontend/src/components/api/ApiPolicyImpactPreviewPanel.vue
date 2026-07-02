@@ -110,7 +110,7 @@ const changedAreasText = computed(() => {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 1rem 1.25rem;
-  background: var(--surface-muted, #fafbfc);
+  background: var(--surface-muted);
 }
 
 .impact-panel__header {

@@ -5,6 +5,8 @@ import { useRoute, useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
 import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import ContentModuleLifecycleImpactDialog from '@/components/contentModules/ContentModuleLifecycleImpactDialog.vue'
 import ContentModuleStatusBadge from '@/components/contentModules/ContentModuleStatusBadge.vue'
@@ -337,20 +339,16 @@ async function handleVersionSaved() {
 </script>
 
 <template>
-  <div class="content-module-detail-page">
-    <header class="page-header">
-      <div>
-        <el-button link type="primary" @click="goBackToList">
-          {{ t('contentModules.detail.backToList') }}
-        </el-button>
-        <h1>{{ detail?.name ?? t('contentModules.detail.loadingTitle') }}</h1>
-        <p v-if="detail" class="meta">
-          {{ detail.moduleCode }}
-          · {{ t('contentModules.detail.groupLabel', { groupCode: detail.groupCode }) }}
-        </p>
-        <p v-if="detail?.description" class="description">{{ detail.description }}</p>
-      </div>
-    </header>
+  <AppPageLayout>
+    <PageHeader
+      show-back
+      :back-label="t('contentModules.detail.backToList')"
+      :title="detail?.name ?? t('contentModules.detail.loadingTitle')"
+      :description="detail ? `${detail.moduleCode} · ${t('contentModules.detail.groupLabel', { groupCode: detail.groupCode })}` : undefined"
+      @back="goBackToList"
+    />
+
+    <p v-if="detail?.description" class="header-extra">{{ detail.description }}</p>
 
     <LoadErrorPanel
       v-if="loadFailed"
@@ -461,38 +459,19 @@ async function handleVersionSaved() {
       :operation-label-key="lifecycleOperationLabelKey"
       @confirm="confirmLifecycleOperation"
     />
-  </div>
+  </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.content-module-detail-page {
-  padding: 1.5rem 2rem 2rem;
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-
-  h1 {
-    margin: 0.35rem 0 0.25rem;
-    font-size: 1.5rem;
-    font-weight: 650;
-  }
-}
-
-.meta,
-.description {
-  margin: 0.15rem 0 0;
+.header-extra {
+  margin: calc(-1 * var(--space-4)) 0 var(--space-6);
   color: var(--text-muted);
 }
 
 .lifecycle-hint,
 .preview-meta {
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--space-3);
   color: var(--text-muted);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 </style>

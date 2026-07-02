@@ -7,12 +7,6 @@ import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
 import TemplateVariableTreePanel from '@/components/templates/TemplateVariableTreePanel.vue'
 import TemplateAuthoringBindingsPanel from '@/components/templates/TemplateAuthoringBindingsPanel.vue'
 import TemplateClauseAuthoringPanel from '@/components/templates/TemplateClauseAuthoringPanel.vue'
-import TemplateTestDataSetPanel from '@/components/templates/TemplateTestDataSetPanel.vue'
-import TemplateTestPreviewWorkflowPanel from '@/components/templates/TemplateTestPreviewWorkflowPanel.vue'
-import TemplateCoveragePanel from '@/components/templates/TemplateCoveragePanel.vue'
-import TemplateChangeDiffPanel from '@/components/templates/TemplateChangeDiffPanel.vue'
-import TemplatePreviewPanel from '@/components/templates/TemplatePreviewPanel.vue'
-import TemplatePreviewRunHistoryPanel from '@/components/templates/TemplatePreviewRunHistoryPanel.vue'
 import {
   resolveTemplateAuthoringSubTab,
   templateAuthoringSubTabLabelKey,
@@ -21,9 +15,7 @@ import {
 import type {
   AnchorBinding,
   CompositionRule,
-  PreviewRecord,
   TemplateContentModuleReference,
-  TemplateLifecycleStatus,
   VariableSchema,
 } from '@/types/template'
 
@@ -36,30 +28,10 @@ const props = defineProps<{
   groupCode: string | null
   canEditContentModuleReferences: boolean
   coverageRefreshToken: number
-  lastPreview: PreviewRecord | null
-  selectedPreviewId: string | null
-  lifecycleStatus: TemplateLifecycleStatus
-  selectedTestDataSetId: string | null
-  showDraftActions: boolean
-  showTestingDecisionActions: boolean
-  showTestGenerate: boolean
-  submitting: boolean
-  generatingPreview: boolean
-  generatingPreviewId: string | null
-  batchTesting: boolean
-  openSubmitForTestDialog?: boolean
 }>()
 
 const emit = defineEmits<{
   updated: []
-  'update:selectedTestDataSetId': [id: string | null]
-  'update:selectedPreviewId': [previewId: string | null]
-  'update:openSubmitForTestDialog': [value: boolean]
-  'test-generate': [testDataSetId: string | undefined]
-  'test-generate-batch': []
-  'submit-for-test': [comment: string]
-  'test-decision': [decision: 'PASSED' | 'FAILED']
-  'batch-complete': []
 }>()
 
 const { t } = useI18n()
@@ -68,18 +40,6 @@ const router = useRouter()
 
 const activeSubTab = ref<TemplateAuthoringSubTab>(resolveTemplateAuthoringSubTab(route.query.authoringTab))
 const contentModuleReferences = ref<TemplateContentModuleReference[]>([])
-const testDataSetPanelRef = ref<{ reload: () => Promise<void> } | null>(null)
-const testDataSetCount = ref(0)
-const expandedPreviewPanels = ref<string[]>([])
-
-watch(
-  () => props.lastPreview?.previewId,
-  (previewId) => {
-    if (previewId && !expandedPreviewPanels.value.includes('previewDetail')) {
-      expandedPreviewPanels.value = [...expandedPreviewPanels.value, 'previewDetail']
-    }
-  },
-)
 
 watch(
   () => route.query.authoringTab,
@@ -108,14 +68,6 @@ function handleReferencesLoaded(references: TemplateContentModuleReference[]) {
 
 function handleUpdated() {
   emit('updated')
-}
-
-function handleSelected(testDataSetId: string | null) {
-  emit('update:selectedTestDataSetId', testDataSetId)
-}
-
-function handleTestGenerateFromRow(testDataSetId: string) {
-  emit('test-generate', testDataSetId)
 }
 
 async function loadContentModuleReferences() {
@@ -180,98 +132,6 @@ onMounted(() => {
           @updated="handleUpdated"
         />
       </el-tab-pane>
-
-      <el-tab-pane :label="t(templateAuthoringSubTabLabelKey('testPreview'))" name="testPreview">
-        <TemplateTestPreviewWorkflowPanel
-          :lifecycle-status="lifecycleStatus"
-          :selected-test-data-set-id="selectedTestDataSetId"
-          :show-draft-actions="showDraftActions"
-          :show-testing-decision-actions="showTestingDecisionActions"
-          :show-test-generate="showTestGenerate"
-          :submitting="submitting"
-          :generating-preview="generatingPreview"
-          :batch-testing="batchTesting"
-          :has-data-sets="testDataSetCount > 0"
-          :open-submit-dialog="openSubmitForTestDialog"
-          @update:open-submit-dialog="emit('update:openSubmitForTestDialog', $event)"
-          @test-generate-selected="emit('test-generate', selectedTestDataSetId ?? undefined)"
-          @test-generate-batch="emit('test-generate-batch')"
-          @submit-for-test="emit('submit-for-test', $event)"
-          @test-decision="emit('test-decision', $event)"
-        />
-
-        <TemplateTestDataSetPanel
-          ref="testDataSetPanelRef"
-          :template-id="templateId"
-          :generating-preview-id="generatingPreviewId"
-          :refresh-token="coverageRefreshToken"
-          @selected="handleSelected"
-          @test-generate="handleTestGenerateFromRow"
-          @loaded="testDataSetCount = $event"
-        />
-
-        <TemplatePreviewRunHistoryPanel
-          :template-id="templateId"
-          :refresh-token="coverageRefreshToken"
-          :selected-preview-id="selectedPreviewId"
-          @selected="emit('update:selectedPreviewId', $event)"
-        />
-
-        <el-collapse v-model="expandedPreviewPanels" class="test-preview-collapse">
-          <el-collapse-item name="coverage">
-            <template #title>
-              <span class="collapse-title">
-                {{ t('templates.coverage.title') }}
-                <ContextHelpTrigger
-                  :title="t('templates.coverage.helpTitle')"
-                  :content="t('templates.coverage.helpContent')"
-                  @click.stop
-                />
-              </span>
-            </template>
-            <TemplateCoveragePanel
-              compact
-              :template-id="templateId"
-              :refresh-token="coverageRefreshToken"
-            />
-          </el-collapse-item>
-          <el-collapse-item name="changeDiff">
-            <template #title>
-              <span class="collapse-title">
-                {{ t('templates.changeDiff.title') }}
-                <ContextHelpTrigger
-                  :title="t('templates.changeDiff.helpTitle')"
-                  :content="t('templates.changeDiff.helpContent')"
-                  @click.stop
-                />
-              </span>
-            </template>
-            <TemplateChangeDiffPanel
-              compact
-              :template-id="templateId"
-              :refresh-token="coverageRefreshToken"
-            />
-          </el-collapse-item>
-          <el-collapse-item name="previewDetail">
-            <template #title>
-              <span class="collapse-title">
-                {{ t('templates.preview.detailTitle') }}
-                <ContextHelpTrigger
-                  :title="t('templates.preview.helpTitle')"
-                  :content="t('templates.preview.helpContent')"
-                  @click.stop
-                />
-              </span>
-            </template>
-            <TemplatePreviewPanel
-              compact
-              :template-id="templateId"
-              :bindings="bindings"
-              :preview="lastPreview"
-            />
-          </el-collapse-item>
-        </el-collapse>
-      </el-tab-pane>
     </el-tabs>
   </el-card>
 </template>
@@ -295,25 +155,5 @@ onMounted(() => {
 
 .authoring-sub-tabs {
   margin-top: 0.25rem;
-}
-
-.test-preview-collapse {
-  margin-top: 1.25rem;
-  border: none;
-
-  :deep(.el-collapse-item__header) {
-    font-weight: 650;
-    font-size: 0.9375rem;
-  }
-
-  :deep(.el-collapse-item__wrap) {
-    border-bottom: none;
-  }
-}
-
-.collapse-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
 }
 </style>

@@ -2,15 +2,17 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
-import RoleJourneyTimeline from '@/components/journey/RoleJourneyTimeline.vue'
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
+import { rowSortMethod } from '@/composables/useDataTableFilters'
 import {
-  auditAdminJourneySteps,
-  roleJourneyTitleKey,
-} from '@/constants/roleJourneyDefinitions'
-import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+  useLifecycleAuditColumnFilters,
+  useManagementAuditColumnFilters,
+} from '@/views/audit/auditEventColumnFilters'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { isGroupScopedAuditRole } from '@/auth/roles'
@@ -19,10 +21,7 @@ import { useSessionStore } from '@/stores/session'
 import type { LifecycleAuditEvent, ManagementAuditEvent } from '@/types/audit'
 import type { TemplateLifecycleStatus } from '@/types/template'
 import { downloadJsonExport } from '@/utils/downloadExport'
-import {
-  resolveAuditAdminJourneyIndex,
-  shouldShowAuditAdminJourney,
-} from '@/utils/auditAdminJourney'
+import { shouldShowAuditAdminJourney } from '@/utils/auditAdminJourney'
 import { formatAuditEventType } from '@/utils/auditEventLabels'
 import { validateGroupAdminAuditFilters } from '@/views/audit/auditFilterValidation'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -35,31 +34,9 @@ const sessionStore = useSessionStore()
 const activeTab = ref<'management' | 'lifecycle'>('management')
 const loadFailed = ref(false)
 const filterValidationKey = ref<string | null>(null)
-const exportJustCompleted = ref(false)
 
 const showAuditAdminJourney = computed(() =>
   shouldShowAuditAdminJourney({ roles: sessionStore.session?.roles ?? [] }),
-)
-
-const auditAdminJourneyResolution = computed(() => {
-  if (!showAuditAdminJourney.value) {
-    return null
-  }
-  return resolveAuditAdminJourneyIndex({
-    filters: auditStore.filters,
-    managementEventCount: auditStore.managementEvents.length,
-    lifecycleEventCount: auditStore.lifecycleEvents.length,
-    exportInProgress: auditStore.exporting,
-    exportJustCompleted: exportJustCompleted.value,
-  })
-})
-
-const auditJourneyCurrentStepIndex = computed(
-  () => auditAdminJourneyResolution.value?.currentStepIndex ?? null,
-)
-
-const auditJourneyGuidanceKey = computed(
-  () => auditAdminJourneyResolution.value?.guidanceKey,
 )
 
 const eventLabelTranslator = computed(() => ({
@@ -93,13 +70,7 @@ const {
   filteredRows: filteredManagementEvents,
   hasActiveFilters: hasManagementColumnFilters,
   clearFilters: clearManagementColumnFilters,
-} = useDataTableFilters(managementSource, [
-  { key: 'eventAt', getValue: (row) => formatDate(row.eventAt) },
-  { key: 'eventType', getValue: (row) => row.eventType ?? '' },
-  { key: 'templateId', getValue: (row) => row.templateId ?? '' },
-  { key: 'actorSummary', getValue: (row) => row.actorSummary ?? '' },
-  { key: 'statusSummary', getValue: (row) => row.statusSummary ?? '' },
-])
+} = useManagementAuditColumnFilters(managementSource)
 
 const lifecycleSource = computed(() => auditStore.lifecycleEvents)
 const {
@@ -107,14 +78,7 @@ const {
   filteredRows: filteredLifecycleEvents,
   hasActiveFilters: hasLifecycleColumnFilters,
   clearFilters: clearLifecycleColumnFilters,
-} = useDataTableFilters(lifecycleSource, [
-  { key: 'eventAt', getValue: (row) => formatDate(row.eventAt) },
-  { key: 'eventType', getValue: (row) => row.eventType ?? '' },
-  { key: 'templateId', getValue: (row) => row.templateId ?? '' },
-  { key: 'fromState', getValue: (row) => formatLifecycleState(row.fromState) },
-  { key: 'toState', getValue: (row) => formatLifecycleState(row.toState) },
-  { key: 'summary', getValue: (row) => row.summary ?? '' },
-])
+} = useLifecycleAuditColumnFilters(lifecycleSource)
 
 const managementUiPage = computed({
   get: () => auditStore.managementPage + 1,
@@ -258,7 +222,6 @@ async function handleExport() {
       t(isManagement ? 'audit.export.managementFilename' : 'audit.export.lifecycleFilename'),
       result,
     )
-    exportJustCompleted.value = true
     ElMessage.success(
       t(isManagement ? 'audit.export.success' : 'audit.export.lifecycleSuccess'),
     )
@@ -269,14 +232,6 @@ async function handleExport() {
     )
   }
 }
-
-watch(
-  () => auditStore.filters,
-  () => {
-    exportJustCompleted.value = false
-  },
-  { deep: true },
-)
 
 const sortManagementByEventType = rowSortMethod<ManagementAuditEvent>((row) =>
   formatEventType(row.eventType),
@@ -295,39 +250,26 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
 </script>
 
 <template>
-  <div class="audit-page">
-    <section v-if="showAuditAdminJourney" id="journey-section" class="journey-section">
-      <RoleJourneyTimeline
-        :steps="auditAdminJourneySteps"
-        :current-step-index="auditJourneyCurrentStepIndex"
-        :guidance-key="auditJourneyGuidanceKey"
-        :title-key="roleJourneyTitleKey('AUDIT_ADMIN')"
-      />
-    </section>
-
-    <header class="page-header">
-      <div>
-        <h1>{{ t('audit.title') }}</h1>
-        <p>{{ t('audit.description') }}</p>
-      </div>
-      <el-button
-        type="primary"
-        :loading="auditStore.exporting"
-        @click="handleExport"
-      >
-        {{ t('audit.export.action') }}
-      </el-button>
-    </header>
-
-    <el-alert
-      v-if="showAuditAdminJourney"
-      class="page-alert view-only-banner"
-      type="info"
-      :title="t('audit.viewOnly.banner')"
-      :description="t('audit.viewOnly.description')"
-      show-icon
-      :closable="false"
-    />
+  <AppPageLayout>
+    <PageHeader
+      :title="t('audit.title')"
+      :description="t('audit.description')"
+    >
+      <template v-if="showAuditAdminJourney" #meta>
+        <el-tag type="info" effect="plain">
+          {{ t('audit.viewOnly.banner') }}
+        </el-tag>
+      </template>
+      <template #actions>
+        <el-button
+          type="primary"
+          :loading="auditStore.exporting"
+          @click="handleExport"
+        >
+          {{ t('audit.export.action') }}
+        </el-button>
+      </template>
+    </PageHeader>
 
     <el-alert
       v-if="filterValidationKey"
@@ -436,14 +378,7 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
                 {{ formatEventType(row.eventType) }}
               </template>
             </el-table-column>
-            <el-table-column prop="templateId" sortable min-width="200">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('audit.columns.templateId')"
-                  v-model="managementColumnFilters.templateId"
-                />
-              </template>
-            </el-table-column>
+            <el-table-column prop="templateId" sortable min-width="200" :label="t('audit.columns.templateId')" />
             <el-table-column
               sortable
               :sort-method="sortManagementByEventAt"
@@ -459,20 +394,10 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
                 {{ formatDate(row.eventAt) }}
               </template>
             </el-table-column>
-            <el-table-column prop="statusSummary" sortable min-width="160">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('audit.columns.statusSummary')"
-                  v-model="managementColumnFilters.statusSummary"
-                />
-              </template>
-            </el-table-column>
+            <el-table-column prop="statusSummary" sortable min-width="160" :label="t('audit.columns.statusSummary')" />
           </AppDataTable>
-          <el-pagination
-            v-if="auditStore.managementTotalElements > auditStore.pageSize"
+          <AppTablePagination
             v-model:current-page="managementUiPage"
-            class="table-pagination"
-            layout="total, prev, pager, next"
             :page-size="auditStore.pageSize"
             :total="auditStore.managementTotalElements"
           />
@@ -529,13 +454,8 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
               sortable
               :sort-method="sortLifecycleFromState"
               width="140"
+              :label="t('audit.columns.fromState')"
             >
-              <template #header>
-                <TableColumnHeader
-                  :label="t('audit.columns.fromState')"
-                  v-model="lifecycleColumnFilters.fromState"
-                />
-              </template>
               <template #default="{ row }: { row: LifecycleAuditEvent }">
                 {{ formatLifecycleState(row.fromState) }}
               </template>
@@ -544,25 +464,13 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
               sortable
               :sort-method="sortLifecycleToState"
               width="140"
+              :label="t('audit.columns.toState')"
             >
-              <template #header>
-                <TableColumnHeader
-                  :label="t('audit.columns.toState')"
-                  v-model="lifecycleColumnFilters.toState"
-                />
-              </template>
               <template #default="{ row }: { row: LifecycleAuditEvent }">
                 {{ formatLifecycleState(row.toState) }}
               </template>
             </el-table-column>
-            <el-table-column prop="summary" sortable min-width="200">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('audit.columns.summary')"
-                  v-model="lifecycleColumnFilters.summary"
-                />
-              </template>
-            </el-table-column>
+            <el-table-column prop="summary" sortable min-width="200" :label="t('audit.columns.summary')" />
             <el-table-column
               sortable
               :sort-method="sortLifecycleByEventAt"
@@ -579,11 +487,8 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
               </template>
             </el-table-column>
           </AppDataTable>
-          <el-pagination
-            v-if="auditStore.lifecycleTotalElements > auditStore.pageSize"
+          <AppTablePagination
             v-model:current-page="lifecycleUiPage"
-            class="table-pagination"
-            layout="total, prev, pager, next"
             :page-size="auditStore.pageSize"
             :total="auditStore.lifecycleTotalElements"
           />
@@ -591,44 +496,22 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
       </el-tab-pane>
     </el-tabs>
     </template>
-  </div>
+  </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.audit-page {
-  padding: 2rem;
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-
-  h1 {
-    margin: 0 0 0.25rem;
-    font-size: 1.75rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-}
-
 .page-alert {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .filters-card {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-6);
 }
 
 .filters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.75rem 1rem;
+  gap: var(--space-3) var(--space-4);
   align-items: end;
 }
 
@@ -638,20 +521,7 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
   padding-bottom: 4px;
 }
 
-.table-pagination {
-  margin-top: 1rem;
-  justify-content: flex-end;
-}
-
 .table-toolbar {
-  margin-bottom: 0.75rem;
-}
-
-.journey-section {
-  margin-bottom: 1.5rem;
-}
-
-.view-only-banner {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-3);
 }
 </style>

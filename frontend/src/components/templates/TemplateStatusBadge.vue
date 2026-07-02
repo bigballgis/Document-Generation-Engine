@@ -38,5 +38,5 @@ const tagType = computed(() => {
 </script>
 
 <template>
-  <el-tag :type="tagType" effect="plain">{{ label }}</el-tag>
+  <el-tag :type="tagType" effect="light" class="status-badge">{{ label }}</el-tag>
 </template>

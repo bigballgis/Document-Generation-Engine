@@ -99,7 +99,7 @@ export async function captureP14LocatorScreenshot(
 }
 
 const BRAND_OPTION_NAME: Record<BrandPreset, RegExp> = {
-  REDBC: /^retail bank$/i,
+  REDBC: /^red bank$/i,
   GREENBC: /^green bank$/i,
 }
 

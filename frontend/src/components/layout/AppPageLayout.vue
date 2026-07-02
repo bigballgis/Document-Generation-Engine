@@ -6,16 +6,13 @@ const props = withDefaults(
     maxWidth?: string
   }>(),
   {
-    maxWidth: undefined,
+    maxWidth: '1440px',
   },
 )
 
-const layoutStyle = computed(() => {
-  if (!props.maxWidth) {
-    return undefined
-  }
-  return { maxWidth: props.maxWidth }
-})
+const layoutStyle = computed(() => ({
+  maxWidth: props.maxWidth,
+}))
 </script>
 
 <template>
@@ -26,6 +23,10 @@ const layoutStyle = computed(() => {
 
 <style scoped lang="scss">
 .app-page-layout {
-  padding: 2rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-8);
+  background: var(--surface-page);
+  box-sizing: border-box;
 }
 </style>

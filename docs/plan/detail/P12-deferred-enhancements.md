@@ -1,9 +1,9 @@
 # P12 — Deferred Enhancements (Detailed Plan)
 
-**Phase status:** **Not Started** (2026-07-01; catch-all idle — no active slice) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
+**Phase status:** **Not Started** (2026-07-03; catch-all idle — no active slice) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
 
 > Single-active-phase invariant: **No formal phase `In Progress`** — **no active P12 slice**
-> (2026-06-29; **P12-BDD-RISK-PROMPT-UX-001 Done**). **P21 remains Done** — do not reopen P21 phase status; **P19 remains Done**
+> (2026-07-03; **P12-UIUX-DEEP-REFACTOR Done**). **P21 remains Done** — do not reopen P21 phase status; **P19 remains Done**
 > — corrective residual only (P19-T08/T10 group UX superseded). AUD-M02 **resolved** via **P12-AUD-M02 Done**
 > (cross-reference P21 §11.4).
 
@@ -20,8 +20,38 @@ Each slice is activated individually via `plan-orchestrator`; only one slice sho
 | **P12-AUD-B10** | Submit-for-approval evidence checklist gate (AUD-B10 remediation) | **Done** (2026-07-01) | P21 audit finding AUD-B10 **resolved**; P21-T09b confirm-on-behalf UI retained |
 | **P12-AUD-M02** | Role constants single-source (AUD-M02 remediation) | **Done** (2026-07-01) | P21 audit finding AUD-M02 **resolved**; P21 §11.4 |
 | **P12-BDD-RISK-PROMPT-UX-001** | Template-scoped risk-prompt config UX redesign (BDD-TEMPLATE-RISK-PROMPT-UX-001) | **Done** (2026-06-29) | Supersedes P19-T08 group override + list-view panel + hardcoded decision categories; **COR-T15** mirror |
+| **P12-UIUX-DEEP-REFACTOR** | Frontend UIUX deep refactor — design token system, visual language upgrade, component unification, shell polish (14 tasks, groups A–E) | **Done** (2026-07-03) | OPT-G3 resolved (TemplateDetailView split); plan: `.cursor/plans/前端_uiux_整改方案_fc6fbf7b.plan.md`; BDD `not-applicable` (no API/permission/behavior change) |
 
-**Active slice:** **None** (2026-06-29 — **P12-BDD-RISK-PROMPT-UX-001 Done**; P12 catch-all idle at slice level).
+**Active slice:** **None** (2026-07-03 — **P12-UIUX-DEEP-REFACTOR Done**; P12 catch-all idle at slice level).
+
+### P12-UIUX-DEEP-REFACTOR — Frontend UIUX deep refactor
+
+**Origin:** Ad-hoc design quality improvement wave (plan: `.cursor/plans/前端_uiux_整改方案_fc6fbf7b.plan.md`). Addresses OPT-G3 (TemplateDetailView split) and related visual/component tech-debt accumulated across P14–P21.
+
+**Depends on:** P21 (TemplateDetailView, journey blocks, audit console established).
+
+**Scope (confirmed 2026-07-03, 14 tasks, groups A–E):**
+
+- **A1:** Brand rename — REDBC zh `"零售银行"` → `"红色银行"`, en `"Retail Bank"` → `"Red Bank"` (brands.ts + brands.test.ts).
+- **B1:** Complete design token system in `global.scss` — gray scale, font sizes, shadows, border-radius, spacing, dialog widths, semantic status colors, `--color-on-primary`.
+- **B2:** Visual language upgrade — white header with brand top-line, professional sidebar with icons + collapse, table/card/button quality, split-panel login page, status badge unification.
+- **B3:** New `PageHeader` component; all views adopt `AppPageLayout`; unified h1 typography; removed eyebrow `displayName` duplicates.
+- **B4:** Unified `EmptyStatePanel`, `AppTablePagination`; fixed `ContentModuleListView` v-model bug.
+- **C1–C4:** Journey/Banner convergence, identity page cleanup, audit console cleanup, new shared `CredentialsPanel` component.
+- **D1–D3:** `TemplateDetailView` split into composable (`useTemplateDetailController`) + view; legacy tabs → `WorkspaceTabShell`; `LifecycleCommentDialog` + `TemplateWorkspaceHeader` + `ReleaseSectionTable` shared components; dead `TemplateDevVersionActionBar.vue` deleted; Journey CTA removed.
+- **E:** Shell polish — user dropdown menu, sidebar icons + collapse, `document.title` routing, breadcrumb dedup, login page cleanup.
+
+**BDD:** `not-applicable` — UI/UX refactor only; no API, permission, backend, or observable behavior change.
+
+**Exit criteria:** All 14 tasks Done; frontend `pnpm -C frontend lint`, `type-check`, `test`, `build` green; 606/606 Vitest pass.
+
+**Status:** **Done** (2026-07-03).
+
+**Gate evidence:** `pnpm -C frontend lint` ✓, `type-check` ✓, `test` ✓ (**606** Vitest, 606/606), `build` ✓. Backend unchanged.
+
+**Deliverables:** `brands.ts`, `brands.test.ts`; `global.scss` (full token system); `PageHeader.vue` + `PageHeader.test.ts`; `AppDataTable.vue`, `AppTablePagination.vue`, `EmptyStatePanel.vue`; `CredentialsPanel.vue` + `CredentialsPanel.test.ts`; `useTemplateDetailController.ts`; `TemplateWorkspaceHeader.vue`, `ReleaseSectionTable.vue`, `LifecycleCommentDialog.vue`; deleted `TemplateDevVersionActionBar.vue`; `ManagementShell.vue` (sidebar polish); `AppBreadcrumb.vue`, `AppPageLayout.vue`, `LoginView.vue`, `RoleJourneyTimeline.vue`; all view files updated to adopt `AppPageLayout` + `PageHeader`.
+
+---
 
 ### P12-AUD-M02 — Role constants single-source
 

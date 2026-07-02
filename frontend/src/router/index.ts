@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { i18n } from '@/i18n'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useSessionStore } from '@/stores/session'
 
@@ -163,6 +164,33 @@ router.beforeEach(async (to) => {
   }
 
   return true
+})
+
+const ROUTE_TITLE_KEYS: Record<string, string> = {
+  dashboard: 'dashboard.title',
+  'template-list': 'templates.list.title',
+  'template-package-hub': 'templates.packageHub.breadcrumbLabel',
+  'master-list': 'masters.list.title',
+  'master-package-hub': 'masters.hub.breadcrumbLabel',
+  'audit-console': 'audit.title',
+  'api-policy-management': 'apiPolicy.home.title',
+  'api-policy-detail': 'apiPolicy.detail.title',
+  'entitlement-users': 'identity.usersPageTitle',
+  'entitlement-groups': 'identity.groupsPageTitle',
+  'content-module-list': 'contentModules.list.title',
+  login: 'login.title',
+  forbidden: 'forbidden.title',
+}
+
+router.afterEach((to) => {
+  const appTitle = i18n.global.t('app.title')
+  const name = typeof to.name === 'string' ? to.name : ''
+  const pageKey = ROUTE_TITLE_KEYS[name]
+  if (pageKey) {
+    document.title = `${i18n.global.t(pageKey)} | ${appTitle}`
+  } else {
+    document.title = appTitle
+  }
 })
 
 export default router

@@ -113,7 +113,7 @@ describe('ManagementShell', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Global Admin')
-    expect(wrapper.text()).toContain('Retail Bank')
+    expect(wrapper.text()).toContain('Red Bank')
     expect(wrapper.text()).not.toContain('REDBC')
     expect(wrapper.text()).toContain('Document content')
     expect(wrapper.text()).toContain('Letterhead templates')

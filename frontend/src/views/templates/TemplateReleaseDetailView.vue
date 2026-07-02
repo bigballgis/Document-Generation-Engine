@@ -3,10 +3,12 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import AppDataTable from '@/components/common/AppDataTable.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import ReleaseSectionTable from '@/components/templates/ReleaseSectionTable.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useCapabilities } from '@/composables/useCapabilities'
 import * as templatesApi from '@/api/templates'
@@ -37,6 +39,22 @@ const lineLabel = computed(() => {
   }
   return versionLineDisplayLabel(t, releaseDetail.value)
 })
+
+const variableColumns = computed(() => [
+  { prop: 'variableKey', label: t('templates.releaseDetail.columns.variableKey') },
+  { prop: 'variableType', label: t('templates.releaseDetail.columns.variableType') },
+  { prop: 'required', label: t('templates.releaseDetail.columns.required') },
+])
+
+const bindingColumns = computed(() => [
+  { prop: 'anchorId', label: t('templates.releaseDetail.columns.anchorId') },
+  { prop: 'declaredContentType', label: t('templates.releaseDetail.columns.contentType') },
+])
+
+const ruleColumns = computed(() => [
+  { prop: 'ruleId', label: t('templates.releaseDetail.columns.ruleId') },
+  { prop: 'targetAnchorId', label: t('templates.releaseDetail.columns.targetAnchor') },
+])
 
 onMounted(async () => {
   await loadReleaseDetail()
@@ -80,33 +98,29 @@ async function handleClone() {
 </script>
 
 <template>
-  <div class="template-release-detail-page">
-    <header class="page-header">
-      <el-button link type="primary" @click="backToHub">
-        {{ t('templates.releaseDetail.backToHub') }}
-      </el-button>
-      <div v-if="releaseDetail" class="header-content">
-        <div>
-          <h1>{{ lineLabel }}</h1>
-          <p>{{ t('templates.releaseDetail.readOnlyHint') }}</p>
-        </div>
-        <div class="header-actions">
-          <TemplateStatusBadge
-            :status="releaseDetail.lifecycleStatus"
-            :approval-sub-state="releaseDetail.approvalSubState"
-          />
-          <el-button
-            v-if="authorTemplates && releaseDetail.cloneable !== false"
-            type="primary"
-            :loading="cloning"
-            @click="handleClone"
-          >
-            {{ t('templates.versionLines.clone') }}
-          </el-button>
-        </div>
-      </div>
-      <h1 v-else>{{ t('templates.releaseDetail.loadingTitle') }}</h1>
-    </header>
+  <AppPageLayout>
+    <PageHeader
+      show-back
+      :back-label="t('templates.releaseDetail.backToHub')"
+      :title="releaseDetail ? lineLabel : t('templates.releaseDetail.loadingTitle')"
+      :description="releaseDetail ? t('templates.releaseDetail.readOnlyHint') : undefined"
+      @back="backToHub"
+    >
+      <template v-if="releaseDetail" #actions>
+        <TemplateStatusBadge
+          :status="releaseDetail.lifecycleStatus"
+          :approval-sub-state="releaseDetail.approvalSubState"
+        />
+        <el-button
+          v-if="authorTemplates && releaseDetail.cloneable !== false"
+          type="primary"
+          :loading="cloning"
+          @click="handleClone"
+        >
+          {{ t('templates.versionLines.clone') }}
+        </el-button>
+      </template>
+    </PageHeader>
 
     <LoadErrorPanel
       v-if="loadFailed"
@@ -126,10 +140,6 @@ async function handleClone() {
       <el-card shadow="never" class="summary-card">
         <dl class="summary-grid">
           <div>
-            <dt>{{ t('templates.releaseDetail.releaseVersion') }}</dt>
-            <dd>{{ releaseDetail.releaseVersion }}</dd>
-          </div>
-          <div>
             <dt>{{ t('templates.releaseDetail.devVersionNumber') }}</dt>
             <dd>{{ releaseDetail.devVersionNumber }}</dd>
           </div>
@@ -144,93 +154,32 @@ async function handleClone() {
         </dl>
       </el-card>
 
-      <el-card shadow="never" class="section-card">
-        <template #header>
-          <span>{{ t('templates.releaseDetail.variablesTitle') }}</span>
-        </template>
-        <AppDataTable :data="releaseDetail.variables">
-          <template #empty>
-            <el-empty :description="t('templates.releaseDetail.noVariables')" />
-          </template>
-          <el-table-column prop="variableKey" :label="t('templates.releaseDetail.columns.variableKey')" />
-          <el-table-column prop="variableType" :label="t('templates.releaseDetail.columns.variableType')" />
-          <el-table-column prop="required" :label="t('templates.releaseDetail.columns.required')" />
-        </AppDataTable>
-      </el-card>
+      <ReleaseSectionTable
+        :title="t('templates.releaseDetail.variablesTitle')"
+        :columns="variableColumns"
+        :data="releaseDetail.variables"
+        :empty-text="t('templates.releaseDetail.noVariables')"
+      />
 
-      <el-card shadow="never" class="section-card">
-        <template #header>
-          <span>{{ t('templates.releaseDetail.bindingsTitle') }}</span>
-        </template>
-        <AppDataTable :data="releaseDetail.bindings">
-          <template #empty>
-            <el-empty :description="t('templates.releaseDetail.noBindings')" />
-          </template>
-          <el-table-column prop="anchorId" :label="t('templates.releaseDetail.columns.anchorId')" />
-          <el-table-column
-            prop="declaredContentType"
-            :label="t('templates.releaseDetail.columns.contentType')"
-          />
-        </AppDataTable>
-      </el-card>
+      <ReleaseSectionTable
+        :title="t('templates.releaseDetail.bindingsTitle')"
+        :columns="bindingColumns"
+        :data="releaseDetail.bindings"
+        :empty-text="t('templates.releaseDetail.noBindings')"
+      />
 
-      <el-card shadow="never" class="section-card">
-        <template #header>
-          <span>{{ t('templates.releaseDetail.rulesTitle') }}</span>
-        </template>
-        <AppDataTable :data="releaseDetail.rules">
-          <template #empty>
-            <el-empty :description="t('templates.releaseDetail.noRules')" />
-          </template>
-          <el-table-column prop="ruleId" :label="t('templates.releaseDetail.columns.ruleId')" />
-          <el-table-column
-            prop="targetAnchorId"
-            :label="t('templates.releaseDetail.columns.targetAnchor')"
-          />
-        </AppDataTable>
-      </el-card>
+      <ReleaseSectionTable
+        :title="t('templates.releaseDetail.rulesTitle')"
+        :columns="ruleColumns"
+        :data="releaseDetail.rules"
+        :empty-text="t('templates.releaseDetail.noRules')"
+      />
     </template>
-  </div>
+  </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.template-release-detail-page {
-  min-height: 100vh;
-  padding: 2rem;
-  background: var(--surface-bg);
-}
-
-.page-header {
-  margin-bottom: 1.5rem;
-}
-
-.header-content {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 0.5rem;
-
-  h1 {
-    margin: 0 0 0.35rem;
-    font-size: 1.75rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-}
-
-.header-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.summary-card,
-.section-card {
+.summary-card {
   margin-bottom: 1rem;
 }
 

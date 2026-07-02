@@ -87,6 +87,8 @@ export default {
     login: '登录',
     logout: '退出登录',
     managementNavigation: '管理导航',
+    collapseSidebar: '收起侧栏',
+    expandSidebar: '展开侧栏',
     groups: {
       overview: '概览',
       myTodos: '我的待办',
@@ -132,7 +134,7 @@ export default {
     },
   },
   brand: {
-    redbc: '零售银行',
+    redbc: '红色银行',
     greenbc: '绿色银行',
   },
   home: {
@@ -1370,6 +1372,7 @@ export default {
     },
     lifecycle: {
       title: '工作流操作',
+      commentDialogTitle: '添加备注（可选）',
       commentPlaceholder: '可选备注（记入操作记录）',
       submitTest: '提交测试',
       passTest: '确认测试通过',
@@ -1696,6 +1699,7 @@ export default {
     edit: '编辑',
     delete: '删除',
     actions: '操作',
+    more: '更多',
     retry: '重试',
     reset: '重置',
     notAvailable: '不适用',

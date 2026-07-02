@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environments'
+import CredentialsPanel from '@/components/api/CredentialsPanel.vue'
 import TemplateCallerContractPanel from '@/components/templates/TemplateCallerContractPanel.vue'
-import AppDataTable from '@/components/common/AppDataTable.vue'
-import AppTablePagination from '@/components/common/AppTablePagination.vue'
-import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import type { ApiCredentialSummary, ApiPolicy } from '@/types/template'
@@ -45,7 +43,15 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+const credentialsPanelRef = ref<InstanceType<typeof CredentialsPanel> | null>(null)
+
 const allowedAdGroupsText = computed(() => props.apiPolicy?.allowedAdGroups.join(', ') ?? '')
+
+function revealCredentialSecret(externalId: string, secret: string) {
+  credentialsPanelRef.value?.revealSecret(externalId, secret)
+}
+
+defineExpose({ revealCredentialSecret })
 </script>
 
 <template>
@@ -103,69 +109,20 @@ const allowedAdGroupsText = computed(() => props.apiPolicy?.allowedAdGroups.join
 
   <el-card shadow="never" class="section-card">
     <h2>{{ t('templates.policy.credentialsTitle') }}</h2>
-    <div class="action-row action-row--compact">
-      <el-button :loading="submitting" @click="emit('createCredential')">
-        {{ t('templates.policy.createCredential') }}
-      </el-button>
-    </div>
-    <AppDataTable :data="paginatedCredentials" empty-text="">
-      <template #empty>
-        <el-empty :description="t('templates.policy.noCredentials')" />
-      </template>
-      <el-table-column prop="externalId" sortable>
-        <template #header>
-          <TableColumnHeader
-            :label="t('templates.policy.credentialExternalId')"
-            v-model="credentialColumnFilters.externalId"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column prop="status" sortable>
-        <template #header>
-          <TableColumnHeader
-            :label="t('templates.policy.credentialStatus')"
-            v-model="credentialColumnFilters.status"
-            filter-type="select"
-            :options="credentialStatusFilterOptions"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column sortable :sort-method="sortCredentialsByCreatedAt" min-width="180">
-        <template #header>
-          <TableColumnHeader
-            :label="t('templates.policy.credentialCreatedAt')"
-            v-model="credentialColumnFilters.createdAt"
-          />
-        </template>
-        <template #default="{ row }">
-          {{ formatDateTime(row.createdAt) }}
-        </template>
-      </el-table-column>
-      <el-table-column :label="t('templates.policy.credentialActions')" min-width="200">
-        <template #default="{ row }">
-          <el-button
-            v-if="row.status === 'ACTIVE'"
-            link
-            type="primary"
-            @click="emit('rotateCredential', row.credentialId, row.externalId)"
-          >
-            {{ t('templates.policy.rotateCredential') }}
-          </el-button>
-          <el-button
-            v-if="row.status === 'ACTIVE'"
-            link
-            type="danger"
-            @click="emit('revokeCredential', row.credentialId)"
-          >
-            {{ t('templates.policy.revokeCredential') }}
-          </el-button>
-        </template>
-      </el-table-column>
-    </AppDataTable>
-    <AppTablePagination
+    <CredentialsPanel
+      ref="credentialsPanelRef"
+      v-model:credential-column-filters="credentialColumnFilters"
       v-model:current-page="credentialsCurrentPage"
+      :credentials="paginatedCredentials"
+      :credential-status-filter-options="credentialStatusFilterOptions"
       :page-size="pageSize"
-      :total="totalCredentialRows"
+      :total-rows="totalCredentialRows"
+      :submitting="submitting"
+      :format-date-time="formatDateTime"
+      :sort-by-created-at="sortCredentialsByCreatedAt"
+      @create="emit('createCredential')"
+      @rotate="(credentialId, externalId) => emit('rotateCredential', credentialId, externalId)"
+      @revoke="(credentialId) => emit('revokeCredential', credentialId)"
     />
   </el-card>
 
@@ -194,10 +151,6 @@ const allowedAdGroupsText = computed(() => props.apiPolicy?.allowedAdGroups.join
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
-}
-
-.action-row--compact {
-  margin-bottom: 1rem;
 }
 
 .policy-summary {

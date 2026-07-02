@@ -4,11 +4,18 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { buildBreadcrumbTrail } from '@/navigation/breadcrumbTrail'
 
+const props = withDefaults(defineProps<{ hideLastSegment?: boolean }>(), {
+  hideLastSegment: false,
+})
+
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
-const segments = computed(() => buildBreadcrumbTrail(route.path))
+const segments = computed(() => {
+  const all = buildBreadcrumbTrail(route.path)
+  return props.hideLastSegment && all.length > 1 ? all.slice(0, -1) : all
+})
 
 function navigate(path: string) {
   router.push(path)

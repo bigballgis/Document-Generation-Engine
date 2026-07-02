@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
 import DashboardStatCards from '@/components/dashboard/DashboardStatCards.vue'
 import TaskHubPartitionSection from '@/components/dashboard/TaskHubPartitionSection.vue'
 import RoleJourneyTimeline from '@/components/journey/RoleJourneyTimeline.vue'
@@ -95,6 +96,11 @@ const authorizedGroupsSummary = computed(() => {
     return t('home.summary.noGroups')
   }
   return groups.join(', ')
+})
+
+const pageDescription = computed(() => {
+  const base = t(taskScope.value.pageDescriptionKey)
+  return `${base} ${t('home.summary.authorizedGroups')}: ${authorizedGroupsSummary.value}`
 })
 
 const canViewWorkItems = computed(() => canViewCollaborationWorkItems(context.value))
@@ -602,25 +608,11 @@ function openDashboardJourney() {
 </script>
 
 <template>
-  <AppPageLayout class="dashboard-page" max-width="1200px">
-    <header class="page-header">
-      <h1>{{ t(taskScope.pageTitleKey) }}</h1>
-      <p>{{ t(taskScope.pageDescriptionKey) }}</p>
-    </header>
-
-    <el-card shadow="never" class="summary-card">
-      <h2>{{ t('home.summary.title') }}</h2>
-      <dl class="summary-grid">
-        <div>
-          <dt>{{ t('home.summary.displayName') }}</dt>
-          <dd>{{ sessionStore.session?.displayName }}</dd>
-        </div>
-        <div>
-          <dt>{{ t('home.summary.authorizedGroups') }}</dt>
-          <dd>{{ authorizedGroupsSummary }}</dd>
-        </div>
-      </dl>
-    </el-card>
+  <AppPageLayout>
+    <PageHeader
+      :title="t(taskScope.pageTitleKey)"
+      :description="pageDescription"
+    />
 
     <LoadErrorPanel
       v-if="mastersLoadError"
@@ -657,11 +649,6 @@ function openDashboardJourney() {
     </section>
 
     <section id="tasks-section" class="tasks-section">
-      <header class="section-header">
-        <h2>{{ t('dashboard.tasks.title') }}</h2>
-        <p>{{ t('dashboard.tasks.description') }}</p>
-      </header>
-
       <el-skeleton v-if="loading || showCollaborationLoading" :rows="5" animated />
 
       <LoadErrorPanel
@@ -693,8 +680,7 @@ function openDashboardJourney() {
         <el-button
           v-for="link in quickLinks"
           :key="link.path"
-          type="primary"
-          plain
+          link
           @click="openQuickLink(link.path)"
         >
           {{ t(link.labelKey) }}
@@ -707,46 +693,6 @@ function openDashboardJourney() {
 </template>
 
 <style scoped lang="scss">
-.page-header {
-  margin-bottom: 1.5rem;
-
-  h1 {
-    margin: 0 0 0.25rem;
-    font-size: 1.75rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-}
-
-.summary-card {
-  margin-bottom: 1.5rem;
-
-  h2 {
-    margin: 0 0 1rem;
-    font-size: 1.1rem;
-  }
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-
-  dt {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-bottom: 0.25rem;
-  }
-
-  dd {
-    margin: 0;
-    font-weight: 600;
-  }
-}
-
 .tasks-section {
   margin-bottom: 2rem;
 }
@@ -757,16 +703,6 @@ function openDashboardJourney() {
 
 .section-header {
   margin-bottom: 1rem;
-
-  h2 {
-    margin: 0 0 0.25rem;
-    font-size: 1.25rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
 }
 
 .quick-links {

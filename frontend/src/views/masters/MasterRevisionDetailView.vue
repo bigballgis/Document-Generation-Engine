@@ -9,9 +9,12 @@ import MasterWorkflowBanner from '@/components/masters/MasterWorkflowBanner.vue'
 import MasterDesignerJourneyBlock from '@/components/journey/MasterDesignerJourneyBlock.vue'
 import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import { canReviewMasters, sessionContext } from '@/auth/roles'
 import { masterDetailPath } from '@/routing/routeKeys'
@@ -19,7 +22,6 @@ import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { shouldShowMasterDesignerJourney } from '@/utils/masterDesignerJourney'
-import type { MasterDesignerWorkspaceNavigation } from '@/utils/masterDesignerWorkspaceLink'
 import {
   MASTER_REVISION_WORKSPACE_TAB_LABEL_KEYS,
   buildMasterRevisionWorkspaceQuery,
@@ -31,6 +33,7 @@ import { formatMasterRevisionLineLabel } from '@/utils/masterRevisionLineLabel'
 import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
+const { formatDateTime } = useLocaleFormatters()
 const route = useRoute()
 const router = useRouter()
 const mastersStore = useMastersStore()
@@ -234,33 +237,18 @@ function formatReviewAction(action: string): string {
   return te(key) ? t(key) : action
 }
 
-function handleJourneyOpenWorkspace(target: MasterDesignerWorkspaceNavigation) {
-  if (target === 'upload') {
-    router.push(masterDetailPath(masterId.value))
-    return
-  }
-  activeWorkspaceTab.value = target
-}
 </script>
 
 <template>
-  <div class="master-revision-detail-page">
-    <header class="page-header">
-      <div>
-        <el-button link type="primary" @click="goBackToPackage">
-          {{ t('masters.revision.backToPackage') }}
-        </el-button>
-        <h1>{{ revisionLineTitle }}</h1>
-        <p v-if="master && revisionLine" class="meta">
-          {{ master.name }}
-          · {{ t('masters.hub.groupLabel', { groupCode: master.groupCode }) }}
-          · {{ revisionLine.originalFilename }}
-        </p>
-        <p v-if="!isCurrentRevision" class="historical-hint">
-          {{ t('masters.revision.historicalReadOnlyHint') }}
-        </p>
-      </div>
-      <div v-if="revisionLine" class="header-meta">
+  <AppPageLayout>
+    <PageHeader
+      show-back
+      :back-label="t('masters.revision.backToPackage')"
+      :title="revisionLineTitle"
+      :description="master && revisionLine ? `${master.name} · ${t('masters.hub.groupLabel', { groupCode: master.groupCode })} · ${revisionLine.originalFilename}` : undefined"
+      @back="goBackToPackage"
+    >
+      <template v-if="revisionLine" #meta>
         <MasterStatusBadge :status="revisionLine.status" />
         <el-tag v-if="isCurrentRevision" size="small" type="success">
           {{ t('masters.revisionLines.currentBadge') }}
@@ -268,8 +256,15 @@ function handleJourneyOpenWorkspace(target: MasterDesignerWorkspaceNavigation) {
         <el-tag v-else size="small" type="info">
           {{ t('masters.revisionLines.historicalBadge') }}
         </el-tag>
-      </div>
-    </header>
+        <span class="meta-updated">
+          {{ formatDateTime(revisionLine.updatedAt) }} · {{ revisionLine.updatedBy }}
+        </span>
+      </template>
+    </PageHeader>
+
+    <p v-if="revisionLine && !isCurrentRevision" class="historical-hint">
+      {{ t('masters.revision.historicalReadOnlyHint') }}
+    </p>
 
     <LoadErrorPanel
       v-if="loadFailed"
@@ -294,8 +289,7 @@ function handleJourneyOpenWorkspace(target: MasterDesignerWorkspaceNavigation) {
         :can-write="canWriteJourney"
         :is-current-revision="isCurrentRevision"
         :show-primary-cta="false"
-        enable-workspace-link
-        @open-workspace="handleJourneyOpenWorkspace"
+        :enable-workspace-link="false"
       />
 
       <MasterWorkflowBanner v-if="workflowMaster" :master="workflowMaster" />
@@ -332,14 +326,6 @@ function handleJourneyOpenWorkspace(target: MasterDesignerWorkspaceNavigation) {
                 <div v-if="revisionLine.changeSummary">
                   <dt>{{ t('masters.revision.changeSummary') }}</dt>
                   <dd>{{ revisionLine.changeSummary }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t('masters.revision.updatedAt') }}</dt>
-                  <dd>{{ new Date(revisionLine.updatedAt).toLocaleString() }}</dd>
-                </div>
-                <div>
-                  <dt>{{ t('masters.revision.updatedBy') }}</dt>
-                  <dd>{{ revisionLine.updatedBy }}</dd>
                 </div>
               </dl>
             </el-card>
@@ -407,45 +393,19 @@ function handleJourneyOpenWorkspace(target: MasterDesignerWorkspaceNavigation) {
       :mode="reviewMode"
       @submit="handleReviewDecision"
     />
-  </div>
+  </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.master-revision-detail-page {
-  min-height: 100vh;
-  padding: 2rem;
-  background: var(--surface-bg);
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-
-  h1 {
-    margin: 0.5rem 0 0.25rem;
-    font-size: 1.75rem;
-  }
-}
-
-.meta {
-  margin: 0;
+.meta-updated {
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
 }
 
 .historical-hint {
-  margin: 0.5rem 0 0;
-  font-size: 0.875rem;
+  margin: calc(-1 * var(--space-4)) 0 var(--space-6);
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
-}
-
-.header-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
 }
 
 .approval-hint {

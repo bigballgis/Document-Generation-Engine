@@ -5,7 +5,10 @@ import { useRouter } from 'vue-router'
 import PackageCatalogNotice from '@/components/catalog/PackageCatalogNotice.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
 import TemplateCreateDialog from '@/components/templates/TemplateCreateDialog.vue'
 import TemplateImportDialog from '@/components/templates/TemplateImportDialog.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
@@ -154,21 +157,20 @@ const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
 </script>
 
 <template>
-  <div class="templates-page">
-    <header class="page-header">
-      <div>
-        <h1>{{ t('templates.list.title') }}</h1>
-        <p>{{ t('templates.list.description') }}</p>
-      </div>
-      <div class="header-actions">
+  <AppPageLayout>
+    <PageHeader
+      :title="t('templates.list.title')"
+      :description="t('templates.list.description')"
+    >
+      <template #actions>
         <el-button v-if="exportTemplates" @click="importDialogOpen = true">
           {{ t('templates.import.open') }}
         </el-button>
         <el-button v-if="authorTemplates" type="primary" @click="createDialogOpen = true">
           {{ t('templates.create.open') }}
         </el-button>
-      </div>
-    </header>
+      </template>
+    </PageHeader>
 
     <PackageCatalogNotice kind="template" />
 
@@ -315,54 +317,29 @@ const sortByUpdatedAt = rowSortMethod<TemplateSummary>((row) => row.updatedAt)
       />
     </template>
 
-    <el-empty v-else-if="!errorMessage" :description="t('templates.list.empty')" />
+    <EmptyStatePanel
+      v-else-if="!errorMessage"
+      title-key="templates.list.empty"
+    />
 
     <TemplateCreateDialog v-model="createDialogOpen" @created="handleCreated" />
     <TemplateImportDialog v-model="importDialogOpen" @imported="handleImported" />
-  </div>
+  </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.templates-page {
-  padding: 2rem;
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-
-  h1 {
-    margin: 0.25rem 0;
-    font-size: 1.75rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-}
-
-.header-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
 .page-alert {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .workflow-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .table-toolbar {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 </style>

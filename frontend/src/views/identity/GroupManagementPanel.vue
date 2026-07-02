@@ -3,10 +3,10 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
-import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
-import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
-import { useEnabledStatusFilterOptions } from '@/composables/useTableFilterOptions'
+import { rowSortMethod } from '@/composables/useDataTableFilters'
 import { canManageGroups } from '@/auth/identityRoles'
 import { useIdentityStore } from '@/stores/identity'
 import { useSessionStore } from '@/stores/session'
@@ -37,27 +37,13 @@ function dimensionLabel(dimension: string): string {
   return te(`identity.dimensions.${dimension}`) ? t(`identity.dimensions.${dimension}`) : dimension
 }
 
-const groupsSource = computed(() => identityStore.groups)
-const { filters: columnFilters, filteredRows: filteredGroups, hasActiveFilters, clearFilters } =
-  useDataTableFilters(groupsSource, [
-    { key: 'groupCode', getValue: (row) => row.groupCode },
-    { key: 'displayName', getValue: (row) => row.displayName },
-    { key: 'dimension', getValue: (row) => dimensionLabel(row.dimension), matchMode: 'exact' },
-    {
-      key: 'status',
-      getValue: (row) =>
-        row.enabled ? t('identity.status.enabled') : t('identity.status.disabled'),
-      matchMode: 'exact',
-    },
-  ])
+type GroupMoreAction = 'toggleEnabled'
 
-const enabledStatusFilterOptions = useEnabledStatusFilterOptions()
-const dimensionFilterOptions = computed(() =>
-  dimensionOptions.map((dimension) => ({
-    value: dimensionLabel(dimension),
-    label: dimensionLabel(dimension),
-  })),
-)
+function handleMoreAction(command: GroupMoreAction, group: BusinessGroupView) {
+  if (command === 'toggleEnabled') {
+    void toggleEnabled(group)
+  }
+}
 
 const errorMessage = computed(() => {
   const key = identityStore.lastGroupErrorMessageKey
@@ -195,41 +181,16 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
     <el-skeleton v-if="identityStore.loadingGroups" :rows="5" animated />
 
     <template v-else>
-      <div v-if="hasActiveFilters && filteredGroups.length > 0" class="table-toolbar">
-        <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
-      </div>
-
-      <template v-if="filteredGroups.length > 0">
-        <AppDataTable :data="filteredGroups">
-        <el-table-column prop="groupCode" sortable min-width="160">
-          <template #header>
-            <TableColumnHeader
-              :label="t('identity.groups.columns.groupCode')"
-              v-model="columnFilters.groupCode"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column prop="displayName" sortable min-width="200">
-          <template #header>
-            <TableColumnHeader
-              :label="t('identity.groups.columns.displayName')"
-              v-model="columnFilters.displayName"
-            />
-          </template>
-        </el-table-column>
+      <template v-if="identityStore.groups.length > 0">
+        <AppDataTable :data="identityStore.groups">
+        <el-table-column prop="groupCode" sortable min-width="160" :label="t('identity.groups.columns.groupCode')" />
+        <el-table-column prop="displayName" sortable min-width="200" :label="t('identity.groups.columns.displayName')" />
         <el-table-column
           sortable
           :sort-method="sortByDimension"
           width="160"
+          :label="t('identity.groups.columns.dimension')"
         >
-          <template #header>
-            <TableColumnHeader
-              :label="t('identity.groups.columns.dimension')"
-              v-model="columnFilters.dimension"
-              filter-type="select"
-              :options="dimensionFilterOptions"
-            />
-          </template>
           <template #default="{ row }">
             {{ dimensionLabel(row.dimension) }}
           </template>
@@ -238,44 +199,44 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
           sortable
           :sort-method="sortByEnabled"
           width="120"
+          :label="t('identity.groups.columns.status')"
         >
-          <template #header>
-            <TableColumnHeader
-              :label="t('identity.groups.columns.status')"
-              v-model="columnFilters.status"
-              filter-type="select"
-              :options="enabledStatusFilterOptions"
-            />
-          </template>
           <template #default="{ row }">
             <el-tag :type="row.enabled ? 'success' : 'info'" size="small">
               {{ row.enabled ? t('identity.status.enabled') : t('identity.status.disabled') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column v-if="canManage" :label="t('identity.groups.columns.actions')" width="220">
+        <el-table-column v-if="canManage" :label="t('identity.groups.columns.actions')" width="160">
           <template #default="{ row }">
-            <el-button link size="small" @click="openEdit(row)">
+            <el-button link size="small" type="primary" @click="openEdit(row)">
               {{ t('identity.groups.edit') }}
             </el-button>
-            <el-button link size="small" @click="toggleEnabled(row)">
-              {{ row.enabled ? t('identity.groups.disable') : t('identity.groups.enable') }}
-            </el-button>
+            <el-dropdown trigger="click" @command="(command: GroupMoreAction) => handleMoreAction(command, row)">
+              <el-button link size="small">
+                {{ t('common.more') }}
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="toggleEnabled">
+                    {{ row.enabled ? t('identity.groups.disable') : t('identity.groups.enable') }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </template>
         </el-table-column>
       </AppDataTable>
 
-        <el-pagination
-          v-if="identityStore.groupsTotal > (identityStore.groupFilters.size ?? 20)"
+        <AppTablePagination
           v-model:current-page="currentPage"
-          class="list-pagination"
-          layout="total, prev, pager, next"
           :page-size="identityStore.groupFilters.size ?? 20"
           :total="identityStore.groupsTotal"
         />
       </template>
 
-      <el-empty v-else :description="t('identity.groups.empty')" />
+      <EmptyStatePanel v-else title-key="identity.groups.empty" />
+
     </template>
 
     <el-dialog
@@ -347,10 +308,5 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
 
 .full-width {
   width: 100%;
-}
-
-.list-pagination {
-  margin-top: 1rem;
-  justify-content: flex-end;
 }
 </style>

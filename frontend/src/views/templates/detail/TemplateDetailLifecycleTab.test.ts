@@ -11,16 +11,8 @@ const baseProps = {
   templateId: 'tpl-1',
   showLifecycleSection: true,
   showGovernanceSection: false,
-  lifecycleComment: '',
-  showDraftActions: false,
-  showTestingDecisionActions: false,
   showSubmitForApproval: false,
-  showApprovalDecisionActions: false,
   showPublishActions: true,
-  showTestGenerate: false,
-  showStopAction: false,
-  showRestoreAction: false,
-  showDeprecateAction: false,
   publishGateItems: [{ key: 'releaseVersion', label: 'Release version is specified.', ready: true }],
   loadingPublishGate: false,
   publishBumpLevel: 'patch' as const,
@@ -30,7 +22,6 @@ const baseProps = {
     { level: 'patch' as const, label: 'Patch', version: '1.0.1' },
     { level: 'minor' as const, label: 'Minor', version: '1.1.0' },
   ],
-  submitting: false,
   bindingGateResult: null as BindingValidationResult | null,
   publishGateLoadError: null as string | null,
   submitGateItems: [{ key: 'ANCHOR_INTEGRITY', label: 'Layout placeholder check', ready: true }],
@@ -91,18 +82,15 @@ describe('TemplateDetailLifecycleTab', () => {
     expect(wrapper.find('.publish-bump-picker').classes()).toContain('publish-bump-picker--wrap')
   })
 
-  it('disables submit-for-approval when submit gate is not ready', () => {
+  it('shows submit gate checklist when showSubmitForApproval is true', () => {
     const wrapper = mountTab({
       showPublishActions: false,
       showSubmitForApproval: true,
-      submitGateReady: false,
     })
 
-    const submitButton = wrapper
-      .findAll('button')
-      .find((button) => button.text().includes('Submit for approval'))
-
-    expect(submitButton?.attributes('disabled')).toBeDefined()
+    expect(wrapper.text()).toContain('Submission readiness checks')
+    expect(wrapper.text()).toContain('Confirm these items before submitting the template for approval.')
+    expect(wrapper.text()).not.toContain('Confirm these items before going live with a release version.')
   })
 
   it('renders submit gate card with submit-specific copy', () => {

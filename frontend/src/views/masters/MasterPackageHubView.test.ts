@@ -148,7 +148,7 @@ describe('MasterPackageHubView', () => {
     expect(wrapper.find('[data-journey-timeline]').exists()).toBe(true)
     expect(wrapper.find('[data-journey-guidance]').exists()).toBe(false)
     expect(wrapper.find('.context-help-trigger').exists()).toBe(true)
-    expect(wrapper.find('[data-master-journey-cta]').text()).toBe('Upload letterhead')
+    expect(wrapper.find('[data-master-journey-cta]').exists()).toBe(false)
   })
 
   it('renders multiple revision lines from paginated history API', async () => {

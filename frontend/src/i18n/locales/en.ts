@@ -88,6 +88,8 @@ export default {
     login: 'Login',
     logout: 'Sign out',
     managementNavigation: 'Management navigation',
+    collapseSidebar: 'Collapse sidebar',
+    expandSidebar: 'Expand sidebar',
     groups: {
       overview: 'Overview',
       myTodos: 'My to-dos',
@@ -133,7 +135,7 @@ export default {
     },
   },
   brand: {
-    redbc: 'Retail Bank',
+    redbc: 'Red Bank',
     greenbc: 'Green Bank',
   },
   home: {
@@ -791,6 +793,7 @@ export default {
     },
     lifecycle: {
       title: 'Workflow actions',
+      commentDialogTitle: 'Add comment (optional)',
       commentPlaceholder: 'Optional comment for the activity log',
       submitTest: 'Submit for testing',
       passTest: 'Confirm test pass',
@@ -1717,6 +1720,7 @@ export default {
     edit: 'Edit',
     delete: 'Delete',
     actions: 'Actions',
+    more: 'More',
     retry: 'Retry',
     reset: 'Reset',
     notAvailable: 'N/A',

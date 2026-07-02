@@ -19,6 +19,7 @@
     "sbom": "cyclonedx-npm --ignore-npm-errors --no-validate --spec-version 1.6 --output-file ../artifacts/sbom/frontend-cyclonedx.json"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.7.9",
     "element-plus": "^2.9.1",
     "pinia": "^2.3.0",

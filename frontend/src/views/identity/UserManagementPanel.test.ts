@@ -105,15 +105,20 @@ describe('UserManagementPanel', () => {
     expect(wrapper.text()).toContain('Retail Operator')
   })
 
-  it('shows the delete action for global admins', async () => {
+  it('shows delete action for global admins in more menu', async () => {
     patchSession(['GLOBAL_ADMIN'], ['*'])
     const wrapper = mountPanel()
     await flushPromises()
 
-    expect(wrapper.find('.delete-action').exists()).toBe(true)
+    const moreButton = wrapper.findAll('button').find((button) => button.text().includes('More'))
+    expect(moreButton).toBeDefined()
+    await moreButton!.trigger('click')
+    await flushPromises()
+
+    expect(document.body.querySelector('.delete-action')).toBeTruthy()
   })
 
-  it('hides the delete action for group admins', async () => {
+  it('hides delete action for group admins', async () => {
     patchSession(['GROUP_ADMIN'], ['RETAIL'])
     const wrapper = mountPanel()
     await flushPromises()

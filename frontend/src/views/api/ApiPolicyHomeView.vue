@@ -3,7 +3,9 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
@@ -68,12 +70,10 @@ const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecy
 
 <template>
   <AppPageLayout>
-    <header class="page-header">
-      <div>
-        <h1>{{ t('apiPolicy.home.title') }}</h1>
-        <p>{{ t('apiPolicy.home.description') }}</p>
-      </div>
-    </header>
+    <PageHeader
+      :title="t('apiPolicy.home.title')"
+      :description="t('apiPolicy.home.description')"
+    />
 
     <el-alert
       v-if="errorMessage"
@@ -96,7 +96,7 @@ const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecy
         @row-click="activateTemplateRow"
       >
         <template #empty>
-          <el-empty :description="t('apiPolicy.home.empty')" />
+          <EmptyStatePanel title-key="apiPolicy.home.empty" />
         </template>
         <el-table-column prop="name" sortable min-width="220">
           <template #header>
@@ -158,25 +158,11 @@ const sortByLifecycleStatus = rowSortMethod<TemplateSummary>((row) => row.lifecy
 </template>
 
 <style scoped lang="scss">
-.page-header {
-  margin-bottom: 1.5rem;
-
-  h1 {
-    margin: 0.25rem 0;
-    font-size: 1.75rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-}
-
 .page-alert {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .table-toolbar {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 </style>

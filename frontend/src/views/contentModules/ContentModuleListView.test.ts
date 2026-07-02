@@ -100,4 +100,45 @@ describe('ContentModuleListView', () => {
     expect(wrapper.text()).toContain('Unable to load content modules')
     expect(wrapper.text()).toContain('Retry')
   })
+
+  it('filters rows when a column filter is applied', async () => {
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([
+      {
+        moduleId: 'MOD-LOAN-DISCLOSURE',
+        moduleCode: 'MOD-LOAN-DISCLOSURE',
+        groupCode: 'RETAIL',
+        name: 'Loan disclosure',
+        createdAt: '2026-06-26T10:00:00Z',
+        updatedAt: '2026-06-26T10:00:00Z',
+      },
+      {
+        moduleId: 'MOD-FEE-SCHEDULE',
+        moduleCode: 'MOD-FEE-SCHEDULE',
+        groupCode: 'CORPORATE',
+        name: 'Fee schedule',
+        createdAt: '2026-06-26T10:00:00Z',
+        updatedAt: '2026-06-26T10:00:00Z',
+      },
+    ])
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleListView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Loan disclosure')
+    expect(wrapper.text()).toContain('Fee schedule')
+
+    const groupFilter = wrapper.find('.table-column-header__control input')
+    await groupFilter.setValue('RETAIL')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Loan disclosure')
+    expect(wrapper.text()).not.toContain('Fee schedule')
+  })
 })

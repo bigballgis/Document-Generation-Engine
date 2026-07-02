@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import AuditConsoleView from '@/views/audit/AuditConsoleView.vue'
 import en from '@/i18n/locales/en'
 import * as auditApi from '@/api/audit'
-import { auditAdminJourneySteps } from '@/constants/roleJourneyDefinitions'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useSessionStore } from '@/stores/session'
 
@@ -16,13 +15,6 @@ vi.mock('@/api/audit', () => ({
   exportManagementEvents: vi.fn(),
   exportLifecycleEvents: vi.fn(),
 }))
-
-const journeyTimelineStub = {
-  name: 'RoleJourneyTimeline',
-  props: ['steps', 'currentStepIndex', 'guidanceKey', 'titleKey'],
-  template:
-    '<div class="journey-timeline-stub" :data-step-count="steps.length" :data-current-index="currentStepIndex" :data-guidance-key="guidanceKey">{{ titleKey }}</div>',
-}
 
 function mountAuditConsole(options?: {
   roles?: string[]
@@ -56,9 +48,6 @@ function mountAuditConsole(options?: {
   return mount(AuditConsoleView, {
     global: {
       plugins: [pinia, i18n, ElementPlus],
-      stubs: {
-        RoleJourneyTimeline: journeyTimelineStub,
-      },
     },
   })
 }
@@ -99,7 +88,7 @@ describe('AuditConsoleView', () => {
     expect(wrapper.text()).not.toContain('Audit console')
   })
 
-  it('shows audit admin journey, view-only banner, and activity log title', async () => {
+  it('shows view-only banner in page header for audit admin', async () => {
     vi.mocked(auditApi.listManagementEvents).mockResolvedValue({
       events: [],
       page: 0,
@@ -111,11 +100,7 @@ describe('AuditConsoleView', () => {
     const wrapper = mountAuditConsole()
     await flushPromises()
 
-    expect(wrapper.find('#journey-section').exists()).toBe(true)
-    expect(Number(wrapper.find('.journey-timeline-stub').attributes('data-step-count'))).toBe(
-      auditAdminJourneySteps.length,
-    )
-    expect(wrapper.find('.journey-timeline-stub').text()).toBe('journey.roles.AUDIT_ADMIN.title')
+    expect(wrapper.find('#journey-section').exists()).toBe(false)
     expect(wrapper.text()).toContain('View only — no actions')
     expect(wrapper.text()).toContain('Activity log')
   })
@@ -161,7 +146,7 @@ describe('AuditConsoleView', () => {
     expect(wrapper.text()).toContain('Template go-live confirmed on behalf of team lead')
   })
 
-  it('does not show audit admin journey for global admin without AUDIT_ADMIN role', async () => {
+  it('does not show view-only banner for global admin without AUDIT_ADMIN role', async () => {
     vi.mocked(auditApi.listManagementEvents).mockResolvedValue({
       events: [],
       page: 0,
@@ -176,7 +161,6 @@ describe('AuditConsoleView', () => {
     })
     await flushPromises()
 
-    expect(wrapper.find('#journey-section').exists()).toBe(false)
     expect(wrapper.text()).not.toContain('View only — no actions')
   })
 

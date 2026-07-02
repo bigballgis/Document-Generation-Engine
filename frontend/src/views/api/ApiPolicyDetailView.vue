@@ -4,15 +4,14 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ApiPolicyImpactPreviewPanel from '@/components/api/ApiPolicyImpactPreviewPanel.vue'
-import AppDataTable from '@/components/common/AppDataTable.vue'
+import CredentialsPanel from '@/components/api/CredentialsPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
-import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
-import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
@@ -45,9 +44,7 @@ const loadFailed = ref(false)
 const previewLoading = ref(false)
 const previewError = ref('')
 const impactPreview = ref<ApiPolicyImpactPreview | null>(null)
-const credentialSecretDialogVisible = ref(false)
-const credentialSecretValue = ref('')
-const credentialSecretExternalId = ref('')
+const credentialsPanelRef = ref<InstanceType<typeof CredentialsPanel> | null>(null)
 const credentialsCurrentPage = ref(1)
 
 const templateId = computed(() => String(route.params.templateId ?? ''))
@@ -125,7 +122,8 @@ const { paginatedRows: paginatedCredentials, totalRows: totalCredentialRows } = 
   credentialsCurrentPage,
   CLIENT_TABLE_PAGE_SIZE,
 )
-const sortCredentialsByCreatedAt = rowSortMethod<ApiCredentialSummary>((row) => row.createdAt)
+const sortCredentialsByCreatedAt = (a: ApiCredentialSummary, b: ApiCredentialSummary) =>
+  a.createdAt.localeCompare(b.createdAt)
 const credentialStatusFilterOptions = useCredentialStatusFilterOptions()
 
 function syncFormsFromPolicy() {
@@ -282,16 +280,14 @@ async function handleSaveDomain() {
   }
 }
 
-function openCredentialSecretDialog(externalId: string, secret: string) {
-  credentialSecretExternalId.value = externalId
-  credentialSecretValue.value = secret
-  credentialSecretDialogVisible.value = true
+function revealCredentialSecret(externalId: string, secret: string) {
+  credentialsPanelRef.value?.revealSecret(externalId, secret)
 }
 
 async function handleCreateCredential() {
   try {
     const created = await templatesStore.createCredential(templateId.value)
-    openCredentialSecretDialog(created.externalId, created.secret)
+    revealCredentialSecret(created.externalId, created.secret)
     ElMessage.success(t('templates.policy.createCredentialSuccess'))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.createCredential'))
@@ -309,7 +305,7 @@ async function handleRotateCredential(credentialId: string, externalId: string) 
   }
   try {
     const rotated = await templatesStore.rotateCredential(templateId.value, credentialId)
-    openCredentialSecretDialog(externalId, rotated.secret)
+    revealCredentialSecret(externalId, rotated.secret)
     ElMessage.success(t('templates.policy.rotateCredentialSuccess'))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.rotateCredential'))
@@ -366,19 +362,18 @@ function currentSummary(domain: ApiPolicyDomain): string {
 
 <template>
   <AppPageLayout>
-    <header class="page-header">
-      <div>
-        <el-button link type="primary" @click="router.push('/api/policies')">
-          {{ t('apiPolicy.detail.backToList') }}
-        </el-button>
-        <h1>{{ template?.name ?? t('apiPolicy.detail.title') }}</h1>
-        <p>{{ t('apiPolicy.detail.description') }}</p>
-      </div>
-      <div v-if="policy" class="page-header__meta">
+    <PageHeader
+      show-back
+      :back-label="t('apiPolicy.detail.backToList')"
+      :title="template?.name ?? t('apiPolicy.detail.title')"
+      :description="t('apiPolicy.detail.description')"
+      @back="router.push('/api/policies')"
+    >
+      <template v-if="policy" #meta>
         <span class="meta-label">{{ t('apiPolicy.detail.policyVersion') }}</span>
         <el-tag type="info" effect="plain">v{{ policy.policyVersion }}</el-tag>
-      </div>
-    </header>
+      </template>
+    </PageHeader>
 
     <LoadErrorPanel
       v-if="loadFailed"
@@ -400,8 +395,7 @@ function currentSummary(domain: ApiPolicyDomain): string {
 
         <div class="domain-content">
           <el-card shadow="never" class="section-card">
-            <h2>{{ t(`apiPolicy.detail.domains.${activeDomain}`) }}</h2>
-            <p class="field-hint">{{ t(`apiPolicy.detail.hints.${activeDomain}`) }}</p>
+            <p class="field-hint domain-hint">{{ t(`apiPolicy.detail.hints.${activeDomain}`) }}</p>
 
             <div class="current-summary">
               <span class="summary-label">{{ t('apiPolicy.detail.currentSummary') }}</span>
@@ -514,117 +508,32 @@ function currentSummary(domain: ApiPolicyDomain): string {
 
           <el-card shadow="never" class="section-card">
             <h2>{{ t('templates.policy.credentialsTitle') }}</h2>
-            <div class="action-row action-row--compact">
-              <el-button :loading="templatesStore.submitting" @click="handleCreateCredential">
-                {{ t('templates.policy.createCredential') }}
-              </el-button>
-            </div>
-            <AppDataTable :data="paginatedCredentials" empty-text="">
-              <template #empty>
-                <el-empty :description="t('templates.policy.noCredentials')" />
-              </template>
-              <el-table-column prop="externalId" sortable>
-                <template #header>
-                  <TableColumnHeader
-                    :label="t('templates.policy.credentialExternalId')"
-                    v-model="credentialColumnFilters.externalId"
-                  />
-                </template>
-              </el-table-column>
-              <el-table-column prop="status" sortable>
-                <template #header>
-                  <TableColumnHeader
-                    :label="t('templates.policy.credentialStatus')"
-                    v-model="credentialColumnFilters.status"
-                    filter-type="select"
-                    :options="credentialStatusFilterOptions"
-                  />
-                </template>
-              </el-table-column>
-              <el-table-column sortable :sort-method="sortCredentialsByCreatedAt" min-width="180">
-                <template #header>
-                  <TableColumnHeader
-                    :label="t('templates.policy.credentialCreatedAt')"
-                    v-model="credentialColumnFilters.createdAt"
-                  />
-                </template>
-                <template #default="{ row }">
-                  {{ formatDateTime(row.createdAt) }}
-                </template>
-              </el-table-column>
-              <el-table-column :label="t('templates.policy.credentialActions')" min-width="200">
-                <template #default="{ row }">
-                  <el-button
-                    v-if="row.status === 'ACTIVE'"
-                    link
-                    type="primary"
-                    @click="handleRotateCredential(row.credentialId, row.externalId)"
-                  >
-                    {{ t('templates.policy.rotateCredential') }}
-                  </el-button>
-                  <el-button
-                    v-if="row.status === 'ACTIVE'"
-                    link
-                    type="danger"
-                    @click="handleRevokeCredential(row.credentialId)"
-                  >
-                    {{ t('templates.policy.revokeCredential') }}
-                  </el-button>
-                </template>
-              </el-table-column>
-            </AppDataTable>
-            <AppTablePagination
+            <CredentialsPanel
+              ref="credentialsPanelRef"
+              v-model:credential-column-filters="credentialColumnFilters"
               v-model:current-page="credentialsCurrentPage"
+              :credentials="paginatedCredentials"
+              :credential-status-filter-options="credentialStatusFilterOptions"
               :page-size="CLIENT_TABLE_PAGE_SIZE"
-              :total="totalCredentialRows"
+              :total-rows="totalCredentialRows"
+              :submitting="templatesStore.submitting"
+              :format-date-time="formatDateTime"
+              :sort-by-created-at="sortCredentialsByCreatedAt"
+              @create="handleCreateCredential"
+              @rotate="handleRotateCredential"
+              @revoke="handleRevokeCredential"
             />
           </el-card>
         </div>
       </div>
     </template>
-
-    <el-dialog
-      v-model="credentialSecretDialogVisible"
-      :title="t('templates.policy.credentialSecretDialogTitle')"
-      width="32rem"
-    >
-      <p>{{ t('templates.policy.credentialSecretHint') }}</p>
-      <p>
-        <strong>{{ credentialSecretExternalId }}</strong>
-      </p>
-      <el-input :model-value="credentialSecretValue" readonly />
-    </el-dialog>
   </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-
-  h1 {
-    margin: 0.25rem 0;
-    font-size: 1.75rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-}
-
-.page-header__meta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
 .meta-label {
   color: var(--text-muted);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 .domain-layout {
@@ -638,7 +547,7 @@ function currentSummary(domain: ApiPolicyDomain): string {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: var(--surface-color, #fff);
+  background: var(--surface-card);
 
   :deep(.el-menu) {
     border-right: none;
@@ -647,11 +556,10 @@ function currentSummary(domain: ApiPolicyDomain): string {
 
 .section-card {
   margin-bottom: 1.5rem;
+}
 
-  h2 {
-    margin: 0 0 0.5rem;
-    font-size: 1.25rem;
-  }
+.domain-hint {
+  margin-top: 0;
 }
 
 .field-hint {
@@ -666,7 +574,7 @@ function currentSummary(domain: ApiPolicyDomain): string {
   margin-bottom: 1rem;
   padding: 0.75rem 1rem;
   border-radius: var(--radius-md);
-  background: var(--surface-muted, #fafbfc);
+  background: var(--surface-muted);
   font-size: 0.875rem;
 }
 
@@ -684,10 +592,5 @@ function currentSummary(domain: ApiPolicyDomain): string {
   display: flex;
   gap: 0.75rem;
   margin-top: 1rem;
-}
-
-.action-row--compact {
-  margin-top: 0;
-  margin-bottom: 1rem;
 }
 </style>

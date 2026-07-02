@@ -5,7 +5,10 @@ import { useRouter } from 'vue-router'
 import PackageCatalogNotice from '@/components/catalog/PackageCatalogNotice.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterUploadDialog from '@/components/masters/MasterUploadDialog.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
@@ -17,7 +20,6 @@ import { useCapabilities } from '@/composables/useCapabilities'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { MASTER_DETAIL_PATH_PREFIX } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
-import { useSessionStore } from '@/stores/session'
 import type { MasterDocumentSummary } from '@/types/master'
 import { ElMessage } from 'element-plus'
 
@@ -26,7 +28,6 @@ const { formatDateTime } = useLocaleFormatters()
 const masterStatusFilterOptions = useMasterStatusFilterOptions()
 const router = useRouter()
 const mastersStore = useMastersStore()
-const sessionStore = useSessionStore()
 
 const uploadDialogOpen = ref(false)
 const currentPage = ref(1)
@@ -106,17 +107,17 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
 </script>
 
 <template>
-  <div class="masters-page">
-    <header class="page-header">
-      <div>
-        <p class="eyebrow">{{ sessionStore.session?.displayName }}</p>
-        <h1>{{ t('masters.list.title') }}</h1>
-        <p>{{ t('masters.list.description') }}</p>
-      </div>
-      <el-button v-if="canUpload" type="primary" @click="uploadDialogOpen = true">
-        {{ t('masters.upload.open') }}
-      </el-button>
-    </header>
+  <AppPageLayout>
+    <PageHeader
+      :title="t('masters.list.title')"
+      :description="t('masters.list.description')"
+    >
+      <template #actions>
+        <el-button v-if="canUpload" type="primary" @click="uploadDialogOpen = true">
+          {{ t('masters.upload.open') }}
+        </el-button>
+      </template>
+    </PageHeader>
 
     <PackageCatalogNotice kind="master" />
 
@@ -226,54 +227,24 @@ const sortByUpdatedAt = rowSortMethod<MasterDocumentSummary>((row) => row.update
       />
     </template>
 
-    <el-empty v-else-if="!errorMessage" :description="t('masters.list.empty')" />
+    <EmptyStatePanel
+      v-else-if="!errorMessage"
+      title-key="masters.list.empty"
+    />
 
     <MasterUploadDialog
       v-model="uploadDialogOpen"
       @submit="handleUpload"
     />
-  </div>
+  </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.masters-page {
-  min-height: 100vh;
-  padding: 2rem;
-  background: var(--surface-bg);
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-
-  h1 {
-    margin: 0.25rem 0;
-    font-size: 1.75rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-}
-
-.eyebrow {
-  display: inline-flex;
-  padding: 0.35rem 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-weight: 600;
-  color: var(--brand-primary);
-}
-
 .page-alert {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .table-toolbar {
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 </style>

@@ -32,7 +32,6 @@ const rowClassName = computed(() => {
   <el-table
     class="app-data-table"
     :class="{ 'app-data-table--activatable': activatable }"
-    stripe
     border
     size="default"
     show-overflow-tooltip
@@ -50,7 +49,7 @@ const rowClassName = computed(() => {
   :deep(.el-table__header-wrapper) {
     th.el-table__cell {
       vertical-align: top;
-      background: color-mix(in srgb, var(--surface-bg) 70%, white);
+      background: var(--surface-muted);
 
       .cell {
         position: relative;

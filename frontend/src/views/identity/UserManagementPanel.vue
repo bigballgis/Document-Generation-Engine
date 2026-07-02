@@ -3,12 +3,12 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppTablePagination from '@/components/common/AppTablePagination.vue'
+import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
-import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
-import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { rowSortMethod } from '@/composables/useDataTableFilters'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
-import { useEnabledStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { assignableGroupCodes, assignableRoles, canDeleteUsers } from '@/auth/identityRoles'
 import { useIdentityStore } from '@/stores/identity'
 import { useSessionStore } from '@/stores/session'
@@ -68,32 +68,7 @@ function roleLabel(role: string): string {
   return te(`identity.roles.${role}`) ? t(`identity.roles.${role}`) : role
 }
 
-const usersSource = computed(() => identityStore.users)
-const { filters: columnFilters, filteredRows: filteredUsers, hasActiveFilters, clearFilters } =
-  useDataTableFilters(usersSource, [
-    { key: 'username', getValue: (row) => row.username },
-    { key: 'displayName', getValue: (row) => row.displayName },
-    { key: 'email', getValue: (row) => row.email },
-    { key: 'roles', getValue: (row) => row.roles.map((role) => roleLabel(role)).join(', ') },
-    {
-      key: 'groups',
-      getValue: (row) => row.authorizedGroupCodes.join(', '),
-    },
-    {
-      key: 'status',
-      getValue: (row) =>
-        row.enabled ? t('identity.status.enabled') : t('identity.status.disabled'),
-      matchMode: 'exact',
-    },
-  ])
-
-const enabledStatusFilterOptions = useEnabledStatusFilterOptions()
-const roleFilterOptions = computed(() =>
-  roleOptions.value.map((role) => ({
-    value: roleLabel(role),
-    label: roleLabel(role),
-  })),
-)
+const users = computed(() => identityStore.users)
 
 const errorMessage = computed(() => {
   const key = identityStore.lastUserErrorMessageKey
@@ -316,6 +291,24 @@ async function confirmDelete(user: ManagementUserView) {
   }
 }
 
+type UserMoreAction = 'toggleEnabled' | 'resetPassword' | 'delete'
+
+function handleMoreAction(command: UserMoreAction, user: ManagementUserView) {
+  switch (command) {
+    case 'toggleEnabled':
+      void toggleEnabled(user)
+      break
+    case 'resetPassword':
+      openResetPassword(user)
+      break
+    case 'delete':
+      void confirmDelete(user)
+      break
+    default:
+      break
+  }
+}
+
 const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enabled)
 </script>
 
@@ -360,58 +353,19 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
     <el-skeleton v-if="identityStore.loadingUsers" :rows="6" animated />
 
     <template v-else>
-      <div v-if="hasActiveFilters && filteredUsers.length > 0" class="table-toolbar">
-        <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
-      </div>
-
-      <template v-if="filteredUsers.length > 0">
-        <AppDataTable :data="filteredUsers">
-      <el-table-column prop="username" sortable width="140">
-        <template #header>
-          <TableColumnHeader
-            :label="t('identity.users.columns.username')"
-            v-model="columnFilters.username"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column prop="displayName" sortable min-width="160">
-        <template #header>
-          <TableColumnHeader
-            :label="t('identity.users.columns.displayName')"
-            v-model="columnFilters.displayName"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column prop="email" sortable min-width="200">
-        <template #header>
-          <TableColumnHeader
-            :label="t('identity.users.columns.email')"
-            v-model="columnFilters.email"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column min-width="200">
-        <template #header>
-          <TableColumnHeader
-            :label="t('identity.users.columns.roles')"
-            v-model="columnFilters.roles"
-            filter-type="select"
-            :options="roleFilterOptions"
-          />
-        </template>
+      <template v-if="users.length > 0">
+        <AppDataTable :data="users">
+      <el-table-column prop="username" sortable width="140" :label="t('identity.users.columns.username')" />
+      <el-table-column prop="displayName" sortable min-width="160" :label="t('identity.users.columns.displayName')" />
+      <el-table-column prop="email" sortable min-width="200" :label="t('identity.users.columns.email')" />
+      <el-table-column min-width="200" :label="t('identity.users.columns.roles')">
         <template #default="{ row }">
           <el-tag v-for="role in row.roles" :key="role" class="role-tag" size="small">
             {{ roleLabel(role) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column min-width="160">
-        <template #header>
-          <TableColumnHeader
-            :label="t('identity.users.columns.groups')"
-            v-model="columnFilters.groups"
-          />
-        </template>
+      <el-table-column min-width="160" :label="t('identity.users.columns.groups')">
         <template #default="{ row }">
           {{ row.authorizedGroupCodes.join(', ') }}
         </template>
@@ -420,57 +374,53 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
         sortable
         :sort-method="sortUsersByEnabled"
         width="120"
+        :label="t('identity.users.columns.status')"
       >
-        <template #header>
-          <TableColumnHeader
-            :label="t('identity.users.columns.status')"
-            v-model="columnFilters.status"
-            filter-type="select"
-            :options="enabledStatusFilterOptions"
-          />
-        </template>
         <template #default="{ row }">
           <el-tag :type="row.enabled ? 'success' : 'info'" size="small">
             {{ row.enabled ? t('identity.status.enabled') : t('identity.status.disabled') }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="t('identity.users.columns.actions')" width="320">
+      <el-table-column :label="t('identity.users.columns.actions')" width="160">
         <template #default="{ row }">
-          <el-button link size="small" @click="openEdit(row)">
+          <el-button link size="small" type="primary" @click="openEdit(row)">
             {{ t('identity.users.edit') }}
           </el-button>
-          <el-button link size="small" @click="toggleEnabled(row)">
-            {{ row.enabled ? t('identity.users.disable') : t('identity.users.enable') }}
-          </el-button>
-          <el-button link size="small" @click="openResetPassword(row)">
-            {{ t('identity.users.resetPassword') }}
-          </el-button>
-          <el-button
-            v-if="canDelete"
-            link
-            size="small"
-            type="danger"
-            class="delete-action"
-            @click="confirmDelete(row)"
-          >
-            {{ t('identity.users.delete') }}
-          </el-button>
+          <el-dropdown trigger="click" @command="(command: UserMoreAction) => handleMoreAction(command, row)">
+            <el-button link size="small">
+              {{ t('common.more') }}
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="toggleEnabled">
+                  {{ row.enabled ? t('identity.users.disable') : t('identity.users.enable') }}
+                </el-dropdown-item>
+                <el-dropdown-item command="resetPassword">
+                  {{ t('identity.users.resetPassword') }}
+                </el-dropdown-item>
+                <el-dropdown-item
+                  v-if="canDelete"
+                  command="delete"
+                  class="delete-action"
+                >
+                  {{ t('identity.users.delete') }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </template>
       </el-table-column>
       </AppDataTable>
 
-        <el-pagination
-          v-if="identityStore.usersTotal > (identityStore.userFilters.size ?? 20)"
+        <AppTablePagination
           v-model:current-page="currentPage"
-          class="list-pagination"
-          layout="total, prev, pager, next"
           :page-size="identityStore.userFilters.size ?? 20"
           :total="identityStore.usersTotal"
         />
       </template>
 
-      <el-empty v-else :description="t('identity.users.empty')" />
+      <EmptyStatePanel v-else title-key="identity.users.empty" />
     </template>
 
     <el-dialog
@@ -597,12 +547,15 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
 .filters {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
+  flex: 1;
   flex-wrap: wrap;
 }
 
 .filter-control {
-  width: 200px;
+  flex: 1 1 12rem;
+  min-width: 0;
+  max-width: 20rem;
 }
 
 .panel-alert {
@@ -621,10 +574,5 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
   margin-top: 0.35rem;
   color: var(--text-muted);
   font-size: 0.8125rem;
-}
-
-.list-pagination {
-  margin-top: 1rem;
-  justify-content: flex-end;
 }
 </style>

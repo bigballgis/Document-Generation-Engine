@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import TemplateWorkspaceHeader from '@/components/templates/TemplateWorkspaceHeader.vue'
 import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
 import TemplateVersionLinesPanel from '@/components/templates/TemplateVersionLinesPanel.vue'
 import TemplateExportActions from '@/components/templates/TemplateExportActions.vue'
@@ -16,11 +16,12 @@ import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOv
 import TemplateDetailApiAccessTab from '@/views/templates/detail/TemplateDetailApiAccessTab.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environments'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
@@ -55,13 +56,12 @@ import {
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
 import { templateDetailTabLabelKey } from '@/views/templates/templateDetailTabs'
 import type { TemplateDevWorkspaceTab } from '@/views/templates/templateDevWorkspaceTabs'
-import { resolveTemplateDevWorkspaceTab } from '@/views/templates/templateDevWorkspaceTabs'
-import type { TemplateJourneyWorkspaceQuery } from '@/utils/templateJourneyWorkspaceLink'
 import type { ApiCredentialSummary, DeleteTemplatePayload } from '@/types/template'
 import type { ComponentPublicInstance } from 'vue'
 
-const HUB_SECONDARY_TABS = ['overview', 'lifecycle', 'apiAccess'] as const
+const HUB_SECONDARY_TABS = ['overview', 'apiAccess'] as const
 type HubSecondaryTab = (typeof HUB_SECONDARY_TABS)[number]
+type ActiveTemplateJourney = 'teamLead' | 'approver' | 'tester' | 'author'
 
 const { t, te } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
@@ -87,12 +87,12 @@ const { confirmAction } = useConfirmAction()
 const metadataEditOpen = ref(false)
 const loadFailed = ref(false)
 const policyLoadFailed = ref(false)
-const credentialSecretDialogVisible = ref(false)
-const credentialSecretValue = ref('')
-const credentialSecretExternalId = ref('')
 const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
 const credentialsCurrentPage = ref(1)
 const versionLinesPanelRef = ref<ComponentPublicInstance<{ reload: () => Promise<void> }> | null>(
+  null,
+)
+const apiAccessTabRef = ref<ComponentPublicInstance<{ revealCredentialSecret: (externalId: string, secret: string) => void }> | null>(
   null,
 )
 
@@ -135,7 +135,8 @@ const { paginatedRows: paginatedCredentials, totalRows: totalCredentialRows } = 
   credentialsCurrentPage,
   CLIENT_TABLE_PAGE_SIZE,
 )
-const sortCredentialsByCreatedAt = rowSortMethod<ApiCredentialSummary>((row) => row.createdAt)
+const sortCredentialsByCreatedAt = (a: ApiCredentialSummary, b: ApiCredentialSummary) =>
+  a.createdAt.localeCompare(b.createdAt)
 const credentialStatusFilterOptions = useCredentialStatusFilterOptions()
 
 const showMetadataEdit = computed(() => {
@@ -276,6 +277,22 @@ const teamLeadJourneyContext = computed((): TemplateTeamLeadJourneyContext | nul
     preReleaseChecksViewed: false,
     publishGateReady: false,
   }
+})
+
+const activeTemplateJourney = computed((): ActiveTemplateJourney | null => {
+  if (showTeamLeadJourney.value) {
+    return 'teamLead'
+  }
+  if (showApproverJourney.value) {
+    return 'approver'
+  }
+  if (showTesterJourney.value) {
+    return 'tester'
+  }
+  if (showAuthorJourney.value) {
+    return 'author'
+  }
+  return null
 })
 
 function resolveSecondaryTab(value: unknown): HubSecondaryTab | undefined {
@@ -428,11 +445,6 @@ function openDevEditor(
   )
 }
 
-function handleJourneyOpenWorkspace(query: TemplateJourneyWorkspaceQuery) {
-  const { workspaceTab, ...extraQuery } = query
-  openDevEditor(resolveTemplateDevWorkspaceTab(workspaceTab), extraQuery)
-}
-
 function openLifecyclePanel() {
   openDevEditor('approval')
 }
@@ -488,16 +500,14 @@ async function handleDeleteTemplate() {
   }
 }
 
-function openCredentialSecretDialog(externalId: string, secret: string) {
-  credentialSecretExternalId.value = externalId
-  credentialSecretValue.value = secret
-  credentialSecretDialogVisible.value = true
+function revealCredentialSecret(externalId: string, secret: string) {
+  apiAccessTabRef.value?.revealCredentialSecret(externalId, secret)
 }
 
 async function handleCreateCredential() {
   try {
     const created = await templatesStore.createCredential(templateId.value)
-    openCredentialSecretDialog(created.externalId, created.secret)
+    revealCredentialSecret(created.externalId, created.secret)
     ElMessage.success(t('templates.policy.createCredentialSuccess'))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.createCredential'))
@@ -515,7 +525,7 @@ async function handleRotateCredential(credentialId: string, externalId: string) 
   }
   try {
     const rotated = await templatesStore.rotateCredential(templateId.value, credentialId)
-    openCredentialSecretDialog(externalId, rotated.secret)
+    revealCredentialSecret(externalId, rotated.secret)
     ElMessage.success(t('templates.policy.rotateCredentialSuccess'))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.rotateCredential'))
@@ -543,55 +553,42 @@ async function handleVersionLinesChanged() {
   await loadTemplate()
   await versionLinesPanelRef.value?.reload()
 }
-
-const displayedCredentialSecret = computed(() => {
-  if (templatesStore.lastCreatedCredential?.secret) {
-    return templatesStore.lastCreatedCredential.secret
-  }
-  return templatesStore.lastRotatedCredential?.secret ?? ''
-})
 </script>
 
 <template>
-  <div class="template-package-hub-page">
-    <header class="page-header">
-      <el-button link type="primary" @click="backToList">
-        {{ t('templates.packageHub.backToList') }}
-      </el-button>
-      <div v-if="template" class="header-content">
-        <div class="header-title-block">
-          <el-tooltip :content="template.name" placement="top">
-            <h1 class="template-name">{{ template.name }}</h1>
-          </el-tooltip>
-          <p>{{ t('templates.packageHub.groupLabel', { groupCode: template.groupCode }) }}</p>
-          <p class="external-id">{{ t('templates.packageHub.externalIdLabel', { externalId: template.externalId }) }}</p>
-        </div>
-        <div class="header-actions">
-          <TemplateExportActions
-            v-if="showExportActions"
-            :template-id="templateId"
-            :external-id="template.externalId"
-          />
-          <el-button
-            v-if="showDeleteTemplateAction"
-            type="danger"
-            plain
-            :loading="templatesStore.submitting"
-            @click="handleDeleteTemplate"
-          >
-            {{ t('templates.deleteAction.button') }}
-          </el-button>
-          <el-button v-if="showMetadataEdit" @click="metadataEditOpen = true">
-            {{ t('templates.metadata.edit') }}
-          </el-button>
-          <TemplateStatusBadge
-            :status="template.lifecycleStatus"
-            :approval-sub-state="template.approvalSubState"
-          />
-        </div>
-      </div>
-      <h1 v-else>{{ t('templates.packageHub.loadingTitle') }}</h1>
-    </header>
+  <AppPageLayout>
+    <TemplateWorkspaceHeader
+      :template-name="template?.name ?? t('templates.packageHub.loadingTitle')"
+      :group-label="template ? t('templates.packageHub.groupLabel', { groupCode: template.groupCode }) : undefined"
+      :status="template?.lifecycleStatus"
+      :approval-sub-state="template?.approvalSubState"
+      :back-label="t('templates.packageHub.backToList')"
+      @back="backToList"
+    >
+      <template v-if="template" #actions>
+        <TemplateExportActions
+          v-if="showExportActions"
+          :template-id="templateId"
+          :external-id="template.externalId"
+        />
+        <el-button
+          v-if="showDeleteTemplateAction"
+          type="danger"
+          plain
+          :loading="templatesStore.submitting"
+          @click="handleDeleteTemplate"
+        >
+          {{ t('templates.deleteAction.button') }}
+        </el-button>
+        <el-button v-if="showMetadataEdit" @click="metadataEditOpen = true">
+          {{ t('templates.metadata.edit') }}
+        </el-button>
+      </template>
+    </TemplateWorkspaceHeader>
+
+    <p v-if="template" class="header-extra">
+      {{ t('templates.packageHub.externalIdLabel', { externalId: template.externalId }) }}
+    </p>
 
     <LoadErrorPanel
       v-if="loadFailed"
@@ -608,41 +605,37 @@ const displayedCredentialSecret = computed(() => {
     />
 
     <template v-else-if="template">
+      <TemplateTeamLeadJourneyBlock
+        v-if="activeTemplateJourney === 'teamLead' && teamLeadJourneyContext"
+        :journey-context="teamLeadJourneyContext"
+        :can-publish="publishTemplates"
+        :show-primary-cta="false"
+        :enable-workspace-link="false"
+      />
+
+      <TemplateApproverJourneyBlock
+        v-if="activeTemplateJourney === 'approver' && approverJourneyContext"
+        :journey-context="approverJourneyContext"
+        :can-decide="decideApprovals"
+        :show-primary-cta="false"
+        :enable-workspace-link="false"
+      />
+
+      <TemplateTesterJourneyBlock
+        v-if="activeTemplateJourney === 'tester' && testerJourneyContext"
+        :journey-context="testerJourneyContext"
+        :can-decide="decideTests"
+        :show-primary-cta="false"
+        :enable-workspace-link="false"
+      />
+
       <TemplateAuthorJourneyBlock
-        v-if="showAuthorJourney && authorJourneyContext"
+        v-if="activeTemplateJourney === 'author' && authorJourneyContext"
         :journey-context="authorJourneyContext"
         :template-id="templateId"
         :can-write="authorTemplates"
         :show-primary-cta="false"
-        enable-workspace-link
-        @open-workspace="handleJourneyOpenWorkspace"
-      />
-
-      <TemplateTesterJourneyBlock
-        v-if="showTesterJourney && testerJourneyContext"
-        :journey-context="testerJourneyContext"
-        :can-decide="decideTests"
-        :show-primary-cta="false"
-        enable-workspace-link
-        @open-workspace="handleJourneyOpenWorkspace"
-      />
-
-      <TemplateApproverJourneyBlock
-        v-if="showApproverJourney && approverJourneyContext"
-        :journey-context="approverJourneyContext"
-        :can-decide="decideApprovals"
-        :show-primary-cta="false"
-        enable-workspace-link
-        @open-workspace="handleJourneyOpenWorkspace"
-      />
-
-      <TemplateTeamLeadJourneyBlock
-        v-if="showTeamLeadJourney && teamLeadJourneyContext"
-        :journey-context="teamLeadJourneyContext"
-        :can-publish="publishTemplates"
-        :show-primary-cta="false"
-        enable-workspace-link
-        @open-workspace="handleJourneyOpenWorkspace"
+        :enable-workspace-link="false"
       />
 
       <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />
@@ -663,21 +656,13 @@ const displayedCredentialSecret = computed(() => {
           <TemplateDetailOverviewTab :template="template" :format-date-time="formatDateTime" />
         </el-tab-pane>
 
-        <el-tab-pane :label="t(templateDetailTabLabelKey('lifecycle'))" name="lifecycle">
-          <el-card shadow="never" class="lifecycle-link-card">
-            <p>{{ t('templates.packageHub.lifecycleHint') }}</p>
-            <el-button type="primary" @click="openLifecyclePanel">
-              {{ t('templates.packageHub.openDevWorkflow') }}
-            </el-button>
-          </el-card>
-        </el-tab-pane>
-
         <el-tab-pane
           v-if="showPolicyPanel"
           :label="t(templateDetailTabLabelKey('apiAccess'))"
           name="apiAccess"
         >
           <TemplateDetailApiAccessTab
+            ref="apiAccessTabRef"
             v-model:credential-column-filters="credentialColumnFilters"
             v-model:credentials-current-page="credentialsCurrentPage"
             v-model:selected-contract-environment="selectedContractEnvironment"
@@ -712,88 +697,17 @@ const displayedCredentialSecret = computed(() => {
       :loading="templatesStore.submitting"
       @submit="handleMetadataUpdate"
     />
-
-    <el-dialog
-      v-model="credentialSecretDialogVisible"
-      :title="t('templates.policy.credentialSecretDialogTitle')"
-      width="480px"
-      :close-on-click-modal="false"
-    >
-      <p>{{ t('templates.policy.credentialSecretHint') }}</p>
-      <p>{{ t('templates.policy.credentialExternalId') }}: {{ credentialSecretExternalId }}</p>
-      <el-input
-        :model-value="displayedCredentialSecret || credentialSecretValue"
-        readonly
-        type="textarea"
-        :rows="3"
-      />
-      <template #footer>
-        <el-button type="primary" @click="credentialSecretDialogVisible = false">
-          {{ t('common.confirm') }}
-        </el-button>
-      </template>
-    </el-dialog>
-  </div>
+  </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.template-package-hub-page {
-  min-height: 100vh;
-  padding: 2rem;
-  background: var(--surface-bg);
-}
-
-.page-header {
-  margin-bottom: 1.5rem;
-}
-
-.header-content {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 0.5rem;
-}
-
-.header-title-block {
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-.template-name {
-  margin: 0 0 0.25rem;
-  font-size: 1.75rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
-}
-
-.header-title-block p,
-.external-id {
-  margin: 0;
-  color: var(--text-muted);
-}
-
-.external-id {
-  margin-top: 0.35rem;
-}
-
-.header-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
+.header-extra {
+  margin: calc(-1 * var(--space-4)) 0 var(--space-6);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .secondary-tabs {
-  margin-top: 1rem;
-}
-
-.lifecycle-link-card {
-  p {
-    margin: 0 0 1rem;
-    color: var(--text-muted);
-  }
+  margin-top: var(--space-4);
 }
 </style>

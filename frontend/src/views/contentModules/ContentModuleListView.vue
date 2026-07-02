@@ -7,6 +7,8 @@ import PackageCatalogNotice from '@/components/catalog/PackageCatalogNotice.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
 import ContentModuleCreateDialog from '@/components/contentModules/ContentModuleCreateDialog.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
@@ -16,7 +18,6 @@ import { useCapabilities } from '@/composables/useCapabilities'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { contentModuleDetailPath } from '@/routing/routeKeys'
 import { useContentModulesStore } from '@/stores/contentModules'
-import { useSessionStore } from '@/stores/session'
 import type { ContentModuleSummary } from '@/types/contentModule'
 import { ElMessage } from 'element-plus'
 
@@ -24,7 +25,6 @@ const { t, te } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
 const router = useRouter()
 const contentModulesStore = useContentModulesStore()
-const sessionStore = useSessionStore()
 const { authorContentModules } = useCapabilities()
 
 const createDialogOpen = ref(false)
@@ -84,17 +84,17 @@ const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updated
 </script>
 
 <template>
-  <div class="content-modules-page">
-    <header class="page-header">
-      <div>
-        <p class="eyebrow">{{ sessionStore.session?.displayName }}</p>
-        <h1>{{ t('contentModules.list.title') }}</h1>
-        <p>{{ t('contentModules.list.description') }}</p>
-      </div>
-      <el-button v-if="canCreate" type="primary" @click="createDialogOpen = true">
-        {{ t('contentModules.create.open') }}
-      </el-button>
-    </header>
+  <AppPageLayout>
+    <PageHeader
+      :title="t('contentModules.list.title')"
+      :description="t('contentModules.list.description')"
+    >
+      <template #actions>
+        <el-button v-if="canCreate" type="primary" @click="createDialogOpen = true">
+          {{ t('contentModules.create.open') }}
+        </el-button>
+      </template>
+    </PageHeader>
 
     <PackageCatalogNotice kind="contentModule" />
 
@@ -122,8 +122,7 @@ const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updated
           <template #header>
             <TableColumnHeader
               :label="t('contentModules.list.columns.group')"
-              filter-key="groupCode"
-              v-model:filter="columnFilters.groupCode"
+              v-model="columnFilters.groupCode"
             />
           </template>
         </el-table-column>
@@ -131,8 +130,7 @@ const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updated
           <template #header>
             <TableColumnHeader
               :label="t('contentModules.list.columns.moduleCode')"
-              filter-key="moduleCode"
-              v-model:filter="columnFilters.moduleCode"
+              v-model="columnFilters.moduleCode"
             />
           </template>
         </el-table-column>
@@ -140,8 +138,7 @@ const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updated
           <template #header>
             <TableColumnHeader
               :label="t('contentModules.list.columns.name')"
-              filter-key="name"
-              v-model:filter="columnFilters.name"
+              v-model="columnFilters.name"
             />
           </template>
         </el-table-column>
@@ -149,8 +146,7 @@ const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updated
           <template #header>
             <TableColumnHeader
               :label="t('contentModules.list.columns.updatedAt')"
-              filter-key="updatedAt"
-              v-model:filter="columnFilters.updatedAt"
+              v-model="columnFilters.updatedAt"
             />
           </template>
           <template #default="{ row }">
@@ -172,44 +168,15 @@ const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updated
     />
 
     <ContentModuleCreateDialog v-model="createDialogOpen" @created="handleCreated" />
-  </div>
+  </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.content-modules-page {
-  padding: 1.5rem 2rem 2rem;
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-
-  h1 {
-    margin: 0.25rem 0;
-    font-size: 1.5rem;
-    font-weight: 650;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-}
-
-.eyebrow {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-}
-
 .page-alert {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .table-toolbar {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-3);
 }
 </style>

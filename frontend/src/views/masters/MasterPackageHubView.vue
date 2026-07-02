@@ -26,6 +26,10 @@ import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 
+import AppPageLayout from '@/components/layout/AppPageLayout.vue'
+
+import PageHeader from '@/components/layout/PageHeader.vue'
+
 import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, masterRevisionDetailPath } from '@/routing/routeKeys'
 
 import { useMastersStore } from '@/stores/masters'
@@ -332,51 +336,29 @@ async function handleSubmitReview(payload: { changeSummary: string }) {
 
 
 
-function handleJourneyFocusAnchors() {
-
-  if (currentRevisionLineId.value) {
-
-    router.push(masterRevisionDetailPath(masterId.value, currentRevisionLineId.value))
-
-  }
-
-}
-
 </script>
 
 
 
 <template>
 
-  <div class="master-package-hub-page">
+  <AppPageLayout>
 
-    <header class="page-header">
+    <PageHeader
 
-      <div>
+      show-back
 
-        <el-button link type="primary" @click="goBack">
+      :back-label="t('masters.hub.backToList')"
 
-          {{ t('masters.hub.backToList') }}
+      :title="master?.name ?? t('masters.hub.loadingTitle')"
 
-        </el-button>
+      :description="master ? t('masters.hub.groupLabel', { groupCode: master.groupCode }) : undefined"
 
-        <h1>{{ master?.name ?? t('masters.hub.loadingTitle') }}</h1>
+      @back="goBack"
 
-        <p v-if="master" class="meta">
+    >
 
-          {{ t('masters.hub.groupLabel', { groupCode: master.groupCode }) }}
-
-        </p>
-
-        <p v-if="master?.description" class="description">
-
-          {{ master.description }}
-
-        </p>
-
-      </div>
-
-      <div v-if="master" class="header-actions">
+      <template v-if="master" #actions>
 
         <MasterStatusBadge :status="master.status" />
 
@@ -398,9 +380,11 @@ function handleJourneyFocusAnchors() {
 
         </el-button>
 
-      </div>
+      </template>
 
-    </header>
+    </PageHeader>
+
+    <p v-if="master?.description" class="header-extra">{{ master.description }}</p>
 
 
 
@@ -435,23 +419,13 @@ function handleJourneyFocusAnchors() {
     <template v-else-if="master">
 
       <MasterDesignerJourneyBlock
-
         v-if="showDesignerJourney && journeyContext"
-
         :journey-context="journeyContext"
-
         :master-id="masterId"
-
         :current-revision-line-id="currentRevisionLineId"
-
         :can-write="canWriteJourney"
-
-        @upload="replaceFileOpen = true"
-
-        @submit-review="submitReviewOpen = true"
-
-        @focus-anchors="handleJourneyFocusAnchors"
-
+        :show-primary-cta="false"
+        :enable-workspace-link="false"
       />
 
 
@@ -502,7 +476,7 @@ function handleJourneyFocusAnchors() {
 
     <MasterSubmitReviewDialog v-model="submitReviewOpen" @submit="handleSubmitReview" />
 
-  </div>
+  </AppPageLayout>
 
 </template>
 
@@ -510,76 +484,13 @@ function handleJourneyFocusAnchors() {
 
 <style scoped lang="scss">
 
-.master-package-hub-page {
+.header-extra {
 
-  min-height: 100vh;
+  margin: calc(-1 * var(--space-4)) 0 var(--space-6);
 
-  padding: 2rem;
-
-  background: var(--surface-bg);
-
-}
-
-
-
-.page-header {
-
-  display: flex;
-
-  align-items: flex-start;
-
-  justify-content: space-between;
-
-  gap: 1rem;
-
-  margin-bottom: 1.5rem;
-
-
-
-  h1 {
-
-    margin: 0.5rem 0 0.25rem;
-
-    font-size: 1.75rem;
-
-  }
-
-}
-
-
-
-.meta,
-
-.description {
-
-  margin: 0;
-
-  color: var(--text-muted);
-
-}
-
-
-
-.description {
-
-  margin-top: 0.35rem;
-
-}
-
-
-
-.header-actions {
-
-  display: flex;
-
-  flex-wrap: wrap;
-
-  align-items: center;
-
-  gap: 0.75rem;
+  color: var(--text-secondary);
 
 }
 
 </style>
-
 

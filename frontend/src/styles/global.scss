@@ -1,27 +1,105 @@
 :root {
   --font-sans: 'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --text-primary: #141820;
-  --text-muted: #5c6670;
-  --surface-bg: #f3f5f8;
+
+  /* Gray scale */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* Surfaces */
+  --surface-page: #f3f5f8;
+  --surface-card: #ffffff;
+  --surface-muted: #f9fafb;
+  --surface-bg: var(--surface-page);
   --surface-gradient-end: #eef2f6;
-  --surface-elevated: #ffffff;
-  --border-color: #e2e8f0;
+  --surface-elevated: var(--surface-card);
+
+  /* Text */
+  --text-primary: #141820;
+  --text-secondary: #5c6670;
+  --text-muted: var(--text-secondary);
+
+  /* Borders */
+  --border-strong: #c5cdd6;
+  --border-default: #e2e8f0;
+  --border-subtle: #eef2f6;
+  --border-color: var(--border-default);
+
+  /* Brand */
   --brand-primary: #db0011;
   --color-primary: var(--brand-primary);
   --brand-primary-hover: #af0010;
-  --brand-header-bg: #fdf3f4;
-  --brand-header-border: #f0d4d8;
-  --nav-surface-bg: #fbf8f8;
+  --on-primary: #fff;
+  --brand-header-bg: #ffffff;
+  --brand-header-border: var(--border-default);
+  --nav-surface-bg: #ffffff;
   --brand-accent-soft: #fce8eb;
+
+  /* Typography scale */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-base: 0.9375rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.625rem;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-soft: var(--shadow-sm);
+  --shadow-card: var(--shadow-lg);
+
+  /* Radius */
   --radius-sm: 6px;
   --radius-md: 10px;
-  --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.04);
+  --radius-lg: 14px;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  --transition-base: 150ms ease;
+
+  /* Dialog widths */
+  --dialog-width-sm: 480px;
+  --dialog-width-md: 640px;
+  --dialog-width-lg: 800px;
+
+  /* Semantic status */
+  --status-success-bg: #ecfdf5;
+  --status-success-text: #047857;
+  --status-warning-bg: #fffbeb;
+  --status-warning-text: #b45309;
+  --status-danger-bg: #fef2f2;
+  --status-danger-text: #b91c1c;
+  --status-info-bg: #eff6ff;
+  --status-info-text: #1d4ed8;
+
+  /* Element Plus token bridge */
+  --el-border-radius-base: var(--radius-sm);
+  --el-component-size: 36px;
+
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: var(--font-size-base);
   line-height: 1.5;
   color: var(--text-primary);
-  background: var(--surface-bg);
+  background: var(--surface-page);
   font-feature-settings: 'kern' 1, 'liga' 1;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -53,6 +131,11 @@ p {
 .el-button {
   font-weight: 600;
   border-radius: var(--radius-sm);
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .el-button--primary {
@@ -62,6 +145,7 @@ p {
   --el-button-hover-border-color: var(--brand-primary-hover);
   --el-button-active-bg-color: var(--brand-primary-hover);
   --el-button-active-border-color: var(--brand-primary-hover);
+  --el-button-text-color: var(--on-primary);
 }
 
 .el-button--primary.is-plain {
@@ -70,45 +154,133 @@ p {
   --el-button-hover-text-color: var(--brand-primary);
 }
 
+.el-button--default {
+  --el-button-bg-color: var(--surface-card);
+  --el-button-border-color: var(--border-default);
+  --el-button-text-color: var(--text-primary);
+  --el-button-hover-bg-color: var(--surface-muted);
+  --el-button-hover-border-color: var(--border-strong);
+  --el-button-hover-text-color: var(--text-primary);
+}
+
+.el-button:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
 .el-card {
   border-radius: var(--radius-md);
-  border-color: var(--border-color);
-  box-shadow: var(--shadow-soft);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
 }
 
 .el-card.is-never-shadow {
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-sm);
 }
 
 .el-input__wrapper,
 .el-select__wrapper {
   border-radius: var(--radius-sm);
+  min-height: 36px;
+}
+
+.el-input__inner {
+  font-size: var(--font-size-base);
 }
 
 .el-table {
-  --el-table-header-bg-color: color-mix(in srgb, var(--surface-bg) 65%, white);
-  --el-table-header-text-color: var(--text-muted);
-  font-size: 0.9375rem;
+  --el-table-header-bg-color: var(--surface-muted);
+  --el-table-header-text-color: var(--text-secondary);
+  --el-table-row-hover-bg-color: transparent;
+  --el-table-border-color: var(--border-default);
+  font-size: var(--font-size-base);
 }
 
 .el-table th.el-table__cell {
   font-weight: 600;
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   letter-spacing: 0.02em;
 }
 
+.el-table td.el-table__cell {
+  font-variant-numeric: tabular-nums;
+}
+
+.el-table .el-table__body tr {
+  height: 48px;
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: transparent;
+}
+
+.el-tag {
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  border: none;
+}
+
+.el-tag.el-tag--success {
+  --el-tag-bg-color: var(--status-success-bg);
+  --el-tag-text-color: var(--status-success-text);
+  --el-tag-border-color: transparent;
+}
+
+.el-tag.el-tag--warning {
+  --el-tag-bg-color: var(--status-warning-bg);
+  --el-tag-text-color: var(--status-warning-text);
+  --el-tag-border-color: transparent;
+}
+
+.el-tag.el-tag--danger {
+  --el-tag-bg-color: var(--status-danger-bg);
+  --el-tag-text-color: var(--status-danger-text);
+  --el-tag-border-color: transparent;
+}
+
+.el-tag.el-tag--info {
+  --el-tag-bg-color: var(--status-info-bg);
+  --el-tag-text-color: var(--status-info-text);
+  --el-tag-border-color: transparent;
+}
+
+.el-tag.el-tag--success.is-plain {
+  --el-tag-bg-color: var(--status-success-bg);
+  --el-tag-border-color: color-mix(in srgb, var(--status-success-text) 20%, transparent);
+  --el-tag-text-color: var(--status-success-text);
+}
+
+.el-tag.el-tag--warning.is-plain {
+  --el-tag-bg-color: var(--status-warning-bg);
+  --el-tag-border-color: color-mix(in srgb, var(--status-warning-text) 20%, transparent);
+  --el-tag-text-color: var(--status-warning-text);
+}
+
+.el-tag.el-tag--danger.is-plain {
+  --el-tag-bg-color: var(--status-danger-bg);
+  --el-tag-border-color: color-mix(in srgb, var(--status-danger-text) 20%, transparent);
+  --el-tag-text-color: var(--status-danger-text);
+}
+
+.el-tag.el-tag--info.is-plain {
+  --el-tag-bg-color: var(--status-info-bg);
+  --el-tag-border-color: color-mix(in srgb, var(--status-info-text) 20%, transparent);
+  --el-tag-text-color: var(--status-info-text);
+}
+
 .page-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-6);
 
   h1 {
     margin: 0;
-    font-size: 1.625rem;
+    font-size: var(--font-size-2xl);
     line-height: 1.25;
   }
 
   p {
     margin: 0.4rem 0 0;
-    font-size: 0.9375rem;
-    color: var(--text-muted);
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
   }
 }
