@@ -402,13 +402,25 @@ const showLifecycleSection = computed(
       (template.value?.lifecycleStatus === 'DRAFT' ||
         template.value?.lifecycleStatus === 'TESTING')),
 )
-const showAuthoringSection = computed(
-  () =>
-    authorTemplates.value &&
-    template.value?.lifecycleStatus !== 'PUBLISHED' &&
-    template.value?.lifecycleStatus !== 'STOPPED' &&
-    template.value?.lifecycleStatus !== 'DEPRECATED',
-)
+const showAuthoringSection = computed(() => {
+  const status = template.value?.lifecycleStatus
+  if (
+    !status ||
+    status === 'PUBLISHED' ||
+    status === 'STOPPED' ||
+    status === 'DEPRECATED'
+  ) {
+    return false
+  }
+  if (authorTemplates.value) {
+    return true
+  }
+  return (
+    isDevEditor.value &&
+    decideTests.value &&
+    (status === 'DRAFT' || status === 'TESTING')
+  )
+})
 const showTestWorkflowRedirect = computed(
   () =>
     isDevEditor.value &&

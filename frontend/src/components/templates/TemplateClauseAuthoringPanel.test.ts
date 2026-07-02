@@ -7,6 +7,7 @@ import TemplateClauseAuthoringPanel from '@/components/templates/TemplateClauseA
 import en from '@/i18n/locales/en'
 import * as contentModulesApi from '@/api/contentModules'
 import * as templatesApi from '@/api/templates'
+import { useSessionStore } from '@/stores/session'
 
 vi.mock('@/api/templates', () => ({
   listTemplateContentModuleReferences: vi.fn(),
@@ -47,15 +48,31 @@ describe('TemplateClauseAuthoringPanel', () => {
       },
     ])
 
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      session: {
+        username: '10000003',
+        displayName: 'Author',
+        email: 'author@example.com',
+        authSource: 'LOCAL',
+        roles: ['TEMPLATE_AUTHOR'],
+        authorizedGroupCodes: ['RETAIL'],
+        defaultRoute: 'route.dashboard-home',
+        visibleRoutes: ['route.dashboard-home', 'route.template-management'],
+        expiresAt: '2099-01-01T00:00:00Z',
+      },
+    })
+
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
-    setActivePinia(createPinia())
     const wrapper = mount(TemplateClauseAuthoringPanel, {
       props: {
         templateId: 'tpl-1',
         groupCode: 'RETAIL',
         editable: false,
       },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [pinia, i18n, ElementPlus] },
     })
 
     await flushPromises()
@@ -83,5 +100,40 @@ describe('TemplateClauseAuthoringPanel', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Add reference')
+  })
+
+  it('does not load content module catalog for template tester without catalog access', async () => {
+    vi.mocked(templatesApi.listTemplateContentModuleReferences).mockResolvedValue([])
+
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      session: {
+        username: '10000006',
+        displayName: 'Tester',
+        email: 'tester@example.com',
+        authSource: 'LOCAL',
+        roles: ['TEMPLATE_TESTER'],
+        authorizedGroupCodes: ['RETAIL'],
+        defaultRoute: 'route.dashboard-home',
+        visibleRoutes: ['route.dashboard-home', 'route.template-management'],
+        expiresAt: '2099-01-01T00:00:00Z',
+      },
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    mount(TemplateClauseAuthoringPanel, {
+      props: {
+        templateId: 'tpl-1',
+        groupCode: 'RETAIL',
+        editable: false,
+      },
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+
+    expect(contentModulesApi.listContentModules).not.toHaveBeenCalled()
   })
 })

@@ -2,8 +2,8 @@
 
 **Phase status:** **Not Started** (2026-07-01; catch-all idle — no active slice) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
 
-> Single-active-phase invariant: **No formal phase `In Progress`** — active slice **P12-BDD-RISK-PROMPT-UX-001
-> → In Progress** (2026-07-02). **P21 remains Done** — do not reopen P21 phase status; **P19 remains Done**
+> Single-active-phase invariant: **No formal phase `In Progress`** — **no active P12 slice**
+> (2026-06-29; **P12-BDD-RISK-PROMPT-UX-001 Done**). **P21 remains Done** — do not reopen P21 phase status; **P19 remains Done**
 > — corrective residual only (P19-T08/T10 group UX superseded). AUD-M02 **resolved** via **P12-AUD-M02 Done**
 > (cross-reference P21 §11.4).
 
@@ -19,9 +19,9 @@ Each slice is activated individually via `plan-orchestrator`; only one slice sho
 | --- | --- | --- | --- |
 | **P12-AUD-B10** | Submit-for-approval evidence checklist gate (AUD-B10 remediation) | **Done** (2026-07-01) | P21 audit finding AUD-B10 **resolved**; P21-T09b confirm-on-behalf UI retained |
 | **P12-AUD-M02** | Role constants single-source (AUD-M02 remediation) | **Done** (2026-07-01) | P21 audit finding AUD-M02 **resolved**; P21 §11.4 |
-| **P12-BDD-RISK-PROMPT-UX-001** | Template-scoped risk-prompt config UX redesign (BDD-TEMPLATE-RISK-PROMPT-UX-001) | **In Progress** (2026-07-02) | Supersedes P19-T08 group override + list-view panel + hardcoded decision categories; **COR-T15** mirror |
+| **P12-BDD-RISK-PROMPT-UX-001** | Template-scoped risk-prompt config UX redesign (BDD-TEMPLATE-RISK-PROMPT-UX-001) | **Done** (2026-06-29) | Supersedes P19-T08 group override + list-view panel + hardcoded decision categories; **COR-T15** mirror |
 
-**Active slice:** **P12-BDD-RISK-PROMPT-UX-001** (2026-07-02) — **P12-AUD-M02** / **P12-AUD-B10** closed **Done**; **P19/P21 phase status unchanged (Done)**.
+**Active slice:** **None** (2026-06-29 — **P12-BDD-RISK-PROMPT-UX-001 Done**; P12 catch-all idle at slice level).
 
 ### P12-AUD-M02 — Role constants single-source
 
@@ -137,7 +137,7 @@ BDD-TEMPLATE-RISK-PROMPT-UX-001; PRD §7; domain-model lifecycle §4; permission
 | **P12-BDD-RISK-PROMPT-UX-001-T02** | backend-engineer | Decision/load path: effective categories by `templateId` for TEST_FAIL / APPROVAL_REJECT (lifecycle or dedicated resolve); extend `RiskPromptConfigServiceTest`; no change to submit/publish gate semantics (S8) | Done |
 | **P12-BDD-RISK-PROMPT-UX-001-T03** | frontend-engineer | Refactor `TemplateRiskPromptConfigPanel` (inherit global, no scope radio/groupCode); **remove** from `TemplateListView`; `TemplateCreateDialog` collapsed `el-collapse` 「测试与审批退回原因（可选）」; template detail dedicated section; template-scoped API client; i18n labels/tooltips/section intro (BINDING_ISSUE = return reason); Vitest S3–S4, S11–S12 | Done |
 | **P12-BDD-RISK-PROMPT-UX-001-T04** | frontend-engineer | Wire `TemplateLifecycleDecisionDialog` to resolved effective config (not hardcoded `TEMPLATE_DECISION_REASON_CATEGORIES`); human-readable labels + negative-decision-only tooltips; Vitest S7 | Done |
-| **P12-BDD-RISK-PROMPT-UX-001-T05** | e2e-test-engineer + e2e-uiux-reviewer | Playwright: create without expand → global categories in decision; override subset filters decision; list view has no config panel; BINDING_ISSUE copy distinct from binding gate panel; UIUX manifest | Not Started |
+| **P12-BDD-RISK-PROMPT-UX-001-T05** | e2e-test-engineer + e2e-uiux-reviewer | Playwright: create without expand → global categories in decision; override subset filters decision; list view has no config panel; BINDING_ISSUE copy distinct from binding gate panel; UIUX manifest | Done |
 
 **Suggested implementation order:** T01 → T02 → T03 → T04 → T05 (backend contract before frontend wiring).
 
@@ -149,7 +149,7 @@ BDD-TEMPLATE-RISK-PROMPT-UX-001; PRD §7; domain-model lifecycle §4; permission
 - P19-T08/T10 historical Done rows unchanged; residual note in [P19 detail](./P19-verifiability-publish-gate.md) § Residual.
 - Ledger + post-task-doc-sync on close.
 
-**Status:** **In Progress** (2026-07-02 — plan-orchestrator activation; no formal P19/P12 phase reopen).
+**Status:** **Done** (2026-06-29 — T01–T05 complete; Playwright **4/4** functional + UIUX **1/1** PASS; manifest PASS).
 
 ## 3. Slice backlog (not active)
 

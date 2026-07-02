@@ -5,6 +5,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplateDetailView from '@/views/templates/TemplateDetailView.vue'
 import TemplateDetailLifecycleTab from '@/views/templates/detail/TemplateDetailLifecycleTab.vue'
+import TemplateDetailAuthoringTab from '@/views/templates/detail/TemplateDetailAuthoringTab.vue'
 import TemplateSubmitForApprovalSummaryDialog from '@/components/templates/TemplateSubmitForApprovalSummaryDialog.vue'
 import en from '@/i18n/locales/en'
 import * as templatesApi from '@/api/templates'
@@ -13,6 +14,7 @@ import { useTemplatesStore } from '@/stores/templates'
 
 vi.mock('@/api/templates', () => ({
   getTemplate: vi.fn(),
+  fetchDevVersionDetail: vi.fn(),
   fetchPublishGate: vi.fn(),
   getTemplateCoverage: vi.fn(),
   fetchChangeDiff: vi.fn(),
@@ -90,6 +92,7 @@ describe('TemplateDetailView', () => {
     routeState.query = {}
     routerReplace.mockReset()
     vi.mocked(templatesApi.getTemplate).mockReset()
+    vi.mocked(templatesApi.fetchDevVersionDetail).mockReset()
     vi.mocked(templatesApi.fetchPublishGate).mockReset()
     vi.mocked(templatesApi.getTemplateCoverage).mockReset()
     vi.mocked(templatesApi.fetchChangeDiff).mockReset()
@@ -307,5 +310,62 @@ describe('TemplateDetailView', () => {
     await flushPromises()
 
     expect(templatesApi.submitForApproval).toHaveBeenCalledWith('tpl-b', { commentSummary: '' })
+  })
+
+  it('shows authoring tab for template tester in dev editor during TESTING', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      session: {
+        username: '10000006',
+        displayName: 'Tester',
+        email: 'tester@example.com',
+        authSource: 'LOCAL',
+        roles: ['TEMPLATE_TESTER'],
+        authorizedGroupCodes: ['RETAIL'],
+        defaultRoute: 'route.dashboard-home',
+        visibleRoutes: ['route.dashboard-home', 'route.template-management'],
+        expiresAt: '2099-01-01T00:00:00Z',
+        capabilities: {
+          decideTests: true,
+          authorTemplates: false,
+        },
+      },
+    })
+
+    routeState.params = { templateId: 'tpl-b', devVersionId: 'dev-1' } as typeof routeState.params
+    routeState.query = { tab: 'authoring', authoringTab: 'testPreview' }
+
+    vi.mocked(templatesApi.fetchDevVersionDetail).mockResolvedValue({
+      ...makeTemplate('tpl-b', 'Testing Template'),
+      lifecycleStatus: 'TESTING',
+    } as never)
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(TemplateDetailView, {
+      props: { workspace: 'dev-editor' },
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+        stubs: {
+          TemplateAuthorJourneyBlock: true,
+          TemplateTesterJourneyBlock: true,
+          TemplateApproverJourneyBlock: true,
+          TemplateTeamLeadJourneyBlock: true,
+          TemplateWorkflowBanner: true,
+          TemplateDevVersionActionBar: true,
+          TemplateDetailOverviewTab: true,
+          TemplateDetailLifecycleTab: true,
+          TemplateDetailAuthoringTab: true,
+          TemplateDetailReleaseVersionsTab: true,
+          TemplateDetailApiAccessTab: true,
+          TemplateMetadataEditDialog: true,
+          TemplatePublishSummaryDialog: true,
+          TemplateLifecycleDecisionDialog: true,
+          TemplateExportActions: true,
+        },
+      },
+    })
+    await flushPromises()
+
+    expect(wrapper.findComponent(TemplateDetailAuthoringTab).exists()).toBe(true)
   })
 })

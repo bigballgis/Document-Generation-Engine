@@ -7,6 +7,9 @@ import {
   E2E_GROUP_ADMIN,
   E2E_TEMPLATE_AUTHOR,
   E2E_TEMPLATE_TESTER,
+  FOL_GROUP_CODE,
+  FOL_MASTER_NAME,
+  E2E_CORP_TEMPLATE_AUTHOR,
 } from './auth'
 import { E2E_API_BASE_URL, findMasterByName } from './masters-api'
 
@@ -135,10 +138,14 @@ function execPsql(sql: string): void {
   )
 }
 
-async function configurePublishableTemplate(request: APIRequestContext, templateId: string): Promise<void> {
-  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+async function configurePublishableTemplate(
+  request: APIRequestContext,
+  templateId: string,
+  authorToken?: string,
+): Promise<void> {
+  const token = authorToken ?? (await apiLogin(request, E2E_TEMPLATE_AUTHOR))
 
-  await authorizedPut(request, authorToken, `/templates/${templateId}/variables/customerName`, {
+  await authorizedPut(request, token, `/templates/${templateId}/variables/customerName`, {
     variableKey: 'customerName',
     variableType: 'TEXT',
     required: true,
@@ -146,25 +153,74 @@ async function configurePublishableTemplate(request: APIRequestContext, template
     description: 'Customer name',
   })
 
-  await authorizedPut(request, authorToken, `/templates/${templateId}/bindings/HEADER`, {
+  await authorizedPut(request, token, `/templates/${templateId}/bindings/HEADER`, {
     anchorId: 'HEADER',
     declaredContentType: 'TEXT',
     structuredContentJson:
       '{"nodes":[{"type":"paragraph","children":[{"type":"variable","key":"customerName"}]}]}',
   })
 
-  await authorizedPost(request, authorToken, `/templates/${templateId}/bindings/validate`, {})
+  await authorizedPost(request, token, `/templates/${templateId}/bindings/validate`, {})
 }
 
 export async function prepareTemplateInTesting(
   request: APIRequestContext,
+  options?: {
+    externalId?: string
+    name?: string
+    masterName?: string
+    groupCode?: string
+  },
+): Promise<TestingTemplateFixture> {
+  const masterCandidates = [
+    {
+      masterName: options?.masterName ?? DEMO_MASTER_NAME,
+      groupCode: options?.groupCode ?? DEMO_GROUP_CODE,
+    },
+  ]
+  if (!options?.masterName) {
+    masterCandidates.push({ masterName: FOL_MASTER_NAME, groupCode: FOL_GROUP_CODE })
+  }
+
+  let lastError: Error | undefined
+  for (const candidate of masterCandidates) {
+    try {
+      return await prepareTemplateInTestingWithMaster(request, candidate.masterName, candidate.groupCode, options)
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+    }
+  }
+  throw lastError ?? new Error('Unable to prepare TESTING template fixture')
+}
+
+/** RETAIL demo master only — required when template tester (RETAIL scope) must open the dev editor. */
+export async function prepareRetailTemplateInTesting(
+  request: APIRequestContext,
+  options?: {
+    externalId?: string
+    name?: string
+  },
+): Promise<TestingTemplateFixture> {
+  return prepareTemplateInTesting(request, {
+    ...options,
+    masterName: DEMO_MASTER_NAME,
+    groupCode: DEMO_GROUP_CODE,
+  })
+}
+
+async function prepareTemplateInTestingWithMaster(
+  request: APIRequestContext,
+  masterName: string,
+  groupCode: string,
   options?: { externalId?: string; name?: string },
 ): Promise<TestingTemplateFixture> {
   const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
-  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
-  const master = await findMasterByName(request, groupAdminToken, DEMO_MASTER_NAME)
+  const authorCredentials =
+    groupCode === FOL_GROUP_CODE ? E2E_CORP_TEMPLATE_AUTHOR : E2E_TEMPLATE_AUTHOR
+  const authorToken = await apiLogin(request, authorCredentials)
+  const master = await findMasterByName(request, groupAdminToken, masterName)
   if (!master) {
-    throw new Error(`Demo master "${DEMO_MASTER_NAME}" was not found`)
+    throw new Error(`Master "${masterName}" was not found`)
   }
 
   const externalId = options?.externalId ?? uniqueExternalId('E2E-COLLAB')
@@ -176,7 +232,7 @@ export async function prepareTemplateInTesting(
     '/templates',
     {
       externalId,
-      groupCode: DEMO_GROUP_CODE,
+      groupCode,
       name,
       description: 'P14-T02 collaboration Playwright fixture',
       masterId: master.id,
@@ -184,7 +240,7 @@ export async function prepareTemplateInTesting(
     201,
   )
 
-  await configurePublishableTemplate(request, createdTemplate.id)
+  await configurePublishableTemplate(request, createdTemplate.id, authorToken)
 
   const testDataSet = await authorizedPost<{ testDataSetId: string }>(
     request,
@@ -214,7 +270,7 @@ export async function prepareTemplateInTesting(
     templateId: createdTemplate.id,
     externalId,
     name,
-    groupCode: DEMO_GROUP_CODE,
+    groupCode,
   }
 }
 

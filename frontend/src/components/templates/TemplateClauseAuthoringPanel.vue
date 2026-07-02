@@ -7,8 +7,10 @@ import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
 import * as contentModulesApi from '@/api/contentModules'
 import * as templatesApi from '@/api/templates'
+import { canAccessContentModuleManagement } from '@/auth/roles'
 import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
 import { useContentModulesStore } from '@/stores/contentModules'
+import { useSessionStore } from '@/stores/session'
 import { DEFAULT_STRUCTURED_CONTENT_JSON, serializeStructuredContent } from '@/utils/structuredContentNodes'
 import { normalizeStructuredContentJson } from '@/utils/structuredContentCompat'
 import type { ContentModuleSummary, ContentModuleVersion } from '@/types/contentModule'
@@ -28,6 +30,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, te } = useI18n()
+const sessionStore = useSessionStore()
 const contentModulesStore = useContentModulesStore()
 
 const loading = ref(false)
@@ -95,6 +98,10 @@ async function loadReferences() {
 
 async function loadModuleOptions() {
   if (!props.groupCode) {
+    moduleOptions.value = []
+    return
+  }
+  if (!canAccessContentModuleManagement(sessionStore.session?.roles ?? [])) {
     moduleOptions.value = []
     return
   }

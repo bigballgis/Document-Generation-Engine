@@ -347,6 +347,46 @@ export async function captureP12AudB10LocatorScreenshot(
   return filename
 }
 
+export const P12_RISK_PROMPT_UX_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'P12-BDD-RISK-PROMPT-UX-001',
+)
+export const P12_RISK_PROMPT_UX_SCREENSHOT_DIR = path.join(
+  P12_RISK_PROMPT_UX_EVIDENCE_ROOT,
+  'screenshots',
+)
+export const P12_RISK_PROMPT_UX_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureP12RiskPromptUxEvidenceDirs(): void {
+  fs.mkdirSync(P12_RISK_PROMPT_UX_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function p12RiskPromptUxScreenshotPath(filename: string): string {
+  return path.join(P12_RISK_PROMPT_UX_SCREENSHOT_DIR, filename)
+}
+
+export async function captureP12RiskPromptUxScreenshot(
+  page: Page,
+  filename: string,
+): Promise<string> {
+  ensureP12RiskPromptUxEvidenceDirs()
+  const target = p12RiskPromptUxScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureP12RiskPromptUxLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureP12RiskPromptUxEvidenceDirs()
+  const target = p12RiskPromptUxScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
 export const P2_T06_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P2-T06')
 export const P2_T06_SCREENSHOT_DIR = path.join(P2_T06_EVIDENCE_ROOT, 'screenshots')
 export const P2_T06_VIEWPORT = P14_T01_VIEWPORT

@@ -136,6 +136,16 @@ export async function demoMasterDetailPath(request: APIRequestContext): Promise<
   return `/masters/${master.id}`
 }
 
+export async function assertDemoCatalogSeeded(request: APIRequestContext): Promise<void> {
+  const token = await apiLogin(request, E2E_GROUP_ADMIN)
+  const master = await findMasterByName(request, token, DEMO_MASTER_NAME)
+  if (!master) {
+    throw new Error(
+      `Demo master "${DEMO_MASTER_NAME}" was not found. Set DOCGEN_SEED_DEMO_CATALOG=true and recreate docgen-backend.`,
+    )
+  }
+}
+
 export async function demoMasterRevisionDetailPath(request: APIRequestContext): Promise<string> {
   const hubPath = await demoMasterDetailPath(request)
   const masterId = hubPath.replace('/masters/', '')
