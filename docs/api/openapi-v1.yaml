@@ -1175,12 +1175,14 @@ paths:
       operationId: listContentModules
       summary: List content modules scoped by group
       description: >-
-        Lists non-deleted content modules for the requested group code. Requires
-        group-scoped read access per permission matrix §5.1.
+        Lists non-deleted content modules. When `groupCode` is omitted, returns all modules
+        accessible to the caller across authorized groups (including shared modules). When
+        `groupCode` is provided, narrows to that group scope. Requires catalog browse access
+        per permission matrix §5.1.
       parameters:
         - name: groupCode
           in: query
-          required: true
+          required: false
           schema:
             type: string
             minLength: 1

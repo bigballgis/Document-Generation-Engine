@@ -20,9 +20,10 @@ function unwrap<T>(envelope: ApiEnvelope<T>): T {
   return envelope.result
 }
 
-export async function listContentModules(groupCode: string): Promise<ContentModuleSummary[]> {
+export async function listContentModules(groupCode?: string): Promise<ContentModuleSummary[]> {
+  const trimmedGroupCode = groupCode?.trim()
   const response = await http.get<ApiEnvelope<ContentModuleSummary[]>>('/content-modules', {
-    params: { groupCode },
+    params: trimmedGroupCode ? { groupCode: trimmedGroupCode } : undefined,
   })
   return unwrap(response.data)
 }

@@ -46,6 +46,31 @@ public class ContentModuleService {
     }
 
     @Transactional(readOnly = true)
+    public List<ContentModuleSummaryView> listAccessible(ManagementSessionClaims session) {
+        assertCatalogBrowseAllowed(session);
+        List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
+        Map<UUID, ContentModuleEntity> modules = new LinkedHashMap<>();
+        if (groupCodes.contains("*")) {
+            moduleRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc()
+                    .forEach(module -> modules.put(module.getId(), module));
+        } else if (groupCodes.isEmpty()) {
+            return List.of();
+        } else {
+            List<String> normalizedGroups = groupCodes.stream()
+                    .map(code -> code.trim().toUpperCase(Locale.ROOT))
+                    .toList();
+            moduleRepository.findByGroupCodeInAndDeletedAtIsNullOrderByUpdatedAtDesc(normalizedGroups)
+                    .forEach(module -> modules.put(module.getId(), module));
+            moduleRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc().stream()
+                    .filter(module -> !modules.containsKey(module.getId()))
+                    .filter(module -> accessSupport.readSharedGroupCodes(module).stream()
+                            .anyMatch(normalizedGroups::contains))
+                    .forEach(module -> modules.put(module.getId(), module));
+        }
+        return modules.values().stream().map(this::toSummary).toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<ContentModuleSummaryView> list(String groupCode, ManagementSessionClaims session) {
         assertCatalogBrowseAllowed(session);
         if (groupCode == null || groupCode.isBlank()) {

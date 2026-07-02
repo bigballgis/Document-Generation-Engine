@@ -56,7 +56,7 @@ describe('ContentModuleListView', () => {
     vi.mocked(contentModulesApi.listContentModules).mockReset()
   })
 
-  it('renders content modules for the selected group', async () => {
+  it('renders content modules across authorized groups', async () => {
     vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([
       {
         moduleId: 'MOD-LOAN-DISCLOSURE',
@@ -78,9 +78,10 @@ describe('ContentModuleListView', () => {
     await flushPromises()
     await flushPromises()
 
-    expect(contentModulesApi.listContentModules).toHaveBeenCalledWith('RETAIL')
+    expect(contentModulesApi.listContentModules).toHaveBeenCalled()
     expect(wrapper.text()).toContain('Loan disclosure')
     expect(wrapper.text()).toContain('MOD-LOAN-DISCLOSURE')
+    expect(wrapper.text()).toContain('RETAIL')
   })
 
   it('shows load error with retry when list fails', async () => {

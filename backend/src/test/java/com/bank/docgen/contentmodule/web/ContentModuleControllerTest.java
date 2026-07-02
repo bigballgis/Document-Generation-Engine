@@ -199,6 +199,17 @@ class ContentModuleControllerTest {
     }
 
     @Test
+    void listAccessibleWithoutGroupCode_returnsModulesAcrossAuthorizedGroups() throws Exception {
+        seedDraftModule();
+
+        mockMvc.perform(get("/api/management/v1/content-modules")
+                        .with(authentication(new ManagementAuthentication(author))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.length()").value(1))
+                .andExpect(jsonPath("$.result[0].moduleCode").value(MODULE_CODE));
+    }
+
+    @Test
     void listIncludesModulesSharedIntoGroup() throws Exception {
         UUID corpModuleId = UUID.randomUUID();
         moduleRepository.save(new ContentModuleEntity(

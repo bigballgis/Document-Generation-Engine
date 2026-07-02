@@ -1,14 +1,7 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-06-29 (**P12-BDD-RISK-PROMPT-UX-001 Done** — T01–T05 complete; Playwright **5/5** + UIUX manifest PASS)
-**Progress note (2026-06-29):** **P12-BDD-RISK-PROMPT-UX-001** **Done** — T01–T05 complete
-(template override Flyway V37/V38, template-scoped GET/PUT API, decision effective-config by
-`templateId`, panel refactor + list-view removal, `TemplateLifecycleDecisionDialog` wired to
-`getDecisionFormConfig`, Playwright BDD S1–S7/S11–S12 + UIUX manifest). **Tester dev-editor**
-Authoring/Test & Preview access fix (`TemplateDetailView`, `TemplateClauseAuthoringPanel`).
-**Gate:** frontend lint/type-check/test/build green (**571** Vitest); Playwright slice **5/5**
-Docker; backend `mvn verify` unchanged from T04 (**609** Surefire). **No active slice.**
-**Last synced (prior):** 2026-07-02 (**P12-BDD-RISK-PROMPT-UX-001 T01–T04 landed** — template-scoped risk-prompt backend + frontend wiring; T05 E2E pending)
+**Last synced:** 2026-07-02 (**WIP landed** — PDF page-number stamping deferred behind flag; content-module list loads all authorized groups)
+**Progress note (2026-07-02):** Ad-hoc WIP **A** — `pdf-page-number-stamping-enabled` (default `false`); `PdfConversionPostProcessor` + `DocxPdfConversionPreprocessor`; FOL master layout v4. **WIP B** — `GET /content-modules` optional `groupCode` + `listAccessible`; list UI drops group picker, adds table group column. **Gate:** backend `mvn verify` BUILD SUCCESS (**614** Surefire, 1 skipped); frontend lint/type-check/test/build green (**571** Vitest). **Prior:** 2026-06-29 **P12-BDD-RISK-PROMPT-UX-001 Done**.
 **Activation note (2026-07-02):** **P12-BDD-RISK-PROMPT-UX-001 activated → In Progress** (BDD
 **BDD-TEMPLATE-RISK-PROMPT-UX-001** READY; supersedes P19-T08 group override + P19-T10 list-view
 panel + hardcoded decision categories). **No formal phase `In Progress`** — P19/P21/P12 catch-all

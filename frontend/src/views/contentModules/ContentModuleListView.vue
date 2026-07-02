@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
@@ -7,14 +7,12 @@ import PackageCatalogNotice from '@/components/catalog/PackageCatalogNotice.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
-import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import ContentModuleCreateDialog from '@/components/contentModules/ContentModuleCreateDialog.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useCapabilities } from '@/composables/useCapabilities'
-import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { contentModuleDetailPath } from '@/routing/routeKeys'
 import { useContentModulesStore } from '@/stores/contentModules'
@@ -28,16 +26,14 @@ const router = useRouter()
 const contentModulesStore = useContentModulesStore()
 const sessionStore = useSessionStore()
 const { authorContentModules } = useCapabilities()
-const { resolveDefaultGroupCode, ensureGroupCatalog } = useScopedGroupOptions()
 
-const selectedGroupCode = ref('')
-const groupSelectRef = ref<InstanceType<typeof ScopedGroupSelect> | null>(null)
 const createDialogOpen = ref(false)
 const currentPage = ref(1)
 
 const allModules = computed(() => contentModulesStore.modules)
 const { filters: columnFilters, filteredRows: filteredModules, hasActiveFilters, clearFilters } =
   useDataTableFilters(allModules, [
+    { key: 'groupCode', getValue: (row) => row.groupCode },
     { key: 'moduleCode', getValue: (row) => row.moduleCode },
     { key: 'name', getValue: (row) => row.name },
     { key: 'updatedAt', getValue: (row) => formatDateTime(row.updatedAt) },
@@ -58,29 +54,12 @@ const errorMessage = computed(() => {
 })
 
 onMounted(async () => {
-  await groupSelectRef.value?.prepare()
-  selectedGroupCode.value = resolveDefaultGroupCode('')
-  if (selectedGroupCode.value) {
-    await reloadModules()
-  }
-})
-
-watch(selectedGroupCode, async (groupCode) => {
-  if (!groupCode) {
-    contentModulesStore.modules = []
-    return
-  }
-  currentPage.value = 1
   await reloadModules()
 })
 
 async function reloadModules() {
-  if (!selectedGroupCode.value) {
-    return
-  }
   try {
-    await ensureGroupCatalog()
-    await contentModulesStore.fetchModules(selectedGroupCode.value)
+    await contentModulesStore.fetchModules()
   } catch {
     // Error surfaced via store message key.
   }
@@ -99,6 +78,7 @@ function handleCreated(moduleId: string) {
   router.push(contentModuleDetailPath(moduleId))
 }
 
+const sortByGroupCode = rowSortMethod<ContentModuleSummary>((row) => row.groupCode)
 const sortByModuleCode = rowSortMethod<ContentModuleSummary>((row) => row.moduleCode)
 const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updatedAt)
 </script>
@@ -118,16 +98,6 @@ const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updated
 
     <PackageCatalogNotice kind="contentModule" />
 
-    <section class="group-filter">
-      <el-form-item :label="t('contentModules.list.groupFilter')" label-position="left" class="group-filter-item">
-        <ScopedGroupSelect
-          ref="groupSelectRef"
-          v-model="selectedGroupCode"
-          :placeholder="t('contentModules.list.groupFilterPlaceholder')"
-        />
-      </el-form-item>
-    </section>
-
     <el-alert
       v-if="errorMessage"
       class="page-alert"
@@ -143,17 +113,20 @@ const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updated
 
     <el-skeleton v-if="contentModulesStore.loadingList" :rows="6" animated />
 
-    <EmptyStatePanel
-      v-else-if="!selectedGroupCode"
-      title-key="contentModules.list.selectGroupTitle"
-      description-key="contentModules.list.selectGroupDescription"
-    />
-
     <template v-else-if="!errorMessage && filteredModules.length > 0">
       <div v-if="hasActiveFilters" class="table-toolbar">
         <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
       </div>
       <AppDataTable activatable :data="paginatedModules" @row-click="activateModuleRow">
+        <el-table-column prop="groupCode" sortable :sort-method="sortByGroupCode" width="140">
+          <template #header>
+            <TableColumnHeader
+              :label="t('contentModules.list.columns.group')"
+              filter-key="groupCode"
+              v-model:filter="columnFilters.groupCode"
+            />
+          </template>
+        </el-table-column>
         <el-table-column prop="moduleCode" sortable :sort-method="sortByModuleCode" min-width="180">
           <template #header>
             <TableColumnHeader
@@ -193,7 +166,7 @@ const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updated
     </template>
 
     <EmptyStatePanel
-      v-else-if="selectedGroupCode && !contentModulesStore.loadingList && !errorMessage"
+      v-else-if="!contentModulesStore.loadingList && !errorMessage"
       title-key="contentModules.list.empty"
       description-key="contentModules.list.emptyDescription"
     />
@@ -230,19 +203,6 @@ const sortByUpdatedAt = rowSortMethod<ContentModuleSummary>((row) => row.updated
   margin: 0;
   font-size: 0.8125rem;
   color: var(--text-muted);
-}
-
-.group-filter {
-  margin-bottom: 1rem;
-}
-
-.group-filter-item {
-  margin-bottom: 0;
-
-  :deep(.el-form-item__label) {
-    font-weight: 600;
-    padding-right: 0.75rem;
-  }
 }
 
 .page-alert {

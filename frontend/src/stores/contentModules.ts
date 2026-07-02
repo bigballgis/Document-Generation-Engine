@@ -24,10 +24,10 @@ export const useContentModulesStore = defineStore('contentModules', () => {
   const lastErrorMessageKey = ref<string | null>(null)
   const activeGroupCode = ref('')
 
-  async function fetchModules(groupCode: string): Promise<void> {
+  async function fetchModules(groupCode?: string): Promise<void> {
     loadingList.value = true
     lastErrorMessageKey.value = null
-    activeGroupCode.value = groupCode
+    activeGroupCode.value = groupCode?.trim() ?? ''
     try {
       modules.value = await contentModulesApi.listContentModules(groupCode)
     } catch (error) {
@@ -63,7 +63,7 @@ export const useContentModulesStore = defineStore('contentModules', () => {
     try {
       const created = await contentModulesApi.createContentModule(payload)
       applyUpdatedModule(created)
-      if (activeGroupCode.value === payload.groupCode) {
+      if (!activeGroupCode.value || activeGroupCode.value === payload.groupCode) {
         modules.value = [toSummary(created), ...modules.value.filter((item) => item.moduleId !== created.moduleId)]
       }
       return created

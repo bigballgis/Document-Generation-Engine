@@ -57,10 +57,13 @@ public class ContentModuleController {
 
     @GetMapping
     public SuccessEnvelope<List<ContentModuleSummaryView>> list(
-            @RequestParam String groupCode,
+            @RequestParam(required = false) String groupCode,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
+        if (groupCode == null || groupCode.isBlank()) {
+            return envelope(request, contentModuleService.listAccessible(session));
+        }
         return envelope(request, contentModuleService.list(groupCode, session));
     }
 

@@ -130,6 +130,20 @@ class ContentModuleServiceTest {
     }
 
     @Test
+    void listAccessible_returnsModulesAcrossAuthorizedGroups() {
+        when(groupAccessService.canBrowseContentModuleCatalog(author)).thenReturn(true);
+        when(groupAccessService.accessibleGroupCodes(author)).thenReturn(List.of("RETAIL", "WHOLESALE"));
+        when(moduleRepository.findByGroupCodeInAndDeletedAtIsNullOrderByUpdatedAtDesc(List.of("RETAIL", "WHOLESALE")))
+                .thenReturn(List.of(module));
+        when(moduleRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc()).thenReturn(List.of(module));
+
+        var result = service.listAccessible(author);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().groupCode()).isEqualTo("RETAIL");
+    }
+
+    @Test
     void list_rejectsBlankGroupCode() {
         when(groupAccessService.canBrowseContentModuleCatalog(author)).thenReturn(true);
 

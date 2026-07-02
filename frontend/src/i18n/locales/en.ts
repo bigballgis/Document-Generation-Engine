@@ -1753,14 +1753,11 @@ export default {
     list: {
       title: 'Standard clauses',
       description:
-        'Browse reusable standard clauses for your authorized groups. Filter by group, then open a clause to manage versions and review workflow.',
-      groupFilter: 'Group',
-      groupFilterPlaceholder: 'Select group',
-      selectGroupTitle: 'Select a group',
-      selectGroupDescription: 'Choose an authorized group to load content modules.',
-      empty: 'No content modules in this group.',
+        'Browse reusable standard clauses for your authorized groups. Filter by group in the table, then open a clause to manage versions and review workflow.',
+      empty: 'No standard clauses yet.',
       emptyDescription: 'Create a module to start authoring reusable clause content.',
       columns: {
+        group: 'Group',
         moduleCode: 'Module code',
         name: 'Name',
         updatedAt: 'Last updated',

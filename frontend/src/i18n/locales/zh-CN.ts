@@ -1731,14 +1731,11 @@ export default {
     list: {
       title: '标准条款',
       description:
-        '浏览授权分组内可复用的标准条款。按分组筛选后打开条款以管理版本与审批流程。',
-      groupFilter: '分组',
-      groupFilterPlaceholder: '选择分组',
-      selectGroupTitle: '选择分组',
-      selectGroupDescription: '请选择授权分组以加载标准条款。',
-      empty: '该分组暂无标准条款。',
+        '浏览授权分组内可复用的标准条款。在表格中按分组筛选后打开条款以管理版本与审批流程。',
+      empty: '暂无标准条款。',
       emptyDescription: '创建模块以开始编写可复用条款内容。',
       columns: {
+        group: '分组',
         moduleCode: '模块代码',
         name: '名称',
         updatedAt: '最后更新',
