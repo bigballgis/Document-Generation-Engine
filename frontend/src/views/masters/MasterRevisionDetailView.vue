@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import MasterReviewDialog from '@/components/masters/MasterReviewDialog.vue'
@@ -7,6 +7,7 @@ import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
 import MasterWorkflowBanner from '@/components/masters/MasterWorkflowBanner.vue'
 import MasterDesignerJourneyBlock from '@/components/journey/MasterDesignerJourneyBlock.vue'
+import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
@@ -18,6 +19,13 @@ import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { shouldShowMasterDesignerJourney } from '@/utils/masterDesignerJourney'
+import type { MasterDesignerWorkspaceNavigation } from '@/utils/masterDesignerWorkspaceLink'
+import {
+  MASTER_REVISION_WORKSPACE_TAB_LABEL_KEYS,
+  buildMasterRevisionWorkspaceQuery,
+  resolveMasterRevisionWorkspaceTabFromQuery,
+  type MasterRevisionWorkspaceTab,
+} from '@/views/masters/masterRevisionWorkspaceTabs'
 import type { MasterDocumentDetail, MasterReviewDecision } from '@/types/master'
 import { formatMasterRevisionLineLabel } from '@/utils/masterRevisionLineLabel'
 import { ElMessage } from 'element-plus'
@@ -34,6 +42,32 @@ const reviewDialogOpen = ref(false)
 const reviewMode = ref<MasterReviewDecision>('APPROVED')
 const loadFailed = ref(false)
 const downloading = ref(false)
+const activeWorkspaceTab = ref<MasterRevisionWorkspaceTab>(
+  resolveMasterRevisionWorkspaceTabFromQuery(route.query),
+)
+
+const workspaceTabs = computed(() =>
+  (['design', 'approval'] as const).map((name) => ({
+    name,
+    labelKey: MASTER_REVISION_WORKSPACE_TAB_LABEL_KEYS[name],
+  })),
+)
+
+watch(
+  () => route.query.workspaceTab,
+  () => {
+    activeWorkspaceTab.value = resolveMasterRevisionWorkspaceTabFromQuery(route.query)
+  },
+)
+
+watch(activeWorkspaceTab, (tab) => {
+  if (resolveMasterRevisionWorkspaceTabFromQuery(route.query) === tab) {
+    return
+  }
+  void router.replace({
+    query: buildMasterRevisionWorkspaceQuery(route.query, tab),
+  })
+})
 
 const masterId = computed(() => String(route.params.masterId ?? ''))
 const revisionLineId = computed(() => String(route.params.revisionLineId ?? ''))
@@ -109,8 +143,6 @@ const canWriteJourney = computed(
         workflowMaster.value.status !== 'PENDING_REVIEW',
     ),
 )
-
-const anchorsPanelRef = ref<HTMLElement | null>(null)
 
 const errorMessage = computed(() => {
   const key = mastersStore.lastErrorMessageKey
@@ -202,8 +234,12 @@ function formatReviewAction(action: string): string {
   return te(key) ? t(key) : action
 }
 
-function handleJourneyFocusAnchors() {
-  anchorsPanelRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+function handleJourneyOpenWorkspace(target: MasterDesignerWorkspaceNavigation) {
+  if (target === 'upload') {
+    router.push(masterDetailPath(masterId.value))
+    return
+  }
+  activeWorkspaceTab.value = target
 }
 </script>
 
@@ -224,7 +260,7 @@ function handleJourneyFocusAnchors() {
           {{ t('masters.revision.historicalReadOnlyHint') }}
         </p>
       </div>
-      <div v-if="revisionLine" class="header-actions">
+      <div v-if="revisionLine" class="header-meta">
         <MasterStatusBadge :status="revisionLine.status" />
         <el-tag v-if="isCurrentRevision" size="small" type="success">
           {{ t('masters.revisionLines.currentBadge') }}
@@ -232,20 +268,6 @@ function handleJourneyFocusAnchors() {
         <el-tag v-else size="small" type="info">
           {{ t('masters.revisionLines.historicalBadge') }}
         </el-tag>
-        <el-button :loading="downloading" @click="handleDownload">
-          {{ t('masters.download.action') }}
-        </el-button>
-        <el-button v-if="canSubmitForReview" type="primary" @click="submitReviewOpen = true">
-          {{ t('masters.submitReview.open') }}
-        </el-button>
-        <template v-if="canDecideReview">
-          <el-button type="success" @click="openReviewDialog('APPROVED')">
-            {{ t('masters.review.approve') }}
-          </el-button>
-          <el-button type="danger" @click="openReviewDialog('REJECTED')">
-            {{ t('masters.review.reject') }}
-          </el-button>
-        </template>
       </div>
     </header>
 
@@ -271,86 +293,112 @@ function handleJourneyFocusAnchors() {
         :current-revision-line-id="revisionLineId"
         :can-write="canWriteJourney"
         :is-current-revision="isCurrentRevision"
-        @upload="router.push(masterDetailPath(masterId))"
-        @submit-review="submitReviewOpen = true"
-        @focus-anchors="handleJourneyFocusAnchors"
+        :show-primary-cta="false"
+        enable-workspace-link
+        @open-workspace="handleJourneyOpenWorkspace"
       />
 
       <MasterWorkflowBanner v-if="workflowMaster" :master="workflowMaster" />
 
-      <section class="detail-grid">
-        <el-card shadow="never">
-          <template #header>
-            <span>{{ t('masters.revision.summaryTitle') }}</span>
+      <WorkspaceTabShell v-model="activeWorkspaceTab" :tabs="workspaceTabs">
+        <template #actions>
+          <template v-if="activeWorkspaceTab === 'design'">
+            <el-button :loading="downloading" @click="handleDownload">
+              {{ t('masters.download.action') }}
+            </el-button>
           </template>
-          <dl class="summary-list">
-            <div v-if="revisionLine.changeSummary">
-              <dt>{{ t('masters.revision.changeSummary') }}</dt>
-              <dd>{{ revisionLine.changeSummary }}</dd>
-            </div>
-            <div>
-              <dt>{{ t('masters.revision.updatedAt') }}</dt>
-              <dd>{{ new Date(revisionLine.updatedAt).toLocaleString() }}</dd>
-            </div>
-            <div>
-              <dt>{{ t('masters.revision.updatedBy') }}</dt>
-              <dd>{{ revisionLine.updatedBy }}</dd>
-            </div>
-          </dl>
-        </el-card>
-
-        <section id="anchors-panel" ref="anchorsPanelRef">
-        <el-card shadow="never">
-          <template #header>
-            <span>{{ t('masters.revision.anchorsTitle') }}</span>
+          <template v-else-if="activeWorkspaceTab === 'approval'">
+            <el-button v-if="canSubmitForReview" type="primary" @click="submitReviewOpen = true">
+              {{ t('masters.submitReview.open') }}
+            </el-button>
+            <template v-if="canDecideReview">
+              <el-button type="success" @click="openReviewDialog('APPROVED')">
+                {{ t('masters.review.approve') }}
+              </el-button>
+              <el-button type="danger" @click="openReviewDialog('REJECTED')">
+                {{ t('masters.review.reject') }}
+              </el-button>
+            </template>
           </template>
-          <AppDataTable v-if="filteredAnchors.length > 0" :data="filteredAnchors">
-            <el-table-column prop="anchorId" sortable min-width="160">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('masters.revision.anchorId')"
-                  v-model="anchorColumnFilters.anchorId"
-                />
-              </template>
-            </el-table-column>
-            <el-table-column prop="displayLabel" sortable min-width="220">
-              <template #header>
-                <TableColumnHeader
-                  :label="t('masters.revision.anchorLabel')"
-                  v-model="anchorColumnFilters.displayLabel"
-                />
-              </template>
-            </el-table-column>
-          </AppDataTable>
-          <el-empty v-else :description="t('masters.revision.noAnchors')" />
-        </el-card>
-        </section>
-      </section>
-
-      <el-card shadow="never" class="history-card">
-        <template #header>
-          <span>{{ t('masters.revision.reviewHistoryTitle') }}</span>
         </template>
-        <el-timeline v-if="revisionLine.reviewHistory.length > 0">
-          <el-timeline-item
-            v-for="(record, index) in revisionLine.reviewHistory"
-            :key="`${record.createdAt}-${index}`"
-            :timestamp="new Date(record.createdAt).toLocaleString()"
-          >
-            <p class="history-action">{{ formatReviewAction(record.action) }}</p>
-            <p v-if="record.changeSummary" class="history-text">
-              {{ t('masters.revision.changeSummary') }}: {{ record.changeSummary }}
-            </p>
-            <p v-if="record.commentSummary" class="history-text">
-              {{ t('masters.review.commentSummary') }}: {{ record.commentSummary }}
-            </p>
-            <p class="history-actor">
-              {{ t('masters.revision.actorLabel', { username: record.actorUsername }) }}
-            </p>
-          </el-timeline-item>
-        </el-timeline>
-        <el-empty v-else :description="t('masters.revision.noReviewHistory')" />
-      </el-card>
+
+        <template #design>
+          <section class="detail-grid">
+            <el-card shadow="never">
+              <template #header>
+                <span>{{ t('masters.revision.summaryTitle') }}</span>
+              </template>
+              <dl class="summary-list">
+                <div v-if="revisionLine.changeSummary">
+                  <dt>{{ t('masters.revision.changeSummary') }}</dt>
+                  <dd>{{ revisionLine.changeSummary }}</dd>
+                </div>
+                <div>
+                  <dt>{{ t('masters.revision.updatedAt') }}</dt>
+                  <dd>{{ new Date(revisionLine.updatedAt).toLocaleString() }}</dd>
+                </div>
+                <div>
+                  <dt>{{ t('masters.revision.updatedBy') }}</dt>
+                  <dd>{{ revisionLine.updatedBy }}</dd>
+                </div>
+              </dl>
+            </el-card>
+
+            <el-card shadow="never">
+              <template #header>
+                <span>{{ t('masters.revision.anchorsTitle') }}</span>
+              </template>
+              <AppDataTable v-if="filteredAnchors.length > 0" :data="filteredAnchors">
+                <el-table-column prop="anchorId" sortable min-width="160">
+                  <template #header>
+                    <TableColumnHeader
+                      :label="t('masters.revision.anchorId')"
+                      v-model="anchorColumnFilters.anchorId"
+                    />
+                  </template>
+                </el-table-column>
+                <el-table-column prop="displayLabel" sortable min-width="220">
+                  <template #header>
+                    <TableColumnHeader
+                      :label="t('masters.revision.anchorLabel')"
+                      v-model="anchorColumnFilters.displayLabel"
+                    />
+                  </template>
+                </el-table-column>
+              </AppDataTable>
+              <el-empty v-else :description="t('masters.revision.noAnchors')" />
+            </el-card>
+          </section>
+        </template>
+
+        <template #approval>
+          <p class="approval-hint">{{ t('masters.revisionWorkspace.approvalHint') }}</p>
+          <el-card shadow="never" class="history-card">
+            <template #header>
+              <span>{{ t('masters.revision.reviewHistoryTitle') }}</span>
+            </template>
+            <el-timeline v-if="revisionLine.reviewHistory.length > 0">
+              <el-timeline-item
+                v-for="(record, index) in revisionLine.reviewHistory"
+                :key="`${record.createdAt}-${index}`"
+                :timestamp="new Date(record.createdAt).toLocaleString()"
+              >
+                <p class="history-action">{{ formatReviewAction(record.action) }}</p>
+                <p v-if="record.changeSummary" class="history-text">
+                  {{ t('masters.revision.changeSummary') }}: {{ record.changeSummary }}
+                </p>
+                <p v-if="record.commentSummary" class="history-text">
+                  {{ t('masters.review.commentSummary') }}: {{ record.commentSummary }}
+                </p>
+                <p class="history-actor">
+                  {{ t('masters.revision.actorLabel', { username: record.actorUsername }) }}
+                </p>
+              </el-timeline-item>
+            </el-timeline>
+            <el-empty v-else :description="t('masters.revision.noReviewHistory')" />
+          </el-card>
+        </template>
+      </WorkspaceTabShell>
     </template>
 
     <MasterSubmitReviewDialog v-model="submitReviewOpen" @submit="handleSubmitReview" />
@@ -393,11 +441,17 @@ function handleJourneyFocusAnchors() {
   color: var(--text-muted);
 }
 
-.header-actions {
+.header-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
+}
+
+.approval-hint {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }
 
 .detail-grid {
@@ -426,7 +480,7 @@ function handleJourneyFocusAnchors() {
 }
 
 .history-card {
-  margin-top: 1rem;
+  margin-top: 0;
 }
 
 .history-action {

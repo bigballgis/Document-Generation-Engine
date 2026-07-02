@@ -14,10 +14,14 @@ vi.mock('@/api/masters', () => ({
 }))
 
 const routerPush = vi.fn()
+const routerReplace = vi.fn()
 
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: { masterId: 'master-1', revisionLineId: 'revision-1' } }),
-  useRouter: () => ({ push: routerPush }),
+  useRoute: () => ({
+    params: { masterId: 'master-1', revisionLineId: 'revision-1' },
+    query: {},
+  }),
+  useRouter: () => ({ push: routerPush, replace: routerReplace }),
 }))
 
 vi.mock('@/auth/roles', async (importOriginal) => {
@@ -43,6 +47,7 @@ describe('MasterRevisionDetailView', () => {
       capabilities: { manageMasters: true },
     } as never
     routerPush.mockReset()
+    routerReplace.mockReset()
     vi.mocked(mastersApi.getMaster).mockReset()
     vi.mocked(mastersApi.getMasterRevisionLine).mockReset()
   })
@@ -99,7 +104,7 @@ describe('MasterRevisionDetailView', () => {
     expect(wrapper.text()).toContain('Historical')
     expect(wrapper.text()).toContain('Anchor catalog')
     expect(wrapper.text()).toContain('Header block')
-    expect(wrapper.find('.header-actions').text()).not.toContain('Submit for review')
+    expect(wrapper.find('.workspace-tab-shell__actions').text()).not.toContain('Submit for review')
     expect(wrapper.find('[data-master-journey-cta]').exists()).toBe(false)
   })
 
@@ -202,6 +207,10 @@ describe('MasterRevisionDetailView', () => {
     await flushPromises()
 
     expect(wrapper.find('[data-journey-timeline]').exists()).toBe(true)
-    expect(wrapper.find('[data-master-journey-cta]').text()).toBe('Submit for review')
+    expect(wrapper.find('[data-master-journey-cta]').exists()).toBe(false)
+    const approvalTab = wrapper.findAll('.el-tabs__item').find((tab) => tab.text().includes('Master approval'))
+    expect(approvalTab).toBeTruthy()
+    await approvalTab!.trigger('click')
+    expect(wrapper.find('.workspace-tab-shell__actions').text()).toContain('Submit for review')
   })
 })

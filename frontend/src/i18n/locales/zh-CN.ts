@@ -239,6 +239,9 @@ export default {
         description: '根据测试或审批反馈修改后，重新提交测试。',
       },
     },
+    journey: {
+      openWorkspace: '打开工作区',
+    },
     quickLinks: {
       title: '文档目录',
       templates: '模板',
@@ -411,6 +414,14 @@ export default {
       noReviewHistory: '暂无审核记录。',
       actorLabel: '操作人 {username}',
     },
+    revisionWorkspace: {
+      openWorkspace: '打开修订工作区',
+      tabs: {
+        design: '主文档设计',
+        approval: '主文档审批',
+      },
+      approvalHint: '使用上方操作按钮提交或决定此主文档审核。',
+    },
     status: {
       DRAFT: '草稿',
       PENDING_REVIEW: '待审核',
@@ -419,7 +430,7 @@ export default {
     },
     workflow: {
       actionRequired: '审核工作流 — 需要操作',
-      useReviewPanel: '请使用页头审核操作完成此主文档审核步骤。',
+      useReviewPanel: '请使用「主文档审批」工作区页签上的操作按钮完成此步骤。',
       submitReview: {
         title: '提交主文档审核',
         description: '完善元数据与文件后提交审核。',
@@ -1788,6 +1799,14 @@ export default {
         changeDescription: '变更说明',
         updatedAt: '最后更新',
       },
+    },
+    workspace: {
+      tabs: {
+        versions: '版本',
+        content: '内容预览',
+        lifecycle: '审批与生命周期',
+      },
+      lifecycleHint: '使用上方操作按钮提交、审批、驳回或执行生命周期操作。',
     },
     reviewState: {
       DRAFT: '编写中',

@@ -19,9 +19,12 @@ vi.mock('@/api/contentModules', () => ({
   applyContentModuleLifecycleOperation: vi.fn(),
 }))
 
+const routerPush = vi.fn()
+const routerReplace = vi.fn()
+
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: { moduleId: 'MOD-LOAN-DISCLOSURE' } }),
-  useRouter: () => ({ push: vi.fn() }),
+  useRoute: () => ({ params: { moduleId: 'MOD-LOAN-DISCLOSURE' }, query: {} }),
+  useRouter: () => ({ push: routerPush, replace: routerReplace }),
 }))
 
 function patchSession(roles: string[]) {
@@ -83,8 +86,9 @@ describe('ContentModuleDetailView', () => {
 
     expect(wrapper.text()).toContain('Loan disclosure')
     expect(wrapper.text()).toContain('1.0.0')
-    expect(wrapper.text()).toContain('Approve')
-    expect(wrapper.text()).toContain('Reject')
+    await wrapper.find('.workspace-tab-shell').findAll('.el-tabs__item')[2].trigger('click')
+    expect(wrapper.find('.workspace-tab-shell__actions').text()).toContain('Approve')
+    expect(wrapper.find('.workspace-tab-shell__actions').text()).toContain('Reject')
   })
 
   it('shows lifecycle actions for group admin when approved active version exists', async () => {
@@ -115,6 +119,7 @@ describe('ContentModuleDetailView', () => {
     patchSession(['GROUP_ADMIN'])
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Stop module')
+    await wrapper.find('.workspace-tab-shell').findAll('.el-tabs__item')[2].trigger('click')
+    expect(wrapper.find('.workspace-tab-shell__actions').text()).toContain('Stop module')
   })
 })

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import ContentModuleLifecycleImpactDialog from '@/components/contentModules/ContentModuleLifecycleImpactDialog.vue'
 import ContentModuleStatusBadge from '@/components/contentModules/ContentModuleStatusBadge.vue'
 import ContentModuleVersionDialog from '@/components/contentModules/ContentModuleVersionDialog.vue'
@@ -30,6 +31,12 @@ import type {
 import { DEFAULT_STRUCTURED_CONTENT_JSON, serializeStructuredContent } from '@/utils/structuredContentNodes'
 import { normalizeStructuredContentJson } from '@/utils/structuredContentCompat'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  CONTENT_MODULE_WORKSPACE_TAB_LABEL_KEYS,
+  buildContentModuleWorkspaceQuery,
+  resolveContentModuleWorkspaceTabFromQuery,
+  type ContentModuleWorkspaceTab,
+} from '@/views/contentModules/contentModuleWorkspaceTabs'
 
 const { t, te } = useI18n()
 const route = useRoute()
@@ -46,6 +53,32 @@ const versionDialogMode = ref<'create' | 'edit'>('create')
 const selectedVersion = ref<ContentModuleVersion | null>(null)
 const impactDialogOpen = ref(false)
 const pendingLifecycleOperation = ref<ContentModuleLifecycleOperation | null>(null)
+const activeWorkspaceTab = ref<ContentModuleWorkspaceTab>(
+  resolveContentModuleWorkspaceTabFromQuery(route.query),
+)
+
+const workspaceTabs = computed(() =>
+  (['versions', 'content', 'lifecycle'] as const).map((name) => ({
+    name,
+    labelKey: CONTENT_MODULE_WORKSPACE_TAB_LABEL_KEYS[name],
+  })),
+)
+
+watch(
+  () => route.query.workspaceTab,
+  () => {
+    activeWorkspaceTab.value = resolveContentModuleWorkspaceTabFromQuery(route.query)
+  },
+)
+
+watch(activeWorkspaceTab, (tab) => {
+  if (resolveContentModuleWorkspaceTabFromQuery(route.query) === tab) {
+    return
+  }
+  void router.replace({
+    query: buildContentModuleWorkspaceQuery(route.query, tab),
+  })
+})
 
 const moduleId = computed(() => String(route.params.moduleId ?? ''))
 const detail = computed(() => contentModulesStore.selectedModule)
@@ -317,34 +350,6 @@ async function handleVersionSaved() {
         </p>
         <p v-if="detail?.description" class="description">{{ detail.description }}</p>
       </div>
-      <div v-if="detail" class="header-actions">
-        <el-button v-if="canEditDraft" @click="openEditDraftDialog">
-          {{ t('contentModules.version.editDraft') }}
-        </el-button>
-        <el-button v-if="canCreateVersion" @click="openCreateVersionDialog">
-          {{ t('contentModules.version.create') }}
-        </el-button>
-        <el-button v-if="canSubmitReview" type="primary" @click="handleSubmitReview">
-          {{ t('contentModules.review.submit') }}
-        </el-button>
-        <template v-if="canApproveReview">
-          <el-button type="success" @click="handleApproveReview">
-            {{ t('contentModules.review.approve') }}
-          </el-button>
-          <el-button type="danger" @click="handleRejectReview">
-            {{ t('contentModules.review.reject') }}
-          </el-button>
-        </template>
-        <el-button v-if="canStop" type="warning" @click="openLifecycleImpact('STOP_USE')">
-          {{ t('contentModules.lifecycle.stop') }}
-        </el-button>
-        <el-button v-if="canRecover" @click="openLifecycleImpact('RECOVER')">
-          {{ t('contentModules.lifecycle.recover') }}
-        </el-button>
-        <el-button v-if="canDeprecate" type="danger" plain @click="openLifecycleImpact('DEPRECATE')">
-          {{ t('contentModules.lifecycle.deprecate') }}
-        </el-button>
-      </div>
     </header>
 
     <LoadErrorPanel
@@ -356,40 +361,89 @@ async function handleVersionSaved() {
     <el-skeleton v-else-if="contentModulesStore.loadingDetail" :rows="8" animated />
 
     <template v-else-if="detail">
-      <section class="versions-section">
-        <h2>{{ t('contentModules.detail.versionsTitle') }}</h2>
-        <AppDataTable v-if="versions.length > 0" :data="versions">
-          <el-table-column prop="semanticVersion" :label="t('contentModules.detail.columns.version')" width="140" />
-          <el-table-column :label="t('contentModules.detail.columns.status')" width="180">
-            <template #default="{ row }">
-              <ContentModuleStatusBadge
-                :review-state="row.reviewState"
-                :lifecycle-state="row.lifecycleState"
-              />
+      <WorkspaceTabShell v-model="activeWorkspaceTab" :tabs="workspaceTabs">
+        <template #actions>
+          <template v-if="activeWorkspaceTab === 'versions'">
+            <el-button v-if="canEditDraft" @click="openEditDraftDialog">
+              {{ t('contentModules.version.editDraft') }}
+            </el-button>
+            <el-button v-if="canCreateVersion" @click="openCreateVersionDialog">
+              {{ t('contentModules.version.create') }}
+            </el-button>
+          </template>
+          <template v-else-if="activeWorkspaceTab === 'content'">
+            <el-button v-if="canEditDraft" @click="openEditDraftDialog">
+              {{ t('contentModules.version.editDraft') }}
+            </el-button>
+          </template>
+          <template v-else-if="activeWorkspaceTab === 'lifecycle'">
+            <el-button v-if="canSubmitReview" type="primary" @click="handleSubmitReview">
+              {{ t('contentModules.review.submit') }}
+            </el-button>
+            <template v-if="canApproveReview">
+              <el-button type="success" @click="handleApproveReview">
+                {{ t('contentModules.review.approve') }}
+              </el-button>
+              <el-button type="danger" @click="handleRejectReview">
+                {{ t('contentModules.review.reject') }}
+              </el-button>
             </template>
-          </el-table-column>
-          <el-table-column prop="changeDescription" :label="t('contentModules.detail.columns.changeDescription')" min-width="220" />
-          <el-table-column :label="t('contentModules.detail.columns.updatedAt')" width="200">
-            <template #default="{ row }">
-              {{ formatDateTime(row.updatedAt) }}
-            </template>
-          </el-table-column>
-        </AppDataTable>
-        <EmptyStatePanel
-          v-else
-          title-key="contentModules.detail.noVersions"
-          description-key="contentModules.detail.noVersionsDescription"
-        />
-      </section>
+            <el-button v-if="canStop" type="warning" @click="openLifecycleImpact('STOP_USE')">
+              {{ t('contentModules.lifecycle.stop') }}
+            </el-button>
+            <el-button v-if="canRecover" @click="openLifecycleImpact('RECOVER')">
+              {{ t('contentModules.lifecycle.recover') }}
+            </el-button>
+            <el-button v-if="canDeprecate" type="danger" plain @click="openLifecycleImpact('DEPRECATE')">
+              {{ t('contentModules.lifecycle.deprecate') }}
+            </el-button>
+          </template>
+        </template>
 
-      <section v-if="previewVersion" class="content-preview-section">
-        <h2>{{ t('contentModules.detail.contentPreviewTitle') }}</h2>
-        <p class="preview-meta">{{ previewVersionLabel }}</p>
-        <ControlledStructuredContentEditor
-          :model-value="previewContentJson"
-          readonly
-        />
-      </section>
+        <template #versions>
+          <AppDataTable v-if="versions.length > 0" :data="versions">
+            <el-table-column prop="semanticVersion" :label="t('contentModules.detail.columns.version')" width="140" />
+            <el-table-column :label="t('contentModules.detail.columns.status')" width="180">
+              <template #default="{ row }">
+                <ContentModuleStatusBadge
+                  :review-state="row.reviewState"
+                  :lifecycle-state="row.lifecycleState"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column prop="changeDescription" :label="t('contentModules.detail.columns.changeDescription')" min-width="220" />
+            <el-table-column :label="t('contentModules.detail.columns.updatedAt')" width="200">
+              <template #default="{ row }">
+                {{ formatDateTime(row.updatedAt) }}
+              </template>
+            </el-table-column>
+          </AppDataTable>
+          <EmptyStatePanel
+            v-else
+            title-key="contentModules.detail.noVersions"
+            description-key="contentModules.detail.noVersionsDescription"
+          />
+        </template>
+
+        <template #content>
+          <template v-if="previewVersion">
+            <p class="preview-meta">{{ previewVersionLabel }}</p>
+            <ControlledStructuredContentEditor
+              :model-value="previewContentJson"
+              readonly
+            />
+          </template>
+          <EmptyStatePanel
+            v-else
+            title-key="contentModules.detail.noVersions"
+            description-key="contentModules.detail.noVersionsDescription"
+          />
+        </template>
+
+        <template #lifecycle>
+          <p class="lifecycle-hint">{{ t('contentModules.workspace.lifecycleHint') }}</p>
+        </template>
+      </WorkspaceTabShell>
     </template>
 
     <ContentModuleVersionDialog
@@ -435,31 +489,7 @@ async function handleVersionSaved() {
   color: var(--text-muted);
 }
 
-.header-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.versions-section {
-  h2 {
-    margin: 0 0 0.75rem;
-    font-size: 1.0625rem;
-    font-weight: 650;
-  }
-}
-
-.content-preview-section {
-  margin-top: 2rem;
-
-  h2 {
-    margin: 0 0 0.75rem;
-    font-size: 1.0625rem;
-    font-weight: 650;
-  }
-}
-
+.lifecycle-hint,
 .preview-meta {
   margin: 0 0 0.75rem;
   color: var(--text-muted);

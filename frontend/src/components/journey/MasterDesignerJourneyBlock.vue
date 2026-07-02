@@ -10,6 +10,10 @@ import {
   resolveMasterDesignerJourneyIndex,
   type MasterDesignerJourneyContext,
 } from '@/utils/masterDesignerJourney'
+import {
+  resolveMasterDesignerWorkspaceNavigation,
+  type MasterDesignerWorkspaceNavigation,
+} from '@/utils/masterDesignerWorkspaceLink'
 
 const props = withDefaults(
   defineProps<{
@@ -18,10 +22,14 @@ const props = withDefaults(
     currentRevisionLineId?: string
     canWrite?: boolean
     isCurrentRevision?: boolean
+    showPrimaryCta?: boolean
+    enableWorkspaceLink?: boolean
   }>(),
   {
     canWrite: false,
     isCurrentRevision: true,
+    showPrimaryCta: true,
+    enableWorkspaceLink: false,
   },
 )
 
@@ -29,6 +37,7 @@ const emit = defineEmits<{
   upload: []
   submitReview: []
   focusAnchors: []
+  openWorkspace: [target: MasterDesignerWorkspaceNavigation]
 }>()
 
 const { t } = useI18n()
@@ -36,8 +45,9 @@ const router = useRouter()
 
 const resolution = computed(() => resolveMasterDesignerJourneyIndex(props.journeyContext))
 
-const showPrimaryCta = computed(
+const showPrimaryCtaButton = computed(
   () =>
+    props.showPrimaryCta &&
     props.canWrite &&
     props.isCurrentRevision &&
     resolution.value.currentStepIndex !== null &&
@@ -48,6 +58,12 @@ const ctaKey = computed(() => {
   const stepId = resolution.value.activeStepId
   return stepId ? masterDesignerStepCtaKey(stepId) : ''
 })
+
+const workspaceNavigation = computed(() =>
+  props.enableWorkspaceLink
+    ? resolveMasterDesignerWorkspaceNavigation(resolution.value.activeStepId)
+    : null,
+)
 
 function handleCtaClick() {
   const stepId = resolution.value.activeStepId
@@ -77,6 +93,14 @@ function handleCtaClick() {
   }
 }
 
+function handleWorkspaceLink() {
+  const target = workspaceNavigation.value
+  if (!target) {
+    return
+  }
+  emit('openWorkspace', target)
+}
+
 async function openCurrentRevision() {
   if (props.currentRevisionLineId) {
     router.push(masterRevisionDetailPath(props.masterId, props.currentRevisionLineId))
@@ -93,7 +117,7 @@ async function openCurrentRevision() {
   >
     <template #after>
       <el-button
-        v-if="showPrimaryCta && ctaKey"
+        v-if="showPrimaryCta && showPrimaryCtaButton && ctaKey"
         type="primary"
         data-master-journey-cta
         @click="handleCtaClick"
@@ -102,6 +126,7 @@ async function openCurrentRevision() {
       </el-button>
       <el-button
         v-else-if="
+          showPrimaryCta &&
           resolution.guidanceKey === 'journey.roles.MASTER_DESIGNER.complete.guidance'
         "
         link
@@ -109,6 +134,15 @@ async function openCurrentRevision() {
         @click="router.push(masterRevisionDetailPath(masterId, currentRevisionLineId ?? ''))"
       >
         {{ t('journey.roles.MASTER_DESIGNER.complete.cta') }}
+      </el-button>
+      <el-button
+        v-else-if="enableWorkspaceLink && workspaceNavigation"
+        link
+        type="primary"
+        data-master-journey-workspace-link
+        @click="handleWorkspaceLink"
+      >
+        {{ t('masters.revisionWorkspace.openWorkspace') }}
       </el-button>
     </template>
   </RoleJourneyTimeline>

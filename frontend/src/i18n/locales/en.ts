@@ -245,6 +245,9 @@ export default {
           'Address test or approval feedback, then submit for testing again.',
       },
     },
+    journey: {
+      openWorkspace: 'Open workspace',
+    },
     quickLinks: {
       title: 'Document catalogs',
       templates: 'Templates',
@@ -418,6 +421,14 @@ export default {
       noReviewHistory: 'No review activity yet.',
       actorLabel: 'By {username}',
     },
+    revisionWorkspace: {
+      openWorkspace: 'Open revision workspace',
+      tabs: {
+        design: 'Master design',
+        approval: 'Master approval',
+      },
+      approvalHint: 'Use the action buttons above to submit or decide this master review.',
+    },
     status: {
       DRAFT: 'Draft',
       PENDING_REVIEW: 'Pending review',
@@ -426,7 +437,7 @@ export default {
     },
     workflow: {
       actionRequired: 'Review workflow — action required',
-      useReviewPanel: 'Use the review actions in the page header to complete this master review step.',
+      useReviewPanel: 'Use the review actions on the Master approval workspace tab to complete this step.',
       submitReview: {
         title: 'Submit master for review',
         description: 'Finish metadata and file fixes, then submit this master for approval.',
@@ -1811,6 +1822,14 @@ export default {
         changeDescription: 'Change description',
         updatedAt: 'Last updated',
       },
+    },
+    workspace: {
+      tabs: {
+        versions: 'Versions',
+        content: 'Content preview',
+        lifecycle: 'Review & lifecycle',
+      },
+      lifecycleHint: 'Use the action buttons above to submit, approve, reject, or apply lifecycle operations.',
     },
     reviewState: {
       DRAFT: 'Draft',
