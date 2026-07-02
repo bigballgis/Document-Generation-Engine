@@ -115,5 +115,6 @@ Write-Host "  Templates: $(@($remainingTemplates | ForEach-Object { $_.externalI
 Write-Host "  Masters  : $(@($remainingMasters | ForEach-Object { $_.name }) -join ', ')"
 if (-not $WhatIf) {
     Write-Host ""
-    Write-Host "Tip: set DOCGEN_SEED_DEMO_CATALOG=false on docgen-backend so RETAIL demo is not re-seeded on restart."
+    Write-Host "Tip: Playwright E2E fixtures use E2E-* prefixes; global-teardown removes them after test runs."
+    Write-Host "      Set DOCGEN_IMPORT_FOL_DEMO=true only when you need to seed/refresh CORP-FOL-OFFER."
 }

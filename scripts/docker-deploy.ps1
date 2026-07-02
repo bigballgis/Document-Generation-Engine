@@ -123,19 +123,21 @@ try {
     $templateCount = @($templates.result).Count
     Write-Host "  Catalog: $masterCount master(s), $templateCount template(s)"
     if ($masterCount -eq 0) {
-        Write-Host "  Warning: catalog is empty. Set DOCGEN_SEED_DEMO_CATALOG=true and recreate docgen-backend."
+        Write-Host "  Warning: catalog is empty. Set DOCGEN_IMPORT_FOL_DEMO=true and redeploy to seed CORP-FOL-OFFER."
     }
 } catch {
     Write-Host "  Warning: could not verify catalog via API: $($_.Exception.Message)"
 }
 
-if ($env:DOCGEN_IMPORT_FOL_DEMO -ne 'false') {
+if ($env:DOCGEN_IMPORT_FOL_DEMO -eq 'true') {
     Write-Host "==> Importing wholesale FOL executive demo (SQL + API)..."
     & "$RepoRoot/deploy/demo-fol/import-fol-demo.ps1" -BackendUrl "http://localhost:$backendPort"
     if ($LASTEXITCODE -ne 0) {
         Write-Error "FOL demo import failed. See deploy/demo-fol/import-fol-demo.ps1"
         exit 1
     }
+} else {
+    Write-Host "  FOL demo import skipped (set DOCGEN_IMPORT_FOL_DEMO=true to seed/refresh CORP-FOL-OFFER)."
 }
 
 Write-Host ""

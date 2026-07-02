@@ -8,6 +8,7 @@ export default defineConfig({
   timeout: 60_000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
+  globalTeardown: './e2e/global-teardown.ts',
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report/docker' }]],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173',

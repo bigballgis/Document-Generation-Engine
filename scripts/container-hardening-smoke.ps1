@@ -119,7 +119,7 @@ docker run -d --name $backendName `
     -e MINIO_ENDPOINT=http://docgen-minio:9000 `
     -e JWT_SECRET=$(if ($env:JWT_SECRET) { $env:JWT_SECRET } else { 'prod-change-me-32-bytes-minimum-secret' }) `
     -e APP_ENVIRONMENT=prod `
-    -e DOCGEN_SEED_DEMO_CATALOG=true `
+    -e DOCGEN_SEED_DEMO_CATALOG=false `
     -e JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=/tmp `
     -p "${backendPort}:8080" `
     $backendImage
