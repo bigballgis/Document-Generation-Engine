@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -63,6 +64,7 @@ public class MasterDocumentEntity {
     private UUID currentRevisionLineId;
 
     @OneToMany(mappedBy = "master", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("documentSequence ASC")
     private List<MasterAnchorEntity> anchors = new ArrayList<>();
 
     protected MasterDocumentEntity() {

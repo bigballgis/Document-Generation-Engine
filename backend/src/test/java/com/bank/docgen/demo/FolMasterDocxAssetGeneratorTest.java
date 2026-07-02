@@ -4,11 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.rendering.DocxWordCompatibilitySupport;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.poi.wp.usermodel.HeaderFooterType;
@@ -28,6 +32,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType;
 /**
  * Build-time helper only — writes the wholesale FOL master DOCX asset under {@code deploy/demo-fol/assets/}.
  * The master is a layout container: page margins, headers, footers, and section-level anchors (ADR-0019).
+ * Anchor ids are generated from {@code deploy/demo-fol/generate-fol-catalog.ps1} (hybrid clause/schedule names).
  */
 class FolMasterDocxAssetGeneratorTest {
 
@@ -36,67 +41,18 @@ class FolMasterDocxAssetGeneratorTest {
 
     private static final Path ASSET_PATH = Path.of("..", "deploy", "demo-fol", "assets", "wholesale-fol-master.docx");
 
-    static final List<String> ANCHOR_IDS = List.of(
-            "FOL_HEADER",
-            "FOL_FACILITY_SUMMARY",
-            "FOL_SEC_01", "FOL_SEC_02", "FOL_SEC_03", "FOL_SEC_04", "FOL_SEC_05",
-            "FOL_SEC_06", "FOL_SEC_07", "FOL_SEC_08", "FOL_SEC_09", "FOL_SEC_10",
-            "FOL_SEC_11", "FOL_SEC_12", "FOL_SEC_13", "FOL_SEC_14", "FOL_SEC_15",
-            "FOL_SEC_16", "FOL_SEC_17", "FOL_SEC_18", "FOL_SEC_19", "FOL_SEC_20",
-            "FOL_SEC_21", "FOL_SEC_22", "FOL_SEC_23", "FOL_SEC_24", "FOL_SEC_25",
-            "FOL_SEC_26", "FOL_SEC_27", "FOL_SEC_28", "FOL_SEC_29", "FOL_SEC_30",
-            "FOL_SCH_01", "FOL_SCH_02", "FOL_SCH_03", "FOL_SCH_04", "FOL_SCH_05", "FOL_SCH_06",
-            "FOL_SIG_BORROWER",
-            "FOL_SIG_LENDER"
-    );
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    static final Map<String, String> SECTION_TITLES = Map.ofEntries(
-            Map.entry("FOL_HEADER", "Letter Header"),
-            Map.entry("FOL_FACILITY_SUMMARY", "Schedule — Facility Particulars (Summary)"),
-            Map.entry("FOL_SEC_01", "1. Definitions and Interpretation"),
-            Map.entry("FOL_SEC_02", "2. The Facility"),
-            Map.entry("FOL_SEC_03", "3. Purpose"),
-            Map.entry("FOL_SEC_04", "4. Conditions of Utilisation"),
-            Map.entry("FOL_SEC_05", "5. Utilisation"),
-            Map.entry("FOL_SEC_06", "6. Repayment"),
-            Map.entry("FOL_SEC_07", "7. Prepayment and Cancellation"),
-            Map.entry("FOL_SEC_08", "8. Interest"),
-            Map.entry("FOL_SEC_09", "9. Interest Periods"),
-            Map.entry("FOL_SEC_10", "10. Changes to the Calculation of Interest"),
-            Map.entry("FOL_SEC_11", "11. Fees"),
-            Map.entry("FOL_SEC_12", "12. Tax Gross-Up and Indemnities"),
-            Map.entry("FOL_SEC_13", "13. Increased Costs"),
-            Map.entry("FOL_SEC_14", "14. Other Indemnities"),
-            Map.entry("FOL_SEC_15", "15. Mitigation by the Lenders"),
-            Map.entry("FOL_SEC_16", "16. Costs and Expenses"),
-            Map.entry("FOL_SEC_17", "17. Guarantee and Indemnity"),
-            Map.entry("FOL_SEC_18", "18. Representations"),
-            Map.entry("FOL_SEC_19", "19. Information Undertakings"),
-            Map.entry("FOL_SEC_20", "20. Financial Covenants"),
-            Map.entry("FOL_SEC_21", "21. General Undertakings"),
-            Map.entry("FOL_SEC_22", "22. Events of Default"),
-            Map.entry("FOL_SEC_23", "23. Changes to the Lenders"),
-            Map.entry("FOL_SEC_24", "24. The Agent and the Arrangers"),
-            Map.entry("FOL_SEC_25", "25. Conduct of Business by the Finance Parties"),
-            Map.entry("FOL_SEC_26", "26. Sharing among the Finance Parties"),
-            Map.entry("FOL_SEC_27", "27. Payment Mechanics"),
-            Map.entry("FOL_SEC_28", "28. Set-Off"),
-            Map.entry("FOL_SEC_29", "29. Notices"),
-            Map.entry("FOL_SEC_30", "30. Governing Law and Jurisdiction"),
-            Map.entry("FOL_SCH_01", "Schedule 1 — Facility Particulars"),
-            Map.entry("FOL_SCH_02", "Schedule 2 — Conditions Precedent"),
-            Map.entry("FOL_SCH_03", "Schedule 3 — Representations"),
-            Map.entry("FOL_SCH_04", "Schedule 4 — Form of Utilisation Request"),
-            Map.entry("FOL_SCH_05", "Schedule 5 — Fees"),
-            Map.entry("FOL_SCH_06", "Schedule 6 — Security Principles"),
-            Map.entry("FOL_SIG_BORROWER", "Execution — Borrower"),
-            Map.entry("FOL_SIG_LENDER", "Execution — Lenders / Agent")
-    );
+    static final List<String> ANCHOR_IDS = loadAnchorIds();
+
+    static final Map<String, String> SECTION_TITLES = loadSectionTitles();
 
     @Test
     void writesWholesaleFolMasterDocxAsset() throws Exception {
         byte[] docx = buildWholesaleFolMasterDocx();
         DocxAnchorExtractor extractor = new DocxAnchorExtractor();
+        assertThat(extractor.extractOrderedAnchorIds(new ByteArrayInputStream(docx)))
+                .containsExactlyElementsOf(ANCHOR_IDS);
         assertThat(extractor.extractAnchorIds(new ByteArrayInputStream(docx)))
                 .containsExactlyInAnyOrderElementsOf(ANCHOR_IDS);
 
@@ -137,6 +93,33 @@ class FolMasterDocxAssetGeneratorTest {
             DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
             document.write(output);
             return output.toByteArray();
+        }
+    }
+
+    private static List<String> loadAnchorIds() {
+        try (InputStream in = FolMasterDocxAssetGeneratorTest.class.getResourceAsStream("/demo/fol-master-anchor-ids.json")) {
+            assertThat(in).as("Run deploy/demo-fol/generate-fol-catalog.ps1 first").isNotNull();
+            JsonNode root = OBJECT_MAPPER.readTree(in);
+            return OBJECT_MAPPER.convertValue(
+                    root.get("anchorIds"),
+                    OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, String.class)
+            );
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to load FOL master anchor ids manifest", ex);
+        }
+    }
+
+    private static Map<String, String> loadSectionTitles() {
+        try (InputStream in = FolMasterDocxAssetGeneratorTest.class.getResourceAsStream("/demo/fol-master-anchor-ids.json")) {
+            assertThat(in).as("Run deploy/demo-fol/generate-fol-catalog.ps1 first").isNotNull();
+            JsonNode root = OBJECT_MAPPER.readTree(in);
+            Map<String, String> titles = new LinkedHashMap<>();
+            for (JsonNode section : root.get("sections")) {
+                titles.put(section.get("anchorId").asText(), section.get("title").asText());
+            }
+            return Map.copyOf(titles);
+        } catch (Exception ex) {
+            throw new IllegalStateException("Failed to load FOL master section titles manifest", ex);
         }
     }
 

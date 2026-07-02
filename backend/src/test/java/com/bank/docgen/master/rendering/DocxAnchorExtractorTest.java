@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
+import org.apache.poi.wp.usermodel.HeaderFooterType;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -27,6 +28,8 @@ class DocxAnchorExtractorTest {
         var anchorIds = extractor.extractAnchorIds(new ByteArrayInputStream(docxBytes));
 
         assertThat(anchorIds).containsExactly("HEADER", "BODY_MAIN");
+        assertThat(extractor.extractOrderedAnchorIds(new ByteArrayInputStream(docxBytes)))
+                .containsExactly("HEADER", "BODY_MAIN");
     }
 
     @Test
@@ -45,5 +48,24 @@ class DocxAnchorExtractorTest {
         var anchorIds = extractor.extractAnchorIds(new ByteArrayInputStream(docxBytes));
 
         assertThat(anchorIds).containsExactly("FOOTER_NOTE");
+    }
+
+    @Test
+    void extractOrderedAnchorIdsTraversesHeadersBeforeBodyBeforeFooters() throws Exception {
+        byte[] docxBytes;
+        try (XWPFDocument document = new XWPFDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            document.createFooter(HeaderFooterType.DEFAULT).createParagraph().createRun()
+                    .setText("{{anchor:FOOTER_ANCHOR}}");
+            XWPFParagraph bodyParagraph = document.createParagraph();
+            bodyParagraph.createRun().setText("{{anchor:BODY_ANCHOR}}");
+            document.createHeader(HeaderFooterType.DEFAULT).createParagraph().createRun()
+                    .setText("{{anchor:HEADER_ANCHOR}}");
+            document.write(output);
+            docxBytes = output.toByteArray();
+        }
+
+        DocxAnchorExtractor extractor = new DocxAnchorExtractor();
+        assertThat(extractor.extractOrderedAnchorIds(new ByteArrayInputStream(docxBytes)))
+                .containsExactly("HEADER_ANCHOR", "BODY_ANCHOR", "FOOTER_ANCHOR");
     }
 }

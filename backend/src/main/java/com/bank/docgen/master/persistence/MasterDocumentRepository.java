@@ -14,6 +14,8 @@ public interface MasterDocumentRepository extends JpaRepository<MasterDocumentEn
 
     Optional<MasterDocumentEntity> findByIdAndDeletedAtIsNull(UUID id);
 
-    @EntityGraph(attributePaths = "anchors")
     Optional<MasterDocumentEntity> findWithAnchorsByIdAndDeletedAtIsNull(UUID id);
+
+    @EntityGraph(attributePaths = "anchors")
+    List<MasterDocumentEntity> findByDeletedAtIsNull();
 }

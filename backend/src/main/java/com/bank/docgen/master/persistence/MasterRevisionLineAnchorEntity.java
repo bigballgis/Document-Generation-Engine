@@ -27,6 +27,9 @@ public class MasterRevisionLineAnchorEntity {
     @Column(name = "display_label", length = 256)
     private String displayLabel;
 
+    @Column(name = "document_sequence", nullable = false)
+    private int documentSequence;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "revision_line_id", insertable = false, updatable = false)
     private MasterRevisionLineEntity revisionLine;
@@ -34,10 +37,20 @@ public class MasterRevisionLineAnchorEntity {
     protected MasterRevisionLineAnchorEntity() {
     }
 
-    public MasterRevisionLineAnchorEntity(UUID revisionLineId, String anchorId, String displayLabel) {
+    public MasterRevisionLineAnchorEntity(
+            UUID revisionLineId,
+            String anchorId,
+            String displayLabel,
+            int documentSequence
+    ) {
         this.revisionLineId = revisionLineId;
         this.anchorId = anchorId;
         this.displayLabel = displayLabel;
+        this.documentSequence = documentSequence;
+    }
+
+    public UUID getRevisionLineId() {
+        return revisionLineId;
     }
 
     public String getAnchorId() {
@@ -46,6 +59,14 @@ public class MasterRevisionLineAnchorEntity {
 
     public String getDisplayLabel() {
         return displayLabel;
+    }
+
+    public int getDocumentSequence() {
+        return documentSequence;
+    }
+
+    public void setDocumentSequence(int documentSequence) {
+        this.documentSequence = documentSequence;
     }
 
     public void setRevisionLine(MasterRevisionLineEntity revisionLine) {

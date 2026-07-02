@@ -115,7 +115,7 @@ public class MasterDocumentService {
             throw new MasterValidationException("api.error.master.invalidState");
         }
         validateDocxFile(docxFile);
-        Set<String> anchorIds = extractAnchors(docxFile);
+        List<String> anchorIds = extractAnchors(docxFile);
         if (anchorIds.isEmpty()) {
             throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
         }
@@ -168,7 +168,7 @@ public class MasterDocumentService {
         UUID revisionLineId = UUID.randomUUID();
         String revisionStorageKey = revisionStorageKey(masterId, revisionLineId, docxFile.getOriginalFilename());
         storeDocx(revisionStorageKey, docxFile);
-        Set<String> anchorIds = extractAnchors(docxFile);
+        List<String> anchorIds = extractAnchors(docxFile);
         if (anchorIds.isEmpty()) {
             throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
         }
@@ -322,18 +322,18 @@ public class MasterDocumentService {
     }
 
     private void assertAnchorIntegrity(MasterDocumentEntity master) {
-        Set<String> extracted = extractAnchorsFromStorage(master.getStorageKey());
+        List<String> extracted = extractAnchorsFromStorage(master.getStorageKey());
         Set<String> catalog = master.getAnchors().stream()
                 .map(MasterAnchorEntity::getAnchorId)
                 .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
-        if (extracted.isEmpty() || !extracted.equals(catalog)) {
+        if (extracted.isEmpty() || !new LinkedHashSet<>(extracted).equals(catalog)) {
             throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
         }
     }
 
-    private Set<String> extractAnchorsFromStorage(String storageKey) {
+    private List<String> extractAnchorsFromStorage(String storageKey) {
         try (InputStream inputStream = objectStoragePort.get(storageKey)) {
-            return docxAnchorExtractor.extractAnchorIds(inputStream);
+            return docxAnchorExtractor.extractOrderedAnchorIds(inputStream);
         } catch (Exception ex) {
             throw new MasterValidationException("api.error.master.anchorExtractionFailed");
         }
@@ -357,21 +357,22 @@ public class MasterDocumentService {
         }
     }
 
-    private Set<String> extractAnchors(MultipartFile docxFile) {
+    private List<String> extractAnchors(MultipartFile docxFile) {
         try (InputStream inputStream = docxFile.getInputStream()) {
             byte[] bytes = inputStream.readAllBytes();
             try (ByteArrayInputStream extractorStream = new ByteArrayInputStream(bytes)) {
-                return docxAnchorExtractor.extractAnchorIds(extractorStream);
+                return docxAnchorExtractor.extractOrderedAnchorIds(extractorStream);
             }
         } catch (Exception ex) {
             throw new MasterValidationException("api.error.master.anchorExtractionFailed");
         }
     }
 
-    private List<MasterAnchorEntity> toAnchorEntities(UUID masterId, Set<String> anchorIds) {
+    private List<MasterAnchorEntity> toAnchorEntities(UUID masterId, List<String> anchorIds) {
         List<MasterAnchorEntity> anchors = new ArrayList<>();
-        for (String anchorId : anchorIds) {
-            anchors.add(new MasterAnchorEntity(masterId, anchorId, anchorId));
+        for (int sequence = 0; sequence < anchorIds.size(); sequence++) {
+            String anchorId = anchorIds.get(sequence);
+            anchors.add(new MasterAnchorEntity(masterId, anchorId, anchorId, sequence));
         }
         return anchors;
     }
@@ -463,7 +464,10 @@ public class MasterDocumentService {
         );
         List<MasterRevisionLineAnchorEntity> snapshotAnchors = anchors.stream()
                 .map(anchor -> new MasterRevisionLineAnchorEntity(
-                        revisionLineId, anchor.getAnchorId(), anchor.getDisplayLabel()))
+                        revisionLineId,
+                        anchor.getAnchorId(),
+                        anchor.getDisplayLabel(),
+                        anchor.getDocumentSequence()))
                 .toList();
         line.replaceAnchors(snapshotAnchors);
         line.getAnchors().forEach(anchor -> anchor.setRevisionLine(line));

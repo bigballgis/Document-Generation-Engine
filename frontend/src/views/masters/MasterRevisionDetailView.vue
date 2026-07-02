@@ -349,7 +349,7 @@ function handleJourneyOpenWorkspace(target: MasterDesignerWorkspaceNavigation) {
                 <span>{{ t('masters.revision.anchorsTitle') }}</span>
               </template>
               <AppDataTable v-if="filteredAnchors.length > 0" :data="filteredAnchors">
-                <el-table-column prop="anchorId" sortable min-width="160">
+                <el-table-column prop="anchorId" min-width="160">
                   <template #header>
                     <TableColumnHeader
                       :label="t('masters.revision.anchorId')"
@@ -357,7 +357,7 @@ function handleJourneyOpenWorkspace(target: MasterDesignerWorkspaceNavigation) {
                     />
                   </template>
                 </el-table-column>
-                <el-table-column prop="displayLabel" sortable min-width="220">
+                <el-table-column prop="displayLabel" min-width="220">
                   <template #header>
                     <TableColumnHeader
                       :label="t('masters.revision.anchorLabel')"

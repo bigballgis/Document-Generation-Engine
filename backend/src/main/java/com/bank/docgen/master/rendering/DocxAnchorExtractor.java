@@ -3,6 +3,7 @@ package com.bank.docgen.master.rendering;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,9 +21,11 @@ public class DocxAnchorExtractor {
     private static final Pattern ANCHOR_PATTERN = Pattern.compile("\\{\\{anchor:([A-Za-z0-9_.-]+)}}");
     private static final String BOOKMARK_PREFIX = "anchor.";
 
-    public Set<String> extractAnchorIds(InputStream docxStream) {
-        Set<String> anchorIds = new LinkedHashSet<>();
+    public List<String> extractOrderedAnchorIds(InputStream docxStream) {
+        LinkedHashSet<String> anchorIds = new LinkedHashSet<>();
         try (XWPFDocument document = new XWPFDocument(docxStream)) {
+            document.getHeaderList().forEach(header ->
+                    header.getParagraphs().forEach(paragraph -> collectFromParagraph(paragraph, anchorIds)));
             for (XWPFParagraph paragraph : document.getParagraphs()) {
                 collectFromParagraph(paragraph, anchorIds);
             }
@@ -35,17 +38,19 @@ public class DocxAnchorExtractor {
                     }
                 }
             }
-            document.getHeaderList().forEach(header ->
-                    header.getParagraphs().forEach(paragraph -> collectFromParagraph(paragraph, anchorIds)));
             document.getFooterList().forEach(footer ->
                     footer.getParagraphs().forEach(paragraph -> collectFromParagraph(paragraph, anchorIds)));
         } catch (IOException ex) {
             throw new DocxAnchorExtractionException(ex);
         }
-        return anchorIds;
+        return List.copyOf(anchorIds);
     }
 
-    private void collectFromParagraph(XWPFParagraph paragraph, Set<String> anchorIds) {
+    public Set<String> extractAnchorIds(InputStream docxStream) {
+        return new LinkedHashSet<>(extractOrderedAnchorIds(docxStream));
+    }
+
+    private void collectFromParagraph(XWPFParagraph paragraph, LinkedHashSet<String> anchorIds) {
         collectFromText(paragraph.getText(), anchorIds);
         for (CTBookmark bookmark : paragraph.getCTP().getBookmarkStartList()) {
             String name = bookmark.getName();
@@ -58,7 +63,7 @@ public class DocxAnchorExtractor {
         }
     }
 
-    private void collectFromText(String text, Set<String> anchorIds) {
+    private void collectFromText(String text, LinkedHashSet<String> anchorIds) {
         if (text == null || text.isBlank()) {
             return;
         }

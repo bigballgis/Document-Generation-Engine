@@ -1,5 +1,6 @@
 package com.bank.docgen.master.persistence;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,9 @@ public interface MasterRevisionLineRepository extends JpaRepository<MasterRevisi
             WHERE line.masterId = :masterId AND line.deletedAt IS NULL
             """)
     int findMaxRevisionSequence(@Param("masterId") UUID masterId);
+
+    @EntityGraph(attributePaths = "anchors")
+    List<MasterRevisionLineEntity> findByDeletedAtIsNull();
 
     @Query("""
             SELECT line.createdAt
