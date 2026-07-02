@@ -1,7 +1,7 @@
 # Execution Sync Ledger
 
 **Last synced:** 2026-07-02 (**WIP A/B + deploy follow-up** — commits `0a72d8d`, `001867f`, `0ef85ca`; Docker redeploy with stamping ON)
-**Progress note (2026-07-02):** **WIP A/B landed** (see prior note). **Deploy:** `.\scripts\docker-deploy.ps1` with `PDF_PAGE_NUMBER_STAMPING_ENABLED=true` + `DOCGEN_SEED_DEMO_CATALOG=true` — backend `/healthz` **200**, UI `4173` **200**; container env verified. Post-step `import-fol-demo.ps1` failed (`TEMPLATE_VALIDATION_FAILED` on variable upsert — template not DRAFT); core stack healthy. **Push:** `git push origin main` **blocked** (GitHub :443 unreachable); local **ahead 6**. **Tooling:** `scripts/cleanup-generated-artifacts.ps1`, `deploy/demo-fol/cleanup-fol-test-data-sets.ps1`; letterhead E2E fixtures restored (noise). **No active slice.**
+**Progress note (2026-07-02):** **E05/E06/M9 realigned** — E06-EV-01–04 re-earned via **P21 Done**; E05-T06/M9-T02 scoped as target-env/org gates (not feature blockers). **FOL import fix** — `Ensure-FolTemplateDraftForImport` resets non-DRAFT demo template; version-lines pagination fix. **Prior:** WIP A/B + deploy follow-up.
 **Progress note (prior 2026-07-02):** Ad-hoc WIP **A** — `pdf-page-number-stamping-enabled` (default `false`); `PdfConversionPostProcessor` + `DocxPdfConversionPreprocessor`; FOL master layout v4. **WIP B** — `GET /content-modules` optional `groupCode` + `listAccessible`; list UI drops group picker, adds table group column. **Gate:** backend `mvn verify` BUILD SUCCESS (**614** Surefire, 1 skipped); frontend lint/type-check/test/build green (**571** Vitest). **Prior:** 2026-06-29 **P12-BDD-RISK-PROMPT-UX-001 Done**.
 **Activation note (2026-07-02):** **P12-BDD-RISK-PROMPT-UX-001 activated → In Progress** (BDD
 **BDD-TEMPLATE-RISK-PROMPT-UX-001** READY; supersedes P19-T08 group override + P19-T10 list-view
@@ -359,9 +359,9 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 
 | Item | Status | Document |
 | --- | --- | --- |
-| E05-T06 External validation evidence | Not Started | [e05-external-validation-evidence.md](../architecture/e05-external-validation-evidence.md) |
-| E06 role-journey release evidence | Not Started | [e06-role-journey-release-evidence.md](../architecture/e06-role-journey-release-evidence.md) |
-| M9-T02 Intranet SCA submission | Not Started | [m9-t02-closure-plan.md](../architecture/m9-t02-closure-plan.md) |
+| E05-T06 External validation evidence | Not Started (target env only; local Docker **Pass** 2026-07-02) | [e05-external-validation-evidence.md](../architecture/e05-external-validation-evidence.md) |
+| E06 role-journey release evidence | Re-earned via P21 (EV-01–04); EV-05 packaging optional | [e06-role-journey-release-evidence.md](../architecture/e06-role-journey-release-evidence.md) |
+| M9-T02 Intranet SCA submission | Not Started (org gate; in-repo SBOM step pending) | [m9-t02-closure-plan.md](../architecture/m9-t02-closure-plan.md) |
 | M10–M11 Deferred security closure | Not Started | m10/m11 task sheets |
 
 ## Milestone ↔ wave mapping

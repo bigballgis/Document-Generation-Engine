@@ -133,6 +133,58 @@ function Remove-StaleCatalogVariables([string]$TemplateId, [string]$Token, [stri
     }
 }
 
+function Get-VersionLines([object]$VersionLinesResponse) {
+    $payload = $VersionLinesResponse.result
+    if ($null -eq $payload) {
+        return @()
+    }
+    if ($null -ne $payload.PSObject.Properties['content']) {
+        return @($payload.content)
+    }
+    return @($payload)
+}
+
+function Ensure-FolTemplateDraftForImport([string]$TemplateId, [string]$Token) {
+    $detail = Invoke-Api GET "/templates/$TemplateId" $Token
+    $status = [string]$detail.result.lifecycleStatus
+    if ($status -eq 'DRAFT') {
+        return
+    }
+
+    $versionLines = Get-VersionLines (Invoke-Api GET "/templates/$TemplateId/version-lines" $Token)
+    $inFlightLine = $versionLines | Where-Object { $_.lineKind -eq 'IN_FLIGHT' } | Select-Object -First 1
+
+    if (-not $inFlightLine) {
+        $releaseLine = $versionLines | Where-Object { $_.releaseVersion } | Select-Object -First 1
+        $releaseVersion = if ($releaseLine) { [string]$releaseLine.releaseVersion } else { [string]$detail.result.releaseVersion }
+        if (-not $releaseVersion) {
+            throw "FOL template $TemplateId is $status with no in-flight or published release line to clone for demo refresh."
+        }
+        Write-Step "Cloning release $releaseVersion to new dev line for FOL catalog refresh (was $status)..."
+        Invoke-Api POST "/templates/$TemplateId/release-versions/$releaseVersion/clone" $Token | Out-Null
+        return
+    }
+
+    Write-Step "Resetting FOL template $TemplateId from $status to DRAFT for catalog refresh (local demo only)..."
+    $sql = @"
+BEGIN;
+UPDATE template
+SET lifecycle_status = 'DRAFT',
+    release_version = NULL,
+    updated_at = (NOW() AT TIME ZONE 'UTC')
+WHERE id = '$TemplateId'::uuid
+  AND deleted_at IS NULL;
+UPDATE template_version
+SET lifecycle_status = 'DRAFT',
+    updated_at = (NOW() AT TIME ZONE 'UTC')
+WHERE template_id = '$TemplateId'::uuid
+  AND (release_version IS NULL OR release_version = '');
+COMMIT;
+"@
+    $sql | docker exec -i $PostgresContainer psql -U $PostgresUser -d $PostgresDb -v ON_ERROR_STOP=1
+    if ($LASTEXITCODE -ne 0) { throw "FOL template draft reset failed (exit $LASTEXITCODE)" }
+}
+
 function Find-ExecutiveDemoTestDataSet([object[]]$Sets, [object]$TestDataConfig) {
     $scenarioName = if ($TestDataConfig.PSObject.Properties['scenarioName']) { [string]$TestDataConfig.scenarioName } else { '' }
     if ($scenarioName) {
@@ -343,6 +395,8 @@ WHERE id = '$templateId'::uuid
         }
     }
 }
+
+Ensure-FolTemplateDraftForImport -TemplateId $templateId -Token $AuthorToken
 
 # --- Variables ---
 $catalogKeys = @($CatalogVariables | ForEach-Object { $_.key })

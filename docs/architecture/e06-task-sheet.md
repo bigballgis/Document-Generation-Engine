@@ -53,3 +53,5 @@ Login-first OA management shell with dual-brand theming and grouped navigation.
 | Contract / OpenAPI conformance | Done |
 | Quality gate logs | Done |
 | Plan status sync | Done |
+| External env validation | Not Started (E05-T06 target env) |
+| Role-journey release packaging | Re-earned via P21 (E06-EV-01–04); optional EV-05 bundle |

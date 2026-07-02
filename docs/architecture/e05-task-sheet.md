@@ -39,7 +39,7 @@ Replace transitional seams with production adapters for persistence, cache, mess
 | E05-T03 | P0 | Infrastructure | MinIO artifact storage | Upload/download round-trip | Done |
 | E05-T04 | P0 | Infrastructure | Kafka async publisher + consumer | Retry + DLT configured | Done |
 | E05-T05 | P0 | Authorization | Enterprise AD Group resolver adapter | 503 fail-closed without cache | Done |
-| E05-T06 | P1 | Platform | External validation evidence ledger | See e05-external-validation-evidence.md | Not Started |
+| E05-T06 | P1 | Platform | External validation evidence ledger | Target-env rows in e05-external-validation-evidence.md; local Docker smoke **Pass** | Not Started (target env) |
 
 ## Gate commands
 
