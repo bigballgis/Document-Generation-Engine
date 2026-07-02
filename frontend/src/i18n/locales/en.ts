@@ -714,12 +714,12 @@ export default {
         governanceHint: 'Use the action buttons above to stop, restore, or deprecate this template.',
         submitApprovalEmpty: 'Submit-for-approval checks appear here when this version is ready to enter approval.',
         publishReadinessEmpty: 'Binding and publish readiness checks appear here when release actions are available.',
-        governanceEmpty: 'Lifecycle governance actions appear here for published templates.',
+        governanceEmpty: 'Maintenance actions for published templates appear here when available.',
         subTabs: {
           submitApproval: 'Submit for approval',
           publishReadiness: 'Publish readiness',
           riskConfig: 'Risk prompts',
-          governance: 'Governance',
+          governance: 'Maintenance',
         },
       },
     },
@@ -1827,9 +1827,9 @@ export default {
       tabs: {
         versions: 'Versions',
         content: 'Content preview',
-        lifecycle: 'Review & lifecycle',
+        lifecycle: 'Review & release',
       },
-      lifecycleHint: 'Use the action buttons above to submit, approve, reject, or apply lifecycle operations.',
+      lifecycleHint: 'Use the action buttons above to submit, approve, reject, or apply post-approval changes.',
     },
     reviewState: {
       DRAFT: 'Draft',

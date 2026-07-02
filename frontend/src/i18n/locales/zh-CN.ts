@@ -704,12 +704,12 @@ export default {
         governanceHint: '使用上方操作按钮停止、恢复或废弃此模板。',
         submitApprovalEmpty: '当版本可提交审批时，此处显示提交前检查项。',
         publishReadinessEmpty: '当可进行发布操作时，此处显示绑定与发布就绪检查。',
-        governanceEmpty: '已发布模板的治理操作说明将显示在此处。',
+        governanceEmpty: '已发布模板的维护操作说明将显示在此处。',
         subTabs: {
           submitApproval: '提交审批',
           publishReadiness: '发布就绪',
           riskConfig: '风险提示',
-          governance: '治理',
+          governance: '维护',
         },
       },
     },
@@ -1804,9 +1804,9 @@ export default {
       tabs: {
         versions: '版本',
         content: '内容预览',
-        lifecycle: '审批与生命周期',
+        lifecycle: '审批与发布',
       },
-      lifecycleHint: '使用上方操作按钮提交、审批、驳回或执行生命周期操作。',
+      lifecycleHint: '使用上方操作按钮提交、审批、驳回或执行发布后变更。',
     },
     reviewState: {
       DRAFT: '编写中',
