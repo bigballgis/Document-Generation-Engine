@@ -219,191 +219,192 @@ function Build-ScheduleParagraphs {
 }
 
 function Get-LmaSectionCatalog {
+    # Anchor ids are derived at generation time via Resolve-FolHybridAnchorId (fol-catalog-shared.ps1).
     return @(
-        @{ Code = 'MOD-FOL-SEC-01'; Name = '1. Definitions and Interpretation'; Ref = 'FOL_SEC_01'; Builder = { Build-DefinitionsParagraphs } }
-        @{ Code = 'MOD-FOL-SEC-02'; Name = '2. The Facility'; Ref = 'FOL_SEC_02'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-01'; Name = '1. Definitions and Interpretation'; Builder = { Build-DefinitionsParagraphs } }
+        @{ Code = 'MOD-FOL-SEC-02'; Name = '2. The Facility'; Topics = @(
             'Commitments and several obligations of Lenders'
             'Availability and cancellation of undrawn Commitments'
             'Increase confirmations and accordion mechanics'
             'Swingline and ancillary facilities where applicable'
         ) }
-        @{ Code = 'MOD-FOL-SEC-03'; Name = '3. Purpose'; Ref = 'FOL_SEC_03'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-03'; Name = '3. Purpose'; Topics = @(
             'Permitted application of proceeds'
             'Refinancing of existing indebtedness'
             'General corporate and working capital purposes'
             'Prohibited uses including sanctions-sensitive activities'
         ) }
-        @{ Code = 'MOD-FOL-SEC-04'; Name = '4. Conditions of Utilisation'; Ref = 'FOL_SEC_04'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-04'; Name = '4. Conditions of Utilisation'; Topics = @(
             'Initial conditions precedent to first Utilisation'
             'Repeating conditions for each Utilisation'
             'Legal opinions and corporate authorisations'
             'KYC/AML and sanctions compliance evidence'
         ) }
-        @{ Code = 'MOD-FOL-SEC-05'; Name = '5. Utilisation'; Ref = 'FOL_SEC_05'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-05'; Name = '5. Utilisation'; Topics = @(
             'Delivery of Utilisation Requests'
             'Minimum amount and integral multiples'
             'Currency and account selection'
             'Agent notification to Lenders'
         ) }
-        @{ Code = 'MOD-FOL-SEC-06'; Name = '6. Repayment'; Ref = 'FOL_SEC_06'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-06'; Name = '6. Repayment'; Topics = @(
             'Scheduled amortisation instalments'
             'Final maturity bullet repayment'
             'Currency of repayment'
             'Application of prepayments'
         ) }
-        @{ Code = 'MOD-FOL-SEC-07'; Name = '7. Prepayment and Cancellation'; Ref = 'FOL_SEC_07'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-07'; Name = '7. Prepayment and Cancellation'; Topics = @(
             'Voluntary prepayment notice and minimum amounts'
             'Mandatory prepayment on change of control'
             'Illegality and asset sale prepayment events'
             'Break Costs and prepayment fees'
         ) }
-        @{ Code = 'MOD-FOL-SEC-08'; Name = '8. Interest'; Ref = 'FOL_SEC_08'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-08'; Name = '8. Interest'; Topics = @(
             'Calculation of interest on Loans'
             'Reference Rate plus Margin'
             'Default interest on overdue amounts'
             'Risk-free rate fallback and benchmark transition'
         ) }
-        @{ Code = 'MOD-FOL-SEC-09'; Name = '9. Interest Periods'; Ref = 'FOL_SEC_09'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-09'; Name = '9. Interest Periods'; Topics = @(
             'Selection and length of Interest Periods'
             'Non-Business Days and convention adjustments'
             'Broken period compensation'
             'Agent coordination of rate fixing'
         ) }
-        @{ Code = 'MOD-FOL-SEC-10'; Name = '10. Changes to the Calculation of Interest'; Ref = 'FOL_SEC_10'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-10'; Name = '10. Changes to the Calculation of Interest'; Topics = @(
             'Market disruption events'
             'Cost of funds fallback (if applicable)'
             'Screen Rate unavailability'
             'Central bank rate fallback'
         ) }
-        @{ Code = 'MOD-FOL-SEC-11'; Name = '11. Fees'; Ref = 'FOL_SEC_11'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-11'; Name = '11. Fees'; Topics = @(
             'Arrangement and underwriting fees'
             'Commitment fees on undrawn amounts'
             'Agency and security agency fees'
             'Utilisation and front-end fees'
         ) }
-        @{ Code = 'MOD-FOL-SEC-12'; Name = '12. Tax Gross-Up and Indemnities'; Ref = 'FOL_SEC_12'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-12'; Name = '12. Tax Gross-Up and Indemnities'; Topics = @(
             'Tax gross-up obligations of Obligors'
             'Tax indemnities in favour of Finance Parties'
             'FATCA and CRS withholding'
             'Stamp duty and registration costs'
         ) }
-        @{ Code = 'MOD-FOL-SEC-13'; Name = '13. Increased Costs'; Ref = 'FOL_SEC_13'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-13'; Name = '13. Increased Costs'; Topics = @(
             'Compensation for increased costs of capital'
             'Change in law affecting Lenders'
             'Mitigation and replacement of Lender'
             'Claims certification procedure'
         ) }
-        @{ Code = 'MOD-FOL-SEC-14'; Name = '14. Other Indemnities'; Ref = 'FOL_SEC_14'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-14'; Name = '14. Other Indemnities'; Topics = @(
             'Indemnity for third party claims'
             'Environmental and litigation indemnities'
             'Currency indemnity'
             'Enforcement costs indemnity'
         ) }
-        @{ Code = 'MOD-FOL-SEC-15'; Name = '15. Mitigation by the Lenders'; Ref = 'FOL_SEC_15'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-15'; Name = '15. Mitigation by the Lenders'; Topics = @(
             'Lender mitigation steps'
             'Designation of different lending office'
             'Replacement of non-consenting Lender'
             'Costs of mitigation'
         ) }
-        @{ Code = 'MOD-FOL-SEC-16'; Name = '16. Costs and Expenses'; Ref = 'FOL_SEC_16'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-16'; Name = '16. Costs and Expenses'; Topics = @(
             'Upfront transaction costs'
             'Amendment and waiver costs'
             'Enforcement and preservation costs'
             'Registration and perfection costs'
         ) }
-        @{ Code = 'MOD-FOL-SEC-17'; Name = '17. Guarantee and Indemnity'; Ref = 'FOL_SEC_17'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-17'; Name = '17. Guarantee and Indemnity'; Topics = @(
             'Guarantee of Obligor obligations'
             'Continuing guarantee and reinstatement'
             'Additional Guarantor accession'
             'Waiver of defences'
         ) }
-        @{ Code = 'MOD-FOL-SEC-18'; Name = '18. Representations'; Ref = 'FOL_SEC_18'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-18'; Name = '18. Representations'; Topics = @(
             'Status and due authorisation'
             'No default and no litigation'
             'Financial statements fair presentation'
             'Sanctions and anti-corruption compliance'
         ) }
-        @{ Code = 'MOD-FOL-SEC-19'; Name = '19. Information Undertakings'; Ref = 'FOL_SEC_19'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-19'; Name = '19. Information Undertakings'; Topics = @(
             'Annual audited financial statements'
             'Quarterly management accounts'
             'Compliance certificates and budget'
             'Notification of default and material events'
         ) }
-        @{ Code = 'MOD-FOL-SEC-20'; Name = '20. Financial Covenants'; Ref = 'FOL_SEC_20'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-20'; Name = '20. Financial Covenants'; Topics = @(
             'Net leverage ratio covenant'
             'Interest cover ratio covenant'
             'Minimum liquidity covenant'
             'Equity cure and testing mechanics'
         ) }
-        @{ Code = 'MOD-FOL-SEC-21'; Name = '21. General Undertakings'; Ref = 'FOL_SEC_21'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-21'; Name = '21. General Undertakings'; Topics = @(
             'Negative pledge and permitted security'
             'Disposals and acquisitions restrictions'
             'Merger and change of business'
             'Pari passu ranking and ranking undertakings'
         ) }
-        @{ Code = 'MOD-FOL-SEC-22'; Name = '22. Events of Default'; Ref = 'FOL_SEC_22'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-22'; Name = '22. Events of Default'; Topics = @(
             'Non-payment Events of Default'
             'Financial covenant breaches'
             'Cross-default and insolvency events'
             'Acceleration and enforcement remedies'
         ) }
-        @{ Code = 'MOD-FOL-SEC-23'; Name = '23. Changes to the Lenders'; Ref = 'FOL_SEC_23'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-23'; Name = '23. Changes to the Lenders'; Topics = @(
             'Assignments and transfers by novation'
             'Disclosure of information to assignees'
             'Transfer certificates and procedures'
             'Pro rata sharing and sub-participations'
         ) }
-        @{ Code = 'MOD-FOL-SEC-24'; Name = '24. The Agent and the Arrangers'; Ref = 'FOL_SEC_24'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-24'; Name = '24. The Agent and the Arrangers'; Topics = @(
             'Appointment and authority of the Agent'
             'Reliance on instructions and certificates'
             'Arranger role and no fiduciary duties'
             'Replacement of the Agent'
         ) }
-        @{ Code = 'MOD-FOL-SEC-25'; Name = '25. Conduct of Business by the Finance Parties'; Ref = 'FOL_SEC_25'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-25'; Name = '25. Conduct of Business by the Finance Parties'; Topics = @(
             'No reliance on Finance Parties advice'
             'Arm''s length relationship'
             'Conflicts of interest disclosure'
             'Reference bank quotations'
         ) }
-        @{ Code = 'MOD-FOL-SEC-26'; Name = '26. Sharing among the Finance Parties'; Ref = 'FOL_SEC_26'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-26'; Name = '26. Sharing among the Finance Parties'; Topics = @(
             'Pro rata sharing of recoveries'
             'Redistribution of payments'
             'Agent redistribution account'
             'Turnover of recoveries'
         ) }
-        @{ Code = 'MOD-FOL-SEC-27'; Name = '27. Payment Mechanics'; Ref = 'FOL_SEC_27'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-27'; Name = '27. Payment Mechanics'; Topics = @(
             'Payments to Agent distribution account'
             'Currency of account and payment'
             'Partial payments and set-off'
             'Disruption to payment systems'
         ) }
-        @{ Code = 'MOD-FOL-SEC-28'; Name = '28. Set-Off'; Ref = 'FOL_SEC_28'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-28'; Name = '28. Set-Off'; Topics = @(
             'Lender set-off rights'
             'Netting of matured obligations'
             'Notification of set-off'
             'Continuing obligations after set-off'
         ) }
-        @{ Code = 'MOD-FOL-SEC-29'; Name = '29. Notices'; Ref = 'FOL_SEC_29'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-29'; Name = '29. Notices'; Topics = @(
             'Form and delivery of notices'
             'Electronic communication'
             'Change of address'
             'Deemed receipt timing'
         ) }
-        @{ Code = 'MOD-FOL-SEC-30'; Name = '30. Governing Law and Jurisdiction'; Ref = 'FOL_SEC_30'; Topics = @(
+        @{ Code = 'MOD-FOL-SEC-30'; Name = '30. Governing Law and Jurisdiction'; Topics = @(
             'English law governing law clause'
             'Exclusive jurisdiction of English courts'
             'Service of process and process agent'
             'Waiver of immunity'
         ) }
-        @{ Code = 'MOD-FOL-SCH-01'; Name = 'Schedule 1 - Facility Particulars'; Ref = 'FOL_SCH_01'; Schedule = '1'; Extra = @(
+        @{ Code = 'MOD-FOL-SCH-01'; Name = 'Schedule 1 - Facility Particulars'; Schedule = '1'; Extra = @(
             'Borrower: Pacific Rim Holdings Ltd. Total Commitments: USD 250,000,000. Margin: 185 bps over Term SOFR. Maturity: 1 July 2031.'
             'Syndicated lender matrix, tranche structure, amortisation schedule and pricing grid are populated from structured list variables in the executive test data set.'
         ) }
-        @{ Code = 'MOD-FOL-SCH-02'; Name = 'Schedule 2 - Conditions Precedent'; Ref = 'FOL_SCH_02'; Schedule = '2' }
-        @{ Code = 'MOD-FOL-SCH-03'; Name = 'Schedule 3 - Representations'; Ref = 'FOL_SCH_03'; Schedule = '3' }
-        @{ Code = 'MOD-FOL-SCH-04'; Name = 'Schedule 4 - Form of Utilisation Request'; Ref = 'FOL_SCH_04'; Schedule = '4' }
-        @{ Code = 'MOD-FOL-SCH-05'; Name = 'Schedule 5 - Fees'; Ref = 'FOL_SCH_05'; Schedule = '5' }
-        @{ Code = 'MOD-FOL-SCH-06'; Name = 'Schedule 6 - Security Principles'; Ref = 'FOL_SCH_06'; Schedule = '6'; Extra = @(
+        @{ Code = 'MOD-FOL-SCH-02'; Name = 'Schedule 2 - Conditions Precedent'; Schedule = '2' }
+        @{ Code = 'MOD-FOL-SCH-03'; Name = 'Schedule 3 - Representations'; Schedule = '3' }
+        @{ Code = 'MOD-FOL-SCH-04'; Name = 'Schedule 4 - Form of Utilisation Request'; Schedule = '4' }
+        @{ Code = 'MOD-FOL-SCH-05'; Name = 'Schedule 5 - Fees'; Schedule = '5' }
+        @{ Code = 'MOD-FOL-SCH-06'; Name = 'Schedule 6 - Security Principles'; Schedule = '6'; Extra = @(
             'Security over shares in the Borrower, account charges, receivables assignments and intercreditor arrangements are described in the security package list variables.'
         ) }
     )

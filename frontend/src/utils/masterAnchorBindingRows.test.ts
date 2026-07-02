@@ -5,15 +5,15 @@ import type { MasterAnchor } from '@/types/master'
 
 describe('buildMasterAnchorBindingRows', () => {
   const masterAnchors: MasterAnchor[] = [
-    { anchorId: 'FOL_SEC_01', displayLabel: 'Section 1' },
-    { anchorId: 'FOL_SEC_02', displayLabel: 'Section 2' },
-    { anchorId: 'FOL_SEC_03', displayLabel: 'Section 3' },
+    { anchorId: 'FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION', displayLabel: '1. Definitions and Interpretation' },
+    { anchorId: 'FOL_CLAUSE_02_THE_FACILITY', displayLabel: '2. The Facility' },
+    { anchorId: 'FOL_CLAUSE_03_PURPOSE', displayLabel: '3. Purpose' },
   ]
 
   it('preserves master anchor order and marks unconfigured anchors', () => {
     const bindings: AnchorBinding[] = [
       {
-        anchorId: 'FOL_SEC_02',
+        anchorId: 'FOL_CLAUSE_02_THE_FACILITY',
         declaredContentType: 'TEXT',
         structuredContentJson: '{"nodes":[]}',
         validationStatus: 'VALID',
@@ -22,7 +22,11 @@ describe('buildMasterAnchorBindingRows', () => {
 
     const rows = buildMasterAnchorBindingRows(masterAnchors, bindings)
 
-    expect(rows.map((row) => row.anchorId)).toEqual(['FOL_SEC_01', 'FOL_SEC_02', 'FOL_SEC_03'])
+    expect(rows.map((row) => row.anchorId)).toEqual([
+      'FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION',
+      'FOL_CLAUSE_02_THE_FACILITY',
+      'FOL_CLAUSE_03_PURPOSE',
+    ])
     expect(rows[0]?.configured).toBe(false)
     expect(rows[1]?.configured).toBe(true)
     expect(rows[1]?.declaredContentType).toBe('TEXT')

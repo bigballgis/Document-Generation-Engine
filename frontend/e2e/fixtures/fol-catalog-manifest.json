@@ -1,0 +1,323 @@
+﻿{
+    "catalogMarker":  "fol-exec-demo-v6-hybrid-anchor-ids",
+    "clauseBindings":  [
+                           {
+                               "anchorId":  "FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION",
+                               "referenceKey":  "FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION",
+                               "moduleCode":  "MOD-FOL-SEC-01",
+                               "title":  "1. Definitions and Interpretation"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_02_THE_FACILITY",
+                               "referenceKey":  "FOL_CLAUSE_02_THE_FACILITY",
+                               "moduleCode":  "MOD-FOL-SEC-02",
+                               "title":  "2. The Facility"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_03_PURPOSE",
+                               "referenceKey":  "FOL_CLAUSE_03_PURPOSE",
+                               "moduleCode":  "MOD-FOL-SEC-03",
+                               "title":  "3. Purpose"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_04_CONDITIONS_OF_UTILISATION",
+                               "referenceKey":  "FOL_CLAUSE_04_CONDITIONS_OF_UTILISATION",
+                               "moduleCode":  "MOD-FOL-SEC-04",
+                               "title":  "4. Conditions of Utilisation"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_05_UTILISATION",
+                               "referenceKey":  "FOL_CLAUSE_05_UTILISATION",
+                               "moduleCode":  "MOD-FOL-SEC-05",
+                               "title":  "5. Utilisation"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_06_REPAYMENT",
+                               "referenceKey":  "FOL_CLAUSE_06_REPAYMENT",
+                               "moduleCode":  "MOD-FOL-SEC-06",
+                               "title":  "6. Repayment"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_07_PREPAYMENT_AND_CANCELLATION",
+                               "referenceKey":  "FOL_CLAUSE_07_PREPAYMENT_AND_CANCELLATION",
+                               "moduleCode":  "MOD-FOL-SEC-07",
+                               "title":  "7. Prepayment and Cancellation"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_08_INTEREST",
+                               "referenceKey":  "FOL_CLAUSE_08_INTEREST",
+                               "moduleCode":  "MOD-FOL-SEC-08",
+                               "title":  "8. Interest"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_09_INTEREST_PERIODS",
+                               "referenceKey":  "FOL_CLAUSE_09_INTEREST_PERIODS",
+                               "moduleCode":  "MOD-FOL-SEC-09",
+                               "title":  "9. Interest Periods"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_10_CHANGES_TO_THE_CALCULATION_OF_INTEREST",
+                               "referenceKey":  "FOL_CLAUSE_10_CHANGES_TO_THE_CALCULATION_OF_INTEREST",
+                               "moduleCode":  "MOD-FOL-SEC-10",
+                               "title":  "10. Changes to the Calculation of Interest"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_11_FEES",
+                               "referenceKey":  "FOL_CLAUSE_11_FEES",
+                               "moduleCode":  "MOD-FOL-SEC-11",
+                               "title":  "11. Fees"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_12_TAX_GROSS_UP_AND_INDEMNITIES",
+                               "referenceKey":  "FOL_CLAUSE_12_TAX_GROSS_UP_AND_INDEMNITIES",
+                               "moduleCode":  "MOD-FOL-SEC-12",
+                               "title":  "12. Tax Gross-Up and Indemnities"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_13_INCREASED_COSTS",
+                               "referenceKey":  "FOL_CLAUSE_13_INCREASED_COSTS",
+                               "moduleCode":  "MOD-FOL-SEC-13",
+                               "title":  "13. Increased Costs"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_14_OTHER_INDEMNITIES",
+                               "referenceKey":  "FOL_CLAUSE_14_OTHER_INDEMNITIES",
+                               "moduleCode":  "MOD-FOL-SEC-14",
+                               "title":  "14. Other Indemnities"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_15_MITIGATION_BY_THE_LENDERS",
+                               "referenceKey":  "FOL_CLAUSE_15_MITIGATION_BY_THE_LENDERS",
+                               "moduleCode":  "MOD-FOL-SEC-15",
+                               "title":  "15. Mitigation by the Lenders"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_16_COSTS_AND_EXPENSES",
+                               "referenceKey":  "FOL_CLAUSE_16_COSTS_AND_EXPENSES",
+                               "moduleCode":  "MOD-FOL-SEC-16",
+                               "title":  "16. Costs and Expenses"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_17_GUARANTEE_AND_INDEMNITY",
+                               "referenceKey":  "FOL_CLAUSE_17_GUARANTEE_AND_INDEMNITY",
+                               "moduleCode":  "MOD-FOL-SEC-17",
+                               "title":  "17. Guarantee and Indemnity"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_18_REPRESENTATIONS",
+                               "referenceKey":  "FOL_CLAUSE_18_REPRESENTATIONS",
+                               "moduleCode":  "MOD-FOL-SEC-18",
+                               "title":  "18. Representations"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_19_INFORMATION_UNDERTAKINGS",
+                               "referenceKey":  "FOL_CLAUSE_19_INFORMATION_UNDERTAKINGS",
+                               "moduleCode":  "MOD-FOL-SEC-19",
+                               "title":  "19. Information Undertakings"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_20_FINANCIAL_COVENANTS",
+                               "referenceKey":  "FOL_CLAUSE_20_FINANCIAL_COVENANTS",
+                               "moduleCode":  "MOD-FOL-SEC-20",
+                               "title":  "20. Financial Covenants"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_21_GENERAL_UNDERTAKINGS",
+                               "referenceKey":  "FOL_CLAUSE_21_GENERAL_UNDERTAKINGS",
+                               "moduleCode":  "MOD-FOL-SEC-21",
+                               "title":  "21. General Undertakings"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_22_EVENTS_OF_DEFAULT",
+                               "referenceKey":  "FOL_CLAUSE_22_EVENTS_OF_DEFAULT",
+                               "moduleCode":  "MOD-FOL-SEC-22",
+                               "title":  "22. Events of Default"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_23_CHANGES_TO_THE_LENDERS",
+                               "referenceKey":  "FOL_CLAUSE_23_CHANGES_TO_THE_LENDERS",
+                               "moduleCode":  "MOD-FOL-SEC-23",
+                               "title":  "23. Changes to the Lenders"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_24_THE_AGENT_AND_THE_ARRANGERS",
+                               "referenceKey":  "FOL_CLAUSE_24_THE_AGENT_AND_THE_ARRANGERS",
+                               "moduleCode":  "MOD-FOL-SEC-24",
+                               "title":  "24. The Agent and the Arrangers"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_25_CONDUCT_OF_BUSINESS_BY_THE_FINANCE_PARTIES",
+                               "referenceKey":  "FOL_CLAUSE_25_CONDUCT_OF_BUSINESS_BY_THE_FINANCE_PARTIES",
+                               "moduleCode":  "MOD-FOL-SEC-25",
+                               "title":  "25. Conduct of Business by the Finance Parties"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_26_SHARING_AMONG_THE_FINANCE_PARTIES",
+                               "referenceKey":  "FOL_CLAUSE_26_SHARING_AMONG_THE_FINANCE_PARTIES",
+                               "moduleCode":  "MOD-FOL-SEC-26",
+                               "title":  "26. Sharing among the Finance Parties"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_27_PAYMENT_MECHANICS",
+                               "referenceKey":  "FOL_CLAUSE_27_PAYMENT_MECHANICS",
+                               "moduleCode":  "MOD-FOL-SEC-27",
+                               "title":  "27. Payment Mechanics"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_28_SET_OFF",
+                               "referenceKey":  "FOL_CLAUSE_28_SET_OFF",
+                               "moduleCode":  "MOD-FOL-SEC-28",
+                               "title":  "28. Set-Off"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_29_NOTICES",
+                               "referenceKey":  "FOL_CLAUSE_29_NOTICES",
+                               "moduleCode":  "MOD-FOL-SEC-29",
+                               "title":  "29. Notices"
+                           },
+                           {
+                               "anchorId":  "FOL_CLAUSE_30_GOVERNING_LAW_AND_JURISDICTION",
+                               "referenceKey":  "FOL_CLAUSE_30_GOVERNING_LAW_AND_JURISDICTION",
+                               "moduleCode":  "MOD-FOL-SEC-30",
+                               "title":  "30. Governing Law and Jurisdiction"
+                           },
+                           {
+                               "anchorId":  "FOL_SCHEDULE_01_FACILITY_PARTICULARS",
+                               "referenceKey":  "FOL_SCHEDULE_01_FACILITY_PARTICULARS",
+                               "moduleCode":  "MOD-FOL-SCH-01",
+                               "title":  "Schedule 1 - Facility Particulars"
+                           },
+                           {
+                               "anchorId":  "FOL_SCHEDULE_02_CONDITIONS_PRECEDENT",
+                               "referenceKey":  "FOL_SCHEDULE_02_CONDITIONS_PRECEDENT",
+                               "moduleCode":  "MOD-FOL-SCH-02",
+                               "title":  "Schedule 2 - Conditions Precedent"
+                           },
+                           {
+                               "anchorId":  "FOL_SCHEDULE_03_REPRESENTATIONS",
+                               "referenceKey":  "FOL_SCHEDULE_03_REPRESENTATIONS",
+                               "moduleCode":  "MOD-FOL-SCH-03",
+                               "title":  "Schedule 3 - Representations"
+                           },
+                           {
+                               "anchorId":  "FOL_SCHEDULE_04_FORM_OF_UTILISATION_REQUEST",
+                               "referenceKey":  "FOL_SCHEDULE_04_FORM_OF_UTILISATION_REQUEST",
+                               "moduleCode":  "MOD-FOL-SCH-04",
+                               "title":  "Schedule 4 - Form of Utilisation Request"
+                           },
+                           {
+                               "anchorId":  "FOL_SCHEDULE_05_FEES",
+                               "referenceKey":  "FOL_SCHEDULE_05_FEES",
+                               "moduleCode":  "MOD-FOL-SCH-05",
+                               "title":  "Schedule 5 - Fees"
+                           },
+                           {
+                               "anchorId":  "FOL_SCHEDULE_06_SECURITY_PRINCIPLES",
+                               "referenceKey":  "FOL_SCHEDULE_06_SECURITY_PRINCIPLES",
+                               "moduleCode":  "MOD-FOL-SCH-06",
+                               "title":  "Schedule 6 - Security Principles"
+                           }
+                       ],
+    "clauseCodes":  [
+                        "MOD-FOL-SEC-01",
+                        "MOD-FOL-SEC-02",
+                        "MOD-FOL-SEC-03",
+                        "MOD-FOL-SEC-04",
+                        "MOD-FOL-SEC-05",
+                        "MOD-FOL-SEC-06",
+                        "MOD-FOL-SEC-07",
+                        "MOD-FOL-SEC-08",
+                        "MOD-FOL-SEC-09",
+                        "MOD-FOL-SEC-10",
+                        "MOD-FOL-SEC-11",
+                        "MOD-FOL-SEC-12",
+                        "MOD-FOL-SEC-13",
+                        "MOD-FOL-SEC-14",
+                        "MOD-FOL-SEC-15",
+                        "MOD-FOL-SEC-16",
+                        "MOD-FOL-SEC-17",
+                        "MOD-FOL-SEC-18",
+                        "MOD-FOL-SEC-19",
+                        "MOD-FOL-SEC-20",
+                        "MOD-FOL-SEC-21",
+                        "MOD-FOL-SEC-22",
+                        "MOD-FOL-SEC-23",
+                        "MOD-FOL-SEC-24",
+                        "MOD-FOL-SEC-25",
+                        "MOD-FOL-SEC-26",
+                        "MOD-FOL-SEC-27",
+                        "MOD-FOL-SEC-28",
+                        "MOD-FOL-SEC-29",
+                        "MOD-FOL-SEC-30",
+                        "MOD-FOL-SCH-01",
+                        "MOD-FOL-SCH-02",
+                        "MOD-FOL-SCH-03",
+                        "MOD-FOL-SCH-04",
+                        "MOD-FOL-SCH-05",
+                        "MOD-FOL-SCH-06"
+                    ],
+    "expectedAnchorCount":  40,
+    "overlayOnlyAnchors":  [
+                               "FOL_HEADER",
+                               "FOL_FACILITY_SUMMARY",
+                               "FOL_SIG_BORROWER",
+                               "FOL_SIG_LENDER"
+                           ],
+    "masterAnchorIds":  [
+                            "FOL_HEADER",
+                            "FOL_FACILITY_SUMMARY",
+                            "FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION",
+                            "FOL_CLAUSE_02_THE_FACILITY",
+                            "FOL_CLAUSE_03_PURPOSE",
+                            "FOL_CLAUSE_04_CONDITIONS_OF_UTILISATION",
+                            "FOL_CLAUSE_05_UTILISATION",
+                            "FOL_CLAUSE_06_REPAYMENT",
+                            "FOL_CLAUSE_07_PREPAYMENT_AND_CANCELLATION",
+                            "FOL_CLAUSE_08_INTEREST",
+                            "FOL_CLAUSE_09_INTEREST_PERIODS",
+                            "FOL_CLAUSE_10_CHANGES_TO_THE_CALCULATION_OF_INTEREST",
+                            "FOL_CLAUSE_11_FEES",
+                            "FOL_CLAUSE_12_TAX_GROSS_UP_AND_INDEMNITIES",
+                            "FOL_CLAUSE_13_INCREASED_COSTS",
+                            "FOL_CLAUSE_14_OTHER_INDEMNITIES",
+                            "FOL_CLAUSE_15_MITIGATION_BY_THE_LENDERS",
+                            "FOL_CLAUSE_16_COSTS_AND_EXPENSES",
+                            "FOL_CLAUSE_17_GUARANTEE_AND_INDEMNITY",
+                            "FOL_CLAUSE_18_REPRESENTATIONS",
+                            "FOL_CLAUSE_19_INFORMATION_UNDERTAKINGS",
+                            "FOL_CLAUSE_20_FINANCIAL_COVENANTS",
+                            "FOL_CLAUSE_21_GENERAL_UNDERTAKINGS",
+                            "FOL_CLAUSE_22_EVENTS_OF_DEFAULT",
+                            "FOL_CLAUSE_23_CHANGES_TO_THE_LENDERS",
+                            "FOL_CLAUSE_24_THE_AGENT_AND_THE_ARRANGERS",
+                            "FOL_CLAUSE_25_CONDUCT_OF_BUSINESS_BY_THE_FINANCE_PARTIES",
+                            "FOL_CLAUSE_26_SHARING_AMONG_THE_FINANCE_PARTIES",
+                            "FOL_CLAUSE_27_PAYMENT_MECHANICS",
+                            "FOL_CLAUSE_28_SET_OFF",
+                            "FOL_CLAUSE_29_NOTICES",
+                            "FOL_CLAUSE_30_GOVERNING_LAW_AND_JURISDICTION",
+                            "FOL_SCHEDULE_01_FACILITY_PARTICULARS",
+                            "FOL_SCHEDULE_02_CONDITIONS_PRECEDENT",
+                            "FOL_SCHEDULE_03_REPRESENTATIONS",
+                            "FOL_SCHEDULE_04_FORM_OF_UTILISATION_REQUEST",
+                            "FOL_SCHEDULE_05_FEES",
+                            "FOL_SCHEDULE_06_SECURITY_PRINCIPLES",
+                            "FOL_SIG_BORROWER",
+                            "FOL_SIG_LENDER"
+                        ],
+    "compositionRuleTargets":  [
+                                   "FOL_CLAUSE_24_THE_AGENT_AND_THE_ARRANGERS",
+                                   "FOL_CLAUSE_11_FEES",
+                                   "FOL_CLAUSE_17_GUARANTEE_AND_INDEMNITY",
+                                   "FOL_CLAUSE_21_GENERAL_UNDERTAKINGS",
+                                   "FOL_SCHEDULE_01_FACILITY_PARTICULARS",
+                                   "FOL_CLAUSE_07_PREPAYMENT_AND_CANCELLATION",
+                                   "FOL_CLAUSE_05_UTILISATION",
+                                   "FOL_CLAUSE_02_THE_FACILITY",
+                                   "FOL_SCHEDULE_06_SECURITY_PRINCIPLES",
+                                   "FOL_CLAUSE_26_SHARING_AMONG_THE_FINANCE_PARTIES",
+                                   "FOL_CLAUSE_07_PREPAYMENT_AND_CANCELLATION",
+                                   "FOL_CLAUSE_20_FINANCIAL_COVENANTS"
+                               ],
+    "generatedAt":  "2026-07-03T00:13:07.6830962+08:00"
+}

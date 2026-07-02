@@ -1,5 +1,6 @@
 import type { APIRequestContext } from '@playwright/test'
 
+import folDemoTestVariables from '../fixtures/fol-demo-test-variables.json' with { type: 'json' }
 import {
   E2E_TEMPLATE_AUTHOR,
   FOL_CLAUSE_CODES,
@@ -37,17 +38,7 @@ export interface FolCatalogFixture {
   groupCode: string
 }
 
-export const FOL_TEST_VARIABLES = {
-  borrowerLegalName: 'Acme International Holdings Ltd.',
-  facilityAmount: '50000000',
-  facilityCurrency: 'USD',
-  facilityType: 'TERM_LOAN',
-  offerDate: '2026-07-01',
-  maturityDate: '2029-07-01',
-  marginBps: '225',
-  includeSyndication: false,
-  leadArranger: 'Global Wholesale Bank N.V.',
-} as const
+export const FOL_TEST_VARIABLES = folDemoTestVariables.variables
 
 async function apiLogin(
   request: APIRequestContext,
@@ -113,7 +104,7 @@ export async function listFolClauses(request: APIRequestContext): Promise<Conten
     token,
     `/content-modules?groupCode=${FOL_GROUP_CODE}`,
   )
-  return modules.filter((module) => FOL_CLAUSE_CODES.includes(module.moduleCode as (typeof FOL_CLAUSE_CODES)[number]))
+  return modules.filter((module) => FOL_CLAUSE_CODES.includes(module.moduleCode))
 }
 
 export async function assertFolCatalogSeeded(request: APIRequestContext): Promise<FolCatalogFixture> {

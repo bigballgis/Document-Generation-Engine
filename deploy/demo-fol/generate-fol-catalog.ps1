@@ -4,6 +4,11 @@
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ConfigDir = Join-Path $Root 'config'
+$RepoRoot = Split-Path -Parent (Split-Path -Parent $Root)
+$E2eFixturesDir = Join-Path $RepoRoot 'frontend/e2e/fixtures'
+
+. (Join-Path $Root 'lma-clause-library.ps1')
+. (Join-Path $Root 'fol-catalog-shared.ps1')
 
 function Write-JsonFile([string]$Path, [object]$Data) {
     $Null = New-Item -ItemType Directory -Force -Path (Split-Path $Path)
@@ -234,18 +239,18 @@ function Build-Variables {
 
 function Build-CompositionRules {
     $rules = @(
-        @{ ruleId = 'rule-syndication-sec24'; conditionExpression = '${includeSyndication} == true'; targetAnchorId = 'FOL_SEC_24'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-hedge-sec11'; conditionExpression = '${includeHedge} == true'; targetAnchorId = 'FOL_SEC_11'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-guarantee-sec17'; conditionExpression = '${includeGuarantee} == true'; targetAnchorId = 'FOL_SEC_17'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-esg-sec21'; conditionExpression = '${includeESG} == true'; targetAnchorId = 'FOL_SEC_21'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-multicurrency-sch01'; conditionExpression = '${includeMultiCurrency} == true'; targetAnchorId = 'FOL_SCH_01'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-accordion-sec07'; conditionExpression = '${includeAccordion} == true'; targetAnchorId = 'FOL_SEC_07'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-swingline-sec05'; conditionExpression = '${includeSwingline} == true'; targetAnchorId = 'FOL_SEC_05'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-lc-subline-sec02'; conditionExpression = '${includeLcSubline} == true'; targetAnchorId = 'FOL_SEC_02'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-security-sch06'; conditionExpression = '${includeSecurityPackage} == true'; targetAnchorId = 'FOL_SCH_06'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-intercreditor-sec26'; conditionExpression = '${includeIntercreditor} == true'; targetAnchorId = 'FOL_SEC_26'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-prepayment-sec07'; conditionExpression = '${includePrepaymentPenalty} == true'; targetAnchorId = 'FOL_SEC_07'; trueBranchRuleId = ''; falseBranchRuleId = '' }
-        @{ ruleId = 'rule-covenants-sec20'; conditionExpression = '${includeFinancialCovenants} == true'; targetAnchorId = 'FOL_SEC_20'; trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-syndication-clause24'; conditionExpression = '${includeSyndication} == true'; targetAnchorId = (Get-FolAnchorIdForSectionNumber 24); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-hedge-clause11'; conditionExpression = '${includeHedge} == true'; targetAnchorId = (Get-FolAnchorIdForSectionNumber 11); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-guarantee-clause17'; conditionExpression = '${includeGuarantee} == true'; targetAnchorId = (Get-FolAnchorIdForSectionNumber 17); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-esg-clause21'; conditionExpression = '${includeESG} == true'; targetAnchorId = (Get-FolAnchorIdForSectionNumber 21); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-multicurrency-schedule01'; conditionExpression = '${includeMultiCurrency} == true'; targetAnchorId = (Get-FolAnchorIdForScheduleNumber 1); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-accordion-clause07'; conditionExpression = '${includeAccordion} == true'; targetAnchorId = (Get-FolAnchorIdForSectionNumber 7); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-swingline-clause05'; conditionExpression = '${includeSwingline} == true'; targetAnchorId = (Get-FolAnchorIdForSectionNumber 5); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-lc-subline-clause02'; conditionExpression = '${includeLcSubline} == true'; targetAnchorId = (Get-FolAnchorIdForSectionNumber 2); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-security-schedule06'; conditionExpression = '${includeSecurityPackage} == true'; targetAnchorId = (Get-FolAnchorIdForScheduleNumber 6); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-intercreditor-clause26'; conditionExpression = '${includeIntercreditor} == true'; targetAnchorId = (Get-FolAnchorIdForSectionNumber 26); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-prepayment-clause07'; conditionExpression = '${includePrepaymentPenalty} == true'; targetAnchorId = (Get-FolAnchorIdForSectionNumber 7); trueBranchRuleId = ''; falseBranchRuleId = '' }
+        @{ ruleId = 'rule-covenants-clause20'; conditionExpression = '${includeFinancialCovenants} == true'; targetAnchorId = (Get-FolAnchorIdForSectionNumber 20); trueBranchRuleId = ''; falseBranchRuleId = '' }
     )
     return @{ rules = $rules }
 }
@@ -406,8 +411,357 @@ function Build-TableComponents {
     }
 }
 
+function Build-DefaultSectionNodes([string]$Title, [string]$RefKey) {
+    return @(
+        Heading $Title
+        Para @(
+            TextRun 'Borrower: '; VarNode 'borrowerLegalName'; LineBreak
+            TextRun 'Facility: '; VarNode 'facilityAmount'; TextRun ' '; VarNode 'facilityCurrency'; LineBreak
+            TextRun 'Agent: '; VarNode 'agentBank'
+        )
+        ModuleRef $AnchorIdKey
+    )
+}
+
+function Build-SectionOverlayNodes {
+    param(
+        [int]$SectionNumber,
+        [string]$AnchorId,
+        [string]$Title,
+        [hashtable]$Tables
+    )
+
+    switch ($SectionNumber) {
+        1 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'The following defined terms apply to this Facility Offer Letter and the Finance Documents:')
+                Loop 'definedTerms' @(
+                    Para @(Emphasis @(VarNode 'definedTermName')); TextRun ' means '; VarNode 'definedTermMeaning'
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        2 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Total Commitments: '; VarNode 'facilityAmount'; TextRun ' '; VarNode 'facilityCurrency'; TextRun ' ('; VarNode 'facilityType'; TextRun ').')
+                Cond '${includeLcSubline} == true' @(
+                    Para @(TextRun 'Letter of credit sub-facility available within the Total Commitments as agreed with the Agent.')
+                )
+                Cond '${includeAccordion} == true' @(
+                    Para @(TextRun 'Accordion: additional commitments may be requested subject to lender consent.')
+                )
+                Loop 'tranches' @(
+                    Para @(TextRun 'Tranche '; VarNode 'trancheName'; TextRun ': '; VarNode 'trancheAmount'; TextRun ' '; VarNode 'trancheCurrency')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        3 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Purpose: '; VarNode 'facilityPurpose')
+                Cond '${includeGreenUseOfProceeds} == true' @(
+                    Para @(TextRun 'Green use of proceeds: eligible green expenditures as certified in accordance with the agreed green loan framework.')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        4 {
+            return @(
+                Heading $Title
+                Cond '${includeKycCondition} == true' @(
+                    Para @(TextRun 'KYC/AML documentation satisfactory to all Finance Parties is a condition precedent to first Utilisation.')
+                )
+                TableRef 'FOL-TBL-CP-CHECKLIST' $Tables.CpChecklist
+                Loop 'conditionsPrecedent' @(
+                    Para @(TextRun '• '; VarNode 'cpItemDescription'; TextRun ' ['; VarNode 'cpItemStatus'; TextRun ']')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        5 {
+            return @(
+                Heading $Title
+                Cond '${includeUtilisationDate} == true' @(
+                    Para @(TextRun 'Target first utilisation: '; VarNode 'firstUtilisationDate'; TextRun '; Availability period ends '; VarNode 'availabilityPeriodEnd')
+                )
+                Cond '${includeSwingline} == true' @(
+                    Para @(TextRun 'Swingline sub-facility available for same-day utilisations subject to Agent approval.')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        6 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Final maturity: '; VarNode 'maturityDate'; TextRun '; Repayment currency: '; VarNode 'facilityCurrency')
+                TableRef 'FOL-TBL-AMORTISATION' $Tables.Amortisation
+                Loop 'amortisationSchedule' @(
+                    Para @(VarNode 'amortDate'; TextRun ': '; VarNode 'amortPrincipal'; TextRun ' (balance '; VarNode 'amortBalance'; TextRun ')')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        7 {
+            return @(
+                Heading $Title
+                Loop 'prepaymentEvents' @(
+                    Para @(VarNode 'prepaymentEventDescription'; TextRun ' — penalty '; VarNode 'prepaymentEventPenaltyPct'; TextRun '%')
+                )
+                Cond '${includePrepaymentPenalty} == true' @(
+                    Para @(TextRun 'Voluntary prepayments subject to minimum notice periods and Break Costs compensation.')
+                )
+                Cond '${includeAccordion} == true' @(
+                    Para @(TextRun 'Mandatory prepayment on change of control or asset sale as set out in the term sheet.')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        8 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Interest: '; VarNode 'referenceRate'; TextRun ' + '; VarNode 'marginBps'; TextRun ' bps; Default margin: '; VarNode 'defaultInterestMarginPct'; TextRun '%')
+                Loop 'benchmarkFallbacks' @(
+                    Para @(TextRun 'Fallback — '; VarNode 'benchmarkFallbackScenario'; TextRun ': '; VarNode 'benchmarkFallbackRate')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        9 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Interest period: '; VarNode 'interestPeriodMonths'; TextRun ' months; Day count: '; VarNode 'dayCountConvention')
+                ModuleRef $AnchorId
+            )
+        }
+        10 {
+            return @(
+                Heading $Title
+                Loop 'benchmarkFallbacks' @(
+                    Para @(VarNode 'benchmarkFallbackScenario'; TextRun ': '; VarNode 'benchmarkFallbackRate')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        11 {
+            return @(
+                Heading $Title
+                Cond '${includeCommitmentFee} == true' @(
+                    Para @(TextRun 'Commitment fee: '; VarNode 'commitmentFeeBps'; TextRun ' bps on undrawn commitments.')
+                )
+                TableRef 'FOL-TBL-FEE-SCHEDULE' $Tables.FeeSchedule
+                Loop 'fees' @(
+                    Para @(VarNode 'feeItemDescription'; TextRun ': '; VarNode 'feeItemAmount'; TextRun ' '; VarNode 'feeItemCurrency')
+                )
+                Cond '${includeHedge} == true' @(
+                    Loop 'hedgeProviders' @(
+                        Para @(TextRun 'Approved hedge provider: '; VarNode 'hedgeProviderName')
+                    )
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        12 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Withholding tax rate: '; VarNode 'withholdingTaxRatePct'; TextRun '%; Gross-up required: '; VarNode 'grossUpRequired')
+                Para @(TextRun 'Stamp duty — '; VarNode 'stampDutyJurisdiction'; TextRun ': '; VarNode 'stampDutyAmount'; TextRun ' '; VarNode 'stampDutyCurrency')
+                Para @(TextRun 'FATCA status: '; VarNode 'fatcaStatus'; TextRun '; CRS reporting: '; VarNode 'crsReportingRequired'; TextRun '; VAT on fees: '; VarNode 'vatApplicable')
+                Para @(TextRun 'Tax indemnity cap: '; VarNode 'taxIndemnityCap'; TextRun ' '; VarNode 'taxIndemnityCurrency')
+                ModuleRef $AnchorId
+            )
+        }
+        13 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Increased costs claims certified by affected Lenders in accordance with LMA market practice.')
+                ModuleRef $AnchorId
+            )
+        }
+        14 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Indemnities for third-party claims, currency losses and enforcement costs in favour of Finance Parties.')
+                ModuleRef $AnchorId
+            )
+        }
+        15 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Lenders shall use reasonable endeavours to mitigate increased costs and may designate an alternative lending office.')
+                ModuleRef $AnchorId
+            )
+        }
+        16 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Borrower to pay upfront transaction costs, amendment fees and security perfection costs.')
+                ModuleRef $AnchorId
+            )
+        }
+        17 {
+            return @(
+                Heading $Title
+                Cond '${includeGuarantee} == true' @(
+                    Loop 'guarantors' @(
+                        Para @(TextRun 'Guarantor: '; VarNode 'guarantorName'; TextRun ' ('; VarNode 'guarantorJurisdiction'; TextRun ')')
+                    )
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        18 {
+            return @(
+                Heading $Title
+                Loop 'representations' @(
+                    Para @(TextRun '• '; VarNode 'representationSummary')
+                )
+                Cond '${includeSanctionsRep} == true' @(
+                    Para @(TextRun 'Sanctions: Borrower confirms compliance with applicable Sanctions regimes.')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        19 {
+            return @(
+                Heading $Title
+                Loop 'infoUndertakings' @(
+                    Para @(VarNode 'infoUndertakingDescription'; TextRun ' — due within '; VarNode 'infoUndertakingDueDays'; TextRun ' days')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        20 {
+            return @(
+                Heading $Title
+                Cond '${includeFinancialCovenants} == true' @(
+                    Para @(TextRun 'Net Leverage ≤ '; VarNode 'netLeverageMax'; TextRun '; Interest Cover ≥ '; VarNode 'interestCoverMin'; TextRun '; Minimum Liquidity USD '; VarNode 'minimumLiquidity')
+                    Loop 'covenants' @(
+                        Para @(VarNode 'covenantName'; TextRun ': '; VarNode 'covenantRatio'; TextRun ' ('; VarNode 'covenantTestFrequency'; TextRun ')')
+                    )
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        21 {
+            return @(
+                Heading $Title
+                Cond '${includeESG} == true' @(
+                    Loop 'esgKpis' @(
+                        Para @(VarNode 'esgKpiName'; TextRun ': '; VarNode 'esgKpiTarget')
+                    )
+                )
+                Cond '${includeSecurityPackage} == true' @(
+                    Loop 'securedAssets' @(
+                        Para @(VarNode 'securedAssetDescription'; TextRun ' ('; VarNode 'securedAssetJurisdiction'; TextRun ')')
+                    )
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        22 {
+            return @(
+                Heading $Title
+                Loop 'eodTriggers' @(
+                    Para @(VarNode 'eodTriggerDescription'; TextRun ' — grace period '; VarNode 'eodTriggerGraceDays'; TextRun ' days')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        23 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Assignments and transfers subject to LMA Transfer Certificate procedures and yank-a-bank provisions.')
+                ModuleRef $AnchorId
+            )
+        }
+        24 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Facility Agent: '; VarNode 'agentBank'; LineBreak; TextRun 'Lead Arranger: '; VarNode 'leadArranger'; LineBreak; TextRun 'Documentation Agent: '; VarNode 'documentationAgent')
+                Cond '${includeSyndication} == true' @(
+                    TableRef 'FOL-TBL-LENDER-MATRIX' $Tables.LenderMatrix
+                    Loop 'lenders' @(
+                        Para @(VarNode 'lenderName'; TextRun ': '; VarNode 'lenderCommitment'; TextRun ' '; VarNode 'facilityCurrency'; TextRun ' ('; VarNode 'lenderCommitmentPct'; TextRun '%) — '; VarNode 'lenderCountry')
+                    )
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        25 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Finance Parties act at arm''s length; no Finance Party owes fiduciary duties to the Borrower.')
+                ModuleRef $AnchorId
+            )
+        }
+        26 {
+            return @(
+                Heading $Title
+                Cond '${includeIntercreditor} == true' @(
+                    Para @(TextRun 'Pro rata sharing and turnover of recoveries subject to the Intercreditor Agreement.')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        27 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'All payments in '; VarNode 'facilityCurrency'; TextRun ' unless otherwise agreed; payments to Agent distribution account.')
+                ModuleRef $AnchorId
+            )
+        }
+        28 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Each Lender may set off matured obligations owed by an Obligor against amounts due to that Lender.')
+                ModuleRef $AnchorId
+            )
+        }
+        29 {
+            return @(
+                Heading $Title
+                Loop 'noticeParties' @(
+                    Para @(VarNode 'noticePartyName'; LineBreak; VarNode 'noticePartyAddress'; LineBreak; TextRun 'Email: '; VarNode 'noticePartyEmail'; TextRun ' (Attn: '; VarNode 'noticePartyAttention'; TextRun ')')
+                )
+                ModuleRef $AnchorId
+            )
+        }
+        30 {
+            return @(
+                Heading $Title
+                Para @(TextRun 'Governing law: '; VarNode 'governingLaw'; LineBreak; TextRun 'Jurisdiction: '; VarNode 'jurisdiction')
+                Para @(TextRun 'LMA form reference: '; VarNode 'lmaFormReference')
+                ModuleRef $AnchorId
+            )
+        }
+        default {
+            return Build-DefaultSectionNodes -Title $Title -RefKey $AnchorId
+        }
+    }
+}
+
 function Build-BindingOverlays {
     $tables = Build-TableComponents
+    $bindings = [ordered]@{}
+
+    foreach ($entry in Get-LmaSectionCatalog) {
+        $sectionNumber = Get-FolSectionNumber $entry
+        if ($sectionNumber -gt 0) {
+            $anchorId = Resolve-FolHybridAnchorId $entry
+            $nodes = Build-SectionOverlayNodes -SectionNumber $sectionNumber -AnchorId $anchorId -Title $entry.Name -Tables $tables
+            $bindings[$anchorId] = @{ schemaVersion = '1.0'; nodes = $nodes }
+        }
+    }
+
+    $sch01Anchor = Get-FolAnchorIdForScheduleNumber 1
+    $sch02Anchor = Get-FolAnchorIdForScheduleNumber 2
+    $sch03Anchor = Get-FolAnchorIdForScheduleNumber 3
+    $sch04Anchor = Get-FolAnchorIdForScheduleNumber 4
+    $sch05Anchor = Get-FolAnchorIdForScheduleNumber 5
+    $sch06Anchor = Get-FolAnchorIdForScheduleNumber 6
 
     $headerNodes = @(
         Para @(
@@ -475,7 +829,7 @@ function Build-BindingOverlays {
         Loop 'tranches' @(
             Para @(TextRun 'Tranche '; VarNode 'trancheName'; TextRun ': '; VarNode 'trancheAmount'; TextRun ' '; VarNode 'trancheCurrency')
         )
-        ModuleRef 'FOL_SCH_01'
+        ModuleRef $sch01Anchor
     )
 
     $sch02Nodes = @(
@@ -490,7 +844,7 @@ function Build-BindingOverlays {
         Cond '${includeSyndication} == true' @(
             Para @(TextRun 'Syndication: fee letters and lender accession documents from each Lender.')
         )
-        ModuleRef 'FOL_SCH_02'
+        ModuleRef $sch02Anchor
     )
 
     $sch03Nodes = @(
@@ -503,7 +857,7 @@ function Build-BindingOverlays {
                 Para @(TextRun 'Guarantor representation — '; VarNode 'guarantorName'; TextRun ' ('; VarNode 'guarantorJurisdiction'; TextRun ')')
             )
         )
-        ModuleRef 'FOL_SCH_03'
+        ModuleRef $sch03Anchor
     )
 
     $sch04Nodes = @(
@@ -511,7 +865,7 @@ function Build-BindingOverlays {
         Cond '${includeUtilisationDate} == true' @(
             Para @(TextRun 'Requested utilisation date: '; VarNode 'firstUtilisationDate'; TextRun '; Amount: '; VarNode 'facilityAmount'; TextRun ' '; VarNode 'facilityCurrency')
         )
-        ModuleRef 'FOL_SCH_04'
+        ModuleRef $sch04Anchor
     )
 
     $sch05Nodes = @(
@@ -523,7 +877,7 @@ function Build-BindingOverlays {
         Loop 'fees' @(
             Para @(VarNode 'feeItemDescription'; TextRun ': '; VarNode 'feeItemAmount'; TextRun ' '; VarNode 'feeItemCurrency')
         )
-        ModuleRef 'FOL_SCH_05'
+        ModuleRef $sch05Anchor
     )
 
     $sch06Nodes = @(
@@ -544,7 +898,7 @@ function Build-BindingOverlays {
                 Para @(TextRun 'Approved hedge provider: '; VarNode 'hedgeProviderName')
             )
         )
-        ModuleRef 'FOL_SCH_06'
+        ModuleRef $sch06Anchor
     )
 
     $borrowerSig = @(
@@ -556,20 +910,18 @@ function Build-BindingOverlays {
         Para @(TextRun 'Name: _________________________  Title: Authorised Signatory  Date: _________')
     )
 
-    return @{
-        bindings = @{
-            FOL_HEADER = @{ schemaVersion = '1.0'; nodes = $headerNodes }
-            FOL_FACILITY_SUMMARY = @{ schemaVersion = '1.0'; nodes = $summaryNodes }
-            FOL_SCH_01 = @{ schemaVersion = '1.0'; nodes = $sch01Nodes }
-            FOL_SCH_02 = @{ schemaVersion = '1.0'; nodes = $sch02Nodes }
-            FOL_SCH_03 = @{ schemaVersion = '1.0'; nodes = $sch03Nodes }
-            FOL_SCH_04 = @{ schemaVersion = '1.0'; nodes = $sch04Nodes }
-            FOL_SCH_05 = @{ schemaVersion = '1.0'; nodes = $sch05Nodes }
-            FOL_SCH_06 = @{ schemaVersion = '1.0'; nodes = $sch06Nodes }
-            FOL_SIG_BORROWER = @{ schemaVersion = '1.0'; nodes = $borrowerSig }
-            FOL_SIG_LENDER = @{ schemaVersion = '1.0'; nodes = $lenderSig }
-        }
-    }
+    $bindings['FOL_HEADER'] = @{ schemaVersion = '1.0'; nodes = $headerNodes }
+    $bindings['FOL_FACILITY_SUMMARY'] = @{ schemaVersion = '1.0'; nodes = $summaryNodes }
+    $bindings[$sch01Anchor] = @{ schemaVersion = '1.0'; nodes = $sch01Nodes }
+    $bindings[$sch02Anchor] = @{ schemaVersion = '1.0'; nodes = $sch02Nodes }
+    $bindings[$sch03Anchor] = @{ schemaVersion = '1.0'; nodes = $sch03Nodes }
+    $bindings[$sch04Anchor] = @{ schemaVersion = '1.0'; nodes = $sch04Nodes }
+    $bindings[$sch05Anchor] = @{ schemaVersion = '1.0'; nodes = $sch05Nodes }
+    $bindings[$sch06Anchor] = @{ schemaVersion = '1.0'; nodes = $sch06Nodes }
+    $bindings['FOL_SIG_BORROWER'] = @{ schemaVersion = '1.0'; nodes = $borrowerSig }
+    $bindings['FOL_SIG_LENDER'] = @{ schemaVersion = '1.0'; nodes = $lenderSig }
+
+    return @{ bindings = $bindings }
 }
 
 function Build-DemoTestVariables {
@@ -760,25 +1112,72 @@ function Build-DemoTestVariables {
             @{ prepaymentEventDescription = 'Change of control mandatory prepayment'; prepaymentEventPenaltyPct = '1.00' }
             @{ prepaymentEventDescription = 'Asset sale excess cash sweep'; prepaymentEventPenaltyPct = '0.00' }
         )
+        withholdingTaxRatePct = '0.00'
+        grossUpRequired = $true
+        stampDutyJurisdiction = 'England and Wales'
+        stampDutyAmount = '1250'
+        stampDutyCurrency = 'GBP'
+        vatApplicable = $false
+        fatcaStatus = 'COMPLIANT'
+        crsReportingRequired = $true
+        taxIndemnityCap = '5000000'
+        taxIndemnityCurrency = 'USD'
     }
 }
 
 # --- Generate ---
 $variables = Build-Variables
-Write-JsonFile (Join-Path $ConfigDir 'fol-variables.json') @{ variables = $variables; generatedAt = (Get-Date -Format 'o'); variableCount = $variables.Count }
+$compositionRules = Build-CompositionRules
+$bindingOverlays = Build-BindingOverlays
+$demoTestVariables = Build-DemoTestVariables
+$compositionRuleTargets = @($compositionRules.rules | ForEach-Object { $_.targetAnchorId })
+$manifest = Build-CatalogManifest -CompositionRuleTargets $compositionRuleTargets
 
-Write-JsonFile (Join-Path $ConfigDir 'fol-composition-rules.json') (Build-CompositionRules)
-Write-JsonFile (Join-Path $ConfigDir 'fol-binding-overlays.json') (Build-BindingOverlays)
+Write-JsonFile (Join-Path $ConfigDir 'fol-variables.json') @{ variables = $variables; generatedAt = (Get-Date -Format 'o'); variableCount = $variables.Count }
+Write-JsonFile (Join-Path $ConfigDir 'fol-composition-rules.json') $compositionRules
+Write-JsonFile (Join-Path $ConfigDir 'fol-binding-overlays.json') $bindingOverlays
+Write-JsonFile (Join-Path $ConfigDir 'fol-catalog-manifest.json') $manifest
+$masterSectionManifest = Get-FolMasterSectionManifest
+$backendTestResourceDir = Join-Path $RepoRoot 'backend/src/test/resources/demo'
+$Null = New-Item -ItemType Directory -Force -Path $backendTestResourceDir
+Write-JsonFile (Join-Path $ConfigDir 'fol-master-anchor-ids.json') @{
+    anchorIds = ($masterSectionManifest | ForEach-Object { $_.anchorId })
+    sections = $masterSectionManifest
+    generatedAt = (Get-Date -Format 'o')
+}
+Write-JsonFile (Join-Path $backendTestResourceDir 'fol-master-anchor-ids.json') @{
+    anchorIds = ($masterSectionManifest | ForEach-Object { $_.anchorId })
+    sections = $masterSectionManifest
+    generatedAt = (Get-Date -Format 'o')
+}
 Write-JsonFile (Join-Path $ConfigDir 'fol-demo-test-variables.json') @{
     name = 'Executive walkthrough - Pacific Rim Holdings'
     scenarioName = 'Syndicated term loan - Pacific Rim USD 250m (LMA IG baseline)'
     required = $true
     coverageTags = @('executive-demo', 'fol', 'syndicated', 'happy-path')
-    variables = (Build-DemoTestVariables)
+    variables = $demoTestVariables
+}
+
+$Null = New-Item -ItemType Directory -Force -Path $E2eFixturesDir
+Write-JsonFile (Join-Path $E2eFixturesDir 'fol-catalog-manifest.json') $manifest
+Write-JsonFile (Join-Path $E2eFixturesDir 'fol-demo-test-variables.json') @{
+    variables = $demoTestVariables
+}
+
+$overlayJson = ($bindingOverlays | ConvertTo-Json -Depth 100)
+$features = @{
+    conditionBlocks = ([regex]::Matches($overlayJson, '"type"\s*:\s*"conditionBlock"')).Count
+    loopBlocks = ([regex]::Matches($overlayJson, '"type"\s*:\s*"loopBlock"')).Count
+    tableComponentRefs = ([regex]::Matches($overlayJson, '"type"\s*:\s*"tableComponentRef"')).Count
 }
 
 Write-Host "Generated FOL catalog artefacts in $ConfigDir"
 Write-Host "  variables:          $($variables.Count)"
-Write-Host "  composition rules:  $((Build-CompositionRules).rules.Count)"
-Write-Host "  binding overlays:   $((Build-BindingOverlays).bindings.Keys.Count) anchors"
+Write-Host "  composition rules:  $($compositionRules.rules.Count)"
+Write-Host "  binding overlays:   $($bindingOverlays.bindings.Keys.Count) anchors"
+Write-Host "  clause bindings:    $($manifest.clauseBindings.Count)"
+Write-Host "  conditionBlocks:    $($features.conditionBlocks)"
+Write-Host "  loopBlocks:         $($features.loopBlocks)"
+Write-Host "  tableComponentRefs: $($features.tableComponentRefs)"
+Write-Host "  e2e fixtures:       $E2eFixturesDir"
 exit 0

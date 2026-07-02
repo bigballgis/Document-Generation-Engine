@@ -25,6 +25,7 @@ $ConfigPath = Join-Path $DemoRoot 'config/fol-template-config.json'
 $SqlPath = Join-Path $DemoRoot 'sql/001-fol-standard-clauses.sql'
 $GenerateSql = Join-Path $DemoRoot 'generate-clauses-sql.ps1'
 $GenerateCatalog = Join-Path $DemoRoot 'generate-fol-catalog.ps1'
+$CatalogShared = Join-Path $DemoRoot 'fol-catalog-shared.ps1'
 $ApiBase = "$BackendUrl/api/management/v1"
 
 function Write-Step([string]$Message) { Write-Host "==> $Message" }
@@ -74,7 +75,8 @@ function Ensure-CatalogGenerated {
         (Resolve-CatalogPath $Config.generatedCatalogFiles.variables),
         (Resolve-CatalogPath $Config.generatedCatalogFiles.compositionRules),
         (Resolve-CatalogPath $Config.generatedCatalogFiles.bindingOverlays),
-        (Resolve-CatalogPath $Config.generatedCatalogFiles.demoTestVariables)
+        (Resolve-CatalogPath $Config.generatedCatalogFiles.demoTestVariables),
+        (Resolve-CatalogPath $Config.generatedCatalogFiles.catalogManifest)
     )
     $missing = $files | Where-Object { -not (Test-Path $_) }
     if ($RegenerateCatalog -or $missing.Count -gt 0) {
@@ -113,6 +115,29 @@ function Merge-ClauseBinding([string]$AnchorId, [string]$ReferenceKey, [object]$
             @{ type = 'contentModuleRef'; referenceKey = $ReferenceKey }
         )
     }
+}
+
+function Remove-StaleLegacyFolBindings([string]$TemplateId) {
+    $sql = @"
+BEGIN;
+DELETE FROM template_content_module_reference tcmr
+USING template_version tv
+WHERE tcmr.template_version_id = tv.id
+  AND tv.template_id = '$TemplateId'::uuid
+  AND tv.lifecycle_status = 'DRAFT'
+  AND (tcmr.reference_key LIKE 'FOL_SEC_%' OR tcmr.reference_key LIKE 'FOL_SCH_%');
+
+DELETE FROM anchor_binding ab
+USING template_version tv
+WHERE ab.template_version_id = tv.id
+  AND tv.template_id = '$TemplateId'::uuid
+  AND tv.lifecycle_status = 'DRAFT'
+  AND (ab.anchor_id LIKE 'FOL_SEC_%' OR ab.anchor_id LIKE 'FOL_SCH_%');
+COMMIT;
+"@
+    Write-Step "Removing legacy FOL_SEC_/FOL_SCH_ bindings and module references..."
+    $sql | docker exec -i $PostgresContainer psql -U $PostgresUser -d $PostgresDb -v ON_ERROR_STOP=1
+    if ($LASTEXITCODE -ne 0) { throw "Legacy FOL binding cleanup failed (exit $LASTEXITCODE)" }
 }
 
 function Remove-StaleCatalogVariables([string]$TemplateId, [string]$Token, [string[]]$CatalogKeys) {
@@ -291,11 +316,14 @@ $VariablesPath = Resolve-CatalogPath $Config.generatedCatalogFiles.variables
 $RulesPath = Resolve-CatalogPath $Config.generatedCatalogFiles.compositionRules
 $OverlaysPath = Resolve-CatalogPath $Config.generatedCatalogFiles.bindingOverlays
 $TestDataPath = Resolve-CatalogPath $Config.generatedCatalogFiles.demoTestVariables
+$ManifestPath = Resolve-CatalogPath $Config.generatedCatalogFiles.catalogManifest
 
 $CatalogVariables = (Get-Content $VariablesPath -Raw | ConvertFrom-Json).variables
 $CompositionRules = (Get-Content $RulesPath -Raw | ConvertFrom-Json).rules
 $BindingOverlays = (Get-Content $OverlaysPath -Raw | ConvertFrom-Json).bindings
 $TestDataConfig = Get-Content $TestDataPath -Raw | ConvertFrom-Json
+$CatalogManifest = Get-Content $ManifestPath -Raw | ConvertFrom-Json
+$ClauseBindings = @($CatalogManifest.clauseBindings)
 
 if (-not $SkipSql) {
     if (-not (Test-Path $SqlPath)) {
@@ -420,18 +448,19 @@ foreach ($var in $CatalogVariables) {
 
 # --- Bindings: overlays + clause module refs ---
 Write-Step "Applying rich binding overlays and clause references..."
+Remove-StaleLegacyFolBindings -TemplateId $templateId
 $overlayKeys = @{}
 $BindingOverlays.PSObject.Properties | ForEach-Object { $overlayKeys[$_.Name] = $_.Value }
 
 # Signature and header anchors from overlays (not in clauseBindings)
-$overlayOnlyAnchors = @('FOL_HEADER', 'FOL_FACILITY_SUMMARY', 'FOL_SIG_BORROWER', 'FOL_SIG_LENDER')
+$overlayOnlyAnchors = @($CatalogManifest.overlayOnlyAnchors)
 foreach ($anchorId in $overlayOnlyAnchors) {
     if ($overlayKeys.ContainsKey($anchorId)) {
         Set-Binding -TemplateId $templateId -Token $AuthorToken -AnchorId $anchorId -StructuredContent $overlayKeys[$anchorId]
     }
 }
 
-foreach ($clause in $Config.clauseBindings) {
+foreach ($clause in $ClauseBindings) {
     $anchorId = $clause.anchorId
     $refKey = $clause.referenceKey
     $overlay = $null
@@ -474,7 +503,7 @@ Write-Host "  Bindings:            $(@($detail.result.bindings).Count)"
 Write-Host "  conditionBlocks:     $($features.conditionBlocks)"
 Write-Host "  loopBlocks:          $($features.loopBlocks)"
 Write-Host "  tableComponentRefs:  $($features.tableComponentRefs)"
-Write-Host "  Clauses (SQL):       $($Config.clauseBindings.Count)"
+Write-Host "  Clauses (SQL):       $($ClauseBindings.Count)"
 Write-Host "  UI:                  http://localhost:4173/templates/$templateId"
 Write-Host ""
 

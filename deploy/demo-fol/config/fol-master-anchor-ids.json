@@ -1,0 +1,207 @@
+﻿{
+    "sections":  [
+                     {
+                         "anchorId":  "FOL_HEADER",
+                         "title":  "Letter Header"
+                     },
+                     {
+                         "anchorId":  "FOL_FACILITY_SUMMARY",
+                         "title":  "Schedule 鈥?Facility Particulars (Summary)"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION",
+                         "title":  "1. Definitions and Interpretation"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_02_THE_FACILITY",
+                         "title":  "2. The Facility"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_03_PURPOSE",
+                         "title":  "3. Purpose"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_04_CONDITIONS_OF_UTILISATION",
+                         "title":  "4. Conditions of Utilisation"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_05_UTILISATION",
+                         "title":  "5. Utilisation"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_06_REPAYMENT",
+                         "title":  "6. Repayment"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_07_PREPAYMENT_AND_CANCELLATION",
+                         "title":  "7. Prepayment and Cancellation"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_08_INTEREST",
+                         "title":  "8. Interest"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_09_INTEREST_PERIODS",
+                         "title":  "9. Interest Periods"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_10_CHANGES_TO_THE_CALCULATION_OF_INTEREST",
+                         "title":  "10. Changes to the Calculation of Interest"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_11_FEES",
+                         "title":  "11. Fees"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_12_TAX_GROSS_UP_AND_INDEMNITIES",
+                         "title":  "12. Tax Gross-Up and Indemnities"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_13_INCREASED_COSTS",
+                         "title":  "13. Increased Costs"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_14_OTHER_INDEMNITIES",
+                         "title":  "14. Other Indemnities"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_15_MITIGATION_BY_THE_LENDERS",
+                         "title":  "15. Mitigation by the Lenders"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_16_COSTS_AND_EXPENSES",
+                         "title":  "16. Costs and Expenses"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_17_GUARANTEE_AND_INDEMNITY",
+                         "title":  "17. Guarantee and Indemnity"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_18_REPRESENTATIONS",
+                         "title":  "18. Representations"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_19_INFORMATION_UNDERTAKINGS",
+                         "title":  "19. Information Undertakings"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_20_FINANCIAL_COVENANTS",
+                         "title":  "20. Financial Covenants"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_21_GENERAL_UNDERTAKINGS",
+                         "title":  "21. General Undertakings"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_22_EVENTS_OF_DEFAULT",
+                         "title":  "22. Events of Default"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_23_CHANGES_TO_THE_LENDERS",
+                         "title":  "23. Changes to the Lenders"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_24_THE_AGENT_AND_THE_ARRANGERS",
+                         "title":  "24. The Agent and the Arrangers"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_25_CONDUCT_OF_BUSINESS_BY_THE_FINANCE_PARTIES",
+                         "title":  "25. Conduct of Business by the Finance Parties"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_26_SHARING_AMONG_THE_FINANCE_PARTIES",
+                         "title":  "26. Sharing among the Finance Parties"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_27_PAYMENT_MECHANICS",
+                         "title":  "27. Payment Mechanics"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_28_SET_OFF",
+                         "title":  "28. Set-Off"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_29_NOTICES",
+                         "title":  "29. Notices"
+                     },
+                     {
+                         "anchorId":  "FOL_CLAUSE_30_GOVERNING_LAW_AND_JURISDICTION",
+                         "title":  "30. Governing Law and Jurisdiction"
+                     },
+                     {
+                         "anchorId":  "FOL_SCHEDULE_01_FACILITY_PARTICULARS",
+                         "title":  "Schedule 1 - Facility Particulars"
+                     },
+                     {
+                         "anchorId":  "FOL_SCHEDULE_02_CONDITIONS_PRECEDENT",
+                         "title":  "Schedule 2 - Conditions Precedent"
+                     },
+                     {
+                         "anchorId":  "FOL_SCHEDULE_03_REPRESENTATIONS",
+                         "title":  "Schedule 3 - Representations"
+                     },
+                     {
+                         "anchorId":  "FOL_SCHEDULE_04_FORM_OF_UTILISATION_REQUEST",
+                         "title":  "Schedule 4 - Form of Utilisation Request"
+                     },
+                     {
+                         "anchorId":  "FOL_SCHEDULE_05_FEES",
+                         "title":  "Schedule 5 - Fees"
+                     },
+                     {
+                         "anchorId":  "FOL_SCHEDULE_06_SECURITY_PRINCIPLES",
+                         "title":  "Schedule 6 - Security Principles"
+                     },
+                     {
+                         "anchorId":  "FOL_SIG_BORROWER",
+                         "title":  "Execution 鈥?Borrower"
+                     },
+                     {
+                         "anchorId":  "FOL_SIG_LENDER",
+                         "title":  "Execution 鈥?Lenders / Agent"
+                     }
+                 ],
+    "anchorIds":  [
+                      "FOL_HEADER",
+                      "FOL_FACILITY_SUMMARY",
+                      "FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION",
+                      "FOL_CLAUSE_02_THE_FACILITY",
+                      "FOL_CLAUSE_03_PURPOSE",
+                      "FOL_CLAUSE_04_CONDITIONS_OF_UTILISATION",
+                      "FOL_CLAUSE_05_UTILISATION",
+                      "FOL_CLAUSE_06_REPAYMENT",
+                      "FOL_CLAUSE_07_PREPAYMENT_AND_CANCELLATION",
+                      "FOL_CLAUSE_08_INTEREST",
+                      "FOL_CLAUSE_09_INTEREST_PERIODS",
+                      "FOL_CLAUSE_10_CHANGES_TO_THE_CALCULATION_OF_INTEREST",
+                      "FOL_CLAUSE_11_FEES",
+                      "FOL_CLAUSE_12_TAX_GROSS_UP_AND_INDEMNITIES",
+                      "FOL_CLAUSE_13_INCREASED_COSTS",
+                      "FOL_CLAUSE_14_OTHER_INDEMNITIES",
+                      "FOL_CLAUSE_15_MITIGATION_BY_THE_LENDERS",
+                      "FOL_CLAUSE_16_COSTS_AND_EXPENSES",
+                      "FOL_CLAUSE_17_GUARANTEE_AND_INDEMNITY",
+                      "FOL_CLAUSE_18_REPRESENTATIONS",
+                      "FOL_CLAUSE_19_INFORMATION_UNDERTAKINGS",
+                      "FOL_CLAUSE_20_FINANCIAL_COVENANTS",
+                      "FOL_CLAUSE_21_GENERAL_UNDERTAKINGS",
+                      "FOL_CLAUSE_22_EVENTS_OF_DEFAULT",
+                      "FOL_CLAUSE_23_CHANGES_TO_THE_LENDERS",
+                      "FOL_CLAUSE_24_THE_AGENT_AND_THE_ARRANGERS",
+                      "FOL_CLAUSE_25_CONDUCT_OF_BUSINESS_BY_THE_FINANCE_PARTIES",
+                      "FOL_CLAUSE_26_SHARING_AMONG_THE_FINANCE_PARTIES",
+                      "FOL_CLAUSE_27_PAYMENT_MECHANICS",
+                      "FOL_CLAUSE_28_SET_OFF",
+                      "FOL_CLAUSE_29_NOTICES",
+                      "FOL_CLAUSE_30_GOVERNING_LAW_AND_JURISDICTION",
+                      "FOL_SCHEDULE_01_FACILITY_PARTICULARS",
+                      "FOL_SCHEDULE_02_CONDITIONS_PRECEDENT",
+                      "FOL_SCHEDULE_03_REPRESENTATIONS",
+                      "FOL_SCHEDULE_04_FORM_OF_UTILISATION_REQUEST",
+                      "FOL_SCHEDULE_05_FEES",
+                      "FOL_SCHEDULE_06_SECURITY_PRINCIPLES",
+                      "FOL_SIG_BORROWER",
+                      "FOL_SIG_LENDER"
+                  ],
+    "generatedAt":  "2026-07-03T00:13:07.8250155+08:00"
+}

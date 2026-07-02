@@ -10,6 +10,7 @@ $Null = New-Item -ItemType Directory -Force -Path (Split-Path $OutFile)
 
 if (-not (Test-Path $Library)) { throw "Missing clause library: $Library" }
 . $Library
+. (Join-Path $Root 'fol-catalog-shared.ps1')
 
 function Escape-Sql([string]$Value) {
     return $Value.Replace("'", "''")
@@ -43,7 +44,6 @@ foreach ($Entry in Get-LmaSectionCatalog) {
     $Clauses.Add([ordered]@{
         Code = $Entry.Code
         Name = $Entry.Name
-        Ref = $Entry.Ref
         Paragraphs = $Paragraphs
     })
 }
@@ -59,7 +59,8 @@ foreach ($Clause in ($Clauses | Sort-Object { $_.Code })) {
     $ModuleId = ('aaaaaaaa-aaaa-aaaa-aaaa-{0:D12}' -f $Index)
     $VersionId = ('bbbbbbbb-bbbb-bbbb-bbbb-{0:D12}' -f $Index)
     $Json = Clause-Json $Clause.Paragraphs
-    $Lines.Add("-- $($Clause.Code) -> $($Clause.Ref) ($(@($Clause.Paragraphs).Count) paragraphs)")
+    $anchorId = Resolve-FolHybridAnchorId ([hashtable]@{ Name = $Clause.Name })
+    $Lines.Add("-- $($Clause.Code) -> $anchorId ($(@($Clause.Paragraphs).Count) paragraphs)")
     $Lines.Add(@"
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT '$ModuleId', '$(Escape-Sql $Clause.Code)', 'CORP', '$(Escape-Sql $Clause.Name)', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'

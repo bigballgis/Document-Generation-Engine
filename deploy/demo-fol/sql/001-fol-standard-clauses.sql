@@ -2,7 +2,7 @@
 -- Meridian Global Banking Corporation 鈥?LMA-style wholesale FOL clauses (CORP group, 100+ page demo target)
 BEGIN;
 
--- MOD-FOL-SCH-01 -> FOL_SCH_01 (41 paragraphs)
+-- MOD-FOL-SCH-01 -> FOL_SCHEDULE_01_FACILITY_PARTICULARS (41 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000001', 'MOD-FOL-SCH-01', 'CORP', 'Schedule 1 - Facility Particulars', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -34,7 +34,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SCH-02 -> FOL_SCH_02 (39 paragraphs)
+-- MOD-FOL-SCH-02 -> FOL_SCHEDULE_02_CONDITIONS_PRECEDENT (39 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000002', 'MOD-FOL-SCH-02', 'CORP', 'Schedule 2 - Conditions Precedent', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -66,7 +66,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SCH-03 -> FOL_SCH_03 (39 paragraphs)
+-- MOD-FOL-SCH-03 -> FOL_SCHEDULE_03_REPRESENTATIONS (39 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000003', 'MOD-FOL-SCH-03', 'CORP', 'Schedule 3 - Representations', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -98,7 +98,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SCH-04 -> FOL_SCH_04 (39 paragraphs)
+-- MOD-FOL-SCH-04 -> FOL_SCHEDULE_04_FORM_OF_UTILISATION_REQUEST (39 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000004', 'MOD-FOL-SCH-04', 'CORP', 'Schedule 4 - Form of Utilisation Request', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -130,7 +130,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SCH-05 -> FOL_SCH_05 (39 paragraphs)
+-- MOD-FOL-SCH-05 -> FOL_SCHEDULE_05_FEES (39 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000005', 'MOD-FOL-SCH-05', 'CORP', 'Schedule 5 - Fees', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -162,7 +162,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SCH-06 -> FOL_SCH_06 (40 paragraphs)
+-- MOD-FOL-SCH-06 -> FOL_SCHEDULE_06_SECURITY_PRINCIPLES (40 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000006', 'MOD-FOL-SCH-06', 'CORP', 'Schedule 6 - Security Principles', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -194,7 +194,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-01 -> FOL_SEC_01 (255 paragraphs)
+-- MOD-FOL-SEC-01 -> FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION (255 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000007', 'MOD-FOL-SEC-01', 'CORP', '1. Definitions and Interpretation', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -226,7 +226,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-02 -> FOL_SEC_02 (30 paragraphs)
+-- MOD-FOL-SEC-02 -> FOL_CLAUSE_02_THE_FACILITY (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000008', 'MOD-FOL-SEC-02', 'CORP', '2. The Facility', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -258,7 +258,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-03 -> FOL_SEC_03 (30 paragraphs)
+-- MOD-FOL-SEC-03 -> FOL_CLAUSE_03_PURPOSE (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000009', 'MOD-FOL-SEC-03', 'CORP', '3. Purpose', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -290,7 +290,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-04 -> FOL_SEC_04 (30 paragraphs)
+-- MOD-FOL-SEC-04 -> FOL_CLAUSE_04_CONDITIONS_OF_UTILISATION (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000010', 'MOD-FOL-SEC-04', 'CORP', '4. Conditions of Utilisation', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -322,7 +322,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-05 -> FOL_SEC_05 (30 paragraphs)
+-- MOD-FOL-SEC-05 -> FOL_CLAUSE_05_UTILISATION (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000011', 'MOD-FOL-SEC-05', 'CORP', '5. Utilisation', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -354,7 +354,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-06 -> FOL_SEC_06 (30 paragraphs)
+-- MOD-FOL-SEC-06 -> FOL_CLAUSE_06_REPAYMENT (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000012', 'MOD-FOL-SEC-06', 'CORP', '6. Repayment', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -386,7 +386,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-07 -> FOL_SEC_07 (30 paragraphs)
+-- MOD-FOL-SEC-07 -> FOL_CLAUSE_07_PREPAYMENT_AND_CANCELLATION (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000013', 'MOD-FOL-SEC-07', 'CORP', '7. Prepayment and Cancellation', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -418,7 +418,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-08 -> FOL_SEC_08 (30 paragraphs)
+-- MOD-FOL-SEC-08 -> FOL_CLAUSE_08_INTEREST (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000014', 'MOD-FOL-SEC-08', 'CORP', '8. Interest', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -450,7 +450,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-09 -> FOL_SEC_09 (30 paragraphs)
+-- MOD-FOL-SEC-09 -> FOL_CLAUSE_09_INTEREST_PERIODS (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000015', 'MOD-FOL-SEC-09', 'CORP', '9. Interest Periods', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -482,7 +482,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-10 -> FOL_SEC_10 (30 paragraphs)
+-- MOD-FOL-SEC-10 -> FOL_CLAUSE_10_CHANGES_TO_THE_CALCULATION_OF_INTEREST (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000016', 'MOD-FOL-SEC-10', 'CORP', '10. Changes to the Calculation of Interest', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -514,7 +514,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-11 -> FOL_SEC_11 (30 paragraphs)
+-- MOD-FOL-SEC-11 -> FOL_CLAUSE_11_FEES (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000017', 'MOD-FOL-SEC-11', 'CORP', '11. Fees', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -546,7 +546,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-12 -> FOL_SEC_12 (30 paragraphs)
+-- MOD-FOL-SEC-12 -> FOL_CLAUSE_12_TAX_GROSS_UP_AND_INDEMNITIES (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000018', 'MOD-FOL-SEC-12', 'CORP', '12. Tax Gross-Up and Indemnities', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -578,7 +578,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-13 -> FOL_SEC_13 (30 paragraphs)
+-- MOD-FOL-SEC-13 -> FOL_CLAUSE_13_INCREASED_COSTS (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000019', 'MOD-FOL-SEC-13', 'CORP', '13. Increased Costs', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -610,7 +610,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-14 -> FOL_SEC_14 (30 paragraphs)
+-- MOD-FOL-SEC-14 -> FOL_CLAUSE_14_OTHER_INDEMNITIES (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000020', 'MOD-FOL-SEC-14', 'CORP', '14. Other Indemnities', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -642,7 +642,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-15 -> FOL_SEC_15 (30 paragraphs)
+-- MOD-FOL-SEC-15 -> FOL_CLAUSE_15_MITIGATION_BY_THE_LENDERS (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000021', 'MOD-FOL-SEC-15', 'CORP', '15. Mitigation by the Lenders', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -674,7 +674,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-16 -> FOL_SEC_16 (30 paragraphs)
+-- MOD-FOL-SEC-16 -> FOL_CLAUSE_16_COSTS_AND_EXPENSES (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000022', 'MOD-FOL-SEC-16', 'CORP', '16. Costs and Expenses', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -706,7 +706,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-17 -> FOL_SEC_17 (30 paragraphs)
+-- MOD-FOL-SEC-17 -> FOL_CLAUSE_17_GUARANTEE_AND_INDEMNITY (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000023', 'MOD-FOL-SEC-17', 'CORP', '17. Guarantee and Indemnity', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -738,7 +738,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-18 -> FOL_SEC_18 (30 paragraphs)
+-- MOD-FOL-SEC-18 -> FOL_CLAUSE_18_REPRESENTATIONS (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000024', 'MOD-FOL-SEC-18', 'CORP', '18. Representations', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -770,7 +770,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-19 -> FOL_SEC_19 (30 paragraphs)
+-- MOD-FOL-SEC-19 -> FOL_CLAUSE_19_INFORMATION_UNDERTAKINGS (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000025', 'MOD-FOL-SEC-19', 'CORP', '19. Information Undertakings', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -802,7 +802,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-20 -> FOL_SEC_20 (30 paragraphs)
+-- MOD-FOL-SEC-20 -> FOL_CLAUSE_20_FINANCIAL_COVENANTS (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000026', 'MOD-FOL-SEC-20', 'CORP', '20. Financial Covenants', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -834,7 +834,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-21 -> FOL_SEC_21 (30 paragraphs)
+-- MOD-FOL-SEC-21 -> FOL_CLAUSE_21_GENERAL_UNDERTAKINGS (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000027', 'MOD-FOL-SEC-21', 'CORP', '21. General Undertakings', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -866,7 +866,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-22 -> FOL_SEC_22 (30 paragraphs)
+-- MOD-FOL-SEC-22 -> FOL_CLAUSE_22_EVENTS_OF_DEFAULT (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000028', 'MOD-FOL-SEC-22', 'CORP', '22. Events of Default', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -898,7 +898,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-23 -> FOL_SEC_23 (30 paragraphs)
+-- MOD-FOL-SEC-23 -> FOL_CLAUSE_23_CHANGES_TO_THE_LENDERS (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000029', 'MOD-FOL-SEC-23', 'CORP', '23. Changes to the Lenders', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -930,7 +930,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-24 -> FOL_SEC_24 (30 paragraphs)
+-- MOD-FOL-SEC-24 -> FOL_CLAUSE_24_THE_AGENT_AND_THE_ARRANGERS (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000030', 'MOD-FOL-SEC-24', 'CORP', '24. The Agent and the Arrangers', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -962,7 +962,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-25 -> FOL_SEC_25 (30 paragraphs)
+-- MOD-FOL-SEC-25 -> FOL_CLAUSE_25_CONDUCT_OF_BUSINESS_BY_THE_FINANCE_PARTIES (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000031', 'MOD-FOL-SEC-25', 'CORP', '25. Conduct of Business by the Finance Parties', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -994,7 +994,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-26 -> FOL_SEC_26 (30 paragraphs)
+-- MOD-FOL-SEC-26 -> FOL_CLAUSE_26_SHARING_AMONG_THE_FINANCE_PARTIES (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000032', 'MOD-FOL-SEC-26', 'CORP', '26. Sharing among the Finance Parties', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -1026,7 +1026,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-27 -> FOL_SEC_27 (30 paragraphs)
+-- MOD-FOL-SEC-27 -> FOL_CLAUSE_27_PAYMENT_MECHANICS (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000033', 'MOD-FOL-SEC-27', 'CORP', '27. Payment Mechanics', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -1058,7 +1058,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-28 -> FOL_SEC_28 (30 paragraphs)
+-- MOD-FOL-SEC-28 -> FOL_CLAUSE_28_SET_OFF (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000034', 'MOD-FOL-SEC-28', 'CORP', '28. Set-Off', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -1090,7 +1090,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-29 -> FOL_SEC_29 (30 paragraphs)
+-- MOD-FOL-SEC-29 -> FOL_CLAUSE_29_NOTICES (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000035', 'MOD-FOL-SEC-29', 'CORP', '29. Notices', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (
@@ -1122,7 +1122,7 @@ WHERE v.module_id = cm.id
   AND cm.deleted_at IS NULL
   AND v.semantic_version = '1.0.0';
 
--- MOD-FOL-SEC-30 -> FOL_SEC_30 (30 paragraphs)
+-- MOD-FOL-SEC-30 -> FOL_CLAUSE_30_GOVERNING_LAW_AND_JURISDICTION (30 paragraphs)
 INSERT INTO content_module (id, module_code, group_code, name, description, shared_group_codes_json, created_by, updated_by)
 SELECT 'aaaaaaaa-aaaa-aaaa-aaaa-000000000036', 'MOD-FOL-SEC-30', 'CORP', '30. Governing Law and Jurisdiction', 'Wholesale FOL standard clause (executive demo)', '[]', '10000003', '10000003'
 WHERE NOT EXISTS (

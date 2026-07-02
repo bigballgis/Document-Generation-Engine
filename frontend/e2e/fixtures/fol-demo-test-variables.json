@@ -490,14 +490,5 @@
                                                  "hedgeProviderName":  "Continental Capital Bank AG"
                                              }
                                          ]
-                  },
-    "name":  "Executive walkthrough - Pacific Rim Holdings",
-    "coverageTags":  [
-                         "executive-demo",
-                         "fol",
-                         "syndicated",
-                         "happy-path"
-                     ],
-    "required":  true,
-    "scenarioName":  "Syndicated term loan - Pacific Rim USD 250m (LMA IG baseline)"
+                  }
 }

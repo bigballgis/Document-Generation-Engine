@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import folCatalogManifest from './fixtures/fol-catalog-manifest.json' with { type: 'json' }
 import {
-  E2E_TEMPLATE_AUTHOR,
   E2E_CORP_TEMPLATE_AUTHOR,
   FOL_CLAUSE_CODES,
   FOL_EXPECTED_ANCHOR_COUNT,
@@ -12,6 +12,10 @@ import {
   loginAsGlobalAdmin,
 } from './helpers/auth'
 import { assertFolCatalogSeeded } from './helpers/fol-api'
+
+const FOL_DEFINITIONS_ANCHOR =
+  folCatalogManifest.clauseBindings.find((binding) => binding.moduleCode === 'MOD-FOL-SEC-01')?.anchorId ??
+  'FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION'
 
 test.describe('corporate FOL catalog (demo seed)', () => {
   test.beforeEach(async ({ page }) => {
@@ -82,9 +86,9 @@ test.describe('corporate FOL catalog (demo seed)', () => {
 
     await designSubTabs.getByRole('tab', { name: /^bindings$/i }).click()
     const anchorFilter = page.locator('.bindings-panel').getByPlaceholder(/filter/i).first()
-    await anchorFilter.fill('FOL_SEC_01')
+    await anchorFilter.fill('FOL_CLAUSE_01')
     await expect(
-      page.locator('.bindings-panel .el-table').getByText('FOL_SEC_01', { exact: true }).first(),
+      page.locator('.bindings-panel .el-table').getByText(FOL_DEFINITIONS_ANCHOR, { exact: true }).first(),
     ).toBeVisible({ timeout: 15_000 })
   })
 })

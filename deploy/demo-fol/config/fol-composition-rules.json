@@ -1,86 +1,86 @@
 ﻿{
     "rules":  [
                   {
-                      "targetAnchorId":  "FOL_SEC_24",
+                      "targetAnchorId":  "FOL_CLAUSE_24_THE_AGENT_AND_THE_ARRANGERS",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-syndication-sec24",
+                      "ruleId":  "rule-syndication-clause24",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeSyndication} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SEC_11",
+                      "targetAnchorId":  "FOL_CLAUSE_11_FEES",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-hedge-sec11",
+                      "ruleId":  "rule-hedge-clause11",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeHedge} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SEC_17",
+                      "targetAnchorId":  "FOL_CLAUSE_17_GUARANTEE_AND_INDEMNITY",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-guarantee-sec17",
+                      "ruleId":  "rule-guarantee-clause17",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeGuarantee} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SEC_21",
+                      "targetAnchorId":  "FOL_CLAUSE_21_GENERAL_UNDERTAKINGS",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-esg-sec21",
+                      "ruleId":  "rule-esg-clause21",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeESG} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SCH_01",
+                      "targetAnchorId":  "FOL_SCHEDULE_01_FACILITY_PARTICULARS",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-multicurrency-sch01",
+                      "ruleId":  "rule-multicurrency-schedule01",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeMultiCurrency} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SEC_07",
+                      "targetAnchorId":  "FOL_CLAUSE_07_PREPAYMENT_AND_CANCELLATION",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-accordion-sec07",
+                      "ruleId":  "rule-accordion-clause07",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeAccordion} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SEC_05",
+                      "targetAnchorId":  "FOL_CLAUSE_05_UTILISATION",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-swingline-sec05",
+                      "ruleId":  "rule-swingline-clause05",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeSwingline} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SEC_02",
+                      "targetAnchorId":  "FOL_CLAUSE_02_THE_FACILITY",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-lc-subline-sec02",
+                      "ruleId":  "rule-lc-subline-clause02",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeLcSubline} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SCH_06",
+                      "targetAnchorId":  "FOL_SCHEDULE_06_SECURITY_PRINCIPLES",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-security-sch06",
+                      "ruleId":  "rule-security-schedule06",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeSecurityPackage} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SEC_26",
+                      "targetAnchorId":  "FOL_CLAUSE_26_SHARING_AMONG_THE_FINANCE_PARTIES",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-intercreditor-sec26",
+                      "ruleId":  "rule-intercreditor-clause26",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeIntercreditor} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SEC_07",
+                      "targetAnchorId":  "FOL_CLAUSE_07_PREPAYMENT_AND_CANCELLATION",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-prepayment-sec07",
+                      "ruleId":  "rule-prepayment-clause07",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includePrepaymentPenalty} == true"
                   },
                   {
-                      "targetAnchorId":  "FOL_SEC_20",
+                      "targetAnchorId":  "FOL_CLAUSE_20_FINANCIAL_COVENANTS",
                       "trueBranchRuleId":  "",
-                      "ruleId":  "rule-covenants-sec20",
+                      "ruleId":  "rule-covenants-clause20",
                       "falseBranchRuleId":  "",
                       "conditionExpression":  "${includeFinancialCovenants} == true"
                   }
