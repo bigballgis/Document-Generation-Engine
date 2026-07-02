@@ -11,7 +11,7 @@ Close frontend dependency security baseline: SBOM generation + intranet SCA + re
 | Layer | In-repo deliverable | Done when |
 | --- | --- | --- |
 | **A. SBOM generation** | CycloneDX SBOM from `frontend/` (pnpm lockfile) in CI or script | Reproducible artifact path documented; sample SBOM archived in repo or CI artifact |
-| **B. Intranet SCA submission** | Procedure + owner + ticket reference | Org tool accepts submission; high/critical triaged |
+| **B. Intranet SCA submission** | Procedure + bundle script + execution log; org upload + ticket | Org tool accepts submission; high/critical triaged; [sca-execution-log.md](../../evidence/security/sca-execution-log.md) updated |
 | **C. Remediation loop** | Dependency bumps or documented exceptions with expiry | `pnpm lint/type-check/test/build` green after remediation |
 
 **M9-T02 is not Done** until **B** completes — org gate cannot be faked in-repo (constitution: no demo-only Done).
@@ -22,7 +22,7 @@ Close frontend dependency security baseline: SBOM generation + intranet SCA + re
 | --- | --- | --- |
 | 1 | Generate frontend CycloneDX SBOM (script or CI job) | **Done** (2026-07-02) — `pnpm -C frontend sbom` / `.\scripts\generate-sbom.ps1` |
 | 1b | Generate backend CycloneDX SBOM | **Done** (2026-07-02) — `mvn -f backend/pom.xml -Psbom package -DskipTests` via same script |
-| 2 | Submit to approved intranet SCA | Not Started (org gate) |
+| 2 | Submit to approved intranet SCA | **Procedure ready** (2026-07-02) — [intranet-sca-submission-runbook.md](../../evidence/security/intranet-sca-submission-runbook.md) + `prepare-sca-submission-bundle.ps1`; **org upload pending owner** |
 | 3 | Remediate or exception-track high/critical | Not Started |
 | 4 | Re-run `pnpm -C frontend lint/type-check/test/build` | Not Started |
 

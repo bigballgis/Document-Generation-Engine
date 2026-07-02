@@ -1,7 +1,7 @@
 # Execution Sync Ledger
 
 **Last synced:** 2026-07-02 (**WIP A/B + deploy follow-up** — commits `0a72d8d`, `001867f`, `0ef85ca`; Docker redeploy with stamping ON)
-**Progress note (2026-07-02):** **M9 SBOM in-repo** — `scripts/generate-sbom.ps1`, `pnpm sbom`, backend `-Psbom`; evidence [docs/evidence/security/README.md](../evidence/security/README.md). **Prior:** E05/E06/M9 realignment; FOL import fix.
+**Progress note (2026-07-02):** **M9-T02 Step 2 prep Done** — intranet SCA runbook + `prepare-sca-submission-bundle.ps1` + [sca-execution-log.md](../evidence/security/sca-execution-log.md); org upload still pending. **Prior:** M9 SBOM in-repo (`generate-sbom.ps1`).
 **Progress note (prior 2026-07-02):** Ad-hoc WIP **A** — `pdf-page-number-stamping-enabled` (default `false`); `PdfConversionPostProcessor` + `DocxPdfConversionPreprocessor`; FOL master layout v4. **WIP B** — `GET /content-modules` optional `groupCode` + `listAccessible`; list UI drops group picker, adds table group column. **Gate:** backend `mvn verify` BUILD SUCCESS (**614** Surefire, 1 skipped); frontend lint/type-check/test/build green (**571** Vitest). **Prior:** 2026-06-29 **P12-BDD-RISK-PROMPT-UX-001 Done**.
 **Activation note (2026-07-02):** **P12-BDD-RISK-PROMPT-UX-001 activated → In Progress** (BDD
 **BDD-TEMPLATE-RISK-PROMPT-UX-001** READY; supersedes P19-T08 group override + P19-T10 list-view
@@ -361,7 +361,7 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | --- | --- | --- |
 | E05-T06 External validation evidence | Not Started (target env only; local Docker **Pass** 2026-07-02) | [e05-external-validation-evidence.md](../architecture/e05-external-validation-evidence.md) |
 | E06 role-journey release evidence | Re-earned via P21 (EV-01–04); EV-05 packaging optional | [e06-role-journey-release-evidence.md](../architecture/e06-role-journey-release-evidence.md) |
-| M9-T02 Intranet SCA submission | In Progress — SBOM gen **Done** (script); org Steps 2–4 pending | [m9-t02-closure-plan.md](../architecture/m9-t02-closure-plan.md) |
+| M9-T02 Intranet SCA submission | In Progress — SBOM + runbook + bundle script **Done**; org upload pending | [m9-t02-closure-plan.md](../architecture/m9-t02-closure-plan.md), [intranet-sca-submission-runbook.md](../evidence/security/intranet-sca-submission-runbook.md) |
 | M10–M11 Deferred security closure | Not Started | m10/m11 task sheets |
 
 ## Milestone ↔ wave mapping

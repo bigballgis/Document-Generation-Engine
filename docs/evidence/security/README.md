@@ -1,28 +1,39 @@
-# Security evidence — SBOM generation
+# Security evidence — SBOM & intranet SCA
 
-CycloneDX SBOM artifacts for intranet SCA submission (M9). **Generated files are not committed** — they live under `artifacts/sbom/` (gitignored).
+CycloneDX SBOM and intranet SCA submission evidence for **M9**. Generated binaries are **not committed** — they live under `artifacts/` (gitignored).
 
-## Generate
-
-From repository root:
+## Quick start
 
 ```powershell
+# 1. Generate SBOM
 .\scripts\generate-sbom.ps1
+
+# 2. Prepare org submission bundle (manifest + checksums + checklist)
+.\scripts\prepare-sca-submission-bundle.ps1
 ```
 
-Or frontend only:
+## Documents
 
-```powershell
-pnpm -C frontend sbom
-```
+| Doc | Purpose |
+| --- | --- |
+| [intranet-sca-submission-runbook.md](./intranet-sca-submission-runbook.md) | M9-T02 Step 2–5 procedure |
+| [sca-execution-log.md](./sca-execution-log.md) | Record each intranet submission cycle |
+| [m9-t02-closure-plan.md](../../architecture/m9-t02-closure-plan.md) | Task steps & Done definition |
 
-## Outputs
+## SBOM outputs
 
 | File | Source |
 | --- | --- |
-| `artifacts/sbom/frontend-cyclonedx.json` | `@cyclonedx/cyclonedx-npm` (pnpm project; `--ignore-npm-errors` for npm ls under pnpm) |
-| `artifacts/sbom/backend-cyclonedx.json` | `mvn -f backend/pom.xml -Psbom package -DskipTests` → `backend/target/bom.json` |
+| `artifacts/sbom/frontend-cyclonedx.json` | `pnpm -C frontend sbom` / `@cyclonedx/cyclonedx-npm` |
+| `artifacts/sbom/backend-cyclonedx.json` | `mvn -f backend/pom.xml -Psbom package -DskipTests` |
 
-## Org gate (not in-repo)
+## Status (2026-07-02)
 
-Submit generated JSON to approved intranet SCA per [m9-t02-closure-plan.md](../architecture/m9-t02-closure-plan.md) Step 2. **M9-T02 remains Not Started** until org submission completes.
+| Step | In-repo | Org gate |
+| --- | --- | --- |
+| SBOM generation | **Done** | — |
+| Submission bundle + runbook | **Done** | — |
+| Intranet SCA upload | — | **Pending owner** |
+| Remediation + re-gates | — | After scan |
+
+**M9-T02 is not Done** until intranet submission is recorded in [sca-execution-log.md](./sca-execution-log.md).
