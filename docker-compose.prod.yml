@@ -28,6 +28,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}
       APP_ENVIRONMENT: prod
       DOCGEN_SEED_DEMO_CATALOG: ${DOCGEN_SEED_DEMO_CATALOG:-false}
+      PDF_PAGE_NUMBER_STAMPING_ENABLED: ${PDF_PAGE_NUMBER_STAMPING_ENABLED:-false}
       HOME: /tmp
       LIBREOFFICE_CONVERSION_MODE: cli
       JAVA_TOOL_OPTIONS: "-Djava.io.tmpdir=/tmp"

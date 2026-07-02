@@ -133,10 +133,75 @@ function Remove-StaleCatalogVariables([string]$TemplateId, [string]$Token, [stri
     }
 }
 
+function Find-ExecutiveDemoTestDataSet([object[]]$Sets, [object]$TestDataConfig) {
+    $scenarioName = if ($TestDataConfig.PSObject.Properties['scenarioName']) { [string]$TestDataConfig.scenarioName } else { '' }
+    if ($scenarioName) {
+        $byScenario = @($Sets) | Where-Object { $_.scenarioName -eq $scenarioName } |
+            Sort-Object { [datetime]$_.updatedAt } -Descending |
+            Select-Object -First 1
+        if ($byScenario) { return $byScenario }
+    }
+    $byTag = @($Sets) | Where-Object {
+        $_.coverageTags -contains 'executive-demo' -or $_.name -like 'Executive walkthrough*'
+    } | Sort-Object { [datetime]$_.updatedAt } -Descending | Select-Object -First 1
+    if ($byTag) { return $byTag }
+    $configName = if ($TestDataConfig.PSObject.Properties['name']) { [string]$TestDataConfig.name } else { '' }
+    if ($configName) {
+        return @($Sets) | Where-Object { $_.name -eq $configName } | Select-Object -First 1
+    }
+    return $null
+}
+
+function Invoke-ExecutiveDemoTestDataSetSql {
+    param(
+        [string]$TemplateId,
+        [string]$KeepExternalId = $null,
+        [ValidateSet('unlock', 'prune')]
+        [string]$Action
+    )
+    $keepClause = if ($KeepExternalId) { "AND external_id <> '$KeepExternalId'" } else { '' }
+    if ($Action -eq 'unlock' -and $KeepExternalId) {
+        $sql = @"
+UPDATE template_test_data_set
+SET locked = FALSE,
+    updated_at = (NOW() AT TIME ZONE 'UTC')
+WHERE template_id = '$TemplateId'::uuid
+  AND external_id = '$KeepExternalId';
+"@
+    } else {
+        $sql = @"
+UPDATE template_test_data_set child
+SET derived_from_id = NULL,
+    updated_at = (NOW() AT TIME ZONE 'UTC')
+WHERE child.template_id = '$TemplateId'::uuid
+  AND child.derived_from_id IN (
+      SELECT id FROM template_test_data_set parent
+      WHERE parent.template_id = '$TemplateId'::uuid
+        AND (
+            parent.scenario_name = 'Syndicated term loan - Pacific Rim USD 250m (LMA IG baseline)'
+            OR parent.name LIKE 'Executive walkthrough%'
+            OR parent.coverage_tags_json LIKE '%executive-demo%'
+        )
+        $keepClause
+  );
+DELETE FROM template_test_data_set
+WHERE template_id = '$TemplateId'::uuid
+  AND (
+      scenario_name = 'Syndicated term loan - Pacific Rim USD 250m (LMA IG baseline)'
+      OR name LIKE 'Executive walkthrough%'
+      OR coverage_tags_json LIKE '%executive-demo%'
+  )
+  $keepClause;
+"@
+    }
+    $sql | docker exec -i $PostgresContainer psql -U $PostgresUser -d $PostgresDb -v ON_ERROR_STOP=1
+    if ($LASTEXITCODE -ne 0) { throw "Executive demo test data set SQL ($Action) failed (exit $LASTEXITCODE)" }
+}
+
 function Upsert-TestDataSet([string]$TemplateId, [string]$Token, [object]$TestDataConfig) {
     $name = $TestDataConfig.name
-    $sets = Invoke-Api GET "/templates/$TemplateId/test-data-sets" $Token
-    $existing = @($sets.result) | Where-Object { $_.name -eq $name } | Select-Object -First 1
+    $sets = @(Invoke-Api GET "/templates/$TemplateId/test-data-sets" $Token).result
+    $existing = Find-ExecutiveDemoTestDataSet -Sets $sets -TestDataConfig $TestDataConfig
     $body = @{
         name = $name
         required = [bool]$TestDataConfig.required
@@ -149,18 +214,20 @@ function Upsert-TestDataSet([string]$TemplateId, [string]$Token, [object]$TestDa
         $body.coverageTags = @($TestDataConfig.coverageTags)
     }
     if (-not $existing) {
-        Invoke-Api POST "/templates/$TemplateId/test-data-sets" $Token -Body $body | Out-Null
-        return
+        $created = Invoke-Api POST "/templates/$TemplateId/test-data-sets" $Token -Body $body
+        $keeperId = $created.result.testDataSetId
+    } else {
+        $keeperId = $existing.testDataSetId
+        if ($existing.locked) {
+            Write-Step "Unlocking locked executive demo test data set $keeperId for in-place refresh..."
+            Invoke-ExecutiveDemoTestDataSetSql -TemplateId $TemplateId -KeepExternalId $keeperId -Action unlock
+        }
+        Invoke-Api PUT "/templates/$TemplateId/test-data-sets/$keeperId" $Token -Body $body | Out-Null
     }
-    $targetId = $existing.testDataSetId
-    if ($existing.locked) {
-        $derived = Invoke-Api POST "/templates/$TemplateId/test-data-sets/$targetId/derive" $Token
-        $targetId = $derived.result.testDataSetId
-    }
-    try {
-        Invoke-Api PUT "/templates/$TemplateId/test-data-sets/$targetId" $Token -Body $body | Out-Null
-    } catch {
-        Write-Host "  (test data set update skipped: $($_.Exception.Message))"
+    $staleCount = @($sets | Where-Object { $_.testDataSetId -ne $keeperId }).Count
+    if ($staleCount -gt 0) {
+        Write-Step "Removing $staleCount stale executive demo test data set(s) on template $TemplateId..."
+        Invoke-ExecutiveDemoTestDataSetSql -TemplateId $TemplateId -KeepExternalId $keeperId -Action prune
     }
 }
 
