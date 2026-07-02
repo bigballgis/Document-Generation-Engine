@@ -51,7 +51,10 @@ import {
 } from '@/composables/useWorkflowTasks'
 import { canMaintainCollaborationTimeoutConfig, canViewCollaborationWorkItems, MANAGEMENT_ROLES } from '@/auth/roles'
 import { useCapabilities } from '@/composables/useCapabilities'
-import CollaborationTimeoutConfigPanel from '@/components/collaboration/CollaborationTimeoutConfigPanel.vue'
+import {
+  buildDashboardJourneyPath,
+  type DashboardJourneyKind,
+} from '@/utils/dashboardJourneyNavigation'
 import * as collaborationApi from '@/api/collaboration'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useMastersStore } from '@/stores/masters'
@@ -350,6 +353,89 @@ const journeyGuidanceKey = computed(() => {
   return undefined
 })
 
+const dashboardJourneyKind = computed((): DashboardJourneyKind | null => {
+  if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
+    return 'MASTER_DESIGNER'
+  }
+  if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
+    return 'TEMPLATE_AUTHOR'
+  }
+  if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
+    return 'TEMPLATE_TESTER'
+  }
+  if (showApproverJourney.value) {
+    return 'TEMPLATE_APPROVER'
+  }
+  if (showGlobalAdminJourney.value) {
+    return 'GLOBAL_ADMIN'
+  }
+  if (showTeamLeadJourney.value) {
+    return 'GROUP_ADMIN'
+  }
+  return null
+})
+
+const journeyActiveStepId = computed(() => {
+  if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
+    return masterDesignerJourneyResolution.value?.activeStepId
+  }
+  if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
+    return templateAuthorJourneyResolution.value?.activeStepId
+  }
+  if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
+    return templateTesterJourneyResolution.value?.activeStepId
+  }
+  if (showApproverJourney.value) {
+    return templateApproverJourneyResolution.value?.activeStepId
+  }
+  if (showGlobalAdminJourney.value) {
+    return globalAdminJourneyResolution.value?.activeStepId
+  }
+  if (showTeamLeadJourney.value) {
+    return templateTeamLeadJourneyResolution.value?.activeStepId
+  }
+  return undefined
+})
+
+const journeyTargetTemplateId = computed(() => {
+  if (primaryClusterOneRole.value === 'TEMPLATE_AUTHOR') {
+    return templateAuthorJourneyResolution.value?.targetTemplateId
+  }
+  if (primaryClusterOneRole.value === 'TEMPLATE_TESTER') {
+    return templateTesterJourneyResolution.value?.targetTemplateId
+  }
+  if (showApproverJourney.value) {
+    return templateApproverJourneyResolution.value?.targetTemplateId
+  }
+  if (showTeamLeadJourney.value) {
+    return templateTeamLeadJourneyResolution.value?.targetTemplateId
+  }
+  return undefined
+})
+
+const journeyTargetMasterId = computed(() => {
+  if (primaryClusterOneRole.value === 'MASTER_DESIGNER') {
+    return masterDesignerJourneyResolution.value?.targetMasterId
+  }
+  if (showTeamLeadJourney.value) {
+    return templateTeamLeadJourneyResolution.value?.targetMasterId
+  }
+  return undefined
+})
+
+const dashboardJourneyPath = computed(() => {
+  const kind = dashboardJourneyKind.value
+  if (!kind) {
+    return null
+  }
+  return buildDashboardJourneyPath({
+    kind,
+    activeStepId: journeyActiveStepId.value,
+    targetTemplateId: journeyTargetTemplateId.value,
+    targetMasterId: journeyTargetMasterId.value,
+  })
+})
+
 const collaborationLoadErrorKey = computed(
   () => collaborationStore.workItemsErrorMessageKey ?? 'collaboration.workItems.error.load',
 )
@@ -506,6 +592,13 @@ function openTask(path: string) {
 function openQuickLink(path: string) {
   router.push(path)
 }
+
+function openDashboardJourney() {
+  if (!dashboardJourneyPath.value) {
+    return
+  }
+  router.push(dashboardJourneyPath.value)
+}
 </script>
 
 <template>
@@ -549,7 +642,18 @@ function openQuickLink(path: string) {
         :current-step-index="journeyCurrentStepIndex"
         :guidance-key="journeyGuidanceKey"
         :title-key="journeyTitleKey"
-      />
+      >
+        <template v-if="dashboardJourneyPath" #after>
+          <el-button
+            link
+            type="primary"
+            data-dashboard-journey-link
+            @click="openDashboardJourney"
+          >
+            {{ t('dashboard.journey.openWorkspace') }}
+          </el-button>
+        </template>
+      </RoleJourneyTimeline>
     </section>
 
     <section id="tasks-section" class="tasks-section">

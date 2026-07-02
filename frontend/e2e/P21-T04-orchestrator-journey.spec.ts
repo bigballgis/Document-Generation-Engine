@@ -44,6 +44,21 @@ test.describe('P21-T04 Template author journey (§12.6)', () => {
     await expect(journeySection.locator('[data-journey-guidance]')).toBeVisible()
   })
 
+  test('dashboard journey is read-only and open workspace deep-links to package hub', async ({ page }) => {
+    await loginAs(page, E2E_TEMPLATE_AUTHOR)
+    await page.goto('/dashboard')
+
+    const journeySection = page.locator('#journey-section')
+    await expect(journeySection).toBeVisible()
+    await expect(page.locator('[data-template-journey-cta]')).toHaveCount(0)
+
+    const workspaceLink = page.locator('[data-dashboard-journey-link]')
+    await expect(workspaceLink).toBeVisible()
+    await workspaceLink.click()
+
+    await expect(page).toHaveURL(/\/templates\/[0-9a-f-]{36}(?:\/|$|\?)/i, { timeout: 15_000 })
+  })
+
   test('template detail shows author journey timeline above workflow banner', async ({
     page,
     request,
