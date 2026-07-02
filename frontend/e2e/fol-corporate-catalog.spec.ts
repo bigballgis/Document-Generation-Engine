@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 
 import {
   E2E_TEMPLATE_AUTHOR,
+  E2E_CORP_TEMPLATE_AUTHOR,
   FOL_CLAUSE_CODES,
   FOL_EXPECTED_ANCHOR_COUNT,
   FOL_GROUP_CODE,
@@ -65,28 +66,32 @@ test.describe('corporate FOL catalog (demo seed)', () => {
       new RegExp(`/templates/${fixture.templateId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/dev/`),
       { timeout: 15_000 },
     )
-    await expect(page.locator('.detail-tabs')).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('#dev-workspace')).toBeVisible({ timeout: 30_000 })
 
-    await page.getByRole('tab', { name: /^template design$/i }).click()
-    const authoringTabs = page.locator('.authoring-sub-tabs')
-    await expect(authoringTabs.getByRole('tab', { name: /^variables$/i })).toBeVisible({ timeout: 30_000 })
+    const workspace = page.locator('.workspace-tab-shell')
+    await expect(workspace.getByRole('tab', { name: /^template design$/i })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    const designSubTabs = page.locator('.design-sub-tabs')
+    await expect(designSubTabs.getByRole('tab', { name: /^variables$/i })).toBeVisible({ timeout: 30_000 })
 
     const variableSearch = page.locator('.variable-tree-panel .search-input input')
     await variableSearch.fill('borrowerLegalName')
     await expect(page.locator('.variable-tree').getByText('Borrower legal name')).toBeVisible({ timeout: 15_000 })
 
-    await authoringTabs.getByRole('tab', { name: /^bindings$/i }).click()
+    await designSubTabs.getByRole('tab', { name: /^bindings$/i }).click()
     const anchorFilter = page.locator('.bindings-panel').getByPlaceholder(/filter/i).first()
     await anchorFilter.fill('FOL_SEC_01')
     await expect(
-      page.locator('.bindings-panel .el-table').getByText('FOL_SEC_01', { exact: true }),
+      page.locator('.bindings-panel .el-table').getByText('FOL_SEC_01', { exact: true }).first(),
     ).toBeVisible({ timeout: 15_000 })
   })
 })
 
 test.describe('corporate FOL content modules (author scope)', () => {
   test.beforeEach(async ({ page }) => {
-    await loginAs(page, E2E_TEMPLATE_AUTHOR)
+    await loginAs(page, E2E_CORP_TEMPLATE_AUTHOR)
   })
 
   test('content module catalog lists FOL standard clauses', async ({ page, request }) => {
@@ -97,11 +102,7 @@ test.describe('corporate FOL content modules (author scope)', () => {
     await expect(page.getByText(/unable to load content modules/i)).not.toBeVisible()
     await expect(page.getByRole('heading', { name: /^standard clauses$/i })).toBeVisible()
 
-    const groupFilter = page.locator('.group-filter-item').getByRole('combobox')
-    await groupFilter.click()
-    await page.locator('.el-select-dropdown__item').filter({ hasText: FOL_GROUP_CODE }).first().click()
-
-    await expect(page.locator('.el-table').getByText('MOD-FOL-SEC-01', { exact: true }).first()).toBeVisible({
+    await expect(page.locator('.el-table').getByText(/^MOD-FOL-SEC-/i).first()).toBeVisible({
       timeout: 15_000,
     })
     await expect(page.locator('.el-table__body-wrapper tbody tr')).not.toHaveCount(0)

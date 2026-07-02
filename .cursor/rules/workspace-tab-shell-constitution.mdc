@@ -1,0 +1,15 @@
+---
+description: Workspace tab shell interaction pattern for detail/workspace pages — journey read-only, single action rail on top-level tabs, dialogs for supplemental input.
+alwaysApply: false
+---
+
+# Workspace Tab Shell Constitution
+
+When building or refactoring detail/workspace pages (template dev editor, master revision, content-module lifecycle, etc.):
+
+1. **Journey/timeline** = visual progress only — no CTA buttons.
+2. **Top-level workspace tabs** = work phases — one right-aligned action rail on the tab row.
+3. **Nested sub-tabs** = content navigation only — no buttons.
+4. **Supplemental input** = modal/dialog — never inline textarea in workflow bars.
+
+Reference: `WorkspaceTabShell.vue`, `TemplateDetailDevWorkspace.vue`, `docs/architecture/management-ui-constitution.md`.

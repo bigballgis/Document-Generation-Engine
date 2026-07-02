@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplateDetailView from '@/views/templates/TemplateDetailView.vue'
 import TemplateDetailLifecycleTab from '@/views/templates/detail/TemplateDetailLifecycleTab.vue'
 import TemplateDetailAuthoringTab from '@/views/templates/detail/TemplateDetailAuthoringTab.vue'
+import TemplateDetailDevWorkspace from '@/views/templates/detail/TemplateDetailDevWorkspace.vue'
 import TemplateSubmitForApprovalSummaryDialog from '@/components/templates/TemplateSubmitForApprovalSummaryDialog.vue'
 import en from '@/i18n/locales/en'
 import * as templatesApi from '@/api/templates'
@@ -312,7 +313,7 @@ describe('TemplateDetailView', () => {
     expect(templatesApi.submitForApproval).toHaveBeenCalledWith('tpl-b', { commentSummary: '' })
   })
 
-  it('shows authoring tab for template tester in dev editor during TESTING', async () => {
+  it('shows dev workspace for template tester in dev editor during TESTING', async () => {
     const sessionStore = useSessionStore()
     sessionStore.$patch({
       session: {
@@ -333,7 +334,7 @@ describe('TemplateDetailView', () => {
     })
 
     routeState.params = { templateId: 'tpl-b', devVersionId: 'dev-1' } as typeof routeState.params
-    routeState.query = { tab: 'authoring', authoringTab: 'testPreview' }
+    routeState.query = { workspaceTab: 'testing' }
 
     vi.mocked(templatesApi.fetchDevVersionDetail).mockResolvedValue({
       ...makeTemplate('tpl-b', 'Testing Template'),
@@ -351,7 +352,7 @@ describe('TemplateDetailView', () => {
           TemplateApproverJourneyBlock: true,
           TemplateTeamLeadJourneyBlock: true,
           TemplateWorkflowBanner: true,
-          TemplateDevVersionActionBar: true,
+          TemplateDetailDevWorkspace: true,
           TemplateDetailOverviewTab: true,
           TemplateDetailLifecycleTab: true,
           TemplateDetailAuthoringTab: true,
@@ -366,6 +367,40 @@ describe('TemplateDetailView', () => {
     })
     await flushPromises()
 
-    expect(wrapper.findComponent(TemplateDetailAuthoringTab).exists()).toBe(true)
+    expect(wrapper.findComponent(TemplateDetailDevWorkspace).exists()).toBe(true)
+    expect(wrapper.findComponent(TemplateDetailAuthoringTab).exists()).toBe(false)
+  })
+
+  it('does not render dev version action bar in dev editor', async () => {
+    routeState.params = { templateId: 'tpl-b', devVersionId: 'dev-1' } as typeof routeState.params
+    vi.mocked(templatesApi.fetchDevVersionDetail).mockResolvedValue(makeTemplate('tpl-b', 'Draft') as never)
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(TemplateDetailView, {
+      props: { workspace: 'dev-editor' },
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+        stubs: {
+          TemplateAuthorJourneyBlock: true,
+          TemplateTesterJourneyBlock: true,
+          TemplateApproverJourneyBlock: true,
+          TemplateTeamLeadJourneyBlock: true,
+          TemplateWorkflowBanner: true,
+          TemplateDetailDevWorkspace: true,
+          TemplateDetailOverviewTab: true,
+          TemplateDetailLifecycleTab: true,
+          TemplateDetailAuthoringTab: true,
+          TemplateDetailReleaseVersionsTab: true,
+          TemplateDetailApiAccessTab: true,
+          TemplateMetadataEditDialog: true,
+          TemplatePublishSummaryDialog: true,
+          TemplateLifecycleDecisionDialog: true,
+          TemplateExportActions: true,
+        },
+      },
+    })
+    await flushPromises()
+
+    expect(wrapper.find('#dev-version-actions').exists()).toBe(false)
   })
 })

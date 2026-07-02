@@ -5,18 +5,24 @@ import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import LifecycleCommentDialog from '@/components/common/LifecycleCommentDialog.vue'
 import type { TemplateLifecycleStatus } from '@/types/template'
 
-const props = defineProps<{
-  lifecycleStatus: TemplateLifecycleStatus
-  selectedTestDataSetId: string | null
-  showDraftActions: boolean
-  showTestingDecisionActions: boolean
-  showTestGenerate: boolean
-  submitting: boolean
-  generatingPreview: boolean
-  batchTesting: boolean
-  hasDataSets: boolean
-  openSubmitDialog?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    lifecycleStatus: TemplateLifecycleStatus
+    selectedTestDataSetId: string | null
+    showDraftActions: boolean
+    showTestingDecisionActions: boolean
+    showTestGenerate: boolean
+    submitting: boolean
+    generatingPreview: boolean
+    batchTesting: boolean
+    hasDataSets: boolean
+    openSubmitDialog?: boolean
+    actionsHidden?: boolean
+  }>(),
+  {
+    actionsHidden: false,
+  },
+)
 
 const emit = defineEmits<{
   'update:openSubmitDialog': [value: boolean]
@@ -69,7 +75,7 @@ function confirmSubmit(comment: string) {
       <el-tag size="small" type="info">{{ t(statusLabelKey) }}</el-tag>
     </div>
 
-    <div class="test-preview-workflow__actions">
+    <div v-if="!actionsHidden" class="test-preview-workflow__actions">
       <el-button-group v-if="showTestGenerate">
         <el-button
           type="primary"

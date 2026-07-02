@@ -54,6 +54,20 @@ This skill is the locked execution standard. Pair with `docs/architecture/manage
 - Tokens used (no magic values), states complete, both brands verified, a11y smoke green,
   E2E functional + UIUX evidence captured. Verified by `e2e-uiux-reviewer`.
 
+## Workspace tab shell pattern
+
+Detail/workspace pages split **orientation** from **work**:
+
+| Layer | Role | Actions |
+| --- | --- | --- |
+| Journey / timeline | Read-only progress + guidance | None |
+| Top-level workspace tabs | Phase work area (design / testing / approval) | Single right-aligned action rail on tab row only |
+| Nested sub-tabs | Content navigation within a phase | None |
+| Dialogs | Comments, summaries, decisions | Confirm/cancel in modal |
+
+Use `WorkspaceTabShell.vue` + context-specific tab panes. Never duplicate action bars
+below the tab row or inside journey blocks. See `docs/architecture/management-ui-constitution.md`.
+
 ## Related
 
 - `.cursor/agents/frontend-engineer.md`, `.cursor/agents/e2e-uiux-reviewer.md`

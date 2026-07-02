@@ -92,3 +92,24 @@ It does not replace product requirements, domain rules, permission rules, or ADR
 - [Implementation Task Plan](./implementation-task-plan.md) owns wave and task decomposition.
 - [PRD](../product/PRD.md), [Domain Model](../domain/domain-model.md), and [Permission Matrix](../security/permission-matrix.md) own the confirmed behavior and authority rules.
 - This document governs the frontend shell and post-login management experience only; the project-wide chain now also includes template lifecycle, API management, audit, notifications, and deployment hardening.
+
+## Workspace Tab Shell Pattern
+
+Detail and workspace pages that combine role journey orientation with multi-phase work
+use a fixed interaction split:
+
+1. **Journey / timeline panels** — read-only orientation only. No CTA buttons, no inline
+   comment fields, no workflow actions embedded in the timeline.
+2. **Workspace tab shell** — the primary work area uses top-level tabs (e.g. design,
+   testing, approval). Exactly one **action rail** sits on the tab header row, right-aligned,
+   and actions are **context-sensitive to the active top-level tab**.
+3. **Nested sub-tabs** — content navigation only (e.g. variables, clause references,
+   bindings). No action buttons on sub-tab rows.
+4. **Supplemental input** — comments, reasons, and confirmations use modal dialogs
+   (`LifecycleCommentDialog`, summary/decision dialogs). Never inline textarea bars in
+   workflow panels.
+
+Apply this pattern consistently to similar surfaces: template dev editor, master revision
+workspace, content-module lifecycle detail, and future role-aware detail pages.
+
+Reference implementation: `WorkspaceTabShell.vue`, `TemplateDetailDevWorkspace.vue`.

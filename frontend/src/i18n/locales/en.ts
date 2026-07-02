@@ -669,15 +669,48 @@ export default {
     devEditor: {
       actionsHint: 'Actions apply to this in-flight dev version line.',
       breadcrumbLabel: 'Dev editor',
-      testWorkflowRedirect: 'Test preview and submit-for-testing live in the Test & Preview tab.',
-      openTestPreviewTab: 'Open Test & Preview',
+      testWorkflowRedirect:
+        'Run preview generation per data set, batch-run all samples, and submit for testing from the Template testing tab. Pass/fail test decisions appear there when the template is in testing.',
+      openTestPreviewTab: 'Open Template testing',
       testWorkflowRedirectHelpTitle: 'Where to test',
       testWorkflowRedirectHelpContent:
-        'Run preview generation per data set, batch-run all samples, and submit for testing from Template design → Test & Preview. Pass/fail test decisions appear there when the template is in testing.',
+        'Use the Template testing workspace tab to run preview generation per data set, batch-run all samples, and submit for testing. Record pass/fail decisions from the same tab action rail when the template is in testing.',
       releaseWorkflowTitle: 'Release workflow',
       releaseWorkflowHelpTitle: 'Approval and go-live',
       releaseWorkflowHelpContent:
         'Submit for approval, record approver decisions, and confirm go-live from here once testing is complete. All pre-release checks must pass before submission.',
+    },
+    devWorkspace: {
+      tabs: {
+        design: 'Template design',
+        testing: 'Template testing',
+        approval: 'Template approval',
+      },
+      design: {
+        title: 'Template design',
+      },
+      testing: {
+        title: 'Template testing',
+        subTabs: {
+          dataSets: 'Test data sets',
+          previewRuns: 'Preview runs',
+          coverage: 'Coverage',
+          changeDiff: 'Change diff',
+        },
+      },
+      approval: {
+        title: 'Template approval',
+        governanceHint: 'Use the action buttons above to stop, restore, or deprecate this template.',
+        submitApprovalEmpty: 'Submit-for-approval checks appear here when this version is ready to enter approval.',
+        publishReadinessEmpty: 'Binding and publish readiness checks appear here when release actions are available.',
+        governanceEmpty: 'Lifecycle governance actions appear here for published templates.',
+        subTabs: {
+          submitApproval: 'Submit for approval',
+          publishReadiness: 'Publish readiness',
+          riskConfig: 'Risk prompts',
+          governance: 'Governance',
+        },
+      },
     },
     versionLines: {
       title: 'Version lines',

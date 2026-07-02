@@ -129,7 +129,7 @@ export interface CreateTemplatePayload {
 }
 
 export interface LifecycleCommentPayload {
-  commentSummary: string
+  commentSummary?: string
 }
 
 export interface LifecycleGovernancePayload {

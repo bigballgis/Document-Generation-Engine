@@ -660,15 +660,47 @@ export default {
     devEditor: {
       actionsHint: '以下操作针对当前在途开发版本线。',
       breadcrumbLabel: '开发编辑器',
-      testWorkflowRedirect: '试生成与提交测试已移至「测试与预览」子标签。',
-      openTestPreviewTab: '打开测试与预览',
+      testWorkflowRedirect: '试生成与提交测试已移至「模板测试」标签页。',
+      openTestPreviewTab: '打开模板测试',
       testWorkflowRedirectHelpTitle: '在哪里测试',
       testWorkflowRedirectHelpContent:
-        '在「模板设计 → 测试与预览」中对每条数据集运行预览、批量试生成，并提交测试。模板处于测试中时可在此记录通过/失败。',
+        '在「模板测试」标签页中对每条数据集运行预览、批量试生成，并提交测试。模板处于测试中时可从同一操作栏记录通过/失败。',
       releaseWorkflowTitle: '发布工作流',
       releaseWorkflowHelpTitle: '审批与上线',
       releaseWorkflowHelpContent:
         '测试完成后在此提交审批、记录审批决策并确认上线。提交前就绪门禁须全部为绿。',
+    },
+    devWorkspace: {
+      tabs: {
+        design: '模板设计',
+        testing: '模板测试',
+        approval: '模板审批',
+      },
+      design: {
+        title: '模板设计',
+      },
+      testing: {
+        title: '模板测试',
+        subTabs: {
+          dataSets: '测试数据集',
+          previewRuns: '预览记录',
+          coverage: '覆盖率',
+          changeDiff: '变更差异',
+        },
+      },
+      approval: {
+        title: '模板审批',
+        governanceHint: '使用上方操作按钮停止、恢复或废弃此模板。',
+        submitApprovalEmpty: '当版本可提交审批时，此处显示提交前检查项。',
+        publishReadinessEmpty: '当可进行发布操作时，此处显示绑定与发布就绪检查。',
+        governanceEmpty: '已发布模板的治理操作说明将显示在此处。',
+        subTabs: {
+          submitApproval: '提交审批',
+          publishReadiness: '发布就绪',
+          riskConfig: '风险提示',
+          governance: '治理',
+        },
+      },
     },
     versionLines: {
       title: '版本线',

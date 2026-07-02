@@ -35,28 +35,27 @@ test.describe('template package hub navigation (BDD-TEMPLATE-PACKAGE-NAV-001)', 
       new RegExp(`/templates/${fixture.templateId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/dev/`),
     )
 
-    await expect(page.locator('.detail-tabs')).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('#dev-workspace')).toBeVisible({ timeout: 30_000 })
   })
 
-  test('lifecycle deep-link redirects to dev editor workflow actions', async ({ page, request }) => {
+  test('lifecycle deep-link redirects to dev editor approval workspace', async ({ page, request }) => {
     const fixture = await assertFolCatalogSeeded(request)
 
     await page.goto(`/templates/${fixture.templateId}?focus=lifecycle`)
 
     await expect(page).toHaveURL(
       new RegExp(
-        `/templates/${fixture.templateId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/dev/.*tab=authoring`,
+        `/templates/${fixture.templateId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/dev/.*workspaceTab=approval`,
       ),
     )
-    await expect(page.locator('#dev-version-actions')).toBeVisible({ timeout: 15_000 })
-    await expect(page.locator('.detail-tabs').getByRole('tab', { name: /^template design$/i })).toHaveAttribute(
-      'aria-selected',
-      'true',
-    )
-    await expect(page.locator('.detail-tabs').getByRole('tab', { name: /^workflow status$/i })).toHaveCount(0)
+    await expect(page.locator('#dev-workspace')).toBeVisible({ timeout: 15_000 })
+    await expect(page.locator('#dev-version-actions')).toHaveCount(0)
+    await expect(
+      page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template approval$/i }),
+    ).toHaveAttribute('aria-selected', 'true')
   })
 
-  test('hub workflow status tab redirects to dev editor workflow actions', async ({ page, request }) => {
+  test('hub workflow status tab redirects to dev editor approval workspace', async ({ page, request }) => {
     const fixture = await assertFolCatalogSeeded(request)
 
     await page.goto(`/templates/${fixture.templateId}?tab=overview`)
@@ -69,11 +68,27 @@ test.describe('template package hub navigation (BDD-TEMPLATE-PACKAGE-NAV-001)', 
     await tabs.getByRole('tab', { name: /^workflow status$/i }).click()
     await expect(page).toHaveURL(
       new RegExp(
-        `/templates/${fixture.templateId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/dev/.*tab=authoring`,
+        `/templates/${fixture.templateId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/dev/.*workspaceTab=approval`,
       ),
       { timeout: 15_000 },
     )
-    await expect(page.locator('#dev-version-actions')).toBeVisible({ timeout: 15_000 })
+    await expect(page.locator('#dev-workspace')).toBeVisible({ timeout: 15_000 })
+    await expect(page.locator('#dev-version-actions')).toHaveCount(0)
+  })
+
+  test('hub journey is read-only and links into dev workspace', async ({ page, request }) => {
+    const fixture = await assertFolCatalogSeeded(request)
+
+    await page.goto(`/templates/${fixture.templateId}`)
+    await expect(page.locator('[data-template-journey-cta]')).toHaveCount(0)
+
+    const workspaceLink = page.locator('[data-journey-workspace-link]').first()
+    await expect(workspaceLink).toBeVisible({ timeout: 15_000 })
+    await workspaceLink.click()
+
+    await expect(page).toHaveURL(/\/dev\//, { timeout: 15_000 })
+    await expect(page.locator('#dev-workspace')).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('[data-template-journey-cta]')).toHaveCount(0)
   })
 })
 
@@ -124,7 +139,7 @@ test.describe('template release line navigation (BDD-TEMPLATE-PACKAGE-NAV-001 S3
       new RegExp(`/templates/${fixture.templateId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/dev/`),
       { timeout: 30_000 },
     )
-    await expect(page.locator('.detail-tabs')).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('#dev-workspace')).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('.version-lines-card')).not.toBeVisible()
   })
 

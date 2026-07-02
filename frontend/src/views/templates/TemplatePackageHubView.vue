@@ -54,6 +54,9 @@ import {
 } from '@/utils/templateTeamLeadJourney'
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
 import { templateDetailTabLabelKey } from '@/views/templates/templateDetailTabs'
+import type { TemplateDevWorkspaceTab } from '@/views/templates/templateDevWorkspaceTabs'
+import { resolveTemplateDevWorkspaceTab } from '@/views/templates/templateDevWorkspaceTabs'
+import type { TemplateJourneyWorkspaceQuery } from '@/utils/templateJourneyWorkspaceLink'
 import type { ApiCredentialSummary, DeleteTemplatePayload } from '@/types/template'
 import type { ComponentPublicInstance } from 'vue'
 
@@ -304,7 +307,7 @@ async function redirectLifecycleDeepLink() {
     if (!template.value) {
       await templatesStore.fetchTemplate(templateId.value)
     }
-    openDevEditor('authoring', { focus: 'workflow' })
+    openDevEditor('approval')
   } catch {
     await router.replace(templatePackageHubPath(templateId.value))
   }
@@ -409,19 +412,29 @@ function backToList() {
   router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
 }
 
-function openDevEditor(tab?: string, extraQuery?: Record<string, string>) {
+function openDevEditor(
+  workspaceTab: TemplateDevWorkspaceTab = 'design',
+  extraQuery?: Record<string, string>,
+) {
   const devVersionId = template.value?.devVersionId
   if (!devVersionId) {
     return
   }
-  const resolvedTab = tab === 'lifecycle' ? 'authoring' : (tab ?? 'authoring')
-  const query =
-    tab === 'lifecycle' ? { focus: 'workflow', ...extraQuery } : extraQuery
-  router.push(templateDevVersionPath(templateId.value, devVersionId, resolvedTab, query))
+  router.push(
+    templateDevVersionPath(templateId.value, devVersionId, undefined, {
+      workspaceTab,
+      ...extraQuery,
+    }),
+  )
+}
+
+function handleJourneyOpenWorkspace(query: TemplateJourneyWorkspaceQuery) {
+  const { workspaceTab, ...extraQuery } = query
+  openDevEditor(resolveTemplateDevWorkspaceTab(workspaceTab), extraQuery)
 }
 
 function openLifecyclePanel() {
-  openDevEditor('authoring', { focus: 'workflow' })
+  openDevEditor('approval')
 }
 
 function openApiPolicyConsole() {
@@ -531,62 +544,6 @@ async function handleVersionLinesChanged() {
   await versionLinesPanelRef.value?.reload()
 }
 
-function handleJourneyDesign() {
-  openDevEditor('authoring')
-}
-
-function handleJourneyCreate() {
-  router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
-}
-
-function handleJourneyTrialGenerate() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneySubmitForTest() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneySubmitForApproval() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneyReviewRequest() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneyCheckEvidence() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneyRecordResult() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneyApproverReviewRequest() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneyApproverReviewSubmission() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneyApproverRecordDecision() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneyTeamLeadReviewGoLiveRequest() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneyTeamLeadRunPreReleaseChecks() {
-  openDevEditor('lifecycle')
-}
-
-function handleJourneyTeamLeadConfirmGoLive() {
-  openDevEditor('lifecycle')
-}
-
 const displayedCredentialSecret = computed(() => {
   if (templatesStore.lastCreatedCredential?.secret) {
     return templatesStore.lastCreatedCredential.secret
@@ -656,38 +613,36 @@ const displayedCredentialSecret = computed(() => {
         :journey-context="authorJourneyContext"
         :template-id="templateId"
         :can-write="authorTemplates"
-        @create="handleJourneyCreate"
-        @design="handleJourneyDesign"
-        @trial-generate="handleJourneyTrialGenerate"
-        @submit-for-test="handleJourneySubmitForTest"
-        @submit-for-approval="handleJourneySubmitForApproval"
+        :show-primary-cta="false"
+        enable-workspace-link
+        @open-workspace="handleJourneyOpenWorkspace"
       />
 
       <TemplateTesterJourneyBlock
         v-if="showTesterJourney && testerJourneyContext"
         :journey-context="testerJourneyContext"
         :can-decide="decideTests"
-        @review-request="handleJourneyReviewRequest"
-        @check-evidence="handleJourneyCheckEvidence"
-        @record-result="handleJourneyRecordResult"
+        :show-primary-cta="false"
+        enable-workspace-link
+        @open-workspace="handleJourneyOpenWorkspace"
       />
 
       <TemplateApproverJourneyBlock
         v-if="showApproverJourney && approverJourneyContext"
         :journey-context="approverJourneyContext"
         :can-decide="decideApprovals"
-        @review-request="handleJourneyApproverReviewRequest"
-        @review-submission="handleJourneyApproverReviewSubmission"
-        @record-decision="handleJourneyApproverRecordDecision"
+        :show-primary-cta="false"
+        enable-workspace-link
+        @open-workspace="handleJourneyOpenWorkspace"
       />
 
       <TemplateTeamLeadJourneyBlock
         v-if="showTeamLeadJourney && teamLeadJourneyContext"
         :journey-context="teamLeadJourneyContext"
         :can-publish="publishTemplates"
-        @review-go-live-request="handleJourneyTeamLeadReviewGoLiveRequest"
-        @run-pre-release-checks="handleJourneyTeamLeadRunPreReleaseChecks"
-        @confirm-go-live="handleJourneyTeamLeadConfirmGoLive"
+        :show-primary-cta="false"
+        enable-workspace-link
+        @open-workspace="handleJourneyOpenWorkspace"
       />
 
       <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />

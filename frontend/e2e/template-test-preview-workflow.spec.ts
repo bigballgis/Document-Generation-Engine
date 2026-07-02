@@ -8,7 +8,7 @@ test.describe('template test & preview workflow (dev editor)', () => {
     await loginAs(page, E2E_TEMPLATE_AUTHOR)
   })
 
-  test('draft dev editor routes test actions to Test & Preview tab', async ({ page, request }) => {
+  test('draft dev editor exposes test actions on Template testing tab row', async ({ page, request }) => {
     test.setTimeout(120_000)
     const fixture = await assertFolCatalogSeeded(request)
 
@@ -20,32 +20,26 @@ test.describe('template test & preview workflow (dev editor)', () => {
       .click()
 
     await expect(page).toHaveURL(/\/dev\//, { timeout: 15_000 })
-    await expect(page.locator('#dev-version-actions')).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('#dev-workspace')).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('#dev-version-actions')).toHaveCount(0)
 
-    const devActions = page.locator('#dev-version-actions')
-    await expect(devActions.getByRole('button', { name: /open test & preview/i })).toBeVisible()
-    await expect(devActions.getByRole('button', { name: /^test generate$/i })).toHaveCount(0)
-    await expect(devActions.getByRole('button', { name: /submit for test/i })).toHaveCount(0)
+    const workspace = page.locator('.workspace-tab-shell')
+    await workspace.getByRole('tab', { name: /^template testing$/i }).click()
+    await expect(page).toHaveURL(/workspaceTab=testing/)
 
-    await page.getByRole('tab', { name: /^template design$/i }).click()
-    const authoringTabs = page.locator('.authoring-sub-tabs')
-    await authoringTabs.getByRole('tab', { name: /test & preview/i }).click()
-
-    const workflow = page.locator('.test-preview-workflow')
-    await expect(workflow).toBeVisible({ timeout: 15_000 })
-    await expect(workflow.getByRole('button', { name: /run preview \(selected\)/i })).toBeVisible()
-    await expect(workflow.getByRole('button', { name: /batch preview all/i })).toBeVisible()
-    await expect(workflow.getByRole('button', { name: /submit for test/i })).toBeVisible()
+    const actions = workspace.locator('.workspace-tab-shell__actions')
+    await expect(actions.getByRole('button', { name: /run preview \(selected\)/i })).toBeVisible()
+    await expect(actions.getByRole('button', { name: /batch preview all/i })).toBeVisible()
+    await expect(actions.getByRole('button', { name: /submit for test/i })).toBeVisible()
 
     const dataSetPanel = page.locator('.test-data-set-panel')
     await expect(dataSetPanel).toBeVisible()
     await expect(dataSetPanel.getByRole('button', { name: /^run preview$/i }).first()).toBeVisible()
 
-    await expect(page.locator('.test-preview-workflow .context-help-trigger')).toBeVisible()
     await expect(page.locator('.test-data-set-panel .context-help-trigger')).toBeVisible()
   })
 
-  test('header shortcut opens Test & Preview sub-tab', async ({ page, request }) => {
+  test('legacy authoringTab=testPreview deep-link opens Template testing tab', async ({ page, request }) => {
     test.setTimeout(90_000)
     const fixture = await assertFolCatalogSeeded(request)
 
@@ -57,10 +51,14 @@ test.describe('template test & preview workflow (dev editor)', () => {
       .click()
 
     await expect(page).toHaveURL(/\/dev\//, { timeout: 15_000 })
-    await expect(page.locator('#dev-version-actions')).toBeVisible({ timeout: 30_000 })
+    const devUrl = page.url()
+    await page.goto(`${devUrl}${devUrl.includes('?') ? '&' : '?'}tab=authoring&authoringTab=testPreview`)
 
-    await page.locator('#dev-version-actions').getByRole('button', { name: /open test & preview/i }).click()
-    await expect(page).toHaveURL(/authoringTab=testPreview/)
-    await expect(page.locator('.test-preview-workflow')).toBeVisible({ timeout: 15_000 })
+    await expect(page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i })).toHaveAttribute(
+      'aria-selected',
+      'true',
+      { timeout: 15_000 },
+    )
+    await expect(page.locator('.test-data-set-panel')).toBeVisible({ timeout: 15_000 })
   })
 })

@@ -25,9 +25,21 @@ export async function reLoginAs(
 
 export async function openContentModulesList(page: Page) {
   await page.goto('/content-modules')
-  await expect(page.getByRole('heading', { name: /^content modules$/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /^standard clauses$/i })).toBeVisible()
   await expect(page.getByText(/unable to load content modules/i)).not.toBeVisible()
   await expect(page.locator('.el-skeleton')).toHaveCount(0)
+}
+
+export async function filterContentModulesTableColumn(
+  page: Page,
+  columnLabel: string | RegExp,
+  value: string,
+) {
+  const header = page
+    .locator('.table-column-header')
+    .filter({ has: page.getByText(columnLabel, { exact: typeof columnLabel === 'string' }) })
+    .first()
+  await header.locator('input').first().fill(value)
 }
 
 export async function openDemoTemplateAuthoringTab(page: Page, externalId: string) {

@@ -84,7 +84,8 @@ public class TemplateLifecycleService {
     public TemplateDetailView submitForTest(UUID templateId, LifecycleCommentRequest request, ManagementSessionClaims session) {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
         requireResubmitForTestEligible(template);
-        transition(template, TemplateLifecycleStatus.TESTING, LifecycleAction.SUBMIT_FOR_TEST, null, request.commentSummary(), session);
+        transition(template, TemplateLifecycleStatus.TESTING, LifecycleAction.SUBMIT_FOR_TEST, null,
+                normalizeComment(request.commentSummary()), session);
         collaborationWorkItemWriter.upsertSubmitForTestWorkItem(template, session);
         return templateService.toDetail(template);
     }
@@ -120,7 +121,7 @@ public class TemplateLifecycleService {
         requirePendingSubmitForApproval(template);
         publishGateService.assertReadyForSubmitForApproval(templateId, session);
         transition(template, TemplateLifecycleStatus.APPROVAL, LifecycleAction.SUBMIT_FOR_APPROVAL,
-                null, request.commentSummary(), session);
+                null, normalizeComment(request.commentSummary()), session);
         collaborationWorkItemWriter.upsertSubmitForApprovalWorkItem(template, session);
         return templateService.toDetail(template);
     }
@@ -361,6 +362,10 @@ public class TemplateLifecycleService {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private String normalizeComment(String commentSummary) {
+        return commentSummary == null ? "" : commentSummary.trim();
     }
 
     private void syncPublishedVersionsToStopped(UUID templateId) {

@@ -16,12 +16,12 @@ import TemplateLifecycleDecisionDialog, {
   type LifecycleDecisionDialogMode,
   type LifecycleDecisionSubmitPayload,
 } from '@/components/templates/TemplateLifecycleDecisionDialog.vue'
-import TemplateDevVersionActionBar from '@/components/templates/TemplateDevVersionActionBar.vue'
 import TemplateExportActions from '@/components/templates/TemplateExportActions.vue'
 import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
 import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
 import TemplateDetailLifecycleTab from '@/views/templates/detail/TemplateDetailLifecycleTab.vue'
 import TemplateDetailAuthoringTab from '@/views/templates/detail/TemplateDetailAuthoringTab.vue'
+import TemplateDetailDevWorkspace from '@/views/templates/detail/TemplateDetailDevWorkspace.vue'
 import TemplateDetailReleaseVersionsTab from '@/views/templates/detail/TemplateDetailReleaseVersionsTab.vue'
 import TemplateDetailApiAccessTab from '@/views/templates/detail/TemplateDetailApiAccessTab.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
@@ -64,6 +64,11 @@ import {
   templateDetailTabLabelKey,
   type TemplateDetailTab,
 } from '@/views/templates/templateDetailTabs'
+import {
+  buildDevWorkspaceQuery,
+  resolveTemplateDevWorkspaceTabFromQuery,
+  type TemplateDevWorkspaceTab,
+} from '@/views/templates/templateDevWorkspaceTabs'
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
 import { resolveWorkflowBannerActionKind } from '@/utils/templateWorkflowBannerContext'
 import {
@@ -165,16 +170,11 @@ const metadataEditOpen = ref(false)
 const loadFailed = ref(false)
 type DetailTab = TemplateDetailTab
 
-function resolveDevEditorInitialTab(): DetailTab {
-  const tab = resolveTemplateDetailTabFromQuery(route.query)
-  if (tab === 'overview' || tab === 'lifecycle') {
-    return 'authoring'
-  }
-  return tab
-}
-
 const activeDetailTab = ref<DetailTab>(
-  isDevEditor.value ? resolveDevEditorInitialTab() : resolveTemplateDetailTabFromQuery(route.query),
+  isDevEditor.value ? 'authoring' : resolveTemplateDetailTabFromQuery(route.query),
+)
+const activeDevWorkspaceTab = ref<TemplateDevWorkspaceTab>(
+  resolveTemplateDevWorkspaceTabFromQuery(route.query),
 )
 const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
 
@@ -421,20 +421,6 @@ const showAuthoringSection = computed(() => {
     (status === 'DRAFT' || status === 'TESTING')
   )
 })
-const showTestWorkflowRedirect = computed(
-  () =>
-    isDevEditor.value &&
-    (template.value?.lifecycleStatus === 'DRAFT' ||
-      template.value?.lifecycleStatus === 'TESTING') &&
-    (authorTemplates.value || decideTests.value),
-)
-const showDevWorkflowBar = computed(
-  () =>
-    isDevEditor.value &&
-    (showLifecycleSection.value ||
-      showGovernanceSection.value ||
-      showTestWorkflowRedirect.value),
-)
 const canEditContentModuleReferences = computed(
   () => authorTemplates.value && template.value?.lifecycleStatus === 'DRAFT',
 )
@@ -586,7 +572,7 @@ async function loadAuthorRemediationWorkItems() {
 }
 
 function handleJourneyDesign() {
-  activeDetailTab.value = 'authoring'
+  openDevWorkspaceTab('design')
 }
 
 function handleJourneyCreate() {
@@ -609,11 +595,19 @@ async function handleJourneySubmitForApproval() {
 }
 
 function handleJourneyReviewRequest() {
+  if (isDevEditor.value) {
+    openDevWorkspaceTab('testing')
+    return
+  }
   openLifecyclePanel()
 }
 
 function handleJourneyCheckEvidence() {
-  openLifecyclePanel()
+  if (isDevEditor.value) {
+    openDevWorkspaceTab('testing')
+  } else {
+    openLifecyclePanel()
+  }
   testerEvidenceViewed.value = {
     fidelityViewedConfirmed: true,
     coverageViewedConfirmed: true,
@@ -622,7 +616,11 @@ function handleJourneyCheckEvidence() {
 }
 
 function handleJourneyRecordResult() {
-  openLifecyclePanel()
+  if (isDevEditor.value) {
+    openDevWorkspaceTab('testing')
+  } else {
+    openLifecyclePanel()
+  }
   testerEvidenceViewed.value = {
     fidelityViewedConfirmed: true,
     coverageViewedConfirmed: true,
@@ -631,11 +629,19 @@ function handleJourneyRecordResult() {
 }
 
 function handleJourneyApproverReviewRequest() {
+  if (isDevEditor.value) {
+    openDevWorkspaceTab('approval')
+    return
+  }
   openLifecyclePanel()
 }
 
 function handleJourneyApproverReviewSubmission() {
-  openLifecyclePanel()
+  if (isDevEditor.value) {
+    openDevWorkspaceTab('approval')
+  } else {
+    openLifecyclePanel()
+  }
   approverEvidenceViewed.value = {
     ...approverEvidenceViewed.value,
     submissionReviewedConfirmed: true,
@@ -643,7 +649,11 @@ function handleJourneyApproverReviewSubmission() {
 }
 
 function handleJourneyApproverRecordDecision() {
-  openLifecyclePanel()
+  if (isDevEditor.value) {
+    openDevWorkspaceTab('approval')
+  } else {
+    openLifecyclePanel()
+  }
   approverEvidenceViewed.value = {
     submissionReviewedConfirmed: true,
     keyEvidenceViewedConfirmed: true,
@@ -712,10 +722,11 @@ function syncTabFromRoute() {
   const normalized = normalizeTemplateDetailQuery(route.query)
   if (normalized) {
     if (isDevEditor.value) {
-      activeDetailTab.value = 'authoring'
-      scrollToDevVersionActions()
-      const query = { ...normalized.query, tab: 'authoring', focus: 'workflow' }
-      void router.replace({ query })
+      activeDevWorkspaceTab.value = 'approval'
+      scrollToDevWorkspace()
+      void router.replace({
+        query: buildDevWorkspaceQuery(normalized.query, 'approval'),
+      })
       return
     }
     activeDetailTab.value = normalized.tab
@@ -724,13 +735,18 @@ function syncTabFromRoute() {
     return
   }
 
-  if (isDevEditor.value && route.query.focus === 'workflow') {
-    activeDetailTab.value = 'authoring'
-    scrollToDevVersionActions()
+  if (isDevEditor.value) {
+    const workspaceTab = resolveTemplateDevWorkspaceTabFromQuery(route.query)
+    if (activeDevWorkspaceTab.value !== workspaceTab) {
+      activeDevWorkspaceTab.value = workspaceTab
+    }
+    if (route.query.focus === 'workflow') {
+      scrollToDevWorkspace()
+    }
     return
   }
 
-  const tab = isDevEditor.value ? resolveDevEditorInitialTab() : resolveTemplateDetailTabFromQuery(route.query)
+  const tab = resolveTemplateDetailTabFromQuery(route.query)
   if (activeDetailTab.value !== tab) {
     activeDetailTab.value = tab
   }
@@ -756,8 +772,11 @@ watch(
   () => {
     resetTransientDetailState()
     activeDetailTab.value = isDevEditor.value
-      ? resolveDevEditorInitialTab()
+      ? 'authoring'
       : resolveTemplateDetailTabFromQuery(route.query)
+    if (isDevEditor.value) {
+      activeDevWorkspaceTab.value = resolveTemplateDevWorkspaceTabFromQuery(route.query)
+    }
     void loadTemplate()
   },
 )
@@ -853,19 +872,24 @@ function scrollToLifecyclePanel() {
   })
 }
 
-function scrollToDevVersionActions() {
+function scrollToDevWorkspace() {
   void nextTick(() => {
-    document.getElementById('dev-version-actions')?.scrollIntoView({
+    document.getElementById('dev-workspace')?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     })
   })
 }
 
+function openDevWorkspaceTab(tab: TemplateDevWorkspaceTab) {
+  activeDevWorkspaceTab.value = tab
+  void router.replace({ query: buildDevWorkspaceQuery(route.query, tab) })
+  scrollToDevWorkspace()
+}
+
 function openLifecyclePanel() {
   if (isDevEditor.value) {
-    activeDetailTab.value = 'authoring'
-    scrollToDevVersionActions()
+    openDevWorkspaceTab('approval')
     return
   }
   activeDetailTab.value = 'lifecycle'
@@ -966,10 +990,7 @@ async function handleTestGenerate(testDataSetId?: string) {
     if (resolvedId) {
       selectedTestDataSetId.value = resolvedId
     }
-    activeDetailTab.value = 'authoring'
-    await router.replace({
-      query: { ...route.query, tab: 'authoring', authoringTab: 'testPreview' },
-    })
+    openDevWorkspaceTab('testing')
     ElMessage.success(t('templates.testGenerate.success', { previewId: preview.previewId }))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.testGenerate'))
@@ -991,10 +1012,7 @@ async function handleBatchTestGenerate() {
       testDataSetIds: dataSets.map((row) => row.testDataSetId),
     })
     coverageRefreshToken.value += 1
-    activeDetailTab.value = 'authoring'
-    await router.replace({
-      query: { ...route.query, tab: 'authoring', authoringTab: 'testPreview' },
-    })
+    openDevWorkspaceTab('testing')
     ElMessage.success(
       t('templates.testDataSets.batchSuccess', {
         succeeded: summary.succeededCount,
@@ -1010,10 +1028,7 @@ async function handleBatchTestGenerate() {
 }
 
 function openTestPreviewTab() {
-  activeDetailTab.value = 'authoring'
-  void router.replace({
-    query: { ...route.query, tab: 'authoring', authoringTab: 'testPreview' },
-  })
+  openDevWorkspaceTab('testing')
 }
 
 async function handlePreviewSelected(previewId: string | null) {
@@ -1428,6 +1443,7 @@ async function handleDeleteTemplate() {
         :template-id="templateId"
         :can-write="authorTemplates"
         :primary-cta-disabled="authorJourneyPrimaryCtaDisabled"
+        :show-primary-cta="!isDevEditor"
         @create="handleJourneyCreate"
         @design="handleJourneyDesign"
         @trial-generate="handleJourneyTrialGenerate"
@@ -1439,6 +1455,7 @@ async function handleDeleteTemplate() {
         v-if="showTesterJourney && testerJourneyContext"
         :journey-context="testerJourneyContext"
         :can-decide="decideTests"
+        :show-primary-cta="!isDevEditor"
         @review-request="handleJourneyReviewRequest"
         @check-evidence="handleJourneyCheckEvidence"
         @record-result="handleJourneyRecordResult"
@@ -1448,6 +1465,7 @@ async function handleDeleteTemplate() {
         v-if="showApproverJourney && approverJourneyContext"
         :journey-context="approverJourneyContext"
         :can-decide="decideApprovals"
+        :show-primary-cta="!isDevEditor"
         @review-request="handleJourneyApproverReviewRequest"
         @review-submission="handleJourneyApproverReviewSubmission"
         @record-decision="handleJourneyApproverRecordDecision"
@@ -1457,24 +1475,38 @@ async function handleDeleteTemplate() {
         v-if="showTeamLeadJourney && teamLeadJourneyContext"
         :journey-context="teamLeadJourneyContext"
         :can-publish="publishTemplates"
+        :show-primary-cta="!isDevEditor"
         @review-go-live-request="handleJourneyTeamLeadReviewGoLiveRequest"
         @run-pre-release-checks="handleJourneyTeamLeadRunPreReleaseChecks"
         @confirm-go-live="handleJourneyTeamLeadConfirmGoLive"
       />
 
       <TemplateWorkflowBanner
-        v-if="!(isDevEditor && showTestWorkflowRedirect)"
+        v-if="!isDevEditor"
         :template="template"
         @open-lifecycle="openLifecyclePanel"
       />
 
-      <TemplateDevVersionActionBar
-        v-if="showDevWorkflowBar"
-        :lifecycle-comment="lifecycleComment"
+      <TemplateDetailDevWorkspace
+        v-if="isDevEditor && showAuthoringSection"
+        :template-id="templateId"
+        :master-id="template.masterId"
+        :variables="template.variables"
+        :bindings="template.bindings"
+        :rules="template.rules"
+        :group-code="template.groupCode"
+        :lifecycle-status="template.lifecycleStatus"
+        :can-edit-content-module-references="canEditContentModuleReferences"
+        :coverage-refresh-token="coverageRefreshToken"
+        :last-preview="lastPreview"
+        :selected-preview-id="selectedPreviewId"
+        :selected-test-data-set-id="selectedTestDataSetId"
+        :show-draft-actions="showDraftActions"
+        :show-testing-decision-actions="showTestingDecisionActions"
         :show-submit-for-approval="showSubmitForApproval"
         :show-approval-decision-actions="showApprovalDecisionActions"
         :show-publish-actions="showPublishActions"
-        :show-test-workflow-redirect="showTestWorkflowRedirect"
+        :show-test-generate="showTestGenerate"
         :show-stop-action="showStopAction"
         :show-restore-action="showRestoreAction"
         :show-deprecate-action="showDeprecateAction"
@@ -1492,20 +1524,29 @@ async function handleDeleteTemplate() {
         :submit-gate-ready="submitGateReady"
         :submit-gate-load-error="submitGateLoadError"
         :submitting="templatesStore.submitting"
-        @update:lifecycle-comment="lifecycleComment = $event"
+        :generating-preview="generatingPreview"
+        :generating-preview-id="generatingPreviewId"
+        :batch-testing="batchTesting"
+        :open-submit-for-test-dialog="submitForTestDialogOpen"
+        @updated="loadTemplate"
+        @update:selected-test-data-set-id="selectedTestDataSetId = $event"
+        @update:selected-preview-id="handlePreviewSelected"
         @update:publish-bump-level="publishBumpLevel = $event"
+        @update:open-submit-for-test-dialog="submitForTestDialogOpen = $event"
+        @test-generate="handleTestGenerate"
+        @test-generate-batch="handleBatchTestGenerate"
+        @submit-for-test="handleSubmitForTest"
+        @test-decision="handleTestDecision"
         @submit-for-approval="handleSubmitForApproval"
         @approval-decision="handleApprovalDecision"
         @publish="handlePublish"
-        @open-test-preview-tab="openTestPreviewTab"
         @governance-action="handleGovernanceAction"
         @retry-publish-gate="loadPublishGateData"
         @retry-submit-gate="loadSubmitGateData"
       />
 
-      <el-tabs v-model="activeDetailTab" class="detail-tabs">
+      <el-tabs v-if="!isDevEditor" v-model="activeDetailTab" class="detail-tabs">
         <el-tab-pane
-          v-if="!isDevEditor"
           :label="t(templateDetailTabLabelKey('overview'))"
           name="overview"
         >
@@ -1513,7 +1554,6 @@ async function handleDeleteTemplate() {
         </el-tab-pane>
 
         <el-tab-pane
-          v-if="!isDevEditor"
           :label="t(templateDetailTabLabelKey('lifecycle'))"
           name="lifecycle"
         >
@@ -1597,7 +1637,6 @@ async function handleDeleteTemplate() {
         </el-tab-pane>
 
         <el-tab-pane
-          v-if="!isDevEditor"
           :label="t(templateDetailTabLabelKey('releaseVersions'))"
           name="releaseVersions"
         >
@@ -1609,7 +1648,7 @@ async function handleDeleteTemplate() {
         </el-tab-pane>
 
         <el-tab-pane
-          v-if="showPolicyPanel && !isDevEditor"
+          v-if="showPolicyPanel"
           :label="t(templateDetailTabLabelKey('apiAccess'))"
           name="apiAccess"
         >

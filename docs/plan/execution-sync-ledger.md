@@ -1,7 +1,7 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-07-02 (**WIP A/B + deploy follow-up** — commits `0a72d8d`, `001867f`, `0ef85ca`; Docker redeploy with stamping ON)
-**Progress note (2026-07-02):** **M9-T02 Step 2 prep Done** — intranet SCA runbook + `prepare-sca-submission-bundle.ps1` + [sca-execution-log.md](../evidence/security/sca-execution-log.md); org upload still pending. **Prior:** M9 SBOM in-repo (`generate-sbom.ps1`).
+**Last synced:** 2026-07-02 (**Dev workspace tab shell** + M9-T02 Step 2 prep commit `1aea0a2`)
+**Progress note (2026-07-02):** **Dev workspace tab shell** — `WorkspaceTabShell`, design/testing/approval top tabs, journey read-only, action rail on tab row; backend `LifecycleCommentRequest` simplified; E2E `template-dev-workspace.spec.ts` **3/3** + package-nav/fol adapted. **Gate:** backend `mvn verify` BUILD SUCCESS; frontend lint/type-check/test/build green (**584** Vitest); Playwright dev-workspace **3/3**, package-nav **10/10** (serial), fol **6/6**. **Prior:** M9-T02 Step 2 prep (`prepare-sca-submission-bundle.ps1`).
 **Progress note (prior 2026-07-02):** Ad-hoc WIP **A** — `pdf-page-number-stamping-enabled` (default `false`); `PdfConversionPostProcessor` + `DocxPdfConversionPreprocessor`; FOL master layout v4. **WIP B** — `GET /content-modules` optional `groupCode` + `listAccessible`; list UI drops group picker, adds table group column. **Gate:** backend `mvn verify` BUILD SUCCESS (**614** Surefire, 1 skipped); frontend lint/type-check/test/build green (**571** Vitest). **Prior:** 2026-06-29 **P12-BDD-RISK-PROMPT-UX-001 Done**.
 **Activation note (2026-07-02):** **P12-BDD-RISK-PROMPT-UX-001 activated → In Progress** (BDD
 **BDD-TEMPLATE-RISK-PROMPT-UX-001** READY; supersedes P19-T08 group override + P19-T10 list-view

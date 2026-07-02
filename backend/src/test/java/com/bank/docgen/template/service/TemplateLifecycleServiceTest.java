@@ -3,6 +3,7 @@ package com.bank.docgen.template.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -122,6 +123,21 @@ class TemplateLifecycleServiceTest {
         assertThat(result.lifecycleStatus()).isEqualTo(TemplateLifecycleStatus.TESTING);
         assertThat(template.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.TESTING);
         verify(collaborationWorkItemWriter).upsertSubmitForTestWorkItem(eq(template), eq(author));
+    }
+
+    @Test
+    void submitForTest_allowsBlankOptionalComment() {
+        when(templateService.requireWritableTemplate(templateId, author)).thenReturn(template);
+        when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.TESTING));
+
+        TemplateDetailView result = service.submitForTest(
+                templateId,
+                new LifecycleCommentRequest("   "),
+                author
+        );
+
+        assertThat(result.lifecycleStatus()).isEqualTo(TemplateLifecycleStatus.TESTING);
+        verify(lifecycleRecordRepository).save(argThat(record -> "".equals(record.getCommentSummary())));
     }
 
     @Test
