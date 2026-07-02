@@ -34,8 +34,8 @@ Restore online/intranet dependency scan execution and frontend audit loop.
 
 | Task ID | Priority | Module | Scope | Acceptance criteria | Status |
 | --- | --- | --- | --- | --- | --- |
-| M9-T01 | P0 | Platform | Backend SBOM generation (CycloneDX) | Artifact archived per run | Not Started |
-| M9-T02 | P0 | Platform | Frontend SBOM + intranet SCA | See m9-t02-closure-plan.md | Not Started |
+| M9-T01 | P0 | Platform | Backend SBOM generation (CycloneDX) | `.\scripts\generate-sbom.ps1 -BackendOnly` → `artifacts/sbom/backend-cyclonedx.json` | Done (in-repo 2026-07-02) |
+| M9-T02 | P0 | Platform | Frontend SBOM + intranet SCA | Step 1 Done; org SCA Steps 2–4 pending — [m9-t02-closure-plan.md](./m9-t02-closure-plan.md) | In Progress |
 | M9-T03 | P1 | Platform | Renew/close security exceptions with metadata | Owner + expiry on any residual | Not Started |
 
 ## Gate commands (when implementation exists)

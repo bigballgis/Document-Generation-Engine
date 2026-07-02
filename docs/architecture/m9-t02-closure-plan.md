@@ -20,7 +20,8 @@ Close frontend dependency security baseline: SBOM generation + intranet SCA + re
 
 | Step | Action | Status |
 | --- | --- | --- |
-| 1 | Generate frontend CycloneDX SBOM (script or CI job) | Not Started |
+| 1 | Generate frontend CycloneDX SBOM (script or CI job) | **Done** (2026-07-02) — `pnpm -C frontend sbom` / `.\scripts\generate-sbom.ps1` |
+| 1b | Generate backend CycloneDX SBOM | **Done** (2026-07-02) — `mvn -f backend/pom.xml -Psbom package -DskipTests` via same script |
 | 2 | Submit to approved intranet SCA | Not Started (org gate) |
 | 3 | Remediate or exception-track high/critical | Not Started |
 | 4 | Re-run `pnpm -C frontend lint/type-check/test/build` | Not Started |

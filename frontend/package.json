@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "test:e2e:docker": "playwright test e2e/catalog.spec.ts e2e/role-journeys.spec.ts e2e/master-replace-docx.spec.ts e2e/content-module-lifecycle.spec.ts e2e/collaboration-todos.spec.ts --config playwright.docker.config.ts",
     "test:e2e:install": "playwright install --with-deps chromium",
-    "pretest:e2e": "playwright install chromium"
+    "pretest:e2e": "playwright install chromium",
+    "sbom": "cyclonedx-npm --ignore-npm-errors --no-validate --spec-version 1.6 --output-file ../artifacts/sbom/frontend-cyclonedx.json"
   },
   "dependencies": {
     "axios": "^1.7.9",
@@ -26,6 +27,7 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "^5.0.0",
     "@playwright/test": "^1.49.1",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitest/coverage-v8": "2.1.9",
