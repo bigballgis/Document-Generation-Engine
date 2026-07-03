@@ -901,3 +901,136 @@ export async function demoFullFlowPublishedDetailPath(
   const fixture = await ensureDemoFullFlowPublished(request)
   return `/templates/${fixture.templateId}`
 }
+
+export const RUNTIME_API_BASE_URL =
+  process.env.E2E_RUNTIME_API_BASE_URL ?? 'http://127.0.0.1:8080/api/dev/v1'
+
+export interface RuntimeCredentialBundle {
+  externalId: string
+  secret: string
+}
+
+export interface CallerInvocationListResult {
+  view: string
+  items: CallerInvocationSummary[]
+  page: number
+  size: number
+  totalElements: number
+}
+
+export interface CallerInvocationSummary {
+  invocationId: string
+  invocationKind: string
+  status: string
+  requestId: string
+  routeType: string
+}
+
+export interface CallerInvocationDetail {
+  summary: CallerInvocationSummary
+  parameters: Record<string, unknown>
+  childItems: CallerInvocationSummary[]
+}
+
+interface CallerInvocationDetailResult {
+  invocation: CallerInvocationSummary & {
+    parameters?: Record<string, unknown>
+    childItems?: CallerInvocationSummary[]
+  }
+}
+
+function runtimeCredentialHeaders(credential: RuntimeCredentialBundle): Record<string, string> {
+  return {
+    'X-Api-Credential-Id': credential.externalId,
+    'X-Api-Credential-Secret': credential.secret,
+    'X-Access-Account': 'e2e-runtime-caller',
+  }
+}
+
+export async function createTemplateApiCredential(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<RuntimeCredentialBundle> {
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  const created = await authorizedPost<{ externalId: string; secret: string }>(
+    request,
+    groupAdminToken,
+    `/templates/${templateId}/api/credentials`,
+    {},
+    201,
+  )
+  return { externalId: created.externalId, secret: created.secret }
+}
+
+export async function runtimeGenerateDefault(
+  request: APIRequestContext,
+  templateExternalId: string,
+  credential: RuntimeCredentialBundle,
+  idempotencyKey: string,
+): Promise<{ status: number; documentId: string | null }> {
+  const response = await request.post(
+    `${RUNTIME_API_BASE_URL}/templates/${templateExternalId}/default/generate`,
+    {
+      headers: {
+        ...runtimeCredentialHeaders(credential),
+        'Content-Type': 'application/json',
+      },
+      data: {
+        output: { format: 'DOCX', mode: 'SYNC_STREAM' },
+        variables: { customerName: 'Bob' },
+        requestId: `req-${idempotencyKey}`,
+        idempotencyKey,
+      },
+    },
+  )
+  const documentId =
+    response.headers()['documentid'] ??
+    response.headers()['documentId'] ??
+    response.headers()['Document-Id'] ??
+    null
+  return { status: response.status(), documentId }
+}
+
+export async function fetchCallerInvocations(
+  request: APIRequestContext,
+  templateExternalId: string,
+  credential: RuntimeCredentialBundle,
+  view: 'logical' | 'flat' = 'logical',
+): Promise<CallerInvocationListResult> {
+  const response = await request.get(
+    `${RUNTIME_API_BASE_URL}/templates/${templateExternalId}/invocations?view=${view}`,
+    { headers: runtimeCredentialHeaders(credential) },
+  )
+  if (!response.ok()) {
+    throw new Error(
+      `GET runtime invocations failed (${response.status()}): ${await response.text()}`,
+    )
+  }
+  const body = (await response.json()) as ApiEnvelope<CallerInvocationListResult>
+  return body.result
+}
+
+export async function fetchCallerInvocationDetail(
+  request: APIRequestContext,
+  templateExternalId: string,
+  credential: RuntimeCredentialBundle,
+  invocationId: string,
+): Promise<CallerInvocationDetail> {
+  const response = await request.get(
+    `${RUNTIME_API_BASE_URL}/templates/${templateExternalId}/invocations/${invocationId}`,
+    { headers: runtimeCredentialHeaders(credential) },
+  )
+  if (!response.ok()) {
+    throw new Error(
+      `GET runtime invocation detail failed (${response.status()}): ${await response.text()}`,
+    )
+  }
+  const body = (await response.json()) as ApiEnvelope<CallerInvocationDetailResult>
+  const invocation = body.result.invocation
+  const { parameters, childItems, ...summary } = invocation
+  return {
+    summary: summary as CallerInvocationSummary,
+    parameters: parameters ?? {},
+    childItems: childItems ?? [],
+  }
+}

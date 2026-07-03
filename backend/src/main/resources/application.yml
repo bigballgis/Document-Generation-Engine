@@ -66,6 +66,13 @@ docgen:
       secret-key: ${MINIO_ROOT_PASSWORD:docgen_local_pwd}
   demo-catalog:
     seed-enabled: ${DOCGEN_SEED_DEMO_CATALOG:false}
+  ad-group-resolver:
+    type: config
+    account-groups:
+      svc-caller:
+        - RETAIL_API
+      e2e-runtime-caller:
+        - RETAIL_API
   collaboration:
     escalation:
       enabled: ${DOCGEN_COLLABORATION_ESCALATION_ENABLED:true}

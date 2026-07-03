@@ -484,3 +484,43 @@ export async function captureP12TemplateTestingOverhaulLocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+export const P12_API_PACKAGE_ACCESS_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'P12-API-PACKAGE-ACCESS',
+)
+export const P12_API_PACKAGE_ACCESS_SCREENSHOT_DIR = path.join(
+  P12_API_PACKAGE_ACCESS_EVIDENCE_ROOT,
+  'screenshots',
+)
+export const P12_API_PACKAGE_ACCESS_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureP12ApiPackageAccessEvidenceDirs(): void {
+  fs.mkdirSync(P12_API_PACKAGE_ACCESS_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function p12ApiPackageAccessScreenshotPath(filename: string): string {
+  return path.join(P12_API_PACKAGE_ACCESS_SCREENSHOT_DIR, filename)
+}
+
+export async function captureP12ApiPackageAccessScreenshot(
+  page: Page,
+  filename: string,
+): Promise<string> {
+  ensureP12ApiPackageAccessEvidenceDirs()
+  const target = p12ApiPackageAccessScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureP12ApiPackageAccessLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureP12ApiPackageAccessEvidenceDirs()
+  const target = p12ApiPackageAccessScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

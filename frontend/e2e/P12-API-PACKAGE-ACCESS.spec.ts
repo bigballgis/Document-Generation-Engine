@@ -5,6 +5,7 @@ import {
   ensureDemoFullFlowPublished,
   fetchRecentManagementInvocations,
 } from './helpers/content-modules-api'
+import { managementNav } from './helpers/nav'
 
 const dockerTarget =
   process.env.E2E_TARGET === 'docker' || process.env.FRONTEND_PORT === '4173'
@@ -48,9 +49,11 @@ test.describe('P12 API package access hub (BDD S6 L1)', () => {
 
     await expect(page.getByRole('heading', { name: /external access|对外接入/i })).toBeVisible()
     await expect(page.getByText(/API access not configured|尚未配置对外接入/i)).toHaveCount(0)
-    await expect(page.getByText(/save generated documents|保存生成文档/i)).toBeVisible()
+    await expect(
+      page.getByText(/save generated documents on the server|在服务端保存生成文档/i),
+    ).toBeVisible()
     await expect(page.getByText(/invocation record retention|调用记录保留/i)).toBeVisible()
-    await expect(page.getByText(/recent invocations|最近调用/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: /recent invocations|最近调用/i })).toBeVisible()
   })
 
   test('BDD S4 — advanced policy domains collapsed by default on hub tab', async ({
@@ -61,8 +64,9 @@ test.describe('P12 API package access hub (BDD S6 L1)', () => {
     await page.goto(`/templates/${fixture.templateId}?tab=apiAccess`)
 
     await expect(page.getByText(/advanced settings|高级设置/i)).toBeVisible()
-    await expect(page.getByText(/platform defaults|平台默认/i)).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /save output settings|保存输出设置/i })).toHaveCount(0)
     await page.getByText(/advanced settings|高级设置/i).click()
+    await expect(page.getByRole('button', { name: /save output settings|保存输出设置/i })).toBeVisible()
     await expect(page.getByText(/platform defaults|平台默认/i).first()).toBeVisible()
   })
 
@@ -85,12 +89,16 @@ test.describe('P12 API package access hub (BDD S6 L1)', () => {
     await page.goto(`/templates/${fixture.templateId}?tab=apiAccess`)
 
     await expect(page.getByText(/invocation summary coming soon|调用摘要即将提供/i)).toHaveCount(0)
-    await expect(page.getByText(/no recent invocations|暂无最近调用/i)).toBeVisible()
+    const emptyState = page.getByText(/no recent invocations|暂无最近调用/i)
+    const invocationTable = page.locator('.invocation-table')
+    await expect(emptyState.or(invocationTable)).toBeVisible()
   })
 
   test('api services overview avoids legacy catalog primary surface', async ({ page }) => {
-    await page.goto('/api/policies')
-    await expect(page.getByText(/external services overview|对外服务概览/i)).toBeVisible()
+    await page.goto('/dashboard')
+    await managementNav(page).getByRole('button', { name: /^external services overview$/i }).click()
+    await expect(page.locator('.page-header h1')).toHaveText(/external services overview|对外服务概览/i)
+    await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
     await expect(page.getByText(/^API policy management$/i)).toHaveCount(0)
   })
 

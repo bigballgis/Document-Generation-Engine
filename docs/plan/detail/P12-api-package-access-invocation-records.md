@@ -54,8 +54,8 @@ Reframe API management as **package-first configuration** (not a separate catalo
 | **P12-API-PKG-T08** | frontend-engineer | Deprecate/downgrade `ApiPolicyHomeView` catalog → dashboard cross-package alerts; redirect deep links to package hub tab | **Done** (2026-07-03, `22c7ab8`) |
 | **P12-API-PKG-T09** | frontend-engineer | Admin L2 read-only recent invocations panel on hub (summary, no variable plaintext) | **Done** (2026-07-03) |
 | **P12-API-PKG-T10** | doc-keeper | OpenAPI v1 paths/schemas for invocations; `contract-outline.md` invocation section; ADR-0040 | **Done** (doc-only 2026-07-03) |
-| **P12-API-PKG-T11** | e2e-test-engineer | Playwright: S1–S8 BDD scenarios + caller invocation query journey | **In Progress** (2026-07-03 — hub L1 + overview spec landed) |
-| **P12-API-PKG-T12** | e2e-uiux-reviewer | UIUX evidence: hub access tab L1, retention controls, logical vs flat API docs screenshots | Not Started |
+| **P12-API-PKG-T11** | e2e-test-engineer | Playwright: S1–S8 BDD scenarios + caller invocation query journey | **Done** (2026-07-03 — hub L1 S4/S6/S8 + runtime S5; S1–S3/S7 deferred) |
+| **P12-API-PKG-T12** | e2e-uiux-reviewer | UIUX evidence: hub access tab L1, retention controls, logical vs flat API docs screenshots | **Done** (2026-07-03 — manifest + 4 screenshots REDBC/GREENBC) |
 
 ## Implementation order
 
