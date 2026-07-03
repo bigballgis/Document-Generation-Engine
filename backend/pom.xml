@@ -38,6 +38,9 @@
         <checkstyle.version>10.20.1</checkstyle.version>
         <pmd.plugin.version>3.26.0</pmd.plugin.version>
         <spotbugs.plugin.version>4.8.6.4</spotbugs.plugin.version>
+        <surefire.forkCount>1</surefire.forkCount>
+        <surefire.argLine>-Xmx512m -XX:+ExitOnOutOfMemoryError</surefire.argLine>
+        <spotbugs.effort>Max</spotbugs.effort>
     </properties>
 
     <dependencies>
@@ -347,7 +350,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <reuseForks>false</reuseForks>
+                    <reuseForks>true</reuseForks>
+                    <forkCount>${surefire.forkCount}</forkCount>
+                    <argLine>${surefire.argLine} ${argLine}</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -355,7 +360,7 @@
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>${spotbugs.plugin.version}</version>
                 <configuration>
-                    <effort>Max</effort>
+                    <effort>${spotbugs.effort}</effort>
                     <threshold>Medium</threshold>
                     <includeTests>false</includeTests>
                     <excludeFilterFile>config/spotbugs/exclude.xml</excludeFilterFile>
@@ -375,6 +380,17 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>dev-fast</id>
+            <properties>
+                <checkstyle.skip>true</checkstyle.skip>
+                <pmd.skip>true</pmd.skip>
+                <spotbugs.skip>true</spotbugs.skip>
+                <jacoco.skip>true</jacoco.skip>
+                <spotbugs.effort>Default</spotbugs.effort>
+                <surefire.forkCount>0.5C</surefire.forkCount>
+            </properties>
+        </profile>
         <profile>
             <id>sbom</id>
             <build>

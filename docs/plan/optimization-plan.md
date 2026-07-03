@@ -143,6 +143,10 @@ Priority: **H/M/L**. All start `Not Started`.
 | G7 | M | Align frontend catalog with backend messageKeys | `en.ts` `api.error` only 2 keys (L14–20) | Catalog covers backend `api.error.*`; fallback strategy documented | Not Started |
 | G8 | M | Implement or de-scope template creation UI | `api/templates.ts` L36 `createTemplate` unused; no create button | Create flow built, or `createTemplate` removed and docs updated | Not Started |
 | G9 | L | Replace role-home placeholders / hide internal route keys | `RoleHomeView.vue` L44/L60–63 placeholder + raw `routeKey` | Real role dashboards or explicit deferred-scope note; no debug leakage | Not Started |
+| G-DX1 | H | Fix Surefire reuseForks + parameterise forkCount | `pom.xml` surefire config | `reuseForks=true`; `forkCount` property; no test regression | **Done** |
+| G-DX2 | H | Add `dev-fast` Maven profile | `pom.xml` profile `dev-fast` | `mvn -Pdev-fast test` skips Checkstyle/PMD/SpotBugs/JaCoCo | **Done** |
+| G-DX3 | M | Parameterise SpotBugs effort | `pom.xml` `spotbugs.effort` property | effort=Max in full verify; effort=Default in dev-fast | **Done** |
+| G-DX4 | M | Add `.mvn/jvm.config` | `backend/.mvn/jvm.config` | Maven daemon JVM flags fixed; `-Xmx2g`, `TieredCompilation` | **Done** |
 
 ---
 
