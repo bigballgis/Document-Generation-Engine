@@ -8,9 +8,7 @@ import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.rendering.DocxAssembler;
-import com.bank.docgen.rendering.DocxPdfPageNumberStampPlanResolver;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
-import com.bank.docgen.rendering.PdfConversionStampPlanContext;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
@@ -107,14 +105,11 @@ public class DocumentGenerationEngine {
         } catch (Exception ex) {
             throw new TemplateValidationException("api.error.rendering.generationFailed");
         }
-        DocumentArtifactPipeline.GeneratedArtifact artifact = PdfConversionStampPlanContext.runWith(
-                DocxPdfPageNumberStampPlanResolver.resolve(docx, renderProfile),
-                () -> documentArtifactPipeline.finalizeArtifact(
-                        docx,
-                        outputFormat,
-                        encryption,
-                        renderProfile
-                )
+        DocumentArtifactPipeline.GeneratedArtifact artifact = documentArtifactPipeline.finalizeArtifact(
+                docx,
+                outputFormat,
+                encryption,
+                renderProfile
         );
         String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         String storageKey = "generated/" + documentId + "/" + artifact.storageFileName();
@@ -124,13 +119,17 @@ public class DocumentGenerationEngine {
                 artifact.bytes().length,
                 artifact.contentType()
         );
+        List<String> fidelityWarnings = new java.util.ArrayList<>(
+                fidelityValidationService.collectWarningCodesForVersion(version.getId(), template.getMasterId())
+        );
+        fidelityWarnings.addAll(artifact.pipelineWarningCodes());
         return new GeneratedDocument(
                 documentId,
                 storageKey,
                 artifact.bytes(),
                 artifact.contentType(),
                 outputFormat,
-                fidelityValidationService.collectWarningCodesForVersion(version.getId(), template.getMasterId())
+                List.copyOf(fidelityWarnings)
         );
     }
 

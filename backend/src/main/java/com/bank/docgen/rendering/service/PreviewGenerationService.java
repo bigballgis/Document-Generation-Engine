@@ -9,9 +9,7 @@ import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.rendering.DocxAssembler;
-import com.bank.docgen.rendering.DocxPdfPageNumberStampPlanResolver;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
-import com.bank.docgen.rendering.PdfConversionStampPlanContext;
 import com.bank.docgen.rendering.api.FidelityWarningView;
 import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.api.PreviewSummaryView;
@@ -177,14 +175,11 @@ public class PreviewGenerationService {
                     version,
                     CallerRenderOverride.empty()
             );
-            DocumentArtifactPipeline.GeneratedArtifact pdfArtifact = PdfConversionStampPlanContext.runWith(
-                    DocxPdfPageNumberStampPlanResolver.resolve(docx, renderProfile),
-                    () -> documentArtifactPipeline.finalizeArtifact(
-                            docx,
-                            "PDF",
-                            NO_ENCRYPTION,
-                            renderProfile
-                    )
+            DocumentArtifactPipeline.GeneratedArtifact pdfArtifact = documentArtifactPipeline.finalizeArtifact(
+                    docx,
+                    "PDF",
+                    NO_ENCRYPTION,
+                    renderProfile
             );
             String pdfStorageKey = "previews/" + preview.getId() + "/output.pdf";
             objectStoragePort.put(

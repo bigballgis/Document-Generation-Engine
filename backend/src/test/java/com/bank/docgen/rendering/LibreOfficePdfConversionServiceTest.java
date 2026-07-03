@@ -30,12 +30,16 @@ class LibreOfficePdfConversionServiceTest {
     @BeforeEach
     void setUp() throws URISyntaxException {
         properties = new DocgenRenderingProperties();
-        fakeLibreOfficeScript = Path.of(
-                LibreOfficePdfConversionServiceTest.class
-                        .getResource("/scripts/fake-libreoffice.cmd")
-                        .toURI()
-        );
+        fakeLibreOfficeScript = resolveFakeLibreOfficeScript("fake-libreoffice");
         testPool = pdfConversionPool();
+    }
+
+    private static Path resolveFakeLibreOfficeScript(String baseName) throws URISyntaxException {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        String suffix = os.contains("win") ? ".cmd" : ".sh";
+        return Path.of(LibreOfficePdfConversionServiceTest.class
+                .getResource("/scripts/" + baseName + suffix)
+                .toURI());
     }
 
     @AfterEach
@@ -70,7 +74,7 @@ class LibreOfficePdfConversionServiceTest {
         LibreOfficePdfConversionService service = service();
         long tempDirsBefore = countDocgenPdfTempDirs();
 
-        byte[] pdf = service.convert(minimalDocxBytes());
+        byte[] pdf = service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()).pdfBytes();
 
         assertThat(pdf).isNotEmpty();
         assertThat(new String(pdf)).contains("%PDF");
@@ -79,33 +83,25 @@ class LibreOfficePdfConversionServiceTest {
 
     @Test
     void removesTempDirectoryAfterFailedConversion() throws URISyntaxException, IOException {
-        Path failScript = Path.of(
-                LibreOfficePdfConversionServiceTest.class
-                        .getResource("/scripts/fake-libreoffice-fail.cmd")
-                        .toURI()
-        );
+        Path failScript = resolveFakeLibreOfficeScript("fake-libreoffice-fail");
         properties.setLibreOfficeCommand(failScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();
         long tempDirsBefore = countDocgenPdfTempDirs();
 
-        assertThatThrownBy(() -> service.convert(minimalDocxBytes()))
+        assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
                 .isInstanceOf(TemplateValidationException.class);
         assertThat(countDocgenPdfTempDirs()).isEqualTo(tempDirsBefore);
     }
 
     @Test
     void rejectsNonZeroExitCode() throws URISyntaxException, IOException {
-        Path failScript = Path.of(
-                LibreOfficePdfConversionServiceTest.class
-                        .getResource("/scripts/fake-libreoffice-fail.cmd")
-                        .toURI()
-        );
+        Path failScript = resolveFakeLibreOfficeScript("fake-libreoffice-fail");
         properties.setLibreOfficeCommand(failScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();
 
-        assertThatThrownBy(() -> service.convert(minimalDocxBytes()))
+        assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
                 .isInstanceOf(TemplateValidationException.class);
     }
 
@@ -115,7 +111,7 @@ class LibreOfficePdfConversionServiceTest {
         properties.setConversionTimeoutSeconds(1);
         LibreOfficePdfConversionService service = service();
 
-        assertThatThrownBy(() -> service.convert(minimalDocxBytes()))
+        assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
                 .isInstanceOf(TemplateValidationException.class);
     }
 
@@ -139,7 +135,7 @@ class LibreOfficePdfConversionServiceTest {
                     pdfConversionPostProcessor()
             );
 
-            byte[] pdf = service.convert(minimalDocxBytes());
+            byte[] pdf = service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()).pdfBytes();
 
             assertThat(pdf).isNotEmpty();
             assertThat(workerThread.get()).isNotNull();

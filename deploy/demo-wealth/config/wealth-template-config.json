@@ -1,0 +1,15 @@
+{
+  "catalogMarker": "wealth-demo-v1",
+  "groupCode": "WEALTH",
+  "pageNumberingProfile": "GLOBAL_ONLY",
+  "masterLayoutVersion": "wealth-layout-v1-global-page",
+  "templateExternalId": "DEMO-WEALTH-STATEMENT",
+  "templateName": "Private Wealth Investment Statement",
+  "masterDocx": "assets/wealth-statement-master.docx",
+  "generatedCatalogFiles": {
+    "variables": "config/wealth-variables.json",
+    "bindingOverlays": "config/wealth-binding-overlays.json",
+    "demoTestVariables": "config/wealth-demo-test-variables.json",
+    "catalogManifest": "config/wealth-catalog-manifest.json"
+  }
+}

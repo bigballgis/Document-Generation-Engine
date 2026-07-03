@@ -1,9 +1,10 @@
 {
-  "catalogMarker": "fol-exec-demo-v6-hybrid-anchor-ids",
+  "catalogMarker": "fol-exec-demo-v7-dual-page-section-breaks",
   "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
   "masterName": "Meridian Wholesale FOL Master",
-  "masterLayoutVersion": "fol-layout-v4-docx-page-field-pdf-stamp",
-  "masterDescription": "Wholesale FOL master — A4, margins, headers, footers (fol-layout-v4-docx-page-field-pdf-stamp)",
+  "masterLayoutVersion": "fol-layout-v5-dual-page-section-breaks",
+  "masterDescription": "Wholesale FOL master — A4, dual-page footer, section breaks (fol-layout-v5-dual-page-section-breaks)",
   "masterDocx": "assets/wholesale-fol-master.docx",
   "templateExternalId": "CORP-FOL-OFFER",
   "templateName": "Facility Offer Letter (Wholesale Term Facility)",

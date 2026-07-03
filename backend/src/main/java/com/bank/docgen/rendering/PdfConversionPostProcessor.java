@@ -1,5 +1,6 @@
 package com.bank.docgen.rendering;
 
+import com.bank.docgen.authoring.structured.RenderProfile;
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import org.springframework.stereotype.Component;
 
@@ -20,24 +21,43 @@ public class PdfConversionPostProcessor {
         this.pdfConversionPreprocessor = pdfConversionPreprocessor;
     }
 
-    public byte[] prepareDocxForConversion(byte[] docxBytes) {
-        if (!renderingProperties.isPdfPageNumberStampingEnabled()) {
+    public byte[] prepareDocxForConversion(byte[] docxBytes, PdfConversionOptions options) {
+        if (!isStampingEnabled(options)) {
             return docxBytes;
         }
         return pdfConversionPreprocessor.prepareForPdfConversion(docxBytes);
     }
 
-    public byte[] finishPdf(byte[] pdfBytes) {
-        if (!renderingProperties.isPdfPageNumberStampingEnabled()) {
-            return pdfBytes;
+    public PdfPageStampResult finishPdf(byte[] pdfBytes, PdfConversionOptions options) {
+        if (!isStampingEnabled(options)) {
+            return PdfPageStampResult.success(pdfBytes);
         }
-        return finishPdf(pdfBytes, PdfConversionStampPlanContext.get());
+        PdfPageNumberStampPlan plan = options.stampPlan() == null
+                ? PdfPageNumberStampPlan.globalOnly()
+                : options.stampPlan();
+        return PdfPageNumberStamper.stampPageNumbers(pdfBytes, plan);
     }
 
-    public byte[] finishPdf(byte[] pdfBytes, PdfPageNumberStampPlan plan) {
-        if (!renderingProperties.isPdfPageNumberStampingEnabled()) {
-            return pdfBytes;
+    public boolean isStampingEnabled(PdfConversionOptions options) {
+        if (options != null && options.pageNumberStampingEnabled()) {
+            return true;
         }
-        return PdfPageNumberStamper.stampPageNumbers(pdfBytes, plan);
+        return renderingProperties.isPdfPageNumberStampingEnabled();
+    }
+
+    public boolean isStampingEnabled(RenderProfile renderProfile) {
+        if (renderProfile != null && renderProfile.pdfPageNumberStampingEnabled()) {
+            return true;
+        }
+        return renderingProperties.isPdfPageNumberStampingEnabled();
+    }
+
+    public PdfConversionOptions resolveOptions(byte[] docxBytes, RenderProfile renderProfile) {
+        boolean enabled = isStampingEnabled(renderProfile);
+        if (!enabled) {
+            return PdfConversionOptions.stampingDisabled();
+        }
+        PdfPageNumberStampPlan plan = DocxPdfPageNumberStampPlanResolver.resolve(docxBytes, renderProfile);
+        return PdfConversionOptions.stampingEnabled(plan);
     }
 }

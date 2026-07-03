@@ -1,0 +1,16 @@
+{
+  "catalogMarker": "trade-lc-demo-v1",
+  "groupCode": "TRADE",
+  "pageNumberingProfile": "GLOBAL_ONLY",
+  "masterLayoutVersion": "trade-lc-layout-v1-global-page",
+  "templates": [
+    {"externalId": "DEMO-TRADE-LC-NOTICE", "name": "Documentary Credit Advice", "masterDocx": "assets/trade-lc-notice-master.docx"},
+    {"externalId": "DEMO-TRADE-GUARANTEE-NOTICE", "name": "Bank Guarantee Notice", "masterDocx": "assets/trade-guarantee-notice-master.docx"}
+  ],
+  "generatedCatalogFiles": {
+    "variables": "config/trade-lc-variables.json",
+    "bindingOverlays": "config/trade-lc-binding-overlays.json",
+    "demoTestVariables": "config/trade-lc-demo-test-variables.json",
+    "catalogManifest": "config/trade-lc-catalog-manifest.json"
+  }
+}

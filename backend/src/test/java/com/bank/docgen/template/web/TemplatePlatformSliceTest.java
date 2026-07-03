@@ -209,7 +209,7 @@ class TemplatePlatformSliceTest {
         mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/master-style-catalog")
                         .with(authentication(new ManagementAuthentication(templateAuthor))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.catalogVersion").value("1.0"))
+                .andExpect(jsonPath("$.result.catalogVersion").value("1.1"))
                 .andExpect(jsonPath("$.result.entries[0].styleKey").value("BodyText"));
 
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/paste-clean")

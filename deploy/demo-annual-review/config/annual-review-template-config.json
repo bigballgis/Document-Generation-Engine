@@ -1,0 +1,16 @@
+{
+  "catalogMarker": "annual-review-demo-v1",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "masterLayoutVersion": "annual-review-layout-v1-dual-page",
+  "templates": [
+    {"externalId": "DEMO-ANNUAL-REVIEW", "name": "Annual Credit Review", "masterDocx": "assets/annual-review-master.docx"},
+    {"externalId": "DEMO-FACILITY-RENEWAL", "name": "Facility Renewal Letter", "masterDocx": "assets/facility-renewal-master.docx"}
+  ],
+  "generatedCatalogFiles": {
+    "variables": "config/annual-review-variables.json",
+    "bindingOverlays": "config/annual-review-binding-overlays.json",
+    "demoTestVariables": "config/annual-review-demo-test-variables.json",
+    "catalogManifest": "config/annual-review-catalog-manifest.json"
+  }
+}

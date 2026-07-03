@@ -1,0 +1,16 @@
+{
+  "catalogMarker": "credit-limit-demo-v1",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "masterName": "Meridian Credit Limit Master",
+  "masterLayoutVersion": "credit-limit-layout-v1-dual-page",
+  "templateExternalId": "DEMO-CREDIT-LIMIT-CONFIRM",
+  "templateName": "Credit Limit Confirmation",
+  "masterDocx": "assets/credit-limit-master.docx",
+  "generatedCatalogFiles": {
+    "variables": "config/credit-limit-variables.json",
+    "bindingOverlays": "config/credit-limit-binding-overlays.json",
+    "demoTestVariables": "config/credit-limit-demo-test-variables.json",
+    "catalogManifest": "config/credit-limit-catalog-manifest.json"
+  }
+}

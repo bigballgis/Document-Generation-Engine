@@ -1,0 +1,18 @@
+{
+  "catalogMarker": "mortgage-demo-v1",
+  "groupCode": "RETAIL",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "masterName": "Meridian Mortgage Approval Master",
+  "masterLayoutVersion": "mortgage-layout-v1-dual-page",
+  "masterDescription": "Mortgage approval letter with repayment schedule section",
+  "templateExternalId": "DEMO-MORTGAGE-APPROVAL",
+  "templateName": "Residential Mortgage Approval",
+  "templateDescription": "Mortgage approval with repayment schedule tableComponent",
+  "masterDocx": "assets/mortgage-approval-master.docx",
+  "generatedCatalogFiles": {
+    "variables": "config/mortgage-variables.json",
+    "bindingOverlays": "config/mortgage-binding-overlays.json",
+    "demoTestVariables": "config/mortgage-demo-test-variables.json",
+    "catalogManifest": "config/mortgage-catalog-manifest.json"
+  }
+}
