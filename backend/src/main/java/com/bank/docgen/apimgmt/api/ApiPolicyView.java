@@ -16,6 +16,9 @@ public record ApiPolicyView(
         int batchAsyncMaxItems,
         boolean docxEncryptionEnabled,
         boolean pdfEncryptionEnabled,
+        boolean saveGeneratedDocuments,
+        int invocationRecordRetentionDays,
+        int documentRetentionDays,
         Instant updatedAt
 ) {
 }

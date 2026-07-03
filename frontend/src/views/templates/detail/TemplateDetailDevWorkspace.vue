@@ -2,11 +2,15 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import LifecycleCommentDialog from '@/components/common/LifecycleCommentDialog.vue'
+import BatchTestProgressDialog from '@/components/template/BatchTestProgressDialog.vue'
 import TemplateDetailDesignTab from '@/views/templates/detail/TemplateDetailDesignTab.vue'
 import TemplateDetailTestingTab from '@/views/templates/detail/TemplateDetailTestingTab.vue'
 import TemplateDetailApprovalTab from '@/views/templates/detail/TemplateDetailApprovalTab.vue'
+import * as templatesApi from '@/api/templates'
+import { useSubmitTestEligibility } from '@/composables/useSubmitTestEligibility'
 import {
   TEMPLATE_DEV_WORKSPACE_TABS,
   buildDevWorkspaceQuery,
@@ -103,15 +107,31 @@ const activeWorkspaceTab = ref<TemplateDevWorkspaceTab>(
 const testDataSetCount = ref(0)
 const submitForTestDialogOpen = ref(false)
 
+// T09: Batch test dialog state
+const batchDialogVisible = ref(false)
+const batchDialogRunId = ref('')
+const batchDialogStreamUrl = ref('')
+const batchRunning = ref(false)
+
+// T10: Submit eligibility composable (only load when templateId is known)
+  const { isEligible, tooltipContent, refresh: refreshEligibility } = useSubmitTestEligibility(
+  props.templateId,
+)
+
+const submitTooltipContent = computed(() => {
+  if (testDataSetCount.value === 0) {
+    return t('templates.testPreview.workflow.noDataSetsTooltip')
+  }
+  return tooltipContent.value
+})
+
+const submitTooltipDisabled = computed(() => isEligible.value && testDataSetCount.value > 0)
+
 const workspaceTabs = computed(() =>
   TEMPLATE_DEV_WORKSPACE_TABS.map((name) => ({
     name,
     labelKey: templateDevWorkspaceTabLabelKey(name),
   })),
-)
-
-const canRunSelected = computed(
-  () => props.showTestGenerate && Boolean(props.selectedTestDataSetId) && !props.generatingPreview,
 )
 
 watch(
@@ -151,6 +171,49 @@ function handleSubmitForTestConfirm(comment: string) {
 function requestSubmitForTestDialog() {
   submitForTestDialogOpen.value = true
 }
+
+async function handleRunFullTest() {
+  try {
+    await ElMessageBox.confirm(
+      t('templates.batchTest.confirmMessage', { count: testDataSetCount.value }),
+      t('templates.batchTest.confirmTitle'),
+      {
+        confirmButtonText: t('templates.batchTest.confirmButton'),
+        cancelButtonText: t('templates.batchTest.cancelButton'),
+        type: 'info',
+      },
+    )
+  } catch {
+    return
+  }
+
+  batchRunning.value = true
+  try {
+    const result = await templatesApi.runBatchTest(props.templateId)
+    batchDialogRunId.value = result.runId
+    batchDialogStreamUrl.value = result.streamUrl
+    batchDialogVisible.value = true
+  } catch {
+    ElMessage.error(t('templates.batchTest.error.start'))
+  } finally {
+    batchRunning.value = false
+  }
+}
+
+function handleBatchCompleted() {
+  emit('test-generate-batch')
+  void refreshEligibility()
+}
+
+watch(
+  activeWorkspaceTab,
+  (tab) => {
+    if (tab === 'testing') {
+      void refreshEligibility()
+    }
+  },
+  { immediate: false },
+)
 </script>
 
 <template>
@@ -158,33 +221,43 @@ function requestSubmitForTestDialog() {
     <WorkspaceTabShell v-model="activeWorkspaceTab" :tabs="workspaceTabs">
       <template #actions>
         <template v-if="activeWorkspaceTab === 'testing'">
-          <el-button-group v-if="showTestGenerate">
-            <el-button
-              type="primary"
-              :loading="generatingPreview"
-              :disabled="!canRunSelected"
-              @click="emit('test-generate', selectedTestDataSetId ?? undefined)"
-            >
-              {{ t('templates.testPreview.workflow.runSelected') }}
-            </el-button>
-            <el-button
-              :loading="batchTesting"
-              :disabled="testDataSetCount === 0 || generatingPreview"
-              @click="emit('test-generate-batch')"
-            >
-              {{ t('templates.testPreview.workflow.runAll') }}
-            </el-button>
-          </el-button-group>
-
-          <el-button
-            v-if="showDraftActions"
-            type="success"
-            :loading="submitting"
-            :disabled="testDataSetCount === 0"
-            @click="requestSubmitForTestDialog"
+          <el-tooltip
+            v-if="showTestGenerate"
+            :content="testDataSetCount === 0 ? t('templates.testPreview.workflow.noDataSetsTooltip') : ''"
+            :disabled="testDataSetCount > 0"
+            placement="bottom"
           >
-            {{ t('templates.lifecycle.submitTest') }}
-          </el-button>
+            <span>
+              <el-button
+                type="primary"
+                :loading="batchRunning"
+                :disabled="testDataSetCount === 0"
+                @click="handleRunFullTest"
+              >
+                {{ t('templates.testPreview.workflow.runAll') }}
+              </el-button>
+            </span>
+          </el-tooltip>
+
+          <el-tooltip
+            v-if="showDraftActions"
+            :content="submitTooltipContent"
+            :disabled="submitTooltipDisabled"
+            placement="bottom"
+            effect="light"
+            popper-class="submit-test-tooltip"
+          >
+            <span>
+              <el-button
+                type="success"
+                :loading="submitting"
+                :disabled="!isEligible || testDataSetCount === 0"
+                @click="requestSubmitForTestDialog"
+              >
+                {{ t('templates.lifecycle.submitTest') }}
+              </el-button>
+            </span>
+          </el-tooltip>
 
           <template v-if="showTestingDecisionActions">
             <el-button type="success" :loading="submitting" @click="emit('test-decision', 'PASSED')">
@@ -310,6 +383,16 @@ function requestSubmitForTestDialog() {
       :confirm-label="t('templates.lifecycle.submitTest')"
       :loading="submitting"
       @confirm="handleSubmitForTestConfirm"
+    />
+
+    <BatchTestProgressDialog
+      v-if="batchDialogVisible"
+      v-model="batchDialogVisible"
+      :template-id="templateId"
+      :run-id="batchDialogRunId"
+      :stream-url="batchDialogStreamUrl"
+      :data-set-count="testDataSetCount"
+      @completed="handleBatchCompleted"
     />
   </section>
 </template>

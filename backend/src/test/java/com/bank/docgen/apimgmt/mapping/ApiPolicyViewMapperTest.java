@@ -55,6 +55,9 @@ class ApiPolicyViewMapperTest {
         assertThat(view.batchAsyncMaxItems()).isEqualTo(10000);
         assertThat(view.docxEncryptionEnabled()).isTrue();
         assertThat(view.pdfEncryptionEnabled()).isFalse();
+        assertThat(view.saveGeneratedDocuments()).isTrue();
+        assertThat(view.invocationRecordRetentionDays()).isEqualTo(90);
+        assertThat(view.documentRetentionDays()).isEqualTo(30);
         assertThat(view.updatedAt()).isEqualTo(policy.getUpdatedAt());
     }
 
@@ -66,8 +69,8 @@ class ApiPolicyViewMapperTest {
         ApiPolicyView view = mapper.toPolicyView(policy);
 
         assertThat(view.allowedAdGroups()).isEmpty();
-        assertThat(view.outputFormats()).containsExactly("DOCX");
-        assertThat(view.outputModes()).containsExactly("SYNC_STREAM");
+        assertThat(view.outputFormats()).containsExactly("DOCX", "PDF");
+        assertThat(view.outputModes()).containsExactly("SYNC_STREAM", "SYNC_DOWNLOAD_URL", "ASYNC_TASK");
     }
 
     @Test

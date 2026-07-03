@@ -1,14 +1,14 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **P12** (2026-07-03 — **P12-TEMPLATE-TESTING-OVERHAUL In Progress**). **Active slice:** **P12-TEMPLATE-TESTING-OVERHAUL** — activated 2026-07-03; 模板测试页全量改造; BDD spec ready; 13 tasks T01–T13; Flyway V41–V42. **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02). Prior slice: **P12-UIUX-DEEP-REFACTOR Done** (2026-07-03; frontend UIUX deep refactor, 14 tasks A–E, **606** Vitest; OPT-G3 resolved).
+**Active formal phase:** **P12** (2026-07-03 — **P12-API-PACKAGE-ACCESS-INVOCATION In Progress**; BDD ready; T01–T02 next). **Prior slice:** **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03; 模板测试页全量改造; T01–T13; Flyway V41–V42; backend `mvn verify`, frontend **643** Vitest, Playwright T13 **8+1** + UIUX manifest **PASS**). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02). Prior slice: **P12-UIUX-DEEP-REFACTOR Done** (2026-07-03; frontend UIUX deep refactor, 14 tasks A–E, **606** Vitest; OPT-G3 resolved).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
 UX-A…UX-F interaction/upgradeability tasks (same plan) run as optimization waves
 against the existing implementation. **UX Wave A** (role gating + half-built interactions)
 re-earned Done on 2026-06-23; **UX Wave B** (workbenches + polish) Done (2026-06-23).
-**P12 In Progress** — active slice **P12-TEMPLATE-TESTING-OVERHAUL In Progress** (activated 2026-07-03); prior slice **P12-UIUX-DEEP-REFACTOR Done** (2026-07-03; frontend UIUX deep refactor, 14 tasks A–E; prior: **P12-AUD-M02 Done** 2026-07-01).
+**P12 In Progress** (2026-07-03) — active slice **P12-API-PACKAGE-ACCESS-INVOCATION** (BDD ready; T01–T02 next). Prior slice **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03; T01–T13; backend `mvn verify`, frontend **643** Vitest, Playwright + UIUX **PASS**); prior **P12-UIUX-DEEP-REFACTOR Done** (2026-07-03; 14 tasks A–E; prior: **P12-AUD-M02 Done** 2026-07-01).
 **P16–P20 (deep-review functional gaps, 2026-06-23):** P16 lifecycle governance **Done**;
 P17 per-domain API policy **Done** (2026-06-25; Wave 3; T01–T09 + COR-F18);
 P18 structured authoring **Done** (2026-06-28; T01–T10); **P19 verifiability/publish-gate Done**
@@ -46,7 +46,7 @@ upstream systems invoke the dynamic API.
 | P9 | Production readiness | P0–P8 | Security scans, observability, deployment evidence, release gates | Done |
 | P10 | Runtime document download | P9 | Secure download with secondary auth and 15-minute expiry | Done |
 | P11 | Batch & async generation | P10 | Sync batch, async task query/cancel | Done |
-| P12 | Deferred enhancements | P0–P11 | Catch-all; active **P12-TEMPLATE-TESTING-OVERHAUL**; queued **P12-API-PACKAGE-ACCESS-INVOCATION** (BDD ready 2026-07-03) | In Progress |
+| P12 | Deferred enhancements | P0–P11 | Catch-all; active slice **P12-API-PACKAGE-ACCESS-INVOCATION In Progress** (2026-07-03; BDD ready; T01–T02 next); prior **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03) | In Progress |
 | P13 | Identity & group administration | P1 | Global/group admins manage users & groups via management API + UI, with fail-closed escalation protection, audit, and green gates | Done |
 | P14 | Confirmed large domains | P2–P8 | Clause/content modules, collaboration to-dos + timeout escalation, template export/import (UX-G) | Done (2026-06-27; T01–T03 + E2E/UIUX/architecture gates; backend **481**, frontend **235+**) |
 | P15 | Kubernetes deployment & container hardening | P9 | Distroless non-root read-only containers, Helm/manifests for app workloads, ConfigMap/Secret, NGINX Ingress + cert-manager TLS, default-deny NetworkPolicy, HPA (CPU/mem + custom), /healthz+/readyz probes, blue-green + manual approval/rollback, CI manifest validation (ADR-0030) | Done (2026-06-27; T01–T10) |
@@ -59,8 +59,9 @@ upstream systems invoke the dynamic API.
 
 > **P21 vs P12:** P21 is **Done** (2026-06-30). AUD-B10 evidence-checklist gap **resolved**
 > under **P12-AUD-B10 Done** (2026-07-01); AUD-M02 role constants gap **resolved** under
-> **P12-AUD-M02 Done** (2026-07-01); P12 active slice **P12-TEMPLATE-TESTING-OVERHAUL In Progress** (activated 2026-07-03). Do not reopen
+> **P12-AUD-M02 Done** (2026-07-01); **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03; T01–T13). **P12 In Progress** — active slice **P12-API-PACKAGE-ACCESS-INVOCATION** (2026-07-03; T01–T02 next). Do not reopen
 > P21 phase status. Detail:
+> [detail/P12-api-package-access-invocation-records.md](./detail/P12-api-package-access-invocation-records.md),
 > [detail/P12-deferred-enhancements.md](./detail/P12-deferred-enhancements.md),
 > [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
 

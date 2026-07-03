@@ -24,6 +24,7 @@ import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.apimgmt.service.ApiPolicyMaterializationService;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import java.time.Instant;
 import java.util.List;
@@ -65,6 +66,8 @@ class TemplateLifecycleServiceTest {
     @Mock
     private ApprovalSubStateResolver approvalSubStateResolver;
     @Mock
+    private ApiPolicyMaterializationService apiPolicyMaterializationService;
+    @Mock
     private ApiPolicyRepository apiPolicyRepository;
 
     private TemplateLifecycleService service;
@@ -88,6 +91,7 @@ class TemplateLifecycleServiceTest {
                 collaborationWorkItemWriter,
                 renderProfileService,
                 approvalSubStateResolver,
+                apiPolicyMaterializationService,
                 apiPolicyRepository
         );
         author = new ManagementSessionClaims(

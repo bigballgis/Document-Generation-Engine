@@ -7,10 +7,10 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Active formal phase: None** (2026-07-03 — P12 catch-all **Not Started** at phase level).
-**Active slice: None** — **P12-UIUX-DEEP-REFACTOR Done** (2026-07-03; frontend UIUX deep refactor, 14 tasks A–E, **606** Vitest; OPT-G3 resolved).
+**Active formal phase: P12** (2026-07-03 — **P12-API-PACKAGE-ACCESS-INVOCATION In Progress**; BDD ready; T01–T02 next).
+**Active slice: P12-API-PACKAGE-ACCESS-INVOCATION** (prior **P12-TEMPLATE-TESTING-OVERHAUL Done** 2026-07-03; T01–T13; backend `mvn verify`, frontend **643** Vitest, Playwright + UIUX **PASS**).
 **P21 Done** (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**,
-frontend **511** Vitest; **AUD-B10 resolved** via P12-AUD-B10; **AUD-M02 resolved** via P12-AUD-M02). Latest gates: frontend **606** Vitest (2026-07-03). See
+frontend **511** Vitest; **AUD-B10 resolved** via P12-AUD-B10; **AUD-M02 resolved** via P12-AUD-M02). Latest gates: backend `mvn verify` BUILD SUCCESS + frontend **643** Vitest (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL). See
 [execution-sync-ledger.md](./execution-sync-ledger.md).
 
 ## Layer model
@@ -52,7 +52,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P9 | Production readiness | [detail/P9-production-readiness.md](detail/P9-production-readiness.md) | Done |
 | P10 | Runtime document download | [detail/P10-runtime-download.md](detail/P10-runtime-download.md) | Done |
 | P11 | Batch & async generation | [detail/P11-batch-async.md](detail/P11-batch-async.md) | Done |
-| P12 | Deferred enhancements | [detail/P12-deferred-enhancements.md](detail/P12-deferred-enhancements.md) · [API package access (queued)](detail/P12-api-package-access-invocation-records.md) | In Progress (**P12-TEMPLATE-TESTING-OVERHAUL** active); **P12-API-PACKAGE-ACCESS-INVOCATION** BDD ready, Not Started |
+| P12 | Deferred enhancements | [detail/P12-deferred-enhancements.md](detail/P12-deferred-enhancements.md) · [API package access (active)](detail/P12-api-package-access-invocation-records.md) | **In Progress** — active slice **P12-API-PACKAGE-ACCESS-INVOCATION** (2026-07-03; BDD ready; T01–T02 next); prior **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03) |
 | P13 | Identity & group administration | [detail/P13-identity-group-administration.md](detail/P13-identity-group-administration.md) | Done |
 | P14 | Confirmed large domains | [detail/P14-confirmed-large-domains.md](detail/P14-confirmed-large-domains.md) | Done (2026-06-27) |
 | P15 | Kubernetes deployment & container hardening | [detail/P15-kubernetes-deployment-container-hardening.md](detail/P15-kubernetes-deployment-container-hardening.md) | Done (2026-06-27; T01–T10) |
@@ -78,11 +78,13 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P15 | K8s Helm, probes, blue-green, CI gates | [deploy/README.md](../deploy/README.md); helm-validate green |
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
-**Active phase: None** (2026-07-03 — P12 catch-all idle at formal phase level). **Active slice: None** — **P12-UIUX-DEEP-REFACTOR Done** (2026-07-03; 14 tasks A–E, **606** Vitest, OPT-G3 resolved). **P21 Done** — closure evidence in
+**Active phase: P12** (2026-07-03 — **P12-API-PACKAGE-ACCESS-INVOCATION In Progress**). **Active slice:** **P12-API-PACKAGE-ACCESS-INVOCATION** (BDD ready; T01–T02 next). Prior **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03). **P21 Done** — closure evidence in
 [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 
+**In-flight work:**
+- **P12-API-PACKAGE-ACCESS-INVOCATION** — package-first API access + invocation records (BDD **ready**; [plan](detail/P12-api-package-access-invocation-records.md); **T01–T02 next**)
+
 **Open backlog (non-active slices):**
-- **P12-API-PACKAGE-ACCESS-INVOCATION** — package-first API access + invocation records (BDD **ready** 2026-07-03; [plan](detail/P12-api-package-access-invocation-records.md))
 - **OPT-D / M9** — architecture/security debt (Redisson, QueryDSL expansion, intranet SCA) — see [optimization-plan.md](./optimization-plan.md)
 - **OPT-G6 (partial)** — brand rename Done via P12-UIUX-DEEP-REFACTOR A1; remaining aria-labels/locale-aware dates deferred
 - ~~**Phase B** — multi-revision master history API~~ → **Done (P2-T06, 2026-07-01)** — see [P2 detail](detail/P2-master-management.md) § P2-T06 and [catalog-navigation-ux.md](../product/catalog-navigation-ux.md)

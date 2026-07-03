@@ -257,7 +257,7 @@ public class TemplateImportService {
                 policy = existing.get();
                 policy.replaceConfiguration(
                         allowedJson,
-                        null,
+                        policy.getDefaultRouteReleaseVersion(),
                         outputFormatsJson,
                         outputModesJson,
                         policySnapshot.batchEnabled(),

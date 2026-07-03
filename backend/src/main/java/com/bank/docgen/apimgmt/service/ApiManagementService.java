@@ -10,6 +10,7 @@ import com.bank.docgen.apimgmt.api.SaveAdGroupsRequest;
 import com.bank.docgen.apimgmt.api.SaveBatchLimitsRequest;
 import com.bank.docgen.apimgmt.api.SaveDefaultRouteRequest;
 import com.bank.docgen.apimgmt.api.SaveEncryptionPolicyRequest;
+import com.bank.docgen.apimgmt.api.SaveInvocationRetentionRequest;
 import com.bank.docgen.apimgmt.api.SaveOutputPolicyRequest;
 import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
 import com.bank.docgen.apimgmt.domain.ApiCredentialStatus;
@@ -288,6 +289,44 @@ public class ApiManagementService {
     }
 
     @Transactional
+    public ApiPolicyView saveInvocationRetentionDomain(
+            UUID templateId,
+            SaveInvocationRetentionRequest request,
+            ManagementSessionClaims session
+    ) {
+        ApiPolicyEntity policy = requirePolicyHead(templateId, session);
+        ApiPolicyRetentionValidator.validate(
+                request.saveGeneratedDocuments(),
+                request.invocationRecordRetentionDays(),
+                request.documentRetentionDays()
+        );
+        if (retentionChanged(policy, request) && !request.confirmed()) {
+            throw new TemplateValidationException("api.error.apimgmt.policyImpactConfirmationRequired");
+        }
+        PolicyUpdateAuditDetail auditDetail = new PolicyUpdateAuditDetail(
+                List.of("INVOCATION_RETENTION: affects new invocations only"),
+                List.of(),
+                List.of(),
+                List.of("Retention changes apply to new invocations only"),
+                request.confirmed(),
+                false,
+                null
+        );
+        return saveSingleDomain(
+                templateId,
+                session,
+                List.of("INVOCATION_RETENTION"),
+                existing -> existing.updateRetentionDomain(
+                        request.saveGeneratedDocuments(),
+                        request.invocationRecordRetentionDays(),
+                        request.documentRetentionDays(),
+                        session.username()
+                ),
+                auditDetail
+        );
+    }
+
+    @Transactional
     public ApiPolicyView saveDefaultRouteDomain(
             UUID templateId,
             SaveDefaultRouteRequest request,
@@ -325,6 +364,12 @@ public class ApiManagementService {
         if (version.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED) {
             throw new TemplateValidationException("api.error.apimgmt.defaultRouteTargetNotCallable");
         }
+    }
+
+    private static boolean retentionChanged(ApiPolicyEntity policy, SaveInvocationRetentionRequest request) {
+        return policy.isSaveGeneratedDocuments() != request.saveGeneratedDocuments()
+                || policy.getInvocationRecordRetentionDays() != request.invocationRecordRetentionDays()
+                || policy.getDocumentRetentionDays() != request.documentRetentionDays();
     }
 
     private ApiPolicyEntity requirePolicyHead(UUID templateId, ManagementSessionClaims session) {

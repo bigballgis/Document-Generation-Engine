@@ -1,6 +1,7 @@
 package com.bank.docgen.template.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.apimgmt.service.ApiPolicyMaterializationService;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
@@ -52,6 +53,7 @@ public class TemplateLifecycleService {
     private final CollaborationWorkItemWriter collaborationWorkItemWriter;
     private final RenderProfileService renderProfileService;
     private final ApprovalSubStateResolver approvalSubStateResolver;
+    private final ApiPolicyMaterializationService apiPolicyMaterializationService;
     private final ApiPolicyRepository apiPolicyRepository;
 
     public TemplateLifecycleService(
@@ -68,6 +70,7 @@ public class TemplateLifecycleService {
             CollaborationWorkItemWriter collaborationWorkItemWriter,
             RenderProfileService renderProfileService,
             ApprovalSubStateResolver approvalSubStateResolver,
+            ApiPolicyMaterializationService apiPolicyMaterializationService,
             ApiPolicyRepository apiPolicyRepository
     ) {
         this.templateService = templateService;
@@ -83,6 +86,7 @@ public class TemplateLifecycleService {
         this.collaborationWorkItemWriter = collaborationWorkItemWriter;
         this.renderProfileService = renderProfileService;
         this.approvalSubStateResolver = approvalSubStateResolver;
+        this.apiPolicyMaterializationService = apiPolicyMaterializationService;
         this.apiPolicyRepository = apiPolicyRepository;
     }
 
@@ -145,6 +149,7 @@ public class TemplateLifecycleService {
         if (request.decision() == LifecycleDecision.APPROVED) {
             transition(template, TemplateLifecycleStatus.PENDING_RELEASE, LifecycleAction.RECORD_APPROVAL_DECISION,
                     request.decision(), persistedComment, session);
+            apiPolicyMaterializationService.ensureApiPolicySkeleton(templateId, session.username());
             String orchestrator = collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, session)
                     .orElseGet(template::getCreatedBy);
             collaborationWorkItemWriter.upsertPendingReleaseWorkItem(template, orchestrator, session);
@@ -162,6 +167,8 @@ public class TemplateLifecycleService {
     public TemplateDetailView publish(UUID templateId, PublishTemplateRequest request, ManagementSessionClaims session) {
         TemplateEntity template = requirePublishableTemplate(templateId, session);
         requireStatus(template, TemplateLifecycleStatus.PENDING_RELEASE);
+        apiPolicyMaterializationService.ensureApiPolicyOnPublish(
+                templateId, request.releaseVersion(), session.username());
         publishGateService.assertReady(templateId, session);
         template.setReleaseVersion(request.releaseVersion());
         template.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);

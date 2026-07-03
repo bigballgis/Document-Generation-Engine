@@ -476,6 +476,7 @@ export interface CoverageSummary {
 
 export interface TestDataSet {
   testDataSetId: string
+  externalId?: string
   templateId: string
   name: string
   description: string | null
@@ -617,4 +618,41 @@ export interface ImportTemplatePayload {
 export interface TemplateImportResult {
   importSummary: TemplateImportSummary
   template: TemplateDetail
+}
+
+export interface AsyncPreviewStarted {
+  previewId: string
+  streamUrl: string
+}
+
+export interface BatchTestStarted {
+  runId: string
+  streamUrl: string
+}
+
+export interface SubmitTestEligibility {
+  eligible: boolean
+  hasValidTestResult: boolean
+  allSamplesSucceeded: boolean
+  coverageGatePassed: boolean
+  failedDataSetNames: string[]
+  uncoveredAnchors: string[]
+  uncoveredVariables: string[]
+}
+
+export type BatchTestRunStatus = 'RUNNING' | 'COMPLETED' | 'FAILED' | 'INVALIDATED'
+
+export interface BatchTestRunSummary {
+  runId: string
+  createdAt: string
+  createdBy: string
+  status: BatchTestRunStatus
+  totalSamples: number
+  succeededCount: number
+  failedCount: number
+  anchorCoveragePct: number | null
+  variableCoveragePct: number | null
+  sampleCoveragePct: number | null
+  gatePassed: boolean | null
+  invalidatedAt: string | null
 }

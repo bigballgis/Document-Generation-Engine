@@ -1,189 +1,98 @@
 package com.bank.docgen.template.service;
 
-
-
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
-
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
-
 import com.bank.docgen.authorization.management.api.PageView;
-
 import com.bank.docgen.authorization.management.service.GroupAccessService;
-
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
-
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
-
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-
 import com.bank.docgen.template.api.TemplateDetailView;
-
 import com.bank.docgen.template.api.TemplateDevVersionCreatedView;
-
 import com.bank.docgen.template.api.TemplateVersionLineDetailView;
-
 import com.bank.docgen.template.api.TemplateVersionLineSummaryView;
-
 import com.bank.docgen.template.domain.ApprovalSubState;
-
 import com.bank.docgen.template.domain.LifecycleAction;
-
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
-
 import com.bank.docgen.template.domain.TemplateVersionLineKind;
-
 import com.bank.docgen.template.mapping.TemplateViewMapper;
-
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
-
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
-
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceEntity;
-
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceRepository;
-
 import com.bank.docgen.template.persistence.TemplateEntity;
-
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
-
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
-
 import com.bank.docgen.template.persistence.TemplateRepository;
-
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
-
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
-
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
-
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
-
 import java.time.Instant;
-
 import java.util.UUID;
-
 import org.springframework.http.HttpStatus;
-
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 
-
-
 @Service
-
 public class TemplateVersionLineService {
-
-
-
     private final TemplateService templateService;
-
     private final TemplateRepository templateRepository;
-
     private final TemplateVersionRepository templateVersionRepository;
-
     private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
-
     private final VariableSchemaRepository variableSchemaRepository;
-
     private final AnchorBindingRepository anchorBindingRepository;
-
     private final TemplateContentModuleReferenceRepository contentModuleReferenceRepository;
-
     private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
-
     private final ApiPolicyRepository apiPolicyRepository;
-
     private final TemplateViewMapper templateViewMapper;
-
     private final ApprovalSubStateResolver approvalSubStateResolver;
-
     private final GroupAccessService groupAccessService;
-
     private final MessageResolver messageResolver;
-
-
-
     public TemplateVersionLineService(
-
             TemplateService templateService,
-
             TemplateRepository templateRepository,
-
             TemplateVersionRepository templateVersionRepository,
-
             TemplateCurrentVersionResolver templateCurrentVersionResolver,
-
             VariableSchemaRepository variableSchemaRepository,
-
             AnchorBindingRepository anchorBindingRepository,
-
             TemplateContentModuleReferenceRepository contentModuleReferenceRepository,
-
             TemplateLifecycleRecordRepository lifecycleRecordRepository,
-
             ApiPolicyRepository apiPolicyRepository,
-
             TemplateViewMapper templateViewMapper,
-
             ApprovalSubStateResolver approvalSubStateResolver,
-
             GroupAccessService groupAccessService,
-
             MessageResolver messageResolver
 
     ) {
-
         this.templateService = templateService;
-
         this.templateRepository = templateRepository;
-
         this.templateVersionRepository = templateVersionRepository;
-
         this.templateCurrentVersionResolver = templateCurrentVersionResolver;
-
         this.variableSchemaRepository = variableSchemaRepository;
-
         this.anchorBindingRepository = anchorBindingRepository;
-
         this.contentModuleReferenceRepository = contentModuleReferenceRepository;
-
         this.lifecycleRecordRepository = lifecycleRecordRepository;
-
         this.apiPolicyRepository = apiPolicyRepository;
-
         this.templateViewMapper = templateViewMapper;
-
         this.approvalSubStateResolver = approvalSubStateResolver;
-
         this.groupAccessService = groupAccessService;
-
         this.messageResolver = messageResolver;
 
     }
 
-
-
     @Transactional(readOnly = true)
-
     public PageView<TemplateVersionLineSummaryView> list(
-
             UUID templateId,
-
             int page,
-
             int size,
 
             ManagementSessionClaims session
 
     ) {
-
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
-
         String defaultRoute = defaultRouteReleaseVersion(templateId);
-
         boolean canAuthor = groupAccessService.canAuthorTemplates(session);
-
         boolean hasInFlight = templateCurrentVersionResolver.hasInFlightDevVersion(templateId);
 
         var rows = templateCurrentVersionResolver.listVersionLinesOrdered(templateId).stream()
@@ -196,30 +105,19 @@ public class TemplateVersionLineService {
 
     }
 
-
-
     @Transactional(readOnly = true)
-
     public TemplateVersionLineDetailView get(
-
             UUID templateId,
-
             UUID versionLineId,
 
             ManagementSessionClaims session
 
     ) {
-
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
-
         TemplateVersionEntity version = requireDevVersionLine(templateId, versionLineId);
-
         String defaultRoute = defaultRouteReleaseVersion(templateId);
-
         boolean canAuthor = groupAccessService.canAuthorTemplates(session);
-
         boolean hasInFlight = templateCurrentVersionResolver.hasInFlightDevVersion(templateId);
-
         TemplateVersionLineSummaryView summary = toSummary(
 
                 version, template, defaultRoute, canAuthor, hasInFlight
@@ -247,47 +145,36 @@ public class TemplateVersionLineService {
                 summary.defaultRouteTarget(),
 
                 summary.cloneable(),
-
                 variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(version.getId()).stream()
 
                         .map(templateViewMapper::toVariableView)
 
                         .toList(),
-
                 anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(version.getId()).stream()
 
                         .map(templateViewMapper::toBindingView)
 
                         .toList(),
-
                 templateViewMapper.loadRules(version)
 
         );
 
     }
 
-
-
     @Transactional(readOnly = true)
-
     public TemplateDetailView getDevDetail(
-
             UUID templateId,
-
             UUID devVersionId,
 
             ManagementSessionClaims session
 
     ) {
-
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
-
         TemplateVersionEntity version = requireDevVersionLine(templateId, devVersionId);
 
         if (!templateCurrentVersionResolver.isInFlight(version)) {
 
             throw new TemplateGovernanceException(
-
                     ApiErrorCodes.TEMPLATE_VERSION_IMMUTABLE,
 
                     "api.error.template.versionImmutable",
@@ -302,22 +189,15 @@ public class TemplateVersionLineService {
 
     }
 
-
-
     @Transactional(readOnly = true)
-
     public TemplateDetailView getReleaseDetail(
-
             UUID templateId,
-
             String releaseVersion,
 
             ManagementSessionClaims session
 
     ) {
-
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
-
         TemplateVersionEntity version = templateVersionRepository
 
                 .findByTemplateIdAndReleaseVersion(templateId, releaseVersion)
@@ -328,26 +208,19 @@ public class TemplateVersionLineService {
 
     }
 
-
-
     @Transactional
-
     public TemplateDevVersionCreatedView cloneReleaseVersion(
-
             UUID templateId,
-
             String releaseVersion,
 
             ManagementSessionClaims session
 
     ) {
-
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
 
         if (templateCurrentVersionResolver.hasInFlightDevVersion(templateId)) {
 
             throw new TemplateGovernanceException(
-
                     ApiErrorCodes.TEMPLATE_DEV_LINE_IN_FLIGHT,
 
                     "api.error.template.devLineInFlight",
@@ -357,7 +230,6 @@ public class TemplateVersionLineService {
             );
 
         }
-
         TemplateVersionEntity source = templateVersionRepository
 
                 .findByTemplateIdAndReleaseVersion(templateId, releaseVersion)
@@ -369,9 +241,6 @@ public class TemplateVersionLineService {
             throw new TemplateNotFoundException();
 
         }
-
-
-
         TemplateVersionEntity target = new TemplateVersionEntity(UUID.randomUUID(), templateId, session.username());
 
         target.setDevVersionNumber(templateCurrentVersionResolver.maxDevVersionNumber(templateId) + 1);
@@ -383,7 +252,6 @@ public class TemplateVersionLineService {
         target.setRenderProfileVersion(source.getRenderProfileVersion());
 
         target.setRenderProfileJson(source.getRenderProfileJson());
-
         templateVersionRepository.save(target);
 
         copyVariables(source, target);
@@ -391,21 +259,12 @@ public class TemplateVersionLineService {
         copyBindings(source, target);
 
         copyContentModuleReferences(source, target);
-
-
-
         TemplateLifecycleStatus fromStatus = template.getLifecycleStatus();
-
         template.setLifecycleStatus(TemplateLifecycleStatus.DRAFT);
-
         template.setUpdatedBy(session.username());
-
         templateRepository.save(template);
 
-
-
         recordCloneLifecycle(
-
                 template,
 
                 fromStatus,
@@ -420,8 +279,6 @@ public class TemplateVersionLineService {
 
         );
 
-
-
         return new TemplateDevVersionCreatedView(
 
                 target.getId().toString(),
@@ -432,28 +289,20 @@ public class TemplateVersionLineService {
 
     }
 
-
-
     @Transactional
-
     public TemplateDetailView abandonInFlightDev(
-
             UUID templateId,
-
             UUID devVersionId,
 
             ManagementSessionClaims session
 
     ) {
-
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
-
         TemplateVersionEntity version = requireActiveDevVersionLine(templateId, devVersionId);
 
         if (!templateCurrentVersionResolver.isInFlight(version)) {
 
             throw new TemplateGovernanceException(
-
                     ApiErrorCodes.TEMPLATE_VERSION_IMMUTABLE,
 
                     "api.error.template.versionImmutable",
@@ -463,33 +312,20 @@ public class TemplateVersionLineService {
             );
 
         }
-
-
-
         TemplateLifecycleStatus fromStatus = template.getLifecycleStatus();
 
         version.setDeletedAt(Instant.now());
-
         templateVersionRepository.save(version);
-
-
-
         TemplateLifecycleStatus toStatus = templateCurrentVersionResolver.findLatestPublishedVersion(templateId)
 
                 .map(TemplateVersionEntity::getLifecycleStatus)
 
                 .orElse(TemplateLifecycleStatus.DRAFT);
-
         template.setLifecycleStatus(toStatus);
-
         template.setUpdatedBy(session.username());
-
         templateRepository.save(template);
 
-
-
         recordAbandonLifecycle(
-
                 template,
 
                 fromStatus,
@@ -504,38 +340,24 @@ public class TemplateVersionLineService {
 
         );
 
-
-
         return templateService.toDetail(template);
 
     }
-
-
-
     private void copyVariables(TemplateVersionEntity source, TemplateVersionEntity target) {
 
         for (VariableSchemaEntity variable : variableSchemaRepository
 
                 .findByTemplateVersionIdOrderByVariableKeyAsc(source.getId())) {
-
             variableSchemaRepository.save(new VariableSchemaEntity(
-
                     UUID.randomUUID(),
 
                     target.getId(),
-
                     variable.getVariableKey(),
-
                     variable.getVariableType(),
-
                     variable.isRequired(),
-
                     variable.getDefaultValue(),
-
                     variable.getEnumValues(),
-
                     variable.getDescription(),
-
                     variable.getComputeExpression()
 
             ));
@@ -543,17 +365,12 @@ public class TemplateVersionLineService {
         }
 
     }
-
-
-
     private void copyBindings(TemplateVersionEntity source, TemplateVersionEntity target) {
 
         for (AnchorBindingEntity binding : anchorBindingRepository
 
                 .findByTemplateVersionIdOrderByAnchorIdAsc(source.getId())) {
-
             anchorBindingRepository.save(new AnchorBindingEntity(
-
                     UUID.randomUUID(),
 
                     target.getId(),
@@ -571,17 +388,12 @@ public class TemplateVersionLineService {
         }
 
     }
-
-
-
     private void copyContentModuleReferences(TemplateVersionEntity source, TemplateVersionEntity target) {
 
         for (TemplateContentModuleReferenceEntity reference : contentModuleReferenceRepository
 
                 .findByTemplateVersionIdOrderByReferenceKeyAsc(source.getId())) {
-
             TemplateContentModuleReferenceEntity copied = new TemplateContentModuleReferenceEntity(
-
                     UUID.randomUUID(),
 
                     target.getId(),
@@ -591,31 +403,21 @@ public class TemplateVersionLineService {
                     reference.getContentModuleVersionId()
 
             );
-
             contentModuleReferenceRepository.save(copied);
 
         }
 
     }
-
-
-
     private void recordCloneLifecycle(
-
             TemplateEntity template,
-
             TemplateLifecycleStatus fromStatus,
-
             String sourceReleaseVersion,
-
             UUID newDevVersionId,
-
             int newDevVersionNumber,
 
             ManagementSessionClaims session
 
     ) {
-
         String comment = messageResolver.resolve(
 
                 "api.audit.lifecycle.clonedRelease",
@@ -627,17 +429,12 @@ public class TemplateVersionLineService {
                 newDevVersionId
 
         );
-
         lifecycleRecordRepository.save(new TemplateLifecycleRecordEntity(
-
                 UUID.randomUUID(),
-
                 template.getId(),
-
                 LifecycleAction.CLONE_FROM_RELEASE,
 
                 fromStatus,
-
                 TemplateLifecycleStatus.DRAFT,
 
                 null,
@@ -651,25 +448,16 @@ public class TemplateVersionLineService {
         ));
 
     }
-
-
-
     private void recordAbandonLifecycle(
-
             TemplateEntity template,
-
             TemplateLifecycleStatus fromStatus,
-
             TemplateLifecycleStatus toStatus,
-
             int abandonedDevVersionNumber,
-
             UUID abandonedDevVersionId,
 
             ManagementSessionClaims session
 
     ) {
-
         String comment = messageResolver.resolve(
 
                 "api.audit.lifecycle.abandonedInFlightDev",
@@ -679,13 +467,9 @@ public class TemplateVersionLineService {
                 abandonedDevVersionId
 
         );
-
         lifecycleRecordRepository.save(new TemplateLifecycleRecordEntity(
-
                 UUID.randomUUID(),
-
                 template.getId(),
-
                 LifecycleAction.ABANDON_IN_FLIGHT_DEV,
 
                 fromStatus,
@@ -703,11 +487,7 @@ public class TemplateVersionLineService {
         ));
 
     }
-
-
-
     private TemplateVersionEntity requireDevVersionLine(UUID templateId, UUID devVersionId) {
-
         TemplateVersionEntity version = templateVersionRepository.findById(devVersionId)
 
                 .orElseThrow(TemplateNotFoundException::new);
@@ -721,11 +501,7 @@ public class TemplateVersionLineService {
         return version;
 
     }
-
-
-
     private TemplateVersionEntity requireActiveDevVersionLine(UUID templateId, UUID devVersionId) {
-
         TemplateVersionEntity version = requireDevVersionLine(templateId, devVersionId);
 
         if (version.isDeleted()) {
@@ -737,9 +513,6 @@ public class TemplateVersionLineService {
         return version;
 
     }
-
-
-
     private String defaultRouteReleaseVersion(UUID templateId) {
 
         return apiPolicyRepository.findByTemplateId(templateId)
@@ -749,27 +522,16 @@ public class TemplateVersionLineService {
                 .orElse(null);
 
     }
-
-
-
     private TemplateVersionLineSummaryView toSummary(
-
             TemplateVersionEntity version,
-
             TemplateEntity template,
-
             String defaultRouteReleaseVersion,
-
             boolean canAuthor,
-
             boolean hasInFlight
 
     ) {
-
         boolean inFlight = templateCurrentVersionResolver.isInFlight(version);
-
         TemplateVersionLineKind lineKind = inFlight ? TemplateVersionLineKind.IN_FLIGHT : TemplateVersionLineKind.PUBLISHED;
-
         Boolean defaultRouteTarget = null;
 
         if (!inFlight && version.getReleaseVersion() != null) {
@@ -777,9 +539,7 @@ public class TemplateVersionLineService {
             defaultRouteTarget = version.getReleaseVersion().equals(defaultRouteReleaseVersion);
 
         }
-
         ApprovalSubState approvalSubState = inFlight ? approvalSubStateResolver.resolve(template) : null;
-
         boolean cloneable = !inFlight && canAuthor && !hasInFlight;
 
         return new TemplateVersionLineSummaryView(
@@ -791,13 +551,11 @@ public class TemplateVersionLineService {
                 version.getReleaseVersion(),
 
                 resolveLifecycleStatus(version, template, inFlight),
-
                 approvalSubState,
 
                 lineKind,
 
                 version.getUpdatedAt(),
-
                 template.getUpdatedBy(),
 
                 defaultRouteTarget,
@@ -807,15 +565,9 @@ public class TemplateVersionLineService {
         );
 
     }
-
-
-
     private TemplateLifecycleStatus resolveLifecycleStatus(
-
             TemplateVersionEntity version,
-
             TemplateEntity template,
-
             boolean inFlight
 
     ) {
@@ -831,5 +583,4 @@ public class TemplateVersionLineService {
     }
 
 }
-
 

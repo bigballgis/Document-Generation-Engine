@@ -28,15 +28,19 @@ test.describe('template test & preview workflow (dev editor)', () => {
     await expect(page).toHaveURL(/workspaceTab=testing/)
 
     const actions = workspace.locator('.workspace-tab-shell__actions')
-    await expect(actions.getByRole('button', { name: /run preview \(selected\)/i })).toBeVisible()
-    await expect(actions.getByRole('button', { name: /batch preview all/i })).toBeVisible()
+    await expect(actions.getByRole('button', { name: /^full test$/i })).toBeVisible()
     await expect(actions.getByRole('button', { name: /submit for test/i })).toBeVisible()
+    await expect(actions.getByRole('button', { name: /batch preview all/i })).toHaveCount(0)
+    await expect(actions.getByRole('button', { name: /run preview \(selected\)/i })).toHaveCount(0)
 
     const dataSetPanel = page.locator('.test-data-set-panel')
     await expect(dataSetPanel).toBeVisible()
     await expect(dataSetPanel.getByRole('button', { name: /^run preview$/i }).first()).toBeVisible()
 
     await expect(page.locator('.test-data-set-panel .context-help-trigger')).toBeVisible()
+
+    await page.locator('.testing-sub-tabs').getByRole('tab', { name: /preview runs/i }).click()
+    await expect(page.locator('.batch-test-history')).toBeVisible()
   })
 
   test('legacy authoringTab=testPreview deep-link opens Template testing tab', async ({ page, request }) => {

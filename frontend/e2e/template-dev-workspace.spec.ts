@@ -42,9 +42,10 @@ test.describe('template dev workspace tab shell', () => {
       'aria-selected',
       'true',
     )
-    await expect(actions.getByRole('button', { name: /run preview \(selected\)/i })).toBeVisible()
-    await expect(actions.getByRole('button', { name: /batch preview all/i })).toBeVisible()
+    await expect(actions.getByRole('button', { name: /^full test$/i })).toBeVisible()
     await expect(actions.getByRole('button', { name: /submit for test/i })).toBeVisible()
+    await expect(actions.getByRole('button', { name: /batch preview all/i })).toHaveCount(0)
+    await expect(actions.getByRole('button', { name: /run preview \(selected\)/i })).toHaveCount(0)
     await expect(page.locator('.test-preview-workflow__actions')).toHaveCount(0)
 
     await workspace.getByRole('tab', { name: /^template approval$/i }).click()
@@ -81,22 +82,18 @@ test.describe('template dev workspace tab shell', () => {
     await expect(approvalSubTabs.getByRole('tab', { name: /submit for approval/i })).toBeVisible()
     await expect(approvalSubTabs.getByRole('tab', { name: /publish readiness/i })).toBeVisible()
     await expect(approvalSubTabs.getByRole('tab', { name: /risk prompts/i })).toBeVisible()
-    await expect(approvalSubTabs.getByRole('tab', { name: /^governance$/i })).toBeVisible()
+    await expect(approvalSubTabs.getByRole('tab', { name: /^maintenance$/i })).toBeVisible()
   })
 
-  test('submit for test opens comment dialog without inline textarea bar', async ({ page, request }) => {
+  test('submit for test stays disabled until full test gate passes', async ({ page, request }) => {
     test.setTimeout(90_000)
     const fixture = await assertFolCatalogSeeded(request)
     await openFolDevEditor(page, fixture.templateId)
 
     await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i }).click()
-    await page
+    const submitButton = page
       .locator('.workspace-tab-shell__actions')
       .getByRole('button', { name: /submit for test/i })
-      .click()
-
-    const dialog = page.getByRole('dialog', { name: /submit for test/i })
-    await expect(dialog).toBeVisible()
-    await expect(page.locator('.dev-version-actions__comment')).toHaveCount(0)
+    await expect(submitButton).toBeDisabled()
   })
 })

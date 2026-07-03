@@ -361,32 +361,15 @@ class TemplatePlatformSliceTest {
         runLifecycle(templateId);
         CredentialBundle credential = configureApiAndCredential(templateId);
 
-        // Clear default route so governance allows deactivating version 1.0.0
-        mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
-                        .with(authentication(new ManagementAuthentication(groupAdmin)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "allowedAdGroups":["RETAIL_API"],
-                                  "defaultRouteReleaseVersion":null,
-                                  "outputFormats":["DOCX"],
-                                  "outputModes":["SYNC_STREAM"],
-                                  "batchEnabled":false,
-                                  "maxBatchSize":10,
-                                  "docxEncryptionEnabled":false,
-                                  "pdfEncryptionEnabled":false
-                                }
-                                """))
-                .andExpect(status().isOk());
-
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/versions/1.0.0/deactivate")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"reason":"Deactivate version only","confirmed":true}
+                                {"reason":"Cannot deactivate default route target","confirmed":true}
                                 """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.lifecycleStatus").value("PUBLISHED"));
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.messageKey")
+                        .value("api.error.template.defaultRouteTargetCannotDeactivate"));
 
         mockMvc.perform(post("/api/dev/v1/templates/TPL-RETAIL-LETTER/versions/1.0.0/generate")
                         .header("X-Api-Credential-Id", credential.externalId())
@@ -394,8 +377,8 @@ class TemplatePlatformSliceTest {
                         .header("X-Access-Account", "svc-caller")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(generateBody("idem-version-stopped-1")))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.error.messageKey").value("api.error.runtime.versionNotCallable"));
+                .andExpect(status().isOk())
+                .andExpect(header().string("documentId", org.hamcrest.Matchers.not(org.hamcrest.Matchers.emptyString())));
     }
 
     @Test
@@ -925,7 +908,7 @@ class TemplatePlatformSliceTest {
                 .andExpect(jsonPath("$.result.paths[0]").value("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract"))
                 .andExpect(jsonPath("$.result.callableVersions[0].releaseVersion").value("1.0.0"))
                 .andExpect(jsonPath("$.result.errorCodes[?(@.code=='BATCH_LIMIT_EXCEEDED')]").exists())
-                .andExpect(jsonPath("$.result.apiPolicy.policyVersion").value(2))
+                .andExpect(jsonPath("$.result.apiPolicy.policyVersion").value(3))
                 .andExpect(jsonPath("$.result.apiPolicy.updatedAt").exists())
                 .andExpect(jsonPath("$.result.apiPolicy.updatedBy").exists())
                 .andExpect(jsonPath("$.result.apiPolicy.allowedOutputFormats[0]").value("DOCX"))
@@ -950,7 +933,7 @@ class TemplatePlatformSliceTest {
                         .header("X-Api-Credential-Secret", credential.secret())
                         .header("X-Access-Account", "svc-caller"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.apiPolicy.policyVersion").value(2))
+                .andExpect(jsonPath("$.result.apiPolicy.policyVersion").value(3))
                 .andExpect(jsonPath("$.result.apiPolicy.allowedOutputFormats[0]").value("DOCX"))
                 .andExpect(jsonPath("$.result.apiPolicy.updatedAt").doesNotExist())
                 .andExpect(jsonPath("$.result.apiPolicy.updatedBy").doesNotExist())
@@ -1105,6 +1088,10 @@ class TemplatePlatformSliceTest {
     }
 
     private void runLifecycle(String templateId) throws Exception {
+        runLifecycle(templateId, "1.0.0", true);
+    }
+
+    private void runLifecycle(String templateId, String releaseVersion, boolean configurePolicyBeforePublish) throws Exception {
         String requiredSampleId = createRequiredTestDataSet(templateId);
         testGenerate(templateId);
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/batch-test")
@@ -1152,17 +1139,19 @@ class TemplatePlatformSliceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.lifecycleStatus").value("PENDING_RELEASE"));
 
-        configurePublishApiPolicy(templateId);
+        if (configurePolicyBeforePublish) {
+            configurePublishApiPolicy(templateId);
+        }
 
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/publish")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"releaseVersion":"1.0.0"}
-                                """))
+                                {"releaseVersion":"%s"}
+                                """.formatted(releaseVersion)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.lifecycleStatus").value("PUBLISHED"))
-                .andExpect(jsonPath("$.result.releaseVersion").value("1.0.0"));
+                .andExpect(jsonPath("$.result.releaseVersion").value(releaseVersion));
     }
 
     private String createRequiredTestDataSet(String templateId) throws Exception {
@@ -1199,7 +1188,7 @@ class TemplatePlatformSliceTest {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.policyVersion").value(1));
+                .andExpect(jsonPath("$.result.policyVersion").value(2));
     }
 
     private CredentialBundle configureApiAndCredential(String templateId) throws Exception {
@@ -1219,7 +1208,7 @@ class TemplatePlatformSliceTest {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.policyVersion").value(2));
+                .andExpect(jsonPath("$.result.policyVersion").value(3));
 
         MvcResult credentialResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/api/credentials")
                         .with(authentication(new ManagementAuthentication(groupAdmin))))
@@ -1247,7 +1236,7 @@ class TemplatePlatformSliceTest {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.policyVersion").value(2));
+                .andExpect(jsonPath("$.result.policyVersion").value(3));
 
         MvcResult credentialResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/api/credentials")
                         .with(authentication(new ManagementAuthentication(groupAdmin))))

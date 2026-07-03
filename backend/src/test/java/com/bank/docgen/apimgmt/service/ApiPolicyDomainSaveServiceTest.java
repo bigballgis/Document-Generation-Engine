@@ -14,6 +14,7 @@ import com.bank.docgen.apimgmt.api.SaveAdGroupsRequest;
 import com.bank.docgen.apimgmt.api.SaveBatchLimitsRequest;
 import com.bank.docgen.apimgmt.api.SaveDefaultRouteRequest;
 import com.bank.docgen.apimgmt.api.SaveEncryptionPolicyRequest;
+import com.bank.docgen.apimgmt.api.SaveInvocationRetentionRequest;
 import com.bank.docgen.apimgmt.api.SaveOutputPolicyRequest;
 import com.bank.docgen.apimgmt.api.SaveDefaultRouteRequest;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
@@ -313,6 +314,47 @@ class ApiPolicyDomainSaveServiceTest {
 
         assertThat(existing.getPolicyVersion()).isEqualTo(2);
         verifyNoInteractions(managementAuditRecorder);
+    }
+
+    @Test
+    void saveInvocationRetentionDomain_bumpsVersionAndRecordsChangedArea() {
+        ApiPolicyEntity existing = existingPolicy(templateId, 2);
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(existing));
+        when(apiPolicyRepository.save(any(ApiPolicyEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var view = service.saveInvocationRetentionDomain(
+                templateId,
+                new SaveInvocationRetentionRequest(true, 365, 180, true),
+                groupAdmin
+        );
+
+        assertThat(view.invocationRecordRetentionDays()).isEqualTo(365);
+        assertThat(view.documentRetentionDays()).isEqualTo(180);
+        assertThat(existing.getPolicyVersion()).isEqualTo(3);
+        verify(managementAuditRecorder).recordPolicyUpdated(
+                eq(templateId),
+                eq("RETAIL"),
+                eq(2),
+                eq(3),
+                eq(List.of("INVOCATION_RETENTION")),
+                eq("10000002"),
+                any(),
+                any()
+        );
+    }
+
+    @Test
+    void saveInvocationRetentionDomain_requiresConfirmationWhenChanged() {
+        ApiPolicyEntity existing = existingPolicy(templateId, 2);
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> service.saveInvocationRetentionDomain(
+                templateId,
+                new SaveInvocationRetentionRequest(true, 365, 180, false),
+                groupAdmin
+        ))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasMessageContaining("api.error.apimgmt.policyImpactConfirmationRequired");
     }
 
     private ApiPolicyImpactPreviewView safePreview() {

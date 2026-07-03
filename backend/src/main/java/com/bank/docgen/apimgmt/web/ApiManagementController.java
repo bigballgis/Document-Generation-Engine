@@ -10,6 +10,7 @@ import com.bank.docgen.apimgmt.api.SaveAdGroupsRequest;
 import com.bank.docgen.apimgmt.api.SaveBatchLimitsRequest;
 import com.bank.docgen.apimgmt.api.SaveDefaultRouteRequest;
 import com.bank.docgen.apimgmt.api.SaveEncryptionPolicyRequest;
+import com.bank.docgen.apimgmt.api.SaveInvocationRetentionRequest;
 import com.bank.docgen.apimgmt.api.SaveOutputPolicyRequest;
 import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
 import com.bank.docgen.apimgmt.service.ApiManagementService;
@@ -124,6 +125,16 @@ public class ApiManagementController {
             HttpServletRequest request
     ) {
         return envelope(request, apiManagementService.saveEncryptionDomain(templateId, body, session));
+    }
+
+    @PutMapping("/policy/invocation-retention")
+    public SuccessEnvelope<ApiPolicyView> saveInvocationRetentionDomain(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody SaveInvocationRetentionRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, apiManagementService.saveInvocationRetentionDomain(templateId, body, session));
     }
 
     @PutMapping("/policy/default-route")

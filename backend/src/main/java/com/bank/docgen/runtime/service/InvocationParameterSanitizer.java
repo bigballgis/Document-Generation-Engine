@@ -1,0 +1,137 @@
+package com.bank.docgen.runtime.service;
+
+import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
+import com.bank.docgen.runtime.api.EncryptionSummaryView;
+import com.bank.docgen.runtime.api.GenerateRequestBody;
+import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.stereotype.Component;
+
+@Component
+public class InvocationParameterSanitizer {
+
+    private final ObjectMapper objectMapper;
+
+    public InvocationParameterSanitizer(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    public String sanitizeSingleRequest(GenerateRequestBody request, String resolvedReleaseVersion) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("releaseVersion", resolvedReleaseVersion);
+        payload.put("variables", request.variables());
+        payload.put("output", request.output());
+        payload.put("encryption", sanitizeEncryption(request.encryption(), request.output().format()));
+        return writeJson(payload);
+    }
+
+    public String sanitizeBatchRequest(BatchGenerateRequestBody request, String resolvedReleaseVersion) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("releaseVersion", resolvedReleaseVersion);
+        payload.put("output", request.output());
+        payload.put("encryption", sanitizeEncryption(request.encryption(), request.output().format()));
+        payload.put("items", request.items().stream().map(this::sanitizeBatchItem).toList());
+        return writeJson(payload);
+    }
+
+    public String sanitizeBatchItem(
+            BatchGenerateRequestBody.BatchGenerateItemBody item,
+            BatchGenerateRequestBody request,
+            String resolvedReleaseVersion
+    ) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("releaseVersion", resolvedReleaseVersion);
+        payload.put("itemId", item.itemId());
+        payload.put("variables", item.variables());
+        var output = item.output() != null ? item.output() : request.output();
+        payload.put("output", output);
+        var encryption = item.encryption() != null ? item.encryption() : request.encryption();
+        payload.put("encryption", sanitizeEncryption(encryption, output.format()));
+        return writeJson(payload);
+    }
+
+    public String stripEncryptionPasswords(String parametersJson) {
+        try {
+            JsonNode root = objectMapper.readTree(parametersJson);
+            if (root instanceof ObjectNode objectNode) {
+                sanitizeEncryptionNode(objectNode.get("encryption"), objectNode);
+                sanitizeItemsArray(objectNode.get("items"));
+            }
+            return objectMapper.writeValueAsString(root);
+        } catch (JsonProcessingException ex) {
+            return parametersJson;
+        }
+    }
+
+    private Map<String, Object> sanitizeBatchItem(BatchGenerateRequestBody.BatchGenerateItemBody item) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("itemId", item.itemId());
+        payload.put("variables", item.variables());
+        payload.put("output", item.output());
+        payload.put("encryption", sanitizeEncryption(
+                item.encryption(),
+                item.output() != null ? item.output().format() : null
+        ));
+        return payload;
+    }
+
+    private EncryptionSummaryView sanitizeEncryption(EncryptionOptionsView encryption, String outputFormat) {
+        String format = outputFormat == null ? "DOCX" : outputFormat;
+        return EncryptionSummaryView.fromRequest(format, encryption);
+    }
+
+    private void sanitizeItemsArray(JsonNode itemsNode) {
+        if (!(itemsNode instanceof ArrayNode arrayNode)) {
+            return;
+        }
+        for (JsonNode itemNode : arrayNode) {
+            if (itemNode instanceof ObjectNode itemObject) {
+                sanitizeEncryptionNode(itemObject.get("encryption"), itemObject);
+            }
+        }
+    }
+
+    private void sanitizeEncryptionNode(JsonNode encryptionNode, ObjectNode parent) {
+        if (encryptionNode == null || encryptionNode.isNull()) {
+            return;
+        }
+        boolean enabled = encryptionNode.path("enabled").asBoolean(false);
+        String outputFormat = encryptionNode.path("outputFormat").asText("DOCX");
+        List<String> permissions = objectMapper.convertValue(
+                encryptionNode.path("permissions"),
+                objectMapper.getTypeFactory().constructCollectionType(List.class, String.class)
+        );
+        if (permissions == null) {
+            permissions = List.of();
+        }
+        boolean openPasswordProvided = encryptionNode.hasNonNull("openPassword")
+                && !encryptionNode.get("openPassword").asText("").isBlank();
+        boolean ownerPasswordProvided = encryptionNode.hasNonNull("ownerPassword")
+                && !encryptionNode.get("ownerPassword").asText("").isBlank();
+        parent.set(
+                "encryption",
+                objectMapper.valueToTree(new EncryptionSummaryView(
+                        enabled,
+                        outputFormat,
+                        openPasswordProvided,
+                        ownerPasswordProvided,
+                        permissions
+                ))
+        );
+    }
+
+    private String writeJson(Object payload) {
+        try {
+            return objectMapper.writeValueAsString(payload);
+        } catch (JsonProcessingException ex) {
+            return "{}";
+        }
+    }
+}

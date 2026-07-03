@@ -1,5 +1,6 @@
 package com.bank.docgen.template.service;
 
+import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
@@ -237,14 +238,31 @@ public class PublishGateService {
     }
 
     private PublishGateItemView apiPolicyItem(UUID templateId) {
-        boolean configured = apiPolicyRepository.findByTemplateId(templateId).isPresent();
+        return apiPolicyRepository.findByTemplateId(templateId)
+                .map(this::callableReadyApiPolicyItem)
+                .orElseGet(() -> new PublishGateItemView(
+                        PublishGateCheckCode.API_POLICY,
+                        false,
+                        true,
+                        "api.error.runtime.policyNotConfigured",
+                        "skeletonPresent=false"
+                ));
+    }
+
+    private PublishGateItemView callableReadyApiPolicyItem(ApiPolicyEntity policy) {
+        // Skeleton presence is sufficient for publish; empty AD groups do not block (runtime fail-closed).
         return new PublishGateItemView(
                 PublishGateCheckCode.API_POLICY,
-                configured,
-                !configured,
-                configured ? "api.publishGate.apiPolicy.ready" : "api.error.runtime.policyNotConfigured",
-                configured ? "configured=true" : "configured=false"
+                true,
+                false,
+                "api.publishGate.apiPolicy.ready",
+                "skeletonPresent=true,adGroupsConfigured=" + hasConfiguredAdGroups(policy)
         );
+    }
+
+    private boolean hasConfiguredAdGroups(ApiPolicyEntity policy) {
+        String json = policy.getAllowedAdGroupsJson();
+        return json != null && !json.isBlank() && !"[]".equals(json.trim());
     }
 
     private PublishGateItemView contentModuleReferencesItem(UUID versionId) {

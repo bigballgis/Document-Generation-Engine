@@ -284,3 +284,9 @@ p {
     color: var(--text-secondary);
   }
 }
+
+.submit-test-tooltip {
+  max-width: 28rem;
+  white-space: pre-line;
+  line-height: 1.5;
+}

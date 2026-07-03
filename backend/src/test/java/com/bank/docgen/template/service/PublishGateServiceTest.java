@@ -264,6 +264,39 @@ class PublishGateServiceTest {
                 .isTrue();
     }
 
+    @Test
+    void publish_withSkeletonPolicyAndEmptyAdGroups_isNotBlocked() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        ApiPolicyEntity skeleton = ApiPolicyEntity.createSkeleton(templateId, "10000002");
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(skeleton));
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.API_POLICY)
+                .findFirst()
+                .orElseThrow())
+                .satisfies(item -> {
+                    assertThat(item.blocker()).isFalse();
+                    assertThat(item.ready()).isTrue();
+                    assertThat(item.summary()).contains("adGroupsConfigured=false");
+                });
+    }
+
+    @Test
+    void publish_withoutApiPolicySkeleton_isBlocked() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.empty());
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.items().stream()
+                .anyMatch(item -> item.checkCode() == PublishGateCheckCode.API_POLICY && item.blocker()))
+                .isTrue();
+    }
+
     private BindingValidationView nonBlockingBindings() {
         return new BindingValidationView(
                 List.of(),

@@ -37,9 +37,10 @@ public class SseEmitterRegistry {
 
         Queue<PendingEvent> buffered = pendingEvents.remove(operationId);
         if (buffered != null) {
-            PendingEvent event;
-            while ((event = buffered.poll()) != null) {
+            PendingEvent event = buffered.poll();
+            while (event != null) {
                 sendToEmitter(emitter, event.eventName(), event.data());
+                event = buffered.poll();
             }
         }
         return emitter;

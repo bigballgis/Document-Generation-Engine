@@ -24,7 +24,6 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
 import com.bank.docgen.template.service.CoverageComputationService;
-import com.bank.docgen.template.service.CoverageThresholdResolver;
 import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
 import com.bank.docgen.template.service.TemplateService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,8 +59,6 @@ class AsyncBatchTestOrchestratorTest {
     @Mock
     private CoverageComputationService coverageComputationService;
     @Mock
-    private CoverageThresholdResolver coverageThresholdResolver;
-    @Mock
     private TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     private SseEmitterRegistry batchSseRegistry;
@@ -77,7 +74,7 @@ class AsyncBatchTestOrchestratorTest {
         orchestrator = new AsyncBatchTestOrchestrator(
                 templateService, groupAccessService, previewGenerationService,
                 batchTestRunRepository, testDataSetRepository,
-                coverageComputationService, coverageThresholdResolver,
+                coverageComputationService,
                 templateCurrentVersionResolver, batchSseRegistry,
                 new ObjectMapper(), syncExecutor
         );

@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
+import BatchTestHistoryPanel from '@/components/template/BatchTestHistoryPanel.vue'
 import TemplateTestDataSetPanel from '@/components/templates/TemplateTestDataSetPanel.vue'
 import TemplateTestPreviewWorkflowPanel from '@/components/templates/TemplateTestPreviewWorkflowPanel.vue'
 import TemplateCoveragePanel from '@/components/templates/TemplateCoveragePanel.vue'
@@ -80,18 +81,7 @@ watch(
 
     <el-tabs v-model="activeSubTab" class="testing-sub-tabs">
       <el-tab-pane :label="t(templateTestingSubTabLabelKey('dataSets'))" name="dataSets">
-        <TemplateTestPreviewWorkflowPanel
-          :lifecycle-status="lifecycleStatus"
-          :selected-test-data-set-id="selectedTestDataSetId"
-          :show-draft-actions="false"
-          :show-testing-decision-actions="false"
-          :show-test-generate="false"
-          :submitting="false"
-          :generating-preview="false"
-          :batch-testing="false"
-          :has-data-sets="false"
-          actions-hidden
-        />
+        <TemplateTestPreviewWorkflowPanel :lifecycle-status="lifecycleStatus" />
 
         <TemplateTestDataSetPanel
           :template-id="templateId"
@@ -104,6 +94,11 @@ watch(
       </el-tab-pane>
 
       <el-tab-pane :label="t(templateTestingSubTabLabelKey('previewRuns'))" name="previewRuns">
+        <BatchTestHistoryPanel
+          :template-id="templateId"
+          :refresh-token="coverageRefreshToken"
+        />
+
         <TemplatePreviewRunHistoryPanel
           :template-id="templateId"
           :refresh-token="coverageRefreshToken"
@@ -155,5 +150,9 @@ watch(
 
 .preview-detail-panel {
   margin-top: 1.25rem;
+}
+
+:deep(.batch-test-history) {
+  margin-bottom: 1.25rem;
 }
 </style>

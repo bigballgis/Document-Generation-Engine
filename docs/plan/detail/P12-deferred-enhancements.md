@@ -1,8 +1,8 @@
 # P12 — Deferred Enhancements (Detailed Plan)
 
-**Phase status:** **In Progress** (2026-07-03; active slice — **P12-TEMPLATE-TESTING-OVERHAUL In Progress**) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
+**Phase status:** **In Progress** (2026-07-03; active slice **P12-API-PACKAGE-ACCESS-INVOCATION**) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
 
-> Single-active-phase invariant: **Active slice: P12-TEMPLATE-TESTING-OVERHAUL In Progress** (activated 2026-07-03; 13 tasks T01–T13, Flyway V41–V42).
+> Single-active-phase invariant: **Active slice: P12-API-PACKAGE-ACCESS-INVOCATION In Progress** (activated 2026-07-03; BDD ready; **T01–T02 next**). Prior slice **P12-TEMPLATE-TESTING-OVERHAUL Done** (closed 2026-07-03; 13 tasks T01–T13, Flyway V41–V42). **P12** is the sole formal phase `In Progress`.
 > **P21 remains Done** — do not reopen P21 phase status; **P19 remains Done**
 > — corrective residual only (P19-T08/T10 group UX superseded). AUD-M02 **resolved** via **P12-AUD-M02 Done**
 > (cross-reference P21 §11.4).
@@ -21,10 +21,10 @@ Each slice is activated individually via `plan-orchestrator`; only one slice sho
 | **P12-AUD-M02** | Role constants single-source (AUD-M02 remediation) | **Done** (2026-07-01) | P21 audit finding AUD-M02 **resolved**; P21 §11.4 |
 | **P12-BDD-RISK-PROMPT-UX-001** | Template-scoped risk-prompt config UX redesign (BDD-TEMPLATE-RISK-PROMPT-UX-001) | **Done** (2026-06-29) | Supersedes P19-T08 group override + list-view panel + hardcoded decision categories; **COR-T15** mirror |
 | **P12-UIUX-DEEP-REFACTOR** | Frontend UIUX deep refactor — design token system, visual language upgrade, component unification, shell polish (14 tasks, groups A–E) | **Done** (2026-07-03) | OPT-G3 resolved (TemplateDetailView split); plan: `.cursor/plans/前端_uiux_整改方案_fc6fbf7b.plan.md`; BDD `not-applicable` (no API/permission/behavior change) |
-| **P12-TEMPLATE-TESTING-OVERHAUL** | 模板测试页全量改造 — SSE 进度流（单次预览 + 全量测试）、临时文件 24h TTL、批测结果持久化与失效、提交测试门禁 API、覆盖率面板增强、测试历史记录（13 tasks T01–T13） | **In Progress** (activated 2026-07-03) | BDD spec: `docs/behavior/template-testing-overhaul.md` (ready); Flyway V41–V42; 6 功能域 F1–F6 |
-| **P12-API-PACKAGE-ACCESS-INVOCATION** | 包级 API 接入重构 + 调用记录 — auto-materialize policy、约定大于配置 Hub UI、invocation records + 留存（12 tasks T01–T12） | **Not Started** (BDD **ready** 2026-07-03) | BDD: `docs/behavior/api-package-access-and-invocation-records.md`; plan: [P12-api-package-access-invocation-records.md](./P12-api-package-access-invocation-records.md) |
+| **P12-TEMPLATE-TESTING-OVERHAUL** | 模板测试页全量改造 — SSE 进度流（单次预览 + 全量测试）、临时文件 24h TTL、批测结果持久化与失效、提交测试门禁 API、覆盖率面板增强、测试历史记录（13 tasks T01–T13） | **Done** (2026-07-03) | BDD spec: `docs/behavior/template-testing-overhaul.md` (ready); Flyway V41–V42; 6 功能域 F1–F6 |
+| **P12-API-PACKAGE-ACCESS-INVOCATION** | 包级 API 接入重构 + 调用记录 — auto-materialize policy、约定大于配置 Hub UI、invocation records + 留存（12 tasks T01–T12） | **In Progress** (activated 2026-07-03; BDD **ready**; **T01–T02 next**) | BDD: `docs/behavior/api-package-access-and-invocation-records.md`; plan: [P12-api-package-access-invocation-records.md](./P12-api-package-access-invocation-records.md) |
 
-**Active slice:** **P12-TEMPLATE-TESTING-OVERHAUL** (activated 2026-07-03 — **In Progress**; 13 tasks T01–T13, Flyway V41–V42; BDD spec ready). **Queued:** **P12-API-PACKAGE-ACCESS-INVOCATION** (BDD ready; **no code** until activated).
+**Active slice:** **P12-API-PACKAGE-ACCESS-INVOCATION In Progress** (2026-07-03; implementation begins **T01 → T02**; T10 doc-only **Done**). Prior: **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03; T01–T13 complete).
 
 ### P12-UIUX-DEEP-REFACTOR — Frontend UIUX deep refactor
 
@@ -197,19 +197,19 @@ BDD-TEMPLATE-RISK-PROMPT-UX-001; PRD §7; domain-model lifecycle §4; permission
 
 | Sub-task | Owner | Scope | Status |
 | --- | --- | --- | --- |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T01** | backend-engineer | Flyway V41（`preview_record` 新增 `expires_at`, `error_details`）；Flyway V42（`template_batch_test_run` 新增 `template_version_id`, `status`, `completed_at`, `invalidated_at`, `coverage_snapshot_json`）；更新 `PreviewRecordEntity`、`BatchTestRunEntity` | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T02** | backend-engineer | 单次预览 SSE 端点：`POST .../previews`（返回 `previewId`）+ `GET .../previews/{previewId}/progress-stream`（`text/event-stream`）；并发控制（Redisson AtomicLong，上限 3）；HTTP 429 + `PREVIEW_CONCURRENCY_LIMIT_EXCEEDED` | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T03** | backend-engineer | 临时文件 24h TTL：`PreviewRecordEntity.expiresAt` 管理；`@Scheduled` 清理任务（每小时）删除 MinIO 临时对象并将 `status = EXPIRED`；过期资源 HTTP 410 + `PREVIEW_ARTIFACT_EXPIRED` | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T04** | backend-engineer | 全量测试 SSE 端点：`POST .../batch-tests`（返回 `runId`）+ `GET .../batch-tests/{runId}/progress-stream`；SSE 逐样本推送 `sample_done` + `batch_completed`；`BatchTestRunEntity` status 状态机（RUNNING → COMPLETED） | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T05** | backend-engineer | 全量测试持久化：`BatchTestRunEntity` 绑定 `templateVersionId`；历史列表保留最新 5 条（软标记旧记录）；模板内容变更后同步写入最新 `BatchTestRunEntity.invalidatedAt`（在 `TemplateVersionLineService` / 版本内容保存成功路径中插入） | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T06** | backend-engineer | 测试历史 API：`GET .../batch-tests?limit=5`；返回摘要含 `runId, createdAt, createdBy, status, totalSamples, succeededCount, failedCount, aggregateCoverage, gatePassed, invalidatedAt` | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T07** | backend-engineer | 提交测试门禁 API：`GET .../submit-test-eligibility`；返回 `{ eligible, reasons[], uncoveredAnchors[], uncoveredVariables[] }`；复用 `CoverageComputationService` + `CoverageThresholdResolver` | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T08** | frontend-engineer | 「运行预览」对话框：SSE 进度展示（QUEUED → PROCESSING → SUCCEEDED/FAILED）；DOCX/PDF 临时下载链接 + 倒计时；并发超限 429 行内提示；失败重试按钮；i18n en/zh-CN | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T09** | frontend-engineer | 「全量测试」按钮改造：改名（删除「批量试生成全部」旧按钮）；确认弹窗；SSE 批量进度对话框（已完成 X/N）；完成后自动刷新 Coverage 面板 + 历史列表；i18n en/zh-CN | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T10** | frontend-engineer | 「提交测试」按钮门禁：挂载时 + 全量测试完成后拉取 `submit-test-eligibility`；`eligible = false` 时置灰 + `el-tooltip` 说明（未覆盖列表最多 5 条）；i18n en/zh-CN | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T11** | frontend-engineer | 测试历史记录列表：展示最近 5 次 `BatchTestRunEntity` 摘要；COMPLETED / INVALIDATED 状态标签；可展开查看各数据集结果；i18n en/zh-CN | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T12** | frontend-engineer | 覆盖率面板增强：三维度阈值对比表格（已覆盖/总数 / 覆盖率 / 阈值 / 状态）；未达标维度行可展开未覆盖项列表；顶部 Alert 颜色（绿/橙）；显示阈值来源（GLOBAL / GROUP）；i18n en/zh-CN | Not Started |
-| **P12-TEMPLATE-TESTING-OVERHAUL-T13** | e2e-test-engineer + e2e-uiux-reviewer | Playwright E2E：F1 成功/并发超限/失败重试；F2 成功/部分失败；F3 失效触发；F4 门禁满足/未满足；F5 覆盖率面板展开；F6 历史记录；UIUX manifest（含 SSE 进度流截图证据） | Not Started |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T01** | backend-engineer | Flyway V41（`preview_records` 新增 `expires_at`, `temp_storage_key`, `temp_artifact_cleaned`）；Flyway V42（`template_batch_test_run` 新增 `invalidated_at`, `template_version_id`, `sample_results_json`, `anchor/variable/sample_coverage_pct`, `all_samples_succeeded`, `gate_passed`, `hidden`）；更新 `PreviewRecordEntity`、`BatchTestRunEntity` | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T02** | backend-engineer | 单次预览 SSE 端点：`POST .../previews/async-preview`（202，返回 `previewId + streamUrl`）+ `GET .../previews/{previewId}/progress-stream`（`text/event-stream`）；`PreviewConcurrencyGuard`（AtomicInteger 上限 3）；HTTP 429 + `PREVIEW_CONCURRENCY_LIMIT_EXCEEDED`；`SseEmitterRegistry`（带缓冲防竞争） | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T03** | backend-engineer | 临时文件 24h TTL：`PreviewRecordEntity.expiresAt/tempStorageKey/tempArtifactCleaned` 管理；`@Scheduled`（每小时）`PreviewTempCleanupScheduler` 删除 MinIO 临时对象；过期资源 HTTP 410 + `PREVIEW_ARTIFACT_EXPIRED` | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T04** | backend-engineer | 全量测试 SSE 端点：`POST .../batch-tests/run`（202，返回 `runId + streamUrl`）+ `GET .../batch-tests/{runId}/progress-stream`；`AsyncBatchTestOrchestrator` 逐样本推送 `sample_started/sample_done/batch_completed/batch_failed`；`BatchTestRunEntity` 状态机（RUNNING → COMPLETED/FAILED）；结果写入 `sample_results_json` | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T05** | backend-engineer | 全量测试持久化与失效：`BatchTestRunEntity` 绑定 `templateVersionId`；历史列表保留最新 5 条（`hidden=true` 软删除）；`TemplateContentChangedEvent` 事件解耦，`BatchTestInvalidationListener` 同步写入最新 `BatchTestRunEntity.invalidatedAt` | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T06** | backend-engineer | 测试历史 API：`GET .../batch-tests?limit=5`；返回 `BatchTestRunSummaryView`（`runId, createdAt, status[RUNNING/COMPLETED/FAILED/INVALIDATED], successCount, failedCount, totalCount, anchorCoveragePct, variableCoveragePct, sampleCoveragePct, gatePassed, invalidatedAt`） | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T07** | backend-engineer | 提交测试门禁 API：`GET .../submit-test-eligibility`；返回 `SubmitTestEligibilityView`（`eligible, conditions{hasValidTestResult/allSamplesSucceeded/coverageGatePassed}, blockingDetails{uncoveredAnchors/Variables/failedDataSetNames}, thresholds, latestRunAt`）；复用 `CoverageComputationService` + `CoverageThresholdResolver` | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T08** | frontend-engineer | 「运行预览」对话框：SSE 进度展示（QUEUED → PROCESSING → SUCCEEDED/FAILED）；DOCX/PDF 临时下载链接 + 倒计时；并发超限 429 行内提示；失败重试按钮；i18n en/zh-CN | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T09** | frontend-engineer | 「全量测试」按钮改造：改名（删除「批量试生成全部」旧按钮）；确认弹窗；SSE 批量进度对话框（已完成 X/N）；完成后自动刷新 Coverage 面板 + 历史列表；i18n en/zh-CN | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T10** | frontend-engineer | 「提交测试」按钮门禁：挂载时 + 全量测试完成后拉取 `submit-test-eligibility`；`eligible = false` 时置灰 + `el-tooltip` 说明（未覆盖列表最多 5 条）；i18n en/zh-CN | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T11** | frontend-engineer | 测试历史记录列表：展示最近 5 次 `BatchTestRunEntity` 摘要；COMPLETED / INVALIDATED 状态标签；可展开查看各数据集结果；i18n en/zh-CN | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T12** | frontend-engineer | 覆盖率面板增强：三维度阈值对比表格（已覆盖/总数 / 覆盖率 / 阈值 / 状态）；未达标维度行可展开未覆盖项列表；顶部 Alert 颜色（绿/橙）；显示阈值来源（GLOBAL / GROUP）；i18n en/zh-CN | **Done** (2026-07-03) |
+| **P12-TEMPLATE-TESTING-OVERHAUL-T13** | e2e-test-engineer + e2e-uiux-reviewer | Playwright E2E：F1 成功/并发超限/失败重试；F2 成功/部分失败；F3 失效触发；F4 门禁满足/未满足；F5 覆盖率面板展开；F6 历史记录；UIUX manifest（含 SSE 进度流截图证据） | **Done** (2026-07-03) |
 
 **Suggested implementation order:** T01 → T02 → T03 → T04 → T05 → T06 → T07（后端合约完成）→ T08 → T09 → T10 → T11 → T12（前端功能）→ T13（E2E）。
 
@@ -226,7 +226,13 @@ BDD-TEMPLATE-RISK-PROMPT-UX-001; PRD §7; domain-model lifecycle §4; permission
 - 绿色门禁：`mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS；前端 `pnpm -C frontend lint`, `type-check`, `test`, `build` 全绿；Playwright T13 全通 + UIUX manifest PASS；
 - `docs/plan/execution-sync-ledger.md` 更新门禁证据。
 
-**Status:** **In Progress** (activated 2026-07-03)
+**Backend gate evidence (T01–T07):** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (2026-07-03); Checkstyle 0 violations; PMD 0 violations; SpotBugs 0 bugs; JaCoCo coverage gates met. New tests: `PreviewTempCleanupSchedulerTest`, `AsyncBatchTestOrchestratorTest`, `BatchTestInvalidationServiceTest`, `BatchTestHistoryServiceTest`, `SubmitTestEligibilityServiceTest`, `BatchTestInvalidationListenerTest`, `BatchTestRunEntityTest`.
+
+**Frontend gate evidence (T08–T12):** `pnpm -C frontend lint` ✓, `type-check` ✓, `test` ✓ (**643** Vitest), `build` ✓ (2026-07-03). Deliverables: `PreviewProgressDialog`, `BatchTestProgressDialog`, `BatchTestHistoryPanel`, `useSubmitTestEligibility`, `TemplateCoveragePanel` threshold table, `TemplateTestDataSetPanel` / `TemplateTestPreviewWorkflowPanel` wiring; i18n en/zh-CN. Bug fix: `getSubmitTestEligibility` API path in `frontend/src/api/templates.ts`; `handlePreviewRetry` wired in `TemplateTestDataSetPanel.vue`.
+
+**E2E/UIUX gate evidence (T13):** Playwright Docker — `P12-TEMPLATE-TESTING-OVERHAUL-T13.spec.ts` **8 passed / 3 skipped** (SCEN-F5-02, SCEN-F4-01, SCEN-F2-02/F4-03 skipped — FOL seed thresholds / intentional failure data set; documented in manifest); `P12-TEMPLATE-TESTING-OVERHAUL-uiux-evidence.spec.ts` **1/1**; UIUX manifest **PASS** (`frontend/e2e/evidence/P12-TEMPLATE-TESTING-OVERHAUL-uiux-manifest.md`; 10 screenshots @ 1440×900, REDBC + GREENBC). Regression: `template-dev-workspace.spec.ts` + `template-test-preview-workflow.spec.ts` **5/5**.
+
+**Status:** **Done** (2026-07-03 — T01–T13 complete; all slice exit criteria met)
 
 ---
 
@@ -234,13 +240,13 @@ BDD-TEMPLATE-RISK-PROMPT-UX-001; PRD §7; domain-model lifecycle §4; permission
 
 | ID | Summary | Status | Notes |
 | --- | --- | --- | --- |
-| **P12-TEMPLATE-TESTING-OVERHAUL** | 模板测试页全量改造（SSE + TTL + 持久化 + 门禁 + 历史，13 tasks） | **In Progress** (activated 2026-07-03) | Active slice; BDD spec ready; T01–T13 |
+| **P12-TEMPLATE-TESTING-OVERHAUL** | 模板测试页全量改造（SSE + TTL + 持久化 + 门禁 + 历史，13 tasks） | **Done** (2026-07-03) | T01–T13 complete; BDD F1–F6 evidenced |
 | — | Additional deferred items from master-plan § Deferred / post-MVP | Not Started | Pick next slice via `plan-orchestrator` when prioritized |
 
 ## 4. Phase exit criteria
 
-P12 phase is **In Progress** — active slice **P12-TEMPLATE-TESTING-OVERHAUL** (activated 2026-07-03). Individual slices run under `plan-orchestrator`.
-**P12-AUD-M02** closed **Done** 2026-07-01. **P12-AUD-B10** closed **Done** 2026-07-01.
+P12 phase is **In Progress** (2026-07-03). Active slice **P12-API-PACKAGE-ACCESS-INVOCATION** (BDD ready; T01–T02 next). **P12-TEMPLATE-TESTING-OVERHAUL** closed **Done** 2026-07-03 (T01–T13). Individual slices run under `plan-orchestrator`.
+**P12-AUD-M02** closed **Done** 2026-07-01. **P12-AUD-B10** closed **Done** 2026-07-01. **P12-UIUX-DEEP-REFACTOR** closed **Done** 2026-07-03.
 
 ## 5. Behavior specification (BDD) — P12-AUD-B10
 

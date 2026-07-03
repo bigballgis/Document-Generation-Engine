@@ -59,6 +59,9 @@ public final class ApiErrorCodes {
     public static final String PREVIEW_CONCURRENCY_LIMIT_EXCEEDED = "PREVIEW_CONCURRENCY_LIMIT_EXCEEDED";
     public static final String PREVIEW_ARTIFACT_EXPIRED = "PREVIEW_ARTIFACT_EXPIRED";
     public static final String BATCH_TEST_RUN_NOT_FOUND = "BATCH_TEST_RUN_NOT_FOUND";
+    public static final String INVOCATION_NOT_FOUND = "INVOCATION_NOT_FOUND";
+    public static final String INVOCATION_RECORD_EXPIRED = "INVOCATION_RECORD_EXPIRED";
+    public static final String INVOCATION_VIEW_INVALID = "INVOCATION_VIEW_INVALID";
 
     private ApiErrorCodes() {
     }

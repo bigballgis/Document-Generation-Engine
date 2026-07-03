@@ -1,5 +1,6 @@
 package com.bank.docgen.apimgmt.persistence;
 
+import com.bank.docgen.apimgmt.domain.ApiPolicyPlatformDefaults;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -39,16 +40,25 @@ public class ApiPolicyEntity {
     private int maxBatchSize;
 
     @Column(name = "batch_sync_max_items", nullable = false)
-    private int batchSyncMaxItems = 100;
+    private int batchSyncMaxItems = ApiPolicyPlatformDefaults.BATCH_SYNC_MAX_ITEMS;
 
     @Column(name = "batch_async_max_items", nullable = false)
-    private int batchAsyncMaxItems = 10000;
+    private int batchAsyncMaxItems = ApiPolicyPlatformDefaults.BATCH_ASYNC_MAX_ITEMS;
 
     @Column(name = "docx_encryption_enabled", nullable = false)
     private boolean docxEncryptionEnabled;
 
     @Column(name = "pdf_encryption_enabled", nullable = false)
     private boolean pdfEncryptionEnabled;
+
+    @Column(name = "save_generated_documents", nullable = false)
+    private boolean saveGeneratedDocuments = ApiPolicyPlatformDefaults.SAVE_GENERATED_DOCUMENTS;
+
+    @Column(name = "invocation_record_retention_days", nullable = false)
+    private int invocationRecordRetentionDays = ApiPolicyPlatformDefaults.INVOCATION_RECORD_RETENTION_DAYS;
+
+    @Column(name = "document_retention_days", nullable = false)
+    private int documentRetentionDays = ApiPolicyPlatformDefaults.DOCUMENT_RETENTION_DAYS;
 
     @Column(name = "created_by", nullable = false, length = 8)
     private String createdBy;
@@ -70,13 +80,31 @@ public class ApiPolicyEntity {
         this.templateId = templateId;
         this.policyVersion = 1;
         this.allowedAdGroupsJson = allowedAdGroupsJson;
-        this.outputFormatsJson = "[\"DOCX\"]";
-        this.outputModesJson = "[\"SYNC_STREAM\"]";
+        this.outputFormatsJson = ApiPolicyPlatformDefaults.OUTPUT_FORMATS_JSON;
+        this.outputModesJson = ApiPolicyPlatformDefaults.OUTPUT_MODES_JSON;
+        this.batchEnabled = ApiPolicyPlatformDefaults.BATCH_ENABLED;
+        this.maxBatchSize = ApiPolicyPlatformDefaults.BATCH_SYNC_MAX_ITEMS;
+        this.batchSyncMaxItems = ApiPolicyPlatformDefaults.BATCH_SYNC_MAX_ITEMS;
+        this.batchAsyncMaxItems = ApiPolicyPlatformDefaults.BATCH_ASYNC_MAX_ITEMS;
+        this.docxEncryptionEnabled = ApiPolicyPlatformDefaults.DOCX_ENCRYPTION_ENABLED;
+        this.pdfEncryptionEnabled = ApiPolicyPlatformDefaults.PDF_ENCRYPTION_ENABLED;
+        this.saveGeneratedDocuments = ApiPolicyPlatformDefaults.SAVE_GENERATED_DOCUMENTS;
+        this.invocationRecordRetentionDays = ApiPolicyPlatformDefaults.INVOCATION_RECORD_RETENTION_DAYS;
+        this.documentRetentionDays = ApiPolicyPlatformDefaults.DOCUMENT_RETENTION_DAYS;
         this.createdBy = createdBy;
         this.updatedBy = createdBy;
         Instant now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
+    }
+
+    public static ApiPolicyEntity createSkeleton(UUID templateId, String actor) {
+        return new ApiPolicyEntity(
+                UUID.randomUUID(),
+                templateId,
+                ApiPolicyPlatformDefaults.ALLOWED_AD_GROUPS_JSON,
+                actor
+        );
     }
 
     public UUID getId() {
@@ -131,6 +159,18 @@ public class ApiPolicyEntity {
         return pdfEncryptionEnabled;
     }
 
+    public boolean isSaveGeneratedDocuments() {
+        return saveGeneratedDocuments;
+    }
+
+    public int getInvocationRecordRetentionDays() {
+        return invocationRecordRetentionDays;
+    }
+
+    public int getDocumentRetentionDays() {
+        return documentRetentionDays;
+    }
+
     public String getCreatedBy() {
         return createdBy;
     }
@@ -145,6 +185,15 @@ public class ApiPolicyEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void materializeDefaultRouteOnFirstPublish(String releaseVersion, String actor) {
+        if (defaultRouteReleaseVersion != null && !defaultRouteReleaseVersion.isBlank()) {
+            return;
+        }
+        this.defaultRouteReleaseVersion = releaseVersion;
+        this.updatedBy = actor;
+        this.updatedAt = Instant.now();
     }
 
     public void update(
@@ -184,7 +233,9 @@ public class ApiPolicyEntity {
             String updatedBy
     ) {
         this.allowedAdGroupsJson = allowedAdGroupsJson;
-        this.defaultRouteReleaseVersion = defaultRouteReleaseVersion;
+        if (defaultRouteReleaseVersion != null) {
+            this.defaultRouteReleaseVersion = defaultRouteReleaseVersion;
+        }
         this.outputFormatsJson = outputFormatsJson;
         this.outputModesJson = outputModesJson;
         this.batchEnabled = batchEnabled;
@@ -232,6 +283,18 @@ public class ApiPolicyEntity {
 
     public void updateDefaultRouteDomain(String defaultRouteReleaseVersion, String updatedBy) {
         this.defaultRouteReleaseVersion = defaultRouteReleaseVersion;
+        bumpVersion(updatedBy);
+    }
+
+    public void updateRetentionDomain(
+            boolean saveGeneratedDocuments,
+            int invocationRecordRetentionDays,
+            int documentRetentionDays,
+            String updatedBy
+    ) {
+        this.saveGeneratedDocuments = saveGeneratedDocuments;
+        this.invocationRecordRetentionDays = invocationRecordRetentionDays;
+        this.documentRetentionDays = documentRetentionDays;
         bumpVersion(updatedBy);
     }
 

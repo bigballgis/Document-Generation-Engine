@@ -5,6 +5,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import PreviewProgressDialog from '@/components/template/PreviewProgressDialog.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
@@ -49,6 +50,12 @@ const sortByUpdatedAt = rowSortMethod<TestDataSet>((row) => row.updatedAt)
 const selectedId = ref<string | null>(null)
 const dialogVisible = ref(false)
 const editingId = ref<string | null>(null)
+
+// T08: Preview progress dialog state
+const previewDialogVisible = ref(false)
+const previewDialogPreviewId = ref('')
+const previewDialogStreamUrl = ref('')
+const previewDialogDataSetName = ref('')
 
 const form = reactive({
   name: '',
@@ -208,10 +215,32 @@ function handleSelect(testDataSetId: string) {
   emit('selected', testDataSetId)
 }
 
-function handleRunPreview(row: TestDataSet) {
+async function handleRunPreview(row: TestDataSet) {
   selectedId.value = row.testDataSetId
   emit('selected', row.testDataSetId)
-  emit('test-generate', row.testDataSetId)
+  try {
+    const result = await templatesApi.startAsyncPreview(props.templateId, {
+      testDataSetId: row.testDataSetId,
+    })
+    previewDialogPreviewId.value = result.previewId
+    previewDialogStreamUrl.value = result.streamUrl
+    previewDialogDataSetName.value = row.name
+    previewDialogVisible.value = true
+  } catch (err: unknown) {
+    const axiosError = err as { response?: { status?: number } }
+    if (axiosError?.response?.status === 429) {
+      ElMessage.error(t('templates.previewProgress.error.concurrencyLimit'))
+    } else {
+      ElMessage.error(t('templates.previewProgress.error.generic'))
+    }
+  }
+}
+
+function handlePreviewRetry() {
+  const row = dataSets.value.find((dataSet) => dataSet.testDataSetId === selectedId.value)
+  if (row) {
+    void handleRunPreview(row)
+  }
 }
 
 onMounted(() => {
@@ -266,7 +295,7 @@ function rowClassName({ row }: { row: TestDataSet }): string {
           {{ t('templates.testDataSets.scenarioName') }}
         </template>
         <template #default="{ row }">
-          {{ row.scenarioName || '—' }}
+          {{ row.scenarioName || t('common.emptyValue') }}
         </template>
       </el-table-column>
       <el-table-column sortable :sort-method="sortByUpdatedAt" min-width="160">
@@ -350,6 +379,14 @@ function rowClassName({ row }: { row: TestDataSet }): string {
         </el-button>
       </template>
     </el-dialog>
+    <PreviewProgressDialog
+      v-model="previewDialogVisible"
+      :template-id="templateId"
+      :preview-id="previewDialogPreviewId"
+      :stream-url="previewDialogStreamUrl"
+      :data-set-name="previewDialogDataSetName"
+      @retry="handlePreviewRetry"
+    />
   </div>
 </template>
 

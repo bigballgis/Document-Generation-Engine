@@ -36,6 +36,8 @@ docgen:
       enabled: ${RUNTIME_RATE_LIMIT_ENABLED:true}
       requests-per-minute: ${RUNTIME_RATE_LIMIT_RPM:120}
       burst-capacity: ${RUNTIME_RATE_LIMIT_BURST:120}
+  invocation:
+    cleanup-interval-ms: ${DOCGEN_INVOCATION_CLEANUP_INTERVAL_MS:3600000}
   idempotency:
     cache: ${IDEMPOTENCY_CACHE:redis}
     redis-key-prefix: "docgen:idempotency:"

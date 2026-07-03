@@ -4,12 +4,10 @@ import com.bank.docgen.rendering.api.SubmitTestEligibilityView;
 import com.bank.docgen.rendering.api.SubmitTestEligibilityView.BlockingDetails;
 import com.bank.docgen.rendering.api.SubmitTestEligibilityView.Conditions;
 import com.bank.docgen.rendering.api.SubmitTestEligibilityView.Thresholds;
-import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
 import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
 import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.api.CoverageThresholdView;
 import com.bank.docgen.template.domain.BindingValidationStatus;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
@@ -98,7 +96,7 @@ public class SubmitTestEligibilityService {
             uncoveredAnchors = computeUncoveredAnchors(version.getId());
             uncoveredAnchorsTotal = uncoveredAnchors.size();
             if (latestRun != null && latestRun.getFailedCount() > 0) {
-                failedDataSetNames = collectFailedDataSetNames(latestRun, templateId);
+                failedDataSetNames = collectFailedDataSetNames(latestRun);
             }
         }
 
@@ -147,7 +145,7 @@ public class SubmitTestEligibilityService {
                 .toList();
     }
 
-    private List<String> collectFailedDataSetNames(BatchTestRunEntity run, UUID templateId) {
+    private List<String> collectFailedDataSetNames(BatchTestRunEntity run) {
         try {
             List<Map<String, Object>> samples = objectMapper.readValue(
                     run.getSampleResultsJson() != null ? run.getSampleResultsJson() : "[]",

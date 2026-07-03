@@ -217,6 +217,9 @@ class TemplateExportServiceTest {
                 10000,
                 false,
                 false,
+                true,
+                90,
+                30,
                 Instant.now()
         );
     }

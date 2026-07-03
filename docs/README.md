@@ -1,11 +1,11 @@
 # Documentation Index
 
 **Project baseline:** Restart from zero (2026-06-23); **P0–P11, P13–P21 Done**; **P12 Not Started**
-(catch-all idle; last slice **P12-AUD-M02 Done** 2026-07-01). **Active formal phase: None**
-(2026-07-01). **P2-T06 Done** (Phase B master revision history, 2026-07-01). **P21 Done** — role-journey frontend redesign &
+(catch-all idle; last slice **P12-TEMPLATE-TESTING-OVERHAUL Done** 2026-07-03). **Active formal phase: None**
+(2026-07-03). **P2-T06 Done** (Phase B master revision history, 2026-07-01). **P21 Done** — role-journey frontend redesign &
 business-friendly terminology (**Done** 2026-06-30; T01–T11 + X01–X06 + X02; **AUD-B10 resolved**
 via P12-AUD-B10; **AUD-M02 resolved** via P12-AUD-M02). Latest gates: backend
-`mvn verify` **564**; frontend lint/type-check/test/build green (**528** Vitest, 2026-07-01). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
+`mvn verify` BUILD SUCCESS; frontend lint/type-check/test/build green (**643** Vitest, 2026-07-03). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
 and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 ## Start here

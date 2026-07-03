@@ -80,6 +80,9 @@ class TemplateImportBundleValidatorTest {
                 10000,
                 false,
                 false,
+                true,
+                90,
+                30,
                 Instant.now()
         );
         TemplateExportBundleView bundle = validBundle(List.of(

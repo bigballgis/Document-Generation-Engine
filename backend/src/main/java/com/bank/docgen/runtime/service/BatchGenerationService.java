@@ -48,6 +48,7 @@ public class BatchGenerationService {
     private final BatchExecutionService batchExecutionService;
     private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
     private final TraceIdProvider traceIdProvider;
+    private final InvocationRecordService invocationRecordService;
 
     public BatchGenerationService(
             ApiPolicyRepository apiPolicyRepository,
@@ -59,7 +60,8 @@ public class BatchGenerationService {
             TemplateVersionRepository templateVersionRepository,
             BatchExecutionService batchExecutionService,
             RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder,
-            TraceIdProvider traceIdProvider
+            TraceIdProvider traceIdProvider,
+            InvocationRecordService invocationRecordService
     ) {
         this.apiPolicyRepository = apiPolicyRepository;
         this.asyncTaskRepository = asyncTaskRepository;
@@ -71,6 +73,7 @@ public class BatchGenerationService {
         this.batchExecutionService = batchExecutionService;
         this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
         this.traceIdProvider = traceIdProvider;
+        this.invocationRecordService = invocationRecordService;
     }
 
     @Transactional
@@ -101,6 +104,7 @@ public class BatchGenerationService {
             }
         }
 
+        String auditId = traceIdProvider.newAuditId();
         try {
             BatchExecutionService.BatchExecutionOutcome outcome = batchExecutionService.execute(
                     template,
@@ -136,6 +140,19 @@ public class BatchGenerationService {
                     null,
                     traceId
             );
+            invocationRecordService.recordBatchSync(
+                    template,
+                    policy,
+                    session,
+                    environment,
+                    routeType,
+                    releaseVersion,
+                    resolvedVersion,
+                    request,
+                    outcome.batchResult(),
+                    RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
+                    auditId
+            );
             return new BatchGenerateResultView(outcome.batchResult());
         } catch (SyncBatchFailureException ex) {
             persistBatchTask(
@@ -164,6 +181,19 @@ public class BatchGenerationService {
                     "Batch failed",
                     ex.batchResult().batchId(),
                     traceId
+            );
+            invocationRecordService.recordBatchSync(
+                    template,
+                    policy,
+                    session,
+                    environment,
+                    routeType,
+                    releaseVersion,
+                    resolvedVersion,
+                    request,
+                    ex.batchResult(),
+                    RuntimeGenerationAuditRecorder.OUTCOME_FAILURE,
+                    auditId
             );
             throw ex;
         }
@@ -208,6 +238,7 @@ public class BatchGenerationService {
         );
         asyncTaskRepository.save(task);
         asyncBatchTaskDispatcher.dispatch(task.getId());
+        String auditId = traceIdProvider.newAuditId();
         runtimeGenerationAuditRecorder.recordBatchAsyncAccepted(
                 template,
                 session,
@@ -221,6 +252,19 @@ public class BatchGenerationService {
                 taskId,
                 batchId,
                 traceIdProvider.currentOrNew(null)
+        );
+        invocationRecordService.recordAsyncAccepted(
+                template,
+                policy,
+                session,
+                environment,
+                routeType,
+                releaseVersion,
+                resolvedVersion,
+                request,
+                taskId,
+                batchId,
+                auditId
         );
         GenerationAsyncTaskEntity refreshed = asyncTaskRepository.findById(task.getId()).orElseThrow();
         return new AsyncAcceptedResultView(toTaskSummary(refreshed, template.getExternalId(), environment));

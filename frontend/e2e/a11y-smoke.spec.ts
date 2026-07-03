@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { E2E_ADMIN, E2E_TEMPLATE_AUTHOR, E2E_TEMPLATE_TESTER, loginAs } from './helpers/auth'
+import { assertFolCatalogSeeded } from './helpers/fol-api'
 import { prepareTemplatePendingSubmitReady } from './helpers/submit-approval-gate-api'
 import { openContentModulesList } from './helpers/ui'
 import { P14_T01_VIEWPORT } from './helpers/uiux-evidence'
@@ -71,5 +72,24 @@ test.describe('management shell accessibility smoke', () => {
         .locator('.submit-gate-card')
         .getByRole('heading', { name: /^submission readiness checks$/i }),
     ).toBeVisible()
+  })
+
+  test('template testing workspace exposes primary h2 after author login', async ({ page, request }) => {
+    test.setTimeout(90_000)
+    await page.setViewportSize(P14_T01_VIEWPORT)
+    const fixture = await assertFolCatalogSeeded(request)
+    await loginAs(page, E2E_TEMPLATE_AUTHOR)
+    await page.goto(`/templates/${fixture.templateId}`)
+    await page
+      .locator('.version-lines-card')
+      .getByRole('button', { name: /view detail/i })
+      .first()
+      .click()
+    await expect(page).toHaveURL(/\/dev\//, { timeout: 15_000 })
+    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i }).click()
+    await expect(page.getByRole('heading', { level: 2, name: /^template testing$/i })).toBeVisible({
+      timeout: 15_000,
+    })
+    await expect(page.locator('.test-data-set-panel')).toBeVisible()
   })
 })

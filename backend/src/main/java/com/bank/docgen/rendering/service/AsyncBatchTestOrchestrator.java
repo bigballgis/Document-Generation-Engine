@@ -3,18 +3,14 @@ package com.bank.docgen.rendering.service;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.rendering.api.AsyncBatchStartResponse;
 import com.bank.docgen.rendering.api.PreviewRecordView;
-import com.bank.docgen.rendering.domain.BatchTestRunStatus;
 import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
 import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.api.CoverageDimensionView;
 import com.bank.docgen.template.api.CoverageSummaryView;
-import com.bank.docgen.template.api.CoverageThresholdView;
 import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
 import com.bank.docgen.template.service.CoverageComputationService;
-import com.bank.docgen.template.service.CoverageThresholdResolver;
 import com.bank.docgen.template.service.TemplateAccessDeniedException;
 import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
 import com.bank.docgen.template.service.TemplateService;
@@ -47,7 +43,6 @@ public class AsyncBatchTestOrchestrator {
     private final BatchTestRunRepository batchTestRunRepository;
     private final TestDataSetRepository testDataSetRepository;
     private final CoverageComputationService coverageComputationService;
-    private final CoverageThresholdResolver coverageThresholdResolver;
     private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
     private final SseEmitterRegistry batchSseRegistry;
     private final ObjectMapper objectMapper;
@@ -60,7 +55,6 @@ public class AsyncBatchTestOrchestrator {
             BatchTestRunRepository batchTestRunRepository,
             TestDataSetRepository testDataSetRepository,
             CoverageComputationService coverageComputationService,
-            CoverageThresholdResolver coverageThresholdResolver,
             TemplateCurrentVersionResolver templateCurrentVersionResolver,
             @Qualifier("batchSseRegistry") SseEmitterRegistry batchSseRegistry,
             ObjectMapper objectMapper,
@@ -72,7 +66,6 @@ public class AsyncBatchTestOrchestrator {
         this.batchTestRunRepository = batchTestRunRepository;
         this.testDataSetRepository = testDataSetRepository;
         this.coverageComputationService = coverageComputationService;
-        this.coverageThresholdResolver = coverageThresholdResolver;
         this.templateCurrentVersionResolver = templateCurrentVersionResolver;
         this.batchSseRegistry = batchSseRegistry;
         this.objectMapper = objectMapper;
@@ -143,12 +136,11 @@ public class AsyncBatchTestOrchestrator {
                         "dataSetExternalId", dataSetId
                 ));
 
-                PreviewRecordView preview;
                 boolean success;
                 String errorDetail = null;
 
                 try {
-                    preview = previewGenerationService.runTestGenerateForBatch(
+                    PreviewRecordView preview = previewGenerationService.runTestGenerateForBatch(
                             templateId, dataSetId, runId, session
                     );
                     success = preview.status() == PreviewStatus.SUCCEEDED;
@@ -156,7 +148,6 @@ public class AsyncBatchTestOrchestrator {
                     LOG.warn("Batch sample {} failed: {}", dataSetId, ex.getMessage());
                     success = false;
                     errorDetail = ex.getMessage();
-                    preview = null;
                 }
 
                 if (success) {
@@ -181,7 +172,6 @@ public class AsyncBatchTestOrchestrator {
             }
 
             CoverageSummaryView coverage = computeCoverage(templateId, session);
-            CoverageThresholdView threshold = resolveThreshold(templateId, session);
 
             BigDecimal anchorPct = coverageToBigDecimal(coverage, CoverageComputationService.DIMENSION_ANCHOR_BINDINGS);
             BigDecimal variablePct = coverageToBigDecimal(coverage, CoverageComputationService.DIMENSION_REQUIRED_VARIABLES);
@@ -234,15 +224,6 @@ public class AsyncBatchTestOrchestrator {
             return coverageComputationService.compute(templateId, session);
         } catch (Exception ex) {
             LOG.warn("Failed to compute coverage for templateId={}: {}", templateId, ex.getMessage());
-            return null;
-        }
-    }
-
-    private CoverageThresholdView resolveThreshold(UUID templateId, ManagementSessionClaims session) {
-        try {
-            var template = templateService.requireReadableTemplate(templateId, session);
-            return coverageThresholdResolver.resolveForTemplate(template);
-        } catch (Exception ex) {
             return null;
         }
     }

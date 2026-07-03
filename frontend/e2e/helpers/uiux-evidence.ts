@@ -444,3 +444,43 @@ export async function captureDemoFullFlowScreenshot(page: Page, filename: string
   await page.screenshot({ path: target, fullPage: false })
   return filename
 }
+
+export const P12_TEMPLATE_TESTING_OVERHAUL_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'P12-TEMPLATE-TESTING-OVERHAUL',
+)
+export const P12_TEMPLATE_TESTING_OVERHAUL_SCREENSHOT_DIR = path.join(
+  P12_TEMPLATE_TESTING_OVERHAUL_EVIDENCE_ROOT,
+  'screenshots',
+)
+export const P12_TEMPLATE_TESTING_OVERHAUL_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureP12TemplateTestingOverhaulEvidenceDirs(): void {
+  fs.mkdirSync(P12_TEMPLATE_TESTING_OVERHAUL_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function p12TemplateTestingOverhaulScreenshotPath(filename: string): string {
+  return path.join(P12_TEMPLATE_TESTING_OVERHAUL_SCREENSHOT_DIR, filename)
+}
+
+export async function captureP12TemplateTestingOverhaulScreenshot(
+  page: Page,
+  filename: string,
+): Promise<string> {
+  ensureP12TemplateTestingOverhaulEvidenceDirs()
+  const target = p12TemplateTestingOverhaulScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureP12TemplateTestingOverhaulLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureP12TemplateTestingOverhaulEvidenceDirs()
+  const target = p12TemplateTestingOverhaulScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

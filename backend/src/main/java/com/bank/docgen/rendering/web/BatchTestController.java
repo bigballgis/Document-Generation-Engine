@@ -5,7 +5,6 @@ import com.bank.docgen.rendering.api.BatchTestRunSummaryView;
 import com.bank.docgen.rendering.api.SubmitTestEligibilityView;
 import com.bank.docgen.rendering.service.AsyncBatchTestOrchestrator;
 import com.bank.docgen.rendering.service.BatchTestHistoryService;
-import com.bank.docgen.rendering.service.BatchTestRunNotFoundException;
 import com.bank.docgen.rendering.service.SubmitTestEligibilityService;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;

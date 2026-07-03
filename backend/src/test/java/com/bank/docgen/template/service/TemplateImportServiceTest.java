@@ -8,6 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.apimgmt.api.ApiPolicyView;
+import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.authorization.management.domain.AuthSource;
@@ -151,6 +153,62 @@ class TemplateImportServiceTest {
         verify(templateRepository).save(saved.capture());
         assertThat(saved.getValue().getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.DRAFT);
         assertThat(saved.getValue().getReleaseVersion()).isNull();
+    }
+
+    @Test
+    void importBundle_preservesExistingDefaultRouteOnPolicyUpdate() {
+        TemplateEntity existing = existingTemplate();
+        existing.setLifecycleStatus(TemplateLifecycleStatus.DRAFT);
+        TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), templateId, "10000003");
+        ApiPolicyEntity existingPolicy = ApiPolicyEntity.createSkeleton(templateId, "10000002");
+        existingPolicy.materializeDefaultRouteOnFirstPublish("1.0.0", "10000002");
+        TemplateExportBundleView bundleWithPolicy = new TemplateExportBundleView(
+                bundle.format(),
+                bundle.metadata(),
+                bundle.variables(),
+                bundle.bindings(),
+                bundle.rules(),
+                bundle.contentModuleReferences(),
+                new ApiPolicyView(
+                        templateId.toString(),
+                        1,
+                        List.of("IMPORTED_GROUP"),
+                        null,
+                        List.of("DOCX"),
+                        List.of("SYNC_STREAM"),
+                        false,
+                        10,
+                        100,
+                        10000,
+                        false,
+                        false,
+                        true,
+                        90,
+                        30,
+                        Instant.now()
+                )
+        );
+
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)).thenReturn(Optional.of(approvedMaster()));
+        when(templateRepository.findByIdAndDeletedAtIsNull(templateId)).thenReturn(Optional.of(existing));
+        when(templateRepository.findByExternalIdAndDeletedAtIsNull("TPL-IMPORT-LETTER")).thenReturn(Optional.of(existing));
+        when(templateCurrentVersionResolver.requireLatestVersion(templateId)).thenReturn(version);
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(existingPolicy));
+        when(apiPolicyRepository.save(any(ApiPolicyEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(templateService.toDetail(existing)).thenReturn(detail(TemplateLifecycleStatus.DRAFT));
+
+        service.importBundle(
+                new ImportTemplateRequest(
+                        masterId.toString(),
+                        bundleWithPolicy,
+                        TemplateImportConflictPolicy.KEEP_TEMPLATE_ID
+                ),
+                groupAdmin
+        );
+
+        ArgumentCaptor<ApiPolicyEntity> policyCaptor = ArgumentCaptor.forClass(ApiPolicyEntity.class);
+        verify(apiPolicyRepository).save(policyCaptor.capture());
+        assertThat(policyCaptor.getValue().getDefaultRouteReleaseVersion()).isEqualTo("1.0.0");
     }
 
     @Test

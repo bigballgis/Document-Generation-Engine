@@ -238,82 +238,45 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TemplateAccessDeniedException.class)
     public ResponseEntity<ErrorEnvelope> handleTemplateAccessDenied(HttpServletRequest request) {
-        return domainError(
-                request,
-                HttpStatus.FORBIDDEN,
-                ApiErrorCodes.ACCESS_DENIED,
-                ApiErrorCategories.TEMPLATE,
-                "api.error.template.accessDenied"
-        );
+        return domainError(request, HttpStatus.FORBIDDEN,
+                ApiErrorCodes.ACCESS_DENIED, ApiErrorCategories.TEMPLATE, "api.error.template.accessDenied");
     }
 
     @ExceptionHandler(TemplateValidationException.class)
     public ResponseEntity<ErrorEnvelope> handleTemplateValidation(
-            HttpServletRequest request,
-            TemplateValidationException ex
-    ) {
-        return domainError(
-                request,
-                HttpStatus.UNPROCESSABLE_ENTITY,
-                ApiErrorCodes.TEMPLATE_VALIDATION_FAILED,
-                ApiErrorCategories.TEMPLATE,
-                ex.messageKey()
-        );
+            HttpServletRequest request, TemplateValidationException ex) {
+        return domainError(request, HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorCodes.TEMPLATE_VALIDATION_FAILED, ApiErrorCategories.TEMPLATE, ex.messageKey());
     }
 
     @ExceptionHandler(PreviewNotFoundException.class)
-    public ResponseEntity<ErrorEnvelope> handlePreviewNotFound(HttpServletRequest request) {
-        return domainError(
-                request,
-                HttpStatus.NOT_FOUND,
-                ApiErrorCodes.PREVIEW_NOT_FOUND,
-                ApiErrorCategories.RENDERING,
-                "api.error.rendering.previewNotFound"
-        );
+    public ResponseEntity<ErrorEnvelope> handlePreviewNotFound(HttpServletRequest req) {
+        return renderingDomainError(req, HttpStatus.NOT_FOUND,
+                ApiErrorCodes.PREVIEW_NOT_FOUND, "api.error.rendering.previewNotFound");
     }
 
     @ExceptionHandler(PreviewArtifactNotAvailableException.class)
-    public ResponseEntity<ErrorEnvelope> handlePreviewArtifactNotAvailable(HttpServletRequest request) {
-        return domainError(
-                request,
-                HttpStatus.NOT_FOUND,
-                ApiErrorCodes.PREVIEW_NOT_FOUND,
-                ApiErrorCategories.RENDERING,
-                "api.error.rendering.previewArtifactNotAvailable"
-        );
+    public ResponseEntity<ErrorEnvelope> handlePreviewArtifactNotAvailable(HttpServletRequest req) {
+        return renderingDomainError(req, HttpStatus.NOT_FOUND,
+                ApiErrorCodes.PREVIEW_NOT_FOUND, "api.error.rendering.previewArtifactNotAvailable");
     }
 
     @ExceptionHandler(PreviewArtifactExpiredException.class)
-    public ResponseEntity<ErrorEnvelope> handlePreviewArtifactExpired(HttpServletRequest request) {
-        return domainError(
-                request,
-                HttpStatus.GONE,
-                ApiErrorCodes.PREVIEW_ARTIFACT_EXPIRED,
-                ApiErrorCategories.RENDERING,
-                "api.error.rendering.previewArtifactExpired"
-        );
+    public ResponseEntity<ErrorEnvelope> handlePreviewArtifactExpired(HttpServletRequest req) {
+        return renderingDomainError(req, HttpStatus.GONE,
+                ApiErrorCodes.PREVIEW_ARTIFACT_EXPIRED, "api.error.rendering.previewArtifactExpired");
     }
 
     @ExceptionHandler(PreviewConcurrencyLimitException.class)
-    public ResponseEntity<ErrorEnvelope> handlePreviewConcurrencyLimit(HttpServletRequest request) {
-        return domainError(
-                request,
-                HttpStatus.TOO_MANY_REQUESTS,
-                ApiErrorCodes.PREVIEW_CONCURRENCY_LIMIT_EXCEEDED,
-                ApiErrorCategories.RENDERING,
-                "api.error.rendering.previewConcurrencyLimitExceeded"
-        );
+    public ResponseEntity<ErrorEnvelope> handlePreviewConcurrencyLimit(HttpServletRequest req) {
+        return renderingDomainError(req, HttpStatus.TOO_MANY_REQUESTS,
+                ApiErrorCodes.PREVIEW_CONCURRENCY_LIMIT_EXCEEDED, "api.error.rendering.previewConcurrencyLimitExceeded");
     }
 
     @ExceptionHandler(BatchTestRunNotFoundException.class)
-    public ResponseEntity<ErrorEnvelope> handleBatchTestRunNotFound(HttpServletRequest request) {
-        return domainError(
-                request,
-                HttpStatus.NOT_FOUND,
-                ApiErrorCodes.BATCH_TEST_RUN_NOT_FOUND,
-                ApiErrorCategories.RENDERING,
-                "api.error.rendering.batchTestRunNotFound"
-        );
+    public ResponseEntity<ErrorEnvelope> handleBatchTestRunNotFound(HttpServletRequest req) {
+        return renderingDomainError(req, HttpStatus.NOT_FOUND,
+                ApiErrorCodes.BATCH_TEST_RUN_NOT_FOUND, "api.error.rendering.batchTestRunNotFound");
     }
 
     @ExceptionHandler(PreviewGenerationException.class)
@@ -354,13 +317,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuditAccessDeniedException.class)
     public ResponseEntity<ErrorEnvelope> handleAuditAccessDenied(HttpServletRequest request) {
-        return domainError(
-                request,
-                HttpStatus.FORBIDDEN,
-                ApiErrorCodes.ACCESS_DENIED,
-                ApiErrorCategories.AUDIT,
-                "api.error.authorization.accessDenied"
-        );
+        return domainError(request, HttpStatus.FORBIDDEN,
+                ApiErrorCodes.ACCESS_DENIED, ApiErrorCategories.AUDIT, "api.error.authorization.accessDenied");
     }
 
     @ExceptionHandler(AuditValidationException.class)
@@ -706,6 +664,11 @@ public class GlobalExceptionHandler {
 
     private boolean isRequiredConstraint(String code) {
         return "NotBlank".equals(code) || "NotNull".equals(code) || "NotEmpty".equals(code);
+    }
+
+    private ResponseEntity<ErrorEnvelope> renderingDomainError(
+            HttpServletRequest request, HttpStatus status, String code, String messageKey) {
+        return domainError(request, status, code, ApiErrorCategories.RENDERING, messageKey);
     }
 
     private String validationReason(org.springframework.validation.FieldError error) {

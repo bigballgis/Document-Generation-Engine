@@ -1,8 +1,8 @@
 # P12 — API Package Access & Invocation Records (Detailed Plan)
 
 **Slice ID:** `P12-API-PACKAGE-ACCESS-INVOCATION`  
-**Phase status:** **Not Started** (BDD **ready** 2026-07-03) | **Depends on:** P6, P7, P17, P21, template package hub (P3-T06)  
-**Active phase note:** P12 phase remains **In Progress** on **P12-TEMPLATE-TESTING-OVERHAUL**; this slice is **queued** — do not switch active slice until testing overhaul completes or user reprioritizes.
+**Slice status:** **In Progress** (activated 2026-07-03) | **Depends on:** P6, P7, P17, P21, template package hub (P3-T06)  
+**Active phase note:** P12 catch-all **In Progress** — this slice is the **single active slice**. Backend **T01–T06 Done** (2026-07-03); **frontend T07–T09** + E2E **T11–T12** remain.
 
 > **BDD:** [api-package-access-and-invocation-records.md](../../behavior/api-package-access-and-invocation-records.md) (`BDD-API-PACKAGE-ACCESS-INVOCATION-001`, status **ready**)
 
@@ -44,12 +44,12 @@ Reframe API management as **package-first configuration** (not a separate catalo
 
 | ID | Owner | Task | Status |
 | --- | --- | --- | --- |
-| **P12-API-PKG-T01** | backend-engineer | Flyway: extend `api_policy` (`save_generated_documents`, `invocation_record_retention_days`, `document_retention_days`); platform defaults constant; `ApiPolicyPlatformDefaults` | Not Started |
-| **P12-API-PKG-T02** | backend-engineer | Lifecycle: `ensureApiPolicySkeleton` on `PENDING_RELEASE`; `ensureApiPolicyOnPublish(releaseVersion)` before publish gate; remove pre-publish «policy must exist» blocker; import must not silent-clear default | Not Started |
-| **P12-API-PKG-T03** | backend-engineer | Flyway: `api_invocation_record` table; `InvocationRecordService` write on generate/batch/async; link idempotency/task; sanitize encryption fields (C12); replay rule (C13) | Not Started |
-| **P12-API-PKG-T04** | backend-engineer | Retention scheduler: cleanup records + artifacts per package TTL; four-layer clock (15m download / 7d idempotency / doc / record) | Not Started |
-| **P12-API-PKG-T05** | backend-engineer | Runtime API: `GET …/invocations` (`view=logical\|flat`, `requestId` filter); `GET …/invocations/{invocationId}`; extend download TTL when save enabled | Not Started |
-| **P12-API-PKG-T06** | backend-engineer | Management: retention domain save + `INVOCATION_RETENTION` audit; backfill migration for published packages missing policy | Not Started |
+| **P12-API-PKG-T01** | backend-engineer | Flyway: extend `api_policy` (`save_generated_documents`, `invocation_record_retention_days`, `document_retention_days`); platform defaults constant; `ApiPolicyPlatformDefaults` | **Done** (2026-07-03) |
+| **P12-API-PKG-T02** | backend-engineer | Lifecycle: `ensureApiPolicySkeleton` on `PENDING_RELEASE`; `ensureApiPolicyOnPublish(releaseVersion)` before publish gate; remove pre-publish «policy must exist» blocker; import must not silent-clear default | **Done** (2026-07-03) |
+| **P12-API-PKG-T03** | backend-engineer | Flyway: `api_invocation_record` table; `InvocationRecordService` write on generate/batch/async; link idempotency/task; sanitize encryption fields (C12); replay rule (C13) | **Done** (2026-07-03) |
+| **P12-API-PKG-T04** | backend-engineer | Retention scheduler: cleanup records + artifacts per package TTL; four-layer clock (15m download / 7d idempotency / doc / record) | **Done** (2026-07-03) |
+| **P12-API-PKG-T05** | backend-engineer | Runtime API: `GET …/invocations` (`view=logical\|flat`, `requestId` filter); `GET …/invocations/{invocationId}`; extend download TTL when save enabled | **Done** (2026-07-03) |
+| **P12-API-PKG-T06** | backend-engineer | Management: retention domain save + `INVOCATION_RETENTION` audit; backfill migration for published packages missing policy | **Done** (2026-07-03) |
 | **P12-API-PKG-T07** | frontend-engineer | Package hub **External access** tab: L1 (routes, AD Group, default, retention presets, credentials); advanced collapsed; remove empty «not configured» state | Not Started |
 | **P12-API-PKG-T08** | frontend-engineer | Deprecate/downgrade `ApiPolicyHomeView` catalog → dashboard cross-package alerts; redirect deep links to package hub tab | Not Started |
 | **P12-API-PKG-T09** | frontend-engineer | Admin L2 read-only recent invocations panel on hub (summary, no variable plaintext) | Not Started |

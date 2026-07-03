@@ -3,6 +3,9 @@ import type { ApiEnvelope } from '@/types/session'
 import type { PageView } from '@/types/identity'
 import type {
   AnchorBinding,
+  AsyncPreviewStarted,
+  BatchTestRunSummary,
+  BatchTestStarted,
   BindingValidationResult,
   BatchTestGeneratePayload,
   BatchTestSummary,
@@ -22,6 +25,7 @@ import type {
   PublishGateChecklist,
   PublishTemplatePayload,
   RuleValidationResult,
+  SubmitTestEligibility,
   TemplateContentModuleReference,
   TemplateDetail,
   TemplateDevVersionCreated,
@@ -493,6 +497,62 @@ export async function listTemplateContentModuleReferences(
     `/templates/${templateId}/content-module-references`,
   )
   return unwrap(response.data)
+}
+
+export async function startAsyncPreview(
+  templateId: string,
+  payload: { testDataSetId: string },
+): Promise<AsyncPreviewStarted> {
+  const response = await http.post<ApiEnvelope<AsyncPreviewStarted>>(
+    `/templates/${templateId}/previews/async-preview`,
+    payload,
+  )
+  return unwrap(response.data)
+}
+
+export async function runBatchTest(templateId: string): Promise<BatchTestStarted> {
+  const response = await http.post<ApiEnvelope<BatchTestStarted>>(
+    `/templates/${templateId}/batch-tests/run`,
+  )
+  return unwrap(response.data)
+}
+
+export async function getBatchTestHistory(templateId: string): Promise<BatchTestRunSummary[]> {
+  const response = await http.get<ApiEnvelope<BatchTestRunSummary[]>>(
+    `/templates/${templateId}/batch-tests`,
+    { params: { limit: 5 } },
+  )
+  return unwrap(response.data)
+}
+
+export async function getSubmitTestEligibility(
+  templateId: string,
+): Promise<SubmitTestEligibility> {
+  const response = await http.get<
+    ApiEnvelope<{
+      eligible: boolean
+      conditions: {
+        hasValidTestResult: boolean
+        allSamplesSucceeded: boolean
+        coverageGatePassed: boolean
+      }
+      blockingDetails: {
+        uncoveredAnchors: string[]
+        uncoveredVariables: string[]
+        failedDataSetNames: string[]
+      }
+    }>
+  >(`/templates/${templateId}/batch-tests/submit-eligibility`)
+  const result = unwrap(response.data)
+  return {
+    eligible: result.eligible,
+    hasValidTestResult: result.conditions.hasValidTestResult,
+    allSamplesSucceeded: result.conditions.allSamplesSucceeded,
+    coverageGatePassed: result.conditions.coverageGatePassed,
+    failedDataSetNames: result.blockingDetails.failedDataSetNames,
+    uncoveredAnchors: result.blockingDetails.uncoveredAnchors,
+    uncoveredVariables: result.blockingDetails.uncoveredVariables,
+  }
 }
 
 export async function upsertTemplateContentModuleReference(

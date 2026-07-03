@@ -7,7 +7,7 @@ import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import * as templatesApi from '@/api/templates'
-import type { CoverageSummary } from '@/types/template'
+import type { CoverageSummary, SubmitTestEligibility } from '@/types/template'
 import { ElMessage } from 'element-plus'
 
 const props = withDefaults(
@@ -24,6 +24,7 @@ const props = withDefaults(
 const { t } = useI18n()
 const loading = ref(false)
 const summary = ref<CoverageSummary | null>(null)
+const eligibility = ref<SubmitTestEligibility | null>(null)
 
 const dimensionLabelKey = computed(() => ({
   REQUIRED_VARIABLES: 'templates.coverage.dimensions.requiredVariables',
@@ -39,12 +40,26 @@ const { paginatedRows: paginatedDimensions, totalRows: totalDimensionRows } = us
   CLIENT_TABLE_PAGE_SIZE,
 )
 
+const uncoveredAnchors = computed(() => eligibility.value?.uncoveredAnchors ?? [])
+const uncoveredVariables = computed(() => eligibility.value?.uncoveredVariables ?? [])
+const hasUncoveredAnchors = computed(() => uncoveredAnchors.value.length > 0)
+const hasUncoveredVariables = computed(() => uncoveredVariables.value.length > 0)
+
 async function loadCoverage() {
   loading.value = true
   try {
-    summary.value = await templatesApi.getTemplateCoverage(props.templateId)
-  } catch {
-    ElMessage.error(t('templates.coverage.error.load'))
+    const [coverageResult, eligibilityResult] = await Promise.allSettled([
+      templatesApi.getTemplateCoverage(props.templateId),
+      templatesApi.getSubmitTestEligibility(props.templateId),
+    ])
+    if (coverageResult.status === 'fulfilled') {
+      summary.value = coverageResult.value
+    } else {
+      ElMessage.error(t('templates.coverage.error.load'))
+    }
+    if (eligibilityResult.status === 'fulfilled') {
+      eligibility.value = eligibilityResult.value
+    }
   } finally {
     loading.value = false
   }
@@ -103,7 +118,7 @@ watch(
         </template>
       </el-alert>
 
-      <p v-if="!compact" class="threshold-hint">
+      <p class="threshold-hint" :class="{ 'threshold-hint--compact': compact }">
         {{
           t('templates.coverage.thresholdHint', {
             scope: summary.appliedThreshold.scopeType,
@@ -152,6 +167,35 @@ watch(
         :page-size="CLIENT_TABLE_PAGE_SIZE"
         :total="totalDimensionRows"
       />
+
+      <!-- T12: Uncovered items sections -->
+      <div v-if="hasUncoveredAnchors || hasUncoveredVariables" class="coverage-uncovered">
+        <el-collapse>
+          <el-collapse-item
+            v-if="hasUncoveredAnchors"
+            :title="t('templates.coverage.uncoveredAnchors.title') + ` (${uncoveredAnchors.length})`"
+            name="anchors"
+          >
+            <ul class="coverage-uncovered__list">
+              <li v-for="anchor in uncoveredAnchors" :key="anchor" class="coverage-uncovered__item">
+                {{ anchor }}
+              </li>
+            </ul>
+          </el-collapse-item>
+
+          <el-collapse-item
+            v-if="hasUncoveredVariables"
+            :title="t('templates.coverage.uncoveredVariables.title') + ` (${uncoveredVariables.length})`"
+            name="variables"
+          >
+            <ul class="coverage-uncovered__list">
+              <li v-for="varKey in uncoveredVariables" :key="varKey" class="coverage-uncovered__item">
+                {{ varKey }}
+              </li>
+            </ul>
+          </el-collapse-item>
+        </el-collapse>
+      </div>
     </template>
   </div>
 </template>
@@ -170,9 +214,33 @@ watch(
 .threshold-hint {
   margin: 0 0 1rem;
   color: var(--text-muted);
+
+  &--compact {
+    margin: 0.5rem 0 0.75rem;
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
+  }
 }
 
 .coverage-table {
   width: 100%;
+}
+
+.coverage-uncovered {
+  margin-top: 1rem;
+
+  &__list {
+    margin: 0;
+    padding: 0 0 0 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  &__item {
+    font-size: 0.875rem;
+    font-family: var(--font-mono, monospace);
+    color: var(--text-default);
+  }
 }
 </style>

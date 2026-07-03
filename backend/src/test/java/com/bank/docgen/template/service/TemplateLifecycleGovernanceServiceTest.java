@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.apimgmt.service.ApiPolicyMaterializationService;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
@@ -65,6 +66,8 @@ class TemplateLifecycleGovernanceServiceTest {
     @Mock
     private ApprovalSubStateResolver approvalSubStateResolver;
     @Mock
+    private ApiPolicyMaterializationService apiPolicyMaterializationService;
+    @Mock
     private ApiPolicyRepository apiPolicyRepository;
 
     private TemplateLifecycleService service;
@@ -89,6 +92,7 @@ class TemplateLifecycleGovernanceServiceTest {
                 collaborationWorkItemWriter,
                 renderProfileService,
                 approvalSubStateResolver,
+                apiPolicyMaterializationService,
                 apiPolicyRepository
         );
         groupAdmin = session(List.of("GROUP_ADMIN"), List.of("RETAIL"));

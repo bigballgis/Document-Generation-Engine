@@ -22,10 +22,10 @@ same gate bar (backend `mvn verify` 114 tests green / JaCoCo met; frontend lint/
 | Epic/milestone mirror | [docs/plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md) |
 | Gate logs | Backend `mvn verify`; frontend lint/type-check/test/build (2026-06-23) |
 
-**Active formal phase:** **None** (2026-07-01 — P12-AUD-M02 **Done**; P12 catch-all **Not Started**). **P21 Done** (2026-06-30). User sequence **P14 → P15 → P18** complete.
+**Active formal phase:** **None** (2026-07-03 — **P12-TEMPLATE-TESTING-OVERHAUL Done**; P12 catch-all **Not Started**). **P21 Done** (2026-06-30). User sequence **P14 → P15 → P18** complete.
 
-**Latest gate evidence (authoritative):** backend `mvn verify` **558** tests (2026-07-01, P12-AUD-B10);
-frontend **521** Vitest (2026-07-01, P12-AUD-M02); see [execution-sync-ledger.md](./plan/execution-sync-ledger.md).
+**Latest gate evidence (authoritative):** backend `mvn verify` BUILD SUCCESS (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL);
+frontend **643** Vitest (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL); Playwright T13 **8+1** passed, **3** skipped (documented); UIUX manifest **PASS**; see [execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 | Phase | Status | Closed |
 | --- | --- | --- |
@@ -38,7 +38,7 @@ frontend **521** Vitest (2026-07-01, P12-AUD-M02); see [execution-sync-ledger.md
 | P18 Structured authoring & fidelity | Done | 2026-06-28 |
 | P19 Verifiability & publish gate | Done | 2026-06-25 |
 | P20 i18n & UI upgradeability | Done | 2026-06-25 |
-| P12 Deferred enhancements (P12-AUD-M02) | Not Started (slice Done) | 2026-07-01 (P12-AUD-M02 closed) |
+| P12 Deferred enhancements (P12-TEMPLATE-TESTING-OVERHAUL) | Not Started (slice Done) | 2026-07-03 (P12-TEMPLATE-TESTING-OVERHAUL T01–T13 closed) |
 | P21 Role-journey frontend redesign | Done | 2026-06-30 |
 
 **P14 summary:** content modules (T01), collaboration to-dos + timeout escalation (T02),
