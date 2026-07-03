@@ -16,6 +16,7 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.service.TemplateValidationException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,7 +28,7 @@ public class BatchExecutionService {
 
     public BatchExecutionService(
             DocumentGenerationEngine documentGenerationEngine,
-            IdempotencyService idempotencyService,
+            @Lazy IdempotencyService idempotencyService,
             MessageResolver messageResolver
     ) {
         this.documentGenerationEngine = documentGenerationEngine;

@@ -21,25 +21,31 @@ describe('templates API', () => {
     vi.mocked(http.get).mockResolvedValue({
       data: {
         metadata: {},
-        result: [
-          {
-            id: 'tpl-1',
-            externalId: 'TPL-RETAIL-LETTER',
-            groupCode: 'RETAIL',
-            name: 'Retail letter',
-            lifecycleStatus: 'DRAFT',
-            releaseVersion: null,
-            masterId: 'master-1',
-            updatedAt: '2026-06-23T10:00:00Z',
-          },
-        ],
+        result: {
+          content: [
+            {
+              id: 'tpl-1',
+              externalId: 'TPL-RETAIL-LETTER',
+              groupCode: 'RETAIL',
+              name: 'Retail letter',
+              lifecycleStatus: 'DRAFT',
+              releaseVersion: null,
+              masterId: 'master-1',
+              updatedAt: '2026-06-23T10:00:00Z',
+            },
+          ],
+          page: 0,
+          size: 20,
+          totalElements: 1,
+          totalPages: 1,
+        },
       },
     })
 
-    const templates = await templatesApi.listTemplates()
+    const pageView = await templatesApi.listTemplates(0, 20)
 
-    expect(http.get).toHaveBeenCalledWith('/templates')
-    expect(templates[0]?.externalId).toBe('TPL-RETAIL-LETTER')
+    expect(http.get).toHaveBeenCalledWith('/templates', { params: { page: 0, size: 20 } })
+    expect(pageView.content[0]?.externalId).toBe('TPL-RETAIL-LETTER')
   })
 
   it('submits template for test', async () => {

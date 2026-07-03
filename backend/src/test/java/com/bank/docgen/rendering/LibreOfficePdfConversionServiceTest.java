@@ -28,13 +28,19 @@ class LibreOfficePdfConversionServiceTest {
     private ThreadPoolTaskExecutor testPool;
 
     @BeforeEach
-    void setUp() throws URISyntaxException {
+    void setUp() throws URISyntaxException, IOException {
         properties = new DocgenRenderingProperties();
+        String scriptName = System.getProperty("os.name", "").toLowerCase().contains("win")
+                ? "fake-libreoffice.cmd"
+                : "fake-libreoffice.sh";
         fakeLibreOfficeScript = Path.of(
                 LibreOfficePdfConversionServiceTest.class
-                        .getResource("/scripts/fake-libreoffice.cmd")
+                        .getResource("/scripts/" + scriptName)
                         .toURI()
         );
+        if (!System.getProperty("os.name", "").toLowerCase().contains("win")) {
+            fakeLibreOfficeScript.toFile().setExecutable(true);
+        }
         testPool = pdfConversionPool();
     }
 
@@ -79,11 +85,17 @@ class LibreOfficePdfConversionServiceTest {
 
     @Test
     void removesTempDirectoryAfterFailedConversion() throws URISyntaxException, IOException {
+        String failScriptName = System.getProperty("os.name", "").toLowerCase().contains("win")
+                ? "fake-libreoffice-fail.cmd"
+                : "fake-libreoffice-fail.sh";
         Path failScript = Path.of(
                 LibreOfficePdfConversionServiceTest.class
-                        .getResource("/scripts/fake-libreoffice-fail.cmd")
+                        .getResource("/scripts/" + failScriptName)
                         .toURI()
         );
+        if (!System.getProperty("os.name", "").toLowerCase().contains("win")) {
+            failScript.toFile().setExecutable(true);
+        }
         properties.setLibreOfficeCommand(failScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();
@@ -96,11 +108,17 @@ class LibreOfficePdfConversionServiceTest {
 
     @Test
     void rejectsNonZeroExitCode() throws URISyntaxException, IOException {
+        String failScriptName = System.getProperty("os.name", "").toLowerCase().contains("win")
+                ? "fake-libreoffice-fail.cmd"
+                : "fake-libreoffice-fail.sh";
         Path failScript = Path.of(
                 LibreOfficePdfConversionServiceTest.class
-                        .getResource("/scripts/fake-libreoffice-fail.cmd")
+                        .getResource("/scripts/" + failScriptName)
                         .toURI()
         );
+        if (!System.getProperty("os.name", "").toLowerCase().contains("win")) {
+            failScript.toFile().setExecutable(true);
+        }
         properties.setLibreOfficeCommand(failScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();

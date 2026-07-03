@@ -2,6 +2,20 @@ spring:
   config:
     activate:
       on-profile: prod
+  datasource:
+    hikari:
+      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:20}
+      minimum-idle: ${HIKARI_MIN_IDLE:5}
+      connection-timeout: ${HIKARI_CONNECTION_TIMEOUT_MS:30000}
+      idle-timeout: ${HIKARI_IDLE_TIMEOUT_MS:600000}
+      max-lifetime: ${HIKARI_MAX_LIFETIME_MS:1800000}
+
+docgen:
+  runtime:
+    rate-limit:
+      distributed: ${RUNTIME_RATE_LIMIT_DISTRIBUTED:false}
+  multi-instance:
+    sse-sticky-sessions-required: true
 
 management:
   endpoints:

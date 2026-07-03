@@ -30,6 +30,10 @@ import type { ApiPolicyDomain, ApiPolicyDomainFormMap, InvocationRetentionDomain
 
 export const useTemplatesStore = defineStore('templates', () => {
   const templates = ref<TemplateSummary[]>([])
+  const templateListPage = ref(0)
+  const templateListSize = ref(20)
+  const templateListTotalElements = ref(0)
+  const templateListTotalPages = ref(0)
   const selectedTemplate = ref<TemplateDetail | null>(null)
   const apiPolicy = ref<ApiPolicy | null>(null)
   const credentials = ref<ApiCredentialSummary[]>([])
@@ -57,11 +61,16 @@ export const useTemplatesStore = defineStore('templates', () => {
     return grouped
   })
 
-  async function fetchTemplates(): Promise<void> {
+  async function fetchTemplates(page = templateListPage.value, size = templateListSize.value): Promise<void> {
     loadingList.value = true
     lastErrorMessageKey.value = null
     try {
-      templates.value = await templatesApi.listTemplates()
+      const pageView = await templatesApi.listTemplates(page, size)
+      templates.value = pageView.content
+      templateListPage.value = pageView.page
+      templateListSize.value = pageView.size
+      templateListTotalElements.value = pageView.totalElements
+      templateListTotalPages.value = pageView.totalPages
     } catch (error) {
       lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.loadList')
       throw error
@@ -499,6 +508,10 @@ export const useTemplatesStore = defineStore('templates', () => {
 
   return {
     templates,
+    templateListPage,
+    templateListSize,
+    templateListTotalElements,
+    templateListTotalPages,
     selectedTemplate,
     apiPolicy,
     credentials,

@@ -52,7 +52,7 @@ class RuntimeRateLimitFilterTest {
         ConsumptionProbe rejected = mock(ConsumptionProbe.class);
         when(rejected.isConsumed()).thenReturn(false);
         when(rejected.getNanosToWaitForRefill()).thenReturn(2_000_000_000L);
-        when(rateLimitService.tryConsume("CRED-1", "svc-caller")).thenReturn(rejected);
+        when(rateLimitService.tryConsumeKey("CRED-1:svc-caller")).thenReturn(rejected);
 
         MockHttpServletRequest request = new MockHttpServletRequest(
                 "POST", "/api/dev/v1/templates/TPL-001/generate");
@@ -75,7 +75,7 @@ class RuntimeRateLimitFilterTest {
         when(rateLimitService.enabled()).thenReturn(true);
         ConsumptionProbe accepted = mock(ConsumptionProbe.class);
         when(accepted.isConsumed()).thenReturn(true);
-        when(rateLimitService.tryConsume("CRED-1", "svc-caller")).thenReturn(accepted);
+        when(rateLimitService.tryConsumeKey("CRED-1:svc-caller")).thenReturn(accepted);
 
         MockHttpServletRequest request = new MockHttpServletRequest(
                 "POST", "/api/dev/v1/templates/TPL-001/generate");

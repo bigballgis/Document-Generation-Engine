@@ -24,7 +24,10 @@ public class RuntimeRateLimitService {
     }
 
     public ConsumptionProbe tryConsume(String credentialExternalId, String accessAccount) {
-        String key = credentialExternalId + ":" + accessAccount;
+        return tryConsumeKey(credentialExternalId + ":" + accessAccount);
+    }
+
+    public ConsumptionProbe tryConsumeKey(String key) {
         Bucket bucket = buckets.computeIfAbsent(key, ignored -> newBucket());
         return bucket.tryConsumeAndReturnRemaining(1);
     }

@@ -160,7 +160,7 @@ public class StructuredContentDocxWriter {
             String type = node.path("type").asText("");
             if ("conditionBlock".equals(type)) {
                 if (evaluateSimpleCondition(node.path("conditionExpression").asText(""), variables)) {
-                    writeInlineOrBlockChildren(node, paragraph, true);
+                    writeInlineOrBlockChildren(node, paragraph);
                 }
                 return;
             }
@@ -195,7 +195,7 @@ public class StructuredContentDocxWriter {
             String loopVariable = node.path("loopVariable").asText("");
             Object rawItems = variables.get(loopVariable);
             if (!(rawItems instanceof List<?> items) || items.isEmpty()) {
-                writeInlineOrBlockChildren(node, paragraph, true);
+                writeInlineOrBlockChildren(node, paragraph);
                 return;
             }
             XWPFParagraph current = paragraph;
@@ -210,10 +210,10 @@ public class StructuredContentDocxWriter {
                         numberingCounters
                 );
                 if (itemIndex == 0) {
-                    scopedSession.writeInlineOrBlockChildren(node, current, true);
+                    scopedSession.writeInlineOrBlockChildren(node, current);
                 } else {
                     XWPFParagraph next = insertParagraphAfter(current);
-                    scopedSession.writeInlineOrBlockChildren(node, next, true);
+                    scopedSession.writeInlineOrBlockChildren(node, next);
                     current = next;
                 }
             }
@@ -291,7 +291,7 @@ public class StructuredContentDocxWriter {
             return builder.toString();
         }
 
-        private void writeInlineOrBlockChildren(JsonNode node, XWPFParagraph paragraph, boolean blockLevel) {
+        private void writeInlineOrBlockChildren(JsonNode node, XWPFParagraph paragraph) {
             JsonNode children = node.path("children");
             if (!children.isArray()) {
                 return;

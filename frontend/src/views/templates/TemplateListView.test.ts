@@ -46,20 +46,26 @@ describe('TemplateListView', () => {
   })
 
   it('renders templates in a flat table with group column', async () => {
-    vi.mocked(templatesApi.listTemplates).mockResolvedValue([
-      {
-        id: 'tpl-1',
-        externalId: 'TPL-RETAIL-LETTER',
-        groupCode: 'RETAIL',
-        name: 'Retail letter',
-        lifecycleStatus: 'DRAFT',
-        releaseVersion: null,
-        releaseVersionCount: 0,
-        masterId: 'master-1',
-        updatedBy: '10000001',
-        updatedAt: '2026-06-23T10:00:00Z',
-      },
-    ])
+    vi.mocked(templatesApi.listTemplates).mockResolvedValue({
+      content: [
+        {
+          id: 'tpl-1',
+          externalId: 'TPL-RETAIL-LETTER',
+          groupCode: 'RETAIL',
+          name: 'Retail letter',
+          lifecycleStatus: 'DRAFT',
+          releaseVersion: null,
+          releaseVersionCount: 0,
+          masterId: 'master-1',
+          updatedBy: '10000001',
+          updatedAt: '2026-06-23T10:00:00Z',
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
 
     const i18n = createI18n({
       legacy: false,
@@ -84,7 +90,13 @@ describe('TemplateListView', () => {
   })
 
   it('shows import action for export-capable users', async () => {
-    vi.mocked(templatesApi.listTemplates).mockResolvedValue([])
+    vi.mocked(templatesApi.listTemplates).mockResolvedValue({
+      content: [],
+      page: 0,
+      size: 20,
+      totalElements: 0,
+      totalPages: 0,
+    })
 
     const i18n = createI18n({
       legacy: false,

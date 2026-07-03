@@ -9,17 +9,21 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Lazy
 public class IdempotencyService {
 
     private final GenerationIdempotencyRepository repository;
     private final IdempotencyCachePort idempotencyCachePort;
     private final MessageDigestFactory messageDigestFactory;
 
+    @Autowired
     public IdempotencyService(
             GenerationIdempotencyRepository repository,
             IdempotencyCachePort idempotencyCachePort

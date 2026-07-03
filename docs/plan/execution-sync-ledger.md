@@ -1,6 +1,7 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-07-03 (**P12-API-PACKAGE-ACCESS-INVOCATION slice Done** — T01–T12 complete; Playwright **10/10** + UIUX manifest **PASS**; commit `2e61dc3`)
+**Last synced:** 2026-07-03 (**SOR full implementation wave** — `cursor/sor-full-implementation-1385`; backend `mvn verify` + frontend **654** Vitest; see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
+**Authoritative gate snapshot (2026-07-03):** backend Surefire **654+** (post-SOR); frontend Vitest **654**; Playwright smoke tier **5** specs in CI (`test:e2e:docker`).
 **Completion note (2026-07-03, P12-API-PKG):** **P12-API-PACKAGE-ACCESS-INVOCATION slice Done** — package-first API access + invocation records. **Backend T01–T06:** Flyway V43–V45; materialize/gate; `InvocationRecordService`; retention scheduler; runtime + management invocation APIs. **Frontend T07–T09:** hub External access L1; `ApiPolicyHomeView` overview downgrade; `TemplateRecentInvocationsPanel`. **E2E T11:** `P12-API-PACKAGE-ACCESS.spec.ts` **6/6**, `P12-API-PACKAGE-ACCESS-RUNTIME.spec.ts` **1/1** (BDD S5 generate + caller query); S1–S3/S7 batch flat deferred. **UIUX T12:** `P12-API-PACKAGE-ACCESS-uiux-evidence.spec.ts` **3/3**; manifest `frontend/e2e/evidence/P12-API-PACKAGE-ACCESS-uiux-manifest.md` **PASS** (4 screenshots REDBC/GREENBC). **Gate:** Docker redeploy ✓; Playwright Docker **10/10**; prior `ManagementInvocationQueryServiceTest` ✓; frontend Vitest **646** ✓. **P12 catch-all → Not Started** (slice complete). **Active formal phase: P22** (**P22-T01 next**). Traceability: [P12-api-package-access-invocation-records.md](./detail/P12-api-package-access-invocation-records.md).
 **Last synced (prior):** 2026-07-03 (**P22-DEMO-EXPANSION activated → In Progress** — BDD ready; P22-T01–T15 Not Started; **P22-T01 next**; plan-orchestrator only — no implementation code)
 **Activation note (2026-07-03):** **P22-DEMO-EXPANSION activated → In Progress** (sole formal phase `In Progress`). **P12-API-PACKAGE-ACCESS-INVOCATION → Done** (2026-07-03 — full slice T01–T12; see completion note above). **P12 catch-all → Not Started**. BDD **ready** (`docs/requirements/demo-expansion-behavior-spec.md`). **P22-T01…T15 Not Started** — **P22-T01 next**. Traceability: [P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md).
@@ -338,7 +339,7 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P9 | Done | Observability, local security gates, prod compose profile |
 | P10 | Done | Secure download with expiry |
 | P11 | Done | Batch + async task lifecycle |
-| P12 | In Progress (2026-07-03) | Active slice **P12-API-PACKAGE-ACCESS-INVOCATION** (BDD ready; T01–T02 next); prior **P12-TEMPLATE-TESTING-OVERHAUL Done** (T01–T13); see [P12 detail](./detail/P12-deferred-enhancements.md) |
+| P12 | Not Started (2026-07-03) | Catch-all idle — last slice **P12-API-PACKAGE-ACCESS-INVOCATION Done** (T01–T12); **P22** sole formal phase `In Progress`; see [P12 detail](./detail/P12-deferred-enhancements.md) |
 | P13 | Done | Identity & group administration (user + group management plane); green gates 2026-06-23 — see P13 mirror block |
 | P14 | Done (2026-06-27) | Confirmed large domains — **P14-T01 Done** (T01a–T01e + architecture remediation); **P14-T02 Done** (T02a–T02d + E2E **3/3** + UIUX **5/5**); **P14-T03 Done** (T03a–T03c + E2E **2/2** + UIUX **7/7**); backend **481**; frontend **235+**; OpenAPI export/import contract; architecture re-review **PASS** (2026-06-26); see [P14 detail](./detail/P14-confirmed-large-domains.md) |
 | P15 | Done (2026-06-27) | Kubernetes deployment & container hardening — T01–T10; [`deploy/README.md`](../deploy/README.md); helm validate + CI gates green — see [P15 detail](./detail/P15-kubernetes-deployment-container-hardening.md) |
@@ -349,9 +350,9 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
 | P21 | Done (2026-06-30) | Role-journey frontend redesign — T01–T11 + X01–X06 + **X02** governance close; backend **`mvn verify` 553**; frontend **511** Vitest; Playwright/UIUX per sub-phase; **AUD-B10 resolved** (P12-AUD-B10 Done 2026-07-01); **AUD-M02 resolved** (P12-AUD-M02 Done 2026-07-01) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
-**Active phase:** **P12** (2026-07-03 — **P12-API-PACKAGE-ACCESS-INVOCATION In Progress**; sole formal phase `In Progress`).
-**Active slice:** **P12-API-PACKAGE-ACCESS-INVOCATION** (2026-07-03 — BDD ready; **T01–T02 next**; no gate evidence yet).
-**P21 Done** — do not reopen. All formal phases P0–P11, P13–P21 **Done**; **P12 In Progress**.
+**Active phase:** **P22** (2026-07-03 — **P22-DEMO-EXPANSION** sole formal phase `In Progress`; coordination note [P22-coordination-note-2026-07-03.md](./P22-coordination-note-2026-07-03.md)).
+**Active slice:** **P22-T01…T15** (P22 session owns status updates — SOR-D03).
+**P21 Done** — do not reopen. All formal phases P0–P11, P13–P21 **Done**; **P12 catch-all Not Started**.
 
 ## Epic ↔ phase mapping
 

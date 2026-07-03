@@ -3,13 +3,22 @@ package com.bank.docgen.template.persistence;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TemplateRepository extends JpaRepository<TemplateEntity, UUID> {
 
     List<TemplateEntity> findByDeletedAtIsNullOrderByUpdatedAtDesc();
 
+    Page<TemplateEntity> findByDeletedAtIsNullOrderByUpdatedAtDesc(Pageable pageable);
+
     List<TemplateEntity> findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(List<String> groupCodes);
+
+    Page<TemplateEntity> findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(
+            List<String> groupCodes,
+            Pageable pageable
+    );
 
     Optional<TemplateEntity> findByIdAndDeletedAtIsNull(UUID id);
 

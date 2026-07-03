@@ -48,8 +48,13 @@ import type {
   PasteCleanResult,
 } from '@/types/template'
 
-export async function listTemplates(): Promise<TemplateSummary[]> {
-  const response = await http.get<ApiEnvelope<TemplateSummary[]>>('/templates')
+export async function listTemplates(
+  page = 0,
+  size = 20,
+): Promise<PageView<TemplateSummary>> {
+  const response = await http.get<ApiEnvelope<PageView<TemplateSummary>>>('/templates', {
+    params: { page, size },
+  })
   return unwrapEnvelope(response.data)
 }
 

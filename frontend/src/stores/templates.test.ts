@@ -24,7 +24,8 @@ describe('templates store', () => {
   })
 
   it('filters published templates for API policy home', async () => {
-    vi.mocked(templatesApi.listTemplates).mockResolvedValue([
+    vi.mocked(templatesApi.listTemplates).mockResolvedValue({
+      content: [
       {
         id: 'tpl-1',
         externalId: 'TPL-A',
@@ -49,7 +50,12 @@ describe('templates store', () => {
         updatedBy: '10000001',
         updatedAt: '2026-06-23T11:00:00Z',
       },
-    ])
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 2,
+      totalPages: 1,
+    })
 
     const store = useTemplatesStore()
     await store.fetchTemplates()

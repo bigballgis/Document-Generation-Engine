@@ -159,11 +159,39 @@ const catalogSortOptions = computed(() => [
   { key: 'externalIdAsc', labelKey: 'table.sort.externalIdAsc' },
 ])
 
+const serverPagingActive = computed(() => !hasAnyActive.value && !activeWorkflowFilter.value)
+
 const { paginatedRows: paginatedTemplates, totalRows: totalTemplateRows } = useCatalogPagination(
   sortedRows,
   currentPage,
   CLIENT_TABLE_PAGE_SIZE,
 )
+
+const tableRows = computed(() =>
+  serverPagingActive.value ? sortedRows.value : paginatedTemplates.value,
+)
+
+const displayTotal = computed(() =>
+  serverPagingActive.value ? templatesStore.templateListTotalElements : totalTemplateRows.value,
+)
+
+const displayPageSize = computed(() =>
+  serverPagingActive.value ? templatesStore.templateListSize : CLIENT_TABLE_PAGE_SIZE,
+)
+
+watch(currentPage, async (page) => {
+  if (!serverPagingActive.value) {
+    return
+  }
+  const serverPage = page - 1
+  if (serverPage !== templatesStore.templateListPage) {
+    try {
+      await templatesStore.fetchTemplates(serverPage, templatesStore.templateListSize)
+    } catch {
+      // Error surfaced via store message key.
+    }
+  }
+})
 
 watch([hasAnyActive, activeWorkflowFilter], () => {
   currentPage.value = 1
@@ -179,7 +207,7 @@ const errorMessage = computed(() => {
 
 onMounted(async () => {
   try {
-    await templatesStore.fetchTemplates()
+    await templatesStore.fetchTemplates(0, templatesStore.templateListSize)
   } catch {
     // Error surfaced via store message key.
   }
@@ -271,7 +299,7 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
       />
 
       <template v-if="sortedRows.length > 0">
-        <AppDataTable activatable :data="paginatedTemplates" @row-click="activateTemplateRow">
+        <AppDataTable activatable :data="tableRows" @row-click="activateTemplateRow">
           <el-table-column
             prop="groupCode"
             :label="t('templates.list.columns.group')"
@@ -325,8 +353,8 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
         </AppDataTable>
         <AppTablePagination
           v-model:current-page="currentPage"
-          :page-size="CLIENT_TABLE_PAGE_SIZE"
-          :total="totalTemplateRows"
+          :page-size="displayPageSize"
+          :total="displayTotal"
         />
       </template>
 

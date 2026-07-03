@@ -45,6 +45,11 @@ class OpenApiContractTest {
 
         assertThat(openAPI).isNotNull();
         assertThat(openAPI.getPaths()).isNotNull();
+        assertThat(openAPI.getComponents()).isNotNull();
+        assertThat(openAPI.getComponents().getSchemas()).containsKeys(
+                "ErrorEnvelope",
+                "Metadata"
+        );
 
         List<String> operationIds = openAPI.getPaths().values().stream()
                 .flatMap(pathItem -> pathItem.readOperations().stream())

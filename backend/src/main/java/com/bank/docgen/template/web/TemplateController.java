@@ -1,5 +1,6 @@
 package com.bank.docgen.template.web;
 
+import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
@@ -100,11 +101,13 @@ public class TemplateController {
     }
 
     @GetMapping
-    public SuccessEnvelope<List<TemplateSummaryView>> list(
+    public SuccessEnvelope<PageView<TemplateSummaryView>> list(
             @AuthenticationPrincipal ManagementSessionClaims session,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
             HttpServletRequest request
     ) {
-        return envelope(request, templateService.list(session));
+        return envelope(request, templateService.list(session, page, size));
     }
 
     @GetMapping("/{templateId}")

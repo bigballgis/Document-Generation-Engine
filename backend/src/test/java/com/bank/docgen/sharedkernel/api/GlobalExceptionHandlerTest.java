@@ -31,7 +31,11 @@ class GlobalExceptionHandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new GlobalExceptionHandler(new TraceIdProvider(), messageResolver);
+        handler = new GlobalExceptionHandler(
+                new TraceIdProvider(),
+                messageResolver,
+                new ValidationErrorFieldMapper(messageResolver)
+        );
         request = new MockHttpServletRequest("POST", "/api/management/v1/groups");
     }
 

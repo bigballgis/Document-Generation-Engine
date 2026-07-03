@@ -1,5 +1,6 @@
 package com.bank.docgen.authorization.management.service;
 
+import com.bank.docgen.audit.service.SecurityManagementAuditRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,12 @@ public class SecurityAuditSummaryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityAuditSummaryService.class);
 
+    private final SecurityManagementAuditRecorder auditRecorder;
+
+    public SecurityAuditSummaryService(SecurityManagementAuditRecorder auditRecorder) {
+        this.auditRecorder = auditRecorder;
+    }
+
     public void recordLoginSuccess(String username, String auditId, String traceId) {
         LOGGER.info(
                 "security.audit.login.success username={} auditId={} traceId={}",
@@ -16,6 +23,7 @@ public class SecurityAuditSummaryService {
                 auditId,
                 traceId
         );
+        auditRecorder.recordSecurityLoginSuccess(username, auditId, traceId);
     }
 
     public void recordLoginFailure(String username, String auditId, String traceId) {
@@ -25,6 +33,7 @@ public class SecurityAuditSummaryService {
                 auditId,
                 traceId
         );
+        auditRecorder.recordSecurityLoginFailure(username, auditId, traceId);
     }
 
     public void recordLogout(String username, String auditId, String traceId) {
@@ -34,6 +43,7 @@ public class SecurityAuditSummaryService {
                 auditId,
                 traceId
         );
+        auditRecorder.recordSecurityLogout(username, auditId, traceId);
     }
 
     public void recordRouteAccessDenied(String username, String routeKey, String auditId, String traceId) {
@@ -44,6 +54,7 @@ public class SecurityAuditSummaryService {
                 auditId,
                 traceId
         );
+        auditRecorder.recordSecurityRouteAccessDenied(username, routeKey, auditId, traceId);
     }
 
     public void recordDocumentDownload(
@@ -56,6 +67,14 @@ public class SecurityAuditSummaryService {
     ) {
         LOGGER.info(
                 "security.audit.download.success credentialId={} accessAccount={} documentId={} templateId={} auditId={} traceId={}",
+                credentialExternalId,
+                accessAccount,
+                documentId,
+                templateExternalId,
+                auditId,
+                traceId
+        );
+        auditRecorder.recordSecurityDocumentDownload(
                 credentialExternalId,
                 accessAccount,
                 documentId,

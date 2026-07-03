@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +41,7 @@ public class AsyncBatchTaskRunner {
             RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder,
             ObjectMapper objectMapper,
             ApiPolicyRepository apiPolicyRepository,
-            InvocationRecordService invocationRecordService,
+            @Lazy InvocationRecordService invocationRecordService,
             TraceIdProvider traceIdProvider
     ) {
         this.asyncTaskRepository = asyncTaskRepository;

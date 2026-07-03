@@ -46,6 +46,9 @@ backend:
       periodSeconds: 10
       timeoutSeconds: 5
       failureThreshold: 3
+  pdb:
+    enabled: false
+    minAvailable: 1
 
 frontend:
   enabled: true
@@ -86,6 +89,9 @@ frontend:
       periodSeconds: 10
       timeoutSeconds: 3
       failureThreshold: 3
+  pdb:
+    enabled: false
+    minAvailable: 1
 
 # Non-sensitive runtime configuration (rendered into ConfigMap).
 config:

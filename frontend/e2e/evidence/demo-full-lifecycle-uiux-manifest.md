@@ -7,6 +7,10 @@
 | Viewport | 1440×900 desktop |
 | Brands | REDBC (API management), GREENBC (template API access tab) |
 
+## Verdict
+
+**Verdict: PASS** (3/3 screenshots; REDBC + GREENBC; 2026-07-03)
+
 ## Scenarios
 
 Published demo template `DEMO-FULL-FLOW-LETTER` after full lifecycle seed (draft → test → approval → publish → API policy).

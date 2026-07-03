@@ -58,11 +58,13 @@ public class RuntimeRateLimitFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String credentialId = request.getHeader(ApiCredentialAuthenticationFilter.HEADER_CREDENTIAL_ID);
         String accessAccount = request.getHeader(ApiCredentialAuthenticationFilter.HEADER_ACCESS_ACCOUNT);
+        String rateLimitKey;
         if (credentialId == null || credentialId.isBlank() || accessAccount == null || accessAccount.isBlank()) {
-            filterChain.doFilter(request, response);
-            return;
+            rateLimitKey = "anonymous:" + request.getRemoteAddr();
+        } else {
+            rateLimitKey = credentialId.trim() + ":" + accessAccount.trim();
         }
-        ConsumptionProbe probe = rateLimitService.tryConsume(credentialId.trim(), accessAccount.trim());
+        ConsumptionProbe probe = rateLimitService.tryConsumeKey(rateLimitKey);
         if (probe.isConsumed()) {
             filterChain.doFilter(request, response);
             return;

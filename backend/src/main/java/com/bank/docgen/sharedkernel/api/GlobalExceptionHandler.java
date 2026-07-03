@@ -58,10 +58,16 @@ public class GlobalExceptionHandler {
 
     private final TraceIdProvider traceIdProvider;
     private final MessageResolver messageResolver;
+    private final ValidationErrorFieldMapper validationErrorFieldMapper;
 
-    public GlobalExceptionHandler(TraceIdProvider traceIdProvider, MessageResolver messageResolver) {
+    public GlobalExceptionHandler(
+            TraceIdProvider traceIdProvider,
+            MessageResolver messageResolver,
+            ValidationErrorFieldMapper validationErrorFieldMapper
+    ) {
         this.traceIdProvider = traceIdProvider;
         this.messageResolver = messageResolver;
+        this.validationErrorFieldMapper = validationErrorFieldMapper;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -73,7 +79,7 @@ public class GlobalExceptionHandler {
         String auditId = traceIdProvider.newAuditId();
         String messageKey = "api.error.validation.requestBodyInvalid";
         List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
-                .map(this::toFieldError)
+                .map(validationErrorFieldMapper::toFieldError)
                 .toList();
         ErrorDetail error = new ErrorDetail(
                 ApiErrorCodes.REQUEST_BODY_INVALID,
@@ -651,61 +657,9 @@ public class GlobalExceptionHandler {
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 
-    private FieldError toFieldError(org.springframework.validation.FieldError error) {
-        String messageKey = validationMessageKey(error);
-        return new FieldError(
-                error.getField(),
-                validationReason(error),
-                messageResolver.resolveOrDefault(messageKey, error.getDefaultMessage())
-        );
-    }
-
-    private String validationMessageKey(org.springframework.validation.FieldError error) {
-        String code = error.getCode();
-        if (code == null) {
-            return "api.error.validation.fieldInvalid";
-        }
-        if (isRequiredConstraint(code)) {
-            return "api.error.validation.fieldRequired";
-        }
-        if ("Size".equals(code)) {
-            return "api.error.validation.fieldSizeInvalid";
-        }
-        if ("Pattern".equals(code)) {
-            return "api.error.validation.fieldPatternInvalid";
-        }
-        return "api.error.validation.fieldInvalid";
-    }
-
-    private boolean isRequiredConstraint(String code) {
-        return "NotBlank".equals(code) || "NotNull".equals(code) || "NotEmpty".equals(code);
-    }
-
     private ResponseEntity<ErrorEnvelope> renderingDomainError(
             HttpServletRequest request, HttpStatus status, String code, String messageKey) {
         return domainError(request, status, code, ApiErrorCategories.RENDERING, messageKey);
     }
 
-    private String validationReason(org.springframework.validation.FieldError error) {
-        String code = error.getCode();
-        if (code == null) {
-            return "RULE_FAILED";
-        }
-        if (isRequiredConstraint(code)) {
-            return "REQUIRED";
-        }
-        if ("Size".equals(code)) {
-            Object[] arguments = error.getArguments();
-            if (arguments != null && arguments.length >= 2
-                    && error.getRejectedValue() instanceof String rejected
-                    && rejected.length() > ((Number) arguments[1]).intValue()) {
-                return "TOO_LONG";
-            }
-            return "TOO_SHORT";
-        }
-        if ("Pattern".equals(code)) {
-            return "PATTERN_MISMATCH";
-        }
-        return "RULE_FAILED";
-    }
 }

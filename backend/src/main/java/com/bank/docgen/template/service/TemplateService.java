@@ -1,5 +1,6 @@
 package com.bank.docgen.template.service;
 
+import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
@@ -32,6 +33,8 @@ import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,8 +76,40 @@ public class TemplateService {
         this.eventPublisher = eventPublisher;
     }
 
+    private static final int DEFAULT_LIST_PAGE_SIZE = 20;
+
     @Transactional(readOnly = true)
-    public List<TemplateSummaryView> list(ManagementSessionClaims session) {
+    public PageView<TemplateSummaryView> list(ManagementSessionClaims session, Integer page, Integer size) {
+        int safePage = page == null ? 0 : Math.max(page, 0);
+        int safeSize = size == null ? DEFAULT_LIST_PAGE_SIZE : (size <= 0 ? DEFAULT_LIST_PAGE_SIZE : size);
+        List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
+        Page<TemplateEntity> templatePage;
+        if (groupCodes.contains("*")) {
+            templatePage = templateRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc(
+                    PageRequest.of(safePage, safeSize)
+            );
+        } else if (groupCodes.isEmpty()) {
+            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
+        } else {
+            templatePage = templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(
+                    groupCodes,
+                    PageRequest.of(safePage, safeSize)
+            );
+        }
+        List<TemplateSummaryView> content = templatePage.getContent().stream()
+                .map(templateViewMapper::toSummary)
+                .toList();
+        return new PageView<>(
+                content,
+                templatePage.getNumber(),
+                templatePage.getSize(),
+                templatePage.getTotalElements(),
+                templatePage.getTotalPages()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<TemplateSummaryView> listAll(ManagementSessionClaims session) {
         List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
         List<TemplateEntity> templates;
         if (groupCodes.contains("*")) {
