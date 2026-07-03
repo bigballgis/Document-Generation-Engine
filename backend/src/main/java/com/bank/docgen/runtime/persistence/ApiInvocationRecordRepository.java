@@ -62,4 +62,11 @@ public interface ApiInvocationRecordRepository extends JpaRepository<ApiInvocati
             Collection<InvocationKind> kinds,
             Instant now
     );
+
+    Page<ApiInvocationRecordEntity> findByTemplateIdAndInvocationKindInAndRecordExpiresAtAfterOrderByCreatedAtDesc(
+            UUID templateId,
+            Collection<InvocationKind> kinds,
+            Instant now,
+            Pageable pageable
+    );
 }

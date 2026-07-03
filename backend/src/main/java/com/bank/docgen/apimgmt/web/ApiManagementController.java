@@ -1,6 +1,7 @@
 package com.bank.docgen.apimgmt.web;
 
 import com.bank.docgen.apimgmt.api.ApiCredentialCreatedView;
+import com.bank.docgen.apimgmt.api.ManagementInvocationSummaryView;
 import com.bank.docgen.apimgmt.api.ApiPolicyImpactPreviewView;
 import com.bank.docgen.apimgmt.api.ApiCredentialSummaryView;
 import com.bank.docgen.apimgmt.api.ApiPolicyView;
@@ -16,6 +17,7 @@ import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
 import com.bank.docgen.apimgmt.service.ApiManagementService;
 import com.bank.docgen.apimgmt.service.ApiPolicyImpactPreviewService;
 import com.bank.docgen.apimgmt.service.ApiPolicyRollbackService;
+import com.bank.docgen.apimgmt.service.ManagementInvocationQueryService;
 import com.bank.docgen.runtime.api.ContractResultView;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
@@ -44,17 +46,20 @@ public class ApiManagementController {
     private final ApiManagementService apiManagementService;
     private final ApiPolicyImpactPreviewService apiPolicyImpactPreviewService;
     private final ApiPolicyRollbackService apiPolicyRollbackService;
+    private final ManagementInvocationQueryService managementInvocationQueryService;
     private final TraceIdProvider traceIdProvider;
 
     public ApiManagementController(
             ApiManagementService apiManagementService,
             ApiPolicyImpactPreviewService apiPolicyImpactPreviewService,
             ApiPolicyRollbackService apiPolicyRollbackService,
+            ManagementInvocationQueryService managementInvocationQueryService,
             TraceIdProvider traceIdProvider
     ) {
         this.apiManagementService = apiManagementService;
         this.apiPolicyImpactPreviewService = apiPolicyImpactPreviewService;
         this.apiPolicyRollbackService = apiPolicyRollbackService;
+        this.managementInvocationQueryService = managementInvocationQueryService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -75,6 +80,16 @@ public class ApiManagementController {
             HttpServletRequest request
     ) {
         return envelope(request, apiManagementService.getCallerContract(templateId, environment, session));
+    }
+
+    @GetMapping("/invocations/recent")
+    public SuccessEnvelope<List<ManagementInvocationSummaryView>> listRecentInvocations(
+            @PathVariable UUID templateId,
+            @RequestParam(defaultValue = "10") int limit,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, managementInvocationQueryService.listRecentInvocations(templateId, limit, session));
     }
 
     @PutMapping("/policy")

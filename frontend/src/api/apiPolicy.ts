@@ -15,6 +15,7 @@ import type {
   ApiCredentialSummary,
   ApiPolicyImpactPreview,
   ApiPolicy,
+  ManagementInvocationSummary,
   UpsertApiPolicyPayload,
 } from '@/types/template'
 
@@ -140,6 +141,17 @@ export async function saveApiPolicyDomain<D extends ApiPolicyDomain>(
     default:
       throw new Error(`Unsupported API policy domain: ${domain satisfies never}`)
   }
+}
+
+export async function listRecentInvocations(
+  templateId: string,
+  limit = 10,
+): Promise<ManagementInvocationSummary[]> {
+  const response = await http.get<ApiEnvelope<ManagementInvocationSummary[]>>(
+    `/templates/${templateId}/api/invocations/recent`,
+    { params: { limit } },
+  )
+  return unwrap(response.data)
 }
 
 export async function fetchApiPolicyImpactPreview(

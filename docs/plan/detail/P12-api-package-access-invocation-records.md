@@ -1,8 +1,8 @@
 # P12 — API Package Access & Invocation Records (Detailed Plan)
 
 **Slice ID:** `P12-API-PACKAGE-ACCESS-INVOCATION`  
-**Slice status:** **In Progress** (activated 2026-07-03) | **Depends on:** P6, P7, P17, P21, template package hub (P3-T06)  
-**Active phase note:** P12 catch-all **In Progress** — this slice is the **single active slice**. Backend **T01–T06 Done** (2026-07-03); **frontend T07–T09** + E2E **T11–T12** remain.
+**Slice status:** **Paused** (2026-07-03 — **P22-DEMO-EXPANSION** user priority) | **Depends on:** P6, P7, P17, P21, template package hub (P3-T06)  
+**Active phase note:** **P22** is the sole formal phase `In Progress`. Backend **T01–T06 Done** (2026-07-03); **frontend T07–T09** + E2E **T11–T12** resume after P22.
 
 > **BDD:** [api-package-access-and-invocation-records.md](../../behavior/api-package-access-and-invocation-records.md) (`BDD-API-PACKAGE-ACCESS-INVOCATION-001`, status **ready**)
 
@@ -50,11 +50,11 @@ Reframe API management as **package-first configuration** (not a separate catalo
 | **P12-API-PKG-T04** | backend-engineer | Retention scheduler: cleanup records + artifacts per package TTL; four-layer clock (15m download / 7d idempotency / doc / record) | **Done** (2026-07-03) |
 | **P12-API-PKG-T05** | backend-engineer | Runtime API: `GET …/invocations` (`view=logical\|flat`, `requestId` filter); `GET …/invocations/{invocationId}`; extend download TTL when save enabled | **Done** (2026-07-03) |
 | **P12-API-PKG-T06** | backend-engineer | Management: retention domain save + `INVOCATION_RETENTION` audit; backfill migration for published packages missing policy | **Done** (2026-07-03) |
-| **P12-API-PKG-T07** | frontend-engineer | Package hub **External access** tab: L1 (routes, AD Group, default, retention presets, credentials); advanced collapsed; remove empty «not configured» state | Not Started |
-| **P12-API-PKG-T08** | frontend-engineer | Deprecate/downgrade `ApiPolicyHomeView` catalog → dashboard cross-package alerts; redirect deep links to package hub tab | Not Started |
-| **P12-API-PKG-T09** | frontend-engineer | Admin L2 read-only recent invocations panel on hub (summary, no variable plaintext) | Not Started |
+| **P12-API-PKG-T07** | frontend-engineer | Package hub **External access** tab: L1 (routes, AD Group, default, retention presets, credentials); advanced collapsed; remove empty «not configured» state | **Done** (2026-07-03, `22c7ab8`) |
+| **P12-API-PKG-T08** | frontend-engineer | Deprecate/downgrade `ApiPolicyHomeView` catalog → dashboard cross-package alerts; redirect deep links to package hub tab | **Done** (2026-07-03, `22c7ab8`) |
+| **P12-API-PKG-T09** | frontend-engineer | Admin L2 read-only recent invocations panel on hub (summary, no variable plaintext) | **Done** (2026-07-03) |
 | **P12-API-PKG-T10** | doc-keeper | OpenAPI v1 paths/schemas for invocations; `contract-outline.md` invocation section; ADR-0040 | **Done** (doc-only 2026-07-03) |
-| **P12-API-PKG-T11** | e2e-test-engineer | Playwright: S1–S8 BDD scenarios + caller invocation query journey | Not Started |
+| **P12-API-PKG-T11** | e2e-test-engineer | Playwright: S1–S8 BDD scenarios + caller invocation query journey | **In Progress** (2026-07-03 — hub L1 + overview spec landed) |
 | **P12-API-PKG-T12** | e2e-uiux-reviewer | UIUX evidence: hub access tab L1, retention controls, logical vs flat API docs screenshots | Not Started |
 
 ## Implementation order

@@ -519,6 +519,17 @@ export interface ApiPolicy {
   updatedAt: string
 }
 
+export interface ManagementInvocationSummary {
+  invocationId: string
+  invocationKind: string
+  status: string
+  requestId: string
+  resolvedReleaseVersion: string | null
+  routeType: string | null
+  createdAt: string
+  accessAccountSummary: string
+}
+
 export interface UpsertApiPolicyPayload {
   allowedAdGroups: string[]
   defaultRouteReleaseVersion: string

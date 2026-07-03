@@ -1745,9 +1745,17 @@ export default {
       recentInvocations: {
         title: 'Recent invocations',
         description: 'Read-only summary for administrators. Full parameters remain caller-scoped.',
-        comingSoonTitle: 'Invocation summary coming soon',
-        comingSoonDescription:
-          'Management invocation summary will list recent calls without exposing variable plaintext.',
+        loadFailed: 'Unable to load recent invocations.',
+        emptyTitle: 'No recent invocations',
+        emptyDescription: 'Calls will appear here after runtime API usage.',
+        columns: {
+          createdAt: 'Created',
+          invocationId: 'Invocation ID',
+          kind: 'Kind',
+          status: 'Status',
+          requestId: 'Request ID',
+          accessAccount: 'Access account',
+        },
       },
       credentialExternalId: 'External ID',
       credentialStatus: 'Status',
