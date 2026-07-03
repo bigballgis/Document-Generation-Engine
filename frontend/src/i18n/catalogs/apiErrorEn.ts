@@ -1,124 +1,184 @@
 export const apiErrorEn = {
-  "authentication": {
-    "invalidCredentials": "Invalid credentials.",
-    "sessionExpired": "Your session has expired. Please sign in again."
+  authentication: {
+    invalidCredentials: "Invalid credentials.",
+    sessionExpired: "Your session has expired. Please sign in again."
   },
-  "authorization": {
-    "accessDenied": "You do not have permission to perform this action.",
-    "groupScopeOutOfRange": "The requested group scope is outside your authorized scope.",
-    "roleAssignmentNotAllowed": "You are not allowed to assign one or more of the requested roles.",
-    "userDeleteNotAllowed": "You are not allowed to delete users.",
-    "groupManagementNotAllowed": "You are not allowed to manage business groups."
+  authorization: {
+    accessDenied: "You do not have permission to perform this action.",
+    groupScopeOutOfRange: "The requested group scope is outside your authorized scope.",
+    roleAssignmentNotAllowed: "You are not allowed to assign one or more of the requested roles.",
+    userDeleteNotAllowed: "You are not allowed to delete users.",
+    groupManagementNotAllowed: "You are not allowed to manage business groups."
   },
-  "validation": {
-    "requestBodyInvalid": "The request body is invalid.",
-    "fieldRequired": "This field is required.",
-    "fieldInvalid": "This field is invalid.",
-    "fieldSizeInvalid": "This field length is invalid.",
-    "fieldPatternInvalid": "This field format is invalid."
+  validation: {
+    requestBodyInvalid: "The request body is invalid.",
+    fieldRequired: "This field is required.",
+    fieldInvalid: "This field is invalid.",
+    fieldSizeInvalid: "This field length is invalid.",
+    fieldPatternInvalid: "This field format is invalid."
   },
-  "storage": {
-    "operationFailed": "Object storage operation failed."
+  storage: {
+    operationFailed: "Object storage operation failed."
   },
-  "generation": {
-    "internalError": "An internal error occurred.",
-    "serviceUnavailable": "The generation service is temporarily unavailable.",
-    "pdfConversionFailed": "PDF conversion failed."
+  generation: {
+    internalError: "An internal error occurred.",
+    serviceUnavailable: "The generation service is temporarily unavailable.",
+    pdfConversionFailed: "PDF conversion failed.",
+    docxNormalizationFailed: "DOCX normalization failed."
   },
-  "master": {
-    "notFound": "The letterhead was not found.",
-    "accessDenied": "You do not have permission to access this letterhead.",
-    "invalidState": "The letterhead is not in a valid state for this operation.",
-    "anchorIntegrityFailed": "Anchor integrity validation failed for the letterhead.",
-    "invalidFile": "The uploaded file is not a valid DOCX letterhead.",
-    "emptyAnchors": "The letterhead must contain at least one anchor.",
-    "docxRequired": "A valid DOCX file is required.",
-    "anchorExtractionFailed": "Unable to extract anchors from the uploaded DOCX.",
-    "storageFailed": "Unable to store the uploaded letterhead.",
-    "downloadFailed": "Unable to download the letterhead file.",
-    "invalidReviewTransition": "The letterhead is not in a valid state for this review action."
+  idempotency: {
+    hashFailed: "Unable to compute the idempotency fingerprint."
   },
-  "template": {
-    "notFound": "The template was not found.",
-    "testDataSetNotFound": "The test data set was not found.",
-    "accessDenied": "You do not have permission to access this template.",
-    "confirmationRequired": "Secondary confirmation is required for this operation.",
-    "invalidState": "The template is not in a valid state for this operation.",
-    "alreadyDeleted": "The template has already been deleted.",
-    "masterNotApproved": "Templates can only be created from approved letterheads.",
-    "masterGroupMismatch": "The letterhead group does not match the template group.",
-    "externalIdExists": "A template with this external identifier already exists.",
-    "testDataSetLocked": "The test data set is locked by test evidence and cannot be modified.",
-    "variableTypeUnsupported": "The variable type is not supported.",
-    "enumValuesRequired": "Enum variables require enum values.",
-    "structuredContentInvalid": "The structured content definition is invalid.",
-    "publishGateBlocked": "Publish is blocked until binding validation passes.",
-    "submitForApprovalGateBlocked": "Submit for approval is blocked until pre-release checks pass.",
-    "decisionReasonCategoryRequired": "A reason category is required for failed or rejected decisions.",
-    "decisionImpactSummaryRequired": "An impact summary is required for failed or rejected decisions.",
-    "exportNotEligible": "Only approved or published templates can be exported.",
-    "exportFormatUnsupported": "The requested export format is not supported.",
-    "exportFailed": "The template export could not be completed.",
-    "importBundleInvalid": "The template import bundle is invalid.",
-    "importBundleUnsupportedFormat": "The template import bundle format is not supported.",
-    "importBundleContainsSecrets": "The template import bundle must not contain secrets or credentials.",
-    "importConflict": "The template import conflicts with an existing template.",
-    "importFailed": "The template import could not be completed.",
-    "defaultRouteTargetCannotDeactivate": "The default route release version cannot be deactivated."
+  master: {
+    notFound: "The letterhead was not found.",
+    accessDenied: "You do not have permission to access this letterhead.",
+    invalidState: "The letterhead is not in a valid state for this operation.",
+    anchorIntegrityFailed: "Anchor integrity validation failed for the letterhead.",
+    invalidFile: "The uploaded file is not a valid DOCX letterhead.",
+    emptyAnchors: "The letterhead must contain at least one anchor.",
+    docxRequired: "A valid DOCX file is required.",
+    docxTooLarge: "The uploaded DOCX exceeds the maximum allowed size.",
+    docxCorrupt: "The uploaded DOCX package is invalid or corrupt.",
+    anchorExtractionFailed: "Unable to extract anchors from the uploaded DOCX.",
+    storageFailed: "Unable to store the uploaded letterhead.",
+    downloadFailed: "Unable to download the letterhead file.",
+    invalidReviewTransition: "The letterhead is not in a valid state for this review action."
   },
-  "rendering": {
-    "previewNotFound": "The preview record was not found.",
-    "generationFailed": "Document generation failed."
+  template: {
+    notFound: "The template was not found.",
+    testDataSetNotFound: "The test data set was not found.",
+    testDataSetLocked: "The test data set is locked by test evidence and cannot be modified.",
+    accessDenied: "You do not have permission to access this template.",
+    confirmationRequired: "Secondary confirmation is required for this operation.",
+    invalidState: "The template is not in a valid state for this operation.",
+    devLineInFlight: "A development version line is already in progress. Finish or abandon it before cloning a published release.",
+    versionImmutable: "Published template version content cannot be modified.",
+    defaultRouteTargetCannotDeactivate: "The release version configured as the default API route cannot be deactivated.",
+    alreadyDeleted: "The template has already been deleted.",
+    masterNotApproved: "Templates can only be created from approved letterheads.",
+    masterGroupMismatch: "The letterhead group does not match the template group.",
+    externalIdExists: "A template with this external identifier already exists.",
+    variableTypeUnsupported: "The variable type is not supported.",
+    enumValuesRequired: "Enum variables require enum values.",
+    structuredContentInvalid: "The structured content definition is invalid.",
+    structuredContentUnknownNodeType: "The structured content contains an unsupported node type.",
+    structuredContentForbiddenConstruct: "The structured content contains a forbidden construct.",
+    publishGateBlocked: "Publish is blocked until binding validation passes.",
+    submitForApprovalGateBlocked: "Submit for approval is blocked until pre-release checks pass.",
+    decisionReasonCategoryRequired: "A reason category is required for failed or rejected decisions.",
+    decisionImpactSummaryRequired: "An impact summary is required for failed or rejected decisions.",
+    decisionFidelityConfirmationRequired: "Fidelity evidence must be confirmed before recording a passing test decision.",
+    decisionCoverageConfirmationRequired: "Coverage summary must be confirmed before recording a passing test decision.",
+    decisionPreviewConfirmationRequired: "Preview evidence must be confirmed before recording a passing test decision.",
+    decisionRationaleRequired: "Approval rationale is required.",
+    decisionKeyEvidenceConfirmationRequired: "Key evidence must be confirmed before approving.",
+    decisionRemediationLinkRequired: "A remediation link to test record, change diff, or checklist is required for rejection.",
+    exceptionInterventionNotAllowed: "Exception intervention is only allowed for group administrators.",
+    exceptionReasonRequired: "An exception reason is required for intervention decisions.",
+    exceptionSecondaryConfirmRequired: "Secondary confirmation is required for exception intervention.",
+    contentModuleReferenceMissing: "The referenced content module version was not found.",
+    contentModuleReferenceInvalid: "The content module reference is not approved, active, or accessible.",
+    contentModuleReferenceLocked: "Published content module references cannot be changed.",
+    exportNotEligible: "Only approved or published templates can be exported.",
+    exportFormatUnsupported: "The requested export format is not supported.",
+    exportFailed: "The template export could not be completed.",
+    importBundleInvalid: "The template import bundle is invalid.",
+    importBundleUnsupportedFormat: "The template import bundle format is not supported.",
+    importBundleContainsSecrets: "The template import bundle must not contain secrets or credentials.",
+    importConflict: "The template import conflicts with an existing template.",
+    importFailed: "The template import could not be completed."
   },
-  "apimgmt": {
-    "policyNotFound": "The API policy was not found.",
-    "accessDenied": "You do not have permission to manage API settings for this template.",
-    "templateNotPublished": "API policy can only be configured for published templates.",
-    "credentialNotActive": "The API credential is not active."
+  rendering: {
+    previewNotFound: "The preview record was not found.",
+    previewArtifactNotAvailable: "The preview artifact is not available for download.",
+    previewArtifactExpired: "The preview artifact has expired. Please regenerate the preview.",
+    generationFailed: "Document generation failed.",
+    renderProfileInvalid: "The render profile configuration is invalid.",
+    previewConcurrencyLimitExceeded: "The preview generation concurrency limit has been reached. Please retry later.",
+    batchTestRunNotFound: "The batch test run was not found."
   },
-  "runtime": {
-    "invalidCredentials": "Invalid API credentials.",
-    "accessAccountRequired": "The access account header is required.",
-    "adGroupDenied": "The caller is not authorized by AD Group policy.",
-    "policyNotConfigured": "API policy is not configured for this template.",
-    "templateCredentialMismatch": "The credential is not valid for this template.",
-    "releaseVersionRequired": "A release version is required for generation.",
-    "versionNotCallable": "The requested release version is not callable.",
-    "idempotencyConflict": "The idempotency key was already used with a different request.",
-    "documentNotFound": "The generated document was not found.",
-    "downloadUrlExpired": "The download URL has expired.",
-    "outputFormatUnsupported": "The requested output format is not supported.",
-    "outputModeUnsupported": "The requested output mode is not supported.",
-    "batchNotEnabled": "Batch generation is not enabled for this template.",
-    "batchLimitExceeded": "The batch item count exceeds the configured limit.",
-    "itemIdDuplicated": "Duplicate item identifiers are not allowed in a batch request.",
-    "asyncTaskNotFound": "The async task was not found.",
-    "asyncTaskExpired": "The async task has expired.",
-    "batchProcessingFailed": "Batch processing failed for one or more items.",
-    "asyncTaskCancellationNotAllowed": "The async task cannot be cancelled in its current state.",
-    "idempotencyKeyRequired": "The idempotency key is required.",
-    "rateLimitExceeded": "Too many requests. Please retry later."
+  apimgmt: {
+    policyNotFound: "The API policy was not found.",
+    accessDenied: "You do not have permission to manage API settings for this template.",
+    templateNotPublished: "API policy can only be configured for published templates.",
+    credentialNotActive: "The API credential is not active.",
+    defaultRouteTargetNotCallable: "The default route target release version is not callable.",
+    policyVersionNotFound: "The requested API policy version was not found.",
+    policyImpactBlocked: "The candidate API policy has blocking impacts and cannot be applied.",
+    policyImpactConfirmationRequired: "Impact preview warnings must be confirmed before applying the API policy change.",
+    invocationRetentionPresetInvalid: "Invocation record retention must use a supported preset value.",
+    documentRetentionPresetInvalid: "Document retention must use a supported preset value.",
+    documentRetentionExceedsRecordRetention: "Document retention cannot exceed invocation record retention."
   },
-  "encryption": {
-    "encryptionParameterInvalid": "Encryption parameters are invalid for the current request.",
-    "encryptionNotAllowed": "Dynamic encryption is not allowed for this API.",
-    "openPasswordRequired": "An open password is required when encryption is enabled.",
-    "ownerPasswordRequired": "An owner password is required when encryption permissions are provided.",
-    "passwordsMustDiffer": "Open and owner passwords must be different.",
-    "passwordLengthInvalid": "Encryption passwords must be between 12 and 128 characters.",
-    "permissionUnsupported": "The requested encryption permission is not supported.",
-    "encryptionFailed": "Document encryption failed."
+  runtime: {
+    invalidCredentials: "Invalid API credentials.",
+    accessAccountRequired: "The access account header is required.",
+    adGroupDenied: "The caller is not authorized by AD Group policy.",
+    policyNotConfigured: "API policy is not configured for this template.",
+    templateCredentialMismatch: "The credential is not valid for this template.",
+    releaseVersionRequired: "A release version is required for generation.",
+    versionNotCallable: "The requested release version is not callable.",
+    idempotencyConflict: "The idempotency key was already used with a different request.",
+    documentNotFound: "The generated document was not found.",
+    downloadUrlExpired: "The download URL has expired.",
+    outputFormatUnsupported: "The requested output format is not supported.",
+    outputModeUnsupported: "The requested output mode is not supported.",
+    batchNotEnabled: "Batch generation is not enabled for this template.",
+    batchLimitExceeded: "The batch item count exceeds the configured limit.",
+    itemIdDuplicated: "Duplicate item identifiers are not allowed in a batch request.",
+    asyncTaskNotFound: "The async task was not found.",
+    asyncTaskExpired: "The async task has expired.",
+    batchProcessingFailed: "Batch processing failed for one or more items.",
+    asyncTaskCancellationNotAllowed: "The async task cannot be cancelled in its current state.",
+    idempotencyKeyRequired: "The idempotency key is required.",
+    rateLimitExceeded: "Too many requests. Please retry later.",
+    invocationNotFound: "The invocation record was not found.",
+    invocationRecordExpired: "The invocation record has expired.",
+    invocationViewInvalid: "The invocation view parameter is invalid."
   },
-  "audit": {
-    "invalidTimeWindow": "The audit time window is invalid.",
-    "scopeRequired": "Group scope and template identifier are required for group-scoped audit queries."
+  encryption: {
+    encryptionParameterInvalid: "Encryption parameters are invalid for the current request.",
+    encryptionNotAllowed: "Dynamic encryption is not allowed for this API.",
+    openPasswordRequired: "An open password is required when encryption is enabled.",
+    ownerPasswordRequired: "An owner password is required when encryption permissions are provided.",
+    passwordsMustDiffer: "Open and owner passwords must be different.",
+    passwordLengthInvalid: "Encryption passwords must be between 12 and 128 characters.",
+    permissionUnsupported: "The requested encryption permission is not supported.",
+    encryptionFailed: "Document encryption failed."
   },
-  "notFound": {
-    "userNotFound": "The requested user does not exist.",
-    "groupNotFound": "The requested business group does not exist."
+  audit: {
+    invalidTimeWindow: "The audit time window is invalid.",
+    scopeRequired: "Group scope and template identifier are required for group-scoped audit queries."
   },
-  "conflict": {
-    "usernameAlreadyExists": "A user with this username already exists.",
-    "groupCodeAlreadyExists": "A business group with this code already exists."
+  notFound: {
+    userNotFound: "The requested user does not exist.",
+    groupNotFound: "The requested business group does not exist."
+  },
+  conflict: {
+    usernameAlreadyExists: "A user with this username already exists.",
+    groupCodeAlreadyExists: "A business group with this code already exists."
+  },
+  contentModule: {
+    notFound: "The content module was not found.",
+    accessDenied: "You do not have permission to access this content module.",
+    groupCodeRequired: "A group code is required to list content modules.",
+    moduleCodeExists: "A content module with this module code already exists.",
+    versionExists: "A content module version with this semantic version already exists.",
+    draftOnlyEditable: "Only draft versions can be edited.",
+    contentStructureRequired: "Content structure is required.",
+    moduleIdRequired: "The content module identifier is required.",
+    changeDescriptionRequired: "A change description is required to submit for review.",
+    rejectionReasonRequired: "A rejection reason is required to reject review.",
+    reviewRoleDenied: "You do not have permission to perform this content module review action.",
+    reviewStateTransitionDenied: "The content module version is not in a valid state for this review transition.",
+    reviewRequestInvalid: "The content module review request is invalid.",
+    lifecycleRoleDenied: "You do not have permission to perform this content module lifecycle operation.",
+    lifecycleStateTransitionDenied: "The content module version is not in a valid state for this lifecycle operation.",
+    lifecycleRequestInvalid: "The content module lifecycle request is invalid.",
+    impactConfirmationRequired: "Impact summary review and secondary confirmation are required for this lifecycle operation."
+  },
+  collaboration: {
+    accessDenied: "You do not have permission to view collaboration work items.",
+    queueDenied: "You do not have permission to view this collaboration work item queue."
   }
 } as const

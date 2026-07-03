@@ -2,6 +2,10 @@
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TOKEN_STORAGE_KEY } from '@/api/http'
+import {
+  connectAuthorizedEventStream,
+  type AuthorizedEventStreamConnection,
+} from '@/utils/authorizedEventStream'
 
 const props = defineProps<{
   modelValue: boolean
@@ -29,14 +33,9 @@ const pdfDownloadUrl = ref('')
 const expiresAt = ref<Date | null>(null)
 const countdown = ref('')
 
-let eventSource: EventSource | null = null
+let eventStream: AuthorizedEventStreamConnection | null = null
 let countdownTimer: ReturnType<typeof setInterval> | null = null
-
-function buildSseUrl(url: string): string {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY) ?? ''
-  const separator = url.includes('?') ? '&' : '?'
-  return `${url}${separator}token=${encodeURIComponent(token)}`
-}
+let streamSessionId = 0
 
 function stageLabel(s: string): string {
   const key = `templates.previewProgress.stage.${s}`
@@ -77,9 +76,10 @@ function stopCountdown() {
 }
 
 function disconnectSse() {
-  if (eventSource) {
-    eventSource.close()
-    eventSource = null
+  streamSessionId += 1
+  if (eventStream) {
+    eventStream.close()
+    eventStream = null
   }
 }
 
@@ -89,49 +89,85 @@ function connectSse() {
   percent.value = 0
   stage.value = ''
   errorMessage.value = ''
+  const sessionId = streamSessionId
 
-  const url = buildSseUrl(props.streamUrl)
-  eventSource = new EventSource(url)
+  void connectAuthorizedEventStream({
+    url: props.streamUrl,
+    token: localStorage.getItem(TOKEN_STORAGE_KEY),
+    onMessage: (event) => {
+      if (sessionId !== streamSessionId) {
+        return
+      }
 
-  eventSource.addEventListener('progress', (evt: MessageEvent) => {
-    const data = JSON.parse(evt.data as string) as {
-      stage: string
-      percent: number
-      message?: string
-    }
-    phase.value = 'progress'
-    stage.value = stageLabel(data.stage)
-    percent.value = data.percent
+      switch (event.type) {
+        case 'progress': {
+          const data = JSON.parse(event.data) as {
+            stage: string
+            percent: number
+            message?: string
+          }
+          phase.value = 'progress'
+          stage.value = stageLabel(data.stage)
+          percent.value = data.percent
+          break
+        }
+        case 'completed': {
+          const data = JSON.parse(event.data) as {
+            previewId: string
+            docxDownloadUrl: string
+            pdfDownloadUrl: string
+            expiresAt: string
+          }
+          disconnectSse()
+          phase.value = 'success'
+          percent.value = 100
+          docxDownloadUrl.value = data.docxDownloadUrl
+          pdfDownloadUrl.value = data.pdfDownloadUrl
+          startCountdown(new Date(data.expiresAt))
+          break
+        }
+        case 'failed': {
+          const data = JSON.parse(event.data) as {
+            error: string
+            retryable?: boolean
+          }
+          disconnectSse()
+          phase.value = 'failed'
+          errorMessage.value = data.error
+          break
+        }
+        default:
+          break
+      }
+    },
+    onError: () => {
+      if (sessionId !== streamSessionId) {
+        return
+      }
+      disconnectSse()
+      phase.value = 'failed'
+      errorMessage.value = t('templates.previewProgress.error.generic')
+    },
   })
-
-  eventSource.addEventListener('completed', (evt: MessageEvent) => {
-    const data = JSON.parse(evt.data as string) as {
-      previewId: string
-      docxDownloadUrl: string
-      pdfDownloadUrl: string
-      expiresAt: string
-    }
-    disconnectSse()
-    phase.value = 'success'
-    percent.value = 100
-    docxDownloadUrl.value = data.docxDownloadUrl
-    pdfDownloadUrl.value = data.pdfDownloadUrl
-    startCountdown(new Date(data.expiresAt))
-  })
-
-  eventSource.addEventListener('failed', (evt: MessageEvent) => {
-    const data = JSON.parse(evt.data as string) as {
-      error: string
-      retryable?: boolean
-    }
-    disconnectSse()
-    phase.value = 'failed'
-    errorMessage.value = data.error
-  })
+    .then((stream) => {
+      if (sessionId !== streamSessionId) {
+        stream.close()
+        return
+      }
+      eventStream = stream
+    })
+    .catch(() => {
+      if (sessionId !== streamSessionId) {
+        return
+      }
+      disconnectSse()
+      phase.value = 'failed'
+      errorMessage.value = t('templates.previewProgress.error.generic')
+    })
 
   // Timeout after 3 minutes
   setTimeout(() => {
-    if (eventSource && phase.value !== 'success' && phase.value !== 'failed') {
+    if (sessionId === streamSessionId && phase.value !== 'success' && phase.value !== 'failed') {
       disconnectSse()
       phase.value = 'failed'
       errorMessage.value = t('templates.previewProgress.error.timeout')

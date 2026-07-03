@@ -3,43 +3,28 @@ import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import BatchTestProgressDialog from '@/components/template/BatchTestProgressDialog.vue'
+import { connectAuthorizedEventStream } from '@/utils/authorizedEventStream'
 import en from '@/i18n/locales/en'
 
-class MockEventSource {
+vi.mock('@/utils/authorizedEventStream', () => ({
+  connectAuthorizedEventStream: vi.fn(),
+}))
+
+interface MockStreamRequest {
   url: string
-  readyState: number = 1
-  private handlers: Record<string, ((evt: MessageEvent) => void)[]> = {}
-  static instances: MockEventSource[] = []
-
-  constructor(url: string) {
-    this.url = url
-    MockEventSource.instances.push(this)
-  }
-
-  addEventListener(event: string, handler: (evt: MessageEvent) => void) {
-    if (!this.handlers[event]) {
-      this.handlers[event] = []
-    }
-    this.handlers[event].push(handler)
-  }
-
-  removeEventListener(event: string, handler: (evt: MessageEvent) => void) {
-    if (this.handlers[event]) {
-      this.handlers[event] = this.handlers[event].filter((h) => h !== handler)
-    }
-  }
-
-  close() {
-    this.readyState = 2
-  }
-
-  emit(event: string, data: unknown) {
-    const msg = { data: JSON.stringify(data) } as MessageEvent
-    this.handlers[event]?.forEach((h) => h(msg))
-  }
+  token?: string | null
+  onMessage: (event: { type: string; data: string }) => void
 }
 
-vi.stubGlobal('EventSource', MockEventSource)
+const streamRequests: MockStreamRequest[] = []
+const closeMocks: Array<ReturnType<typeof vi.fn>> = []
+
+function emitStreamEvent(index: number, type: string, payload: unknown) {
+  streamRequests[index]?.onMessage({
+    type,
+    data: JSON.stringify(payload),
+  })
+}
 
 function makeI18n() {
   return createI18n({ legacy: false, locale: 'en', messages: { en } })
@@ -47,7 +32,17 @@ function makeI18n() {
 
 describe('BatchTestProgressDialog', () => {
   beforeEach(() => {
-    MockEventSource.instances = []
+    streamRequests.length = 0
+    closeMocks.length = 0
+    vi.mocked(connectAuthorizedEventStream).mockImplementation(async ({ url, token, onMessage }) => {
+      const close = vi.fn()
+      streamRequests.push({ url, token, onMessage })
+      closeMocks.push(close)
+      return {
+        close,
+        done: Promise.resolve(),
+      }
+    })
     localStorage.setItem('docgen.accessToken', 'test-token')
   })
 
@@ -70,7 +65,7 @@ describe('BatchTestProgressDialog', () => {
       attachTo: document.body,
     })
     await flushPromises()
-    expect(MockEventSource.instances).toHaveLength(0)
+    expect(streamRequests).toHaveLength(0)
   })
 
   it('shows progress dialog with sample count when opened', async () => {
@@ -88,9 +83,10 @@ describe('BatchTestProgressDialog', () => {
     })
     await flushPromises()
 
-    expect(MockEventSource.instances).toHaveLength(1)
-    expect(MockEventSource.instances[0].url).toContain('progress-stream')
-    expect(MockEventSource.instances[0].url).toContain('token=test-token')
+    expect(streamRequests).toHaveLength(1)
+    expect(streamRequests[0]?.url).toContain('progress-stream')
+    expect(streamRequests[0]?.url).not.toContain('token=')
+    expect(streamRequests[0]?.token).toBe('test-token')
     expect(document.body.textContent).toContain('0 / 3')
 
     wrapper.unmount()
@@ -111,7 +107,7 @@ describe('BatchTestProgressDialog', () => {
     })
     await flushPromises()
 
-    MockEventSource.instances[0].emit('sample_done', {
+    emitStreamEvent(0, 'sample_done', {
       sampleIndex: 1,
       success: true,
       dataSetExternalId: 'TDS-001',
@@ -139,7 +135,7 @@ describe('BatchTestProgressDialog', () => {
     })
     await flushPromises()
 
-    MockEventSource.instances[0].emit('batch_completed', {
+    emitStreamEvent(0, 'batch_completed', {
       runId: 'run-1',
       successCount: 2,
       failedCount: 1,
@@ -172,7 +168,7 @@ describe('BatchTestProgressDialog', () => {
     })
     await flushPromises()
 
-    MockEventSource.instances[0].emit('batch_failed', {
+    emitStreamEvent(0, 'batch_failed', {
       error: 'Internal batch error',
     })
     await wrapper.vm.$nextTick()
@@ -197,13 +193,12 @@ describe('BatchTestProgressDialog', () => {
     })
     await flushPromises()
 
-    const es = MockEventSource.instances[0]
-    expect(es.readyState).not.toBe(2)
+    expect(closeMocks[0]).not.toHaveBeenCalled()
 
     await wrapper.setProps({ modelValue: false })
     await flushPromises()
 
-    expect(es.readyState).toBe(2)
+    expect(closeMocks[0]).toHaveBeenCalled()
 
     wrapper.unmount()
   })

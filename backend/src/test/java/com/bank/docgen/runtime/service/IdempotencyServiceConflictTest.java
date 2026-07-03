@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyRepository;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -98,5 +99,20 @@ class IdempotencyServiceConflictTest {
         GenerationIdempotencyEntity result = service.begin(KEY, TEMPLATE_ID, "hash-A");
 
         assertThat(result).isSameAs(existing);
+    }
+
+    @Test
+    void hashRequestFailureRaisesHardError() {
+        IdempotencyService failingService = new IdempotencyService(
+                repository,
+                cachePort,
+                algorithm -> {
+                    throw new NoSuchAlgorithmException(algorithm);
+                }
+        );
+
+        assertThatThrownBy(() -> failingService.hashRequest("{\"customerId\":\"123\"}"))
+                .isInstanceOf(IdempotencyHashException.class)
+                .hasMessageContaining("SHA-256");
     }
 }

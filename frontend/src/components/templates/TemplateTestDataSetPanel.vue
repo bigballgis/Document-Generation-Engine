@@ -8,6 +8,7 @@ import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import PreviewProgressDialog from '@/components/template/PreviewProgressDialog.vue'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
+import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import * as templatesApi from '@/api/templates'
 import { useConfirmAction } from '@/composables/useConfirmAction'
@@ -28,6 +29,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const { confirmAction } = useConfirmAction()
+const { formatDateTime } = useLocaleFormatters()
 const loading = ref(false)
 const saving = ref(false)
 const dataSets = ref<TestDataSet[]>([])
@@ -37,7 +39,7 @@ const { filters: columnFilters, filteredRows: filteredDataSets } = useDataTableF
   [
     { key: 'name', getValue: (row) => row.name },
     { key: 'testDataSetId', getValue: (row) => row.testDataSetId },
-    { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
+    { key: 'updatedAt', getValue: (row) => formatDateTime(row.updatedAt) },
   ],
 )
 const dataSetsCurrentPage = ref(1)
@@ -306,7 +308,7 @@ function rowClassName({ row }: { row: TestDataSet }): string {
           />
         </template>
         <template #default="{ row }">
-          {{ new Date(row.updatedAt).toLocaleString() }}
+          {{ formatDateTime(row.updatedAt) }}
         </template>
       </el-table-column>
       <el-table-column :label="t('common.actions')" min-width="280" fixed="right">

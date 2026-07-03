@@ -52,13 +52,13 @@ public class ManagementUserEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "management_user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role", nullable = false, length = 64)
     @Enumerated(EnumType.STRING)
     private Set<ManagementRole> roles = new LinkedHashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "management_user_group_scope", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "group_code", nullable = false, length = 64)
     private Set<String> authorizedGroupCodes = new LinkedHashSet<>();

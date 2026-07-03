@@ -1,3 +1,4 @@
+import { unwrapEnvelope } from '@/api/envelope'
 import { http } from '@/api/http'
 import type { ApiEnvelope } from '@/types/session'
 import type {
@@ -12,21 +13,14 @@ import type {
   UpdateMasterMetadataPayload,
 } from '@/types/master'
 
-function unwrap<T>(envelope: ApiEnvelope<T>): T {
-  if (!envelope.result) {
-    throw new Error('API response missing result')
-  }
-  return envelope.result
-}
-
 export async function listMasters(): Promise<MasterDocumentSummary[]> {
   const response = await http.get<ApiEnvelope<MasterDocumentSummary[]>>('/masters')
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function getMaster(masterId: string): Promise<MasterDocumentDetail> {
   const response = await http.get<ApiEnvelope<MasterDocumentDetail>>(`/masters/${masterId}`)
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function createMaster(
@@ -44,7 +38,7 @@ export async function createMaster(
   const response = await http.post<ApiEnvelope<MasterDocumentDetail>>('/masters', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function submitMasterReview(
@@ -55,7 +49,7 @@ export async function submitMasterReview(
     `/masters/${masterId}/submit-review`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function decideMasterReview(
@@ -66,14 +60,14 @@ export async function decideMasterReview(
     `/masters/${masterId}/review`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function getMasterImpactAnalysis(masterId: string): Promise<MasterImpactAnalysis> {
   const response = await http.get<ApiEnvelope<MasterImpactAnalysis>>(
     `/masters/${masterId}/impact-analysis`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function updateMasterMetadata(
@@ -84,7 +78,7 @@ export async function updateMasterMetadata(
     `/masters/${masterId}`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function downloadMasterFile(masterId: string): Promise<{ blob: Blob; filename: string }> {
@@ -106,7 +100,7 @@ export async function listMasterRevisionLines(
     `/masters/${masterId}/revision-lines`,
     { params: { page, size } },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function getMasterRevisionLine(
@@ -116,7 +110,7 @@ export async function getMasterRevisionLine(
   const response = await http.get<ApiEnvelope<MasterRevisionLineDetail>>(
     `/masters/${masterId}/revision-lines/${revisionLineId}`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function downloadMasterRevisionLineFile(
@@ -144,5 +138,5 @@ export async function replaceMasterFile(masterId: string, file: File): Promise<M
       headers: { 'Content-Type': 'multipart/form-data' },
     },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }

@@ -3,6 +3,7 @@ package com.bank.docgen.runtime.service;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyRepository;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.HexFormat;
@@ -17,13 +18,23 @@ public class IdempotencyService {
 
     private final GenerationIdempotencyRepository repository;
     private final IdempotencyCachePort idempotencyCachePort;
+    private final MessageDigestFactory messageDigestFactory;
 
     public IdempotencyService(
             GenerationIdempotencyRepository repository,
             IdempotencyCachePort idempotencyCachePort
     ) {
+        this(repository, idempotencyCachePort, MessageDigest::getInstance);
+    }
+
+    IdempotencyService(
+            GenerationIdempotencyRepository repository,
+            IdempotencyCachePort idempotencyCachePort,
+            MessageDigestFactory messageDigestFactory
+    ) {
         this.repository = repository;
         this.idempotencyCachePort = idempotencyCachePort;
+        this.messageDigestFactory = messageDigestFactory;
     }
 
     @Transactional(readOnly = true)
@@ -119,14 +130,20 @@ public class IdempotencyService {
 
     public String hashRequest(String payload) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = messageDigestFactory.create("SHA-256");
             return HexFormat.of().formatHex(digest.digest(payload.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception ex) {
-            return payload;
+        } catch (GeneralSecurityException ex) {
+            throw new IdempotencyHashException("SHA-256", ex);
         }
     }
 
     private String cacheKey(UUID templateId, String idempotencyKey) {
         return templateId + ":" + idempotencyKey;
+    }
+
+    @FunctionalInterface
+    interface MessageDigestFactory {
+
+        MessageDigest create(String algorithm) throws GeneralSecurityException;
     }
 }

@@ -3,46 +3,28 @@ import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import PreviewProgressDialog from '@/components/template/PreviewProgressDialog.vue'
+import { connectAuthorizedEventStream } from '@/utils/authorizedEventStream'
 import en from '@/i18n/locales/en'
 
-// Mock EventSource globally
-class MockEventSource {
+vi.mock('@/utils/authorizedEventStream', () => ({
+  connectAuthorizedEventStream: vi.fn(),
+}))
+
+interface MockStreamRequest {
   url: string
-  onmessage: ((evt: MessageEvent) => void) | null = null
-  onerror: ((evt: Event) => void) | null = null
-  readyState: number = 1
-  private handlers: Record<string, ((evt: MessageEvent) => void)[]> = {}
-  static instances: MockEventSource[] = []
-
-  constructor(url: string) {
-    this.url = url
-    MockEventSource.instances.push(this)
-  }
-
-  addEventListener(event: string, handler: (evt: MessageEvent) => void) {
-    if (!this.handlers[event]) {
-      this.handlers[event] = []
-    }
-    this.handlers[event].push(handler)
-  }
-
-  removeEventListener(event: string, handler: (evt: MessageEvent) => void) {
-    if (this.handlers[event]) {
-      this.handlers[event] = this.handlers[event].filter((h) => h !== handler)
-    }
-  }
-
-  close() {
-    this.readyState = 2
-  }
-
-  emit(event: string, data: unknown) {
-    const msg = { data: JSON.stringify(data) } as MessageEvent
-    this.handlers[event]?.forEach((h) => h(msg))
-  }
+  token?: string | null
+  onMessage: (event: { type: string; data: string }) => void
 }
 
-vi.stubGlobal('EventSource', MockEventSource)
+const streamRequests: MockStreamRequest[] = []
+const closeMocks: Array<ReturnType<typeof vi.fn>> = []
+
+function emitStreamEvent(index: number, type: string, payload: unknown) {
+  streamRequests[index]?.onMessage({
+    type,
+    data: JSON.stringify(payload),
+  })
+}
 
 function makeI18n() {
   return createI18n({ legacy: false, locale: 'en', messages: { en } })
@@ -50,7 +32,17 @@ function makeI18n() {
 
 describe('PreviewProgressDialog', () => {
   beforeEach(() => {
-    MockEventSource.instances = []
+    streamRequests.length = 0
+    closeMocks.length = 0
+    vi.mocked(connectAuthorizedEventStream).mockImplementation(async ({ url, token, onMessage }) => {
+      const close = vi.fn()
+      streamRequests.push({ url, token, onMessage })
+      closeMocks.push(close)
+      return {
+        close,
+        done: Promise.resolve(),
+      }
+    })
     localStorage.setItem('docgen.accessToken', 'test-token')
   })
 
@@ -73,7 +65,7 @@ describe('PreviewProgressDialog', () => {
       attachTo: document.body,
     })
     await flushPromises()
-    expect(MockEventSource.instances).toHaveLength(0)
+    expect(streamRequests).toHaveLength(0)
   })
 
   it('connects SSE and shows progress stage when dialog opens', async () => {
@@ -91,12 +83,13 @@ describe('PreviewProgressDialog', () => {
     })
     await flushPromises()
 
-    expect(MockEventSource.instances).toHaveLength(1)
-    expect(MockEventSource.instances[0].url).toContain('progress-stream')
-    expect(MockEventSource.instances[0].url).toContain('token=test-token')
+    expect(streamRequests).toHaveLength(1)
+    expect(streamRequests[0]?.url).toContain('progress-stream')
+    expect(streamRequests[0]?.url).not.toContain('token=')
+    expect(streamRequests[0]?.token).toBe('test-token')
 
     // Emit progress event
-    MockEventSource.instances[0].emit('progress', {
+    emitStreamEvent(0, 'progress', {
       stage: 'GENERATING_DOCX',
       percent: 40,
       message: 'Generating document',
@@ -125,7 +118,7 @@ describe('PreviewProgressDialog', () => {
     })
     await flushPromises()
 
-    MockEventSource.instances[0].emit('completed', {
+    emitStreamEvent(0, 'completed', {
       previewId: 'prev-1',
       docxDownloadUrl: 'http://example.com/docx',
       pdfDownloadUrl: 'http://example.com/pdf',
@@ -154,7 +147,7 @@ describe('PreviewProgressDialog', () => {
     })
     await flushPromises()
 
-    MockEventSource.instances[0].emit('failed', {
+    emitStreamEvent(0, 'failed', {
       error: 'Render engine failed',
       retryable: true,
     })
@@ -181,13 +174,12 @@ describe('PreviewProgressDialog', () => {
     })
     await flushPromises()
 
-    const es = MockEventSource.instances[0]
-    expect(es.readyState).not.toBe(2)
+    expect(closeMocks[0]).not.toHaveBeenCalled()
 
     await wrapper.setProps({ modelValue: false })
     await flushPromises()
 
-    expect(es.readyState).toBe(2)
+    expect(closeMocks[0]).toHaveBeenCalled()
 
     wrapper.unmount()
   })
@@ -207,7 +199,7 @@ describe('PreviewProgressDialog', () => {
     })
     await flushPromises()
 
-    MockEventSource.instances[0].emit('failed', { error: 'Failed', retryable: true })
+    emitStreamEvent(0, 'failed', { error: 'Failed', retryable: true })
     await wrapper.vm.$nextTick()
 
     const retryBtn = document.querySelector('[data-testid="retry-btn"]')

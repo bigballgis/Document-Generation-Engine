@@ -7,6 +7,7 @@ import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
@@ -30,6 +31,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, te } = useI18n()
+const { formatDateTime } = useLocaleFormatters()
 const lifecycleStatusFilterOptions = useLifecycleStatusFilterOptions()
 const defaultRouteFilterOptions = computed(() => [
   { value: t('templates.versions.defaultRouteYes'), label: t('templates.versions.defaultRouteYes') },
@@ -54,7 +56,7 @@ const { filters: columnFilters, filteredRows: filteredVersions, hasActiveFilters
         row.defaultRouteTarget ? t('templates.versions.defaultRouteYes') : t('templates.versions.defaultRouteNo'),
       matchMode: 'exact',
     },
-    { key: 'updatedAt', getValue: (row) => new Date(row.updatedAt).toLocaleString() },
+    { key: 'updatedAt', getValue: (row) => formatDateTime(row.updatedAt) },
     { key: 'updatedBy', getValue: (row) => row.updatedBy },
   ])
 const versionsCurrentPage = ref(1)
@@ -314,7 +316,7 @@ const sortByUpdatedAt = rowSortMethod<TemplateReleaseVersion>((row) => row.updat
             />
           </template>
           <template #default="{ row }">
-            {{ new Date(row.updatedAt).toLocaleString() }}
+            {{ formatDateTime(row.updatedAt) }}
           </template>
         </el-table-column>
         <el-table-column

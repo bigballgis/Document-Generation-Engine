@@ -7,6 +7,7 @@ import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
 import com.bank.docgen.rendering.DocxAssemblyException;
 import com.bank.docgen.runtime.service.IdempotencyConflictException;
+import com.bank.docgen.runtime.service.IdempotencyHashException;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -96,6 +97,23 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.INTERNAL_ERROR);
         assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.storage.operationFailed");
+    }
+
+    @Test
+    void idempotencyHashFailureMapsToStableInternalErrorEnvelope() {
+        when(messageResolver.resolve("api.error.idempotency.hashFailed"))
+                .thenReturn("Unable to compute the idempotency fingerprint.");
+
+        ResponseEntity<ErrorEnvelope> response = handler.handleIdempotencyHashFailure(
+                request,
+                new IdempotencyHashException("SHA-256", new RuntimeException("missing provider"))
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.IDEMPOTENCY_HASH_FAILED);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.IDEMPOTENCY);
+        assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.idempotency.hashFailed");
     }
 
     @Test

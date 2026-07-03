@@ -22,3 +22,9 @@ logging:
   level:
     root: INFO
     com.bank.docgen: INFO
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

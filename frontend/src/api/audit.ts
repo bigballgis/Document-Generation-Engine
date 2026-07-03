@@ -1,3 +1,4 @@
+import { unwrapEnvelope } from '@/api/envelope'
 import { http } from '@/api/http'
 import type {
   AuditPagedResult,
@@ -10,13 +11,6 @@ import type {
 import type { ApiEnvelope } from '@/types/session'
 
 const DEFAULT_PAGE_SIZE = 20
-
-function unwrap<T>(envelope: ApiEnvelope<T>): T {
-  if (!envelope.result) {
-    throw new Error('API response missing result')
-  }
-  return envelope.result
-}
 
 function buildAuditParams(filters: AuditQueryFilters): Record<string, string | number> {
   const params: Record<string, string | number> = {
@@ -49,7 +43,7 @@ export async function listManagementEvents(
     '/admin/audit/management-events',
     { params: buildAuditParams(filters) },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function exportManagementEvents(
@@ -59,7 +53,7 @@ export async function exportManagementEvents(
     '/admin/audit/management-events/export',
     { params: buildExportParams(filters) },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function listLifecycleEvents(
@@ -69,7 +63,7 @@ export async function listLifecycleEvents(
     '/admin/audit/lifecycle-events',
     { params: buildAuditParams(filters) },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function exportLifecycleEvents(
@@ -79,7 +73,7 @@ export async function exportLifecycleEvents(
     '/admin/audit/lifecycle-events/export',
     { params: buildExportParams(filters) },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 function buildExportParams(filters: AuditQueryFilters): Record<string, string> {

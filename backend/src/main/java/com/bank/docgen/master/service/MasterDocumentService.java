@@ -26,6 +26,7 @@ import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,6 +35,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +47,8 @@ public class MasterDocumentService {
 
     private static final String DOCX_CONTENT_TYPE =
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    private static final long DEFAULT_MAX_DOCX_UPLOAD_BYTES = 50L * 1024L * 1024L;
+    private static final byte[] ZIP_MAGIC_BYTES = {'P', 'K', 3, 4};
 
     private final MasterDocumentRepository masterDocumentRepository;
     private final MasterAnchorRepository masterAnchorRepository;
@@ -51,6 +57,7 @@ public class MasterDocumentService {
     private final ObjectStoragePort objectStoragePort;
     private final DocxAnchorExtractor docxAnchorExtractor;
     private final GroupAccessService groupAccessService;
+    private final long maxDocxUploadBytes;
 
     public MasterDocumentService(
             MasterDocumentRepository masterDocumentRepository,
@@ -59,7 +66,8 @@ public class MasterDocumentService {
             MasterRevisionLineRepository masterRevisionLineRepository,
             ObjectStoragePort objectStoragePort,
             DocxAnchorExtractor docxAnchorExtractor,
-            GroupAccessService groupAccessService
+            GroupAccessService groupAccessService,
+            @Value("${docgen.master.max-docx-upload-bytes:" + DEFAULT_MAX_DOCX_UPLOAD_BYTES + "}") long maxDocxUploadBytes
     ) {
         this.masterDocumentRepository = masterDocumentRepository;
         this.masterAnchorRepository = masterAnchorRepository;
@@ -68,6 +76,7 @@ public class MasterDocumentService {
         this.objectStoragePort = objectStoragePort;
         this.docxAnchorExtractor = docxAnchorExtractor;
         this.groupAccessService = groupAccessService;
+        this.maxDocxUploadBytes = maxDocxUploadBytes;
     }
 
     @Transactional(readOnly = true)
@@ -343,10 +352,14 @@ public class MasterDocumentService {
         if (docxFile == null || docxFile.isEmpty()) {
             throw new MasterValidationException("api.error.master.docxRequired");
         }
+        if (docxFile.getSize() > maxDocxUploadBytes) {
+            throw new MasterValidationException("api.error.master.docxTooLarge");
+        }
         String filename = docxFile.getOriginalFilename();
         if (filename == null || !filename.toLowerCase(Locale.ROOT).endsWith(".docx")) {
             throw new MasterValidationException("api.error.master.docxRequired");
         }
+        assertDocxPackageStructure(docxFile);
     }
 
     private void storeDocx(String storageKey, MultipartFile docxFile) {
@@ -365,6 +378,43 @@ public class MasterDocumentService {
             }
         } catch (Exception ex) {
             throw new MasterValidationException("api.error.master.anchorExtractionFailed");
+        }
+    }
+
+    private void assertDocxPackageStructure(MultipartFile docxFile) {
+        try (PushbackInputStream inputStream = new PushbackInputStream(docxFile.getInputStream(), ZIP_MAGIC_BYTES.length)) {
+            byte[] signature = inputStream.readNBytes(ZIP_MAGIC_BYTES.length);
+            if (signature.length < ZIP_MAGIC_BYTES.length || !java.util.Arrays.equals(signature, ZIP_MAGIC_BYTES)) {
+                throw new MasterValidationException("api.error.master.docxCorrupt");
+            }
+            inputStream.unread(signature);
+            assertRequiredDocxEntries(inputStream);
+        } catch (MasterValidationException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new MasterValidationException("api.error.master.docxCorrupt");
+        }
+    }
+
+    private void assertRequiredDocxEntries(InputStream inputStream) throws Exception {
+        boolean hasContentTypes = false;
+        boolean hasRelationships = false;
+        boolean hasDocumentXml = false;
+        try (ZipInputStream zipInputStream = new ZipInputStream(inputStream)) {
+            for (ZipEntry entry = zipInputStream.getNextEntry(); entry != null; entry = zipInputStream.getNextEntry()) {
+                String entryName = entry.getName();
+                if ("[Content_Types].xml".equals(entryName)) {
+                    hasContentTypes = true;
+                } else if ("_rels/.rels".equals(entryName)) {
+                    hasRelationships = true;
+                } else if ("word/document.xml".equals(entryName)) {
+                    hasDocumentXml = true;
+                }
+                zipInputStream.closeEntry();
+            }
+        }
+        if (!hasContentTypes || !hasRelationships || !hasDocumentXml) {
+            throw new MasterValidationException("api.error.master.docxCorrupt");
         }
     }
 

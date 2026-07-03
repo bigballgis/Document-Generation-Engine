@@ -30,6 +30,7 @@
   "devDependencies": {
     "@cyclonedx/cyclonedx-npm": "^5.0.0",
     "@playwright/test": "^1.49.1",
+    "@types/node": "^26.1.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitest/coverage-v8": "2.1.9",
     "@vue/test-utils": "^2.4.6",

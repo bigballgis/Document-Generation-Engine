@@ -1,3 +1,4 @@
+import { unwrapEnvelope } from '@/api/envelope'
 import { http } from '@/api/http'
 import type {
   ApiPolicyDomain,
@@ -26,16 +27,9 @@ export interface RotatedCredential {
   rotatedAt: string
 }
 
-function unwrap<T>(envelope: ApiEnvelope<T>): T {
-  if (!envelope.result) {
-    throw new Error('API response missing result')
-  }
-  return envelope.result
-}
-
 export async function getApiPolicy(templateId: string): Promise<ApiPolicy> {
   const response = await http.get<ApiEnvelope<ApiPolicy>>(`/templates/${templateId}/api/policy`)
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function upsertApiPolicy(
@@ -46,7 +40,7 @@ export async function upsertApiPolicy(
     `/templates/${templateId}/api/policy`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function saveAdGroupsDomain(
@@ -58,7 +52,7 @@ export async function saveAdGroupsDomain(
     `/templates/${templateId}/api/policy/ad-groups`,
     { ...payload, confirmed },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function saveOutputDomain(
@@ -70,7 +64,7 @@ export async function saveOutputDomain(
     `/templates/${templateId}/api/policy/output`,
     { ...payload, confirmed },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function saveBatchLimitsDomain(
@@ -82,7 +76,7 @@ export async function saveBatchLimitsDomain(
     `/templates/${templateId}/api/policy/batch-limits`,
     { ...payload, confirmed },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function saveEncryptionDomain(
@@ -94,7 +88,7 @@ export async function saveEncryptionDomain(
     `/templates/${templateId}/api/policy/encryption`,
     { ...payload, confirmed },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function saveDefaultRouteDomain(
@@ -106,7 +100,7 @@ export async function saveDefaultRouteDomain(
     `/templates/${templateId}/api/policy/default-route`,
     { ...payload, confirmed },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function saveInvocationRetentionDomain(
@@ -118,7 +112,7 @@ export async function saveInvocationRetentionDomain(
     `/templates/${templateId}/api/policy/invocation-retention`,
     { ...payload, confirmed },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function saveApiPolicyDomain<D extends ApiPolicyDomain>(
@@ -151,7 +145,7 @@ export async function listRecentInvocations(
     `/templates/${templateId}/api/invocations/recent`,
     { params: { limit } },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function fetchApiPolicyImpactPreview(
@@ -162,21 +156,21 @@ export async function fetchApiPolicyImpactPreview(
     `/templates/${templateId}/api/policy/impact-preview`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function listCredentials(templateId: string): Promise<ApiCredentialSummary[]> {
   const response = await http.get<ApiEnvelope<ApiCredentialSummary[]>>(
     `/templates/${templateId}/api/credentials`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function createCredential(templateId: string): Promise<ApiCredentialCreated> {
   const response = await http.post<ApiEnvelope<ApiCredentialCreated>>(
     `/templates/${templateId}/api/credentials`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function rotateCredential(
@@ -186,7 +180,7 @@ export async function rotateCredential(
   const response = await http.post<ApiEnvelope<RotatedCredential>>(
     `/templates/${templateId}/api/credentials/${credentialId}/rotate`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function revokeCredential(
@@ -196,5 +190,5 @@ export async function revokeCredential(
   const response = await http.post<ApiEnvelope<ApiCredentialSummary>>(
     `/templates/${templateId}/api/credentials/${credentialId}/revoke`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }

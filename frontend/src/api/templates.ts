@@ -1,3 +1,4 @@
+import { unwrapEnvelope } from '@/api/envelope'
 import { http } from '@/api/http'
 import type { ApiEnvelope } from '@/types/session'
 import type { PageView } from '@/types/identity'
@@ -47,21 +48,14 @@ import type {
   PasteCleanResult,
 } from '@/types/template'
 
-function unwrap<T>(envelope: ApiEnvelope<T>): T {
-  if (!envelope.result) {
-    throw new Error('API response missing result')
-  }
-  return envelope.result
-}
-
 export async function listTemplates(): Promise<TemplateSummary[]> {
   const response = await http.get<ApiEnvelope<TemplateSummary[]>>('/templates')
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function getTemplate(templateId: string): Promise<TemplateDetail> {
   const response = await http.get<ApiEnvelope<TemplateDetail>>(`/templates/${templateId}`)
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function listTemplateVersionLines(
@@ -73,7 +67,7 @@ export async function listTemplateVersionLines(
     `/templates/${templateId}/version-lines`,
     { params: { page, size } },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function fetchDevVersionDetail(
@@ -83,7 +77,7 @@ export async function fetchDevVersionDetail(
   const response = await http.get<ApiEnvelope<TemplateDetail>>(
     `/templates/${templateId}/dev/${devVersionId}`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function fetchReleaseVersionDetail(
@@ -93,7 +87,7 @@ export async function fetchReleaseVersionDetail(
   const response = await http.get<ApiEnvelope<TemplateVersionLineDetail>>(
     `/templates/${templateId}/releases/${encodeURIComponent(releaseVersion)}`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function cloneReleaseVersion(
@@ -103,7 +97,7 @@ export async function cloneReleaseVersion(
   const response = await http.post<ApiEnvelope<TemplateVersionLineSummary>>(
     `/templates/${templateId}/release-versions/${encodeURIComponent(releaseVersion)}/clone`,
   )
-  const result = unwrap(response.data)
+  const result = unwrapEnvelope(response.data)
   return {
     devVersionId: result.devVersionId,
     devVersionNumber: result.devVersionNumber,
@@ -118,12 +112,12 @@ export async function abandonDevVersion(templateId: string, devVersionId: string
   if (response.status === 204 || !response.data) {
     return
   }
-  unwrap(response.data)
+  unwrapEnvelope(response.data)
 }
 
 export async function createTemplate(payload: CreateTemplatePayload): Promise<TemplateDetail> {
   const response = await http.post<ApiEnvelope<TemplateDetail>>('/templates', payload)
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function deleteTemplate(
@@ -141,7 +135,7 @@ export async function submitForTest(
     `/templates/${templateId}/lifecycle/submit-test`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function recordTestDecision(
@@ -152,7 +146,7 @@ export async function recordTestDecision(
     `/templates/${templateId}/lifecycle/test-decision`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function submitForApproval(
@@ -163,7 +157,7 @@ export async function submitForApproval(
     `/templates/${templateId}/lifecycle/submit-approval`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function recordApprovalDecision(
@@ -174,7 +168,7 @@ export async function recordApprovalDecision(
     `/templates/${templateId}/lifecycle/approval-decision`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function publishTemplate(
@@ -185,7 +179,7 @@ export async function publishTemplate(
     `/templates/${templateId}/lifecycle/publish`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function stopTemplate(
@@ -196,7 +190,7 @@ export async function stopTemplate(
     `/templates/${templateId}/lifecycle/stop`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function restoreTemplate(
@@ -207,7 +201,7 @@ export async function restoreTemplate(
     `/templates/${templateId}/lifecycle/restore`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function deprecateTemplate(
@@ -218,7 +212,7 @@ export async function deprecateTemplate(
     `/templates/${templateId}/lifecycle/deprecate`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function fetchLifecycleImpactPreview(
@@ -229,14 +223,14 @@ export async function fetchLifecycleImpactPreview(
     `/templates/${templateId}/lifecycle/impact-preview`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function fetchReleaseVersions(templateId: string): Promise<TemplateReleaseVersion[]> {
   const response = await http.get<ApiEnvelope<TemplateReleaseVersion[]>>(
     `/templates/${templateId}/release-versions`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function deactivateTemplateVersion(
@@ -248,7 +242,7 @@ export async function deactivateTemplateVersion(
     `/templates/${templateId}/versions/${encodeURIComponent(releaseVersion)}/deactivate`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function restoreTemplateVersion(
@@ -260,7 +254,7 @@ export async function restoreTemplateVersion(
     `/templates/${templateId}/versions/${encodeURIComponent(releaseVersion)}/restore`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function updateTemplateMetadata(
@@ -268,7 +262,7 @@ export async function updateTemplateMetadata(
   payload: UpdateTemplateMetadataPayload,
 ): Promise<TemplateDetail> {
   const response = await http.patch<ApiEnvelope<TemplateDetail>>(`/templates/${templateId}`, payload)
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function testGenerate(
@@ -279,7 +273,7 @@ export async function testGenerate(
     `/templates/${templateId}/previews/test-generate`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function batchTestGenerate(
@@ -290,12 +284,12 @@ export async function batchTestGenerate(
     `/templates/${templateId}/previews/batch-test`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function getTemplateCoverage(templateId: string): Promise<CoverageSummary> {
   const response = await http.get<ApiEnvelope<CoverageSummary>>(`/templates/${templateId}/coverage`)
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export type PublishGatePhase = 'PUBLISH' | 'SUBMIT_FOR_APPROVAL'
@@ -308,28 +302,28 @@ export async function fetchPublishGate(
     `/templates/${templateId}/publish-gate`,
     phase ? { params: { phase } } : undefined,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function fetchChangeDiff(templateId: string): Promise<ChangeDiffSummary> {
   const response = await http.get<ApiEnvelope<ChangeDiffSummary>>(
     `/templates/${templateId}/change-diff`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function getPreview(templateId: string, previewId: string): Promise<PreviewRecord> {
   const response = await http.get<ApiEnvelope<PreviewRecord>>(
     `/templates/${templateId}/previews/${previewId}`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function listPreviewRuns(templateId: string): Promise<PreviewRunSummary[]> {
   const response = await http.get<ApiEnvelope<PreviewRunSummary[]>>(
     `/templates/${templateId}/previews`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export type PreviewArtifactFormat = 'docx' | 'pdf'
@@ -354,14 +348,14 @@ export async function validateBindings(templateId: string): Promise<BindingValid
     `/templates/${templateId}/bindings/validate`,
     {},
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function getMasterStyleCatalog(templateId: string): Promise<MasterStyleCatalog> {
   const response = await http.get<ApiEnvelope<MasterStyleCatalog>>(
     `/templates/${templateId}/master-style-catalog`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function pasteClean(
@@ -372,7 +366,7 @@ export async function pasteClean(
     `/templates/${templateId}/paste-clean`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function validateRules(
@@ -383,7 +377,7 @@ export async function validateRules(
     `/templates/${templateId}/rules/validate`,
     { rules },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function saveRules(
@@ -394,7 +388,7 @@ export async function saveRules(
     `/templates/${templateId}/rules`,
     { rules },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function upsertVariable(
@@ -406,7 +400,7 @@ export async function upsertVariable(
     `/templates/${templateId}/variables/${encodeURIComponent(variableKey)}`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function deleteVariable(templateId: string, variableKey: string): Promise<void> {
@@ -422,14 +416,14 @@ export async function upsertBinding(
     `/templates/${templateId}/bindings/${encodeURIComponent(anchorId)}`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function listTestDataSets(templateId: string): Promise<TestDataSet[]> {
   const response = await http.get<ApiEnvelope<TestDataSet[]>>(
     `/templates/${templateId}/test-data-sets`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function createTestDataSet(
@@ -440,7 +434,7 @@ export async function createTestDataSet(
     `/templates/${templateId}/test-data-sets`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function updateTestDataSet(
@@ -452,7 +446,7 @@ export async function updateTestDataSet(
     `/templates/${templateId}/test-data-sets/${testDataSetId}`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function deleteTestDataSet(templateId: string, testDataSetId: string): Promise<void> {
@@ -466,12 +460,12 @@ export async function deriveTestDataSet(
   const response = await http.post<ApiEnvelope<TestDataSet>>(
     `/templates/${templateId}/test-data-sets/${testDataSetId}/derive`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function exportTemplateJson(templateId: string): Promise<TemplateExportResult> {
   const response = await http.get<ApiEnvelope<TemplateExportResult>>(`/templates/${templateId}/export`)
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function exportTemplateZip(templateId: string): Promise<{ blob: Blob; filename: string }> {
@@ -487,7 +481,7 @@ export async function exportTemplateZip(templateId: string): Promise<{ blob: Blo
 
 export async function importTemplate(payload: ImportTemplatePayload): Promise<TemplateImportResult> {
   const response = await http.post<ApiEnvelope<TemplateImportResult>>('/templates/import', payload)
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function listTemplateContentModuleReferences(
@@ -496,7 +490,7 @@ export async function listTemplateContentModuleReferences(
   const response = await http.get<ApiEnvelope<TemplateContentModuleReference[]>>(
     `/templates/${templateId}/content-module-references`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function startAsyncPreview(
@@ -507,14 +501,14 @@ export async function startAsyncPreview(
     `/templates/${templateId}/previews/async-preview`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function runBatchTest(templateId: string): Promise<BatchTestStarted> {
   const response = await http.post<ApiEnvelope<BatchTestStarted>>(
     `/templates/${templateId}/batch-tests/run`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function getBatchTestHistory(templateId: string): Promise<BatchTestRunSummary[]> {
@@ -522,7 +516,7 @@ export async function getBatchTestHistory(templateId: string): Promise<BatchTest
     `/templates/${templateId}/batch-tests`,
     { params: { limit: 5 } },
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function getSubmitTestEligibility(
@@ -543,7 +537,7 @@ export async function getSubmitTestEligibility(
       }
     }>
   >(`/templates/${templateId}/batch-tests/submit-eligibility`)
-  const result = unwrap(response.data)
+  const result = unwrapEnvelope(response.data)
   return {
     eligible: result.eligible,
     hasValidTestResult: result.conditions.hasValidTestResult,
@@ -564,5 +558,5 @@ export async function upsertTemplateContentModuleReference(
     `/templates/${templateId}/content-module-references/${encodeURIComponent(referenceKey)}`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }

@@ -2,6 +2,10 @@
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TOKEN_STORAGE_KEY } from '@/api/http'
+import {
+  connectAuthorizedEventStream,
+  type AuthorizedEventStreamConnection,
+} from '@/utils/authorizedEventStream'
 
 const props = defineProps<{
   modelValue: boolean
@@ -39,18 +43,14 @@ const sampleCoveragePct = ref<number | null>(null)
 const gatePassed = ref<boolean | null>(null)
 const errorMessage = ref('')
 
-let eventSource: EventSource | null = null
-
-function buildSseUrl(url: string): string {
-  const token = localStorage.getItem(TOKEN_STORAGE_KEY) ?? ''
-  const separator = url.includes('?') ? '&' : '?'
-  return `${url}${separator}token=${encodeURIComponent(token)}`
-}
+let eventStream: AuthorizedEventStreamConnection | null = null
+let streamSessionId = 0
 
 function disconnectSse() {
-  if (eventSource) {
-    eventSource.close()
-    eventSource = null
+  streamSessionId += 1
+  if (eventStream) {
+    eventStream.close()
+    eventStream = null
   }
 }
 
@@ -71,72 +71,108 @@ function resetState() {
 function connectSse() {
   disconnectSse()
   resetState()
+  const sessionId = streamSessionId
 
-  const url = buildSseUrl(props.streamUrl)
-  eventSource = new EventSource(url)
+  void connectAuthorizedEventStream({
+    url: props.streamUrl,
+    token: localStorage.getItem(TOKEN_STORAGE_KEY),
+    onMessage: (event) => {
+      if (sessionId !== streamSessionId) {
+        return
+      }
 
-  eventSource.addEventListener('sample_started', (evt: MessageEvent) => {
-    const data = JSON.parse(evt.data as string) as {
-      sampleIndex: number
-      totalSamples: number
-      dataSetExternalId: string
-    }
-    currentSample.value = {
-      index: data.sampleIndex,
-      total: data.totalSamples,
-      externalId: data.dataSetExternalId,
-    }
+      switch (event.type) {
+        case 'sample_started': {
+          const data = JSON.parse(event.data) as {
+            sampleIndex: number
+            totalSamples: number
+            dataSetExternalId: string
+          }
+          currentSample.value = {
+            index: data.sampleIndex,
+            total: data.totalSamples,
+            externalId: data.dataSetExternalId,
+          }
+          break
+        }
+        case 'sample_done': {
+          const data = JSON.parse(event.data) as {
+            sampleIndex: number
+            success: boolean
+            dataSetExternalId: string
+            errorDetail?: string
+          }
+          completedCount.value = data.sampleIndex
+          samples.value = [
+            ...samples.value,
+            {
+              sampleIndex: data.sampleIndex,
+              dataSetExternalId: data.dataSetExternalId,
+              success: data.success,
+              errorDetail: data.errorDetail,
+            },
+          ]
+          break
+        }
+        case 'batch_completed': {
+          const data = JSON.parse(event.data) as {
+            runId: string
+            successCount: number
+            failedCount: number
+            anchorCoveragePct: number
+            variableCoveragePct: number
+            sampleCoveragePct: number
+            gatePassed: boolean
+          }
+          disconnectSse()
+          phase.value = 'completed'
+          summarySuccessCount.value = data.successCount
+          summaryFailedCount.value = data.failedCount
+          anchorCoveragePct.value = data.anchorCoveragePct
+          variableCoveragePct.value = data.variableCoveragePct
+          sampleCoveragePct.value = data.sampleCoveragePct
+          gatePassed.value = data.gatePassed
+          emit('completed')
+          break
+        }
+        case 'batch_failed': {
+          const data = JSON.parse(event.data) as { error: string }
+          disconnectSse()
+          phase.value = 'failed'
+          errorMessage.value = data.error
+          break
+        }
+        default:
+          break
+      }
+    },
+    onError: () => {
+      if (sessionId !== streamSessionId) {
+        return
+      }
+      disconnectSse()
+      phase.value = 'failed'
+      errorMessage.value = t('templates.batchTest.error.stream')
+    },
   })
-
-  eventSource.addEventListener('sample_done', (evt: MessageEvent) => {
-    const data = JSON.parse(evt.data as string) as {
-      sampleIndex: number
-      success: boolean
-      dataSetExternalId: string
-      errorDetail?: string
-    }
-    completedCount.value = data.sampleIndex
-    samples.value = [
-      ...samples.value,
-      {
-        sampleIndex: data.sampleIndex,
-        dataSetExternalId: data.dataSetExternalId,
-        success: data.success,
-        errorDetail: data.errorDetail,
-      },
-    ]
-  })
-
-  eventSource.addEventListener('batch_completed', (evt: MessageEvent) => {
-    const data = JSON.parse(evt.data as string) as {
-      runId: string
-      successCount: number
-      failedCount: number
-      anchorCoveragePct: number
-      variableCoveragePct: number
-      sampleCoveragePct: number
-      gatePassed: boolean
-    }
-    disconnectSse()
-    phase.value = 'completed'
-    summarySuccessCount.value = data.successCount
-    summaryFailedCount.value = data.failedCount
-    anchorCoveragePct.value = data.anchorCoveragePct
-    variableCoveragePct.value = data.variableCoveragePct
-    sampleCoveragePct.value = data.sampleCoveragePct
-    gatePassed.value = data.gatePassed
-    emit('completed')
-  })
-
-  eventSource.addEventListener('batch_failed', (evt: MessageEvent) => {
-    const data = JSON.parse(evt.data as string) as { error: string }
-    disconnectSse()
-    phase.value = 'failed'
-    errorMessage.value = data.error
-  })
+    .then((stream) => {
+      if (sessionId !== streamSessionId) {
+        stream.close()
+        return
+      }
+      eventStream = stream
+    })
+    .catch(() => {
+      if (sessionId !== streamSessionId) {
+        return
+      }
+      disconnectSse()
+      phase.value = 'failed'
+      errorMessage.value = t('templates.batchTest.error.stream')
+    })
 
   setTimeout(() => {
-    if (eventSource && phase.value === 'running') {
+    if (sessionId === streamSessionId && phase.value === 'running') {
       disconnectSse()
       phase.value = 'failed'
       errorMessage.value = t('templates.batchTest.error.timeout')

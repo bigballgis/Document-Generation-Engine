@@ -1,3 +1,4 @@
+import { unwrapEnvelope } from '@/api/envelope'
 import { http } from '@/api/http'
 import type { ApiEnvelope } from '@/types/session'
 import type {
@@ -13,31 +14,24 @@ import type {
   UpdateContentModuleVersionPayload,
 } from '@/types/contentModule'
 
-function unwrap<T>(envelope: ApiEnvelope<T>): T {
-  if (!envelope.result) {
-    throw new Error('API response missing result')
-  }
-  return envelope.result
-}
-
 export async function listContentModules(groupCode?: string): Promise<ContentModuleSummary[]> {
   const trimmedGroupCode = groupCode?.trim()
   const response = await http.get<ApiEnvelope<ContentModuleSummary[]>>('/content-modules', {
     params: trimmedGroupCode ? { groupCode: trimmedGroupCode } : undefined,
   })
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function getContentModule(moduleId: string): Promise<ContentModuleDetail> {
   const response = await http.get<ApiEnvelope<ContentModuleDetail>>(`/content-modules/${moduleId}`)
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function createContentModule(
   payload: CreateContentModulePayload,
 ): Promise<ContentModuleDetail> {
   const response = await http.post<ApiEnvelope<ContentModuleDetail>>('/content-modules', payload)
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function createContentModuleVersion(
@@ -48,7 +42,7 @@ export async function createContentModuleVersion(
     `/content-modules/${moduleId}/versions`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function updateContentModuleDraftVersion(
@@ -60,7 +54,7 @@ export async function updateContentModuleDraftVersion(
     `/content-modules/${moduleId}/versions/${encodeURIComponent(semanticVersion)}`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function transitionContentModuleReview(
@@ -71,7 +65,7 @@ export async function transitionContentModuleReview(
     `/content-modules/${moduleId}/review/transition`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function previewContentModuleLifecycleImpact(
@@ -80,7 +74,7 @@ export async function previewContentModuleLifecycleImpact(
   const response = await http.get<ApiEnvelope<ContentModuleLifecycleImpactSummary>>(
     `/content-modules/${moduleId}/lifecycle/impact/preview`,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }
 
 export async function applyContentModuleLifecycleOperation(
@@ -91,5 +85,5 @@ export async function applyContentModuleLifecycleOperation(
     `/content-modules/${moduleId}/lifecycle/operation/apply`,
     payload,
   )
-  return unwrap(response.data)
+  return unwrapEnvelope(response.data)
 }

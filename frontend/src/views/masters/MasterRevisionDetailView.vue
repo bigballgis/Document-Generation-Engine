@@ -367,7 +367,7 @@ function formatReviewAction(action: string): string {
               <el-timeline-item
                 v-for="(record, index) in revisionLine.reviewHistory"
                 :key="`${record.createdAt}-${index}`"
-                :timestamp="new Date(record.createdAt).toLocaleString()"
+                :timestamp="formatDateTime(record.createdAt)"
               >
                 <p class="history-action">{{ formatReviewAction(record.action) }}</p>
                 <p v-if="record.changeSummary" class="history-text">

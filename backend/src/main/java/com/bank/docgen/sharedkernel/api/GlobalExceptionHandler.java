@@ -12,12 +12,13 @@ import com.bank.docgen.audit.service.AuditValidationException;
 import com.bank.docgen.runtime.service.AsyncTaskCancellationNotAllowedException;
 import com.bank.docgen.runtime.service.AsyncTaskExpiredException;
 import com.bank.docgen.runtime.service.AsyncTaskNotFoundException;
-import com.bank.docgen.runtime.service.SyncBatchFailureException;
 import com.bank.docgen.runtime.service.IdempotencyConflictException;
+import com.bank.docgen.runtime.service.IdempotencyHashException;
 import com.bank.docgen.runtime.service.RuntimeAccessDeniedException;
 import com.bank.docgen.runtime.service.RuntimeBatchValidationException;
 import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
 import com.bank.docgen.runtime.service.RuntimeDownloadExpiredException;
+import com.bank.docgen.runtime.service.SyncBatchFailureException;
 import com.bank.docgen.rendering.EncryptionFailedException;
 import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
 import com.bank.docgen.rendering.service.PreviewArtifactExpiredException;
@@ -407,6 +408,20 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
+    }
+
+    @ExceptionHandler(IdempotencyHashException.class)
+    public ResponseEntity<ErrorEnvelope> handleIdempotencyHashFailure(
+            HttpServletRequest request,
+            IdempotencyHashException ex
+    ) {
+        return domainError(
+                request,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ApiErrorCodes.IDEMPOTENCY_HASH_FAILED,
+                ApiErrorCategories.IDEMPOTENCY,
+                ex.messageKey()
+        );
     }
 
     @ExceptionHandler(AsyncTaskNotFoundException.class)

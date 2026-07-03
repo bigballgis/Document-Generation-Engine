@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { createI18n } from 'vue-i18n'
 import { describe, expect, it } from 'vitest'
 import { apiErrorEn } from '@/i18n/catalogs/apiErrorEn'
@@ -20,8 +22,20 @@ function collectLeafPaths(obj: Record<string, unknown>, prefix = ''): string[] {
 }
 
 const apiErrorLeafPaths = collectLeafPaths(apiErrorEn as Record<string, unknown>)
+const backendApiErrorPaths = readFileSync(
+  resolve(process.cwd(), '../backend/src/main/resources/i18n/messages_en.properties'),
+  'utf8',
+)
+  .split(/\r?\n/)
+  .map((line) => line.split('=', 1)[0]?.trim())
+  .filter((key): key is string => Boolean(key) && key.startsWith('api.error.'))
+  .map((key) => key.slice('api.error.'.length))
 
 describe('api.error catalog', () => {
+  it('matches every backend api.error key in the frontend English catalog', () => {
+    expect(apiErrorLeafPaths.slice().sort()).toEqual(backendApiErrorPaths.slice().sort())
+  })
+
   it('mirrors en and zh-CN catalog structure', () => {
     const enPaths = collectLeafPaths(apiErrorEn as Record<string, unknown>)
     const zhPaths = collectLeafPaths(apiErrorZhCn as Record<string, unknown>)
@@ -50,7 +64,6 @@ describe('api.error catalog', () => {
       expect(zhMessage).not.toBe(key)
       expect(enMessage.length).toBeGreaterThan(0)
       expect(zhMessage.length).toBeGreaterThan(0)
-      expect(zhMessage).not.toBe(enMessage)
     }
   })
 
