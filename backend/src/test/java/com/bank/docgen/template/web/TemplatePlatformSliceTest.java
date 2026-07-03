@@ -361,6 +361,24 @@ class TemplatePlatformSliceTest {
         runLifecycle(templateId);
         CredentialBundle credential = configureApiAndCredential(templateId);
 
+        // Clear default route so governance allows deactivating version 1.0.0
+        mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
+                        .with(authentication(new ManagementAuthentication(groupAdmin)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "allowedAdGroups":["RETAIL_API"],
+                                  "defaultRouteReleaseVersion":null,
+                                  "outputFormats":["DOCX"],
+                                  "outputModes":["SYNC_STREAM"],
+                                  "batchEnabled":false,
+                                  "maxBatchSize":10,
+                                  "docxEncryptionEnabled":false,
+                                  "pdfEncryptionEnabled":false
+                                }
+                                """))
+                .andExpect(status().isOk());
+
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/versions/1.0.0/deactivate")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)

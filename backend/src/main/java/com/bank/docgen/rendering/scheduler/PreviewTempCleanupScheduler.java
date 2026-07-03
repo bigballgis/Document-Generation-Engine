@@ -36,7 +36,6 @@ public class PreviewTempCleanupScheduler {
             try {
                 deleteArtifact(record.getTempStorageKey());
                 deleteArtifact(record.getPdfArtifactStorageKey());
-                deleteArtifact(record.getArtifactStorageKey());
                 record.markTempArtifactCleaned();
                 record.markExpired();
                 previewRecordRepository.save(record);

@@ -108,7 +108,7 @@ public class AsyncBatchTestOrchestrator {
                 .map(TestDataSetEntity::getExternalId)
                 .toList();
 
-        asyncExecutor.execute(() -> executeBatchRun(templateId, runId, dataSetIds, session));
+        asyncExecutor.execute(() -> executeBatchRun(templateId, run, dataSetIds, session));
 
         return new AsyncBatchStartResponse(runId.toString(), streamUrl);
     }
@@ -123,10 +123,11 @@ public class AsyncBatchTestOrchestrator {
 
     private void executeBatchRun(
             UUID templateId,
-            UUID runId,
+            BatchTestRunEntity run,
             List<String> dataSetIds,
             ManagementSessionClaims session
     ) {
+        UUID runId = run.getId();
         try {
             int total = dataSetIds.size();
             List<SampleResult> results = new ArrayList<>();
@@ -192,22 +193,20 @@ public class AsyncBatchTestOrchestrator {
             final boolean gatePassed = coverage != null && allSucceeded && !coverage.belowThreshold();
             final String sampleResultsJson = writeSampleResults(results);
 
-            batchTestRunRepository.findById(runId).ifPresent(run -> {
-                run.completeRun(
-                        finalSucceededCount,
-                        finalFailedCount,
-                        0,
-                        0,
-                        sampleResultsJson,
-                        anchorPct,
-                        variablePct,
-                        samplePct,
-                        allSucceeded,
-                        gatePassed
-                );
-                batchTestRunRepository.save(run);
-                pruneOldRuns(templateId);
-            });
+            run.completeRun(
+                    finalSucceededCount,
+                    finalFailedCount,
+                    0,
+                    0,
+                    sampleResultsJson,
+                    anchorPct,
+                    variablePct,
+                    samplePct,
+                    allSucceeded,
+                    gatePassed
+            );
+            batchTestRunRepository.save(run);
+            pruneOldRuns(templateId);
 
             batchSseRegistry.send(runId, "batch_completed", Map.of(
                     "runId", runId.toString(),
@@ -220,10 +219,8 @@ public class AsyncBatchTestOrchestrator {
 
         } catch (Exception ex) {
             LOG.error("Batch test run {} failed unexpectedly", runId, ex);
-            batchTestRunRepository.findById(runId).ifPresent(run -> {
-                run.failRun();
-                batchTestRunRepository.save(run);
-            });
+            run.failRun();
+            batchTestRunRepository.save(run);
             batchSseRegistry.send(runId, "batch_failed", Map.of(
                     "error", "Batch test run encountered an unexpected error"
             ));
