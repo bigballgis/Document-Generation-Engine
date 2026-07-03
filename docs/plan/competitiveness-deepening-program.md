@@ -98,7 +98,7 @@ Only **one CDP wave** may be `In Progress` at a time (same discipline as phase p
 
 **Removed from CDP:** former «CD-1 = P22 code» — that work is **only** in the P22 session, not delegated via CDP task IDs.
 
-**Current wave (this session):** **CD-0** (activated 2026-07-04).
+**Current wave (this session):** **CD-0** — **CD-DOC Done** (2026-07-04); **CD-BDD-T01…T08 `ready`**; CD-UX-T01/T03/T17 Done; CD-UX-T04 pending ADR.
 
 ---
 
@@ -253,14 +253,15 @@ Every implementer task across CDP MUST include these fields (detail docs follow 
 
 Mark CD-0 **Done** only when ALL true:
 
-- [ ] CD-DOC-T01…T20 merged (see detail doc)
-- [ ] CD-PIT registry published; CD-PIT-01…10 each have mitigation row
-- [ ] CD-BDD-T01…T08 status `ready`
-- [ ] CD-UX-T01…T04 merged into usability-review / PRD
-- [ ] `docs/README.md` indexes CDP + new behavior specs
-- [ ] `execution-sync-ledger.md` CDP section added
+- [x] CD-DOC-T01…T20 merged (2026-07-04)
+- [x] CD-PIT registry published; CD-PIT-01…10 each have mitigation row
+- [x] CD-BDD-T01…T08 status `ready`
+- [x] CD-UX-T01/T03 merged into usability-review; T04 pending
+- [x] `docs/README.md` indexes CDP + behavior specs
+- [x] `execution-sync-ledger.md` CDP section added
+- [ ] Proposed ADR drafts 0041–0043 (CD-PIT §4) — optional before CD-0 close
 
-*(Optional handoff to P22 session: P22 task rows reference CD-PIT IDs — not required for CD-0 Done.)*
+**Next wave (this session):** **CD-2** — `e2e-test-engineer` implements CD-E2E-T01 from [mvp-golden-path-browser.md](../behavior/mvp-golden-path-browser.md).
 
 ---
 

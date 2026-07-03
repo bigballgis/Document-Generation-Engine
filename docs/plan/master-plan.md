@@ -1,14 +1,14 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **P22** (2026-07-03 — **P22-DEMO-EXPANSION In Progress**; BDD ready; **P22-T01 next**). **Prior:** **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12; Playwright **10/10** + UIUX **PASS**; `2e61dc3`). **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
+**Active formal phase:** **P22** (2026-07-03 — **P22-DEMO-EXPANSION In Progress**; partial progress `6f9c76a`; T01/T02 largely done, T03/T04 partial; gates **RED**). **Prior:** **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12; Playwright **10/10** + UIUX **PASS**; `2e61dc3`). **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
 UX-A…UX-F interaction/upgradeability tasks (same plan) run as optimization waves
 against the existing implementation. **UX Wave A** (role gating + half-built interactions)
 re-earned Done on 2026-06-23; **UX Wave B** (workbenches + polish) Done (2026-06-23).
-**P22 In Progress** (2026-07-03) — **P22-DEMO-EXPANSION** (BDD ready; rendering fidelity + dual page numbers + eight bank letter demos; **P22-T01 next**). **P12 catch-all → Not Started** (slice **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03).
+**P22 In Progress** (2026-07-03) — **P22-DEMO-EXPANSION** (partial `6f9c76a`: T01/T02 largely done, T03/T04 partial; T05–T15 Not Started; gates **RED**). **P12 catch-all → Not Started** (slice **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03).
 **P16–P20 (deep-review functional gaps, 2026-06-23):** P16 lifecycle governance **Done**;
 P17 per-domain API policy **Done** (2026-06-25; Wave 3; T01–T09 + COR-F18);
 P18 structured authoring **Done** (2026-06-28; T01–T10); **P19 verifiability/publish-gate Done**
@@ -56,7 +56,7 @@ upstream systems invoke the dynamic API.
 | P19 | Template verifiability, publish gate & decision forms | P3, P4, P5 | Multi-sample coverage thresholds, batch test, change-diff, preview comparison, live publish-gate checklist, controlled test/approval opinion forms + risk prompts + exception markers (gaps G4, G5) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | P1 | Locale registry/switcher/fallback + html lang, config-driven brand theming, environment selector (gap G6, i18n constitution) | Done (2026-06-25) |
 | P21 | Role-journey frontend redesign & business-friendly terminology | P13, P14, P19, P20 | Hybrid IA (single task hub authoritative + behavior-typed "my to-dos" entries + per-role `RoleJourneyTimeline`), task-hub queue partitioning + restored fields + inline open actions, 6 collaboration-trigger backend completeness (+ `RESOLVED`), foreign-bank non-IT persona business-friendly L1 copy (en/zh, keys stable); **plus code-grounded audit remediation** — permission single-source/fail-closed, template-detail bug fixes (focus/tab, stale id), APPROVAL dual-substate, i18n parity, a11y focus ring, capability/route/OpenAPI drift; ADR Batch B / COR-T11 not violated | Done (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest; **AUD-B10 resolved** P12-AUD-B10 Done 2026-07-01; **AUD-M02 resolved** P12-AUD-M02 Done 2026-07-01) |
-| P22 | Demo expansion & rendering fidelity | P3, P4, P18 | Structured content DOCX fidelity (P18 rendering gap), dual page numbering, per-demo footers, eight bank letter `deploy/demo-*` packages, `import-all-demos.ps1` (R1–R5; BDD-DEMO-EXP-001…015) | **In Progress** (2026-07-03; P22-T01–T15 **Not Started**; **P22-T01 next**) |
+| P22 | Demo expansion & rendering fidelity | P3, P4, P18 | Structured content DOCX fidelity (P18 rendering gap), dual page numbering, per-demo footers, eight bank letter `deploy/demo-*` packages, `import-all-demos.ps1` (R1–R5; BDD-DEMO-EXP-001…015) | **In Progress** (2026-07-03; partial `6f9c76a` — T01/T02 **In Progress**, T03/T04 partial; T05–T15 **Not Started**; gates **RED**) |
 
 > **P22 vs P12:** **P22** is the sole formal phase **In Progress** (2026-07-03). Closes P18/P4
 > rendering fidelity gap per [demo-expansion-behavior-spec.md](../requirements/demo-expansion-behavior-spec.md).

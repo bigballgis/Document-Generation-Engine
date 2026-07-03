@@ -48,6 +48,9 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone ↔ phase mapping + gate evidence + transitional seams index |
 | [Master plan](./plan/master-plan.md) | P0–P22 phases — see phase detail plans for status |
 | [Comprehensive optimization roadmap](./plan/comprehensive-optimization-roadmap.md) | **Unified execution map** — docs, API contract, template workflow, frontend UX, performance, E2E (COR-0…6, 2026-06-23) |
+| **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **Launch readiness** — doc truth, E2E golden paths, pitfall registry (`CD-*` tasks) |
+| [P12 Deferred enhancements](./plan/detail/P12-deferred-enhancements.md) | Catch-all slice registry (testing overhaul, API package, UIUX refactor — Done slices) |
+| [P12 API package access](./plan/detail/P12-api-package-access-invocation-records.md) | Package-first API access + invocation records (**Done** 2026-07-03) |
 | [Optimization plan & backlog](./plan/optimization-plan.md) | Technical debt detail (OPT-A…G): gates, coverage, backend architecture |
 | [UX & upgradeability optimization plan](./plan/ux-upgradeability-optimization-plan.md) | Historical UX waves (UX-A…G); cross-check against comprehensive roadmap |
 | [P0 Foundation](./plan/detail/P0-foundation.md) | Scaffold, compose, gates |
@@ -124,9 +127,16 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 | Document | Status | Purpose |
 | --- | --- | --- |
-| **[MVP golden path (browser)](./behavior/mvp-golden-path-browser.md)** | **ready** | CDP CD-BDD-T01 — full MVP chain in browser (CD-E2E-T01) |
-| [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12-TEMPLATE-TESTING-OVERHAUL 2026-07-03) | P12 template testing tab BDD |
-| [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **Done** (P12-API 2026-07-03) | Package-first API access, invocation records |
+| **[MVP golden path (browser)](./behavior/mvp-golden-path-browser.md)** | **ready** | CD-BDD-T01 → CD-E2E-T01 |
+| [Tester decision journey](./behavior/tester-decision-journey.md) | **ready** | CD-BDD-T02 → CD-E2E-T02/T03 |
+| [Approver decision journey](./behavior/approver-decision-journey.md) | **ready** | CD-BDD-T03 → CD-E2E-T04 |
+| [Team lead publish journey](./behavior/team-lead-publish-journey.md) | **ready** | CD-BDD-T04 → CD-E2E-T05 |
+| [Master designer lifecycle](./behavior/master-designer-lifecycle.md) | **ready** | CD-BDD-T05 → CD-E2E-T06 |
+| [API policy edit-save journey](./behavior/api-policy-edit-save-journey.md) | **ready** | CD-BDD-T06 → CD-E2E-T07 |
+| [Preview comparison journey](./behavior/preview-comparison-journey.md) | **ready** | CD-BDD-T07 → CD-E2E-T09 |
+| [Audit admin query journey](./behavior/audit-admin-query-journey.md) | **ready** | CD-BDD-T08 → CD-E2E-T11 |
+| [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12 2026-07-03) | P12 template testing tab |
+| [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **Done** (P12 2026-07-03) | Package-first API access |
 
 ## ADRs
 

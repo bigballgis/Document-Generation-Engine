@@ -25,27 +25,24 @@ workflow review, frontend workflow & operation-experience review (OA design alig
 
 ## 0. Executive summary
 
-**Updated:** 2026-06-29 (doc-consistency sync)
+**Updated:** 2026-07-04 (CDP doc sync)
 
 The platform has a **feature-complete v1 management + runtime stack**: formal phases **P0–P11,
-P13–P20 Done** (P12 deferred catch-all only). MVP vertical slice and user sequence
-**P14 → P15 → P18** are closed with green gates (backend **524** tests, frontend **250**
-Vitest, domain E2E on Docker 4173).
+P13–P21 Done** (P12 deferred catch-all only). **P22 In Progress** (other session — rendering write path). **CDP Wave CD-0 In Progress** (this session — doc/E2E/pitfall specs). MVP vertical slice and user sequence
+**P14 → P15 → P18** are closed with green gates.
 
-**COR-0 through COR-6 are Done.** Remaining work is **optimization backlog (OPT-\*)**,
-**enterprise closure** (external validation, intranet SCA), and **transitional production
-seams** (AD Group stub, Kafka default profile, multi-instance rate limit / Redisson).
+**COR-0 through COR-6 are Done.** Remaining work: **CDP**, **P22 rendering**, **OPT-\*** backlog,
+**enterprise closure** (external validation, intranet SCA), and **transitional production seams**.
 
 | Class | Severity | Headline (current) |
 | --- | --- | --- |
-| **Documentation drift** | Low (residual) | Periodic sync of ledger, PROJECT-STATUS-RESET, and task sheets after each slice; misfiled `P13-confirmed-large-domains.md` retired |
+| **Documentation drift** | Low (residual) | CD-DOC reconciliation in progress; ledger CDP section added |
 | **Contract & runtime correctness** | Closed (COR-1) | Idempotency, async states, batch partial failure aligned — see §3 |
-| **Product workflow completeness** | Closed | P14 collaboration, P19 verifiability/publish gate, P18 structured authoring — all Done |
-| **Frontend workflow & OA UX** | Mostly closed (COR-3) | Dashboard consolidates workflow queues (COR-T11); residual OPT-G (TemplateDetailView split, locale polish) |
+| **Product workflow completeness** | **Closed except rendering write path** | P14/P19/P18 authoring Done; structured DOCX write → **P22** |
+| **Frontend workflow & OA UX** | Mostly closed (COR-3) | CD-E2E golden path open (CD-2) |
 | **Production deploy evidence** | Medium | P15 Helm/manifest CI green; no in-repo real-cluster rollout evidence (E05-T06) |
 
-**Next sequencing:** OPT Wave 3 (D5/G*) → pick **P12** slice or enterprise milestones M9–M11.
-Historical recommended order (COR-0 → … → COR-6) is **complete** — see §1.
+**Next sequencing:** **CDP CD-0** → **CD-2 E2E**; **P22** parallel (other session); OPT Wave 3 residual.
 
 ---
 

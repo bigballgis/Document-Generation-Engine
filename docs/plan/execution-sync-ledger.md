@@ -1,6 +1,8 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-07-03 (**P12-API-PACKAGE-ACCESS-INVOCATION slice Done** — T01–T12 complete; Playwright **10/10** + UIUX manifest **PASS**; commit `2e61dc3`)
+**Last synced:** 2026-07-03 (**P22-DEMO-EXPANSION partial progress** — Wave 1 largely complete; Wave 2 partial; commit `6f9c76a`; gates **RED/pending**)
+**Progress note (2026-07-03, P22):** **P22-DEMO-EXPANSION remains In Progress** (not Done). **Wave 1 (T01/T02) largely complete:** `StructuredContentDocxWriter`, `DocxListNumberingSupport`, `DocxMasterStyleRegistry`, `StructuredContentImageResolver`; `default-master-style-catalog-v1.json` v1.1; `DocxAssemblerTest` BDD-DEMO-EXP-001/002/004/013–015 coverage. **Wave 2 (T03/T04) partial:** `PdfPageNumberStampPlan`, `DocxPdfPageNumberStampPlanResolver`, `PdfPageNumberStamper` section-aware stamping; `DocumentGenerationEngine` + `PreviewGenerationService` pipeline wiring. **Not started:** T05–T15 demo packages, FOL executive upgrade (T14), `import-all-demos.ps1` (T13), T15 regression/Docker smoke. **Gate:** `mvn -B -ntp -f backend/pom.xml verify` **RED/pending** (blocked on `target/` clean + catalog sync). **Architecture review:** Critical findings **C1–C3** open — remediation required before T01/T02 close-out. **Active formal phase: P22** (T01/T02 close-out + T03/T04 next). Traceability: [P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md).
+**Last synced (prior):** 2026-07-03 (**P12-API-PACKAGE-ACCESS-INVOCATION slice Done** — T01–T12 complete; Playwright **10/10** + UIUX manifest **PASS**; commit `2e61dc3`)
 **Completion note (2026-07-03, P12-API-PKG):** **P12-API-PACKAGE-ACCESS-INVOCATION slice Done** — package-first API access + invocation records. **Backend T01–T06:** Flyway V43–V45; materialize/gate; `InvocationRecordService`; retention scheduler; runtime + management invocation APIs. **Frontend T07–T09:** hub External access L1; `ApiPolicyHomeView` overview downgrade; `TemplateRecentInvocationsPanel`. **E2E T11:** `P12-API-PACKAGE-ACCESS.spec.ts` **6/6**, `P12-API-PACKAGE-ACCESS-RUNTIME.spec.ts` **1/1** (BDD S5 generate + caller query); S1–S3/S7 batch flat deferred. **UIUX T12:** `P12-API-PACKAGE-ACCESS-uiux-evidence.spec.ts` **3/3**; manifest `frontend/e2e/evidence/P12-API-PACKAGE-ACCESS-uiux-manifest.md` **PASS** (4 screenshots REDBC/GREENBC). **Gate:** Docker redeploy ✓; Playwright Docker **10/10**; prior `ManagementInvocationQueryServiceTest` ✓; frontend Vitest **646** ✓. **P12 catch-all → Not Started** (slice complete). **Active formal phase: P22** (**P22-T01 next**). Traceability: [P12-api-package-access-invocation-records.md](./detail/P12-api-package-access-invocation-records.md).
 **Last synced (prior):** 2026-07-03 (**P22-DEMO-EXPANSION activated → In Progress** — BDD ready; P22-T01–T15 Not Started; **P22-T01 next**; plan-orchestrator only — no implementation code)
 **Activation note (2026-07-03):** **P22-DEMO-EXPANSION activated → In Progress** (sole formal phase `In Progress`). **P12-API-PACKAGE-ACCESS-INVOCATION → Done** (2026-07-03 — full slice T01–T12; see completion note above). **P12 catch-all → Not Started**. BDD **ready** (`docs/requirements/demo-expansion-behavior-spec.md`). **P22-T01…T15 Not Started** — **P22-T01 next**. Traceability: [P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md).
@@ -647,9 +649,24 @@ Each row lists exit criteria; remove from this index when closed.
 | Runtime rate limit | Process-local Bucket4j; requests without credential headers bypass filter (auth layer rejects later) | Shared Redis limiter or documented fail-closed at filter; ADR 0031 alignment | COR-B10, OPT-F8 |
 | Workbench vs Dashboard | **Done** — COR-T11 (2026-06-24): workflow + collaboration queues on Dashboard; legacy workbench routes redirect; standalone workbench views removed | COR-T11 decision in `docs/adr/decisions/2026-06-23-batch-b-workflow-defaults.md` | COR-T11 |
 | zh-CN / `api.error` catalog | **Done (2026-06-25)** — en/zh `api.error` + primary journey zh-CN bundles | Residual non-primary keys may en-fallback until touched | P20-T06 Done |
-| P19 verifiability | **Done (2026-06-25)** — T01–T10: batch test, coverage, change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, UI | Residual fidelity depth remains P18 | P19 Done, COR-L03 Done |
+| P19 verifiability | **Done (2026-06-25)** — T01–T10: batch test, coverage, change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, UI | Residual structured **DOCX write fidelity** tracked under **P22** (not P18) | P19 Done, COR-L03 Done |
+| Structured content DOCX write | P18 authoring/validation Done; `StructuredContentDocxWriter` landed (`6f9c76a`); BDD 001/002/004/013–015 partial green | P22-T01/T02 Done + `mvn verify` green; architecture C1–C3 closed | P22, CD-PIT |
+| Dual page numbering (DOCX/PDF) | Stamp plan + stamper wiring partial (`6f9c76a`); master DOCX section fields incomplete | P22-T03/T04 Done; BDD-005/006 green | P22, CD-PIT-05 |
+| Paste cleaning ↔ binding validation | P18-T07 edit-time only; not in `computeBindingStatus` | Wired to publish gate OR ADR documents edit-time-only scope | P18-T07, CD-HARD-T05 |
 | Service-layer authorization | Route visibility not enforced at API filter | **Documented pattern + contract test (2026-06-24)** — ADR-0001 | COR-P06 |
 | Redisson multi-instance locks | Lettuce cache only | **ADR-0039 evaluation recorded (2026-06-24)**; implement when multi-instance | COR-P05 |
+
+## CDP — Competitiveness Deepening Program (2026-07-04)
+
+Cross-cutting launch-readiness program; **not** a formal phase. Task prefix **`CD-*`**. P22 rendering code runs in a **separate session**.
+
+| Wave | Scope | Status | Evidence |
+| --- | --- | --- | --- |
+| **CD-0** | Doc truth (CD-DOC), pitfall registry (CD-PIT), BDD drafts (CD-BDD), UX metrics (CD-UX) | **In Progress** | [competitiveness-deepening-program.md](./plan/competitiveness-deepening-program.md) |
+| **CD-2** | Browser E2E golden paths (CD-E2E) | Not Started | [CDP-e2e-full-chain-evidence.md](./plan/detail/CDP-e2e-full-chain-evidence.md) |
+| **CD-3** | Production pitfall hardening (CD-HARD) | Not Started | After P22 Done; [CDP-industry-pitfall-registry.md](./plan/detail/CDP-industry-pitfall-registry.md) |
+
+**CD-0 gate (open):** CD-DOC **Done** (2026-07-04); CD-BDD-T01…T08 **ready**; CD-2 **Not Started**; ADR 0041–0043 drafts optional.
 
 ## Sync maintenance
 

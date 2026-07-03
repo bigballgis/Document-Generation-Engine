@@ -557,7 +557,7 @@
 ## 已确认：模板级退回原因配置 UX 重构（BDD-TEMPLATE-RISK-PROMPT-UX-001，2026-07-02）
 
 **BDD ID:** `BDD-TEMPLATE-RISK-PROMPT-UX-001`  
-**Status:** Confirmed (2026-07-02) — **Not yet implemented** (supersedes P19-T08 group-scoped risk-prompt panel on `TemplateListView`)  
+**Status:** **Done** (2026-06-29) — implemented via [P12-BDD-RISK-PROMPT-UX-001](../plan/detail/P12-deferred-enhancements.md) (supersedes P19-T08 group-scoped risk-prompt panel on `TemplateListView`)  
 **Supersedes:** Group-scoped risk prompt override in product/UI/API; disconnected `TemplateRiskPromptConfigPanel` on list view; hardcoded `TEMPLATE_DECISION_REASON_CATEGORIES` in `TemplateLifecycleDecisionDialog`
 
 | Field | Specification |

@@ -1,8 +1,9 @@
 # P22 — Demo Expansion & Rendering Fidelity (Detailed Plan)
 
 **Phase ID:** `P22-DEMO-EXPANSION`  
-**Phase status:** **In Progress** (activated 2026-07-03) | **Depends on:** P3, P4, P18 (authoring model Done; **rendering-side gap** remains)  
-**BDD:** [demo-expansion-behavior-spec.md](../../requirements/demo-expansion-behavior-spec.md) (`BDD-DEMO-EXP-001`…`015`, readiness **ready**)
+**Phase status:** **In Progress** (activated 2026-07-03; **partial progress** — commit `6f9c76a`) | **Depends on:** P3, P4, P18 (authoring model Done; **rendering-side gap** remains)  
+**BDD:** [demo-expansion-behavior-spec.md](../../requirements/demo-expansion-behavior-spec.md) (`BDD-DEMO-EXP-001`…`015`, readiness **ready**)  
+**Gate status:** **RED / pending** — `mvn verify` not green (blocked on `target/` clean + catalog sync); architecture review **C1–C3** open; demo packages T05–T15 not started.
 
 > **Single-active-phase invariant:** **P22** is the sole formal phase `In Progress` (activated 2026-07-03 by `plan-orchestrator`). **P12 catch-all → Not Started** (slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03). **CDP** program Wave CD-0 runs in parallel for doc/E2E/pitfall specs — see [competitiveness-deepening-program.md](../competitiveness-deepening-program.md). Do not reopen P18 phase status; this phase closes the **P18/P4 rendering fidelity gap** documented in the behavior spec.
 
@@ -50,10 +51,10 @@ Deliver a single end-to-end slice that:
 
 | ID | Owner | Task | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| **P22-T01** | backend-engineer | **StructuredContentDocxWriter** — extend `DocxAssembler` / dedicated writer: paragraph runs with emphasis/underline; ordered/unordered lists (`numId`/`ilvl`); `styleRef` resolution; `lineBreak`; `variable`/`textRun`; `tableComponent`/`tableComponentRef` → `XWPFTable`; `conditionBlock`/`loopBlock` with `NumberingService` re-sequence; `contentModuleRef` recursive expand; `imageRef`/`sealRef` embed | — | Not Started |
-| **P22-T02** | backend-engineer | **Master style catalog expansion** — add demo-required styles (`Heading2`, `Heading3`, `ClauseBody`, `TableHeader`, `ScheduleTitle`, etc.) to default catalog + demo master generators; wire style ID mapping in T01 writer | P22-T01 | Not Started |
-| **P22-T03** | backend-engineer | **Section-aware page numbering in master DOCX** — section breaks, `pgNumType` restart, footer fields `PAGE` + `SECTIONPAGES` + `NUMPAGES`; `pageNumberingProfile` in demo config (`GLOBAL_ONLY` \| `SECTION_AND_GLOBAL` \| `SECTION_ONLY`); update `*MasterDocxAssetGeneratorTest` assertions | P22-T01 | Not Started |
-| **P22-T04** | backend-engineer | **PdfPageNumberStamper section-aware** — dual-page stamping aligned with section boundaries when LibreOffice omits field eval; respect `renderProfile.pdfPageNumberStampingEnabled`; fidelity warning on stamper failure (no silent no-page PDF) | P22-T03 | Not Started |
+| **P22-T01** | backend-engineer | **StructuredContentDocxWriter** — extend `DocxAssembler` / dedicated writer: paragraph runs with emphasis/underline; ordered/unordered lists (`numId`/`ilvl`); `styleRef` resolution; `lineBreak`; `variable`/`textRun`; `tableComponent`/`tableComponentRef` → `XWPFTable`; `conditionBlock`/`loopBlock` with `NumberingService` re-sequence; `contentModuleRef` recursive expand; `imageRef`/`sealRef` embed | — | **In Progress** (largely done — `StructuredContentDocxWriter`, `DocxAssembler` wiring, BDD 001/002/004/013–015 tests; `6f9c76a`) |
+| **P22-T02** | backend-engineer | **Master style catalog expansion** — add demo-required styles (`Heading2`, `Heading3`, `ClauseBody`, `TableHeader`, `ScheduleTitle`, etc.) to default catalog + demo master generators; wire style ID mapping in T01 writer | P22-T01 | **In Progress** (catalog v1.1 + `DocxMasterStyleRegistry`; demo master generators / full style matrix pending) |
+| **P22-T03** | backend-engineer | **Section-aware page numbering in master DOCX** — section breaks, `pgNumType` restart, footer fields `PAGE` + `SECTIONPAGES` + `NUMPAGES`; `pageNumberingProfile` in demo config (`GLOBAL_ONLY` \| `SECTION_AND_GLOBAL` \| `SECTION_ONLY`); update `*MasterDocxAssetGeneratorTest` assertions | P22-T01 | **In Progress** (partial — stamp-plan resolver + pipeline hooks; master DOCX section fields + generator assertions pending) |
+| **P22-T04** | backend-engineer | **PdfPageNumberStamper section-aware** — dual-page stamping aligned with section boundaries when LibreOffice omits field eval; respect `renderProfile.pdfPageNumberStampingEnabled`; fidelity warning on stamper failure (no silent no-page PDF) | P22-T03 | **In Progress** (partial — `PdfPageNumberStamper`, `PdfPageNumberStampPlan`, `DocumentGenerationEngine` / `PreviewGenerationService` wiring; BDD-005/006 + fidelity warnings pending) |
 | **P22-T05** | backend-engineer | **`deploy/demo-retail-account/`** — assets, config (`DEMO-RETAIL-ACCOUNT-OPEN`, `DEMO-RETAIL-ACCOUNT-BALANCE`), sql, `RetailAccountMasterDocxAssetGeneratorTest`, `import-retail-account-demo.ps1`; RETAIL group; `GLOBAL_ONLY` footer | P22-T01, P22-T02, P22-T03 | Not Started |
 | **P22-T06** | backend-engineer | **`deploy/demo-mortgage/`** — `DEMO-MORTGAGE-APPROVAL`; repayment schedule `tableComponent`; `SECTION_AND_GLOBAL`; 8–20 page target | P22-T01, P22-T02, P22-T03 | Not Started |
 | **P22-T07** | backend-engineer | **`deploy/demo-credit-limit/`** — `DEMO-CREDIT-LIMIT-CONFIRM`; CORP; dual-page; condition + underline nodes | P22-T01, P22-T02, P22-T03 | Not Started |
@@ -95,7 +96,7 @@ Wave 6 — Gates & evidence
   P22-T15
 ```
 
-**First delegation target for `backend-engineer`:** **P22-T01** (failing tests for BDD-DEMO-EXP-001, 002, 004, 014, 015 partial).
+**First delegation target for `backend-engineer`:** **P22-T01/T02 close-out** (green `mvn verify`, architecture **C1–C3** remediation, remaining BDD gaps) → then **P22-T03/T04** (section-aware master DOCX + PDF dual-page BDD-005/006).
 
 ## 6. BDD scenario → task mapping
 
@@ -157,7 +158,7 @@ Wave 6 — Gates & evidence
 
 | Next agent | Action |
 | --- | --- |
-| **backend-engineer** | TDD: P22-T01 failing tests → `StructuredContentDocxWriter` / `DocxAssembler` enhancement |
+| **backend-engineer** | Close T01/T02 (verify green + C1–C3); complete T03/T04 dual-page; then Wave 3 demo packages T05–T12 |
 | **e2e-test-engineer** | After T13/T15 — import + preview smoke per BDD-009 |
 | **post-task-doc-sync** | On phase Done — ledger, master plan, requirements cross-links |
 
@@ -167,4 +168,6 @@ Wave 6 — Gates & evidence
 
 | Date | Change |
 | --- | --- |
-| 2026-07-03 | Phase activated; 15 tasks Not Started; P12-API-PACKAGE-ACCESS-INVOCATION paused |
+| 2026-07-03 | Phase activated; 15 tasks Not Started; P12-API-PACKAGE-ACCESS-INVOCATION **Done** (same date) |
+| 2026-07-04 | CDP program added; P22 code tracked in separate session per [competitiveness-deepening-program.md](../competitiveness-deepening-program.md) |
+| 2026-07-03 | **Partial progress** (`6f9c76a`): T01/T02 largely done; T03/T04 partial (Wave 2); T05–T15 Not Started; gates **RED** (`mvn verify` pending target clean + catalog sync); architecture review **C1–C3** open |

@@ -53,7 +53,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P9 | Production readiness | [detail/P9-production-readiness.md](detail/P9-production-readiness.md) | Done |
 | P10 | Runtime document download | [detail/P10-runtime-download.md](detail/P10-runtime-download.md) | Done |
 | P11 | Batch & async generation | [detail/P11-batch-async.md](detail/P11-batch-async.md) | Done |
-| P12 | Deferred enhancements | [detail/P12-deferred-enhancements.md](detail/P12-deferred-enhancements.md) · [API package access (paused)](detail/P12-api-package-access-invocation-records.md) | **Not Started** — slice **P12-API-PACKAGE-ACCESS-INVOCATION paused** (T01–T06 Done; T07–T12 after P22); prior **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03) |
+| P12 | Deferred enhancements | [detail/P12-deferred-enhancements.md](detail/P12-deferred-enhancements.md) · [API package access (Done)](detail/P12-api-package-access-invocation-records.md) | **Not Started** — slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03) |
 | P13 | Identity & group administration | [detail/P13-identity-group-administration.md](detail/P13-identity-group-administration.md) | Done |
 | P14 | Confirmed large domains | [detail/P14-confirmed-large-domains.md](detail/P14-confirmed-large-domains.md) | Done (2026-06-27) |
 | P15 | Kubernetes deployment & container hardening | [detail/P15-kubernetes-deployment-container-hardening.md](detail/P15-kubernetes-deployment-container-hardening.md) | Done (2026-06-27; T01–T10) |

@@ -205,6 +205,12 @@ function handleBatchCompleted() {
   void refreshEligibility()
 }
 
+watch(batchDialogVisible, (visible, wasVisible) => {
+  if (wasVisible && !visible) {
+    void refreshEligibility()
+  }
+})
+
 watch(
   activeWorkspaceTab,
   (tab) => {
