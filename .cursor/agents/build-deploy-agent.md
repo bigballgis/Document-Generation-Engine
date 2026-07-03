@@ -29,6 +29,7 @@ build/gate/deploy work to this agent — they do not run Maven or Docker command
 | Restart only (no compile) | `.\scripts\docker-deploy.ps1 -SkipBuild` |
 | Force-rebuild images | `.\scripts\docker-deploy.ps1 -ForceRebuild` |
 | Hardening smoke | `.\scripts\container-hardening-smoke.ps1 -SkipBuild` |
+| E2E docker acceptance | `pnpm -C frontend test:e2e:docker` (stack deployed at 4173) |
 | Health check | `curl -f http://localhost:8080/healthz` |
 | UI reachability | `curl -f http://localhost:4173` |
 
@@ -51,7 +52,7 @@ mvn -B -ntp -f backend/pom.xml -Pdev-fast test -Dtest=TemplateServiceTest
 mvn -B -ntp -f backend/pom.xml -Pdev-fast test -Dtest=TemplateServiceTest#shouldReturnTemplate
 ```
 
-Expected wall time: **~46 s** (707 tests, cloud agent VM).
+Expected wall time: under a minute on a typical dev machine (test count grows with the project).
 
 ### Full quality gate (pre-push / CI)
 
@@ -61,7 +62,8 @@ Runs Checkstyle + PMD + SpotBugs (`effort=Max`) + JaCoCo coverage check.
 mvn -B -ntp -f backend/pom.xml verify
 ```
 
-Expected wall time: **~79 s**.
+Expected wall time: a few minutes at most; if it degrades back toward 10+ minutes, check that
+`reuseForks=true` and `.mvn/jvm.config` are intact.
 
 Gate thresholds (pom.xml):
 - JaCoCo LINE ≥ 0.70 / BRANCH ≥ 0.45

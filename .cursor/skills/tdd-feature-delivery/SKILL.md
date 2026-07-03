@@ -47,7 +47,8 @@ mvn -B -ntp -f backend/pom.xml verify
 ```
 
 - Includes Checkstyle + PMD + SpotBugs (`effort=Max`) + JaCoCo.
-- Coverage gate: changed lines >= 85%; security-critical / core domain >= 90%.
+- Enforced coverage floors (pom.xml, ratchet): JaCoCo LINE ≥ 0.70 / BRANCH ≥ 0.45.
+- Review target (not mechanically enforced): changed lines ≥ 85%; security-critical / core domain ≥ 90%.
 
 ## Frontend gates
 

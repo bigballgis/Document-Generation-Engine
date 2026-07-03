@@ -1,6 +1,6 @@
 ---
 name: post-task-commit-review
-description: Mandatory workflow after post-task-doc-sync — review the full change set, escalate to security/bugbot/architecture subagents when needed, then stage, commit, and push before claiming Done. Skips push only when the user explicitly opts out.
+description: Mandatory workflow after post-task-doc-sync — review the full change set, escalate to architecture-reviewer/explore subagents when needed, then stage, commit, and push before claiming Done. Skips push only when the user explicitly opts out.
 ---
 
 # Post-Task Commit Review
@@ -22,7 +22,7 @@ Any behavior-changing task where the parent delegated end-of-task commit (defaul
 ```
 1. Confirm gates green + doc sync complete (sync report or checklist done)
 2. Invoke post-task-commit-review agent (or follow its checklist inline)
-3. Review change set; escalate to security-review / bugbot / architecture-reviewer if needed
+3. Review change set; escalate to architecture-reviewer (security/boundary) / explore (defect scan) if needed
 4. Block on 🔴 Critical; fix and re-gate if code changes
 5. git status + diff + log → stage → commit → push → verify status
 6. Emit commit-gate report; only then mark Done

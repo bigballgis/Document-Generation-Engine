@@ -25,10 +25,10 @@ work — only orchestration, user communication, and synthesis of subagent outpu
 
 ```
 behavior-spec-author → plan-orchestrator → doc-keeper(if docs change)
-  → backend-engineer / frontend-engineer (TDD)
-  → e2e-test-engineer (functional) → e2e-uiux-reviewer (UIUX, frontend)
-  → architecture-reviewer → deploy-engineer (release-relevant)
-  → post-task-doc-sync → post-task-commit-review → Done
+ → backend-engineer / frontend-engineer (TDD; gates via build-deploy-agent)
+ → e2e-test-engineer (functional) → e2e-uiux-reviewer (UIUX, frontend)
+ → architecture-reviewer → build-deploy-agent (deploy, release-relevant)
+ → post-task-doc-sync → post-task-commit-review → Done
 ```
 
 ## Non-negotiables
@@ -40,7 +40,7 @@ behavior-spec-author → plan-orchestrator → doc-keeper(if docs change)
    functional journeys AND `e2e-uiux-reviewer` evidence before Done.
 4. **Bank OA style lock** — Frontend surfaces meet `.cursor/skills/frontend-oa-design/SKILL.md`;
    token-based, dual-brand (REDBC/GREENBC), no overflow/overlap, a11y green.
-5. **Docker deploy is gated** — `deploy-engineer` only deploys on green gates + evidence;
+5. **Docker deploy is gated** — `build-deploy-agent` only deploys on green gates + evidence;
    no secrets in images; rollback readiness recorded.
 6. **End gates** — `post-task-doc-sync` then `post-task-commit-review` before any Done claim.
 7. **Single active phase** — Exactly one plan phase `In Progress` (see `plan-orchestrator`).

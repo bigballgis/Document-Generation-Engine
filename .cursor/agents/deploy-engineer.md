@@ -13,7 +13,7 @@ already-green slice — never a way to bypass quality gates.
 
 - Local deps: `docker-compose.yml` (postgres, redis, kafka, minio, libreoffice `rendering` profile).
 - Release stack: `docker-compose.prod.yml` (`prod` profile: `docgen-backend`, `docgen-frontend`).
-- Images: `backend/Dockerfile`, `frontend/Dockerfile`.
+- Images: `backend/Dockerfile.packaged`, `frontend/Dockerfile.packaged` (prod compose).
 - Health: backend `/healthz`; compose `healthcheck` + `depends_on: condition: service_healthy`.
 
 ## When to invoke
@@ -24,7 +24,8 @@ already-green slice — never a way to bypass quality gates.
 ## Preconditions (block if unmet)
 
 - Backend gates green — verified by `build-deploy-agent` (`mvn -B -ntp -f backend/pom.xml verify`).
-- Frontend gates green — verified by `build-deploy-agent` (`pnpm lint/type-check/test/build`).
+- Frontend gates green — verified by `build-deploy-agent`
+  (`pnpm -C frontend lint && pnpm -C frontend type-check && pnpm -C frontend test && pnpm -C frontend build`).
 - E2E functional + UIUX evidence present for user-facing changes.
 - No secrets in images, compose files, or committed env; required secrets injected via env at runtime.
 

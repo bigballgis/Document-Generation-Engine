@@ -15,7 +15,7 @@ delegated end-of-task commit (default for implementer agents).
    (or follow its checklist verbatim inline) before claiming Done.
 2. **Order** — Gates green → `post-task-doc-sync` → `post-task-commit-review` → Done.
 3. **Review before commit** — Block commit on 🔴 Critical findings; escalate to
-   `security-review`, `bugbot`, or `architecture-reviewer` when appropriate.
+   `architecture-reviewer` (security/boundary focus) or `explore` (defect scan) when appropriate.
 4. **Commit scope** — One coherent commit per task slice: code + docs from the same change set.
 5. **Push by default** — After commit, push to the tracked remote unless the user explicitly opted out in the same session.
 6. **Implementer agents must delegate** — `backend-engineer`, `frontend-engineer`, and

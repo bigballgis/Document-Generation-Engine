@@ -27,9 +27,19 @@ Every user-facing string is translatable; nothing is hardcoded.
 
 ## Frontend (Vue 3)
 
-- Use the i18n message catalog; `en` is the default locale and the source of truth.
+- Base bundle: `frontend/src/i18n/locales/en.ts` (~2500 lines, domain-first namespaces:
+  `app`, `login`, `nav`, `templates`, `masters`, `audit`, `identity`, `contentModules`, …).
+- `zh-CN.ts` is lazy-loaded and must mirror `en.ts` structure manually; only `api.error.*`
+  is test-guarded (`src/i18n/catalogs/apiErrorCatalog.test.ts`).
+- API error strings live in `src/i18n/catalogs/apiErrorEn.ts` / `apiErrorZhCn.ts`, merged
+  under `api.error.*`.
+- UI key convention: domain-first dotted paths (`templates.detail.tabs.overview`,
+  `login.validation.usernameRequired`). Tab/config TS files export `*_LABEL_KEYS` maps.
+- Components: `const { t } = useI18n()` then `t('key')`; error keys resolved via
+  `resolveApiErrorMessageKey(error, 'fallback.key')` from `src/api/errorEnvelope.ts`.
 - Add the English key first; components reference keys, never literals.
 - Locale switching must not change information architecture, layout, or component structure.
+- Locale persistence: localStorage `docgen.app.locale`; registry `src/i18n/localeRegistry.ts`.
 
 ## Default workflow when adding a string
 
