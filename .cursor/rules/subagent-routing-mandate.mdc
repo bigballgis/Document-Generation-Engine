@@ -22,7 +22,8 @@ Classify the user request, then **invoke `Task` immediately** when matched:
 | Plan phase / COR-* / master-plan status | `plan-orchestrator` | Single active phase invariant |
 | Requirements, PRD, matrix, API contract docs | `doc-keeper` | Before or with behavior code |
 | Deep read-only audit (repo-wide, drift, review) | `explore` | Parallel OK; parent synthesizes |
-| Docker deploy / compose / prod validation | `deploy-engineer` | After green gates |
+| Build gates / Maven / pnpm / scripts | `build-deploy-agent` | Delegates all compile, test, gate, image-build, deploy ops |
+| Docker deploy / compose / prod validation | `build-deploy-agent` | Supersedes `deploy-engineer` for routine ops; use `deploy-engineer` for release rollback planning |
 | Task slice complete (behavior landed) | `post-task-doc-sync` | **Before** Done |
 | After doc sync (when commit delegated) | `post-task-commit-review` | **Before** Done |
 

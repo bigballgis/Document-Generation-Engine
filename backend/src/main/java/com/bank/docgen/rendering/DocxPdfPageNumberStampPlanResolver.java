@@ -68,12 +68,13 @@ public final class DocxPdfPageNumberStampPlanResolver {
     private static String collectFooterXml(byte[] docxBytes) throws IOException {
         StringBuilder builder = new StringBuilder();
         try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(docxBytes))) {
-            ZipEntry entry;
-            while ((entry = zip.getNextEntry()) != null) {
+            ZipEntry entry = zip.getNextEntry();
+            while (entry != null) {
                 String name = entry.getName();
                 if (name.startsWith("word/footer") && name.endsWith(".xml")) {
                     builder.append(new String(zip.readAllBytes(), StandardCharsets.UTF_8));
                 }
+                entry = zip.getNextEntry();
             }
         }
         return builder.toString();
@@ -81,11 +82,12 @@ public final class DocxPdfPageNumberStampPlanResolver {
 
     private static String readZipEntry(byte[] docxBytes, String entryName) throws IOException {
         try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(docxBytes))) {
-            ZipEntry entry;
-            while ((entry = zip.getNextEntry()) != null) {
+            ZipEntry entry = zip.getNextEntry();
+            while (entry != null) {
                 if (entryName.equals(entry.getName())) {
                     return new String(zip.readAllBytes(), StandardCharsets.UTF_8);
                 }
+                entry = zip.getNextEntry();
             }
         }
         throw new IOException("Missing zip entry: " + entryName);
