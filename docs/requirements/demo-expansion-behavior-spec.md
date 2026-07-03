@@ -443,8 +443,8 @@ backend/src/test/java/.../<Code>MasterDocxAssetGeneratorTest.java
 |----|-----|
 | **BDD readiness** | `ready` |
 | **阻塞问题** | 无（用户已确认范围） |
-| **Handoff** | `plan-orchestrator` 分解实现任务 → `backend-engineer`（渲染/页码/导入）+ `frontend-engineer`（若需演示导航）→ E2E → doc-sync |
-| **计划落点** | **P22-DEMO-EXPANSION**（[P22 detail plan](../plan/detail/P22-demo-expansion-rendering-fidelity.md)）—  sole formal phase `In Progress` (2026-07-03) |
+| **Handoff** | `plan-orchestrator` decomposition complete → **P22 Done** (2026-07-03) |
+| **计划落点** | **P22-DEMO-EXPANSION** — [P22 detail plan](../plan/detail/P22-demo-expansion-rendering-fidelity.md) **Done** (2026-07-03) |
 
 ---
 

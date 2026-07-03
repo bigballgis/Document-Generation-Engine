@@ -90,7 +90,7 @@ export async function confirmTestPassFromDevWorkspace(page: Page) {
   })
 }
 
-export async function submitForApprovalFromDevWorkspace(page: Page, comment = 'CDP E2E submit for approval') {
+export async function submitForApprovalFromDevWorkspace(page: Page) {
   const submitButton = workspaceActions(page).getByRole('button', { name: /^submit for approval$/i })
   await expect(submitButton).toBeEnabled({ timeout: 60_000 })
 
@@ -198,8 +198,8 @@ export async function confirmTestPassFromLifecycleTab(page: Page) {
   await confirmTestPassFromDevWorkspace(page)
 }
 
-export async function submitForApprovalFromLifecycleTab(page: Page, comment?: string) {
-  await submitForApprovalFromDevWorkspace(page, comment)
+export async function submitForApprovalFromLifecycleTab(page: Page) {
+  await submitForApprovalFromDevWorkspace(page)
 }
 
 export async function approveTemplateFromLifecycleTab(page: Page, rationale?: string) {

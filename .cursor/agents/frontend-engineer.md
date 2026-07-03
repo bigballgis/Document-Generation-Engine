@@ -62,8 +62,13 @@ UIUX evidence expected. If missing, request the behavior spec first.
 2. Write a failing component/unit test, then implement the smallest change to pass.
 3. Frontend should not outpace backend session/authorization support for the same slice.
 4. Apply the bank OA style lock and token system to every changed surface.
-5. Run gates: `pnpm lint`, `pnpm type-check`, `pnpm test`, `pnpm build`.
-6. **E2E functional** — hand off to `e2e-test-engineer` for user-journey coverage.
-7. **E2E UIUX** — hand off to `e2e-uiux-reviewer` for visual/responsive/a11y/brand evidence.
-8. **Post-task doc sync** — invoke `post-task-doc-sync` after gates and evidence pass.
-9. **Post-task commit review** — invoke `post-task-commit-review` after doc sync; then claim Done.
+5. **TDD inner loop** — delegate to `build-deploy-agent`:
+   - Fast: `pnpm -C frontend test --run`
+   - Single spec: `pnpm -C frontend test --run <path>`
+6. **Full gates** — delegate to `build-deploy-agent`:
+   - `pnpm -C frontend lint && pnpm -C frontend type-check && pnpm -C frontend test && pnpm -C frontend build`
+   - Never use `corepack pnpm`; always `pnpm` directly.
+7. **E2E functional** — hand off to `e2e-test-engineer` for user-journey coverage.
+8. **E2E UIUX** — hand off to `e2e-uiux-reviewer` for visual/responsive/a11y/brand evidence.
+9. **Post-task doc sync** — invoke `post-task-doc-sync` after gates and evidence pass.
+10. **Post-task commit review** — invoke `post-task-commit-review` after doc sync; then claim Done.

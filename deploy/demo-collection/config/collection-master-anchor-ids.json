@@ -1,0 +1,7 @@
+{
+  "anchorIds": ["RATE_CHANGE_BODY", "OVERDUE_COLLECTION_BODY"],
+  "templates": [
+    {"externalId": "DEMO-RATE-CHANGE-NOTICE", "anchorIds": ["RATE_CHANGE_BODY"]},
+    {"externalId": "DEMO-OVERDUE-COLLECTION", "anchorIds": ["OVERDUE_COLLECTION_BODY"]}
+  ]
+}

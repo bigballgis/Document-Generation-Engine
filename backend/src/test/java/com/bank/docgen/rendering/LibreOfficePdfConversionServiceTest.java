@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,9 +30,10 @@ class LibreOfficePdfConversionServiceTest {
     private ThreadPoolTaskExecutor testPool;
 
     @BeforeEach
-    void setUp() throws URISyntaxException {
+    void setUp() throws URISyntaxException, IOException {
         properties = new DocgenRenderingProperties();
         fakeLibreOfficeScript = resolveFakeLibreOfficeScript("fake-libreoffice");
+        ensureExecutable(fakeLibreOfficeScript);
         testPool = pdfConversionPool();
     }
 
@@ -40,6 +43,16 @@ class LibreOfficePdfConversionServiceTest {
         return Path.of(LibreOfficePdfConversionServiceTest.class
                 .getResource("/scripts/" + baseName + suffix)
                 .toURI());
+    }
+
+    private static void ensureExecutable(Path script) throws IOException {
+        if (!System.getProperty("os.name", "").toLowerCase().contains("win")) {
+            Files.setPosixFilePermissions(script, EnumSet.of(
+                    PosixFilePermission.OWNER_READ,
+                    PosixFilePermission.OWNER_WRITE,
+                    PosixFilePermission.OWNER_EXECUTE
+            ));
+        }
     }
 
     @AfterEach
@@ -84,6 +97,7 @@ class LibreOfficePdfConversionServiceTest {
     @Test
     void removesTempDirectoryAfterFailedConversion() throws URISyntaxException, IOException {
         Path failScript = resolveFakeLibreOfficeScript("fake-libreoffice-fail");
+        ensureExecutable(failScript);
         properties.setLibreOfficeCommand(failScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();
@@ -97,6 +111,7 @@ class LibreOfficePdfConversionServiceTest {
     @Test
     void rejectsNonZeroExitCode() throws URISyntaxException, IOException {
         Path failScript = resolveFakeLibreOfficeScript("fake-libreoffice-fail");
+        ensureExecutable(failScript);
         properties.setLibreOfficeCommand(failScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();

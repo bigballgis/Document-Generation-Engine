@@ -1,0 +1,56 @@
+{
+  "catalogMarker": "credit-limit-demo-v1",
+  "bindings": {
+    "CREDIT_LIMIT_BODY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Dear "},
+            {"type": "variable", "key": "customerName"},
+            {"type": "textRun", "value": ",\n\nWe write to confirm the credit facilities available to you under facility reference "},
+            {"type": "underline", "children": [{"type": "variable", "key": "facilityReference"}]},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Approved revolving credit limit: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "creditLimit"}]},
+            {"type": "textRun", "value": ". This confirmation is valid as at "},
+            {"type": "variable", "key": "reviewDate"},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeOverdraft} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [
+                {"type": "textRun", "value": "Overdraft sub-limit: "},
+                {"type": "underline", "children": [{"type": "variable", "key": "overdraftLimit"}]},
+                {"type": "textRun", "value": " (subject to daily review)."}
+              ]
+            }
+          ]
+        },
+        {"type": "contentModuleRef", "referenceKey": "CREDIT-LIMIT-STANDARD-CLAUSE"}
+      ]
+    },
+    "CREDIT_LIMIT_TERMS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "styleRef",
+          "styleId": "ClauseBody",
+          "children": [{"type": "textRun", "value": "General Terms and Covenants"}]
+        },
+        {"type": "contentModuleRef", "referenceKey": "CREDIT-LIMIT-COVENANTS"}
+      ]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "catalogMarker": "annual-review-demo-v1",
+  "testDataSets": [
+    {
+      "id": "annual-review-executive",
+      "label": "Annual Credit Review — Executive Sample",
+      "variables": {
+        "customerName": "Harbour Logistics Holdings plc",
+        "facilityReference": "CORP-FAC-2024-77102",
+        "reviewDate": "2026-06-30",
+        "includeCovenantSchedule": true,
+        "covenantItems": [
+          {"covenantName": "Leverage ratio", "covenantStatus": "Compliant — 2.4:1 (limit 3.0:1)"},
+          {"covenantName": "Interest cover", "covenantStatus": "Compliant — 3.1:1 (minimum 2.5:1)"},
+          {"covenantName": "Tangible net worth", "covenantStatus": "Compliant — GBP 42.3m (minimum GBP 35.0m)"}
+        ]
+      }
+    },
+    {
+      "id": "facility-renewal-executive",
+      "label": "Facility Renewal — Executive Sample",
+      "variables": {
+        "customerName": "Harbour Logistics Holdings plc",
+        "facilityReference": "CORP-FAC-2024-77102",
+        "renewalDate": "2027-06-30"
+      }
+    }
+  ]
+}

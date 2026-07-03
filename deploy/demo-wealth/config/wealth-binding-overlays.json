@@ -1,0 +1,68 @@
+{
+  "catalogMarker": "wealth-demo-v1",
+  "bindings": {
+    "WEALTH_STATEMENT_BODY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {"type": "imageRef", "assetKey": "meridian-wealth-logo", "widthPt": 100},
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Private Wealth Investment Statement\n\nClient: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "clientName"}]},
+            {"type": "textRun", "value": "\nPortfolio: "},
+            {"type": "variable", "key": "portfolioReference"},
+            {"type": "textRun", "value": "  |  As at "},
+            {"type": "variable", "key": "statementDate"}
+          ]
+        },
+        {"type": "contentModuleRef", "referenceKey": "WEALTH-STATEMENT-INTRO"}
+      ]
+    },
+    "WEALTH_HOLDINGS_TABLE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "children": [{"type": "text", "value": "Portfolio Holdings"}]
+        },
+        {
+          "type": "tableComponentRef",
+          "tableComponent": {
+            "columns": [
+              {"header": "Instrument", "field": "instrument"},
+              {"header": "Quantity", "field": "quantity"},
+              {"header": "Market Price", "field": "marketPrice"},
+              {"header": "Market Value", "field": "marketValue"}
+            ],
+            "rowsVariable": "holdings"
+          }
+        }
+      ]
+    },
+    "WEALTH_FOOTER_TOTALS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "tableComponentRef",
+          "tableComponent": {
+            "columns": [
+              {"header": "Summary", "field": "label"},
+              {"header": "Amount", "field": "amount"}
+            ],
+            "rows": [
+              {"label": "Total cost basis", "amountVariable": "totalCost"},
+              {"label": "Total market value", "amountVariable": "totalMarketValue"}
+            ]
+          }
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "emphasis", "variant": "italic", "children": [{"type": "textRun", "value": "Past performance is not indicative of future results. Values shown are indicative only."}]}
+          ]
+        }
+      ]
+    }
+  }
+}

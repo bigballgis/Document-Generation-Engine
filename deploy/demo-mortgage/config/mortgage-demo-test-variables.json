@@ -1,0 +1,27 @@
+{
+  "catalogMarker": "mortgage-demo-v1",
+  "name": "Mortgage Approval — Executive Sample",
+  "required": true,
+  "variables": {
+    "borrowerName": "Mr Oliver Hartley & Mrs Sarah Hartley",
+    "propertyAddress": "14 Willow Close, Bristol BS8 4QT",
+    "loanAmount": "GBP 385,000.00",
+    "interestRate": "4.29% fixed for 5 years",
+    "termYears": "25",
+    "approvalDate": "2026-06-20",
+    "repaymentSchedule": [
+      {"paymentDate": "2026-08-01", "principal": "GBP 892.14", "interest": "GBP 1,375.88", "balance": "GBP 384,107.86"},
+      {"paymentDate": "2026-09-01", "principal": "GBP 895.33", "interest": "GBP 1,372.69", "balance": "GBP 383,212.53"},
+      {"paymentDate": "2026-10-01", "principal": "GBP 898.53", "interest": "GBP 1,369.49", "balance": "GBP 382,314.00"},
+      {"paymentDate": "2026-11-01", "principal": "GBP 901.74", "interest": "GBP 1,366.28", "balance": "GBP 381,412.26"},
+      {"paymentDate": "2026-12-01", "principal": "GBP 904.96", "interest": "GBP 1,363.06", "balance": "GBP 380,507.30"},
+      {"paymentDate": "2027-01-01", "principal": "GBP 908.20", "interest": "GBP 1,359.82", "balance": "GBP 379,599.10"},
+      {"paymentDate": "2027-02-01", "principal": "GBP 911.45", "interest": "GBP 1,356.57", "balance": "GBP 378,687.65"},
+      {"paymentDate": "2027-03-01", "principal": "GBP 914.71", "interest": "GBP 1,353.31", "balance": "GBP 377,772.94"},
+      {"paymentDate": "2027-04-01", "principal": "GBP 917.98", "interest": "GBP 1,350.04", "balance": "GBP 376,854.96"},
+      {"paymentDate": "2027-05-01", "principal": "GBP 921.26", "interest": "GBP 1,346.76", "balance": "GBP 375,933.70"},
+      {"paymentDate": "2027-06-01", "principal": "GBP 924.55", "interest": "GBP 1,343.47", "balance": "GBP 375,009.15"},
+      {"paymentDate": "2027-07-01", "principal": "GBP 927.86", "interest": "GBP 1,340.16", "balance": "GBP 374,081.29"}
+    ]
+  }
+}

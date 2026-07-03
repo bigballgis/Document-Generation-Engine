@@ -1,0 +1,25 @@
+{
+  "catalogMarker": "trade-lc-demo-v1",
+  "testDataSets": [
+    {
+      "id": "trade-lc-executive",
+      "label": "Documentary Credit Advice — Executive Sample",
+      "variables": {
+        "beneficiaryName": "Shanghai Apex Trading Co., Ltd.",
+        "applicantName": "EuroParts GmbH",
+        "lcNumber": "LC-2026-MERI-44821",
+        "lcAmount": "USD 1,250,000.00",
+        "expiryDate": "2026-09-30"
+      }
+    },
+    {
+      "id": "trade-guarantee-executive",
+      "label": "Bank Guarantee Notice — Executive Sample",
+      "variables": {
+        "beneficiaryName": "Gulf Infrastructure LLC",
+        "guaranteeReference": "BG-2026-MERI-99201",
+        "guaranteeAmount": "USD 3,500,000.00"
+      }
+    }
+  ]
+}

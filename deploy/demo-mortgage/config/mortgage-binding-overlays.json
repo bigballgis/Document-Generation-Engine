@@ -1,0 +1,72 @@
+{
+  "catalogMarker": "mortgage-demo-v1",
+  "bindings": {
+    "MORTGAGE_BODY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Dear "},
+            {"type": "variable", "key": "borrowerName"},
+            {"type": "textRun", "value": ",\n\nWe are pleased to confirm that your application for a residential mortgage in respect of "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "propertyAddress"}]},
+            {"type": "textRun", "value": " has been approved subject to the conditions set out below."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Approved loan amount: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "loanAmount"}]},
+            {"type": "textRun", "value": " at a fixed rate of "},
+            {"type": "variable", "key": "interestRate"},
+            {"type": "textRun", "value": " over "},
+            {"type": "variable", "key": "termYears"},
+            {"type": "textRun", "value": " years. Approval date: "},
+            {"type": "variable", "key": "approvalDate"},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "styleRef",
+          "styleId": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "This offer is subject to satisfactory valuation, legal review, and compliance with our responsible lending policy."}
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "MORTGAGE-STANDARD-TERMS"
+        }
+      ]
+    },
+    "MORTGAGE_SCHEDULE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "children": [{"type": "text", "value": "Repayment Schedule"}]
+        },
+        {
+          "type": "tableComponentRef",
+          "tableComponent": {
+            "columns": [
+              {"header": "Payment Date", "field": "paymentDate"},
+              {"header": "Principal", "field": "principal"},
+              {"header": "Interest", "field": "interest"},
+              {"header": "Balance", "field": "balance"}
+            ],
+            "rowsVariable": "repaymentSchedule"
+          }
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "The schedule above is illustrative. Actual amounts may vary following completion and first payment date."}
+          ]
+        }
+      ]
+    }
+  }
+}

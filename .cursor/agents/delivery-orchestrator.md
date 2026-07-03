@@ -39,24 +39,27 @@ Hard rule reference: `.cursor/rules/subagent-routing-mandate.mdc`.
 0. Behavior spec   → behavior-spec-author      (BDD gate; skip only if BDD readiness = not-applicable)
 1. Plan            → plan-orchestrator          (classify vs active phase; one phase In Progress)
 2. Docs-first      → doc-keeper                 (update source-of-truth before code if behavior changes)
-3a. Backend        → backend-engineer           (TDD: red → green → refactor → mvn verify)
+3a. Backend        → backend-engineer           (TDD: red → green → refactor)
+                     └─ gates/deploy delegated → build-deploy-agent
 3b. Frontend       → frontend-engineer          (TDD + bank OA style lock + i18n)
+                     └─ gates/deploy delegated → build-deploy-agent
 4. E2E functional  → e2e-test-engineer          (Playwright user-journey evidence)
-5. E2E UIUX        → e2e-uiux-reviewer           (visual/responsive/a11y/theme/brand evidence)
+5. E2E UIUX        → e2e-uiux-reviewer          (visual/responsive/a11y/theme/brand evidence)
 6. Architecture    → architecture-reviewer      (boundaries, ADR, fail-closed, sensitive data)
-7. Deploy          → deploy-engineer            (Docker build/compose/healthcheck/rollback when release-relevant)
+7. Deploy          → build-deploy-agent         (Docker build/compose/healthcheck/rollback when release-relevant)
 8. Doc sync        → post-task-doc-sync         (plan layer + ledger + sheets + indexes)
 9. Commit gate     → post-task-commit-review    (review change set → stage → commit → push by default)
 ```
 
 ## Routing rules
 
-- Backend-only slice: 0 → 1 → (2) → 3a → 6 → 8 → 9. Add 7 if deployable surface changed.
-- Frontend-only slice: 0 → 1 → (2) → 3b → 4 → 5 → 6 → 8 → 9.
-- Full-stack slice: run 3a and 3b, keep frontend from outpacing backend session/authorization support.
+- Backend-only slice: 0 → 1 → (2) → 3a [+build-deploy-agent gates] → 6 → 8 → 9. Add 7 [build-deploy-agent] if deployable surface changed.
+- Frontend-only slice: 0 → 1 → (2) → 3b [+build-deploy-agent gates] → 4 → 5 → 6 → 8 → 9.
+- Full-stack slice: run 3a and 3b (backend first), gates via build-deploy-agent; keep frontend from outpacing backend.
 - Docs-only governance change: 1 → 2 → 8 → 9.
-- Deploy/release task: ensure gates green for the slice, then 7 → 8 → 9.
+- Deploy/release task: ensure gates green, then build-deploy-agent (step 7) → 8 → 9.
 - Bug fix: write the failing regression test first (via the owning engineer), then proceed from stage 3.
+- Build/gate/deploy only: route directly to `build-deploy-agent` (no spec/plan needed).
 
 ## Hard gates between stages (do not advance if violated)
 

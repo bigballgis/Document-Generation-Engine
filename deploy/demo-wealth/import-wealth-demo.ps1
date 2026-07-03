@@ -2,11 +2,12 @@
 param(
     [string]$BackendUrl = 'http://localhost:8080',
     [string]$PostgresContainer = 'docgen-postgres',
-    [switch]$SkipSql
+    [switch]$SkipSql,
+    [switch]$SkipApi
 )
 $ErrorActionPreference = 'Stop'
 $DemoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Shared = Join-Path (Split-Path -Parent $DemoRoot) 'demo-import-shared.ps1'
 if (-not (Test-Path $Shared)) { throw "Missing shared import helper: $Shared" }
 . $Shared
-Import-DemoPackage -DemoRoot $DemoRoot -ConfigPath (Join-Path $DemoRoot 'config/wealth-template-config.json') -BackendUrl $BackendUrl -PostgresContainer $PostgresContainer -SkipSql:$SkipSql
+Import-DemoPackage -DemoRoot $DemoRoot -ConfigPath (Join-Path $DemoRoot 'config/wealth-template-config.json') -BackendUrl $BackendUrl -PostgresContainer $PostgresContainer -SkipSql:$SkipSql -SkipApi:$SkipApi

@@ -1,0 +1,7 @@
+{
+  "anchorIds": ["RETAIL_OPEN_BODY", "RETAIL_OPEN_TERMS", "RETAIL_BALANCE_BODY", "RETAIL_BALANCE_SUMMARY"],
+  "templates": [
+    {"externalId": "DEMO-RETAIL-ACCOUNT-OPEN", "anchorIds": ["RETAIL_OPEN_BODY", "RETAIL_OPEN_TERMS"]},
+    {"externalId": "DEMO-RETAIL-ACCOUNT-BALANCE", "anchorIds": ["RETAIL_BALANCE_BODY", "RETAIL_BALANCE_SUMMARY"]}
+  ]
+}

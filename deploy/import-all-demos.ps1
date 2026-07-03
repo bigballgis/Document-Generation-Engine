@@ -7,6 +7,7 @@ param(
     [string]$BackendUrl = $(if ($env:BACKEND_PORT) { "http://localhost:$($env:BACKEND_PORT)" } else { 'http://localhost:8080' }),
     [string]$PostgresContainer = 'docgen-postgres',
     [switch]$SkipSql,
+    [switch]$SkipApi,
     [switch]$RegenerateCatalog
 )
 
@@ -34,6 +35,7 @@ foreach ($demo in $DemoScripts) {
     Write-Host "==> import-all-demos: $($demo.Name)"
     $args = @('-BackendUrl', $BackendUrl, '-PostgresContainer', $PostgresContainer)
     if ($SkipSql) { $args += '-SkipSql' }
+    if ($SkipApi) { $args += '-SkipApi' }
     if ($RegenerateCatalog) { $args += '-RegenerateCatalog' }
     & $scriptPath @args
     if ($LASTEXITCODE -ne 0) { throw "Import failed for $($demo.Name) (exit $LASTEXITCODE)" }

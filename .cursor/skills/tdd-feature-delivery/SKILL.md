@@ -25,14 +25,41 @@ real behavior and green gates.
 
 ## Backend gates
 
+Delegate all gate commands to `build-deploy-agent`.
+
+### TDD inner loop (fast — skips static analysis)
+
+```bash
+# All tests
+mvn -B -ntp -f backend/pom.xml -Pdev-fast test
+
+# Single test class
+mvn -B -ntp -f backend/pom.xml -Pdev-fast test -Dtest=<ClassName>
+
+# Single test method
+mvn -B -ntp -f backend/pom.xml -Pdev-fast test -Dtest=<ClassName>#<methodName>
+```
+
+### Full quality gate (pre-push mandatory)
+
 ```bash
 mvn -B -ntp -f backend/pom.xml verify
 ```
 
-- Includes Checkstyle + PMD + SpotBugs + JaCoCo.
+- Includes Checkstyle + PMD + SpotBugs (`effort=Max`) + JaCoCo.
 - Coverage gate: changed lines >= 85%; security-critical / core domain >= 90%.
 
 ## Frontend gates
+
+Delegate all gate commands to `build-deploy-agent`.
+
+### TDD inner loop (fast)
+
+```bash
+pnpm -C frontend test --run
+```
+
+### Full quality gates (pre-push mandatory)
 
 ```bash
 pnpm -C frontend lint

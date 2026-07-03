@@ -1,0 +1,7 @@
+{
+  "anchorIds": ["CREDIT_LIMIT_BODY", "CREDIT_LIMIT_TERMS"],
+  "sections": [
+    {"anchorId": "CREDIT_LIMIT_BODY", "title": "Credit Limit Confirmation"},
+    {"anchorId": "CREDIT_LIMIT_TERMS", "title": "Terms and Covenants"}
+  ]
+}

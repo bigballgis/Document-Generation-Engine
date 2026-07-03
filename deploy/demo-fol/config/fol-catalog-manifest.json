@@ -1,5 +1,6 @@
 ﻿{
-    "catalogMarker":  "fol-exec-demo-v6-hybrid-anchor-ids",
+    "catalogMarker":  "fol-exec-demo-v7-dual-page-section-breaks",
+    "folPageTarget":  100,
     "clauseBindings":  [
                            {
                                "anchorId":  "FOL_CLAUSE_01_DEFINITIONS_AND_INTERPRETATION",

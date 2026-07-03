@@ -1,0 +1,72 @@
+{
+  "catalogMarker": "trade-lc-demo-v1",
+  "bindings": {
+    "TRADE_LC_BODY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {"type": "imageRef", "assetKey": "meridian-trade-logo", "widthPt": 120},
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Documentary Credit Advice\n\nWe advise that a documentary credit has been issued in favour of "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "beneficiaryName"}]},
+            {"type": "textRun", "value": " at the request of "},
+            {"type": "variable", "key": "applicantName"},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "LC Number: "},
+            {"type": "variable", "key": "lcNumber"},
+            {"type": "textRun", "value": "  |  Amount: "},
+            {"type": "variable", "key": "lcAmount"},
+            {"type": "textRun", "value": "  |  Expiry: "},
+            {"type": "variable", "key": "expiryDate"}
+          ]
+        },
+        {"type": "contentModuleRef", "referenceKey": "TRADE-LC-STANDARD-CLAUSE"}
+      ]
+    },
+    "TRADE_LC_ATTACHMENT": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {"type": "sealRef", "assetKey": "meridian-authorised-seal", "widthPt": 80},
+        {
+          "type": "paragraph",
+          "children": [{"type": "textRun", "value": "Attachment: Copy of SWIFT MT700 message (mock data for demonstration purposes only)."}]
+        }
+      ]
+    },
+    "TRADE_GUARANTEE_BODY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {"type": "imageRef", "assetKey": "meridian-trade-logo", "widthPt": 120},
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Bank Guarantee Notice\n\nWe confirm issuance of guarantee reference "},
+            {"type": "variable", "key": "guaranteeReference"},
+            {"type": "textRun", "value": " for "},
+            {"type": "variable", "key": "guaranteeAmount"},
+            {"type": "textRun", "value": " in favour of "},
+            {"type": "variable", "key": "beneficiaryName"},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {"type": "contentModuleRef", "referenceKey": "TRADE-GUARANTEE-STANDARD-CLAUSE"}
+      ]
+    },
+    "TRADE_GUARANTEE_ATTACHMENT": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {"type": "sealRef", "assetKey": "meridian-authorised-seal", "widthPt": 80},
+        {
+          "type": "paragraph",
+          "children": [{"type": "textRun", "value": "This guarantee is subject to URDG 758 and our standard trade finance terms."}]
+        }
+      ]
+    }
+  }
+}

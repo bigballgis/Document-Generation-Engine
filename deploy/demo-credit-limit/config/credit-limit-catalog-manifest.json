@@ -1,0 +1,12 @@
+{
+  "catalogMarker": "credit-limit-demo-v1",
+  "packageCode": "credit-limit",
+  "groupCode": "CORP",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "pageTarget": 10,
+  "templates": ["DEMO-CREDIT-LIMIT-CONFIRM"],
+  "contentModuleRefs": [
+    {"referenceKey": "CREDIT-LIMIT-STANDARD-CLAUSE", "moduleCode": "CREDIT-LIMIT-STD"},
+    {"referenceKey": "CREDIT-LIMIT-COVENANTS", "moduleCode": "CREDIT-LIMIT-COV"}
+  ]
+}
