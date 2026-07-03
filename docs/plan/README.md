@@ -87,6 +87,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 **P21 Done** — closure evidence in [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 
 **Open backlog (non-active slices):**
+- **SOR-0…7** — consolidated system optimization review (2026-07-03; 52 tasks, all Not Started) — see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md)
 - **OPT-D / M9** — architecture/security debt (Redisson, QueryDSL expansion, intranet SCA) — see [optimization-plan.md](./optimization-plan.md)
 - **OPT-G6 (partial)** — brand rename Done via P12-UIUX-DEEP-REFACTOR A1; remaining aria-labels/locale-aware dates deferred
 - ~~**Phase B** — multi-revision master history API~~ → **Done (P2-T06, 2026-07-01)** — see [P2 detail](detail/P2-master-management.md) § P2-T06 and [catalog-navigation-ux.md](../product/catalog-navigation-ux.md)
@@ -95,6 +96,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 
 | Backlog | Lens |
 | --- | --- |
+| **[system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md)** | **Current consolidated review (SOR-0…7, 2026-07-03)**: plan truth, CI gate automation, security seams, performance, frontend structure, contract/i18n, architecture, ops readiness — all tasks Not Started |
 | **[comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)** | **Unified prioritized map (COR-0…6): docs sync, API contract, template workflow, frontend UX, performance, E2E, P14–P20 — start here (2026-06-23)** |
 | [optimization-plan.md](./optimization-plan.md) | Technical debt detail: quality gates, coverage, backend architecture/security/performance (OPT-A…G) |
 | [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimization-plan.md) | Historical UX waves (UX-A…G); verify Done claims against comprehensive roadmap |

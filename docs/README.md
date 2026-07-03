@@ -47,6 +47,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Plan index](./plan/README.md) | Layer rules and phase links |
 | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone ↔ phase mapping + gate evidence + transitional seams index |
 | [Master plan](./plan/master-plan.md) | P0–P22 phases — see phase detail plans for status |
+| [System optimization review 2026-07](./plan/system-optimization-review-2026-07.md) | **Current consolidated optimization backlog** (SOR-0…7, 2026-07-03) — plan truth, CI gates, security seams, performance, frontend structure, contract/i18n, architecture, ops; all tasks Not Started |
 | [Comprehensive optimization roadmap](./plan/comprehensive-optimization-roadmap.md) | **Unified execution map** — docs, API contract, template workflow, frontend UX, performance, E2E (COR-0…6, 2026-06-23) |
 | [Optimization plan & backlog](./plan/optimization-plan.md) | Technical debt detail (OPT-A…G): gates, coverage, backend architecture |
 | [UX & upgradeability optimization plan](./plan/ux-upgradeability-optimization-plan.md) | Historical UX waves (UX-A…G); cross-check against comprehensive roadmap |
