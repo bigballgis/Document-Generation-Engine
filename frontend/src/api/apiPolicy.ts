@@ -6,6 +6,7 @@ import type {
   BatchLimitsDomainForm,
   DefaultRouteDomainForm,
   EncryptionDomainForm,
+  InvocationRetentionDomainForm,
   OutputPolicyDomainForm,
 } from '@/types/apiPolicyDomain'
 import type { ApiEnvelope } from '@/types/session'
@@ -102,6 +103,18 @@ export async function saveDefaultRouteDomain(
 ): Promise<ApiPolicy> {
   const response = await http.put<ApiEnvelope<ApiPolicy>>(
     `/templates/${templateId}/api/policy/default-route`,
+    { ...payload, confirmed },
+  )
+  return unwrap(response.data)
+}
+
+export async function saveInvocationRetentionDomain(
+  templateId: string,
+  payload: InvocationRetentionDomainForm,
+  confirmed = true,
+): Promise<ApiPolicy> {
+  const response = await http.put<ApiEnvelope<ApiPolicy>>(
+    `/templates/${templateId}/api/policy/invocation-retention`,
     { ...payload, confirmed },
   )
   return unwrap(response.data)

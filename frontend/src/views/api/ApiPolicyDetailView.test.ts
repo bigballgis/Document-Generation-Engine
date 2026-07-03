@@ -44,6 +44,9 @@ const samplePolicy = {
   maxBatchSize: 10,
   docxEncryptionEnabled: false,
   pdfEncryptionEnabled: false,
+  saveGeneratedDocuments: true,
+  invocationRecordRetentionDays: 90,
+  documentRetentionDays: 30,
   updatedAt: '2026-06-25T10:00:00Z',
 }
 

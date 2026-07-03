@@ -34,12 +34,19 @@ export interface DefaultRouteDomainForm {
   defaultRouteReleaseVersion: string
 }
 
+export interface InvocationRetentionDomainForm {
+  saveGeneratedDocuments: boolean
+  invocationRecordRetentionDays: number
+  documentRetentionDays: number
+}
+
 export type ApiPolicyDomainFormMap = {
   AD_GROUP_AUTHORIZATION: AdGroupsDomainForm
   OUTPUT_POLICY: OutputPolicyDomainForm
   BATCH_LIMIT: BatchLimitsDomainForm
   ENCRYPTION_CAPABILITY: EncryptionDomainForm
   DEFAULT_ROUTE_TARGET: DefaultRouteDomainForm
+  INVOCATION_RETENTION: InvocationRetentionDomainForm
 }
 
 export function resolveBatchSyncMaxItems(policy: ApiPolicy): number {
@@ -135,5 +142,13 @@ export function createDomainFormFromPolicy<D extends ApiPolicyDomain>(
       } as ApiPolicyDomainFormMap[D]
     default:
       throw new Error(`Unsupported API policy domain: ${domain satisfies never}`)
+  }
+}
+
+export function createRetentionFormFromPolicy(policy: ApiPolicy): InvocationRetentionDomainForm {
+  return {
+    saveGeneratedDocuments: policy.saveGeneratedDocuments,
+    invocationRecordRetentionDays: policy.invocationRecordRetentionDays,
+    documentRetentionDays: policy.documentRetentionDays,
   }
 }

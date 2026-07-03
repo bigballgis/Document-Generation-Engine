@@ -18,6 +18,9 @@ const samplePolicy: ApiPolicy = {
   batchAsyncMaxItems: 5000,
   docxEncryptionEnabled: false,
   pdfEncryptionEnabled: true,
+  saveGeneratedDocuments: true,
+  invocationRecordRetentionDays: 90,
+  documentRetentionDays: 30,
   updatedAt: '2026-06-25T10:00:00Z',
 }
 

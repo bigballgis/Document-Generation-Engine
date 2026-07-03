@@ -513,6 +513,9 @@ export interface ApiPolicy {
   batchAsyncMaxItems?: number
   docxEncryptionEnabled: boolean
   pdfEncryptionEnabled: boolean
+  saveGeneratedDocuments: boolean
+  invocationRecordRetentionDays: number
+  documentRetentionDays: number
   updatedAt: string
 }
 

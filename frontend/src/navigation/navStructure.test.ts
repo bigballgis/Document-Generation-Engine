@@ -416,8 +416,8 @@ describe('navStructure', () => {
         expect(value).not.toMatch(forbiddenPattern)
       }
 
-      expect(en.apiPolicy.home.title).toBe('Manage API access')
-      expect(zhCN.apiPolicy.home.title).toBe('API 接入管理')
+      expect(en.apiPolicy.home.title).toBe('External services overview')
+      expect(zhCN.apiPolicy.home.title).toBe('对外服务概览')
       expect(zhCN.templates.policy.credentialsTitle).toBe('接入账号')
     })
 

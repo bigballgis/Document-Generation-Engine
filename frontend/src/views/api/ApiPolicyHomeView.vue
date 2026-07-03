@@ -1,99 +1,21 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
-import AppTablePagination from '@/components/common/AppTablePagination.vue'
-import CatalogFilterToolbar from '@/components/common/CatalogFilterToolbar.vue'
-import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
-import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
-import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import { apiPolicyDetailPath } from '@/routing/routeKeys'
+import { templatePackageHubPath, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateSummary } from '@/types/template'
 
 const { t, te } = useI18n()
-const lifecycleStatusFilterOptions = useLifecycleStatusFilterOptions()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
-const currentPage = ref(1)
 
 const publishedTemplates = computed(() => templatesStore.publishedTemplates)
-const {
-  searchQuery,
-  filters,
-  activeSortKey,
-  sortedRows,
-  hasAnyActive,
-  activeFilterChips,
-  clearAll,
-  removeFilterChip,
-} = useCatalogTableControls(publishedTemplates, {
-  searchGetters: [
-    (row) => row.name,
-    (row) => row.externalId,
-    (row) => row.groupCode,
-  ],
-  filters: [
-    {
-      key: 'groupCode',
-      labelKey: 'apiPolicy.home.groupCode',
-      getValue: (row) => row.groupCode,
-    },
-    {
-      key: 'status',
-      labelKey: 'templates.list.columns.status',
-      getValue: (row) => row.lifecycleStatus,
-      matchMode: 'exact',
-    },
-  ],
-  sortOptions: [
-    {
-      key: 'nameAsc',
-      labelKey: 'table.sort.nameAsc',
-      getter: (row) => row.name,
-      order: 'asc',
-    },
-    {
-      key: 'externalIdAsc',
-      labelKey: 'table.sort.externalIdAsc',
-      getter: (row) => row.externalId,
-      order: 'asc',
-    },
-  ],
-  defaultSortKey: 'nameAsc',
-})
-
-const catalogToolbarFilters = computed(() => [
-  { key: 'groupCode', labelKey: 'apiPolicy.home.groupCode', type: 'text' as const },
-  {
-    key: 'status',
-    labelKey: 'templates.list.columns.status',
-    type: 'select' as const,
-    options: lifecycleStatusFilterOptions.value,
-  },
-])
-
-const catalogSortOptions = computed(() => [
-  { key: 'nameAsc', labelKey: 'table.sort.nameAsc' },
-  { key: 'externalIdAsc', labelKey: 'table.sort.externalIdAsc' },
-])
-
-const { paginatedRows: paginatedTemplates, totalRows: totalTemplateRows } = useCatalogPagination(
-  sortedRows,
-  currentPage,
-  CLIENT_TABLE_PAGE_SIZE,
-)
-
-watch(hasAnyActive, () => {
-  currentPage.value = 1
-})
 
 const errorMessage = computed(() => {
   const key = templatesStore.lastErrorMessageKey
@@ -111,12 +33,16 @@ onMounted(async () => {
   }
 })
 
-function openTemplate(templateId: string) {
-  router.push(apiPolicyDetailPath(templateId))
+function openPackageAccess(templateId: string) {
+  router.push(templatePackageHubPath(templateId, 'apiAccess'))
+}
+
+function openTemplateCatalog() {
+  router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
 }
 
 const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSummary>((row) =>
-  openTemplate(row.id),
+  openPackageAccess(row.id),
 )
 </script>
 
@@ -136,60 +62,100 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
       :closable="false"
     />
 
-    <el-skeleton v-if="templatesStore.loadingList" :rows="5" animated />
+    <el-alert
+      class="page-alert monitoring-hint"
+      type="info"
+      :title="t('apiPolicy.home.monitoringHint')"
+      show-icon
+      :closable="false"
+    />
 
-    <template v-else>
-      <CatalogFilterToolbar
-        v-if="publishedTemplates.length > 0"
-        v-model:search-query="searchQuery"
-        v-model:filter-values="filters"
-        v-model:active-sort-key="activeSortKey"
-        :filters="catalogToolbarFilters"
-        :sort-options="catalogSortOptions"
-        :active-filter-chips="activeFilterChips"
-        :has-any-active="hasAnyActive"
-        @clear="clearAll"
-        @remove-chip="removeFilterChip"
+    <el-card shadow="never" class="section-card">
+      <h2>{{ t('apiPolicy.home.alerts.title') }}</h2>
+      <p class="section-description">{{ t('apiPolicy.home.alerts.description') }}</p>
+      <EmptyStatePanel
+        title-key="apiPolicy.home.alerts.comingSoonTitle"
+        description-key="apiPolicy.home.alerts.comingSoonDescription"
       />
+    </el-card>
 
-      <AppDataTable activatable :data="paginatedTemplates" @row-click="activateTemplateRow">
-        <template #empty>
-          <EmptyStatePanel title-key="apiPolicy.home.empty" />
-        </template>
-        <el-table-column prop="name" :label="t('templates.list.columns.name')" min-width="220" />
-        <el-table-column
-          prop="externalId"
-          :label="t('templates.list.columns.externalId')"
-          min-width="180"
-        />
-        <el-table-column
-          prop="groupCode"
-          :label="t('apiPolicy.home.groupCode')"
-          width="140"
-        />
-        <el-table-column :label="t('templates.list.columns.status')" width="140">
-          <template #default="{ row }">
-            <TemplateStatusBadge :status="row.lifecycleStatus" />
+    <el-card shadow="never" class="section-card">
+      <div class="section-header">
+        <div>
+          <h2>{{ t('apiPolicy.home.packageLinks.title') }}</h2>
+          <p class="section-description">{{ t('apiPolicy.home.packageLinks.description') }}</p>
+        </div>
+        <el-button @click="openTemplateCatalog">
+          {{ t('apiPolicy.home.packageLinks.browseTemplates') }}
+        </el-button>
+      </div>
+
+      <el-skeleton v-if="templatesStore.loadingList" :rows="4" animated />
+
+      <template v-else>
+        <AppDataTable activatable :data="publishedTemplates" @row-click="activateTemplateRow">
+          <template #empty>
+            <EmptyStatePanel title-key="apiPolicy.home.empty" />
           </template>
-        </el-table-column>
-        <el-table-column
-          prop="releaseVersion"
-          :label="t('templates.list.columns.releaseVersion')"
-          width="140"
-        />
-      </AppDataTable>
-      <AppTablePagination
-        v-if="sortedRows.length > 0"
-        v-model:current-page="currentPage"
-        :page-size="CLIENT_TABLE_PAGE_SIZE"
-        :total="totalTemplateRows"
-      />
-    </template>
+          <el-table-column prop="name" :label="t('templates.list.columns.name')" min-width="220" />
+          <el-table-column
+            prop="externalId"
+            :label="t('templates.list.columns.externalId')"
+            min-width="180"
+          />
+          <el-table-column
+            prop="groupCode"
+            :label="t('apiPolicy.home.groupCode')"
+            width="140"
+          />
+          <el-table-column
+            prop="releaseVersion"
+            :label="t('templates.list.columns.releaseVersion')"
+            width="140"
+          />
+          <el-table-column :label="t('apiPolicy.home.packageLinks.action')" width="180" fixed="right">
+            <template #default="{ row }">
+              <el-button type="primary" link @click.stop="openPackageAccess(row.id)">
+                {{ t('apiPolicy.home.packageLinks.openAccess') }}
+              </el-button>
+            </template>
+          </el-table-column>
+        </AppDataTable>
+      </template>
+    </el-card>
   </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
 .page-alert {
   margin-bottom: var(--space-4);
+}
+
+.monitoring-hint {
+  margin-bottom: var(--space-6);
+}
+
+.section-card {
+  margin-bottom: var(--space-6);
+
+  h2 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--font-size-lg);
+  }
+}
+
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.section-description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
 }
 </style>

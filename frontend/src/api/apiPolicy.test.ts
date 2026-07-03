@@ -21,6 +21,9 @@ const samplePolicy = {
   maxBatchSize: 25,
   docxEncryptionEnabled: true,
   pdfEncryptionEnabled: false,
+  saveGeneratedDocuments: true,
+  invocationRecordRetentionDays: 90,
+  documentRetentionDays: 30,
   updatedAt: '2026-06-23T11:00:00Z',
 }
 
@@ -155,6 +158,25 @@ describe('apiPolicy API', () => {
 
     expect(http.put).toHaveBeenCalledWith('/templates/tpl-1/api/policy/default-route', {
       defaultRouteReleaseVersion: '2.0.0',
+      confirmed: true,
+    })
+  })
+
+  it('saves invocation retention domain', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: { metadata: {}, result: samplePolicy },
+    })
+
+    await apiPolicyApi.saveInvocationRetentionDomain('tpl-1', {
+      saveGeneratedDocuments: true,
+      invocationRecordRetentionDays: 365,
+      documentRetentionDays: 180,
+    })
+
+    expect(http.put).toHaveBeenCalledWith('/templates/tpl-1/api/policy/invocation-retention', {
+      saveGeneratedDocuments: true,
+      invocationRecordRetentionDays: 365,
+      documentRetentionDays: 180,
       confirmed: true,
     })
   })

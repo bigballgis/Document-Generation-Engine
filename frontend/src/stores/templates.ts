@@ -26,7 +26,7 @@ import type {
   UpsertBindingPayload,
   UpsertVariablePayload,
 } from '@/types/template'
-import type { ApiPolicyDomain, ApiPolicyDomainFormMap } from '@/types/apiPolicyDomain'
+import type { ApiPolicyDomain, ApiPolicyDomainFormMap, InvocationRetentionDomainForm } from '@/types/apiPolicyDomain'
 
 export const useTemplatesStore = defineStore('templates', () => {
   const templates = ref<TemplateSummary[]>([])
@@ -149,6 +149,24 @@ export const useTemplatesStore = defineStore('templates', () => {
     lastErrorMessageKey.value = null
     try {
       apiPolicy.value = await apiPolicyApi.saveApiPolicyDomain(templateId, domain, payload, confirmed)
+      return apiPolicy.value
+    } catch (error) {
+      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
+      throw error
+    } finally {
+      submitting.value = false
+    }
+  }
+
+  async function saveInvocationRetentionDomain(
+    templateId: string,
+    payload: InvocationRetentionDomainForm,
+    confirmed = true,
+  ): Promise<ApiPolicy> {
+    submitting.value = true
+    lastErrorMessageKey.value = null
+    try {
+      apiPolicy.value = await apiPolicyApi.saveInvocationRetentionDomain(templateId, payload, confirmed)
       return apiPolicy.value
     } catch (error) {
       lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
@@ -500,6 +518,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     saveApiPolicy,
     previewApiPolicyImpact,
     saveApiPolicyDomain,
+    saveInvocationRetentionDomain,
     createCredential,
     rotateCredential,
     revokeCredential,

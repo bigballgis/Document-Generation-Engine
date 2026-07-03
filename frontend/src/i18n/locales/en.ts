@@ -107,7 +107,7 @@ export default {
       contentModules: 'Standard clauses',
       masterVersions: 'Letterhead versions',
       templateVersions: 'Template versions',
-      apiPolicies: 'API management',
+      apiPolicies: 'External services overview',
       audit: 'Activity log',
     },
     behaviorItems: {
@@ -262,7 +262,7 @@ export default {
       title: 'Document catalogs',
       templates: 'Templates',
       masters: 'Letterhead templates',
-      apiPolicies: 'API management',
+      apiPolicies: 'External services overview',
     },
   },
   packageCatalog: {
@@ -1711,6 +1711,44 @@ export default {
       notConfiguredTitle: 'API access not configured',
       notConfiguredDescription:
         'External access settings have not been configured for this template yet.',
+      platformDefaults: 'Platform defaults',
+      l1: {
+        adGroupsTitle: 'Authorized AD groups',
+        adGroupsHint: 'Runtime callers must belong to one of these AD groups.',
+        editAdGroups: 'Edit allowed AD groups',
+        saveAdGroups: 'Save AD groups',
+        defaultRouteTitle: 'Default route',
+        editDefaultRoute: 'Default release version',
+        saveDefaultRoute: 'Save default route',
+      },
+      retention: {
+        title: 'Retention',
+        hint: 'Applies to new invocations and saved documents only.',
+        saveGeneratedDocuments: 'Save generated documents on the server',
+        recordDays: 'Invocation record retention',
+        documentDays: 'Document retention',
+        presetDays: '{days} days',
+        save: 'Save retention',
+        saveSuccess: 'Retention settings saved.',
+        confirmSaveAdGroups: 'Apply AD group authorization changes immediately?',
+        confirmSaveDefaultRoute: 'Apply the default route change immediately?',
+        confirmSaveRetention: 'Apply retention changes to new invocations?',
+        confirmSaveAdvanced: 'Apply advanced setting changes immediately?',
+      },
+      advanced: {
+        title: 'Advanced settings',
+        hint: 'Output formats, batch limits, and encryption override platform defaults when changed.',
+        saveOutput: 'Save output settings',
+        saveBatch: 'Save batch limits',
+        saveEncryption: 'Save encryption settings',
+      },
+      recentInvocations: {
+        title: 'Recent invocations',
+        description: 'Read-only summary for administrators. Full parameters remain caller-scoped.',
+        comingSoonTitle: 'Invocation summary coming soon',
+        comingSoonDescription:
+          'Management invocation summary will list recent calls without exposing variable plaintext.',
+      },
       credentialExternalId: 'External ID',
       credentialStatus: 'Status',
       credentialCreatedAt: 'Created',
@@ -1868,10 +1906,28 @@ export default {
   },
   apiPolicy: {
     home: {
-      title: 'Manage API access',
-      description: 'Select a published template to manage API access and access keys.',
+      title: 'External services overview',
+      description:
+        'Monitor cross-package external access. Configure AD groups, routes, retention, and access keys on each template package hub.',
       empty: 'No published templates in your authorized scope.',
       groupCode: 'Group',
+      monitoringHint:
+        'External access is configured per template package. Open a package hub External access tab to edit settings.',
+      alerts: {
+        title: 'Attention items',
+        description:
+          'Cross-package alerts for missing AD groups and expiring access keys will appear here.',
+        comingSoonTitle: 'Aggregated alerts coming soon',
+        comingSoonDescription:
+          'Package-level monitoring will surface templates that need attention without duplicating the template catalog.',
+      },
+      packageLinks: {
+        title: 'Published packages',
+        description: 'Jump directly to a package external access tab.',
+        browseTemplates: 'Browse templates',
+        action: 'External access',
+        openAccess: 'Open external access',
+      },
     },
     detail: {
       title: 'Manage API access',

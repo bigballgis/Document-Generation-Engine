@@ -139,7 +139,6 @@ const {
   loadPolicyData,
   backToList,
   openLifecyclePanel,
-  openApiPolicyConsole,
   handleTestGenerate,
   handleBatchTestGenerate,
   handlePreviewSelected,
@@ -484,7 +483,6 @@ const {
             :submitting="templatesStore.submitting"
             :format-date-time="formatDateTime"
             :sort-credentials-by-created-at="sortCredentialsByCreatedAt"
-            @open-api-policy-console="openApiPolicyConsole"
             @create-credential="handleCreateCredential"
             @rotate-credential="handleRotateCredential"
             @revoke-credential="handleRevokeCredential"
