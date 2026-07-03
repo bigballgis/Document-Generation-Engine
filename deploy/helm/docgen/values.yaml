@@ -248,3 +248,15 @@ networkPolicy:
         protocol: TCP
       - port: 443
         protocol: TCP
+
+# Prometheus Operator integration (SOR-O01). Requires monitoring.coreos.com CRDs.
+observability:
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+    path: /actuator/prometheus
+    additionalLabels: {}
+  prometheusRules:
+    enabled: false
+    additionalLabels: {}

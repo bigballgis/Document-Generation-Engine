@@ -1,0 +1,36 @@
+{{- if and .Values.backend.enabled .Values.observability.prometheusRules.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "docgen.backend.fullname" . }}-alerts
+  labels:
+    {{- include "docgen.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+    {{- with .Values.observability.prometheusRules.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  groups:
+    - name: docgen.backend.rules
+      rules:
+        - alert: DocgenBackendPodRestartBurst
+          expr: increase(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}", pod=~"{{ include "docgen.backend.fullname" . }}.*"}[15m]) > 2
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Docgen backend pods restarting frequently
+            description: More than two restarts in 15 minutes for docgen backend pods.
+        - alert: DocgenBackendHigh5xxRate
+          expr: |
+            sum(rate(http_server_requests_seconds_count{namespace="{{ .Release.Namespace }}", status=~"5.."}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count{namespace="{{ .Release.Namespace }}"}[5m]))
+            > 0.05
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: Docgen backend elevated 5xx rate
+            description: More than 5% of HTTP requests returned 5xx for 10 minutes.
+{{- end }}

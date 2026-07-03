@@ -71,9 +71,9 @@ rendering-adjacent structural refactors until P22 lands.
 | SOR-2 | Production correctness & security seams | P0/P1 | 9 | Done | After SOR-1 |
 | SOR-3 | Performance & scalability | P1 | 6 | In Progress | P01/P05 Done; P02/P03/P06 remain |
 | SOR-4 | Frontend structural health | P1/P2 | 7 | In Progress | F05 Done (`cd3648e`); F01–F04/F06/F07 remain |
-| SOR-5 | Contract & i18n integrity | P1 | 5 | In Progress | K01/K02/K04 Done; K03/K05 remain |
+| SOR-5 | Contract & i18n integrity | P1 | 5 | In Progress | K01/K02/K04/K05 Done; K03 remain |
 | SOR-6 | Architecture & code health | P2 | 6 | Not Started | A02/A03 blocked until P22 closes |
-| SOR-7 | Test depth & operational readiness | P2 | 10 | In Progress | O02/O03 partial; T04 pointer; T01–T03/O01/O04–O06 remain |
+| SOR-7 | Test depth & operational readiness | P2 | 10 | In Progress | O01/O02/O03/O05/O06 Done; T01 Done; T02–T03 remain |
 
 ---
 
@@ -160,7 +160,7 @@ script-only (PowerShell: `scripts/p0-gate.ps1`, `scripts/release-gate.ps1`) and 
 | SOR-K02 | Medium | Locale-formatter bypass sweep | Raw `toLocaleString()` in `TemplateTestDataSetPanel.vue:40,309`, `TemplateReleaseVersionHistoryPanel.vue:57,317`, `MasterRevisionDetailView.vue:370` | All dates/numbers via shared locale formatters; include aria-label pass | Done | OPT-G6 residual |
 | SOR-K03 | Medium | OpenAPI codegen for API DTO types | `frontend/src/types/template.ts` — **672** lines hand-written; no codegen from `docs/api/openapi-v1.yaml`; drift risk | Generation introduced for DTOs; hand-written drift eliminated | Not Started | Open question (§12: tool choice) |
 | SOR-K04 | Medium | Deepen OpenAPI contract test | `OpenApiContractTest.java:15-56` asserts only operationId set membership | Envelope shape / enums / headers snapshot tests | Done | — |
-| SOR-K05 | Medium | Capability-based client guards | `stores/session.ts:30-32` — client role checks rely on `visibleRoutes` only | Router meta `requiredCapability` + action-button capability guards | Not Started | = OPT-G5 successor |
+| SOR-K05 | Medium | Capability-based client guards | `stores/session.ts:30-32` — client role checks rely on `visibleRoutes` only | Router meta `requiredCapability` + action-button capability guards | Done | = OPT-G5 successor |
 
 ---
 
@@ -181,16 +181,16 @@ script-only (PowerShell: `scripts/p0-gate.ps1`, `scripts/release-gate.ps1`) and 
 
 | ID | Pri | Title | Evidence (verified 2026-07-03) | Acceptance hint | Status | Cross-ref |
 | --- | --- | --- | --- | --- | --- | --- |
-| SOR-T01 | Medium | Test `DockerExecPdfConversionService` | Zero tests while docker-exec is the prod conversion mode | Integration test with a fake docker exec | Not Started | — |
+| SOR-T01 | Medium | Test `DockerExecPdfConversionService` | Zero tests while docker-exec is the prod conversion mode | Integration test with a fake docker exec | Done | — |
 | SOR-T02 | Medium | A11y depth beyond smoke | `e2e/a11y-smoke.spec.ts` checks headings/buttons only; no `@axe-core/playwright`; dialog focus management rarely tested | Axe scans on key views; dialog focus audit | Not Started | — |
 | SOR-T03 | Medium | Close E2E journey gaps + expand docker subset | Identity/group admin journeys, user CRUD, password reset, forbidden-page content untested; docker acceptance subset is 5/51 specs | New journeys + expanded tagged subset (with SOR-C03 tiering) | Not Started | SOR-C03 |
 | SOR-T04 | Medium | Rendering font smoke test — **coordination pointer only** | Planned as CD-PIT-01 (`CDP-industry-pitfall-registry.md:32`, `RenderingFontSmokeTest`) but absent in repo | Implementation is **CDP-owned (CD-HARD-T01)**; SOR only verifies it lands and links evidence — do not implement here | Done | CD-HARD-T01 / CD-PIT-01 (§10) |
-| SOR-O01 | High | Deliver observability per ADR-0030 | No OTel/ServiceMonitor/PrometheusRule/dashboards/alert rules in repo; `docs/operations/runbook.md:24` documents `/actuator/prometheus` but `SecurityConfig.java:53-63` has no actuator permit rule → scrape likely blocked | Working scrape verified; alert rules + dashboards versioned; [ADR-0030](../adr/operations/0030-operational-platform-baseline.md) rows re-earned | In Progress | SOR-A06 |
+| SOR-O01 | High | Deliver observability per ADR-0030 | No OTel/ServiceMonitor/PrometheusRule/dashboards/alert rules in repo; `docs/operations/runbook.md:24` documents `/actuator/prometheus` but `SecurityConfig.java:53-63` has no actuator permit rule → scrape likely blocked | Working scrape verified; alert rules + dashboards versioned; [ADR-0030](../adr/operations/0030-operational-platform-baseline.md) rows re-earned | Done | SOR-A06 |
 | SOR-O02 | High | HPA custom metric — emit or descope | `deploy/helm/docgen/values-prod.yaml:74-78` and `backend-hpa.yaml:29-39` declare `docgen_http_requests_per_second`, but the app never emits it and no Prometheus Adapter rule exists | Metric emitted + adapter rule, or HPA descoped to CPU/mem with doc note | Done | — |
 | SOR-O03 | High | Add PodDisruptionBudget | No PDB anywhere under `deploy/` — node drains can evict all pods | PDBs for backend/frontend; drain behavior evidence | Done | — |
-| SOR-O04 | High | Ops runbooks vs accepted ADR-0030 | `docs/operations/runbook.md` is 45 lines vs accepted backup-weekly / DR-drill / incident-alerting / secret-rotation decisions | Backup-restore, incident-response, DR drill checklist, Flyway migration rollout playbook (blue-green expand-contract) | Not Started | ADR-0030 |
-| SOR-O05 | Medium | Compose prod healthcheck parity | `docker-compose.prod.yml:44-45` disables the backend healthcheck; frontend `nginx.conf` lacks `/readyz` (K8s configmap has it) | Healthchecks enabled + `condition: service_healthy`; `/readyz` parity between compose and K8s | Not Started | — |
-| SOR-O06 | Medium | Readiness probe scope decision | `ReadinessProbe.java:15-21` checks Postgres only | Decide Redis/MinIO/Kafka inclusion or document DB-only intent | Not Started | Open question (§12) |
+| SOR-O04 | High | Ops runbooks vs accepted ADR-0030 | `docs/operations/runbook.md` is 45 lines vs accepted backup-weekly / DR-drill / incident-alerting / secret-rotation decisions | Backup-restore, incident-response, DR drill checklist, Flyway migration rollout playbook (blue-green expand-contract) | Done | ADR-0030 |
+| SOR-O05 | Medium | Compose prod healthcheck parity | `docker-compose.prod.yml:44-45` disables the backend healthcheck; frontend `nginx.conf` lacks `/readyz` (K8s configmap has it) | Healthchecks enabled + `condition: service_healthy`; `/readyz` parity between compose and K8s | Done | — |
+| SOR-O06 | Medium | Readiness probe scope decision | `ReadinessProbe.java:15-21` checks Postgres only | Decide Redis/MinIO/Kafka inclusion or document DB-only intent | Done | Open question (§12) |
 
 ---
 
@@ -287,5 +287,6 @@ A SOR task is `Done` only when:
 
 | Date | Change |
 | --- | --- |
+| 2026-07-03 | SOR wave 2 on `cursor/sor-full-implementation-1385`: O01/O04/O05/O06, T01, K05 Done; Helm ServiceMonitor/PrometheusRule; compose healthcheck parity; expanded runbook; DockerExecPdfConversionService fake-docker test. |
 | 2026-07-03 | SOR full implementation wave on `cursor/sor-full-implementation-1385`: waves SOR-0/1/2 Done; SOR-3/4/5/7 partial; SOR-6 Not Started (P22 overlap). IdempotencyService `@Autowired` constructor fix for Spring context. |
 | 2026-07-03 | Document created from the four-audit consolidated review. Waves SOR-0…SOR-7 defined (**52 tasks**, incl. 1 coordination pointer SOR-T04); all tasks `Not Started`. No formal phase status changed — P22 remains the sole phase `In Progress`. |

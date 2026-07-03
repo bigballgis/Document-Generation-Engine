@@ -11,6 +11,9 @@ public class DocgenRenderingProperties {
 
     private String dockerContainerName = "docgen-libreoffice";
 
+    /** CLI used to invoke Docker (override in tests with a fake docker script). */
+    private String dockerCliCommand = "docker";
+
     private int conversionTimeoutSeconds = 120;
 
     private int conversionPoolSize = 2;
@@ -43,6 +46,14 @@ public class DocgenRenderingProperties {
 
     public void setDockerContainerName(String dockerContainerName) {
         this.dockerContainerName = dockerContainerName;
+    }
+
+    public String getDockerCliCommand() {
+        return dockerCliCommand;
+    }
+
+    public void setDockerCliCommand(String dockerCliCommand) {
+        this.dockerCliCommand = dockerCliCommand;
     }
 
     public int getConversionTimeoutSeconds() {

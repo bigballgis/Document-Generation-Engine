@@ -63,9 +63,9 @@ public class DockerExecPdfConversionService implements PdfConversionService {
             String container = renderingProperties.getDockerContainerName();
             String containerInput = "/tmp/docgen-input.docx";
 
-            runCommand("docker", "cp", inputDocx.toString(), container + ":" + containerInput);
+            runCommand(renderingProperties.getDockerCliCommand(), "cp", inputDocx.toString(), container + ":" + containerInput);
             runCommand(
-                    "docker", "exec", container,
+                    renderingProperties.getDockerCliCommand(), "exec", container,
                     renderingProperties.getLibreOfficeCommand(),
                     "--headless",
                     "--convert-to", "pdf",
@@ -73,7 +73,7 @@ public class DockerExecPdfConversionService implements PdfConversionService {
                     containerInput
             );
             Path outputPdf = hostDir.resolve("input.pdf");
-            runCommand("docker", "cp", container + ":/tmp/input.pdf", outputPdf.toString());
+            runCommand(renderingProperties.getDockerCliCommand(), "cp", container + ":/tmp/input.pdf", outputPdf.toString());
             if (!Files.exists(outputPdf)) {
                 throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
             }

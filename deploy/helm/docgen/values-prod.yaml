@@ -106,3 +106,9 @@ networkPolicy:
   externalEgress:
     cidrs:
       - 10.64.0.0/16
+
+observability:
+  serviceMonitor:
+    enabled: true
+  prometheusRules:
+    enabled: true

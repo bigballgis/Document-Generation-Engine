@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import * as authApi from '@/api/auth'
+import { canAccessRouteWithCapability } from '@/auth/routeCapabilities'
 import { resolveApiErrorMessageKey, TOKEN_STORAGE_KEY } from '@/api/http'
 import { pathForRouteKey } from '@/routing/routeKeys'
 import type { ManagementSession } from '@/types/session'
@@ -28,7 +29,7 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   function canAccessRoute(routeKey: string): boolean {
-    return session.value?.visibleRoutes.includes(routeKey) ?? false
+    return canAccessRouteWithCapability(routeKey, session.value)
   }
 
   function hasRole(role: string): boolean {

@@ -1,0 +1,79 @@
+import { describe, expect, it } from 'vitest'
+import { canAccessRouteWithCapability } from '@/auth/routeCapabilities'
+import { ROUTE_KEYS } from '@/routing/routeKeys'
+import type { ManagementSession } from '@/types/session'
+
+function session(partial: Partial<ManagementSession>): ManagementSession {
+  return {
+    username: '10000001',
+    displayName: 'Tester',
+    email: 'tester@example.com',
+    authSource: 'LOCAL',
+    roles: ['TEMPLATE_AUTHOR'],
+    authorizedGroupCodes: ['RETAIL'],
+    defaultRoute: ROUTE_KEYS.dashboardHome,
+    visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.templateManagement],
+    expiresAt: '2099-01-01T00:00:00Z',
+    ...partial,
+  }
+}
+
+describe('routeCapabilities', () => {
+  it('denies template route when capabilities explicitly false despite visibleRoutes', () => {
+    const denied = canAccessRouteWithCapability(
+      ROUTE_KEYS.templateManagement,
+      session({
+        capabilities: {
+          manageMasters: false,
+          reviewMasters: false,
+          authorTemplates: false,
+          decideTests: false,
+          decideApprovals: false,
+          publishTemplates: false,
+          stopTemplates: false,
+          restoreOrDeprecateTemplates: false,
+          deleteTemplates: false,
+          exportTemplates: false,
+          viewCollaborationWorkItems: false,
+          maintainCollaborationTimeoutConfig: false,
+          authorContentModules: false,
+          decideContentModuleReviews: false,
+          manageContentModuleLifecycle: false,
+          manageApiPolicy: false,
+          readAudit: false,
+        },
+      }),
+    )
+
+    expect(denied).toBe(false)
+  })
+
+  it('allows route when capability guard passes and route is visible', () => {
+    const allowed = canAccessRouteWithCapability(
+      ROUTE_KEYS.templateManagement,
+      session({
+        capabilities: {
+          manageMasters: false,
+          reviewMasters: false,
+          authorTemplates: true,
+          decideTests: false,
+          decideApprovals: false,
+          publishTemplates: false,
+          stopTemplates: false,
+          restoreOrDeprecateTemplates: false,
+          deleteTemplates: false,
+          exportTemplates: false,
+          viewCollaborationWorkItems: false,
+          maintainCollaborationTimeoutConfig: false,
+          authorContentModules: false,
+          decideContentModuleReviews: false,
+          manageContentModuleLifecycle: false,
+          manageApiPolicy: false,
+          readAudit: false,
+        },
+      }),
+    )
+
+    expect(allowed).toBe(true)
+  })
+})
