@@ -1,7 +1,10 @@
 import { expect, test } from '@playwright/test'
 
 import { E2E_GROUP_ADMIN, loginAs } from './helpers/auth'
-import { ensureDemoFullFlowPublished } from './helpers/content-modules-api'
+import {
+  ensureDemoFullFlowPublished,
+  fetchRecentManagementInvocations,
+} from './helpers/content-modules-api'
 
 const dockerTarget =
   process.env.E2E_TARGET === 'docker' || process.env.FRONTEND_PORT === '4173'
@@ -89,5 +92,29 @@ test.describe('P12 API package access hub (BDD S6 L1)', () => {
     await page.goto('/api/policies')
     await expect(page.getByText(/external services overview|对外服务概览/i)).toBeVisible()
     await expect(page.getByText(/^API policy management$/i)).toHaveCount(0)
+  })
+
+  test('BDD S6 — management recent invocations API returns summary without parameters', async ({
+    request,
+  }) => {
+    const fixture = await ensureDemoFullFlowPublished(request)
+    const rows = await fetchRecentManagementInvocations(request, fixture.templateId, 10)
+    expect(Array.isArray(rows)).toBe(true)
+    for (const row of rows) {
+      expect(row).not.toHaveProperty('parameters')
+      expect(row).not.toHaveProperty('variableValues')
+      expect(Object.keys(row).sort()).toEqual(
+        [
+          'accessAccountSummary',
+          'createdAt',
+          'invocationId',
+          'invocationKind',
+          'requestId',
+          'resolvedReleaseVersion',
+          'routeType',
+          'status',
+        ].sort(),
+      )
+    }
   })
 })

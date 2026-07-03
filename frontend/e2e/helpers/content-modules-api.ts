@@ -681,6 +681,17 @@ export interface DemoFullFlowApiPolicy {
   outputFormats: string[]
 }
 
+export interface ManagementInvocationSummary {
+  invocationId: string
+  invocationKind: string
+  status: string
+  requestId: string
+  resolvedReleaseVersion: string
+  routeType: string
+  createdAt: string
+  accessAccountSummary: string
+}
+
 export type DemoFullFlowLifecycleStage =
   | 'DRAFT'
   | 'TESTING'
@@ -702,6 +713,19 @@ export async function fetchDemoFullFlowApiPolicy(
 ): Promise<DemoFullFlowApiPolicy> {
   const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
   return authorizedGet<DemoFullFlowApiPolicy>(request, groupAdminToken, `/templates/${templateId}/api/policy`)
+}
+
+export async function fetchRecentManagementInvocations(
+  request: APIRequestContext,
+  templateId: string,
+  limit = 10,
+): Promise<ManagementInvocationSummary[]> {
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  return authorizedGet<ManagementInvocationSummary[]>(
+    request,
+    groupAdminToken,
+    `/templates/${templateId}/api/invocations/recent?limit=${limit}`,
+  )
 }
 
 export async function createDemoFullFlowDraftTemplate(
