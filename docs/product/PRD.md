@@ -13,6 +13,7 @@
 - [权限矩阵](../security/permission-matrix.md)
 - [文档治理规则](../governance.md)
 - [模板创作与渲染一阶原则审查](authoring-rendering-first-principles-review.md)
+- [综合演示包扩展行为规格](../requirements/demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；P22）
 
 ## 2. 记录原则
 
@@ -367,6 +368,10 @@ v1 编辑器可以采用类似富文本或 Word 的熟悉工具栏外观，但�
 
 条款或内容模块引用通过检索和显式版本选择完成，检索至少支持组、共享范围和状态过滤；引用时展示版本和审批状态。发布版本锁定具体模块版本，升级引用必须执行影响预览并重新经过测试、审批和发布流程。
 
+P18 已确认结构化节点矩阵、母版样式目录与发布锁定的 `renderProfile`；**P22** 补齐**渲染写入路径**：结构化内容树写入锚点占位符时必须按节点类型生成对应 Word 构造（段落 run、列表、样式引用、表格组件、条件/循环块、模块引用、图片/签章等），不得退化为单一字体样式的纯文本。干净演示绑定在运行期生成时不应出现 `CONTROLLED_STYLE_FALLBACK` 等虚假保真警告。
+
+**双页码（P22，已确认）**：多节长文档可同时展示**章节级**页码（当前 Word 节内 `Page X of Y`，字段语义 `PAGE` + `SECTIONPAGES`）与**文档全局**页码（整份文档物理页 `Page A of B`，字段语义 `PAGE` + `NUMPAGES`）。页码版式由母版页脚资产定义；单节短信函可不强制双页码，由演示包 `pageNumberingProfile` 声明。DOCX 与 PDF 页码语义须一致；PDF 转换若未求值 Word 字段，则受发布锁定 `renderProfile` 控制的 PDF 页码加盖路径须按节边界还原双页码语义。
+
 ### 6.4.2 条款或内容模块生命周期与权限
 
 条款或内容模块 v1 采用独立版本审批生命周期。
@@ -630,6 +635,37 @@ API 需要支持批量生成。
 - 默认同步批量最多 100 条。
 - 默认异步批量最多 10,000 条。
 - 具体 API 管理配置可以配置更低上限。
+
+### 6.7 综合演示包扩展与渲染保真（P22）
+
+> 完整 Given/When/Then 见 [demo-expansion-behavior-spec.md](../requirements/demo-expansion-behavior-spec.md)；实现计划 [P22-demo-expansion-rendering-fidelity.md](../plan/detail/P22-demo-expansion-rendering-fidelity.md)。
+
+本切片在**单次交付**内完成演示扩展与 P18/P4 渲染侧缺口闭合，能力域如下：
+
+| 域 | 产品行为摘要 |
+| --- | --- |
+| **R1 渲染保真** | P18 v1 节点矩阵在最终 DOCX 中可见且语义正确（强调、下划线、列表、`styleRef`、表格组件、条件/循环、模块引用、图片/签章等） |
+| **R2 双页码** | 章节级 + 文档全局页码并存；DOCX 与 PDF 一致（见 §6.5.1） |
+| **R3 按演示页脚** | 各信函类型母版资产独立页眉/页脚版式（银行抬头、免责声明、监管标识等）；不由 runtime 变量拼接 |
+| **R4 八类演示** | 见下表；每类至少一个已发布模板、≥1 executive 级测试数据集、可生成 DOCX+PDF |
+| **R5 可重复导入** | 各包镜像 `deploy/demo-fol/` 目录契约；`deploy/import-all-demos.ps1` 按优先级导入；`catalogMarker` / `masterLayoutVersion` 幂等 |
+
+**八类银行信函演示（已确认优先级与 `externalId` 契约）**：
+
+| 优先级 | 文档类型 | 包路径 | 模板 `externalId` | 组 | 页码配置 |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 批发 FOL（升级） | `deploy/demo-fol/` | `DEMO-FOL-WHOLESALE` | CORP | 双页码 |
+| 2 | 零售账户函（开户/余额确认） | `deploy/demo-retail-account/` | `DEMO-RETAIL-ACCOUNT-OPEN`, `DEMO-RETAIL-ACCOUNT-BALANCE` | RETAIL | 全局为主 |
+| 3 | 按揭批核 + 还款表 | `deploy/demo-mortgage/` | `DEMO-MORTGAGE-APPROVAL` | RETAIL | 双页码 |
+| 4 | 授信/额度确认 | `deploy/demo-credit-limit/` | `DEMO-CREDIT-LIMIT-CONFIRM` | CORP | 双页码 |
+| 5 | 信用证/保函通知 | `deploy/demo-trade-lc/` | `DEMO-TRADE-LC-NOTICE`, `DEMO-TRADE-GUARANTEE-NOTICE` | TRADE | 全局 + 附件节 |
+| 6 | 利率变更 / 逾期催收 | `deploy/demo-collection/` | `DEMO-RATE-CHANGE-NOTICE`, `DEMO-OVERDUE-COLLECTION` | RETAIL | 全局 |
+| 7 | 年审 / 续期函 | `deploy/demo-annual-review/` | `DEMO-ANNUAL-REVIEW`, `DEMO-FACILITY-RENEWAL` | CORP | 双页码 |
+| 8 | 财富/私人银行投资结单 | `deploy/demo-wealth/` | `DEMO-WEALTH-STATEMENT` | WEALTH | 全局（多表续页） |
+
+视觉逼真度（已确认）：每类须使用真实银行信函版式；仅客户名、账号、金额、日期等为 mock 变量。批发 FOL 升级保持 executive 规模（≥100 页目标、40 锚点），并在绑定中覆盖多种结构化节点以验证保真。
+
+演示导入与验收以平台工程师自动化脚本为主（`import-all-demos.ps1`、构建期母版资产生成器）；模板作者/测试人员通过管理面预览与全量测试验收 DOCX/PDF 保真。运行期 API 调用方对已发布演示模板的权限与既有模板级 AD Group + API 凭证模型一致；**无新增调用方请求字段**。
 
 ## 7. 模板生命周期
 

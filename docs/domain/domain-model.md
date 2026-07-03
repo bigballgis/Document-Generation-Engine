@@ -12,6 +12,7 @@
 - [权限矩阵](../security/permission-matrix.md)
 - [文档治理规则](../governance.md)
 - [模板创作与渲染一阶原则审查](../product/authoring-rendering-first-principles-review.md)
+- [综合演示包扩展行为规格](../requirements/demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；P22）
 
 ## 2. 核心领域对象
 
@@ -405,7 +406,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 `RenderProfileService` 在模板发布时锁定受控 `renderProfile`（默认 `authoring/default-render-profile-v1.json`，版本 `rp-v1`），持久化至 `template_version.render_profile_version` 与 `render_profile_json`。
 
-**Profile 维度：** 样式映射（`styleMappingPolicy`）、编号（`numberingBehavior`）、表格分页（`tablePaginationPolicy`）、图片缩放（`imageScalingPolicy`）、PDF 转换（`pdfConversionPolicy`）、保真策略（`fidelityPolicy`）。
+**Profile 维度：** 样式映射（`styleMappingPolicy`）、编号（`numberingBehavior`）、表格分页（`tablePaginationPolicy`）、图片缩放（`imageScalingPolicy`）、PDF 转换（`pdfConversionPolicy`）、保真策略（`fidelityPolicy`）、PDF 页码加盖（`pdfPageNumberStampingEnabled`，P22，可选布尔，默认由平台 profile 资产定义）。
 
 **锁定规则：** `TemplateLifecycleService.publish` 调用 `lockForPublish`；已锁定版本幂等跳过。运行期 `resolveEffectiveProfile` 忽略 `CallerRenderOverride`（调用方不得覆盖发布配置）；`DocumentGenerationEngine` 与 `DocumentArtifactPipeline` 使用锁定 profile。
 
@@ -423,6 +424,46 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 - **运行期同步生成：** `DocumentGenerationEngine.generate` → `GeneratedDocument.fidelityWarningCodes`；`RuntimeGenerationService` 透传至 `SyncGenerateResult`；`RuntimeTemplateController` 写入响应头 `fidelityWarningCount` / `fidelityWarningCodes`（逗号分隔）。幂等重放路径按当前模板版本重新计算 warnings，不再返回硬编码 stub。
 
 **已移除：** 预览/运行期硬编码 `CONTROLLED_STYLE_FALLBACK` stub；干净内容绑定返回空 warnings 列表。
+
+#### 2.6.10 结构化内容 DOCX 写入 StructuredContentDocxWriter（P22-T01）
+
+`StructuredContentDocxWriter`（或 `DocxAssembler` 内聚等价实现）将锚点绑定的结构化内容树写入母版 DOCX 占位符，**按 v1 节点类型生成对应 Word 构造**，替代纯文本降级路径。
+
+**最低覆盖节点与输出：**
+
+| 节点类型 | DOCX 输出 |
+| --- | --- |
+| `paragraph` | 独立段落；子 run 组合 |
+| `sectionHeading` | 标题段落；`styleRef` 或母版 Heading 样式 |
+| `list` | Word 编号/项目符号（`numId`/`ilvl` 或等价 POI 构造） |
+| `emphasis` | run 粗体/斜体属性 |
+| `underline` | run 下划线属性 |
+| `styleRef` | 解析 `MasterStyleCatalog` 应用到段落或 run |
+| `lineBreak` | 软换行 |
+| `variable` / `textRun` | 变量替换与字面文本 |
+| `tableComponent` / `tableComponentRef` | `XWPFTable`（表头、循环行、footer 行、repeat header） |
+| `conditionBlock` / `loopBlock` | 条件/循环语义；循环后 `NumberingService` 确定性重排 |
+| `contentModuleRef` | 递归展开引用模块 |
+| `imageRef` / `sealRef` | 嵌入图片 run；签章须在授权区域内 |
+
+**不变式：** 发布锁定的 `RenderProfile` 约束样式/编号/表格分页；调用方 `CallerRenderOverride` 无效。不支持节点类型不得静默丢弃。干净演示绑定运行期不得返回虚假 `CONTROLLED_STYLE_FALLBACK` 警告。
+
+#### 2.6.11 页码语义与 PDF 加盖 Page numbering & PDF stamping（P22-T03/T04）
+
+**页码类型（已确认语义）：**
+
+| 类型 | 含义 | Word 字段参考 | 示例 |
+| --- | --- | --- | --- |
+| **章节级（Section）** | 当前 Word 节内页序 | `PAGE` + `SECTIONPAGES`（节启用重启时） | `Section Page 2 of 15` |
+| **文档全局（Document）** | 整份文档物理页序 | 连续 `PAGE` + `NUMPAGES` | `Page 47 of 120` |
+
+母版通过分节符划分章节；需章节重启的节在 `sectPr` 配置 `pgNumType` restart。页脚版式在**母版 DOCX 资产**中定义，不由 runtime 变量拼接。
+
+**`PageNumberingProfile`（演示包配置枚举，非 API 字段）：** `GLOBAL_ONLY` | `SECTION_AND_GLOBAL` | `SECTION_ONLY`。声明于 `deploy/demo-*/config/*-template-config.json`，驱动母版生成与导入幂等；单节短信函可不强制双页码。
+
+**`PdfPageNumberStamper`：** LibreOffice 转换若未求值 Word 页码字段，则按节边界在 PDF 上还原 DOCX 页码语义（含双页码）。是否启用由发布锁定 `RenderProfile` 的 `pdfPageNumberStampingEnabled`（及既有 PDF 转换策略）控制；加盖失败须记录 fidelity warning，不得在要求页码时静默返回无页码 PDF。
+
+**Profile 维度扩展（P22）：** 在 §2.6.8 既有维度基础上，`RenderProfile` 可包含 `pdfPageNumberStampingEnabled`（布尔，发布锁定，调用方不可覆盖）。
 
 ### 2.7 模板 Template
 
@@ -1233,6 +1274,41 @@ P19 范围（见 [P5 薄切片边界](../plan/detail/P5-lifecycle-governance.md)
 - 导入生产环境时，不能直接导出为最终发布版本。
 - 导入生产遇到已有相同模板 ID 时，保留模板 ID，并在目标环境创建新的开发版本；模板发布版本号在后续发布时再由模板编排人员或管理员选择。
 - 导入生产不重新生成模板 ID 或 API 地址；导入后的模板仍需从草稿重新经过测试、审批、待发布和发布流程后才可形成新的发布版本。
+
+### 2.18 演示包（部署制品）Demo Package
+
+演示包是仓库内 `deploy/demo-<code>/` 下的**部署制品契约**，用于销售/验收/培训的一键导入；不是持久化领域实体，但导入后物化为平台内的母版、模板、内容模块与测试数据集。
+
+**目录契约（已确认，镜像 `deploy/demo-fol/`）：**
+
+```
+deploy/demo-<code>/
+  assets/                         # 母版 DOCX、图片、签章
+  config/
+    <code>-catalog-manifest.json
+    <code>-template-config.json   # catalogMarker, masterLayoutVersion, pageNumberingProfile, …
+    <code>-variables.json
+    <code>-master-anchor-ids.json
+  sql/                            # 内容模块种子
+  import-<code>-demo.ps1
+```
+
+仓库级 `deploy/import-all-demos.ps1` 按行为规格 §11 优先级调用各 import 脚本。
+
+**`DemoTemplateConfig`（config 最低字段）：**
+
+| 字段 | 说明 |
+| --- | --- |
+| `catalogMarker` | 导入幂等标记 |
+| `masterLayoutVersion` | 母版版式版本；变更时触发母版重上传 |
+| `pageNumberingProfile` | `GLOBAL_ONLY` \| `SECTION_AND_GLOBAL` \| `SECTION_ONLY` |
+| `templateExternalId` | 稳定模板键（如 `DEMO-FOL-WHOLESALE`） |
+| `groupCode` | 业务组（`CORP` / `RETAIL` / `TRADE` / `WEALTH`） |
+| `masterName` | 母版资产名称 |
+
+**构建期：** `*MasterDocxAssetGeneratorTest` 写入 `assets/*-master.docx` 并断言锚点提取与页脚字段存在。
+
+**导入不变式：** 重复导入同一 `catalogMarker` 不得创建重复 `externalId` 模板；母版仅在 `masterLayoutVersion` 变化时重上传。导入失败（如 API 401/403）须非零退出，不得部分写入未标记 catalog。
 
 ## 7. 待确认领域设计议题
 

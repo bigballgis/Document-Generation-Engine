@@ -1,14 +1,14 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **P12** (2026-07-03 — **P12-API-PACKAGE-ACCESS-INVOCATION In Progress**; BDD ready; T01–T02 next). **Prior slice:** **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03; 模板测试页全量改造; T01–T13; Flyway V41–V42; backend `mvn verify`, frontend **643** Vitest, Playwright T13 **8+1** + UIUX manifest **PASS**). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02). Prior slice: **P12-UIUX-DEEP-REFACTOR Done** (2026-07-03; frontend UIUX deep refactor, 14 tasks A–E, **606** Vitest; OPT-G3 resolved).
+**Active formal phase:** **P22** (2026-07-03 — **P22-DEMO-EXPANSION In Progress**; BDD ready; **P22-T01 next**). **Prior:** **P12-API-PACKAGE-ACCESS-INVOCATION paused** (T01–T06 Done; T07–T12 resume after P22). **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
 UX-A…UX-F interaction/upgradeability tasks (same plan) run as optimization waves
 against the existing implementation. **UX Wave A** (role gating + half-built interactions)
 re-earned Done on 2026-06-23; **UX Wave B** (workbenches + polish) Done (2026-06-23).
-**P12 In Progress** (2026-07-03) — active slice **P12-API-PACKAGE-ACCESS-INVOCATION** (BDD ready; T01–T02 next). Prior slice **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03; T01–T13; backend `mvn verify`, frontend **643** Vitest, Playwright + UIUX **PASS**); prior **P12-UIUX-DEEP-REFACTOR Done** (2026-07-03; 14 tasks A–E; prior: **P12-AUD-M02 Done** 2026-07-01).
+**P22 In Progress** (2026-07-03) — **P22-DEMO-EXPANSION** (BDD ready; rendering fidelity + dual page numbers + eight bank letter demos; **P22-T01 next**). **P12 catch-all → Not Started** (slice **P12-API-PACKAGE-ACCESS-INVOCATION** paused — T01–T06 Done; resumes after P22).
 **P16–P20 (deep-review functional gaps, 2026-06-23):** P16 lifecycle governance **Done**;
 P17 per-domain API policy **Done** (2026-06-25; Wave 3; T01–T09 + COR-F18);
 P18 structured authoring **Done** (2026-06-28; T01–T10); **P19 verifiability/publish-gate Done**
@@ -46,7 +46,7 @@ upstream systems invoke the dynamic API.
 | P9 | Production readiness | P0–P8 | Security scans, observability, deployment evidence, release gates | Done |
 | P10 | Runtime document download | P9 | Secure download with secondary auth and 15-minute expiry | Done |
 | P11 | Batch & async generation | P10 | Sync batch, async task query/cancel | Done |
-| P12 | Deferred enhancements | P0–P11 | Catch-all; active slice **P12-API-PACKAGE-ACCESS-INVOCATION In Progress** (2026-07-03; BDD ready; T01–T02 next); prior **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03) | In Progress |
+| P12 | Deferred enhancements | P0–P11 | Catch-all; slice **P12-API-PACKAGE-ACCESS-INVOCATION paused** (T01–T06 Done; T07–T12 after P22); prior **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03) | Not Started |
 | P13 | Identity & group administration | P1 | Global/group admins manage users & groups via management API + UI, with fail-closed escalation protection, audit, and green gates | Done |
 | P14 | Confirmed large domains | P2–P8 | Clause/content modules, collaboration to-dos + timeout escalation, template export/import (UX-G) | Done (2026-06-27; T01–T03 + E2E/UIUX/architecture gates; backend **481**, frontend **235+**) |
 | P15 | Kubernetes deployment & container hardening | P9 | Distroless non-root read-only containers, Helm/manifests for app workloads, ConfigMap/Secret, NGINX Ingress + cert-manager TLS, default-deny NetworkPolicy, HPA (CPU/mem + custom), /healthz+/readyz probes, blue-green + manual approval/rollback, CI manifest validation (ADR-0030) | Done (2026-06-27; T01–T10) |
@@ -56,14 +56,15 @@ upstream systems invoke the dynamic API.
 | P19 | Template verifiability, publish gate & decision forms | P3, P4, P5 | Multi-sample coverage thresholds, batch test, change-diff, preview comparison, live publish-gate checklist, controlled test/approval opinion forms + risk prompts + exception markers (gaps G4, G5) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | P1 | Locale registry/switcher/fallback + html lang, config-driven brand theming, environment selector (gap G6, i18n constitution) | Done (2026-06-25) |
 | P21 | Role-journey frontend redesign & business-friendly terminology | P13, P14, P19, P20 | Hybrid IA (single task hub authoritative + behavior-typed "my to-dos" entries + per-role `RoleJourneyTimeline`), task-hub queue partitioning + restored fields + inline open actions, 6 collaboration-trigger backend completeness (+ `RESOLVED`), foreign-bank non-IT persona business-friendly L1 copy (en/zh, keys stable); **plus code-grounded audit remediation** — permission single-source/fail-closed, template-detail bug fixes (focus/tab, stale id), APPROVAL dual-substate, i18n parity, a11y focus ring, capability/route/OpenAPI drift; ADR Batch B / COR-T11 not violated | Done (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest; **AUD-B10 resolved** P12-AUD-B10 Done 2026-07-01; **AUD-M02 resolved** P12-AUD-M02 Done 2026-07-01) |
+| P22 | Demo expansion & rendering fidelity | P3, P4, P18 | Structured content DOCX fidelity (P18 rendering gap), dual page numbering, per-demo footers, eight bank letter `deploy/demo-*` packages, `import-all-demos.ps1` (R1–R5; BDD-DEMO-EXP-001…015) | **In Progress** (2026-07-03; P22-T01–T15 **Not Started**; **P22-T01 next**) |
 
-> **P21 vs P12:** P21 is **Done** (2026-06-30). AUD-B10 evidence-checklist gap **resolved**
-> under **P12-AUD-B10 Done** (2026-07-01); AUD-M02 role constants gap **resolved** under
-> **P12-AUD-M02 Done** (2026-07-01); **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03; T01–T13). **P12 In Progress** — active slice **P12-API-PACKAGE-ACCESS-INVOCATION** (2026-07-03; T01–T02 next). Do not reopen
-> P21 phase status. Detail:
+> **P22 vs P12:** **P22** is the sole formal phase **In Progress** (2026-07-03). Closes P18/P4
+> rendering fidelity gap per [demo-expansion-behavior-spec.md](../requirements/demo-expansion-behavior-spec.md).
+> **P12-API-PACKAGE-ACCESS-INVOCATION paused** (T01–T06 Done; T07–T12 resume after P22). Do not reopen
+> P18/P21 phase status. Detail:
+> [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md),
 > [detail/P12-api-package-access-invocation-records.md](./detail/P12-api-package-access-invocation-records.md),
-> [detail/P12-deferred-enhancements.md](./detail/P12-deferred-enhancements.md),
-> [detail/P21-role-journey-frontend-redesign.md](./detail/P21-role-journey-frontend-redesign.md).
+> [detail/P12-deferred-enhancements.md](./detail/P12-deferred-enhancements.md).
 
 ## Thin vertical slice (MVP chain)
 

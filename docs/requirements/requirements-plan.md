@@ -10,6 +10,7 @@
 - [领域模型](../domain/domain-model.md)
 - [权限矩阵](../security/permission-matrix.md)
 - [文档治理规则](../governance.md)
+- [综合演示包扩展行为规格](demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；渲染保真 + 双页码 + 八类银行信函演示）
 
 ## 记录原则
 
@@ -791,6 +792,19 @@
 | `GROUP_MANAGEMENT_NOT_ALLOWED` | 403 | `AUTHORIZATION` | 分组创建/编辑/停用/启用仅全局管理员可执行。 |
 
 注：管理平面引入 `NOT_FOUND` 与 `CONFLICT` 两个错误类别，仅用于 `/api/management/v1` 管理面；这两个类别不并入运行时动态 API v1 的 10 类固定错误类别集合。
+
+## 已确认：综合演示包扩展（单次交付切片）
+
+> 完整 Given/When/Then 见 [demo-expansion-behavior-spec.md](demo-expansion-behavior-spec.md)；实现计划：[P22-demo-expansion-rendering-fidelity.md](../plan/detail/P22-demo-expansion-rendering-fidelity.md)（**In Progress** 2026-07-03）。
+
+- v1 演示扩展在**单次交付切片**内完成：结构化内容渲染保真（P18 节点矩阵落地到 DOCX）、双页码（章节级 + 文档全局）、八类银行信函演示包。
+- 双页码语义：**章节级**为当前 Word 节内 `Page X of Y`；**文档全局**为整份文档物理页 `Page A of B`；同一页脚可同时展示；DOCX 与 PDF 语义一致。
+- 页脚版式按演示类型在母版资产中独立配置，贴近真实银行信函；仅客户数据为 mock。
+- 八类信函（优先级顺序）：批发 FOL（升级现有 `deploy/demo-fol/`）、零售账户函（开户/余额确认）、按揭批核+还款表、授信额度确认、信用证/保函通知、利率变更/逾期催收、年审/续期函、财富/私人银行投资结单。
+- 各演示包目录结构镜像 `deploy/demo-fol/`（`assets/`、`config/`、`sql/`、`import-*-demo.ps1`）；仓库级 `deploy/import-all-demos.ps1` 按优先级导入；导入幂等依赖 `catalogMarker` / `masterLayoutVersion`。
+- 批发 FOL 升级保持 executive 规模（≥100 页目标、40 锚点）；须在新绑定中覆盖 list、emphasis、styleRef、tableComponent、contentModuleRef 等节点以验证保真。
+- 结构化内容写入 DOCX 不得退化为单一 Calibri 10pt 纯文本；表格须为真实 Word 表格；`styleRef` 须解析母版样式目录。
+- 发布锁定的 `renderProfile` 继续约束渲染；API 调用方不得覆盖；保真警告遵循既有 blocker/warning 分级。
 
 ## 待确认：设计优化议题
 

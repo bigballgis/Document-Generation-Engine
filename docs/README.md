@@ -1,8 +1,8 @@
 # Documentation Index
 
 **Project baseline:** Restart from zero (2026-06-23); **P0–P11, P13–P21 Done**; **P12 Not Started**
-(catch-all idle; last slice **P12-TEMPLATE-TESTING-OVERHAUL Done** 2026-07-03). **Active formal phase: None**
-(2026-07-03). **P2-T06 Done** (Phase B master revision history, 2026-07-01). **P21 Done** — role-journey frontend redesign &
+(catch-all idle; slice **P12-API-PACKAGE-ACCESS-INVOCATION paused** — T01–T06 Done). **Active formal phase: P22**
+(2026-07-03 — **P22-DEMO-EXPANSION In Progress**; BDD ready; **P22-T01 next**). **P2-T06 Done** (Phase B master revision history, 2026-07-01). **P21 Done** — role-journey frontend redesign &
 business-friendly terminology (**Done** 2026-06-30; T01–T11 + X01–X06 + X02; **AUD-B10 resolved**
 via P12-AUD-B10; **AUD-M02 resolved** via P12-AUD-M02). Latest gates: backend
 `mvn verify` BUILD SUCCESS; frontend lint/type-check/test/build green (**643** Vitest, 2026-07-03). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
@@ -13,7 +13,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | Order | Document | Purpose |
 | --- | --- | --- |
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
-| 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P20) |
+| 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P22) |
 | 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
 | 2c | **[Deployment guide](../deploy/README.md)** | **Canonical** install/upgrade/cutover/rollback — Docker Compose + Kubernetes (ADR-0030) |
 | 3 | [Orchestration high-level plan](./architecture/orchestration-high-level-plan.md) | Epic ordering and active epic rules |
@@ -26,6 +26,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | Document | Purpose |
 | --- | --- |
 | [Requirements plan](./requirements/requirements-plan.md) | Raw confirmed requirements |
+| [Demo expansion behavior spec](./requirements/demo-expansion-behavior-spec.md) | BDD-DEMO-EXP — rendering fidelity, dual page numbers, eight bank letter demos |
 | [Non-functional requirements](./requirements/non-functional-requirements.md) | Quality, security, reliability constraints |
 | [PRD](./product/PRD.md) | Product-facing behavior |
 | [Catalog navigation UX](./product/catalog-navigation-ux.md) | Master/template package catalog IA + hybrid behavior-typed navigation (P21) |
@@ -39,7 +40,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | --- | --- |
 | [Plan index](./plan/README.md) | Layer rules and phase links |
 | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone ↔ phase mapping + gate evidence + transitional seams index |
-| [Master plan](./plan/master-plan.md) | P0–P20 phases — see phase detail plans for status |
+| [Master plan](./plan/master-plan.md) | P0–P22 phases — see phase detail plans for status |
 | [Comprehensive optimization roadmap](./plan/comprehensive-optimization-roadmap.md) | **Unified execution map** — docs, API contract, template workflow, frontend UX, performance, E2E (COR-0…6, 2026-06-23) |
 | [Optimization plan & backlog](./plan/optimization-plan.md) | Technical debt detail (OPT-A…G): gates, coverage, backend architecture |
 | [UX & upgradeability optimization plan](./plan/ux-upgradeability-optimization-plan.md) | Historical UX waves (UX-A…G); cross-check against comprehensive roadmap |
@@ -64,6 +65,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [P19 Verifiability & publish gate](./plan/detail/P19-verifiability-publish-gate.md) | Batch test, coverage, live publish gate, decision forms (Done 2026-06-25) |
 | [P20 i18n & UI upgradeability](./plan/detail/P20-i18n-ui-upgradeability.md) | Locale registry, brand theming, zh-CN primary journey (Done 2026-06-25) |
 | [P21 Role-journey frontend redesign](./plan/detail/P21-role-journey-frontend-redesign.md) | Hybrid IA, behavior-typed to-dos, per-role journeys, business-friendly terminology (**Done** 2026-06-30) |
+| [P22 Demo expansion & rendering fidelity](./plan/detail/P22-demo-expansion-rendering-fidelity.md) | Structured content DOCX fidelity, dual page numbers, eight bank letter demos (**In Progress** 2026-07-03) |
 | **[Deployment guide](../deploy/README.md)** | **Canonical operator guide** — prerequisites, install/upgrade/cutover/rollback/secrets; indexes all `deploy/*.md` topic docs |
 
 ## Architecture

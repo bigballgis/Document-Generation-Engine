@@ -29,6 +29,7 @@ Field names, capability breakdown, error-code names, and response structure are 
 - [统一授权与敏感数据处理 ADR](../adr/authorization-security/0020-unified-authorization-and-sensitive-data-handling.md)
 - [正式 OpenAPI v1](openapi-v1.yaml)
 - [API 示例](examples/README.md)
+- [综合演示包扩展行为规格](../requirements/demo-expansion-behavior-spec.md)（P22 — 渲染保真；**无调用方 API 变更**）
 
 ## 已确认 API 能力
 
@@ -674,6 +675,16 @@ default 路径特殊规则：首次请求创建幂等记录时，应记录当时
 同步文件流响应头确认字段：`auditId`、`traceId`、`requestId`、`idempotencyKey`、`idempotencyStatus`、`documentId`、`templateId`、`routeType`、`resolvedReleaseVersion`、`output.format`、`output.mode`、`fidelityWarningCount` 和 `fidelityWarningCodes`。
 
 后台 API 契约页提供调用方视图，展示授权模板的契约版本对比、错误码说明、调用示例、可调用版本列表、API 策略摘要、调用方自身 API 凭证非敏感状态、保真警告码目录、字段含义、JSON 示例、同步文件流响应头说明，以及授权范围内的非敏感调用结果警告摘要和 `traceId` 或 `auditId` 定位标识。契约版本对比由页面基于已授权可见的现有契约信息、可调用版本、请求 Schema、响应 Schema、错误码、API 策略、路由/default 目标和示例计算展示；v1 不在 `ContractResponse` 中新增专门的契约版本对比字段。v1 不建设独立开发者门户；该视图不展示完整审计明细、完整请求体、模板变量原值、客户数据、完整生成内容或 API 凭证 secret，也不提供 API 凭证自助管理。
+
+## P22 演示扩展与渲染保真 — API 影响（2026-07-03）
+
+**调用方（动态 API v1）：无契约变更。** P22 不新增或修改 OpenAPI 请求/响应字段；`generate`、`batch-generate`、异步任务查询与同步文件流响应头语义保持不变。演示模板运行期仍通过既有路径返回 `result.fidelityWarnings[]`（或响应头摘要）；干净演示绑定不得再依赖虚假 `CONTROLLED_STYLE_FALLBACK` stub（实现侧 P22-T01/T15）。
+
+**发布锁定 `renderProfile`（内部，非 OpenAPI 暴露）：** 实现可将 `pdfPageNumberStampingEnabled` 纳入 `template_version.render_profile_json`（与 `renderProfileVersion` 一并发布锁定）。该字段控制 PDF 页码加盖路径，**调用方不可通过请求体覆盖**；与既有 `CallerRenderOverride` 忽略规则一致。默认 profile（`rp-v1`）在 P22 实现时按需扩展；不要求 bump `renderProfileVersion` 除非发布语义变化需新版本号。
+
+**`pageNumberingProfile`：** 仅存在于 `deploy/demo-*/config/*-template-config.json` 演示导入配置，驱动母版资产生成与导入幂等；**不是** runtime API 字段，也不进入 `renderProfile` JSON schema 的调用方可见契约。
+
+**管理面：** 无新增管理 API 路由。演示导入通过 PowerShell 脚本 + 既有 Management API（母版上传、模板创建等）完成；权限沿用现有角色与组范围（见 [permission-matrix.md](../security/permission-matrix.md)）。
 
 ## 响应字段命名确认
 

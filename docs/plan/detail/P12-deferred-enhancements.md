@@ -1,8 +1,8 @@
 # P12 — Deferred Enhancements (Detailed Plan)
 
-**Phase status:** **In Progress** (2026-07-03; active slice **P12-API-PACKAGE-ACCESS-INVOCATION**) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
+**Phase status:** **Not Started** (2026-07-03; no active slice — **P12-API-PACKAGE-ACCESS-INVOCATION paused** for **P22** priority) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
 
-> Single-active-phase invariant: **Active slice: P12-API-PACKAGE-ACCESS-INVOCATION In Progress** (activated 2026-07-03; BDD ready; **T01–T02 next**). Prior slice **P12-TEMPLATE-TESTING-OVERHAUL Done** (closed 2026-07-03; 13 tasks T01–T13, Flyway V41–V42). **P12** is the sole formal phase `In Progress`.
+> Single-active-phase invariant: **P22-DEMO-EXPANSION In Progress** (sole formal phase; activated 2026-07-03). Slice **P12-API-PACKAGE-ACCESS-INVOCATION paused** — T01–T06 Done preserved; T07–T12 resume after P22 Done. Prior slice **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03).
 > **P21 remains Done** — do not reopen P21 phase status; **P19 remains Done**
 > — corrective residual only (P19-T08/T10 group UX superseded). AUD-M02 **resolved** via **P12-AUD-M02 Done**
 > (cross-reference P21 §11.4).
@@ -22,9 +22,9 @@ Each slice is activated individually via `plan-orchestrator`; only one slice sho
 | **P12-BDD-RISK-PROMPT-UX-001** | Template-scoped risk-prompt config UX redesign (BDD-TEMPLATE-RISK-PROMPT-UX-001) | **Done** (2026-06-29) | Supersedes P19-T08 group override + list-view panel + hardcoded decision categories; **COR-T15** mirror |
 | **P12-UIUX-DEEP-REFACTOR** | Frontend UIUX deep refactor — design token system, visual language upgrade, component unification, shell polish (14 tasks, groups A–E) | **Done** (2026-07-03) | OPT-G3 resolved (TemplateDetailView split); plan: `.cursor/plans/前端_uiux_整改方案_fc6fbf7b.plan.md`; BDD `not-applicable` (no API/permission/behavior change) |
 | **P12-TEMPLATE-TESTING-OVERHAUL** | 模板测试页全量改造 — SSE 进度流（单次预览 + 全量测试）、临时文件 24h TTL、批测结果持久化与失效、提交测试门禁 API、覆盖率面板增强、测试历史记录（13 tasks T01–T13） | **Done** (2026-07-03) | BDD spec: `docs/behavior/template-testing-overhaul.md` (ready); Flyway V41–V42; 6 功能域 F1–F6 |
-| **P12-API-PACKAGE-ACCESS-INVOCATION** | 包级 API 接入重构 + 调用记录 — auto-materialize policy、约定大于配置 Hub UI、invocation records + 留存（12 tasks T01–T12） | **In Progress** (activated 2026-07-03; BDD **ready**; **T01–T02 next**) | BDD: `docs/behavior/api-package-access-and-invocation-records.md`; plan: [P12-api-package-access-invocation-records.md](./P12-api-package-access-invocation-records.md) |
+| **P12-API-PACKAGE-ACCESS-INVOCATION** | 包级 API 接入重构 + 调用记录 — auto-materialize policy、约定大于配置 Hub UI、invocation records + 留存（12 tasks T01–T12） | **Paused** (2026-07-03 — P22 priority; T01–T06 **Done**; T07–T12 Not Started; resume after P22) | BDD: `docs/behavior/api-package-access-and-invocation-records.md`; plan: [P12-api-package-access-invocation-records.md](./P12-api-package-access-invocation-records.md) |
 
-**Active slice:** **P12-API-PACKAGE-ACCESS-INVOCATION In Progress** (2026-07-03; implementation begins **T01 → T02**; T10 doc-only **Done**). Prior: **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03; T01–T13 complete).
+**Active slice:** **None** (P22-DEMO-EXPANSION is the sole formal phase In Progress). **Paused:** **P12-API-PACKAGE-ACCESS-INVOCATION** (T01–T06 Done; T07–T12 resume post-P22).
 
 ### P12-UIUX-DEEP-REFACTOR — Frontend UIUX deep refactor
 

@@ -32,6 +32,7 @@ API behavior is defined by formal API contract artifacts and source-of-truth doc
 - [PRD](../product/PRD.md)
 - [Domain Model](../domain/domain-model.md)
 - [Permission Matrix](../security/permission-matrix.md)
+- [P22 Demo expansion behavior spec](../requirements/demo-expansion-behavior-spec.md) — rendering fidelity; **no caller-facing OpenAPI change**
 
 OpenAPI v1 is the formal API schema baseline. The contract outline is the formal companion explainer with rationale, confirmed constraints, cross-links, and explicit open notes; only entries explicitly marked as open notes are non-final.
 
