@@ -1,0 +1,93 @@
+OLD:
+    public byte[] assemble(InputStream masterDocx, Map<String, String> anchorContent) {
+        try (XWPFDocument document = new XWPFDocument(masterDocx); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            removeMasterLayoutFillerParagraphs(document);
+            replaceAnchorsInDocumentBody(document, anchorContent);
+            for (XWPFTable table : document.getTables()) {
+                for (XWPFTableRow row : table.getRows()) {
+                    for (XWPFTableCell cell : row.getTableCells()) {
+                        replaceInParagraphs(cell.getParagraphs(), anchorContent);
+                    }
+                }
+            }
+            document.getHeaderList().forEach(header -> replaceInParagraphs(header.getParagraphs(), anchorContent));
+            document.getFooterList().forEach(footer -> replaceInParagraphs(footer.getParagraphs(), anchorContent));
+            DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
+            document.write(output);
+            return output.toByteArray();
+        } catch (IOException ex) {
+            throw new DocxAssemblyException(ex);
+        }
+    }
+
+NEW:
+    public byte[] assemble(InputStream masterDocx, Map<String, String> anchorContent) {
+        try (XWPFDocument document = new XWPFDocument(masterDocx); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            removeMasterLayoutFillerParagraphs(document);
+            replaceAnchorsInDocumentBody(document, anchorContent);
+            for (XWPFTable table : document.getTables()) {
+                for (XWPFTableRow row : table.getRows()) {
+                    for (XWPFTableCell cell : row.getTableCells()) {
+                        replaceInParagraphs(cell.getParagraphs(), anchorContent);
+                    }
+                }
+            }
+            document.getHeaderList().forEach(header -> replaceInParagraphs(header.getParagraphs(), anchorContent));
+            document.getFooterList().forEach(footer -> replaceInParagraphs(footer.getParagraphs(), anchorContent));
+            DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
+            document.write(output);
+            return output.toByteArray();
+        } catch (IOException ex) {
+            throw new DocxAssemblyException(ex);
+        }
+    }
+
+    public byte[] assembleStructured(
+            InputStream masterDocx,
+            Map<String, String> bindingJsonByAnchor,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures
+    ) {
+        try (XWPFDocument document = new XWPFDocument(masterDocx); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            removeMasterLayoutFillerParagraphs(document);
+            replaceStructuredAnchorsInDocumentBody(
+                    document,
+                    bindingJsonByAnchor,
+                    variables,
+                    pinnedModuleStructures
+            );
+            Map<String, String> plainTextFallback = buildAnchorReplacements(
+                    bindingJsonByAnchor,
+                    variables,
+                    pinnedModuleStructures
+            );
+            for (XWPFTable table : document.getTables()) {
+                for (XWPFTableRow row : table.getRows()) {
+                    for (XWPFTableCell cell : row.getTableCells()) {
+                        replaceInParagraphs(cell.getParagraphs(), plainTextFallback);
+                    }
+                }
+            }
+            document.getHeaderList().forEach(header -> replaceInParagraphs(header.getParagraphs(), plainTextFallback));
+            document.getFooterList().forEach(footer -> replaceInParagraphs(footer.getParagraphs(), plainTextFallback));
+            DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
+            document.write(output);
+            return output.toByteArray();
+        } catch (IOException ex) {
+            throw new DocxAssemblyException(ex);
+        }
+    }
+
+    public byte[] assembleStructuredFromBytes(
+            byte[] masterBytes,
+            Map<String, String> bindingJsonByAnchor,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures
+    ) {
+        return assembleStructured(
+                new ByteArrayInputStream(masterBytes),
+                bindingJsonByAnchor,
+                variables,
+                pinnedModuleStructures
+        );
+    }

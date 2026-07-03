@@ -1,0 +1,31 @@
+OLD:
+    private record AnchorReplacement(int paragraphIndex, String anchorId, String structuredJson) {
+    }
+        List<IBodyElement> bodyElements = document.getBodyElements();
+        for (int index = bodyElements.size() - 1; index >= 0; index--) {
+            IBodyElement element = bodyElements.get(index);
+            if (element instanceof XWPFParagraph paragraph) {
+                String text = paragraph.getText();
+                if (text != null && text.contains(MASTER_FILLER_MARKER)) {
+                    document.removeBodyElement(index);
+                }
+            }
+        }
+    }
+
+NEW:
+    private record AnchorReplacement(int paragraphIndex, String anchorId, String structuredJson) {
+    }
+
+    private void removeMasterLayoutFillerParagraphs(XWPFDocument document) {
+        List<IBodyElement> bodyElements = document.getBodyElements();
+        for (int index = bodyElements.size() - 1; index >= 0; index--) {
+            IBodyElement element = bodyElements.get(index);
+            if (element instanceof XWPFParagraph paragraph) {
+                String text = paragraph.getText();
+                if (text != null && text.contains(MASTER_FILLER_MARKER)) {
+                    document.removeBodyElement(index);
+                }
+            }
+        }
+    }

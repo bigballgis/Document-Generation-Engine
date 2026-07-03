@@ -1,0 +1,101 @@
+OLD:
+package com.bank.docgen.rendering;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.poi.xwpf.usermodel.IBodyElement;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.apache.xmlbeans.XmlCursor;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DocxAssembler {
+
+    private static final Pattern ANCHOR_PATTERN = Pattern.compile("\\{\\{anchor:([A-Za-z0-9_.-]+)}}");
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([A-Za-z0-9_.-]+)}}");
+    private static final Pattern SIMPLE_CONDITION_PATTERN = Pattern.compile(
+            "\\$\\{([A-Za-z0-9_.-]+)}\\s*==\\s*(true|false)",
+            Pattern.CASE_INSENSITIVE
+    );
+    private static final String MASTER_FILLER_MARKER =
+            "Section-level anchor in the master layout container";
+
+    private final ObjectMapper objectMapper;
+
+    public DocxAssembler(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+NEW:
+package com.bank.docgen.rendering;
+
+import com.bank.docgen.authoring.structured.MasterStyleCatalog;
+import com.bank.docgen.authoring.structured.MasterStyleCatalogEntry;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.poi.xwpf.usermodel.IBodyElement;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.apache.xmlbeans.XmlCursor;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
+
+@Component
+public class DocxAssembler {
+
+    private static final Pattern ANCHOR_PATTERN = Pattern.compile("\\{\\{anchor:([A-Za-z0-9_.-]+)}}");
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([A-Za-z0-9_.-]+)}}");
+    private static final Pattern SIMPLE_CONDITION_PATTERN = Pattern.compile(
+            "\\$\\{([A-Za-z0-9_.-]+)}\\s*==\\s*(true|false)",
+            Pattern.CASE_INSENSITIVE
+    );
+    private static final String MASTER_FILLER_MARKER =
+            "Section-level anchor in the master layout container";
+    private static final String DEFAULT_STYLE_CATALOG_RESOURCE = "authoring/default-master-style-catalog-v1.json";
+
+    private final ObjectMapper objectMapper;
+    private final MasterStyleCatalog styleCatalog;
+    private final StructuredContentDocxWriter structuredContentDocxWriter;
+
+    public DocxAssembler(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        this.styleCatalog = loadDefaultStyleCatalog(objectMapper);
+        this.structuredContentDocxWriter = new StructuredContentDocxWriter(
+                objectMapper,
+                styleCatalog,
+                new StructuredContentImageResolver()
+        );
+    }
