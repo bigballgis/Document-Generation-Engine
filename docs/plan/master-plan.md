@@ -1,14 +1,14 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **P22** (2026-07-03 — **P22-DEMO-EXPANSION In Progress**; BDD ready; **P22-T01 next**). **Prior:** **P12-API-PACKAGE-ACCESS-INVOCATION paused** (T01–T06 Done; T07–T12 resume after P22). **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
+**Active formal phase:** **P22** (2026-07-03 — **P22-DEMO-EXPANSION In Progress**; BDD ready; **P22-T01 next**). **Prior:** **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12; Playwright **10/10** + UIUX **PASS**; `2e61dc3`). **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
 UX-A…UX-F interaction/upgradeability tasks (same plan) run as optimization waves
 against the existing implementation. **UX Wave A** (role gating + half-built interactions)
 re-earned Done on 2026-06-23; **UX Wave B** (workbenches + polish) Done (2026-06-23).
-**P22 In Progress** (2026-07-03) — **P22-DEMO-EXPANSION** (BDD ready; rendering fidelity + dual page numbers + eight bank letter demos; **P22-T01 next**). **P12 catch-all → Not Started** (slice **P12-API-PACKAGE-ACCESS-INVOCATION** paused — T01–T06 Done; resumes after P22).
+**P22 In Progress** (2026-07-03) — **P22-DEMO-EXPANSION** (BDD ready; rendering fidelity + dual page numbers + eight bank letter demos; **P22-T01 next**). **P12 catch-all → Not Started** (slice **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03).
 **P16–P20 (deep-review functional gaps, 2026-06-23):** P16 lifecycle governance **Done**;
 P17 per-domain API policy **Done** (2026-06-25; Wave 3; T01–T09 + COR-F18);
 P18 structured authoring **Done** (2026-06-28; T01–T10); **P19 verifiability/publish-gate Done**
@@ -46,7 +46,7 @@ upstream systems invoke the dynamic API.
 | P9 | Production readiness | P0–P8 | Security scans, observability, deployment evidence, release gates | Done |
 | P10 | Runtime document download | P9 | Secure download with secondary auth and 15-minute expiry | Done |
 | P11 | Batch & async generation | P10 | Sync batch, async task query/cancel | Done |
-| P12 | Deferred enhancements | P0–P11 | Catch-all; slice **P12-API-PACKAGE-ACCESS-INVOCATION paused** (T01–T06 Done; T07–T12 after P22); prior **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03) | Not Started |
+| P12 | Deferred enhancements | P0–P11 | Catch-all; slice **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12; Playwright **10/10**); prior **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03) | Not Started |
 | P13 | Identity & group administration | P1 | Global/group admins manage users & groups via management API + UI, with fail-closed escalation protection, audit, and green gates | Done |
 | P14 | Confirmed large domains | P2–P8 | Clause/content modules, collaboration to-dos + timeout escalation, template export/import (UX-G) | Done (2026-06-27; T01–T03 + E2E/UIUX/architecture gates; backend **481**, frontend **235+**) |
 | P15 | Kubernetes deployment & container hardening | P9 | Distroless non-root read-only containers, Helm/manifests for app workloads, ConfigMap/Secret, NGINX Ingress + cert-manager TLS, default-deny NetworkPolicy, HPA (CPU/mem + custom), /healthz+/readyz probes, blue-green + manual approval/rollback, CI manifest validation (ADR-0030) | Done (2026-06-27; T01–T10) |
@@ -60,7 +60,7 @@ upstream systems invoke the dynamic API.
 
 > **P22 vs P12:** **P22** is the sole formal phase **In Progress** (2026-07-03). Closes P18/P4
 > rendering fidelity gap per [demo-expansion-behavior-spec.md](../requirements/demo-expansion-behavior-spec.md).
-> **P12-API-PACKAGE-ACCESS-INVOCATION paused** (T01–T06 Done; T07–T12 resume after P22). Do not reopen
+> **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12; commit `2e61dc3`). Do not reopen
 > P18/P21 phase status. Detail:
 > [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md),
 > [detail/P12-api-package-access-invocation-records.md](./detail/P12-api-package-access-invocation-records.md),

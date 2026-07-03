@@ -1,8 +1,8 @@
 # P12 — API Package Access & Invocation Records (Detailed Plan)
 
 **Slice ID:** `P12-API-PACKAGE-ACCESS-INVOCATION`  
-**Slice status:** **Paused** (2026-07-03 — **P22-DEMO-EXPANSION** user priority) | **Depends on:** P6, P7, P17, P21, template package hub (P3-T06)  
-**Active phase note:** **P22** is the sole formal phase `In Progress`. Backend **T01–T06 Done** (2026-07-03); **frontend T07–T09** + E2E **T11–T12** resume after P22.
+**Slice status:** **Done** (2026-07-03 — T01–T12 complete; Playwright **10/10** + UIUX manifest **PASS**; commit `2e61dc3`) | **Depends on:** P6, P7, P17, P21, template package hub (P3-T06)  
+**Active phase note:** **P22** is the sole formal phase `In Progress`. **P12-API-PACKAGE-ACCESS-INVOCATION closed Done** (2026-07-03).
 
 > **BDD:** [api-package-access-and-invocation-records.md](../../behavior/api-package-access-and-invocation-records.md) (`BDD-API-PACKAGE-ACCESS-INVOCATION-001`, status **ready**)
 
