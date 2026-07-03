@@ -1,9 +1,11 @@
 package com.bank.docgen.template.service;
 
+import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
@@ -27,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +52,7 @@ public class TemplateLifecycleService {
     private final CollaborationWorkItemWriter collaborationWorkItemWriter;
     private final RenderProfileService renderProfileService;
     private final ApprovalSubStateResolver approvalSubStateResolver;
+    private final ApiPolicyRepository apiPolicyRepository;
 
     public TemplateLifecycleService(
             TemplateService templateService,
@@ -63,7 +67,8 @@ public class TemplateLifecycleService {
             TemplateContentModuleReferenceService contentModuleReferenceService,
             CollaborationWorkItemWriter collaborationWorkItemWriter,
             RenderProfileService renderProfileService,
-            ApprovalSubStateResolver approvalSubStateResolver
+            ApprovalSubStateResolver approvalSubStateResolver,
+            ApiPolicyRepository apiPolicyRepository
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -78,6 +83,7 @@ public class TemplateLifecycleService {
         this.collaborationWorkItemWriter = collaborationWorkItemWriter;
         this.renderProfileService = renderProfileService;
         this.approvalSubStateResolver = approvalSubStateResolver;
+        this.apiPolicyRepository = apiPolicyRepository;
     }
 
     @Transactional
@@ -224,6 +230,15 @@ public class TemplateLifecycleService {
         if (version.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED) {
             throw new TemplateValidationException("api.error.template.invalidState");
         }
+        apiPolicyRepository.findByTemplateId(templateId).ifPresent(policy -> {
+            if (releaseVersion.equals(policy.getDefaultRouteReleaseVersion())) {
+                throw new TemplateGovernanceException(
+                        ApiErrorCodes.TEMPLATE_DEFAULT_ROUTE_TARGET,
+                        "api.error.template.defaultRouteTargetCannotDeactivate",
+                        HttpStatus.CONFLICT
+                );
+            }
+        });
         version.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
         templateVersionRepository.save(version);
         recordLifecycle(

@@ -101,7 +101,7 @@ describe('ContentModuleListView', () => {
     expect(wrapper.text()).toContain('Retry')
   })
 
-  it('filters rows when a column filter is applied', async () => {
+  it('filters rows when a toolbar group filter is applied', async () => {
     vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([
       {
         moduleId: 'MOD-LOAN-DISCLOSURE',
@@ -134,7 +134,7 @@ describe('ContentModuleListView', () => {
     expect(wrapper.text()).toContain('Loan disclosure')
     expect(wrapper.text()).toContain('Fee schedule')
 
-    const groupFilter = wrapper.find('.table-column-header__control input')
+    const groupFilter = wrapper.find('.catalog-filter-toolbar__control input')
     await groupFilter.setValue('RETAIL')
     await flushPromises()
 

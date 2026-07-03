@@ -406,6 +406,60 @@ class TemplateVersionLineControllerTest {
 
     @Test
 
+    void abandonInFlightDev_softDeletesDevLine_resetsTemplateToPublished_allowsClone() throws Exception {
+
+        String masterId = uploadAndApproveMaster();
+
+        String templateId = createTemplate(masterId);
+
+        configureTemplate(templateId);
+
+        runLifecycle(templateId);
+
+        String clonedDevVersionId = cloneRelease(templateId, "1.0.0");
+
+
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/dev/" + clonedDevVersionId + "/abandon")
+
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+
+                .andExpect(status().isOk())
+
+                .andExpect(jsonPath("$.result.lifecycleStatus").value("PUBLISHED"));
+
+
+
+        mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/version-lines")
+
+                        .param("page", "0")
+
+                        .param("size", "20")
+
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+
+                .andExpect(status().isOk())
+
+                .andExpect(jsonPath("$.result.totalElements").value(1))
+
+                .andExpect(jsonPath("$.result.content[0].releaseVersion").value("1.0.0"))
+
+                .andExpect(jsonPath("$.result.content[0].lineKind").value("PUBLISHED"));
+
+
+
+        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/release-versions/1.0.0/clone")
+
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+
+                .andExpect(status().isCreated());
+
+    }
+
+
+
+    @Test
+
     void cloneBlockedWhileInFlightDevExists() throws Exception {
 
         String masterId = uploadAndApproveMaster();

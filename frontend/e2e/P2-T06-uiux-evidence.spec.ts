@@ -28,7 +28,7 @@ const hasReplacementFixture = fs.existsSync(REPLACEMENT_DOCX_PATH)
 async function openMasterHub(page: import('@playwright/test').Page, hubPath: string) {
   await page.goto(hubPath)
   await expect(page.locator('.master-package-hub-page')).toBeVisible()
-  await expect(page.getByText(/unable to load master documents|无法加载主文档/i)).not.toBeVisible()
+  await expect(page.getByText(/unable to load letterheads|无法加载母版/i)).not.toBeVisible()
   await expect(page.getByRole('heading', { level: 1, name: DEMO_MASTER_NAME })).toBeVisible()
   await expect(page.locator('.revision-lines-card')).toBeVisible()
   await expect(page.locator('.el-skeleton')).toHaveCount(0)

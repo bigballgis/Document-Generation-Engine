@@ -37,7 +37,7 @@ test.describe('master DOCX replacement (demo retail letterhead)', () => {
     await loginAs(page, E2E_GROUP_ADMIN)
     await page.goto('/masters')
 
-    await expect(page.getByText(/unable to load master documents/i)).not.toBeVisible()
+    await expect(page.getByText(/unable to load letterheads/i)).not.toBeVisible()
     await expect(page.getByRole('heading', { name: /^masters$/i })).toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0)
     await expect(page.getByText(DEMO_MASTER_NAME)).toBeVisible()

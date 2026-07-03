@@ -6,8 +6,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
+import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleGovernanceRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
@@ -61,6 +64,8 @@ class TemplateLifecycleGovernanceServiceTest {
     private com.bank.docgen.authoring.structured.RenderProfileService renderProfileService;
     @Mock
     private ApprovalSubStateResolver approvalSubStateResolver;
+    @Mock
+    private ApiPolicyRepository apiPolicyRepository;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -83,7 +88,8 @@ class TemplateLifecycleGovernanceServiceTest {
                 contentModuleReferenceService,
                 collaborationWorkItemWriter,
                 renderProfileService,
-                approvalSubStateResolver
+                approvalSubStateResolver,
+                apiPolicyRepository
         );
         groupAdmin = session(List.of("GROUP_ADMIN"), List.of("RETAIL"));
         templateId = UUID.randomUUID();
@@ -211,6 +217,30 @@ class TemplateLifecycleGovernanceServiceTest {
                 ArgumentCaptor.forClass(TemplateLifecycleRecordEntity.class);
         verify(lifecycleRecordRepository).save(recordCaptor.capture());
         assertThat(recordCaptor.getValue().getAction()).isEqualTo(LifecycleAction.RESTORE_VERSION);
+    }
+
+    @Test
+    void deactivateVersion_whenDefaultRouteTarget_throwsConflict() {
+        when(groupAccessService.canManageReleaseVersionState(groupAdmin)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "1.0.0"))
+                .thenReturn(Optional.of(version));
+        ApiPolicyEntity policy = new ApiPolicyEntity(UUID.randomUUID(), templateId, "[\"RETAIL_API\"]", "10000001");
+        policy.updateDefaultRouteDomain("1.0.0", "10000001");
+        when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(policy));
+
+        assertThatThrownBy(() -> service.deactivateVersion(
+                templateId,
+                "1.0.0",
+                new LifecycleGovernanceRequest("Deactivate default route target", true),
+                groupAdmin
+        ))
+                .isInstanceOf(TemplateGovernanceException.class)
+                .satisfies(ex -> {
+                    TemplateGovernanceException governance = (TemplateGovernanceException) ex;
+                    assertThat(governance.errorCode()).isEqualTo(ApiErrorCodes.TEMPLATE_DEFAULT_ROUTE_TARGET);
+                    assertThat(governance.messageKey()).isEqualTo("api.error.template.defaultRouteTargetCannotDeactivate");
+                });
     }
 
     @Test

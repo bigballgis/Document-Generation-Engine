@@ -1,6 +1,7 @@
 import { mount, flushPromises } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
-import ElementPlus from 'element-plus'
+import ElementPlus, { ElMessageBox } from 'element-plus'
+import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplateVersionLinesPanel from '@/components/templates/TemplateVersionLinesPanel.vue'
 import en from '@/i18n/locales/en'
@@ -9,6 +10,7 @@ import * as templatesApi from '@/api/templates'
 vi.mock('@/api/templates', () => ({
   listTemplateVersionLines: vi.fn(),
   cloneReleaseVersion: vi.fn(),
+  abandonDevVersion: vi.fn(),
 }))
 
 const routerPush = vi.fn()
@@ -40,7 +42,10 @@ const publishedLine = {
   defaultRouteTarget: true,
 }
 
-function mountPanel(canAuthor = true) {
+function mountPanel(options: { canClone?: boolean; canManageVersions?: boolean } = {}) {
+  const { canClone = true, canManageVersions = false } = options
+  const pinia = createPinia()
+  setActivePinia(pinia)
   const i18n = createI18n({
     legacy: false,
     locale: 'en',
@@ -48,9 +53,9 @@ function mountPanel(canAuthor = true) {
   })
 
   return mount(TemplateVersionLinesPanel, {
-    props: { templateId: 'tpl-1', canClone: canAuthor },
+    props: { templateId: 'tpl-1', canClone, canManageVersions },
     global: {
-      plugins: [i18n, ElementPlus],
+      plugins: [pinia, i18n, ElementPlus],
     },
   })
 }
@@ -60,6 +65,9 @@ describe('TemplateVersionLinesPanel', () => {
     routerPush.mockReset()
     vi.mocked(templatesApi.listTemplateVersionLines).mockReset()
     vi.mocked(templatesApi.cloneReleaseVersion).mockReset()
+    vi.mocked(templatesApi.abandonDevVersion).mockReset()
+    vi.spyOn(ElMessageBox, 'confirm').mockResolvedValue(undefined as never)
+    vi.spyOn(ElMessageBox, 'prompt').mockResolvedValue({ value: 'test reason' } as never)
   })
 
   it('navigates to dev editor on in-flight row click', async () => {
@@ -129,7 +137,7 @@ describe('TemplateVersionLinesPanel', () => {
       lifecycleStatus: 'DRAFT',
     })
 
-    const wrapper = mountPanel(true)
+    const wrapper = mountPanel({ canClone: true })
     await flushPromises()
 
     const cloneButton = wrapper.find('[data-version-line-clone]')
@@ -151,7 +159,7 @@ describe('TemplateVersionLinesPanel', () => {
       totalPages: 1,
     })
 
-    const wrapper = mountPanel(true)
+    const wrapper = mountPanel({ canClone: true })
     await flushPromises()
 
     expect(wrapper.find('[data-version-line-clone]').exists()).toBe(false)
@@ -170,5 +178,135 @@ describe('TemplateVersionLinesPanel', () => {
     await flushPromises()
 
     expect(wrapper.find('.list-pagination').exists()).toBe(true)
+  })
+
+  it('shows abandon action on in-flight rows when author-capable', async () => {
+    vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
+      content: [inFlightLine],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+    vi.mocked(templatesApi.abandonDevVersion).mockResolvedValue(undefined)
+
+    const wrapper = mountPanel({ canClone: true })
+    await flushPromises()
+
+    const abandonButton = wrapper.find('[data-version-line-abandon]')
+    expect(abandonButton.exists()).toBe(true)
+
+    await abandonButton.trigger('click')
+    await flushPromises()
+
+    expect(ElMessageBox.confirm).toHaveBeenCalled()
+    expect(templatesApi.abandonDevVersion).toHaveBeenCalledWith('tpl-1', 'dev-2')
+  })
+
+  it('hides abandon action when not author-capable', async () => {
+    vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
+      content: [inFlightLine],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const wrapper = mountPanel({ canClone: false })
+    await flushPromises()
+
+    expect(wrapper.find('[data-version-line-abandon]').exists()).toBe(false)
+  })
+
+  it('hides clone on published rows when an in-flight line exists', async () => {
+    vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
+      content: [inFlightLine, { ...publishedLine, cloneable: true }],
+      page: 0,
+      size: 20,
+      totalElements: 2,
+      totalPages: 1,
+    })
+
+    const wrapper = mountPanel({ canClone: true })
+    await flushPromises()
+
+    expect(wrapper.find('[data-version-line-clone]').exists()).toBe(false)
+  })
+
+  it('shows deactivate on published rows when version management is allowed', async () => {
+    vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
+      content: [{ ...publishedLine, lifecycleStatus: 'PUBLISHED' as const }],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const wrapper = mountPanel({ canManageVersions: true })
+    await flushPromises()
+
+    expect(wrapper.find('[data-version-line-deactivate]').exists()).toBe(true)
+  })
+
+  it('disables deactivate when row is the default route target', async () => {
+    vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
+      content: [{ ...publishedLine, lifecycleStatus: 'PUBLISHED' as const, defaultRouteTarget: true }],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const wrapper = mountPanel({ canManageVersions: true })
+    await flushPromises()
+
+    const deactivateButton = wrapper.find('[data-version-line-deactivate]')
+    expect(deactivateButton.exists()).toBe(true)
+    expect(deactivateButton.attributes('disabled')).toBeDefined()
+  })
+
+  it('shows restore on stopped published rows when version management is allowed', async () => {
+    vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
+      content: [{ ...publishedLine, lifecycleStatus: 'STOPPED' as const, defaultRouteTarget: false }],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const wrapper = mountPanel({ canManageVersions: true })
+    await flushPromises()
+
+    expect(wrapper.find('[data-version-line-restore]').exists()).toBe(true)
+  })
+
+  it('shows create-from-latest-release button when no in-flight line exists', async () => {
+    vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
+      content: [{ ...publishedLine, cloneable: true }],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const wrapper = mountPanel({ canClone: true })
+    await flushPromises()
+
+    expect(wrapper.find('[data-version-line-create-from-latest]').exists()).toBe(true)
+  })
+
+  it('hides create-from-latest-release button when an in-flight line exists', async () => {
+    vi.mocked(templatesApi.listTemplateVersionLines).mockResolvedValue({
+      content: [inFlightLine, publishedLine],
+      page: 0,
+      size: 20,
+      totalElements: 2,
+      totalPages: 1,
+    })
+
+    const wrapper = mountPanel({ canClone: true })
+    await flushPromises()
+
+    expect(wrapper.find('[data-version-line-create-from-latest]').exists()).toBe(false)
   })
 })

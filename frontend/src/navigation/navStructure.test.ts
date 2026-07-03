@@ -78,8 +78,15 @@ const masterDesignerCapabilities: ManagementCapabilities = {
   manageMasters: true,
 }
 
-function behaviorIds(groups: ReturnType<typeof buildVisibleNavGroups>): string[] {
-  return groups.find((group) => group.id === 'myTodos')?.items.map((item) => item.id) ?? []
+function behaviorItemIds(
+  roles: string[],
+  capabilities: ManagementCapabilities,
+  visibleRoutes: string[] = [dashboardRoute, ROUTE_KEYS.templateManagement],
+): string[] {
+  return buildVisibleBehaviorNavItems(
+    { roles, capabilities },
+    visibleRoutes,
+  ).map((item) => item.id)
 }
 
 describe('navStructure', () => {
@@ -106,49 +113,37 @@ describe('navStructure', () => {
 
   describe('behavior nav visibility (Spec C)', () => {
     it('shows only testing entry for TEMPLATE_TESTER with decideTests', () => {
-      const groups = buildVisibleNavGroups(
-        [dashboardRoute, ROUTE_KEYS.templateManagement],
-        ['TEMPLATE_TESTER'],
-        testerCapabilities,
-      )
-
-      expect(behaviorIds(groups)).toEqual(['behavior-testing'])
+      expect(
+        behaviorItemIds(['TEMPLATE_TESTER'], testerCapabilities),
+      ).toEqual(['behavior-testing'])
     })
 
     it('shows only approval entry for TEMPLATE_APPROVER with decideApprovals', () => {
-      const groups = buildVisibleNavGroups(
-        [dashboardRoute, ROUTE_KEYS.templateManagement],
-        ['TEMPLATE_APPROVER'],
-        approverCapabilities,
-      )
-
-      expect(behaviorIds(groups)).toEqual(['behavior-approval'])
+      expect(
+        behaviorItemIds(['TEMPLATE_APPROVER'], approverCapabilities),
+      ).toEqual(['behavior-approval'])
     })
 
     it('shows only remediation entry for TEMPLATE_AUTHOR with authorTemplates', () => {
-      const groups = buildVisibleNavGroups(
-        [dashboardRoute, ROUTE_KEYS.templateManagement],
-        ['TEMPLATE_AUTHOR'],
-        authorCapabilities,
-      )
-
-      expect(behaviorIds(groups)).toEqual(['behavior-remediation'])
+      expect(
+        behaviorItemIds(['TEMPLATE_AUTHOR'], authorCapabilities),
+      ).toEqual(['behavior-remediation'])
     })
 
     it('shows all six behavior entries for GROUP_ADMIN', () => {
-      const groups = buildVisibleNavGroups(
-        [
-          dashboardRoute,
-          ROUTE_KEYS.masterManagement,
-          ROUTE_KEYS.templateManagement,
-          ROUTE_KEYS.apiPolicyManagement,
-          ROUTE_KEYS.identityAdministration,
-        ],
-        ['GROUP_ADMIN'],
-        globalAdminCapabilities,
-      )
-
-      expect(behaviorIds(groups)).toEqual([
+      expect(
+        behaviorItemIds(
+          ['GROUP_ADMIN'],
+          globalAdminCapabilities,
+          [
+            dashboardRoute,
+            ROUTE_KEYS.masterManagement,
+            ROUTE_KEYS.templateManagement,
+            ROUTE_KEYS.apiPolicyManagement,
+            ROUTE_KEYS.identityAdministration,
+          ],
+        ),
+      ).toEqual([
         'behavior-testing',
         'behavior-approval',
         'behavior-remediation',
@@ -159,23 +154,22 @@ describe('navStructure', () => {
     })
 
     it('shows only master-review for MASTER_DESIGNER with master-management route', () => {
-      const groups = buildVisibleNavGroups(
-        [dashboardRoute, ROUTE_KEYS.masterManagement, ROUTE_KEYS.templateManagement],
-        ['MASTER_DESIGNER'],
-        masterDesignerCapabilities,
-      )
-
-      expect(behaviorIds(groups)).toEqual(['behavior-master-review'])
+      expect(
+        behaviorItemIds(
+          ['MASTER_DESIGNER'],
+          masterDesignerCapabilities,
+          [dashboardRoute, ROUTE_KEYS.masterManagement, ROUTE_KEYS.templateManagement],
+        ),
+      ).toEqual(['behavior-master-review'])
     })
 
-    it('omits myTodos group entirely for AUDIT_ADMIN without dashboard-home', () => {
-      const groups = buildVisibleNavGroups(
-        [ROUTE_KEYS.auditConsole],
-        ['AUDIT_ADMIN'],
-        { ...globalAdminCapabilities, readAudit: true, decideTests: false },
-      )
-
-      expect(groups.some((group) => group.id === 'myTodos')).toBe(false)
+    it('returns no behavior items for AUDIT_ADMIN without dashboard-home', () => {
+      expect(
+        buildVisibleBehaviorNavItems(
+          { roles: ['AUDIT_ADMIN'], capabilities: { ...globalAdminCapabilities, readAudit: true, decideTests: false } },
+          [ROUTE_KEYS.auditConsole],
+        ),
+      ).toEqual([])
     })
 
     it('hides behavior entries when dashboard-home is missing (fail-closed)', () => {
@@ -188,18 +182,14 @@ describe('navStructure', () => {
     })
 
     it('hides entry when capability is explicitly false even if role would grant', () => {
-      const groups = buildVisibleNavGroups(
-        [dashboardRoute, ROUTE_KEYS.templateManagement],
-        ['TEMPLATE_TESTER'],
-        { ...testerCapabilities, decideTests: false },
-      )
-
-      expect(groups.some((group) => group.id === 'myTodos')).toBe(false)
+      expect(
+        behaviorItemIds(['TEMPLATE_TESTER'], { ...testerCapabilities, decideTests: false }),
+      ).toEqual([])
     })
   })
 
-  describe('behavior group placement', () => {
-    it('inserts myTodos after overview and before entitlement', () => {
+  describe('sidebar nav groups', () => {
+    it('does not inject myTodos group into visible nav groups', () => {
       const groups = buildVisibleNavGroups(
         [
           dashboardRoute,
@@ -212,7 +202,6 @@ describe('navStructure', () => {
 
       expect(groups.map((group) => group.id)).toEqual([
         'overview',
-        'myTodos',
         'entitlement',
         'documentContent',
       ])

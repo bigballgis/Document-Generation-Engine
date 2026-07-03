@@ -14,7 +14,7 @@ test.describe('document catalogs (demo seed)', () => {
   test('master catalog loads without error and shows demo master', async ({ page }) => {
     await page.goto('/masters')
 
-    await expect(page.getByText(/unable to load master documents/i)).not.toBeVisible()
+    await expect(page.getByText(/unable to load letterheads/i)).not.toBeVisible()
     await expect(page.getByRole('heading', { name: /^masters$/i })).toBeVisible()
     await expect(page.getByText(DEMO_MASTER_NAME)).toBeVisible()
     await expect(page.locator('.el-table').getByText(DEMO_GROUP_CODE, { exact: true })).toBeVisible()

@@ -90,10 +90,25 @@ function mountDashboard(extraStubs: Record<string, unknown> = {}) {
         ElSkeleton: true,
         ElEmpty: true,
         ElButton: true,
+        ElTabs: { template: '<div class="dashboard-tabs-stub"><slot /></div>' },
+        ElTabPane: true,
         ...extraStubs,
       },
     },
   })
+}
+
+function mountDashboardWorkflowTab(extraStubs: Record<string, unknown> = {}) {
+  routeRef.value.query = { tab: 'workflow' }
+  return mountDashboard(extraStubs)
+}
+
+function mountDashboardQueueTab(
+  queue: string,
+  extraStubs: Record<string, unknown> = {},
+) {
+  routeRef.value.query = { queue }
+  return mountDashboard(extraStubs)
 }
 
 describe('DashboardView', () => {
@@ -135,7 +150,7 @@ describe('DashboardView', () => {
 
     expect(wrapper.find('.load-error-stub').exists()).toBe(true)
     expect(wrapper.findComponent({ name: 'DashboardStatCards' }).exists()).toBe(false)
-    expect(wrapper.find('#tasks-section').exists()).toBe(true)
+    expect(wrapper.find('#tasks-section').exists()).toBe(false)
   })
 
   it('retries loading after error panel retry', async () => {
@@ -227,7 +242,7 @@ describe('DashboardView', () => {
     await flushPromises()
 
     expect(fetchSpy).toHaveBeenCalledWith({ queue: 'TEST' })
-    expect(wrapper.find('h1').text()).toBe('collaboration.workItem.queue.TEST.title')
+    expect(wrapper.find('h1').text()).toBe('dashboard.title')
     expect(wrapper.find('.partition-stub').text()).toBe('queue-TEST')
   })
 
@@ -268,10 +283,10 @@ describe('DashboardView', () => {
     await flushPromises()
 
     expect(fetchSpy).not.toHaveBeenCalled()
-    expect(wrapper.find('h1').text()).toBe('nav.behaviorItems.masterReview')
+    expect(wrapper.find('h1').text()).toBe('dashboard.title')
   })
 
-  it('shows collaboration load error inside tasks section while stats remain visible', async () => {
+  it('shows collaboration load error inside tasks section on queue tab', async () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       displayName: 'Tester',
@@ -293,35 +308,22 @@ describe('DashboardView', () => {
       throw new Error('network')
     })
 
-    const wrapper = mount(DashboardView, {
-      global: {
-        stubs: {
-          DashboardStatCards: {
-            template: '<div class="stats-stub" />',
-          },
-          LoadErrorPanel: {
-            props: ['messageKey'],
-            template: '<div class="load-error-stub">{{ messageKey }}</div>',
-          },
-          TaskHubPartitionSection: true,
-          CollaborationTimeoutConfigPanel: true,
-          ElCard: { template: '<div><slot /></div>' },
-          ElSkeleton: true,
-          ElEmpty: true,
-          ElButton: true,
-        },
+    const wrapper = mountDashboardQueueTab('TEST', {
+      LoadErrorPanel: {
+        props: ['messageKey'],
+        template: '<div class="load-error-stub">{{ messageKey }}</div>',
       },
+      TaskHubPartitionSection: true,
     })
 
     await flushPromises()
 
-    expect(wrapper.find('.stats-stub').exists()).toBe(true)
     expect(wrapper.find('#tasks-section .load-error-stub').text()).toBe(
       'collaboration.workItems.error.load',
     )
   })
 
-  it('shows journey section above tasks for TEMPLATE_AUTHOR with six-step stepper', async () => {
+  it('shows journey on workflow tab for TEMPLATE_AUTHOR with six-step stepper', async () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       displayName: 'Author',
@@ -344,7 +346,7 @@ describe('DashboardView', () => {
       templatesStore.templates = []
     })
 
-    const wrapper = mountDashboard({
+    const wrapper = mountDashboardWorkflowTab({
       TaskHubPartitionSection: {
         props: ['partition'],
         template: '<div class="partition-stub">{{ partition.id }}</div>',
@@ -352,14 +354,8 @@ describe('DashboardView', () => {
     })
     await flushPromises()
 
-    const journeySection = wrapper.find('#journey-section')
-    const tasksSection = wrapper.find('#tasks-section')
-    expect(journeySection.exists()).toBe(true)
-    expect(tasksSection.exists()).toBe(true)
-    expect(
-      journeySection.element.compareDocumentPosition(tasksSection.element) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy()
+    expect(wrapper.find('#journey-section').exists()).toBe(true)
+    expect(wrapper.find('#tasks-section').exists()).toBe(false)
 
     const stub = wrapper.find('.journey-timeline-stub')
     expect(Number(stub.attributes('data-step-count'))).toBe(templateAuthorJourneySteps.length)
@@ -405,7 +401,7 @@ describe('DashboardView', () => {
       ] as never
     })
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('3')
@@ -447,7 +443,7 @@ describe('DashboardView', () => {
       ]
     })
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     const stub = wrapper.find('.journey-timeline-stub')
@@ -493,7 +489,7 @@ describe('DashboardView', () => {
       ]
     })
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     const stub = wrapper.find('.journey-timeline-stub')
@@ -517,7 +513,7 @@ describe('DashboardView', () => {
     const templatesStore = useTemplatesStore()
     vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('#journey-section').exists()).toBe(true)
@@ -546,7 +542,7 @@ describe('DashboardView', () => {
     })
     vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('0')
@@ -580,7 +576,7 @@ describe('DashboardView', () => {
     })
     vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('2')
@@ -628,7 +624,7 @@ describe('DashboardView', () => {
     )
     vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('3')
@@ -662,7 +658,7 @@ describe('DashboardView', () => {
     })
     vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBeUndefined()
@@ -687,7 +683,7 @@ describe('DashboardView', () => {
     const templatesStore = useTemplatesStore()
     vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(Number(wrapper.find('.journey-timeline-stub').attributes('data-step-count'))).toBe(
@@ -742,7 +738,7 @@ describe('DashboardView', () => {
       },
     ]
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('0')
@@ -779,7 +775,7 @@ describe('DashboardView', () => {
       ] as never
     })
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('1')
@@ -805,7 +801,7 @@ describe('DashboardView', () => {
     const templatesStore = useTemplatesStore()
     vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('#journey-section').exists()).toBe(true)
@@ -853,13 +849,13 @@ describe('DashboardView', () => {
       },
     ]
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('0')
   })
 
-  it('still shows journey section on filtered queue deep links', async () => {
+  it('hides journey section on filtered queue deep links', async () => {
     routeRef.value.query = { queue: 'TEST' }
     routeRef.value.hash = '#tasks-section'
 
@@ -884,8 +880,9 @@ describe('DashboardView', () => {
     const wrapper = mountDashboard()
     await flushPromises()
 
-    expect(wrapper.find('#journey-section').exists()).toBe(true)
-    expect(wrapper.find('h1').text()).toBe('collaboration.workItem.queue.TEST.title')
+    expect(wrapper.find('#journey-section').exists()).toBe(false)
+    expect(wrapper.find('#tasks-section').exists()).toBe(true)
+    expect(wrapper.find('h1').text()).toBe('dashboard.title')
   })
 
   it('shows team-lead journey with 4 steps for GROUP_ADMIN-only sessions', async () => {
@@ -910,7 +907,7 @@ describe('DashboardView', () => {
     const mastersStore = useMastersStore()
     vi.spyOn(mastersStore, 'fetchMasters').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('#journey-section').exists()).toBe(true)
@@ -956,7 +953,7 @@ describe('DashboardView', () => {
     const templatesStore = useTemplatesStore()
     vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('0')
@@ -1000,13 +997,13 @@ describe('DashboardView', () => {
       },
     ]
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('1')
   })
 
-  it('shows global admin journey with 6 steps for GLOBAL_ADMIN sessions', async () => {
+  it('shows global admin journey with 5 steps for GLOBAL_ADMIN sessions', async () => {
     const sessionStore = useSessionStore()
     sessionStore.session = {
       displayName: 'Global Admin',
@@ -1033,7 +1030,7 @@ describe('DashboardView', () => {
     const mastersStore = useMastersStore()
     vi.spyOn(mastersStore, 'fetchMasters').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('#journey-section').exists()).toBe(true)
@@ -1065,7 +1062,7 @@ describe('DashboardView', () => {
     const mastersStore = useMastersStore()
     vi.spyOn(mastersStore, 'fetchMasters').mockResolvedValue(undefined)
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').text()).toBe('journey.roles.GLOBAL_ADMIN.title')
@@ -1112,9 +1109,38 @@ describe('DashboardView', () => {
       ]
     })
 
-    const wrapper = mountDashboard()
+    const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
 
     expect(wrapper.find('.journey-timeline-stub').attributes('data-current-index')).toBe('4')
+  })
+
+  it('fetches collaboration work items on overview tab for accurate pending actions count', async () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      displayName: 'Tester',
+      authorizedGroupCodes: ['RETAIL'],
+      visibleRoutes: ['route.template-management'],
+      roles: ['TEMPLATE_TESTER'],
+      capabilities: caps({ decideTests: true, viewCollaborationWorkItems: true }),
+    } as never
+    vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(
+      (routeKey: string) => routeKey === 'route.template-management',
+    )
+
+    const templatesStore = useTemplatesStore()
+    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+
+    const collaborationStore = useCollaborationStore()
+    const fetchSpy = vi.spyOn(collaborationStore, 'fetchWorkItems').mockResolvedValue(undefined)
+
+    // No query params — this is the overview tab
+    routeRef.value.query = {}
+
+    const wrapper = mountDashboard()
+    await flushPromises()
+
+    expect(fetchSpy).toHaveBeenCalledWith(undefined)
+    expect(wrapper.find('#tasks-section').exists()).toBe(false)
   })
 })

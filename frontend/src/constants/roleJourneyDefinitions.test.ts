@@ -61,15 +61,14 @@ describe('roleJourneyDefinitions', () => {
     ])
   })
 
-  it('globalAdminJourneySteps has exactly 6 steps in Spec B order', () => {
-    expect(globalAdminJourneySteps).toHaveLength(6)
+  it('globalAdminJourneySteps has exactly 5 steps in Spec B order', () => {
+    expect(globalAdminJourneySteps).toHaveLength(5)
     expect(globalAdminJourneySteps.map((step) => step.id)).toEqual([
       'reviewOverview',
       'manageUsersGroups',
       'removeTemplates',
       'setReminderDefaults',
       'monitorOverdue',
-      'reviewAllTodos',
     ])
   })
 

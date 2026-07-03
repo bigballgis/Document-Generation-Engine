@@ -31,7 +31,6 @@ const STEP_INDEX = {
   removeTemplates: 2,
   setReminderDefaults: 3,
   monitorOverdue: 4,
-  reviewAllTodos: 5,
 } as const
 
 export function isPendingReviewMaster(
@@ -72,16 +71,18 @@ export function resolveGlobalAdminDashboardJourneyIndex(
 
   if (hasInheritedTeamLeadWork(masters, workItems)) {
     return {
-      currentStepIndex: STEP_INDEX.reviewAllTodos,
-      activeStepId: 'reviewAllTodos',
+      currentStepIndex: null,
+      guidanceKey: EMPTY_GUIDANCE,
+      activeStepId: 'reviewOverview',
     }
   }
 
   const openQueues = distinctQueuesWithOpenItems(workItems)
   if (openQueues.length >= 2) {
     return {
-      currentStepIndex: STEP_INDEX.reviewAllTodos,
-      activeStepId: 'reviewAllTodos',
+      currentStepIndex: null,
+      guidanceKey: EMPTY_GUIDANCE,
+      activeStepId: 'reviewOverview',
     }
   }
 

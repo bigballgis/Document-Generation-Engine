@@ -5,33 +5,45 @@ export interface BreadcrumbSegment {
   path?: string
 }
 
+const TOP_LEVEL_LIST_PATHS = new Set([
+  '/dashboard',
+  '/entitlement/users',
+  '/entitlement/groups',
+  '/masters',
+  '/templates',
+  '/content-modules',
+  '/api/policies',
+  '/audit',
+])
+
 const MASTER_REVISION_PATH = /^\/masters\/([^/]+)\/revisions\/[^/]+$/
 const MASTER_HUB_PATH = /^\/masters\/([^/]+)$/
 const TEMPLATE_DEV_PATH = /^\/templates\/([^/]+)\/dev\/[^/]+$/
 const TEMPLATE_RELEASE_PATH = /^\/templates\/([^/]+)\/releases\/[^/]+$/
 const TEMPLATE_HUB_PATH = /^\/templates\/([^/]+)$/
 
-const DETAIL_PREFIXES: Array<{ prefix: string; listPath: string; listLabelKey: string; groupLabelKey: string }> = [
+const DETAIL_PREFIXES: Array<{ prefix: string; listPath: string; listLabelKey: string }> = [
   {
     prefix: '/templates/',
     listPath: '/templates',
     listLabelKey: 'nav.items.templates',
-    groupLabelKey: 'nav.groups.content',
   },
   {
     prefix: '/content-modules/',
     listPath: '/content-modules',
     listLabelKey: 'nav.items.contentModules',
-    groupLabelKey: 'nav.groups.content',
   },
 ]
 
 export function buildBreadcrumbTrail(path: string): BreadcrumbSegment[] {
+  if (TOP_LEVEL_LIST_PATHS.has(path)) {
+    return []
+  }
+
   const templateDevMatch = TEMPLATE_DEV_PATH.exec(path)
   if (templateDevMatch) {
     const templateId = templateDevMatch[1]
     return [
-      { labelKey: 'nav.groups.content' },
       { labelKey: 'nav.items.templates', path: '/templates' },
       { labelKey: 'templates.packageHub.breadcrumbLabel', path: `/templates/${templateId}` },
       { labelKey: 'templates.devEditor.breadcrumbLabel' },
@@ -42,7 +54,6 @@ export function buildBreadcrumbTrail(path: string): BreadcrumbSegment[] {
   if (templateReleaseMatch) {
     const templateId = templateReleaseMatch[1]
     return [
-      { labelKey: 'nav.groups.content' },
       { labelKey: 'nav.items.templates', path: '/templates' },
       { labelKey: 'templates.packageHub.breadcrumbLabel', path: `/templates/${templateId}` },
       { labelKey: 'templates.releaseDetail.breadcrumbLabel' },
@@ -52,7 +63,6 @@ export function buildBreadcrumbTrail(path: string): BreadcrumbSegment[] {
   const templateHubMatch = TEMPLATE_HUB_PATH.exec(path)
   if (templateHubMatch) {
     return [
-      { labelKey: 'nav.groups.content' },
       { labelKey: 'nav.items.templates', path: '/templates' },
       { labelKey: 'templates.packageHub.breadcrumbLabel' },
     ]
@@ -62,7 +72,6 @@ export function buildBreadcrumbTrail(path: string): BreadcrumbSegment[] {
   if (revisionMatch) {
     const masterId = revisionMatch[1]
     return [
-      { labelKey: 'nav.groups.content' },
       { labelKey: 'nav.items.masters', path: '/masters' },
       { labelKey: 'masters.hub.breadcrumbLabel', path: `/masters/${masterId}` },
       { labelKey: 'masters.revision.breadcrumbLabel' },
@@ -72,7 +81,6 @@ export function buildBreadcrumbTrail(path: string): BreadcrumbSegment[] {
   const hubMatch = MASTER_HUB_PATH.exec(path)
   if (hubMatch) {
     return [
-      { labelKey: 'nav.groups.content' },
       { labelKey: 'nav.items.masters', path: '/masters' },
       { labelKey: 'masters.hub.breadcrumbLabel' },
     ]
@@ -81,7 +89,6 @@ export function buildBreadcrumbTrail(path: string): BreadcrumbSegment[] {
   for (const detail of DETAIL_PREFIXES) {
     if (path.startsWith(detail.prefix)) {
       return [
-        { labelKey: detail.groupLabelKey },
         { labelKey: detail.listLabelKey, path: detail.listPath },
         { labelKey: 'nav.breadcrumb.detail' },
       ]
@@ -91,10 +98,7 @@ export function buildBreadcrumbTrail(path: string): BreadcrumbSegment[] {
   for (const group of NAV_GROUPS) {
     for (const item of group.items) {
       if (path === item.path) {
-        return [
-          { labelKey: group.labelKey },
-          { labelKey: item.labelKey, path: item.path },
-        ]
+        return []
       }
     }
   }

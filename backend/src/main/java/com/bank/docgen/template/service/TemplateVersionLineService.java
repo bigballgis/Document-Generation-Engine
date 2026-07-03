@@ -58,6 +58,8 @@ import com.bank.docgen.template.persistence.VariableSchemaEntity;
 
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 
+import java.time.Instant;
+
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -432,6 +434,84 @@ public class TemplateVersionLineService {
 
 
 
+    @Transactional
+
+    public TemplateDetailView abandonInFlightDev(
+
+            UUID templateId,
+
+            UUID devVersionId,
+
+            ManagementSessionClaims session
+
+    ) {
+
+        TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
+
+        TemplateVersionEntity version = requireActiveDevVersionLine(templateId, devVersionId);
+
+        if (!templateCurrentVersionResolver.isInFlight(version)) {
+
+            throw new TemplateGovernanceException(
+
+                    ApiErrorCodes.TEMPLATE_VERSION_IMMUTABLE,
+
+                    "api.error.template.versionImmutable",
+
+                    HttpStatus.FORBIDDEN
+
+            );
+
+        }
+
+
+
+        TemplateLifecycleStatus fromStatus = template.getLifecycleStatus();
+
+        version.setDeletedAt(Instant.now());
+
+        templateVersionRepository.save(version);
+
+
+
+        TemplateLifecycleStatus toStatus = templateCurrentVersionResolver.findLatestPublishedVersion(templateId)
+
+                .map(TemplateVersionEntity::getLifecycleStatus)
+
+                .orElse(TemplateLifecycleStatus.DRAFT);
+
+        template.setLifecycleStatus(toStatus);
+
+        template.setUpdatedBy(session.username());
+
+        templateRepository.save(template);
+
+
+
+        recordAbandonLifecycle(
+
+                template,
+
+                fromStatus,
+
+                toStatus,
+
+                version.getDevVersionNumber(),
+
+                devVersionId,
+
+                session
+
+        );
+
+
+
+        return templateService.toDetail(template);
+
+    }
+
+
+
     private void copyVariables(TemplateVersionEntity source, TemplateVersionEntity target) {
 
         for (VariableSchemaEntity variable : variableSchemaRepository
@@ -574,6 +654,58 @@ public class TemplateVersionLineService {
 
 
 
+    private void recordAbandonLifecycle(
+
+            TemplateEntity template,
+
+            TemplateLifecycleStatus fromStatus,
+
+            TemplateLifecycleStatus toStatus,
+
+            int abandonedDevVersionNumber,
+
+            UUID abandonedDevVersionId,
+
+            ManagementSessionClaims session
+
+    ) {
+
+        String comment = messageResolver.resolve(
+
+                "api.audit.lifecycle.abandonedInFlightDev",
+
+                abandonedDevVersionNumber,
+
+                abandonedDevVersionId
+
+        );
+
+        lifecycleRecordRepository.save(new TemplateLifecycleRecordEntity(
+
+                UUID.randomUUID(),
+
+                template.getId(),
+
+                LifecycleAction.ABANDON_IN_FLIGHT_DEV,
+
+                fromStatus,
+
+                toStatus,
+
+                null,
+
+                comment,
+
+                null,
+
+                session.username()
+
+        ));
+
+    }
+
+
+
     private TemplateVersionEntity requireDevVersionLine(UUID templateId, UUID devVersionId) {
 
         TemplateVersionEntity version = templateVersionRepository.findById(devVersionId)
@@ -581,6 +713,22 @@ public class TemplateVersionLineService {
                 .orElseThrow(TemplateNotFoundException::new);
 
         if (!version.getTemplateId().equals(templateId)) {
+
+            throw new TemplateNotFoundException();
+
+        }
+
+        return version;
+
+    }
+
+
+
+    private TemplateVersionEntity requireActiveDevVersionLine(UUID templateId, UUID devVersionId) {
+
+        TemplateVersionEntity version = requireDevVersionLine(templateId, devVersionId);
+
+        if (version.isDeleted()) {
 
             throw new TemplateNotFoundException();
 

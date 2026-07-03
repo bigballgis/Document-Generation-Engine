@@ -219,6 +219,6 @@ describe('MasterPackageHubView', () => {
 
     expect(wrapper.text()).toContain('letterhead-v2.docx')
     expect(wrapper.text()).toContain('letterhead-v1.docx')
-    expect(wrapper.text()).toContain('Update Master DOCX')
+    expect(wrapper.text()).toContain('Update letterhead DOCX')
   })
 })

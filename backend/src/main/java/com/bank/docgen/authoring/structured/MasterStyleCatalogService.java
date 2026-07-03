@@ -119,7 +119,7 @@ public class MasterStyleCatalogService {
                     MESSAGE_KEY_MISSING_STYLE,
                     location,
                     "Style '" + sanitize(normalizedKey) + "' is not in the approved master style catalog.",
-                    "Choose a style from the master catalog or update the master document."
+                    "Choose a style from the master catalog or update the letterhead."
             ));
             return;
         }

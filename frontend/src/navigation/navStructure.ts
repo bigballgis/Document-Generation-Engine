@@ -253,25 +253,7 @@ export function buildVisibleNavGroups(
     items: group.items.filter((item) => allowed.has(item.routeKey)),
   })).filter((group) => group.items.length > 0)
 
-  const behaviorItems = buildVisibleBehaviorNavItems(context, visibleRouteKeys)
-  if (behaviorItems.length === 0) {
-    return resourceGroups
-  }
-
-  const myTodosGroup: NavGroupDefinition = {
-    id: 'myTodos',
-    labelKey: 'nav.groups.myTodos',
-    items: behaviorItems,
-  }
-
-  const overviewIndex = resourceGroups.findIndex((group) => group.id === 'overview')
-  if (overviewIndex === -1) {
-    return [myTodosGroup, ...resourceGroups]
-  }
-
-  return [
-    ...resourceGroups.slice(0, overviewIndex + 1),
-    myTodosGroup,
-    ...resourceGroups.slice(overviewIndex + 1),
-  ]
+  // Behavior queue items are now surfaced as tabs inside DashboardView;
+  // do not duplicate them in the sidebar.
+  return resourceGroups
 }

@@ -33,7 +33,7 @@ test.describe('corporate FOL catalog (demo seed)', () => {
   test('master catalog shows FOL letterhead for CORP group', async ({ page }) => {
     await page.goto('/masters')
 
-    await expect(page.getByText(/unable to load master documents/i)).not.toBeVisible()
+    await expect(page.getByText(/unable to load letterheads/i)).not.toBeVisible()
     await expect(page.getByRole('heading', { name: /^masters$/i })).toBeVisible()
     await expect(page.getByText(FOL_MASTER_NAME)).toBeVisible()
     await expect(page.locator('.el-table').getByText(FOL_GROUP_CODE, { exact: true }).first()).toBeVisible()

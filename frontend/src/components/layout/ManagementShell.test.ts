@@ -122,7 +122,7 @@ describe('ManagementShell', () => {
     expect(wrapper.text()).toContain('Page content')
   })
 
-  it('renders myTodos behavior group for tester with only testing entry', async () => {
+  it('does not render myTodos behavior entries in the sidebar', async () => {
     const wrapper = mountShell({
       username: '10000002',
       displayName: 'Template Tester',
@@ -138,8 +138,8 @@ describe('ManagementShell', () => {
 
     await flushPromises()
 
-    expect(wrapper.text()).toContain('My to-dos')
-    expect(wrapper.text()).toContain('Waiting on my testing')
+    expect(wrapper.text()).not.toContain('My to-dos')
+    expect(wrapper.text()).not.toContain('Waiting on my testing')
     expect(wrapper.text()).not.toContain('Waiting on my approval')
   })
 
@@ -163,7 +163,7 @@ describe('ManagementShell', () => {
     expect(wrapper.text()).not.toContain('Waiting on my testing')
   })
 
-  it('navigates to dashboard with queue query and hash when behavior entry is clicked', async () => {
+  it('does not render behavior queue shortcuts in the sidebar', async () => {
     const wrapper = mountShell({
       username: '10000002',
       displayName: 'Template Tester',
@@ -182,14 +182,7 @@ describe('ManagementShell', () => {
     const testingButton = wrapper
       .findAll('button.nav-item')
       .find((button) => button.text() === 'Waiting on my testing')
-    expect(testingButton).toBeDefined()
-    await testingButton!.trigger('click')
-
-    expect(routerPush).toHaveBeenCalledWith({
-      path: '/dashboard',
-      query: { queue: 'TEST' },
-      hash: '#tasks-section',
-    })
+    expect(testingButton).toBeUndefined()
   })
 
   it('does not render disabled stubs for hidden behavior entries', async () => {

@@ -208,7 +208,7 @@ describe('MasterRevisionDetailView', () => {
 
     expect(wrapper.find('[data-journey-timeline]').exists()).toBe(true)
     expect(wrapper.find('[data-master-journey-cta]').exists()).toBe(false)
-    const approvalTab = wrapper.findAll('.el-tabs__item').find((tab) => tab.text().includes('Master approval'))
+    const approvalTab = wrapper.findAll('.el-tabs__item').find((tab) => tab.text().includes('Letterhead review'))
     expect(approvalTab).toBeTruthy()
     await approvalTab!.trigger('click')
     expect(wrapper.find('.workspace-tab-shell__actions').text()).toContain('Submit for review')

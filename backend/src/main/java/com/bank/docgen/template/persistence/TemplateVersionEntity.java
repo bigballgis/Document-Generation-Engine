@@ -51,6 +51,9 @@ public class TemplateVersionEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     protected TemplateVersionEntity() {
     }
 
@@ -136,6 +139,19 @@ public class TemplateVersionEntity {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Instant getDeletedAt() {
+        return deletedAt;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public void setDeletedAt(Instant deletedAt) {
+        this.deletedAt = deletedAt;
+        this.updatedAt = Instant.now();
     }
 
     public void setReleaseVersion(String releaseVersion) {

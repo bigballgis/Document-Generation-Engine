@@ -24,7 +24,7 @@ const hasReplacementFixture = fs.existsSync(REPLACEMENT_DOCX_PATH)
 async function openDemoMasterHub(page: import('@playwright/test').Page) {
   await page.goto('/masters')
 
-  await expect(page.getByText(/unable to load master documents/i)).not.toBeVisible()
+  await expect(page.getByText(/unable to load letterheads/i)).not.toBeVisible()
   await expect(page.getByRole('heading', { name: /^masters$/i })).toBeVisible()
   await expect(page.locator('.el-skeleton')).toHaveCount(0)
   await expect(page.getByText(DEMO_MASTER_NAME)).toBeVisible()

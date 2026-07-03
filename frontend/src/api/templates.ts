@@ -107,6 +107,16 @@ export async function cloneReleaseVersion(
   }
 }
 
+export async function abandonDevVersion(templateId: string, devVersionId: string): Promise<void> {
+  const response = await http.post<ApiEnvelope<unknown> | undefined>(
+    `/templates/${templateId}/dev/${devVersionId}/abandon`,
+  )
+  if (response.status === 204 || !response.data) {
+    return
+  }
+  unwrap(response.data)
+}
+
 export async function createTemplate(payload: CreateTemplatePayload): Promise<TemplateDetail> {
   const response = await http.post<ApiEnvelope<TemplateDetail>>('/templates', payload)
   return unwrap(response.data)

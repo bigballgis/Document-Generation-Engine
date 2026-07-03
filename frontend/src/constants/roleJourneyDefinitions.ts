@@ -78,7 +78,6 @@ export const globalAdminJourneySteps: RoleJourneyStep[] = [
   clusterThreeStep('GLOBAL_ADMIN', 'removeTemplates'),
   clusterThreeStep('GLOBAL_ADMIN', 'setReminderDefaults'),
   clusterThreeStep('GLOBAL_ADMIN', 'monitorOverdue'),
-  clusterThreeStep('GLOBAL_ADMIN', 'reviewAllTodos'),
 ]
 
 function clusterFourStep(role: ClusterFourRole, id: string): RoleJourneyStep {

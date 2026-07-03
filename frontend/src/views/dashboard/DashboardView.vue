@@ -46,7 +46,7 @@ import {
 import { useDashboardStats } from '@/composables/useDashboardStats'
 import {
   buildTaskPartitions,
-  dashboardQuickLinks,
+  getVisibleCollaborationQueues,
   parseDashboardTaskScope,
   useWorkflowTasks,
 } from '@/composables/useWorkflowTasks'
@@ -73,6 +73,84 @@ const collaborationStore = useCollaborationStore()
 const { context, reviewMasters, manageMasters, decideApprovals, publishTemplates, deleteTemplates } =
   useCapabilities()
 const { tasks } = useWorkflowTasks()
+
+// ── Dashboard tabs ────────────────────────────────────────────────────────────
+type DashboardTabKey = 'overview' | 'workflow' | CollaborationWorkItemQueue | 'master-review'
+
+interface DashboardTab {
+  key: DashboardTabKey
+  labelKey: string
+  useJourneyTitle?: boolean
+}
+
+const visibleTabs = computed((): DashboardTab[] => {
+  const tabs: DashboardTab[] = [{ key: 'overview', labelKey: 'dashboard.tabs.overview' }]
+  for (const queue of getVisibleCollaborationQueues(context.value)) {
+    const labelKey = `nav.behaviorItems.${queueToNavKey(queue)}`
+    tabs.push({ key: queue, labelKey })
+  }
+  if (reviewMasters.value || manageMasters.value) {
+    tabs.push({ key: 'master-review', labelKey: 'nav.behaviorItems.masterReview' })
+  }
+  if (showJourneySection.value) {
+    tabs.push({
+      key: 'workflow',
+      labelKey: 'dashboard.tabs.workflow',
+      useJourneyTitle: true,
+    })
+  }
+  return tabs
+})
+
+function queueToNavKey(queue: CollaborationWorkItemQueue): string {
+  const map: Record<CollaborationWorkItemQueue, string> = {
+    TEST: 'testing',
+    APPROVAL: 'approval',
+    REMEDIATION: 'remediation',
+    PENDING_RELEASE: 'pendingRelease',
+    ESCALATION: 'escalation',
+  }
+  return map[queue]
+}
+
+const activeTab = computed((): DashboardTabKey => {
+  const tabQuery = typeof route.query.tab === 'string' ? route.query.tab : undefined
+  if (tabQuery === 'workflow' && showJourneySection.value) {
+    return 'workflow'
+  }
+  const filter = typeof route.query.filter === 'string' ? route.query.filter : undefined
+  if (filter === 'master-review') {
+    return 'master-review'
+  }
+  const q = typeof route.query.queue === 'string' ? route.query.queue : undefined
+  if (q && visibleTabs.value.some((tab) => tab.key === q)) {
+    return q as DashboardTabKey
+  }
+  return 'overview'
+})
+
+const isOverviewTab = computed(() => activeTab.value === 'overview')
+const isWorkflowTab = computed(() => activeTab.value === 'workflow')
+const isTaskTab = computed(() => !isOverviewTab.value && !isWorkflowTab.value)
+
+function tabLabel(tab: DashboardTab): string {
+  if (tab.useJourneyTitle && journeyTitleKey.value) {
+    return t(journeyTitleKey.value)
+  }
+  return t(tab.labelKey)
+}
+
+function handleTabChange(tabKey: string) {
+  if (tabKey === 'overview') {
+    void router.replace({ path: '/dashboard' })
+  } else if (tabKey === 'workflow') {
+    void router.replace({ path: '/dashboard', query: { tab: 'workflow' } })
+  } else if (tabKey === 'master-review') {
+    void router.replace({ path: '/dashboard', query: { filter: 'master-review' } })
+  } else {
+    void router.replace({ path: '/dashboard', query: { queue: tabKey } })
+  }
+}
 const visibleRoutes = computed(() => sessionStore.session?.visibleRoutes ?? [])
 const { stats } = useDashboardStats(visibleRoutes)
 
@@ -82,10 +160,6 @@ const templatesLoadError = ref(false)
 
 const globalTimeoutConfig = ref<CollaborationTimeoutConfig | null>(null)
 const groupTimeoutConfigs = reactive<Record<string, CollaborationTimeoutConfig | null>>({})
-
-const quickLinks = computed(() =>
-  dashboardQuickLinks(sessionStore.session?.visibleRoutes ?? []),
-)
 
 const authorizedGroupsSummary = computed(() => {
   const groups = sessionStore.session?.authorizedGroupCodes ?? []
@@ -99,11 +173,30 @@ const authorizedGroupsSummary = computed(() => {
 })
 
 const pageDescription = computed(() => {
+  if (isOverviewTab.value) {
+    return `${t('dashboard.description')} ${t('home.summary.authorizedGroups')}: ${authorizedGroupsSummary.value}`
+  }
+  if (isWorkflowTab.value) {
+    return `${t('dashboard.workflowTab.description')} ${t('home.summary.authorizedGroups')}: ${authorizedGroupsSummary.value}`
+  }
   const base = t(taskScope.value.pageDescriptionKey)
   return `${base} ${t('home.summary.authorizedGroups')}: ${authorizedGroupsSummary.value}`
 })
 
 const canViewWorkItems = computed(() => canViewCollaborationWorkItems(context.value))
+
+const shouldLoadCollaborationWorkItems = computed(() => {
+  if (!canViewWorkItems.value) {
+    return false
+  }
+  if (isOverviewTab.value) {
+    return true
+  }
+  if (isWorkflowTab.value) {
+    return true
+  }
+  return isTaskTab.value && taskScope.value.fetchCollaboration
+})
 
 const showTimeoutConfig = computed(() => canMaintainCollaborationTimeoutConfig(context.value))
 
@@ -463,7 +556,7 @@ function resolveCollaborationFetchParams():
 }
 
 async function loadTimeoutConfigsForWorkItems() {
-  if (!canViewWorkItems.value || !taskScope.value.fetchCollaboration) {
+  if (!shouldLoadCollaborationWorkItems.value) {
     globalTimeoutConfig.value = null
     return
   }
@@ -505,7 +598,7 @@ async function loadTimeoutConfigsForWorkItems() {
 }
 
 async function fetchCollaborationWorkItems() {
-  if (!canViewWorkItems.value || !taskScope.value.fetchCollaboration) {
+  if (!shouldLoadCollaborationWorkItems.value) {
     return
   }
   const params = resolveCollaborationFetchParams()
@@ -533,7 +626,7 @@ async function loadDashboardData() {
       }),
     )
   }
-  if (canViewWorkItems.value && taskScope.value.fetchCollaboration) {
+  if (shouldLoadCollaborationWorkItems.value) {
     jobs.push(
       fetchCollaborationWorkItems().catch(() => {
         /* error captured in collaboration store */
@@ -568,14 +661,14 @@ onMounted(() => {
 })
 
 watch(
-  () => [route.hash, route.query.queue, route.query.filter] as const,
+  () => [route.hash, route.query.queue, route.query.filter, route.query.tab] as const,
   () => {
     void scrollToTasksIfRequested()
   },
 )
 
 watch(
-  () => [route.query.queue, route.query.filter] as const,
+  () => [route.query.queue, route.query.filter, route.query.tab] as const,
   () => {
     void fetchCollaborationWorkItems().catch(() => {
       /* error captured in collaboration store */
@@ -595,10 +688,6 @@ function openTask(path: string) {
   router.push(path)
 }
 
-function openQuickLink(path: string) {
-  router.push(path)
-}
-
 function openDashboardJourney() {
   if (!dashboardJourneyPath.value) {
     return
@@ -610,7 +699,7 @@ function openDashboardJourney() {
 <template>
   <AppPageLayout>
     <PageHeader
-      :title="t(taskScope.pageTitleKey)"
+      :title="t('dashboard.title')"
       :description="pageDescription"
     />
 
@@ -626,9 +715,27 @@ function openDashboardJourney() {
       @retry="loadDashboardData"
     />
 
-    <DashboardStatCards v-if="showStatsSection" :stats="stats" :loading="loading" />
+    <el-tabs
+      v-if="visibleTabs.length > 1"
+      :model-value="activeTab"
+      class="dashboard-tabs"
+      @tab-change="handleTabChange"
+    >
+      <el-tab-pane
+        v-for="tab in visibleTabs"
+        :key="tab.key"
+        :label="tabLabel(tab)"
+        :name="tab.key"
+      />
+    </el-tabs>
 
-    <section v-if="showJourneySection" id="journey-section" class="journey-section">
+    <template v-if="isOverviewTab">
+      <DashboardStatCards v-if="showStatsSection" :stats="stats" :loading="loading" />
+
+      <CollaborationTimeoutConfigPanel v-if="showTimeoutConfig" />
+    </template>
+
+    <section v-else-if="isWorkflowTab" id="journey-section" class="journey-section">
       <RoleJourneyTimeline
         :steps="journeySteps"
         :current-step-index="journeyCurrentStepIndex"
@@ -648,7 +755,7 @@ function openDashboardJourney() {
       </RoleJourneyTimeline>
     </section>
 
-    <section id="tasks-section" class="tasks-section">
+    <section v-else id="tasks-section" class="tasks-section">
       <el-skeleton v-if="loading || showCollaborationLoading" :rows="5" animated />
 
       <LoadErrorPanel
@@ -673,48 +780,56 @@ function openDashboardJourney() {
         />
       </template>
     </section>
-
-    <section v-if="quickLinks.length > 0" class="quick-links">
-      <h2>{{ t('dashboard.quickLinks.title') }}</h2>
-      <div class="quick-link-grid">
-        <el-button
-          v-for="link in quickLinks"
-          :key="link.path"
-          link
-          @click="openQuickLink(link.path)"
-        >
-          {{ t(link.labelKey) }}
-        </el-button>
-      </div>
-    </section>
-
-    <CollaborationTimeoutConfigPanel v-if="showTimeoutConfig" />
   </AppPageLayout>
 </template>
 
 <style scoped lang="scss">
-.tasks-section {
-  margin-bottom: 2rem;
+.dashboard-tabs {
+  margin-bottom: var(--space-6);
+
+  :deep(.el-tabs__header) {
+    margin-bottom: 0;
+  }
+
+  :deep(.el-tabs__nav-wrap::after) {
+    height: 1px;
+    background: var(--border-default);
+  }
+
+  :deep(.el-tabs__item) {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 0 var(--space-4);
+    height: 40px;
+    line-height: 40px;
+
+    &.is-active {
+      color: var(--brand-primary);
+      font-weight: 600;
+    }
+
+    &:hover {
+      color: var(--brand-primary);
+    }
+  }
+
+  :deep(.el-tabs__active-bar) {
+    background: var(--brand-primary);
+    height: 2px;
+  }
 }
 
 .journey-section {
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-6);
+}
+
+.tasks-section {
+  margin-bottom: var(--space-6);
 }
 
 .section-header {
   margin-bottom: 1rem;
 }
 
-.quick-links {
-  h2 {
-    margin: 0 0 1rem;
-    font-size: 1.1rem;
-  }
-}
-
-.quick-link-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
 </style>

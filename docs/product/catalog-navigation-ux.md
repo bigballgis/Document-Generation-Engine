@@ -294,5 +294,16 @@ Full mapping: [business-terminology-guide.md](./business-terminology-guide.md).
 
 - **Hub secondary IA during migration:** Whether overview / workflow / external-access remain as hub tabs, hub secondary panels only, or gain dedicated routes — implementation may ship a temporary redirect from legacy `?tab=` query params to new routes; default landing remains version-lines table once hub ships.
 - **Concurrent in-flight dev lines:** v1 confirmed model is **one active in-flight dev line** per template (package `devVersionId`); historical dev versions that were published remain as immutable published rows only — no second parallel in-flight line without completing or abandoning current dev (clone blocked per S7).
-- **Abandon / discard in-flight dev:** No new “delete dev line” API in this slice; returning to published-only state may require a future lifecycle action (out of scope here).
+- **Abandon / discard in-flight dev:** No new “delete dev line” API in this slice; returning to published-only state may require a future lifecycle action (out of scope here). **Superseded 2026-07-03** — implemented; see BDD-TEMPLATE-VERSION-LINE-ACTIONS below.
+
+## BDD-TEMPLATE-VERSION-LINE-ACTIONS (confirmed 2026-07-03)
+
+**Status:** Implemented (backend + hub UI)
+
+| Field | Specification |
+| --- | --- |
+| **Actors** | `TEMPLATE_AUTHOR` (abandon, clone); `GROUP_ADMIN` / `GLOBAL_ADMIN` (release deactivate/restore) |
+| **Hub IA** | Version-lines table primary; no journey blocks or workflow banner |
+| **Abandon (Option A)** | Logical delete in-flight dev; published releases unchanged |
+| **Default route guard** | Cannot deactivate release that is API default route target (`409`) |
 - **OpenAPI publication:** `version-lines`, dev get, release get, and `clone` management endpoints added to `openapi-v1.yaml` (P3-T06, 2026-07-01).

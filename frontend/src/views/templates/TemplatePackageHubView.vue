@@ -4,14 +4,9 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import TemplateWorkspaceHeader from '@/components/templates/TemplateWorkspaceHeader.vue'
-import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
 import TemplateVersionLinesPanel from '@/components/templates/TemplateVersionLinesPanel.vue'
 import TemplateExportActions from '@/components/templates/TemplateExportActions.vue'
 import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
-import TemplateAuthorJourneyBlock from '@/components/journey/TemplateAuthorJourneyBlock.vue'
-import TemplateTesterJourneyBlock from '@/components/journey/TemplateTesterJourneyBlock.vue'
-import TemplateApproverJourneyBlock from '@/components/journey/TemplateApproverJourneyBlock.vue'
-import TemplateTeamLeadJourneyBlock from '@/components/journey/TemplateTeamLeadJourneyBlock.vue'
 import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
 import TemplateDetailApiAccessTab from '@/views/templates/detail/TemplateDetailApiAccessTab.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
@@ -33,26 +28,6 @@ import {
   templatePackageHubPath,
 } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
-import { useSessionStore } from '@/stores/session'
-import { useCollaborationStore } from '@/stores/collaboration'
-import { canViewCollaborationWorkItems } from '@/auth/roles'
-import {
-  isTemplateInRemediation,
-  shouldShowTemplateAuthorJourney,
-  type TemplateAuthorJourneyContext,
-} from '@/utils/templateAuthorJourney'
-import {
-  shouldShowTemplateTesterJourney,
-  type TemplateTesterJourneyContext,
-} from '@/utils/templateTesterJourney'
-import {
-  shouldShowTemplateApproverJourney,
-  type TemplateApproverJourneyContext,
-} from '@/utils/templateApproverJourney'
-import {
-  shouldShowTemplateTeamLeadJourney,
-  type TemplateTeamLeadJourneyContext,
-} from '@/utils/templateTeamLeadJourney'
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
 import { templateDetailTabLabelKey } from '@/views/templates/templateDetailTabs'
 import type { TemplateDevWorkspaceTab } from '@/views/templates/templateDevWorkspaceTabs'
@@ -61,26 +36,19 @@ import type { ComponentPublicInstance } from 'vue'
 
 const HUB_SECONDARY_TABS = ['overview', 'apiAccess'] as const
 type HubSecondaryTab = (typeof HUB_SECONDARY_TABS)[number]
-type ActiveTemplateJourney = 'teamLead' | 'approver' | 'tester' | 'author'
 
 const { t, te } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
 const route = useRoute()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
-const sessionStore = useSessionStore()
-const collaborationStore = useCollaborationStore()
 const {
   authorTemplates,
-  decideTests,
-  decideApprovals,
-  publishTemplates,
-  reviewMasters,
   manageApiPolicy,
   deleteTemplates,
   exportTemplates,
   editTemplateMetadata,
-  context,
+  manageReleaseVersionState,
 } = useCapabilities()
 const { confirmAction } = useConfirmAction()
 
@@ -159,142 +127,6 @@ const showPolicyPanel = computed(
   () => template.value?.lifecycleStatus === 'PUBLISHED' && manageApiPolicy.value,
 )
 
-const openRemediationTemplateIds = computed(() => {
-  const ids = new Set<string>()
-  for (const item of collaborationStore.workItems) {
-    if (item.queue === 'REMEDIATION') {
-      ids.add(item.templateId)
-    }
-  }
-  return ids
-})
-
-const showAuthorJourney = computed(() => {
-  if (
-    !template.value ||
-    !shouldShowTemplateAuthorJourney({
-      authorTemplates: authorTemplates.value,
-      roles: sessionStore.session?.roles ?? [],
-    })
-  ) {
-    return false
-  }
-  const status = template.value.lifecycleStatus
-  if (
-    status === 'PENDING_RELEASE' &&
-    publishTemplates.value &&
-    shouldShowTemplateTeamLeadJourney({
-      publishTemplates: publishTemplates.value,
-      reviewMasters: reviewMasters.value,
-    })
-  ) {
-    return false
-  }
-  return status !== 'STOPPED' && status !== 'DEPRECATED' && status !== 'DELETED'
-})
-
-const authorJourneyContext = computed((): TemplateAuthorJourneyContext | null => {
-  if (!template.value) {
-    return null
-  }
-  return {
-    lifecycleStatus: template.value.lifecycleStatus,
-    approvalSubState: template.value.approvalSubState,
-    bindingsCount: template.value.bindings.length,
-    hasSuccessfulTrialOutput: false,
-    isRemediation: isTemplateInRemediation(template.value.id, openRemediationTemplateIds.value),
-  }
-})
-
-const showTesterJourney = computed(
-  () =>
-    Boolean(
-      template.value &&
-        shouldShowTemplateTesterJourney({ decideTests: decideTests.value }) &&
-        template.value.lifecycleStatus === 'TESTING',
-    ),
-)
-
-const testerJourneyContext = computed((): TemplateTesterJourneyContext | null => {
-  if (!template.value || template.value.lifecycleStatus !== 'TESTING') {
-    return null
-  }
-  return {
-    lifecycleStatus: 'TESTING',
-    hasPreviewArtifact: false,
-    fidelityViewedConfirmed: false,
-    coverageViewedConfirmed: false,
-    previewViewedConfirmed: false,
-  }
-})
-
-const showApproverJourney = computed(
-  () =>
-    Boolean(
-      template.value &&
-        shouldShowTemplateApproverJourney({ decideApprovals: decideApprovals.value }) &&
-        template.value.lifecycleStatus === 'APPROVAL' &&
-        template.value.approvalSubState === 'PENDING_DECISION',
-    ),
-)
-
-const approverJourneyContext = computed((): TemplateApproverJourneyContext | null => {
-  if (
-    !template.value ||
-    template.value.lifecycleStatus !== 'APPROVAL' ||
-    template.value.approvalSubState !== 'PENDING_DECISION'
-  ) {
-    return null
-  }
-  return {
-    lifecycleStatus: 'APPROVAL',
-    approvalSubState: 'PENDING_DECISION',
-    submissionReviewedConfirmed: false,
-    keyEvidenceViewedConfirmed: false,
-  }
-})
-
-const showTeamLeadJourney = computed(
-  () =>
-    Boolean(
-      template.value &&
-        publishTemplates.value &&
-        template.value.lifecycleStatus === 'PENDING_RELEASE' &&
-        shouldShowTemplateTeamLeadJourney({
-          publishTemplates: publishTemplates.value,
-          reviewMasters: reviewMasters.value,
-        }),
-    ),
-)
-
-const teamLeadJourneyContext = computed((): TemplateTeamLeadJourneyContext | null => {
-  if (!template.value || template.value.lifecycleStatus !== 'PENDING_RELEASE') {
-    return null
-  }
-  return {
-    lifecycleStatus: 'PENDING_RELEASE',
-    goLiveRequestReviewedConfirmed: false,
-    preReleaseChecksViewed: false,
-    publishGateReady: false,
-  }
-})
-
-const activeTemplateJourney = computed((): ActiveTemplateJourney | null => {
-  if (showTeamLeadJourney.value) {
-    return 'teamLead'
-  }
-  if (showApproverJourney.value) {
-    return 'approver'
-  }
-  if (showTesterJourney.value) {
-    return 'tester'
-  }
-  if (showAuthorJourney.value) {
-    return 'author'
-  }
-  return null
-})
-
 function resolveSecondaryTab(value: unknown): HubSecondaryTab | undefined {
   if (typeof value === 'string' && (HUB_SECONDARY_TABS as readonly string[]).includes(value)) {
     return value as HubSecondaryTab
@@ -353,7 +185,7 @@ onMounted(async () => {
   ) {
     return
   }
-  await Promise.all([loadTemplate(), loadAuthorRemediationWorkItems()])
+  await loadTemplate()
 })
 
 onUnmounted(() => {
@@ -389,17 +221,6 @@ watch(secondaryTab, (tab) => {
   }
   void router.replace({ query: { ...route.query, tab } })
 })
-
-async function loadAuthorRemediationWorkItems() {
-  if (!authorTemplates.value || !canViewCollaborationWorkItems(context.value)) {
-    return
-  }
-  try {
-    await collaborationStore.fetchWorkItems({ queue: 'REMEDIATION' })
-  } catch {
-    /* degrade */
-  }
-}
 
 async function loadTemplate() {
   loadFailed.value = false
@@ -443,10 +264,6 @@ function openDevEditor(
       ...extraQuery,
     }),
   )
-}
-
-function openLifecyclePanel() {
-  openDevEditor('approval')
 }
 
 function openApiPolicyConsole() {
@@ -605,46 +422,13 @@ async function handleVersionLinesChanged() {
     />
 
     <template v-else-if="template">
-      <TemplateTeamLeadJourneyBlock
-        v-if="activeTemplateJourney === 'teamLead' && teamLeadJourneyContext"
-        :journey-context="teamLeadJourneyContext"
-        :can-publish="publishTemplates"
-        :show-primary-cta="false"
-        :enable-workspace-link="false"
-      />
-
-      <TemplateApproverJourneyBlock
-        v-if="activeTemplateJourney === 'approver' && approverJourneyContext"
-        :journey-context="approverJourneyContext"
-        :can-decide="decideApprovals"
-        :show-primary-cta="false"
-        :enable-workspace-link="false"
-      />
-
-      <TemplateTesterJourneyBlock
-        v-if="activeTemplateJourney === 'tester' && testerJourneyContext"
-        :journey-context="testerJourneyContext"
-        :can-decide="decideTests"
-        :show-primary-cta="false"
-        :enable-workspace-link="false"
-      />
-
-      <TemplateAuthorJourneyBlock
-        v-if="activeTemplateJourney === 'author' && authorJourneyContext"
-        :journey-context="authorJourneyContext"
-        :template-id="templateId"
-        :can-write="authorTemplates"
-        :show-primary-cta="false"
-        :enable-workspace-link="false"
-      />
-
-      <TemplateWorkflowBanner :template="template" @open-lifecycle="openLifecyclePanel" />
-
       <TemplateVersionLinesPanel
         ref="versionLinesPanelRef"
         :template-id="templateId"
         :can-clone="authorTemplates"
+        :can-manage-versions="manageReleaseVersionState"
         @cloned="handleVersionLinesChanged"
+        @changed="handleVersionLinesChanged"
       />
 
       <el-tabs

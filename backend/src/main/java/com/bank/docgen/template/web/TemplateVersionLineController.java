@@ -180,6 +180,26 @@ public class TemplateVersionLineController {
 
 
 
+    @PostMapping("/dev/{devVersionId}/abandon")
+
+    public SuccessEnvelope<TemplateDetailView> abandonInFlightDev(
+
+            @PathVariable UUID templateId,
+
+            @PathVariable UUID devVersionId,
+
+            @AuthenticationPrincipal ManagementSessionClaims session,
+
+            HttpServletRequest request
+
+    ) {
+
+        return envelope(request, templateVersionLineService.abandonInFlightDev(templateId, devVersionId, session));
+
+    }
+
+
+
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {
 
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));

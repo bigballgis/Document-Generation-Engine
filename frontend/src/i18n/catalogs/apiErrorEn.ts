@@ -26,17 +26,17 @@ export const apiErrorEn = {
     "pdfConversionFailed": "PDF conversion failed."
   },
   "master": {
-    "notFound": "The master document was not found.",
-    "accessDenied": "You do not have permission to access this master document.",
-    "invalidState": "The master document is not in a valid state for this operation.",
-    "anchorIntegrityFailed": "Anchor integrity validation failed for the master document.",
-    "invalidFile": "The uploaded file is not a valid DOCX master document.",
-    "emptyAnchors": "The master document must contain at least one anchor.",
+    "notFound": "The letterhead was not found.",
+    "accessDenied": "You do not have permission to access this letterhead.",
+    "invalidState": "The letterhead is not in a valid state for this operation.",
+    "anchorIntegrityFailed": "Anchor integrity validation failed for the letterhead.",
+    "invalidFile": "The uploaded file is not a valid DOCX letterhead.",
+    "emptyAnchors": "The letterhead must contain at least one anchor.",
     "docxRequired": "A valid DOCX file is required.",
     "anchorExtractionFailed": "Unable to extract anchors from the uploaded DOCX.",
-    "storageFailed": "Unable to store the uploaded master document.",
-    "downloadFailed": "Unable to download the master document file.",
-    "invalidReviewTransition": "The master document is not in a valid state for this review action."
+    "storageFailed": "Unable to store the uploaded letterhead.",
+    "downloadFailed": "Unable to download the letterhead file.",
+    "invalidReviewTransition": "The letterhead is not in a valid state for this review action."
   },
   "template": {
     "notFound": "The template was not found.",
@@ -45,8 +45,8 @@ export const apiErrorEn = {
     "confirmationRequired": "Secondary confirmation is required for this operation.",
     "invalidState": "The template is not in a valid state for this operation.",
     "alreadyDeleted": "The template has already been deleted.",
-    "masterNotApproved": "Templates can only be created from approved master documents.",
-    "masterGroupMismatch": "The master document group does not match the template group.",
+    "masterNotApproved": "Templates can only be created from approved letterheads.",
+    "masterGroupMismatch": "The letterhead group does not match the template group.",
     "externalIdExists": "A template with this external identifier already exists.",
     "testDataSetLocked": "The test data set is locked by test evidence and cannot be modified.",
     "variableTypeUnsupported": "The variable type is not supported.",
@@ -63,7 +63,8 @@ export const apiErrorEn = {
     "importBundleUnsupportedFormat": "The template import bundle format is not supported.",
     "importBundleContainsSecrets": "The template import bundle must not contain secrets or credentials.",
     "importConflict": "The template import conflicts with an existing template.",
-    "importFailed": "The template import could not be completed."
+    "importFailed": "The template import could not be completed.",
+    "defaultRouteTargetCannotDeactivate": "The default route release version cannot be deactivated."
   },
   "rendering": {
     "previewNotFound": "The preview record was not found.",

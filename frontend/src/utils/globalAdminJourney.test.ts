@@ -69,7 +69,7 @@ describe('resolveGlobalAdminDashboardJourneyIndex', () => {
     })
   })
 
-  it('maps inherited PENDING_REVIEW master work to reviewAllTodos', () => {
+  it('maps inherited PENDING_REVIEW master work to reviewOverview without highlighting a step', () => {
     const resolution = resolveGlobalAdminDashboardJourneyIndex(
       [
         masterSummary({
@@ -81,24 +81,26 @@ describe('resolveGlobalAdminDashboardJourneyIndex', () => {
       [],
     )
     expect(resolution).toEqual({
-      currentStepIndex: 5,
-      activeStepId: 'reviewAllTodos',
+      currentStepIndex: null,
+      guidanceKey: 'journey.roles.GLOBAL_ADMIN.empty.guidance',
+      activeStepId: 'reviewOverview',
     })
   })
 
-  it('maps inherited PENDING_RELEASE work items to reviewAllTodos', () => {
+  it('maps inherited PENDING_RELEASE work items to reviewOverview without highlighting a step', () => {
     const resolution = resolveGlobalAdminDashboardJourneyIndex(
       [],
       [],
       [workItem({ queue: 'PENDING_RELEASE' })],
     )
     expect(resolution).toEqual({
-      currentStepIndex: 5,
-      activeStepId: 'reviewAllTodos',
+      currentStepIndex: null,
+      guidanceKey: 'journey.roles.GLOBAL_ADMIN.empty.guidance',
+      activeStepId: 'reviewOverview',
     })
   })
 
-  it('maps multiple open queues to reviewAllTodos', () => {
+  it('maps multiple open queues to reviewOverview without highlighting a step', () => {
     const resolution = resolveGlobalAdminDashboardJourneyIndex(
       [],
       [],
@@ -108,8 +110,9 @@ describe('resolveGlobalAdminDashboardJourneyIndex', () => {
       ],
     )
     expect(resolution).toEqual({
-      currentStepIndex: 5,
-      activeStepId: 'reviewAllTodos',
+      currentStepIndex: null,
+      guidanceKey: 'journey.roles.GLOBAL_ADMIN.empty.guidance',
+      activeStepId: 'reviewOverview',
     })
   })
 

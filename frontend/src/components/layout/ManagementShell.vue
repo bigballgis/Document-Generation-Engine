@@ -8,7 +8,6 @@ import {
   ArrowDown,
   SwitchButton,
   HomeFilled,
-  DataLine,
   Postcard,
   Document,
   Collection,
@@ -22,6 +21,7 @@ import AppBreadcrumb from '@/components/layout/AppBreadcrumb.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { BRAND_REGISTRY } from '@/config/brands'
 import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
+import { buildBreadcrumbTrail } from '@/navigation/breadcrumbTrail'
 import { buildVisibleNavGroups, resolveNavItemTarget, type NavItemDefinition } from '@/navigation/navStructure'
 import { useAppStore } from '@/stores/app'
 import { useSessionStore } from '@/stores/session'
@@ -45,12 +45,6 @@ function toggleCollapsed() {
 // ── Nav icons ─────────────────────────────────────────────────────────────────
 const NAV_ICON_MAP: Record<string, Component> = {
   dashboard: HomeFilled,
-  'behavior-testing': DataLine,
-  'behavior-approval': DataLine,
-  'behavior-remediation': DataLine,
-  'behavior-pending-release': DataLine,
-  'behavior-escalation': DataLine,
-  'behavior-master-review': DataLine,
   users: User,
   groups: UserFilled,
   masters: Postcard,
@@ -91,31 +85,10 @@ const navGroups = computed(() => {
   return buildVisibleNavGroups(session.visibleRoutes, session.roles, session.capabilities)
 })
 
-// List-page paths where the breadcrumb last segment duplicates the page h1.
-const LIST_PATHS = new Set([
-  '/dashboard',
-  '/templates',
-  '/masters',
-  '/content-modules',
-  '/api/policies',
-  '/audit',
-  '/entitlement/users',
-  '/entitlement/groups',
-])
-const hideBreadcrumbLastSegment = computed(() => LIST_PATHS.has(route.path))
+// Breadcrumb hidden on top-level list pages (see breadcrumbTrail.ts).
+const breadcrumbSegments = computed(() => buildBreadcrumbTrail(route.path))
 
 function isNavItemActive(item: NavItemDefinition): boolean {
-  if (item.path === '/dashboard') {
-    if (item.id === 'dashboard') {
-      return route.path === '/dashboard' && !route.query.queue && !route.query.filter
-    }
-    if (item.query?.queue) {
-      return route.path === '/dashboard' && route.query.queue === item.query.queue
-    }
-    if (item.query?.filter) {
-      return route.path === '/dashboard' && route.query.filter === item.query.filter
-    }
-  }
   if (item.path === route.path) {
     return true
   }
@@ -266,7 +239,7 @@ function handleBrandChange(brand: BrandPreset) {
       </aside>
 
       <main class="shell-content">
-        <AppBreadcrumb :hide-last-segment="hideBreadcrumbLastSegment" />
+        <AppBreadcrumb v-if="breadcrumbSegments.length > 0" />
         <slot />
       </main>
     </div>

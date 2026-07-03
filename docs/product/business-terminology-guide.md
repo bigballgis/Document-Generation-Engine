@@ -61,7 +61,14 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | API credentials | Access keys / Connection accounts | 接入账号 | (credential surfaces) | avoid "credential" |
 | Access & identity | Users & permissions | 用户与权限 | `nav.groups.entitlement` | "entitlement" too IT |
 | Identity administration | User management | 用户管理 | `nav.routes.identityAdministration` | |
-| Master documents | Letterhead templates / Document masters | 母版文档 | `nav.items.masters` | bank-natural |
+| Master documents | Letterhead templates / Document masters | 母版文档 | `nav.items.masters` | bank-natural; **never** use 主文档 on L1 |
+| Master (object) | Letterhead | 母版 | `masters.*`, dashboard stats | short form for the DOCX asset |
+| Master package | Letterhead package | 母版包 | `packageCatalog.master`, `masters.hub` | catalog row / package hub |
+| Master name | Letterhead name | 母版名称 | `masters.list.columns.name` | form/table L2 |
+| Master designer (role) | Letterhead designer | 母版设计人员 | `roles.MASTER_DESIGNER` | aligns with domain docs & permission matrix |
+| Master review / approval | Letterhead review | 母版审核 | `masters.workflow.*`, `nav.behaviorItems.masterReview` | not 主文档审批 |
+| Master ID (technical) | Master ID | 母版 ID | `templates.detail.masterId` | L2 field label only |
+| Layout placeholder (was anchor) | Layout placeholder | 版式占位符 | `templates.authoring.*` | never expose "anchor" on L1 |
 | Template authoring | Template design | 模板设计 | `home.templateAuthoring.title` | authoring/orchestrate too IT |
 | Content modules | Standard clauses | 标准条款 | `nav.items.contentModules` | compliance/product familiar |
 | Audit log / Audit console | Activity log / Audit trail | 操作记录 | `nav.items.audit`, `home.audit.title` | "console" too IT; audit role may keep "audit" |
@@ -96,7 +103,7 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | REMEDIATION | Waiting on my fixes | 待我修改 | TEMPLATE_AUTHOR, GROUP, GLOBAL |
 | PENDING_RELEASE | Waiting to confirm go-live | 待确认上线 | GROUP, GLOBAL |
 | ESCALATION | Overdue to follow up | 超时待跟进 | GROUP, GLOBAL |
-| (master review) | Masters to review | 待审核母版 | GROUP, GLOBAL (+ MASTER_DESIGNER for own rework) |
+| (master review) | Letterheads to review | 待审核母版 | GROUP, GLOBAL (+ MASTER_DESIGNER for own rework) |
 | Collaboration timeout config | Reminder timing | 催办时限设置 | GROUP, GLOBAL |
 | Escalation (concept) | Overdue reminder | 超时提醒 | notification, not system escalation |
 | Exception intervention | Confirm on behalf (with audit trail) | 代为确认（留痕） | GROUP, GLOBAL |
@@ -120,6 +127,44 @@ sub-phases land; keep the i18n key column populated when a sweep touches a key.
 | Lifecycle impact preview | Impact preview | 影响预览 | `contentModules.lifecycle.impactTitle` | P21-X01 |
 | Semantic version (L1 label) | Version number | 版本号 | `contentModules.version.semanticVersion` | hide semver concept |
 | Audit lifecycle tab export | Template workflow export | 模板工作流导出 | `audit.export.lifecycleSuccess` | P21-X01 |
+
+### 4.5 Master / letterhead / 母版（canonical glossary）
+
+**Problem:** zh-CN had mixed **主文档** and **母版** on L1 surfaces, causing confusion. English had mixed
+**master document**, **letterhead**, and **master** for the same domain object (`MasterDocument` in code).
+
+**Rule:** User-facing L1 copy uses one business term per language. Internal identifiers (`master`,
+`MasterDocument`, `/masters`, `masterId`, audit fields) stay unchanged.
+
+| Layer | English (L1) | 中文（L1） | When to use |
+| --- | --- | --- | --- |
+| Module / nav / page title | **Letterhead templates** | **母版文档** | Side nav, list page title, quick links (`nav.items.masters`, `masters.list.title`) |
+| Short object name | **Letterhead** | **母版** | Sentences, buttons, task cards, errors (`打开母版`, `Approve letterhead`) |
+| Package container | **Letterhead package** | **母版包** | Catalog rows, hub pages (`packageCatalog.master.*`, `masters.hub.*`) |
+| Revision snapshot | **Revision line** | **修订线** | Immutable upload/replace history (`MasterRevisionLine`) |
+| Layout slot in DOCX | **Layout placeholder** | **版式占位符** | Bindings, integrity checks — not **锚点** on L1 |
+| Role | **Letterhead designer** | **母版设计人员** | `MASTER_DESIGNER` display label |
+| Behavior queue | **Letterheads to review** | **待审核母版** | Dashboard / nav behavior entry |
+
+**Forbidden on L1 (zh-CN):** **主文档** — do not use in any user-facing bundle value.
+
+**Forbidden on L1 (en):** **master document** / **master documents** as primary labels — prefer
+**letterhead** (object) or **letterhead templates** (module).
+
+**i18n keys touched by this glossary (representative):**
+
+| Key area | en baseline | zh-CN |
+| --- | --- | --- |
+| `masters.list.title` | Letterhead templates | 母版文档 |
+| `masters.upload.open` | New letterhead package | 新建母版包 |
+| `dashboard.quickLinks.masters` | Letterhead templates | 母版文档 |
+| `dashboard.stats.masterPendingReview.title` | Letterheads awaiting review | 待审核母版 |
+| `nav.behaviorItems.masterReview` | Letterheads to review | 待审核母版 |
+| `api.error.master.*` (L1 message) | …this letterhead… | …此母版… |
+| `roles.MASTER_DESIGNER` | Letterhead designer | 母版设计人员 |
+
+**Code / docs (L3 — unchanged):** `MasterDocument`, `master_document`, `GET /masters`, Flyway table
+names, audit event codes, OpenAPI schema `MasterDocumentResponse`.
 
 ## 5. Acceptance (per P21 sub-phase)
 

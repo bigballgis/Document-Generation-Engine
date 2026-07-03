@@ -82,7 +82,7 @@ describe('MasterListView', () => {
 
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Unable to load master documents')
+    expect(wrapper.text()).toContain('Unable to load letterheads')
     expect(wrapper.text()).toContain('Retry')
   })
 })

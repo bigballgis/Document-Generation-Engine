@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
+import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -55,6 +56,8 @@ class TemplateLifecyclePublishGateTest {
     private com.bank.docgen.authoring.structured.RenderProfileService renderProfileService;
     @Mock
     private ApprovalSubStateResolver approvalSubStateResolver;
+    @Mock
+    private ApiPolicyRepository apiPolicyRepository;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -78,7 +81,8 @@ class TemplateLifecyclePublishGateTest {
                 contentModuleReferenceService,
                 collaborationWorkItemWriter,
                 renderProfileService,
-                approvalSubStateResolver
+                approvalSubStateResolver,
+                apiPolicyRepository
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",
