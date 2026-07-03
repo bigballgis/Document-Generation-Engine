@@ -112,6 +112,13 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Production runbook](./operations/runbook.md) | Release gate, local prod compose profile, observability |
 | [ADR-0030 Operational Platform Baseline](./adr/operations/0030-operational-platform-baseline.md) | Accepted CD, hardening, backup, and observability decisions |
 
+## Behavior specifications (`docs/behavior/`)
+
+| Document | Status | Purpose |
+| --- | --- | --- |
+| [Template testing overhaul](./behavior/template-testing-overhaul.md) | ready | P12 template testing tab BDD |
+| [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **ready** | Package-first API access, convention-over-config UI, invocation records (BDD-API-PACKAGE-ACCESS-INVOCATION-001) |
+
 ## ADRs
 
 | Document | Purpose |

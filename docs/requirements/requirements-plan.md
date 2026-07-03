@@ -113,7 +113,7 @@
 - 异步任务取消成功后的最终状态为 `CANCELLED`；取消后的任务不返回已生成结果、下载地址或异步批量单笔成功结果，即使取消前已有部分单笔生成完成。
 - 异步任务查询不返回进度百分比；单笔任务通过状态和时间字段表达进展，异步批量任务通过 `batch.summary` 返回总数、已处理数、成功数、失败数和跳过数等进度摘要。
 - 异步任务状态集合确认为 `ACCEPTED`、`PROCESSING`、`SUCCEEDED`、`FAILED`、`PARTIAL_SUCCEEDED`、`EXPIRED`、`CANCELLED`；`PARTIAL_SUCCEEDED` 仅用于异步批量任务。
-- 异步任务和生成结果默认保留 7 天。
+- 异步任务和生成结果默认保留 7 天（**幂等记录与异步任务实体默认窗口**；与包级调用记录/文档 artifact 留存 **解耦**，见 BDD-API-PACKAGE-ACCESS-INVOCATION-001）。
 - 生成结果 7 天到期清理前不主动通知调用方或管理员，仅记录清理审计。
 - API 错误模型采用细分 `error.code` + `error.category` 分组；`error.code` 使用稳定细分错误码，`error.category` 用于调用方按大类处理。
 - 所有 API 错误响应必须返回 `error.retryable`，明确重复提交或重试是否允许。
@@ -252,13 +252,55 @@
 - AD Group 授权配置和 DOCX/PDF 动态加密配置不在模板编排或模板提交时配置，只在 API 管理中配置。
 - API 管理配置展示字段 v1 基线确认为 `apiPolicy.policyVersion`、`apiPolicy.updatedAt`、`apiPolicy.updatedBy`、`apiPolicy.allowedOutputFormats`、`apiPolicy.allowedOutputModes`、`apiPolicy.batchLimits.syncMaxItems`、`apiPolicy.batchLimits.asyncMaxItems`、`apiPolicy.encryptionCapabilities`、`apiPolicy.adGroupAuthorizationSummary`、`apiPolicy.credentialSummary`；不得展示 API 凭证 secret、完整 AD Group 成员、未授权组详情、加密密码、历史密文或其他敏感配置明文。
 
+## 已确认：包级 API 接入与调用记录（BDD-API-PACKAGE-ACCESS-INVOCATION-001，2026-07-03）
+
+> 完整 BDD：[api-package-access-and-invocation-records.md](../behavior/api-package-access-and-invocation-records.md)  
+> 实施计划：[P12-api-package-access-invocation-records.md](../plan/detail/P12-api-package-access-invocation-records.md)  
+> ADR：[0040-api-package-access-and-invocation-retention.md](../adr/api-management/0040-api-package-access-and-invocation-retention.md)
+
+### 包结构 API（配置非 catalog）
+
+- 模板包与 API 配置 **1:1**；有已发布 release 后 **必然存在** `api_policy` 行，不是「新建 API 条目」流程。
+- 进入 **待发布**（`PENDING_RELEASE`）时 materialize **骨架** `api_policy`（`defaultRouteReleaseVersion` 为空，平台约定默认填充输出/批量/加密/留存字段）。
+- **首次发布** release `R` 时：写入 `defaultRouteReleaseVersion=R`；同时生效 **包 default API**（`…/default/generate`）与 **版本 explicit API**（`…/versions/R/generate`）。
+- **第二次及后续发布** **不得静默修改** default；新增 release 仅增加 explicit 路径；改 default 必须走 P17 影响预览 + 确认 + 审计。
+- 发布门禁 **不得** 再要求 publish 前手工创建 policy；空 AD Group  **不阻断发布**，运行时 fail-closed。
+- 管理 UI **主入口** 为模板 **包 Hub → 对外接入** Tab；侧栏「API 管理」独立模板 catalog **降级** 为跨包监控/待办（缺 AD Group、凭证将过期等）。
+- **约定大于配置**：L1 默认展示 AD Group、default 路由、留存三项、路由摘要、凭证；输出/批量/加密等 **高级设置** 折叠，默认平台约定（DOCX+PDF、三种输出模式、batch 100/10000、加密关）。
+
+### 调用记录（InvocationRecord）
+
+- 独立于管理端 **合规审计摘要**；面向授权 **调用方** 查询自身历史与 **服务端备份**。
+- 每次生成（成功/失败）写入 `api_invocation_record`（与幂等记录关联；`IDEMPOTENCY_REPLAYED` **不** duplicate 新记录）。
+- 调用方 GET 自己的记录详情含 **完整** `variables`/`context`/batch items；**禁止** 持久化 encryption 明文密码；管理端/审计仍仅摘要。
+- 单表存储；`invocationKind`：`SINGLE` | `BATCH_ROOT` | `BATCH_ITEM` | `ASYNC_TASK`；查询 `view=logical`（真实调用，batch 仅 ROOT）与 `view=flat`（平铺，**不含** ROOT，仅 SINGLE+ITEM 同结构）。
+- 管理端包 Hub **只读** 最近调用摘要（无 variables 明文）。
+
+### 留存策略（包级可配，约定默认）
+
+| 字段 | 约定默认 | 上限 | UI |
+| --- | --- | --- | --- |
+| `saveGeneratedDocuments` | `true` | — | 开关 |
+| `invocationRecordRetentionDays` | 90 | 2555（7×365） | 预设：7/30/90/180/365/1095/2555 天 |
+| `documentRetentionDays` | 30 | 365 | 预设：7/30/90/180/365 天；且 ≤ 记录留存 |
+
+- 变更留存仅影响 **新产生** 记录的 `*ExpiresAt`；审计 `changedAreas` 含 `INVOCATION_RETENTION`。
+- **四层时钟**（互不替代）：下载 URL **15 分钟**；幂等窗口 **7 天**；文档 artifact（save=true 时按包级 days）；调用记录（包级 days）。文档可先过期，记录仍可查参数，`download` 返回 410。
+- 修订：原「异步任务和生成结果默认保留 7 天」指 **幂等/任务默认窗口**；包级 `saveGeneratedDocuments=true` 时 **文档 artifact** 按 `documentRetentionDays` 保留（最长 1 年）。
+
+### 运行时 API（待 OpenAPI 落地）
+
+- `GET /api/{environment}/v1/templates/{templateId}/invocations` — `view=logical|flat`，可选 `requestId` 过滤。
+- `GET /api/{environment}/v1/templates/{templateId}/invocations/{invocationId}` — 详情（credential  scoped）。
+- 现有 `…/documents/{documentId}/download` — 在 artifact 未过期且 save=true 时重取。
+
 ## 已确认：审计
 
 - 模板侧需要审计：创建/编辑模板、提交测试、测试通过、测试不通过、提交审批、审批通过、审批不通过、发布、停用、恢复、废弃、版本停用、版本恢复、导出/导入、母版提交审核、母版审核通过、母版审核不通过、母版变更和母版影响分析。
 - API 管理侧需要审计：API 凭证创建、轮换、吊销、过期、到期提醒、凭证摘要查看、AD Group 授权配置变更、输出方式配置变更、批量上限配置变更、DOCX/PDF 动态加密配置变更、default 路径目标发布版本配置变更。
 - API 调用审计至少记录：调用时间、环境、访问账号、访问账号 AD Group、API 凭证/调用方、模板与发布版本、路由类型、default 路径解析后的目标发布版本、输出格式、成功/失败与错误原因、耗时、请求参数摘要、生成文件标识、`requestId`、`idempotencyKey` 或其摘要、幂等处理状态；批量调用还需记录 `batchId`、`items[].itemId` 或其摘要、失败项重试关联的 `originalBatchId` 或等效关联字段；如复用已过期 `idempotencyKey`，还需记录过期 key 复用审计字段。
 - API 调用和 API 管理配置变更审计采用标准摘要对象，字段基线包括 `auditId`、`eventType`、`eventAt`、操作者或系统主体摘要、API 凭证或指纹摘要、访问账号、环境、模板、发布版本、解析后发布版本、路由类型、`requestId`、`idempotencyKey` 摘要、幂等状态、`taskId`、`batchId`、`itemId`（或其安全摘要）、`contextSummary`、输出摘要、加密摘要、批量摘要、资源 ID、结果摘要、错误摘要、耗时和配置差异摘要。
-- API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 `changedAreas` 表达变更配置域；`changedAreas` 取值基线为 `AD_GROUP_AUTHORIZATION`、`OUTPUT_POLICY`、`BATCH_LIMIT`、`ENCRYPTION_CAPABILITY`、`DEFAULT_ROUTE_TARGET`。
+- API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 `changedAreas` 表达变更配置域；`changedAreas` 取值基线为 `AD_GROUP_AUTHORIZATION`、`OUTPUT_POLICY`、`BATCH_LIMIT`、`ENCRYPTION_CAPABILITY`、`DEFAULT_ROUTE_TARGET`、`INVOCATION_RETENTION`（2026-07-03 新增，包级调用记录与文档留存策略）。
 - API 管理配置变更审计需要记录 `policyVersion`、上一配置版本、变更配置域、配置差异摘要、影响预览摘要、硬阻断和警告摘要、确认结果、是否回滚以及回滚来源版本；不得记录敏感配置明文。
 - 标准审计摘要不得记录模板变量原值、加密密码、完整请求体、API 凭证 secret、完整下载地址、完整 AD Group 成员、未授权组详情、历史密文或敏感配置明文。
 - 审计管理员可查看全部审计记录。

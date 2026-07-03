@@ -46,7 +46,7 @@ upstream systems invoke the dynamic API.
 | P9 | Production readiness | P0–P8 | Security scans, observability, deployment evidence, release gates | Done |
 | P10 | Runtime document download | P9 | Secure download with secondary auth and 15-minute expiry | Done |
 | P11 | Batch & async generation | P10 | Sync batch, async task query/cancel | Done |
-| P12 | Deferred enhancements | P0–P11 | Catch-all for deferred/post-MVP enhancements; last closed **P12-BDD-RISK-PROMPT-UX-001 Done** (2026-06-29); prior **P12-AUD-M02 Done** (2026-07-01); **P12-TEMPLATE-TESTING-OVERHAUL In Progress** (activated 2026-07-03, BDD spec ready, 13 tasks T01–T13) | In Progress (**P12-TEMPLATE-TESTING-OVERHAUL** activated 2026-07-03; P12-BDD-RISK-PROMPT-UX-001 Done 2026-06-29; P12-AUD-M02 Done 2026-07-01) |
+| P12 | Deferred enhancements | P0–P11 | Catch-all; active **P12-TEMPLATE-TESTING-OVERHAUL**; queued **P12-API-PACKAGE-ACCESS-INVOCATION** (BDD ready 2026-07-03) | In Progress |
 | P13 | Identity & group administration | P1 | Global/group admins manage users & groups via management API + UI, with fail-closed escalation protection, audit, and green gates | Done |
 | P14 | Confirmed large domains | P2–P8 | Clause/content modules, collaboration to-dos + timeout escalation, template export/import (UX-G) | Done (2026-06-27; T01–T03 + E2E/UIUX/architecture gates; backend **481**, frontend **235+**) |
 | P15 | Kubernetes deployment & container hardening | P9 | Distroless non-root read-only containers, Helm/manifests for app workloads, ConfigMap/Secret, NGINX Ingress + cert-manager TLS, default-deny NetworkPolicy, HPA (CPU/mem + custom), /healthz+/readyz probes, blue-green + manual approval/rollback, CI manifest validation (ADR-0030) | Done (2026-06-27; T01–T10) |

@@ -801,8 +801,8 @@ API 响应交付规则：
 - 异步任务取消成功后的最终状态为 `CANCELLED`；取消后的任务不返回已生成结果、下载地址或异步批量单笔成功结果，即使取消前已有部分单笔生成完成。
 - 异步任务查询不返回进度百分比；单笔任务通过状态和时间字段表达进展，异步批量任务通过 `batch.summary` 返回总数、已处理数、成功数、失败数和跳过数等进度摘要。
 - 异步任务状态集合确认为 `ACCEPTED`、`PROCESSING`、`SUCCEEDED`、`FAILED`、`PARTIAL_SUCCEEDED`、`EXPIRED`、`CANCELLED`；`PARTIAL_SUCCEEDED` 仅用于异步批量任务。
-- 异步任务和生成结果默认保留 7 天。
-- 生成结果 7 天到期清理前不主动通知调用方或管理员，仅记录清理审计。
+- 异步任务和生成结果默认保留 7 天（**幂等/异步任务默认窗口**；包级 document/invocation retention 见 BDD-API-PACKAGE-ACCESS-INVOCATION-001）。
+- 生成结果 7 天到期清理前不主动通知调用方或管理员，仅记录清理审计（**不含**包级 `saveGeneratedDocuments=true` 时的 artifact 长留存；artifact 按 `documentRetentionDays` 清理）。
 
 API 错误模型规则：
 
@@ -880,6 +880,15 @@ API 管理配置展示字段 v1 基线确认为 `apiPolicy.policyVersion`、`api
 其他 API 管理配置影响预览至少包含当前配置与候选配置差异、受影响模板及未停用发布版本、授权调用方或 AD Group 范围摘要、近期调用量摘要、可能被拒绝的输出模式/批量/加密调用摘要和预期错误码提示。
 
 其他 API 管理配置回滚按一次新的受控变更处理，需要选择历史配置作为候选配置，执行影响预览，确认后立即生效，并记录审计；回滚不主动通知调用方或管理员。
+
+### 包级 API 接入与调用记录（2026-07-03）
+
+> BDD：[api-package-access-and-invocation-records.md](../behavior/api-package-access-and-invocation-records.md) · ADR：[0040](../adr/api-management/0040-api-package-access-and-invocation-retention.md)
+
+- 模板包与 API 配置 1:1；**待发布** 时 materialize 骨架 policy；**首次发布** 设置 default 路由并同时提供 default + explicit 生成路径；后续发布 **不静默** 改 default。
+- API 管理 UI **主入口** 为包 Hub「对外接入」；约定大于配置（L1：AD Group、default、留存、路由、凭证；高级策略折叠）。
+- **调用记录**独立于合规审计；调用方可查询自身历史与完整参数（encryption 密码不落库）；包级可配是否保存生成文档及记录/文档留存（默认 save 开 / 90d / 30d；最长 7y / 1y 预设）。
+- 运行时 `GET …/invocations` 支持 logical（真实调用）与 flat（平铺 item 级）视图。
 
 API 凭证生命周期、轮换、吊销、过期、到期提醒和相关审计策略已确认；API 凭证到期提醒是生命周期专门通知，不改变其他 API 管理配置变更不主动通知调用方或管理员的基线。
 

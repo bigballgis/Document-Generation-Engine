@@ -22,8 +22,9 @@ Each slice is activated individually via `plan-orchestrator`; only one slice sho
 | **P12-BDD-RISK-PROMPT-UX-001** | Template-scoped risk-prompt config UX redesign (BDD-TEMPLATE-RISK-PROMPT-UX-001) | **Done** (2026-06-29) | Supersedes P19-T08 group override + list-view panel + hardcoded decision categories; **COR-T15** mirror |
 | **P12-UIUX-DEEP-REFACTOR** | Frontend UIUX deep refactor — design token system, visual language upgrade, component unification, shell polish (14 tasks, groups A–E) | **Done** (2026-07-03) | OPT-G3 resolved (TemplateDetailView split); plan: `.cursor/plans/前端_uiux_整改方案_fc6fbf7b.plan.md`; BDD `not-applicable` (no API/permission/behavior change) |
 | **P12-TEMPLATE-TESTING-OVERHAUL** | 模板测试页全量改造 — SSE 进度流（单次预览 + 全量测试）、临时文件 24h TTL、批测结果持久化与失效、提交测试门禁 API、覆盖率面板增强、测试历史记录（13 tasks T01–T13） | **In Progress** (activated 2026-07-03) | BDD spec: `docs/behavior/template-testing-overhaul.md` (ready); Flyway V41–V42; 6 功能域 F1–F6 |
+| **P12-API-PACKAGE-ACCESS-INVOCATION** | 包级 API 接入重构 + 调用记录 — auto-materialize policy、约定大于配置 Hub UI、invocation records + 留存（12 tasks T01–T12） | **Not Started** (BDD **ready** 2026-07-03) | BDD: `docs/behavior/api-package-access-and-invocation-records.md`; plan: [P12-api-package-access-invocation-records.md](./P12-api-package-access-invocation-records.md) |
 
-**Active slice:** **P12-TEMPLATE-TESTING-OVERHAUL** (activated 2026-07-03 — **In Progress**; 13 tasks T01–T13, Flyway V41–V42; BDD spec ready).
+**Active slice:** **P12-TEMPLATE-TESTING-OVERHAUL** (activated 2026-07-03 — **In Progress**; 13 tasks T01–T13, Flyway V41–V42; BDD spec ready). **Queued:** **P12-API-PACKAGE-ACCESS-INVOCATION** (BDD ready; **no code** until activated).
 
 ### P12-UIUX-DEEP-REFACTOR — Frontend UIUX deep refactor
 

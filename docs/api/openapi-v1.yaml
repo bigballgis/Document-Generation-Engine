@@ -18,6 +18,8 @@ tags:
     description: Async task query and cancellation.
   - name: Download
     description: Generated document download.
+  - name: Invocation
+    description: Caller-scoped invocation record query and parameter backup.
   - name: Admin
     description: API management, credential lifecycle administration, template lifecycle governance, template export/import, master revision-line read paths, content-module governance, and collaboration timeout configuration.
   - name: Collaboration
@@ -429,6 +431,68 @@ paths:
         '503':
           $ref: '#/components/responses/ErrorResponse'
         '504':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/templates/{templateId}/invocations:
+    get:
+      tags: [Invocation]
+      operationId: listInvocationRecords
+      summary: List caller-scoped invocation records for a template
+      description: >-
+        Returns invocation history for the authenticated API credential only.
+        Use view=logical (default) for batch roots and async tasks, or view=flat
+        for per-item rows without BATCH_ROOT. Optional requestId filter for tracing.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/InvocationViewQuery'
+        - $ref: '#/components/parameters/InvocationRequestIdQuery'
+        - $ref: '#/components/parameters/InvocationPageQuery'
+        - $ref: '#/components/parameters/InvocationSizeQuery'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Invocation list returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvocationListResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/{environment}/v1/templates/{templateId}/invocations/{invocationId}:
+    get:
+      tags: [Invocation]
+      operationId: getInvocationRecord
+      summary: Get invocation record detail with sanitized parameters
+      description: >-
+        Returns full sanitized request parameters for the caller's own invocation.
+        Encryption passwords are never returned. Cross-credential access is denied.
+      parameters:
+        - $ref: '#/components/parameters/Environment'
+        - $ref: '#/components/parameters/TemplateId'
+        - $ref: '#/components/parameters/InvocationId'
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Invocation detail returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvocationDetailResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -2388,6 +2452,48 @@ components:
         type: string
         minLength: 1
       description: Optional caller request tracking ID for task query. Audited for tracing only and not used for task lookup or idempotency.
+    InvocationId:
+      name: invocationId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^INV-[A-Za-z0-9]+$'
+      example: INV-7K3M9Q2R
+    InvocationViewQuery:
+      name: view
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [logical, flat]
+        default: logical
+      description: logical returns SINGLE, BATCH_ROOT, ASYNC_TASK; flat returns SINGLE and BATCH_ITEM only.
+    InvocationRequestIdQuery:
+      name: requestId
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      description: Filter by caller requestId. Not used for idempotency resolution on this endpoint.
+    InvocationPageQuery:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    InvocationSizeQuery:
+      name: size
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
     DocumentId:
       name: documentId
       in: path
@@ -2797,6 +2903,115 @@ components:
           properties:
             task:
               $ref: '#/components/schemas/CancelledTaskSummary'
+    InvocationKind:
+      type: string
+      enum: [SINGLE, BATCH_ROOT, BATCH_ITEM, ASYNC_TASK]
+    InvocationStatus:
+      type: string
+      enum: [ACCEPTED, PROCESSING, SUCCEEDED, FAILED, PARTIAL_SUCCEEDED, EXPIRED, CANCELLED]
+    InvocationSummary:
+      type: object
+      additionalProperties: false
+      required: [invocationId, invocationKind, templateId, status, createdAt]
+      properties:
+        invocationId:
+          type: string
+          pattern: '^INV-[A-Za-z0-9]+$'
+        invocationKind:
+          $ref: '#/components/schemas/InvocationKind'
+        templateId:
+          type: string
+          pattern: '^TPL-[A-Za-z0-9-]+$'
+        resolvedReleaseVersion:
+          type: string
+        routeType:
+          $ref: '#/components/schemas/RouteType'
+        status:
+          $ref: '#/components/schemas/InvocationStatus'
+        requestId:
+          type: string
+        idempotencyKey:
+          type: string
+        batchId:
+          type: string
+        taskId:
+          type: string
+        parentInvocationId:
+          type: string
+        itemId:
+          type: string
+        artifactSaved:
+          type: boolean
+        documentId:
+          type: string
+        documentExpiresAt:
+          type: string
+          format: date-time
+        recordExpiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        childItemCount:
+          type: integer
+          minimum: 0
+          description: Present on BATCH_ROOT in logical view when child summaries are not embedded.
+    InvocationListResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [view, items, page, size, totalElements]
+          properties:
+            view:
+              type: string
+              enum: [logical, flat]
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/InvocationSummary'
+            page:
+              type: integer
+              minimum: 0
+            size:
+              type: integer
+              minimum: 1
+            totalElements:
+              type: integer
+              minimum: 0
+    InvocationDetailResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: object
+          additionalProperties: false
+          required: [invocation]
+          properties:
+            invocation:
+              allOf:
+                - $ref: '#/components/schemas/InvocationSummary'
+                - type: object
+                  additionalProperties: false
+                  properties:
+                    parameters:
+                      type: object
+                      additionalProperties: true
+                      description: Sanitized request payload; encryption passwords excluded.
+                    childItems:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/InvocationSummary'
+                      description: Optional embedded BATCH_ITEM summaries when view=logical on detail.
     CancelledTaskSummary:
       type: object
       additionalProperties: false

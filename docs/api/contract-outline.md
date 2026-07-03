@@ -46,13 +46,14 @@ Field names, capability breakdown, error-code names, and response structure are 
 - 下载地址取文件路径为 `/api/{environment}/v1/documents/{documentId}/download`；下载时仍需要通过 `documentId` 关联模板并执行模板级二次授权。
 - API 契约查看路径为 `GET /api/{environment}/v1/templates/{templateId}/contract`。
 - 可调用版本列表路径为 `GET /api/{environment}/v1/templates/{templateId}/versions`；该接口返回当前授权视角下可调用的发布版本列表，不作为后台版本管理列表。
+- **调用记录**（2026-07-03）：`GET /api/{environment}/v1/templates/{templateId}/invocations`（`view=logical|flat`，可选 `requestId`）；`GET …/invocations/{invocationId}`。
 - API v1 请求头字段确认为 `X-Api-Credential-Id`、`X-Api-Credential-Secret`、`X-Access-Account`；可选追踪请求头为 `X-Trace-Id`。
 - `X-Trace-Id` 传入时平台沿用该值作为响应和审计中的 `traceId`；未传入时由平台生成 `traceId`。
 - `releaseVersion` 路径参数采用语义化版本号，例如 `1.0.0`、`1.1.0`、`2.0.0`。
 - default 路径不得隐式指向最新版本，必须由全局管理员或分组管理员在 API 管理中显式配置目标发布版本。
 - API 调用权限是模板级别。
 - API 采用 API 凭证 + AD Group 双重认证授权。
-- AD Group 解析规则适用于所有需要 AD Group 授权的 API 操作，包括生成、批量生成、异步任务查询、异步任务取消、下载取文件、API 契约查看和可调用版本列表。
+- AD Group 解析规则适用于所有需要 AD Group 授权的 API 操作，包括生成、批量生成、异步任务查询、异步任务取消、下载取文件、API 契约查看、可调用版本列表和 **调用记录查询**。
 - AD Group 成功解析结果按 `accessAccount` + `environment` 缓存 5 分钟；不缓存解析失败结果。
 - AD Group 解析失败时，如果存在未过期缓存，则使用未过期缓存继续授权；如果不存在未过期缓存，则返回 `503 AD_GROUP_RESOLUTION_FAILED`，`retryable=true`。
 - AD Group 授权不得使用过期缓存兜底；过期缓存不能作为授权依据。
@@ -76,7 +77,7 @@ Field names, capability breakdown, error-code names, and response structure are 
 - 异步任务 v1 支持受控取消；仅未完成且未过期的任务可取消，取消成功后状态为 `CANCELLED`，且不返回已生成结果、下载地址或异步批量单笔成功结果。
 - 异步任务查询不返回进度百分比；异步批量任务通过 `batch.summary` 返回进度摘要。
 - 异步任务状态集合确认为 `ACCEPTED`、`PROCESSING`、`SUCCEEDED`、`FAILED`、`PARTIAL_SUCCEEDED`、`EXPIRED`、`CANCELLED`；`PARTIAL_SUCCEEDED` 仅用于异步批量任务。
-- 异步任务和生成结果默认保留 7 天。
+- 异步任务和生成结果默认保留 7 天（**幂等/异步任务默认窗口**；包级 document/invocation retention 见 BDD-API-PACKAGE-ACCESS-INVOCATION-001）。
 - 批量请求支持批次级统一输出和加密配置，也允许单笔记录单独覆盖输出格式、输出模式和加密参数。
 - 批量请求中每笔记录的单独覆盖都必须受模板级 API 管理配置约束，不能绕过输出方式、批量上限或动态加密能力限制。
 - 批量请求中每笔记录必须传入 `items[].itemId`，且同一批次内必须唯一；重复 `items[].itemId` 返回 `400 ITEM_ID_DUPLICATED`，不创建批次或异步任务。
@@ -103,7 +104,7 @@ Field names, capability breakdown, error-code names, and response structure are 
 - `context` 采用安全白名单，v1 仅允许 `sourceSystem`、`channel`、`businessRequestId`、`upstreamTraceId`、`scenario`、`locale`；字段值均为字符串；未知 `context` 字段返回 `400 REQUEST_BODY_INVALID`。
 - API 管理配置展示字段 v1 基线确认为 `apiPolicy.policyVersion`、`apiPolicy.updatedAt`、`apiPolicy.updatedBy`、`apiPolicy.allowedOutputFormats`、`apiPolicy.allowedOutputModes`、`apiPolicy.batchLimits.syncMaxItems`、`apiPolicy.batchLimits.asyncMaxItems`、`apiPolicy.encryptionCapabilities`、`apiPolicy.adGroupAuthorizationSummary`、`apiPolicy.credentialSummary`。
 - 异步任务受理响应返回 `task.queryPath`，值为任务查询相对路径，不是免认证或签名地址；后续查询仍需 API 凭证、AD Group 和模板级授权。
-- v1 采用统一授权判定基线；文档生成、批量生成、异步任务查询、异步任务取消、下载取文件、API 契约查看、可调用版本列表和 API 管理均在业务处理或敏感响应返回前完成对应授权判定。
+- v1 采用统一授权判定基线；文档生成、批量生成、异步任务查询、异步任务取消、下载取文件、API 契约查看、可调用版本列表、**调用记录查询**和 API 管理均在业务处理或敏感响应返回前完成对应授权判定。
 - 授权拒绝或授权依赖失败只返回已确认的安全错误码和通用安全消息，不泄露未授权资源是否存在、未授权组详情、完整成员列表、API secret、加密密码或内部配置细节。
 - v1 建立敏感数据分级处理基线；日志、审计、管理界面、API 契约展示、契约示例、错误响应、导出文件和支持排查材料必须执行脱敏或摘要化规则。
 - v1 不提供发布版本级 API 管理配置覆盖机制，模板级 API 管理配置仍是唯一基线。
@@ -175,6 +176,7 @@ API 契约查看和可调用版本列表必须按当前授权视角返回结果�
 | 查询异步任务 | 查询异步生成任务状态、结果和错误明细。 | 查询路径、结果结构、状态命名和进度摘要已确认；不返回进度百分比。 |
 | 取消异步任务 | 取消未完成且未过期的异步任务。 | 受控取消路径、授权方式、终态和不可取消错误码已确认。 |
 | 获取下载地址文件 | 使用同步或异步返回的下载地址获取生成文件。 | 下载路径、15 分钟固定有效期、二次授权、多次下载、不可配置为一次性、过期不重新签发和结果保留已确认。 |
+| 查询调用记录 | 调用方查询本凭证在模板下的历史调用与参数备份。 | 列表 `view=logical\|flat`、可选 `requestId` 过滤、详情含 sanitized parameters；幂等 replay 不新建记录；仅本 credential 可见。 |
 
 ## 路由与路径语义
 
@@ -193,6 +195,8 @@ API 路径统一采用 `/api/{environment}/v1` 前缀。`{environment}` 用于�
 | 下载地址取文件 | 调用方使用返回的下载地址获取生成文件。 | 下载路径以文档为资源；下载时通过 `documentId` 关联模板并执行模板级二次授权。 | `/api/{environment}/v1/documents/{documentId}/download` |
 | API 契约查看 | 调用方查看当前授权模板的契约摘要、路径、策略、错误码和示例索引。 | 返回契约摘要，不内嵌完整 OpenAPI YAML。 | `/api/{environment}/v1/templates/{templateId}/contract` |
 | 可调用版本列表 | 调用方查看当前授权视角下可调用的发布版本列表。 | 返回可调用发布版本，不作为后台版本管理列表。 | `/api/{environment}/v1/templates/{templateId}/versions` |
+| 调用记录列表 | 调用方分页查询本凭证在模板下的调用历史。 | `view=logical`（默认）或 `view=flat`；可选 `requestId`；不含其他 credential 记录。 | `/api/{environment}/v1/templates/{templateId}/invocations` |
+| 调用记录详情 | 调用方查看单条调用详情与 sanitized 参数。 | `invocationId` 前缀 `INV-`；encryption 密码不返回；跨 credential 403。 | `/api/{environment}/v1/templates/{templateId}/invocations/{invocationId}` |
 
 default 路径目标版本变更属于 API 管理配置变更，需要审计，并应提供影响预览。default 路径目标版本变更只支持立即生效，不支持未来定时生效或待生效变更；变更不主动通知调用方或管理员。
 
@@ -225,6 +229,12 @@ View API contract summary
 
 List callable release versions
 /api/{environment}/v1/templates/{templateId}/versions
+
+List invocation records (caller-scoped)
+/api/{environment}/v1/templates/{templateId}/invocations
+
+Get invocation record detail
+/api/{environment}/v1/templates/{templateId}/invocations/{invocationId}
 ```
 
 default 路径调用时，审计记录需要能体现请求使用了 default 路径，以及 default 路径解析后的目标发布版本。
@@ -781,11 +791,65 @@ Asynchronous accepted response draft
 
 下载地址展示确认：`download.url` 在 API 响应中返回对当前授权调用方可用的地址；日志、审计、管理界面和契约示例展示下载地址时必须脱敏，不展示完整可用地址。
 
-结果清理确认：生成结果 7 天到期清理前不主动通知调用方或管理员，仅记录清理审计。
+结果清理确认：生成结果 7 天到期清理前不主动通知调用方或管理员，仅记录清理审计（**幂等/异步任务默认窗口**；包级 `saveGeneratedDocuments=true` 时 artifact 按 `documentRetentionDays` 独立清理，见 ADR-0040）。
+
+## 调用记录查询接口确认
+
+确认基线（2026-07-03，BDD-API-PACKAGE-ACCESS-INVOCATION-001，ADR-0040）：调用记录是 **产品化查询/备份** 能力，与合规审计摘要并存。调用方仅可查询 **本 API 凭证** 在授权模板下的记录；管理端包 Hub 只读摘要不含 variables 明文。
+
+### 路径与查询参数
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/{environment}/v1/templates/{templateId}/invocations` | 分页列表 |
+| GET | `/api/{environment}/v1/templates/{templateId}/invocations/{invocationId}` | 单条详情 |
+
+| 查询参数 | 必填 | 说明 |
+| --- | --- | --- |
+| `view` | 否 | `logical`（默认）或 `flat` |
+| `requestId` | 否 | 按调用方 `requestId` 过滤；不参与幂等定位 |
+| `page` / `size` | 否 | 分页（具体默认值在 OpenAPI schema 中定义） |
+
+### 视图语义
+
+| `view` | 包含 `invocationKind` | 用途 |
+| --- | --- | --- |
+| `logical` | `SINGLE`、`BATCH_ROOT`、`ASYNC_TASK` | 批次聚合视图；ROOT 可内嵌或链接子 item 摘要 |
+| `flat` | `SINGLE`、`BATCH_ITEM` | 平铺对账；**不含** `BATCH_ROOT` |
+
+### 标识与关联字段
+
+- `invocationId`：`INV-` 前缀 + 不透明 token。
+- 关联：`requestId`、`idempotencyKey`、`batchId`、`taskId`（async）、`parentInvocationId`（batch item）、`items[].itemId`（batch item 回显）。
+- `artifactSaved`：是否保存了生成文档；`false` 时 download 始终 410。
+- `documentExpiresAt` / `recordExpiresAt`：artifact 与记录到期时间（ISO 8601 带时区）。
+
+### 参数存储与详情
+
+- 详情 `parameters` 返回调用时 sanitized JSON（variables、output、encryption 元数据等）。
+- **禁止** 持久化或返回 `openPassword` / `ownerPassword`；`encryption.enabled` 与 permissions 摘要可返回。
+- `IDEMPOTENCY_REPLAYED` **不**新建 invocation；列表/详情通过原记录的 `idempotencyKey` 或 `requestId` 解析。
+
+### 授权与错误
+
+- 授权：API 凭证 + AD Group + 模板级授权；记录范围 **credential-scoped**。
+- 跨 credential 访问已知 `invocationId` → `403 ACCESS_DENIED`。
+- 记录或 artifact 已过期 → 列表不可见或详情 404；artifact 过期但记录未过期 → 详情可查参数，download → `410`.
+
+### 与四层时钟关系
+
+| 层 | 默认 | 可配 |
+| --- | --- | --- |
+| 下载 URL | 15 分钟 | 否 |
+| 幂等记录 | 7 天 | 否 |
+| 文档 artifact | 30 天（save=true） | 包级 `documentRetentionDays`（max 365） |
+| 调用记录 | 90 天 | 包级 `invocationRecordRetentionDays`（max 2555） |
+
+包级留存变更仅影响 **新产生** 的记录 TTL；`changedAreas` 含 `INVOCATION_RETENTION`。
 
 ## 异步任务查询与取消接口确认
 
-确认基线：异步任务查询需要返回任务状态、响应元数据、成功结果或统一错误明细；异步批量任务需要返回批次汇总和单笔成功/失败明细。异步任务和生成结果默认保留 7 天。
+确认基线：异步任务查询需要返回任务状态、响应元数据、成功结果或统一错误明细；异步批量任务需要返回批次汇总和单笔成功/失败明细。异步任务和生成结果默认保留 7 天（**幂等/异步任务默认窗口**；包级 artifact/record retention 见 ADR-0040）。
 
 确认基线：异步任务查询接口可选接受 `requestId` 作为附加追踪标识；该字段不参与 `taskId` 定位或幂等判断，仅用于审计关联与排查。
 

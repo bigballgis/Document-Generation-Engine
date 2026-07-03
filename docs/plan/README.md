@@ -52,7 +52,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P9 | Production readiness | [detail/P9-production-readiness.md](detail/P9-production-readiness.md) | Done |
 | P10 | Runtime document download | [detail/P10-runtime-download.md](detail/P10-runtime-download.md) | Done |
 | P11 | Batch & async generation | [detail/P11-batch-async.md](detail/P11-batch-async.md) | Done |
-| P12 | Deferred enhancements | [detail/P12-deferred-enhancements.md](detail/P12-deferred-enhancements.md) | Not Started (slice **P12-UIUX-DEEP-REFACTOR Done** 2026-07-03; prior: P12-BDD-RISK-PROMPT-UX-001 Done 2026-06-29) |
+| P12 | Deferred enhancements | [detail/P12-deferred-enhancements.md](detail/P12-deferred-enhancements.md) · [API package access (queued)](detail/P12-api-package-access-invocation-records.md) | In Progress (**P12-TEMPLATE-TESTING-OVERHAUL** active); **P12-API-PACKAGE-ACCESS-INVOCATION** BDD ready, Not Started |
 | P13 | Identity & group administration | [detail/P13-identity-group-administration.md](detail/P13-identity-group-administration.md) | Done |
 | P14 | Confirmed large domains | [detail/P14-confirmed-large-domains.md](detail/P14-confirmed-large-domains.md) | Done (2026-06-27) |
 | P15 | Kubernetes deployment & container hardening | [detail/P15-kubernetes-deployment-container-hardening.md](detail/P15-kubernetes-deployment-container-hardening.md) | Done (2026-06-27; T01–T10) |
@@ -82,6 +82,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 
 **Open backlog (non-active slices):**
+- **P12-API-PACKAGE-ACCESS-INVOCATION** — package-first API access + invocation records (BDD **ready** 2026-07-03; [plan](detail/P12-api-package-access-invocation-records.md))
 - **OPT-D / M9** — architecture/security debt (Redisson, QueryDSL expansion, intranet SCA) — see [optimization-plan.md](./optimization-plan.md)
 - **OPT-G6 (partial)** — brand rename Done via P12-UIUX-DEEP-REFACTOR A1; remaining aria-labels/locale-aware dates deferred
 - ~~**Phase B** — multi-revision master history API~~ → **Done (P2-T06, 2026-07-01)** — see [P2 detail](detail/P2-master-management.md) § P2-T06 and [catalog-navigation-ux.md](../product/catalog-navigation-ux.md)

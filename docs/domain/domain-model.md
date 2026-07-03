@@ -749,6 +749,25 @@ Template Collaboration Work Item 用于站内待办和状态提示，不是 Temp
 
 动态 API 是模板发布后生成的文档生成调用能力。
 
+#### 2.12.1 包级 API 配置 ApiPolicy（扩展，2026-07-03）
+
+- 与模板包 **1:1**；**待发布** 时存在骨架行；**首次发布** 写入 `defaultRouteReleaseVersion`。
+- 首次发布同时暴露：**default** 路径（`…/default/generate`）与 **explicit** 路径（`…/versions/{releaseVersion}/generate`）。
+- 后续发布 **不静默** 修改 default；新 release 仅增加 explicit 路径。
+- 扩展字段（包级可配）：`saveGeneratedDocuments`（默认 true）、`invocationRecordRetentionDays`（默认 90，max 2555）、`documentRetentionDays`（默认 30，max 365，≤ 记录留存）。
+- 约定默认输出/批量/加密由 `ApiPolicyPlatformDefaults` 单源定义（DOCX+PDF、三种 output mode、batch 100/10000、加密关）。
+- 配置变更 `changedAreas` 含 `INVOCATION_RETENTION`（留存策略）。
+
+#### 2.12.2 调用记录 ApiInvocationRecord（2026-07-03）
+
+- 每次运行时生成（含 batch/async）写入 **单表** `api_invocation_record`。
+- `invocationKind`：`SINGLE` | `BATCH_ROOT` | `BATCH_ITEM` | `ASYNC_TASK`。
+- 调用方仅可查 **本 credential** 记录；详情含完整 parameters（encryption 密码 **不** 持久化）。
+- 查询视图：`logical`（batch 聚合 ROOT）| `flat`（SINGLE + BATCH_ITEM，不含 ROOT）。
+- 运行时路径：`GET …/invocations`（`view=logical|flat`，可选 `requestId`）；`GET …/invocations/{invocationId}`。
+- 与 `RuntimeGenerationAuditEvent` 并存：审计摘要合规；invocation 产品化查询/备份。
+- 四层时钟：下载 URL 15m、幂等 7d、document artifact（包级）、record（包级）。
+
 模板发布后需要生成：
 
 - 接口地址。

@@ -140,9 +140,16 @@ Columns: name, external ID, in-flight workflow status, current release version, 
 Package-level surface (BDD-TEMPLATE-PACKAGE-NAV-001). **Default primary surface:** paginated **version lines** table (in-flight dev line + published release lines). Row click navigates by line kind; published lines expose a **Clone** action.
 
 1. **Package header** — name, external ID, group, package-level workflow status
-2. **Package actions** — export/import, metadata edit (when permitted), links to external access / API management
-3. **Version lines** — paginated table: dev version number, release version (when published), lifecycle status, approval sub-state (when `APPROVAL`), updated at/by, default-route indicator (published only)
-4. **Secondary panels (hub-retained)** — workflow summary banner, role journey blocks, collaboration hints (unchanged from P21; not the default landing focus)
+2. **Package actions** — export/import, metadata edit (when permitted)
+3. **Version lines** — paginated table: dev version number, release version (when published), lifecycle status, approval sub-state (when `APPROVAL`), updated at/by, **default-route indicator** (published only), **explicit generate path summary** (published only)
+4. **Secondary tabs (hub-retained)** — overview, **External access** (primary API configuration surface per BDD-API-PACKAGE-ACCESS-INVOCATION-001), workflow/journey panels as needed
+
+**External access tab (target IA, 2026-07-03):**
+
+- L1: package `externalId`; default + explicit route summary; AD Group; default route selector (governed change); retention presets (save documents, record/doc days); credentials; read-only recent invocation summary for admins.
+- Advanced (collapsed): output formats/modes, batch limits, encryption overrides.
+- **No** «API not configured» empty state once skeleton policy exists from `PENDING_RELEASE`.
+- Standalone sidebar «API management» template catalog **deprecated** → dashboard cross-package alerts (missing AD Group, expiring credentials).
 
 Does **not** host full authoring (variables, bindings, structured content editor); those live on the dev version route.
 
