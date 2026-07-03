@@ -31,6 +31,13 @@ public class PdfConversionPostProcessor {
         if (!renderingProperties.isPdfPageNumberStampingEnabled()) {
             return pdfBytes;
         }
-        return PdfPageNumberStamper.stampPageNumbers(pdfBytes);
+        return finishPdf(pdfBytes, PdfConversionStampPlanContext.get());
+    }
+
+    public byte[] finishPdf(byte[] pdfBytes, PdfPageNumberStampPlan plan) {
+        if (!renderingProperties.isPdfPageNumberStampingEnabled()) {
+            return pdfBytes;
+        }
+        return PdfPageNumberStamper.stampPageNumbers(pdfBytes, plan);
     }
 }

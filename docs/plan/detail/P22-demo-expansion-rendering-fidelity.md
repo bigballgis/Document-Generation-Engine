@@ -4,7 +4,7 @@
 **Phase status:** **In Progress** (activated 2026-07-03) | **Depends on:** P3, P4, P18 (authoring model Done; **rendering-side gap** remains)  
 **BDD:** [demo-expansion-behavior-spec.md](../../requirements/demo-expansion-behavior-spec.md) (`BDD-DEMO-EXP-001`…`015`, readiness **ready**)
 
-> **Single-active-phase invariant:** **P22** is the sole formal phase `In Progress` (activated 2026-07-03 by `plan-orchestrator`). **P12 catch-all → Not Started** (slice **P12-API-PACKAGE-ACCESS-INVOCATION** paused — T01–T06 Done preserved; T07–T12 resume after P22). Do not reopen P18 phase status; this phase closes the **P18/P4 rendering fidelity gap** documented in the behavior spec.
+> **Single-active-phase invariant:** **P22** is the sole formal phase `In Progress` (activated 2026-07-03 by `plan-orchestrator`). **P12 catch-all → Not Started** (slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03). **CDP** program Wave CD-0 runs in parallel for doc/E2E/pitfall specs — see [competitiveness-deepening-program.md](../competitiveness-deepening-program.md). Do not reopen P18 phase status; this phase closes the **P18/P4 rendering fidelity gap** documented in the behavior spec.
 
 ## 1. Purpose
 

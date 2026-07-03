@@ -1,11 +1,14 @@
 # Documentation Index
 
 **Project baseline:** Restart from zero (2026-06-23); **P0–P11, P13–P21 Done**; **P12 Not Started**
-(catch-all idle; slice **P12-API-PACKAGE-ACCESS-INVOCATION paused** — T01–T06 Done). **Active formal phase: P22**
-(2026-07-03 — **P22-DEMO-EXPANSION In Progress**; BDD ready; **P22-T01 next**). **P2-T06 Done** (Phase B master revision history, 2026-07-01). **P21 Done** — role-journey frontend redesign &
-business-friendly terminology (**Done** 2026-06-30; T01–T11 + X01–X06 + X02; **AUD-B10 resolved**
-via P12-AUD-B10; **AUD-M02 resolved** via P12-AUD-M02). Latest gates: backend
-`mvn verify` BUILD SUCCESS; frontend lint/type-check/test/build green (**643** Vitest, 2026-07-03). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
+(catch-all idle; slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03).
+
+**Active work in this documentation track:** **[CDP Wave CD-0 In Progress](./plan/competitiveness-deepening-program.md)** — doc truth, E2E BDD, pitfall registry, browser golden-path evidence (task IDs **`CD-*` only).
+
+**Formal phase (repo-wide, other session):** **P22** — rendering + demos; see [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md) (**do not mix with CDP session**).
+
+**P2-T06 Done** (Phase B master revision history, 2026-07-01). **P21 Done**. Latest gates: backend
+`mvn verify` BUILD SUCCESS; frontend **643** Vitest (2026-07-03). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
 and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 ## Start here
@@ -14,6 +17,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | --- | --- | --- |
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
 | 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P22) |
+| 2a | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **This session** — doc truth, E2E golden paths, pitfall registry ( **`CD-*` tasks** ) |
 | 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
 | 2c | **[Deployment guide](../deploy/README.md)** | **Canonical** install/upgrade/cutover/rollback — Docker Compose + Kubernetes (ADR-0030) |
 | 3 | [Orchestration high-level plan](./architecture/orchestration-high-level-plan.md) | Epic ordering and active epic rules |
@@ -29,6 +33,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Demo expansion behavior spec](./requirements/demo-expansion-behavior-spec.md) | BDD-DEMO-EXP — rendering fidelity, dual page numbers, eight bank letter demos |
 | [Non-functional requirements](./requirements/non-functional-requirements.md) | Quality, security, reliability constraints |
 | [PRD](./product/PRD.md) | Product-facing behavior |
+| [Usability review](./product/usability-review.md) | UX baselines, role journeys, open UX questions |
+| [Authoring & rendering first principles](./product/authoring-rendering-first-principles-review.md) | Core product philosophy — fidelity over API breadth |
 | [Catalog navigation UX](./product/catalog-navigation-ux.md) | Master/template package catalog IA + hybrid behavior-typed navigation (P21) |
 | [Business terminology guide](./product/business-terminology-guide.md) | Business-friendly L1 label SSOT for non-IT bank users (P21) |
 | [Domain model](./domain/domain-model.md) | Objects, states, invariants |
@@ -118,8 +124,9 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 | Document | Status | Purpose |
 | --- | --- | --- |
-| [Template testing overhaul](./behavior/template-testing-overhaul.md) | ready | P12 template testing tab BDD |
-| [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **ready** | Package-first API access, convention-over-config UI, invocation records (BDD-API-PACKAGE-ACCESS-INVOCATION-001) |
+| **[MVP golden path (browser)](./behavior/mvp-golden-path-browser.md)** | **ready** | CDP CD-BDD-T01 — full MVP chain in browser (CD-E2E-T01) |
+| [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12-TEMPLATE-TESTING-OVERHAUL 2026-07-03) | P12 template testing tab BDD |
+| [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **Done** (P12-API 2026-07-03) | Package-first API access, invocation records |
 
 ## ADRs
 

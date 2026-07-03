@@ -1,5 +1,5 @@
 {
-  "catalogVersion": "1.0",
+  "catalogVersion": "1.1",
   "styles": [
     {
       "styleKey": "BodyText",
@@ -7,9 +7,34 @@
       "renderPurpose": "BODY"
     },
     {
+      "styleKey": "ClauseBody",
+      "applicableNodeTypes": ["paragraph", "textRun", "emphasis", "underline", "list"],
+      "renderPurpose": "BODY"
+    },
+    {
       "styleKey": "Heading1",
       "applicableNodeTypes": ["sectionHeading"],
       "renderPurpose": "HEADING"
+    },
+    {
+      "styleKey": "Heading2",
+      "applicableNodeTypes": ["sectionHeading"],
+      "renderPurpose": "HEADING"
+    },
+    {
+      "styleKey": "Heading3",
+      "applicableNodeTypes": ["sectionHeading"],
+      "renderPurpose": "HEADING"
+    },
+    {
+      "styleKey": "ScheduleTitle",
+      "applicableNodeTypes": ["sectionHeading"],
+      "renderPurpose": "HEADING"
+    },
+    {
+      "styleKey": "TableHeader",
+      "applicableNodeTypes": ["paragraph", "textRun"],
+      "renderPurpose": "TABLE"
     }
   ]
 }

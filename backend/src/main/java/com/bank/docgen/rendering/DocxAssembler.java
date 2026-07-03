@@ -1,5 +1,7 @@
 package com.bank.docgen.rendering;
 
+import com.bank.docgen.authoring.structured.MasterStyleCatalog;
+import com.bank.docgen.authoring.structured.MasterStyleCatalogEntry;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
@@ -7,10 +9,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
@@ -21,6 +25,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.apache.xmlbeans.XmlCursor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,11 +39,20 @@ public class DocxAssembler {
     );
     private static final String MASTER_FILLER_MARKER =
             "Section-level anchor in the master layout container";
+    private static final String DEFAULT_STYLE_CATALOG_RESOURCE = "authoring/default-master-style-catalog-v1.json";
 
     private final ObjectMapper objectMapper;
+    private final MasterStyleCatalog styleCatalog;
+    private final StructuredContentDocxWriter structuredContentDocxWriter;
 
     public DocxAssembler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
+        this.styleCatalog = loadDefaultStyleCatalog(objectMapper);
+        this.structuredContentDocxWriter = new StructuredContentDocxWriter(
+                objectMapper,
+                styleCatalog,
+                new StructuredContentImageResolver()
+        );
     }
 
     public byte[] assemble(InputStream masterDocx, Map<String, String> anchorContent) {
@@ -495,5 +509,130 @@ public class DocxAssembler {
 
     public byte[] assembleFromBytes(byte[] masterBytes, Map<String, String> anchorContent) {
         return assemble(new ByteArrayInputStream(masterBytes), anchorContent);
+    }
+
+    public byte[] assembleStructured(
+            InputStream masterDocx,
+            Map<String, String> bindingJsonByAnchor,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures
+    ) {
+        try (XWPFDocument document = new XWPFDocument(masterDocx); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            removeMasterLayoutFillerParagraphs(document);
+            replaceStructuredAnchorsInDocumentBody(
+                    document,
+                    bindingJsonByAnchor,
+                    variables,
+                    pinnedModuleStructures
+            );
+            Map<String, String> plainTextFallback = buildAnchorReplacements(
+                    bindingJsonByAnchor,
+                    variables,
+                    pinnedModuleStructures
+            );
+            for (XWPFTable table : document.getTables()) {
+                for (XWPFTableRow row : table.getRows()) {
+                    for (XWPFTableCell cell : row.getTableCells()) {
+                        replaceInParagraphs(cell.getParagraphs(), plainTextFallback);
+                    }
+                }
+            }
+            document.getHeaderList().forEach(header -> replaceInParagraphs(header.getParagraphs(), plainTextFallback));
+            document.getFooterList().forEach(footer -> replaceInParagraphs(footer.getParagraphs(), plainTextFallback));
+            DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
+            document.write(output);
+            return output.toByteArray();
+        } catch (IOException ex) {
+            throw new DocxAssemblyException(ex);
+        }
+    }
+
+    public byte[] assembleStructuredFromBytes(
+            byte[] masterBytes,
+            Map<String, String> bindingJsonByAnchor,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures
+    ) {
+        return assembleStructured(
+                new ByteArrayInputStream(masterBytes),
+                bindingJsonByAnchor,
+                variables,
+                pinnedModuleStructures
+        );
+    }
+
+    private void replaceStructuredAnchorsInDocumentBody(
+            XWPFDocument document,
+            Map<String, String> bindingJsonByAnchor,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures
+    ) {
+        List<AnchorReplacement> replacements = new ArrayList<>();
+        List<IBodyElement> bodyElements = document.getBodyElements();
+        for (int index = 0; index < bodyElements.size(); index++) {
+            IBodyElement element = bodyElements.get(index);
+            if (!(element instanceof XWPFParagraph paragraph)) {
+                continue;
+            }
+            String text = paragraph.getText();
+            if (text == null || text.isBlank()) {
+                continue;
+            }
+            Matcher matcher = ANCHOR_PATTERN.matcher(text);
+            if (!matcher.find()) {
+                continue;
+            }
+            String anchorId = matcher.group(1);
+            String structuredJson = bindingJsonByAnchor.get(anchorId);
+            if (structuredJson == null || structuredJson.isBlank()) {
+                continue;
+            }
+            replacements.add(new AnchorReplacement(index, anchorId, structuredJson));
+        }
+        for (int replacementIndex = replacements.size() - 1; replacementIndex >= 0; replacementIndex--) {
+            AnchorReplacement replacement = replacements.get(replacementIndex);
+            structuredContentDocxWriter.replaceAnchorParagraph(
+                    document,
+                    replacement.paragraphIndex(),
+                    replacement.structuredJson(),
+                    variables,
+                    pinnedModuleStructures
+            );
+        }
+    }
+
+    private MasterStyleCatalog loadDefaultStyleCatalog(ObjectMapper mapper) {
+        try (InputStream inputStream = new ClassPathResource(DEFAULT_STYLE_CATALOG_RESOURCE).getInputStream()) {
+            JsonNode root = mapper.readTree(inputStream);
+            Map<String, MasterStyleCatalogEntry> styles = new HashMap<>();
+            JsonNode stylesNode = root.get("styles");
+            if (stylesNode != null && stylesNode.isArray()) {
+                for (JsonNode styleNode : stylesNode) {
+                    String styleKey = styleNode.path("styleKey").asText("");
+                    if (styleKey.isBlank()) {
+                        continue;
+                    }
+                    List<String> applicable = new ArrayList<>();
+                    JsonNode applicableNode = styleNode.get("applicableNodeTypes");
+                    if (applicableNode != null && applicableNode.isArray()) {
+                        applicableNode.forEach(node -> applicable.add(node.asText()));
+                    }
+                    styles.put(
+                            styleKey,
+                            new MasterStyleCatalogEntry(
+                                    styleKey,
+                                    Set.copyOf(applicable),
+                                    styleNode.path("renderPurpose").asText("")
+                            )
+                    );
+                }
+            }
+            return new MasterStyleCatalog(root.path("catalogVersion").asText("1.0"), styles);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Unable to load master style catalog: " + DEFAULT_STYLE_CATALOG_RESOURCE, ex);
+        }
+    }
+
+    private record AnchorReplacement(int paragraphIndex, String anchorId, String structuredJson) {
     }
 }

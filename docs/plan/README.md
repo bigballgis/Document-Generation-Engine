@@ -7,8 +7,9 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Active formal phase: P22** (2026-07-03 — **P22-DEMO-EXPANSION In Progress**; BDD ready; **P22-T01 next**).
-**P12 Not Started** (catch-all idle; slice **P12-API-PACKAGE-ACCESS-INVOCATION paused** — T01–T06 Done; resumes after P22). Prior slice **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03; T01–T13; backend `mvn verify`, frontend **643** Vitest, Playwright + UIUX **PASS**).
+**Active work (CDP session):** **[CDP Wave CD-0](./competitiveness-deepening-program.md)** — `CD-*` tasks only.
+
+**Formal phase P22:** tracked in [P22 detail](detail/P22-demo-expansion-rendering-fidelity.md) — **executed in another session**, not via CDP task IDs.
 **P21 Done** (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**,
 frontend **511** Vitest; **AUD-B10 resolved** via P12-AUD-B10; **AUD-M02 resolved** via P12-AUD-M02). Latest gates: backend `mvn verify` BUILD SUCCESS + frontend **643** Vitest (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL). See
 [execution-sync-ledger.md](./execution-sync-ledger.md).
@@ -79,14 +80,11 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P15 | K8s Helm, probes, blue-green, CI gates | [deploy/README.md](../deploy/README.md); helm-validate green |
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
-**Active phase: P22** (2026-07-03 — **P22-DEMO-EXPANSION In Progress**). **Active slice:** rendering fidelity + eight bank letter demos (BDD **ready**; [plan](detail/P22-demo-expansion-rendering-fidelity.md); **P22-T01 next**). **P12 catch-all → Not Started** (slice **P12-API-PACKAGE-ACCESS-INVOCATION paused** — T01–T06 Done). **P21 Done** — closure evidence in
-[detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
-
 **In-flight work:**
-- **P22-DEMO-EXPANSION** — structured content DOCX fidelity, dual page numbers, `deploy/demo-*` packages, `import-all-demos.ps1` (BDD **ready**; [plan](detail/P22-demo-expansion-rendering-fidelity.md); **P22-T01 next**)
+- **CDP (this session)** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)
+- **P22 (other session)** — rendering + demos ([plan](detail/P22-demo-expansion-rendering-fidelity.md); formal phase accounting only here)
 
-**Paused (resume after P22):**
-- **P12-API-PACKAGE-ACCESS-INVOCATION** — package-first API access + invocation records (BDD **ready**; T01–T06 Done; T07–T12 Not Started)
+**P21 Done** — closure evidence in [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 
 **Open backlog (non-active slices):**
 - **OPT-D / M9** — architecture/security debt (Redisson, QueryDSL expansion, intranet SCA) — see [optimization-plan.md](./optimization-plan.md)

@@ -65,6 +65,10 @@ upstream systems invoke the dynamic API.
 > [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md),
 > [detail/P12-api-package-access-invocation-records.md](./detail/P12-api-package-access-invocation-records.md),
 > [detail/P12-deferred-enhancements.md](./detail/P12-deferred-enhancements.md).
+>
+> **CDP (this session):** [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) — Wave CD-0…CD-3; task prefix **`CD-*`** only.
+>
+> **P22 (other session):** formal phase may show In Progress in this file for repo accounting; implementation tracked in [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md). **Do not** execute P22 from CDP docs.
 
 ## Thin vertical slice (MVP chain)
 

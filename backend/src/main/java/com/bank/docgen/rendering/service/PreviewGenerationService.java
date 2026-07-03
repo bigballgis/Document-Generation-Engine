@@ -9,7 +9,9 @@ import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.rendering.DocxAssembler;
+import com.bank.docgen.rendering.DocxPdfPageNumberStampPlanResolver;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
+import com.bank.docgen.rendering.PdfConversionStampPlanContext;
 import com.bank.docgen.rendering.api.FidelityWarningView;
 import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.api.PreviewSummaryView;
@@ -155,14 +157,14 @@ public class PreviewGenerationService {
             bindings.forEach(binding -> bindingJson.put(binding.getAnchorId(), binding.getStructuredContentJson()));
             Map<String, String> pinnedModuleStructures =
                     contentModuleReferenceService.resolvePinnedContentStructures(version.getId());
-            Map<String, String> anchorContent = docxAssembler.buildAnchorReplacements(
-                    bindingJson,
-                    variables,
-                    pinnedModuleStructures
-            );
             byte[] docx;
             try (InputStream masterStream = objectStoragePort.get(master.getStorageKey())) {
-                docx = docxAssembler.assemble(masterStream, anchorContent);
+                docx = docxAssembler.assembleStructured(
+                        masterStream,
+                        bindingJson,
+                        variables,
+                        pinnedModuleStructures
+                );
             }
             String storageKey = "previews/" + preview.getId() + "/output.docx";
             objectStoragePort.put(
@@ -175,11 +177,14 @@ public class PreviewGenerationService {
                     version,
                     CallerRenderOverride.empty()
             );
-            DocumentArtifactPipeline.GeneratedArtifact pdfArtifact = documentArtifactPipeline.finalizeArtifact(
-                    docx,
-                    "PDF",
-                    NO_ENCRYPTION,
-                    renderProfile
+            DocumentArtifactPipeline.GeneratedArtifact pdfArtifact = PdfConversionStampPlanContext.runWith(
+                    DocxPdfPageNumberStampPlanResolver.resolve(docx, renderProfile),
+                    () -> documentArtifactPipeline.finalizeArtifact(
+                            docx,
+                            "PDF",
+                            NO_ENCRYPTION,
+                            renderProfile
+                    )
             );
             String pdfStorageKey = "previews/" + preview.getId() + "/output.pdf";
             objectStoragePort.put(
