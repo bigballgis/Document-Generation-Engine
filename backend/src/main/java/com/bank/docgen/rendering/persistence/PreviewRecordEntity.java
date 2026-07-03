@@ -60,6 +60,18 @@ public class PreviewRecordEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "expires_at")
+    private Instant expiresAt;
+
+    @Column(name = "temp_storage_key", length = 512)
+    private String tempStorageKey;
+
+    @Column(name = "temp_artifact_cleaned", nullable = false)
+    private boolean tempArtifactCleaned;
+
+    @Column(name = "error_details", columnDefinition = "TEXT")
+    private String errorDetails;
+
     protected PreviewRecordEntity() {
     }
 
@@ -173,5 +185,47 @@ public class PreviewRecordEntity {
     public void markFailed() {
         this.status = PreviewStatus.FAILED;
         this.updatedAt = Instant.now();
+    }
+
+    public void markFailed(String errorDetails) {
+        this.status = PreviewStatus.FAILED;
+        this.errorDetails = errorDetails;
+        this.updatedAt = Instant.now();
+    }
+
+    public void markExpired() {
+        this.status = PreviewStatus.EXPIRED;
+        this.updatedAt = Instant.now();
+    }
+
+    public void setExpiresAt(Instant expiresAt) {
+        this.expiresAt = expiresAt;
+        this.updatedAt = Instant.now();
+    }
+
+    public void setTempStorageKey(String tempStorageKey) {
+        this.tempStorageKey = tempStorageKey;
+        this.updatedAt = Instant.now();
+    }
+
+    public void markTempArtifactCleaned() {
+        this.tempArtifactCleaned = true;
+        this.updatedAt = Instant.now();
+    }
+
+    public Instant getExpiresAt() {
+        return expiresAt;
+    }
+
+    public String getTempStorageKey() {
+        return tempStorageKey;
+    }
+
+    public boolean isTempArtifactCleaned() {
+        return tempArtifactCleaned;
+    }
+
+    public String getErrorDetails() {
+        return errorDetails;
     }
 }

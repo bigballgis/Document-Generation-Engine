@@ -27,9 +27,11 @@ import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
+import com.bank.docgen.template.event.TemplateContentChangedEvent;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,7 @@ public class TemplateService {
     private final TemplateBindingConfigurationService bindingConfigurationService;
     private final TemplateViewMapper templateViewMapper;
     private final TemplateCurrentVersionResolver templateVersionSupport;
+    private final ApplicationEventPublisher eventPublisher;
 
     public TemplateService(
             TemplateRepository templateRepository,
@@ -55,7 +58,8 @@ public class TemplateService {
             TemplateStructuredAuthoringService structuredAuthoringService,
             TemplateBindingConfigurationService bindingConfigurationService,
             TemplateViewMapper templateViewMapper,
-            TemplateCurrentVersionResolver templateVersionSupport
+            TemplateCurrentVersionResolver templateVersionSupport,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
@@ -66,6 +70,7 @@ public class TemplateService {
         this.bindingConfigurationService = bindingConfigurationService;
         this.templateViewMapper = templateViewMapper;
         this.templateVersionSupport = templateVersionSupport;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -173,7 +178,9 @@ public class TemplateService {
         TemplateEntity template = requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
-        return bindingConfigurationService.upsertVariable(version, request);
+        VariableSchemaView result = bindingConfigurationService.upsertVariable(version, request);
+        eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
+        return result;
     }
 
     @Transactional
@@ -182,6 +189,7 @@ public class TemplateService {
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
         bindingConfigurationService.deleteVariable(version.getId(), variableKey);
+        eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
     }
 
     @Transactional
@@ -193,7 +201,9 @@ public class TemplateService {
         TemplateEntity template = requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
-        return bindingConfigurationService.upsertBinding(template.getMasterId(), version, request);
+        AnchorBindingView result = bindingConfigurationService.upsertBinding(template.getMasterId(), version, request);
+        eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
+        return result;
     }
 
     @Transactional
@@ -205,7 +215,9 @@ public class TemplateService {
         TemplateEntity template = requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
-        return bindingConfigurationService.saveRules(version, rules);
+        List<CompositionRuleView> result = bindingConfigurationService.saveRules(version, rules);
+        eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
+        return result;
     }
 
     @Transactional(readOnly = true)

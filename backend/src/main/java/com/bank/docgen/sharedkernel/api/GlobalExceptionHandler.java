@@ -20,9 +20,12 @@ import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
 import com.bank.docgen.runtime.service.RuntimeDownloadExpiredException;
 import com.bank.docgen.rendering.EncryptionFailedException;
 import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
+import com.bank.docgen.rendering.service.PreviewArtifactExpiredException;
 import com.bank.docgen.rendering.service.PreviewArtifactNotAvailableException;
+import com.bank.docgen.rendering.service.PreviewConcurrencyLimitException;
 import com.bank.docgen.rendering.service.PreviewGenerationException;
 import com.bank.docgen.rendering.service.PreviewNotFoundException;
+import com.bank.docgen.rendering.service.BatchTestRunNotFoundException;
 import com.bank.docgen.rendering.DocxAssemblyException;
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
 import com.bank.docgen.template.service.TemplateGovernanceException;
@@ -277,6 +280,39 @@ public class GlobalExceptionHandler {
                 ApiErrorCodes.PREVIEW_NOT_FOUND,
                 ApiErrorCategories.RENDERING,
                 "api.error.rendering.previewArtifactNotAvailable"
+        );
+    }
+
+    @ExceptionHandler(PreviewArtifactExpiredException.class)
+    public ResponseEntity<ErrorEnvelope> handlePreviewArtifactExpired(HttpServletRequest request) {
+        return domainError(
+                request,
+                HttpStatus.GONE,
+                ApiErrorCodes.PREVIEW_ARTIFACT_EXPIRED,
+                ApiErrorCategories.RENDERING,
+                "api.error.rendering.previewArtifactExpired"
+        );
+    }
+
+    @ExceptionHandler(PreviewConcurrencyLimitException.class)
+    public ResponseEntity<ErrorEnvelope> handlePreviewConcurrencyLimit(HttpServletRequest request) {
+        return domainError(
+                request,
+                HttpStatus.TOO_MANY_REQUESTS,
+                ApiErrorCodes.PREVIEW_CONCURRENCY_LIMIT_EXCEEDED,
+                ApiErrorCategories.RENDERING,
+                "api.error.rendering.previewConcurrencyLimitExceeded"
+        );
+    }
+
+    @ExceptionHandler(BatchTestRunNotFoundException.class)
+    public ResponseEntity<ErrorEnvelope> handleBatchTestRunNotFound(HttpServletRequest request) {
+        return domainError(
+                request,
+                HttpStatus.NOT_FOUND,
+                ApiErrorCodes.BATCH_TEST_RUN_NOT_FOUND,
+                ApiErrorCategories.RENDERING,
+                "api.error.rendering.batchTestRunNotFound"
         );
     }
 

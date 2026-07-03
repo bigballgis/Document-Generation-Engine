@@ -5,6 +5,9 @@ import { managementNav } from './nav'
 
 export const DEMO_MASTER_NAME = 'Demo Retail Letterhead'
 export const DEMO_TEMPLATE_EXTERNAL_ID = 'DEMO-RETAIL-LETTER'
+/** Idempotent full-lifecycle demo template (draft → test → approval → publish → API policy). */
+export const DEMO_FULL_FLOW_EXTERNAL_ID = 'DEMO-FULL-FLOW-LETTER'
+export const DEMO_FULL_FLOW_NAME = 'Demo Full-Flow Retail Letter'
 export const DEMO_GROUP_CODE = 'RETAIL'
 
 export const FOL_MASTER_NAME = 'Meridian Wholesale FOL Master'

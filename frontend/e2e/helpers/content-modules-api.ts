@@ -1,5 +1,7 @@
 import type { APIRequestContext } from '@playwright/test'
 import {
+  DEMO_FULL_FLOW_EXTERNAL_ID,
+  DEMO_FULL_FLOW_NAME,
   DEMO_GROUP_CODE,
   DEMO_MASTER_NAME,
   DEMO_TEMPLATE_EXTERNAL_ID,
@@ -8,7 +10,7 @@ import {
   E2E_TEMPLATE_AUTHOR,
   E2E_TEMPLATE_TESTER,
 } from './auth'
-import { E2E_API_BASE_URL, findMasterByName } from './masters-api'
+import { E2E_API_BASE_URL, ensureDemoRetailMasterApproved, findMasterByName } from './masters-api'
 
 interface ApiEnvelope<T> {
   result: T
@@ -656,4 +658,222 @@ export async function attachReferenceToDemoTemplate(
     module.moduleId,
     module.semanticVersion,
   )
+}
+
+export const DEMO_FULL_FLOW_RELEASE_VERSION = '1.0.0'
+
+export interface DemoFullFlowFixture {
+  templateId: string
+  externalId: string
+  name: string
+  releaseVersion: string
+}
+
+export interface DemoFullFlowTemplateDetail {
+  lifecycleStatus: string
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+}
+
+export interface DemoFullFlowApiPolicy {
+  policyVersion: number
+  defaultRouteReleaseVersion: string
+  allowedAdGroups: string[]
+  outputFormats: string[]
+}
+
+export type DemoFullFlowLifecycleStage =
+  | 'DRAFT'
+  | 'TESTING'
+  | 'APPROVAL_PENDING_DECISION'
+  | 'PENDING_RELEASE'
+  | 'PUBLISHED'
+
+async function fetchDemoFullFlowTemplateDetail(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<DemoFullFlowTemplateDetail> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  return authorizedGet<DemoFullFlowTemplateDetail>(request, authorToken, `/templates/${templateId}`)
+}
+
+export async function fetchDemoFullFlowApiPolicy(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<DemoFullFlowApiPolicy> {
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  return authorizedGet<DemoFullFlowApiPolicy>(request, groupAdminToken, `/templates/${templateId}/api/policy`)
+}
+
+export async function createDemoFullFlowDraftTemplate(
+  request: APIRequestContext,
+): Promise<DemoFullFlowFixture> {
+  const existing = await findTemplateByExternalId(request, DEMO_FULL_FLOW_EXTERNAL_ID)
+  if (existing) {
+    if (existing.lifecycleStatus === 'DRAFT') {
+      await configurePublishableTemplate(request, existing.id)
+    }
+    return {
+      templateId: existing.id,
+      externalId: DEMO_FULL_FLOW_EXTERNAL_ID,
+      name: DEMO_FULL_FLOW_NAME,
+      releaseVersion: DEMO_FULL_FLOW_RELEASE_VERSION,
+    }
+  }
+
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const master = await ensureDemoRetailMasterApproved(request)
+
+  const createdTemplate = await authorizedPost<{ id: string; externalId: string }>(
+    request,
+    authorToken,
+    '/templates',
+    {
+      externalId: DEMO_FULL_FLOW_EXTERNAL_ID,
+      groupCode: DEMO_GROUP_CODE,
+      name: DEMO_FULL_FLOW_NAME,
+      description: 'Full lifecycle demo template for E2E and manual walkthrough',
+      masterId: master.id,
+    },
+    201,
+  )
+
+  await configurePublishableTemplate(request, createdTemplate.id)
+
+  return {
+    templateId: createdTemplate.id,
+    externalId: DEMO_FULL_FLOW_EXTERNAL_ID,
+    name: DEMO_FULL_FLOW_NAME,
+    releaseVersion: DEMO_FULL_FLOW_RELEASE_VERSION,
+  }
+}
+
+async function advanceDemoFullFlowToTesting(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<void> {
+  const detail = await fetchDemoFullFlowTemplateDetail(request, templateId)
+  if (detail.lifecycleStatus === 'TESTING') {
+    return
+  }
+  if (detail.lifecycleStatus !== 'DRAFT') {
+    return
+  }
+  await ensureDemoTemplateSubmittedForTest(request, templateId)
+}
+
+async function advanceDemoFullFlowToApprovalPendingDecision(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<void> {
+  const detail = await fetchDemoFullFlowTemplateDetail(request, templateId)
+  if (
+    detail.lifecycleStatus === 'APPROVAL' &&
+    detail.approvalSubState === 'PENDING_DECISION'
+  ) {
+    return
+  }
+  if (detail.lifecycleStatus === 'PENDING_RELEASE' || detail.lifecycleStatus === 'PUBLISHED') {
+    return
+  }
+
+  await advanceDemoFullFlowToTesting(request, templateId)
+  await ensureDemoTemplatePendingApprovalDecision(request, templateId)
+}
+
+async function advanceDemoFullFlowToPendingRelease(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<void> {
+  const detail = await fetchDemoFullFlowTemplateDetail(request, templateId)
+  if (detail.lifecycleStatus === 'PENDING_RELEASE' || detail.lifecycleStatus === 'PUBLISHED') {
+    return
+  }
+
+  await advanceDemoFullFlowToApprovalPendingDecision(request, templateId)
+  await ensureDemoTemplatePendingRelease(request, templateId)
+}
+
+async function advanceDemoFullFlowToPublished(
+  request: APIRequestContext,
+  templateId: string,
+  releaseVersion: string,
+): Promise<void> {
+  const detail = await fetchDemoFullFlowTemplateDetail(request, templateId)
+  if (detail.lifecycleStatus === 'PUBLISHED') {
+    return
+  }
+
+  if (detail.lifecycleStatus !== 'PENDING_RELEASE') {
+    await advanceDemoFullFlowToPendingRelease(request, templateId)
+  }
+
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  await authorizedPut(request, groupAdminToken, `/templates/${templateId}/api/policy`, {
+    allowedAdGroups: ['RETAIL_API'],
+    defaultRouteReleaseVersion: releaseVersion,
+    outputFormats: ['DOCX'],
+    outputModes: ['SYNC_STREAM'],
+    batchEnabled: false,
+    maxBatchSize: 10,
+    docxEncryptionEnabled: false,
+    pdfEncryptionEnabled: false,
+  })
+
+  await authorizedPost(request, groupAdminToken, `/templates/${templateId}/lifecycle/publish`, {
+    releaseVersion,
+  })
+
+  const published = await fetchDemoFullFlowTemplateDetail(request, templateId)
+  if (published.lifecycleStatus !== 'PUBLISHED') {
+    throw new Error(
+      `Failed to publish full-flow demo template (status=${published.lifecycleStatus}, templateId=${templateId})`,
+    )
+  }
+}
+
+export async function ensureDemoFullFlowAtStage(
+  request: APIRequestContext,
+  stage: DemoFullFlowLifecycleStage,
+): Promise<DemoFullFlowFixture> {
+  const fixture = await createDemoFullFlowDraftTemplate(request)
+
+  switch (stage) {
+    case 'DRAFT':
+      break
+    case 'TESTING':
+      await advanceDemoFullFlowToTesting(request, fixture.templateId)
+      break
+    case 'APPROVAL_PENDING_DECISION':
+      await advanceDemoFullFlowToApprovalPendingDecision(request, fixture.templateId)
+      break
+    case 'PENDING_RELEASE':
+      await advanceDemoFullFlowToPendingRelease(request, fixture.templateId)
+      break
+    case 'PUBLISHED':
+      await advanceDemoFullFlowToPublished(
+        request,
+        fixture.templateId,
+        fixture.releaseVersion,
+      )
+      break
+    default: {
+      const exhaustiveStage: never = stage
+      throw new Error(`Unsupported full-flow lifecycle stage: ${exhaustiveStage}`)
+    }
+  }
+
+  return fixture
+}
+
+export async function ensureDemoFullFlowPublished(
+  request: APIRequestContext,
+): Promise<DemoFullFlowFixture> {
+  return ensureDemoFullFlowAtStage(request, 'PUBLISHED')
+}
+
+export async function demoFullFlowPublishedDetailPath(
+  request: APIRequestContext,
+): Promise<string> {
+  const fixture = await ensureDemoFullFlowPublished(request)
+  return `/templates/${fixture.templateId}`
 }

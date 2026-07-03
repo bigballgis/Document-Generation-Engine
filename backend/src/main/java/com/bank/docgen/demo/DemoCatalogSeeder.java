@@ -1,7 +1,5 @@
 package com.bank.docgen.demo;
 
-import com.bank.docgen.authorization.management.domain.AuthSource;
-import com.bank.docgen.authorization.management.domain.ManagementRoute;
 import com.bank.docgen.master.api.CreateMasterRequest;
 import com.bank.docgen.master.api.DecideMasterReviewRequest;
 import com.bank.docgen.master.api.MasterDocumentDetailView;
@@ -12,8 +10,6 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.service.TemplateService;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,12 +68,22 @@ public class DemoCatalogSeeder implements ApplicationRunner {
     }
 
     private void seedIfNeeded() {
+        ensureApprovedDemoMaster();
+
         if (templateRepository.findByExternalIdAndDeletedAtIsNull(DEMO_TEMPLATE_EXTERNAL_ID).isPresent()) {
-            log.info("Demo catalog already present (template {}). Skipping seed.", DEMO_TEMPLATE_EXTERNAL_ID);
+            log.info("Demo catalog already present (template {}). Skipping draft seed.", DEMO_TEMPLATE_EXTERNAL_ID);
             return;
         }
 
-        String masterId = ensureApprovedDemoMaster();
+        String masterId = masterDocumentRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(
+                List.of(DEMO_GROUP_CODE)
+        ).stream()
+                .filter(master -> DEMO_MASTER_NAME.equals(master.getName()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Approved demo master missing after ensure step"))
+                .getId()
+                .toString();
+
         templateService.create(
                 new CreateTemplateRequest(
                         DEMO_TEMPLATE_EXTERNAL_ID,
@@ -89,13 +95,17 @@ public class DemoCatalogSeeder implements ApplicationRunner {
                 templateAuthorSession()
         );
         log.info(
-                "Seeded demo catalog: master '{}' (APPROVED) and template '{}'.",
+                "Seeded demo catalog: master '{}' (APPROVED) and draft template '{}'.",
                 DEMO_MASTER_NAME,
                 DEMO_TEMPLATE_EXTERNAL_ID
         );
     }
 
-    private String ensureApprovedDemoMaster() {
+    private void ensureApprovedDemoMaster() {
+        ensureApprovedDemoMasterReturningId();
+    }
+
+    private String ensureApprovedDemoMasterReturningId() {
         var existing = masterDocumentRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(
                 List.of(DEMO_GROUP_CODE)
         ).stream()
@@ -140,28 +150,14 @@ public class DemoCatalogSeeder implements ApplicationRunner {
     }
 
     private static ManagementSessionClaims groupAdminSession() {
-        return session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL", "CORP"));
+        return DemoCatalogSessions.groupAdminSession();
     }
 
     private static ManagementSessionClaims globalAdminSession() {
-        return session("10000001", List.of("GLOBAL_ADMIN"), List.of("*"));
+        return DemoCatalogSessions.globalAdminSession();
     }
 
     private static ManagementSessionClaims templateAuthorSession() {
-        return session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
-    }
-
-    private static ManagementSessionClaims session(String username, List<String> roles, List<String> groups) {
-        return new ManagementSessionClaims(
-                username,
-                "Demo Seeder",
-                "demo-seeder@example.com",
-                AuthSource.LOCAL,
-                roles,
-                groups,
-                ManagementRoute.DASHBOARD_HOME.routeKey(),
-                List.of(ManagementRoute.DASHBOARD_HOME.routeKey()),
-                Instant.now().plus(Duration.ofHours(1))
-        );
+        return DemoCatalogSessions.templateAuthorSession();
     }
 }

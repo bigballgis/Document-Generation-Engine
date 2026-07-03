@@ -419,3 +419,28 @@ export async function switchLocale(page: Page, locale: AppLocale): Promise<void>
   await page.getByRole('option', { name: LOCALE_OPTION_NAME[locale] }).click()
   await expect(page.locator('html')).toHaveAttribute('lang', locale)
 }
+
+export const DEMO_FULL_FLOW_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'demo-full-lifecycle')
+export const DEMO_FULL_FLOW_SCREENSHOT_DIR = path.join(DEMO_FULL_FLOW_EVIDENCE_ROOT, 'screenshots')
+export const DEMO_FULL_FLOW_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureDemoFullFlowEvidenceDirs(): void {
+  fs.mkdirSync(DEMO_FULL_FLOW_SCREENSHOT_DIR, { recursive: true })
+}
+
+export async function captureDemoFullFlowLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureDemoFullFlowEvidenceDirs()
+  const target = path.join(DEMO_FULL_FLOW_SCREENSHOT_DIR, filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export async function captureDemoFullFlowScreenshot(page: Page, filename: string): Promise<string> {
+  ensureDemoFullFlowEvidenceDirs()
+  const target = path.join(DEMO_FULL_FLOW_SCREENSHOT_DIR, filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}

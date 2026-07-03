@@ -3,7 +3,6 @@ package com.bank.docgen.template.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +16,7 @@ import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
+import org.springframework.context.ApplicationEventPublisher;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
@@ -61,6 +61,8 @@ class TemplateServiceMetadataTest {
     private TemplateBindingConfigurationService bindingConfigurationService;
     @Mock
     private TemplateCurrentVersionResolver templateCurrentVersionResolver;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     private TemplateService service;
     private ManagementSessionClaims author;
@@ -87,7 +89,8 @@ class TemplateServiceMetadataTest {
                 structuredAuthoringService,
                 bindingConfigurationService,
                 viewMapper,
-                templateCurrentVersionResolver
+                templateCurrentVersionResolver,
+                eventPublisher
         );
         author = new ManagementSessionClaims(
                 "10000003",

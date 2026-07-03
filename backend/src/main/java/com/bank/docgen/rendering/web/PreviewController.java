@@ -1,10 +1,12 @@
 package com.bank.docgen.rendering.web;
 
+import com.bank.docgen.rendering.api.AsyncPreviewStartResponse;
 import com.bank.docgen.rendering.api.BatchTestGenerateRequest;
 import com.bank.docgen.rendering.api.BatchTestSummaryView;
 import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.api.PreviewSummaryView;
 import com.bank.docgen.rendering.api.TestGenerateRequest;
+import com.bank.docgen.rendering.service.AsyncPreviewOrchestrator;
 import com.bank.docgen.rendering.service.BatchTestGenerationService;
 import com.bank.docgen.rendering.service.PreviewArtifactDownloadService;
 import com.bank.docgen.rendering.service.PreviewArtifactDownloadService.PreviewArtifactFormat;
@@ -20,13 +22,17 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/api/management/v1/templates/{templateId}/previews")
@@ -35,17 +41,20 @@ public class PreviewController {
     private final PreviewGenerationService previewGenerationService;
     private final BatchTestGenerationService batchTestGenerationService;
     private final PreviewArtifactDownloadService previewArtifactDownloadService;
+    private final AsyncPreviewOrchestrator asyncPreviewOrchestrator;
     private final TraceIdProvider traceIdProvider;
 
     public PreviewController(
             PreviewGenerationService previewGenerationService,
             BatchTestGenerationService batchTestGenerationService,
             PreviewArtifactDownloadService previewArtifactDownloadService,
+            AsyncPreviewOrchestrator asyncPreviewOrchestrator,
             TraceIdProvider traceIdProvider
     ) {
         this.previewGenerationService = previewGenerationService;
         this.batchTestGenerationService = batchTestGenerationService;
         this.previewArtifactDownloadService = previewArtifactDownloadService;
+        this.asyncPreviewOrchestrator = asyncPreviewOrchestrator;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -133,6 +142,30 @@ public class PreviewController {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();
         return new SuccessEnvelope<>(Metadata.minimal(auditId, traceId), result);
+    }
+
+    @PostMapping("/async-preview")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public SuccessEnvelope<AsyncPreviewStartResponse> startAsyncPreview(
+            @PathVariable UUID templateId,
+            @Valid @RequestBody TestGenerateRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        String baseUrl = request.getScheme() + "://" + request.getServerName()
+                + ":" + request.getServerPort()
+                + "/api/management/v1/templates/" + templateId + "/previews";
+        AsyncPreviewStartResponse response = asyncPreviewOrchestrator.startAsync(templateId, body, session, baseUrl);
+        return envelope(request, response);
+    }
+
+    @GetMapping(value = "/{previewId}/progress-stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamPreviewProgress(
+            @PathVariable UUID templateId,
+            @PathVariable UUID previewId,
+            @AuthenticationPrincipal ManagementSessionClaims session
+    ) {
+        return asyncPreviewOrchestrator.streamProgress(templateId, previewId, session);
     }
 
     private String sanitizeDownloadFilename(String filename) {

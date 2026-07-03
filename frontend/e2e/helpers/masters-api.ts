@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { APIRequestContext } from '@playwright/test'
 import {
+  DEMO_GROUP_CODE,
   DEMO_MASTER_NAME,
   E2E_ADMIN,
   E2E_GROUP_ADMIN,
@@ -137,13 +138,96 @@ export async function demoMasterDetailPath(request: APIRequestContext): Promise<
 }
 
 export async function assertDemoCatalogSeeded(request: APIRequestContext): Promise<void> {
+  await ensureDemoRetailMasterApproved(request)
   const token = await apiLogin(request, E2E_GROUP_ADMIN)
   const master = await findMasterByName(request, token, DEMO_MASTER_NAME)
   if (!master) {
     throw new Error(
-      `Demo master "${DEMO_MASTER_NAME}" was not found. Set DOCGEN_SEED_DEMO_CATALOG=true and recreate docgen-backend.`,
+      `Demo master "${DEMO_MASTER_NAME}" was not found after ensure step.`,
     )
   }
+}
+
+export async function ensureDemoRetailMasterApproved(
+  request: APIRequestContext,
+): Promise<MasterSummary> {
+  if (!fs.existsSync(DEMO_SEED_DOCX_PATH)) {
+    throw new Error(
+      `Missing seed fixture ${DEMO_SEED_DOCX_PATH}. Run: mvn -f backend/pom.xml -Dtest=E2eDocxFixtureGeneratorTest test`,
+    )
+  }
+
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  const existing = await findMasterByName(request, groupAdminToken, DEMO_MASTER_NAME)
+  if (existing?.status === 'APPROVED') {
+    return existing
+  }
+
+  if (existing) {
+    let detail = await authorizedGet<MasterDetail>(request, groupAdminToken, `/masters/${existing.id}`)
+    if (detail.status === 'DRAFT' || detail.status === 'REJECTED') {
+      detail = await authorizedPost<MasterDetail>(
+        request,
+        groupAdminToken,
+        `/masters/${existing.id}/submit-review`,
+        { changeSummary: 'E2E demo retail master submit' },
+      )
+    }
+    if (detail.status === 'PENDING_REVIEW') {
+      const adminToken = await apiLogin(request, E2E_ADMIN)
+      detail = await authorizedPost<MasterDetail>(
+        request,
+        adminToken,
+        `/masters/${existing.id}/review`,
+        { decision: 'APPROVED', commentSummary: 'E2E demo retail master approval' },
+      )
+    }
+    if (detail.status !== 'APPROVED') {
+      throw new Error(`Failed to approve demo master (status=${detail.status})`)
+    }
+    return detail
+  }
+
+  const createResponse = await request.post(`${E2E_API_BASE_URL}/masters`, {
+    headers: { Authorization: `Bearer ${groupAdminToken}` },
+    multipart: {
+      file: {
+        name: DEMO_SEED_DOCX_FILENAME,
+        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        buffer: fs.readFileSync(DEMO_SEED_DOCX_PATH),
+      },
+      groupCode: DEMO_GROUP_CODE,
+      name: DEMO_MASTER_NAME,
+      description: 'Demo retail letterhead for full-lifecycle E2E',
+    },
+  })
+  if (!createResponse.ok()) {
+    throw new Error(
+      `POST /masters failed (${createResponse.status()}): ${await createResponse.text()}`,
+    )
+  }
+  const created = ((await createResponse.json()) as ApiEnvelope<MasterDetail>).result
+
+  await authorizedPost<MasterDetail>(
+    request,
+    groupAdminToken,
+    `/masters/${created.id}/submit-review`,
+    { changeSummary: 'E2E demo retail master initial submit' },
+  )
+
+  const adminToken = await apiLogin(request, E2E_ADMIN)
+  const approved = await authorizedPost<MasterDetail>(
+    request,
+    adminToken,
+    `/masters/${created.id}/review`,
+    { decision: 'APPROVED', commentSummary: 'E2E demo retail master initial approval' },
+  )
+
+  if (approved.status !== 'APPROVED') {
+    throw new Error(`Failed to create approved demo master (status=${approved.status})`)
+  }
+
+  return approved
 }
 
 export async function demoMasterRevisionDetailPath(request: APIRequestContext): Promise<string> {
