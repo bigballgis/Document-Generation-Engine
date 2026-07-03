@@ -50,6 +50,41 @@ test.describe('P12 API package access hub (BDD S6 L1)', () => {
     await expect(page.getByText(/recent invocations|最近调用/i)).toBeVisible()
   })
 
+  test('BDD S4 — advanced policy domains collapsed by default on hub tab', async ({
+    page,
+    request,
+  }) => {
+    const fixture = await ensureDemoFullFlowPublished(request)
+    await page.goto(`/templates/${fixture.templateId}?tab=apiAccess`)
+
+    await expect(page.getByText(/advanced settings|高级设置/i)).toBeVisible()
+    await expect(page.getByText(/platform defaults|平台默认/i)).toHaveCount(0)
+    await page.getByText(/advanced settings|高级设置/i).click()
+    await expect(page.getByText(/platform defaults|平台默认/i).first()).toBeVisible()
+  })
+
+  test('BDD S8 — retention preset options visible on L1 surface', async ({ page, request }) => {
+    const fixture = await ensureDemoFullFlowPublished(request)
+    await page.goto(`/templates/${fixture.templateId}?tab=apiAccess`)
+
+    const recordSelect = page.locator('.retention-select').first()
+    await expect(recordSelect).toBeVisible()
+    await recordSelect.click()
+    await expect(page.getByRole('option', { name: /365 days|365 天/i })).toBeVisible()
+    await expect(page.getByRole('option', { name: /90 days|90 天/i })).toBeVisible()
+  })
+
+  test('recent invocations panel shows empty state instead of coming-soon placeholder', async ({
+    page,
+    request,
+  }) => {
+    const fixture = await ensureDemoFullFlowPublished(request)
+    await page.goto(`/templates/${fixture.templateId}?tab=apiAccess`)
+
+    await expect(page.getByText(/invocation summary coming soon|调用摘要即将提供/i)).toHaveCount(0)
+    await expect(page.getByText(/no recent invocations|暂无最近调用/i)).toBeVisible()
+  })
+
   test('api services overview avoids legacy catalog primary surface', async ({ page }) => {
     await page.goto('/api/policies')
     await expect(page.getByText(/external services overview|对外服务概览/i)).toBeVisible()
