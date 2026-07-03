@@ -16,6 +16,8 @@ gates, and updated owning docs.
 > reset. It records concrete, evidence-backed gaps found by read-only analysis on
 > 2026-06-23. Source evidence is cited by file path; verify before acting.
 
+> **2026-07-03:** Statuses reconciled against COR-*/P12 evidence; open residuals re-scoped into [LRP](./launch-readiness-program.md).
+
 ---
 
 ## 0. Headline findings
@@ -31,7 +33,7 @@ gates, and updated owning docs.
 | F3 | **Stack drift vs ADR** | High | **Mostly closed** — QueryDSL, MapStruct, Bucket4j, Resilience4j landed; Redisson deferred (ADR-0039) |
 | F4 | **Thin test coverage** | High | **Mostly closed** — COR-C/E + P14/P18 E2E; backend **524**, frontend **250** Vitest, 13 Playwright specs |
 | F5 | **Rendering→runtime reverse dependency** | Medium | **Closed** — OPT-D1 (2026-06-24) |
-| F6 | **Git baseline** | Medium | **Partial** — `main` has commits; OPT-B5 baseline tag still Not Started |
+| F6 | **Git baseline** | Medium | **Closed** — main carries full commit history; baseline tag (B5) optional/dropped |
 
 ---
 
@@ -76,7 +78,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | B2 | H | Add JaCoCo coverage thresholds | `pom.xml` `coverage-check` execution | `jacoco:check` enforces ratchet floors LINE ≥0.70 / BRANCH ≥0.45 (current 0.746 / 0.473); ratchet target 0.85/0.60 documented | **Done** |
 | B3 | M | Add frontend coverage gate | `frontend/vitest.config.ts` coverage block; `test` script uses `--coverage` | Vitest v8 coverage with ratchet floors (lines 22 / fn 32 / branch 55; baseline 23.6/34.7/64.5); `pnpm -C frontend test` enforces it | **Done** |
 | B4 | M | Add ESLint a11y plugin | `frontend/eslint.config.js` + `eslint-plugin-vuejs-accessibility` | `flat/recommended` a11y rules active; `pnpm -C frontend lint` green (0 problems) | **Done** |
-| B5 | M | First commit + baseline tag | branch `main` has no commits (F6) | Initial commit of current tree + tag (e.g. `baseline-2026-06-23`) so optimization diffs are auditable | Not Started (awaiting go-ahead) |
+| B5 | M | First commit + baseline tag | branch `main` has no commits (F6) | Initial commit of current tree + tag (e.g. `baseline-2026-06-23`) so optimization diffs are auditable | **Dropped** (2026-07-03 — main has established commit history; baseline tag no longer meaningful) |
 
 **Gate evidence (2026-06-23, re-verified):** backend `mvn -B -ntp -f backend/pom.xml verify` → BUILD SUCCESS, 71 tests, 0 Checkstyle / PMD / SpotBugs violations, JaCoCo check passed. Frontend `pnpm lint` 0 problems; `pnpm test` (with coverage) passes ratchet floors. Ratchet debts recorded in `config/spotbugs/exclude.xml` (EI_EXPOSE_REP×166 deferred to an immutability pass; REC_CATCH_EXCEPTION×8 deferred to OPT-E3).
 
@@ -101,7 +103,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | D3 | M | Introduce MapStruct mappers | hand-written `toSummary`/`toDetail`/`toPolicyView` (e.g. `TemplateService` L341–404) | Mappers via MapStruct (ADR); services slimmed; behavior unchanged | **Done** (2026-06-25; COR-P08 apimgmt `ApiPolicyViewMapper`; opportunistic expansion ongoing) |
 | D4 | M | Introduce QueryDSL for complex queries | `ManagementAuditEventRepository` JPQL, in-memory filtering | Audit/list queries type-safe + pageable via QueryDSL | **Done** (2026-06-25; COR-P07; `ManagementAuditEventRepositoryQuerydslTest` 5/5; verify 319 tests) |
 | D5 | M | Split god services | `TemplateService` ~250 L (was ~651), `BatchGenerationService` 403 L, `ApiManagementService` 326 L | Responsibilities separated (validation/mapping/authz extracted); each class focused | **In Progress** — slice 1 Done: `TemplateViewMapper` (651→547 L); slice 2 Done: `TemplateStructuredAuthoringService` (547→495 L); slice 3 **Done** (2026-07-01): `TemplateBindingConfigurationService` (variable schema, bindings, rules, validation; 495→250 L); `TemplateBindingConfigurationServiceTest`; BDD `not-applicable`; backend **588** Surefire |
-| D6 | L | Evaluate declarative authorization | no `@PreAuthorize`; authz all manual in services | Decision recorded; if adopted, consistent enforcement reduces missed-endpoint risk | Not Started |
+| D6 | L | Evaluate declarative authorization | no `@PreAuthorize`; authz all manual in services | Decision recorded; if adopted, consistent enforcement reduces missed-endpoint risk | Not Started (pattern documented via COR-P06/ADR-0001; adoption optional) |
 
 ### OPT-E Backend security & correctness hardening
 
@@ -115,7 +117,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | E6 | M | Remove hardcoded user-facing strings | `ContractAssemblyService`, `TemplateLifecycleService` publish audit | **Done** (Wave 2, scoped): contract AD-group summaries + publish lifecycle reason via `messages_en.properties` |
 | E7 | M | Handle uncovered exceptions in `GlobalExceptionHandler` | `ObjectStorageException`, `DocxAssemblyException`, `IllegalStateException` | **Done** (Wave 2): mapped to envelope with stable message keys |
 | E8 | M | Fix download Content-Type | `RuntimeDocumentController` L35 hardcoded DOCX MIME | **Done** (Wave 3): Content-Type derived from storage key via `ArtifactContentTypes`; PDF/DOCX covered in `DocumentDownloadServiceTest` |
-| E9 | L | Idempotency hash failure should not fall back to raw payload | `IdempotencyService` L88–90 returns payload on digest error | Digest failure is a hard error, not weakened key | Not Started |
+| E9 | L | Idempotency hash failure should not fall back to raw payload | `IdempotencyService` L88–90 returns payload on digest error | Digest failure is a hard error, not weakened key | Not Started → **LR-B7** |
 
 ### OPT-F Backend performance & resilience
 
@@ -124,11 +126,11 @@ Priority: **H/M/L**. All start `Not Started`.
 | F1 | H | Add rate limiting (Bucket4j or gateway) | no rate limiting anywhere; `BatchLimitsView` is contract-only | **Done** (Wave 3): Bucket4j per `credentialId:accessAccount`; 429 + `Retry-After` + `RATE_LIMIT_EXCEEDED`; `RuntimeRateLimitFilterTest` |
 | F2 | H | Add resilience around external calls | no Resilience4j; LibreOffice/MinIO/Kafka unguarded | **Done** (Wave 3): Resilience4j circuit-breaker + retry on MinIO put/get/delete and PDF conversion; `serviceUnavailable` mapping; `ResilienceFailureMapperTest` |
 | F3 | H | Stream large artifacts instead of `readAllBytes` | `DocumentDownloadService` L60–62, `RuntimeGenerationService` L138–139 | **Done** (Wave 3): download + sync replay stream from object storage; lazy-load tests in `DocumentDownloadServiceTest` / `RuntimeGenerationServiceGenerateTest` |
-| F4 | M | Paginate list/audit queries | `TemplateRepository.findBy...`, `ManagementAuditEventRepository.search` return `List` | Pageable endpoints; default page size; tests | Not Started |
-| F5 | M | Fix EAGER anchors fetch | `MasterDocumentEntity` L62 `@OneToMany(EAGER)` | LAZY + explicit fetch-join where needed; no N+1 on list | Not Started |
-| F6 | M | Offload synchronous LibreOffice from request thread | `RuntimeGenerationService`→`finalizeArtifact` runs PDF conversion inline | Conversion async/bounded pool with timeout; request not blocked unduly | Not Started |
-| F7 | L | Clean LibreOffice temp dirs | `LibreOfficePdfConversionService` L27–52 no `finally` cleanup | Temp dirs deleted in `finally`; no leak | Not Started |
-| F8 | L | Evaluate Redisson distributed lock | only Lettuce KV idempotency; no lock | Decision recorded; lock added for idempotency-begin/async-task if multi-instance | Not Started |
+| F4 | M | Paginate list/audit queries | `TemplateRepository.findBy...`, `ManagementAuditEventRepository.search` return `List` | Pageable endpoints; default page size; tests | **Partial** (2026-07-03) — audit pagination Done (COR-B08/COR-F17, 2026-06-24); catalog lists (templates/masters/content-modules) still return full lists → residual **LR-C5** |
+| F5 | M | Fix EAGER anchors fetch | `MasterDocumentEntity` L62 `@OneToMany(EAGER)` | LAZY + explicit fetch-join where needed; no N+1 on list | **Done** (2026-06-25; COR-P04 — LAZY + batch count + EntityGraph detail) |
+| F6 | M | Offload synchronous LibreOffice from request thread | `RuntimeGenerationService`→`finalizeArtifact` runs PDF conversion inline | Conversion async/bounded pool with timeout; request not blocked unduly | **Partial** (2026-06-25) — pooling + timeout Done (COR-P02 `PdfConversionOffloadSupport` + `pdfConversionExecutor`); LibreOffice profile isolation + CLI hardening residual → **LR-A1** |
+| F7 | L | Clean LibreOffice temp dirs | `LibreOfficePdfConversionService` L27–52 no `finally` cleanup | Temp dirs deleted in `finally`; no leak | **Done** (2026-06-24; COR-P03 — try/finally temp dir cleanup + test) |
+| F8 | L | Evaluate Redisson distributed lock | only Lettuce KV idempotency; no lock | Decision recorded; lock added for idempotency-begin/async-task if multi-instance | **Done (evaluation)** (2026-06-24; ADR-0039 — single-instance accepted; multi-instance implementation deferred → LR-B1/LR-B2) |
 
 ### OPT-G Frontend quality, types & UX
 
@@ -137,12 +139,12 @@ Priority: **H/M/L**. All start `Not Started`.
 | G1 | H | Add axios response interceptor (401/403 + envelope) | `api/http.ts` request-only interceptor; `en.ts` L17–18 `sessionExpired` unused | **Done** (Wave 3): 401 clears session + `sessionExpired` login redirect; 403 → forbidden with server `traceId`; `http.test.ts` |
 | G2 | H | Align `ApiEnvelope.error` with OpenAPI | `types/session.ts` L25–29 lacks `category`, `retryable` | **Done** (Wave 3): contract-aligned `ApiErrorDetail`; centralized `resolveApiError*` helpers; stores use structured parsing |
 | G3 | H | Split `TemplateDetailView.vue` (550 L) | single file holds lifecycle+authoring+preview+policy+contract | Decomposed into subviews/composables; tested | **Done** (2026-07-03; P12-UIUX-DEEP-REFACTOR D1–D3: `useTemplateDetailController` composable + view; `WorkspaceTabShell`; **606** Vitest) |
-| G4 | M | Extract shared `unwrap`/`resolveApiError`/list patterns | duplicated in 5 api modules + 4 stores + 3 list views | Shared composables/util; duplication removed | Not Started |
-| G5 | M | Route client-side role checks + tests | `stores/session.ts` L35–47 only checks master/template/audit; api-policy/home rely on backend `visibleRoutes` | Symmetric client checks + router integration tests | Not Started |
+| G4 | M | Extract shared `unwrap`/`resolveApiError`/list patterns | duplicated in 5 api modules + 4 stores + 3 list views | Shared composables/util; duplication removed | Not Started → **LR-C13** |
+| G5 | M | Route client-side role checks + tests | `stores/session.ts` L35–47 only checks master/template/audit; api-policy/home rely on backend `visibleRoutes` | Symmetric client checks + router integration tests | Not Started → **LR-C13** |
 | G6 | M | i18n-ize placeholders/aria-labels/brand + locale-aware dates | `LoginView` L76, `ManagementShell` L87, `theme/tokens.ts` L17–24, 7× `toLocaleString()` | All user-facing strings via keys; dates use i18n locale | **Partial** (2026-07-03; P12-UIUX-DEEP-REFACTOR A1: brand rename via `brands.ts` config-driven; remaining aria-labels/locale-aware dates deferred) |
-| G7 | M | Align frontend catalog with backend messageKeys | `en.ts` `api.error` only 2 keys (L14–20) | Catalog covers backend `api.error.*`; fallback strategy documented | Not Started |
-| G8 | M | Implement or de-scope template creation UI | `api/templates.ts` L36 `createTemplate` unused; no create button | Create flow built, or `createTemplate` removed and docs updated | Not Started |
-| G9 | L | Replace role-home placeholders / hide internal route keys | `RoleHomeView.vue` L44/L60–63 placeholder + raw `routeKey` | Real role dashboards or explicit deferred-scope note; no debug leakage | Not Started |
+| G7 | M | Align frontend catalog with backend messageKeys | `en.ts` `api.error` only 2 keys (L14–20) | Catalog covers backend `api.error.*`; fallback strategy documented | **Partial** (2026-07-03) — `apiErrorEn/Zh` catalog now standalone but ~94/145 keys; completion + parity test → **LR-C11** |
+| G8 | M | Implement or de-scope template creation UI | `api/templates.ts` L36 `createTemplate` unused; no create button | Create flow built, or `createTemplate` removed and docs updated | **Done** (2026-06-23; COR-F12 — TemplateCreateDialog + create button on TemplateListView + Vitest) |
+| G9 | L | Replace role-home placeholders / hide internal route keys | `RoleHomeView.vue` L44/L60–63 placeholder + raw `routeKey` | Real role dashboards or explicit deferred-scope note; no debug leakage | **Done** (2026-06-24; RoleHomeView removed — legacy home routes redirect to /dashboard, no raw routeKey leakage; per-role dashboards not planned for v1) |
 | G-DX1 | H | Fix Surefire reuseForks + parameterise forkCount | `pom.xml` surefire config | `reuseForks=true`; `forkCount` property; no test regression | **Done** |
 | G-DX2 | H | Add `dev-fast` Maven profile | `pom.xml` profile `dev-fast` | `mvn -Pdev-fast test` skips Checkstyle/PMD/SpotBugs/JaCoCo | **Done** |
 | G-DX3 | M | Parameterise SpotBugs effort | `pom.xml` `spotbugs.effort` property | effort=Max in full verify; effort=Default in dev-fast | **Done** |
@@ -211,4 +213,6 @@ once Wave 1 exit criteria are met.
 | --- | --- | --- |
 | Wave 1 | OPT-A + OPT-B (incl. B5) | **Done** — B1–B4 green; B5 baseline tag optional |
 | Wave 2 | OPT-C + OPT-E + OPT-D (start) | **Done** — OPT-C/E complete; D1–D4 Done; D5–D6 open |
-| Wave 3 | OPT-D (finish) + OPT-F + OPT-G | **In Progress** — F1/F2/F3, G1/G2, E8 **Done**; D5–D6, F4–F8, G3–G9 remain |
+| Wave 3 | OPT-D (finish) + OPT-F + OPT-G | **Superseded** (2026-07-03) — F1/F2/F3, G1/G2/G3, E8, F5/F7/F8 Done; D5 slice 3 Done (2026-07-01); residuals (F4/F6 partial, G4/G5/G6/G7 residual, E9) re-scoped into **[LRP](./launch-readiness-program.md)** (LR-A1, LR-B7, LR-C5, LR-C11, LR-C13); D5 remainder + D6 stay OPT backlog (not absorbed) |
+
+Post-Wave-3 optimization intake is tracked in [launch-readiness-program.md](./launch-readiness-program.md) (LR-*).

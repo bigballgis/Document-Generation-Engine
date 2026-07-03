@@ -83,6 +83,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 **In-flight work:**
 - **CDP (this session)** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)
 - **P22 (other session)** — rendering + demos ([plan](detail/P22-demo-expansion-rendering-fidelity.md); formal phase accounting only here)
+- **LRP (planned 2026-07-03, Not Started)** — launch readiness & deep optimization ([program](./launch-readiness-program.md); Waves **LR-A…LR-E**; tasks **`LR-*`**; program, not a formal phase)
 
 **P21 Done** — closure evidence in [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 
@@ -96,5 +97,6 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | Backlog | Lens |
 | --- | --- |
 | **[comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)** | **Unified prioritized map (COR-0…6): docs sync, API contract, template workflow, frontend UX, performance, E2E, P14–P20 — start here (2026-06-23)** |
+| [launch-readiness-program.md](./launch-readiness-program.md) | Launch-readiness deep optimization — production pitfalls + usability deepening (LR-A…E, 2026-07-03) |
 | [optimization-plan.md](./optimization-plan.md) | Technical debt detail: quality gates, coverage, backend architecture/security/performance (OPT-A…G) |
 | [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimization-plan.md) | Historical UX waves (UX-A…G); verify Done claims against comprehensive roadmap |

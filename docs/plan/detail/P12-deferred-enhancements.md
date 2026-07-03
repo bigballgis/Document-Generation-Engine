@@ -245,7 +245,7 @@ BDD-TEMPLATE-RISK-PROMPT-UX-001; PRD §7; domain-model lifecycle §4; permission
 
 ## 4. Phase exit criteria
 
-P12 phase is **In Progress** (2026-07-03). Active slice **P12-API-PACKAGE-ACCESS-INVOCATION** (BDD ready; T01–T02 next). **P12-TEMPLATE-TESTING-OVERHAUL** closed **Done** 2026-07-03 (T01–T13). Individual slices run under `plan-orchestrator`.
+P12 phase is **Not Started** (catch-all; no active slice — P22-DEMO-EXPANSION is the sole formal phase In Progress). **P12-API-PACKAGE-ACCESS-INVOCATION** closed **Done** 2026-07-03 (T01–T12). **P12-TEMPLATE-TESTING-OVERHAUL** closed **Done** 2026-07-03 (T01–T13). Individual slices run under `plan-orchestrator`.
 **P12-AUD-M02** closed **Done** 2026-07-01. **P12-AUD-B10** closed **Done** 2026-07-01. **P12-UIUX-DEEP-REFACTOR** closed **Done** 2026-07-03.
 
 ## 5. Behavior specification (BDD) — P12-AUD-B10
