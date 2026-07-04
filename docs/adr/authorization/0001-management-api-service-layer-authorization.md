@@ -47,8 +47,10 @@ independently of which routes the UI shows, using role and group-scoped capabili
   stay aligned with the permission matrix and AD Group roles.
 - Negative: New management endpoints require an explicit capability check in the owning
   service, not only a frontend route guard.
-- Contract: `ManagementAuthorizationContractTest` guards that management services retain
-  `GroupAccessService` delegation and controllers avoid `ManagementRoute` imports.
+- Contract: `ManagementAuthorizationContractTest` (with `ManagementAuthorizationRegistry`
+  and optional `ManagementOpenApiPathSanityTest`) guards that all `/api/management/v1/**`
+  controllers avoid `ManagementRoute` / `@PreAuthorize`, and primary domain services retain
+  `GroupAccessService` delegation or documented exceptions.
 
 ## Related Documents
 
