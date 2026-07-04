@@ -24,13 +24,8 @@ import {
   shouldShowTemplateTeamLeadJourney,
   type TemplateTeamLeadJourneyContext,
 } from '@/utils/templateTeamLeadJourney'
-import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
-import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, apiPolicyDetailPath, templatePackageHubPath } from '@/routing/routeKeys'
+import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, templatePackageHubPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import * as templatesApi from '@/api/templates'
 import {
@@ -46,12 +41,13 @@ import {
   type TemplateDevWorkspaceTab,
 } from '@/views/templates/templateDevWorkspaceTabs'
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
-import type { ApiCredentialSummary, PreviewRecord } from '@/types/template'
+import type { PreviewRecord } from '@/types/template'
 import {
   useTemplateLifecycleActions,
   type GovernanceAction,
   type LifecycleDecisionDialogMode,
 } from '@/views/templates/useTemplateLifecycleActions'
+import { useTemplatePolicyCredentials } from '@/views/templates/useTemplatePolicyCredentials'
 
 export type { GovernanceAction, LifecycleDecisionDialogMode }
 
@@ -71,16 +67,11 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     decideApprovals,
     publishTemplates,
     reviewMasters,
-    manageApiPolicy,
     exportTemplates,
     editTemplateMetadata,
     context,
   } = useCapabilities()
-  const { confirmAction } = useConfirmAction()
 
-  const credentialSecretDialogVisible = ref(false)
-  const credentialSecretValue = ref('')
-  const credentialSecretExternalId = ref('')
   const lastPreview = ref<PreviewRecord | null>(null)
   const selectedPreviewId = ref<string | null>(null)
   const testerEvidenceViewed = ref({
@@ -101,7 +92,6 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
   const generatingPreviewId = ref<string | null>(null)
   const batchTesting = ref(false)
   const coverageRefreshToken = ref(0)
-  const policyLoadFailed = ref(false)
   const metadataEditOpen = ref(false)
   const loadFailed = ref(false)
   const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
@@ -119,24 +109,6 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
   )
 
   const loadTemplateHolder = { fn: async (): Promise<void> => {} }
-
-  const credentialsSource = computed(() => templatesStore.credentials)
-  const { filters: credentialColumnFilters, filteredRows: filteredCredentials } = useDataTableFilters(
-    credentialsSource,
-    [
-      { key: 'externalId', getValue: (row) => row.externalId },
-      { key: 'status', getValue: (row) => row.status, matchMode: 'exact' },
-      { key: 'createdAt', getValue: (row) => formatDateTime(row.createdAt) },
-    ],
-  )
-  const credentialsCurrentPage = ref(1)
-  const { paginatedRows: paginatedCredentials, totalRows: totalCredentialRows } = useCatalogPagination(
-    filteredCredentials,
-    credentialsCurrentPage,
-    CLIENT_TABLE_PAGE_SIZE,
-  )
-  const sortCredentialsByCreatedAt = rowSortMethod<ApiCredentialSummary>((row) => row.createdAt)
-  const credentialStatusFilterOptions = useCredentialStatusFilterOptions()
 
   const templateMatchesRoute = computed(
     () => templatesStore.selectedTemplate?.id === templateId.value,
@@ -157,8 +129,6 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     return selected !== null && selected.id !== templateId.value
   })
 
-  const canPolicy = computed(() => manageApiPolicy.value)
-
   const errorMessage = computed(() => {
     const key = templatesStore.lastErrorMessageKey
     if (!key) {
@@ -176,6 +146,12 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     activeDetailTab,
   })
 
+  const policy = useTemplatePolicyCredentials({
+    templateId,
+    template,
+    errorMessage,
+  })
+
   const showMetadataEdit = computed(() => {
     const status = template.value?.lifecycleStatus
     if (!status || !editTemplateMetadata.value) {
@@ -190,9 +166,6 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
       isTemplateExportEligible(template.value!.lifecycleStatus),
   )
 
-  const showPolicyPanel = computed(
-    () => template.value?.lifecycleStatus === 'PUBLISHED' && canPolicy.value,
-  )
   const showAuthoringSection = computed(() => {
     const status = template.value?.lifecycleStatus
     if (
@@ -221,13 +194,6 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
       (template.value?.lifecycleStatus === 'DRAFT' ||
         template.value?.lifecycleStatus === 'TESTING'),
   )
-
-  const displayedCredentialSecret = computed(() => {
-    if (templatesStore.lastCreatedCredential?.secret) {
-      return templatesStore.lastCreatedCredential.secret
-    }
-    return templatesStore.lastRotatedCredential?.secret ?? ''
-  })
 
   const openRemediationTemplateIds = computed(() => {
     const ids = new Set<string>()
@@ -360,7 +326,7 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
       tabs.push({ name: 'authoring', labelKey: templateDetailTabLabelKey('authoring') })
     }
     tabs.push({ name: 'releaseVersions', labelKey: templateDetailTabLabelKey('releaseVersions') })
-    if (showPolicyPanel.value) {
+    if (policy.showPolicyPanel.value) {
       tabs.push({ name: 'apiAccess', labelKey: templateDetailTabLabelKey('apiAccess') })
     }
     return tabs
@@ -508,8 +474,8 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
       preReleaseChecksViewed: false,
     }
     lifecycle.resetLifecycleTransientState()
+    policy.resetPolicyCredentialsTransientState()
     lastPreview.value = null
-    policyLoadFailed.value = false
   }
 
   function syncTabFromRoute() {
@@ -607,8 +573,8 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
       } else {
         await templatesStore.fetchTemplate(templateId.value)
       }
-      if (showPolicyPanel.value) {
-        await loadPolicyData()
+      if (policy.showPolicyPanel.value) {
+        await policy.loadPolicyData()
       }
     } catch {
       loadFailed.value = true
@@ -650,34 +616,12 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     scrollToLifecyclePanel()
   }
 
-  async function loadPolicyData() {
-    policyLoadFailed.value = false
-    try {
-      await Promise.all([
-        templatesStore.fetchApiPolicy(templateId.value),
-        templatesStore.fetchCredentials(templateId.value),
-      ])
-    } catch {
-      policyLoadFailed.value = true
-    }
-  }
-
-  function openApiPolicyConsole() {
-    router.push(apiPolicyDetailPath(templateId.value))
-  }
-
   function backToList() {
     if (isDevEditor.value) {
       router.push(templatePackageHubPath(templateId.value))
       return
     }
     router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
-  }
-
-  function openCredentialSecretDialog(externalId: string, secret: string) {
-    credentialSecretExternalId.value = externalId
-    credentialSecretValue.value = secret
-    credentialSecretDialogVisible.value = true
   }
 
   async function handleTestGenerate(testDataSetId?: string) {
@@ -757,51 +701,6 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     }
   }
 
-  async function handleCreateCredential() {
-    try {
-      const created = await templatesStore.createCredential(templateId.value)
-      openCredentialSecretDialog(created.externalId, created.secret)
-      ElMessage.success(t('templates.policy.createCredentialSuccess'))
-    } catch {
-      ElMessage.error(errorMessage.value || t('templates.error.createCredential'))
-    }
-  }
-
-  async function handleRotateCredential(credentialId: string, externalId: string) {
-    const confirmed = await confirmAction({
-      titleKey: 'templates.policy.confirmRotateTitle',
-      messageKey: 'templates.policy.confirmRotateMessage',
-      type: 'warning',
-    })
-    if (!confirmed) {
-      return
-    }
-    try {
-      const rotated = await templatesStore.rotateCredential(templateId.value, credentialId)
-      openCredentialSecretDialog(externalId, rotated.secret)
-      ElMessage.success(t('templates.policy.rotateCredentialSuccess'))
-    } catch {
-      ElMessage.error(errorMessage.value || t('templates.error.rotateCredential'))
-    }
-  }
-
-  async function handleRevokeCredential(credentialId: string) {
-    const confirmed = await confirmAction({
-      titleKey: 'templates.policy.confirmRevokeTitle',
-      messageKey: 'templates.policy.confirmRevokeMessage',
-      type: 'warning',
-    })
-    if (!confirmed) {
-      return
-    }
-    try {
-      await templatesStore.revokeCredential(templateId.value, credentialId)
-      ElMessage.success(t('templates.policy.revokeCredentialSuccess'))
-    } catch {
-      ElMessage.error(errorMessage.value || t('templates.error.revokeCredential'))
-    }
-  }
-
   return {
     // i18n
     t,
@@ -868,12 +767,12 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     showAuthoringSection,
     canEditContentModuleReferences,
     // policy
-    showPolicyPanel,
-    canPolicy,
+    showPolicyPanel: policy.showPolicyPanel,
+    canPolicy: policy.canPolicy,
     showExportActions,
     showDeleteTemplateAction: lifecycle.showDeleteTemplateAction,
     showMetadataEdit,
-    policyLoadFailed,
+    policyLoadFailed: policy.policyLoadFailed,
     // publish gate
     publishGateItems: lifecycle.publishGateItems,
     publishGateReady: lifecycle.publishGateReady,
@@ -902,10 +801,10 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     publishSummaryOpen: lifecycle.publishSummaryOpen,
     submitSummaryOpen: lifecycle.submitSummaryOpen,
     metadataEditOpen,
-    credentialSecretDialogVisible,
-    credentialSecretValue,
-    credentialSecretExternalId,
-    displayedCredentialSecret,
+    credentialSecretDialogVisible: policy.credentialSecretDialogVisible,
+    credentialSecretValue: policy.credentialSecretValue,
+    credentialSecretExternalId: policy.credentialSecretExternalId,
+    displayedCredentialSecret: policy.displayedCredentialSecret,
     // test state
     lastPreview,
     selectedPreviewId,
@@ -919,12 +818,12 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     testerEvidenceViewed,
     approverEvidenceViewed,
     // credentials table
-    credentialColumnFilters,
-    credentialsCurrentPage,
-    paginatedCredentials,
-    credentialStatusFilterOptions,
-    totalCredentialRows,
-    sortCredentialsByCreatedAt,
+    credentialColumnFilters: policy.credentialColumnFilters,
+    credentialsCurrentPage: policy.credentialsCurrentPage,
+    paginatedCredentials: policy.paginatedCredentials,
+    credentialStatusFilterOptions: policy.credentialStatusFilterOptions,
+    totalCredentialRows: policy.totalCredentialRows,
+    sortCredentialsByCreatedAt: policy.sortCredentialsByCreatedAt,
     // contract
     selectedContractEnvironment,
     // store
@@ -933,10 +832,10 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     loadTemplate,
     loadPublishGateData: lifecycle.loadPublishGateData,
     loadSubmitGateData: lifecycle.loadSubmitGateData,
-    loadPolicyData,
+    loadPolicyData: policy.loadPolicyData,
     backToList,
     openLifecyclePanel,
-    openApiPolicyConsole,
+    openApiPolicyConsole: policy.openApiPolicyConsole,
     openDevWorkspaceTab,
     handleTestGenerate,
     handleBatchTestGenerate,
@@ -952,9 +851,9 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     confirmPublishFromSummary: lifecycle.confirmPublishFromSummary,
     handleGovernanceAction: lifecycle.handleGovernanceAction,
     handleMetadataUpdate,
-    handleCreateCredential,
-    handleRotateCredential,
-    handleRevokeCredential,
+    handleCreateCredential: policy.handleCreateCredential,
+    handleRotateCredential: policy.handleRotateCredential,
+    handleRevokeCredential: policy.handleRevokeCredential,
     handleDeleteTemplate: lifecycle.handleDeleteTemplate,
   }
 }

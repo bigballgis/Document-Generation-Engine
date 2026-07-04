@@ -1,7 +1,8 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-07-04 (**SOR-F01 lifecycle slice** — `cursor/sor-full-implementation-1385`; SOR-F01 In Progress; frontend Vitest **689**; see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
-**Authoritative gate snapshot (2026-07-04):** backend Surefire **727** (1 skipped); frontend Vitest **689**; Playwright docker smoke tier **8** specs.
+**Last synced:** 2026-07-04 (**SOR-F01 policy/credentials slice** — `cursor/sor-full-implementation-1385`; SOR-F01 In Progress; frontend Vitest **704**; see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
+**Authoritative gate snapshot (2026-07-04):** backend Surefire **727** (1 skipped); frontend Vitest **704**; Playwright docker smoke tier **8** specs.
+**Completion note (2026-07-04, SOR-F01 slice 2):** **SOR-F01 In Progress** — extracted `useTemplatePolicyCredentials.ts` (policy load, credentials table, secret dialog, create/rotate/revoke handlers); **15** new Vitest tests; `useTemplateDetailController.ts` **960 → 859** lines. **Gate:** `pnpm -C frontend lint` ✓, `type-check` ✓, `test` ✓ (**704**), `build` ✓. BDD `not-applicable` (refactor only).
 **Completion note (2026-07-04, SOR-F01 slice 1):** **SOR-F01 In Progress** — extracted `useTemplateLifecycleActions.ts` (submit/test/approval/publish/governance/delete + publish/submit gate state); **15** new Vitest tests; `useTemplateDetailController.ts` **1538 → 960** lines. **Gate:** `pnpm -C frontend lint` ✓, `type-check` ✓, `test` ✓ (**689**), `build` ✓. BDD `not-applicable` (refactor only).
 **Last synced (prior):** 2026-07-04 (**SOR P02 spool slice** — `cursor/sor-full-implementation-1385`; SOR-P02 Done; backend Surefire **727** (1 skipped); see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
 **Authoritative gate snapshot (prior 2026-07-04):** backend Surefire **727** (1 skipped); frontend Vitest **674**; Playwright docker smoke tier **8** specs.
