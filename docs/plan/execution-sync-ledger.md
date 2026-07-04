@@ -1,7 +1,10 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-07-04 (**SOR P02 spool slice** — `cursor/sor-full-implementation-1385`; SOR-P02 Done; backend Surefire **727** (1 skipped); see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
-**Authoritative gate snapshot (2026-07-04):** backend Surefire **727** (1 skipped); frontend Vitest **674**; Playwright docker smoke tier **8** specs.
+**Last synced:** 2026-07-04 (**SOR-F01 lifecycle slice** — `cursor/sor-full-implementation-1385`; SOR-F01 In Progress; frontend Vitest **689**; see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
+**Authoritative gate snapshot (2026-07-04):** backend Surefire **727** (1 skipped); frontend Vitest **689**; Playwright docker smoke tier **8** specs.
+**Completion note (2026-07-04, SOR-F01 slice 1):** **SOR-F01 In Progress** — extracted `useTemplateLifecycleActions.ts` (submit/test/approval/publish/governance/delete + publish/submit gate state); **15** new Vitest tests; `useTemplateDetailController.ts` **1538 → 960** lines. **Gate:** `pnpm -C frontend lint` ✓, `type-check` ✓, `test` ✓ (**689**), `build` ✓. BDD `not-applicable` (refactor only).
+**Last synced (prior):** 2026-07-04 (**SOR P02 spool slice** — `cursor/sor-full-implementation-1385`; SOR-P02 Done; backend Surefire **727** (1 skipped); see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
+**Authoritative gate snapshot (prior 2026-07-04):** backend Surefire **727** (1 skipped); frontend Vitest **674**; Playwright docker smoke tier **8** specs.
 **Completion note (2026-07-04, SOR-P02):** **SOR-P02 Done** — `SpooledArtifact` + `ArtifactSpoolService`; `DocumentArtifactPipeline` spools finalized artifacts to temp files with file-length size guard; `DocumentGenerationEngine` uploads to MinIO via `InputStream` from spool and returns `artifactBytes` null; preview artifact paths updated. **Gate:** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (Surefire **727**, 1 skipped); Checkstyle/PMD/SpotBugs 0 violations.
 **Last synced (prior):** 2026-07-04 (**SOR F06/F07 slice** — `cursor/sor-full-implementation-1385`; SOR-F07 Done; SOR-F06 partial; frontend Vitest **667**; see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
 **Last synced (prior):** 2026-07-04 (**SOR P06/F06 slice** — `cursor/sor-full-implementation-1385`; SOR-P06 Done; SOR-F06 partial; frontend Vitest **664**; see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
