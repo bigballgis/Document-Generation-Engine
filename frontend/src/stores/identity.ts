@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import axios from 'axios'
 import * as identityApi from '@/api/identity'
-import { resolveApiErrorMessageKey } from '@/api/http'
+import { resolveApiError, resolveApiErrorMessageKey } from '@/api/http'
 import type {
   BusinessGroupView,
   CreateGroupRequest,
@@ -27,7 +28,17 @@ export const useIdentityStore = defineStore('identity', () => {
   const loadingGroups = ref(false)
   const submitting = ref(false)
   const lastUserErrorMessageKey = ref<string | null>(null)
+  const lastUserErrorRetryable = ref(false)
   const lastGroupErrorMessageKey = ref<string | null>(null)
+
+  function isAbortError(error: unknown): boolean {
+    return axios.isCancel(error) || (error instanceof Error && error.name === 'AbortError')
+  }
+
+  function recordUserError(error: unknown, fallbackKey: string) {
+    lastUserErrorMessageKey.value = resolveApiErrorMessageKey(error, fallbackKey)
+    lastUserErrorRetryable.value = resolveApiError(error)?.error.retryable ?? false
+  }
 
   function applyUpdatedUser(updated: ManagementUserView) {
     users.value = users.value.map((item) => (item.id === updated.id ? updated : item))
@@ -37,16 +48,23 @@ export const useIdentityStore = defineStore('identity', () => {
     groups.value = groups.value.map((item) => (item.id === updated.id ? updated : item))
   }
 
-  async function fetchUsers(query: UserQuery = userFilters.value): Promise<void> {
+  async function fetchUsers(
+    query: UserQuery = userFilters.value,
+    options: { signal?: AbortSignal } = {},
+  ): Promise<void> {
     loadingUsers.value = true
     lastUserErrorMessageKey.value = null
+    lastUserErrorRetryable.value = false
     userFilters.value = { ...userFilters.value, ...query }
     try {
-      const page = await identityApi.listUsers(userFilters.value)
+      const page = await identityApi.listUsers(userFilters.value, options)
       users.value = page.content
       usersTotal.value = page.totalElements
     } catch (error) {
-      lastUserErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.loadUsers')
+      if (isAbortError(error)) {
+        return
+      }
+      recordUserError(error, 'identity.error.loadUsers')
       throw error
     } finally {
       loadingUsers.value = false
@@ -204,6 +222,7 @@ export const useIdentityStore = defineStore('identity', () => {
     loadingGroups,
     submitting,
     lastUserErrorMessageKey,
+    lastUserErrorRetryable,
     lastGroupErrorMessageKey,
     fetchUsers,
     createUser,

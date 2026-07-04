@@ -74,14 +74,34 @@ describe('identity store', () => {
     vi.mocked(identityApi.listUsers).mockRejectedValue(
       axiosEnvelopeError(
         403,
-        'api.error.forbidden.userManagementNotAllowed',
+        'api.error.authorization.accessDenied',
         { code: 'ACCESS_DENIED', category: 'AUTHORIZATION', message: 'Not allowed.' },
       ),
     )
     const store = useIdentityStore()
 
     await expect(store.fetchUsers()).rejects.toBeTruthy()
-    expect(store.lastUserErrorMessageKey).toBe('api.error.forbidden.userManagementNotAllowed')
+    expect(store.lastUserErrorMessageKey).toBe('api.error.authorization.accessDenied')
+    expect(store.lastUserErrorRetryable).toBe(false)
+  })
+
+  it('records retryable flag from backend envelope', async () => {
+    vi.mocked(identityApi.listUsers).mockRejectedValue(
+      axiosEnvelopeError(
+        503,
+        'api.error.generation.serviceUnavailable',
+        {
+          code: 'SERVICE_UNAVAILABLE',
+          category: 'GENERATION',
+          message: 'Unavailable.',
+          retryable: true,
+        },
+      ),
+    )
+    const store = useIdentityStore()
+
+    await expect(store.fetchUsers()).rejects.toBeTruthy()
+    expect(store.lastUserErrorRetryable).toBe(true)
   })
 
   it('prepends created user', async () => {

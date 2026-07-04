@@ -29,9 +29,13 @@ function buildUserParams(query: UserQuery): Record<string, string | number> {
   return params
 }
 
-export async function listUsers(query: UserQuery = {}): Promise<PageView<ManagementUserView>> {
+export async function listUsers(
+  query: UserQuery = {},
+  options: { signal?: AbortSignal } = {},
+): Promise<PageView<ManagementUserView>> {
   const response = await http.get<ApiEnvelope<PageView<ManagementUserView>>>('/users', {
     params: buildUserParams(query),
+    signal: options.signal,
   })
   return unwrapEnvelope(response.data)
 }

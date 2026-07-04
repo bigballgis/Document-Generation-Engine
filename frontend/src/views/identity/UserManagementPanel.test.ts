@@ -3,6 +3,7 @@ import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 import UserManagementPanel from '@/views/identity/UserManagementPanel.vue'
 import en from '@/i18n/locales/en'
 import * as identityApi from '@/api/identity'
@@ -192,12 +193,13 @@ describe('UserManagementPanel', () => {
 
   it('surfaces backend error codes on load failure', async () => {
     patchSession(['GROUP_ADMIN'], ['RETAIL'])
-    vi.mocked(identityApi.listUsers).mockRejectedValue({
-      isAxiosError: true,
-      response: {
-        data: { error: { messageKey: 'identity.error.loadUsers' } },
-      },
-    })
+    vi.mocked(identityApi.listUsers).mockRejectedValue(
+      axiosEnvelopeError(403, 'identity.error.loadUsers', {
+        code: 'ACCESS_DENIED',
+        category: 'AUTHORIZATION',
+        message: 'Not allowed.',
+      }),
+    )
     const wrapper = mountPanel()
     await flushPromises()
 
