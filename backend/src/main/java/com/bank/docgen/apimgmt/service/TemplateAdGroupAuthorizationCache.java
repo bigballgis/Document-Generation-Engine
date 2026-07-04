@@ -1,5 +1,6 @@
 package com.bank.docgen.apimgmt.service;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -33,6 +34,10 @@ public class TemplateAdGroupAuthorizationCache {
     }
 
     private record CacheEntry(List<String> allowedGroups, Instant expiresAt) {
+
+        private CacheEntry {
+            allowedGroups = DefensiveCopies.copyStringList(allowedGroups);
+        }
 
         boolean isExpired() {
             return Instant.now().isAfter(expiresAt);

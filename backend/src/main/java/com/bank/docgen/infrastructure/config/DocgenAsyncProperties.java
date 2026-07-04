@@ -21,11 +21,11 @@ public class DocgenAsyncProperties {
     }
 
     public Kafka getKafka() {
-        return kafka;
+        return kafka == null ? new Kafka() : kafka.copy();
     }
 
     public void setKafka(Kafka kafka) {
-        this.kafka = kafka;
+        this.kafka = kafka == null ? new Kafka() : kafka.copy();
     }
 
     public static class Kafka {
@@ -58,6 +58,14 @@ public class DocgenAsyncProperties {
 
         public void setConsumerGroup(String consumerGroup) {
             this.consumerGroup = consumerGroup;
+        }
+
+        Kafka copy() {
+            Kafka copy = new Kafka();
+            copy.setAsyncBatchTopic(asyncBatchTopic);
+            copy.setDeadLetterTopic(deadLetterTopic);
+            copy.setConsumerGroup(consumerGroup);
+            return copy;
         }
     }
 }

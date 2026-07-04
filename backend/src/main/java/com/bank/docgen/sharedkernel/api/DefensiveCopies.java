@@ -1,5 +1,6 @@
 package com.bank.docgen.sharedkernel.api;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,5 +38,20 @@ public final class DefensiveCopies {
 
     public static <K, V> Map<K, V> copyMap(Map<K, V> values) {
         return values == null ? Map.of() : Map.copyOf(values);
+    }
+
+    public static Map<String, String> copyStringStringMap(Map<String, String> values) {
+        return copyMap(values);
+    }
+
+    public static Map<String, List<String>> copyAccountGroupsMap(Map<String, List<String>> values) {
+        if (values == null || values.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, List<String>> copy = new LinkedHashMap<>();
+        for (Map.Entry<String, List<String>> entry : values.entrySet()) {
+            copy.put(entry.getKey(), copyStringList(entry.getValue()));
+        }
+        return Map.copyOf(copy);
     }
 }

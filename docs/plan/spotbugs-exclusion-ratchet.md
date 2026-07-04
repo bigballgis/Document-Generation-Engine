@@ -1,6 +1,6 @@
 # SpotBugs Exclusion Ratchet Plan (SOR-A05)
 
-**Status:** Active — slice 0 complete (REC_CATCH_EXCEPTION removed); **slice 1 Done** (2026-07-04); **slice 2 Done** (2026-07-04); **slice 3 Done** (2026-07-04); **slice 4 first batch Done** (2026-07-04).  
+**Status:** Active — slice 0 complete (REC_CATCH_EXCEPTION removed); **slice 1 Done** (2026-07-04); **slice 2 Done** (2026-07-04); **slice 3 Done** (2026-07-04); **slice 4 first batch Done** (2026-07-04); **slice 5 Done** (2026-07-04).  
 **Filter file:** `backend/config/spotbugs/exclude.xml`  
 **Automated guard:** `SpotBugsExclusionRatchetTest` (Surefire)
 
@@ -9,7 +9,7 @@
 | Metric | Value | Notes |
 | --- | --- | --- |
 | `<Match>` blocks | **3** | `BASELINE_MATCH_COUNT=3` in guard test |
-| Deferred `EI_EXPOSE_REP` / `EI_EXPOSE_REP2` | ~65 | −17 in slice 4 first batch (domain/authoring DTOs); −67 in slice 3; −2 in slice 2; −15 in slice 1; blanket exclude retained |
+| Deferred `EI_EXPOSE_REP` / `EI_EXPOSE_REP2` | ~52 | −13 in slice 5; −17 in slice 4 first batch; −67 in slice 3; −2 in slice 2; −15 in slice 1; blanket exclude retained |
 | Deferred `REC_CATCH_EXCEPTION` | **0** | Removed from exclude.xml; 11 call sites narrowed |
 | Framework token exclusions | 1 block | `CT_CONSTRUCTOR_THROW,SE_BAD_FIELD` (Spring auth tokens) |
 | Test-class exclusion | 1 block | `~.*Test$` (tests out of gate scope) |
@@ -110,6 +110,33 @@ Factory methods on authoring records delegate to compact constructors (canonical
 **Tests:** `DomainDtoImmutabilityTest` (**10** cases: authoring validation, style catalog, audit page, PDF stamp plan, resolved image bytes, sync generate bytes, table render model, generated document, paste cleaning summary, AD group properties).
 
 **Exit:** ~17 deferred EI findings addressed (~82→~**65**); −20% target met; `exclude.xml` blanket `EI_EXPOSE_REP` match unchanged (`BASELINE_MATCH_COUNT=3`).
+
+## Slice 5 evidence (EI_EXPOSE_REP — service / infrastructure / remaining authoring)
+
+Extended **`DefensiveCopies`** with `copyStringStringMap` and `copyAccountGroupsMap` (refactored `AdGroupResolverProperties` getter/setter to shared helper).
+
+| Class | Module | Components hardened |
+| --- | --- | --- |
+| `TemplateExportZipArtifact` | `template.service` | `content` (byte[]) |
+| `CacheEntry` | `apimgmt.service` | `allowedGroups` |
+| `EffectiveRiskPromptConfig` | `template.service` | `reasonCategories`, `riskPromptCopy` |
+| `DocgenAsyncProperties` | `infrastructure.config` | `getKafka()` / `setKafka()` defensive copy |
+| `AdGroupResolverProperties` | `apimgmt.service` | `setAccountGroups()` deep copy (getter migrated to `copyAccountGroupsMap`) |
+| `PasteCleaningResult` | `authoring.structured` | `summary` re-wrap |
+| `TableComponentValidationResult` | `authoring.structured` | `fidelity`, `renderModel` re-wrap |
+| `StorageProperties` | `infrastructure.storage` | nested `minio` record copy |
+| `LoginSession` | `authorization.management.service` | nested `ManagementSessionView` re-wrap |
+| `BatchExecutionOutcome` | `runtime.service` | nested `BatchResultView` re-wrap |
+
+| Metric | Value |
+| --- | --- |
+| Types hardened | **11** classes (incl. nested records) |
+| Collection / byte[] / nested components | **~13** fields |
+| Service nested records verified | `BatchExecutionService`, `ManagementAuthService`, `TemplateExportService`, `TemplateAdGroupAuthorizationCache`; stream-only artifacts (`MasterDownloadArtifact`, `PreviewDownloadArtifact`) unchanged |
+
+**Tests:** `DomainDtoImmutabilityTest` (**19** cases; +9 slice 5).
+
+**Exit:** ~13 deferred EI findings addressed (~65→~**52**); −20% target met; `exclude.xml` blanket `EI_EXPOSE_REP` match unchanged (`BASELINE_MATCH_COUNT=3`).
 
 ## Slice 0 evidence (REC_CATCH fixes)
 

@@ -37,6 +37,13 @@ public class BatchExecutionService {
     }
 
     public record BatchExecutionOutcome(BatchResultView batchResult, TaskStatus taskStatus) {
+        public BatchExecutionOutcome {
+            batchResult = new BatchResultView(
+                    batchResult.batchId(),
+                    batchResult.summary(),
+                    batchResult.items()
+            );
+        }
     }
 
     public BatchExecutionOutcome execute(

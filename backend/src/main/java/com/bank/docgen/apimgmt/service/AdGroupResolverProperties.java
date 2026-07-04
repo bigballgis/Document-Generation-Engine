@@ -20,17 +20,10 @@ public class AdGroupResolverProperties {
     }
 
     public Map<String, List<String>> getAccountGroups() {
-        if (accountGroups == null || accountGroups.isEmpty()) {
-            return Map.of();
-        }
-        Map<String, List<String>> copy = new java.util.LinkedHashMap<>();
-        for (Map.Entry<String, List<String>> entry : accountGroups.entrySet()) {
-            copy.put(entry.getKey(), DefensiveCopies.copyStringList(entry.getValue()));
-        }
-        return Map.copyOf(copy);
+        return DefensiveCopies.copyAccountGroupsMap(accountGroups);
     }
 
     public void setAccountGroups(Map<String, List<String>> accountGroups) {
-        this.accountGroups = accountGroups;
+        this.accountGroups = DefensiveCopies.copyAccountGroupsMap(accountGroups);
     }
 }

@@ -115,5 +115,19 @@ public class ManagementAuthService {
     }
 
     public record LoginSession(String accessToken, ManagementSessionView session) {
+        public LoginSession {
+            session = new ManagementSessionView(
+                    session.username(),
+                    session.displayName(),
+                    session.email(),
+                    session.authSource(),
+                    session.roles(),
+                    session.authorizedGroupCodes(),
+                    session.defaultRoute(),
+                    session.visibleRoutes(),
+                    session.capabilities(),
+                    session.expiresAt()
+            );
+        }
     }
 }

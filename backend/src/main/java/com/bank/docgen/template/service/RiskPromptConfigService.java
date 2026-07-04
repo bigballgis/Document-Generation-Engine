@@ -16,6 +16,7 @@ import com.bank.docgen.template.persistence.TemplateRiskPromptOverrideRepository
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -231,10 +232,14 @@ public class RiskPromptConfigService {
         }
     }
 
-    record EffectiveRiskPromptConfig(
+    public record EffectiveRiskPromptConfig(
             List<String> reasonCategories,
             Map<String, String> riskPromptCopy,
             String updatedAt
     ) {
+        public EffectiveRiskPromptConfig {
+            reasonCategories = DefensiveCopies.copyStringList(reasonCategories);
+            riskPromptCopy = DefensiveCopies.copyStringStringMap(riskPromptCopy);
+        }
     }
 }

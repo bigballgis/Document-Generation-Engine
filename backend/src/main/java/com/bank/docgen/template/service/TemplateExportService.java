@@ -159,5 +159,8 @@ public class TemplateExportService {
     }
 
     public record TemplateExportZipArtifact(String filename, byte[] content) {
+        public TemplateExportZipArtifact {
+            content = com.bank.docgen.sharedkernel.api.DefensiveCopies.copyBytes(content);
+        }
     }
 }
