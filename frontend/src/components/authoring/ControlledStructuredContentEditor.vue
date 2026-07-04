@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import PasteCleaningSummaryDialog from '@/components/authoring/PasteCleaningSummaryDialog.vue'
-import * as templatesApi from '@/api/templates'
+import { useTemplatesStore } from '@/stores/templates'
 import type { MasterStyleCatalog, PasteCleaningSummary, VariableSchema } from '@/types/template'
 import { buildVariableOptionLabel } from '@/utils/variableDisplayName'
 import {
@@ -33,6 +33,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, te } = useI18n()
+const templatesStore = useTemplatesStore()
 
 const loadingCatalog = ref(false)
 const styleCatalog = ref<MasterStyleCatalog | null>(null)
@@ -135,7 +136,7 @@ onMounted(async () => {
   }
   loadingCatalog.value = true
   try {
-    styleCatalog.value = await templatesApi.getMasterStyleCatalog(props.templateId)
+    styleCatalog.value = await templatesStore.fetchMasterStyleCatalog(props.templateId)
     selectedStyleKey.value = styleCatalog.value.entries[0]?.styleKey ?? 'BodyText'
   } catch {
     ElMessage.error(t('templates.structuredEditor.error.loadCatalog'))
@@ -231,7 +232,7 @@ async function runPasteClean(html: string) {
   }
   prePasteSnapshot.value = serializeStructuredContent(documentModel.value)
   try {
-    const result = await templatesApi.pasteClean(props.templateId, {
+    const result = await templatesStore.pasteClean(props.templateId, {
       sourceHtml: html,
       prePasteStructuredContentJson: prePasteSnapshot.value,
     })

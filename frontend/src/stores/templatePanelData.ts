@@ -5,6 +5,7 @@ import type { PageView } from '@/types/identity'
 import type {
   AsyncPreviewStarted,
   BatchTestRunSummary,
+  BatchTestStarted,
   ChangeDiffSummary,
   CoverageSummary,
   PreviewRecord,
@@ -14,6 +15,7 @@ import type {
   TemplateDevVersionCreated,
   TemplateExportResult,
   TemplateReleaseVersion,
+  TemplateVersionLineDetail,
   TemplateVersionLineSummary,
   TestDataSet,
   UpsertContentModuleReferencePayload,
@@ -57,6 +59,8 @@ export interface TemplatePanelEntry {
   batchTestHistory: BatchTestRunSummary[]
   loadingBatchTestHistory: boolean
   exporting: boolean
+  releaseVersionDetails: Record<string, TemplateVersionLineDetail>
+  loadingReleaseVersionDetail: Record<string, boolean>
 }
 
 function createEmptyEntry(): TemplatePanelEntry {
@@ -81,7 +85,13 @@ function createEmptyEntry(): TemplatePanelEntry {
     batchTestHistory: [],
     loadingBatchTestHistory: false,
     exporting: false,
+    releaseVersionDetails: {},
+    loadingReleaseVersionDetail: {},
   }
+}
+
+function releaseVersionDetailKey(templateId: string, releaseVersion: string): string {
+  return `${templateId}:${releaseVersion}`
 }
 
 export const useTemplatePanelDataStore = defineStore('templatePanelData', () => {
@@ -344,6 +354,28 @@ export const useTemplatePanelDataStore = defineStore('templatePanelData', () => 
     }
   }
 
+  async function runBatchTest(templateId: string): Promise<BatchTestStarted> {
+    const result = await templatesApi.runBatchTest(templateId)
+    invalidateBatchTestDomains(templateId)
+    return result
+  }
+
+  async function fetchReleaseVersionDetail(
+    templateId: string,
+    releaseVersion: string,
+  ): Promise<TemplateVersionLineDetail> {
+    const entry = entryFor(templateId)
+    const key = releaseVersionDetailKey(templateId, releaseVersion)
+    entry.loadingReleaseVersionDetail = { ...entry.loadingReleaseVersionDetail, [key]: true }
+    try {
+      const detail = await templatesApi.fetchReleaseVersionDetail(templateId, releaseVersion)
+      entry.releaseVersionDetails = { ...entry.releaseVersionDetails, [key]: detail }
+      return detail
+    } finally {
+      entry.loadingReleaseVersionDetail = { ...entry.loadingReleaseVersionDetail, [key]: false }
+    }
+  }
+
   async function exportTemplateJson(templateId: string): Promise<TemplateExportResult> {
     const entry = entryFor(templateId)
     entry.exporting = true
@@ -394,6 +426,8 @@ export const useTemplatePanelDataStore = defineStore('templatePanelData', () => 
     fetchContentModuleReferences,
     upsertContentModuleReference,
     fetchBatchTestHistory,
+    runBatchTest,
+    fetchReleaseVersionDetail,
     exportTemplateJson,
     exportTemplateZip,
     getEntry,

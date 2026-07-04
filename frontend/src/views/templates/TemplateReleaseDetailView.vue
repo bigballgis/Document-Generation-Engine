@@ -11,7 +11,7 @@ import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import ReleaseSectionTable from '@/components/templates/ReleaseSectionTable.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useCapabilities } from '@/composables/useCapabilities'
-import * as templatesApi from '@/api/templates'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import {
   templateDevVersionPath,
   templatePackageHubPath,
@@ -24,6 +24,7 @@ const { formatDateTime } = useLocaleFormatters()
 const route = useRoute()
 const router = useRouter()
 const { authorTemplates } = useCapabilities()
+const panelDataStore = useTemplatePanelDataStore()
 
 const loading = ref(false)
 const loadFailed = ref(false)
@@ -64,7 +65,7 @@ async function loadReleaseDetail() {
   loading.value = true
   loadFailed.value = false
   try {
-    releaseDetail.value = await templatesApi.fetchReleaseVersionDetail(
+    releaseDetail.value = await panelDataStore.fetchReleaseVersionDetail(
       templateId.value,
       releaseVersion.value,
     )
@@ -86,7 +87,7 @@ async function handleClone() {
   }
   cloning.value = true
   try {
-    const created = await templatesApi.cloneReleaseVersion(templateId.value, releaseVersion.value)
+    const created = await panelDataStore.cloneReleaseVersion(templateId.value, releaseVersion.value)
     ElMessage.success(t('templates.versionLines.cloneSuccess'))
     router.push(templateDevVersionPath(templateId.value, created.devVersionId))
   } catch {

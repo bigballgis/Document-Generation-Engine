@@ -16,6 +16,8 @@ import type {
   LifecycleDecisionPayload,
   LifecycleGovernancePayload,
   LifecycleImpactPreviewRequest,
+  MasterStyleCatalog,
+  PasteCleanResult,
   PublishTemplatePayload,
   TemplateDetail,
   TemplateImportResult,
@@ -40,6 +42,7 @@ export const useTemplatesStore = defineStore('templates', () => {
   const submitting = ref(false)
   const lastErrorMessageKey = ref<string | null>(null)
   const lastListErrorRetryable = ref(false)
+  const masterStyleCatalogByTemplateId = ref<Record<string, MasterStyleCatalog>>({})
 
   const publishedTemplates = computed(() =>
     templates.value.filter((item) => item.lifecycleStatus === 'PUBLISHED'),
@@ -325,6 +328,26 @@ export const useTemplatesStore = defineStore('templates', () => {
     }
   }
 
+  async function fetchMasterStyleCatalog(templateId: string): Promise<MasterStyleCatalog> {
+    const cached = masterStyleCatalogByTemplateId.value[templateId]
+    if (cached) {
+      return cached
+    }
+    const catalog = await templatesApi.getMasterStyleCatalog(templateId)
+    masterStyleCatalogByTemplateId.value = {
+      ...masterStyleCatalogByTemplateId.value,
+      [templateId]: catalog,
+    }
+    return catalog
+  }
+
+  async function pasteClean(
+    templateId: string,
+    payload: { sourceHtml: string; prePasteStructuredContentJson: string },
+  ): Promise<PasteCleanResult> {
+    return templatesApi.pasteClean(templateId, payload)
+  }
+
   function applyUpdatedTemplate(updated: TemplateDetail) {
     selectedTemplate.value = updated
     templates.value = templates.value.map((item) =>
@@ -358,9 +381,16 @@ export const useTemplatesStore = defineStore('templates', () => {
     if (templateId) {
       apiPolicyStore.clearTemplate(templateId)
       panelDataStore.clearTemplate(templateId)
+      const nextCatalogs = { ...masterStyleCatalogByTemplateId.value }
+      delete nextCatalogs[templateId]
+      masterStyleCatalogByTemplateId.value = nextCatalogs
     } else if (apiPolicyStore.activeTemplateId) {
-      apiPolicyStore.clearTemplate(apiPolicyStore.activeTemplateId)
-      panelDataStore.clearTemplate(apiPolicyStore.activeTemplateId)
+      const activeId = apiPolicyStore.activeTemplateId
+      apiPolicyStore.clearTemplate(activeId)
+      panelDataStore.clearTemplate(activeId)
+      const nextCatalogs = { ...masterStyleCatalogByTemplateId.value }
+      delete nextCatalogs[activeId]
+      masterStyleCatalogByTemplateId.value = nextCatalogs
     }
   }
 
@@ -402,6 +432,8 @@ export const useTemplatesStore = defineStore('templates', () => {
     deleteVariable,
     upsertBinding,
     saveRules,
+    fetchMasterStyleCatalog,
+    pasteClean,
     clearSelected,
   }
 })

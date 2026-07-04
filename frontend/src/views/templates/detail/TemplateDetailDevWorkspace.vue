@@ -9,7 +9,7 @@ import BatchTestProgressDialog from '@/components/template/BatchTestProgressDial
 import TemplateDetailDesignTab from '@/views/templates/detail/TemplateDetailDesignTab.vue'
 import TemplateDetailTestingTab from '@/views/templates/detail/TemplateDetailTestingTab.vue'
 import TemplateDetailApprovalTab from '@/views/templates/detail/TemplateDetailApprovalTab.vue'
-import * as templatesApi from '@/api/templates'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { useSubmitTestEligibility } from '@/composables/useSubmitTestEligibility'
 import {
   TEMPLATE_DEV_WORKSPACE_TABS,
@@ -100,6 +100,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const panelDataStore = useTemplatePanelDataStore()
 
 const activeWorkspaceTab = ref<TemplateDevWorkspaceTab>(
   resolveTemplateDevWorkspaceTabFromQuery(route.query),
@@ -189,7 +190,7 @@ async function handleRunFullTest() {
 
   batchRunning.value = true
   try {
-    const result = await templatesApi.runBatchTest(props.templateId)
+    const result = await panelDataStore.runBatchTest(props.templateId)
     batchDialogRunId.value = result.runId
     batchDialogStreamUrl.value = result.streamUrl
     batchDialogVisible.value = true

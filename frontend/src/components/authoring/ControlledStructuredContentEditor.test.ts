@@ -1,25 +1,40 @@
 import { flushPromises, mount } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
 import en from '@/i18n/locales/en'
-import * as templatesApi from '@/api/templates'
+import { useTemplatesStore } from '@/stores/templates'
 
-vi.mock('@/api/templates', () => ({
-  getMasterStyleCatalog: vi.fn(),
-  pasteClean: vi.fn(),
-}))
+vi.mock('@/stores/templates', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/stores/templates')>()
+  return {
+    ...actual,
+    useTemplatesStore: vi.fn(),
+  }
+})
 
 describe('ControlledStructuredContentEditor', () => {
+  const fetchMasterStyleCatalog = vi.fn()
+  const pasteClean = vi.fn()
+
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    vi.mocked(useTemplatesStore).mockReturnValue({
+      fetchMasterStyleCatalog,
+      pasteClean,
+    } as unknown as ReturnType<typeof useTemplatesStore>)
+  })
+
   afterEach(() => {
     document.body.innerHTML = ''
-    vi.mocked(templatesApi.getMasterStyleCatalog).mockReset()
-    vi.mocked(templatesApi.pasteClean).mockReset()
+    fetchMasterStyleCatalog.mockReset()
+    pasteClean.mockReset()
   })
 
   it('only confirmed nodes are insertable via toolbar', async () => {
-    vi.mocked(templatesApi.getMasterStyleCatalog).mockResolvedValue({
+    fetchMasterStyleCatalog.mockResolvedValue({
       catalogVersion: '1.0',
       entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
     })
@@ -56,7 +71,7 @@ describe('ControlledStructuredContentEditor', () => {
 
     await flushPromises()
 
-    expect(templatesApi.getMasterStyleCatalog).not.toHaveBeenCalled()
+    expect(fetchMasterStyleCatalog).not.toHaveBeenCalled()
   })
 
   it('hides editing toolbar in readonly mode', async () => {
