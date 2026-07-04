@@ -3,8 +3,8 @@ package com.bank.docgen.runtime.service;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyRepository;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Optional;
@@ -21,24 +21,14 @@ public class IdempotencyService {
 
     private final GenerationIdempotencyRepository repository;
     private final IdempotencyCachePort idempotencyCachePort;
-    private final MessageDigestFactory messageDigestFactory;
 
     @Autowired
     public IdempotencyService(
             GenerationIdempotencyRepository repository,
             IdempotencyCachePort idempotencyCachePort
     ) {
-        this(repository, idempotencyCachePort, MessageDigest::getInstance);
-    }
-
-    IdempotencyService(
-            GenerationIdempotencyRepository repository,
-            IdempotencyCachePort idempotencyCachePort,
-            MessageDigestFactory messageDigestFactory
-    ) {
         this.repository = repository;
         this.idempotencyCachePort = idempotencyCachePort;
-        this.messageDigestFactory = messageDigestFactory;
     }
 
     @Transactional(readOnly = true)
@@ -134,20 +124,21 @@ public class IdempotencyService {
 
     public String hashRequest(String payload) {
         try {
-            MessageDigest digest = messageDigestFactory.create("SHA-256");
+            MessageDigest digest = newDigest();
             return HexFormat.of().formatHex(digest.digest(payload.getBytes(StandardCharsets.UTF_8)));
-        } catch (GeneralSecurityException ex) {
-            throw new IdempotencyHashException("SHA-256", ex);
+        } catch (Exception ex) {
+            // LR-B7 (OPT-E9): hard failure by design. Falling back to the raw payload would
+            // silently weaken idempotency semantics and persist raw variable values.
+            throw new IdempotencyDigestException(ex);
         }
+    }
+
+    /** Seam for tests to simulate digest unavailability. */
+    protected MessageDigest newDigest() throws NoSuchAlgorithmException {
+        return MessageDigest.getInstance("SHA-256");
     }
 
     private String cacheKey(UUID templateId, String idempotencyKey) {
         return templateId + ":" + idempotencyKey;
-    }
-
-    @FunctionalInterface
-    interface MessageDigestFactory {
-
-        MessageDigest create(String algorithm) throws GeneralSecurityException;
     }
 }

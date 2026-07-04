@@ -77,6 +77,8 @@ public class KafkaAsyncBatchConfig {
         );
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, new FixedBackOff(1000L, 3L));
         factory.setCommonErrorHandler(errorHandler);
+        // LR-B5: drain the in-flight record below the 30s graceful-shutdown phase timeout.
+        factory.getContainerProperties().setShutdownTimeout(25_000L);
         return factory;
     }
 }

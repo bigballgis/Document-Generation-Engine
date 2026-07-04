@@ -3,7 +3,7 @@
 **Program:** [competitiveness-deepening-program.md](../competitiveness-deepening-program.md)  
 **Wave CD-0:** Spec + ADR drafts (non-code)  
 **Wave CD-1/3:** Implementation mitigations  
-**Sources:** Industry literature (LibreOffice/PDF conversion, enterprise CCMS, bank doc automation), codebase audit (P22 gap spec, OPT seams)
+**Sources:** Industry literature (LibreOffice/PDF conversion, enterprise CCMS, bank doc automation), codebase audit (P22 gap spec, OPT seams), LRP launch-readiness audit (2026-07-03)
 
 ---
 
@@ -132,6 +132,61 @@
 | **Mitigation** | **v1:** Dashboard queues + inline open to exact anchor; **post-v1:** comment threads (defer — document in usability-review 待确认) |
 | **Owner wave** | CD-0 doc decision |
 | **Doc anchor** | usability-review §待确认 |
+
+### CD-PIT-11 — LibreOffice shared-profile concurrency failures *(added 2026-07-03, LRP audit)*
+
+| Field | Content |
+| --- | --- |
+| **Symptom** | Concurrent PDF conversions fail intermittently, output goes missing, or `soffice` crashes silently (industry-frequent: shared user-profile lock) |
+| **Root cause** | `LibreOfficePdfConversionService` `ProcessBuilder` passes no `-env:UserInstallation`; the conversion pool (default size 2) lets concurrent `soffice` processes contend for the same HOME profile lock |
+| **Detection** | Integration/smoke test running ≥4 conversions in parallel |
+| **Mitigation** | Unique temp profile per invocation + `--norestore --nolockcheck --nodefault --nologo` + cleanup in `finally` |
+| **Owner wave** | **LR-A1** |
+| **Doc anchor** | [docs/plan/detail/LRP-A-rendering-trust-hardening.md](./LRP-A-rendering-trust-hardening.md) |
+
+### CD-PIT-12 — SSE buffered/broken behind reverse proxy *(added 2026-07-03, LRP audit)*
+
+| Field | Content |
+| --- | --- |
+| **Symptom** | On Docker 4173, preview/batch-test progress does not arrive incrementally (whole batch bursts at once) or the stream drops silently |
+| **Root cause** | `frontend/nginx.conf` has no SSE location (nginx defaults `proxy_buffering on`, `proxy_read_timeout 60s`); backend sends no `X-Accel-Buffering: no` / `Cache-Control: no-cache`; `SseEmitterRegistry` 3-min timeout without heartbeat |
+| **Detection** | LR-E1 incremental-arrival E2E (4173) |
+| **Mitigation** | Heartbeat comment ~20s + response headers + nginx SSE location (buffering off, raised read_timeout) |
+| **Owner wave** | **LR-B3 / LR-E1** |
+| **Doc anchor** | [docs/plan/detail/LRP-B-runtime-scaleout-session.md](./LRP-B-runtime-scaleout-session.md) |
+
+### CD-PIT-13 — Hard JWT expiry loses authoring work *(added 2026-07-03, LRP audit)*
+
+| Field | Content |
+| --- | --- |
+| **Symptom** | Any request 401s once an author has been editing for 30 minutes; unsaved form work is lost |
+| **Root cause** | `PT30M` hard expiry with no renewal/revocation (logout is log-only) |
+| **Detection** | Session-expiry scenario E2E + dirty-form guard tests |
+| **Mitigation** | Sliding renewal/refresh + Redis revocation list (LR-B6) + dirty-form guard and local drafts (LR-C1/C2) |
+| **Owner wave** | **LR-B6 + LR-C1/C2** |
+| **Doc anchor** | [docs/plan/detail/LRP-B-runtime-scaleout-session.md](./LRP-B-runtime-scaleout-session.md) + [docs/plan/detail/LRP-C-usability-deepening.md](./LRP-C-usability-deepening.md) |
+
+### CD-PIT-14 — Duplicate scheduled jobs on scale-out *(added 2026-07-03, LRP audit)*
+
+| Field | Content |
+| --- | --- |
+| **Symptom** | With multiple replicas, cleanup/escalation jobs execute repeatedly (duplicate escalation to-dos, racing deletes) |
+| **Root cause** | 3 `@Scheduled` jobs (invocation retention / collaboration escalation / preview temp cleanup) have no distributed mutex; P15 delivered HPA, contradicting ADR-0039's single-instance assumption |
+| **Detection** | Two-instance compose smoke observing duplicate execution logs |
+| **Mitigation** | Topology decision ADR-0044 (LR-B1) + ShedLock-style DB mutex (LR-B2; dependency requires dependency-policy check) (ADR-0044 Accepted 2026-07-04 — decision convergence; LR-B2 ShedLock landed) |
+| **Owner wave** | **LR-B1 / LR-B2** |
+| **Doc anchor** | [docs/plan/detail/LRP-B-runtime-scaleout-session.md](./LRP-B-runtime-scaleout-session.md) |
+
+### CD-PIT-15 — Unbounded audit table growth *(added 2026-07-03, LRP audit)*
+
+| Field | Content |
+| --- | --- |
+| **Symptom** | Management/runtime audit tables grow without bound, degrading queries and backups |
+| **Root cause** | V9/V17 only create tables + indexes; no retention/archival (contrast: invocation records already have V43/V44 + a cleanup scheduler) |
+| **Detection** | Capacity reports / slow-query monitoring |
+| **Mitigation** | Retention config + scheduled cleanup/archival (mirror the invocation pattern; record the retention baseline in an ADR) |
+| **Owner wave** | **LR-D1** |
+| **Doc anchor** | [docs/plan/detail/LRP-D-ops-observability.md](./LRP-D-ops-observability.md) |
 
 ---
 

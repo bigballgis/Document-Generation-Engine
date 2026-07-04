@@ -30,6 +30,9 @@
         <logstash-logback.version>8.0</logstash-logback.version>
         <querydsl.version>5.1.0</querydsl.version>
         <mapstruct.version>1.6.3</mapstruct.version>
+        <!-- LR-B2: latest 6.x line; 6.x is the ShedLock line tested with Spring Boot 3.3
+             (7.x targets Boot 3.4+/Spring 6.2). Pre-verification: ADR-0044 appendix. -->
+        <shedlock.version>6.10.0</shedlock.version>
         <!-- Quality gates (OPT-B). gate.fail toggles ratchet measure vs enforce. -->
         <gate.fail>true</gate.fail>
         <jacoco.line.min>0.70</jacoco.line.min>
@@ -38,6 +41,9 @@
         <checkstyle.version>10.20.1</checkstyle.version>
         <pmd.plugin.version>3.26.0</pmd.plugin.version>
         <spotbugs.plugin.version>4.8.6.4</spotbugs.plugin.version>
+        <surefire.forkCount>1</surefire.forkCount>
+        <surefire.argLine>-Xmx512m -XX:+ExitOnOutOfMemoryError</surefire.argLine>
+        <spotbugs.effort>Max</spotbugs.effort>
     </properties>
 
     <dependencies>
@@ -177,6 +183,16 @@
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j-core</artifactId>
             <version>8.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-spring</artifactId>
+            <version>${shedlock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc-template</artifactId>
+            <version>${shedlock.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
@@ -355,7 +371,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <reuseForks>false</reuseForks>
+                    <reuseForks>true</reuseForks>
+                    <forkCount>${surefire.forkCount}</forkCount>
+                    <argLine>${surefire.argLine} ${argLine}</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -363,7 +381,7 @@
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>${spotbugs.plugin.version}</version>
                 <configuration>
-                    <effort>Max</effort>
+                    <effort>${spotbugs.effort}</effort>
                     <threshold>Medium</threshold>
                     <includeTests>false</includeTests>
                     <excludeFilterFile>config/spotbugs/exclude.xml</excludeFilterFile>
@@ -383,6 +401,17 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>dev-fast</id>
+            <properties>
+                <checkstyle.skip>true</checkstyle.skip>
+                <pmd.skip>true</pmd.skip>
+                <spotbugs.skip>true</spotbugs.skip>
+                <jacoco.skip>true</jacoco.skip>
+                <spotbugs.effort>Default</spotbugs.effort>
+                <surefire.forkCount>0.5C</surefire.forkCount>
+            </properties>
+        </profile>
         <profile>
             <id>sbom</id>
             <build>

@@ -25,3 +25,9 @@ warnings; stores preview records as authoritative evidence for test/approval.
 **Backend slice evidence:** `com.bank.docgen.rendering` module, Flyway V6, `PreviewController`, `DocxAssemblerTest`, `PdfConversionService`, `PreviewRecordView.comparisonSummary`.
 
 **Frontend slice evidence:** `TemplatePreviewPanel` on `TemplateDetailView`.
+
+## Known gap (P22 — other session)
+
+- **P4-T01** delivered thin DOCX assembly (plain-text structured downgrade path at slice close).
+- **Structured content → real Word constructs** (emphasis, lists, styleRef, tables, numbering) is **P22-T01+**, not a reopen of P4 phase status.
+- See [P22 demo expansion](./P22-demo-expansion-rendering-fidelity.md) and transitional seam in [execution-sync-ledger.md](../execution-sync-ledger.md).

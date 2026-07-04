@@ -17,6 +17,8 @@ green gates, and synced owning docs (per the delivery + doc-sync constitutions).
 > before acting. Items marked **(needs decision)** require maintainer confirmation
 > before they become confirmed requirements.
 
+> **2026-07-03:** Historical waves remain Done; new usability deepening (dirty-form guard, draft recovery, undo/redo, side-by-side preview, notification center, onboarding tour, server-side pagination) is planned in [launch-readiness-program.md](./launch-readiness-program.md) Wave LR-C — not re-opened here.
+
 ---
 
 ## 0. Headline findings (user-interaction)

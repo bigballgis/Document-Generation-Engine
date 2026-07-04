@@ -5,7 +5,7 @@ import com.bank.docgen.runtime.service.AsyncTaskCancellationNotAllowedException;
 import com.bank.docgen.runtime.service.AsyncTaskExpiredException;
 import com.bank.docgen.runtime.service.AsyncTaskNotFoundException;
 import com.bank.docgen.runtime.service.IdempotencyConflictException;
-import com.bank.docgen.runtime.service.IdempotencyHashException;
+import com.bank.docgen.runtime.service.IdempotencyDigestException;
 import com.bank.docgen.runtime.service.RuntimeAccessDeniedException;
 import com.bank.docgen.runtime.service.RuntimeBatchValidationException;
 import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
@@ -88,18 +88,12 @@ public class RuntimeExceptionAdvice {
         return errorEnvelopeFactory.idempotencyConflict(request, ex);
     }
 
-    @ExceptionHandler(IdempotencyHashException.class)
-    public ResponseEntity<ErrorEnvelope> handleIdempotencyHashFailure(
+    @ExceptionHandler(IdempotencyDigestException.class)
+    public ResponseEntity<ErrorEnvelope> handleIdempotencyDigestFailure(
             HttpServletRequest request,
-            IdempotencyHashException ex
+            IdempotencyDigestException ex
     ) {
-        return errorEnvelopeFactory.domainError(
-                request,
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                ApiErrorCodes.IDEMPOTENCY_HASH_FAILED,
-                ApiErrorCategories.IDEMPOTENCY,
-                ex.messageKey()
-        );
+        return errorEnvelopeFactory.idempotencyDigestFailure(request, ex);
     }
 
     @ExceptionHandler(AsyncTaskNotFoundException.class)

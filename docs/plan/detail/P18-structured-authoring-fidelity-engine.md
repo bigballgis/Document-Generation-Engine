@@ -93,6 +93,12 @@ surfaced in test/approval/publish materials and the runtime success response per
   ≥90% per constitution.
 - PRD §6.4–6.5.1 + permission-matrix cross-links verified; ledger evidence recorded.
 
+## Residual (closed by P22 — other session)
+
+- **Authoring + validation + UI:** Done (P18-T01…T10).
+- **DOCX structured write path:** Open — tracked in [P22 demo expansion](./P22-demo-expansion-rendering-fidelity.md) (P22-T01+), not a reopen of P18 phase status.
+- **Do not** mark P18 incomplete; use transitional seam «Structured content DOCX write» in [execution-sync-ledger.md](../execution-sync-ledger.md).
+
 ---
 
 ## Task-level behavior specs & test-first plan (2026-06-23)

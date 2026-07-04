@@ -3,6 +3,7 @@ package com.bank.docgen.sharedkernel.api;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.rendering.PdfConversionCapacityExceededException;
 import com.bank.docgen.runtime.service.IdempotencyConflictException;
+import com.bank.docgen.runtime.service.IdempotencyDigestException;
 import com.bank.docgen.runtime.service.SyncBatchFailureException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
@@ -114,6 +115,25 @@ public class ErrorEnvelopeFactory {
                 conflictSummary
         );
         return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
+    }
+
+    public ResponseEntity<ErrorEnvelope> idempotencyDigestFailure(
+            HttpServletRequest request,
+            IdempotencyDigestException ex
+    ) {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        String messageKey = ex.messageKey();
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.IDEMPOTENCY_DIGEST_FAILED,
+                ApiErrorCategories.GENERATION,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                true,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 

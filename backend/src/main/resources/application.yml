@@ -1,6 +1,9 @@
 spring:
   application:
     name: docgen-backend
+  # LR-B5: bounded drain window per shutdown phase; executors/Kafka drain in ~25s below it.
+  lifecycle:
+    timeout-per-shutdown-phase: ${SHUTDOWN_DRAIN_TIMEOUT:30s}
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:docgen}
     username: ${POSTGRES_USER:docgen}
@@ -56,6 +59,10 @@ docgen:
     conversion-queue-capacity: ${PDF_CONVERSION_QUEUE_CAPACITY:0}
     max-generated-artifact-bytes: ${MAX_GENERATED_ARTIFACT_BYTES:52428800}
     pdf-page-number-stamping-enabled: ${PDF_PAGE_NUMBER_STAMPING_ENABLED:false}
+    # LR-B3: progress-stream SSE timeout (longest batch test + margin) and keep-alive
+    # heartbeat cadence. Proxy read timeout must be >= 3x the heartbeat interval.
+    sse-timeout: ${SSE_TIMEOUT:PT15M}
+    sse-heartbeat-interval: ${SSE_HEARTBEAT_INTERVAL:PT20S}
   jwt:
     secret: ${JWT_SECRET:local-dev-only-change-me-please-32bytes-min}
     access-token-ttl: PT30M
@@ -137,3 +144,5 @@ resilience4j:
 
 server:
   port: ${BACKEND_PORT:8080}
+  # LR-B5: stop accepting new requests on SIGTERM, let in-flight requests drain.
+  shutdown: graceful

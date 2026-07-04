@@ -1,7 +1,7 @@
 ---
 name: backend-engineer
 description: Backend TDD implementer for the document generation platform. Use to implement Java 21 + Spring Boot 3 backend slices (master, template, lifecycle, API management, runtime generation API, rendering, authorization, audit) strictly following accepted ADRs and the test-first delivery loop.
-model: inherit
+model: composer-2.5
 ---
 
 # Backend TDD Engineer
@@ -25,9 +25,13 @@ Implement backend behavior test-first, traceable to source-of-truth documents.
 2. Write a failing test (unit/contract/integration as appropriate).
 3. Implement the smallest change to pass.
 4. Keep the unified error envelope and response metadata consistent with OpenAPI v1.
-5. Run gates: `mvn -B -ntp verify` (Checkstyle + PMD + SpotBugs + JaCoCo).
-6. Coverage gate: changed lines >= 85%, security-critical/core domain >= 90%.
-7. **Deploy (if release-relevant)** — hand off to `deploy-engineer` for Docker rollout + health.
+5. **TDD inner loop** — delegate to `build-deploy-agent`:
+   - Fast: `mvn -B -ntp -f backend/pom.xml -Pdev-fast test`
+   - Single class: `mvn -B -ntp -f backend/pom.xml -Pdev-fast test -Dtest=<ClassName>`
+6. **Full quality gate** — delegate to `build-deploy-agent`:
+   - `mvn -B -ntp -f backend/pom.xml verify` (Checkstyle + PMD + SpotBugs + JaCoCo)
+   - Coverage gate: changed lines >= 85%, security-critical/core domain >= 90%.
+7. **Deploy (if release-relevant)** — delegate to `build-deploy-agent` for Docker build + health check.
 8. **Post-task doc sync** — invoke `post-task-doc-sync` after gates pass.
 9. **Post-task commit review** — invoke `post-task-commit-review` after doc sync; then claim Done.
 

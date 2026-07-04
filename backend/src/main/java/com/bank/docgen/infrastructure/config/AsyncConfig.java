@@ -25,6 +25,9 @@ public class AsyncConfig {
         executor.setMaxPoolSize(4);
         executor.setQueueCapacity(100);
         executor.setThreadNamePrefix("async-batch-");
+        // LR-B5: drain in-flight async batch work below the 30s shutdown phase timeout.
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(25);
         executor.initialize();
         return executor;
     }

@@ -1,6 +1,7 @@
 # Execution Sync Ledger
 
-**Last synced:** 2026-07-04 (**SpotBugs EI slice 5** — `cursor/sor-full-implementation-1385`; service/infrastructure/authoring defensive copies; see [spotbugs-exclusion-ratchet.md](./spotbugs-exclusion-ratchet.md))
+**Last synced:** 2026-07-04 (**main merge** — `cursor/sor-full-implementation-1385`; merged `origin/main` LR-B batch 1 + build DX; SpotBugs slice 5 retained)
+**Last synced (2026-07-03):** Build DX optimization Done — G-DX1–G-DX4: `reuseForks=true`, `forkCount` property, `dev-fast` profile (skips Checkstyle/PMD/SpotBugs/JaCoCo), SpotBugs effort parameterised, `.mvn/jvm.config` added. Pre-existing PMD violations fixed (`DocxPdfPageNumberStampPlanResolver` `AssignmentInOperand` ×2, `StructuredContentDocxWriter` `UnusedFormalParameter`). Pre-existing test regressions fixed (`TemplatePlatformSliceTest` catalogVersion `1.0`→`1.1`; `LibreOfficePdfConversionServiceTest` Linux `.sh` scripts). **Gate:** `mvn -B -ntp -f backend/pom.xml -Pdev-fast test` BUILD SUCCESS **707** tests **46s**; `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS **707** tests **79s**. BDD: `not-applicable`. Active formal phase: **P22**.
 **Authoritative gate snapshot (2026-07-04):** backend Surefire **870** (1 skipped); frontend Vitest **763**; Playwright docker smoke tier **8** specs.
 **Completion note (2026-07-04, SpotBugs EI slice 5):** SpotBugs exclusion ratchet **slice 5 Done** — extended `DefensiveCopies` (`copyStringStringMap`, `copyAccountGroupsMap`); defensive copies on **11** service/infrastructure/authoring types (**~13** collection/byte[]/nested components): `TemplateExportZipArtifact`, `TemplateAdGroupAuthorizationCache.CacheEntry`, `RiskPromptConfigService.EffectiveRiskPromptConfig`, `DocgenAsyncProperties` (Kafka get/set), `AdGroupResolverProperties.setAccountGroups`, `PasteCleaningResult`, `TableComponentValidationResult`, `StorageProperties`, `ManagementAuthService.LoginSession`, `BatchExecutionService.BatchExecutionOutcome`. **−13** deferred EI (~65→~**52**). **Tests:** `DomainDtoImmutabilityTest` (19). **Gate:** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (Surefire **870**, 1 skipped); Checkstyle/PMD/SpotBugs 0 violations. BDD `not-applicable`. Optional SOR-A05 follow-up — does not re-open A05 Done.
 **Completion note (2026-07-04, SpotBugs EI slice 4 first batch):** SpotBugs exclusion ratchet **slice 4 first batch Done** — extended `DefensiveCopies` (`copyBytes`, `copyNestedList`); compact-constructor defensive copies on **14** domain/authoring/internal types (**~20** collection/byte[] fields); **8/8** `authoring/structured/*` records with collection components hardened; `AdGroupResolverProperties.getAccountGroups()` deep-copy return. **−17** deferred EI (~82→~**65**). **Tests:** `DomainDtoImmutabilityTest` (10). **Gate:** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (Surefire **861**, 1 skipped); Checkstyle/PMD/SpotBugs 0 violations. BDD `not-applicable`. Optional SOR-A05 follow-up — does not re-open A05 Done.
@@ -27,6 +28,9 @@
 **Last synced (prior):** 2026-07-04 (**SOR wave 3/7 slice** — `cursor/sor-full-implementation-1385`; SOR-P03/T02/T03 Done; SOR-P02 size-cap slice In Progress; backend `mvn verify` **723** Surefire; frontend Vitest **656**; docker Playwright subset **8** specs; see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
 **Last synced (prior):** 2026-07-03 (**SOR full implementation wave** — `cursor/sor-full-implementation-1385`; backend `mvn verify` + frontend **654** Vitest; see [system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md))
 **Authoritative gate snapshot (2026-07-03):** backend Surefire **654+** (post-SOR); frontend Vitest **654**; Playwright smoke tier **5** specs in CI (`test:e2e:docker`).
+**Last synced:** 2026-07-03 (**P22-DEMO-EXPANSION partial progress** — Wave 1 largely complete; Wave 2 partial; commit `6f9c76a`; gates **RED/pending**)
+**Progress note (2026-07-03, P22):** **P22-DEMO-EXPANSION remains In Progress** (not Done). **Wave 1 (T01/T02) largely complete:** `StructuredContentDocxWriter`, `DocxListNumberingSupport`, `DocxMasterStyleRegistry`, `StructuredContentImageResolver`; `default-master-style-catalog-v1.json` v1.1; `DocxAssemblerTest` BDD-DEMO-EXP-001/002/004/013–015 coverage. **Wave 2 (T03/T04) partial:** `PdfPageNumberStampPlan`, `DocxPdfPageNumberStampPlanResolver`, `PdfPageNumberStamper` section-aware stamping; `DocumentGenerationEngine` + `PreviewGenerationService` pipeline wiring. **Not started:** T05–T15 demo packages, FOL executive upgrade (T14), `import-all-demos.ps1` (T13), T15 regression/Docker smoke. **Gate:** `mvn -B -ntp -f backend/pom.xml verify` **RED/pending** (blocked on `target/` clean + catalog sync). **Architecture review:** Critical findings **C1–C3** open — remediation required before T01/T02 close-out. **Active formal phase: P22** (T01/T02 close-out + T03/T04 next). Traceability: [P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md).
+**Last synced (prior):** 2026-07-03 (**P12-API-PACKAGE-ACCESS-INVOCATION slice Done** — T01–T12 complete; Playwright **10/10** + UIUX manifest **PASS**; commit `2e61dc3`)
 **Completion note (2026-07-03, P12-API-PKG):** **P12-API-PACKAGE-ACCESS-INVOCATION slice Done** — package-first API access + invocation records. **Backend T01–T06:** Flyway V43–V45; materialize/gate; `InvocationRecordService`; retention scheduler; runtime + management invocation APIs. **Frontend T07–T09:** hub External access L1; `ApiPolicyHomeView` overview downgrade; `TemplateRecentInvocationsPanel`. **E2E T11:** `P12-API-PACKAGE-ACCESS.spec.ts` **6/6**, `P12-API-PACKAGE-ACCESS-RUNTIME.spec.ts` **1/1** (BDD S5 generate + caller query); S1–S3/S7 batch flat deferred. **UIUX T12:** `P12-API-PACKAGE-ACCESS-uiux-evidence.spec.ts` **3/3**; manifest `frontend/e2e/evidence/P12-API-PACKAGE-ACCESS-uiux-manifest.md` **PASS** (4 screenshots REDBC/GREENBC). **Gate:** Docker redeploy ✓; Playwright Docker **10/10**; prior `ManagementInvocationQueryServiceTest` ✓; frontend Vitest **646** ✓. **P12 catch-all → Not Started** (slice complete). **Active formal phase: P22** (**P22-T01 next**). Traceability: [P12-api-package-access-invocation-records.md](./detail/P12-api-package-access-invocation-records.md).
 **Last synced (prior):** 2026-07-03 (**P22-DEMO-EXPANSION activated → In Progress** — BDD ready; P22-T01–T15 Not Started; **P22-T01 next**; plan-orchestrator only — no implementation code)
 **Activation note (2026-07-03):** **P22-DEMO-EXPANSION activated → In Progress** (sole formal phase `In Progress`). **P12-API-PACKAGE-ACCESS-INVOCATION → Done** (2026-07-03 — full slice T01–T12; see completion note above). **P12 catch-all → Not Started**. BDD **ready** (`docs/requirements/demo-expansion-behavior-spec.md`). **P22-T01…T15 Not Started** — **P22-T01 next**. Traceability: [P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md).
@@ -364,7 +368,7 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P9 | Done | Observability, local security gates, prod compose profile |
 | P10 | Done | Secure download with expiry |
 | P11 | Done | Batch + async task lifecycle |
-| P12 | Not Started (2026-07-03) | Catch-all idle — last slice **P12-API-PACKAGE-ACCESS-INVOCATION Done** (T01–T12); **P22** sole formal phase `In Progress`; see [P12 detail](./detail/P12-deferred-enhancements.md) |
+| P12 | Not Started (catch-all) | Slices **P12-API-PACKAGE-ACCESS-INVOCATION Done** (T01–T12) and **P12-TEMPLATE-TESTING-OVERHAUL Done** (T01–T13); **P22** sole formal phase `In Progress`; see [P12 detail](./detail/P12-deferred-enhancements.md) |
 | P13 | Done | Identity & group administration (user + group management plane); green gates 2026-06-23 — see P13 mirror block |
 | P14 | Done (2026-06-27) | Confirmed large domains — **P14-T01 Done** (T01a–T01e + architecture remediation); **P14-T02 Done** (T02a–T02d + E2E **3/3** + UIUX **5/5**); **P14-T03 Done** (T03a–T03c + E2E **2/2** + UIUX **7/7**); backend **481**; frontend **235+**; OpenAPI export/import contract; architecture re-review **PASS** (2026-06-26); see [P14 detail](./detail/P14-confirmed-large-domains.md) |
 | P15 | Done (2026-06-27) | Kubernetes deployment & container hardening — T01–T10; [`deploy/README.md`](../deploy/README.md); helm validate + CI gates green — see [P15 detail](./detail/P15-kubernetes-deployment-container-hardening.md) |
@@ -376,7 +380,7 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P21 | Done (2026-06-30) | Role-journey frontend redesign — T01–T11 + X01–X06 + **X02** governance close; backend **`mvn verify` 553**; frontend **511** Vitest; Playwright/UIUX per sub-phase; **AUD-B10 resolved** (P12-AUD-B10 Done 2026-07-01); **AUD-M02 resolved** (P12-AUD-M02 Done 2026-07-01) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
 
 **Active phase:** **P22** (2026-07-03 — **P22-DEMO-EXPANSION** sole formal phase `In Progress`; coordination note [P22-coordination-note-2026-07-03.md](./P22-coordination-note-2026-07-03.md)).
-**Active slice:** **P22-T01…T15** (P22 session owns status updates — SOR-D03).
+**Active slice:** **P22-T01…T15** (P22 session owns status updates).
 **P21 Done** — do not reopen. All formal phases P0–P11, P13–P21 **Done**; **P12 catch-all Not Started**.
 
 ## Epic ↔ phase mapping
@@ -666,16 +670,53 @@ Each row lists exit criteria; remove from this index when closed.
 | Seam | Current behavior | Exit criteria | Tracked in |
 | --- | --- | --- | --- |
 | AD Group resolution | `ConfigAdGroupResolver` — config-file stub, fail-closed | Production LDAP/AD adapter + integration tests | E05-T06, P6 |
-| Async batch transport | Default in-process `@Async`; Kafka optional via `ASYNC_TRANSPORT=kafka` | Production profile uses Kafka + DLT; in-process dev-only documented | P11, M14 |
+| Async batch transport | Default in-process `@Async`; Kafka optional via `ASYNC_TRANSPORT=kafka` | **Accepted-for-v1 in-process per ADR-0044 branch (b)** (2026-07-04); Kafka switch remains optional; dev compose kafka healthcheck + evidence → LR-B4 (In Progress) | P11, M14, LR-B4 |
 | Security forbidden-route audit | Log-only in some paths | Durable security audit event per matrix §13.3 | COR-P06 |
 | QueryDSL / MapStruct / Redisson | QueryDSL audit + MapStruct apimgmt Done (2026-06-25); Lettuce | ADR-0037 opportunistic expansion ongoing | OPT-D3/D4 Done; COR-P05 |
 | Publish gate checklist | Server-side live gate blocks publish on blockers/thresholds | **Done** (2026-06-25; `PublishGateService` + UI checklist + publish summary dialog) | COR-T01, P19-T06 |
-| Runtime rate limit | Process-local Bucket4j; requests without credential headers bypass filter (auth layer rejects later) | Shared Redis limiter or documented fail-closed at filter; ADR 0031 alignment | COR-B10, OPT-F8 |
+| Runtime rate limit | Process-local Bucket4j; pass-through for requests without credential headers **documented as deliberate** (auth layer rejects downstream; LR-B7 2026-07-04 code-comment + ADR-0044 §Deferred ADR-0031) | Shared limiter remains scale-out prerequisite (ADR-0044 #3 — bucket4j-redis per ADR-0031 or gateway enforcement) | COR-B10, OPT-F8, LR-B7 |
 | Workbench vs Dashboard | **Done** — COR-T11 (2026-06-24): workflow + collaboration queues on Dashboard; legacy workbench routes redirect; standalone workbench views removed | COR-T11 decision in `docs/adr/decisions/2026-06-23-batch-b-workflow-defaults.md` | COR-T11 |
 | zh-CN / `api.error` catalog | **Done (2026-06-25)** — en/zh `api.error` + primary journey zh-CN bundles | Residual non-primary keys may en-fallback until touched | P20-T06 Done |
-| P19 verifiability | **Done (2026-06-25)** — T01–T10: batch test, coverage, change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, UI | Residual fidelity depth remains P18 | P19 Done, COR-L03 Done |
+| P19 verifiability | **Done (2026-06-25)** — T01–T10: batch test, coverage, change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, UI | Residual structured **DOCX write fidelity** tracked under **P22** (not P18) | P19 Done, COR-L03 Done |
+| Structured content DOCX write | P18 authoring/validation Done; `StructuredContentDocxWriter` landed (`6f9c76a`); BDD 001/002/004/013–015 partial green | P22-T01/T02 Done + `mvn verify` green; architecture C1–C3 closed | P22, CD-PIT |
+| Dual page numbering (DOCX/PDF) | Stamp plan + stamper wiring partial (`6f9c76a`); master DOCX section fields incomplete | P22-T03/T04 Done; BDD-005/006 green | P22, CD-PIT-05 |
+| Paste cleaning ↔ binding validation | P18-T07 edit-time only; not in `computeBindingStatus` | Wired to publish gate OR ADR documents edit-time-only scope | P18-T07, CD-HARD-T05 |
 | Service-layer authorization | Route visibility not enforced at API filter | **Documented pattern + contract test (2026-06-24)** — ADR-0001 | COR-P06 |
-| Redisson multi-instance locks | Lettuce cache only | **ADR-0039 evaluation recorded (2026-06-24)**; implement when multi-instance | COR-P05 |
+| Redisson multi-instance locks | Lettuce cache; **ShedLock JDBC mutex on all 3 @Scheduled jobs (LR-B2, 2026-07-04)** | **ADR-0039 evaluation recorded (2026-06-24)**; topology decision **ADR-0044 Accepted** (2026-07-04); Redisson itself still deferred per ADR-0039/0044 — implement when multi-instance | COR-P05, LR-B1, LR-B2 |
+
+## CDP — Competitiveness Deepening Program (2026-07-04)
+
+Cross-cutting launch-readiness program; **not** a formal phase. Task prefix **`CD-*`**. P22 rendering code runs in a **separate session**.
+
+| Wave | Scope | Status | Evidence |
+| --- | --- | --- | --- |
+| **CD-0** | Doc truth (CD-DOC), pitfall registry (CD-PIT), BDD drafts (CD-BDD), UX metrics (CD-UX) | **In Progress** | [competitiveness-deepening-program.md](./plan/competitiveness-deepening-program.md) |
+| **CD-2** | Browser E2E golden paths (CD-E2E) | Not Started | [CDP-e2e-full-chain-evidence.md](./plan/detail/CDP-e2e-full-chain-evidence.md) |
+| **CD-3** | Production pitfall hardening (CD-HARD) | Not Started | After P22 Done; [CDP-industry-pitfall-registry.md](./plan/detail/CDP-industry-pitfall-registry.md) |
+
+**CD-0 gate (open):** CD-DOC **Done** (2026-07-04); CD-BDD-T01…T08 **ready**; CD-2 **Not Started**; ADR 0041–0043 drafts optional.
+
+## LRP — Launch Readiness & Deep-Optimization Program (2026-07-03)
+
+Cross-cutting program at the same level as CDP; **not** a formal phase — **P22 remains the sole formal phase In Progress**. Task prefix **`LR-*`** only; do not execute `P22-*`/`CD-*` from LRP. Planning committed 2026-07-03 (program + 4 wave detail docs); Wave LR-B implementation started 2026-07-04 (batch 1 evidence below).
+
+| Wave | Scope | Status | Evidence |
+| --- | --- | --- | --- |
+| **LR-A** | Rendering trust chain & file safety (LR-A1…A7) | Not Started | [launch-readiness-program.md](./launch-readiness-program.md) §3; [LRP-A detail](./detail/LRP-A-rendering-trust-hardening.md) |
+| **LR-B** | Multi-instance correctness & session governance (LR-B1…B8) | **In Progress** (2026-07-04) | [program §4](./launch-readiness-program.md); [LRP-B detail](./detail/LRP-B-runtime-scaleout-session.md) |
+| **LR-C** | Business usability deepening (LR-C1…C13) | Not Started | [program §5](./launch-readiness-program.md); [LRP-C detail](./detail/LRP-C-usability-deepening.md) |
+| **LR-D** | Ops observability & data lifecycle (LR-D1…D7) | Not Started | [program §6](./launch-readiness-program.md); [LRP-D detail](./detail/LRP-D-ops-observability.md) |
+| **LR-E** | Release readiness gate (LR-E1…E2) | Not Started | [program §7](./launch-readiness-program.md) (no separate detail doc) |
+
+**LR-B batch 1 evidence (2026-07-04):** LR-B1/B2/B7 **Done**; LR-B3/B4/B5 In Progress; LR-B6 Blocked; LR-B8 Not Started. Gates: `mvn -B -ntp -f backend/pom.xml verify` — **727** tests BUILD SUCCESS (Failures 0, Errors 0, Skipped 1 — pre-existing Kafka environment skip); Checkstyle/PMD/SpotBugs 0 violations; JaCoCo pass. `helm lint` green for base/dev/staging/prod values (equivalent of `.\scripts\helm-validate.ps1`; no pwsh in environment). Architecture review: two rounds BLOCK → remediated → **PASS-with-suggestions** (agent `7f494a6b`). Key deliverables: ADR-0044 (topology decision, Accepted); `V46__shedlock.sql`; `SchedulerLockConfig` + `@SchedulerLock` on 3 schedulers; `SseResponseHeaders`; `IdempotencyDigestException` hard 500 (`IDEMPOTENCY_DIGEST_FAILED`, retryable, messageKey `api.error.generation.idempotencyDigestFailed`). Outstanding: B3 `frontend/nginx.conf` SSE location + Docker curl smoke; B4 dev compose kafka healthcheck + prod-profile evidence; B5 Docker restart smoke; B6 awaiting user session-policy confirmation; B8 not started; zh-CN key `api.error.generation.idempotencyDigestFailed` absorbed by LR-C11.
+
+**Seam mapping (LRP tasks → transitional seams above; seam rows re-annotated 2026-07-04 by LR-B batch 1):**
+
+- «Async batch transport» → **LR-B4** (close or re-annotate accepted-for-v1 via ADR-0044)
+- «Security forbidden-route audit» → **LR-D7** (durable events; closes seam)
+- «Redisson multi-instance locks» / ADR-0039 → **LR-B1** (topology ADR-0044) + **LR-B2** (scheduler mutex)
+- «Paste cleaning ↔ binding validation» + «Structured content DOCX write» → **LR-A4** adjacency only (closure stays with P22 / CD-HARD-T05)
+- «Runtime rate limit» → **LR-B7** (filter fail-closed alignment per ADR-0031)
 
 ## Sync maintenance
 

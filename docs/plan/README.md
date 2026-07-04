@@ -53,7 +53,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P9 | Production readiness | [detail/P9-production-readiness.md](detail/P9-production-readiness.md) | Done |
 | P10 | Runtime document download | [detail/P10-runtime-download.md](detail/P10-runtime-download.md) | Done |
 | P11 | Batch & async generation | [detail/P11-batch-async.md](detail/P11-batch-async.md) | Done |
-| P12 | Deferred enhancements | [detail/P12-deferred-enhancements.md](detail/P12-deferred-enhancements.md) · [API package access (paused)](detail/P12-api-package-access-invocation-records.md) | **Not Started** — slice **P12-API-PACKAGE-ACCESS-INVOCATION paused** (T01–T06 Done; T07–T12 after P22); prior **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03) |
+| P12 | Deferred enhancements | [detail/P12-deferred-enhancements.md](detail/P12-deferred-enhancements.md) · [API package access (Done)](detail/P12-api-package-access-invocation-records.md) | **Not Started** — slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03) |
 | P13 | Identity & group administration | [detail/P13-identity-group-administration.md](detail/P13-identity-group-administration.md) | Done |
 | P14 | Confirmed large domains | [detail/P14-confirmed-large-domains.md](detail/P14-confirmed-large-domains.md) | Done (2026-06-27) |
 | P15 | Kubernetes deployment & container hardening | [detail/P15-kubernetes-deployment-container-hardening.md](detail/P15-kubernetes-deployment-container-hardening.md) | Done (2026-06-27; T01–T10) |
@@ -83,6 +83,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 **In-flight work:**
 - **CDP (this session)** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)
 - **P22 (other session)** — rendering + demos ([plan](detail/P22-demo-expansion-rendering-fidelity.md); formal phase accounting only here)
+- **LRP (In Progress — Wave LR-B activated 2026-07-04)** — launch readiness & deep optimization ([program](./launch-readiness-program.md); Waves **LR-A…LR-E**; tasks **`LR-*`**; program, not a formal phase)
 
 **P21 Done** — closure evidence in [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 
@@ -98,6 +99,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | --- | --- |
 | **[system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md)** | **Current consolidated review (SOR-0…7, 2026-07-03)**: plan truth, CI gate automation, security seams, performance, frontend structure, contract/i18n, architecture, ops readiness — all tasks Not Started |
 | **[comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)** | **Unified prioritized map (COR-0…6): docs sync, API contract, template workflow, frontend UX, performance, E2E, P14–P20 — start here (2026-06-23)** |
+| [launch-readiness-program.md](./launch-readiness-program.md) | Launch-readiness deep optimization — production pitfalls + usability deepening (LR-A…E, 2026-07-03) |
 | [optimization-plan.md](./optimization-plan.md) | Technical debt detail: quality gates, coverage, backend architecture/security/performance (OPT-A…G) |
 | [spotbugs-exclusion-ratchet.md](./spotbugs-exclusion-ratchet.md) | SpotBugs exclude.xml ratchet (SOR-A05): baseline `<Match>` count, banned patterns, EI slice cadence |
 | [coverage-ratchet-plan.md](./coverage-ratchet-plan.md) | JaCoCo / Vitest bundle floors (SOR-C02) |

@@ -1,6 +1,7 @@
 # Production-style compose profile for release candidate validation.
 # Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d
 # Container hardening (ADR-0030 / P15-T01): read-only root FS + tmpfs writable paths + non-root images.
+# ADR-0044: v1 topology = single backend replica (do not scale docgen-backend; see docs/adr/operations/0044-deployment-topology-v1.md).
 
 services:
   docgen-backend:

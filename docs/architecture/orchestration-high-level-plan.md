@@ -56,13 +56,13 @@ model, permissions, API docs, and ADRs.
 | E06 | P1 | No | Management UI product shell: login-first, OA layout, dual-brand | Done | E01–E05 slices |
 | E07 | P2 | No | Production readiness: gates, observability, deployment evidence | Done (local gates) | E01–E06 |
 | E11 | P1 | No | Role-journey navigation after login (GLOBAL/GROUP/TEMPLATE_AUTHOR) | Done | P1 login |
-| E12 | P1 | No | Frontend role-operation journey UI continuation | Done (thin slice); UX Wave A/B extension in progress — see [e12-phase3-task-sheet.md](../architecture/e12-phase3-task-sheet.md) | E11 |
+| E12 | P1 | No | Frontend role-operation journey UI continuation | **Done** (2026-06-30; P21 + UX Wave A/B) — see [e12-phase3-task-sheet.md](../architecture/e12-phase3-task-sheet.md) | E11 |
 
 ## Active epic rule
 
 - Exactly **one** epic may be `Active = Yes` (status `In Progress`).
-- **Current active epic:** none — MVP epics re-earned Done; next work is P12 deferred items
-  or external validation (E05-T06, M9-T02).
+- **Current active epic:** none — MVP epics re-earned Done.
+- **In-flight (non-epic):** **CDP** Wave CD-0 ([competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** formal phase (other session); **LRP** launch-readiness & deep-optimization program ([launch-readiness-program.md](../plan/launch-readiness-program.md); **In Progress** — Wave LR-B activated 2026-07-04; LR-B1/B2/B7 Done).
 
 ## Recommended activation sequence
 

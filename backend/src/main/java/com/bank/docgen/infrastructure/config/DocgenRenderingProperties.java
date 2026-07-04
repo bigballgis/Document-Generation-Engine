@@ -1,5 +1,7 @@
 package com.bank.docgen.infrastructure.config;
 
+import com.bank.docgen.rendering.service.SseEmitterRegistry;
+import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "docgen.rendering")
@@ -27,6 +29,15 @@ public class DocgenRenderingProperties {
 
     /** Maximum generated artifact size (DOCX/PDF bytes) before persistence (SOR-P02). */
     private long maxGeneratedArtifactBytes = 52_428_800L;
+
+    /**
+     * LR-B3: SSE emitter timeout for progress streams. Sized to the longest expected
+     * batch-test run plus margin (previously hardcoded to 3 minutes in the registry).
+     */
+    private Duration sseTimeout = SseEmitterRegistry.DEFAULT_SSE_TIMEOUT;
+
+    /** LR-B3: cadence of the {@code : keep-alive} SSE comment heartbeat. */
+    private Duration sseHeartbeatInterval = SseEmitterRegistry.DEFAULT_HEARTBEAT_INTERVAL;
 
     /**
      * When enabled, strips Word {@code PAGE} fields before LibreOffice conversion and stamps
@@ -104,5 +115,21 @@ public class DocgenRenderingProperties {
 
     public void setPdfPageNumberStampingEnabled(boolean pdfPageNumberStampingEnabled) {
         this.pdfPageNumberStampingEnabled = pdfPageNumberStampingEnabled;
+    }
+
+    public Duration getSseTimeout() {
+        return sseTimeout;
+    }
+
+    public void setSseTimeout(Duration sseTimeout) {
+        this.sseTimeout = sseTimeout;
+    }
+
+    public Duration getSseHeartbeatInterval() {
+        return sseHeartbeatInterval;
+    }
+
+    public void setSseHeartbeatInterval(Duration sseHeartbeatInterval) {
+        this.sseHeartbeatInterval = sseHeartbeatInterval;
     }
 }

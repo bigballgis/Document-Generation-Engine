@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,16 +32,17 @@ class LibreOfficePdfConversionServiceTest {
     @BeforeEach
     void setUp() throws URISyntaxException, IOException {
         properties = new DocgenRenderingProperties();
-        String scriptName = System.getProperty("os.name", "").toLowerCase().contains("win")
-                ? "fake-libreoffice.cmd"
-                : "fake-libreoffice.sh";
+        boolean windows = System.getProperty("os.name", "").toLowerCase().contains("win");
+        String scriptName = windows ? "/scripts/fake-libreoffice.cmd" : "/scripts/fake-libreoffice.sh";
         fakeLibreOfficeScript = Path.of(
-                LibreOfficePdfConversionServiceTest.class
-                        .getResource("/scripts/" + scriptName)
-                        .toURI()
+                LibreOfficePdfConversionServiceTest.class.getResource(scriptName).toURI()
         );
-        if (!System.getProperty("os.name", "").toLowerCase().contains("win")) {
-            fakeLibreOfficeScript.toFile().setExecutable(true);
+        if (!windows) {
+            Files.setPosixFilePermissions(fakeLibreOfficeScript, EnumSet.of(
+                    PosixFilePermission.OWNER_READ,
+                    PosixFilePermission.OWNER_WRITE,
+                    PosixFilePermission.OWNER_EXECUTE
+            ));
         }
         testPool = pdfConversionPool();
     }
@@ -85,17 +88,7 @@ class LibreOfficePdfConversionServiceTest {
 
     @Test
     void removesTempDirectoryAfterFailedConversion() throws URISyntaxException, IOException {
-        String failScriptName = System.getProperty("os.name", "").toLowerCase().contains("win")
-                ? "fake-libreoffice-fail.cmd"
-                : "fake-libreoffice-fail.sh";
-        Path failScript = Path.of(
-                LibreOfficePdfConversionServiceTest.class
-                        .getResource("/scripts/" + failScriptName)
-                        .toURI()
-        );
-        if (!System.getProperty("os.name", "").toLowerCase().contains("win")) {
-            failScript.toFile().setExecutable(true);
-        }
+        Path failScript = resolveFailScript();
         properties.setLibreOfficeCommand(failScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();
@@ -108,17 +101,7 @@ class LibreOfficePdfConversionServiceTest {
 
     @Test
     void rejectsNonZeroExitCode() throws URISyntaxException, IOException {
-        String failScriptName = System.getProperty("os.name", "").toLowerCase().contains("win")
-                ? "fake-libreoffice-fail.cmd"
-                : "fake-libreoffice-fail.sh";
-        Path failScript = Path.of(
-                LibreOfficePdfConversionServiceTest.class
-                        .getResource("/scripts/" + failScriptName)
-                        .toURI()
-        );
-        if (!System.getProperty("os.name", "").toLowerCase().contains("win")) {
-            failScript.toFile().setExecutable(true);
-        }
+        Path failScript = resolveFailScript();
         properties.setLibreOfficeCommand(failScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();
@@ -165,6 +148,20 @@ class LibreOfficePdfConversionServiceTest {
         } finally {
             pool.shutdown();
         }
+    }
+
+    private Path resolveFailScript() throws URISyntaxException, IOException {
+        boolean windows = System.getProperty("os.name", "").toLowerCase().contains("win");
+        String scriptName = windows ? "/scripts/fake-libreoffice-fail.cmd" : "/scripts/fake-libreoffice-fail.sh";
+        Path script = Path.of(LibreOfficePdfConversionServiceTest.class.getResource(scriptName).toURI());
+        if (!windows) {
+            Files.setPosixFilePermissions(script, EnumSet.of(
+                    PosixFilePermission.OWNER_READ,
+                    PosixFilePermission.OWNER_WRITE,
+                    PosixFilePermission.OWNER_EXECUTE
+            ));
+        }
+        return script;
     }
 
     private LibreOfficePdfConversionService service() {

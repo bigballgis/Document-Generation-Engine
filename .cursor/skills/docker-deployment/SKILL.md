@@ -63,5 +63,6 @@ curl -f http://localhost:8080/healthz
 
 ## Related
 
-- `.cursor/agents/deploy-engineer.md`
+- `.cursor/agents/build-deploy-agent.md` — routine build/gate/deploy ops (preferred entry point)
+- `.cursor/agents/deploy-engineer.md` — rollback planning and release governance
 - `.cursor/skills/tdd-feature-delivery/SKILL.md`

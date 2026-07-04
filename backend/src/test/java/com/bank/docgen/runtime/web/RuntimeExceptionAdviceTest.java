@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.runtime.service.IdempotencyConflictException;
-import com.bank.docgen.runtime.service.IdempotencyHashException;
+import com.bank.docgen.runtime.service.IdempotencyDigestException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
@@ -55,19 +55,21 @@ class RuntimeExceptionAdviceTest {
     }
 
     @Test
-    void idempotencyHashFailureMapsToStableInternalErrorEnvelope() {
-        when(messageResolver.resolve("api.error.idempotency.hashFailed"))
-                .thenReturn("Unable to compute the idempotency fingerprint.");
+    void idempotencyDigestFailureMapsToRetryableInternalServerError() {
+        when(messageResolver.resolve("api.error.generation.idempotencyDigestFailed"))
+                .thenReturn("The request could not be processed safely. Please retry.");
 
-        ResponseEntity<ErrorEnvelope> response = advice.handleIdempotencyHashFailure(
+        ResponseEntity<ErrorEnvelope> response = advice.handleIdempotencyDigestFailure(
                 request,
-                new IdempotencyHashException("SHA-256", new RuntimeException("missing provider"))
+                new IdempotencyDigestException(new IllegalStateException("digest unavailable"))
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.IDEMPOTENCY_HASH_FAILED);
-        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.IDEMPOTENCY);
-        assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.idempotency.hashFailed");
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.IDEMPOTENCY_DIGEST_FAILED);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.GENERATION);
+        assertThat(response.getBody().error().messageKey())
+                .isEqualTo("api.error.generation.idempotencyDigestFailed");
+        assertThat(response.getBody().error().retryable()).isTrue();
     }
 }

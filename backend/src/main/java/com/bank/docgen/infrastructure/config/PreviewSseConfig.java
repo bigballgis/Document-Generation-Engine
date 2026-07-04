@@ -8,12 +8,18 @@ import org.springframework.context.annotation.Configuration;
 public class PreviewSseConfig {
 
     @Bean(name = "previewSseRegistry")
-    public SseEmitterRegistry previewSseRegistry() {
-        return new SseEmitterRegistry();
+    public SseEmitterRegistry previewSseRegistry(DocgenRenderingProperties renderingProperties) {
+        return new SseEmitterRegistry(
+                renderingProperties.getSseTimeout(),
+                renderingProperties.getSseHeartbeatInterval()
+        );
     }
 
     @Bean(name = "batchSseRegistry")
-    public SseEmitterRegistry batchSseRegistry() {
-        return new SseEmitterRegistry();
+    public SseEmitterRegistry batchSseRegistry(DocgenRenderingProperties renderingProperties) {
+        return new SseEmitterRegistry(
+                renderingProperties.getSseTimeout(),
+                renderingProperties.getSseHeartbeatInterval()
+        );
     }
 }

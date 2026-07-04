@@ -241,8 +241,7 @@ supersedes portions of the original P19-T08/T10 delivery without reopening the P
 | **P19-T08R** | P19-T08 group override | Template-scoped override API + resolve chain; deprecate GROUP user-facing upsert | **P12-BDD-RISK-PROMPT-UX-001-T01/T02** |
 | **P19-T10R** | P19-T10 list-view panel + hardcoded decision categories | Remove list-view panel; create/detail UX relocation; wire `TemplateLifecycleDecisionDialog` | **P12-BDD-RISK-PROMPT-UX-001-T03/T04/T05** |
 
-**BDD:** `BDD-TEMPLATE-RISK-PROMPT-UX-001` (READY 2026-07-02) — see
-`docs/requirements/requirements-plan.md`, PRD §7, ADR-0021 consequences update.
+**BDD:** `BDD-TEMPLATE-RISK-PROMPT-UX-001` — **Done** (2026-06-29) via [P12-BDD-RISK-PROMPT-UX-001](./P12-deferred-enhancements.md); see `docs/requirements/requirements-plan.md`.
 
 **Activation vehicle:** [P12-BDD-RISK-PROMPT-UX-001](./P12-deferred-enhancements.md) (catch-all slice;
 formal P12 phase stays **Not Started**). **COR mirror:** COR-T15.

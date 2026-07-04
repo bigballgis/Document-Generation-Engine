@@ -86,10 +86,29 @@
 
 ## 待确认产品体验问题
 
-- 角色关键任务完成时间的量化阈值、采样窗口和分环境目标值。
-- `TEMPLATE_AUTHOR` 与现有“母版设计人员”在登录落地页导航上的最终融合策略。
+- 角色关键任务完成时间的量化阈值、采样窗口和分环境目标值（**CD-UX-T01 草案见下表**）。
+- `TEMPLATE_AUTHOR` 与现有“母版设计人员”在登录落地页导航上的最终融合策略（**CD-UX-T04 待 ADR/PRD 决策**）。
 - 无权访问反馈页的文案与按钮动作细节（返回上一页、回到首页、联系管理员）。
+
+## CDP 体验指标草案（CD-UX-T01，非 SLA）
+
+| 角色 | 关键任务 | 目标时间（桌面） | 测量 |
+| --- | --- | --- | --- |
+| TEMPLATE_TESTER | Pass/Fail 单次判定 | ≤ 5 min | CD-E2E-T02 可选 timing |
+| TEMPLATE_APPROVER | Approve/Reject | ≤ 5 min | CD-E2E-T04 |
+| GROUP_ADMIN | Go-live 发布确认 | ≤ 3 min | CD-E2E-T05 |
+| TEMPLATE_AUTHOR | 提交审批（证据齐全） | ≤ 8 min | CD-E2E-T01 |
+
+## 禁止的 UX 反模式（CD-UX-T03）
+
+- 用 **API helper 推进生命周期** 却声称 UX/E2E Done。
+- 旅程测试 **只断言时间线可见**，不断言任务完成（队列消失、状态变更）。
+- 编辑态快预览作为测试/审批 **唯一证据**（须最终路径产物）。
+- Playwright `test.skip` 无 manifest 记录。
 
 ## 推荐下一步
 
-1. 转入 API 契约一致性审查，核对正式 OpenAPI v1、示例和设计草案是否完全一致。
+1. **CDP Wave CD-0** — finish [CD-DOC reconciliation](../plan/detail/CDP-doc-truth-reconciliation.md) and [CD-BDD](../plan/competitiveness-deepening-program.md) behavior specs.
+2. **CD-E2E-T01** — browser [MVP golden path](../behavior/mvp-golden-path-browser.md) (task-completion evidence, not API helpers).
+3. **P22 demo acceptance** (other session) — eight bank letter demos + rendering write path per [demo-expansion spec](../requirements/demo-expansion-behavior-spec.md).
+4. Resolve **§待确认** items L87–91 (task-time budgets, landing-page fusion, forbidden-page actions) into PRD/NFR or explicit deferrals.

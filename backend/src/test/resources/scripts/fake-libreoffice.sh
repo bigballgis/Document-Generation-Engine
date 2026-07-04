@@ -1,19 +1,11 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
 OUTDIR=""
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
   case "$1" in
-    --outdir)
-      OUTDIR="$2"
-      shift 2
-      ;;
-    *)
-      shift
-      ;;
+    --outdir) OUTDIR="$2"; shift 2 ;;
+    *) shift ;;
   esac
 done
-if [[ -z "$OUTDIR" ]]; then
-  exit 1
-fi
-printf '%%PDF-1.4' > "${OUTDIR}/input.pdf"
+[ -z "$OUTDIR" ] && exit 1
+printf "%%PDF-1.4\n" > "$OUTDIR/input.pdf"
 exit 0
