@@ -1,6 +1,7 @@
 package com.bank.docgen.collaboration.scheduler;
 
 import com.bank.docgen.collaboration.service.CollaborationEscalationService;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -24,7 +25,13 @@ public class CollaborationEscalationScheduler {
         this.escalationService = escalationService;
     }
 
+    // LR-B2: lockAtMostFor PT10M >> observed runtime (seconds); lockAtLeastFor PT20S << 5min interval.
     @Scheduled(fixedDelayString = "${docgen.collaboration.escalation.fixed-delay-ms:300000}")
+    @SchedulerLock(
+            name = "collaboration-escalation-check",
+            lockAtMostFor = "PT10M",
+            lockAtLeastFor = "PT20S"
+    )
     public void runEscalationCheck() {
         int created = escalationService.processDueEscalations();
         if (created > 0) {

@@ -5,6 +5,7 @@ import com.bank.docgen.runtime.persistence.ApiInvocationRecordEntity;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordRepository;
 import java.time.Instant;
 import java.util.List;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,7 +28,13 @@ public class InvocationRetentionCleanupScheduler {
         this.objectStoragePort = objectStoragePort;
     }
 
+    // LR-B2: lockAtMostFor PT10M >> observed runtime (seconds); lockAtLeastFor PT20S << 1h interval.
     @Scheduled(fixedDelayString = "${docgen.invocation.cleanup-interval-ms:3600000}")
+    @SchedulerLock(
+            name = "invocation-retention-cleanup-artifacts",
+            lockAtMostFor = "PT10M",
+            lockAtLeastFor = "PT20S"
+    )
     @Transactional
     public void cleanExpiredDocumentArtifacts() {
         List<ApiInvocationRecordEntity> expiredArtifacts =
@@ -53,6 +60,11 @@ public class InvocationRetentionCleanupScheduler {
     }
 
     @Scheduled(fixedDelayString = "${docgen.invocation.cleanup-interval-ms:3600000}")
+    @SchedulerLock(
+            name = "invocation-retention-cleanup-records",
+            lockAtMostFor = "PT10M",
+            lockAtLeastFor = "PT20S"
+    )
     @Transactional
     public void cleanExpiredRecords() {
         List<ApiInvocationRecordEntity> expiredRecords = repository.findByRecordExpiresAtBefore(Instant.now());

@@ -11,6 +11,7 @@ related:
   - docs/adr/technology-stack/0028-backend-platform-stack-baseline.md
   - docs/adr/technology-stack/0037-backend-dependency-realization-sequencing.md
   - docs/adr/technology-stack/0034-data-and-storage-operations-baseline.md
+  - docs/adr/operations/0044-deployment-topology-v1.md
 ---
 
 # ADR 0039: Redisson Distributed Lock Evaluation
@@ -58,3 +59,4 @@ without distributed locks. Production deployment today is a single backend insta
 
 - [ADR 0028: Backend Platform Stack Baseline](./0028-backend-platform-stack-baseline.md)
 - [ADR 0037: Backend Dependency Realization Sequencing](./0037-backend-dependency-realization-sequencing.md)
+- Refined by [ADR 0044: Deployment Topology for v1 Launch](../operations/0044-deployment-topology-v1.md) (deployment topology v1)

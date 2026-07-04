@@ -14,6 +14,7 @@ import com.bank.docgen.runtime.service.AsyncTaskExpiredException;
 import com.bank.docgen.runtime.service.AsyncTaskNotFoundException;
 import com.bank.docgen.runtime.service.SyncBatchFailureException;
 import com.bank.docgen.runtime.service.IdempotencyConflictException;
+import com.bank.docgen.runtime.service.IdempotencyDigestException;
 import com.bank.docgen.runtime.service.RuntimeAccessDeniedException;
 import com.bank.docgen.runtime.service.RuntimeBatchValidationException;
 import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
@@ -409,6 +410,14 @@ public class GlobalExceptionHandler {
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 
+    @ExceptionHandler(IdempotencyDigestException.class)
+    public ResponseEntity<ErrorEnvelope> handleIdempotencyDigestFailure(
+            HttpServletRequest request, IdempotencyDigestException ex) {
+        // LR-B7: hard 500-class failure, retryable — never a weakened idempotency key.
+        return errorEnvelope(request, HttpStatus.INTERNAL_SERVER_ERROR,
+                ApiErrorCodes.IDEMPOTENCY_DIGEST_FAILED, ApiErrorCategories.GENERATION, ex.messageKey(), true);
+    }
+
     @ExceptionHandler(AsyncTaskNotFoundException.class)
     public ResponseEntity<ErrorEnvelope> handleAsyncTaskNotFound(HttpServletRequest request) {
         return domainError(
@@ -597,41 +606,23 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<ErrorEnvelope> authenticationError(
-            HttpServletRequest request,
-            String code,
-            String messageKey
-    ) {
-        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
-        String auditId = traceIdProvider.newAuditId();
-        ErrorDetail error = new ErrorDetail(
-                code,
-                ApiErrorCategories.AUTHENTICATION,
-                messageResolver.resolve(messageKey),
-                messageKey,
-                false,
-                null
-        );
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
+            HttpServletRequest request, String code, String messageKey) {
+        return errorEnvelope(request, HttpStatus.UNAUTHORIZED,
+                code, ApiErrorCategories.AUTHENTICATION, messageKey, false);
     }
 
     private ResponseEntity<ErrorEnvelope> domainError(
-            HttpServletRequest request,
-            HttpStatus status,
-            String code,
-            String category,
-            String messageKey
-    ) {
+            HttpServletRequest request, HttpStatus status, String code, String category, String messageKey) {
+        return errorEnvelope(request, status, code, category, messageKey, false);
+    }
+
+    private ResponseEntity<ErrorEnvelope> errorEnvelope(
+            HttpServletRequest request, HttpStatus status,
+            String code, String category, String messageKey, boolean retryable) {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();
         ErrorDetail error = new ErrorDetail(
-                code,
-                category,
-                messageResolver.resolve(messageKey),
-                messageKey,
-                false,
-                null
-        );
+                code, category, messageResolver.resolve(messageKey), messageKey, retryable, null);
         return ResponseEntity.status(status)
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }

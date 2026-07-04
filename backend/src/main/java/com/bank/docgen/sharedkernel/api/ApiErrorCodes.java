@@ -29,6 +29,7 @@ public final class ApiErrorCodes {
     public static final String ITEM_ID_DUPLICATED = "ITEM_ID_DUPLICATED";
     public static final String OUTPUT_MODE_NOT_ALLOWED = "OUTPUT_MODE_NOT_ALLOWED";
     public static final String IDEMPOTENCY_KEY_CONFLICT = "IDEMPOTENCY_KEY_CONFLICT";
+    public static final String IDEMPOTENCY_DIGEST_FAILED = "IDEMPOTENCY_DIGEST_FAILED";
     public static final String ASYNC_TASK_NOT_FOUND = "ASYNC_TASK_NOT_FOUND";
     public static final String ASYNC_TASK_CANCELLATION_NOT_ALLOWED = "ASYNC_TASK_CANCELLATION_NOT_ALLOWED";
     public static final String ASYNC_TASK_EXPIRED = "ASYNC_TASK_EXPIRED";
