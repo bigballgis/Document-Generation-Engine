@@ -86,6 +86,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0028-backend-platform-stack-baseline.md](./technology-stack/0028-backend-platform-stack-baseline.md) | Accepted | Backend platform stack baseline |
 | [0029-frontend-application-stack-baseline.md](./technology-stack/0029-frontend-application-stack-baseline.md) | Accepted | Frontend application stack baseline |
 | [0030-operational-platform-baseline.md](./operations/0030-operational-platform-baseline.md) | Accepted | Operational platform baseline |
+| [0047-distributed-tracing-otlp-baseline.md](./operations/0047-distributed-tracing-otlp-baseline.md) | Accepted | Distributed tracing OTLP export and trace ID correlation baseline (SOR-A06) |
 | [0031-api-platform-hardening-baseline.md](./api/0031-api-platform-hardening-baseline.md) | Accepted | API platform hardening baseline |
 | [0032-identity-and-security-operations-baseline.md](./authorization-security/0032-identity-and-security-operations-baseline.md) | Accepted | Identity and security operations baseline |
 | [0033-async-messaging-and-task-retry-baseline.md](./async-processing/0033-async-messaging-and-task-retry-baseline.md) | Accepted | Async messaging and task retry baseline |

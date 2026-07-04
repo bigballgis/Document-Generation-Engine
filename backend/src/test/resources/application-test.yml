@@ -18,6 +18,12 @@ spring:
   flyway:
     enabled: false
 
+management:
+  tracing:
+    enabled: false
+    sampling:
+      probability: 0.0
+
 docgen:
   runtime:
     rate-limit:
