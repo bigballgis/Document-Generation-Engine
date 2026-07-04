@@ -12,7 +12,7 @@ runtime images — no Maven/npm compile inside `docker build`.
 ## Non-negotiables
 
 1. **Deploy script** — `.\scripts\docker-deploy.ps1` from repo root:
-   - `mvn -f backend/pom.xml package -DskipTests`
+   - `mvn -B -ntp -f backend/pom.xml package -Dmaven.test.skip=true`
    - `pnpm -C frontend build`
    - `docker compose ... build` (copies `backend/target/*.jar` + `frontend/dist`)
    - `docker compose ... up -d`
@@ -29,6 +29,7 @@ runtime images — no Maven/npm compile inside `docker build`.
 | Frontend TDD inner loop | `pnpm -C frontend test --run` |
 | Frontend full gates | `pnpm -C frontend lint && pnpm -C frontend type-check && pnpm -C frontend test && pnpm -C frontend build` |
 | Both stacks (p0) | `.\scripts\p0-gate.ps1` |
+| E2E docker acceptance | `pnpm -C frontend test:e2e:docker` (stack deployed at 4173) |
 | Release with evidence | `.\scripts\release-gate.ps1` |
 | Deploy (full) | `.\scripts\docker-deploy.ps1` |
 | Deploy (restart only) | `.\scripts\docker-deploy.ps1 -SkipBuild` |

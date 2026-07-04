@@ -15,9 +15,26 @@ Implement backend behavior test-first, traceable to source-of-truth documents.
 - Redis (Redisson) for cache/locks/idempotency; Kafka (at-least-once, retry + DLT) for async.
 - MinIO (Java SDK) for object storage; LibreOffice headless for PDF conversion.
 - Spring Security + JWT; Argon2id password hashing; fail-closed authorization.
-- Jackson, MapStruct, Hibernate Validator, Resilience4j, springdoc-openapi.
+- Jackson, MapStruct, Hibernate Validator, Resilience4j, Bucket4j, springdoc-openapi.
 - Module-first package layout under `com.bank.docgen.<module>`; rendering stays isolated
   from lifecycle/authorization/API-governance logic.
+
+## Codebase map (real modules under `com.bank.docgen`)
+
+`apimgmt`, `audit`, `authoring` (structured content), `authorization` (management auth),
+`collaboration`, `contentmodule`, `demo` (seeders + fixture generators), `infrastructure`
+(resilience etc.), `master`, `rendering`, `runtime` (public generation API), `sharedkernel`,
+`template`. Tests mirror the same packages under `src/test/java`.
+
+## Test conventions
+
+- Most tests are plain unit tests (Mockito) or focused slices; `@SpringBootTest` is reserved
+  for controller/web slices and integration seeder tests — prefer the narrowest slice that works.
+- H2 for JPA tests; `spring-kafka-test` for Kafka consumers; QueryDSL repo tests exist
+  (e.g. `ManagementAuditEventRepositoryQuerydslTest`) — follow existing patterns per module.
+- Warning: some `demo` tests (`*AssetGeneratorTest`, `E2eDocxFixtureGeneratorTest`) write DOCX
+  fixtures into `deploy/` and `frontend/e2e/fixtures/` as a side effect — do not commit those
+  binary diffs unless the fixture change is intentional.
 
 ## Delivery loop (mandatory)
 
@@ -30,7 +47,8 @@ Implement backend behavior test-first, traceable to source-of-truth documents.
    - Single class: `mvn -B -ntp -f backend/pom.xml -Pdev-fast test -Dtest=<ClassName>`
 6. **Full quality gate** — delegate to `build-deploy-agent`:
    - `mvn -B -ntp -f backend/pom.xml verify` (Checkstyle + PMD + SpotBugs + JaCoCo)
-   - Coverage gate: changed lines >= 85%, security-critical/core domain >= 90%.
+   - Enforced floors (pom.xml, ratchet): JaCoCo LINE ≥ 0.70 / BRANCH ≥ 0.45.
+   - Review target for new code: changed lines ≥ 85%, security-critical/core domain ≥ 90%.
 7. **Deploy (if release-relevant)** — delegate to `build-deploy-agent` for Docker build + health check.
 8. **Post-task doc sync** — invoke `post-task-doc-sync` after gates pass.
 9. **Post-task commit review** — invoke `post-task-commit-review` after doc sync; then claim Done.

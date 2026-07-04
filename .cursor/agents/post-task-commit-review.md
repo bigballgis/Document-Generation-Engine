@@ -44,9 +44,12 @@ Delegate readonly review before committing:
 
 | Condition | Subagent | `subagent_type` |
 | --- | --- | --- |
-| Auth, crypto, secrets, permissions | Security Review | `security-review` |
-| General defect / logic risk | Bugbot | `bugbot` |
+| Auth, crypto, secrets, permissions | Architecture reviewer (security focus) | `architecture-reviewer` |
+| General defect / logic risk | Read-only exploration review | `explore` |
 | Architecture / module boundary doubt | Architecture reviewer | `architecture-reviewer` |
+
+(If a dedicated security-review or bug-hunting subagent becomes available in the runtime,
+prefer it for the first two rows.)
 
 Fix 🔴 Critical findings in the parent session, re-run gates if code changed, then re-review.
 Do not commit until 🔴 items are resolved or the user explicitly accepts the risk.

@@ -12,10 +12,27 @@ This skill is the locked execution standard. Pair with `docs/architecture/manage
 
 - Tokens: `frontend/src/theme/tokens.ts` (brand presets) + CSS variables in
   `frontend/src/styles/global.scss`. Components reference variables/tokens — never raw hex/px.
+- Brand registry: `frontend/src/config/brands.ts` (`BRAND_REGISTRY`, codes `REDBC`/`GREENBC`,
+  default `REDBC`). Theme applied by `applyBrandTheme(preset)` → sets `html[data-brand]` +
+  CSS vars (`--brand-primary`, `--color-primary`, `--brand-header-bg`, `--nav-surface-bg`, …).
+  Element Plus primary controls are wired to `--brand-primary` in `global.scss`.
 - Brand: REDBC `#DB0011` (hover `#AF0010`), GREENBC `#00847F` (hover `#006A66`),
   header/surface `#FFFFFF`, text `#1A1A1A`, muted `#5C6670`, border `#E4E7EB`.
+- Logo: `components/branding/BrandLogo.vue` (imports `assets/brands/redbc-logo.svg` /
+  `greenbc-logo.svg`); brand switcher lives in `ManagementShell.vue` header
+  (`AppSearchSelect.brand-switcher`); persistence via `useAppStore` → localStorage `docgen.app.brand`.
 - Typography: system UI stack already set; one type scale, consistent weights/line-heights.
 - Brand color = primary actions + emphasis only. Never a full background wash.
+
+## Shared component vocabulary (use these before building new ones)
+
+`frontend/src/components/common/`: `AppPageLayout`, `AppDataTable`, `AppTablePagination`,
+`AppSearchSelect`, `CatalogFilterToolbar`, `TableColumnHeader`, `SectionPanelHeader`,
+`WorkspaceTabShell`, `LoadErrorPanel`, `EmptyStatePanel`, `ScopedGroupSelect`,
+`LifecycleCommentDialog`, `ContextHelpTrigger`. Layout: `components/layout/ManagementShell.vue`,
+`AppBreadcrumb`, `PageHeader`. Status badges per domain (`MasterStatusBadge`,
+`ContentModuleStatusBadge`). Building a table/pagination/empty-state from raw Element Plus
+when a shared wrapper exists is a review blocker.
 
 ## Layout
 

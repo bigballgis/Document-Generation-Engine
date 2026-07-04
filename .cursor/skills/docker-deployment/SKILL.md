@@ -10,8 +10,8 @@ Deployment releases an already-green slice. Never use it to bypass gates; never 
 ## Assets
 
 - `docker-compose.yml` — local deps: postgres, redis, kafka, minio, libreoffice (`rendering` profile).
-- `docker-compose.prod.yml` — `prod` profile: `docgen-backend`, `docgen-frontend`.
-- `backend/Dockerfile`, `frontend/Dockerfile`.
+- `docker-compose.prod.yml` — `prod` profile: `docgen-backend`, `docgen-frontend`
+  (built from `backend/Dockerfile.packaged`, `frontend/Dockerfile.packaged`).
 - Health: backend `/healthz`; compose `healthcheck` + `depends_on: service_healthy`.
 
 ## Preconditions (block if unmet)
@@ -24,8 +24,11 @@ Deployment releases an already-green slice. Never use it to bypass gates; never 
 
 ## Workflow (canonical — user tests only here)
 
+Compile on host (local Maven/pnpm), then images only copy pre-built artifacts —
+no Maven/npm inside `docker build`.
+
 ```powershell
-# From repo root — builds inside Docker; does not re-pull base images from registry
+# From repo root — host compile + docker image packaging + rollout
 .\scripts\docker-deploy.ps1
 
 # Restart only (no compile)
@@ -36,6 +39,8 @@ Equivalent manual steps:
 
 ```bash
 docker compose up -d docgen-postgres docgen-redis docgen-minio
+mvn -B -ntp -f backend/pom.xml package -Dmaven.test.skip=true   # host compile
+pnpm -C frontend build                                           # host compile
 docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod build --pull=false docgen-backend docgen-frontend
 docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d docgen-backend docgen-frontend
 curl -f http://localhost:8080/healthz

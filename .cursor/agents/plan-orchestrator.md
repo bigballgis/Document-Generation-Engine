@@ -12,7 +12,8 @@ specialists, `delivery-orchestrator` routes the pipeline and calls you for stage
 
 ## Plan layer
 
-- Overall plan: `docs/plan/master-plan.md` (phases P0..P9, dependencies, exit criteria).
+- Overall plan: `docs/plan/master-plan.md` — always read it for the current phase list and
+  active phase (phases have grown past P22; never assume a fixed range).
 - Detailed plans: `docs/plan/detail/<phase>.md` (task and design decomposition per phase).
 - Index: `docs/plan/README.md`.
 

@@ -24,7 +24,8 @@ Behavior drives the plan; tests drive the code.
 ## Quality gates (must be green before Done)
 
 - Backend: `mvn -B -ntp -f backend/pom.xml verify` (Checkstyle + PMD + SpotBugs + JaCoCo).
-  Coverage: changed lines >= 85%; security-critical / core domain >= 90%.
+  Enforced floors (pom.xml ratchet): LINE ≥ 0.70 / BRANCH ≥ 0.45.
+  Review target for new code: changed lines ≥ 85%; security-critical / core domain ≥ 90%.
 - Frontend: `pnpm -C frontend lint`, `type-check`, `test`, `build`.
 
 ## Done definition
