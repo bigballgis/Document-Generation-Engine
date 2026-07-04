@@ -35,7 +35,7 @@ describe('masters API', () => {
 
     const masters = await mastersApi.listMasters()
 
-    expect(http.get).toHaveBeenCalledWith('/masters')
+    expect(http.get).toHaveBeenCalledWith('/masters', { signal: undefined })
     expect(masters).toHaveLength(1)
     expect(masters[0]?.name).toBe('Retail letterhead')
   })

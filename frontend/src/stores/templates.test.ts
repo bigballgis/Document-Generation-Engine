@@ -23,6 +23,47 @@ describe('templates store', () => {
     vi.mocked(templatesApi.listTemplates).mockReset()
   })
 
+  it('loads templates from paginated API', async () => {
+    vi.mocked(templatesApi.listTemplates).mockResolvedValue({
+      content: [
+        {
+          id: 'tpl-1',
+          externalId: 'TPL-A',
+          groupCode: 'RETAIL',
+          name: 'Draft template',
+          lifecycleStatus: 'DRAFT',
+          releaseVersion: null,
+          releaseVersionCount: 0,
+          masterId: 'master-1',
+          updatedBy: '10000001',
+          updatedAt: '2026-06-23T10:00:00Z',
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+    const store = useTemplatesStore()
+
+    await store.fetchTemplates()
+
+    expect(store.templates).toHaveLength(1)
+    expect(store.templateListTotalElements).toBe(1)
+  })
+
+  it('records list retryable flag on template load failure', async () => {
+    vi.mocked(templatesApi.listTemplates).mockRejectedValue(
+      axiosEnvelopeError(503, 'api.error.generation.serviceUnavailable', {
+        retryable: true,
+      }),
+    )
+    const store = useTemplatesStore()
+
+    await expect(store.fetchTemplates()).rejects.toBeTruthy()
+    expect(store.lastListErrorRetryable).toBe(true)
+  })
+
   it('filters published templates for API policy home', async () => {
     vi.mocked(templatesApi.listTemplates).mockResolvedValue({
       content: [

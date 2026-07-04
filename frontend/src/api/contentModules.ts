@@ -14,10 +14,14 @@ import type {
   UpdateContentModuleVersionPayload,
 } from '@/types/contentModule'
 
-export async function listContentModules(groupCode?: string): Promise<ContentModuleSummary[]> {
+export async function listContentModules(
+  groupCode?: string,
+  options: { signal?: AbortSignal } = {},
+): Promise<ContentModuleSummary[]> {
   const trimmedGroupCode = groupCode?.trim()
   const response = await http.get<ApiEnvelope<ContentModuleSummary[]>>('/content-modules', {
     params: trimmedGroupCode ? { groupCode: trimmedGroupCode } : undefined,
+    signal: options.signal,
   })
   return unwrapEnvelope(response.data)
 }

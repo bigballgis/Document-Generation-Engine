@@ -8,6 +8,7 @@ import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import { rowSortMethod } from '@/composables/useDataTableFilters'
+import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { isGroupScopedAuditRole } from '@/auth/roles'
@@ -29,6 +30,14 @@ const sessionStore = useSessionStore()
 const activeTab = ref<'management' | 'lifecycle'>('management')
 const loadFailed = ref(false)
 const filterValidationKey = ref<string | null>(null)
+
+const { reload: reloadActiveTab, signal: auditAbortSignal } = useAbortableCatalogLoader(async (signal) => {
+  if (activeTab.value === 'management') {
+    await auditStore.fetchManagementEvents(auditStore.managementPage, { signal })
+    return
+  }
+  await auditStore.fetchLifecycleEvents(auditStore.lifecyclePage, { signal })
+})
 
 const showAuditAdminJourney = computed(() =>
   shouldShowAuditAdminJourney({ roles: sessionStore.session?.roles ?? [] }),
@@ -65,14 +74,14 @@ const lifecycleSource = computed(() => auditStore.lifecycleEvents)
 const managementUiPage = computed({
   get: () => auditStore.managementPage + 1,
   set: (page: number) => {
-    void auditStore.fetchManagementEvents(page - 1)
+    void auditStore.fetchManagementEvents(page - 1, { signal: auditAbortSignal.value })
   },
 })
 
 const lifecycleUiPage = computed({
   get: () => auditStore.lifecyclePage + 1,
   set: (page: number) => {
-    void auditStore.fetchLifecycleEvents(page - 1)
+    void auditStore.fetchLifecycleEvents(page - 1, { signal: auditAbortSignal.value })
   },
 })
 
@@ -143,11 +152,7 @@ async function refreshActiveTab() {
 
   loadFailed.value = false
   try {
-    if (activeTab.value === 'management') {
-      await auditStore.fetchManagementEvents(auditStore.managementPage)
-    } else {
-      await auditStore.fetchLifecycleEvents(auditStore.lifecyclePage)
-    }
+    await reloadActiveTab()
   } catch {
     loadFailed.value = true
   }
@@ -170,9 +175,9 @@ async function applyFilters() {
   loadFailed.value = false
   try {
     if (activeTab.value === 'management') {
-      await auditStore.fetchManagementEvents(0)
+      await auditStore.fetchManagementEvents(0, { signal: auditAbortSignal.value })
     } else {
-      await auditStore.fetchLifecycleEvents(0)
+      await auditStore.fetchLifecycleEvents(0, { signal: auditAbortSignal.value })
     }
   } catch {
     loadFailed.value = true
@@ -265,6 +270,7 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
     <LoadErrorPanel
       v-if="loadFailed"
       :message-key="loadErrorMessageKey"
+      :retryable="auditStore.lastListErrorRetryable"
       @retry="refreshActiveTab"
     />
 

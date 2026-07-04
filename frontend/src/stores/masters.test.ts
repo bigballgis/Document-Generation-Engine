@@ -113,6 +113,18 @@ describe('masters store', () => {
     expect(store.lastErrorMessageKey).toBe('api.error.storage.operationFailed')
   })
 
+  it('records list retryable flag on load failure', async () => {
+    vi.mocked(mastersApi.listMasters).mockRejectedValue(
+      axiosEnvelopeError(503, 'api.error.generation.serviceUnavailable', {
+        retryable: true,
+      }),
+    )
+    const store = useMastersStore()
+
+    await expect(store.fetchMasters()).rejects.toBeTruthy()
+    expect(store.lastListErrorRetryable).toBe(true)
+  })
+
   it('loads revision lines page into store state', async () => {
     vi.mocked(mastersApi.listMasterRevisionLines).mockResolvedValue({
       content: [

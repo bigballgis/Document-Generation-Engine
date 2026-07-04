@@ -6,11 +6,13 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import CatalogFilterToolbar from '@/components/common/CatalogFilterToolbar.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import TemplateCreateDialog from '@/components/templates/TemplateCreateDialog.vue'
 import TemplateImportDialog from '@/components/templates/TemplateImportDialog.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
@@ -24,7 +26,7 @@ import type { TemplateSummary, TemplateLifecycleStatus } from '@/types/template'
 import { isAwaitingApproverDecision } from '@/utils/templateApproverJourney'
 import { ElMessage } from 'element-plus'
 
-const { t, te } = useI18n()
+const { t } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
 const lifecycleStatusFilterOptions = useLifecycleStatusFilterOptions()
 const router = useRouter()
@@ -179,6 +181,10 @@ const displayPageSize = computed(() =>
   serverPagingActive.value ? templatesStore.templateListSize : CLIENT_TABLE_PAGE_SIZE,
 )
 
+const { reload: reloadTemplates, signal: abortSignal } = useAbortableCatalogLoader((signal) =>
+  templatesStore.fetchTemplates(0, templatesStore.templateListSize, { signal }),
+)
+
 watch(currentPage, async (page) => {
   if (!serverPagingActive.value) {
     return
@@ -186,7 +192,9 @@ watch(currentPage, async (page) => {
   const serverPage = page - 1
   if (serverPage !== templatesStore.templateListPage) {
     try {
-      await templatesStore.fetchTemplates(serverPage, templatesStore.templateListSize)
+      await templatesStore.fetchTemplates(serverPage, templatesStore.templateListSize, {
+        signal: abortSignal.value,
+      })
     } catch {
       // Error surfaced via store message key.
     }
@@ -197,20 +205,8 @@ watch([hasAnyActive, activeWorkflowFilter], () => {
   currentPage.value = 1
 })
 
-const errorMessage = computed(() => {
-  const key = templatesStore.lastErrorMessageKey
-  if (!key) {
-    return ''
-  }
-  return te(key) ? t(key) : t('templates.error.loadList')
-})
-
 onMounted(async () => {
-  try {
-    await templatesStore.fetchTemplates(0, templatesStore.templateListSize)
-  } catch {
-    // Error surfaced via store message key.
-  }
+  await reloadTemplates()
 })
 
 function clearWorkflowFilter() {
@@ -274,18 +270,16 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
       </el-check-tag>
     </div>
 
-    <el-alert
-      v-if="errorMessage"
-      class="page-alert"
-      type="error"
-      :title="errorMessage"
-      show-icon
-      :closable="false"
+    <LoadErrorPanel
+      v-if="templatesStore.lastErrorMessageKey && !templatesStore.loadingList"
+      :message-key="templatesStore.lastErrorMessageKey"
+      :retryable="templatesStore.lastListErrorRetryable"
+      @retry="reloadTemplates"
     />
 
-    <el-skeleton v-if="templatesStore.loadingList" :rows="6" animated />
+    <el-skeleton v-else-if="templatesStore.loadingList" :rows="6" animated />
 
-    <template v-else-if="!errorMessage && catalogTemplates.length > 0">
+    <template v-else-if="catalogTemplates.length > 0">
       <CatalogFilterToolbar
         v-model:search-query="searchQuery"
         v-model:filter-values="filters"
@@ -361,7 +355,7 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
       <EmptyStatePanel v-else title-key="templates.list.empty" />
     </template>
 
-    <EmptyStatePanel v-else-if="!errorMessage" title-key="templates.list.empty" />
+    <EmptyStatePanel v-else title-key="templates.list.empty" />
 
     <TemplateCreateDialog v-model="createDialogOpen" @created="handleCreated" />
     <TemplateImportDialog v-model="importDialogOpen" @imported="handleImported" />

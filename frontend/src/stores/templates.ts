@@ -3,6 +3,11 @@ import { computed, ref } from 'vue'
 import * as apiPolicyApi from '@/api/apiPolicy'
 import * as templatesApi from '@/api/templates'
 import { resolveApiErrorMessageKey } from '@/api/http'
+import {
+  clearStoreListError,
+  handleStoreListFailure,
+  type AbortableRequestOptions,
+} from '@/stores/storeRequestSupport'
 import type {
   ApiCredentialCreated,
   ApiCredentialSummary,
@@ -46,6 +51,7 @@ export const useTemplatesStore = defineStore('templates', () => {
   const loadingPolicy = ref(false)
   const submitting = ref(false)
   const lastErrorMessageKey = ref<string | null>(null)
+  const lastListErrorRetryable = ref(false)
 
   const publishedTemplates = computed(() =>
     templates.value.filter((item) => item.lifecycleStatus === 'PUBLISHED'),
@@ -61,19 +67,22 @@ export const useTemplatesStore = defineStore('templates', () => {
     return grouped
   })
 
-  async function fetchTemplates(page = templateListPage.value, size = templateListSize.value): Promise<void> {
+  async function fetchTemplates(
+    page = templateListPage.value,
+    size = templateListSize.value,
+    options: AbortableRequestOptions = {},
+  ): Promise<void> {
     loadingList.value = true
-    lastErrorMessageKey.value = null
+    clearStoreListError(lastErrorMessageKey, lastListErrorRetryable)
     try {
-      const pageView = await templatesApi.listTemplates(page, size)
+      const pageView = await templatesApi.listTemplates(page, size, options)
       templates.value = pageView.content
       templateListPage.value = pageView.page
       templateListSize.value = pageView.size
       templateListTotalElements.value = pageView.totalElements
       templateListTotalPages.value = pageView.totalPages
     } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.loadList')
-      throw error
+      handleStoreListFailure(error, 'templates.error.loadList', lastErrorMessageKey, lastListErrorRetryable)
     } finally {
       loadingList.value = false
     }
@@ -522,6 +531,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     loadingPolicy,
     submitting,
     lastErrorMessageKey,
+    lastListErrorRetryable,
     publishedTemplates,
     templatesByGroup,
     fetchTemplates,

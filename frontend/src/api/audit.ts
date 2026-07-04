@@ -38,10 +38,11 @@ function buildAuditParams(filters: AuditQueryFilters): Record<string, string | n
 
 export async function listManagementEvents(
   filters: AuditQueryFilters,
+  options: { signal?: AbortSignal } = {},
 ): Promise<AuditPagedResult<ManagementAuditEvent>> {
   const response = await http.get<ApiEnvelope<AuditPagedResult<ManagementAuditEvent>>>(
     '/admin/audit/management-events',
-    { params: buildAuditParams(filters) },
+    { params: buildAuditParams(filters), signal: options.signal },
   )
   return unwrapEnvelope(response.data)
 }
@@ -58,10 +59,11 @@ export async function exportManagementEvents(
 
 export async function listLifecycleEvents(
   filters: AuditQueryFilters,
+  options: { signal?: AbortSignal } = {},
 ): Promise<AuditPagedResult<LifecycleAuditEvent>> {
   const response = await http.get<ApiEnvelope<AuditPagedResult<LifecycleAuditEvent>>>(
     '/admin/audit/lifecycle-events',
-    { params: buildAuditParams(filters) },
+    { params: buildAuditParams(filters), signal: options.signal },
   )
   return unwrapEnvelope(response.data)
 }

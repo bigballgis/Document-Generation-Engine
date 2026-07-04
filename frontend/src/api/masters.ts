@@ -13,8 +13,12 @@ import type {
   UpdateMasterMetadataPayload,
 } from '@/types/master'
 
-export async function listMasters(): Promise<MasterDocumentSummary[]> {
-  const response = await http.get<ApiEnvelope<MasterDocumentSummary[]>>('/masters')
+export async function listMasters(
+  options: { signal?: AbortSignal } = {},
+): Promise<MasterDocumentSummary[]> {
+  const response = await http.get<ApiEnvelope<MasterDocumentSummary[]>>('/masters', {
+    signal: options.signal,
+  })
   return unwrapEnvelope(response.data)
 }
 

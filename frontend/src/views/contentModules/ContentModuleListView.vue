@@ -6,9 +6,11 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import CatalogFilterToolbar from '@/components/common/CatalogFilterToolbar.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import ContentModuleCreateDialog from '@/components/contentModules/ContentModuleCreateDialog.vue'
+import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
@@ -115,17 +117,13 @@ const errorMessage = computed(() => {
   return te(key) ? t(key) : t('contentModules.error.loadList')
 })
 
+const { reload: reloadModules } = useAbortableCatalogLoader((signal) =>
+  contentModulesStore.fetchModules(undefined, { signal }),
+)
+
 onMounted(async () => {
   await reloadModules()
 })
-
-async function reloadModules() {
-  try {
-    await contentModulesStore.fetchModules()
-  } catch {
-    // Error surfaced via store message key.
-  }
-}
 
 function openModule(moduleId: string) {
   router.push(contentModuleDetailPath(moduleId))
@@ -155,22 +153,16 @@ function handleCreated(moduleId: string) {
       </template>
     </PageHeader>
 
-    <el-alert
-      v-if="errorMessage"
-      class="page-alert"
-      type="error"
-      :title="errorMessage"
-      show-icon
-      :closable="false"
-    >
-      <el-button size="small" type="primary" @click="reloadModules">
-        {{ t('common.retry') }}
-      </el-button>
-    </el-alert>
+    <LoadErrorPanel
+      v-if="contentModulesStore.lastErrorMessageKey && !contentModulesStore.loadingList"
+      :message-key="contentModulesStore.lastErrorMessageKey"
+      :retryable="contentModulesStore.lastListErrorRetryable"
+      @retry="reloadModules"
+    />
 
-    <el-skeleton v-if="contentModulesStore.loadingList" :rows="6" animated />
+    <el-skeleton v-else-if="contentModulesStore.loadingList" :rows="6" animated />
 
-    <template v-else-if="!errorMessage && allModules.length > 0">
+    <template v-else-if="allModules.length > 0">
       <CatalogFilterToolbar
         v-model:search-query="searchQuery"
         v-model:filter-values="filters"

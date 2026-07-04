@@ -2,6 +2,11 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import * as contentModulesApi from '@/api/contentModules'
 import { resolveApiErrorMessageKey, resolveStoreErrorMessageKey } from '@/api/http'
+import {
+  clearStoreListError,
+  handleStoreListFailure,
+  type AbortableRequestOptions,
+} from '@/stores/storeRequestSupport'
 import type {
   ContentModuleDetail,
   ContentModuleLifecycleImpactSummary,
@@ -22,20 +27,26 @@ export const useContentModulesStore = defineStore('contentModules', () => {
   const loadingImpactPreview = ref(false)
   const submitting = ref(false)
   const lastErrorMessageKey = ref<string | null>(null)
+  const lastListErrorRetryable = ref(false)
   const activeGroupCode = ref('')
 
-  async function fetchModules(groupCode?: string): Promise<void> {
+  async function fetchModules(
+    groupCode?: string,
+    options: AbortableRequestOptions = {},
+  ): Promise<void> {
     loadingList.value = true
-    lastErrorMessageKey.value = null
+    clearStoreListError(lastErrorMessageKey, lastListErrorRetryable)
     activeGroupCode.value = groupCode?.trim() ?? ''
     try {
-      modules.value = await contentModulesApi.listContentModules(groupCode)
+      modules.value = await contentModulesApi.listContentModules(groupCode, options)
     } catch (error) {
-      lastErrorMessageKey.value = resolveStoreErrorMessageKey(
+      handleStoreListFailure(
         error,
         'contentModules.error.loadList',
+        lastErrorMessageKey,
+        lastListErrorRetryable,
+        { useStoreResolver: true },
       )
-      throw error
     } finally {
       loadingList.value = false
     }
@@ -193,7 +204,7 @@ export const useContentModulesStore = defineStore('contentModules', () => {
   }
 
   function clearListError() {
-    lastErrorMessageKey.value = null
+    clearStoreListError(lastErrorMessageKey, lastListErrorRetryable)
   }
 
   return {
@@ -205,6 +216,7 @@ export const useContentModulesStore = defineStore('contentModules', () => {
     loadingImpactPreview,
     submitting,
     lastErrorMessageKey,
+    lastListErrorRetryable,
     activeGroupCode,
     fetchModules,
     fetchModule,

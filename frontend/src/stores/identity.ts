@@ -1,8 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
 import * as identityApi from '@/api/identity'
-import { resolveApiError, resolveApiErrorMessageKey } from '@/api/http'
+import { resolveApiErrorMessageKey } from '@/api/http'
+import {
+  clearStoreListError,
+  handleStoreListFailure,
+  type AbortableRequestOptions,
+} from '@/stores/storeRequestSupport'
 import type {
   BusinessGroupView,
   CreateGroupRequest,
@@ -31,15 +35,6 @@ export const useIdentityStore = defineStore('identity', () => {
   const lastUserErrorRetryable = ref(false)
   const lastGroupErrorMessageKey = ref<string | null>(null)
 
-  function isAbortError(error: unknown): boolean {
-    return axios.isCancel(error) || (error instanceof Error && error.name === 'AbortError')
-  }
-
-  function recordUserError(error: unknown, fallbackKey: string) {
-    lastUserErrorMessageKey.value = resolveApiErrorMessageKey(error, fallbackKey)
-    lastUserErrorRetryable.value = resolveApiError(error)?.error.retryable ?? false
-  }
-
   function applyUpdatedUser(updated: ManagementUserView) {
     users.value = users.value.map((item) => (item.id === updated.id ? updated : item))
   }
@@ -50,22 +45,17 @@ export const useIdentityStore = defineStore('identity', () => {
 
   async function fetchUsers(
     query: UserQuery = userFilters.value,
-    options: { signal?: AbortSignal } = {},
+    options: AbortableRequestOptions = {},
   ): Promise<void> {
     loadingUsers.value = true
-    lastUserErrorMessageKey.value = null
-    lastUserErrorRetryable.value = false
+    clearStoreListError(lastUserErrorMessageKey, lastUserErrorRetryable)
     userFilters.value = { ...userFilters.value, ...query }
     try {
       const page = await identityApi.listUsers(userFilters.value, options)
       users.value = page.content
       usersTotal.value = page.totalElements
     } catch (error) {
-      if (isAbortError(error)) {
-        return
-      }
-      recordUserError(error, 'identity.error.loadUsers')
-      throw error
+      handleStoreListFailure(error, 'identity.error.loadUsers', lastUserErrorMessageKey, lastUserErrorRetryable)
     } finally {
       loadingUsers.value = false
     }

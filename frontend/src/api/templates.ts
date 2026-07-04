@@ -51,9 +51,11 @@ import type {
 export async function listTemplates(
   page = 0,
   size = 20,
+  options: { signal?: AbortSignal } = {},
 ): Promise<PageView<TemplateSummary>> {
   const response = await http.get<ApiEnvelope<PageView<TemplateSummary>>>('/templates', {
     params: { page, size },
+    signal: options.signal,
   })
   return unwrapEnvelope(response.data)
 }

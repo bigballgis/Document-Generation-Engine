@@ -49,6 +49,7 @@ describe('audit store', () => {
 
     expect(auditApi.listManagementEvents).toHaveBeenCalledWith(
       expect.objectContaining({ actorRole: 'GLOBAL_ADMIN' }),
+      {},
     )
   })
 

@@ -6,10 +6,12 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import CatalogFilterToolbar from '@/components/common/CatalogFilterToolbar.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterUploadDialog from '@/components/masters/MasterUploadDialog.vue'
+import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
@@ -126,17 +128,13 @@ const errorMessage = computed(() => {
   return te(key) ? t(key) : t('masters.error.loadList')
 })
 
+const { reload: reloadMasters } = useAbortableCatalogLoader((signal) =>
+  mastersStore.fetchMasters({ signal }),
+)
+
 onMounted(async () => {
   await reloadMasters()
 })
-
-async function reloadMasters() {
-  try {
-    await mastersStore.fetchMasters()
-  } catch {
-    // Error surfaced via store message key.
-  }
-}
 
 function openMaster(masterId: string) {
   router.push(`${MASTER_DETAIL_PATH_PREFIX}${masterId}`)
@@ -184,22 +182,16 @@ async function handleUpload(payload: {
       </template>
     </PageHeader>
 
-    <el-alert
-      v-if="errorMessage"
-      class="page-alert"
-      type="error"
-      :title="errorMessage"
-      show-icon
-      :closable="false"
-    >
-      <el-button size="small" type="primary" @click="reloadMasters">
-        {{ t('common.retry') }}
-      </el-button>
-    </el-alert>
+    <LoadErrorPanel
+      v-if="mastersStore.lastErrorMessageKey && !mastersStore.loadingList"
+      :message-key="mastersStore.lastErrorMessageKey"
+      :retryable="mastersStore.lastListErrorRetryable"
+      @retry="reloadMasters"
+    />
 
-    <el-skeleton v-if="mastersStore.loadingList" :rows="6" animated />
+    <el-skeleton v-else-if="mastersStore.loadingList" :rows="6" animated />
 
-    <template v-else-if="!errorMessage && allMasters.length > 0">
+    <template v-else-if="allMasters.length > 0">
       <CatalogFilterToolbar
         v-model:search-query="searchQuery"
         v-model:filter-values="filters"

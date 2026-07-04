@@ -2,6 +2,11 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import * as mastersApi from '@/api/masters'
 import { resolveApiErrorMessageKey, resolveStoreErrorMessageKey } from '@/api/http'
+import {
+  clearStoreListError,
+  handleStoreListFailure,
+  type AbortableRequestOptions,
+} from '@/stores/storeRequestSupport'
 import type {
   CreateMasterPayload,
   DecideMasterReviewPayload,
@@ -27,6 +32,7 @@ export const useMastersStore = defineStore('masters', () => {
   const loadingRevisionLine = ref(false)
   const submitting = ref(false)
   const lastErrorMessageKey = ref<string | null>(null)
+  const lastListErrorRetryable = ref(false)
   const draftReviewHistoryByMasterId = ref<Record<string, MasterReviewRecord[]>>({})
 
   const mastersByGroup = computed(() => {
@@ -39,14 +45,19 @@ export const useMastersStore = defineStore('masters', () => {
     return grouped
   })
 
-  async function fetchMasters(): Promise<void> {
+  async function fetchMasters(options: AbortableRequestOptions = {}): Promise<void> {
     loadingList.value = true
-    lastErrorMessageKey.value = null
+    clearStoreListError(lastErrorMessageKey, lastListErrorRetryable)
     try {
-      masters.value = await mastersApi.listMasters()
+      masters.value = await mastersApi.listMasters(options)
     } catch (error) {
-      lastErrorMessageKey.value = resolveStoreErrorMessageKey(error, 'masters.error.loadList')
-      throw error
+      handleStoreListFailure(
+        error,
+        'masters.error.loadList',
+        lastErrorMessageKey,
+        lastListErrorRetryable,
+        { useStoreResolver: true },
+      )
     } finally {
       loadingList.value = false
     }
@@ -288,6 +299,7 @@ export const useMastersStore = defineStore('masters', () => {
     loadingRevisionLine,
     submitting,
     lastErrorMessageKey,
+    lastListErrorRetryable,
     draftReviewHistoryByMasterId,
     mastersByGroup,
     fetchMasters,
