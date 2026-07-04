@@ -1,5 +1,6 @@
 package com.bank.docgen.runtime.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import java.util.List;
 
@@ -10,6 +11,10 @@ public record EncryptionSummaryView(
         boolean ownerPasswordProvided,
         List<String> permissions
 ) {
+    public EncryptionSummaryView {
+        permissions = DefensiveCopies.copyStringList(permissions);
+    }
+
     public static EncryptionSummaryView disabled(String outputFormat) {
         return new EncryptionSummaryView(false, outputFormat, false, false, List.of());
     }

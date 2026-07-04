@@ -1,5 +1,7 @@
 package com.bank.docgen.runtime.security;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -12,10 +14,6 @@ public record RuntimeSessionClaims(
         List<String> callerAdGroups
 ) {
     public RuntimeSessionClaims {
-        callerAdGroups = copyStrings(callerAdGroups);
-    }
-
-    private static List<String> copyStrings(List<String> values) {
-        return values == null ? List.of() : List.copyOf(values);
+        callerAdGroups = DefensiveCopies.copyStringList(callerAdGroups);
     }
 }

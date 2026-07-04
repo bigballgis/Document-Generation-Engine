@@ -1,5 +1,7 @@
 package com.bank.docgen.runtime.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -15,11 +17,19 @@ public record BatchGenerateRequestBody(
         @NotBlank String requestId,
         @NotBlank String idempotencyKey
 ) {
+    public BatchGenerateRequestBody {
+        items = DefensiveCopies.copyList(items);
+    }
+
     public record BatchGenerateItemBody(
             @NotBlank String itemId,
             @NotNull Map<String, Object> variables,
             OutputOptionsView output,
             EncryptionOptionsView encryption
     ) {
+    public BatchGenerateItemBody {
+        variables = DefensiveCopies.copyMap(variables);
+    }
+
     }
 }

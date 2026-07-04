@@ -1,5 +1,6 @@
 package com.bank.docgen.authorization.management.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.time.Instant;
 import java.util.List;
 
@@ -16,11 +17,7 @@ public record ManagementUserView(
         Instant updatedAt
 ) {
     public ManagementUserView {
-        roles = copyStrings(roles);
-        authorizedGroupCodes = copyStrings(authorizedGroupCodes);
-    }
-
-    private static List<String> copyStrings(List<String> values) {
-        return values == null ? List.of() : List.copyOf(values);
+        roles = DefensiveCopies.copyStringList(roles);
+        authorizedGroupCodes = DefensiveCopies.copyStringList(authorizedGroupCodes);
     }
 }

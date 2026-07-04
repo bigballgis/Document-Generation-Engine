@@ -8,4 +8,7 @@ public record EncryptionOptionsView(
         String ownerPassword,
         List<String> permissions
 ) {
+    public EncryptionOptionsView {
+        permissions = DefensiveCopies.copyStringList(permissions);
+    }
 }

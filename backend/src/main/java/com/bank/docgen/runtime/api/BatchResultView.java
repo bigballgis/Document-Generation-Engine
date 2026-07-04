@@ -1,5 +1,6 @@
 package com.bank.docgen.runtime.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.util.List;
 
 public record BatchResultView(
@@ -7,4 +8,7 @@ public record BatchResultView(
         BatchSummaryView summary,
         List<BatchResultItemView> items
 ) {
+    public BatchResultView {
+        items = DefensiveCopies.copyList(items);
+    }
 }

@@ -1,5 +1,7 @@
 package com.bank.docgen.template.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.domain.TemplateVersionLineKind;
@@ -21,4 +23,10 @@ public record TemplateVersionLineDetailView(
         List<AnchorBindingView> bindings,
         List<CompositionRuleView> rules
 ) {
+    public TemplateVersionLineDetailView {
+        variables = DefensiveCopies.copyList(variables);
+        bindings = DefensiveCopies.copyList(bindings);
+        rules = DefensiveCopies.copyList(rules);
+    }
+
 }

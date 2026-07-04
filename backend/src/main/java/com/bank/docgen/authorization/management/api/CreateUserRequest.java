@@ -1,6 +1,7 @@
 package com.bank.docgen.authorization.management.api;
 
 import com.bank.docgen.authorization.management.domain.ManagementRole;
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,15 +34,7 @@ public record CreateUserRequest(
         List<String> authorizedGroupCodes
 ) {
     public CreateUserRequest {
-        roles = copyRoles(roles);
-        authorizedGroupCodes = copyStrings(authorizedGroupCodes);
-    }
-
-    private static List<ManagementRole> copyRoles(List<ManagementRole> values) {
-        return values == null ? List.of() : List.copyOf(values);
-    }
-
-    private static List<String> copyStrings(List<String> values) {
-        return values == null ? List.of() : List.copyOf(values);
+        roles = DefensiveCopies.copyList(roles);
+        authorizedGroupCodes = DefensiveCopies.copyStringList(authorizedGroupCodes);
     }
 }

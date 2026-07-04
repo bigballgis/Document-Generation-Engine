@@ -1,5 +1,6 @@
 package com.bank.docgen.audit.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.time.Instant;
 import java.util.List;
 
@@ -14,4 +15,7 @@ public record LifecycleAuditEventView(
         String summary,
         List<String> warningCodes
 ) {
+    public LifecycleAuditEventView {
+        warningCodes = DefensiveCopies.copyStringList(warningCodes);
+    }
 }

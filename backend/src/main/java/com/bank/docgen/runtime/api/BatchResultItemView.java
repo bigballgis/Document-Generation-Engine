@@ -1,5 +1,7 @@
 package com.bank.docgen.runtime.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import com.bank.docgen.sharedkernel.api.ErrorDetail;
 import java.util.List;
 
@@ -12,6 +14,10 @@ public record BatchResultItemView(
         List<String> fidelityWarnings,
         ErrorDetail error
 ) {
+    public BatchResultItemView {
+        fidelityWarnings = DefensiveCopies.copyList(fidelityWarnings);
+    }
+
     public BatchResultItemView(
             String itemId,
             String status,

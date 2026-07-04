@@ -1,5 +1,7 @@
 package com.bank.docgen.template.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import java.time.Instant;
@@ -24,4 +26,10 @@ public record TemplateDetailView(
         Instant updatedAt,
         boolean readOnly
 ) {
+    public TemplateDetailView {
+        variables = DefensiveCopies.copyList(variables);
+        bindings = DefensiveCopies.copyList(bindings);
+        rules = DefensiveCopies.copyList(rules);
+    }
+
 }

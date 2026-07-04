@@ -14,6 +14,12 @@ public record ErrorDetail(
         java.util.Map<String, Object> idempotencyConflict,
         List<BatchErrorItemView> items
 ) {
+    public ErrorDetail {
+        fieldErrors = DefensiveCopies.copyList(fieldErrors);
+        idempotencyConflict = DefensiveCopies.copyMap(idempotencyConflict);
+        items = DefensiveCopies.copyList(items);
+    }
+
     public ErrorDetail(
             String code,
             String category,

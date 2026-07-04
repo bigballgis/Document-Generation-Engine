@@ -1,5 +1,7 @@
 package com.bank.docgen.contentmodule.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -14,4 +16,8 @@ public record CreateContentModuleRequest(
         @NotBlank String contentStructureJson,
         @Size(max = 2048) String changeDescription
 ) {
+    public CreateContentModuleRequest {
+        sharedGroupCodes = DefensiveCopies.copyList(sharedGroupCodes);
+    }
+
 }

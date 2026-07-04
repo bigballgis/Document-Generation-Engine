@@ -1,5 +1,7 @@
 package com.bank.docgen.template.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -19,4 +21,9 @@ public record TestDataSetView(
         Instant createdAt,
         Instant updatedAt
 ) {
+    public TestDataSetView {
+        variables = DefensiveCopies.copyMap(variables);
+        coverageTags = DefensiveCopies.copyList(coverageTags);
+    }
+
 }

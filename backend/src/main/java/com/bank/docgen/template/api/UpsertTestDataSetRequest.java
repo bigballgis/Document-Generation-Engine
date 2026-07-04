@@ -1,5 +1,7 @@
 package com.bank.docgen.template.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -13,4 +15,9 @@ public record UpsertTestDataSetRequest(
         String scenarioName,
         List<String> coverageTags
 ) {
+    public UpsertTestDataSetRequest {
+        variables = DefensiveCopies.copyMap(variables);
+        coverageTags = DefensiveCopies.copyStringList(coverageTags);
+    }
+
 }

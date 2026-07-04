@@ -1,5 +1,7 @@
 package com.bank.docgen.contentmodule.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import java.util.List;
 
 public record ContentModuleDetailView(
@@ -11,4 +13,9 @@ public record ContentModuleDetailView(
         List<String> sharedGroupCodes,
         List<ContentModuleVersionView> versions
 ) {
+    public ContentModuleDetailView {
+        sharedGroupCodes = DefensiveCopies.copyStringList(sharedGroupCodes);
+        versions = DefensiveCopies.copyList(versions);
+    }
+
 }

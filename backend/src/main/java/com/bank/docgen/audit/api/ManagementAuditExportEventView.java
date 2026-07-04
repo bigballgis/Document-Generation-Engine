@@ -1,5 +1,7 @@
 package com.bank.docgen.audit.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -18,4 +20,9 @@ public record ManagementAuditExportEventView(
         String statusSummary,
         List<String> warningCodes
 ) {
+    public ManagementAuditExportEventView {
+        changedAreas = DefensiveCopies.copyList(changedAreas);
+        warningCodes = DefensiveCopies.copyStringList(warningCodes);
+    }
+
 }

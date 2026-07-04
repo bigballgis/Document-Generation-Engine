@@ -1,6 +1,6 @@
 # SpotBugs Exclusion Ratchet Plan (SOR-A05)
 
-**Status:** Active — slice 0 complete (REC_CATCH_EXCEPTION removed); **slice 1 Done** (2026-07-04); **slice 2 Done** (2026-07-04).  
+**Status:** Active — slice 0 complete (REC_CATCH_EXCEPTION removed); **slice 1 Done** (2026-07-04); **slice 2 Done** (2026-07-04); **slice 3 Done** (2026-07-04).  
 **Filter file:** `backend/config/spotbugs/exclude.xml`  
 **Automated guard:** `SpotBugsExclusionRatchetTest` (Surefire)
 
@@ -9,7 +9,7 @@
 | Metric | Value | Notes |
 | --- | --- | --- |
 | `<Match>` blocks | **3** | `BASELINE_MATCH_COUNT=3` in guard test |
-| Deferred `EI_EXPOSE_REP` / `EI_EXPOSE_REP2` | ~149 | −2 in slice 2 (persistence entities); −15 in slice 1; blanket exclude retained |
+| Deferred `EI_EXPOSE_REP` / `EI_EXPOSE_REP2` | ~82 | −67 in slice 3 (API views/records); −2 in slice 2; −15 in slice 1; blanket exclude retained |
 | Deferred `REC_CATCH_EXCEPTION` | **0** | Removed from exclude.xml; 11 call sites narrowed |
 | Framework token exclusions | 1 block | `CT_CONSTRUCTOR_THROW,SE_BAD_FIELD` (Spring auth tokens) |
 | Test-class exclusion | 1 block | `~.*Test$` (tests out of gate scope) |
@@ -23,7 +23,7 @@
 | **0 (Done)** | `REC_CATCH_EXCEPTION` | 11 findings across storage, master, rendering, runtime, template | 0 SpotBugs REC_CATCH; pattern removed from exclude.xml |
 | **1 (Done)** | `EI_EXPOSE_REP` — security-critical | `ManagementSessionClaims`, runtime credential views, JWT/session DTOs | −15 findings (8 classes); deferred ~166→~151; blanket exclude retained |
 | **2 (Done)** | `EI_EXPOSE_REP` — persistence entities | JPA entities with collection getters | Module-by-module; JaCoCo unchanged |
-| **3** | `EI_EXPOSE_REP` — API views / records | MapStruct-generated + hand-written views | Reduce deferred count below 100 |
+| **3 (Done)** | `EI_EXPOSE_REP` — API views / records | MapStruct-generated + hand-written views | Reduce deferred count below 100 |
 | **4+** | Remaining `EI_EXPOSE_REP` | Quarterly −20% of deferred count | Remove blanket `<Match>` when &lt; 10 remain |
 
 ## Slice 1 evidence (EI_EXPOSE_REP — security/session DTOs)
@@ -60,6 +60,23 @@ Mutation remains via domain methods (`replaceAnchors`, `assignRoles`, `assignGro
 **Tests:** `PersistenceEntityCollectionImmutabilityTest` (3 cases).
 
 **Exit:** ~2 deferred EI findings addressed (~151→~149); `exclude.xml` blanket `EI_EXPOSE_REP` match unchanged (`BASELINE_MATCH_COUNT=3`).
+
+## Slice 3 evidence (EI_EXPOSE_REP — API views / records)
+
+Shared utility **`com.bank.docgen.sharedkernel.api.DefensiveCopies`** (`copyList`, `copyStringList`, `copySet`, `copyMap`; null-safe → empty immutable defaults).
+
+Hand-written API records under `**/api/**` with `List`/`Set`/`Map` components use compact-constructor defensive copies. Slice 1 DTOs migrated off per-file `copyStrings` helpers.
+
+| Metric | Value |
+| --- | --- |
+| API types hardened | **67** Java files (`**/api/**` records + nested record bodies) |
+| Collection components | **~82** fields (`List`/`Set`/`Map`) |
+| Security claims migrated | `ManagementSessionClaims`, `RuntimeSessionClaims` → shared utility |
+| Excluded (non-DTO) | `GlobalExceptionHandler`, `ErrorEnvelopeFactory` |
+
+**Tests:** `ApiDtoImmutabilityTest` (**9** cases: runtime contract, template detail, master detail, batch result, API policy, audit event, content module, preview comparison, error detail) + existing `SecuritySessionDtoImmutabilityTest` (7).
+
+**Exit:** ~67 deferred EI findings addressed (~149→~**82**); below 100 target; `exclude.xml` blanket `EI_EXPOSE_REP` match unchanged (`BASELINE_MATCH_COUNT=3`).
 
 ## Slice 0 evidence (REC_CATCH fixes)
 

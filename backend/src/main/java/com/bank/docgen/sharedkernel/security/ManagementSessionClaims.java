@@ -1,6 +1,7 @@
 package com.bank.docgen.sharedkernel.security;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.time.Instant;
 import java.util.List;
 
@@ -16,12 +17,8 @@ public record ManagementSessionClaims(
         Instant expiresAt
 ) {
     public ManagementSessionClaims {
-        roles = copyStrings(roles);
-        authorizedGroupCodes = copyStrings(authorizedGroupCodes);
-        visibleRoutes = copyStrings(visibleRoutes);
-    }
-
-    private static List<String> copyStrings(List<String> values) {
-        return values == null ? List.of() : List.copyOf(values);
+        roles = DefensiveCopies.copyStringList(roles);
+        authorizedGroupCodes = DefensiveCopies.copyStringList(authorizedGroupCodes);
+        visibleRoutes = DefensiveCopies.copyStringList(visibleRoutes);
     }
 }

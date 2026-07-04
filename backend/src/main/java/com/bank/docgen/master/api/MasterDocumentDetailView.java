@@ -1,5 +1,7 @@
 package com.bank.docgen.master.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -18,4 +20,9 @@ public record MasterDocumentDetailView(
         Instant createdAt,
         Instant updatedAt
 ) {
+    public MasterDocumentDetailView {
+        anchors = DefensiveCopies.copyList(anchors);
+        reviewHistory = DefensiveCopies.copyList(reviewHistory);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.bank.docgen.audit.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.util.List;
 
 public record AuditPagedResult<T>(
@@ -9,6 +10,10 @@ public record AuditPagedResult<T>(
         long totalElements,
         int totalPages
 ) {
+    public AuditPagedResult {
+        events = DefensiveCopies.copyList(events);
+    }
+
     public static final int DEFAULT_PAGE_SIZE = 20;
 
     public static int normalizePage(Integer page) {

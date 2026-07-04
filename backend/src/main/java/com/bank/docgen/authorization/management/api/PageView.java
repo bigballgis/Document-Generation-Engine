@@ -1,5 +1,6 @@
 package com.bank.docgen.authorization.management.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.util.List;
 
 public record PageView<T>(
@@ -10,11 +11,7 @@ public record PageView<T>(
         int totalPages
 ) {
     public PageView {
-        content = copyContent(content);
-    }
-
-    private static <T> List<T> copyContent(List<T> values) {
-        return values == null ? List.of() : List.copyOf(values);
+        content = DefensiveCopies.copyList(content);
     }
 
     public static <T> PageView<T> of(List<T> all, int page, int size) {

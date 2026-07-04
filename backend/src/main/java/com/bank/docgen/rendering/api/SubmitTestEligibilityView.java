@@ -1,5 +1,6 @@
 package com.bank.docgen.rendering.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.time.Instant;
 import java.util.List;
 
@@ -24,6 +25,11 @@ public record SubmitTestEligibilityView(
             int uncoveredVariablesTotal,
             List<String> failedDataSetNames
     ) {
+        public BlockingDetails {
+            uncoveredAnchors = DefensiveCopies.copyStringList(uncoveredAnchors);
+            uncoveredVariables = DefensiveCopies.copyStringList(uncoveredVariables);
+            failedDataSetNames = DefensiveCopies.copyStringList(failedDataSetNames);
+        }
     }
 
     public record Thresholds(

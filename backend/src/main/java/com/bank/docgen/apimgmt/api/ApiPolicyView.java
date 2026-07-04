@@ -1,5 +1,7 @@
 package com.bank.docgen.apimgmt.api;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -21,4 +23,10 @@ public record ApiPolicyView(
         int documentRetentionDays,
         Instant updatedAt
 ) {
+    public ApiPolicyView {
+        allowedAdGroups = DefensiveCopies.copyList(allowedAdGroups);
+        outputFormats = DefensiveCopies.copyList(outputFormats);
+        outputModes = DefensiveCopies.copyList(outputModes);
+    }
+
 }
