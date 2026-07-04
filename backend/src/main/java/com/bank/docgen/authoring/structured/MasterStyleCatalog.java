@@ -1,5 +1,6 @@
 package com.bank.docgen.authoring.structured;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.util.Map;
 
 public record MasterStyleCatalog(
@@ -7,11 +8,14 @@ public record MasterStyleCatalog(
         Map<String, MasterStyleCatalogEntry> stylesByKey
 ) {
 
+    public MasterStyleCatalog {
+        stylesByKey = DefensiveCopies.copyMap(stylesByKey);
+    }
+
     public MasterStyleCatalogEntry find(String styleKey) {
         if (styleKey == null || styleKey.isBlank()) {
             return null;
         }
-        Map<String, MasterStyleCatalogEntry> styles = stylesByKey == null ? Map.of() : stylesByKey;
-        return styles.get(styleKey.trim());
+        return stylesByKey.get(styleKey.trim());
     }
 }

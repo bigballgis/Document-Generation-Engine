@@ -11,6 +11,7 @@ import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocxPdfPageNumberStampPlanResolver;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.rendering.PdfConversionStampPlanContext;
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
@@ -154,5 +155,9 @@ public class DocumentGenerationEngine {
             String outputFormat,
             List<String> fidelityWarningCodes
     ) {
+        public GeneratedDocument {
+            artifactBytes = DefensiveCopies.copyBytes(artifactBytes);
+            fidelityWarningCodes = DefensiveCopies.copyList(fidelityWarningCodes);
+        }
     }
 }

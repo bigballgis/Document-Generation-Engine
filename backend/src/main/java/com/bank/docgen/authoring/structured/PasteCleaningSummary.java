@@ -1,5 +1,6 @@
 package com.bank.docgen.authoring.structured;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.util.List;
 
 public record PasteCleaningSummary(
@@ -9,6 +10,10 @@ public record PasteCleaningSummary(
         int warningCount,
         int blockedCount
 ) {
+
+    public PasteCleaningSummary {
+        items = DefensiveCopies.copyList(items);
+    }
 
     public static PasteCleaningSummary of(List<PasteCleaningSummaryItem> rawItems) {
         List<PasteCleaningSummaryItem> items = rawItems == null ? List.of() : List.copyOf(rawItems);

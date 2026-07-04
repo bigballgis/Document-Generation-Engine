@@ -1,6 +1,6 @@
 # SpotBugs Exclusion Ratchet Plan (SOR-A05)
 
-**Status:** Active — slice 0 complete (REC_CATCH_EXCEPTION removed); **slice 1 Done** (2026-07-04); **slice 2 Done** (2026-07-04); **slice 3 Done** (2026-07-04).  
+**Status:** Active — slice 0 complete (REC_CATCH_EXCEPTION removed); **slice 1 Done** (2026-07-04); **slice 2 Done** (2026-07-04); **slice 3 Done** (2026-07-04); **slice 4 first batch Done** (2026-07-04).  
 **Filter file:** `backend/config/spotbugs/exclude.xml`  
 **Automated guard:** `SpotBugsExclusionRatchetTest` (Surefire)
 
@@ -9,7 +9,7 @@
 | Metric | Value | Notes |
 | --- | --- | --- |
 | `<Match>` blocks | **3** | `BASELINE_MATCH_COUNT=3` in guard test |
-| Deferred `EI_EXPOSE_REP` / `EI_EXPOSE_REP2` | ~82 | −67 in slice 3 (API views/records); −2 in slice 2; −15 in slice 1; blanket exclude retained |
+| Deferred `EI_EXPOSE_REP` / `EI_EXPOSE_REP2` | ~65 | −17 in slice 4 first batch (domain/authoring DTOs); −67 in slice 3; −2 in slice 2; −15 in slice 1; blanket exclude retained |
 | Deferred `REC_CATCH_EXCEPTION` | **0** | Removed from exclude.xml; 11 call sites narrowed |
 | Framework token exclusions | 1 block | `CT_CONSTRUCTOR_THROW,SE_BAD_FIELD` (Spring auth tokens) |
 | Test-class exclusion | 1 block | `~.*Test$` (tests out of gate scope) |
@@ -77,6 +77,39 @@ Hand-written API records under `**/api/**` with `List`/`Set`/`Map` components us
 **Tests:** `ApiDtoImmutabilityTest` (**9** cases: runtime contract, template detail, master detail, batch result, API policy, audit event, content module, preview comparison, error detail) + existing `SecuritySessionDtoImmutabilityTest` (7).
 
 **Exit:** ~67 deferred EI findings addressed (~149→~**82**); below 100 target; `exclude.xml` blanket `EI_EXPOSE_REP` match unchanged (`BASELINE_MATCH_COUNT=3`).
+
+## Slice 4 first batch evidence (EI_EXPOSE_REP — domain / authoring / internal DTOs)
+
+Extended **`DefensiveCopies`** with `copyBytes` (byte[] clone, null-safe) and `copyNestedList` (nested `List<List<T>>`).
+
+| Class | Module | Components hardened |
+| --- | --- | --- |
+| `TableLoopRowDefinition` | `authoring.structured` | `cells` |
+| `TableComponentRenderModel` | `authoring.structured` | `columns`, `headerRows`, `footerRows` |
+| `StructuredContentValidationResult` | `authoring.structured` | `blockers`, `warnings` |
+| `ReferenceNodeValidationResult` | `authoring.structured` | `attachmentLists` |
+| `PasteCleaningSummary` | `authoring.structured` | `items` |
+| `NumberingValidationResult` | `authoring.structured` | `sequence` |
+| `MasterStyleCatalogEntry` | `authoring.structured` | `applicableNodeTypes` |
+| `MasterStyleCatalog` | `authoring.structured` | `stylesByKey` |
+| `AuditSearchPage` | `audit.persistence` | `content` |
+| `PdfPageNumberStampPlan` | `rendering` | `sectionStartPages` |
+| `StructuredContentImageResolver.ResolvedImage` | `rendering` | `bytes` |
+| `SyncGenerateResult` | `runtime.api` | `artifactBytes`, `fidelityWarningCodes` |
+| `DocumentGenerationEngine.GeneratedDocument` | `runtime.service` | `artifactBytes`, `fidelityWarningCodes` |
+| `AdGroupResolverProperties` | `apimgmt.service` | `getAccountGroups()` deep copy |
+
+Factory methods on authoring records delegate to compact constructors (canonical defensive copy path).
+
+| Metric | Value |
+| --- | --- |
+| Types hardened | **14** classes |
+| Collection / byte[] components | **~20** fields |
+| Authoring `structured/*` records | **8** of **8** with collection components |
+
+**Tests:** `DomainDtoImmutabilityTest` (**10** cases: authoring validation, style catalog, audit page, PDF stamp plan, resolved image bytes, sync generate bytes, table render model, generated document, paste cleaning summary, AD group properties).
+
+**Exit:** ~17 deferred EI findings addressed (~82→~**65**); −20% target met; `exclude.xml` blanket `EI_EXPOSE_REP` match unchanged (`BASELINE_MATCH_COUNT=3`).
 
 ## Slice 0 evidence (REC_CATCH fixes)
 

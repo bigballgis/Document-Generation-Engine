@@ -1,5 +1,6 @@
 package com.bank.docgen.rendering;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
@@ -48,5 +49,9 @@ public class StructuredContentImageResolver {
     }
 
     public record ResolvedImage(byte[] bytes, String fileName) {
+
+        public ResolvedImage {
+            bytes = DefensiveCopies.copyBytes(bytes);
+        }
     }
 }

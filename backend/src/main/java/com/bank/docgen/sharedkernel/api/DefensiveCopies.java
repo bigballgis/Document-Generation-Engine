@@ -5,15 +5,26 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Shared defensive copies for immutable API DTOs (SpotBugs EI_EXPOSE_REP2 ratchet).
+ * Shared defensive copies for immutable DTOs (SpotBugs EI_EXPOSE_REP / EI_EXPOSE_REP2 ratchet).
  */
 public final class DefensiveCopies {
 
     private DefensiveCopies() {
     }
 
+    public static byte[] copyBytes(byte[] values) {
+        return values == null ? null : values.clone();
+    }
+
     public static <T> List<T> copyList(List<T> values) {
         return values == null ? List.of() : List.copyOf(values);
+    }
+
+    public static <T> List<List<T>> copyNestedList(List<List<T>> values) {
+        if (values == null) {
+            return List.of();
+        }
+        return values.stream().map(DefensiveCopies::copyList).toList();
     }
 
     public static List<String> copyStringList(List<String> values) {

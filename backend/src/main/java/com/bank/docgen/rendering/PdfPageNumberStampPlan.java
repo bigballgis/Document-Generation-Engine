@@ -1,5 +1,6 @@
 package com.bank.docgen.rendering;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.util.List;
 
 /**
@@ -10,14 +11,19 @@ public record PdfPageNumberStampPlan(
         List<Integer> sectionStartPages
 ) {
 
+    public PdfPageNumberStampPlan {
+        sectionStartPages = DefensiveCopies.copyList(sectionStartPages);
+        if (sectionStartPages.isEmpty()) {
+            sectionStartPages = List.of(1);
+        }
+    }
+
     public static PdfPageNumberStampPlan globalOnly() {
         return new PdfPageNumberStampPlan(false, List.of(1));
     }
 
     public static PdfPageNumberStampPlan sectionAndGlobal(List<Integer> sectionStartPages) {
-        return new PdfPageNumberStampPlan(true, sectionStartPages == null || sectionStartPages.isEmpty()
-                ? List.of(1)
-                : List.copyOf(sectionStartPages));
+        return new PdfPageNumberStampPlan(true, sectionStartPages);
     }
 
     public int sectionIndexForPage(int pageNumber) {

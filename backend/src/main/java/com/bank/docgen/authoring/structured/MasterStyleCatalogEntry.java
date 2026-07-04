@@ -1,5 +1,6 @@
 package com.bank.docgen.authoring.structured;
 
+import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.util.Set;
 
 public record MasterStyleCatalogEntry(
@@ -8,11 +9,14 @@ public record MasterStyleCatalogEntry(
         String renderPurpose
 ) {
 
+    public MasterStyleCatalogEntry {
+        applicableNodeTypes = DefensiveCopies.copySet(applicableNodeTypes);
+    }
+
     public boolean appliesToNodeType(String nodeTypeJson) {
         if (nodeTypeJson == null || nodeTypeJson.isBlank()) {
             return false;
         }
-        Set<String> types = applicableNodeTypes == null ? Set.of() : applicableNodeTypes;
-        return types.contains(nodeTypeJson.trim());
+        return applicableNodeTypes.contains(nodeTypeJson.trim());
     }
 }

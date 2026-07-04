@@ -15,6 +15,7 @@ public record SyncGenerateResult(
         String idempotencyStatus
 ) {
     public SyncGenerateResult {
+        artifactBytes = DefensiveCopies.copyBytes(artifactBytes);
         fidelityWarningCodes = DefensiveCopies.copyList(fidelityWarningCodes);
     }
 
