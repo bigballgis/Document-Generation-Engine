@@ -24,6 +24,8 @@ export const apiErrorZhCn = {
     internalError: "发生内部错误。",
     serviceUnavailable: "生成服务暂时不可用。",
     pdfConversionFailed: "PDF 转换失败。",
+    pdfConversionCapacityExceeded: "PDF 转换容量暂时已满，请稍后重试。",
+    artifactTooLarge: "生成的产物超过配置的大小上限。",
     docxNormalizationFailed: "DOCX 规范化失败。"
   },
   idempotency: {

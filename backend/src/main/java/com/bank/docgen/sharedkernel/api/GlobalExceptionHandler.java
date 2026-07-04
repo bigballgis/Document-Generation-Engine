@@ -28,6 +28,7 @@ import com.bank.docgen.rendering.service.PreviewGenerationException;
 import com.bank.docgen.rendering.service.PreviewNotFoundException;
 import com.bank.docgen.rendering.service.BatchTestRunNotFoundException;
 import com.bank.docgen.rendering.DocxAssemblyException;
+import com.bank.docgen.rendering.PdfConversionCapacityExceededException;
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
 import com.bank.docgen.template.service.TemplateGovernanceException;
 import com.bank.docgen.template.service.TemplateAccessDeniedException;
@@ -254,6 +255,26 @@ public class GlobalExceptionHandler {
             HttpServletRequest request, TemplateValidationException ex) {
         return domainError(request, HttpStatus.UNPROCESSABLE_ENTITY,
                 ApiErrorCodes.TEMPLATE_VALIDATION_FAILED, ApiErrorCategories.TEMPLATE, ex.messageKey());
+    }
+
+    @ExceptionHandler(PdfConversionCapacityExceededException.class)
+    public ResponseEntity<ErrorEnvelope> handlePdfConversionCapacityExceeded(
+            HttpServletRequest request,
+            PdfConversionCapacityExceededException ex
+    ) {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        String messageKey = ex.messageKey();
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.PDF_CONVERSION_CAPACITY_EXCEEDED,
+                ApiErrorCategories.GENERATION,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                true,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 
     @ExceptionHandler(PreviewNotFoundException.class)

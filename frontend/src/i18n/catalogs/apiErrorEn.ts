@@ -24,6 +24,8 @@ export const apiErrorEn = {
     internalError: "An internal error occurred.",
     serviceUnavailable: "The generation service is temporarily unavailable.",
     pdfConversionFailed: "PDF conversion failed.",
+    pdfConversionCapacityExceeded: "PDF conversion capacity is temporarily exceeded; retry later.",
+    artifactTooLarge: "Generated artifact exceeds the configured size limit.",
     docxNormalizationFailed: "DOCX normalization failed."
   },
   idempotency: {

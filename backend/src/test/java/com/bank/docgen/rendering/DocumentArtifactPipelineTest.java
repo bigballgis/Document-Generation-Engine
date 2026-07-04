@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,9 @@ class DocumentArtifactPipelineTest {
 
     private final DocxEncryptionService docxEncryptionService = new DocxEncryptionService();
     private final PdfEncryptionService pdfEncryptionService = new PdfEncryptionService();
+    private final GeneratedArtifactSizeGuard artifactSizeGuard = new GeneratedArtifactSizeGuard(
+            new DocgenRenderingProperties()
+    );
 
     @Test
     void pdfPathConvertsThenEncrypts() {
@@ -28,7 +32,8 @@ class DocumentArtifactPipelineTest {
         DocumentArtifactPipeline pipeline = new DocumentArtifactPipeline(
                 docxEncryptionService,
                 pdfConversionService,
-                pdfEncryptionService
+                pdfEncryptionService,
+                artifactSizeGuard
         );
         EncryptionOptionsView encryption = new EncryptionOptionsView(false, null, null, null);
 
@@ -47,7 +52,8 @@ class DocumentArtifactPipelineTest {
         DocumentArtifactPipeline pipeline = new DocumentArtifactPipeline(
                 docxEncryptionService,
                 pdfConversionService,
-                pdfEncryptionService
+                pdfEncryptionService,
+                artifactSizeGuard
         );
         EncryptionOptionsView encryption = new EncryptionOptionsView(
                 true,

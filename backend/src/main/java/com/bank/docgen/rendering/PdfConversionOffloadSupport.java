@@ -9,6 +9,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 public final class PdfConversionOffloadSupport {
 
@@ -22,11 +23,12 @@ public final class PdfConversionOffloadSupport {
             int conversionTimeoutSeconds,
             Supplier<byte[]> conversion
     ) {
+        assertCapacityAvailable(executor);
         Future<byte[]> future;
         try {
             future = CompletableFuture.supplyAsync(conversion, executor);
         } catch (RejectedExecutionException ex) {
-            throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+            throw new PdfConversionCapacityExceededException();
         }
         try {
             return future.get(conversionTimeoutSeconds + TIMEOUT_BUFFER_SECONDS, TimeUnit.SECONDS);
@@ -35,17 +37,31 @@ public final class PdfConversionOffloadSupport {
             throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
         } catch (ExecutionException ex) {
             Throwable cause = ex.getCause();
+            if (cause instanceof PdfConversionCapacityExceededException capacityException) {
+                throw capacityException;
+            }
             if (cause instanceof TemplateValidationException validationException) {
                 throw validationException;
             }
             if (cause instanceof RejectedExecutionException) {
-                throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+                throw new PdfConversionCapacityExceededException();
             }
             throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             future.cancel(true);
             throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+        }
+    }
+
+    static void assertCapacityAvailable(Executor executor) {
+        if (!(executor instanceof ThreadPoolTaskExecutor taskExecutor)) {
+            return;
+        }
+        if (taskExecutor.getThreadPoolExecutor().getQueue().remainingCapacity() == 0
+                && taskExecutor.getThreadPoolExecutor().getActiveCount()
+                >= taskExecutor.getThreadPoolExecutor().getMaximumPoolSize()) {
+            throw new PdfConversionCapacityExceededException();
         }
     }
 }

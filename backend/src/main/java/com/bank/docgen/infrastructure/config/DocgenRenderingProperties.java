@@ -19,6 +19,16 @@ public class DocgenRenderingProperties {
     private int conversionPoolSize = 2;
 
     /**
+     * Bounded queue for PDF conversion tasks. Default {@code 0} isolates sync capacity to
+     * {@link #conversionPoolSize} workers — saturated requests fail fast (SOR-P03) instead of
+     * blocking servlet threads behind a deep queue.
+     */
+    private int conversionQueueCapacity = 0;
+
+    /** Maximum generated artifact size (DOCX/PDF bytes) before persistence (SOR-P02). */
+    private long maxGeneratedArtifactBytes = 52_428_800L;
+
+    /**
      * When enabled, strips Word {@code PAGE} fields before LibreOffice conversion and stamps
      * {@code Page X of Y} onto the PDF. Deferred by default until final PDF fidelity work.
      */
@@ -70,6 +80,22 @@ public class DocgenRenderingProperties {
 
     public void setConversionPoolSize(int conversionPoolSize) {
         this.conversionPoolSize = conversionPoolSize;
+    }
+
+    public int getConversionQueueCapacity() {
+        return conversionQueueCapacity;
+    }
+
+    public void setConversionQueueCapacity(int conversionQueueCapacity) {
+        this.conversionQueueCapacity = conversionQueueCapacity;
+    }
+
+    public long getMaxGeneratedArtifactBytes() {
+        return maxGeneratedArtifactBytes;
+    }
+
+    public void setMaxGeneratedArtifactBytes(long maxGeneratedArtifactBytes) {
+        this.maxGeneratedArtifactBytes = maxGeneratedArtifactBytes;
     }
 
     public boolean isPdfPageNumberStampingEnabled() {

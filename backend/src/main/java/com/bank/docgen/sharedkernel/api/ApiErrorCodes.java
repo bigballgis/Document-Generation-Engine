@@ -63,6 +63,7 @@ public final class ApiErrorCodes {
     public static final String INVOCATION_NOT_FOUND = "INVOCATION_NOT_FOUND";
     public static final String INVOCATION_RECORD_EXPIRED = "INVOCATION_RECORD_EXPIRED";
     public static final String INVOCATION_VIEW_INVALID = "INVOCATION_VIEW_INVALID";
+    public static final String PDF_CONVERSION_CAPACITY_EXCEEDED = "PDF_CONVERSION_CAPACITY_EXCEEDED";
 
     private ApiErrorCodes() {
     }

@@ -90,7 +90,7 @@ class PdfConversionOffloadSupportTest {
     }
 
     @Test
-    void mapsRejectedExecutionToPdfConversionFailed() {
+    void mapsRejectedExecutionToCapacityExceeded() {
         ThreadPoolExecutor saturatedPool = new ThreadPoolExecutor(
                 1,
                 1,
@@ -123,8 +123,7 @@ class PdfConversionOffloadSupportTest {
                     5,
                     () -> new byte[]{1}
             ))
-                    .isInstanceOf(TemplateValidationException.class)
-                    .hasMessage("api.error.generation.pdfConversionFailed");
+                    .isInstanceOf(PdfConversionCapacityExceededException.class);
 
             blocker.cancel(true);
         } finally {
@@ -132,11 +131,47 @@ class PdfConversionOffloadSupportTest {
         }
     }
 
+    @Test
+    void failsFastWhenPoolAlreadySaturated() {
+        executor = boundedExecutor(1);
+        executor.execute(() -> {
+            try {
+                Thread.sleep(2_000);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        // Wait until worker is active.
+        awaitActiveWorker(executor);
+
+        assertThatThrownBy(() -> PdfConversionOffloadSupport.executeOffloaded(
+                executor,
+                5,
+                () -> new byte[]{1}
+        ))
+                .isInstanceOf(PdfConversionCapacityExceededException.class);
+    }
+
+    private void awaitActiveWorker(ThreadPoolTaskExecutor taskExecutor) {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        while (System.nanoTime() < deadline) {
+            if (taskExecutor.getThreadPoolExecutor().getActiveCount() > 0) {
+                return;
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+    }
+
     private ThreadPoolTaskExecutor boundedExecutor(int poolSize) {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(poolSize);
         taskExecutor.setMaxPoolSize(poolSize);
-        taskExecutor.setQueueCapacity(poolSize * 4);
+        taskExecutor.setQueueCapacity(0);
         taskExecutor.setThreadNamePrefix("pdf-conversion-test-");
         taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         taskExecutor.initialize();

@@ -13,10 +13,11 @@ public class PdfConversionExecutorConfig {
     @Profile("!test")
     public ThreadPoolTaskExecutor pdfConversionExecutor(DocgenRenderingProperties renderingProperties) {
         int poolSize = renderingProperties.getConversionPoolSize();
+        int queueCapacity = renderingProperties.getConversionQueueCapacity();
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(poolSize);
         executor.setMaxPoolSize(poolSize);
-        executor.setQueueCapacity(poolSize * 4);
+        executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("pdf-conversion-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
         executor.initialize();

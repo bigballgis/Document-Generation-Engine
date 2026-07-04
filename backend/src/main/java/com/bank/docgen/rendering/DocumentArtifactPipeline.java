@@ -10,15 +10,18 @@ public class DocumentArtifactPipeline {
     private final DocxEncryptionService docxEncryptionService;
     private final PdfConversionService pdfConversionService;
     private final PdfEncryptionService pdfEncryptionService;
+    private final GeneratedArtifactSizeGuard artifactSizeGuard;
 
     public DocumentArtifactPipeline(
             DocxEncryptionService docxEncryptionService,
             PdfConversionService pdfConversionService,
-            PdfEncryptionService pdfEncryptionService
+            PdfEncryptionService pdfEncryptionService,
+            GeneratedArtifactSizeGuard artifactSizeGuard
     ) {
         this.docxEncryptionService = docxEncryptionService;
         this.pdfConversionService = pdfConversionService;
         this.pdfEncryptionService = pdfEncryptionService;
+        this.artifactSizeGuard = artifactSizeGuard;
     }
 
     public GeneratedArtifact finalizeArtifact(
@@ -35,6 +38,7 @@ public class DocumentArtifactPipeline {
             EncryptionOptionsView encryption,
             RenderProfile renderProfile
     ) {
+        artifactSizeGuard.assertWithinLimit(docxBytes);
         if ("PDF".equalsIgnoreCase(outputFormat) && renderProfile != null
                 && renderProfile.pdfConversionPolicy() == null) {
             throw new IllegalStateException("Render profile missing PDF conversion policy");
@@ -42,6 +46,7 @@ public class DocumentArtifactPipeline {
         if ("PDF".equalsIgnoreCase(outputFormat)) {
             byte[] pdfBytes = pdfConversionService.convert(docxBytes);
             pdfBytes = pdfEncryptionService.encrypt(pdfBytes, encryption);
+            artifactSizeGuard.assertWithinLimit(pdfBytes);
             return new GeneratedArtifact(
                     pdfBytes,
                     "application/pdf",
@@ -49,6 +54,7 @@ public class DocumentArtifactPipeline {
             );
         }
         byte[] encryptedDocx = docxEncryptionService.encrypt(docxBytes, encryption);
+        artifactSizeGuard.assertWithinLimit(encryptedDocx);
         return new GeneratedArtifact(
                 encryptedDocx,
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
