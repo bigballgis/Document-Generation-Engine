@@ -15,4 +15,13 @@ public record ManagementSessionClaims(
         List<String> visibleRoutes,
         Instant expiresAt
 ) {
+    public ManagementSessionClaims {
+        roles = copyStrings(roles);
+        authorizedGroupCodes = copyStrings(authorizedGroupCodes);
+        visibleRoutes = copyStrings(visibleRoutes);
+    }
+
+    private static List<String> copyStrings(List<String> values) {
+        return values == null ? List.of() : List.copyOf(values);
+    }
 }

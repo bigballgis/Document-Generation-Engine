@@ -15,4 +15,13 @@ public record ManagementSessionView(
         ManagementCapabilitiesView capabilities,
         Instant expiresAt
 ) {
+    public ManagementSessionView {
+        roles = copyStrings(roles);
+        authorizedGroupCodes = copyStrings(authorizedGroupCodes);
+        visibleRoutes = copyStrings(visibleRoutes);
+    }
+
+    private static List<String> copyStrings(List<String> values) {
+        return values == null ? List.of() : List.copyOf(values);
+    }
 }

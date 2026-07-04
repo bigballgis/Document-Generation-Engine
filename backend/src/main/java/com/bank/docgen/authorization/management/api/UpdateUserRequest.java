@@ -23,4 +23,16 @@ public record UpdateUserRequest(
         @NotNull
         List<String> authorizedGroupCodes
 ) {
+    public UpdateUserRequest {
+        roles = copyRoles(roles);
+        authorizedGroupCodes = copyStrings(authorizedGroupCodes);
+    }
+
+    private static List<ManagementRole> copyRoles(List<ManagementRole> values) {
+        return values == null ? List.of() : List.copyOf(values);
+    }
+
+    private static List<String> copyStrings(List<String> values) {
+        return values == null ? List.of() : List.copyOf(values);
+    }
 }

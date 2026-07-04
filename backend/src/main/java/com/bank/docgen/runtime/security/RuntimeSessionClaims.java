@@ -11,4 +11,11 @@ public record RuntimeSessionClaims(
         String accessAccount,
         List<String> callerAdGroups
 ) {
+    public RuntimeSessionClaims {
+        callerAdGroups = copyStrings(callerAdGroups);
+    }
+
+    private static List<String> copyStrings(List<String> values) {
+        return values == null ? List.of() : List.copyOf(values);
+    }
 }

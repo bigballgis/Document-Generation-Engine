@@ -16,4 +16,12 @@ public record ApiPolicySummaryView(
         AdGroupAuthorizationSummaryView adGroupAuthorizationSummary,
         RuntimeCredentialSummaryView credentialSummary
 ) {
+    public ApiPolicySummaryView {
+        allowedOutputFormats = copyStrings(allowedOutputFormats);
+        allowedOutputModes = copyStrings(allowedOutputModes);
+    }
+
+    private static List<String> copyStrings(List<String> values) {
+        return values == null ? List.of() : List.copyOf(values);
+    }
 }

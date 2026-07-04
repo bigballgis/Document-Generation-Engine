@@ -15,4 +15,12 @@ public record ManagementUserView(
         Instant createdAt,
         Instant updatedAt
 ) {
+    public ManagementUserView {
+        roles = copyStrings(roles);
+        authorizedGroupCodes = copyStrings(authorizedGroupCodes);
+    }
+
+    private static List<String> copyStrings(List<String> values) {
+        return values == null ? List.of() : List.copyOf(values);
+    }
 }

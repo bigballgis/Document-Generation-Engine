@@ -9,6 +9,14 @@ public record PageView<T>(
         long totalElements,
         int totalPages
 ) {
+    public PageView {
+        content = copyContent(content);
+    }
+
+    private static <T> List<T> copyContent(List<T> values) {
+        return values == null ? List.of() : List.copyOf(values);
+    }
+
     public static <T> PageView<T> of(List<T> all, int page, int size) {
         int safeSize = size <= 0 ? 20 : size;
         int safePage = Math.max(page, 0);

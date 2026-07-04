@@ -32,4 +32,16 @@ public record CreateUserRequest(
         @NotNull
         List<String> authorizedGroupCodes
 ) {
+    public CreateUserRequest {
+        roles = copyRoles(roles);
+        authorizedGroupCodes = copyStrings(authorizedGroupCodes);
+    }
+
+    private static List<ManagementRole> copyRoles(List<ManagementRole> values) {
+        return values == null ? List.of() : List.copyOf(values);
+    }
+
+    private static List<String> copyStrings(List<String> values) {
+        return values == null ? List.of() : List.copyOf(values);
+    }
 }
