@@ -11,7 +11,7 @@ import type { VariableSchema } from '@/types/template'
 
 function varSchema(
   variableKey: string,
-  variableType = 'TEXT',
+  variableType: VariableSchema['variableType'] = 'TEXT',
   description: string | null = null,
 ): VariableSchema {
   return {
@@ -19,7 +19,7 @@ function varSchema(
     variableType,
     required: true,
     defaultValue: null,
-    enumValues: [],
+    enumValues: null,
     description,
   }
 }

@@ -153,7 +153,7 @@ export function useTemplateDetailNavigation(options: UseTemplateDetailNavigation
     }
     return {
       lifecycleStatus: template.value.lifecycleStatus,
-      approvalSubState: template.value.approvalSubState,
+      approvalSubState: template.value.approvalSubState ?? undefined,
       bindingsCount: template.value.bindings.length,
       hasSuccessfulTrialOutput: lastPreview.value?.status === 'SUCCEEDED',
       isRemediation: isTemplateInRemediation(template.value.id, openRemediationTemplateIds.value),

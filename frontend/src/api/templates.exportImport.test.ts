@@ -66,7 +66,7 @@ describe('templates export/import API', () => {
     const payload = {
       masterId: 'master-1',
       bundle: {
-        format: 'template-export-bundle-v1-json',
+        format: 'template-export-bundle-v1-json' as const,
         metadata: {
           templateId: 'tpl-2',
           externalId: 'TPL-2',
@@ -84,7 +84,7 @@ describe('templates export/import API', () => {
         bindings: [],
         rules: [],
         contentModuleReferences: [],
-        policySnapshot: null,
+        policySnapshot: undefined,
       },
       importConflictPolicy: 'REJECT_IMPORT' as const,
     }

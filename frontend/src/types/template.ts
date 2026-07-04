@@ -1,24 +1,23 @@
-export type TemplateLifecycleStatus =
-  | 'DRAFT'
-  | 'TESTING'
-  | 'APPROVAL'
-  | 'PENDING_RELEASE'
-  | 'PUBLISHED'
-  | 'STOPPED'
-  | 'DELETED'
-  | 'DEPRECATED'
+import type { Schema } from '@/types/openapi'
+
+/**
+ * OpenAPI-backed management DTO aliases. Types without a matching schema remain
+ * hand-written below with a short comment when not yet in `openapi-v1.yaml`.
+ */
+export type TemplateLifecycleStatus = Schema<'TemplateLifecycleStatus'> | 'DELETED'
 
 export type LifecycleDecision = 'PASSED' | 'FAILED' | 'APPROVED' | 'REJECTED'
 
-export type PreviewStatus = 'ACCEPTED' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | 'EXPIRED'
+export type PreviewStatus = Schema<'PreviewStatus'>
 
+/** Not yet modeled in `openapi-v1.yaml` (management template list). */
 export interface TemplateSummary {
   id: string
   externalId: string
   groupCode: string
   name: string
   lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION'
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
   releaseVersion: string | null
   releaseVersionCount: number
   masterId: string
@@ -26,6 +25,7 @@ export interface TemplateSummary {
   updatedAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management release version history). */
 export interface TemplateReleaseVersion {
   releaseVersion: string
   devVersionNumber: number
@@ -35,75 +35,42 @@ export interface TemplateReleaseVersion {
   defaultRouteTarget: boolean
 }
 
-export interface TemplateVersionLineSummary {
-  devVersionId: string
-  devVersionNumber: number
-  releaseVersion: string | null
-  lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION'
-  lineKind?: 'IN_FLIGHT' | 'PUBLISHED'
-  updatedAt: string
-  updatedBy: string
-  defaultRouteTarget: boolean | null
-  cloneable?: boolean
-}
-
-export interface TemplateVersionLineDetail extends TemplateVersionLineSummary {
-  variables: VariableSchema[]
-  bindings: AnchorBinding[]
-  rules: CompositionRule[]
-}
-
-export interface TemplateDevVersionCreated {
-  devVersionId: string
-  devVersionNumber: number
+export type TemplateVersionLineSummary = Omit<
+  Schema<'TemplateVersionLineSummaryView'>,
+  'lifecycleStatus'
+> & {
   lifecycleStatus: TemplateLifecycleStatus
 }
 
-export interface VariableSchema {
-  variableKey: string
-  variableType: string
-  required: boolean
-  defaultValue: string | null
-  enumValues: string[]
-  description: string | null
+export type TemplateVersionLineDetail = Omit<
+  Schema<'TemplateVersionLineDetailView'>,
+  'lifecycleStatus'
+> & {
+  lifecycleStatus: TemplateLifecycleStatus
+}
+
+export type TemplateDevVersionCreated = Schema<'TemplateDevVersionCreatedView'> & {
+  lifecycleStatus?: TemplateLifecycleStatus
+}
+
+export type VariableSchema = Schema<'TemplateExportVariableSchemaView'> & {
   computeExpression?: string | null
 }
 
-export interface AnchorBinding {
-  anchorId: string
-  declaredContentType: string
-  structuredContentJson: string | null
-  validationStatus?: string
-}
+export type AnchorBinding = Schema<'TemplateExportAnchorBindingView'>
 
-export interface CompositionRule {
-  ruleId: string
-  conditionExpression: string
-  targetAnchorId: string
-  trueBranchRuleId?: string | null
-  falseBranchRuleId?: string | null
-}
+export type CompositionRule = Schema<'TemplateExportCompositionRuleView'>
 
-export interface TemplateDetail {
-  id: string
-  externalId: string
-  groupCode: string
-  name: string
-  description: string | null
-  masterId: string
+export type TemplateDetail = Omit<
+  Schema<'TemplateDetailView'>,
+  'lifecycleStatus' | 'approvalSubState' | 'releaseVersion'
+> & {
   lifecycleStatus: TemplateLifecycleStatus
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
   releaseVersion: string | null
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION'
-  devVersionId: string
-  devVersionNumber: number
-  variables: VariableSchema[]
-  bindings: AnchorBinding[]
-  rules: CompositionRule[]
-  createdAt: string
-  updatedAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management variable upsert). */
 export interface UpsertVariablePayload {
   variableKey: string
   variableType: string
@@ -114,12 +81,14 @@ export interface UpsertVariablePayload {
   computeExpression?: string | null
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management binding upsert). */
 export interface UpsertBindingPayload {
   anchorId: string
   declaredContentType: string
   structuredContentJson: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management template create). */
 export interface CreateTemplatePayload {
   externalId: string
   groupCode: string
@@ -128,10 +97,12 @@ export interface CreateTemplatePayload {
   description?: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management lifecycle comment). */
 export interface LifecycleCommentPayload {
   commentSummary?: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management lifecycle governance). */
 export interface LifecycleGovernancePayload {
   reason: string
   confirmed: boolean
@@ -144,11 +115,13 @@ export type LifecycleGovernanceAction =
   | 'DEACTIVATE_VERSION'
   | 'RESTORE_VERSION'
 
+/** Not yet modeled in `openapi-v1.yaml` (management lifecycle impact preview request). */
 export interface LifecycleImpactPreviewRequest {
   action: LifecycleGovernanceAction
   releaseVersion?: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management lifecycle impact preview). */
 export interface LifecycleImpactPreview {
   action: LifecycleGovernanceAction
   releaseVersion: string | null
@@ -158,11 +131,13 @@ export interface LifecycleImpactPreview {
   summaryMessageKey: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management template metadata update). */
 export interface UpdateTemplateMetadataPayload {
   name?: string
   description?: string | null
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management lifecycle decision). */
 export interface LifecycleDecisionPayload {
   decision: LifecycleDecision
   commentSummary?: string
@@ -192,6 +167,7 @@ export type PublishGateCheckCode =
   | 'API_POLICY'
   | 'BLOCKER_STATUS'
 
+/** Not yet modeled in `openapi-v1.yaml` (management publish gate). */
 export interface PublishGateItem {
   checkCode: PublishGateCheckCode
   ready: boolean
@@ -200,6 +176,7 @@ export interface PublishGateItem {
   summary: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management publish gate). */
 export interface PublishGateChecklist {
   templateId: string
   ready: boolean
@@ -214,12 +191,14 @@ export type ChangeDiffDimensionCode =
   | 'RULES'
   | 'CONTRACT_SUMMARY'
 
+/** Not yet modeled in `openapi-v1.yaml` (management change diff). */
 export interface ChangeDiffModification {
   key: string
   changeType: string
   summary: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management change diff). */
 export interface ChangeDiffDimension {
   dimension: ChangeDiffDimensionCode
   added: string[]
@@ -227,6 +206,7 @@ export interface ChangeDiffDimension {
   modified: ChangeDiffModification[]
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management change diff). */
 export interface ChangeDiffSummary {
   templateId: string
   baselineReleaseVersion: string | null
@@ -239,6 +219,7 @@ export interface ChangeDiffSummary {
 export type PreviewComparisonLocationType = 'PAGE' | 'ANCHOR' | 'SECTION' | 'COMPONENT'
 export type PreviewComparisonSeverity = 'WARNING' | 'BLOCKER'
 
+/** Not yet modeled in `openapi-v1.yaml` (management preview comparison). */
 export interface PreviewComparisonItem {
   locationType: PreviewComparisonLocationType
   locationRef: string
@@ -247,6 +228,7 @@ export interface PreviewComparisonItem {
   summary: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management preview comparison). */
 export interface PreviewComparison {
   totalDiffCount: number
   blockerCount: number
@@ -254,6 +236,7 @@ export interface PreviewComparison {
   items: PreviewComparisonItem[]
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management risk prompt config). */
 export interface RiskPromptConfig {
   scopeType: 'GLOBAL'
   groupCode: null
@@ -262,11 +245,13 @@ export interface RiskPromptConfig {
   updatedAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management risk prompt config). */
 export interface UpsertGlobalRiskPromptConfigPayload {
   reasonCategories: string[]
   riskPromptCopy: Record<string, string>
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management risk prompt config). */
 export interface TemplateRiskPromptConfig {
   useDefault: boolean
   reasonCategories: string[]
@@ -274,35 +259,41 @@ export interface TemplateRiskPromptConfig {
   updatedAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management risk prompt config). */
 export interface UpsertTemplateRiskPromptConfigPayload {
   useDefault: boolean
   reasonCategories?: string[]
   riskPromptCopy?: Record<string, string>
 }
 
+/** UI-only form state; not an API DTO. */
 export interface DecisionFormConfig {
   reasonCategories: string[]
   riskPromptCopy: Record<string, string>
 }
 
+/** UI-only form state; not an API DTO. */
 export interface TemplateRiskPromptFormState {
   customize: boolean
   reasonCategories: string[]
   riskPromptCopy: Record<string, string>
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management publish). */
 export interface PublishTemplatePayload {
   releaseVersion: string
 }
 
 export type PasteCleaningCategory = 'TRANSFORMED' | 'REMOVED' | 'WARNING' | 'BLOCKED'
 
+/** Not yet modeled in `openapi-v1.yaml` (management paste clean). */
 export interface PasteCleaningSummaryItem {
   category: PasteCleaningCategory
   messageKey: string
   detectionSummary: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management paste clean). */
 export interface PasteCleaningSummary {
   items: PasteCleaningSummaryItem[]
   transformedCount: number
@@ -311,6 +302,7 @@ export interface PasteCleaningSummary {
   blockedCount: number
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management paste clean). */
 export interface PasteCleanResult {
   blocked: boolean
   cleanedStructuredContentJson: string | null
@@ -318,17 +310,20 @@ export interface PasteCleanResult {
   prePasteSnapshotJson: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management master style catalog). */
 export interface MasterStyleCatalogEntry {
   styleKey: string
   applicableNodeTypes: string[]
   renderPurpose: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management master style catalog). */
 export interface MasterStyleCatalog {
   catalogVersion: string
   entries: MasterStyleCatalogEntry[]
 }
 
+/** Management preview fidelity warning (shape differs from dynamic API `FidelityWarning`). */
 export interface FidelityWarning {
   code: string
   messageKey: string
@@ -337,6 +332,7 @@ export interface FidelityWarning {
   viewed?: boolean
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management preview record). */
 export interface PreviewRecord {
   previewId: string
   templateId: string
@@ -351,6 +347,7 @@ export interface PreviewRecord {
   createdAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management preview run summary). */
 export interface PreviewRunSummary {
   previewId: string
   templateVersionId: string
@@ -365,69 +362,41 @@ export interface PreviewRunSummary {
   pdfAvailable: boolean
 }
 
-export type RuleValidationStatus =
-  | 'VALID'
-  | 'MISSING_VARIABLE'
-  | 'MISSING_ANCHOR'
-  | 'INVALID_BRANCH_REFERENCE'
-  | 'MALFORMED_RULE'
+export type RuleValidationStatus = Schema<'RuleValidationStatus'>
 
-export interface CompositionRuleInput {
-  ruleId: string
-  conditionExpression: string
-  targetAnchorId: string
-  trueBranchRuleId?: string
-  falseBranchRuleId?: string
-}
+export type CompositionRuleInput = Schema<'TemplateRuleValidationItemRequest'>
 
-export interface RuleValidationItem {
-  ruleId: string
-  conditionExpression: string
-  targetAnchorId: string
-  trueBranchRuleId: string | null
-  falseBranchRuleId: string | null
-  status: RuleValidationStatus
-}
+export type RuleValidationItem = Schema<'TemplateRuleValidationItemResponse'>
 
-export interface RuleValidationSummary {
-  blocking: boolean
-  totalRules: number
-  validCount: number
-  missingVariableCount: number
-  missingAnchorCount: number
-  invalidBranchReferenceCount: number
-  malformedRuleCount: number
-}
+export type RuleValidationSummary = Schema<'TemplateRuleValidationSummary'>
 
-export interface RuleValidationResult {
-  validated: boolean
-  rules: RuleValidationItem[]
+export type RuleValidationResult = Schema<'TemplateRuleValidationResponse'> & {
   summary: RuleValidationSummary
 }
 
-export interface BindingValidationSummary {
-  blocking: boolean
-  totalBindings: number
-  validCount: number
-  missingAnchorCount: number
-  duplicateBindingCount: number
-  incompatibleContentTypeCount: number
-}
+export type BindingValidationSummary = Schema<'TemplateBindingValidationSummary'>
 
+/**
+ * Management binding validation response shape; OpenAPI `TemplateBindingValidationResponse`
+ * uses item `status` while management UI maps to `AnchorBinding.validationStatus`.
+ */
 export interface BindingValidationResult {
   bindings: AnchorBinding[]
   summary: BindingValidationSummary
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management test generate). */
 export interface TestGeneratePayload {
   variables?: Record<string, unknown>
   testDataSetId?: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management batch test generate). */
 export interface BatchTestGeneratePayload {
   testDataSetIds: string[]
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management batch test sample). */
 export interface BatchTestSampleResult {
   testDataSetId: string
   previewId: string
@@ -436,6 +405,7 @@ export interface BatchTestSampleResult {
   blockerCount: number
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management batch test summary). */
 export interface BatchTestSummary {
   batchTestRunId: string
   templateId: string
@@ -448,6 +418,7 @@ export interface BatchTestSummary {
   createdAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management coverage). */
 export interface CoverageDimension {
   dimensionCode: string
   totalCount: number
@@ -457,6 +428,7 @@ export interface CoverageDimension {
   belowThreshold: boolean
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management coverage). */
 export interface CoverageThreshold {
   scopeType: string
   groupCode: string | null
@@ -465,6 +437,7 @@ export interface CoverageThreshold {
   minAnchorBindingPct: number
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management coverage). */
 export interface CoverageSummary {
   templateId: string
   aggregatePercentage: number
@@ -474,6 +447,7 @@ export interface CoverageSummary {
   appliedThreshold: CoverageThreshold
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management test data set). */
 export interface TestDataSet {
   testDataSetId: string
   externalId?: string
@@ -491,6 +465,7 @@ export interface TestDataSet {
   updatedAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management test data set upsert). */
 export interface UpsertTestDataSetPayload {
   name: string
   description?: string
@@ -500,6 +475,7 @@ export interface UpsertTestDataSetPayload {
   coverageTags?: string[]
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management API policy read model). */
 export interface ApiPolicy {
   templateId: string
   policyVersion: number
@@ -519,6 +495,7 @@ export interface ApiPolicy {
   updatedAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management invocation history). */
 export interface ManagementInvocationSummary {
   invocationId: string
   invocationKind: string
@@ -530,6 +507,7 @@ export interface ManagementInvocationSummary {
   accessAccountSummary: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management API policy upsert). */
 export interface UpsertApiPolicyPayload {
   allowedAdGroups: string[]
   defaultRouteReleaseVersion: string
@@ -541,6 +519,7 @@ export interface UpsertApiPolicyPayload {
   pdfEncryptionEnabled: boolean
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management API policy impact preview). */
 export interface ApiPolicyImpactPreview {
   changedAreas: string[]
   blocking: boolean
@@ -553,6 +532,7 @@ export interface ApiPolicyImpactPreview {
   idempotencyImpactSummary: string | null
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management API credential). */
 export interface ApiCredentialSummary {
   credentialId: string
   externalId: string
@@ -561,6 +541,7 @@ export interface ApiCredentialSummary {
   revokedAt: string | null
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management API credential create). */
 export interface ApiCredentialCreated {
   credentialId: string
   externalId: string
@@ -569,81 +550,49 @@ export interface ApiCredentialCreated {
   createdAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management template delete). */
 export interface DeleteTemplatePayload {
   reason: string
 }
 
-export type TemplateImportConflictPolicy = 'KEEP_TEMPLATE_ID' | 'REJECT_IMPORT'
+export type TemplateImportConflictPolicy = Schema<'TemplateImportConflictPolicy'>
 
-export interface TemplateExportMetadata {
-  templateId: string
-  externalId: string
-  groupCode: string
-  name: string
-  description: string | null
-  masterId: string
-  lifecycleStatus: TemplateLifecycleStatus
-  releaseVersion: string | null
-  devVersionId: string
-  devVersionNumber: number
-  exportedAt: string
-}
+export type TemplateExportMetadata = Schema<'TemplateExportMetadataView'>
 
-export interface TemplateContentModuleReference {
-  referenceKey: string
-  moduleId: string
-  semanticVersion: string
-  locked: boolean
-}
+export type TemplateContentModuleReference = Schema<'TemplateExportContentModuleReferenceView'>
 
+/** Not yet modeled in `openapi-v1.yaml` (management content module reference upsert). */
 export interface UpsertContentModuleReferencePayload {
   referenceKey: string
   moduleId: string
   semanticVersion: string
 }
 
-export interface TemplateExportBundle {
-  format: string
-  metadata: TemplateExportMetadata
-  variables: VariableSchema[]
-  bindings: AnchorBinding[]
-  rules: CompositionRule[]
-  contentModuleReferences: TemplateContentModuleReference[]
-  policySnapshot: ApiPolicy | null
-}
+export type TemplateExportBundle = Schema<'TemplateExportBundleView'>
 
-export interface TemplateExportResult {
-  format: string
-  bundle: TemplateExportBundle
-}
+export type TemplateExportResult = Schema<'TemplateExportResult'>
 
-export interface TemplateImportSummary {
-  resolvedTemplateId: string
-  newDevelopmentVersion: number
-  importBatchId: string
-}
+export type TemplateImportSummary = Schema<'TemplateImportSummaryView'>
 
-export interface ImportTemplatePayload {
-  masterId: string
-  bundle: TemplateExportBundle
-  importConflictPolicy?: TemplateImportConflictPolicy
-}
+export type ImportTemplatePayload = Schema<'ImportTemplateRequest'>
 
-export interface TemplateImportResult {
-  importSummary: TemplateImportSummary
+export type TemplateImportResult = Omit<Schema<'TemplateImportResult'>, 'template'> & {
   template: TemplateDetail
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management async preview stream). */
 export interface AsyncPreviewStarted {
   previewId: string
   streamUrl: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management batch test stream). */
 export interface BatchTestStarted {
   runId: string
   streamUrl: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management submit-for-test eligibility). */
 export interface SubmitTestEligibility {
   eligible: boolean
   hasValidTestResult: boolean
@@ -656,6 +605,7 @@ export interface SubmitTestEligibility {
 
 export type BatchTestRunStatus = 'RUNNING' | 'COMPLETED' | 'FAILED' | 'INVALIDATED'
 
+/** Not yet modeled in `openapi-v1.yaml` (management batch test run history). */
 export interface BatchTestRunSummary {
   runId: string
   createdAt: string

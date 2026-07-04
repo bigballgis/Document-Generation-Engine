@@ -2,7 +2,7 @@ import type { TemplateLifecycleStatus, TemplateSummary } from '@/types/template'
 
 export interface TemplateApproverJourneyContext {
   lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION'
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
   submissionReviewedConfirmed?: boolean
   keyEvidenceViewedConfirmed?: boolean
 }
@@ -26,7 +26,7 @@ const EMPTY_GUIDANCE = 'journey.roles.TEMPLATE_APPROVER.empty.guidance'
 
 export function isAwaitingApproverDecision(template: {
   lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION'
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
 }): boolean {
   return (
     template.lifecycleStatus === 'APPROVAL' && template.approvalSubState === 'PENDING_DECISION'

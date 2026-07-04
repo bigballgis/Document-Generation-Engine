@@ -85,7 +85,7 @@ const workflowMaster = computed<MasterDocumentDetail | null>(() => {
     ...master.value,
     status: revisionLine.value.status,
     originalFilename: revisionLine.value.originalFilename,
-    changeSummary: revisionLine.value.changeSummary,
+    changeSummary: revisionLine.value.changeSummary ?? null,
     anchors: revisionLine.value.anchors,
     reviewHistory: revisionLine.value.reviewHistory,
     updatedAt: revisionLine.value.updatedAt,

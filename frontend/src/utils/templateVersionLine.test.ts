@@ -9,9 +9,11 @@ describe('templateVersionLine', () => {
         devVersionNumber: 1,
         releaseVersion: null,
         lifecycleStatus: 'DRAFT',
+        lineKind: 'IN_FLIGHT',
         updatedAt: '2026-06-23T10:00:00Z',
         updatedBy: '10000003',
         defaultRouteTarget: null,
+        cloneable: false,
       }),
     ).toBe(true)
   })
@@ -24,9 +26,11 @@ describe('templateVersionLine', () => {
         devVersionNumber: 1,
         releaseVersion: '1.0.0',
         lifecycleStatus: 'PUBLISHED',
+        lineKind: 'PUBLISHED',
         updatedAt: '2026-06-23T10:00:00Z',
         updatedBy: '10000003',
         defaultRouteTarget: true,
+        cloneable: true,
       },
     )
 

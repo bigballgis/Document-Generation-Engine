@@ -78,7 +78,7 @@ const variableCatalog = computed(() => {
       variableType: 'TEXT',
       required: false,
       defaultValue: null,
-      enumValues: [],
+      enumValues: null,
       description: null,
     }),
   )

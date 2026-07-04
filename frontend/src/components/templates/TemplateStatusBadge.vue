@@ -5,7 +5,7 @@ import type { TemplateLifecycleStatus } from '@/types/template'
 
 const props = defineProps<{
   status: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION'
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
 }>()
 
 const { t } = useI18n()

@@ -129,6 +129,8 @@ describe('contentModules API', () => {
         defaultRouteAffected: false,
         recentCallSummary: 'none',
         remediationHint: 'none',
+        templateStopRequired: false,
+        releaseStopRequired: false,
       },
     })
 
@@ -136,6 +138,6 @@ describe('contentModules API', () => {
       '/content-modules/MOD-LOAN-DISCLOSURE/lifecycle/operation/apply',
       expect.objectContaining({ operationType: 'STOP_USE', secondConfirmation: true }),
     )
-    expect(result.snapshot.state).toBe('STOPPED')
+    expect(result.snapshot?.state).toBe('STOPPED')
   })
 })

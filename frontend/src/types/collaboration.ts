@@ -1,52 +1,18 @@
-export type CollaborationWorkItemQueue =
-  | 'TEST'
-  | 'APPROVAL'
-  | 'REMEDIATION'
-  | 'PENDING_RELEASE'
-  | 'ESCALATION'
+import type { Schema } from '@/types/openapi'
 
-export type CollaborationWorkItemTriggerType =
-  | 'SUBMIT_FOR_TEST'
-  | 'TEST_FAILURE_OR_RETURN_TO_DRAFT'
-  | 'SUBMIT_FOR_APPROVAL'
-  | 'APPROVAL_FAILURE_OR_RETURN_TO_DRAFT'
-  | 'APPROVAL_PENDING_RELEASE'
-  | 'TIMEOUT_ESCALATION'
+export type CollaborationWorkItemQueue = Schema<'CollaborationWorkItemQueue'>
 
-export type CollaborationTimeoutScopeType = 'GLOBAL' | 'GROUP'
+export type CollaborationWorkItemTriggerType = Schema<'CollaborationWorkItemTriggerType'>
 
-export interface CollaborationWorkItemSummary {
-  workItemId: string
-  templateId: string
-  templateName: string
-  groupCode: string
-  queue: CollaborationWorkItemQueue
-  triggerType: CollaborationWorkItemTriggerType
-  submitterUserId: string
-  summaryText: string
-  createdAt: string
-  ageSeconds: number
-}
+export type CollaborationTimeoutScopeType = Schema<'CollaborationTimeoutScopeType'>
 
-export interface CollaborationTimeoutConfig {
-  scopeType: CollaborationTimeoutScopeType
-  groupCode: string | null
-  testThresholdHours: number
-  approvalThresholdHours: number
-  pendingReleaseThresholdHours: number
-  remediationThresholdHours: number
-  updatedAt: string
-}
+export type CollaborationWorkItemSummary = Schema<'CollaborationWorkItemSummaryView'>
 
-export interface UpsertCollaborationTimeoutConfigPayload {
-  scopeType: CollaborationTimeoutScopeType
-  groupCode: string | null
-  testThresholdHours: number
-  approvalThresholdHours: number
-  pendingReleaseThresholdHours: number
-  remediationThresholdHours: number
-}
+export type CollaborationTimeoutConfig = Schema<'CollaborationTimeoutConfigView'>
 
+export type UpsertCollaborationTimeoutConfigPayload = Schema<'UpsertCollaborationTimeoutConfigRequest'>
+
+/** Not yet modeled in `openapi-v1.yaml` (client-side query params). */
 export interface ListCollaborationWorkItemsParams {
   groupCode?: string
   queue?: CollaborationWorkItemQueue

@@ -1,128 +1,42 @@
-export type ContentModuleReviewState = 'DRAFT' | 'SUBMITTED' | 'APPROVED'
+import type { Schema } from '@/types/openapi'
 
-export type ContentModuleLifecycleState = 'ACTIVE' | 'STOPPED' | 'DEPRECATED'
+export type ContentModuleReviewState = Schema<'ContentModuleVersionView'>['reviewState']
 
-export type ContentModuleReviewOperation =
-  | 'SUBMIT_FOR_REVIEW'
-  | 'APPROVE_REVIEW'
-  | 'REJECT_REVIEW'
+export type ContentModuleLifecycleState = NonNullable<
+  Schema<'ContentModuleVersionView'>['lifecycleState']
+>
 
-export type ContentModuleLifecycleOperation = 'STOP_USE' | 'RECOVER' | 'DEPRECATE'
+export type ContentModuleReviewOperation = Schema<'ContentModuleReviewTransitionRequest'>['operation']
+
+export type ContentModuleLifecycleOperation =
+  Schema<'ContentModuleLifecycleOperationApplyRequest'>['operationType']
 
 export type ContentModuleGovernanceActorRole =
-  | 'GLOBAL_ADMIN'
-  | 'GROUP_ADMIN'
-  | 'APPROVER'
-  | 'TEMPLATE_AUTHOR'
-  | 'MASTER_DESIGNER'
+  Schema<'ContentModuleReviewTransitionRequest'>['actorRole']
 
-export interface ContentModuleVersion {
-  versionId: string
-  semanticVersion: string
-  reviewState: ContentModuleReviewState
-  lifecycleState?: ContentModuleLifecycleState
-  /** Present for authoring roles when loading draft versions for edit. */
-  contentStructureJson?: string | null
-  changeDescription?: string | null
-  createdAt: string
-  updatedAt: string
-}
+export type ContentModuleVersion = Schema<'ContentModuleVersionView'>
 
-export interface ContentModuleSummary {
-  moduleId: string
-  moduleCode: string
-  groupCode: string
-  name: string
-  description?: string | null
-  sharedGroupCodes?: string[]
-  createdAt: string
-  updatedAt: string
-}
+export type ContentModuleSummary = Schema<'ContentModuleSummaryView'>
 
-export interface ContentModuleDetail {
-  moduleId: string
-  moduleCode: string
-  groupCode: string
-  name: string
-  description?: string | null
-  sharedGroupCodes?: string[]
-  versions: ContentModuleVersion[]
-}
+export type ContentModuleDetail = Schema<'ContentModuleDetailView'>
 
-export interface CreateContentModulePayload {
-  moduleCode: string
-  groupCode: string
-  name: string
-  description?: string
-  sharedGroupCodes?: string[]
-  semanticVersion: string
-  contentStructureJson: string
-  changeDescription?: string
-}
+export type CreateContentModulePayload = Schema<'CreateContentModuleRequest'>
 
-export interface CreateContentModuleVersionPayload {
-  semanticVersion: string
-  contentStructureJson: string
-  changeDescription?: string
-}
+export type CreateContentModuleVersionPayload = Schema<'CreateContentModuleVersionRequest'>
 
-export interface UpdateContentModuleVersionPayload {
-  contentStructureJson: string
-  changeDescription?: string
-}
+export type UpdateContentModuleVersionPayload = Schema<'UpdateContentModuleVersionRequest'>
 
-export interface ContentModuleReviewTransitionPayload {
-  operation: ContentModuleReviewOperation
-  actorRole: ContentModuleGovernanceActorRole
-  actorId: string
-  changeDescription?: string
-  rejectionReason?: string
-}
+export type ContentModuleReviewTransitionPayload = Schema<'ContentModuleReviewTransitionRequest'>
 
-export interface ContentModuleReviewSnapshot {
-  moduleId: string
-  state: ContentModuleReviewState
-  updatedAt: string
-  updatedBy: string
-  rejectionReason?: string | null
-}
+export type ContentModuleReviewSnapshot = Schema<'ContentModuleReviewSnapshot'>
 
-export interface ContentModuleReviewTransitionResult {
-  applied: boolean
-  errorCode?: string | null
-  errorMessage?: string | null
-  snapshot: ContentModuleReviewSnapshot
-}
+export type ContentModuleReviewTransitionResult = Schema<'ContentModuleReviewTransitionResult'>
 
-export interface ContentModuleLifecycleImpactSummary {
-  referenceTemplateCount: number
-  referenceTemplateListHint: string
-  impactedReleaseVersionsHint: string
-  defaultRouteAffected: boolean
-  recentCallSummary: string
-  remediationHint: string
-}
+export type ContentModuleLifecycleImpactSummary = Schema<'ContentModuleLifecycleImpactSummary'>
 
-export interface ContentModuleLifecycleOperationPayload {
-  operationType: ContentModuleLifecycleOperation
-  actorRole: ContentModuleGovernanceActorRole
-  actorId: string
-  impactSummaryViewed: boolean
-  secondConfirmation: boolean
-  impactSummary?: ContentModuleLifecycleImpactSummary
-}
+export type ContentModuleLifecycleOperationPayload =
+  Schema<'ContentModuleLifecycleOperationApplyRequest'>
 
-export interface ContentModuleLifecycleSnapshot {
-  moduleId: string
-  state: ContentModuleLifecycleState
-  updatedAt: string
-  updatedBy: string
-}
+export type ContentModuleLifecycleSnapshot = Schema<'ContentModuleLifecycleSnapshot'>
 
-export interface ContentModuleLifecycleOperationResult {
-  applied: boolean
-  errorCode?: string | null
-  errorMessage?: string | null
-  snapshot: ContentModuleLifecycleSnapshot
-  impactSummary?: ContentModuleLifecycleImpactSummary
-}
+export type ContentModuleLifecycleOperationResult = Schema<'ContentModuleLifecycleOperationResult'>

@@ -1,9 +1,13 @@
+import type { Schema } from '@/types/openapi'
+
+/** Management API field errors may include reasons beyond the dynamic API OpenAPI enum. */
 export interface ApiFieldError {
   field: string
   reason: string
   message: string
 }
 
+/** Management API errors include codes beyond the dynamic API OpenAPI enum. */
 export interface ApiErrorDetail {
   code: string
   category: string
@@ -13,10 +17,8 @@ export interface ApiErrorDetail {
   fieldErrors?: ApiFieldError[]
 }
 
-export interface ApiMetadata {
-  auditId?: string
-  traceId?: string
-}
+/** Envelope metadata; management responses may omit dynamic-API-only fields. */
+export type ApiMetadata = Partial<Schema<'Metadata'>>
 
 export interface ApiEnvelope<T> {
   metadata: ApiMetadata
@@ -24,6 +26,7 @@ export interface ApiEnvelope<T> {
   error?: ApiErrorDetail
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management auth session). */
 export interface ManagementCapabilities {
   manageMasters: boolean
   reviewMasters: boolean
@@ -44,6 +47,7 @@ export interface ManagementCapabilities {
   readAudit: boolean
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management auth session). */
 export interface ManagementSession {
   username: string
   displayName: string
@@ -57,6 +61,7 @@ export interface ManagementSession {
   expiresAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management auth login). */
 export interface LoginResult {
   accessToken: string
   tokenType: string

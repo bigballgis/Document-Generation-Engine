@@ -70,7 +70,7 @@ describe('TemplateExportActions', () => {
         bindings: [],
         rules: [],
         contentModuleReferences: [],
-        policySnapshot: null,
+        policySnapshot: undefined,
       },
     })
 

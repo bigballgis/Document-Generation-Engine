@@ -474,7 +474,7 @@ async function handleVersionLinesChanged() {
       v-if="template"
       v-model="metadataEditOpen"
       :initial-name="template.name"
-      :initial-description="template.description"
+      :initial-description="template.description ?? null"
       :loading="templatesStore.submitting"
       @submit="handleMetadataUpdate"
     />

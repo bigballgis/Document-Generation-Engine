@@ -28,6 +28,7 @@ const inFlightLine = {
   updatedAt: '2026-06-24T10:00:00Z',
   updatedBy: '10000003',
   defaultRouteTarget: null,
+  cloneable: false,
 }
 
 const publishedLine = {

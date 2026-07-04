@@ -1,3 +1,5 @@
+import type { Schema } from '@/types/openapi'
+
 export const MANAGEMENT_ROLE_VALUES = [
   'GLOBAL_ADMIN',
   'GROUP_ADMIN',
@@ -12,6 +14,7 @@ export type ManagementRole = (typeof MANAGEMENT_ROLE_VALUES)[number]
 
 export type GroupDimension = 'BUSINESS_LINE' | 'DEPARTMENT'
 
+/** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface ManagementUserView {
   id: string
   username: string
@@ -25,6 +28,7 @@ export interface ManagementUserView {
   updatedAt: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface BusinessGroupView {
   id: string
   groupCode: string
@@ -35,14 +39,13 @@ export interface BusinessGroupView {
   updatedAt: string
 }
 
-export interface PageView<T> {
+type OpenApiPageView = Schema<'PageView'>
+
+export interface PageView<T> extends Omit<OpenApiPageView, 'content'> {
   content: T[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface CreateUserRequest {
   username: string
   displayName: string
@@ -52,6 +55,7 @@ export interface CreateUserRequest {
   authorizedGroupCodes: string[]
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface UpdateUserRequest {
   displayName: string
   email: string
@@ -59,20 +63,24 @@ export interface UpdateUserRequest {
   authorizedGroupCodes: string[]
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface ResetPasswordRequest {
   newPassword: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface CreateGroupRequest {
   groupCode: string
   displayName: string
   dimension: GroupDimension
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface UpdateGroupRequest {
   displayName: string
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface UserQuery {
   group?: string
   role?: string
@@ -80,6 +88,7 @@ export interface UserQuery {
   size?: number
 }
 
+/** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface GroupQuery {
   page?: number
   size?: number

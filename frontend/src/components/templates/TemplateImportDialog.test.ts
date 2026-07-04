@@ -112,7 +112,7 @@ describe('TemplateImportDialog', () => {
       bindings: [],
       rules: [],
       contentModuleReferences: [],
-      policySnapshot: null,
+      policySnapshot: undefined,
     })
 
     const { wrapper, store } = mountDialog()

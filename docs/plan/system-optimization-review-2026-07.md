@@ -71,7 +71,7 @@ rendering-adjacent structural refactors until P22 lands.
 | SOR-2 | Production correctness & security seams | P0/P1 | 9 | Done | After SOR-1 |
 | SOR-3 | Performance & scalability | P1 | 6 | Done | P01–P06 Done (2026-07-04) |
 | SOR-4 | Frontend structural health | P1/P2 | 7 | Done | F01–F07 Done (2026-07-04); F04 panel store consolidation |
-| SOR-5 | Contract & i18n integrity | P1 | 5 | In Progress | K01/K02/K04/K05 Done; K03 remain |
+| SOR-5 | Contract & i18n integrity | P1 | 5 | Done | K01–K05 Done (2026-07-04); openapi-typescript codegen + parity test |
 | SOR-6 | Architecture & code health | P2 | 6 | Not Started | A02/A03 blocked until P22 closes |
 | SOR-7 | Test depth & operational readiness | P2 | 10 | In Progress | O01/O02/O03/O05/O06 Done; T01 Done; T02–T03 remain |
 
@@ -158,7 +158,7 @@ script-only (PowerShell: `scripts/p0-gate.ps1`, `scripts/release-gate.ps1`) and 
 | --- | --- | --- | --- | --- | --- | --- |
 | SOR-K01 | High | Frontend `api.error` catalog parity + automated parity test | Backend `messages_en.properties` has **145** `api.error.*` keys; frontend `apiErrorEn.ts` missing `contentModule.*`, `collaboration.*`, `rendering.preview*`, `apimgmt.retention*`, `runtime.invocation*` families — users see raw fallbacks | Catalog parity restored; automated test diffs frontend catalog against the backend bundle | Done | OPT-G7 successor |
 | SOR-K02 | Medium | Locale-formatter bypass sweep | Raw `toLocaleString()` in `TemplateTestDataSetPanel.vue:40,309`, `TemplateReleaseVersionHistoryPanel.vue:57,317`, `MasterRevisionDetailView.vue:370` | All dates/numbers via shared locale formatters; include aria-label pass | Done | OPT-G6 residual |
-| SOR-K03 | Medium | OpenAPI codegen for API DTO types | `frontend/src/types/template.ts` — **672** lines hand-written; no codegen from `docs/api/openapi-v1.yaml`; drift risk | Generation introduced for DTOs; hand-written drift eliminated | Not Started | Open question (§12: tool choice) |
+| SOR-K03 | Medium | OpenAPI codegen for API DTO types | `frontend/src/types/template.ts` — **672** lines hand-written; no codegen from `docs/api/openapi-v1.yaml`; drift risk | Generation introduced for DTOs; hand-written drift eliminated | Done | ADR-0046; `pnpm -C frontend codegen:openapi`; parity test |
 | SOR-K04 | Medium | Deepen OpenAPI contract test | `OpenApiContractTest.java:15-56` asserts only operationId set membership | Envelope shape / enums / headers snapshot tests | Done | — |
 | SOR-K05 | Medium | Capability-based client guards | `stores/session.ts:30-32` — client role checks rely on `visibleRoutes` only | Router meta `requiredCapability` + action-button capability guards | Done | = OPT-G5 successor |
 
@@ -243,7 +243,7 @@ maintainer/user decision before or during implementation — do not promote to c
 | Q3 | Artifact encryption at rest: MinIO SSE/KMS adoption and key management ownership | SOR-S09 (ADR) |
 | Q4 | Horizontal-scale timeline: when >1 backend replica is planned (drives SOR-S07 priority) | SOR-S07 |
 | Q5 | Readiness probe scope: DB-only vs include Redis/MinIO/Kafka | SOR-O06 |
-| Q6 | OpenAPI codegen tool choice and generated-code ownership conventions | SOR-K03 |
+| Q6 | OpenAPI codegen tool choice and generated-code ownership conventions | SOR-K03 | **Resolved 2026-07-04:** **`openapi-typescript`** (types-only); committed output at `frontend/src/types/generated/openapi-v1.ts`; regen via `pnpm -C frontend codegen:openapi`; domain modules wrap via `Schema<T>` in `frontend/src/types/openapi.ts`; Vitest parity test regen-diff gate. ADR [0046](../adr/technology-stack/0046-frontend-openapi-typescript-codegen.md). |
 | Q7 | Sync PDF path end-state: async 202+poll vs isolated-capacity sync (interacts with CD-HARD-T02) | SOR-P03 |
 
 ---
