@@ -11,6 +11,8 @@ import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.domain.ManagementRole;
 import com.bank.docgen.authorization.management.persistence.ManagementUserEntity;
 import com.bank.docgen.authorization.management.persistence.ManagementUserRepository;
+import com.bank.docgen.authorization.management.session.SessionProperties;
+import com.bank.docgen.authorization.management.session.SessionRevocationStore;
 import com.bank.docgen.sharedkernel.security.JwtTokenService;
 import com.bank.docgen.sharedkernel.security.PasswordHashService;
 import java.time.Instant;
@@ -34,6 +36,8 @@ class ManagementAuthServiceTest {
     private JwtTokenService jwtTokenService;
     @Mock
     private SecurityAuditSummaryService securityAuditSummaryService;
+    @Mock
+    private SessionRevocationStore sessionRevocationStore;
 
     private ManagementAuthService service;
 
@@ -46,7 +50,9 @@ class ManagementAuthServiceTest {
                 jwtTokenService,
                 new RouteVisibilityService(),
                 new ManagementCapabilitiesService(groupAccessService),
-                securityAuditSummaryService
+                securityAuditSummaryService,
+                sessionRevocationStore,
+                new SessionProperties("PT8H", "memory")
         );
     }
 

@@ -36,6 +36,25 @@ public class SecurityAuditSummaryService {
         );
     }
 
+    public void recordSessionRenewal(String username, String auditId, String traceId) {
+        LOGGER.info(
+                "security.audit.session.renewal username={} auditId={} traceId={}",
+                username,
+                auditId,
+                traceId
+        );
+    }
+
+    public void recordSessionRenewalDenied(String username, String reason, String auditId, String traceId) {
+        LOGGER.warn(
+                "security.audit.session.renewal.denied username={} reason={} auditId={} traceId={}",
+                username,
+                reason,
+                auditId,
+                traceId
+        );
+    }
+
     public void recordRouteAccessDenied(String username, String routeKey, String auditId, String traceId) {
         LOGGER.warn(
                 "security.audit.route.denied username={} routeKey={} auditId={} traceId={}",

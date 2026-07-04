@@ -12,6 +12,14 @@ export async function login(username: string, password: string): Promise<LoginRe
   return response.data.result
 }
 
+export async function renewSession(): Promise<LoginResult> {
+  const response = await http.post<ApiEnvelope<LoginResult>>('/auth/renew')
+  if (!response.data.result) {
+    throw new Error('Renew response missing result')
+  }
+  return response.data.result
+}
+
 export async function fetchSession(): Promise<ManagementSession> {
   const response = await http.get<ApiEnvelope<ManagementSession>>('/auth/session')
   if (!response.data.result) {

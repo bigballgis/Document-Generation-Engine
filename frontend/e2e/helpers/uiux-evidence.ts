@@ -485,6 +485,35 @@ export async function captureP12TemplateTestingOverhaulLocatorScreenshot(
   return filename
 }
 
+export const LRP_B6_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-B6')
+export const LRP_B6_SCREENSHOT_DIR = path.join(LRP_B6_EVIDENCE_ROOT, 'screenshots')
+export const LRP_B6_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureLrpB6EvidenceDirs(): void {
+  fs.mkdirSync(LRP_B6_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function lrpB6ScreenshotPath(filename: string): string {
+  return path.join(LRP_B6_SCREENSHOT_DIR, filename)
+}
+
+export async function captureLrpB6Screenshot(page: Page, filename: string): Promise<string> {
+  ensureLrpB6EvidenceDirs()
+  const target = lrpB6ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureLrpB6LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureLrpB6EvidenceDirs()
+  const target = lrpB6ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
 export const P12_API_PACKAGE_ACCESS_EVIDENCE_ROOT = path.join(
   E2E_DIR,
   '..',

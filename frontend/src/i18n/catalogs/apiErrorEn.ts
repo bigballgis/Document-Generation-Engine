@@ -1,7 +1,10 @@
 export const apiErrorEn = {
   "authentication": {
     "invalidCredentials": "Invalid credentials.",
-    "sessionExpired": "Your session has expired. Please sign in again."
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "sessionAbsoluteLimitReached": "Your sign-in session has reached its maximum duration. Please sign in again.",
+    "sessionRevoked": "Your session is no longer valid. Please sign in again.",
+    "sessionValidationUnavailable": "We are unable to verify your session right now. Please try again later."
   },
   "authorization": {
     "accessDenied": "You do not have permission to perform this action.",

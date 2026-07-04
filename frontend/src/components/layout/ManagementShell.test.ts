@@ -10,12 +10,19 @@ import { useSessionStore } from '@/stores/session'
 import type { ManagementCapabilities } from '@/types/session'
 
 const routerPush = vi.fn()
-const routeState = { path: '/audit', query: {} as Record<string, string>, hash: '' }
+const routeState = {
+  path: '/audit',
+  fullPath: '/audit',
+  query: {} as Record<string, string>,
+  hash: '',
+}
 
 vi.mock('vue-router', () => ({
   useRoute: () => routeState,
   useRouter: () => ({ push: routerPush }),
 }))
+
+vi.mock('@/api/auth')
 
 const globalAdminCapabilities: ManagementCapabilities = {
   manageMasters: true,
@@ -57,13 +64,20 @@ const testerCapabilities: ManagementCapabilities = {
   readAudit: false,
 }
 
-function mountShell(session: NonNullable<ReturnType<typeof useSessionStore>['session']>) {
+function mountShell(
+  session: NonNullable<ReturnType<typeof useSessionStore>['session']>,
+  storeOverrides: Partial<{
+    accessTokenExpiresAt: string | null
+    sessionAbsoluteDeadline: string | null
+  }> = {},
+) {
   const pinia = createPinia()
   setActivePinia(pinia)
   const sessionStore = useSessionStore()
   sessionStore.$patch({
     accessToken: 'token',
     session,
+    ...storeOverrides,
   })
 
   const i18n = createI18n({
@@ -80,11 +94,27 @@ function mountShell(session: NonNullable<ReturnType<typeof useSessionStore>['ses
   })
 }
 
+function globalAdminSession(): NonNullable<ReturnType<typeof useSessionStore>['session']> {
+  return {
+    username: '10000001',
+    displayName: 'Global Admin',
+    email: 'admin@example.com',
+    authSource: 'LOCAL',
+    roles: ['GLOBAL_ADMIN'],
+    authorizedGroupCodes: ['*'],
+    defaultRoute: ROUTE_KEYS.dashboardHome,
+    visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.auditConsole],
+    capabilities: globalAdminCapabilities,
+    expiresAt: new Date(Date.now() + 30 * 60_000).toISOString(),
+  }
+}
+
 describe('ManagementShell', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     routerPush.mockReset()
     routeState.path = '/audit'
+    routeState.fullPath = '/audit'
     routeState.query = {}
     routeState.hash = ''
   })
@@ -205,5 +235,49 @@ describe('ManagementShell', () => {
       .findAll('button.nav-item')
       .find((button) => button.text().includes('approval'))
     expect(approvalButton).toBeUndefined()
+  })
+
+  it('shows the session limit reminder when the absolute deadline is near', async () => {
+    const wrapper = mountShell(globalAdminSession(), {
+      accessTokenExpiresAt: new Date(Date.now() + 5 * 60_000).toISOString(),
+      sessionAbsoluteDeadline: new Date(Date.now() + 5 * 60_000).toISOString(),
+    })
+
+    await flushPromises()
+
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Session ending soon')
+    expect(wrapper.text()).toContain('Sign in again')
+  })
+
+  it('hides the session limit reminder while far from the absolute deadline', async () => {
+    const wrapper = mountShell(globalAdminSession(), {
+      accessTokenExpiresAt: new Date(Date.now() + 30 * 60_000).toISOString(),
+      sessionAbsoluteDeadline: new Date(Date.now() + 4 * 3_600_000).toISOString(),
+    })
+
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('Session ending soon')
+  })
+
+  it('reminder action signs out and redirects to login preserving the destination', async () => {
+    const wrapper = mountShell(globalAdminSession(), {
+      accessTokenExpiresAt: new Date(Date.now() + 5 * 60_000).toISOString(),
+      sessionAbsoluteDeadline: new Date(Date.now() + 5 * 60_000).toISOString(),
+    })
+
+    await flushPromises()
+
+    const actionButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Sign in again'))
+    expect(actionButton).toBeDefined()
+
+    await actionButton!.trigger('click')
+    await flushPromises()
+
+    expect(useSessionStore().authenticated).toBe(false)
+    expect(routerPush).toHaveBeenCalledWith({ name: 'login', query: { redirect: '/audit' } })
   })
 })

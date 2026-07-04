@@ -2,6 +2,9 @@ export const apiErrorZhCn = {
   authentication: {
     invalidCredentials: '凭据无效。',
     sessionExpired: '会话已过期，请重新登录。',
+    sessionAbsoluteLimitReached: '您的登录会话已达到最长使用时限，请重新登录。',
+    sessionRevoked: '您的登录状态已失效，请重新登录。',
+    sessionValidationUnavailable: '当前无法核实您的登录状态，请稍后重试。',
   },
   authorization: {
     accessDenied: '您无权执行此操作。',

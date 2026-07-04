@@ -13,6 +13,7 @@ public record ManagementSessionView(
         String defaultRoute,
         List<String> visibleRoutes,
         ManagementCapabilitiesView capabilities,
-        Instant expiresAt
+        Instant expiresAt,
+        Instant absoluteSessionExpiresAt
 ) {
 }

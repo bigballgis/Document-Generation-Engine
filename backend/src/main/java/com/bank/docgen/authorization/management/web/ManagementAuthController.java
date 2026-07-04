@@ -47,8 +47,22 @@ public class ManagementAuthController {
                 auditId,
                 traceId
         );
-        LoginResult result = new LoginResult(loginSession.accessToken(), "Bearer", loginSession.session());
-        return new SuccessEnvelope<>(Metadata.minimal(auditId, traceId), result);
+        return new SuccessEnvelope<>(Metadata.minimal(auditId, traceId), toLoginResult(loginSession));
+    }
+
+    /**
+     * Sliding session renewal (LR-B6): requires a valid, non-revoked management token; answers
+     * with the same shape as login. The presented token's {@code jti} is revoked on success.
+     */
+    @PostMapping("/renew")
+    public SuccessEnvelope<LoginResult> renew(
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest httpRequest
+    ) {
+        String traceId = traceIdProvider.currentOrNew(httpRequest.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        ManagementAuthService.LoginSession renewed = managementAuthService.renew(session, auditId, traceId);
+        return new SuccessEnvelope<>(Metadata.minimal(auditId, traceId), toLoginResult(renewed));
     }
 
     @PostMapping("/logout")
@@ -71,5 +85,15 @@ public class ManagementAuthController {
         String auditId = traceIdProvider.newAuditId();
         ManagementSessionView current = managementAuthService.currentSession(session);
         return new SuccessEnvelope<>(Metadata.minimal(auditId, traceId), current);
+    }
+
+    private static LoginResult toLoginResult(ManagementAuthService.LoginSession loginSession) {
+        return new LoginResult(
+                loginSession.accessToken(),
+                "Bearer",
+                loginSession.accessTokenExpiresAt(),
+                loginSession.sessionAbsoluteDeadline(),
+                loginSession.session()
+        );
     }
 }
