@@ -2,6 +2,7 @@ global:
   environment: dev
 
 backend:
+  # ADR-0044: v1 launches single backend replica; enable only after scale-out prerequisites (LR-B2/B3/B4) are met.
   replicaCount: 1
   image:
     tag: dev

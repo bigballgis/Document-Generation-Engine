@@ -643,11 +643,11 @@ Each row lists exit criteria; remove from this index when closed.
 | Seam | Current behavior | Exit criteria | Tracked in |
 | --- | --- | --- | --- |
 | AD Group resolution | `ConfigAdGroupResolver` — config-file stub, fail-closed | Production LDAP/AD adapter + integration tests | E05-T06, P6 |
-| Async batch transport | Default in-process `@Async`; Kafka optional via `ASYNC_TRANSPORT=kafka` | Production profile uses Kafka + DLT; in-process dev-only documented | P11, M14 |
+| Async batch transport | Default in-process `@Async`; Kafka optional via `ASYNC_TRANSPORT=kafka` | **Accepted-for-v1 in-process per ADR-0044 branch (b)** (2026-07-04); Kafka switch remains optional; dev compose kafka healthcheck + evidence → LR-B4 (In Progress) | P11, M14, LR-B4 |
 | Security forbidden-route audit | Log-only in some paths | Durable security audit event per matrix §13.3 | COR-P06 |
 | QueryDSL / MapStruct / Redisson | QueryDSL audit + MapStruct apimgmt Done (2026-06-25); Lettuce | ADR-0037 opportunistic expansion ongoing | OPT-D3/D4 Done; COR-P05 |
 | Publish gate checklist | Server-side live gate blocks publish on blockers/thresholds | **Done** (2026-06-25; `PublishGateService` + UI checklist + publish summary dialog) | COR-T01, P19-T06 |
-| Runtime rate limit | Process-local Bucket4j; requests without credential headers bypass filter (auth layer rejects later) | Shared Redis limiter or documented fail-closed at filter; ADR 0031 alignment | COR-B10, OPT-F8 |
+| Runtime rate limit | Process-local Bucket4j; pass-through for requests without credential headers **documented as deliberate** (auth layer rejects downstream; LR-B7 2026-07-04 code-comment + ADR-0044 §Deferred ADR-0031) | Shared limiter remains scale-out prerequisite (ADR-0044 #3 — bucket4j-redis per ADR-0031 or gateway enforcement) | COR-B10, OPT-F8, LR-B7 |
 | Workbench vs Dashboard | **Done** — COR-T11 (2026-06-24): workflow + collaboration queues on Dashboard; legacy workbench routes redirect; standalone workbench views removed | COR-T11 decision in `docs/adr/decisions/2026-06-23-batch-b-workflow-defaults.md` | COR-T11 |
 | zh-CN / `api.error` catalog | **Done (2026-06-25)** — en/zh `api.error` + primary journey zh-CN bundles | Residual non-primary keys may en-fallback until touched | P20-T06 Done |
 | P19 verifiability | **Done (2026-06-25)** — T01–T10: batch test, coverage, change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, UI | Residual structured **DOCX write fidelity** tracked under **P22** (not P18) | P19 Done, COR-L03 Done |
@@ -655,7 +655,7 @@ Each row lists exit criteria; remove from this index when closed.
 | Dual page numbering (DOCX/PDF) | Stamp plan + stamper wiring partial (`6f9c76a`); master DOCX section fields incomplete | P22-T03/T04 Done; BDD-005/006 green | P22, CD-PIT-05 |
 | Paste cleaning ↔ binding validation | P18-T07 edit-time only; not in `computeBindingStatus` | Wired to publish gate OR ADR documents edit-time-only scope | P18-T07, CD-HARD-T05 |
 | Service-layer authorization | Route visibility not enforced at API filter | **Documented pattern + contract test (2026-06-24)** — ADR-0001 | COR-P06 |
-| Redisson multi-instance locks | Lettuce cache only | **ADR-0039 evaluation recorded (2026-06-24)**; implement when multi-instance | COR-P05 |
+| Redisson multi-instance locks | Lettuce cache; **ShedLock JDBC mutex on all 3 @Scheduled jobs (LR-B2, 2026-07-04)** | **ADR-0039 evaluation recorded (2026-06-24)**; topology decision **ADR-0044 Accepted** (2026-07-04); Redisson itself still deferred per ADR-0039/0044 — implement when multi-instance | COR-P05, LR-B1, LR-B2 |
 
 ## CDP — Competitiveness Deepening Program (2026-07-04)
 
@@ -671,17 +671,19 @@ Cross-cutting launch-readiness program; **not** a formal phase. Task prefix **`C
 
 ## LRP — Launch Readiness & Deep-Optimization Program (2026-07-03)
 
-Cross-cutting program at the same level as CDP; **not** a formal phase — **P22 remains the sole formal phase In Progress**. Task prefix **`LR-*`** only; do not execute `P22-*`/`CD-*` from LRP. Planning committed in this change set (program + 4 wave detail docs); no `LR-*` implementation has started.
+Cross-cutting program at the same level as CDP; **not** a formal phase — **P22 remains the sole formal phase In Progress**. Task prefix **`LR-*`** only; do not execute `P22-*`/`CD-*` from LRP. Planning committed 2026-07-03 (program + 4 wave detail docs); Wave LR-B implementation started 2026-07-04 (batch 1 evidence below).
 
 | Wave | Scope | Status | Evidence |
 | --- | --- | --- | --- |
 | **LR-A** | Rendering trust chain & file safety (LR-A1…A7) | Not Started | [launch-readiness-program.md](./launch-readiness-program.md) §3; [LRP-A detail](./detail/LRP-A-rendering-trust-hardening.md) |
-| **LR-B** | Multi-instance correctness & session governance (LR-B1…B8) | Not Started | [program §4](./launch-readiness-program.md); [LRP-B detail](./detail/LRP-B-runtime-scaleout-session.md) |
+| **LR-B** | Multi-instance correctness & session governance (LR-B1…B8) | **In Progress** (2026-07-04) | [program §4](./launch-readiness-program.md); [LRP-B detail](./detail/LRP-B-runtime-scaleout-session.md) |
 | **LR-C** | Business usability deepening (LR-C1…C13) | Not Started | [program §5](./launch-readiness-program.md); [LRP-C detail](./detail/LRP-C-usability-deepening.md) |
 | **LR-D** | Ops observability & data lifecycle (LR-D1…D7) | Not Started | [program §6](./launch-readiness-program.md); [LRP-D detail](./detail/LRP-D-ops-observability.md) |
 | **LR-E** | Release readiness gate (LR-E1…E2) | Not Started | [program §7](./launch-readiness-program.md) (no separate detail doc) |
 
-**Seam mapping (LRP tasks → transitional seams above; seams table itself unchanged):**
+**LR-B batch 1 evidence (2026-07-04):** LR-B1/B2/B7 **Done**; LR-B3/B4/B5 In Progress; LR-B6 Blocked; LR-B8 Not Started. Gates: `mvn -B -ntp -f backend/pom.xml verify` — **727** tests BUILD SUCCESS (Failures 0, Errors 0, Skipped 1 — pre-existing Kafka environment skip); Checkstyle/PMD/SpotBugs 0 violations; JaCoCo pass. `helm lint` green for base/dev/staging/prod values (equivalent of `.\scripts\helm-validate.ps1`; no pwsh in environment). Architecture review: two rounds BLOCK → remediated → **PASS-with-suggestions** (agent `7f494a6b`). Key deliverables: ADR-0044 (topology decision, Accepted); `V46__shedlock.sql`; `SchedulerLockConfig` + `@SchedulerLock` on 3 schedulers; `SseResponseHeaders`; `IdempotencyDigestException` hard 500 (`IDEMPOTENCY_DIGEST_FAILED`, retryable, messageKey `api.error.generation.idempotencyDigestFailed`). Outstanding: B3 `frontend/nginx.conf` SSE location + Docker curl smoke; B4 dev compose kafka healthcheck + prod-profile evidence; B5 Docker restart smoke; B6 awaiting user session-policy confirmation; B8 not started; zh-CN key `api.error.generation.idempotencyDigestFailed` absorbed by LR-C11.
+
+**Seam mapping (LRP tasks → transitional seams above; seam rows re-annotated 2026-07-04 by LR-B batch 1):**
 
 - «Async batch transport» → **LR-B4** (close or re-annotate accepted-for-v1 via ADR-0044)
 - «Security forbidden-route audit» → **LR-D7** (durable events; closes seam)

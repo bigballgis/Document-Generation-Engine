@@ -2,7 +2,7 @@
 
 **Program ID:** `LRP`  
 **Created:** 2026-07-03  
-**Status:** **Not Started** (planned 2026-07-03)  
+**Status:** **In Progress** (Wave LR-B activated 2026-07-04)  
 **North star:** Lift the system from **「功能齐全」** to **「生产可靠 + 业务好用」** — absorb the industry's known production pitfalls (rendering/conversion, proxy streaming, multi-instance, session), and maximize functionality + usability **inside the confirmed v1 boundary**, before launch.
 
 **Authoritative entry for lower-tier implementers:** Read this file first, then the wave detail doc for your task ID prefix. LRP task IDs are prefixed **`LR-*`** only.
@@ -93,7 +93,7 @@ From the 2026-07-03 full-repo inventory + industry research. Verify evidence pat
 3. Formal phase accounting is untouched: **P22 remains the sole formal phase In Progress**; LRP wave status lives in this file + [execution-sync-ledger.md](./execution-sync-ledger.md) § LRP.
 4. Tasks marked **BDD: required** may not start implementation until `behavior-spec-author` publishes a `ready` spec in `docs/behavior/`.
 
-**Current wave:** none — program **Not Started** (planned 2026-07-03).
+**Current wave:** **LR-B** (`In Progress` 2026-07-04; activated on user confirmation). Program status: **In Progress**.
 
 ---
 
@@ -119,13 +119,13 @@ From the 2026-07-03 full-repo inventory + industry research. Verify evidence pat
 
 | ID | Owner | Title | Depends | BDD | Maps | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| LR-B1 | doc-keeper + architecture-reviewer | Deployment topology decision ADR-0044 (single vs multi replica) | — | not-applicable | CD-PIT-14; ADR-0039; P15 HPA | Not Started |
-| LR-B2 | backend-engineer | Scheduler distributed mutex (ShedLock JDBC or DB lock) | LR-B1 | not-applicable | CD-PIT-14; new dependency → policy check + ADR | Not Started |
-| LR-B3 | backend-engineer + frontend-engineer | SSE production readiness (heartbeat, headers, nginx SSE location) | — | not-applicable (verified by LR-E1) | CD-PIT-12 | Not Started |
-| LR-B4 | deploy-engineer + backend-engineer | Async transport production topology (Kafka or accepted in-process) | LR-B1 | not-applicable | Ledger seam «Async batch transport» | Not Started |
-| LR-B5 | backend-engineer | Graceful shutdown & drain (server, pools, SSE) | — | not-applicable | §1 finding 7 | Not Started |
-| LR-B6 | backend-engineer + frontend-engineer | Session renewal + revocation (no SSO/OIDC) | User session-policy confirmation | **required** | CD-PIT-13; COR-F03 | Not Started |
-| LR-B7 | backend-engineer | Idempotency digest hard-fail + rate-limit filter fail-closed alignment | — | not-applicable | OPT-E9; COR-B10 residual; ADR-0031 | Not Started |
+| LR-B1 | doc-keeper + architecture-reviewer | Deployment topology decision ADR-0044 (single vs multi replica) | — | not-applicable | CD-PIT-14; ADR-0039; P15 HPA | **Done** (2026-07-04 — ADR-0044 Accepted; Helm values synced; helm lint green; architecture review PASS-with-suggestions) |
+| LR-B2 | backend-engineer | Scheduler distributed mutex (ShedLock JDBC or DB lock) | LR-B1 | not-applicable | CD-PIT-14; new dependency → policy check + ADR | **Done** (2026-07-04 — ShedLock 6.10.0 + V46 + 3 schedulers locked; SchedulerLockAnnotationTest + JdbcTemplateLockProviderIntegrationTest; verify 727 green; intranet SCA checkpoint open via M9) |
+| LR-B3 | backend-engineer + frontend-engineer | SSE production readiness (heartbeat, headers, nginx SSE location) | — | not-applicable (verified by LR-E1) | CD-PIT-12 | **In Progress** (2026-07-04 — backend heartbeat/anti-buffering headers/config-driven timeout + @PreDestroy + tests done; `frontend/nginx.conf` SSE location + Docker curl smoke pending; E2E owned by LR-E1) |
+| LR-B4 | deploy-engineer + backend-engineer | Async transport production topology (Kafka or accepted in-process) | LR-B1 | not-applicable | Ledger seam «Async batch transport» | **In Progress** (2026-07-04 — branch (b) recorded in ADR-0044 + seam re-annotated; dev compose kafka healthcheck + prod-profile evidence pending) |
+| LR-B5 | backend-engineer | Graceful shutdown & drain (server, pools, SSE) | — | not-applicable | §1 finding 7 | **In Progress** (2026-07-04 — graceful shutdown config + executor drain + SSE registry shutdown + GracefulShutdownConfigTest done; Docker restart smoke pending) |
+| LR-B6 | backend-engineer + frontend-engineer | Session renewal + revocation (no SSO/OIDC) | User session-policy confirmation | **required** | CD-PIT-13; COR-F03 | Blocked (awaiting user session-policy confirmation) |
+| LR-B7 | backend-engineer | Idempotency digest hard-fail + rate-limit filter fail-closed alignment | — | not-applicable | OPT-E9; COR-B10 residual; ADR-0031 | **Done** (2026-07-04 — digest hard-fail + filter decision recorded; 3 test classes; verify green) |
 | LR-B8 | deploy-engineer | Prod health & resource limits (compose healthcheck, mem/cpu, JVM) | — | not-applicable | §1 finding 7 | Not Started |
 
 ---
@@ -279,4 +279,4 @@ Every implementer task across LRP MUST include these fields (detail docs follow 
 
 ---
 
-**Next action (when LRP activates):** confirm activation with the user → set **LR-B** `In Progress` in this file + ledger § LRP → delegate **LR-B1** to doc-keeper + architecture-reviewer, and **LR-B3/B5/B8** per detail doc. **Do not** start `P22-*` or `CD-*` from here.
+**Next action (Wave LR-B In Progress; batch 1 landed 2026-07-04 — B1/B2/B7 Done):** close the LR-B3 residual (`frontend/nginx.conf` SSE location + Docker curl smoke), LR-B4 residual (dev compose kafka healthcheck + prod-profile evidence), LR-B5 residual (Docker restart smoke); start **LR-B8**; **LR-B6** stays Blocked until the user confirms the session policy. **Do not** start `P22-*` or `CD-*` from here.

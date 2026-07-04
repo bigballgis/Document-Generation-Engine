@@ -59,6 +59,13 @@ public class RuntimeRateLimitFilter extends OncePerRequestFilter {
         String credentialId = request.getHeader(ApiCredentialAuthenticationFilter.HEADER_CREDENTIAL_ID);
         String accessAccount = request.getHeader(ApiCredentialAuthenticationFilter.HEADER_ACCESS_ACCOUNT);
         if (credentialId == null || credentialId.isBlank() || accessAccount == null || accessAccount.isBlank()) {
+            // LR-B7 recorded decision (ADR-0031 alignment; ledger seam «Runtime rate limit»):
+            // requests without credential headers PASS THROUGH the limiter deliberately —
+            // there is no stable caller identity to bucket, and ApiCredentialAuthenticationFilter
+            // rejects them immediately downstream (401, fail-closed at the auth layer). Buckets
+            // stay reserved for authenticated caller identities. In-process Bucket4j remains
+            // correct under the ADR-0044 v1 single-replica topology; a shared/distributed
+            // limiter is an ADR-0031 follow-up gated on scale-out (ADR-0044 prerequisite #3).
             filterChain.doFilter(request, response);
             return;
         }

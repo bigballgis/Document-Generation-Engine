@@ -2,7 +2,8 @@ global:
   environment: staging
 
 backend:
-  replicaCount: 2
+  # ADR-0044: v1 launches single backend replica; enable only after scale-out prerequisites (LR-B2/B3/B4) are met.
+  replicaCount: 1
   image:
     tag: staging
   resources:
@@ -59,7 +60,9 @@ certificate:
 
 autoscaling:
   backend:
-    enabled: true
+    # ADR-0044: v1 launches single backend replica; enable only after scale-out prerequisites (LR-B2/B3/B4) are met.
+    enabled: false
+    # Tuning fields below are inert while enabled: false (kept for future scaled state).
     minReplicas: 2
     maxReplicas: 8
     customMetric:

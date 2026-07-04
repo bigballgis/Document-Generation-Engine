@@ -173,7 +173,7 @@
 | **Symptom** | With multiple replicas, cleanup/escalation jobs execute repeatedly (duplicate escalation to-dos, racing deletes) |
 | **Root cause** | 3 `@Scheduled` jobs (invocation retention / collaboration escalation / preview temp cleanup) have no distributed mutex; P15 delivered HPA, contradicting ADR-0039's single-instance assumption |
 | **Detection** | Two-instance compose smoke observing duplicate execution logs |
-| **Mitigation** | Topology decision ADR-0044 (LR-B1) + ShedLock-style DB mutex (LR-B2; dependency requires dependency-policy check) |
+| **Mitigation** | Topology decision ADR-0044 (LR-B1) + ShedLock-style DB mutex (LR-B2; dependency requires dependency-policy check) (ADR-0044 Accepted 2026-07-04 — decision convergence; LR-B2 ShedLock landed) |
 | **Owner wave** | **LR-B1 / LR-B2** |
 | **Doc anchor** | [docs/plan/detail/LRP-B-runtime-scaleout-session.md](./LRP-B-runtime-scaleout-session.md) |
 

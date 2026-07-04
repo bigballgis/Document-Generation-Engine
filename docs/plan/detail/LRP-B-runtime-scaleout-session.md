@@ -1,7 +1,7 @@
 # LRP Wave LR-B — Multi-Instance Correctness & Session Governance 「多实例正确性与会话治理」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** Not Started (planned 2026-07-03)  
+**Wave status:** **In Progress** (activated 2026-07-04)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer`, `doc-keeper`/`architecture-reviewer` for ADR-0044)  
 **Prerequisites:** none for B1/B3/B5/B7/B8; **B2/B4 depend on LR-B1 decision**; **B6 depends on explicit user confirmation of the session policy**
 
@@ -45,13 +45,13 @@
 - **Artifacts:** `docs/adr/operations/0044-deployment-topology-v1.md`; Helm values sync; ledger seam row update.
 - **Done when:** Decision Accepted + values synced + doc sync + commit review.
 - **Maps:** CD-PIT-14; ADR-0039; P15-T05.
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-04 — ADR-0044 Accepted; Helm values synced; helm lint green; architecture review PASS-with-suggestions)
 
 ### LR-B2 — Scheduler distributed mutex
 
 - **Owner agent:** backend-engineer
 - **BDD:** not-applicable — internal scheduling correctness; job outcomes unchanged.
-- **Depends on:** LR-B1. If ADR-0044 decides single replica, this task downgrades to **recommended low-cost insurance** (still schedule it — restart overlap and future scale-out both benefit).
+- **Depends on:** LR-B1 — decided (ADR-0044, 2026-07-04): single serving replica. Per ADR-0044 the mutex is **recommended low-cost insurance under the Docker Compose single-container topology** (restart overlap) and **MANDATORY before the first K8s blue-green prod deployment** (chart keeps blue+green resident → schedulers double-run). Still schedule it this wave.
 - **Read first:**
   1. `backend/src/main/java/com/bank/docgen/runtime/scheduler/InvocationRetentionCleanupScheduler.java`
   2. `backend/src/main/java/com/bank/docgen/collaboration/scheduler/CollaborationEscalationScheduler.java`
@@ -70,7 +70,7 @@
 - **Artifacts:** new Flyway migration; scheduler annotations/guards; tests; dependency verification note.
 - **Done when:** Mutex proven by tests + gates green + doc sync + commit review.
 - **Maps:** CD-PIT-14; ledger seam «Redisson multi-instance locks» (DB lock chosen here; Redisson stays ADR-0039/0044 scoped).
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-04 — ShedLock 6.10.0 + V46 + 3 schedulers locked; SchedulerLockAnnotationTest + JdbcTemplateLockProviderIntegrationTest; verify 727 green; intranet SCA checkpoint open via M9)
 
 ### LR-B3 — SSE production readiness
 
@@ -96,7 +96,7 @@
 - **Artifacts:** modified `SseEmitterRegistry.java`, `PreviewController.java` (+ batch stream controller), `frontend/nginx.conf`; tests; config documentation.
 - **Done when:** Unit tests + Docker curl smoke green + doc sync + commit review (LR-E1 closes the wave-level evidence).
 - **Maps:** CD-PIT-12; LR-E1.
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-04 — backend heartbeat/anti-buffering headers/config-driven timeout + @PreDestroy + tests done; `frontend/nginx.conf` SSE location + Docker curl smoke pending; E2E owned by LR-E1)
 
 ### LR-B4 — Async transport production topology
 
@@ -120,7 +120,7 @@
 - **Artifacts:** compose/Helm changes; ledger seam row update; ADR-0044 appendix.
 - **Done when:** Decision implemented or formally accepted + evidence archived + doc sync + commit review.
 - **Maps:** Ledger seam «Async batch transport»; P11/M14.
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-04 — branch (b) recorded in ADR-0044 + seam re-annotated; dev compose kafka healthcheck + prod-profile evidence pending)
 
 ### LR-B5 — Graceful shutdown & drain
 
@@ -145,7 +145,7 @@
 - **Artifacts:** `application.yml` lifecycle block; executor config changes; registry shutdown hook; smoke evidence.
 - **Done when:** Restart smoke proven + gates green + doc sync + commit review.
 - **Maps:** Program §1 finding 7; LR-B8 (healthcheck pairs with drain).
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-04 — graceful shutdown config + executor drain + SSE registry shutdown + GracefulShutdownConfigTest done; Docker restart smoke pending)
 
 ### LR-B6 — Session renewal + revocation
 
@@ -172,7 +172,7 @@
 - **Artifacts:** behavior spec; backend token/filter/logout changes; frontend renewal + reminder; matrix/security-view updates; tests + E2E spec.
 - **Done when:** Confirmed policy implemented + scenarios green + gates + E2E/UIUX evidence + doc sync + commit review.
 - **Maps:** CD-PIT-13; COR-F03 (Done — reused); LR-C1/C2 (companion work-loss guards).
-- **Status:** Not Started
+- **Status:** Blocked (awaiting user session-policy confirmation)
 
 ### LR-B7 — Idempotency digest hard-fail + rate-limit filter fail-closed alignment
 
@@ -195,7 +195,7 @@
 - **Artifacts:** `IdempotencyService` change + tests; filter change or ADR/seam documentation; OPT-E9 status update.
 - **Done when:** Both alignments proven by tests/docs + doc sync + commit review.
 - **Maps:** OPT-E9; COR-B10 residual; ADR-0031.
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-04 — digest hard-fail + filter decision recorded; 3 test classes; verify green)
 
 ### LR-B8 — Prod health & resource limits
 

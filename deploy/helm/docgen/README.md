@@ -11,8 +11,8 @@ referenced via `ConfigMap` / `Secret` only — no in-cluster StatefulSets.
 | `Chart.yaml` | Chart metadata |
 | `values.yaml` | Base defaults (securityContext, resources, probes, config) |
 | `values-dev.yaml` | Dev overrides (single replica, demo seed, dev endpoints) |
-| `values-staging.yaml` | Staging overrides (Ingress + TLS, HPA, 2 replicas) |
-| `values-prod.yaml` | Production overrides (blue-green, stricter network egress) |
+| `values-staging.yaml` | Staging overrides (Ingress + TLS; single backend replica per ADR-0044) |
+| `values-prod.yaml` | Production overrides (blue-green, stricter network egress; single backend replica per ADR-0044) |
 | `templates/` | Deployments, Services, Ingress, HPA, NetworkPolicy, ConfigMap, Secret refs |
 | `templates/_helpers.tpl` | Shared securityContext helpers |
 
@@ -64,8 +64,18 @@ Full routing matrix and validation:
 | Backend HPA | `templates/backend-hpa.yaml` | CPU + memory + optional Pods custom metric |
 | Frontend HPA | `templates/frontend-hpa.yaml` | CPU + memory (custom metric off by default) |
 
-Enabled in `values-staging.yaml` and `values-prod.yaml`. Production blue-green mode scales the
-**active color** Deployment only (`scaleTargetRef` follows `blueGreen.activeColor`).
+**Deployment topology (ADR-0044):** v1 launches with a **single backend replica** in every
+environment — `backend.replicaCount: 1` and `autoscaling.backend.enabled: false` in all values
+files. Backend HPA may be re-enabled only after the scale-out prerequisites in
+[ADR-0044](../../../docs/adr/operations/0044-deployment-topology-v1.md) are met (scheduler
+mutex LR-B2, SSE sticky routing/relay LR-B3, shared rate limit, `ASYNC_TRANSPORT=kafka` LR-B4).
+The frontend is stateless and unconstrained by this decision. Blue-green (below) keeps
+**both colors resident** (one replica each) with traffic on the active color only — safe for
+traffic-bound components, but schedulers double-run, so the LR-B2 scheduler mutex is
+**mandatory before the first blue-green prod deployment** (ADR-0044).
+
+When re-enabled, production blue-green mode scales the **active color** Deployment only
+(`scaleTargetRef` follows `blueGreen.activeColor`).
 
 Custom metric `docgen_http_requests_per_second` requires **Prometheus Adapter** (or equivalent)
 in the cluster — see [deploy/k8s-hpa-autoscaling.md](../../k8s-hpa-autoscaling.md).
@@ -142,17 +152,17 @@ secrets:
 ```
 
 ```yaml
-# values-staging.yaml — pre-prod with Ingress, TLS, HPA
+# values-staging.yaml — pre-prod with Ingress + TLS (single backend replica per ADR-0044)
 global:
   environment: staging
 backend:
-  replicaCount: 2
+  replicaCount: 1
 ingress:
   enabled: true
   host: docgen.staging.example.com
 autoscaling:
   backend:
-    enabled: true
+    enabled: false # ADR-0044: re-enable only after scale-out prerequisites
 secrets:
   create: false
   existingSecretName: docgen-app-secrets-staging
@@ -231,3 +241,4 @@ docker run --rm -v "${chart}:/chart:ro" alpine/helm:3.14.4 template docgen-dev /
 - [deploy/README.md](../../README.md) — install, upgrade, blue-green runbook
 - [deploy/container-hardening.md](../../container-hardening.md) — image hardening evidence
 - [ADR-0030](../../../docs/adr/operations/0030-operational-platform-baseline.md) — operational baseline
+- [ADR-0044](../../../docs/adr/operations/0044-deployment-topology-v1.md) — v1 deployment topology (single backend replica)

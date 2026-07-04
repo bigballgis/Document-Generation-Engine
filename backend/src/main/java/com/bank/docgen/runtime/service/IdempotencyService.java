@@ -4,6 +4,7 @@ import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Optional;
@@ -119,11 +120,18 @@ public class IdempotencyService {
 
     public String hashRequest(String payload) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = newDigest();
             return HexFormat.of().formatHex(digest.digest(payload.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception ex) {
-            return payload;
+            // LR-B7 (OPT-E9): hard failure by design. Falling back to the raw payload would
+            // silently weaken idempotency semantics and persist raw variable values.
+            throw new IdempotencyDigestException(ex);
         }
+    }
+
+    /** Seam for tests to simulate digest unavailability. */
+    protected MessageDigest newDigest() throws NoSuchAlgorithmException {
+        return MessageDigest.getInstance("SHA-256");
     }
 
     private String cacheKey(UUID templateId, String idempotencyKey) {
