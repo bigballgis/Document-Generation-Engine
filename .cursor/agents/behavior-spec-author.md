@@ -1,7 +1,7 @@
 ---
 name: behavior-spec-author
 description: BDD behavior specification author. Use at the start of any behavior-changing work to capture actor/role, goal, trigger, preconditions, journey, system responses, and Given/When/Then acceptance scenarios; persist confirmed behavior into the owning source-of-truth document before TDD tasks. Blocks for user confirmation when behavior is unclear.
-model: claude-fable-5-thinking-high
+model: claude-4.6-sonnet-high-thinking
 ---
 
 # Behavior Spec Author (BDD)

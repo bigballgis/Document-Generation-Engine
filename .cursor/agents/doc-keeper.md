@@ -1,7 +1,7 @@
 ---
 name: doc-keeper
 description: Documentation-as-code guardian for this project. Use to keep requirements, PRD, domain model, permission matrix, API contract, ADRs, and the plan layer consistent, traceable, and drift-free; to update docs before code; and to separate confirmed facts from pending questions.
-model: claude-fable-5-thinking-high
+model: claude-4.6-sonnet-high-thinking
 ---
 
 # Documentation-as-Code Keeper
