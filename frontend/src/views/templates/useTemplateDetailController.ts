@@ -1,45 +1,12 @@
-import { computed, nextTick, onMounted, ref, watch, type Ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environments'
 import { useCapabilities } from '@/composables/useCapabilities'
-import { canViewCollaborationWorkItems } from '@/auth/roles'
-import { useCollaborationStore } from '@/stores/collaboration'
-import { useSessionStore } from '@/stores/session'
-import {
-  isTemplateInRemediation,
-  shouldShowTemplateAuthorJourney,
-  type TemplateAuthorJourneyContext,
-} from '@/utils/templateAuthorJourney'
-import {
-  shouldShowTemplateTesterJourney,
-  type TemplateTesterJourneyContext,
-} from '@/utils/templateTesterJourney'
-import {
-  shouldShowTemplateApproverJourney,
-  type TemplateApproverJourneyContext,
-} from '@/utils/templateApproverJourney'
-import {
-  shouldShowTemplateTeamLeadJourney,
-  type TemplateTeamLeadJourneyContext,
-} from '@/utils/templateTeamLeadJourney'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, templatePackageHubPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import * as templatesApi from '@/api/templates'
-import {
-  normalizeTemplateDetailQuery,
-  resolveTemplateDetailTab,
-  resolveTemplateDetailTabFromQuery,
-  templateDetailTabLabelKey,
-  type TemplateDetailTab,
-} from '@/views/templates/templateDetailTabs'
-import {
-  buildDevWorkspaceQuery,
-  resolveTemplateDevWorkspaceTabFromQuery,
-  type TemplateDevWorkspaceTab,
-} from '@/views/templates/templateDevWorkspaceTabs'
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
 import type { PreviewRecord } from '@/types/template'
 import {
@@ -48,6 +15,15 @@ import {
   type LifecycleDecisionDialogMode,
 } from '@/views/templates/useTemplateLifecycleActions'
 import { useTemplatePolicyCredentials } from '@/views/templates/useTemplatePolicyCredentials'
+import {
+  resolveTemplateDetailTabFromQuery,
+  type TemplateDetailTab,
+} from '@/views/templates/templateDetailTabs'
+import {
+  resolveTemplateDevWorkspaceTabFromQuery,
+  type TemplateDevWorkspaceTab,
+} from '@/views/templates/templateDevWorkspaceTabs'
+import { useTemplateDetailNavigation } from '@/views/templates/useTemplateDetailNavigation'
 
 export type { GovernanceAction, LifecycleDecisionDialogMode }
 
@@ -57,10 +33,7 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
   const { t, te } = useI18n()
   const { formatDateTime } = useLocaleFormatters()
   const route = useRoute()
-  const router = useRouter()
   const templatesStore = useTemplatesStore()
-  const sessionStore = useSessionStore()
-  const collaborationStore = useCollaborationStore()
   const {
     authorTemplates,
     decideTests,
@@ -69,39 +42,17 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     reviewMasters,
     exportTemplates,
     editTemplateMetadata,
-    context,
   } = useCapabilities()
 
   const lastPreview = ref<PreviewRecord | null>(null)
   const selectedPreviewId = ref<string | null>(null)
-  const testerEvidenceViewed = ref({
-    fidelityViewedConfirmed: false,
-    coverageViewedConfirmed: false,
-    previewViewedConfirmed: false,
-  })
-  const approverEvidenceViewed = ref({
-    submissionReviewedConfirmed: false,
-    keyEvidenceViewedConfirmed: false,
-  })
-  const teamLeadGoLiveViewed = ref({
-    goLiveRequestReviewedConfirmed: false,
-    preReleaseChecksViewed: false,
-  })
   const selectedTestDataSetId = ref<string | null>(null)
   const generatingPreview = ref(false)
   const generatingPreviewId = ref<string | null>(null)
   const batchTesting = ref(false)
   const coverageRefreshToken = ref(0)
   const metadataEditOpen = ref(false)
-  const loadFailed = ref(false)
   const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
-
-  const activeDetailTab = ref<TemplateDetailTab>(
-    isDevEditor.value ? 'authoring' : resolveTemplateDetailTabFromQuery(route.query),
-  )
-  const activeDevWorkspaceTab = ref<TemplateDevWorkspaceTab>(
-    resolveTemplateDevWorkspaceTabFromQuery(route.query),
-  )
 
   const templateId = computed(() => route.params.templateId as string)
   const devVersionId = computed(() =>
@@ -137,6 +88,13 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     return te(key) ? t(key) : t('templates.error.loadDetail')
   })
 
+  const activeDetailTab = ref<TemplateDetailTab>(
+    isDevEditor.value ? 'authoring' : resolveTemplateDetailTabFromQuery(route.query),
+  )
+  const activeDevWorkspaceTab = ref<TemplateDevWorkspaceTab>(
+    resolveTemplateDevWorkspaceTabFromQuery(route.query),
+  )
+
   const lifecycle = useTemplateLifecycleActions({
     templateId,
     template,
@@ -159,6 +117,7 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     }
     return status !== 'PUBLISHED' && status !== 'STOPPED' && status !== 'DEPRECATED'
   })
+
   const showExportActions = computed(
     () =>
       exportTemplates.value &&
@@ -185,9 +144,11 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
       (status === 'DRAFT' || status === 'TESTING')
     )
   })
+
   const canEditContentModuleReferences = computed(
     () => authorTemplates.value && template.value?.lifecycleStatus === 'DRAFT',
   )
+
   const showTestGenerate = computed(
     () =>
       authorTemplates.value &&
@@ -195,434 +156,24 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
         template.value?.lifecycleStatus === 'TESTING'),
   )
 
-  const openRemediationTemplateIds = computed(() => {
-    const ids = new Set<string>()
-    for (const item of collaborationStore.workItems) {
-      if (item.queue === 'REMEDIATION') {
-        ids.add(item.templateId)
-      }
-    }
-    return ids
+  const handleTestGenerateRef: { fn: (testDataSetId?: string) => Promise<void> } = {
+    fn: async () => {},
+  }
+
+  const navigation = useTemplateDetailNavigation({
+    isDevEditor,
+    templateId,
+    devVersionId,
+    template,
+    lastPreview,
+    showAuthoringSection,
+    activeDetailTab,
+    activeDevWorkspaceTab,
+    loadTemplateHolder,
+    lifecycle,
+    policy,
+    handleTestGenerate: (testDataSetId) => handleTestGenerateRef.fn(testDataSetId),
   })
-
-  const showAuthorJourney = computed(() => {
-    if (!template.value || !shouldShowTemplateAuthorJourney({
-      authorTemplates: authorTemplates.value,
-      roles: sessionStore.session?.roles ?? [],
-    })) {
-      return false
-    }
-    const status = template.value.lifecycleStatus
-    if (
-      status === 'PENDING_RELEASE' &&
-      publishTemplates.value &&
-      shouldShowTemplateTeamLeadJourney({
-        publishTemplates: publishTemplates.value,
-        reviewMasters: reviewMasters.value,
-      })
-    ) {
-      return false
-    }
-    return status !== 'STOPPED' && status !== 'DEPRECATED' && status !== 'DELETED'
-  })
-
-  const authorJourneyContext = computed((): TemplateAuthorJourneyContext | null => {
-    if (!template.value) {
-      return null
-    }
-    return {
-      lifecycleStatus: template.value.lifecycleStatus,
-      approvalSubState: template.value.approvalSubState,
-      bindingsCount: template.value.bindings.length,
-      hasSuccessfulTrialOutput: lastPreview.value?.status === 'SUCCEEDED',
-      isRemediation: isTemplateInRemediation(template.value.id, openRemediationTemplateIds.value),
-    }
-  })
-
-  const showTesterJourney = computed(() => {
-    if (
-      !template.value ||
-      !shouldShowTemplateTesterJourney({ decideTests: decideTests.value }) ||
-      template.value.lifecycleStatus !== 'TESTING'
-    ) {
-      return false
-    }
-    return true
-  })
-
-  const testerJourneyContext = computed((): TemplateTesterJourneyContext | null => {
-    if (!template.value || template.value.lifecycleStatus !== 'TESTING') {
-      return null
-    }
-    return {
-      lifecycleStatus: 'TESTING',
-      hasPreviewArtifact: lastPreview.value?.status === 'SUCCEEDED',
-      fidelityViewedConfirmed: testerEvidenceViewed.value.fidelityViewedConfirmed,
-      coverageViewedConfirmed: testerEvidenceViewed.value.coverageViewedConfirmed,
-      previewViewedConfirmed: testerEvidenceViewed.value.previewViewedConfirmed,
-    }
-  })
-
-  const showApproverJourney = computed(() => {
-    if (
-      !template.value ||
-      !shouldShowTemplateApproverJourney({ decideApprovals: decideApprovals.value }) ||
-      template.value.lifecycleStatus !== 'APPROVAL' ||
-      template.value.approvalSubState !== 'PENDING_DECISION'
-    ) {
-      return false
-    }
-    return true
-  })
-
-  const approverJourneyContext = computed((): TemplateApproverJourneyContext | null => {
-    if (
-      !template.value ||
-      template.value.lifecycleStatus !== 'APPROVAL' ||
-      template.value.approvalSubState !== 'PENDING_DECISION'
-    ) {
-      return null
-    }
-    return {
-      lifecycleStatus: 'APPROVAL',
-      approvalSubState: 'PENDING_DECISION',
-      submissionReviewedConfirmed: approverEvidenceViewed.value.submissionReviewedConfirmed,
-      keyEvidenceViewedConfirmed: approverEvidenceViewed.value.keyEvidenceViewedConfirmed,
-    }
-  })
-
-  const showTeamLeadJourney = computed(() => {
-    if (
-      !template.value ||
-      !publishTemplates.value ||
-      template.value.lifecycleStatus !== 'PENDING_RELEASE'
-    ) {
-      return false
-    }
-    return shouldShowTemplateTeamLeadJourney({
-      publishTemplates: publishTemplates.value,
-      reviewMasters: reviewMasters.value,
-    })
-  })
-
-  const teamLeadJourneyContext = computed((): TemplateTeamLeadJourneyContext | null => {
-    if (!template.value || template.value.lifecycleStatus !== 'PENDING_RELEASE') {
-      return null
-    }
-    return {
-      lifecycleStatus: 'PENDING_RELEASE',
-      goLiveRequestReviewedConfirmed: teamLeadGoLiveViewed.value.goLiveRequestReviewedConfirmed,
-      preReleaseChecksViewed: teamLeadGoLiveViewed.value.preReleaseChecksViewed,
-      publishGateReady: lifecycle.publishGateReady.value,
-    }
-  })
-
-  const detailTabs = computed(() => {
-    const tabs = [
-      { name: 'overview', labelKey: templateDetailTabLabelKey('overview') },
-      { name: 'lifecycle', labelKey: templateDetailTabLabelKey('lifecycle') },
-    ] as Array<{ name: string; labelKey: string }>
-    if (showAuthoringSection.value) {
-      tabs.push({ name: 'authoring', labelKey: templateDetailTabLabelKey('authoring') })
-    }
-    tabs.push({ name: 'releaseVersions', labelKey: templateDetailTabLabelKey('releaseVersions') })
-    if (policy.showPolicyPanel.value) {
-      tabs.push({ name: 'apiAccess', labelKey: templateDetailTabLabelKey('apiAccess') })
-    }
-    return tabs
-  })
-
-  async function loadAuthorRemediationWorkItems() {
-    if (!authorTemplates.value || !canViewCollaborationWorkItems(context.value)) {
-      return
-    }
-    try {
-      await collaborationStore.fetchWorkItems({ queue: 'REMEDIATION' })
-    } catch {
-      /* degrade — remediation flag may be false until work items load */
-    }
-  }
-
-  function handleJourneyDesign() {
-    openDevWorkspaceTab('design')
-  }
-
-  function handleJourneyCreate() {
-    router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
-  }
-
-  async function handleJourneyTrialGenerate() {
-    openLifecyclePanel()
-    await handleTestGenerate()
-  }
-
-  async function handleJourneySubmitForTest() {
-    openTestPreviewTab()
-    lifecycle.submitForTestDialogOpen.value = true
-  }
-
-  async function handleJourneySubmitForApproval() {
-    openLifecyclePanel()
-    await lifecycle.handleSubmitForApproval()
-  }
-
-  function handleJourneyReviewRequest() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('testing')
-      return
-    }
-    openLifecyclePanel()
-  }
-
-  function handleJourneyCheckEvidence() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('testing')
-    } else {
-      openLifecyclePanel()
-    }
-    testerEvidenceViewed.value = {
-      fidelityViewedConfirmed: true,
-      coverageViewedConfirmed: true,
-      previewViewedConfirmed: false,
-    }
-  }
-
-  function handleJourneyRecordResult() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('testing')
-    } else {
-      openLifecyclePanel()
-    }
-    testerEvidenceViewed.value = {
-      fidelityViewedConfirmed: true,
-      coverageViewedConfirmed: true,
-      previewViewedConfirmed: true,
-    }
-  }
-
-  function handleJourneyApproverReviewRequest() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('approval')
-      return
-    }
-    openLifecyclePanel()
-  }
-
-  function handleJourneyApproverReviewSubmission() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('approval')
-    } else {
-      openLifecyclePanel()
-    }
-    approverEvidenceViewed.value = {
-      ...approverEvidenceViewed.value,
-      submissionReviewedConfirmed: true,
-    }
-  }
-
-  function handleJourneyApproverRecordDecision() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('approval')
-    } else {
-      openLifecyclePanel()
-    }
-    approverEvidenceViewed.value = {
-      submissionReviewedConfirmed: true,
-      keyEvidenceViewedConfirmed: true,
-    }
-  }
-
-  function handleJourneyTeamLeadReviewGoLiveRequest() {
-    openLifecyclePanel()
-    teamLeadGoLiveViewed.value = {
-      ...teamLeadGoLiveViewed.value,
-      goLiveRequestReviewedConfirmed: true,
-    }
-  }
-
-  async function handleJourneyTeamLeadRunPreReleaseChecks() {
-    openLifecyclePanel()
-    await lifecycle.loadPublishGateData()
-    teamLeadGoLiveViewed.value = {
-      ...teamLeadGoLiveViewed.value,
-      goLiveRequestReviewedConfirmed: true,
-      preReleaseChecksViewed: true,
-    }
-  }
-
-  async function handleJourneyTeamLeadConfirmGoLive() {
-    openLifecyclePanel()
-    teamLeadGoLiveViewed.value = {
-      goLiveRequestReviewedConfirmed: true,
-      preReleaseChecksViewed: true,
-    }
-    await lifecycle.handlePublish()
-  }
-
-  function resetTransientDetailState() {
-    testerEvidenceViewed.value = {
-      fidelityViewedConfirmed: false,
-      coverageViewedConfirmed: false,
-      previewViewedConfirmed: false,
-    }
-    approverEvidenceViewed.value = {
-      submissionReviewedConfirmed: false,
-      keyEvidenceViewedConfirmed: false,
-    }
-    teamLeadGoLiveViewed.value = {
-      goLiveRequestReviewedConfirmed: false,
-      preReleaseChecksViewed: false,
-    }
-    lifecycle.resetLifecycleTransientState()
-    policy.resetPolicyCredentialsTransientState()
-    lastPreview.value = null
-  }
-
-  function syncTabFromRoute() {
-    const normalized = normalizeTemplateDetailQuery(route.query)
-    if (normalized) {
-      if (isDevEditor.value) {
-        activeDevWorkspaceTab.value = 'approval'
-        scrollToDevWorkspace()
-        void router.replace({
-          query: buildDevWorkspaceQuery(normalized.query, 'approval'),
-        })
-        return
-      }
-      activeDetailTab.value = normalized.tab
-      scrollToLifecyclePanel()
-      void router.replace({ query: normalized.query })
-      return
-    }
-
-    if (isDevEditor.value) {
-      const workspaceTab = resolveTemplateDevWorkspaceTabFromQuery(route.query)
-      if (activeDevWorkspaceTab.value !== workspaceTab) {
-        activeDevWorkspaceTab.value = workspaceTab
-      }
-      if (route.query.focus === 'workflow') {
-        scrollToDevWorkspace()
-      }
-      return
-    }
-
-    const tab = resolveTemplateDetailTabFromQuery(route.query)
-    if (activeDetailTab.value !== tab) {
-      activeDetailTab.value = tab
-    }
-  }
-
-  onMounted(async () => {
-    syncTabFromRoute()
-    await Promise.all([loadTemplate(), loadAuthorRemediationWorkItems()])
-  })
-
-  watch(
-    () => devVersionId.value,
-    () => {
-      if (isDevEditor.value) {
-        resetTransientDetailState()
-        void loadTemplate()
-      }
-    },
-  )
-
-  watch(
-    () => templateId.value,
-    () => {
-      resetTransientDetailState()
-      activeDetailTab.value = isDevEditor.value
-        ? 'authoring'
-        : resolveTemplateDetailTabFromQuery(route.query)
-      if (isDevEditor.value) {
-        activeDevWorkspaceTab.value = resolveTemplateDevWorkspaceTabFromQuery(route.query)
-      }
-      void loadTemplate()
-    },
-  )
-
-  watch(
-    () => route.query,
-    () => {
-      syncTabFromRoute()
-    },
-    { deep: true },
-  )
-
-  watch(activeDetailTab, (tab) => {
-    if (route.query.focus === 'lifecycle' || route.query.focus === 'workflow') {
-      return
-    }
-    if (isDevEditor.value && tab === 'lifecycle') {
-      return
-    }
-    if (resolveTemplateDetailTab(route.query.tab) === tab) {
-      return
-    }
-    const query = { ...route.query }
-    delete query.focus
-    router.replace({ query: { ...query, tab } })
-  })
-
-  async function loadTemplate() {
-    loadFailed.value = false
-    try {
-      if (isDevEditor.value && devVersionId.value) {
-        const detail = await templatesApi.fetchDevVersionDetail(templateId.value, devVersionId.value)
-        templatesStore.$patch({ selectedTemplate: detail })
-      } else {
-        await templatesStore.fetchTemplate(templateId.value)
-      }
-      if (policy.showPolicyPanel.value) {
-        await policy.loadPolicyData()
-      }
-    } catch {
-      loadFailed.value = true
-    }
-  }
-
-  loadTemplateHolder.fn = loadTemplate
-
-  function scrollToLifecyclePanel() {
-    void nextTick(() => {
-      document.getElementById('template-lifecycle-panel')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      })
-    })
-  }
-
-  function scrollToDevWorkspace() {
-    void nextTick(() => {
-      document.getElementById('dev-workspace')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      })
-    })
-  }
-
-  function openDevWorkspaceTab(tab: TemplateDevWorkspaceTab) {
-    activeDevWorkspaceTab.value = tab
-    void router.replace({ query: buildDevWorkspaceQuery(route.query, tab) })
-    scrollToDevWorkspace()
-  }
-
-  function openLifecyclePanel() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('approval')
-      return
-    }
-    activeDetailTab.value = 'lifecycle'
-    scrollToLifecyclePanel()
-  }
-
-  function backToList() {
-    if (isDevEditor.value) {
-      router.push(templatePackageHubPath(templateId.value))
-      return
-    }
-    router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
-  }
 
   async function handleTestGenerate(testDataSetId?: string) {
     const resolvedId = testDataSetId ?? selectedTestDataSetId.value ?? undefined
@@ -637,7 +188,7 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
       if (resolvedId) {
         selectedTestDataSetId.value = resolvedId
       }
-      openDevWorkspaceTab('testing')
+      navigation.openDevWorkspaceTab('testing')
       ElMessage.success(t('templates.testGenerate.success', { previewId: preview.previewId }))
     } catch {
       ElMessage.error(errorMessage.value || t('templates.error.testGenerate'))
@@ -646,6 +197,8 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
       generatingPreviewId.value = null
     }
   }
+
+  handleTestGenerateRef.fn = handleTestGenerate
 
   async function handleBatchTestGenerate() {
     batchTesting.value = true
@@ -659,7 +212,7 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
         testDataSetIds: dataSets.map((row) => row.testDataSetId),
       })
       coverageRefreshToken.value += 1
-      openDevWorkspaceTab('testing')
+      navigation.openDevWorkspaceTab('testing')
       ElMessage.success(
         t('templates.testDataSets.batchSuccess', {
           succeeded: summary.succeededCount,
@@ -672,10 +225,6 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     } finally {
       batchTesting.value = false
     }
-  }
-
-  function openTestPreviewTab() {
-    openDevWorkspaceTab('testing')
   }
 
   async function handlePreviewSelected(previewId: string | null) {
@@ -715,11 +264,11 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     // template data
     template,
     showDetailSkeleton,
-    loadFailed,
+    loadFailed: navigation.loadFailed,
     // tabs
-    activeDetailTab,
-    activeDevWorkspaceTab,
-    detailTabs,
+    activeDetailTab: navigation.activeDetailTab,
+    activeDevWorkspaceTab: navigation.activeDevWorkspaceTab,
+    detailTabs: navigation.detailTabs,
     // capabilities
     authorTemplates,
     decideTests,
@@ -727,30 +276,30 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     publishTemplates,
     reviewMasters,
     // journey display
-    showAuthorJourney,
-    authorJourneyContext,
-    showTesterJourney,
-    testerJourneyContext,
-    showApproverJourney,
-    approverJourneyContext,
-    showTeamLeadJourney,
-    teamLeadJourneyContext,
+    showAuthorJourney: navigation.showAuthorJourney,
+    authorJourneyContext: navigation.authorJourneyContext,
+    showTesterJourney: navigation.showTesterJourney,
+    testerJourneyContext: navigation.testerJourneyContext,
+    showApproverJourney: navigation.showApproverJourney,
+    approverJourneyContext: navigation.approverJourneyContext,
+    showTeamLeadJourney: navigation.showTeamLeadJourney,
+    teamLeadJourneyContext: navigation.teamLeadJourneyContext,
     authorJourneyPrimaryCtaDisabled: lifecycle.authorJourneyPrimaryCtaDisabled,
     // journey handlers
-    handleJourneyCreate,
-    handleJourneyDesign,
-    handleJourneyTrialGenerate,
-    handleJourneySubmitForTest,
-    handleJourneySubmitForApproval,
-    handleJourneyReviewRequest,
-    handleJourneyCheckEvidence,
-    handleJourneyRecordResult,
-    handleJourneyApproverReviewRequest,
-    handleJourneyApproverReviewSubmission,
-    handleJourneyApproverRecordDecision,
-    handleJourneyTeamLeadReviewGoLiveRequest,
-    handleJourneyTeamLeadRunPreReleaseChecks,
-    handleJourneyTeamLeadConfirmGoLive,
+    handleJourneyCreate: navigation.handleJourneyCreate,
+    handleJourneyDesign: navigation.handleJourneyDesign,
+    handleJourneyTrialGenerate: navigation.handleJourneyTrialGenerate,
+    handleJourneySubmitForTest: navigation.handleJourneySubmitForTest,
+    handleJourneySubmitForApproval: navigation.handleJourneySubmitForApproval,
+    handleJourneyReviewRequest: navigation.handleJourneyReviewRequest,
+    handleJourneyCheckEvidence: navigation.handleJourneyCheckEvidence,
+    handleJourneyRecordResult: navigation.handleJourneyRecordResult,
+    handleJourneyApproverReviewRequest: navigation.handleJourneyApproverReviewRequest,
+    handleJourneyApproverReviewSubmission: navigation.handleJourneyApproverReviewSubmission,
+    handleJourneyApproverRecordDecision: navigation.handleJourneyApproverRecordDecision,
+    handleJourneyTeamLeadReviewGoLiveRequest: navigation.handleJourneyTeamLeadReviewGoLiveRequest,
+    handleJourneyTeamLeadRunPreReleaseChecks: navigation.handleJourneyTeamLeadRunPreReleaseChecks,
+    handleJourneyTeamLeadConfirmGoLive: navigation.handleJourneyTeamLeadConfirmGoLive,
     // lifecycle visibility
     showLifecycleSection: lifecycle.showLifecycleSection,
     showGovernanceSection: lifecycle.showGovernanceSection,
@@ -815,8 +364,8 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     coverageRefreshToken,
     submitForTestDialogOpen: lifecycle.submitForTestDialogOpen,
     // tester evidence
-    testerEvidenceViewed,
-    approverEvidenceViewed,
+    testerEvidenceViewed: navigation.testerEvidenceViewed,
+    approverEvidenceViewed: navigation.approverEvidenceViewed,
     // credentials table
     credentialColumnFilters: policy.credentialColumnFilters,
     credentialsCurrentPage: policy.credentialsCurrentPage,
@@ -829,14 +378,14 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     // store
     templatesStore,
     // handlers
-    loadTemplate,
+    loadTemplate: navigation.loadTemplate,
     loadPublishGateData: lifecycle.loadPublishGateData,
     loadSubmitGateData: lifecycle.loadSubmitGateData,
     loadPolicyData: policy.loadPolicyData,
-    backToList,
-    openLifecyclePanel,
+    backToList: navigation.backToList,
+    openLifecyclePanel: navigation.openLifecyclePanel,
     openApiPolicyConsole: policy.openApiPolicyConsole,
-    openDevWorkspaceTab,
+    openDevWorkspaceTab: navigation.openDevWorkspaceTab,
     handleTestGenerate,
     handleBatchTestGenerate,
     handlePreviewSelected,
