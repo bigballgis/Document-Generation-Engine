@@ -22,9 +22,10 @@ class DocumentArtifactPipelineTest {
     private final GeneratedArtifactSizeGuard artifactSizeGuard = new GeneratedArtifactSizeGuard(
             new DocgenRenderingProperties()
     );
+    private final ArtifactSpoolService artifactSpoolService = new ArtifactSpoolService(artifactSizeGuard);
 
     @Test
-    void pdfPathConvertsThenEncrypts() {
+    void pdfPathConvertsThenEncrypts() throws Exception {
         byte[] docx = new byte[]{1, 2, 3};
         byte[] pdf = new byte[]{37, 80, 68, 70};
         when(pdfConversionService.convert(docx)).thenReturn(pdf);
@@ -33,27 +34,29 @@ class DocumentArtifactPipelineTest {
                 docxEncryptionService,
                 pdfConversionService,
                 pdfEncryptionService,
-                artifactSizeGuard
+                artifactSizeGuard,
+                artifactSpoolService
         );
         EncryptionOptionsView encryption = new EncryptionOptionsView(false, null, null, null);
 
-        DocumentArtifactPipeline.GeneratedArtifact artifact =
-                pipeline.finalizeArtifact(docx, "PDF", encryption);
-
-        verify(pdfConversionService).convert(docx);
-        assertThat(artifact.contentType()).isEqualTo("application/pdf");
-        assertThat(artifact.storageFileName()).isEqualTo("output.pdf");
-        assertThat(artifact.bytes()).isEqualTo(pdf);
+        try (DocumentArtifactPipeline.GeneratedArtifact artifact =
+                pipeline.finalizeArtifact(docx, "PDF", encryption)) {
+            verify(pdfConversionService).convert(docx);
+            assertThat(artifact.contentType()).isEqualTo("application/pdf");
+            assertThat(artifact.storageFileName()).isEqualTo("output.pdf");
+            assertThat(artifact.spooled().openInputStream().readAllBytes()).isEqualTo(pdf);
+        }
     }
 
     @Test
-    void docxPathEncryptsWithoutPdfConversion() {
+    void docxPathEncryptsWithoutPdfConversion() throws Exception {
         byte[] docx = buildMinimalDocxBytes();
         DocumentArtifactPipeline pipeline = new DocumentArtifactPipeline(
                 docxEncryptionService,
                 pdfConversionService,
                 pdfEncryptionService,
-                artifactSizeGuard
+                artifactSizeGuard,
+                artifactSpoolService
         );
         EncryptionOptionsView encryption = new EncryptionOptionsView(
                 true,
@@ -62,13 +65,13 @@ class DocumentArtifactPipelineTest {
                 null
         );
 
-        DocumentArtifactPipeline.GeneratedArtifact artifact =
-                pipeline.finalizeArtifact(docx, "DOCX", encryption);
-
-        assertThat(artifact.contentType())
-                .isEqualTo("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        assertThat(artifact.storageFileName()).isEqualTo("output.docx");
-        assertThat(artifact.bytes()).isNotEqualTo(docx);
+        try (DocumentArtifactPipeline.GeneratedArtifact artifact =
+                pipeline.finalizeArtifact(docx, "DOCX", encryption)) {
+            assertThat(artifact.contentType())
+                    .isEqualTo("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            assertThat(artifact.storageFileName()).isEqualTo("output.docx");
+            assertThat(artifact.spooled().openInputStream().readAllBytes()).isNotEqualTo(docx);
+        }
     }
 
     private byte[] buildMinimalDocxBytes() {

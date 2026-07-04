@@ -11,17 +11,20 @@ public class DocumentArtifactPipeline {
     private final PdfConversionService pdfConversionService;
     private final PdfEncryptionService pdfEncryptionService;
     private final GeneratedArtifactSizeGuard artifactSizeGuard;
+    private final ArtifactSpoolService artifactSpoolService;
 
     public DocumentArtifactPipeline(
             DocxEncryptionService docxEncryptionService,
             PdfConversionService pdfConversionService,
             PdfEncryptionService pdfEncryptionService,
-            GeneratedArtifactSizeGuard artifactSizeGuard
+            GeneratedArtifactSizeGuard artifactSizeGuard,
+            ArtifactSpoolService artifactSpoolService
     ) {
         this.docxEncryptionService = docxEncryptionService;
         this.pdfConversionService = pdfConversionService;
         this.pdfEncryptionService = pdfEncryptionService;
         this.artifactSizeGuard = artifactSizeGuard;
+        this.artifactSpoolService = artifactSpoolService;
     }
 
     public GeneratedArtifact finalizeArtifact(
@@ -46,26 +49,39 @@ public class DocumentArtifactPipeline {
         if ("PDF".equalsIgnoreCase(outputFormat)) {
             byte[] pdfBytes = pdfConversionService.convert(docxBytes);
             pdfBytes = pdfEncryptionService.encrypt(pdfBytes, encryption);
-            artifactSizeGuard.assertWithinLimit(pdfBytes);
-            return new GeneratedArtifact(
+            return spoolFinalArtifact(
                     pdfBytes,
                     "application/pdf",
                     "output.pdf"
             );
         }
         byte[] encryptedDocx = docxEncryptionService.encrypt(docxBytes, encryption);
-        artifactSizeGuard.assertWithinLimit(encryptedDocx);
-        return new GeneratedArtifact(
+        return spoolFinalArtifact(
                 encryptedDocx,
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 "output.docx"
         );
     }
 
+    private GeneratedArtifact spoolFinalArtifact(byte[] finalBytes, String contentType, String storageFileName) {
+        try {
+            SpooledArtifact spooled = artifactSpoolService.spool(finalBytes);
+            return new GeneratedArtifact(spooled, contentType, storageFileName);
+        } catch (java.io.IOException ex) {
+            throw new com.bank.docgen.template.service.TemplateValidationException(
+                    "api.error.rendering.generationFailed"
+            );
+        }
+    }
+
     public record GeneratedArtifact(
-            byte[] bytes,
+            SpooledArtifact spooled,
             String contentType,
             String storageFileName
-    ) {
+    ) implements AutoCloseable {
+        @Override
+        public void close() throws java.io.IOException {
+            spooled.close();
+        }
     }
 }

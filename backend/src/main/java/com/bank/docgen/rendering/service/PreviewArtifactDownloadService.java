@@ -111,12 +111,18 @@ public class PreviewArtifactDownloadService {
                 renderProfile
         );
         String pdfKey = "previews/" + preview.getId() + "/output.pdf";
-        objectStoragePort.put(
-                pdfKey,
-                new java.io.ByteArrayInputStream(pdfArtifact.bytes()),
-                pdfArtifact.bytes().length,
-                pdfArtifact.contentType()
-        );
+        try (pdfArtifact) {
+            try (java.io.InputStream pdfStream = pdfArtifact.spooled().openInputStream()) {
+                objectStoragePort.put(
+                        pdfKey,
+                        pdfStream,
+                        pdfArtifact.spooled().sizeBytes(),
+                        pdfArtifact.contentType()
+                );
+            }
+        } catch (Exception ex) {
+            throw new PreviewArtifactNotAvailableException();
+        }
         preview.setPdfArtifactStorageKey(pdfKey);
         previewRecordRepository.save(preview);
         return pdfKey;

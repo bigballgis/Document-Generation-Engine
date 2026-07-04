@@ -116,22 +116,28 @@ public class DocumentGenerationEngine {
                         renderProfile
                 )
         );
-        String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
-        String storageKey = "generated/" + documentId + "/" + artifact.storageFileName();
-        objectStoragePort.put(
-                storageKey,
-                new java.io.ByteArrayInputStream(artifact.bytes()),
-                artifact.bytes().length,
-                artifact.contentType()
-        );
-        return new GeneratedDocument(
-                documentId,
-                storageKey,
-                artifact.bytes(),
-                artifact.contentType(),
-                outputFormat,
-                fidelityValidationService.collectWarningCodesForVersion(version.getId(), template.getMasterId())
-        );
+        try (artifact) {
+            String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
+            String storageKey = "generated/" + documentId + "/" + artifact.storageFileName();
+            try (InputStream artifactStream = artifact.spooled().openInputStream()) {
+                objectStoragePort.put(
+                        storageKey,
+                        artifactStream,
+                        artifact.spooled().sizeBytes(),
+                        artifact.contentType()
+                );
+            }
+            return new GeneratedDocument(
+                    documentId,
+                    storageKey,
+                    null,
+                    artifact.contentType(),
+                    outputFormat,
+                    fidelityValidationService.collectWarningCodesForVersion(version.getId(), template.getMasterId())
+            );
+        } catch (java.io.IOException ex) {
+            throw new TemplateValidationException("api.error.rendering.generationFailed");
+        }
     }
 
     public record GeneratedDocument(

@@ -187,12 +187,16 @@ public class PreviewGenerationService {
                     )
             );
             String pdfStorageKey = "previews/" + preview.getId() + "/output.pdf";
-            objectStoragePort.put(
-                    pdfStorageKey,
-                    new java.io.ByteArrayInputStream(pdfArtifact.bytes()),
-                    pdfArtifact.bytes().length,
-                    pdfArtifact.contentType()
-            );
+            try (pdfArtifact) {
+                try (java.io.InputStream pdfStream = pdfArtifact.spooled().openInputStream()) {
+                    objectStoragePort.put(
+                            pdfStorageKey,
+                            pdfStream,
+                            pdfArtifact.spooled().sizeBytes(),
+                            pdfArtifact.contentType()
+                    );
+                }
+            }
             List<FidelityWarningView> warnings = fidelityValidationService.collectWarningsForVersion(
                     version.getId(),
                     template.getMasterId()

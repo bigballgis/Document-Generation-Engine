@@ -69,7 +69,7 @@ rendering-adjacent structural refactors until P22 lands.
 | SOR-0 | Plan-layer truth reconciliation | P0 | 4 | Done | Docs-only; do first; no code |
 | SOR-1 | CI quality-gate automation | P0 | 5 | Done | Protects everything else |
 | SOR-2 | Production correctness & security seams | P0/P1 | 9 | Done | After SOR-1 |
-| SOR-3 | Performance & scalability | P1 | 6 | In Progress | P01/P05 Done; P02/P03/P06 remain |
+| SOR-3 | Performance & scalability | P1 | 6 | Done | P01–P06 Done (2026-07-04) |
 | SOR-4 | Frontend structural health | P1/P2 | 7 | In Progress | F05 Done (`cd3648e`); F01–F04/F06/F07 remain |
 | SOR-5 | Contract & i18n integrity | P1 | 5 | In Progress | K01/K02/K04/K05 Done; K03 remain |
 | SOR-6 | Architecture & code health | P2 | 6 | Not Started | A02/A03 blocked until P22 closes |
@@ -130,7 +130,7 @@ script-only (PowerShell: `scripts/p0-gate.ps1`, `scripts/release-gate.ps1`) and 
 | ID | Pri | Title | Evidence (verified 2026-07-03) | Acceptance hint | Status | Cross-ref |
 | --- | --- | --- | --- | --- | --- | --- |
 | SOR-P01 | Medium-High | Server pagination end-to-end for unbounded list APIs | `TemplateController.java:102-107` / `TemplateService.java:77-81` `findByDeletedAtIsNullOrderByUpdatedAtDesc()`; same pattern for masters, content modules, preview records; frontend loads full arrays then client-paginates at page size 10 (`frontend/src/api/templates.ts:57-59`, `TemplateListView.vue:180-182`) | Pageable endpoints + default page size + UI server paging (audit console already paginated) | Done | OPT-F4 residual successor |
-| SOR-P02 | High | Stream/spool the artifact pipeline | `DocumentGenerationEngine.java:99-125` full in-memory `byte[]` pipeline; `LibreOfficePdfConversionService.java:85` `readAllBytes` | Stream/spool to temp/MinIO earlier in the pipeline; size caps | In Progress | **2026-07-04 slice:** `GeneratedArtifactSizeGuard` + `max-generated-artifact-bytes` (50 MiB default) on `DocumentArtifactPipeline`; full stream/spool deferred |
+| SOR-P02 | High | Stream/spool the artifact pipeline | `DocumentGenerationEngine.java:99-125` full in-memory `byte[]` pipeline; `LibreOfficePdfConversionService.java:85` `readAllBytes` | Stream/spool to temp/MinIO earlier in the pipeline; size caps | Done | **2026-07-04:** `SpooledArtifact` + `ArtifactSpoolService`; pipeline spools finalized artifacts; engine uploads from temp file with `artifactBytes` null; `GeneratedArtifactSizeGuard` enforces file length; sync runtime streams from MinIO. Residual seam: PDF conversion internals still materialize bytes (`LibreOfficePdfConversionService.readAllBytes`) |
 | SOR-P03 | High | Fix sync PDF conversion blocking servlet threads | `PdfConversionOffloadSupport.java:20-32` — request thread blocks on `future.get` up to ~125 s; pool default 2 (`application.yml:55`); `PdfConversionExecutorConfig` AbortPolicy | Async 202+poll path, or isolated capacity + queue metrics for the sync path | Done | **2026-07-04:** queue default 0, fail-fast `PDF_CONVERSION_CAPACITY_EXCEEDED` (503 retryable), Micrometer `docgen.pdf.conversion.pool.*` |
 | SOR-P04 | Medium | LAZY user role/group collections | `ManagementUserEntity.java:55-64` — EAGER `@ElementCollection` role/group collections | LAZY + fetch-join where needed; no N+1 on list paths | Done | OPT-F5 residual |
 | SOR-P05 | Medium | HikariCP pool tuning for prod | `application.yml` datasource block has no pool settings | Explicit pool sizing + timeouts per environment profile | Done | — |
