@@ -4,11 +4,13 @@ import * as authApi from '@/api/auth'
 import { canAccessRouteWithCapability } from '@/auth/routeCapabilities'
 import { resolveApiErrorMessageKey, TOKEN_STORAGE_KEY } from '@/api/http'
 import { pathForRouteKey } from '@/routing/routeKeys'
-import type { ManagementSession } from '@/types/session'
+import type { LoginResult, ManagementSession } from '@/types/session'
 
 export const useSessionStore = defineStore('session', () => {
   const accessToken = ref<string | null>(localStorage.getItem(TOKEN_STORAGE_KEY))
   const session = ref<ManagementSession | null>(null)
+  const accessTokenExpiresAt = ref<string | null>(null)
+  const sessionAbsoluteDeadline = ref<string | null>(null)
   const loading = ref(false)
   const lastDenyTraceId = ref<string | null>(null)
 
@@ -23,9 +25,24 @@ export const useSessionStore = defineStore('session', () => {
     }
   }
 
+  /**
+   * Atomically applies a login/renew response: token, session view, and the
+   * server-issued renewal timestamps (never derived from the JWT or the local
+   * clock — spec B9).
+   */
+  function applyAuthResult(result: LoginResult) {
+    persistToken(result.accessToken)
+    session.value = result.session
+    accessTokenExpiresAt.value = result.accessTokenExpiresAt ?? result.session.expiresAt ?? null
+    sessionAbsoluteDeadline.value =
+      result.sessionAbsoluteDeadline ?? result.session.absoluteSessionExpiresAt ?? null
+  }
+
   function clearSession() {
     persistToken(null)
     session.value = null
+    accessTokenExpiresAt.value = null
+    sessionAbsoluteDeadline.value = null
   }
 
   function canAccessRoute(routeKey: string): boolean {
@@ -47,13 +64,30 @@ export const useSessionStore = defineStore('session', () => {
     loading.value = true
     try {
       const result = await authApi.login(username, password)
-      persistToken(result.accessToken)
-      session.value = result.session
+      applyAuthResult(result)
       const { useMastersStore } = await import('@/stores/masters')
       useMastersStore().clearListError()
     } finally {
       loading.value = false
     }
+  }
+
+  /**
+   * Silent sliding renewal (LR-B6, SCEN-UX-01): swaps the token and renewal
+   * timestamps in place without navigation, dialogs, or resetting other
+   * stores. Failures propagate to the caller; the shared 401 interceptor owns
+   * the clear-session + redirect flow (COR-F03).
+   */
+  async function renewSession(): Promise<void> {
+    const result = await authApi.renewSession()
+    if (!accessToken.value) {
+      // The user signed out while the renew round-trip was in flight: logout
+      // revoked the old jti, but the token in this late response was never
+      // revoked. Persisting it would resurrect the session client-side, so
+      // discard the result (spec D2: logout takes effect immediately).
+      return
+    }
+    applyAuthResult(result)
   }
 
   async function restoreSession(): Promise<boolean> {
@@ -62,7 +96,10 @@ export const useSessionStore = defineStore('session', () => {
     }
     loading.value = true
     try {
-      session.value = await authApi.fetchSession()
+      const restored = await authApi.fetchSession()
+      session.value = restored
+      accessTokenExpiresAt.value = restored.expiresAt ?? null
+      sessionAbsoluteDeadline.value = restored.absoluteSessionExpiresAt ?? null
       return true
     } catch {
       clearSession()
@@ -94,6 +131,8 @@ export const useSessionStore = defineStore('session', () => {
   return {
     accessToken,
     session,
+    accessTokenExpiresAt,
+    sessionAbsoluteDeadline,
     loading,
     authenticated,
     lastDenyTraceId,
@@ -102,6 +141,7 @@ export const useSessionStore = defineStore('session', () => {
     hasRole,
     defaultHomePath,
     login,
+    renewSession,
     restoreSession,
     logout,
     loginErrorMessageKey,

@@ -65,7 +65,12 @@ docgen:
     sse-heartbeat-interval: ${SSE_HEARTBEAT_INTERVAL:PT20S}
   jwt:
     secret: ${JWT_SECRET:local-dev-only-change-me-please-32bytes-min}
-    access-token-ttl: PT30M
+    access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:PT30M}
+  # LR-B6: sliding session renewal + revocation (absolute limit anchored at first login;
+  # revocation list backend must be redis outside tests — memory is transitional-test-only).
+  session:
+    absolute-ttl: ${SESSION_ABSOLUTE_TTL:PT8H}
+    revocation-store: ${SESSION_REVOCATION_STORE:redis}
   storage:
     provider: ${STORAGE_PROVIDER:minio}
     bucket: ${STORAGE_BUCKET:docgen-artifacts}

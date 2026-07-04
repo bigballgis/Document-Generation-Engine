@@ -19,6 +19,8 @@ import {
 import BrandLogo from '@/components/branding/BrandLogo.vue'
 import AppBreadcrumb from '@/components/layout/AppBreadcrumb.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import SessionLimitReminder from '@/components/session/SessionLimitReminder.vue'
+import { useSessionRenewal } from '@/composables/useSessionRenewal'
 import { BRAND_REGISTRY } from '@/config/brands'
 import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
 import { buildBreadcrumbTrail } from '@/navigation/breadcrumbTrail'
@@ -32,6 +34,14 @@ const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
 const sessionStore = useSessionStore()
+
+// ── Session renewal + absolute-limit reminder (LR-B6) ────────────────────────
+const { reminderVisible } = useSessionRenewal()
+
+async function handleSessionReminderAction() {
+  await sessionStore.logout()
+  await router.push({ name: 'login', query: { redirect: route.fullPath } })
+}
 
 // ── Sidebar collapse ──────────────────────────────────────────────────────────
 const COLLAPSED_KEY = 'docgen.nav.collapsed'
@@ -173,6 +183,8 @@ function handleBrandChange(brand: BrandPreset) {
         </el-dropdown>
       </div>
     </header>
+
+    <SessionLimitReminder v-if="reminderVisible" @action="handleSessionReminderAction" />
 
     <div class="shell-body">
       <aside class="shell-nav" :class="{ 'shell-nav--collapsed': navCollapsed }">

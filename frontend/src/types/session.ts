@@ -59,11 +59,17 @@ export interface ManagementSession {
   visibleRoutes: string[]
   capabilities?: ManagementCapabilities
   expiresAt: string
+  /** ISO-8601 UTC instant when the session hits the absolute 8h limit (LR-B6). */
+  absoluteSessionExpiresAt?: string
 }
 
-/** Not yet modeled in `openapi-v1.yaml` (management auth login). */
+/** Shared shape of the login and renew responses (LR-B6 renewal contract). */
 export interface LoginResult {
   accessToken: string
   tokenType: string
   session: ManagementSession
+  /** ISO-8601 UTC expiry of the issued access token. */
+  accessTokenExpiresAt?: string
+  /** ISO-8601 UTC absolute session deadline (first login + 8h). */
+  sessionAbsoluteDeadline?: string
 }

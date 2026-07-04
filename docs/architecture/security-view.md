@@ -35,6 +35,7 @@ This view summarizes architecture-level security boundaries. Detailed permission
 - During E05 integration hardening, enterprise identity and secret-provider integrations must remain fail-closed until complete rollout evidence is captured.
 - Management UI users must complete authenticated management-login session establishment before protected management surfaces rely on role or group context.
 - Current management-login baseline is local account authentication with password-hash verification; future enterprise SSO remains an extension seam, not a delivered fact in this iteration.
+- Management sessions renew by sliding renewal (activity-driven re-issue, 30-min token TTL, 8-hour absolute cap anchored at first login) and are revocable: logout and every renewal write the old token id (`jti`) to a Redis revocation list checked on every request (LR-B6, permission matrix §13.5, BDD-LRP-SESSION-001).
 
 ## Sensitive Data Handling
 
@@ -53,6 +54,7 @@ This view summarizes architecture-level security boundaries. Detailed permission
 - If AD Group resolution fails and no valid unexpired cache exists, deny according to the confirmed API error model.
 - If policy state cannot be loaded, deny protected operations rather than using stale or assumed policy.
 - If task or document ownership cannot be resolved for query/download, return only safe errors.
+- If the session revocation store (Redis) is unavailable, reject the request (`401 SESSION_VALIDATION_UNAVAILABLE`, retryable) — no code path allows a token through when revocation cannot be verified; production refuses to start with the in-memory revocation store (LR-B6).
 
 ## Container and network hardening (P15 / ADR-0030)
 

@@ -83,7 +83,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 **In-flight work:**
 - **CDP (this session)** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)
 - **P22 (other session)** — rendering + demos ([plan](detail/P22-demo-expansion-rendering-fidelity.md); formal phase accounting only here)
-- **LRP (In Progress — Wave LR-B activated 2026-07-04)** — launch readiness & deep optimization ([program](./launch-readiness-program.md); Waves **LR-A…LR-E**; tasks **`LR-*`**; program, not a formal phase)
+- **LRP (In Progress — Wave LR-B Done 2026-07-04; Wave LR-A activated 2026-07-04)** — launch readiness & deep optimization ([program](./launch-readiness-program.md); Waves **LR-A…LR-E**; tasks **`LR-*`**; program, not a formal phase)
 
 **P21 Done** — closure evidence in [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 

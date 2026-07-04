@@ -2,6 +2,7 @@ package com.bank.docgen.sharedkernel.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -21,6 +22,7 @@ public class JwtTokenService {
     private static final String CLAIM_GROUPS = "groups";
     private static final String CLAIM_DEFAULT_ROUTE = "defaultRoute";
     private static final String CLAIM_VISIBLE_ROUTES = "visibleRoutes";
+    private static final String CLAIM_SESSION_STARTED_AT = "sessionStartedAt";
 
     private final JwtProperties jwtProperties;
     private final SecretKey secretKey;
@@ -41,11 +43,15 @@ public class JwtTokenService {
                 .compact();
     }
 
+    /**
+     * Issues a management token whose expiry comes from {@code session.expiresAt()} so renewal
+     * can clamp it to the absolute session deadline (LR-B6). {@code jti} and
+     * {@code sessionStartedAt} are mandatory revocation/limit claims.
+     */
     public String createManagementToken(ManagementSessionClaims session) {
         Instant now = Instant.now();
-        Duration ttl = Duration.parse(jwtProperties.accessTokenTtl());
-        Instant expiresAt = now.plus(ttl);
         return Jwts.builder()
+                .id(session.jti())
                 .subject(session.username())
                 .claim(CLAIM_DISPLAY_NAME, session.displayName())
                 .claim(CLAIM_EMAIL, session.email())
@@ -54,8 +60,9 @@ public class JwtTokenService {
                 .claim(CLAIM_GROUPS, session.authorizedGroupCodes())
                 .claim(CLAIM_DEFAULT_ROUTE, session.defaultRoute())
                 .claim(CLAIM_VISIBLE_ROUTES, session.visibleRoutes())
+                .claim(CLAIM_SESSION_STARTED_AT, session.sessionStartedAt().getEpochSecond())
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(expiresAt))
+                .expiration(Date.from(session.expiresAt()))
                 .signWith(secretKey)
                 .compact();
     }
@@ -66,6 +73,13 @@ public class JwtTokenService {
 
     public ManagementSessionClaims parseManagementToken(String token) {
         var claims = parseClaims(token);
+        String jti = claims.getId();
+        Object sessionStartedAtRaw = claims.get(CLAIM_SESSION_STARTED_AT);
+        if (jti == null || jti.isBlank() || !(sessionStartedAtRaw instanceof Number sessionStartedAtSeconds)) {
+            // Pre-LR-B6 tokens without revocation/limit claims are rejected outright
+            // (spec B8 / [ASSUMED-LEGACY-TOKEN]): a one-time re-login replaces them.
+            throw new MalformedJwtException("Management token is missing required session claims");
+        }
         return new ManagementSessionClaims(
                 claims.getSubject(),
                 claims.get(CLAIM_DISPLAY_NAME, String.class),
@@ -76,6 +90,8 @@ public class JwtTokenService {
                 claims.get(CLAIM_GROUPS, List.class),
                 claims.get(CLAIM_DEFAULT_ROUTE, String.class),
                 claims.get(CLAIM_VISIBLE_ROUTES, List.class),
+                jti,
+                Instant.ofEpochSecond(sessionStartedAtSeconds.longValue()),
                 claims.getExpiration().toInstant()
         );
     }

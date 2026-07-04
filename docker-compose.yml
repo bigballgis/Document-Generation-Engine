@@ -31,7 +31,9 @@ services:
       retries: 10
 
   docgen-kafka:
-    image: bitnami/kafka:3.7
+    # LR-B4 (2026-07): Bitnami moved legacy tags to the bitnamilegacy namespace — the original bitnami/kafka:3.7 manifest is delisted from Docker Hub.
+    # Production must use company-approved registry coordinates instead (dependency policy, tech-stack-guardrails).
+    image: bitnamilegacy/kafka:3.7
     container_name: docgen-kafka
     environment:
       KAFKA_CFG_NODE_ID: 0
@@ -44,6 +46,15 @@ services:
       ALLOW_PLAINTEXT_LISTENER: "yes"
     ports:
       - "${KAFKA_PORT:-9092}:9092"
+    # LR-B4: broker API probe so dependent services can gate on Kafka readiness.
+    # Kafka stays an optional component (async transport v1 is in-process, ADR-0044);
+    # no depends_on entries are added elsewhere.
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/bitnami/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
 
   docgen-minio:
     image: minio/minio:RELEASE.2024-12-18T13-15-44Z

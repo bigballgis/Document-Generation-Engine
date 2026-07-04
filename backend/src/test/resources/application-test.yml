@@ -35,6 +35,8 @@ docgen:
   jwt:
     secret: test-jwt-secret-at-least-32-bytes-long!!
     access-token-ttl: PT5M
+  session:
+    revocation-store: memory
   storage:
     provider: filesystem
     bucket: docgen-test

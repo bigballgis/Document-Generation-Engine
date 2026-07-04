@@ -1,7 +1,7 @@
 # LRP Wave LR-B — Multi-Instance Correctness & Session Governance 「多实例正确性与会话治理」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (activated 2026-07-04)  
+**Wave status:** **Done** (2026-07-04 — B1–B8 all Done; batch 1 B1/B2/B7 + batch 2 wrap-up B3/B4/B5/B6/B8; evidence in [execution-sync-ledger.md](../execution-sync-ledger.md) § LRP)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer`, `doc-keeper`/`architecture-reviewer` for ADR-0044)  
 **Prerequisites:** none for B1/B3/B5/B7/B8; **B2/B4 depend on LR-B1 decision**; **B6 depends on explicit user confirmation of the session policy**
 
@@ -96,7 +96,7 @@
 - **Artifacts:** modified `SseEmitterRegistry.java`, `PreviewController.java` (+ batch stream controller), `frontend/nginx.conf`; tests; config documentation.
 - **Done when:** Unit tests + Docker curl smoke green + doc sync + commit review (LR-E1 closes the wave-level evidence).
 - **Maps:** CD-PIT-12; LR-E1.
-- **Status:** **In Progress** (2026-07-04 — backend heartbeat/anti-buffering headers/config-driven timeout + @PreDestroy + tests done; `frontend/nginx.conf` SSE location + Docker curl smoke pending; E2E owned by LR-E1)
+- **Status:** **Done** (2026-07-04 — batch 1: backend heartbeat/anti-buffering headers/config-driven timeout + @PreDestroy + tests; batch 2: `frontend/nginx.conf` SSE location (regex `progress-stream` match, `proxy_buffering off`, 90 s read/send timeouts) + Docker 4173 curl smoke — headers `X-Accel-Buffering: no` + `Cache-Control: no-cache` at backend (nginx consumes the former, preserves the latter — buffering off in effect); progress 10% → completed 524 ms apart (incremental, not burst); 78 s idle survival with `: keep-alive` at strict 20 s cadence ×3. Browser-level incremental proof stays **LR-E1**)
 
 ### LR-B4 — Async transport production topology
 
@@ -120,7 +120,7 @@
 - **Artifacts:** compose/Helm changes; ledger seam row update; ADR-0044 appendix.
 - **Done when:** Decision implemented or formally accepted + evidence archived + doc sync + commit review.
 - **Maps:** Ledger seam «Async batch transport»; P11/M14.
-- **Status:** **In Progress** (2026-07-04 — branch (b) recorded in ADR-0044 + seam re-annotated; dev compose kafka healthcheck + prod-profile evidence pending)
+- **Status:** **Done** (2026-07-04 — batch 1: branch (b) in-process accepted-for-v1 recorded in ADR-0044 + seam re-annotated; batch 2: dev compose `docgen-kafka` healthcheck (real broker API probe `kafka-broker-api-versions.sh`, healthy at t+5 s after start) + image source fix `bitnami/kafka:3.7` delisted from Docker Hub → `bitnamilegacy/kafka:3.7` (same image ID `cb4410499b04`; production must use company-approved registry coordinates — comment in compose); prod-profile stack 6 containers healthy evidence archived)
 
 ### LR-B5 — Graceful shutdown & drain
 
@@ -145,7 +145,7 @@
 - **Artifacts:** `application.yml` lifecycle block; executor config changes; registry shutdown hook; smoke evidence.
 - **Done when:** Restart smoke proven + gates green + doc sync + commit review.
 - **Maps:** Program §1 finding 7; LR-B8 (healthcheck pairs with drain).
-- **Status:** **In Progress** (2026-07-04 — graceful shutdown config + executor drain + SSE registry shutdown + GracefulShutdownConfigTest done; Docker restart smoke pending)
+- **Status:** **Done** (2026-07-04 — batch 1: graceful shutdown config + executor drain + SSE registry shutdown + GracefulShutdownConfigTest; batch 2 Docker restart smoke: 3 async-preview requests fired, `docker stop` exits in **1.606 s** (ExitCode 143), logs `Commencing graceful shutdown` → `Graceful shutdown complete` → Hikari shutdown; restart back to healthy in ~20 s)
 
 ### LR-B6 — Session renewal + revocation
 
@@ -172,7 +172,7 @@
 - **Artifacts:** behavior spec; backend token/filter/logout changes; frontend renewal + reminder; matrix/security-view updates; tests + E2E spec.
 - **Done when:** Confirmed policy implemented + scenarios green + gates + E2E/UIUX evidence + doc sync + commit review.
 - **Maps:** CD-PIT-13; COR-F03 (Done — reused); LR-C1/C2 (companion work-loss guards).
-- **Status:** Blocked (awaiting user session-policy confirmation)
+- **Status:** **Done** (2026-07-04 — full chain: BDD [BDD-LRP-SESSION-001](../../behavior/session-renewal-revocation.md) ready (policy user-confirmed) → backend (jti/sessionStartedAt claims, `POST /auth/renew` sliding renewal + 8 h cap truncation, Redis revocation fail-closed, logout writes revocation, legacy token rejected, 3 new error codes + messageKeys, prod memory-store startup guard) → frontend (session store timestamps/renewSession, `useSessionRenewal` silent renewal, `SessionLimitReminder` banner, apiError + i18n en/zh) → E2E Playwright Part A (silent renewal without interrupting editing) + Part B (reminder/i18n/redirect) with TTL environment probe → UIUX initial FAIL (button contrast) → tokenized 3-state fix 4.84:1/7.09:1 → re-review **PASS** (manifest `frontend/e2e/evidence/LRP-B6-uiux-manifest.md`, 7 screenshots) → security review **PASS-with-suggestions** (agent 23c9b81a); 🟡#2 race guard fixed (late renew response after logout discarded + test); implementation deviations written back to spec §14.1; permission matrix §13.5 + security-view updated)
 
 ### LR-B7 — Idempotency digest hard-fail + rate-limit filter fail-closed alignment
 
@@ -220,14 +220,14 @@
 - **Artifacts:** `docker-compose.prod.yml` + `docker-compose.yml` changes; JVM flag change; evidence in ledger.
 - **Done when:** Prod stack healthy under limits + evidence archived + doc sync + commit review.
 - **Maps:** Program §1 finding 7; LR-B5 (drain + health pair); ADR-0030.
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-04 — prod compose backend real healthcheck (`wget http://127.0.0.1:8080/healthz`, start_period 90 s for Flyway) + frontend `depends_on: service_healthy` + mem/cpu limits (backend 1536m/2.0, frontend 256m/0.5 — same order of magnitude as Helm values) + `JAVA_TOOL_OPTIONS -XX:MaxRAMPercentage=75.0` (container log confirms `Picked up`). Environment note: sandbox cgroup v2 lacks the memory controller, so limits are evidenced via HostConfig inspection (Created-state container Mem=1610612736 / NanoCpus=2000000000) + run with a no-limits override — a sandbox constraint, not a config defect; production K8s/normal Docker unaffected)
 
 ---
 
-## 2. Exit gate (Wave LR-B)
+## 2. Exit gate (Wave LR-B) — **all met, 2026-07-04**
 
-- [ ] ADR-0044 Accepted; Helm/compose consistent with the decision
-- [ ] Schedulers mutex-guarded (or single-replica insurance recorded); SSE heartbeat + proxy config landed
-- [ ] Graceful shutdown proven by restart smoke; prod healthcheck + limits live
-- [ ] Session policy confirmed → renewal + revocation shipped with E2E evidence
-- [ ] Ledger seams «Async batch transport» / «Redisson multi-instance locks» / «Runtime rate limit» rows resolved or ADR-annotated
+- [x] ADR-0044 Accepted; Helm/compose consistent with the decision — LR-B1 (helm lint green; compose single-replica comments; LR-B4/B8 compose changes follow the decision)
+- [x] Schedulers mutex-guarded (or single-replica insurance recorded); SSE heartbeat + proxy config landed — LR-B2 (ShedLock V46 + 3 schedulers) + LR-B3 (heartbeat/headers + nginx SSE location + Docker curl smoke)
+- [x] Graceful shutdown proven by restart smoke; prod healthcheck + limits live — LR-B5 (`docker stop` 1.606 s, graceful shutdown logs) + LR-B8 (real `/healthz` healthcheck + mem/cpu limits + MaxRAMPercentage)
+- [x] Session policy confirmed → renewal + revocation shipped with E2E evidence — LR-B6 (BDD-LRP-SESSION-001; Playwright Part A/B green; UIUX PASS; security review PASS-with-suggestions)
+- [x] Ledger seams «Async batch transport» / «Redisson multi-instance locks» / «Runtime rate limit» rows resolved or ADR-annotated — accepted-for-v1 per ADR-0044 branch (b) / ADR-0044 + ShedLock / ADR-0031 alignment recorded (LR-B4/B1+B2/B7)

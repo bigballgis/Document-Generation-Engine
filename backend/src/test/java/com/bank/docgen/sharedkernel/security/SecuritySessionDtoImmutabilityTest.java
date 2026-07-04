@@ -53,7 +53,8 @@ class SecuritySessionDtoImmutabilityTest {
                 "/dashboard",
                 routes,
                 null,
-                Instant.parse("2030-01-01T00:00:00Z")
+                Instant.parse("2030-01-01T00:00:00Z"),
+                Instant.parse("2030-01-01T08:00:00Z")
         );
 
         roles.add("GLOBAL_ADMIN");

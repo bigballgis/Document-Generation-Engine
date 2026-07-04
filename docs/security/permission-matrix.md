@@ -491,4 +491,32 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 | 无权控件策略 | 隐藏（§13 已确认） |
 | API 管理员角色 | 并入 GLOBAL/GROUP 管理员（§13 已确认） |
 
+### 13.5 管理会话治理：滑动续期与撤销（LR-B6，2026-07-04 确认并交付）
+
+**来源：** [BDD-LRP-SESSION-001](../behavior/session-renewal-revocation.md)（会话策略由用户 2026-07-04 确认）。
+边界维持 [ADR-0036](../adr/authorization-security/0036-local-account-store-authorization-authority.md)：本地账户 + JWT，**无 SSO/OIDC**；本节仅作用于管理端令牌路径，运行时 API 凭证体系不受影响。会话行为对全部 7 个管理端角色一致生效。
+
+**滑动续期语义：**
+
+- 用户活动即续期：前端在令牌临过期且近期有活动时静默调用 `POST /api/management/v1/auth/renew`，重新签发访问令牌，不打断编辑。
+- 访问令牌 TTL 30 分钟（`docgen.jwt.access-token-ttl: PT30M`，env 可覆盖 `JWT_ACCESS_TOKEN_TTL`）。
+- 绝对会话上限 8 小时（`docgen.session.absolute-ttl: PT8H`，env 可覆盖 `SESSION_ABSOLUTE_TTL`），自首次登录 `sessionStartedAt` 起计；新令牌过期时间 = min(now + TTL, sessionStartedAt + 8h)，达到上限后拒绝续期（`401 SESSION_ABSOLUTE_LIMIT_REACHED`），用户重新登录后上限重新起算。
+- 续期必须重新校验账号仍启用（enabled、未逻辑删除），并按 login 同路径重新派生角色/分组/路由 claims——授权变更最迟 30 分钟内生效；账号停用后续期被拒绝（fail-closed）。
+
+**撤销语义：**
+
+- 管理令牌携带唯一 `jti`；logout 与续期成功都会将旧 `jti` 写入 Redis 撤销名单（key 前缀 `docgen:session:revoked:`，TTL = 旧令牌剩余寿命，自过期无需清理任务）。
+- `JwtAuthenticationFilter` 逐请求校验撤销名单；撤销命中返回 `401 SESSION_REVOKED`——logout 从 log-only 升级为真实失效，旧令牌不可重放。
+
+**Fail-closed：**
+
+- 撤销名单（Redis）不可用时**拒绝请求**（`401 SESSION_VALIDATION_UNAVAILABLE`，retryable=true）；不存在「撤销校验失败仍放行」的代码路径；logout/renew 时撤销写入失败返回 503（fail-closed，前端仍清空本地会话）。
+- 撤销存储 `docgen.session.revocation-store` 取值 `redis`（默认）/ `memory`（transitional-test-only）；`docgen.environment=prod` 且 store=memory 时**拒绝启动**（启动守卫已实现）。
+
+**发布切换期存量旧令牌（legacy token）：**
+
+- 无 `jti`/`sessionStartedAt` claim 的旧令牌一律视为无效（`401 SESSION_EXPIRED`），用户一次性重新登录即可；不做兼容放行。
+
+实现偏差与已接受竞态（并发 renew、跨 tab 去重）见 [BDD-LRP-SESSION-001 §Implementation deviations](../behavior/session-renewal-revocation.md)。
+
 

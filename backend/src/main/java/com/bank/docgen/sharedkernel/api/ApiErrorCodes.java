@@ -6,6 +6,9 @@ public final class ApiErrorCodes {
     public static final String INTERNAL_ERROR = "INTERNAL_ERROR";
     public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
     public static final String SESSION_EXPIRED = "SESSION_EXPIRED";
+    public static final String SESSION_ABSOLUTE_LIMIT_REACHED = "SESSION_ABSOLUTE_LIMIT_REACHED";
+    public static final String SESSION_REVOKED = "SESSION_REVOKED";
+    public static final String SESSION_VALIDATION_UNAVAILABLE = "SESSION_VALIDATION_UNAVAILABLE";
     public static final String ACCESS_DENIED = "ACCESS_DENIED";
     public static final String MASTER_NOT_FOUND = "MASTER_NOT_FOUND";
     public static final String MASTER_VALIDATION_FAILED = "MASTER_VALIDATION_FAILED";

@@ -6,6 +6,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
+import com.bank.docgen.authorization.management.session.SessionRevocationStore;
+import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.JwtTokenService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import io.jsonwebtoken.JwtException;
@@ -29,11 +31,14 @@ class JwtAuthenticationFilterTest {
     @Mock
     private JwtTokenService jwtTokenService;
 
+    @Mock
+    private SessionRevocationStore sessionRevocationStore;
+
     private JwtAuthenticationFilter filter;
 
     @BeforeEach
     void setUp() {
-        filter = new JwtAuthenticationFilter(jwtTokenService);
+        filter = new JwtAuthenticationFilter(jwtTokenService, sessionRevocationStore, new TraceIdProvider());
     }
 
     @AfterEach
@@ -82,6 +87,7 @@ class JwtAuthenticationFilterTest {
                 Instant.now().plusSeconds(3600)
         );
         when(jwtTokenService.parseManagementToken("valid-token")).thenReturn(session);
+        when(sessionRevocationStore.isRevoked(session.jti())).thenReturn(false);
 
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/management/v1/templates");
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer valid-token");

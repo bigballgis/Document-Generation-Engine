@@ -375,10 +375,16 @@ class DomainDtoImmutabilityTest {
                 "/templates",
                 List.of("/templates"),
                 null,
-                Instant.parse("2026-07-04T12:00:00Z")
+                Instant.parse("2026-07-04T12:00:00Z"),
+                Instant.parse("2026-07-04T20:00:00Z")
         );
 
-        ManagementAuthService.LoginSession loginSession = new ManagementAuthService.LoginSession("token", session);
+        ManagementAuthService.LoginSession loginSession = new ManagementAuthService.LoginSession(
+                "token",
+                Instant.parse("2026-07-04T12:00:00Z"),
+                Instant.parse("2026-07-04T20:00:00Z"),
+                session
+        );
 
         roles.add("TEMPLATE_APPROVER");
 

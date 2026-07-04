@@ -1,5 +1,6 @@
 package com.bank.docgen.infrastructure.config;
 
+import com.bank.docgen.authorization.management.web.JwtAuthenticationFilter;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorDetail;
@@ -42,6 +43,34 @@ public class ManagementSecurityHandlers implements AuthenticationEntryPoint, Acc
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException {
+        // LR-B6: the JWT filter flags revocation-list outcomes so 401s stay distinguishable
+        // by error code (SESSION_REVOKED / SESSION_VALIDATION_UNAVAILABLE vs SESSION_EXPIRED).
+        Object sessionValidationFailure =
+                request.getAttribute(JwtAuthenticationFilter.SESSION_VALIDATION_FAILURE_ATTRIBUTE);
+        if (ApiErrorCodes.SESSION_REVOKED.equals(sessionValidationFailure)) {
+            writeError(
+                    response,
+                    request,
+                    HttpStatus.UNAUTHORIZED,
+                    ApiErrorCodes.SESSION_REVOKED,
+                    ApiErrorCategories.AUTHENTICATION,
+                    "api.error.authentication.sessionRevoked",
+                    false
+            );
+            return;
+        }
+        if (ApiErrorCodes.SESSION_VALIDATION_UNAVAILABLE.equals(sessionValidationFailure)) {
+            writeError(
+                    response,
+                    request,
+                    HttpStatus.UNAUTHORIZED,
+                    ApiErrorCodes.SESSION_VALIDATION_UNAVAILABLE,
+                    ApiErrorCategories.AUTHENTICATION,
+                    "api.error.authentication.sessionValidationUnavailable",
+                    true
+            );
+            return;
+        }
         writeError(
                 response,
                 request,
