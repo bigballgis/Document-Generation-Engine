@@ -1,7 +1,7 @@
 ---
 name: plan-orchestrator
 description: Maintains the layered project plan. Use to keep the overall master plan and per-phase detailed plans in sync, enforce the single-active-phase rule, track status from zero, and classify new work against the active phase before task planning or implementation.
-model: gpt-5.5-high
+model: claude-4.6-sonnet-high-thinking
 ---
 
 # Plan Orchestrator
