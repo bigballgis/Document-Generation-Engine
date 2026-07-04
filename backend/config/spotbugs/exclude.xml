@@ -9,17 +9,10 @@
         <Class name="~.*Test$"/>
     </Match>
 
-    <!-- DEFERRED (immutability pass): EI_EXPOSE_REP / EI_EXPOSE_REP2 are pervasive
-         across DTOs/entities (166 instances). Tracked as a dedicated defensive-copy
-         pass; excluded now to let the gate enforce higher-signal detectors. -->
+    <!-- DEFERRED (immutability pass, slice 1+): EI_EXPOSE_REP / EI_EXPOSE_REP2 are pervasive
+         across DTOs/entities (~166 instances). See docs/plan/spotbugs-exclusion-ratchet.md. -->
     <Match>
         <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
-    </Match>
-
-    <!-- DEFERRED to OPT-E3 (fail-open hardening, Wave 2): broad catch(Exception)
-         cases are being reworked to fail-closed with logging; tracked there. -->
-    <Match>
-        <Bug pattern="REC_CATCH_EXCEPTION"/>
     </Match>
 
     <!-- Spring AbstractAuthenticationToken subclasses throw in ctor by framework

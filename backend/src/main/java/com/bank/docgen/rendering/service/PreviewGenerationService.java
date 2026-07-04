@@ -32,6 +32,7 @@ import com.bank.docgen.template.service.TemplateService;
 import com.bank.docgen.template.service.TestDataSetService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.util.HexFormat;
@@ -39,12 +40,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PreviewGenerationService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PreviewGenerationService.class);
     private static final EncryptionOptionsView NO_ENCRYPTION =
             new EncryptionOptionsView(false, null, null, null);
     private static final int PREVIEW_HISTORY_LIMIT = 50;
@@ -207,7 +211,8 @@ public class PreviewGenerationService {
                 testDataSetService.lockForEvidence(templateId, request.testDataSetId());
             }
             return toView(preview, warnings, bindings);
-        } catch (Exception ex) {
+        } catch (IOException | RuntimeException ex) {
+            LOG.warn("Preview generation failed for template {} preview {}: {}", templateId, preview.getId(), ex.getMessage());
             preview.markFailed();
             previewRecordRepository.save(preview);
             if (throwOnFailure) {

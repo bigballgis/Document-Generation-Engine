@@ -20,16 +20,21 @@ import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DocumentGenerationEngine {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DocumentGenerationEngine.class);
 
     private final TemplateVersionRepository templateVersionRepository;
     private final AnchorBindingRepository anchorBindingRepository;
@@ -104,7 +109,8 @@ public class DocumentGenerationEngine {
                     variables,
                     pinnedModuleStructures
             );
-        } catch (Exception ex) {
+        } catch (IOException | RuntimeException ex) {
+            LOG.warn("Document generation assembly failed for template {}: {}", template.getId(), ex.getMessage());
             throw new TemplateValidationException("api.error.rendering.generationFailed");
         }
         DocumentArtifactPipeline.GeneratedArtifact artifact = PdfConversionStampPlanContext.runWith(

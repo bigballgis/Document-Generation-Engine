@@ -72,7 +72,7 @@ rendering-adjacent structural refactors until P22 lands.
 | SOR-3 | Performance & scalability | P1 | 6 | Done | P01–P06 Done (2026-07-04) |
 | SOR-4 | Frontend structural health | P1/P2 | 7 | Done | F01–F07 Done (2026-07-04); F04 panel store consolidation |
 | SOR-5 | Contract & i18n integrity | P1 | 5 | Done | K01–K05 Done (2026-07-04); openapi-typescript codegen + parity test |
-| SOR-6 | Architecture & code health | P2 | 6 | In Progress | A01/A04 Done; A02/A03 blocked until P22 closes; A05/A06 remain |
+| SOR-6 | Architecture & code health | P2 | 6 | In Progress | A01/A04/A05 Done; A02/A03 blocked until P22 closes; A06 remains |
 | SOR-7 | Test depth & operational readiness | P2 | 10 | In Progress | O01/O02/O03/O05/O06 Done; T01 Done; T02–T03 remain |
 
 ---
@@ -172,7 +172,7 @@ script-only (PowerShell: `scripts/p0-gate.ps1`, `scripts/release-gate.ps1`) and 
 | SOR-A02 | Medium | Rendering-facing ports/DTOs (decouple rendering from template/authorization) | `PreviewGenerationService` imports `TemplateService`/`TestDataSetService`; `AsyncBatchTestOrchestrator` imports `GroupAccessService` | Ports/DTOs at the rendering boundary; module-boundary doc updated | Not Started | **Coordinate with P22 session; do not start while P22 edits rendering** |
 | SOR-A03 | Medium | Continue god-service split (OPT-D5 remaining) | `ApiManagementService` 535 L, `BatchGenerationService` 511 L, `TemplateLifecycleService` 544 L, `TemplateVersionLineService` 586 L, `DocxAssembler` 638 L | Focused services extracted per OPT-D5 pattern; `DocxAssembler` split only after P22 lands | Not Started | OPT-D5 (§10); P22 overlap |
 | SOR-A04 | Medium | Declarative authorization decision + route-coverage tests | Zero `@PreAuthorize` in the codebase; manual `GroupAccessService` calls per endpoint | Decision recorded (= OPT-D6); route-coverage authz contract tests regardless of outcome | Done | **2026-07-04:** ADR-0001 reaffirmed (service-layer `GroupAccessService`, not `@PreAuthorize`); `ManagementAuthorizationContractTest` + `ManagementAuthorizationRegistry` cover **19** controllers / **21** GAS anchors + **12** delegates + **4** exceptions; `ManagementOpenApiPathSanityTest` for documented paths; Q/OPT-D6 closed |
-| SOR-A05 | Medium | SpotBugs exclusion ratchet | `backend/config/spotbugs/exclude.xml:12-23` excludes 166× `EI_EXPOSE_REP` + 8× `REC_CATCH_EXCEPTION` | Ratchet plan reduces exclusions over successive slices | Not Started | — |
+| SOR-A05 | Medium | SpotBugs exclusion ratchet | `backend/config/spotbugs/exclude.xml` — `REC_CATCH_EXCEPTION` removed (slice 0); `EI_EXPOSE_REP` deferred (~166) | Ratchet plan reduces exclusions over successive slices | Done | **2026-07-04:** [spotbugs-exclusion-ratchet.md](./spotbugs-exclusion-ratchet.md); 11 REC_CATCH sites narrowed; `SpotBugsExclusionRatchetTest` guard (`BASELINE_MATCH_COUNT=3`) |
 | SOR-A06 | Medium | Distributed tracing | Micrometer Prometheus registry only; no OTel dependency | Micrometer Tracing + OTLP export; traceId propagated to audit consistently | Not Started | Pairs with SOR-O01 |
 
 ---

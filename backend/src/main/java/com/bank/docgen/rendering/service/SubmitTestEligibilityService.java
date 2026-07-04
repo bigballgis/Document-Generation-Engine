@@ -18,6 +18,7 @@ import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.bank.docgen.template.service.CoverageThresholdResolver;
 import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
 import com.bank.docgen.template.service.TemplateService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -169,7 +170,8 @@ public class SubmitTestEligibilityService {
         try {
             Map<String, Object> vars = objectMapper.readValue(variablesJson, new TypeReference<>() {});
             return new ArrayList<>(vars.keySet());
-        } catch (Exception ex) {
+        } catch (JsonProcessingException ex) {
+            LOG.debug("Failed to parse variable keys JSON: {}", ex.getMessage());
             return List.of();
         }
     }

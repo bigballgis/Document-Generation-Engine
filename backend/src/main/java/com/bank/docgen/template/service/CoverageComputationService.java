@@ -17,6 +17,7 @@ import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -24,11 +25,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CoverageComputationService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CoverageComputationService.class);
 
     public static final String DIMENSION_REQUIRED_VARIABLES = "REQUIRED_VARIABLES";
     public static final String DIMENSION_REQUIRED_SAMPLES = "REQUIRED_SAMPLES";
@@ -207,7 +212,8 @@ public class CoverageComputationService {
             java.util.Map<String, Object> variables = objectMapper.readValue(variablesJson, new TypeReference<>() {
             });
             return new ArrayList<>(variables.keySet());
-        } catch (Exception ex) {
+        } catch (JsonProcessingException ex) {
+            LOG.debug("Failed to parse test data set variables JSON: {}", ex.getMessage());
             return List.of();
         }
     }

@@ -2,15 +2,20 @@ package com.bank.docgen.rendering;
 
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.StandardProtectionPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PdfEncryptionService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PdfEncryptionService.class);
 
     public byte[] encrypt(byte[] pdfBytes, EncryptionOptionsView encryption) {
         if (encryption == null || !Boolean.TRUE.equals(encryption.enabled())) {
@@ -32,7 +37,8 @@ public class PdfEncryptionService {
                 document.save(output);
                 return output.toByteArray();
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
+            LOG.warn("PDF encryption failed: {}", ex.getMessage());
             throw new EncryptionFailedException();
         }
     }

@@ -99,4 +99,6 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | **[system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md)** | **Current consolidated review (SOR-0…7, 2026-07-03)**: plan truth, CI gate automation, security seams, performance, frontend structure, contract/i18n, architecture, ops readiness — all tasks Not Started |
 | **[comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)** | **Unified prioritized map (COR-0…6): docs sync, API contract, template workflow, frontend UX, performance, E2E, P14–P20 — start here (2026-06-23)** |
 | [optimization-plan.md](./optimization-plan.md) | Technical debt detail: quality gates, coverage, backend architecture/security/performance (OPT-A…G) |
+| [spotbugs-exclusion-ratchet.md](./spotbugs-exclusion-ratchet.md) | SpotBugs exclude.xml ratchet (SOR-A05): baseline `<Match>` count, banned patterns, EI slice cadence |
+| [coverage-ratchet-plan.md](./coverage-ratchet-plan.md) | JaCoCo / Vitest bundle floors (SOR-C02) |
 | [ux-upgradeability-optimization-plan.md](./ux-upgradeability-optimization-plan.md) | Historical UX waves (UX-A…G); verify Done claims against comprehensive roadmap |

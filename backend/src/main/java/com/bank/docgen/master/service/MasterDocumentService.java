@@ -25,6 +25,7 @@ import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +48,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class MasterDocumentService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MasterDocumentService.class);
     private static final String DOCX_CONTENT_TYPE =
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
     private static final long DEFAULT_MAX_DOCX_UPLOAD_BYTES = 50L * 1024L * 1024L;
@@ -365,7 +369,8 @@ public class MasterDocumentService {
     private void storeDocx(String storageKey, MultipartFile docxFile) {
         try (InputStream inputStream = docxFile.getInputStream()) {
             objectStoragePort.put(storageKey, inputStream, docxFile.getSize(), DOCX_CONTENT_TYPE);
-        } catch (Exception ex) {
+        } catch (IOException ex) {
+            LOG.warn("Failed to store master DOCX at {}: {}", storageKey, ex.getMessage());
             throw new MasterValidationException("api.error.master.storageFailed");
         }
     }
@@ -376,7 +381,8 @@ public class MasterDocumentService {
             try (ByteArrayInputStream extractorStream = new ByteArrayInputStream(bytes)) {
                 return docxAnchorExtractor.extractOrderedAnchorIds(extractorStream);
             }
-        } catch (Exception ex) {
+        } catch (IOException ex) {
+            LOG.warn("Failed to extract anchors from uploaded DOCX: {}", ex.getMessage());
             throw new MasterValidationException("api.error.master.anchorExtractionFailed");
         }
     }

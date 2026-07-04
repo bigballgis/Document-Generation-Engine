@@ -12,7 +12,18 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.StatObjectArgs;
+import io.minio.errors.ErrorResponseException;
+import io.minio.errors.InsufficientDataException;
+import io.minio.errors.InternalException;
+import io.minio.errors.InvalidResponseException;
+import io.minio.errors.ServerException;
+import io.minio.errors.XmlParserException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +31,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "docgen.storage.provider", havingValue = "minio", matchIfMissing = true)
 public class MinioObjectStorage implements ObjectStoragePort {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MinioObjectStorage.class);
     private static final String RESILIENCE_INSTANCE = "objectStorage";
 
     private final MinioClient minioClient;
@@ -66,7 +78,18 @@ public class MinioObjectStorage implements ObjectStoragePort {
                     .object(objectKey)
                     .build());
             return true;
-        } catch (Exception ex) {
+        } catch (ErrorResponseException ex) {
+            LOG.debug("Object not found for key {}: {}", objectKey, ex.errorResponse().code());
+            return false;
+        } catch (IOException
+                | InvalidKeyException
+                | NoSuchAlgorithmException
+                | InsufficientDataException
+                | InternalException
+                | InvalidResponseException
+                | ServerException
+                | XmlParserException ex) {
+            LOG.warn("Failed to stat object key {}: {}", objectKey, ex.getMessage());
             return false;
         }
     }

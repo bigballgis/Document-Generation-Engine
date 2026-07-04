@@ -13,15 +13,19 @@ import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
 import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
 import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PreviewArtifactDownloadService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PreviewArtifactDownloadService.class);
     private static final EncryptionOptionsView NO_ENCRYPTION =
             new EncryptionOptionsView(false, null, null, null);
 
@@ -101,7 +105,8 @@ public class PreviewArtifactDownloadService {
         byte[] docxBytes;
         try (InputStream docxStream = objectStoragePort.get(docxKey)) {
             docxBytes = docxStream.readAllBytes();
-        } catch (Exception ex) {
+        } catch (IOException ex) {
+            LOG.warn("Failed to read preview DOCX artifact {}: {}", docxKey, ex.getMessage());
             throw new PreviewArtifactNotAvailableException();
         }
         DocumentArtifactPipeline.GeneratedArtifact pdfArtifact = documentArtifactPipeline.finalizeArtifact(
@@ -120,7 +125,8 @@ public class PreviewArtifactDownloadService {
                         pdfArtifact.contentType()
                 );
             }
-        } catch (Exception ex) {
+        } catch (IOException | RuntimeException ex) {
+            LOG.warn("Failed to materialize preview PDF for {}: {}", preview.getId(), ex.getMessage());
             throw new PreviewArtifactNotAvailableException();
         }
         preview.setPdfArtifactStorageKey(pdfKey);

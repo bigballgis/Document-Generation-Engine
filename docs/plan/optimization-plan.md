@@ -78,7 +78,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | B4 | M | Add ESLint a11y plugin | `frontend/eslint.config.js` + `eslint-plugin-vuejs-accessibility` | `flat/recommended` a11y rules active; `pnpm -C frontend lint` green (0 problems) | **Done** |
 | B5 | M | First commit + baseline tag | branch `main` has no commits (F6) | Initial commit of current tree + tag (e.g. `baseline-2026-06-23`) so optimization diffs are auditable | Not Started (awaiting go-ahead) |
 
-**Gate evidence (2026-06-23, re-verified):** backend `mvn -B -ntp -f backend/pom.xml verify` → BUILD SUCCESS, 71 tests, 0 Checkstyle / PMD / SpotBugs violations, JaCoCo check passed. Frontend `pnpm lint` 0 problems; `pnpm test` (with coverage) passes ratchet floors. Ratchet debts recorded in `config/spotbugs/exclude.xml` (EI_EXPOSE_REP×166 deferred to an immutability pass; REC_CATCH_EXCEPTION×8 deferred to OPT-E3).
+**Gate evidence (2026-06-23, re-verified):** backend `mvn -B -ntp -f backend/pom.xml verify` → BUILD SUCCESS, 71 tests, 0 Checkstyle / PMD / SpotBugs violations, JaCoCo check passed. Frontend `pnpm lint` 0 problems; `pnpm test` (with coverage) passes ratchet floors. Ratchet debts: `EI_EXPOSE_REP`×~166 deferred to immutability pass ([spotbugs-exclusion-ratchet.md](./spotbugs-exclusion-ratchet.md)); `REC_CATCH_EXCEPTION` cleared in SOR-A05 slice 0 (2026-07-04).
 
 ### OPT-C Test coverage recovery
 
