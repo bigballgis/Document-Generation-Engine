@@ -72,7 +72,7 @@ rendering-adjacent structural refactors until P22 lands.
 | SOR-3 | Performance & scalability | P1 | 6 | Done | P01–P06 Done (2026-07-04) |
 | SOR-4 | Frontend structural health | P1/P2 | 7 | Done | F01–F07 Done (2026-07-04); F04 panel store consolidation |
 | SOR-5 | Contract & i18n integrity | P1 | 5 | Done | K01–K05 Done (2026-07-04); openapi-typescript codegen + parity test |
-| SOR-6 | Architecture & code health | P2 | 6 | Not Started | A02/A03 blocked until P22 closes |
+| SOR-6 | Architecture & code health | P2 | 6 | In Progress | A01 Done; A02/A03 blocked until P22 closes |
 | SOR-7 | Test depth & operational readiness | P2 | 10 | In Progress | O01/O02/O03/O05/O06 Done; T01 Done; T02–T03 remain |
 
 ---
@@ -168,7 +168,7 @@ script-only (PowerShell: `scripts/p0-gate.ps1`, `scripts/release-gate.ps1`) and 
 
 | ID | Pri | Title | Evidence (verified 2026-07-03) | Acceptance hint | Status | Cross-ref |
 | --- | --- | --- | --- | --- | --- | --- |
-| SOR-A01 | Medium | Split `GlobalExceptionHandler` God class | `GlobalExceptionHandler.java` — **696** lines, cross-module, importing 10+ modules | Per-module `@RestControllerAdvice`; envelope builder stays in sharedkernel | Not Started | — |
+| SOR-A01 | Medium | Split `GlobalExceptionHandler` God class | `GlobalExceptionHandler.java` — **696** lines, cross-module, importing 10+ modules | Per-module `@RestControllerAdvice`; envelope builder stays in sharedkernel | Done | — |
 | SOR-A02 | Medium | Rendering-facing ports/DTOs (decouple rendering from template/authorization) | `PreviewGenerationService` imports `TemplateService`/`TestDataSetService`; `AsyncBatchTestOrchestrator` imports `GroupAccessService` | Ports/DTOs at the rendering boundary; module-boundary doc updated | Not Started | **Coordinate with P22 session; do not start while P22 edits rendering** |
 | SOR-A03 | Medium | Continue god-service split (OPT-D5 remaining) | `ApiManagementService` 535 L, `BatchGenerationService` 511 L, `TemplateLifecycleService` 544 L, `TemplateVersionLineService` 586 L, `DocxAssembler` 638 L | Focused services extracted per OPT-D5 pattern; `DocxAssembler` split only after P22 lands | Not Started | OPT-D5 (§10); P22 overlap |
 | SOR-A04 | Medium | Declarative authorization decision + route-coverage tests | Zero `@PreAuthorize` in the codebase; manual `GroupAccessService` calls per endpoint | Decision recorded (= OPT-D6); route-coverage authz contract tests regardless of outcome | Not Started | OPT-D6 successor |

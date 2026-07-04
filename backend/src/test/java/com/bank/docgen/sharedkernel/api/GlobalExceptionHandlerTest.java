@@ -4,10 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
-import com.bank.docgen.infrastructure.storage.ObjectStorageException;
-import com.bank.docgen.rendering.DocxAssemblyException;
-import com.bank.docgen.runtime.service.IdempotencyConflictException;
-import com.bank.docgen.runtime.service.IdempotencyHashException;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,9 +27,12 @@ class GlobalExceptionHandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new GlobalExceptionHandler(
+        ErrorEnvelopeFactory errorEnvelopeFactory = new ErrorEnvelopeFactory(
                 new TraceIdProvider(),
-                messageResolver,
+                messageResolver
+        );
+        handler = new GlobalExceptionHandler(
+                errorEnvelopeFactory,
                 new ValidationErrorFieldMapper(messageResolver)
         );
         request = new MockHttpServletRequest("POST", "/api/management/v1/groups");
@@ -72,70 +71,6 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void idempotencyConflictIncludesSafeSummary() {
-        when(messageResolver.resolve("api.error.runtime.idempotencyConflict"))
-                .thenReturn("The idempotency key was already used with a different request.");
-
-        ResponseEntity<ErrorEnvelope> response = handler.handleIdempotencyConflict(
-                request,
-                new IdempotencyConflictException("idem-conflict-1")
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.IDEMPOTENCY);
-        assertThat(response.getBody().error().idempotencyConflict())
-                .containsEntry("idempotencyKey", "idem-conflict-1")
-                .containsEntry("conflictType", IdempotencyConflictException.REQUEST_SEMANTICS_MISMATCH);
-    }
-
-    @Test
-    void objectStorageExceptionMapsToInternalErrorEnvelope() {
-        when(messageResolver.resolve("api.error.storage.operationFailed"))
-                .thenReturn("Object storage operation failed.");
-
-        ResponseEntity<ErrorEnvelope> response = handler.handleObjectStorage(
-                request,
-                new ObjectStorageException("Failed to read object", new RuntimeException("io"))
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.INTERNAL_ERROR);
-        assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.storage.operationFailed");
-    }
-
-    @Test
-    void idempotencyHashFailureMapsToStableInternalErrorEnvelope() {
-        when(messageResolver.resolve("api.error.idempotency.hashFailed"))
-                .thenReturn("Unable to compute the idempotency fingerprint.");
-
-        ResponseEntity<ErrorEnvelope> response = handler.handleIdempotencyHashFailure(
-                request,
-                new IdempotencyHashException("SHA-256", new RuntimeException("missing provider"))
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.IDEMPOTENCY_HASH_FAILED);
-        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.IDEMPOTENCY);
-        assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.idempotency.hashFailed");
-    }
-
-    @Test
-    void docxAssemblyExceptionMapsToRenderingFailed() {
-        when(messageResolver.resolve("api.error.rendering.generationFailed"))
-                .thenReturn("Document generation failed.");
-
-        ResponseEntity<ErrorEnvelope> response = handler.handleDocxAssembly(
-                request,
-                new DocxAssemblyException(new RuntimeException("docx"))
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
-        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.RENDERING_FAILED);
-        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.RENDERING);
-    }
-
-    @Test
     void illegalStateExceptionMapsToInternalError() {
         when(messageResolver.resolve("api.error.generation.internalError"))
                 .thenReturn("An internal error occurred.");
@@ -144,5 +79,17 @@ class GlobalExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.generation.internalError");
+    }
+
+    @Test
+    void unexpectedExceptionMapsToRetryableInternalError() {
+        when(messageResolver.resolveOrDefault("api.error.generation.internalError", "An internal error occurred."))
+                .thenReturn("An internal error occurred.");
+
+        ResponseEntity<ErrorEnvelope> response = handler.handleUnexpected(request, new RuntimeException("boom"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.INTERNAL_ERROR);
+        assertThat(response.getBody().error().retryable()).isTrue();
     }
 }

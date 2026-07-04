@@ -1,0 +1,176 @@
+package com.bank.docgen.runtime.web;
+
+import com.bank.docgen.rendering.EncryptionFailedException;
+import com.bank.docgen.runtime.service.AsyncTaskCancellationNotAllowedException;
+import com.bank.docgen.runtime.service.AsyncTaskExpiredException;
+import com.bank.docgen.runtime.service.AsyncTaskNotFoundException;
+import com.bank.docgen.runtime.service.IdempotencyConflictException;
+import com.bank.docgen.runtime.service.IdempotencyHashException;
+import com.bank.docgen.runtime.service.RuntimeAccessDeniedException;
+import com.bank.docgen.runtime.service.RuntimeBatchValidationException;
+import com.bank.docgen.runtime.service.RuntimeDocumentNotFoundException;
+import com.bank.docgen.runtime.service.RuntimeDownloadExpiredException;
+import com.bank.docgen.runtime.service.RuntimeEncryptionValidationException;
+import com.bank.docgen.runtime.service.SyncBatchFailureException;
+import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
+import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
+import com.bank.docgen.sharedkernel.api.ErrorEnvelopeFactory;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+@Order(0)
+public class RuntimeExceptionAdvice {
+
+    private final ErrorEnvelopeFactory errorEnvelopeFactory;
+
+    public RuntimeExceptionAdvice(ErrorEnvelopeFactory errorEnvelopeFactory) {
+        this.errorEnvelopeFactory = errorEnvelopeFactory;
+    }
+
+    @ExceptionHandler(RuntimeDocumentNotFoundException.class)
+    public ResponseEntity<ErrorEnvelope> handleRuntimeDocumentNotFound(HttpServletRequest request) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.NOT_FOUND,
+                ApiErrorCodes.DOCUMENT_NOT_FOUND,
+                ApiErrorCategories.RUNTIME,
+                "api.error.runtime.documentNotFound"
+        );
+    }
+
+    @ExceptionHandler(RuntimeDownloadExpiredException.class)
+    public ResponseEntity<ErrorEnvelope> handleRuntimeDownloadExpired(HttpServletRequest request) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.GONE,
+                ApiErrorCodes.DOWNLOAD_URL_EXPIRED,
+                ApiErrorCategories.RUNTIME,
+                "api.error.runtime.downloadUrlExpired"
+        );
+    }
+
+    @ExceptionHandler(RuntimeAccessDeniedException.class)
+    public ResponseEntity<ErrorEnvelope> handleRuntimeAccessDenied(HttpServletRequest request) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.FORBIDDEN,
+                ApiErrorCodes.ACCESS_DENIED,
+                ApiErrorCategories.RUNTIME,
+                "api.error.authorization.accessDenied"
+        );
+    }
+
+    @ExceptionHandler(RuntimeBatchValidationException.class)
+    public ResponseEntity<ErrorEnvelope> handleRuntimeBatchValidation(
+            HttpServletRequest request,
+            RuntimeBatchValidationException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.errorCode(),
+                ApiErrorCategories.RUNTIME,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(IdempotencyConflictException.class)
+    public ResponseEntity<ErrorEnvelope> handleIdempotencyConflict(
+            HttpServletRequest request,
+            IdempotencyConflictException ex
+    ) {
+        return errorEnvelopeFactory.idempotencyConflict(request, ex);
+    }
+
+    @ExceptionHandler(IdempotencyHashException.class)
+    public ResponseEntity<ErrorEnvelope> handleIdempotencyHashFailure(
+            HttpServletRequest request,
+            IdempotencyHashException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ApiErrorCodes.IDEMPOTENCY_HASH_FAILED,
+                ApiErrorCategories.IDEMPOTENCY,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(AsyncTaskNotFoundException.class)
+    public ResponseEntity<ErrorEnvelope> handleAsyncTaskNotFound(HttpServletRequest request) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.NOT_FOUND,
+                ApiErrorCodes.ASYNC_TASK_NOT_FOUND,
+                ApiErrorCategories.RUNTIME,
+                "api.error.runtime.asyncTaskNotFound"
+        );
+    }
+
+    @ExceptionHandler(AsyncTaskCancellationNotAllowedException.class)
+    public ResponseEntity<ErrorEnvelope> handleAsyncTaskCancellationNotAllowed(HttpServletRequest request) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.CONFLICT,
+                ApiErrorCodes.ASYNC_TASK_CANCELLATION_NOT_ALLOWED,
+                ApiErrorCategories.RUNTIME,
+                "api.error.runtime.asyncTaskCancellationNotAllowed"
+        );
+    }
+
+    @ExceptionHandler(AsyncTaskExpiredException.class)
+    public ResponseEntity<ErrorEnvelope> handleAsyncTaskExpired(HttpServletRequest request) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.GONE,
+                ApiErrorCodes.ASYNC_TASK_EXPIRED,
+                ApiErrorCategories.RUNTIME,
+                "api.error.runtime.asyncTaskExpired"
+        );
+    }
+
+    @ExceptionHandler(SyncBatchFailureException.class)
+    public ResponseEntity<ErrorEnvelope> handleSyncBatchFailure(
+            HttpServletRequest request,
+            SyncBatchFailureException ex
+    ) {
+        return errorEnvelopeFactory.syncBatchFailure(request, ex);
+    }
+
+    @ExceptionHandler(RuntimeEncryptionValidationException.class)
+    public ResponseEntity<ErrorEnvelope> handleRuntimeEncryptionValidation(
+            HttpServletRequest request,
+            RuntimeEncryptionValidationException ex
+    ) {
+        String code = "api.error.encryption.encryptionNotAllowed".equals(ex.messageKey())
+                ? ApiErrorCodes.ENCRYPTION_NOT_ALLOWED
+                : ApiErrorCodes.ENCRYPTION_PARAMETER_INVALID;
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.BAD_REQUEST,
+                code,
+                ApiErrorCategories.ENCRYPTION,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(EncryptionFailedException.class)
+    public ResponseEntity<ErrorEnvelope> handleEncryptionFailed(
+            HttpServletRequest request,
+            EncryptionFailedException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ApiErrorCodes.ENCRYPTION_FAILED,
+                ApiErrorCategories.ENCRYPTION,
+                ex.messageKey()
+        );
+    }
+}
