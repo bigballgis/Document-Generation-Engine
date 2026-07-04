@@ -8,6 +8,12 @@ spot-verified (see §13 Audit provenance).
 **Task ID prefix:** `SOR-*` (System Optimization Review) — no collision with existing
 `OPT`/`COR`/`UX`/`CD`/`P`/`E`/`M`/`AUD` prefixes.
 
+> **Program status (2026-07-04):** Actionable SOR backlog **complete**. Waves SOR-0…5 and
+> SOR-7 **Done**; SOR-6 **Done** except **SOR-A02/A03 Blocked** on P22 overlap. Ongoing
+> work outside program closure: **EI_EXPOSE_REP** SpotBugs ratchet
+> ([spotbugs-exclusion-ratchet.md](./spotbugs-exclusion-ratchet.md), slice 1+).
+> **P22 remains the sole formal phase `In Progress`** (see [master-plan.md](./master-plan.md)).
+
 > **Formal phase impact: none.** This is an **optimization backlog program document**
 > (same genre as [comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)
 > and [competitiveness-deepening-program.md](./competitiveness-deepening-program.md)),
@@ -73,7 +79,7 @@ rendering-adjacent structural refactors until P22 lands.
 | SOR-4 | Frontend structural health | P1/P2 | 7 | Done | F01–F07 Done (2026-07-04); F04 panel store consolidation |
 | SOR-5 | Contract & i18n integrity | P1 | 5 | Done | K01–K05 Done (2026-07-04); openapi-typescript codegen + parity test |
 | SOR-6 | Architecture & code health | P2 | 6 | Done | A01/A04/A05/A06 Done; A02/A03 Blocked (P22 overlap) |
-| SOR-7 | Test depth & operational readiness | P2 | 10 | In Progress | O01/O02/O03/O05/O06 Done; T01 Done; T02–T03 remain |
+| SOR-7 | Test depth & operational readiness | P2 | 10 | Done | T01–T04, O01–O06 Done (2026-07-04) |
 
 ---
 
@@ -287,6 +293,7 @@ A SOR task is `Done` only when:
 
 | Date | Change |
 | --- | --- |
+| 2026-07-04 | SOR program closeout on `cursor/sor-full-implementation-1385` @ `1add9b1`: waves SOR-0…5 and SOR-7 **Done** (SOR-7 T01–T04, O01–O06); SOR-6 **Done** except A02/A03 **Blocked** on P22; actionable backlog complete; EI SpotBugs ratchet continues slice 1+ ([spotbugs-exclusion-ratchet.md](./spotbugs-exclusion-ratchet.md)). Gates: backend Surefire **831** (1 skipped); frontend Vitest **763**. No formal phase status changed — P22 remains sole `In Progress`. |
 | 2026-07-03 | SOR wave 2 on `cursor/sor-full-implementation-1385`: O01/O04/O05/O06, T01, K05 Done; Helm ServiceMonitor/PrometheusRule; compose healthcheck parity; expanded runbook; DockerExecPdfConversionService fake-docker test. |
 | 2026-07-03 | SOR full implementation wave on `cursor/sor-full-implementation-1385`: waves SOR-0/1/2 Done; SOR-3/4/5/7 partial; SOR-6 Not Started (P22 overlap). IdempotencyService `@Autowired` constructor fix for Spring context. |
 | 2026-07-03 | Document created from the four-audit consolidated review. Waves SOR-0…SOR-7 defined (**52 tasks**, incl. 1 coordination pointer SOR-T04); all tasks `Not Started`. No formal phase status changed — P22 remains the sole phase `In Progress`. |
