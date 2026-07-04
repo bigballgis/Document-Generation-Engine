@@ -69,6 +69,8 @@ upstream systems invoke the dynamic API.
 > **CDP (this session):** [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) — Wave CD-0…CD-3; task prefix **`CD-*`** only.
 >
 > **P22 (other session):** formal phase may show In Progress in this file for repo accounting; implementation tracked in [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md). **Do not** execute P22 from CDP docs.
+>
+> **LRP (planned 2026-07-03):** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; program (not a formal phase); P22 remains the sole formal phase In Progress.
 
 ## Thin vertical slice (MVP chain)
 
