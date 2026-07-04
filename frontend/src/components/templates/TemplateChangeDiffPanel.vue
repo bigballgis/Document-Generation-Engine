@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
-import * as templatesApi from '@/api/templates'
-import type { ChangeDiffSummary } from '@/types/template'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { ElMessage } from 'element-plus'
 
 const props = withDefaults(
@@ -18,8 +17,10 @@ const props = withDefaults(
 )
 
 const { t } = useI18n()
-const loading = ref(false)
-const summary = ref<ChangeDiffSummary | null>(null)
+const panelDataStore = useTemplatePanelDataStore()
+const entry = computed(() => panelDataStore.getEntry(props.templateId))
+const loading = computed(() => entry.value.loadingChangeDiff)
+const summary = computed(() => entry.value.changeDiff)
 
 const dimensionLabelKey: Record<string, string> = {
   CONTENT: 'templates.changeDiff.dimensions.content',
@@ -30,13 +31,10 @@ const dimensionLabelKey: Record<string, string> = {
 }
 
 async function loadChangeDiff() {
-  loading.value = true
   try {
-    summary.value = await templatesApi.fetchChangeDiff(props.templateId)
+    await panelDataStore.fetchChangeDiff(props.templateId)
   } catch {
     ElMessage.error(t('templates.changeDiff.error.load'))
-  } finally {
-    loading.value = false
   }
 }
 
@@ -45,7 +43,7 @@ function dimensionLabel(code: string): string {
   return key ? t(key) : code
 }
 
-function dimensionChangeCount(dimension: ChangeDiffSummary['dimensions'][number]): number {
+function dimensionChangeCount(dimension: NonNullable<typeof summary.value>['dimensions'][number]): number {
   return dimension.added.length + dimension.removed.length + dimension.modified.length
 }
 

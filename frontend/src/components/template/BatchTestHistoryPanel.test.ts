@@ -1,7 +1,8 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import BatchTestHistoryPanel from '@/components/template/BatchTestHistoryPanel.vue'
 import en from '@/i18n/locales/en'
 import * as templatesApi from '@/api/templates'
@@ -61,6 +62,10 @@ const mockHistory: BatchTestRunSummary[] = [
 ]
 
 describe('BatchTestHistoryPanel', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
   afterEach(() => {
     document.body.innerHTML = ''
     vi.mocked(templatesApi.getBatchTestHistory).mockReset()
@@ -72,7 +77,7 @@ describe('BatchTestHistoryPanel', () => {
 
     const wrapper = mount(BatchTestHistoryPanel, {
       props: { templateId: 'tpl-1' },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
       attachTo: document.body,
     })
     await flushPromises()
@@ -87,7 +92,7 @@ describe('BatchTestHistoryPanel', () => {
 
     const wrapper = mount(BatchTestHistoryPanel, {
       props: { templateId: 'tpl-1' },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
       attachTo: document.body,
     })
     await flushPromises()
@@ -106,7 +111,7 @@ describe('BatchTestHistoryPanel', () => {
 
     const wrapper = mount(BatchTestHistoryPanel, {
       props: { templateId: 'tpl-1' },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
       attachTo: document.body,
     })
     await flushPromises()
@@ -122,7 +127,7 @@ describe('BatchTestHistoryPanel', () => {
 
     const wrapper = mount(BatchTestHistoryPanel, {
       props: { templateId: 'tpl-1' },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
       attachTo: document.body,
     })
     await flushPromises()
@@ -141,7 +146,7 @@ describe('BatchTestHistoryPanel', () => {
 
     const wrapper = mount(BatchTestHistoryPanel, {
       props: { templateId: 'tpl-1', refreshToken: 0 },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
       attachTo: document.body,
     })
     await flushPromises()

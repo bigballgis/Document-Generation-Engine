@@ -13,7 +13,7 @@ import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { useCapabilities } from '@/composables/useCapabilities'
-import * as templatesApi from '@/api/templates'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { useTemplatesStore } from '@/stores/templates'
 import type {
   LifecycleGovernanceAction,
@@ -38,11 +38,13 @@ const defaultRouteFilterOptions = computed(() => [
   { value: t('templates.versions.defaultRouteNo'), label: t('templates.versions.defaultRouteNo') },
 ])
 const templatesStore = useTemplatesStore()
+const panelDataStore = useTemplatePanelDataStore()
 const { manageReleaseVersionState } = useCapabilities()
 
-const loading = ref(false)
 const loadError = ref(false)
-const versions = ref<TemplateReleaseVersion[]>([])
+const entry = computed(() => panelDataStore.getEntry(props.templateId))
+const loading = computed(() => entry.value.loadingReleaseVersions)
+const versions = computed(() => entry.value.releaseVersions)
 
 const versionsSource = computed(() => versions.value)
 const { filters: columnFilters, filteredRows: filteredVersions, hasActiveFilters, clearFilters } =
@@ -85,15 +87,12 @@ const errorMessage = computed(() => {
 })
 
 async function loadVersions() {
-  loading.value = true
   loadError.value = false
   try {
-    versions.value = await templatesApi.fetchReleaseVersions(props.templateId)
+    await panelDataStore.fetchReleaseVersions(props.templateId)
   } catch {
     loadError.value = true
-    versions.value = []
-  } finally {
-    loading.value = false
+    panelDataStore.invalidateVersionLineDomains(props.templateId)
   }
 }
 
@@ -197,6 +196,7 @@ async function handleVersionAction(
       await templatesStore.restoreTemplateVersion(props.templateId, releaseVersion, payload)
     }
     ElMessage.success(t(successKey))
+    panelDataStore.invalidateVersionLineDomains(props.templateId)
     await loadVersions()
     emit('changed')
   } catch {

@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import FidelityWarningList from '@/components/authoring/FidelityWarningList.vue'
-import * as templatesApi from '@/api/templates'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { downloadBlobExport } from '@/utils/downloadExport'
 import type { AnchorBinding, PreviewComparisonItem, PreviewRecord } from '@/types/template'
 
@@ -20,7 +20,14 @@ const props = withDefaults(
 )
 
 const { t, te } = useI18n()
-const loading = ref(false)
+const panelDataStore = useTemplatePanelDataStore()
+const loading = computed(() => {
+  const previewId = latestPreview.value?.previewId
+  if (!previewId) {
+    return false
+  }
+  return panelDataStore.getEntry(props.templateId).loadingPreviewById[previewId] ?? false
+})
 const downloadingFormat = ref<'docx' | 'pdf' | null>(null)
 const latestPreview = ref<PreviewRecord | null>(props.preview)
 
@@ -51,14 +58,13 @@ async function refreshPreview() {
   if (!latestPreview.value?.previewId) {
     return
   }
-  loading.value = true
   try {
-    latestPreview.value = await templatesApi.getPreview(
+    latestPreview.value = await panelDataStore.fetchPreview(
       props.templateId,
       latestPreview.value.previewId,
     )
-  } finally {
-    loading.value = false
+  } catch {
+    ElMessage.error(t('templates.previewHistory.error.load'))
   }
 }
 
@@ -88,7 +94,7 @@ async function downloadArtifact(format: 'docx' | 'pdf') {
   }
   downloadingFormat.value = format
   try {
-    const { blob, filename } = await templatesApi.downloadPreviewArtifact(
+    const { blob, filename } = await panelDataStore.downloadPreviewArtifact(
       props.templateId,
       latestPreview.value.previewId,
       format,

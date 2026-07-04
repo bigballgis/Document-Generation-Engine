@@ -10,7 +10,7 @@ import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import * as templatesApi from '@/api/templates'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { useTemplatesStore } from '@/stores/templates'
 import {
   templateDevVersionPath,
@@ -34,17 +34,20 @@ const { t, te } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
+const panelDataStore = useTemplatePanelDataStore()
 
-const loading = ref(false)
 const loadError = ref(false)
 const cloningReleaseVersion = ref<string | null>(null)
 const abandoningDevVersionId = ref<string | null>(null)
 const currentPage = ref(1)
-const totalElements = ref(0)
-const totalPages = ref(0)
-const versionLines = ref<TemplateVersionLineSummary[]>([])
 
 const pageSize = SERVER_TABLE_PAGE_SIZE
+const entry = computed(() => panelDataStore.getEntry(props.templateId))
+const loading = computed(() => entry.value.loadingVersionLines)
+const versionLinesCache = computed(() => entry.value.versionLines)
+const versionLines = computed(() => versionLinesCache.value?.content ?? [])
+const totalElements = computed(() => versionLinesCache.value?.totalElements ?? 0)
+const totalPages = computed(() => versionLinesCache.value?.totalPages ?? 0)
 
 const hasInFlightLine = computed(() => versionLines.value.some(isInFlightVersionLine))
 
@@ -65,24 +68,12 @@ function lineLabel(row: TemplateVersionLineSummary): string {
 }
 
 async function loadVersionLines() {
-  loading.value = true
   loadError.value = false
   try {
-    const page = await templatesApi.listTemplateVersionLines(
-      props.templateId,
-      currentPage.value - 1,
-      pageSize,
-    )
-    versionLines.value = page.content
-    totalElements.value = page.totalElements
-    totalPages.value = page.totalPages
+    await panelDataStore.fetchVersionLines(props.templateId, currentPage.value - 1, pageSize)
   } catch {
     loadError.value = true
-    versionLines.value = []
-    totalElements.value = 0
-    totalPages.value = 0
-  } finally {
-    loading.value = false
+    panelDataStore.invalidateVersionLineDomains(props.templateId)
   }
 }
 
@@ -158,7 +149,7 @@ async function handleClone(row: TemplateVersionLineSummary) {
   }
   cloningReleaseVersion.value = row.releaseVersion
   try {
-    const created = await templatesApi.cloneReleaseVersion(props.templateId, row.releaseVersion)
+    const created = await panelDataStore.cloneReleaseVersion(props.templateId, row.releaseVersion)
     ElMessage.success(t('templates.versionLines.cloneSuccess'))
     emit('cloned')
     router.push(templateDevVersionPath(props.templateId, created.devVersionId))
@@ -194,9 +185,10 @@ async function handleAbandon(row: TemplateVersionLineSummary) {
 
   abandoningDevVersionId.value = row.devVersionId
   try {
-    await templatesApi.abandonDevVersion(props.templateId, row.devVersionId)
+    await panelDataStore.abandonDevVersion(props.templateId, row.devVersionId)
     ElMessage.success(t('templates.versionLines.abandonSuccess'))
     emit('changed')
+    panelDataStore.invalidateVersionLineDomains(props.templateId)
     await loadVersionLines()
   } catch {
     ElMessage.error(t('templates.versionLines.abandonError'))
@@ -295,6 +287,7 @@ async function handleVersionAction(
     }
     ElMessage.success(t(successKey))
     emit('changed')
+    panelDataStore.invalidateVersionLineDomains(props.templateId)
     await loadVersionLines()
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))

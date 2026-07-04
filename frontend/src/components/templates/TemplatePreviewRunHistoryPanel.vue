@@ -7,7 +7,7 @@ import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
-import * as templatesApi from '@/api/templates'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { downloadBlobExport } from '@/utils/downloadExport'
 import type { PreviewRunSummary } from '@/types/template'
 
@@ -23,9 +23,11 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
-const loading = ref(false)
+const panelDataStore = useTemplatePanelDataStore()
 const downloadingKey = ref<string | null>(null)
-const runs = ref<PreviewRunSummary[]>([])
+const entry = computed(() => panelDataStore.getEntry(props.templateId))
+const loading = computed(() => entry.value.loadingPreviewRuns)
+const runs = computed(() => entry.value.previewRuns)
 const runsSource = computed(() => runs.value)
 
 const { filteredRows: filteredRuns } = useDataTableFilters(runsSource, [
@@ -37,9 +39,8 @@ const { filteredRows: filteredRuns } = useDataTableFilters(runsSource, [
 const sortByCreatedAt = rowSortMethod<PreviewRunSummary>((row) => row.createdAt)
 
 async function loadRuns() {
-  loading.value = true
   try {
-    runs.value = await templatesApi.listPreviewRuns(props.templateId)
+    await panelDataStore.fetchPreviewRuns(props.templateId)
     if (props.selectedPreviewId) {
       const stillExists = runs.value.some((row) => row.previewId === props.selectedPreviewId)
       if (!stillExists) {
@@ -48,8 +49,6 @@ async function loadRuns() {
     }
   } catch {
     ElMessage.error(t('templates.previewHistory.error.load'))
-  } finally {
-    loading.value = false
   }
 }
 
@@ -57,7 +56,7 @@ async function downloadArtifact(row: PreviewRunSummary, format: 'docx' | 'pdf') 
   const key = `${row.previewId}-${format}`
   downloadingKey.value = key
   try {
-    const { blob, filename } = await templatesApi.downloadPreviewArtifact(
+    const { blob, filename } = await panelDataStore.downloadPreviewArtifact(
       props.templateId,
       row.previewId,
       format,

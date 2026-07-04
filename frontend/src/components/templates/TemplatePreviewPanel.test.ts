@@ -1,7 +1,8 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplatePreviewPanel from '@/components/templates/TemplatePreviewPanel.vue'
 import en from '@/i18n/locales/en'
 import * as templatesApi from '@/api/templates'
@@ -12,6 +13,10 @@ vi.mock('@/api/templates', () => ({
 }))
 
 describe('TemplatePreviewPanel', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
   afterEach(() => {
     document.body.innerHTML = ''
     vi.mocked(templatesApi.getPreview).mockReset()
@@ -72,7 +77,7 @@ describe('TemplatePreviewPanel', () => {
         bindings: [],
         preview,
       },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
     })
 
     await flushPromises()
@@ -98,7 +103,7 @@ describe('TemplatePreviewPanel', () => {
         bindings: [],
         preview: null,
       },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
     })
 
     await flushPromises()

@@ -6,8 +6,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import * as templatesApi from '@/api/templates'
-import type { CoverageSummary, SubmitTestEligibility } from '@/types/template'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { ElMessage } from 'element-plus'
 
 const props = withDefaults(
@@ -22,9 +21,11 @@ const props = withDefaults(
 )
 
 const { t } = useI18n()
-const loading = ref(false)
-const summary = ref<CoverageSummary | null>(null)
-const eligibility = ref<SubmitTestEligibility | null>(null)
+const panelDataStore = useTemplatePanelDataStore()
+const entry = computed(() => panelDataStore.getEntry(props.templateId))
+const loading = computed(() => entry.value.loadingCoverage)
+const summary = computed(() => entry.value.coverage)
+const eligibility = computed(() => entry.value.submitTestEligibility)
 
 const dimensionLabelKey = computed(() => ({
   REQUIRED_VARIABLES: 'templates.coverage.dimensions.requiredVariables',
@@ -46,22 +47,9 @@ const hasUncoveredAnchors = computed(() => uncoveredAnchors.value.length > 0)
 const hasUncoveredVariables = computed(() => uncoveredVariables.value.length > 0)
 
 async function loadCoverage() {
-  loading.value = true
-  try {
-    const [coverageResult, eligibilityResult] = await Promise.allSettled([
-      templatesApi.getTemplateCoverage(props.templateId),
-      templatesApi.getSubmitTestEligibility(props.templateId),
-    ])
-    if (coverageResult.status === 'fulfilled') {
-      summary.value = coverageResult.value
-    } else {
-      ElMessage.error(t('templates.coverage.error.load'))
-    }
-    if (eligibilityResult.status === 'fulfilled') {
-      eligibility.value = eligibilityResult.value
-    }
-  } finally {
-    loading.value = false
+  const result = await panelDataStore.fetchCoverage(props.templateId)
+  if (!result.coverage) {
+    ElMessage.error(t('templates.coverage.error.load'))
   }
 }
 
@@ -168,7 +156,6 @@ watch(
         :total="totalDimensionRows"
       />
 
-      <!-- T12: Uncovered items sections -->
       <div v-if="hasUncoveredAnchors || hasUncoveredVariables" class="coverage-uncovered">
         <el-collapse>
           <el-collapse-item

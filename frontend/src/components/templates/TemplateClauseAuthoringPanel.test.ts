@@ -87,14 +87,15 @@ describe('TemplateClauseAuthoringPanel', () => {
     vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([])
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
-    setActivePinia(createPinia())
+    const pinia = createPinia()
+    setActivePinia(pinia)
     const wrapper = mount(TemplateClauseAuthoringPanel, {
       props: {
         templateId: 'tpl-1',
         groupCode: 'RETAIL',
         editable: true,
       },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [pinia, i18n, ElementPlus] },
     })
 
     await flushPromises()

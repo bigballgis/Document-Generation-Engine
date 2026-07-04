@@ -1,7 +1,8 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplateContentModuleReferencesPanel from '@/components/templates/TemplateContentModuleReferencesPanel.vue'
 import en from '@/i18n/locales/en'
 import * as contentModulesApi from '@/api/contentModules'
@@ -18,6 +19,10 @@ vi.mock('@/api/contentModules', () => ({
 }))
 
 describe('TemplateContentModuleReferencesPanel', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
   afterEach(() => {
     document.body.innerHTML = ''
     vi.mocked(templatesApi.listTemplateContentModuleReferences).mockReset()
@@ -43,7 +48,7 @@ describe('TemplateContentModuleReferencesPanel', () => {
         groupCode: 'RETAIL',
         editable: false,
       },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
     })
 
     await flushPromises()
@@ -74,7 +79,7 @@ describe('TemplateContentModuleReferencesPanel', () => {
         groupCode: 'RETAIL',
         editable: true,
       },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
     })
 
     await flushPromises()
@@ -111,7 +116,7 @@ describe('TemplateContentModuleReferencesPanel', () => {
         groupCode: 'RETAIL',
         editable: true,
       },
-      global: { plugins: [i18n, ElementPlus] },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
     })
 
     await flushPromises()

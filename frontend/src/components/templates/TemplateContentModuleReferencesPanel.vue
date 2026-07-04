@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import * as contentModulesApi from '@/api/contentModules'
-import * as templatesApi from '@/api/templates'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
 import type { ContentModuleSummary, ContentModuleVersion } from '@/types/contentModule'
 import type { TemplateContentModuleReference } from '@/types/template'
@@ -22,11 +22,13 @@ const emit = defineEmits<{
 }>()
 
 const { t, te } = useI18n()
+const panelDataStore = useTemplatePanelDataStore()
 
-const loading = ref(false)
 const saving = ref(false)
 const dialogOpen = ref(false)
-const references = ref<TemplateContentModuleReference[]>([])
+const entry = computed(() => panelDataStore.getEntry(props.templateId))
+const loading = computed(() => entry.value.loadingContentModuleReferences)
+const references = computed(() => entry.value.contentModuleReferences)
 const moduleOptions = ref<ContentModuleSummary[]>([])
 const versionOptions = ref<ContentModuleVersion[]>([])
 const editingReferenceKey = ref<string | null>(null)
@@ -61,14 +63,11 @@ function approvedReferencableVersions(versions: ContentModuleVersion[]): Content
 }
 
 async function loadReferences() {
-  loading.value = true
   try {
-    references.value = await templatesApi.listTemplateContentModuleReferences(props.templateId)
+    await panelDataStore.fetchContentModuleReferences(props.templateId)
   } catch (error) {
     const key = resolveApiErrorMessageKey(error, 'templates.contentModuleReferences.error.load')
     ElMessage.error(te(key) ? t(key) : t('templates.contentModuleReferences.error.load'))
-  } finally {
-    loading.value = false
   }
 }
 
@@ -142,14 +141,13 @@ async function handleSubmit() {
   saving.value = true
   try {
     const upsertKey = editingReferenceKey.value ?? referenceKey
-    await templatesApi.upsertTemplateContentModuleReference(props.templateId, upsertKey, {
+    await panelDataStore.upsertContentModuleReference(props.templateId, upsertKey, {
       referenceKey,
       moduleId,
       semanticVersion,
     })
     dialogOpen.value = false
     ElMessage.success(t('templates.contentModuleReferences.saveSuccess'))
-    await loadReferences()
     emit('updated')
   } catch (error) {
     const key = resolveApiErrorMessageKey(error, 'templates.contentModuleReferences.error.save')

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import * as templatesApi from '@/api/templates'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import type { BatchTestRunSummary } from '@/types/template'
 
 const props = defineProps<{
@@ -15,17 +15,16 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
-const loading = ref(false)
-const history = ref<BatchTestRunSummary[]>([])
+const panelDataStore = useTemplatePanelDataStore()
+const entry = computed(() => panelDataStore.getEntry(props.templateId))
+const loading = computed(() => entry.value.loadingBatchTestHistory)
+const history = computed(() => entry.value.batchTestHistory)
 
 async function loadHistory() {
-  loading.value = true
   try {
-    history.value = await templatesApi.getBatchTestHistory(props.templateId)
+    await panelDataStore.fetchBatchTestHistory(props.templateId)
   } catch {
     ElMessage.error(t('templates.batchTestHistory.error.load'))
-  } finally {
-    loading.value = false
   }
 }
 

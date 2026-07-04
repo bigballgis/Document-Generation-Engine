@@ -70,7 +70,7 @@ rendering-adjacent structural refactors until P22 lands.
 | SOR-1 | CI quality-gate automation | P0 | 5 | Done | Protects everything else |
 | SOR-2 | Production correctness & security seams | P0/P1 | 9 | Done | After SOR-1 |
 | SOR-3 | Performance & scalability | P1 | 6 | Done | P01–P06 Done (2026-07-04) |
-| SOR-4 | Frontend structural health | P1/P2 | 7 | In Progress | F01–F02 Done (2026-07-04); F03–F04 remain; F05–F07 Done |
+| SOR-4 | Frontend structural health | P1/P2 | 7 | Done | F01–F07 Done (2026-07-04); F04 panel store consolidation |
 | SOR-5 | Contract & i18n integrity | P1 | 5 | In Progress | K01/K02/K04/K05 Done; K03 remain |
 | SOR-6 | Architecture & code health | P2 | 6 | Not Started | A02/A03 blocked until P22 closes |
 | SOR-7 | Test depth & operational readiness | P2 | 10 | In Progress | O01/O02/O03/O05/O06 Done; T01 Done; T02–T03 remain |

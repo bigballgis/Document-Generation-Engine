@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import * as templatesApi from '@/api/templates'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import {
   buildTemplateExportJsonFilename,
   buildTemplateExportZipFilename,
@@ -15,7 +15,8 @@ const props = defineProps<{
 }>()
 
 const { t, te } = useI18n()
-const exporting = ref(false)
+const panelDataStore = useTemplatePanelDataStore()
+const exporting = computed(() => panelDataStore.getEntry(props.templateId).exporting)
 
 function resolveErrorMessage(error: unknown, fallbackKey: string): string {
   if (error instanceof Error && te(error.message)) {
@@ -25,9 +26,8 @@ function resolveErrorMessage(error: unknown, fallbackKey: string): string {
 }
 
 async function handleExportJson() {
-  exporting.value = true
   try {
-    const result = await templatesApi.exportTemplateJson(props.templateId)
+    const result = await panelDataStore.exportTemplateJson(props.templateId)
     downloadJsonExport(
       buildTemplateExportJsonFilename(props.externalId),
       result,
@@ -35,21 +35,16 @@ async function handleExportJson() {
     ElMessage.success(t('templates.export.success'))
   } catch (error) {
     ElMessage.error(resolveErrorMessage(error, 'templates.error.export'))
-  } finally {
-    exporting.value = false
   }
 }
 
 async function handleExportZip() {
-  exporting.value = true
   try {
-    const { blob, filename } = await templatesApi.exportTemplateZip(props.templateId)
+    const { blob, filename } = await panelDataStore.exportTemplateZip(props.templateId)
     downloadBlobExport(filename || buildTemplateExportZipFilename(props.externalId), blob)
     ElMessage.success(t('templates.export.success'))
   } catch (error) {
     ElMessage.error(resolveErrorMessage(error, 'templates.error.export'))
-  } finally {
-    exporting.value = false
   }
 }
 

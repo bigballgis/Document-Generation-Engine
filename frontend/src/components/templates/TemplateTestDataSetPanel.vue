@@ -10,8 +10,8 @@ import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFi
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import * as templatesApi from '@/api/templates'
 import { useConfirmAction } from '@/composables/useConfirmAction'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import type { TestDataSet } from '@/types/template'
 import { ElMessage } from 'element-plus'
 
@@ -30,9 +30,10 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const { confirmAction } = useConfirmAction()
 const { formatDateTime } = useLocaleFormatters()
-const loading = ref(false)
+const panelDataStore = useTemplatePanelDataStore()
 const saving = ref(false)
-const dataSets = ref<TestDataSet[]>([])
+const dataSets = computed(() => panelDataStore.getEntry(props.templateId).testDataSets)
+const loading = computed(() => panelDataStore.getEntry(props.templateId).loadingTestDataSets)
 const dataSetsSource = computed(() => dataSets.value)
 const { filters: columnFilters, filteredRows: filteredDataSets } = useDataTableFilters(
   dataSetsSource,
@@ -86,14 +87,11 @@ function parseCoverageTags(): string[] {
 }
 
 async function loadDataSets() {
-  loading.value = true
   try {
-    dataSets.value = await templatesApi.listTestDataSets(props.templateId)
+    await panelDataStore.fetchTestDataSets(props.templateId)
     emit('loaded', dataSets.value.length)
   } catch {
     ElMessage.error(t('templates.testDataSets.error.load'))
-  } finally {
-    loading.value = false
   }
 }
 
@@ -161,16 +159,15 @@ async function handleSave() {
   saving.value = true
   try {
     if (editingId.value) {
-      await templatesApi.updateTestDataSet(props.templateId, editingId.value, payload)
+      await panelDataStore.updateTestDataSet(props.templateId, editingId.value, payload)
       ElMessage.success(t('templates.testDataSets.updateSuccess'))
     } else {
-      const created = await templatesApi.createTestDataSet(props.templateId, payload)
+      const created = await panelDataStore.createTestDataSet(props.templateId, payload)
       selectedId.value = created.testDataSetId
       emit('selected', created.testDataSetId)
       ElMessage.success(t('templates.testDataSets.createSuccess'))
     }
     dialogVisible.value = false
-    await loadDataSets()
   } catch {
     ElMessage.error(t('templates.testDataSets.error.save'))
   } finally {
@@ -180,11 +177,10 @@ async function handleSave() {
 
 async function handleDerive(testDataSetId: string) {
   try {
-    const derived = await templatesApi.deriveTestDataSet(props.templateId, testDataSetId)
+    const derived = await panelDataStore.deriveTestDataSet(props.templateId, testDataSetId)
     selectedId.value = derived.testDataSetId
     emit('selected', derived.testDataSetId)
     ElMessage.success(t('templates.testDataSets.deriveSuccess'))
-    await loadDataSets()
   } catch {
     ElMessage.error(t('templates.testDataSets.error.save'))
   }
@@ -200,13 +196,12 @@ async function handleDelete(testDataSetId: string) {
     return
   }
   try {
-    await templatesApi.deleteTestDataSet(props.templateId, testDataSetId)
+    await panelDataStore.deleteTestDataSet(props.templateId, testDataSetId)
     if (selectedId.value === testDataSetId) {
       selectedId.value = null
       emit('selected', null)
     }
     ElMessage.success(t('templates.testDataSets.deleteSuccess'))
-    await loadDataSets()
   } catch {
     ElMessage.error(t('templates.testDataSets.error.delete'))
   }
@@ -221,7 +216,7 @@ async function handleRunPreview(row: TestDataSet) {
   selectedId.value = row.testDataSetId
   emit('selected', row.testDataSetId)
   try {
-    const result = await templatesApi.startAsyncPreview(props.templateId, {
+    const result = await panelDataStore.startAsyncPreview(props.templateId, {
       testDataSetId: row.testDataSetId,
     })
     previewDialogPreviewId.value = result.previewId

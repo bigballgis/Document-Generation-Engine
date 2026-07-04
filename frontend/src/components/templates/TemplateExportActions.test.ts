@@ -1,6 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
+import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplateExportActions from '@/components/templates/TemplateExportActions.vue'
 import en from '@/i18n/locales/en'
@@ -18,6 +19,7 @@ vi.mock('@/utils/downloadExport', () => ({
 
 describe('TemplateExportActions', () => {
   beforeEach(() => {
+    setActivePinia(createPinia())
     vi.mocked(templatesApi.exportTemplateJson).mockReset()
     vi.mocked(templatesApi.exportTemplateZip).mockReset()
   })
@@ -35,7 +37,7 @@ describe('TemplateExportActions', () => {
         externalId: 'TPL-EXPORT',
       },
       global: {
-        plugins: [i18n, ElementPlus],
+        plugins: [createPinia(), i18n, ElementPlus],
       },
     })
   }

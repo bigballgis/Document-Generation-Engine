@@ -6,7 +6,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
 import * as contentModulesApi from '@/api/contentModules'
-import * as templatesApi from '@/api/templates'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { canAccessContentModuleManagement } from '@/auth/roles'
 import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
 import { useContentModulesStore } from '@/stores/contentModules'
@@ -32,14 +32,16 @@ const emit = defineEmits<{
 const { t, te } = useI18n()
 const sessionStore = useSessionStore()
 const contentModulesStore = useContentModulesStore()
+const panelDataStore = useTemplatePanelDataStore()
 
-const loading = ref(false)
 const saving = ref(false)
 const savingClause = ref(false)
 const referenceDialogOpen = ref(false)
 const previewDialogOpen = ref(false)
 const clauseEditDialogOpen = ref(false)
-const references = ref<TemplateContentModuleReference[]>([])
+const entry = computed(() => panelDataStore.getEntry(props.templateId))
+const loading = computed(() => entry.value.loadingContentModuleReferences)
+const references = computed(() => entry.value.contentModuleReferences)
 const moduleOptions = ref<ContentModuleSummary[]>([])
 const versionOptions = ref<ContentModuleVersion[]>([])
 const editingReferenceKey = ref<string | null>(null)
@@ -84,15 +86,12 @@ function approvedReferencableVersions(versions: ContentModuleVersion[]): Content
 }
 
 async function loadReferences() {
-  loading.value = true
   try {
-    references.value = await templatesApi.listTemplateContentModuleReferences(props.templateId)
+    await panelDataStore.fetchContentModuleReferences(props.templateId)
     emit('referencesLoaded', references.value)
   } catch (error) {
     const key = resolveApiErrorMessageKey(error, 'templates.clauseAuthoring.error.load')
     ElMessage.error(te(key) ? t(key) : t('templates.clauseAuthoring.error.load'))
-  } finally {
-    loading.value = false
   }
 }
 
@@ -170,14 +169,13 @@ async function handleSubmitReference() {
   saving.value = true
   try {
     const upsertKey = editingReferenceKey.value ?? referenceKey
-    await templatesApi.upsertTemplateContentModuleReference(props.templateId, upsertKey, {
+    await panelDataStore.upsertContentModuleReference(props.templateId, upsertKey, {
       referenceKey,
       moduleId,
       semanticVersion,
     })
     referenceDialogOpen.value = false
     ElMessage.success(t('templates.clauseAuthoring.saveReferenceSuccess'))
-    await loadReferences()
     emit('updated')
   } catch (error) {
     const key = resolveApiErrorMessageKey(error, 'templates.clauseAuthoring.error.saveReference')

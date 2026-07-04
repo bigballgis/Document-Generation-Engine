@@ -26,6 +26,7 @@ import type {
   UpsertVariablePayload,
 } from '@/types/template'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
+import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 
 export const useTemplatesStore = defineStore('templates', () => {
   const templates = ref<TemplateSummary[]>([])
@@ -353,10 +354,13 @@ export const useTemplatesStore = defineStore('templates', () => {
   function clearSelected(templateId?: string) {
     selectedTemplate.value = null
     const apiPolicyStore = useApiPolicyStore()
+    const panelDataStore = useTemplatePanelDataStore()
     if (templateId) {
       apiPolicyStore.clearTemplate(templateId)
+      panelDataStore.clearTemplate(templateId)
     } else if (apiPolicyStore.activeTemplateId) {
       apiPolicyStore.clearTemplate(apiPolicyStore.activeTemplateId)
+      panelDataStore.clearTemplate(apiPolicyStore.activeTemplateId)
     }
   }
 
