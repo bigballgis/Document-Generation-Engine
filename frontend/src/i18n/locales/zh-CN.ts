@@ -1876,6 +1876,7 @@ export default {
     actions: '操作',
     more: '更多',
     retry: '重试',
+    retryableHint: '此错误可重试，请稍后再试。',
     reset: '重置',
     notAvailable: '不适用',
     emptyValue: '—',

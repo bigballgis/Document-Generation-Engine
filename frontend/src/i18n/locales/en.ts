@@ -1897,6 +1897,7 @@ export default {
     actions: 'Actions',
     more: 'More',
     retry: 'Retry',
+    retryableHint: 'This error is retryable. You can try again in a moment.',
     reset: 'Reset',
     notAvailable: 'N/A',
     emptyValue: '—',
