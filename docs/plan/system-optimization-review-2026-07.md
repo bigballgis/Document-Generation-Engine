@@ -51,7 +51,7 @@ constitution and automation** to be the dominant risk theme:
 | CI automation absent | Critical | `.github/workflows/` has exactly **1** workflow (K8s manifest gates); constitution gates (`mvn verify`, pnpm lint/type-check/test/build) are manual PowerShell only; deploy script builds with tests skipped |
 | Production security seams | Critical/High | Default secrets baked into `application.yml` and prod compose; extension-only DOCX upload validation; log-only security audit events; multi-instance correctness unresolved |
 | Performance ceilings | High | Unbounded list APIs with client-side pagination; full in-memory byte[] artifact pipeline; sync PDF conversion blocks servlet threads up to ~125 s on a pool of 2 |
-| Frontend structural debt | High | `useTemplateDetailController.ts` **1538** lines untested; `DashboardView.vue` **835** lines; duplicated API-policy UI; 15+ components bypass store cache |
+| Frontend structural debt | High | `useTemplateDetailController.ts` decomposed (**408** lines, SOR-F01 Done); `DashboardView.vue` **211** lines (SOR-F02 Done); duplicated API-policy UI; 15+ components bypass store cache |
 | Contract/i18n integrity | High | Frontend `api.error` catalog materially behind backend (~145 backend keys); hand-written API types with no codegen; contract test asserts operationIds only |
 | Operational readiness | High | ADR-0030 observability rows undelivered (no ServiceMonitor/alerts/dashboards; actuator scrape likely blocked); HPA custom metric never emitted; no PodDisruptionBudget; 45-line runbook |
 
@@ -70,7 +70,7 @@ rendering-adjacent structural refactors until P22 lands.
 | SOR-1 | CI quality-gate automation | P0 | 5 | Done | Protects everything else |
 | SOR-2 | Production correctness & security seams | P0/P1 | 9 | Done | After SOR-1 |
 | SOR-3 | Performance & scalability | P1 | 6 | Done | P01–P06 Done (2026-07-04) |
-| SOR-4 | Frontend structural health | P1/P2 | 7 | In Progress | F01 Done (2026-07-04 slice 3); F02–F04 remain; F05–F07 Done |
+| SOR-4 | Frontend structural health | P1/P2 | 7 | In Progress | F01–F02 Done (2026-07-04); F03–F04 remain; F05–F07 Done |
 | SOR-5 | Contract & i18n integrity | P1 | 5 | In Progress | K01/K02/K04/K05 Done; K03 remain |
 | SOR-6 | Architecture & code health | P2 | 6 | Not Started | A02/A03 blocked until P22 closes |
 | SOR-7 | Test depth & operational readiness | P2 | 10 | In Progress | O01/O02/O03/O05/O06 Done; T01 Done; T02–T03 remain |
@@ -143,7 +143,7 @@ script-only (PowerShell: `scripts/p0-gate.ps1`, `scripts/release-gate.ps1`) and 
 | ID | Pri | Title | Evidence (verified 2026-07-03) | Acceptance hint | Status | Cross-ref |
 | --- | --- | --- | --- | --- | --- | --- |
 | SOR-F01 | High | Split `useTemplateDetailController.ts` into tested domain composables | `frontend/src/views/templates/useTemplateDetailController.ts` was **1538** lines with no dedicated unit tests (OPT-G3 marked Done but the decomposition moved the monolith into the composable) | Domain composables (lifecycle actions, policy panel, credentials, …), each with Vitest coverage | Done | **2026-07-04 slice 1:** `useTemplateLifecycleActions.ts` (**698** lines, **15** Vitest tests); controller **960** lines. **Slice 2:** `useTemplatePolicyCredentials.ts` (**161** lines, **15** Vitest tests); controller **859** lines. **Slice 3:** `useTemplateDetailNavigation.ts` (**591** lines, **16** Vitest tests); controller **408** lines (journey + tab/route sync + load shell). OPT-G3 follow-up |
-| SOR-F02 | High | Decompose `DashboardView.vue` | `frontend/src/views/dashboard/DashboardView.vue` is **835** lines | Extract overview/workflow tabs + journey blocks into components | Not Started | — |
+| SOR-F02 | High | Decompose `DashboardView.vue` | `frontend/src/views/dashboard/DashboardView.vue` was **835** lines | Extract overview/workflow tabs + journey blocks into components | Done | **2026-07-04:** `DashboardView.vue` **835 → 211** lines; tab panels `DashboardOverviewTab`, `DashboardWorkflowTab`, `DashboardTasksTab`; composables `useDashboardTabs` (107 lines, **10** tests), `useDashboardJourney` (387 lines, **8** tests), `useDashboardDataLoader` (235 lines, **7** tests). BDD `not-applicable` (refactor only) |
 | SOR-F03 | High | De-duplicate API policy UI + dedicated store | `TemplateDetailApiAccessTab.vue` (**691** lines) vs `ApiPolicyDetailView.vue` (**596** lines) duplicate the policy domain editor; policy/credentials state lives in the **549**-line `stores/templates.ts` god store | Shared `ApiPolicyDomainEditor`; dedicated apiPolicy store keyed by `templateId` | Not Started | — |
 | SOR-F04 | High | Consolidate direct API calls through stores/composables | 15+ components call API modules directly, bypassing store cache (e.g. `TemplateTestDataSetPanel.vue:89-222`, `TemplateCoveragePanel.vue:52`, `TemplateVersionLinesPanel.vue:71`) — stale-data risk after mutations | Data access via stores/composables with explicit invalidation rules | Not Started | — |
 | SOR-F05 | Medium | Duplication cleanup — envelope unwrap, tab sync, module references | Identical `unwrap<T>()` in 10 api modules (OPT-G4 successor); tab↔query sync copy-pasted 6+ times; content-module reference loading triplicated | Shared `unwrapEnvelope` + `useQuerySyncedTab` + `useTemplateContentModuleReferences` | Done | OPT-G4 successor |
