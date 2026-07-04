@@ -1,7 +1,7 @@
 ---
 name: architecture-reviewer
 description: Read-only architecture and governance reviewer. Use to review changes against module boundaries, accepted ADRs, non-functional requirements, the security/permission model, and the document-as-code constitution before merge.
-model: inherit
+model: claude-opus-4-8-thinking-high
 readonly: true
 ---
 

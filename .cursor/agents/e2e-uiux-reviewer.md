@@ -1,7 +1,7 @@
 ---
 name: e2e-uiux-reviewer
 description: Frontend UIUX evidence reviewer for the bank OA management UI. Use to verify visual quality, layout density, responsive behavior (desktop-first), accessibility, dual-brand theming (REDBC/GREENBC), logo switching, text-overflow/overlap, and interaction polish with screenshots and viewport-specific evidence. Read-only on app code; produces an evidence manifest and findings.
-model: inherit
+model: composer-2.5-fast
 readonly: true
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: backend-engineer
 description: Backend TDD implementer for the document generation platform. Use to implement Java 21 + Spring Boot 3 backend slices (master, template, lifecycle, API management, runtime generation API, rendering, authorization, audit) strictly following accepted ADRs and the test-first delivery loop.
-model: inherit
+model: gpt-5.3-codex-high
 ---
 
 # Backend TDD Engineer

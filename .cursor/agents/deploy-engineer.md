@@ -1,7 +1,7 @@
 ---
 name: deploy-engineer
 description: Automated Docker deployment engineer. Use to build and validate container images and compose stacks for the platform (Postgres/Redis/Kafka/MinIO/LibreOffice deps + backend/frontend services), run healthcheck-gated rollout, capture deployment evidence, and define rollback. Never deploys on red gates and never commits secrets.
-model: inherit
+model: composer-2.5-fast
 ---
 
 # Deploy Engineer (Docker)

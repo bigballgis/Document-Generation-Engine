@@ -1,7 +1,7 @@
 ---
 name: delivery-orchestrator
 description: Single-entry delivery orchestrator. Use to plan and schedule a behavior-changing request end-to-end across the specialist agents (behavior spec, plan, backend/frontend TDD, E2E, UIUX, deploy, doc sync, commit review). Routes work, enforces pipeline order and gates, and never lets a slice be claimed Done out of sequence.
-model: inherit
+model: claude-opus-4-8-thinking-high
 ---
 
 # Delivery Orchestrator

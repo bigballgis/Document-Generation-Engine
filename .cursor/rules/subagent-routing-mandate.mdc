@@ -64,3 +64,10 @@ If `subagent=inline`, state the exception (read-only / single-line / user opt-ou
 - Doc sync / commit: `post-task-doc-sync-constitution.mdc`, `post-task-commit-review-constitution.mdc`
 
 Agent definitions: `.cursor/agents/*.md` — read the target agent file before `Task`.
+
+## Model selection
+
+Specialists pin a default model in frontmatter; see
+[`.cursor/agents/MODEL-STRATEGY.md`](../agents/MODEL-STRATEGY.md). Parent agents should **not**
+override `model` on Task unless the user explicitly requests a one-off change — file config is
+the durable source of truth.

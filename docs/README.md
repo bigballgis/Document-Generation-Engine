@@ -156,8 +156,11 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 ## Project agent tooling (`.cursor/`)
 
+Per-agent model assignments: [`.cursor/agents/MODEL-STRATEGY.md`](../.cursor/agents/MODEL-STRATEGY.md).
+
 | Asset | Purpose |
 | --- | --- |
+| `.cursor/agents/MODEL-STRATEGY.md` | Subagent model tiers and pinned slugs |
 | `.cursor/agents/delivery-orchestrator.md` | Single-entry pipeline scheduler / router |
 | `.cursor/agents/behavior-spec-author.md` | BDD behavior spec (Given/When/Then) gate |
 | `.cursor/agents/plan-orchestrator.md` | Plan layer maintenance |
@@ -166,6 +169,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | `.cursor/agents/frontend-engineer.md` | Frontend TDD implementer (bank OA style lock) |
 | `.cursor/agents/e2e-test-engineer.md` | Playwright functional E2E journeys |
 | `.cursor/agents/e2e-uiux-reviewer.md` | Visual/responsive/a11y/brand UIUX evidence |
+| `.cursor/agents/build-deploy-agent.md` | Build gates, p0/release gate, Docker deploy scripts |
 | `.cursor/agents/deploy-engineer.md` | Automated Docker build/deploy/rollback |
 | `.cursor/agents/architecture-reviewer.md` | Read-only architecture review |
 | `.cursor/agents/post-task-doc-sync.md` | Mandatory end-of-task documentation sync |
