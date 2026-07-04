@@ -151,7 +151,7 @@
 | **Symptom** | On Docker 4173, preview/batch-test progress does not arrive incrementally (whole batch bursts at once) or the stream drops silently |
 | **Root cause** | `frontend/nginx.conf` has no SSE location (nginx defaults `proxy_buffering on`, `proxy_read_timeout 60s`); backend sends no `X-Accel-Buffering: no` / `Cache-Control: no-cache`; `SseEmitterRegistry` 3-min timeout without heartbeat |
 | **Detection** | LR-E1 incremental-arrival E2E (4173) |
-| **Mitigation** | Heartbeat comment ~20s + response headers + nginx SSE location (buffering off, raised read_timeout) |
+| **Mitigation** | Heartbeat comment ~20s + response headers + nginx SSE location (buffering off, raised read_timeout) (LR-B3 landed 2026-07-04 — heartbeat + anti-buffering headers + nginx SSE location + Docker curl smoke; browser-level incremental proof → LR-E1) |
 | **Owner wave** | **LR-B3 / LR-E1** |
 | **Doc anchor** | [docs/plan/detail/LRP-B-runtime-scaleout-session.md](./LRP-B-runtime-scaleout-session.md) |
 
@@ -162,7 +162,7 @@
 | **Symptom** | Any request 401s once an author has been editing for 30 minutes; unsaved form work is lost |
 | **Root cause** | `PT30M` hard expiry with no renewal/revocation (logout is log-only) |
 | **Detection** | Session-expiry scenario E2E + dirty-form guard tests |
-| **Mitigation** | Sliding renewal/refresh + Redis revocation list (LR-B6) + dirty-form guard and local drafts (LR-C1/C2) |
+| **Mitigation** | Sliding renewal/refresh + Redis revocation list (LR-B6) + dirty-form guard and local drafts (LR-C1/C2) (LR-B6 landed 2026-07-04 — sliding renewal + revocation; 8 h absolute cap, fail-closed Redis check, silent frontend renewal + reminder banner; LR-C1/C2 still open) |
 | **Owner wave** | **LR-B6 + LR-C1/C2** |
 | **Doc anchor** | [docs/plan/detail/LRP-B-runtime-scaleout-session.md](./LRP-B-runtime-scaleout-session.md) + [docs/plan/detail/LRP-C-usability-deepening.md](./LRP-C-usability-deepening.md) |
 

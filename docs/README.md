@@ -49,7 +49,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Master plan](./plan/master-plan.md) | P0–P22 phases — see phase detail plans for status |
 | [Comprehensive optimization roadmap](./plan/comprehensive-optimization-roadmap.md) | **Unified execution map** — docs, API contract, template workflow, frontend UX, performance, E2E (COR-0…6, 2026-06-23) |
 | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **Launch readiness** — doc truth, E2E golden paths, pitfall registry (`CD-*` tasks) |
-| [Launch Readiness & Deep-Optimization Program (LRP)](./plan/launch-readiness-program.md) | Production pitfalls + usability deepening — Waves LR-A…LR-E (`LR-*` tasks; **In Progress** — Wave LR-B activated 2026-07-04; detail docs linked from the program) |
+| [Launch Readiness & Deep-Optimization Program (LRP)](./plan/launch-readiness-program.md) | Production pitfalls + usability deepening — Waves LR-A…LR-E (`LR-*` tasks; **In Progress** — Wave LR-B **Done** 2026-07-04, Wave LR-A activated 2026-07-04; detail docs linked from the program) |
 | [P12 Deferred enhancements](./plan/detail/P12-deferred-enhancements.md) | Catch-all slice registry (testing overhaul, API package, UIUX refactor — Done slices) |
 | [P12 API package access](./plan/detail/P12-api-package-access-invocation-records.md) | Package-first API access + invocation records (**Done** 2026-07-03) |
 | [Optimization plan & backlog](./plan/optimization-plan.md) | Technical debt detail (OPT-A…G): gates, coverage, backend architecture |
@@ -138,6 +138,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Audit admin query journey](./behavior/audit-admin-query-journey.md) | **ready** | CD-BDD-T08 → CD-E2E-T11 |
 | [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12 2026-07-03) | P12 template testing tab |
 | [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **Done** (P12 2026-07-03) | Package-first API access |
+| [Session renewal & revocation](./behavior/session-renewal-revocation.md) | **ready** (LR-B6 delivered 2026-07-04) | BDD-LRP-SESSION-001 → LR-B6 **Done** (sliding renewal, 30 min TTL, 8 h absolute cap, Redis revocation fail-closed; policy confirmed 2026-07-04; implementation deviations in spec §14.1) |
 
 ## ADRs
 

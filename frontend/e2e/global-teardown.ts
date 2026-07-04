@@ -64,7 +64,7 @@ export default async function globalTeardown(): Promise<void> {
 
   try {
     const token = await apiLogin()
-    const templates = await authorizedGet<TemplateSummary[]>('/templates', token)
+    const templates = await authorizedGet<TemplateSummary[]>(token, '/templates')
     const e2eTemplates = templates.filter(
       (template) =>
         template.externalId.startsWith(E2E_FIXTURE_PREFIX) &&

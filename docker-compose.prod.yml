@@ -2,6 +2,7 @@
 # Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d
 # Container hardening (ADR-0030 / P15-T01): read-only root FS + tmpfs writable paths + non-root images.
 # ADR-0044: v1 topology = single backend replica (do not scale docgen-backend; see docs/adr/operations/0044-deployment-topology-v1.md).
+# LR-B8 (ADR-0030 / ADR-0044): real backend healthcheck + mem/cpu limits; frontend gates on backend health.
 
 services:
   docgen-backend:
@@ -27,12 +28,20 @@ services:
       REDIS_PORT: 6379
       MINIO_ENDPOINT: http://docgen-minio:9000
       JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}
+      JWT_ACCESS_TOKEN_TTL: ${JWT_ACCESS_TOKEN_TTL:-PT30M}
+      SESSION_ABSOLUTE_TTL: ${SESSION_ABSOLUTE_TTL:-PT8H}
       APP_ENVIRONMENT: prod
       DOCGEN_SEED_DEMO_CATALOG: ${DOCGEN_SEED_DEMO_CATALOG:-false}
       PDF_PAGE_NUMBER_STAMPING_ENABLED: ${PDF_PAGE_NUMBER_STAMPING_ENABLED:-false}
       HOME: /tmp
       LIBREOFFICE_CONVERSION_MODE: cli
-      JAVA_TOOL_OPTIONS: "-Djava.io.tmpdir=/tmp"
+      # LR-B8: MaxRAMPercentage caps the heap at 75% of mem_limit (~1.15G of 1536m),
+      # leaving headroom for metaspace/threads + LibreOffice CLI conversion peaks.
+      JAVA_TOOL_OPTIONS: "-Djava.io.tmpdir=/tmp -XX:MaxRAMPercentage=75.0"
+    # LR-B8: same order of magnitude as Helm values.yaml backend limits (cpu "2" / memory 1536Mi);
+    # JVM heap 75% of 1536m ≈ 1.15G + LibreOffice conversion peak fits within the limit.
+    mem_limit: 1536m
+    cpus: 2.0
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     depends_on:
@@ -42,8 +51,14 @@ services:
         condition: service_healthy
       docgen-minio:
         condition: service_healthy
+    # LR-B8: real probe (was healthcheck: disable: true); alpine busybox wget ships in the image.
+    # start_period 90s leaves time for Flyway migrations before failures count.
     healthcheck:
-      disable: true
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
 
   docgen-frontend:
     build:
@@ -57,11 +72,16 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:mode=1777,size=64m
+    # LR-B8: same order of magnitude as Helm values.yaml frontend limits (cpu 500m / memory 256Mi);
+    # static NGINX serving + SSE proxy needs little memory.
+    mem_limit: 256m
+    cpus: 0.5
     ports:
       - "${FRONTEND_PORT:-4173}:8080"
+    # LR-B8: gate on backend health now that the backend has a real healthcheck.
     depends_on:
       docgen-backend:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1"]
       interval: 15s
