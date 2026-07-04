@@ -155,7 +155,7 @@ public class MasterDocumentEntity {
     }
 
     public List<MasterAnchorEntity> getAnchors() {
-        return anchors;
+        return List.copyOf(anchors);
     }
 
     public void setName(String name) {

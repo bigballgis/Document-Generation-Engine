@@ -1,6 +1,6 @@
 # SpotBugs Exclusion Ratchet Plan (SOR-A05)
 
-**Status:** Active — slice 0 complete (REC_CATCH_EXCEPTION removed); **slice 1 Done** (2026-07-04).  
+**Status:** Active — slice 0 complete (REC_CATCH_EXCEPTION removed); **slice 1 Done** (2026-07-04); **slice 2 Done** (2026-07-04).  
 **Filter file:** `backend/config/spotbugs/exclude.xml`  
 **Automated guard:** `SpotBugsExclusionRatchetTest` (Surefire)
 
@@ -9,7 +9,7 @@
 | Metric | Value | Notes |
 | --- | --- | --- |
 | `<Match>` blocks | **3** | `BASELINE_MATCH_COUNT=3` in guard test |
-| Deferred `EI_EXPOSE_REP` / `EI_EXPOSE_REP2` | ~151 | −15 in slice 1 (security/session DTOs); blanket exclude retained |
+| Deferred `EI_EXPOSE_REP` / `EI_EXPOSE_REP2` | ~149 | −2 in slice 2 (persistence entities); −15 in slice 1; blanket exclude retained |
 | Deferred `REC_CATCH_EXCEPTION` | **0** | Removed from exclude.xml; 11 call sites narrowed |
 | Framework token exclusions | 1 block | `CT_CONSTRUCTOR_THROW,SE_BAD_FIELD` (Spring auth tokens) |
 | Test-class exclusion | 1 block | `~.*Test$` (tests out of gate scope) |
@@ -22,7 +22,7 @@
 | --- | --- | --- | --- |
 | **0 (Done)** | `REC_CATCH_EXCEPTION` | 11 findings across storage, master, rendering, runtime, template | 0 SpotBugs REC_CATCH; pattern removed from exclude.xml |
 | **1 (Done)** | `EI_EXPOSE_REP` — security-critical | `ManagementSessionClaims`, runtime credential views, JWT/session DTOs | −15 findings (8 classes); deferred ~166→~151; blanket exclude retained |
-| **2** | `EI_EXPOSE_REP` — persistence entities | JPA entities with collection getters | Module-by-module; JaCoCo unchanged |
+| **2 (Done)** | `EI_EXPOSE_REP` — persistence entities | JPA entities with collection getters | Module-by-module; JaCoCo unchanged |
 | **3** | `EI_EXPOSE_REP` — API views / records | MapStruct-generated + hand-written views | Reduce deferred count below 100 |
 | **4+** | Remaining `EI_EXPOSE_REP` | Quarterly −20% of deferred count | Remove blanket `<Match>` when &lt; 10 remain |
 
@@ -44,6 +44,22 @@ Defensive `List.copyOf` in record compact constructors (null-safe → `List.of()
 **Tests:** `SecuritySessionDtoImmutabilityTest` (7 cases) + `JwtTokenServiceTest` management-token round-trip immutability.
 
 **Exit:** ~15 deferred EI findings addressed; `exclude.xml` blanket `EI_EXPOSE_REP` match unchanged (`BASELINE_MATCH_COUNT=3`).
+
+## Slice 2 evidence (EI_EXPOSE_REP — persistence entities)
+
+Full scan of `backend/src/main/java/**/persistence/*Entity.java` (**31** files): only **4** entities declare collection fields; **29** store collections as JSON strings or scalars (no EI risk on getters).
+
+| Class | Module | Collection getter | Change |
+| --- | --- | --- | --- |
+| `MasterDocumentEntity` | `master.persistence` | `getAnchors()` | `List.copyOf(anchors)` |
+| `MasterRevisionLineEntity` | `master.persistence` | `getAnchors()` | `List.copyOf(anchors)` |
+| `ManagementUserEntity` | `authorization.management.persistence` | `getRoles()`, `getAuthorizedGroupCodes()` | **Verified** — already `Set.copyOf` (no change) |
+
+Mutation remains via domain methods (`replaceAnchors`, `assignRoles`, `assignGroupScope`); no callers mutate via getters (grep-confirmed).
+
+**Tests:** `PersistenceEntityCollectionImmutabilityTest` (3 cases).
+
+**Exit:** ~2 deferred EI findings addressed (~151→~149); `exclude.xml` blanket `EI_EXPOSE_REP` match unchanged (`BASELINE_MATCH_COUNT=3`).
 
 ## Slice 0 evidence (REC_CATCH fixes)
 

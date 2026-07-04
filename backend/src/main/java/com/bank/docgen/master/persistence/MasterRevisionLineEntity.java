@@ -151,7 +151,7 @@ public class MasterRevisionLineEntity {
     }
 
     public List<MasterRevisionLineAnchorEntity> getAnchors() {
-        return anchors;
+        return List.copyOf(anchors);
     }
 
     public void markSuperseded() {
