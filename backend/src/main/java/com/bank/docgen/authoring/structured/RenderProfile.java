@@ -9,7 +9,8 @@ public record RenderProfile(
         String tablePaginationPolicy,
         String imageScalingPolicy,
         String pdfConversionPolicy,
-        String fidelityPolicy
+        String fidelityPolicy,
+        boolean pdfPageNumberStampingEnabled
 ) {
 
     public static RenderProfile fromJsonNode(JsonNode node) {
@@ -20,7 +21,8 @@ public record RenderProfile(
                 node.path("tablePaginationPolicy").asText("REPEAT_HEADER"),
                 node.path("imageScalingPolicy").asText("PROPORTIONAL_FIT"),
                 node.path("pdfConversionPolicy").asText("SEMANTIC_FIDELITY"),
-                node.path("fidelityPolicy").asText("BLOCKERS_PREVENT_PUBLISH")
+                node.path("fidelityPolicy").asText("BLOCKERS_PREVENT_PUBLISH"),
+                node.path("pdfPageNumberStampingEnabled").asBoolean(false)
         );
     }
 }

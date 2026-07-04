@@ -8,9 +8,7 @@ import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.rendering.DocxAssembler;
-import com.bank.docgen.rendering.DocxPdfPageNumberStampPlanResolver;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
-import com.bank.docgen.rendering.PdfConversionStampPlanContext;
 import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
@@ -114,14 +112,11 @@ public class DocumentGenerationEngine {
             LOG.warn("Document generation assembly failed for template {}: {}", template.getId(), ex.getMessage());
             throw new TemplateValidationException("api.error.rendering.generationFailed");
         }
-        DocumentArtifactPipeline.GeneratedArtifact artifact = PdfConversionStampPlanContext.runWith(
-                DocxPdfPageNumberStampPlanResolver.resolve(docx, renderProfile),
-                () -> documentArtifactPipeline.finalizeArtifact(
-                        docx,
-                        outputFormat,
-                        encryption,
-                        renderProfile
-                )
+        DocumentArtifactPipeline.GeneratedArtifact artifact = documentArtifactPipeline.finalizeArtifact(
+                docx,
+                outputFormat,
+                encryption,
+                renderProfile
         );
         try (artifact) {
             String documentId = "DOC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
@@ -134,13 +129,17 @@ public class DocumentGenerationEngine {
                         artifact.contentType()
                 );
             }
+            List<String> fidelityWarnings = new java.util.ArrayList<>(
+                    fidelityValidationService.collectWarningCodesForVersion(version.getId(), template.getMasterId())
+            );
+            fidelityWarnings.addAll(artifact.pipelineWarningCodes());
             return new GeneratedDocument(
                     documentId,
                     storageKey,
                     null,
                     artifact.contentType(),
                     outputFormat,
-                    fidelityValidationService.collectWarningCodesForVersion(version.getId(), template.getMasterId())
+                    List.copyOf(fidelityWarnings)
             );
         } catch (java.io.IOException ex) {
             throw new TemplateValidationException("api.error.rendering.generationFailed");

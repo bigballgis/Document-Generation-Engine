@@ -130,7 +130,8 @@ class DocumentGenerationEngineTest {
                         "REPEAT_HEADER",
                         "PROPORTIONAL_FIT",
                         "SEMANTIC_FIDELITY",
-                        "BLOCKERS_PREVENT_PUBLISH"
+                        "BLOCKERS_PREVENT_PUBLISH",
+                        false
                 ));
         when(documentArtifactPipeline.finalizeArtifact(any(), eq("DOCX"), any(), any())).thenReturn(artifact);
         when(fidelityValidationService.collectWarningCodesForVersion(VERSION_ID, MASTER_ID)).thenReturn(List.of());

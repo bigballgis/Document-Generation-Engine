@@ -1,0 +1,13 @@
+{
+  "catalogMarker": "credit-limit-demo-v1",
+  "name": "Credit Limit Confirmation — Executive Sample",
+  "required": true,
+  "variables": {
+    "customerName": "Northgate Manufacturing Ltd.",
+    "facilityReference": "CORP-CL-2026-88421",
+    "creditLimit": "GBP 12,500,000.00",
+    "reviewDate": "2026-06-30",
+    "includeOverdraft": true,
+    "overdraftLimit": "GBP 1,000,000.00"
+  }
+}

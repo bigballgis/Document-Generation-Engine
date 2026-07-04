@@ -1,0 +1,11 @@
+{
+  "catalogMarker": "credit-limit-demo-v1",
+  "variables": [
+    {"key": "customerName", "label": "Customer Name", "type": "STRING", "required": true},
+    {"key": "facilityReference", "label": "Facility Reference", "type": "STRING", "required": true},
+    {"key": "creditLimit", "label": "Credit Limit", "type": "MONEY", "required": true},
+    {"key": "reviewDate", "label": "Review Date", "type": "DATE", "required": true},
+    {"key": "includeOverdraft", "label": "Include Overdraft Facility", "type": "BOOLEAN", "required": false},
+    {"key": "overdraftLimit", "label": "Overdraft Limit", "type": "MONEY", "required": false}
+  ]
+}

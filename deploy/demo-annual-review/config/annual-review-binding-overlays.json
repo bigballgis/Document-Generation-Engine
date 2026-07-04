@@ -1,0 +1,89 @@
+{
+  "catalogMarker": "annual-review-demo-v1",
+  "bindings": {
+    "ANNUAL_REVIEW_BODY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Dear "},
+            {"type": "variable", "key": "customerName"},
+            {"type": "textRun", "value": ",\n\nWe have completed the annual credit review of facility "},
+            {"type": "variable", "key": "facilityReference"},
+            {"type": "textRun", "value": " as at "},
+            {"type": "variable", "key": "reviewDate"},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {"type": "contentModuleRef", "referenceKey": "ANNUAL-REVIEW-STANDARD-CLAUSE"}
+      ]
+    },
+    "ANNUAL_REVIEW_SCHEDULE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeCovenantSchedule} == true",
+          "children": [
+            {
+              "type": "sectionHeading",
+              "children": [{"type": "text", "value": "Covenant Compliance Schedule"}]
+            },
+            {
+              "type": "loopBlock",
+              "loopVariable": "covenantItems",
+              "children": [
+                {
+                  "type": "paragraph",
+                  "children": [
+                    {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "covenantName"}]},
+                    {"type": "textRun", "value": ": "},
+                    {"type": "variable", "key": "covenantStatus"}
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "FACILITY_RENEWAL_BODY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "styleRef",
+          "styleId": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Facility Renewal Confirmation for "},
+            {"type": "variable", "key": "customerName"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "We confirm renewal of facility "},
+            {"type": "variable", "key": "facilityReference"},
+            {"type": "textRun", "value": " effective "},
+            {"type": "variable", "key": "renewalDate"},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {"type": "contentModuleRef", "referenceKey": "FACILITY-RENEWAL-STANDARD-CLAUSE"}
+      ]
+    },
+    "FACILITY_RENEWAL_TERMS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "orderedList",
+          "children": [
+            {"type": "listItem", "children": [{"type": "textRun", "value": "Pricing remains subject to annual review."}]},
+            {"type": "listItem", "children": [{"type": "textRun", "value": "Security arrangements unchanged unless notified separately."}]},
+            {"type": "listItem", "children": [{"type": "textRun", "value": "All other terms of the facility agreement continue in full force."}]}
+          ]
+        }
+      ]
+    }
+  }
+}

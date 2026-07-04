@@ -1,0 +1,11 @@
+{
+  "catalogMarker": "wealth-demo-v1",
+  "packageCode": "wealth",
+  "groupCode": "WEALTH",
+  "pageNumberingProfile": "GLOBAL_ONLY",
+  "pageTarget": 20,
+  "templates": ["DEMO-WEALTH-STATEMENT"],
+  "contentModuleRefs": [
+    {"referenceKey": "WEALTH-STATEMENT-INTRO", "moduleCode": "WEALTH-STATEMENT-STD"}
+  ]
+}

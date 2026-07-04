@@ -2,6 +2,9 @@ package com.bank.docgen.demo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bank.docgen.demo.support.DemoMasterDocxAssertions;
+import com.bank.docgen.demo.support.DemoMasterDocxLayoutSupport;
+import com.bank.docgen.demo.support.DemoMasterDocxPageNumberSupport;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.rendering.DocxWordCompatibilitySupport;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,8 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageSz;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType;
 
 /**
  * Build-time helper only — writes the wholesale FOL master DOCX asset under {@code deploy/demo-fol/assets/}.
@@ -37,7 +38,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType;
 class FolMasterDocxAssetGeneratorTest {
 
     /** Bump when page layout / header / footer changes; import script uses this to refresh uploaded masters. */
-    static final String MASTER_LAYOUT_VERSION = "fol-layout-v4-docx-page-field-pdf-stamp";
+    static final String MASTER_LAYOUT_VERSION = "fol-layout-v5-dual-page-section-breaks";
 
     private static final Path ASSET_PATH = Path.of("..", "deploy", "demo-fol", "assets", "wholesale-fol-master.docx");
 
@@ -67,6 +68,8 @@ class FolMasterDocxAssetGeneratorTest {
             assertThat(sectPr.isSetPgSz()).isTrue();
             CTPageSz pageSize = sectPr.getPgSz();
             assertThat(pageSize.getW()).isEqualTo(BigInteger.valueOf(11906));
+            String footerXml = DemoMasterDocxAssertions.readFooterXml(docx);
+            assertThat(footerXml).contains("SECTIONPAGES").contains("NUMPAGES");
         }
 
         Files.createDirectories(ASSET_PATH.getParent());
@@ -85,9 +88,15 @@ class FolMasterDocxAssetGeneratorTest {
             addCentered(document, "(Confidential — Subject to Contract)", 10, true, "990000");
             document.createParagraph();
 
+            int sectionIndex = 0;
             for (String anchorId : ANCHOR_IDS) {
                 String title = SECTION_TITLES.getOrDefault(anchorId, anchorId);
+                if (sectionIndex == 10) {
+                    XWPFParagraph breakParagraph = document.createParagraph();
+                    DemoMasterDocxLayoutSupport.insertSectionBreakNextPage(breakParagraph, true);
+                }
                 addSection(document, title, anchorId);
+                sectionIndex++;
             }
 
             DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
@@ -124,22 +133,7 @@ class FolMasterDocxAssetGeneratorTest {
     }
 
     private static void configurePageLayout(XWPFDocument document) {
-        CTSectPr sectPr = document.getDocument().getBody().isSetSectPr()
-                ? document.getDocument().getBody().getSectPr()
-                : document.getDocument().getBody().addNewSectPr();
-
-        CTPageSz pageSize = sectPr.isSetPgSz() ? sectPr.getPgSz() : sectPr.addNewPgSz();
-        pageSize.setW(BigInteger.valueOf(11906));
-        pageSize.setH(BigInteger.valueOf(16838));
-
-        CTPageMar margins = sectPr.isSetPgMar() ? sectPr.getPgMar() : sectPr.addNewPgMar();
-        margins.setTop(BigInteger.valueOf(1440));
-        margins.setBottom(BigInteger.valueOf(1440));
-        margins.setLeft(BigInteger.valueOf(1701));
-        margins.setRight(BigInteger.valueOf(1276));
-        margins.setHeader(BigInteger.valueOf(708));
-        margins.setFooter(BigInteger.valueOf(708));
-        margins.setGutter(BigInteger.valueOf(0));
+        DemoMasterDocxLayoutSupport.configureA4PageLayout(document);
     }
 
     private static void configureDefaultHeader(XWPFDocument document) {
@@ -183,7 +177,7 @@ class FolMasterDocxAssetGeneratorTest {
 
         XWPFParagraph pageLine = footer.createParagraph();
         pageLine.setAlignment(ParagraphAlignment.CENTER);
-        addPageNumberRun(pageLine);
+        DemoMasterDocxPageNumberSupport.addDualPageNumberFields(pageLine);
 
         XWPFParagraph disclaimerLine = footer.createParagraph();
         disclaimerLine.setAlignment(ParagraphAlignment.CENTER);
@@ -192,25 +186,6 @@ class FolMasterDocxAssetGeneratorTest {
         disclaimerRun.setItalic(true);
         disclaimerRun.setColor("888888");
         disclaimerRun.setText("Internal demonstration document — not an offer capable of acceptance");
-    }
-
-    private static void addPageNumberRun(XWPFParagraph paragraph) {
-        XWPFRun prefix = paragraph.createRun();
-        prefix.setFontSize(8);
-        prefix.setFontFamily("Calibri");
-        prefix.setText("Page ");
-
-        var ctp = paragraph.getCTP();
-        CTR begin = ctp.addNewR();
-        begin.addNewFldChar().setFldCharType(STFldCharType.BEGIN);
-        CTR instruction = ctp.addNewR();
-        instruction.addNewInstrText().setStringValue(" PAGE \\* MERGEFORMAT ");
-        CTR separate = ctp.addNewR();
-        separate.addNewFldChar().setFldCharType(STFldCharType.SEPARATE);
-        CTR placeholder = ctp.addNewR();
-        placeholder.addNewT().setStringValue("1");
-        CTR end = ctp.addNewR();
-        end.addNewFldChar().setFldCharType(STFldCharType.END);
     }
 
     private static void addSection(XWPFDocument document, String title, String anchorId) {

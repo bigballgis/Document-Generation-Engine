@@ -1,0 +1,11 @@
+{
+  "catalogMarker": "annual-review-demo-v1",
+  "variables": [
+    {"key": "customerName", "label": "Customer Name", "type": "STRING", "required": true},
+    {"key": "facilityReference", "label": "Facility Reference", "type": "STRING", "required": true},
+    {"key": "reviewDate", "label": "Review Date", "type": "DATE", "required": true},
+    {"key": "renewalDate", "label": "Renewal Date", "type": "DATE", "required": false},
+    {"key": "includeCovenantSchedule", "label": "Include Covenant Schedule", "type": "BOOLEAN", "required": false},
+    {"key": "covenantItems", "label": "Covenant Items", "type": "LIST", "required": false}
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "anchorIds": ["WEALTH_STATEMENT_BODY", "WEALTH_HOLDINGS_TABLE", "WEALTH_FOOTER_TOTALS"],
+  "sections": [
+    {"anchorId": "WEALTH_STATEMENT_BODY", "title": "Investment Statement"},
+    {"anchorId": "WEALTH_HOLDINGS_TABLE", "title": "Portfolio Holdings"},
+    {"anchorId": "WEALTH_FOOTER_TOTALS", "title": "Summary Totals"}
+  ]
+}

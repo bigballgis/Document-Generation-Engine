@@ -2111,6 +2111,39 @@
                      "FOL_FACILITY_SUMMARY":  {
                                                   "nodes":  [
                                                                 {
+                                                                    "type":  "styleRef",
+                                                                    "styleId":  "ScheduleTitle",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "value":  "Key facility particulars are summarised below.",
+                                                                                         "type":  "textRun"
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
+                                                                    "type":  "orderedList",
+                                                                    "children":  [
+                                                                                     {
+                                                                                         "type":  "listItem",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Commitments and margin per Schedule 1.",
+                                                                                                              "type":  "textRun"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     },
+                                                                                     {
+                                                                                         "type":  "listItem",
+                                                                                         "children":  [
+                                                                                                          {
+                                                                                                              "value":  "Conditions precedent before first utilisation.",
+                                                                                                              "type":  "textRun"
+                                                                                                          }
+                                                                                                      ]
+                                                                                     }
+                                                                                 ]
+                                                                },
+                                                                {
                                                                     "type":  "sectionHeading",
                                                                     "children":  [
                                                                                      {

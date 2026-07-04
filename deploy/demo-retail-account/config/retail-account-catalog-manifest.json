@@ -1,0 +1,7 @@
+{
+  "catalogMarker": "retail-account-demo-v1",
+  "packageCode": "retail-account",
+  "groupCode": "RETAIL",
+  "pageNumberingProfile": "GLOBAL_ONLY",
+  "templates": ["DEMO-RETAIL-ACCOUNT-OPEN", "DEMO-RETAIL-ACCOUNT-BALANCE"]
+}

@@ -1,0 +1,28 @@
+{
+  "catalogMarker": "retail-account-demo-v1",
+  "groupCode": "RETAIL",
+  "pageNumberingProfile": "GLOBAL_ONLY",
+  "masterName": "Meridian Retail Account Master",
+  "masterLayoutVersion": "retail-account-layout-v1-global-page",
+  "masterDescription": "Retail account opening and balance confirmation letters",
+  "templates": [
+    {
+      "externalId": "DEMO-RETAIL-ACCOUNT-OPEN",
+      "name": "Retail Account Opening Confirmation",
+      "masterDocx": "assets/retail-account-open-master.docx",
+      "description": "Account opening confirmation letter for retail customers"
+    },
+    {
+      "externalId": "DEMO-RETAIL-ACCOUNT-BALANCE",
+      "name": "Retail Account Balance Confirmation",
+      "masterDocx": "assets/retail-account-balance-master.docx",
+      "description": "Account balance confirmation letter"
+    }
+  ],
+  "generatedCatalogFiles": {
+    "variables": "config/retail-account-variables.json",
+    "bindingOverlays": "config/retail-account-binding-overlays.json",
+    "demoTestVariables": "config/retail-account-demo-test-variables.json",
+    "catalogManifest": "config/retail-account-catalog-manifest.json"
+  }
+}

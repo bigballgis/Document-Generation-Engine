@@ -45,20 +45,29 @@ public class DockerExecPdfConversionService implements PdfConversionService {
     }
 
     @Override
-    public byte[] convert(byte[] docxBytes) {
+    public DocumentArtifactPipeline.PdfConversionResult convertWithResult(
+            byte[] docxBytes,
+            PdfConversionOptions options
+    ) {
+        PdfConversionOptions resolvedOptions = options == null
+                ? PdfConversionOptions.stampingDisabled()
+                : options;
         return ResilienceSupport.execute(circuitBreaker, retry, () -> PdfConversionOffloadSupport.executeOffloaded(
                 pdfConversionExecutor,
                 renderingProperties.getConversionTimeoutSeconds(),
-                () -> convertInternal(docxBytes)
+                () -> convertInternal(docxBytes, resolvedOptions)
         ));
     }
 
-    private byte[] convertInternal(byte[] docxBytes) {
+    private DocumentArtifactPipeline.PdfConversionResult convertInternal(
+            byte[] docxBytes,
+            PdfConversionOptions options
+    ) {
         Path hostDir = null;
         try {
             hostDir = Files.createTempDirectory("docgen-docker-pdf-");
             Path inputDocx = hostDir.resolve("input.docx");
-            byte[] pdfSourceDocx = pdfConversionPostProcessor.prepareDocxForConversion(docxBytes);
+            byte[] pdfSourceDocx = pdfConversionPostProcessor.prepareDocxForConversion(docxBytes, options);
             Files.write(inputDocx, pdfSourceDocx);
             String container = renderingProperties.getDockerContainerName();
             String containerInput = "/tmp/docgen-input.docx";
@@ -78,7 +87,8 @@ public class DockerExecPdfConversionService implements PdfConversionService {
                 throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
             }
             byte[] converted = Files.readAllBytes(outputPdf);
-            return pdfConversionPostProcessor.finishPdf(converted);
+            PdfPageStampResult stampResult = pdfConversionPostProcessor.finishPdf(converted, options);
+            return DocumentArtifactPipeline.PdfConversionResult.of(stampResult.pdfBytes(), stampResult);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new TemplateValidationException("api.error.generation.pdfConversionFailed");

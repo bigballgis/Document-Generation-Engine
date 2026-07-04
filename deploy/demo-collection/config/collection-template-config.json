@@ -1,0 +1,16 @@
+{
+  "catalogMarker": "collection-demo-v1",
+  "groupCode": "RETAIL",
+  "pageNumberingProfile": "GLOBAL_ONLY",
+  "masterLayoutVersion": "collection-layout-v1-global-page",
+  "templates": [
+    {"externalId": "DEMO-RATE-CHANGE-NOTICE", "name": "Rate Change Notice", "masterDocx": "assets/rate-change-notice-master.docx"},
+    {"externalId": "DEMO-OVERDUE-COLLECTION", "name": "Overdue Collection Notice", "masterDocx": "assets/overdue-collection-master.docx"}
+  ],
+  "generatedCatalogFiles": {
+    "variables": "config/collection-variables.json",
+    "bindingOverlays": "config/collection-binding-overlays.json",
+    "demoTestVariables": "config/collection-demo-test-variables.json",
+    "catalogManifest": "config/collection-catalog-manifest.json"
+  }
+}

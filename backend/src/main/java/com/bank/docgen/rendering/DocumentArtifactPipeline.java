@@ -2,6 +2,8 @@ package com.bank.docgen.rendering;
 
 import com.bank.docgen.authoring.structured.RenderProfile;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,19 +14,22 @@ public class DocumentArtifactPipeline {
     private final PdfEncryptionService pdfEncryptionService;
     private final GeneratedArtifactSizeGuard artifactSizeGuard;
     private final ArtifactSpoolService artifactSpoolService;
+    private final PdfConversionPostProcessor pdfConversionPostProcessor;
 
     public DocumentArtifactPipeline(
             DocxEncryptionService docxEncryptionService,
             PdfConversionService pdfConversionService,
             PdfEncryptionService pdfEncryptionService,
             GeneratedArtifactSizeGuard artifactSizeGuard,
-            ArtifactSpoolService artifactSpoolService
+            ArtifactSpoolService artifactSpoolService,
+            PdfConversionPostProcessor pdfConversionPostProcessor
     ) {
         this.docxEncryptionService = docxEncryptionService;
         this.pdfConversionService = pdfConversionService;
         this.pdfEncryptionService = pdfEncryptionService;
         this.artifactSizeGuard = artifactSizeGuard;
         this.artifactSpoolService = artifactSpoolService;
+        this.pdfConversionPostProcessor = pdfConversionPostProcessor;
     }
 
     public GeneratedArtifact finalizeArtifact(
@@ -47,26 +52,34 @@ public class DocumentArtifactPipeline {
             throw new IllegalStateException("Render profile missing PDF conversion policy");
         }
         if ("PDF".equalsIgnoreCase(outputFormat)) {
-            byte[] pdfBytes = pdfConversionService.convert(docxBytes);
-            pdfBytes = pdfEncryptionService.encrypt(pdfBytes, encryption);
+            PdfConversionOptions options = pdfConversionPostProcessor.resolveOptions(docxBytes, renderProfile);
+            PdfConversionResult conversionResult = pdfConversionService.convertWithResult(docxBytes, options);
+            byte[] pdfBytes = pdfEncryptionService.encrypt(conversionResult.pdfBytes(), encryption);
             return spoolFinalArtifact(
                     pdfBytes,
                     "application/pdf",
-                    "output.pdf"
+                    "output.pdf",
+                    conversionResult.pipelineWarningCodes()
             );
         }
         byte[] encryptedDocx = docxEncryptionService.encrypt(docxBytes, encryption);
         return spoolFinalArtifact(
                 encryptedDocx,
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "output.docx"
+                "output.docx",
+                List.of()
         );
     }
 
-    private GeneratedArtifact spoolFinalArtifact(byte[] finalBytes, String contentType, String storageFileName) {
+    private GeneratedArtifact spoolFinalArtifact(
+            byte[] finalBytes,
+            String contentType,
+            String storageFileName,
+            List<String> pipelineWarningCodes
+    ) {
         try {
             SpooledArtifact spooled = artifactSpoolService.spool(finalBytes);
-            return new GeneratedArtifact(spooled, contentType, storageFileName);
+            return new GeneratedArtifact(spooled, contentType, storageFileName, pipelineWarningCodes);
         } catch (java.io.IOException ex) {
             throw new com.bank.docgen.template.service.TemplateValidationException(
                     "api.error.rendering.generationFailed"
@@ -77,11 +90,28 @@ public class DocumentArtifactPipeline {
     public record GeneratedArtifact(
             SpooledArtifact spooled,
             String contentType,
-            String storageFileName
+            String storageFileName,
+            List<String> pipelineWarningCodes
     ) implements AutoCloseable {
+        public GeneratedArtifact(SpooledArtifact spooled, String contentType, String storageFileName) {
+            this(spooled, contentType, storageFileName, List.of());
+        }
+
         @Override
         public void close() throws java.io.IOException {
             spooled.close();
+        }
+    }
+
+    public record PdfConversionResult(
+            byte[] pdfBytes,
+            List<String> pipelineWarningCodes
+    ) {
+
+        public static PdfConversionResult of(byte[] pdfBytes, PdfPageStampResult stampResult) {
+            List<String> warnings = new ArrayList<>();
+            stampResult.warning().ifPresent(code -> warnings.add(code.name()));
+            return new PdfConversionResult(pdfBytes, List.copyOf(warnings));
         }
     }
 }

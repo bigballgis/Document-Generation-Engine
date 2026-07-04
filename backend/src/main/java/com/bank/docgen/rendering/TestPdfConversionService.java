@@ -20,8 +20,20 @@ public class TestPdfConversionService implements PdfConversionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestPdfConversionService.class);
 
+    private final PdfConversionPostProcessor pdfConversionPostProcessor;
+
+    public TestPdfConversionService(PdfConversionPostProcessor pdfConversionPostProcessor) {
+        this.pdfConversionPostProcessor = pdfConversionPostProcessor;
+    }
+
     @Override
-    public byte[] convert(byte[] docxBytes) {
+    public DocumentArtifactPipeline.PdfConversionResult convertWithResult(
+            byte[] docxBytes,
+            PdfConversionOptions options
+    ) {
+        PdfConversionOptions resolvedOptions = options == null
+                ? PdfConversionOptions.stampingDisabled()
+                : options;
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
@@ -34,7 +46,8 @@ public class TestPdfConversionService implements PdfConversionService {
             }
             try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
                 document.save(output);
-                return output.toByteArray();
+                PdfPageStampResult stampResult = pdfConversionPostProcessor.finishPdf(output.toByteArray(), resolvedOptions);
+                return DocumentArtifactPipeline.PdfConversionResult.of(stampResult.pdfBytes(), stampResult);
             }
         } catch (IOException ex) {
             LOG.warn("Test PDF conversion failed: {}", ex.getMessage());

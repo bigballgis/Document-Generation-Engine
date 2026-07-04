@@ -1,0 +1,11 @@
+{
+  "catalogMarker": "wealth-demo-v1",
+  "variables": [
+    {"key": "clientName", "label": "Client Name", "type": "STRING", "required": true},
+    {"key": "portfolioReference", "label": "Portfolio Reference", "type": "STRING", "required": true},
+    {"key": "statementDate", "label": "Statement Date", "type": "DATE", "required": true},
+    {"key": "holdings", "label": "Holdings", "type": "LIST", "required": true},
+    {"key": "totalMarketValue", "label": "Total Market Value", "type": "MONEY", "required": true},
+    {"key": "totalCost", "label": "Total Cost", "type": "MONEY", "required": true}
+  ]
+}

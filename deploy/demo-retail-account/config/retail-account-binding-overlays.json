@@ -1,0 +1,46 @@
+{
+  "catalogMarker": "retail-account-demo-v1",
+  "bindings": {
+    "RETAIL_OPEN_BODY": {
+      "type": "paragraph",
+      "children": [
+        {"type": "textRun", "text": "Dear "},
+        {"type": "variable", "key": "customerName"},
+        {"type": "textRun", "text": ",\n\nWe are pleased to confirm that your account "},
+        {"type": "variable", "key": "accountNumber"},
+        {"type": "textRun", "text": " has been opened at our "},
+        {"type": "variable", "key": "branchName"},
+        {"type": "textRun", "text": " branch effective "},
+        {"type": "variable", "key": "openingDate"},
+        {"type": "textRun", "text": "."}
+      ]
+    },
+    "RETAIL_OPEN_TERMS": {
+      "type": "paragraph",
+      "children": [
+        {"type": "emphasis", "variant": "bold", "children": [{"type": "textRun", "text": "Important:"}]},
+        {"type": "textRun", "text": " Please retain this letter for your records."}
+      ]
+    },
+    "RETAIL_BALANCE_BODY": {
+      "type": "paragraph",
+      "children": [
+        {"type": "textRun", "text": "Account "},
+        {"type": "variable", "key": "accountNumber"},
+        {"type": "textRun", "text": " held in the name of "},
+        {"type": "variable", "key": "customerName"},
+        {"type": "textRun", "text": " showed a balance of "},
+        {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "balanceAmount"}]},
+        {"type": "textRun", "text": " as at "},
+        {"type": "variable", "key": "balanceDate"},
+        {"type": "textRun", "text": "."}
+      ]
+    },
+    "RETAIL_BALANCE_SUMMARY": {
+      "type": "paragraph",
+      "children": [
+        {"type": "textRun", "text": "This confirmation is provided for your information only."}
+      ]
+    }
+  }
+}

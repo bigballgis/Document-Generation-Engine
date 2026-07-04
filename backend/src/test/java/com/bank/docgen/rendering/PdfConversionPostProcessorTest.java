@@ -3,6 +3,7 @@ package com.bank.docgen.rendering;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
+import com.bank.docgen.rendering.domain.FidelityWarningCode;
 import java.io.ByteArrayOutputStream;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -25,14 +26,16 @@ class PdfConversionPostProcessorTest {
                 new DocxPdfConversionPreprocessor()
         );
         byte[] sourcePdf = samplePdf();
+        PdfConversionOptions options = PdfConversionOptions.stampingDisabled();
 
-        byte[] finished = processor.finishPdf(sourcePdf);
+        PdfPageStampResult finished = processor.finishPdf(sourcePdf, options);
 
-        try (PDDocument document = Loader.loadPDF(finished)) {
+        try (PDDocument document = Loader.loadPDF(finished.pdfBytes())) {
             String text = new PDFTextStripper().getText(document);
             assertThat(text).contains("Body page 1");
             assertThat(text).doesNotContain("Page 1 of 1");
         }
+        assertThat(finished.warning()).isEmpty();
     }
 
     @Test
@@ -44,13 +47,32 @@ class PdfConversionPostProcessorTest {
                 new DocxPdfConversionPreprocessor()
         );
         byte[] sourcePdf = samplePdf();
+        PdfConversionOptions options = PdfConversionOptions.stampingEnabled(PdfPageNumberStampPlan.globalOnly());
 
-        byte[] finished = processor.finishPdf(sourcePdf);
+        PdfPageStampResult finished = processor.finishPdf(sourcePdf, options);
 
-        try (PDDocument document = Loader.loadPDF(finished)) {
+        try (PDDocument document = Loader.loadPDF(finished.pdfBytes())) {
             String text = new PDFTextStripper().getText(document);
             assertThat(text).contains("Page 1 of 1");
         }
+        assertThat(finished.warning()).isEmpty();
+    }
+
+    @Test
+    void renderProfileEnablesStampingWhenPlatformDefaultDisabled() throws Exception {
+        DocgenRenderingProperties properties = new DocgenRenderingProperties();
+        properties.setPdfPageNumberStampingEnabled(false);
+        PdfConversionPostProcessor processor = new PdfConversionPostProcessor(
+                properties,
+                new DocxPdfConversionPreprocessor()
+        );
+        assertThat(processor.isStampingEnabled(
+                com.bank.docgen.authoring.structured.RenderProfile.fromJsonNode(
+                        new com.fasterxml.jackson.databind.ObjectMapper().readTree("""
+                                {"pdfPageNumberStampingEnabled": true}
+                                """)
+                )
+        )).isTrue();
     }
 
     private static byte[] samplePdf() throws Exception {

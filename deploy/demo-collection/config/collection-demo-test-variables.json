@@ -1,0 +1,25 @@
+{
+  "catalogMarker": "collection-demo-v1",
+  "testDataSets": [
+    {
+      "id": "rate-change-executive",
+      "label": "Rate Change Notice — Executive Sample",
+      "variables": {
+        "customerName": "Ms Priya Sharma",
+        "accountNumber": "GB29 MERI 6016 1331 9268 19",
+        "newRate": "5.75% AER (variable)",
+        "effectiveDate": "2026-08-01"
+      }
+    },
+    {
+      "id": "overdue-collection-executive",
+      "label": "Overdue Collection Notice — Executive Sample",
+      "variables": {
+        "customerName": "Mr Daniel Reeves",
+        "accountNumber": "GB82 MERI 4047 5312 8741 63",
+        "overdueAmount": "GBP 1,247.50",
+        "dueDate": "2026-06-15"
+      }
+    }
+  ]
+}

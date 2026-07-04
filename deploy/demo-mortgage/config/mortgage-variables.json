@@ -1,0 +1,12 @@
+{
+  "catalogMarker": "mortgage-demo-v1",
+  "variables": [
+    {"key": "borrowerName", "label": "Borrower Name", "type": "STRING", "required": true},
+    {"key": "propertyAddress", "label": "Property Address", "type": "STRING", "required": true},
+    {"key": "loanAmount", "label": "Loan Amount", "type": "MONEY", "required": true},
+    {"key": "interestRate", "label": "Interest Rate", "type": "STRING", "required": true},
+    {"key": "termYears", "label": "Term (Years)", "type": "INTEGER", "required": true},
+    {"key": "approvalDate", "label": "Approval Date", "type": "DATE", "required": true},
+    {"key": "repaymentSchedule", "label": "Repayment Schedule", "type": "LIST", "required": true}
+  ]
+}

@@ -24,16 +24,16 @@ public final class PdfPageNumberStamper {
     }
 
     public static byte[] stampPageNumbers(byte[] pdfBytes) {
-        return stampPageNumbers(pdfBytes, PdfPageNumberStampPlan.globalOnly());
+        return stampPageNumbers(pdfBytes, PdfPageNumberStampPlan.globalOnly()).pdfBytes();
     }
 
-    public static byte[] stampPageNumbers(byte[] pdfBytes, PdfPageNumberStampPlan plan) {
+    public static PdfPageStampResult stampPageNumbers(byte[] pdfBytes, PdfPageNumberStampPlan plan) {
         PdfPageNumberStampPlan resolvedPlan = plan == null ? PdfPageNumberStampPlan.globalOnly() : plan;
         try (PDDocument document = Loader.loadPDF(pdfBytes);
                 ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             int totalPages = document.getNumberOfPages();
             if (totalPages == 0) {
-                return pdfBytes;
+                return PdfPageStampResult.success(pdfBytes);
             }
             PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
             List<Integer> sectionStarts = normalizeSectionStarts(resolvedPlan.sectionStartPages(), totalPages);
@@ -63,9 +63,9 @@ public final class PdfPageNumberStamper {
                 }
             }
             document.save(output);
-            return output.toByteArray();
+            return PdfPageStampResult.success(output.toByteArray());
         } catch (IOException ex) {
-            return pdfBytes;
+            return PdfPageStampResult.failure(pdfBytes);
         }
     }
 

@@ -1,0 +1,57 @@
+{
+  "catalogMarker": "collection-demo-v1",
+  "bindings": {
+    "RATE_CHANGE_BODY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Dear "},
+            {"type": "variable", "key": "customerName"},
+            {"type": "textRun", "value": ",\n\nWe are writing to inform you of a change to the interest rate applicable to account "},
+            {"type": "variable", "key": "accountNumber"},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Your new rate of "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "newRate"}]},
+            {"type": "textRun", "value": " will take effect from "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "effectiveDate"}]},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {"type": "contentModuleRef", "referenceKey": "COLLECTION-RATE-CHANGE-CLAUSE"}
+      ]
+    },
+    "OVERDUE_COLLECTION_BODY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Dear "},
+            {"type": "variable", "key": "customerName"},
+            {"type": "textRun", "value": ",\n\nOur records show that account "},
+            {"type": "variable", "key": "accountNumber"},
+            {"type": "textRun", "value": " has an overdue balance."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "children": [
+            {"type": "textRun", "value": "Overdue amount: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "overdueAmount"}]},
+            {"type": "textRun", "value": " originally due on "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "underline", "children": [{"type": "variable", "key": "dueDate"}]}]},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {"type": "contentModuleRef", "referenceKey": "COLLECTION-OVERDUE-CLAUSE"}
+      ]
+    }
+  }
+}

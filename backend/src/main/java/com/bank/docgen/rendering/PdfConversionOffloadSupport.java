@@ -18,13 +18,13 @@ public final class PdfConversionOffloadSupport {
     private PdfConversionOffloadSupport() {
     }
 
-    public static byte[] executeOffloaded(
+    public static <T> T executeOffloaded(
             Executor executor,
             int conversionTimeoutSeconds,
-            Supplier<byte[]> conversion
+            Supplier<T> conversion
     ) {
         assertCapacityAvailable(executor);
-        Future<byte[]> future;
+        Future<T> future;
         try {
             future = CompletableFuture.supplyAsync(conversion, executor);
         } catch (RejectedExecutionException ex) {

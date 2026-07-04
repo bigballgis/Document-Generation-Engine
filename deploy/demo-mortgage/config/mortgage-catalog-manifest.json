@@ -1,0 +1,11 @@
+{
+  "catalogMarker": "mortgage-demo-v1",
+  "packageCode": "mortgage",
+  "groupCode": "RETAIL",
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+  "pageTarget": 12,
+  "templates": ["DEMO-MORTGAGE-APPROVAL"],
+  "contentModuleRefs": [
+    {"referenceKey": "MORTGAGE-STANDARD-TERMS", "moduleCode": "MORTGAGE-STD-TERMS"}
+  ]
+}

@@ -32,19 +32,27 @@ class LibreOfficePdfConversionServiceTest {
     @BeforeEach
     void setUp() throws URISyntaxException, IOException {
         properties = new DocgenRenderingProperties();
-        boolean windows = System.getProperty("os.name", "").toLowerCase().contains("win");
-        String scriptName = windows ? "/scripts/fake-libreoffice.cmd" : "/scripts/fake-libreoffice.sh";
-        fakeLibreOfficeScript = Path.of(
-                LibreOfficePdfConversionServiceTest.class.getResource(scriptName).toURI()
-        );
-        if (!windows) {
-            Files.setPosixFilePermissions(fakeLibreOfficeScript, EnumSet.of(
+        fakeLibreOfficeScript = resolveFakeLibreOfficeScript("fake-libreoffice");
+        ensureExecutable(fakeLibreOfficeScript);
+        testPool = pdfConversionPool();
+    }
+
+    private static Path resolveFakeLibreOfficeScript(String baseName) throws URISyntaxException {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        String suffix = os.contains("win") ? ".cmd" : ".sh";
+        return Path.of(LibreOfficePdfConversionServiceTest.class
+                .getResource("/scripts/" + baseName + suffix)
+                .toURI());
+    }
+
+    private static void ensureExecutable(Path script) throws IOException {
+        if (!System.getProperty("os.name", "").toLowerCase().contains("win")) {
+            Files.setPosixFilePermissions(script, EnumSet.of(
                     PosixFilePermission.OWNER_READ,
                     PosixFilePermission.OWNER_WRITE,
                     PosixFilePermission.OWNER_EXECUTE
             ));
         }
-        testPool = pdfConversionPool();
     }
 
     @AfterEach
@@ -79,7 +87,7 @@ class LibreOfficePdfConversionServiceTest {
         LibreOfficePdfConversionService service = service();
         long tempDirsBefore = countDocgenPdfTempDirs();
 
-        byte[] pdf = service.convert(minimalDocxBytes());
+        byte[] pdf = service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()).pdfBytes();
 
         assertThat(pdf).isNotEmpty();
         assertThat(new String(pdf)).contains("%PDF");
@@ -88,25 +96,27 @@ class LibreOfficePdfConversionServiceTest {
 
     @Test
     void removesTempDirectoryAfterFailedConversion() throws URISyntaxException, IOException {
-        Path failScript = resolveFailScript();
+        Path failScript = resolveFakeLibreOfficeScript("fake-libreoffice-fail");
+        ensureExecutable(failScript);
         properties.setLibreOfficeCommand(failScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();
         long tempDirsBefore = countDocgenPdfTempDirs();
 
-        assertThatThrownBy(() -> service.convert(minimalDocxBytes()))
+        assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
                 .isInstanceOf(TemplateValidationException.class);
         assertThat(countDocgenPdfTempDirs()).isEqualTo(tempDirsBefore);
     }
 
     @Test
     void rejectsNonZeroExitCode() throws URISyntaxException, IOException {
-        Path failScript = resolveFailScript();
+        Path failScript = resolveFakeLibreOfficeScript("fake-libreoffice-fail");
+        ensureExecutable(failScript);
         properties.setLibreOfficeCommand(failScript.toString());
         properties.setConversionTimeoutSeconds(30);
         LibreOfficePdfConversionService service = service();
 
-        assertThatThrownBy(() -> service.convert(minimalDocxBytes()))
+        assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
                 .isInstanceOf(TemplateValidationException.class);
     }
 
@@ -116,7 +126,7 @@ class LibreOfficePdfConversionServiceTest {
         properties.setConversionTimeoutSeconds(1);
         LibreOfficePdfConversionService service = service();
 
-        assertThatThrownBy(() -> service.convert(minimalDocxBytes()))
+        assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
                 .isInstanceOf(TemplateValidationException.class);
     }
 
@@ -140,7 +150,7 @@ class LibreOfficePdfConversionServiceTest {
                     pdfConversionPostProcessor()
             );
 
-            byte[] pdf = service.convert(minimalDocxBytes());
+            byte[] pdf = service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()).pdfBytes();
 
             assertThat(pdf).isNotEmpty();
             assertThat(workerThread.get()).isNotNull();
@@ -148,20 +158,6 @@ class LibreOfficePdfConversionServiceTest {
         } finally {
             pool.shutdown();
         }
-    }
-
-    private Path resolveFailScript() throws URISyntaxException, IOException {
-        boolean windows = System.getProperty("os.name", "").toLowerCase().contains("win");
-        String scriptName = windows ? "/scripts/fake-libreoffice-fail.cmd" : "/scripts/fake-libreoffice-fail.sh";
-        Path script = Path.of(LibreOfficePdfConversionServiceTest.class.getResource(scriptName).toURI());
-        if (!windows) {
-            Files.setPosixFilePermissions(script, EnumSet.of(
-                    PosixFilePermission.OWNER_READ,
-                    PosixFilePermission.OWNER_WRITE,
-                    PosixFilePermission.OWNER_EXECUTE
-            ));
-        }
-        return script;
     }
 
     private LibreOfficePdfConversionService service() {

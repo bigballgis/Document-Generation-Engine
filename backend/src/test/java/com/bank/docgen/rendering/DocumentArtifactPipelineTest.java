@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -16,6 +17,9 @@ class DocumentArtifactPipelineTest {
 
     @Mock
     private PdfConversionService pdfConversionService;
+
+    @Mock
+    private PdfConversionPostProcessor pdfConversionPostProcessor;
 
     private final DocxEncryptionService docxEncryptionService = new DocxEncryptionService();
     private final PdfEncryptionService pdfEncryptionService = new PdfEncryptionService();
@@ -28,20 +32,24 @@ class DocumentArtifactPipelineTest {
     void pdfPathConvertsThenEncrypts() throws Exception {
         byte[] docx = new byte[]{1, 2, 3};
         byte[] pdf = new byte[]{37, 80, 68, 70};
-        when(pdfConversionService.convert(docx)).thenReturn(pdf);
+        PdfConversionOptions options = PdfConversionOptions.stampingDisabled();
+        when(pdfConversionPostProcessor.resolveOptions(docx, null)).thenReturn(options);
+        when(pdfConversionService.convertWithResult(docx, options))
+                .thenReturn(new DocumentArtifactPipeline.PdfConversionResult(pdf, List.of()));
 
         DocumentArtifactPipeline pipeline = new DocumentArtifactPipeline(
                 docxEncryptionService,
                 pdfConversionService,
                 pdfEncryptionService,
                 artifactSizeGuard,
-                artifactSpoolService
+                artifactSpoolService,
+                pdfConversionPostProcessor
         );
         EncryptionOptionsView encryption = new EncryptionOptionsView(false, null, null, null);
 
         try (DocumentArtifactPipeline.GeneratedArtifact artifact =
                 pipeline.finalizeArtifact(docx, "PDF", encryption)) {
-            verify(pdfConversionService).convert(docx);
+            verify(pdfConversionService).convertWithResult(docx, options);
             assertThat(artifact.contentType()).isEqualTo("application/pdf");
             assertThat(artifact.storageFileName()).isEqualTo("output.pdf");
             assertThat(artifact.spooled().openInputStream().readAllBytes()).isEqualTo(pdf);
@@ -56,7 +64,8 @@ class DocumentArtifactPipelineTest {
                 pdfConversionService,
                 pdfEncryptionService,
                 artifactSizeGuard,
-                artifactSpoolService
+                artifactSpoolService,
+                pdfConversionPostProcessor
         );
         EncryptionOptionsView encryption = new EncryptionOptionsView(
                 true,

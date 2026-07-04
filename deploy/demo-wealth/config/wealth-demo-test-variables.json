@@ -1,0 +1,18 @@
+{
+  "catalogMarker": "wealth-demo-v1",
+  "name": "Wealth Statement — Executive Sample",
+  "required": true,
+  "variables": {
+    "clientName": "Lord & Lady Ashford Family Trust",
+    "portfolioReference": "PWM-UK-2026-44821",
+    "statementDate": "2026-06-30",
+    "holdings": [
+      {"instrument": "Meridian Global Equity Fund", "quantity": "12,500", "marketPrice": "GBP 18.42", "marketValue": "GBP 230,250.00"},
+      {"instrument": "UK Gilt 2035 4.25%", "quantity": "GBP 500,000", "marketPrice": "98.75", "marketValue": "GBP 493,750.00"},
+      {"instrument": "Apple Inc. (AAPL)", "quantity": "2,400", "marketPrice": "USD 198.50", "marketValue": "USD 476,400.00"},
+      {"instrument": "Meridian ESG Bond Fund", "quantity": "85,000", "marketPrice": "GBP 10.12", "marketValue": "GBP 860,200.00"}
+    ],
+    "totalCost": "GBP 1,892,450.00",
+    "totalMarketValue": "GBP 2,064,120.00"
+  }
+}

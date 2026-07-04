@@ -1,0 +1,12 @@
+{
+  "catalogMarker": "trade-lc-demo-v1",
+  "variables": [
+    {"key": "beneficiaryName", "label": "Beneficiary Name", "type": "STRING", "required": true},
+    {"key": "applicantName", "label": "Applicant Name", "type": "STRING", "required": true},
+    {"key": "lcNumber", "label": "LC Number", "type": "STRING", "required": true},
+    {"key": "lcAmount", "label": "LC Amount", "type": "MONEY", "required": true},
+    {"key": "expiryDate", "label": "Expiry Date", "type": "DATE", "required": true},
+    {"key": "guaranteeReference", "label": "Guarantee Reference", "type": "STRING", "required": false},
+    {"key": "guaranteeAmount", "label": "Guarantee Amount", "type": "MONEY", "required": false}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "catalogMarker": "retail-account-demo-v1",
+  "variables": [
+    {"key": "customerName", "label": "Customer Name", "type": "STRING", "required": true},
+    {"key": "accountNumber", "label": "Account Number", "type": "STRING", "required": true},
+    {"key": "branchName", "label": "Branch Name", "type": "STRING", "required": true},
+    {"key": "openingDate", "label": "Opening Date", "type": "DATE", "required": true},
+    {"key": "balanceAmount", "label": "Balance Amount", "type": "MONEY", "required": false},
+    {"key": "balanceDate", "label": "Balance Date", "type": "DATE", "required": false}
+  ]
+}
