@@ -5,6 +5,7 @@ import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
 import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
 import java.time.Instant;
 import java.util.List;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,7 +28,13 @@ public class PreviewTempCleanupScheduler {
         this.objectStoragePort = objectStoragePort;
     }
 
+    // LR-B2: lockAtMostFor PT10M >> observed runtime (seconds); lockAtLeastFor PT20S << 1h interval.
     @Scheduled(fixedDelayString = "${docgen.preview.cleanup-interval-ms:3600000}")
+    @SchedulerLock(
+            name = "preview-temp-cleanup",
+            lockAtMostFor = "PT10M",
+            lockAtLeastFor = "PT20S"
+    )
     @Transactional
     public void cleanExpiredTempPreviews() {
         List<PreviewRecordEntity> expired = previewRecordRepository.findExpiredTempPreviews(Instant.now());

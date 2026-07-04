@@ -7,6 +7,7 @@ import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
 import com.bank.docgen.rendering.DocxAssemblyException;
 import com.bank.docgen.runtime.service.IdempotencyConflictException;
+import com.bank.docgen.runtime.service.IdempotencyDigestException;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,6 +82,25 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().error().idempotencyConflict())
                 .containsEntry("idempotencyKey", "idem-conflict-1")
                 .containsEntry("conflictType", IdempotencyConflictException.REQUEST_SEMANTICS_MISMATCH);
+    }
+
+    @Test
+    void idempotencyDigestFailureMapsToRetryableInternalServerError() {
+        when(messageResolver.resolve("api.error.generation.idempotencyDigestFailed"))
+                .thenReturn("The request could not be processed safely. Please retry.");
+
+        ResponseEntity<ErrorEnvelope> response = handler.handleIdempotencyDigestFailure(
+                request,
+                new IdempotencyDigestException(new IllegalStateException("digest unavailable"))
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.IDEMPOTENCY_DIGEST_FAILED);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.GENERATION);
+        assertThat(response.getBody().error().messageKey())
+                .isEqualTo("api.error.generation.idempotencyDigestFailed");
+        assertThat(response.getBody().error().retryable()).isTrue();
     }
 
     @Test

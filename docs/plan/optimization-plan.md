@@ -117,7 +117,7 @@ Priority: **H/M/L**. All start `Not Started`.
 | E6 | M | Remove hardcoded user-facing strings | `ContractAssemblyService`, `TemplateLifecycleService` publish audit | **Done** (Wave 2, scoped): contract AD-group summaries + publish lifecycle reason via `messages_en.properties` |
 | E7 | M | Handle uncovered exceptions in `GlobalExceptionHandler` | `ObjectStorageException`, `DocxAssemblyException`, `IllegalStateException` | **Done** (Wave 2): mapped to envelope with stable message keys |
 | E8 | M | Fix download Content-Type | `RuntimeDocumentController` L35 hardcoded DOCX MIME | **Done** (Wave 3): Content-Type derived from storage key via `ArtifactContentTypes`; PDF/DOCX covered in `DocumentDownloadServiceTest` |
-| E9 | L | Idempotency hash failure should not fall back to raw payload | `IdempotencyService` L88–90 returns payload on digest error | Digest failure is a hard error, not weakened key | Not Started → **LR-B7** |
+| E9 | L | Idempotency hash failure should not fall back to raw payload | `IdempotencyService` L88–90 returns payload on digest error | Digest failure is a hard error, not weakened key | **Done** (2026-07-04; LR-B7 — IdempotencyDigestException hard 500 + IDEMPOTENCY_DIGEST_FAILED envelope + IdempotencyServiceDigestTest; raw-payload fallback removed) |
 
 ### OPT-F Backend performance & resilience
 

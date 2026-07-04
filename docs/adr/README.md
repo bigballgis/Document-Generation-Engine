@@ -96,6 +96,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0038-sync-download-url-runtime-deferred.md](./api/0038-sync-download-url-runtime-deferred.md) | Accepted | Defer `SYNC_DOWNLOAD_URL` runtime delivery until secure download URL contract is ready (COR-B01) |
 | [0039-redisson-lock-evaluation.md](./technology-stack/0039-redisson-lock-evaluation.md) | Accepted | Redisson distributed lock evaluation — accepted single-instance risk; mandatory before multi-instance (COR-P05) |
 | [0040-api-package-access-and-invocation-retention.md](./api-management/0040-api-package-access-and-invocation-retention.md) | Accepted | Package-first API access surface, auto-materialize policy, invocation records, four-layer retention (2026-07-03) |
+| [0044-deployment-topology-v1.md](./operations/0044-deployment-topology-v1.md) | Accepted | v1 deployment topology — single backend replica; backend HPA disabled until scale-out prerequisites met; refines ADR-0039 (LR-B1, 2026-07-04) |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
 Use [0000-template.md](./0000-template.md) when creating new ADRs. Place new numbered ADRs in the directory matching their `topic` frontmatter.

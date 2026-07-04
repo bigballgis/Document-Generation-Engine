@@ -2,7 +2,8 @@ global:
   environment: prod
 
 backend:
-  replicaCount: 3
+  # ADR-0044: v1 launches single backend replica; enable only after scale-out prerequisites (LR-B2/B3/B4) are met.
+  replicaCount: 1
   image:
     tag: prod
   resources:
@@ -66,7 +67,9 @@ certificate:
 
 autoscaling:
   backend:
-    enabled: true
+    # ADR-0044: v1 launches single backend replica; enable only after scale-out prerequisites (LR-B2/B3/B4) are met.
+    enabled: false
+    # Tuning fields below are inert while enabled: false (kept for future scaled state).
     minReplicas: 3
     maxReplicas: 12
     targetCPUUtilizationPercentage: 70

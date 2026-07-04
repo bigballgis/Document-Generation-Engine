@@ -9,6 +9,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class PdfConversionExecutorConfig {
 
+    // destroyMethod "shutdown" honors waitForTasksToCompleteOnShutdown/awaitTermination below.
     @Bean(name = "pdfConversionExecutor", destroyMethod = "shutdown")
     @Profile("!test")
     public ThreadPoolTaskExecutor pdfConversionExecutor(DocgenRenderingProperties renderingProperties) {
@@ -19,6 +20,9 @@ public class PdfConversionExecutorConfig {
         executor.setQueueCapacity(poolSize * 4);
         executor.setThreadNamePrefix("pdf-conversion-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+        // LR-B5: let running LibreOffice conversions finish (bounded) instead of killing them.
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setAwaitTerminationSeconds(25);
         executor.initialize();
         return executor;
     }

@@ -177,7 +177,9 @@ certificate:
 
 autoscaling:
   backend:
+    # ADR-0044: v1 launches single backend replica; enable only after scale-out prerequisites (LR-B2/B3/B4) are met.
     enabled: false
+    # Tuning fields below are inert while enabled: false (kept for future scaled state).
     minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70

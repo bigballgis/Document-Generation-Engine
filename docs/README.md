@@ -49,7 +49,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Master plan](./plan/master-plan.md) | P0–P22 phases — see phase detail plans for status |
 | [Comprehensive optimization roadmap](./plan/comprehensive-optimization-roadmap.md) | **Unified execution map** — docs, API contract, template workflow, frontend UX, performance, E2E (COR-0…6, 2026-06-23) |
 | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **Launch readiness** — doc truth, E2E golden paths, pitfall registry (`CD-*` tasks) |
-| [Launch Readiness & Deep-Optimization Program (LRP)](./plan/launch-readiness-program.md) | Production pitfalls + usability deepening — Waves LR-A…LR-E (`LR-*` tasks; planned 2026-07-03, Not Started; detail docs linked from the program) |
+| [Launch Readiness & Deep-Optimization Program (LRP)](./plan/launch-readiness-program.md) | Production pitfalls + usability deepening — Waves LR-A…LR-E (`LR-*` tasks; **In Progress** — Wave LR-B activated 2026-07-04; detail docs linked from the program) |
 | [P12 Deferred enhancements](./plan/detail/P12-deferred-enhancements.md) | Catch-all slice registry (testing overhaul, API package, UIUX refactor — Done slices) |
 | [P12 API package access](./plan/detail/P12-api-package-access-invocation-records.md) | Package-first API access + invocation records (**Done** 2026-07-03) |
 | [Optimization plan & backlog](./plan/optimization-plan.md) | Technical debt detail (OPT-A…G): gates, coverage, backend architecture |
@@ -157,11 +157,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 ## Project agent tooling (`.cursor/`)
 
-Per-agent model assignments: [`.cursor/agents/MODEL-STRATEGY.md`](../.cursor/agents/MODEL-STRATEGY.md).
-
 | Asset | Purpose |
 | --- | --- |
-| `.cursor/agents/MODEL-STRATEGY.md` | Subagent model tiers and pinned slugs |
 | `.cursor/agents/delivery-orchestrator.md` | Single-entry pipeline scheduler / router |
 | `.cursor/agents/behavior-spec-author.md` | BDD behavior spec (Given/When/Then) gate |
 | `.cursor/agents/plan-orchestrator.md` | Plan layer maintenance |
@@ -170,7 +167,6 @@ Per-agent model assignments: [`.cursor/agents/MODEL-STRATEGY.md`](../.cursor/age
 | `.cursor/agents/frontend-engineer.md` | Frontend TDD implementer (bank OA style lock) |
 | `.cursor/agents/e2e-test-engineer.md` | Playwright functional E2E journeys |
 | `.cursor/agents/e2e-uiux-reviewer.md` | Visual/responsive/a11y/brand UIUX evidence |
-| `.cursor/agents/build-deploy-agent.md` | Build gates, p0/release gate, Docker deploy scripts |
 | `.cursor/agents/deploy-engineer.md` | Automated Docker build/deploy/rollback |
 | `.cursor/agents/architecture-reviewer.md` | Read-only architecture review |
 | `.cursor/agents/post-task-doc-sync.md` | Mandatory end-of-task documentation sync |
