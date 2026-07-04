@@ -10,7 +10,7 @@ import {
   useTemplatePolicyCredentials,
   type UseTemplatePolicyCredentialsOptions,
 } from '@/views/templates/useTemplatePolicyCredentials'
-import { useTemplatesStore } from '@/stores/templates'
+import { useApiPolicyStore } from '@/stores/apiPolicy'
 
 const routerPush = vi.fn()
 const confirmAction = vi.fn()
@@ -92,7 +92,7 @@ function mountPolicyCredentials(
   return {
     wrapper,
     policy: (wrapper.vm as { policy: ReturnType<typeof useTemplatePolicyCredentials> }).policy,
-    store: useTemplatesStore(),
+    store: useApiPolicyStore(),
   }
 }
 
@@ -135,22 +135,23 @@ describe('useTemplatePolicyCredentials', () => {
   it('loadPolicyData fetches policy and credentials', async () => {
     const templateRef = ref(makeTemplate())
     const { policy, store, wrapper } = mountPolicyCredentials(templateRef, pinia)
-    const fetchApiPolicy = vi.spyOn(store, 'fetchApiPolicy').mockResolvedValue()
+    const fetchPolicy = vi.spyOn(store, 'fetchPolicy').mockResolvedValue()
     const fetchCredentials = vi.spyOn(store, 'fetchCredentials').mockResolvedValue()
 
     await policy.loadPolicyData()
     await flushPromises()
 
-    expect(fetchApiPolicy).toHaveBeenCalledWith('tpl-1')
+    expect(fetchPolicy).toHaveBeenCalledWith('tpl-1')
     expect(fetchCredentials).toHaveBeenCalledWith('tpl-1')
     expect(policy.policyLoadFailed.value).toBe(false)
+    expect(store.activeTemplateId).toBe('tpl-1')
     wrapper.unmount()
   })
 
   it('loadPolicyData sets policyLoadFailed when fetch fails', async () => {
     const templateRef = ref(makeTemplate())
     const { policy, store, wrapper } = mountPolicyCredentials(templateRef, pinia)
-    vi.spyOn(store, 'fetchApiPolicy').mockRejectedValue(new Error('network'))
+    vi.spyOn(store, 'fetchPolicy').mockRejectedValue(new Error('network'))
 
     await policy.loadPolicyData()
     await flushPromises()
@@ -172,14 +173,15 @@ describe('useTemplatePolicyCredentials', () => {
   it('displayedCredentialSecret prefers lastCreatedCredential secret', () => {
     const templateRef = ref(makeTemplate())
     const { policy, store, wrapper } = mountPolicyCredentials(templateRef, pinia)
-    store.lastCreatedCredential = {
+    store.setActiveTemplate('tpl-1')
+    store.entryFor('tpl-1').lastCreatedCredential = {
       externalId: 'ext-1',
       secret: 'created-secret',
       credentialId: 'cred-1',
       status: 'ACTIVE',
       createdAt: '2026-06-23T10:00:00Z',
     }
-    store.lastRotatedCredential = {
+    store.entryFor('tpl-1').lastRotatedCredential = {
       credentialId: 'cred-2',
       externalId: 'ext-2',
       secret: 'rotated-secret',
@@ -192,8 +194,13 @@ describe('useTemplatePolicyCredentials', () => {
   it('displayedCredentialSecret falls back to lastRotatedCredential secret', () => {
     const templateRef = ref(makeTemplate())
     const { policy, store, wrapper } = mountPolicyCredentials(templateRef, pinia)
-    store.lastCreatedCredential = null
-    store.lastRotatedCredential = { credentialId: 'cred-2', externalId: 'ext-2', secret: 'rotated-secret' }
+    store.setActiveTemplate('tpl-1')
+    store.entryFor('tpl-1').lastCreatedCredential = null
+    store.entryFor('tpl-1').lastRotatedCredential = {
+      credentialId: 'cred-2',
+      externalId: 'ext-2',
+      secret: 'rotated-secret',
+    }
 
     expect(policy.displayedCredentialSecret.value).toBe('rotated-secret')
     wrapper.unmount()

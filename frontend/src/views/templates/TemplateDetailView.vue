@@ -89,6 +89,10 @@ const {
   showDeleteTemplateAction,
   showMetadataEdit,
   policyLoadFailed,
+  apiPolicy,
+  loadingPolicy,
+  policySubmitting,
+  policyLoadErrorKey,
   publishGateItems,
   publishGateReady,
   publishVersion,
@@ -472,15 +476,15 @@ const {
             v-model:selected-contract-environment="selectedContractEnvironment"
             :template-id="templateId"
             :show-policy-panel="showPolicyPanel"
-            :loading-policy="templatesStore.loadingPolicy"
-            :api-policy="templatesStore.apiPolicy"
+            :loading-policy="loadingPolicy"
+            :api-policy="apiPolicy"
             :policy-load-failed="policyLoadFailed"
-            :policy-load-error-key="templatesStore.lastErrorMessageKey"
+            :policy-load-error-key="policyLoadErrorKey"
             :paginated-credentials="paginatedCredentials"
             :credential-status-filter-options="credentialStatusFilterOptions"
             :page-size="CLIENT_TABLE_PAGE_SIZE"
             :total-credential-rows="totalCredentialRows"
-            :submitting="templatesStore.submitting"
+            :submitting="policySubmitting"
             :format-date-time="formatDateTime"
             :sort-credentials-by-created-at="sortCredentialsByCreatedAt"
             @create-credential="handleCreateCredential"

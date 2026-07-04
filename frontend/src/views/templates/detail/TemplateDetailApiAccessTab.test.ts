@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
+import { createPinia, setActivePinia } from 'pinia'
 import { describe, expect, it, vi } from 'vitest'
 import TemplateDetailApiAccessTab from '@/views/templates/detail/TemplateDetailApiAccessTab.vue'
 import en from '@/i18n/locales/en'
@@ -12,12 +13,12 @@ vi.mock('@/composables/useCapabilities', () => ({
   }),
 }))
 
-vi.mock('@/stores/templates', () => ({
-  useTemplatesStore: () => ({
-    lastErrorMessageKey: null,
-    saveApiPolicyDomain: vi.fn(),
+vi.mock('@/stores/apiPolicy', () => ({
+  useApiPolicyStore: () => ({
+    entryFor: () => ({ lastErrorMessageKey: null }),
+    savePolicyDomain: vi.fn(),
     saveInvocationRetentionDomain: vi.fn(),
-    previewApiPolicyImpact: vi.fn(),
+    previewImpact: vi.fn(),
   }),
 }))
 
@@ -60,11 +61,12 @@ const baseProps = {
 }
 
 function mountTab(props: Partial<typeof baseProps> = {}) {
+  setActivePinia(createPinia())
   const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
   return mount(TemplateDetailApiAccessTab, {
     props: { ...baseProps, ...props },
     global: {
-      plugins: [i18n, ElementPlus],
+      plugins: [createPinia(), i18n, ElementPlus],
       stubs: {
         TemplateCallerContractPanel: true,
         TemplateRecentInvocationsPanel: true,

@@ -26,6 +26,7 @@ import {
   templateDevVersionPath,
   templatePackageHubPath,
 } from '@/routing/routeKeys'
+import { useApiPolicyStore } from '@/stores/apiPolicy'
 import { useTemplatesStore } from '@/stores/templates'
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
 import { templateDetailTabLabelKey } from '@/views/templates/templateDetailTabs'
@@ -41,6 +42,7 @@ const { formatDateTime } = useLocaleFormatters()
 const route = useRoute()
 const router = useRouter()
 const templatesStore = useTemplatesStore()
+const apiPolicyStore = useApiPolicyStore()
 const {
   authorTemplates,
   manageApiPolicy,
@@ -88,7 +90,7 @@ const errorMessage = computed(() => {
   return te(key) ? t(key) : t('templates.error.loadDetail')
 })
 
-const credentialsSource = computed(() => templatesStore.credentials)
+const credentialsSource = computed(() => apiPolicyStore.credentials)
 const { filters: credentialColumnFilters, filteredRows: filteredCredentials } = useDataTableFilters(
   credentialsSource,
   [
@@ -235,10 +237,11 @@ async function loadTemplate() {
 
 async function loadPolicyData() {
   policyLoadFailed.value = false
+  apiPolicyStore.setActiveTemplate(templateId.value)
   try {
     await Promise.all([
-      templatesStore.fetchApiPolicy(templateId.value),
-      templatesStore.fetchCredentials(templateId.value),
+      apiPolicyStore.fetchPolicy(templateId.value),
+      apiPolicyStore.fetchCredentials(templateId.value),
     ])
   } catch {
     policyLoadFailed.value = true
@@ -318,7 +321,7 @@ function revealCredentialSecret(externalId: string, secret: string) {
 
 async function handleCreateCredential() {
   try {
-    const created = await templatesStore.createCredential(templateId.value)
+    const created = await apiPolicyStore.createCredential(templateId.value)
     revealCredentialSecret(created.externalId, created.secret)
     ElMessage.success(t('templates.policy.createCredentialSuccess'))
   } catch {
@@ -336,7 +339,7 @@ async function handleRotateCredential(credentialId: string, externalId: string) 
     return
   }
   try {
-    const rotated = await templatesStore.rotateCredential(templateId.value, credentialId)
+    const rotated = await apiPolicyStore.rotateCredential(templateId.value, credentialId)
     revealCredentialSecret(externalId, rotated.secret)
     ElMessage.success(t('templates.policy.rotateCredentialSuccess'))
   } catch {
@@ -354,7 +357,7 @@ async function handleRevokeCredential(credentialId: string) {
     return
   }
   try {
-    await templatesStore.revokeCredential(templateId.value, credentialId)
+    await apiPolicyStore.revokeCredential(templateId.value, credentialId)
     ElMessage.success(t('templates.policy.revokeCredentialSuccess'))
   } catch {
     ElMessage.error(errorMessage.value || t('templates.error.revokeCredential'))
@@ -447,15 +450,15 @@ async function handleVersionLinesChanged() {
             v-model:selected-contract-environment="selectedContractEnvironment"
             :template-id="templateId"
             :show-policy-panel="showPolicyPanel"
-            :loading-policy="templatesStore.loadingPolicy"
-            :api-policy="templatesStore.apiPolicy"
+            :loading-policy="apiPolicyStore.loadingPolicy"
+            :api-policy="apiPolicyStore.apiPolicy"
             :policy-load-failed="policyLoadFailed"
-            :policy-load-error-key="templatesStore.lastErrorMessageKey"
+            :policy-load-error-key="apiPolicyStore.lastErrorMessageKey"
             :paginated-credentials="paginatedCredentials"
             :credential-status-filter-options="credentialStatusFilterOptions"
             :page-size="CLIENT_TABLE_PAGE_SIZE"
             :total-credential-rows="totalCredentialRows"
-            :submitting="templatesStore.submitting"
+            :submitting="apiPolicyStore.submitting"
             :format-date-time="formatDateTime"
             :sort-credentials-by-created-at="sortCredentialsByCreatedAt"
             @create-credential="handleCreateCredential"

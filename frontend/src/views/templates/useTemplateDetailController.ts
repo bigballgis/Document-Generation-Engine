@@ -322,6 +322,10 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     showDeleteTemplateAction: lifecycle.showDeleteTemplateAction,
     showMetadataEdit,
     policyLoadFailed: policy.policyLoadFailed,
+    apiPolicy: policy.apiPolicy,
+    loadingPolicy: policy.loadingPolicy,
+    policySubmitting: policy.policySubmitting,
+    policyLoadErrorKey: policy.policyLoadErrorKey,
     // publish gate
     publishGateItems: lifecycle.publishGateItems,
     publishGateReady: lifecycle.publishGateReady,

@@ -5,6 +5,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, templatePackageHubPath } from '@/routing/routeKeys'
+import { useApiPolicyStore } from '@/stores/apiPolicy'
 import { useTemplatesStore } from '@/stores/templates'
 import * as templatesApi from '@/api/templates'
 import { conflictsWithExisting, suggestNextVersions, type SemverBumpLevel } from '@/utils/semver'
@@ -49,6 +50,7 @@ export function useTemplateLifecycleActions(options: UseTemplateLifecycleActions
   const { t, te } = useI18n()
   const router = useRouter()
   const templatesStore = useTemplatesStore()
+  const apiPolicyStore = useApiPolicyStore()
   const {
     authorTemplates,
     decideTests,
@@ -309,7 +311,8 @@ export function useTemplateLifecycleActions(options: UseTemplateLifecycleActions
     publishGateLoadError.value = null
     loadingPublishGate.value = true
     try {
-      await templatesStore.fetchApiPolicy(templateId.value)
+      apiPolicyStore.setActiveTemplate(templateId.value)
+      await apiPolicyStore.fetchPolicy(templateId.value)
       const [bindings, checklist, coverage, changeDiff, versions] = await Promise.all([
         templatesStore.validateBindings(templateId.value),
         templatesApi.fetchPublishGate(templateId.value),
@@ -323,7 +326,9 @@ export function useTemplateLifecycleActions(options: UseTemplateLifecycleActions
       publishChangeDiffSummary.value = changeDiff
       publishedReleaseVersions.value = versions.map((entry) => entry.releaseVersion)
     } catch {
-      publishGateLoadError.value = resolvePublishGateLoadErrorKey(templatesStore.lastErrorMessageKey)
+      publishGateLoadError.value = resolvePublishGateLoadErrorKey(
+        apiPolicyStore.lastErrorMessageKey ?? templatesStore.lastErrorMessageKey,
+      )
       bindingGateResult.value = null
       publishGateChecklist.value = null
       publishCoverageSummary.value = null

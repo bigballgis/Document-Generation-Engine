@@ -10,7 +10,7 @@ import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { apiPolicyDetailPath } from '@/routing/routeKeys'
-import { useTemplatesStore } from '@/stores/templates'
+import { useApiPolicyStore } from '@/stores/apiPolicy'
 import type { ApiCredentialSummary, TemplateDetail } from '@/types/template'
 
 export interface UseTemplatePolicyCredentialsOptions {
@@ -20,12 +20,12 @@ export interface UseTemplatePolicyCredentialsOptions {
 }
 
 export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentialsOptions) {
-  const { templateId, template, errorMessage } = options
+  const { templateId, template } = options
 
-  const { t } = useI18n()
+  const { t, te } = useI18n()
   const { formatDateTime } = useLocaleFormatters()
   const router = useRouter()
-  const templatesStore = useTemplatesStore()
+  const apiPolicyStore = useApiPolicyStore()
   const { manageApiPolicy } = useCapabilities()
   const { confirmAction } = useConfirmAction()
 
@@ -34,7 +34,7 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
   const credentialSecretValue = ref('')
   const credentialSecretExternalId = ref('')
 
-  const credentialsSource = computed(() => templatesStore.credentials)
+  const credentialsSource = computed(() => apiPolicyStore.credentials)
   const { filters: credentialColumnFilters, filteredRows: filteredCredentials } = useDataTableFilters(
     credentialsSource,
     [
@@ -59,18 +59,32 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
   )
 
   const displayedCredentialSecret = computed(() => {
-    if (templatesStore.lastCreatedCredential?.secret) {
-      return templatesStore.lastCreatedCredential.secret
+    if (apiPolicyStore.lastCreatedCredential?.secret) {
+      return apiPolicyStore.lastCreatedCredential.secret
     }
-    return templatesStore.lastRotatedCredential?.secret ?? ''
+    return apiPolicyStore.lastRotatedCredential?.secret ?? ''
   })
+
+  const apiPolicy = computed(() => apiPolicyStore.apiPolicy)
+  const loadingPolicy = computed(() => apiPolicyStore.loadingPolicy)
+  const policySubmitting = computed(() => apiPolicyStore.submitting)
+  const policyLoadErrorKey = computed(() => apiPolicyStore.lastErrorMessageKey)
+
+  function resolvePolicyErrorMessage(fallbackKey: string): string {
+    const key = apiPolicyStore.lastErrorMessageKey
+    if (!key) {
+      return t(fallbackKey)
+    }
+    return te(key) ? t(key) : t(fallbackKey)
+  }
 
   async function loadPolicyData() {
     policyLoadFailed.value = false
+    apiPolicyStore.setActiveTemplate(templateId.value)
     try {
       await Promise.all([
-        templatesStore.fetchApiPolicy(templateId.value),
-        templatesStore.fetchCredentials(templateId.value),
+        apiPolicyStore.fetchPolicy(templateId.value),
+        apiPolicyStore.fetchCredentials(templateId.value),
       ])
     } catch {
       policyLoadFailed.value = true
@@ -89,11 +103,11 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
 
   async function handleCreateCredential() {
     try {
-      const created = await templatesStore.createCredential(templateId.value)
+      const created = await apiPolicyStore.createCredential(templateId.value)
       openCredentialSecretDialog(created.externalId, created.secret)
       ElMessage.success(t('templates.policy.createCredentialSuccess'))
     } catch {
-      ElMessage.error(errorMessage.value || t('templates.error.createCredential'))
+      ElMessage.error(resolvePolicyErrorMessage('templates.error.createCredential'))
     }
   }
 
@@ -107,11 +121,11 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
       return
     }
     try {
-      const rotated = await templatesStore.rotateCredential(templateId.value, credentialId)
+      const rotated = await apiPolicyStore.rotateCredential(templateId.value, credentialId)
       openCredentialSecretDialog(externalId, rotated.secret)
       ElMessage.success(t('templates.policy.rotateCredentialSuccess'))
     } catch {
-      ElMessage.error(errorMessage.value || t('templates.error.rotateCredential'))
+      ElMessage.error(resolvePolicyErrorMessage('templates.error.rotateCredential'))
     }
   }
 
@@ -125,10 +139,10 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
       return
     }
     try {
-      await templatesStore.revokeCredential(templateId.value, credentialId)
+      await apiPolicyStore.revokeCredential(templateId.value, credentialId)
       ElMessage.success(t('templates.policy.revokeCredentialSuccess'))
     } catch {
-      ElMessage.error(errorMessage.value || t('templates.error.revokeCredential'))
+      ElMessage.error(resolvePolicyErrorMessage('templates.error.revokeCredential'))
     }
   }
 
@@ -144,6 +158,10 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
     credentialSecretValue,
     credentialSecretExternalId,
     displayedCredentialSecret,
+    apiPolicy,
+    loadingPolicy,
+    policySubmitting,
+    policyLoadErrorKey,
     credentialColumnFilters,
     credentialsCurrentPage,
     paginatedCredentials,

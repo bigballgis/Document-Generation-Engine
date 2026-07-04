@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import * as apiPolicyApi from '@/api/apiPolicy'
 import * as templatesApi from '@/api/templates'
 import { resolveApiErrorMessageKey } from '@/api/http'
 import {
@@ -9,10 +8,6 @@ import {
   type AbortableRequestOptions,
 } from '@/stores/storeRequestSupport'
 import type {
-  ApiCredentialCreated,
-  ApiCredentialSummary,
-  ApiPolicyImpactPreview,
-  ApiPolicy,
   CompositionRuleInput,
   CreateTemplatePayload,
   DeleteTemplatePayload,
@@ -27,11 +22,10 @@ import type {
   TemplateSummary,
   TestGeneratePayload,
   UpdateTemplateMetadataPayload,
-  UpsertApiPolicyPayload,
   UpsertBindingPayload,
   UpsertVariablePayload,
 } from '@/types/template'
-import type { ApiPolicyDomain, ApiPolicyDomainFormMap, InvocationRetentionDomainForm } from '@/types/apiPolicyDomain'
+import { useApiPolicyStore } from '@/stores/apiPolicy'
 
 export const useTemplatesStore = defineStore('templates', () => {
   const templates = ref<TemplateSummary[]>([])
@@ -40,15 +34,8 @@ export const useTemplatesStore = defineStore('templates', () => {
   const templateListTotalElements = ref(0)
   const templateListTotalPages = ref(0)
   const selectedTemplate = ref<TemplateDetail | null>(null)
-  const apiPolicy = ref<ApiPolicy | null>(null)
-  const credentials = ref<ApiCredentialSummary[]>([])
-  const lastCreatedCredential = ref<ApiCredentialCreated | null>(null)
-  const lastRotatedCredential = ref<{ credentialId: string; externalId: string; secret: string } | null>(
-    null,
-  )
   const loadingList = ref(false)
   const loadingDetail = ref(false)
-  const loadingPolicy = ref(false)
   const submitting = ref(false)
   const lastErrorMessageKey = ref<string | null>(null)
   const lastListErrorRetryable = ref(false)
@@ -98,150 +85,6 @@ export const useTemplatesStore = defineStore('templates', () => {
       throw error
     } finally {
       loadingDetail.value = false
-    }
-  }
-
-  async function fetchApiPolicy(templateId: string): Promise<void> {
-    loadingPolicy.value = true
-    lastErrorMessageKey.value = null
-    try {
-      apiPolicy.value = await apiPolicyApi.getApiPolicy(templateId)
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.loadPolicy')
-      throw error
-    } finally {
-      loadingPolicy.value = false
-    }
-  }
-
-  async function fetchCredentials(templateId: string): Promise<void> {
-    lastErrorMessageKey.value = null
-    try {
-      credentials.value = await apiPolicyApi.listCredentials(templateId)
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.loadCredentials')
-      throw error
-    }
-  }
-
-  async function saveApiPolicy(
-    templateId: string,
-    payload: UpsertApiPolicyPayload,
-  ): Promise<ApiPolicy> {
-    submitting.value = true
-    lastErrorMessageKey.value = null
-    try {
-      apiPolicy.value = await apiPolicyApi.upsertApiPolicy(templateId, payload)
-      return apiPolicy.value
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
-      throw error
-    } finally {
-      submitting.value = false
-    }
-  }
-
-  async function previewApiPolicyImpact(
-    templateId: string,
-    payload: UpsertApiPolicyPayload,
-  ): Promise<ApiPolicyImpactPreview> {
-    submitting.value = true
-    lastErrorMessageKey.value = null
-    try {
-      return await apiPolicyApi.fetchApiPolicyImpactPreview(templateId, payload)
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.previewPolicyImpact')
-      throw error
-    } finally {
-      submitting.value = false
-    }
-  }
-
-  async function saveApiPolicyDomain<D extends ApiPolicyDomain>(
-    templateId: string,
-    domain: D,
-    payload: ApiPolicyDomainFormMap[D],
-    confirmed = true,
-  ): Promise<ApiPolicy> {
-    submitting.value = true
-    lastErrorMessageKey.value = null
-    try {
-      apiPolicy.value = await apiPolicyApi.saveApiPolicyDomain(templateId, domain, payload, confirmed)
-      return apiPolicy.value
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
-      throw error
-    } finally {
-      submitting.value = false
-    }
-  }
-
-  async function saveInvocationRetentionDomain(
-    templateId: string,
-    payload: InvocationRetentionDomainForm,
-    confirmed = true,
-  ): Promise<ApiPolicy> {
-    submitting.value = true
-    lastErrorMessageKey.value = null
-    try {
-      apiPolicy.value = await apiPolicyApi.saveInvocationRetentionDomain(templateId, payload, confirmed)
-      return apiPolicy.value
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
-      throw error
-    } finally {
-      submitting.value = false
-    }
-  }
-
-  async function createCredential(templateId: string): Promise<ApiCredentialCreated> {
-    submitting.value = true
-    lastErrorMessageKey.value = null
-    try {
-      lastCreatedCredential.value = await apiPolicyApi.createCredential(templateId)
-      lastRotatedCredential.value = null
-      await fetchCredentials(templateId)
-      return lastCreatedCredential.value
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.createCredential')
-      throw error
-    } finally {
-      submitting.value = false
-    }
-  }
-
-  async function rotateCredential(templateId: string, credentialId: string) {
-    submitting.value = true
-    lastErrorMessageKey.value = null
-    try {
-      const rotated = await apiPolicyApi.rotateCredential(templateId, credentialId)
-      lastRotatedCredential.value = {
-        credentialId: rotated.credentialId,
-        externalId: rotated.externalId,
-        secret: rotated.secret,
-      }
-      lastCreatedCredential.value = null
-      await fetchCredentials(templateId)
-      return rotated
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.rotateCredential')
-      throw error
-    } finally {
-      submitting.value = false
-    }
-  }
-
-  async function revokeCredential(templateId: string, credentialId: string) {
-    submitting.value = true
-    lastErrorMessageKey.value = null
-    try {
-      await apiPolicyApi.revokeCredential(templateId, credentialId)
-      await fetchCredentials(templateId)
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.revokeCredential')
-      throw error
-    } finally {
-      submitting.value = false
     }
   }
 
@@ -507,12 +350,14 @@ export const useTemplatesStore = defineStore('templates', () => {
     }
   }
 
-  function clearSelected() {
+  function clearSelected(templateId?: string) {
     selectedTemplate.value = null
-    apiPolicy.value = null
-    credentials.value = []
-    lastCreatedCredential.value = null
-    lastRotatedCredential.value = null
+    const apiPolicyStore = useApiPolicyStore()
+    if (templateId) {
+      apiPolicyStore.clearTemplate(templateId)
+    } else if (apiPolicyStore.activeTemplateId) {
+      apiPolicyStore.clearTemplate(apiPolicyStore.activeTemplateId)
+    }
   }
 
   return {
@@ -522,13 +367,8 @@ export const useTemplatesStore = defineStore('templates', () => {
     templateListTotalElements,
     templateListTotalPages,
     selectedTemplate,
-    apiPolicy,
-    credentials,
-    lastCreatedCredential,
-    lastRotatedCredential,
     loadingList,
     loadingDetail,
-    loadingPolicy,
     submitting,
     lastErrorMessageKey,
     lastListErrorRetryable,
@@ -536,15 +376,6 @@ export const useTemplatesStore = defineStore('templates', () => {
     templatesByGroup,
     fetchTemplates,
     fetchTemplate,
-    fetchApiPolicy,
-    fetchCredentials,
-    saveApiPolicy,
-    previewApiPolicyImpact,
-    saveApiPolicyDomain,
-    saveInvocationRetentionDomain,
-    createCredential,
-    rotateCredential,
-    revokeCredential,
     createTemplate,
     importTemplate,
     deleteTemplate,
