@@ -77,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Fail-closed (LR-B6 P4): if the revocation list cannot be checked, the token is
             // rejected — the security context stays empty and protected endpoints answer 401.
             String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
-            LOGGER.error("session.revocation.check.unavailable failing closed traceId={}", traceId, ex);
+            LOGGER.error("session.revocation.check.unavailable failing closed traceId=" + traceId, ex);
             SecurityContextHolder.clearContext();
             request.setAttribute(SESSION_VALIDATION_FAILURE_ATTRIBUTE, ApiErrorCodes.SESSION_VALIDATION_UNAVAILABLE);
             return;

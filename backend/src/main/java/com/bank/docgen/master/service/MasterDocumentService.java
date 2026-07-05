@@ -363,6 +363,15 @@ public class MasterDocumentService {
         if (filename == null || !filename.toLowerCase(Locale.ROOT).endsWith(".docx")) {
             throw new MasterValidationException("api.error.master.docxRequired");
         }
+        // LR-A3 (CD-PIT-04): reject masquerading uploads by content type. The declared
+        // content type must match the OOXML Word document media type; files claiming to be
+        // .docx but sending text/html/image/etc. content are rejected before POI parses them.
+        String contentType = docxFile.getContentType();
+        if (contentType != null
+                && !contentType.equals(DOCX_CONTENT_TYPE)
+                && !contentType.equals("application/octet-stream")) {
+            throw new MasterValidationException("api.error.master.docxRequired");
+        }
         assertDocxPackageStructure(docxFile);
     }
 

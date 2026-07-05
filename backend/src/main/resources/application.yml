@@ -1,6 +1,12 @@
 spring:
   application:
     name: docgen-backend
+  # LR-A3 (CD-PIT-04): multipart upload limits — 50MB per file, 60MB per request (headroom
+  # for multi-file batches). Mirrored by nginx client_max_body_size and MasterDocumentService.
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:50MB}
+      max-request-size: ${MAX_REQUEST_SIZE:60MB}
   # LR-B5: bounded drain window per shutdown phase; executors/Kafka drain in ~25s below it.
   lifecycle:
     timeout-per-shutdown-phase: ${SHUTDOWN_DRAIN_TIMEOUT:30s}

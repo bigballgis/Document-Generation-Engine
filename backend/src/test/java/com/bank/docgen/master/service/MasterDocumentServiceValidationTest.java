@@ -130,6 +130,26 @@ class MasterDocumentServiceValidationTest {
         verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(org.mockito.ArgumentMatchers.any());
     }
 
+    @Test
+    void rejectsMasqueradingContentTypeBeforeStorage() {
+        // LR-A3 (CD-PIT-04): a file claiming to be .docx but sending text/html content is
+        // rejected before POI/LibreOffice ever parse it.
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "master.docx",
+                "text/html",
+                new byte[]{'<', 'h', 't', 'm', 'l', '>'}
+        );
+
+        assertThatThrownBy(() -> service.create(request(), file, GLOBAL_ADMIN))
+                .isInstanceOf(MasterValidationException.class)
+                .extracting(ex -> ((MasterValidationException) ex).messageKey())
+                .isEqualTo("api.error.master.docxRequired");
+
+        verify(objectStoragePort, never()).put(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.any());
+        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(org.mockito.ArgumentMatchers.any());
+    }
+
     private CreateMasterRequest request() {
         return new CreateMasterRequest("RETAIL", "Retail Letter Master", "Sample");
     }
