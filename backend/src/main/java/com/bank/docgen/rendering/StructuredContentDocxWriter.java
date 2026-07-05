@@ -148,12 +148,31 @@ public class StructuredContentDocxWriter {
                     paragraphAvailable = false;
                     continue;
                 }
+                // LR-A4 (CD-PIT-07): unsupported structured node types must fail-closed.
+                // qrBarcodeRef / attachmentListRef are declared in the v1 node matrix but have
+                // no writer branch — silently dropping them loses content in published letters.
+                // Throw a fidelity blocker instead so the author is forced to fix the template.
+                if (isUnsupportedRenderableType(type)) {
+                    throw new DocxAssemblyException(
+                            "api.error.rendering.unsupportedNodeType",
+                            "Unsupported structured content node type: " + type
+                    );
+                }
                 if (!paragraphAvailable) {
                     currentParagraph = insertParagraphAfter(currentParagraph);
                 }
                 writeBlockNode(node, currentParagraph);
                 paragraphAvailable = false;
             }
+        }
+
+        /**
+         * LR-A4: types declared in {@link com.bank.docgen.authoring.structured.StructuredContentNodeType}
+         * but NOT handled by this writer. They are renderable in principle (the matrix admits them)
+         * but no DOCX emission branch exists yet — failing closed prevents silent content loss.
+         */
+        private boolean isUnsupportedRenderableType(String type) {
+            return "qrBarcodeRef".equals(type) || "attachmentListRef".equals(type);
         }
 
         private void writeBlockNode(JsonNode node, XWPFParagraph paragraph) {

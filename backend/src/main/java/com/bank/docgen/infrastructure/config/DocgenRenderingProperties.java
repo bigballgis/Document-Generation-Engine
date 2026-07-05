@@ -31,6 +31,13 @@ public class DocgenRenderingProperties {
     private long maxGeneratedArtifactBytes = 52_428_800L;
 
     /**
+     * LR-A7 / ADR-0042: pagination delta budget (pages). If |pdfPages - wordPages| exceeds
+     * this, a fidelity warning fires; at 2x, a fidelity blocker. The budget is a pending
+     * proposal until the user confirms — until then the delta is logged but not enforced.
+     */
+    private int paginationDeltaBudgetPages = 1;
+
+    /**
      * LR-B3: SSE emitter timeout for progress streams. Sized to the longest expected
      * batch-test run plus margin (previously hardcoded to 3 minutes in the registry).
      */
@@ -107,6 +114,14 @@ public class DocgenRenderingProperties {
 
     public void setMaxGeneratedArtifactBytes(long maxGeneratedArtifactBytes) {
         this.maxGeneratedArtifactBytes = maxGeneratedArtifactBytes;
+    }
+
+    public int getPaginationDeltaBudgetPages() {
+        return paginationDeltaBudgetPages;
+    }
+
+    public void setPaginationDeltaBudgetPages(int paginationDeltaBudgetPages) {
+        this.paginationDeltaBudgetPages = paginationDeltaBudgetPages;
     }
 
     public boolean isPdfPageNumberStampingEnabled() {

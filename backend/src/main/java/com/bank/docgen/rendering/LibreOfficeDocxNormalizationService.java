@@ -56,13 +56,22 @@ public class LibreOfficeDocxNormalizationService implements DocxNormalizationSer
 
     private byte[] normalizeInternal(byte[] docxBytes) {
         Path tempDir = null;
+        Path profileDir = null;
         try {
             tempDir = Files.createTempDirectory("docgen-docx-normalize-");
+            // LR-A1: per-invocation profile isolation (CD-PIT-11) — same rationale as the PDF
+            // conversion service; normalization also drives a soffice process.
+            profileDir = Files.createTempDirectory("docgen-lo-norm-profile-");
             Path inputDocx = tempDir.resolve("assembled-in.docx");
             Files.write(inputDocx, docxBytes);
             ProcessBuilder processBuilder = new ProcessBuilder(
                     renderingProperties.getLibreOfficeCommand(),
                     "--headless",
+                    "-env:UserInstallation=" + LibreOfficePdfConversionService.profileUrl(profileDir),
+                    "--norestore",
+                    "--nolockcheck",
+                    "--nodefault",
+                    "--nologo",
                     "--convert-to",
                     "docx",
                     "--outdir",
@@ -97,6 +106,23 @@ public class LibreOfficeDocxNormalizationService implements DocxNormalizationSer
                     // Best-effort temp cleanup.
                 }
             }
+            if (profileDir != null) {
+                deleteProfileTree(profileDir);
+            }
+        }
+    }
+
+    private static void deleteProfileTree(Path profileDir) {
+        try (java.util.stream.Stream<Path> walk = Files.walk(profileDir)) {
+            walk.sorted(java.util.Comparator.reverseOrder()).forEach(path -> {
+                try {
+                    Files.deleteIfExists(path);
+                } catch (IOException ignored) {
+                    // Best-effort profile cleanup.
+                }
+            });
+        } catch (IOException ignored) {
+            // Best-effort profile cleanup.
         }
     }
 }

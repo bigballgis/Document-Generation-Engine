@@ -184,7 +184,25 @@ public class DocxAssembler {
             String inline = renderChildren(node, variables, pinnedModuleStructures);
             return blockLevel ? inline : inline + "\n";
         }
+        // LR-A4 (CD-PIT-07): unsupported structured node types must fail closed — never
+        // silently drop content. qrBarcodeRef / attachmentListRef are in the v1 node matrix
+        // but have no renderer; throwing forces the author to fix the template.
+        if (isUnsupportedRenderableType(type)) {
+            throw new DocxAssemblyException(
+                    "api.error.rendering.unsupportedNodeType",
+                    "Unsupported structured content node type: " + type
+            );
+        }
         return "";
+    }
+
+    /**
+     * LR-A4: types declared in {@link com.bank.docgen.authoring.structured.StructuredContentNodeType}
+     * but NOT handled by this renderer. Mirrors {@code StructuredContentDocxWriter} so the text
+     * renderer and the DOCX writer fail consistently on the same unrendered types.
+     */
+    private boolean isUnsupportedRenderableType(String type) {
+        return "qrBarcodeRef".equals(type) || "attachmentListRef".equals(type);
     }
 
     private String renderLoopBlock(

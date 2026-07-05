@@ -71,12 +71,22 @@ public class DockerExecPdfConversionService implements PdfConversionService {
             Files.write(inputDocx, pdfSourceDocx);
             String container = renderingProperties.getDockerContainerName();
             String containerInput = "/tmp/docgen-input.docx";
+            // LR-A1: per-invocation profile isolation inside the LibreOffice sidecar container
+            // (CD-PIT-11). A unique container profile path prevents concurrent conversions from
+            // sharing one soffice user profile and deadlocking on lock files. Derived from the
+            // unique host temp dir name so it cannot collide across pooled invocations.
+            String containerProfile = "/tmp/docgen-lo-profile-" + hostDir.getFileName().toString();
 
             runCommand(renderingProperties.getDockerCliCommand(), "cp", inputDocx.toString(), container + ":" + containerInput);
             runCommand(
                     renderingProperties.getDockerCliCommand(), "exec", container,
                     renderingProperties.getLibreOfficeCommand(),
                     "--headless",
+                    "-env:UserInstallation=file://" + containerProfile,
+                    "--norestore",
+                    "--nolockcheck",
+                    "--nodefault",
+                    "--nologo",
                     "--convert-to", "pdf",
                     "--outdir", "/tmp",
                     containerInput

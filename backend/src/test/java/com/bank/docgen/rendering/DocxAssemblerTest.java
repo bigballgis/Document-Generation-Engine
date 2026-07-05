@@ -1,6 +1,7 @@
 package com.bank.docgen.rendering;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
@@ -122,6 +123,33 @@ class DocxAssemblerTest {
         );
 
         assertThat(rendered).isEqualTo("Date: 2026-07-01\nTo: Pacific Rim Holdings Ltd.");
+    }
+
+    @Test
+    void failsClosedOnUnsupportedQrBarcodeNode() {
+        // LR-A4 (CD-PIT-07): qrBarcodeRef is in the v1 node matrix but has no writer branch.
+        // It must fail closed with the unsupportedNodeType message key, never silently drop.
+        String structured = """
+                {"nodes":[{"type":"qrBarcodeRef","referenceKey":"PAYMENT-QR"}]}
+                """;
+
+        assertThatThrownBy(() -> assembler.renderStructuredContent(structured, Map.of()))
+                .isInstanceOf(DocxAssemblyException.class)
+                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
+                .isEqualTo("api.error.rendering.unsupportedNodeType");
+    }
+
+    @Test
+    void failsClosedOnUnsupportedAttachmentListNode() {
+        // LR-A4 (CD-PIT-07): attachmentListRef is declared but unrendered in v1.
+        String structured = """
+                {"nodes":[{"type":"attachmentListRef","referenceKey":"ATTACHMENTS"}]}
+                """;
+
+        assertThatThrownBy(() -> assembler.renderStructuredContent(structured, Map.of()))
+                .isInstanceOf(DocxAssemblyException.class)
+                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
+                .isEqualTo("api.error.rendering.unsupportedNodeType");
     }
 
     @Test
