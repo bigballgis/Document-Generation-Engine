@@ -1,0 +1,51 @@
+groups:
+  - name: docgen-backend
+    rules:
+      - alert: HighPdfConversionFailureRate
+        expr: rate(docgen_pdf_conversion_failures_total[5m]) > 0.17
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PDF conversion failure rate > 10/min"
+          description: "LibreOffice conversion is failing; check LR-A1 profile isolation and font baseline."
+
+      - alert: HighGenerationLatencyP95
+        expr: histogram_quantile(0.95, rate(docgen_generation_duration_seconds_bucket[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Document generation p95 > 10s"
+
+      - alert: HighHttpLatencyP95
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri!~"/actuator.*"}[5m])) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HTTP p95 > 3s"
+
+      - alert: HighJvmMemoryUsage
+        expr: jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "JVM heap > 85%"
+
+      - alert: DbConnectionPoolExhausted
+        expr: db_connection_pool_active / db_connection_pool_max > 0.9
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HikariCP connection pool > 90% utilized"
+
+      - alert: HighSseEmitterCount
+        expr: docgen_sse_emitters_active > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Active SSE emitters > 100; check for leaked connections"
