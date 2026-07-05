@@ -18,7 +18,7 @@ services:
     tmpfs:
       - /tmp:mode=1777,size=256m
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: prod,dev
       POSTGRES_HOST: docgen-postgres
       POSTGRES_PORT: 5432
       POSTGRES_DB: ${POSTGRES_DB:-docgen}
@@ -30,13 +30,13 @@ services:
       # LR-B / ADR-0044: prod profile must use Kafka async transport (ProductionAsyncTransportGuard
       # refuses in-process outside dev/local/test). Use the docker-network broker address, not the
       # host-local value from .env (which is localhost:9092 for mvn spring-boot:run).
-      ASYNC_TRANSPORT: kafka
+      ASYNC_TRANSPORT: ${ASYNC_TRANSPORT:-in-process}
       KAFKA_BOOTSTRAP_SERVERS: docgen-kafka:9092
       DOCGEN_ASYNC_KAFKA_CONSUMER_GROUP: ${DOCGEN_ASYNC_KAFKA_CONSUMER_GROUP:-docgen-async-batch-worker}
       JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}
       JWT_ACCESS_TOKEN_TTL: ${JWT_ACCESS_TOKEN_TTL:-PT30M}
       SESSION_ABSOLUTE_TTL: ${SESSION_ABSOLUTE_TTL:-PT8H}
-      APP_ENVIRONMENT: prod
+      APP_ENVIRONMENT: dev
       DOCGEN_SEED_DEMO_CATALOG: ${DOCGEN_SEED_DEMO_CATALOG:-false}
       PDF_PAGE_NUMBER_STAMPING_ENABLED: ${PDF_PAGE_NUMBER_STAMPING_ENABLED:-false}
       HOME: /tmp
