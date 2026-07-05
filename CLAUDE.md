@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Active formal phase:** None (2026-07-04 — **P22-DEMO-EXPANSION Done**; T01–T15; gates **GREEN**). **Prior:** **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03). See [docs/plan/execution-sync-ledger.md](docs/plan/execution-sync-ledger.md).
 
+**Task source (2026-07-05):** `.taskmaster/tasks/tasks.json` (task-master-ai v0.43.1) is the source of truth for **new/active work** going forward. `docs/plan/` is the **frozen archive** for P0–P22 history + live record for LRP/CDP/SOR active programs. Project history is fully traceable from zero via `docs/plan/` (P0–P22, 23 phases, 30 detail files, 6 cross-cutting programs) and `.taskmaster/` (new work from 2026-07-05). See ADR-0053.
+
 This is a **dual-agent project** — workflow automation is orchestrated by Cursor rules (`.cursor/rules/*.mdc`, `.cursor/agents/*.md`) and **Claude Code should operate as the parent orchestrator**, delegating to Cursor's specialist subagents via the Task tool.
 
 **Please read ALL guide files under `.cursor/` before starting any delivery work.** Key rules:
@@ -200,15 +202,19 @@ When in doubt about a behavior/architecture decision, follow this order:
 
 ```
 1. Latest explicit user confirmation (direct conversation)
-2. docs/plan/master-plan.md (current active phase)
-3. docs/plan/detail/<phase>.md (task rows)
-4. docs/domain/domain-model.md
-5. docs/security/permission-matrix.md
-6. docs/product/PRD.md
-7. docs/requirements/requirements-plan.md
-8. Acceptance ADRs (docs/adr/)
-9. Plan/tech/task sheets (docs/architecture/*task-sheet*.md)
+2. .taskmaster/tasks/tasks.json (active + pending tasks — new work, task-master-ai)
+3. docs/plan/master-plan.md (phase-level history; P0–P22 frozen archive)
+4. docs/plan/detail/<phase>.md (task-level history; frozen for Done phases,
+   live for LRP/CDP/SOR active programs)
+5. docs/domain/domain-model.md
+6. docs/security/permission-matrix.md
+7. docs/product/PRD.md
+8. docs/requirements/requirements-plan.md
+9. Acceptance ADRs (docs/adr/)
+10. Plan/tech/task sheets (docs/architecture/*task-sheet*.md)
 ```
+
+**Task source:** `.taskmaster/tasks/tasks.json` (task-master-ai) for new/active work; `docs/plan/` is the frozen archive for P0–P22 history + live record for LRP/CDP/SOR programs.
 
 **Never silently pick a side on conflicts** — surface them and confirm.
 
@@ -287,3 +293,7 @@ _No active workspace servers in mcp.json._
 - **microsoft-foundry** — `C:\Users\孙豫龙\.agents\skills\microsoft-foundry` — Deploy, evaluate, and manage Foundry agents end-to-end: Docker build, ACR push, hosted/prompt agent create, container start, batch eval, continuous eval, prompt optimizer workflows, agent.yaml, dataset curation from trac
 
 <!-- cloude-code-toolbox:mcp-skills-awareness-end -->
+
+## Task Master AI Instructions
+**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+@./.taskmaster/CLAUDE.md

@@ -1,0 +1,10 @@
+{
+  "master": {
+    "tasks": [],
+    "metadata": {
+      "created": "2026-07-05",
+      "description": "Document Generation Engine — new task source (task-master-ai, adopted 2026-07-05 per ADR-0053)",
+      "updated": "2026-07-05T18:36:57.066Z"
+    }
+  }
+}

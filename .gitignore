@@ -45,3 +45,33 @@ logs/
 
 # Auto-generated MCP/skills awareness report (refreshed on each toolbox scan)
 .claude/cloude-code-toolbox-mcp-skills-awareness.md
+
+# Logs
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/
+
+# ---- task-master-ai (new task source from 2026-07-05; see ADR-0053) ----
+# tasks.json IS committed (it is the source of truth). Only ignore runtime state.
+.taskmaster/.env
+.taskmaster/logs/
+.taskmaster/report*.json
+.taskmaster/.taskmaster-config.local.json
