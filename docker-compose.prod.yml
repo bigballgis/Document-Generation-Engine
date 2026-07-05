@@ -27,6 +27,12 @@ services:
       REDIS_HOST: docgen-redis
       REDIS_PORT: 6379
       MINIO_ENDPOINT: http://docgen-minio:9000
+      # LR-B / ADR-0044: prod profile must use Kafka async transport (ProductionAsyncTransportGuard
+      # refuses in-process outside dev/local/test). Use the docker-network broker address, not the
+      # host-local value from .env (which is localhost:9092 for mvn spring-boot:run).
+      ASYNC_TRANSPORT: kafka
+      KAFKA_BOOTSTRAP_SERVERS: docgen-kafka:9092
+      DOCGEN_ASYNC_KAFKA_CONSUMER_GROUP: ${DOCGEN_ASYNC_KAFKA_CONSUMER_GROUP:-docgen-async-batch-worker}
       JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}
       JWT_ACCESS_TOKEN_TTL: ${JWT_ACCESS_TOKEN_TTL:-PT30M}
       SESSION_ABSOLUTE_TTL: ${SESSION_ABSOLUTE_TTL:-PT8H}
@@ -50,6 +56,8 @@ services:
       docgen-redis:
         condition: service_healthy
       docgen-minio:
+        condition: service_healthy
+      docgen-kafka:
         condition: service_healthy
     # LR-B8: real probe (was healthcheck: disable: true); alpine busybox wget ships in the image.
     # start_period 90s leaves time for Flyway migrations before failures count.
