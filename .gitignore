@@ -42,3 +42,6 @@ logs/
 
 # Copilot Plus machine-local workspace
 .copilotPlus/
+
+# Auto-generated MCP/skills awareness report (refreshed on each toolbox scan)
+.claude/cloude-code-toolbox-mcp-skills-awareness.md
