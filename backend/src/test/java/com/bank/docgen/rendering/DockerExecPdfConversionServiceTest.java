@@ -18,7 +18,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
+/**
+ * Tests the docker-exec conversion path against a fake-docker.sh test double. The fake scripts
+ * are bash-only (no .cmd variants), so the test is disabled on Windows: Windows ProcessBuilder
+ * cannot launch .sh files directly. The path is exercised on Linux CI; the sibling
+ * LibreOfficePdfConversionServiceTest covers the cli mode on both OSes via .cmd/.sh pairs.
+ */
+@DisabledOnOs(OS.WINDOWS)
 class DockerExecPdfConversionServiceTest {
 
     private DocgenRenderingProperties properties;
