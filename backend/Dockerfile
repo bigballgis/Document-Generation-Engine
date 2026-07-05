@@ -8,10 +8,17 @@ RUN --mount=type=cache,target=/root/.m2/repository \
 
 FROM eclipse-temurin:21-jre-alpine AS runtime
 WORKDIR /app
+# LR-A2 / ADR-0041: rendering font baseline — CJK + metric-compatible substitutes
+# (Carlito/Caladea) for Calibri/Cambria so bank correspondence renders without tofu or
+# layout drift (CD-PIT-01).
 RUN apk add --no-cache \
         libreoffice \
         ttf-dejavu \
         fontconfig \
+        font-noto-cjk \
+        font-crosextra-carlito \
+        font-crosextra-caladea \
+    && fc-cache -f \
     && addgroup -g 65532 -S nonroot \
     && adduser -S -u 65532 -G nonroot nonroot \
     && chown -R nonroot:nonroot /app

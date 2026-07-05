@@ -10,8 +10,10 @@ import io.github.resilience4j.retry.RetryRegistry;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
@@ -64,14 +66,24 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
             PdfConversionOptions options
     ) {
         Path tempDir = null;
+        Path profileDir = null;
         try {
             tempDir = Files.createTempDirectory("docgen-pdf-");
+            // LR-A1: per-invocation profile isolation — concurrent pooled conversions must not share
+            // one LibreOffice user profile (CD-PIT-11: the industry's top intermittent headless
+            // conversion failure class). Each invocation gets its own -env:UserInstallation profile.
+            profileDir = Files.createTempDirectory("docgen-lo-profile-");
             Path inputDocx = tempDir.resolve("input.docx");
             byte[] pdfSourceDocx = pdfConversionPostProcessor.prepareDocxForConversion(docxBytes, options);
             Files.write(inputDocx, pdfSourceDocx);
             ProcessBuilder processBuilder = new ProcessBuilder(
                     renderingProperties.getLibreOfficeCommand(),
                     "--headless",
+                    "-env:UserInstallation=" + profileUrl(profileDir),
+                    "--norestore",
+                    "--nolockcheck",
+                    "--nodefault",
+                    "--nologo",
                     "--convert-to",
                     "pdf",
                     "--outdir",
@@ -109,6 +121,46 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
                     // Best-effort temp cleanup.
                 }
             }
+            if (profileDir != null) {
+                deleteProfileTree(profileDir);
+            }
+        }
+    }
+
+    /**
+     * Build the {@code file://} URL LibreOffice expects for {@code -env:UserInstallation}. The path
+     * must be absolute, URL-encoded, and use forward slashes — also on Windows where {@code Path}
+     * uses backslashes.
+     */
+    static String profileUrl(Path profileDir) {
+        String absolute = profileDir.toAbsolutePath().toString().replace('\\', '/');
+        StringBuilder encoded = new StringBuilder("file:///");
+        for (int i = 0; i < absolute.length(); i++) {
+            char c = absolute.charAt(i);
+            if (c == ':' || c == ' ' || c == '[' || c == ']' || c == '{' || c == '}') {
+                encoded.append(String.format("%%%02X", (int) c));
+            } else {
+                encoded.append(c);
+            }
+        }
+        return encoded.toString();
+    }
+
+    /**
+     * LibreOffice populates the profile dir with a tree (user/, registrymodifications.xcu, lock
+     * files). Best-effort recursive delete — mirrors temp cleanup tolerance of failures.
+     */
+    private static void deleteProfileTree(Path profileDir) {
+        try (Stream<Path> walk = Files.walk(profileDir)) {
+            walk.sorted(Comparator.reverseOrder()).forEach(path -> {
+                try {
+                    Files.deleteIfExists(path);
+                } catch (IOException ignored) {
+                    // Best-effort profile cleanup.
+                }
+            });
+        } catch (IOException ignored) {
+            // Best-effort profile cleanup.
         }
     }
 }

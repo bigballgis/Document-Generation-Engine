@@ -1,12 +1,18 @@
 # Runtime image — copies pre-built JAR from backend/target (see scripts/docker-deploy.ps1).
 # ADR-0030 / P15-T01: non-root JRE (UID 65532); mount /tmp tmpfs with read-only root FS.
 # LibreOffice headless is embedded for Docker acceptance PDF conversion (cli mode; ADR-0019).
+# LR-A2 / ADR-0041: rendering font baseline — CJK + metric-compatible substitutes for
+# Calibri/Cambria so bank correspondence renders without tofu or layout drift (CD-PIT-01).
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 RUN apk add --no-cache \
         libreoffice \
         ttf-dejavu \
         fontconfig \
+        font-noto-cjk \
+        font-crosextra-carlito \
+        font-crosextra-caladea \
+    && fc-cache -f \
     && addgroup -g 65532 -S nonroot \
     && adduser -S -u 65532 -G nonroot nonroot \
     && chown -R nonroot:nonroot /app

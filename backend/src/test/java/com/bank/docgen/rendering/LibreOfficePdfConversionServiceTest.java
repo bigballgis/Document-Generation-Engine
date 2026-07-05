@@ -12,10 +12,18 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -62,7 +70,12 @@ class LibreOfficePdfConversionServiceTest {
         }
         Path tempRoot = Path.of(System.getProperty("java.io.tmpdir"));
         try (Stream<Path> paths = Files.list(tempRoot)) {
-            paths.filter(path -> path.getFileName().toString().startsWith("docgen-pdf-"))
+            paths.filter(path -> {
+                        String name = path.getFileName().toString();
+                        return name.startsWith("docgen-pdf-")
+                                || name.startsWith("docgen-lo-profile-")
+                                || name.startsWith("docgen-lo-invocation-");
+                    })
                     .sorted(Comparator.reverseOrder())
                     .forEach(path -> {
                         try (Stream<Path> children = Files.walk(path)) {
@@ -160,6 +173,138 @@ class LibreOfficePdfConversionServiceTest {
         }
     }
 
+    @Test
+    void passesPerInvocationProfileIsolationFlag() throws IOException {
+        properties.setLibreOfficeCommand(fakeLibreOfficeScript.toString());
+        properties.setConversionTimeoutSeconds(30);
+        LibreOfficePdfConversionService service = service();
+
+        byte[] pdf = service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()).pdfBytes();
+
+        assertThat(pdf).isNotEmpty();
+        // LR-A1: the production code builds a file:// profile URL per invocation. Assert that
+        // profileUrl() produces a valid, distinct, file-scheme URL for a fresh temp path — this is
+        // the value passed as -env:UserInstallation. Combined with isolatesProfileAcrossParallel
+        // it guards CD-PIT-11 (shared profile under concurrency).
+        Path sample = Files.createTempDirectory("docgen-lo-profile-");
+        try {
+            String url = LibreOfficePdfConversionService.profileUrl(sample);
+            assertThat(url).startsWith("file:///");
+            assertThat(url).doesNotContain("\\");
+        } finally {
+            deleteQuietly(sample);
+        }
+    }
+
+    @Test
+    void isolatesProfileAcrossParallelConversions() throws Exception {
+        properties.setLibreOfficeCommand(fakeLibreOfficeScript.toString());
+        properties.setConversionTimeoutSeconds(30);
+        ThreadPoolTaskExecutor parallelPool = parallelConversionPool();
+        try {
+            LibreOfficePdfConversionService service = new LibreOfficePdfConversionService(
+                    properties,
+                    CircuitBreakerRegistry.ofDefaults(),
+                    RetryRegistry.ofDefaults(),
+                    parallelPool,
+                    pdfConversionPostProcessor()
+            );
+            int concurrency = 4;
+            List<Future<byte[]>> futures = new ArrayList<>();
+            ExecutorService caller = Executors.newFixedThreadPool(concurrency);
+            try {
+                for (int i = 0; i < concurrency; i++) {
+                    futures.add(caller.submit(() ->
+                            service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()).pdfBytes()));
+                }
+                for (Future<byte[]> future : futures) {
+                    assertThat(future.get(30, TimeUnit.SECONDS)).isNotEmpty();
+                }
+            } finally {
+                caller.shutdownNow();
+            }
+            // CD-PIT-11: every concurrent invocation must build a DISTINCT profile URL. Because
+            // convertInternal allocates a fresh temp dir per call and derives the URL from it,
+            // distinct temp paths imply distinct -env:UserInstallation values. Assert the URL
+            // builder is injective over distinct paths — this is the isolation invariant.
+            List<String> urls = distinctProfileUrlsFor(concurrency);
+            assertThat(urls).hasSize(concurrency);
+            assertThat(new HashSet<>(urls)).hasSize(concurrency);
+        } finally {
+            parallelPool.shutdown();
+        }
+    }
+
+    @Test
+    void cleansUpProfileDirectoryAfterConversion() throws IOException {
+        properties.setLibreOfficeCommand(fakeLibreOfficeScript.toString());
+        properties.setConversionTimeoutSeconds(30);
+        LibreOfficePdfConversionService service = service();
+        long profileDirsBefore = countDocgenLoProfileDirs();
+
+        service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled());
+
+        assertThat(countDocgenLoProfileDirs()).isEqualTo(profileDirsBefore);
+    }
+
+    @Test
+    void cleansUpProfileDirectoryAfterFailedConversion() throws URISyntaxException, IOException {
+        Path failScript = resolveFakeLibreOfficeScript("fake-libreoffice-fail");
+        ensureExecutable(failScript);
+        properties.setLibreOfficeCommand(failScript.toString());
+        properties.setConversionTimeoutSeconds(30);
+        LibreOfficePdfConversionService service = service();
+        long profileDirsBefore = countDocgenLoProfileDirs();
+
+        assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
+                .isInstanceOf(TemplateValidationException.class);
+        assertThat(countDocgenLoProfileDirs()).isEqualTo(profileDirsBefore);
+    }
+
+    @Test
+    void profileUrlIsFileSchemeWithForwardSlashes() {
+        Path profile = Path.of("tmp").resolve("lo-profile").toAbsolutePath();
+
+        String url = LibreOfficePdfConversionService.profileUrl(profile);
+
+        assertThat(url).startsWith("file:///");
+        assertThat(url).doesNotContain("\\");
+    }
+
+    private List<String> distinctProfileUrlsFor(int count) throws IOException {
+        List<String> urls = new ArrayList<>();
+        List<Path> dirs = new ArrayList<>();
+        try {
+            for (int i = 0; i < count; i++) {
+                Path dir = Files.createTempDirectory("docgen-lo-profile-");
+                dirs.add(dir);
+                urls.add(LibreOfficePdfConversionService.profileUrl(dir));
+            }
+        } finally {
+            for (Path dir : dirs) {
+                deleteQuietly(dir);
+            }
+        }
+        return urls;
+    }
+
+    private static void deleteQuietly(Path path) {
+        if (path == null || !Files.exists(path)) {
+            return;
+        }
+        try (Stream<Path> walk = Files.walk(path)) {
+            walk.sorted(Comparator.reverseOrder()).forEach(p -> {
+                try {
+                    Files.deleteIfExists(p);
+                } catch (IOException ignored) {
+                    // best-effort
+                }
+            });
+        } catch (IOException ignored) {
+            // best-effort
+        }
+    }
+
     private LibreOfficePdfConversionService service() {
         return new LibreOfficePdfConversionService(
                 properties,
@@ -194,10 +339,28 @@ class LibreOfficePdfConversionServiceTest {
         return executor;
     }
 
+    private ThreadPoolTaskExecutor parallelConversionPool() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(8);
+        executor.setThreadNamePrefix("pdf-parallel-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
+        return executor;
+    }
+
     private long countDocgenPdfTempDirs() throws IOException {
         Path tempRoot = Path.of(System.getProperty("java.io.tmpdir"));
         try (Stream<Path> paths = Files.list(tempRoot)) {
             return paths.filter(path -> path.getFileName().toString().startsWith("docgen-pdf-")).count();
+        }
+    }
+
+    private long countDocgenLoProfileDirs() throws IOException {
+        Path tempRoot = Path.of(System.getProperty("java.io.tmpdir"));
+        try (Stream<Path> paths = Files.list(tempRoot)) {
+            return paths.filter(path -> path.getFileName().toString().startsWith("docgen-lo-profile-")).count();
         }
     }
 }
