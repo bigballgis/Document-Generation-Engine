@@ -48,13 +48,35 @@ import type {
   PasteCleanResult,
 } from '@/types/template'
 
+export interface TemplateListQuery {
+  page?: number
+  size?: number
+  search?: string
+  groupCode?: string
+  lifecycleStatus?: string
+  sort?: string
+}
+
 export async function listTemplates(
   page = 0,
   size = 20,
-  options: { signal?: AbortSignal } = {},
+  options: { signal?: AbortSignal; search?: string; groupCode?: string; lifecycleStatus?: string; sort?: string } = {},
 ): Promise<PageView<TemplateSummary>> {
+  const params: Record<string, string | number> = { page, size }
+  if (options.search) {
+    params.search = options.search
+  }
+  if (options.groupCode) {
+    params.groupCode = options.groupCode
+  }
+  if (options.lifecycleStatus) {
+    params.lifecycleStatus = options.lifecycleStatus
+  }
+  if (options.sort) {
+    params.sort = options.sort
+  }
   const response = await http.get<ApiEnvelope<PageView<TemplateSummary>>>('/templates', {
-    params: { page, size },
+    params,
     signal: options.signal,
   })
   return unwrapEnvelope(response.data)

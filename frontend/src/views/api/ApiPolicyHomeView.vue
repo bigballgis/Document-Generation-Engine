@@ -4,8 +4,10 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
+import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { templatePackageHubPath, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
@@ -25,12 +27,12 @@ const errorMessage = computed(() => {
   return te(key) ? t(key) : t('templates.error.loadList')
 })
 
+const { reload: reloadTemplates } = useAbortableCatalogLoader((signal) =>
+  templatesStore.fetchTemplates(0, templatesStore.templateListSize, { signal }),
+)
+
 onMounted(async () => {
-  try {
-    await templatesStore.fetchTemplates()
-  } catch {
-    // Error surfaced via store message key.
-  }
+  await reloadTemplates()
 })
 
 function openPackageAccess(templateId: string) {
@@ -53,8 +55,15 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
       :description="t('apiPolicy.home.description')"
     />
 
+    <LoadErrorPanel
+      v-if="errorMessage && !templatesStore.loadingList"
+      :message-key="templatesStore.lastErrorMessageKey ?? 'templates.error.loadList'"
+      :retryable="templatesStore.lastListErrorRetryable"
+      @retry="reloadTemplates"
+    />
+
     <el-alert
-      v-if="errorMessage"
+      v-else-if="errorMessage"
       class="page-alert"
       type="error"
       :title="errorMessage"

@@ -470,6 +470,8 @@ export default {
       fileHint: '上传 .docx 母版，锚点将在服务端提取。',
       submit: '上传',
       success: '母版上传成功。',
+      errorTooLarge: '文件超过 50 MB 上传上限，请压缩后重试。',
+      errorDocxOnly: '仅支持上传 .docx 母版文件。',
     },
     submitReview: {
       open: '提交审核',
@@ -1884,6 +1886,12 @@ export default {
     more: '更多',
     retry: '重试',
     retryableHint: '此错误可重试，请稍后再试。',
+    dirtyGuard: {
+      title: '未保存的更改',
+      message: '存在未保存的更改，确定要离开并放弃吗？',
+      discard: '放弃',
+      stay: '留下',
+    },
     reset: '重置',
     notAvailable: '不适用',
     emptyValue: '—',

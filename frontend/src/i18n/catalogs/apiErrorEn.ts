@@ -29,7 +29,8 @@ export const apiErrorEn = {
     pdfConversionFailed: "PDF conversion failed.",
     pdfConversionCapacityExceeded: "PDF conversion capacity is temporarily exceeded; retry later.",
     artifactTooLarge: "Generated artifact exceeds the configured size limit.",
-    docxNormalizationFailed: "DOCX normalization failed."
+    docxNormalizationFailed: "DOCX normalization failed.",
+    idempotencyDigestFailed: "The request could not be processed safely. Please retry."
   },
   idempotency: {
     hashFailed: "Unable to compute the idempotency fingerprint."
@@ -100,7 +101,8 @@ export const apiErrorEn = {
     generationFailed: "Document generation failed.",
     renderProfileInvalid: "The render profile configuration is invalid.",
     previewConcurrencyLimitExceeded: "The preview generation concurrency limit has been reached. Please retry later.",
-    batchTestRunNotFound: "The batch test run was not found."
+    batchTestRunNotFound: "The batch test run was not found.",
+    unsupportedNodeType: "The template contains a structured content node type that cannot be rendered. Remove or replace the unsupported node before publishing."
   },
   apimgmt: {
     policyNotFound: "The API policy was not found.",

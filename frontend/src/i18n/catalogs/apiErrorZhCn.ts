@@ -29,7 +29,8 @@ export const apiErrorZhCn = {
     pdfConversionFailed: "PDF 转换失败。",
     pdfConversionCapacityExceeded: "PDF 转换容量暂时已满，请稍后重试。",
     artifactTooLarge: "生成的产物超过配置的大小上限。",
-    docxNormalizationFailed: "DOCX 规范化失败。"
+    docxNormalizationFailed: "DOCX 规范化失败。",
+    idempotencyDigestFailed: "请求无法安全处理，请重试。"
   },
   idempotency: {
     hashFailed: "无法计算幂等指纹。"
@@ -100,7 +101,8 @@ export const apiErrorZhCn = {
     generationFailed: "文档生成失败。",
     renderProfileInvalid: "渲染配置无效。",
     previewConcurrencyLimitExceeded: "预览生成并发数已达上限，请稍后重试。",
-    batchTestRunNotFound: "未找到批量测试运行记录。"
+    batchTestRunNotFound: "未找到批量测试运行记录。",
+    unsupportedNodeType: "模板包含无法渲染的结构化内容节点类型，请在发布前移除或替换不支持的节点。"
   },
   apimgmt: {
     policyNotFound: "未找到 API 策略。",

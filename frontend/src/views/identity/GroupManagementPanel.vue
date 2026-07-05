@@ -5,6 +5,7 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { rowSortMethod } from '@/composables/useDataTableFilters'
 import { canManageGroups } from '@/auth/identityRoles'
@@ -169,8 +170,15 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
       </el-button>
     </header>
 
+    <LoadErrorPanel
+      v-if="errorMessage && !identityStore.loadingGroups"
+      :message-key="identityStore.lastGroupErrorMessageKey ?? 'identity.error.loadGroups'"
+      :retryable="identityStore.lastGroupErrorRetryable"
+      @retry="reload"
+    />
+
     <el-alert
-      v-if="errorMessage"
+      v-else-if="errorMessage"
       class="panel-alert"
       type="error"
       :title="errorMessage"

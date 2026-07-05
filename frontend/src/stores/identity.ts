@@ -34,6 +34,7 @@ export const useIdentityStore = defineStore('identity', () => {
   const lastUserErrorMessageKey = ref<string | null>(null)
   const lastUserErrorRetryable = ref(false)
   const lastGroupErrorMessageKey = ref<string | null>(null)
+  const lastGroupErrorRetryable = ref(false)
 
   function applyUpdatedUser(updated: ManagementUserView) {
     users.value = users.value.map((item) => (item.id === updated.id ? updated : item))
@@ -140,6 +141,7 @@ export const useIdentityStore = defineStore('identity', () => {
   async function fetchGroups(query: GroupQuery = groupFilters.value): Promise<void> {
     loadingGroups.value = true
     lastGroupErrorMessageKey.value = null
+    lastGroupErrorRetryable.value = false
     groupFilters.value = { ...groupFilters.value, ...query }
     try {
       const page = await identityApi.listGroups(groupFilters.value)
@@ -147,6 +149,7 @@ export const useIdentityStore = defineStore('identity', () => {
       groupsTotal.value = page.totalElements
     } catch (error) {
       lastGroupErrorMessageKey.value = resolveApiErrorMessageKey(error, 'identity.error.loadGroups')
+      lastGroupErrorRetryable.value = true
       throw error
     } finally {
       loadingGroups.value = false
@@ -214,6 +217,7 @@ export const useIdentityStore = defineStore('identity', () => {
     lastUserErrorMessageKey,
     lastUserErrorRetryable,
     lastGroupErrorMessageKey,
+    lastGroupErrorRetryable,
     fetchUsers,
     createUser,
     updateUser,

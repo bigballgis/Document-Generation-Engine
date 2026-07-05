@@ -16,6 +16,14 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const { resolveDefaultGroupCode, ensureGroupCatalog } = useScopedGroupOptions()
 
+// LR-A3: client-side file size + type guard mirroring the backend limit (50MB) and the
+// nginx client_max_body_size. Rejects oversized/masquerading files before upload starts.
+const MAX_UPLOAD_BYTES = 50 * 1024 * 1024
+const DOCX_CONTENT_TYPES = new Set([
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/octet-stream',
+])
+
 const visible = computed({
   get: () => props.modelValue,
   set: (value: boolean) => emit('update:modelValue', value),
@@ -29,6 +37,7 @@ const form = reactive({
 
 const selectedFile = ref<File | null>(null)
 const fileList = ref<{ name: string }[]>([])
+const fileErrorKey = ref<string | null>(null)
 
 watch(
   () => props.modelValue,
@@ -42,13 +51,37 @@ watch(
 )
 
 function onFileChange(uploadFile: { raw?: File }) {
-  selectedFile.value = uploadFile.raw ?? null
-  fileList.value = selectedFile.value ? [{ name: selectedFile.value.name }] : []
+  const file = uploadFile.raw ?? null
+  fileErrorKey.value = null
+  if (file) {
+    if (file.size > MAX_UPLOAD_BYTES) {
+      fileErrorKey.value = 'masters.upload.errorTooLarge'
+      selectedFile.value = null
+      fileList.value = []
+      return
+    }
+    const lowerName = file.name.toLowerCase()
+    if (!lowerName.endsWith('.docx')) {
+      fileErrorKey.value = 'masters.upload.errorDocxOnly'
+      selectedFile.value = null
+      fileList.value = []
+      return
+    }
+    if (file.type && !DOCX_CONTENT_TYPES.has(file.type)) {
+      fileErrorKey.value = 'masters.upload.errorDocxOnly'
+      selectedFile.value = null
+      fileList.value = []
+      return
+    }
+  }
+  selectedFile.value = file
+  fileList.value = file ? [{ name: file.name }] : []
 }
 
 function onFileRemove() {
   selectedFile.value = null
   fileList.value = []
+  fileErrorKey.value = null
 }
 
 function resetForm() {
@@ -114,6 +147,9 @@ const canSubmit = computed(
           <el-button>{{ t('masters.upload.chooseFile') }}</el-button>
           <template #tip>
             <div class="upload-tip">{{ t('masters.upload.fileHint') }}</div>
+            <div v-if="fileErrorKey" class="upload-error" role="alert">
+              {{ t(fileErrorKey) }}
+            </div>
           </template>
         </el-upload>
       </el-form-item>
@@ -131,6 +167,12 @@ const canSubmit = computed(
 .upload-tip {
   margin-top: 0.5rem;
   color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.upload-error {
+  margin-top: 0.25rem;
+  color: var(--color-danger, #f56c6c);
   font-size: 0.875rem;
 }
 </style>

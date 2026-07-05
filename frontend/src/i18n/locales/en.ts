@@ -478,6 +478,8 @@ export default {
       fileHint: 'Upload a .docx letterhead. Anchors are extracted on the server.',
       submit: 'Upload',
       success: 'Letterhead uploaded successfully.',
+      errorTooLarge: 'The file exceeds the 50 MB upload limit. Reduce the file size and try again.',
+      errorDocxOnly: 'Only .docx letterhead files are accepted.',
     },
     submitReview: {
       open: 'Submit for review',
@@ -1906,6 +1908,12 @@ export default {
     more: 'More',
     retry: 'Retry',
     retryableHint: 'This error is retryable. You can try again in a moment.',
+    dirtyGuard: {
+      title: 'Unsaved changes',
+      message: 'You have unsaved changes. Leave and discard them?',
+      discard: 'Discard',
+      stay: 'Stay',
+    },
     reset: 'Reset',
     notAvailable: 'N/A',
     emptyValue: '—',
