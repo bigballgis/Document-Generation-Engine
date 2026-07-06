@@ -1,6 +1,5 @@
 package com.bank.docgen.runtime.persistence;
 
-import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventEntity;
 import java.time.Instant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

@@ -347,7 +347,7 @@ public class MasterDocumentService {
     private List<String> extractAnchorsFromStorage(String storageKey) {
         try (InputStream inputStream = objectStoragePort.get(storageKey)) {
             return docxAnchorExtractor.extractOrderedAnchorIds(inputStream);
-        } catch (Exception ex) {
+        } catch (IOException | RuntimeException ex) {
             throw new MasterValidationException("api.error.master.anchorExtractionFailed");
         }
     }
@@ -368,8 +368,8 @@ public class MasterDocumentService {
         // .docx but sending text/html/image/etc. content are rejected before POI parses them.
         String contentType = docxFile.getContentType();
         if (contentType != null
-                && !contentType.equals(DOCX_CONTENT_TYPE)
-                && !contentType.equals("application/octet-stream")) {
+                && !DOCX_CONTENT_TYPE.equals(contentType)
+                && !"application/octet-stream".equals(contentType)) {
             throw new MasterValidationException("api.error.master.docxRequired");
         }
         assertDocxPackageStructure(docxFile);

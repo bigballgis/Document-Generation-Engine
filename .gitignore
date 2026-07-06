@@ -30,6 +30,7 @@ Thumbs.db
 artifacts/
 logs/
 *.log
+.tmp/
 
 # ---- Agent / tooling workspace (machine-local state, do not commit) ----
 # Claude Code auto-commits working changes locally to prevent loss (see

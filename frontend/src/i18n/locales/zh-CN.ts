@@ -1886,12 +1886,6 @@ export default {
     more: '更多',
     retry: '重试',
     retryableHint: '此错误可重试，请稍后再试。',
-    dirtyGuard: {
-      title: '未保存的更改',
-      message: '存在未保存的更改，确定要离开并放弃吗？',
-      discard: '放弃',
-      stay: '留下',
-    },
     reset: '重置',
     notAvailable: '不适用',
     emptyValue: '—',

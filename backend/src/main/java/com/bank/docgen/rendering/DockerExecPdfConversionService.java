@@ -75,7 +75,11 @@ public class DockerExecPdfConversionService implements PdfConversionService {
             // (CD-PIT-11). A unique container profile path prevents concurrent conversions from
             // sharing one soffice user profile and deadlocking on lock files. Derived from the
             // unique host temp dir name so it cannot collide across pooled invocations.
-            String containerProfile = "/tmp/docgen-lo-profile-" + hostDir.getFileName().toString();
+            Path profileDirName = hostDir.getFileName();
+            if (profileDirName == null) {
+                throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+            }
+            String containerProfile = "/tmp/docgen-lo-profile-" + profileDirName;
 
             runCommand(renderingProperties.getDockerCliCommand(), "cp", inputDocx.toString(), container + ":" + containerInput);
             runCommand(

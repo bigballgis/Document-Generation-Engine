@@ -1,7 +1,0 @@
-Invoke-RestMethod : 无法连接到远程服务器
-所在位置 D:\working\Document Generation Engine\.tmp\demo_driver.ps1:10 字符: 10
-+     $r = Invoke-RestMethod -Method POST -Uri "$MGMT/auth/login" -Cont ...
-+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (:) [Invoke-RestMethod], WebException
-    + FullyQualifiedErrorId : System.Net.WebException,Microsoft.PowerShell.Commands.InvokeRestMethodCommand
- 

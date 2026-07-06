@@ -1908,12 +1908,6 @@ export default {
     more: 'More',
     retry: 'Retry',
     retryableHint: 'This error is retryable. You can try again in a moment.',
-    dirtyGuard: {
-      title: 'Unsaved changes',
-      message: 'You have unsaved changes. Leave and discard them?',
-      discard: 'Discard',
-      stay: 'Stay',
-    },
     reset: 'Reset',
     notAvailable: 'N/A',
     emptyValue: '—',

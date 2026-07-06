@@ -44,7 +44,13 @@ if git diff --cached --quiet -- && git diff --quiet -- && git ls-files --others 
 fi
 
 # Stage tracked modifications + untracked (non-ignored) files.
-git add -A -- ':!*.lock' ':!pnpm-lock.yaml' 2>/dev/null || git add -A
+# Exclude agent scratch space and lockfiles — .tmp/ must never enter version control.
+git add -A -- \
+  ':!*.lock' \
+  ':!pnpm-lock.yaml' \
+  ':!.tmp' \
+  ':!.tmp/**' \
+  2>/dev/null || git add -A -- ':!.tmp' ':!.tmp/**'
 
 # Re-check after staging; exit if truly clean.
 if git diff --cached --quiet --; then
