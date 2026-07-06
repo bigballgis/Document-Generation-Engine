@@ -94,7 +94,7 @@ async function main() {
     const headers = {
       'X-Api-Credential-Id': cred.body.result.externalId,
       'X-Api-Credential-Secret': cred.body.result.secret,
-      'X-Access-Account': 'demo-real-letter-caller',
+      'X-Access-Account': 'svc-caller',
     };
     let vars = { customerName: 'Executive Sample Customer' };
     if (ext === 'DEMO-CREDIT-LIMIT-CONFIRM') {
