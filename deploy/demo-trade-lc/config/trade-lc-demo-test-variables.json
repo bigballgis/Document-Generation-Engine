@@ -1,24 +1,59 @@
 {
-  "catalogMarker": "trade-lc-demo-v1",
+  "catalogMarker": "trade-lc-demo-v2-real",
   "testDataSets": [
     {
       "id": "trade-lc-executive",
-      "label": "Documentary Credit Advice — Executive Sample",
+      "label": "Documentary Credit Advice — Real Executive Sample",
       "variables": {
+        "issuingBankName": "Meridian Global Banking Corporation — Trade Services",
+        "issuingBankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+        "issuingBankSwift": "MERIGB2L",
+        "letterDate": "2026-07-06",
         "beneficiaryName": "Shanghai Apex Trading Co., Ltd.",
+        "beneficiaryAddress": "Floor 18, Lujiazui Tower, 1688 Lujiazui Ring Road, Shanghai 200120, China",
         "applicantName": "EuroParts GmbH",
+        "applicantAddress": "Industriestrasse 42, 80339 München, Germany",
         "lcNumber": "LC-2026-MERI-44821",
-        "lcAmount": "USD 1,250,000.00",
-        "expiryDate": "2026-09-30"
+        "lcAmount": "1,250,000.00",
+        "currency": "USD",
+        "expiryDate": "2026-09-30",
+        "expiryPlace": "our counters in London",
+        "goodsDescription": "Precision automotive components (HS code 8708.29.00), 12,000 units, packed in 40 containers",
+        "shipmentFrom": "Shanghai, China",
+        "shipmentTo": "Hamburg, Germany",
+        "latestShipmentDate": "2026-09-15",
+        "incoterms": "CIF Hamburg (Incoterms 2020)",
+        "partialShipments": "not allowed",
+        "transhipment": "allowed",
+        "applicableRules": "UCP 600 (ICC Publication 600)",
+        "signatoryName": "David K. Olubanjo",
+        "signatoryTitle": "Director, Trade Finance Operations — Meridian Global Banking Corporation",
+        "requiredDocuments": [
+          {"documentName": "Signed commercial invoice in triplicate, indicating LC number and applicant reference."},
+          {"documentName": "Full set (3/3) of clean on board marine bills of lading, consigned to order of issuing bank, marked 'freight prepaid', notify applicant."},
+          {"documentName": "Packing list in triplicate, showing gross/net weight, dimensions and container numbers."},
+          {"documentName": "Certificate of origin issued by CCPIT, indicating goods are of Chinese origin."},
+          {"documentName": "Marine insurance policy or certificate for 110% of CIF value, blank endorsed, covering all risks, Institute Cargo Clauses (A), institute war and strikes clauses, claims payable at destination."},
+          {"documentName": "Beneficiary's certificate confirming that a copy each of invoice, packing list and bills of lading has been sent to the applicant within 5 days of shipment."}
+        ]
       }
     },
     {
       "id": "trade-guarantee-executive",
-      "label": "Bank Guarantee Notice — Executive Sample",
+      "label": "Bank Guarantee Notice — Real Executive Sample",
       "variables": {
-        "beneficiaryName": "Gulf Infrastructure LLC",
+        "issuingBankName": "Meridian Global Banking Corporation — Trade Services",
+        "issuingBankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+        "issuingBankSwift": "MERIGB2L",
+        "letterDate": "2026-07-06",
+        "signatoryName": "David K. Olubanjo",
+        "signatoryTitle": "Director, Trade Finance Operations — Meridian Global Banking Corporation",
+        "applicableRules": "URDG 758 (ICC Publication 758)",
         "guaranteeReference": "BG-2026-MERI-99201",
-        "guaranteeAmount": "USD 3,500,000.00"
+        "guaranteeAmount": "3,500,000.00",
+        "currency": "USD",
+        "guaranteeBeneficiaryName": "Gulf Infrastructure LLC",
+        "underlyingContract": "Engineering, Procurement and Construction contract dated 1 March 2026 for the Al-Marjan Desalination Plant (Contract Ref GI-DESAL-2026-04)"
       }
     }
   ]

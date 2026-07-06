@@ -1,11 +1,113 @@
 {
-  "catalogMarker": "wealth-demo-v1",
+  "catalogMarker": "wealth-demo-v2-real",
   "variables": [
-    {"key": "clientName", "label": "Client Name", "type": "STRING", "required": true},
-    {"key": "portfolioReference", "label": "Portfolio Reference", "type": "STRING", "required": true},
-    {"key": "statementDate", "label": "Statement Date", "type": "DATE", "required": true},
-    {"key": "holdings", "label": "Holdings", "type": "LIST", "required": true},
-    {"key": "totalMarketValue", "label": "Total Market Value", "type": "MONEY", "required": true},
-    {"key": "totalCost", "label": "Total Cost", "type": "MONEY", "required": true}
+    {
+      "key": "bankName",
+      "label": "Bank Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankAddress",
+      "label": "Bank Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "relationshipManager",
+      "label": "Relationship Manager",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "clientName",
+      "label": "Client Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "clientAddress",
+      "label": "Client Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "portfolioReference",
+      "label": "Portfolio Reference",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "statementDate",
+      "label": "Statement Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "statementPeriod",
+      "label": "Statement Period",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "custodian",
+      "label": "Custodian",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "baseCurrency",
+      "label": "Base Currency",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "holdings",
+      "label": "Holdings",
+      "type": "LIST",
+      "required": true
+    },
+    {
+      "key": "totalMarketValue",
+      "label": "Total Market Value",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "totalCost",
+      "label": "Total Cost",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "unrealisedGainLoss",
+      "label": "Unrealised Gain/Loss",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "unrealisedGainLossPct",
+      "label": "Unrealised Gain/Loss %",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "incomeReceived",
+      "label": "Income Received (period)",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "signatoryName",
+      "label": "Signatory Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryTitle",
+      "label": "Signatory Title",
+      "type": "TEXT",
+      "required": true
+    }
   ]
 }

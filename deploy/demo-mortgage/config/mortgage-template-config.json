@@ -1,13 +1,13 @@
 {
-  "catalogMarker": "mortgage-demo-v1",
+  "catalogMarker": "mortgage-demo-v2-real",
   "groupCode": "RETAIL",
   "pageNumberingProfile": "SECTION_AND_GLOBAL",
   "masterName": "Meridian Mortgage Approval Master",
-  "masterLayoutVersion": "mortgage-layout-v1-dual-page",
-  "masterDescription": "Mortgage approval letter with repayment schedule section",
+  "masterLayoutVersion": "mortgage-layout-v2-dual-page",
+  "masterDescription": "Real bank-grade residential mortgage approval master — A4, dual-page footer, FCA-regulated header (mortgage-layout-v2-dual-page)",
   "templateExternalId": "DEMO-MORTGAGE-APPROVAL",
   "templateName": "Residential Mortgage Approval",
-  "templateDescription": "Mortgage approval with repayment schedule tableComponent",
+  "templateDescription": "Real foreign-bank residential mortgage approval with full repayment schedule, FCA-aligned terms, signatures (mortgage-demo-v2-real)",
   "masterDocx": "assets/mortgage-approval-master.docx",
   "generatedCatalogFiles": {
     "variables": "config/mortgage-variables.json",

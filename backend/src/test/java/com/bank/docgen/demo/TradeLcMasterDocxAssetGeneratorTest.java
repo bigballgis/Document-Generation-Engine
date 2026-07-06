@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 class TradeLcMasterDocxAssetGeneratorTest {
 
-    static final String MASTER_LAYOUT_VERSION = "trade-lc-layout-v1-global-page";
+    static final String MASTER_LAYOUT_VERSION = "trade-lc-layout-v2-global-page";
     private static final Path LC_ASSET = Path.of("..", "deploy", "demo-trade-lc", "assets", "trade-lc-notice-master.docx");
     private static final Path GUARANTEE_ASSET = Path.of("..", "deploy", "demo-trade-lc", "assets", "trade-guarantee-notice-master.docx");
     static final List<String> LC_ANCHORS = List.of("TRADE_LC_BODY", "TRADE_LC_ATTACHMENT");

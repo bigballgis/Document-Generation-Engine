@@ -1,67 +1,117 @@
 {
-  "catalogMarker": "wealth-demo-v1",
+  "catalogMarker": "wealth-demo-v2-real",
   "bindings": {
     "WEALTH_STATEMENT_BODY": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "imageRef", "assetKey": "meridian-wealth-logo", "widthPt": 100},
-        {
-          "type": "paragraph",
-          "children": [
-            {"type": "textRun", "value": "Private Wealth Investment Statement\n\nClient: "},
-            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "clientName"}]},
-            {"type": "textRun", "value": "\nPortfolio: "},
-            {"type": "variable", "key": "portfolioReference"},
-            {"type": "textRun", "value": "  |  As at "},
-            {"type": "variable", "key": "statementDate"}
-          ]
-        },
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Date: "},
+          {"type": "variable", "key": "statementDate"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "To: "},
+          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "clientName"}]},
+          {"type": "textRun", "value": ", "},
+          {"type": "variable", "key": "clientAddress"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Dear Valued Client,"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "We are pleased to provide your Private Wealth Investment Statement for the portfolio referenced below, covering the period "},
+          {"type": "variable", "key": "statementPeriod"},
+          {"type": "textRun", "value": ". This statement is prepared and issued by "},
+          {"type": "variable", "key": "bankName"},
+          {"type": "textRun", "value": " in its capacity as custodian and investment manager."}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Portfolio Reference: "},
+          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "portfolioReference"}]}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Custodian: "},
+          {"type": "variable", "key": "custodian"}
+        ]},
         {"type": "contentModuleRef", "referenceKey": "WEALTH-STATEMENT-INTRO"}
       ]
     },
     "WEALTH_HOLDINGS_TABLE": {
       "schemaVersion": "1.0",
       "nodes": [
-        {
-          "type": "sectionHeading",
-          "children": [{"type": "text", "value": "Portfolio Holdings"}]
-        },
-        {
-          "type": "tableComponentRef",
-          "tableComponent": {
-            "columns": [
-              {"header": "Instrument", "field": "instrument"},
-              {"header": "Quantity", "field": "quantity"},
-              {"header": "Market Price", "field": "marketPrice"},
-              {"header": "Market Value", "field": "marketValue"}
-            ],
-            "rowsVariable": "holdings"
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "Portfolio Holdings"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "The following table sets out the holdings in your portfolio as at the statement date. All values are expressed in "},
+          {"type": "variable", "key": "baseCurrency"},
+          {"type": "textRun", "value": " unless otherwise indicated."}
+        ]},
+        {"type": "tableComponentRef", "tableComponent": {
+          "componentKey": "WEALTH-TBL-HOLDINGS",
+          "columnSchema": [
+            {"columnKey": "instrument", "widthPct": 40},
+            {"columnKey": "quantity", "widthPct": 20},
+            {"columnKey": "marketPrice", "widthPct": 20},
+            {"columnKey": "marketValue", "widthPct": 20}
+          ],
+          "headerRows": [[
+            {"columnKey": "instrument", "value": "Instrument"},
+            {"columnKey": "quantity", "value": "Quantity"},
+            {"columnKey": "marketPrice", "value": "Market Price"},
+            {"columnKey": "marketValue", "value": "Market Value"}
+          ]],
+          "loopRow": {
+            "loopVariable": "holdings",
+            "cells": [
+              {"columnKey": "instrument", "variableKey": "instrument"},
+              {"columnKey": "quantity", "variableKey": "quantity"},
+              {"columnKey": "marketPrice", "variableKey": "marketPrice"},
+              {"columnKey": "marketValue", "variableKey": "marketValue"}
+            ]
           }
-        }
+        }},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Market prices are sourced from recognised exchanges and pricing services as at close of business on the statement date. Foreign currency holdings are converted at the prevailing exchange rate for display purposes only; actual settlement amounts may differ."}
+        ]}
       ]
     },
     "WEALTH_FOOTER_TOTALS": {
       "schemaVersion": "1.0",
       "nodes": [
-        {
-          "type": "tableComponentRef",
-          "tableComponent": {
-            "columns": [
-              {"header": "Summary", "field": "label"},
-              {"header": "Amount", "field": "amount"}
-            ],
-            "rows": [
-              {"label": "Total cost basis", "amountVariable": "totalCost"},
-              {"label": "Total market value", "amountVariable": "totalMarketValue"}
-            ]
-          }
-        },
-        {
-          "type": "paragraph",
-          "children": [
-            {"type": "emphasis", "variant": "italic", "children": [{"type": "textRun", "value": "Past performance is not indicative of future results. Values shown are indicative only."}]}
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "Portfolio Summary"}]},
+        {"type": "tableComponentRef", "tableComponent": {
+          "componentKey": "WEALTH-TBL-SUMMARY",
+          "columnSchema": [
+            {"columnKey": "label", "widthPct": 60},
+            {"columnKey": "amount", "widthPct": 40}
+          ],
+          "headerRows": [[
+            {"columnKey": "label", "value": "Summary"},
+            {"columnKey": "amount", "value": "Amount"}
+          ]],
+          "footerRows": [
+            [{"columnKey": "label", "value": "Total cost basis"}, {"columnKey": "amount", "variableKey": "totalCost"}],
+            [{"columnKey": "label", "value": "Total market value"}, {"columnKey": "amount", "variableKey": "totalMarketValue"}],
+            [{"columnKey": "label", "value": "Unrealised gain/loss"}, {"columnKey": "amount", "variableKey": "unrealisedGainLoss"}],
+            [{"columnKey": "label", "value": "Unrealised gain/loss %"}, {"columnKey": "amount", "variableKey": "unrealisedGainLossPct"}],
+            [{"columnKey": "label", "value": "Income received (period)"}, {"columnKey": "amount", "variableKey": "incomeReceived"}]
           ]
-        }
+        }},
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "Important Notices"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "This statement is provided for information purposes only and does not constitute investment advice, an offer to sell or a solicitation of an offer to buy any securities or investment products. Past performance is not indicative of future results. The value of investments and income from them may go down as well as up, and investors may not get back the amount originally invested."}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Corporate actions, pending trades and accrued income items may not be fully reflected until settlement completes. If you have any queries regarding this statement or wish to discuss your portfolio, please contact your Relationship Manager using the details below."}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Yours sincerely,"}
+        ]},
+        {"type": "paragraph", "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]},
+        {"type": "paragraph", "children": [{"type": "variable", "key": "signatoryTitle"}]},
+        {"type": "paragraph", "children": [{"type": "variable", "key": "bankName"}, {"type": "textRun", "value": ", "}, {"type": "variable", "key": "bankAddress"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Relationship Manager: "},
+          {"type": "variable", "key": "relationshipManager"}
+        ]}
       ]
     }
   }

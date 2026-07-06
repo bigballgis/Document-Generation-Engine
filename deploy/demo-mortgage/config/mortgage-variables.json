@@ -1,12 +1,167 @@
 {
-  "catalogMarker": "mortgage-demo-v1",
+  "catalogMarker": "mortgage-demo-v2-real",
   "variables": [
-    {"key": "borrowerName", "label": "Borrower Name", "type": "STRING", "required": true},
-    {"key": "propertyAddress", "label": "Property Address", "type": "STRING", "required": true},
-    {"key": "loanAmount", "label": "Loan Amount", "type": "MONEY", "required": true},
-    {"key": "interestRate", "label": "Interest Rate", "type": "STRING", "required": true},
-    {"key": "termYears", "label": "Term (Years)", "type": "INTEGER", "required": true},
-    {"key": "approvalDate", "label": "Approval Date", "type": "DATE", "required": true},
-    {"key": "repaymentSchedule", "label": "Repayment Schedule", "type": "LIST", "required": true}
+    {
+      "key": "lenderName",
+      "label": "Lender Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "lenderAddress",
+      "label": "Lender Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "lenderFcaNumber",
+      "label": "Lender FCA Number",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "letterDate",
+      "label": "Letter Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "borrowerName",
+      "label": "Borrower Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "borrowerAddress",
+      "label": "Borrower Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "propertyAddress",
+      "label": "Property Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "propertyTenure",
+      "label": "Property Tenure",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "propertyType",
+      "label": "Property Type",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "loanAmount",
+      "label": "Loan Amount",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "propertyValue",
+      "label": "Property Value",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "ltvRatio",
+      "label": "Loan-to-Value Ratio",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "interestRate",
+      "label": "Interest Rate",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "rateType",
+      "label": "Rate Type",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "fixedRatePeriod",
+      "label": "Fixed Rate Period",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "reversionRate",
+      "label": "Reversion Rate",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "termYears",
+      "label": "Term (Years)",
+      "type": "NUMBER",
+      "required": true
+    },
+    {
+      "key": "monthlyPayment",
+      "label": "Monthly Payment",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "firstPaymentDate",
+      "label": "First Payment Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "approvalDate",
+      "label": "Approval Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "offerExpiryDate",
+      "label": "Offer Expiry Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "repaymentSchedule",
+      "label": "Repayment Schedule",
+      "type": "LIST",
+      "required": true
+    },
+    {
+      "key": "insuranceRequirement",
+      "label": "Buildings Insurance Requirement",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "earlyRepaymentCharge",
+      "label": "Early Repayment Charge",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryName",
+      "label": "Signatory Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryTitle",
+      "label": "Signatory Title",
+      "type": "TEXT",
+      "required": true
+    }
   ]
 }

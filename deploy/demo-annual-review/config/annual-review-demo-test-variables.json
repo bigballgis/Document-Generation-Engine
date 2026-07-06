@@ -1,28 +1,60 @@
 {
-  "catalogMarker": "annual-review-demo-v1",
+  "catalogMarker": "annual-review-demo-v2-real",
   "testDataSets": [
     {
       "id": "annual-review-executive",
-      "label": "Annual Credit Review — Executive Sample",
+      "label": "Annual Credit Review — Real Executive Sample",
       "variables": {
+        "bankName": "Meridian Global Banking Corporation",
+        "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+        "letterDate": "2026-07-06",
         "customerName": "Harbour Logistics Holdings plc",
+        "customerAddress": "Pier 9, Port of Felixstowe, Suffolk IP11 3SY, United Kingdom",
         "facilityReference": "CORP-FAC-2024-77102",
+        "facilityType": "revolving credit facility",
+        "facilityAmount": "15,000,000.00",
+        "currency": "GBP",
         "reviewDate": "2026-06-30",
+        "reviewOutcome": "Facility confirmed; all covenants compliant; pricing revised as set out below",
+        "renewalDate": "2026-07-01",
+        "expiryDate": "2027-06-30",
+        "marginBps": "175",
+        "referenceRate": "SONIA (compounded in arrears)",
         "includeCovenantSchedule": true,
+        "materialFindings": "No material findings. The Borrower remains in compliance with all financial covenants. The Group's audited financial statements for the year ended 31 March 2026 show a strengthening of the leverage position and stable interest cover.",
+        "signatoryName": "Jonathan A. Whitmore",
+        "signatoryTitle": "Director, Corporate Credit — Wholesale Banking",
         "covenantItems": [
-          {"covenantName": "Leverage ratio", "covenantStatus": "Compliant — 2.4:1 (limit 3.0:1)"},
-          {"covenantName": "Interest cover", "covenantStatus": "Compliant — 3.1:1 (minimum 2.5:1)"},
-          {"covenantName": "Tangible net worth", "covenantStatus": "Compliant — GBP 42.3m (minimum GBP 35.0m)"}
+          {"covenantName": "Leverage ratio", "covenantStatus": "Compliant — 2.40:1.00 (limit 3.00:1.00)"},
+          {"covenantName": "Interest cover", "covenantStatus": "Compliant — 3.10:1.00 (minimum 2.50:1.00)"},
+          {"covenantName": "Tangible net worth", "covenantStatus": "Compliant — GBP 42,300,000 (minimum GBP 35,000,000)"},
+          {"covenantName": "Minimum liquidity", "covenantStatus": "Compliant — GBP 8,100,000 (minimum GBP 5,000,000)"}
         ]
       }
     },
     {
       "id": "facility-renewal-executive",
-      "label": "Facility Renewal — Executive Sample",
+      "label": "Facility Renewal — Real Executive Sample",
       "variables": {
+        "bankName": "Meridian Global Banking Corporation",
+        "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+        "letterDate": "2026-07-06",
         "customerName": "Harbour Logistics Holdings plc",
+        "customerAddress": "Pier 9, Port of Felixstowe, Suffolk IP11 3SY, United Kingdom",
         "facilityReference": "CORP-FAC-2024-77102",
-        "renewalDate": "2027-06-30"
+        "facilityType": "revolving credit facility",
+        "facilityAmount": "15,000,000.00",
+        "currency": "GBP",
+        "reviewDate": "2026-06-30",
+        "reviewOutcome": "Facility renewed for a further 12-month term",
+        "renewalDate": "2026-07-01",
+        "expiryDate": "2027-06-30",
+        "marginBps": "175",
+        "referenceRate": "SONIA (compounded in arrears)",
+        "includeCovenantSchedule": false,
+        "materialFindings": "Not applicable to renewal confirmation",
+        "signatoryName": "Jonathan A. Whitmore",
+        "signatoryTitle": "Director, Corporate Credit — Wholesale Banking"
       }
     }
   ]

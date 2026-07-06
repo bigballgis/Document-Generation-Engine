@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 class MortgageMasterDocxAssetGeneratorTest {
 
-    static final String MASTER_LAYOUT_VERSION = "mortgage-layout-v1-dual-page";
+    static final String MASTER_LAYOUT_VERSION = "mortgage-layout-v2-dual-page";
 
     private static final Path ASSET = Path.of("..", "deploy", "demo-mortgage", "assets", "mortgage-approval-master.docx");
     static final List<String> ANCHOR_IDS = List.of("MORTGAGE_BODY", "MORTGAGE_SCHEDULE");

@@ -1,13 +1,48 @@
 {
-  "catalogMarker": "credit-limit-demo-v1",
-  "name": "Credit Limit Confirmation — Executive Sample",
+  "catalogMarker": "credit-limit-demo-v2-real",
+  "name": "Credit Limit Confirmation — Real Executive Sample",
   "required": true,
   "variables": {
-    "customerName": "Northgate Manufacturing Ltd.",
+    "bankName": "Meridian Global Banking Corporation",
+    "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+    "bankBranch": "Wholesale Banking — Corporate Credit",
+    "letterDate": "2026-07-06",
+    "borrowerName": "Northgate Manufacturing Ltd.",
+    "borrowerAddress": "Unit 7, Trident Industrial Park, Leeds LS10 1TT",
+    "borrowerCountry": "United Kingdom",
+    "guarantorName": "Northgate Holdings plc",
     "facilityReference": "CORP-CL-2026-88421",
-    "creditLimit": "GBP 12,500,000.00",
+    "creditLimit": "12,500,000.00",
+    "currency": "GBP",
+    "facilityType": "Revolving Credit Facility",
+    "availabilityPeriod": "364 days",
     "reviewDate": "2026-06-30",
+    "expiryDate": "2027-07-05",
+    "marginBps": "165",
+    "referenceRate": "SONIA (compounded in arrears)",
+    "commitmentFeeBps": "40",
     "includeOverdraft": true,
-    "overdraftLimit": "GBP 1,000,000.00"
+    "overdraftLimit": "1,000,000.00",
+    "includeFinancialCovenants": true,
+    "maxLeverageRatio": "3.50:1.00",
+    "minInterestCover": "3.00:1.00",
+    "minTangibleNetWorth": "8,000,000.00",
+    "governingLaw": "English law",
+    "jurisdiction": "England and Wales",
+    "signatoryName": "Jonathan A. Whitmore",
+    "signatoryTitle": "Director, Corporate Credit — Wholesale Banking",
+    "conditionsPrecedent": [
+      {"conditionText": "Certified constitutional documents of the Borrower and Guarantor, including board resolutions authorising the facility."},
+      {"conditionText": "Legal opinion from counsel of recognised standing in the Borrower's jurisdiction of incorporation."},
+      {"conditionText": "Audited financial statements for the last two financial years and most recent management accounts."},
+      {"conditionText": "Know-your-customer, anti-money-laundering and sanctions screening documentation for all Obligors."},
+      {"conditionText": "Executed security documentation over the shares in the Borrower and the guaranteed accounts."}
+    ],
+    "repaymentSchedule": [
+      {"paymentDate": "2026-10-05", "principal": "GBP 1,041,666.67", "interest": "GBP 312,500.00", "balance": "GBP 11,458,333.33"},
+      {"paymentDate": "2027-01-05", "principal": "GBP 1,041,666.67", "interest": "GBP 286,458.33", "balance": "GBP 10,416,666.66"},
+      {"paymentDate": "2027-04-05", "principal": "GBP 1,041,666.67", "interest": "GBP 260,416.67", "balance": "GBP 9,374,999.99"},
+      {"paymentDate": "2027-07-05", "principal": "GBP 9,374,999.99", "interest": "GBP 234,375.00", "balance": "GBP 0.00"}
+    ]
   }
 }

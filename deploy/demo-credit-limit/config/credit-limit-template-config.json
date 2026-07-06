@@ -1,11 +1,13 @@
 {
-  "catalogMarker": "credit-limit-demo-v1",
+  "catalogMarker": "credit-limit-demo-v2-real",
   "groupCode": "CORP",
   "pageNumberingProfile": "SECTION_AND_GLOBAL",
   "masterName": "Meridian Credit Limit Master",
-  "masterLayoutVersion": "credit-limit-layout-v1-dual-page",
+  "masterLayoutVersion": "credit-limit-layout-v2-dual-page",
+  "masterDescription": "Real bank-grade credit limit confirmation master — A4, dual-page footer, branded header (credit-limit-layout-v2-dual-page)",
   "templateExternalId": "DEMO-CREDIT-LIMIT-CONFIRM",
-  "templateName": "Credit Limit Confirmation",
+  "templateName": "Credit Facility Confirmation",
+  "templateDescription": "Real foreign-bank credit facility confirmation — revolving credit facility with covenants, repayment schedule, signatures (credit-limit-demo-v2-real)",
   "masterDocx": "assets/credit-limit-master.docx",
   "generatedCatalogFiles": {
     "variables": "config/credit-limit-variables.json",

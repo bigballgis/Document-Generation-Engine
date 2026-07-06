@@ -1,11 +1,185 @@
 {
-  "catalogMarker": "credit-limit-demo-v1",
+  "catalogMarker": "credit-limit-demo-v2-real",
   "variables": [
-    {"key": "customerName", "label": "Customer Name", "type": "STRING", "required": true},
-    {"key": "facilityReference", "label": "Facility Reference", "type": "STRING", "required": true},
-    {"key": "creditLimit", "label": "Credit Limit", "type": "MONEY", "required": true},
-    {"key": "reviewDate", "label": "Review Date", "type": "DATE", "required": true},
-    {"key": "includeOverdraft", "label": "Include Overdraft Facility", "type": "BOOLEAN", "required": false},
-    {"key": "overdraftLimit", "label": "Overdraft Limit", "type": "MONEY", "required": false}
+    {
+      "key": "bankName",
+      "label": "Bank Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankAddress",
+      "label": "Bank Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "bankBranch",
+      "label": "Bank Branch",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "letterDate",
+      "label": "Letter Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "borrowerName",
+      "label": "Borrower Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "borrowerAddress",
+      "label": "Borrower Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "borrowerCountry",
+      "label": "Borrower Country",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "guarantorName",
+      "label": "Guarantor Name",
+      "type": "TEXT",
+      "required": false
+    },
+    {
+      "key": "facilityReference",
+      "label": "Facility Reference",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "creditLimit",
+      "label": "Credit Limit",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "facilityType",
+      "label": "Facility Type",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "availabilityPeriod",
+      "label": "Availability Period",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "reviewDate",
+      "label": "Review Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "expiryDate",
+      "label": "Expiry Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "marginBps",
+      "label": "Margin (bps)",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "referenceRate",
+      "label": "Reference Rate",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "commitmentFeeBps",
+      "label": "Commitment Fee (bps)",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "includeOverdraft",
+      "label": "Include Overdraft Facility",
+      "type": "BOOLEAN",
+      "required": false
+    },
+    {
+      "key": "overdraftLimit",
+      "label": "Overdraft Limit",
+      "type": "AMOUNT",
+      "required": false
+    },
+    {
+      "key": "includeFinancialCovenants",
+      "label": "Include Financial Covenants",
+      "type": "BOOLEAN",
+      "required": false
+    },
+    {
+      "key": "maxLeverageRatio",
+      "label": "Max Leverage Ratio",
+      "type": "TEXT",
+      "required": false
+    },
+    {
+      "key": "minInterestCover",
+      "label": "Min Interest Cover",
+      "type": "TEXT",
+      "required": false
+    },
+    {
+      "key": "minTangibleNetWorth",
+      "label": "Min Tangible Net Worth",
+      "type": "AMOUNT",
+      "required": false
+    },
+    {
+      "key": "governingLaw",
+      "label": "Governing Law",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "jurisdiction",
+      "label": "Jurisdiction",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryName",
+      "label": "Signatory Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryTitle",
+      "label": "Signatory Title",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "repaymentSchedule",
+      "label": "Repayment Schedule",
+      "type": "LIST",
+      "required": false
+    },
+    {
+      "key": "conditionsPrecedent",
+      "label": "Conditions Precedent",
+      "type": "LIST",
+      "required": false
+    }
   ]
 }

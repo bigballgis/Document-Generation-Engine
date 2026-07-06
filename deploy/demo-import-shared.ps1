@@ -304,7 +304,7 @@ function Import-DemoPackage {
         try {
             Invoke-DemoApi -ApiBase $ApiBase -Method POST -Path "/templates/$templateId/bindings/validate" -Token $AuthorToken -Body @{} | Out-Null
         } catch {
-            Write-Warning "Binding validation for $externalId: $($_.Exception.Message)"
+            Write-Warning ("Binding validation for {0}: {1}" -f $externalId, $_.Exception.Message)
         }
     }
 

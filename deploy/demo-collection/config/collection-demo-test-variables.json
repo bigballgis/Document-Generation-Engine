@@ -1,24 +1,48 @@
 {
-  "catalogMarker": "collection-demo-v1",
+  "catalogMarker": "collection-demo-v2-real",
   "testDataSets": [
     {
       "id": "rate-change-executive",
-      "label": "Rate Change Notice — Executive Sample",
+      "label": "Rate Change Notice — Real Executive Sample",
       "variables": {
+        "bankName": "Meridian Retail Banking",
+        "bankAddress": "PO Box 1200, London EC2N 1DB, United Kingdom",
+        "letterDate": "2026-07-06",
         "customerName": "Ms Priya Sharma",
+        "customerAddress": "Flat 4, 22 Kingsway, Birmingham B15 2RA",
         "accountNumber": "GB29 MERI 6016 1331 9268 19",
-        "newRate": "5.75% AER (variable)",
-        "effectiveDate": "2026-08-01"
+        "accountType": "personal variable-rate savings account",
+        "letterType": "Rate variation notice",
+        "oldRate": "4.20% AER (variable)",
+        "newRate": "3.95% AER (variable)",
+        "effectiveDate": "2026-08-01",
+        "currency": "GBP",
+        "relationshipManager": "Anita Deshmukh",
+        "contactPhone": "0800 224 482",
+        "signatoryName": "Marcus T. Veitch",
+        "signatoryTitle": "Head of Retail Savings — Meridian Retail Banking"
       }
     },
     {
       "id": "overdue-collection-executive",
-      "label": "Overdue Collection Notice — Executive Sample",
+      "label": "Overdue Collection Notice — Real Executive Sample",
       "variables": {
+        "bankName": "Meridian Retail Banking",
+        "bankAddress": "PO Box 1200, London EC2N 1DB, United Kingdom",
+        "letterDate": "2026-07-06",
         "customerName": "Mr Daniel Reeves",
+        "customerAddress": "8 Hollybush Lane, Leeds LS16 7QF",
         "accountNumber": "GB82 MERI 4047 5312 8741 63",
-        "overdueAmount": "GBP 1,247.50",
-        "dueDate": "2026-06-15"
+        "accountType": "personal current account",
+        "letterType": "Overdue balance notice",
+        "overdueAmount": "1,247.50",
+        "currency": "GBP",
+        "dueDate": "2026-06-15",
+        "daysOverdue": "21",
+        "relationshipManager": "Carl Patterson",
+        "contactPhone": "0800 224 482",
+        "signatoryName": "Marcus T. Veitch",
+        "signatoryTitle": "Head of Retail Collections — Meridian Retail Banking"
       }
     }
   ]

@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 class WealthMasterDocxAssetGeneratorTest {
 
-    static final String MASTER_LAYOUT_VERSION = "wealth-layout-v1-global-page";
+    static final String MASTER_LAYOUT_VERSION = "wealth-layout-v2-global-page";
     private static final Path ASSET = Path.of("..", "deploy", "demo-wealth", "assets", "wealth-statement-master.docx");
     static final List<String> ANCHOR_IDS = List.of("WEALTH_STATEMENT_BODY", "WEALTH_HOLDINGS_TABLE", "WEALTH_FOOTER_TOTALS");
 

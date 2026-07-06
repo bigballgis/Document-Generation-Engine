@@ -1,11 +1,11 @@
 {
-  "catalogMarker": "annual-review-demo-v1",
+  "catalogMarker": "annual-review-demo-v2-real",
   "groupCode": "CORP",
   "pageNumberingProfile": "SECTION_AND_GLOBAL",
-  "masterLayoutVersion": "annual-review-layout-v1-dual-page",
+  "masterLayoutVersion": "annual-review-layout-v2-dual-page",
   "templates": [
-    {"externalId": "DEMO-ANNUAL-REVIEW", "name": "Annual Credit Review", "masterDocx": "assets/annual-review-master.docx"},
-    {"externalId": "DEMO-FACILITY-RENEWAL", "name": "Facility Renewal Letter", "masterDocx": "assets/facility-renewal-master.docx"}
+    {"externalId": "DEMO-ANNUAL-REVIEW", "name": "Annual Credit Review", "masterDocx": "assets/annual-review-master.docx", "description": "Real foreign-bank annual credit review with covenant compliance schedule, material findings, pricing adjustment, signatures"},
+    {"externalId": "DEMO-FACILITY-RENEWAL", "name": "Facility Renewal Letter", "masterDocx": "assets/facility-renewal-master.docx", "description": "Real foreign-bank facility renewal confirmation with renewed terms, KYC, governing law, signatures"}
   ],
   "generatedCatalogFiles": {
     "variables": "config/annual-review-variables.json",

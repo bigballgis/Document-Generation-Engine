@@ -2,6 +2,6 @@
   "anchorIds": ["MORTGAGE_BODY", "MORTGAGE_SCHEDULE"],
   "sections": [
     {"anchorId": "MORTGAGE_BODY", "title": "Mortgage Approval Letter"},
-    {"anchorId": "MORTGAGE_SCHEDULE", "title": "Repayment Schedule"}
+    {"anchorId": "MORTGAGE_SCHEDULE", "title": "Repayment Schedule and Signatures"}
   ]
 }

@@ -1,71 +1,144 @@
 {
-  "catalogMarker": "trade-lc-demo-v1",
+  "catalogMarker": "trade-lc-demo-v2-real",
   "bindings": {
     "TRADE_LC_BODY": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "imageRef", "assetKey": "meridian-trade-logo", "widthPt": 120},
-        {
-          "type": "paragraph",
-          "children": [
-            {"type": "textRun", "value": "Documentary Credit Advice\n\nWe advise that a documentary credit has been issued in favour of "},
-            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "beneficiaryName"}]},
-            {"type": "textRun", "value": " at the request of "},
-            {"type": "variable", "key": "applicantName"},
-            {"type": "textRun", "value": "."}
-          ]
-        },
-        {
-          "type": "paragraph",
-          "children": [
-            {"type": "textRun", "value": "LC Number: "},
-            {"type": "variable", "key": "lcNumber"},
-            {"type": "textRun", "value": "  |  Amount: "},
-            {"type": "variable", "key": "lcAmount"},
-            {"type": "textRun", "value": "  |  Expiry: "},
-            {"type": "variable", "key": "expiryDate"}
-          ]
-        },
-        {"type": "contentModuleRef", "referenceKey": "TRADE-LC-STANDARD-CLAUSE"}
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Date: "},
+          {"type": "variable", "key": "letterDate"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "To: "},
+          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "beneficiaryName"}]},
+          {"type": "textRun", "value": ", "},
+          {"type": "variable", "key": "beneficiaryAddress"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Applicant: "},
+          {"type": "variable", "key": "applicantName"},
+          {"type": "textRun", "value": ", "},
+          {"type": "variable", "key": "applicantAddress"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "We are pleased to advise that an irrevocable documentary credit has been issued by "},
+          {"type": "variable", "key": "issuingBankName"},
+          {"type": "textRun", "value": " (SWIFT "},
+          {"type": "variable", "key": "issuingBankSwift"},
+          {"type": "textRun", "value": ") at the request and for the account of the above Applicant in your favour, subject to the "},
+          {"type": "variable", "key": "applicableRules"},
+          {"type": "textRun", "value": "."}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "DC Number: "},
+          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "lcNumber"}]},
+          {"type": "textRun", "value": " | Amount: "},
+          {"type": "variable", "key": "currency"},
+          {"type": "textRun", "value": " "},
+          {"type": "variable", "key": "lcAmount"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Expiry Date: "},
+          {"type": "variable", "key": "expiryDate"},
+          {"type": "textRun", "value": " at "},
+          {"type": "variable", "key": "expiryPlace"}
+        ]},
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "Shipment Terms"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Goods: "},
+          {"type": "variable", "key": "goodsDescription"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "From: "},
+          {"type": "variable", "key": "shipmentFrom"},
+          {"type": "textRun", "value": " | To: "},
+          {"type": "variable", "key": "shipmentTo"},
+          {"type": "textRun", "value": " | Latest Shipment: "},
+          {"type": "variable", "key": "latestShipmentDate"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Incoterms: "},
+          {"type": "variable", "key": "incoterms"},
+          {"type": "textRun", "value": " | Partial Shipments: "},
+          {"type": "variable", "key": "partialShipments"},
+          {"type": "textRun", "value": " | Transhipment: "},
+          {"type": "variable", "key": "transhipment"}
+        ]},
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "Documents Required"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Each presentation must comprise the following documents, all in form and substance satisfactory to the issuing bank:"}
+        ]},
+        {"type": "loopBlock", "itemsReferenceKey": "requiredDocuments", "children": [
+          {"type": "list", "children": [{"type": "variable", "key": "documentName"}]}
+        ]},
+        {"type": "contentModuleRef", "referenceKey": "TRADE-LC-STANDARD-CLAUSE"},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "For and on behalf of "},
+          {"type": "variable", "key": "issuingBankName"},
+          {"type": "textRun", "value": ":"}
+        ]},
+        {"type": "paragraph", "children": [{"type": "textRun", "value": "_____________________________"}]},
+        {"type": "paragraph", "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]},
+        {"type": "paragraph", "children": [{"type": "variable", "key": "signatoryTitle"}]},
+        {"type": "paragraph", "children": [{"type": "variable", "key": "issuingBankAddress"}]}
       ]
     },
     "TRADE_LC_ATTACHMENT": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "sealRef", "assetKey": "meridian-authorised-seal", "widthPt": 80},
-        {
-          "type": "paragraph",
-          "children": [{"type": "textRun", "value": "Attachment: Copy of SWIFT MT700 message (mock data for demonstration purposes only)."}]
-        }
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "Attachment — SWIFT MT700 Message"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "A copy of the SWIFT MT700 message constituting the operative documentary credit instrument is appended for your records. The MT700 takes precedence over this advice in the event of any inconsistency."}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "This advice is issued without engagement on our part. We assume no responsibility for the authenticity, accuracy or compliance of any document presented under the credit, save as required by the applicable rules."}
+        ]}
       ]
     },
     "TRADE_GUARANTEE_BODY": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "imageRef", "assetKey": "meridian-trade-logo", "widthPt": 120},
-        {
-          "type": "paragraph",
-          "children": [
-            {"type": "textRun", "value": "Bank Guarantee Notice\n\nWe confirm issuance of guarantee reference "},
-            {"type": "variable", "key": "guaranteeReference"},
-            {"type": "textRun", "value": " for "},
-            {"type": "variable", "key": "guaranteeAmount"},
-            {"type": "textRun", "value": " in favour of "},
-            {"type": "variable", "key": "beneficiaryName"},
-            {"type": "textRun", "value": "."}
-          ]
-        },
-        {"type": "contentModuleRef", "referenceKey": "TRADE-GUARANTEE-STANDARD-CLAUSE"}
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Date: "},
+          {"type": "variable", "key": "letterDate"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "To: "},
+          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "guaranteeBeneficiaryName"}]}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "We, "},
+          {"type": "variable", "key": "issuingBankName"},
+          {"type": "textRun", "value": " (SWIFT "},
+          {"type": "variable", "key": "issuingBankSwift"},
+          {"type": "textRun", "value": "), hereby issue our irrevocable unconditional undertaking reference "},
+          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "guaranteeReference"}]},
+          {"type": "textRun", "value": " in favour of the Beneficiary for "},
+          {"type": "variable", "key": "currency"},
+          {"type": "textRun", "value": " "},
+          {"type": "variable", "key": "guaranteeAmount"},
+          {"type": "textRun", "value": " in connection with the underlying contract described as "},
+          {"type": "variable", "key": "underlyingContract"},
+          {"type": "textRun", "value": "."}
+        ]},
+        {"type": "contentModuleRef", "referenceKey": "TRADE-GUARANTEE-STANDARD-CLAUSE"},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "For and on behalf of "},
+          {"type": "variable", "key": "issuingBankName"},
+          {"type": "textRun", "value": ":"}
+        ]},
+        {"type": "paragraph", "children": [{"type": "textRun", "value": "_____________________________"}]},
+        {"type": "paragraph", "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]},
+        {"type": "paragraph", "children": [{"type": "variable", "key": "signatoryTitle"}]}
       ]
     },
     "TRADE_GUARANTEE_ATTACHMENT": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "sealRef", "assetKey": "meridian-authorised-seal", "widthPt": 80},
-        {
-          "type": "paragraph",
-          "children": [{"type": "textRun", "value": "This guarantee is subject to URDG 758 and our standard trade finance terms."}]
-        }
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "Attachment — Guarantee Terms"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "This guarantee is subject to URDG 758 and our standard trade finance terms. A copy of the full guarantee text and any amendments forms part of this attachment."}
+        ]}
       ]
     }
   }

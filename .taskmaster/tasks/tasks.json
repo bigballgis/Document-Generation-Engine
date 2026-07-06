@@ -23,9 +23,9 @@
         "dependencies": [
           "1"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-06T01:18:14.719Z"
+        "updatedAt": "2026-07-06T07:58:09.048Z"
       },
       {
         "id": "3",
@@ -37,8 +37,9 @@
         "dependencies": [
           "2"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-06T08:36:05.491Z"
       },
       {
         "id": "4",
@@ -50,8 +51,9 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-06T11:31:08.885Z"
       },
       {
         "id": "5",
@@ -63,8 +65,9 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-06T11:31:08.931Z"
       },
       {
         "id": "6",
@@ -77,8 +80,9 @@
           "4",
           "5"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-06T11:31:08.969Z"
       },
       {
         "id": "7",
@@ -109,9 +113,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-06T01:18:14.720Z",
+      "lastModified": "2026-07-06T11:31:08.970Z",
       "taskCount": 8,
-      "completedCount": 1,
+      "completedCount": 5,
       "tags": [
         "master"
       ]

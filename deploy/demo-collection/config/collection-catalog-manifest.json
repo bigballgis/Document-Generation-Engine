@@ -1,9 +1,9 @@
 {
-  "catalogMarker": "collection-demo-v1",
+  "catalogMarker": "collection-demo-v2-real",
   "packageCode": "collection",
   "groupCode": "RETAIL",
   "pageNumberingProfile": "GLOBAL_ONLY",
-  "pageTarget": 4,
+  "pageTarget": 3,
   "templates": ["DEMO-RATE-CHANGE-NOTICE", "DEMO-OVERDUE-COLLECTION"],
   "contentModuleRefs": [
     {"referenceKey": "COLLECTION-RATE-CHANGE-CLAUSE", "moduleCode": "COLLECTION-RATE-STD"},

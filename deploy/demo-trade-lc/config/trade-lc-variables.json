@@ -1,12 +1,173 @@
 {
-  "catalogMarker": "trade-lc-demo-v1",
+  "catalogMarker": "trade-lc-demo-v2-real",
   "variables": [
-    {"key": "beneficiaryName", "label": "Beneficiary Name", "type": "STRING", "required": true},
-    {"key": "applicantName", "label": "Applicant Name", "type": "STRING", "required": true},
-    {"key": "lcNumber", "label": "LC Number", "type": "STRING", "required": true},
-    {"key": "lcAmount", "label": "LC Amount", "type": "MONEY", "required": true},
-    {"key": "expiryDate", "label": "Expiry Date", "type": "DATE", "required": true},
-    {"key": "guaranteeReference", "label": "Guarantee Reference", "type": "STRING", "required": false},
-    {"key": "guaranteeAmount", "label": "Guarantee Amount", "type": "MONEY", "required": false}
+    {
+      "key": "issuingBankName",
+      "label": "Issuing Bank Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "issuingBankAddress",
+      "label": "Issuing Bank Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "issuingBankSwift",
+      "label": "Issuing Bank SWIFT",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "letterDate",
+      "label": "Letter Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "beneficiaryName",
+      "label": "Beneficiary Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "beneficiaryAddress",
+      "label": "Beneficiary Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "applicantName",
+      "label": "Applicant Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "applicantAddress",
+      "label": "Applicant Address",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "lcNumber",
+      "label": "LC Number",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "lcAmount",
+      "label": "LC Amount",
+      "type": "AMOUNT",
+      "required": true
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "expiryDate",
+      "label": "Expiry Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "expiryPlace",
+      "label": "Place of Expiry",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "goodsDescription",
+      "label": "Goods Description",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "shipmentFrom",
+      "label": "Shipment From",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "shipmentTo",
+      "label": "Shipment To",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "latestShipmentDate",
+      "label": "Latest Shipment Date",
+      "type": "DATE",
+      "required": true
+    },
+    {
+      "key": "incoterms",
+      "label": "Incoterms",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "partialShipments",
+      "label": "Partial Shipments",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "transhipment",
+      "label": "Transhipment",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "requiredDocuments",
+      "label": "Required Documents",
+      "type": "LIST",
+      "required": true
+    },
+    {
+      "key": "guaranteeReference",
+      "label": "Guarantee Reference",
+      "type": "TEXT",
+      "required": false
+    },
+    {
+      "key": "guaranteeAmount",
+      "label": "Guarantee Amount",
+      "type": "AMOUNT",
+      "required": false
+    },
+    {
+      "key": "guaranteeBeneficiaryName",
+      "label": "Guarantee Beneficiary Name",
+      "type": "TEXT",
+      "required": false
+    },
+    {
+      "key": "underlyingContract",
+      "label": "Underlying Contract",
+      "type": "TEXT",
+      "required": false
+    },
+    {
+      "key": "applicableRules",
+      "label": "Applicable Rules",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryName",
+      "label": "Signatory Name",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "signatoryTitle",
+      "label": "Signatory Title",
+      "type": "TEXT",
+      "required": true
+    }
   ]
 }

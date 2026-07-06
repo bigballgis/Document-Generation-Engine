@@ -1,71 +1,130 @@
 {
-  "catalogMarker": "mortgage-demo-v1",
+  "catalogMarker": "mortgage-demo-v2-real",
   "bindings": {
     "MORTGAGE_BODY": {
       "schemaVersion": "1.0",
       "nodes": [
-        {
-          "type": "paragraph",
-          "children": [
-            {"type": "textRun", "value": "Dear "},
-            {"type": "variable", "key": "borrowerName"},
-            {"type": "textRun", "value": ",\n\nWe are pleased to confirm that your application for a residential mortgage in respect of "},
-            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "propertyAddress"}]},
-            {"type": "textRun", "value": " has been approved subject to the conditions set out below."}
-          ]
-        },
-        {
-          "type": "paragraph",
-          "children": [
-            {"type": "textRun", "value": "Approved loan amount: "},
-            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "loanAmount"}]},
-            {"type": "textRun", "value": " at a fixed rate of "},
-            {"type": "variable", "key": "interestRate"},
-            {"type": "textRun", "value": " over "},
-            {"type": "variable", "key": "termYears"},
-            {"type": "textRun", "value": " years. Approval date: "},
-            {"type": "variable", "key": "approvalDate"},
-            {"type": "textRun", "value": "."}
-          ]
-        },
-        {
-          "type": "styleRef",
-          "styleId": "ClauseBody",
-          "children": [
-            {"type": "textRun", "value": "This offer is subject to satisfactory valuation, legal review, and compliance with our responsible lending policy."}
-          ]
-        },
-        {
-          "type": "contentModuleRef",
-          "referenceKey": "MORTGAGE-STANDARD-TERMS"
-        }
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Date: "},
+          {"type": "variable", "key": "letterDate"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "To: "},
+          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "borrowerName"}]},
+          {"type": "textRun", "value": " ("},
+          {"type": "variable", "key": "borrowerAddress"},
+          {"type": "textRun", "value": ")"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Dear Borrower,"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "We are pleased to confirm that your application for a residential mortgage loan secured on "},
+          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "propertyAddress"}]},
+          {"type": "textRun", "value": " ("},
+          {"type": "variable", "key": "propertyType"},
+          {"type": "textRun", "value": ", held under "},
+          {"type": "variable", "key": "propertyTenure"},
+          {"type": "textRun", "value": ") has been approved by "},
+          {"type": "variable", "key": "lenderName"},
+          {"type": "textRun", "value": " subject to the terms and conditions set out in this offer."}
+        ]},
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "1. Mortgage Particulars"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Loan Amount: "},
+          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "loanAmount"}]}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Property Value: "},
+          {"type": "variable", "key": "currency"},
+          {"type": "textRun", "value": " "},
+          {"type": "variable", "key": "propertyValue"},
+          {"type": "textRun", "value": " (Loan-to-Value: "},
+          {"type": "variable", "key": "ltvRatio"},
+          {"type": "textRun", "value": ")"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Interest Rate: "},
+          {"type": "variable", "key": "interestRate"},
+          {"type": "textRun", "value": " ("},
+          {"type": "variable", "key": "rateType"},
+          {"type": "textRun", "value": " for "},
+          {"type": "variable", "key": "fixedRatePeriod"},
+          {"type": "textRun", "value": ", reverting to "},
+          {"type": "variable", "key": "reversionRate"},
+          {"type": "textRun", "value": ")"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "Term: "},
+          {"type": "variable", "key": "termYears"},
+          {"type": "textRun", "value": " years | Monthly Payment: "},
+          {"type": "variable", "key": "currency"},
+          {"type": "textRun", "value": " "},
+          {"type": "variable", "key": "monthlyPayment"}
+        ]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "First Payment Date: "},
+          {"type": "variable", "key": "firstPaymentDate"},
+          {"type": "textRun", "value": " | Offer Valid Until: "},
+          {"type": "variable", "key": "offerExpiryDate"}
+        ]},
+        {"type": "contentModuleRef", "referenceKey": "MORTGAGE-STANDARD-TERMS"},
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "2. Conditions of this Offer"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "This offer is subject to satisfactory valuation, legal title verification, and compliance with our responsible lending policy. "},
+          {"type": "variable", "key": "insuranceRequirement"},
+          {"type": "textRun", "value": " Early repayment charge: "},
+          {"type": "variable", "key": "earlyRepaymentCharge"},
+          {"type": "textRun", "value": "."}
+        ]}
       ]
     },
     "MORTGAGE_SCHEDULE": {
       "schemaVersion": "1.0",
       "nodes": [
-        {
-          "type": "sectionHeading",
-          "children": [{"type": "text", "value": "Repayment Schedule"}]
-        },
-        {
-          "type": "tableComponentRef",
-          "tableComponent": {
-            "columns": [
-              {"header": "Payment Date", "field": "paymentDate"},
-              {"header": "Principal", "field": "principal"},
-              {"header": "Interest", "field": "interest"},
-              {"header": "Balance", "field": "balance"}
-            ],
-            "rowsVariable": "repaymentSchedule"
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "3. Repayment Schedule"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "The following schedule sets out the first twelve payments under the mortgage. Interest is calculated daily on the outstanding balance and applied monthly."}
+        ]},
+        {"type": "tableComponentRef", "tableComponent": {
+          "componentKey": "MORTGAGE-TBL-SCHEDULE",
+          "columnSchema": [
+            {"columnKey": "paymentDate", "widthPct": 25},
+            {"columnKey": "principal", "widthPct": 25},
+            {"columnKey": "interest", "widthPct": 25},
+            {"columnKey": "balance", "widthPct": 25}
+          ],
+          "headerRows": [[
+            {"columnKey": "paymentDate", "value": "Payment Date"},
+            {"columnKey": "principal", "value": "Principal"},
+            {"columnKey": "interest", "value": "Interest"},
+            {"columnKey": "balance", "value": "Balance"}
+          ]],
+          "loopRow": {
+            "loopVariable": "repaymentSchedule",
+            "cells": [
+              {"columnKey": "paymentDate", "variableKey": "paymentDate"},
+              {"columnKey": "principal", "variableKey": "principal"},
+              {"columnKey": "interest", "variableKey": "interest"},
+              {"columnKey": "balance", "variableKey": "balance"}
+            ]
           }
-        },
-        {
-          "type": "paragraph",
-          "children": [
-            {"type": "textRun", "value": "The schedule above is illustrative. Actual amounts may vary following completion and first payment date."}
-          ]
-        }
+        }},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "The schedule is indicative. Actual amounts may vary following completion and the first payment date."}
+        ]},
+        {"type": "sectionHeading", "children": [{"type": "text", "value": "4. Signatures"}]},
+        {"type": "paragraph", "children": [
+          {"type": "textRun", "value": "For and on behalf of "},
+          {"type": "variable", "key": "lenderName"},
+          {"type": "textRun", "value": " (FCA register number "},
+          {"type": "variable", "key": "lenderFcaNumber"},
+          {"type": "textRun", "value": "):"}
+        ]},
+        {"type": "paragraph", "children": [{"type": "textRun", "value": "_____________________________"}]},
+        {"type": "paragraph", "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]},
+        {"type": "paragraph", "children": [{"type": "variable", "key": "signatoryTitle"}]},
+        {"type": "paragraph", "children": [{"type": "variable", "key": "lenderAddress"}]}
       ]
     }
   }

@@ -1,11 +1,11 @@
 {
-  "catalogMarker": "collection-demo-v1",
+  "catalogMarker": "collection-demo-v2-real",
   "groupCode": "RETAIL",
   "pageNumberingProfile": "GLOBAL_ONLY",
-  "masterLayoutVersion": "collection-layout-v1-global-page",
+  "masterLayoutVersion": "collection-layout-v2-global-page",
   "templates": [
-    {"externalId": "DEMO-RATE-CHANGE-NOTICE", "name": "Rate Change Notice", "masterDocx": "assets/rate-change-notice-master.docx"},
-    {"externalId": "DEMO-OVERDUE-COLLECTION", "name": "Overdue Collection Notice", "masterDocx": "assets/overdue-collection-master.docx"}
+    {"externalId": "DEMO-RATE-CHANGE-NOTICE", "name": "Rate Change Notice", "masterDocx": "assets/rate-change-notice-master.docx", "description": "Real foreign-bank rate variation notice (FCA CONC) with right to switch, interest calculation, signatures"},
+    {"externalId": "DEMO-OVERDUE-COLLECTION", "name": "Overdue Collection Notice", "masterDocx": "assets/overdue-collection-master.docx", "description": "Real foreign-bank overdue collection notice (FCA CONC / treating customers fairly) with consequences, financial difficulty, complaints"}
   ],
   "generatedCatalogFiles": {
     "variables": "config/collection-variables.json",

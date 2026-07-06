@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 class CreditLimitMasterDocxAssetGeneratorTest {
 
-    static final String MASTER_LAYOUT_VERSION = "credit-limit-layout-v1-dual-page";
+    static final String MASTER_LAYOUT_VERSION = "credit-limit-layout-v2-dual-page";
     private static final Path ASSET = Path.of("..", "deploy", "demo-credit-limit", "assets", "credit-limit-master.docx");
     static final List<String> ANCHOR_IDS = List.of("CREDIT_LIMIT_BODY", "CREDIT_LIMIT_TERMS");
 
@@ -37,17 +37,35 @@ class CreditLimitMasterDocxAssetGeneratorTest {
     static byte[] buildMaster() throws Exception {
         try (XWPFDocument document = new XWPFDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             DemoMasterDocxLayoutSupport.configureA4PageLayout(document);
-            document.createHeader(HeaderFooterType.DEFAULT).createParagraph().createRun()
-                    .setText("Meridian Corporate Banking — Credit Facilities");
+            org.apache.poi.xwpf.usermodel.XWPFHeader header = document.createHeader(HeaderFooterType.DEFAULT);
+            org.apache.poi.xwpf.usermodel.XWPFParagraph brandLine = header.createParagraph();
+            brandLine.setAlignment(ParagraphAlignment.LEFT);
+            XWPFRun brandRun = brandLine.createRun();
+            brandRun.setBold(true);
+            brandRun.setFontSize(9);
+            brandRun.setColor("003366");
+            brandRun.setText("Meridian Global Banking Corporation — Corporate Credit");
+            org.apache.poi.xwpf.usermodel.XWPFParagraph confLine = header.createParagraph();
+            confLine.setAlignment(ParagraphAlignment.RIGHT);
+            XWPFRun confRun = confLine.createRun();
+            confRun.setBold(true);
+            confRun.setFontSize(7);
+            confRun.setColor("990000");
+            confRun.setText("STRICTLY PRIVATE AND CONFIDENTIAL");
             XWPFFooter footer = document.createFooter(HeaderFooterType.DEFAULT);
-            footer.createParagraph().createRun().setText("Strictly Private and Confidential — Corporate Banking");
+            org.apache.poi.xwpf.usermodel.XWPFParagraph addrLine = footer.createParagraph();
+            addrLine.setAlignment(ParagraphAlignment.LEFT);
+            XWPFRun addrRun = addrLine.createRun();
+            addrRun.setFontSize(7);
+            addrRun.setColor("666666");
+            addrRun.setText("25 Lombard Street, London EC3V 9AA  |  www.meridian-global.example  |  Regulated by the PRA & FCA");
             XWPFParagraph pageLine = footer.createParagraph();
             pageLine.setAlignment(ParagraphAlignment.CENTER);
             DemoMasterDocxPageNumberSupport.addDualPageNumberFields(pageLine);
-            addTitle(document, "Credit Limit Confirmation");
+            addTitle(document, "Credit Facility Confirmation");
             document.createParagraph().createRun().setText("{{anchor:CREDIT_LIMIT_BODY}}");
             DemoMasterDocxLayoutSupport.insertSectionBreakNextPage(document.createParagraph(), true);
-            addTitle(document, "Facility Terms");
+            addTitle(document, "Facility Terms and Covenants");
             document.createParagraph().createRun().setText("{{anchor:CREDIT_LIMIT_TERMS}}");
             DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
             document.write(output);

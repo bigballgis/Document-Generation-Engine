@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 class AnnualReviewMasterDocxAssetGeneratorTest {
 
-    static final String MASTER_LAYOUT_VERSION = "annual-review-layout-v1-dual-page";
+    static final String MASTER_LAYOUT_VERSION = "annual-review-layout-v2-dual-page";
     private static final Path REVIEW_ASSET = Path.of("..", "deploy", "demo-annual-review", "assets", "annual-review-master.docx");
     private static final Path RENEWAL_ASSET = Path.of("..", "deploy", "demo-annual-review", "assets", "facility-renewal-master.docx");
     static final List<String> REVIEW_ANCHORS = List.of("ANNUAL_REVIEW_BODY", "ANNUAL_REVIEW_SCHEDULE");

@@ -1,9 +1,9 @@
 {
-  "catalogMarker": "annual-review-demo-v1",
+  "catalogMarker": "annual-review-demo-v2-real",
   "packageCode": "annual-review",
   "groupCode": "CORP",
   "pageNumberingProfile": "SECTION_AND_GLOBAL",
-  "pageTarget": 15,
+  "pageTarget": 8,
   "templates": ["DEMO-ANNUAL-REVIEW", "DEMO-FACILITY-RENEWAL"],
   "contentModuleRefs": [
     {"referenceKey": "ANNUAL-REVIEW-STANDARD-CLAUSE", "moduleCode": "ANNUAL-REVIEW-STD"},

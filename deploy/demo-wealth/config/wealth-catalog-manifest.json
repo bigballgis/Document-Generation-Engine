@@ -1,9 +1,9 @@
 {
-  "catalogMarker": "wealth-demo-v1",
+  "catalogMarker": "wealth-demo-v2-real",
   "packageCode": "wealth",
   "groupCode": "WEALTH",
   "pageNumberingProfile": "GLOBAL_ONLY",
-  "pageTarget": 20,
+  "pageTarget": 10,
   "templates": ["DEMO-WEALTH-STATEMENT"],
   "contentModuleRefs": [
     {"referenceKey": "WEALTH-STATEMENT-INTRO", "moduleCode": "WEALTH-STATEMENT-STD"}

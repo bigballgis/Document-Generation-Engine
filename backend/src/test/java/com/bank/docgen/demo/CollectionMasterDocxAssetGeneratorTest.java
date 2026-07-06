@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 class CollectionMasterDocxAssetGeneratorTest {
 
-    static final String MASTER_LAYOUT_VERSION = "collection-layout-v1-global-page";
+    static final String MASTER_LAYOUT_VERSION = "collection-layout-v2-global-page";
     private static final Path RATE_ASSET = Path.of("..", "deploy", "demo-collection", "assets", "rate-change-notice-master.docx");
     private static final Path OVERDUE_ASSET = Path.of("..", "deploy", "demo-collection", "assets", "overdue-collection-master.docx");
     static final List<String> RATE_ANCHORS = List.of("RATE_CHANGE_BODY");

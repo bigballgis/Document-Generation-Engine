@@ -1,9 +1,9 @@
 {
-  "catalogMarker": "trade-lc-demo-v1",
+  "catalogMarker": "trade-lc-demo-v2-real",
   "packageCode": "trade-lc",
   "groupCode": "TRADE",
   "pageNumberingProfile": "GLOBAL_ONLY",
-  "pageTarget": 8,
+  "pageTarget": 6,
   "templates": ["DEMO-TRADE-LC-NOTICE", "DEMO-TRADE-GUARANTEE-NOTICE"],
   "contentModuleRefs": [
     {"referenceKey": "TRADE-LC-STANDARD-CLAUSE", "moduleCode": "TRADE-LC-STD"},
