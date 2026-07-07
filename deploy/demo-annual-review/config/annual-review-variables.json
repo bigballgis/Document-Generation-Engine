@@ -1,125 +1,41 @@
 {
-  "catalogMarker": "annual-review-demo-v2-real",
+  "catalogMarker": "annual-review-demo-v3-bank-grade",
   "variables": [
-    {
-      "key": "bankName",
-      "label": "Bank Name",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "bankAddress",
-      "label": "Bank Address",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "letterDate",
-      "label": "Letter Date",
-      "type": "DATE",
-      "required": true
-    },
-    {
-      "key": "customerName",
-      "label": "Customer Name",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "customerAddress",
-      "label": "Customer Address",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "facilityReference",
-      "label": "Facility Reference",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "facilityType",
-      "label": "Facility Type",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "facilityAmount",
-      "label": "Facility Amount",
-      "type": "AMOUNT",
-      "required": true
-    },
-    {
-      "key": "currency",
-      "label": "Currency",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "reviewDate",
-      "label": "Review Date",
-      "type": "DATE",
-      "required": true
-    },
-    {
-      "key": "reviewOutcome",
-      "label": "Review Outcome",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "renewalDate",
-      "label": "Renewal Date",
-      "type": "DATE",
-      "required": false
-    },
-    {
-      "key": "expiryDate",
-      "label": "Expiry Date",
-      "type": "DATE",
-      "required": false
-    },
-    {
-      "key": "marginBps",
-      "label": "Margin (bps)",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "referenceRate",
-      "label": "Reference Rate",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "includeCovenantSchedule",
-      "label": "Include Covenant Schedule",
-      "type": "BOOLEAN",
-      "required": false
-    },
-    {
-      "key": "covenantItems",
-      "label": "Covenant Items",
-      "type": "LIST",
-      "required": false
-    },
-    {
-      "key": "materialFindings",
-      "label": "Material Findings",
-      "type": "TEXT",
-      "required": false
-    },
-    {
-      "key": "signatoryName",
-      "label": "Signatory Name",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "signatoryTitle",
-      "label": "Signatory Title",
-      "type": "TEXT",
-      "required": true
-    }
+    {"key": "bankName", "label": "Bank Name", "type": "TEXT", "required": true},
+    {"key": "bankAddress", "label": "Bank Address", "type": "TEXT", "required": true},
+    {"key": "bankBranch", "label": "Bank Branch", "type": "TEXT", "required": true},
+    {"key": "letterDate", "label": "Letter Date", "type": "DATE", "required": true},
+    {"key": "customerName", "label": "Customer Name", "type": "TEXT", "required": true},
+    {"key": "customerAddress", "label": "Customer Address", "type": "TEXT", "required": true},
+    {"key": "customerReference", "label": "Customer Reference", "type": "TEXT", "required": true},
+    {"key": "groupName", "label": "Group Name", "type": "TEXT", "required": true},
+    {"key": "facilityReference", "label": "Facility Reference", "type": "TEXT", "required": true},
+    {"key": "facilityType", "label": "Facility Type", "type": "TEXT", "required": true},
+    {"key": "facilityAmount", "label": "Facility Amount", "type": "AMOUNT", "required": true},
+    {"key": "utilisedAmount", "label": "Utilised Amount", "type": "AMOUNT", "required": true},
+    {"key": "availableAmount", "label": "Available Amount", "type": "AMOUNT", "required": true},
+    {"key": "currency", "label": "Currency", "type": "TEXT", "required": true},
+    {"key": "reviewDate", "label": "Review Date", "type": "DATE", "required": true},
+    {"key": "reviewPeriod", "label": "Review Period", "type": "TEXT", "required": true},
+    {"key": "nextReviewDate", "label": "Next Review Date", "type": "DATE", "required": true},
+    {"key": "reviewOutcome", "label": "Review Outcome", "type": "TEXT", "required": true},
+    {"key": "renewalDate", "label": "Renewal Date", "type": "DATE", "required": false},
+    {"key": "expiryDate", "label": "Expiry Date", "type": "DATE", "required": false},
+    {"key": "renewalTermMonths", "label": "Renewal Term (Months)", "type": "TEXT", "required": false},
+    {"key": "marginBps", "label": "Margin (bps)", "type": "TEXT", "required": true},
+    {"key": "referenceRate", "label": "Reference Rate", "type": "TEXT", "required": true},
+    {"key": "relationshipManager", "label": "Relationship Manager", "type": "TEXT", "required": true},
+    {"key": "relationshipManagerPhone", "label": "Relationship Manager Phone", "type": "TEXT", "required": true},
+    {"key": "relationshipManagerEmail", "label": "Relationship Manager Email", "type": "TEXT", "required": true},
+    {"key": "includeCovenantSchedule", "label": "Include Covenant Schedule", "type": "BOOLEAN", "required": false},
+    {"key": "includeFinancialCovenants", "label": "Include Financial Covenants", "type": "BOOLEAN", "required": false},
+    {"key": "includeGuarantor", "label": "Include Guarantor", "type": "BOOLEAN", "required": false},
+    {"key": "guarantorName", "label": "Guarantor Name", "type": "TEXT", "required": false},
+    {"key": "covenantItems", "label": "Covenant Items", "type": "LIST", "required": false},
+    {"key": "conditionsPrecedent", "label": "Conditions Precedent", "type": "LIST", "required": false},
+    {"key": "materialFindings", "label": "Material Findings", "type": "TEXT", "required": false},
+    {"key": "governingLaw", "label": "Governing Law", "type": "TEXT", "required": true},
+    {"key": "signatoryName", "label": "Signatory Name", "type": "TEXT", "required": true},
+    {"key": "signatoryTitle", "label": "Signatory Title", "type": "TEXT", "required": true}
   ]
 }

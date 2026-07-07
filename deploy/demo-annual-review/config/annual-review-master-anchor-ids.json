@@ -1,7 +1,72 @@
 {
-  "anchorIds": ["ANNUAL_REVIEW_BODY", "ANNUAL_REVIEW_SCHEDULE", "FACILITY_RENEWAL_BODY", "FACILITY_RENEWAL_TERMS"],
+  "anchorIds": [
+    "ARR_PARTIES",
+    "ARR_DEFINED_TERMS",
+    "ARR_REVIEW_SUMMARY",
+    "ARR_PRICING",
+    "ARR_COVENANTS",
+    "ARR_FINDINGS",
+    "ARR_CONTINUATION",
+    "ARR_GOVERNING_LAW",
+    "ARR_SIGNATURE",
+    "FRN_PARTIES",
+    "FRN_RENEWAL_CONFIRM",
+    "FRN_RENEWED_TERMS",
+    "FRN_COVENANTS",
+    "FRN_CONDITIONS",
+    "FRN_KYC",
+    "FRN_SCHEDULE",
+    "FRN_GOVERNING_LAW",
+    "FRN_SIGNATURE"
+  ],
   "templates": [
-    {"externalId": "DEMO-ANNUAL-REVIEW", "anchorIds": ["ANNUAL_REVIEW_BODY", "ANNUAL_REVIEW_SCHEDULE"]},
-    {"externalId": "DEMO-FACILITY-RENEWAL", "anchorIds": ["FACILITY_RENEWAL_BODY", "FACILITY_RENEWAL_TERMS"]}
+    {
+      "externalId": "DEMO-ANNUAL-REVIEW",
+      "anchorIds": [
+        "ARR_PARTIES",
+        "ARR_DEFINED_TERMS",
+        "ARR_REVIEW_SUMMARY",
+        "ARR_PRICING",
+        "ARR_COVENANTS",
+        "ARR_FINDINGS",
+        "ARR_CONTINUATION",
+        "ARR_GOVERNING_LAW",
+        "ARR_SIGNATURE"
+      ]
+    },
+    {
+      "externalId": "DEMO-FACILITY-RENEWAL",
+      "anchorIds": [
+        "FRN_PARTIES",
+        "FRN_RENEWAL_CONFIRM",
+        "FRN_RENEWED_TERMS",
+        "FRN_COVENANTS",
+        "FRN_CONDITIONS",
+        "FRN_KYC",
+        "FRN_SCHEDULE",
+        "FRN_GOVERNING_LAW",
+        "FRN_SIGNATURE"
+      ]
+    }
+  ],
+  "sections": [
+    {"anchorId": "ARR_PARTIES", "title": "Parties and Recital"},
+    {"anchorId": "ARR_DEFINED_TERMS", "title": "Defined Terms"},
+    {"anchorId": "ARR_REVIEW_SUMMARY", "title": "Review Summary"},
+    {"anchorId": "ARR_PRICING", "title": "Pricing Adjustment"},
+    {"anchorId": "ARR_COVENANTS", "title": "Covenant Compliance"},
+    {"anchorId": "ARR_FINDINGS", "title": "Material Findings"},
+    {"anchorId": "ARR_CONTINUATION", "title": "Continued Availability"},
+    {"anchorId": "ARR_GOVERNING_LAW", "title": "Governing Law"},
+    {"anchorId": "ARR_SIGNATURE", "title": "Authorised Signatory"},
+    {"anchorId": "FRN_PARTIES", "title": "Parties and Recital"},
+    {"anchorId": "FRN_RENEWAL_CONFIRM", "title": "Renewal Confirmation"},
+    {"anchorId": "FRN_RENEWED_TERMS", "title": "Renewed Terms"},
+    {"anchorId": "FRN_COVENANTS", "title": "Financial Covenants"},
+    {"anchorId": "FRN_CONDITIONS", "title": "Conditions Precedent"},
+    {"anchorId": "FRN_KYC", "title": "KYC and AML Requirements"},
+    {"anchorId": "FRN_SCHEDULE", "title": "Covenant Compliance Schedule"},
+    {"anchorId": "FRN_GOVERNING_LAW", "title": "Governing Law"},
+    {"anchorId": "FRN_SIGNATURE", "title": "Authorised Signatory"}
   ]
 }

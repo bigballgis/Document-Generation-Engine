@@ -1,5 +1,5 @@
 {
-  "catalogMarker": "annual-review-demo-v2-real",
+  "catalogMarker": "annual-review-demo-v3-bank-grade",
   "testDataSets": [
     {
       "id": "annual-review-executive",
@@ -7,28 +7,43 @@
       "variables": {
         "bankName": "Meridian Global Banking Corporation",
         "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+        "bankBranch": "Corporate Credit — Wholesale Banking",
         "letterDate": "2026-07-06",
         "customerName": "Harbour Logistics Holdings plc",
         "customerAddress": "Pier 9, Port of Felixstowe, Suffolk IP11 3SY, United Kingdom",
+        "customerReference": "CORP-REL-2024-77102",
+        "groupName": "Harbour Logistics",
         "facilityReference": "CORP-FAC-2024-77102",
         "facilityType": "revolving credit facility",
         "facilityAmount": "15,000,000.00",
+        "utilisedAmount": "8,450,000.00",
+        "availableAmount": "6,550,000.00",
         "currency": "GBP",
         "reviewDate": "2026-06-30",
+        "reviewPeriod": "year ended 31 March 2026",
+        "nextReviewDate": "2027-06-30",
         "reviewOutcome": "Facility confirmed; all covenants compliant; pricing revised as set out below",
         "renewalDate": "2026-07-01",
         "expiryDate": "2027-06-30",
+        "renewalTermMonths": "12",
         "marginBps": "175",
         "referenceRate": "SONIA (compounded in arrears)",
+        "relationshipManager": "Sarah K. Pemberton",
+        "relationshipManagerPhone": "+44 20 7626 4102",
+        "relationshipManagerEmail": "sarah.pemberton@meridian-global.example",
         "includeCovenantSchedule": true,
+        "includeFinancialCovenants": true,
+        "includeGuarantor": true,
+        "guarantorName": "Harbour Logistics Parent Ltd",
+        "governingLaw": "the laws of England and Wales",
         "materialFindings": "No material findings. The Borrower remains in compliance with all financial covenants. The Group's audited financial statements for the year ended 31 March 2026 show a strengthening of the leverage position and stable interest cover.",
         "signatoryName": "Jonathan A. Whitmore",
         "signatoryTitle": "Director, Corporate Credit — Wholesale Banking",
         "covenantItems": [
-          {"covenantName": "Leverage ratio", "covenantStatus": "Compliant — 2.40:1.00 (limit 3.00:1.00)"},
-          {"covenantName": "Interest cover", "covenantStatus": "Compliant — 3.10:1.00 (minimum 2.50:1.00)"},
-          {"covenantName": "Tangible net worth", "covenantStatus": "Compliant — GBP 42,300,000 (minimum GBP 35,000,000)"},
-          {"covenantName": "Minimum liquidity", "covenantStatus": "Compliant — GBP 8,100,000 (minimum GBP 5,000,000)"}
+          {"covenantName": "Leverage ratio", "covenantLimit": "3.00:1.00 max", "covenantActual": "2.40:1.00", "covenantStatus": "Compliant"},
+          {"covenantName": "Interest cover", "covenantLimit": "2.50:1.00 min", "covenantActual": "3.10:1.00", "covenantStatus": "Compliant"},
+          {"covenantName": "Tangible net worth", "covenantLimit": "GBP 35,000,000 min", "covenantActual": "GBP 42,300,000", "covenantStatus": "Compliant"},
+          {"covenantName": "Minimum liquidity", "covenantLimit": "GBP 5,000,000 min", "covenantActual": "GBP 8,100,000", "covenantStatus": "Compliant"}
         ]
       }
     },
@@ -38,23 +53,49 @@
       "variables": {
         "bankName": "Meridian Global Banking Corporation",
         "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
+        "bankBranch": "Corporate Credit — Wholesale Banking",
         "letterDate": "2026-07-06",
         "customerName": "Harbour Logistics Holdings plc",
         "customerAddress": "Pier 9, Port of Felixstowe, Suffolk IP11 3SY, United Kingdom",
+        "customerReference": "CORP-REL-2024-77102",
+        "groupName": "Harbour Logistics",
         "facilityReference": "CORP-FAC-2024-77102",
         "facilityType": "revolving credit facility",
         "facilityAmount": "15,000,000.00",
+        "utilisedAmount": "8,450,000.00",
+        "availableAmount": "6,550,000.00",
         "currency": "GBP",
         "reviewDate": "2026-06-30",
+        "reviewPeriod": "year ended 31 March 2026",
+        "nextReviewDate": "2027-06-30",
         "reviewOutcome": "Facility renewed for a further 12-month term",
         "renewalDate": "2026-07-01",
         "expiryDate": "2027-06-30",
+        "renewalTermMonths": "12",
         "marginBps": "175",
         "referenceRate": "SONIA (compounded in arrears)",
-        "includeCovenantSchedule": false,
+        "relationshipManager": "Sarah K. Pemberton",
+        "relationshipManagerPhone": "+44 20 7626 4102",
+        "relationshipManagerEmail": "sarah.pemberton@meridian-global.example",
+        "includeCovenantSchedule": true,
+        "includeFinancialCovenants": true,
+        "includeGuarantor": false,
+        "governingLaw": "the laws of England and Wales",
         "materialFindings": "Not applicable to renewal confirmation",
         "signatoryName": "Jonathan A. Whitmore",
-        "signatoryTitle": "Director, Corporate Credit — Wholesale Banking"
+        "signatoryTitle": "Director, Corporate Credit — Wholesale Banking",
+        "conditionsPrecedent": [
+          {"conditionText": "Executed renewal confirmation returned by the renewal date"},
+          {"conditionText": "Updated compliance certificate delivered within 30 days of the renewal date"},
+          {"conditionText": "Satisfactory KYC/AML refresh for the Borrower and each Obligor"},
+          {"conditionText": "Payment of all fees and expenses due under the Finance Documents"}
+        ],
+        "covenantItems": [
+          {"covenantName": "Leverage ratio", "covenantLimit": "3.00:1.00 max", "covenantActual": "2.40:1.00", "covenantStatus": "Compliant"},
+          {"covenantName": "Interest cover", "covenantLimit": "2.50:1.00 min", "covenantActual": "3.10:1.00", "covenantStatus": "Compliant"},
+          {"covenantName": "Tangible net worth", "covenantLimit": "GBP 35,000,000 min", "covenantActual": "GBP 42,300,000", "covenantStatus": "Compliant"},
+          {"covenantName": "Minimum liquidity", "covenantLimit": "GBP 5,000,000 min", "covenantActual": "GBP 8,100,000", "covenantStatus": "Compliant"}
+        ]
       }
     }
   ]

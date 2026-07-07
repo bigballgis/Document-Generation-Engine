@@ -1,141 +1,730 @@
 {
-  "catalogMarker": "annual-review-demo-v2-real",
+  "catalogMarker": "annual-review-demo-v3-bank-grade",
   "bindings": {
-    "ANNUAL_REVIEW_BODY": {
+    "ARR_PARTIES": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Date: "},
-          {"type": "variable", "key": "letterDate"}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "To: "},
-          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "customerName"}]},
-          {"type": "textRun", "value": ", "},
-          {"type": "variable", "key": "customerAddress"}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Dear Sirs,"}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Re: Annual Credit Review — Facility Reference "},
-          {"type": "underline", "children": [{"type": "variable", "key": "facilityReference"}]}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "We have completed the annual credit review of the "},
-          {"type": "variable", "key": "facilityType"},
-          {"type": "textRun", "value": " (the \"Facility\") of "},
-          {"type": "variable", "key": "currency"},
-          {"type": "textRun", "value": " "},
-          {"type": "variable", "key": "facilityAmount"},
-          {"type": "textRun", "value": " made available to you by "},
-          {"type": "variable", "key": "bankName"},
-          {"type": "textRun", "value": ", as at "},
-          {"type": "variable", "key": "reviewDate"},
-          {"type": "textRun", "value": "."}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Review outcome: "},
-          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "reviewOutcome"}]}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Pricing: The margin is set at "},
-          {"type": "variable", "key": "marginBps"},
-          {"type": "textRun", "value": " bps over "},
-          {"type": "variable", "key": "referenceRate"},
-          {"type": "textRun", "value": ", subject to continued compliance with the terms of the facility agreement."}
-        ]},
-        {"type": "contentModuleRef", "referenceKey": "ANNUAL-REVIEW-STANDARD-CLAUSE"}
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Date: "},
+            {"type": "variable", "key": "letterDate"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Our ref: "},
+            {"type": "variable", "key": "customerReference"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "To: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "customerName"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "variable", "key": "customerAddress"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "textRun", "value": "Dear Sirs,"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Re: Annual Credit Review — Facility Reference "},
+            {"type": "underline", "children": [{"type": "variable", "key": "facilityReference"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "We, "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "bankName"}]},
+            {"type": "textRun", "value": " of "},
+            {"type": "variable", "key": "bankAddress"},
+            {"type": "textRun", "value": " (the Bank), acting through "},
+            {"type": "variable", "key": "bankBranch"},
+            {"type": "textRun", "value": ", write in connection with the annual credit review of the "},
+            {"type": "variable", "key": "facilityType"},
+            {"type": "textRun", "value": " (the \"Facility\") made available to "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "customerName"}]},
+            {"type": "textRun", "value": " (the Borrower) and members of the "},
+            {"type": "variable", "key": "groupName"},
+            {"type": "textRun", "value": " group (the Group)."}
+          ]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeGuarantor} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "The obligations of the Borrower under the Finance Documents are guaranteed by "},
+                {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "guarantorName"}]},
+                {"type": "textRun", "value": " (the Guarantor)."}
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Your relationship manager is "},
+            {"type": "variable", "key": "relationshipManager"},
+            {"type": "textRun", "value": " (tel: "},
+            {"type": "variable", "key": "relationshipManagerPhone"},
+            {"type": "textRun", "value": "; email: "},
+            {"type": "variable", "key": "relationshipManagerEmail"},
+            {"type": "textRun", "value": ")."}
+          ]
+        }
       ]
     },
-    "ANNUAL_REVIEW_SCHEDULE": {
+    "ARR_DEFINED_TERMS": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "conditionBlock", "conditionExpression": "${includeCovenantSchedule} == true", "children": [
-          {"type": "sectionHeading", "children": [{"type": "text", "value": "Covenant Compliance Schedule"}]},
-          {"type": "paragraph", "children": [
-            {"type": "textRun", "value": "The following covenants were tested as at the review date based on the most recent audited financial statements and management accounts of the Group:"}
-          ]},
-          {"type": "loopBlock", "loopVariable": "covenantItems", "children": [
-            {"type": "paragraph", "children": [
-              {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "covenantName"}]},
-              {"type": "textRun", "value": ": "},
-              {"type": "variable", "key": "covenantStatus"}
-            ]}
-          ]}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Material findings: "},
-          {"type": "variable", "key": "materialFindings"}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "For and on behalf of "},
-          {"type": "variable", "key": "bankName"},
-          {"type": "textRun", "value": ":"}
-        ]},
-        {"type": "paragraph", "children": [{"type": "textRun", "value": "_____________________________"}]},
-        {"type": "paragraph", "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]},
-        {"type": "paragraph", "children": [{"type": "variable", "key": "signatoryTitle"}]},
-        {"type": "paragraph", "children": [{"type": "variable", "key": "bankAddress"}]}
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Defined Terms"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Facility\""},
+            {"type": "textRun", "value": " means the "},
+            {"type": "variable", "key": "facilityType"},
+            {"type": "textRun", "value": " of "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "facilityAmount"}]},
+            {"type": "textRun", "value": " identified by reference "},
+            {"type": "underline", "children": [{"type": "variable", "key": "facilityReference"}]},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Review Date\""},
+            {"type": "textRun", "value": " means "},
+            {"type": "variable", "key": "reviewDate"},
+            {"type": "textRun", "value": ", being the date as at which the annual credit review was completed."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Review Period\""},
+            {"type": "textRun", "value": " means the financial period "},
+            {"type": "variable", "key": "reviewPeriod"},
+            {"type": "textRun", "value": " covered by this review."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Finance Documents\""},
+            {"type": "textRun", "value": " means the facility agreement, this letter, any security documents, and any other document designated as a Finance Document therein."}
+          ]
+        }
       ]
     },
-    "FACILITY_RENEWAL_BODY": {
+    "ARR_REVIEW_SUMMARY": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Date: "},
-          {"type": "variable", "key": "letterDate"}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "To: "},
-          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "customerName"}]},
-          {"type": "textRun", "value": ", "},
-          {"type": "variable", "key": "customerAddress"}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Dear Sirs,"}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Re: Facility Renewal Confirmation — Facility Reference "},
-          {"type": "underline", "children": [{"type": "variable", "key": "facilityReference"}]}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "We are pleased to confirm the renewal of the "},
-          {"type": "variable", "key": "facilityType"},
-          {"type": "textRun", "value": " of "},
-          {"type": "variable", "key": "currency"},
-          {"type": "textRun", "value": " "},
-          {"type": "variable", "key": "facilityAmount"},
-          {"type": "textRun", "value": " made available to you by "},
-          {"type": "variable", "key": "bankName"},
-          {"type": "textRun", "value": ", effective from "},
-          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "renewalDate"}]},
-          {"type": "textRun", "value": " and expiring on "},
-          {"type": "variable", "key": "expiryDate"},
-          {"type": "textRun", "value": "."}
-        ]},
-        {"type": "contentModuleRef", "referenceKey": "FACILITY-RENEWAL-STANDARD-CLAUSE"}
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Review Summary"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "We have completed the annual credit review of the Facility as at the Review Date, based on the Group's audited financial statements, management accounts, compliance certificates and industry outlook for the Review Period."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Utilisation as at the Review Date: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "utilisedAmount"}]},
+            {"type": "textRun", "value": " utilised; "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "availableAmount"}]},
+            {"type": "textRun", "value": " available."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Review outcome: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "reviewOutcome"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The next annual review is scheduled for "},
+            {"type": "variable", "key": "nextReviewDate"},
+            {"type": "textRun", "value": ", unless an interim review is triggered by a material adverse change or event of default."}
+          ]
+        }
       ]
     },
-    "FACILITY_RENEWAL_TERMS": {
+    "ARR_PRICING": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "sectionHeading", "children": [{"type": "text", "value": "Renewed Terms"}]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "The renewal is subject to the following terms:"}
-        ]},
-        {"type": "list", "children": [{"type": "textRun", "value": "Pricing: Margin of "}, {"type": "variable", "key": "marginBps"}, {"type": "textRun", "value": " bps over "}, {"type": "variable", "key": "referenceRate"}, {"type": "textRun", "value": ", subject to annual review."}]},
-        {"type": "list", "children": [{"type": "textRun", "value": "Security arrangements continue unchanged unless notified separately in writing by the Bank."}]},
-        {"type": "list", "children": [{"type": "textRun", "value": "All other terms of the facility agreement continue in full force and effect, save as expressly varied by this renewal."}]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "For and on behalf of "},
-          {"type": "variable", "key": "bankName"},
-          {"type": "textRun", "value": ":"}
-        ]},
-        {"type": "paragraph", "children": [{"type": "textRun", "value": "_____________________________"}]},
-        {"type": "paragraph", "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]},
-        {"type": "paragraph", "children": [{"type": "variable", "key": "signatoryTitle"}]},
-        {"type": "paragraph", "children": [{"type": "variable", "key": "bankAddress"}]}
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Pricing Adjustment"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The margin applicable to the Facility is set at "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "marginBps"}, {"type": "textRun", "value": " bps"}]},
+            {"type": "textRun", "value": " per annum over "},
+            {"type": "variable", "key": "referenceRate"},
+            {"type": "textRun", "value": ", calculated on the basis of actual days elapsed and a 365-day year (or 366 days in a leap year)."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The revised margin takes effect from "},
+            {"type": "variable", "key": "renewalDate"},
+            {"type": "textRun", "value": " and applies to all outstanding and future utilisations until the next review date, subject to continued compliance with the terms of the facility agreement."}
+          ]
+        }
+      ]
+    },
+    "ARR_COVENANTS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Financial Covenants and Compliance"}]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeCovenantSchedule} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "The following financial covenants were tested as at the Review Date based on the most recent audited financial statements and management accounts of the Group:"}
+              ]
+            },
+            {
+              "type": "paragraph",
+              "styleRef": "ScheduleTitle",
+              "children": [
+                {"type": "textRun", "value": "Schedule 1 — Covenant Compliance Summary"}
+              ]
+            },
+            {
+              "type": "tableComponentRef",
+              "tableComponent": {
+                "componentKey": "ANNUAL-REVIEW-TBL-COVENANTS",
+                "columnSchema": [
+                  {"columnKey": "covenantName", "widthPct": 25},
+                  {"columnKey": "covenantLimit", "widthPct": 25},
+                  {"columnKey": "covenantActual", "widthPct": 25},
+                  {"columnKey": "covenantStatus", "widthPct": 25}
+                ],
+                "headerRows": [[
+                  {"columnKey": "covenantName", "value": "Covenant"},
+                  {"columnKey": "covenantLimit", "value": "Covenant Limit"},
+                  {"columnKey": "covenantActual", "value": "Actual / Tested"},
+                  {"columnKey": "covenantStatus", "value": "Status"}
+                ]],
+                "loopRow": {
+                  "loopVariable": "covenantItems",
+                  "cells": [
+                    {"columnKey": "covenantName", "variableKey": "covenantName"},
+                    {"columnKey": "covenantLimit", "variableKey": "covenantLimit"},
+                    {"columnKey": "covenantActual", "variableKey": "covenantActual"},
+                    {"columnKey": "covenantStatus", "variableKey": "covenantStatus"}
+                  ]
+                }
+              }
+            },
+            {
+              "type": "loopBlock",
+              "loopVariable": "covenantItems",
+              "children": [
+                {
+                  "type": "list",
+                  "children": [
+                    {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "covenantName"}]},
+                    {"type": "textRun", "value": ": "},
+                    {"type": "variable", "key": "covenantStatus"}
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeFinancialCovenants} == true",
+          "children": [
+            {
+              "type": "contentModuleRef",
+              "referenceKey": "ANNUAL-REVIEW-COVENANTS"
+            }
+          ]
+        }
+      ]
+    },
+    "ARR_FINDINGS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Material Findings"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Material findings arising from the review: "},
+            {"type": "variable", "key": "materialFindings"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Save as disclosed above, no breaches, defaults or material adverse changes were identified during the Review Period."}
+          ]
+        }
+      ]
+    },
+    "ARR_CONTINUATION": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Continued Availability"}]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "ANNUAL-REVIEW-STANDARD-CLAUSE"
+        }
+      ]
+    },
+    "ARR_GOVERNING_LAW": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Governing Law"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "This letter and any non-contractual obligations arising out of or in connection with it are governed by, and construed in accordance with, "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "governingLaw"}]},
+            {"type": "textRun", "value": "."}
+          ]
+        }
+      ]
+    },
+    "ARR_SIGNATURE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "For and on behalf of "},
+            {"type": "variable", "key": "bankName"},
+            {"type": "textRun", "value": ":"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "textRun", "value": "_____________________________"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "variable", "key": "signatoryTitle"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "variable", "key": "bankAddress"}]
+        }
+      ]
+    },
+    "FRN_PARTIES": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Date: "},
+            {"type": "variable", "key": "letterDate"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Our ref: "},
+            {"type": "variable", "key": "customerReference"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "To: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "customerName"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "variable", "key": "customerAddress"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "textRun", "value": "Dear Sirs,"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Re: Facility Renewal Confirmation — Facility Reference "},
+            {"type": "underline", "children": [{"type": "variable", "key": "facilityReference"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "We, "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "bankName"}]},
+            {"type": "textRun", "value": ", acting through "},
+            {"type": "variable", "key": "bankBranch"},
+            {"type": "textRun", "value": ", write in connection with the renewal of the "},
+            {"type": "variable", "key": "facilityType"},
+            {"type": "textRun", "value": " made available to "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "customerName"}]},
+            {"type": "textRun", "value": "."}
+          ]
+        }
+      ]
+    },
+    "FRN_RENEWAL_CONFIRM": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Renewal Confirmation"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "We are pleased to confirm the renewal of the Facility of "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "facilityAmount"}]},
+            {"type": "textRun", "value": ", effective from "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "renewalDate"}]},
+            {"type": "textRun", "value": " for a term of "},
+            {"type": "variable", "key": "renewalTermMonths"},
+            {"type": "textRun", "value": " months, expiring on "},
+            {"type": "variable", "key": "expiryDate"},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Review outcome: "},
+            {"type": "variable", "key": "reviewOutcome"}
+          ]
+        }
+      ]
+    },
+    "FRN_RENEWED_TERMS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Renewed Terms"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The renewal is subject to the following terms:"}
+          ]
+        },
+        {
+          "type": "list",
+          "ordered": true,
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "Pricing: Margin of "},
+                {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "marginBps"}, {"type": "textRun", "value": " bps"}]},
+                {"type": "textRun", "value": " over "},
+                {"type": "variable", "key": "referenceRate"},
+                {"type": "textRun", "value": ", subject to annual review."}
+              ]
+            },
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "Security arrangements continue unchanged unless notified separately in writing by the Bank."}
+              ]
+            },
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "All other terms of the facility agreement continue in full force and effect, save as expressly varied by this renewal."}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "FRN_COVENANTS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Financial Covenants"}]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeFinancialCovenants} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "The Borrower shall procure that the Group complies with the financial covenants set out in the facility agreement, tested quarterly on each Financial Quarter end."}
+              ]
+            },
+            {
+              "type": "contentModuleRef",
+              "referenceKey": "ANNUAL-REVIEW-COVENANTS"
+            }
+          ]
+        }
+      ]
+    },
+    "FRN_CONDITIONS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Conditions Precedent to Renewal"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The renewal is conditional upon satisfaction of the following conditions precedent, each in form and substance satisfactory to the Bank:"}
+          ]
+        },
+        {
+          "type": "loopBlock",
+          "loopVariable": "conditionsPrecedent",
+          "children": [
+            {
+              "type": "list",
+              "children": [
+                {"type": "variable", "key": "conditionText"}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "FRN_KYC": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "KYC and AML Requirements"}]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "FACILITY-RENEWAL-STANDARD-CLAUSE"
+        }
+      ]
+    },
+    "FRN_SCHEDULE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Covenant Compliance Schedule"}]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeCovenantSchedule} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "Covenant compliance as at the Review Date ("},
+                {"type": "variable", "key": "reviewDate"},
+                {"type": "textRun", "value": "):"}
+              ]
+            },
+            {
+              "type": "tableComponentRef",
+              "tableComponent": {
+                "componentKey": "FACILITY-RENEWAL-TBL-COVENANTS",
+                "columnSchema": [
+                  {"columnKey": "covenantName", "widthPct": 25},
+                  {"columnKey": "covenantLimit", "widthPct": 25},
+                  {"columnKey": "covenantActual", "widthPct": 25},
+                  {"columnKey": "covenantStatus", "widthPct": 25}
+                ],
+                "headerRows": [[
+                  {"columnKey": "covenantName", "value": "Covenant"},
+                  {"columnKey": "covenantLimit", "value": "Covenant Limit"},
+                  {"columnKey": "covenantActual", "value": "Actual / Tested"},
+                  {"columnKey": "covenantStatus", "value": "Status"}
+                ]],
+                "loopRow": {
+                  "loopVariable": "covenantItems",
+                  "cells": [
+                    {"columnKey": "covenantName", "variableKey": "covenantName"},
+                    {"columnKey": "covenantLimit", "variableKey": "covenantLimit"},
+                    {"columnKey": "covenantActual", "variableKey": "covenantActual"},
+                    {"columnKey": "covenantStatus", "variableKey": "covenantStatus"}
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "FRN_GOVERNING_LAW": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Governing Law"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "This renewal confirmation and any non-contractual obligations arising out of or in connection with it are governed by, and construed in accordance with, "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "governingLaw"}]},
+            {"type": "textRun", "value": "."}
+          ]
+        }
+      ]
+    },
+    "FRN_SIGNATURE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "For and on behalf of "},
+            {"type": "variable", "key": "bankName"},
+            {"type": "textRun", "value": ":"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "textRun", "value": "_____________________________"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "variable", "key": "signatoryTitle"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "variable", "key": "bankAddress"}]
+        }
       ]
     }
   }
