@@ -1,8 +1,24 @@
 {
-  "anchorIds": ["WEALTH_STATEMENT_BODY", "WEALTH_HOLDINGS_TABLE", "WEALTH_FOOTER_TOTALS"],
+  "anchorIds": [
+    "WST_PARTIES",
+    "WST_DEFINED_TERMS",
+    "WST_PORTFOLIO_SUMMARY",
+    "WST_HOLDINGS_EQUITY",
+    "WST_HOLDINGS_FIXED_INCOME",
+    "WST_HOLDINGS_ALTERNATIVES",
+    "WST_INCOME_ACTIVITY",
+    "WST_PORTFOLIO_TOTALS",
+    "WST_DISCLAIMERS_SIGNATURE"
+  ],
   "sections": [
-    {"anchorId": "WEALTH_STATEMENT_BODY", "title": "Investment Statement"},
-    {"anchorId": "WEALTH_HOLDINGS_TABLE", "title": "Portfolio Holdings"},
-    {"anchorId": "WEALTH_FOOTER_TOTALS", "title": "Summary Totals"}
+    {"anchorId": "WST_PARTIES", "title": "Client and Portfolio"},
+    {"anchorId": "WST_DEFINED_TERMS", "title": "Defined Terms"},
+    {"anchorId": "WST_PORTFOLIO_SUMMARY", "title": "Portfolio Summary"},
+    {"anchorId": "WST_HOLDINGS_EQUITY", "title": "Equity Holdings"},
+    {"anchorId": "WST_HOLDINGS_FIXED_INCOME", "title": "Fixed Income Holdings"},
+    {"anchorId": "WST_HOLDINGS_ALTERNATIVES", "title": "Alternative Assets"},
+    {"anchorId": "WST_INCOME_ACTIVITY", "title": "Income Activity"},
+    {"anchorId": "WST_PORTFOLIO_TOTALS", "title": "Portfolio Totals"},
+    {"anchorId": "WST_DISCLAIMERS_SIGNATURE", "title": "Disclaimers and Signature"}
   ]
 }

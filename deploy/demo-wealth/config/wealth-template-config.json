@@ -1,13 +1,13 @@
 {
-  "catalogMarker": "wealth-demo-v2-real",
+  "catalogMarker": "wealth-demo-v3-bank-grade",
   "groupCode": "WEALTH",
   "pageNumberingProfile": "GLOBAL_ONLY",
   "masterName": "Meridian Private Wealth Statement Master",
-  "masterLayoutVersion": "wealth-layout-v2-global-page",
-  "masterDescription": "Real foreign-bank private wealth investment statement master — A4, global page, branded header (wealth-layout-v2-global-page)",
+  "masterLayoutVersion": "wealth-layout-v3-nine-anchors",
+  "masterDescription": "Bank-grade private wealth investment statement master — A4, global page numbering, branded header, multi-table holdings (wealth-layout-v3-nine-anchors)",
   "templateExternalId": "DEMO-WEALTH-STATEMENT",
   "templateName": "Private Wealth Investment Statement",
-  "templateDescription": "Real foreign-bank private wealth investment statement with full holdings table, portfolio summary, income, unrealised P&L, disclaimers, signatures (wealth-demo-v2-real)",
+  "templateDescription": "Bank-grade private wealth investment statement with equity, fixed income and alternative holdings tables, income activity, portfolio totals, regulatory disclaimers and signature (wealth-demo-v3-bank-grade)",
   "masterDocx": "assets/wealth-statement-master.docx",
   "generatedCatalogFiles": {
     "variables": "config/wealth-variables.json",

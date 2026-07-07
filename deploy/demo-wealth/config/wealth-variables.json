@@ -1,113 +1,36 @@
 {
-  "catalogMarker": "wealth-demo-v2-real",
+  "catalogMarker": "wealth-demo-v3-bank-grade",
   "variables": [
-    {
-      "key": "bankName",
-      "label": "Bank Name",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "bankAddress",
-      "label": "Bank Address",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "relationshipManager",
-      "label": "Relationship Manager",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "clientName",
-      "label": "Client Name",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "clientAddress",
-      "label": "Client Address",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "portfolioReference",
-      "label": "Portfolio Reference",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "statementDate",
-      "label": "Statement Date",
-      "type": "DATE",
-      "required": true
-    },
-    {
-      "key": "statementPeriod",
-      "label": "Statement Period",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "custodian",
-      "label": "Custodian",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "baseCurrency",
-      "label": "Base Currency",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "holdings",
-      "label": "Holdings",
-      "type": "LIST",
-      "required": true
-    },
-    {
-      "key": "totalMarketValue",
-      "label": "Total Market Value",
-      "type": "AMOUNT",
-      "required": true
-    },
-    {
-      "key": "totalCost",
-      "label": "Total Cost",
-      "type": "AMOUNT",
-      "required": true
-    },
-    {
-      "key": "unrealisedGainLoss",
-      "label": "Unrealised Gain/Loss",
-      "type": "AMOUNT",
-      "required": true
-    },
-    {
-      "key": "unrealisedGainLossPct",
-      "label": "Unrealised Gain/Loss %",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "incomeReceived",
-      "label": "Income Received (period)",
-      "type": "AMOUNT",
-      "required": true
-    },
-    {
-      "key": "signatoryName",
-      "label": "Signatory Name",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "signatoryTitle",
-      "label": "Signatory Title",
-      "type": "TEXT",
-      "required": true
-    }
+    {"key": "bankName", "label": "Bank Name", "type": "TEXT", "required": true},
+    {"key": "bankAddress", "label": "Bank Address", "type": "TEXT", "required": true},
+    {"key": "bankFcaNumber", "label": "Bank FCA Register Number", "type": "TEXT", "required": true},
+    {"key": "relationshipManager", "label": "Relationship Manager", "type": "TEXT", "required": true},
+    {"key": "relationshipManagerPhone", "label": "Relationship Manager Phone", "type": "TEXT", "required": true},
+    {"key": "relationshipManagerEmail", "label": "Relationship Manager Email", "type": "TEXT", "required": true},
+    {"key": "clientName", "label": "Client Name", "type": "TEXT", "required": true},
+    {"key": "clientAddress", "label": "Client Address", "type": "TEXT", "required": true},
+    {"key": "clientReference", "label": "Client Reference", "type": "TEXT", "required": true},
+    {"key": "portfolioReference", "label": "Portfolio Reference", "type": "TEXT", "required": true},
+    {"key": "statementDate", "label": "Statement Date", "type": "DATE", "required": true},
+    {"key": "statementPeriod", "label": "Statement Period", "type": "TEXT", "required": true},
+    {"key": "custodian", "label": "Custodian", "type": "TEXT", "required": true},
+    {"key": "baseCurrency", "label": "Base Currency", "type": "TEXT", "required": true},
+    {"key": "cashBalance", "label": "Cash Balance", "type": "AMOUNT", "required": true},
+    {"key": "netAssetValue", "label": "Net Asset Value", "type": "AMOUNT", "required": true},
+    {"key": "equityHoldings", "label": "Equity Holdings", "type": "LIST", "required": true},
+    {"key": "fixedIncomeHoldings", "label": "Fixed Income Holdings", "type": "LIST", "required": true},
+    {"key": "alternativeHoldings", "label": "Alternative Holdings", "type": "LIST", "required": true},
+    {"key": "incomeItems", "label": "Income Items", "type": "LIST", "required": true},
+    {"key": "totalCost", "label": "Total Cost Basis", "type": "AMOUNT", "required": true},
+    {"key": "totalMarketValue", "label": "Total Market Value", "type": "AMOUNT", "required": true},
+    {"key": "unrealisedGainLoss", "label": "Unrealised Gain/Loss", "type": "AMOUNT", "required": true},
+    {"key": "unrealisedGainLossPct", "label": "Unrealised Gain/Loss %", "type": "TEXT", "required": true},
+    {"key": "incomeReceived", "label": "Total Income Received", "type": "AMOUNT", "required": true},
+    {"key": "dividendsReceived", "label": "Dividends Received", "type": "AMOUNT", "required": true},
+    {"key": "interestReceived", "label": "Interest Received", "type": "AMOUNT", "required": true},
+    {"key": "includeOffshoreHoldings", "label": "Include Offshore Holdings", "type": "BOOLEAN", "required": false},
+    {"key": "offshoreCustodian", "label": "Offshore Custodian", "type": "TEXT", "required": false},
+    {"key": "signatoryName", "label": "Signatory Name", "type": "TEXT", "required": true},
+    {"key": "signatoryTitle", "label": "Signatory Title", "type": "TEXT", "required": true}
   ]
 }
