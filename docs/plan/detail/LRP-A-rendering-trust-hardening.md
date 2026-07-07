@@ -75,7 +75,7 @@
 - **Artifacts:** modified `backend/Dockerfile`, `backend/Dockerfile.packaged`; new `RenderingFontSmokeTest`; evidence PDF/screenshot reference in ledger.
 - **Done when:** Smoke test green + Docker evidence archived + CD-HARD-T01 cross-referenced + doc sync + commit review.
 - **Maps:** CD-PIT-01; CD-HARD-T01; ADR-0041 (drafted by LR-A5).
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-08; P23-T02 / CD-HARD-T01 executed — `fonts-noto-cjk`, `fonts-crosextra-carlito`, `fonts-crosextra-caladea` in both Dockerfiles; `fc-list :lang=zh` build assertion; `RenderingFontSmokeTest` green in `mvn verify`; gates BUILD SUCCESS)
 
 ### LR-A3 — Upload deep validation + size limits
 

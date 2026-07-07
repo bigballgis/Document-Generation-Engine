@@ -6,21 +6,26 @@ COPY src ./src
 RUN --mount=type=cache,target=/root/.m2/repository \
     mvn -B package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine AS runtime
+# Runtime uses Debian jammy (not Alpine) because Alpine 3.23 lacks fonts-crosextra-caladea;
+# Carlito + Caladea metric-compatible substitutes are required by LR-A2 / ADR-0041 (CD-PIT-01).
+FROM eclipse-temurin:21-jre-jammy AS runtime
 WORKDIR /app
-# LR-A2 / ADR-0041: rendering font baseline — CJK + metric-compatible substitutes
-# (Carlito/Caladea) for Calibri/Cambria so bank correspondence renders without tofu or
-# layout drift (CD-PIT-01).
-RUN apk add --no-cache \
-        libreoffice \
-        ttf-dejavu \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libreoffice-core \
+        libreoffice-writer \
+        fonts-dejavu \
         fontconfig \
-        font-noto-cjk \
-        font-crosextra-carlito \
-        font-crosextra-caladea \
+        fonts-noto-cjk \
+        fonts-crosextra-carlito \
+        fonts-crosextra-caladea \
     && fc-cache -f \
-    && addgroup -g 65532 -S nonroot \
-    && adduser -S -u 65532 -G nonroot nonroot \
+    && sh -c 'fc-list :lang=zh | grep -q . || { echo "LR-A2: no CJK fonts (fc-list :lang=zh empty)" >&2; exit 1; }' \
+    && sh -c 'fc-list | grep -qi carlito || { echo "LR-A2: Carlito font missing" >&2; exit 1; }' \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system --gid 65532 nonroot \
+    && useradd --system --uid 65532 --gid nonroot --home-dir /tmp --shell /usr/sbin/nologin nonroot \
     && chown -R nonroot:nonroot /app
 COPY --from=build --chown=nonroot:nonroot /app/target/docgen-backend-*.jar app.jar
 USER 65532:65532

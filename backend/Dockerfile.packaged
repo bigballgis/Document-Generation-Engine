@@ -19,6 +19,8 @@ RUN apt-get update \
         fonts-crosextra-carlito \
         fonts-crosextra-caladea \
     && fc-cache -f \
+    && sh -c 'fc-list :lang=zh | grep -q . || { echo "LR-A2: no CJK fonts (fc-list :lang=zh empty)" >&2; exit 1; }' \
+    && sh -c 'fc-list | grep -qi carlito || { echo "LR-A2: Carlito font missing" >&2; exit 1; }' \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd --system --gid 65532 nonroot \
