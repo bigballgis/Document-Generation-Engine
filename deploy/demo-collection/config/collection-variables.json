@@ -1,119 +1,37 @@
 {
-  "catalogMarker": "collection-demo-v2-real",
+  "catalogMarker": "collection-demo-v3-bank-grade",
   "variables": [
-    {
-      "key": "bankName",
-      "label": "Bank Name",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "bankAddress",
-      "label": "Bank Address",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "letterDate",
-      "label": "Letter Date",
-      "type": "DATE",
-      "required": true
-    },
-    {
-      "key": "customerName",
-      "label": "Customer Name",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "customerAddress",
-      "label": "Customer Address",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "accountNumber",
-      "label": "Account Number",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "accountType",
-      "label": "Account Type",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "letterType",
-      "label": "Letter Type",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "oldRate",
-      "label": "Old Interest Rate",
-      "type": "TEXT",
-      "required": false
-    },
-    {
-      "key": "newRate",
-      "label": "New Interest Rate",
-      "type": "TEXT",
-      "required": false
-    },
-    {
-      "key": "effectiveDate",
-      "label": "Effective Date",
-      "type": "DATE",
-      "required": false
-    },
-    {
-      "key": "overdueAmount",
-      "label": "Overdue Amount",
-      "type": "AMOUNT",
-      "required": false
-    },
-    {
-      "key": "currency",
-      "label": "Currency",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "dueDate",
-      "label": "Original Due Date",
-      "type": "DATE",
-      "required": false
-    },
-    {
-      "key": "daysOverdue",
-      "label": "Days Overdue",
-      "type": "TEXT",
-      "required": false
-    },
-    {
-      "key": "relationshipManager",
-      "label": "Relationship Manager",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "contactPhone",
-      "label": "Contact Phone",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "signatoryName",
-      "label": "Signatory Name",
-      "type": "TEXT",
-      "required": true
-    },
-    {
-      "key": "signatoryTitle",
-      "label": "Signatory Title",
-      "type": "TEXT",
-      "required": true
-    }
+    {"key": "bankName", "label": "Bank Name", "type": "TEXT", "required": true},
+    {"key": "bankAddress", "label": "Bank Address", "type": "TEXT", "required": true},
+    {"key": "bankFcaNumber", "label": "Bank FCA Register Number", "type": "TEXT", "required": true},
+    {"key": "branchName", "label": "Branch Name", "type": "TEXT", "required": true},
+    {"key": "letterDate", "label": "Letter Date", "type": "DATE", "required": true},
+    {"key": "customerName", "label": "Customer Name", "type": "TEXT", "required": true},
+    {"key": "customerAddress", "label": "Customer Address", "type": "TEXT", "required": true},
+    {"key": "customerReference", "label": "Customer Reference", "type": "TEXT", "required": true},
+    {"key": "accountNumber", "label": "Account Number", "type": "TEXT", "required": true},
+    {"key": "accountType", "label": "Account Type", "type": "TEXT", "required": true},
+    {"key": "letterType", "label": "Letter Type", "type": "TEXT", "required": true},
+    {"key": "currency", "label": "Currency", "type": "TEXT", "required": true},
+    {"key": "relationshipManager", "label": "Relationship Manager", "type": "TEXT", "required": true},
+    {"key": "contactPhone", "label": "Contact Phone", "type": "TEXT", "required": true},
+    {"key": "signatoryName", "label": "Signatory Name", "type": "TEXT", "required": true},
+    {"key": "signatoryTitle", "label": "Signatory Title", "type": "TEXT", "required": true},
+    {"key": "oldRate", "label": "Old Interest Rate", "type": "TEXT", "required": false},
+    {"key": "newRate", "label": "New Interest Rate", "type": "TEXT", "required": false},
+    {"key": "effectiveDate", "label": "Effective Date", "type": "DATE", "required": false},
+    {"key": "noticePeriodDays", "label": "Notice Period (Days)", "type": "TEXT", "required": false},
+    {"key": "grossRate", "label": "Gross Rate", "type": "TEXT", "required": false},
+    {"key": "aerRate", "label": "AER Rate", "type": "TEXT", "required": false},
+    {"key": "accountBalance", "label": "Account Balance", "type": "AMOUNT", "required": false},
+    {"key": "rateChangeReason", "label": "Rate Change Reason", "type": "TEXT", "required": false},
+    {"key": "overdueAmount", "label": "Overdue Amount", "type": "AMOUNT", "required": false},
+    {"key": "dueDate", "label": "Original Due Date", "type": "DATE", "required": false},
+    {"key": "daysOverdue", "label": "Days Overdue", "type": "TEXT", "required": false},
+    {"key": "arrearsStage", "label": "Arrears Stage", "type": "TEXT", "required": false},
+    {"key": "defaultInterestRate", "label": "Default Interest Rate", "type": "TEXT", "required": false},
+    {"key": "minimumPayment", "label": "Minimum Payment", "type": "AMOUNT", "required": false},
+    {"key": "paymentReference", "label": "Payment Reference", "type": "TEXT", "required": false},
+    {"key": "totalOutstanding", "label": "Total Outstanding Balance", "type": "AMOUNT", "required": false}
   ]
 }

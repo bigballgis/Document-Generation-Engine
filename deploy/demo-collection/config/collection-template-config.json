@@ -1,11 +1,21 @@
 {
-  "catalogMarker": "collection-demo-v2-real",
+  "catalogMarker": "collection-demo-v3-bank-grade",
   "groupCode": "RETAIL",
   "pageNumberingProfile": "GLOBAL_ONLY",
-  "masterLayoutVersion": "collection-layout-v2-global-page",
+  "masterLayoutVersion": "collection-layout-v3-eight-anchors",
   "templates": [
-    {"externalId": "DEMO-RATE-CHANGE-NOTICE", "name": "Rate Change Notice", "masterDocx": "assets/rate-change-notice-master.docx", "description": "Real foreign-bank rate variation notice (FCA CONC) with right to switch, interest calculation, signatures"},
-    {"externalId": "DEMO-OVERDUE-COLLECTION", "name": "Overdue Collection Notice", "masterDocx": "assets/overdue-collection-master.docx", "description": "Real foreign-bank overdue collection notice (FCA CONC / treating customers fairly) with consequences, financial difficulty, complaints"}
+    {
+      "externalId": "DEMO-RATE-CHANGE-NOTICE",
+      "name": "Rate Change Notice",
+      "masterDocx": "assets/rate-change-notice-master.docx",
+      "description": "P23 bank-grade rate variation notice (FCA CONC) with regulatory emphasis, right to switch, interest calculation, disclaimer footer"
+    },
+    {
+      "externalId": "DEMO-OVERDUE-COLLECTION",
+      "name": "Overdue Collection Notice",
+      "masterDocx": "assets/overdue-collection-master.docx",
+      "description": "P23 bank-grade overdue collection notice (FCA CONC / treating customers fairly) with repayment table, consequences, support, disclaimer footer"
+    }
   ],
   "generatedCatalogFiles": {
     "variables": "config/collection-variables.json",

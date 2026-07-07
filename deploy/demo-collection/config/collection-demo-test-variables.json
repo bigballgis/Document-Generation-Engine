@@ -1,21 +1,29 @@
 {
-  "catalogMarker": "collection-demo-v2-real",
+  "catalogMarker": "collection-demo-v3-bank-grade",
   "testDataSets": [
     {
       "id": "rate-change-executive",
-      "label": "Rate Change Notice — Real Executive Sample",
+      "label": "Rate Change Notice — P23 Executive Sample",
       "variables": {
         "bankName": "Meridian Retail Banking",
         "bankAddress": "PO Box 1200, London EC2N 1DB, United Kingdom",
+        "bankFcaNumber": "123456",
+        "branchName": "Birmingham City Centre",
         "letterDate": "2026-07-06",
         "customerName": "Ms Priya Sharma",
         "customerAddress": "Flat 4, 22 Kingsway, Birmingham B15 2RA",
+        "customerReference": "MRB-RCN-2026-004821",
         "accountNumber": "GB29 MERI 6016 1331 9268 19",
         "accountType": "personal variable-rate savings account",
         "letterType": "Rate variation notice",
         "oldRate": "4.20% AER (variable)",
         "newRate": "3.95% AER (variable)",
         "effectiveDate": "2026-08-01",
+        "noticePeriodDays": "14",
+        "grossRate": "3.87% (variable)",
+        "aerRate": "3.95% AER (variable)",
+        "accountBalance": "12,450.00",
+        "rateChangeReason": "a change in the Bank of England base rate",
         "currency": "GBP",
         "relationshipManager": "Anita Deshmukh",
         "contactPhone": "0800 224 482",
@@ -25,13 +33,16 @@
     },
     {
       "id": "overdue-collection-executive",
-      "label": "Overdue Collection Notice — Real Executive Sample",
+      "label": "Overdue Collection Notice — P23 Executive Sample",
       "variables": {
         "bankName": "Meridian Retail Banking",
         "bankAddress": "PO Box 1200, London EC2N 1DB, United Kingdom",
+        "bankFcaNumber": "123456",
+        "branchName": "Leeds Headingley",
         "letterDate": "2026-07-06",
         "customerName": "Mr Daniel Reeves",
         "customerAddress": "8 Hollybush Lane, Leeds LS16 7QF",
+        "customerReference": "MRB-OCN-2026-009317",
         "accountNumber": "GB82 MERI 4047 5312 8741 63",
         "accountType": "personal current account",
         "letterType": "Overdue balance notice",
@@ -39,10 +50,20 @@
         "currency": "GBP",
         "dueDate": "2026-06-15",
         "daysOverdue": "21",
+        "arrearsStage": "FINAL_NOTICE",
+        "defaultInterestRate": "12.9% per annum",
+        "minimumPayment": "1,247.50",
+        "paymentReference": "MRB-PAY-874163",
+        "totalOutstanding": "1,289.42",
         "relationshipManager": "Carl Patterson",
         "contactPhone": "0800 224 482",
         "signatoryName": "Marcus T. Veitch",
-        "signatoryTitle": "Head of Retail Collections — Meridian Retail Banking"
+        "signatoryTitle": "Head of Retail Collections — Meridian Retail Banking",
+        "repaymentMethods": [
+          {"method": "Online banking", "details": "Log in to Meridian Online and select Pay a bill using reference MRB-PAY-874163"},
+          {"method": "Telephone banking", "details": "Call 0800 224 482 and quote your payment reference"},
+          {"method": "Branch payment", "details": "Visit Leeds Headingley branch with this letter and pay by debit card or cash"}
+        ]
       }
     }
   ]
