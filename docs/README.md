@@ -5,7 +5,7 @@
 
 **Active work in this documentation track:** **[CDP Wave CD-0 In Progress](./plan/competitiveness-deepening-program.md)** — doc truth, E2E BDD, pitfall registry, browser golden-path evidence (task IDs **`CD-*` only).
 
-**Active formal phase:** **P23** — demo document typography & layout excellence; see [P23 detail](./plan/detail/P23-demo-typography-layout-excellence.md).
+**Active formal phase:** **None** — **P23 Done** (2026-07-08). See [P23 detail](./plan/detail/P23-demo-typography-layout-excellence.md).
 
 **P22 Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md).
 
@@ -81,7 +81,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [P20 i18n & UI upgradeability](./plan/detail/P20-i18n-ui-upgradeability.md) | Locale registry, brand theming, zh-CN primary journey (Done 2026-06-25) |
 | [P21 Role-journey frontend redesign](./plan/detail/P21-role-journey-frontend-redesign.md) | Hybrid IA, behavior-typed to-dos, per-role journeys, business-friendly terminology (**Done** 2026-06-30) |
 | [P22 Demo expansion & rendering fidelity](./plan/detail/P22-demo-expansion-rendering-fidelity.md) | Structured content DOCX writer, dual page numbers, eight demo **scaffolds** (**Done** 2026-07-04) |
-| [P23 Demo typography & layout excellence](./plan/detail/P23-demo-typography-layout-excellence.md) | Bank-grade styles, rich bindings, font baseline, POI/E2E acceptance (**In Progress** 2026-07-08) |
+| [P23 Demo typography & layout excellence](./plan/detail/P23-demo-typography-layout-excellence.md) | Bank-grade styles, rich bindings, font baseline, POI/E2E acceptance (**Done** 2026-07-08; T01–T16) |
 | **[Deployment guide](../deploy/README.md)** | **Canonical operator guide** — prerequisites, install/upgrade/cutover/rollback/secrets; indexes all `deploy/*.md` topic docs |
 
 ## Architecture
@@ -146,6 +146,14 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12 2026-07-03) | P12 template testing tab |
 | [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **Done** (P12 2026-07-03) | Package-first API access |
 | [Session renewal & revocation](./behavior/session-renewal-revocation.md) | **ready** (LR-B6 delivered 2026-07-04) | BDD-LRP-SESSION-001 → LR-B6 **Done** (sliding renewal, 30 min TTL, 8 h absolute cap, Redis revocation fail-closed; policy confirmed 2026-07-04; implementation deviations in spec §14.1) |
+
+## Evidence & acceptance artifacts
+
+| Document | Purpose |
+| --- | --- |
+| [Demo typography review checklist](./evidence/demo-typography-review-checklist.md) | Human reviewer checklist — fonts, styles, margins, headers/footers, tables, signatures (**P23-T16**; ≥2 CORP + ≥2 RETAIL mandatory samples) |
+| [Fundraising demo summary](./evidence/fundraising-demo-summary.md) | 13-template evidence matrix — generate script, E2E, POI tests, manifest paths (**P23-T16**) |
+| [Security evidence index](./evidence/security/README.md) | SCA runbook and execution logs |
 
 ## ADRs
 
