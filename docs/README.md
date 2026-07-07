@@ -32,7 +32,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | Document | Purpose |
 | --- | --- |
 | [Requirements plan](./requirements/requirements-plan.md) | Raw confirmed requirements |
-| [Demo expansion behavior spec](./requirements/demo-expansion-behavior-spec.md) | BDD-DEMO-EXP — rendering fidelity, dual page numbers, eight bank letter demos |
+| [Demo expansion behavior spec](./requirements/demo-expansion-behavior-spec.md) | BDD-DEMO-EXP — rendering fidelity, dual page numbers, eight bank letter demos (**P22 Done**) |
+| [Demo typography & layout behavior spec](./requirements/demo-typography-layout-behavior-spec.md) | BDD-DEMO-TYP-001…020 — bank-grade Word styles, rich bindings, font baseline, POI/E2E acceptance (**P23**; ready 2026-07-08) |
 | [Non-functional requirements](./requirements/non-functional-requirements.md) | Quality, security, reliability constraints |
 | [PRD](./product/PRD.md) | Product-facing behavior |
 | [Usability review](./product/usability-review.md) | UX baselines, role journeys, open UX questions |

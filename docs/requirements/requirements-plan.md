@@ -11,7 +11,7 @@
 - [权限矩阵](../security/permission-matrix.md)
 - [文档治理规则](../governance.md)
 - [综合演示包扩展行为规格](demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；渲染保真 + 双页码 + 八类银行信函演示 — **P22 Done**）
-- [演示文档排版与版式卓越行为规格](demo-typography-layout-behavior-spec.md)（BDD-DEMO-TYP — **待编写**；实现计划 [P23](../plan/detail/P23-demo-typography-layout-excellence.md) **In Progress** 2026-07-08）
+- [演示文档排版与版式卓越行为规格](demo-typography-layout-behavior-spec.md)（BDD-DEMO-TYP-001…020 — **ready** 2026-07-08；实现计划 [P23](../plan/detail/P23-demo-typography-layout-excellence.md) **In Progress**）
 
 ## 记录原则
 
@@ -809,7 +809,7 @@
 
 ## 已确认：演示文档排版与版式卓越（2026-07-08 战略优先级）
 
-> 用户确认（2026-07-08）：当前生成的演示文档**内容存在但 Word 排版/版式/字体/样式不达标**，不符合国际大型银行对外信函品质；Word 为最佳排版工具，演示输出须达到**外资银行信函级**观感。实现计划：[P23-demo-typography-layout-excellence.md](../plan/detail/P23-demo-typography-layout-excellence.md)（**In Progress**）；行为规格 [demo-typography-layout-behavior-spec.md](demo-typography-layout-behavior-spec.md)（**待 `behavior-spec-author` 编写**）。Task Master 任务 4–8 与本阶段对齐。
+> 用户确认（2026-07-08）：当前生成的演示文档**内容存在但 Word 排版/版式/字体/样式不达标**，不符合国际大型银行对外信函品质；Word 为最佳排版工具，演示输出须达到**外资银行信函级**观感。实现计划：[P23-demo-typography-layout-excellence.md](../plan/detail/P23-demo-typography-layout-excellence.md)（**In Progress**）；行为规格 [demo-typography-layout-behavior-spec.md](demo-typography-layout-behavior-spec.md)（**ready** — `BDD-DEMO-TYP-001`…`020`，P23-T01 Done 2026-07-08）。Task Master 任务 4–8 与本阶段对齐。
 
 - **与 P22 关系：** P22 交付结构化内容写入引擎、双页码机制、八类 `deploy/demo-*` **脚手架**与 `import-all-demos.ps1`；**不 reopen P22**。P23 承接母版样式、富结构化绑定、字体基线与视觉验收。
 - **母版 DOCX：** 每类演示须定义银行级命名样式（Heading1–3、ClauseBody、TableHeader、SignatureBlock 等）、字体、页边距、页眉页脚（按 `pageNumberingProfile`）。

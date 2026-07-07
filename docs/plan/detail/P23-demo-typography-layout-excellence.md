@@ -4,7 +4,7 @@
 **Phase status:** **In Progress** (activated 2026-07-08; user strategic direction — demo output must meet international large-bank letter grade)  
 **Depends on:** P22 (**Done** — rendering engine + package scaffold), P18/P4 (authoring + pipeline Done), LRP Wave LR-A (font baseline **LR-A2**; pagination corpus **LR-A7**)  
 **Task Master mirror:** `.taskmaster/tasks/tasks.json` tasks **4–8** (foreign-bank-letter grade rewrites + publish + generate + evidence)  
-**BDD:** `docs/requirements/demo-typography-layout-behavior-spec.md` — **to be authored** by `behavior-spec-author` before implementation (`BDD-DEMO-TYP-001`…`020` proposed; see §6)
+**BDD:** `docs/requirements/demo-typography-layout-behavior-spec.md` — **ready** (P23-T01 Done 2026-07-08; `BDD-DEMO-TYP-001`…`020`; see §6)
 
 > **Single-active-phase invariant:** **P23** is the sole formal phase `In Progress` (activated 2026-07-08). **P22 remains Done** with honest carry-forward note (T05–T11 scaffold-only). **LRP** Wave LR-A remains **In Progress** as a cross-cutting program (not a formal phase). Coordinate **LR-A2** and **P23-T02** — same font baseline, single evidence row.
 
@@ -56,7 +56,7 @@ Word is the authoritative typesetting surface. Generated DOCX must exhibit:
 
 | ID | Owner | Task | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| **P23-T01** | doc-keeper + behavior-spec-author | **BDD behavior spec** — `demo-typography-layout-behavior-spec.md`: actor (demo author / runtime caller), typography/layout acceptance scenarios, per-demo-type footer/header rules, font baseline expectations, POI/E2E evidence hooks (`BDD-DEMO-TYP-001`…`020`) | — | **Not Started** |
+| **P23-T01** | doc-keeper + behavior-spec-author | **BDD behavior spec** — `demo-typography-layout-behavior-spec.md`: actor (demo author / runtime caller), typography/layout acceptance scenarios, per-demo-type footer/header rules, font baseline expectations, POI/E2E evidence hooks (`BDD-DEMO-TYP-001`…`020`) | — | **Done** (2026-07-08; readiness `ready`) |
 | **P23-T02** | deploy-engineer + backend-engineer | **Font baseline in Docker** — executes **LR-A2** / CD-HARD-T01: CJK + Carlito/Caladea (or verified substitutes) in both Dockerfiles; `fc-list` build assertion; `RenderingFontSmokeTest`; evidence PDF. **Single owner row** — update LR-A2 status when Done, do not duplicate work | P23-T01 (typography rules) | **Not Started** |
 | **P23-T03** | backend-engineer | **Master style system for demos** — extend `*MasterDocxAssetGeneratorTest` pattern: standard bank style set (Heading1–3, ClauseBody, TableHeader, SignatureBlock, etc.); margins (e.g. 2.54 cm); default body font; header/footer slots per `pageNumberingProfile`; shared style manifest doc in `deploy/demo-shared/` | P23-T01 | **Not Started** |
 | **P23-T04** | backend-engineer | **Rewrite `deploy/demo-credit-limit/`** — bank-grade credit-limit confirmation (parties, defined terms, facility, interest, covenants, EOD, governing law, signature); ≥20 variables; rich binding overlays + SQL; regenerate master; maps **taskmaster #4** | P23-T03 | **Not Started** |
@@ -96,7 +96,7 @@ Wave 4 — Acceptance + evidence
   LR-A7 pagination corpus (doc-keeper — after ≥5 Wave 2 packages Done)
 ```
 
-**First delegation:** **behavior-spec-author** → **P23-T01**; then **backend-engineer** → **P23-T03** + **P23-T04** (pilot package).
+**First delegation:** ~~**behavior-spec-author** → **P23-T01**~~ **Done** (2026-07-08); **next:** **backend-engineer** → **P23-T03** + **P23-T04** (pilot package); **P23-T02** (LR-A2 font) may parallel after T01.
 
 ---
 
@@ -132,6 +132,11 @@ Wave 4 — Acceptance + evidence
 | **BDD-DEMO-TYP-013** | No placeholder markers in extracted text | T14, T15 |
 | **BDD-DEMO-TYP-014** | POI asserts `w:rFonts` for heading vs body differ | T15 |
 | **BDD-DEMO-TYP-015** | Human checklist items pass for CORP-FOL + credit-limit samples | T16 |
+| **BDD-DEMO-TYP-016** | Master DOCX embeds full bank style catalog at build time | T03, T15 |
+| **BDD-DEMO-TYP-017** | Demo bindings use rich structured nodes not flat placeholder text | T04…T11 |
+| **BDD-DEMO-TYP-018** | Document margins conform to bank baseline (≥2.54 cm) | T03, T15 |
+| **BDD-DEMO-TYP-019** | FOL and full-flow align with shared style manifest | T11 |
+| **BDD-DEMO-TYP-020** | Human typography review covers ≥2 CORP + ≥2 RETAIL samples | T16 |
 
 ---
 
@@ -181,3 +186,4 @@ Wave 4 — Acceptance + evidence
 | Date | Change |
 | --- | --- |
 | 2026-07-08 | Phase activated **In Progress**; 16 tasks Not Started; honest P22 carry-forward documented; taskmaster 4–8 mapped; LR-A2/A7 cross-linked |
+| 2026-07-08 | **P23-T01 Done** — `demo-typography-layout-behavior-spec.md` ready (`BDD-DEMO-TYP-001`…`020`); next delegation P23-T03 + T04 |
