@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Context
 
-**Active formal phase:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE In Progress** (2026-07-08). **Prior:** **P22-DEMO-EXPANSION Done** (2026-07-04; T01–T15; gates **GREEN**; scaffold carry-forward). See [docs/plan/execution-sync-ledger.md](docs/plan/execution-sync-ledger.md).
+**Active formal phase:** **None** (2026-07-08 — **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done**; T01–T16; gates **GREEN**). **Prior:** **P22-DEMO-EXPANSION Done** (2026-07-04). See [docs/plan/execution-sync-ledger.md](docs/plan/execution-sync-ledger.md).
 
 **Task source (2026-07-05):** `.taskmaster/tasks/tasks.json` (task-master-ai v0.43.1) is the source of truth for **new/active work** going forward. `docs/plan/` is the **frozen archive** for P0–P22 history + live record for LRP/CDP/SOR active programs. Project history is fully traceable from zero via `docs/plan/` (P0–P22, 23 phases, 30 detail files, 6 cross-cutting programs) and `.taskmaster/` (new work from 2026-07-05). See ADR-0053.
 
