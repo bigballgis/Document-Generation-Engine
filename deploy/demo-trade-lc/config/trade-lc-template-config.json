@@ -1,11 +1,21 @@
 {
-  "catalogMarker": "trade-lc-demo-v2-real",
+  "catalogMarker": "trade-lc-demo-v3-bank-grade",
   "groupCode": "TRADE",
   "pageNumberingProfile": "GLOBAL_ONLY",
-  "masterLayoutVersion": "trade-lc-layout-v2-global-page",
+  "masterLayoutVersion": "trade-lc-layout-v3-nine-anchors",
   "templates": [
-    {"externalId": "DEMO-TRADE-LC-NOTICE", "name": "Documentary Credit Advice", "masterDocx": "assets/trade-lc-notice-master.docx", "description": "Real foreign-bank documentary credit advice (UCP 600) with full shipment terms, documents required, signatures"},
-    {"externalId": "DEMO-TRADE-GUARANTEE-NOTICE", "name": "Bank Guarantee Notice", "masterDocx": "assets/trade-guarantee-notice-master.docx", "description": "Real foreign-bank on-demand guarantee notice (URDG 758) with claim procedure, expiry, governing law"}
+    {
+      "externalId": "DEMO-TRADE-LC-NOTICE",
+      "name": "Documentary Credit Advice",
+      "masterDocx": "assets/trade-lc-notice-master.docx",
+      "description": "Bank-grade documentary credit advice (UCP 600 / ISBP 745) with defined terms, shipment particulars, document checklist table, UCP presentation module, seal and logo refs"
+    },
+    {
+      "externalId": "DEMO-TRADE-GUARANTEE-NOTICE",
+      "name": "Bank Guarantee Notice",
+      "masterDocx": "assets/trade-guarantee-notice-master.docx",
+      "description": "Bank-grade on-demand guarantee notice (URDG 758) with claim procedure, expiry, governing law, seal and logo refs"
+    }
   ],
   "generatedCatalogFiles": {
     "variables": "config/trade-lc-variables.json",

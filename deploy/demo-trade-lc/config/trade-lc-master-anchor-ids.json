@@ -1,7 +1,72 @@
 {
-  "anchorIds": ["TRADE_LC_BODY", "TRADE_LC_ATTACHMENT", "TRADE_GUARANTEE_BODY", "TRADE_GUARANTEE_ATTACHMENT"],
+  "anchorIds": [
+    "TLC_PARTIES",
+    "TLC_DEFINED_TERMS",
+    "TLC_FACILITY",
+    "TLC_SHIPMENT",
+    "TLC_DOCUMENTS",
+    "TLC_UCP_TERMS",
+    "TLC_GOVERNING_LAW",
+    "TLC_SIGNATURE",
+    "TLC_ATTACHMENT",
+    "TGN_PARTIES",
+    "TGN_DEFINED_TERMS",
+    "TGN_UNDERTAKING",
+    "TGN_CLAIMS",
+    "TGN_EXPIRY",
+    "TGN_URDG_TERMS",
+    "TGN_GOVERNING_LAW",
+    "TGN_SIGNATURE",
+    "TGN_ATTACHMENT"
+  ],
   "templates": [
-    {"externalId": "DEMO-TRADE-LC-NOTICE", "anchorIds": ["TRADE_LC_BODY", "TRADE_LC_ATTACHMENT"]},
-    {"externalId": "DEMO-TRADE-GUARANTEE-NOTICE", "anchorIds": ["TRADE_GUARANTEE_BODY", "TRADE_GUARANTEE_ATTACHMENT"]}
+    {
+      "externalId": "DEMO-TRADE-LC-NOTICE",
+      "anchorIds": [
+        "TLC_PARTIES",
+        "TLC_DEFINED_TERMS",
+        "TLC_FACILITY",
+        "TLC_SHIPMENT",
+        "TLC_DOCUMENTS",
+        "TLC_UCP_TERMS",
+        "TLC_GOVERNING_LAW",
+        "TLC_SIGNATURE",
+        "TLC_ATTACHMENT"
+      ]
+    },
+    {
+      "externalId": "DEMO-TRADE-GUARANTEE-NOTICE",
+      "anchorIds": [
+        "TGN_PARTIES",
+        "TGN_DEFINED_TERMS",
+        "TGN_UNDERTAKING",
+        "TGN_CLAIMS",
+        "TGN_EXPIRY",
+        "TGN_URDG_TERMS",
+        "TGN_GOVERNING_LAW",
+        "TGN_SIGNATURE",
+        "TGN_ATTACHMENT"
+      ]
+    }
+  ],
+  "sections": [
+    {"anchorId": "TLC_PARTIES", "title": "Parties and Recital"},
+    {"anchorId": "TLC_DEFINED_TERMS", "title": "Defined Terms"},
+    {"anchorId": "TLC_FACILITY", "title": "Credit Particulars"},
+    {"anchorId": "TLC_SHIPMENT", "title": "Shipment Terms"},
+    {"anchorId": "TLC_DOCUMENTS", "title": "Documents Required"},
+    {"anchorId": "TLC_UCP_TERMS", "title": "UCP Presentation Terms"},
+    {"anchorId": "TLC_GOVERNING_LAW", "title": "Governing Law"},
+    {"anchorId": "TLC_SIGNATURE", "title": "Authorised Signatory"},
+    {"anchorId": "TLC_ATTACHMENT", "title": "Attachments"},
+    {"anchorId": "TGN_PARTIES", "title": "Parties and Recital"},
+    {"anchorId": "TGN_DEFINED_TERMS", "title": "Defined Terms"},
+    {"anchorId": "TGN_UNDERTAKING", "title": "Undertaking Particulars"},
+    {"anchorId": "TGN_CLAIMS", "title": "Claim Procedure"},
+    {"anchorId": "TGN_EXPIRY", "title": "Expiry and Reduction"},
+    {"anchorId": "TGN_URDG_TERMS", "title": "URDG Standard Terms"},
+    {"anchorId": "TGN_GOVERNING_LAW", "title": "Governing Law"},
+    {"anchorId": "TGN_SIGNATURE", "title": "Authorised Signatory"},
+    {"anchorId": "TGN_ATTACHMENT", "title": "Attachments"}
   ]
 }
