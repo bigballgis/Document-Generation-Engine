@@ -20,6 +20,14 @@ public final class DemoMasterDocxAssertions {
         return readZipEntryMatching(docxBytes, "word/styles.xml"::equals);
     }
 
+    public static String readDocumentXml(byte[] docxBytes) throws IOException {
+        return readZipEntryMatching(docxBytes, "word/document.xml"::equals);
+    }
+
+    public static String readZipEntry(byte[] docxBytes, String entryName) throws IOException {
+        return readZipEntryMatching(docxBytes, entryName::equals);
+    }
+
     private static String readZipEntryMatching(byte[] docxBytes, Predicate<String> matcher) throws IOException {
         StringBuilder builder = new StringBuilder();
         try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(docxBytes))) {
