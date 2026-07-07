@@ -1,5 +1,5 @@
 {
-  "catalogMarker": "mortgage-demo-v2-real",
+  "catalogMarker": "mortgage-demo-v3-bank-grade",
   "variables": [
     {
       "key": "lenderName",
@@ -26,6 +26,12 @@
       "required": true
     },
     {
+      "key": "mortgageReference",
+      "label": "Mortgage Reference",
+      "type": "TEXT",
+      "required": true
+    },
+    {
       "key": "borrowerName",
       "label": "Borrower Name",
       "type": "TEXT",
@@ -36,6 +42,18 @@
       "label": "Borrower Address",
       "type": "TEXT",
       "required": true
+    },
+    {
+      "key": "includeCoBorrower",
+      "label": "Include Co-Borrower",
+      "type": "BOOLEAN",
+      "required": false
+    },
+    {
+      "key": "coBorrowerName",
+      "label": "Co-Borrower Name",
+      "type": "TEXT",
+      "required": false
     },
     {
       "key": "propertyAddress",
@@ -134,12 +152,6 @@
       "required": true
     },
     {
-      "key": "repaymentSchedule",
-      "label": "Repayment Schedule",
-      "type": "LIST",
-      "required": true
-    },
-    {
       "key": "insuranceRequirement",
       "label": "Buildings Insurance Requirement",
       "type": "TEXT",
@@ -148,6 +160,24 @@
     {
       "key": "earlyRepaymentCharge",
       "label": "Early Repayment Charge",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "maxOverpaymentPct",
+      "label": "Max Annual Overpayment (%)",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "governingLaw",
+      "label": "Governing Law",
+      "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "jurisdiction",
+      "label": "Jurisdiction",
       "type": "TEXT",
       "required": true
     },
@@ -162,6 +192,18 @@
       "label": "Signatory Title",
       "type": "TEXT",
       "required": true
+    },
+    {
+      "key": "repaymentSchedule",
+      "label": "Repayment Schedule",
+      "type": "LIST",
+      "required": true
+    },
+    {
+      "key": "conditionsPrecedent",
+      "label": "Conditions Precedent",
+      "type": "LIST",
+      "required": false
     }
   ]
 }

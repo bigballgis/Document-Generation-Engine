@@ -1,11 +1,28 @@
 {
-  "catalogMarker": "mortgage-demo-v2-real",
+  "catalogMarker": "mortgage-demo-v3-bank-grade",
   "packageCode": "mortgage",
   "groupCode": "RETAIL",
   "pageNumberingProfile": "SECTION_AND_GLOBAL",
-  "pageTarget": 10,
-  "templates": ["DEMO-MORTGAGE-APPROVAL"],
+  "pageTarget": 12,
+  "templates": [
+    {
+      "externalId": "DEMO-MORTGAGE-APPROVAL",
+      "anchorIds": [
+        "MT_PARTIES",
+        "MT_DEFINED_TERMS",
+        "MT_LOAN_TERMS",
+        "MT_INTEREST",
+        "MT_COVENANTS",
+        "MT_CONDITIONS",
+        "MT_SCHEDULE",
+        "MT_GOVERNING_LAW",
+        "MT_SIGNATURE"
+      ]
+    }
+  ],
   "contentModuleRefs": [
-    {"referenceKey": "MORTGAGE-STANDARD-TERMS", "moduleCode": "MORTGAGE-STD-TERMS"}
+    {"referenceKey": "MORTGAGE-STANDARD-TERMS", "moduleCode": "MORTGAGE-STD-TERMS"},
+    {"referenceKey": "MORTGAGE-PROPERTY-COVENANTS", "moduleCode": "MORTGAGE-PROP-COV"},
+    {"referenceKey": "MORTGAGE-DEFAULT-CLAUSE", "moduleCode": "MORTGAGE-DEFAULT"}
   ]
 }

@@ -1,7 +1,24 @@
 {
-  "anchorIds": ["MORTGAGE_BODY", "MORTGAGE_SCHEDULE"],
+  "anchorIds": [
+    "MT_PARTIES",
+    "MT_DEFINED_TERMS",
+    "MT_LOAN_TERMS",
+    "MT_INTEREST",
+    "MT_COVENANTS",
+    "MT_CONDITIONS",
+    "MT_SCHEDULE",
+    "MT_GOVERNING_LAW",
+    "MT_SIGNATURE"
+  ],
   "sections": [
-    {"anchorId": "MORTGAGE_BODY", "title": "Mortgage Approval Letter"},
-    {"anchorId": "MORTGAGE_SCHEDULE", "title": "Repayment Schedule and Signatures"}
+    {"anchorId": "MT_PARTIES", "title": "Parties and Recital"},
+    {"anchorId": "MT_DEFINED_TERMS", "title": "Defined Terms"},
+    {"anchorId": "MT_LOAN_TERMS", "title": "Loan Particulars"},
+    {"anchorId": "MT_INTEREST", "title": "Interest and Repayments"},
+    {"anchorId": "MT_COVENANTS", "title": "Borrower Covenants"},
+    {"anchorId": "MT_CONDITIONS", "title": "Conditions Precedent"},
+    {"anchorId": "MT_SCHEDULE", "title": "Amortization Schedule"},
+    {"anchorId": "MT_GOVERNING_LAW", "title": "Governing Law"},
+    {"anchorId": "MT_SIGNATURE", "title": "Signatures"}
   ]
 }
