@@ -1,24 +1,83 @@
 {
-  "catalogMarker": "retail-account-demo-v1",
+  "catalogMarker": "retail-account-demo-v3-bank-grade",
   "testDataSets": [
     {
       "id": "retail-open-executive",
-      "label": "Retail Account Opening — Executive Sample",
+      "label": "Retail Account Opening — P23 Executive Sample",
       "variables": {
-        "customerName": "Ms Eleanor Whitfield",
-        "accountNumber": "GB29 MERI 6016 1331 9268 19",
+        "bankName": "Meridian Retail Banking",
+        "bankAddress": "42 High Street, Manchester M1 1AA, United Kingdom",
+        "bankFcaNumber": "123456",
         "branchName": "Manchester Deansgate",
-        "openingDate": "2026-06-15"
+        "branchAddress": "Unit 4, Deansgate, Manchester M3 2BW",
+        "branchPhone": "0161 496 3200",
+        "letterDate": "2026-07-06",
+        "customerReference": "MRB-RAO-2026-003847",
+        "customerName": "Ms Eleanor Whitfield",
+        "customerAddress": "Flat 12, 8 Whitworth Street West, Manchester M1 5WW",
+        "accountNumber": "GB29 MERI 6016 1331 9268 19",
+        "sortCode": "60-16-13",
+        "accountType": "Meridian Everyday Current Account",
+        "currency": "GBP",
+        "openingDate": "2026-06-15",
+        "includeJointAccount": false,
+        "includeOverdraft": true,
+        "overdraftLimit": "1,500.00",
+        "debitCardType": "Contactless Visa Debit",
+        "relationshipManager": "Sophie Hartley",
+        "contactPhone": "0800 123 4567",
+        "signatoryName": "James R. Thornton",
+        "signatoryTitle": "Branch Manager — Manchester Deansgate",
+        "feeSchedule": [
+          {"feeType": "Monthly account fee", "amount": "£0.00", "frequency": "Monthly", "notes": "No monthly fee for Everyday Current Account"},
+          {"feeType": "Arranged overdraft usage", "amount": "39.9% EAR", "frequency": "Daily", "notes": "Variable rate; charged on amount overdrawn"},
+          {"feeType": "Unarranged overdraft fee", "amount": "£5.00", "frequency": "Per day", "notes": "Max one fee per day"},
+          {"feeType": "International debit card purchase", "amount": "2.75%", "frequency": "Per transaction", "notes": "Non-sterling transactions"},
+          {"feeType": "CHAPS payment (outgoing)", "amount": "£25.00", "frequency": "Per payment", "notes": "Same-day sterling transfer"},
+          {"feeType": "Stopped cheque", "amount": "£10.00", "frequency": "Per item", "notes": "Subject to cheque availability"}
+        ]
       }
     },
     {
       "id": "retail-balance-executive",
-      "label": "Retail Balance Confirmation — Executive Sample",
+      "label": "Retail Balance Confirmation — P23 Executive Sample",
       "variables": {
+        "bankName": "Meridian Retail Banking",
+        "bankAddress": "42 High Street, Manchester M1 1AA, United Kingdom",
+        "bankFcaNumber": "123456",
+        "branchName": "Leeds Headingley",
+        "branchAddress": "15 Otley Road, Leeds LS6 3AA",
+        "branchPhone": "0113 496 3200",
+        "letterDate": "2026-07-06",
+        "customerReference": "MRB-RAB-2026-005291",
         "customerName": "Mr James Porter",
+        "customerAddress": "22 Hollybush Lane, Leeds LS16 7QF",
         "accountNumber": "GB82 MERI 4047 5312 8741 63",
-        "balanceAmount": "GBP 24,567.89",
-        "balanceDate": "2026-06-30"
+        "sortCode": "40-47-53",
+        "accountType": "Meridian Reward Saver Account",
+        "currency": "GBP",
+        "balanceDate": "2026-06-30",
+        "balanceAmount": "24,567.89",
+        "availableBalance": "24,517.89",
+        "interestRate": "4.25% gross",
+        "aerRate": "4.33% AER (variable)",
+        "includeOverdraft": false,
+        "relationshipManager": "Carl Patterson",
+        "contactPhone": "0800 123 4567",
+        "signatoryName": "James R. Thornton",
+        "signatoryTitle": "Head of Retail Banking — North Region",
+        "feeSchedule": [
+          {"feeType": "Monthly account fee", "amount": "£0.00", "frequency": "Monthly", "notes": "No monthly fee for Reward Saver"},
+          {"feeType": "Withdrawal notice (60-day)", "amount": "£0.00", "frequency": "N/A", "notes": "Penalty-free with 60 days notice"},
+          {"feeType": "Early withdrawal", "amount": "90 days interest", "frequency": "Per withdrawal", "notes": "On amount withdrawn without notice"}
+        ],
+        "recentTransactions": [
+          {"transactionDate": "2026-06-28", "description": "Salary credit — Porter Engineering Ltd", "amount": "+3,250.00", "balance": "24,567.89"},
+          {"transactionDate": "2026-06-25", "description": "Standing order — Mortgage payment", "amount": "-1,125.00", "balance": "21,317.89"},
+          {"transactionDate": "2026-06-20", "description": "Interest credit", "amount": "+87.42", "balance": "22,442.89"},
+          {"transactionDate": "2026-06-15", "description": "Direct debit — British Gas", "amount": "-142.50", "balance": "22,355.47"},
+          {"transactionDate": "2026-06-10", "description": "Transfer from current account", "amount": "+2,000.00", "balance": "22,497.97"}
+        ]
       }
     }
   ]

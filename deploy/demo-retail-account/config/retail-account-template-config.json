@@ -1,9 +1,9 @@
 {
-  "catalogMarker": "retail-account-demo-v1",
+  "catalogMarker": "retail-account-demo-v3-bank-grade",
   "groupCode": "RETAIL",
   "pageNumberingProfile": "GLOBAL_ONLY",
   "masterName": "Meridian Retail Account Master",
-  "masterLayoutVersion": "retail-account-layout-v1-global-page",
+  "masterLayoutVersion": "retail-account-layout-v3-eight-anchors",
   "masterDescription": "Retail account opening and balance confirmation letters",
   "templates": [
     {

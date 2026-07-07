@@ -2,62 +2,241 @@ package com.bank.docgen.demo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bank.docgen.demo.support.DemoMasterDocxAssertions;
 import com.bank.docgen.demo.support.DemoMasterDocxLayoutSupport;
 import com.bank.docgen.demo.support.DemoMasterDocxPageNumberSupport;
+import com.bank.docgen.demo.support.DemoMasterDocxStyleSupport;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
+import com.bank.docgen.rendering.DocxMasterStyleRegistry;
 import com.bank.docgen.rendering.DocxWordCompatibilitySupport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 import org.apache.poi.wp.usermodel.HeaderFooterType;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFHeader;
 import org.apache.poi.xwpf.usermodel.XWPFFooter;
+import org.apache.poi.xwpf.usermodel.XWPFHeader;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFStyles;
 import org.junit.jupiter.api.Test;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 
 class RetailAccountMasterDocxAssetGeneratorTest {
 
-    static final String MASTER_LAYOUT_VERSION = "retail-account-layout-v1-global-page";
-
+    static final String MASTER_LAYOUT_VERSION = "retail-account-layout-v3-eight-anchors";
     private static final Path OPEN_ASSET = Path.of("..", "deploy", "demo-retail-account", "assets", "retail-account-open-master.docx");
     private static final Path BALANCE_ASSET = Path.of("..", "deploy", "demo-retail-account", "assets", "retail-account-balance-master.docx");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(
+            "LOREM|TODO|\\{\\{placeholder|placeholder text",
+            Pattern.CASE_INSENSITIVE
+    );
 
-    static final List<String> OPEN_ANCHORS = List.of("RETAIL_OPEN_BODY", "RETAIL_OPEN_TERMS");
-    static final List<String> BALANCE_ANCHORS = List.of("RETAIL_BALANCE_BODY", "RETAIL_BALANCE_SUMMARY");
+    static final List<String> OPEN_ANCHOR_IDS = List.of(
+            "RAO_PARTIES",
+            "RAO_ACCOUNT_OPENING",
+            "RAO_PRODUCT_TERMS",
+            "RAO_FEE_SCHEDULE",
+            "RAO_REGULATORY",
+            "RAO_DIGITAL_BANKING",
+            "RAO_SIGNATURE",
+            "RAO_DISCLAIMER"
+    );
+
+    static final List<String> BALANCE_ANCHOR_IDS = List.of(
+            "RAB_PARTIES",
+            "RAB_BALANCE_CONFIRMATION",
+            "RAB_TRANSACTION_SUMMARY",
+            "RAB_INTEREST_TAX",
+            "RAB_FEE_SCHEDULE",
+            "RAB_REGULATORY",
+            "RAB_SIGNATURE",
+            "RAB_DISCLAIMER"
+    );
+
+    /** @deprecated use {@link #OPEN_ANCHOR_IDS} */
+    @Deprecated
+    static final List<String> OPEN_ANCHORS = OPEN_ANCHOR_IDS;
+
+    /** @deprecated use {@link #BALANCE_ANCHOR_IDS} */
+    @Deprecated
+    static final List<String> BALANCE_ANCHORS = BALANCE_ANCHOR_IDS;
 
     @Test
     void writesRetailAccountMasterDocxAssets() throws Exception {
-        byte[] openDocx = buildMaster("Account Opening Confirmation", OPEN_ANCHORS);
-        byte[] balanceDocx = buildMaster("Account Balance Confirmation", BALANCE_ANCHORS);
-
+        byte[] openDocx = buildAccountOpeningMaster();
+        byte[] balanceDocx = buildBalanceConfirmationMaster();
         DocxAnchorExtractor extractor = new DocxAnchorExtractor();
-        assertThat(extractor.extractOrderedAnchorIds(new ByteArrayInputStream(openDocx))).containsExactlyElementsOf(OPEN_ANCHORS);
-        assertThat(extractor.extractOrderedAnchorIds(new ByteArrayInputStream(balanceDocx))).containsExactlyElementsOf(BALANCE_ANCHORS);
+        assertThat(extractor.extractOrderedAnchorIds(new ByteArrayInputStream(openDocx)))
+                .containsExactlyElementsOf(OPEN_ANCHOR_IDS);
+        assertThat(extractor.extractOrderedAnchorIds(new ByteArrayInputStream(balanceDocx)))
+                .containsExactlyElementsOf(BALANCE_ANCHOR_IDS);
+        assertThat(OPEN_ANCHOR_IDS).hasSize(8);
+        assertThat(BALANCE_ANCHOR_IDS).hasSize(8);
+
+        assertBankGradeMaster(openDocx);
+        assertBankGradeMaster(balanceDocx);
+
+        String openFooterXml = DemoMasterDocxAssertions.readFooterXml(openDocx);
+        assertThat(openFooterXml).contains("NUMPAGES");
+        assertThat(openFooterXml).doesNotContain("SECTIONPAGES");
+        assertThat(openFooterXml).contains("Customer Service");
+        assertThat(openFooterXml).contains("Manchester");
+        assertThat(openFooterXml).doesNotContain("Wholesale");
 
         Files.createDirectories(OPEN_ASSET.getParent());
         Files.write(OPEN_ASSET, openDocx);
         Files.write(BALANCE_ASSET, balanceDocx);
     }
 
+    private static void assertBankGradeMaster(byte[] docx) throws Exception {
+        DemoMasterDocxStyleSupport.assertSharedBankStylesPresent(docx);
+        String stylesXml = DemoMasterDocxAssertions.readStylesXml(docx);
+        assertThat(stylesXml)
+                .contains("w:styleId=\"ClauseBody\"")
+                .contains("w:styleId=\"SignatureBlock\"")
+                .contains("w:styleId=\"TableHeader\"")
+                .contains("w:styleId=\"DisclaimerBody\"");
+
+        assertNoPlaceholderMarkers(docx);
+
+        try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docx))) {
+            CTSectPr sectPr = document.getDocument().getBody().getSectPr();
+            assertThat(sectPr).isNotNull();
+            CTPageMar margins = sectPr.getPgMar();
+            long baseline = DemoMasterDocxStyleSupport.MARGIN_BASELINE_TWIPS;
+            assertThat(((BigInteger) margins.getLeft()).longValue()).isGreaterThanOrEqualTo(baseline);
+            assertThat(((BigInteger) margins.getRight()).longValue()).isGreaterThanOrEqualTo(baseline);
+        }
+    }
+
+    private static void assertNoPlaceholderMarkers(byte[] docxBytes) throws Exception {
+        try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docxBytes))) {
+            StringBuilder text = new StringBuilder();
+            document.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n'));
+            document.getHeaderList().forEach(header ->
+                    header.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n')));
+            document.getFooterList().forEach(footer ->
+                    footer.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n')));
+            String body = text.toString().toUpperCase(Locale.ROOT);
+            assertThat(PLACEHOLDER_PATTERN.matcher(body).find())
+                    .as("Master DOCX must not contain LOREM/TODO/placeholder markers")
+                    .isFalse();
+            assertThat(body).doesNotContain("LOREM");
+        }
+    }
+
+    static byte[] buildAccountOpeningMaster() throws Exception {
+        return buildMaster(
+                "Account Opening Confirmation",
+                "Meridian Retail Banking — Customer Correspondence",
+                "Customer Service: 0800 123 4567  |  42 High Street, Manchester M1 1AA  |  FSCS protected deposits",
+                OPEN_ANCHOR_IDS,
+                List.of(
+                        "Parties and Account",
+                        "Account Opening Confirmation",
+                        "Product Terms and Conditions",
+                        "Fee Schedule",
+                        "Regulatory Notice",
+                        "Digital Banking Services",
+                        "Authorised Signatory",
+                        "Important Information"
+                )
+        );
+    }
+
+    static byte[] buildBalanceConfirmationMaster() throws Exception {
+        return buildMaster(
+                "Account Balance Confirmation",
+                "Meridian Retail Banking — Customer Correspondence",
+                "Customer Service: 0800 123 4567  |  42 High Street, Manchester M1 1AA  |  FSCS protected deposits",
+                BALANCE_ANCHOR_IDS,
+                List.of(
+                        "Parties and Account",
+                        "Balance Confirmation",
+                        "Transaction Summary",
+                        "Interest and Tax",
+                        "Applicable Fees",
+                        "Regulatory Notice",
+                        "Authorised Signatory",
+                        "Important Information"
+                )
+        );
+    }
+
+    /**
+     * Builds a minimal single-anchor master for binding assembly tests.
+     */
+    static byte[] buildMaster(String title, String anchorId) throws Exception {
+        return buildMaster(
+                title,
+                "Meridian Retail Banking — Customer Correspondence",
+                "Customer Service: 0800 123 4567  |  42 High Street, Manchester M1 1AA",
+                List.of(anchorId),
+                List.of("Body")
+        );
+    }
+
+    /**
+     * @deprecated use {@link #buildAccountOpeningMaster()} or {@link #buildBalanceConfirmationMaster()}
+     */
+    @Deprecated
     static byte[] buildMaster(String title, List<String> anchorIds) throws Exception {
+        return buildMaster(
+                title,
+                "Meridian Retail Banking — Customer Correspondence",
+                "Customer Service: 0800 123 4567  |  42 High Street, Manchester M1 1AA",
+                anchorIds,
+                anchorIds.stream().map(id -> "Section").toList()
+        );
+    }
+
+    private static byte[] buildMaster(
+            String title,
+            String headerBrand,
+            String footerDisclaimer,
+            List<String> anchorIds,
+            List<String> sectionTitles
+    ) throws Exception {
         try (XWPFDocument document = new XWPFDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             DemoMasterDocxLayoutSupport.configureA4PageLayout(document);
-            configureHeader(document);
-            configureFooter(document);
+            DemoMasterDocxStyleSupport.applySharedBankStyles(document);
+            applyRetailProductStyles(document);
 
-            addCentered(document, "Meridian Retail Banking", 16, true, "006633");
-            addCentered(document, title, 12, true, "000000");
-            document.createParagraph();
+            XWPFHeader header = document.createHeader(HeaderFooterType.DEFAULT);
+            XWPFParagraph brandLine = header.createParagraph();
+            brandLine.setAlignment(ParagraphAlignment.LEFT);
+            XWPFRun brandRun = brandLine.createRun();
+            brandRun.setBold(true);
+            brandRun.setFontSize(9);
+            brandRun.setColor("006633");
+            brandRun.setText(headerBrand);
 
-            for (String anchorId : anchorIds) {
-                XWPFParagraph anchorParagraph = document.createParagraph();
-                anchorParagraph.createRun().setText("{{anchor:" + anchorId + "}}");
-                document.createParagraph();
+            XWPFFooter footer = document.createFooter(HeaderFooterType.DEFAULT);
+            XWPFParagraph disclaimerLine = footer.createParagraph();
+            disclaimerLine.setAlignment(ParagraphAlignment.LEFT);
+            XWPFRun disclaimerRun = disclaimerLine.createRun();
+            disclaimerRun.setFontSize(7);
+            disclaimerRun.setColor("666666");
+            disclaimerRun.setText(footerDisclaimer);
+            XWPFParagraph pageLine = footer.createParagraph();
+            pageLine.setAlignment(ParagraphAlignment.CENTER);
+            DemoMasterDocxPageNumberSupport.addGlobalPageNumberFields(pageLine);
+
+            addTitle(document, title);
+            for (int index = 0; index < anchorIds.size(); index++) {
+                if (index > 0) {
+                    insertSectionBreak(document);
+                    addSectionTitle(document, sectionTitles.get(index));
+                }
+                addAnchor(document, anchorIds.get(index));
             }
 
             DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
@@ -66,44 +245,38 @@ class RetailAccountMasterDocxAssetGeneratorTest {
         }
     }
 
-    private static void configureHeader(XWPFDocument document) {
-        XWPFHeader header = document.createHeader(HeaderFooterType.DEFAULT);
-        XWPFParagraph line = header.createParagraph();
-        XWPFRun run = line.createRun();
-        run.setBold(true);
-        run.setFontSize(9);
-        run.setColor("006633");
-        run.setText("Meridian Retail Banking — Customer Correspondence");
+    private static void applyRetailProductStyles(XWPFDocument document) {
+        XWPFStyles styles = document.getStyles();
+        if (styles == null) {
+            return;
+        }
+        DocxMasterStyleRegistry.registerBankParagraphStyle(styles, "DisclaimerBody", 16, "Calibri", false);
     }
 
-    private static void configureFooter(XWPFDocument document) {
-        XWPFFooter footer = document.createFooter(HeaderFooterType.DEFAULT);
-        XWPFParagraph address = footer.createParagraph();
-        address.setAlignment(ParagraphAlignment.LEFT);
-        XWPFRun addressRun = address.createRun();
-        addressRun.setFontSize(7);
-        addressRun.setColor("666666");
-        addressRun.setText("Customer Service: 0800 123 4567  |  42 High Street, Manchester M1 1AA");
-
-        XWPFParagraph pageLine = footer.createParagraph();
-        pageLine.setAlignment(ParagraphAlignment.CENTER);
-        DemoMasterDocxPageNumberSupport.addGlobalPageNumberFields(pageLine);
-
-        XWPFParagraph disclaimer = footer.createParagraph();
-        disclaimer.setAlignment(ParagraphAlignment.CENTER);
-        XWPFRun disclaimerRun = disclaimer.createRun();
-        disclaimerRun.setFontSize(7);
-        disclaimerRun.setItalic(true);
-        disclaimerRun.setText("This is a demonstration document — not a contractual offer");
-    }
-
-    private static void addCentered(XWPFDocument document, String text, int size, boolean bold, String color) {
+    private static void addTitle(XWPFDocument document, String text) {
         XWPFParagraph paragraph = document.createParagraph();
         paragraph.setAlignment(ParagraphAlignment.CENTER);
         XWPFRun run = paragraph.createRun();
-        run.setBold(bold);
-        run.setFontSize(size);
-        run.setColor(color);
+        run.setBold(true);
+        run.setFontSize(14);
+        run.setColor("006633");
         run.setText(text);
+    }
+
+    private static void addSectionTitle(XWPFDocument document, String text) {
+        XWPFParagraph paragraph = document.createParagraph();
+        paragraph.setAlignment(ParagraphAlignment.LEFT);
+        XWPFRun run = paragraph.createRun();
+        run.setBold(true);
+        run.setFontSize(12);
+        run.setText(text);
+    }
+
+    private static void addAnchor(XWPFDocument document, String anchorId) {
+        document.createParagraph().createRun().setText("{{anchor:" + anchorId + "}}");
+    }
+
+    private static void insertSectionBreak(XWPFDocument document) {
+        DemoMasterDocxLayoutSupport.insertSectionBreakNextPage(document.createParagraph(), false);
     }
 }

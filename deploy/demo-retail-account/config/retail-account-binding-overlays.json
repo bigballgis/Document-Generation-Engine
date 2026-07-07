@@ -1,45 +1,652 @@
 {
-  "catalogMarker": "retail-account-demo-v1",
+  "catalogMarker": "retail-account-demo-v3-bank-grade",
   "bindings": {
-    "RETAIL_OPEN_BODY": {
-      "type": "paragraph",
-      "children": [
-        {"type": "textRun", "text": "Dear "},
-        {"type": "variable", "key": "customerName"},
-        {"type": "textRun", "text": ",\n\nWe are pleased to confirm that your account "},
-        {"type": "variable", "key": "accountNumber"},
-        {"type": "textRun", "text": " has been opened at our "},
-        {"type": "variable", "key": "branchName"},
-        {"type": "textRun", "text": " branch effective "},
-        {"type": "variable", "key": "openingDate"},
-        {"type": "textRun", "text": "."}
+    "RAO_PARTIES": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Date: "},
+            {"type": "variable", "key": "letterDate"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Our ref: "},
+            {"type": "variable", "key": "customerReference"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "To: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "customerName"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "variable", "key": "customerAddress"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "textRun", "value": "Dear Customer,"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Re: Account Opening Confirmation — "},
+            {"type": "underline", "children": [{"type": "variable", "key": "accountNumber"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Branch: "},
+            {"type": "variable", "key": "branchName"},
+            {"type": "textRun", "value": ", "},
+            {"type": "variable", "key": "branchAddress"},
+            {"type": "textRun", "value": " (tel: "},
+            {"type": "variable", "key": "branchPhone"},
+            {"type": "textRun", "value": ")"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "We, "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "bankName"}]},
+            {"type": "textRun", "value": " of "},
+            {"type": "variable", "key": "bankAddress"},
+            {"type": "textRun", "value": " (FCA "},
+            {"type": "variable", "key": "bankFcaNumber"},
+            {"type": "textRun", "value": "), are pleased to confirm the opening of your retail account."}
+          ]
+        }
       ]
     },
-    "RETAIL_OPEN_TERMS": {
-      "type": "paragraph",
-      "children": [
-        {"type": "emphasis", "variant": "bold", "children": [{"type": "textRun", "text": "Important:"}]},
-        {"type": "textRun", "text": " Please retain this letter for your records."}
+    "RAO_ACCOUNT_OPENING": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Account Opening Confirmation"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "We are pleased to confirm that your "},
+            {"type": "variable", "key": "accountType"},
+            {"type": "textRun", "value": " (the \"Account\") with account number "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "accountNumber"}]},
+            {"type": "textRun", "value": " and sort code "},
+            {"type": "underline", "children": [{"type": "variable", "key": "sortCode"}]},
+            {"type": "textRun", "value": " was opened at our "},
+            {"type": "variable", "key": "branchName"},
+            {"type": "textRun", "value": " branch with effect from "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "openingDate"}]},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeJointAccount} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "The Account is held jointly with "},
+                {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "jointHolderName"}]},
+                {"type": "textRun", "value": ". Both account holders are jointly and severally liable for all amounts owing on the Account."}
+              ]
+            }
+          ]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeOverdraft} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "An arranged overdraft facility of up to "},
+                {"type": "emphasis", "variant": "bold", "children": [
+                  {"type": "variable", "key": "currency"},
+                  {"type": "textRun", "value": " "},
+                  {"type": "variable", "key": "overdraftLimit"}
+                ]},
+                {"type": "textRun", "value": " has been made available on the Account, subject to the terms set out in this letter and the Account terms and conditions."}
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Your "},
+            {"type": "variable", "key": "debitCardType"},
+            {"type": "textRun", "value": " debit card will be dispatched to your registered address within five working days of the account opening date."}
+          ]
+        }
       ]
     },
-    "RETAIL_BALANCE_BODY": {
-      "type": "paragraph",
-      "children": [
-        {"type": "textRun", "text": "Account "},
-        {"type": "variable", "key": "accountNumber"},
-        {"type": "textRun", "text": " held in the name of "},
-        {"type": "variable", "key": "customerName"},
-        {"type": "textRun", "text": " showed a balance of "},
-        {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "balanceAmount"}]},
-        {"type": "textRun", "text": " as at "},
-        {"type": "variable", "key": "balanceDate"},
-        {"type": "textRun", "text": "."}
+    "RAO_PRODUCT_TERMS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Product Terms and Conditions"}]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "RETAIL-ACCOUNT-OPEN-STD"
+        }
       ]
     },
-    "RETAIL_BALANCE_SUMMARY": {
-      "type": "paragraph",
-      "children": [
-        {"type": "textRun", "text": "This confirmation is provided for your information only."}
+    "RAO_FEE_SCHEDULE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Fee Schedule"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ScheduleTitle",
+          "children": [
+            {"type": "textRun", "value": "Schedule 1 — Account Fees and Charges (effective from account opening date)"}
+          ]
+        },
+        {
+          "type": "tableComponentRef",
+          "tableComponent": {
+            "componentKey": "RETAIL-TBL-FEE-SCHEDULE",
+            "columnSchema": [
+              {"columnKey": "feeType", "widthPct": 35},
+              {"columnKey": "amount", "widthPct": 25},
+              {"columnKey": "frequency", "widthPct": 20},
+              {"columnKey": "notes", "widthPct": 20}
+            ],
+            "headerRows": [[
+              {"columnKey": "feeType", "value": "Fee Type"},
+              {"columnKey": "amount", "value": "Amount"},
+              {"columnKey": "frequency", "value": "Frequency"},
+              {"columnKey": "notes", "value": "Notes"}
+            ]],
+            "loopRow": {
+              "loopVariable": "feeSchedule",
+              "cells": [
+                {"columnKey": "feeType", "variableKey": "feeType"},
+                {"columnKey": "amount", "variableKey": "amount"},
+                {"columnKey": "frequency", "variableKey": "frequency"},
+                {"columnKey": "notes", "variableKey": "notes"}
+              ]
+            }
+          }
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Fees are subject to change. We will give you at least 60 days' notice before increasing any fee that is not linked to a change in the Bank of England base rate. A full schedule of fees is available on request or at meridianretail.co.uk/fees."}
+          ]
+        }
+      ]
+    },
+    "RAO_REGULATORY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Regulatory Notice"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Your eligible deposits with "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "bankName"}]},
+            {"type": "textRun", "value": " are protected up to a total of £85,000 by the Financial Services Compensation Scheme (FSCS), the UK's deposit guarantee scheme. Any deposits you hold above this limit are unlikely to be covered."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DisclaimerBody",
+          "children": [
+            {"type": "textRun", "value": "This confirmation is provided for information purposes only and does not amend the terms and conditions governing your Account. Please read the enclosed Account terms and conditions carefully and contact us if you have any questions."}
+          ]
+        }
+      ]
+    },
+    "RAO_DIGITAL_BANKING": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Digital Banking Services"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "You may register for Meridian Online and Mobile Banking using the activation code enclosed with your welcome pack. Your relationship manager, "},
+            {"type": "variable", "key": "relationshipManager"},
+            {"type": "textRun", "value": ", can assist with registration (tel: "},
+            {"type": "variable", "key": "contactPhone"},
+            {"type": "textRun", "value": ")."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "For your security, never share your online banking credentials or one-time passcodes with anyone, including bank staff. We will never ask you to transfer money to a safe account."}
+          ]
+        }
+      ]
+    },
+    "RAO_SIGNATURE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Authorised Signatory"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {"type": "textRun", "value": "Yours sincerely,"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {"type": "variable", "key": "signatoryTitle"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {"type": "variable", "key": "bankName"}
+          ]
+        }
+      ]
+    },
+    "RAO_DISCLAIMER": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Important Information"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DisclaimerBody",
+          "children": [
+            {"type": "textRun", "value": "This is a demonstration document issued for system testing purposes. It does not constitute a contractual offer or amendment to your Account terms and conditions."}
+          ]
+        }
+      ]
+    },
+    "RAB_PARTIES": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Date: "},
+            {"type": "variable", "key": "letterDate"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Our ref: "},
+            {"type": "variable", "key": "customerReference"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "To: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "customerName"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "variable", "key": "customerAddress"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "textRun", "value": "Dear Customer,"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Re: Account Balance Confirmation — "},
+            {"type": "underline", "children": [{"type": "variable", "key": "accountNumber"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Branch: "},
+            {"type": "variable", "key": "branchName"},
+            {"type": "textRun", "value": " | "},
+            {"type": "variable", "key": "bankName"},
+            {"type": "textRun", "value": " (FCA "},
+            {"type": "variable", "key": "bankFcaNumber"},
+            {"type": "textRun", "value": ")"}
+          ]
+        }
+      ]
+    },
+    "RAB_BALANCE_CONFIRMATION": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Balance Confirmation"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "We confirm that your "},
+            {"type": "variable", "key": "accountType"},
+            {"type": "textRun", "value": " held in the name of "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "customerName"}]},
+            {"type": "textRun", "value": " (account number "},
+            {"type": "underline", "children": [{"type": "variable", "key": "accountNumber"}]},
+            {"type": "textRun", "value": ", sort code "},
+            {"type": "variable", "key": "sortCode"},
+            {"type": "textRun", "value": ") showed a cleared balance of "},
+            {"type": "emphasis", "variant": "bold", "children": [
+              {"type": "variable", "key": "currency"},
+              {"type": "textRun", "value": " "},
+              {"type": "variable", "key": "balanceAmount"}
+            ]},
+            {"type": "textRun", "value": " as at close of business on "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "balanceDate"}]},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Available balance (after pending transactions): "},
+            {"type": "emphasis", "variant": "bold", "children": [
+              {"type": "variable", "key": "currency"},
+              {"type": "textRun", "value": " "},
+              {"type": "variable", "key": "availableBalance"}
+            ]},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeOverdraft} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "Arranged overdraft limit: "},
+                {"type": "emphasis", "variant": "bold", "children": [
+                  {"type": "variable", "key": "currency"},
+                  {"type": "textRun", "value": " "},
+                  {"type": "variable", "key": "overdraftLimit"}
+                ]},
+                {"type": "textRun", "value": "."}
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "RAB_TRANSACTION_SUMMARY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Transaction Summary"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ScheduleTitle",
+          "children": [
+            {"type": "textRun", "value": "Schedule 1 — Recent Transactions (last 30 days)"}
+          ]
+        },
+        {
+          "type": "tableComponentRef",
+          "tableComponent": {
+            "componentKey": "RETAIL-TBL-TRANSACTIONS",
+            "columnSchema": [
+              {"columnKey": "transactionDate", "widthPct": 25},
+              {"columnKey": "description", "widthPct": 40},
+              {"columnKey": "amount", "widthPct": 20},
+              {"columnKey": "balance", "widthPct": 15}
+            ],
+            "headerRows": [[
+              {"columnKey": "transactionDate", "value": "Date"},
+              {"columnKey": "description", "value": "Description"},
+              {"columnKey": "amount", "value": "Amount"},
+              {"columnKey": "balance", "value": "Balance"}
+            ]],
+            "loopRow": {
+              "loopVariable": "recentTransactions",
+              "cells": [
+                {"columnKey": "transactionDate", "variableKey": "transactionDate"},
+                {"columnKey": "description", "variableKey": "description"},
+                {"columnKey": "amount", "variableKey": "amount"},
+                {"columnKey": "balance", "variableKey": "balance"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "RAB_INTEREST_TAX": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Interest and Tax"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The gross interest rate applicable to your Account is "},
+            {"type": "variable", "key": "interestRate"},
+            {"type": "textRun", "value": " (AER "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "aerRate"}]},
+            {"type": "textRun", "value": "). Interest is calculated daily on the cleared credit balance and credited monthly."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Interest is paid gross. You may be liable to pay tax on interest received in accordance with UK tax law. It is your responsibility to disclose any interest to HM Revenue & Customs."}
+          ]
+        }
+      ]
+    },
+    "RAB_FEE_SCHEDULE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Applicable Fees"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ScheduleTitle",
+          "children": [
+            {"type": "textRun", "value": "Schedule 2 — Fees Applied During Statement Period"}
+          ]
+        },
+        {
+          "type": "tableComponentRef",
+          "tableComponent": {
+            "componentKey": "RETAIL-TBL-FEE-SCHEDULE",
+            "columnSchema": [
+              {"columnKey": "feeType", "widthPct": 35},
+              {"columnKey": "amount", "widthPct": 25},
+              {"columnKey": "frequency", "widthPct": 20},
+              {"columnKey": "notes", "widthPct": 20}
+            ],
+            "headerRows": [[
+              {"columnKey": "feeType", "value": "Fee Type"},
+              {"columnKey": "amount", "value": "Amount"},
+              {"columnKey": "frequency", "value": "Frequency"},
+              {"columnKey": "notes", "value": "Notes"}
+            ]],
+            "loopRow": {
+              "loopVariable": "feeSchedule",
+              "cells": [
+                {"columnKey": "feeType", "variableKey": "feeType"},
+                {"columnKey": "amount", "variableKey": "amount"},
+                {"columnKey": "frequency", "variableKey": "frequency"},
+                {"columnKey": "notes", "variableKey": "notes"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "RAB_REGULATORY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Regulatory Notice"}]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "RETAIL-ACCOUNT-BALANCE-STD"
+        }
+      ]
+    },
+    "RAB_SIGNATURE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Authorised Signatory"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {"type": "textRun", "value": "Yours faithfully,"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {"type": "variable", "key": "signatoryTitle"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {"type": "variable", "key": "bankName"}
+          ]
+        }
+      ]
+    },
+    "RAB_DISCLAIMER": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Important Information"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DisclaimerBody",
+          "children": [
+            {"type": "textRun", "value": "This balance confirmation is provided for your information only and should not be relied upon for mortgage, visa or other official purposes without independent verification. For certified balance confirmations, please contact your branch."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DisclaimerBody",
+          "children": [
+            {"type": "textRun", "value": "This is a demonstration document issued for system testing purposes."}
+          ]
+        }
       ]
     }
   }
