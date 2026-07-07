@@ -3,7 +3,7 @@
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
 **Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3** first — all independent of P22)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer` for images, `doc-keeper` for ADRs)  
-**Prerequisites:** none for A1/A2/A3/A5; **A4/A6 depend on P22-T01/T02 Done**; **A7 depends on P22 demo packages (T05+)** — track via [P22 detail](./P22-demo-expansion-rendering-fidelity.md)
+**Prerequisites:** none for A1/A2/A3/A5; **A4/A6 depend on P22-T01/T02 Done**; **A7 depends on P23 demo packages (T04+ letter-grade)** — track via [P23 detail](./P23-demo-typography-layout-excellence.md)
 
 > **Session note:** `LR-A*` tasks only. Do **not** pick up `P22-*` (rendering write path — other session) or `CD-*` (CDP session). Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
 
@@ -50,6 +50,8 @@
 - **Status:** Not Started
 
 ### LR-A2 — Font baseline (CJK + metric-compatible) in images + smoke test
+
+> **P23 coordination:** **P23-T02** executes this task for demo typography acceptance. Record Done **once** in both LRP-A and P23 ledger rows.
 
 - **Owner agent:** deploy-engineer + backend-engineer
 - **BDD:** not-applicable — packaging/runtime asset baseline; rendering behavior contract unchanged (output becomes correct, not different).
@@ -182,14 +184,14 @@
 
 - **Owner agent:** doc-keeper (+ backend-engineer for extraction tooling if needed)
 - **BDD:** not-applicable — measurement + documentation baseline.
-- **Depends on:** P22 demo packages available (**P22-T05+** Done for ≥5 letter types).
+- **Depends on:** **P23** demo packages available (**P23-T04+** Done for ≥5 letter-grade types) — see [P23 detail](./P23-demo-typography-layout-excellence.md) §7
 - **Read first:**
   1. [CDP program](../competitiveness-deepening-program.md) §6 — **CD-HARD-T04** row (this task executes it)
   2. [CDP-industry-pitfall-registry.md](./CDP-industry-pitfall-registry.md) — CD-PIT-02
   3. ADR-0042 draft (LR-A5)
 - **Do NOT:** Promise Word-identical pagination; block launch on deltas within the recorded budget.
 - **Steps:**
-  1. Assemble a corpus of ≥5 demo letters (from P22 packages) with a manual Word page-count baseline per letter.
+  1. Assemble a corpus of ≥5 demo letters (from **P23** packages) with a manual Word page-count baseline per letter.
   2. Generate PDFs through the Docker stack; record page counts + notable layout drift.
   3. Compute deltas; propose the acceptance budget in ADR-0042 (finalize its Proposed → review cycle).
   4. Document the corpus + rerun procedure in NFR §production rendering; wire budget breach → fidelity-warning follow-up as a recorded future task (not implemented here).
@@ -208,6 +210,6 @@
 ## 2. Exit gate (Wave LR-A)
 
 - [ ] LR-A1/A2/A3 Done (schedulable now); LR-A5 ADR drafts reviewed
-- [ ] LR-A4/A6 Done once P22-T01/T02 Done; LR-A7 Done once demo corpus exists
+- [ ] LR-A4/A6 Done once P22-T01/T02 Done; LR-A7 Done once **P23** letter-grade demo corpus exists (≥5 types)
 - [ ] No structured node can silently disappear from generated DOCX (blocked or warned)
 - [ ] Ledger § LRP wave row updated with gate evidence per task

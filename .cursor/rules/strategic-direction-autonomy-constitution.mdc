@@ -1,0 +1,59 @@
+---
+description: Hard constraint — when strategic direction is clear, agents proceed through the delivery pipeline autonomously without end-of-turn confirmation loops.
+alwaysApply: true
+---
+
+# Strategic Direction Autonomy Constitution
+
+When the user has stated a clear north star, priority, or active phase, agents **execute
+the next correct pipeline step** — they do not poll the user for permission on routine
+progression.
+
+## Direction is clear when any of these hold
+
+- User names a goal, quality bar, or phase (e.g. «P23 bank-grade Word typography»).
+- An active formal phase / task slice is `In Progress` with documented exit criteria.
+- Requirements or BDD spec already confirm the behavior (readiness **ready**).
+- User explicitly delegates end-to-end delivery («按你的分析进行下去»).
+
+Treat **latest explicit user confirmation** as sufficient to proceed until a genuine blocker
+appears.
+
+## Autonomous progression (mandatory)
+
+1. **Parent agent** — classify once, delegate via `Task`, synthesize outcomes. Do not stop
+   after each subagent to ask «要继续吗？» when the pipeline order is known.
+2. **Specialists** — complete the assigned slice, run gates, chain to the next mandated
+   stage (`post-task-doc-sync` → `post-task-commit-review`) without permission prompts.
+3. **Commits** — when a coherent task slice is green, **commit in the same session** via
+   post-task-commit-review. Do not ask «需要提交吗？」 for routine slice completion.
+4. **Push** — push by default after commit unless the user opted out in the same session
+   (`no-push`, `draft`, `plan-only`).
+5. **Reporting** — state what was done, evidence, and the **single next action taken or
+   delegated** — not a menu of optional follow-ups.
+
+## Still block or ask (only these)
+
+| Situation | Action |
+| --- | --- |
+| Behavior / acceptance genuinely unclear | `behavior-spec-author`; surface open questions |
+| Conflicting source-of-truth docs | Surface conflict per document-as-code constitution |
+| ADR-level stack / dependency change | Confirm per tech-stack-guardrails |
+| Destructive git (force push, hard reset, amend after push) | User must explicitly request |
+| Secrets / credentials in staging area | Stop; never commit |
+| User same-session opt-out (`no-commit`, `no-push`, `不要子 agent`) | Honor immediately |
+
+## Forbidden
+
+- End-of-turn engagement bait: «说个字我就…», «需要我 commit/push/继续吗？», «二选一您定」
+  when direction and next pipeline step are already known.
+- Stopping after plan or constitution updates without executing the unblocked next stage
+  (e.g. P23 activated → do not wait to start P23-T01 BDD).
+- Substituting confirmation loops for missing analysis — **decide and act**, then report.
+
+## Relation to other constitutions
+
+- Does **not** skip BDD, TDD, E2E, doc-sync, or commit-review gates — it removes **human
+  permission polling** between those gates.
+- Complements `delivery-orchestration-constitution.mdc` and `subagent-routing-mandate.mdc`.
+- User same-session explicit opt-out overrides autonomous push/commit defaults.

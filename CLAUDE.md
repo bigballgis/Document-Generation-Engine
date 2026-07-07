@@ -4,13 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Context
 
-**Active formal phase:** None (2026-07-04 — **P22-DEMO-EXPANSION Done**; T01–T15; gates **GREEN**). **Prior:** **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03). See [docs/plan/execution-sync-ledger.md](docs/plan/execution-sync-ledger.md).
+**Active formal phase:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE In Progress** (2026-07-08). **Prior:** **P22-DEMO-EXPANSION Done** (2026-07-04; T01–T15; gates **GREEN**; scaffold carry-forward). See [docs/plan/execution-sync-ledger.md](docs/plan/execution-sync-ledger.md).
 
 **Task source (2026-07-05):** `.taskmaster/tasks/tasks.json` (task-master-ai v0.43.1) is the source of truth for **new/active work** going forward. `docs/plan/` is the **frozen archive** for P0–P22 history + live record for LRP/CDP/SOR active programs. Project history is fully traceable from zero via `docs/plan/` (P0–P22, 23 phases, 30 detail files, 6 cross-cutting programs) and `.taskmaster/` (new work from 2026-07-05). See ADR-0053.
 
 This is a **dual-agent project** — workflow automation is orchestrated by Cursor rules (`.cursor/rules/*.mdc`, `.cursor/agents/*.md`) and **Claude Code should operate as the parent orchestrator**, delegating to Cursor's specialist subagents via the Task tool.
 
 **Please read ALL guide files under `.cursor/` before starting any delivery work.** Key rules:
+- `.cursor/rules/strategic-direction-autonomy-constitution.mdc` — **when direction is clear, proceed autonomously; no end-of-turn confirmation loops**
 - `.cursor/rules/subagent-routing-mandate.mdc` — the routing table for parent agents
 - `.cursor/rules/delivery-orchestration-constitution.mdc` — the full pipeline order
 - `.cursor/rules/tdd-bdd-delivery-constitution.mdc` — test-first gates

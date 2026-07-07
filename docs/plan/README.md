@@ -9,7 +9,8 @@ verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
 **Active work (CDP session):** **[CDP Wave CD-0](./competitiveness-deepening-program.md)** — `CD-*` tasks only.
 
-**Formal phase P22:** tracked in [P22 detail](detail/P22-demo-expansion-rendering-fidelity.md) — **executed in another session**, not via CDP task IDs.
+**Formal phase P23:** **[P23 Demo typography & layout excellence](detail/P23-demo-typography-layout-excellence.md)** — **In Progress** (2026-07-08); bank-grade Word output for all demo packages.
+**Formal phase P22:** **Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](detail/P22-demo-expansion-rendering-fidelity.md).
 **P21 Done** (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**,
 frontend **511** Vitest; **AUD-B10 resolved** via P12-AUD-B10; **AUD-M02 resolved** via P12-AUD-M02). Latest gates: backend `mvn verify` BUILD SUCCESS + frontend **643** Vitest (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL). See
 [execution-sync-ledger.md](./execution-sync-ledger.md).
@@ -63,7 +64,8 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P19 | Template verifiability, publish gate & decision forms | [detail/P19-verifiability-publish-gate.md](detail/P19-verifiability-publish-gate.md) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | Done (2026-06-25) |
 | P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | Done (2026-06-30; T01–T11 + X01–X06 + X02; AUD-B10 resolved P12-AUD-B10 Done 2026-07-01; AUD-M02 resolved P12-AUD-M02 Done 2026-07-01) |
-| P22 | Demo expansion & rendering fidelity | [detail/P22-demo-expansion-rendering-fidelity.md](detail/P22-demo-expansion-rendering-fidelity.md) | **In Progress** (2026-07-03; BDD ready; **P22-T01 next**) |
+| P22 | Demo expansion & rendering fidelity | [detail/P22-demo-expansion-rendering-fidelity.md](detail/P22-demo-expansion-rendering-fidelity.md) | **Done** (2026-07-04; engine + scaffolds; typography → P23) |
+| P23 | Demo document typography & layout excellence | [detail/P23-demo-typography-layout-excellence.md](detail/P23-demo-typography-layout-excellence.md) | **In Progress** (2026-07-08; T01–T16; BDD spec pending) |
 
 ## First delivery target (thin vertical slice) — achieved
 
@@ -81,9 +83,9 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **In-flight work:**
-- **CDP (this session)** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)
-- **P22 (other session)** — rendering + demos ([plan](detail/P22-demo-expansion-rendering-fidelity.md); formal phase accounting only here)
-- **LRP (In Progress — Wave LR-B Done 2026-07-04; Wave LR-A activated 2026-07-04)** — launch readiness & deep optimization ([program](./launch-readiness-program.md); Waves **LR-A…LR-E**; tasks **`LR-*`**; program, not a formal phase)
+- **P23 (active formal phase)** — demo typography & layout excellence ([plan](detail/P23-demo-typography-layout-excellence.md); **P23-T01 next** — BDD spec)
+- **CDP** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)
+- **LRP (In Progress — Wave LR-B Done 2026-07-04; Wave LR-A activated 2026-07-04)** — launch readiness & deep optimization ([program](./launch-readiness-program.md); Waves **LR-A…LR-E**; **LR-A2** ↔ P23-T02)
 
 **P21 Done** — closure evidence in [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 

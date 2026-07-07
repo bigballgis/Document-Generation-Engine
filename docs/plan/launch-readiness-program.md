@@ -15,7 +15,8 @@
 | [detail/LRP-D-ops-observability.md](./detail/LRP-D-ops-observability.md) | Wave LR-D — ops observability & data lifecycle 「运维可观测与数据生命周期」 |
 | §7 of this file | Wave LR-E — release readiness gate 「发布就绪门禁」 (no separate detail doc) |
 | [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) | **Sibling program CDP** — doc truth, browser E2E, pitfall registry (`CD-*`; do not execute here) |
-| [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **External session** — formal phase P22 rendering + demos (do not execute here) |
+| [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **Done** — rendering engine + demo scaffolds (2026-07-04) |
+| [detail/P23-demo-typography-layout-excellence.md](./detail/P23-demo-typography-layout-excellence.md) | **Active formal phase** — bank-grade demo typography/layout (2026-07-08) |
 
 ---
 
@@ -23,11 +24,12 @@
 
 | Work stream | Where it runs | This LRP program owns |
 | --- | --- | --- |
-| **P22** (P22-T01…T15, rendering + demos) | **Another session** — track via [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) | **Nothing.** Do not start `P22-*` tasks from LRP docs. |
+| **P22** (P22-T01…T15, rendering + demo scaffolds) | **Done** (2026-07-04) — typography/content → **P23** | **Nothing.** Do not reopen P22. |
+| **P23** (P23-T01…T16, demo typography & layout excellence) | **Formal phase In Progress** — track via [P23 detail](./detail/P23-demo-typography-layout-excellence.md) | **LR-A2** / **LR-A7** coordinate with P23 (§5); LRP does not own P23 package rewrites. |
 | **CDP** (CD-DOC/CD-BDD/CD-E2E/CD-HARD, `CD-*`) | **Another session** — track via [CDP program](./competitiveness-deepening-program.md) | **Nothing.** LRP references CD-2 (browser E2E) and CD-3 (CD-HARD) as prerequisite/sibling waves; it does **not** duplicate or execute their tasks. |
 | **LRP** (`LR-*` — production hardening + usability deepening) | **This program** | LR-A…LR-E per §2 wave map. |
 
-**Formal phase note:** `master-plan.md` keeps **P22** as the sole formal phase `In Progress`. LRP is a **cross-cutting program** at the same level as CDP — **not** a new formal phase and **not** a replacement for P22 accounting. LRP implementers follow task IDs prefixed **`LR-*`** only.
+**Formal phase note:** `master-plan.md` keeps **P23** as the sole formal phase `In Progress` (2026-07-08). LRP is a **cross-cutting program** at the same level as CDP — **not** a new formal phase. LRP implementers follow task IDs prefixed **`LR-*`** only.
 
 **Shared-wave contract with CDP:** where an LRP task executes a CD-HARD task (LR-A2→CD-HARD-T01, LR-A6→CD-HARD-T03, LR-A7→CD-HARD-T04), status is recorded **once** in the CDP detail doc and mirrored by ledger reference — never forked.
 
@@ -90,7 +92,7 @@ From the 2026-07-03 full-repo inventory + industry research. Verify evidence pat
 
 1. Within LRP, only **one wave** may be `In Progress` at a time (same discipline as CDP).
 2. **Recommended first activation:** **LR-B** (core **B1/B3/B5/B8**) then **LR-A** (core **A1/A2/A3**) — production-defect classes first; both cores are independent of P22.
-3. Formal phase accounting is untouched: **P22 remains the sole formal phase In Progress**; LRP wave status lives in this file + [execution-sync-ledger.md](./execution-sync-ledger.md) § LRP.
+3. Formal phase accounting: **P23 is the sole formal phase In Progress** (2026-07-08); LRP wave status lives in this file + [execution-sync-ledger.md](./execution-sync-ledger.md) § LRP.
 4. Tasks marked **BDD: required** may not start implementation until `behavior-spec-author` publishes a `ready` spec in `docs/behavior/`.
 
 **Current wave:** **LR-A** (`In Progress`, activated 2026-07-04 after LR-B closure — per rule 2 recommended order, core **A1/A2/A3** first; user-confirmed procedural activation). **LR-B Done** (2026-07-04). Program status: **In Progress**.
@@ -109,7 +111,7 @@ From the 2026-07-03 full-repo inventory + industry research. Verify evidence pat
 | LR-A4 | backend-engineer | Unsupported-node fail-closed closure | **P22-T01/T02 Done** | **required** | CD-PIT-07; P18/P22 | Not Started |
 | LR-A5 | doc-keeper | Draft ADR-0041/0042/0043 (font baseline / pagination delta / OOXML validation) | — | not-applicable | CD-PIT registry §4 | Not Started |
 | LR-A6 | backend-engineer | OOXML output validation gate (executes CD-HARD-T03) | P22-T01 Done | not-applicable | CD-PIT-03 | Not Started |
-| LR-A7 | doc-keeper | Pagination delta budget + corpus (executes CD-HARD-T04) | P22 demo packages (T05+) | not-applicable | CD-PIT-02; ADR-0042 | Not Started |
+| LR-A7 | doc-keeper | Pagination delta budget + corpus (executes CD-HARD-T04) | **P23** demo packages (T04+ letter-grade) | not-applicable | CD-PIT-02; ADR-0042 | Not Started |
 
 ---
 

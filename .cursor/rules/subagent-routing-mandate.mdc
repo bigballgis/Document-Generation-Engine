@@ -57,6 +57,13 @@ Everything else → **Task**, not inline implementation.
 
 If `subagent=inline`, state the exception (read-only / single-line / user opt-out).
 
+## Autonomous chaining (no permission polling)
+
+When strategic direction is clear (`strategic-direction-autonomy-constitution.mdc`), the
+parent agent **delegates the next pipeline stage immediately** after each stage completes
+(e.g. plan-orchestrator Done → `behavior-spec-author` for P23-T01) without asking the user
+to choose. Report outcomes and evidence; do not offer «要继续吗？」 menus.
+
 ## Relation to other rules
 
 - Pipeline order: `delivery-orchestration-constitution.mdc`

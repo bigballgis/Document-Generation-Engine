@@ -2,6 +2,8 @@
 
 **Last synced:** 2026-07-07 (**repo hygiene cleanup** — post Jul 4–7 low-tier agent WIP pollution remediation on `main`)
 **Completion note (2026-07-07, repo hygiene):** **Workspace cleanup Done** — removed tracked `.tmp/` ad-hoc scripts (16 files) + added `.gitignore` rule; hardened `.claude/hooks/auto-commit.sh` to exclude `.tmp/**` from staging; reverted Authoring UX wave dead scaffolding (5 composables + `notifications` store + tests only referenced by tests — ADR-0050/0051 remain **Proposed**); corrected `.taskmaster/tasks/tasks.json` tasks **4/5** from false `done` → `in-progress` (demo anchor expansion incomplete); backend micro-fixes: `MasterDocumentService` catch narrowing + Yoda equals, `DockerExecPdfConversionService` profile null guard, audit cleanup repo redundant import removed; regen `openapi-v1.ts` for parity test. **Not done (deferred):** interactive rebase of 16+ WIP commits already on `origin/main` (no force-push); demo package ≥9-anchor rewrite (tasks 4–5); full Authoring UX wire-up. **Gate:** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (**971** Surefire, 3 skipped); `pnpm -C frontend lint`, `type-check`, `test` (**786** after dead-code removal), `build` ✓. BDD `not-applicable`. Active formal phase: **None** (task source: `.taskmaster/tasks/tasks.json` per ADR-0053).
+**Last synced:** 2026-07-08 (**P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE activated → In Progress** — user strategic direction: bank-grade Word typography/layout for demo documents; honest P22 carry-forward T05–T11 scaffold; taskmaster 4–8 mapped to P23-T04…T16; **P23-T01 next** — BDD spec; plan-orchestrator only — no implementation code in this sync)
+**Activation note (2026-07-08):** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE activated → In Progress** (sole formal phase `In Progress`). **P22 remains Done** with carry-forward note. **LRP** Wave LR-A remains `In Progress` (program, not formal phase). Coordinate **LR-A2** ↔ **P23-T02** (font baseline). Traceability: [P23-demo-typography-layout-excellence.md](./detail/P23-demo-typography-layout-excellence.md).
 **Last synced (prior):** 2026-07-04 (**main merge** — integrate P22 demo expansion T13-T15 + C1-C3 remediation with SOR mainline; merged `origin/cursor/cloud-agent-1783101398163-dg1u3`)
 **Completion note (2026-07-04, P22):** **P22-DEMO-EXPANSION Done** — demo expansion & rendering fidelity slice closed. **T13 Done:** `import-all-demos.ps1` priority chain; all seven `import-*-demo.ps1` wired to `demo-import-shared.ps1` `Import-DemoPackage` (full Management API path + `catalogMarker` idempotency). **T14 Done:** FOL executive upgrade — `fol-binding-overlays.json` rich nodes across 40 anchors; `folPageTarget` ≥100; `FolExecutiveDocxAssemblyTest` + `FolExecutiveDemoBindingAuditTest` green. **T15 Done:** BDD contract tests (`DemoPackageStructureContractTest`, `DemoImportIdempotencyContractTest`, `DemoExpansionFooterLayoutTest`, `DemoExpansionPageNumberingTest`, FOL executive tests); demo package configs/SQL/bindings for mortgage, credit-limit, trade-lc, collection, annual-review, wealth. **Gate:** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS; `pnpm -C frontend lint`, `type-check`, `test`, `build` ✓. **Active formal phase: None** (P22 closed). Traceability: [P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md).
 **Last synced (prior 2026-07-04):** **main merge** — `cursor/sor-full-implementation-1385`; merged `origin/main` LR-B batch 1 + build DX; SpotBugs slice 5 retained
@@ -371,7 +373,7 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P9 | Done | Observability, local security gates, prod compose profile |
 | P10 | Done | Secure download with expiry |
 | P11 | Done | Batch + async task lifecycle |
-| P12 | Not Started (catch-all) | Slices **P12-API-PACKAGE-ACCESS-INVOCATION Done** (T01–T12) and **P12-TEMPLATE-TESTING-OVERHAUL Done** (T01–T13); **P22** sole formal phase `In Progress`; see [P12 detail](./detail/P12-deferred-enhancements.md) |
+| P12 | Not Started (catch-all) | Slices **P12-API-PACKAGE-ACCESS-INVOCATION Done** (T01–T12) and **P12-TEMPLATE-TESTING-OVERHAUL Done** (T01–T13); **P23** sole formal phase `In Progress`; see [P12 detail](./detail/P12-deferred-enhancements.md) |
 | P13 | Done | Identity & group administration (user + group management plane); green gates 2026-06-23 — see P13 mirror block |
 | P14 | Done (2026-06-27) | Confirmed large domains — **P14-T01 Done** (T01a–T01e + architecture remediation); **P14-T02 Done** (T02a–T02d + E2E **3/3** + UIUX **5/5**); **P14-T03 Done** (T03a–T03c + E2E **2/2** + UIUX **7/7**); backend **481**; frontend **235+**; OpenAPI export/import contract; architecture re-review **PASS** (2026-06-26); see [P14 detail](./detail/P14-confirmed-large-domains.md) |
 | P15 | Done (2026-06-27) | Kubernetes deployment & container hardening — T01–T10; [`deploy/README.md`](../deploy/README.md); helm validate + CI gates green — see [P15 detail](./detail/P15-kubernetes-deployment-container-hardening.md) |
@@ -381,10 +383,12 @@ Use the latest full-verify row above for gate claims; milestone blocks below are
 | P18 | Done (2026-06-28) | **P18-T01–T10 Done** — controlled authoring UI + management paste/catalog APIs — see [P18 detail](./detail/P18-structured-authoring-fidelity-engine.md) |
 | P19 | Done (2026-06-25) | T01–T10 complete — change-diff, preview comparison, live publish gate, decision forms, risk prompts, exception markers, verifiability UI; gates 281 backend / 169 frontend / E2E 7/7 — see [P19 detail](./detail/P19-verifiability-publish-gate.md) |
 | P21 | Done (2026-06-30) | Role-journey frontend redesign — T01–T11 + X01–X06 + **X02** governance close; backend **`mvn verify` 553**; frontend **511** Vitest; Playwright/UIUX per sub-phase; **AUD-B10 resolved** (P12-AUD-B10 Done 2026-07-01); **AUD-M02 resolved** (P12-AUD-M02 Done 2026-07-01) — see [P21 detail](./detail/P21-role-journey-frontend-redesign.md) |
+| P22 | Done (2026-07-04) | Demo expansion — rendering engine + eight demo **scaffolds** + import chain; T05–T11 scaffold carry-forward → **P23** — see [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) |
+| P23 | **In Progress** (2026-07-08) | Demo typography & layout excellence — bank-grade styles, rich bindings, font baseline (LR-A2), POI/E2E acceptance; taskmaster 4–8 — see [P23 detail](./detail/P23-demo-typography-layout-excellence.md) |
 
-**Active phase:** **P22** (2026-07-03 — **P22-DEMO-EXPANSION** sole formal phase `In Progress`; coordination note [P22-coordination-note-2026-07-03.md](./P22-coordination-note-2026-07-03.md)).
-**Active slice:** **P22-T01…T15** (P22 session owns status updates).
-**P21 Done** — do not reopen. All formal phases P0–P11, P13–P21 **Done**; **P12 catch-all Not Started**.
+**Active phase:** **P23** (2026-07-08 — **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE** sole formal phase `In Progress`).
+**Active slice:** **P23-T01…T16** (BDD spec **P23-T01 next**).
+**P21 Done** — do not reopen. All formal phases P0–P11, P13–P22 **Done** except **P23 In Progress**; **P12 catch-all Not Started**.
 
 ## Epic ↔ phase mapping
 
@@ -701,7 +705,7 @@ Cross-cutting launch-readiness program; **not** a formal phase. Task prefix **`C
 
 ## LRP — Launch Readiness & Deep-Optimization Program (2026-07-03)
 
-Cross-cutting program at the same level as CDP; **not** a formal phase — **P22 remains the sole formal phase In Progress**. Task prefix **`LR-*`** only; do not execute `P22-*`/`CD-*` from LRP. Planning committed 2026-07-03 (program + 4 wave detail docs); Wave LR-B implemented 2026-07-04 (batch 1 + batch 2 evidence below); **Wave LR-A activated 2026-07-04** (procedural activation on LR-B closure per program §2 rule 2 — core A1/A2/A3 first).
+Cross-cutting program at the same level as CDP; **not** a formal phase — **P23 is the sole formal phase In Progress** (2026-07-08). Task prefix **`LR-*`** only; do not execute `P23-*`/`CD-*` from LRP. **LR-A2** (font baseline) and **LR-A7** (pagination corpus) coordinate with [P23 detail](./detail/P23-demo-typography-layout-excellence.md) §5.
 
 | Wave | Scope | Status | Evidence |
 | --- | --- | --- | --- |

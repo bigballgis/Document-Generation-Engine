@@ -1,11 +1,11 @@
 # P22 — Demo Expansion & Rendering Fidelity (Detailed Plan)
 
 **Phase ID:** `P22-DEMO-EXPANSION`  
-**Phase status:** **Done** (closed 2026-07-03; T01–T15 complete; gates **GREEN**) | **Depends on:** P3, P4, P18 (authoring model Done; **rendering-side gap** closed)  
+**Phase status:** **Done** (closed 2026-07-04; T01–T15 complete; gates **GREEN**) — **honest carry-forward:** T05–T11 delivered **package scaffolds** («scaffold; rich bindings/catalog generation pending»); bank-grade typography, rich bindings, and foreign-bank-letter content → **[P23](./P23-demo-typography-layout-excellence.md)** (activated 2026-07-08) | **Depends on:** P3, P4, P18 (authoring model Done; **rendering-side gap** closed)  
 **BDD:** [demo-expansion-behavior-spec.md](../../requirements/demo-expansion-behavior-spec.md) (`BDD-DEMO-EXP-001`…`015`, readiness **ready**)  
 **Gate status:** **GREEN** — `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS (2026-07-03); `pnpm -C frontend lint`, `type-check`, `test` (**646**), `build` ✓; BDD-DEMO-EXP-001…015 regression tests green.
 
-> **Single-active-phase invariant:** **P22** is the sole formal phase `In Progress` (activated 2026-07-03 by `plan-orchestrator`). **P12 catch-all → Not Started** (slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03). **CDP** program Wave CD-0 runs in parallel for doc/E2E/pitfall specs — see [competitiveness-deepening-program.md](../competitiveness-deepening-program.md). Do not reopen P18 phase status; this phase closes the **P18/P4 rendering fidelity gap** documented in the behavior spec.
+> **Single-active-phase invariant:** **P23** is the sole formal phase `In Progress` (activated 2026-07-08). **P22 Done** (engine + scaffold). **LRP** Wave LR-A `In Progress` as cross-cutting program. **CDP** runs in parallel — see [competitiveness-deepening-program.md](../competitiveness-deepening-program.md).
 
 ## 1. Purpose
 
@@ -170,5 +170,6 @@ Wave 6 — Gates & evidence
 | --- | --- |
 | 2026-07-03 | Phase activated; 15 tasks Not Started; P12-API-PACKAGE-ACCESS-INVOCATION **Done** (same date) |
 | 2026-07-04 | CDP program added; P22 code tracked in separate session per [competitiveness-deepening-program.md](../competitiveness-deepening-program.md) |
-| 2026-07-03 | **Phase Done** — T13 import-all-demos + idempotency; T14 FOL executive scale; T15 BDD regression + gates GREEN |
+| 2026-07-04 | **Phase Done** — T13 import-all-demos + idempotency; T14 FOL executive scale; T15 BDD regression + gates GREEN |
+| 2026-07-08 | **Honest closure note** — T05–T11 scaffold-only; typography/layout/content excellence carried to **P23** (user strategic direction) |
 | 2026-07-03 | **Partial progress** (`6f9c76a`): T01/T02 largely done; T03/T04 partial (Wave 2); T05–T15 Not Started; gates **RED** (`mvn verify` pending target clean + catalog sync); architecture review **C1–C3** open |

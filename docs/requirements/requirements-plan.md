@@ -10,7 +10,8 @@
 - [领域模型](../domain/domain-model.md)
 - [权限矩阵](../security/permission-matrix.md)
 - [文档治理规则](../governance.md)
-- [综合演示包扩展行为规格](demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；渲染保真 + 双页码 + 八类银行信函演示）
+- [综合演示包扩展行为规格](demo-expansion-behavior-spec.md)（BDD-DEMO-EXP；渲染保真 + 双页码 + 八类银行信函演示 — **P22 Done**）
+- [演示文档排版与版式卓越行为规格](demo-typography-layout-behavior-spec.md)（BDD-DEMO-TYP — **待编写**；实现计划 [P23](../plan/detail/P23-demo-typography-layout-excellence.md) **In Progress** 2026-07-08）
 
 ## 记录原则
 
@@ -795,7 +796,7 @@
 
 ## 已确认：综合演示包扩展（单次交付切片）
 
-> 完整 Given/When/Then 见 [demo-expansion-behavior-spec.md](demo-expansion-behavior-spec.md)；实现计划：[P22-demo-expansion-rendering-fidelity.md](../plan/detail/P22-demo-expansion-rendering-fidelity.md)（**In Progress** 2026-07-03）。
+> 完整 Given/When/Then 见 [demo-expansion-behavior-spec.md](demo-expansion-behavior-spec.md)；实现计划：[P22-demo-expansion-rendering-fidelity.md](../plan/detail/P22-demo-expansion-rendering-fidelity.md)（**Done** 2026-07-04 — 渲染引擎 + 演示包脚手架；T05–T11 富绑定/目录生成待 **P23** 承接）。
 
 - v1 演示扩展在**单次交付切片**内完成：结构化内容渲染保真（P18 节点矩阵落地到 DOCX）、双页码（章节级 + 文档全局）、八类银行信函演示包。
 - 双页码语义：**章节级**为当前 Word 节内 `Page X of Y`；**文档全局**为整份文档物理页 `Page A of B`；同一页脚可同时展示；DOCX 与 PDF 语义一致。
@@ -805,6 +806,18 @@
 - 批发 FOL 升级保持 executive 规模（≥100 页目标、40 锚点）；须在新绑定中覆盖 list、emphasis、styleRef、tableComponent、contentModuleRef 等节点以验证保真。
 - 结构化内容写入 DOCX 不得退化为单一 Calibri 10pt 纯文本；表格须为真实 Word 表格；`styleRef` 须解析母版样式目录。
 - 发布锁定的 `renderProfile` 继续约束渲染；API 调用方不得覆盖；保真警告遵循既有 blocker/warning 分级。
+
+## 已确认：演示文档排版与版式卓越（2026-07-08 战略优先级）
+
+> 用户确认（2026-07-08）：当前生成的演示文档**内容存在但 Word 排版/版式/字体/样式不达标**，不符合国际大型银行对外信函品质；Word 为最佳排版工具，演示输出须达到**外资银行信函级**观感。实现计划：[P23-demo-typography-layout-excellence.md](../plan/detail/P23-demo-typography-layout-excellence.md)（**In Progress**）；行为规格 [demo-typography-layout-behavior-spec.md](demo-typography-layout-behavior-spec.md)（**待 `behavior-spec-author` 编写**）。Task Master 任务 4–8 与本阶段对齐。
+
+- **与 P22 关系：** P22 交付结构化内容写入引擎、双页码机制、八类 `deploy/demo-*` **脚手架**与 `import-all-demos.ps1`；**不 reopen P22**。P23 承接母版样式、富结构化绑定、字体基线与视觉验收。
+- **母版 DOCX：** 每类演示须定义银行级命名样式（Heading1–3、ClauseBody、TableHeader、SignatureBlock 等）、字体、页边距、页眉页脚（按 `pageNumberingProfile`）。
+- **富结构化绑定：** 禁止占位纯文本降级；须使用 emphasis、列表、表格、condition/loop、styleRef 等 P18/P22 节点矩阵能力。
+- **字体基线（Docker）：** CJK + 与 Calibri/Cambria 度量兼容的替代字体（与 LRP **LR-A2** / P23-T02 同一交付，不重复建设）。
+- **视觉验收：** POI 断言（样式 ID、`document.xml` 字体）+ Playwright 运行时生成 E2E + 可选人工排版检查清单（募资/演示证据）。
+- **覆盖范围：** 全部八类演示包（含 FOL / full-flow 抛光）达到「foreign bank letter grade」；与 taskmaster tasks 4–8（重写、发布、生成、证据包）一致。
+- **退出标准：** 见 P23 详细计划 §3；LR-A7 分页语料库依赖 P23 至少五类信函级演示完成。
 
 ## 待确认：设计优化议题
 

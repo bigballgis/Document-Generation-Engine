@@ -1,0 +1,183 @@
+# P23 — Demo Document Typography & Layout Excellence (Detailed Plan)
+
+**Phase ID:** `P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE`  
+**Phase status:** **In Progress** (activated 2026-07-08; user strategic direction — demo output must meet international large-bank letter grade)  
+**Depends on:** P22 (**Done** — rendering engine + package scaffold), P18/P4 (authoring + pipeline Done), LRP Wave LR-A (font baseline **LR-A2**; pagination corpus **LR-A7**)  
+**Task Master mirror:** `.taskmaster/tasks/tasks.json` tasks **4–8** (foreign-bank-letter grade rewrites + publish + generate + evidence)  
+**BDD:** `docs/requirements/demo-typography-layout-behavior-spec.md` — **to be authored** by `behavior-spec-author` before implementation (`BDD-DEMO-TYP-001`…`020` proposed; see §6)
+
+> **Single-active-phase invariant:** **P23** is the sole formal phase `In Progress` (activated 2026-07-08). **P22 remains Done** with honest carry-forward note (T05–T11 scaffold-only). **LRP** Wave LR-A remains **In Progress** as a cross-cutting program (not a formal phase). Coordinate **LR-A2** and **P23-T02** — same font baseline, single evidence row.
+
+---
+
+## 1. North star
+
+**Every generated demo document must look and read like correspondence from an international wholesale/retail bank — not a prototype.**
+
+Word is the authoritative typesetting surface. Generated DOCX must exhibit:
+
+- **Professional typography** — consistent body/heading fonts, point sizes, line spacing, widow/orphan-safe paragraph spacing, emphasis that maps to Word runs (not plain-text downgrade).
+- **Bank-grade layout** — margins, headers/footers, page numbering profiles per letter type, signature blocks, schedule tables with header styles.
+- **Rich structured bindings** — `styleRef`, lists, tables, conditions, loops, module refs rendered with the P22 writer (no placeholder paragraphs).
+- **Font-faithful Docker output** — CJK + metric-compatible Latin substitutes (Calibri/Cambria class) so PDF preview matches intent (**LR-A2**).
+- **Verifiable acceptance** — automated POI/XML assertions + Playwright runtime generate checks + optional human typography checklist for fundraising evidence.
+
+**Honest baseline (2026-07-08):** P22 closed the **rendering engine** and **deploy scaffold** (import chain, master generators, BDD contract tests). User review and taskmaster tasks 4–8 confirm **content depth and Word polish remain insufficient** — seven demo packages (T05–T11) were marked «scaffold; rich bindings/catalog generation pending» at P22 close. P23 owns closing that gap **alongside** comprehensive demo coverage (all 8+ templates runtime-callable with bank-letter-grade output).
+
+---
+
+## 2. Relationship to P22 (no reopen)
+
+| P22 delivered (Done) | P23 completes (this phase) |
+| --- | --- |
+| `StructuredContentDocxWriter` + style catalog expansion (T01/T02) | Apply styles in **master assets** and **binding overlays** per demo |
+| Section-aware page numbering + PDF stamper (T03/T04) | Per-demo **footer/header layouts** with real bank copy and field placement |
+| Eight `deploy/demo-*` package scaffolds + `import-all-demos.ps1` (T05–T13) | **Rich bindings**, SQL clauses, variables, executive test data (taskmaster 4–5) |
+| FOL executive scale (T14) | Bring **remaining demos** to FOL-comparable depth where product-appropriate |
+| BDD contract/regression tests (T15) | **Typography/layout acceptance** tests (POI styles/fonts + E2E DOCX structure) |
+
+**Do not reopen P22 phase status.** Track progress under **P23-T01…T16**.
+
+---
+
+## 3. Exit criteria
+
+1. **Master assets:** Each demo master DOCX defines bank-grade named styles (`Heading1`–`Heading3`, `ClauseBody`, `DefinedTerm`, `TableHeader`, `ScheduleTitle`, `SignatureBlock`, product-specific variants) with fonts, spacing, and margins documented in package README + generator test assertions.
+2. **Rich bindings:** All eight demo families use structured nodes (not flat placeholder text): `sectionHeading`, `paragraph` with `emphasis`/`underline`, `styleRef`, `conditionBlock`, `loopBlock`, `tableComponentRef` where product requires; binding validation passes with zero errors.
+3. **Font baseline:** **LR-A2 Done** — Docker images ship CJK + metric-compatible Latin fonts; `RenderingFontSmokeTest` green; demo letters with Chinese/Latin mixed content render without tofu (**P23-T02** evidence mirrors LR-A2).
+4. **Runtime coverage:** All templates in §7 generate HTTP 200 DOCX via runtime API with package executive test variables; `publish-all-demos.ps1` + E2E `demo-runtime-generate.spec.ts` green (**P23-T13/T14**; builds on user commit 2026-07-08).
+5. **Visual acceptance:** POI assertions on generated DOCX verify style IDs, font names in `document.xml`, table/header/footer presence (**P23-T15**); optional human checklist signed for ≥2 CORP + ≥2 RETAIL samples (**P23-T16**).
+6. **Pagination corpus:** **LR-A7** unblocked — ≥5 bank-letter-grade demos available for Word-vs-PDF page delta measurement (ADR-0042 budget).
+7. **Green gates:** `mvn verify`; frontend lint/type-check/test/build; Docker deploy + import + generate smoke; ledger updated with evidence.
+
+---
+
+## 4. Task breakdown
+
+| ID | Owner | Task | Depends on | Status |
+| --- | --- | --- | --- | --- |
+| **P23-T01** | doc-keeper + behavior-spec-author | **BDD behavior spec** — `demo-typography-layout-behavior-spec.md`: actor (demo author / runtime caller), typography/layout acceptance scenarios, per-demo-type footer/header rules, font baseline expectations, POI/E2E evidence hooks (`BDD-DEMO-TYP-001`…`020`) | — | **Not Started** |
+| **P23-T02** | deploy-engineer + backend-engineer | **Font baseline in Docker** — executes **LR-A2** / CD-HARD-T01: CJK + Carlito/Caladea (or verified substitutes) in both Dockerfiles; `fc-list` build assertion; `RenderingFontSmokeTest`; evidence PDF. **Single owner row** — update LR-A2 status when Done, do not duplicate work | P23-T01 (typography rules) | **Not Started** |
+| **P23-T03** | backend-engineer | **Master style system for demos** — extend `*MasterDocxAssetGeneratorTest` pattern: standard bank style set (Heading1–3, ClauseBody, TableHeader, SignatureBlock, etc.); margins (e.g. 2.54 cm); default body font; header/footer slots per `pageNumberingProfile`; shared style manifest doc in `deploy/demo-shared/` | P23-T01 | **Not Started** |
+| **P23-T04** | backend-engineer | **Rewrite `deploy/demo-credit-limit/`** — bank-grade credit-limit confirmation (parties, defined terms, facility, interest, covenants, EOD, governing law, signature); ≥20 variables; rich binding overlays + SQL; regenerate master; maps **taskmaster #4** | P23-T03 | **Not Started** |
+| **P23-T05** | backend-engineer | **Rewrite `deploy/demo-mortgage/`** — mortgage approval + amortization schedule table; ≥20 variables; SECTION_AND_GLOBAL footer; maps **taskmaster #5** (mortgage slice) | P23-T03 | **Not Started** |
+| **P23-T06** | backend-engineer | **Rewrite `deploy/demo-trade-lc/`** — LC/guarantee notice; document checklist table; seal/image refs; ≥20 variables | P23-T03 | **Not Started** |
+| **P23-T07** | backend-engineer | **Rewrite `deploy/demo-collection/`** — rate change + overdue collection; regulatory emphasis + disclaimer footer; ≥15 variables | P23-T03 | **Not Started** |
+| **P23-T08** | backend-engineer | **Rewrite `deploy/demo-annual-review/`** — annual review + facility renewal; covenant loop/table; CORP dual-page; ≥20 variables | P23-T03 | **Not Started** |
+| **P23-T09** | backend-engineer | **Rewrite `deploy/demo-wealth/`** — wealth statement; holdings tables; ≥20 variables | P23-T03 | **Not Started** |
+| **P23-T10** | backend-engineer | **Rewrite `deploy/demo-retail-account/`** — account opening/balance letters; fee schedule table; ≥15 variables | P23-T03 | **Not Started** |
+| **P23-T11** | backend-engineer | **FOL + full-flow polish pass** — align `deploy/demo-fol/` and `deploy/demo-full-flow/` masters/bindings with P23 style manifest; bump `catalogMarker` where content changes | P23-T03, P23-T04…T10 | **Not Started** |
+| **P23-T12** | backend-engineer | **Publish orchestration** — `publish-all-demos.ps1` + lifecycle + API policy/credential for all templates; AD Group alignment (RETAIL_API / CORP_API); maps **taskmaster #6** | P23-T04…T11 | **Not Started** |
+| **P23-T13** | e2e-test-engineer | **Runtime generate E2E** — extend `demo-runtime-generate.spec.ts` for all published demos; fixture JSON per package; assert HTTP 200 + DOCX size floor; maps **taskmaster #7** | P23-T12 | **Not Started** |
+| **P23-T14** | backend-engineer | **Runtime generate script + manifest** — PowerShell driver saves `.tmp/generated_<externalId>.docx`; SHA-256 manifest; audit SUCCESS records | P23-T12 | **Not Started** |
+| **P23-T15** | backend-engineer | **POI typography/layout assertions** — JUnit suite: style IDs applied; `w:rFonts` for body/headings; table styles; footer field codes; no `LOREM`/`{{placeholder}}`; unzipped `document.xml` spot checks | P23-T04…T11, P23-T02 | **Not Started** |
+| **P23-T16** | doc-keeper | **Human review checklist + evidence bundle** — `docs/evidence/demo-typography-review-checklist.md`; fundraising summary; maps **taskmaster #8**; archive sample DOCX under `.tmp/evidence/` | P23-T13, P23-T14, P23-T15 | **Not Started** |
+
+### Recommended wave order
+
+```text
+Wave 0 — Behavior + font baseline (parallel OK)
+  P23-T01 (BDD ready gate)
+  P23-T02 (LR-A2 font baseline — can start after T01 typography rules drafted)
+
+Wave 1 — Style manifest (blocks all package rewrites)
+  P23-T03
+
+Wave 2 — Package rewrites (parallel per package after T03)
+  P23-T04 (credit-limit — taskmaster #4 pilot)
+  P23-T05…T10 (remaining six families — taskmaster #5)
+  P23-T11 (FOL + full-flow polish)
+
+Wave 3 — Publish + runtime proof
+  P23-T12 → P23-T13/T14
+
+Wave 4 — Acceptance + evidence
+  P23-T15 → P23-T16
+  LR-A7 pagination corpus (doc-keeper — after ≥5 Wave 2 packages Done)
+```
+
+**First delegation:** **behavior-spec-author** → **P23-T01**; then **backend-engineer** → **P23-T03** + **P23-T04** (pilot package).
+
+---
+
+## 5. LRP / CDP cross-links
+
+| External task | P23 relationship | Rule |
+| --- | --- | --- |
+| **LR-A2** Font baseline | **P23-T02** executes same work | Record Done once; mirror in LRP-A row + ledger |
+| **LR-A7** Pagination delta corpus | Depends on P23 Wave 2 (≥5 letter-grade demos) | Schedule after P23-T05/T08/T04/T06/T07 |
+| **LR-A5** ADR-0041/0042/0043 | ADR-0041 fed by T02; ADR-0042 by LR-A7 | doc-keeper |
+| **LR-A6** OOXML validation gate | Complements **P23-T15** | Can run in parallel once writer output stable |
+| **CD-HARD-T01** | Executed via LR-A2 / P23-T02 | Single status row |
+| **taskmaster 4–8** | Maps to P23-T04…T16 | Update taskmaster status as P23 tasks close |
+
+---
+
+## 6. BDD scenario outline (for T01 authoring)
+
+| BDD ID | Scenario summary | Primary tasks |
+| --- | --- | --- |
+| **BDD-DEMO-TYP-001** | Generated DOCX applies `ClauseBody` style to operative paragraphs | T03, T04, T15 |
+| **BDD-DEMO-TYP-002** | Headings use `Heading1`–`Heading3` with correct outline level | T03, T15 |
+| **BDD-DEMO-TYP-003** | Table rows use `TableHeader` style | T03, T05, T06, T15 |
+| **BDD-DEMO-TYP-004** | Signature block uses dedicated style + spacing | T03, T04, T15 |
+| **BDD-DEMO-TYP-005** | Emphasis/underline render as Word runs (not plain text) | T04…T11, T15 |
+| **BDD-DEMO-TYP-006** | `styleRef` resolves to master catalog style ID | T04…T11, T15 |
+| **BDD-DEMO-TYP-007** | Retail demo footer layout (GLOBAL_ONLY) | T10, T15 |
+| **BDD-DEMO-TYP-008** | CORP dual-page footer fields | T04, T08, T11, T15 |
+| **BDD-DEMO-TYP-009** | CJK sample paragraph renders with Noto (no tofu) in Docker PDF | T02, T15 |
+| **BDD-DEMO-TYP-010** | Latin body uses metric-compatible font (Carlito class) | T02, T15 |
+| **BDD-DEMO-TYP-011** | All eight demo types import + generate after rewrite | T12, T13 |
+| **BDD-DEMO-TYP-012** | Runtime E2E generates DOCX > size floor per template | T13 |
+| **BDD-DEMO-TYP-013** | No placeholder markers in extracted text | T14, T15 |
+| **BDD-DEMO-TYP-014** | POI asserts `w:rFonts` for heading vs body differ | T15 |
+| **BDD-DEMO-TYP-015** | Human checklist items pass for CORP-FOL + credit-limit samples | T16 |
+
+---
+
+## 7. Demo template coverage matrix
+
+| Priority | Package | externalId(s) | P23 task | Min variables | Typography notes |
+| --- | --- | --- | --- | --- | --- |
+| 1 | demo-credit-limit | `DEMO-CREDIT-LIMIT-CONFIRM` | T04 | ≥20 | CORP dual-page; defined terms block |
+| 2 | demo-mortgage | `DEMO-MORTGAGE-APPROVAL` | T05 | ≥20 | Schedule table; SECTION_AND_GLOBAL |
+| 3 | demo-trade-lc | `DEMO-TRADE-LC`, etc. | T06 | ≥20 | Document checklist; UCP reference |
+| 4 | demo-collection | `DEMO-RATE-CHANGE-NOTICE`, `DEMO-OVERDUE-COLLECTION` | T07 | ≥15 | Regulatory emphasis footer |
+| 5 | demo-annual-review | `DEMO-ANNUAL-REVIEW`, `DEMO-FACILITY-RENEWAL` | T08 | ≥20 | Covenant table loop |
+| 6 | demo-wealth | `DEMO-WEALTH-STATEMENT` | T09 | ≥20 | Multi-table holdings |
+| 7 | demo-retail-account | `DEMO-RETAIL-ACCOUNT`, etc. | T10 | ≥15 | Fee table; GLOBAL_ONLY |
+| 8 | demo-fol | `CORP-FOL-OFFER` | T11 | (existing) | Style manifest alignment |
+| 9 | demo-full-flow | `DEMO-FULL-FLOW-LETTER` | T11 | (existing) | Retail letter polish |
+
+---
+
+## 8. Gate commands
+
+| Stage | Command | When |
+| --- | --- | --- |
+| Backend | `mvn -B -ntp -f backend/pom.xml verify` | Every Java task; mandatory T15 |
+| Frontend | `pnpm -C frontend lint && type-check && test && build` | T13 E2E slice |
+| Docker | `.\scripts\docker-deploy.ps1` | T02, T12, T13 |
+| Import | `.\deploy\import-all-demos.ps1` | T12 |
+| Publish | `.\deploy\publish-all-demos.ps1` | T12 |
+| E2E | `pnpm -C frontend test:e2e:docker` | T13 |
+| Health | `http://localhost:8080/healthz`, UI `http://localhost:4173` | T13 smoke |
+
+---
+
+## 9. Classification rationale
+
+| Alternative | Decision |
+| --- | --- |
+| Reopen P22 | **Rejected** — P22 honestly closed engine + scaffold; reopening blurs Done evidence |
+| LRP wave only | **Rejected** — typography/content is product-facing demo deliverable, not ops hardening alone |
+| P12 slice | **Rejected** — scope spans 8 packages + fonts + acceptance suite; warrants formal phase |
+| **P23 formal phase** | **Accepted** — user strategic priority 2026-07-08; aligns with taskmaster 4–8; pairs with LR-A2/A7 |
+
+---
+
+## Change log
+
+| Date | Change |
+| --- | --- |
+| 2026-07-08 | Phase activated **In Progress**; 16 tasks Not Started; honest P22 carry-forward documented; taskmaster 4–8 mapped; LR-A2/A7 cross-linked |

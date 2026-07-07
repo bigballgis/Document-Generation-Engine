@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **None** (2026-07-03 — **P22-DEMO-EXPANSION Done**; T01–T15 complete; gates **GREEN**). **Prior:** **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12; Playwright **10/10** + UIUX **PASS**; `2e61dc3`). **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03). **P21 Done** (2026-06-30; AUD-B10 **resolved** via P12-AUD-B10; AUD-M02 **resolved** via P12-AUD-M02). User sequence P14 → P15 → P18 **complete**; **P21 role-journey frontend redesign Done** (2026-06-30; T01–T11 + X01–X06 + X02).
+**Active formal phase:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE** (**In Progress** — activated 2026-07-08; user strategic direction: bank-grade Word typography/layout for all demo documents alongside comprehensive demo coverage). **Prior:** **P22-DEMO-EXPANSION Done** (2026-07-04 — rendering engine + package scaffold; T05–T11 honest note: rich bindings pending → **P23**). **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03). **P21 Done** (2026-06-30). User sequence P14 → P15 → P18 **complete**.
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
@@ -56,20 +56,22 @@ upstream systems invoke the dynamic API.
 | P19 | Template verifiability, publish gate & decision forms | P3, P4, P5 | Multi-sample coverage thresholds, batch test, change-diff, preview comparison, live publish-gate checklist, controlled test/approval opinion forms + risk prompts + exception markers (gaps G4, G5) | Done (2026-06-25; T01–T10) |
 | P20 | i18n multi-locale readiness & UI upgradeability | P1 | Locale registry/switcher/fallback + html lang, config-driven brand theming, environment selector (gap G6, i18n constitution) | Done (2026-06-25) |
 | P21 | Role-journey frontend redesign & business-friendly terminology | P13, P14, P19, P20 | Hybrid IA (single task hub authoritative + behavior-typed "my to-dos" entries + per-role `RoleJourneyTimeline`), task-hub queue partitioning + restored fields + inline open actions, 6 collaboration-trigger backend completeness (+ `RESOLVED`), foreign-bank non-IT persona business-friendly L1 copy (en/zh, keys stable); **plus code-grounded audit remediation** — permission single-source/fail-closed, template-detail bug fixes (focus/tab, stale id), APPROVAL dual-substate, i18n parity, a11y focus ring, capability/route/OpenAPI drift; ADR Batch B / COR-T11 not violated | Done (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest; **AUD-B10 resolved** P12-AUD-B10 Done 2026-07-01; **AUD-M02 resolved** P12-AUD-M02 Done 2026-07-01) |
-| P22 | Demo expansion & rendering fidelity | P3, P4, P18 | Structured content DOCX fidelity (P18 rendering gap), dual page numbering, per-demo footers, eight bank letter `deploy/demo-*` packages, `import-all-demos.ps1` (R1–R5; BDD-DEMO-EXP-001…015) | **Done** (2026-07-03; T01–T15; gates **GREEN**) |
+| P22 | Demo expansion & rendering fidelity | P3, P4, P18 | Structured content DOCX writer, dual page numbering, eight `deploy/demo-*` **scaffolds**, `import-all-demos.ps1` (R1–R5 engine + structure; **content/typography excellence → P23**) | **Done** (2026-07-04; T01–T15; gates **GREEN**; T05–T11 scaffold carry-forward) |
+| P23 | Demo document typography & layout excellence | P22, P18, LRP LR-A2 | Bank-grade master styles/fonts/margins/headers-footers; rich structured bindings (not placeholder text); all 8+ demos at foreign-bank-letter grade; POI + E2E + human typography acceptance; taskmaster 4–8 | **In Progress** (2026-07-08; T01–T16; BDD spec pending) |
 
-> **P22 vs P12:** **P22 Done** (2026-07-03). Closes P18/P4 rendering fidelity gap per [demo-expansion-behavior-spec.md](../requirements/demo-expansion-behavior-spec.md).
+> **P23 vs P22:** **P22 Done** — closed rendering **engine** and deploy **scaffold**. **P23 In Progress** — user priority 2026-07-08: generated demos must meet international large-bank Word typography and layout standards; pairs with **LR-A2** (font baseline) and **LR-A7** (pagination corpus). Detail: [detail/P23-demo-typography-layout-excellence.md](./detail/P23-demo-typography-layout-excellence.md).
+>
+> **P22 vs P12:** **P22 Done** (2026-07-04). Closes P18/P4 rendering fidelity **engine** gap per [demo-expansion-behavior-spec.md](../requirements/demo-expansion-behavior-spec.md).
 > **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12; commit `2e61dc3`). Do not reopen
 > P18/P21 phase status. Detail:
 > [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md),
 > [detail/P12-api-package-access-invocation-records.md](./detail/P12-api-package-access-invocation-records.md),
 > [detail/P12-deferred-enhancements.md](./detail/P12-deferred-enhancements.md).
 >
-> **CDP (this session):** [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) — Wave CD-0…CD-3; task prefix **`CD-*`** only.
+> **P22 (Done 2026-07-04):** rendering engine + demo scaffolds — typography/content excellence → **P23**.
 >
-> **P22 (other session):** formal phase may show In Progress in this file for repo accounting; implementation tracked in [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md). **Do not** execute P22 from CDP docs.
->
-> **LRP (In Progress — Wave LR-B Done 2026-07-04; Wave LR-A activated 2026-07-04):** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; program (not a formal phase); P22 remains the sole formal phase In Progress.
+> **CDP (parallel program):** [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) — Wave CD-0…CD-3; task prefix **`CD-*`** only.
+> **LRP (In Progress — Wave LR-B Done 2026-07-04; Wave LR-A activated 2026-07-04):** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; program (not a formal phase). **LR-A2** (font baseline) and **LR-A7** (pagination corpus) coordinate with **P23** — see [P23 detail](./detail/P23-demo-typography-layout-excellence.md) §5.
 
 ## Thin vertical slice (MVP chain)
 

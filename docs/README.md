@@ -5,7 +5,9 @@
 
 **Active work in this documentation track:** **[CDP Wave CD-0 In Progress](./plan/competitiveness-deepening-program.md)** — doc truth, E2E BDD, pitfall registry, browser golden-path evidence (task IDs **`CD-*` only).
 
-**Formal phase (repo-wide, other session):** **P22** — rendering + demos; see [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md) (**do not mix with CDP session**).
+**Active formal phase:** **P23** — demo document typography & layout excellence; see [P23 detail](./plan/detail/P23-demo-typography-layout-excellence.md).
+
+**P22 Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md).
 
 **P2-T06 Done** (Phase B master revision history, 2026-07-01). **P21 Done**. Latest gates: backend
 `mvn verify` BUILD SUCCESS; frontend **643** Vitest (2026-07-03). See [PROJECT-STATUS-RESET.md](./PROJECT-STATUS-RESET.md)
@@ -16,7 +18,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | Order | Document | Purpose |
 | --- | --- | --- |
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
-| 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P22) |
+| 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P23) |
 | 2a | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **This session** — doc truth, E2E golden paths, pitfall registry ( **`CD-*` tasks** ) |
 | 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
 | 2c | **[Deployment guide](../deploy/README.md)** | **Canonical** install/upgrade/cutover/rollback — Docker Compose + Kubernetes (ADR-0030) |
@@ -46,7 +48,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | --- | --- |
 | [Plan index](./plan/README.md) | Layer rules and phase links |
 | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone ↔ phase mapping + gate evidence + transitional seams index |
-| [Master plan](./plan/master-plan.md) | P0–P22 phases — see phase detail plans for status |
+| [Master plan](./plan/master-plan.md) | P0–P23 phases — see phase detail plans for status |
 | [System optimization review 2026-07](./plan/system-optimization-review-2026-07.md) | **Consolidated optimization program** (SOR-0…7, 2026-07-04 closeout) — actionable backlog complete except P22-blocked A02/A03 |
 | [SpotBugs exclusion ratchet](./plan/spotbugs-exclusion-ratchet.md) | Ongoing EI_EXPOSE_REP reduction plan (SOR-A05 slice 1+; post-SOR program) |
 | [Comprehensive optimization roadmap](./plan/comprehensive-optimization-roadmap.md) | **Unified execution map** — docs, API contract, template workflow, frontend UX, performance, E2E (COR-0…6, 2026-06-23) |
@@ -77,7 +79,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [P19 Verifiability & publish gate](./plan/detail/P19-verifiability-publish-gate.md) | Batch test, coverage, live publish gate, decision forms (Done 2026-06-25) |
 | [P20 i18n & UI upgradeability](./plan/detail/P20-i18n-ui-upgradeability.md) | Locale registry, brand theming, zh-CN primary journey (Done 2026-06-25) |
 | [P21 Role-journey frontend redesign](./plan/detail/P21-role-journey-frontend-redesign.md) | Hybrid IA, behavior-typed to-dos, per-role journeys, business-friendly terminology (**Done** 2026-06-30) |
-| [P22 Demo expansion & rendering fidelity](./plan/detail/P22-demo-expansion-rendering-fidelity.md) | Structured content DOCX fidelity, dual page numbers, eight bank letter demos (**In Progress** 2026-07-03) |
+| [P22 Demo expansion & rendering fidelity](./plan/detail/P22-demo-expansion-rendering-fidelity.md) | Structured content DOCX writer, dual page numbers, eight demo **scaffolds** (**Done** 2026-07-04) |
+| [P23 Demo typography & layout excellence](./plan/detail/P23-demo-typography-layout-excellence.md) | Bank-grade styles, rich bindings, font baseline, POI/E2E acceptance (**In Progress** 2026-07-08) |
 | **[Deployment guide](../deploy/README.md)** | **Canonical operator guide** — prerequisites, install/upgrade/cutover/rollback/secrets; indexes all `deploy/*.md` topic docs |
 
 ## Architecture
@@ -95,6 +98,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [TDD delivery workflow](./architecture/tdd-delivery-workflow.md) | Mandatory delivery loop |
 | [Quality gate baseline](./architecture/quality-gate-threshold-baseline.md) | Threshold defaults |
 | [AI development guide](./architecture/ai-development-guide.md) | Reading paths for implementers |
+| [UX entity display constitution](./architecture/ux-entity-display-constitution.md) | Entity columns, links, filters, fluid vs contained layout |
 
 ## Orchestration & milestones
 
@@ -184,6 +188,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | `.cursor/skills/i18n-english-first/` | English-first i18n skill |
 | `.cursor/skills/plan-status-tracking/` | Plan status skill |
 | `.cursor/rules/*.mdc` | Project constitutions (always apply) |
+| `.cursor/rules/strategic-direction-autonomy-constitution.mdc` | **When direction is clear, proceed autonomously — no permission polling** (always apply) |
 | `.cursor/rules/subagent-routing-mandate.mdc` | **Parent agent must delegate via Task/subagent_type** (always apply) |
 | `.cursor/hooks.json` | Auto-chain commit review after doc-sync subagent |
 

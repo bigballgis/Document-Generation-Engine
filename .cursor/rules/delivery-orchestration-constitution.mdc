@@ -33,6 +33,10 @@ behavior-spec-author → plan-orchestrator → doc-keeper(if docs change)
 
 ## Non-negotiables
 
+0. **Strategic direction autonomy** — When north star / active phase / confirmed BDD is
+   clear, proceed through pipeline stages without end-of-turn permission prompts. See
+   `strategic-direction-autonomy-constitution.mdc`. Block only on genuine ambiguity,
+   conflicts, or explicit user opt-out — not routine next steps.
 1. **BDD first** — No tests or code before a behavior spec exists, or BDD readiness is
    explicitly `not-applicable`. Unclear behavior blocks for user confirmation.
 2. **TDD always** — Failing test before implementation; smallest change to green; refactor.
