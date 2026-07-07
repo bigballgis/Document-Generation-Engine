@@ -93,8 +93,10 @@ docgen:
     account-groups:
       svc-caller:
         - RETAIL_API
+        - CORP_API
       e2e-runtime-caller:
         - RETAIL_API
+        - CORP_API
   collaboration:
     escalation:
       enabled: ${DOCGEN_COLLABORATION_ESCALATION_ENABLED:true}

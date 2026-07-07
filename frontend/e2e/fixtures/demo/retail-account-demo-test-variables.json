@@ -1,0 +1,25 @@
+{
+  "catalogMarker": "retail-account-demo-v1",
+  "testDataSets": [
+    {
+      "id": "retail-open-executive",
+      "label": "Retail Account Opening — Executive Sample",
+      "variables": {
+        "customerName": "Ms Eleanor Whitfield",
+        "accountNumber": "GB29 MERI 6016 1331 9268 19",
+        "branchName": "Manchester Deansgate",
+        "openingDate": "2026-06-15"
+      }
+    },
+    {
+      "id": "retail-balance-executive",
+      "label": "Retail Balance Confirmation — Executive Sample",
+      "variables": {
+        "customerName": "Mr James Porter",
+        "accountNumber": "GB82 MERI 4047 5312 8741 63",
+        "balanceAmount": "GBP 24,567.89",
+        "balanceDate": "2026-06-30"
+      }
+    }
+  ]
+}

@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:docker": "playwright test e2e/catalog.spec.ts e2e/role-journeys.spec.ts e2e/master-replace-docx.spec.ts e2e/content-module-lifecycle.spec.ts e2e/collaboration-todos.spec.ts e2e/a11y-smoke.spec.ts e2e/sor-a11y-axe.spec.ts e2e/sor-journey-gaps.spec.ts --config playwright.docker.config.ts",
+    "test:e2e:docker:demos": "playwright test e2e/demo-runtime-generate.spec.ts --config playwright.docker.config.ts",
     "test:e2e:install": "playwright install --with-deps chromium",
     "pretest:e2e": "playwright install chromium",
     "sbom": "cyclonedx-npm --ignore-npm-errors --no-validate --spec-version 1.6 --output-file ../artifacts/sbom/frontend-cyclonedx.json"
@@ -36,6 +37,7 @@
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitest/coverage-v8": "2.1.9",
     "@vue/test-utils": "^2.4.6",
+    "adm-zip": "^0.5.18",
     "eslint": "^9.17.0",
     "eslint-plugin-vue": "^9.32.0",
     "eslint-plugin-vuejs-accessibility": "^2.4.1",

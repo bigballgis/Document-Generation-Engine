@@ -33,11 +33,14 @@ foreach ($demo in $DemoScripts) {
         continue
     }
     Write-Host "==> import-all-demos: $($demo.Name)"
-    $args = @('-BackendUrl', $BackendUrl, '-PostgresContainer', $PostgresContainer)
-    if ($SkipSql) { $args += '-SkipSql' }
-    if ($SkipApi) { $args += '-SkipApi' }
-    if ($RegenerateCatalog) { $args += '-RegenerateCatalog' }
-    & $scriptPath @args
+    $importParams = @{
+        BackendUrl         = $BackendUrl
+        PostgresContainer  = $PostgresContainer
+    }
+    if ($SkipSql) { $importParams.SkipSql = $true }
+    if ($SkipApi) { $importParams.SkipApi = $true }
+    if ($RegenerateCatalog) { $importParams.RegenerateCatalog = $true }
+    & $scriptPath @importParams
     if ($LASTEXITCODE -ne 0) { throw "Import failed for $($demo.Name) (exit $LASTEXITCODE)" }
 }
 Write-Host '==> import-all-demos: completed successfully'

@@ -1,0 +1,31 @@
+{
+  "catalogMarker": "wealth-demo-v2-real",
+  "name": "Private Wealth Investment Statement — Real Executive Sample",
+  "required": true,
+  "variables": {
+    "bankName": "Meridian Private Wealth",
+    "bankAddress": "1 St James's Square, London SW1Y 4JU, United Kingdom",
+    "relationshipManager": "Charles Pemberton-Smythe",
+    "clientName": "The Lord & Lady Ashford Family Trust",
+    "clientAddress": "c/o Ashford Chambers, 14 Berkeley Square, London W1J 6BR",
+    "portfolioReference": "PWM-UK-2026-44821",
+    "statementDate": "2026-06-30",
+    "statementPeriod": "1 January 2026 to 30 June 2026 (H1 2026)",
+    "custodian": "Meridian Private Wealth Custody Ltd",
+    "baseCurrency": "GBP",
+    "holdings": [
+      {"instrument": "Meridian Global Equity Fund (Accumulation)", "quantity": "12,500", "marketPrice": "GBP 18.42", "marketValue": "GBP 230,250.00"},
+      {"instrument": "UK Gilt 4.25% 2035", "quantity": "GBP 500,000 nominal", "marketPrice": "98.75", "marketValue": "GBP 493,750.00"},
+      {"instrument": "Apple Inc. (AAPL) — NASDAQ", "quantity": "2,400", "marketPrice": "USD 198.50", "marketValue": "USD 476,400.00"},
+      {"instrument": "Meridian ESG Bond Fund (Income)", "quantity": "85,000", "marketPrice": "GBP 10.12", "marketValue": "GBP 860,200.00"},
+      {"instrument": "Rolls-Royce Holdings plc (RR.) — LSE", "quantity": "18,000", "marketPrice": "GBP 4.21", "marketValue": "GBP 75,780.00"}
+    ],
+    "totalCost": "1,892,450.00",
+    "totalMarketValue": "2,064,120.00",
+    "unrealisedGainLoss": "171,670.00",
+    "unrealisedGainLossPct": "+9.07%",
+    "incomeReceived": "28,415.50",
+    "signatoryName": "Eleanor V. Fitzpatrick",
+    "signatoryTitle": "Managing Director, Meridian Private Wealth"
+  }
+}
