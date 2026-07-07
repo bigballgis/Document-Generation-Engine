@@ -310,3 +310,54 @@ function Import-DemoPackage {
 
     Write-DemoStep "Demo package import complete (catalogMarker=$marker)"
 }
+
+# P23-T12 — canonical publish registry (mirrored by DemoPublishRegistry / DemoPublishOrchestrationContractTest).
+function Get-DemoAllowedApiAdGroups {
+    param([Parameter(Mandatory = $true)][string]$GroupCode)
+    if ($GroupCode -eq 'CORP') { return @('CORP_API') }
+    return @('RETAIL_API')
+}
+
+function Get-DemoPublishExternalIds {
+    param([string]$DeployRoot)
+    if (-not $DeployRoot) {
+        $DeployRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+    }
+    $ids = [System.Collections.Generic.List[string]]::new()
+    $packageOrder = @(
+        'demo-fol',
+        'demo-retail-account',
+        'demo-mortgage',
+        'demo-credit-limit',
+        'demo-trade-lc',
+        'demo-collection',
+        'demo-annual-review',
+        'demo-wealth'
+    )
+    foreach ($packageDir in $packageOrder) {
+        $configDir = Join-Path $DeployRoot $packageDir 'config'
+        if (-not (Test-Path $configDir)) { continue }
+        Get-ChildItem $configDir -Filter '*-template-config.json' | ForEach-Object {
+            $config = Get-Content $_.FullName -Raw | ConvertFrom-Json
+            foreach ($def in (Get-DemoTemplateDefinitions -Config $config)) {
+                if ($def.externalId) { $ids.Add([string]$def.externalId) }
+            }
+        }
+    }
+    if ($ids -notcontains 'DEMO-FULL-FLOW-LETTER') {
+        $ids.Insert(1, 'DEMO-FULL-FLOW-LETTER')
+    }
+    return @($ids | Select-Object -Unique)
+}
+
+function Resolve-DemoPublishAccessToken {
+    param([string]$GroupCode)
+    if ($GroupCode -in @('TRADE', 'WEALTH')) { return $script:GlobalAdminToken }
+    return $script:AuthorToken
+}
+
+function Resolve-DemoPublishTesterToken {
+    param([string]$GroupCode)
+    if ($GroupCode -in @('TRADE', 'WEALTH')) { return $script:GlobalAdminToken }
+    return $script:TesterToken
+}

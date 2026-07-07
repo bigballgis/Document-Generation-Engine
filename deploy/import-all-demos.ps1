@@ -1,4 +1,8 @@
-# Import all demo packages in priority order (P22 R5).
+# Import all demo packages in priority order (P22 R5 / P23-T12).
+# Covers 8 deploy/demo-* families (12 templates). DEMO-FULL-FLOW-LETTER is seeded
+# separately via docgen.demo-catalog.seed-enabled=true (DemoFullFlowCatalogSeeder) or E2E helpers.
+# After import, run deploy/publish-all-demos.ps1 to publish all templates + API credentials.
+#
 # Usage (from repo root):
 #   .\deploy\import-all-demos.ps1
 #   .\deploy\import-all-demos.ps1 -SkipSql

@@ -45,3 +45,42 @@ Bindings must reference style keys from this manifest via `styleRef` or `section
 
 - [demo-typography-layout-behavior-spec.md](../../docs/requirements/demo-typography-layout-behavior-spec.md)
 - [P23 detail plan](../../docs/plan/detail/P23-demo-typography-layout-excellence.md) — task **P23-T03**
+
+## Publish orchestration (P23-T12)
+
+After v3 bank-grade rewrites, import then publish all runtime-callable demo templates:
+
+```powershell
+# From repo root — backend must be healthy on :8080
+.\deploy\import-all-demos.ps1
+.\deploy\publish-all-demos.ps1
+```
+
+| Step | Script | Templates |
+| --- | --- | --- |
+| Import | `deploy/import-all-demos.ps1` | 8 packages → 12 external IDs from `*-template-config.json` |
+| Full-flow seed | `DemoFullFlowCatalogSeeder` (when `docgen.demo-catalog.seed-enabled=true`) | `DEMO-FULL-FLOW-LETTER` |
+| Publish | `deploy/publish-all-demos.ps1` | All **13** external IDs via `Get-DemoPublishExternalIds` |
+
+### Template coverage (publish registry)
+
+| externalId | groupCode | API policy AD group |
+| --- | --- | --- |
+| `CORP-FOL-OFFER` | CORP | `CORP_API` |
+| `DEMO-FULL-FLOW-LETTER` | RETAIL | `RETAIL_API` |
+| `DEMO-RETAIL-ACCOUNT-OPEN` / `BALANCE` | RETAIL | `RETAIL_API` |
+| `DEMO-MORTGAGE-APPROVAL` | RETAIL | `RETAIL_API` |
+| `DEMO-CREDIT-LIMIT-CONFIRM` | CORP | `CORP_API` |
+| `DEMO-TRADE-LC-NOTICE` / `GUARANTEE-NOTICE` | TRADE | `RETAIL_API` |
+| `DEMO-RATE-CHANGE-NOTICE` / `OVERDUE-COLLECTION` | RETAIL | `RETAIL_API` |
+| `DEMO-ANNUAL-REVIEW` / `FACILITY-RENEWAL` | CORP | `CORP_API` |
+| `DEMO-WEALTH-STATEMENT` | WEALTH | `RETAIL_API` |
+
+Runtime callers `svc-caller` and `e2e-runtime-caller` are granted **both** `RETAIL_API` and `CORP_API` in `application.yml`.
+
+### Outputs
+
+- `.tmp/credentials/<externalId>.json` — API credential bundles for runtime generate (P23-T14)
+- `.tmp/evidence/all-demos-publish-summary.json` — publish evidence table
+
+Contract tests: `DemoPublishOrchestrationContractTest` (BDD-DEMO-TYP-011).
