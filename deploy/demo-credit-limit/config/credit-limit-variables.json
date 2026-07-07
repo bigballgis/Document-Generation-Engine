@@ -1,5 +1,5 @@
 {
-  "catalogMarker": "credit-limit-demo-v2-real",
+  "catalogMarker": "credit-limit-demo-v3-bank-grade",
   "variables": [
     {
       "key": "bankName",
@@ -50,6 +50,12 @@
       "required": false
     },
     {
+      "key": "includeGuarantor",
+      "label": "Include Guarantor",
+      "type": "BOOLEAN",
+      "required": false
+    },
+    {
       "key": "facilityReference",
       "label": "Facility Reference",
       "type": "TEXT",
@@ -77,6 +83,12 @@
       "key": "availabilityPeriod",
       "label": "Availability Period",
       "type": "TEXT",
+      "required": true
+    },
+    {
+      "key": "sanctionDate",
+      "label": "Sanction Date",
+      "type": "DATE",
       "required": true
     },
     {

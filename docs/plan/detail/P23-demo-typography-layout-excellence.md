@@ -59,7 +59,7 @@ Word is the authoritative typesetting surface. Generated DOCX must exhibit:
 | **P23-T01** | doc-keeper + behavior-spec-author | **BDD behavior spec** — `demo-typography-layout-behavior-spec.md`: actor (demo author / runtime caller), typography/layout acceptance scenarios, per-demo-type footer/header rules, font baseline expectations, POI/E2E evidence hooks (`BDD-DEMO-TYP-001`…`020`) | — | **Done** (2026-07-08; readiness `ready`) |
 | **P23-T02** | deploy-engineer + backend-engineer | **Font baseline in Docker** — executes **LR-A2** / CD-HARD-T01: CJK + Carlito/Caladea (or verified substitutes) in both Dockerfiles; `fc-list` build assertion; `RenderingFontSmokeTest`; evidence PDF. **Single owner row** — update LR-A2 status when Done, do not duplicate work | P23-T01 (typography rules) | **Done** (2026-07-08; LR-A2 mirrored; BDD-DEMO-TYP-009/010) |
 | **P23-T03** | backend-engineer | **Master style system for demos** — extend `*MasterDocxAssetGeneratorTest` pattern: standard bank style set (Heading1–3, ClauseBody, TableHeader, SignatureBlock, etc.); margins (e.g. 2.54 cm); default body font; header/footer slots per `pageNumberingProfile`; shared style manifest doc in `deploy/demo-shared/` | P23-T01 | **Done** (2026-07-08; `deploy/demo-shared/` manifest + `DemoMasterDocxStyleSupport`; credit-limit reference POI assertions; `mvn verify` green) |
-| **P23-T04** | backend-engineer | **Rewrite `deploy/demo-credit-limit/`** — bank-grade credit-limit confirmation (parties, defined terms, facility, interest, covenants, EOD, governing law, signature); ≥20 variables; rich binding overlays + SQL; regenerate master; maps **taskmaster #4** | P23-T03 | **Not Started** |
+| **P23-T04** | backend-engineer | **Rewrite `deploy/demo-credit-limit/`** — bank-grade credit-limit confirmation (parties, defined terms, facility, interest, covenants, EOD, governing law, signature); ≥20 variables; rich binding overlays + SQL; regenerate master; maps **taskmaster #4** | P23-T03 | **Done** (2026-07-08; 9 anchors; 32 variables; rich nodes styleRef/emphasis/underline/conditionBlock/loopBlock/tableComponentRef/contentModuleRef; `mvn verify` green) |
 | **P23-T05** | backend-engineer | **Rewrite `deploy/demo-mortgage/`** — mortgage approval + amortization schedule table; ≥20 variables; SECTION_AND_GLOBAL footer; maps **taskmaster #5** (mortgage slice) | P23-T03 | **Not Started** |
 | **P23-T06** | backend-engineer | **Rewrite `deploy/demo-trade-lc/`** — LC/guarantee notice; document checklist table; seal/image refs; ≥20 variables | P23-T03 | **Not Started** |
 | **P23-T07** | backend-engineer | **Rewrite `deploy/demo-collection/`** — rate change + overdue collection; regulatory emphasis + disclaimer footer; ≥15 variables | P23-T03 | **Not Started** |
@@ -96,7 +96,7 @@ Wave 4 — Acceptance + evidence
   LR-A7 pagination corpus (doc-keeper — after ≥5 Wave 2 packages Done)
 ```
 
-**First delegation:** ~~**behavior-spec-author** → **P23-T01**~~ **Done** (2026-07-08); ~~**backend-engineer** → **P23-T02** (LR-A2 font)~~ **Done** (2026-07-08); ~~**backend-engineer** → **P23-T03** (style manifest)~~ **Done** (2026-07-08); **next:** **backend-engineer** → **P23-T04** (credit-limit pilot rewrite).
+**First delegation:** ~~**behavior-spec-author** → **P23-T01**~~ **Done** (2026-07-08); ~~**backend-engineer** → **P23-T02** (LR-A2 font)~~ **Done** (2026-07-08); ~~**backend-engineer** → **P23-T03** (style manifest)~~ **Done** (2026-07-08); ~~**backend-engineer** → **P23-T04** (credit-limit pilot rewrite)~~ **Done** (2026-07-08); **next:** **backend-engineer** → **P23-T05** (mortgage rewrite).
 
 ---
 
@@ -188,4 +188,4 @@ Wave 4 — Acceptance + evidence
 | 2026-07-08 | Phase activated **In Progress**; 16 tasks Not Started; honest P22 carry-forward documented; taskmaster 4–8 mapped; LR-A2/A7 cross-linked |
 | 2026-07-08 | **P23-T02 Done** — LR-A2 font baseline: Debian jammy runtime in both Dockerfiles; `RenderingFontSmokeTest`; `fc-list :lang=zh` build gate |
 | 2026-07-08 | **P23-T03 Done** — `deploy/demo-shared/` bank style manifest; `DemoMasterDocxStyleSupport` + credit-limit POI assertions; margin baseline 2.54 cm; gates green |
-| 2026-07-08 | **P23-T01 Done** — `demo-typography-layout-behavior-spec.md` ready (`BDD-DEMO-TYP-001`…`020`); next delegation P23-T04 |
+| 2026-07-08 | **P23-T04 Done** — `deploy/demo-credit-limit/` bank-grade rewrite: 9 anchors (CL_PARTIES…CL_SIGNATURE); 32 variables; rich binding overlays (styleRef, emphasis, underline, conditionBlock, loopBlock, tableComponentRef, contentModuleRef); SQL EOD module; master regenerated; POI assertions green; pilot pattern for T05–T10 |

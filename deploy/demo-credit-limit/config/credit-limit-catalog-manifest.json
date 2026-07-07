@@ -1,12 +1,28 @@
 {
-  "catalogMarker": "credit-limit-demo-v2-real",
+  "catalogMarker": "credit-limit-demo-v3-bank-grade",
   "packageCode": "credit-limit",
   "groupCode": "CORP",
   "pageNumberingProfile": "SECTION_AND_GLOBAL",
-  "pageTarget": 8,
-  "templates": ["DEMO-CREDIT-LIMIT-CONFIRM"],
+  "pageTarget": 12,
+  "templates": [
+    {
+      "externalId": "DEMO-CREDIT-LIMIT-CONFIRM",
+      "anchorIds": [
+        "CL_PARTIES",
+        "CL_DEFINED_TERMS",
+        "CL_FACILITY",
+        "CL_INTEREST",
+        "CL_COVENANTS",
+        "CL_REPAYMENT",
+        "CL_EOD",
+        "CL_GOVERNING_LAW",
+        "CL_SIGNATURE"
+      ]
+    }
+  ],
   "contentModuleRefs": [
     {"referenceKey": "CREDIT-LIMIT-STANDARD-CLAUSE", "moduleCode": "CREDIT-LIMIT-STD"},
-    {"referenceKey": "CREDIT-LIMIT-COVENANTS", "moduleCode": "CREDIT-LIMIT-COV"}
+    {"referenceKey": "CREDIT-LIMIT-COVENANTS", "moduleCode": "CREDIT-LIMIT-COV"},
+    {"referenceKey": "CREDIT-LIMIT-EOD", "moduleCode": "CREDIT-LIMIT-EOD"}
   ]
 }

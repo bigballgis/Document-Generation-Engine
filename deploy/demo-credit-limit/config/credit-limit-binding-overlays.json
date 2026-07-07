@@ -1,140 +1,510 @@
 {
-  "catalogMarker": "credit-limit-demo-v2-real",
+  "catalogMarker": "credit-limit-demo-v3-bank-grade",
   "bindings": {
-    "CREDIT_LIMIT_BODY": {
+    "CL_PARTIES": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Date: "},
-          {"type": "variable", "key": "letterDate"}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "To: "},
-          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "borrowerName"}]}
-        ]},
-        {"type": "paragraph", "children": [{"type": "variable", "key": "borrowerAddress"}]},
-        {"type": "paragraph", "children": [{"type": "variable", "key": "borrowerCountry"}]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Dear Sirs,"}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Re: Credit Facility Confirmation — Facility Reference "},
-          {"type": "underline", "children": [{"type": "variable", "key": "facilityReference"}]}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "We are pleased to confirm the credit facilities made available to "},
-          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "borrowerName"}]},
-          {"type": "textRun", "value": " (the Borrower) by "},
-          {"type": "variable", "key": "bankName"},
-          {"type": "textRun", "value": ", "},
-          {"type": "variable", "key": "bankBranch"},
-          {"type": "textRun", "value": ", pursuant to the facility agreement referenced above. This letter sets out the operative terms of the facility and is a Finance Document for the purposes of the agreement."}
-        ]},
-        {"type": "sectionHeading", "children": [{"type": "text", "value": "1. Facility Particulars"}]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Facility Type: "},
-          {"type": "variable", "key": "facilityType"},
-          {"type": "textRun", "value": " | Facility Reference: "},
-          {"type": "variable", "key": "facilityReference"}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Aggregate Credit Limit: "},
-          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "creditLimit"}]}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Availability Period: "},
-          {"type": "variable", "key": "availabilityPeriod"},
-          {"type": "textRun", "value": " (from the date of this letter until "},
-          {"type": "variable", "key": "expiryDate"},
-          {"type": "textRun", "value": ")."}
-        ]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Pricing: Margin of "},
-          {"type": "variable", "key": "marginBps"},
-          {"type": "textRun", "value": " bps over "},
-          {"type": "variable", "key": "referenceRate"},
-          {"type": "textRun", "value": "; commitment fee of "},
-          {"type": "variable", "key": "commitmentFeeBps"},
-          {"type": "textRun", "value": " bps per annum on undrawn amounts."}
-        ]},
-        {"type": "conditionBlock", "conditionExpression": "${includeOverdraft} == true", "children": [
-          {"type": "paragraph", "children": [
-            {"type": "textRun", "value": "Overdraft Sub-limit: "},
-            {"type": "underline", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "overdraftLimit"}]},
-            {"type": "textRun", "value": " (subject to daily review and intra-day overdraft limits set by the Agent)."}
-          ]}
-        ]},
-        {"type": "sectionHeading", "children": [{"type": "text", "value": "2. Conditions Precedent"}]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "Drawdown under the facility is subject to satisfaction of the following conditions precedent, each in form and substance satisfactory to the Bank:"}
-        ]},
-        {"type": "list", "children": [{"type": "textRun", "value": "Certified constitutional documents of the Borrower and Guarantor, including board resolutions authorising the facility."}]},
-        {"type": "list", "children": [{"type": "textRun", "value": "Legal opinion from counsel of recognised standing in the Borrower's jurisdiction of incorporation."}]},
-        {"type": "list", "children": [{"type": "textRun", "value": "Audited financial statements for the last two financial years and most recent management accounts."}]},
-        {"type": "list", "children": [{"type": "textRun", "value": "Know-your-customer, anti-money-laundering and sanctions screening documentation for all Obligors."}]},
-        {"type": "list", "children": [{"type": "textRun", "value": "Executed security documentation over the shares in the Borrower and the guaranteed accounts."}]},
-        {"type": "contentModuleRef", "referenceKey": "CREDIT-LIMIT-STANDARD-CLAUSE"}
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Date: "},
+            {"type": "variable", "key": "letterDate"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "To: "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "borrowerName"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "variable", "key": "borrowerAddress"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "variable", "key": "borrowerCountry"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [{"type": "textRun", "value": "Dear Sirs,"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Re: Credit Facility Confirmation — Facility Reference "},
+            {"type": "underline", "children": [{"type": "variable", "key": "facilityReference"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "We, "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "bankName"}]},
+            {"type": "textRun", "value": " of "},
+            {"type": "variable", "key": "bankAddress"},
+            {"type": "textRun", "value": " (the Bank), acting through "},
+            {"type": "variable", "key": "bankBranch"},
+            {"type": "textRun", "value": ", are pleased to confirm the credit facilities made available to "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "borrowerName"}]},
+            {"type": "textRun", "value": " (the Borrower), with effect from the date of this letter (the Sanction Date)."}
+          ]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeGuarantor} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "The obligations of the Borrower under the Finance Documents are guaranteed by "},
+                {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "guarantorName"}]},
+                {"type": "textRun", "value": " (the Guarantor) pursuant to a guarantee and indemnity to be entered into on or before the first utilisation date."}
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "This letter constitutes a Finance Document and sets out the principal commercial terms of the Facility. Capitalised terms used but not defined herein have the meanings given to them in the facility agreement."}
+          ]
+        }
       ]
     },
-    "CREDIT_LIMIT_TERMS": {
+    "CL_DEFINED_TERMS": {
       "schemaVersion": "1.0",
       "nodes": [
-        {"type": "sectionHeading", "children": [{"type": "text", "value": "3. Financial Covenants"}]},
-        {"type": "conditionBlock", "conditionExpression": "${includeFinancialCovenants} == true", "children": [
-          {"type": "paragraph", "children": [
-            {"type": "textRun", "value": "The Borrower shall comply with the following financial covenants, tested quarterly on each Financial Quarter end:"}
-          ]},
-          {"type": "list", "children": [{"type": "textRun", "value": "Maximum Leverage Ratio: "}, {"type": "variable", "key": "maxLeverageRatio"}]},
-          {"type": "list", "children": [{"type": "textRun", "value": "Minimum Interest Cover Ratio: "}, {"type": "variable", "key": "minInterestCover"}]},
-          {"type": "list", "children": [{"type": "textRun", "value": "Minimum Tangible Net Worth: "}, {"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "minTangibleNetWorth"}]}
-        ]},
-        {"type": "contentModuleRef", "referenceKey": "CREDIT-LIMIT-COVENANTS"},
-        {"type": "sectionHeading", "children": [{"type": "text", "value": "4. Repayment Schedule"}]},
-        {"type": "tableComponentRef", "tableComponent": {
-          "componentKey": "CREDIT-LIMIT-TBL-SCHEDULE",
-          "columnSchema": [
-            {"columnKey": "paymentDate", "widthPct": 25},
-            {"columnKey": "principal", "widthPct": 25},
-            {"columnKey": "interest", "widthPct": 25},
-            {"columnKey": "balance", "widthPct": 25}
-          ],
-          "headerRows": [[
-            {"columnKey": "paymentDate", "value": "Payment Date"},
-            {"columnKey": "principal", "value": "Principal"},
-            {"columnKey": "interest", "value": "Interest"},
-            {"columnKey": "balance", "value": "Outstanding Balance"}
-          ]],
-          "loopRow": {
-            "loopVariable": "repaymentSchedule",
-            "cells": [
-              {"columnKey": "paymentDate", "variableKey": "paymentDate"},
-              {"columnKey": "principal", "variableKey": "principal"},
-              {"columnKey": "interest", "variableKey": "interest"},
-              {"columnKey": "balance", "variableKey": "balance"}
-            ]
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Defined Terms"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Agent\""},
+            {"type": "textRun", "value": " means the Bank in its capacity as agent for the Lenders."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Availability Period\""},
+            {"type": "textRun", "value": " means the period from the Sanction Date to "},
+            {"type": "variable", "key": "expiryDate"},
+            {"type": "textRun", "value": ", being "},
+            {"type": "variable", "key": "availabilityPeriod"},
+            {"type": "textRun", "value": " from the date of this letter."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Commitment\""},
+            {"type": "textRun", "value": " means the aggregate revolving credit commitment of "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "creditLimit"}]},
+            {"type": "textRun", "value": " made available to the Borrower under the Facility."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Facility\""},
+            {"type": "textRun", "value": " means the "},
+            {"type": "variable", "key": "facilityType"},
+            {"type": "textRun", "value": " identified by reference "},
+            {"type": "underline", "children": [{"type": "variable", "key": "facilityReference"}]},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Finance Documents\""},
+            {"type": "textRun", "value": " means this letter, the facility agreement, any security documents, and any other document designated as a Finance Document therein."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Margin\""},
+            {"type": "textRun", "value": " means "},
+            {"type": "variable", "key": "marginBps"},
+            {"type": "textRun", "value": " basis points per annum above the Reference Rate."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "DefinedTerm",
+          "children": [
+            {"type": "textRun", "value": "\"Reference Rate\""},
+            {"type": "textRun", "value": " means "},
+            {"type": "variable", "key": "referenceRate"},
+            {"type": "textRun", "value": ", as published or compounded in accordance with the facility agreement."}
+          ]
+        }
+      ]
+    },
+    "CL_FACILITY": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Facility Particulars"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The Bank agrees to make available to the Borrower a "},
+            {"type": "variable", "key": "facilityType"},
+            {"type": "textRun", "value": " in an aggregate principal amount not exceeding "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "creditLimit"}]},
+            {"type": "textRun", "value": " (the Commitment), subject to the terms and conditions set out in the Finance Documents."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Facility Reference: "},
+            {"type": "underline", "children": [{"type": "variable", "key": "facilityReference"}]},
+            {"type": "textRun", "value": " | Sanction Date: "},
+            {"type": "variable", "key": "sanctionDate"},
+            {"type": "textRun", "value": " | Next Review Date: "},
+            {"type": "variable", "key": "reviewDate"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The Availability Period commences on the Sanction Date and expires on "},
+            {"type": "variable", "key": "expiryDate"},
+            {"type": "textRun", "value": ". No utilisation may be made after expiry of the Availability Period unless the Commitment has been extended in writing by the Bank."}
+          ]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeOverdraft} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "Overdraft Sub-limit: Within the Commitment, an overdraft facility of up to "},
+                {"type": "underline", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "overdraftLimit"}]},
+                {"type": "textRun", "value": " may be utilised on a same-day basis, subject to intra-day limits and daily review by the Agent."}
+              ]
+            }
+          ]
+        },
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading3",
+          "numbering": {"level": 2},
+          "children": [{"type": "text", "value": "Conditions Precedent to First Utilisation"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The Bank is not obliged to fund any utilisation until the following conditions precedent have been satisfied, each in form and substance satisfactory to the Bank:"}
+          ]
+        },
+        {
+          "type": "loopBlock",
+          "loopVariable": "conditionsPrecedent",
+          "children": [
+            {
+              "type": "list",
+              "children": [
+                {"type": "variable", "key": "conditionText"}
+              ]
+            }
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "CREDIT-LIMIT-STANDARD-CLAUSE"
+        }
+      ]
+    },
+    "CL_INTEREST": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Interest, Fees and Pricing"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Interest on each Loan accrues at the rate per annum which is the aggregate of the Reference Rate ("},
+            {"type": "variable", "key": "referenceRate"},
+            {"type": "textRun", "value": ") and the Margin of "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "marginBps"}, {"type": "textRun", "value": " bps"}]},
+            {"type": "textRun", "value": ", calculated on the basis of actual days elapsed and a 365-day year (or 366 days in a leap year)."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "A commitment fee of "},
+            {"type": "variable", "key": "commitmentFeeBps"},
+            {"type": "textRun", "value": " basis points per annum is payable on the undrawn and uncancelled Commitment, calculated daily and paid quarterly in arrears on the last Business Day of each March, June, September and December."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Default interest applies to any overdue amount at the rate specified in the facility agreement (typically two per cent. per annum above the rate which would have been payable if the overdue amount had, during the period of non-payment, constituted a Loan in the currency of the overdue amount)."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Interest periods shall be one, three or six months as selected by the Borrower in the relevant Utilisation Request, subject to availability of the Reference Rate for the selected period."}
+          ]
+        }
+      ]
+    },
+    "CL_COVENANTS": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Financial Covenants and Reporting"}]
+        },
+        {
+          "type": "conditionBlock",
+          "conditionExpression": "${includeFinancialCovenants} == true",
+          "children": [
+            {
+              "type": "paragraph",
+              "styleRef": "ClauseBody",
+              "children": [
+                {"type": "textRun", "value": "The Borrower shall procure that the Group complies with the following financial covenants, tested quarterly on each Financial Quarter end based on consolidated financial statements:"}
+              ]
+            },
+            {
+              "type": "list",
+              "ordered": true,
+              "children": [
+                {
+                  "type": "paragraph",
+                  "children": [
+                    {"type": "textRun", "value": "Maximum Leverage Ratio: Total Financial Indebtedness to EBITDA not to exceed "},
+                    {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "maxLeverageRatio"}]}
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "children": [
+                    {"type": "textRun", "value": "Minimum Interest Cover Ratio: EBITDA to net finance costs to be not less than "},
+                    {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "minInterestCover"}]}
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "children": [
+                    {"type": "textRun", "value": "Minimum Tangible Net Worth: "},
+                    {"type": "underline", "children": [{"type": "variable", "key": "currency"}, {"type": "textRun", "value": " "}, {"type": "variable", "key": "minTangibleNetWorth"}]},
+                    {"type": "textRun", "value": " as at each Financial Quarter end."}
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "CREDIT-LIMIT-COVENANTS"
+        }
+      ]
+    },
+    "CL_REPAYMENT": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Repayment Schedule"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ScheduleTitle",
+          "children": [
+            {"type": "textRun", "value": "Schedule 1 — Indicative Repayment Profile (subject to adjustment on each Interest Payment Date)"}
+          ]
+        },
+        {
+          "type": "tableComponentRef",
+          "tableComponent": {
+            "componentKey": "CREDIT-LIMIT-TBL-SCHEDULE",
+            "columnSchema": [
+              {"columnKey": "paymentDate", "widthPct": 25},
+              {"columnKey": "principal", "widthPct": 25},
+              {"columnKey": "interest", "widthPct": 25},
+              {"columnKey": "balance", "widthPct": 25}
+            ],
+            "headerRows": [[
+              {"columnKey": "paymentDate", "value": "Payment Date"},
+              {"columnKey": "principal", "value": "Principal Repayment"},
+              {"columnKey": "interest", "value": "Interest"},
+              {"columnKey": "balance", "value": "Outstanding Balance"}
+            ]],
+            "loopRow": {
+              "loopVariable": "repaymentSchedule",
+              "cells": [
+                {"columnKey": "paymentDate", "variableKey": "paymentDate"},
+                {"columnKey": "principal", "variableKey": "principal"},
+                {"columnKey": "interest", "variableKey": "interest"},
+                {"columnKey": "balance", "variableKey": "balance"}
+              ]
+            }
           }
-        }},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "The schedule above is indicative. Actual amounts will be confirmed on each interest determination date by the Agent."}
-        ]},
-        {"type": "sectionHeading", "children": [{"type": "text", "value": "5. Governing Law and Jurisdiction"}]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "This letter and any non-contractual obligations arising out of it are governed by "},
-          {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "governingLaw"}]},
-          {"type": "textRun", "value": ". The parties submit to the exclusive jurisdiction of the courts of "},
-          {"type": "variable", "key": "jurisdiction"},
-          {"type": "textRun", "value": "."}
-        ]},
-        {"type": "sectionHeading", "children": [{"type": "text", "value": "6. Signatures"}]},
-        {"type": "paragraph", "children": [
-          {"type": "textRun", "value": "For and on behalf of "},
-          {"type": "variable", "key": "bankName"},
-          {"type": "textRun", "value": ":"}
-        ]},
-        {"type": "paragraph", "children": [{"type": "textRun", "value": "_____________________________"}]},
-        {"type": "paragraph", "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]},
-        {"type": "paragraph", "children": [{"type": "variable", "key": "signatoryTitle"}]},
-        {"type": "paragraph", "children": [{"type": "variable", "key": "bankAddress"}]}
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The schedule above is indicative only. Actual principal and interest amounts will be confirmed by the Agent on each interest determination date. Mandatory prepayment applies on change of control, illegality and disposal of assets exceeding the materiality threshold specified in the facility agreement."}
+          ]
+        }
+      ]
+    },
+    "CL_EOD": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Events of Default"}]
+        },
+        {
+          "type": "contentModuleRef",
+          "referenceKey": "CREDIT-LIMIT-EOD"
+        }
+      ]
+    },
+    "CL_GOVERNING_LAW": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Governing Law and Jurisdiction"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "This letter and any non-contractual obligations arising out of or in connection with it are governed by "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "governingLaw"}]},
+            {"type": "textRun", "value": "."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "The courts of "},
+            {"type": "underline", "children": [{"type": "variable", "key": "jurisdiction"}]},
+            {"type": "textRun", "value": " have exclusive jurisdiction to settle any dispute arising out of or in connection with this letter or the Finance Documents. The Borrower irrevocably submits to the jurisdiction of such courts and waives any objection to proceedings in such courts on grounds of inconvenient forum."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Nothing in this clause limits the right of the Bank to take proceedings in any other court of competent jurisdiction, nor shall the taking of proceedings in one or more jurisdictions preclude the taking of proceedings in any other jurisdiction."}
+          ]
+        }
+      ]
+    },
+    "CL_SIGNATURE": {
+      "schemaVersion": "1.0",
+      "nodes": [
+        {
+          "type": "sectionHeading",
+          "styleRef": "Heading2",
+          "numbering": {"level": 1},
+          "children": [{"type": "text", "value": "Authorised Signatory"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "ClauseBody",
+          "children": [
+            {"type": "textRun", "value": "Please confirm your acceptance of the terms set out in this letter by countersigning and returning an executed copy to the Bank within ten Business Days of the date of this letter."}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {"type": "textRun", "value": "Yours faithfully,"}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [
+            {"type": "textRun", "value": "For and on behalf of "},
+            {"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "bankName"}]}
+          ]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "textRun", "value": "_____________________________"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "variable", "key": "signatoryTitle"}]
+        },
+        {
+          "type": "paragraph",
+          "styleRef": "SignatureBlock",
+          "children": [{"type": "variable", "key": "bankAddress"}]
+        }
       ]
     }
   }

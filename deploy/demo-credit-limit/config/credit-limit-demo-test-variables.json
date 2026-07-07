@@ -1,23 +1,25 @@
 {
-  "catalogMarker": "credit-limit-demo-v2-real",
-  "name": "Credit Limit Confirmation — Real Executive Sample",
+  "catalogMarker": "credit-limit-demo-v3-bank-grade",
+  "name": "Credit Limit Confirmation — Executive Sample",
   "required": true,
   "variables": {
     "bankName": "Meridian Global Banking Corporation",
     "bankAddress": "25 Lombard Street, London EC3V 9AA, United Kingdom",
     "bankBranch": "Wholesale Banking — Corporate Credit",
-    "letterDate": "2026-07-06",
+    "letterDate": "2026-07-08",
+    "sanctionDate": "2026-07-08",
     "borrowerName": "Northgate Manufacturing Ltd.",
     "borrowerAddress": "Unit 7, Trident Industrial Park, Leeds LS10 1TT",
     "borrowerCountry": "United Kingdom",
     "guarantorName": "Northgate Holdings plc",
+    "includeGuarantor": true,
     "facilityReference": "CORP-CL-2026-88421",
     "creditLimit": "12,500,000.00",
     "currency": "GBP",
     "facilityType": "Revolving Credit Facility",
     "availabilityPeriod": "364 days",
     "reviewDate": "2026-06-30",
-    "expiryDate": "2027-07-05",
+    "expiryDate": "2027-07-07",
     "marginBps": "165",
     "referenceRate": "SONIA (compounded in arrears)",
     "commitmentFeeBps": "40",
@@ -39,10 +41,10 @@
       {"conditionText": "Executed security documentation over the shares in the Borrower and the guaranteed accounts."}
     ],
     "repaymentSchedule": [
-      {"paymentDate": "2026-10-05", "principal": "GBP 1,041,666.67", "interest": "GBP 312,500.00", "balance": "GBP 11,458,333.33"},
-      {"paymentDate": "2027-01-05", "principal": "GBP 1,041,666.67", "interest": "GBP 286,458.33", "balance": "GBP 10,416,666.66"},
-      {"paymentDate": "2027-04-05", "principal": "GBP 1,041,666.67", "interest": "GBP 260,416.67", "balance": "GBP 9,374,999.99"},
-      {"paymentDate": "2027-07-05", "principal": "GBP 9,374,999.99", "interest": "GBP 234,375.00", "balance": "GBP 0.00"}
+      {"paymentDate": "2026-10-07", "principal": "GBP 1,041,666.67", "interest": "GBP 312,500.00", "balance": "GBP 11,458,333.33"},
+      {"paymentDate": "2027-01-07", "principal": "GBP 1,041,666.67", "interest": "GBP 286,458.33", "balance": "GBP 10,416,666.66"},
+      {"paymentDate": "2027-04-07", "principal": "GBP 1,041,666.67", "interest": "GBP 260,416.67", "balance": "GBP 9,374,999.99"},
+      {"paymentDate": "2027-07-07", "principal": "GBP 9,374,999.99", "interest": "GBP 234,375.00", "balance": "GBP 0.00"}
     ]
   }
 }

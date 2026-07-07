@@ -14,6 +14,8 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 import org.apache.poi.wp.usermodel.HeaderFooterType;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -26,19 +28,44 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 
 class CreditLimitMasterDocxAssetGeneratorTest {
 
-    static final String MASTER_LAYOUT_VERSION = "credit-limit-layout-v3-bank-styles";
+    static final String MASTER_LAYOUT_VERSION = "credit-limit-layout-v4-nine-anchors";
     private static final Path ASSET = Path.of("..", "deploy", "demo-credit-limit", "assets", "credit-limit-master.docx");
-    static final List<String> ANCHOR_IDS = List.of("CREDIT_LIMIT_BODY", "CREDIT_LIMIT_TERMS");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(
+            "LOREM|TODO|\\{\\{placeholder|placeholder text",
+            Pattern.CASE_INSENSITIVE
+    );
+
+    static final List<String> ANCHOR_IDS = List.of(
+            "CL_PARTIES",
+            "CL_DEFINED_TERMS",
+            "CL_FACILITY",
+            "CL_INTEREST",
+            "CL_COVENANTS",
+            "CL_REPAYMENT",
+            "CL_EOD",
+            "CL_GOVERNING_LAW",
+            "CL_SIGNATURE"
+    );
 
     @Test
     void writesCreditLimitMasterDocxAsset() throws Exception {
         byte[] docx = buildMaster();
         assertThat(new DocxAnchorExtractor().extractOrderedAnchorIds(new ByteArrayInputStream(docx)))
                 .containsExactlyElementsOf(ANCHOR_IDS);
+        assertThat(ANCHOR_IDS).hasSizeGreaterThanOrEqualTo(9);
 
         DemoMasterDocxStyleSupport.assertSharedBankStylesPresent(docx);
         String stylesXml = DemoMasterDocxAssertions.readStylesXml(docx);
-        assertThat(stylesXml).contains("w:styleId=\"ClauseBody\"").contains("w:styleId=\"SignatureBlock\"");
+        assertThat(stylesXml)
+                .contains("w:styleId=\"ClauseBody\"")
+                .contains("w:styleId=\"DefinedTerm\"")
+                .contains("w:styleId=\"SignatureBlock\"")
+                .contains("w:styleId=\"TableHeader\"");
+
+        String footerXml = DemoMasterDocxAssertions.readFooterXml(docx);
+        assertThat(footerXml).contains("SECTIONPAGES");
+
+        assertNoPlaceholderMarkers(docx);
 
         try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docx))) {
             CTSectPr sectPr = document.getDocument().getBody().getSectPr();
@@ -53,10 +80,27 @@ class CreditLimitMasterDocxAssetGeneratorTest {
         Files.write(ASSET, docx);
     }
 
+    private static void assertNoPlaceholderMarkers(byte[] docxBytes) throws Exception {
+        try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docxBytes))) {
+            StringBuilder text = new StringBuilder();
+            document.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n'));
+            document.getHeaderList().forEach(header ->
+                    header.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n')));
+            document.getFooterList().forEach(footer ->
+                    footer.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n')));
+            String body = text.toString().toUpperCase(Locale.ROOT);
+            assertThat(PLACEHOLDER_PATTERN.matcher(body).find())
+                    .as("Master DOCX must not contain LOREM/TODO/placeholder markers")
+                    .isFalse();
+            assertThat(body).doesNotContain("LOREM");
+        }
+    }
+
     static byte[] buildMaster() throws Exception {
         try (XWPFDocument document = new XWPFDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             DemoMasterDocxLayoutSupport.configureA4PageLayout(document);
             DemoMasterDocxStyleSupport.applySharedBankStyles(document);
+
             org.apache.poi.xwpf.usermodel.XWPFHeader header = document.createHeader(HeaderFooterType.DEFAULT);
             org.apache.poi.xwpf.usermodel.XWPFParagraph brandLine = header.createParagraph();
             brandLine.setAlignment(ParagraphAlignment.LEFT);
@@ -72,6 +116,7 @@ class CreditLimitMasterDocxAssetGeneratorTest {
             confRun.setFontSize(7);
             confRun.setColor("990000");
             confRun.setText("STRICTLY PRIVATE AND CONFIDENTIAL");
+
             XWPFFooter footer = document.createFooter(HeaderFooterType.DEFAULT);
             org.apache.poi.xwpf.usermodel.XWPFParagraph addrLine = footer.createParagraph();
             addrLine.setAlignment(ParagraphAlignment.LEFT);
@@ -82,11 +127,26 @@ class CreditLimitMasterDocxAssetGeneratorTest {
             XWPFParagraph pageLine = footer.createParagraph();
             pageLine.setAlignment(ParagraphAlignment.CENTER);
             DemoMasterDocxPageNumberSupport.addDualPageNumberFields(pageLine);
+
             addTitle(document, "Credit Facility Confirmation");
-            document.createParagraph().createRun().setText("{{anchor:CREDIT_LIMIT_BODY}}");
-            DemoMasterDocxLayoutSupport.insertSectionBreakNextPage(document.createParagraph(), true);
-            addTitle(document, "Facility Terms and Covenants");
-            document.createParagraph().createRun().setText("{{anchor:CREDIT_LIMIT_TERMS}}");
+            addAnchor(document, "CL_PARTIES");
+            insertSectionBreak(document);
+            addSectionTitle(document, "Defined Terms");
+            addAnchor(document, "CL_DEFINED_TERMS");
+            insertSectionBreak(document);
+            addSectionTitle(document, "Facility Terms");
+            addAnchor(document, "CL_FACILITY");
+            addAnchor(document, "CL_INTEREST");
+            addAnchor(document, "CL_COVENANTS");
+            insertSectionBreak(document);
+            addSectionTitle(document, "Schedules and Default");
+            addAnchor(document, "CL_REPAYMENT");
+            addAnchor(document, "CL_EOD");
+            insertSectionBreak(document);
+            addSectionTitle(document, "Closing Provisions");
+            addAnchor(document, "CL_GOVERNING_LAW");
+            addAnchor(document, "CL_SIGNATURE");
+
             DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
             document.write(output);
             return output.toByteArray();
@@ -94,11 +154,28 @@ class CreditLimitMasterDocxAssetGeneratorTest {
     }
 
     private static void addTitle(XWPFDocument document, String text) {
-        XWPFParagraph p = document.createParagraph();
-        p.setAlignment(ParagraphAlignment.CENTER);
-        XWPFRun run = p.createRun();
+        XWPFParagraph paragraph = document.createParagraph();
+        paragraph.setAlignment(ParagraphAlignment.CENTER);
+        XWPFRun run = paragraph.createRun();
         run.setBold(true);
         run.setFontSize(14);
         run.setText(text);
+    }
+
+    private static void addSectionTitle(XWPFDocument document, String text) {
+        XWPFParagraph paragraph = document.createParagraph();
+        paragraph.setAlignment(ParagraphAlignment.LEFT);
+        XWPFRun run = paragraph.createRun();
+        run.setBold(true);
+        run.setFontSize(12);
+        run.setText(text);
+    }
+
+    private static void addAnchor(XWPFDocument document, String anchorId) {
+        document.createParagraph().createRun().setText("{{anchor:" + anchorId + "}}");
+    }
+
+    private static void insertSectionBreak(XWPFDocument document) {
+        DemoMasterDocxLayoutSupport.insertSectionBreakNextPage(document.createParagraph(), true);
     }
 }

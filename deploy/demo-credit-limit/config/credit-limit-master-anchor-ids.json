@@ -1,7 +1,24 @@
 {
-  "anchorIds": ["CREDIT_LIMIT_BODY", "CREDIT_LIMIT_TERMS"],
+  "anchorIds": [
+    "CL_PARTIES",
+    "CL_DEFINED_TERMS",
+    "CL_FACILITY",
+    "CL_INTEREST",
+    "CL_COVENANTS",
+    "CL_REPAYMENT",
+    "CL_EOD",
+    "CL_GOVERNING_LAW",
+    "CL_SIGNATURE"
+  ],
   "sections": [
-    {"anchorId": "CREDIT_LIMIT_BODY", "title": "Credit Limit Confirmation"},
-    {"anchorId": "CREDIT_LIMIT_TERMS", "title": "Terms and Covenants"}
+    {"anchorId": "CL_PARTIES", "title": "Parties and Recital"},
+    {"anchorId": "CL_DEFINED_TERMS", "title": "Defined Terms"},
+    {"anchorId": "CL_FACILITY", "title": "Facility Particulars"},
+    {"anchorId": "CL_INTEREST", "title": "Interest and Fees"},
+    {"anchorId": "CL_COVENANTS", "title": "Financial Covenants"},
+    {"anchorId": "CL_REPAYMENT", "title": "Repayment Schedule"},
+    {"anchorId": "CL_EOD", "title": "Events of Default"},
+    {"anchorId": "CL_GOVERNING_LAW", "title": "Governing Law"},
+    {"anchorId": "CL_SIGNATURE", "title": "Signatures"}
   ]
 }
