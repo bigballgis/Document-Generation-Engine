@@ -52,6 +52,7 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
     static final String DEMO_FULL_FLOW_EXTERNAL_ID = "DEMO-FULL-FLOW-LETTER";
     static final String DEMO_FULL_FLOW_NAME = "Demo Full-Flow Retail Letter";
     static final String DEMO_FULL_FLOW_RELEASE_VERSION = "1.0.0";
+    static final String DEMO_FULL_FLOW_MASTER_LAYOUT_VERSION = DemoRetailLetterheadDocxBuilder.MASTER_LAYOUT_VERSION;
     private static final String STRUCTURED_BINDING_JSON =
             "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"variable\",\"key\":\"customerName\"}]}]}";
 

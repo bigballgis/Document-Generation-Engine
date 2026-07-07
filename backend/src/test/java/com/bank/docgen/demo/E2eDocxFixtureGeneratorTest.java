@@ -2,6 +2,8 @@ package com.bank.docgen.demo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bank.docgen.demo.support.DemoMasterDocxAssertions;
+import com.bank.docgen.demo.support.DemoMasterDocxStyleSupport;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
@@ -20,6 +22,11 @@ class E2eDocxFixtureGeneratorTest {
         DocxAnchorExtractor extractor = new DocxAnchorExtractor();
         assertThat(extractor.extractAnchorIds(new ByteArrayInputStream(seedDocx))).containsExactly("HEADER");
         assertThat(extractor.extractAnchorIds(new ByteArrayInputStream(replacementDocx))).containsExactly("HEADER");
+
+        DemoMasterDocxStyleSupport.assertSharedBankStylesPresent(seedDocx);
+        DemoMasterDocxStyleSupport.assertSharedBankStylesPresent(replacementDocx);
+        assertThat(DemoMasterDocxAssertions.readStylesXml(seedDocx)).contains("w:styleId=\"ClauseBody\"");
+        assertThat(DemoMasterDocxAssertions.readFooterXml(seedDocx)).contains("NUMPAGES");
 
         Files.createDirectories(FIXTURES_DIR);
         Files.write(FIXTURES_DIR.resolve("demo-retail-letterhead-seed.docx"), seedDocx);

@@ -3,6 +3,7 @@ package com.bank.docgen.demo.support;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -19,15 +20,15 @@ public final class DemoMasterDocxAssertions {
         return readZipEntryMatching(docxBytes, "word/styles.xml"::equals);
     }
 
-    private static String readZipEntryMatching(byte[] docxBytes, java.util.function.Predicate<String> matcher)
-            throws IOException {
+    private static String readZipEntryMatching(byte[] docxBytes, Predicate<String> matcher) throws IOException {
         StringBuilder builder = new StringBuilder();
         try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(docxBytes))) {
-            ZipEntry entry;
-            while ((entry = zip.getNextEntry()) != null) {
+            ZipEntry entry = zip.getNextEntry();
+            while (entry != null) {
                 if (matcher.test(entry.getName())) {
                     builder.append(new String(zip.readAllBytes(), StandardCharsets.UTF_8));
                 }
+                entry = zip.getNextEntry();
             }
         }
         return builder.toString();

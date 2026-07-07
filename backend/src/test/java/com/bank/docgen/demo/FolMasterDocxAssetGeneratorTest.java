@@ -3,21 +3,19 @@ package com.bank.docgen.demo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.demo.support.DemoMasterDocxAssertions;
-import com.bank.docgen.demo.support.DemoMasterDocxLayoutSupport;
-import com.bank.docgen.demo.support.DemoMasterDocxPageNumberSupport;
+import com.bank.docgen.demo.support.DemoMasterDocxStyleSupport;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.rendering.DocxWordCompatibilitySupport;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.apache.poi.wp.usermodel.HeaderFooterType;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -37,12 +35,18 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
  */
 class FolMasterDocxAssetGeneratorTest {
 
-    /** Bump when page layout / header / footer changes; import script uses this to refresh uploaded masters. */
-    static final String MASTER_LAYOUT_VERSION = "fol-layout-v5-dual-page-section-breaks";
+    /** Bump when page layout / header / footer / style catalog changes; import script uses this to refresh uploaded masters. */
+    static final String MASTER_LAYOUT_VERSION = "fol-layout-v6-bank-style-manifest";
 
     private static final Path ASSET_PATH = Path.of("..", "deploy", "demo-fol", "assets", "wholesale-fol-master.docx");
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(
+            "LOREM|TODO|\\{\\{placeholder|placeholder text",
+            Pattern.CASE_INSENSITIVE
+    );
+
+    private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER =
+            new com.fasterxml.jackson.databind.ObjectMapper();
 
     static final List<String> ANCHOR_IDS = loadAnchorIds();
 
@@ -57,6 +61,20 @@ class FolMasterDocxAssetGeneratorTest {
         assertThat(extractor.extractAnchorIds(new ByteArrayInputStream(docx)))
                 .containsExactlyInAnyOrderElementsOf(ANCHOR_IDS);
 
+        DemoMasterDocxStyleSupport.assertSharedBankStylesPresent(docx);
+        String stylesXml = DemoMasterDocxAssertions.readStylesXml(docx);
+        assertThat(stylesXml)
+                .contains("w:styleId=\"ClauseBody\"")
+                .contains("w:styleId=\"DefinedTerm\"")
+                .contains("w:styleId=\"SignatureBlock\"")
+                .contains("w:styleId=\"TableHeader\"")
+                .contains("w:styleId=\"Heading1\"");
+
+        String footerXml = DemoMasterDocxAssertions.readFooterXml(docx);
+        assertThat(footerXml).contains("SECTIONPAGES").contains("NUMPAGES");
+
+        assertNoPlaceholderMarkers(docx);
+
         try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docx))) {
             assertThat(document.getHeaderList()).isNotEmpty();
             assertThat(document.getFooterList()).isNotEmpty();
@@ -65,11 +83,12 @@ class FolMasterDocxAssetGeneratorTest {
             assertThat(sectPr.isSetPgMar()).isTrue();
             CTPageMar margins = sectPr.getPgMar();
             assertThat(margins.getLeft()).isNotNull();
+            long baseline = DemoMasterDocxStyleSupport.MARGIN_BASELINE_TWIPS;
+            assertThat(((BigInteger) margins.getLeft()).longValue()).isGreaterThanOrEqualTo(baseline);
+            assertThat(((BigInteger) margins.getRight()).longValue()).isGreaterThanOrEqualTo(baseline);
             assertThat(sectPr.isSetPgSz()).isTrue();
             CTPageSz pageSize = sectPr.getPgSz();
             assertThat(pageSize.getW()).isEqualTo(BigInteger.valueOf(11906));
-            String footerXml = DemoMasterDocxAssertions.readFooterXml(docx);
-            assertThat(footerXml).contains("SECTIONPAGES").contains("NUMPAGES");
         }
 
         Files.createDirectories(ASSET_PATH.getParent());
@@ -78,7 +97,8 @@ class FolMasterDocxAssetGeneratorTest {
 
     static byte[] buildWholesaleFolMasterDocx() throws Exception {
         try (XWPFDocument document = new XWPFDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            configurePageLayout(document);
+            com.bank.docgen.demo.support.DemoMasterDocxLayoutSupport.configureA4PageLayout(document);
+            DemoMasterDocxStyleSupport.applySharedBankStyles(document);
             configureDefaultHeader(document);
             configureDefaultFooter(document);
 
@@ -93,7 +113,10 @@ class FolMasterDocxAssetGeneratorTest {
                 String title = SECTION_TITLES.getOrDefault(anchorId, anchorId);
                 if (sectionIndex == 10) {
                     XWPFParagraph breakParagraph = document.createParagraph();
-                    DemoMasterDocxLayoutSupport.insertSectionBreakNextPage(breakParagraph, true);
+                    com.bank.docgen.demo.support.DemoMasterDocxLayoutSupport.insertSectionBreakNextPage(
+                            breakParagraph,
+                            true
+                    );
                 }
                 addSection(document, title, anchorId);
                 sectionIndex++;
@@ -105,10 +128,26 @@ class FolMasterDocxAssetGeneratorTest {
         }
     }
 
+    private static void assertNoPlaceholderMarkers(byte[] docxBytes) throws Exception {
+        try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docxBytes))) {
+            StringBuilder text = new StringBuilder();
+            document.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n'));
+            document.getHeaderList().forEach(header ->
+                    header.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n')));
+            document.getFooterList().forEach(footer ->
+                    footer.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n')));
+            String body = text.toString().toUpperCase(Locale.ROOT);
+            assertThat(PLACEHOLDER_PATTERN.matcher(body).find())
+                    .as("Master DOCX must not contain LOREM/TODO/placeholder markers")
+                    .isFalse();
+            assertThat(body).doesNotContain("LOREM");
+        }
+    }
+
     private static List<String> loadAnchorIds() {
-        try (InputStream in = FolMasterDocxAssetGeneratorTest.class.getResourceAsStream("/demo/fol-master-anchor-ids.json")) {
+        try (java.io.InputStream in = FolMasterDocxAssetGeneratorTest.class.getResourceAsStream("/demo/fol-master-anchor-ids.json")) {
             assertThat(in).as("Run deploy/demo-fol/generate-fol-catalog.ps1 first").isNotNull();
-            JsonNode root = OBJECT_MAPPER.readTree(in);
+            com.fasterxml.jackson.databind.JsonNode root = OBJECT_MAPPER.readTree(in);
             return OBJECT_MAPPER.convertValue(
                     root.get("anchorIds"),
                     OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, String.class)
@@ -119,21 +158,17 @@ class FolMasterDocxAssetGeneratorTest {
     }
 
     private static Map<String, String> loadSectionTitles() {
-        try (InputStream in = FolMasterDocxAssetGeneratorTest.class.getResourceAsStream("/demo/fol-master-anchor-ids.json")) {
+        try (java.io.InputStream in = FolMasterDocxAssetGeneratorTest.class.getResourceAsStream("/demo/fol-master-anchor-ids.json")) {
             assertThat(in).as("Run deploy/demo-fol/generate-fol-catalog.ps1 first").isNotNull();
-            JsonNode root = OBJECT_MAPPER.readTree(in);
+            com.fasterxml.jackson.databind.JsonNode root = OBJECT_MAPPER.readTree(in);
             Map<String, String> titles = new LinkedHashMap<>();
-            for (JsonNode section : root.get("sections")) {
+            for (com.fasterxml.jackson.databind.JsonNode section : root.get("sections")) {
                 titles.put(section.get("anchorId").asText(), section.get("title").asText());
             }
             return Map.copyOf(titles);
         } catch (Exception ex) {
             throw new IllegalStateException("Failed to load FOL master section titles manifest", ex);
         }
-    }
-
-    private static void configurePageLayout(XWPFDocument document) {
-        DemoMasterDocxLayoutSupport.configureA4PageLayout(document);
     }
 
     private static void configureDefaultHeader(XWPFDocument document) {
@@ -177,7 +212,7 @@ class FolMasterDocxAssetGeneratorTest {
 
         XWPFParagraph pageLine = footer.createParagraph();
         pageLine.setAlignment(ParagraphAlignment.CENTER);
-        DemoMasterDocxPageNumberSupport.addDualPageNumberFields(pageLine);
+        com.bank.docgen.demo.support.DemoMasterDocxPageNumberSupport.addDualPageNumberFields(pageLine);
 
         XWPFParagraph disclaimerLine = footer.createParagraph();
         disclaimerLine.setAlignment(ParagraphAlignment.CENTER);
@@ -185,6 +220,7 @@ class FolMasterDocxAssetGeneratorTest {
         disclaimerRun.setFontSize(7);
         disclaimerRun.setItalic(true);
         disclaimerRun.setColor("888888");
+        disclaimerRun.setFontFamily("Calibri");
         disclaimerRun.setText("Internal demonstration document — not an offer capable of acceptance");
     }
 

@@ -16,10 +16,7 @@ class DemoExpansionFooterLayoutTest {
 
     @Test
     void bddDemoExp007_retailAccountFooterHasBranchAddressWithoutWholesaleDisclaimer() throws Exception {
-        byte[] docx = RetailAccountMasterDocxAssetGeneratorTest.buildMaster(
-                "Account Opening Confirmation",
-                RetailAccountMasterDocxAssetGeneratorTest.OPEN_ANCHORS
-        );
+        byte[] docx = RetailAccountMasterDocxAssetGeneratorTest.buildAccountOpeningMaster();
         String footerXml = DemoMasterDocxAssertions.readFooterXml(docx);
         assertThat(footerXml).contains("Customer Service");
         assertThat(footerXml).contains("Manchester");
@@ -29,10 +26,7 @@ class DemoExpansionFooterLayoutTest {
 
     @Test
     void bddDemoExp008_collectionNoticeFooterHasRegulatoryDisclaimer() throws Exception {
-        byte[] docx = CollectionMasterDocxAssetGeneratorTest.buildMaster(
-                "Overdue Payment Collection Notice",
-                CollectionMasterDocxAssetGeneratorTest.OVERDUE_ANCHORS.get(0)
-        );
+        byte[] docx = CollectionMasterDocxAssetGeneratorTest.buildOverdueMaster();
         String footerXml = DemoMasterDocxAssertions.readFooterXml(docx);
         assertThat(footerXml).contains("Regulatory collection notice");
         assertThat(footerXml).contains("FCA CONC");
@@ -46,7 +40,7 @@ class DemoExpansionFooterLayoutTest {
                   {"type":"emphasis","variant":"bold","children":[{"type":"textRun","value":"GBP 1,247.50"}]}
                 ]}]}
                 """;
-        byte[] docx = assembleSingleAnchor("OVERDUE_COLLECTION_BODY", structured);
+        byte[] docx = assembleSingleAnchor("OCN_ARREARS", structured);
         try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docx))) {
             String allText = document.getParagraphs().stream()
                     .map(p -> p.getText() == null ? "" : p.getText())
@@ -63,7 +57,7 @@ class DemoExpansionFooterLayoutTest {
         byte[] master = CollectionMasterDocxAssetGeneratorTest.buildMaster(
                 "Overdue Payment Collection Notice",
                 anchorId
-        );
+        ); // single-anchor master for assembly slice
         var assembler = new com.bank.docgen.rendering.DocxAssembler(new com.fasterxml.jackson.databind.ObjectMapper());
         return assembler.assembleStructuredFromBytes(
                 master,
