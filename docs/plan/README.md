@@ -65,7 +65,7 @@ docs/architecture/e*-task-sheet.md                   ← Epic task decomposition
 | P20 | i18n multi-locale readiness & UI upgradeability | [detail/P20-i18n-ui-upgradeability.md](detail/P20-i18n-ui-upgradeability.md) | Done (2026-06-25) |
 | P21 | Role-journey frontend redesign & business-friendly terminology | [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md) | Done (2026-06-30; T01–T11 + X01–X06 + X02; AUD-B10 resolved P12-AUD-B10 Done 2026-07-01; AUD-M02 resolved P12-AUD-M02 Done 2026-07-01) |
 | P22 | Demo expansion & rendering fidelity | [detail/P22-demo-expansion-rendering-fidelity.md](detail/P22-demo-expansion-rendering-fidelity.md) | **Done** (2026-07-04; engine + scaffolds; typography → P23) |
-| P23 | Demo document typography & layout excellence | [detail/P23-demo-typography-layout-excellence.md](detail/P23-demo-typography-layout-excellence.md) | **In Progress** (2026-07-08; T01–T16; BDD spec pending) |
+| P23 | Demo document typography & layout excellence | [detail/P23-demo-typography-layout-excellence.md](detail/P23-demo-typography-layout-excellence.md) | **In Progress** (2026-07-08; T01–T14 **Done**; T15–T16 Not Started) |
 
 ## First delivery target (thin vertical slice) — achieved
 
@@ -83,7 +83,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **In-flight work:**
-- **P23 (active formal phase)** — demo typography & layout excellence ([plan](detail/P23-demo-typography-layout-excellence.md); **P23-T01 next** — BDD spec)
+- **P23 (active formal phase)** — demo typography & layout excellence ([plan](detail/P23-demo-typography-layout-excellence.md); **P23-T15 next** — POI typography/layout assertions)
 - **CDP** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)
 - **LRP (In Progress — Wave LR-B Done 2026-07-04; Wave LR-A activated 2026-07-04)** — launch readiness & deep optimization ([program](./launch-readiness-program.md); Waves **LR-A…LR-E**; **LR-A2** ↔ P23-T02)
 

@@ -83,4 +83,20 @@ Runtime callers `svc-caller` and `e2e-runtime-caller` are granted **both** `RETA
 - `.tmp/credentials/<externalId>.json` — API credential bundles for runtime generate (P23-T14)
 - `.tmp/evidence/all-demos-publish-summary.json` — publish evidence table
 
-Contract tests: `DemoPublishOrchestrationContractTest` (BDD-DEMO-TYP-011).
+### Runtime generate (P23-T14)
+
+After publish, generate executive DOCX artifacts for all **13** templates:
+
+```powershell
+.\deploy\generate-all-demos.ps1
+```
+
+| Step | Script | Outputs |
+| --- | --- | --- |
+| Generate | `deploy/generate-all-demos.ps1` | `.tmp/generated_<externalId>.docx` |
+| Manifest | (same script) | `.tmp/evidence/generated-docx-manifest.json` |
+| Audit | (same script) | `.tmp/evidence/audit-records/<externalId>.json` |
+
+Manifest source: `deploy/demo-shared/demo-runtime-generate-manifest.json` (mirrors `DEMO_RUNTIME_CASES` / `demoRuntimeRegistry.ts`).
+
+Contract tests: `DemoPublishOrchestrationContractTest` (BDD-DEMO-TYP-011), `DemoGenerateOrchestrationContractTest` (BDD-DEMO-TYP-012/013).

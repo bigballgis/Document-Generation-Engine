@@ -1,0 +1,93 @@
+{
+  "manifestVersion": "p23-t14-v1",
+  "bddIds": ["BDD-DEMO-TYP-011", "BDD-DEMO-TYP-012", "BDD-DEMO-TYP-013"],
+  "forbiddenPatterns": ["LOREM", "{{", "}}", "PLACEHOLDER", "TODO"],
+  "templates": [
+    {
+      "externalId": "CORP-FOL-OFFER",
+      "minDocxBytes": 20480,
+      "contentMarkers": ["Pacific Rim Holdings", "Meridian Global Banking Corporation", "Borrower"],
+      "variablesFixture": "deploy/demo-fol/config/fol-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-FULL-FLOW-LETTER",
+      "minDocxBytes": 2560,
+      "contentMarkers": ["Margaret Sinclair"],
+      "variablesFixture": "frontend/e2e/fixtures/demo/full-flow-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-RETAIL-ACCOUNT-OPEN",
+      "minDocxBytes": 4096,
+      "contentMarkers": ["Eleanor Whitfield", "Manchester Deansgate", "Meridian Everyday Current Account"],
+      "variablesFixture": "deploy/demo-retail-account/config/retail-account-demo-test-variables.json",
+      "testDataSetId": "retail-open-executive"
+    },
+    {
+      "externalId": "DEMO-RETAIL-ACCOUNT-BALANCE",
+      "minDocxBytes": 4096,
+      "contentMarkers": ["James Porter", "24,567.89", "Meridian Everyday Current Account"],
+      "variablesFixture": "deploy/demo-retail-account/config/retail-account-demo-test-variables.json",
+      "testDataSetId": "retail-balance-executive"
+    },
+    {
+      "externalId": "DEMO-MORTGAGE-APPROVAL",
+      "minDocxBytes": 5120,
+      "contentMarkers": ["Oliver Hartley", "Willow Close", "Meridian Home Finance"],
+      "variablesFixture": "deploy/demo-mortgage/config/mortgage-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-CREDIT-LIMIT-CONFIRM",
+      "minDocxBytes": 7680,
+      "contentMarkers": ["Northgate Manufacturing", "CORP-CL-2026", "Revolving Credit Facility"],
+      "variablesFixture": "deploy/demo-credit-limit/config/credit-limit-demo-test-variables.json"
+    },
+    {
+      "externalId": "DEMO-TRADE-LC-NOTICE",
+      "minDocxBytes": 5120,
+      "contentMarkers": ["Shanghai Apex", "LC-2026-MERI-44821", "UCP 600"],
+      "variablesFixture": "deploy/demo-trade-lc/config/trade-lc-demo-test-variables.json",
+      "testDataSetId": "trade-lc-executive"
+    },
+    {
+      "externalId": "DEMO-TRADE-GUARANTEE-NOTICE",
+      "minDocxBytes": 5120,
+      "contentMarkers": ["Gulf Infrastructure", "BG-2026-MERI-99201", "URDG 758"],
+      "variablesFixture": "deploy/demo-trade-lc/config/trade-lc-demo-test-variables.json",
+      "testDataSetId": "trade-guarantee-executive"
+    },
+    {
+      "externalId": "DEMO-RATE-CHANGE-NOTICE",
+      "minDocxBytes": 4096,
+      "contentMarkers": ["Priya Sharma", "3.95% AER", "Meridian Retail Banking"],
+      "variablesFixture": "deploy/demo-collection/config/collection-demo-test-variables.json",
+      "testDataSetId": "rate-change-executive"
+    },
+    {
+      "externalId": "DEMO-OVERDUE-COLLECTION",
+      "minDocxBytes": 4096,
+      "contentMarkers": ["Daniel Reeves", "1,247.50", "overdue balance"],
+      "variablesFixture": "deploy/demo-collection/config/collection-demo-test-variables.json",
+      "testDataSetId": "overdue-collection-executive"
+    },
+    {
+      "externalId": "DEMO-ANNUAL-REVIEW",
+      "minDocxBytes": 5120,
+      "contentMarkers": ["Harbour Logistics", "CORP-FAC-2024-77102", "Covenant"],
+      "variablesFixture": "deploy/demo-annual-review/config/annual-review-demo-test-variables.json",
+      "testDataSetId": "annual-review-executive"
+    },
+    {
+      "externalId": "DEMO-FACILITY-RENEWAL",
+      "minDocxBytes": 4608,
+      "contentMarkers": ["Harbour Logistics", "CORP-FAC-2024-77102", "Renewal Confirmation"],
+      "variablesFixture": "deploy/demo-annual-review/config/annual-review-demo-test-variables.json",
+      "testDataSetId": "facility-renewal-executive"
+    },
+    {
+      "externalId": "DEMO-WEALTH-STATEMENT",
+      "minDocxBytes": 5120,
+      "contentMarkers": ["Ashford Family Trust", "PWM-UK-2026", "Meridian Private Wealth"],
+      "variablesFixture": "deploy/demo-wealth/config/wealth-demo-test-variables.json"
+    }
+  ]
+}
