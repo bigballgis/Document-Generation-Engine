@@ -1,0 +1,105 @@
+{
+  "manifestVersion": "1.0.0",
+  "catalogVersion": "demo-bank-v1",
+  "description": "Shared bank-grade Word style catalog for P23 demo master DOCX assets (P23-T03).",
+  "layout": {
+    "pageSize": "A4",
+    "marginsTwips": {
+      "top": 1440,
+      "bottom": 1440,
+      "left": 1440,
+      "right": 1440,
+      "header": 708,
+      "footer": 708,
+      "gutter": 0
+    },
+    "marginsCm": {
+      "top": 2.54,
+      "bottom": 2.54,
+      "left": 2.54,
+      "right": 2.54
+    },
+    "marginBaselineTwips": 1440,
+    "marginBaselineCm": 2.54
+  },
+  "fonts": {
+    "bodyLatin": "Calibri",
+    "bodyLatinDockerSubstitute": "Carlito",
+    "headingLatin": "Cambria",
+    "headingLatinDockerSubstitute": "Caladea",
+    "cjk": "Noto Sans CJK SC"
+  },
+  "styles": [
+    {
+      "styleKey": "Heading1",
+      "applicableNodeTypes": ["sectionHeading"],
+      "renderPurpose": "HEADING",
+      "fontFamily": "Cambria",
+      "fontSizeHalfPoints": 32,
+      "bold": true,
+      "outlineLevel": 0
+    },
+    {
+      "styleKey": "Heading2",
+      "applicableNodeTypes": ["sectionHeading"],
+      "renderPurpose": "HEADING",
+      "fontFamily": "Cambria",
+      "fontSizeHalfPoints": 28,
+      "bold": true,
+      "outlineLevel": 1
+    },
+    {
+      "styleKey": "Heading3",
+      "applicableNodeTypes": ["sectionHeading"],
+      "renderPurpose": "HEADING",
+      "fontFamily": "Cambria",
+      "fontSizeHalfPoints": 24,
+      "bold": true,
+      "outlineLevel": 2
+    },
+    {
+      "styleKey": "ClauseBody",
+      "applicableNodeTypes": ["paragraph", "textRun", "emphasis", "underline", "list"],
+      "renderPurpose": "BODY",
+      "fontFamily": "Calibri",
+      "fontSizeHalfPoints": 20,
+      "bold": false,
+      "spacingAfterTwips": 120
+    },
+    {
+      "styleKey": "DefinedTerm",
+      "applicableNodeTypes": ["paragraph", "textRun", "emphasis"],
+      "renderPurpose": "BODY",
+      "fontFamily": "Calibri",
+      "fontSizeHalfPoints": 20,
+      "bold": true
+    },
+    {
+      "styleKey": "TableHeader",
+      "applicableNodeTypes": ["paragraph", "textRun"],
+      "renderPurpose": "TABLE",
+      "fontFamily": "Calibri",
+      "fontSizeHalfPoints": 20,
+      "bold": true
+    },
+    {
+      "styleKey": "ScheduleTitle",
+      "applicableNodeTypes": ["sectionHeading"],
+      "renderPurpose": "HEADING",
+      "fontFamily": "Cambria",
+      "fontSizeHalfPoints": 26,
+      "bold": true,
+      "outlineLevel": 1
+    },
+    {
+      "styleKey": "SignatureBlock",
+      "applicableNodeTypes": ["paragraph", "textRun"],
+      "renderPurpose": "BODY",
+      "fontFamily": "Calibri",
+      "fontSizeHalfPoints": 20,
+      "bold": false,
+      "spacingBeforeTwips": 240,
+      "spacingAfterTwips": 120
+    }
+  ]
+}

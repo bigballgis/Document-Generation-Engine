@@ -28,10 +28,11 @@ public final class DemoMasterDocxLayoutSupport {
         pageSize.setH(BigInteger.valueOf(16838));
 
         CTPageMar margins = sectPr.isSetPgMar() ? sectPr.getPgMar() : sectPr.addNewPgMar();
-        margins.setTop(BigInteger.valueOf(1440));
-        margins.setBottom(BigInteger.valueOf(1440));
-        margins.setLeft(BigInteger.valueOf(1701));
-        margins.setRight(BigInteger.valueOf(1276));
+        long baseline = DemoMasterDocxStyleSupport.MARGIN_BASELINE_TWIPS;
+        margins.setTop(BigInteger.valueOf(baseline));
+        margins.setBottom(BigInteger.valueOf(baseline));
+        margins.setLeft(BigInteger.valueOf(baseline));
+        margins.setRight(BigInteger.valueOf(baseline));
         margins.setHeader(BigInteger.valueOf(708));
         margins.setFooter(BigInteger.valueOf(708));
         margins.setGutter(BigInteger.valueOf(0));

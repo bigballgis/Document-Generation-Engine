@@ -28,8 +28,28 @@ public final class DocxMasterStyleRegistry {
             return;
         }
         for (MasterStyleCatalogEntry entry : catalog.stylesByKey().values()) {
-            registerParagraphStyle(styles, entry.styleKey(), resolveHeadingSize(entry.styleKey()));
+            registerBankParagraphStyle(
+                    styles,
+                    entry.styleKey(),
+                    resolveDefaultFontSizeHalfPoints(entry.styleKey()),
+                    "Calibri",
+                    isBoldStyle(entry.styleKey())
+            );
         }
+    }
+
+    public static void registerBankParagraphStyle(
+            XWPFStyles styles,
+            String styleKey,
+            int fontSizeHalfPoints,
+            String fontFamily,
+            boolean bold
+    ) {
+        registerParagraphStyle(styles, styleKey, fontSizeHalfPoints, fontFamily, bold);
+    }
+
+    public static int resolveDefaultFontSizeHalfPoints(String styleKey) {
+        return resolveHeadingSize(styleKey);
     }
 
     public static String resolveWordStyleId(String styleKey) {
@@ -39,7 +59,13 @@ public final class DocxMasterStyleRegistry {
         return styleKey.trim();
     }
 
-    private static void registerParagraphStyle(XWPFStyles styles, String styleKey, int fontSizeHalfPoints) {
+    private static void registerParagraphStyle(
+            XWPFStyles styles,
+            String styleKey,
+            int fontSizeHalfPoints,
+            String fontFamily,
+            boolean bold
+    ) {
         String styleId = resolveWordStyleId(styleKey);
         if (styles.styleExist(styleId)) {
             return;
@@ -51,10 +77,27 @@ public final class DocxMasterStyleRegistry {
         name.setVal(styleId);
         ctStyle.setName(name);
         ctStyle.addNewQFormat();
+        var runProperties = ctStyle.addNewRPr();
         if (fontSizeHalfPoints > 0) {
-            ctStyle.addNewRPr().addNewSz().setVal(BigInteger.valueOf(fontSizeHalfPoints));
+            runProperties.addNewSz().setVal(BigInteger.valueOf(fontSizeHalfPoints));
+        }
+        if (fontFamily != null && !fontFamily.isBlank()) {
+            var fonts = runProperties.addNewRFonts();
+            fonts.setAscii(fontFamily);
+            fonts.setHAnsi(fontFamily);
+            fonts.setCs(fontFamily);
+        }
+        if (bold) {
+            runProperties.addNewB();
         }
         styles.addStyle(new XWPFStyle(ctStyle));
+    }
+
+    private static boolean isBoldStyle(String styleKey) {
+        return switch (styleKey) {
+            case "Heading1", "Heading2", "Heading3", "ScheduleTitle", "TableHeader", "DefinedTerm" -> true;
+            default -> false;
+        };
     }
 
     private static int resolveHeadingSize(String styleKey) {
@@ -64,6 +107,8 @@ public final class DocxMasterStyleRegistry {
             case "Heading3" -> 24;
             case "ScheduleTitle" -> 26;
             case "TableHeader" -> 20;
+            case "DefinedTerm" -> 20;
+            case "SignatureBlock" -> 20;
             case "ClauseBody", "BodyText" -> 20;
             default -> 20;
         };

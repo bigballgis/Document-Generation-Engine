@@ -2,12 +2,15 @@ package com.bank.docgen.demo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bank.docgen.demo.support.DemoMasterDocxAssertions;
 import com.bank.docgen.demo.support.DemoMasterDocxLayoutSupport;
 import com.bank.docgen.demo.support.DemoMasterDocxPageNumberSupport;
+import com.bank.docgen.demo.support.DemoMasterDocxStyleSupport;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.rendering.DocxWordCompatibilitySupport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -18,10 +21,12 @@ import org.apache.poi.xwpf.usermodel.XWPFFooter;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.junit.jupiter.api.Test;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 
 class CreditLimitMasterDocxAssetGeneratorTest {
 
-    static final String MASTER_LAYOUT_VERSION = "credit-limit-layout-v2-dual-page";
+    static final String MASTER_LAYOUT_VERSION = "credit-limit-layout-v3-bank-styles";
     private static final Path ASSET = Path.of("..", "deploy", "demo-credit-limit", "assets", "credit-limit-master.docx");
     static final List<String> ANCHOR_IDS = List.of("CREDIT_LIMIT_BODY", "CREDIT_LIMIT_TERMS");
 
@@ -30,6 +35,20 @@ class CreditLimitMasterDocxAssetGeneratorTest {
         byte[] docx = buildMaster();
         assertThat(new DocxAnchorExtractor().extractOrderedAnchorIds(new ByteArrayInputStream(docx)))
                 .containsExactlyElementsOf(ANCHOR_IDS);
+
+        DemoMasterDocxStyleSupport.assertSharedBankStylesPresent(docx);
+        String stylesXml = DemoMasterDocxAssertions.readStylesXml(docx);
+        assertThat(stylesXml).contains("w:styleId=\"ClauseBody\"").contains("w:styleId=\"SignatureBlock\"");
+
+        try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docx))) {
+            CTSectPr sectPr = document.getDocument().getBody().getSectPr();
+            assertThat(sectPr).isNotNull();
+            CTPageMar margins = sectPr.getPgMar();
+            long baseline = DemoMasterDocxStyleSupport.MARGIN_BASELINE_TWIPS;
+            assertThat(((BigInteger) margins.getLeft()).longValue()).isGreaterThanOrEqualTo(baseline);
+            assertThat(((BigInteger) margins.getRight()).longValue()).isGreaterThanOrEqualTo(baseline);
+        }
+
         Files.createDirectories(ASSET.getParent());
         Files.write(ASSET, docx);
     }
@@ -37,6 +56,7 @@ class CreditLimitMasterDocxAssetGeneratorTest {
     static byte[] buildMaster() throws Exception {
         try (XWPFDocument document = new XWPFDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             DemoMasterDocxLayoutSupport.configureA4PageLayout(document);
+            DemoMasterDocxStyleSupport.applySharedBankStyles(document);
             org.apache.poi.xwpf.usermodel.XWPFHeader header = document.createHeader(HeaderFooterType.DEFAULT);
             org.apache.poi.xwpf.usermodel.XWPFParagraph brandLine = header.createParagraph();
             brandLine.setAlignment(ParagraphAlignment.LEFT);

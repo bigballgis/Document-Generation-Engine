@@ -35,6 +35,16 @@
       "styleKey": "TableHeader",
       "applicableNodeTypes": ["paragraph", "textRun"],
       "renderPurpose": "TABLE"
+    },
+    {
+      "styleKey": "DefinedTerm",
+      "applicableNodeTypes": ["paragraph", "textRun", "emphasis"],
+      "renderPurpose": "BODY"
+    },
+    {
+      "styleKey": "SignatureBlock",
+      "applicableNodeTypes": ["paragraph", "textRun"],
+      "renderPurpose": "BODY"
     }
   ]
 }
