@@ -1,0 +1,8 @@
+{
+  "catalogMarker": "full-flow-layout-v2-bank-style-manifest",
+  "name": "Demo Full-Flow Retail Letter — Executive Sample",
+  "required": true,
+  "variables": {
+    "customerName": "Margaret Sinclair"
+  }
+}
