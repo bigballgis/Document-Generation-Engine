@@ -15,6 +15,7 @@ public record TemplateVersionLineSummaryView(
         Instant updatedAt,
         String updatedBy,
         Boolean defaultRouteTarget,
-        boolean cloneable
+        boolean cloneable,
+        String updatedByDisplayName
 ) {
 }

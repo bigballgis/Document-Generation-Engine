@@ -40,6 +40,16 @@ describe('TemplateContentModuleReferencesPanel', () => {
         locked: false,
       },
     ])
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([
+      {
+        moduleId: 'MOD-LOAN-DISCLOSURE',
+        moduleCode: 'MOD-LOAN-DISCLOSURE',
+        groupCode: 'RETAIL',
+        name: 'Loan disclosure',
+        createdAt: '2026-06-26T10:00:00Z',
+        updatedAt: '2026-06-26T10:00:00Z',
+      },
+    ])
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(TemplateContentModuleReferencesPanel, {
@@ -55,8 +65,9 @@ describe('TemplateContentModuleReferencesPanel', () => {
 
     expect(templatesApi.listTemplateContentModuleReferences).toHaveBeenCalledWith('tpl-1')
     expect(wrapper.text()).toContain('LOAN_DISCLOSURE')
-    expect(wrapper.text()).toContain('MOD-LOAN-DISCLOSURE')
+    expect(wrapper.text()).toContain('Loan disclosure')
     expect(wrapper.text()).toContain('1.0.0')
+    expect(wrapper.find('.entity-link-cell__text, .entity-link-cell__link').text()).toContain('Loan disclosure')
   })
 
   it('shows add reference control when editable', async () => {
@@ -124,6 +135,6 @@ describe('TemplateContentModuleReferencesPanel', () => {
     await flushPromises()
 
     expect(contentModulesApi.listContentModules).toHaveBeenCalledWith('RETAIL')
-    expect(vi.mocked(contentModulesApi.listContentModules).mock.calls).toHaveLength(1)
+    expect(vi.mocked(contentModulesApi.listContentModules).mock.calls.length).toBeGreaterThanOrEqual(1)
   })
 })

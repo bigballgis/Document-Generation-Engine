@@ -593,3 +593,43 @@ export async function captureP13ExternalServicesScreenshot(
   await page.screenshot({ path: target, fullPage: true })
   return filename
 }
+
+export const UX_ENTITY_DISPLAY_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'UX-ENTITY-DISPLAY',
+)
+export const UX_ENTITY_DISPLAY_SCREENSHOT_DIR = path.join(
+  UX_ENTITY_DISPLAY_EVIDENCE_ROOT,
+  'screenshots',
+)
+export const UX_ENTITY_DISPLAY_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureUxEntityDisplayEvidenceDirs(): void {
+  fs.mkdirSync(UX_ENTITY_DISPLAY_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function uxEntityDisplayScreenshotPath(filename: string): string {
+  return path.join(UX_ENTITY_DISPLAY_SCREENSHOT_DIR, filename)
+}
+
+export async function captureUxEntityDisplayScreenshot(
+  page: Page,
+  filename: string,
+): Promise<string> {
+  ensureUxEntityDisplayEvidenceDirs()
+  const target = uxEntityDisplayScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureUxEntityDisplayLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureUxEntityDisplayEvidenceDirs()
+  const target = uxEntityDisplayScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

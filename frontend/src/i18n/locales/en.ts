@@ -1978,6 +1978,9 @@ export default {
     reset: 'Reset',
     notAvailable: 'N/A',
     emptyValue: '—',
+    copyToClipboard: 'Copy to clipboard',
+    copyToClipboardSuccess: 'Copied to clipboard.',
+    copyToClipboardError: 'Unable to copy. Copy it manually.',
     loadError: 'Unable to load this page.',
     language: 'Language',
     locales: {
@@ -2558,6 +2561,7 @@ export default {
     },
     groups: {
       readOnlyHint: 'You can view groups within your authorized scope. Group changes require a global administrator.',
+      searchPlaceholder: 'Search by group code or display name',
       columns: {
         groupCode: 'Group code',
         displayName: 'Display name',

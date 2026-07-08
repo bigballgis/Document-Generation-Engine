@@ -4,6 +4,7 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -29,7 +30,11 @@ import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +54,8 @@ public class TemplateVersionLineService {
     private final ApprovalSubStateResolver approvalSubStateResolver;
     private final GroupAccessService groupAccessService;
     private final MessageResolver messageResolver;
+    private final ManagementUserDisplayService managementUserDisplayService;
+
     public TemplateVersionLineService(
             TemplateService templateService,
             TemplateRepository templateRepository,
@@ -62,8 +69,8 @@ public class TemplateVersionLineService {
             TemplateViewMapper templateViewMapper,
             ApprovalSubStateResolver approvalSubStateResolver,
             GroupAccessService groupAccessService,
-            MessageResolver messageResolver
-
+            MessageResolver messageResolver,
+            ManagementUserDisplayService managementUserDisplayService
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -78,7 +85,7 @@ public class TemplateVersionLineService {
         this.approvalSubStateResolver = approvalSubStateResolver;
         this.groupAccessService = groupAccessService;
         this.messageResolver = messageResolver;
-
+        this.managementUserDisplayService = managementUserDisplayService;
     }
 
     @Transactional(readOnly = true)
@@ -95,14 +102,37 @@ public class TemplateVersionLineService {
         boolean canAuthor = groupAccessService.canAuthorTemplates(session);
         boolean hasInFlight = templateCurrentVersionResolver.hasInFlightDevVersion(templateId);
 
-        var rows = templateCurrentVersionResolver.listVersionLinesOrdered(templateId).stream()
-
+        var rows = enrichSummaries(templateCurrentVersionResolver.listVersionLinesOrdered(templateId).stream()
                 .map(version -> toSummary(version, template, defaultRoute, canAuthor, hasInFlight))
-
-                .toList();
+                .toList());
 
         return PageView.of(rows, page, size);
+    }
 
+    private List<TemplateVersionLineSummaryView> enrichSummaries(List<TemplateVersionLineSummaryView> summaries) {
+        if (summaries.isEmpty()) {
+            return summaries;
+        }
+        Set<String> usernames = summaries.stream()
+                .map(TemplateVersionLineSummaryView::updatedBy)
+                .filter(username -> username != null && !username.isBlank())
+                .collect(Collectors.toSet());
+        Map<String, String> displayNames = managementUserDisplayService.lookupDisplayNames(usernames);
+        return summaries.stream()
+                .map(summary -> new TemplateVersionLineSummaryView(
+                        summary.devVersionId(),
+                        summary.devVersionNumber(),
+                        summary.releaseVersion(),
+                        summary.lifecycleStatus(),
+                        summary.approvalSubState(),
+                        summary.lineKind(),
+                        summary.updatedAt(),
+                        summary.updatedBy(),
+                        summary.defaultRouteTarget(),
+                        summary.cloneable(),
+                        summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy())
+                ))
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -560,7 +590,8 @@ public class TemplateVersionLineService {
 
                 defaultRouteTarget,
 
-                cloneable
+                cloneable,
+                null
 
         );
 

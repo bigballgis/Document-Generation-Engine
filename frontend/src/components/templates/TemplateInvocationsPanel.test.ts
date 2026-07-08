@@ -8,6 +8,18 @@ import en from '@/i18n/locales/en'
 import * as apiPolicyApi from '@/api/apiPolicy'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useSessionStore } from '@/stores/session'
+import { ElMessage } from 'element-plus'
+
+vi.mock('element-plus', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('element-plus')>()
+  return {
+    ...actual,
+    ElMessage: {
+      success: vi.fn(),
+      error: vi.fn(),
+    },
+  }
+})
 
 vi.mock('@/api/apiPolicy', () => ({
   listInvocations: vi.fn(),
@@ -109,6 +121,25 @@ describe('TemplateInvocationsPanel', () => {
     expect(wrapper.text()).toContain('Invocation history')
     expect(wrapper.text()).toContain('inv-1')
     expect(wrapper.text()).toContain('req-abc')
+    expect(wrapper.findAll('[data-testid="copy-invocation-id"]').length).toBeGreaterThan(0)
+    expect(wrapper.findAll('[data-testid="copy-request-id"]').length).toBeGreaterThan(0)
+  })
+
+  it('copies invocation id to clipboard from table action', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+
+    const wrapper = mountPanel()
+    await flushPromises()
+
+    await wrapper.find('[data-testid="copy-invocation-id"]').trigger('click')
+    await flushPromises()
+
+    expect(writeText).toHaveBeenCalledWith('inv-1')
+    expect(ElMessage.success).toHaveBeenCalled()
   })
 
   it('applies status and requestId filters', async () => {

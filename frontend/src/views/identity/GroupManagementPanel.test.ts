@@ -82,6 +82,34 @@ describe('GroupManagementPanel', () => {
     expect(wrapper.text()).toContain('Retail banking')
   })
 
+  it('filters groups by search query on group code and display name', async () => {
+    patchSession(['GLOBAL_ADMIN'])
+    vi.mocked(identityApi.listGroups).mockResolvedValue({
+      content: [
+        sampleGroup,
+        {
+          ...sampleGroup,
+          id: 'group-2',
+          groupCode: 'CORPORATE',
+          displayName: 'Corporate banking',
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 2,
+      totalPages: 1,
+    })
+    const wrapper = mountPanel()
+    await flushPromises()
+
+    const vm = wrapper.vm as unknown as { searchQuery: string }
+    vm.searchQuery = 'corporate'
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Corporate banking')
+    expect(wrapper.text()).not.toContain('Retail banking')
+  })
+
   it('shows write controls for global admins', async () => {
     patchSession(['GLOBAL_ADMIN'])
     const wrapper = mountPanel()

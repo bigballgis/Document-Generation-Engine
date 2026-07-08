@@ -6,6 +6,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import CatalogFilterToolbar from '@/components/common/CatalogFilterToolbar.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
@@ -19,11 +20,13 @@ import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { templateDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateSummary, TemplateLifecycleStatus } from '@/types/template'
 import { isAwaitingApproverDecision } from '@/utils/templateApproverJourney'
+import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 import { ElMessage } from 'element-plus'
 
 const { t } = useI18n()
@@ -33,6 +36,7 @@ const router = useRouter()
 const templatesStore = useTemplatesStore()
 const { authorTemplates, exportTemplates, decideTests, decideApprovals, publishTemplates } =
   useCapabilities()
+const { templateDetailLink } = useEntityLinkTargets()
 
 type WorkflowFilterKey = 'awaitingTest' | 'awaitingApproval' | 'awaitingPublish'
 
@@ -237,7 +241,7 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
 </script>
 
 <template>
-  <AppPageLayout>
+  <AppPageLayout layout-variant="fluid">
     <PageHeader
       :title="t('templates.list.title')"
       :description="t('templates.list.description')"
@@ -300,11 +304,17 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
             width="140"
           />
           <el-table-column
-            prop="name"
             :label="t('templates.list.columns.name')"
             min-width="220"
-            show-overflow-tooltip
-          />
+          >
+            <template #default="{ row }">
+              <EntityLinkCell
+                :label="row.name"
+                :subtitle="row.externalId"
+                :to="templateDetailLink(row.id)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column
             prop="externalId"
             :label="t('templates.list.columns.externalId')"
@@ -334,11 +344,14 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
             width="120"
           />
           <el-table-column
-            prop="updatedBy"
             :label="t('templates.list.columns.updatedBy')"
             min-width="120"
             show-overflow-tooltip
-          />
+          >
+            <template #default="{ row }">
+              {{ resolveUpdatedByDisplay(row.updatedBy, row.updatedByDisplayName) }}
+            </template>
+          </el-table-column>
           <el-table-column :label="t('templates.list.columns.updatedAt')" min-width="180">
             <template #default="{ row }">
               {{ formatDateTime(row.updatedAt) }}

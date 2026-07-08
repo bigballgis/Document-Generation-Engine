@@ -13,6 +13,7 @@ import { masterRevisionDetailPath } from '@/routing/routeKeys'
 import * as mastersApi from '@/api/masters'
 import type { MasterRevisionLineSummary } from '@/types/master'
 import { formatMasterRevisionLineLabel } from '@/utils/masterRevisionLineLabel'
+import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 
 const props = defineProps<{
   masterId: string
@@ -143,7 +144,11 @@ defineExpose({
             {{ formatDateTime(row.updatedAt) }}
           </template>
         </el-table-column>
-        <el-table-column prop="updatedBy" min-width="120" :label="t('masters.revisionLines.updatedBy')" />
+        <el-table-column min-width="120" :label="t('masters.revisionLines.updatedBy')">
+          <template #default="{ row }">
+            {{ resolveUpdatedByDisplay(row.updatedBy, row.updatedByDisplayName) }}
+          </template>
+        </el-table-column>
         <el-table-column width="120" :label="t('masters.revisionLines.actions')">
           <template #default="{ row }">
             <el-button link type="primary" @click.stop="openRevisionDetail(row)">

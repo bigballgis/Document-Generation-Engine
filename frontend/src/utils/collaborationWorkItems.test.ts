@@ -23,7 +23,26 @@ describe('collaborationWorkItems utils', () => {
     expect(task.kind).toBe('template-test')
     expect(task.path).toBe('/templates/tpl-1?tab=lifecycle')
     expect(task.submitterUserId).toBe('10000003')
+    expect(task.submitterDisplayName).toBeUndefined()
     expect(task.ageSeconds).toBe(7200)
+  })
+
+  it('maps submitterDisplayName when provided by API', () => {
+    const task = collaborationWorkItemToTask({
+      workItemId: 'wi-2',
+      templateId: 'tpl-1',
+      templateName: 'Loan Notice',
+      groupCode: 'RETAIL',
+      queue: 'TEST',
+      triggerType: 'SUBMIT_FOR_TEST',
+      submitterUserId: '10000003',
+      submitterDisplayName: 'Carol Tester',
+      summaryText: 'Template submitted for testing',
+      createdAt: '2026-06-26T10:00:00Z',
+      ageSeconds: 3600,
+    })
+
+    expect(task.submitterDisplayName).toBe('Carol Tester')
   })
 
   it('maps ESCALATION queue to template-escalation kind', () => {

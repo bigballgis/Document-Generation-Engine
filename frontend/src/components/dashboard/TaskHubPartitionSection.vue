@@ -11,6 +11,7 @@ import type { TaskPartition, WorkflowTask } from '@/composables/useWorkflowTasks
 import {
   formatCollaborationAgeSeconds,
 } from '@/utils/collaborationWorkItems'
+import { resolveSubmitterDisplay } from '@/utils/userDisplay'
 import {
   isAgeOverdueForQueue,
   resolveEffectiveTimeoutConfig,
@@ -48,7 +49,7 @@ const filterDefs = isCollaboration
         getValue: (row: WorkflowTask) =>
           row.ageSeconds !== undefined ? formatCollaborationAgeSeconds(row.ageSeconds) : '',
       },
-      { key: 'submitter', getValue: (row: WorkflowTask) => row.submitterUserId ?? '' },
+      { key: 'submitter', getValue: (row: WorkflowTask) => resolveSubmitterDisplay(row.submitterUserId, row.submitterDisplayName) },
     ]
   : [
       { key: 'action', getValue: (row: WorkflowTask) => t(row.titleKey) },
@@ -75,7 +76,9 @@ const sortTasksByTrigger = rowSortMethod<WorkflowTask>((row) =>
   row.triggerType ? t(`collaboration.workItem.trigger.${row.triggerType}.description`) : '',
 )
 const sortTasksBySummary = rowSortMethod<WorkflowTask>((row) => row.summaryText ?? '')
-const sortTasksBySubmitter = rowSortMethod<WorkflowTask>((row) => row.submitterUserId ?? '')
+const sortTasksBySubmitter = rowSortMethod<WorkflowTask>((row) =>
+  resolveSubmitterDisplay(row.submitterUserId, row.submitterDisplayName),
+)
 const sortTasksByAge = rowSortMethod<WorkflowTask>((row) => row.ageSeconds ?? 0)
 
 const selectedTask = ref<WorkflowTask | null>(null)
@@ -240,7 +243,7 @@ function openTask(path: string, event?: Event) {
               />
             </template>
             <template #default="{ row }">
-              {{ row.submitterUserId ?? '—' }}
+              {{ resolveSubmitterDisplay(row.submitterUserId, row.submitterDisplayName) }}
             </template>
           </el-table-column>
         </template>

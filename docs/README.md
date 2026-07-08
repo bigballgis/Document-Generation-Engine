@@ -99,7 +99,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [TDD delivery workflow](./architecture/tdd-delivery-workflow.md) | Mandatory delivery loop |
 | [Quality gate baseline](./architecture/quality-gate-threshold-baseline.md) | Threshold defaults |
 | [AI development guide](./architecture/ai-development-guide.md) | Reading paths for implementers |
-| [UX entity display constitution](./architecture/ux-entity-display-constitution.md) | Entity columns, links, filters, fluid vs contained layout |
+| [UX entity display constitution](./architecture/ux-entity-display-constitution.md) | Entity columns, links, filters, fluid vs contained layout (**Phases 0–3 Done**, Phase 4 In Progress — 2026-07-08) |
+| [Frontend entity display skill](../.cursor/skills/frontend-entity-display/SKILL.md) | Implementer workflow for `EntityLinkCell`, filters, `layoutVariant` |
 
 ## Orchestration & milestones
 

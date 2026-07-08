@@ -31,7 +31,11 @@ const TRIGGER_DESCRIPTION_KEY: Record<CollaborationWorkItemTriggerType, string> 
   TIMEOUT_ESCALATION: 'collaboration.workItem.trigger.TIMEOUT_ESCALATION.description',
 }
 
-export function collaborationWorkItemToTask(item: CollaborationWorkItemSummary): WorkflowTask {
+export type CollaborationWorkItemWithDisplay = CollaborationWorkItemSummary & {
+  submitterDisplayName?: string | null
+}
+
+export function collaborationWorkItemToTask(item: CollaborationWorkItemWithDisplay): WorkflowTask {
   return {
     id: `collaboration-${item.workItemId}`,
     kind: QUEUE_KIND[item.queue],
@@ -46,6 +50,7 @@ export function collaborationWorkItemToTask(item: CollaborationWorkItemSummary):
     queue: item.queue,
     triggerType: item.triggerType,
     submitterUserId: item.submitterUserId,
+    submitterDisplayName: item.submitterDisplayName ?? undefined,
     summaryText: item.summaryText,
     ageSeconds: item.ageSeconds,
     createdAt: item.createdAt,

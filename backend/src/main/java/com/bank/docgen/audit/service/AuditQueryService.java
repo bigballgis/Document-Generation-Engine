@@ -12,9 +12,8 @@ import com.bank.docgen.audit.api.LifecycleAuditEventView;
 import com.bank.docgen.audit.persistence.AuditSearchPage;
 import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
 import com.bank.docgen.audit.persistence.ManagementAuditEventRepository;
-import com.bank.docgen.authorization.management.persistence.ManagementUserEntity;
-import com.bank.docgen.authorization.management.persistence.ManagementUserRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventEntity;
@@ -29,7 +28,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -49,7 +47,7 @@ public class AuditQueryService {
     private final RuntimeGenerationAuditEventRepository runtimeGenerationAuditEventRepository;
     private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
     private final TemplateService templateService;
-    private final ManagementUserRepository managementUserRepository;
+    private final ManagementUserDisplayService managementUserDisplayService;
     private final GroupAccessService groupAccessService;
     private final AuditMaskingService auditMaskingService;
     private final ObjectMapper objectMapper;
@@ -59,7 +57,7 @@ public class AuditQueryService {
             RuntimeGenerationAuditEventRepository runtimeGenerationAuditEventRepository,
             TemplateLifecycleRecordRepository lifecycleRecordRepository,
             TemplateService templateService,
-            ManagementUserRepository managementUserRepository,
+            ManagementUserDisplayService managementUserDisplayService,
             GroupAccessService groupAccessService,
             AuditMaskingService auditMaskingService,
             ObjectMapper objectMapper
@@ -68,7 +66,7 @@ public class AuditQueryService {
         this.runtimeGenerationAuditEventRepository = runtimeGenerationAuditEventRepository;
         this.lifecycleRecordRepository = lifecycleRecordRepository;
         this.templateService = templateService;
-        this.managementUserRepository = managementUserRepository;
+        this.managementUserDisplayService = managementUserDisplayService;
         this.groupAccessService = groupAccessService;
         this.auditMaskingService = auditMaskingService;
         this.objectMapper = objectMapper;
@@ -283,7 +281,7 @@ public class AuditQueryService {
                 .filter(username -> username != null && !username.isBlank())
                 .collect(Collectors.toSet());
         Map<UUID, TemplateDisplayInfo> templateDisplayInfo = templateService.lookupDisplayInfoByIds(templateIds);
-        Map<String, String> actorDisplayNames = lookupActorDisplayNames(actorUsernames);
+        Map<String, String> actorDisplayNames = managementUserDisplayService.lookupDisplayNames(actorUsernames);
         return records.stream()
                 .map(record -> toLifecycleView(
                         record.getTemplateId(),
@@ -298,8 +296,7 @@ public class AuditQueryService {
         if (username == null || username.isBlank()) {
             return null;
         }
-        String displayName = actorDisplayNames.get(username);
-        return displayName != null ? displayName : username;
+        return actorDisplayNames.get(username);
     }
 
     @Transactional(readOnly = true)
@@ -543,27 +540,6 @@ public class AuditQueryService {
                 record.getCommentSummary(),
                 List.of()
         );
-    }
-
-    private Map<String, String> lookupActorDisplayNames(Set<String> actorUsernames) {
-        if (actorUsernames == null || actorUsernames.isEmpty()) {
-            return Map.of();
-        }
-        Map<String, String> displayNames = new HashMap<>();
-        for (ManagementUserEntity user : managementUserRepository.findByUsernameInAndDeletedAtIsNull(actorUsernames)) {
-            displayNames.put(user.getUsername(), formatActorDisplayName(user.getDisplayName(), user.getUsername()));
-        }
-        return displayNames;
-    }
-
-    private static String formatActorDisplayName(String displayName, String username) {
-        if (displayName == null || displayName.isBlank()) {
-            return username;
-        }
-        if (username == null || username.isBlank()) {
-            return displayName;
-        }
-        return displayName + " (" + username + ")";
     }
 
     private List<String> readStringList(String json) {

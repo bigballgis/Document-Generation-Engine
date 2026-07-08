@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.rendering.api.BatchTestRunSummaryView;
 import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
 import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
@@ -27,6 +28,8 @@ class BatchTestHistoryServiceTest {
     private TemplateService templateService;
     @Mock
     private BatchTestRunRepository batchTestRunRepository;
+    @Mock
+    private ManagementUserDisplayService managementUserDisplayService;
 
     private BatchTestHistoryService service;
     private UUID templateId;
@@ -34,7 +37,7 @@ class BatchTestHistoryServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new BatchTestHistoryService(templateService, batchTestRunRepository);
+        service = new BatchTestHistoryService(templateService, batchTestRunRepository, managementUserDisplayService);
         templateId = UUID.randomUUID();
         session = new ManagementSessionClaims(
                 "10000001", "Author", "author@test.com",

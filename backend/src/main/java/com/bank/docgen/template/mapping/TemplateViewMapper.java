@@ -66,7 +66,8 @@ public class TemplateViewMapper {
                 releaseVersionCount,
                 template.getMasterId().toString(),
                 template.getUpdatedBy(),
-                template.getUpdatedAt()
+                template.getUpdatedAt(),
+                null
         );
     }
 

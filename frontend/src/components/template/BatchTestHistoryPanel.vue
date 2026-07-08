@@ -6,6 +6,7 @@ import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
+import { formatUserDisplayLabel } from '@/utils/userDisplay'
 import type { BatchTestRunSummary } from '@/types/template'
 
 const props = defineProps<{
@@ -89,7 +90,7 @@ defineExpose({ reload: loadHistory })
 
       <el-table-column :label="t('templates.batchTestHistory.columns.runBy')" min-width="120">
         <template #default="{ row }">
-          {{ row.createdBy }}
+          {{ formatUserDisplayLabel(row.createdBy, row.createdByDisplayName) }}
         </template>
       </el-table-column>
 

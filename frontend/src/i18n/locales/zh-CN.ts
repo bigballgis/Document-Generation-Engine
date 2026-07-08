@@ -1956,6 +1956,9 @@ export default {
     reset: '重置',
     notAvailable: '不适用',
     emptyValue: '—',
+    copyToClipboard: '复制到剪贴板',
+    copyToClipboardSuccess: '已复制到剪贴板。',
+    copyToClipboardError: '无法复制，请手动复制。',
     loadError: '页面加载失败。',
     language: '语言',
     locales: {
@@ -2526,6 +2529,7 @@ export default {
     },
     groups: {
       readOnlyHint: '您可查看授权范围内的分组。分组变更需全局管理员权限。',
+      searchPlaceholder: '按分组代码或显示名称搜索',
       columns: {
         groupCode: '分组代码',
         displayName: '显示名称',

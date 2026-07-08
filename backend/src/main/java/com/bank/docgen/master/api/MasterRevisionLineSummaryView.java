@@ -11,6 +11,7 @@ public record MasterRevisionLineSummaryView(
         Instant updatedAt,
         String updatedBy,
         boolean current,
-        int revisionSequence
+        int revisionSequence,
+        String updatedByDisplayName
 ) {
 }

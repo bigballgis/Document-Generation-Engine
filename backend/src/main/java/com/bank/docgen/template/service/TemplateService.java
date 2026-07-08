@@ -4,6 +4,7 @@ import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.master.domain.MasterDocumentStatus;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
@@ -55,6 +56,7 @@ public class TemplateService {
     private final TemplateViewMapper templateViewMapper;
     private final TemplateCurrentVersionResolver templateVersionSupport;
     private final ApplicationEventPublisher eventPublisher;
+    private final ManagementUserDisplayService managementUserDisplayService;
 
     public TemplateService(
             TemplateRepository templateRepository,
@@ -66,7 +68,8 @@ public class TemplateService {
             TemplateBindingConfigurationService bindingConfigurationService,
             TemplateViewMapper templateViewMapper,
             TemplateCurrentVersionResolver templateVersionSupport,
-            ApplicationEventPublisher eventPublisher
+            ApplicationEventPublisher eventPublisher,
+            ManagementUserDisplayService managementUserDisplayService
     ) {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
@@ -78,6 +81,7 @@ public class TemplateService {
         this.templateViewMapper = templateViewMapper;
         this.templateVersionSupport = templateVersionSupport;
         this.eventPublisher = eventPublisher;
+        this.managementUserDisplayService = managementUserDisplayService;
     }
 
     private static final int DEFAULT_LIST_PAGE_SIZE = 20;
@@ -100,9 +104,9 @@ public class TemplateService {
                     PageRequest.of(safePage, safeSize)
             );
         }
-        List<TemplateSummaryView> content = templatePage.getContent().stream()
+        List<TemplateSummaryView> content = enrichTemplateSummaries(templatePage.getContent().stream()
                 .map(templateViewMapper::toSummary)
-                .toList();
+                .toList());
         return new PageView<>(
                 content,
                 templatePage.getNumber(),
@@ -123,7 +127,34 @@ public class TemplateService {
         } else {
             templates = templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(groupCodes);
         }
-        return templates.stream().map(templateViewMapper::toSummary).toList();
+        return enrichTemplateSummaries(templates.stream().map(templateViewMapper::toSummary).toList());
+    }
+
+    private List<TemplateSummaryView> enrichTemplateSummaries(List<TemplateSummaryView> summaries) {
+        if (summaries.isEmpty()) {
+            return summaries;
+        }
+        Set<String> usernames = summaries.stream()
+                .map(TemplateSummaryView::updatedBy)
+                .filter(username -> username != null && !username.isBlank())
+                .collect(Collectors.toSet());
+        Map<String, String> displayNames = managementUserDisplayService.lookupDisplayNames(usernames);
+        return summaries.stream()
+                .map(summary -> new TemplateSummaryView(
+                        summary.id(),
+                        summary.externalId(),
+                        summary.groupCode(),
+                        summary.name(),
+                        summary.lifecycleStatus(),
+                        summary.approvalSubState(),
+                        summary.releaseVersion(),
+                        summary.releaseVersionCount(),
+                        summary.masterId(),
+                        summary.updatedBy(),
+                        summary.updatedAt(),
+                        summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy())
+                ))
+                .toList();
     }
 
     @Transactional(readOnly = true)

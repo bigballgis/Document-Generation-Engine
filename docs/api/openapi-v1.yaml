@@ -4366,6 +4366,12 @@ components:
         updatedBy:
           type: string
           description: Eight-digit operator username.
+        updatedByDisplayName:
+          type: string
+          nullable: true
+          description: >-
+            Optional display label for updatedBy in format
+            "displayName (username)"; falls back to username when user not found.
         current:
           type: boolean
           description: True for exactly one line per master; false for superseded lines.
@@ -4522,6 +4528,12 @@ components:
           format: date-time
         updatedBy:
           type: string
+        updatedByDisplayName:
+          type: string
+          nullable: true
+          description: >-
+            Optional display label for updatedBy in format
+            "displayName (username)"; falls back to username when user not found.
         defaultRouteTarget:
           type: boolean
           nullable: true
@@ -5749,6 +5761,12 @@ components:
           $ref: '#/components/schemas/CollaborationWorkItemTriggerType'
         submitterUserId:
           type: string
+        submitterDisplayName:
+          type: string
+          nullable: true
+          description: >-
+            Optional display label for submitterUserId in format
+            "displayName (username)"; falls back to username when user not found.
         summaryText:
           type: string
         createdAt:
@@ -6126,6 +6144,150 @@ components:
         importBatchId:
           type: string
           format: uuid
+    TemplateSummaryView:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - externalId
+        - groupCode
+        - name
+        - lifecycleStatus
+        - releaseVersionCount
+        - masterId
+        - updatedBy
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        externalId:
+          type: string
+        groupCode:
+          type: string
+        name:
+          type: string
+        lifecycleStatus:
+          $ref: '#/components/schemas/TemplateLifecycleStatus'
+        approvalSubState:
+          type: string
+          enum: [PENDING_SUBMIT, PENDING_DECISION]
+          nullable: true
+        releaseVersion:
+          type: string
+          nullable: true
+        releaseVersionCount:
+          type: integer
+          minimum: 0
+        masterId:
+          type: string
+          format: uuid
+        updatedBy:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        updatedByDisplayName:
+          type: string
+          nullable: true
+          description: >-
+            Optional display label for updatedBy in format
+            "displayName (username)"; falls back to username when user not found.
+    MasterDocumentSummaryView:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - groupCode
+        - name
+        - status
+        - originalFilename
+        - anchorCount
+        - updatedBy
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        groupCode:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+        originalFilename:
+          type: string
+        anchorCount:
+          type: integer
+          minimum: 0
+        updatedBy:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        updatedByDisplayName:
+          type: string
+          nullable: true
+          description: >-
+            Optional display label for updatedBy in format
+            "displayName (username)"; falls back to username when user not found.
+    BatchTestRunSummaryView:
+      type: object
+      additionalProperties: false
+      required:
+        - runId
+        - createdAt
+        - status
+        - successCount
+        - failedCount
+        - totalCount
+      properties:
+        runId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          nullable: true
+        createdByDisplayName:
+          type: string
+          nullable: true
+          description: >-
+            Optional display label for createdBy in format
+            "displayName (username)"; falls back to username when user not found.
+        status:
+          type: string
+          enum: [RUNNING, COMPLETED, FAILED, INVALIDATED]
+        successCount:
+          type: integer
+          minimum: 0
+        failedCount:
+          type: integer
+          minimum: 0
+        totalCount:
+          type: integer
+          minimum: 0
+        anchorCoveragePct:
+          type: number
+          format: decimal
+          nullable: true
+        variableCoveragePct:
+          type: number
+          format: decimal
+          nullable: true
+        sampleCoveragePct:
+          type: number
+          format: decimal
+          nullable: true
+        gatePassed:
+          type: boolean
+          nullable: true
+        invalidatedAt:
+          type: string
+          format: date-time
+          nullable: true
     TemplateDetailView:
       type: object
       additionalProperties: false

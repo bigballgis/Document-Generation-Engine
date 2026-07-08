@@ -22,6 +22,7 @@ export interface TemplateSummary {
   releaseVersionCount: number
   masterId: string
   updatedBy: string
+  updatedByDisplayName?: string | null
   updatedAt: string
 }
 
@@ -40,6 +41,7 @@ export type TemplateVersionLineSummary = Omit<
   'lifecycleStatus'
 > & {
   lifecycleStatus: TemplateLifecycleStatus
+  updatedByDisplayName?: string | null
 }
 
 export type TemplateVersionLineDetail = Omit<
@@ -672,6 +674,7 @@ export interface BatchTestRunSummary {
   runId: string
   createdAt: string
   createdBy: string
+  createdByDisplayName?: string | null
   status: BatchTestRunStatus
   totalSamples: number
   succeededCount: number

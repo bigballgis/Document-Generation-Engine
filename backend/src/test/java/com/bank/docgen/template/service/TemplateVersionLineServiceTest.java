@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.TemplateDevVersionCreatedView;
@@ -69,6 +70,8 @@ class TemplateVersionLineServiceTest {
     private GroupAccessService groupAccessService;
     @Mock
     private MessageResolver messageResolver;
+    @Mock
+    private ManagementUserDisplayService managementUserDisplayService;
 
     private TemplateVersionLineService service;
     private ManagementSessionClaims author;
@@ -90,7 +93,8 @@ class TemplateVersionLineServiceTest {
                 templateViewMapper,
                 approvalSubStateResolver,
                 groupAccessService,
-                messageResolver
+                messageResolver,
+                managementUserDisplayService
         );
         author = new ManagementSessionClaims(
                 "10000003",

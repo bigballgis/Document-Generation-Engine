@@ -1855,6 +1855,8 @@ export interface components {
             updatedAt: string;
             /** @description Eight-digit operator username. */
             updatedBy: string;
+            /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
+            updatedByDisplayName?: string | null;
             /** @description True for exactly one line per master; false for superseded lines. */
             current: boolean;
             /** @description Monotonic sequence within the master (Phase B). Omitted in Phase A single-line responses. */
@@ -1919,6 +1921,8 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
             updatedBy: string;
+            /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
+            updatedByDisplayName?: string | null;
             /** @description True when this published line is the API default route target. */
             defaultRouteTarget?: boolean | null;
             /** @description True when the actor may clone this published line (no in-flight dev line exists and actor has author capability). */
@@ -2367,6 +2371,8 @@ export interface components {
             queue: components["schemas"]["CollaborationWorkItemQueue"];
             triggerType: components["schemas"]["CollaborationWorkItemTriggerType"];
             submitterUserId: string;
+            /** @description Optional display label for submitterUserId in format "displayName (username)"; falls back to username when user not found. */
+            submitterDisplayName?: string | null;
             summaryText: string;
             /** Format: date-time */
             createdAt: string;
@@ -2516,6 +2522,62 @@ export interface components {
             newDevelopmentVersion: number;
             /** Format: uuid */
             importBatchId: string;
+        };
+        TemplateSummaryView: {
+            /** Format: uuid */
+            id: string;
+            externalId: string;
+            groupCode: string;
+            name: string;
+            lifecycleStatus: components["schemas"]["TemplateLifecycleStatus"];
+            /** @enum {string|null} */
+            approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION" | null;
+            releaseVersion?: string | null;
+            releaseVersionCount: number;
+            /** Format: uuid */
+            masterId: string;
+            updatedBy: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
+            updatedByDisplayName?: string | null;
+        };
+        MasterDocumentSummaryView: {
+            /** Format: uuid */
+            id: string;
+            groupCode: string;
+            name: string;
+            status: string;
+            originalFilename: string;
+            anchorCount: number;
+            updatedBy: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
+            updatedByDisplayName?: string | null;
+        };
+        BatchTestRunSummaryView: {
+            /** Format: uuid */
+            runId: string;
+            /** Format: date-time */
+            createdAt: string;
+            createdBy?: string | null;
+            /** @description Optional display label for createdBy in format "displayName (username)"; falls back to username when user not found. */
+            createdByDisplayName?: string | null;
+            /** @enum {string} */
+            status: "RUNNING" | "COMPLETED" | "FAILED" | "INVALIDATED";
+            successCount: number;
+            failedCount: number;
+            totalCount: number;
+            /** Format: decimal */
+            anchorCoveragePct?: number | null;
+            /** Format: decimal */
+            variableCoveragePct?: number | null;
+            /** Format: decimal */
+            sampleCoveragePct?: number | null;
+            gatePassed?: boolean | null;
+            /** Format: date-time */
+            invalidatedAt?: string | null;
         };
         TemplateDetailView: {
             /** Format: uuid */

@@ -21,6 +21,7 @@ const mockHistory: BatchTestRunSummary[] = [
     runId: 'run-100',
     createdAt: '2026-07-03T10:00:00Z',
     createdBy: 'alice',
+    createdByDisplayName: 'Alice Author',
     status: 'COMPLETED',
     totalSamples: 5,
     succeededCount: 5,
@@ -101,6 +102,22 @@ describe('BatchTestHistoryPanel', () => {
     expect(document.body.textContent).toContain('Readiness checks passed')
     // run-099 readiness not met
     expect(document.body.textContent).toContain('Readiness checks not met')
+
+    wrapper.unmount()
+  })
+
+  it('renders createdBy display name when available', async () => {
+    vi.mocked(templatesApi.getBatchTestHistory).mockResolvedValue(mockHistory)
+    const i18n = makeI18n()
+
+    const wrapper = mount(BatchTestHistoryPanel, {
+      props: { templateId: 'tpl-1' },
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
+      attachTo: document.body,
+    })
+    await flushPromises()
+
+    expect(document.body.textContent).toContain('Alice Author')
 
     wrapper.unmount()
   })

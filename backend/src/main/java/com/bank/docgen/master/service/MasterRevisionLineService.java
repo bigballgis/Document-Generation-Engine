@@ -2,6 +2,7 @@ package com.bank.docgen.master.service;
 
 import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.api.MasterAnchorView;
 import com.bank.docgen.master.api.MasterRevisionLineDetailView;
@@ -17,7 +18,10 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,19 +42,22 @@ public class MasterRevisionLineService {
     private final MasterReviewRecordRepository masterReviewRecordRepository;
     private final ObjectStoragePort objectStoragePort;
     private final GroupAccessService groupAccessService;
+    private final ManagementUserDisplayService managementUserDisplayService;
 
     public MasterRevisionLineService(
             MasterDocumentRepository masterDocumentRepository,
             MasterRevisionLineRepository masterRevisionLineRepository,
             MasterReviewRecordRepository masterReviewRecordRepository,
             ObjectStoragePort objectStoragePort,
-            GroupAccessService groupAccessService
+            GroupAccessService groupAccessService,
+            ManagementUserDisplayService managementUserDisplayService
     ) {
         this.masterDocumentRepository = masterDocumentRepository;
         this.masterRevisionLineRepository = masterRevisionLineRepository;
         this.masterReviewRecordRepository = masterReviewRecordRepository;
         this.objectStoragePort = objectStoragePort;
         this.groupAccessService = groupAccessService;
+        this.managementUserDisplayService = managementUserDisplayService;
     }
 
     @Transactional(readOnly = true)
@@ -64,8 +71,10 @@ public class MasterRevisionLineService {
         Pageable pageable = PageRequest.of(Math.max(page, 0), size <= 0 ? 20 : size);
         Page<MasterRevisionLineEntity> lines = masterRevisionLineRepository
                 .findByMasterIdAndDeletedAtIsNullOrderByCurrentDescCreatedAtDesc(masterId, pageable);
+        List<MasterRevisionLineSummaryView> content = enrichSummaries(
+                lines.getContent().stream().map(line -> toSummary(line, master)).toList());
         return new PageView<>(
-                lines.getContent().stream().map(line -> toSummary(line, master)).toList(),
+                content,
                 lines.getNumber(),
                 lines.getSize(),
                 lines.getTotalElements(),
@@ -129,8 +138,34 @@ public class MasterRevisionLineService {
                 line.getUpdatedAt(),
                 line.getUpdatedBy(),
                 line.isCurrent(),
-                line.getRevisionSequence()
+                line.getRevisionSequence(),
+                null
         );
+    }
+
+    private List<MasterRevisionLineSummaryView> enrichSummaries(List<MasterRevisionLineSummaryView> summaries) {
+        if (summaries.isEmpty()) {
+            return summaries;
+        }
+        Set<String> usernames = summaries.stream()
+                .map(MasterRevisionLineSummaryView::updatedBy)
+                .filter(username -> username != null && !username.isBlank())
+                .collect(Collectors.toSet());
+        Map<String, String> displayNames = managementUserDisplayService.lookupDisplayNames(usernames);
+        return summaries.stream()
+                .map(summary -> new MasterRevisionLineSummaryView(
+                        summary.id(),
+                        summary.lineLabel(),
+                        summary.status(),
+                        summary.originalFilename(),
+                        summary.anchorCount(),
+                        summary.updatedAt(),
+                        summary.updatedBy(),
+                        summary.current(),
+                        summary.revisionSequence(),
+                        summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy())
+                ))
+                .toList();
     }
 
     private MasterRevisionLineDetailView toDetail(MasterRevisionLineEntity line, MasterDocumentEntity master) {

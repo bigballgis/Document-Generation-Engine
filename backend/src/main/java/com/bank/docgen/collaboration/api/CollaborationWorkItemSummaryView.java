@@ -14,6 +14,7 @@ public record CollaborationWorkItemSummaryView(
         String submitterUserId,
         String summaryText,
         Instant createdAt,
-        long ageSeconds
+        long ageSeconds,
+        String submitterDisplayName
 ) {
 }

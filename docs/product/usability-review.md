@@ -70,6 +70,38 @@
 - 已登录用户访问无权限路由时，体验基线为前端阻断并展示统一无权访问反馈，同时不泄露未授权页面数据。
 - 首要体验成效指标方向已确认：降低角色关键任务完成时间。
 
+## UX 实体展示 rollout（constitution）
+
+Governed by [UX entity display constitution](../architecture/ux-entity-display-constitution.md).
+Implementation phases 0–4 **Done** (2026-07-08); E2E UIUX manifest pending. Ledger:
+[execution-sync-ledger.md](../plan/execution-sync-ledger.md).
+
+### 已落地（Phase 0–3）
+
+| 议题 | 落地行为 |
+| --- | --- |
+| 目录表暴露内部 UUID | 模板、母版、内容模块主列使用 `EntityLinkCell` 展示可读名称/编码；有读权限时可导航至详情 |
+| 操作人列显示用户 ID | 列表与摘要 API 返回 `updatedByDisplayName` / `submitterDisplayName` / `createdByDisplayName`；前端 `userDisplay.ts` 优先展示 displayName，回退 username |
+| 目录页横向空间浪费 | 模板/母版/内容模块/审计/API 策略总览/分组管理采用 `AppPageLayout layoutVariant="fluid"` |
+| 筛选控件与数据形态不匹配 | API 策略总览：生命周期枚举 → select、分组 → `ScopedGroupSelect`；分组管理：名称搜索输入 |
+| 跨引用列可读性 | 模板内容模块引用、母版修订行、模板版本行、仪表盘待办提交人列使用 display name 规则 |
+
+### 已落地（Phase 4）
+
+| 议题 | 落地行为 |
+| --- | --- |
+| 批量测试历史操作人列 | `BatchTestHistoryPanel` 使用 `createdByDisplayName`；`userDisplay.ts` 优先展示 display name |
+| 调用记录技术标识可复制 | `TemplateInvocationsPanel` 为技术 ID 提供复制按钮，主列保持可读标签 |
+| 模板概览母版引用 | `TemplateDetailOverviewTab` 母版名称可链接至母版详情（有读权限时） |
+| 协作待办与审计操作人 | 协作队列、仪表盘待办、审计查询返回并展示 actor display name |
+
+**待完成：** `e2e-uiux-reviewer` 证据（目录表无 UUID 列、筛选控件矩阵、fluid 宽度；REDBC/GREENBC 截图）。
+
+### 仍属 constitution 待确认项
+
+- 审计与 API 调用记录是否对所有实体类型有稳定业务副标题规则。
+- 跨组实体引用在查看者 scope 外的标准文案。
+
 ## 友好度原则候选
 
 - 将复杂权限和生命周期状态转化为用户能理解的操作状态和下一步行动。

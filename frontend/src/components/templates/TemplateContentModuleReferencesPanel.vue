@@ -3,7 +3,9 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import * as contentModulesApi from '@/api/contentModules'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
 import type { ContentModuleSummary, ContentModuleVersion } from '@/types/contentModule'
@@ -22,6 +24,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, te } = useI18n()
+const { contentModuleDetailLink } = useEntityLinkTargets()
 const panelDataStore = useTemplatePanelDataStore()
 
 const saving = ref(false)
@@ -53,6 +56,16 @@ function moduleOptionLabel(module: ContentModuleSummary): string {
     return base
   }
   return `${base} (${module.groupCode})`
+}
+
+function resolveModuleName(moduleId: string): string {
+  const module = moduleOptions.value.find((item) => item.moduleId === moduleId)
+  return module?.name ?? moduleId
+}
+
+function resolveModuleSubtitle(moduleId: string): string | undefined {
+  const module = moduleOptions.value.find((item) => item.moduleId === moduleId)
+  return module?.moduleCode
 }
 
 function approvedReferencableVersions(versions: ContentModuleVersion[]): ContentModuleVersion[] {
@@ -158,7 +171,7 @@ async function handleSubmit() {
 }
 
 onMounted(() => {
-  void loadReferences()
+  void Promise.all([loadReferences(), loadModuleOptions()])
 })
 
 watch(
@@ -192,10 +205,17 @@ watch(
         min-width="180"
       />
       <el-table-column
-        prop="moduleId"
         :label="t('templates.contentModuleReferences.columns.moduleId')"
         min-width="200"
-      />
+      >
+        <template #default="{ row }">
+          <EntityLinkCell
+            :label="resolveModuleName(row.moduleId)"
+            :subtitle="resolveModuleSubtitle(row.moduleId)"
+            :to="contentModuleDetailLink(row.moduleId)"
+          />
+        </template>
+      </el-table-column>
       <el-table-column
         prop="semanticVersion"
         :label="t('templates.contentModuleReferences.columns.semanticVersion')"

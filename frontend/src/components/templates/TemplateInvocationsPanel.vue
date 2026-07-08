@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { DocumentCopy } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { listInvocations } from '@/api/apiPolicy'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
@@ -107,6 +109,18 @@ function openInvocationSummary(row: ManagementInvocationSummary) {
   drawerVisible.value = true
 }
 
+async function copyTechnicalId(value: string) {
+  if (!value) {
+    return
+  }
+  try {
+    await navigator.clipboard.writeText(value)
+    ElMessage.success(t('common.copyToClipboardSuccess'))
+  } catch {
+    ElMessage.error(t('common.copyToClipboardError'))
+  }
+}
+
 onMounted(() => {
   void loadInvocations()
 })
@@ -180,10 +194,27 @@ onMounted(() => {
           </template>
         </el-table-column>
         <el-table-column
-          prop="invocationId"
           :label="t('templates.policy.invocations.columns.invocationId')"
-          min-width="140"
-        />
+          min-width="180"
+        >
+          <template #default="{ row }">
+            <div class="technical-id-cell">
+              <span class="technical-id-cell__value">{{ row.invocationId }}</span>
+              <el-tooltip :content="t('common.copyToClipboard')">
+                <el-button
+                  link
+                  type="primary"
+                  class="technical-id-cell__copy"
+                  :aria-label="t('common.copyToClipboard')"
+                  data-testid="copy-invocation-id"
+                  @click.stop="copyTechnicalId(row.invocationId)"
+                >
+                  <el-icon><DocumentCopy /></el-icon>
+                </el-button>
+              </el-tooltip>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column
           prop="invocationKind"
           :label="t('templates.policy.invocations.columns.kind')"
@@ -195,10 +226,27 @@ onMounted(() => {
           min-width="120"
         />
         <el-table-column
-          prop="requestId"
           :label="t('templates.policy.invocations.columns.requestId')"
-          min-width="140"
-        />
+          min-width="180"
+        >
+          <template #default="{ row }">
+            <div class="technical-id-cell">
+              <span class="technical-id-cell__value">{{ row.requestId }}</span>
+              <el-tooltip :content="t('common.copyToClipboard')">
+                <el-button
+                  link
+                  type="primary"
+                  class="technical-id-cell__copy"
+                  :aria-label="t('common.copyToClipboard')"
+                  data-testid="copy-request-id"
+                  @click.stop="copyTechnicalId(row.requestId)"
+                >
+                  <el-icon><DocumentCopy /></el-icon>
+                </el-button>
+              </el-tooltip>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column
           prop="accessAccountSummary"
           :label="t('templates.policy.invocations.columns.accessAccount')"
@@ -259,5 +307,24 @@ onMounted(() => {
 
 .invocation-table {
   width: 100%;
+}
+
+.technical-id-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.technical-id-cell__value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.technical-id-cell__copy {
+  flex-shrink: 0;
 }
 </style>

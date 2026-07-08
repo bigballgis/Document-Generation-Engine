@@ -15,6 +15,7 @@ public record TemplateSummaryView(
         int releaseVersionCount,
         String masterId,
         String updatedBy,
-        Instant updatedAt
+        Instant updatedAt,
+        String updatedByDisplayName
 ) {
 }

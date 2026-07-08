@@ -46,6 +46,7 @@ export interface WorkflowTask {
   queue?: CollaborationWorkItemQueue
   triggerType?: CollaborationWorkItemTriggerType
   submitterUserId?: string
+  submitterDisplayName?: string
   summaryText?: string
   ageSeconds?: number
   createdAt?: string

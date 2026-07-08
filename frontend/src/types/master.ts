@@ -18,6 +18,7 @@ export interface MasterDocumentSummary {
   originalFilename: string
   anchorCount: number
   updatedBy: string
+  updatedByDisplayName?: string | null
   updatedAt: string
 }
 
@@ -76,7 +77,9 @@ export interface UpdateMasterMetadataPayload {
   description?: string | null
 }
 
-export type MasterRevisionLineSummary = Schema<'MasterRevisionLineSummaryView'>
+export type MasterRevisionLineSummary = Schema<'MasterRevisionLineSummaryView'> & {
+  updatedByDisplayName?: string | null
+}
 
 export type MasterRevisionLineDetail = Omit<Schema<'MasterRevisionLineDetailView'>, 'changeSummary'> & {
   changeSummary?: string | null

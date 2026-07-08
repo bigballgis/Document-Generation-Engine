@@ -6,6 +6,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import CatalogFilterToolbar from '@/components/common/CatalogFilterToolbar.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
@@ -18,10 +19,12 @@ import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useMasterStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { MASTER_DETAIL_PATH_PREFIX } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
 import type { MasterDocumentSummary } from '@/types/master'
+import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
@@ -29,6 +32,7 @@ const { formatDateTime } = useLocaleFormatters()
 const masterStatusFilterOptions = useMasterStatusFilterOptions()
 const router = useRouter()
 const mastersStore = useMastersStore()
+const { masterDetailLink } = useEntityLinkTargets()
 
 const uploadDialogOpen = ref(false)
 const currentPage = ref(1)
@@ -169,7 +173,7 @@ async function handleUpload(payload: {
 </script>
 
 <template>
-  <AppPageLayout>
+  <AppPageLayout layout-variant="fluid">
     <PageHeader
       :title="t('masters.list.title')"
       :description="t('masters.list.description')"
@@ -212,11 +216,16 @@ async function handleUpload(payload: {
             width="140"
           />
           <el-table-column
-            prop="name"
             :label="t('masters.list.columns.name')"
             min-width="220"
-            show-overflow-tooltip
-          />
+          >
+            <template #default="{ row }">
+              <EntityLinkCell
+                :label="row.name"
+                :to="masterDetailLink(row.id)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column :label="t('masters.list.columns.status')" width="160">
             <template #default="{ row }">
               <MasterStatusBadge :status="row.status" />
@@ -228,11 +237,14 @@ async function handleUpload(payload: {
             width="100"
           />
           <el-table-column
-            prop="updatedBy"
             :label="t('masters.list.columns.updatedBy')"
             min-width="120"
             show-overflow-tooltip
-          />
+          >
+            <template #default="{ row }">
+              {{ resolveUpdatedByDisplay(row.updatedBy, row.updatedByDisplayName) }}
+            </template>
+          </el-table-column>
           <el-table-column
             :label="t('masters.list.columns.updatedAt')"
             min-width="180"

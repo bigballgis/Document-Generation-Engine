@@ -6,6 +6,7 @@ import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import CatalogFilterToolbar from '@/components/common/CatalogFilterToolbar.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
@@ -16,6 +17,7 @@ import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useCapabilities } from '@/composables/useCapabilities'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { contentModuleDetailPath } from '@/routing/routeKeys'
 import { useContentModulesStore } from '@/stores/contentModules'
@@ -27,6 +29,7 @@ const { formatDateTime } = useLocaleFormatters()
 const router = useRouter()
 const contentModulesStore = useContentModulesStore()
 const { authorContentModules } = useCapabilities()
+const { contentModuleDetailLink } = useEntityLinkTargets()
 
 const createDialogOpen = ref(false)
 const currentPage = ref(1)
@@ -140,7 +143,7 @@ function handleCreated(moduleId: string) {
 </script>
 
 <template>
-  <AppPageLayout>
+  <AppPageLayout layout-variant="fluid">
     <PageHeader
       :title="t('contentModules.list.title')"
       :description="t('contentModules.list.description')"
@@ -189,11 +192,17 @@ function handleCreated(moduleId: string) {
             show-overflow-tooltip
           />
           <el-table-column
-            prop="name"
             :label="t('contentModules.list.columns.name')"
             min-width="220"
-            show-overflow-tooltip
-          />
+          >
+            <template #default="{ row }">
+              <EntityLinkCell
+                :label="row.name"
+                :subtitle="row.moduleCode"
+                :to="contentModuleDetailLink(row.moduleId)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column :label="t('contentModules.list.columns.updatedAt')" width="200">
             <template #default="{ row }">
               {{ formatDateTime(row.updatedAt) }}

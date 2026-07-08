@@ -1,6 +1,7 @@
 package com.bank.docgen.master.service;
 
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.api.CreateMasterRequest;
 import com.bank.docgen.master.api.DecideMasterReviewRequest;
@@ -61,6 +62,7 @@ public class MasterDocumentService {
     private final ObjectStoragePort objectStoragePort;
     private final DocxAnchorExtractor docxAnchorExtractor;
     private final GroupAccessService groupAccessService;
+    private final ManagementUserDisplayService managementUserDisplayService;
     private final long maxDocxUploadBytes;
 
     public MasterDocumentService(
@@ -71,6 +73,7 @@ public class MasterDocumentService {
             ObjectStoragePort objectStoragePort,
             DocxAnchorExtractor docxAnchorExtractor,
             GroupAccessService groupAccessService,
+            ManagementUserDisplayService managementUserDisplayService,
             @Value("${docgen.master.max-docx-upload-bytes:" + DEFAULT_MAX_DOCX_UPLOAD_BYTES + "}") long maxDocxUploadBytes
     ) {
         this.masterDocumentRepository = masterDocumentRepository;
@@ -80,6 +83,7 @@ public class MasterDocumentService {
         this.objectStoragePort = objectStoragePort;
         this.docxAnchorExtractor = docxAnchorExtractor;
         this.groupAccessService = groupAccessService;
+        this.managementUserDisplayService = managementUserDisplayService;
         this.maxDocxUploadBytes = maxDocxUploadBytes;
     }
 
@@ -95,9 +99,9 @@ public class MasterDocumentService {
             masters = masterDocumentRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(groupCodes);
         }
         Map<UUID, Long> anchorCounts = loadAnchorCounts(masters);
-        return masters.stream()
+        return enrichMasterSummaries(masters.stream()
                 .map(master -> toSummary(master, anchorCounts.getOrDefault(master.getId(), 0L)))
-                .toList();
+                .toList());
     }
 
     @Transactional(readOnly = true)
@@ -451,8 +455,33 @@ public class MasterDocumentService {
                 master.getOriginalFilename(),
                 Math.toIntExact(anchorCount),
                 master.getUpdatedBy(),
-                master.getUpdatedAt()
+                master.getUpdatedAt(),
+                null
         );
+    }
+
+    private List<MasterDocumentSummaryView> enrichMasterSummaries(List<MasterDocumentSummaryView> summaries) {
+        if (summaries.isEmpty()) {
+            return summaries;
+        }
+        Set<String> usernames = summaries.stream()
+                .map(MasterDocumentSummaryView::updatedBy)
+                .filter(username -> username != null && !username.isBlank())
+                .collect(Collectors.toSet());
+        Map<String, String> displayNames = managementUserDisplayService.lookupDisplayNames(usernames);
+        return summaries.stream()
+                .map(summary -> new MasterDocumentSummaryView(
+                        summary.id(),
+                        summary.groupCode(),
+                        summary.name(),
+                        summary.status(),
+                        summary.originalFilename(),
+                        summary.anchorCount(),
+                        summary.updatedBy(),
+                        summary.updatedAt(),
+                        summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy())
+                ))
+                .toList();
     }
 
     private Map<UUID, Long> loadAnchorCounts(List<MasterDocumentEntity> masters) {

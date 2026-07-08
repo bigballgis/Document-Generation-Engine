@@ -1,14 +1,32 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { MASTER_DETAIL_PATH_PREFIX } from '@/routing/routeKeys'
+import { getMaster } from '@/api/masters'
+import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import type { TemplateDetail } from '@/types/template'
 
-defineProps<{
+const props = defineProps<{
   template: TemplateDetail
   formatDateTime: (value: string) => string
 }>()
 
 const { t } = useI18n()
+const { masterDetailLink } = useEntityLinkTargets()
+const masterName = ref<string | null>(null)
+
+onMounted(() => {
+  void loadMasterName()
+})
+
+async function loadMasterName() {
+  try {
+    const master = await getMaster(props.template.masterId)
+    masterName.value = master.name
+  } catch {
+    masterName.value = null
+  }
+}
 </script>
 
 <template>
@@ -22,9 +40,10 @@ const { t } = useI18n()
       <div>
         <dt>{{ t('templates.detail.masterId') }}</dt>
         <dd>
-          <router-link :to="`${MASTER_DETAIL_PATH_PREFIX}${template.masterId}`">
-            {{ template.masterId }}
-          </router-link>
+          <EntityLinkCell
+            :label="masterName ?? template.masterId"
+            :to="masterDetailLink(template.masterId)"
+          />
         </dd>
       </div>
       <div>

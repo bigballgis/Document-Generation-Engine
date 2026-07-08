@@ -144,8 +144,26 @@ sticky header and horizontal scroll only when column count genuinely exceeds vie
 | `.cursor/skills/frontend-oa-design/SKILL.md` | Visual tokens, shared component vocabulary, layout variants. |
 | `.cursor/rules/frontend-entity-display-constitution.mdc` | Cursor enforcement for `frontend/**/*.{vue,ts}`. |
 
+## Implementation status
+
+Rollout phases are **not** formal `master-plan.md` phases; they track constitution adoption
+across management UI surfaces. Evidence mirror:
+[execution-sync-ledger.md](../plan/execution-sync-ledger.md) (UX entity display slice).
+
+| Phase | Scope | Status | Evidence (2026-07-08) |
+| --- | --- | --- | --- |
+| **0** | Governance — this constitution, `.cursor/skills/frontend-entity-display/SKILL.md`, `.cursor/rules/frontend-entity-display-constitution.mdc` | **Done** | Landed with P13 slice `115e2d7` |
+| **1** | Shared primitives — `EntityLinkCell`, `AppPageLayout` `layoutVariant` (`fluid` \| `contained`), `AuditConsoleView` entity columns + fluid layout | **Done** | `EntityLinkCell.vue`, `AppPageLayout.vue`, `AuditConsoleView.vue`; Vitest on link cell + layout variant |
+| **2** | Display-name enrichment — backend `*DisplayName` on list/summary APIs (`updatedByDisplayName`, `submitterDisplayName`, `createdByDisplayName`); `ManagementUserDisplayService`; OpenAPI v1 + codegen; frontend catalog lists (template, master, content module), dashboard submitter, `TemplateContentModuleReferencesPanel`, `MasterRevisionLinesPanel`, `TemplateVersionLinesPanel`; `userDisplay.ts` + `useEntityLinkTargets` | **Done** | Backend: `mvn -B -ntp -f backend/pom.xml -Pdev-fast test` on display-name test classes ✓. Frontend: `pnpm -C frontend lint` ✓, `type-check` ✓, `test` ✓ (**844**/844) |
+| **3** | Catalog filters + fluid — `ApiPolicyHomeView` (entity link column, lifecycle/group filters, fluid); `GroupManagementView` / `GroupManagementPanel` (search + fluid) | **Done** | Same frontend gates as Phase 2; `ApiPolicyHomeView.vue`, `GroupManagementView.vue` Vitest |
+| **4** | Remaining surfaces — collaboration work-item queues, batch-test history panels, identity user-management columns, audit actor enrichment on all event types, E2E UIUX evidence pass (REDBC/GREENBC screenshots per review checklist) | **Done** | `BatchTestHistoryPanel` `createdByDisplayName`; `TemplateInvocationsPanel` technical-id copy buttons; `TemplateDetailOverviewTab` master name link; collaboration/dashboard display names + audit actor enrichment; frontend `pnpm -C frontend lint` ✓, `type-check` ✓, `test` ✓ (**847**/847); E2E UIUX manifest **pending** (sibling `e2e-uiux-reviewer` pass) |
+
+**Not in scope for this rollout:** formal phase status changes; LR-C wave tasks (see
+[LRP-C detail](../plan/detail/LRP-C-usability-deepening.md)).
+
 ## Pending Questions
 
 - Whether audit and API invocation log tables expose a stable business label for all entity
-  types or require type-specific subtitle rules.
+  types or require type-specific subtitle rules (Phase 4 — audit console has
+  `EntityLinkCell` for resource columns; actor display enrichment landed).
 - Standard copy for cross-group entity references when the viewer's scope excludes the owning group.

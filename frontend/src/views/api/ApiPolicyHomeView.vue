@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import CatalogFilterToolbar from '@/components/common/CatalogFilterToolbar.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
@@ -10,8 +11,10 @@ import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
+import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
+import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { templatePackageHubPath, ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
+import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, templatePackageHubPath } from '@/routing/routeKeys'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
 import { useTemplatesStore } from '@/stores/templates'
 import type { ApiAccessAlert, ApiAccessAlertKind } from '@/types/template'
@@ -22,9 +25,58 @@ const router = useRouter()
 const { formatDateTime } = useLocaleFormatters()
 const templatesStore = useTemplatesStore()
 const apiPolicyStore = useApiPolicyStore()
+const { templateDetailLink } = useEntityLinkTargets()
 
 const publishedTemplates = computed(() => templatesStore.publishedTemplates)
 const packageLinksCollapse = ref<string[]>([])
+
+const {
+  searchQuery: publishedSearchQuery,
+  filters: publishedFilters,
+  activeSortKey: publishedSortKey,
+  sortedRows: sortedPublishedTemplates,
+  hasAnyActive: publishedHasAnyActive,
+  activeFilterChips: publishedActiveFilterChips,
+  clearAll: clearPublishedFilters,
+  removeFilterChip: removePublishedFilterChip,
+} = useCatalogTableControls(publishedTemplates, {
+  searchGetters: [(row) => row.name, (row) => row.externalId],
+  filters: [
+    {
+      key: 'groupCode',
+      labelKey: 'apiPolicy.home.groupCode',
+      getValue: (row) => row.groupCode,
+    },
+  ],
+  sortOptions: [
+    {
+      key: 'nameAsc',
+      labelKey: 'table.sort.nameAsc',
+      getter: (row) => row.name,
+      order: 'asc',
+    },
+    {
+      key: 'groupAsc',
+      labelKey: 'table.sort.groupAsc',
+      getter: (row) => row.groupCode,
+      order: 'asc',
+    },
+  ],
+  defaultSortKey: 'nameAsc',
+})
+
+const publishedToolbarFilters = computed(() => [
+  {
+    key: 'groupCode',
+    labelKey: 'apiPolicy.home.groupCode',
+    type: 'text' as const,
+  },
+])
+
+const publishedSortOptions = computed(() => [
+  { key: 'nameAsc', labelKey: 'table.sort.nameAsc' },
+  { key: 'groupAsc', labelKey: 'table.sort.groupAsc' },
+])
 
 const templateListErrorMessage = computed(() => {
   const key = templatesStore.lastErrorMessageKey
@@ -88,7 +140,7 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
 </script>
 
 <template>
-  <AppPageLayout>
+  <AppPageLayout layout-variant="fluid">
     <PageHeader
       :title="t('apiPolicy.home.title')"
       :description="t('apiPolicy.home.description')"
@@ -136,7 +188,7 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
               <EntityLinkCell
                 :label="row.templateName"
                 :subtitle="row.templateExternalId"
-                :link-to="templatePackageHubPath(row.templateId, 'apiAccess')"
+                :to="templatePackageHubPath(row.templateId, 'apiAccess')"
               />
             </template>
           </el-table-column>
@@ -185,11 +237,36 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
           <el-skeleton v-else-if="templatesStore.loadingList" :rows="4" animated />
 
           <template v-else>
-            <AppDataTable activatable :data="publishedTemplates" @row-click="activateTemplateRow">
+            <CatalogFilterToolbar
+              v-if="publishedTemplates.length > 0"
+              v-model:search-query="publishedSearchQuery"
+              v-model:filter-values="publishedFilters"
+              v-model:active-sort-key="publishedSortKey"
+              :filters="publishedToolbarFilters"
+              :sort-options="publishedSortOptions"
+              :active-filter-chips="publishedActiveFilterChips"
+              :has-any-active="publishedHasAnyActive"
+              @clear="clearPublishedFilters"
+              @remove-chip="removePublishedFilterChip"
+            />
+
+            <AppDataTable
+              activatable
+              :data="sortedPublishedTemplates"
+              @row-click="activateTemplateRow"
+            >
               <template #empty>
                 <EmptyStatePanel title-key="apiPolicy.home.empty" />
               </template>
-              <el-table-column prop="name" :label="t('templates.list.columns.name')" min-width="220" />
+              <el-table-column :label="t('templates.list.columns.name')" min-width="220">
+                <template #default="{ row }">
+                  <EntityLinkCell
+                    :label="row.name"
+                    :subtitle="row.externalId"
+                    :to="templateDetailLink(row.id)"
+                  />
+                </template>
+              </el-table-column>
               <el-table-column
                 prop="externalId"
                 :label="t('templates.list.columns.externalId')"

@@ -6,6 +6,8 @@ import java.time.Instant;
 public record BatchTestRunSummaryView(
         String runId,
         Instant createdAt,
+        String createdBy,
+        String createdByDisplayName,
         String status,
         int successCount,
         int failedCount,

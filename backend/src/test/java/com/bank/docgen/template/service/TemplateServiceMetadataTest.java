@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.TemplateDetailView;
@@ -63,6 +64,8 @@ class TemplateServiceMetadataTest {
     private TemplateCurrentVersionResolver templateCurrentVersionResolver;
     @Mock
     private ApplicationEventPublisher eventPublisher;
+    @Mock
+    private ManagementUserDisplayService managementUserDisplayService;
 
     private TemplateService service;
     private ManagementSessionClaims author;
@@ -90,7 +93,8 @@ class TemplateServiceMetadataTest {
                 bindingConfigurationService,
                 viewMapper,
                 templateCurrentVersionResolver,
-                eventPublisher
+                eventPublisher,
+                managementUserDisplayService
         );
         author = new ManagementSessionClaims(
                 "10000003",

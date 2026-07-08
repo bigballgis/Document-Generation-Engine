@@ -13,9 +13,8 @@ import com.bank.docgen.audit.persistence.AuditSearchPage;
 import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
 import com.bank.docgen.audit.persistence.ManagementAuditEventRepository;
 import com.bank.docgen.authorization.management.domain.AuthSource;
-import com.bank.docgen.authorization.management.domain.ManagementRole;
-import com.bank.docgen.authorization.management.persistence.ManagementUserEntity;
-import com.bank.docgen.authorization.management.persistence.ManagementUserRepository;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.template.service.TemplateService;
 import com.bank.docgen.template.service.TemplateService.TemplateDisplayInfo;
@@ -30,7 +29,6 @@ import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventRepository
 import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +55,7 @@ class AuditQueryServiceTest {
     @Mock
     private GroupAccessService groupAccessService;
     @Mock
-    private ManagementUserRepository managementUserRepository;
+    private ManagementUserDisplayService managementUserDisplayService;
 
     private AuditQueryService service;
     private ManagementSessionClaims globalAdmin;
@@ -70,7 +68,7 @@ class AuditQueryServiceTest {
                 runtimeGenerationAuditEventRepository,
                 lifecycleRecordRepository,
                 templateService,
-                managementUserRepository,
+                managementUserDisplayService,
                 groupAccessService,
                 new AuditMaskingService(),
                 new ObjectMapper()
@@ -272,9 +270,8 @@ class AuditQueryServiceTest {
                 TEMPLATE_ID,
                 new TemplateDisplayInfo("Sample", "TPL-001")
         ));
-        ManagementUserEntity actor = managementUser("10000003", "Lifecycle Tester");
-        when(managementUserRepository.findByUsernameInAndDeletedAtIsNull(Set.of("10000003")))
-                .thenReturn(List.of(actor));
+        when(managementUserDisplayService.lookupDisplayNames(Set.of("10000003")))
+                .thenReturn(Map.of("10000003", "Lifecycle Tester (10000003)"));
 
         var result = service.queryLifecycleEvents(
                 globalAdmin,
@@ -295,7 +292,7 @@ class AuditQueryServiceTest {
         assertThat(event.actorId()).isEqualTo("10000003");
         assertThat(event.actorDisplayName()).isEqualTo("Lifecycle Tester (10000003)");
         verify(templateService).lookupDisplayInfoByIds(Set.of(TEMPLATE_ID));
-        verify(managementUserRepository).findByUsernameInAndDeletedAtIsNull(Set.of("10000003"));
+        verify(managementUserDisplayService).lookupDisplayNames(Set.of("10000003"));
     }
 
     @Test
@@ -482,19 +479,6 @@ class AuditQueryServiceTest {
         );
         entity.setLifecycleStatus(TemplateLifecycleStatus.DRAFT);
         return entity;
-    }
-
-    private ManagementUserEntity managementUser(String username, String displayName) {
-        return new ManagementUserEntity(
-                UUID.randomUUID(),
-                username,
-                displayName,
-                username + "@example.com",
-                "hash",
-                AuthSource.LOCAL,
-                new LinkedHashSet<>(Set.of(ManagementRole.GROUP_ADMIN)),
-                new LinkedHashSet<>(Set.of("RETAIL"))
-        );
     }
 
     private ManagementSessionClaims session(String username, List<String> roles, List<String> groups) {

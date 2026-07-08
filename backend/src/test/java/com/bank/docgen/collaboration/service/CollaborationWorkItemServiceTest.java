@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.collaboration.api.CollaborationWorkItemSummaryView;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemStatus;
@@ -17,6 +18,8 @@ import com.bank.docgen.collaboration.persistence.CollaborationWorkItemRepository
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +37,8 @@ class CollaborationWorkItemServiceTest {
     private CollaborationWorkItemRepository workItemRepository;
     @Mock
     private GroupAccessService groupAccessService;
+    @Mock
+    private ManagementUserDisplayService managementUserDisplayService;
 
     private CollaborationWorkItemAccessSupport accessSupport;
     private CollaborationWorkItemService service;
@@ -44,7 +49,8 @@ class CollaborationWorkItemServiceTest {
     @BeforeEach
     void setUp() {
         accessSupport = new CollaborationWorkItemAccessSupport(groupAccessService);
-        service = new CollaborationWorkItemService(workItemRepository, groupAccessService, accessSupport);
+        service = new CollaborationWorkItemService(
+                workItemRepository, groupAccessService, accessSupport, managementUserDisplayService);
         tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
         author = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
         masterDesigner = session("10000004", List.of("MASTER_DESIGNER"), List.of("RETAIL"));
@@ -59,6 +65,8 @@ class CollaborationWorkItemServiceTest {
                 eq(List.of(CollaborationWorkItemQueue.TEST)),
                 eq(List.of("RETAIL"))
         )).thenReturn(List.of(testWorkItem()));
+        when(managementUserDisplayService.lookupDisplayNames(Set.of("10000003")))
+                .thenReturn(Map.of("10000003", "Template Author (10000003)"));
 
         List<CollaborationWorkItemSummaryView> items = service.listQueue(tester, null, null);
 
@@ -67,6 +75,7 @@ class CollaborationWorkItemServiceTest {
         assertThat(items.get(0).templateName()).isEqualTo("Loan Notice Template");
         assertThat(items.get(0).queue()).isEqualTo(CollaborationWorkItemQueue.TEST);
         assertThat(items.get(0).submitterUserId()).isEqualTo("10000003");
+        assertThat(items.get(0).submitterDisplayName()).isEqualTo("Template Author (10000003)");
         assertThat(items.get(0).ageSeconds()).isGreaterThanOrEqualTo(0);
     }
 

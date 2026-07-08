@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.api.CreateMasterRequest;
 import com.bank.docgen.master.persistence.MasterAnchorRepository;
@@ -59,6 +60,8 @@ class MasterDocumentServiceValidationTest {
 
     @Mock
     private DocxAnchorExtractor docxAnchorExtractor;
+    @Mock
+    private ManagementUserDisplayService managementUserDisplayService;
 
     private MasterDocumentService service;
 
@@ -72,6 +75,7 @@ class MasterDocumentServiceValidationTest {
                 objectStoragePort,
                 docxAnchorExtractor,
                 new GroupAccessService(),
+                managementUserDisplayService,
                 4096
         );
     }

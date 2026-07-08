@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
@@ -31,6 +32,19 @@ const form = reactive<{ groupCode: string; displayName: string; dimension: Group
 })
 
 const currentPage = ref(1)
+const searchQuery = ref('')
+
+const filteredGroups = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+  if (!query) {
+    return identityStore.groups
+  }
+  return identityStore.groups.filter(
+    (group) =>
+      group.groupCode.toLowerCase().includes(query) ||
+      group.displayName.toLowerCase().includes(query),
+  )
+})
 
 const dimensionOptions: GroupDimension[] = ['BUSINESS_LINE', 'DEPARTMENT']
 
@@ -163,8 +177,16 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
 <template>
   <section class="group-panel">
     <header class="panel-header">
-      <p v-if="!canManage" class="read-only-hint">{{ t('identity.groups.readOnlyHint') }}</p>
-      <span v-else />
+      <div class="panel-header__leading">
+        <p v-if="!canManage" class="read-only-hint">{{ t('identity.groups.readOnlyHint') }}</p>
+        <el-input
+          v-model="searchQuery"
+          class="panel-search"
+          clearable
+          :placeholder="t('identity.groups.searchPlaceholder')"
+          :prefix-icon="Search"
+        />
+      </div>
       <el-button v-if="canManage" type="primary" @click="openCreate">
         {{ t('identity.groups.create') }}
       </el-button>
@@ -190,7 +212,7 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
 
     <template v-else>
       <template v-if="identityStore.groups.length > 0">
-        <AppDataTable :data="identityStore.groups">
+        <AppDataTable :data="filteredGroups">
         <el-table-column prop="groupCode" sortable min-width="160" :label="t('identity.groups.columns.groupCode')" />
         <el-table-column prop="displayName" sortable min-width="200" :label="t('identity.groups.columns.displayName')" />
         <el-table-column
@@ -303,6 +325,18 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.panel-header__leading {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.panel-search {
+  max-width: 320px;
 }
 
 .read-only-hint {

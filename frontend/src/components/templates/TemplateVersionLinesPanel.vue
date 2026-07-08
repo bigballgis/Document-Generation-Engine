@@ -18,6 +18,7 @@ import {
 } from '@/routing/routeKeys'
 import type { LifecycleGovernanceAction, TemplateVersionLineSummary } from '@/types/template'
 import { isInFlightVersionLine, versionLineDisplayLabel } from '@/utils/templateVersionLine'
+import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 
 const props = defineProps<{
   templateId: string
@@ -378,7 +379,11 @@ defineExpose({
             {{ formatDateTime(row.updatedAt) }}
           </template>
         </el-table-column>
-        <el-table-column prop="updatedBy" min-width="120" :label="t('templates.versionLines.updatedBy')" />
+        <el-table-column min-width="120" :label="t('templates.versionLines.updatedBy')">
+          <template #default="{ row }">
+            {{ resolveUpdatedByDisplay(row.updatedBy, row.updatedByDisplayName) }}
+          </template>
+        </el-table-column>
         <el-table-column min-width="280" :label="t('templates.versionLines.actions')">
           <template #default="{ row }">
             <el-button link type="primary" @click.stop="openVersionLine(row)">
