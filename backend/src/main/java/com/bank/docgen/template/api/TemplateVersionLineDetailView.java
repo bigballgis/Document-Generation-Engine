@@ -17,6 +17,7 @@ public record TemplateVersionLineDetailView(
         TemplateVersionLineKind lineKind,
         Instant updatedAt,
         String updatedBy,
+        String updatedByDisplayName,
         Boolean defaultRouteTarget,
         boolean cloneable,
         List<VariableSchemaView> variables,

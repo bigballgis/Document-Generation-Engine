@@ -9,6 +9,7 @@ public record TemplateReleaseVersionView(
         TemplateLifecycleStatus lifecycleStatus,
         Instant updatedAt,
         String updatedBy,
+        String updatedByDisplayName,
         boolean defaultRouteTarget
 ) {
 }

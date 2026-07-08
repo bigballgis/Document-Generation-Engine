@@ -1892,6 +1892,8 @@ export interface components {
             reviewHistory: components["schemas"]["MasterReviewRecordView"][];
             createdBy: string;
             updatedBy: string;
+            /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
+            updatedByDisplayName?: string | null;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -2602,6 +2604,12 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+            /** @description Version author username for read-only release detail views. */
+            updatedBy?: string | null;
+            /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
+            updatedByDisplayName?: string | null;
+            /** @description True when the detail is an immutable published release snapshot. */
+            readOnly?: boolean;
         };
         TemplateImportResult: {
             importSummary: components["schemas"]["TemplateImportSummaryView"];

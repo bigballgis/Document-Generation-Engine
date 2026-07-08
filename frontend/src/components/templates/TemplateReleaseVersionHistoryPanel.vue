@@ -20,6 +20,7 @@ import type {
   TemplateLifecycleStatus,
   TemplateReleaseVersion,
 } from '@/types/template'
+import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 
 const props = defineProps<{
   templateId: string
@@ -59,7 +60,7 @@ const { filters: columnFilters, filteredRows: filteredVersions, hasActiveFilters
       matchMode: 'exact',
     },
     { key: 'updatedAt', getValue: (row) => formatDateTime(row.updatedAt) },
-    { key: 'updatedBy', getValue: (row) => row.updatedBy },
+    { key: 'updatedBy', getValue: (row) => resolveUpdatedByDisplay(row.updatedBy, row.updatedByDisplayName) },
   ])
 const versionsCurrentPage = ref(1)
 const { paginatedRows: paginatedVersions, totalRows: totalVersionRows } = useCatalogPagination(
@@ -296,12 +297,15 @@ const sortByUpdatedAt = rowSortMethod<TemplateReleaseVersion>((row) => row.updat
             <span v-else>{{ t('templates.versions.defaultRouteNo') }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="updatedBy" sortable min-width="120">
+        <el-table-column sortable min-width="120">
           <template #header>
             <TableColumnHeader
               :label="t('templates.versions.updatedBy')"
               v-model="columnFilters.updatedBy"
             />
+          </template>
+          <template #default="{ row }">
+            {{ resolveUpdatedByDisplay(row.updatedBy, row.updatedByDisplayName) }}
           </template>
         </el-table-column>
         <el-table-column

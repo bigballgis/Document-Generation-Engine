@@ -30,6 +30,7 @@ import {
 } from '@/views/masters/masterRevisionWorkspaceTabs'
 import type { MasterDocumentDetail, MasterReviewDecision } from '@/types/master'
 import { formatMasterRevisionLineLabel } from '@/utils/masterRevisionLineLabel'
+import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 import { ElMessage } from 'element-plus'
 
 const { t, te } = useI18n()
@@ -257,7 +258,8 @@ function formatReviewAction(action: string): string {
           {{ t('masters.revisionLines.historicalBadge') }}
         </el-tag>
         <span class="meta-updated">
-          {{ formatDateTime(revisionLine.updatedAt) }} · {{ revisionLine.updatedBy }}
+          {{ formatDateTime(revisionLine.updatedAt) }} ·
+          {{ resolveUpdatedByDisplay(revisionLine.updatedBy, revisionLine.updatedByDisplayName) }}
         </span>
       </template>
     </PageHeader>

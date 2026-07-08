@@ -169,7 +169,7 @@ public class TemplateService {
         String defaultRoute = apiPolicyRepository.findByTemplateId(templateId)
                 .map(ApiPolicyEntity::getDefaultRouteReleaseVersion)
                 .orElse(null);
-        return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(template.getId()).stream()
+        return enrichReleaseVersions(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(template.getId()).stream()
                 .filter(version -> version.getReleaseVersion() != null && !version.getReleaseVersion().isBlank())
                 .map(version -> new TemplateReleaseVersionView(
                         version.getReleaseVersion(),
@@ -177,7 +177,30 @@ public class TemplateService {
                         version.getLifecycleStatus(),
                         version.getUpdatedAt(),
                         version.getCreatedBy(),
+                        null,
                         defaultRoute != null && defaultRoute.equals(version.getReleaseVersion())
+                ))
+                .toList());
+    }
+
+    private List<TemplateReleaseVersionView> enrichReleaseVersions(List<TemplateReleaseVersionView> versions) {
+        if (versions.isEmpty()) {
+            return versions;
+        }
+        Set<String> usernames = versions.stream()
+                .map(TemplateReleaseVersionView::updatedBy)
+                .filter(username -> username != null && !username.isBlank())
+                .collect(Collectors.toSet());
+        Map<String, String> displayNames = managementUserDisplayService.lookupDisplayNames(usernames);
+        return versions.stream()
+                .map(version -> new TemplateReleaseVersionView(
+                        version.releaseVersion(),
+                        version.devVersionNumber(),
+                        version.lifecycleStatus(),
+                        version.updatedAt(),
+                        version.updatedBy(),
+                        version.updatedBy() == null ? null : displayNames.get(version.updatedBy()),
+                        version.defaultRouteTarget()
                 ))
                 .toList();
     }

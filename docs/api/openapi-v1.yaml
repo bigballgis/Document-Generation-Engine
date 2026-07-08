@@ -4458,6 +4458,12 @@ components:
           type: string
         updatedBy:
           type: string
+        updatedByDisplayName:
+          type: string
+          nullable: true
+          description: >-
+            Optional display label for updatedBy in format
+            "displayName (username)"; falls back to username when user not found.
         createdAt:
           type: string
           format: date-time
@@ -6354,6 +6360,19 @@ components:
         updatedAt:
           type: string
           format: date-time
+        updatedBy:
+          type: string
+          nullable: true
+          description: Version author username for read-only release detail views.
+        updatedByDisplayName:
+          type: string
+          nullable: true
+          description: >-
+            Optional display label for updatedBy in format
+            "displayName (username)"; falls back to username when user not found.
+        readOnly:
+          type: boolean
+          description: True when the detail is an immutable published release snapshot.
     TemplateImportResult:
       type: object
       additionalProperties: false

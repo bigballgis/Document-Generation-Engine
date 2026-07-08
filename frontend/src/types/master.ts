@@ -83,6 +83,7 @@ export type MasterRevisionLineSummary = Schema<'MasterRevisionLineSummaryView'> 
 
 export type MasterRevisionLineDetail = Omit<Schema<'MasterRevisionLineDetailView'>, 'changeSummary'> & {
   changeSummary?: string | null
+  updatedByDisplayName?: string | null
 }
 
 export type MasterRevisionLinePage = PageView<MasterRevisionLineSummary>

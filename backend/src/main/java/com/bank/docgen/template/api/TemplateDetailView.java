@@ -24,6 +24,8 @@ public record TemplateDetailView(
         List<CompositionRuleView> rules,
         Instant createdAt,
         Instant updatedAt,
+        String updatedBy,
+        String updatedByDisplayName,
         boolean readOnly
 ) {
     public TemplateDetailView {

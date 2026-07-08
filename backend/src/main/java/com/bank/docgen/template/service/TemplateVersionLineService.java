@@ -172,6 +172,8 @@ public class TemplateVersionLineService {
 
                 summary.updatedBy(),
 
+                summary.updatedByDisplayName(),
+
                 summary.defaultRouteTarget(),
 
                 summary.cloneable(),
@@ -234,7 +236,32 @@ public class TemplateVersionLineService {
 
                 .orElseThrow(TemplateNotFoundException::new);
 
-        return templateViewMapper.toDetailForVersion(template, version, true);
+        TemplateDetailView detail = templateViewMapper.toDetailForVersion(template, version, true);
+        String updatedBy = version.getCreatedBy();
+        String updatedByDisplayName = updatedBy == null || updatedBy.isBlank()
+                ? null
+                : managementUserDisplayService.lookupDisplayNames(Set.of(updatedBy)).get(updatedBy);
+        return new TemplateDetailView(
+                detail.id(),
+                detail.externalId(),
+                detail.groupCode(),
+                detail.name(),
+                detail.description(),
+                detail.masterId(),
+                detail.lifecycleStatus(),
+                detail.approvalSubState(),
+                detail.releaseVersion(),
+                detail.devVersionId(),
+                detail.devVersionNumber(),
+                detail.variables(),
+                detail.bindings(),
+                detail.rules(),
+                detail.createdAt(),
+                detail.updatedAt(),
+                updatedBy,
+                updatedByDisplayName,
+                detail.readOnly()
+        );
 
     }
 

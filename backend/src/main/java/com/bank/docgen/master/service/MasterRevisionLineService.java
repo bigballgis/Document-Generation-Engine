@@ -200,10 +200,17 @@ public class MasterRevisionLineService {
                 scopedHistory,
                 line.getCreatedBy(),
                 line.getUpdatedBy(),
+                resolveUpdatedByDisplayName(line.getUpdatedBy()),
                 line.getCreatedAt(),
                 line.getUpdatedAt()
         );
     }
+
+    private String resolveUpdatedByDisplayName(String updatedBy) {
+        if (updatedBy == null || updatedBy.isBlank()) {
+            return null;
+        }
+        return managementUserDisplayService.lookupDisplayNames(Set.of(updatedBy)).get(updatedBy);
 
     private Instant nextRevisionCreatedAt(UUID masterId, int revisionSequence) {
         return masterRevisionLineRepository

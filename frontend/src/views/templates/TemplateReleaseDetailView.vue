@@ -18,6 +18,7 @@ import {
 } from '@/routing/routeKeys'
 import type { TemplateVersionLineDetail } from '@/types/template'
 import { versionLineDisplayLabel } from '@/utils/templateVersionLine'
+import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 
 const { t } = useI18n()
 const { formatDateTime } = useLocaleFormatters()
@@ -150,7 +151,14 @@ async function handleClone() {
           </div>
           <div>
             <dt>{{ t('templates.releaseDetail.updatedBy') }}</dt>
-            <dd>{{ releaseDetail.updatedBy }}</dd>
+            <dd>
+              {{
+                resolveUpdatedByDisplay(
+                  releaseDetail.updatedBy ?? '',
+                  releaseDetail.updatedByDisplayName,
+                )
+              }}
+            </dd>
           </div>
         </dl>
       </el-card>

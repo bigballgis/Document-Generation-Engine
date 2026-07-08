@@ -73,7 +73,7 @@
 ## UX 实体展示 rollout（constitution）
 
 Governed by [UX entity display constitution](../architecture/ux-entity-display-constitution.md).
-Implementation phases 0–4 **Done** (2026-07-08); E2E UIUX manifest pending. Ledger:
+Implementation phases 0–4 **Done** (2026-07-08); E2E UIUX manifest **PASS** (`frontend/e2e/evidence/UX-ENTITY-DISPLAY-uiux-manifest.md`). Ledger:
 [execution-sync-ledger.md](../plan/execution-sync-ledger.md).
 
 ### 已落地（Phase 0–3）
@@ -94,8 +94,10 @@ Implementation phases 0–4 **Done** (2026-07-08); E2E UIUX manifest pending. Le
 | 调用记录技术标识可复制 | `TemplateInvocationsPanel` 为技术 ID 提供复制按钮，主列保持可读标签 |
 | 模板概览母版引用 | `TemplateDetailOverviewTab` 母版名称可链接至母版详情（有读权限时） |
 | 协作待办与审计操作人 | 协作队列、仪表盘待办、审计查询返回并展示 actor display name |
+| 发布/修订/版本详情元数据 | 母版修订详情、模板发布详情、发布版本历史表 `updatedBy` 使用 `resolveUpdatedByDisplay` |
+| 仪表盘待办区横向布局 | `DashboardView` 采用 `layout-variant="fluid"` |
 
-**待完成：** `e2e-uiux-reviewer` 证据（目录表无 UUID 列、筛选控件矩阵、fluid 宽度；REDBC/GREENBC 截图）。
+**E2E UIUX 证据：** `UX-ENTITY-DISPLAY-uiux-evidence.spec.ts` **1/1**；manifest **PASS**（5 张 REDBC/GREENBC 截图；目录表无裸 UUID、筛选控件、fluid 宽度）。
 
 ### 仍属 constitution 待确认项
 

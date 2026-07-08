@@ -107,7 +107,7 @@ function openTask(path: string) {
 </script>
 
 <template>
-  <AppPageLayout>
+  <AppPageLayout layout-variant="fluid">
     <PageHeader
       :title="t('dashboard.title')"
       :description="pageDescription"

@@ -18,6 +18,7 @@ public record MasterRevisionLineDetailView(
         List<MasterReviewRecordView> reviewHistory,
         String createdBy,
         String updatedBy,
+        String updatedByDisplayName,
         Instant createdAt,
         Instant updatedAt
 ) {

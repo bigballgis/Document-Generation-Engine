@@ -33,6 +33,7 @@ export interface TemplateReleaseVersion {
   lifecycleStatus: TemplateLifecycleStatus
   updatedAt: string
   updatedBy: string
+  updatedByDisplayName?: string | null
   defaultRouteTarget: boolean
 }
 
@@ -49,6 +50,18 @@ export type TemplateVersionLineDetail = Omit<
   'lifecycleStatus'
 > & {
   lifecycleStatus: TemplateLifecycleStatus
+  updatedByDisplayName?: string | null
+}
+
+export type TemplateDetail = Omit<
+  Schema<'TemplateDetailView'>,
+  'lifecycleStatus' | 'approvalSubState' | 'releaseVersion'
+> & {
+  lifecycleStatus: TemplateLifecycleStatus
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  releaseVersion: string | null
+  updatedBy?: string | null
+  updatedByDisplayName?: string | null
 }
 
 export type TemplateDevVersionCreated = Schema<'TemplateDevVersionCreatedView'> & {
@@ -62,15 +75,6 @@ export type VariableSchema = Schema<'TemplateExportVariableSchemaView'> & {
 export type AnchorBinding = Schema<'TemplateExportAnchorBindingView'>
 
 export type CompositionRule = Schema<'TemplateExportCompositionRuleView'>
-
-export type TemplateDetail = Omit<
-  Schema<'TemplateDetailView'>,
-  'lifecycleStatus' | 'approvalSubState' | 'releaseVersion'
-> & {
-  lifecycleStatus: TemplateLifecycleStatus
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
-  releaseVersion: string | null
-}
 
 /** Not yet modeled in `openapi-v1.yaml` (management variable upsert). */
 export interface UpsertVariablePayload {
