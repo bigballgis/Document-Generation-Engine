@@ -49,7 +49,7 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DemoFullFlowCatalogSeeder.class);
 
-    static final String DEMO_FULL_FLOW_EXTERNAL_ID = "DEMO-FULL-FLOW-LETTER";
+    public static final String DEMO_FULL_FLOW_EXTERNAL_ID = "DEMO-FULL-FLOW-LETTER";
     static final String DEMO_FULL_FLOW_NAME = "Demo Full-Flow Retail Letter";
     static final String DEMO_FULL_FLOW_RELEASE_VERSION = "1.0.0";
     static final String DEMO_FULL_FLOW_MASTER_LAYOUT_VERSION = DemoRetailLetterheadDocxBuilder.MASTER_LAYOUT_VERSION;

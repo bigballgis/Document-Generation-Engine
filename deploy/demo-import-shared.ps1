@@ -361,3 +361,40 @@ function Resolve-DemoPublishTesterToken {
     if ($GroupCode -in @('TRADE', 'WEALTH')) { return $script:GlobalAdminToken }
     return $script:TesterToken
 }
+
+# P23-T14 — runtime generate manifest + executive variable resolution (mirrored by DemoRuntimeGenerateManifest).
+function Get-DemoRuntimeGenerateManifest {
+    param([string]$DeployRoot)
+    if (-not $DeployRoot) {
+        $DeployRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+    }
+    $manifestPath = Join-Path $DeployRoot 'demo-shared/demo-runtime-generate-manifest.json'
+    if (-not (Test-Path $manifestPath)) {
+        throw "Missing runtime generate manifest: $manifestPath"
+    }
+    return (Get-Content $manifestPath -Raw | ConvertFrom-Json)
+}
+
+function Resolve-DemoExecutiveVariables {
+    param(
+        [Parameter(Mandatory = $true)][object]$TemplateEntry,
+        [Parameter(Mandatory = $true)][string]$WorkspaceRoot
+    )
+    $fixturePath = Join-Path $WorkspaceRoot ([string]$TemplateEntry.variablesFixture)
+    if (-not (Test-Path $fixturePath)) {
+        throw "Missing variables fixture for $($TemplateEntry.externalId): $fixturePath"
+    }
+    $fixture = Get-Content $fixturePath -Raw | ConvertFrom-Json
+    if ($TemplateEntry.PSObject.Properties['testDataSetId'] -and $TemplateEntry.testDataSetId) {
+        $dataSetId = [string]$TemplateEntry.testDataSetId
+        $matched = @($fixture.testDataSets) | Where-Object { [string]$_.id -eq $dataSetId } | Select-Object -First 1
+        if (-not $matched) {
+            throw "testDataSet '$dataSetId' not found in $fixturePath"
+        }
+        return $matched.variables
+    }
+    if ($fixture.PSObject.Properties['variables'] -and $fixture.variables) {
+        return $fixture.variables
+    }
+    throw "Fixture $fixturePath has no variables or testDataSet match for $($TemplateEntry.externalId)"
+}
