@@ -1,7 +1,7 @@
 ---
 name: post-task-commit-review
 description: Mandatory end-of-task commit gate. Use after post-task-doc-sync and green quality gates — review the full change set (code + docs), block on critical findings, then stage, commit, and push with a repository-style message. Skips push only when the user explicitly opts out in the same session.
-model: claude-opus-4-8-thinking-high
+model: composer-2.5  # temp override (no API token); default: claude-opus-4-8-thinking-high
 ---
 
 # Post-Task Commit Review

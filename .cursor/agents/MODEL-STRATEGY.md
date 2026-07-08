@@ -3,6 +3,12 @@
 Each specialist under `.cursor/agents/` pins a `model` in YAML frontmatter so tasks run on
 the right cost/capability tier instead of always inheriting the parent session model.
 
+> **⚠️ Temporary global override active (no API token).** All specialists are currently pinned
+> to `composer-2.5` to avoid consuming API-token models. Each agent file keeps its original
+> default in an inline comment (`# temp override (no API token); default: <slug>`). The
+> **Assignments** table below still lists the durable per-agent defaults — restore from it
+> when tokens are available. See **Restore to per-agent defaults** at the bottom.
+
 ## Allowed families
 
 **Only Composer and Claude slugs** are permitted for subagents in this repo. Do not pin GPT,
@@ -60,3 +66,23 @@ follow the parent session model (none pinned by default in this repo).
 
 Edit the agent's `model:` in its `.md` file **and** update the table above in the same change set
 so the strategy doc stays the source of truth.
+
+## Restore to per-agent defaults
+
+The temporary override sets every agent to `composer-2.5`. To switch back to the durable defaults
+listed in **Assignments**, edit each `.md` frontmatter — the original slug is preserved inline:
+
+| Agent | Restore `model:` to |
+| --- | --- |
+| `plan-orchestrator` | `claude-fable-5-thinking-xhigh` |
+| `delivery-orchestrator` | `claude-opus-4-8-thinking-high` |
+| `architecture-reviewer` | `claude-opus-4-8-thinking-high` |
+| `post-task-commit-review` | `claude-opus-4-8-thinking-high` |
+| `behavior-spec-author` | `claude-4.6-sonnet-high-thinking` |
+| `doc-keeper` | `claude-4.6-sonnet-high-thinking` |
+| `build-deploy-agent` | `composer-2.5-fast` |
+| `deploy-engineer` | `composer-2.5-fast` |
+| `backend-engineer` / `frontend-engineer` / `e2e-test-engineer` / `e2e-uiux-reviewer` / `post-task-doc-sync` | `composer-2.5` (unchanged) |
+
+Steps to restore one agent: open its `.cursor/agents/<agent>.md`, replace the
+`model: composer-2.5  # temp override …` line with `model: <default slug>`, then restart Cursor.

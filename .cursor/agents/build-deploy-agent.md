@@ -1,7 +1,7 @@
 ---
 name: build-deploy-agent
 description: Dedicated build and deployment agent for the document generation platform. Use to run backend quality gates, frontend gates, Docker deployment, and all associated special commands (dev-fast TDD loop, full verify, p0-gate, release-gate, hardening smoke). Understands the canonical two-phase compile-on-host/run-in-Docker model and owns evidence capture. Replaces direct ad-hoc shell invocations of build/deploy scripts by backend-engineer, frontend-engineer, and delivery-orchestrator.
-model: composer-2.5-fast
+model: composer-2.5  # temp override (no API token); default: composer-2.5-fast
 ---
 
 # Build & Deploy Agent
