@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
@@ -7,12 +7,27 @@ import ApiPolicyDomainEditor from '@/components/api/ApiPolicyDomainEditor.vue'
 import en from '@/i18n/locales/en'
 import type { ApiPolicy } from '@/types/template'
 
+vi.mock('element-plus', async () => {
+  const actual = await vi.importActual<typeof import('element-plus')>('element-plus')
+  return {
+    ...actual,
+    ElMessageBox: {
+      ...actual.ElMessageBox,
+      confirm: vi.fn().mockResolvedValue(undefined),
+    },
+  }
+})
+
+const previewImpact = vi.fn()
+const savePolicyDomain = vi.fn()
+const saveInvocationRetentionDomain = vi.fn()
+
 vi.mock('@/stores/apiPolicy', () => ({
   useApiPolicyStore: () => ({
     entryFor: () => ({ lastErrorMessageKey: null }),
-    savePolicyDomain: vi.fn(),
-    saveInvocationRetentionDomain: vi.fn(),
-    previewImpact: vi.fn(),
+    savePolicyDomain,
+    saveInvocationRetentionDomain,
+    previewImpact,
   }),
 }))
 
@@ -69,6 +84,13 @@ describe('ApiPolicyDomainEditor', () => {
     expect(wrapper.text()).toContain('Output modes')
   })
 
+  it('expands advanced settings when initialDomainAnchor is OUTPUT_POLICY', async () => {
+    const wrapper = mountEditor({ initialDomainAnchor: 'OUTPUT_POLICY' })
+    await wrapper.vm.$nextTick()
+    const collapse = wrapper.findComponent({ name: 'ElCollapse' })
+    expect(collapse.exists()).toBe(true)
+  })
+
   it('truncates long AD group summary text', () => {
     const longGroups = Array.from({ length: 8 }, (_, index) => `GROUP-${index}-VERY-LONG-NAME`)
     const wrapper = mountEditor({
@@ -81,5 +103,65 @@ describe('ApiPolicyDomainEditor', () => {
     const adGroupsCell = wrapper.find('.policy-ad-groups')
     expect(adGroupsCell.exists()).toBe(true)
     expect(adGroupsCell.classes()).toContain('policy-value--truncate')
+  })
+
+  it('disables retention save until the form is dirty', () => {
+    const wrapper = mountEditor()
+    const saveButton = wrapper.find('[data-testid="retention-save-button"]')
+    expect(saveButton.exists()).toBe(true)
+    expect(saveButton.attributes('disabled')).toBeDefined()
+  })
+
+  it('shows inline success after retention save', async () => {
+    saveInvocationRetentionDomain.mockResolvedValue({
+      ...samplePolicy,
+      invocationRecordRetentionDays: 180,
+    })
+
+    const wrapper = mountEditor()
+    const exposed = wrapper.vm as unknown as {
+      retentionForm: { invocationRecordRetentionDays: number }
+    }
+    exposed.retentionForm.invocationRecordRetentionDays = 180
+    await flushPromises()
+
+    const saveButton = wrapper.find('[data-testid="retention-save-button"]')
+    expect(saveButton.attributes('disabled')).toBeUndefined()
+
+    await saveButton.trigger('click')
+    await flushPromises()
+
+    expect(saveInvocationRetentionDomain).toHaveBeenCalledWith(
+      'tpl-1',
+      expect.objectContaining({ invocationRecordRetentionDays: 180 }),
+    )
+    expect(wrapper.find('[data-testid="retention-save-success"]').exists()).toBe(true)
+  })
+
+  it('runs impact preview before saving output settings', async () => {
+    previewImpact.mockResolvedValue({
+      changedAreas: ['OUTPUT_POLICY'],
+      blocking: false,
+      warnings: [],
+      defaultRouteImpacted: false,
+      currentPolicyVersion: 1,
+      nextPolicyVersion: 2,
+      summaryMessageKey: 'api.apimgmt.policyImpact.safe',
+      contractDiffSummary: null,
+      idempotencyImpactSummary: null,
+    })
+    savePolicyDomain.mockResolvedValue(samplePolicy)
+
+    const wrapper = mountEditor({ initialDomainAnchor: 'OUTPUT_POLICY' })
+    await flushPromises()
+
+    const saveButtons = wrapper
+      .findAll('button')
+      .filter((button) => button.text().includes('Save output settings'))
+    await saveButtons[0]?.trigger('click')
+    await flushPromises()
+
+    expect(previewImpact).toHaveBeenCalled()
+    expect(savePolicyDomain).toHaveBeenCalledWith('tpl-1', 'OUTPUT_POLICY', expect.any(Object))
   })
 })

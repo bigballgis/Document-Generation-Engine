@@ -1,5 +1,6 @@
 package com.bank.docgen.authorization.management.persistence;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,4 +19,7 @@ public interface ManagementUserRepository extends JpaRepository<ManagementUserEn
 
     @EntityGraph(attributePaths = {"roles", "authorizedGroupCodes"})
     List<ManagementUserEntity> findByDeletedAtIsNullOrderByUsernameAsc();
+
+    @EntityGraph(attributePaths = {"roles", "authorizedGroupCodes"})
+    List<ManagementUserEntity> findByUsernameInAndDeletedAtIsNull(Collection<String> usernames);
 }

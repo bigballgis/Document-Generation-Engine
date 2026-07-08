@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import * as apiPolicyApi from '@/api/apiPolicy'
 import { resolveApiErrorMessageKey } from '@/api/http'
 import type {
+  ApiAccessAlert,
   ApiCredentialCreated,
   ApiCredentialSummary,
   ApiPolicyImpactPreview,
@@ -42,6 +43,9 @@ function createEmptyEntry(): ApiPolicyEntry {
 export const useApiPolicyStore = defineStore('apiPolicy', () => {
   const entries = ref<Record<string, ApiPolicyEntry>>({})
   const activeTemplateId = ref<string | null>(null)
+  const alerts = ref<ApiAccessAlert[]>([])
+  const loadingAlerts = ref(false)
+  const alertsErrorMessageKey = ref<string | null>(null)
 
   function entryFor(templateId: string): ApiPolicyEntry {
     if (!entries.value[templateId]) {
@@ -121,6 +125,20 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
     } catch (error) {
       entry.lastErrorMessageKey = resolveApiErrorMessageKey(error, 'templates.error.loadCredentials')
       throw error
+    }
+  }
+
+  async function fetchAlerts(): Promise<void> {
+    loadingAlerts.value = true
+    alertsErrorMessageKey.value = null
+    try {
+      alerts.value = await apiPolicyApi.fetchAlerts()
+    } catch (error) {
+      alerts.value = []
+      alertsErrorMessageKey.value = resolveApiErrorMessageKey(error, 'apiPolicy.home.alerts.loadFailed')
+      throw error
+    } finally {
+      loadingAlerts.value = false
     }
   }
 
@@ -255,6 +273,9 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
   return {
     entries,
     activeTemplateId,
+    alerts,
+    loadingAlerts,
+    alertsErrorMessageKey,
     apiPolicy,
     credentials,
     loadingPolicy,
@@ -267,6 +288,7 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
     entryFor,
     fetchPolicy,
     fetchCredentials,
+    fetchAlerts,
     savePolicy,
     previewImpact,
     savePolicyDomain,

@@ -1,7 +1,20 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteLocationGeneric } from 'vue-router'
 import { i18n } from '@/i18n'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useSessionStore } from '@/stores/session'
+
+function redirectLegacyApiPolicyDetail(to: RouteLocationGeneric) {
+  const templateId = String(to.params.templateId ?? '')
+  const domain = to.query.domain
+  const location: { path: string; query: { tab: string }; hash?: string } = {
+    path: `/templates/${templateId}`,
+    query: { tab: 'apiAccess' },
+  }
+  if (typeof domain === 'string' && domain.length > 0) {
+    location.hash = `#domain=${encodeURIComponent(domain)}`
+  }
+  return location
+}
 
 const router = createRouter({
   history: createWebHistory(),
@@ -51,9 +64,7 @@ const router = createRouter({
     },
     {
       path: '/api/policies/:templateId',
-      name: 'api-policy-detail',
-      component: () => import('@/views/api/ApiPolicyDetailView.vue'),
-      meta: { logicalRoute: ROUTE_KEYS.apiPolicyManagement },
+      redirect: redirectLegacyApiPolicyDetail,
     },
     {
       path: '/audit',
@@ -174,7 +185,6 @@ const ROUTE_TITLE_KEYS: Record<string, string> = {
   'master-package-hub': 'masters.hub.breadcrumbLabel',
   'audit-console': 'audit.title',
   'api-policy-management': 'apiPolicy.home.title',
-  'api-policy-detail': 'apiPolicy.detail.title',
   'entitlement-users': 'identity.usersPageTitle',
   'entitlement-groups': 'identity.groupsPageTitle',
   'content-module-list': 'contentModules.list.title',

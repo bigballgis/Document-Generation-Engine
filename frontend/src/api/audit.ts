@@ -24,6 +24,9 @@ function buildAuditParams(filters: AuditQueryFilters): Record<string, string | n
   if (filters.eventType) {
     params.eventType = filters.eventType
   }
+  if (filters.requestId) {
+    params.requestId = filters.requestId
+  }
   if (filters.eventAtFrom) {
     params.eventAtFrom = filters.eventAtFrom
   }
@@ -87,6 +90,9 @@ function buildExportParams(filters: AuditQueryFilters): Record<string, string> {
   }
   if (filters.eventType) {
     params.eventType = filters.eventType
+  }
+  if (filters.requestId) {
+    params.requestId = filters.requestId
   }
   if (filters.eventAtFrom) {
     params.eventAtFrom = filters.eventAtFrom

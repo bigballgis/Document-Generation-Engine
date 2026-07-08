@@ -4,6 +4,7 @@ import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
 import { describe, expect, it, vi } from 'vitest'
 import TemplateDetailApiAccessTab from '@/views/templates/detail/TemplateDetailApiAccessTab.vue'
+import RouteSummaryPanel from '@/components/templates/RouteSummaryPanel.vue'
 import en from '@/i18n/locales/en'
 import type { ApiPolicy } from '@/types/template'
 
@@ -11,6 +12,18 @@ vi.mock('@/composables/useCapabilities', () => ({
   useCapabilities: () => ({
     manageApiPolicy: { value: true },
   }),
+}))
+
+const { routeState } = vi.hoisted(() => ({
+  routeState: {
+    hash: '',
+    query: {} as Record<string, string | string[] | undefined>,
+  },
+}))
+
+vi.mock('vue-router', () => ({
+  useRoute: () => routeState,
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }))
 
 vi.mock('@/stores/apiPolicy', () => ({
@@ -69,14 +82,22 @@ function mountTab(props: Partial<typeof baseProps> = {}) {
       plugins: [createPinia(), i18n, ElementPlus],
       stubs: {
         TemplateCallerContractPanel: true,
-        TemplateRecentInvocationsPanel: true,
+        TemplateInvocationsPanel: true,
         CredentialsPanel: true,
+        RouteSummaryPanel: true,
       },
     },
   })
 }
 
 describe('TemplateDetailApiAccessTab', () => {
+  it('renders route summary panel before policy card', () => {
+    const wrapper = mountTab({ apiPolicy: samplePolicy })
+    const routePanel = wrapper.findComponent(RouteSummaryPanel)
+    expect(routePanel.exists()).toBe(true)
+    expect(routePanel.props('templateId')).toBe('tpl-1')
+  })
+
   it('shows policy load error with retry', async () => {
     const wrapper = mountTab({
       policyLoadFailed: true,
@@ -113,6 +134,11 @@ describe('TemplateDetailApiAccessTab', () => {
     const adGroupsCell = wrapper.find('.policy-ad-groups')
     expect(adGroupsCell.exists()).toBe(true)
     expect(adGroupsCell.classes()).toContain('policy-value--truncate')
+  })
+
+  it('keeps caller contract collapsed by default', () => {
+    const wrapper = mountTab({ apiPolicy: samplePolicy })
+    expect(wrapper.find('.contract-collapse .el-collapse-item').classes()).not.toContain('is-active')
   })
 
   it('shows L1 sections even when AD groups and default route are unset', () => {

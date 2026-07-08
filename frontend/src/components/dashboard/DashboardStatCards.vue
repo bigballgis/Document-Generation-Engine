@@ -41,7 +41,11 @@ function navigate(path: string) {
         :key="stat.key"
         shadow="never"
         class="stat-card"
-        :class="{ 'stat-card--highlight': stat.key === 'pendingActions' && stat.count > 0 }"
+        :class="{
+          'stat-card--highlight':
+            (stat.key === 'pendingActions' || stat.key === 'externalServicesAlerts') &&
+            stat.count > 0,
+        }"
       >
         <p class="stat-count">{{ stat.count }}</p>
         <h3>{{ t(stat.titleKey) }}</h3>

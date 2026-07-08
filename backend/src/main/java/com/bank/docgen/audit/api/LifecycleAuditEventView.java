@@ -8,10 +8,13 @@ public record LifecycleAuditEventView(
         Instant eventAt,
         String eventType,
         String templateId,
+        String templateDisplayName,
+        String templateExternalId,
         String operation,
         String fromState,
         String toState,
         String actorId,
+        String actorDisplayName,
         String summary,
         List<String> warningCodes
 ) {

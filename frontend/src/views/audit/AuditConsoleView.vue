@@ -1,21 +1,30 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
+import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
+import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import { rowSortMethod } from '@/composables/useDataTableFilters'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
+import { useAuditEventTypeOptions } from '@/composables/useAuditEventTypeOptions'
+import { useAuditTemplateFilterOptions } from '@/composables/useAuditTemplateFilterOptions'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { isGroupScopedAuditRole } from '@/auth/roles'
+import { ROUTE_KEYS, templatePackageHubPath } from '@/routing/routeKeys'
 import { useAuditStore } from '@/stores/audit'
 import { useSessionStore } from '@/stores/session'
 import type { LifecycleAuditEvent, ManagementAuditEvent } from '@/types/audit'
 import type { TemplateLifecycleStatus } from '@/types/template'
+import { resolveAuditActorDisplay, resolveAuditTemplateDisplay } from '@/utils/auditEntityDisplay'
+import type { AuditActorDisplayFields } from '@/utils/auditEntityDisplay'
 import { downloadJsonExport } from '@/utils/downloadExport'
 import { shouldShowAuditAdminJourney } from '@/utils/auditAdminJourney'
 import { formatAuditEventType } from '@/utils/auditEventLabels'
@@ -23,6 +32,7 @@ import { validateGroupAdminAuditFilters } from '@/views/audit/auditFilterValidat
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const { t, te } = useI18n()
+const route = useRoute()
 const { formatDateTime } = useLocaleFormatters()
 const auditStore = useAuditStore()
 const sessionStore = useSessionStore()
@@ -67,6 +77,9 @@ const errorMessage = computed(() => {
 
 const showGroupFilters = computed(() => isGroupScopedAuditRole(auditStore.actorRole))
 const { isGroupLocked: isAuditGroupLocked } = useScopedGroupOptions()
+const auditEventTypeOptions = useAuditEventTypeOptions()
+const { templateOptions, loadingTemplates, searchTemplates } = useAuditTemplateFilterOptions()
+const canLinkTemplates = computed(() => sessionStore.canAccessRoute(ROUTE_KEYS.templateManagement))
 
 const managementSource = computed(() => auditStore.managementEvents)
 const lifecycleSource = computed(() => auditStore.lifecycleEvents)
@@ -104,8 +117,26 @@ function formatEventType(eventType?: string) {
   return formatAuditEventType(eventType, eventLabelTranslator.value)
 }
 
-function formatActor(value?: string) {
-  return value?.trim() ? value : '—'
+function formatActor(event: AuditActorDisplayFields) {
+  return resolveAuditActorDisplay(event)
+}
+
+function resolveTemplateCell(
+  event: Pick<
+    ManagementAuditEvent,
+    'templateId' | 'templateDisplayName' | 'templateExternalId'
+  >,
+) {
+  const display = resolveAuditTemplateDisplay(event)
+  const to: RouteLocationRaw | undefined =
+    event.templateId && canLinkTemplates.value
+      ? templatePackageHubPath(event.templateId)
+      : undefined
+  return { ...display, to }
+}
+
+function handleTemplateFilterSearch(query: string) {
+  void searchTemplates(query)
 }
 
 function exportScopeSummary(): string {
@@ -125,14 +156,29 @@ function exportScopeSummary(): string {
   if (auditStore.filters.templateId?.trim()) {
     parts.push(`${t('audit.filters.templateId')}: ${auditStore.filters.templateId.trim()}`)
   }
+  if (auditStore.filters.requestId?.trim()) {
+    parts.push(`${t('audit.filters.requestId')}: ${auditStore.filters.requestId.trim()}`)
+  }
   if (parts.length === 0) {
     return t('audit.export.scopeAll')
   }
   return parts.join('\n')
 }
 
+function applyRequestIdFromRouteQuery() {
+  const raw = route.query.requestId
+  const requestId = Array.isArray(raw) ? raw[0] : raw
+  if (typeof requestId === 'string' && requestId.trim().length > 0) {
+    auditStore.filters.requestId = requestId.trim()
+  }
+}
+
 onMounted(async () => {
   auditStore.initializeFiltersFromSession()
+  applyRequestIdFromRouteQuery()
+  if (showGroupFilters.value) {
+    await searchTemplates('')
+  }
   await refreshActiveTab()
 })
 
@@ -220,6 +266,14 @@ async function handleExport() {
   }
 }
 
+const sortManagementByActor = rowSortMethod<ManagementAuditEvent>((row) => formatActor(row))
+const sortManagementByTemplate = rowSortMethod<ManagementAuditEvent>(
+  (row) => resolveAuditTemplateDisplay(row).label,
+)
+const sortLifecycleByActor = rowSortMethod<LifecycleAuditEvent>((row) => formatActor(row))
+const sortLifecycleByTemplate = rowSortMethod<LifecycleAuditEvent>(
+  (row) => resolveAuditTemplateDisplay(row).label,
+)
 const sortManagementByEventType = rowSortMethod<ManagementAuditEvent>((row) =>
   formatEventType(row.eventType),
 )
@@ -237,7 +291,7 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
 </script>
 
 <template>
-  <AppPageLayout>
+  <AppPageLayout layout-variant="fluid">
     <PageHeader
       :title="t('audit.title')"
       :description="t('audit.description')"
@@ -278,10 +332,24 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
     <el-card shadow="never" class="filters-card">
       <div class="filters-grid">
         <el-form-item :label="t('audit.filters.eventType')">
-          <el-input
+          <AppSearchSelect
             v-model="auditStore.filters.eventType"
-            :placeholder="t('audit.filters.eventTypePlaceholder')"
             clearable
+            :placeholder="t('audit.filters.eventTypePlaceholder')"
+          >
+            <el-option
+              v-for="option in auditEventTypeOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </AppSearchSelect>
+        </el-form-item>
+        <el-form-item :label="t('audit.filters.requestId')">
+          <el-input
+            v-model="auditStore.filters.requestId"
+            clearable
+            :placeholder="t('audit.filters.requestIdPlaceholder')"
           />
         </el-form-item>
         <el-form-item :label="t('audit.filters.eventAtFrom')">
@@ -309,11 +377,22 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
           />
         </el-form-item>
         <el-form-item v-if="showGroupFilters" :label="t('audit.filters.templateId')">
-          <el-input
+          <AppSearchSelect
             v-model="auditStore.filters.templateId"
-            :placeholder="t('audit.filters.templateIdPlaceholder')"
             clearable
-          />
+            filterable
+            remote
+            :remote-method="handleTemplateFilterSearch"
+            :loading="loadingTemplates"
+            :placeholder="t('audit.filters.templateIdPlaceholder')"
+          >
+            <el-option
+              v-for="option in templateOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </AppSearchSelect>
         </el-form-item>
         <div class="filters-actions">
           <el-button type="primary" @click="applyFilters">
@@ -337,11 +416,12 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
             <el-table-column
               prop="actorSummary"
               sortable
+              :sort-method="sortManagementByActor"
               min-width="160"
               :label="t('audit.columns.actorSummary')"
             >
               <template #default="{ row }: { row: ManagementAuditEvent }">
-                {{ formatActor(row.actorSummary) }}
+                {{ formatActor(row) }}
               </template>
             </el-table-column>
             <el-table-column
@@ -358,9 +438,16 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
             <el-table-column
               prop="templateId"
               sortable
+              :sort-method="sortManagementByTemplate"
               min-width="200"
               :label="t('audit.columns.templateId')"
-            />
+            >
+              <template #default="{ row }: { row: ManagementAuditEvent }">
+                <EntityLinkCell
+                  v-bind="resolveTemplateCell(row)"
+                />
+              </template>
+            </el-table-column>
             <el-table-column
               sortable
               :sort-method="sortManagementByEventAt"
@@ -396,11 +483,12 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
             <el-table-column
               prop="actorId"
               sortable
+              :sort-method="sortLifecycleByActor"
               min-width="140"
               :label="t('audit.columns.actorSummary')"
             >
               <template #default="{ row }: { row: LifecycleAuditEvent }">
-                {{ formatActor(row.actorId) }}
+                {{ formatActor(row) }}
               </template>
             </el-table-column>
             <el-table-column
@@ -417,9 +505,16 @@ const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
             <el-table-column
               prop="templateId"
               sortable
+              :sort-method="sortLifecycleByTemplate"
               min-width="200"
               :label="t('audit.columns.templateId')"
-            />
+            >
+              <template #default="{ row }: { row: LifecycleAuditEvent }">
+                <EntityLinkCell
+                  v-bind="resolveTemplateCell(row)"
+                />
+              </template>
+            </el-table-column>
             <el-table-column
               sortable
               :sort-method="sortLifecycleFromState"

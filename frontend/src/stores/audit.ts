@@ -39,6 +39,7 @@ export const useAuditStore = defineStore('audit', () => {
     actorRole: 'GLOBAL_ADMIN',
     eventType: '',
     templateId: '',
+    requestId: '',
     groupScope: '',
     eventAtFrom: '',
     eventAtTo: '',
@@ -65,6 +66,9 @@ export const useAuditStore = defineStore('audit', () => {
     }
     if (filters.value.eventAtTo?.trim()) {
       query.eventAtTo = filters.value.eventAtTo.trim()
+    }
+    if (filters.value.requestId?.trim()) {
+      query.requestId = filters.value.requestId.trim()
     }
     if (requiresGroupScope.value) {
       if (filters.value.groupScope?.trim()) {
@@ -99,6 +103,7 @@ export const useAuditStore = defineStore('audit', () => {
       actorRole: actorRole.value ?? 'GLOBAL_ADMIN',
       eventType: '',
       templateId: '',
+      requestId: '',
       groupScope: '',
       eventAtFrom: '',
       eventAtTo: '',
@@ -213,4 +218,4 @@ export const useAuditStore = defineStore('audit', () => {
     exportLifecycleEvents,
   }
 })
-
+

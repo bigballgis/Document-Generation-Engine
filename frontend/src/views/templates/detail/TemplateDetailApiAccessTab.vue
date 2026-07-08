@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import RouteSummaryPanel from '@/components/templates/RouteSummaryPanel.vue'
 import ApiPolicyDomainEditor from '@/components/api/ApiPolicyDomainEditor.vue'
 import CredentialsPanel from '@/components/api/CredentialsPanel.vue'
 import TemplateCallerContractPanel from '@/components/templates/TemplateCallerContractPanel.vue'
-import TemplateRecentInvocationsPanel from '@/components/templates/TemplateRecentInvocationsPanel.vue'
+import TemplateInvocationsPanel from '@/components/templates/TemplateInvocationsPanel.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environments'
 import { useCapabilities } from '@/composables/useCapabilities'
+import { API_POLICY_DOMAINS, type ApiPolicyDomain } from '@/types/apiPolicyDomain'
 import type { ApiCredentialSummary, ApiPolicy } from '@/types/template'
 
 const props = defineProps<{
@@ -43,11 +46,34 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const route = useRoute()
 const { manageApiPolicy } = useCapabilities()
 
 const credentialsPanelRef = ref<InstanceType<typeof CredentialsPanel> | null>(null)
+const contractExpanded = ref<string[]>([])
 
 const canEditPolicy = computed(() => manageApiPolicy.value && Boolean(props.apiPolicy))
+
+function resolveDomainAnchor(value: unknown): ApiPolicyDomain | null {
+  if (typeof value !== 'string' || value.length === 0) {
+    return null
+  }
+  if (API_POLICY_DOMAINS.includes(value as ApiPolicyDomain)) {
+    return value as ApiPolicyDomain
+  }
+  return null
+}
+
+const domainAnchor = computed((): ApiPolicyDomain | null => {
+  const hashMatch = /^#domain=(.+)$/.exec(route.hash)
+  if (hashMatch) {
+    const fromHash = resolveDomainAnchor(decodeURIComponent(hashMatch[1]))
+    if (fromHash) {
+      return fromHash
+    }
+  }
+  return resolveDomainAnchor(route.query.domain)
+})
 
 function revealCredentialSecret(externalId: string, secret: string) {
   credentialsPanelRef.value?.revealSecret(externalId, secret)
@@ -57,64 +83,79 @@ defineExpose({ revealCredentialSecret })
 </script>
 
 <template>
-  <el-card shadow="never" class="section-card">
-    <div class="section-header">
-      <h2>{{ t('templates.policy.title') }}</h2>
-      <span v-if="apiPolicy" class="policy-version">
-        {{ t('templates.policy.policyVersion') }} v{{ apiPolicy.policyVersion }}
-      </span>
-    </div>
+  <div class="api-access-layout">
+    <RouteSummaryPanel :template-id="templateId" />
 
-    <el-skeleton v-if="loadingPolicy" :rows="6" animated />
-    <LoadErrorPanel
-      v-else-if="policyLoadFailed"
-      :message-key="policyLoadErrorKey ?? 'templates.error.loadPolicy'"
-      @retry="emit('retryPolicyLoad')"
-    />
-    <ApiPolicyDomainEditor
-      v-else
-      variant="tab-sections"
-      :template-id="templateId"
-      :api-policy="apiPolicy"
-      :can-edit="canEditPolicy"
-      :submitting="submitting"
-    />
-  </el-card>
+    <el-card shadow="never" class="section-card">
+      <div class="section-header">
+        <h2>{{ t('templates.policy.title') }}</h2>
+        <span v-if="apiPolicy" class="policy-version">
+          {{ t('templates.policy.policyVersion') }} v{{ apiPolicy.policyVersion }}
+        </span>
+      </div>
 
-  <el-card v-if="showPolicyPanel" shadow="never" class="section-card">
-    <h2>{{ t('templates.contract.title') }}</h2>
-    <TemplateCallerContractPanel
-      :template-id="templateId"
-      :environment="selectedContractEnvironment ?? DEFAULT_ENVIRONMENT"
-      @update:environment="selectedContractEnvironment = $event"
-    />
-  </el-card>
+      <el-skeleton v-if="loadingPolicy" :rows="6" animated />
+      <LoadErrorPanel
+        v-else-if="policyLoadFailed"
+        :message-key="policyLoadErrorKey ?? 'templates.error.loadPolicy'"
+        @retry="emit('retryPolicyLoad')"
+      />
+      <ApiPolicyDomainEditor
+        v-else
+        variant="tab-sections"
+        :template-id="templateId"
+        :api-policy="apiPolicy"
+        :can-edit="canEditPolicy"
+        :submitting="submitting"
+        :initial-domain-anchor="domainAnchor"
+      />
+    </el-card>
 
-  <el-card shadow="never" class="section-card">
-    <h2>{{ t('templates.policy.credentialsTitle') }}</h2>
-    <CredentialsPanel
-      ref="credentialsPanelRef"
-      v-model:credential-column-filters="credentialColumnFilters"
-      v-model:current-page="credentialsCurrentPage"
-      :credentials="paginatedCredentials"
-      :credential-status-filter-options="credentialStatusFilterOptions"
-      :page-size="pageSize"
-      :total-rows="totalCredentialRows"
-      :submitting="submitting"
-      :format-date-time="formatDateTime"
-      :sort-by-created-at="sortCredentialsByCreatedAt"
-      @create="emit('createCredential')"
-      @rotate="(credentialId, externalId) => emit('rotateCredential', credentialId, externalId)"
-      @revoke="(credentialId) => emit('revokeCredential', credentialId)"
-    />
-  </el-card>
+    <el-card v-if="showPolicyPanel" shadow="never" class="section-card">
+      <h2>{{ t('templates.policy.credentialsTitle') }}</h2>
+      <CredentialsPanel
+        ref="credentialsPanelRef"
+        v-model:credential-column-filters="credentialColumnFilters"
+        v-model:current-page="credentialsCurrentPage"
+        :credentials="paginatedCredentials"
+        :credential-status-filter-options="credentialStatusFilterOptions"
+        :page-size="pageSize"
+        :total-rows="totalCredentialRows"
+        :submitting="submitting"
+        :format-date-time="formatDateTime"
+        :sort-by-created-at="sortCredentialsByCreatedAt"
+        @create="emit('createCredential')"
+        @rotate="(credentialId, externalId) => emit('rotateCredential', credentialId, externalId)"
+        @revoke="(credentialId) => emit('revokeCredential', credentialId)"
+      />
+    </el-card>
 
-  <TemplateRecentInvocationsPanel :template-id="templateId" />
+    <TemplateInvocationsPanel :template-id="templateId" />
+
+    <el-card shadow="never" class="section-card">
+      <el-collapse v-model="contractExpanded" class="contract-collapse">
+        <el-collapse-item name="contract" :title="t('templates.contract.title')">
+          <p class="contract-hint">{{ t('templates.contract.description') }}</p>
+          <TemplateCallerContractPanel
+            :template-id="templateId"
+            :environment="selectedContractEnvironment ?? DEFAULT_ENVIRONMENT"
+            @update:environment="selectedContractEnvironment = $event"
+          />
+        </el-collapse-item>
+      </el-collapse>
+    </el-card>
+  </div>
 </template>
 
 <style scoped lang="scss">
+.api-access-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
 .section-card {
-  margin-bottom: var(--space-6);
+  margin-bottom: 0;
 
   h2 {
     margin: 0 0 var(--space-4);
@@ -136,6 +177,26 @@ defineExpose({ revealCredentialSecret })
 }
 
 .policy-version {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.contract-collapse {
+  border: none;
+
+  :deep(.el-collapse-item__header) {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  :deep(.el-collapse-item__wrap) {
+    border-bottom: none;
+  }
+}
+
+.contract-hint {
+  margin: 0 0 var(--space-4);
   color: var(--text-muted);
   font-size: var(--font-size-sm);
 }

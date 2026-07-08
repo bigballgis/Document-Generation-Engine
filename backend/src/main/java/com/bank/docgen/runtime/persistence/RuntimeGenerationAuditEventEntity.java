@@ -152,6 +152,42 @@ public class RuntimeGenerationAuditEventEntity {
         return eventType;
     }
 
+    public Instant getEventAt() {
+        return eventAt;
+    }
+
+    public UUID getTemplateId() {
+        return templateId;
+    }
+
+    public String getGroupCode() {
+        return groupCode;
+    }
+
+    public UUID getCredentialId() {
+        return credentialId;
+    }
+
+    public String getCredentialFingerprint() {
+        return credentialFingerprint;
+    }
+
+    public String getAccessAccount() {
+        return accessAccount;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public String getOutcome() {
+        return outcome;
+    }
+
+    public String getResultSummary() {
+        return resultSummary;
+    }
+
     public String getEnvironment() {
         return environment;
     }

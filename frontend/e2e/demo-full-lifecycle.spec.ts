@@ -2,7 +2,6 @@ import { expect, test, type APIRequestContext } from '@playwright/test'
 
 import {
   DEMO_FULL_FLOW_EXTERNAL_ID,
-  DEMO_FULL_FLOW_NAME,
   E2E_GROUP_ADMIN,
   E2E_TEMPLATE_AUTHOR,
   loginAs,
@@ -123,64 +122,62 @@ test.describe('Demo full lifecycle through API management (BDD)', () => {
     expect(policy.policyVersion).toBeGreaterThanOrEqual(1)
   })
 
-  test('stage 6 — published template appears on API management home', async ({ page, request }) => {
+  test('stage 6 — published template appears on external services overview', async ({ page, request }) => {
     fixture = await ensureDemoFullFlowPublished(request)
     await loginAs(page, E2E_GROUP_ADMIN)
     await page.goto('/dashboard')
-    await managementNav(page).getByRole('button', { name: /^api management$/i }).click()
+    await managementNav(page).getByRole('button', { name: /^external services overview$/i }).click()
     await expect(page).toHaveURL(/\/api\/policies/)
 
-    await expect(page.locator('.page-header h1')).toHaveText(/manage api access/i)
+    await expect(page.locator('.page-header h1')).toHaveText(/external services overview|对外服务概览/i)
     await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
     await expect(page.getByRole('row', { name: new RegExp(DEMO_FULL_FLOW_EXTERNAL_ID, 'i') })).toBeVisible({
       timeout: 30_000,
     })
   })
 
-  test('stage 7 — group admin opens API policy detail with domain navigation', async ({ page, request }) => {
+  test('stage 7 — group admin opens hub external access from overview', async ({ page, request }) => {
     fixture = await ensureDemoFullFlowPublished(request)
     await loginAs(page, E2E_GROUP_ADMIN)
     await page.goto('/dashboard')
-    await managementNav(page).getByRole('button', { name: /^api management$/i }).click()
+    await managementNav(page).getByRole('button', { name: /^external services overview$/i }).click()
     await page.getByRole('row', { name: new RegExp(DEMO_FULL_FLOW_EXTERNAL_ID, 'i') }).click()
-    await expect(page).toHaveURL(new RegExp(`/api/policies/${fixture.templateId}`), { timeout: 15_000 })
+    await expect(page).toHaveURL(
+      new RegExp(`/templates/${fixture.templateId}\\?tab=apiAccess`),
+      { timeout: 15_000 },
+    )
 
-    await expect(page.locator('.page-header h1')).toHaveText(DEMO_FULL_FLOW_NAME)
+    await expect(page.getByRole('heading', { name: /external access|对外接入/i })).toBeVisible()
     await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
+    await expect(page.getByText(/authorized ad groups|授权 ad 组/i)).toBeVisible()
+    await expect(page.getByText(/default route|默认路由/i)).toBeVisible()
+    await expect(page.getByText(/advanced settings|高级设置/i)).toBeVisible()
 
-    await expect(page.getByRole('menuitem', { name: /ad group authorization/i })).toBeVisible()
-    await expect(page.getByRole('menuitem', { name: /output settings/i })).toBeVisible()
-    await expect(page.getByRole('menuitem', { name: /batch limits/i })).toBeVisible()
-    await expect(page.getByRole('menuitem', { name: /encryption capability/i })).toBeVisible()
-    await expect(page.getByRole('menuitem', { name: /default route target/i })).toBeVisible()
-
-    await page.getByRole('menuitem', { name: /output settings/i }).click()
-    await expect(page.getByText(/^DOCX$/i).first()).toBeVisible()
+    await page.getByText(/advanced settings|高级设置/i).click()
+    await expect(page.getByRole('button', { name: /save output settings|保存输出设置/i })).toBeVisible()
   })
 
-  test('stage 8 — template hub API access tab links to policy console', async ({ page, request }) => {
+  test('stage 8 — legacy api policy URL redirects to hub tab', async ({ page, request }) => {
     fixture = await ensureDemoFullFlowPublished(request)
     await loginAs(page, E2E_GROUP_ADMIN)
-    await page.goto(`/templates/${fixture.templateId}?tab=apiAccess`)
+    await page.goto(`/api/policies/${fixture.templateId}?domain=OUTPUT_POLICY`)
+    await expect(page).toHaveURL(
+      new RegExp(`/templates/${fixture.templateId}\\?tab=apiAccess`),
+      { timeout: 15_000 },
+    )
+
     await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
-
-    const policySummary = page.locator('.policy-summary')
-    await expect(policySummary.getByText(/RETAIL_API/)).toBeVisible()
-    await expect(policySummary.getByText(DEMO_FULL_FLOW_RELEASE_VERSION)).toBeVisible()
-
-    const openConsole = page.getByRole('button', { name: /open access settings/i })
-    await expect(openConsole).toBeVisible()
-    await openConsole.click()
-
-    await expect(page).toHaveURL(new RegExp(`/api/policies/${fixture.templateId}`), { timeout: 15_000 })
+    await expect(page.getByRole('heading', { name: /external access|对外接入/i })).toBeVisible()
+    await expect(page.getByText(/RETAIL_API/)).toBeVisible()
+    await expect(page.locator('.domain-nav')).toHaveCount(0)
   })
 
-  test('stage 9 — left nav API management entry reaches published template catalog', async ({ page, request }) => {
+  test('stage 9 — left nav external services entry reaches published template catalog', async ({ page, request }) => {
     fixture = await ensureDemoFullFlowPublished(request)
     await loginAs(page, E2E_GROUP_ADMIN)
     await page.goto('/dashboard')
 
-    await managementNav(page).getByRole('button', { name: /^api management$/i }).click()
+    await managementNav(page).getByRole('button', { name: /^external services overview$/i }).click()
     await expect(page).toHaveURL(/\/api\/policies/)
     await expect(page.getByRole('row', { name: new RegExp(DEMO_FULL_FLOW_EXTERNAL_ID, 'i') })).toBeVisible()
   })

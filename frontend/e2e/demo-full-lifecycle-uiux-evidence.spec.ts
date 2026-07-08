@@ -2,7 +2,6 @@ import { expect, test } from '@playwright/test'
 
 import {
   DEMO_FULL_FLOW_EXTERNAL_ID,
-  DEMO_FULL_FLOW_NAME,
   E2E_GROUP_ADMIN,
   loginAs,
 } from './helpers/auth'
@@ -53,11 +52,11 @@ test.describe('Demo full lifecycle UIUX evidence', () => {
     await page.setViewportSize(DEMO_FULL_FLOW_VIEWPORT)
   })
 
-  test('capture API management home and policy detail (REDBC)', async ({ page }) => {
+  test('capture external services overview and hub api access tab (REDBC)', async ({ page }) => {
     await loginAs(page, E2E_GROUP_ADMIN)
     await page.goto('/dashboard')
-    await managementNav(page).getByRole('button', { name: /^api management$/i }).click()
-    await expect(page.locator('.page-header h1')).toHaveText(/manage api access/i)
+    await managementNav(page).getByRole('button', { name: /^external services overview$/i }).click()
+    await expect(page.locator('.page-header h1')).toHaveText(/external services overview|对外服务概览/i)
     await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
 
     const catalogTable = page.locator('.app-data-table')
@@ -65,11 +64,11 @@ test.describe('Demo full lifecycle UIUX evidence', () => {
     await captureDemoFullFlowScreenshot(page, '01-api-management-home-redbc-1440x900.png')
 
     await page.getByRole('row', { name: new RegExp(DEMO_FULL_FLOW_EXTERNAL_ID, 'i') }).click()
-    await expect(page).toHaveURL(new RegExp(`/api/policies/${templateId}`))
-    await expect(page.locator('.page-header h1')).toHaveText(DEMO_FULL_FLOW_NAME)
-    await expect(page.locator('.domain-nav')).toBeVisible()
+    await expect(page).toHaveURL(new RegExp(`/templates/${templateId}\\?tab=apiAccess`))
+    await expect(page.getByRole('heading', { name: /external access|对外接入/i })).toBeVisible()
+    await expect(page.locator('.api-access-layout')).toBeVisible()
     await captureDemoFullFlowLocatorScreenshot(
-      page.locator('.domain-layout'),
+      page.locator('.api-access-layout'),
       '02-api-policy-detail-domains-redbc-1440x900.png',
     )
   })
@@ -78,7 +77,7 @@ test.describe('Demo full lifecycle UIUX evidence', () => {
     await loginAs(page, E2E_GROUP_ADMIN)
     await page.goto(`/templates/${templateId}?tab=apiAccess`)
     await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
-    const policyCard = page.locator('.section-card').filter({ has: page.locator('.policy-summary') })
+    const policyCard = page.locator('.api-access-layout').first()
     await expect(policyCard).toBeVisible()
 
     await switchBrand(page, 'GREENBC')

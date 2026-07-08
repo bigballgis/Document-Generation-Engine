@@ -19,6 +19,7 @@ related:
   - docs/architecture/e06-task-sheet.md
   - docs/architecture/e11-role-journey-ui-continuation-plan.md
   - docs/architecture/e12-frontend-role-journey-development-plan.md
+  - docs/architecture/ux-entity-display-constitution.md
 ---
 
 # Management UI Constitution
@@ -113,3 +114,14 @@ Apply this pattern consistently to similar surfaces: template dev editor, master
 workspace, content-module lifecycle detail, and future role-aware detail pages.
 
 Reference implementation: `WorkspaceTabShell.vue`, `TemplateDetailDevWorkspace.vue`.
+
+## Entity Display and Catalog UX
+
+Human-readable entity columns, navigable links, filter control selection, and fluid vs
+contained table layout are governed by a dedicated constitution:
+
+- [UX Entity Display Constitution](./ux-entity-display-constitution.md)
+- Implementer skill: `.cursor/skills/frontend-entity-display/SKILL.md`
+- Cursor rule: `.cursor/rules/frontend-entity-display-constitution.mdc`
+
+Apply alongside this document for all catalog, list, audit table, and cross-reference columns.

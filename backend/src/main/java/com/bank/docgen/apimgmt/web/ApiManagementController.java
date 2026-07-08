@@ -1,7 +1,11 @@
 package com.bank.docgen.apimgmt.web;
 
 import com.bank.docgen.apimgmt.api.ApiCredentialCreatedView;
+import com.bank.docgen.apimgmt.api.ManagementInvocationDetailView;
 import com.bank.docgen.apimgmt.api.ManagementInvocationSummaryView;
+import com.bank.docgen.apimgmt.api.ApiRoutesSummaryView;
+import com.bank.docgen.apimgmt.service.ManagementInvocationFilters;
+import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.apimgmt.api.ApiPolicyImpactPreviewView;
 import com.bank.docgen.apimgmt.api.ApiCredentialSummaryView;
 import com.bank.docgen.apimgmt.api.ApiPolicyView;
@@ -25,6 +29,7 @@ import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -82,6 +87,16 @@ public class ApiManagementController {
         return envelope(request, apiManagementService.getCallerContract(templateId, environment, session));
     }
 
+    @GetMapping("/routes-summary")
+    public SuccessEnvelope<ApiRoutesSummaryView> getRoutesSummary(
+            @PathVariable UUID templateId,
+            @RequestParam(defaultValue = "dev") String environment,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, apiManagementService.getRoutesSummary(templateId, environment, session));
+    }
+
     @GetMapping("/invocations/recent")
     public SuccessEnvelope<List<ManagementInvocationSummaryView>> listRecentInvocations(
             @PathVariable UUID templateId,
@@ -90,6 +105,51 @@ public class ApiManagementController {
             HttpServletRequest request
     ) {
         return envelope(request, managementInvocationQueryService.listRecentInvocations(templateId, limit, session));
+    }
+
+    @GetMapping("/invocations")
+    public SuccessEnvelope<PageView<ManagementInvocationSummaryView>> listInvocations(
+            @PathVariable UUID templateId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String invocationKind,
+            @RequestParam(required = false) String requestId,
+            @RequestParam(required = false) Instant createdAfter,
+            @RequestParam(required = false) Instant createdBefore,
+            @RequestParam(required = false) UUID credentialId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        ManagementInvocationFilters filters = new ManagementInvocationFilters(
+                status,
+                invocationKind,
+                requestId,
+                createdAfter,
+                createdBefore,
+                credentialId
+        );
+        return envelope(request, managementInvocationQueryService.listInvocations(
+                templateId,
+                session,
+                page,
+                size,
+                filters
+        ));
+    }
+
+    @GetMapping("/invocations/{invocationId}")
+    public SuccessEnvelope<ManagementInvocationDetailView> getInvocationDetail(
+            @PathVariable UUID templateId,
+            @PathVariable String invocationId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, managementInvocationQueryService.getInvocationDetail(
+                templateId,
+                invocationId,
+                session
+        ));
     }
 
     @PutMapping("/policy")

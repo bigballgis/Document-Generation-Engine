@@ -120,10 +120,19 @@ export function templateLifecyclePanelPath(templateId: string): string {
   return templatePackageHubPath(templateId, 'lifecycle')
 }
 
-export function apiPolicyDetailPath(templateId: string, domain?: string): string {
-  const base = `${API_POLICY_DETAIL_PATH_PREFIX}${templateId}`
+/** Canonical external-access surface — package hub tab (P13 IA convergence). */
+export function apiPolicyHubPath(templateId: string, domain?: string): string {
+  const base = templatePackageHubPath(templateId, 'apiAccess')
   if (!domain) {
     return base
   }
-  return `${base}?domain=${encodeURIComponent(domain)}`
+  return `${base}#domain=${encodeURIComponent(domain)}`
+}
+
+/**
+ * @deprecated Legacy `/api/policies/:id` — resolves to hub path for programmatic navigation.
+ * Router redirect handles direct browser hits to the old URL.
+ */
+export function apiPolicyDetailPath(templateId: string, domain?: string): string {
+  return apiPolicyHubPath(templateId, domain)
 }

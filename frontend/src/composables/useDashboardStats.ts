@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue'
 import { pathForRouteKey, ROUTE_KEYS } from '@/routing/routeKeys'
+import { useApiPolicyStore } from '@/stores/apiPolicy'
 import { useMastersStore } from '@/stores/masters'
 import { useTemplatesStore } from '@/stores/templates'
 import { useWorkflowTasks } from '@/composables/useWorkflowTasks'
@@ -26,9 +27,12 @@ const TEMPLATE_STAT_KEYS = new Set([
   'catalogTemplates',
 ])
 
+const API_POLICY_STAT_KEYS = new Set(['externalServicesAlerts'])
+
 export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) {
   const mastersStore = useMastersStore()
   const templatesStore = useTemplatesStore()
+  const apiPolicyStore = useApiPolicyStore()
   const { tasks } = useWorkflowTasks()
 
   const stats = computed<DashboardStatCard[]>(() => {
@@ -112,6 +116,14 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
         actionKey: 'dashboard.stats.catalogTemplates.action',
         path: pathForRouteKey(ROUTE_KEYS.templateManagement),
       },
+      {
+        key: 'externalServicesAlerts',
+        count: apiPolicyStore.alerts.length,
+        titleKey: 'dashboard.stats.externalServicesAlerts.title',
+        descriptionKey: 'dashboard.stats.externalServicesAlerts.description',
+        actionKey: 'dashboard.stats.externalServicesAlerts.action',
+        path: pathForRouteKey(ROUTE_KEYS.apiPolicyManagement),
+      },
     ]
 
     return allStats.filter((stat) => {
@@ -123,6 +135,9 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
       }
       if (TEMPLATE_STAT_KEYS.has(stat.key)) {
         return allowed.has(ROUTE_KEYS.templateManagement)
+      }
+      if (API_POLICY_STAT_KEYS.has(stat.key)) {
+        return allowed.has(ROUTE_KEYS.apiPolicyManagement)
       }
       return true
     })

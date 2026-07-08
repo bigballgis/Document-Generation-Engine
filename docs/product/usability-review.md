@@ -10,6 +10,8 @@
 - [领域模型](../domain/domain-model.md)
 - [权限矩阵](../security/permission-matrix.md)
 - [模板创作与渲染一阶原则审查](authoring-rendering-first-principles-review.md)
+- [Management UI constitution](../architecture/management-ui-constitution.md)
+- [UX entity display constitution](../architecture/ux-entity-display-constitution.md)
 
 ## 体验审查结论
 

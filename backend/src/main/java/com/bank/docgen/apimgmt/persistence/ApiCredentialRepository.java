@@ -16,4 +16,6 @@ public interface ApiCredentialRepository extends JpaRepository<ApiCredentialEnti
             UUID templateId,
             ApiCredentialStatus status
     );
+
+    List<ApiCredentialEntity> findByTemplateIdIn(List<UUID> templateIds);
 }

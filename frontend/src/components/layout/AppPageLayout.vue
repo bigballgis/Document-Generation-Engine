@@ -4,15 +4,22 @@ import { computed } from 'vue'
 const props = withDefaults(
   defineProps<{
     maxWidth?: string
+    layoutVariant?: 'contained' | 'fluid'
   }>(),
   {
     maxWidth: '1440px',
+    layoutVariant: 'contained',
   },
 )
 
-const layoutStyle = computed(() => ({
-  maxWidth: props.maxWidth,
-}))
+const layoutStyle = computed(() => {
+  if (props.layoutVariant === 'fluid') {
+    return undefined
+  }
+  return {
+    maxWidth: props.maxWidth,
+  }
+})
 </script>
 
 <template>

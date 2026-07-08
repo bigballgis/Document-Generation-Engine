@@ -160,13 +160,11 @@ describe('useTemplatePolicyCredentials', () => {
     wrapper.unmount()
   })
 
-  it('openApiPolicyConsole navigates to API policy detail path', () => {
+  it('removed openApiPolicyConsole dead navigation helper', () => {
     const templateRef = ref(makeTemplate())
     const { policy, wrapper } = mountPolicyCredentials(templateRef, pinia)
 
-    policy.openApiPolicyConsole()
-
-    expect(routerPush).toHaveBeenCalledWith('/api/policies/tpl-1')
+    expect(policy).not.toHaveProperty('openApiPolicyConsole')
     wrapper.unmount()
   })
 

@@ -47,6 +47,12 @@ pnpm -C frontend exec playwright test e2e/a11y-smoke.spec.ts e2e/<slice>-uiux-ev
 - Accessibility: `a11y-smoke.spec.ts` green + focus/contrast/labels for changed surfaces.
 - Forbidden-state view renders unified no-access with `traceId`, no data leak.
 - English-first copy via i18n keys; spot-check locale switch does not break layout.
+- **Entity display** (`.cursor/skills/frontend-entity-display/SKILL.md`,
+  `docs/architecture/ux-entity-display-constitution.md`):
+  - No raw UUID visible in entity columns at 1440×900.
+  - Entity names link when user has read access; missing/forbidden links are plain text, no leak.
+  - Filter row: enums use select, entity refs use async search select — flag wrong control types.
+  - Catalog/table pages use fluid width — flag wasted horizontal space or unnecessary 1440px gutters.
 
 ## Output format
 
@@ -56,4 +62,6 @@ pnpm -C frontend exec playwright test e2e/a11y-smoke.spec.ts e2e/<slice>-uiux-ev
 
 Each finding cites the view/component file and the violated rule. Deliverables: evidence
 manifest (`frontend/e2e/evidence/<phase-task>-uiux-manifest.md`) + screenshots for both brands.
-Reference: `docs/architecture/management-ui-constitution.md`, `.cursor/skills/frontend-oa-design/SKILL.md`.
+Reference: `docs/architecture/management-ui-constitution.md`,
+`docs/architecture/ux-entity-display-constitution.md`, `.cursor/skills/frontend-oa-design/SKILL.md`,
+`.cursor/skills/frontend-entity-display/SKILL.md`.

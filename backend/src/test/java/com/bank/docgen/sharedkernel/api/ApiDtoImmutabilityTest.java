@@ -173,6 +173,8 @@ class ApiDtoImmutabilityTest {
                 Instant.parse("2026-01-01T00:00:00Z"),
                 "POLICY_UPDATED",
                 "tpl-1",
+                null,
+                null,
                 "cred-1",
                 1,
                 2,
@@ -182,7 +184,8 @@ class ApiDtoImmutabilityTest {
                 "actor",
                 "fp",
                 "ok",
-                warningCodes
+                warningCodes,
+                null
         );
 
         changedAreas.add("BATCH_LIMITS");

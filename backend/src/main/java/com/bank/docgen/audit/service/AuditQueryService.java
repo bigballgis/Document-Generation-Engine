@@ -12,20 +12,30 @@ import com.bank.docgen.audit.api.LifecycleAuditEventView;
 import com.bank.docgen.audit.persistence.AuditSearchPage;
 import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
 import com.bank.docgen.audit.persistence.ManagementAuditEventRepository;
+import com.bank.docgen.authorization.management.persistence.ManagementUserEntity;
+import com.bank.docgen.authorization.management.persistence.ManagementUserRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventEntity;
+import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.service.TemplateService.TemplateDisplayInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,23 +46,29 @@ public class AuditQueryService {
     public static final String LIFECYCLE_EXPORT_FORMAT = "lifecycle-audit-export-v1-json";
 
     private final ManagementAuditEventRepository managementAuditEventRepository;
+    private final RuntimeGenerationAuditEventRepository runtimeGenerationAuditEventRepository;
     private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
     private final TemplateService templateService;
+    private final ManagementUserRepository managementUserRepository;
     private final GroupAccessService groupAccessService;
     private final AuditMaskingService auditMaskingService;
     private final ObjectMapper objectMapper;
 
     public AuditQueryService(
             ManagementAuditEventRepository managementAuditEventRepository,
+            RuntimeGenerationAuditEventRepository runtimeGenerationAuditEventRepository,
             TemplateLifecycleRecordRepository lifecycleRecordRepository,
             TemplateService templateService,
+            ManagementUserRepository managementUserRepository,
             GroupAccessService groupAccessService,
             AuditMaskingService auditMaskingService,
             ObjectMapper objectMapper
     ) {
         this.managementAuditEventRepository = managementAuditEventRepository;
+        this.runtimeGenerationAuditEventRepository = runtimeGenerationAuditEventRepository;
         this.lifecycleRecordRepository = lifecycleRecordRepository;
         this.templateService = templateService;
+        this.managementUserRepository = managementUserRepository;
         this.groupAccessService = groupAccessService;
         this.auditMaskingService = auditMaskingService;
         this.objectMapper = objectMapper;
@@ -68,30 +84,55 @@ public class AuditQueryService {
             Instant eventAtFrom,
             Instant eventAtTo,
             String groupScope,
+            String requestId,
             Integer page,
             Integer size
     ) {
         validateTimeWindow(eventAtFrom, eventAtTo);
         String groupFilter = resolveGroupFilter(session, actorRole, templateId, groupScope);
+        String normalizedRequestId = normalizeRequestId(requestId);
         int safePage = AuditPagedResult.normalizePage(page);
         int safeSize = AuditPagedResult.normalizeSize(size);
-        AuditSearchPage<ManagementAuditEventEntity> searchPage = managementAuditEventRepository.searchPaged(
-                templateId,
-                eventType,
-                credentialId,
-                eventAtFrom,
-                eventAtTo,
-                groupFilter,
-                safePage,
-                safeSize
-        );
-        List<ManagementAuditEventView> events = searchPage.content().stream().map(this::toManagementView).toList();
+        List<ManagementAuditEventView> events;
+        long totalElements;
+        int totalPages;
+        if (normalizedRequestId != null) {
+            AuditSearchPage<RuntimeGenerationAuditEventEntity> searchPage =
+                    runtimeGenerationAuditEventRepository.searchPaged(
+                            templateId,
+                            eventType,
+                            credentialId,
+                            eventAtFrom,
+                            eventAtTo,
+                            groupFilter,
+                            normalizedRequestId,
+                            safePage,
+                            safeSize
+                    );
+            events = toManagementViewsFromRuntime(searchPage.content());
+            totalElements = searchPage.totalElements();
+            totalPages = searchPage.totalPages();
+        } else {
+            AuditSearchPage<ManagementAuditEventEntity> searchPage = managementAuditEventRepository.searchPaged(
+                    templateId,
+                    eventType,
+                    credentialId,
+                    eventAtFrom,
+                    eventAtTo,
+                    groupFilter,
+                    safePage,
+                    safeSize
+            );
+            events = toManagementViews(searchPage.content());
+            totalElements = searchPage.totalElements();
+            totalPages = searchPage.totalPages();
+        }
         return new ManagementAuditQueryResult(
                 events,
                 safePage,
                 safeSize,
-                searchPage.totalElements(),
-                searchPage.totalPages()
+                totalElements,
+                totalPages
         );
     }
 
@@ -104,18 +145,33 @@ public class AuditQueryService {
             UUID credentialId,
             Instant eventAtFrom,
             Instant eventAtTo,
-            String groupScope
+            String groupScope,
+            String requestId
     ) {
         validateTimeWindow(eventAtFrom, eventAtTo);
         String groupFilter = resolveGroupFilter(session, actorRole, templateId, groupScope);
-        List<ManagementAuditExportEventView> events = managementAuditEventRepository.search(
-                templateId,
-                eventType,
-                credentialId,
-                eventAtFrom,
-                eventAtTo,
-                groupFilter
-        ).stream().map(this::toExportView).toList();
+        String normalizedRequestId = normalizeRequestId(requestId);
+        List<ManagementAuditExportEventView> events;
+        if (normalizedRequestId != null) {
+            events = runtimeGenerationAuditEventRepository.search(
+                    templateId,
+                    eventType,
+                    credentialId,
+                    eventAtFrom,
+                    eventAtTo,
+                    groupFilter,
+                    normalizedRequestId
+            ).stream().map(this::toRuntimeExportView).toList();
+        } else {
+            events = managementAuditEventRepository.search(
+                    templateId,
+                    eventType,
+                    credentialId,
+                    eventAtFrom,
+                    eventAtTo,
+                    groupFilter
+            ).stream().map(this::toExportView).toList();
+        }
         return new ManagementAuditExportResult(EXPORT_FORMAT, events);
     }
 
@@ -128,6 +184,7 @@ public class AuditQueryService {
             Instant eventAtFrom,
             Instant eventAtTo,
             String groupScope,
+            String requestId,
             Integer page,
             Integer size
     ) {
@@ -139,6 +196,9 @@ public class AuditQueryService {
 
         int safePage = AuditPagedResult.normalizePage(page);
         int safeSize = AuditPagedResult.normalizeSize(size);
+        if (normalizeRequestId(requestId) != null) {
+            return new LifecycleAuditQueryResult(List.of(), safePage, safeSize, 0, 0);
+        }
         UUID scopedTemplateId = resolveLifecycleTemplateId(session, actorRole, templateId, groupScope);
         AuditSearchPage<TemplateLifecycleRecordEntity> searchPage = lifecycleRecordRepository.searchPaged(
                 scopedTemplateId,
@@ -148,9 +208,7 @@ public class AuditQueryService {
                 safePage,
                 safeSize
         );
-        List<LifecycleAuditEventView> events = searchPage.content().stream()
-                .map(record -> toLifecycleView(record.getTemplateId(), record))
-                .toList();
+        List<LifecycleAuditEventView> events = toLifecycleViews(searchPage.content());
         return new LifecycleAuditQueryResult(
                 events,
                 safePage,
@@ -191,12 +249,57 @@ public class AuditQueryService {
         List<TemplateLifecycleRecordEntity> records = scopedTemplateId != null
                 ? lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(scopedTemplateId)
                 : lifecycleRecordRepository.findAllByOrderByCreatedAtDesc();
-        return records.stream()
+        List<TemplateLifecycleRecordEntity> filtered = records.stream()
                 .filter(record -> eventType == null || record.getAction().name().equals(eventType))
                 .filter(record -> eventAtFrom == null || !record.getCreatedAt().isBefore(eventAtFrom))
                 .filter(record -> eventAtTo == null || !record.getCreatedAt().isAfter(eventAtTo))
-                .map(record -> toLifecycleView(record.getTemplateId(), record))
                 .toList();
+        return toLifecycleViews(filtered);
+    }
+
+    private List<ManagementAuditEventView> toManagementViews(List<ManagementAuditEventEntity> entities) {
+        if (entities.isEmpty()) {
+            return List.of();
+        }
+        Set<UUID> templateIds = entities.stream()
+                .map(ManagementAuditEventEntity::getTemplateId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<UUID, TemplateDisplayInfo> templateDisplayInfo = templateService.lookupDisplayInfoByIds(templateIds);
+        return entities.stream()
+                .map(entity -> toManagementView(entity, templateDisplayInfo.get(entity.getTemplateId())))
+                .toList();
+    }
+
+    private List<LifecycleAuditEventView> toLifecycleViews(List<TemplateLifecycleRecordEntity> records) {
+        if (records.isEmpty()) {
+            return List.of();
+        }
+        Set<UUID> templateIds = records.stream()
+                .map(TemplateLifecycleRecordEntity::getTemplateId)
+                .collect(Collectors.toSet());
+        Set<String> actorUsernames = records.stream()
+                .map(TemplateLifecycleRecordEntity::getActorUsername)
+                .filter(username -> username != null && !username.isBlank())
+                .collect(Collectors.toSet());
+        Map<UUID, TemplateDisplayInfo> templateDisplayInfo = templateService.lookupDisplayInfoByIds(templateIds);
+        Map<String, String> actorDisplayNames = lookupActorDisplayNames(actorUsernames);
+        return records.stream()
+                .map(record -> toLifecycleView(
+                        record.getTemplateId(),
+                        record,
+                        templateDisplayInfo.get(record.getTemplateId()),
+                        resolveActorDisplayName(record.getActorUsername(), actorDisplayNames)
+                ))
+                .toList();
+    }
+
+    private static String resolveActorDisplayName(String username, Map<String, String> actorDisplayNames) {
+        if (username == null || username.isBlank()) {
+            return null;
+        }
+        String displayName = actorDisplayNames.get(username);
+        return displayName != null ? displayName : username;
     }
 
     @Transactional(readOnly = true)
@@ -207,13 +310,17 @@ public class AuditQueryService {
             String eventType,
             Instant eventAtFrom,
             Instant eventAtTo,
-            String groupScope
+            String groupScope,
+            String requestId
     ) {
         validateTimeWindow(eventAtFrom, eventAtTo);
         if (!groupAccessService.canReadAudit(session)) {
             throw new AuditAccessDeniedException();
         }
         validateActorRole(session, actorRole);
+        if (normalizeRequestId(requestId) != null) {
+            return new LifecycleAuditExportResult(LIFECYCLE_EXPORT_FORMAT, List.of());
+        }
         List<LifecycleAuditEventView> events = queryAllLifecycleEvents(
                 session,
                 actorRole,
@@ -298,11 +405,16 @@ public class AuditQueryService {
         }
     }
 
-    private ManagementAuditEventView toManagementView(ManagementAuditEventEntity entity) {
+    private ManagementAuditEventView toManagementView(
+            ManagementAuditEventEntity entity,
+            TemplateDisplayInfo templateDisplayInfo
+    ) {
         return new ManagementAuditEventView(
                 entity.getEventAt(),
                 entity.getEventType(),
                 entity.getTemplateId() == null ? null : entity.getTemplateId().toString(),
+                templateDisplayInfo == null ? null : templateDisplayInfo.name(),
+                templateDisplayInfo == null ? null : templateDisplayInfo.externalId(),
                 entity.getCredentialId() == null ? null : entity.getCredentialId().toString(),
                 entity.getPreviousPolicyVersion(),
                 entity.getPolicyVersion(),
@@ -312,8 +424,85 @@ public class AuditQueryService {
                 entity.getActorSummary(),
                 entity.getCredentialFingerprint(),
                 entity.getStatusSummary(),
-                readStringList(entity.getWarningCodesJson())
+                readStringList(entity.getWarningCodesJson()),
+                null
         );
+    }
+
+    private List<ManagementAuditEventView> toManagementViewsFromRuntime(
+            List<RuntimeGenerationAuditEventEntity> entities
+    ) {
+        if (entities.isEmpty()) {
+            return List.of();
+        }
+        Set<UUID> templateIds = entities.stream()
+                .map(RuntimeGenerationAuditEventEntity::getTemplateId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<UUID, TemplateDisplayInfo> templateDisplayInfo = templateService.lookupDisplayInfoByIds(templateIds);
+        return entities.stream()
+                .map(entity -> toManagementViewFromRuntime(
+                        entity,
+                        templateDisplayInfo.get(entity.getTemplateId())
+                ))
+                .toList();
+    }
+
+    private ManagementAuditEventView toManagementViewFromRuntime(
+            RuntimeGenerationAuditEventEntity entity,
+            TemplateDisplayInfo templateDisplayInfo
+    ) {
+        String statusSummary = entity.getResultSummary();
+        if (statusSummary == null || statusSummary.isBlank()) {
+            statusSummary = entity.getOutcome();
+        }
+        return new ManagementAuditEventView(
+                entity.getEventAt(),
+                entity.getEventType(),
+                entity.getTemplateId() == null ? null : entity.getTemplateId().toString(),
+                templateDisplayInfo == null ? null : templateDisplayInfo.name(),
+                templateDisplayInfo == null ? null : templateDisplayInfo.externalId(),
+                entity.getCredentialId() == null ? null : entity.getCredentialId().toString(),
+                null,
+                null,
+                List.of(),
+                false,
+                null,
+                entity.getAccessAccount(),
+                entity.getCredentialFingerprint(),
+                statusSummary,
+                List.of(),
+                entity.getRequestId()
+        );
+    }
+
+    private ManagementAuditExportEventView toRuntimeExportView(RuntimeGenerationAuditEventEntity entity) {
+        String statusSummary = entity.getResultSummary();
+        if (statusSummary == null || statusSummary.isBlank()) {
+            statusSummary = entity.getOutcome();
+        }
+        return new ManagementAuditExportEventView(
+                entity.getEventAt(),
+                entity.getEventType(),
+                entity.getTemplateId() == null ? null : entity.getTemplateId().toString(),
+                entity.getCredentialId() == null ? null : entity.getCredentialId().toString(),
+                null,
+                null,
+                List.of(),
+                false,
+                null,
+                auditMaskingService.maskActorSummary(entity.getAccessAccount()),
+                auditMaskingService.maskCredentialFingerprint(entity.getCredentialFingerprint()),
+                statusSummary,
+                List.of()
+        );
+    }
+
+    private static String normalizeRequestId(String requestId) {
+        if (requestId == null || requestId.isBlank()) {
+            return null;
+        }
+        return requestId.trim();
     }
 
     private ManagementAuditExportEventView toExportView(ManagementAuditEventEntity entity) {
@@ -334,18 +523,47 @@ public class AuditQueryService {
         );
     }
 
-    private LifecycleAuditEventView toLifecycleView(UUID templateId, TemplateLifecycleRecordEntity record) {
+    private LifecycleAuditEventView toLifecycleView(
+            UUID templateId,
+            TemplateLifecycleRecordEntity record,
+            TemplateDisplayInfo templateDisplayInfo,
+            String actorDisplayName
+    ) {
         return new LifecycleAuditEventView(
                 record.getCreatedAt(),
                 record.getAction().name(),
                 templateId.toString(),
+                templateDisplayInfo == null ? null : templateDisplayInfo.name(),
+                templateDisplayInfo == null ? null : templateDisplayInfo.externalId(),
                 record.getAction().name(),
                 record.getFromStatus() == null ? null : record.getFromStatus().name(),
                 record.getToStatus() == null ? null : record.getToStatus().name(),
                 record.getActorUsername(),
+                actorDisplayName,
                 record.getCommentSummary(),
                 List.of()
         );
+    }
+
+    private Map<String, String> lookupActorDisplayNames(Set<String> actorUsernames) {
+        if (actorUsernames == null || actorUsernames.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, String> displayNames = new HashMap<>();
+        for (ManagementUserEntity user : managementUserRepository.findByUsernameInAndDeletedAtIsNull(actorUsernames)) {
+            displayNames.put(user.getUsername(), formatActorDisplayName(user.getDisplayName(), user.getUsername()));
+        }
+        return displayNames;
+    }
+
+    private static String formatActorDisplayName(String displayName, String username) {
+        if (displayName == null || displayName.isBlank()) {
+            return username;
+        }
+        if (username == null || username.isBlank()) {
+            return displayName;
+        }
+        return displayName + " (" + username + ")";
     }
 
     private List<String> readStringList(String json) {

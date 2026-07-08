@@ -8,6 +8,8 @@ model: composer-2.5
 
 Build the management UI test-first, login-first, and role-aware. Style authority:
 `.cursor/skills/frontend-oa-design/SKILL.md` — read it before changing any surface.
+Entity display authority: `.cursor/skills/frontend-entity-display/SKILL.md` — read it before
+changing list views, entity columns, catalog filters, or page layout width.
 
 ## Stack (accepted ADRs — do not change without user reopening)
 
@@ -75,6 +77,8 @@ Build the management UI test-first, login-first, and role-aware. Style authority
 3. Frontend must not outpace backend session/authorization support for the same slice.
 4. Apply the bank OA style lock (`.cursor/skills/frontend-oa-design/SKILL.md`) — tokens only,
    both REDBC and GREENBC verified, all interaction/async states defined.
+   Apply entity display governance (`.cursor/skills/frontend-entity-display/SKILL.md`) —
+   `EntityLinkCell` for entity columns, filter matrix compliance, `layoutVariant` fluid vs contained.
 5. **TDD inner loop** — delegate to `build-deploy-agent`:
    - Fast: `pnpm -C frontend test --run` or `pnpm -C frontend test:watch`
    - Single spec: `pnpm -C frontend test --run <path>`
@@ -95,3 +99,6 @@ Build the management UI test-first, login-first, and role-aware. Style authority
 - Never log or render secrets, tokens, or raw credential material.
 - Workspace/detail pages follow the tab shell pattern (`.cursor/rules/workspace-tab-shell-constitution.mdc`,
   component `WorkspaceTabShell.vue`): journey read-only, single action rail, dialogs for supplemental input.
+- No raw UUID in user-facing entity table columns; use `EntityLinkCell` with read-access gating.
+- Catalog filters: enum → select, entity → async `AppSearchSelect`; free-text only when API supports it.
+- Table-heavy catalog pages use `AppPageLayout layoutVariant="fluid"`; detail/form pages use `contained` (1440px).

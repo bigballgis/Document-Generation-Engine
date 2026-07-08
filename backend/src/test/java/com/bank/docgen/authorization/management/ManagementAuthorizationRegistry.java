@@ -13,6 +13,7 @@ final class ManagementAuthorizationRegistry {
     static final String MANAGEMENT_API_PREFIX = "/api/management/v1";
 
     static final Set<String> MANAGEMENT_CONTROLLERS = Set.of(
+            "com.bank.docgen.apimgmt.web.ApiAccessController",
             "com.bank.docgen.apimgmt.web.ApiManagementController",
             "com.bank.docgen.audit.web.AuditController",
             "com.bank.docgen.authorization.management.web.GroupManagementController",
@@ -38,6 +39,10 @@ final class ManagementAuthorizationRegistry {
      * Primary domain services invoked by each management controller (excluding infrastructure helpers).
      */
     static final Map<String, Set<String>> CONTROLLER_PRIMARY_SERVICES = Map.ofEntries(
+            Map.entry(
+                    "com.bank.docgen.apimgmt.web.ApiAccessController",
+                    Set.of("com.bank.docgen.apimgmt.service.ApiAccessAlertQueryService")
+            ),
             Map.entry(
                     "com.bank.docgen.apimgmt.web.ApiManagementController",
                     Set.of(
@@ -222,6 +227,7 @@ final class ManagementAuthorizationRegistry {
     );
 
     static final Set<String> GROUP_ACCESS_ANCHORS = Set.of(
+            "com.bank.docgen.apimgmt.service.ApiAccessAlertQueryService",
             "com.bank.docgen.apimgmt.service.ApiManagementService",
             "com.bank.docgen.apimgmt.service.ApiPolicyImpactPreviewService",
             "com.bank.docgen.apimgmt.service.ApiPolicyRollbackService",

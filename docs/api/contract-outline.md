@@ -858,6 +858,17 @@ Asynchronous accepted response draft
 
 包级留存变更仅影响 **新产生** 的记录 TTL；`changedAreas` 含 `INVOCATION_RETENTION`。
 
+### 管理端包 Hub 只读摘要（2026-07-08，P13-EXTERNAL-SERVICES-EXCELLENCE）
+
+管理端 **不含** 调用方 `variables` 明文；与 runtime 调用方 invocation API 分离。
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/management/v1/templates/{templateId}/api/routes-summary` | 包 externalId、默认 generate 路径、explicit 路径列表 |
+| GET | `/api/management/v1/templates/{templateId}/api/invocations` | 分页列表；筛选 `status`、`invocationKind`、`requestId`、`createdAfter`/`createdBefore`、`credentialId` |
+| GET | `/api/management/v1/templates/{templateId}/api/invocations/{invocationId}` | 单条摘要详情（无 parameters） |
+| GET | `/api/management/v1/api-access/alerts` | 跨包待关注项（缺 AD 组、凭证即将过期、无凭证） |
+
 ## 异步任务查询与取消接口确认
 
 确认基线：异步任务查询需要返回任务状态、响应元数据、成功结果或统一错误明细；异步批量任务需要返回批次汇总和单笔成功/失败明细。异步任务和生成结果默认保留 7 天（**幂等/异步任务默认窗口**；包级 artifact/record retention 见 ADR-0040）。

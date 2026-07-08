@@ -2,9 +2,19 @@ import type { Schema } from '@/types/openapi'
 
 export type AuditReadActorRole = Schema<'AuditReadActorRole'>
 
-export type ManagementAuditEvent = Schema<'ManagementAuditEvent'>
+/** Optional display fields may arrive before OpenAPI schema refresh. */
+export type AuditEventDisplayExtensions = {
+  templateDisplayName?: string
+  templateExternalId?: string
+  actorDisplayName?: string
+}
 
-export type LifecycleAuditEvent = Schema<'LifecycleAuditEvent'>
+export type ManagementAuditEvent = Schema<'ManagementAuditEvent'> & AuditEventDisplayExtensions
+
+export type LifecycleAuditEvent = Schema<'LifecycleAuditEvent'> &
+  AuditEventDisplayExtensions & {
+    actorSummary?: string
+  }
 
 export type ManagementAuditExportResult = Schema<'ManagementAuditExportResponse'>
 
@@ -18,6 +28,7 @@ export interface AuditQueryFilters {
   actorRole: AuditReadActorRole
   templateId?: string
   eventType?: string
+  requestId?: string
   eventAtFrom?: string
   eventAtTo?: string
   groupScope?: string

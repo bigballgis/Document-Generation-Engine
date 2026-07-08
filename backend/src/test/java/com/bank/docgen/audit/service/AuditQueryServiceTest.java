@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,17 +13,27 @@ import com.bank.docgen.audit.persistence.AuditSearchPage;
 import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
 import com.bank.docgen.audit.persistence.ManagementAuditEventRepository;
 import com.bank.docgen.authorization.management.domain.AuthSource;
+import com.bank.docgen.authorization.management.domain.ManagementRole;
+import com.bank.docgen.authorization.management.persistence.ManagementUserEntity;
+import com.bank.docgen.authorization.management.persistence.ManagementUserRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
+import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.service.TemplateService.TemplateDisplayInfo;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventEntity;
+import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventRepository;
+import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,11 +49,15 @@ class AuditQueryServiceTest {
     @Mock
     private ManagementAuditEventRepository managementAuditEventRepository;
     @Mock
+    private RuntimeGenerationAuditEventRepository runtimeGenerationAuditEventRepository;
+    @Mock
     private TemplateLifecycleRecordRepository lifecycleRecordRepository;
     @Mock
     private TemplateService templateService;
     @Mock
     private GroupAccessService groupAccessService;
+    @Mock
+    private ManagementUserRepository managementUserRepository;
 
     private AuditQueryService service;
     private ManagementSessionClaims globalAdmin;
@@ -52,8 +67,10 @@ class AuditQueryServiceTest {
     void setUp() {
         service = new AuditQueryService(
                 managementAuditEventRepository,
+                runtimeGenerationAuditEventRepository,
                 lifecycleRecordRepository,
                 templateService,
+                managementUserRepository,
                 groupAccessService,
                 new AuditMaskingService(),
                 new ObjectMapper()
@@ -79,12 +96,15 @@ class AuditQueryServiceTest {
                 null,
                 null,
                 null,
+                null,
                 0,
                 20
         );
 
         assertThat(result.events()).hasSize(1);
         assertThat(result.events().getFirst().eventType()).isEqualTo("API_POLICY_UPDATED");
+        assertThat(result.events().getFirst().templateDisplayName()).isNull();
+        assertThat(result.events().getFirst().templateExternalId()).isNull();
         assertThat(result.page()).isZero();
         assertThat(result.size()).isEqualTo(20);
         assertThat(result.totalElements()).isEqualTo(1);
@@ -97,6 +117,7 @@ class AuditQueryServiceTest {
         assertThatThrownBy(() -> service.queryManagementEvents(
                 groupAdmin,
                 AuditReadActorRole.GROUP_ADMIN,
+                null,
                 null,
                 null,
                 null,
@@ -126,6 +147,7 @@ class AuditQueryServiceTest {
                 null,
                 null,
                 "RETAIL",
+                null,
                 0,
                 20
         );
@@ -148,6 +170,7 @@ class AuditQueryServiceTest {
                 from,
                 to,
                 null,
+                null,
                 0,
                 20
         )).isInstanceOf(AuditValidationException.class);
@@ -160,6 +183,7 @@ class AuditQueryServiceTest {
         assertThatThrownBy(() -> service.queryManagementEvents(
                 globalAdmin,
                 AuditReadActorRole.GLOBAL_ADMIN,
+                null,
                 null,
                 null,
                 null,
@@ -186,12 +210,92 @@ class AuditQueryServiceTest {
                 null,
                 null,
                 null,
+                null,
                 null
         );
 
         assertThat(result.format()).isEqualTo(AuditQueryService.EXPORT_FORMAT);
         assertThat(result.events()).hasSize(1);
         assertThat(result.events().getFirst().actorSummaryMasked()).contains("****");
+    }
+
+    @Test
+    void managementEventsEnrichTemplateDisplayFieldsInBatch() {
+        when(groupAccessService.canReadAudit(globalAdmin)).thenReturn(true);
+        ManagementAuditEventEntity entity = sampleManagementEvent();
+        when(managementAuditEventRepository.searchPaged(
+                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(0), eq(20)
+        )).thenReturn(new AuditSearchPage<>(List.of(entity), 1, 1));
+        when(templateService.lookupDisplayInfoByIds(Set.of(TEMPLATE_ID))).thenReturn(Map.of(
+                TEMPLATE_ID,
+                new TemplateDisplayInfo("Sample", "TPL-001")
+        ));
+
+        var result = service.queryManagementEvents(
+                globalAdmin,
+                AuditReadActorRole.GLOBAL_ADMIN,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                0,
+                20
+        );
+
+        assertThat(result.events().getFirst().templateId()).isEqualTo(TEMPLATE_ID.toString());
+        assertThat(result.events().getFirst().templateDisplayName()).isEqualTo("Sample");
+        assertThat(result.events().getFirst().templateExternalId()).isEqualTo("TPL-001");
+        verify(templateService).lookupDisplayInfoByIds(Set.of(TEMPLATE_ID));
+    }
+
+    @Test
+    void lifecycleEventsEnrichTemplateAndActorDisplayFieldsInBatch() {
+        when(groupAccessService.canReadAudit(globalAdmin)).thenReturn(true);
+        TemplateLifecycleRecordEntity record = new TemplateLifecycleRecordEntity(
+                UUID.randomUUID(),
+                TEMPLATE_ID,
+                LifecycleAction.SUBMIT_FOR_TEST,
+                TemplateLifecycleStatus.DRAFT,
+                TemplateLifecycleStatus.TESTING,
+                null,
+                "Ready for test",
+                null,
+                "10000003"
+        );
+        when(lifecycleRecordRepository.searchPaged(
+                isNull(), isNull(), isNull(), isNull(), eq(0), eq(20)
+        )).thenReturn(new AuditSearchPage<>(List.of(record), 1, 1));
+        when(templateService.lookupDisplayInfoByIds(Set.of(TEMPLATE_ID))).thenReturn(Map.of(
+                TEMPLATE_ID,
+                new TemplateDisplayInfo("Sample", "TPL-001")
+        ));
+        ManagementUserEntity actor = managementUser("10000003", "Lifecycle Tester");
+        when(managementUserRepository.findByUsernameInAndDeletedAtIsNull(Set.of("10000003")))
+                .thenReturn(List.of(actor));
+
+        var result = service.queryLifecycleEvents(
+                globalAdmin,
+                AuditReadActorRole.GLOBAL_ADMIN,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                0,
+                20
+        );
+
+        var event = result.events().getFirst();
+        assertThat(event.templateDisplayName()).isEqualTo("Sample");
+        assertThat(event.templateExternalId()).isEqualTo("TPL-001");
+        assertThat(event.actorId()).isEqualTo("10000003");
+        assertThat(event.actorDisplayName()).isEqualTo("Lifecycle Tester (10000003)");
+        verify(templateService).lookupDisplayInfoByIds(Set.of(TEMPLATE_ID));
+        verify(managementUserRepository).findByUsernameInAndDeletedAtIsNull(Set.of("10000003"));
     }
 
     @Test
@@ -220,6 +324,7 @@ class AuditQueryServiceTest {
                 null,
                 null,
                 null,
+                null,
                 0,
                 20
         );
@@ -243,12 +348,105 @@ class AuditQueryServiceTest {
                 null,
                 null,
                 null,
-                "RETAIL"
+                "RETAIL",
+                null
         );
 
         assertThat(result.format()).isEqualTo(AuditQueryService.LIFECYCLE_EXPORT_FORMAT);
         verify(templateService, org.mockito.Mockito.times(2))
                 .requireReadableTemplate(TEMPLATE_ID, groupAdmin);
+    }
+
+    @Test
+    void managementEventsFilterByRequestIdQueriesRuntimeAuditStoreWithExactMatch() {
+        when(groupAccessService.canReadAudit(globalAdmin)).thenReturn(true);
+        RuntimeGenerationAuditEventEntity entity = sampleRuntimeAuditEvent("req-audit-001");
+        when(runtimeGenerationAuditEventRepository.searchPaged(
+                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq("req-audit-001"), eq(0), eq(20)
+        )).thenReturn(new AuditSearchPage<>(List.of(entity), 1, 1));
+        when(templateService.lookupDisplayInfoByIds(Set.of(TEMPLATE_ID))).thenReturn(Map.of(
+                TEMPLATE_ID,
+                new TemplateDisplayInfo("Sample", "TPL-001")
+        ));
+
+        var result = service.queryManagementEvents(
+                globalAdmin,
+                AuditReadActorRole.GLOBAL_ADMIN,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "req-audit-001",
+                0,
+                20
+        );
+
+        assertThat(result.events()).hasSize(1);
+        assertThat(result.events().getFirst().requestId()).isEqualTo("req-audit-001");
+        assertThat(result.events().getFirst().eventType()).isEqualTo(RuntimeGenerationAuditRecorder.EVENT_SYNC_GENERATION);
+        verify(runtimeGenerationAuditEventRepository).searchPaged(
+                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq("req-audit-001"), eq(0), eq(20)
+        );
+        verify(managementAuditEventRepository, never()).searchPaged(
+                isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(0), eq(20)
+        );
+    }
+
+    @Test
+    void lifecycleEventsReturnEmptyWhenRequestIdFilterProvided() {
+        when(groupAccessService.canReadAudit(globalAdmin)).thenReturn(true);
+
+        var result = service.queryLifecycleEvents(
+                globalAdmin,
+                AuditReadActorRole.GLOBAL_ADMIN,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "req-audit-001",
+                0,
+                20
+        );
+
+        assertThat(result.events()).isEmpty();
+        assertThat(result.totalElements()).isZero();
+        verify(lifecycleRecordRepository, never()).searchPaged(
+                isNull(), isNull(), isNull(), isNull(), eq(0), eq(20)
+        );
+    }
+
+    private RuntimeGenerationAuditEventEntity sampleRuntimeAuditEvent(String requestId) {
+        return new RuntimeGenerationAuditEventEntity(
+                UUID.randomUUID(),
+                Instant.parse("2026-06-23T10:00:00Z"),
+                RuntimeGenerationAuditRecorder.EVENT_SYNC_GENERATION,
+                "management",
+                TEMPLATE_ID,
+                "RETAIL",
+                UUID.randomUUID(),
+                "fp-CRED-ABCD1234",
+                "access-01",
+                "1.0.0",
+                "1.0.0",
+                "EXPLICIT",
+                "PDF",
+                "ATTACHMENT",
+                requestId,
+                "hash-idem",
+                "ACCEPTED",
+                null,
+                null,
+                "doc-1",
+                RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
+                "Generated PDF",
+                null,
+                120L,
+                "audit-1",
+                "trace-1"
+        );
     }
 
     private ManagementAuditEventEntity sampleManagementEvent() {
@@ -284,6 +482,19 @@ class AuditQueryServiceTest {
         );
         entity.setLifecycleStatus(TemplateLifecycleStatus.DRAFT);
         return entity;
+    }
+
+    private ManagementUserEntity managementUser(String username, String displayName) {
+        return new ManagementUserEntity(
+                UUID.randomUUID(),
+                username,
+                displayName,
+                username + "@example.com",
+                "hash",
+                AuthSource.LOCAL,
+                new LinkedHashSet<>(Set.of(ManagementRole.GROUP_ADMIN)),
+                new LinkedHashSet<>(Set.of("RETAIL"))
+        );
     }
 
     private ManagementSessionClaims session(String username, List<String> roles, List<String> groups) {

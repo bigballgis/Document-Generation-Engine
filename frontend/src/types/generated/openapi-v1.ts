@@ -844,6 +844,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/templates/{templateId}/api/routes-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get callable route summary for a template package
+         * @description Returns package external ID, default generate path, default route release version, and explicit per-release paths assembled from the published contract. Management read-only; no caller variables or secrets.
+         */
+        get: operations["getTemplateApiRoutesSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates/{templateId}/api/invocations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Paginated management invocation history for a template package
+         * @description Read-only administrator summary scoped to the template package. Does not return caller variable plaintext. Supports filters for status, kind, requestId, credential, and created-at range.
+         */
+        get: operations["listTemplateManagementInvocations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates/{templateId}/api/invocations/{invocationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get management invocation detail summary
+         * @description Returns non-sensitive invocation detail for administrators. Does not include caller variable plaintext. Includes audit deep-link hints.
+         */
+        get: operations["getTemplateManagementInvocationDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/api-access/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List cross-package API access attention items
+         * @description Aggregates non-sensitive alerts across authorized template packages (missing AD groups, expiring credentials, no credentials). Each item includes a hub deep-link path for remediation.
+         */
+        get: operations["listApiAccessAlerts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/masters/{masterId}/revision-lines": {
         parameters: {
             query?: never;
@@ -1429,6 +1509,85 @@ export interface components {
             handling: string;
             expectedErrorCode: string;
         };
+        ApiRoutesSummaryView: {
+            templateExternalId: string;
+            defaultRouteReleaseVersion: string;
+            defaultGeneratePath: string;
+            explicitPaths: components["schemas"]["ExplicitRoutePathView"][];
+        };
+        ExplicitRoutePathView: {
+            releaseVersion: string;
+            generatePath: string;
+        };
+        ApiRoutesSummaryResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["ApiRoutesSummaryView"];
+        };
+        ManagementInvocationSummaryView: {
+            invocationId: string;
+            invocationKind: string;
+            status: string;
+            requestId: string;
+            resolvedReleaseVersion: string;
+            routeType: string;
+            /** Format: date-time */
+            createdAt: string;
+            accessAccountSummary: string;
+        };
+        ManagementInvocationAuditLinkHintView: {
+            requestId: string;
+            auditId: string;
+        };
+        ManagementInvocationDetailView: {
+            invocationId: string;
+            requestId: string;
+            routeType: string;
+            resolvedReleaseVersion: string;
+            outcome: string;
+            /** Format: int64 */
+            durationMs: number;
+            accessAccountSummary: string;
+            /** Format: uuid */
+            credentialId: string;
+            batchId: string | null;
+            parentInvocationId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            documentPresent: boolean;
+            auditLinkHint: components["schemas"]["ManagementInvocationAuditLinkHintView"];
+        };
+        ManagementInvocationPageResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PageView"] & {
+                content: components["schemas"]["ManagementInvocationSummaryView"][];
+            };
+        };
+        ManagementInvocationDetailResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["ManagementInvocationDetailView"];
+        };
+        /** @enum {string} */
+        ApiAccessAlertType: "MISSING_AD_GROUP" | "EXPIRING_CREDENTIAL" | "NO_CREDENTIALS";
+        /** @enum {string} */
+        ApiAccessAlertSeverity: "WARNING" | "INFO";
+        ApiAccessAlertView: {
+            alertType: components["schemas"]["ApiAccessAlertType"];
+            severity: components["schemas"]["ApiAccessAlertSeverity"];
+            /** Format: uuid */
+            templateId: string;
+            templateExternalId: string;
+            templateName: string;
+            groupCode: string;
+            detailMessageKey: string;
+            hubDeepLinkPath: string;
+            credentialExternalId?: string;
+            /** Format: date-time */
+            expiresAt?: string;
+        };
+        ApiAccessAlertListResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["ApiAccessAlertView"][];
+        };
         CredentialSummary: {
             credentialId?: string;
             status?: components["schemas"]["CredentialStatus"];
@@ -1542,6 +1701,8 @@ export interface components {
             eventAt: string;
             eventType: string;
             templateId?: string;
+            templateDisplayName?: string;
+            templateExternalId?: string;
             credentialId?: string;
             previousPolicyVersion?: number;
             policyVersion?: number;
@@ -1561,10 +1722,13 @@ export interface components {
             eventAt: string;
             eventType: string;
             templateId?: string;
+            templateDisplayName?: string;
+            templateExternalId?: string;
             operation?: string;
             fromState?: string;
             toState?: string;
             actorId?: string;
+            actorDisplayName?: string;
             summary?: string;
             warningCodes: string[];
         };
@@ -4390,6 +4554,132 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getTemplateApiRoutesSummary: {
+        parameters: {
+            query?: {
+                /** @description Runtime environment for contract assembly (defaults to `dev`). */
+                environment?: string;
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Route summary returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiRoutesSummaryResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listTemplateManagementInvocations: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+                status?: string;
+                invocationKind?: string;
+                requestId?: string;
+                createdAfter?: string;
+                createdBefore?: string;
+                credentialId?: string;
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated invocation summaries returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagementInvocationPageResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getTemplateManagementInvocationDetail: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+                invocationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invocation detail returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagementInvocationDetailResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listApiAccessAlerts: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Alert list returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiAccessAlertListResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };

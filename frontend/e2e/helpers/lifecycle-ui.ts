@@ -185,6 +185,123 @@ export async function saveApiRetentionPolicyFromHubTab(page: Page) {
   })
 }
 
+export async function expandApiPolicyAdvancedSettings(page: Page) {
+  await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
+  const advancedToggle = page.getByRole('button', { name: /advanced settings|高级设置/i })
+  await expect(advancedToggle).toBeVisible()
+  const saveOutputButton = page.getByRole('button', { name: /save output settings|保存输出设置/i })
+  if ((await saveOutputButton.count()) === 0) {
+    await advancedToggle.click()
+  }
+  await expect(saveOutputButton).toBeVisible()
+}
+
+export async function editOutputPolicyCandidate(
+  page: Page,
+  currentFormats: string[],
+  currentModes: string[],
+) {
+  const advancedRegion = page.getByRole('region', { name: /advanced settings|高级设置/i })
+  const modes = currentModes ?? []
+  const formatSelect = advancedRegion.getByRole('combobox').nth(0)
+  const modeSelect = advancedRegion.getByRole('combobox').nth(1)
+
+  if (!currentFormats.includes('PDF')) {
+    await formatSelect.click({ force: true })
+    await page.getByRole('option', { name: 'PDF' }).click()
+    await page.keyboard.press('Escape')
+    return
+  }
+  if (!modes.includes('INLINE')) {
+    await modeSelect.click({ force: true })
+    await page.getByRole('option', { name: 'INLINE' }).click()
+    await page.keyboard.press('Escape')
+    return
+  }
+  if (!modes.includes('SYNC_DOWNLOAD_URL')) {
+    await modeSelect.click({ force: true })
+    await page.getByRole('option', { name: 'SYNC_DOWNLOAD_URL' }).click()
+    await page.keyboard.press('Escape')
+    return
+  }
+  await modeSelect.click({ force: true })
+  await page.getByRole('option', { name: 'INLINE' }).click()
+  await page.keyboard.press('Escape')
+}
+
+async function confirmPolicyChangeDialog(page: Page) {
+  const messageBox = page.locator('.el-message-box')
+  await expect(messageBox).toBeVisible()
+  await messageBox.getByRole('button', { name: /^(ok|confirm)$/i }).click()
+}
+
+export async function saveApiOutputPolicyFromHubTab(page: Page) {
+  await expandApiPolicyAdvancedSettings(page)
+
+  const previewPromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes('/api/policy/impact-preview'),
+    { timeout: 45_000 },
+  )
+  const savePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PUT' && response.url().includes('/api/policy/output'),
+    { timeout: 60_000 },
+  )
+
+  await page.getByRole('button', { name: /save output settings|保存输出设置/i }).click()
+
+  const previewResponse = await previewPromise
+  expect(previewResponse.ok()).toBeTruthy()
+
+  await expect(page.locator('.el-message-box')).toBeVisible({ timeout: 10_000 })
+  await confirmPolicyChangeDialog(page)
+
+  const saveResponse = await savePromise
+  expect(saveResponse.ok()).toBeTruthy()
+
+  await expect(
+    page.locator('.el-message').getByText(/access setting saved|访问设置已保存/i),
+  ).toBeVisible({ timeout: 15_000 })
+}
+
+export async function saveDefaultRouteFromHubTab(page: Page, releaseVersion: string) {
+  await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
+
+  const routeSection = page.locator('#policy-domain-DEFAULT_ROUTE_TARGET')
+  const routeInput = routeSection.locator('input').first()
+  await expect(routeInput).toBeVisible()
+  await routeInput.fill(releaseVersion)
+
+  const previewPromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes('/api/policy/impact-preview'),
+    { timeout: 45_000 },
+  )
+  const savePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'PUT' && response.url().includes('/api/policy/default-route'),
+    { timeout: 60_000 },
+  )
+
+  await routeSection.getByRole('button', { name: /save default route|保存默认路由/i }).click()
+
+  const previewResponse = await previewPromise
+  expect(previewResponse.ok()).toBeTruthy()
+
+  await expect(page.locator('.el-message-box')).toBeVisible({ timeout: 10_000 })
+  await confirmPolicyChangeDialog(page)
+
+  const saveResponse = await savePromise
+  expect(saveResponse.ok()).toBeTruthy()
+
+  await expect(
+    page.locator('.el-message').getByText(/access setting saved|访问设置已保存/i),
+  ).toBeVisible({ timeout: 15_000 })
+}
+
 /** @deprecated Hub deep-link redirects to dev editor; use openDevEditorWorkspaceTab. */
 export async function openTemplateLifecycleTab(page: Page, templateId: string, request: APIRequestContext) {
   await openDevEditorWorkspaceTab(page, templateId, request, 'approval')

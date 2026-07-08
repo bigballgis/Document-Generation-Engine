@@ -7,7 +7,9 @@ import {
   fetchCallerInvocationDetail,
   fetchCallerInvocations,
   fetchRecentManagementInvocations,
+  runtimeBatchGenerateDefault,
   runtimeGenerateDefault,
+  updateApiPolicyBatchSettings,
 } from './helpers/content-modules-api'
 
 test.describe('P12 API invocations runtime (BDD S5/S6)', () => {
@@ -60,5 +62,43 @@ test.describe('P12 API invocations runtime (BDD S5/S6)', () => {
     const adminMatch = adminRows.find((row) => row.invocationId === invocationId)
     expect(adminMatch).toBeDefined()
     expect(adminMatch).not.toHaveProperty('parameters')
+  })
+
+  test('BDD S7 — batch logical root vs flat item rows', async ({ request }) => {
+    const fixture = await ensureDemoFullFlowPublished(request)
+    await updateApiPolicyBatchSettings(request, fixture.templateId, true, 10)
+    const credential = await createTemplateApiCredential(request, fixture.templateId)
+    const idempotencyKey = `e2e-p12-s7-${Date.now()}`
+
+    const batchResult = await runtimeBatchGenerateDefault(
+      request,
+      DEMO_FULL_FLOW_EXTERNAL_ID,
+      credential,
+      idempotencyKey,
+      3,
+    )
+    expect(batchResult.status).toBe(200)
+    expect(batchResult.batchId).toBeTruthy()
+
+    const logical = await fetchCallerInvocations(
+      request,
+      DEMO_FULL_FLOW_EXTERNAL_ID,
+      credential,
+      'logical',
+    )
+    const logicalRoots = logical.items.filter((item) => item.invocationKind === 'BATCH_ROOT')
+    expect(logicalRoots).toHaveLength(1)
+    expect(logicalRoots[0]?.batchId).toBe(batchResult.batchId)
+
+    const flat = await fetchCallerInvocations(
+      request,
+      DEMO_FULL_FLOW_EXTERNAL_ID,
+      credential,
+      'flat',
+    )
+    const flatItems = flat.items.filter((item) => item.invocationKind === 'BATCH_ITEM')
+    expect(flatItems).toHaveLength(3)
+    expect(flat.items.some((item) => item.invocationKind === 'BATCH_ROOT')).toBe(false)
+    expect(new Set(flatItems.map((item) => item.batchId))).toEqual(new Set([batchResult.batchId]))
   })
 })

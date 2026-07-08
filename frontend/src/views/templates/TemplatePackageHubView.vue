@@ -9,6 +9,8 @@ import TemplateExportActions from '@/components/templates/TemplateExportActions.
 import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
 import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
 import TemplateDetailApiAccessTab from '@/views/templates/detail/TemplateDetailApiAccessTab.vue'
+import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
+import type { WorkspaceTabOption } from '@/components/common/WorkspaceTabShell.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
@@ -127,6 +129,23 @@ const showExportActions = computed(
 const showPolicyPanel = computed(
   () => template.value?.lifecycleStatus === 'PUBLISHED' && manageApiPolicy.value,
 )
+
+const hubWorkspaceTabs = computed((): WorkspaceTabOption[] => {
+  const tabs: WorkspaceTabOption[] = [
+    { name: 'overview', labelKey: templateDetailTabLabelKey('overview') },
+  ]
+  if (showPolicyPanel.value) {
+    tabs.push({ name: 'apiAccess', labelKey: templateDetailTabLabelKey('apiAccess') })
+  }
+  return tabs
+})
+
+const activeHubTab = computed({
+  get: () => secondaryTab.value ?? 'overview',
+  set: (value: string) => {
+    secondaryTab.value = value as HubSecondaryTab
+  },
+})
 
 function resolveSecondaryTab(value: unknown): HubSecondaryTab | undefined {
   if (typeof value === 'string' && (HUB_SECONDARY_TABS as readonly string[]).includes(value)) {
@@ -429,20 +448,12 @@ async function handleVersionLinesChanged() {
         @changed="handleVersionLinesChanged"
       />
 
-      <el-tabs
-        :model-value="secondaryTab"
-        class="secondary-tabs"
-        @tab-change="(name: string | number) => (secondaryTab = String(name) as HubSecondaryTab)"
-      >
-        <el-tab-pane :label="t(templateDetailTabLabelKey('overview'))" name="overview">
+      <WorkspaceTabShell v-model="activeHubTab" :tabs="hubWorkspaceTabs">
+        <template #overview>
           <TemplateDetailOverviewTab :template="template" :format-date-time="formatDateTime" />
-        </el-tab-pane>
+        </template>
 
-        <el-tab-pane
-          v-if="showPolicyPanel"
-          :label="t(templateDetailTabLabelKey('apiAccess'))"
-          name="apiAccess"
-        >
+        <template #apiAccess>
           <TemplateDetailApiAccessTab
             ref="apiAccessTabRef"
             v-model:credential-column-filters="credentialColumnFilters"
@@ -466,8 +477,8 @@ async function handleVersionLinesChanged() {
             @revoke-credential="handleRevokeCredential"
             @retry-policy-load="loadPolicyData"
           />
-        </el-tab-pane>
-      </el-tabs>
+        </template>
+      </WorkspaceTabShell>
     </template>
 
     <TemplateMetadataEditDialog
@@ -486,9 +497,5 @@ async function handleVersionLinesChanged() {
   margin: calc(-1 * var(--space-4)) 0 var(--space-6);
   color: var(--text-secondary);
   font-size: var(--font-size-sm);
-}
-
-.secondary-tabs {
-  margin-top: var(--space-4);
 }
 </style>

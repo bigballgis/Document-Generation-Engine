@@ -5,7 +5,8 @@ import java.util.Collection;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface RuntimeGenerationAuditEventRepository extends JpaRepository<RuntimeGenerationAuditEventEntity, UUID> {
+public interface RuntimeGenerationAuditEventRepository
+        extends JpaRepository<RuntimeGenerationAuditEventEntity, UUID>, RuntimeGenerationAuditEventRepositoryCustom {
 
     long countByTemplateIdInAndEventAtAfterAndEventTypeIn(
             Collection<UUID> templateIds,

@@ -13,9 +13,7 @@ import com.bank.docgen.runtime.api.ApiPolicySummaryView;
 import com.bank.docgen.runtime.api.BatchLimitsView;
 
 import com.bank.docgen.runtime.api.CallableVersionView;
-
 import com.bank.docgen.runtime.api.ContractResultView;
-
 import com.bank.docgen.runtime.api.DefaultRouteSummaryView;
 
 import com.bank.docgen.runtime.api.EncryptionCapabilitiesView;
@@ -125,6 +123,22 @@ public class ContractAssemblyService {
     public List<CallableVersionView> listCallableVersions(TemplateEntity template, String environment) {
 
         return buildCallableVersions(template, environment);
+
+    }
+
+
+
+    public DefaultRouteSummaryView summarizeDefaultRoute(
+
+            TemplateEntity template,
+
+            ApiPolicyEntity policy,
+
+            String environment
+
+    ) {
+
+        return buildDefaultRoute(template, policy, environment, ContractViewAudience.ADMIN);
 
     }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRef, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
@@ -17,9 +17,7 @@ import {
   resolveBatchAsyncMaxItems,
   resolveBatchSyncMaxItems,
   type ApiPolicyDomain,
-  type BatchLimitsDomainForm,
-  type EncryptionDomainForm,
-  type OutputPolicyDomainForm,
+  type ApiPolicyDomainFormMap,
 } from '@/types/apiPolicyDomain'
 import type { ApiPolicy } from '@/types/template'
 
@@ -31,12 +29,14 @@ const props = withDefaults(
     submitting?: boolean
     variant: 'tab-sections' | 'domain-console'
     activeDomain?: ApiPolicyDomain
+    initialDomainAnchor?: ApiPolicyDomain | null
     policyOutputFormatOptions?: string[]
     policyOutputModeOptions?: string[]
   }>(),
   {
     canEdit: false,
     submitting: false,
+    initialDomainAnchor: null,
     policyOutputFormatOptions: () => ['DOCX', 'PDF'],
     policyOutputModeOptions: () => [
       'SYNC_STREAM',
@@ -71,6 +71,36 @@ const apiPolicyStore = useApiPolicyStore()
 
 const advancedExpanded = ref<string[]>([])
 
+const ADVANCED_POLICY_DOMAINS: ApiPolicyDomain[] = [
+  'OUTPUT_POLICY',
+  'BATCH_LIMIT',
+  'ENCRYPTION_CAPABILITY',
+]
+
+function applyDomainAnchor(domain: ApiPolicyDomain) {
+  if (ADVANCED_POLICY_DOMAINS.includes(domain)) {
+    advancedExpanded.value = ['advanced']
+  }
+  void nextTick(() => {
+    document.getElementById(`policy-domain-${domain}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
+}
+
+onMounted(() => {
+  if (props.initialDomainAnchor) {
+    applyDomainAnchor(props.initialDomainAnchor)
+  }
+})
+
+watch(
+  () => props.initialDomainAnchor,
+  (domain) => {
+    if (domain) {
+      applyDomainAnchor(domain)
+    }
+  },
+)
+
 const outputUsesPlatformDefaults = computed(() =>
   isOutputPolicyPlatformDefault(outputForm.outputFormats, outputForm.outputModes),
 )
@@ -93,6 +123,40 @@ const documentRetentionOptions = computed(() =>
     value: days,
     label: t('templates.policy.retention.presetDays', { days }),
   })),
+)
+
+const retentionSaveFeedback = ref<'success' | 'error' | null>(null)
+
+const retentionBaseline = computed(() => ({
+  saveGeneratedDocuments: props.apiPolicy?.saveGeneratedDocuments ?? false,
+  invocationRecordRetentionDays: props.apiPolicy?.invocationRecordRetentionDays ?? 90,
+  documentRetentionDays: props.apiPolicy?.documentRetentionDays ?? 30,
+}))
+
+const retentionDirty = computed(() => {
+  if (!props.apiPolicy) {
+    return false
+  }
+  const baseline = retentionBaseline.value
+  return (
+    retentionForm.saveGeneratedDocuments !== baseline.saveGeneratedDocuments ||
+    retentionForm.invocationRecordRetentionDays !== baseline.invocationRecordRetentionDays ||
+    retentionForm.documentRetentionDays !== baseline.documentRetentionDays
+  )
+})
+
+const retentionPresetsValid = computed(
+  () =>
+    INVOCATION_RECORD_RETENTION_PRESETS.includes(
+      retentionForm.invocationRecordRetentionDays as (typeof INVOCATION_RECORD_RETENTION_PRESETS)[number],
+    ) &&
+    DOCUMENT_RETENTION_PRESETS.includes(
+      retentionForm.documentRetentionDays as (typeof DOCUMENT_RETENTION_PRESETS)[number],
+    ),
+)
+
+const canSaveRetention = computed(
+  () => props.canEdit && retentionDirty.value && retentionPresetsValid.value,
 )
 
 const consoleOutputModeOptions = computed(() => {
@@ -138,16 +202,16 @@ async function saveAdGroupsDomain() {
   }
 }
 
-async function saveDefaultRouteDomain() {
+async function saveDomainWithImpactPreview<D extends 'DEFAULT_ROUTE_TARGET' | 'OUTPUT_POLICY' | 'BATCH_LIMIT'>(
+  domain: D,
+  form: ApiPolicyDomainFormMap[D],
+  fallbackConfirmKey: string,
+) {
   if (!props.canEdit || !props.apiPolicy) {
     return
   }
   try {
-    const payload = buildUpsertPayloadForDomain(
-      props.apiPolicy,
-      'DEFAULT_ROUTE_TARGET',
-      defaultRouteForm,
-    )
+    const payload = buildUpsertPayloadForDomain(props.apiPolicy, domain, form)
     const preview = await apiPolicyStore.previewImpact(props.templateId, payload)
     if (preview.blocking) {
       ElMessage.error(t('apiPolicy.detail.impact.blockedSave'))
@@ -168,35 +232,58 @@ async function saveDefaultRouteDomain() {
       } catch {
         return
       }
-    } else if (!(await confirmSave('templates.policy.retention.confirmSaveDefaultRoute'))) {
+    } else if (!(await confirmSave(fallbackConfirmKey))) {
       return
     }
-    await apiPolicyStore.savePolicyDomain(props.templateId, 'DEFAULT_ROUTE_TARGET', defaultRouteForm)
+    await apiPolicyStore.savePolicyDomain(props.templateId, domain, form)
     ElMessage.success(t('apiPolicy.detail.saveSuccess'))
   } catch {
     ElMessage.error(resolveErrorMessage('templates.error.savePolicy'))
   }
 }
 
+async function saveDefaultRouteDomain() {
+  await saveDomainWithImpactPreview(
+    'DEFAULT_ROUTE_TARGET',
+    defaultRouteForm,
+    'templates.policy.retention.confirmSaveDefaultRoute',
+  )
+}
+
 async function saveRetentionDomain() {
-  if (!props.canEdit) {
+  if (!canSaveRetention.value) {
     return
   }
   if (!(await confirmSave('templates.policy.retention.confirmSaveRetention'))) {
     return
   }
+  retentionSaveFeedback.value = null
   try {
     await apiPolicyStore.saveInvocationRetentionDomain(props.templateId, { ...retentionForm })
-    ElMessage.success(t('templates.policy.retention.saveSuccess'))
+    retentionSaveFeedback.value = 'success'
   } catch {
+    retentionSaveFeedback.value = 'error'
     ElMessage.error(resolveErrorMessage('templates.error.savePolicy'))
   }
 }
 
-async function saveAdvancedDomain(
-  domain: 'OUTPUT_POLICY' | 'BATCH_LIMIT' | 'ENCRYPTION_CAPABILITY',
-  form: OutputPolicyDomainForm | BatchLimitsDomainForm | EncryptionDomainForm,
-) {
+async function saveOutputDomain() {
+  await saveDomainWithImpactPreview(
+    'OUTPUT_POLICY',
+    outputForm,
+    'templates.policy.retention.confirmSaveAdvanced',
+  )
+}
+
+async function saveBatchDomain() {
+  await saveDomainWithImpactPreview(
+    'BATCH_LIMIT',
+    batchForm,
+    'templates.policy.retention.confirmSaveAdvanced',
+  )
+}
+
+async function saveEncryptionDomain() {
   if (!props.canEdit) {
     return
   }
@@ -204,7 +291,7 @@ async function saveAdvancedDomain(
     return
   }
   try {
-    await apiPolicyStore.savePolicyDomain(props.templateId, domain, form as never)
+    await apiPolicyStore.savePolicyDomain(props.templateId, 'ENCRYPTION_CAPABILITY', encryptionForm)
     ElMessage.success(t('apiPolicy.detail.saveSuccess'))
   } catch {
     ElMessage.error(resolveErrorMessage('templates.error.savePolicy'))
@@ -227,6 +314,7 @@ watch(
     retentionForm.documentRetentionDays,
   ],
   () => {
+    retentionSaveFeedback.value = null
     emit('formEdited')
   },
 )
@@ -246,7 +334,7 @@ defineExpose({
 
 <template>
   <template v-if="variant === 'tab-sections'">
-    <section class="l1-section">
+    <section id="policy-domain-AD_GROUP_AUTHORIZATION" class="l1-section">
       <h3>{{ t('templates.policy.l1.adGroupsTitle') }}</h3>
       <p class="field-hint">{{ t('templates.policy.l1.adGroupsHint') }}</p>
       <dl class="policy-summary">
@@ -285,7 +373,7 @@ defineExpose({
       </el-form>
     </section>
 
-    <section class="l1-section">
+    <section id="policy-domain-DEFAULT_ROUTE_TARGET" class="l1-section">
       <h3>{{ t('templates.policy.l1.defaultRouteTitle') }}</h3>
       <dl class="policy-summary">
         <div>
@@ -307,9 +395,36 @@ defineExpose({
       </el-form>
     </section>
 
-    <section class="l1-section">
+    <section id="policy-domain-INVOCATION_RETENTION" class="l1-section">
       <h3>{{ t('templates.policy.retention.title') }}</h3>
       <p class="field-hint">{{ t('templates.policy.retention.hint') }}</p>
+      <el-alert
+        v-if="retentionSaveFeedback === 'success'"
+        type="success"
+        :title="t('templates.policy.retention.inlineSaveSuccess')"
+        show-icon
+        :closable="false"
+        class="retention-feedback"
+        data-testid="retention-save-success"
+      />
+      <el-alert
+        v-else-if="retentionSaveFeedback === 'error'"
+        type="error"
+        :title="resolveErrorMessage('templates.error.savePolicy')"
+        show-icon
+        :closable="false"
+        class="retention-feedback"
+        data-testid="retention-save-error"
+      />
+      <el-alert
+        v-else-if="canEdit && retentionDirty && !retentionPresetsValid"
+        type="warning"
+        :title="t('templates.policy.retention.invalidPreset')"
+        show-icon
+        :closable="false"
+        class="retention-feedback"
+        data-testid="retention-invalid-preset"
+      />
       <el-form label-position="top" class="inline-form retention-form">
         <el-form-item :label="t('templates.policy.retention.saveGeneratedDocuments')">
           <el-switch v-model="retentionForm.saveGeneratedDocuments" :disabled="!canEdit" />
@@ -346,7 +461,13 @@ defineExpose({
           </el-select>
         </el-form-item>
         <div v-if="canEdit" class="action-row">
-          <el-button type="primary" :loading="submitting" @click="saveRetentionDomain">
+          <el-button
+            type="primary"
+            :loading="submitting"
+            :disabled="!canSaveRetention"
+            data-testid="retention-save-button"
+            @click="saveRetentionDomain"
+          >
             {{ t('templates.policy.retention.save') }}
           </el-button>
         </div>
@@ -441,7 +562,7 @@ defineExpose({
       <el-collapse-item name="advanced" :title="t('templates.policy.advanced.title')">
         <p class="field-hint">{{ t('templates.policy.advanced.hint') }}</p>
 
-        <section class="advanced-block">
+        <section id="policy-domain-OUTPUT_POLICY" class="advanced-block">
           <div class="advanced-header">
             <h4>{{ t('apiPolicy.detail.domains.OUTPUT_POLICY') }}</h4>
             <el-tag v-if="outputUsesPlatformDefaults" type="info" effect="plain">
@@ -472,7 +593,7 @@ defineExpose({
             <div class="action-row">
               <el-button
                 :loading="submitting"
-                @click="saveAdvancedDomain('OUTPUT_POLICY', outputForm)"
+                @click="saveOutputDomain"
               >
                 {{ t('templates.policy.advanced.saveOutput') }}
               </el-button>
@@ -483,7 +604,7 @@ defineExpose({
           </p>
         </section>
 
-        <section class="advanced-block">
+        <section id="policy-domain-BATCH_LIMIT" class="advanced-block">
           <div class="advanced-header">
             <h4>{{ t('apiPolicy.detail.domains.BATCH_LIMIT') }}</h4>
             <el-tag v-if="batchUsesPlatformDefaults" type="info" effect="plain">
@@ -501,7 +622,7 @@ defineExpose({
               <el-input-number v-model="batchForm.asyncMaxItems" :min="1" :max="100000" />
             </el-form-item>
             <div class="action-row">
-              <el-button :loading="submitting" @click="saveAdvancedDomain('BATCH_LIMIT', batchForm)">
+              <el-button :loading="submitting" @click="saveBatchDomain">
                 {{ t('templates.policy.advanced.saveBatch') }}
               </el-button>
             </div>
@@ -518,7 +639,7 @@ defineExpose({
           </p>
         </section>
 
-        <section class="advanced-block">
+        <section id="policy-domain-ENCRYPTION_CAPABILITY" class="advanced-block">
           <div class="advanced-header">
             <h4>{{ t('apiPolicy.detail.domains.ENCRYPTION_CAPABILITY') }}</h4>
             <el-tag v-if="encryptionUsesPlatformDefaults" type="info" effect="plain">
@@ -535,7 +656,7 @@ defineExpose({
             <div class="action-row">
               <el-button
                 :loading="submitting"
-                @click="saveAdvancedDomain('ENCRYPTION_CAPABILITY', encryptionForm)"
+                @click="saveEncryptionDomain"
               >
                 {{ t('templates.policy.advanced.saveEncryption') }}
               </el-button>
@@ -623,8 +744,13 @@ defineExpose({
 }
 
 .retention-form {
+  margin-top: var(--space-3);
   display: grid;
   gap: var(--space-2);
+}
+
+.retention-feedback {
+  margin-bottom: var(--space-4);
 }
 
 .retention-select {

@@ -1,6 +1,5 @@
 import { computed, ref, type ComputedRef } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
@@ -9,7 +8,6 @@ import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFi
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useCredentialStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import { apiPolicyDetailPath } from '@/routing/routeKeys'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
 import type { ApiCredentialSummary, TemplateDetail } from '@/types/template'
 
@@ -24,7 +22,6 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
 
   const { t, te } = useI18n()
   const { formatDateTime } = useLocaleFormatters()
-  const router = useRouter()
   const apiPolicyStore = useApiPolicyStore()
   const { manageApiPolicy } = useCapabilities()
   const { confirmAction } = useConfirmAction()
@@ -89,10 +86,6 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
     } catch {
       policyLoadFailed.value = true
     }
-  }
-
-  function openApiPolicyConsole() {
-    router.push(apiPolicyDetailPath(templateId.value))
   }
 
   function openCredentialSecretDialog(externalId: string, secret: string) {
@@ -169,7 +162,6 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
     totalCredentialRows,
     sortCredentialsByCreatedAt,
     loadPolicyData,
-    openApiPolicyConsole,
     openCredentialSecretDialog,
     handleCreateCredential,
     handleRotateCredential,

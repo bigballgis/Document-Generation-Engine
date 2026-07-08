@@ -27,7 +27,7 @@ This skill is the locked execution standard. Pair with `docs/architecture/manage
 ## Shared component vocabulary (use these before building new ones)
 
 `frontend/src/components/common/`: `AppPageLayout`, `AppDataTable`, `AppTablePagination`,
-`AppSearchSelect`, `CatalogFilterToolbar`, `TableColumnHeader`, `SectionPanelHeader`,
+`AppSearchSelect`, `CatalogFilterToolbar`, `EntityLinkCell`, `TableColumnHeader`, `SectionPanelHeader`,
 `WorkspaceTabShell`, `LoadErrorPanel`, `EmptyStatePanel`, `ScopedGroupSelect`,
 `LifecycleCommentDialog`, `ContextHelpTrigger`. Layout: `components/layout/ManagementShell.vue`,
 `AppBreadcrumb`, `PageHeader`. Status badges per domain (`MasterStatusBadge`,
@@ -38,14 +38,19 @@ when a shared wrapper exists is a review blocker.
 
 - OA shell: fixed top brand bar (logo slot + brand switch + session) + left navigation +
   spacious desktop-first content region.
-- Desktop-first; comfortable max content width; consistent spacing scale (e.g. 4/8/12/16/24).
+- Desktop-first; consistent spacing scale (e.g. 4/8/12/16/24).
+- **`AppPageLayout` variants** (`frontend/src/components/layout/AppPageLayout.vue`):
+  - **`fluid`** — catalog/list/audit table-heavy pages; no max-width; tables use full content width.
+  - **`contained`** — forms, wizards, detail/workspace pages; `1440px` centered max width.
 - Logo and brand assets come from the shared slot and switch with theme; no page-local branding.
+- Entity display + filter rules: `.cursor/skills/frontend-entity-display/SKILL.md`.
 
 ## Components
 
 | Element | Required quality |
 | --- | --- |
-| Data tables | clear headers, aligned columns, sensible density, sort where useful, sticky header for long lists, pagination, empty/loading/error states |
+| Data tables | clear headers, aligned columns, sensible density, sort where useful, sticky header for long lists, pagination, empty/loading/error states; **entity columns use `EntityLinkCell`** (human-readable label + optional subtitle + link when read access); never raw UUID as primary cell text |
+| Filters | `CatalogFilterToolbar` for catalog pages; enum → select, entity → async `AppSearchSelect`, scoped group → `ScopedGroupSelect`; free-text only when API supports substring search |
 | Forms | aligned labels, grouped sections, inline validation states, clear primary vs secondary actions |
 | Dialogs/drawers | purposeful, dismissable, focus-trapped, no layout shift |
 | Buttons | primary/secondary/tertiary hierarchy; hover/active/focus/disabled/loading states |
@@ -89,3 +94,5 @@ below the tab row or inside journey blocks. See `docs/architecture/management-ui
 
 - `.cursor/agents/frontend-engineer.md`, `.cursor/agents/e2e-uiux-reviewer.md`
 - `docs/architecture/management-ui-constitution.md`
+- `docs/architecture/ux-entity-display-constitution.md`
+- `.cursor/skills/frontend-entity-display/SKILL.md`

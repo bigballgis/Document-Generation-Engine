@@ -9,6 +9,8 @@ public record ManagementAuditEventView(
         Instant eventAt,
         String eventType,
         String templateId,
+        String templateDisplayName,
+        String templateExternalId,
         String credentialId,
         Integer previousPolicyVersion,
         Integer policyVersion,
@@ -18,7 +20,8 @@ public record ManagementAuditEventView(
         String actorSummary,
         String credentialFingerprint,
         String statusSummary,
-        List<String> warningCodes
+        List<String> warningCodes,
+        String requestId
 ) {
     public ManagementAuditEventView {
         changedAreas = DefensiveCopies.copyList(changedAreas);

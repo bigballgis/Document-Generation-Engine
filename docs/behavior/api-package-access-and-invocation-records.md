@@ -289,6 +289,58 @@ L2 可早于 L3 结束（C8）；L0 可多次重签（requirements 允许在 art
 
 **Ready for implementation** (2026-07-03) — BDD decisions C1–C15 confirmed; requirements, PRD, domain model, permission matrix, contract outline, and plan layer synced (doc-only pass; no code).
 
+**P13 Phase 1 IA redirect slice** — **BDD readiness: `ready`** (2026-07-08). See §15.
+
+---
+
+## 15. P13 Phase 1 — IA 收敛与 Legacy 重定向（2026-07-08）
+
+**BDD ID:** `BDD-API-PACKAGE-ACCESS-IA-REDIRECT-001`  
+**Actor:** 分组/全局管理员（`canManageApiPolicy`）  
+**Goal:** 消除 `ApiPolicyDetailView` 与包 Hub External access 双编辑面；legacy 书签与深链自动迁移至 Hub Tab。
+
+### 15.1 重定向语义（已确认）
+
+| Legacy 路由 | 目标 | 备注 |
+| --- | --- | --- |
+| `/api/policies/:templateId` | `/templates/:templateId?tab=apiAccess` | Vue Router `redirect`；无 duplicate editor |
+| `/api/policies/:templateId?domain=OUTPUT_POLICY` | 同上 + `#domain=OUTPUT_POLICY` | `domain` query 转为 hash anchor；Hub 展开高级设置并滚动至对应域 |
+| `/api/policies`（overview） | **保留** | 跨包监控概览；深链至 Hub `?tab=apiAccess` |
+
+**不变约束：** 包级 `api_policy` 语义不变；管理端 invocation API 本阶段不变（Phase 2）。
+
+### 15.2 Acceptance Scenarios（Given / When / Then）
+
+**SCEN-IA-01 — Legacy 详情路由重定向（required）**
+
+- **Given** 已发布模板 `T` 且管理员有 `canManageApiPolicy`
+- **When** 浏览器访问 `/api/policies/T`
+- **Then** 客户端导航至 `/templates/T?tab=apiAccess`；**不**渲染独立 `ApiPolicyDetailView` 全屏编辑器
+
+**SCEN-IA-02 — Domain query 保留为 hash（required）**
+
+- **Given** 同上
+- **When** 访问 `/api/policies/T?domain=OUTPUT_POLICY`
+- **Then** 重定向至 `/templates/T?tab=apiAccess#domain=OUTPUT_POLICY`；Hub External access Tab 可见且高级设置中 Output settings 区域可定位（折叠展开或滚动）
+
+**SCEN-IA-03 — Overview 深链至 Hub（required）**
+
+- **Given** External services overview 列出已发布包 `T`
+- **When** 管理员点击包行或「Open external access」
+- **Then** 导航至 `/templates/T?tab=apiAccess`（非 legacy detail 路径）
+
+**SCEN-IA-04 — 无 duplicate editor（required）**
+
+- **Given** 管理员已在 Hub External access Tab 编辑策略
+- **When** 通过任意入口（侧栏 overview、模板 Hub、legacy 书签）再次打开同一包接入配置
+- **Then** 始终落在同一 Hub Tab 编辑面；不存在第二套 domain-console 全页编辑器
+
+**SCEN-IA-05 — Legacy 书签迁移边界**
+
+- **Given** 用户收藏了旧 URL `/api/policies/T?domain=BATCH_LIMIT`
+- **When** 打开收藏
+- **Then** 重定向成功；Hub Tab 加载 L1 + 凭证 + 最近调用；无 404、无空白 duplicate 页
+
 ---
 
 ## 14. 设计审查（两轮）

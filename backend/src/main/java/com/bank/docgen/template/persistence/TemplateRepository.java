@@ -1,5 +1,6 @@
 package com.bank.docgen.template.persistence;
 
+import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,5 +25,16 @@ public interface TemplateRepository extends JpaRepository<TemplateEntity, UUID> 
 
     Optional<TemplateEntity> findByExternalIdAndDeletedAtIsNull(String externalId);
 
+    List<TemplateEntity> findByIdInAndDeletedAtIsNull(List<UUID> ids);
+
     List<TemplateEntity> findByMasterIdAndDeletedAtIsNull(UUID masterId);
+
+    List<TemplateEntity> findByDeletedAtIsNullAndLifecycleStatusOrderByUpdatedAtDesc(
+            TemplateLifecycleStatus lifecycleStatus
+    );
+
+    List<TemplateEntity> findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
+            List<String> groupCodes,
+            TemplateLifecycleStatus lifecycleStatus
+    );
 }

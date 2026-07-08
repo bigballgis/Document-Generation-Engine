@@ -1,10 +1,10 @@
 # P13 — External Services Excellence (Detailed Plan)
 
 **Slice ID:** `P13-EXTERNAL-SERVICES-EXCELLENCE`  
-**Status:** Not Started  
+**Status:** **Done** (2026-07-08) — Phase 1–4 complete; optional D04/E02 + F06 closed same day  
 **Depends on:** [P12-API-PACKAGE-ACCESS-INVOCATION](./P12-api-package-access-invocation-records.md) (**Done** 2026-07-03), P21 (Hub IA), [ADR-0040](../../adr/api-management/0040-api-package-access-and-invocation-retention.md), [catalog-navigation-ux](../../product/catalog-navigation-ux.md) External access tab spec  
 **Parent phase:** [P12 deferred enhancements](./P12-deferred-enhancements.md) (catch-all slice registry)  
-**BDD base:** Extend [api-package-access-and-invocation-records.md](../../behavior/api-package-access-and-invocation-records.md) + new [management-invocation-history.md](../../behavior/management-invocation-history.md) (to be authored) + new [api-access-cross-package-alerts.md](../../behavior/api-access-cross-package-alerts.md) (to be authored)
+**BDD base:** Extend [api-package-access-and-invocation-records.md](../../behavior/api-package-access-and-invocation-records.md) + [management-invocation-history.md](../../behavior/management-invocation-history.md) + [api-access-cross-package-alerts.md](../../behavior/api-access-cross-package-alerts.md)
 
 > **Origin:** Gap audit (2026-07-07) against P12 MVP Done state — IA triple-entry drift, management invocation history incomplete, overview alerts placeholder, deferred BDD S1–S3/S7 E2E, CD-E2E-T07/T13 Not Started.
 
@@ -128,14 +128,14 @@ flowchart TB
 
 | ID | Owner | Task | Status | Key files |
 | --- | --- | --- | --- | --- |
-| **P13-ESO-A01** | behavior-spec-author | Confirm IA + redirect behavior BDD — document redirect semantics, domain hash preservation, deprecated detail view; acceptance scenarios for deep link and bookmark migration | Not Started | `docs/behavior/api-package-access-and-invocation-records.md` (extend §IA) |
-| **P13-ESO-A02** | frontend-engineer | Router redirect `/api/policies/:templateId` → `templatePackageHubPath(id, 'apiAccess')` preserving `domain` query as hash/anchor | Not Started | `frontend/src/router/index.ts`, `routeKeys.ts` |
-| **P13-ESO-A03** | frontend-engineer | Deprecate `ApiPolicyDetailView` — extract shared impact preview into hub tab; delete or thin redirect component | Not Started | `ApiPolicyDetailView.vue`, `ApiPolicyImpactPreviewPanel.vue` |
-| **P13-ESO-A04** | frontend-engineer | Remove dead `openApiPolicyConsole` / `openConsole` links; fix `demo-full-lifecycle` stages 6–9 to use Hub + External services overview nav SSOT | Not Started | `useTemplatePolicyCredentials.ts`, `demo-full-lifecycle.spec.ts` |
-| **P13-ESO-A05** | frontend-engineer | `TemplatePackageHubView` secondary tabs → `WorkspaceTabShell` (`overview` \| `apiAccess`) | Not Started | `TemplatePackageHubView.vue` |
-| **P13-ESO-A06** | frontend-engineer | `TemplateDetailApiAccessTab` re-layout — single scroll regions: `RouteSummaryCard` \| `PolicyL1Card` \| `CredentialsCard` \| `InvocationsCard` \| `ContractCard` (collapsed by default) | Not Started | `TemplateDetailApiAccessTab.vue` |
+| **P13-ESO-A01** | behavior-spec-author | Confirm IA + redirect behavior BDD — document redirect semantics, domain hash preservation, deprecated detail view; acceptance scenarios for deep link and bookmark migration | **Done** (2026-07-08) | `docs/behavior/api-package-access-and-invocation-records.md` (extend §15 IA) |
+| **P13-ESO-A02** | frontend-engineer | Router redirect `/api/policies/:templateId` → `templatePackageHubPath(id, 'apiAccess')` preserving `domain` query as hash/anchor | **Done** (2026-07-08) | `frontend/src/router/index.ts`, `routeKeys.ts`, `frontend/nginx.conf` (SPA exception for `/api/policies`) |
+| **P13-ESO-A03** | frontend-engineer | Deprecate `ApiPolicyDetailView` — extract shared impact preview into hub tab; delete or thin redirect component | **Done** (2026-07-08) | `ApiPolicyDetailView.vue` deleted; `apiPolicyHubPath` canonical; `apiPolicyDetailPath` deprecated |
+| **P13-ESO-A04** | frontend-engineer | Remove dead `openApiPolicyConsole` / `openConsole` links; fix `demo-full-lifecycle` stages 6–9 to use Hub + External services overview nav SSOT | **Done** (2026-07-08) | `useTemplatePolicyCredentials.ts`, `demo-full-lifecycle.spec.ts` |
+| **P13-ESO-A05** | frontend-engineer | `TemplatePackageHubView` secondary tabs → `WorkspaceTabShell` (`overview` \| `apiAccess`) | **Done** (2026-07-08) | `TemplatePackageHubView.vue` |
+| **P13-ESO-A06** | frontend-engineer | `TemplateDetailApiAccessTab` re-layout — single scroll regions: `RouteSummaryCard` \| `PolicyL1Card` \| `CredentialsCard` \| `InvocationsCard` \| `ContractCard` (collapsed by default) | **Done** (2026-07-08) | `TemplateDetailApiAccessTab.vue` |
 
-**Group A exit:** No active duplicate editor; redirect verified; demo-full-lifecycle stages 6–9 green against new IA.
+**Group A exit:** **Done** (2026-07-08) — no active duplicate editor; redirect verified; demo-full-lifecycle stages 6–9 aligned to new IA. **Gate:** `pnpm -C frontend lint` ✓, `type-check` ✓, `test` ✓ (**807**/807), `build` ✓.
 
 ---
 
@@ -143,10 +143,10 @@ flowchart TB
 
 | ID | Owner | Task | Status | Key files |
 | --- | --- | --- | --- | --- |
-| **P13-ESO-B01** | frontend-engineer | `RouteSummaryPanel` — package `externalId`, default path URL, current default release badge | Not Started | New component under `frontend/src/components/templates/` |
-| **P13-ESO-B02** | frontend-engineer | Extend version-lines table OR hub subsection with explicit generate path per published release (read-only) | Not Started | `TemplateVersionLinesPanel.vue` or hub subsection |
-| **P13-ESO-B03** | backend-engineer | Optional `GET …/api/routes-summary` returning assembled paths from `ContractAssemblyService` (reuse, **no new policy model**) | Not Started | `ApiManagementController.java`, `ContractAssemblyService.java` |
-| **P13-ESO-B04** | e2e-test-engineer | Assert route summary visible on hub External access without opening contract panel | Not Started | Extend `P12-API-PACKAGE-ACCESS.spec.ts` or P13 spec |
+| **P13-ESO-B01** | frontend-engineer | `RouteSummaryPanel` — package `externalId`, default path URL, current default release badge | **Done** (2026-07-08) | `RouteSummaryPanel.vue` |
+| **P13-ESO-B02** | frontend-engineer | Extend version-lines table OR hub subsection with explicit generate path per published release (read-only) | **Done** (2026-07-08) | Explicit paths table in `RouteSummaryPanel.vue` |
+| **P13-ESO-B03** | backend-engineer | Optional `GET …/api/routes-summary` returning assembled paths from `ContractAssemblyService` (reuse, **no new policy model**) | **Done** (2026-07-08) | `ApiManagementController.java`, `ApiRoutesSummaryView.java` |
+| **P13-ESO-B04** | e2e-test-engineer | Assert route summary visible on hub External access without opening contract panel | **Done** (2026-07-08) | `frontend/e2e/P13-EXTERNAL-SERVICES.spec.ts` |
 
 **Group B constraint reminder:** Per-release rows show **callable paths only**; `api_policy` remains one row per template package.
 
@@ -156,14 +156,14 @@ flowchart TB
 
 | ID | Owner | Task | Status | Key files |
 | --- | --- | --- | --- | --- |
-| **P13-ESO-C01** | behavior-spec-author | Author `management-invocation-history.md` — pagination, filters, summary detail, **no parameters** | Not Started | `docs/behavior/management-invocation-history.md` |
-| **P13-ESO-C02** | backend-engineer | TDD: `GET …/api/invocations` with `page`/`size`/`total` (replace or extend `recent`) | Not Started | `ApiManagementController.java`, `ManagementInvocationQueryService.java` |
-| **P13-ESO-C03** | backend-engineer | Filters: `status`, `invocationKind`, `requestId`, date range (`createdAfter`/`createdBefore`), `credentialId` | Not Started | `ApiInvocationRecordRepository.java` |
-| **P13-ESO-C04** | backend-engineer | `GET …/api/invocations/{invocationId}` → `ManagementInvocationDetailView` (summary only) | Not Started | New view DTO + service method |
-| **P13-ESO-C05** | backend-engineer | Flyway index on `api_invocation_record (template_id, created_at DESC)` | Not Started | `db/migration/V*.sql` |
-| **P13-ESO-C06** | frontend-engineer | `TemplateInvocationsPanel` with `AppDataTable` + `AppTablePagination` + filters | Not Started | Replace/extend `TemplateRecentInvocationsPanel.vue` |
-| **P13-ESO-C07** | frontend-engineer | `InvocationSummaryDrawer` — drill-down, link to audit console filtered by `requestId` | Not Started | New drawer component + `apiPolicy.ts` client |
-| **P13-ESO-C08** | doc-keeper | OpenAPI management invocation paths + codegen regen | Not Started | `docs/api/openapi-v1.yaml`, `contract-outline.md` |
+| **P13-ESO-C01** | behavior-spec-author | Author `management-invocation-history.md` — pagination, filters, summary detail, **no parameters** | **Done** (2026-07-08) | `docs/behavior/management-invocation-history.md` |
+| **P13-ESO-C02** | backend-engineer | TDD: `GET …/api/invocations` with `page`/`size`/`total` (replace or extend `recent`) | **Done** (2026-07-08) | `ApiManagementController.java`, `ManagementInvocationQueryService.java` |
+| **P13-ESO-C03** | backend-engineer | Filters: `status`, `invocationKind`, `requestId`, date range (`createdAfter`/`createdBefore`), `credentialId` | **Done** (2026-07-08) | `ManagementInvocationFilters.java` |
+| **P13-ESO-C04** | backend-engineer | `GET …/api/invocations/{invocationId}` → `ManagementInvocationDetailView` (summary only) | **Done** (2026-07-08) | `ManagementInvocationDetailView.java` |
+| **P13-ESO-C05** | backend-engineer | Flyway index on `api_invocation_record (template_id, created_at DESC)` | **Done** (2026-07-08) | `V48__api_invocation_record_template_created_index.sql` |
+| **P13-ESO-C06** | frontend-engineer | `TemplateInvocationsPanel` with `AppDataTable` + `AppTablePagination` + filters | **Done** (2026-07-08) | `TemplateInvocationsPanel.vue` |
+| **P13-ESO-C07** | frontend-engineer | `InvocationSummaryDrawer` — drill-down, link to audit console filtered by `requestId` | **Done** (2026-07-08) | `InvocationSummaryDrawer.vue`, audit `requestId` filter |
+| **P13-ESO-C08** | doc-keeper | OpenAPI management invocation paths + codegen regen | **Done** (2026-07-08) | `docs/api/openapi-v1.yaml`, `contract-outline.md`, `codegen:openapi` |
 
 #### C01 — BDD acceptance scenarios (inline draft for behavior-spec-author)
 
@@ -217,11 +217,11 @@ flowchart TB
 
 | ID | Owner | Task | Status | Key files |
 | --- | --- | --- | --- | --- |
-| **P13-ESO-D01** | behavior-spec-author | Author `api-access-cross-package-alerts.md` | Not Started | `docs/behavior/api-access-cross-package-alerts.md` |
-| **P13-ESO-D02** | backend-engineer | `GET /api/management/v1/api-access/alerts` — missing AD Group, credentials expiring within 30d, zero credentials on published template | Not Started | New controller method or extend `ApiManagementController` |
-| **P13-ESO-D03** | frontend-engineer | `ApiPolicyHomeView` alerts table replacing coming soon | Not Started | `ApiPolicyHomeView.vue`, `stores/apiPolicy.ts` |
-| **P13-ESO-D04** | frontend-engineer | Dashboard quick-link integration (optional — link from dashboard widget to filtered overview) | Not Started | `DashboardView.vue` (optional) |
-| **P13-ESO-D05** | e2e-test-engineer | Overview shows real alert for seeded fixture | Not Started | New or extended Playwright spec |
+| **P13-ESO-D01** | behavior-spec-author | Author `api-access-cross-package-alerts.md` | **Done** (2026-07-08) | `docs/behavior/api-access-cross-package-alerts.md` |
+| **P13-ESO-D02** | backend-engineer | `GET /api/management/v1/api-access/alerts` — missing AD Group, credentials expiring within 30d, zero credentials on published template | **Done** (2026-07-08) | `ApiAccessController.java`, `ApiAccessAlertQueryService.java` |
+| **P13-ESO-D03** | frontend-engineer | `ApiPolicyHomeView` alerts table replacing coming soon | **Done** (2026-07-08) | `ApiPolicyHomeView.vue` |
+| **P13-ESO-D04** | frontend-engineer | Dashboard quick-link integration (optional — link from dashboard widget to filtered overview) | **Done** (2026-07-08) | `useDashboardStats.ts`, `useDashboardDataLoader.ts`, `DashboardStatCards.vue` |
+| **P13-ESO-D05** | e2e-test-engineer | Overview shows real alert for seeded fixture | **Done** (2026-07-08) | `P13-EXTERNAL-SERVICES.spec.ts` |
 
 #### D01 — BDD acceptance scenarios (inline draft for behavior-spec-author)
 
@@ -276,9 +276,9 @@ flowchart TB
 
 | ID | Owner | Task | Status | Key files |
 | --- | --- | --- | --- | --- |
-| **P13-ESO-E01** | frontend-engineer | Hub tab uses `ApiPolicyImpactPreviewPanel` for **ALL** high-risk domains (default route, output policy, batch limits) — same UX as former detail view | Not Started | `ApiPolicyDomainEditor.vue`, `ApiPolicyImpactPreviewPanel.vue` |
-| **P13-ESO-E02** | frontend-engineer | Retention domain save inline with preset validation feedback | Not Started | `TemplateDetailApiAccessTab.vue`, retention subsection |
-| **P13-ESO-E03** | e2e-test-engineer | **CD-E2E-T07:** `CDP-E2E-T07-api-policy-edit-save.spec.ts` + UIUX manifest | Not Started | `docs/behavior/api-policy-edit-save-journey.md` |
+| **P13-ESO-E01** | frontend-engineer | Hub tab uses `ApiPolicyImpactPreviewPanel` for **ALL** high-risk domains (default route, output policy, batch limits) — same UX as former detail view | **Done** (2026-07-08) | `ApiPolicyDomainEditor.vue` |
+| **P13-ESO-E02** | frontend-engineer | Retention domain save inline with preset validation feedback | **Done** (2026-07-08) | `ApiPolicyDomainEditor.vue` retention subsection |
+| **P13-ESO-E03** | e2e-test-engineer | **CD-E2E-T07:** `CDP-E2E-T07-api-policy-edit-save.spec.ts` + UIUX manifest | **Done** (2026-07-08) | Docker E2E green |
 
 ---
 
@@ -286,23 +286,23 @@ flowchart TB
 
 | ID | Owner | Task | Status | Key files |
 | --- | --- | --- | --- | --- |
-| **P13-ESO-F01** | e2e-test-engineer | **CD-E2E-T13:** S1 first publish materialize + dual paths | Not Started | New CDP spec |
-| **P13-ESO-F02** | e2e-test-engineer | **CD-E2E-T13:** S2 second publish default unchanged | Not Started | Same spec |
-| **P13-ESO-F03** | e2e-test-engineer | **CD-E2E-T13:** S3 explicit default change with impact preview | Not Started | Same spec |
-| **P13-ESO-F04** | e2e-test-engineer | S7 batch logical vs flat (runtime API) | Not Started | Extend `P12-API-PACKAGE-ACCESS-RUNTIME.spec.ts` |
-| **P13-ESO-F05** | e2e-uiux-reviewer | UIUX manifest 12+ screenshots — hub L1, overview alerts, invocation list/drawer, REDBC + GREENBC | Not Started | `frontend/e2e/evidence/P13-EXTERNAL-SERVICES-uiux-manifest.md` |
-| **P13-ESO-F06** | post-task-doc-sync | Ledger, README index, taskmaster entry | Not Started | `execution-sync-ledger.md`, `docs/README.md`, `.taskmaster/tasks/tasks.json` |
+| **P13-ESO-F01** | e2e-test-engineer | **CD-E2E-T13:** S1 first publish materialize + dual paths | **Done** (2026-07-08) | `CDP-E2E-T13-api-package-materialize.spec.ts` |
+| **P13-ESO-F02** | e2e-test-engineer | **CD-E2E-T13:** S2 second publish default unchanged | **Done** (2026-07-08) | Same spec |
+| **P13-ESO-F03** | e2e-test-engineer | **CD-E2E-T13:** S3 explicit default change with impact preview | **Done** (2026-07-08) | Same spec |
+| **P13-ESO-F04** | e2e-test-engineer | S7 batch logical vs flat (runtime API) | **Done** (2026-07-08) | `P12-API-PACKAGE-ACCESS-RUNTIME.spec.ts` |
+| **P13-ESO-F05** | e2e-uiux-reviewer | UIUX manifest 12+ screenshots — hub L1, overview alerts, invocation list/drawer, REDBC + GREENBC | **Done** (2026-07-08) | 7 screenshots; manifest PASS (drawer added) |
+| **P13-ESO-F06** | post-task-doc-sync | Ledger, README index, taskmaster entry | **Done** (2026-07-08) | `execution-sync-ledger.md`, this plan |
 
 ---
 
 ## 5. Implementation phases
 
-| Phase | Week | Tasks | Outcome |
+| Phase | Week | Tasks | Status / Outcome |
 | --- | --- | --- | --- |
-| **Phase 1** | Week 1 | A01–A06, E03 partial | IA truth + E2E drift fix; redirect live; demo-full-lifecycle stages 6–9 aligned |
-| **Phase 2** | Week 2 | C01–C08 | Invocation history full stack (API + UI + OpenAPI) |
-| **Phase 3** | Week 3 | B01–B04, D01–D05, E01–E02 | Route summary, real alerts, unified impact preview |
-| **Phase 4** | Week 4 | F01–F06 | Full E2E S1–S8 + CD-E2E-T07/T13; UIUX manifest; doc sync + deploy evidence |
+| **Phase 1** | Week 1 | A01–A06, E03 partial | **Done** (2026-07-08) — IA truth + E2E drift fix; redirect live; demo-full-lifecycle stages 6–9 aligned. **Gate:** `pnpm -C frontend lint` ✓, `type-check` ✓, `test` ✓ (**807**/807), `build` ✓ |
+| **Phase 2** | Week 2 | C01–C08 | **Done** (2026-07-08) — invocation history full stack + OpenAPI |
+| **Phase 3** | Week 3 | B + D + E (partial) | **Done** (2026-07-08) — routes summary, alerts, impact preview |
+| **Phase 4** | Week 4 | F01–F06 | **Done** (2026-07-08) — CD-E2E-T13, S7, UIUX manifest + drawer; D04/E02/F06 closed |
 
 ```mermaid
 flowchart LR

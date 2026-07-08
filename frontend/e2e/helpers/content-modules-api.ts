@@ -11,6 +11,9 @@ import {
   E2E_TEMPLATE_TESTER,
 } from './auth'
 import { E2E_API_BASE_URL, ensureDemoRetailMasterApproved, findMasterByName } from './masters-api'
+import { fetchSubmitGateChecklist } from './submit-approval-gate-api'
+import { getBatchTestHistoryViaApi, runBatchTestViaApi } from './template-testing-api'
+import { cloneReleaseVersion } from './template-version-lines-api'
 
 interface ApiEnvelope<T> {
   result: T
@@ -123,12 +126,32 @@ function uniqueModuleCode(prefix: string): string {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}`.replace(/[^A-Z0-9_-]/g, '-')
 }
 
+interface TemplateListPage {
+  content: TemplateSummary[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+async function listTemplates(request: APIRequestContext, token: string): Promise<TemplateSummary[]> {
+  const page = await authorizedGet<TemplateListPage | TemplateSummary[]>(
+    request,
+    token,
+    '/templates?size=200',
+  )
+  if (Array.isArray(page)) {
+    return page
+  }
+  return page.content ?? []
+}
+
 export async function findTemplateByExternalId(
   request: APIRequestContext,
   externalId: string,
 ): Promise<TemplateSummary | undefined> {
   const token = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
-  const templates = await authorizedGet<TemplateSummary[]>(request, token, '/templates')
+  const templates = await listTemplates(request, token)
   return templates.find((template) => template.externalId === externalId)
 }
 
@@ -679,6 +702,7 @@ export interface DemoFullFlowApiPolicy {
   defaultRouteReleaseVersion: string
   allowedAdGroups: string[]
   outputFormats: string[]
+  outputModes: string[]
 }
 
 export interface ManagementInvocationSummary {
@@ -924,6 +948,9 @@ export interface CallerInvocationSummary {
   status: string
   requestId: string
   routeType: string
+  batchId?: string | null
+  parentInvocationId?: string | null
+  itemId?: string | null
 }
 
 export interface CallerInvocationDetail {
@@ -1033,4 +1060,274 @@ export async function fetchCallerInvocationDetail(
     parameters: parameters ?? {},
     childItems: childItems ?? [],
   }
+}
+
+export interface ManagementRoutesSummary {
+  templateExternalId: string
+  defaultRouteReleaseVersion: string
+  defaultGeneratePath: string
+  explicitPaths: Array<{ releaseVersion: string; generatePath: string }>
+}
+
+export interface ManagementCallerContract {
+  paths: string[]
+  callableVersions: Array<{ releaseVersion: string; explicitVersionUrl: string }>
+}
+
+async function authorizedGetOptional<T>(
+  request: APIRequestContext,
+  token: string,
+  pathSuffix: string,
+): Promise<T | null> {
+  const response = await request.get(`${E2E_API_BASE_URL}${pathSuffix}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (response.status() === 404) {
+    return null
+  }
+  if (!response.ok()) {
+    throw new Error(`GET ${pathSuffix} failed (${response.status()}): ${await response.text()}`)
+  }
+  const body = (await response.json()) as ApiEnvelope<T>
+  return body.result
+}
+
+export async function fetchApiPolicyOrNull(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<DemoFullFlowApiPolicy | null> {
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  return authorizedGetOptional<DemoFullFlowApiPolicy>(
+    request,
+    groupAdminToken,
+    `/templates/${templateId}/api/policy`,
+  )
+}
+
+export async function fetchManagementRoutesSummary(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<ManagementRoutesSummary> {
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  return authorizedGet<ManagementRoutesSummary>(
+    request,
+    groupAdminToken,
+    `/templates/${templateId}/api/routes-summary?environment=dev`,
+  )
+}
+
+export async function fetchManagementCallerContract(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<ManagementCallerContract> {
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  const contract = await authorizedGet<{
+    paths: string[]
+    callableVersions: Array<{ releaseVersion: string; explicitVersionUrl: string }>
+  }>(request, groupAdminToken, `/templates/${templateId}/api/contract?environment=dev`)
+  return {
+    paths: contract.paths ?? [],
+    callableVersions: contract.callableVersions ?? [],
+  }
+}
+
+export async function createIsolatedTemplatePendingRelease(
+  request: APIRequestContext,
+  externalIdPrefix = 'E2E-T13',
+): Promise<{ templateId: string; externalId: string }> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const master = await ensureDemoRetailMasterApproved(request)
+  const externalId = uniqueModuleCode(externalIdPrefix)
+
+  const createdTemplate = await authorizedPost<{ id: string; externalId: string }>(
+    request,
+    authorToken,
+    '/templates',
+    {
+      externalId,
+      groupCode: DEMO_GROUP_CODE,
+      name: `E2E API materialize ${externalId}`,
+      description: 'CD-E2E-T13 publish materialize fixture',
+      masterId: master.id,
+    },
+    201,
+  )
+
+  await configurePublishableTemplate(request, createdTemplate.id)
+  await ensureDemoTemplatePendingRelease(request, createdTemplate.id)
+
+  return { templateId: createdTemplate.id, externalId: createdTemplate.externalId }
+}
+
+export async function publishTemplateRelease(
+  request: APIRequestContext,
+  templateId: string,
+  releaseVersion: string,
+): Promise<void> {
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  await authorizedPost(request, groupAdminToken, `/templates/${templateId}/lifecycle/publish`, {
+    releaseVersion,
+  })
+
+  const detail = await fetchDemoFullFlowTemplateDetail(request, templateId)
+  if (detail.lifecycleStatus !== 'PUBLISHED') {
+    throw new Error(
+      `Publish failed for template ${templateId} (status=${detail.lifecycleStatus}, release=${releaseVersion})`,
+    )
+  }
+}
+
+export async function publishSecondReleaseFromClone(
+  request: APIRequestContext,
+  templateId: string,
+  sourceReleaseVersion: string,
+  nextReleaseVersion: string,
+): Promise<void> {
+  await cloneReleaseVersion(request, templateId, sourceReleaseVersion, 201)
+  await advanceInFlightDevToPendingRelease(request, templateId)
+  await publishTemplateRelease(request, templateId, nextReleaseVersion)
+}
+
+async function advanceInFlightDevToPendingRelease(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<void> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const testerToken = await apiLogin(request, E2E_TEMPLATE_TESTER)
+  const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
+
+  await authorizedPost<{ testDataSetId: string }>(
+    request,
+    authorToken,
+    `/templates/${templateId}/test-data-sets`,
+    {
+      name: `E2E second publish sample ${Date.now()}`,
+      required: true,
+      variables: { customerName: 'Alice' },
+    },
+    201,
+  )
+
+  await authorizedPost(request, authorToken, `/templates/${templateId}/previews/test-generate`, {
+    variables: { customerName: 'Alice' },
+  })
+
+  const batchRun = await runBatchTestViaApi(request, templateId)
+  await waitForBatchTestGatePassed(request, templateId, batchRun.runId)
+
+  await authorizedPost(request, authorToken, `/templates/${templateId}/lifecycle/submit-test`, {
+    commentSummary: 'E2E second publish ready for test',
+  })
+
+  await authorizedPost(request, testerToken, `/templates/${templateId}/lifecycle/test-decision`, {
+    decision: 'PASSED',
+    commentSummary: 'E2E second publish test passed',
+    fidelityViewedConfirmed: true,
+    coverageViewedConfirmed: true,
+    previewViewedConfirmed: true,
+  })
+
+  const submitGate = await fetchSubmitGateChecklist(request, templateId)
+  if (!submitGate.ready) {
+    const blockers = submitGate.items
+      .filter((item) => item.blocker && !item.ready)
+      .map((item) => item.checkCode)
+    throw new Error(`Submit-for-approval gate blocked: ${blockers.join(', ') || 'unknown'}`)
+  }
+
+  await authorizedPost(request, authorToken, `/templates/${templateId}/lifecycle/submit-approval`, {
+    commentSummary: 'E2E second publish ready for approval',
+  })
+
+  await authorizedPost(request, approverToken, `/templates/${templateId}/lifecycle/approval-decision`, {
+    decision: 'APPROVED',
+    commentSummary: 'E2E second publish approved',
+    keyEvidenceConfirmed: true,
+  })
+
+  const detail = await fetchDemoFullFlowTemplateDetail(request, templateId)
+  if (detail.lifecycleStatus !== 'PENDING_RELEASE') {
+    throw new Error(
+      `Failed to advance cloned dev to PENDING_RELEASE (status=${detail.lifecycleStatus})`,
+    )
+  }
+}
+
+async function waitForBatchTestGatePassed(
+  request: APIRequestContext,
+  templateId: string,
+  runId: string,
+): Promise<void> {
+  const deadline = Date.now() + 300_000
+  while (Date.now() < deadline) {
+    const history = await getBatchTestHistoryViaApi(request, templateId, 1)
+    const latest = history[0]
+    if (latest?.runId === runId && latest.status === 'COMPLETED') {
+      if (latest.gatePassed !== true) {
+        throw new Error(`Batch test completed without gate pass: ${JSON.stringify(latest)}`)
+      }
+      return
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2_000))
+  }
+  throw new Error(`Batch test ${runId} did not complete within timeout`)
+}
+
+export async function updateApiPolicyBatchSettings(
+  request: APIRequestContext,
+  templateId: string,
+  batchEnabled: boolean,
+  maxBatchSize = 10,
+): Promise<DemoFullFlowApiPolicy> {
+  const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
+  const current = await fetchDemoFullFlowApiPolicy(request, templateId)
+  return authorizedPut<DemoFullFlowApiPolicy>(request, groupAdminToken, `/templates/${templateId}/api/policy`, {
+    allowedAdGroups: current.allowedAdGroups.length > 0 ? current.allowedAdGroups : ['RETAIL_API'],
+    defaultRouteReleaseVersion: current.defaultRouteReleaseVersion,
+    outputFormats: current.outputFormats,
+    outputModes: current.outputModes.length > 0 ? current.outputModes : ['SYNC_STREAM'],
+    batchEnabled,
+    maxBatchSize,
+    docxEncryptionEnabled: false,
+    pdfEncryptionEnabled: false,
+  })
+}
+
+export async function runtimeBatchGenerateDefault(
+  request: APIRequestContext,
+  templateExternalId: string,
+  credential: RuntimeCredentialBundle,
+  idempotencyKey: string,
+  itemCount = 3,
+): Promise<{ status: number; batchId: string | null }> {
+  const items = Array.from({ length: itemCount }, (_, index) => ({
+    itemId: `item-${index + 1}`,
+    variables: { customerName: `Customer-${index + 1}` },
+  }))
+
+  const response = await request.post(
+    `${RUNTIME_API_BASE_URL}/templates/${templateExternalId}/default/batch-generate`,
+    {
+      headers: {
+        ...runtimeCredentialHeaders(credential),
+        'Content-Type': 'application/json',
+      },
+      data: {
+        output: { format: 'DOCX', mode: 'SYNC_STREAM' },
+        items,
+        requestId: `req-batch-${idempotencyKey}`,
+        idempotencyKey,
+      },
+    },
+  )
+
+  let batchId: string | null = null
+  if (response.ok()) {
+    const body = (await response.json()) as ApiEnvelope<{
+      batch?: { batchId?: string }
+    }>
+    batchId = body.result.batch?.batchId ?? null
+  }
+
+  return { status: response.status(), batchId }
 }

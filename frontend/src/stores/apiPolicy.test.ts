@@ -10,6 +10,7 @@ vi.mock('@/api/apiPolicy', () => ({
   saveApiPolicyDomain: vi.fn(),
   saveInvocationRetentionDomain: vi.fn(),
   fetchApiPolicyImpactPreview: vi.fn(),
+  fetchAlerts: vi.fn(),
   createCredential: vi.fn(),
   rotateCredential: vi.fn(),
   revokeCredential: vi.fn(),
@@ -182,5 +183,22 @@ describe('apiPolicy store', () => {
 
     expect(store.activeTemplateId).toBeNull()
     expect(store.apiPolicy).toBeNull()
+  })
+
+  it('fetchAlerts stores cross-package alerts', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockResolvedValue([
+      {
+        alertKind: 'MISSING_AD_GROUP',
+        templateId: 'tpl-1',
+        templateName: 'Retail account open',
+        templateExternalId: 'RETAIL-ACCOUNT-OPEN',
+      },
+    ])
+    const store = useApiPolicyStore()
+
+    await store.fetchAlerts()
+
+    expect(store.alerts).toHaveLength(1)
+    expect(store.loadingAlerts).toBe(false)
   })
 })

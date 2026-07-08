@@ -553,3 +553,43 @@ export async function captureP12ApiPackageAccessLocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+export const P13_EXTERNAL_SERVICES_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'P13-EXTERNAL-SERVICES',
+)
+export const P13_EXTERNAL_SERVICES_SCREENSHOT_DIR = path.join(
+  P13_EXTERNAL_SERVICES_EVIDENCE_ROOT,
+  'screenshots',
+)
+export const P13_EXTERNAL_SERVICES_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureP13ExternalServicesEvidenceDirs(): void {
+  fs.mkdirSync(P13_EXTERNAL_SERVICES_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function p13ExternalServicesScreenshotPath(filename: string): string {
+  return path.join(P13_EXTERNAL_SERVICES_SCREENSHOT_DIR, filename)
+}
+
+export async function captureP13ExternalServicesLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureP13ExternalServicesEvidenceDirs()
+  const target = p13ExternalServicesScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export async function captureP13ExternalServicesScreenshot(
+  page: Page,
+  filename: string,
+): Promise<string> {
+  ensureP13ExternalServicesEvidenceDirs()
+  const target = p13ExternalServicesScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: true })
+  return filename
+}

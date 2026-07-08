@@ -5,6 +5,7 @@ import { canViewCollaborationWorkItems, MANAGEMENT_ROLES } from '@/auth/roles'
 import { useCapabilities } from '@/composables/useCapabilities'
 import type { ClusterOneRole } from '@/constants/roleJourneyDefinitions'
 import * as collaborationApi from '@/api/collaboration'
+import { useApiPolicyStore } from '@/stores/apiPolicy'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
@@ -27,6 +28,7 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
   const sessionStore = useSessionStore()
   const mastersStore = useMastersStore()
   const templatesStore = useTemplatesStore()
+  const apiPolicyStore = useApiPolicyStore()
   const collaborationStore = useCollaborationStore()
   const { context, reviewMasters, manageMasters } = useCapabilities()
 
@@ -162,6 +164,13 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
       jobs.push(
         fetchCollaborationWorkItems().catch(() => {
           /* error captured in collaboration store */
+        }),
+      )
+    }
+    if (sessionStore.canAccessRoute('route.api-policy-management')) {
+      jobs.push(
+        apiPolicyStore.fetchAlerts().catch(() => {
+          /* degrade to zero-count stat card */
         }),
       )
     }

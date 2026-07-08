@@ -4,6 +4,8 @@ import com.bank.docgen.apimgmt.api.ApiCredentialCreatedView;
 import com.bank.docgen.apimgmt.api.ApiCredentialSummaryView;
 import com.bank.docgen.apimgmt.api.ApiPolicyImpactPreviewView;
 import com.bank.docgen.apimgmt.api.ApiPolicyView;
+import com.bank.docgen.apimgmt.api.ApiRoutesSummaryView;
+import com.bank.docgen.apimgmt.api.ExplicitRoutePathView;
 import com.bank.docgen.apimgmt.mapping.ApiPolicyViewMapper;
 import com.bank.docgen.apimgmt.api.RotateCredentialResponse;
 import com.bank.docgen.apimgmt.api.SaveAdGroupsRequest;
@@ -19,6 +21,7 @@ import com.bank.docgen.apimgmt.persistence.ApiCredentialRepository;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.runtime.api.ContractResultView;
+import com.bank.docgen.runtime.api.DefaultRouteSummaryView;
 import com.bank.docgen.runtime.domain.ContractViewAudience;
 import com.bank.docgen.runtime.api.RuntimeCredentialSummaryView;
 import com.bank.docgen.runtime.service.ContractAssemblyService;
@@ -123,6 +126,33 @@ public class ApiManagementService {
                 environment,
                 credentialSummary,
                 ContractViewAudience.ADMIN
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public ApiRoutesSummaryView getRoutesSummary(
+            UUID templateId,
+            String environment,
+            ManagementSessionClaims session
+    ) {
+        TemplateEntity template = requireApiAdmin(templateId, session);
+        ApiPolicyEntity policy = apiPolicyRepository.findByTemplateId(templateId)
+                .orElseThrow(ApiManagementNotFoundException::new);
+        DefaultRouteSummaryView defaultRoute = contractAssemblyService.summarizeDefaultRoute(
+                template,
+                policy,
+                environment
+        );
+        List<ExplicitRoutePathView> explicitPaths = contractAssemblyService
+                .listCallableVersions(template, environment)
+                .stream()
+                .map(version -> new ExplicitRoutePathView(version.releaseVersion(), version.explicitVersionUrl()))
+                .toList();
+        return new ApiRoutesSummaryView(
+                template.getExternalId(),
+                policy.getDefaultRouteReleaseVersion(),
+                defaultRoute.url(),
+                explicitPaths
         );
     }
 

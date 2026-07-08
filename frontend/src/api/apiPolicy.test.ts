@@ -291,4 +291,127 @@ describe('apiPolicy API', () => {
     expect(http.post).toHaveBeenCalledWith('/templates/tpl-1/api/credentials/cred-1/revoke')
     expect(revoked.status).toBe('REVOKED')
   })
+
+  it('loads paginated invocations with filters', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [
+            {
+              invocationId: 'inv-1',
+              invocationKind: 'SINGLE',
+              status: 'SUCCEEDED',
+              requestId: 'req-abc',
+              resolvedReleaseVersion: '1.0.0',
+              routeType: 'DEFAULT',
+              createdAt: '2026-06-23T10:00:00Z',
+              accessAccountSummary: 'svc***',
+            },
+          ],
+          page: 1,
+          size: 20,
+          totalElements: 25,
+          totalPages: 2,
+        },
+      },
+    })
+
+    const page = await apiPolicyApi.listInvocations('tpl-1', 1, 20, {
+      status: 'FAILED',
+      invocationKind: 'SINGLE',
+      requestId: 'req-abc',
+    })
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/api/invocations', {
+      params: {
+        page: 1,
+        size: 20,
+        status: 'FAILED',
+        invocationKind: 'SINGLE',
+        requestId: 'req-abc',
+      },
+    })
+    expect(page.content).toHaveLength(1)
+    expect(page.totalElements).toBe(25)
+  })
+
+  it('loads invocation detail summary', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          invocationId: 'inv-1',
+          requestId: 'req-abc',
+          routeType: 'DEFAULT',
+          resolvedReleaseVersion: '1.0.0',
+          outcome: 'SUCCEEDED',
+          durationMs: 120,
+          accessAccountSummary: 'svc***',
+          credentialId: 'cred-1',
+          batchId: null,
+          parentInvocationId: null,
+          createdAt: '2026-06-23T10:00:00Z',
+          documentPresent: true,
+          auditLinkHint: {
+            requestId: 'req-abc',
+            auditId: 'audit-1',
+          },
+        },
+      },
+    })
+
+    const detail = await apiPolicyApi.getInvocationDetail('tpl-1', 'inv-1')
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/api/invocations/inv-1')
+    expect(detail.outcome).toBe('SUCCEEDED')
+    expect(detail.auditLinkHint.requestId).toBe('req-abc')
+  })
+
+  it('loads routes summary for a template', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          templateExternalId: 'RETAIL-ACCOUNT-OPEN',
+          defaultRouteReleaseVersion: '2.1.0',
+          defaultGeneratePath: '/api/dev/v1/templates/RETAIL-ACCOUNT-OPEN/default/generate',
+          explicitPaths: [
+            {
+              releaseVersion: '2.1.0',
+              generatePath: '/api/dev/v1/templates/RETAIL-ACCOUNT-OPEN/versions/2.1.0/generate',
+            },
+          ],
+        },
+      },
+    })
+
+    const summary = await apiPolicyApi.fetchRoutesSummary('tpl-1')
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/api/routes-summary')
+    expect(summary.externalId).toBe('RETAIL-ACCOUNT-OPEN')
+    expect(summary.defaultPath).toContain('/default/generate')
+  })
+
+  it('loads cross-package API access alerts', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: [
+          {
+            alertType: 'NO_CREDENTIALS',
+            templateId: 'tpl-2',
+            templateName: 'Mortgage approval',
+            templateExternalId: 'MORTGAGE-APPROVAL',
+          },
+        ],
+      },
+    })
+
+    const alerts = await apiPolicyApi.fetchAlerts()
+
+    expect(http.get).toHaveBeenCalledWith('/api-access/alerts')
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]?.alertKind).toBe('NO_CREDENTIALS')
+  })
 })

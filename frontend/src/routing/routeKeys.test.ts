@@ -19,8 +19,9 @@ describe('routeKeys', () => {
     expect(pathForRouteKey(ROUTE_KEYS.auditConsole)).toBe('/audit')
     expect(pathForRouteKey(ROUTE_KEYS.apiPolicyManagement)).toBe('/api/policies')
     expect(apiPolicyDetailPath('tpl-1', 'OUTPUT_POLICY')).toBe(
-      '/api/policies/tpl-1?domain=OUTPUT_POLICY',
+      '/templates/tpl-1?tab=apiAccess#domain=OUTPUT_POLICY',
     )
+    expect(apiPolicyDetailPath('tpl-1')).toBe('/templates/tpl-1?tab=apiAccess')
     expect(pathForRouteKey(ROUTE_KEYS.identityAdministration)).toBe('/entitlement/users')
   })
 

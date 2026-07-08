@@ -388,7 +388,6 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     loadPolicyData: policy.loadPolicyData,
     backToList: navigation.backToList,
     openLifecyclePanel: navigation.openLifecyclePanel,
-    openApiPolicyConsole: policy.openApiPolicyConsole,
     openDevWorkspaceTab: navigation.openDevWorkspaceTab,
     handleTestGenerate,
     handleBatchTestGenerate,

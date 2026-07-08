@@ -1,0 +1,25 @@
+---
+description: Entity display, navigable links, filter control selection, and fluid vs contained layout for management UI tables and catalogs.
+globs: frontend/**/*.{vue,ts}
+alwaysApply: false
+---
+
+# Frontend Entity Display Constitution
+
+Human-readable entity columns, correct filters, and layout width matching page intent are
+mandatory for catalog and cross-reference surfaces.
+
+## Non-negotiables
+
+- Never show raw UUID or internal id as the primary visible value in a user-facing table column or summary field.
+- Entity primary labels link to detail routes when the session has read access; plain text when not.
+- Use `EntityLinkCell` for entity columns — do not hand-roll link + truncate logic per view.
+- Filters: enum → select; entity reference → async `AppSearchSelect`; free-text only when the API supports substring search on that field.
+- Table-heavy catalog pages: `AppPageLayout layoutVariant="fluid"`. Forms/detail/workspace: `layoutVariant="contained"` (1440px).
+- Prefer `CatalogFilterToolbar` for catalog filter rows; extend via shared types, not page-local filter bars.
+
+## Required reading
+
+- Architecture: `docs/architecture/ux-entity-display-constitution.md`
+- Skill: `.cursor/skills/frontend-entity-display/SKILL.md`
+- Visual baseline: `.cursor/skills/frontend-oa-design/SKILL.md`

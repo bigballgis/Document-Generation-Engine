@@ -142,6 +142,6 @@ test.describe('CDP-E2E-T01 MVP golden path — browser only (BDD-CDP-MVP-001)', 
     await saveApiRetentionPolicyFromHubTab(page)
 
     await expect(page.getByText(/policy version|策略版本/i).first()).toBeVisible()
-    await expect(page.getByRole('button', { name: /open access settings|打开接入设置/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /external access|对外接入/i })).toBeVisible()
   })
 })

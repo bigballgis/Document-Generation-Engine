@@ -31,7 +31,11 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.event.TemplateContentChangedEvent;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -308,6 +312,25 @@ public class TemplateService {
     public TemplateEntity requireTemplateByExternalId(String externalId) {
         return templateRepository.findByExternalIdAndDeletedAtIsNull(externalId)
                 .orElseThrow(TemplateNotFoundException::new);
+    }
+
+    public record TemplateDisplayInfo(String name, String externalId) {
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, TemplateDisplayInfo> lookupDisplayInfoByIds(Set<UUID> templateIds) {
+        if (templateIds == null || templateIds.isEmpty()) {
+            return Map.of();
+        }
+        List<UUID> distinctIds = templateIds.stream().filter(Objects::nonNull).distinct().toList();
+        if (distinctIds.isEmpty()) {
+            return Map.of();
+        }
+        return templateRepository.findByIdInAndDeletedAtIsNull(distinctIds).stream()
+                .collect(Collectors.toMap(
+                        TemplateEntity::getId,
+                        template -> new TemplateDisplayInfo(template.getName(), template.getExternalId())
+                ));
     }
 
     TemplateDetailView toDetail(TemplateEntity template) {
