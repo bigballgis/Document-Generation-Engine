@@ -146,6 +146,7 @@ const {
   handleTestGenerate,
   handleBatchTestGenerate,
   handlePreviewSelected,
+  handlePreviewRefreshed,
   handleSubmitForTest,
   handleTestDecision,
   submitLifecycleDecision,
@@ -316,6 +317,7 @@ const {
         @governance-action="handleGovernanceAction"
         @retry-publish-gate="loadPublishGateData"
         @retry-submit-gate="loadSubmitGateData"
+        @preview-refreshed="handlePreviewRefreshed"
       />
 
       <WorkspaceTabShell

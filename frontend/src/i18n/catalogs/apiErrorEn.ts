@@ -18,7 +18,8 @@ export const apiErrorEn = {
     fieldRequired: "This field is required.",
     fieldInvalid: "This field is invalid.",
     fieldSizeInvalid: "This field length is invalid.",
-    fieldPatternInvalid: "This field format is invalid."
+    fieldPatternInvalid: "This field format is invalid.",
+    contentModuleStructureMissing: "The referenced content module has no pinned structure."
   },
   storage: {
     operationFailed: "Object storage operation failed."
@@ -102,7 +103,9 @@ export const apiErrorEn = {
     renderProfileInvalid: "The render profile configuration is invalid.",
     previewConcurrencyLimitExceeded: "The preview generation concurrency limit has been reached. Please retry later.",
     batchTestRunNotFound: "The batch test run was not found.",
-    unsupportedNodeType: "The template contains a structured content node type that cannot be rendered. Remove or replace the unsupported node before publishing."
+    unsupportedNodeType: "The template contains a structured content node type that cannot be rendered. Remove or replace the unsupported node before publishing.",
+    imageAssetNotFound: "The referenced image asset could not be found.",
+    sealAssetNotFound: "The referenced seal asset could not be found."
   },
   apimgmt: {
     policyNotFound: "The API policy was not found.",

@@ -18,7 +18,8 @@ export const apiErrorZhCn = {
     fieldRequired: "此字段为必填项。",
     fieldInvalid: "此字段无效。",
     fieldSizeInvalid: "此字段长度无效。",
-    fieldPatternInvalid: "此字段格式无效。"
+    fieldPatternInvalid: "此字段格式无效。",
+    contentModuleStructureMissing: "引用的内容模块没有固定的结构。"
   },
   storage: {
     operationFailed: "对象存储操作失败。"
@@ -102,7 +103,9 @@ export const apiErrorZhCn = {
     renderProfileInvalid: "渲染配置无效。",
     previewConcurrencyLimitExceeded: "预览生成并发数已达上限，请稍后重试。",
     batchTestRunNotFound: "未找到批量测试运行记录。",
-    unsupportedNodeType: "模板包含无法渲染的结构化内容节点类型，请在发布前移除或替换不支持的节点。"
+    unsupportedNodeType: "模板包含无法渲染的结构化内容节点类型，请在发布前移除或替换不支持的节点。",
+    imageAssetNotFound: "找不到引用的图片资源。",
+    sealAssetNotFound: "找不到引用的印章资源。"
   },
   apimgmt: {
     policyNotFound: "未找到 API 策略。",

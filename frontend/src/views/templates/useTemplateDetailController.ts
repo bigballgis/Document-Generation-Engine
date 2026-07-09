@@ -6,9 +6,6 @@ import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environme
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useTemplatesStore } from '@/stores/templates'
-import * as templatesApi from '@/api/templates'
-import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
-import type { PreviewRecord } from '@/types/template'
 import {
   useTemplateLifecycleActions,
   type GovernanceAction,
@@ -24,49 +21,30 @@ import {
   type TemplateDevWorkspaceTab,
 } from '@/views/templates/templateDevWorkspaceTabs'
 import { useTemplateDetailNavigation } from '@/views/templates/useTemplateDetailNavigation'
+import { useTemplatePreviewActions } from '@/views/templates/useTemplatePreviewActions'
+import { useTemplateDetailVisibility } from '@/views/templates/useTemplateDetailVisibility'
 
 export type { GovernanceAction, LifecycleDecisionDialogMode }
 
 export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-editor'>) {
   const isDevEditor = computed(() => workspace.value === 'dev-editor')
-
   const { t, te } = useI18n()
   const { formatDateTime } = useLocaleFormatters()
   const route = useRoute()
   const templatesStore = useTemplatesStore()
-  const {
-    authorTemplates,
-    decideTests,
-    decideApprovals,
-    publishTemplates,
-    reviewMasters,
-    exportTemplates,
-    editTemplateMetadata,
-  } = useCapabilities()
+  const { authorTemplates, decideTests, decideApprovals, publishTemplates, reviewMasters } =
+    useCapabilities()
 
-  const lastPreview = ref<PreviewRecord | null>(null)
-  const selectedPreviewId = ref<string | null>(null)
-  const selectedTestDataSetId = ref<string | null>(null)
-  const generatingPreview = ref(false)
-  const generatingPreviewId = ref<string | null>(null)
-  const batchTesting = ref(false)
-  const coverageRefreshToken = ref(0)
   const metadataEditOpen = ref(false)
   const selectedContractEnvironment = ref<RuntimeEnvironment>(DEFAULT_ENVIRONMENT)
-
   const templateId = computed(() => route.params.templateId as string)
   const devVersionId = computed(() =>
     isDevEditor.value ? String(route.params.devVersionId ?? '') : '',
   )
-
   const loadTemplateHolder = { fn: async (): Promise<void> => {} }
 
-  const templateMatchesRoute = computed(
-    () => templatesStore.selectedTemplate?.id === templateId.value,
-  )
-
   const template = computed(() => {
-    if (!templateMatchesRoute.value) {
+    if (templatesStore.selectedTemplate?.id !== templateId.value) {
       return null
     }
     return templatesStore.selectedTemplate
@@ -82,10 +60,7 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
 
   const errorMessage = computed(() => {
     const key = templatesStore.lastErrorMessageKey
-    if (!key) {
-      return ''
-    }
-    return te(key) ? t(key) : t('templates.error.loadDetail')
+    return !key ? '' : te(key) ? t(key) : t('templates.error.loadDetail')
   })
 
   const activeDetailTab = ref<TemplateDetailTab>(
@@ -104,141 +79,36 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     activeDetailTab,
   })
 
-  const policy = useTemplatePolicyCredentials({
-    templateId,
-    template,
-    errorMessage,
-  })
+  const policy = useTemplatePolicyCredentials({ templateId, template, errorMessage })
 
-  const showMetadataEdit = computed(() => {
-    const status = template.value?.lifecycleStatus
-    if (!status || !editTemplateMetadata.value) {
-      return false
-    }
-    return status !== 'PUBLISHED' && status !== 'STOPPED' && status !== 'DEPRECATED'
-  })
+  const visibility = useTemplateDetailVisibility({ isDevEditor, template })
 
-  const showExportActions = computed(
-    () =>
-      exportTemplates.value &&
-      Boolean(template.value) &&
-      isTemplateExportEligible(template.value!.lifecycleStatus),
-  )
-
-  const showAuthoringSection = computed(() => {
-    const status = template.value?.lifecycleStatus
-    if (
-      !status ||
-      status === 'PUBLISHED' ||
-      status === 'STOPPED' ||
-      status === 'DEPRECATED'
-    ) {
-      return false
-    }
-    if (authorTemplates.value) {
-      return true
-    }
-    return (
-      isDevEditor.value &&
-      decideTests.value &&
-      (status === 'DRAFT' || status === 'TESTING')
-    )
-  })
-
-  const canEditContentModuleReferences = computed(
-    () => authorTemplates.value && template.value?.lifecycleStatus === 'DRAFT',
-  )
-
-  const showTestGenerate = computed(
-    () =>
-      authorTemplates.value &&
-      (template.value?.lifecycleStatus === 'DRAFT' ||
-        template.value?.lifecycleStatus === 'TESTING'),
-  )
-
-  const handleTestGenerateRef: { fn: (testDataSetId?: string) => Promise<void> } = {
-    fn: async () => {},
+  const previewActionsRef: { openDevWorkspaceTab: (tab: TemplateDevWorkspaceTab) => void } = {
+    openDevWorkspaceTab: () => {},
   }
+
+  const preview = useTemplatePreviewActions({
+    templateId,
+    errorMessage,
+    openDevWorkspaceTab: (tab) => previewActionsRef.openDevWorkspaceTab(tab),
+  })
 
   const navigation = useTemplateDetailNavigation({
     isDevEditor,
     templateId,
     devVersionId,
     template,
-    lastPreview,
-    showAuthoringSection,
+    lastPreview: preview.lastPreview,
+    showAuthoringSection: visibility.showAuthoringSection,
     activeDetailTab,
     activeDevWorkspaceTab,
     loadTemplateHolder,
     lifecycle,
     policy,
-    handleTestGenerate: (testDataSetId) => handleTestGenerateRef.fn(testDataSetId),
+    handleTestGenerate: preview.handleTestGenerate,
   })
 
-  async function handleTestGenerate(testDataSetId?: string) {
-    const resolvedId = testDataSetId ?? selectedTestDataSetId.value ?? undefined
-    generatingPreview.value = true
-    generatingPreviewId.value = resolvedId ?? null
-    try {
-      const preview = await templatesStore.testGenerate(templateId.value, {
-        testDataSetId: resolvedId,
-      })
-      lastPreview.value = preview
-      selectedPreviewId.value = preview.previewId
-      if (resolvedId) {
-        selectedTestDataSetId.value = resolvedId
-      }
-      navigation.openDevWorkspaceTab('testing')
-      ElMessage.success(t('templates.testGenerate.success', { previewId: preview.previewId }))
-    } catch {
-      ElMessage.error(errorMessage.value || t('templates.error.testGenerate'))
-    } finally {
-      generatingPreview.value = false
-      generatingPreviewId.value = null
-    }
-  }
-
-  handleTestGenerateRef.fn = handleTestGenerate
-
-  async function handleBatchTestGenerate() {
-    batchTesting.value = true
-    try {
-      const dataSets = await templatesApi.listTestDataSets(templateId.value)
-      if (dataSets.length === 0) {
-        ElMessage.warning(t('templates.testDataSets.error.noDataSetsForBatch'))
-        return
-      }
-      const summary = await templatesApi.batchTestGenerate(templateId.value, {
-        testDataSetIds: dataSets.map((row) => row.testDataSetId),
-      })
-      coverageRefreshToken.value += 1
-      navigation.openDevWorkspaceTab('testing')
-      ElMessage.success(
-        t('templates.testDataSets.batchSuccess', {
-          succeeded: summary.succeededCount,
-          failed: summary.failedCount,
-          warnings: summary.warningCount,
-        }),
-      )
-    } catch {
-      ElMessage.error(t('templates.testDataSets.error.batch'))
-    } finally {
-      batchTesting.value = false
-    }
-  }
-
-  async function handlePreviewSelected(previewId: string | null) {
-    selectedPreviewId.value = previewId
-    if (!previewId) {
-      lastPreview.value = null
-      return
-    }
-    try {
-      lastPreview.value = await templatesApi.getPreview(templateId.value, previewId)
-    } catch {
-      ElMessage.error(errorMessage.value || t('templates.previewHistory.error.loadDetail'))
-    }
-  }
+  previewActionsRef.openDevWorkspaceTab = navigation.openDevWorkspaceTab
 
   async function handleMetadataUpdate(payload: { name: string; description: string | null }) {
     try {
@@ -251,31 +121,23 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
   }
 
   return {
-    // i18n
     t,
     te,
-    // formatters
     formatDateTime,
-    // route state
     templateId,
     devVersionId,
-    // core mode
     isDevEditor,
-    // template data
     template,
     showDetailSkeleton,
     loadFailed: navigation.loadFailed,
-    // tabs
     activeDetailTab: navigation.activeDetailTab,
     activeDevWorkspaceTab: navigation.activeDevWorkspaceTab,
     detailTabs: navigation.detailTabs,
-    // capabilities
     authorTemplates,
     decideTests,
     decideApprovals,
     publishTemplates,
     reviewMasters,
-    // journey display
     showAuthorJourney: navigation.showAuthorJourney,
     authorJourneyContext: navigation.authorJourneyContext,
     showTesterJourney: navigation.showTesterJourney,
@@ -285,7 +147,6 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     showTeamLeadJourney: navigation.showTeamLeadJourney,
     teamLeadJourneyContext: navigation.teamLeadJourneyContext,
     authorJourneyPrimaryCtaDisabled: lifecycle.authorJourneyPrimaryCtaDisabled,
-    // journey handlers
     handleJourneyCreate: navigation.handleJourneyCreate,
     handleJourneyDesign: navigation.handleJourneyDesign,
     handleJourneyTrialGenerate: navigation.handleJourneyTrialGenerate,
@@ -300,7 +161,6 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     handleJourneyTeamLeadReviewGoLiveRequest: navigation.handleJourneyTeamLeadReviewGoLiveRequest,
     handleJourneyTeamLeadRunPreReleaseChecks: navigation.handleJourneyTeamLeadRunPreReleaseChecks,
     handleJourneyTeamLeadConfirmGoLive: navigation.handleJourneyTeamLeadConfirmGoLive,
-    // lifecycle visibility
     showLifecycleSection: lifecycle.showLifecycleSection,
     showGovernanceSection: lifecycle.showGovernanceSection,
     showDraftActions: lifecycle.showDraftActions,
@@ -308,25 +168,22 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     showSubmitForApproval: lifecycle.showSubmitForApproval,
     showApprovalDecisionActions: lifecycle.showApprovalDecisionActions,
     showPublishActions: lifecycle.showPublishActions,
-    showTestGenerate,
+    showTestGenerate: visibility.showTestGenerate,
     showStopAction: lifecycle.showStopAction,
     showRestoreAction: lifecycle.showRestoreAction,
     showDeprecateAction: lifecycle.showDeprecateAction,
-    // authoring visibility
-    showAuthoringSection,
-    canEditContentModuleReferences,
-    // policy
+    showAuthoringSection: visibility.showAuthoringSection,
+    canEditContentModuleReferences: visibility.canEditContentModuleReferences,
     showPolicyPanel: policy.showPolicyPanel,
     canPolicy: policy.canPolicy,
-    showExportActions,
+    showExportActions: visibility.showExportActions,
     showDeleteTemplateAction: lifecycle.showDeleteTemplateAction,
-    showMetadataEdit,
+    showMetadataEdit: visibility.showMetadataEdit,
     policyLoadFailed: policy.policyLoadFailed,
     apiPolicy: policy.apiPolicy,
     loadingPolicy: policy.loadingPolicy,
     policySubmitting: policy.policySubmitting,
     policyLoadErrorKey: policy.policyLoadErrorKey,
-    // publish gate
     publishGateItems: lifecycle.publishGateItems,
     publishGateReady: lifecycle.publishGateReady,
     publishVersion: lifecycle.publishVersion,
@@ -337,16 +194,13 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     publishGateLoadError: lifecycle.publishGateLoadError,
     publishCoverageSummary: lifecycle.publishCoverageSummary,
     publishChangeDiffSummary: lifecycle.publishChangeDiffSummary,
-    // submit gate
     submitGateItems: lifecycle.submitGateItems,
     submitGateReady: lifecycle.submitGateReady,
     loadingSubmitGate: lifecycle.loadingSubmitGate,
     submitGateLoadError: lifecycle.submitGateLoadError,
     submitCoverageSummary: lifecycle.submitCoverageSummary,
     submitChangeDiffSummary: lifecycle.submitChangeDiffSummary,
-    // binding gate
     bindingGateResult: lifecycle.bindingGateResult,
-    // dialog state
     lifecycleComment: lifecycle.lifecycleComment,
     lifecycleCommentDialogOpen: lifecycle.lifecycleCommentDialogOpen,
     decisionDialogOpen: lifecycle.decisionDialogOpen,
@@ -358,30 +212,24 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     credentialSecretValue: policy.credentialSecretValue,
     credentialSecretExternalId: policy.credentialSecretExternalId,
     displayedCredentialSecret: policy.displayedCredentialSecret,
-    // test state
-    lastPreview,
-    selectedPreviewId,
-    selectedTestDataSetId,
-    generatingPreview,
-    generatingPreviewId,
-    batchTesting,
-    coverageRefreshToken,
+    lastPreview: preview.lastPreview,
+    selectedPreviewId: preview.selectedPreviewId,
+    selectedTestDataSetId: preview.selectedTestDataSetId,
+    generatingPreview: preview.generatingPreview,
+    generatingPreviewId: preview.generatingPreviewId,
+    batchTesting: preview.batchTesting,
+    coverageRefreshToken: preview.coverageRefreshToken,
     submitForTestDialogOpen: lifecycle.submitForTestDialogOpen,
-    // tester evidence
     testerEvidenceViewed: navigation.testerEvidenceViewed,
     approverEvidenceViewed: navigation.approverEvidenceViewed,
-    // credentials table
     credentialColumnFilters: policy.credentialColumnFilters,
     credentialsCurrentPage: policy.credentialsCurrentPage,
     paginatedCredentials: policy.paginatedCredentials,
     credentialStatusFilterOptions: policy.credentialStatusFilterOptions,
     totalCredentialRows: policy.totalCredentialRows,
     sortCredentialsByCreatedAt: policy.sortCredentialsByCreatedAt,
-    // contract
     selectedContractEnvironment,
-    // store
     templatesStore,
-    // handlers
     loadTemplate: navigation.loadTemplate,
     loadPublishGateData: lifecycle.loadPublishGateData,
     loadSubmitGateData: lifecycle.loadSubmitGateData,
@@ -389,9 +237,10 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
     backToList: navigation.backToList,
     openLifecyclePanel: navigation.openLifecyclePanel,
     openDevWorkspaceTab: navigation.openDevWorkspaceTab,
-    handleTestGenerate,
-    handleBatchTestGenerate,
-    handlePreviewSelected,
+    handleTestGenerate: preview.handleTestGenerate,
+    handleBatchTestGenerate: preview.handleBatchTestGenerate,
+    handlePreviewSelected: preview.handlePreviewSelected,
+    handlePreviewRefreshed: preview.handlePreviewRefreshed,
     handleSubmitForTest: lifecycle.handleSubmitForTest,
     handleTestDecision: lifecycle.handleTestDecision,
     openApprovalRejectDialog: lifecycle.openApprovalRejectDialog,

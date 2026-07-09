@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **None** — **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08; T01–T16). **Prior:** **P22-DEMO-EXPANSION Done** (2026-07-04 — rendering engine + package scaffold; T05–T11 honest note: rich bindings pending → **P23 closed**). **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03). **P21 Done** (2026-06-30). User sequence P14 → P15 → P18 **complete**.
+**Active formal phase:** **CORE-FORTRESS-F7-AUTHORING-UX** — **In Progress** (2026-07-09). **Prior:** **CORE-FORTRESS-F6 Done** (2026-07-09; frontend kernel refactor; controller **243** lines; composable **73** Vitest; F6-T08 E2E env blocker); **CORE-FORTRESS-F5 Done** (2026-07-09; F5 targeted **31/31**; full `mvn verify` Windows file-lock caveat); **CORE-FORTRESS-F4 Done** (2026-07-09); **CORE-FORTRESS-F3 Done** (2026-07-09); **CORE-FORTRESS-F2 Done** (2026-07-09); **CORE-FORTRESS-F1 Done** (2026-07-09). **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
@@ -58,7 +58,16 @@ upstream systems invoke the dynamic API.
 | P21 | Role-journey frontend redesign & business-friendly terminology | P13, P14, P19, P20 | Hybrid IA (single task hub authoritative + behavior-typed "my to-dos" entries + per-role `RoleJourneyTimeline`), task-hub queue partitioning + restored fields + inline open actions, 6 collaboration-trigger backend completeness (+ `RESOLVED`), foreign-bank non-IT persona business-friendly L1 copy (en/zh, keys stable); **plus code-grounded audit remediation** — permission single-source/fail-closed, template-detail bug fixes (focus/tab, stale id), APPROVAL dual-substate, i18n parity, a11y focus ring, capability/route/OpenAPI drift; ADR Batch B / COR-T11 not violated | Done (2026-06-30; T01–T11 + X01–X06 + X02; backend **553**, frontend **511** Vitest; **AUD-B10 resolved** P12-AUD-B10 Done 2026-07-01; **AUD-M02 resolved** P12-AUD-M02 Done 2026-07-01) |
 | P22 | Demo expansion & rendering fidelity | P3, P4, P18 | Structured content DOCX writer, dual page numbering, eight `deploy/demo-*` **scaffolds**, `import-all-demos.ps1` (R1–R5 engine + structure; **content/typography excellence → P23**) | **Done** (2026-07-04; T01–T15; gates **GREEN**; T05–T11 scaffold carry-forward) |
 | P23 | Demo document typography & layout excellence | P22, P18, LRP LR-A2 | Bank-grade master styles/fonts/margins/headers-footers; rich structured bindings (not placeholder text); all 8+ demos at foreign-bank-letter grade; POI + E2E + human typography checklist; taskmaster 4–8 | **Done** (2026-07-08; T01–T16; gates **GREEN**; human reviewer sign-off template published — execution pending) |
+| CORE-FORTRESS F1 | Rendering core correctness | P23, P22, P18 | Unified structured→DOCX engine; fail-closed module/image refs | **Done** (2026-07-09) |
+| CORE-FORTRESS F2 | Runtime lightweight | F1 | Publish fidelity cache; lifecycle bulk; idempotency hash cache | **Done** (2026-07-09) |
+| CORE-FORTRESS F3 | Node matrix + expression engine | F2 | Rich conditionals; matrix validation hardening | **Done** (2026-07-09) |
+| CORE-FORTRESS F4 | Production rendering hardening | F3 | LO pool, fonts, pagination | **Done** (2026-07-09; targeted **23/23**; full `mvn verify` env caveat) |
+| CORE-FORTRESS F5 | Async durability + security depth | F4 | Kafka retry/DLT depth; fail-closed security seams | **Done** (2026-07-09; F5 targeted **31/31**; full `mvn verify` env caveat) |
+| CORE-FORTRESS F6 | Frontend kernel refactor | F5 | Composable decomposition; zero behavior change; Bank OA lock | **Done** (2026-07-09; controller **243** lines; composable **73** Vitest; F6-T08 E2E env blocker) |
+| CORE-FORTRESS F7 | Authoring UX (dirty guard, side-by-side preview) | F5, F6 | `useDirtyGuard`; side-by-side preview; LR-C1/C4 | **In Progress** (2026-07-09) |
 
+> **CORE-FORTRESS program:** [detail/CORE-FORTRESS-program-roadmap.md](./detail/CORE-FORTRESS-program-roadmap.md) — F1–F6 Done; **F7 In Progress**; F8 queued.
+>
 > **P23 vs P22:** **P22 Done** — closed rendering **engine** and deploy **scaffold**. **P23 Done** (2026-07-08) — bank-grade Word typography/layout for all demo packages; pairs with **LR-A2** (font baseline **Done**) and unblocks **LR-A7** (pagination corpus). Detail: [detail/P23-demo-typography-layout-excellence.md](./detail/P23-demo-typography-layout-excellence.md).
 >
 > **P22 vs P12:** **P22 Done** (2026-07-04). Closes P18/P4 rendering fidelity **engine** gap per [demo-expansion-behavior-spec.md](../requirements/demo-expansion-behavior-spec.md).

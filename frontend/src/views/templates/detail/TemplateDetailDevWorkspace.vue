@@ -95,6 +95,7 @@ const emit = defineEmits<{
   governanceAction: [action: GovernanceAction]
   retryPublishGate: []
   retrySubmitGate: []
+  'preview-refreshed': [preview: PreviewRecord]
 }>()
 
 const { t } = useI18n()
@@ -340,7 +341,11 @@ watch(
           :group-code="groupCode"
           :can-edit-content-module-references="canEditContentModuleReferences"
           :coverage-refresh-token="coverageRefreshToken"
+          :last-preview="lastPreview"
+          :selected-test-data-set-id="selectedTestDataSetId"
+          :generating-preview="generatingPreview"
           @updated="emit('updated')"
+          @preview-refreshed="emit('preview-refreshed', $event)"
         />
       </template>
 

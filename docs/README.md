@@ -147,6 +147,13 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12 2026-07-03) | P12 template testing tab |
 | [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **Done** (P12 2026-07-03) | Package-first API access |
 | [Session renewal & revocation](./behavior/session-renewal-revocation.md) | **ready** (LR-B6 delivered 2026-07-04) | BDD-LRP-SESSION-001 → LR-B6 **Done** (sliding renewal, 30 min TTL, 8 h absolute cap, Redis revocation fail-closed; policy confirmed 2026-07-04; implementation deviations in spec §14.1) |
+| **[CORE-FORTRESS F1 rendering correctness](./behavior/core-fortress-f1-rendering-correctness.md)** | **Done** (2026-07-09) | Unified renderer, fail-closed refs — **F1 closed** |
+| **[CORE-FORTRESS F2 runtime lightweight](./behavior/core-fortress-f2-runtime-lightweight.md)** | **Done** (2026-07-09) | Publish fidelity cache, bulk lifecycle, idempotency — **F2 closed** |
+| **[CORE-FORTRESS F3 node matrix + expression engine](./behavior/core-fortress-f3-node-matrix-expression.md)** | **Done** (2026-07-09) | Shared `ConditionExpressionEvaluator`; matrix validation hardening — **F3 closed** |
+| **[CORE-FORTRESS F4 production rendering hardening](./behavior/core-fortress-f4-production-rendering-hardening.md)** | **Done** (2026-07-09) | LO pool parallel regression, config evidence, pagination corpus schema — **F4 closed** (Docker measurements + full `mvn verify` env follow-up) |
+| **[CORE-FORTRESS F5 async durability + security depth](./behavior/core-fortress-f5-async-durability-security.md)** | **Done** (2026-07-09) | Stale reclaim, Kafka DLT, payload scrub, 429 audit, credential rotation — **F5 closed** (full `mvn verify` env follow-up) |
+| **[CORE-FORTRESS F6 frontend kernel refactor](./behavior/core-fortress-f6-frontend-kernel-refactor.md)** | **Done** (2026-07-09) | Composable decomposition — controller **243** lines; **73** composable Vitest; F6-T08 E2E env blocker documented |
+| **[CORE-FORTRESS F7 authoring UX](./behavior/core-fortress-f7-authoring-ux.md)** | **In Progress** (2026-07-09) | Dirty guard + side-by-side preview; maps LR-C1/C4 |
 
 ## Evidence & acceptance artifacts
 

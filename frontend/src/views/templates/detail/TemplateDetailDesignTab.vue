@@ -18,6 +18,7 @@ import {
 import type {
   AnchorBinding,
   CompositionRule,
+  PreviewRecord,
   VariableSchema,
 } from '@/types/template'
 
@@ -30,10 +31,14 @@ const props = defineProps<{
   groupCode: string | null
   canEditContentModuleReferences: boolean
   coverageRefreshToken: number
+  lastPreview?: PreviewRecord | null
+  selectedTestDataSetId?: string | null
+  generatingPreview?: boolean
 }>()
 
 const emit = defineEmits<{
   updated: []
+  'preview-refreshed': [preview: PreviewRecord]
 }>()
 
 const { t } = useI18n()
@@ -131,7 +136,11 @@ onMounted(() => {
           :bindings="bindings"
           :rules="rules"
           :content-module-references="contentModuleReferences"
+          :last-preview="lastPreview ?? null"
+          :selected-test-data-set-id="selectedTestDataSetId ?? null"
+          :generating-preview="generatingPreview ?? false"
           @updated="handleUpdated"
+          @preview-refreshed="emit('preview-refreshed', $event)"
         />
       </el-tab-pane>
     </el-tabs>
