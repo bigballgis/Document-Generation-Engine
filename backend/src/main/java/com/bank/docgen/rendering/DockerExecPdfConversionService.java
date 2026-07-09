@@ -1,8 +1,6 @@
 package com.bank.docgen.rendering;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
-import com.bank.docgen.infrastructure.resilience.ResilienceSupport;
-import com.bank.docgen.template.service.TemplateValidationException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.Retry;
@@ -55,11 +53,13 @@ public class DockerExecPdfConversionService implements PdfConversionService {
         PdfConversionOptions resolvedOptions = options == null
                 ? PdfConversionOptions.stampingDisabled()
                 : options;
-        return ResilienceSupport.execute(circuitBreaker, retry, () -> PdfConversionOffloadSupport.executeOffloaded(
+        return ResilientPdfConversionSupport.convertWithResilience(
+                circuitBreaker,
+                retry,
                 pdfConversionExecutor,
                 renderingProperties.getConversionTimeoutSeconds(),
                 () -> convertInternal(docxBytes, resolvedOptions)
-        ));
+        );
     }
 
     private DocumentArtifactPipeline.PdfConversionResult convertInternal(
@@ -81,7 +81,7 @@ public class DockerExecPdfConversionService implements PdfConversionService {
             // unique host temp dir name so it cannot collide across pooled invocations.
             Path profileDirName = hostDir.getFileName();
             if (profileDirName == null) {
-                throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+                throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
             }
             containerProfile = "/tmp/docgen-lo-profile-" + profileDirName;
 
@@ -102,16 +102,16 @@ public class DockerExecPdfConversionService implements PdfConversionService {
             Path outputPdf = hostDir.resolve("input.pdf");
             runCommand(renderingProperties.getDockerCliCommand(), "cp", container + ":/tmp/input.pdf", outputPdf.toString());
             if (!Files.exists(outputPdf)) {
-                throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+                throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
             }
             byte[] converted = Files.readAllBytes(outputPdf);
             PdfPageStampResult stampResult = pdfConversionPostProcessor.finishPdf(converted, options);
             return DocumentArtifactPipeline.PdfConversionResult.of(stampResult.pdfBytes(), stampResult);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+            throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
         } catch (IOException ex) {
-            throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+            throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
         } finally {
             if (hostDir != null) {
                 try {
@@ -156,7 +156,7 @@ public class DockerExecPdfConversionService implements PdfConversionService {
         Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
         boolean finished = process.waitFor(renderingProperties.getConversionTimeoutSeconds(), TimeUnit.SECONDS);
         if (!finished || process.exitValue() != 0) {
-            throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+            throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
         }
     }
 }

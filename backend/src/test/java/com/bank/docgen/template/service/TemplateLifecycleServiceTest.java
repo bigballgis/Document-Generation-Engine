@@ -23,6 +23,7 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.apimgmt.service.ApiPolicyMaterializationService;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
@@ -95,7 +96,8 @@ class TemplateLifecycleServiceTest {
                 approvalSubStateResolver,
                 apiPolicyMaterializationService,
                 apiPolicyRepository,
-                versionFidelityWarningService
+                versionFidelityWarningService,
+                new ObjectMapper()
         );
         author = new ManagementSessionClaims(
                 "10000003",

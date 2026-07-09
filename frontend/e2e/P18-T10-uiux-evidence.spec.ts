@@ -1,5 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 
+import { requireDockerStack } from './helpers/stack-readiness'
+
 import { E2E_TEMPLATE_AUTHOR, loginAs } from './helpers/auth'
 import { E2E_API_BASE_URL } from './helpers/masters-api'
 import {
@@ -54,24 +56,7 @@ test.describe('P18-T10 UIUX evidence', () => {
   test.beforeAll(async ({ request }) => {
     ensureP18T10EvidenceDirs()
 
-    let backendReady = false
-    let frontendReady = false
-    try {
-      const backend = await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })
-      backendReady = backend.ok()
-    } catch {
-      backendReady = false
-    }
-    try {
-      const frontend = await request.get(FRONTEND_BASE_URL, { timeout: 5_000 })
-      frontendReady = frontend.ok()
-    } catch {
-      frontendReady = false
-    }
-    test.skip(
-      !(backendReady && frontendReady),
-      `Docker stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Start with .\\scripts\\docker-deploy.ps1`,
-    )
+    await requireDockerStack(request, { frontendBaseUrl: FRONTEND_BASE_URL, skipMessage: `Docker stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Start with .\\scripts\\docker-deploy.ps1` })
 
     cleanFixture = await prepareDraftTemplateWithCleanBinding(request)
     warningFixture = await prepareDraftTemplateWithImageScalingBinding(request)

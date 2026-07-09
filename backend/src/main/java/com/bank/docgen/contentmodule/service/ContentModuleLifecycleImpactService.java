@@ -34,7 +34,7 @@ public class ContentModuleLifecycleImpactService {
             RuntimeGenerationAuditRecorder.EVENT_BATCH_SYNC
     );
 
-    private final ContentModuleAccessSupport accessSupport;
+    private final ContentModuleAccessService accessSupport;
     private final GroupAccessService groupAccessService;
     private final ContentModuleVersionRepository versionRepository;
     private final TemplateContentModuleReferenceRepository referenceRepository;
@@ -44,7 +44,7 @@ public class ContentModuleLifecycleImpactService {
     private final RuntimeGenerationAuditEventRepository runtimeAuditRepository;
 
     public ContentModuleLifecycleImpactService(
-            ContentModuleAccessSupport accessSupport,
+            ContentModuleAccessService accessSupport,
             GroupAccessService groupAccessService,
             ContentModuleVersionRepository versionRepository,
             TemplateContentModuleReferenceRepository referenceRepository,

@@ -361,10 +361,10 @@
           "children": [{"type": "text", "value": "Repayment Schedule"}]
         },
         {
-          "type": "paragraph",
+          "type": "sectionHeading",
           "styleRef": "ScheduleTitle",
           "children": [
-            {"type": "textRun", "value": "Schedule 1 — Indicative Repayment Profile (subject to adjustment on each Interest Payment Date)"}
+            {"type": "text", "value": "Schedule 1 — Indicative Repayment Profile (subject to adjustment on each Interest Payment Date)"}
           ]
         },
         {

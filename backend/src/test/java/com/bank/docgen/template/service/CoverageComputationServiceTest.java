@@ -4,9 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
-import com.bank.docgen.rendering.domain.PreviewStatus;
-import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
-import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
+import com.bank.docgen.template.port.PreviewEvidencePort;
+import java.util.Set;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CoverageSummaryView;
 import com.bank.docgen.template.api.CoverageThresholdView;
@@ -44,7 +43,7 @@ class CoverageComputationServiceTest {
     @Mock
     private TestDataSetRepository testDataSetRepository;
     @Mock
-    private PreviewRecordRepository previewRecordRepository;
+    private PreviewEvidencePort previewEvidencePort;
     @Mock
     private AnchorBindingRepository anchorBindingRepository;
     @Mock
@@ -65,7 +64,7 @@ class CoverageComputationServiceTest {
                 templateVersionRepository,
                 variableSchemaRepository,
                 testDataSetRepository,
-                previewRecordRepository,
+                previewEvidencePort,
                 anchorBindingRepository,
                 coverageThresholdResolver,
                 new ObjectMapper(),
@@ -100,9 +99,8 @@ class CoverageComputationServiceTest {
                 .thenReturn(new CoverageThresholdView("GLOBAL", null, 80, 100, 80));
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
                 .thenReturn(List.of(validBinding("ANCHOR-1")));
-        when(previewRecordRepository.findByTemplateIdAndTemplateVersionIdAndStatus(
-                templateId, versionId, PreviewStatus.SUCCEEDED))
-                .thenReturn(List.of());
+        when(previewEvidencePort.successfulPreviewTestDataSetExternalIds(templateId, versionId))
+                .thenReturn(Set.of());
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.bank.docgen.authoring.structured;
 
 import com.bank.docgen.rendering.api.FidelityWarningView;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;

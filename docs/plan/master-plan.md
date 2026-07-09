@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **None** (2026-07-09). **CORE-FORTRESS program Done** — F1–F8 complete (F8 observability/SLO/DR/evidence bundle; `mvn verify` **1154**; arch review PASS). **Prior:** **CORE-FORTRESS-F7 Done** (2026-07-09; authoring UX — `useDirtyGuard` + side-by-side preview; Vitest **894**; E2E **12/12**; LR-C1/C4 mirrored Done); **CORE-FORTRESS-F6 Done** (2026-07-09; frontend kernel refactor; controller **243** lines; composable **73** Vitest; F6-T08 E2E parity **9/9**); **CORE-FORTRESS-F5 Done** (2026-07-09; F5 targeted **31/31**; full `mvn verify` Windows file-lock caveat); **CORE-FORTRESS-F4 Done** (2026-07-09); **CORE-FORTRESS-F3 Done** (2026-07-09); **CORE-FORTRESS-F2 Done** (2026-07-09); **CORE-FORTRESS-F1 Done** (2026-07-09). **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08).
+**Active formal program:** **None** (2026-07-09). **CODE-QUALITY program Done** — CQ-01A…CQ-08; ArchUnit **11/11**; `mvn verify` **GREEN**; `pnpm` **894** tests + build **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete (F8 observability/SLO/DR/evidence bundle). **Prior:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
@@ -66,7 +66,10 @@ upstream systems invoke the dynamic API.
 | CORE-FORTRESS F6 | Frontend kernel refactor | F5 | Composable decomposition; zero behavior change; Bank OA lock | **Done** (2026-07-09; controller **243** lines; composable **73** Vitest; F6-T08 E2E **9/9**) |
 | CORE-FORTRESS F7 | Authoring UX (dirty guard, side-by-side preview) | F5, F6 | `useDirtyGuard`; side-by-side preview; LR-C1/C4 | **Done** (2026-07-09; Vitest **894**; E2E **12/12**) |
 | CORE-FORTRESS F8 | Observability, SLO, DR, evidence bundle | F1–F7 | Micrometer SLOs; deep readiness; DR playbook; evidence bundle | **Done** (2026-07-09; `mvn verify` **1154**; arch review PASS) |
+| CODE-QUALITY | Code hygiene & structural consistency | CORE-FORTRESS F1–F8 | Module boundary decoupling; god-class extraction; DRY demo/PDF/E2E infra; naming normalization — zero behavior change | **Done** (2026-07-09; CQ-01A…CQ-08; ArchUnit **11/11**) |
 
+> **CODE-QUALITY program (closed):** [code-quality-program.md](./code-quality-program.md) — **Done** (2026-07-09); detail [detail/CODE-QUALITY-code-hygiene.md](./detail/CODE-QUALITY-code-hygiene.md). BDD **`not-applicable`** (refactor only).
+>
 > **CORE-FORTRESS program:** [detail/CORE-FORTRESS-program-roadmap.md](./detail/CORE-FORTRESS-program-roadmap.md) — **Done** (F1–F8; 2026-07-09).
 >
 > **P23 vs P22:** **P22 Done** — closed rendering **engine** and deploy **scaffold**. **P23 Done** (2026-07-08) — bank-grade Word typography/layout for all demo packages; pairs with **LR-A2** (font baseline **Done**) and unblocks **LR-A7** (pagination corpus). Detail: [detail/P23-demo-typography-layout-excellence.md](./detail/P23-demo-typography-layout-excellence.md).
@@ -81,7 +84,7 @@ upstream systems invoke the dynamic API.
 > **P22 (Done 2026-07-04):** rendering engine + demo scaffolds — typography/content excellence → **P23**.
 >
 > **CDP (parallel program):** [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) — Wave CD-0…CD-3; task prefix **`CD-*`** only.
-> **LRP (In Progress — Wave LR-B Done 2026-07-04; Wave LR-A activated 2026-07-04; Wave LR-C In Progress — LR-C1/C4 Done via F7):** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; program (not a formal phase). **LR-A2** (font baseline) and **LR-A7** (pagination corpus) coordinate with **P23** — see [P23 detail](./detail/P23-demo-typography-layout-excellence.md) §5.
+> **LRP (sibling program — not sole active):** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; **LR-C1/C4 Done** via CORE-FORTRESS F7. **No** formal program `In Progress` (2026-07-09) — new work via `.taskmaster/`.
 
 ## Thin vertical slice (MVP chain)
 

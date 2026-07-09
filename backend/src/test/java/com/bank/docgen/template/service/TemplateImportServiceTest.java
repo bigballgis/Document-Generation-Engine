@@ -79,7 +79,7 @@ class TemplateImportServiceTest {
                 templateService,
                 contentModuleReferenceService,
                 managementAuditRecorder,
-                new TemplateExportAccessSupport(new GroupAccessService()),
+                new TemplateExportAccessService(new GroupAccessService()),
                 new TemplateImportBundleValidator(new ObjectMapper().findAndRegisterModules()),
                 new ObjectMapper().findAndRegisterModules(),
                 templateCurrentVersionResolver

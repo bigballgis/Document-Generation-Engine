@@ -19,6 +19,7 @@ import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -89,7 +90,8 @@ class TemplateLifecyclePublishGateTest {
                 approvalSubStateResolver,
                 apiPolicyMaterializationService,
                 apiPolicyRepository,
-                versionFidelityWarningService
+                versionFidelityWarningService,
+                new ObjectMapper()
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",

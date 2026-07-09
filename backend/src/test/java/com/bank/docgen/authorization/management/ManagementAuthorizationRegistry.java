@@ -163,6 +163,18 @@ final class ManagementAuthorizationRegistry {
                     "com.bank.docgen.template.service.TemplateService"
             ),
             Map.entry(
+                    "com.bank.docgen.rendering.service.BatchTestGenerationService",
+                    "com.bank.docgen.template.service.TemplatePreviewAuthorizationAdapter"
+            ),
+            Map.entry(
+                    "com.bank.docgen.rendering.service.AsyncBatchTestOrchestrator",
+                    "com.bank.docgen.template.service.TemplatePreviewAuthorizationAdapter"
+            ),
+            Map.entry(
+                    "com.bank.docgen.rendering.service.AsyncPreviewOrchestrator",
+                    "com.bank.docgen.template.service.TemplatePreviewAuthorizationAdapter"
+            ),
+            Map.entry(
                     "com.bank.docgen.rendering.service.PreviewArtifactDownloadService",
                     "com.bank.docgen.template.service.TemplateService"
             ),
@@ -192,11 +204,11 @@ final class ManagementAuthorizationRegistry {
             ),
             Map.entry(
                     "com.bank.docgen.template.service.TemplateExportService",
-                    "com.bank.docgen.template.service.TemplateExportAccessSupport"
+                    "com.bank.docgen.template.service.TemplateExportAccessService"
             ),
             Map.entry(
                     "com.bank.docgen.template.service.TemplateImportService",
-                    "com.bank.docgen.template.service.TemplateExportAccessSupport"
+                    "com.bank.docgen.template.service.TemplateExportAccessService"
             ),
             Map.entry(
                     "com.bank.docgen.template.service.TemplateRuleValidationService",
@@ -240,12 +252,10 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.contentmodule.service.ContentModuleService",
             "com.bank.docgen.master.service.MasterDocumentService",
             "com.bank.docgen.master.service.MasterRevisionLineService",
-            "com.bank.docgen.rendering.service.AsyncBatchTestOrchestrator",
-            "com.bank.docgen.rendering.service.AsyncPreviewOrchestrator",
-            "com.bank.docgen.rendering.service.BatchTestGenerationService",
             "com.bank.docgen.template.service.TemplateDeleteService",
-            "com.bank.docgen.template.service.TemplateExportAccessSupport",
+            "com.bank.docgen.template.service.TemplateExportAccessService",
             "com.bank.docgen.template.service.TemplateLifecycleService",
+            "com.bank.docgen.template.service.TemplatePreviewAuthorizationAdapter",
             "com.bank.docgen.template.service.TemplateService",
             "com.bank.docgen.template.service.TemplateVersionLineService",
             "com.bank.docgen.template.service.TestDataSetService"

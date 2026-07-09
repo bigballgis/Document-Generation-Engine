@@ -1,5 +1,6 @@
 package com.bank.docgen.authoring.structured;
 
+import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;

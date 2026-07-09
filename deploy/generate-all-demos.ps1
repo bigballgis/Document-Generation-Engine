@@ -22,7 +22,8 @@ param(
     [string]$CredentialDir = '',
     [string]$OutputDir = '',
     [string]$EvidenceDir = '',
-    [switch]$SkipAuditFetch
+    [switch]$SkipAuditFetch,
+    [switch]$ContinueOnFailure
 )
 
 $ErrorActionPreference = 'Stop'
@@ -48,7 +49,7 @@ function Invoke-MgmtApi {
 function Get-TemplateDetailByExternalId {
     param([string]$ExternalId, [string]$AccessToken)
     $list = Invoke-MgmtApi GET '/templates?size=200' $AccessToken
-    $content = if ($list.result.content) { @($list.result.content) } else { @($list.result) }
+    $content = Get-DemoApiResultItems -Response $list
     return $content | Where-Object { $_.externalId -eq $ExternalId } | Select-Object -First 1
 }
 
@@ -274,10 +275,10 @@ foreach ($templateEntry in @($manifest.templates)) {
             throw "DOCX below size floor for $externalId"
         }
         if (-not $artifactChecks.contentMarkersPassed) {
-            throw "DOCX missing content markers for $externalId: $($artifactChecks.missingMarkers -join ', ')"
+            throw "DOCX missing content markers for ${externalId}: $($artifactChecks.missingMarkers -join ', ')"
         }
         if (-not $artifactChecks.forbiddenPatternScanPassed) {
-            throw "DOCX contains forbidden patterns for $externalId: $($artifactChecks.forbiddenHits -join ', ')"
+            throw "DOCX contains forbidden patterns for ${externalId}: $($artifactChecks.forbiddenHits -join ', ')"
         }
 
         $auditSummary = $null
@@ -348,7 +349,11 @@ $manifestPath = Join-Path $EvidenceDir 'generated-docx-manifest.json'
 ($evidence | ConvertTo-Json -Depth 20) | Set-Content $manifestPath -Encoding UTF8
 Write-GenerateStep "evidence written to $manifestPath ($successCount/$($manifest.templates.Count) succeeded)"
 
-if ($failureCount -gt 0) {
+if ($failureCount -gt 0 -and -not $ContinueOnFailure) {
     throw "generate-all-demos completed with $failureCount failure(s); see $manifestPath"
 }
-Write-GenerateStep 'completed successfully'
+if ($failureCount -gt 0) {
+    Write-Warning "generate-all-demos completed with $failureCount failure(s); see $manifestPath"
+} else {
+    Write-GenerateStep 'completed successfully'
+}

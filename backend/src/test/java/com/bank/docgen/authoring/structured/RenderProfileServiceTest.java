@@ -3,6 +3,7 @@ package com.bank.docgen.authoring.structured;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
+import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;

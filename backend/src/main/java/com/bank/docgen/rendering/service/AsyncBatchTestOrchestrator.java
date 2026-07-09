@@ -1,6 +1,5 @@
 package com.bank.docgen.rendering.service;
 
-import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.rendering.api.AsyncBatchStartResponse;
 import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.domain.PreviewStatus;
@@ -10,10 +9,9 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CoverageSummaryView;
 import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
-import com.bank.docgen.template.service.CoverageComputationService;
-import com.bank.docgen.template.service.TemplateAccessDeniedException;
-import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.port.TemplateCoveragePort;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
+import com.bank.docgen.template.port.TemplateRenderContextPort;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -37,36 +35,37 @@ public class AsyncBatchTestOrchestrator {
     private static final int MAX_VISIBLE_RUNS = 5;
     private static final String BATCH_STORAGE_PREFIX = "batch-test/";
 
-    private final TemplateService templateService;
-    private final GroupAccessService groupAccessService;
+    private static final String DIMENSION_ANCHOR_BINDINGS = "ANCHOR_BINDINGS";
+    private static final String DIMENSION_REQUIRED_VARIABLES = "REQUIRED_VARIABLES";
+    private static final String DIMENSION_REQUIRED_SAMPLES = "REQUIRED_SAMPLES";
+
+    private final TemplatePreviewAuthorizationPort previewAuthorizationPort;
     private final PreviewGenerationService previewGenerationService;
     private final BatchTestRunRepository batchTestRunRepository;
     private final TestDataSetRepository testDataSetRepository;
-    private final CoverageComputationService coverageComputationService;
-    private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
+    private final TemplateCoveragePort templateCoveragePort;
+    private final TemplateRenderContextPort renderContextPort;
     private final SseEmitterRegistry batchSseRegistry;
     private final ObjectMapper objectMapper;
     private final Executor asyncExecutor;
 
     public AsyncBatchTestOrchestrator(
-            TemplateService templateService,
-            GroupAccessService groupAccessService,
+            TemplatePreviewAuthorizationPort previewAuthorizationPort,
             PreviewGenerationService previewGenerationService,
             BatchTestRunRepository batchTestRunRepository,
             TestDataSetRepository testDataSetRepository,
-            CoverageComputationService coverageComputationService,
-            TemplateCurrentVersionResolver templateCurrentVersionResolver,
+            TemplateCoveragePort templateCoveragePort,
+            TemplateRenderContextPort renderContextPort,
             @Qualifier("batchSseRegistry") SseEmitterRegistry batchSseRegistry,
             ObjectMapper objectMapper,
             @Qualifier("asyncTaskExecutor") Executor asyncExecutor
     ) {
-        this.templateService = templateService;
-        this.groupAccessService = groupAccessService;
+        this.previewAuthorizationPort = previewAuthorizationPort;
         this.previewGenerationService = previewGenerationService;
         this.batchTestRunRepository = batchTestRunRepository;
         this.testDataSetRepository = testDataSetRepository;
-        this.coverageComputationService = coverageComputationService;
-        this.templateCurrentVersionResolver = templateCurrentVersionResolver;
+        this.templateCoveragePort = templateCoveragePort;
+        this.renderContextPort = renderContextPort;
         this.batchSseRegistry = batchSseRegistry;
         this.objectMapper = objectMapper;
         this.asyncExecutor = asyncExecutor;
@@ -81,12 +80,10 @@ public class AsyncBatchTestOrchestrator {
             ManagementSessionClaims session,
             String baseUrl
     ) {
-        templateService.requireReadableTemplate(templateId, session);
-        if (!groupAccessService.canAuthorTemplates(session)) {
-            throw new TemplateAccessDeniedException();
-        }
+        previewAuthorizationPort.requireReadableSnapshot(templateId, session);
+        previewAuthorizationPort.requirePreviewAuthor(session);
 
-        var version = templateCurrentVersionResolver.requireInFlightDevVersion(templateId);
+        var version = renderContextPort.requireInFlightDevVersion(templateId);
         List<TestDataSetEntity> dataSets =
                 testDataSetRepository.findByTemplateIdOrderByUpdatedAtDesc(templateId);
 
@@ -110,7 +107,7 @@ public class AsyncBatchTestOrchestrator {
      * Creates an SSE emitter for streaming batch test progress.
      */
     public SseEmitter streamProgress(UUID templateId, UUID runId, ManagementSessionClaims session) {
-        templateService.requireReadableTemplate(templateId, session);
+        previewAuthorizationPort.requireReadableSnapshot(templateId, session);
         return batchSseRegistry.register(runId);
     }
 
@@ -173,9 +170,9 @@ public class AsyncBatchTestOrchestrator {
 
             CoverageSummaryView coverage = computeCoverage(templateId, session);
 
-            BigDecimal anchorPct = coverageToBigDecimal(coverage, CoverageComputationService.DIMENSION_ANCHOR_BINDINGS);
-            BigDecimal variablePct = coverageToBigDecimal(coverage, CoverageComputationService.DIMENSION_REQUIRED_VARIABLES);
-            BigDecimal samplePct = coverageToBigDecimal(coverage, CoverageComputationService.DIMENSION_REQUIRED_SAMPLES);
+            BigDecimal anchorPct = coverageToBigDecimal(coverage, DIMENSION_ANCHOR_BINDINGS);
+            BigDecimal variablePct = coverageToBigDecimal(coverage, DIMENSION_REQUIRED_VARIABLES);
+            BigDecimal samplePct = coverageToBigDecimal(coverage, DIMENSION_REQUIRED_SAMPLES);
 
             final int finalSucceededCount = succeededCount;
             final int finalFailedCount = failedCount;
@@ -221,7 +218,7 @@ public class AsyncBatchTestOrchestrator {
 
     private CoverageSummaryView computeCoverage(UUID templateId, ManagementSessionClaims session) {
         try {
-            return coverageComputationService.compute(templateId, session);
+            return templateCoveragePort.compute(templateId, session);
         } catch (Exception ex) {
             LOG.warn("Failed to compute coverage for templateId={}: {}", templateId, ex.getMessage());
             return null;

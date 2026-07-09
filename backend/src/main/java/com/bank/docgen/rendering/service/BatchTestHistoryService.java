@@ -6,7 +6,7 @@ import com.bank.docgen.rendering.domain.BatchTestRunStatus;
 import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
 import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,16 +18,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BatchTestHistoryService {
 
-    private final TemplateService templateService;
+    private final TemplatePreviewAuthorizationPort previewAuthorizationPort;
     private final BatchTestRunRepository batchTestRunRepository;
     private final ManagementUserDisplayService managementUserDisplayService;
 
     public BatchTestHistoryService(
-            TemplateService templateService,
+            TemplatePreviewAuthorizationPort previewAuthorizationPort,
             BatchTestRunRepository batchTestRunRepository,
             ManagementUserDisplayService managementUserDisplayService
     ) {
-        this.templateService = templateService;
+        this.previewAuthorizationPort = previewAuthorizationPort;
         this.batchTestRunRepository = batchTestRunRepository;
         this.managementUserDisplayService = managementUserDisplayService;
     }
@@ -38,7 +38,7 @@ public class BatchTestHistoryService {
             int limit,
             ManagementSessionClaims session
     ) {
-        templateService.requireReadableTemplate(templateId, session);
+        previewAuthorizationPort.requireReadableSnapshot(templateId, session);
         return enrichSummaries(batchTestRunRepository.findByTemplateIdAndHiddenFalseOrderByCreatedAtDesc(templateId)
                 .stream()
                 .limit(limit)

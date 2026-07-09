@@ -6,7 +6,7 @@ import com.bank.docgen.demo.support.DemoMasterDocxAssertions;
 import com.bank.docgen.rendering.PdfPageNumberStampPlan;
 import com.bank.docgen.rendering.PdfPageNumberStamper;
 import com.bank.docgen.rendering.PdfPageStampResult;
-import com.bank.docgen.rendering.domain.FidelityWarningCode;
+import com.bank.docgen.sharedkernel.document.fidelity.FidelityWarningCode;
 import java.io.ByteArrayOutputStream;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;

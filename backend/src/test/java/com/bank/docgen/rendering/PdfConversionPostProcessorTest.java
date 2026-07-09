@@ -3,7 +3,7 @@ package com.bank.docgen.rendering;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
-import com.bank.docgen.rendering.domain.FidelityWarningCode;
+import com.bank.docgen.sharedkernel.document.fidelity.FidelityWarningCode;
 import java.io.ByteArrayOutputStream;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -67,7 +67,7 @@ class PdfConversionPostProcessorTest {
                 new DocxPdfConversionPreprocessor()
         );
         assertThat(processor.isStampingEnabled(
-                com.bank.docgen.authoring.structured.RenderProfile.fromJsonNode(
+                com.bank.docgen.sharedkernel.document.RenderProfile.fromJsonNode(
                         new com.fasterxml.jackson.databind.ObjectMapper().readTree("""
                                 {"pdfPageNumberStampingEnabled": true}
                                 """)

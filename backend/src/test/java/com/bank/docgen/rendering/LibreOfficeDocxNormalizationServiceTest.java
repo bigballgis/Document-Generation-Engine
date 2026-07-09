@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
-import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.rendering.RenderingOperationException;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import java.io.IOException;
@@ -68,7 +68,7 @@ class LibreOfficeDocxNormalizationServiceTest {
         long profileDirsBefore = countTempDirs("docgen-lo-norm-profile-");
 
         assertThatThrownBy(() -> service.normalize(minimalDocxBytes()))
-                .isInstanceOf(TemplateValidationException.class);
+                .isInstanceOf(RenderingOperationException.class);
         assertThat(countTempDirs("docgen-lo-norm-profile-")).isEqualTo(profileDirsBefore);
     }
 

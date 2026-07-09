@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
-import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.rendering.api.AsyncPreviewStartResponse;
 import com.bank.docgen.rendering.api.PreviewComparisonView;
 import com.bank.docgen.rendering.api.PreviewRecordView;
@@ -18,8 +17,8 @@ import com.bank.docgen.rendering.api.TestGenerateRequest;
 import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.persistence.TemplateEntity;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.port.RenderableTemplateSnapshot;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -35,9 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AsyncPreviewOrchestratorTest {
 
     @Mock
-    private TemplateService templateService;
-    @Mock
-    private GroupAccessService groupAccessService;
+    private TemplatePreviewAuthorizationPort previewAuthorizationPort;
     @Mock
     private PreviewGenerationService previewGenerationService;
     @Mock
@@ -59,7 +56,7 @@ class AsyncPreviewOrchestratorTest {
         concurrencyGuard = new PreviewConcurrencyGuard(3);
         sseRegistry = new SseEmitterRegistry();
         orchestrator = new AsyncPreviewOrchestrator(
-                templateService, groupAccessService, previewGenerationService,
+                previewAuthorizationPort, previewGenerationService,
                 previewRecordRepository, concurrencyGuard, sseRegistry, syncExecutor
         );
         templateId = UUID.randomUUID();
@@ -69,9 +66,9 @@ class AsyncPreviewOrchestratorTest {
                 List.of("RETAIL"), "route.home", List.of("route.home"),
                 Instant.now().plusSeconds(3600)
         );
-        when(templateService.requireReadableTemplate(templateId, session))
-                .thenReturn(new TemplateEntity(templateId, "TPL-1", "RETAIL", "Demo", null, UUID.randomUUID(), "author"));
-        when(groupAccessService.canAuthorTemplates(session)).thenReturn(true);
+        UUID masterId = UUID.randomUUID();
+        when(previewAuthorizationPort.requireReadableSnapshot(templateId, session))
+                .thenReturn(new RenderableTemplateSnapshot(templateId, masterId, "RETAIL"));
     }
 
     @Test

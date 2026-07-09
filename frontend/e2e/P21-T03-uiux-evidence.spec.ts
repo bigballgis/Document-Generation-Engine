@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { requireDockerStack } from './helpers/stack-readiness'
+
 import { E2E_MASTER_DESIGNER, loginAs } from './helpers/auth'
 import { demoMasterDetailPath } from './helpers/masters-api'
 import {
@@ -18,22 +20,7 @@ test.describe('P21-T03 UIUX evidence', () => {
 
   test.beforeAll(async ({ request }) => {
     ensureP21T03EvidenceDirs()
-    let backendReady = false
-    let frontendReady = false
-    try {
-      backendReady = (await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })).ok()
-    } catch {
-      backendReady = false
-    }
-    try {
-      frontendReady = (await request.get(FRONTEND_BASE_URL, { timeout: 5_000 })).ok()
-    } catch {
-      frontendReady = false
-    }
-    test.skip(
-      !(backendReady && frontendReady),
-      `Stack required (${FRONTEND_BASE_URL} + :8080).`,
-    )
+    await requireDockerStack(request, { frontendBaseUrl: FRONTEND_BASE_URL, skipMessage: `Stack required (${FRONTEND_BASE_URL} + :8080).` })
   })
 
   test.beforeEach(async ({ page }) => {

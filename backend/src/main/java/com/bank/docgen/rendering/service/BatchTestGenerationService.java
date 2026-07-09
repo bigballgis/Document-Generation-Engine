@@ -7,10 +7,8 @@ import com.bank.docgen.rendering.api.PreviewRecordView;
 import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
 import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
-import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.service.TemplateAccessDeniedException;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -22,23 +20,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BatchTestGenerationService {
 
-    private final TemplateService templateService;
+    private final TemplatePreviewAuthorizationPort previewAuthorizationPort;
     private final PreviewGenerationService previewGenerationService;
     private final BatchTestRunRepository batchTestRunRepository;
-    private final GroupAccessService groupAccessService;
     private final ObjectMapper objectMapper;
 
     public BatchTestGenerationService(
-            TemplateService templateService,
+            TemplatePreviewAuthorizationPort previewAuthorizationPort,
             PreviewGenerationService previewGenerationService,
             BatchTestRunRepository batchTestRunRepository,
-            GroupAccessService groupAccessService,
             ObjectMapper objectMapper
     ) {
-        this.templateService = templateService;
+        this.previewAuthorizationPort = previewAuthorizationPort;
         this.previewGenerationService = previewGenerationService;
         this.batchTestRunRepository = batchTestRunRepository;
-        this.groupAccessService = groupAccessService;
         this.objectMapper = objectMapper;
     }
 
@@ -48,10 +43,8 @@ public class BatchTestGenerationService {
             BatchTestGenerateRequest request,
             ManagementSessionClaims session
     ) {
-        templateService.requireReadableTemplate(templateId, session);
-        if (!groupAccessService.canAuthorTemplates(session)) {
-            throw new TemplateAccessDeniedException();
-        }
+        previewAuthorizationPort.requireReadableSnapshot(templateId, session);
+        previewAuthorizationPort.requirePreviewAuthor(session);
 
         UUID batchRunId = UUID.randomUUID();
         BatchTestRunEntity run = new BatchTestRunEntity(

@@ -9,11 +9,8 @@ import static org.mockito.Mockito.when;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.domain.AuthSource;
-import com.bank.docgen.rendering.domain.PreviewStatus;
-import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
-import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
-import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
-import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
+import com.bank.docgen.template.port.BatchTestRunGateSnapshot;
+import com.bank.docgen.template.port.PreviewEvidencePort;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.BindingValidationSummaryView;
 import com.bank.docgen.template.api.BindingValidationView;
@@ -58,9 +55,7 @@ class PublishGateServiceTest {
     @Mock
     private ApiPolicyRepository apiPolicyRepository;
     @Mock
-    private PreviewRecordRepository previewRecordRepository;
-    @Mock
-    private BatchTestRunRepository batchTestRunRepository;
+    private PreviewEvidencePort previewEvidencePort;
     @Mock
     private CoverageComputationService coverageComputationService;
     @Mock
@@ -87,8 +82,7 @@ class PublishGateServiceTest {
                 templateVersionRepository,
                 lifecycleRecordRepository,
                 apiPolicyRepository,
-                previewRecordRepository,
-                batchTestRunRepository,
+                previewEvidencePort,
                 coverageComputationService,
                 changeDiffService,
                 templateRuleValidationService,
@@ -137,15 +131,10 @@ class PublishGateServiceTest {
         when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
                 .thenReturn(List.of(new VariableSchemaEntity(
                         UUID.randomUUID(), versionId, "field", VariableType.TEXT, true, null, null, "desc", null)));
-        when(batchTestRunRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
-                .thenReturn(List.of(new BatchTestRunEntity(
-                        UUID.randomUUID(), templateId, "10000002", 1, 1, 0, 0, 0, "[]")));
-        when(previewRecordRepository.findByTemplateIdAndTemplateVersionIdAndStatus(
-                templateId, versionId, PreviewStatus.SUCCEEDED))
-                .thenReturn(List.of(successfulPreview()));
-        when(previewRecordRepository.findByTemplateIdAndTemplateVersionIdAndStatus(
-                templateId, versionId, PreviewStatus.FAILED))
-                .thenReturn(List.of());
+        when(previewEvidencePort.latestBatchTestRun(templateId))
+                .thenReturn(Optional.of(new BatchTestRunGateSnapshot(0)));
+        when(previewEvidencePort.countSuccessfulPreviews(templateId, versionId)).thenReturn(1);
+        when(previewEvidencePort.countFailedPreviews(templateId, versionId)).thenReturn(0);
         when(contentModuleReferenceService.validateReferences(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 0, 0));
     }
@@ -196,8 +185,7 @@ class PublishGateServiceTest {
     void publishGate_isEvaluatedLive_notStaticText() {
         when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
-        when(batchTestRunRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
-                .thenReturn(List.of());
+        when(previewEvidencePort.latestBatchTestRun(templateId)).thenReturn(Optional.empty());
 
         PublishGateChecklistView checklist = service.evaluate(templateId, admin);
 
@@ -406,20 +394,5 @@ class PublishGateServiceTest {
                 null,
                 "10000007"
         );
-    }
-
-    private PreviewRecordEntity successfulPreview() {
-        PreviewRecordEntity preview = new PreviewRecordEntity(
-                UUID.randomUUID(),
-                templateId,
-                versionId,
-                "DOCX",
-                "hash",
-                "10000002",
-                "TDS-1",
-                null
-        );
-        preview.markSucceeded("previews/test/output.docx", "previews/test/output.pdf", "[]");
-        return preview;
     }
 }

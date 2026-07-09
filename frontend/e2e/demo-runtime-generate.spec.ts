@@ -15,6 +15,8 @@
  */
 import { expect, test } from '@playwright/test'
 
+import { requireBackendReady } from './helpers/stack-readiness'
+
 import {
   assertDocxArtifact,
   DEMO_PUBLISH_EXTERNAL_IDS,
@@ -25,13 +27,9 @@ import {
 
 test.describe('Demo bank-grade runtime generate (BDD-DEMO-TYP-011/012)', () => {
   test.beforeAll(async ({ request }) => {
-    let backendReady = false
-    try {
-      backendReady = (await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })).ok()
-    } catch {
-      backendReady = false
-    }
-    test.skip(!backendReady, 'Backend :8080 required for demo runtime generate E2E.')
+    await requireBackendReady(request, {
+      skipMessage: 'Backend :8080 required for demo runtime generate E2E.',
+    })
   })
 
   test('publish registry has 13 runtime cases', () => {

@@ -1,5 +1,7 @@
 package com.bank.docgen.audit.service;
 
+import com.bank.docgen.audit.api.GenerationAuditEventView;
+import com.bank.docgen.audit.api.GenerationAuditQueryResult;
 import com.bank.docgen.audit.api.AuditPagedResult;
 import com.bank.docgen.audit.api.LifecycleAuditExportResult;
 import com.bank.docgen.audit.api.LifecycleAuditQueryResult;
@@ -16,6 +18,7 @@ import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventEntity;
 import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
@@ -131,6 +134,44 @@ public class AuditQueryService {
                 safeSize,
                 totalElements,
                 totalPages
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public GenerationAuditQueryResult queryGenerationEventsByExternalId(
+            ManagementSessionClaims session,
+            String templateExternalId,
+            Integer page,
+            Integer size
+    ) {
+        if (!groupAccessService.canReadAudit(session)) {
+            throw new AuditAccessDeniedException();
+        }
+        TemplateEntity template = templateService.requireTemplateByExternalId(templateExternalId.trim());
+        templateService.requireReadableTemplate(template.getId(), session);
+        int safePage = AuditPagedResult.normalizePage(page);
+        int safeSize = AuditPagedResult.normalizeSize(size);
+        AuditSearchPage<RuntimeGenerationAuditEventEntity> searchPage =
+                runtimeGenerationAuditEventRepository.searchPaged(
+                        template.getId(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        safePage,
+                        safeSize
+                );
+        List<GenerationAuditEventView> content = searchPage.content().stream()
+                .map(entity -> toGenerationAuditEventView(entity, template.getExternalId()))
+                .toList();
+        return new GenerationAuditQueryResult(
+                content,
+                safePage,
+                safeSize,
+                searchPage.totalElements(),
+                searchPage.totalPages()
         );
     }
 
@@ -540,6 +581,32 @@ public class AuditQueryService {
                 record.getCommentSummary(),
                 List.of()
         );
+    }
+
+    private GenerationAuditEventView toGenerationAuditEventView(
+            RuntimeGenerationAuditEventEntity entity,
+            String templateExternalId
+    ) {
+        return new GenerationAuditEventView(
+                entity.getEventAt(),
+                entity.getEventType(),
+                templateExternalId,
+                entity.getRequestId(),
+                entity.getOutcome(),
+                mapGenerationAuditStatus(entity.getOutcome()),
+                auditMaskingService.maskActorSummary(entity.getAccessAccount())
+        );
+    }
+
+    private static String mapGenerationAuditStatus(String outcome) {
+        if (RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS.equals(outcome)
+                || RuntimeGenerationAuditRecorder.OUTCOME_REPLAYED.equals(outcome)) {
+            return "SUCCEEDED";
+        }
+        if (RuntimeGenerationAuditRecorder.OUTCOME_FAILURE.equals(outcome)) {
+            return "FAILED";
+        }
+        return outcome;
     }
 
     private List<String> readStringList(String json) {

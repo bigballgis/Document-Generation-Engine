@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
+import com.bank.docgen.demo.support.DemoMasterDocxTestAssertions;
 import org.apache.poi.wp.usermodel.HeaderFooterType;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -39,11 +39,6 @@ class FolMasterDocxAssetGeneratorTest {
     static final String MASTER_LAYOUT_VERSION = "fol-layout-v6-bank-style-manifest";
 
     private static final Path ASSET_PATH = Path.of("..", "deploy", "demo-fol", "assets", "wholesale-fol-master.docx");
-
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(
-            "LOREM|TODO|\\{\\{placeholder|placeholder text",
-            Pattern.CASE_INSENSITIVE
-    );
 
     private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER =
             new com.fasterxml.jackson.databind.ObjectMapper();
@@ -73,7 +68,7 @@ class FolMasterDocxAssetGeneratorTest {
         String footerXml = DemoMasterDocxAssertions.readFooterXml(docx);
         assertThat(footerXml).contains("SECTIONPAGES").contains("NUMPAGES");
 
-        assertNoPlaceholderMarkers(docx);
+        DemoMasterDocxTestAssertions.assertNoPlaceholderMarkers(docx);
 
         try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docx))) {
             assertThat(document.getHeaderList()).isNotEmpty();
@@ -128,21 +123,6 @@ class FolMasterDocxAssetGeneratorTest {
         }
     }
 
-    private static void assertNoPlaceholderMarkers(byte[] docxBytes) throws Exception {
-        try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docxBytes))) {
-            StringBuilder text = new StringBuilder();
-            document.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n'));
-            document.getHeaderList().forEach(header ->
-                    header.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n')));
-            document.getFooterList().forEach(footer ->
-                    footer.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n')));
-            String body = text.toString().toUpperCase(Locale.ROOT);
-            assertThat(PLACEHOLDER_PATTERN.matcher(body).find())
-                    .as("Master DOCX must not contain LOREM/TODO/placeholder markers")
-                    .isFalse();
-            assertThat(body).doesNotContain("LOREM");
-        }
-    }
 
     private static List<String> loadAnchorIds() {
         try (java.io.InputStream in = FolMasterDocxAssetGeneratorTest.class.getResourceAsStream("/demo/fol-master-anchor-ids.json")) {

@@ -1,4 +1,4 @@
-package com.bank.docgen.authoring.structured.expression;
+package com.bank.docgen.sharedkernel.document.expression;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

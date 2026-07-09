@@ -45,6 +45,11 @@
       "styleKey": "SignatureBlock",
       "applicableNodeTypes": ["paragraph", "textRun"],
       "renderPurpose": "BODY"
+    },
+    {
+      "styleKey": "DisclaimerBody",
+      "applicableNodeTypes": ["paragraph", "textRun"],
+      "renderPurpose": "BODY"
     }
   ]
 }

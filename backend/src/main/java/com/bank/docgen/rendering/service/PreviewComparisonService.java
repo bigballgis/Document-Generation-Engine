@@ -3,7 +3,7 @@ package com.bank.docgen.rendering.service;
 import com.bank.docgen.rendering.api.FidelityWarningView;
 import com.bank.docgen.rendering.api.PreviewComparisonItemView;
 import com.bank.docgen.rendering.api.PreviewComparisonView;
-import com.bank.docgen.rendering.domain.FidelityWarningCode;
+import com.bank.docgen.sharedkernel.document.fidelity.FidelityWarningCode;
 import com.bank.docgen.template.domain.BindingValidationStatus;
 import com.bank.docgen.template.domain.PreviewComparisonLocationType;
 import com.bank.docgen.template.domain.PreviewComparisonSeverity;

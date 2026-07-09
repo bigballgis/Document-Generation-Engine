@@ -43,7 +43,7 @@ public class TemplateExportService {
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final ManagementAuditRecorder managementAuditRecorder;
     private final TemplateService templateService;
-    private final TemplateExportAccessSupport exportAccessSupport;
+    private final TemplateExportAccessService exportAccessSupport;
     private final ObjectMapper objectMapper;
     private final TemplateCurrentVersionResolver templateVersionSupport;
 
@@ -55,7 +55,7 @@ public class TemplateExportService {
             TemplateContentModuleReferenceService contentModuleReferenceService,
             ManagementAuditRecorder managementAuditRecorder,
             TemplateService templateService,
-            TemplateExportAccessSupport exportAccessSupport,
+            TemplateExportAccessService exportAccessSupport,
             ObjectMapper objectMapper,
             TemplateCurrentVersionResolver templateVersionSupport
     ) {

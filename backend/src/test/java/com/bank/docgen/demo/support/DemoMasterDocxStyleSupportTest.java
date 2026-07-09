@@ -2,7 +2,7 @@ package com.bank.docgen.demo.support;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.bank.docgen.authoring.structured.MasterStyleCatalog;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import com.bank.docgen.rendering.DocxWordCompatibilitySupport;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

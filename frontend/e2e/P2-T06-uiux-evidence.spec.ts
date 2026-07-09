@@ -2,6 +2,8 @@ import fs from 'node:fs'
 
 import { expect, test } from '@playwright/test'
 
+import { requireDockerStack } from './helpers/stack-readiness'
+
 import {
   DEMO_MASTER_NAME,
   E2E_GROUP_ADMIN,
@@ -69,22 +71,7 @@ test.describe('P2-T06 UIUX evidence', () => {
 
     ensureP2T06EvidenceDirs()
 
-    let backendReady = false
-    let frontendReady = false
-    try {
-      backendReady = (await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })).ok()
-    } catch {
-      backendReady = false
-    }
-    try {
-      frontendReady = (await request.get(FRONTEND_BASE_URL, { timeout: 5_000 })).ok()
-    } catch {
-      frontendReady = false
-    }
-    test.skip(
-      !(backendReady && frontendReady),
-      `Docker stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Start with .\\scripts\\docker-deploy.ps1`,
-    )
+    await requireDockerStack(request, { frontendBaseUrl: FRONTEND_BASE_URL, skipMessage: `Docker stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Start with .\\scripts\\docker-deploy.ps1` })
 
     const seeded = await prepareDemoMasterWithReplaceHistory(request)
     hubPath = seeded.hubPath

@@ -1,4 +1,4 @@
-package com.bank.docgen.authoring.structured;
+package com.bank.docgen.sharedkernel.document;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

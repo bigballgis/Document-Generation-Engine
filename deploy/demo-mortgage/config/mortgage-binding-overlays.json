@@ -329,10 +329,10 @@
           "children": [{"type": "text", "value": "Amortization Schedule"}]
         },
         {
-          "type": "paragraph",
+          "type": "sectionHeading",
           "styleRef": "ScheduleTitle",
           "children": [
-            {"type": "textRun", "value": "Schedule 1 — Indicative Repayment Profile (first twelve monthly payments; subject to adjustment on completion)"}
+            {"type": "text", "value": "Schedule 1 — Indicative Repayment Profile (first twelve monthly payments; subject to adjustment on completion)"}
           ]
         },
         {

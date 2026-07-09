@@ -64,7 +64,7 @@ class ContentModuleLifecycleImpactServiceTest {
 
     @BeforeEach
     void setUp() {
-        ContentModuleAccessSupport accessSupport = new ContentModuleAccessSupport(
+        ContentModuleAccessService accessSupport = new ContentModuleAccessService(
                 moduleRepository,
                 groupAccessService,
                 new ObjectMapper()

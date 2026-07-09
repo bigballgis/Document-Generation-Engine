@@ -1,6 +1,5 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.template.service.TemplateValidationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -34,23 +33,23 @@ public final class PdfConversionOffloadSupport {
             return future.get(conversionTimeoutSeconds + TIMEOUT_BUFFER_SECONDS, TimeUnit.SECONDS);
         } catch (TimeoutException ex) {
             future.cancel(true);
-            throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+            throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
         } catch (ExecutionException ex) {
             Throwable cause = ex.getCause();
             if (cause instanceof PdfConversionCapacityExceededException capacityException) {
                 throw capacityException;
             }
-            if (cause instanceof TemplateValidationException validationException) {
+            if (cause instanceof RenderingOperationException validationException) {
                 throw validationException;
             }
             if (cause instanceof RejectedExecutionException) {
                 throw new PdfConversionCapacityExceededException();
             }
-            throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+            throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             future.cancel(true);
-            throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+            throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
         }
     }
 

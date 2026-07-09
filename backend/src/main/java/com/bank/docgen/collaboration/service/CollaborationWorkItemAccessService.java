@@ -9,11 +9,11 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CollaborationWorkItemAccessSupport {
+public class CollaborationWorkItemAccessService {
 
     private final GroupAccessService groupAccessService;
 
-    public CollaborationWorkItemAccessSupport(GroupAccessService groupAccessService) {
+    public CollaborationWorkItemAccessService(GroupAccessService groupAccessService) {
         this.groupAccessService = groupAccessService;
     }
 

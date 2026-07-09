@@ -21,8 +21,8 @@
     }
   ],
   "contentModuleRefs": [
-    {"referenceKey": "CREDIT-LIMIT-STANDARD-CLAUSE", "moduleCode": "CREDIT-LIMIT-STD"},
-    {"referenceKey": "CREDIT-LIMIT-COVENANTS", "moduleCode": "CREDIT-LIMIT-COV"},
-    {"referenceKey": "CREDIT-LIMIT-EOD", "moduleCode": "CREDIT-LIMIT-EOD"}
+    {"referenceKey": "CREDIT-LIMIT-STANDARD-CLAUSE", "moduleCode": "CREDIT-LIMIT-STD", "semanticVersion": "1.0.0"},
+    {"referenceKey": "CREDIT-LIMIT-COVENANTS", "moduleCode": "CREDIT-LIMIT-COV", "semanticVersion": "1.0.0"},
+    {"referenceKey": "CREDIT-LIMIT-EOD", "moduleCode": "CREDIT-LIMIT-EOD", "semanticVersion": "1.0.0"}
   ]
 }

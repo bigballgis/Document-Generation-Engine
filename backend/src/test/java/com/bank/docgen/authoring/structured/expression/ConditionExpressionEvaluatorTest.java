@@ -2,6 +2,7 @@ package com.bank.docgen.authoring.structured.expression;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bank.docgen.sharedkernel.document.expression.ConditionExpressionEvaluator;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;

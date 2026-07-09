@@ -3,16 +3,19 @@
   "groupCode": "RETAIL",
   "pageNumberingProfile": "GLOBAL_ONLY",
   "masterLayoutVersion": "collection-layout-v3-eight-anchors",
+  "masterDescription": "Retail collection and rate change letters",
   "templates": [
     {
       "externalId": "DEMO-RATE-CHANGE-NOTICE",
       "name": "Rate Change Notice",
+      "masterName": "Meridian Rate Change Notice Master",
       "masterDocx": "assets/rate-change-notice-master.docx",
       "description": "P23 bank-grade rate variation notice (FCA CONC) with regulatory emphasis, right to switch, interest calculation, disclaimer footer"
     },
     {
       "externalId": "DEMO-OVERDUE-COLLECTION",
       "name": "Overdue Collection Notice",
+      "masterName": "Meridian Overdue Collection Master",
       "masterDocx": "assets/overdue-collection-master.docx",
       "description": "P23 bank-grade overdue collection notice (FCA CONC / treating customers fairly) with repayment table, consequences, support, disclaimer footer"
     }

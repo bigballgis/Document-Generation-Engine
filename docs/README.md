@@ -5,7 +5,7 @@
 
 **Active work in this documentation track:** **[CDP Wave CD-0 In Progress](./plan/competitiveness-deepening-program.md)** — doc truth, E2E BDD, pitfall registry, browser golden-path evidence (task IDs **`CD-*` only).
 
-**Active formal phase:** **None** (2026-07-09). **CORE-FORTRESS program Done** — F1–F8 complete (F8 observability/SLO/DR/evidence bundle; `mvn verify` **1154**; arch review PASS). **Prior:** **CORE-FORTRESS F7 Done** (2026-07-09; LR-C1/C4 mirrored). See [program roadmap](./plan/detail/CORE-FORTRESS-program-roadmap.md).
+**Active formal program:** **None** (2026-07-09). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. See [CODE-QUALITY program](./plan/code-quality-program.md) · [task sheet](./plan/detail/CODE-QUALITY-code-hygiene.md).
 
 **P22 Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md).
 
@@ -54,7 +54,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [SpotBugs exclusion ratchet](./plan/spotbugs-exclusion-ratchet.md) | Ongoing EI_EXPOSE_REP reduction plan (SOR-A05 slice 1+; post-SOR program) |
 | [Comprehensive optimization roadmap](./plan/comprehensive-optimization-roadmap.md) | **Unified execution map** — docs, API contract, template workflow, frontend UX, performance, E2E (COR-0…6, 2026-06-23) |
 | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **Launch readiness** — doc truth, E2E golden paths, pitfall registry (`CD-*` tasks) |
-| [Launch Readiness & Deep-Optimization Program (LRP)](./plan/launch-readiness-program.md) | Production pitfalls + usability deepening — Waves LR-A…LR-E (`LR-*` tasks; **In Progress** — Wave LR-B **Done** 2026-07-04, Wave LR-A activated 2026-07-04; detail docs linked from the program) |
+| **[Code Quality Program (CODE-QUALITY)](./plan/code-quality-program.md)** | **Done** (2026-07-09) — behavior-preserving hygiene: module boundaries, god-class extraction, DRY infra (`CQ-*` all slices) |
+| [Launch Readiness & Deep-Optimization Program (LRP)](./plan/launch-readiness-program.md) | Production pitfalls + usability deepening — Waves LR-A…LR-E (`LR-*` tasks; sibling program; LR-C1/C4 Done via F7) |
 | [P12 Deferred enhancements](./plan/detail/P12-deferred-enhancements.md) | Catch-all slice registry (testing overhaul, API package, UIUX refactor — Done slices) |
 | [P12 API package access](./plan/detail/P12-api-package-access-invocation-records.md) | Package-first API access + invocation records (**Done** 2026-07-03) |
 | [Optimization plan & backlog](./plan/optimization-plan.md) | Technical debt detail (OPT-A…G): gates, coverage, backend architecture |

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
 import com.bank.docgen.rendering.DocxAssemblyException;
+import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
@@ -86,5 +87,21 @@ class RenderingExceptionAdviceTest {
         assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.CONTENT_MODULE_STRUCTURE_MISSING);
         assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.VALIDATION);
         assertThat(response.getBody().error().retryable()).isFalse();
+    }
+
+    @Test
+    void renderingOperationExceptionMapsToRenderingFailed() {
+        when(messageResolver.resolve("api.error.generation.pdfConversionFailed"))
+                .thenReturn("PDF conversion failed.");
+
+        ResponseEntity<ErrorEnvelope> response = advice.handleRenderingOperation(
+                request,
+                new RenderingOperationException("api.error.generation.pdfConversionFailed")
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.RENDERING_FAILED);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.GENERATION);
+        assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.generation.pdfConversionFailed");
     }
 }

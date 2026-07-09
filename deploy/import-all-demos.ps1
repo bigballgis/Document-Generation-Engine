@@ -12,7 +12,8 @@ param(
     [string]$PostgresContainer = 'docgen-postgres',
     [switch]$SkipSql,
     [switch]$SkipApi,
-    [switch]$RegenerateCatalog
+    [switch]$RegenerateCatalog,
+    [switch]$SkipMasterRefresh
 )
 
 $ErrorActionPreference = 'Stop'
@@ -44,6 +45,7 @@ foreach ($demo in $DemoScripts) {
     if ($SkipSql) { $importParams.SkipSql = $true }
     if ($SkipApi) { $importParams.SkipApi = $true }
     if ($RegenerateCatalog) { $importParams.RegenerateCatalog = $true }
+    if ($SkipMasterRefresh) { $importParams.SkipMasterRefresh = $true }
     & $scriptPath @importParams
     if ($LASTEXITCODE -ne 0) { throw "Import failed for $($demo.Name) (exit $LASTEXITCODE)" }
 }

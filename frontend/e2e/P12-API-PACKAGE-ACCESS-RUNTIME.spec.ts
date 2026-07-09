@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { requireBackendReady } from './helpers/stack-readiness'
+
 import { DEMO_FULL_FLOW_EXTERNAL_ID } from './helpers/auth'
 import {
   createTemplateApiCredential,
@@ -16,13 +18,9 @@ test.describe('P12 API invocations runtime (BDD S5/S6)', () => {
   test.describe.configure({ mode: 'serial' })
 
   test.beforeAll(async ({ request }) => {
-    let backendReady = false
-    try {
-      backendReady = (await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })).ok()
-    } catch {
-      backendReady = false
-    }
-    test.skip(!backendReady, 'Backend :8080 required for runtime invocation E2E.')
+    await requireBackendReady(request, {
+      skipMessage: 'Backend :8080 required for runtime invocation E2E.',
+    })
   })
 
   test('BDD S5 — runtime generate writes caller-visible invocation with parameters', async ({

@@ -2,19 +2,20 @@
   "catalogMarker": "retail-account-demo-v3-bank-grade",
   "groupCode": "RETAIL",
   "pageNumberingProfile": "GLOBAL_ONLY",
-  "masterName": "Meridian Retail Account Master",
   "masterLayoutVersion": "retail-account-layout-v3-eight-anchors",
   "masterDescription": "Retail account opening and balance confirmation letters",
   "templates": [
     {
       "externalId": "DEMO-RETAIL-ACCOUNT-OPEN",
       "name": "Retail Account Opening Confirmation",
+      "masterName": "Meridian Retail Account Open Master",
       "masterDocx": "assets/retail-account-open-master.docx",
       "description": "Account opening confirmation letter for retail customers"
     },
     {
       "externalId": "DEMO-RETAIL-ACCOUNT-BALANCE",
       "name": "Retail Account Balance Confirmation",
+      "masterName": "Meridian Retail Account Balance Master",
       "masterDocx": "assets/retail-account-balance-master.docx",
       "description": "Account balance confirmation letter"
     }

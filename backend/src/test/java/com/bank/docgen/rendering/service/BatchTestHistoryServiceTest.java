@@ -9,8 +9,8 @@ import com.bank.docgen.rendering.api.BatchTestRunSummaryView;
 import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
 import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.persistence.TemplateEntity;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.port.RenderableTemplateSnapshot;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class BatchTestHistoryServiceTest {
 
     @Mock
-    private TemplateService templateService;
+    private TemplatePreviewAuthorizationPort previewAuthorizationPort;
     @Mock
     private BatchTestRunRepository batchTestRunRepository;
     @Mock
@@ -37,7 +37,7 @@ class BatchTestHistoryServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new BatchTestHistoryService(templateService, batchTestRunRepository, managementUserDisplayService);
+        service = new BatchTestHistoryService(previewAuthorizationPort, batchTestRunRepository, managementUserDisplayService);
         templateId = UUID.randomUUID();
         session = new ManagementSessionClaims(
                 "10000001", "Author", "author@test.com",
@@ -45,8 +45,8 @@ class BatchTestHistoryServiceTest {
                 List.of("RETAIL"), "route.home", List.of("route.home"),
                 Instant.now().plusSeconds(3600)
         );
-        when(templateService.requireReadableTemplate(templateId, session))
-                .thenReturn(new TemplateEntity(templateId, "TPL-1", "RETAIL", "Demo", null, UUID.randomUUID(), "author"));
+        when(previewAuthorizationPort.requireReadableSnapshot(templateId, session))
+                .thenReturn(new RenderableTemplateSnapshot(templateId, UUID.randomUUID(), "RETAIL"));
     }
 
     @Test

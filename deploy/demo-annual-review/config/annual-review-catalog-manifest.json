@@ -6,8 +6,8 @@
   "pageTarget": 12,
   "templates": ["DEMO-ANNUAL-REVIEW", "DEMO-FACILITY-RENEWAL"],
   "contentModuleRefs": [
-    {"referenceKey": "ANNUAL-REVIEW-STANDARD-CLAUSE", "moduleCode": "ANNUAL-REVIEW-STD"},
-    {"referenceKey": "ANNUAL-REVIEW-COVENANTS", "moduleCode": "ANNUAL-REVIEW-COV"},
-    {"referenceKey": "FACILITY-RENEWAL-STANDARD-CLAUSE", "moduleCode": "FACILITY-RENEWAL-STD"}
+    {"referenceKey": "ANNUAL-REVIEW-STANDARD-CLAUSE", "moduleCode": "ANNUAL-REVIEW-STD", "semanticVersion": "3.0.0"},
+    {"referenceKey": "ANNUAL-REVIEW-COVENANTS", "moduleCode": "ANNUAL-REVIEW-COV", "semanticVersion": "3.0.0"},
+    {"referenceKey": "FACILITY-RENEWAL-STANDARD-CLAUSE", "moduleCode": "FACILITY-RENEWAL-STD", "semanticVersion": "3.0.0"}
   ]
 }

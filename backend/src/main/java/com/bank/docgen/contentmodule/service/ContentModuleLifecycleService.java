@@ -27,14 +27,14 @@ public class ContentModuleLifecycleService {
     private final ContentModuleRepository moduleRepository;
     private final ContentModuleVersionRepository versionRepository;
     private final GroupAccessService groupAccessService;
-    private final ContentModuleAccessSupport accessSupport;
+    private final ContentModuleAccessService accessSupport;
     private final ManagementAuditRecorder auditRecorder;
 
     public ContentModuleLifecycleService(
             ContentModuleRepository moduleRepository,
             ContentModuleVersionRepository versionRepository,
             GroupAccessService groupAccessService,
-            ContentModuleAccessSupport accessSupport,
+            ContentModuleAccessService accessSupport,
             ManagementAuditRecorder auditRecorder
     ) {
         this.moduleRepository = moduleRepository;

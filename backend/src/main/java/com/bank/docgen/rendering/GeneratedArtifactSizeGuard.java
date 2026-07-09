@@ -1,7 +1,6 @@
 package com.bank.docgen.rendering;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
-import com.bank.docgen.template.service.TemplateValidationException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +26,7 @@ public class GeneratedArtifactSizeGuard {
 
     private void assertWithinLimit(long artifactByteCount) {
         if (artifactByteCount > renderingProperties.getMaxGeneratedArtifactBytes()) {
-            throw new TemplateValidationException("api.error.generation.artifactTooLarge");
+            throw new RenderingOperationException("api.error.generation.artifactTooLarge");
         }
     }
 }

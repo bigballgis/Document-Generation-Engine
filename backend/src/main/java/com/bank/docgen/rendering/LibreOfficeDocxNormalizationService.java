@@ -2,7 +2,6 @@ package com.bank.docgen.rendering;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import com.bank.docgen.infrastructure.resilience.ResilienceSupport;
-import com.bank.docgen.template.service.TemplateValidationException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.Retry;
@@ -85,18 +84,18 @@ public class LibreOfficeDocxNormalizationService implements DocxNormalizationSer
                     TimeUnit.SECONDS
             );
             if (!finished || process.exitValue() != 0) {
-                throw new TemplateValidationException("api.error.generation.docxNormalizationFailed");
+                throw new RenderingOperationException("api.error.generation.docxNormalizationFailed");
             }
             Path outputDocx = tempDir.resolve("assembled-in.docx");
             if (!Files.exists(outputDocx) || Files.size(outputDocx) == 0) {
-                throw new TemplateValidationException("api.error.generation.docxNormalizationFailed");
+                throw new RenderingOperationException("api.error.generation.docxNormalizationFailed");
             }
             return Files.readAllBytes(outputDocx);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            throw new TemplateValidationException("api.error.generation.docxNormalizationFailed");
+            throw new RenderingOperationException("api.error.generation.docxNormalizationFailed");
         } catch (IOException ex) {
-            throw new TemplateValidationException("api.error.generation.docxNormalizationFailed");
+            throw new RenderingOperationException("api.error.generation.docxNormalizationFailed");
         } finally {
             if (tempDir != null) {
                 try {

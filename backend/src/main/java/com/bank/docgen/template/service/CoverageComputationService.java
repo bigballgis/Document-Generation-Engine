@@ -1,8 +1,6 @@
 package com.bank.docgen.template.service;
 
-import com.bank.docgen.rendering.domain.PreviewStatus;
-import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
-import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
+import com.bank.docgen.template.port.PreviewEvidencePort;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CoverageDimensionView;
 import com.bank.docgen.template.api.CoverageSummaryView;
@@ -47,7 +45,7 @@ public class CoverageComputationService {
     private final TemplateVersionRepository templateVersionRepository;
     private final VariableSchemaRepository variableSchemaRepository;
     private final TestDataSetRepository testDataSetRepository;
-    private final PreviewRecordRepository previewRecordRepository;
+    private final PreviewEvidencePort previewEvidencePort;
     private final AnchorBindingRepository anchorBindingRepository;
     private final CoverageThresholdResolver coverageThresholdResolver;
     private final ObjectMapper objectMapper;
@@ -58,7 +56,7 @@ public class CoverageComputationService {
             TemplateVersionRepository templateVersionRepository,
             VariableSchemaRepository variableSchemaRepository,
             TestDataSetRepository testDataSetRepository,
-            PreviewRecordRepository previewRecordRepository,
+            PreviewEvidencePort previewEvidencePort,
             AnchorBindingRepository anchorBindingRepository,
             CoverageThresholdResolver coverageThresholdResolver,
             ObjectMapper objectMapper,
@@ -68,7 +66,7 @@ public class CoverageComputationService {
         this.templateVersionRepository = templateVersionRepository;
         this.variableSchemaRepository = variableSchemaRepository;
         this.testDataSetRepository = testDataSetRepository;
-        this.previewRecordRepository = previewRecordRepository;
+        this.previewEvidencePort = previewEvidencePort;
         this.anchorBindingRepository = anchorBindingRepository;
         this.coverageThresholdResolver = coverageThresholdResolver;
         this.objectMapper = objectMapper;
@@ -83,14 +81,10 @@ public class CoverageComputationService {
 
         List<TestDataSetEntity> dataSets = testDataSetRepository.findByTemplateIdOrderByUpdatedAtDesc(templateId);
         Set<String> exercisedVariableKeys = collectExercisedVariableKeys(dataSets);
-        List<PreviewRecordEntity> successfulPreviews = previewRecordRepository
-                .findByTemplateIdAndTemplateVersionIdAndStatus(templateId, version.getId(), PreviewStatus.SUCCEEDED);
-        Set<String> testedSampleIds = new HashSet<>();
-        successfulPreviews.forEach(preview -> {
-            if (preview.getTestDataSetExternalId() != null) {
-                testedSampleIds.add(preview.getTestDataSetExternalId());
-            }
-        });
+        Set<String> testedSampleIds = previewEvidencePort.successfulPreviewTestDataSetExternalIds(
+                templateId,
+                version.getId()
+        );
 
         CoverageDimensionView requiredVariables = computeRequiredVariables(
                 version.getId(),

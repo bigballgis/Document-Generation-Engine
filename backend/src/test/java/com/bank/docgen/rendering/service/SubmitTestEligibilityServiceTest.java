@@ -12,15 +12,15 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CoverageThresholdView;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
-import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
-import com.bank.docgen.template.service.CoverageThresholdResolver;
-import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.port.RenderableTemplateSnapshot;
+import com.bank.docgen.template.port.TemplateCoveragePort;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
+import com.bank.docgen.template.port.TemplateRenderContextPort;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -40,7 +40,7 @@ import org.mockito.quality.Strictness;
 class SubmitTestEligibilityServiceTest {
 
     @Mock
-    private TemplateService templateService;
+    private TemplatePreviewAuthorizationPort previewAuthorizationPort;
     @Mock
     private BatchTestRunRepository batchTestRunRepository;
     @Mock
@@ -52,28 +52,28 @@ class SubmitTestEligibilityServiceTest {
     @Mock
     private TestDataSetRepository testDataSetRepository;
     @Mock
-    private CoverageThresholdResolver coverageThresholdResolver;
+    private TemplateCoveragePort templateCoveragePort;
     @Mock
-    private TemplateCurrentVersionResolver templateCurrentVersionResolver;
+    private TemplateRenderContextPort renderContextPort;
 
     private SubmitTestEligibilityService service;
     private UUID templateId;
     private UUID versionId;
     private ManagementSessionClaims session;
-    private TemplateEntity template;
-    private TemplateVersionEntity version; // NOSONAR - concrete instance for test
+    private RenderableTemplateSnapshot template;
+    private TemplateVersionEntity version;
 
     @BeforeEach
     void setUp() {
         service = new SubmitTestEligibilityService(
-                templateService,
+                previewAuthorizationPort,
                 batchTestRunRepository,
                 previewRecordRepository,
                 variableSchemaRepository,
                 anchorBindingRepository,
                 testDataSetRepository,
-                coverageThresholdResolver,
-                templateCurrentVersionResolver,
+                templateCoveragePort,
+                renderContextPort,
                 new ObjectMapper()
         );
         templateId = UUID.randomUUID();
@@ -84,11 +84,11 @@ class SubmitTestEligibilityServiceTest {
                 List.of("RETAIL"), "route.home", List.of("route.home"),
                 Instant.now().plusSeconds(3600)
         );
-        template = new TemplateEntity(templateId, "TPL-1", "RETAIL", "Demo", null, UUID.randomUUID(), "author");
+        template = new RenderableTemplateSnapshot(templateId, UUID.randomUUID(), "RETAIL");
         version = new TemplateVersionEntity(versionId, templateId, "author");
-        when(templateService.requireReadableTemplate(templateId, session)).thenReturn(template);
-        when(templateCurrentVersionResolver.requireInFlightDevVersion(templateId)).thenReturn(version);
-        when(coverageThresholdResolver.resolveForTemplate(template))
+        when(previewAuthorizationPort.requireReadableSnapshot(templateId, session)).thenReturn(template);
+        when(renderContextPort.requireInFlightDevVersion(templateId)).thenReturn(version);
+        when(templateCoveragePort.resolveThreshold("RETAIL"))
                 .thenReturn(new CoverageThresholdView("GLOBAL", null, 80, 100, 80));
         when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId)).thenReturn(List.of());
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)).thenReturn(List.of());

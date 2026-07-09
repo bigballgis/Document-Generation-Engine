@@ -481,6 +481,70 @@ class AuditQueryServiceTest {
         return entity;
     }
 
+    @Test
+    void globalAdminQueriesGenerationEventsByExternalId() {
+        when(groupAccessService.canReadAudit(globalAdmin)).thenReturn(true);
+        TemplateEntity template = new TemplateEntity(
+                TEMPLATE_ID,
+                "CORP-FOL-OFFER",
+                "CORP",
+                "Sample",
+                null,
+                UUID.randomUUID(),
+                "10000002"
+        );
+        template.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
+        RuntimeGenerationAuditEventEntity runtimeEvent = new RuntimeGenerationAuditEventEntity(
+                UUID.randomUUID(),
+                Instant.parse("2026-07-09T14:00:00Z"),
+                RuntimeGenerationAuditRecorder.EVENT_SYNC_GENERATION,
+                "dev",
+                TEMPLATE_ID,
+                "CORP",
+                UUID.randomUUID(),
+                "fp-demo",
+                "e2e-runtime-caller",
+                "1.0.0",
+                "1.0.0",
+                "DEFAULT_ROUTE",
+                "DOCX",
+                "SYNC_STREAM",
+                "req-demo",
+                null,
+                null,
+                null,
+                null,
+                "DOC-001",
+                RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
+                "Generation succeeded",
+                null,
+                42L,
+                "AUD-001",
+                "trace-001"
+        );
+        when(templateService.requireTemplateByExternalId("CORP-FOL-OFFER")).thenReturn(template);
+        when(templateService.requireReadableTemplate(TEMPLATE_ID, globalAdmin)).thenReturn(template);
+        when(runtimeGenerationAuditEventRepository.searchPaged(
+                eq(TEMPLATE_ID),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                eq(0),
+                eq(50)
+        )).thenReturn(new AuditSearchPage<>(List.of(runtimeEvent), 1, 1));
+
+        var result = service.queryGenerationEventsByExternalId(globalAdmin, "CORP-FOL-OFFER", 0, 50);
+
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().getFirst().templateExternalId()).isEqualTo("CORP-FOL-OFFER");
+        assertThat(result.content().getFirst().status()).isEqualTo("SUCCEEDED");
+        assertThat(result.content().getFirst().outcome()).isEqualTo("SUCCESS");
+        assertThat(result.content().getFirst().accessAccountSummary()).isEqualTo("e2****er");
+    }
+
     private ManagementSessionClaims session(String username, List<String> roles, List<String> groups) {
         return new ManagementSessionClaims(
                 username,

@@ -1,6 +1,6 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.authoring.structured.RenderProfile;
+import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import org.springframework.stereotype.Component;
 

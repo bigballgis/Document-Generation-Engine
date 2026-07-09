@@ -4,8 +4,20 @@
   "pageNumberingProfile": "SECTION_AND_GLOBAL",
   "masterLayoutVersion": "annual-review-layout-v3-nine-anchors",
   "templates": [
-    {"externalId": "DEMO-ANNUAL-REVIEW", "name": "Annual Credit Review", "masterDocx": "assets/annual-review-master.docx", "description": "Bank-grade annual credit review with covenant compliance schedule, material findings, pricing adjustment, dual-page footer, signatures"},
-    {"externalId": "DEMO-FACILITY-RENEWAL", "name": "Facility Renewal Letter", "masterDocx": "assets/facility-renewal-master.docx", "description": "Bank-grade facility renewal confirmation with renewed terms, covenant table, KYC, governing law, signatures"}
+    {
+      "externalId": "DEMO-ANNUAL-REVIEW",
+      "name": "Annual Credit Review",
+      "masterName": "Meridian Annual Credit Review Master",
+      "masterDocx": "assets/annual-review-master.docx",
+      "description": "Bank-grade annual credit review with covenant compliance schedule, material findings, pricing adjustment, dual-page footer, signatures"
+    },
+    {
+      "externalId": "DEMO-FACILITY-RENEWAL",
+      "name": "Facility Renewal Letter",
+      "masterName": "Meridian Facility Renewal Master",
+      "masterDocx": "assets/facility-renewal-master.docx",
+      "description": "Bank-grade facility renewal confirmation with renewed terms, covenant table, KYC, governing law, signatures"
+    }
   ],
   "generatedCatalogFiles": {
     "variables": "config/annual-review-variables.json",

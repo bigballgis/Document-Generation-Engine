@@ -2,7 +2,7 @@ package com.bank.docgen.rendering.service;
 
 import com.bank.docgen.authoring.structured.CallerRenderOverride;
 import com.bank.docgen.authoring.structured.FidelityValidationService;
-import com.bank.docgen.authoring.structured.RenderProfile;
+import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
@@ -21,13 +21,11 @@ import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
-import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
-import com.bank.docgen.template.persistence.TemplateVersionRepository;
-import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
-import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
-import com.bank.docgen.template.service.TemplateService;
-import com.bank.docgen.template.service.TestDataSetService;
+import com.bank.docgen.template.port.RenderableTemplateSnapshot;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
+import com.bank.docgen.template.port.TemplateRenderContextPort;
+import com.bank.docgen.template.port.TestDataSetEvidencePort;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -51,9 +49,9 @@ public class PreviewGenerationService {
             new EncryptionOptionsView(false, null, null, null);
     private static final int PREVIEW_HISTORY_LIMIT = 50;
 
-    private final TemplateService templateService;
-    private final TestDataSetService testDataSetService;
-    private final TemplateVersionRepository templateVersionRepository;
+    private final TemplatePreviewAuthorizationPort previewAuthorizationPort;
+    private final TestDataSetEvidencePort testDataSetEvidencePort;
+    private final TemplateRenderContextPort renderContextPort;
     private final AnchorBindingRepository anchorBindingRepository;
     private final MasterDocumentRepository masterDocumentRepository;
     private final PreviewRecordRepository previewRecordRepository;
@@ -62,15 +60,13 @@ public class PreviewGenerationService {
     private final DocumentArtifactPipeline documentArtifactPipeline;
     private final ObjectMapper objectMapper;
     private final PreviewComparisonService previewComparisonService;
-    private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final RenderProfileService renderProfileService;
     private final FidelityValidationService fidelityValidationService;
-    private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     public PreviewGenerationService(
-            TemplateService templateService,
-            TestDataSetService testDataSetService,
-            TemplateVersionRepository templateVersionRepository,
+            TemplatePreviewAuthorizationPort previewAuthorizationPort,
+            TestDataSetEvidencePort testDataSetEvidencePort,
+            TemplateRenderContextPort renderContextPort,
             AnchorBindingRepository anchorBindingRepository,
             MasterDocumentRepository masterDocumentRepository,
             PreviewRecordRepository previewRecordRepository,
@@ -79,14 +75,12 @@ public class PreviewGenerationService {
             DocumentArtifactPipeline documentArtifactPipeline,
             ObjectMapper objectMapper,
             PreviewComparisonService previewComparisonService,
-            TemplateContentModuleReferenceService contentModuleReferenceService,
             RenderProfileService renderProfileService,
-            FidelityValidationService fidelityValidationService,
-            TemplateCurrentVersionResolver templateCurrentVersionResolver
+            FidelityValidationService fidelityValidationService
     ) {
-        this.templateService = templateService;
-        this.testDataSetService = testDataSetService;
-        this.templateVersionRepository = templateVersionRepository;
+        this.previewAuthorizationPort = previewAuthorizationPort;
+        this.testDataSetEvidencePort = testDataSetEvidencePort;
+        this.renderContextPort = renderContextPort;
         this.anchorBindingRepository = anchorBindingRepository;
         this.masterDocumentRepository = masterDocumentRepository;
         this.previewRecordRepository = previewRecordRepository;
@@ -95,10 +89,8 @@ public class PreviewGenerationService {
         this.documentArtifactPipeline = documentArtifactPipeline;
         this.objectMapper = objectMapper;
         this.previewComparisonService = previewComparisonService;
-        this.contentModuleReferenceService = contentModuleReferenceService;
         this.renderProfileService = renderProfileService;
         this.fidelityValidationService = fidelityValidationService;
-        this.templateCurrentVersionResolver = templateCurrentVersionResolver;
     }
 
     @Transactional
@@ -133,9 +125,9 @@ public class PreviewGenerationService {
             ManagementSessionClaims session,
             boolean throwOnFailure
     ) {
-        TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
+        RenderableTemplateSnapshot template = previewAuthorizationPort.requireReadableSnapshot(templateId, session);
         Map<String, Object> variables = resolveVariables(templateId, request, session);
-        TemplateVersionEntity version = templateCurrentVersionResolver.requireInFlightDevVersion(templateId);
+        TemplateVersionEntity version = renderContextPort.requireInFlightDevVersion(templateId);
         String variablesHash = hashVariables(variables);
         PreviewRecordEntity preview = new PreviewRecordEntity(
                 UUID.randomUUID(),
@@ -151,14 +143,14 @@ public class PreviewGenerationService {
         renderProfileService.applyPreviewRenderProfileVersion(preview, version);
         previewRecordRepository.save(preview);
         try {
-            MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.getMasterId())
+            MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.masterId())
                     .orElseThrow(MasterNotFoundException::new);
             List<AnchorBindingEntity> bindings = anchorBindingRepository
                     .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
             Map<String, String> bindingJson = new LinkedHashMap<>();
             bindings.forEach(binding -> bindingJson.put(binding.getAnchorId(), binding.getStructuredContentJson()));
             Map<String, String> pinnedModuleStructures =
-                    contentModuleReferenceService.resolvePinnedContentStructures(version.getId());
+                    renderContextPort.resolvePinnedContentStructures(version.getId());
             byte[] docx;
             try (InputStream masterStream = objectStoragePort.get(master.getStorageKey())) {
                 docx = docxAssembler.assembleStructured(
@@ -198,12 +190,12 @@ public class PreviewGenerationService {
             }
             List<FidelityWarningView> warnings = fidelityValidationService.collectWarningsForVersion(
                     version.getId(),
-                    template.getMasterId()
+                    template.masterId()
             );
             preview.markSucceeded(storageKey, pdfStorageKey, writeWarnings(warnings));
             previewRecordRepository.save(preview);
             if (request.testDataSetId() != null && !request.testDataSetId().isBlank()) {
-                testDataSetService.lockForEvidence(templateId, request.testDataSetId());
+                testDataSetEvidencePort.lockForEvidence(templateId, request.testDataSetId());
             }
             return toView(preview, warnings, bindings);
         } catch (IOException | RuntimeException ex) {
@@ -219,7 +211,7 @@ public class PreviewGenerationService {
 
     @Transactional(readOnly = true)
     public List<PreviewSummaryView> listPreviews(UUID templateId, ManagementSessionClaims session) {
-        templateService.requireReadableTemplate(templateId, session);
+        previewAuthorizationPort.requireReadableSnapshot(templateId, session);
         return previewRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId).stream()
                 .limit(PREVIEW_HISTORY_LIMIT)
                 .map(this::toSummaryView)
@@ -228,7 +220,7 @@ public class PreviewGenerationService {
 
     @Transactional(readOnly = true)
     public PreviewRecordView getPreview(UUID templateId, UUID previewId, ManagementSessionClaims session) {
-        templateService.requireReadableTemplate(templateId, session);
+        previewAuthorizationPort.requireReadableSnapshot(templateId, session);
         PreviewRecordEntity preview = previewRecordRepository.findById(previewId)
                 .orElseThrow(PreviewNotFoundException::new);
         if (!preview.getTemplateId().equals(templateId)) {
@@ -295,7 +287,7 @@ public class PreviewGenerationService {
     ) {
         Map<String, Object> resolved = new LinkedHashMap<>();
         if (request.testDataSetId() != null && !request.testDataSetId().isBlank()) {
-            resolved.putAll(testDataSetService.resolveVariables(templateId, request.testDataSetId(), session));
+            resolved.putAll(testDataSetEvidencePort.resolveVariables(templateId, request.testDataSetId(), session));
         }
         if (request.variables() != null) {
             resolved.putAll(request.variables());

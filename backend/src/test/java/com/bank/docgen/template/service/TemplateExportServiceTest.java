@@ -74,7 +74,7 @@ class TemplateExportServiceTest {
                 contentModuleReferenceService,
                 managementAuditRecorder,
                 templateService,
-                new TemplateExportAccessSupport(new GroupAccessService()),
+                new TemplateExportAccessService(new GroupAccessService()),
                 new ObjectMapper().findAndRegisterModules(),
                 templateCurrentVersionResolver
         );

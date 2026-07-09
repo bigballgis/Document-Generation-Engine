@@ -35,7 +35,7 @@
     }
   ],
   "contentModuleRefs": [
-    {"referenceKey": "TRADE-LC-UCP-CLAUSE", "moduleCode": "TRADE-LC-UCP"},
-    {"referenceKey": "TRADE-GUARANTEE-URDG-CLAUSE", "moduleCode": "TRADE-GUARANTEE-URDG"}
+    {"referenceKey": "TRADE-LC-UCP-CLAUSE", "moduleCode": "TRADE-LC-STD", "semanticVersion": "2.0.0"},
+    {"referenceKey": "TRADE-GUARANTEE-URDG-CLAUSE", "moduleCode": "TRADE-GUARANTEE-STD", "semanticVersion": "2.0.0"}
   ]
 }

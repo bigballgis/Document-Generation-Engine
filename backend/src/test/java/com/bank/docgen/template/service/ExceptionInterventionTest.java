@@ -21,6 +21,7 @@ import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -91,7 +92,8 @@ class ExceptionInterventionTest {
                 approvalSubStateResolver,
                 apiPolicyMaterializationService,
                 apiPolicyRepository,
-                versionFidelityWarningService
+                versionFidelityWarningService,
+                new ObjectMapper()
         );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(

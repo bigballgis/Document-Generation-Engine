@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
-import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.rendering.api.AsyncBatchStartResponse;
 import com.bank.docgen.rendering.api.PreviewComparisonView;
 import com.bank.docgen.rendering.api.PreviewRecordView;
@@ -19,13 +18,14 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CoverageDimensionView;
 import com.bank.docgen.template.api.CoverageSummaryView;
 import com.bank.docgen.template.api.CoverageThresholdView;
-import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
+import com.bank.docgen.template.port.RenderableTemplateSnapshot;
+import com.bank.docgen.template.port.TemplateCoveragePort;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
+import com.bank.docgen.template.port.TemplateRenderContextPort;
 import com.bank.docgen.template.service.CoverageComputationService;
-import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
-import com.bank.docgen.template.service.TemplateService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
@@ -47,9 +47,7 @@ import static org.mockito.Mockito.atLeast;
 class AsyncBatchTestOrchestratorTest {
 
     @Mock
-    private TemplateService templateService;
-    @Mock
-    private GroupAccessService groupAccessService;
+    private TemplatePreviewAuthorizationPort previewAuthorizationPort;
     @Mock
     private PreviewGenerationService previewGenerationService;
     @Mock
@@ -57,9 +55,9 @@ class AsyncBatchTestOrchestratorTest {
     @Mock
     private TestDataSetRepository testDataSetRepository;
     @Mock
-    private CoverageComputationService coverageComputationService;
+    private TemplateCoveragePort templateCoveragePort;
     @Mock
-    private TemplateCurrentVersionResolver templateCurrentVersionResolver;
+    private TemplateRenderContextPort renderContextPort;
 
     private SseEmitterRegistry batchSseRegistry;
     private AsyncBatchTestOrchestrator orchestrator;
@@ -72,10 +70,10 @@ class AsyncBatchTestOrchestratorTest {
     void setUp() {
         batchSseRegistry = new SseEmitterRegistry();
         orchestrator = new AsyncBatchTestOrchestrator(
-                templateService, groupAccessService, previewGenerationService,
+                previewAuthorizationPort, previewGenerationService,
                 batchTestRunRepository, testDataSetRepository,
-                coverageComputationService,
-                templateCurrentVersionResolver, batchSseRegistry,
+                templateCoveragePort,
+                renderContextPort, batchSseRegistry,
                 new ObjectMapper(), syncExecutor
         );
         templateId = UUID.randomUUID();
@@ -86,10 +84,9 @@ class AsyncBatchTestOrchestratorTest {
                 List.of("RETAIL"), "route.home", List.of("route.home"),
                 Instant.now().plusSeconds(3600)
         );
-        when(templateService.requireReadableTemplate(templateId, session))
-                .thenReturn(new TemplateEntity(templateId, "TPL-1", "RETAIL", "Demo", null, UUID.randomUUID(), "author"));
-        when(groupAccessService.canAuthorTemplates(session)).thenReturn(true);
-        when(templateCurrentVersionResolver.requireInFlightDevVersion(templateId))
+        when(previewAuthorizationPort.requireReadableSnapshot(templateId, session))
+                .thenReturn(new RenderableTemplateSnapshot(templateId, UUID.randomUUID(), "RETAIL"));
+        when(renderContextPort.requireInFlightDevVersion(templateId))
                 .thenReturn(new TemplateVersionEntity(versionId, templateId, "author"));
         when(batchTestRunRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(batchTestRunRepository.findById(any())).thenReturn(Optional.empty());
@@ -101,7 +98,7 @@ class AsyncBatchTestOrchestratorTest {
     void startBatchRun_returnsRunIdAndStreamUrl() {
         when(testDataSetRepository.findByTemplateIdOrderByUpdatedAtDesc(templateId))
                 .thenReturn(List.of());
-        when(coverageComputationService.compute(any(), any())).thenReturn(emptyCoverage());
+        when(templateCoveragePort.compute(any(), any())).thenReturn(emptyCoverage());
 
         AsyncBatchStartResponse response = orchestrator.startBatchRun(templateId, session, "http://localhost");
 
@@ -117,7 +114,7 @@ class AsyncBatchTestOrchestratorTest {
                 .thenReturn(List.of(ds1, ds2));
         stubSuccessfulGeneration("TDS-001");
         stubSuccessfulGeneration("TDS-002");
-        when(coverageComputationService.compute(any(), any())).thenReturn(emptyCoverage());
+        when(templateCoveragePort.compute(any(), any())).thenReturn(emptyCoverage());
 
         orchestrator.startBatchRun(templateId, session, "http://localhost");
 
@@ -129,7 +126,7 @@ class AsyncBatchTestOrchestratorTest {
     void startBatchRun_savesRunEntity() {
         when(testDataSetRepository.findByTemplateIdOrderByUpdatedAtDesc(templateId))
                 .thenReturn(List.of());
-        when(coverageComputationService.compute(any(), any())).thenReturn(emptyCoverage());
+        when(templateCoveragePort.compute(any(), any())).thenReturn(emptyCoverage());
 
         orchestrator.startBatchRun(templateId, session, "http://localhost");
 
@@ -147,7 +144,7 @@ class AsyncBatchTestOrchestratorTest {
     void startBatchRun_prunesRunsExceedingFive() {
         when(testDataSetRepository.findByTemplateIdOrderByUpdatedAtDesc(templateId))
                 .thenReturn(List.of());
-        when(coverageComputationService.compute(any(), any())).thenReturn(emptyCoverage());
+        when(templateCoveragePort.compute(any(), any())).thenReturn(emptyCoverage());
 
         BatchTestRunEntity old1 = runEntity();
         BatchTestRunEntity old2 = runEntity();

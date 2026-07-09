@@ -253,10 +253,10 @@
           ]
         },
         {
-          "type": "paragraph",
+          "type": "sectionHeading",
           "styleRef": "ScheduleTitle",
           "children": [
-            {"type": "textRun", "value": "Schedule 1 — Document Checklist (46A)"}
+            {"type": "text", "value": "Schedule 1 — Document Checklist (46A)"}
           ]
         },
         {

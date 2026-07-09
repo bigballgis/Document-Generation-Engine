@@ -65,7 +65,8 @@ class ManagementOpenApiPathSanityTest {
         if (path.startsWith("/api/management/v1/templates")) {
             return java.util.Optional.of("com.bank.docgen.template");
         }
-        if (path.startsWith("/api/management/v1/admin/audit")) {
+        if (path.startsWith("/api/management/v1/admin/audit")
+                || path.startsWith("/api/management/v1/audit/")) {
             return java.util.Optional.of("com.bank.docgen.audit");
         }
         if (path.startsWith("/api/management/v1/users")

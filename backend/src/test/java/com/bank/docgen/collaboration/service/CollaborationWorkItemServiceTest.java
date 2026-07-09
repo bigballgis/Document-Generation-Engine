@@ -40,7 +40,7 @@ class CollaborationWorkItemServiceTest {
     @Mock
     private ManagementUserDisplayService managementUserDisplayService;
 
-    private CollaborationWorkItemAccessSupport accessSupport;
+    private CollaborationWorkItemAccessService accessSupport;
     private CollaborationWorkItemService service;
     private ManagementSessionClaims tester;
     private ManagementSessionClaims author;
@@ -48,7 +48,7 @@ class CollaborationWorkItemServiceTest {
 
     @BeforeEach
     void setUp() {
-        accessSupport = new CollaborationWorkItemAccessSupport(groupAccessService);
+        accessSupport = new CollaborationWorkItemAccessService(groupAccessService);
         service = new CollaborationWorkItemService(
                 workItemRepository, groupAccessService, accessSupport, managementUserDisplayService);
         tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));

@@ -1,7 +1,7 @@
 package com.bank.docgen.authoring.structured;
 
-import com.bank.docgen.authoring.structured.expression.ConditionExpressionEvaluator;
-import com.bank.docgen.rendering.domain.FidelityWarningCode;
+import com.bank.docgen.sharedkernel.document.expression.ConditionExpressionEvaluator;
+import com.bank.docgen.sharedkernel.document.fidelity.FidelityWarningCode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;

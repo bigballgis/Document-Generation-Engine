@@ -1,5 +1,7 @@
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test'
 
+import { isDockerStackReady } from './helpers/stack-readiness'
+
 import { E2E_ADMIN, loginAs } from './helpers/auth'
 import { E2E_API_BASE_URL } from './helpers/masters-api'
 import {
@@ -28,13 +30,7 @@ const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${defaul
 const REMINDER_WINDOW_MS = 10 * 60_000
 
 async function stackReady(request: APIRequestContext): Promise<boolean> {
-  try {
-    const backend = await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })
-    const frontend = await request.get(FRONTEND_BASE_URL, { timeout: 5_000 })
-    return backend.ok() && frontend.ok()
-  } catch {
-    return false
-  }
+  return isDockerStackReady(request, { frontendBaseUrl: FRONTEND_BASE_URL })
 }
 
 async function absoluteDeadlineMsLeft(request: APIRequestContext): Promise<number> {

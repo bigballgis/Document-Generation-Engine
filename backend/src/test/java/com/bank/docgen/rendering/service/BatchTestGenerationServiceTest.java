@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
-import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.rendering.api.BatchTestGenerateRequest;
 import com.bank.docgen.rendering.api.BatchTestSummaryView;
 import com.bank.docgen.rendering.api.FidelityWarningView;
@@ -18,8 +17,8 @@ import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
 import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.persistence.TemplateEntity;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.port.RenderableTemplateSnapshot;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
@@ -36,13 +35,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class BatchTestGenerationServiceTest {
 
     @Mock
-    private TemplateService templateService;
+    private TemplatePreviewAuthorizationPort previewAuthorizationPort;
     @Mock
     private PreviewGenerationService previewGenerationService;
     @Mock
     private BatchTestRunRepository batchTestRunRepository;
-    @Mock
-    private GroupAccessService groupAccessService;
 
     private BatchTestGenerationService service;
     private UUID templateId;
@@ -51,10 +48,9 @@ class BatchTestGenerationServiceTest {
     @BeforeEach
     void setUp() {
         service = new BatchTestGenerationService(
-                templateService,
+                previewAuthorizationPort,
                 previewGenerationService,
                 batchTestRunRepository,
-                groupAccessService,
                 new ObjectMapper()
         );
         templateId = UUID.randomUUID();
@@ -69,17 +65,8 @@ class BatchTestGenerationServiceTest {
                 List.of("route.template-authoring-home"),
                 Instant.now().plusSeconds(3600)
         );
-        when(templateService.requireReadableTemplate(templateId, author))
-                .thenReturn(new TemplateEntity(
-                        templateId,
-                        "TPL-1",
-                        "RETAIL",
-                        "Demo",
-                        null,
-                        UUID.randomUUID(),
-                        "10000003"
-                ));
-        when(groupAccessService.canAuthorTemplates(author)).thenReturn(true);
+        when(previewAuthorizationPort.requireReadableSnapshot(templateId, author))
+                .thenReturn(new RenderableTemplateSnapshot(templateId, UUID.randomUUID(), "RETAIL"));
         when(batchTestRunRepository.save(any(BatchTestRunEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
     }

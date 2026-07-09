@@ -47,7 +47,7 @@ class ContentModuleReviewServiceTest {
     private ManagementAuditRecorder auditRecorder;
 
     private ContentModuleReviewService reviewService;
-    private ContentModuleAccessSupport accessSupport;
+    private ContentModuleAccessService accessSupport;
     private ContentModuleEntity module;
     private ContentModuleVersionEntity draftVersion;
     private ManagementSessionClaims author;
@@ -55,7 +55,7 @@ class ContentModuleReviewServiceTest {
 
     @BeforeEach
     void setUp() {
-        accessSupport = new ContentModuleAccessSupport(moduleRepository, groupAccessService, new ObjectMapper());
+        accessSupport = new ContentModuleAccessService(moduleRepository, groupAccessService, new ObjectMapper());
         reviewService = new ContentModuleReviewService(
                 moduleRepository,
                 versionRepository,

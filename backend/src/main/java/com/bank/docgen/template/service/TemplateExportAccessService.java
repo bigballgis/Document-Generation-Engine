@@ -6,11 +6,11 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TemplateExportAccessSupport {
+public class TemplateExportAccessService {
 
     private final GroupAccessService groupAccessService;
 
-    public TemplateExportAccessSupport(GroupAccessService groupAccessService) {
+    public TemplateExportAccessService(GroupAccessService groupAccessService) {
         this.groupAccessService = groupAccessService;
     }
 

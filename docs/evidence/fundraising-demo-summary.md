@@ -16,9 +16,10 @@ Human-readable index mapping each published demo template to its **evidence arti
 
 ```powershell
 .\scripts\docker-deploy.ps1
-.\deploy\import-all-demos.ps1 -BackendUrl http://localhost:8080
+.\deploy\import-all-demos.ps1 -BackendUrl http://localhost:8080 -SkipSql
 .\deploy\publish-all-demos.ps1 -BackendUrl http://localhost:8080
 .\deploy\generate-all-demos.ps1 -BackendUrl http://localhost:8080
+.\deploy\capture-fundraising-evidence-bundle.ps1 -BackendUrl http://localhost:8080 -ContinueOnGenerateFailure
 ```
 
 ---

@@ -25,7 +25,7 @@
     {
       "externalId": "DEMO-RETAIL-ACCOUNT-BALANCE",
       "minDocxBytes": 4096,
-      "contentMarkers": ["James Porter", "24,567.89", "Meridian Everyday Current Account"],
+      "contentMarkers": ["James Porter", "24,567.89", "Meridian Reward Saver Account"],
       "variablesFixture": "deploy/demo-retail-account/config/retail-account-demo-test-variables.json",
       "testDataSetId": "retail-balance-executive"
     },

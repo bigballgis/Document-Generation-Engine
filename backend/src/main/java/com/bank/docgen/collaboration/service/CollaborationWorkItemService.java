@@ -23,13 +23,13 @@ public class CollaborationWorkItemService {
 
     private final CollaborationWorkItemRepository workItemRepository;
     private final GroupAccessService groupAccessService;
-    private final CollaborationWorkItemAccessSupport accessSupport;
+    private final CollaborationWorkItemAccessService accessSupport;
     private final ManagementUserDisplayService managementUserDisplayService;
 
     public CollaborationWorkItemService(
             CollaborationWorkItemRepository workItemRepository,
             GroupAccessService groupAccessService,
-            CollaborationWorkItemAccessSupport accessSupport,
+            CollaborationWorkItemAccessService accessSupport,
             ManagementUserDisplayService managementUserDisplayService
     ) {
         this.workItemRepository = workItemRepository;

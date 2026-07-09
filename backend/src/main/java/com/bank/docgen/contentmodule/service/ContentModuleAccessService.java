@@ -14,13 +14,13 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ContentModuleAccessSupport {
+public class ContentModuleAccessService {
 
     private final ContentModuleRepository moduleRepository;
     private final GroupAccessService groupAccessService;
     private final ObjectMapper objectMapper;
 
-    public ContentModuleAccessSupport(
+    public ContentModuleAccessService(
             ContentModuleRepository moduleRepository,
             GroupAccessService groupAccessService,
             ObjectMapper objectMapper

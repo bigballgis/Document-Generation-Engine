@@ -6,7 +6,7 @@
   "pageTarget": 6,
   "templates": ["DEMO-RATE-CHANGE-NOTICE", "DEMO-OVERDUE-COLLECTION"],
   "contentModuleRefs": [
-    {"referenceKey": "COLLECTION-RATE-CHANGE-CLAUSE", "moduleCode": "COLLECTION-RATE-STD"},
-    {"referenceKey": "COLLECTION-OVERDUE-CLAUSE", "moduleCode": "COLLECTION-OVERDUE-STD"}
+    {"referenceKey": "COLLECTION-RATE-CHANGE-CLAUSE", "moduleCode": "COLLECTION-RATE-STD", "semanticVersion": "3.0.0"},
+    {"referenceKey": "COLLECTION-OVERDUE-CLAUSE", "moduleCode": "COLLECTION-OVERDUE-STD", "semanticVersion": "3.0.0"}
   ]
 }

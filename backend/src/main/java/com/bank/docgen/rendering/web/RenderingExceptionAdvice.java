@@ -2,6 +2,7 @@ package com.bank.docgen.rendering.web;
 
 import com.bank.docgen.infrastructure.storage.ObjectStorageException;
 import com.bank.docgen.rendering.DocxAssemblyException;
+import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.rendering.PdfConversionCapacityExceededException;
 import com.bank.docgen.rendering.service.BatchTestRunNotFoundException;
 import com.bank.docgen.rendering.service.PreviewArtifactExpiredException;
@@ -121,6 +122,20 @@ public class RenderingExceptionAdvice {
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 ex.errorCode(),
                 ex.category(),
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(RenderingOperationException.class)
+    public ResponseEntity<ErrorEnvelope> handleRenderingOperation(
+            HttpServletRequest request,
+            RenderingOperationException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorCodes.RENDERING_FAILED,
+                ApiErrorCategories.GENERATION,
                 ex.messageKey()
         );
     }

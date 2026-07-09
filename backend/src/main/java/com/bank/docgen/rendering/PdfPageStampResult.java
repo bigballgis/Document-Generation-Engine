@@ -1,6 +1,6 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.rendering.domain.FidelityWarningCode;
+import com.bank.docgen.sharedkernel.document.fidelity.FidelityWarningCode;
 import java.util.Optional;
 
 /**

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { requireDockerStack } from './helpers/stack-readiness'
+
 import { E2E_GROUP_ADMIN, loginAs } from './helpers/auth'
 import { ensureDemoFullFlowPublished } from './helpers/content-modules-api'
 import { managementNav } from './helpers/nav'
@@ -23,22 +25,7 @@ test.describe('P12 API package access UIUX evidence (T12)', () => {
 
   test.beforeAll(async ({ request }) => {
     ensureP12ApiPackageAccessEvidenceDirs()
-    let backendReady = false
-    let frontendReady = false
-    try {
-      backendReady = (await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })).ok()
-    } catch {
-      backendReady = false
-    }
-    try {
-      frontendReady = (await request.get(FRONTEND_BASE_URL, { timeout: 5_000 })).ok()
-    } catch {
-      frontendReady = false
-    }
-    test.skip(
-      !(backendReady && frontendReady),
-      `Stack required (${FRONTEND_BASE_URL} + :8080).`,
-    )
+    await requireDockerStack(request, { frontendBaseUrl: FRONTEND_BASE_URL, skipMessage: `Stack required (${FRONTEND_BASE_URL} + :8080).` })
 
     const fixture = await ensureDemoFullFlowPublished(request)
     templateId = fixture.templateId

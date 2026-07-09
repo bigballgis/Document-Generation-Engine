@@ -246,10 +246,10 @@
               ]
             },
             {
-              "type": "paragraph",
+              "type": "sectionHeading",
               "styleRef": "ScheduleTitle",
               "children": [
-                {"type": "textRun", "value": "Schedule 1 — Covenant Compliance Summary"}
+                {"type": "text", "value": "Schedule 1 — Covenant Compliance Summary"}
               ]
             },
             {

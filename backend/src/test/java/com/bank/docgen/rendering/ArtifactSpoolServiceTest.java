@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
-import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.rendering.RenderingOperationException;
 import java.nio.file.Files;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +25,7 @@ class ArtifactSpoolServiceTest {
         }
 
         assertThatThrownBy(() -> spoolService.spool(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9}))
-                .isInstanceOf(TemplateValidationException.class)
+                .isInstanceOf(RenderingOperationException.class)
                 .hasMessage("api.error.generation.artifactTooLarge");
     }
 }

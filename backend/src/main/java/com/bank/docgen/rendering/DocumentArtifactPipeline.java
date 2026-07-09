@@ -1,6 +1,6 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.authoring.structured.RenderProfile;
+import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +81,7 @@ public class DocumentArtifactPipeline {
             SpooledArtifact spooled = artifactSpoolService.spool(finalBytes);
             return new GeneratedArtifact(spooled, contentType, storageFileName, pipelineWarningCodes);
         } catch (java.io.IOException ex) {
-            throw new com.bank.docgen.template.service.TemplateValidationException(
+            throw new RenderingOperationException(
                     "api.error.rendering.generationFailed"
             );
         }

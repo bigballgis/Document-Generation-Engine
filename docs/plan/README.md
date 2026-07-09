@@ -7,7 +7,7 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Active formal phase:** **CORE-FORTRESS F8** — Observability, SLO, DR — **In Progress** (2026-07-09); see [program roadmap](detail/CORE-FORTRESS-program-roadmap.md) and [master-plan](master-plan.md). **Prior:** **CORE-FORTRESS F7 Done** (2026-07-09; authoring UX; Vitest **894**; E2E **12/12**; LR-C1/C4 Done). **CORE-FORTRESS F6 Done** (2026-07-09; frontend kernel refactor; controller **243** lines; composable **73** Vitest). **CORE-FORTRESS F5 Done** (2026-07-09; async durability + security depth; F5 targeted **31/31**; full `mvn verify` Windows env caveat). **CORE-FORTRESS F4 Done** (2026-07-09).
+**Active formal program:** **CODE-QUALITY** — Code hygiene & structural consistency — **In Progress** (2026-07-09; Wave 1 **CQ-01A** + **CQ-01B** In Progress); see [program entry](code-quality-program.md) and [task sheet](detail/CODE-QUALITY-code-hygiene.md). **CORE-FORTRESS program Done** (F1–F8; 2026-07-09; `mvn verify` **1154**). **Prior:** **CORE-FORTRESS F7 Done** (authoring UX; Vitest **894**; E2E **12/12**); **F6 Done** (frontend kernel refactor; composable **73** Vitest).
 **Active work (CDP session):** **[CDP Wave CD-0](./competitiveness-deepening-program.md)** — `CD-*` tasks only.
 
 **Formal phase P23:** **[P23 Demo typography & layout excellence](detail/P23-demo-typography-layout-excellence.md)** — **Done** (2026-07-08; T01–T16; bank-grade Word output for all demo packages).
@@ -84,12 +84,11 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **In-flight work:**
-- **CORE-FORTRESS F8 In Progress** (2026-07-09) — observability / SLO / DR ([program roadmap](detail/CORE-FORTRESS-program-roadmap.md); [F8 detail](detail/CORE-FORTRESS-f8-observability-slo-dr.md)). **F7 Done** (2026-07-09; Vitest **894**; E2E **12/12**; LR-C1/C4 Done — [F7 detail](detail/CORE-FORTRESS-f7-authoring-ux.md))
-- **CORE-FORTRESS F6 Done** (2026-07-09; controller **243** lines; composable **73** Vitest; F6-T08 E2E **9/9**)
-- **CORE-FORTRESS F5 Done** (2026-07-09) — async durability + security depth ([detail](detail/CORE-FORTRESS-f5-async-durability-security.md); F5 targeted **31/31**; full `mvn verify` env caveat)
+- **CODE-QUALITY In Progress** (2026-07-09) — code hygiene & structural consistency ([program](code-quality-program.md); [detail](detail/CODE-QUALITY-code-hygiene.md); Wave 1 **CQ-01A** + **CQ-01B** In Progress; BDD `not-applicable`)
+- **CORE-FORTRESS Done** (2026-07-09; F1–F8 — [program roadmap](detail/CORE-FORTRESS-program-roadmap.md))
 - **P23 Done** (2026-07-08) — demo typography & layout excellence ([plan](detail/P23-demo-typography-layout-excellence.md); T01–T16; human reviewer sign-off operational follow-up)
 - **CDP** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)
-- **LRP (In Progress — Wave LR-B Done 2026-07-04; Wave LR-A activated 2026-07-04)** — launch readiness & deep optimization ([program](./launch-readiness-program.md); Waves **LR-A…LR-E**; **LR-A2** ↔ P23-T02)
+- **LRP (sibling program)** — launch readiness & deep optimization ([program](./launch-readiness-program.md); Waves **LR-A…LR-E**; LR-C1/C4 Done via F7; not sole active)
 
 **P21 Done** — closure evidence in [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 
@@ -103,9 +102,10 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 
 | Backlog | Lens |
 | --- | --- |
-| **[system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md)** | **Current consolidated review (SOR-0…7, 2026-07-03)**: plan truth, CI gate automation, security seams, performance, frontend structure, contract/i18n, architecture, ops readiness — all tasks Not Started |
+| **[code-quality-program.md](./code-quality-program.md)** | **Active CODE-QUALITY program (2026-07-09):** behavior-preserving hygiene — module boundaries, god-class extraction, DRY demo/PDF/E2E infra (`CQ-*`; Wave 1 In Progress) |
+| **[system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md)** | **Consolidated optimization review (SOR-0…7, 2026-07-04 closeout)** — open hygiene items superseded by **CODE-QUALITY** where duplicated |
 | **[comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)** | **Unified prioritized map (COR-0…6): docs sync, API contract, template workflow, frontend UX, performance, E2E, P14–P20 — start here (2026-06-23)** |
-| [launch-readiness-program.md](./launch-readiness-program.md) | Launch-readiness deep optimization — production pitfalls + usability deepening (LR-A…E, 2026-07-03) |
+| [launch-readiness-program.md](./launch-readiness-program.md) | Launch-readiness deep optimization — production pitfalls + usability deepening (LR-A…E; sibling program; LR-C1/C4 Done via F7) |
 | [optimization-plan.md](./optimization-plan.md) | Technical debt detail: quality gates, coverage, backend architecture/security/performance (OPT-A…G) |
 | [spotbugs-exclusion-ratchet.md](./spotbugs-exclusion-ratchet.md) | SpotBugs exclude.xml ratchet (SOR-A05): baseline `<Match>` count, banned patterns, EI slice cadence |
 | [coverage-ratchet-plan.md](./coverage-ratchet-plan.md) | JaCoCo / Vitest bundle floors (SOR-C02) |

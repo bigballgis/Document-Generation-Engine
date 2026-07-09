@@ -1,0 +1,150 @@
+.l1-section {
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border-color);
+
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  h3 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--font-size-md);
+  }
+}
+
+.field-hint {
+  margin: 0 0 var(--space-3);
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.domain-hint {
+  margin-top: 0;
+}
+
+.policy-summary {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+
+  div {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+  }
+
+  dt {
+    margin: 0;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+  }
+}
+
+.policy-value--truncate {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.policy-empty {
+  color: var(--text-muted);
+}
+
+.inline-form {
+  max-width: 40rem;
+}
+
+.retention-form {
+  margin-top: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.retention-feedback {
+  margin-bottom: var(--space-4);
+}
+
+.retention-select {
+  width: 100%;
+  max-width: 16rem;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.advanced-card {
+  margin-top: var(--space-6);
+  margin-bottom: 0;
+  border: none;
+  padding: 0;
+
+  :deep(.el-card__body) {
+    padding: 0;
+  }
+}
+
+.advanced-block {
+  padding-bottom: var(--space-5);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border-color);
+
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  h4 {
+    margin: 0;
+    font-size: var(--font-size-md);
+  }
+}
+
+.advanced-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.readonly-summary {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.current-summary {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+  font-size: var(--font-size-sm);
+}
+
+.summary-label {
+  color: var(--text-muted);
+  min-width: 7rem;
+}
+
+.domain-form {
+  max-width: 40rem;
+  margin-bottom: var(--space-4);
+}

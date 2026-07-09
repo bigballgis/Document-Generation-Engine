@@ -15,9 +15,9 @@ import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
-import com.bank.docgen.template.service.CoverageThresholdResolver;
-import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.port.TemplateCoveragePort;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
+import com.bank.docgen.template.port.TemplateRenderContextPort;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,43 +38,43 @@ public class SubmitTestEligibilityService {
     private static final Logger LOG = LoggerFactory.getLogger(SubmitTestEligibilityService.class);
     private static final int MAX_LIST_SIZE = 5;
 
-    private final TemplateService templateService;
+    private final TemplatePreviewAuthorizationPort previewAuthorizationPort;
     private final BatchTestRunRepository batchTestRunRepository;
     private final PreviewRecordRepository previewRecordRepository;
     private final VariableSchemaRepository variableSchemaRepository;
     private final AnchorBindingRepository anchorBindingRepository;
     private final TestDataSetRepository testDataSetRepository;
-    private final CoverageThresholdResolver coverageThresholdResolver;
-    private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
+    private final TemplateCoveragePort templateCoveragePort;
+    private final TemplateRenderContextPort renderContextPort;
     private final ObjectMapper objectMapper;
 
     public SubmitTestEligibilityService(
-            TemplateService templateService,
+            TemplatePreviewAuthorizationPort previewAuthorizationPort,
             BatchTestRunRepository batchTestRunRepository,
             PreviewRecordRepository previewRecordRepository,
             VariableSchemaRepository variableSchemaRepository,
             AnchorBindingRepository anchorBindingRepository,
             TestDataSetRepository testDataSetRepository,
-            CoverageThresholdResolver coverageThresholdResolver,
-            TemplateCurrentVersionResolver templateCurrentVersionResolver,
+            TemplateCoveragePort templateCoveragePort,
+            TemplateRenderContextPort renderContextPort,
             ObjectMapper objectMapper
     ) {
-        this.templateService = templateService;
+        this.previewAuthorizationPort = previewAuthorizationPort;
         this.batchTestRunRepository = batchTestRunRepository;
         this.previewRecordRepository = previewRecordRepository;
         this.variableSchemaRepository = variableSchemaRepository;
         this.anchorBindingRepository = anchorBindingRepository;
         this.testDataSetRepository = testDataSetRepository;
-        this.coverageThresholdResolver = coverageThresholdResolver;
-        this.templateCurrentVersionResolver = templateCurrentVersionResolver;
+        this.templateCoveragePort = templateCoveragePort;
+        this.renderContextPort = renderContextPort;
         this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
     public SubmitTestEligibilityView evaluate(UUID templateId, ManagementSessionClaims session) {
-        var template = templateService.requireReadableTemplate(templateId, session);
-        var version = templateCurrentVersionResolver.requireInFlightDevVersion(templateId);
-        var threshold = coverageThresholdResolver.resolveForTemplate(template);
+        var snapshot = previewAuthorizationPort.requireReadableSnapshot(templateId, session);
+        var version = renderContextPort.requireInFlightDevVersion(templateId);
+        var threshold = templateCoveragePort.resolveThreshold(snapshot.groupCode());
 
         var latestValid = batchTestRunRepository.findLatestValidByTemplateId(templateId);
         BatchTestRunEntity latestRun = latestValid.orElse(null);

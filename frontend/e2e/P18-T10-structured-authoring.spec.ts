@@ -1,5 +1,7 @@
 import { expect, test, type APIRequestContext, type Locator, type Page } from '@playwright/test'
 
+import { isDockerStackReady } from './helpers/stack-readiness'
+
 import { E2E_TEMPLATE_AUTHOR, loginAs } from './helpers/auth'
 import { E2E_API_BASE_URL } from './helpers/masters-api'
 import {
@@ -11,21 +13,7 @@ import {
 const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173'
 
 async function assertDockerStackReady(request: APIRequestContext): Promise<boolean> {
-  let backendReady = false
-  let frontendReady = false
-  try {
-    const backend = await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })
-    backendReady = backend.ok()
-  } catch {
-    backendReady = false
-  }
-  try {
-    const frontend = await request.get(FRONTEND_BASE_URL, { timeout: 5_000 })
-    frontendReady = frontend.ok()
-  } catch {
-    frontendReady = false
-  }
-  return backendReady && frontendReady
+  return isDockerStackReady(request, { frontendBaseUrl: FRONTEND_BASE_URL })
 }
 
 async function openAuthoringTab(page: Page) {

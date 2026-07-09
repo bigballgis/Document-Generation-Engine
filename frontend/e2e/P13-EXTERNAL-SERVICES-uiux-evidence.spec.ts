@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { isBackendReady } from './helpers/stack-readiness'
+
 import { E2E_GROUP_ADMIN, loginAs } from './helpers/auth'
 import {
   createTemplateApiCredential,
@@ -44,12 +46,7 @@ test.describe('P13 External services UIUX evidence', () => {
 
   test.beforeAll(async ({ request }) => {
     ensureP13ExternalServicesEvidenceDirs()
-    let backendReady = false
-    try {
-      backendReady = (await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })).ok()
-    } catch {
-      backendReady = false
-    }
+    const backendReady = await isBackendReady(request)
     const frontendBaseUrl = await resolveReachableFrontendBaseUrl(request)
     test.skip(
       !(backendReady && frontendBaseUrl),

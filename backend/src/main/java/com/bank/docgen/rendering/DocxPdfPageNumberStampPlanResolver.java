@@ -1,6 +1,6 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.authoring.structured.RenderProfile;
+import com.bank.docgen.sharedkernel.document.RenderProfile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

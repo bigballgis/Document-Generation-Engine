@@ -2,10 +2,7 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
-import com.bank.docgen.rendering.domain.PreviewStatus;
-import com.bank.docgen.rendering.persistence.BatchTestRunEntity;
-import com.bank.docgen.rendering.persistence.BatchTestRunRepository;
-import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
+import com.bank.docgen.template.port.PreviewEvidencePort;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.ChangeDiffView;
@@ -36,8 +33,7 @@ public class PublishGateService {
     private final TemplateVersionRepository templateVersionRepository;
     private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
     private final ApiPolicyRepository apiPolicyRepository;
-    private final PreviewRecordRepository previewRecordRepository;
-    private final BatchTestRunRepository batchTestRunRepository;
+    private final PreviewEvidencePort previewEvidencePort;
     private final CoverageComputationService coverageComputationService;
     private final ChangeDiffService changeDiffService;
     private final TemplateRuleValidationService templateRuleValidationService;
@@ -50,8 +46,7 @@ public class PublishGateService {
             TemplateVersionRepository templateVersionRepository,
             TemplateLifecycleRecordRepository lifecycleRecordRepository,
             ApiPolicyRepository apiPolicyRepository,
-            PreviewRecordRepository previewRecordRepository,
-            BatchTestRunRepository batchTestRunRepository,
+            PreviewEvidencePort previewEvidencePort,
             CoverageComputationService coverageComputationService,
             ChangeDiffService changeDiffService,
             TemplateRuleValidationService templateRuleValidationService,
@@ -63,8 +58,7 @@ public class PublishGateService {
         this.templateVersionRepository = templateVersionRepository;
         this.lifecycleRecordRepository = lifecycleRecordRepository;
         this.apiPolicyRepository = apiPolicyRepository;
-        this.previewRecordRepository = previewRecordRepository;
-        this.batchTestRunRepository = batchTestRunRepository;
+        this.previewEvidencePort = previewEvidencePort;
         this.coverageComputationService = coverageComputationService;
         this.changeDiffService = changeDiffService;
         this.templateRuleValidationService = templateRuleValidationService;
@@ -176,23 +170,21 @@ public class PublishGateService {
     }
 
     private PublishGateItemView testResultsItem(UUID templateId) {
-        List<BatchTestRunEntity> runs = batchTestRunRepository.findByTemplateIdOrderByCreatedAtDesc(templateId);
-        boolean hasRun = !runs.isEmpty();
-        BatchTestRunEntity latest = hasRun ? runs.get(0) : null;
-        boolean blocking = !hasRun || latest.getBlockerCount() > 0;
+        var latest = previewEvidencePort.latestBatchTestRun(templateId);
+        boolean hasRun = latest.isPresent();
+        int blockerCount = latest.map(snapshot -> snapshot.blockerCount()).orElse(0);
+        boolean blocking = !hasRun || blockerCount > 0;
         return new PublishGateItemView(
                 PublishGateCheckCode.TEST_RESULTS,
-                hasRun && latest.getBlockerCount() == 0,
+                hasRun && blockerCount == 0,
                 blocking,
                 hasRun ? "api.publishGate.testResults.ready" : "api.publishGate.testResults.missing",
-                hasRun ? "blockerCount=" + latest.getBlockerCount() : "noBatchRun"
+                hasRun ? "blockerCount=" + blockerCount : "noBatchRun"
         );
     }
 
     private PublishGateItemView previewPresentItem(UUID templateId, UUID versionId) {
-        int previewCount = previewRecordRepository
-                .findByTemplateIdAndTemplateVersionIdAndStatus(templateId, versionId, PreviewStatus.SUCCEEDED)
-                .size();
+        int previewCount = previewEvidencePort.countSuccessfulPreviews(templateId, versionId);
         boolean ready = previewCount > 0;
         return new PublishGateItemView(
                 PublishGateCheckCode.PREVIEW_PRESENT,
@@ -286,9 +278,7 @@ public class PublishGateService {
             BindingValidationView bindings,
             CoverageSummaryView coverage
     ) {
-        int previewBlockers = previewRecordRepository
-                .findByTemplateIdAndTemplateVersionIdAndStatus(templateId, versionId, PreviewStatus.FAILED)
-                .size();
+        int previewBlockers = previewEvidencePort.countFailedPreviews(templateId, versionId);
         boolean blocking = bindings.summary().blocking()
                 || coverage.belowThreshold()
                 || previewBlockers > 0;

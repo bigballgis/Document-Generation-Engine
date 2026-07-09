@@ -1,14 +1,12 @@
 package com.bank.docgen.rendering.service;
 
-import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.rendering.api.AsyncPreviewStartResponse;
 import com.bank.docgen.rendering.api.TestGenerateRequest;
 import com.bank.docgen.rendering.domain.PreviewStatus;
 import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
 import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.service.TemplateAccessDeniedException;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -31,8 +29,7 @@ public class AsyncPreviewOrchestrator {
     private static final String BATCH_TEST_STORAGE_PREFIX = "batch-test/";
     static final String TEMP_STORAGE_PREFIX = "preview-temp/";
 
-    private final TemplateService templateService;
-    private final GroupAccessService groupAccessService;
+    private final TemplatePreviewAuthorizationPort previewAuthorizationPort;
     private final PreviewGenerationService previewGenerationService;
     private final PreviewRecordRepository previewRecordRepository;
     private final PreviewConcurrencyGuard concurrencyGuard;
@@ -40,16 +37,14 @@ public class AsyncPreviewOrchestrator {
     private final Executor asyncExecutor;
 
     public AsyncPreviewOrchestrator(
-            TemplateService templateService,
-            GroupAccessService groupAccessService,
+            TemplatePreviewAuthorizationPort previewAuthorizationPort,
             PreviewGenerationService previewGenerationService,
             PreviewRecordRepository previewRecordRepository,
             PreviewConcurrencyGuard concurrencyGuard,
             @Qualifier("previewSseRegistry") SseEmitterRegistry sseRegistry,
             @Qualifier("asyncTaskExecutor") Executor asyncExecutor
     ) {
-        this.templateService = templateService;
-        this.groupAccessService = groupAccessService;
+        this.previewAuthorizationPort = previewAuthorizationPort;
         this.previewGenerationService = previewGenerationService;
         this.previewRecordRepository = previewRecordRepository;
         this.concurrencyGuard = concurrencyGuard;
@@ -68,10 +63,8 @@ public class AsyncPreviewOrchestrator {
             ManagementSessionClaims session,
             String baseUrl
     ) {
-        templateService.requireReadableTemplate(templateId, session);
-        if (!groupAccessService.canAuthorTemplates(session)) {
-            throw new TemplateAccessDeniedException();
-        }
+        previewAuthorizationPort.requireReadableSnapshot(templateId, session);
+        previewAuthorizationPort.requirePreviewAuthor(session);
         if (!concurrencyGuard.tryAcquire()) {
             throw new PreviewConcurrencyLimitException();
         }
@@ -89,7 +82,7 @@ public class AsyncPreviewOrchestrator {
      * If generation is already complete, sends the final event immediately.
      */
     public SseEmitter streamProgress(UUID templateId, UUID previewId, ManagementSessionClaims session) {
-        templateService.requireReadableTemplate(templateId, session);
+        previewAuthorizationPort.requireReadableSnapshot(templateId, session);
         SseEmitter emitter = sseRegistry.register(previewId);
 
         previewRecordRepository.findById(previewId).ifPresent(record -> {

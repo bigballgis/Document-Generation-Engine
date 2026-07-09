@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
-import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.rendering.RenderingOperationException;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import java.io.IOException;
@@ -117,7 +117,7 @@ class LibreOfficePdfConversionServiceTest {
         long tempDirsBefore = countDocgenPdfTempDirs();
 
         assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
-                .isInstanceOf(TemplateValidationException.class);
+                .isInstanceOf(RenderingOperationException.class);
         assertThat(countDocgenPdfTempDirs()).isEqualTo(tempDirsBefore);
     }
 
@@ -130,7 +130,7 @@ class LibreOfficePdfConversionServiceTest {
         LibreOfficePdfConversionService service = service();
 
         assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
-                .isInstanceOf(TemplateValidationException.class);
+                .isInstanceOf(RenderingOperationException.class);
     }
 
     @Test
@@ -140,7 +140,7 @@ class LibreOfficePdfConversionServiceTest {
         LibreOfficePdfConversionService service = service();
 
         assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
-                .isInstanceOf(TemplateValidationException.class);
+                .isInstanceOf(RenderingOperationException.class);
     }
 
     @Test
@@ -257,7 +257,7 @@ class LibreOfficePdfConversionServiceTest {
         long profileDirsBefore = countDocgenLoProfileDirs();
 
         assertThatThrownBy(() -> service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()))
-                .isInstanceOf(TemplateValidationException.class);
+                .isInstanceOf(RenderingOperationException.class);
         assertThat(countDocgenLoProfileDirs()).isEqualTo(profileDirsBefore);
     }
 

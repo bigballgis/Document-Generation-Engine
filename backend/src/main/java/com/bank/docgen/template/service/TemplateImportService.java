@@ -44,7 +44,7 @@ public class TemplateImportService {
     private final TemplateService templateService;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final ManagementAuditRecorder managementAuditRecorder;
-    private final TemplateExportAccessSupport importAccessSupport;
+    private final TemplateExportAccessService importAccessSupport;
     private final TemplateImportBundleValidator bundleValidator;
     private final ObjectMapper objectMapper;
     private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
@@ -57,7 +57,7 @@ public class TemplateImportService {
             TemplateService templateService,
             TemplateContentModuleReferenceService contentModuleReferenceService,
             ManagementAuditRecorder managementAuditRecorder,
-            TemplateExportAccessSupport importAccessSupport,
+            TemplateExportAccessService importAccessSupport,
             TemplateImportBundleValidator bundleValidator,
             ObjectMapper objectMapper,
             TemplateCurrentVersionResolver templateCurrentVersionResolver

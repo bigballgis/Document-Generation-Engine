@@ -21,8 +21,8 @@
     }
   ],
   "contentModuleRefs": [
-    {"referenceKey": "MORTGAGE-STANDARD-TERMS", "moduleCode": "MORTGAGE-STD-TERMS"},
-    {"referenceKey": "MORTGAGE-PROPERTY-COVENANTS", "moduleCode": "MORTGAGE-PROP-COV"},
-    {"referenceKey": "MORTGAGE-DEFAULT-CLAUSE", "moduleCode": "MORTGAGE-DEFAULT"}
+    {"referenceKey": "MORTGAGE-STANDARD-TERMS", "moduleCode": "MORTGAGE-STD-TERMS", "semanticVersion": "3.0.0"},
+    {"referenceKey": "MORTGAGE-PROPERTY-COVENANTS", "moduleCode": "MORTGAGE-PROP-COV", "semanticVersion": "1.0.0"},
+    {"referenceKey": "MORTGAGE-DEFAULT-CLAUSE", "moduleCode": "MORTGAGE-DEFAULT", "semanticVersion": "1.0.0"}
   ]
 }

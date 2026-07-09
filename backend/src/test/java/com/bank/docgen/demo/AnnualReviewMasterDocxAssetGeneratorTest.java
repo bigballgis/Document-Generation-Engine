@@ -15,7 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
+import com.bank.docgen.demo.support.DemoMasterDocxTestAssertions;
 import org.apache.poi.wp.usermodel.HeaderFooterType;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -32,11 +32,6 @@ class AnnualReviewMasterDocxAssetGeneratorTest {
     static final String MASTER_LAYOUT_VERSION = "annual-review-layout-v3-nine-anchors";
     private static final Path REVIEW_ASSET = Path.of("..", "deploy", "demo-annual-review", "assets", "annual-review-master.docx");
     private static final Path RENEWAL_ASSET = Path.of("..", "deploy", "demo-annual-review", "assets", "facility-renewal-master.docx");
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(
-            "LOREM|TODO|\\{\\{placeholder|placeholder text",
-            Pattern.CASE_INSENSITIVE
-    );
-
     static final List<String> REVIEW_ANCHOR_IDS = List.of(
             "ARR_PARTIES",
             "ARR_DEFINED_TERMS",
@@ -103,7 +98,7 @@ class AnnualReviewMasterDocxAssetGeneratorTest {
                 .contains("w:styleId=\"SignatureBlock\"")
                 .contains("w:styleId=\"TableHeader\"");
 
-        assertNoPlaceholderMarkers(docx);
+        DemoMasterDocxTestAssertions.assertNoPlaceholderMarkers(docx);
 
         try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docx))) {
             CTSectPr sectPr = document.getDocument().getBody().getSectPr();
@@ -115,21 +110,6 @@ class AnnualReviewMasterDocxAssetGeneratorTest {
         }
     }
 
-    private static void assertNoPlaceholderMarkers(byte[] docxBytes) throws Exception {
-        try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docxBytes))) {
-            StringBuilder text = new StringBuilder();
-            document.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n'));
-            document.getHeaderList().forEach(header ->
-                    header.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n')));
-            document.getFooterList().forEach(footer ->
-                    footer.getParagraphs().forEach(paragraph -> text.append(paragraph.getText()).append('\n')));
-            String body = text.toString().toUpperCase(Locale.ROOT);
-            assertThat(PLACEHOLDER_PATTERN.matcher(body).find())
-                    .as("Master DOCX must not contain LOREM/TODO/placeholder markers")
-                    .isFalse();
-            assertThat(body).doesNotContain("LOREM");
-        }
-    }
 
     static byte[] buildAnnualReviewMaster() throws Exception {
         return buildMaster(

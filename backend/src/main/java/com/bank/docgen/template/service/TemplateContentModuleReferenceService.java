@@ -4,7 +4,7 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
-import com.bank.docgen.contentmodule.service.ContentModuleAccessSupport;
+import com.bank.docgen.contentmodule.service.ContentModuleAccessService;
 import com.bank.docgen.contentmodule.service.ContentModuleNotFoundException;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView;
@@ -33,7 +33,7 @@ public class TemplateContentModuleReferenceService {
     private final TemplateContentModuleReferenceRepository referenceRepository;
     private final ContentModuleRepository contentModuleRepository;
     private final ContentModuleVersionRepository contentModuleVersionRepository;
-    private final ContentModuleAccessSupport contentModuleAccessSupport;
+    private final ContentModuleAccessService ContentModuleAccessService;
     private final TemplateCurrentVersionResolver templateVersionSupport;
 
     public TemplateContentModuleReferenceService(
@@ -42,7 +42,7 @@ public class TemplateContentModuleReferenceService {
             TemplateContentModuleReferenceRepository referenceRepository,
             ContentModuleRepository contentModuleRepository,
             ContentModuleVersionRepository contentModuleVersionRepository,
-            ContentModuleAccessSupport contentModuleAccessSupport,
+            ContentModuleAccessService ContentModuleAccessService,
             TemplateCurrentVersionResolver templateVersionSupport
     ) {
         this.templateService = templateService;
@@ -50,7 +50,7 @@ public class TemplateContentModuleReferenceService {
         this.referenceRepository = referenceRepository;
         this.contentModuleRepository = contentModuleRepository;
         this.contentModuleVersionRepository = contentModuleVersionRepository;
-        this.contentModuleAccessSupport = contentModuleAccessSupport;
+        this.ContentModuleAccessService = ContentModuleAccessService;
         this.templateVersionSupport = templateVersionSupport;
     }
 
@@ -182,7 +182,7 @@ public class TemplateContentModuleReferenceService {
             String semanticVersion,
             ManagementSessionClaims session
     ) {
-        ContentModuleEntity module = contentModuleAccessSupport.requireReadableModule(moduleId, session);
+        ContentModuleEntity module = ContentModuleAccessService.requireReadableModule(moduleId, session);
         assertTemplateCanReferenceModule(template, module);
         ContentModuleVersionEntity version = contentModuleVersionRepository
                 .findByModuleIdAndSemanticVersion(module.getId(), semanticVersion.trim())
@@ -197,7 +197,7 @@ public class TemplateContentModuleReferenceService {
         if (template.getGroupCode().equalsIgnoreCase(module.getGroupCode())) {
             return;
         }
-        boolean shared = contentModuleAccessSupport.readSharedGroupCodes(module).stream()
+        boolean shared = ContentModuleAccessService.readSharedGroupCodes(module).stream()
                 .anyMatch(code -> code.equalsIgnoreCase(template.getGroupCode()));
         if (!shared) {
             throw new TemplateValidationException("api.error.template.contentModuleReferenceInvalid");
@@ -212,7 +212,7 @@ public class TemplateContentModuleReferenceService {
                 .orElseThrow(ContentModuleNotFoundException::new);
         return new ContentModuleReferenceView(
                 reference.getReferenceKey(),
-                contentModuleAccessSupport.publicModuleId(module),
+                ContentModuleAccessService.publicModuleId(module),
                 version.getSemanticVersion(),
                 reference.isLockedFlag()
         );

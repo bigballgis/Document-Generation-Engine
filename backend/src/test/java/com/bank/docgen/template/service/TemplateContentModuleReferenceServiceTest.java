@@ -15,7 +15,7 @@ import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
-import com.bank.docgen.contentmodule.service.ContentModuleAccessSupport;
+import com.bank.docgen.contentmodule.service.ContentModuleAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.UpsertContentModuleReferenceRequest;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
@@ -66,7 +66,7 @@ class TemplateContentModuleReferenceServiceTest {
 
     @BeforeEach
     void setUp() {
-        ContentModuleAccessSupport accessSupport = new ContentModuleAccessSupport(
+        ContentModuleAccessService accessSupport = new ContentModuleAccessService(
                 contentModuleRepository,
                 groupAccessService,
                 new ObjectMapper()

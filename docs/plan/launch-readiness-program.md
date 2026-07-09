@@ -2,7 +2,7 @@
 
 **Program ID:** `LRP`  
 **Created:** 2026-07-03  
-**Status:** **In Progress** (Wave LR-B **Done** 2026-07-04; Wave LR-A activated 2026-07-04; Wave LR-C **In Progress** — LR-C1/C4 **Done** via CORE-FORTRESS F7 2026-07-09)  
+**Status:** **In Progress** (Wave LR-B **Done** 2026-07-04; Wave LR-A activated 2026-07-04; Wave LR-C partial — LR-C1/C4 **Done** via CORE-FORTRESS F7 2026-07-09). **Not sole active formal program** — **CODE-QUALITY** activated 2026-07-09; see [code-quality-program.md](./code-quality-program.md).  
 **North star:** Lift the system from **「功能齐全」** to **「生产可靠 + 业务好用」** — absorb the industry's known production pitfalls (rendering/conversion, proxy streaming, multi-instance, session), and maximize functionality + usability **inside the confirmed v1 boundary**, before launch.
 
 **Authoritative entry for lower-tier implementers:** Read this file first, then the wave detail doc for your task ID prefix. LRP task IDs are prefixed **`LR-*`** only.
@@ -17,7 +17,8 @@
 | [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) | **Sibling program CDP** — doc truth, browser E2E, pitfall registry (`CD-*`; do not execute here) |
 | [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **Done** — rendering engine + demo scaffolds (2026-07-04) |
 | [detail/P23-demo-typography-layout-excellence.md](./detail/P23-demo-typography-layout-excellence.md) | **Done** — bank-grade demo typography/layout (2026-07-08) |
-| [detail/CORE-FORTRESS-program-roadmap.md](./detail/CORE-FORTRESS-program-roadmap.md) | **Active formal phase CORE-FORTRESS F8** — F7 Done (LR-C1/C4 mirrored) |
+| [detail/CORE-FORTRESS-program-roadmap.md](./detail/CORE-FORTRESS-program-roadmap.md) | **CORE-FORTRESS Done** (F1–F8; 2026-07-09) |
+| [code-quality-program.md](./code-quality-program.md) | **Active formal program CODE-QUALITY** — code hygiene (`CQ-*`; Wave 1 In Progress) |
 
 ---
 

@@ -210,9 +210,15 @@ WHERE id = '$TemplateId'::uuid
   AND deleted_at IS NULL;
 UPDATE template_version
 SET lifecycle_status = 'DRAFT',
+    release_version = NULL,
     updated_at = (NOW() AT TIME ZONE 'UTC')
 WHERE template_id = '$TemplateId'::uuid
-  AND (release_version IS NULL OR release_version = '');
+  AND deleted_at IS NULL;
+UPDATE template_content_module_reference
+SET locked_flag = FALSE
+WHERE template_version_id IN (
+    SELECT id FROM template_version WHERE template_id = '$TemplateId'::uuid AND deleted_at IS NULL
+);
 COMMIT;
 "@
     $sql | docker exec -i $PostgresContainer psql -U $PostgresUser -d $PostgresDb -v ON_ERROR_STOP=1
@@ -494,7 +500,21 @@ Invoke-Api POST "/templates/$templateId/bindings/validate" $AuthorToken -Body @{
 
 # --- Composition rules (>=10) ---
 Write-Step "Applying $($CompositionRules.Count) composition rules..."
-Invoke-Api PUT "/templates/$templateId/rules" $AuthorToken -Body @{ rules = @($CompositionRules) } | Out-Null
+$sanitizedRules = @($CompositionRules | ForEach-Object {
+    $rule = [ordered]@{
+        ruleId = $_.ruleId
+        conditionExpression = $_.conditionExpression
+        targetAnchorId = $_.targetAnchorId
+    }
+    if ($_.trueBranchRuleId -and -not [string]::IsNullOrWhiteSpace([string]$_.trueBranchRuleId)) {
+        $rule.trueBranchRuleId = [string]$_.trueBranchRuleId
+    }
+    if ($_.falseBranchRuleId -and -not [string]::IsNullOrWhiteSpace([string]$_.falseBranchRuleId)) {
+        $rule.falseBranchRuleId = [string]$_.falseBranchRuleId
+    }
+    $rule
+})
+Invoke-Api PUT "/templates/$templateId/rules" $AuthorToken -Body @{ rules = $sanitizedRules } | Out-Null
 
 # --- Test data set ---
 Write-Step "Refreshing executive demo test data set..."

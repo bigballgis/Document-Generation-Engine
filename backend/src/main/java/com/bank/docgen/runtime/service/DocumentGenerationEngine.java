@@ -3,7 +3,7 @@ package com.bank.docgen.runtime.service;
 import com.bank.docgen.authoring.structured.CallerRenderOverride;
 import com.bank.docgen.runtime.metrics.GenerationMetrics;
 import com.bank.docgen.template.service.VersionFidelityWarningService;
-import com.bank.docgen.authoring.structured.RenderProfile;
+import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
@@ -19,7 +19,7 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.TemplateNotFoundException;
-import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.rendering.RenderingOperationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
@@ -183,7 +183,7 @@ public class DocumentGenerationEngine {
             );
         } catch (IOException | RuntimeException ex) {
             LOG.warn("Document generation assembly failed for template {}: {}", template.getId(), ex.getMessage());
-            throw new TemplateValidationException("api.error.rendering.generationFailed");
+            throw new RenderingOperationException("api.error.rendering.generationFailed");
         }
         DocumentArtifactPipeline.GeneratedArtifact artifact = documentArtifactPipeline.finalizeArtifact(
                 docx,
@@ -215,7 +215,7 @@ public class DocumentGenerationEngine {
                     List.copyOf(fidelityWarnings)
             );
         } catch (java.io.IOException ex) {
-            throw new TemplateValidationException("api.error.rendering.generationFailed");
+            throw new RenderingOperationException("api.error.rendering.generationFailed");
         }
     }
 

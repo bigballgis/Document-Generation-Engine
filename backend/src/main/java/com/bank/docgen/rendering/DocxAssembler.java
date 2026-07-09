@@ -1,7 +1,7 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.authoring.structured.MasterStyleCatalog;
-import com.bank.docgen.authoring.structured.MasterStyleCatalogEntry;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalogEntry;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;

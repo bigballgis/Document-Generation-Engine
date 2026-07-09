@@ -7,7 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bank.docgen.authoring.structured.MasterStyleCatalog;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import com.bank.docgen.authoring.structured.MasterStyleCatalogService;
 import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
 import com.bank.docgen.authoring.structured.NumberingService;

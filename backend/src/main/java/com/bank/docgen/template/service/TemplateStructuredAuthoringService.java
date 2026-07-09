@@ -1,6 +1,6 @@
 package com.bank.docgen.template.service;
 
-import com.bank.docgen.authoring.structured.MasterStyleCatalog;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import com.bank.docgen.authoring.structured.MasterStyleCatalogService;
 import com.bank.docgen.authoring.structured.PasteCleaningResult;
 import com.bank.docgen.authoring.structured.PasteCleaningService;

@@ -12,6 +12,7 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.sharedkernel.api.ErrorDetail;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.service.TemplateValidationException;
 import java.util.ArrayList;
@@ -150,7 +151,9 @@ public class BatchExecutionService {
     private ErrorDetail toItemError(RuntimeException ex) {
         String messageKey = ex instanceof TemplateValidationException validation
                 ? validation.messageKey()
-                : "api.error.rendering.generationFailed";
+                : ex instanceof RenderingOperationException rendering
+                        ? rendering.messageKey()
+                        : "api.error.rendering.generationFailed";
         return new ErrorDetail(
                 ApiErrorCodes.RENDERING_FAILED,
                 ApiErrorCategories.RENDERING,

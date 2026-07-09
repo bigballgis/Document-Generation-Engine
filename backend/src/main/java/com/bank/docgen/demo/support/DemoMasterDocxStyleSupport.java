@@ -1,7 +1,7 @@
 package com.bank.docgen.demo.support;
 
-import com.bank.docgen.authoring.structured.MasterStyleCatalog;
-import com.bank.docgen.authoring.structured.MasterStyleCatalogEntry;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalogEntry;
 import com.bank.docgen.rendering.DocxMasterStyleRegistry;
 import com.bank.docgen.rendering.DocxWordCompatibilitySupport;
 import com.fasterxml.jackson.databind.JsonNode;

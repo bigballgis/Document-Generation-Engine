@@ -128,7 +128,7 @@ class DocumentGenerationEngineTest {
         when(objectStoragePort.get("masters/master.docx")).thenReturn(new ByteArrayInputStream(docx));
         when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(docx);
         when(renderProfileService.resolveEffectiveProfile(any(), any()))
-                .thenReturn(new com.bank.docgen.authoring.structured.RenderProfile(
+                .thenReturn(new com.bank.docgen.sharedkernel.document.RenderProfile(
                         "rp-v1",
                         "MASTER_CATALOG_LOCKED",
                         "CONTROLLED_MULTILEVEL",
@@ -209,7 +209,7 @@ class DocumentGenerationEngineTest {
         when(objectStoragePort.get("masters/master.docx")).thenReturn(new ByteArrayInputStream(docx));
         when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(docx);
         when(renderProfileService.resolveEffectiveProfile(any(), any()))
-                .thenReturn(new com.bank.docgen.authoring.structured.RenderProfile(
+                .thenReturn(new com.bank.docgen.sharedkernel.document.RenderProfile(
                         "rp-v1",
                         "MASTER_CATALOG_LOCKED",
                         "CONTROLLED_MULTILEVEL",

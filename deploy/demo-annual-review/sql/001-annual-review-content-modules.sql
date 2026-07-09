@@ -23,7 +23,7 @@ SELECT 'f1000001-0001-4000-8000-000000000003', 'ANNUAL-REVIEW-COV', 'CORP', 'Ann
 WHERE NOT EXISTS (SELECT 1 FROM content_module WHERE module_code = 'ANNUAL-REVIEW-COV' AND deleted_at IS NULL);
 
 INSERT INTO content_module_version (id, module_id, semantic_version, review_state, lifecycle_state, content_structure_json, change_description, created_by, updated_by)
-SELECT 'f2000001-0001-4000-8000-000000000003', cm.id, '3.0.0', 'APPROVED', 'ACTIVE',
+SELECT 'f2000001-0001-4000-8000-000000000005', cm.id, '3.0.0', 'APPROVED', 'ACTIVE',
        '{"blocks":[
          {"type":"paragraph","text":"Reporting: The Borrower shall deliver to the Bank (i) audited annual consolidated financial statements within 120 days of each financial year end; (ii) unaudited quarterly management accounts within 45 days of each Financial Quarter end; and (iii) a Compliance Certificate signed by two directors or authorised signatories confirming compliance with the financial covenants, within 30 days of each Financial Quarter end."},
          {"type":"paragraph","text":"Equity Cure: Where a breach of any financial covenant occurs, the Borrower may, with the consent of the Bank, cure such breach by an equity injection, provided that no more than two equity cures may be applied in any rolling four-quarter period and the cured compliance is recalculated in accordance with the facility agreement."},

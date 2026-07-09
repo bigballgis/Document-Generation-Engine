@@ -18,16 +18,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class CollaborationWorkItemAccessSupportTest {
+class CollaborationWorkItemAccessServiceTest {
 
     @Mock
     private GroupAccessService groupAccessService;
 
-    private CollaborationWorkItemAccessSupport accessSupport;
+    private CollaborationWorkItemAccessService accessSupport;
 
     @BeforeEach
     void setUp() {
-        accessSupport = new CollaborationWorkItemAccessSupport(groupAccessService);
+        accessSupport = new CollaborationWorkItemAccessService(groupAccessService);
     }
 
     @Test

@@ -1,5 +1,7 @@
 import { expect, test, type APIRequestContext } from '@playwright/test'
 
+import { requireDockerStack } from './helpers/stack-readiness'
+
 import {
   DEMO_FULL_FLOW_EXTERNAL_ID,
   E2E_GROUP_ADMIN,
@@ -23,22 +25,7 @@ const defaultPort = dockerTarget ? 4173 : 5173
 const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${defaultPort}`
 
 async function assertStackReady(request: APIRequestContext) {
-  let backendReady = false
-  let frontendReady = false
-  try {
-    backendReady = (await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })).ok()
-  } catch {
-    backendReady = false
-  }
-  try {
-    frontendReady = (await request.get(FRONTEND_BASE_URL, { timeout: 5_000 })).ok()
-  } catch {
-    frontendReady = false
-  }
-  test.skip(
-    !(backendReady && frontendReady),
-    `Stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Start with .\\scripts\\docker-deploy.ps1`,
-  )
+  await requireDockerStack(request, { frontendBaseUrl: FRONTEND_BASE_URL, skipMessage: `Stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Start with .\\scripts\\docker-deploy.ps1` })
 }
 
 async function fetchFullFlowStatus(request: APIRequestContext, templateId: string) {

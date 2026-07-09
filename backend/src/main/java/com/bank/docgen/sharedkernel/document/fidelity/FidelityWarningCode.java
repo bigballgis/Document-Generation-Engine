@@ -1,5 +1,8 @@
-package com.bank.docgen.rendering.domain;
+package com.bank.docgen.sharedkernel.document.fidelity;
 
+/**
+ * Cross-module fidelity warning codes shared by authoring validation and rendering output.
+ */
 public enum FidelityWarningCode {
     CONTROLLED_STYLE_FALLBACK,
     LOW_RISK_PAGINATION_DIFFERENCE,

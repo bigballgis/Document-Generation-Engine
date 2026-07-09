@@ -456,7 +456,7 @@
         },
         {
           "type": "paragraph",
-          "styleRef": "DisclaimerBody",
+          "styleRef": "ClauseBody",
           "children": [
             {"type": "textRun", "value": "This statement is provided for information purposes only and does not constitute investment advice, an offer to sell or a solicitation of an offer to buy any securities or investment products. "},
             {"type": "emphasis", "variant": "bold", "children": [{"type": "textRun", "value": "Past performance is not indicative of future results."}]},
@@ -479,12 +479,12 @@
         {
           "type": "paragraph",
           "styleRef": "SignatureBlock",
-          "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]}
+          "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]
         },
         {
           "type": "paragraph",
           "styleRef": "SignatureBlock",
-          "children": [{"type": "variable", "key": "signatoryTitle"}]}
+          "children": [{"type": "variable", "key": "signatoryTitle"}]
         },
         {
           "type": "paragraph",

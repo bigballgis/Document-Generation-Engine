@@ -1,4 +1,4 @@
-package com.bank.docgen.authoring.structured;
+package com.bank.docgen.sharedkernel.document.style;
 
 import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.util.Set;

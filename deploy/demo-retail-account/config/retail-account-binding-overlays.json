@@ -170,10 +170,10 @@
           "children": [{"type": "text", "value": "Fee Schedule"}]
         },
         {
-          "type": "paragraph",
+          "type": "sectionHeading",
           "styleRef": "ScheduleTitle",
           "children": [
-            {"type": "textRun", "value": "Schedule 1 — Account Fees and Charges (effective from account opening date)"}
+            {"type": "text", "value": "Schedule 1 — Account Fees and Charges (effective from account opening date)"}
           ]
         },
         {
@@ -232,7 +232,7 @@
         },
         {
           "type": "paragraph",
-          "styleRef": "DisclaimerBody",
+          "styleRef": "ClauseBody",
           "children": [
             {"type": "textRun", "value": "This confirmation is provided for information purposes only and does not amend the terms and conditions governing your Account. Please read the enclosed Account terms and conditions carefully and contact us if you have any questions."}
           ]
@@ -318,7 +318,7 @@
         },
         {
           "type": "paragraph",
-          "styleRef": "DisclaimerBody",
+          "styleRef": "ClauseBody",
           "children": [
             {"type": "textRun", "value": "This is a demonstration document issued for system testing purposes. It does not constitute a contractual offer or amendment to your Account terms and conditions."}
           ]
@@ -461,10 +461,10 @@
           "children": [{"type": "text", "value": "Transaction Summary"}]
         },
         {
-          "type": "paragraph",
+          "type": "sectionHeading",
           "styleRef": "ScheduleTitle",
           "children": [
-            {"type": "textRun", "value": "Schedule 1 — Recent Transactions (last 30 days)"}
+            {"type": "text", "value": "Schedule 1 — Recent Transactions (last 30 days)"}
           ]
         },
         {
@@ -535,10 +535,10 @@
           "children": [{"type": "text", "value": "Applicable Fees"}]
         },
         {
-          "type": "paragraph",
+          "type": "sectionHeading",
           "styleRef": "ScheduleTitle",
           "children": [
-            {"type": "textRun", "value": "Schedule 2 — Fees Applied During Statement Period"}
+            {"type": "text", "value": "Schedule 2 — Fees Applied During Statement Period"}
           ]
         },
         {
@@ -635,14 +635,14 @@
         },
         {
           "type": "paragraph",
-          "styleRef": "DisclaimerBody",
+          "styleRef": "ClauseBody",
           "children": [
             {"type": "textRun", "value": "This balance confirmation is provided for your information only and should not be relied upon for mortgage, visa or other official purposes without independent verification. For certified balance confirmations, please contact your branch."}
           ]
         },
         {
           "type": "paragraph",
-          "styleRef": "DisclaimerBody",
+          "styleRef": "ClauseBody",
           "children": [
             {"type": "textRun", "value": "This is a demonstration document issued for system testing purposes."}
           ]

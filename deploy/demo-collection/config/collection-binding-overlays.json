@@ -113,7 +113,7 @@
         },
         {
           "type": "paragraph",
-          "styleRef": "RegulatoryEmphasis",
+          "styleRef": "ClauseBody",
           "children": [
             {"type": "textRun", "value": "We will give you at least "},
             {"type": "underline", "children": [{"type": "variable", "key": "noticePeriodDays"}]},
@@ -148,14 +148,14 @@
         },
         {
           "type": "paragraph",
-          "styleRef": "RegulatoryEmphasis",
+          "styleRef": "ClauseBody",
           "children": [
             {"type": "textRun", "value": "If you are dissatisfied with the change, you may switch your Account to an alternative product we offer, or close your Account without charge and without penalty, at any time before the effective date by contacting us using the details below."}
           ]
         },
         {
           "type": "conditionBlock",
-          "conditionExpression": "${accountType} contains 'fixed'",
+          "conditionExpression": "${includeFixedRateExclusion} == true",
           "children": [
             {
               "type": "paragraph",
@@ -236,12 +236,12 @@
         {
           "type": "paragraph",
           "styleRef": "SignatureBlock",
-          "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]}
+          "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]
         },
         {
           "type": "paragraph",
           "styleRef": "SignatureBlock",
-          "children": [{"type": "variable", "key": "signatoryTitle"}]}
+          "children": [{"type": "variable", "key": "signatoryTitle"}]
         },
         {
           "type": "paragraph",
@@ -265,7 +265,7 @@
         },
         {
           "type": "paragraph",
-          "styleRef": "DisclaimerBody",
+          "styleRef": "ClauseBody",
           "children": [
             {"type": "textRun", "value": "This notice is issued for information purposes only and does not amend the terms and conditions of your Account. "},
             {"type": "emphasis", "variant": "bold", "children": [{"type": "textRun", "value": "Meridian Retail Banking"}]},
@@ -382,7 +382,7 @@
         },
         {
           "type": "paragraph",
-          "styleRef": "RegulatoryEmphasis",
+          "styleRef": "ClauseBody",
           "children": [
             {"type": "textRun", "value": "Please contact us immediately to discuss repayment arrangements. We are committed to treating customers fairly throughout the collections process, in accordance with FCA CONC."}
           ]
@@ -429,9 +429,9 @@
           ]
         },
         {
-          "type": "paragraph",
+          "type": "sectionHeading",
           "styleRef": "ScheduleTitle",
-          "children": [{"type": "textRun", "value": "Repayment Methods"}]
+          "children": [{"type": "text", "value": "Repayment Methods"}]
         },
         {
           "type": "tableComponentRef",
@@ -480,7 +480,7 @@
           "children": [
             {
               "type": "paragraph",
-              "styleRef": "RegulatoryEmphasis",
+              "styleRef": "ClauseBody",
               "children": [
                 {"type": "textRun", "value": "FINAL NOTICE: Failure to bring your Account up to date within 14 days may result in referral to an external collections agency and a record on your credit file held by credit reference agencies."}
               ]
@@ -542,12 +542,12 @@
         {
           "type": "paragraph",
           "styleRef": "SignatureBlock",
-          "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]}
+          "children": [{"type": "emphasis", "variant": "bold", "children": [{"type": "variable", "key": "signatoryName"}]}]
         },
         {
           "type": "paragraph",
           "styleRef": "SignatureBlock",
-          "children": [{"type": "variable", "key": "signatoryTitle"}]}
+          "children": [{"type": "variable", "key": "signatoryTitle"}]
         },
         {
           "type": "paragraph",
@@ -571,7 +571,7 @@
         },
         {
           "type": "paragraph",
-          "styleRef": "DisclaimerBody",
+          "styleRef": "ClauseBody",
           "children": [
             {"type": "textRun", "value": "This notice is issued in accordance with our collections policy and FCA CONC. "},
             {"type": "emphasis", "variant": "bold", "children": [{"type": "textRun", "value": "Meridian Retail Banking"}]},

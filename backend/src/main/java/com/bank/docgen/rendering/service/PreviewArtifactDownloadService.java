@@ -1,14 +1,14 @@
 package com.bank.docgen.rendering.service;
 
 import com.bank.docgen.authoring.structured.CallerRenderOverride;
-import com.bank.docgen.authoring.structured.RenderProfile;
+import com.bank.docgen.sharedkernel.document.RenderProfile;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
-import com.bank.docgen.template.service.TemplateService;
+import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
 import com.bank.docgen.rendering.persistence.PreviewRecordEntity;
 import com.bank.docgen.rendering.persistence.PreviewRecordRepository;
 import com.bank.docgen.rendering.domain.PreviewStatus;
@@ -29,7 +29,7 @@ public class PreviewArtifactDownloadService {
     private static final EncryptionOptionsView NO_ENCRYPTION =
             new EncryptionOptionsView(false, null, null, null);
 
-    private final TemplateService templateService;
+    private final TemplatePreviewAuthorizationPort previewAuthorizationPort;
     private final PreviewRecordRepository previewRecordRepository;
     private final TemplateVersionRepository templateVersionRepository;
     private final ObjectStoragePort objectStoragePort;
@@ -37,14 +37,14 @@ public class PreviewArtifactDownloadService {
     private final RenderProfileService renderProfileService;
 
     public PreviewArtifactDownloadService(
-            TemplateService templateService,
+            TemplatePreviewAuthorizationPort previewAuthorizationPort,
             PreviewRecordRepository previewRecordRepository,
             TemplateVersionRepository templateVersionRepository,
             ObjectStoragePort objectStoragePort,
             DocumentArtifactPipeline documentArtifactPipeline,
             RenderProfileService renderProfileService
     ) {
-        this.templateService = templateService;
+        this.previewAuthorizationPort = previewAuthorizationPort;
         this.previewRecordRepository = previewRecordRepository;
         this.templateVersionRepository = templateVersionRepository;
         this.objectStoragePort = objectStoragePort;
@@ -59,7 +59,7 @@ public class PreviewArtifactDownloadService {
             PreviewArtifactFormat format,
             ManagementSessionClaims session
     ) {
-        templateService.requireReadableTemplate(templateId, session);
+        previewAuthorizationPort.requireReadableSnapshot(templateId, session);
         PreviewRecordEntity preview = requirePreview(templateId, previewId);
         if (preview.getStatus() != PreviewStatus.SUCCEEDED) {
             throw new PreviewArtifactNotAvailableException();

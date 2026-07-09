@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class TemplateLifecycleService {
 
     private static final String STRUCTURED_OPINION_PREFIX = DecisionFormService.STRUCTURED_OPINION_PREFIX;
-    private static final ObjectMapper STRUCTURED_OPINION_MAPPER = new ObjectMapper();
 
     private final TemplateService templateService;
     private final TemplateRepository templateRepository;
@@ -57,6 +56,7 @@ public class TemplateLifecycleService {
     private final ApiPolicyMaterializationService apiPolicyMaterializationService;
     private final ApiPolicyRepository apiPolicyRepository;
     private final VersionFidelityWarningService versionFidelityWarningService;
+    private final ObjectMapper objectMapper;
 
     public TemplateLifecycleService(
             TemplateService templateService,
@@ -74,7 +74,8 @@ public class TemplateLifecycleService {
             ApprovalSubStateResolver approvalSubStateResolver,
             ApiPolicyMaterializationService apiPolicyMaterializationService,
             ApiPolicyRepository apiPolicyRepository,
-            VersionFidelityWarningService versionFidelityWarningService
+            VersionFidelityWarningService versionFidelityWarningService,
+            ObjectMapper objectMapper
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -92,6 +93,7 @@ public class TemplateLifecycleService {
         this.apiPolicyMaterializationService = apiPolicyMaterializationService;
         this.apiPolicyRepository = apiPolicyRepository;
         this.versionFidelityWarningService = versionFidelityWarningService;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional
@@ -336,7 +338,7 @@ public class TemplateLifecycleService {
         structured.put("reasonCategory", request.reasonCategory().trim());
         structured.put("impactSummary", request.impactSummary().trim());
         try {
-            return STRUCTURED_OPINION_PREFIX + STRUCTURED_OPINION_MAPPER.writeValueAsString(structured);
+            return STRUCTURED_OPINION_PREFIX + objectMapper.writeValueAsString(structured);
         } catch (JsonProcessingException ex) {
             throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
         }
@@ -357,7 +359,7 @@ public class TemplateLifecycleService {
             return null;
         }
         try {
-            return STRUCTURED_OPINION_PREFIX + STRUCTURED_OPINION_MAPPER.writeValueAsString(remediation);
+            return STRUCTURED_OPINION_PREFIX + objectMapper.writeValueAsString(remediation);
         } catch (JsonProcessingException ex) {
             throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
         }
@@ -371,7 +373,7 @@ public class TemplateLifecycleService {
         marker.put("exceptionReason", request.exceptionReason().trim());
         try {
             return DecisionFormService.EXCEPTION_INTERVENTION_PREFIX
-                    + STRUCTURED_OPINION_MAPPER.writeValueAsString(marker);
+                    + objectMapper.writeValueAsString(marker);
         } catch (JsonProcessingException ex) {
             throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
         }

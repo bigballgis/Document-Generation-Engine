@@ -12,6 +12,7 @@ import com.bank.docgen.runtime.persistence.GenerationAsyncTaskRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.service.TemplateNotFoundException;
+import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -97,7 +98,7 @@ public class AsyncBatchTaskRunner {
             );
             applyOutcome(task, template, request, outcome);
             asyncTaskRepository.save(task);
-        } catch (TemplateValidationException ex) {
+        } catch (RenderingOperationException | TemplateValidationException ex) {
             handleFailure(task, ex);
         } catch (RuntimeException ex) {
             handleFailure(task, ex);
@@ -226,6 +227,9 @@ public class AsyncBatchTaskRunner {
     }
 
     static String summarizeFailure(RuntimeException ex) {
+        if (ex instanceof RenderingOperationException renderingException) {
+            return renderingException.messageKey();
+        }
         if (ex instanceof TemplateValidationException validationException) {
             return validationException.messageKey();
         }

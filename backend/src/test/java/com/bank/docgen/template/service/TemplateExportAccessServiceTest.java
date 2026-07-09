@@ -13,13 +13,13 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class TemplateExportAccessSupportTest {
+class TemplateExportAccessServiceTest {
 
-    private TemplateExportAccessSupport support;
+    private TemplateExportAccessService support;
 
     @BeforeEach
     void setUp() {
-        support = new TemplateExportAccessSupport(new GroupAccessService());
+        support = new TemplateExportAccessService(new GroupAccessService());
     }
 
     @Test

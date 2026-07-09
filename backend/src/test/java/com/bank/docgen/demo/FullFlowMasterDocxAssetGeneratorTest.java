@@ -3,6 +3,7 @@ package com.bank.docgen.demo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.demo.support.DemoMasterDocxAssertions;
+import com.bank.docgen.demo.support.DemoMasterDocxTestAssertions;
 import com.bank.docgen.demo.support.DemoMasterDocxStyleSupport;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import java.io.ByteArrayInputStream;

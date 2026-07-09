@@ -16,7 +16,7 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
-import com.bank.docgen.authoring.structured.expression.ConditionExpressionEvaluator;
+import com.bank.docgen.sharedkernel.document.expression.ConditionExpressionEvaluator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

@@ -24,7 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
-class ContentModuleAccessSupportTest {
+class ContentModuleAccessServiceTest {
 
     private static final UUID MODULE_ID = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 
@@ -33,12 +33,12 @@ class ContentModuleAccessSupportTest {
     @Mock
     private GroupAccessService groupAccessService;
 
-    private ContentModuleAccessSupport accessSupport;
+    private ContentModuleAccessService accessSupport;
     private ContentModuleEntity module;
 
     @BeforeEach
     void setUp() {
-        accessSupport = new ContentModuleAccessSupport(moduleRepository, groupAccessService, new ObjectMapper());
+        accessSupport = new ContentModuleAccessService(moduleRepository, groupAccessService, new ObjectMapper());
         module = new ContentModuleEntity(
                 MODULE_ID,
                 "MOD-LOAN-DISCLOSURE",

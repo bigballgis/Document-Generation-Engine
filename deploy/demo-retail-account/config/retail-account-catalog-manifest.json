@@ -3,5 +3,9 @@
   "packageCode": "retail-account",
   "groupCode": "RETAIL",
   "pageNumberingProfile": "GLOBAL_ONLY",
-  "templates": ["DEMO-RETAIL-ACCOUNT-OPEN", "DEMO-RETAIL-ACCOUNT-BALANCE"]
+  "templates": ["DEMO-RETAIL-ACCOUNT-OPEN", "DEMO-RETAIL-ACCOUNT-BALANCE"],
+  "contentModuleRefs": [
+    {"referenceKey": "RETAIL-ACCOUNT-OPEN-STD", "moduleCode": "RETAIL-ACCOUNT-OPEN-STD", "semanticVersion": "3.0.0"},
+    {"referenceKey": "RETAIL-ACCOUNT-BALANCE-STD", "moduleCode": "RETAIL-ACCOUNT-BALANCE-STD", "semanticVersion": "3.0.0"}
+  ]
 }

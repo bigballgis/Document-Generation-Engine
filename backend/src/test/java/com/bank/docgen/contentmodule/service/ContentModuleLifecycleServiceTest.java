@@ -51,14 +51,14 @@ class ContentModuleLifecycleServiceTest {
     private ManagementAuditRecorder auditRecorder;
 
     private ContentModuleLifecycleService lifecycleService;
-    private ContentModuleAccessSupport accessSupport;
+    private ContentModuleAccessService accessSupport;
     private ContentModuleEntity module;
     private ContentModuleVersionEntity activeVersion;
     private ManagementSessionClaims groupAdmin;
 
     @BeforeEach
     void setUp() {
-        accessSupport = new ContentModuleAccessSupport(moduleRepository, groupAccessService, new ObjectMapper());
+        accessSupport = new ContentModuleAccessService(moduleRepository, groupAccessService, new ObjectMapper());
         lifecycleService = new ContentModuleLifecycleService(
                 moduleRepository,
                 versionRepository,

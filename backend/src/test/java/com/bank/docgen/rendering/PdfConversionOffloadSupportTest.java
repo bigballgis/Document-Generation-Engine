@@ -3,7 +3,7 @@ package com.bank.docgen.rendering;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.bank.docgen.template.service.TemplateValidationException;
+import com.bank.docgen.rendering.RenderingOperationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
@@ -54,17 +54,17 @@ class PdfConversionOffloadSupportTest {
     }
 
     @Test
-    void propagatesTemplateValidationException() {
+    void propagatesRenderingOperationException() {
         executor = boundedExecutor(1);
 
         assertThatThrownBy(() -> PdfConversionOffloadSupport.executeOffloaded(
                 executor,
                 5,
                 () -> {
-                    throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+                    throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
                 }
         ))
-                .isInstanceOf(TemplateValidationException.class)
+                .isInstanceOf(RenderingOperationException.class)
                 .hasMessage("api.error.generation.pdfConversionFailed");
     }
 
@@ -85,7 +85,7 @@ class PdfConversionOffloadSupportTest {
                     return new byte[]{1};
                 }
         ))
-                .isInstanceOf(TemplateValidationException.class)
+                .isInstanceOf(RenderingOperationException.class)
                 .hasMessage("api.error.generation.pdfConversionFailed");
     }
 

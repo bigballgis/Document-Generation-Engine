@@ -1,6 +1,5 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.template.service.TemplateValidationException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -51,7 +50,7 @@ public class TestPdfConversionService implements PdfConversionService {
             }
         } catch (IOException ex) {
             LOG.warn("Test PDF conversion failed: {}", ex.getMessage());
-            throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
+            throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
         }
     }
 }

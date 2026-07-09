@@ -93,9 +93,7 @@ public class ManagementAuditRecorder {
             PolicyUpdateAuditDetail detail
     ) {
         boolean rollback = detail.rollback() != null && detail.rollback();
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 API_POLICY_UPDATED,
                 templateId,
                 groupCode,
@@ -110,7 +108,7 @@ public class ManagementAuditRecorder {
                 null,
                 truncate(buildStatusSummary(changedAreas, detail)),
                 writeAuditPayload(detail)
-        ));
+        );
     }
 
     private String buildStatusSummary(List<String> changedAreas, PolicyUpdateAuditDetail detail) {
@@ -145,9 +143,7 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 API_CREDENTIAL_CREATED,
                 templateId,
                 groupCode,
@@ -162,7 +158,7 @@ public class ManagementAuditRecorder {
                 fingerprint(credentialExternalId),
                 "Credential created",
                 writeJson(List.of())
-        ));
+        );
     }
 
     @Transactional
@@ -176,9 +172,7 @@ public class ManagementAuditRecorder {
             int rotationGeneration,
             String previousCredentialFingerprint
     ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 API_CREDENTIAL_ROTATED,
                 templateId,
                 groupCode,
@@ -194,7 +188,7 @@ public class ManagementAuditRecorder {
                 "Credential rotated; generation=" + rotationGeneration
                         + "; previousFingerprint=" + previousCredentialFingerprint,
                 writeJson(List.of())
-        ));
+        );
     }
 
     @Transactional
@@ -206,9 +200,7 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 API_CREDENTIAL_REVOKED,
                 templateId,
                 groupCode,
@@ -223,7 +215,7 @@ public class ManagementAuditRecorder {
                 fingerprint(credentialExternalId),
                 "Credential revoked",
                 writeJson(List.of())
-        ));
+        );
     }
 
     @Transactional
@@ -289,9 +281,7 @@ public class ManagementAuditRecorder {
             CollaborationWorkItemQueue sourceQueue,
             String statusSummary
     ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 COLLABORATION_TIMEOUT_ESCALATION,
                 templateId,
                 groupCode,
@@ -306,7 +296,7 @@ public class ManagementAuditRecorder {
                 null,
                 truncate(statusSummary),
                 writeJson(List.of())
-        ));
+        );
     }
 
     @Transactional
@@ -319,9 +309,7 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 COLLABORATION_WORK_ITEM_CREATED,
                 templateId,
                 groupCode,
@@ -336,7 +324,7 @@ public class ManagementAuditRecorder {
                 null,
                 truncate("Collaboration work item created: " + queue.name() + "/" + triggerType.name()),
                 writeJson(List.of())
-        ));
+        );
     }
 
     @Transactional
@@ -348,9 +336,7 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 COLLABORATION_WORK_ITEM_RESOLVED,
                 templateId,
                 groupCode,
@@ -365,7 +351,7 @@ public class ManagementAuditRecorder {
                 null,
                 truncate("Collaboration work item resolved: " + queue.name()),
                 writeJson(List.of())
-        ));
+        );
     }
 
     @Transactional
@@ -376,9 +362,7 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 TEMPLATE_EXPORTED,
                 templateId,
                 groupCode,
@@ -393,7 +377,7 @@ public class ManagementAuditRecorder {
                 null,
                 truncate("Template exported: " + externalId),
                 writeJson(List.of())
-        ));
+        );
     }
 
     @Transactional
@@ -406,9 +390,7 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 TEMPLATE_IMPORTED,
                 templateId,
                 groupCode,
@@ -423,7 +405,7 @@ public class ManagementAuditRecorder {
                 null,
                 truncate("Template imported: " + externalId + " batch=" + importBatchId + " dev=" + developmentVersion),
                 writeJson(List.of())
-        ));
+        );
     }
 
     @Transactional
@@ -570,9 +552,7 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String auditPayloadJson
     ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 eventType,
                 moduleId,
                 groupCode,
@@ -587,7 +567,7 @@ public class ManagementAuditRecorder {
                 null,
                 truncate(statusSummary),
                 auditPayloadJson
-        ));
+        );
     }
 
     private String writeContentModuleLifecyclePayload(ContentModuleLifecycleAuditDetail detail) {
@@ -633,9 +613,7 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
+        persistAuditEvent(
                 eventType,
                 null,
                 groupCode,
@@ -650,6 +628,42 @@ public class ManagementAuditRecorder {
                 null,
                 truncate(statusSummary),
                 writeJson(List.of())
+        );
+    }
+
+    private void persistAuditEvent(
+            String eventType,
+            UUID templateId,
+            String groupCode,
+            UUID credentialId,
+            Integer previousPolicyVersion,
+            Integer policyVersion,
+            String changedAreasJson,
+            boolean rollback,
+            Integer rollbackSourcePolicyVersion,
+            String actorUsername,
+            String actorSummary,
+            String credentialFingerprint,
+            String statusSummary,
+            String warningCodesJson
+    ) {
+        repository.save(new ManagementAuditEventEntity(
+                UUID.randomUUID(),
+                Instant.now(),
+                eventType,
+                templateId,
+                groupCode,
+                credentialId,
+                previousPolicyVersion,
+                policyVersion,
+                changedAreasJson,
+                rollback,
+                rollbackSourcePolicyVersion,
+                actorUsername,
+                actorSummary,
+                credentialFingerprint,
+                statusSummary,
+                warningCodesJson
         ));
     }
 

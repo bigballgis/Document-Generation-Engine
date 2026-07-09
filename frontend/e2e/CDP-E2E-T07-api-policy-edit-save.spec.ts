@@ -1,5 +1,7 @@
 import { expect, test, type APIRequestContext } from '@playwright/test'
 
+import { isBackendReady } from './helpers/stack-readiness'
+
 import { E2E_GROUP_ADMIN, loginAs } from './helpers/auth'
 import {
   ensureDemoFullFlowPublished,
@@ -34,12 +36,7 @@ test.describe('CDP-E2E-T07 API policy edit save (BDD-CDP-APIPOL-001)', () => {
   test.describe.configure({ mode: 'serial', timeout: 120_000 })
 
   test.beforeAll(async ({ request }) => {
-    let backendReady = false
-    try {
-      backendReady = (await request.get('http://127.0.0.1:8080/healthz', { timeout: 5_000 })).ok()
-    } catch {
-      backendReady = false
-    }
+    const backendReady = await isBackendReady(request)
     const frontendBaseUrl = await resolveReachableFrontendBaseUrl(request)
     test.skip(
       !(backendReady && frontendBaseUrl),

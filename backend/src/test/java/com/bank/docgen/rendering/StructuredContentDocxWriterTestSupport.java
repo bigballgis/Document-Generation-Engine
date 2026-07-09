@@ -1,13 +1,12 @@
 package com.bank.docgen.rendering;
 
-import com.bank.docgen.authoring.structured.MasterStyleCatalog;
-import com.bank.docgen.authoring.structured.MasterStyleCatalogEntry;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalogEntry;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
