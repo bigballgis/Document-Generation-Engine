@@ -74,7 +74,7 @@ Optional shortcuts (same workflows): `/deliver`, `/multitask-slices`, `/deploy-q
 | Tier | Model | Typical agents |
 | --- | --- | --- |
 | Governance | `grok-4.5-fast-xhigh` | delivery-orchestrator, plan-orchestrator, architecture-reviewer, integration-merger, post-task-commit-review, … |
-| Delivery | `glm-5.2-high` | behavior-spec-author, doc-keeper, backend/frontend/rendering engineers, e2e-*, post-task-doc-sync |
+| Delivery | `composer-2.5` | behavior-spec-author, doc-keeper, backend/frontend/rendering engineers, e2e-*, post-task-doc-sync |
 | Execution | `composer-2.5-fast` | worktree-router, build-deploy-agent, deploy-engineer (rollback), verifier |
 
 Built-in Cursor types (no project file): `explore`, `bugbot`.

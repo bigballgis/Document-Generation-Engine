@@ -1,7 +1,7 @@
 ---
 name: post-task-doc-sync
 description: Mandatory end-of-task documentation synchronizer. Use after every behavior-changing task, bug fix, or phase completion — before claiming Done — to align plan layer, sync ledger, epic/milestone task sheets, indexes, and evidence with repository reality and green gates.
-model: glm-5.2-high
+model: composer-2.5
 ---
 
 # Post-Task Documentation Sync

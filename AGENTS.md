@@ -32,7 +32,7 @@ Optional stage **14** = `verifier`.
 | Tier | Model | Agents |
 | --- | --- | --- |
 | Governance | `grok-4.5-fast-xhigh` | delivery-orchestrator, plan-orchestrator, architecture-reviewer, code-quality-reviewer (`is_background`), integration-merger, post-task-commit-review |
-| Delivery | `glm-5.2-high` | behavior-spec-author, doc-keeper, backend-engineer, frontend-engineer, rendering-engineer, e2e-*, post-task-doc-sync |
+| Delivery | `composer-2.5` | behavior-spec-author, doc-keeper, backend-engineer, frontend-engineer, rendering-engineer, e2e-*, post-task-doc-sync |
 | Execution | `composer-2.5-fast` | worktree-router, build-deploy-agent, deploy-engineer (rollback), **verifier** |
 
 `inherit` is forbidden — `.cursor/agents/MODEL-STRATEGY.md`.

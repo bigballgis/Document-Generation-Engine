@@ -3,24 +3,27 @@
 Each specialist under `.cursor/agents/` **must** pin an explicit `model` slug in YAML
 frontmatter. **`inherit` is forbidden.**
 
-> **Active policy (no API quota):** Cursor-included families only (Grok / GLM / Composer).
-> Claude API-token slugs stay frozen until quota returns.
+> **Active policy (no Cursor API pool):** Prefer Cursor first-party families only
+> (**Grok** + **Composer**). Do **not** pin `glm-5.2-*` — GLM Coding Plan still
+> deducts Cursor API quota in this workspace. Claude API-token slugs stay frozen
+> until quota returns.
 
 ## Allowed families (current)
 
 | Family | Slugs | Role |
 | --- | --- | --- |
 | **Grok 4.5 High Fast** | `grok-4.5-fast-xhigh` | Governance |
-| **GLM 5.2 High** | `glm-5.2-high` | Delivery |
+| **Composer 2.5** | `composer-2.5` | Delivery |
 | **Composer 2.5 Fast** | `composer-2.5-fast` | Execution |
 | **`inherit`** | — | **Forbidden** |
+| **GLM 5.2** | `glm-5.2-high` etc. | **Avoid** (API pool) |
 
 ## Tiers
 
 | Tier | Slug | When |
 | --- | --- | --- |
 | **Governance** | `grok-4.5-fast-xhigh` | Routing, plan, architecture, commit, merge |
-| **Delivery** | `glm-5.2-high` | BDD, docs, TDD implementation, E2E, doc-sync |
+| **Delivery** | `composer-2.5` | BDD, docs, TDD implementation, E2E, doc-sync |
 | **Execution** | `composer-2.5-fast` | Gates, deploy queue, worktree placement |
 
 ## Current assignments
@@ -33,14 +36,14 @@ frontmatter. **`inherit` is forbidden.**
 | `code-quality-reviewer` | Governance | `grok-4.5-fast-xhigh` |
 | `post-task-commit-review` | Governance | `grok-4.5-fast-xhigh` |
 | `integration-merger` | Governance | `grok-4.5-fast-xhigh` |
-| `behavior-spec-author` | Delivery | `glm-5.2-high` |
-| `doc-keeper` | Delivery | `glm-5.2-high` |
-| `backend-engineer` | Delivery | `glm-5.2-high` |
-| `frontend-engineer` | Delivery | `glm-5.2-high` |
-| `rendering-engineer` | Delivery | `glm-5.2-high` |
-| `e2e-test-engineer` | Delivery | `glm-5.2-high` |
-| `e2e-uiux-reviewer` | Delivery | `glm-5.2-high` |
-| `post-task-doc-sync` | Delivery | `glm-5.2-high` |
+| `behavior-spec-author` | Delivery | `composer-2.5` |
+| `doc-keeper` | Delivery | `composer-2.5` |
+| `backend-engineer` | Delivery | `composer-2.5` |
+| `frontend-engineer` | Delivery | `composer-2.5` |
+| `rendering-engineer` | Delivery | `composer-2.5` |
+| `e2e-test-engineer` | Delivery | `composer-2.5` |
+| `e2e-uiux-reviewer` | Delivery | `composer-2.5` |
+| `post-task-doc-sync` | Delivery | `composer-2.5` |
 | `verifier` | Execution | `composer-2.5-fast` |
 | `worktree-router` | Execution | `composer-2.5-fast` |
 | `build-deploy-agent` | Execution | `composer-2.5-fast` |
@@ -54,11 +57,14 @@ doc-sync/commit on **main**.
 
 ## Fallback if a slug is rejected
 
-Governance → `grok-4.5-fast-xhigh` → `glm-5.2-high`  
-Delivery → `glm-5.2-high` → `grok-4.5-fast-xhigh`  
-Execution → `composer-2.5-fast` → `glm-5.2-high`
+Governance → `grok-4.5-fast-xhigh` → `composer-2.5`  
+Delivery → `composer-2.5` → `composer-2.5-fast` → `grok-4.5-fast-xhigh`  
+Execution → `composer-2.5-fast` → `composer-2.5`
+
+Do **not** fall back to `glm-5.2-*` while API pool conservation is required.
 
 ## API restore (later)
 
 Still no `inherit`. Prefer Claude Fable/Opus/Sonnet for plan/governance/reasoning when
-quota returns; keep Composer/GLM for implementation/execution as desired.
+quota returns; optionally reintroduce GLM for Delivery if API pool is acceptable.
+Keep Composer for Execution.

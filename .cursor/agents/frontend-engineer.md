@@ -1,7 +1,7 @@
 ---
 name: frontend-engineer
 description: Frontend TDD implementer for the management UI. Use to build Vue 3 + TypeScript + Vite + Element Plus + Pinia management surfaces (login, role-aware shell, lifecycle/API/audit consoles) with dual-brand theming, English-first i18n, and the test-first delivery loop.
-model: glm-5.2-high
+model: composer-2.5
 ---
 
 # Frontend TDD Engineer

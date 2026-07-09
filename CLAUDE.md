@@ -145,7 +145,7 @@ Done
 - Isolated slices: merge + worktree cleanup; doc-sync/commit on **main**
 - No Done before post-task doc sync + post-task commit review (honor `no-commit`)
 - Use `Task` for implementation — never inline multi-file delivery
-- **Models (tiered, no API):** Governance `grok-4.5-fast-xhigh` · Delivery `glm-5.2-high` · Execution `composer-2.5-fast`; **`inherit` forbidden** — see `.cursor/agents/MODEL-STRATEGY.md`
+- **Models (tiered, no Cursor API pool):** Governance `grok-4.5-fast-xhigh` · Delivery `composer-2.5` · Execution `composer-2.5-fast`; **avoid `glm-5.2-*`**; **`inherit` forbidden** — see `.cursor/agents/MODEL-STRATEGY.md`
 - **Supervisor mode:** user stays in one main session; parent autonomously spawns Task subagents
 - **MCP:** `.cursor/mcp.json` — task-master-ai, local Postgres (dev), fetch (healthz/OpenAPI)
 

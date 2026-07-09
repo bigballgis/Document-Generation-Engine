@@ -1,7 +1,7 @@
 ---
 name: behavior-spec-author
 description: BDD behavior specification author. Use at the start of any behavior-changing work to capture actor/role, goal, trigger, preconditions, journey, system responses, and Given/When/Then acceptance scenarios; persist confirmed behavior into the owning source-of-truth document before TDD tasks. Blocks for user confirmation when behavior is unclear.
-model: glm-5.2-high
+model: composer-2.5
 ---
 
 # Behavior Spec Author (BDD)
