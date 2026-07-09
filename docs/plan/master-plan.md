@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase:** **None** (2026-07-09). **CORE-FORTRESS program Done** — F1–F8 complete (F8 observability/SLO/DR/evidence bundle; `mvn verify` **1154**; arch review PASS). **Prior:** **CORE-FORTRESS-F7 Done** (2026-07-09; authoring UX — `useDirtyGuard` + side-by-side preview; Vitest **894**; E2E **12/12**; LR-C1/C4 mirrored Done); **CORE-FORTRESS-F6 Done** (2026-07-09; frontend kernel refactor; controller **243** lines; composable **73** Vitest; F6-T08 E2E env blocker); **CORE-FORTRESS-F5 Done** (2026-07-09; F5 targeted **31/31**; full `mvn verify` Windows file-lock caveat); **CORE-FORTRESS-F4 Done** (2026-07-09); **CORE-FORTRESS-F3 Done** (2026-07-09); **CORE-FORTRESS-F2 Done** (2026-07-09); **CORE-FORTRESS-F1 Done** (2026-07-09). **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08).
+**Active formal phase:** **None** (2026-07-09). **CORE-FORTRESS program Done** — F1–F8 complete (F8 observability/SLO/DR/evidence bundle; `mvn verify` **1154**; arch review PASS). **Prior:** **CORE-FORTRESS-F7 Done** (2026-07-09; authoring UX — `useDirtyGuard` + side-by-side preview; Vitest **894**; E2E **12/12**; LR-C1/C4 mirrored Done); **CORE-FORTRESS-F6 Done** (2026-07-09; frontend kernel refactor; controller **243** lines; composable **73** Vitest; F6-T08 E2E parity **9/9**); **CORE-FORTRESS-F5 Done** (2026-07-09; F5 targeted **31/31**; full `mvn verify` Windows file-lock caveat); **CORE-FORTRESS-F4 Done** (2026-07-09); **CORE-FORTRESS-F3 Done** (2026-07-09); **CORE-FORTRESS-F2 Done** (2026-07-09); **CORE-FORTRESS-F1 Done** (2026-07-09). **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
@@ -63,7 +63,7 @@ upstream systems invoke the dynamic API.
 | CORE-FORTRESS F3 | Node matrix + expression engine | F2 | Rich conditionals; matrix validation hardening | **Done** (2026-07-09) |
 | CORE-FORTRESS F4 | Production rendering hardening | F3 | LO pool, fonts, pagination | **Done** (2026-07-09; targeted **23/23**; full `mvn verify` env caveat) |
 | CORE-FORTRESS F5 | Async durability + security depth | F4 | Kafka retry/DLT depth; fail-closed security seams | **Done** (2026-07-09; F5 targeted **31/31**; full `mvn verify` env caveat) |
-| CORE-FORTRESS F6 | Frontend kernel refactor | F5 | Composable decomposition; zero behavior change; Bank OA lock | **Done** (2026-07-09; controller **243** lines; composable **73** Vitest; F6-T08 E2E env blocker) |
+| CORE-FORTRESS F6 | Frontend kernel refactor | F5 | Composable decomposition; zero behavior change; Bank OA lock | **Done** (2026-07-09; controller **243** lines; composable **73** Vitest; F6-T08 E2E **9/9**) |
 | CORE-FORTRESS F7 | Authoring UX (dirty guard, side-by-side preview) | F5, F6 | `useDirtyGuard`; side-by-side preview; LR-C1/C4 | **Done** (2026-07-09; Vitest **894**; E2E **12/12**) |
 | CORE-FORTRESS F8 | Observability, SLO, DR, evidence bundle | F1–F7 | Micrometer SLOs; deep readiness; DR playbook; evidence bundle | **Done** (2026-07-09; `mvn verify` **1154**; arch review PASS) |
 

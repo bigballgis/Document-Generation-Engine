@@ -85,7 +85,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 
 **In-flight work:**
 - **CORE-FORTRESS F8 In Progress** (2026-07-09) — observability / SLO / DR ([program roadmap](detail/CORE-FORTRESS-program-roadmap.md); [F8 detail](detail/CORE-FORTRESS-f8-observability-slo-dr.md)). **F7 Done** (2026-07-09; Vitest **894**; E2E **12/12**; LR-C1/C4 Done — [F7 detail](detail/CORE-FORTRESS-f7-authoring-ux.md))
-- **CORE-FORTRESS F6 Done** (2026-07-09; controller **243** lines; composable **73** Vitest; F6-T08 E2E env blocker)
+- **CORE-FORTRESS F6 Done** (2026-07-09; controller **243** lines; composable **73** Vitest; F6-T08 E2E **9/9**)
 - **CORE-FORTRESS F5 Done** (2026-07-09) — async durability + security depth ([detail](detail/CORE-FORTRESS-f5-async-durability-security.md); F5 targeted **31/31**; full `mvn verify` env caveat)
 - **P23 Done** (2026-07-08) — demo typography & layout excellence ([plan](detail/P23-demo-typography-layout-excellence.md); T01–T16; human reviewer sign-off operational follow-up)
 - **CDP** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)

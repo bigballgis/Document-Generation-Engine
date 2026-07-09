@@ -9,7 +9,7 @@
 | F3 | Node matrix + expression engine | **Done** (2026-07-09) | [CORE-FORTRESS-f3-node-matrix-expression.md](./CORE-FORTRESS-f3-node-matrix-expression.md) |
 | F4 | Production rendering hardening (LO pool, fonts, pagination) | **Done** (2026-07-09; code complete; `mvn verify` env caveat) | [CORE-FORTRESS-f4-production-rendering-hardening.md](./CORE-FORTRESS-f4-production-rendering-hardening.md) |
 | F5 | Async durability + security depth | **Done** (2026-07-09; F5 targeted **31/31**; full `mvn verify` Windows env caveat) | [CORE-FORTRESS-f5-async-durability-security.md](./CORE-FORTRESS-f5-async-durability-security.md) |
-| F6 | Frontend kernel refactor | **Done** (2026-07-09; F6-T08 E2E env blocker documented) | [CORE-FORTRESS-f6-frontend-kernel-refactor.md](./CORE-FORTRESS-f6-frontend-kernel-refactor.md) |
+| F6 | Frontend kernel refactor | **Done** (2026-07-09; F6-T08 parity smoke **9/9** green) | [CORE-FORTRESS-f6-frontend-kernel-refactor.md](./CORE-FORTRESS-f6-frontend-kernel-refactor.md) |
 | F7 | Authoring UX (dirty guard, side-by-side preview) | **Done** (2026-07-09; Vitest **894**; E2E **12/12**) | [CORE-FORTRESS-f7-authoring-ux.md](./CORE-FORTRESS-f7-authoring-ux.md) |
 | F8 | Observability, SLO, DR, evidence bundle | **Done** (2026-07-09; `mvn verify` **1154** tests; arch review PASS) | [CORE-FORTRESS-f8-observability-slo-dr.md](./CORE-FORTRESS-f8-observability-slo-dr.md) |
 

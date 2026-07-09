@@ -47,7 +47,8 @@ class FolExecutiveDemoBindingAuditTest {
         String overlaysJson = Files.readString(FOL_ROOT.resolve("config/fol-binding-overlays.json"));
         assertThat(overlaysJson).contains("\"emphasis\"");
         assertThat(overlaysJson).contains("\"styleRef\"");
-        assertThat(overlaysJson).contains("\"orderedList\"");
+        assertThat(overlaysJson).contains("\"type\":  \"list\"");
+        assertThat(overlaysJson).contains("\"ordered\":  true");
         assertThat(overlaysJson).contains("\"contentModuleRef\"");
         assertThat(overlaysJson).contains("\"conditionBlock\"");
         assertThat(overlaysJson).contains("\"loopBlock\"");

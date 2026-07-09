@@ -2121,10 +2121,11 @@
                                                                                  ]
                                                                 },
                                                                 {
-                                                                    "type":  "orderedList",
+                                                                    "type":  "list",
+                                                                    "ordered":  true,
                                                                     "children":  [
                                                                                      {
-                                                                                         "type":  "listItem",
+                                                                                         "type":  "paragraph",
                                                                                          "children":  [
                                                                                                           {
                                                                                                               "value":  "Commitments and margin per Schedule 1.",
@@ -2133,7 +2134,7 @@
                                                                                                       ]
                                                                                      },
                                                                                      {
-                                                                                         "type":  "listItem",
+                                                                                         "type":  "paragraph",
                                                                                          "children":  [
                                                                                                           {
                                                                                                               "value":  "Conditions precedent before first utilisation.",

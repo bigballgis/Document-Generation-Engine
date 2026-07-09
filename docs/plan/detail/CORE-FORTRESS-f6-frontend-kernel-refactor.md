@@ -63,7 +63,7 @@
 | **F6-T05** | frontend-engineer | **A4 facade slim** — controller ≤250 lines; add return-shape stability test (`useTemplateDetailController.test.ts`) | F6-T02–T04 | **Done** (2026-07-09; controller **243** lines) |
 | **F6-T06** | code-quality-reviewer | **Hygiene pass** — dead exports, DRY duplicates across split files, naming consistency | F6-T05 | **Done** (2026-07-09) |
 | **F6-T07** | build-deploy-agent | **Frontend gates** — lint, type-check, test, build evidence in ledger | F6-T05 | **Done** (2026-07-09; **874** Vitest total; composable **73** = 46 baseline + 27 new) |
-| **F6-T08** | e2e-test-engineer | **Parity smoke** — rerun existing template detail / dev-workspace Playwright specs (no new journeys required) | F6-T07 | **Blocked** (2026-07-09; env — FOL demo bindings **0/40** + P21-T06b spec selector drift; **not F6 regression** — see ledger) |
+| **F6-T08** | e2e-test-engineer | **Parity smoke** — rerun existing template detail / dev-workspace Playwright specs (no new journeys required) | F6-T07 | **Done** (2026-07-09; Playwright docker **9/9** — `P21-T06b`, `template-dev-workspace`, `fol-corporate-catalog`; FOL import fix `orderedList`→`list`+`ordered`) |
 | **F6-T09** | post-task-doc-sync | **Plan + ledger closeout** — mark F6 Done; update roadmap + behavior index | F6-T07 green; F6-T08 env blocker documented | **Done** (2026-07-09) |
 
 **Task count:** **9** (F6-T01 … F6-T09)

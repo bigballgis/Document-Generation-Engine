@@ -3,10 +3,7 @@ import { expect, test } from '@playwright/test'
 import { E2E_TEMPLATE_AUTHOR, loginAs } from './helpers/auth'
 import { demoTemplateDetailPath } from './helpers/content-modules-api'
 
-const dockerTarget =
-  process.env.E2E_TARGET === 'docker' || process.env.FRONTEND_PORT === '4173'
-const defaultPort = dockerTarget ? 4173 : 5173
-const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${defaultPort}`
+const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173'
 
 test.describe('P21-T06b template detail states', () => {
   test.beforeAll(async ({ request }) => {
@@ -35,7 +32,9 @@ test.describe('P21-T06b template detail states', () => {
     const detailPath = await demoTemplateDetailPath(request)
     await page.goto(`${detailPath}?tab=lifecycle`, { waitUntil: 'domcontentloaded' })
 
-    await expect(page.locator('.template-name')).toBeVisible({ timeout: 15_000 })
-    await expect(page.locator('#template-lifecycle-panel')).toBeVisible()
+    await expect(page.locator('.workspace-header__title')).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByRole('heading', { name: /^template approval$/i })).toBeVisible({
+      timeout: 15_000,
+    })
   })
 })

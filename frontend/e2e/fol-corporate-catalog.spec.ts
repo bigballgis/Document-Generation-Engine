@@ -34,7 +34,7 @@ test.describe('corporate FOL catalog (demo seed)', () => {
     await page.goto('/masters')
 
     await expect(page.getByText(/unable to load letterheads/i)).not.toBeVisible()
-    await expect(page.getByRole('heading', { name: /^masters$/i })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /^letterhead templates$/i })).toBeVisible()
     await expect(page.getByText(FOL_MASTER_NAME)).toBeVisible()
     await expect(page.locator('.el-table').getByText(FOL_GROUP_CODE, { exact: true }).first()).toBeVisible()
   })
@@ -43,8 +43,8 @@ test.describe('corporate FOL catalog (demo seed)', () => {
     await page.goto('/templates')
 
     await expect(page.getByText(/unable to load templates/i)).not.toBeVisible()
-    await expect(page.getByRole('heading', { name: /^templates$/i })).toBeVisible()
-    await expect(page.getByText(FOL_TEMPLATE_EXTERNAL_ID)).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /^templates$/i })).toBeVisible()
+    await expect(page.locator('.el-table').getByText(FOL_TEMPLATE_EXTERNAL_ID).first()).toBeVisible()
   })
 
   test('FOL template hub opens dev editor with variables and content module references', async ({
@@ -85,10 +85,9 @@ test.describe('corporate FOL catalog (demo seed)', () => {
     await expect(page.locator('.variable-tree').getByText('Borrower legal name')).toBeVisible({ timeout: 15_000 })
 
     await designSubTabs.getByRole('tab', { name: /^bindings$/i }).click()
-    const anchorFilter = page.locator('.bindings-panel').getByPlaceholder(/filter/i).first()
-    await anchorFilter.fill('FOL_CLAUSE_01')
+    await expect(page.locator('.bindings-panel .el-table')).toBeVisible({ timeout: 15_000 })
     await expect(
-      page.locator('.bindings-panel .el-table').getByText(FOL_DEFINITIONS_ANCHOR, { exact: true }).first(),
+      page.locator('.bindings-panel .el-table__row').filter({ hasText: FOL_DEFINITIONS_ANCHOR }).first(),
     ).toBeVisible({ timeout: 15_000 })
   })
 })
@@ -104,9 +103,10 @@ test.describe('corporate FOL content modules (author scope)', () => {
     await page.goto('/content-modules')
 
     await expect(page.getByText(/unable to load content modules/i)).not.toBeVisible()
-    await expect(page.getByRole('heading', { name: /^standard clauses$/i })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /^standard clauses$/i })).toBeVisible()
 
-    await expect(page.locator('.el-table').getByText(/^MOD-FOL-SEC-/i).first()).toBeVisible({
+    await page.getByPlaceholder(/search/i).fill('MOD-FOL-SEC-01')
+    await expect(page.locator('.el-table').getByText('MOD-FOL-SEC-01', { exact: true }).first()).toBeVisible({
       timeout: 15_000,
     })
     await expect(page.locator('.el-table__body-wrapper tbody tr')).not.toHaveCount(0)

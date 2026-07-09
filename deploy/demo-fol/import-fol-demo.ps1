@@ -65,6 +65,15 @@ function Get-Token([string]$Username, [string]$Password) {
     return $login.result.accessToken
 }
 
+function Get-ApiListItems([object]$EnvelopeResult) {
+    if ($null -eq $EnvelopeResult) { return @() }
+    if ($EnvelopeResult -is [System.Array]) { return $EnvelopeResult }
+    if ($null -ne $EnvelopeResult.PSObject.Properties['content']) {
+        return @($EnvelopeResult.content)
+    }
+    return @($EnvelopeResult)
+}
+
 function Resolve-CatalogPath([string]$RelativePath) {
     return Join-Path $DemoRoot ($RelativePath -replace '^config/', 'config/')
 }
@@ -361,8 +370,8 @@ if (-not (Test-Path $DocxPath)) {
     throw "Missing master DOCX: $DocxPath`nRun: mvn -f backend/pom.xml test -Dtest=FolMasterDocxAssetGeneratorTest"
 }
 
-$masters = Invoke-Api GET '/masters' $AdminToken
-$master = $masters.result | Where-Object { $_.name -eq $Config.masterName } | Select-Object -First 1
+$masters = Invoke-Api GET '/masters?size=200' $AdminToken
+$master = Get-ApiListItems $masters.result | Where-Object { $_.name -eq $Config.masterName } | Select-Object -First 1
 if (-not $master) {
     Write-Step "Uploading FOL master DOCX..."
     $created = Invoke-Api POST '/masters' $GroupAdminToken -MultipartFields @{
@@ -390,8 +399,9 @@ $masterId = $master.id
 Write-Step "Master ready: $($Config.masterName) ($masterId)"
 
 # --- Template ---
-$templates = Invoke-Api GET '/templates' $AuthorToken
-$template = $templates.result | Where-Object { $_.externalId -eq $Config.templateExternalId } | Select-Object -First 1
+$needsDescriptionPatch = $false
+$templates = Invoke-Api GET '/templates?size=200' $AuthorToken
+$template = Get-ApiListItems $templates.result | Where-Object { $_.externalId -eq $Config.templateExternalId } | Select-Object -First 1
 if (-not $template) {
     Write-Step "Creating FOL template $($Config.templateExternalId)..."
     $created = Invoke-Api POST '/templates' $AuthorToken -Body @{
@@ -417,14 +427,18 @@ WHERE id = '$templateId'::uuid
         if ($LASTEXITCODE -ne 0) { throw "Template master re-link failed (exit $LASTEXITCODE)" }
     }
     if ($template.description -notlike "*$($Config.catalogMarker)*") {
-        Invoke-Api PATCH "/templates/$templateId" $AuthorToken -Body @{
-            name = $Config.templateName
-            description = $Config.templateDescription
-        }
+        $needsDescriptionPatch = $true
     }
 }
 
 Ensure-FolTemplateDraftForImport -TemplateId $templateId -Token $AuthorToken
+
+if ($needsDescriptionPatch) {
+    Invoke-Api PATCH "/templates/$templateId" $AuthorToken -Body @{
+        name = $Config.templateName
+        description = $Config.templateDescription
+    }
+}
 
 # --- Variables ---
 $catalogKeys = @($CatalogVariables | ForEach-Object { $_.key })
