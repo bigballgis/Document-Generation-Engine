@@ -53,6 +53,17 @@ public class BatchExecutionService {
             String batchId,
             boolean continueOnItemFailure
     ) {
+        return execute(template, releaseVersion, request, batchId, continueOnItemFailure, "sync");
+    }
+
+    public BatchExecutionOutcome execute(
+            TemplateEntity template,
+            String releaseVersion,
+            BatchGenerateRequestBody request,
+            String batchId,
+            boolean continueOnItemFailure,
+            String mode
+    ) {
         List<BatchResultItemView> items = new ArrayList<>();
         List<DocumentGenerationEngine.GeneratedDocument> successfulDocuments = new ArrayList<>();
         int successCount = 0;
@@ -67,7 +78,8 @@ public class BatchExecutionService {
                         releaseVersion,
                         item.variables(),
                         output.format(),
-                        encryption
+                        encryption,
+                        mode
                 );
                 if (continueOnItemFailure) {
                     idempotencyService.registerDownloadableDocument(

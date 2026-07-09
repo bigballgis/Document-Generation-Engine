@@ -80,8 +80,8 @@ class TradeLcMasterDocxAssetGeneratorTest {
         assertThat(lcFooterXml).doesNotContain("SECTIONPAGES");
 
         Files.createDirectories(LC_ASSET.getParent());
-        Files.write(LC_ASSET, lc);
-        Files.write(GUARANTEE_ASSET, guarantee);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(LC_ASSET, lc);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(GUARANTEE_ASSET, guarantee);
     }
 
     private static void assertBankGradeMaster(byte[] docx) throws Exception {

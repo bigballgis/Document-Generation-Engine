@@ -2,29 +2,62 @@ groups:
   - name: docgen-backend
     rules:
       - alert: HighPdfConversionFailureRate
-        expr: rate(docgen_pdf_conversion_failures_total[5m]) > 0.17
+        expr: rate(docgen_pdf_conversion_outcome_total{result="failure"}[5m]) > 0.17
         for: 5m
         labels:
           severity: critical
+          draft: "true"
         annotations:
           summary: "PDF conversion failure rate > 10/min"
           description: "LibreOffice conversion is failing; check LR-A1 profile isolation and font baseline."
+          draft: "true"
+          nfr_reference: "LR-D5 pending proposal — not SLA until confirmed"
 
       - alert: HighGenerationLatencyP95
         expr: histogram_quantile(0.95, rate(docgen_generation_duration_seconds_bucket[5m])) > 10
         for: 5m
         labels:
           severity: warning
+          draft: "true"
         annotations:
-          summary: "Document generation p95 > 10s"
+          summary: "Document generation p95 > 10s (end-to-end incl. PDF)"
+          description: "See non-functional-requirements.md LR-D5 — sync HTTP p95 target is 3s; generation pipeline p95 draft threshold is 10s."
+          draft: "true"
+          nfr_reference: "LR-D5 pending proposal — sync HTTP p95 <= 3s; generation p95 <= 10s"
+
+      - alert: HighSyncGenerationLatencyP95
+        expr: histogram_quantile(0.95, rate(docgen_generation_duration_seconds_bucket{mode="sync"}[5m])) > 3
+        for: 5m
+        labels:
+          severity: warning
+          draft: "true"
+        annotations:
+          summary: "Sync generation p95 > 3s"
+          description: "NFR proposal for sync generation latency; confirm in LR-D5 before removing draft."
+          draft: "true"
+          nfr_reference: "LR-D5 pending proposal — sync generation p95 <= 3s"
+
+      - alert: HighPdfConversionLatencyP95
+        expr: histogram_quantile(0.95, rate(docgen_pdf_conversion_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+          draft: "true"
+        annotations:
+          summary: "PDF conversion p95 > 30s"
+          draft: "true"
+          nfr_reference: "LR-D5 pending proposal"
 
       - alert: HighHttpLatencyP95
         expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{uri!~"/actuator.*"}[5m])) > 3
         for: 5m
         labels:
           severity: warning
+          draft: "true"
         annotations:
           summary: "HTTP p95 > 3s"
+          draft: "true"
+          nfr_reference: "LR-D5 pending proposal — HTTP p95 <= 3s"
 
       - alert: HighJvmMemoryUsage
         expr: jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} > 0.85

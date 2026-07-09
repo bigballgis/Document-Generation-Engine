@@ -29,7 +29,13 @@ class E2eDocxFixtureGeneratorTest {
         assertThat(DemoMasterDocxAssertions.readFooterXml(seedDocx)).contains("NUMPAGES");
 
         Files.createDirectories(FIXTURES_DIR);
-        Files.write(FIXTURES_DIR.resolve("demo-retail-letterhead-seed.docx"), seedDocx);
-        Files.write(FIXTURES_DIR.resolve("retail-letterhead-replacement.docx"), replacementDocx);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(
+                FIXTURES_DIR.resolve("demo-retail-letterhead-seed.docx"),
+                seedDocx
+        );
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(
+                FIXTURES_DIR.resolve("retail-letterhead-replacement.docx"),
+                replacementDocx
+        );
     }
 }

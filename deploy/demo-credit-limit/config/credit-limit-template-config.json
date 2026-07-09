@@ -1,18 +1,36 @@
-{
-  "catalogMarker": "credit-limit-demo-v3-bank-grade",
-  "groupCode": "CORP",
-  "pageNumberingProfile": "SECTION_AND_GLOBAL",
-  "masterName": "Meridian Credit Limit Master",
-  "masterLayoutVersion": "credit-limit-layout-v4-nine-anchors",
-  "masterDescription": "P23 bank-grade credit limit confirmation master — nine anchors, dual-page footer, shared style catalog",
-  "templateExternalId": "DEMO-CREDIT-LIMIT-CONFIRM",
-  "templateName": "Credit Facility Confirmation",
-  "templateDescription": "Foreign-bank credit facility confirmation — parties, defined terms, facility, covenants, repayment schedule, EOD, governing law, signatures (credit-limit-demo-v3-bank-grade)",
-  "masterDocx": "assets/credit-limit-master.docx",
-  "generatedCatalogFiles": {
-    "variables": "config/credit-limit-variables.json",
-    "bindingOverlays": "config/credit-limit-binding-overlays.json",
-    "demoTestVariables": "config/credit-limit-demo-test-variables.json",
-    "catalogManifest": "config/credit-limit-catalog-manifest.json"
-  }
-}
+{
+
+  "catalogMarker": "credit-limit-demo-v3-bank-grade",
+
+  "groupCode": "CORP",
+
+  "pageNumberingProfile": "SECTION_AND_GLOBAL",
+
+  "masterName": "Meridian Credit Limit Master",
+
+  "masterLayoutVersion": "credit-limit-layout-v4-nine-anchors",
+
+  "masterDescription": "P23 bank-grade credit limit confirmation master — nine anchors, dual-page footer, shared style catalog",
+
+  "templateExternalId": "DEMO-CREDIT-LIMIT-CONFIRM",
+
+  "templateName": "Credit Facility Confirmation",
+
+  "templateDescription": "Foreign-bank credit facility confirmation — parties, defined terms, facility, covenants, repayment schedule, EOD, governing law, signatures (credit-limit-demo-v3-bank-grade)",
+
+  "masterDocx": "assets/credit-limit-master.docx",
+
+  "generatedCatalogFiles": {
+
+    "variables": "config/credit-limit-variables.json",
+
+    "bindingOverlays": "config/credit-limit-binding-overlays.json",
+
+    "demoTestVariables": "config/credit-limit-demo-test-variables.json",
+
+    "catalogManifest": "config/credit-limit-catalog-manifest.json"
+
+  }
+
+}
+

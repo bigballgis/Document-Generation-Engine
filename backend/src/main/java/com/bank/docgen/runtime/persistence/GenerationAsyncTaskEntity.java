@@ -60,6 +60,9 @@ public class GenerationAsyncTaskEntity {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+    @Column(name = "processing_attempt_count", nullable = false)
+    private int processingAttemptCount;
+
     protected GenerationAsyncTaskEntity() {
     }
 
@@ -91,6 +94,7 @@ public class GenerationAsyncTaskEntity {
         this.createdAt = Instant.now();
         this.updatedAt = this.createdAt;
         this.expiresAt = expiresAt;
+        this.processingAttemptCount = 0;
     }
 
     public UUID getId() {
@@ -153,8 +157,23 @@ public class GenerationAsyncTaskEntity {
         return expiresAt;
     }
 
+    public int getProcessingAttemptCount() {
+        return processingAttemptCount;
+    }
+
     public void markProcessing() {
         this.status = TaskStatus.PROCESSING;
+        this.processingAttemptCount++;
+        this.updatedAt = Instant.now();
+    }
+
+    public void markAccepted() {
+        this.status = TaskStatus.ACCEPTED;
+        this.updatedAt = Instant.now();
+    }
+
+    public void scrubRequestPayload(String scrubbedPayloadJson) {
+        this.requestPayloadJson = scrubbedPayloadJson;
         this.updatedAt = Instant.now();
     }
 

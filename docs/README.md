@@ -5,7 +5,7 @@
 
 **Active work in this documentation track:** **[CDP Wave CD-0 In Progress](./plan/competitiveness-deepening-program.md)** — doc truth, E2E BDD, pitfall registry, browser golden-path evidence (task IDs **`CD-*` only).
 
-**Active formal phase:** **CORE-FORTRESS F8** — Observability, SLO, DR — **In Progress** (2026-07-09). **Prior:** **CORE-FORTRESS F7 Done** (2026-07-09; LR-C1/C4 mirrored). See [program roadmap](./plan/detail/CORE-FORTRESS-program-roadmap.md).
+**Active formal phase:** **None** (2026-07-09). **CORE-FORTRESS program Done** — F1–F8 complete (F8 observability/SLO/DR/evidence bundle; `mvn verify` **1154**; arch review PASS). **Prior:** **CORE-FORTRESS F7 Done** (2026-07-09; LR-C1/C4 mirrored). See [program roadmap](./plan/detail/CORE-FORTRESS-program-roadmap.md).
 
 **P22 Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md).
 
@@ -154,7 +154,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[CORE-FORTRESS F5 async durability + security depth](./behavior/core-fortress-f5-async-durability-security.md)** | **Done** (2026-07-09) | Stale reclaim, Kafka DLT, payload scrub, 429 audit, credential rotation — **F5 closed** (full `mvn verify` env follow-up) |
 | **[CORE-FORTRESS F6 frontend kernel refactor](./behavior/core-fortress-f6-frontend-kernel-refactor.md)** | **Done** (2026-07-09) | Composable decomposition — controller **243** lines; **73** composable Vitest; F6-T08 E2E env blocker documented |
 | **[CORE-FORTRESS F7 authoring UX](./behavior/core-fortress-f7-authoring-ux.md)** | **Done** (2026-07-09) | Dirty guard + side-by-side preview; LR-C1/C4 mirrored Done — Vitest **894**; E2E **12/12** |
-| **[CORE-FORTRESS F8 observability / SLO / DR](./behavior/core-fortress-f8-observability-slo-dr.md)** | **In Progress** (2026-07-09) | Micrometer SLOs; deep readiness; DR playbook; evidence bundle |
+| **[CORE-FORTRESS F8 observability / SLO / DR](./behavior/core-fortress-f8-observability-slo-dr.md)** | **Done** (2026-07-09) | Micrometer SLOs; deep readiness; DR playbook; evidence bundle — `mvn verify` **1154** |
 
 ## Evidence & acceptance artifacts
 

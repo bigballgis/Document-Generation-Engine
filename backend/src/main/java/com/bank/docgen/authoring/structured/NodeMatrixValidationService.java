@@ -1,5 +1,6 @@
 package com.bank.docgen.authoring.structured;
 
+import com.bank.docgen.authoring.structured.expression.ConditionExpressionEvaluator;
 import com.bank.docgen.rendering.domain.FidelityWarningCode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,11 +18,15 @@ public class NodeMatrixValidationService {
 
     public static final String MESSAGE_KEY_UNRESOLVED_VARIABLE = "generation.warning.fidelity.unresolvedVariable";
     public static final String MESSAGE_KEY_UNSUPPORTED_NODE = "generation.warning.fidelity.unsupportedNode";
+    public static final String MESSAGE_KEY_INVALID_CONDITION_EXPRESSION =
+            "generation.warning.fidelity.invalidConditionExpression";
 
     private final ObjectMapper objectMapper;
+    private final ConditionExpressionEvaluator conditionExpressionEvaluator;
 
     public NodeMatrixValidationService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
+        this.conditionExpressionEvaluator = ConditionExpressionEvaluator.INSTANCE;
     }
 
     public StructuredContentValidationResult validate(String structuredContentJson, Set<String> declaredVariableKeys) {
@@ -81,12 +86,73 @@ public class NodeMatrixValidationService {
                 ));
             }
         }
+        if (nodeType == StructuredContentNodeType.CONDITION_BLOCK) {
+            validateConditionExpression(node, location, declaredVariableKeys, blockers);
+        }
+        if (nodeType == StructuredContentNodeType.LOOP_BLOCK) {
+            validateLoopVariable(node, location, declaredVariableKeys, blockers);
+        }
         JsonNode children = node.get("children");
         if (children != null && children.isArray()) {
             for (int index = 0; index < children.size(); index++) {
                 walkNode(children.get(index), location + ".children[" + index + "]", declaredVariableKeys, blockers, warnings);
             }
         }
+    }
+
+    private void validateConditionExpression(
+            JsonNode node,
+            String location,
+            Set<String> declaredVariableKeys,
+            List<StructuredContentFidelityIssue> blockers
+    ) {
+        String expression = node.path("conditionExpression").asText("").trim();
+        if (expression.isBlank() || !conditionExpressionEvaluator.validateSyntax(expression).isEmpty()) {
+            blockers.add(invalidConditionExpressionIssue(location, expression));
+            return;
+        }
+        for (String variableKey : conditionExpressionEvaluator.extractVariableReferences(expression)) {
+            if (!declaredVariableKeys.contains(variableKey)) {
+                blockers.add(new StructuredContentFidelityIssue(
+                        StructuredContentFidelitySeverity.BLOCKER,
+                        FidelityWarningCode.UNRESOLVED_VARIABLE,
+                        MESSAGE_KEY_UNRESOLVED_VARIABLE,
+                        location,
+                        "Variable reference '" + sanitizeForSummary(variableKey) + "' is not declared in the template schema.",
+                        "Declare the variable in the template schema or remove the reference."
+                ));
+            }
+        }
+    }
+
+    private void validateLoopVariable(
+            JsonNode node,
+            String location,
+            Set<String> declaredVariableKeys,
+            List<StructuredContentFidelityIssue> blockers
+    ) {
+        String loopVariable = node.path("loopVariable").asText("").trim();
+        if (loopVariable.isBlank() || !declaredVariableKeys.contains(loopVariable)) {
+            blockers.add(new StructuredContentFidelityIssue(
+                    StructuredContentFidelitySeverity.BLOCKER,
+                    FidelityWarningCode.UNRESOLVED_VARIABLE,
+                    MESSAGE_KEY_UNRESOLVED_VARIABLE,
+                    location,
+                    "Variable reference '" + sanitizeForSummary(loopVariable) + "' is not declared in the template schema.",
+                    "Declare the variable in the template schema or remove the reference."
+            ));
+        }
+    }
+
+    private StructuredContentFidelityIssue invalidConditionExpressionIssue(String location, String expression) {
+        return new StructuredContentFidelityIssue(
+                StructuredContentFidelitySeverity.BLOCKER,
+                FidelityWarningCode.INVALID_CONDITION_EXPRESSION,
+                MESSAGE_KEY_INVALID_CONDITION_EXPRESSION,
+                location,
+                "Condition expression '" + sanitizeForSummary(expression) + "' is malformed.",
+                "Fix the condition expression syntax or remove the condition block."
+        );
     }
 
     private StructuredContentFidelityIssue invalidDocumentIssue() {

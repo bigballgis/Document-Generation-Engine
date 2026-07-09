@@ -1,7 +1,8 @@
 package com.bank.docgen.runtime.service;
 
 import com.bank.docgen.authoring.structured.CallerRenderOverride;
-import com.bank.docgen.authoring.structured.FidelityValidationService;
+import com.bank.docgen.runtime.metrics.GenerationMetrics;
+import com.bank.docgen.template.service.VersionFidelityWarningService;
 import com.bank.docgen.authoring.structured.RenderProfile;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
@@ -21,6 +22,8 @@ import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -43,7 +46,8 @@ public class DocumentGenerationEngine {
     private final DocumentArtifactPipeline documentArtifactPipeline;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final RenderProfileService renderProfileService;
-    private final FidelityValidationService fidelityValidationService;
+    private final VersionFidelityWarningService versionFidelityWarningService;
+    private final GenerationMetrics generationMetrics;
 
     public DocumentGenerationEngine(
             TemplateVersionRepository templateVersionRepository,
@@ -54,7 +58,8 @@ public class DocumentGenerationEngine {
             DocumentArtifactPipeline documentArtifactPipeline,
             TemplateContentModuleReferenceService contentModuleReferenceService,
             RenderProfileService renderProfileService,
-            FidelityValidationService fidelityValidationService
+            VersionFidelityWarningService versionFidelityWarningService,
+            GenerationMetrics generationMetrics
     ) {
         this.templateVersionRepository = templateVersionRepository;
         this.anchorBindingRepository = anchorBindingRepository;
@@ -64,7 +69,8 @@ public class DocumentGenerationEngine {
         this.documentArtifactPipeline = documentArtifactPipeline;
         this.contentModuleReferenceService = contentModuleReferenceService;
         this.renderProfileService = renderProfileService;
-        this.fidelityValidationService = fidelityValidationService;
+        this.versionFidelityWarningService = versionFidelityWarningService;
+        this.generationMetrics = generationMetrics;
     }
 
     public GeneratedDocument generate(
@@ -74,10 +80,77 @@ public class DocumentGenerationEngine {
             String outputFormat,
             EncryptionOptionsView encryption
     ) {
-        return generate(template, releaseVersion, variables, outputFormat, encryption, CallerRenderOverride.empty());
+        return generate(template, releaseVersion, variables, outputFormat, encryption, CallerRenderOverride.empty(), "sync");
     }
 
     public GeneratedDocument generate(
+            TemplateEntity template,
+            String releaseVersion,
+            Map<String, Object> variables,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            CallerRenderOverride callerRenderOverride
+    ) {
+        return generate(
+                template,
+                releaseVersion,
+                variables,
+                outputFormat,
+                encryption,
+                callerRenderOverride,
+                "sync"
+        );
+    }
+
+    public GeneratedDocument generate(
+            TemplateEntity template,
+            String releaseVersion,
+            Map<String, Object> variables,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            String mode
+    ) {
+        return generate(
+                template,
+                releaseVersion,
+                variables,
+                outputFormat,
+                encryption,
+                CallerRenderOverride.empty(),
+                mode
+        );
+    }
+
+    public GeneratedDocument generate(
+            TemplateEntity template,
+            String releaseVersion,
+            Map<String, Object> variables,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            CallerRenderOverride callerRenderOverride,
+            String mode
+    ) {
+        Instant start = Instant.now();
+        String format = GenerationMetrics.normalizeFormat(outputFormat);
+        String invocationMode = mode == null || mode.isBlank() ? "sync" : mode;
+        try {
+            GeneratedDocument result = generateInternal(
+                    template,
+                    releaseVersion,
+                    variables,
+                    outputFormat,
+                    encryption,
+                    callerRenderOverride
+            );
+            generationMetrics.record(Duration.between(start, Instant.now()), "success", format, invocationMode);
+            return result;
+        } catch (RuntimeException ex) {
+            generationMetrics.record(Duration.between(start, Instant.now()), "failure", format, invocationMode);
+            throw ex;
+        }
+    }
+
+    private GeneratedDocument generateInternal(
             TemplateEntity template,
             String releaseVersion,
             Map<String, Object> variables,
@@ -130,7 +203,7 @@ public class DocumentGenerationEngine {
                 );
             }
             List<String> fidelityWarnings = new java.util.ArrayList<>(
-                    fidelityValidationService.collectWarningCodesForVersion(version.getId(), template.getMasterId())
+                    versionFidelityWarningService.resolveWarningCodes(version, template.getMasterId())
             );
             fidelityWarnings.addAll(artifact.pipelineWarningCodes());
             return new GeneratedDocument(

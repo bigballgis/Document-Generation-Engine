@@ -78,4 +78,115 @@ class NodeMatrixValidationServiceTest {
         assertThat(blocker.suggestion()).doesNotContain(sensitivePlaintext);
         assertThat(blocker.detectionSummary()).contains("missingKey");
     }
+
+    @Test
+    void malformedConditionExpression_isBlocker() {
+        String json = """
+                {
+                  "nodes": [
+                    {
+                      "type": "conditionBlock",
+                      "conditionExpression": "${x} === true",
+                      "children": [{ "type": "textRun", "value": "Hidden" }]
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result = service.validate(json, Set.of("x"));
+
+        assertThat(result.blockers()).hasSize(1);
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.INVALID_CONDITION_EXPRESSION);
+        assertThat(result.blockers().getFirst().messageKey())
+                .isEqualTo(NodeMatrixValidationService.MESSAGE_KEY_INVALID_CONDITION_EXPRESSION);
+        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0]");
+    }
+
+    @Test
+    void undeclaredVariableInConditionExpression_isBlocker() {
+        String json = """
+                {
+                  "nodes": [
+                    {
+                      "type": "conditionBlock",
+                      "conditionExpression": "${missingVar} != null",
+                      "children": [{ "type": "textRun", "value": "Hidden" }]
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result = service.validate(json, Set.of("customerName"));
+
+        assertThat(result.blockers()).hasSize(1);
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.UNRESOLVED_VARIABLE);
+        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0]");
+    }
+
+    @Test
+    void validRichConditionExpression_passesValidation() {
+        String json = """
+                {
+                  "nodes": [
+                    {
+                      "type": "conditionBlock",
+                      "conditionExpression": "${customerName} != null && ${amount} >= 0",
+                      "children": [{ "type": "textRun", "value": "Shown" }]
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result = service.validate(json, Set.of("customerName", "amount"));
+
+        assertThat(result.blockers()).isEmpty();
+    }
+
+    @Test
+    void undeclaredLoopVariable_isBlocker() {
+        String json = """
+                {
+                  "nodes": [
+                    {
+                      "type": "loopBlock",
+                      "loopVariable": "undeclaredItems",
+                      "children": [{ "type": "textRun", "value": "Row" }]
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result = service.validate(json, Set.of("items"));
+
+        assertThat(result.blockers()).hasSize(1);
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.UNRESOLVED_VARIABLE);
+        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0]");
+    }
+
+    @Test
+    void nestedMalformedConditionExpression_reportsInnerLocation() {
+        String json = """
+                {
+                  "nodes": [
+                    {
+                      "type": "conditionBlock",
+                      "conditionExpression": "${show} == true",
+                      "children": [
+                        {
+                          "type": "conditionBlock",
+                          "conditionExpression": "${inner} === true",
+                          "children": [{ "type": "textRun", "value": "Nested" }]
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result = service.validate(json, Set.of("show", "inner"));
+
+        assertThat(result.blockers()).hasSize(1);
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.INVALID_CONDITION_EXPRESSION);
+        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0].children[0]");
+    }
 }

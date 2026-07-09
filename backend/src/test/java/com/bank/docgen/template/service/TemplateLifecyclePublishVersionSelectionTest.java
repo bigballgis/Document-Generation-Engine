@@ -62,6 +62,8 @@ class TemplateLifecyclePublishVersionSelectionTest {
     private ApiPolicyMaterializationService apiPolicyMaterializationService;
     @Mock
     private ApiPolicyRepository apiPolicyRepository;
+    @Mock
+    private VersionFidelityWarningService versionFidelityWarningService;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -85,7 +87,8 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 renderProfileService,
                 approvalSubStateResolver,
                 apiPolicyMaterializationService,
-                apiPolicyRepository
+                apiPolicyRepository,
+                versionFidelityWarningService
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",

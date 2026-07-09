@@ -51,3 +51,5 @@ docgen:
         - RETAIL_API
       svc-denied:
         - OTHER_API
+  rendering:
+    demo-classpath-image-tier-enabled: true

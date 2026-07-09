@@ -92,8 +92,8 @@ class RetailAccountMasterDocxAssetGeneratorTest {
         assertThat(openFooterXml).doesNotContain("Wholesale");
 
         Files.createDirectories(OPEN_ASSET.getParent());
-        Files.write(OPEN_ASSET, openDocx);
-        Files.write(BALANCE_ASSET, balanceDocx);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(OPEN_ASSET, openDocx);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(BALANCE_ASSET, balanceDocx);
     }
 
     private static void assertBankGradeMaster(byte[] docx) throws Exception {

@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 @ConditionalOnProperty(name = "docgen.rendering.conversion-mode", havingValue = "docker-exec")
 public class DockerExecPdfConversionService implements PdfConversionService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DockerExecPdfConversionService.class);
     private static final String RESILIENCE_INSTANCE = "pdfConversion";
 
     private final DocgenRenderingProperties renderingProperties;
@@ -64,12 +67,13 @@ public class DockerExecPdfConversionService implements PdfConversionService {
             PdfConversionOptions options
     ) {
         Path hostDir = null;
+        String container = renderingProperties.getDockerContainerName();
+        String containerProfile = null;
         try {
             hostDir = Files.createTempDirectory("docgen-docker-pdf-");
             Path inputDocx = hostDir.resolve("input.docx");
             byte[] pdfSourceDocx = pdfConversionPostProcessor.prepareDocxForConversion(docxBytes, options);
             Files.write(inputDocx, pdfSourceDocx);
-            String container = renderingProperties.getDockerContainerName();
             String containerInput = "/tmp/docgen-input.docx";
             // LR-A1: per-invocation profile isolation inside the LibreOffice sidecar container
             // (CD-PIT-11). A unique container profile path prevents concurrent conversions from
@@ -79,7 +83,7 @@ public class DockerExecPdfConversionService implements PdfConversionService {
             if (profileDirName == null) {
                 throw new TemplateValidationException("api.error.generation.pdfConversionFailed");
             }
-            String containerProfile = "/tmp/docgen-lo-profile-" + profileDirName;
+            containerProfile = "/tmp/docgen-lo-profile-" + profileDirName;
 
             runCommand(renderingProperties.getDockerCliCommand(), "cp", inputDocx.toString(), container + ":" + containerInput);
             runCommand(
@@ -117,6 +121,33 @@ public class DockerExecPdfConversionService implements PdfConversionService {
                 } catch (IOException ignored) {
                     // Best-effort temp cleanup.
                 }
+            }
+            if (containerProfile != null) {
+                bestEffortContainerProfileCleanup(container, containerProfile);
+            }
+        }
+    }
+
+    /**
+     * F4-A3: best-effort removal of the per-invocation LibreOffice profile inside the sidecar
+     * container so concurrent conversions do not accumulate profile trees on disk.
+     */
+    private void bestEffortContainerProfileCleanup(String container, String containerProfile) {
+        try {
+            runCommand(
+                    renderingProperties.getDockerCliCommand(),
+                    "exec",
+                    container,
+                    "rm",
+                    "-rf",
+                    containerProfile
+            );
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        } catch (IOException | RuntimeException ex) {
+            // Best-effort container profile cleanup — conversion already completed.
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Container profile cleanup skipped for {}: {}", containerProfile, ex.toString());
             }
         }
     }

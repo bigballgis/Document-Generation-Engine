@@ -498,6 +498,7 @@ public class ApiManagementService {
         if (credential.getStatus() != ApiCredentialStatus.ACTIVE) {
             throw new TemplateValidationException("api.error.apimgmt.credentialNotActive");
         }
+        String previousFingerprint = fingerprint(credential.getExternalId());
         String secret = generateSecret();
         credential.rotateSecret(passwordHashService.hash(secret));
         apiCredentialRepository.save(credential);
@@ -507,7 +508,9 @@ public class ApiManagementService {
                 credential.getId(),
                 credential.getExternalId(),
                 session.username(),
-                actorSummary(session)
+                actorSummary(session),
+                credential.getRotationGeneration(),
+                previousFingerprint
         );
         return new RotateCredentialResponse(
                 credential.getId().toString(),
@@ -547,6 +550,10 @@ public class ApiManagementService {
 
     private String actorSummary(ManagementSessionClaims session) {
         return session.displayName() + " (" + session.username() + ")";
+    }
+
+    private String fingerprint(String externalId) {
+        return externalId == null ? null : "fp-" + externalId;
     }
 
     private String generateSecret() {

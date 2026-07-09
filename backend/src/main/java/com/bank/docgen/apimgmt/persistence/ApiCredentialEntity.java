@@ -42,6 +42,9 @@ public class ApiCredentialEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "rotation_generation", nullable = false)
+    private int rotationGeneration;
+
     protected ApiCredentialEntity() {
     }
 
@@ -55,6 +58,7 @@ public class ApiCredentialEntity {
         Instant now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
+        this.rotationGeneration = 0;
     }
 
     public UUID getId() {
@@ -93,6 +97,10 @@ public class ApiCredentialEntity {
         return updatedAt;
     }
 
+    public int getRotationGeneration() {
+        return rotationGeneration;
+    }
+
     public void revoke() {
         this.status = ApiCredentialStatus.REVOKED;
         this.revokedAt = Instant.now();
@@ -101,6 +109,7 @@ public class ApiCredentialEntity {
 
     public void rotateSecret(String newSecretHash) {
         this.secretHash = newSecretHash;
+        this.rotationGeneration++;
         this.updatedAt = Instant.now();
     }
 }

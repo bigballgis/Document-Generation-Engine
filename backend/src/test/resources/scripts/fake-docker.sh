@@ -37,10 +37,22 @@ fi
 if [[ "$command_name" == "exec" ]]; then
   container="$1"
   shift
+  if [[ "${1:-}" == "rm" && "${2:-}" == "-rf" && -n "${3:-}" ]]; then
+    target="$3"
+    remapped_target="$state_root/$container$target"
+    rm -rf "$remapped_target"
+    exit 0
+  fi
   remapped=()
   for arg in "$@"; do
     if [[ "$arg" == /tmp/* ]]; then
       remapped+=("$state_root/$container$arg")
+    elif [[ "$arg" == -env:UserInstallation=file://* ]]; then
+      profile_path="${arg#-env:UserInstallation=file://}"
+      remapped_profile="$state_root/$container$profile_path"
+      mkdir -p "$remapped_profile"
+      echo "$profile_path" >> "$state_root/profile-invocations.log"
+      remapped+=("-env:UserInstallation=file://$remapped_profile")
     else
       remapped+=("$arg")
     fi

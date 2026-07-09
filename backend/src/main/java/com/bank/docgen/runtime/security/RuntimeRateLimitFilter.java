@@ -1,6 +1,7 @@
 package com.bank.docgen.runtime.security;
 
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorDetail;
@@ -28,17 +29,20 @@ public class RuntimeRateLimitFilter extends OncePerRequestFilter {
     private final TraceIdProvider traceIdProvider;
     private final MessageResolver messageResolver;
     private final ObjectMapper objectMapper;
+    private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
 
     public RuntimeRateLimitFilter(
             RuntimeRateLimitService rateLimitService,
             TraceIdProvider traceIdProvider,
             MessageResolver messageResolver,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder
     ) {
         this.rateLimitService = rateLimitService;
         this.traceIdProvider = traceIdProvider;
         this.messageResolver = messageResolver;
         this.objectMapper = objectMapper;
+        this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
     }
 
     @Override
@@ -77,16 +81,25 @@ public class RuntimeRateLimitFilter extends OncePerRequestFilter {
             return;
         }
         long retryAfterSeconds = Math.max(1L, TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill()));
-        writeRateLimitResponse(request, response, retryAfterSeconds);
+        writeRateLimitResponse(request, response, retryAfterSeconds, credentialId.trim(), accessAccount.trim());
     }
 
     private void writeRateLimitResponse(
             HttpServletRequest request,
             HttpServletResponse response,
-            long retryAfterSeconds
+            long retryAfterSeconds,
+            String credentialId,
+            String accessAccount
     ) throws IOException {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();
+        runtimeGenerationAuditRecorder.recordRateLimitDenied(
+                resolveEnvironment(request.getRequestURI()),
+                credentialId.trim(),
+                accessAccount.trim(),
+                traceId,
+                auditId
+        );
         String messageKey = "api.error.runtime.rateLimitExceeded";
         ErrorDetail error = new ErrorDetail(
                 ApiErrorCodes.RATE_LIMIT_EXCEEDED,
@@ -103,5 +116,16 @@ public class RuntimeRateLimitFilter extends OncePerRequestFilter {
                 response.getOutputStream(),
                 new ErrorEnvelope(Metadata.minimal(auditId, traceId), error)
         );
+    }
+
+    static String resolveEnvironment(String requestUri) {
+        if (requestUri == null) {
+            return "unknown";
+        }
+        String[] segments = requestUri.split("/");
+        if (segments.length >= 3 && "api".equals(segments[1])) {
+            return segments[2];
+        }
+        return "unknown";
     }
 }

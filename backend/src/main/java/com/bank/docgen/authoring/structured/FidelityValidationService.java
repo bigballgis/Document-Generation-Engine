@@ -84,7 +84,7 @@ public class FidelityValidationService {
                 .warnings());
         addWarnings(deduped, anchorId, masterStyleCatalogService.validate(structuredContentJson, styleCatalog)
                 .warnings());
-        addWarnings(deduped, anchorId, tableComponentService.validateStructuredContent(structuredContentJson)
+        addWarnings(deduped, anchorId, tableComponentService.validateStructuredContent(structuredContentJson, declaredVariableKeys)
                 .warnings());
         addWarnings(deduped, anchorId, referenceNodeService.validateStructuredContent(structuredContentJson)
                 .fidelity()

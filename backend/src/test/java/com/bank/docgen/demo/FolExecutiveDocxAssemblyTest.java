@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.demo.support.DemoPackageContractSupport;
 import com.bank.docgen.demo.support.FolDemoContentModuleSupport;
+import com.bank.docgen.rendering.StructuredContentDocxWriterTestSupport;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +25,7 @@ class FolExecutiveDocxAssemblyTest {
     private static final int MIN_BODY_CHARACTERS_FOR_EXECUTIVE_SCALE = 180_000;
     private static final int MIN_PARAGRAPHS_FOR_EXECUTIVE_SCALE = 600;
 
-    private final DocxAssembler assembler = new DocxAssembler(new ObjectMapper());
+    private final DocxAssembler assembler = StructuredContentDocxWriterTestSupport.createAssembler(new ObjectMapper());
 
     @Test
     void bddDemoExp010_executiveDatasetAssemblesLargeStructuredDocx() throws Exception {

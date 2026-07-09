@@ -67,6 +67,16 @@ public class IdempotencyService {
 
     @Transactional
     public GenerationIdempotencyEntity begin(String idempotencyKey, UUID templateId, String requestHash) {
+        return begin(idempotencyKey, templateId, requestHash, null);
+    }
+
+    @Transactional
+    public GenerationIdempotencyEntity begin(
+            String idempotencyKey,
+            UUID templateId,
+            String requestHash,
+            String resolvedReleaseVersion
+    ) {
         GenerationIdempotencyEntity entity = new GenerationIdempotencyEntity(
                 UUID.randomUUID(),
                 idempotencyKey,
@@ -75,6 +85,7 @@ public class IdempotencyService {
                 "IN_PROGRESS",
                 Instant.now().plusSeconds(IdempotencyConstants.RETENTION_SECONDS)
         );
+        entity.setResolvedReleaseVersion(resolvedReleaseVersion);
         GenerationIdempotencyEntity saved;
         try {
             saved = repository.saveAndFlush(entity);

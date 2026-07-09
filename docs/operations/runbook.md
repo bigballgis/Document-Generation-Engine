@@ -39,12 +39,30 @@ Compose prod profile enables backend and frontend health checks with `service_he
 
 ## Readiness scope (SOR-O06)
 
-| Probe | Endpoint | Checks | Rationale |
+| Probe | Endpoint | Traffic gate | Diagnostic checks |
 | --- | --- | --- | --- |
-| Liveness | `/healthz` | Process up | Restart hung JVM |
-| Readiness | `/readyz` | PostgreSQL `SELECT 1` | Route traffic when DB authoritative state is reachable |
+| Liveness | `/healthz` | N/A — process up only | None |
+| Readiness | `/readyz` | **PostgreSQL `SELECT 1` only** (503 when down) | `checks.postgres`, `checks.redis`, `checks.minio`, `checks.kafka` |
 
-Redis, MinIO, and Kafka are **not** included in `/readyz` for v1. Partial dependency outages fail specific API operations and metrics instead of draining all pods. Revisit when multi-region HA or strict sync-generation SLO requires stricter gates.
+Redis, MinIO, and Kafka appear in `/readyz` JSON for **diagnostics only** — they do **not** remove the pod from Service endpoints when Postgres is healthy (F8-C2 / SOR-O06 preserved). Optional contributors use `@Profile("!test")` with short timeouts (≤ 2s).
+
+Example response (Postgres up, Redis down):
+
+```json
+{
+  "status": "UP",
+  "checks": {
+    "postgres": { "status": "UP" },
+    "redis": { "status": "DOWN" },
+    "minio": { "status": "UP" },
+    "kafka": { "status": "SKIPPED", "detail": "async transport is not kafka" }
+  }
+}
+```
+
+When `ASYNC_TRANSPORT` is not `kafka`, `checks.kafka.status` is `SKIPPED`.
+
+See [deploy/k8s-health-probes.md](../deploy/k8s-health-probes.md) for probe wiring.
 
 ## Observability
 
@@ -75,13 +93,38 @@ Expect `# HELP` lines for JVM and HTTP metrics.
 
 **Cadence:** weekly full backup + daily incremental (operator-managed Postgres/MinIO tooling).
 
-**Restore drill checklist (annual):**
+## Disaster Recovery
 
-1. Restore latest full + incremental backup to an isolated namespace/cluster.
-2. Run Flyway migrate (should be no-op if backup is post-migration).
-3. Verify `/readyz`, login, template list, and one sync generation smoke.
-4. Record RPO/RTO observed vs targets (RPO ≤ 15 min, RTO ≤ 30 min).
-5. Archive evidence under `artifacts/dr-drill/<date>/`.
+Aligned with [ADR-0030](../adr/operations/0030-operational-platform-baseline.md): **RPO ≤ 15 min**, **RTO ≤ 30 min**. Failover is **manual**; use [blue-green runbook](../deploy/blue-green-runbook.md) for color revert after restore.
+
+### Preconditions
+
+- Isolated namespace/cluster or compose project for drill (never against production traffic).
+- Latest Postgres full + incremental backups and MinIO bucket snapshot available.
+- Flyway is **forward-only** — no down migrations; schema rollback requires a new migration or color revert.
+
+### DR drill checklist
+
+1. **Backup verify** — confirm latest Postgres and MinIO backups within RPO window.
+2. **Restore Postgres** — restore full + incremental to isolated instance; record restore start time.
+3. **Restore MinIO** — restore object bucket to isolated MinIO; verify bucket head succeeds.
+4. **Start stack** — `docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile prod up -d` (or Helm to isolated namespace).
+5. **Flyway** — application startup runs migrate; expect no-op if backup is post-migration.
+6. **Readiness** — `curl -sf http://localhost:8080/readyz` → HTTP 200, `checks.postgres.status=UP`.
+7. **Smoke** — management login, template list, one sync generation (DOCX or PDF).
+8. **Record RPO/RTO** — note observed recovery time vs ADR-0030 targets.
+9. **Archive evidence** — `artifacts/dr-drill/<YYYY-MM-DD>/` with:
+   - `restore-log.txt` — commands and timestamps
+   - `readyz.json` — post-restore readiness snapshot
+   - `smoke-notes.md` — generation smoke outcome
+   - `rpo-rto.json` — `{ "rpoObservedMinutes": N, "rtoObservedMinutes": N, "targets": { "rpo": 15, "rto": 30 } }`
+
+First annual drill **execution** is tracked under LR-D2; F8 delivers this checklist and directory convention.
+
+### Schema rollback policy
+
+- **No Flyway down migrations.**
+- Breaking schema: expand-contract across two releases; revert traffic via blue-green `activeColor` to previous image if needed.
 
 ## Incident response
 

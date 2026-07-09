@@ -42,7 +42,10 @@ See also [Production runbook](../docs/operations/runbook.md) for release-gate an
 | [k8s-ingress-tls.md](./k8s-ingress-tls.md) | Service DNS, NGINX Ingress, cert-manager TLS 1.2+ (P15-T04) |
 | [k8s-hpa-autoscaling.md](./k8s-hpa-autoscaling.md) | HPA CPU/memory + custom metrics (P15-T05) |
 | [k8s-network-policy.md](./k8s-network-policy.md) | Default-deny NetworkPolicy + explicit allow rules (P15-T06) |
-| [k8s-health-probes.md](./k8s-health-probes.md) | Liveness `/healthz` + readiness `/readyz` (P15-T07) |
+| [k8s-health-probes.md](./k8s-health-probes.md) | Liveness `/healthz` + readiness `/readyz` (P15-T07; F8 deep readiness checks) |
+| [observability/prometheus-alerts.yaml](./observability/prometheus-alerts.yaml) | Draft SLO alert rules (`docgen.generation.*`, `docgen.pdf.conversion.*`) |
+| [core-fortress-release-checklist.md](../docs/operations/core-fortress-release-checklist.md) | CORE-FORTRESS release evidence checklist |
+| `scripts/core-fortress-evidence-bundle.ps1` | Evidence bundle collector (`release-gate.ps1 -EvidenceBundle`) |
 | [blue-green-runbook.md](./blue-green-runbook.md) | Production cutover, manual approval, rollback (P15-T08) |
 | [ci-k8s-gates.md](./ci-k8s-gates.md) | Blocking CI manifest validation (P15-T09) |
 

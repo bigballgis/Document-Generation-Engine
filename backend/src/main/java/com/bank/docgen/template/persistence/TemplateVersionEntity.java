@@ -42,6 +42,9 @@ public class TemplateVersionEntity {
     @Column(name = "render_profile_json", columnDefinition = "TEXT")
     private String renderProfileJson;
 
+    @Column(name = "fidelity_warning_codes_json", columnDefinition = "TEXT")
+    private String fidelityWarningCodesJson;
+
     @Column(name = "created_by", nullable = false, length = 8)
     private String createdBy;
 
@@ -126,6 +129,15 @@ public class TemplateVersionEntity {
 
     public void setRenderProfileJson(String renderProfileJson) {
         this.renderProfileJson = renderProfileJson;
+        this.updatedAt = Instant.now();
+    }
+
+    public String getFidelityWarningCodesJson() {
+        return fidelityWarningCodesJson;
+    }
+
+    public void setFidelityWarningCodesJson(String fidelityWarningCodesJson) {
+        this.fidelityWarningCodesJson = fidelityWarningCodesJson;
         this.updatedAt = Instant.now();
     }
 

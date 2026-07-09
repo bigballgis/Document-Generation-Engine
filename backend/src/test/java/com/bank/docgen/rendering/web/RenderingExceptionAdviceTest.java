@@ -66,4 +66,25 @@ class RenderingExceptionAdviceTest {
         assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.RENDERING_FAILED);
         assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.RENDERING);
     }
+
+    @Test
+    void docxAssemblyExceptionMapsContentModuleStructureMissingToValidation() {
+        when(messageResolver.resolve("api.error.validation.contentModuleStructureMissing"))
+                .thenReturn("The referenced content module has no pinned structure.");
+
+        ResponseEntity<ErrorEnvelope> response = advice.handleDocxAssembly(
+                request,
+                new DocxAssemblyException(
+                        ApiErrorCodes.CONTENT_MODULE_STRUCTURE_MISSING,
+                        ApiErrorCategories.VALIDATION,
+                        "api.error.validation.contentModuleStructureMissing",
+                        "Content module pinned structure is missing for reference: CLAUSE-1"
+                )
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.CONTENT_MODULE_STRUCTURE_MISSING);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.VALIDATION);
+        assertThat(response.getBody().error().retryable()).isFalse();
+    }
 }

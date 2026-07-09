@@ -30,6 +30,7 @@ class HealthControllerTest {
     void readyzReturnsUpWhenDatabaseIsAvailable() throws Exception {
         mockMvc.perform(get("/readyz"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("UP"));
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.checks.postgres.status").value("UP"));
     }
 }

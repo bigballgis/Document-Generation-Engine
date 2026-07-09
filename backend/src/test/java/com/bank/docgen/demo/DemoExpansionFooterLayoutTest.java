@@ -3,6 +3,7 @@ package com.bank.docgen.demo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.demo.support.DemoMasterDocxAssertions;
+import com.bank.docgen.rendering.StructuredContentDocxWriterTestSupport;
 import java.io.ByteArrayInputStream;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -58,7 +59,9 @@ class DemoExpansionFooterLayoutTest {
                 "Overdue Payment Collection Notice",
                 anchorId
         ); // single-anchor master for assembly slice
-        var assembler = new com.bank.docgen.rendering.DocxAssembler(new com.fasterxml.jackson.databind.ObjectMapper());
+        var assembler = StructuredContentDocxWriterTestSupport.createAssembler(
+                new com.fasterxml.jackson.databind.ObjectMapper()
+        );
         return assembler.assembleStructuredFromBytes(
                 master,
                 java.util.Map.of(anchorId, structuredJson),

@@ -90,8 +90,8 @@ class CollectionMasterDocxAssetGeneratorTest {
         assertThat(rateFooterXml).contains("Regulatory collection notice");
 
         Files.createDirectories(RATE_ASSET.getParent());
-        Files.write(RATE_ASSET, rate);
-        Files.write(OVERDUE_ASSET, overdue);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(RATE_ASSET, rate);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(OVERDUE_ASSET, overdue);
     }
 
     private static void assertBankGradeMaster(byte[] docx) throws Exception {

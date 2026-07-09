@@ -153,12 +153,27 @@ public class TemplateContentModuleReferenceService {
     }
 
     private boolean isReferenceValidForPublish(TemplateContentModuleReferenceEntity reference) {
-        if (reference.isLockedFlag()) {
-            return contentModuleVersionRepository.findById(reference.getContentModuleVersionId()).isPresent();
-        }
         return contentModuleVersionRepository.findById(reference.getContentModuleVersionId())
-                .map(ContentModuleVersionEntity::isReferencable)
+                .map(version -> isReferenceVersionValidForPublish(reference, version))
                 .orElse(false);
+    }
+
+    private boolean isReferenceVersionValidForPublish(
+            TemplateContentModuleReferenceEntity reference,
+            ContentModuleVersionEntity version
+    ) {
+        if (isPinnedStructureMissing(version)) {
+            return false;
+        }
+        if (reference.isLockedFlag()) {
+            return true;
+        }
+        return version.isReferencable();
+    }
+
+    private boolean isPinnedStructureMissing(ContentModuleVersionEntity version) {
+        String structure = version.getContentStructureJson();
+        return structure == null || structure.isBlank();
     }
 
     private ContentModuleVersionEntity resolveReferencableVersion(

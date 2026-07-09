@@ -52,6 +52,8 @@ docgen:
     redis-key-prefix: "docgen:idempotency:"
   async:
     transport: ${ASYNC_TRANSPORT:in-process}
+    stale-processing-threshold-seconds: ${DOCGEN_ASYNC_STALE_PROCESSING_THRESHOLD_SECONDS:900}
+    stale-reclaim-interval-ms: ${DOCGEN_ASYNC_STALE_RECLAIM_INTERVAL_MS:300000}
     kafka:
       async-batch-topic: generation.async-batch-task.v1
       dead-letter-topic: generation.async-batch-task.v1.dlt
@@ -60,15 +62,19 @@ docgen:
     libreoffice-command: ${LIBREOFFICE_COMMAND:soffice}
     conversion-mode: ${LIBREOFFICE_CONVERSION_MODE:cli}
     docker-container-name: ${LIBREOFFICE_DOCKER_CONTAINER:docgen-libreoffice}
-    conversion-timeout-seconds: 120
+    conversion-timeout-seconds: ${PDF_CONVERSION_TIMEOUT_SECONDS:120}
     conversion-pool-size: ${PDF_CONVERSION_POOL_SIZE:2}
     conversion-queue-capacity: ${PDF_CONVERSION_QUEUE_CAPACITY:0}
+    # LR-A7 / ADR-0042: pagination delta budget (pages) — measurement baseline in NFR;
+    # runtime enforcement pending ADR acceptance.
+    pagination-delta-budget-pages: ${PAGINATION_DELTA_BUDGET_PAGES:1}
     max-generated-artifact-bytes: ${MAX_GENERATED_ARTIFACT_BYTES:52428800}
     pdf-page-number-stamping-enabled: ${PDF_PAGE_NUMBER_STAMPING_ENABLED:false}
     # LR-B3: progress-stream SSE timeout (longest batch test + margin) and keep-alive
     # heartbeat cadence. Proxy read timeout must be >= 3x the heartbeat interval.
     sse-timeout: ${SSE_TIMEOUT:PT15M}
     sse-heartbeat-interval: ${SSE_HEARTBEAT_INTERVAL:PT20S}
+    demo-classpath-image-tier-enabled: ${DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED:false}
   jwt:
     secret: ${JWT_SECRET:local-dev-only-change-me-please-32bytes-min}
     access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:PT30M}

@@ -293,6 +293,32 @@ class TemplateContentModuleReferenceServiceTest {
     }
 
     @Test
+    void validateForPublishGate_blocksEmptyPinnedStructure() {
+        TemplateContentModuleReferenceEntity reference = new TemplateContentModuleReferenceEntity(
+                UUID.randomUUID(),
+                VERSION_ID,
+                "CLAUSE-1",
+                MODULE_VERSION_V1
+        );
+        when(referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(VERSION_ID))
+                .thenReturn(List.of(reference));
+        ContentModuleVersionEntity emptyStructure = version(
+                MODULE_VERSION_V1,
+                "1.0.0",
+                ContentModuleReviewState.APPROVED,
+                ContentModuleLifecycleState.ACTIVE
+        );
+        emptyStructure.setContentStructureJson("");
+        when(contentModuleVersionRepository.findById(MODULE_VERSION_V1))
+                .thenReturn(Optional.of(emptyStructure));
+
+        var summary = service.validateReferences(VERSION_ID);
+
+        assertThat(summary.blocking()).isTrue();
+        assertThat(summary.invalidReferences()).isEqualTo(1);
+    }
+
+    @Test
     void validateForPublishGate_passesWhenAllReferencable() {
         TemplateContentModuleReferenceEntity validReference = new TemplateContentModuleReferenceEntity(
                 UUID.randomUUID(),

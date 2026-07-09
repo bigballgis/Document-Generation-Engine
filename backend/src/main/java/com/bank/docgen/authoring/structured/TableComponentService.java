@@ -94,11 +94,18 @@ public class TableComponentService {
     }
 
     public StructuredContentValidationResult validateStructuredContent(String structuredContentJson) {
+        return validateStructuredContent(structuredContentJson, Set.of());
+    }
+
+    public StructuredContentValidationResult validateStructuredContent(
+            String structuredContentJson,
+            Set<String> declaredVariableKeys
+    ) {
         List<StructuredContentFidelityIssue> blockers = new ArrayList<>();
         try {
             JsonNode root = objectMapper.readTree(structuredContentJson);
             if (root.isObject() && root.get("nodes").isArray()) {
-                walkContentNodes(root.get("nodes"), "nodes", blockers);
+                walkContentNodes(root.get("nodes"), "nodes", declaredVariableKeys, blockers);
             }
         } catch (IOException ex) {
             return StructuredContentValidationResult.of(blockers, List.of());
@@ -106,7 +113,12 @@ public class TableComponentService {
         return StructuredContentValidationResult.of(blockers, List.of());
     }
 
-    private void walkContentNodes(JsonNode nodes, String location, List<StructuredContentFidelityIssue> blockers) {
+    private void walkContentNodes(
+            JsonNode nodes,
+            String location,
+            Set<String> declaredVariableKeys,
+            List<StructuredContentFidelityIssue> blockers
+    ) {
         for (int index = 0; index < nodes.size(); index++) {
             JsonNode node = nodes.get(index);
             String nodeLocation = location + "[" + index + "]";
@@ -117,11 +129,38 @@ public class TableComponentService {
                 TableComponentValidationResult validation =
                         validateAndBuildRenderModel(node.get("tableComponent").toString());
                 blockers.addAll(validation.fidelity().blockers());
+                validateLoopRowVariable(
+                        node.get("tableComponent").get("loopRow"),
+                        nodeLocation + ".tableComponent.loopRow",
+                        declaredVariableKeys,
+                        blockers
+                );
             }
             JsonNode children = node.get("children");
             if (children != null && children.isArray()) {
-                walkContentNodes(children, nodeLocation + ".children", blockers);
+                walkContentNodes(children, nodeLocation + ".children", declaredVariableKeys, blockers);
             }
+        }
+    }
+
+    private void validateLoopRowVariable(
+            JsonNode loopRowNode,
+            String location,
+            Set<String> declaredVariableKeys,
+            List<StructuredContentFidelityIssue> blockers
+    ) {
+        if (loopRowNode == null || loopRowNode.isNull()) {
+            return;
+        }
+        String loopVariable = loopRowNode.path("loopVariable").asText("").trim();
+        if (loopVariable.isBlank() || !declaredVariableKeys.contains(loopVariable)) {
+            blockers.add(tableIssue(
+                    FidelityWarningCode.UNRESOLVED_VARIABLE,
+                    NodeMatrixValidationService.MESSAGE_KEY_UNRESOLVED_VARIABLE,
+                    location,
+                    "Loop variable '" + loopVariable + "' is not declared in the template schema.",
+                    "Declare the loop variable in the template schema or remove the loop row."
+            ));
         }
     }
 

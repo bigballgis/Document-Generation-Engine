@@ -179,7 +179,7 @@ class TemplateBindingConfigurationServiceTest {
                 .thenReturn(new MasterStyleCatalog("1.0", Map.of()));
         when(masterStyleCatalogService.validate(eq(MINIMAL_STRUCTURED_CONTENT), any()))
                 .thenReturn(StructuredContentValidationResult.of(List.of(), List.of()));
-        when(tableComponentService.validateStructuredContent(MINIMAL_STRUCTURED_CONTENT))
+        when(tableComponentService.validateStructuredContent(eq(MINIMAL_STRUCTURED_CONTENT), any()))
                 .thenReturn(StructuredContentValidationResult.of(List.of(), List.of()));
         when(referenceNodeService.validateStructuredContent(MINIMAL_STRUCTURED_CONTENT))
                 .thenReturn(ReferenceNodeValidationResult.of(
@@ -203,6 +203,63 @@ class TemplateBindingConfigurationServiceTest {
         );
 
         assertThat(status).isEqualTo(BindingValidationStatus.VALID);
+    }
+
+    @Test
+    void computeBindingStatus_malformedConditionExpression_isIncompatible() {
+        UUID masterId = UUID.randomUUID();
+        String structuredContent = """
+                {
+                  "nodes": [
+                    {
+                      "type": "conditionBlock",
+                      "conditionExpression": "${x} === true",
+                      "children": [{ "type": "textRun", "value": "Hidden" }]
+                    }
+                  ]
+                }
+                """;
+        ObjectMapper objectMapper = new ObjectMapper();
+        TemplateBindingConfigurationService integrationService = new TemplateBindingConfigurationService(
+                variableSchemaRepository,
+                anchorBindingRepository,
+                templateVersionRepository,
+                masterDocumentRepository,
+                objectMapper,
+                new StructuredContentSchemaValidator(objectMapper),
+                new NodeMatrixValidationService(objectMapper),
+                masterStyleCatalogService,
+                new TableComponentService(objectMapper),
+                referenceNodeService,
+                numberingService,
+                templateViewMapper
+        );
+        when(masterStyleCatalogService.loadForMaster(masterId))
+                .thenReturn(new MasterStyleCatalog("1.0", Map.of()));
+        when(masterStyleCatalogService.validate(eq(structuredContent), any()))
+                .thenReturn(StructuredContentValidationResult.of(List.of(), List.of()));
+        when(referenceNodeService.validateStructuredContent(structuredContent))
+                .thenReturn(ReferenceNodeValidationResult.of(
+                        StructuredContentValidationResult.of(List.of(), List.of()),
+                        List.of()
+                ));
+        when(numberingService.validateStructuredContent(structuredContent))
+                .thenReturn(NumberingValidationResult.of(
+                        StructuredContentValidationResult.of(List.of(), List.of()),
+                        List.of()
+                ));
+
+        BindingValidationStatus status = integrationService.computeBindingStatus(
+                "BODY",
+                AnchorContentType.TEXT,
+                Set.of("BODY"),
+                List.of("BODY"),
+                structuredContent,
+                Set.of("x"),
+                masterId
+        );
+
+        assertThat(status).isEqualTo(BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE);
     }
 
     @Test

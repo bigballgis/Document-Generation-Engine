@@ -93,11 +93,20 @@ public class RenderingExceptionAdvice {
             HttpServletRequest request,
             PreviewGenerationException ex
     ) {
-        return errorEnvelopeFactory.domainError(
+        Throwable cause = ex.getCause();
+        if (cause instanceof DocxAssemblyException assemblyException) {
+            return errorEnvelopeFactory.domainError(
+                    request,
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    assemblyException.errorCode(),
+                    assemblyException.category(),
+                    assemblyException.messageKey()
+            );
+        }
+        return errorEnvelopeFactory.renderingDomainError(
                 request,
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 ApiErrorCodes.RENDERING_FAILED,
-                ApiErrorCategories.RENDERING,
                 ex.messageKey()
         );
     }
@@ -110,8 +119,8 @@ public class RenderingExceptionAdvice {
         return errorEnvelopeFactory.domainError(
                 request,
                 HttpStatus.UNPROCESSABLE_ENTITY,
-                ApiErrorCodes.RENDERING_FAILED,
-                ApiErrorCategories.RENDERING,
+                ex.errorCode(),
+                ex.category(),
                 ex.messageKey()
         );
     }

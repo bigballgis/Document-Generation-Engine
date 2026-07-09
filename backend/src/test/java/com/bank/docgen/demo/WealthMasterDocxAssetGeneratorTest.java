@@ -69,7 +69,7 @@ class WealthMasterDocxAssetGeneratorTest {
         assertThat(footerXml).contains("Past performance is not indicative");
 
         Files.createDirectories(ASSET.getParent());
-        Files.write(ASSET, docx);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(ASSET, docx);
     }
 
     private static void assertBankGradeMaster(byte[] docx) throws Exception {

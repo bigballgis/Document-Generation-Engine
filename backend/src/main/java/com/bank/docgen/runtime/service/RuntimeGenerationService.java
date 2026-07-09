@@ -13,7 +13,7 @@ import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
-import com.bank.docgen.authoring.structured.FidelityValidationService;
+import com.bank.docgen.template.service.VersionFidelityWarningService;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
@@ -42,7 +42,7 @@ public class RuntimeGenerationService {
     private final ContractAssemblyService contractAssemblyService;
     private final DocumentGenerationEngine documentGenerationEngine;
     private final ObjectMapper objectMapper;
-    private final FidelityValidationService fidelityValidationService;
+    private final VersionFidelityWarningService versionFidelityWarningService;
 
     public RuntimeGenerationService(
             TemplateVersionRepository templateVersionRepository,
@@ -54,7 +54,7 @@ public class RuntimeGenerationService {
             ContractAssemblyService contractAssemblyService,
             DocumentGenerationEngine documentGenerationEngine,
             ObjectMapper objectMapper,
-            FidelityValidationService fidelityValidationService
+            VersionFidelityWarningService versionFidelityWarningService
     ) {
         this.templateVersionRepository = templateVersionRepository;
         this.apiPolicyRepository = apiPolicyRepository;
@@ -65,7 +65,7 @@ public class RuntimeGenerationService {
         this.contractAssemblyService = contractAssemblyService;
         this.documentGenerationEngine = documentGenerationEngine;
         this.objectMapper = objectMapper;
-        this.fidelityValidationService = fidelityValidationService;
+        this.versionFidelityWarningService = versionFidelityWarningService;
     }
 
     @Transactional(readOnly = true)
@@ -142,8 +142,8 @@ public class RuntimeGenerationService {
                         contentTypeForFormat(request.output().format()),
                         existingRecord.getDocumentId(),
                         resolvedVersion,
-                        fidelityValidationService.collectWarningCodesForVersion(
-                                version.getId(),
+                        versionFidelityWarningService.resolveWarningCodes(
+                                version,
                                 template.getMasterId()
                         ),
                         IdempotencyConstants.STATUS_REPLAYED
@@ -154,7 +154,7 @@ public class RuntimeGenerationService {
             }
         }
         GenerationIdempotencyEntity idempotency = existing.orElseGet(() ->
-                idempotencyService.begin(request.idempotencyKey(), template.getId(), requestHash));
+                idempotencyService.begin(request.idempotencyKey(), template.getId(), requestHash, resolvedVersion));
         DocumentGenerationEngine.GeneratedDocument generated = documentGenerationEngine.generate(
                 template,
                 resolvedVersion,
@@ -210,6 +210,10 @@ public class RuntimeGenerationService {
             GenerationIdempotencyEntity stored,
             UUID templateId
     ) {
+        String cached = stored.getResolvedReleaseVersion();
+        if (cached != null && !cached.isBlank()) {
+            return cached;
+        }
         return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId).stream()
                 .filter(version -> version.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED)
                 .map(TemplateVersionEntity::getReleaseVersion)

@@ -90,6 +90,21 @@ class DocumentDownloadServiceTest {
     }
 
     @Test
+    void batchAsyncArtifactDownloadWithinWindowSucceeds() throws Exception {
+        when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(templateEntity()));
+        GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID, "generated/async-batch/DOC-12345678.docx");
+        ByteArrayInputStream stream = new ByteArrayInputStream(new byte[]{4, 5, 6});
+        when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
+        when(objectStoragePort.get("generated/async-batch/DOC-12345678.docx")).thenReturn(stream);
+
+        try (DocumentDownloadService.DownloadArtifact artifact =
+                service.resolveDownload(DOCUMENT_ID, "dev", session, request)) {
+            assertThat(artifact.contentStream().readAllBytes()).containsExactly(4, 5, 6);
+            assertThat(artifact.documentId()).isEqualTo(DOCUMENT_ID);
+        }
+    }
+
+    @Test
     void validDownloadReturnsStreamMetadataAndPersistsAudit() throws Exception {
         when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(templateEntity()));
         GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID, "generated/DOC-1/output.docx");

@@ -3,6 +3,7 @@ package com.bank.docgen.template.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,6 +70,8 @@ class TemplateLifecycleGovernanceServiceTest {
     private ApiPolicyMaterializationService apiPolicyMaterializationService;
     @Mock
     private ApiPolicyRepository apiPolicyRepository;
+    @Mock
+    private VersionFidelityWarningService versionFidelityWarningService;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -93,7 +96,8 @@ class TemplateLifecycleGovernanceServiceTest {
                 renderProfileService,
                 approvalSubStateResolver,
                 apiPolicyMaterializationService,
-                apiPolicyRepository
+                apiPolicyRepository,
+                versionFidelityWarningService
         );
         groupAdmin = session(List.of("GROUP_ADMIN"), List.of("RETAIL"));
         templateId = UUID.randomUUID();
@@ -105,8 +109,6 @@ class TemplateLifecycleGovernanceServiceTest {
     void stop_fromPublished_setsStoppedAndRecordsAudit() {
         when(groupAccessService.canStopTemplates(groupAdmin)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
-        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
-                .thenReturn(List.of(version));
         when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.STOPPED));
 
         TemplateDetailView result = service.stop(
@@ -117,7 +119,12 @@ class TemplateLifecycleGovernanceServiceTest {
 
         assertThat(result.lifecycleStatus()).isEqualTo(TemplateLifecycleStatus.STOPPED);
         assertThat(template.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.STOPPED);
-        assertThat(version.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.STOPPED);
+        verify(templateVersionRepository).bulkUpdateLifecycleStatus(
+                eq(templateId),
+                eq(TemplateLifecycleStatus.PUBLISHED),
+                eq(TemplateLifecycleStatus.STOPPED),
+                any(Instant.class)
+        );
         ArgumentCaptor<TemplateLifecycleRecordEntity> recordCaptor =
                 ArgumentCaptor.forClass(TemplateLifecycleRecordEntity.class);
         verify(lifecycleRecordRepository).save(recordCaptor.capture());
@@ -139,14 +146,17 @@ class TemplateLifecycleGovernanceServiceTest {
         version.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
         when(groupAccessService.canRestoreOrDeprecateTemplates(groupAdmin)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
-        when(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId))
-                .thenReturn(List.of(version));
         when(templateService.toDetail(template)).thenReturn(detail(TemplateLifecycleStatus.PUBLISHED));
 
         service.restore(templateId, new LifecycleGovernanceRequest("Restore service", true), groupAdmin);
 
         assertThat(template.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
-        assertThat(version.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
+        verify(templateVersionRepository).bulkUpdateLifecycleStatus(
+                eq(templateId),
+                eq(TemplateLifecycleStatus.STOPPED),
+                eq(TemplateLifecycleStatus.PUBLISHED),
+                any(Instant.class)
+        );
     }
 
     @Test

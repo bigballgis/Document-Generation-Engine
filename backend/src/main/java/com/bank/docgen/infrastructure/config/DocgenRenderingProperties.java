@@ -52,6 +52,12 @@ public class DocgenRenderingProperties {
      */
     private boolean pdfPageNumberStampingEnabled = false;
 
+    /**
+     * F1-A3: when enabled, unresolved image/seal references may fall back to
+     * {@code classpath:rendering/demo-images/}. Production profiles must keep this {@code false}.
+     */
+    private boolean demoClasspathImageTierEnabled = false;
+
     public String getLibreOfficeCommand() {
         return libreOfficeCommand;
     }
@@ -130,6 +136,14 @@ public class DocgenRenderingProperties {
 
     public void setPdfPageNumberStampingEnabled(boolean pdfPageNumberStampingEnabled) {
         this.pdfPageNumberStampingEnabled = pdfPageNumberStampingEnabled;
+    }
+
+    public boolean isDemoClasspathImageTierEnabled() {
+        return demoClasspathImageTierEnabled;
+    }
+
+    public void setDemoClasspathImageTierEnabled(boolean demoClasspathImageTierEnabled) {
+        this.demoClasspathImageTierEnabled = demoClasspathImageTierEnabled;
     }
 
     public Duration getSseTimeout() {

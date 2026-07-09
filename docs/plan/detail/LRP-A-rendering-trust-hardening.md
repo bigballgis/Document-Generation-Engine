@@ -47,7 +47,7 @@
 - **Artifacts:** modified `LibreOfficePdfConversionService.java` (+ sibling CLI launch sites); new parallel-conversion regression test under `backend/src/test/java/com/bank/docgen/rendering/`; Docker smoke note in ledger if used.
 - **Done when:** Parallel regression green + `mvn verify` green + post-task-doc-sync (this row + ledger) + post-task-commit-review.
 - **Maps:** CD-PIT-11; COR-P02 / OPT-F6 (pool already Done — this task hardens it).
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-09 — closed by **CORE-FORTRESS F4**; `LibreOfficeParallelConversionIntegrationTest` + profile isolation tests)
 
 ### LR-A2 — Font baseline (CJK + metric-compatible) in images + smoke test
 
@@ -203,13 +203,13 @@
 - **Artifacts:** NFR §production rendering corpus table; ADR-0042 finalized budget; evidence PDFs referenced in ledger.
 - **Done when:** Corpus + budget merged + CD-HARD-T04 cross-referenced + doc sync + commit review.
 - **Maps:** CD-PIT-02; ADR-0042.
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-09 — **F4 subset Done**: NFR §production rendering corpus schema + rerun procedure; row measurements _待测_ until Docker redeploy)
 
 ---
 
 ## 2. Exit gate (Wave LR-A)
 
-- [ ] LR-A1/A2/A3 Done (schedulable now); LR-A5 ADR drafts reviewed
+- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); LR-A3 schedulable; LR-A5 ADR drafts reviewed
 - [ ] LR-A4/A6 Done once P22-T01/T02 Done; LR-A7 Done once **P23** letter-grade demo corpus exists (≥5 types)
 - [ ] No structured node can silently disappear from generated DOCX (blocked or warned)
 - [ ] Ledger § LRP wave row updated with gate evidence per task

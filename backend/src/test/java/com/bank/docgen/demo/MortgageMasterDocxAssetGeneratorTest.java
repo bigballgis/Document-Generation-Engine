@@ -78,7 +78,7 @@ class MortgageMasterDocxAssetGeneratorTest {
         }
 
         Files.createDirectories(ASSET.getParent());
-        Files.write(ASSET, docx);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(ASSET, docx);
     }
 
     private static void assertNoPlaceholderMarkers(byte[] docxBytes) throws Exception {

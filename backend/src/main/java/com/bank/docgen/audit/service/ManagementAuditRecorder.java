@@ -172,7 +172,9 @@ public class ManagementAuditRecorder {
             UUID credentialId,
             String credentialExternalId,
             String actorUsername,
-            String actorSummary
+            String actorSummary,
+            int rotationGeneration,
+            String previousCredentialFingerprint
     ) {
         repository.save(new ManagementAuditEventEntity(
                 UUID.randomUUID(),
@@ -189,7 +191,8 @@ public class ManagementAuditRecorder {
                 actorUsername,
                 actorSummary,
                 fingerprint(credentialExternalId),
-                "Credential rotated",
+                "Credential rotated; generation=" + rotationGeneration
+                        + "; previousFingerprint=" + previousCredentialFingerprint,
                 writeJson(List.of())
         ));
     }

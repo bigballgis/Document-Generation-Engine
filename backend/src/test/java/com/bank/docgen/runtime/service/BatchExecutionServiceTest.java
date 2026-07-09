@@ -76,7 +76,7 @@ class BatchExecutionServiceTest {
     @Test
     void executeAsyncMode_marksPartialSucceededWhenOneItemFails() {
         when(messageResolver.resolve(anyString())).thenReturn("Generation failed.");
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any()))
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), anyString()))
                 .thenReturn(generated("DOC-1"))
                 .thenThrow(new TemplateValidationException("api.error.rendering.generationFailed"));
 
@@ -98,7 +98,7 @@ class BatchExecutionServiceTest {
     @Test
     void executeSyncMode_throwsWhenAnyItemFailsWithoutRegisteringDocuments() {
         when(messageResolver.resolve(anyString())).thenReturn("Generation failed.");
-        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any()))
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), anyString()))
                 .thenReturn(generated("DOC-1"))
                 .thenThrow(new TemplateValidationException("api.error.rendering.generationFailed"));
 

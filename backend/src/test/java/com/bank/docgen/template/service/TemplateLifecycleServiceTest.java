@@ -69,6 +69,8 @@ class TemplateLifecycleServiceTest {
     private ApiPolicyMaterializationService apiPolicyMaterializationService;
     @Mock
     private ApiPolicyRepository apiPolicyRepository;
+    @Mock
+    private VersionFidelityWarningService versionFidelityWarningService;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims author;
@@ -92,7 +94,8 @@ class TemplateLifecycleServiceTest {
                 renderProfileService,
                 approvalSubStateResolver,
                 apiPolicyMaterializationService,
-                apiPolicyRepository
+                apiPolicyRepository,
+                versionFidelityWarningService
         );
         author = new ManagementSessionClaims(
                 "10000003",

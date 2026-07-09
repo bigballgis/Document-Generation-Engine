@@ -1,6 +1,19 @@
 # Release gate — backend verify, frontend gates, evidence output
+param(
+    [switch]$EvidenceBundle,
+    [switch]$IncludeRuntimeSnapshots
+)
+
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
+
+if ($EvidenceBundle) {
+    $bundleArgs = @()
+    if ($IncludeRuntimeSnapshots) { $bundleArgs += '-IncludeRuntimeSnapshots' }
+    & (Join-Path $PSScriptRoot 'core-fortress-evidence-bundle.ps1') @bundleArgs
+    exit $LASTEXITCODE
+}
+
 $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $evidenceDir = Join-Path $root "artifacts/release-gate/$timestamp"
 New-Item -ItemType Directory -Force -Path $evidenceDir | Out-Null

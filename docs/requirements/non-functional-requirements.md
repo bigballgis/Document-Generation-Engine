@@ -81,3 +81,46 @@
 
 **验证方式：** LR-D6 负载冒烟基线（≥20 并发同步 + SSE 预览 on Docker）将测量上述前
 三项，测量结果决定提案是否上调或下调。确认前的所有 NFR 数值不进入 SLA 承诺。
+
+## 已确认：生产渲染（CORE-FORTRESS F4 / LR-A7 子集）
+
+> **分页承诺边界：** LibreOffice PDF 与 Microsoft Word **不承诺逐页一致**。本节仅记录
+> 可重复测量的页数 delta 基线与提案预算；运行时强制告警/阻断留待 ADR-0042 用户确认后启用。
+
+### 配置项（`docgen.rendering` / 环境变量）
+
+| 属性 | 环境变量 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `conversion-pool-size` | `PDF_CONVERSION_POOL_SIZE` | `2` | PDF 转换 bounded pool 大小（core=max） |
+| `conversion-timeout-seconds` | `PDF_CONVERSION_TIMEOUT_SECONDS` | `120` | 单次转换超时（秒） |
+| `conversion-queue-capacity` | `PDF_CONVERSION_QUEUE_CAPACITY` | `0` | 队列容量；`0` = fail-fast（SOR-P03） |
+| `pagination-delta-budget-pages` | `PAGINATION_DELTA_BUDGET_PAGES` | `1` | 分页 delta 提案预算（页）；**pending ADR-0042** |
+
+### 分页语料表（P23 demo masters — 初始基线）
+
+测量日期、栈版本/git SHA 在每次复测时更新。Word 基线页数为人工在 Word 中打开记录。
+
+| # | Demo package | Master asset | 业务类型 | Word 页数 | Docker PDF 页数 | Delta | 测量日期 | Git SHA |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | demo-credit-limit | `deploy/demo-credit-limit/assets/credit-limit-master.docx` | 授信额度通知 | _待测_ | _待测_ | _待测_ | _待测_ | _待测_ |
+| 2 | demo-mortgage | `deploy/demo-mortgage/assets/mortgage-approval-master.docx` | 按揭批核 | _待测_ | _待测_ | _待测_ | _待测_ | _待测_ |
+| 3 | demo-trade-lc | `deploy/demo-trade-lc/assets/trade-lc-notice-master.docx` | 贸易信用证 | _待测_ | _待测_ | _待测_ | _待测_ | _待测_ |
+| 4 | demo-collection | `deploy/demo-collection/assets/overdue-collection-master.docx` | 逾期催收 | _待测_ | _待测_ | _待测_ | _待测_ | _待测_ |
+| 5 | demo-retail-account | `deploy/demo-retail-account/assets/retail-account-open-master.docx` | 零售开户 | _待测_ | _待测_ | _待测_ | _待测_ |
+| 6 | demo-fol（可选） | `deploy/demo-fol/assets/wholesale-fol-master.docx` | 批发 FOL | _待测_ | _待测_ | _待测_ | _待测_ |
+
+**提案预算（pending user confirmation / ADR-0042）：** 参考 `paginationDeltaBudgetPages=1`；
+语料复测后汇总 max/median delta 再定稿。
+
+### 可重复测量规程
+
+1. **部署栈：** 自仓库根目录执行 `.\scripts\docker-deploy.ps1`（或 `-FOLDemo` 加载 demo 数据）。
+2. **生成 PDF：** 对语料表中每个 master，经平台生成流程产出 PDF（管理 UI 预览/批量测试或 runtime API）。
+3. **计页：** 使用 PDFBox（`PDDocument.getNumberOfPages()`）或 `pdfinfo` 读取 Docker 栈 PDF 页数。
+4. **Word 基线：** 在同一 master DOCX 上用 Microsoft Word 打开，人工记录页数（不要求 Word 自动化批处理）。
+5. **记录 delta：** `delta = |pdfPages - wordPages|`；允许 ±0 页读数误差（单页文档边界）。
+6. **更新表格：** 填写测量日期、`git rev-parse --short HEAD`、栈版本（`docker compose images`）。
+7. **汇总：** 计算 max/median delta，与提案预算对比；结论写入 ADR-0042 草案（**不**在 F4 运行时阻断）。
+
+**后端辅助：** `mvn -B -ntp -f backend/pom.xml -Pdev-fast test -Dtest=LibreOfficeParallelConversionIntegrationTest`
+在含 `soffice` 的环境验证 ≥4 路并发转换；无 `soffice` 时 skip（与 `RenderingFontSmokeTest` 同模式）。

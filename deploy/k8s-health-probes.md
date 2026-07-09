@@ -28,7 +28,31 @@ Implementation: `backend/src/main/java/com/bank/docgen/sharedkernel/health/`.
 | Endpoint | Handler | HTTP | Body | Checks |
 | --- | --- | --- | --- | --- |
 | `/healthz` | `HealthController.liveness()` | **200** always (when process up) | `{"status":"UP"}` | Process alive only — **no** dependency checks |
-| `/readyz` | `HealthController.readiness()` | **200** when ready, **503** when not | `{"status":"UP"}` or `{"status":"DOWN"}` | `ReadinessProbe.isReady()` — PostgreSQL `SELECT 1` via `JdbcTemplate` |
+| `/readyz` | `HealthController.readiness()` | **200** when Postgres up, **503** when Postgres down | Structured JSON — see below | Traffic gate: Postgres `SELECT 1`; optional Redis/MinIO/Kafka in `checks.*` |
+
+### `/readyz` response (F8-B2)
+
+Traffic gating remains **Postgres-only** (SOR-O06). Optional dependency probes report status without affecting HTTP 200 when Postgres is healthy.
+
+```json
+{
+  "status": "UP",
+  "checks": {
+    "postgres": { "status": "UP" },
+    "redis": { "status": "UP" },
+    "minio": { "status": "UP" },
+    "kafka": { "status": "SKIPPED", "detail": "async transport is not kafka" }
+  }
+}
+```
+
+| `checks.*.status` | Meaning |
+| --- | --- |
+| `UP` | Component reachable |
+| `DOWN` | Probe failed (diagnostic only unless `postgres`) |
+| `SKIPPED` | Not configured (e.g. Kafka when `ASYNC_TRANSPORT!=kafka`) |
+
+Implementation: `ReadinessProbe`, `ReadinessReport`, `*ReadinessContributor` (`@Profile("!test")`).
 
 Both paths are permit-all in `SecurityConfig` (no JWT).
 

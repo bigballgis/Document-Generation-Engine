@@ -41,6 +41,9 @@ public class GenerationIdempotencyEntity {
     @Column(name = "download_expires_at")
     private Instant downloadExpiresAt;
 
+    @Column(name = "resolved_release_version", length = 32)
+    private String resolvedReleaseVersion;
+
     protected GenerationIdempotencyEntity() {
     }
 
@@ -99,6 +102,14 @@ public class GenerationIdempotencyEntity {
 
     public Instant getDownloadExpiresAt() {
         return downloadExpiresAt;
+    }
+
+    public String getResolvedReleaseVersion() {
+        return resolvedReleaseVersion;
+    }
+
+    public void setResolvedReleaseVersion(String resolvedReleaseVersion) {
+        this.resolvedReleaseVersion = resolvedReleaseVersion;
     }
 
     public void complete(String responseStorageKey, String documentId) {

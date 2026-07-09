@@ -27,6 +27,7 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -55,6 +56,7 @@ public class TemplateLifecycleService {
     private final ApprovalSubStateResolver approvalSubStateResolver;
     private final ApiPolicyMaterializationService apiPolicyMaterializationService;
     private final ApiPolicyRepository apiPolicyRepository;
+    private final VersionFidelityWarningService versionFidelityWarningService;
 
     public TemplateLifecycleService(
             TemplateService templateService,
@@ -71,7 +73,8 @@ public class TemplateLifecycleService {
             RenderProfileService renderProfileService,
             ApprovalSubStateResolver approvalSubStateResolver,
             ApiPolicyMaterializationService apiPolicyMaterializationService,
-            ApiPolicyRepository apiPolicyRepository
+            ApiPolicyRepository apiPolicyRepository,
+            VersionFidelityWarningService versionFidelityWarningService
     ) {
         this.templateService = templateService;
         this.templateRepository = templateRepository;
@@ -88,6 +91,7 @@ public class TemplateLifecycleService {
         this.approvalSubStateResolver = approvalSubStateResolver;
         this.apiPolicyMaterializationService = apiPolicyMaterializationService;
         this.apiPolicyRepository = apiPolicyRepository;
+        this.versionFidelityWarningService = versionFidelityWarningService;
     }
 
     @Transactional
@@ -178,6 +182,7 @@ public class TemplateLifecycleService {
         version.setReleaseVersion(request.releaseVersion());
         version.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
         renderProfileService.lockForPublish(version);
+        versionFidelityWarningService.snapshotOnPublish(version, template.getMasterId());
         templateVersionRepository.save(version);
         contentModuleReferenceService.lockReferencesForPublish(version.getId());
         recordLifecycle(template, LifecycleAction.PUBLISH, TemplateLifecycleStatus.PENDING_RELEASE,
@@ -391,28 +396,29 @@ public class TemplateLifecycleService {
     }
 
     private void syncPublishedVersionsToStopped(UUID templateId) {
-        templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId).stream()
-                .filter(version -> version.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED)
-                .forEach(version -> {
-                    version.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
-                    templateVersionRepository.save(version);
-                });
+        templateVersionRepository.bulkUpdateLifecycleStatus(
+                templateId,
+                TemplateLifecycleStatus.PUBLISHED,
+                TemplateLifecycleStatus.STOPPED,
+                Instant.now()
+        );
     }
 
     private void syncStoppedVersionsToPublished(UUID templateId) {
-        templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId).stream()
-                .filter(version -> version.getLifecycleStatus() == TemplateLifecycleStatus.STOPPED)
-                .forEach(version -> {
-                    version.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
-                    templateVersionRepository.save(version);
-                });
+        templateVersionRepository.bulkUpdateLifecycleStatus(
+                templateId,
+                TemplateLifecycleStatus.STOPPED,
+                TemplateLifecycleStatus.PUBLISHED,
+                Instant.now()
+        );
     }
 
     private void syncAllVersionsToDeprecated(UUID templateId) {
-        templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId).forEach(version -> {
-            version.setLifecycleStatus(TemplateLifecycleStatus.DEPRECATED);
-            templateVersionRepository.save(version);
-        });
+        templateVersionRepository.bulkUpdateAllLifecycleStatus(
+                templateId,
+                TemplateLifecycleStatus.DEPRECATED,
+                Instant.now()
+        );
     }
 
     private boolean hasCallableVersions(UUID templateId) {

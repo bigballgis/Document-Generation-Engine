@@ -199,6 +199,8 @@ class TemplateExportServiceTest {
                 List.of(),
                 Instant.now(),
                 Instant.now(),
+                "test-user",
+                "Test User",
                 true
         );
     }

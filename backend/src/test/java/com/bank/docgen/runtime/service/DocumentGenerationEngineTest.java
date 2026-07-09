@@ -9,7 +9,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bank.docgen.authoring.structured.FidelityValidationService;
+import com.bank.docgen.runtime.metrics.GenerationMetrics;
+import com.bank.docgen.template.service.VersionFidelityWarningService;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
@@ -31,6 +32,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,13 +63,15 @@ class DocumentGenerationEngineTest {
     @Mock
     private RenderProfileService renderProfileService;
     @Mock
-    private FidelityValidationService fidelityValidationService;
+    private VersionFidelityWarningService versionFidelityWarningService;
 
+    private GenerationMetrics generationMetrics;
     private DocumentGenerationEngine engine;
     private TemplateEntity template;
 
     @BeforeEach
     void setUp() {
+        generationMetrics = new GenerationMetrics(new SimpleMeterRegistry());
         engine = new DocumentGenerationEngine(
                 templateVersionRepository,
                 anchorBindingRepository,
@@ -77,7 +81,8 @@ class DocumentGenerationEngineTest {
                 documentArtifactPipeline,
                 contentModuleReferenceService,
                 renderProfileService,
-                fidelityValidationService
+                versionFidelityWarningService,
+                generationMetrics
         );
         template = new TemplateEntity(
                 TEMPLATE_ID,
@@ -134,7 +139,7 @@ class DocumentGenerationEngineTest {
                         false
                 ));
         when(documentArtifactPipeline.finalizeArtifact(any(), eq("DOCX"), any(), any())).thenReturn(artifact);
-        when(fidelityValidationService.collectWarningCodesForVersion(VERSION_ID, MASTER_ID)).thenReturn(List.of());
+        when(versionFidelityWarningService.resolveWarningCodes(any(), eq(MASTER_ID))).thenReturn(List.of());
 
         byte[][] uploadedBytesHolder = new byte[1][];
         doAnswer(invocation -> {
@@ -167,5 +172,72 @@ class DocumentGenerationEngineTest {
                 eq("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
         );
         assertThat(Files.exists(spooled.path())).isFalse();
+    }
+
+    @Test
+    void generate_usesCachedFidelityWarningsForPublishedVersion() throws Exception {
+        TemplateVersionEntity version = new TemplateVersionEntity(VERSION_ID, TEMPLATE_ID, "10000001");
+        version.setReleaseVersion("1.0.0");
+        version.setLifecycleStatus(com.bank.docgen.template.domain.TemplateLifecycleStatus.PUBLISHED);
+        version.setFidelityWarningCodesJson("[\"CACHED_WARNING\"]");
+        MasterDocumentEntity master = new MasterDocumentEntity(
+                MASTER_ID,
+                "RETAIL",
+                "Retail Master",
+                "Retail master document",
+                "masters/master.docx",
+                "master.docx",
+                "10000001"
+        );
+        byte[] docx = new byte[]{1, 2, 3};
+        byte[] finalBytes = new byte[]{9, 8, 7};
+        GeneratedArtifactSizeGuard sizeGuard = new GeneratedArtifactSizeGuard(
+                new com.bank.docgen.infrastructure.config.DocgenRenderingProperties()
+        );
+        SpooledArtifact spooled = new ArtifactSpoolService(sizeGuard).spool(finalBytes);
+        DocumentArtifactPipeline.GeneratedArtifact artifact = new DocumentArtifactPipeline.GeneratedArtifact(
+                spooled,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "output.docx"
+        );
+
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, "1.0.0"))
+                .thenReturn(Optional.of(version));
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(MASTER_ID)).thenReturn(Optional.of(master));
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(VERSION_ID)).thenReturn(List.of());
+        when(contentModuleReferenceService.resolvePinnedContentStructures(VERSION_ID)).thenReturn(java.util.Map.of());
+        when(objectStoragePort.get("masters/master.docx")).thenReturn(new ByteArrayInputStream(docx));
+        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenReturn(docx);
+        when(renderProfileService.resolveEffectiveProfile(any(), any()))
+                .thenReturn(new com.bank.docgen.authoring.structured.RenderProfile(
+                        "rp-v1",
+                        "MASTER_CATALOG_LOCKED",
+                        "CONTROLLED_MULTILEVEL",
+                        "REPEAT_HEADER",
+                        "PROPORTIONAL_FIT",
+                        "SEMANTIC_FIDELITY",
+                        "BLOCKERS_PREVENT_PUBLISH",
+                        false
+                ));
+        when(documentArtifactPipeline.finalizeArtifact(any(), eq("DOCX"), any(), any())).thenReturn(artifact);
+        when(versionFidelityWarningService.resolveWarningCodes(version, MASTER_ID))
+                .thenReturn(List.of("CACHED_WARNING"));
+        doAnswer(invocation -> null).when(objectStoragePort).put(
+                anyString(),
+                any(InputStream.class),
+                anyLong(),
+                anyString()
+        );
+
+        DocumentGenerationEngine.GeneratedDocument generated = engine.generate(
+                template,
+                "1.0.0",
+                java.util.Map.of("customerName", "Alice"),
+                "DOCX",
+                new EncryptionOptionsView(false, null, null, null)
+        );
+
+        assertThat(generated.fidelityWarningCodes()).containsExactly("CACHED_WARNING");
+        verify(versionFidelityWarningService).resolveWarningCodes(version, MASTER_ID);
     }
 }

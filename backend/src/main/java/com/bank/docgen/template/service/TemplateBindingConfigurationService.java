@@ -261,7 +261,7 @@ public class TemplateBindingConfigurationService {
             var fidelity = nodeMatrixValidationService.validate(structuredContentJson, declaredVariableKeys);
             var styleCatalog = masterStyleCatalogService.loadForMaster(masterId);
             var styleFidelity = masterStyleCatalogService.validate(structuredContentJson, styleCatalog);
-            var tableFidelity = tableComponentService.validateStructuredContent(structuredContentJson);
+            var tableFidelity = tableComponentService.validateStructuredContent(structuredContentJson, declaredVariableKeys);
             var referenceFidelity = referenceNodeService.validateStructuredContent(structuredContentJson);
             var numberingFidelity = numberingService.validateStructuredContent(structuredContentJson);
             if (fidelity.hasBlockers()

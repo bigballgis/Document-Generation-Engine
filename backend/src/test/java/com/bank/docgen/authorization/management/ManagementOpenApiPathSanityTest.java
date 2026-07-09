@@ -76,6 +76,11 @@ class ManagementOpenApiPathSanityTest {
         if (path.startsWith("/api/management/v1/risk-prompt-config")) {
             return java.util.Optional.of("com.bank.docgen.template");
         }
+        if (path.startsWith("/api/management/v1/api-access")
+                || path.startsWith("/api/management/v1/api/policies")
+                || path.startsWith("/api/management/v1/invocations")) {
+            return java.util.Optional.of("com.bank.docgen.apimgmt");
+        }
         return java.util.Optional.empty();
     }
 }

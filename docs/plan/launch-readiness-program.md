@@ -162,8 +162,8 @@ From the 2026-07-03 full-repo inventory + industry research. Verify evidence pat
 | ID | Owner | Title | Depends | BDD | Maps | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | LR-D1 | backend-engineer | Audit data retention & archival (management + runtime) | LR-B2 (mutex) | **required** + ADR | CD-PIT-15; ADR-0040 pattern | Not Started |
-| LR-D2 | deploy-engineer + doc-keeper | Backup/restore runbook + drill (pg, MinIO, Flyway forward-only) | — | not-applicable | ADR-0030 RPO≤15min/RTO≤30min | Not Started |
-| LR-D3 | backend-engineer + deploy-engineer | Metrics & alerting as code (Micrometer + Prometheus rules + Grafana JSON) | — | not-applicable | §1 finding 12 | Not Started |
+| LR-D2 | deploy-engineer + doc-keeper | Backup/restore runbook + drill (pg, MinIO, Flyway forward-only) | — | not-applicable | ADR-0030 RPO≤15min/RTO≤30min | Not Started (F8 partial: runbook § DR + `artifacts/dr-drill/` convention Done 2026-07-09; annual drill still open) |
+| LR-D3 | backend-engineer + deploy-engineer | Metrics & alerting as code (Micrometer + Prometheus rules + Grafana JSON) | — | not-applicable | §1 finding 12 | Not Started (F8 partial: generation/PDF Micrometer series + draft `prometheus-alerts.yaml` Done 2026-07-09; SSE/DLT/429 + Grafana still open) |
 | LR-D4 | backend-engineer | Trace propagation decision + minimal impl (traceId → Kafka/async/MDC) | — | not-applicable | §1 finding 12 | Not Started |
 | LR-D5 | doc-keeper | NFR quantification proposals (p95, SSE, capacity — as **pending**, never confirmed) | — | not-applicable | usability-review L87–91; CD-UX-T01 | Not Started |
 | LR-D6 | backend-engineer + e2e-test-engineer | Load smoke baseline (≥20 concurrent sync + SSE preview on Docker) | LR-A1, LR-B3 recommended first | not-applicable | validates LR-A1/B3 | Not Started |

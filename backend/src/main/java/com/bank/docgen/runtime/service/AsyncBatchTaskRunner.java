@@ -33,6 +33,8 @@ public class AsyncBatchTaskRunner {
     private final ApiPolicyRepository apiPolicyRepository;
     private final InvocationRecordService invocationRecordService;
     private final TraceIdProvider traceIdProvider;
+    private final AsyncBatchTaskStaleReclaimService staleReclaimService;
+    private final AsyncBatchPayloadScrubber payloadScrubber;
 
     public AsyncBatchTaskRunner(
             GenerationAsyncTaskRepository asyncTaskRepository,
@@ -42,7 +44,9 @@ public class AsyncBatchTaskRunner {
             ObjectMapper objectMapper,
             ApiPolicyRepository apiPolicyRepository,
             @Lazy InvocationRecordService invocationRecordService,
-            TraceIdProvider traceIdProvider
+            TraceIdProvider traceIdProvider,
+            AsyncBatchTaskStaleReclaimService staleReclaimService,
+            AsyncBatchPayloadScrubber payloadScrubber
     ) {
         this.asyncTaskRepository = asyncTaskRepository;
         this.templateRepository = templateRepository;
@@ -52,6 +56,8 @@ public class AsyncBatchTaskRunner {
         this.apiPolicyRepository = apiPolicyRepository;
         this.invocationRecordService = invocationRecordService;
         this.traceIdProvider = traceIdProvider;
+        this.staleReclaimService = staleReclaimService;
+        this.payloadScrubber = payloadScrubber;
     }
 
     @Async("asyncTaskExecutor")
@@ -68,6 +74,13 @@ public class AsyncBatchTaskRunner {
         if (isTerminalStatus(task.getStatus())) {
             return;
         }
+        if (task.getStatus() == TaskStatus.PROCESSING) {
+            if (!staleReclaimService.isStale(task)) {
+                return;
+            }
+            staleReclaimService.reclaimTask(task.getId());
+            return;
+        }
         task.markProcessing();
         asyncTaskRepository.save(task);
         try {
@@ -79,35 +92,45 @@ public class AsyncBatchTaskRunner {
                     task.getReleaseVersion(),
                     request,
                     task.getBatchExternalId(),
-                    true
+                    true,
+                    "async"
             );
             applyOutcome(task, template, request, outcome);
             asyncTaskRepository.save(task);
+        } catch (TemplateValidationException ex) {
+            handleFailure(task, ex);
         } catch (RuntimeException ex) {
-            task.markFailed();
-            asyncTaskRepository.save(task);
-            TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNull(task.getTemplateId()).orElse(null);
-            if (template != null) {
-                BatchGenerateRequestBody request = readRequestPayload(task.getRequestPayloadJson());
-                runtimeGenerationAuditRecorder.recordBatchAsyncCompletedFromTask(
-                        template,
-                        task,
-                        request,
-                        RuntimeGenerationAuditRecorder.OUTCOME_FAILURE,
-                        null,
-                        summarizeFailure(ex)
-                );
-                completeAsyncInvocation(template, task, request, null, TaskStatus.FAILED, ex);
-            }
+            handleFailure(task, ex);
         }
     }
 
-    private boolean isTerminalStatus(TaskStatus status) {
+    static boolean isTerminalStatus(TaskStatus status) {
         return status == TaskStatus.SUCCEEDED
                 || status == TaskStatus.FAILED
                 || status == TaskStatus.PARTIAL_SUCCEEDED
-                || status == TaskStatus.EXPIRED
-                || status == TaskStatus.PROCESSING;
+                || status == TaskStatus.EXPIRED;
+    }
+
+    private void handleFailure(GenerationAsyncTaskEntity task, RuntimeException ex) {
+        task.markFailed();
+        BatchGenerateRequestBody request = null;
+        TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNull(task.getTemplateId()).orElse(null);
+        if (template != null) {
+            request = readRequestPayload(task.getRequestPayloadJson());
+            scrubTerminalPayload(task, request);
+            runtimeGenerationAuditRecorder.recordBatchAsyncCompletedFromTask(
+                    template,
+                    task,
+                    request,
+                    RuntimeGenerationAuditRecorder.OUTCOME_FAILURE,
+                    null,
+                    summarizeFailure(ex)
+            );
+            completeAsyncInvocation(template, task, request, null, TaskStatus.FAILED, ex);
+        } else {
+            scrubTerminalPayload(task, request);
+        }
+        asyncTaskRepository.save(task);
     }
 
     private void applyOutcome(
@@ -132,6 +155,7 @@ public class AsyncBatchTaskRunner {
                 outcomeLabel = RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS;
             }
         }
+        scrubTerminalPayload(task, request);
         runtimeGenerationAuditRecorder.recordBatchAsyncCompletedFromTask(
                 template,
                 task,
@@ -150,6 +174,13 @@ public class AsyncBatchTaskRunner {
                 outcome.taskStatus(),
                 null
         );
+    }
+
+    private void scrubTerminalPayload(GenerationAsyncTaskEntity task, BatchGenerateRequestBody request) {
+        if (request == null) {
+            return;
+        }
+        task.scrubRequestPayload(payloadScrubber.scrub(request));
     }
 
     private void completeAsyncInvocation(
@@ -194,9 +225,11 @@ public class AsyncBatchTaskRunner {
         );
     }
 
-    private String summarizeFailure(RuntimeException ex) {
-        String message = ex.getMessage();
-        return message == null ? ex.getClass().getSimpleName() : message;
+    static String summarizeFailure(RuntimeException ex) {
+        if (ex instanceof TemplateValidationException validationException) {
+            return validationException.messageKey();
+        }
+        return ex.getClass().getSimpleName();
     }
 
     private String writeBatchResult(com.bank.docgen.runtime.api.BatchResultView batchResult) {

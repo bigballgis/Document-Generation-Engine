@@ -10,6 +10,16 @@ public class DocgenAsyncProperties {
      */
     private String transport = "in-process";
 
+    /**
+     * Stale {@code PROCESSING} threshold before reclaim (seconds). Default 900 (15 min).
+     */
+    private long staleProcessingThresholdSeconds = 900L;
+
+    /**
+     * ShedLock scheduler interval for stale task reclaim (milliseconds). Default 300000 (5 min).
+     */
+    private long staleReclaimIntervalMs = 300_000L;
+
     private Kafka kafka = new Kafka();
 
     public String getTransport() {
@@ -18,6 +28,22 @@ public class DocgenAsyncProperties {
 
     public void setTransport(String transport) {
         this.transport = transport;
+    }
+
+    public long getStaleProcessingThresholdSeconds() {
+        return staleProcessingThresholdSeconds;
+    }
+
+    public void setStaleProcessingThresholdSeconds(long staleProcessingThresholdSeconds) {
+        this.staleProcessingThresholdSeconds = staleProcessingThresholdSeconds;
+    }
+
+    public long getStaleReclaimIntervalMs() {
+        return staleReclaimIntervalMs;
+    }
+
+    public void setStaleReclaimIntervalMs(long staleReclaimIntervalMs) {
+        this.staleReclaimIntervalMs = staleReclaimIntervalMs;
     }
 
     public Kafka getKafka() {

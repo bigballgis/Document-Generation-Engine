@@ -11,16 +11,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.apache.poi.wp.usermodel.HeaderFooterType;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFFooter;
+import org.apache.poi.xwpf.usermodel.XWPFHeader;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.junit.jupiter.api.Test;
 
 class DocxAssemblerTest {
 
-    private final DocxAssembler assembler = new DocxAssembler(new ObjectMapper());
+    private final DocxAssembler assembler = StructuredContentDocxWriterTestSupport.createAssembler(new ObjectMapper());
 
     @Test
     void assemblesDocxByReplacingAnchorPlaceholder() throws Exception {
@@ -455,6 +459,55 @@ class DocxAssemblerTest {
     }
 
     @Test
+    void bddF1A1_002_tableCellStructuredContentPreservesEmphasis() throws Exception {
+        String structured = """
+                {"nodes":[{"type":"paragraph","children":[
+                  {"type":"emphasis","variant":"bold","children":[{"type":"textRun","value":"Cell value"}]}
+                ]}]}
+                """;
+
+        byte[] result = assembleStructuredTableCellAnchor("CELL", structured);
+
+        try (XWPFDocument document = new XWPFDocument(new java.io.ByteArrayInputStream(result))) {
+            XWPFTableCell cell = document.getTables().getFirst().getRow(0).getCell(0);
+            assertThat(cell.getParagraphs().getFirst().getRuns().stream().anyMatch(XWPFRun::isBold)).isTrue();
+        }
+    }
+
+    @Test
+    void bddF1A1_003_headerStructuredContentPreservesEmphasis() throws Exception {
+        String structured = """
+                {"nodes":[{"type":"paragraph","children":[
+                  {"type":"emphasis","variant":"bold","children":[{"type":"textRun","value":"Header title"}]}
+                ]}]}
+                """;
+
+        byte[] result = assembleStructuredHeaderAnchor("HDR", structured);
+
+        try (XWPFDocument document = new XWPFDocument(new java.io.ByteArrayInputStream(result))) {
+            XWPFHeader header = document.getHeaderList().getFirst();
+            assertThat(header.getParagraphs().getFirst().getRuns().stream().anyMatch(XWPFRun::isBold)).isTrue();
+        }
+    }
+
+    @Test
+    void bddF1A1_003_footerStructuredContentPreservesUnderline() throws Exception {
+        String structured = """
+                {"nodes":[{"type":"paragraph","children":[
+                  {"type":"underline","children":[{"type":"textRun","value":"Footer note"}]}
+                ]}]}
+                """;
+
+        byte[] result = assembleStructuredFooterAnchor("FTR", structured);
+
+        try (XWPFDocument document = new XWPFDocument(new java.io.ByteArrayInputStream(result))) {
+            XWPFFooter footer = document.getFooterList().getFirst();
+            assertThat(footer.getParagraphs().getFirst().getRuns().stream()
+                    .anyMatch(run -> run.getUnderline() != UnderlinePatterns.NONE)).isTrue();
+        }
+    }
+
+    @Test
     void bddDemoExp015_imageAndSealReferencesEmbedPictures() throws Exception {
         String structured = """
                 {"nodes":[
@@ -496,6 +549,39 @@ class DocxAssemblerTest {
                 variables,
                 Map.of()
         );
+    }
+
+    private byte[] assembleStructuredTableCellAnchor(String anchorId, String structuredJson) throws Exception {
+        byte[] master;
+        try (XWPFDocument document = new XWPFDocument(); java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {
+            XWPFTable table = document.createTable(1, 1);
+            table.getRow(0).getCell(0).getParagraphs().getFirst().createRun().setText("{{anchor:" + anchorId + "}}");
+            document.write(output);
+            master = output.toByteArray();
+        }
+        return assembler.assembleStructuredFromBytes(master, Map.of(anchorId, structuredJson), Map.of(), Map.of());
+    }
+
+    private byte[] assembleStructuredHeaderAnchor(String anchorId, String structuredJson) throws Exception {
+        byte[] master;
+        try (XWPFDocument document = new XWPFDocument(); java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {
+            document.createHeader(HeaderFooterType.DEFAULT).createParagraph().createRun()
+                    .setText("{{anchor:" + anchorId + "}}");
+            document.write(output);
+            master = output.toByteArray();
+        }
+        return assembler.assembleStructuredFromBytes(master, Map.of(anchorId, structuredJson), Map.of(), Map.of());
+    }
+
+    private byte[] assembleStructuredFooterAnchor(String anchorId, String structuredJson) throws Exception {
+        byte[] master;
+        try (XWPFDocument document = new XWPFDocument(); java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {
+            document.createFooter(HeaderFooterType.DEFAULT).createParagraph().createRun()
+                    .setText("{{anchor:" + anchorId + "}}");
+            document.write(output);
+            master = output.toByteArray();
+        }
+        return assembler.assembleStructuredFromBytes(master, Map.of(anchorId, structuredJson), Map.of(), Map.of());
     }
 
     private static String readZipEntryText(byte[] zipBytes, String entryName) throws Exception {

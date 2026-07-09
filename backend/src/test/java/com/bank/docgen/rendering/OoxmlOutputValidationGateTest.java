@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
  */
 class OoxmlOutputValidationGateTest {
 
-    private final DocxAssembler assembler = new DocxAssembler(new ObjectMapper());
+    private final DocxAssembler assembler = StructuredContentDocxWriterTestSupport.createAssembler(new ObjectMapper());
 
     @Test
     void assembledDocxOpensAsValidOoxmlPackage() throws Exception {

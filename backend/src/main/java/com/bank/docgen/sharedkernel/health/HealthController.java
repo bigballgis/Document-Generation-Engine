@@ -1,6 +1,5 @@
 package com.bank.docgen.sharedkernel.health;
 
-import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,15 +14,16 @@ public class HealthController {
     }
 
     @GetMapping("/healthz")
-    public ResponseEntity<Map<String, String>> liveness() {
-        return ResponseEntity.ok(Map.of("status", "UP"));
+    public ResponseEntity<ReadinessReport> liveness() {
+        return ResponseEntity.ok(ReadinessReport.of("UP", java.util.Map.of()));
     }
 
     @GetMapping("/readyz")
-    public ResponseEntity<Map<String, String>> readiness() {
-        if (readinessProbe.isReady()) {
-            return ResponseEntity.ok(Map.of("status", "UP"));
+    public ResponseEntity<ReadinessReport> readiness() {
+        ReadinessReport report = readinessProbe.check();
+        if (report.trafficReady()) {
+            return ResponseEntity.ok(report);
         }
-        return ResponseEntity.status(503).body(Map.of("status", "DOWN"));
+        return ResponseEntity.status(503).body(report);
     }
 }

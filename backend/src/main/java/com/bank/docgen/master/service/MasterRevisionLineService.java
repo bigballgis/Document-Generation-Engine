@@ -211,6 +211,7 @@ public class MasterRevisionLineService {
             return null;
         }
         return managementUserDisplayService.lookupDisplayNames(Set.of(updatedBy)).get(updatedBy);
+    }
 
     private Instant nextRevisionCreatedAt(UUID masterId, int revisionSequence) {
         return masterRevisionLineRepository

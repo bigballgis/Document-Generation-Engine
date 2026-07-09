@@ -11,8 +11,15 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,6 +100,51 @@ class DockerExecPdfConversionServiceTest {
                 .isInstanceOf(TemplateValidationException.class);
     }
 
+    @Test
+    void usesDistinctContainerProfilesAcrossParallelConversions() throws Exception {
+        ThreadPoolTaskExecutor parallelPool = parallelConversionPool();
+        try {
+            DockerExecPdfConversionService parallelService = new DockerExecPdfConversionService(
+                    properties,
+                    CircuitBreakerRegistry.ofDefaults(),
+                    RetryRegistry.ofDefaults(),
+                    parallelPool,
+                    new PdfConversionPostProcessor(properties, new DocxPdfConversionPreprocessor())
+            );
+            int concurrency = 2;
+            List<Future<byte[]>> futures = new ArrayList<>();
+            ExecutorService callers = Executors.newFixedThreadPool(concurrency);
+            try {
+                for (int i = 0; i < concurrency; i++) {
+                    futures.add(callers.submit(() -> parallelService.convert(minimalDocxBytes())));
+                }
+                for (Future<byte[]> future : futures) {
+                    assertThat(future.get(30, TimeUnit.SECONDS)).isNotEmpty();
+                }
+            } finally {
+                callers.shutdownNow();
+            }
+
+            Set<String> invokedProfiles = readInvokedProfiles();
+            assertThat(invokedProfiles).hasSize(concurrency);
+            assertThat(countContainerProfileDirs())
+                    .as("container profile directories must be cleaned after conversion")
+                    .isZero();
+        } finally {
+            parallelPool.shutdown();
+        }
+    }
+
+    @Test
+    void cleansUpContainerProfileAfterConversion() throws IOException {
+        DockerExecPdfConversionService service = service();
+        long profilesBefore = countContainerProfileDirs();
+
+        service.convert(minimalDocxBytes());
+
+        assertThat(countContainerProfileDirs()).isEqualTo(profilesBefore);
+    }
+
     private DockerExecPdfConversionService service() {
         return new DockerExecPdfConversionService(
                 properties,
@@ -124,6 +176,34 @@ class DockerExecPdfConversionServiceTest {
         executor.setThreadNamePrefix("docker-pdf-test-" + UUID.randomUUID() + "-");
         executor.initialize();
         return executor;
+    }
+
+    private ThreadPoolTaskExecutor parallelConversionPool() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(2);
+        executor.setQueueCapacity(4);
+        executor.setThreadNamePrefix("docker-pdf-parallel-" + UUID.randomUUID() + "-");
+        executor.initialize();
+        return executor;
+    }
+
+    private Set<String> readInvokedProfiles() throws IOException {
+        Path log = fakeDockerState.resolve("profile-invocations.log");
+        if (!Files.exists(log)) {
+            return Set.of();
+        }
+        return Set.copyOf(Files.readAllLines(log));
+    }
+
+    private long countContainerProfileDirs() throws IOException {
+        Path profilesRoot = fakeDockerState.resolve(properties.getDockerContainerName()).resolve("tmp");
+        if (!Files.exists(profilesRoot)) {
+            return 0;
+        }
+        try (Stream<Path> paths = Files.list(profilesRoot)) {
+            return paths.filter(path -> path.getFileName().toString().startsWith("docgen-lo-profile-")).count();
+        }
     }
 
     private long countHostTempDirs(String prefix) throws IOException {

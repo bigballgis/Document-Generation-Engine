@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.rendering.domain.FidelityWarningCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class TableComponentServiceTest {
@@ -89,5 +90,61 @@ class TableComponentServiceTest {
         TableComponentRenderModel model = service.validateAndBuildRenderModel(json).renderModel().orElseThrow();
 
         assertThat(model.repeatHeaderAcrossPages()).isTrue();
+    }
+
+    @Test
+    void undeclaredLoopRowVariable_isBlocker() {
+        String structuredContent = """
+                {
+                  "nodes": [
+                    {
+                      "type": "tableComponentRef",
+                      "tableComponent": {
+                        "componentKey": "TABLE-LOOP",
+                        "columnSchema": [{ "columnKey": "colA", "widthPct": 100 }],
+                        "headerRows": [[{ "columnKey": "colA", "value": "Header" }]],
+                        "loopRow": {
+                          "loopVariable": "undeclaredItems",
+                          "cells": [{ "columnKey": "colA", "variableKey": "itemValue" }]
+                        }
+                      }
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result =
+                service.validateStructuredContent(structuredContent, Set.of("lineItems"));
+
+        assertThat(result.blockers()).hasSize(1);
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.UNRESOLVED_VARIABLE);
+        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0].tableComponent.loopRow");
+    }
+
+    @Test
+    void declaredLoopRowVariable_passesValidation() {
+        String structuredContent = """
+                {
+                  "nodes": [
+                    {
+                      "type": "tableComponentRef",
+                      "tableComponent": {
+                        "componentKey": "TABLE-LOOP",
+                        "columnSchema": [{ "columnKey": "colA", "widthPct": 100 }],
+                        "headerRows": [[{ "columnKey": "colA", "value": "Header" }]],
+                        "loopRow": {
+                          "loopVariable": "lineItems",
+                          "cells": [{ "columnKey": "colA", "variableKey": "itemValue" }]
+                        }
+                      }
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result =
+                service.validateStructuredContent(structuredContent, Set.of("lineItems"));
+
+        assertThat(result.blockers()).isEmpty();
     }
 }

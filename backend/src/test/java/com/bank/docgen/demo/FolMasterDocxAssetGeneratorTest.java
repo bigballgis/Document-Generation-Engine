@@ -92,7 +92,7 @@ class FolMasterDocxAssetGeneratorTest {
         }
 
         Files.createDirectories(ASSET_PATH.getParent());
-        Files.write(ASSET_PATH, docx);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(ASSET_PATH, docx);
     }
 
     static byte[] buildWholesaleFolMasterDocx() throws Exception {

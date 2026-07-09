@@ -4,6 +4,7 @@ import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
 import com.bank.docgen.runtime.api.EncryptionSummaryView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.security.VariableHashSupport;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +27,7 @@ public class InvocationParameterSanitizer {
     public String sanitizeSingleRequest(GenerateRequestBody request, String resolvedReleaseVersion) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("releaseVersion", resolvedReleaseVersion);
-        payload.put("variables", request.variables());
+        payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, request.variables()));
         payload.put("output", request.output());
         payload.put("encryption", sanitizeEncryption(request.encryption(), request.output().format()));
         return writeJson(payload);
@@ -37,6 +38,8 @@ public class InvocationParameterSanitizer {
         payload.put("releaseVersion", resolvedReleaseVersion);
         payload.put("output", request.output());
         payload.put("encryption", sanitizeEncryption(request.encryption(), request.output().format()));
+        payload.put("itemsCount", request.items().size());
+        payload.put("itemsHash", hashBatchItems(request));
         payload.put("items", request.items().stream().map(this::sanitizeBatchItem).toList());
         return writeJson(payload);
     }
@@ -49,7 +52,7 @@ public class InvocationParameterSanitizer {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("releaseVersion", resolvedReleaseVersion);
         payload.put("itemId", item.itemId());
-        payload.put("variables", item.variables());
+        payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, item.variables()));
         var output = item.output() != null ? item.output() : request.output();
         payload.put("output", output);
         var encryption = item.encryption() != null ? item.encryption() : request.encryption();
@@ -73,13 +76,20 @@ public class InvocationParameterSanitizer {
     private Map<String, Object> sanitizeBatchItem(BatchGenerateRequestBody.BatchGenerateItemBody item) {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("itemId", item.itemId());
-        payload.put("variables", item.variables());
+        payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, item.variables()));
         payload.put("output", item.output());
         payload.put("encryption", sanitizeEncryption(
                 item.encryption(),
                 item.output() != null ? item.output().format() : null
         ));
         return payload;
+    }
+
+    private String hashBatchItems(BatchGenerateRequestBody request) {
+        List<String> itemHashes = request.items().stream()
+                .map(item -> VariableHashSupport.hashVariables(objectMapper, item.variables()))
+                .toList();
+        return VariableHashSupport.hashPayload(objectMapper, itemHashes);
     }
 
     private EncryptionSummaryView sanitizeEncryption(EncryptionOptionsView encryption, String outputFormat) {

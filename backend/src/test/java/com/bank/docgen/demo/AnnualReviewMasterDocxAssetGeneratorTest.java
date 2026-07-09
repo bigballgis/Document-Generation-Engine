@@ -90,8 +90,8 @@ class AnnualReviewMasterDocxAssetGeneratorTest {
         assertThat(reviewFooterXml).contains("Regulated by the PRA");
 
         Files.createDirectories(REVIEW_ASSET.getParent());
-        Files.write(REVIEW_ASSET, review);
-        Files.write(RENEWAL_ASSET, renewal);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(REVIEW_ASSET, review);
+        com.bank.docgen.demo.support.DemoDeployAssetWriteSupport.writeBestEffort(RENEWAL_ASSET, renewal);
     }
 
     private static void assertBankGradeMaster(byte[] docx) throws Exception {

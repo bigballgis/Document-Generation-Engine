@@ -16,20 +16,19 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
-import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.authoring.structured.expression.ConditionExpressionEvaluator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TemplateRuleValidationService {
 
-    private static final Pattern VARIABLE_REFERENCE = Pattern.compile("\\$\\{([A-Za-z0-9_]+)\\}");
+    private static final ConditionExpressionEvaluator CONDITION_EVALUATOR = ConditionExpressionEvaluator.INSTANCE;
 
     private final TemplateService templateService;
     private final TemplateVersionRepository templateVersionRepository;
@@ -120,9 +119,11 @@ public class TemplateRuleValidationService {
         if (!anchorIds.contains(rule.targetAnchorId())) {
             return RuleValidationStatus.MISSING_ANCHOR;
         }
-        Matcher matcher = VARIABLE_REFERENCE.matcher(rule.conditionExpression());
-        while (matcher.find()) {
-            if (!variableKeys.contains(matcher.group(1))) {
+        if (!CONDITION_EVALUATOR.validateSyntax(rule.conditionExpression()).isEmpty()) {
+            return RuleValidationStatus.MALFORMED_RULE;
+        }
+        for (String variableKey : CONDITION_EVALUATOR.extractVariableReferences(rule.conditionExpression())) {
+            if (!variableKeys.contains(variableKey)) {
                 return RuleValidationStatus.MISSING_VARIABLE;
             }
         }

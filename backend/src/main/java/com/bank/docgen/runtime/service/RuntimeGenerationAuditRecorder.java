@@ -24,6 +24,7 @@ public class RuntimeGenerationAuditRecorder {
     public static final String EVENT_BATCH_ASYNC_ACCEPTED = "API_GENERATION_BATCH_ASYNC_ACCEPTED";
     public static final String EVENT_BATCH_ASYNC_COMPLETED = "API_GENERATION_BATCH_ASYNC_COMPLETED";
     public static final String EVENT_DOCUMENT_DOWNLOAD = "API_DOCUMENT_DOWNLOAD";
+    public static final String EVENT_RATE_LIMIT_DENIED = "API_RATE_LIMIT_DENIED";
 
     public static final String OUTCOME_SUCCESS = "SUCCESS";
     public static final String OUTCOME_FAILURE = "FAILURE";
@@ -240,6 +241,44 @@ public class RuntimeGenerationAuditRecorder {
                 null,
                 traceIdProvider.newAuditId(),
                 traceIdProvider.currentOrNew(null)
+        ));
+    }
+
+    @Transactional
+    public void recordRateLimitDenied(
+            String environment,
+            String credentialExternalId,
+            String accessAccount,
+            String traceId,
+            String auditId
+    ) {
+        repository.save(new RuntimeGenerationAuditEventEntity(
+                UUID.randomUUID(),
+                Instant.now(),
+                EVENT_RATE_LIMIT_DENIED,
+                environment,
+                UUID.fromString("00000000-0000-0000-0000-000000000000"),
+                null,
+                null,
+                fingerprint(credentialExternalId),
+                accessAccount,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                OUTCOME_FAILURE,
+                summarize("Rate limit denied"),
+                null,
+                null,
+                auditId,
+                traceId
         ));
     }
 

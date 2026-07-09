@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.collaboration.scheduler.CollaborationEscalationScheduler;
 import com.bank.docgen.rendering.scheduler.PreviewTempCleanupScheduler;
+import com.bank.docgen.runtime.scheduler.AsyncBatchTaskStaleReclaimScheduler;
 import com.bank.docgen.runtime.scheduler.InvocationRetentionCleanupScheduler;
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -22,7 +23,8 @@ class SchedulerLockAnnotationTest {
     private static final List<Class<?>> SCHEDULER_CLASSES = List.of(
             InvocationRetentionCleanupScheduler.class,
             CollaborationEscalationScheduler.class,
-            PreviewTempCleanupScheduler.class
+            PreviewTempCleanupScheduler.class,
+            AsyncBatchTaskStaleReclaimScheduler.class
     );
 
     @Test

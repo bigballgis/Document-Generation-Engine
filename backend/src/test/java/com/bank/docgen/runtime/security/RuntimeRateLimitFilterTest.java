@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.infrastructure.config.RuntimeRateLimitProperties;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -30,6 +31,8 @@ class RuntimeRateLimitFilterTest {
     private RuntimeRateLimitService rateLimitService;
     @Mock
     private MessageResolver messageResolver;
+    @Mock
+    private RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final TraceIdProvider traceIdProvider = new TraceIdProvider();
@@ -42,7 +45,8 @@ class RuntimeRateLimitFilterTest {
                 rateLimitService,
                 traceIdProvider,
                 messageResolver,
-                objectMapper
+                objectMapper,
+                runtimeGenerationAuditRecorder
         );
     }
 
@@ -70,6 +74,13 @@ class RuntimeRateLimitFilterTest {
         JsonNode body = objectMapper.readTree(response.getContentAsString());
         assertThat(body.path("error").path("code").asText()).isEqualTo(ApiErrorCodes.RATE_LIMIT_EXCEEDED);
         assertThat(body.path("error").path("retryable").asBoolean()).isTrue();
+        verify(runtimeGenerationAuditRecorder).recordRateLimitDenied(
+                "dev",
+                "CRED-1",
+                "svc-caller",
+                body.path("metadata").path("traceId").asText(),
+                body.path("metadata").path("auditId").asText()
+        );
     }
 
     /**

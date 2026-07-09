@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
-import com.bank.docgen.authoring.structured.FidelityValidationService;
+import com.bank.docgen.template.service.VersionFidelityWarningService;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.api.OutputOptionsView;
@@ -62,7 +62,7 @@ class RuntimeGenerationServiceGenerateTest {
     @Mock
     private DocumentGenerationEngine documentGenerationEngine;
     @Mock
-    private FidelityValidationService fidelityValidationService;
+    private VersionFidelityWarningService versionFidelityWarningService;
 
     private RuntimeGenerationService service;
     private TemplateEntity template;
@@ -81,7 +81,7 @@ class RuntimeGenerationServiceGenerateTest {
                 mock(ContractAssemblyService.class),
                 documentGenerationEngine,
                 new ObjectMapper(),
-                fidelityValidationService
+                versionFidelityWarningService
         );
         template = publishedTemplate(TEMPLATE_ID);
         policy = policyForTemplate(TEMPLATE_ID);
@@ -105,7 +105,7 @@ class RuntimeGenerationServiceGenerateTest {
         doNothing().when(encryptionParameterValidator).validate(any(), any(), anyString());
         when(idempotencyService.hashRequest(anyString())).thenReturn("hash-a");
         when(idempotencyService.findExisting("idem-1", TEMPLATE_ID, "hash-a")).thenReturn(Optional.of(existing));
-        when(fidelityValidationService.collectWarningCodesForVersion(VERSION_ID, template.getMasterId()))
+        when(versionFidelityWarningService.resolveWarningCodes(version, template.getMasterId()))
                 .thenReturn(List.of());
         when(objectStoragePort.get("storage/replay.docx")).thenReturn(new ByteArrayInputStream(new byte[]{9, 8, 7}));
 
@@ -136,7 +136,7 @@ class RuntimeGenerationServiceGenerateTest {
         when(idempotencyService.hashRequest(anyString())).thenReturn("hash-a");
         when(idempotencyService.findExisting("idem-replay-stream", TEMPLATE_ID, "hash-a"))
                 .thenReturn(Optional.of(existing));
-        when(fidelityValidationService.collectWarningCodesForVersion(VERSION_ID, template.getMasterId()))
+        when(versionFidelityWarningService.resolveWarningCodes(version, template.getMasterId()))
                 .thenReturn(List.of());
         when(objectStoragePort.get("storage/replay.docx")).thenReturn(stream);
 
@@ -170,7 +170,7 @@ class RuntimeGenerationServiceGenerateTest {
         when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
         when(idempotencyService.hashRequest(anyString())).thenReturn("hash-a");
         when(idempotencyService.findExisting("idem-2", TEMPLATE_ID, "hash-a")).thenReturn(Optional.empty());
-        when(idempotencyService.begin("idem-2", TEMPLATE_ID, "hash-a")).thenReturn(pending);
+        when(idempotencyService.begin("idem-2", TEMPLATE_ID, "hash-a", RELEASE_VERSION)).thenReturn(pending);
         when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, RELEASE_VERSION))
                 .thenReturn(Optional.of(version));
         when(documentGenerationEngine.generate(
@@ -217,7 +217,7 @@ class RuntimeGenerationServiceGenerateTest {
         when(apiPolicyRepository.findByTemplateId(TEMPLATE_ID)).thenReturn(Optional.of(policy));
         when(idempotencyService.hashRequest(anyString())).thenReturn("hash-a");
         when(idempotencyService.findExisting("idem-new-stream", TEMPLATE_ID, "hash-a")).thenReturn(Optional.empty());
-        when(idempotencyService.begin("idem-new-stream", TEMPLATE_ID, "hash-a")).thenReturn(pending);
+        when(idempotencyService.begin("idem-new-stream", TEMPLATE_ID, "hash-a", RELEASE_VERSION)).thenReturn(pending);
         when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, RELEASE_VERSION))
                 .thenReturn(Optional.of(version));
         when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any())).thenReturn(generated);
@@ -360,7 +360,7 @@ class RuntimeGenerationServiceGenerateTest {
                         .isEqualTo(IdempotencyConflictException.REQUEST_IN_PROGRESS));
 
         verify(documentGenerationEngine, never()).generate(any(), anyString(), any(), anyString(), any());
-        verify(idempotencyService, never()).begin(anyString(), any(), anyString());
+        verify(idempotencyService, never()).begin(anyString(), any(), anyString(), any());
     }
 
     @Test
@@ -373,7 +373,7 @@ class RuntimeGenerationServiceGenerateTest {
         ArgumentCaptor<String> payloadCaptor = ArgumentCaptor.forClass(String.class);
         when(idempotencyService.hashRequest(payloadCaptor.capture())).thenReturn("hash-a");
         when(idempotencyService.findExisting(any(), any(), any())).thenReturn(Optional.empty());
-        when(idempotencyService.begin(any(), any(), any())).thenReturn(pendingIdempotency(TEMPLATE_ID));
+        when(idempotencyService.begin(any(), any(), any(), any())).thenReturn(pendingIdempotency(TEMPLATE_ID));
         when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any()))
                 .thenReturn(new DocumentGenerationEngine.GeneratedDocument(
                         "DOC-1",

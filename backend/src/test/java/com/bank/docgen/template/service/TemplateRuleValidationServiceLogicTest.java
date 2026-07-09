@@ -39,6 +39,19 @@ class TemplateRuleValidationServiceLogicTest {
     }
 
     @Test
+    void flagsMalformedRuleExpression() {
+        RuleValidationStatus status = invokeValidateRule(
+                "rule-1",
+                "${customerName} === null",
+                "ANCHOR-1",
+                java.util.Set.of("customerName"),
+                java.util.Set.of("ANCHOR-1"),
+                java.util.Set.of("rule-1")
+        );
+        assertEquals(RuleValidationStatus.MALFORMED_RULE, status);
+    }
+
+    @Test
     void flagsInvalidBranchReference() {
         RuleValidationStatus status = invokeValidateRule(
                 "rule-1",

@@ -62,6 +62,8 @@ class ExceptionInterventionTest {
     private ApiPolicyMaterializationService apiPolicyMaterializationService;
     @Mock
     private ApiPolicyRepository apiPolicyRepository;
+    @Mock
+    private VersionFidelityWarningService versionFidelityWarningService;
 
     private DecisionFormService decisionFormService;
     private TemplateLifecycleService lifecycleService;
@@ -88,7 +90,8 @@ class ExceptionInterventionTest {
                 renderProfileService,
                 approvalSubStateResolver,
                 apiPolicyMaterializationService,
-                apiPolicyRepository
+                apiPolicyRepository,
+                versionFidelityWarningService
         );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(

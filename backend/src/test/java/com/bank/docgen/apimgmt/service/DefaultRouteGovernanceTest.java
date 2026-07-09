@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.bank.docgen.authoring.structured.FidelityValidationService;
+import com.bank.docgen.template.service.VersionFidelityWarningService;
 import com.bank.docgen.apimgmt.api.ApiPolicyImpactPreviewView;
 import com.bank.docgen.apimgmt.api.SaveDefaultRouteRequest;
 import com.bank.docgen.apimgmt.mapping.ApiPolicyViewMapperFactory;
@@ -122,7 +122,7 @@ class DefaultRouteGovernanceTest {
                 contractAssemblyService,
                 null,
                 objectMapper,
-                mock(FidelityValidationService.class)
+                mock(VersionFidelityWarningService.class)
         );
         groupAdmin = session(List.of("GROUP_ADMIN"));
         templateId = UUID.randomUUID();

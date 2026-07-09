@@ -3,6 +3,7 @@ package com.bank.docgen.template.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
@@ -121,7 +122,7 @@ class PublishGateServiceTest {
         when(templateCurrentVersionResolver.requireInFlightDevVersion(templateId))
                 .thenReturn(new TemplateVersionEntity(versionId, templateId, "10000002"));
         when(templateService.loadRules(any(TemplateVersionEntity.class))).thenReturn(List.of());
-        when(templateRuleValidationService.validateRules(
+        lenient().when(templateRuleValidationService.validateRules(
                 org.mockito.ArgumentMatchers.eq(templateId),
                 org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.eq(admin)))
@@ -249,6 +250,29 @@ class PublishGateServiceTest {
     }
 
     @Test
+    void publishGate_blocksContentModuleReferencesWithEmptyPinnedStructure() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        when(contentModuleReferenceService.validateReferences(versionId))
+                .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(true, 1, 1));
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.ready()).isFalse();
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.CONTENT_MODULE_REFERENCES)
+                .findFirst()
+                .orElseThrow())
+                .satisfies(item -> {
+                    assertThat(item.blocker()).isTrue();
+                    assertThat(item.ready()).isFalse();
+                    assertThat(item.messageKey()).isEqualTo("api.publishGate.contentModuleReferences.blocked");
+                });
+        assertThatThrownBy(() -> service.assertReady(templateId, admin))
+                .isInstanceOf(TemplateValidationException.class);
+    }
+
+    @Test
     void publishGate_blocksInvalidContentModuleReferences() {
         when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
@@ -282,6 +306,24 @@ class PublishGateServiceTest {
                     assertThat(item.ready()).isTrue();
                     assertThat(item.summary()).contains("adGroupsConfigured=false");
                 });
+    }
+
+    @Test
+    void publish_withMalformedRuleExpression_isBlocked_ruleBounds() {
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        when(templateRuleValidationService.validateRules(
+                org.mockito.ArgumentMatchers.eq(templateId),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.eq(admin)))
+                .thenReturn(malformedRules());
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.ready()).isFalse();
+        assertThat(checklist.items().stream()
+                .anyMatch(item -> item.checkCode() == PublishGateCheckCode.RULE_BOUNDS && item.blocker()))
+                .isTrue();
     }
 
     @Test
@@ -327,6 +369,21 @@ class PublishGateServiceTest {
                 List.of(CoverageComputationService.BLOCKER_REQUIRED_VARIABLES),
                 List.of(dimension),
                 new CoverageThresholdView("GLOBAL", null, 80, 100, 80));
+    }
+
+    private TemplateRuleValidationView malformedRules() {
+        return new TemplateRuleValidationView(
+                false,
+                List.of(new TemplateRuleValidationItemResponse(
+                        "rule-1",
+                        "${customerName} === null",
+                        "ANCHOR-1",
+                        null,
+                        null,
+                        com.bank.docgen.template.domain.RuleValidationStatus.MALFORMED_RULE
+                )),
+                new TemplateRuleValidationSummaryView(true, 1, 0, 0, 0, 0, 1)
+        );
     }
 
     private TemplateRuleValidationView validRules() {

@@ -271,6 +271,23 @@ class LibreOfficePdfConversionServiceTest {
         assertThat(url).doesNotContain("\\");
     }
 
+    @Test
+    void sequentialConversionsDoNotAccumulateTempArtifacts() throws IOException {
+        properties.setLibreOfficeCommand(fakeLibreOfficeScript.toString());
+        properties.setConversionTimeoutSeconds(30);
+        LibreOfficePdfConversionService service = service();
+        long pdfDirsBefore = countDocgenPdfTempDirs();
+        long profileDirsBefore = countDocgenLoProfileDirs();
+
+        for (int i = 0; i < 10; i++) {
+            byte[] pdf = service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()).pdfBytes();
+            assertThat(pdf).isNotEmpty();
+        }
+
+        assertThat(countDocgenPdfTempDirs()).isEqualTo(pdfDirsBefore);
+        assertThat(countDocgenLoProfileDirs()).isEqualTo(profileDirsBefore);
+    }
+
     private List<String> distinctProfileUrlsFor(int count) throws IOException {
         List<String> urls = new ArrayList<>();
         List<Path> dirs = new ArrayList<>();

@@ -2,7 +2,7 @@
 
 **Program ID:** `CORE-FORTRESS`  
 **Phase ID:** `CORE-FORTRESS-F8-OBSERVABILITY-SLO-DR`  
-**Phase status:** **In Progress** (2026-07-09)  
+**Phase status:** **Done** (2026-07-09)  
 **Depends on:** CORE-FORTRESS F1–F7 (**all Done** — F8 is final phase; F6∥F7 must complete before F8-T02+)  
 **BDD:** `docs/behavior/core-fortress-f8-observability-slo-dr.md` — **ready** (`BDD-CORE-FORTRESS-F8-001`)
 
@@ -60,16 +60,16 @@
 | ID | Owner | Task | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | **F8-T01** | behavior-spec-author | **BDD behavior spec** — `core-fortress-f8-observability-slo-dr.md` + this plan | — | **Done** (2026-07-09; readiness `ready`) |
-| **F8-T02** | backend-engineer | **B1 metrics instrumentation** — `GenerationMetrics` / extend conversion path: `docgen.generation.duration`, `docgen.pdf.conversion.duration`, `docgen.pdf.conversion.outcome`; wire in `DocumentGenerationEngine` + PDF service | F8-T01, F1–F7 Done | **Not Started** |
-| **F8-T03** | backend-engineer | **B1 metric tests** — `GenerationMetricsTest`, `PdfConversionMetricsTest`; optional `@SpringBootTest` scrape smoke (`MetricsScrapeSmokeTest`) | F8-T02 | **Not Started** |
-| **F8-T04** | backend-engineer | **B2 readiness depth** — `ReadinessProbe` → `ReadinessReport` with `checks` map; optional Redis/MinIO/Kafka probes (`@Profile("!test")`); preserve 503 only on Postgres failure | F8-T01, F1–F7 Done | **Not Started** |
-| **F8-T05** | backend-engineer | **B2 readiness tests + probe docs** — `ReadinessProbeTest` / MVC test BDD-F8-B2-*; update `deploy/k8s-health-probes.md`, `docs/operations/runbook.md` § Readiness scope | F8-T04 | **Not Started** |
-| **F8-T06** | backend-engineer + deploy-engineer | **B1 alerting as code** — sync `deploy/observability/prometheus-alerts.yaml` + README with implemented metric names; `draft: true` annotations; promtool lint or documented manual validation | F8-T02 | **Not Started** |
-| **F8-T07** | doc-keeper + deploy-engineer | **B3 DR runbook section** — expand `docs/operations/runbook.md` § Disaster Recovery: backup cadence, restore steps, smoke, RPO/RTO template, `artifacts/dr-drill/` convention; index from `deploy/README.md` | F8-T01 | **Not Started** |
-| **F8-T08** | build-deploy-agent | **B4 evidence bundle** — `scripts/core-fortress-evidence-bundle.ps1` + checklist (`docs/operations/core-fortress-release-checklist.md`); integrate with `release-gate.ps1` (`-EvidenceBundle` or post-step); git SHA + health/metrics snapshots | F8-T02, F8-T04 | **Not Started** |
-| **F8-T09** | architecture-reviewer | **Boundary review** — SOR-O06 preserved; no secrets in evidence bundle; metrics cardinality bounded; fail-closed readiness JSON schema stable | F8-T02–T08 | **Not Started** |
-| **F8-T10** | build-deploy-agent | **Gate evidence** — full `mvn verify`; optional Docker scrape smoke; record counts in ledger | F8-T03–T08 | **Not Started** |
-| **F8-T11** | post-task-doc-sync | **Closeout** — F8 Done; roadmap; master-plan; `docs/README.md` behavior index; CORE-FORTRESS program **Done** | F8-T09–T10 | **Not Started** |
+| **F8-T02** | backend-engineer | **B1 metrics instrumentation** — `GenerationMetrics` / extend conversion path: `docgen.generation.duration`, `docgen.pdf.conversion.duration`, `docgen.pdf.conversion.outcome`; wire in `DocumentGenerationEngine` + PDF service | F8-T01, F1–F7 Done | **Done** (2026-07-09) |
+| **F8-T03** | backend-engineer | **B1 metric tests** — `GenerationMetricsTest`, `PdfConversionMetricsTest`; optional `@SpringBootTest` scrape smoke (`MetricsScrapeSmokeTest`) | F8-T02 | **Done** (2026-07-09) |
+| **F8-T04** | backend-engineer | **B2 readiness depth** — `ReadinessProbe` → `ReadinessReport` with `checks` map; optional Redis/MinIO/Kafka probes (`@Profile("!test")`); preserve 503 only on Postgres failure | F8-T01, F1–F7 Done | **Done** (2026-07-09) |
+| **F8-T05** | backend-engineer | **B2 readiness tests + probe docs** — `ReadinessProbeTest` / MVC test BDD-F8-B2-*; update `deploy/k8s-health-probes.md`, `docs/operations/runbook.md` § Readiness scope | F8-T04 | **Done** (2026-07-09) |
+| **F8-T06** | backend-engineer + deploy-engineer | **B1 alerting as code** — sync `deploy/observability/prometheus-alerts.yaml` + README with implemented metric names; `draft: true` annotations; promtool lint or documented manual validation | F8-T02 | **Done** (2026-07-09) |
+| **F8-T07** | doc-keeper + deploy-engineer | **B3 DR runbook section** — expand `docs/operations/runbook.md` § Disaster Recovery: backup cadence, restore steps, smoke, RPO/RTO template, `artifacts/dr-drill/` convention; index from `deploy/README.md` | F8-T01 | **Done** (2026-07-09) |
+| **F8-T08** | build-deploy-agent | **B4 evidence bundle** — `scripts/core-fortress-evidence-bundle.ps1` + checklist (`docs/operations/core-fortress-release-checklist.md`); integrate with `release-gate.ps1` (`-EvidenceBundle` or post-step); git SHA + health/metrics snapshots | F8-T02, F8-T04 | **Done** (2026-07-09) |
+| **F8-T09** | architecture-reviewer | **Boundary review** — SOR-O06 preserved; no secrets in evidence bundle; metrics cardinality bounded; fail-closed readiness JSON schema stable | F8-T02–T08 | **Done** (2026-07-09; PASS) |
+| **F8-T10** | build-deploy-agent | **Gate evidence** — full `mvn verify`; optional Docker scrape smoke; record counts in ledger | F8-T03–T08 | **Done** (2026-07-09) |
+| **F8-T11** | post-task-doc-sync | **Closeout** — F8 Done; roadmap; master-plan; `docs/README.md` behavior index; CORE-FORTRESS program **Done** | F8-T09–T10 | **Done** (2026-07-09) |
 
 **Task count:** **11** (F8-T01 … F8-T11)
 
@@ -171,9 +171,9 @@ Wave 3 — Evidence + review + closeout
 
 ## 11. Doc sync checklist (F8-T11)
 
-- [ ] `CORE-FORTRESS-program-roadmap.md` — F8 → **Done**; program banner **CORE-FORTRESS Done**
-- [ ] `docs/plan/master-plan.md` — CORE-FORTRESS status mirror
-- [ ] `docs/plan/execution-sync-ledger.md` — gate evidence + metric series list
-- [ ] `docs/README.md` — behavior spec index entry
-- [ ] `deploy/README.md` — link evidence bundle + observability updates
-- [ ] LR-D2/D3 rows — note F8 partial delivery (avoid duplicate Done claims)
+- [x] `CORE-FORTRESS-program-roadmap.md` — F8 → **Done**; program banner **CORE-FORTRESS Done**
+- [x] `docs/plan/master-plan.md` — CORE-FORTRESS status mirror
+- [x] `docs/plan/execution-sync-ledger.md` — gate evidence + metric series list
+- [x] `docs/README.md` — behavior spec index entry
+- [x] `deploy/README.md` — link evidence bundle + observability updates
+- [x] LR-D2/D3 rows — note F8 partial delivery (avoid duplicate Done claims)

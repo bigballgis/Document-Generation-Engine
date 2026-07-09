@@ -42,7 +42,8 @@ class InvocationParameterSanitizerTest {
         assertThat(root.get("encryption").get("enabled").asBoolean()).isTrue();
         assertThat(root.get("encryption").get("openPasswordProvided").asBoolean()).isTrue();
         assertThat(root.get("encryption").get("ownerPasswordProvided").asBoolean()).isTrue();
-        assertThat(root.get("variables").get("name").asText()).isEqualTo("Alice");
+        assertThat(root.has("variables")).isFalse();
+        assertThat(root.get("variablesHash").asText()).hasSize(64);
     }
 
     @Test
@@ -66,6 +67,10 @@ class InvocationParameterSanitizerTest {
         assertThat(root.get("encryption").has("openPassword")).isFalse();
         assertThat(root.get("items").get(0).get("encryption").has("ownerPassword")).isFalse();
         assertThat(root.get("items").get(0).get("encryption").get("ownerPasswordProvided").asBoolean()).isTrue();
+        assertThat(root.toString()).doesNotContain("100");
+        assertThat(root.get("itemsHash").asText()).hasSize(64);
+        assertThat(root.get("items").get(0).has("variables")).isFalse();
+        assertThat(root.get("items").get(0).get("variablesHash").asText()).hasSize(64);
     }
 
     @Test

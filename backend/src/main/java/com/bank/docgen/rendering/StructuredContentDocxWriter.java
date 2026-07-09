@@ -1,6 +1,9 @@
 package com.bank.docgen.rendering;
 
 import com.bank.docgen.authoring.structured.MasterStyleCatalog;
+import com.bank.docgen.authoring.structured.expression.ConditionExpressionEvaluator;
+import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -9,8 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.IBody;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
@@ -28,11 +29,8 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
  */
 public class StructuredContentDocxWriter {
 
-    private static final Pattern SIMPLE_CONDITION_PATTERN = Pattern.compile(
-            "\\$\\{([A-Za-z0-9_.-]+)}\\s*==\\s*(true|false)",
-            Pattern.CASE_INSENSITIVE
-    );
     private static final int MAX_NUMBERING_LEVELS = 4;
+    private static final ConditionExpressionEvaluator CONDITION_EVALUATOR = ConditionExpressionEvaluator.INSTANCE;
 
     private final ObjectMapper objectMapper;
     private final MasterStyleCatalog styleCatalog;
@@ -55,25 +53,68 @@ public class StructuredContentDocxWriter {
             Map<String, Object> variables,
             Map<String, String> pinnedModuleStructures
     ) {
+        replaceStructuredAnchorInParagraph(
+                document,
+                document,
+                document.getParagraphs().get(paragraphIndex),
+                structuredContentJson,
+                variables,
+                pinnedModuleStructures
+        );
+    }
+
+    /**
+     * Replaces a single anchor paragraph inside any Word body (document body, table cell, header, footer).
+     */
+    public void replaceStructuredAnchorInParagraph(
+            XWPFDocument document,
+            IBody body,
+            XWPFParagraph anchorParagraph,
+            String structuredContentJson,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures
+    ) {
         try {
             JsonNode root = objectMapper.readTree(structuredContentJson);
             JsonNode nodes = resolveRootNodes(root);
             if (!nodes.isArray() || nodes.isEmpty()) {
-                clearParagraph(document.getParagraphs().get(paragraphIndex));
+                clearParagraph(anchorParagraph);
                 return;
             }
             DocxMasterStyleRegistry.ensureCatalogStyles(document, styleCatalog);
             WriteSession session = new WriteSession(
                     document,
-                    document,
+                    body,
                     new DocxListNumberingSupport(document),
                     variables == null ? Map.of() : variables,
                     pinnedModuleStructures == null ? Map.of() : pinnedModuleStructures,
                     new int[MAX_NUMBERING_LEVELS]
             );
-            XWPFParagraph anchorParagraph = document.getParagraphs().get(paragraphIndex);
             clearParagraph(anchorParagraph);
             session.writeBlockNodes(nodes, anchorParagraph, true);
+        } catch (IOException ex) {
+            throw new DocxAssemblyException(ex);
+        }
+    }
+
+    /**
+     * F1-C2: plain-text projection derived from the authoritative DOCX writer output — never a second renderer.
+     */
+    public String renderPlainTextProjection(
+            String structuredContentJson,
+            Map<String, Object> variables,
+            Map<String, String> pinnedModuleStructures
+    ) {
+        try (XWPFDocument document = new XWPFDocument()) {
+            document.createParagraph();
+            replaceAnchorParagraph(
+                    document,
+                    0,
+                    structuredContentJson,
+                    variables,
+                    pinnedModuleStructures
+            );
+            return StructuredContentPlainTextProjection.fromDocument(document);
         } catch (IOException ex) {
             throw new DocxAssemblyException(ex);
         }
@@ -178,7 +219,7 @@ public class StructuredContentDocxWriter {
         private void writeBlockNode(JsonNode node, XWPFParagraph paragraph) {
             String type = node.path("type").asText("");
             if ("conditionBlock".equals(type)) {
-                if (evaluateSimpleCondition(node.path("conditionExpression").asText(""), variables)) {
+                if (CONDITION_EVALUATOR.evaluate(node.path("conditionExpression").asText(""), variables)) {
                     writeInlineOrBlockChildren(node, paragraph);
                 }
                 return;
@@ -205,6 +246,11 @@ public class StructuredContentDocxWriter {
                 }
                 applyParagraphStyle(paragraph, resolveStyleRef(node, "BodyText"));
                 writeInlineChildren(node, paragraph);
+                return;
+            }
+            if ("text".equals(type) || "textRun".equals(type)) {
+                applyParagraphStyle(paragraph, resolveStyleRef(node, "BodyText"));
+                writeRunText(paragraph, node.path("value").asText(""), false, false, false);
                 return;
             }
             writeInlineChildren(node, paragraph);
@@ -242,7 +288,12 @@ public class StructuredContentDocxWriter {
             String referenceKey = node.path("referenceKey").asText("").trim().toUpperCase(Locale.ROOT);
             String pinnedStructure = pinnedModuleStructures.get(referenceKey);
             if (pinnedStructure == null || pinnedStructure.isBlank()) {
-                return;
+                throw new DocxAssemblyException(
+                        ApiErrorCodes.CONTENT_MODULE_STRUCTURE_MISSING,
+                        ApiErrorCategories.VALIDATION,
+                        "api.error.validation.contentModuleStructureMissing",
+                        "Content module pinned structure is missing for reference: " + referenceKey
+                );
             }
             try {
                 JsonNode root = objectMapper.readTree(pinnedStructure);
@@ -403,12 +454,9 @@ public class StructuredContentDocxWriter {
         private void writeReferenceNode(JsonNode node, XWPFParagraph paragraph) {
             StructuredContentImageResolver.ResolvedImage image;
             if ("sealRef".equals(node.path("type").asText(""))) {
-                image = imageResolver.resolveSealRef(node.path("referenceKey").asText("")).orElse(null);
+                image = imageResolver.resolveSealRef(node.path("referenceKey").asText(""));
             } else {
-                image = imageResolver.resolveImageRef(node.path("imageRef").asText("")).orElse(null);
-            }
-            if (image == null) {
-                return;
+                image = imageResolver.resolveImageRef(node.path("imageRef").asText(""));
             }
             try {
                 XWPFRun run = paragraph.createRun();
@@ -583,29 +631,6 @@ public class StructuredContentDocxWriter {
             mapItem.forEach((key, value) -> scoped.put(String.valueOf(key), value));
         }
         return scoped;
-    }
-
-    private static boolean evaluateSimpleCondition(String expression, Map<String, Object> variables) {
-        if (expression == null || expression.isBlank()) {
-            return false;
-        }
-        Matcher matcher = SIMPLE_CONDITION_PATTERN.matcher(expression.trim());
-        if (!matcher.matches()) {
-            return false;
-        }
-        String variableKey = matcher.group(1);
-        boolean expectTrue = "true".equalsIgnoreCase(matcher.group(2));
-        return expectTrue == toBoolean(variables.get(variableKey));
-    }
-
-    private static boolean toBoolean(Object value) {
-        if (value instanceof Boolean booleanValue) {
-            return booleanValue;
-        }
-        if (value == null) {
-            return false;
-        }
-        return Boolean.parseBoolean(String.valueOf(value));
     }
 
     private static void applyDefaultRunStyle(XWPFRun run) {
