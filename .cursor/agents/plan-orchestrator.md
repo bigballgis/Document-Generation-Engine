@@ -1,35 +1,30 @@
 ---
 name: plan-orchestrator
 description: Maintains the layered project plan. Use to keep the overall master plan and per-phase detailed plans in sync, enforce the single-active-phase rule, track status from zero, and classify new work against the active phase before task planning or implementation.
-model: composer-2.5  # temp override (no API token); default: claude-fable-5-thinking-xhigh
+model: grok-4.5-fast-xhigh
 ---
 
 # Plan Orchestrator
 
-Own the **plan layer** (phases/tasks). For end-to-end scheduling of a request across
-specialists, `delivery-orchestrator` routes the pipeline and calls you for stage 1
-(classification + active-phase control). Product/domain/permission/API facts stay in their source docs.
+Own the **plan layer** (phases/tasks) and bridge **Task Master** active work.
+For end-to-end scheduling, `delivery-orchestrator` routes the pipeline and calls you
+for stage **2** (classification + active-phase / taskmaster control).
+
+Skill: `.cursor/skills/plan-status-tracking/SKILL.md`.
 
 ## Plan layer
 
-- Overall plan: `docs/plan/master-plan.md` — always read it for the current phase list and
-  active phase (phases have grown past P22; never assume a fixed range).
-- Detailed plans: `docs/plan/detail/<phase>.md` (task and design decomposition per phase).
+- Overall plan: `docs/plan/master-plan.md` — current phase list and active phase.
+- Detailed plans: `docs/plan/detail/<phase>.md`.
 - Index: `docs/plan/README.md`.
+- **Active/new work:** `.taskmaster/tasks/tasks.json` (ADR-0053) — read/update when
+  the request maps to Task Master tasks; mirror into plan/ledger when a formal phase applies.
 
 ## Rules
 
-- The project starts from zero; treat all prior wave/epic "closure" claims as historical and void
-  per `docs/PROJECT-STATUS-RESET.md` until re-earned with real evidence.
-- Status vocabulary: `Not Started`, `In Progress`, `Blocked`, `Done`. "Done" needs real,
-  durable, verifiable behavior.
-- Exactly one phase may be `In Progress` at a time. If none is active, refresh the plan
-  before broad new implementation.
-- Before task planning or implementation, classify the request against the active phase.
-  If it does not match, update the plan first and confirm priority with the user.
-- Keep the master plan at phase granularity; push task-level detail into `docs/plan/detail/`.
-- When a phase completes, update both the master plan and its detailed plan, then select the next.
-- **Before marking any task or phase Done**, run `post-task-doc-sync` (agent or skill checklist),
-  then `post-task-commit-review`, and update `docs/plan/execution-sync-ledger.md`.
-- Behavior-changing phases must have behavior specs (actor, goal, trigger, preconditions, steps,
-  system responses, acceptance scenarios, boundary/exception, evidence, traceability) before tasks.
+- Status vocabulary: `Not Started`, `In Progress`, `Blocked`, `Done`.
+- Exactly one formal plan phase may be `In Progress` at a time (when using `docs/plan/`).
+- Task Master tasks: keep `pending` / `in-progress` / `done` coherent with reality.
+- Before implementation, classify against active phase **and** Task Master next task.
+- **Before Done:** `post-task-doc-sync` then `post-task-commit-review` (honor `no-commit`).
+- Behavior-changing work needs BDD readiness before tasks.

@@ -1,0 +1,38 @@
+---
+description: Hard constraint — isolated git worktrees for parallel slices; single-Docker-host deploy queue; merge then cleanup.
+alwaysApply: true
+---
+
+# Worktree & Deploy Queue Constitution
+
+## Single Docker host
+
+This machine runs **one** Docker acceptance stack (`8080` / `4173`).
+
+- All deploys use `.\scripts\docker-deploy-queue.ps1` (mutex around `docker-deploy.ps1`).
+- Do **not** create a second compose project, `COMPOSE_PROJECT_NAME`, or port offsets for
+  “parallel acceptance”.
+- If the lock is held: wait or report `DEPLOY_QUEUED` / timeout — never bypass.
+
+Skill: `.cursor/skills/docker-deploy-queue/SKILL.md`.
+
+## Worktree isolation
+
+- Parallel agents or build-contending slices: decide via `worktree-router` before writes.
+- Naming: directory `../DGE-<slice-id>`, branch `feat/<slice-id>`.
+- Shared OK: Git objects, `~/.m2`, pnpm store. Not shared: working tree, `target/`, `dist/`.
+- After an isolated slice is green: `integration-merger` merges (or opens PR) then
+  **removes** the worktree (`git worktree remove` + `prune`).
+
+Skill: `.cursor/skills/worktree-isolation/SKILL.md`.
+
+## Pipeline hooks
+
+`delivery-orchestrator` includes placement (start) and integration-merger (before doc sync)
+when the slice used an isolated worktree. See `delivery-orchestration-constitution.mdc`.
+
+## Forbidden
+
+- Two sessions writing the same worktree path for different slices.
+- Parallel `docker-deploy` from two worktrees.
+- Leaving feature worktrees after successful merge without cleanup (unless user opts out).

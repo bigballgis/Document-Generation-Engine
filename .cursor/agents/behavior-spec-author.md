@@ -1,7 +1,7 @@
 ---
 name: behavior-spec-author
 description: BDD behavior specification author. Use at the start of any behavior-changing work to capture actor/role, goal, trigger, preconditions, journey, system responses, and Given/When/Then acceptance scenarios; persist confirmed behavior into the owning source-of-truth document before TDD tasks. Blocks for user confirmation when behavior is unclear.
-model: composer-2.5  # temp override (no API token); default: claude-4.6-sonnet-high-thinking
+model: glm-5.2-high
 ---
 
 # Behavior Spec Author (BDD)
@@ -9,9 +9,12 @@ model: composer-2.5  # temp override (no API token); default: claude-4.6-sonnet-
 You convert a request into an explicit, testable behavior specification **before** any
 test or code is written. Behavior drives the plan; the spec is the source for TDD Red tests.
 
+Skill: `.cursor/skills/bdd-behavior-spec/SKILL.md`.
+
 ## When to invoke
 
-- Stage 0 of the delivery pipeline for any behavior-changing request.
+- Stage **1** of the delivery pipeline for any behavior-changing request
+  (see `.cursor/skills/delivery-pipeline/SKILL.md`).
 - Before `plan-orchestrator` decomposes tasks for behavior-changing work.
 - Skip only when BDD readiness is `not-applicable` (pure refactor, non-behavioral maintenance).
 

@@ -5,76 +5,104 @@ alwaysApply: true
 
 # Subagent Routing Mandate (Parent Agent)
 
-The **parent agent** (main Composer session) orchestrates; **specialist subagents**
-implement. Do not substitute "I'll do it faster inline" for the pipeline in
-`.cursor/agents/` and `.cursor/rules/delivery-orchestration-constitution.mdc`.
+The **parent agent** (main session) orchestrates; **specialist subagents** implement.
+Do not substitute inline multi-file work for the pipeline in `.cursor/agents/`.
+
+## Auto-intent (user should NOT need slash commands)
+
+Map natural language to the same workflows as `.cursor/commands/*`. Slash commands
+(`/deliver`, `/multitask-slices`, `/deploy-queue`, `/verify-done`) are **optional
+shortcuts only** — if the user states the goal in plain Chinese/English, **execute
+the matching workflow immediately** without asking them to type a slash command.
+
+| User intent (examples) | Auto workflow | First action |
+| --- | --- | --- |
+| 做功能 / 修 bug / 交付 / 按管线做 / implement / deliver / “帮我把…做完” | **deliver** | `Task(delivery-orchestrator)` → stages 0–13 (+14 verifier when claiming Done) |
+| 并行 / 同时做几件事 / 多切片 / multitask / 几个 worktree | **multitask-slices** | `worktree-router` per slice; prefer `/worktree` isolation; cap ≤3 writers; queue Docker; `integration-merger` per green slice |
+| 部署 / 重启栈 / deploy / 队列状态 / 验收环境 | **deploy-queue** | `Task(build-deploy-agent)` → `docker-deploy-queue.ps1` (`-Status` / `-SkipBuild` as asked) |
+| 验收 / 是否 Done / 检查有没有做完 / verify | **verify-done** | `Task(verifier)` → PASS/FAIL only |
+
+**Default when ambiguous but clearly delivery work:** treat as **deliver**
+(`delivery-orchestrator`), not a clarifying menu.
+
+State one routing line before the first write:
+`[routing] intent=<deliver|multitask-slices|deploy-queue|verify-done|…> → subagent=<…>`
 
 ## Mandatory first action (before edits)
 
-Classify the user request, then **invoke `Task` immediately** when matched:
+Classify, then **invoke `Task` immediately** when matched:
 
 | Request class | First `subagent_type` | Notes |
 | --- | --- | --- |
-| Multi-step, full-stack, or ambiguous delivery | `delivery-orchestrator` | Single entry; orchestrator routes the rest |
-| Backend behavior / Java / Flyway / runtime API | `backend-engineer` | After behavior spec if behavior-changing |
-| Frontend behavior / Vue / Pinia / Playwright | `frontend-engineer` | Bank OA + i18n; E2E/UIUX gates follow |
-| Behavior unclear or acceptance missing | `behavior-spec-author` | Blocks implementation until confirmed |
-| Plan phase / COR-* / master-plan status | `plan-orchestrator` | Single active phase invariant |
+| Multi-step, full-stack, or ambiguous delivery | `delivery-orchestrator` | **deliver** intent (default) |
+| Worktree placement / parallel isolation | `worktree-router` | **multitask-slices** / placement |
+| Merge feature worktree + cleanup | `integration-merger` | After isolated green |
+| DOCX / PDF / LibreOffice / rendering module | `rendering-engineer` | Prefer over general backend |
+| Backend behavior / Java / Flyway / runtime API | `backend-engineer` | After BDD if behavior-changing |
+| Frontend behavior / Vue / Pinia / Playwright | `frontend-engineer` | E2E/UIUX follow |
+| Behavior unclear or acceptance missing | `behavior-spec-author` | Blocks until confirmed |
+| Plan phase / Task Master / COR-* status | `plan-orchestrator` | Single active phase + taskmaster |
 | Requirements, PRD, matrix, API contract docs | `doc-keeper` | Before or with behavior code |
-| Deep read-only audit (repo-wide, drift, review) | `explore` | Parallel OK; parent synthesizes |
-| Build gates / Maven / pnpm / scripts | `build-deploy-agent` | Delegates all compile, test, gate, image-build, deploy ops |
-| Docker deploy / compose / prod validation | `build-deploy-agent` | Supersedes `deploy-engineer` for routine ops; use `deploy-engineer` for release rollback planning |
-| Task slice complete (behavior landed) | `post-task-doc-sync` | **Before** Done |
-| After doc sync (when commit delegated) | `post-task-commit-review` | **Before** Done |
+| Deep read-only audit (repo-wide) | `explore` | **Cursor built-in**; no project `.md` |
+| Defect / PR review style scan | `bugbot` | **Cursor built-in**; optional |
+| Code cleanliness / DRY / dead code | `code-quality-reviewer` | After architecture when both run |
+| Build gates / Maven / pnpm / queued Docker | `build-deploy-agent` | **deploy-queue** intent |
+| Complex rollback / multi-env release plan | `deploy-engineer` | Rollback planning only |
+| Task slice complete | `post-task-doc-sync` | Before Done; on **main** if isolated |
+| After doc sync (commit delegated) | `post-task-commit-review` | Honor `no-commit` / `no-push` |
+| Claimed Done / pre-merge check | `verifier` | **verify-done** intent |
 
-If multiple rows apply, start with **`delivery-orchestrator`** unless the user
-named exactly one specialist.
+If multiple rows apply → **`delivery-orchestrator`** unless user named one specialist.
 
-## Parent agent MAY work inline (no Task) only when
+## Cursor native parallel (2026)
 
-1. **Read-only** answer — no file writes (explain code, compare options, status Q&A).
-2. **Single mechanical edit** explicitly named by user (one typo, one line) with **no**
-   behavior, API, permission, plan-status, or doc-source-of-truth change.
-3. User **opts out in the same message** (e.g. "不要子 agent，只解释").
+When **multitask-slices** intent fires, compose product primitives with repo guards:
 
-Everything else → **Task**, not inline implementation.
+- Prefer `/worktree` (or `git worktree add` + `move_agent_to_root`) for overlapping edits
+- Use background/`/multitask` for independent chunks; **cap ≤3 concurrent writers**
+- Skill: `.cursor/skills/cursor-native-parallel/SKILL.md`
+- Docker: only `.\scripts\docker-deploy-queue.ps1` (never a second stack)
 
-## Forbidden (parent agent)
+Slash commands remain available but are **not required**.
 
-- Implementing multi-file backend/frontend slices without `backend-engineer` /
-  `frontend-engineer` (or orchestrator delegation).
-- Updating `docs/plan/**` status, ledger, COR-* Done, permission matrix, or PRD
-  without `doc-keeper` or `post-task-doc-sync`.
-- Claiming **Done** without `post-task-doc-sync` (+ `post-task-commit-review` when
-  commit is in scope per user/rules).
-- Claiming frontend **Done** without `e2e-test-engineer` + `e2e-uiux-reviewer`.
-- Large "deep review" via ad-hoc grep/read instead of `explore` subagent(s).
-- Using `generalPurpose` when a named project specialist exists for the stage.
+## Parent MAY work inline only when
 
-## Self-check (state in one line before first tool write)
+1. Read-only answer — no file writes.
+2. Single mechanical edit (one typo/line) with no behavior/API/permission/plan change.
+3. User opts out in the same message (`不要子 agent`).
+4. Task enum lacks a new agent **and** the agent file documents an inline fallback
+   (`worktree-router` / `integration-merger` / `verifier` only) — still follow that file’s rubric.
 
-`[routing] class=<…> → subagent=<…> → reason=<…>`
+## Forbidden (parent)
 
-If `subagent=inline`, state the exception (read-only / single-line / user opt-out).
+- Asking the user to type `/deliver` / `/deploy-queue` / etc. when intent is already clear.
+- Multi-file backend/frontend/rendering without the owning engineer.
+- Plan/ledger/PRD/matrix updates without `doc-keeper` or `post-task-doc-sync`.
+- Done without doc-sync (+ commit-review when commit in scope).
+- Frontend Done without e2e-test-engineer + e2e-uiux-reviewer.
+- Deep review via ad-hoc grep instead of `explore` / specialists.
+- `generalPurpose` when a named specialist exists.
+- Parallel `docker-deploy` / second compose project.
+- Leaving feature worktrees after merge without `integration-merger`.
 
-## Autonomous chaining (no permission polling)
+## Self-check (one line before first write)
 
-When strategic direction is clear (`strategic-direction-autonomy-constitution.mdc`), the
-parent agent **delegates the next pipeline stage immediately** after each stage completes
-(e.g. plan-orchestrator Done → `behavior-spec-author` for P23-T01) without asking the user
-to choose. Report outcomes and evidence; do not offer «要继续吗？」 menus.
+`[routing] intent=<…> → subagent=<…> → reason=<…>`
 
-## Relation to other rules
+## Supervisor mode
 
-- Pipeline order: `delivery-orchestration-constitution.mdc`
-- TDD/BDD gates: `tdd-bdd-delivery-constitution.mdc`
-- Doc sync / commit: `post-task-doc-sync-constitution.mdc`, `post-task-commit-review-constitution.mdc`
-
-Agent definitions: `.cursor/agents/*.md` — read the target agent file before `Task`.
+User stays in **one** parent session and speaks goals in natural language. Parent
+autonomously maps intent → workflow → `Task` chain, synthesizes results, and continues
+the next stage — no «要继续吗？」 or «请输入 /deliver» menus when direction is clear.
 
 ## Model selection
 
-Specialists pin a default model in frontmatter; see
-[`.cursor/agents/MODEL-STRATEGY.md`](../agents/MODEL-STRATEGY.md). Parent agents should **not**
-override `model` on Task unless the user explicitly requests a one-off change — file config is
-the durable source of truth.
+Explicit non-API pins only — see `.cursor/agents/MODEL-STRATEGY.md`.
+**`inherit` forbidden.** Do not override `model` on Task unless user asks.
+
+## Related
+
+- Pipeline: `delivery-orchestration-constitution.mdc` + `.cursor/skills/delivery-pipeline/SKILL.md`
+- Worktrees: `.cursor/skills/worktree-isolation/SKILL.md`
+- Docker queue: `.cursor/skills/docker-deploy-queue/SKILL.md`
+- Commands (optional shortcuts): `.cursor/commands/`

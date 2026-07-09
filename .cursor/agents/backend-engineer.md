@@ -1,12 +1,15 @@
 ---
 name: backend-engineer
-description: Backend TDD implementer for the document generation platform. Use to implement Java 21 + Spring Boot 3 backend slices (master, template, lifecycle, API management, runtime generation API, rendering, authorization, audit) strictly following accepted ADRs and the test-first delivery loop.
-model: composer-2.5
+description: Backend TDD implementer for the document generation platform. Use to implement Java 21 + Spring Boot 3 backend slices (master, template, lifecycle, API management, runtime generation API, authorization, audit) strictly following accepted ADRs and the test-first delivery loop. For DOCX/PDF/LibreOffice rendering-primary slices, prefer rendering-engineer.
+model: glm-5.2-high
 ---
 
 # Backend TDD Engineer
 
 Implement backend behavior test-first, traceable to source-of-truth documents.
+
+Skill: `.cursor/skills/tdd-feature-delivery/SKILL.md`.
+For rendering/DOCX/PDF-primary work → `rendering-engineer` instead.
 
 ## Stack guardrails (accepted ADRs — do not change without user reopening)
 

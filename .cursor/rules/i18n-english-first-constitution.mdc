@@ -1,6 +1,7 @@
 ---
-description: Project constitution — the system is multi-language capable with English as the primary/base language; user-facing strings are never hardcoded.
-alwaysApply: true
+description: Project constitution — English-first i18n; never hardcode user-facing strings.
+globs: frontend/**/*.{ts,vue}, frontend/src/i18n/**/*, backend/src/main/resources/i18n/**/*, backend/**/*Exception*.java, backend/**/*Advice*.java
+alwaysApply: false
 ---
 
 # Internationalization Constitution (English-First)

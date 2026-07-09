@@ -1,88 +1,64 @@
 # Subagent model strategy
 
-Each specialist under `.cursor/agents/` pins a `model` in YAML frontmatter so tasks run on
-the right cost/capability tier instead of always inheriting the parent session model.
+Each specialist under `.cursor/agents/` **must** pin an explicit `model` slug in YAML
+frontmatter. **`inherit` is forbidden.**
 
-> **⚠️ Temporary global override active (no API token).** All specialists are currently pinned
-> to `composer-2.5` to avoid consuming API-token models. Each agent file keeps its original
-> default in an inline comment (`# temp override (no API token); default: <slug>`). The
-> **Assignments** table below still lists the durable per-agent defaults — restore from it
-> when tokens are available. See **Restore to per-agent defaults** at the bottom.
+> **Active policy (no API quota):** Cursor-included families only (Grok / GLM / Composer).
+> Claude API-token slugs stay frozen until quota returns.
 
-## Allowed families
+## Allowed families (current)
 
-**Only Composer and Claude slugs** are permitted for subagents in this repo. Do not pin GPT,
-Codex, or other families.
-
-| Family | Slugs used here |
-| --- | --- |
-| **Claude Fable** | `claude-fable-5-thinking-xhigh` — **`plan-orchestrator` only** |
-| **Claude Opus / Sonnet** | `claude-opus-4-8-thinking-high`, `claude-4.6-sonnet-high-thinking` |
-| **Composer** | `composer-2.5`, `composer-2.5-fast` |
-
-Use exact slugs from the Cursor model picker. `inherit` remains valid when a specialist should
-follow the parent session model (none pinned by default in this repo).
+| Family | Slugs | Role |
+| --- | --- | --- |
+| **Grok 4.5 High Fast** | `grok-4.5-fast-xhigh` | Governance |
+| **GLM 5.2 High** | `glm-5.2-high` | Delivery |
+| **Composer 2.5 Fast** | `composer-2.5-fast` | Execution |
+| **`inherit`** | — | **Forbidden** |
 
 ## Tiers
 
-| Tier | Slug | When to use |
+| Tier | Slug | When |
 | --- | --- | --- |
-| **Plan** | `claude-fable-5-thinking-xhigh` | Plan layer maintenance only (`plan-orchestrator`) |
-| **Governance** | `claude-opus-4-8-thinking-high` | Pipeline routing, architecture review, pre-commit gate |
-| **Reasoning** | `claude-4.6-sonnet-high-thinking` | BDD specs and documentation reconciliation |
-| **Implementation** | `composer-2.5` | Backend/frontend TDD, Playwright, UIUX evidence, structured doc sync |
-| **Execution** | `composer-2.5-fast` | Script gates and Docker ops only |
+| **Governance** | `grok-4.5-fast-xhigh` | Routing, plan, architecture, commit, merge |
+| **Delivery** | `glm-5.2-high` | BDD, docs, TDD implementation, E2E, doc-sync |
+| **Execution** | `composer-2.5-fast` | Gates, deploy queue, worktree placement |
 
-## Assignments
+## Current assignments
 
-| Agent | Model | Rationale |
+| Agent | Tier | Model |
 | --- | --- | --- |
-| `plan-orchestrator` | `claude-fable-5-thinking-xhigh` | **Plan only** — master/detail plan, single active phase |
-| `delivery-orchestrator` | `claude-opus-4-8-thinking-high` | End-to-end routing; must not skip gates or mis-order pipeline |
-| `architecture-reviewer` | `claude-opus-4-8-thinking-high` | Read-only but high impact; ADR/module/permission drift is costly |
-| `post-task-commit-review` | `claude-opus-4-8-thinking-high` | Final commit gate; block on critical findings |
-| `behavior-spec-author` | `claude-4.6-sonnet-high-thinking` | Given/When/Then clarity and requirement traceability |
-| `doc-keeper` | `claude-4.6-sonnet-high-thinking` | Source-of-truth reconciliation across many docs |
-| `backend-engineer` | `composer-2.5` | Java 21 + Spring Boot TDD |
-| `frontend-engineer` | `composer-2.5` | Vue 3 + TypeScript TDD |
-| `e2e-test-engineer` | `composer-2.5` | Playwright functional journeys |
-| `e2e-uiux-reviewer` | `composer-2.5` | Visual/responsive/a11y/brand evidence needs full Composer capability |
-| `post-task-doc-sync` | `composer-2.5` | Checklist-driven plan/doc sync; not plan authoring |
-| `build-deploy-agent` | `composer-2.5-fast` | Maven/pnpm gates and deploy scripts |
-| `deploy-engineer` | `composer-2.5-fast` | Docker compose rollout and rollback evidence |
+| `delivery-orchestrator` | Governance | `grok-4.5-fast-xhigh` |
+| `plan-orchestrator` | Governance | `grok-4.5-fast-xhigh` |
+| `architecture-reviewer` | Governance | `grok-4.5-fast-xhigh` |
+| `code-quality-reviewer` | Governance | `grok-4.5-fast-xhigh` |
+| `post-task-commit-review` | Governance | `grok-4.5-fast-xhigh` |
+| `integration-merger` | Governance | `grok-4.5-fast-xhigh` |
+| `behavior-spec-author` | Delivery | `glm-5.2-high` |
+| `doc-keeper` | Delivery | `glm-5.2-high` |
+| `backend-engineer` | Delivery | `glm-5.2-high` |
+| `frontend-engineer` | Delivery | `glm-5.2-high` |
+| `rendering-engineer` | Delivery | `glm-5.2-high` |
+| `e2e-test-engineer` | Delivery | `glm-5.2-high` |
+| `e2e-uiux-reviewer` | Delivery | `glm-5.2-high` |
+| `post-task-doc-sync` | Delivery | `glm-5.2-high` |
+| `verifier` | Execution | `composer-2.5-fast` |
+| `worktree-router` | Execution | `composer-2.5-fast` |
+| `build-deploy-agent` | Execution | `composer-2.5-fast` |
+| `deploy-engineer` | Execution | `composer-2.5-fast` |
 
-## Override and fallback
+## Supervisor mode
 
-1. **Agent file wins** — frontmatter `model:` is the durable default for that specialist.
-2. **Task tool** — parent may pass `model` on a single invocation; prefer file config for consistency.
-3. **Fable scope** — Fable is pinned **only** on `plan-orchestrator`; do not assign Fable elsewhere.
-4. **Family lock** — new assignments must stay within Composer + Claude; update this doc when adding agents.
-5. **Plan / Max Mode** — some billing tiers restrict non-Composer subagents; enable Max Mode or
-   usage-based billing if a pinned Claude slug is ignored.
-6. **Team policy** — org admin may block specific models; fall back to allowed slugs and update this table.
-7. **Reload** — restart Cursor after editing agent definitions.
+User stays in one parent session; parent/orchestrator spawn `Task` workers autonomously.
+Parallel → worktree-router; Docker → queue; isolated Done → integration-merger then
+doc-sync/commit on **main**.
 
-## Changing assignments
+## Fallback if a slug is rejected
 
-Edit the agent's `model:` in its `.md` file **and** update the table above in the same change set
-so the strategy doc stays the source of truth.
+Governance → `grok-4.5-fast-xhigh` → `glm-5.2-high`  
+Delivery → `glm-5.2-high` → `grok-4.5-fast-xhigh`  
+Execution → `composer-2.5-fast` → `glm-5.2-high`
 
-## Restore to per-agent defaults
+## API restore (later)
 
-The temporary override sets every agent to `composer-2.5`. To switch back to the durable defaults
-listed in **Assignments**, edit each `.md` frontmatter — the original slug is preserved inline:
-
-| Agent | Restore `model:` to |
-| --- | --- |
-| `plan-orchestrator` | `claude-fable-5-thinking-xhigh` |
-| `delivery-orchestrator` | `claude-opus-4-8-thinking-high` |
-| `architecture-reviewer` | `claude-opus-4-8-thinking-high` |
-| `post-task-commit-review` | `claude-opus-4-8-thinking-high` |
-| `behavior-spec-author` | `claude-4.6-sonnet-high-thinking` |
-| `doc-keeper` | `claude-4.6-sonnet-high-thinking` |
-| `build-deploy-agent` | `composer-2.5-fast` |
-| `deploy-engineer` | `composer-2.5-fast` |
-| `backend-engineer` / `frontend-engineer` / `e2e-test-engineer` / `e2e-uiux-reviewer` / `post-task-doc-sync` | `composer-2.5` (unchanged) |
-
-Steps to restore one agent: open its `.cursor/agents/<agent>.md`, replace the
-`model: composer-2.5  # temp override …` line with `model: <default slug>`, then restart Cursor.
+Still no `inherit`. Prefer Claude Fable/Opus/Sonnet for plan/governance/reasoning when
+quota returns; keep Composer/GLM for implementation/execution as desired.

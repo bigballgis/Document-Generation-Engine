@@ -1,8 +1,9 @@
 # Document Generation Platform
 
-Enterprise low-code document generation for bank correspondence. **P0–P11 Done**
-(re-earned 2026-06-23). See [docs/plan/master-plan.md](docs/plan/master-plan.md)
-and [docs/plan/execution-sync-ledger.md](docs/plan/execution-sync-ledger.md).
+Enterprise low-code document generation for bank correspondence.
+Plan history and live programs: [docs/plan/master-plan.md](docs/plan/master-plan.md),
+[docs/plan/execution-sync-ledger.md](docs/plan/execution-sync-ledger.md).
+Active/new tasks: [`.taskmaster/tasks/tasks.json`](.taskmaster/tasks/tasks.json) (ADR-0053).
 
 ## Repository layout
 
@@ -10,8 +11,97 @@ and [docs/plan/execution-sync-ledger.md](docs/plan/execution-sync-ledger.md).
 backend/          Java 21 + Spring Boot 3 (Maven)
 frontend/         Vue 3 + TypeScript + Vite + Element Plus
 docs/             Requirements, ADRs, OpenAPI v1, plan layer
+.cursor/          Cursor agents, skills, rules, hooks (AI delivery system)
+AGENTS.md         Short index of the agent system
 docker-compose.yml Local PostgreSQL, Redis, Kafka, MinIO
 ```
+
+## AI agent delivery system
+
+This repo is built for **supervisor-mode** AI development: you stay in **one main Cursor
+chat**; the parent agent routes work through specialists via the Task tool. Do not open a
+new chat per pipeline stage.
+
+| Resource | Path |
+| --- | --- |
+| Index | [AGENTS.md](AGENTS.md) |
+| Agents (17) | [`.cursor/agents/`](.cursor/agents/) |
+| Model pins | [`.cursor/agents/MODEL-STRATEGY.md`](.cursor/agents/MODEL-STRATEGY.md) |
+| Pipeline stages 0–13 | [`.cursor/skills/delivery-pipeline/SKILL.md`](.cursor/skills/delivery-pipeline/SKILL.md) |
+| Routing rules | [`.cursor/rules/subagent-routing-mandate.mdc`](.cursor/rules/subagent-routing-mandate.mdc) |
+| Orchestration constitution | [`.cursor/rules/delivery-orchestration-constitution.mdc`](.cursor/rules/delivery-orchestration-constitution.mdc) |
+| MCP (Cursor) | [`.cursor/mcp.json`](.cursor/mcp.json) |
+| Slash commands | [`.cursor/commands/`](.cursor/commands/) (`/deliver`, `/multitask-slices`, `/deploy-queue`, `/verify-done`) |
+| Native parallel | [`.cursor/skills/cursor-native-parallel/SKILL.md`](.cursor/skills/cursor-native-parallel/SKILL.md) |
+
+### How to use it
+
+1. In the **main** Cursor Agent chat, state the goal in natural language (Chinese or English),
+   or name a Task Master / plan task id. **You do not need to type slash commands.**
+2. The parent auto-maps intent and runs the matching workflow:
+   - delivery / 做功能 / 修 bug → `delivery-orchestrator` (full pipeline)
+   - parallel / 并行切片 → worktree-router + capped writers + deploy queue
+   - deploy / 部署 / 队列 → `build-deploy-agent` + `docker-deploy-queue.ps1`
+   - verify / 验收 / 是否 Done → `verifier`
+3. You review summaries and unblock only when asked (unclear BDD, ADR conflicts,
+   `no-commit` / secrets, etc.).
+
+Optional shortcuts (same workflows): `/deliver`, `/multitask-slices`, `/deploy-queue`,
+`/verify-done` — see [`.cursor/commands/`](.cursor/commands/).
+
+### Canonical pipeline (0–13)
+
+```text
+0  worktree-router          → MAIN vs isolated worktree
+1  behavior-spec-author     → BDD (skip only if not-applicable)
+2  plan-orchestrator        → plan phase + Task Master
+3  doc-keeper               → docs-first when SoT changes
+4  engineers                → backend | frontend | rendering (TDD)
+5  build-deploy-agent       → queued stack prep for E2E (:4173 / :8080)
+6  e2e-test-engineer        → Playwright functional (frontend)
+7  e2e-uiux-reviewer        → UIUX evidence (frontend)
+8  architecture-reviewer    → boundaries / ADR / fail-closed
+9  code-quality-reviewer    → optional hygiene
+10 build-deploy-agent       → queued deploy evidence
+11 integration-merger       → merge + remove worktree (if isolated)
+12 post-task-doc-sync       → plan / ledger / Task Master (on main)
+13 post-task-commit-review  → review → commit → push (honor no-commit / no-push)
+14 verifier (optional)      → independent PASS/FAIL before handoff
+```
+
+### Model tiers (no `inherit`)
+
+| Tier | Model | Typical agents |
+| --- | --- | --- |
+| Governance | `grok-4.5-fast-xhigh` | delivery-orchestrator, plan-orchestrator, architecture-reviewer, integration-merger, post-task-commit-review, … |
+| Delivery | `glm-5.2-high` | behavior-spec-author, doc-keeper, backend/frontend/rendering engineers, e2e-*, post-task-doc-sync |
+| Execution | `composer-2.5-fast` | worktree-router, build-deploy-agent, deploy-engineer (rollback), verifier |
+
+Built-in Cursor types (no project file): `explore`, `bugbot`.
+
+### Parallel work & Docker
+
+- Prefer Cursor **`/multitask`** + **`/worktree`** (or Agents Window) for parallel writers; still run `worktree-router` for naming (`../DGE-<slice>`, `feat/<slice>`).
+- Cap concurrent writers (≤3). After isolated green → `integration-merger`, then doc-sync/commit on **main**.
+- This machine has **one** Docker acceptance stack — always use the deploy queue (or `/deploy-queue`):
+
+```powershell
+.\scripts\docker-deploy-queue.ps1 -Status
+.\scripts\docker-deploy-queue.ps1
+.\scripts\docker-deploy-queue.ps1 -SkipBuild
+```
+
+### MCP (project)
+
+Configured in [`.cursor/mcp.json`](.cursor/mcp.json):
+
+| Server | Use |
+| --- | --- |
+| `task-master-ai` | Active task list (core tools) |
+| `docgen-postgres` | Local Docker Postgres (dev only; compose must be up) |
+| `fetch` | `http://localhost:8080/healthz`, OpenAPI, etc. |
+
+Reload the Cursor window after changing agents or MCP config.
 
 ## Prerequisites
 
@@ -27,15 +117,17 @@ docker-compose.yml Local PostgreSQL, Redis, Kafka, MinIO
 
 ### Docker-only validation (required for manual testing)
 
-Compile on your machine (Maven / pnpm use local caches), run in Docker:
+Compile on your machine (Maven / pnpm use local caches), run in Docker. Prefer the
+**queue** wrapper on this single Docker host:
 
 ```powershell
 copy .env.example .env   # if .env does not exist
-.\scripts\docker-deploy.ps1
+.\scripts\docker-deploy-queue.ps1
 ```
 
-This runs local `mvn package` + `pnpm build`, then builds slim images that **only copy**
-`backend/target/*.jar` and `frontend/dist` — no dependency download inside Docker build.
+This acquires a deploy mutex, then runs local `mvn package` + `pnpm build`, then builds
+slim images that **only copy** `backend/target/*.jar` and `frontend/dist` — no dependency
+download inside Docker build.
 
 | Service | URL |
 | --- | --- |
@@ -44,10 +136,11 @@ This runs local `mvn package` + `pnpm build`, then builds slim images that **onl
 | PDF conversion | LibreOffice headless (embedded in `docgen-backend` image) |
 | Login | `10000001` / `ChangeMe123!` |
 
-Restart without recompiling: `.\scripts\docker-deploy.ps1 -SkipBuild`.
+Restart without recompiling: `.\scripts\docker-deploy-queue.ps1 -SkipBuild`.  
+Queue status: `.\scripts\docker-deploy-queue.ps1 -Status`.
 
 The backend image includes LibreOffice for DOCX→PDF acceptance testing (`LIBREOFFICE_CONVERSION_MODE=cli`).
-No separate LibreOffice sidecar is required for `docker-deploy.ps1`.
+No separate LibreOffice sidecar is required for the queued deploy.
 
 ### 1. Environment
 
@@ -122,6 +215,7 @@ pnpm -C frontend build
 ## Documentation entry
 
 Start at [docs/README.md](docs/README.md) and [docs/plan/master-plan.md](docs/plan/master-plan.md).
+AI delivery system: [AGENTS.md](AGENTS.md) and [`.cursor/agents/`](.cursor/agents/).
 
 Kubernetes deployment (P15): [deploy/README.md](deploy/README.md) — chart validate via
 `.\scripts\helm-validate.ps1`; CI blocking gates via `.\scripts\ci-k8s-manifest-gates.ps1`
@@ -134,7 +228,7 @@ blue-green cutover in [deploy/blue-green-runbook.md](deploy/blue-green-runbook.m
 **P14-T01** clause/content module lifecycle (T01a–T01e; backend **469**; frontend **224**; architecture re-review **PASS**);
 **P14-T02** collaboration to-dos + timeout escalation (T02a–T02d; E2E **3/3**; backend **481**; frontend **235**);
 **P14-T03** template export/import (T03a–T03c; OpenAPI contract; E2E **2/2**; backend **481**; frontend **235+**).
-**Active phase:** **P22** — **P22-DEMO-EXPANSION In Progress** (2026-07-03; partial `6f9c76a`; gates **RED**) — the sole formal phase `In Progress`; see [docs/plan/master-plan.md](docs/plan/master-plan.md). **In-flight / planned programs (not formal phases):** **CDP** (Wave CD-0 In Progress, other session — [docs/plan/competitiveness-deepening-program.md](docs/plan/competitiveness-deepening-program.md)) and **LRP** (**In Progress** — Wave LR-B **Done** 2026-07-04 (B1–B8); Wave LR-A activated 2026-07-04 — [docs/plan/launch-readiness-program.md](docs/plan/launch-readiness-program.md)). **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03 — template testing tab overhaul T01–T13; backend `mvn verify`, frontend **643** Vitest, Playwright + UIUX **PASS**). **P2-T06 Done** (2026-07-01 — Phase B full master revision history; backend **564**, frontend **528** Vitest). Activate next slice via `plan-orchestrator`.
+**Active phase:** **CORE-FORTRESS-F7-AUTHORING-UX** — **In Progress** (2026-07-09) — the sole formal phase `In Progress`; see [docs/plan/master-plan.md](docs/plan/master-plan.md). **Prior:** **CORE-FORTRESS F6 Done** (2026-07-09; frontend kernel refactor; controller **243** lines; composable **73** Vitest). **CORE-FORTRESS F5 Done** (2026-07-09; async durability + security depth; F5 targeted **31/31**; full `mvn verify` Windows file-lock caveat). **CORE-FORTRESS F4 Done** (2026-07-09). **P23 Done** (2026-07-08). **In-flight programs (not formal phases):** **CDP** ([docs/plan/competitiveness-deepening-program.md](docs/plan/competitiveness-deepening-program.md)) and **LRP** ([docs/plan/launch-readiness-program.md](docs/plan/launch-readiness-program.md)).
 MVP P0–P11 complete;
 **P13** Done (2026-06-23); **P14** Done (2026-06-27); **P15** Done (2026-06-27; T01–T10);
 **P17** Done (2026-06-25); **P18** Done (2026-06-28); **P19** Done (2026-06-25);

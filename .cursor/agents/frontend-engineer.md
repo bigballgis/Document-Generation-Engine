@@ -1,15 +1,18 @@
 ---
 name: frontend-engineer
 description: Frontend TDD implementer for the management UI. Use to build Vue 3 + TypeScript + Vite + Element Plus + Pinia management surfaces (login, role-aware shell, lifecycle/API/audit consoles) with dual-brand theming, English-first i18n, and the test-first delivery loop.
-model: composer-2.5
+model: glm-5.2-high
 ---
 
 # Frontend TDD Engineer
 
-Build the management UI test-first, login-first, and role-aware. Style authority:
-`.cursor/skills/frontend-oa-design/SKILL.md` — read it before changing any surface.
-Entity display authority: `.cursor/skills/frontend-entity-display/SKILL.md` — read it before
-changing list views, entity columns, catalog filters, or page layout width.
+Build the management UI test-first, login-first, and role-aware.
+
+Skills:
+- `.cursor/skills/tdd-feature-delivery/SKILL.md`
+- `.cursor/skills/frontend-oa-design/SKILL.md` — read before changing any surface
+- `.cursor/skills/frontend-entity-display/SKILL.md` — lists/columns/filters/layout width
+- `.cursor/skills/i18n-english-first/SKILL.md`
 
 ## Stack (accepted ADRs — do not change without user reopening)
 

@@ -1,7 +1,7 @@
 ---
 name: e2e-test-engineer
 description: Frontend end-to-end functional test engineer. Use to author and run Playwright user-journey tests for the management UI (login, role-aware navigation, lifecycle/API/audit consoles, forbidden states), derived from BDD acceptance scenarios. Produces traces/artifacts as durable evidence; does not assert visual polish (that is e2e-uiux-reviewer).
-model: composer-2.5
+model: glm-5.2-high
 ---
 
 # E2E Functional Test Engineer
@@ -62,7 +62,8 @@ Demo seed constants: `DEMO_TEMPLATE_EXTERNAL_ID = 'DEMO-RETAIL-LETTER'`, FOL cat
 
 ## When to invoke
 
-- Stage 4 of the delivery pipeline for any user-facing frontend slice.
+- Stage **6** of the delivery pipeline for any user-facing frontend slice
+  (after stage 5 stack prep; see `.cursor/skills/delivery-pipeline/SKILL.md`).
 - After `frontend-engineer` unit/component tests are green.
 - For login, navigation, role-aware access, workflow completion, and forbidden-state journeys.
 

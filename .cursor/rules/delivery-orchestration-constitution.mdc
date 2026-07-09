@@ -1,5 +1,5 @@
 ---
-description: Hard constraint — single-entry delivery orchestration and fixed BDD→TDD→E2E→deploy→doc-sync→commit pipeline order for behavior-changing work.
+description: Hard constraint — single-entry delivery orchestration and fixed placement→BDD→TDD→E2E→queued-deploy→merge→doc-sync→commit pipeline for behavior-changing work.
 alwaysApply: true
 ---
 
@@ -8,57 +8,61 @@ alwaysApply: true
 Non-trivial, behavior-changing work is scheduled through one orchestrator and a fixed
 pipeline. Specialists own their stage; nobody jumps the order.
 
+Canonical stage numbers: `.cursor/skills/delivery-pipeline/SKILL.md`.
+
 ## Single entry
 
 - Route multi-step or behavior-changing requests through `delivery-orchestrator`.
 - A single narrow change may call one specialist directly, but still respects gate order.
-- **Parent agent:** see `subagent-routing-mandate.mdc` — default is **delegate via `Task`**, not inline multi-file implementation.
+- **Parent agent:** see `subagent-routing-mandate.mdc` — default is **delegate via `Task`**.
+- **Supervisor mode:** one main session; parent/orchestrator autonomously spawn subagents.
 
 ## Parent agent obligation
 
-Before the first repository write in a turn, classify the request and invoke the
-matching specialist (`delivery-orchestrator` when in doubt). The parent session
-**must not** own production code, plan-status updates, or Done claims for delivery
-work — only orchestration, user communication, and synthesis of subagent outputs.
+Before the first repository write, classify and invoke the matching specialist
+(`delivery-orchestrator` when in doubt). Parent must **not** own production code,
+plan-status updates, or Done claims — only orchestration and synthesis.
 
-## Fixed pipeline order
+## Fixed pipeline order (authoritative)
 
 ```
-behavior-spec-author → plan-orchestrator → doc-keeper(if docs change)
- → backend-engineer / frontend-engineer (TDD; gates via build-deploy-agent)
- → e2e-test-engineer (functional) → e2e-uiux-reviewer (UIUX, frontend)
- → architecture-reviewer → build-deploy-agent (deploy, release-relevant)
- → post-task-doc-sync → post-task-commit-review → Done
+0 worktree-router → 1 behavior-spec-author → 2 plan-orchestrator → 3 doc-keeper(if docs)
+ → 4 backend-engineer | frontend-engineer | rendering-engineer
+ → 5 build-deploy-agent (E2E stack prep, queued)
+ → 6 e2e-test-engineer → 7 e2e-uiux-reviewer   (frontend user-facing)
+ → 8 architecture-reviewer → 9 code-quality-reviewer (optional)
+ → 10 build-deploy-agent (deploy evidence, queued)
+ → 11 integration-merger (if isolated) → 12 post-task-doc-sync → 13 post-task-commit-review → Done
 ```
+
+**Review order:** architecture (8) then optional code-quality (9). Do not reverse.
+
+**Isolated worktrees:** code in feature tree; merge at 11; doc-sync+commit (12–13) on **main**.
 
 ## Non-negotiables
 
-0. **Strategic direction autonomy** — When north star / active phase / confirmed BDD is
-   clear, proceed through pipeline stages without end-of-turn permission prompts. See
-   `strategic-direction-autonomy-constitution.mdc`. Block only on genuine ambiguity,
-   conflicts, or explicit user opt-out — not routine next steps.
-1. **BDD first** — No tests or code before a behavior spec exists, or BDD readiness is
-   explicitly `not-applicable`. Unclear behavior blocks for user confirmation.
-2. **TDD always** — Failing test before implementation; smallest change to green; refactor.
-3. **Frontend E2E mandatory** — User-facing frontend changes require `e2e-test-engineer`
-   functional journeys AND `e2e-uiux-reviewer` evidence before Done.
-4. **Bank OA style lock** — Frontend surfaces meet `.cursor/skills/frontend-oa-design/SKILL.md`;
-   token-based, dual-brand (REDBC/GREENBC), no overflow/overlap, a11y green.
-5. **Docker deploy is gated** — `build-deploy-agent` only deploys on green gates + evidence;
-   no secrets in images; rollback readiness recorded.
-6. **End gates** — `post-task-doc-sync` then `post-task-commit-review` before any Done claim.
-7. **Single active phase** — Exactly one plan phase `In Progress` (see `plan-orchestrator`).
+0. Strategic direction autonomy — proceed without end-of-turn permission prompts when clear.
+1. BDD first — no tests/code before spec or `not-applicable`.
+2. TDD always — failing test first.
+3. Frontend E2E mandatory for user-facing changes (stages 5–7).
+4. Bank OA style lock + English-first i18n.
+5. Docker deploy gated and **queued** (`docker-deploy-queue.ps1`); single host.
+6. Worktree placement via `worktree-router`; cleanup via `integration-merger`.
+7. End gates 12 then 13 before Done (honor `no-commit` / `no-push`).
+8. Single active plan phase (or explicit Task Master active task).
+9. Behavior-changing acceptance surfaces require queued deploy evidence (stage 5 and/or 10).
 
 ## Forbidden
 
-- Skipping the behavior spec for behavior-changing work.
-- Claiming frontend Done without E2E functional + UIUX evidence.
-- Deploying on red gates, or baking secrets/credentials into images or compose.
-- Reordering or skipping the end gates (doc sync, commit review).
-- **Parent agent implementing delivery slices inline** when a named specialist or
-  orchestrator exists (see `subagent-routing-mandate.mdc`).
+- Skipping behavior spec for behavior-changing work.
+- Frontend Done without E2E functional + UIUX.
+- Deploy on red gates; secrets in images; parallel compose stacks.
+- Reordering/skipping end gates; leaving worktrees after merge.
+- Parent implementing delivery slices inline when a specialist exists.
+- Claiming Done from an isolated worktree without merge + main doc-sync.
 
-## Done definition (extends TDD + doc-sync + commit-review constitutions)
+## Done definition
 
-Done = durable behavior + green gates + (frontend) E2E functional + UIUX evidence +
-post-task doc sync + post-task commit review + updated plan status.
+Done = durable behavior + green gates + (frontend) E2E + UIUX + queued deploy evidence
+when required + worktree cleaned if isolated + post-task doc sync + post-task commit
+review (or explicit `no-commit`) + updated plan/Task Master status.

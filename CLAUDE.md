@@ -14,8 +14,10 @@ This is a **dual-agent project** — workflow automation is orchestrated by Curs
 - `.cursor/rules/strategic-direction-autonomy-constitution.mdc` — **when direction is clear, proceed autonomously; no end-of-turn confirmation loops**
 - `.cursor/rules/subagent-routing-mandate.mdc` — the routing table for parent agents
 - `.cursor/rules/delivery-orchestration-constitution.mdc` — the full pipeline order
+- `.cursor/rules/worktree-and-deploy-queue-constitution.mdc` — worktree isolation + single Docker queue
 - `.cursor/rules/tdd-bdd-delivery-constitution.mdc` — test-first gates
 - `.cursor/rules/document-as-code-constitution.mdc` — docs-first behavior updates
+- `.cursor/agents/MODEL-STRATEGY.md` — tiered Grok / GLM / Composer Fast (`inherit` forbidden)
 
 ## Quick Commands (host compile, Docker runtime)
 
@@ -35,17 +37,18 @@ pnpm -C frontend build                                           # Compile only 
 # Both stacks (p0 gate)
 .\scripts\p0-gate.ps1                                            # Mechanical debounce for auto mode
 
-# Docker-only validation (required for manual testing)
-.\scripts\docker-deploy.ps1                                      # Full compile + deploy (run on host, execute in containers)
-.\scripts\docker-deploy.ps1 -SkipBuild                          # Restart containers only
-curl -f http://localhost:8080/healthz                            # Backend health
-curl -f http://localhost:4173                                    # Management UI
+# Docker-only validation (required for manual testing) — single host, queued
+.\scripts\docker-deploy-queue.ps1                            # Mutex + full compile + deploy
+.\scripts\docker-deploy-queue.ps1 -SkipBuild                 # Restart containers only
+.\scripts\docker-deploy-queue.ps1 -Status                    # Show lock / queue
+curl -f http://localhost:8080/healthz                        # Backend health
+curl -f http://localhost:4173                                # Management UI
 
 # E2E docker acceptance (tests at http://localhost:4173)
-pnpm -C frontend test:e2e:docker                                 # Playwright smoke (8 specs in CI)
+pnpm -C frontend test:e2e:docker                             # Playwright smoke (8 specs in CI)
 
 # Seed FOL demo
-.\scripts\docker-deploy.ps1 -FOLDemo                             # Deploys with demo data loaded
+$env:DOCGEN_IMPORT_FOL_DEMO='true'; .\scripts\docker-deploy-queue.ps1
 ```
 
 **Important:** Manual acceptance testing runs in Docker containers. Compilation happens on the host (local Maven/pnpm using `~/.m2` and `node_modules`), then artifacts are copied into runtime images — **no native Maven/npm inside Docker build.**
@@ -114,28 +117,37 @@ Coverage floors (vitest.config.ts): lines 22 / functions 32 / branches 55.
 
 ## Delivery Pipeline (parent agent: you)
 
-All behavior-changing work routes through **one orchestrator** with a fixed stage order.
+All behavior-changing work routes through **one orchestrator** with fixed stage numbers
+(see `.cursor/skills/delivery-pipeline/SKILL.md`):
 
 ```
-0. Behavior spec              → behavior-spec-author      (BDD gate; skip only if readiness = not-applicable)
-1. Plan phase control         → plan-orchestrator         (at most one phase In Progress per master-plan.md)
-2. Docs-first update          → doc-keeper                 (update source-of-truth before code)
-3a. Backend TDD               → backend-engineer           (red → green → refactor)
-3b. Frontend TDD              → frontend-engineer          (TDD + bank OA style lock + dhiless i18n)
-4. E2E functional             → e2e-test-engineer          (Playwright user-journey)
-5. E2E UIUX                   → e2e-uiux-reviewer          (visual/responsive/a11y/brand evidence)
-6. Architecture & governance → architecture-reviewer      (boundaries, ADR, fail-closed, sensitive data)
-7. Deploy (if release-relevant) → build-deploy-agent       (Docker, health, rollback)
-8. Plan layer sync            → post-task-doc-sync         (plan/detail/master-plan/ledger/sheets/indexes)
-9. Commit gate                → post-task-commit-review    (review → stage → commit → push by default)
+0. Placement       → worktree-router
+1. Behavior spec   → behavior-spec-author
+2. Plan            → plan-orchestrator (+ Task Master when applicable)
+3. Docs-first      → doc-keeper
+4. Implement       → backend-engineer | frontend-engineer | rendering-engineer
+5. E2E stack prep  → build-deploy-agent (docker-deploy-queue)
+6. E2E functional  → e2e-test-engineer
+7. E2E UIUX        → e2e-uiux-reviewer
+8. Architecture    → architecture-reviewer
+9. Code quality    → code-quality-reviewer (optional)
+10. Deploy evidence → build-deploy-agent (queue)
+11. Integrate      → integration-merger (if ISOLATED)
+12. Doc sync       → post-task-doc-sync (on main after merge)
+13. Commit gate    → post-task-commit-review
 Done
 ```
 
-**Non-negotiable pipeline order:**
+**Non-negotiable:**
 - No code before behavior spec (BDD)
 - No frontend Done without E2E functional + UIUX evidence
-- No Done before post-task doc sync + post-task commit review
-- Use `Task` tool for ALL implementation — never inline multi-file changes
+- No parallel Docker acceptance stacks — queue only
+- Isolated slices: merge + worktree cleanup; doc-sync/commit on **main**
+- No Done before post-task doc sync + post-task commit review (honor `no-commit`)
+- Use `Task` for implementation — never inline multi-file delivery
+- **Models (tiered, no API):** Governance `grok-4.5-fast-xhigh` · Delivery `glm-5.2-high` · Execution `composer-2.5-fast`; **`inherit` forbidden** — see `.cursor/agents/MODEL-STRATEGY.md`
+- **Supervisor mode:** user stays in one main session; parent autonomously spawns Task subagents
+- **MCP:** `.cursor/mcp.json` — task-master-ai, local Postgres (dev), fetch (healthz/OpenAPI)
 
 ## Git Workflow Rules
 
@@ -195,7 +207,7 @@ Store scheduled tasks in `.claude/scheduled_tasks.json`.
 
 ### In-Session Permission Whitelisting
 
-For read-only queries (grep, read files, check status), use `fewer-permission-prompts` skill to add priorities to `.claude/settings.json` and reduce repeated read-only Bash prompts.
+Prefer allowing read-only git/fs tools in `.claude/settings.json` to reduce repeated permission prompts for Grep/Read/Glob-style work. Do not weaken write/deploy permissions.
 
 ## Documentation Source-of-Truth Order
 
@@ -231,7 +243,10 @@ When in doubt about a behavior/architecture decision, follow this order:
 
 - **Read more:** `docs/plan/master-plan.md`, `docs/plan/execution-sync-ledger.md`, `docs/plan/README.md`
 - **Backend details:** `backend/README.md`
-- **Docker deployment:** `.\scripts\docker-deploy.ps1`, `docker-compose.prod.yml`
+- **Docker deployment (queued):** `.\scripts\docker-deploy-queue.ps1`, `docker-compose.prod.yml`
+- **Worktree isolation:** `.cursor/skills/worktree-isolation/SKILL.md`, agents `worktree-router` / `integration-merger`
+- **Model strategy:** `.cursor/agents/MODEL-STRATEGY.md` (tiered Grok / GLM / Composer Fast; `inherit` forbidden)
+
 - **Frontend i18n:** `.cursor/skills/i18n-english-first/SKILL.md`
 - **Frontend OA design:** `.cursor/skills/frontend-oa-design/SKILL.md`
 - **TDD delivery loop:** `.cursor/skills/tdd-feature-delivery/SKILL.md`

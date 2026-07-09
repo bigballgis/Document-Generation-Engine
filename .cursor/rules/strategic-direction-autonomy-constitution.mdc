@@ -25,10 +25,13 @@ appears.
    after each subagent to ask «要继续吗？» when the pipeline order is known.
 2. **Specialists** — complete the assigned slice, run gates, chain to the next mandated
    stage (`post-task-doc-sync` → `post-task-commit-review`) without permission prompts.
-3. **Commits** — when a coherent task slice is green, **commit in the same session** via
-   post-task-commit-review. Do not ask «需要提交吗？」 for routine slice completion.
-4. **Push** — push by default after commit unless the user opted out in the same session
-   (`no-push`, `draft`, `plan-only`).
+3. **Commits** — when a coherent task slice is green **and** the session delegated commit
+   (default for implementer agents), run `post-task-commit-review` without asking
+   «需要提交吗？». **User same-session opt-out wins:** `no-commit`, `draft`, `plan-only`,
+   or a user rule that requires explicit commit requests — then stop after doc-sync and
+   report “ready to commit” without staging.
+4. **Push** — after a successful commit-review commit, push by default unless the user
+   opted out (`no-push`, `draft`, `plan-only`).
 5. **Reporting** — state what was done, evidence, and the **single next action taken or
    delegated** — not a menu of optional follow-ups.
 
@@ -42,6 +45,7 @@ appears.
 | Destructive git (force push, hard reset, amend after push) | User must explicitly request |
 | Secrets / credentials in staging area | Stop; never commit |
 | User same-session opt-out (`no-commit`, `no-push`, `不要子 agent`) | Honor immediately |
+| User rule requires explicit commit request | Do not auto-commit; finish doc-sync and wait |
 
 ## Forbidden
 

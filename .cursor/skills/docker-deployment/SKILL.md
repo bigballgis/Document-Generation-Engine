@@ -28,11 +28,13 @@ Compile on host (local Maven/pnpm), then images only copy pre-built artifacts �
 no Maven/npm inside `docker build`.
 
 ```powershell
-# From repo root — host compile + docker image packaging + rollout
-.\scripts\docker-deploy.ps1
+# From repo root — queued (single Docker host mutex) then host compile + rollout
+.\scripts\docker-deploy-queue.ps1
+.\scripts\docker-deploy-queue.ps1 -SkipBuild
+.\scripts\docker-deploy-queue.ps1 -Status
 
-# Restart only (no compile)
-.\scripts\docker-deploy.ps1 -SkipBuild
+# Underlying script (debugging / already holding queue)
+.\scripts\docker-deploy.ps1
 ```
 
 Equivalent manual steps:

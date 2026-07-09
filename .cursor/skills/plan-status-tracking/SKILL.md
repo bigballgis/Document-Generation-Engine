@@ -11,9 +11,13 @@ per-phase plans with task/design decomposition.
 ## Files
 
 - `docs/plan/README.md` — plan layer index and rules.
-- `docs/plan/master-plan.md` — phases P0..P11 (overall plan).
-- `docs/plan/detail/<phase>.md` — detailed tasks and design for one phase.
+- `docs/plan/master-plan.md` — phase-level history (P0–P23+; see file for current status).
+- `docs/plan/detail/<phase>.md` — detailed tasks (frozen for Done phases; live for LRP/CDP/SOR).
 - `docs/plan/execution-sync-ledger.md` — epic/milestone mirror + gate evidence.
+- `.taskmaster/tasks/tasks.json` — **active/new work** source of truth since 2026-07-05 (ADR-0053).
+
+When both Task Master and `docs/plan/` apply: update Task Master for active tasks, and
+mirror status into plan/ledger when the work maps to a formal phase/program.
 
 ## Status vocabulary (only these)
 

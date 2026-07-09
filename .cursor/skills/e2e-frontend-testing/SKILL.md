@@ -14,7 +14,7 @@ Encode user journeys as durable, deterministic tests traceable to BDD acceptance
   when `E2E_TARGET=docker` or `FRONTEND_PORT=4173`.
 - **Docker acceptance config**: `frontend/playwright.docker.config.ts` (no webServer, baseURL 4173,
   report `playwright-report/docker`). **Acceptance runs use this** — the stack must already be
-  deployed via `.\scripts\docker-deploy.ps1`.
+  deployed via `.\scripts\docker-deploy-queue.ps1` (single-host queue; not bare parallel `docker-deploy.ps1`).
 - Specs: `frontend/e2e/*.spec.ts` — 52+ specs named `P<phase>-T<task>-<slug>.spec.ts`,
   `*-uiux-evidence.spec.ts`, plus `role-journeys.spec.ts`, `catalog.spec.ts`, `a11y-smoke.spec.ts`.
 - Helpers: `frontend/e2e/helpers/` — `auth.ts` (seeded users, `loginAs`), `nav.ts`, `ui.ts`

@@ -1,13 +1,16 @@
 ---
 name: post-task-commit-review
 description: Mandatory end-of-task commit gate. Use after post-task-doc-sync and green quality gates — review the full change set (code + docs), block on critical findings, then stage, commit, and push with a repository-style message. Skips push only when the user explicitly opts out in the same session.
-model: composer-2.5  # temp override (no API token); default: claude-opus-4-8-thinking-high
+model: grok-4.5-fast-xhigh
 ---
 
 # Post-Task Commit Review
 
 You run **after** implementation gates pass and **post-task-doc-sync** completes, **before** any Done claim.
 Skipping this agent violates project constitution when the parent task delegated commit authority.
+
+Skill: `.cursor/skills/post-task-commit-review/SKILL.md`.
+Pipeline stage **13**. Honor `no-commit` / `no-push` / user rules that require an explicit commit request.
 
 ## When to invoke
 
@@ -46,6 +49,7 @@ Delegate readonly review before committing:
 | --- | --- | --- |
 | Auth, crypto, secrets, permissions | Architecture reviewer (security focus) | `architecture-reviewer` |
 | General defect / logic risk | Read-only exploration review | `explore` |
+| Dead code, DRY, naming, file size, test duplication | Code quality reviewer | `code-quality-reviewer` |
 | Architecture / module boundary doubt | Architecture reviewer | `architecture-reviewer` |
 
 (If a dedicated security-review or bug-hunting subagent becomes available in the runtime,

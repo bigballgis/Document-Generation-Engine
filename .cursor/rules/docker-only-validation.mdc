@@ -1,47 +1,37 @@
 ---
-description: Host build + Docker runtime — compile with local Maven/pnpm, test only in Docker containers.
-alwaysApply: true
+description: Hard constraint — host compile + Docker runtime; use docker-deploy-queue on this single host. Apply when deploying, running E2E docker, or changing Docker/compose/scripts.
+globs: docker-compose*.yml, **/Dockerfile*, scripts/docker-*.ps1, frontend/e2e/**/*, frontend/playwright*.ts
+alwaysApply: false
 ---
 
 # Docker Runtime Validation
 
 Manual acceptance testing runs in Docker containers. **Compilation happens on the host**
-(local Maven / pnpm using your `~/.m2` and `node_modules`), then artifacts are copied into
-runtime images — no Maven/npm compile inside `docker build`.
+(local Maven / pnpm), then artifacts are copied into runtime images — no Maven/npm inside
+`docker build`.
 
 ## Non-negotiables
 
-1. **Deploy script** — `.\scripts\docker-deploy.ps1` from repo root:
-   - `mvn -B -ntp -f backend/pom.xml package -Dmaven.test.skip=true`
-   - `pnpm -C frontend build`
-   - `docker compose ... build` (copies `backend/target/*.jar` + `frontend/dist`)
-   - `docker compose ... up -d`
+1. **Deploy entry (queued)** — `.\scripts\docker-deploy-queue.ps1` (mutex around
+   `docker-deploy.ps1`). Bare `docker-deploy.ps1` only when debugging with the lock held.
 2. **Test URLs** — UI `http://localhost:4173`, health `http://localhost:8080/healthz`.
-3. **After code changes** — rerun the deploy script (not `pnpm dev` / `spring-boot:run` for acceptance).
+3. **After behavior changes** — queued redeploy before claiming acceptance Done.
 
-## Gate commands (use the right command for the right context)
+## Gate commands
 
 | Context | Command |
-|---------|---------|
-| Backend TDD inner loop (fast) | `mvn -B -ntp -f backend/pom.xml -Pdev-fast test` |
-| Backend single test class | `mvn -B -ntp -f backend/pom.xml -Pdev-fast test -Dtest=<ClassName>` |
-| Backend full quality gate | `mvn -B -ntp -f backend/pom.xml verify` |
-| Frontend TDD inner loop | `pnpm -C frontend test --run` |
-| Frontend full gates | `pnpm -C frontend lint && pnpm -C frontend type-check && pnpm -C frontend test && pnpm -C frontend build` |
-| Both stacks (p0) | `.\scripts\p0-gate.ps1` |
-| E2E docker acceptance | `pnpm -C frontend test:e2e:docker` (stack deployed at 4173) |
-| Release with evidence | `.\scripts\release-gate.ps1` |
-| Deploy (full) | `.\scripts\docker-deploy.ps1` |
-| Deploy (restart only) | `.\scripts\docker-deploy.ps1 -SkipBuild` |
+| --- | --- |
+| Backend TDD | `mvn -B -ntp -f backend/pom.xml -Pdev-fast test` |
+| Backend full gate | `mvn -B -ntp -f backend/pom.xml verify` |
+| Frontend full gates | `pnpm -C frontend lint && type-check && test && build` |
+| Deploy queued | `.\scripts\docker-deploy-queue.ps1` |
+| E2E docker | `pnpm -C frontend test:e2e:docker` |
 
 ## Forbidden
 
-- Claiming Done without redeploying containers after behavior changes.
-- Long-running Maven inside Docker BuildKit for routine deploys (use host Maven instead).
-- Running `mvn verify` for TDD inner loops — use `-Pdev-fast test` instead.
+- Parallel acceptance stacks / second `COMPOSE_PROJECT_NAME` / ad-hoc port offsets.
+- Claiming Done without redeploy after behavior changes.
+- `mvn verify` for TDD inner loops — use `-Pdev-fast test`.
 
-## Reference
-
-- `backend/Dockerfile.packaged`, `frontend/Dockerfile.packaged`
-- `scripts/docker-deploy.ps1`
-- `.cursor/agents/build-deploy-agent.md`
+Skill: `.cursor/skills/docker-deploy-queue/SKILL.md`.
+Agent: `build-deploy-agent`.

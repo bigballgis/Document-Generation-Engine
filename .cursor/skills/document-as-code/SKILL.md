@@ -22,11 +22,13 @@ system must remain rebuildable from documentation alone.
 ## Source-of-truth order (resolve conflicts in this order)
 
 1. Latest explicit user confirmation
-2. `docs/requirements/requirements-plan.md`
-3. `docs/product/PRD.md`
-4. `docs/domain/domain-model.md`
-5. `docs/security/permission-matrix.md`
-6. ADRs under `docs/adr/`
+2. `.taskmaster/tasks/tasks.json` (active work since 2026-07-05; ADR-0053)
+3. `docs/plan/` (master-plan, detail, execution-sync-ledger)
+4. `docs/requirements/requirements-plan.md`
+5. `docs/product/PRD.md`
+6. `docs/domain/domain-model.md`
+7. `docs/security/permission-matrix.md`
+8. ADRs under `docs/adr/`
 
 If two documents disagree, do NOT silently choose. Mark the conflict as an open
 question and confirm with the user; preserve the latest confirmed decision.
@@ -42,7 +44,7 @@ question and confirm with the user; preserve the latest confirmed decision.
 
 ## Project status baseline
 
-The project restarted from zero (see `docs/PROJECT-STATUS-RESET.md`). P0–P11
-re-earned Done; execution truth lives in `docs/plan/` and
-`docs/plan/execution-sync-ledger.md`. Post-task sync is mandatory before Done
+Execution truth: `.taskmaster/tasks/tasks.json` for new/active work; `docs/plan/` for
+P0–P23 history and live LRP/CDP/SOR programs; `docs/plan/execution-sync-ledger.md` for
+evidence. See `docs/PROJECT-STATUS-RESET.md`. Post-task sync is mandatory before Done
 (`.cursor/skills/post-task-doc-sync/SKILL.md`).

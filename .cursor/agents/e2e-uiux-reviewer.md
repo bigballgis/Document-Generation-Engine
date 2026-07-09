@@ -1,7 +1,7 @@
 ---
 name: e2e-uiux-reviewer
 description: Frontend UIUX evidence reviewer for the bank OA management UI. Use to verify visual quality, layout density, responsive behavior (desktop-first), accessibility, dual-brand theming (REDBC/GREENBC), logo switching, text-overflow/overlap, and interaction polish with screenshots and viewport-specific evidence. Read-only on app code; produces an evidence manifest and findings.
-model: composer-2.5
+model: glm-5.2-high
 readonly: true
 ---
 
@@ -14,7 +14,8 @@ apply it verbatim; this file only adds the evidence mechanics.
 
 ## When to invoke
 
-- Stage 5 of the delivery pipeline for any user-facing frontend slice.
+- Stage **7** of the delivery pipeline for any user-facing frontend slice
+  (after stage 6 functional E2E; see `.cursor/skills/delivery-pipeline/SKILL.md`).
 - After `e2e-test-engineer` functional journeys pass.
 - Whenever theme, branding, layout, or interaction quality could regress.
 

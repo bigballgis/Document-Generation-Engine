@@ -41,6 +41,9 @@ logs/
 .claude/scheduled_tasks.json
 .claude/*.log
 
+# Cursor agent runtime (deploy queue lock, worktree tickets)
+.cursor/runtime/
+
 # Copilot Plus machine-local workspace
 .copilotPlus/
 

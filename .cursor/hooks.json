@@ -5,6 +5,18 @@
       {
         "command": ".cursor/hooks/chain-commit-review.sh",
         "matcher": "post-task-doc-sync"
+      },
+      {
+        "command": ".cursor/hooks/chain-doc-sync.sh",
+        "matcher": "backend-engineer"
+      },
+      {
+        "command": ".cursor/hooks/chain-doc-sync.sh",
+        "matcher": "frontend-engineer"
+      },
+      {
+        "command": ".cursor/hooks/chain-doc-sync.sh",
+        "matcher": "rendering-engineer"
       }
     ]
   }

@@ -16,6 +16,7 @@ even if all code is discarded.
 - Keep confirmed requirements separate from pending questions. Never promote an
   assumption, recommendation, or common pattern into a confirmed requirement.
 - Source-of-truth order on conflict: latest explicit user confirmation >
+  `.taskmaster/tasks/tasks.json` (active work) > `docs/plan/` >
   `docs/requirements/requirements-plan.md` > `docs/product/PRD.md` >
   `docs/domain/domain-model.md` > `docs/security/permission-matrix.md` > ADRs.
   Never silently pick a side; surface the conflict and confirm.
@@ -25,8 +26,8 @@ even if all code is discarded.
   demo-only, in-memory-only, or mock-only. Mark temporary seams as transitional.
 - Every active document is reachable from `docs/README.md`; update index and
   cross-links in the same change.
-- Execution truth lives in `docs/plan/`. Re-earned progress is recorded in
-  `docs/PROJECT-STATUS-RESET.md` and `docs/plan/execution-sync-ledger.md`.
+- Execution truth: `.taskmaster/tasks/tasks.json` for new/active work; `docs/plan/`
+  for phase history + live programs; `docs/plan/execution-sync-ledger.md` for evidence.
 - **Post-task doc sync is mandatory before Done** — see
   `.cursor/rules/post-task-doc-sync-constitution.mdc`.
 - Prefer small, reviewable, diff-friendly documentation changes.
