@@ -2212,6 +2212,53 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/audit/generation:
+    get:
+      tags: [Admin]
+      operationId: listGenerationAuditEventsByTemplateExternalId
+      summary: Paginated runtime generation audit summaries for a template package
+      description: >-
+        Read-only management query scoped by template external id. Requires
+        readAudit capability and readable template access for the caller's group
+        scope. Returns non-sensitive generation audit summaries only; does not
+        expose caller variable plaintext, full request bodies, or download URLs.
+      parameters:
+        - name: templateExternalId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 20
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Paginated generation audit summaries returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerationAuditQueryResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/{environment}/v1/admin/masters:
     post:
       tags: [Admin]
@@ -3740,6 +3787,64 @@ components:
                   type: array
                   items:
                     $ref: '#/components/schemas/ManagementInvocationSummaryView'
+    GenerationAuditEventView:
+      type: object
+      additionalProperties: false
+      required:
+        - eventAt
+        - eventType
+        - templateExternalId
+        - requestId
+        - outcome
+        - status
+        - accessAccountSummary
+      properties:
+        eventAt:
+          type: string
+          format: date-time
+        eventType:
+          type: string
+        templateExternalId:
+          type: string
+        requestId:
+          type: string
+        outcome:
+          type: string
+        status:
+          type: string
+        accessAccountSummary:
+          type: string
+    GenerationAuditQueryResult:
+      type: object
+      additionalProperties: false
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/GenerationAuditEventView'
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+        totalElements:
+          type: integer
+          minimum: 0
+          format: int64
+        totalPages:
+          type: integer
+          minimum: 0
+    GenerationAuditQueryResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/GenerationAuditQueryResult'
     ManagementInvocationDetailResponse:
       type: object
       additionalProperties: false

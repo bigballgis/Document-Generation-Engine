@@ -1,5 +1,6 @@
 package com.bank.docgen.authorization.management.service;
 
+import com.bank.docgen.audit.service.ManagementAuditEventTypes;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.authorization.management.api.BusinessGroupView;
 import com.bank.docgen.authorization.management.api.CreateGroupRequest;
@@ -61,7 +62,7 @@ public class BusinessGroupService {
         );
         businessGroupRepository.save(group);
         auditRecorder.recordGroupEvent(
-                ManagementAuditRecorder.GROUP_CREATED,
+                ManagementAuditEventTypes.GROUP_CREATED,
                 group.getGroupCode(),
                 session.username(),
                 actorSummary(session),
@@ -78,7 +79,7 @@ public class BusinessGroupService {
         group.rename(request.displayName());
         businessGroupRepository.save(group);
         auditRecorder.recordGroupEvent(
-                ManagementAuditRecorder.GROUP_UPDATED,
+                ManagementAuditEventTypes.GROUP_UPDATED,
                 group.getGroupCode(),
                 session.username(),
                 actorSummary(session),
@@ -95,7 +96,7 @@ public class BusinessGroupService {
         group.disable();
         businessGroupRepository.save(group);
         auditRecorder.recordGroupEvent(
-                ManagementAuditRecorder.GROUP_DISABLED,
+                ManagementAuditEventTypes.GROUP_DISABLED,
                 group.getGroupCode(),
                 session.username(),
                 actorSummary(session),
@@ -112,7 +113,7 @@ public class BusinessGroupService {
         group.enable();
         businessGroupRepository.save(group);
         auditRecorder.recordGroupEvent(
-                ManagementAuditRecorder.GROUP_ENABLED,
+                ManagementAuditEventTypes.GROUP_ENABLED,
                 group.getGroupCode(),
                 session.username(),
                 actorSummary(session),

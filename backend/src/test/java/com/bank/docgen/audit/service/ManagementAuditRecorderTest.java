@@ -32,7 +32,14 @@ class ManagementAuditRecorderTest {
 
     @BeforeEach
     void setUp() {
-        recorder = new ManagementAuditRecorder(repository, objectMapper);
+        ManagementAuditEventWriter eventWriter = new ManagementAuditEventWriter(repository, objectMapper);
+        recorder = new ManagementAuditRecorder(
+                new ApiPolicyAuditRecorder(eventWriter),
+                new IdentityAuditRecorder(eventWriter),
+                new CollaborationAuditRecorder(eventWriter),
+                new ContentModuleAuditRecorder(eventWriter),
+                new TemplateTransferAuditRecorder(eventWriter)
+        );
     }
 
     @Test
@@ -63,7 +70,7 @@ class ManagementAuditRecorderTest {
         verify(repository).save(captor.capture());
         ManagementAuditEventEntity saved = captor.getValue();
 
-        assertThat(saved.getEventType()).isEqualTo(ManagementAuditRecorder.API_POLICY_UPDATED);
+        assertThat(saved.getEventType()).isEqualTo(ManagementAuditEventTypes.API_POLICY_UPDATED);
         assertThat(saved.getPreviousPolicyVersion()).isEqualTo(2);
         assertThat(saved.getPolicyVersion()).isEqualTo(3);
         assertThat(saved.getChangedAreasJson()).contains("DEFAULT_ROUTE_TARGET");
@@ -182,7 +189,7 @@ class ManagementAuditRecorderTest {
         verify(repository).save(captor.capture());
         ManagementAuditEventEntity saved = captor.getValue();
 
-        assertThat(saved.getEventType()).isEqualTo(ManagementAuditRecorder.CONTENT_MODULE_LIFECYCLE_OPERATION);
+        assertThat(saved.getEventType()).isEqualTo(ManagementAuditEventTypes.CONTENT_MODULE_LIFECYCLE_OPERATION);
         JsonNode payload = objectMapper.readTree(saved.getWarningCodesJson());
         assertThat(payload.get("referenceTemplateCount").asInt()).isEqualTo(2);
         assertThat(payload.get("recentCallSummary").asText()).isEqualTo("recentCalls=12/7d");
@@ -209,7 +216,7 @@ class ManagementAuditRecorderTest {
         verify(repository).save(captor.capture());
         ManagementAuditEventEntity saved = captor.getValue();
 
-        assertThat(saved.getEventType()).isEqualTo(ManagementAuditRecorder.COLLABORATION_WORK_ITEM_CREATED);
+        assertThat(saved.getEventType()).isEqualTo(ManagementAuditEventTypes.COLLABORATION_WORK_ITEM_CREATED);
         assertThat(saved.getTemplateId()).isEqualTo(templateId);
         assertThat(saved.getGroupCode()).isEqualTo("RETAIL");
         assertThat(saved.getActorUsername()).isEqualTo("10000003");
@@ -236,7 +243,7 @@ class ManagementAuditRecorderTest {
         verify(repository).save(captor.capture());
         ManagementAuditEventEntity saved = captor.getValue();
 
-        assertThat(saved.getEventType()).isEqualTo(ManagementAuditRecorder.COLLABORATION_WORK_ITEM_RESOLVED);
+        assertThat(saved.getEventType()).isEqualTo(ManagementAuditEventTypes.COLLABORATION_WORK_ITEM_RESOLVED);
         assertThat(saved.getTemplateId()).isEqualTo(templateId);
         assertThat(saved.getGroupCode()).isEqualTo("RETAIL");
         assertThat(saved.getStatusSummary()).contains("TEST");

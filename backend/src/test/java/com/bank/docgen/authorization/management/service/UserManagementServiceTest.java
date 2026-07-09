@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.audit.service.ManagementAuditEventTypes;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.authorization.management.api.CreateUserRequest;
 import com.bank.docgen.authorization.management.api.ManagementUserView;
@@ -58,7 +59,7 @@ class UserManagementServiceTest {
         assertThat(view.authorizedGroupCodes()).containsExactly("RETAIL");
         verify(userRepository).save(any(ManagementUserEntity.class));
         verify(auditRecorder).recordUserEvent(
-                org.mockito.ArgumentMatchers.eq(ManagementAuditRecorder.USER_CREATED),
+                org.mockito.ArgumentMatchers.eq(ManagementAuditEventTypes.USER_CREATED),
                 anyString(), anyString(), anyString());
     }
 
@@ -136,7 +137,7 @@ class UserManagementServiceTest {
 
         assertThat(user.isDeleted()).isTrue();
         verify(auditRecorder).recordUserEvent(
-                org.mockito.ArgumentMatchers.eq(ManagementAuditRecorder.USER_DELETED),
+                org.mockito.ArgumentMatchers.eq(ManagementAuditEventTypes.USER_DELETED),
                 anyString(), anyString(), anyString());
     }
 
@@ -159,7 +160,7 @@ class UserManagementServiceTest {
 
         assertThat(user.getPasswordHash()).isEqualTo("NEWHASH");
         verify(auditRecorder).recordUserEvent(
-                org.mockito.ArgumentMatchers.eq(ManagementAuditRecorder.USER_PASSWORD_RESET),
+                org.mockito.ArgumentMatchers.eq(ManagementAuditEventTypes.USER_PASSWORD_RESET),
                 anyString(), anyString(), anyString());
     }
 

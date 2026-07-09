@@ -1,5 +1,6 @@
 package com.bank.docgen.collaboration.service;
 
+import com.bank.docgen.audit.service.ManagementAuditEventTypes;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.collaboration.api.CollaborationTimeoutConfigView;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
@@ -17,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CollaborationEscalationService {
 
-    static final String SYSTEM_ACTOR_USERNAME = ManagementAuditRecorder.COLLABORATION_ESCALATION_ACTOR_USERNAME;
-    static final String SYSTEM_ACTOR_SUMMARY = ManagementAuditRecorder.COLLABORATION_ESCALATION_ACTOR_SUMMARY;
+    static final String SYSTEM_ACTOR_USERNAME = ManagementAuditEventTypes.COLLABORATION_ESCALATION_ACTOR_USERNAME;
+    static final String SYSTEM_ACTOR_SUMMARY = ManagementAuditEventTypes.COLLABORATION_ESCALATION_ACTOR_SUMMARY;
 
     private final CollaborationWorkItemRepository workItemRepository;
     private final CollaborationTimeoutResolver timeoutResolver;

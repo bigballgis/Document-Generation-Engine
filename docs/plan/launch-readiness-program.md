@@ -27,11 +27,11 @@
 | Work stream | Where it runs | This LRP program owns |
 | --- | --- | --- |
 | **P22** (P22-T01…T15, rendering + demo scaffolds) | **Done** (2026-07-04) — typography/content → **P23** | **Nothing.** Do not reopen P22. |
-| **P23** (P23-T01…T16, demo typography & layout excellence) | **Formal phase In Progress** — track via [P23 detail](./detail/P23-demo-typography-layout-excellence.md) | **LR-A2** / **LR-A7** coordinate with P23 (§5); LRP does not own P23 package rewrites. |
+| **P23** (P23-T01…T16, demo typography & layout excellence) | **Done** (2026-07-08) — track via [P23 detail](./detail/P23-demo-typography-layout-excellence.md) | **LR-A2** / **LR-A7** coordinate with P23 (§5); LRP does not own P23 package rewrites. |
 | **CDP** (CD-DOC/CD-BDD/CD-E2E/CD-HARD, `CD-*`) | **Another session** — track via [CDP program](./competitiveness-deepening-program.md) | **Nothing.** LRP references CD-2 (browser E2E) and CD-3 (CD-HARD) as prerequisite/sibling waves; it does **not** duplicate or execute their tasks. |
 | **LRP** (`LR-*` — production hardening + usability deepening) | **This program** | LR-A…LR-E per §2 wave map. |
 
-**Formal phase note:** `master-plan.md` keeps **P23** as the sole formal phase `In Progress` (2026-07-08). LRP is a **cross-cutting program** at the same level as CDP — **not** a new formal phase. LRP implementers follow task IDs prefixed **`LR-*`** only.
+**Formal phase note:** `master-plan.md` has **no active formal phase** (2026-07-09; CORE-FORTRESS + CODE-QUALITY **Done**). LRP is a **cross-cutting program** at the same level as CDP — **not** a formal phase. LRP implementers follow task IDs prefixed **`LR-*`** only.
 
 **Shared-wave contract with CDP:** where an LRP task executes a CD-HARD task (LR-A2→CD-HARD-T01, LR-A6→CD-HARD-T03, LR-A7→CD-HARD-T04), status is recorded **once** in the CDP detail doc and mirrored by ledger reference — never forked.
 

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.audit.service.ManagementAuditEventTypes;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.authorization.management.api.BusinessGroupView;
 import com.bank.docgen.authorization.management.api.CreateGroupRequest;
@@ -53,7 +54,7 @@ class BusinessGroupServiceTest {
         assertThat(view.enabled()).isTrue();
         verify(businessGroupRepository).save(any(BusinessGroupEntity.class));
         verify(auditRecorder).recordGroupEvent(
-                org.mockito.ArgumentMatchers.eq(ManagementAuditRecorder.GROUP_CREATED),
+                org.mockito.ArgumentMatchers.eq(ManagementAuditEventTypes.GROUP_CREATED),
                 anyString(), anyString(), anyString(), anyString());
     }
 
@@ -107,7 +108,7 @@ class BusinessGroupServiceTest {
 
         assertThat(view.displayName()).isEqualTo("Retail Renamed");
         verify(auditRecorder).recordGroupEvent(
-                org.mockito.ArgumentMatchers.eq(ManagementAuditRecorder.GROUP_UPDATED),
+                org.mockito.ArgumentMatchers.eq(ManagementAuditEventTypes.GROUP_UPDATED),
                 anyString(), anyString(), anyString(), anyString());
     }
 

@@ -984,6 +984,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/audit/generation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Paginated runtime generation audit summaries for a template package
+         * @description Read-only management query scoped by template external id. Requires readAudit capability and readable template access for the caller's group scope. Returns non-sensitive generation audit summaries only; does not expose caller variable plaintext, full request bodies, or download URLs.
+         */
+        get: operations["listGenerationAuditEventsByTemplateExternalId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/{environment}/v1/admin/masters": {
         parameters: {
             query?: never;
@@ -1561,6 +1581,28 @@ export interface components {
             result: components["schemas"]["PageView"] & {
                 content: components["schemas"]["ManagementInvocationSummaryView"][];
             };
+        };
+        GenerationAuditEventView: {
+            /** Format: date-time */
+            eventAt: string;
+            eventType: string;
+            templateExternalId: string;
+            requestId: string;
+            outcome: string;
+            status: string;
+            accessAccountSummary: string;
+        };
+        GenerationAuditQueryResult: {
+            content: components["schemas"]["GenerationAuditEventView"][];
+            page: number;
+            size: number;
+            /** Format: int64 */
+            totalElements: number;
+            totalPages: number;
+        };
+        GenerationAuditQueryResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["GenerationAuditQueryResult"];
         };
         ManagementInvocationDetailResponse: {
             metadata: components["schemas"]["Metadata"];
@@ -4842,6 +4884,37 @@ export interface operations {
                 };
                 content: {
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": string;
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listGenerationAuditEventsByTemplateExternalId: {
+        parameters: {
+            query: {
+                templateExternalId: string;
+                page?: number;
+                size?: number;
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated generation audit summaries returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationAuditQueryResponse"];
                 };
             };
             401: components["responses"]["ErrorResponse"];

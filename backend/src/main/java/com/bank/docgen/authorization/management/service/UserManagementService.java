@@ -1,5 +1,6 @@
 package com.bank.docgen.authorization.management.service;
 
+import com.bank.docgen.audit.service.ManagementAuditEventTypes;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.authorization.management.api.CreateUserRequest;
 import com.bank.docgen.authorization.management.api.ManagementUserView;
@@ -88,7 +89,7 @@ public class UserManagementService {
                 groupCodes
         );
         managementUserRepository.save(user);
-        recordUserEvent(ManagementAuditRecorder.USER_CREATED, session, user, "Created user");
+        recordUserEvent(ManagementAuditEventTypes.USER_CREATED, session, user, "Created user");
         return toView(user);
     }
 
@@ -103,7 +104,7 @@ public class UserManagementService {
         user.assignRoles(roles);
         user.assignGroupScope(groupCodes);
         managementUserRepository.save(user);
-        recordUserEvent(ManagementAuditRecorder.USER_UPDATED, session, user, "Updated user roles/scope/profile");
+        recordUserEvent(ManagementAuditEventTypes.USER_UPDATED, session, user, "Updated user roles/scope/profile");
         return toView(user);
     }
 
@@ -112,7 +113,7 @@ public class UserManagementService {
         ManagementUserEntity user = loadVisible(id, session);
         user.disable();
         managementUserRepository.save(user);
-        recordUserEvent(ManagementAuditRecorder.USER_DISABLED, session, user, "Disabled user");
+        recordUserEvent(ManagementAuditEventTypes.USER_DISABLED, session, user, "Disabled user");
         return toView(user);
     }
 
@@ -121,7 +122,7 @@ public class UserManagementService {
         ManagementUserEntity user = loadVisible(id, session);
         user.enable();
         managementUserRepository.save(user);
-        recordUserEvent(ManagementAuditRecorder.USER_ENABLED, session, user, "Enabled user");
+        recordUserEvent(ManagementAuditEventTypes.USER_ENABLED, session, user, "Enabled user");
         return toView(user);
     }
 
@@ -130,7 +131,7 @@ public class UserManagementService {
         ManagementUserEntity user = loadVisible(id, session);
         user.resetPassword(passwordHashService.hash(request.newPassword()));
         managementUserRepository.save(user);
-        recordUserEvent(ManagementAuditRecorder.USER_PASSWORD_RESET, session, user, "Reset password");
+        recordUserEvent(ManagementAuditEventTypes.USER_PASSWORD_RESET, session, user, "Reset password");
         return toView(user);
     }
 
@@ -149,7 +150,7 @@ public class UserManagementService {
                 .orElseThrow(UserNotFoundException::new);
         user.markDeleted();
         managementUserRepository.save(user);
-        recordUserEvent(ManagementAuditRecorder.USER_DELETED, session, user, "Logically deleted user");
+        recordUserEvent(ManagementAuditEventTypes.USER_DELETED, session, user, "Logically deleted user");
         return toView(user);
     }
 

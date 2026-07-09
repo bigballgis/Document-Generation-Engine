@@ -152,6 +152,7 @@ API 管理配置按配置域独立保存；每个配置域操作动线为编辑�
 | 配置 default 路径目标发布版本 | 是 | 被授权组范围内 | 否 | 否 | default 路径目标发布版本属于 API 管理配置，必须显式指向未停用发布版本；作为独立配置域保存，配置变更只支持立即生效，不支持未来定时生效或待生效变更；配置变更和回滚都需要影响预览、硬阻断/警告判断和审计，不主动通知调用方或管理员。 |
 | 配置调用记录与文档留存 | 是 | 被授权组范围内 | 否 | 否 | 包级 `saveGeneratedDocuments`、`invocationRecordRetentionDays`、`documentRetentionDays`（预设选项；max 7y/1y）；`changedAreas` 含 `INVOCATION_RETENTION`；仅影响新产生的记录 TTL。 |
 | 查看包级调用记录摘要 | 是 | 被授权组范围内 | 是（只读摘要） | 否 | 包 Hub L2 最近调用列表；**无** variables 明文；合规明细仍仅审计角色。 |
+| 查看包级生成审计摘要 | 是 | 被授权组范围内 | 否 | 否 | `GET /api/management/v1/audit/generation?templateExternalId=`；需 `readAudit` + 可读模板组范围；返回 `eventAt/eventType/requestId/outcome/status/accessAccountSummary` 等非敏感摘要；**不得**返回变量明文、完整请求体或下载地址。 |
 
 ## 8. API 授权规则
 
