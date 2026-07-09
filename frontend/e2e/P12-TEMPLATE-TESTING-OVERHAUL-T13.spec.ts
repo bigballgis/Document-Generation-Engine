@@ -14,7 +14,6 @@ import {
   previewProgressDialog,
   submitForTestButton,
   startAsyncPreviewWithStatus,
-  submitForTestButton,
   touchTemplateContentForInvalidation,
   waitForPreviewConcurrencySlot,
 } from './helpers/template-testing-api'

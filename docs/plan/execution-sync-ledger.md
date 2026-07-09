@@ -1,5 +1,9 @@
 # Execution Sync Ledger
 
+**Activation note (2026-07-09):** **CORE-FORTRESS-F8-OBSERVABILITY-SLO-DR activated → In Progress** (sole formal phase). F7 Done. Program roadmap: [CORE-FORTRESS-program-roadmap.md](./detail/CORE-FORTRESS-program-roadmap.md).
+
+**Completion note (2026-07-09, CORE-FORTRESS F7):** **CORE-FORTRESS-F7-AUTHORING-UX Done** — B1 `useDirtyGuard` + `DirtyGuardConfirmDialog` (beforeunload / onBeforeRouteLeave / dialog-close); B2 `AuthoringSideBySideLayout` + `AuthoringPreviewPane` (stale badge + Refresh CTA + CD-PIT-08 boundary copy). **LRP mirror:** **LR-C1 → Done**; **LR-C4 → Done**. **Gate:** `pnpm -C frontend lint && type-check && test && build` — **GREEN** (**894** Vitest). **E2E:** CORE-FORTRESS-F7 Playwright **12/12** PASS (docker). Detail: [CORE-FORTRESS-f7-authoring-ux.md](./detail/CORE-FORTRESS-f7-authoring-ux.md).
+
 **Activation note (2026-07-09):** **CORE-FORTRESS-F7-AUTHORING-UX activated → In Progress** (sole formal phase). F6 Done. Program roadmap: [CORE-FORTRESS-program-roadmap.md](./detail/CORE-FORTRESS-program-roadmap.md).
 
 **Completion note (2026-07-09, CORE-FORTRESS F6):** **CORE-FORTRESS-F6-FRONTEND-KERNEL-REFACTOR Done** — A1 `useTemplatePreviewActions`; A2 lifecycle split (`useTemplateLifecycleGates`, `useTemplateLifecycleDecisions`); A3 navigation split (`useTemplateDetailTabs`, `useTemplateJourneyContext`, `useTemplateDetailLoad`); A4 controller facade **243** lines + return-shape stability test; A5 composable Vitest **73** (46 baseline + 27 new). **Gate:** `pnpm -C frontend lint && pnpm -C frontend type-check && pnpm -C frontend test && pnpm -C frontend build` — **GREEN** (**874** Vitest total). **F6-T08 Blocked** — E2E parity smoke: FOL demo bindings missing (**0/40**) + P21-T06b spec selector drift; **not F6 regression** — re-run after demo seed / selector fix. Detail: [CORE-FORTRESS-f6-frontend-kernel-refactor.md](./detail/CORE-FORTRESS-f6-frontend-kernel-refactor.md).
@@ -751,13 +755,13 @@ Cross-cutting launch-readiness program; **not** a formal phase. Task prefix **`C
 
 ## LRP — Launch Readiness & Deep-Optimization Program (2026-07-03)
 
-Cross-cutting program at the same level as CDP; **not** a formal phase — **P23 is the sole formal phase In Progress** (2026-07-08). Task prefix **`LR-*`** only; do not execute `P23-*`/`CD-*` from LRP. **LR-A2** (font baseline) and **LR-A7** (pagination corpus) coordinate with [P23 detail](./detail/P23-demo-typography-layout-excellence.md) §5.
+Cross-cutting program at the same level as CDP; **not** a formal phase — **CORE-FORTRESS F8** is the sole formal phase In Progress (2026-07-09). Task prefix **`LR-*`** only; do not execute `P23-*`/`CD-*`/`CORE-FORTRESS-*` from LRP. **LR-A2** (font baseline) and **LR-A7** (pagination corpus) coordinate with [P23 detail](./detail/P23-demo-typography-layout-excellence.md) §5.
 
 | Wave | Scope | Status | Evidence |
 | --- | --- | --- | --- |
 | **LR-A** | Rendering trust chain & file safety (LR-A1…A7) | **In Progress** (activated 2026-07-04) | [launch-readiness-program.md](./launch-readiness-program.md) §3; [LRP-A detail](./detail/LRP-A-rendering-trust-hardening.md) |
 | **LR-B** | Multi-instance correctness & session governance (LR-B1…B8) | **Done** (2026-07-04) | [program §4](./launch-readiness-program.md); [LRP-B detail](./detail/LRP-B-runtime-scaleout-session.md); batch 1 + batch 2 evidence below |
-| **LR-C** | Business usability deepening (LR-C1…C13) | Not Started | [program §5](./launch-readiness-program.md); [LRP-C detail](./detail/LRP-C-usability-deepening.md) |
+| **LR-C** | Business usability deepening (LR-C1…C13) | **In Progress** (LR-C1/C4 Done via CORE-FORTRESS F7 2026-07-09; C2–C3/C5–C13 remain) | [program §5](./launch-readiness-program.md); [LRP-C detail](./detail/LRP-C-usability-deepening.md); F7 evidence above |
 
 **Adjacent (not LR-C task IDs):** UX entity display constitution **Phases 0–4 Done** (2026-07-08) — catalog entity links, display-name columns, fluid layout, filter matrix on API policy + group management; Phase 4 remaining surfaces (`BatchTestHistoryPanel`, `TemplateInvocationsPanel`, `TemplateDetailOverviewTab`, collaboration/audit display names). Gates: backend `-Pdev-fast test` display-name classes ✓; frontend lint/type-check/test **847** ✓. E2E UIUX manifest pending. Traceability: [ux-entity-display-constitution.md](../architecture/ux-entity-display-constitution.md).
 | **LR-D** | Ops observability & data lifecycle (LR-D1…D7) | Not Started | [program §6](./launch-readiness-program.md); [LRP-D detail](./detail/LRP-D-ops-observability.md) |

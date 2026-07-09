@@ -7,7 +7,7 @@
 **Parallel with:** CORE-FORTRESS F7 (authoring UX — coordinate merge on `ControlledStructuredContentEditor` / dev-workspace)  
 **BDD:** `docs/behavior/core-fortress-f6-frontend-kernel-refactor.md` — **ready** (`BDD-CORE-FORTRESS-F6-001`)
 
-> **Single-active-phase invariant:** **F6 Done** (2026-07-09). **F7** sole formal `In Progress`. F1–F5 **Done**.
+> **Single-active-phase invariant:** **F6 Done** (2026-07-09). **F7 Done** (2026-07-09). **F8** sole formal `In Progress`. F1–F7 **Done**.
 
 > **Baseline (SOR-F01 Done 2026-07-04):** `useTemplateDetailController` **408** lines; siblings: `useTemplateLifecycleActions` **658**, `useTemplateDetailNavigation` **542**, `useTemplatePolicyCredentials` **154**; **46** Vitest tests across composables.
 

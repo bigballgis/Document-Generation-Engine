@@ -1,12 +1,15 @@
 <script setup lang="ts">
 
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import DirtyGuardConfirmDialog from '@/components/common/DirtyGuardConfirmDialog.vue'
+import AuthoringSideBySideLayout from '@/components/templates/AuthoringSideBySideLayout.vue'
+import AuthoringPreviewPane from '@/components/templates/AuthoringPreviewPane.vue'
 
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 
@@ -19,6 +22,7 @@ import { DEFAULT_STRUCTURED_CONTENT_JSON } from '@/utils/structuredContentNodes'
 import { buildMasterAnchorBindingRows, type MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
 
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
+import { useDirtyGuard } from '@/composables/useDirtyGuard'
 
 import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
 
@@ -33,6 +37,8 @@ import type {
   CompositionRule,
 
   CompositionRuleInput,
+
+  PreviewRecord,
 
   TemplateContentModuleReference,
 
@@ -62,6 +68,12 @@ const props = defineProps<{
 
   contentModuleReferences: TemplateContentModuleReference[]
 
+  lastPreview?: PreviewRecord | null
+
+  selectedTestDataSetId?: string | null
+
+  generatingPreview?: boolean
+
 }>()
 
 
@@ -69,6 +81,8 @@ const props = defineProps<{
 const emit = defineEmits<{
 
   updated: []
+
+  'preview-refreshed': [preview: PreviewRecord]
 
 }>()
 
@@ -99,6 +113,30 @@ const validationResult = ref<BindingValidationResult | null>(null)
 const visibilityEnabled = ref(false)
 
 const visibilityExpression = ref('')
+
+const editorDirty = ref(false)
+
+const structureRevision = ref(0)
+
+const previewSyncedRevision = ref(0)
+
+const structuredEditorRef = ref<InstanceType<typeof ControlledStructuredContentEditor> | null>(null)
+
+type EditSnapshot = {
+
+  declaredContentType: string
+
+  structuredContentJson: string
+
+  visibilityEnabled: boolean
+
+  visibilityExpression: string
+
+}
+
+const editSnapshot = ref<EditSnapshot | null>(null)
+
+const suppressStructureBump = ref(false)
 
 
 
@@ -179,6 +217,82 @@ const editingRow = computed(() =>
   anchorRowsSource.value.find((row) => row.anchorId === editingAnchorId.value) ?? null,
 
 )
+
+
+
+const formDirty = computed(() => {
+
+  if (!editSnapshot.value || panelMode.value !== 'edit') {
+
+    return false
+
+  }
+
+  const snapshot = editSnapshot.value
+
+  return (
+
+    bindingForm.declaredContentType !== snapshot.declaredContentType
+
+    || bindingForm.structuredContentJson !== snapshot.structuredContentJson
+
+    || visibilityEnabled.value !== snapshot.visibilityEnabled
+
+    || visibilityExpression.value !== snapshot.visibilityExpression
+
+    || editorDirty.value
+
+  )
+
+})
+
+
+
+const previewStale = computed(
+
+  () => props.lastPreview != null && structureRevision.value !== previewSyncedRevision.value,
+
+)
+
+
+
+const localPreviewRefreshing = ref(false)
+
+const previewRefreshing = computed(
+  () => props.generatingPreview === true || localPreviewRefreshing.value,
+)
+
+const {
+  dialogVisible: dirtyGuardDialogVisible,
+  saving: dirtyGuardSaving,
+  showSaveAction: dirtyGuardShowSave,
+  handleStay: dirtyGuardStay,
+  handleDiscard: dirtyGuardDiscard,
+  handleSave: dirtyGuardSave,
+  requestLeave: dirtyGuardRequestLeave,
+} = useDirtyGuard({
+
+  isDirty: formDirty,
+
+  enabled: computed(() => panelMode.value === 'edit'),
+
+  onSave: async () => {
+
+    try {
+
+      await saveBindingDraft()
+
+      return true
+
+    } catch {
+
+      return false
+
+    }
+
+  },
+
+})
 
 
 
@@ -318,7 +432,29 @@ function loadVisibilityRuleForAnchor(anchorId: string) {
 
 
 
+function captureEditSnapshot() {
+
+  editSnapshot.value = {
+
+    declaredContentType: bindingForm.declaredContentType,
+
+    structuredContentJson: bindingForm.structuredContentJson,
+
+    visibilityEnabled: visibilityEnabled.value,
+
+    visibilityExpression: visibilityExpression.value,
+
+  }
+
+  editorDirty.value = false
+
+}
+
+
+
 function openEditPanel(row: MasterAnchorBindingRow) {
+
+  suppressStructureBump.value = true
 
   editingAnchorId.value = row.anchorId
 
@@ -342,15 +478,53 @@ function openEditPanel(row: MasterAnchorBindingRow) {
 
   panelMode.value = 'edit'
 
+  captureEditSnapshot()
+
+  previewSyncedRevision.value = structureRevision.value
+
+  suppressStructureBump.value = false
+
 }
 
 
 
 function backToList() {
 
-  panelMode.value = 'list'
+  void dirtyGuardRequestLeave(() => {
 
-  editingAnchorId.value = null
+    panelMode.value = 'list'
+
+    editingAnchorId.value = null
+
+    editSnapshot.value = null
+
+  })
+
+}
+
+
+
+async function saveBindingDraft() {
+
+  await templatesStore.upsertBinding(props.templateId, bindingForm.anchorId, { ...bindingForm })
+
+  const mergedRules = mergeAnchorVisibilityRule(
+
+    props.rules ?? [],
+
+    bindingForm.anchorId,
+
+    visibilityEnabled.value,
+
+    visibilityExpression.value,
+
+  )
+
+  await templatesStore.saveRules(props.templateId, mergedRules)
+
+  structuredEditorRef.value?.markPristine()
+
+  captureEditSnapshot()
 
 }
 
@@ -360,27 +534,17 @@ async function handleSaveBinding() {
 
   try {
 
-    await templatesStore.upsertBinding(props.templateId, bindingForm.anchorId, { ...bindingForm })
-
-    const mergedRules = mergeAnchorVisibilityRule(
-
-      props.rules ?? [],
-
-      bindingForm.anchorId,
-
-      visibilityEnabled.value,
-
-      visibilityExpression.value,
-
-    )
-
-    await templatesStore.saveRules(props.templateId, mergedRules)
+    await saveBindingDraft()
 
     ElMessage.success(t('templates.authoring.saveBindingSuccess'))
 
     emit('updated')
 
-    backToList()
+    panelMode.value = 'list'
+
+    editingAnchorId.value = null
+
+    editSnapshot.value = null
 
   } catch {
 
@@ -389,6 +553,84 @@ async function handleSaveBinding() {
   }
 
 }
+
+
+
+async function handlePreviewRefresh() {
+
+  if (previewRefreshing.value) {
+
+    return
+
+  }
+
+  localPreviewRefreshing.value = true
+
+  try {
+
+    const preview = await templatesStore.testGenerate(props.templateId, {
+
+      testDataSetId: props.selectedTestDataSetId ?? undefined,
+
+    })
+
+    previewSyncedRevision.value = structureRevision.value
+
+    emit('preview-refreshed', preview)
+
+    ElMessage.success(t('templates.testGenerate.success', { previewId: preview.previewId }))
+
+  } catch {
+
+    ElMessage.error(t('templates.error.testGenerate'))
+
+  } finally {
+
+    localPreviewRefreshing.value = false
+
+  }
+
+}
+
+
+
+function handleEditorDirtyChange(dirty: boolean) {
+
+  editorDirty.value = dirty
+
+}
+
+
+
+function handleStructureChange() {
+
+  if (suppressStructureBump.value) {
+
+    return
+
+  }
+
+  structureRevision.value += 1
+
+}
+
+
+
+watch(
+
+  () => [bindingForm.declaredContentType, visibilityEnabled.value, visibilityExpression.value],
+
+  () => {
+
+    if (panelMode.value === 'edit' && !suppressStructureBump.value) {
+
+      structureRevision.value += 1
+
+    }
+
+  },
+
+)
 
 
 
@@ -645,84 +887,74 @@ async function handleValidateBindings() {
 
         <p class="binding-editor__hint">{{ t('templates.authoring.bindingEditorSubtitle') }}</p>
 
+        <AuthoringSideBySideLayout>
+          <template #editor>
+            <el-form label-position="top" class="binding-form">
+              <el-form-item :label="t('templates.authoring.contentType')">
+                <AppSearchSelect v-model="bindingForm.declaredContentType" style="width: 100%">
+                  <el-option v-for="type in contentTypes" :key="type" :label="type" :value="type" />
+                </AppSearchSelect>
+              </el-form-item>
 
+              <div class="visibility-section">
+                <h4>{{ t('templates.authoring.visibilityCondition.title') }}</h4>
+                <p class="visibility-section__hint">
+                  {{ t('templates.authoring.visibilityCondition.description') }}
+                </p>
+                <el-form-item>
+                  <el-checkbox v-model="visibilityEnabled">
+                    {{ t('templates.authoring.visibilityCondition.enable') }}
+                  </el-checkbox>
+                </el-form-item>
+                <el-form-item
+                  v-if="visibilityEnabled"
+                  :label="t('templates.authoring.visibilityCondition.expression')"
+                >
+                  <el-input
+                    v-model="visibilityExpression"
+                    :placeholder="t('templates.authoring.visibilityCondition.expressionPlaceholder')"
+                  />
+                </el-form-item>
+              </div>
 
-        <el-form label-position="top" class="binding-form">
+              <el-form-item :label="t('templates.authoring.structuredContentEditor')">
+                <ControlledStructuredContentEditor
+                  ref="structuredEditorRef"
+                  v-model="bindingForm.structuredContentJson"
+                  :template-id="templateId"
+                  :variables="variables"
+                  :content-module-reference-keys="contentModuleReferenceKeys"
+                  :baseline="editSnapshot?.structuredContentJson"
+                  @dirty-change="handleEditorDirtyChange"
+                  @structure-change="handleStructureChange"
+                />
+              </el-form-item>
+            </el-form>
+          </template>
 
-          <el-form-item :label="t('templates.authoring.contentType')">
-
-            <AppSearchSelect v-model="bindingForm.declaredContentType" style="width: 100%">
-
-              <el-option v-for="type in contentTypes" :key="type" :label="type" :value="type" />
-
-            </AppSearchSelect>
-
-          </el-form-item>
-
-
-
-          <div class="visibility-section">
-
-            <h4>{{ t('templates.authoring.visibilityCondition.title') }}</h4>
-
-            <p class="visibility-section__hint">{{ t('templates.authoring.visibilityCondition.description') }}</p>
-
-            <el-form-item>
-
-              <el-checkbox v-model="visibilityEnabled">
-
-                {{ t('templates.authoring.visibilityCondition.enable') }}
-
-              </el-checkbox>
-
-            </el-form-item>
-
-            <el-form-item
-
-              v-if="visibilityEnabled"
-
-              :label="t('templates.authoring.visibilityCondition.expression')"
-
-            >
-
-              <el-input
-
-                v-model="visibilityExpression"
-
-                :placeholder="t('templates.authoring.visibilityCondition.expressionPlaceholder')"
-
-              />
-
-            </el-form-item>
-
-          </div>
-
-
-
-          <el-form-item :label="t('templates.authoring.structuredContentEditor')">
-
-            <ControlledStructuredContentEditor
-
-              v-model="bindingForm.structuredContentJson"
-
+          <template #preview>
+            <AuthoringPreviewPane
               :template-id="templateId"
-
-              :variables="variables"
-
-              :content-module-reference-keys="contentModuleReferenceKeys"
-
+              :bindings="bindings"
+              :preview="lastPreview ?? null"
+              :stale="previewStale"
+              :refreshing="previewRefreshing"
+              @refresh="handlePreviewRefresh"
             />
-
-          </el-form-item>
-
-        </el-form>
-
+          </template>
+        </AuthoringSideBySideLayout>
       </div>
-
     </template>
 
+    <DirtyGuardConfirmDialog
+      v-model="dirtyGuardDialogVisible"
+      :show-save="dirtyGuardShowSave"
+      :saving="dirtyGuardSaving"
+      @stay="dirtyGuardStay"
+      @discard="dirtyGuardDiscard"
+      @save="dirtyGuardSave"
+    />
   </div>
-
 </template>
 
 

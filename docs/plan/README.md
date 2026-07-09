@@ -7,7 +7,7 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Active formal phase:** **CORE-FORTRESS F7** — Authoring UX — **In Progress** (2026-07-09); see [program roadmap](detail/CORE-FORTRESS-program-roadmap.md) and [master-plan](master-plan.md). **Prior:** **CORE-FORTRESS F6 Done** (2026-07-09; frontend kernel refactor; controller **243** lines; composable **73** Vitest). **CORE-FORTRESS F5 Done** (2026-07-09; async durability + security depth; F5 targeted **31/31**; full `mvn verify` Windows env caveat). **CORE-FORTRESS F4 Done** (2026-07-09).
+**Active formal phase:** **CORE-FORTRESS F8** — Observability, SLO, DR — **In Progress** (2026-07-09); see [program roadmap](detail/CORE-FORTRESS-program-roadmap.md) and [master-plan](master-plan.md). **Prior:** **CORE-FORTRESS F7 Done** (2026-07-09; authoring UX; Vitest **894**; E2E **12/12**; LR-C1/C4 Done). **CORE-FORTRESS F6 Done** (2026-07-09; frontend kernel refactor; controller **243** lines; composable **73** Vitest). **CORE-FORTRESS F5 Done** (2026-07-09; async durability + security depth; F5 targeted **31/31**; full `mvn verify` Windows env caveat). **CORE-FORTRESS F4 Done** (2026-07-09).
 **Active work (CDP session):** **[CDP Wave CD-0](./competitiveness-deepening-program.md)** — `CD-*` tasks only.
 
 **Formal phase P23:** **[P23 Demo typography & layout excellence](detail/P23-demo-typography-layout-excellence.md)** — **Done** (2026-07-08; T01–T16; bank-grade Word output for all demo packages).
@@ -84,7 +84,8 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **In-flight work:**
-- **CORE-FORTRESS F7 In Progress** (2026-07-09) — authoring UX ([program roadmap](detail/CORE-FORTRESS-program-roadmap.md); [F7 detail](detail/CORE-FORTRESS-f7-authoring-ux.md); F7-T01 next). **F6 Done** (2026-07-09; controller **243** lines; composable **73** Vitest; F6-T08 E2E env blocker)
+- **CORE-FORTRESS F8 In Progress** (2026-07-09) — observability / SLO / DR ([program roadmap](detail/CORE-FORTRESS-program-roadmap.md); [F8 detail](detail/CORE-FORTRESS-f8-observability-slo-dr.md)). **F7 Done** (2026-07-09; Vitest **894**; E2E **12/12**; LR-C1/C4 Done — [F7 detail](detail/CORE-FORTRESS-f7-authoring-ux.md))
+- **CORE-FORTRESS F6 Done** (2026-07-09; controller **243** lines; composable **73** Vitest; F6-T08 E2E env blocker)
 - **CORE-FORTRESS F5 Done** (2026-07-09) — async durability + security depth ([detail](detail/CORE-FORTRESS-f5-async-durability-security.md); F5 targeted **31/31**; full `mvn verify` env caveat)
 - **P23 Done** (2026-07-08) — demo typography & layout excellence ([plan](detail/P23-demo-typography-layout-excellence.md); T01–T16; human reviewer sign-off operational follow-up)
 - **CDP** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)

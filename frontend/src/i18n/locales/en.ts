@@ -1186,6 +1186,16 @@ export default {
         contentModules: 'Clause references',
         testPreview: 'Test & preview',
       },
+      previewPaneTitle: 'Final-chain preview',
+      previewStale: 'Preview out of date',
+      previewRefreshNow: 'Refresh now',
+      previewBoundary:
+        'This edit-preview uses the final rendering chain for guidance only. It is not legal evidence of the published release artifact.',
+      previewEmptyTitle: 'No preview yet',
+      previewEmptyDescription:
+        'Run a test generation or refresh to load the final-chain DOCX/PDF artifact beside the editor.',
+      previewCollapse: 'Hide preview',
+      previewExpand: 'Show preview',
     },
     structuredEditor: {
       bindingHint:
@@ -1972,6 +1982,13 @@ export default {
     edit: 'Edit',
     delete: 'Delete',
     actions: 'Actions',
+    dirtyGuard: {
+      title: 'Unsaved changes',
+      message: 'You have unsaved changes. What would you like to do?',
+      stay: 'Stay',
+      discard: 'Discard changes',
+      save: 'Save and continue',
+    },
     more: 'More',
     retry: 'Retry',
     retryableHint: 'This error is retryable. You can try again in a moment.',

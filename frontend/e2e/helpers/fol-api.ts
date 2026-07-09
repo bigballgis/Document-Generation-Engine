@@ -69,11 +69,34 @@ async function authorizedGet<T>(
   return body.result
 }
 
+interface TemplateListPage {
+  content: TemplateDetail[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+async function listTemplates(
+  request: APIRequestContext,
+  token: string,
+): Promise<TemplateDetail[]> {
+  const page = await authorizedGet<TemplateListPage | TemplateDetail[]>(
+    request,
+    token,
+    '/templates?size=200',
+  )
+  if (Array.isArray(page)) {
+    return page
+  }
+  return page.content ?? []
+}
+
 export async function findFolTemplate(
   request: APIRequestContext,
 ): Promise<TemplateDetail | undefined> {
   const token = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
-  const templates = await authorizedGet<TemplateDetail[]>(request, token, '/templates')
+  const templates = await listTemplates(request, token)
   return templates.find((template) => template.externalId === FOL_TEMPLATE_EXTERNAL_ID)
 }
 

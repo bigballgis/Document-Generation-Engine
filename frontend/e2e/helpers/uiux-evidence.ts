@@ -633,3 +633,33 @@ export async function captureUxEntityDisplayLocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+export const F7_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'F7')
+export const F7_SCREENSHOT_DIR = path.join(F7_EVIDENCE_ROOT, 'screenshots')
+export const F7_VIEWPORT = P14_T01_VIEWPORT
+export const F7_NARROW_VIEWPORT = { width: 375, height: 812 } as const
+
+export function ensureF7EvidenceDirs(): void {
+  fs.mkdirSync(F7_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function f7ScreenshotPath(filename: string): string {
+  return path.join(F7_SCREENSHOT_DIR, filename)
+}
+
+export async function captureF7Screenshot(page: Page, filename: string): Promise<string> {
+  ensureF7EvidenceDirs()
+  const target = f7ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureF7LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureF7EvidenceDirs()
+  const target = f7ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

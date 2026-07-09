@@ -42,6 +42,22 @@ async function authorizedGet<T>(token: string, pathSuffix: string): Promise<T> {
   return body.result
 }
 
+interface TemplateListPage {
+  content: TemplateSummary[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+async function listTemplates(token: string): Promise<TemplateSummary[]> {
+  const page = await authorizedGet<TemplateListPage | TemplateSummary[]>(token, '/templates?size=200')
+  if (Array.isArray(page)) {
+    return page
+  }
+  return page.content ?? []
+}
+
 async function deleteTemplate(token: string, templateId: string, externalId: string): Promise<void> {
   const response = await fetch(`${API_BASE}/templates/${templateId}`, {
     method: 'DELETE',
@@ -64,7 +80,7 @@ export default async function globalTeardown(): Promise<void> {
 
   try {
     const token = await apiLogin()
-    const templates = await authorizedGet<TemplateSummary[]>(token, '/templates')
+    const templates = await listTemplates(token)
     const e2eTemplates = templates.filter(
       (template) =>
         template.externalId.startsWith(E2E_FIXTURE_PREFIX) &&

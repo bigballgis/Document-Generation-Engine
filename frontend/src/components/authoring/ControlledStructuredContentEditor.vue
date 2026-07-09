@@ -26,11 +26,17 @@ const props = defineProps<{
   variables?: VariableSchema[]
   contentModuleReferenceKeys?: string[]
   readonly?: boolean
+  /** Saved baseline JSON; when omitted, initial modelValue is the baseline. */
+  baseline?: string
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
+  'dirty-change': [dirty: boolean]
+  'structure-change': []
 }>()
+
+const pristineBaseline = ref(props.baseline ?? (props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON))
 
 const { t, te } = useI18n()
 const templatesStore = useTemplatesStore()
@@ -113,11 +119,35 @@ watch(
   },
 )
 
+watch(
+  () => props.baseline,
+  (value) => {
+    if (value !== undefined) {
+      pristineBaseline.value = value
+    }
+  },
+)
+
+function emitDirtyState() {
+  const current = serializeStructuredContent(documentModel.value)
+  emit('dirty-change', current !== pristineBaseline.value)
+}
+
+function markPristine() {
+  pristineBaseline.value = serializeStructuredContent(documentModel.value)
+  emit('dirty-change', false)
+}
+
+defineExpose({ markPristine })
+
 watch(documentModel, (value) => {
   if (isReadonly.value) {
     return
   }
-  emit('update:modelValue', serializeStructuredContent(value))
+  const serialized = serializeStructuredContent(value)
+  emit('update:modelValue', serialized)
+  emitDirtyState()
+  emit('structure-change')
 }, { deep: true })
 
 const DEFAULT_STYLE_CATALOG: MasterStyleCatalog = {

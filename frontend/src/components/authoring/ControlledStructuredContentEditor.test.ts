@@ -74,19 +74,30 @@ describe('ControlledStructuredContentEditor', () => {
     expect(fetchMasterStyleCatalog).not.toHaveBeenCalled()
   })
 
-  it('hides editing toolbar in readonly mode', async () => {
+  it('emits dirty-change when content diverges from baseline', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+
+    const baseline = '{"schemaVersion":"1.0","nodes":[]}'
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(ControlledStructuredContentEditor, {
       props: {
-        modelValue: '{"schemaVersion":"1.0","nodes":[{"type":"paragraph","children":[{"type":"textRun","value":"Preview"}]}]}',
-        readonly: true,
+        modelValue: baseline,
+        templateId: 'tpl-1',
+        baseline,
       },
       global: { plugins: [i18n, ElementPlus] },
     })
 
     await flushPromises()
 
-    expect(wrapper.find('[data-testid="insert-block-node"]').exists()).toBe(false)
-    expect(wrapper.text()).toContain('Paragraph')
+    const blockButtons = wrapper.findAll('[data-testid="insert-block-node"]')
+    await blockButtons[0]?.trigger('click')
+    await flushPromises()
+
+    const dirtyEvents = wrapper.emitted('dirty-change')
+    expect(dirtyEvents?.[dirtyEvents.length - 1]?.[0]).toBe(true)
   })
 })

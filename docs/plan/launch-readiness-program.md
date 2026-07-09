@@ -2,7 +2,7 @@
 
 **Program ID:** `LRP`  
 **Created:** 2026-07-03  
-**Status:** **In Progress** (Wave LR-B **Done** 2026-07-04; Wave LR-A activated 2026-07-04)  
+**Status:** **In Progress** (Wave LR-B **Done** 2026-07-04; Wave LR-A activated 2026-07-04; Wave LR-C **In Progress** — LR-C1/C4 **Done** via CORE-FORTRESS F7 2026-07-09)  
 **North star:** Lift the system from **「功能齐全」** to **「生产可靠 + 业务好用」** — absorb the industry's known production pitfalls (rendering/conversion, proxy streaming, multi-instance, session), and maximize functionality + usability **inside the confirmed v1 boundary**, before launch.
 
 **Authoritative entry for lower-tier implementers:** Read this file first, then the wave detail doc for your task ID prefix. LRP task IDs are prefixed **`LR-*`** only.
@@ -16,7 +16,8 @@
 | §7 of this file | Wave LR-E — release readiness gate 「发布就绪门禁」 (no separate detail doc) |
 | [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) | **Sibling program CDP** — doc truth, browser E2E, pitfall registry (`CD-*`; do not execute here) |
 | [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **Done** — rendering engine + demo scaffolds (2026-07-04) |
-| [detail/P23-demo-typography-layout-excellence.md](./detail/P23-demo-typography-layout-excellence.md) | **Active formal phase** — bank-grade demo typography/layout (2026-07-08) |
+| [detail/P23-demo-typography-layout-excellence.md](./detail/P23-demo-typography-layout-excellence.md) | **Done** — bank-grade demo typography/layout (2026-07-08) |
+| [detail/CORE-FORTRESS-program-roadmap.md](./detail/CORE-FORTRESS-program-roadmap.md) | **Active formal phase CORE-FORTRESS F8** — F7 Done (LR-C1/C4 mirrored) |
 
 ---
 
@@ -105,13 +106,13 @@ From the 2026-07-03 full-repo inventory + industry research. Verify evidence pat
 
 | ID | Owner | Title | Depends | BDD | Maps | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| LR-A1 | backend-engineer | LibreOffice per-invocation profile isolation + CLI hardening | — | not-applicable | CD-PIT-11; COR-P02/OPT-F6 (pool exists) | Not Started |
-| LR-A2 | deploy-engineer + backend-engineer | Font baseline (CJK + metric-compatible) in images + smoke test | — | not-applicable | CD-PIT-01; CD-HARD-T01; ADR-0041 (LR-A5) | Not Started |
+| LR-A1 | backend-engineer | LibreOffice per-invocation profile isolation + CLI hardening | — | not-applicable | CD-PIT-11; COR-P02/OPT-F6 (pool exists) | **Done** (2026-07-09 — F4) |
+| LR-A2 | deploy-engineer + backend-engineer | Font baseline (CJK + metric-compatible) in images + smoke test | — | not-applicable | CD-PIT-01; CD-HARD-T01; ADR-0041 (LR-A5) | **Done** (2026-07-08 — P23) |
 | LR-A3 | backend-engineer (+deploy-engineer) | Upload deep validation + size limits | — | **required** | §1 finding 6 | Not Started |
 | LR-A4 | backend-engineer | Unsupported-node fail-closed closure | **P22-T01/T02 Done** | **required** | CD-PIT-07; P18/P22 | Not Started |
 | LR-A5 | doc-keeper | Draft ADR-0041/0042/0043 (font baseline / pagination delta / OOXML validation) | — | not-applicable | CD-PIT registry §4 | Not Started |
 | LR-A6 | backend-engineer | OOXML output validation gate (executes CD-HARD-T03) | P22-T01 Done | not-applicable | CD-PIT-03 | Not Started |
-| LR-A7 | doc-keeper | Pagination delta budget + corpus (executes CD-HARD-T04) | **P23** demo packages (T04+ letter-grade) | not-applicable | CD-PIT-02; ADR-0042 | Not Started |
+| LR-A7 | doc-keeper | Pagination delta budget + corpus (executes CD-HARD-T04) | **P23** demo packages (T04+ letter-grade) | not-applicable | CD-PIT-02; ADR-0042 | **In Progress** (F4 subset — schema + procedure; measurements pending Docker) |
 
 ---
 
@@ -138,10 +139,10 @@ From the 2026-07-03 full-repo inventory + industry research. Verify evidence pat
 
 | ID | Owner | Title | Depends | BDD | Maps | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| LR-C1 | frontend-engineer | Dirty-form guard framework `useDirtyGuard` | — | **required** | §1 finding 10 | Not Started |
+| LR-C1 | frontend-engineer | Dirty-form guard framework `useDirtyGuard` | — | **required** | §1 finding 10 | **Done** (2026-07-09 — CORE-FORTRESS F7) |
 | LR-C2 | frontend-engineer | Structured editor local draft recovery | — | **required** | CD-PIT-13 companion | Not Started |
 | LR-C3 | frontend-engineer | Editor undo/redo (bounded history + Ctrl+Z/Y) | — | **required** | §1 finding 10 | Not Started |
-| LR-C4 | frontend-engineer | Side-by-side authoring preview (final-chain artifact) | — | **required** | CD-PIT-08 boundary kept | Not Started |
+| LR-C4 | frontend-engineer | Side-by-side authoring preview (final-chain artifact) | — | **required** | CD-PIT-08 boundary kept | **Done** (2026-07-09 — CORE-FORTRESS F7) |
 | LR-C5 | backend-engineer + frontend-engineer | Catalog server-side pagination/filter (templates/masters/modules) | — | **required** | OPT-F4 residual; COR-F09 semantics kept | Not Started |
 | LR-C6 | frontend-engineer (+backend-engineer) | Global search / command palette (Ctrl+K) | LR-C5 (server search) | **required** | §1 finding 10 | Not Started |
 | LR-C7 | backend-engineer + frontend-engineer | In-app notification center (bell + unread; in-app only) | P14 (Done) | **required** | v1 boundary §0.1 | Not Started |

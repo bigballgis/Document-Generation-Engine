@@ -1,11 +1,13 @@
 # LRP Wave LR-C — Business Usability Deepening 「业务易用性深化」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** Not Started (planned 2026-07-03)  
+**Wave status:** **In Progress** (LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; remaining C2–C3/C5–C13 Not Started)  
 **Owner default:** `frontend-engineer` (+ `backend-engineer` where noted); every user-facing slice pairs `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** none for most tasks; **C6 depends on LR-C5**; **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
 
 > **Session note:** `LR-C*` tasks only. All UI work obeys `.cursor/skills/frontend-oa-design/SKILL.md` (bank OA lock, REDBC/GREENBC dual-brand) and `.cursor/rules/workspace-tab-shell-constitution.mdc`. i18n: English keys first, zh-CN additive — never literals (`.cursor/skills/i18n-english-first/SKILL.md`).
+>
+> **CORE-FORTRESS F7 mirror (2026-07-09):** LR-C1 + LR-C4 delivered under [CORE-FORTRESS-f7-authoring-ux.md](./CORE-FORTRESS-f7-authoring-ux.md) — Vitest **894**; E2E CORE-FORTRESS-F7 **12/12** PASS.
 
 ---
 
@@ -48,7 +50,7 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - **Gates:** §1 standard block; spec `frontend/e2e/LRP-C1-dirty-guard.spec.ts`; UIUX manifest.
 - **Artifacts:** `useDirtyGuard.ts` + tests; wired views/dialogs; behavior spec; E2E + manifest.
 - **Done when:** Scenarios green + gates + UIUX PASS + doc sync + commit review.
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-09 — delivered via **CORE-FORTRESS F7**; `useDirtyGuard` + `DirtyGuardConfirmDialog`; E2E `CORE-FORTRESS-F7-dirty-guard.spec.ts`; Vitest **894** gate GREEN)
 
 ### LR-C2 — Structured editor local draft recovery
 
@@ -112,7 +114,7 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - **Artifacts:** layout + badge components; behavior spec; tests + E2E + manifest.
 - **Done when:** Scenarios green + gates + UIUX PASS + doc sync + commit review.
 - **Maps:** CD-PIT-08 (boundary preserved); CD-E2E-T09 (CDP comparison journey — not duplicated).
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-09 — delivered via **CORE-FORTRESS F7**; `AuthoringSideBySideLayout` + `AuthoringPreviewPane`; E2E `CORE-FORTRESS-F7-side-by-side-preview.spec.ts`; E2E **12/12** PASS)
 
 ### LR-C5 — Catalog server-side pagination/filter
 
@@ -317,7 +319,8 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 
 ## 3. Exit gate (Wave LR-C)
 
-- [ ] LR-C1…C8 shipped with BDD specs, functional Playwright journeys, and UIUX manifests (both brands)
+- [x] LR-C1 + LR-C4 shipped via CORE-FORTRESS F7 (2026-07-09; Vitest **894**; E2E **12/12**; BDD + UIUX evidence)
+- [ ] LR-C2/C3/C5…C8 shipped with BDD specs, functional Playwright journeys, and UIUX manifests (both brands)
 - [ ] LR-C9…C13 shipped with green gates; OPT-G4/G5/G6-residual/G7 + F4-residual rows updated
 - [ ] `api.error` parity test enforcing 145/145 active in `pnpm -C frontend test`
 - [ ] No dead-end error list remains among the six §2/LR-C9 targets
