@@ -251,8 +251,10 @@ function handleBrandChange(brand: BrandPreset) {
       </aside>
 
       <main class="shell-content">
-        <AppBreadcrumb v-if="breadcrumbSegments.length > 0" />
-        <slot />
+        <AppBreadcrumb v-if="breadcrumbSegments.length > 0" class="shell-breadcrumb" />
+        <div class="shell-page-root">
+          <slot />
+        </div>
       </main>
     </div>
   </div>
@@ -487,7 +489,23 @@ nav {
 .shell-content {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
   background: var(--surface-page);
+}
+
+.shell-breadcrumb {
+  flex: 0 0 auto;
+}
+
+.shell-page-root {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 </style>

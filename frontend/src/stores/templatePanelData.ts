@@ -12,10 +12,10 @@ import type {
   PreviewRunSummary,
   SubmitTestEligibility,
   TemplateContentModuleReference,
+  TemplateDetail,
   TemplateDevVersionCreated,
   TemplateExportResult,
   TemplateReleaseVersion,
-  TemplateVersionLineDetail,
   TemplateVersionLineSummary,
   TestDataSet,
   UpsertContentModuleReferencePayload,
@@ -59,7 +59,7 @@ export interface TemplatePanelEntry {
   batchTestHistory: BatchTestRunSummary[]
   loadingBatchTestHistory: boolean
   exporting: boolean
-  releaseVersionDetails: Record<string, TemplateVersionLineDetail>
+  releaseVersionDetails: Record<string, TemplateDetail>
   loadingReleaseVersionDetail: Record<string, boolean>
 }
 
@@ -363,7 +363,7 @@ export const useTemplatePanelDataStore = defineStore('templatePanelData', () => 
   async function fetchReleaseVersionDetail(
     templateId: string,
     releaseVersion: string,
-  ): Promise<TemplateVersionLineDetail> {
+  ): Promise<TemplateDetail> {
     const entry = entryFor(templateId)
     const key = releaseVersionDetailKey(templateId, releaseVersion)
     entry.loadingReleaseVersionDetail = { ...entry.loadingReleaseVersionDetail, [key]: true }
