@@ -7,10 +7,11 @@ Execution truth for this project lives here.
 verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06-25).
 **P14** confirmed large domains **Done** (2026-06-27). **P15** Kubernetes deployment **Done**
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
-**Active formal program:** **CODE-QUALITY** — Code hygiene & structural consistency — **In Progress** (2026-07-09; Wave 1 **CQ-01A** + **CQ-01B** In Progress); see [program entry](code-quality-program.md) and [task sheet](detail/CODE-QUALITY-code-hygiene.md). **CORE-FORTRESS program Done** (F1–F8; 2026-07-09; `mvn verify` **1154**). **Prior:** **CORE-FORTRESS F7 Done** (authoring UX; Vitest **894**; E2E **12/12**); **F6 Done** (frontend kernel refactor; composable **73** Vitest).
-**Active work (CDP session):** **[CDP Wave CD-0](./competitiveness-deepening-program.md)** — `CD-*` tasks only.
+**Active formal phase / program:** **None** (2026-07-09). **CODE-QUALITY program Done** (CQ-01A…CQ-08; ArchUnit **11/11**); see [program entry](code-quality-program.md) and [task sheet](detail/CODE-QUALITY-code-hygiene.md). **CORE-FORTRESS program Done** (F1–F8; 2026-07-09; `mvn verify` **1154**). **Prior:** **CORE-FORTRESS F7 Done** (authoring UX; Vitest **894**; E2E **12/12**); **F6 Done** (frontend kernel refactor; composable **73** Vitest).
 
-**Ad-hoc slice (2026-07-10):** **[MGMT-UI-DEFECTS](detail/MGMT-UI-defects.md)** — Round 2 / P0 **Done**; **Round 3 / P1 depth governance Done** (`mgmt-ui-p1`; merge `180bffb`; worktree removed). Formal phase remains **None**.
+**Active delivery focus (2026-07-10):** **[LRP Wave LR-A](./launch-readiness-program.md)** — slice **`lrp-a3-upload-validation` / LR-A3** **In Progress** (gap-close; BDD ready). Detail: [LRP-A](detail/LRP-A-rendering-trust-hardening.md); BDD: [lrp-a3-master-docx-upload-validation.md](../behavior/lrp-a3-master-docx-upload-validation.md). Formal phase remains **None**. Do **not** start CDP from this focus.
+
+**Ad-hoc slice (2026-07-10):** **[MGMT-UI-DEFECTS](detail/MGMT-UI-defects.md)** — Round 2 / P0 **Done**; **Round 3 / P1 depth governance Done** (`mgmt-ui-p1`; merge `180bffb`; worktree removed).
 
 **Formal phase P23:** **[P23 Demo typography & layout excellence](detail/P23-demo-typography-layout-excellence.md)** — **Done** (2026-07-08; T01–T16; bank-grade Word output for all demo packages).
 **Formal phase P22:** **Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](detail/P22-demo-expansion-rendering-fidelity.md).
@@ -86,11 +87,11 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **In-flight work:**
-- **CODE-QUALITY In Progress** (2026-07-09) — code hygiene & structural consistency ([program](code-quality-program.md); [detail](detail/CODE-QUALITY-code-hygiene.md); Wave 1 **CQ-01A** + **CQ-01B** In Progress; BDD `not-applicable`)
+- **LRP Wave LR-A In Progress** (delivery focus 2026-07-10) — **LR-A3** upload deep validation gap-close (`lrp-a3-upload-validation`; BDD ready) — [program](./launch-readiness-program.md); [detail](detail/LRP-A-rendering-trust-hardening.md)
+- **CODE-QUALITY Done** (2026-07-09) — code hygiene & structural consistency ([program](code-quality-program.md); [detail](detail/CODE-QUALITY-code-hygiene.md))
 - **CORE-FORTRESS Done** (2026-07-09; F1–F8 — [program roadmap](detail/CORE-FORTRESS-program-roadmap.md))
 - **P23 Done** (2026-07-08) — demo typography & layout excellence ([plan](detail/P23-demo-typography-layout-excellence.md); T01–T16; human reviewer sign-off operational follow-up)
-- **CDP** — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)
-- **LRP (sibling program)** — launch readiness & deep optimization ([program](./launch-readiness-program.md); Waves **LR-A…LR-E**; LR-C1/C4 Done via F7; not sole active)
+- **CDP** (sibling; **not** this session) — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**)
 
 **P21 Done** — closure evidence in [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 
@@ -104,7 +105,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 
 | Backlog | Lens |
 | --- | --- |
-| **[code-quality-program.md](./code-quality-program.md)** | **Active CODE-QUALITY program (2026-07-09):** behavior-preserving hygiene — module boundaries, god-class extraction, DRY demo/PDF/E2E infra (`CQ-*`; Wave 1 In Progress) |
+| **[code-quality-program.md](./code-quality-program.md)** | **CODE-QUALITY program Done (2026-07-09):** behavior-preserving hygiene — module boundaries, god-class extraction, DRY demo/PDF/E2E infra (`CQ-*`) |
 | **[system-optimization-review-2026-07.md](./system-optimization-review-2026-07.md)** | **Consolidated optimization review (SOR-0…7, 2026-07-04 closeout)** — open hygiene items superseded by **CODE-QUALITY** where duplicated |
 | **[comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md)** | **Unified prioritized map (COR-0…6): docs sync, API contract, template workflow, frontend UX, performance, E2E, P14–P20 — start here (2026-06-23)** |
 | [launch-readiness-program.md](./launch-readiness-program.md) | Launch-readiness deep optimization — production pitfalls + usability deepening (LR-A…E; sibling program; LR-C1/C4 Done via F7) |

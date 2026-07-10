@@ -101,4 +101,12 @@ Create an ADR when a decision affects future design or implementation, including
 | [0046-frontend-openapi-typescript-codegen.md](./technology-stack/0046-frontend-openapi-typescript-codegen.md) | Accepted | Frontend OpenAPI TypeScript codegen (`openapi-typescript`) for management DTO types (SOR-K03) |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
+### LR-A5 triad note (not Accepted — deferred from LR-A3 slice)
+
+| ADR | On-disk status | Note |
+| --- | --- | --- |
+| `rendering-authoring/0041-rendering-font-baseline.md` | **Missing** | Still referenced by ADR-0042; full draft + index row deferred to LR-A5 (not expanded in LR-A3). |
+| [0042-pagination-delta-budget.md](./rendering-authoring/0042-pagination-delta-budget.md) | **Proposed** | Exists; not yet Accepted / not promoted into the Accepted table above. |
+| [0043-ooxml-output-validation-gate.md](./rendering-authoring/0043-ooxml-output-validation-gate.md) | **Proposed** | Exists; same as 0042. |
+
 Use [0000-template.md](./0000-template.md) when creating new ADRs. Place new numbered ADRs in the directory matching their `topic` frontmatter.

@@ -355,6 +355,7 @@
 - 母版审核通过后才允许被新建或更新模板引用；草稿、待审核和审核不通过的母版不得被模板引用。
 - 母版审核不通过后回到草稿，并保留审核记录；修改后可重新提交审核并生成新的审核记录。
 - 母版更新后不自动影响已有模板；母版变更需要影响分析，影响分析至少包含引用模板清单和重新测试提示。
+- **母版 DOCX 上传深度校验与体积上限（LR-A3，2026-07-10 确认）：** 创建母版与替换母版文件（`POST /api/management/v1/masters`、`PUT /api/management/v1/masters/{id}/file`）在持久化与锚点抽取之前，必须校验后缀 `.docx`、可选 Content-Type 白名单、服务内体积上限、ZIP magic（`PK\x03\x04`）与 OPC 必需条目（`[Content_Types].xml`、`_rels/.rels`、`word/document.xml`）。默认上限：**50MB** 文件（`docgen.master.max-docx-upload-bytes` / Spring `max-file-size`）与 **60MB** 整请求（Spring `max-request-size` + nginx `client_max_body_size 60m`）。校验失败返回统一错误信封；稳定 `messageKey` 为 `api.error.master.docxRequired`、`api.error.master.docxTooLarge`、`api.error.master.docxCorrupt`（**不**采用 `invalidDocxContent`）。边界层超限（nginx / Spring multipart）须对用户可读、可翻译，不得以原始 HTML 错误页为唯一反馈。合法 Word/LibreOffice `.docx` 不得被误拒。病毒/恶意软件扫描**不是**本条确认范围（见待确认）。行为规格：[LR-A3 upload validation](../behavior/lrp-a3-master-docx-upload-validation.md)。
 - 模板编排负责锚点内容编排。
 - 普通模板基础信息更新由全局管理员和分组管理员执行；全局管理员可更新全部普通模板基础信息，分组管理员可更新被授权组范围内普通模板基础信息。
 - 分组管理员可在被授权组范围内执行模板常规操作，包括选择母版创建模板、配置锚点内容、配置模板变量、配置条件/循环规则、测试生成 DOCX/PDF、提交测试/审批、发布/停用模板。
@@ -824,4 +825,5 @@
 以下议题来自文档一致性、可行性和可用性审查，不作为已确认需求。
 
 - 动态 API 契约已输出正式 OpenAPI Schema 和正式示例，后续需要随契约变更持续维护，详见 [API 文档索引](../api/README.md) 与 [OpenAPI v1](../api/openapi-v1.yaml)。
+- **母版 DOCX 上传病毒 / 恶意软件扫描**（引擎选型、同步 vs 异步、失败策略）— **Pending**（owner: 安全/产品；recorded 2026-07-10 with LR-A3）。LR-A3 仅交付 ZIP magic + OPC 结构探测 + 体积上限，**不**实现杀毒。行为规格：[LR-A3 upload validation](../behavior/lrp-a3-master-docx-upload-validation.md) §13 Q-LR-A3-01。
 

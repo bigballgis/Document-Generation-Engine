@@ -1,3 +1,4 @@
+import { AxiosError, AxiosHeaders } from 'axios'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useMastersStore } from '@/stores/masters'
@@ -8,6 +9,7 @@ vi.mock('@/api/masters', () => ({
   listMasters: vi.fn(),
   getMaster: vi.fn(),
   createMaster: vi.fn(),
+  replaceMasterFile: vi.fn(),
   submitMasterReview: vi.fn(),
   decideMasterReview: vi.fn(),
   getMasterImpactAnalysis: vi.fn(),
@@ -150,6 +152,40 @@ describe('masters store', () => {
 
     expect(page.content).toHaveLength(1)
     expect(store.revisionLinesPage?.content[0]?.id).toBe('revision-1')
+  })
+
+  it('maps nginx HTML 413 on replace to readable upload size key', async () => {
+    vi.mocked(mastersApi.replaceMasterFile).mockRejectedValue(
+      new AxiosError('Request failed', '413', undefined, undefined, {
+        status: 413,
+        statusText: 'Payload Too Large',
+        headers: { 'content-type': 'text/html' },
+        config: { headers: new AxiosHeaders() },
+        data: '<html><body>413 Request Entity Too Large</body></html>',
+      }),
+    )
+    const store = useMastersStore()
+    const file = new File([new Uint8Array(8)], 'huge.docx')
+
+    await expect(store.replaceMasterFile('master-1', file)).rejects.toBeTruthy()
+    expect(store.lastErrorMessageKey).toBe('masters.upload.errorTooLarge')
+  })
+
+  it('records Spring envelope docxTooLarge on upload failure', async () => {
+    vi.mocked(mastersApi.createMaster).mockRejectedValue(
+      axiosEnvelopeError(413, 'api.error.master.docxTooLarge', {
+        code: 'MASTER_VALIDATION_FAILED',
+        category: 'VALIDATION',
+        message: 'The uploaded DOCX exceeds the maximum allowed size.',
+      }),
+    )
+    const store = useMastersStore()
+    const file = new File([new Uint8Array(8)], 'letterhead.docx')
+
+    await expect(
+      store.uploadMaster({ groupCode: 'RETAIL', name: 'Retail letterhead' }, file),
+    ).rejects.toBeTruthy()
+    expect(store.lastErrorMessageKey).toBe('api.error.master.docxTooLarge')
   })
 
   it('loads revision line detail into store state', async () => {

@@ -252,6 +252,7 @@ AD Group 用于 API 调用授权。
 - 母版审核通过后形成可供模板引用的 DOCX 母版样式目录。
 - 母版样式目录需要标明可用样式名称、适用节点类型和渲染用途。
 - 母版样式目录变更后，不自动影响已发布模板；模板升级母版样式目录或调整样式映射时，必须执行影响分析，并重新经过测试、审批和发布流程。
+- **DOCX 上传校验（LR-A3）：** 创建与替换文件共用同一校验契约；仅接受可识别为 OOXML Word 包的 `.docx`（后缀 + ZIP magic + OPC 必需条目探测；Content-Type 为辅助白名单，非唯一真相）。默认业务文件上限 **50MB**（`>` 拒绝；恰好等于上限接受）；Spring 整请求与 nginx 默认 **60MB**。失败不得写入对象存储、不得抽取锚点；`messageKey`：`api.error.master.docxRequired` / `docxTooLarge` / `docxCorrupt`。病毒扫描未确认（pending）。Traceability: [BDD-LRP-A3-UPLOAD-001](../behavior/lrp-a3-master-docx-upload-validation.md)。
 
 已确认修订线导航规则（P2-T05 Phase A + P2-T06 Phase B，见 [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) § Master revision history）：
 

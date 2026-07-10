@@ -144,6 +144,8 @@ v1 正式业务出信由上游业务系统通过动态 API 间接触发；文档
 - 删除母版。
 - 更新母版基础信息。
 
+上传或替换母版 DOCX 时，系统须在入库与锚点抽取前完成深度校验与体积上限（后缀、内容结构探测、多层 size limit）；拒绝原因通过稳定 `messageKey`（`docxRequired` / `docxTooLarge` / `docxCorrupt`）对用户可读展示。默认文件上限 50MB、请求/代理上限 60MB。病毒扫描不在 v1 已确认范围。详见 [LR-A3 upload validation](../behavior/lrp-a3-master-docx-upload-validation.md) 与 [requirements-plan](../requirements/requirements-plan.md)「母版与模板编排」。
+
 分组管理员可管理被授权组范围内的全部母版常规操作，包括上传/创建 DOCX 母版、维护锚点、修改基础版式、提交母版审核、删除母版、更新母版基础信息，并查看母版审核、变更和影响分析审计。
 
 母版审核由管理员执行；全局管理员可审核全部母版，分组管理员可审核被授权组范围内母版。

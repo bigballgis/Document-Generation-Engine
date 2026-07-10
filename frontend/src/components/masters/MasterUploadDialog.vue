@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
+import { validateMasterDocxUploadFile } from '@/utils/validateMasterDocxUpload'
 
 const props = defineProps<{
   modelValue: boolean
@@ -15,14 +16,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const { resolveDefaultGroupCode, ensureGroupCatalog } = useScopedGroupOptions()
-
-// LR-A3: client-side file size + type guard mirroring the backend limit (50MB) and the
-// nginx client_max_body_size. Rejects oversized/masquerading files before upload starts.
-const MAX_UPLOAD_BYTES = 50 * 1024 * 1024
-const DOCX_CONTENT_TYPES = new Set([
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/octet-stream',
-])
 
 const visible = computed({
   get: () => props.modelValue,
@@ -54,21 +47,9 @@ function onFileChange(uploadFile: { raw?: File }) {
   const file = uploadFile.raw ?? null
   fileErrorKey.value = null
   if (file) {
-    if (file.size > MAX_UPLOAD_BYTES) {
-      fileErrorKey.value = 'masters.upload.errorTooLarge'
-      selectedFile.value = null
-      fileList.value = []
-      return
-    }
-    const lowerName = file.name.toLowerCase()
-    if (!lowerName.endsWith('.docx')) {
-      fileErrorKey.value = 'masters.upload.errorDocxOnly'
-      selectedFile.value = null
-      fileList.value = []
-      return
-    }
-    if (file.type && !DOCX_CONTENT_TYPES.has(file.type)) {
-      fileErrorKey.value = 'masters.upload.errorDocxOnly'
+    const validation = validateMasterDocxUploadFile(file)
+    if (!validation.ok) {
+      fileErrorKey.value = validation.messageKey
       selectedFile.value = null
       fileList.value = []
       return

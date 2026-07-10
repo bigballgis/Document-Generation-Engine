@@ -14,19 +14,19 @@ be signed off. No item is skipped; a single 🔴 blocks launch.
 
 | Wave | Status | Evidence |
 | --- | --- | --- |
-| LR-A (rendering trust) | In Progress — A1/A2/A3/A4/A5/A6/A7 land in this session | `LibreOfficePdfConversionServiceTest`, `RenderingFontBaselineTest`, `OoxmlOutputValidationGateTest`, ADR-0041/0042/0043 |
+| LR-A (rendering trust) | **In Progress** — A1/A2 **Done**; **A3 In Progress** (2026-07-10 gap-close); A5 Partial (0042/0043); A4/A6/A7 remain | BDD [lrp-a3-master-docx-upload-validation.md](../behavior/lrp-a3-master-docx-upload-validation.md); ADR-0042/0043 Proposed (0041 deferred) |
 | LR-B (multi-instance + session) | Done (2026-07-04) | ADR-0044, ShedLock V46, SSE proxy config, graceful shutdown, LR-B6 session renewal |
-| LR-C (usability deepening) | In Progress — C1/C2/C3/C4/C5/C6/C7/C8/C9/C10/C11/C12/C13 | composables + stores added; E2E/UIUX evidence pending Docker redeploy |
-| LR-D (ops + data lifecycle) | In Progress — D1/D2/D3/D4/D5/D6/D7 | `AuditRetentionCleanupScheduler`, backup runbook, Prometheus alerts, NFR proposals, `LoadSmokeBaselineTest` |
+| LR-C (usability deepening) | Partial — C1/C4 **Done** (F7); C2–C3/C5–C13 Not Started | F7 evidence in ledger; not current delivery focus |
+| LR-D (ops + data lifecycle) | Not Started (checklist rows may be aspirational) | Do not treat as active delivery focus |
 | LR-E1 (SSE-through-proxy E2E) | Scaffold in place | `LRP-E1-sse-incremental-progress.spec.ts` (full journey pending seeded template) |
 
 ## Go/no-go checklist
 
 ### Rendering fidelity
 
-- [ ] LR-A1: per-invocation LibreOffice profile isolation — parallel conversion regression green.
-- [ ] LR-A2: CJK + metric-compatible fonts baked into the backend image; `RenderingFontBaselineTest` green in Docker.
-- [ ] LR-A3: upload size limits (50MB) + deep validation enforced at Spring + nginx + service; regression green.
+- [x] LR-A1: per-invocation LibreOffice profile isolation — parallel conversion regression green.
+- [x] LR-A2: CJK + metric-compatible fonts baked into the backend image; `RenderingFontBaselineTest` / smoke green.
+- [ ] LR-A3: upload size limits (50MB) + deep validation enforced at Spring + nginx + service; regression green (**In Progress** gap-close 2026-07-10).
 - [ ] LR-A4: unsupported structured node types fail closed; no silent content loss.
 - [ ] LR-A6: OOXML output validation gate green on the corpus.
 - [ ] LR-A7: pagination delta corpus measured; deltas within the ±1 budget (or documented exceptions).

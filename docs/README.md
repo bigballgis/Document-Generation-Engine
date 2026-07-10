@@ -156,6 +156,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[CORE-FORTRESS F6 frontend kernel refactor](./behavior/core-fortress-f6-frontend-kernel-refactor.md)** | **Done** (2026-07-09) | Composable decomposition — controller **243** lines; **73** composable Vitest; F6-T08 E2E env blocker documented |
 | **[CORE-FORTRESS F7 authoring UX](./behavior/core-fortress-f7-authoring-ux.md)** | **Done** (2026-07-09) | Dirty guard + side-by-side preview; LR-C1/C4 mirrored Done — Vitest **894**; E2E **12/12** |
 | **[CORE-FORTRESS F8 observability / SLO / DR](./behavior/core-fortress-f8-observability-slo-dr.md)** | **Done** (2026-07-09) | Micrometer SLOs; deep readiness; DR playbook; evidence bundle — `mvn verify` **1154** |
+| **[LR-A3 master DOCX upload validation](./behavior/lrp-a3-master-docx-upload-validation.md)** | **ready** (2026-07-10) | BDD-LRP-A3-UPLOAD-001 — ZIP magic + OPC probe + 50MB/60MB limits; virus scan pending Q |
 
 ## Evidence & acceptance artifacts
 

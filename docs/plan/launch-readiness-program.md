@@ -2,7 +2,7 @@
 
 **Program ID:** `LRP`  
 **Created:** 2026-07-03  
-**Status:** **In Progress** (Wave LR-B **Done** 2026-07-04; Wave LR-A activated 2026-07-04; Wave LR-C partial — LR-C1/C4 **Done** via CORE-FORTRESS F7 2026-07-09). **Not sole active formal program** — **CODE-QUALITY** activated 2026-07-09; see [code-quality-program.md](./code-quality-program.md).  
+**Status:** **In Progress** (Wave LR-B **Done** 2026-07-04; Wave LR-A activated 2026-07-04; Wave LR-C partial — LR-C1/C4 **Done** via CORE-FORTRESS F7 2026-07-09). **Formal phase / program:** **None**. **Active delivery focus (2026-07-10):** Wave **LR-A** / slice **`lrp-a3-upload-validation` (LR-A3)** — see [LRP-A detail](./detail/LRP-A-rendering-trust-hardening.md). **CODE-QUALITY Done** (2026-07-09); see [code-quality-program.md](./code-quality-program.md).  
 **North star:** Lift the system from **「功能齐全」** to **「生产可靠 + 业务好用」** — absorb the industry's known production pitfalls (rendering/conversion, proxy streaming, multi-instance, session), and maximize functionality + usability **inside the confirmed v1 boundary**, before launch.
 
 **Authoritative entry for lower-tier implementers:** Read this file first, then the wave detail doc for your task ID prefix. LRP task IDs are prefixed **`LR-*`** only.
@@ -18,7 +18,7 @@
 | [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **Done** — rendering engine + demo scaffolds (2026-07-04) |
 | [detail/P23-demo-typography-layout-excellence.md](./detail/P23-demo-typography-layout-excellence.md) | **Done** — bank-grade demo typography/layout (2026-07-08) |
 | [detail/CORE-FORTRESS-program-roadmap.md](./detail/CORE-FORTRESS-program-roadmap.md) | **CORE-FORTRESS Done** (F1–F8; 2026-07-09) |
-| [code-quality-program.md](./code-quality-program.md) | **Active formal program CODE-QUALITY** — code hygiene (`CQ-*`; Wave 1 In Progress) |
+| [code-quality-program.md](./code-quality-program.md) | **CODE-QUALITY Done** (2026-07-09) — code hygiene (`CQ-*`) |
 
 ---
 
@@ -27,11 +27,11 @@
 | Work stream | Where it runs | This LRP program owns |
 | --- | --- | --- |
 | **P22** (P22-T01…T15, rendering + demo scaffolds) | **Done** (2026-07-04) — typography/content → **P23** | **Nothing.** Do not reopen P22. |
-| **P23** (P23-T01…T16, demo typography & layout excellence) | **Formal phase In Progress** — track via [P23 detail](./detail/P23-demo-typography-layout-excellence.md) | **LR-A2** / **LR-A7** coordinate with P23 (§5); LRP does not own P23 package rewrites. |
-| **CDP** (CD-DOC/CD-BDD/CD-E2E/CD-HARD, `CD-*`) | **Another session** — track via [CDP program](./competitiveness-deepening-program.md) | **Nothing.** LRP references CD-2 (browser E2E) and CD-3 (CD-HARD) as prerequisite/sibling waves; it does **not** duplicate or execute their tasks. |
-| **LRP** (`LR-*` — production hardening + usability deepening) | **This program** | LR-A…LR-E per §2 wave map. |
+| **P23** (P23-T01…T16, demo typography & layout excellence) | **Done** (2026-07-08) — track via [P23 detail](./detail/P23-demo-typography-layout-excellence.md) | **LR-A2 Done**; **LR-A7** still coordinates with P23 corpus; LRP does not own P23 package rewrites. |
+| **CDP** (CD-DOC/CD-BDD/CD-E2E/CD-HARD, `CD-*`) | **Another session** — track via [CDP program](./competitiveness-deepening-program.md) | **Nothing.** Do **not** start CDP from the LR-A3 delivery focus. LRP references CD-2/CD-3 as sibling waves only. |
+| **LRP** (`LR-*` — production hardening + usability deepening) | **This program — active delivery focus** | LR-A…LR-E per §2 wave map; current slice **LR-A3**. |
 
-**Formal phase note:** `master-plan.md` keeps **P23** as the sole formal phase `In Progress` (2026-07-08). LRP is a **cross-cutting program** at the same level as CDP — **not** a new formal phase. LRP implementers follow task IDs prefixed **`LR-*`** only.
+**Formal phase note:** `master-plan.md` has **no** formal phase `In Progress` (**None**, 2026-07-09+). LRP is a **cross-cutting program** at the same level as CDP — **not** a new formal phase. LRP implementers follow task IDs prefixed **`LR-*`** only.
 
 **Shared-wave contract with CDP:** where an LRP task executes a CD-HARD task (LR-A2→CD-HARD-T01, LR-A6→CD-HARD-T03, LR-A7→CD-HARD-T04), status is recorded **once** in the CDP detail doc and mirrored by ledger reference — never forked.
 
@@ -94,10 +94,10 @@ From the 2026-07-03 full-repo inventory + industry research. Verify evidence pat
 
 1. Within LRP, only **one wave** may be `In Progress` at a time (same discipline as CDP).
 2. **Recommended first activation:** **LR-B** (core **B1/B3/B5/B8**) then **LR-A** (core **A1/A2/A3**) — production-defect classes first; both cores are independent of P22.
-3. Formal phase accounting: **P23 is the sole formal phase In Progress** (2026-07-08); LRP wave status lives in this file + [execution-sync-ledger.md](./execution-sync-ledger.md) § LRP.
+3. Formal phase accounting: **None** (2026-07-09+); LRP wave status lives in this file + [execution-sync-ledger.md](./execution-sync-ledger.md) § LRP. Delivery focus may be a single LRP slice without promoting a formal phase.
 4. Tasks marked **BDD: required** may not start implementation until `behavior-spec-author` publishes a `ready` spec in `docs/behavior/`.
 
-**Current wave:** **LR-A** (`In Progress`, activated 2026-07-04 after LR-B closure — per rule 2 recommended order, core **A1/A2/A3** first; user-confirmed procedural activation). **LR-B Done** (2026-07-04). Program status: **In Progress**.
+**Current wave:** **LR-A** (`In Progress`, activated 2026-07-04 after LR-B closure). **Active slice (2026-07-10):** **LR-A3** / `lrp-a3-upload-validation` **In Progress** (gap-close; BDD [ready](../behavior/lrp-a3-master-docx-upload-validation.md)). **LR-B Done** (2026-07-04). Program status: **In Progress**.
 
 ---
 
@@ -109,9 +109,9 @@ From the 2026-07-03 full-repo inventory + industry research. Verify evidence pat
 | --- | --- | --- | --- | --- | --- | --- |
 | LR-A1 | backend-engineer | LibreOffice per-invocation profile isolation + CLI hardening | — | not-applicable | CD-PIT-11; COR-P02/OPT-F6 (pool exists) | **Done** (2026-07-09 — F4) |
 | LR-A2 | deploy-engineer + backend-engineer | Font baseline (CJK + metric-compatible) in images + smoke test | — | not-applicable | CD-PIT-01; CD-HARD-T01; ADR-0041 (LR-A5) | **Done** (2026-07-08 — P23) |
-| LR-A3 | backend-engineer (+deploy-engineer) | Upload deep validation + size limits | — | **required** | §1 finding 6 | Not Started |
+| LR-A3 | backend-engineer (+deploy-engineer) | Upload deep validation + size limits (gap-close) | — | **required** ([ready](../behavior/lrp-a3-master-docx-upload-validation.md)) | §1 finding 6 | **In Progress** (2026-07-10 — `lrp-a3-upload-validation`) |
 | LR-A4 | backend-engineer | Unsupported-node fail-closed closure | **P22-T01/T02 Done** | **required** | CD-PIT-07; P18/P22 | Not Started |
-| LR-A5 | doc-keeper | Draft ADR-0041/0042/0043 (font baseline / pagination delta / OOXML validation) | — | not-applicable | CD-PIT registry §4 | Not Started |
+| LR-A5 | doc-keeper | Draft ADR-0041/0042/0043 (font baseline / pagination delta / OOXML validation) | — | not-applicable | CD-PIT registry §4 | **Partial** — 0042/0043 Proposed on disk; **0041 missing** (deferred this pass) |
 | LR-A6 | backend-engineer | OOXML output validation gate (executes CD-HARD-T03) | P22-T01 Done | not-applicable | CD-PIT-03 | Not Started |
 | LR-A7 | doc-keeper | Pagination delta budget + corpus (executes CD-HARD-T04) | **P23** demo packages (T04+ letter-grade) | not-applicable | CD-PIT-02; ADR-0042 | **In Progress** (F4 subset — schema + procedure; measurements pending Docker) |
 

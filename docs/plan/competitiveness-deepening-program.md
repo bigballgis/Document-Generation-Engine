@@ -12,8 +12,8 @@
 | [detail/CDP-doc-truth-reconciliation.md](./detail/CDP-doc-truth-reconciliation.md) | Wave CD-DOC — documentation drift fixes |
 | [detail/CDP-e2e-full-chain-evidence.md](./detail/CDP-e2e-full-chain-evidence.md) | Wave CD-E2E — browser golden paths + UIUX evidence |
 | [detail/CDP-industry-pitfall-registry.md](./detail/CDP-industry-pitfall-registry.md) | Wave CD-PIT — industry pitfalls → ADR/NFR/test mitigations |
-| [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **External session** — formal phase P22 rendering + eight demos (do not execute here) |
-| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — production hardening + usability deepening; do not execute `LR-*` from CDP session |
+| [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **Done** (2026-07-04) — rendering engine + demos (do not reopen from CDP) |
+| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — **active delivery focus 2026-07-10** is LR-A3; do not execute `LR-*` from CDP session |
 | [comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md) | Historical COR/OPT waves (mostly Done) |
 
 ---
@@ -22,10 +22,11 @@
 
 | Work stream | Where it runs | This CDP session owns |
 | --- | --- | --- |
-| **P22** (P22-T01…T15, rendering + demos) | **Another session** — track via [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) + `execution-sync-ledger.md` | **Nothing.** Do not start P22 tasks from CDP docs unless user explicitly moves session. |
-| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD after P22) | **This session** | CD-0 → CD-2 → CD-3 (see §2). |
+| **P22** (P22-T01…T15, rendering + demos) | **Done** (2026-07-04) — track via [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) | **Nothing.** Do not reopen P22 from CDP. |
+| **LRP** (`LR-*`, Wave LR-A / LR-A3) | **Active delivery focus (2026-07-10)** — outside CDP | **Nothing.** Do not start LR-A3 from CDP docs. |
+| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **This program when activated** | CD-0 → CD-2 → CD-3 (see §2). **Not** the current delivery focus. |
 
-**Formal phase note:** `master-plan.md` may still show **P22 In Progress** for repo-wide phase accounting. That does **not** mean every agent/session should execute P22. **CDP implementers follow task IDs prefixed `CD-*` only.**
+**Formal phase note:** `master-plan.md` has formal phase **None** (2026-07-09+). Current delivery focus is **LRP LR-A3**, not CDP. **CDP implementers follow task IDs prefixed `CD-*` only** when this program is the active focus.
 
 
 ## 0. Executive summary
@@ -68,7 +69,7 @@
                  doc truth, BDD, browser E2E, post-P22 hardening specs
 ```
 
-**Repo phase accounting:** `master-plan.md` may list P22 as the sole formal phase `In Progress`. CDP is a **parallel program** — not a phase replacement and not a mandate to run P22 in every session.
+**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). Current delivery focus is **LRP LR-A3**, not CDP. CDP is a **parallel program** — not a phase replacement.
 
 ---
 

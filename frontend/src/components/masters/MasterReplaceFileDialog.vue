@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { validateMasterDocxUploadFile } from '@/utils/validateMasterDocxUpload'
 
 const props = defineProps<{
   modelValue: boolean
@@ -22,6 +23,7 @@ const visible = computed({
 
 const selectedFile = ref<File | null>(null)
 const fileList = ref<{ name: string }[]>([])
+const fileErrorKey = ref<string | null>(null)
 
 watch(
   () => props.modelValue,
@@ -31,17 +33,30 @@ watch(
     }
     selectedFile.value = null
     fileList.value = []
+    fileErrorKey.value = null
   },
 )
 
 function onFileChange(uploadFile: { raw?: File }) {
-  selectedFile.value = uploadFile.raw ?? null
-  fileList.value = selectedFile.value ? [{ name: selectedFile.value.name }] : []
+  const file = uploadFile.raw ?? null
+  fileErrorKey.value = null
+  if (file) {
+    const validation = validateMasterDocxUploadFile(file)
+    if (!validation.ok) {
+      fileErrorKey.value = validation.messageKey
+      selectedFile.value = null
+      fileList.value = []
+      return
+    }
+  }
+  selectedFile.value = file
+  fileList.value = file ? [{ name: file.name }] : []
 }
 
 function onFileRemove() {
   selectedFile.value = null
   fileList.value = []
+  fileErrorKey.value = null
 }
 
 function closeDialog() {
@@ -73,14 +88,17 @@ const canSubmit = computed(() => Boolean(selectedFile.value))
     <el-upload
       :auto-upload="false"
       :file-list="fileList"
-      accept=".docx"
+      accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       :limit="1"
       @change="onFileChange"
       @remove="onFileRemove"
     >
       <el-button>{{ t('masters.upload.chooseFile') }}</el-button>
       <template #tip>
-        <div class="el-upload__tip">{{ t('masters.upload.fileHint') }}</div>
+        <div class="upload-tip">{{ t('masters.upload.fileHint') }}</div>
+        <div v-if="fileErrorKey" class="upload-error" role="alert">
+          {{ t(fileErrorKey) }}
+        </div>
       </template>
     </el-upload>
     <template #footer>
@@ -101,5 +119,17 @@ const canSubmit = computed(() => Boolean(selectedFile.value))
 .current-file {
   margin: 0 0 1rem;
   font-size: 0.9rem;
+}
+
+.upload-tip {
+  margin-top: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.upload-error {
+  margin-top: 0.25rem;
+  color: var(--color-danger, #f56c6c);
+  font-size: 0.875rem;
 }
 </style>

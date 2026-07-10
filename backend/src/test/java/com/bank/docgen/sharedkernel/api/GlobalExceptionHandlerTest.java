@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
@@ -91,5 +92,26 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.INTERNAL_ERROR);
         assertThat(response.getBody().error().retryable()).isTrue();
+    }
+
+    @Test
+    void maxUploadSizeExceededMapsToReadableDocxTooLargeEnvelope() {
+        // A4 (Spring multipart): oversize must return JSON envelope + docxTooLarge, not raw HTML/500
+        when(messageResolver.resolve("api.error.master.docxTooLarge"))
+                .thenReturn("The uploaded DOCX exceeds the maximum allowed size.");
+
+        ResponseEntity<ErrorEnvelope> response = handler.handleMaxUploadSizeExceeded(
+                request,
+                new MaxUploadSizeExceededException(50L * 1024L * 1024L)
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.PAYLOAD_TOO_LARGE);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.MASTER_VALIDATION_FAILED);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.MASTER);
+        assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.master.docxTooLarge");
+        assertThat(response.getBody().error().message())
+                .isEqualTo("The uploaded DOCX exceeds the maximum allowed size.");
+        assertThat(response.getBody().error().retryable()).isFalse();
     }
 }
