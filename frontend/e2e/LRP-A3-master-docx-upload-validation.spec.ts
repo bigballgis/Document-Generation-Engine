@@ -141,7 +141,7 @@ test.describe('LR-A3 master DOCX upload validation (A4 / A7)', () => {
     await captureEvidence(page, 'A7-non-docx-precheck')
   })
 
-  test('A4: nginx-style HTML 413 maps to readable ElMessage (no raw HTML)', async ({ page }) => {
+  test('A4: nginx-style HTML 413 maps to readable inline error (no raw HTML)', async ({ page }) => {
     test.skip(
       !hasReplacementFixture,
       'Replacement DOCX fixture missing — run: mvn -f backend/pom.xml -Dtest=E2eDocxFixtureGeneratorTest test',
@@ -169,11 +169,12 @@ test.describe('LR-A3 master DOCX upload validation (A4 / A7)', () => {
     await expect(dialog.getByRole('button', { name: /^replace file$/i })).toBeEnabled()
     await dialog.getByRole('button', { name: /^replace file$/i }).click()
 
-    const message = page.locator('.el-message').filter({ hasText: READABLE_TOO_LARGE })
-    await expect(message).toBeVisible()
-    await expect(message).not.toContainText(/Request Entity Too Large/i)
-    await expect(message).not.toContainText(/nginx\//i)
-    await expect(message).not.toContainText(/<html/i)
+    const inlineError = dialog.locator('.upload-error')
+    await expect(inlineError).toBeVisible()
+    await expect(inlineError).toHaveText(READABLE_TOO_LARGE)
+    await expect(inlineError).not.toContainText(/Request Entity Too Large/i)
+    await expect(inlineError).not.toContainText(/nginx\//i)
+    await expect(inlineError).not.toContainText(/<html/i)
     await expect(page.getByText(REPLACE_SUCCESS)).not.toBeVisible()
     await expect(dialog).toBeVisible()
 
@@ -215,12 +216,12 @@ test.describe('LR-A3 master DOCX upload validation (A4 / A7)', () => {
     await dialog.locator('input[type="file"]').setInputFiles(REPLACEMENT_DOCX_PATH)
     await dialog.getByRole('button', { name: /^replace file$/i }).click()
 
-    const message = page.locator('.el-message').filter({
-      hasText: /The uploaded DOCX exceeds the maximum allowed size\./i,
-    })
-    await expect(message).toBeVisible()
-    await expect(message).not.toContainText(RAW_NGINX_HTML)
+    const inlineError = dialog.locator('.upload-error')
+    await expect(inlineError).toBeVisible()
+    await expect(inlineError).toHaveText(/The uploaded DOCX exceeds the maximum allowed size\./i)
+    await expect(inlineError).not.toContainText(RAW_NGINX_HTML)
     await expect(page.getByText(REPLACE_SUCCESS)).not.toBeVisible()
+    await expect(dialog).toBeVisible()
 
     await captureEvidence(page, 'A4-spring-envelope-413')
   })

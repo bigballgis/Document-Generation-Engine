@@ -306,9 +306,15 @@ async function handleReplaceFile(file: File) {
 
   } catch {
 
-    ElMessage.error(errorMessage.value || t('masters.error.replaceFile'))
+    // Keep dialog open — inline translated error via serverErrorKey (LR-C10-B).
 
   }
+
+}
+
+function clearReplaceServerError() {
+
+  mastersStore.lastErrorMessageKey = null
 
 }
 
@@ -470,7 +476,13 @@ async function handleSubmitReview(payload: { changeSummary: string }) {
 
       :loading="mastersStore.submitting"
 
+      :upload-progress="mastersStore.uploadProgress"
+
+      :server-error-key="replaceFileOpen ? mastersStore.lastErrorMessageKey : null"
+
       @submit="handleReplaceFile"
+
+      @clear-server-error="clearReplaceServerError"
 
     />
 
