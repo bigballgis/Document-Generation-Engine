@@ -324,23 +324,23 @@
       {
         "id": "24",
         "title": "CDP CD-2 T13 package materialize re-evidence + wave closeout",
-        "description": "Sole-active CD-2 E2E after T12 Done: CD-E2E-T13 package materialize on publish / default-route stability (BDD S1–S3 re-evidence + wave closeout). Specs exist (CDP-E2E-T13-api-package-materialize.spec.ts; P13-ESO-F01–F03 historically claimed Done — CDP wave still open for honest re-evidence). Do NOT invent duplicate tasks. Do NOT mark wave CD-2 Done until T13 green + merge. Do NOT activate LR-C10. Out of scope: new product features, LR-*.",
-        "details": "ACTIVATED 2026-07-11. Slice id: cdp-e2e-t13-materialize. Status: in-progress (sole-active CDP E2E). Placement: ISOLATED D:/working/DGE-cdp-e2e-t13-materialize · feat/cdp-e2e-t13-materialize · base c83ae9d (T12 Done on main). BDD ready: docs/behavior/api-package-access-and-invocation-records.md (BDD-API-PACKAGE-ACCESS-INVOCATION-001 S1–S3). Existing spec: frontend/e2e/CDP-E2E-T13-api-package-materialize.spec.ts. Reconciliation: P13-ESO-F01–F03 historically claimed CD-E2E-T13 Done; CDP wave matrix still Not Started for T13 until re-evidence. Formal phase remains None. Wave CD-2 stays In Progress (partial — T01–T12 Done; T13 In Progress). Next: after BDD ready confirm → deploy stack → run existing CDP-E2E-T13 specs.",
+        "description": "COMPLETED 2026-07-11. CD-E2E-T13 package materialize re-evidence + Wave CD-2 closeout. Merge b2b0899; worktree removed. Wave CD-2 → Done (T01–T13). Do NOT activate LR-C10. Do NOT start CD-3 as In Progress (recommend only).",
+        "details": "DONE 2026-07-11. Slice id: cdp-e2e-t13-materialize. Status: done. Merge: b2b0899 (feat/cdp-e2e-t13-materialize → main FF); worktree DGE-cdp-e2e-t13-materialize REMOVED. BDD ready: docs/behavior/api-package-access-and-invocation-records.md (BDD-API-PACKAGE-ACCESS-INVOCATION-001 S1–S3). Reconciliation: P13-ESO-F01–F03 historically claimed Done; CDP wave re-evidence closed after T10 fixture fix (fidelityViewedConfirmed) + CD-2 UIUX. Gates: Playwright docker --workers=1 functional 3/3 + uiux 1/1; UIUX Verdict PASS (5 screenshots @1920 REDBC; CDP-E2E-T13-uiux-manifest.md); architecture-reviewer PASS_WITH_SUGGESTIONS (Critical 0); Stage 5/10 DEPLOY_OK healthz 200 + :4173 200. Wave CD-2 → Done (T01–T13 all Done). Formal phase remains None. Do NOT activate LR-C10. Do NOT start CD-3 as In Progress (recommend only). Next recommend: LR-C10 or CD-3.",
         "testStrategy": "1. BDD S1: first publish materialize + dual paths. 2. BDD S2: second publish default unchanged. 3. BDD S3: explicit default change with impact preview. 4. Playwright docker --workers=1 green on CDP-E2E-T13-api-package-materialize.spec.ts. 5. UIUX/manifest as needed for wave closeout. 6. Do not claim wave CD-2 Done until T13 green + merge.",
         "priority": "high",
         "dependencies": [
           "23"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-11T04:37:00.000Z"
+        "updatedAt": "2026-07-11T04:55:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T04:37:00.000Z",
+      "lastModified": "2026-07-11T04:55:00.000Z",
       "taskCount": 24,
-      "completedCount": 23,
+      "completedCount": 24,
       "tags": [
         "master"
       ]

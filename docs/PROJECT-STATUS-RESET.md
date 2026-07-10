@@ -24,7 +24,7 @@ same gate bar (backend `mvn verify` 114 tests green / JaCoCo met; frontend lint/
 
 **Active formal phase (repo-wide):** **None** (2026-07-09+). **CORE-FORTRESS Done** (F1–F8); **CODE-QUALITY Done**. See [master-plan.md](./plan/master-plan.md).
 
-**Delivery focus note (2026-07-11):** **CDP Wave CD-2 In Progress** (**partial** — T01–T11 Done, merge tip `6e3f825`; T12/T13 Not Started; no sole-active CDP E2E slice) — [competitiveness-deepening-program.md](./plan/competitiveness-deepening-program.md). **Wave LR-A Done** (A1–A7; merge `cc9e5f6`); **LR-A5 Done** (**ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred) — [launch-readiness-program.md](./plan/launch-readiness-program.md). **P12 catch-all Not Started** (slices Done). **P21 Done** (2026-06-30). User sequence **P14 → P15 → P18** complete.
+**Delivery focus note (2026-07-11):** **CDP Wave CD-2 Done** (T01–T13; merge tip `b2b0899`; all matrix manifests PASS) — [competitiveness-deepening-program.md](./plan/competitiveness-deepening-program.md). Recommend next: **LR-C10** or **CD-3** (do not auto-activate). **Wave LR-A Done** (A1–A7; merge `cc9e5f6`); **LR-A5 Done** (**ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred) — [launch-readiness-program.md](./plan/launch-readiness-program.md). **P12 catch-all Not Started** (slices Done). **P21 Done** (2026-06-30). User sequence **P14 → P15 → P18** complete.
 
 **Latest gate evidence (authoritative):** backend `mvn verify` BUILD SUCCESS (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL);
 frontend **643** Vitest (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL); Playwright T13 **8+1** passed, **3** skipped (documented); UIUX manifest **PASS**; see [execution-sync-ledger.md](./plan/execution-sync-ledger.md).

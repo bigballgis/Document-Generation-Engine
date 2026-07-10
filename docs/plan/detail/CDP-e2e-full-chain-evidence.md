@@ -1,13 +1,15 @@
 # CDP Wave CD-E2E — Full-Chain Browser Evidence
 
 **Program:** [competitiveness-deepening-program.md](../competitiveness-deepening-program.md)  
-**Wave:** CD-2 — **In Progress** (2026-07-11; **partial** — T01/T01b + T02/T03/T04 + T05 + T06 + T07 + T08 + T09 + T10 + T11 + T12 Done; **CD-E2E-T13 → In Progress** — sole-active CDP E2E slice)
+**Wave:** CD-2 — **Done** (2026-07-11; T01/T01b + T02–T13 all Done; merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825` / `f12b193` / `b2b0899`; all matrix manifests PASS)
 **Owner default:** `e2e-test-engineer` + `e2e-uiux-reviewer`
 **Prerequisites:** Docker stack (`.\scripts\docker-deploy-queue.ps1`); read `frontend/e2e/helpers/auth.ts`, `frontend/e2e/helpers/cdp-mvp-golden-api.ts`
 
-> **Activation note (2026-07-11):** Slice `cdp-e2e-t13-materialize` — **CD-E2E-T13 → In Progress** (sole-active CDP E2E slice — package materialize on publish / default-route stability; BDD S1–S3 re-evidence + wave closeout). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t13-materialize` · `feat/cdp-e2e-t13-materialize` · base `c83ae9d` (T12 Done on main). BDD **ready**: `docs/behavior/api-package-access-and-invocation-records.md` (BDD-API-PACKAGE-ACCESS-INVOCATION-001 S1–S3). Specs already exist (`CDP-E2E-T13-api-package-materialize.spec.ts`; P13-ESO-F01–F03 historically claimed Done — CDP wave still open for honest re-evidence). Do **not** invent duplicate tasks. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Do **not** activate LR-C10. **Task Master #24 → in-progress**.
+> **Completion note (2026-07-11):** Slice `cdp-e2e-t13-materialize` merged to `main` (`b2b0899`; worktree **REMOVED**). **CD-E2E-T13 → Done**. Package materialize / default-route stability re-evidenced (BDD S1–S3). Playwright docker `--workers=1` functional **3/3** + uiux **1/1**; UIUX Verdict **PASS** (**5** screenshots @1920 REDBC; `CDP-E2E-T13-uiux-manifest.md`); architecture-reviewer **PASS_WITH_SUGGESTIONS** (Critical **0**); Stage 5/10 **DEPLOY_OK** healthz **200** + `:4173` **200**. Reconciliation: P13-ESO-F01–F03 historically claimed Done; CDP wave re-evidence closed after T10 fixture fix. **Wave CD-2 → Done**. Formal phase remains **None**. Do **not** activate LR-C10. Do **not** start CD-3 as In Progress (recommend only). **Task Master #24 → done**.
 
-> **Completion note (2026-07-11):** Slice `cdp-e2e-t12-i18n-brands` merged to `main` (`f12b193`; worktree **REMOVED**). **CD-E2E-T12 → Done**. zh-CN + dual-brand golden screenshot browser evidence closed (BDD-CDP-I18N-001/002). Playwright docker `--workers=1` **3/3** (functional **2/2** + uiux-evidence **1/1**); UIUX Verdict **PASS** (**7** screenshots @1920 zh-CN REDBC+GREENBC; `CDP-E2E-T12-uiux-manifest.md`); architecture-reviewer **PASS_WITH_SUGGESTIONS** (Critical **0**); Stage 5/10 **DEPLOY_OK** healthz **200** + `:4173` **200** (E2E-only SkipBuild). Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Superseded scheduling: T13 activated (see activation note above). **Task Master #23 → done**.
+> **Activation note (2026-07-11):** Slice `cdp-e2e-t13-materialize` — **CD-E2E-T13 → In Progress** (sole-active CDP E2E slice — package materialize on publish / default-route stability; BDD S1–S3 re-evidence + wave closeout). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t13-materialize` · `feat/cdp-e2e-t13-materialize` · base `c83ae9d` (T12 Done on main). BDD **ready**: `docs/behavior/api-package-access-and-invocation-records.md` (BDD-API-PACKAGE-ACCESS-INVOCATION-001 S1–S3). Specs already exist (`CDP-E2E-T13-api-package-materialize.spec.ts`; P13-ESO-F01–F03 historically claimed Done — CDP wave still open for honest re-evidence). Superseded by T13 + CD-2 completion note above. **Task Master #24 → in-progress** (now done).
+
+> **Completion note (2026-07-11):** Slice `cdp-e2e-t12-i18n-brands` merged to `main` (`f12b193`; worktree **REMOVED**). **CD-E2E-T12 → Done**. zh-CN + dual-brand golden screenshot browser evidence closed (BDD-CDP-I18N-001/002). Playwright docker `--workers=1` **3/3** (functional **2/2** + uiux-evidence **1/1**); UIUX Verdict **PASS** (**7** screenshots @1920 zh-CN REDBC+GREENBC; `CDP-E2E-T12-uiux-manifest.md`); architecture-reviewer **PASS_WITH_SUGGESTIONS** (Critical **0**); Stage 5/10 **DEPLOY_OK** healthz **200** + `:4173` **200** (E2E-only SkipBuild). Formal phase remains **None**. Superseded scheduling: T13 completed (see completion note above). **Task Master #23 → done**.
 
 > **Activation note (2026-07-11):** Slice `cdp-e2e-t12-i18n-brands` — **CD-E2E-T12 → In Progress** (sole-active CDP E2E slice — zh-CN locale + REDBC/GREENBC dual-brand golden screenshots @1920). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t12-i18n-brands` · `feat/cdp-e2e-t12-i18n-brands`. BDD **ready**: `docs/behavior/zh-cn-dual-brand-golden-screenshots.md` (BDD-CDP-I18N-001/002). Superseded by completion note above. **Task Master #23 → in-progress** (now done).
 
@@ -212,9 +214,10 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - **Owner:** `e2e-test-engineer` (+ `e2e-uiux-reviewer` if UIUX re-evidence needed)
 - **Read first:** `docs/behavior/api-package-access-and-invocation-records.md` (BDD-API-PACKAGE-ACCESS-INVOCATION-001 S1–S3 **ready**); existing `frontend/e2e/CDP-E2E-T13-api-package-materialize.spec.ts`
 - **Acceptance:** S1 first publish materialize + dual paths; S2 second publish default unchanged; S3 explicit default change with impact preview — Docker Playwright green + ledger evidence. Wave CD-2 may close only after this task Done + merge.
-- **Status:** **In Progress** (2026-07-11 — slice `cdp-e2e-t13-materialize`; sole-active CDP E2E; honest re-evidence — P13-ESO-F01–F03 historically claimed Done; do not invent duplicate tasks)
-- **Artifacts:** `CDP-E2E-T13-api-package-materialize.spec.ts` (exists); UIUX/manifest as needed for wave closeout
-- **Reconciliation:** Specs exist from P13 Phase 4; CDP wave matrix still open until re-run evidence recorded under CD-2
+- **Status:** **Done** (2026-07-11 — slice `cdp-e2e-t13-materialize`; merge `b2b0899`; worktree removed)
+- **Artifacts:** `CDP-E2E-T13-api-package-materialize.spec.ts` + `CDP-E2E-T13-uiux-evidence.spec.ts` + `frontend/e2e/evidence/CDP-E2E-T13-uiux-manifest.md` + screenshots (5 @1920 REDBC)
+- **Evidence:** Playwright docker `--workers=1` functional **3/3** + uiux **1/1**; UIUX Verdict **PASS**; architecture **PASS_WITH_SUGGESTIONS** (Critical **0**); Stage 5/10 deploy healthz/4173 **200**
+- **Reconciliation:** P13-ESO-F01–F03 historically claimed Done; CDP wave re-evidence closed (T10 fixture fix `fidelityViewedConfirmed` + CD-2 UIUX)
 
 ---
 
@@ -222,7 +225,7 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 
 | Source | Scenario | CD-E2E task |
 | --- | --- | --- |
-| P12-API BDD S1–S3, S7 | Package materialize on publish, default route stability | CD-E2E-T13 (**In Progress** — sole-active; preview-success frame gap closed by T08; re-evidence + wave closeout) |
+| P12-API BDD S1–S3, S7 | Package materialize on publish, default route stability | CD-E2E-T13 (**Done** — merge `b2b0899`; preview-success frame gap closed by T08; re-evidence + wave closeout) |
 
 ---
 
@@ -249,8 +252,8 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - [x] CD-E2E-T10 Done (2026-07-11 — slice `cdp-e2e-t10-fidelity`; merge `b16e52a`) — **not** wave exit
 - [x] CD-E2E-T11 Done (2026-07-11 — slice `cdp-e2e-t11-audit`; merge `6e3f825`) — **not** wave exit
 - [x] CD-E2E-T12 Done (2026-07-11 — slice `cdp-e2e-t12-i18n-brands`; merge `f12b193`) — **not** wave exit
-- [ ] CD-E2E-T13 In Progress (slice `cdp-e2e-t13-materialize`) — **sole-active CDP E2E**; wave not closed until T13 Done + merge
-- [x] T01 paired manifest **PASS** (15 screenshots); T02/T03/T04 manifests **PASS** (3/1/3 shots); T05 manifest **PASS** (4 shots @1920); T06 manifest **PASS** (6 shots @1920); T07 manifest **PASS** (9 shots); T08 manifest **PASS** (3 shots @1920); T09 manifest **PASS** (3 shots @1920 REDBC); T10 manifest **PASS** (6 shots @1920 REDBC); T11 manifest **PASS** (5 shots @1920 REDBC); T12 manifest **PASS** (7 shots @1920 zh-CN REDBC+GREENBC)
-- [x] `execution-sync-ledger.md` records T01 + T02–T04 + T05 + T06 + T07 + T08 + T09 + T10 + T11 + T12 Playwright counts + Docker deploy (2026-07-11); T13 activation recorded
+- [x] CD-E2E-T13 Done (2026-07-11 — slice `cdp-e2e-t13-materialize`; merge `b2b0899`) — **wave exit**
+- [x] T01 paired manifest **PASS** (15 screenshots); T02/T03/T04 manifests **PASS** (3/1/3 shots); T05 manifest **PASS** (4 shots @1920); T06 manifest **PASS** (6 shots @1920); T07 manifest **PASS** (9 shots); T08 manifest **PASS** (3 shots @1920); T09 manifest **PASS** (3 shots @1920 REDBC); T10 manifest **PASS** (6 shots @1920 REDBC); T11 manifest **PASS** (5 shots @1920 REDBC); T12 manifest **PASS** (7 shots @1920 zh-CN REDBC+GREENBC); T13 manifest **PASS** (5 shots @1920 REDBC)
+- [x] `execution-sync-ledger.md` records T01 + T02–T04 + T05 + T06 + T07 + T08 + T09 + T10 + T11 + T12 + T13 Playwright counts + Docker deploy (2026-07-11)
 - [x] `usability-review.md` references golden path spec as confirmed evidence (T01)
-- [ ] Full matrix + all manifests PASS before wave **Done**
+- [x] Full matrix + all manifests PASS — wave **Done** (2026-07-11)
