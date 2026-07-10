@@ -371,6 +371,7 @@ async function ensureDemoTemplatePendingRelease(
     await authorizedPost(request, approverToken, `/templates/${templateId}/lifecycle/approval-decision`, {
       decision: 'APPROVED',
       commentSummary: 'E2E approved for team-lead go-live journey',
+      fidelityViewedConfirmed: true,
       keyEvidenceConfirmed: true,
     })
   }

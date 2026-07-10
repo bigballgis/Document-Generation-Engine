@@ -145,6 +145,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [API policy edit-save journey](./behavior/api-policy-edit-save-journey.md) | **ready** | CD-BDD-T06 → CD-E2E-T07 |
 | **[Preview success + artifact download](./behavior/preview-success-artifact-download-journey.md)** | **ready** | CD-BDD-T08 → **CD-E2E-T08** (closes P12 T13 preview-success manifest gap; CD-PIT-08 final-path download) |
 | [Preview comparison journey](./behavior/preview-comparison-journey.md) | **ready** | CD-BDD-T07 → CD-E2E-T09 |
+| **[Fidelity viewed confirmation](./behavior/fidelity-viewed-confirmation-journey.md)** | **ready** | **CD-E2E-T10** — BDD-CDP-FID-001…004 (Pass/Approve/Publish fail-closed) |
 | [Audit admin query journey](./behavior/audit-admin-query-journey.md) | **ready** | CD-BDD-T08 → CD-E2E-T11 |
 | [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12 2026-07-03) | P12 template testing tab |
 | [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **Done** (P12 2026-07-03) | Package-first API access |

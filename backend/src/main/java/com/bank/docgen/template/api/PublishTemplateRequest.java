@@ -6,6 +6,10 @@ import jakarta.validation.constraints.Pattern;
 public record PublishTemplateRequest(
         @NotBlank
         @Pattern(regexp = "^[0-9]+\\.[0-9]+\\.[0-9]+$")
-        String releaseVersion
+        String releaseVersion,
+        Boolean fidelityViewedConfirmed
 ) {
+    public PublishTemplateRequest(String releaseVersion) {
+        this(releaseVersion, null);
+    }
 }

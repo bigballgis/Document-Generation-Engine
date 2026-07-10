@@ -190,7 +190,7 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
                         "Demo full-flow seed approved",
                         null,
                         null,
-                        null,
+                        true,
                         null,
                         null,
                         true,
@@ -221,7 +221,7 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
 
         templateLifecycleService.publish(
                 templateId,
-                new PublishTemplateRequest(DEMO_FULL_FLOW_RELEASE_VERSION),
+                new PublishTemplateRequest(DEMO_FULL_FLOW_RELEASE_VERSION, true),
                 DemoCatalogSessions.groupAdminSession()
         );
     }

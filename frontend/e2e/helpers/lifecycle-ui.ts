@@ -107,7 +107,10 @@ async function waitForTesterOrApproverOpenDestination(page: Page): Promise<'hub'
   return 'dev'
 }
 
-export async function confirmTestPassAfterTesterOpen(page: Page) {
+/**
+ * Tester dashboard Open → open Confirm test pass dialog (does not submit).
+ */
+export async function openConfirmTestPassDialogAfterTesterOpen(page: Page) {
   const destination = await waitForTesterOrApproverOpenDestination(page)
 
   if (destination === 'hub') {
@@ -117,13 +120,19 @@ export async function confirmTestPassAfterTesterOpen(page: Page) {
       .first()
     await expect(passButton).toBeVisible({ timeout: 15_000 })
     await passButton.click()
-    await completeConfirmTestPassDialog(page)
-    return
+  } else {
+    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i }).click()
+    await workspaceActions(page).getByRole('button', { name: /^confirm test pass$/i }).click()
   }
 
-  // lifecycle deep-link opens approval tab; Confirm test pass is on testing actions.
-  await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i }).click()
-  await confirmTestPassFromDevWorkspace(page)
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByText(/confirm test pass/i)).toBeVisible()
+  return dialog
+}
+
+export async function confirmTestPassAfterTesterOpen(page: Page) {
+  await openConfirmTestPassDialogAfterTesterOpen(page)
+  await completeConfirmTestPassDialog(page)
 }
 
 /**
@@ -158,7 +167,7 @@ export async function confirmTestFailAfterTesterOpen(
 async function completeConfirmTestPassDialog(page: Page) {
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText(/confirm test pass/i)).toBeVisible()
-  await dialog.getByText(/I reviewed fidelity warnings/i).click()
+  await dialog.getByTestId('confirm-fidelity-viewed').click()
   await dialog.getByText(/I reviewed the coverage summary/i).click()
   await dialog.getByText(/I reviewed the structured preview comparison/i).click()
 
@@ -216,12 +225,9 @@ async function completeConfirmTestFailDialog(
 }
 
 /**
- * Approver dashboard Open → Approve with rationale + key evidence confirmation.
+ * Approver dashboard Open → open Confirm approval dialog (does not submit).
  */
-export async function approveTemplateAfterApproverOpen(
-  page: Page,
-  rationale = 'CDP E2E approval rationale — evidence reviewed and ready for release.',
-) {
+export async function openApproveDialogAfterApproverOpen(page: Page) {
   const destination = await waitForTesterOrApproverOpenDestination(page)
 
   if (destination === 'hub') {
@@ -238,7 +244,23 @@ export async function approveTemplateAfterApproverOpen(
 
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText(/confirm approval/i)).toBeVisible()
+  return dialog
+}
+
+/**
+ * Approver dashboard Open → Approve with rationale + key evidence confirmation.
+ * When a fidelity-viewed checkbox is present (CD-E2E-T10), it is checked as well.
+ */
+export async function approveTemplateAfterApproverOpen(
+  page: Page,
+  rationale = 'CDP E2E approval rationale — evidence reviewed and ready for release.',
+) {
+  const dialog = await openApproveDialogAfterApproverOpen(page)
   await dialog.getByRole('textbox', { name: /approval rationale/i }).fill(rationale)
+  const fidelityConfirm = dialog.getByTestId('confirm-fidelity-viewed')
+  if ((await fidelityConfirm.count()) > 0) {
+    await fidelityConfirm.click()
+  }
   await dialog.getByText(/I reviewed key evidence/i).click()
 
   const decisionResponsePromise = page.waitForResponse(
@@ -285,6 +307,10 @@ export async function approveTemplateFromDevWorkspace(
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText(/confirm approval/i)).toBeVisible()
   await dialog.getByRole('textbox', { name: /approval rationale/i }).fill(rationale)
+  const fidelityConfirm = dialog.getByTestId('confirm-fidelity-viewed')
+  if ((await fidelityConfirm.count()) > 0) {
+    await fidelityConfirm.click()
+  }
   await dialog.getByText(/I reviewed key evidence/i).click()
 
   const decisionResponsePromise = page.waitForResponse(
@@ -314,6 +340,10 @@ export async function confirmGoLiveFromDevWorkspace(page: Page) {
   await publishButton.click()
   const dialog = page.locator('.el-dialog').filter({ hasText: /go-live summary/i })
   await expect(dialog).toBeVisible()
+  const fidelityConfirm = dialog.getByTestId('confirm-fidelity-viewed')
+  if ((await fidelityConfirm.count()) > 0) {
+    await fidelityConfirm.click()
+  }
   await dialog.getByRole('button', { name: /^confirm go-live$/i }).click()
 
   const publishResponse = await publishResponsePromise
@@ -357,6 +387,10 @@ export async function openGoLiveSummaryAfterTeamLeadOpen(page: Page) {
  */
 export async function confirmGoLiveAfterTeamLeadOpen(page: Page) {
   const dialog = await openGoLiveSummaryAfterTeamLeadOpen(page)
+  const fidelityConfirm = dialog.getByTestId('confirm-fidelity-viewed')
+  if ((await fidelityConfirm.count()) > 0) {
+    await fidelityConfirm.click()
+  }
 
   const publishResponsePromise = page.waitForResponse(
     (response) =>

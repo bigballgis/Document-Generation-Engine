@@ -119,11 +119,56 @@ describe('TemplatePublishSummaryDialog', () => {
     expect(wrapper.text()).toContain('Preview comparison reports 2 difference(s)')
   })
 
-  it('enables confirm when all required gate items are ready', async () => {
+  it('keeps confirm disabled until fidelity viewed is checked even when gates are ready (BDD-CDP-FID-003)', async () => {
     const wrapper = mountDialog([
       { key: 'ANCHOR_INTEGRITY', label: 'Layout placeholder check', ready: true },
       { key: 'COVERAGE_THRESHOLDS', label: 'Coverage thresholds', ready: true },
     ])
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('I reviewed fidelity warnings')
+    expect(wrapper.find('[data-testid="confirm-fidelity-viewed"]').exists()).toBe(true)
+
+    const confirmButton = () =>
+      wrapper.findAll('button').find((button) => button.text().includes('Confirm go-live'))
+
+    expect(confirmButton()?.attributes('disabled')).toBeDefined()
+
+    const checkbox = wrapper.findComponent({ name: 'ElCheckbox' })
+    await checkbox.setValue(true)
+    await flushPromises()
+
+    expect(confirmButton()?.attributes('disabled')).toBeUndefined()
+  })
+
+  it('emits fidelityViewedConfirmed on confirm', async () => {
+    const wrapper = mountDialog([
+      { key: 'ANCHOR_INTEGRITY', label: 'Layout placeholder check', ready: true },
+    ])
+    await flushPromises()
+
+    await wrapper.findComponent({ name: 'ElCheckbox' }).setValue(true)
+    await flushPromises()
+
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Confirm go-live'))
+      ?.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.emitted('confirm')?.[0]?.[0]).toMatchObject({
+      fidelityViewedConfirmed: true,
+    })
+  })
+
+  it('enables confirm when all required gate items are ready and fidelity viewed is confirmed', async () => {
+    const wrapper = mountDialog([
+      { key: 'ANCHOR_INTEGRITY', label: 'Layout placeholder check', ready: true },
+      { key: 'COVERAGE_THRESHOLDS', label: 'Coverage thresholds', ready: true },
+    ])
+    await flushPromises()
+
+    await wrapper.findComponent({ name: 'ElCheckbox' }).setValue(true)
     await flushPromises()
 
     const confirmButton = wrapper

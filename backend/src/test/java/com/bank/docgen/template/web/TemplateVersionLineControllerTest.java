@@ -828,6 +828,8 @@ class TemplateVersionLineControllerTest {
 
                                   "commentSummary":"Approved",
 
+                                  "fidelityViewedConfirmed":true,
+
                                   "keyEvidenceConfirmed":true
 
                                 }
@@ -846,7 +848,7 @@ class TemplateVersionLineControllerTest {
 
                         .content("""
 
-                                {"releaseVersion":"1.0.0"}
+                                {"releaseVersion":"1.0.0","fidelityViewedConfirmed":true}
 
                                 """))
 

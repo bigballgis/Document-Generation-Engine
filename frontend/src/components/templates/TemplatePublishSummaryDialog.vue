@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ChangeDiffSummary, CoverageSummary, PreviewComparison } from '@/types/template'
-import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
+import {
+  isPublishSummaryConfirmReady,
+  type PublishGateDisplayItem,
+} from '@/utils/templateLifecycleDecisionForm'
 
 const props = defineProps<{
   modelValue: boolean
@@ -17,10 +20,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  confirm: []
+  confirm: [payload: { fidelityViewedConfirmed: boolean }]
 }>()
 
 const { t } = useI18n()
+
+const fidelityViewedConfirmed = ref(false)
 
 const visible = computed({
   get: () => props.modelValue,
@@ -31,6 +36,14 @@ const requiredItems = computed(() => props.gateItems.filter((item) => !item.info
 const readyCount = computed(() => requiredItems.value.filter((item) => item.ready).length)
 const requiredCount = computed(() => requiredItems.value.length)
 const hasBlockers = computed(() => requiredItems.value.some((item) => !item.ready))
+
+const confirmDisabled = computed(
+  () =>
+    !isPublishSummaryConfirmReady({
+      hasBlockers: hasBlockers.value,
+      fidelityViewedConfirmed: fidelityViewedConfirmed.value,
+    }),
+)
 
 const coverageStatusKey = computed(() => {
   if (!props.coverageSummary) {
@@ -63,12 +76,24 @@ const previewComparisonStatusKey = computed(() => {
   return 'templates.publishSummary.previewComparisonClean'
 })
 
+watch(
+  () => props.modelValue,
+  (open) => {
+    if (open) {
+      fidelityViewedConfirmed.value = false
+    }
+  },
+)
+
 function close() {
   visible.value = false
 }
 
 function confirm() {
-  emit('confirm')
+  if (confirmDisabled.value) {
+    return
+  }
+  emit('confirm', { fidelityViewedConfirmed: fidelityViewedConfirmed.value })
 }
 </script>
 
@@ -139,9 +164,18 @@ function confirm() {
       </p>
     </section>
 
+    <section class="publish-summary-section">
+      <el-checkbox
+        v-model="fidelityViewedConfirmed"
+        data-testid="confirm-fidelity-viewed"
+      >
+        {{ t('templates.lifecycle.decisionForm.confirmFidelityViewed') }}
+      </el-checkbox>
+    </section>
+
     <template #footer>
       <el-button @click="close">{{ t('common.cancel') }}</el-button>
-      <el-button type="primary" :loading="loading" :disabled="hasBlockers" @click="confirm">
+      <el-button type="primary" :loading="loading" :disabled="confirmDisabled" @click="confirm">
         {{ t('templates.publishSummary.confirm') }}
       </el-button>
     </template>

@@ -290,6 +290,8 @@ export interface TemplateRiskPromptFormState {
 /** Not yet modeled in `openapi-v1.yaml` (management publish). */
 export interface PublishTemplatePayload {
   releaseVersion: string
+  /** Release Summary fidelity-viewed confirmation (BDD-CDP-FID-003). */
+  fidelityViewedConfirmed?: boolean
 }
 
 export type PasteCleaningCategory = 'TRANSFORMED' | 'REMOVED' | 'WARNING' | 'BLOCKED'

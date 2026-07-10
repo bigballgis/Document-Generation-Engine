@@ -128,6 +128,7 @@ export function useTemplateLifecycleDecisions(options: UseTemplateLifecycleDecis
         await templatesStore.recordApprovalDecision(templateId.value, {
           decision: 'APPROVED',
           commentSummary: payload.commentSummary,
+          fidelityViewedConfirmed: payload.fidelityViewedConfirmed,
           keyEvidenceConfirmed: payload.keyEvidenceConfirmed,
           exceptionIntervention: payload.exceptionIntervention,
           exceptionReason: payload.exceptionReason,
@@ -186,11 +187,12 @@ export function useTemplateLifecycleDecisions(options: UseTemplateLifecycleDecis
     publishSummaryOpen.value = true
   }
 
-  async function confirmPublishFromSummary() {
+  async function confirmPublishFromSummary(payload?: { fidelityViewedConfirmed?: boolean }) {
     publishSummaryOpen.value = false
     try {
       await templatesStore.publishTemplate(templateId.value, {
         releaseVersion: gates.publishVersion.value,
+        fidelityViewedConfirmed: payload?.fidelityViewedConfirmed,
       })
       await loadTemplate()
       if (isDevEditor.value) {

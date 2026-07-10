@@ -1133,6 +1133,7 @@ class TemplatePlatformSliceTest {
                                 {
                                   "decision":"APPROVED",
                                   "commentSummary":"Approved",
+                                  "fidelityViewedConfirmed":true,
                                   "keyEvidenceConfirmed":true
                                 }
                                 """))
@@ -1147,7 +1148,7 @@ class TemplatePlatformSliceTest {
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"releaseVersion":"%s"}
+                                {"releaseVersion":"%s","fidelityViewedConfirmed":true}
                                 """.formatted(releaseVersion)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.lifecycleStatus").value("PUBLISHED"))

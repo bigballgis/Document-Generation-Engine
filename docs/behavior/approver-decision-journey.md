@@ -19,6 +19,8 @@
 - **When** Reject → 退回原因分类 + 整改要求（必填）
 - **Then** 模板回到 DRAFT/修复态；作者收到整改待办
 
+> **Fail-closed（保真未查看）：** 见 [fidelity-viewed-confirmation-journey.md](./fidelity-viewed-confirmation-journey.md) **BDD-CDP-FID-002**（CD-E2E-T10）— 未确认保真摘要不得 Approve。
+
 ## 证据
 
 `frontend/e2e/CDP-E2E-T04-approver-decision.spec.ts`；manifest PASS。

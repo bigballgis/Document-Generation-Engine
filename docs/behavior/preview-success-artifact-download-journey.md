@@ -120,7 +120,7 @@
 | 并发 429 | SCEN-F1-02 | Out of scope |
 | 过期 410 | SCEN-F1-04 | Out of scope |
 | 并排对比 / warningCode 筛选 | [preview-comparison-journey.md](./preview-comparison-journey.md) | **CD-E2E-T09** — 禁止本切片扩展 |
-| Pass/Approve/Publish 保真「已查看」勾选 | CD-E2E-T10 | Out of scope |
+| Pass/Approve/Publish 保真「已查看」勾选 | CD-E2E-T10 | Out of scope — 见 [fidelity-viewed-confirmation-journey.md](./fidelity-viewed-confirmation-journey.md) |
 | Authoring 侧 edit-preview 非权威 banner | F7 BDD-F7-B2-005 | 已 Done；本切片不改 authoring pane |
 | 无 `canAuthorTemplates` | fail-closed：不可见 Run preview / 403 | 沿用既有授权；本切片不新开权限矩阵 |
 

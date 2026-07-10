@@ -173,6 +173,7 @@ public class TemplateLifecycleService {
     public TemplateDetailView publish(UUID templateId, PublishTemplateRequest request, ManagementSessionClaims session) {
         TemplateEntity template = requirePublishableTemplate(templateId, session);
         requireStatus(template, TemplateLifecycleStatus.PENDING_RELEASE);
+        decisionFormService.validatePublishConfirmation(request.fidelityViewedConfirmed());
         apiPolicyMaterializationService.ensureApiPolicyOnPublish(
                 templateId, request.releaseVersion(), session.username());
         publishGateService.assertReady(templateId, session);

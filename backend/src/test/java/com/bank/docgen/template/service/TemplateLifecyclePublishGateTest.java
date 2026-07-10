@@ -49,8 +49,6 @@ class TemplateLifecyclePublishGateTest {
     @Mock
     private PublishGateService publishGateService;
     @Mock
-    private DecisionFormService decisionFormService;
-    @Mock
     private TemplateContentModuleReferenceService contentModuleReferenceService;
     @Mock
     private CollaborationWorkItemWriter collaborationWorkItemWriter;
@@ -66,6 +64,7 @@ class TemplateLifecyclePublishGateTest {
     private VersionFidelityWarningService versionFidelityWarningService;
 
     private TemplateLifecycleService service;
+    private DecisionFormService decisionFormService;
     private ManagementSessionClaims groupAdmin;
     private ManagementSessionClaims tester;
     private ManagementSessionClaims approver;
@@ -74,6 +73,7 @@ class TemplateLifecyclePublishGateTest {
 
     @BeforeEach
     void setUp() {
+        decisionFormService = new DecisionFormService(groupAccessService);
         service = new TemplateLifecycleService(
                 templateService,
                 templateRepository,
@@ -146,9 +146,38 @@ class TemplateLifecyclePublishGateTest {
         org.mockito.Mockito.doThrow(new TemplateValidationException("api.error.template.publishGateBlocked"))
                 .when(publishGateService).assertReady(templateId, groupAdmin);
 
-        assertThatThrownBy(() -> service.publish(templateId, new PublishTemplateRequest("1.0.0"), groupAdmin))
+        assertThatThrownBy(() ->
+                        service.publish(templateId, new PublishTemplateRequest("1.0.0", true), groupAdmin))
                 .isInstanceOf(TemplateValidationException.class)
                 .hasFieldOrPropertyWithValue("messageKey", "api.error.template.publishGateBlocked");
+    }
+
+    @Test
+    void publishBlockedWhenFidelityViewedNotConfirmed() {
+        when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
+
+        assertThatThrownBy(() ->
+                        service.publish(templateId, new PublishTemplateRequest("1.0.0", false), groupAdmin))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasFieldOrPropertyWithValue(
+                        "messageKey",
+                        "api.error.template.decisionFidelityConfirmationRequired"
+                );
+    }
+
+    @Test
+    void publishBlockedWhenFidelityViewedMissing() {
+        when(groupAccessService.canPublishTemplates(groupAdmin)).thenReturn(true);
+        when(templateService.requireReadableTemplate(templateId, groupAdmin)).thenReturn(template);
+
+        assertThatThrownBy(() ->
+                        service.publish(templateId, new PublishTemplateRequest("1.0.0"), groupAdmin))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasFieldOrPropertyWithValue(
+                        "messageKey",
+                        "api.error.template.decisionFidelityConfirmationRequired"
+                );
     }
 
     @Test
@@ -156,11 +185,6 @@ class TemplateLifecyclePublishGateTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.TESTING);
         when(groupAccessService.canDecideTemplateTests(tester)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, tester)).thenReturn(template);
-        org.mockito.Mockito.doThrow(new TemplateValidationException("api.error.template.decisionReasonCategoryRequired"))
-                .when(decisionFormService).validateTestDecision(
-                        new LifecycleDecisionRequest(LifecycleDecision.FAILED, "Needs fixes", null, "Binding broken"),
-                        tester
-                );
 
         assertThatThrownBy(() -> service.recordTestDecision(
                 templateId,
@@ -176,11 +200,6 @@ class TemplateLifecyclePublishGateTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.TESTING);
         when(groupAccessService.canDecideTemplateTests(tester)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, tester)).thenReturn(template);
-        org.mockito.Mockito.doThrow(new TemplateValidationException("api.error.template.decisionImpactSummaryRequired"))
-                .when(decisionFormService).validateTestDecision(
-                        new LifecycleDecisionRequest(LifecycleDecision.FAILED, "Needs fixes", "BINDING_ISSUE", null),
-                        tester
-                );
 
         assertThatThrownBy(() -> service.recordTestDecision(
                 templateId,
@@ -228,11 +247,6 @@ class TemplateLifecyclePublishGateTest {
         template.setLifecycleStatus(TemplateLifecycleStatus.APPROVAL);
         when(groupAccessService.canDecideTemplateApprovals(approver)).thenReturn(true);
         when(templateService.requireReadableTemplate(templateId, approver)).thenReturn(template);
-        org.mockito.Mockito.doThrow(new TemplateValidationException("api.error.template.decisionReasonCategoryRequired"))
-                .when(decisionFormService).validateApprovalDecision(
-                        new LifecycleDecisionRequest(LifecycleDecision.REJECTED, "Not ready", null, "Scope changed"),
-                        approver
-                );
 
         assertThatThrownBy(() -> service.recordApprovalDecision(
                 templateId,

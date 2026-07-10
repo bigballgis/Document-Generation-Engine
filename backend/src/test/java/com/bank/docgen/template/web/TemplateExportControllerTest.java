@@ -272,6 +272,7 @@ class TemplateExportControllerTest {
                                 {
                                   "decision":"APPROVED",
                                   "commentSummary":"Approved",
+                                  "fidelityViewedConfirmed":true,
                                   "keyEvidenceConfirmed":true
                                 }
                                 """))
@@ -295,7 +296,7 @@ class TemplateExportControllerTest {
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/publish")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"releaseVersion\":\"1.0.0\"}"))
+                        .content("{\"releaseVersion\":\"1.0.0\",\"fidelityViewedConfirmed\":true}"))
                 .andExpect(status().isOk());
     }
 

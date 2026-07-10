@@ -232,6 +232,7 @@ export async function prepareTemplatePendingRelease(
   await authorizedPost(request, approverToken, `/templates/${template.templateId}/lifecycle/approval-decision`, {
     decision: 'APPROVED',
     commentSummary: 'E2E CDP team-lead publish fixture — ready for PENDING_RELEASE',
+    fidelityViewedConfirmed: true,
     keyEvidenceConfirmed: true,
   })
 

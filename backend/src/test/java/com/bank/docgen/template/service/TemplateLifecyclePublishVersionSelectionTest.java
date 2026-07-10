@@ -129,7 +129,7 @@ class TemplateLifecyclePublishVersionSelectionTest {
         when(templateService.toDetail(template)).thenReturn(detail());
         when(messageResolver.resolve(any(), any())).thenReturn("Published release 2.0.0");
 
-        service.publish(templateId, new PublishTemplateRequest("2.0.0"), groupAdmin);
+        service.publish(templateId, new PublishTemplateRequest("2.0.0", true), groupAdmin);
 
         assertThat(candidateVersion.getReleaseVersion()).isEqualTo("2.0.0");
         assertThat(candidateVersion.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);

@@ -97,6 +97,76 @@ class DecisionFormServiceTest {
     }
 
     @Test
+    void approvalApprove_requiresFidelityViewedConfirmation() {
+        LifecycleDecisionRequest request = new LifecycleDecisionRequest(
+                LifecycleDecision.APPROVED,
+                "Ready for release",
+                null,
+                null,
+                false,
+                null,
+                null,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        assertThatThrownBy(() -> service.validateApprovalDecision(request, approver))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasFieldOrPropertyWithValue(
+                        "messageKey",
+                        "api.error.template.decisionFidelityConfirmationRequired"
+                );
+    }
+
+    @Test
+    void approvalApprove_requiresFidelityViewedWhenMissing() {
+        LifecycleDecisionRequest request = new LifecycleDecisionRequest(
+                LifecycleDecision.APPROVED,
+                "Ready for release",
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        assertThatThrownBy(() -> service.validateApprovalDecision(request, approver))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasFieldOrPropertyWithValue(
+                        "messageKey",
+                        "api.error.template.decisionFidelityConfirmationRequired"
+                );
+    }
+
+    @Test
+    void publish_requiresFidelityViewedConfirmation() {
+        assertThatThrownBy(() -> service.validatePublishConfirmation(false))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasFieldOrPropertyWithValue(
+                        "messageKey",
+                        "api.error.template.decisionFidelityConfirmationRequired"
+                );
+        assertThatThrownBy(() -> service.validatePublishConfirmation(null))
+                .isInstanceOf(TemplateValidationException.class)
+                .hasFieldOrPropertyWithValue(
+                        "messageKey",
+                        "api.error.template.decisionFidelityConfirmationRequired"
+                );
+    }
+
+    @Test
     void approvalReject_requiresCategoryAndRemediation_linksEvidence() {
         LifecycleDecisionRequest request = new LifecycleDecisionRequest(
                 LifecycleDecision.REJECTED,

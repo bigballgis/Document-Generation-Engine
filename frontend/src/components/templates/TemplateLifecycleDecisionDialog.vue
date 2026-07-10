@@ -219,6 +219,7 @@ function buildSubmitPayload(): LifecycleDecisionSubmitPayload {
   if (isApprovalPassMode.value) {
     return {
       commentSummary: form.commentSummary.trim(),
+      fidelityViewedConfirmed: form.fidelityViewedConfirmed,
       keyEvidenceConfirmed: form.keyEvidenceConfirmed,
       exceptionIntervention: form.exceptionIntervention || undefined,
       exceptionReason: form.exceptionIntervention ? form.exceptionReason.trim() : undefined,
@@ -274,7 +275,10 @@ async function submitForm() {
       <template v-if="isTestPassMode">
         <p class="decision-intro">{{ t('templates.lifecycle.decisionForm.passTestIntro') }}</p>
         <el-form-item>
-          <el-checkbox v-model="form.fidelityViewedConfirmed">
+          <el-checkbox
+            v-model="form.fidelityViewedConfirmed"
+            data-testid="confirm-fidelity-viewed"
+          >
             {{ t('templates.lifecycle.decisionForm.confirmFidelityViewed') }}
           </el-checkbox>
         </el-form-item>
@@ -305,6 +309,14 @@ async function submitForm() {
             show-word-limit
             :placeholder="t('templates.lifecycle.decisionForm.approvalRationalePlaceholder')"
           />
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox
+            v-model="form.fidelityViewedConfirmed"
+            data-testid="confirm-fidelity-viewed"
+          >
+            {{ t('templates.lifecycle.decisionForm.confirmFidelityViewed') }}
+          </el-checkbox>
         </el-form-item>
         <el-form-item>
           <el-checkbox v-model="form.keyEvidenceConfirmed">

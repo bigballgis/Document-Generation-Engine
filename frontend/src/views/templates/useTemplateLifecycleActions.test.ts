@@ -383,10 +383,13 @@ describe('useTemplateLifecycleActions', () => {
     lifecycle.publishVersion.value = '2.0.0'
     lifecycle.publishSummaryOpen.value = true
 
-    await lifecycle.confirmPublishFromSummary()
+    await lifecycle.confirmPublishFromSummary({ fidelityViewedConfirmed: true })
     await flushPromises()
 
-    expect(templatesApi.publishTemplate).toHaveBeenCalledWith('tpl-1', { releaseVersion: '2.0.0' })
+    expect(templatesApi.publishTemplate).toHaveBeenCalledWith('tpl-1', {
+      releaseVersion: '2.0.0',
+      fidelityViewedConfirmed: true,
+    })
     expect(loadTemplate).toHaveBeenCalled()
     expect(activeDetailTab.value).toBe('releaseVersions')
     expect(lifecycle.publishSummaryOpen.value).toBe(false)

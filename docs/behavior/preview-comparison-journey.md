@@ -108,7 +108,7 @@
 | 对比 items 为空 | 显示 no comparison items；摘要可为 clean | 允许；主场景优先用非空种子 |
 | Authoring F7 side-by-side | 编辑态并排预览 | **Out of scope**（CORE-FORTRESS F7 Done） |
 | T08 预览成功 + 下载 | 已 Done | 可复用 helper，不重复验收下载 |
-| T10 保真「已查看」勾选 | Pass/Approve/Publish 确认 | **CD-E2E-T10** — 禁止本切片扩展 |
+| T10 保真「已查看」勾选 | Pass/Approve/Publish 确认 | **CD-E2E-T10** — 见 [fidelity-viewed-confirmation-journey.md](./fidelity-viewed-confirmation-journey.md)（BDD-CDP-FID-001…004）；禁止本切片扩展 |
 | 无权限用户 | fail-closed：不可见 Testing / 403 | 沿用权限矩阵；本切片不新开矩阵行 |
 | 敏感明文 | 对比/警告仅非敏感摘要 | 回归：截图与断言不得依赖变量原值 |
 
