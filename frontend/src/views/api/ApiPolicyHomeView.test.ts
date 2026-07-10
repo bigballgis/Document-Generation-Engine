@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ApiPolicyHomeView from '@/views/api/ApiPolicyHomeView.vue'
 import * as apiPolicyApi from '@/api/apiPolicy'
 import en from '@/i18n/locales/en'
-import { useTemplatesStore } from '@/stores/templates'
 
 const routerPush = vi.fn()
 
@@ -17,14 +16,6 @@ vi.mock('vue-router', () => ({
 vi.mock('@/api/apiPolicy', () => ({
   fetchAlerts: vi.fn(),
 }))
-
-vi.mock('@/stores/templates', async () => {
-  const actual = await vi.importActual<typeof import('@/stores/templates')>('@/stores/templates')
-  return {
-    ...actual,
-    useTemplatesStore: vi.fn(),
-  }
-})
 
 const sampleAlerts = [
   {
@@ -59,14 +50,6 @@ describe('ApiPolicyHomeView', () => {
   beforeEach(() => {
     routerPush.mockReset()
     vi.mocked(apiPolicyApi.fetchAlerts).mockReset()
-    vi.mocked(useTemplatesStore).mockReturnValue({
-      publishedTemplates: [],
-      loadingList: false,
-      lastErrorMessageKey: null,
-      lastListErrorRetryable: false,
-      templateListSize: 50,
-      fetchTemplates: vi.fn().mockResolvedValue(undefined),
-    } as unknown as ReturnType<typeof useTemplatesStore>)
   })
 
   it('renders alerts table instead of coming soon placeholder', async () => {
@@ -89,5 +72,39 @@ describe('ApiPolicyHomeView', () => {
     await table.vm.$emit('row-click', sampleAlerts[0])
 
     expect(routerPush).toHaveBeenCalledWith('/templates/tpl-1?tab=apiAccess')
+  })
+
+  it('shows LoadErrorPanel instead of empty alerts table when fetch fails', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockRejectedValue({
+      response: { status: 500, data: { error: { code: 'INTERNAL_ERROR' } } },
+    })
+    const wrapper = mountHome()
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('No attention items')
+    expect(wrapper.findComponent({ name: 'LoadErrorPanel' }).exists()).toBe(true)
+  })
+
+  it('offers browse templates when alerts are empty', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockResolvedValue([])
+    const wrapper = mountHome()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Browse templates')
+    expect(wrapper.findComponent({ name: 'ElCollapse' }).exists()).toBe(false)
+  })
+
+  it('navigates to template catalog from header action', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockResolvedValue([])
+    const wrapper = mountHome()
+    await flushPromises()
+
+    const browseButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Browse templates'))
+    expect(browseButton).toBeDefined()
+    await browseButton!.trigger('click')
+
+    expect(routerPush).toHaveBeenCalledWith('/templates')
   })
 })

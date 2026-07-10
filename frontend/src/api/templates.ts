@@ -34,7 +34,6 @@ import type {
   TemplateImportResult,
   TemplateReleaseVersion,
   TemplateSummary,
-  TemplateVersionLineDetail,
   TemplateVersionLineSummary,
   UpsertContentModuleReferencePayload,
   TestDataSet,
@@ -112,8 +111,8 @@ export async function fetchDevVersionDetail(
 export async function fetchReleaseVersionDetail(
   templateId: string,
   releaseVersion: string,
-): Promise<TemplateVersionLineDetail> {
-  const response = await http.get<ApiEnvelope<TemplateVersionLineDetail>>(
+): Promise<TemplateDetail> {
+  const response = await http.get<ApiEnvelope<TemplateDetail>>(
     `/templates/${templateId}/releases/${encodeURIComponent(releaseVersion)}`,
   )
   return unwrapEnvelope(response.data)
@@ -330,6 +329,16 @@ export async function fetchPublishGate(
   const response = await http.get<ApiEnvelope<PublishGateChecklist>>(
     `/templates/${templateId}/publish-gate`,
     phase ? { params: { phase } } : undefined,
+  )
+  return unwrapEnvelope(response.data)
+}
+
+export async function fetchReleasePublishGate(
+  templateId: string,
+  releaseVersion: string,
+): Promise<PublishGateChecklist> {
+  const response = await http.get<ApiEnvelope<PublishGateChecklist>>(
+    `/templates/${templateId}/releases/${encodeURIComponent(releaseVersion)}/publish-gate`,
   )
   return unwrapEnvelope(response.data)
 }

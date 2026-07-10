@@ -1846,6 +1846,48 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/releases/{releaseVersion}/publish-gate:
+    get:
+      tags: [Admin]
+      operationId: getTemplateReleasePublishGate
+      summary: Evaluate publish-gate checklist for a published release version
+      description: >-
+        Live publish-gate evaluation against the published release version entity
+        (bindings, coverage, rules, previews, content-module refs scoped to that
+        version). Does **not** require an in-flight DEV line. Reuses the same
+        checklist item builders as `GET /templates/{templateId}/publish-gate`.
+        Unknown release version returns `404`. This is a live evaluation against
+        the release snapshot semantics — not a historical gate result persisted
+        at publish time.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: releaseVersion
+          in: path
+          required: true
+          description: Semantic release version (e.g. `1.0.0`).
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Publish-gate checklist for the published release version.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishGateChecklistResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/templates/{templateId}/release-versions/{releaseVersion}/clone:
     post:
       tags: [Admin]
@@ -4624,6 +4666,61 @@ components:
           $ref: '#/components/schemas/Metadata'
         result:
           $ref: '#/components/schemas/TemplateDetailView'
+    PublishGateCheckCode:
+      type: string
+      enum:
+        - ANCHOR_INTEGRITY
+        - VARIABLE_SCHEMA
+        - RULE_BOUNDS
+        - TEST_RESULTS
+        - PREVIEW_PRESENT
+        - CHANGE_DIFF
+        - APPROVAL_SUMMARY
+        - COVERAGE_THRESHOLDS
+        - API_POLICY
+        - CONTENT_MODULE_REFERENCES
+        - BLOCKER_STATUS
+    PublishGateItemView:
+      type: object
+      additionalProperties: false
+      required: [checkCode, ready, blocker, messageKey, summary]
+      properties:
+        checkCode:
+          $ref: '#/components/schemas/PublishGateCheckCode'
+        ready:
+          type: boolean
+        blocker:
+          type: boolean
+        messageKey:
+          type: string
+        summary:
+          type: string
+    PublishGateChecklistView:
+      type: object
+      additionalProperties: false
+      required: [templateId, ready, blockerCount, items]
+      properties:
+        templateId:
+          type: string
+          format: uuid
+        ready:
+          type: boolean
+        blockerCount:
+          type: integer
+          minimum: 0
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublishGateItemView'
+    PublishGateChecklistResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/PublishGateChecklistView'
     MasterAnchorContentType:
       type: string
       enum: [TEXT, RICH_TEXT, TABLE, IMAGE, CLAUSE, STAMP, BARCODE, ATTACHMENT_LIST, UNSPECIFIED]

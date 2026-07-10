@@ -150,6 +150,7 @@ describe('ManagementShell', () => {
     expect(wrapper.text()).toContain('Templates')
     expect(wrapper.text()).toContain('Activity log')
     expect(wrapper.text()).toContain('Page content')
+    expect(wrapper.find('.shell-page-root').exists()).toBe(true)
   })
 
   it('does not render myTodos behavior entries in the sidebar', async () => {

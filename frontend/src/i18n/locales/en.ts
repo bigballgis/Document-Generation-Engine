@@ -686,6 +686,8 @@ export default {
         apiAccess: 'External access',
       },
       summaryTitle: 'Summary',
+      name: 'Template name',
+      groupCode: 'Group',
       externalId: 'External ID',
       masterId: 'Master ID',
       releaseVersion: 'Release version',
@@ -792,6 +794,45 @@ export default {
       devVersionNumber: 'Dev version at publish',
       updatedAt: 'Last updated',
       updatedBy: 'Last updated by',
+      tabs: {
+        basics: 'Basics',
+        testing: 'Testing',
+        approval: 'Approval',
+        variables: 'Variables',
+        bindings: 'Bindings',
+        rules: 'Rules',
+      },
+      basics: {
+        lineKind: 'Line kind',
+        defaultRoute: 'Default API route',
+        defaultRouteYes: 'Yes — default route target',
+        defaultRouteNo: 'No',
+      },
+      testing: {
+        readOnlySummary:
+          'This published release completed the testing workflow before go-live. Snapshot data below is read-only.',
+        lifecycleStatus: 'Status at publish',
+      },
+      approval: {
+        readOnlySummary:
+          'Approval and go-live decisions are frozen in this published snapshot. No workflow actions are available here.',
+        lifecycleStatus: 'Release status',
+        approvalSubState: 'Approval sub-state',
+        noApprovalSubState: 'Not applicable for published releases',
+        publishGateTitle: 'Current pre-release checks evaluation',
+        publishGateSubtitle:
+          'Live evaluation of this published release version at view time — not a historical publish-time snapshot.',
+        publishGateEmptyTitle: 'No pre-release checks returned',
+        publishGateEmptyDescription:
+          'The live pre-release checks API returned no checklist items for this published release version. This is not a fabricated all-green state.',
+        timelineTitle: 'Workflow audit trail',
+        timelineHint:
+          'Recorded workflow events for this template package (read-only). Filtered by package, not by individual release version.',
+        timelineLoadError: 'Unable to load workflow audit trail.',
+        timelineEmptyTitle: 'No workflow events yet',
+        timelineEmptyDescription:
+          'No approval or publish activity has been recorded for this template package yet.',
+      },
       variablesTitle: 'Variables',
       bindingsTitle: 'Binding summary',
       rulesTitle: 'Composition rules',

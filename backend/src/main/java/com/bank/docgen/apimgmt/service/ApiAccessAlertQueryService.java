@@ -13,7 +13,6 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
-import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -131,7 +130,7 @@ public class ApiAccessAlertQueryService {
 
         alerts.sort(Comparator
                 .comparing(ApiAccessAlertView::severity)
-                .thenComparing(ApiAccessAlertView::templateName, String.CASE_INSENSITIVE_ORDER)
+                .thenComparing(ApiAccessAlertView::templateName, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
                 .thenComparing(alert -> alert.alertType().name()));
         return List.copyOf(alerts);
     }
@@ -167,11 +166,16 @@ public class ApiAccessAlertQueryService {
     }
 
     private List<String> readStringList(String json) {
+        if (json == null || json.isBlank()) {
+            return List.of();
+        }
         try {
-            return objectMapper.readValue(json, new TypeReference<List<String>>() {
+            List<String> values = objectMapper.readValue(json, new TypeReference<List<String>>() {
             });
+            return values == null ? List.of() : values;
         } catch (JsonProcessingException ex) {
-            throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
+            // Alert aggregation is best-effort: malformed policy JSON must not 500 the home surface.
+            return List.of();
         }
     }
 }

@@ -12,6 +12,8 @@ import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 
+import com.bank.docgen.template.api.PublishGateChecklistView;
+
 import com.bank.docgen.template.api.TemplateDetailView;
 
 import com.bank.docgen.template.api.TemplateDevVersionCreatedView;
@@ -19,6 +21,8 @@ import com.bank.docgen.template.api.TemplateDevVersionCreatedView;
 import com.bank.docgen.template.api.TemplateVersionLineDetailView;
 
 import com.bank.docgen.template.api.TemplateVersionLineSummaryView;
+
+import com.bank.docgen.template.service.PublishGateService;
 
 import com.bank.docgen.template.service.TemplateVersionLineService;
 
@@ -56,6 +60,8 @@ public class TemplateVersionLineController {
 
     private final TemplateVersionLineService templateVersionLineService;
 
+    private final PublishGateService publishGateService;
+
     private final TraceIdProvider traceIdProvider;
 
 
@@ -64,11 +70,15 @@ public class TemplateVersionLineController {
 
             TemplateVersionLineService templateVersionLineService,
 
+            PublishGateService publishGateService,
+
             TraceIdProvider traceIdProvider
 
     ) {
 
         this.templateVersionLineService = templateVersionLineService;
+
+        this.publishGateService = publishGateService;
 
         this.traceIdProvider = traceIdProvider;
 
@@ -153,6 +163,26 @@ public class TemplateVersionLineController {
     ) {
 
         return envelope(request, templateVersionLineService.getReleaseDetail(templateId, releaseVersion, session));
+
+    }
+
+
+
+    @GetMapping("/releases/{releaseVersion}/publish-gate")
+
+    public SuccessEnvelope<PublishGateChecklistView> getReleasePublishGate(
+
+            @PathVariable UUID templateId,
+
+            @PathVariable String releaseVersion,
+
+            @AuthenticationPrincipal ManagementSessionClaims session,
+
+            HttpServletRequest request
+
+    ) {
+
+        return envelope(request, publishGateService.evaluateForRelease(templateId, releaseVersion, session));
 
     }
 

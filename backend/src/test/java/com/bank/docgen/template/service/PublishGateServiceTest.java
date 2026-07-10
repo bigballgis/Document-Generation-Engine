@@ -113,29 +113,29 @@ class PublishGateServiceTest {
                 Instant.now().plusSeconds(3600)
         );
         when(templateService.requireReadableTemplate(templateId, admin)).thenReturn(template);
-        when(templateCurrentVersionResolver.requireInFlightDevVersion(templateId))
+        lenient().when(templateCurrentVersionResolver.requireInFlightDevVersion(templateId))
                 .thenReturn(new TemplateVersionEntity(versionId, templateId, "10000002"));
-        when(templateService.loadRules(any(TemplateVersionEntity.class))).thenReturn(List.of());
+        lenient().when(templateService.loadRules(any(TemplateVersionEntity.class))).thenReturn(List.of());
         lenient().when(templateRuleValidationService.validateRules(
                 org.mockito.ArgumentMatchers.eq(templateId),
                 org.mockito.ArgumentMatchers.any(),
                 org.mockito.ArgumentMatchers.eq(admin)))
                 .thenReturn(validRules());
-        when(changeDiffService.compute(templateId, admin))
+        lenient().when(changeDiffService.compute(templateId, admin))
                 .thenReturn(new com.bank.docgen.template.api.ChangeDiffView(
                         templateId.toString(), "1.0.0", versionId.toString(), false, 0, List.of()));
-        when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
+        lenient().when(lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId))
                 .thenReturn(List.of(approvalRecord()));
-        when(apiPolicyRepository.findByTemplateId(templateId))
+        lenient().when(apiPolicyRepository.findByTemplateId(templateId))
                 .thenReturn(Optional.of(new ApiPolicyEntity(UUID.randomUUID(), templateId, "[]", "10000002")));
-        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
+        lenient().when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
                 .thenReturn(List.of(new VariableSchemaEntity(
                         UUID.randomUUID(), versionId, "field", VariableType.TEXT, true, null, null, "desc", null)));
-        when(previewEvidencePort.latestBatchTestRun(templateId))
+        lenient().when(previewEvidencePort.latestBatchTestRun(templateId))
                 .thenReturn(Optional.of(new BatchTestRunGateSnapshot(0)));
-        when(previewEvidencePort.countSuccessfulPreviews(templateId, versionId)).thenReturn(1);
-        when(previewEvidencePort.countFailedPreviews(templateId, versionId)).thenReturn(0);
-        when(contentModuleReferenceService.validateReferences(versionId))
+        lenient().when(previewEvidencePort.countSuccessfulPreviews(templateId, versionId)).thenReturn(1);
+        lenient().when(previewEvidencePort.countFailedPreviews(templateId, versionId)).thenReturn(0);
+        lenient().when(contentModuleReferenceService.validateReferences(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 0, 0));
     }
 
@@ -325,6 +325,58 @@ class PublishGateServiceTest {
         assertThat(checklist.items().stream()
                 .anyMatch(item -> item.checkCode() == PublishGateCheckCode.API_POLICY && item.blocker()))
                 .isTrue();
+    }
+
+    @Test
+    void evaluateForRelease_usesPublishedVersion_withoutInFlightDev() {
+        String releaseVersion = "1.0.0";
+        UUID publishedVersionId = UUID.randomUUID();
+        TemplateVersionEntity published = new TemplateVersionEntity(publishedVersionId, templateId, "10000002");
+        published.setReleaseVersion(releaseVersion);
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, releaseVersion))
+                .thenReturn(Optional.of(published));
+        when(templateService.validateBindingsForVersion(templateId, published, admin))
+                .thenReturn(nonBlockingBindings());
+        when(coverageComputationService.computeForVersion(templateId, published, admin))
+                .thenReturn(greenCoverage());
+        when(changeDiffService.computeForVersion(templateId, published, admin))
+                .thenReturn(new com.bank.docgen.template.api.ChangeDiffView(
+                        templateId.toString(), null, publishedVersionId.toString(), false, 0, List.of()));
+        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(publishedVersionId))
+                .thenReturn(List.of(new VariableSchemaEntity(
+                        UUID.randomUUID(), publishedVersionId, "field", VariableType.TEXT, true, null, null, "desc", null)));
+        when(previewEvidencePort.countSuccessfulPreviews(templateId, publishedVersionId)).thenReturn(1);
+        when(previewEvidencePort.countFailedPreviews(templateId, publishedVersionId)).thenReturn(0);
+        when(contentModuleReferenceService.validateReferences(publishedVersionId))
+                .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 0, 0));
+        when(templateRuleValidationService.validateRulesForVersion(
+                org.mockito.ArgumentMatchers.eq(templateId),
+                org.mockito.ArgumentMatchers.eq(published),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.eq(admin)))
+                .thenReturn(validRules());
+
+        PublishGateChecklistView checklist = service.evaluateForRelease(templateId, releaseVersion, admin);
+
+        assertThat(checklist.templateId()).isEqualTo(templateId.toString());
+        assertThat(checklist.ready()).isTrue();
+        assertThat(checklist.items()).isNotEmpty();
+        assertThat(checklist.items().stream().map(item -> item.checkCode()).toList())
+                .contains(
+                        PublishGateCheckCode.ANCHOR_INTEGRITY,
+                        PublishGateCheckCode.VARIABLE_SCHEMA,
+                        PublishGateCheckCode.APPROVAL_SUMMARY,
+                        PublishGateCheckCode.API_POLICY
+                );
+    }
+
+    @Test
+    void evaluateForRelease_unknownRelease_throwsTemplateNotFound() {
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(templateId, "9.9.9"))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.evaluateForRelease(templateId, "9.9.9", admin))
+                .isInstanceOf(TemplateNotFoundException.class);
     }
 
     private BindingValidationView nonBlockingBindings() {

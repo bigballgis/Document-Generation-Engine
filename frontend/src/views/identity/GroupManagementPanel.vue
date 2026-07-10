@@ -193,22 +193,13 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
     </header>
 
     <LoadErrorPanel
-      v-if="errorMessage && !identityStore.loadingGroups"
+      v-if="errorMessage"
       :message-key="identityStore.lastGroupErrorMessageKey ?? 'identity.error.loadGroups'"
       :retryable="identityStore.lastGroupErrorRetryable"
       @retry="reload"
     />
 
-    <el-alert
-      v-else-if="errorMessage"
-      class="panel-alert"
-      type="error"
-      :title="errorMessage"
-      show-icon
-      :closable="false"
-    />
-
-    <el-skeleton v-if="identityStore.loadingGroups" :rows="5" animated />
+    <el-skeleton v-else-if="identityStore.loadingGroups" :rows="5" animated />
 
     <template v-else>
       <template v-if="identityStore.groups.length > 0">
@@ -342,10 +333,6 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
 .read-only-hint {
   margin: 0;
   color: var(--text-muted);
-}
-
-.panel-alert {
-  margin-bottom: 0.5rem;
 }
 
 .full-width {

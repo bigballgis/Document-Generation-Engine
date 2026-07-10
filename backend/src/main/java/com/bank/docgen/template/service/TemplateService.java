@@ -321,6 +321,16 @@ public class TemplateService {
     }
 
     @Transactional(readOnly = true)
+    public BindingValidationView validateBindingsForVersion(
+            UUID templateId,
+            TemplateVersionEntity version,
+            ManagementSessionClaims session
+    ) {
+        TemplateEntity template = requireReadableTemplate(templateId, session);
+        return bindingConfigurationService.validateBindings(template.getMasterId(), version);
+    }
+
+    @Transactional(readOnly = true)
     public MasterStyleCatalogView getMasterStyleCatalog(UUID templateId, ManagementSessionClaims session) {
         TemplateEntity template = requireReadableTemplate(templateId, session);
         return structuredAuthoringService.getMasterStyleCatalog(template.getMasterId());

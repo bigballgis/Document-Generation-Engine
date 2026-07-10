@@ -2,7 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import type { FormInstance, FormRules } from 'element-plus'
+import type { FormInstance, FormItemRule } from 'element-plus'
 import BrandLogo from '@/components/branding/BrandLogo.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import { BRAND_REGISTRY } from '@/config/brands'
@@ -24,6 +24,7 @@ const form = reactive({
 })
 
 const errorMessageKey = ref<string | null>(null)
+const passwordInlineError = ref('')
 const submitting = ref(false)
 
 const brandOptions = computed(() => [
@@ -40,24 +41,29 @@ const localeOptions = computed(() =>
   })),
 )
 
-const rules = computed<FormRules>(() => ({
+const rules = computed<Record<string, FormItemRule[]>>(() => ({
   username: [
     {
-      required: true,
-      message: t('login.validation.usernameRequired'),
-      trigger: 'blur',
-    },
-    {
-      pattern: /^\d{8}$/,
-      message: t('login.validation.usernameFormat'),
-      trigger: 'blur',
+      validator: (_rule, value, callback) => {
+        const trimmed = String(value ?? '').trim()
+        if (!trimmed) {
+          callback(new Error(t('login.validation.usernameRequired')))
+          return
+        }
+        if (!/^\d{8}$/.test(trimmed)) {
+          callback(new Error(t('login.validation.usernameFormat')))
+          return
+        }
+        callback()
+      },
+      trigger: ['blur', 'change'],
     },
   ],
   password: [
     {
       required: true,
       message: t('login.validation.passwordRequired'),
-      trigger: 'blur',
+      trigger: ['blur', 'change'],
     },
   ],
 }))
@@ -78,8 +84,20 @@ function handleLocaleChange(locale: string) {
   void appStore.setLocale(resolveAppLocale(locale))
 }
 
+function clearPasswordInlineError() {
+  passwordInlineError.value = ''
+}
+
 async function submitLogin() {
   errorMessageKey.value = null
+  passwordInlineError.value = ''
+  form.username = form.username.trim()
+  form.password = form.password.trim()
+  // Edge-only trim: whitespace-only becomes empty → same required outcome as blank.
+  if (!form.password) {
+    passwordInlineError.value = t('login.validation.passwordRequired')
+    return
+  }
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) {
     return
@@ -87,7 +105,7 @@ async function submitLogin() {
 
   submitting.value = true
   try {
-    await sessionStore.login(form.username.trim(), form.password)
+    await sessionStore.login(form.username, form.password)
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
     await router.replace(redirect ?? sessionStore.defaultHomePath())
   } catch (error) {
@@ -164,7 +182,15 @@ async function submitLogin() {
               autocomplete="current-password"
               show-password
               :aria-label="t('login.password')"
+              @input="clearPasswordInlineError"
             />
+            <p
+              v-if="passwordInlineError"
+              class="el-form-item__error"
+              data-testid="login-password-required"
+            >
+              {{ passwordInlineError }}
+            </p>
           </el-form-item>
           <el-form-item :label="t('login.brandLabel')">
             <AppSearchSelect
