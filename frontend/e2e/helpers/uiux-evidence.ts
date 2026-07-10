@@ -672,6 +672,7 @@ export type CdpE2eCd2DecisionTaskId =
   | 'CDP-E2E-T04'
   | 'CDP-E2E-T05'
   | 'CDP-E2E-T06'
+  | 'CDP-E2E-T08'
 
 function cdpE2eDecisionEvidenceRoot(taskId: CdpE2eCd2DecisionTaskId): string {
   return path.join(E2E_DIR, '..', 'evidence', taskId)
@@ -700,6 +701,17 @@ export async function captureCdpE2eDecisionScreenshot(
   ensureCdpE2eDecisionEvidenceDirs(taskId)
   const target = cdpE2eDecisionScreenshotPath(taskId, filename)
   await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCdpE2eDecisionLocatorScreenshot(
+  locator: Locator,
+  taskId: CdpE2eCd2DecisionTaskId,
+  filename: string,
+): Promise<string> {
+  ensureCdpE2eDecisionEvidenceDirs(taskId)
+  const target = cdpE2eDecisionScreenshotPath(taskId, filename)
+  await locator.screenshot({ path: target })
   return filename
 }
 

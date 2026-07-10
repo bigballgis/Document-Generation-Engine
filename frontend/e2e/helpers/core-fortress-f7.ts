@@ -1,6 +1,6 @@
 import { expect, type APIRequestContext, type Page } from '@playwright/test'
 
-import { isDockerStackReady } from './helpers/stack-readiness'
+import { isDockerStackReady } from './stack-readiness'
 
 import { listTemplateVersionLines } from './template-version-lines-api'
 

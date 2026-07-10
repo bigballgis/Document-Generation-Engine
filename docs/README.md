@@ -143,6 +143,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Team lead publish journey](./behavior/team-lead-publish-journey.md) | **ready** | CD-BDD-T04 → CD-E2E-T05 |
 | [Master designer lifecycle](./behavior/master-designer-lifecycle.md) | **ready** | CD-BDD-T05 → **CD-E2E-T06 Done** (2026-07-10; merge `3aed175`) |
 | [API policy edit-save journey](./behavior/api-policy-edit-save-journey.md) | **ready** | CD-BDD-T06 → CD-E2E-T07 |
+| **[Preview success + artifact download](./behavior/preview-success-artifact-download-journey.md)** | **ready** | CD-BDD-T08 → **CD-E2E-T08** (closes P12 T13 preview-success manifest gap; CD-PIT-08 final-path download) |
 | [Preview comparison journey](./behavior/preview-comparison-journey.md) | **ready** | CD-BDD-T07 → CD-E2E-T09 |
 | [Audit admin query journey](./behavior/audit-admin-query-journey.md) | **ready** | CD-BDD-T08 → CD-E2E-T11 |
 | [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12 2026-07-03) | P12 template testing tab |

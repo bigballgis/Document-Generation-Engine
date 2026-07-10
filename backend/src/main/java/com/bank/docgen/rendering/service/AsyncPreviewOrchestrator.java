@@ -110,7 +110,7 @@ public class AsyncPreviewOrchestrator {
                     "message", "Starting preview generation"
             ));
 
-            var preview = previewGenerationService.testGenerate(templateId, request, session);
+            var preview = previewGenerationService.testGenerate(templateId, request, previewId, session);
 
             previewRecordRepository.findById(previewId).ifPresent(record -> {
                 if (record.getStatus() == PreviewStatus.SUCCEEDED) {

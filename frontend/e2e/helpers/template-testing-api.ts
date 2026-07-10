@@ -402,7 +402,21 @@ export async function runPreviewFromFirstDataSetRow(page: Page): Promise<void> {
 
 export async function waitForPreviewDialogSuccess(page: Page): Promise<void> {
   const dialog = previewProgressDialog(page)
-  await expect(dialog.getByRole('button', { name: /^download docx$/i })).toBeVisible({ timeout: 300_000 })
-  await expect(dialog.getByRole('button', { name: /^download pdf$/i })).toBeVisible()
+  // PreviewProgressDialog renders downloads as <el-button tag="a"> → accessible role "link".
+  const terminal = await Promise.race([
+    dialog
+      .getByRole('link', { name: /^download docx$/i })
+      .waitFor({ state: 'visible', timeout: 300_000 })
+      .then(() => 'success' as const),
+    dialog
+      .locator('.preview-progress__error')
+      .waitFor({ state: 'visible', timeout: 300_000 })
+      .then(() => 'error' as const),
+  ])
+  if (terminal === 'error') {
+    const message = (await dialog.locator('.preview-progress__error').innerText()).trim()
+    throw new Error(`Preview reached error terminal state (expected success): ${message}`)
+  }
+  await expect(dialog.getByRole('link', { name: /^download pdf$/i })).toBeVisible()
   await expect(dialog.getByText(/expires in/i)).toBeVisible()
 }

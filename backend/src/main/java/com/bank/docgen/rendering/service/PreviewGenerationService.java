@@ -99,7 +99,21 @@ public class PreviewGenerationService {
             TestGenerateRequest request,
             ManagementSessionClaims session
     ) {
-        return runTestGenerate(templateId, request, null, session, true);
+        return runTestGenerate(templateId, request, null, null, session, true);
+    }
+
+    /**
+     * Async preview path — persist under the orchestrator-allocated {@code previewId}
+     * so SSE stream URLs and artifact download URLs resolve to the same record.
+     */
+    @Transactional
+    public PreviewRecordView testGenerate(
+            UUID templateId,
+            TestGenerateRequest request,
+            UUID previewId,
+            ManagementSessionClaims session
+    ) {
+        return runTestGenerate(templateId, request, null, previewId, session, true);
     }
 
     @Transactional
@@ -113,6 +127,7 @@ public class PreviewGenerationService {
                 templateId,
                 new TestGenerateRequest(null, testDataSetId),
                 batchTestRunId,
+                null,
                 session,
                 false
         );
@@ -122,6 +137,7 @@ public class PreviewGenerationService {
             UUID templateId,
             TestGenerateRequest request,
             UUID batchTestRunId,
+            UUID previewId,
             ManagementSessionClaims session,
             boolean throwOnFailure
     ) {
@@ -130,7 +146,7 @@ public class PreviewGenerationService {
         TemplateVersionEntity version = renderContextPort.requireInFlightDevVersion(templateId);
         String variablesHash = hashVariables(variables);
         PreviewRecordEntity preview = new PreviewRecordEntity(
-                UUID.randomUUID(),
+                previewId != null ? previewId : UUID.randomUUID(),
                 templateId,
                 version.getId(),
                 "DOCX",

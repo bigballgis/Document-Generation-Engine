@@ -94,7 +94,7 @@ class AsyncPreviewOrchestratorTest {
                 templateId, new TestGenerateRequest(null, "TDS-001"), session, "http://localhost"
         )).isInstanceOf(PreviewConcurrencyLimitException.class);
 
-        verify(previewGenerationService, never()).testGenerate(any(), any(), any());
+        verify(previewGenerationService, never()).testGenerate(any(), any(), any(UUID.class), any());
     }
 
     @Test
@@ -112,7 +112,7 @@ class AsyncPreviewOrchestratorTest {
 
     @Test
     void startAsync_generationFails_releasesSlot() {
-        when(previewGenerationService.testGenerate(eq(templateId), any(), eq(session)))
+        when(previewGenerationService.testGenerate(eq(templateId), any(), any(UUID.class), eq(session)))
                 .thenThrow(new PreviewGenerationException("api.error.rendering.generationFailed", new RuntimeException()));
 
         orchestrator.startAsync(
@@ -120,6 +120,23 @@ class AsyncPreviewOrchestratorTest {
         );
 
         assertThat(concurrencyGuard.getActiveCount()).isZero();
+    }
+
+    @Test
+    void startAsync_passesOrchestratorPreviewIdToGeneration() {
+        stubSuccessfulPreview();
+
+        AsyncPreviewStartResponse response = orchestrator.startAsync(
+                templateId,
+                new TestGenerateRequest(null, "TDS-001"),
+                session,
+                "http://localhost/api/management/v1/templates/" + templateId + "/previews"
+        );
+
+        UUID allocatedId = UUID.fromString(response.previewId());
+        verify(previewGenerationService).testGenerate(
+                eq(templateId), any(TestGenerateRequest.class), eq(allocatedId), eq(session));
+        assertThat(response.streamUrl()).contains(allocatedId.toString());
     }
 
     private void stubSuccessfulPreview() {
@@ -134,7 +151,8 @@ class AsyncPreviewOrchestratorTest {
                 "TDS-001",
                 Instant.now()
         );
-        when(previewGenerationService.testGenerate(eq(templateId), any(), eq(session))).thenReturn(view);
+        when(previewGenerationService.testGenerate(eq(templateId), any(), any(UUID.class), eq(session)))
+                .thenReturn(view);
         when(previewRecordRepository.findById(any())).thenReturn(Optional.empty());
     }
 }

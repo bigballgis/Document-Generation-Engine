@@ -236,12 +236,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-10T14:15:00.000Z"
+      },
+      {
+        "id": "18",
+        "title": "CDP CD-2 T08 Preview success + artifact download UI",
+        "description": "Next highest-value CD-2 E2E after T06 Done: CD-E2E-T08 Preview success + artifact download UI (closes T13 preview-success manifest gap). Browser-only task-completion + UIUX manifest with preview success screenshot. BDD ready: preview-success-artifact-download-journey.md (BDD-CDP-PREV). Do NOT mark wave CD-2 Done. Do NOT activate T07/T09–T13. Out of scope: audit-governance, LR-*.",
+        "details": "ACTIVATED 2026-07-10. Slice id: cdp-e2e-t08-preview. Status: in-progress. Placement: ISOLATED D:/working/DGE-cdp-e2e-t08-preview · feat/cdp-e2e-t08-preview · base e0d8bef (T06 docs tip; upstream merge 3aed175). BDD ready: docs/behavior/preview-success-artifact-download-journey.md (BDD-CDP-PREV). Acceptance: Test tab preview complete; download works; screenshot in UIUX manifest. Wave CD-2 stays In Progress (partial — T01–T06 Done; T08 In Progress; T07 + T09–T13 Not Started). Formal phase remains None. Sole active CDP slice. Gate evidence: [].",
+        "testStrategy": "1. Testing Tab Run preview → SSE success complete state. 2. Download DOCX and/or PDF from success dialog triggers valid download. 3. Paired UIUX manifest includes preview success screenshot (closes T13 gap). 4. Verdict PASS. 5. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "17"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T14:30:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T14:15:00.000Z",
-      "taskCount": 17,
+      "lastModified": "2026-07-10T14:30:00.000Z",
+      "taskCount": 18,
       "completedCount": 17,
       "tags": [
         "master"
