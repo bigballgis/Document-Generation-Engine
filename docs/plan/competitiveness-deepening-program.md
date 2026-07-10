@@ -69,7 +69,7 @@
                  doc truth, BDD, browser E2E, post-P22 hardening specs
 ```
 
-**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). **Wave LR-A Done** (2026-07-10; A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred). CDP Wave **CD-2 Done** (2026-07-11; T01–T13; merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825` / `f12b193` / `b2b0899`). LRP program remains **In Progress** (**LR-C11 In Progress** 2026-07-11 — slice `lrp-c11-api-error-i18n` sole-active; **LR-C10 Done** 2026-07-11 — merge `bdaf95d`; **LR-C9 Done** 2026-07-10 — merge `0013615`; Wave LR-C partial; Wave LR-A Done — Word/XSD residuals deferred separately). CDP is a **parallel program** — not a phase replacement.
+**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). **Wave LR-A Done** (2026-07-10; A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred). CDP Wave **CD-2 Done** (2026-07-11; T01–T13; merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825` / `f12b193` / `b2b0899`). LRP program remains **In Progress** (**LR-C11 Done** 2026-07-11 — merge `44fcf40`; **no sole-active** LRP slice; **LR-C10 Done** 2026-07-11 — merge `bdaf95d`; **LR-C9 Done** 2026-07-10 — merge `0013615`; Wave LR-C partial; Wave LR-A Done — Word/XSD residuals deferred separately). CDP is a **parallel program** — not a phase replacement.
 
 ---
 
@@ -265,7 +265,7 @@ Mark CD-0 **Done** only when ALL true:
 
 **CD-0 status:** **Done** (2026-07-10) — required checklist met; optional ADR drafts do not block wave close.
 
-**Next wave (this session):** **CD-2 Done** (2026-07-11) — **T01/T01b Done** (merge `1930842`); **T02/T03/T04 Done** (2026-07-10; merge `6821f45`); **T05 Done** (2026-07-10; merge `895f16e`); **T06 Done** (2026-07-10; merge `3aed175`); **T08 Done** (2026-07-10; merge `c62b1a1`); **T07 Done** (2026-07-11; merge `1eb230b`); **T09 Done** (2026-07-11; merge `55a6ab6`); **T10 Done** (2026-07-11; merge `b16e52a`); **T11 Done** (2026-07-11; merge `6e3f825`); **T12 Done** (2026-07-11; merge `f12b193`); **T13 Done** (2026-07-11; merge `b2b0899`). Sibling LRP: **LR-C11 In Progress** (2026-07-11; slice `lrp-c11-api-error-i18n`; sole-active). Do **not** activate CD-3 while LR-C11 is sole-active.
+**Next wave (this session):** **CD-2 Done** (2026-07-11) — **T01/T01b Done** (merge `1930842`); **T02/T03/T04 Done** (2026-07-10; merge `6821f45`); **T05 Done** (2026-07-10; merge `895f16e`); **T06 Done** (2026-07-10; merge `3aed175`); **T08 Done** (2026-07-10; merge `c62b1a1`); **T07 Done** (2026-07-11; merge `1eb230b`); **T09 Done** (2026-07-11; merge `55a6ab6`); **T10 Done** (2026-07-11; merge `b16e52a`); **T11 Done** (2026-07-11; merge `6e3f825`); **T12 Done** (2026-07-11; merge `f12b193`); **T13 Done** (2026-07-11; merge `b2b0899`). Sibling LRP: **LR-C11 Done** (2026-07-11; merge `44fcf40`; **no sole-active**). Recommend next: **LR-C12** or **CD-3** or pause (do **not** auto-activate).
 
 ---
 
@@ -294,4 +294,4 @@ Mark CD-0 **Done** only when ALL true:
 
 ---
 
-**Next action (this session):** **Wave CD-2 → Done** (2026-07-11; T01–T13; merge tip `b2b0899`). Sibling LRP: **LR-C11 → In Progress** (2026-07-11; slice `lrp-c11-api-error-i18n`; Task Master #26; sole-active LRP). Formal phase remains **None**. **No sole-active CDP E2E slice.** Do **not** activate CD-3 or LR-C12 while C11 is sole-active.
+**Next action (this session):** **Wave CD-2 → Done** (2026-07-11; T01–T13; merge tip `b2b0899`). Sibling LRP: **LR-C11 → Done** (2026-07-11; merge `44fcf40`; Task Master #26). Formal phase remains **None**. **No sole-active LRP/CDP slice.** Recommend next: **LR-C12** or **CD-3** or pause (do **not** auto-activate).

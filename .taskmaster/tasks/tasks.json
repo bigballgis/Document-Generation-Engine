@@ -353,22 +353,22 @@
         "id": "26",
         "title": "LR-C11 api.error i18n closure",
         "description": "Sole-active LRP slice: close frontend api.error catalog parity with backend messageKeys; parity Vitest; replace raw toLocaleString; logoSlotLabel disposition; OPT-G7/G6 residual updates. English-first i18n. Do NOT mark Wave LR-C Done. Do NOT activate LR-C12 or CD-3.",
-        "details": "ACTIVATED 2026-07-11. Slice id: lrp-c11-api-error-i18n. Status: in-progress. Placement: ISOLATED D:/working/DGE-lrp-c11-api-error-i18n · feat/lrp-c11-api-error-i18n. BDD readiness: not-applicable (catalog completion per i18n constitution). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9/C10 Done; C11 In Progress; C2/C3/C5/C7/C8/C12/C13 Not Started). Live key baseline at activation: backend api.error.* 159; frontend catalog 158 leaves; missing api.error.rendering.ooxmlValidationFailed (plan historically cited 145 — re-baseline acceptance to live N/N). Scope: apiErrorEn/ZhCn parity + backend parity test; useLocaleFormatters for raw toLocaleString sites; logoSlotLabel disposition note; OPT-G7/G6 row updates on Done. Out of scope: backend key changes; LR-C12; CD-3; frontend catalog implementation is stage 4 (this task tracks plan activation).",
-        "testStrategy": "1. Parity Vitest fails if any backend api.error.* missing from frontend catalog; passes at N/N (N=live backend count; 159 at activation). 2. zh-CN timestamps on master revision / release version history use locale-aware formatters. 3. pnpm lint/type-check/test/build green. 4. zh-CN screenshot spot-check on 2 error surfaces. 5. Do not claim Wave LR-C Done.",
+        "details": "DONE 2026-07-11. Slice id: lrp-c11-api-error-i18n. Merge: 44fcf4047e0f67a7116703fd60ebf6af29e2bbb4 (feat/lrp-c11-api-error-i18n → main). Status: done. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9/C10/C11 Done; C2/C3/C5/C7/C8/C12/C13 Not Started). No sole-active LRP slice. Delivered: api.error catalog parity 159/159; parity Vitest enforced; logoSlotLabel proper-noun exempt; toLocaleString residual closed (useLocaleFormatters already compliant). OPT-G7 residual closed; OPT-G6 locale/catalog residual closed (aria-label sweep remains). Gates: pnpm lint/type-check/test/build GREEN (973 tests); architecture PASS_WITH_NOTES Critical 0; e2e/uiux/deploy skipped (catalog-only). Recommend next: LR-C12 or pause (do not auto-activate).",
+        "testStrategy": "1. Parity Vitest fails if any backend api.error.* missing from frontend catalog; passes at N/N (N=live backend count; 159/159 Done). 2. zh-CN timestamps on master revision / release version history use locale-aware formatters. 3. pnpm lint/type-check/test/build green. 4. zh-CN screenshot spot-check on 2 error surfaces. 5. Do not claim Wave LR-C Done.",
         "priority": "high",
         "dependencies": [
           "25"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-11T06:20:00.000Z"
+        "updatedAt": "2026-07-11T06:35:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T06:20:00.000Z",
+      "lastModified": "2026-07-11T06:35:00.000Z",
       "taskCount": 26,
-      "completedCount": 25,
+      "completedCount": 26,
       "tags": [
         "master"
       ]
