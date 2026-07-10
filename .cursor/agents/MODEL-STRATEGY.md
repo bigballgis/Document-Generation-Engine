@@ -3,28 +3,28 @@
 Each specialist under `.cursor/agents/` **must** pin an explicit `model` slug in YAML
 frontmatter. **`inherit` is forbidden.**
 
-> **Active policy (no Cursor API pool):** Prefer Cursor first-party families only
-> (**Grok** + **Composer**). Do **not** pin `glm-5.2-*` — GLM Coding Plan still
-> deducts Cursor API quota in this workspace. Claude API-token slugs stay frozen
-> until quota returns.
+> **Active policy (2026-07-10):** **All project specialists pin `grok-4.5-fast-xhigh`.**
+> Single-model fleet for production consistency — no Composer / GLM tier split.
+> Do **not** pin `glm-5.2-*` (Cursor API pool). Do **not** use `inherit`.
 
-## Allowed families (current)
+## Canonical pin
 
-| Family | Slugs | Role |
+| Slug | Role |
+| --- | --- |
+| **`grok-4.5-fast-xhigh`** | **Every** `.cursor/agents/*.md` specialist |
+| **`inherit`** | **Forbidden** |
+| **`composer-2.5` / `composer-2.5-fast`** | **Retired** for project agents (do not reintroduce without explicit user request) |
+| **`glm-5.2-*`** | **Avoid** (API pool) |
+
+## Role tiers (capability, not model)
+
+Tiers describe **pipeline responsibility** only. Model slug is identical for all.
+
+| Tier | Responsibility | Agents |
 | --- | --- | --- |
-| **Grok 4.5 High Fast** | `grok-4.5-fast-xhigh` | Governance |
-| **Composer 2.5** | `composer-2.5` | Delivery |
-| **Composer 2.5 Fast** | `composer-2.5-fast` | Execution |
-| **`inherit`** | — | **Forbidden** |
-| **GLM 5.2** | `glm-5.2-high` etc. | **Avoid** (API pool) |
-
-## Tiers
-
-| Tier | Slug | When |
-| --- | --- | --- |
-| **Governance** | `grok-4.5-fast-xhigh` | Routing, plan, architecture, commit, merge |
-| **Delivery** | `composer-2.5` | BDD, docs, TDD implementation, E2E, doc-sync |
-| **Execution** | `composer-2.5-fast` | Gates, deploy queue, worktree placement |
+| **Governance** | Routing, plan, architecture, quality, merge, commit | `delivery-orchestrator`, `plan-orchestrator`, `architecture-reviewer`, `code-quality-reviewer`, `integration-merger`, `post-task-commit-review` |
+| **Delivery** | BDD, docs, TDD implementation, E2E, doc-sync | `behavior-spec-author`, `doc-keeper`, `backend-engineer`, `frontend-engineer`, `rendering-engineer`, `e2e-test-engineer`, `e2e-uiux-reviewer`, `post-task-doc-sync` |
+| **Execution** | Worktree, gates, deploy queue, verify | `worktree-router`, `build-deploy-agent`, `deploy-engineer`, `verifier` |
 
 ## Current assignments
 
@@ -36,35 +36,36 @@ frontmatter. **`inherit` is forbidden.**
 | `code-quality-reviewer` | Governance | `grok-4.5-fast-xhigh` |
 | `post-task-commit-review` | Governance | `grok-4.5-fast-xhigh` |
 | `integration-merger` | Governance | `grok-4.5-fast-xhigh` |
-| `behavior-spec-author` | Delivery | `composer-2.5` |
-| `doc-keeper` | Delivery | `composer-2.5` |
-| `backend-engineer` | Delivery | `composer-2.5` |
-| `frontend-engineer` | Delivery | `composer-2.5` |
-| `rendering-engineer` | Delivery | `composer-2.5` |
-| `e2e-test-engineer` | Delivery | `composer-2.5` |
-| `e2e-uiux-reviewer` | Delivery | `composer-2.5` |
-| `post-task-doc-sync` | Delivery | `composer-2.5` |
-| `verifier` | Execution | `composer-2.5-fast` |
-| `worktree-router` | Execution | `composer-2.5-fast` |
-| `build-deploy-agent` | Execution | `composer-2.5-fast` |
-| `deploy-engineer` | Execution | `composer-2.5-fast` |
+| `behavior-spec-author` | Delivery | `grok-4.5-fast-xhigh` |
+| `doc-keeper` | Delivery | `grok-4.5-fast-xhigh` |
+| `backend-engineer` | Delivery | `grok-4.5-fast-xhigh` |
+| `frontend-engineer` | Delivery | `grok-4.5-fast-xhigh` |
+| `rendering-engineer` | Delivery | `grok-4.5-fast-xhigh` |
+| `e2e-test-engineer` | Delivery | `grok-4.5-fast-xhigh` |
+| `e2e-uiux-reviewer` | Delivery | `grok-4.5-fast-xhigh` |
+| `post-task-doc-sync` | Delivery | `grok-4.5-fast-xhigh` |
+| `verifier` | Execution | `grok-4.5-fast-xhigh` |
+| `worktree-router` | Execution | `grok-4.5-fast-xhigh` |
+| `build-deploy-agent` | Execution | `grok-4.5-fast-xhigh` |
+| `deploy-engineer` | Execution | `grok-4.5-fast-xhigh` |
+
+## Production rules
+
+1. **Pin in frontmatter** — every agent file has `model: grok-4.5-fast-xhigh`.
+2. **Parent `Task` calls** — do **not** pass `model` unless the user explicitly requests a different slug in the same session.
+3. **Built-in Cursor types** (`explore`, `bugbot`) — no project frontmatter; Cursor-owned.
+4. **Region / availability failure** — if `grok-4.5-fast-xhigh` is rejected, surface the error to the user; do **not** silently fall back to Composer/GLM without confirmation.
+5. **No `inherit`** — ever.
+
+## Fallback (only with user confirmation)
+
+Preferred order if Grok is unavailable in-region:
+
+1. User-approved alternate first-party slug
+2. Stop and report — do not invent a fleet-wide Composer rollback
 
 ## Supervisor mode
 
 User stays in one parent session; parent/orchestrator spawn `Task` workers autonomously.
 Parallel → worktree-router; Docker → queue; isolated Done → integration-merger then
 doc-sync/commit on **main**.
-
-## Fallback if a slug is rejected
-
-Governance → `grok-4.5-fast-xhigh` → `composer-2.5`  
-Delivery → `composer-2.5` → `composer-2.5-fast` → `grok-4.5-fast-xhigh`  
-Execution → `composer-2.5-fast` → `composer-2.5`
-
-Do **not** fall back to `glm-5.2-*` while API pool conservation is required.
-
-## API restore (later)
-
-Still no `inherit`. Prefer Claude Fable/Opus/Sonnet for plan/governance/reasoning when
-quota returns; optionally reintroduce GLM for Delivery if API pool is acceptable.
-Keep Composer for Execution.

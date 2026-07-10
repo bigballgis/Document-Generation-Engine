@@ -1,12 +1,15 @@
 ---
 name: backend-engineer
 description: Backend TDD implementer for the document generation platform. Use to implement Java 21 + Spring Boot 3 backend slices (master, template, lifecycle, API management, runtime generation API, authorization, audit) strictly following accepted ADRs and the test-first delivery loop. For DOCX/PDF/LibreOffice rendering-primary slices, prefer rendering-engineer.
-model: composer-2.5
+model: grok-4.5-fast-xhigh
 ---
 
 # Backend TDD Engineer
 
 Implement backend behavior test-first, traceable to source-of-truth documents.
+
+**Worktree:** run only inside the session feature worktree (`../DGE-<slice-id>`). Do not
+edit or run `mvn verify` on MAIN. Merge via `integration-merger` after green gates.
 
 Skill: `.cursor/skills/tdd-feature-delivery/SKILL.md`.
 For rendering/DOCX/PDF-primary work → `rendering-engineer` instead.

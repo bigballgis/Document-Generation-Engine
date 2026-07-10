@@ -18,7 +18,7 @@ the matching workflow immediately** without asking them to type a slash command.
 | User intent (examples) | Auto workflow | First action |
 | --- | --- | --- |
 | 做功能 / 修 bug / 交付 / 按管线做 / implement / deliver / “帮我把…做完” | **deliver** | `Task(delivery-orchestrator)` → stages 0–13 (+14 verifier when claiming Done) |
-| 并行 / 同时做几件事 / 多切片 / multitask / 几个 worktree | **multitask-slices** | `worktree-router` per slice; prefer `/worktree` isolation; cap ≤3 writers; queue Docker; `integration-merger` per green slice |
+| 并行 / 同时做几件事 / 多切片 / multitask / 几个 worktree | **multitask-slices** | **one worktree per slice** (mandatory); cap ≤3 writers; queue Docker; `integration-merger` per green slice |
 | 部署 / 重启栈 / deploy / 队列状态 / 验收环境 | **deploy-queue** | `Task(build-deploy-agent)` → `docker-deploy-queue.ps1` (`-Status` / `-SkipBuild` as asked) |
 | 验收 / 是否 Done / 检查有没有做完 / verify | **verify-done** | `Task(verifier)` → PASS/FAIL only |
 
@@ -30,13 +30,16 @@ State one routing line before the first write:
 
 ## Mandatory first action (before edits)
 
-Classify, then **invoke `Task` immediately** when matched:
+Classify, then **invoke `Task` immediately** when matched.
+
+**Delivery writes (default):** stage **0** `worktree-router` → provision `../DGE-<slice-id>` →
+`move_agent_to_root` → then pipeline stages 1–13. **Never** implement on MAIN.
 
 | Request class | First `subagent_type` | Notes |
 | --- | --- | --- |
-| Multi-step, full-stack, or ambiguous delivery | `delivery-orchestrator` | **deliver** intent (default) |
-| Worktree placement / parallel isolation | `worktree-router` | **multitask-slices** / placement |
-| Merge feature worktree + cleanup | `integration-merger` | After isolated green |
+| Multi-step, full-stack, or ambiguous delivery | `delivery-orchestrator` | Starts at stage 0 worktree |
+| **Any delivery / implement / fix (before first write)** | **`worktree-router`** | **Mandatory** unless read-only or `main-only` opt-out |
+| Merge feature worktree + cleanup | `integration-merger` | Stage 11; after green gates |
 | DOCX / PDF / LibreOffice / rendering module | `rendering-engineer` | Prefer over general backend |
 | Backend behavior / Java / Flyway / runtime API | `backend-engineer` | After BDD if behavior-changing |
 | Frontend behavior / Vue / Pinia / Playwright | `frontend-engineer` | E2E/UIUX follow |
@@ -58,7 +61,7 @@ If multiple rows apply → **`delivery-orchestrator`** unless user named one spe
 
 When **multitask-slices** intent fires, compose product primitives with repo guards:
 
-- Prefer `/worktree` (or `git worktree add` + `move_agent_to_root`) for overlapping edits
+- Prefer `/worktree` + `git worktree add ../DGE-<slice-id>` + **`move_agent_to_root`** for **every** delivery session (not only parallel)
 - Use background/`/multitask` for independent chunks; **cap ≤3 concurrent writers**
 - Skill: `.cursor/skills/cursor-native-parallel/SKILL.md`
 - Docker: only `.\scripts\docker-deploy-queue.ps1` (never a second stack)
@@ -83,6 +86,8 @@ Slash commands remain available but are **not required**.
 - Deep review via ad-hoc grep instead of `explore` / specialists.
 - `generalPurpose` when a named specialist exists.
 - Parallel `docker-deploy` / second compose project.
+- Implementing delivery on MAIN without stage 0 worktree (`worktree-and-deploy-queue-constitution.mdc`).
+- Running full build gates on MAIN while a feature worktree slice is active.
 - Leaving feature worktrees after merge without `integration-merger`.
 
 ## Self-check (one line before first write)
@@ -97,8 +102,8 @@ the next stage — no «要继续吗？」 or «请输入 /deliver» menus when 
 
 ## Model selection
 
-Explicit non-API pins only — see `.cursor/agents/MODEL-STRATEGY.md`.
-**`inherit` forbidden.** Do not override `model` on Task unless user asks.
+Fleet pin: `grok-4.5-fast-xhigh` for every project specialist — see `.cursor/agents/MODEL-STRATEGY.md`.
+**`inherit` forbidden.** Do not override `model` on Task unless the user explicitly requests a different slug.
 
 ## Related
 

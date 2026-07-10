@@ -69,13 +69,9 @@ Optional shortcuts (same workflows): `/deliver`, `/multitask-slices`, `/deploy-q
 14 verifier (optional)      → independent PASS/FAIL before handoff
 ```
 
-### Model tiers (no `inherit`)
+### Model policy (no `inherit`)
 
-| Tier | Model | Typical agents |
-| --- | --- | --- |
-| Governance | `grok-4.5-fast-xhigh` | delivery-orchestrator, plan-orchestrator, architecture-reviewer, integration-merger, post-task-commit-review, … |
-| Delivery | `composer-2.5` | behavior-spec-author, doc-keeper, backend/frontend/rendering engineers, e2e-*, post-task-doc-sync |
-| Execution | `composer-2.5-fast` | worktree-router, build-deploy-agent, deploy-engineer (rollback), verifier |
+**All project specialists pin `grok-4.5-fast-xhigh`.** Role tiers (Governance / Delivery / Execution) describe pipeline responsibility only — not different models. See [`.cursor/agents/MODEL-STRATEGY.md`](.cursor/agents/MODEL-STRATEGY.md).
 
 Built-in Cursor types (no project file): `explore`, `bugbot`.
 

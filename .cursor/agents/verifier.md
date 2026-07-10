@@ -1,7 +1,7 @@
 ---
 name: verifier
 description: Independent completion verifier. Use after a slice claims Done or before merge/release — check gates, E2E evidence, deploy queue evidence, doc-sync, commit state, and worktree cleanup. Read-only; reports PASS/FAIL with blockers. Do not implement fixes unless the user asks.
-model: composer-2.5-fast
+model: grok-4.5-fast-xhigh
 readonly: true
 ---
 

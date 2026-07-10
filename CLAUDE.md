@@ -17,7 +17,7 @@ This is a **dual-agent project** — workflow automation is orchestrated by Curs
 - `.cursor/rules/worktree-and-deploy-queue-constitution.mdc` — worktree isolation + single Docker queue
 - `.cursor/rules/tdd-bdd-delivery-constitution.mdc` — test-first gates
 - `.cursor/rules/document-as-code-constitution.mdc` — docs-first behavior updates
-- `.cursor/agents/MODEL-STRATEGY.md` — tiered Grok / GLM / Composer Fast (`inherit` forbidden)
+- `.cursor/agents/MODEL-STRATEGY.md` — all specialists `grok-4.5-fast-xhigh` (`inherit` forbidden)
 
 ## Quick Commands (host compile, Docker runtime)
 
@@ -121,31 +121,32 @@ All behavior-changing work routes through **one orchestrator** with fixed stage 
 (see `.cursor/skills/delivery-pipeline/SKILL.md`):
 
 ```
-0. Placement       → worktree-router
+0. Placement       → worktree-router (MANDATORY — ../DGE-<slice-id> + move_agent_to_root)
 1. Behavior spec   → behavior-spec-author
 2. Plan            → plan-orchestrator (+ Task Master when applicable)
 3. Docs-first      → doc-keeper
-4. Implement       → backend-engineer | frontend-engineer | rendering-engineer
+4. Implement       → backend-engineer | frontend-engineer | rendering-engineer [feature worktree]
 5. E2E stack prep  → build-deploy-agent (docker-deploy-queue)
 6. E2E functional  → e2e-test-engineer
 7. E2E UIUX        → e2e-uiux-reviewer
 8. Architecture    → architecture-reviewer
 9. Code quality    → code-quality-reviewer (optional)
 10. Deploy evidence → build-deploy-agent (queue)
-11. Integrate      → integration-merger (if ISOLATED)
-12. Doc sync       → post-task-doc-sync (on main after merge)
+11. Integrate      → integration-merger (MANDATORY — merge + remove worktree)
+12. Doc sync       → post-task-doc-sync (MAIN only, after merge)
 13. Commit gate    → post-task-commit-review
 Done
 ```
 
 **Non-negotiable:**
+- **Every delivery session:** new worktree before writes; never implement on MAIN
 - No code before behavior spec (BDD)
 - No frontend Done without E2E functional + UIUX evidence
 - No parallel Docker acceptance stacks — queue only
-- Isolated slices: merge + worktree cleanup; doc-sync/commit on **main**
+- Isolated slices: merge + worktree cleanup at stage 11; doc-sync/commit on **MAIN**
 - No Done before post-task doc sync + post-task commit review (honor `no-commit`)
 - Use `Task` for implementation — never inline multi-file delivery
-- **Models (tiered, no Cursor API pool):** Governance `grok-4.5-fast-xhigh` · Delivery `composer-2.5` · Execution `composer-2.5-fast`; **avoid `glm-5.2-*`**; **`inherit` forbidden** — see `.cursor/agents/MODEL-STRATEGY.md`
+- **Models:** all specialists pin `grok-4.5-fast-xhigh`; **avoid `glm-5.2-*`**; **`inherit` forbidden** — see `.cursor/agents/MODEL-STRATEGY.md`
 - **Supervisor mode:** user stays in one main session; parent autonomously spawns Task subagents
 - **MCP:** `.cursor/mcp.json` — task-master-ai, local Postgres (dev), fetch (healthz/OpenAPI)
 
@@ -245,7 +246,7 @@ When in doubt about a behavior/architecture decision, follow this order:
 - **Backend details:** `backend/README.md`
 - **Docker deployment (queued):** `.\scripts\docker-deploy-queue.ps1`, `docker-compose.prod.yml`
 - **Worktree isolation:** `.cursor/skills/worktree-isolation/SKILL.md`, agents `worktree-router` / `integration-merger`
-- **Model strategy:** `.cursor/agents/MODEL-STRATEGY.md` (tiered Grok / GLM / Composer Fast; `inherit` forbidden)
+- **Model strategy:** `.cursor/agents/MODEL-STRATEGY.md` (fleet-wide `grok-4.5-fast-xhigh`; `inherit` forbidden)
 
 - **Frontend i18n:** `.cursor/skills/i18n-english-first/SKILL.md`
 - **Frontend OA design:** `.cursor/skills/frontend-oa-design/SKILL.md`

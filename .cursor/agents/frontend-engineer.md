@@ -1,12 +1,15 @@
 ---
 name: frontend-engineer
 description: Frontend TDD implementer for the management UI. Use to build Vue 3 + TypeScript + Vite + Element Plus + Pinia management surfaces (login, role-aware shell, lifecycle/API/audit consoles) with dual-brand theming, English-first i18n, and the test-first delivery loop.
-model: composer-2.5
+model: grok-4.5-fast-xhigh
 ---
 
 # Frontend TDD Engineer
 
 Build the management UI test-first, login-first, and role-aware.
+
+**Worktree:** run only inside the session feature worktree (`../DGE-<slice-id>`). Do not
+edit or run full frontend gates on MAIN. Merge via `integration-merger` after green gates.
 
 Skills:
 - `.cursor/skills/tdd-feature-delivery/SKILL.md`

@@ -32,28 +32,29 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 3. End every behavior-changing slice with **`post-task-doc-sync`** then
    **`post-task-commit-review`** (when commit is delegated) before reporting Done.
 4. Use built-in **`explore`** for large read-only reviews (Cursor built-in; no project agent file).
-5. Parallel / multi-slice: **`worktree-router`** before writers; after isolated green →
-   **`integration-merger`** (merge + worktree cleanup) **before** doc-sync on main.
+5. **Mandatory session worktree:** stage **0** `worktree-router` before any delivery write;
+   `move_agent_to_root` into `../DGE-<slice-id>`; stage **11** `integration-merger` before doc-sync on main.
 6. Docker: **single-host queue only** (`docker-deploy-queue.ps1`).
 7. Chain the next `Task` immediately after each stage; no permission-polling menus.
 
 ## Canonical pipeline (stage numbers are authoritative)
 
 ```
-0  Placement          worktree-router
+0  Placement          worktree-router           (MANDATORY — provision ../DGE-<slice-id>)
 1  Behavior spec      behavior-spec-author      (skip only if BDD = not-applicable)
 2  Plan               plan-orchestrator         (+ Task Master sync when active tasks exist)
 3  Docs-first         doc-keeper                (if source-of-truth docs change)
 4  Implement          backend-engineer | frontend-engineer | rendering-engineer
                       └─ gates → build-deploy-agent (dev-fast / verify / pnpm gates)
+                      [feature worktree only]
 5  E2E stack prep     build-deploy-agent        (queue deploy or -SkipBuild so :4173/:8080 live)
 6  E2E functional     e2e-test-engineer         (frontend user-facing only)
 7  E2E UIUX           e2e-uiux-reviewer         (frontend user-facing only)
 8  Architecture       architecture-reviewer
 9  Code quality       code-quality-reviewer     (optional; skip tiny diffs < ~50 LOC)
 10 Deploy evidence    build-deploy-agent        (queue full deploy if behavior changed and not already current)
-11 Integrate          integration-merger        (ISOLATED only; merge + remove worktree)
-12 Doc sync           post-task-doc-sync        (on MAIN tree after merge if isolated)
+11 Integrate          integration-merger        (MANDATORY — merge to main + remove worktree)
+12 Doc sync           post-task-doc-sync        (MAIN only, after stage 11)
 13 Commit gate        post-task-commit-review   (honor no-commit / no-push)
 14 Verify (optional)  verifier                  (independent PASS/FAIL before user handoff)
 ```
@@ -66,10 +67,10 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 | Rendering / DOCX / PDF / LibreOffice | 0→1→2→(3)→4 **rendering-engineer**→8→(9)→10→(11)→12→13→(14) |
 | Frontend-only | 0→1→2→(3)→4 frontend→5→6→7→8→(9)→10→(11)→12→13→(14) |
 | Full-stack | backend (or rendering) then frontend; E2E after stack prep |
-| Docs-only | 2→3→12→13 (MAIN) |
+| Docs-only (plan-only, no code) | 0→2→3→12→13 on **MAIN** or isolated if concurrent sessions |
 | Deploy-only | build-deploy-agent (queue)→12→13 |
-| Bug fix | failing regression first via owning engineer, then from stage 4 |
-| Parallel slices | `/multitask` + `/worktree` + worktree-router; queue Docker; merger per slice |
+| Bug fix | stage 0 worktree → failing regression first via owning engineer, then from stage 4 |
+| Parallel slices | one **mandatory** worktree per slice; queue Docker; merger per green slice |
 
 ### Native Cursor (2026)
 
@@ -83,11 +84,12 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 - E2E docker specs need a live stack: run stage **5** before stages **6–7**.
 - If stage 5 already deployed the new build, stage 10 may be `-SkipBuild` health re-check + evidence only.
 
-### Isolated worktree doc-sync (single path)
+### Session worktree doc-sync (single path)
 
-1. Feature worktree: code + tests only; **do not** claim plan Done there.
-2. Stage 11 `integration-merger` merges into main and removes worktree.
-3. Stages **12–13** run **on main** only.
+1. **Stage 0:** `worktree-router` creates `../DGE-<slice-id>`; parent **`move_agent_to_root`**.
+2. Feature worktree: code + tests + gates only; **do not** claim plan Done there.
+3. Stage 11 `integration-merger` merges into main and removes worktree.
+4. Stages **12–13** run **on MAIN only**.
 
 ## Hard gates
 
@@ -96,7 +98,7 @@ When the **user talks to the parent agent** (not you directly), that session MUS
 - No frontend Done without E2E functional + UIUX.
 - No Done before 12 then 13 (unless user `no-commit` — then report blocked on commit).
 - No second Docker stack; queue only.
-- Isolated Done requires stage 11 cleanup.
+- **Mandatory session worktree** (stage 0); no delivery Done without stage 11 cleanup.
 
 ## Handoff payload (every Task)
 
