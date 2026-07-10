@@ -1,13 +1,15 @@
 # CDP Wave CD-E2E — Full-Chain Browser Evidence
 
 **Program:** [competitiveness-deepening-program.md](../competitiveness-deepening-program.md)  
-**Wave:** CD-2 — **In Progress** (2026-07-11; **partial** — T01/T01b + T02/T03/T04 + T05 + T06 + T07 + T08 + **T09 Done**; **T10 In Progress** (sole-active CDP E2E slice); T11–T12 + T13 remain Not Started)
+**Wave:** CD-2 — **In Progress** (2026-07-11; **partial** — T01/T01b + T02/T03/T04 + T05 + T06 + T07 + T08 + T09 + **T10 Done**; T11–T12 + T13 remain Not Started; no sole-active CDP E2E slice)
 **Owner default:** `e2e-test-engineer` + `e2e-uiux-reviewer`
 **Prerequisites:** Docker stack (`.\scripts\docker-deploy-queue.ps1`); read `frontend/e2e/helpers/auth.ts`, `frontend/e2e/helpers/cdp-mvp-golden-api.ts`
 
-> **Activation note (2026-07-11):** Slice `cdp-e2e-t10-fidelity` — **CD-E2E-T10 → In Progress** (sole-active CDP E2E slice — Fidelity «viewed» confirmation on pass/approve/publish; browser evidence). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t10-fidelity` · `feat/cdp-e2e-t10-fidelity` · base `f0cb16f` (T09 docs tip; upstream merge `55a6ab6`). BDD **ready**: `docs/behavior/fidelity-viewed-confirmation-journey.md` (BDD-CDP-FID-001…004). Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Do **not** activate LR-C10 / T11–T13. **Task Master #21 → in-progress**.
+> **Completion note (2026-07-11):** Slice `cdp-e2e-t10-fidelity` merged to `main` (`b16e52a`; includes `0bf7a08` UIUX; worktree **REMOVED**). **CD-E2E-T10 → Done**. Fidelity «viewed» confirmation on pass/approve/publish closed (BDD-CDP-FID-001…004). Backend `mvn -Pdev-fast test` **1216** passed; frontend lint/type-check/test **960** passed; Playwright docker `--workers=1` functional **6/6**; UIUX **3/3** + **6** screenshots @1920 REDBC; Verdict **PASS** (`CDP-E2E-T10-uiux-manifest.md`); architecture-reviewer **PASS_WITH_SUGGESTIONS** (no Critical); Stage 5/10 **DEPLOY_OK** healthz **200** + `:4173` **200**. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. No sole-active CDP E2E slice. **Next recommend:** **T11** (audit admin query smoke) or **T13** (package materialize). **Task Master #21 → done**.
 
-> **Completion note (2026-07-11):** Slice `cdp-e2e-t09-compare` merged to `main` (`55a6ab6`; worktree **REMOVED**). **CD-E2E-T09 → Done**. Preview vs final comparison panel E2E closed (BDD-CDP-CMP-001). E2E-only (no product src changes). Playwright docker `--workers=1`: functional **1/1** + UIUX evidence **1/1** (**2/2**); UIUX Verdict **PASS** (`CDP-E2E-T09-uiux-manifest.md` + **3** screenshots @1920 REDBC); architecture-reviewer **PASS_WITH_SUGGESTIONS** / merge allowed (no Critical); Stage 5/10 **DEPLOY_OK** healthz **200** + `:4173` **200** (E2E-only; no image rebuild; queue idle). Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Superseded scheduling: T10 activated (see activation note above). **Task Master #20 → done**.
+> **Activation note (2026-07-11):** Slice `cdp-e2e-t10-fidelity` — **CD-E2E-T10 → In Progress** (sole-active CDP E2E slice — Fidelity «viewed» confirmation on pass/approve/publish; browser evidence). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t10-fidelity` · `feat/cdp-e2e-t10-fidelity` · base `f0cb16f` (T09 docs tip; upstream merge `55a6ab6`). BDD **ready**: `docs/behavior/fidelity-viewed-confirmation-journey.md` (BDD-CDP-FID-001…004). Superseded by completion note above. **Task Master #21 → in-progress** (now done).
+
+> **Completion note (2026-07-11):** Slice `cdp-e2e-t09-compare` merged to `main` (`55a6ab6`; worktree **REMOVED**). **CD-E2E-T09 → Done**. Preview vs final comparison panel E2E closed (BDD-CDP-CMP-001). E2E-only (no product src changes). Playwright docker `--workers=1`: functional **1/1** + UIUX evidence **1/1** (**2/2**); UIUX Verdict **PASS** (`CDP-E2E-T09-uiux-manifest.md` + **3** screenshots @1920 REDBC); architecture-reviewer **PASS_WITH_SUGGESTIONS** / merge allowed (no Critical); Stage 5/10 **DEPLOY_OK** healthz **200** + `:4173` **200** (E2E-only; no image rebuild; queue idle). Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Superseded scheduling: T10 completed (see completion note above). **Task Master #20 → done**.
 
 > **Activation note (2026-07-11):** Slice `cdp-e2e-t09-compare` — **CD-E2E-T09 → In Progress** (Preview vs final comparison panel; browser evidence; BDD-CDP-CMP-001). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t09-compare` · `feat/cdp-e2e-t09-compare` · base `origin/main` @ `3467f5a` (T07 merge tip `1eb230b`). BDD **ready**: `docs/behavior/preview-comparison-journey.md` (BDD-CDP-CMP-001). Superseded by completion note above. **Task Master #20 → in-progress** (now done).
 
@@ -170,8 +172,9 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - **Owner:** `e2e-test-engineer`
 - **Read first:** `docs/behavior/fidelity-viewed-confirmation-journey.md` (**BDD-CDP-FID-001…004** **ready**); cross: tester/approver/publish journeys
 - **Acceptance:** Cannot pass test / approve / publish without acknowledging fidelity summary (checkbox or equivalent).
-- **Status:** **In Progress** (2026-07-11 — slice `cdp-e2e-t10-fidelity`; sole-active CDP E2E slice; BDD **ready**)
-- **Placement:** ISOLATED `D:/working/DGE-cdp-e2e-t10-fidelity` · `feat/cdp-e2e-t10-fidelity` · base `f0cb16f` (upstream merge `55a6ab6`)
+- **Status:** **Done** (2026-07-11 — slice `cdp-e2e-t10-fidelity`; merge `b16e52a`; includes `0bf7a08` UIUX; worktree removed)
+- **Artifacts:** `CDP-E2E-T10-fidelity-viewed.spec.ts` + `CDP-E2E-T10-uiux-evidence.spec.ts` + `frontend/e2e/evidence/CDP-E2E-T10-uiux-manifest.md` + screenshots (6 @1920 REDBC)
+- **Evidence:** backend `mvn -Pdev-fast test` **1216**; frontend lint/type-check/test **960**; Playwright docker `--workers=1` functional **6/6**; UIUX **3/3** Verdict **PASS**; architecture **PASS_WITH_SUGGESTIONS** (no Critical); Stage 5/10 deploy healthz/4173 **200**
 - **BDD scenarios:** BDD-CDP-FID-001 (Pass blocked), BDD-CDP-FID-002 (Approve blocked), BDD-CDP-FID-003 (Publish blocked), BDD-CDP-FID-004 (ack → proceed smoke)
 
 ### CD-E2E-T11 — Audit admin query smoke
@@ -217,9 +220,10 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - [x] CD-E2E-T08 Done (2026-07-10 — slice `cdp-e2e-t08-preview`; merge `c62b1a1`) — **not** wave exit
 - [x] CD-E2E-T07 Done (2026-07-11 — slice `cdp-e2e-t07-api-policy`; merge `1eb230b`) — **not** wave exit
 - [x] CD-E2E-T09 Done (2026-07-11 — slice `cdp-e2e-t09-compare`; merge `55a6ab6`) — **not** wave exit
-- [ ] T10 In Progress; T11–T13 Not Started — **wave not closed**
+- [x] CD-E2E-T10 Done (2026-07-11 — slice `cdp-e2e-t10-fidelity`; merge `b16e52a`) — **not** wave exit
+- [ ] T11–T13 Not Started — **wave not closed**
 - [ ] CD-E2E-T01…T11 Done (T12 recommended) — **wave not closed**
-- [x] T01 paired manifest **PASS** (15 screenshots); T02/T03/T04 manifests **PASS** (3/1/3 shots); T05 manifest **PASS** (4 shots @1920); T06 manifest **PASS** (6 shots @1920); T07 manifest **PASS** (9 shots); T08 manifest **PASS** (3 shots @1920); T09 manifest **PASS** (3 shots @1920 REDBC)
-- [x] `execution-sync-ledger.md` records T01 + T02–T04 + T05 + T06 + T07 + T08 + T09 Playwright counts + Docker deploy (2026-07-11)
+- [x] T01 paired manifest **PASS** (15 screenshots); T02/T03/T04 manifests **PASS** (3/1/3 shots); T05 manifest **PASS** (4 shots @1920); T06 manifest **PASS** (6 shots @1920); T07 manifest **PASS** (9 shots); T08 manifest **PASS** (3 shots @1920); T09 manifest **PASS** (3 shots @1920 REDBC); T10 manifest **PASS** (6 shots @1920 REDBC)
+- [x] `execution-sync-ledger.md` records T01 + T02–T04 + T05 + T06 + T07 + T08 + T09 + T10 Playwright counts + Docker deploy (2026-07-11)
 - [x] `usability-review.md` references golden path spec as confirmed evidence (T01)
 - [ ] Full matrix + all manifests PASS before wave **Done**

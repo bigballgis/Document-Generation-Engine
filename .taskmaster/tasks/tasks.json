@@ -283,22 +283,22 @@
         "id": "21",
         "title": "CDP CD-2 T10 Fidelity viewed confirmation E2E",
         "description": "Sole-active CD-2 E2E after T09 Done: CD-E2E-T10 Fidelity «viewed» confirmation on pass/approve/publish (browser-only task-completion + UIUX manifest). BDD ready: fidelity-viewed-confirmation-journey.md (BDD-CDP-FID-001…004). Do NOT mark wave CD-2 Done. Do NOT activate T11-T13 or LR-C10. Out of scope: audit-governance, LR-*.",
-        "details": "ACTIVATED 2026-07-11. Slice id: cdp-e2e-t10-fidelity. Status: in-progress. Placement: ISOLATED D:/working/DGE-cdp-e2e-t10-fidelity · feat/cdp-e2e-t10-fidelity · base f0cb16f (T09 docs tip; upstream merge 55a6ab6). BDD ready: docs/behavior/fidelity-viewed-confirmation-journey.md (BDD-CDP-FID-001…004). Behavior: cannot pass test / approve / publish without acknowledging fidelity summary. Wave CD-2 stays In Progress (partial — T01-T09 Done; T10 In Progress; T11-T13 Not Started). Formal phase remains None. Gate evidence: []. Do not claim T10 Done until Playwright + UIUX + merge.",
+        "details": "DONE 2026-07-11. Slice id: cdp-e2e-t10-fidelity. Status: done. Merge: b16e52a (feat/cdp-e2e-t10-fidelity → main FF; includes 0bf7a08 UIUX + product/E2E); worktree DGE-cdp-e2e-t10-fidelity REMOVED. BDD ready: docs/behavior/fidelity-viewed-confirmation-journey.md (BDD-CDP-FID-001…004). Gates: backend mvn -Pdev-fast test 1216 passed; frontend lint/type-check/test 960 passed; Playwright docker --workers=1 functional 6/6; UIUX 3/3 + 6 screenshots @1920 REDBC; Verdict PASS (CDP-E2E-T10-uiux-manifest.md); architecture-reviewer PASS_WITH_SUGGESTIONS (no Critical); Stage 5/10 DEPLOY_OK healthz 200 + :4173 200. Wave CD-2 stays In Progress (partial — T01-T10 Done; T11-T13 Not Started; no sole-active CDP E2E slice). Formal phase remains None. Next recommend: T11 (audit admin query smoke) or T13 (package materialize).",
         "testStrategy": "1. BDD-CDP-FID-001 Pass blocked without fidelity ack. 2. BDD-CDP-FID-002 Approve blocked. 3. BDD-CDP-FID-003 Publish blocked. 4. BDD-CDP-FID-004 ack then proceed smoke. 5. Paired UIUX manifest; Verdict PASS. 6. docker-deploy-queue healthz/4173 OK. 7. Do not claim wave CD-2 Done.",
         "priority": "high",
         "dependencies": [
           "20"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-11T01:30:00.000Z"
+        "updatedAt": "2026-07-11T03:30:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T01:30:00.000Z",
+      "lastModified": "2026-07-11T03:30:00.000Z",
       "taskCount": 21,
-      "completedCount": 20,
+      "completedCount": 21,
       "tags": [
         "master"
       ]

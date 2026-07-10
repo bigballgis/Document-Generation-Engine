@@ -62,7 +62,7 @@ model, permissions, API docs, and ADRs.
 
 - Exactly **one** epic may be `Active = Yes` (status `In Progress`).
 - **Current active epic:** none — MVP epics re-earned Done.
-- **In-flight (non-epic):** **CDP** Wave CD-2 **In Progress** (**partial** — T01–T09 Done, merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6`; T10–T12 + T13 Not Started; [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** Done (other session); **LRP** launch-readiness & deep-optimization program ([launch-readiness-program.md](../plan/launch-readiness-program.md); **In Progress** — Wave LR-B **Done** 2026-07-04; Wave LR-A **Done** 2026-07-10 A1–A7 / merge `cc9e5f6`; **LR-C9 Done** (`lrp-c9-load-error-panel`; merge `0013615`); Wave LR-C partial; Word/XSD/LO24 residuals deferred separately).
+- **In-flight (non-epic):** **CDP** Wave CD-2 **In Progress** (**partial** — T01–T10 Done, merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a`; T11–T12 + T13 Not Started; [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** Done (other session); **LRP** launch-readiness & deep-optimization program ([launch-readiness-program.md](../plan/launch-readiness-program.md); **In Progress** — Wave LR-B **Done** 2026-07-04; Wave LR-A **Done** 2026-07-10 A1–A7 / merge `cc9e5f6`; **LR-C9 Done** (`lrp-c9-load-error-panel`; merge `0013615`); Wave LR-C partial; Word/XSD/LO24 residuals deferred separately).
 
 ## Recommended activation sequence
 
