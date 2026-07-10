@@ -3,7 +3,7 @@
 **Project baseline:** Restart from zero (2026-06-23); **P0–P11, P13–P21 Done**; **P12 Not Started**
 (catch-all idle; slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03).
 
-**Active work in this documentation track:** **[CDP Wave CD-2 In Progress](./plan/competitiveness-deepening-program.md)** (**partial** — CD-E2E-T01–T05 **Done**, merges `1930842` / `6821f45` / `895f16e`; T06–T12 Not Started; task IDs **`CD-*`** only). **CD-0 Done**. Formal phase remains **None**.
+**Active work in this documentation track:** **[CDP Wave CD-2 In Progress](./plan/competitiveness-deepening-program.md)** (**partial** — CD-E2E-T01–T06 **Done**, merges `1930842` / `6821f45` / `895f16e` / `3aed175`; T07–T12 Not Started; task IDs **`CD-*`** only). **CD-0 Done**. Formal phase remains **None**. **Next:** prefer **T08** or **T07**.
 
 **Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **LR-A4 Done** (2026-07-10; merge `a523a09`). **CDP golden path T01 Done** (2026-07-10; merge `1930842`). See [CODE-QUALITY program](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md) · [CDP](./plan/competitiveness-deepening-program.md).
 
@@ -19,7 +19,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | --- | --- | --- |
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
 | 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P23) |
-| 2a | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **Active program** — CD-2 partial (T01–T05 Done); E2E matrix + pitfall registry ( **`CD-*` tasks** ) |
+| 2a | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **Active program** — CD-2 partial (T01–T06 Done); E2E matrix + pitfall registry ( **`CD-*` tasks** ) |
 | 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
 | 2c | **[Deployment guide](../deploy/README.md)** | **Canonical** install/upgrade/cutover/rollback — Docker Compose + Kubernetes (ADR-0030) |
 | 3 | [Orchestration high-level plan](./architecture/orchestration-high-level-plan.md) | Epic ordering and active epic rules |
@@ -141,7 +141,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Tester decision journey](./behavior/tester-decision-journey.md) | **ready** | CD-BDD-T02 → CD-E2E-T02/T03 |
 | [Approver decision journey](./behavior/approver-decision-journey.md) | **ready** | CD-BDD-T03 → CD-E2E-T04 |
 | [Team lead publish journey](./behavior/team-lead-publish-journey.md) | **ready** | CD-BDD-T04 → CD-E2E-T05 |
-| [Master designer lifecycle](./behavior/master-designer-lifecycle.md) | **ready** | CD-BDD-T05 → CD-E2E-T06 |
+| [Master designer lifecycle](./behavior/master-designer-lifecycle.md) | **ready** | CD-BDD-T05 → **CD-E2E-T06 Done** (2026-07-10; merge `3aed175`) |
 | [API policy edit-save journey](./behavior/api-policy-edit-save-journey.md) | **ready** | CD-BDD-T06 → CD-E2E-T07 |
 | [Preview comparison journey](./behavior/preview-comparison-journey.md) | **ready** | CD-BDD-T07 → CD-E2E-T09 |
 | [Audit admin query journey](./behavior/audit-admin-query-journey.md) | **ready** | CD-BDD-T08 → CD-E2E-T11 |
