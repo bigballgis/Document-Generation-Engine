@@ -62,7 +62,7 @@ model, permissions, API docs, and ADRs.
 
 - Exactly **one** epic may be `Active = Yes` (status `In Progress`).
 - **Current active epic:** none — MVP epics re-earned Done.
-- **In-flight (non-epic):** **CDP** Wave CD-0 ([competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** formal phase (other session); **LRP** launch-readiness & deep-optimization program ([launch-readiness-program.md](../plan/launch-readiness-program.md); **In Progress** — Wave LR-B **Done** 2026-07-04 (B1–B8); Wave LR-A activated 2026-07-04).
+- **In-flight (non-epic):** **CDP** Wave CD-2 **In Progress** (**partial** — T01/T01b Done; [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** Done (other session); **LRP** launch-readiness & deep-optimization program ([launch-readiness-program.md](../plan/launch-readiness-program.md); **In Progress** — Wave LR-B **Done** 2026-07-04; Wave LR-A **In Progress**, A3 Done).
 
 ## Recommended activation sequence
 

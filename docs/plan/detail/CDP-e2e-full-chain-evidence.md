@@ -1,11 +1,11 @@
 # CDP Wave CD-E2E — Full-Chain Browser Evidence
 
 **Program:** [competitiveness-deepening-program.md](../competitiveness-deepening-program.md)  
-**Wave:** CD-2 — **In Progress** (2026-07-10; golden-path closeout only — CD-E2E-T01 + T01b; T02–T12 deferred)  
+**Wave:** CD-2 — **In Progress** (2026-07-10; **partial** — golden-path T01/T01b **Done**; T02–T12 + T13 remain Not Started)  
 **Owner default:** `e2e-test-engineer` + `e2e-uiux-reviewer`  
-**Prerequisites:** Docker stack (`.\scripts\docker-deploy.ps1`); read `frontend/e2e/helpers/auth.ts`, `frontend/e2e/helpers/demo-full-flow.ts`
+**Prerequisites:** Docker stack (`.\scripts\docker-deploy-queue.ps1`); read `frontend/e2e/helpers/auth.ts`, `frontend/e2e/helpers/cdp-mvp-golden-api.ts`
 
-> **Session note (2026-07-10):** Slice `cdp-e2e-golden` — close CD-2 golden-path browser evidence (CD-E2E-T01 + seed T01b if needed). Full T02–T12 matrix deferred. Do **not** mark wave CD-2 **Done** until E2E green later. Formal phase remains **None**.
+> **Completion note (2026-07-10):** Slice `cdp-e2e-golden` merged to `main` (`1930842`; feature `6d27c57` / `5e1c3cd`; worktree removed). **CD-E2E-T01** + **T01b Done**. Full T02–T12 matrix + T13 deferred this slice. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**.
 
 ---
 
@@ -46,7 +46,7 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - **Do NOT:** Modify backend unless test reveals contract bug (escalate).
 - **Steps:**
   1. Create `frontend/e2e/CDP-E2E-T01-mvp-golden-path.spec.ts`.
-  2. Use dedicated seed template code `CDP-MVP-GOLDEN` (add to demo seeder in separate backend task if missing — coordinate via CD-E2E-T01b).
+  2. Use dedicated seed template via CD-E2E-T01b fixture helper (`prepareCdpMvpGoldenDraft` — idempotent DRAFT clone; not Flyway).
   3. Browser flow: GLOBAL_ADMIN login → (or role handoff) master approve → author configure minimal binding → test tab SSE preview success → Pass test form → Submit for approval → Approver Approve → GROUP_ADMIN publish confirm → API policy save one domain → runtime generate via UI-exposed path OR contract page trigger documented in spec.
   4. Assert queue items appear/disappear on Dashboard after each decision.
   5. Pair UIUX manifest `frontend/e2e/evidence/CDP-E2E-T01-uiux-manifest.md` (≥8 screenshots, REDBC + GREENBC).
@@ -54,15 +54,17 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
   - **G** Docker stack ready **W** spec runs **T** ≥1 test green end-to-end without API stage advancement for test/approve/publish.
   - **G** author submits failing gate **T** submit blocked with visible checklist (reuse AUD-B10 patterns).
 - **Gates:** Playwright green; `e2e-uiux-reviewer` PASS.
-- **Status:** In Progress (2026-07-10 — slice `cdp-e2e-golden`; BDD ready; implementation not finished — do **not** claim Done)
+- **Status:** **Done** (2026-07-10 — slice `cdp-e2e-golden`; merge `1930842`)
+- **Evidence:** `CDP-E2E-T01-mvp-golden-path.spec.ts` Docker **1 passed / 0 failed / 0 skipped** (:4173); UIUX manifest **Verdict PASS** (15 screenshots @1920, REDBC+GREENBC); architecture-reviewer **PASS** (suggestions only; Design panel read-only for decision roles deferred); production fixes `routeCapabilities.ts`, `useTemplateDetailVisibility.ts`; deploy `docker-deploy-queue.ps1` COMPOSE_PROJECT_NAME=`documentgenerationengine` healthz/4173 OK after routeCapabilities rebuild.
 
-### CD-E2E-T01b — Golden path seed fixture (backend)
+### CD-E2E-T01b — Golden path seed fixture
 
-- **Owner:** `backend-engineer`
+- **Owner:** `e2e-test-engineer` (API fixture helper; not backend Flyway)
 - **Depends on:** CD-BDD-T01 draft
-- **Steps:** Add `CDP-MVP-GOLDEN` template seed: DRAFT, minimal binding, one test dataset, callable after publish script.
-- **Acceptance:** Idempotent Flyway/SQL or DemoCatalogSeeder marker; documented in spec.
-- **Status:** In Progress (2026-07-10 — seed if needed for T01; not Done until fixture verified)
+- **Steps:** Provide idempotent DRAFT clone for golden-path specs (setup/teardown only — not lifecycle advancement inside test body).
+- **Acceptance:** Idempotent fixture yields DRAFT; documented in spec; callable from T01 / UIUX evidence specs.
+- **Delivered as:** `frontend/e2e/helpers/cdp-mvp-golden-api.ts` → `prepareCdpMvpGoldenDraft` (idempotent DRAFT clone) — **not** a Flyway/DemoCatalogSeeder seeder.
+- **Status:** **Done** (2026-07-10 — verified with T01 Docker green)
 
 ### CD-E2E-T02 — Tester structured pass journey
 
@@ -104,7 +106,7 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - **Owner:** `e2e-test-engineer`
 - **Read first:** `docs/behavior/api-policy-edit-save-journey.md`, `demo-full-lifecycle.spec.ts` stages 6–9
 - **Acceptance:** One config domain (e.g. output format) edited, impact preview shown, save confirmed, audit entry link visible.
-- **Status:** Not Started
+- **Status:** Not Started (**deferred** this slice — not re-run in `cdp-e2e-golden`)
 
 ### CD-E2E-T08 — Preview success + artifact download UI
 
@@ -145,7 +147,7 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 
 | Source | Scenario | CD-E2E task |
 | --- | --- | --- |
-| P12-API BDD S1–S3, S7 | Package materialize on publish, default route stability | CD-E2E-T13 (Not Started — add after T01) |
+| P12-API BDD S1–S3, S7 | Package materialize on publish, default route stability | CD-E2E-T13 (Not Started — **deferred** this slice; not re-run in `cdp-e2e-golden`) |
 
 ---
 
@@ -162,7 +164,9 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 
 ## 5. CD-2 exit gate
 
-- [ ] CD-E2E-T01…T11 Done (T12 recommended)
-- [ ] All paired manifests **PASS**
-- [ ] `execution-sync-ledger.md` records Playwright counts + Docker deploy date
-- [ ] `usability-review.md` references golden path spec as confirmed evidence
+- [x] CD-E2E-T01 Done (2026-07-10) — T02…T11 remain
+- [ ] CD-E2E-T01…T11 Done (T12 recommended) — **wave not closed**
+- [x] T01 paired manifest **PASS** (15 screenshots) — remaining manifests pending
+- [x] `execution-sync-ledger.md` records T01 Playwright counts + Docker deploy (2026-07-10)
+- [x] `usability-review.md` references golden path spec as confirmed evidence (T01)
+- [ ] Full matrix + all manifests PASS before wave **Done**

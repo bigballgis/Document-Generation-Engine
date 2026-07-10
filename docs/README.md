@@ -3,9 +3,9 @@
 **Project baseline:** Restart from zero (2026-06-23); **P0–P11, P13–P21 Done**; **P12 Not Started**
 (catch-all idle; slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03).
 
-**Active work in this documentation track:** **[CDP Wave CD-0 In Progress](./plan/competitiveness-deepening-program.md)** — doc truth, E2E BDD, pitfall registry, browser golden-path evidence (task IDs **`CD-*` only).
+**Active work in this documentation track:** **[CDP Wave CD-2 In Progress](./plan/competitiveness-deepening-program.md)** (**partial** — CD-E2E-T01/T01b **Done**; T02–T12 Not Started; task IDs **`CD-*`** only). **CD-0 Done**.
 
-**Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **LR-A3 Done** (2026-07-10; merge `e62c210`). **Recommended next:** CDP golden path (status note only). See [CODE-QUALITY program](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md).
+**Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **LR-A3 Done** (2026-07-10; merge `e62c210`). **CDP golden path T01 Done** (2026-07-10; merge `1930842`). See [CODE-QUALITY program](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md) · [CDP](./plan/competitiveness-deepening-program.md).
 
 **P22 Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md).
 
@@ -19,7 +19,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | --- | --- | --- |
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
 | 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P23) |
-| 2a | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **This session** — doc truth, E2E golden paths, pitfall registry ( **`CD-*` tasks** ) |
+| 2a | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **Active program** — CD-2 partial (T01/T01b Done); E2E matrix + pitfall registry ( **`CD-*` tasks** ) |
 | 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
 | 2c | **[Deployment guide](../deploy/README.md)** | **Canonical** install/upgrade/cutover/rollback — Docker Compose + Kubernetes (ADR-0030) |
 | 3 | [Orchestration high-level plan](./architecture/orchestration-high-level-plan.md) | Epic ordering and active epic rules |
@@ -137,7 +137,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 | Document | Status | Purpose |
 | --- | --- | --- |
-| **[MVP golden path (browser)](./behavior/mvp-golden-path-browser.md)** | **ready** | CD-BDD-T01 → CD-E2E-T01 |
+| **[MVP golden path (browser)](./behavior/mvp-golden-path-browser.md)** | **ready** | CD-BDD-T01 → **CD-E2E-T01 Done** (2026-07-10; Docker 1/1) |
 | [Tester decision journey](./behavior/tester-decision-journey.md) | **ready** | CD-BDD-T02 → CD-E2E-T02/T03 |
 | [Approver decision journey](./behavior/approver-decision-journey.md) | **ready** | CD-BDD-T03 → CD-E2E-T04 |
 | [Team lead publish journey](./behavior/team-lead-publish-journey.md) | **ready** | CD-BDD-T04 → CD-E2E-T05 |

@@ -2,7 +2,7 @@
 
 **Program ID:** `CDP`  
 **Created:** 2026-07-04  
-**Status:** **In Progress** (Wave **CD-2** — golden-path closeout only; CD-0 **Done**)  
+**Status:** **In Progress** (Wave **CD-2** — **partial**; golden-path T01/T01b **Done**; CD-0 **Done**)  
 **North star:** Close the gap between **「功能齐全」** and **「银行敢用、业务愿用、集成方信得过」** by making rendering fidelity, verifiable publish, role-complete journeys, and documentation truth **provably solid** before production launch.
 
 **Authoritative entry for lower-tier implementers:** Read this file first, then the wave detail doc for your task ID prefix.
@@ -13,7 +13,7 @@
 | [detail/CDP-e2e-full-chain-evidence.md](./detail/CDP-e2e-full-chain-evidence.md) | Wave CD-E2E — browser golden paths + UIUX evidence |
 | [detail/CDP-industry-pitfall-registry.md](./detail/CDP-industry-pitfall-registry.md) | Wave CD-PIT — industry pitfalls → ADR/NFR/test mitigations |
 | [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **Done** (2026-07-04) — rendering engine + demos (do not reopen from CDP) |
-| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — **LR-A3 Done** (2026-07-10); Wave LR-A remains In Progress (A4–A7); do **not** start LR-A4 from this CDP slice; do not execute `LR-*` from CDP session |
+| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — **LR-A3 Done** (2026-07-10); Wave LR-A remains In Progress (A4–A7); do **not** start LR-A4 from this CDP closeout; do not execute `LR-*` from CDP session |
 | [comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md) | Historical COR/OPT waves (mostly Done) |
 
 ---
@@ -24,7 +24,7 @@
 | --- | --- | --- |
 | **P22** (P22-T01…T15, rendering + demos) | **Done** (2026-07-04) — track via [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) | **Nothing.** Do not reopen P22 from CDP. |
 | **LRP** (`LR-*`, Wave LR-A) | **LR-A3 Done** (2026-07-10) — outside CDP; Wave LR-A stays In Progress | **Nothing.** Do not start LR-A4 / virus scan / audit-governance from this slice. |
-| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **Active delivery focus** (2026-07-10) — Wave **CD-2** golden-path closeout | CD-0 **Done** → CD-2 **In Progress** (CD-E2E-T01 + T01b only; T02–T12 deferred) → CD-3 later. |
+| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **Active delivery focus** (2026-07-10) — Wave **CD-2** partial (T01/T01b Done) | CD-0 **Done** → CD-2 **In Progress** (T01/T01b **Done**; T02–T12 Not Started) → CD-3 later. |
 
 **Formal phase note:** `master-plan.md` has formal phase **None** (2026-07-09+). CDP Wave **CD-2** is the active **program wave** (not a formal phase). **CDP implementers follow task IDs prefixed `CD-*` only.**
 
@@ -69,7 +69,7 @@
                  doc truth, BDD, browser E2E, post-P22 hardening specs
 ```
 
-**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). Current delivery focus is **CDP Wave CD-2** (golden-path closeout). LRP Wave LR-A remains **In Progress** as a sibling program (A4 not started in this slice). CDP is a **parallel program** — not a phase replacement.
+**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). Current delivery focus is **CDP Wave CD-2** (partial — golden-path T01/T01b Done; matrix continues). LRP Wave LR-A remains **In Progress** as a sibling program (A4 not started in this slice). CDP is a **parallel program** — not a phase replacement.
 
 ---
 
@@ -100,7 +100,7 @@ Only **one CDP wave** may be `In Progress` at a time (same discipline as phase p
 
 **Removed from CDP:** former «CD-1 = P22 code» — that work is **only** in the P22 session, not delegated via CDP task IDs.
 
-**Current wave (this session):** **CD-2** — **In Progress** (2026-07-10; golden-path closeout only). **CD-0 Done** (CD-DOC Done 2026-07-04; CD-BDD-T01…T08 `ready`; CD-UX-T01/T03 Done; CD-UX-T04 pending ADR — non-blocking). Active tasks: **CD-E2E-T01** + **CD-E2E-T01b** `In Progress`. T02–T12 remain `Not Started` (deferred). Do **not** mark full CD-2 Done until E2E green.
+**Current wave (this session):** **CD-2** — **In Progress** (2026-07-10; **partial progress**). **CD-0 Done**. **CD-E2E-T01** + **CD-E2E-T01b** → **Done** (merge `1930842`). T02–T12 + T13 remain `Not Started` (deferred this slice; T07 not re-run). Do **not** mark full CD-2 Done until remaining matrix green.
 
 ---
 
@@ -265,7 +265,7 @@ Mark CD-0 **Done** only when ALL true:
 
 **CD-0 status:** **Done** (2026-07-10) — required checklist met; optional ADR drafts do not block wave close.
 
-**Next wave (this session):** **CD-2 In Progress** — `e2e-test-engineer` implements CD-E2E-T01 (+ T01b seed if needed) from [mvp-golden-path-browser.md](../behavior/mvp-golden-path-browser.md). T02–T12 deferred.
+**Next wave (this session):** **CD-2 In Progress** — golden-path **T01/T01b Done** (2026-07-10). Next matrix: CD-E2E-T02… from [CDP-e2e detail](./detail/CDP-e2e-full-chain-evidence.md). T07/T13 deferred this slice.
 
 ---
 
@@ -273,7 +273,7 @@ Mark CD-0 **Done** only when ALL true:
 
 | Metric | Baseline (2026-07-04) | CDP target | P22 session (external) |
 | --- | --- | --- | --- |
-| Browser MVP golden path E2E | **None** (API hybrid) | 1 spec green on Docker 4173 | — |
+| Browser MVP golden path E2E | **None** (API hybrid) | **Met** — `CDP-E2E-T01` Docker **1/1** PASS (2026-07-10) | — |
 | Structured node DOCX fidelity | Plain-text downgrade | Doc + pitfall specs Done | 8 demos, 0 false fallback |
 | Playwright skipped scenarios (T13) | 3 skipped | 0 skipped OR documented fixtures (CD-2) | — |
 | Doc status contradictions | ≥6 critical | 0 | — |
@@ -294,4 +294,4 @@ Mark CD-0 **Done** only when ALL true:
 
 ---
 
-**Next action (this session):** Execute **CD-E2E-T01** (+ **CD-E2E-T01b** seed if needed) on slice `cdp-e2e-golden`. Do **not** start T02–T12, LR-A4, virus scan, or audit-governance in this slice.
+**Next action (this session):** CD-E2E-T01/T01b **Done**. Continue CD-2 matrix (**T02+**) when scheduled. Do **not** mark CD-2 Done; do **not** start LR-A4, virus scan, or audit-governance from this closeout.

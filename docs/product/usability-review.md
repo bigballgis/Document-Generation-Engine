@@ -144,7 +144,7 @@ Implementation phases 0–4 **Done** (2026-07-08); E2E UIUX manifest **PASS** (`
 
 ## 推荐下一步
 
-1. **CDP Wave CD-0** — finish [CD-DOC reconciliation](../plan/detail/CDP-doc-truth-reconciliation.md) and [CD-BDD](../plan/competitiveness-deepening-program.md) behavior specs.
-2. **CD-E2E-T01** — browser [MVP golden path](../behavior/mvp-golden-path-browser.md) (task-completion evidence, not API helpers).
-3. **P22 demo acceptance** (other session) — eight bank letter demos + rendering write path per [demo-expansion spec](../requirements/demo-expansion-behavior-spec.md).
+1. **CDP Wave CD-2** — continue matrix after **CD-E2E-T01 Done** (2026-07-10): browser [MVP golden path](../behavior/mvp-golden-path-browser.md) evidence in `frontend/e2e/CDP-E2E-T01-mvp-golden-path.spec.ts` (Docker **1/1**) + UIUX manifest **PASS** (15 screenshots). Next: CD-E2E-T02… (T07/T13 deferred this slice).
+2. **CD-E2E-T02…T05** — tester / approver / team-lead / master-designer task-completion journeys.
+3. **P22 demo acceptance** (other session) — eight bank letter demos + rendering write path per [demo-expansion spec](../requirements/demo-expansion-behavior-spec.md) — **P22 Done**; typography → P23 Done.
 4. Resolve **§待确认** items L87–91 (task-time budgets, landing-page fusion, forbidden-page actions) into PRD/NFR or explicit deferrals.
