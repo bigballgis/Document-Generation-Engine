@@ -2,6 +2,7 @@ package com.bank.docgen.template.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
 import com.bank.docgen.template.port.PreviewEvidencePort;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.BindingValidationView;
@@ -16,6 +17,8 @@ import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.PublishGateCheckCode;
 import com.bank.docgen.template.domain.PublishGatePhase;
+import com.bank.docgen.template.persistence.AnchorBindingEntity;
+import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
@@ -40,6 +43,8 @@ public class PublishGateService {
     private final VariableSchemaRepository variableSchemaRepository;
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final TemplateCurrentVersionResolver templateVersionSupport;
+    private final AnchorBindingRepository anchorBindingRepository;
+    private final NodeMatrixValidationService nodeMatrixValidationService;
 
     public PublishGateService(
             TemplateService templateService,
@@ -52,7 +57,9 @@ public class PublishGateService {
             TemplateRuleValidationService templateRuleValidationService,
             VariableSchemaRepository variableSchemaRepository,
             TemplateContentModuleReferenceService contentModuleReferenceService,
-            TemplateCurrentVersionResolver templateVersionSupport
+            TemplateCurrentVersionResolver templateVersionSupport,
+            AnchorBindingRepository anchorBindingRepository,
+            NodeMatrixValidationService nodeMatrixValidationService
     ) {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
@@ -65,6 +72,8 @@ public class PublishGateService {
         this.variableSchemaRepository = variableSchemaRepository;
         this.contentModuleReferenceService = contentModuleReferenceService;
         this.templateVersionSupport = templateVersionSupport;
+        this.anchorBindingRepository = anchorBindingRepository;
+        this.nodeMatrixValidationService = nodeMatrixValidationService;
     }
 
     @Transactional(readOnly = true)
@@ -139,6 +148,7 @@ public class PublishGateService {
         items.add(coverageThresholdsItem(coverage));
         items.add(apiPolicyItem(templateId));
         items.add(contentModuleReferencesItem(version.getId()));
+        items.add(unsupportedStructuredNodesItem(version.getId()));
         items.add(blockerStatusItem(templateId, version.getId(), bindings, coverage));
 
         List<PublishGateItemView> phaseItems = filterForPhase(items, phase);
@@ -312,6 +322,25 @@ public class PublishGateService {
                         : "api.publishGate.contentModuleReferences.ready",
                 "invalidReferences=" + validation.invalidReferences()
                         + ",totalReferences=" + validation.totalReferences()
+        );
+    }
+
+    private PublishGateItemView unsupportedStructuredNodesItem(UUID versionId) {
+        int unsupportedNodeCount = 0;
+        for (AnchorBindingEntity binding : anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)) {
+            unsupportedNodeCount += nodeMatrixValidationService.countUnsupportedNodeBlockers(
+                    binding.getStructuredContentJson()
+            );
+        }
+        boolean blocking = unsupportedNodeCount > 0;
+        return new PublishGateItemView(
+                PublishGateCheckCode.UNSUPPORTED_STRUCTURED_NODES,
+                !blocking,
+                blocking,
+                blocking
+                        ? "api.publishGate.unsupportedStructuredNodes.blocked"
+                        : "api.publishGate.unsupportedStructuredNodes.ready",
+                "unsupportedNodeCount=" + unsupportedNodeCount
         );
     }
 

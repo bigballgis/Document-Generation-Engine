@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.template.port.BatchTestRunGateSnapshot;
 import com.bank.docgen.template.port.PreviewEvidencePort;
@@ -25,6 +26,8 @@ import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.PublishGateCheckCode;
 import com.bank.docgen.template.domain.PublishGatePhase;
+import com.bank.docgen.template.persistence.AnchorBindingEntity;
+import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
@@ -68,6 +71,10 @@ class PublishGateServiceTest {
     private TemplateContentModuleReferenceService contentModuleReferenceService;
     @Mock
     private TemplateCurrentVersionResolver templateCurrentVersionResolver;
+    @Mock
+    private AnchorBindingRepository anchorBindingRepository;
+    @Mock
+    private NodeMatrixValidationService nodeMatrixValidationService;
 
     private PublishGateService service;
     private UUID templateId;
@@ -88,7 +95,9 @@ class PublishGateServiceTest {
                 templateRuleValidationService,
                 variableSchemaRepository,
                 contentModuleReferenceService,
-                templateCurrentVersionResolver
+                templateCurrentVersionResolver,
+                anchorBindingRepository,
+                nodeMatrixValidationService
         );
         templateId = UUID.randomUUID();
         versionId = UUID.randomUUID();
@@ -137,6 +146,10 @@ class PublishGateServiceTest {
         lenient().when(previewEvidencePort.countFailedPreviews(templateId, versionId)).thenReturn(0);
         lenient().when(contentModuleReferenceService.validateReferences(versionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 0, 0));
+        lenient().when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
+                .thenReturn(List.of());
+        lenient().when(nodeMatrixValidationService.countUnsupportedNodeBlockers(any()))
+                .thenReturn(0);
     }
 
     @Test
@@ -277,6 +290,90 @@ class PublishGateServiceTest {
     }
 
     @Test
+    void publishGate_blocksQrBarcodeRef_unsupportedStructuredNodes() {
+        // A1 — LR-A4 dedicated publish-gate hard-block for writer-unsupported qrBarcodeRef
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        String qrJson = "{\"nodes\":[{\"type\":\"qrBarcodeRef\",\"referenceKey\":\"PAYMENT-QR\"}]}";
+        AnchorBindingEntity binding = new AnchorBindingEntity(
+                UUID.randomUUID(),
+                versionId,
+                "BODY",
+                com.bank.docgen.template.domain.AnchorContentType.RICH_TEXT,
+                qrJson,
+                com.bank.docgen.template.domain.BindingValidationStatus.VALID
+        );
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
+                .thenReturn(List.of(binding));
+        when(nodeMatrixValidationService.countUnsupportedNodeBlockers(qrJson)).thenReturn(1);
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.ready()).isFalse();
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.UNSUPPORTED_STRUCTURED_NODES)
+                .findFirst()
+                .orElseThrow())
+                .satisfies(item -> {
+                    assertThat(item.blocker()).isTrue();
+                    assertThat(item.ready()).isFalse();
+                    assertThat(item.messageKey()).isEqualTo("api.publishGate.unsupportedStructuredNodes.blocked");
+                    assertThat(item.summary()).contains("unsupportedNodeCount=1");
+                });
+        assertThatThrownBy(() -> service.assertReady(templateId, admin))
+                .isInstanceOf(TemplateValidationException.class);
+    }
+
+    @Test
+    void publishGate_blocksAttachmentListRef_unsupportedStructuredNodes() {
+        // A2 — LR-A4 dedicated publish-gate hard-block for writer-unsupported attachmentListRef
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        String attachmentJson = "{\"nodes\":[{\"type\":\"attachmentListRef\",\"referenceKey\":\"ATTACHMENTS\"}]}";
+        AnchorBindingEntity binding = new AnchorBindingEntity(
+                UUID.randomUUID(),
+                versionId,
+                "BODY",
+                com.bank.docgen.template.domain.AnchorContentType.RICH_TEXT,
+                attachmentJson,
+                com.bank.docgen.template.domain.BindingValidationStatus.VALID
+        );
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
+                .thenReturn(List.of(binding));
+        when(nodeMatrixValidationService.countUnsupportedNodeBlockers(attachmentJson)).thenReturn(1);
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.ready()).isFalse();
+        assertThat(checklist.items().stream()
+                .anyMatch(item -> item.checkCode() == PublishGateCheckCode.UNSUPPORTED_STRUCTURED_NODES
+                        && item.blocker()
+                        && "api.publishGate.unsupportedStructuredNodes.blocked".equals(item.messageKey())))
+                .isTrue();
+        assertThatThrownBy(() -> service.assertReady(templateId, admin))
+                .isInstanceOf(TemplateValidationException.class);
+    }
+
+    @Test
+    void publishGate_unsupportedStructuredNodes_readyWhenAbsent() {
+        // A8 — happy path: no writer-unsupported nodes → dedicated check ready
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.UNSUPPORTED_STRUCTURED_NODES)
+                .findFirst()
+                .orElseThrow())
+                .satisfies(item -> {
+                    assertThat(item.blocker()).isFalse();
+                    assertThat(item.ready()).isTrue();
+                    assertThat(item.messageKey()).isEqualTo("api.publishGate.unsupportedStructuredNodes.ready");
+                });
+    }
+
+    @Test
     void publish_withSkeletonPolicyAndEmptyAdGroups_isNotBlocked() {
         when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
         when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
@@ -349,6 +446,8 @@ class PublishGateServiceTest {
         when(previewEvidencePort.countFailedPreviews(templateId, publishedVersionId)).thenReturn(0);
         when(contentModuleReferenceService.validateReferences(publishedVersionId))
                 .thenReturn(new com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView(false, 0, 0));
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(publishedVersionId))
+                .thenReturn(List.of());
         when(templateRuleValidationService.validateRulesForVersion(
                 org.mockito.ArgumentMatchers.eq(templateId),
                 org.mockito.ArgumentMatchers.eq(published),

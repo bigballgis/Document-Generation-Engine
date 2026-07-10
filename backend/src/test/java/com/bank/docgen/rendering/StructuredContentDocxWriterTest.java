@@ -420,6 +420,86 @@ class StructuredContentDocxWriterTest {
                 .isEqualTo("api.error.rendering.unsupportedNodeType");
     }
 
+    @Test
+    void failsClosedOnQrBarcodeNestedInConditionBlock() {
+        // A5 — nested fail-closed under conditionBlock (true branch)
+        String structured = """
+                {"nodes":[{
+                  "type":"conditionBlock",
+                  "conditionExpression":"${show} == true",
+                  "children":[{"type":"qrBarcodeRef","referenceKey":"PAYMENT-QR"}]
+                }]}
+                """;
+
+        assertThatThrownBy(() -> render(structured, Map.of("show", true)))
+                .isInstanceOf(DocxAssemblyException.class)
+                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
+                .isEqualTo("api.error.rendering.unsupportedNodeType");
+    }
+
+    @Test
+    void failsClosedOnAttachmentListNestedInLoopBlock() {
+        // A5 — nested fail-closed under loopBlock
+        String structured = """
+                {"nodes":[{
+                  "type":"loopBlock",
+                  "loopVariable":"items",
+                  "children":[{"type":"attachmentListRef","referenceKey":"ATTACHMENTS"}]
+                }]}
+                """;
+
+        assertThatThrownBy(() -> render(structured, Map.of("items", List.of(Map.of("n", "1")))))
+                .isInstanceOf(DocxAssemblyException.class)
+                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
+                .isEqualTo("api.error.rendering.unsupportedNodeType");
+    }
+
+    @Test
+    void failsClosedOnQrBarcodeInsidePinnedContentModule() {
+        // A5 — fail-closed after contentModuleRef expansion
+        String structured = """
+                {"nodes":[{"type":"contentModuleRef","referenceKey":"CLAUSE-1"}]}
+                """;
+        Map<String, String> pinned = Map.of(
+                "CLAUSE-1",
+                "{\"nodes\":[{\"type\":\"qrBarcodeRef\",\"referenceKey\":\"PAYMENT-QR\"}]}"
+        );
+
+        assertThatThrownBy(() -> render(structured, Map.of(), pinned))
+                .isInstanceOf(DocxAssemblyException.class)
+                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
+                .isEqualTo("api.error.rendering.unsupportedNodeType");
+    }
+
+    @Test
+    void failsClosedOnQrBarcodeAsParagraphInlineChild() {
+        // A5 — writeInlineNode path must not silently skip
+        String structured = """
+                {"nodes":[{"type":"paragraph","children":[
+                  {"type":"textRun","value":"Pay: "},
+                  {"type":"qrBarcodeRef","referenceKey":"PAYMENT-QR"}
+                ]}]}
+                """;
+
+        assertThatThrownBy(() -> render(structured, Map.of()))
+                .isInstanceOf(DocxAssemblyException.class)
+                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
+                .isEqualTo("api.error.rendering.unsupportedNodeType");
+    }
+
+    @Test
+    void failsClosedOnUnknownNodeType() {
+        // A6 — unknown type must not silently omit
+        String structured = """
+                {"nodes":[{"type":"rawHtml","value":"<b>x</b>"}]}
+                """;
+
+        assertThatThrownBy(() -> render(structured, Map.of()))
+                .isInstanceOf(DocxAssemblyException.class)
+                .extracting(ex -> ((DocxAssemblyException) ex).messageKey())
+                .isEqualTo("api.error.rendering.unsupportedNodeType");
+    }
+
     private byte[] render(String structuredJson, Map<String, Object> variables) throws Exception {
         return render(structuredJson, variables, Map.of());
     }

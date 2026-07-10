@@ -2,6 +2,8 @@ package com.bank.docgen.rendering;
 
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import com.bank.docgen.sharedkernel.document.expression.ConditionExpressionEvaluator;
+import com.bank.docgen.sharedkernel.document.structured.DocxWriterHandledStructuredNodeTypes;
+import com.bank.docgen.sharedkernel.document.structured.WriterUnsupportedStructuredNodeTypes;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -96,16 +98,9 @@ class StructuredContentDocxWriteSession {
                 paragraphAvailable = false;
                 continue;
             }
-            // LR-A4 (CD-PIT-07): unsupported structured node types must fail-closed.
-            // qrBarcodeRef / attachmentListRef are declared in the v1 node matrix but have
-            // no writer branch — silently dropping them loses content in published letters.
-            // Throw a fidelity blocker instead so the author is forced to fix the template.
-            if (isUnsupportedRenderableType(type)) {
-                throw new DocxAssemblyException(
-                        "api.error.rendering.unsupportedNodeType",
-                        "Unsupported structured content node type: " + type
-                );
-            }
+            // LR-A4 (CD-PIT-07): unsupported / writer-missing structured node types must fail-closed.
+            // Never silently drop content from published letters.
+            rejectIfUnrenderable(type);
             if (!paragraphAvailable) {
                 currentParagraph = insertParagraphAfter(currentParagraph);
             }
@@ -115,16 +110,23 @@ class StructuredContentDocxWriteSession {
     }
 
     /**
-     * LR-A4: types declared in {@link com.bank.docgen.authoring.structured.StructuredContentNodeType}
-     * but NOT handled by this writer. They are renderable in principle (the matrix admits them)
-     * but no DOCX emission branch exists yet — failing closed prevents silent content loss.
+     * LR-A4: reject matrix-declared types without a DOCX writer and unknown types.
+     * Shared authority: {@link WriterUnsupportedStructuredNodeTypes} /
+     * {@link DocxWriterHandledStructuredNodeTypes}.
      */
-    private boolean isUnsupportedRenderableType(String type) {
-        return "qrBarcodeRef".equals(type) || "attachmentListRef".equals(type);
+    private void rejectIfUnrenderable(String type) {
+        if (WriterUnsupportedStructuredNodeTypes.containsJsonType(type)
+                || !DocxWriterHandledStructuredNodeTypes.containsJsonType(type)) {
+            throw new DocxAssemblyException(
+                    "api.error.rendering.unsupportedNodeType",
+                    "Unsupported structured content node type: " + type
+            );
+        }
     }
 
     private void writeBlockNode(JsonNode node, XWPFParagraph paragraph) {
         String type = node.path("type").asText("");
+        rejectIfUnrenderable(type);
         if ("conditionBlock".equals(type)) {
             if (CONDITION_EVALUATOR.evaluate(node.path("conditionExpression").asText(""), variables)) {
                 writeInlineOrBlockChildren(node, paragraph);
@@ -342,7 +344,9 @@ class StructuredContentDocxWriteSession {
         }
         if ("imageRef".equals(type) || "sealRef".equals(type)) {
             writeReferenceNode(node, paragraph);
+            return;
         }
+        rejectIfUnrenderable(type);
     }
 
     private void writeInlineChildrenWithStyle(

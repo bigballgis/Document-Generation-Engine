@@ -1,11 +1,11 @@
 # LRP Wave LR-A — Rendering Trust Chain & File Safety 「渲染信任链与文件安全」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3 Done**; A5 Partial; A4/A6/A7 remain)  
+**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3 Done**; **A4 In Progress**; A5 Partial; A6/A7 Not Started)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer` for images, `doc-keeper` for ADRs)  
 **Prerequisites:** none for A1/A2/A3/A5; **A4/A6 depend on P22-T01/T02 Done**; **A7 depends on P23 demo packages (T04+ letter-grade)** — track via [P23 detail](./P23-demo-typography-layout-excellence.md)
 
-> **Session note (2026-07-10):** **LR-A3 Done** (`lrp-a3-upload-validation`; merge `e62c210`). Formal phase remains **None**. Recommended next delivery focus: **CDP golden path** (status note only — do **not** start CDP code from this sync). Remaining LR-A: A4/A6/A7 + A5 (0041 deferred). Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
+> **Session note (2026-07-10):** **LR-A4 → In Progress** (slice `lrp-a4-fail-closed-nodes`; worktree `D:/working/DGE-lrp-a4-fail-closed-nodes`; branch `feat/lrp-a4-fail-closed-nodes`). BDD **ready** (`BDD-LRP-A4-FAIL-CLOSED-001`); locked **(b) publish-gate hard-block**; writers deferred; empty `contentModuleRef` pinned remains F1 hard-fail. **LR-A3 Done** (merge `e62c210`). Formal phase remains **None**. **Sole active LRP task:** LR-A4 (A6/A7 Not Started; A5 Partial deferred). Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
 
 ---
 
@@ -95,28 +95,28 @@
 ### LR-A4 — Unsupported-node fail-closed closure
 
 - **Owner agent:** backend-engineer
-- **BDD:** **required** — publish-gate blocking and fidelity warnings are user-visible behavior.
+- **BDD:** **ready** (2026-07-10) — [docs/behavior/lrp-a4-fail-closed-unsupported-nodes.md](../../behavior/lrp-a4-fail-closed-unsupported-nodes.md) (`BDD-LRP-A4-FAIL-CLOSED-001` v1.0.0)
+- **Locked decision (user 2026-07-10):** **(b) hard-block at publish gate** for writer-unsupported declared types (`qrBarcodeRef`, `attachmentListRef`); **do not** implement full writers in this slice; **no silent omit** at publish/render (incl. nested paths). Empty `contentModuleRef` pinned remains F1 fail-closed (`CONTENT_MODULE_STRUCTURE_MISSING`) — not “warning-only”.
 - **Depends on:** **P22-T01/T02 Done** (writer + style catalog stabilized) — verify in [P22 detail](./P22-demo-expansion-rendering-fidelity.md) before starting.
 - **Read first:**
   1. `backend/src/main/java/com/bank/docgen/authoring/structured/StructuredContentNodeType.java` (`qrBarcodeRef`, `attachmentListRef`)
-  2. `backend/src/main/java/com/bank/docgen/rendering/StructuredContentDocxWriter.java` (esp. `expandContentModule` L222–234 silent return)
-  3. P18 node matrix + fidelity warning model ([P18 detail](./P18-structured-authoring-fidelity-engine.md))
-  4. [CDP-industry-pitfall-registry.md](./CDP-industry-pitfall-registry.md) — CD-PIT-07
-- **Do NOT:** Invent new node types; reopen P18/P22 phase status; weaken existing UNSUPPORTED_NODE validation to make rendering pass.
-- **Steps:**
-  1. Wait for BDD spec `ready` covering both decisions (render vs hard-block; warning vs silence).
-  2. Decide per node with the user via spec: `qrBarcodeRef`/`attachmentListRef` either (a) get a writer implementation, or (b) are **hard-blocked at the publish gate** when present (fail-closed) — record the decision in the spec + PRD note.
-  3. Implement the chosen path; if (b), extend `PublishGateService` checks + gate UI copy (existing pattern, COR-T01).
-  4. Change `StructuredContentDocxWriter.expandContentModule`: missing/blank pinned structure emits a **fidelity warning** (existing warning channel) instead of silent return.
-  5. Tests: publish blocked (or node rendered), fidelity warning emitted, regression on existing module expansion.
-- **Acceptance (G/W/T):**
-  - **G** a template whose structure contains a node with no writer support **W** publish is attempted **T** publish is blocked with a visible checklist reason (or the node renders correctly, per recorded decision) — never silent loss.
-  - **G** a `contentModuleRef` whose pinned structure is absent **W** DOCX is generated **T** output carries a fidelity warning naming the reference key; generation does not silently omit content without trace.
-- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; Docker redeploy + one manual generation showing the warning surface.
-- **Artifacts:** behavior spec; modified writer/publish gate + tests; PRD/domain note for the decision.
-- **Done when:** Decision recorded + scenarios green + gates green + doc sync + commit review.
-- **Maps:** CD-PIT-07; P18/P22; ledger seams «Structured content DOCX write» adjacency (closure itself stays with P22).
-- **Status:** Not Started
+  2. `backend/src/main/java/com/bank/docgen/rendering/StructuredContentDocxWriteSession.java` (top-level unsupported throw; nested silent-omit gap)
+  3. `PublishGateService` + `NodeMatrixValidationService` + `ReferenceNodeService`
+  4. P18 node matrix + fidelity warning model ([P18 detail](./P18-structured-authoring-fidelity-engine.md))
+  5. [CDP-industry-pitfall-registry.md](./CDP-industry-pitfall-registry.md) — CD-PIT-07
+  6. Behavior spec above (A1–A9)
+- **Do NOT:** Invent new node types; reopen P18/P22/F1 phase status; weaken existing UNSUPPORTED_NODE validation; implement QR/attachment writers here; allow warning-only publish for writer-unsupported nodes.
+- **Steps (implementation — after this BDD):**
+  1. Single authoritative writer-unsupported set shared by validation + writer.
+  2. Binding / node-matrix blockers for that set; extend `PublishGateService` (dedicated check **or** equivalent ANCHOR_INTEGRITY/BLOCKER_STATUS surfacing — see LR-A4-C5).
+  3. Close nested silent-omit in `StructuredContentDocxWriteSession` (condition/loop/module/inline paths).
+  4. Keep top-level render throw + F1 empty-pinned fail-closed; add A1–A9 tests.
+- **Acceptance (G/W/T):** see behavior spec §10 (A1–A9).
+- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; Docker redeploy + manual checklist evidence when implementing.
+- **Artifacts:** behavior spec (**Done**); modified writer/publish gate + tests; PRD/domain note (**Done** in BDD persist).
+- **Done when:** Scenarios green + gates green + doc sync + commit review (implementation slice).
+- **Maps:** CD-PIT-07; P18/P22; F1-A2 regression; ledger seams «Structured content DOCX write».
+- **Status:** **In Progress** (2026-07-10 — slice `lrp-a4-fail-closed-nodes`; BDD ready; implementation active; Task Master #10)
 
 ### LR-A5 — ADR-0041/0042/0043 drafting
 
@@ -181,7 +181,7 @@
 - **Artifacts:** NFR §production rendering corpus table; ADR-0042 finalized budget; evidence PDFs referenced in ledger.
 - **Done when:** Corpus + budget merged + CD-HARD-T04 cross-referenced + doc sync + commit review.
 - **Maps:** CD-PIT-02; ADR-0042.
-- **Status:** **In Progress** (2026-07-09 — **F4 subset Done**: NFR §production rendering corpus schema + rerun procedure; row measurements _待测_ until Docker redeploy)
+- **Status:** **Not Started** (2026-07-10 — sole active LRP task is LR-A4; F4 already landed NFR corpus schema + rerun procedure; row measurements remain deferred until a dedicated Docker measurement pass — do not treat as competing In Progress)
 
 ---
 

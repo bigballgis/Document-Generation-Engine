@@ -77,7 +77,7 @@ public final class StructuredContentDocxWriterTestSupport {
                 }
             };
 
-    static byte[] renderAnchorParagraph(
+    public static byte[] renderAnchorParagraph(
             StructuredContentDocxWriter writer,
             String structuredJson,
             Map<String, Object> variables,

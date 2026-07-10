@@ -171,6 +171,8 @@ export type PublishGateCheckCode =
   | 'APPROVAL_SUMMARY'
   | 'COVERAGE_THRESHOLDS'
   | 'API_POLICY'
+  | 'CONTENT_MODULE_REFERENCES'
+  | 'UNSUPPORTED_STRUCTURED_NODES'
   | 'BLOCKER_STATUS'
 
 /** Not yet modeled in `openapi-v1.yaml` (management publish gate). */

@@ -4679,6 +4679,7 @@ components:
         - COVERAGE_THRESHOLDS
         - API_POLICY
         - CONTENT_MODULE_REFERENCES
+        - UNSUPPORTED_STRUCTURED_NODES
         - BLOCKER_STATUS
     PublishGateItemView:
       type: object

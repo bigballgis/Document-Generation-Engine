@@ -123,12 +123,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-10T02:57:00.000Z"
+      },
+      {
+        "id": "10",
+        "title": "LR-A4 fail-closed unsupported structured nodes",
+        "description": "Fail-closed publish/render for writer-unsupported structured nodes (qrBarcodeRef, attachmentListRef): no silent omit at any nesting depth; hard-block at publish gate (option b); full QR/attachment writers deferred; empty contentModuleRef pinned remains F1 hard-fail (CONTENT_MODULE_STRUCTURE_MISSING). Out of scope: virus scan, CD-E2E T02–T12, LR-A7 measurements, DGE-audit-governance.",
+        "details": "Slice id: lrp-a4-fail-closed-nodes. Plan: LR-A4 In Progress (2026-07-10). Placement: ISOLATED D:/working/DGE-lrp-a4-fail-closed-nodes · feat/lrp-a4-fail-closed-nodes. BDD ready: docs/behavior/lrp-a4-fail-closed-unsupported-nodes.md (BDD-LRP-A4-FAIL-CLOSED-001) A1–A9. Locked: publish-gate hard-block; writers deferred. Writer-unsupported set: [qrBarcodeRef, attachmentListRef]. Formal phase remains None. Sole active LRP task (A6/A7 Not Started). Implementer: backend-engineer. Read: StructuredContentNodeType, StructuredContentDocxWriteSession, PublishGateService, NodeMatrixValidationService, ReferenceNodeService.",
+        "testStrategy": "1. A1–A9 per BDD-LRP-A4-FAIL-CLOSED-001. 2. Publish with qrBarcodeRef/attachmentListRef → checklist FAIL; cannot PUBLISHED. 3. Nested condition/loop/module/inline paths throw unsupportedNodeType (no silent omit). 4. Empty contentModuleRef pinned still CONTENT_MODULE_STRUCTURE_MISSING. 5. Unknown type still UNSUPPORTED_NODE. 6. mvn -B -ntp -f backend/pom.xml verify green. 7. Docker redeploy + manual checklist when implementing.",
+        "priority": "high",
+        "dependencies": [
+          "9"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T05:11:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T02:57:00.000Z",
-      "taskCount": 9,
+      "lastModified": "2026-07-10T05:11:00.000Z",
+      "taskCount": 10,
       "completedCount": 9,
       "tags": [
         "master"
