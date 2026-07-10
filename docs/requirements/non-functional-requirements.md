@@ -96,29 +96,35 @@
 | `conversion-queue-capacity` | `PDF_CONVERSION_QUEUE_CAPACITY` | `0` | 队列容量；`0` = fail-fast（SOR-P03） |
 | `pagination-delta-budget-pages` | `PAGINATION_DELTA_BUDGET_PAGES` | `1` | 分页 delta 提案预算（页）；**pending ADR-0042** |
 
-### 分页语料表（P23 demo masters — 初始基线）
+### 分页语料表（P23 demo masters — LR-A7 测量基线）
 
-测量日期、栈版本/git SHA 在每次复测时更新。Word 基线页数为人工在 Word 中打开记录。
+测量日期、栈版本/git SHA 在每次复测时更新。Docker PDF 页数经 runtime `SYNC_STREAM` + host `pypdf` 计页（2026-07-10 / `9a40b48`）。
 
-| # | Demo package | Master asset | 业务类型 | Word 页数 | Docker PDF 页数 | Delta | 测量日期 | Git SHA |
+| # | Demo package | Master asset / externalId | 业务类型 | Word 页数 | Docker PDF 页数 | Delta | 测量日期 | Git SHA |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | demo-credit-limit | `deploy/demo-credit-limit/assets/credit-limit-master.docx` | 授信额度通知 | _待测_ | _待测_ | _待测_ | _待测_ | _待测_ |
-| 2 | demo-mortgage | `deploy/demo-mortgage/assets/mortgage-approval-master.docx` | 按揭批核 | _待测_ | _待测_ | _待测_ | _待测_ | _待测_ |
-| 3 | demo-trade-lc | `deploy/demo-trade-lc/assets/trade-lc-notice-master.docx` | 贸易信用证 | _待测_ | _待测_ | _待测_ | _待测_ | _待测_ |
-| 4 | demo-collection | `deploy/demo-collection/assets/overdue-collection-master.docx` | 逾期催收 | _待测_ | _待测_ | _待测_ | _待测_ | _待测_ |
-| 5 | demo-retail-account | `deploy/demo-retail-account/assets/retail-account-open-master.docx` | 零售开户 | _待测_ | _待测_ | _待测_ | _待测_ |
-| 6 | demo-fol（可选） | `deploy/demo-fol/assets/wholesale-fol-master.docx` | 批发 FOL | _待测_ | _待测_ | _待测_ | _待测_ |
+| 1 | demo-credit-limit | `DEMO-CREDIT-LIMIT-CONFIRM` | 授信额度通知 | n/a[^word-baseline] | 6 | n/a[^word-baseline] | 2026-07-10 | `9a40b48` |
+| 2 | demo-mortgage | `DEMO-MORTGAGE-APPROVAL` | 按揭批核 | n/a[^word-baseline] | 6 | n/a[^word-baseline] | 2026-07-10 | `9a40b48` |
+| 3 | demo-trade-lc | `DEMO-TRADE-LC-NOTICE` | 贸易信用证 | n/a[^word-baseline] | 9 | n/a[^word-baseline] | 2026-07-10 | `9a40b48` |
+| 4 | demo-collection | `DEMO-OVERDUE-COLLECTION` | 逾期催收 | n/a[^word-baseline] | 8 | n/a[^word-baseline] | 2026-07-10 | `9a40b48` |
+| 5 | demo-retail-account | `DEMO-RETAIL-ACCOUNT-OPEN` | 零售开户 | n/a[^word-baseline] | 8 | n/a[^word-baseline] | 2026-07-10 | `9a40b48` |
+| 6 | demo-fol（可选） | `CORP-FOL-OFFER` | 批发 FOL | n/a[^word-baseline] | 86 | n/a[^word-baseline] | 2026-07-10 | `9a40b48` |
+
+[^word-baseline]: **Word 基线方法 = `ms-word-unavailable-on-host`。** 测量主机无 Microsoft Word；Word 页数与 Word-vs-LO delta **刻意保持 n/a**，禁止虚构数字。真 Word 基线须在装有 Word 的主机复测后回填。
+
+**汇总（必测 5 封）：** max Docker PDF pages = **9**；median = **8**；max/median Word delta = **n/a**（Word 不可用）。
+
+**证据：** 精简摘要 [`docs/evidence/lrp-a7-pagination/`](../evidence/lrp-a7-pagination/)；完整 PDF 工件见 worktree `.tmp/evidence/lrp-a7-pagination/`（不入库大二进制）。
 
 **提案预算（pending user confirmation / ADR-0042）：** 参考 `paginationDeltaBudgetPages=1`；
-语料复测后汇总 max/median delta 再定稿。
+Word-vs-LO delta 确认前 **不** 将预算升为 Accepted / 运行时强制。
 
 ### 可重复测量规程
 
 1. **部署栈：** 自仓库根目录执行 `.\scripts\docker-deploy.ps1`（或 `-FOLDemo` 加载 demo 数据）。
 2. **生成 PDF：** 对语料表中每个 master，经平台生成流程产出 PDF（管理 UI 预览/批量测试或 runtime API）。
 3. **计页：** 使用 PDFBox（`PDDocument.getNumberOfPages()`）或 `pdfinfo` 读取 Docker 栈 PDF 页数。
-4. **Word 基线：** 在同一 master DOCX 上用 Microsoft Word 打开，人工记录页数（不要求 Word 自动化批处理）。
-5. **记录 delta：** `delta = |pdfPages - wordPages|`；允许 ±0 页读数误差（单页文档边界）。
+4. **Word 基线：** 在同一 master DOCX 上用 Microsoft Word 打开，人工记录页数（不要求 Word 自动化批处理）。若主机无 Word，记录 `method=ms-word-unavailable-on-host` 并将 Word/delta 列填 **n/a**（禁止虚构）。
+5. **记录 delta：** 仅当 Word 页数可得时计算 `delta = |pdfPages - wordPages|`；允许 ±0 页读数误差（单页文档边界）。
 6. **更新表格：** 填写测量日期、`git rev-parse --short HEAD`、栈版本（`docker compose images`）。
 7. **汇总：** 计算 max/median delta，与提案预算对比；结论写入 ADR-0042 草案（**不**在 F4 运行时阻断）。
 

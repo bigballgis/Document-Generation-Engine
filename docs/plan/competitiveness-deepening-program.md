@@ -208,14 +208,14 @@ Each task pairs: `*.spec.ts` + `evidence/*-uiux-manifest.md` + `e2e-uiux-reviewe
 
 ## 6. Wave CD-3 — Production hardening (post-P22)
 
-| ID | Task | Owner | Maps |
-| --- | --- | --- | --- |
-| CD-HARD-T01 | Font bundle in Docker image + CI smoke | deploy-engineer | CD-PIT-01 |
-| CD-HARD-T02 | LibreOffice conversion pool (async) | backend-engineer | CD-PIT-06, OPT-F6 |
-| CD-HARD-T03 | OOXML output validation test (LO 24 open) | backend-engineer | CD-PIT-03 |
-| CD-HARD-T04 | Pagination delta budget doc + sample corpus | doc-keeper | CD-PIT-02 |
-| CD-HARD-T05 | Paste cleaning wired to binding validation OR ADR «edit-time only» | backend-engineer | P18-T07 seam |
-| CD-HARD-T06 | List audit/export E2E | e2e-test-engineer | CD-BDD-T08 |
+| ID | Task | Owner | Maps | Status |
+| --- | --- | --- | --- | --- |
+| CD-HARD-T01 | Font bundle in Docker image + CI smoke | deploy-engineer | CD-PIT-01 | **Done** (executed-by-LR-A2 / P23-T02) |
+| CD-HARD-T02 | LibreOffice conversion pool (async) | backend-engineer | CD-PIT-06, OPT-F6 | Done (OPT-F6 / COR-P02 lineage) |
+| CD-HARD-T03 | OOXML output validation test (LO 24 open) | backend-engineer | CD-PIT-03 | Not Started (executes via LR-A6) |
+| CD-HARD-T04 | Pagination delta budget doc + sample corpus | doc-keeper | CD-PIT-02 | **Done** (2026-07-10 — executed-by-LR-A7; Docker PDF corpus ≥5 + FOL; Word/delta n/a — `ms-word-unavailable-on-host`; ADR-0042 remains Proposed) |
+| CD-HARD-T05 | Paste cleaning wired to binding validation OR ADR «edit-time only» | backend-engineer | P18-T07 seam | Not Started |
+| CD-HARD-T06 | List audit/export E2E | e2e-test-engineer | CD-BDD-T08 | Not Started |
 
 ---
 

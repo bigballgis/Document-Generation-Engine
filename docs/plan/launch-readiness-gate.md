@@ -14,7 +14,7 @@ be signed off. No item is skipped; a single 🔴 blocks launch.
 
 | Wave | Status | Evidence |
 | --- | --- | --- |
-| LR-A (rendering trust) | **In Progress** — A1/A2/A3 **Done**; A5 Partial (0042/0043); A4/A6/A7 remain | LR-A3 merge `e62c210`; BDD [lrp-a3-master-docx-upload-validation.md](../behavior/lrp-a3-master-docx-upload-validation.md); ADR-0042/0043 Proposed (0041 deferred) |
+| LR-A (rendering trust) | **In Progress** — A1–A4 **Done**; **A7 Done** (Docker PDF corpus; Word delta residual); A5 Partial (0042/0043); A6 Not Started | LR-A4 merge `a523a09`; LR-A3 merge `e62c210`; ADR-0042/0043 Proposed (0041 deferred); CD-HARD-T04 Done executed-by-LR-A7; evidence [lrp-a7-pagination](../evidence/lrp-a7-pagination/) |
 | LR-B (multi-instance + session) | Done (2026-07-04) | ADR-0044, ShedLock V46, SSE proxy config, graceful shutdown, LR-B6 session renewal |
 | LR-C (usability deepening) | Partial — C1/C4 **Done** (F7); C2–C3/C5–C13 Not Started | F7 evidence in ledger; not current delivery focus |
 | LR-D (ops + data lifecycle) | Not Started (checklist rows may be aspirational) | Do not treat as active delivery focus |
@@ -27,9 +27,9 @@ be signed off. No item is skipped; a single 🔴 blocks launch.
 - [x] LR-A1: per-invocation LibreOffice profile isolation — parallel conversion regression green.
 - [x] LR-A2: CJK + metric-compatible fonts baked into the backend image; `RenderingFontBaselineTest` / smoke green.
 - [x] LR-A3: upload size limits (50MB) + deep validation enforced at Spring + nginx + service; regression green (**Done** 2026-07-10; merge `e62c210`; E2E 5/5).
-- [ ] LR-A4: unsupported structured node types fail closed; no silent content loss.
+- [x] LR-A4: unsupported structured node types fail closed; no silent content loss (**Done** 2026-07-10; merge `a523a09`; full writers deferred).
 - [ ] LR-A6: OOXML output validation gate green on the corpus.
-- [ ] LR-A7: pagination delta corpus measured; deltas within the ±1 budget (or documented exceptions).
+- [x] LR-A7: Docker PDF pagination corpus measured (≥5 letters; max 9 / median 8) — **Done** 2026-07-10 with documented exception (Word pages/delta **n/a** — `ms-word-unavailable-on-host`; ADR-0042 remains Proposed until Word-equipped host confirms ±1 budget).
 
 ### Multi-instance + session
 

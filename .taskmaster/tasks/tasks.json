@@ -137,13 +137,27 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-10T05:55:00.000Z"
+      },
+      {
+        "id": "11",
+        "title": "LR-A7 pagination delta corpus measurements",
+        "description": "Close LR-A7 measurement gap — Docker page-count / pagination-delta for ≥5 P23 demo corpus; fill NFR table; update ADR-0042 proposal with measured data; mark CD-HARD-T04 executed-by-LR-A7 on Done. Do NOT expand A5/A6 full closeout unless trivial doc-only. Out of scope: virus scan, CD-E2E T02–T12, DGE-audit-governance.",
+        "details": "Slice id: lrp-a7-pagination-measure. Plan: LR-A7 Done (2026-07-10) with documented exception — Docker PDF corpus closed (≥5 + FOL; max 9 / median 8); Word pages/delta n/a (ms-word-unavailable-on-host; not fabricated); ADR-0042 remains Proposed; CD-HARD-T04 Done executed-by-LR-A7. Placement: ISOLATED D:/working/DGE-lrp-a7-pagination-measure · feat/lrp-a7-pagination-measure · base 9a40b48. BDD not-applicable. Formal phase remains None. Wave LR-A remains In Progress (A5 Partial; A6 Not Started). Residual: Word-vs-LO delta on Word-equipped host under LR-A5/ADR-0042 (not a new In Progress task; do not start LR-A6/LR-C9). Evidence: docs/evidence/lrp-a7-pagination/; NFR corpus; pagination-delta-corpus.md.",
+        "testStrategy": "1. Assemble ≥5 P23 demo letters; generate PDFs via Docker stack; record page counts. 2. Fill NFR §production rendering corpus table (Word/delta n/a when Word unavailable — document method). 3. Update ADR-0042 proposal with measured Docker PDF summary (Proposed OK until Word confirm). 4. Cross-ref CD-HARD-T04 executed-by-LR-A7 on Done. 5. docker-deploy-queue evidence when measuring.",
+        "priority": "high",
+        "dependencies": [
+          "10"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T07:05:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T05:55:00.000Z",
-      "taskCount": 10,
-      "completedCount": 10,
+      "lastModified": "2026-07-10T07:05:00.000Z",
+      "taskCount": 11,
+      "completedCount": 11,
       "tags": [
         "master"
       ]

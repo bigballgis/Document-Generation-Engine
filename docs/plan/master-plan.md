@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase / program:** **None** (2026-07-09+). **Delivery focus note (2026-07-10):** **LR-A4 Done** (`lrp-a4-fail-closed-nodes`; merge `a523a09`; BDD [ready](../behavior/lrp-a4-fail-closed-unsupported-nodes.md); publish hard-block, writers deferred) — [LRP-A detail](./detail/LRP-A-rendering-trust-hardening.md); [launch-readiness-program.md](./launch-readiness-program.md). Formal phase remains **None**. **Sibling:** CDP Wave CD-2 **partial** (T01/T01b Done, merge `1930842`; T02–T12 Not Started). **LRP:** LR-A3/A4 Done; Wave LR-A **In Progress** (A5 Partial; A6/A7 Not Started). **CODE-QUALITY program Done** — CQ-01A…CQ-08; ArchUnit **11/11**; `mvn verify` **GREEN**; `pnpm` **894** tests + build **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **Prior:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08).
+**Active formal phase / program:** **None** (2026-07-09+). **Delivery focus note (2026-07-10):** **LR-A7 Done** (`lrp-a7-pagination-measure`; Docker PDF corpus measured; Word delta residual) — [LRP-A detail](./detail/LRP-A-rendering-trust-hardening.md); [launch-readiness-program.md](./launch-readiness-program.md). Formal phase remains **None**. **Sibling:** CDP Wave CD-2 **partial** (T01/T01b Done, merge `1930842`; T02–T12 Not Started). **LRP:** LR-A3/A4/A7 Done; Wave LR-A **In Progress** (A5 Partial; A6 Not Started). **CODE-QUALITY program Done** — CQ-01A…CQ-08; ArchUnit **11/11**; `mvn verify` **GREEN**; `pnpm` **894** tests + build **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **Prior:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
@@ -84,7 +84,7 @@ upstream systems invoke the dynamic API.
 > **P22 (Done 2026-07-04):** rendering engine + demo scaffolds — typography/content excellence → **P23**.
 >
 > **CDP (active delivery focus):** [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) — Wave **CD-0 Done**; Wave **CD-2 In Progress** (**partial** — T01/T01b **Done**; T02–T12 Not Started); task prefix **`CD-*`** only. Do **not** mark full CD-2 Done until remaining matrix green.
-> **LRP:** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; **LR-A3/A4 Done** (2026-07-10); Wave LR-A remains **In Progress** (A5 Partial; A6/A7 Not Started); **LR-C1/C4 Done** via CORE-FORTRESS F7. Formal phase remains **None** — do not promote LRP/CDP to a formal phase row.
+> **LRP:** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; **LR-A3/A4/A7 Done** (2026-07-10); Wave LR-A remains **In Progress** (A5 Partial; A6 Not Started; Word-vs-LO residual under ADR-0042); **LR-C1/C4 Done** via CORE-FORTRESS F7. Formal phase remains **None** — do not promote LRP/CDP to a formal phase row.
 
 ## Thin vertical slice (MVP chain)
 

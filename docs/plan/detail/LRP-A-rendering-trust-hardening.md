@@ -1,11 +1,15 @@
 # LRP Wave LR-A — Rendering Trust Chain & File Safety 「渲染信任链与文件安全」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3/A4 Done**; A5 Partial; A6/A7 Not Started)  
+**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3/A4 Done**; **LR-A7 Done** with documented exception; A5 Partial; A6 Not Started)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer` for images, `doc-keeper` for ADRs)  
 **Prerequisites:** none for A1/A2/A3/A5; **A4/A6 depend on P22-T01/T02 Done**; **A7 depends on P23 demo packages (T04+ letter-grade)** — track via [P23 detail](./P23-demo-typography-layout-excellence.md)
 
-> **Completion note (2026-07-10):** **LR-A4 → Done** (slice `lrp-a4-fail-closed-nodes`; merge `a523a09` / feature `4bccf9d`). Fail-closed publish/render for writer-unsupported nodes (`qrBarcodeRef`, `attachmentListRef`); no silent omit; full writers deferred. BDD **ready** (`BDD-LRP-A4-FAIL-CLOSED-001` A1–A9). Formal phase remains **None**. Wave LR-A remains **In Progress** (A5 Partial; A6/A7 Not Started — no sole active In Progress task). Optional follow-up (arch PASS_WITH_NOTES): pinned-module deep scan. Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
+> **Completion note (2026-07-10):** **LR-A7 → Done** (slice `lrp-a7-pagination-measure`; ISOLATED `D:/working/DGE-lrp-a7-pagination-measure` · `feat/lrp-a7-pagination-measure`; base `9a40b48`) **with documented exception**. Docker PDF corpus measurement gap **closed** (≥5 P23 letters + optional FOL; durable evidence). MS Word authoring baseline **unavailable** on measurement host → Word pages / delta columns remain **n/a** (`method=ms-word-unavailable-on-host`; not fabricated). True Word-vs-LO delta validation + ADR-0042 **Accepted** remain a **residual follow-up** (record under LR-A5/ADR-0042 — do **not** start LR-A6/LR-C9 for this residual; not a new In Progress task). **CD-HARD-T04 → Done** (executed-by-LR-A7) with same honesty note. BDD **not-applicable**. Formal phase remains **None**. Wave LR-A remains **In Progress** (**A5 Partial**; **A6 Not Started**). Evidence: [pagination-delta-corpus.md](../pagination-delta-corpus.md); [docs/evidence/lrp-a7-pagination/](../../evidence/lrp-a7-pagination/); NFR §production rendering.
+
+> **Activation note (2026-07-10):** **LR-A7 → In Progress** (slice `lrp-a7-pagination-measure`; ISOLATED `D:/working/DGE-lrp-a7-pagination-measure` · `feat/lrp-a7-pagination-measure`; base `9a40b48`). Superseded by LR-A7 completion note above.
+
+> **Completion note (2026-07-10):** **LR-A4 → Done** (slice `lrp-a4-fail-closed-nodes`; merge `a523a09` / feature `4bccf9d`). Fail-closed publish/render for writer-unsupported nodes (`qrBarcodeRef`, `attachmentListRef`); no silent omit; full writers deferred. BDD **ready** (`BDD-LRP-A4-FAIL-CLOSED-001` A1–A9). Formal phase remains **None**. Optional follow-up (arch PASS_WITH_NOTES): pinned-module deep scan.
 
 ---
 
@@ -119,7 +123,7 @@
 - **Status:** **Done** (2026-07-10 — slice `lrp-a4-fail-closed-nodes`; merge `a523a09` / feature `4bccf9d`; Task Master #10)
 - **Delivered:** `WriterUnsupportedStructuredNodeTypes` + `DocxWriterHandledStructuredNodeTypes`; publish-gate hard-block; nested silent-omit closed in `StructuredContentDocxWriteSession`; A1–A9 tests green. Full QR/attachment writers **deferred**.
 - **Gates (GREEN):** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS; architecture-reviewer **PASS_WITH_NOTES**; `docker-deploy-queue.ps1` exit 0 (healthz 8080 UP; UI 4173 200; compose `documentgenerationengine`).
-- **Deferred / optional:** virus scan (non-goal); full QR/attachment writers; pinned-module deep scan (arch note); CD-E2E T02–T12; LR-A7 measurements; DGE-audit-governance.
+- **Deferred / optional:** virus scan (non-goal); full QR/attachment writers; pinned-module deep scan (arch note); CD-E2E T02–T12; Word-vs-LO delta on Word-equipped host (LR-A7 residual under ADR-0042); DGE-audit-governance.
 
 ### LR-A5 — ADR-0041/0042/0043 drafting
 
@@ -135,6 +139,7 @@
   1. Draft missing `docs/adr/rendering-authoring/0041-rendering-font-baseline.md` (cite LR-A2 package verification).
   2. Confirm ADR index reachability for 0041–0043.
   3. Request architecture-reviewer review; record outcome.
+  4. **Residual from LR-A7:** on a Word-equipped host, fill Word page baselines + Word-vs-LO deltas in NFR / [pagination-delta-corpus.md](../pagination-delta-corpus.md); only then consider ADR-0042 **Accepted** / enforcement (do not invent numbers; do not start LR-A6/LR-C9 for this residual alone).
 - **Maps:** CD-PIT-01/02/03; LR-A2/A6/A7 consume these decisions.
 
 ### LR-A6 — OOXML output validation gate
@@ -184,14 +189,15 @@
 - **Artifacts:** NFR §production rendering corpus table; ADR-0042 finalized budget; evidence PDFs referenced in ledger.
 - **Done when:** Corpus + budget merged + CD-HARD-T04 cross-referenced + doc sync + commit review.
 - **Maps:** CD-PIT-02; ADR-0042.
-- **Status:** **Not Started** (2026-07-10 — F4 already landed NFR corpus schema + rerun procedure; row measurements remain deferred until a dedicated Docker measurement pass — candidate next LRP slice `lrp-a7-pagination-measure`)
+- **Status:** **Done** (2026-07-10 — documented exception: Docker PDF corpus closed; Word pages/delta n/a until Word-equipped host; ADR-0042 remains Proposed; CD-HARD-T04 Done executed-by-LR-A7)
+- **Residual (not a new In Progress task):** Re-measure Word baselines + Word-vs-LO deltas on a Word-equipped host; only then consider ADR-0042 Accepted / enforcement. Track under LR-A5 / ADR-0042 notes — do not expand LR-A6 or LR-C9 for this residual.
 
 ---
 
 ## 2. Exit gate (Wave LR-A)
 
-- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 Done** (2026-07-10 gap-close; merge `e62c210`); **LR-A4 Done** (2026-07-10; merge `a523a09`); LR-A5 **Partial** (0042/0043 on disk; 0041 deferred)
+- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 Done** (2026-07-10 gap-close; merge `e62c210`); **LR-A4 Done** (2026-07-10; merge `a523a09`); LR-A5 **Partial** (0042/0043 on disk; 0041 deferred); **LR-A7 Done** (2026-07-10 — Docker PDF corpus; Word delta residual)
 - [x] LR-A4 Done (writer-unsupported fail-closed; full writers deferred) — A6 still Not Started once scheduled
-- [ ] LR-A6 Done; LR-A7 Done once **P23** letter-grade demo corpus measurements land
+- [ ] LR-A6 Done; Wave LR-A remains open while A5 Partial / A6 Not Started (Word-vs-LO residual under ADR-0042 — not blocking LR-A7 Done claim)
 - [x] Writer-unsupported declared nodes (`qrBarcodeRef`/`attachmentListRef`) cannot silently disappear (publish hard-block + render fail-closed) — full writers still deferred
-- [ ] Ledger § LRP wave row updated with gate evidence per remaining A5/A6/A7 task
+- [ ] Ledger § LRP wave row updated with gate evidence per remaining A5/A6 task

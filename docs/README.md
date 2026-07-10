@@ -163,6 +163,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 
 | Document | Purpose |
 | --- | --- |
+| [LR-A7 pagination measurement](./evidence/lrp-a7-pagination/README.md) | Docker PDF page-count corpus (2026-07-10 / `9a40b48`); Word baseline n/a on host; slim JSON + README (PDFs untracked under `.tmp/`) |
 | [Demo typography review checklist](./evidence/demo-typography-review-checklist.md) | Human reviewer checklist — fonts, styles, margins, headers/footers, tables, signatures (**P23-T16**; ≥2 CORP + ≥2 RETAIL mandatory samples) |
 | [Fundraising demo summary](./evidence/fundraising-demo-summary.md) | 13-template evidence matrix — generate script, E2E, POI tests, manifest paths (**P23-T16**) |
 | [Security evidence index](./evidence/security/README.md) | SCA runbook and execution logs |

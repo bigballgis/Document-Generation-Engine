@@ -57,6 +57,27 @@ not block or warn.
 - **Neutral:** The budget is a configuration property, not hardcoded — can be tuned per
   deployment.
 
+### Measurement note (2026-07-10 — LR-A7 / CD-HARD-T04)
+
+Docker PDF corpus measured on git SHA `9a40b48` (runtime `SYNC_STREAM` + host `pypdf`):
+
+| externalId | Docker PDF pages | Word pages | Delta |
+| --- | --- | --- | --- |
+| `DEMO-CREDIT-LIMIT-CONFIRM` | 6 | n/a | n/a |
+| `DEMO-MORTGAGE-APPROVAL` | 6 | n/a | n/a |
+| `DEMO-TRADE-LC-NOTICE` | 9 | n/a | n/a |
+| `DEMO-OVERDUE-COLLECTION` | 8 | n/a | n/a |
+| `DEMO-RETAIL-ACCOUNT-OPEN` | 8 | n/a | n/a |
+| `CORP-FOL-OFFER` (optional) | 86 | n/a | n/a |
+
+Required corpus aggregates: **max = 9** / **median = 8** Docker PDF pages. Word method =
+`ms-word-unavailable-on-host` — Word pages and deltas remain **n/a** (not fabricated).
+
+**This ADR stays `Proposed`.** Word confirmation on a Word-equipped host is still required
+before **Accepted** status or runtime warning/blocker enforcement. See
+[pagination-delta-corpus.md](../../plan/pagination-delta-corpus.md) and
+[docs/evidence/lrp-a7-pagination/](../../evidence/lrp-a7-pagination/).
+
 ## Alternatives considered
 
 - **Zero-tolerance (exact page match)** — rejected: impossible with OSS engines; would

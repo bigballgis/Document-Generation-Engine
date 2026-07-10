@@ -1,36 +1,45 @@
 # Pagination Delta Corpus — LR-A7 / ADR-0042
 
-**Status:** Proposed baseline (pending user confirmation per document-as-code constitution)
-**Last updated:** 2026-07-05
+**Status:** Docker PDF corpus **measured** (2026-07-10); Word-vs-LO delta **pending** Word-equipped host  
+**Last updated:** 2026-07-10  
+**Git SHA:** `9a40b48`  
+**Tasks:** LR-A7 **Done** (documented exception); CD-HARD-T04 **Done** (executed-by-LR-A7)
 
 ## Purpose
 
 Record the Word vs LibreOffice-PDF page-count delta for each demo letter in the corpus. Per
-ADR-0042, the v1 budget is **±1 page**; entries exceeding the budget trigger a fidelity
-warning, and entries exceeding ±2 trigger a fidelity blocker (both gated on user confirmation).
+ADR-0042, the v1 **proposed** budget is **±1 page**; entries exceeding the budget would trigger a
+fidelity warning, and entries exceeding ±2 a fidelity blocker — **both gated on user confirmation
+and a real Word baseline**. ADR-0042 remains **Proposed**.
 
 The corpus is the regression test for layout drift — if a rendering change shifts any entry's
-delta, the change must be reviewed.
+Docker PDF page count, the change must be reviewed.
+
+## Measurement method (2026-07-10)
+
+1. Docker acceptance stack `@ localhost:8080` (healthz UP; LibreOffice in `docgen-backend`).
+2. Runtime `POST .../generate` with `format=PDF`, `mode=SYNC_STREAM`.
+3. Page counts via host Python `pypdf` (`PdfReader`).
+4. **Word baseline:** `method=ms-word-unavailable-on-host` → `wordPages=null`, `delta=null`.
+   Do **not** invent Word page counts or treat Docker/LO PDF pages as Microsoft Word baselines.
+5. LO-proxy separate soffice pass: skipped (runtime Docker PDF already uses container LibreOffice).
 
 ## Baseline measurements
 
-Measurements are taken with: master DOCX authored in Word → assembled by the platform →
-DOCX→PDF via LibreOffice headless (cli mode, font baseline per ADR-0041). Page counts are
-counted on the rendered PDF.
-
-| Demo package | Template | Word pages (author) | PDF pages (LO) | Delta | Status |
+| Demo package | externalId | Word pages (author) | PDF pages (Docker/LO) | Delta | Status |
 | --- | --- | --- | --- | --- | --- |
-| `deploy/demo-fol` | FOL corporate letter | _pending_ | _pending_ | _pending_ | baseline not yet measured |
-| `deploy/demo-mortgage` | Mortgage approval letter | _pending_ | _pending_ | _pending_ | baseline not yet measured |
-| `deploy/demo-credit-limit` | Credit-limit adjustment letter | _pending_ | _pending_ | _pending_ | baseline not yet measured |
-| `deploy/demo-trade-lc` | Trade letter of credit | _pending_ | _pending_ | _pending_ | baseline not yet measured |
-| `deploy/demo-collection` | Collection notice | _pending_ | _pending_ | _pending_ | baseline not yet measured |
-| `deploy/demo-annual-review` | Annual review letter | _pending_ | _pending_ | _pending_ | baseline not yet measured |
+| `deploy/demo-credit-limit` | `DEMO-CREDIT-LIMIT-CONFIRM` | n/a | 6 | n/a | Docker PDF measured; Word pending |
+| `deploy/demo-mortgage` | `DEMO-MORTGAGE-APPROVAL` | n/a | 6 | n/a | Docker PDF measured; Word pending |
+| `deploy/demo-trade-lc` | `DEMO-TRADE-LC-NOTICE` | n/a | 9 | n/a | Docker PDF measured; Word pending |
+| `deploy/demo-collection` | `DEMO-OVERDUE-COLLECTION` | n/a | 8 | n/a | Docker PDF measured; Word pending |
+| `deploy/demo-retail-account` | `DEMO-RETAIL-ACCOUNT-OPEN` | n/a | 8 | n/a | Docker PDF measured; Word pending |
+| `deploy/demo-fol` (optional) | `CORP-FOL-OFFER` | n/a | 86 | n/a | Docker PDF measured; Word pending |
 
-> The corpus is seeded with the eight demo packages shipped in P22. Concrete measurements
-> land when the Docker stack with the LR-A2 font baseline is redeployed; the table above is
-> the schema, not the data. Each row is filled in by a `docker-deploy.ps1` + manual page
-> count (or an automated `PdfPageCountTest` once the corpus is wired).
+**Aggregates (required 5):** max PDF pages = **9**; median = **8**; max/median Word delta = **n/a**.
+
+**Evidence:** [`docs/evidence/lrp-a7-pagination/`](../evidence/lrp-a7-pagination/) (README + `measurement-results.json`); full PDFs under worktree `.tmp/evidence/lrp-a7-pagination/` (untracked binaries).
+
+> **Honesty note:** LR-A7 / CD-HARD-T04 close the **Docker PDF measurement gap** (≥5 letters + durable evidence). True Word-vs-LO delta validation remains a **residual follow-up** on a Word-equipped host — not a new In Progress task; do not start LR-A6 / LR-C9 for this residual.
 
 ## Budget enforcement (pending confirmation)
 
@@ -38,12 +47,13 @@ counted on the rendered PDF.
 - **±2 pages** → fidelity warning logged; author should review but may publish.
 - **±3+ pages** → fidelity blocker; template must not publish until layout is adjusted.
 
-The enforcement is a **pending proposal** — until the user confirms the budget, the system
-logs the delta but does not warn or block. This file records the baseline so the delta is
-visible even before enforcement is wired.
+The enforcement is a **pending proposal** — until the user confirms the budget **and** Word
+baselines exist, the system must not treat Docker-only page counts as Word deltas. This file
+records the Docker PDF baseline so drift is visible even before Word confirmation.
 
 ## Drift detection
 
 When a rendering change (LR-A1 profile isolation, LR-A2 font baseline, POI upgrade,
-LibreOffice upgrade) lands, re-measure every row. Any delta change > 0 must be called out
-in the commit message and reviewed by the architecture-reviewer.
+LibreOffice upgrade) lands, re-measure every required row's Docker PDF pages. Any page-count
+change > 0 must be called out in the commit message and reviewed. After Word baselines land,
+also re-check deltas against ADR-0042.
