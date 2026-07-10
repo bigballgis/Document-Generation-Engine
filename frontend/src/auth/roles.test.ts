@@ -89,6 +89,11 @@ describe('management roles', () => {
     expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.TEMPLATE_AUTHOR] })).toBe(false)
   })
 
+  it('allows master designer to manage masters via fallback (permission-matrix §4)', () => {
+    expect(canUploadMasters({ roles: [MANAGEMENT_ROLES.MASTER_DESIGNER] })).toBe(true)
+    expect(canReviewMasters({ roles: [MANAGEMENT_ROLES.MASTER_DESIGNER] })).toBe(false)
+  })
+
   it('denies upload when manageMasters capability is explicitly false (AUD-P01)', () => {
     expect(
       canUploadMasters({

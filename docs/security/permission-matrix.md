@@ -462,7 +462,7 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 
 | capability | 角色 |
 | --- | --- |
-| `manageMasters` | GLOBAL, GROUP |
+| `manageMasters` | GLOBAL, GROUP, MASTER_DESIGNER |
 | `reviewMasters` | GLOBAL, GROUP |
 | `authorTemplates` | GLOBAL, GROUP, MASTER_DESIGNER, TEMPLATE_AUTHOR |
 | `decideTests` | GLOBAL, GROUP, TEMPLATE_TESTER |

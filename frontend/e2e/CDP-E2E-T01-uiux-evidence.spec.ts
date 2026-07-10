@@ -17,7 +17,6 @@ import { fetchTemplateDetail } from './helpers/submit-approval-gate-api'
 import {
   approveTemplateFromDevWorkspace,
   confirmGoLiveFromDevWorkspace,
-  confirmTestPassAfterTesterOpen,
   openDevEditorWorkspaceTab,
   saveApiRetentionPolicyFromHubTab,
   submitForApprovalFromDevWorkspace,

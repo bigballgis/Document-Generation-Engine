@@ -61,7 +61,13 @@ export function canReviewMasters(context: CapabilityContext): boolean {
 
 function canManageMastersByRole(roles: string[]): boolean {
   return roles.some((role) =>
-    ([MANAGEMENT_ROLES.GLOBAL_ADMIN, MANAGEMENT_ROLES.GROUP_ADMIN] as string[]).includes(role),
+    (
+      [
+        MANAGEMENT_ROLES.GLOBAL_ADMIN,
+        MANAGEMENT_ROLES.GROUP_ADMIN,
+        MANAGEMENT_ROLES.MASTER_DESIGNER,
+      ] as string[]
+    ).includes(role),
   )
 }
 

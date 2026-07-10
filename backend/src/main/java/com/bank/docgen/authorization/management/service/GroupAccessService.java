@@ -26,7 +26,9 @@ public class GroupAccessService {
     }
 
     public boolean canManageMasters(ManagementSessionClaims session) {
-        return session.roles().contains("GLOBAL_ADMIN") || session.roles().contains("GROUP_ADMIN");
+        return session.roles().contains("GLOBAL_ADMIN")
+                || session.roles().contains("GROUP_ADMIN")
+                || session.roles().contains("MASTER_DESIGNER");
     }
 
     public boolean canAuthorTemplates(ManagementSessionClaims session) {

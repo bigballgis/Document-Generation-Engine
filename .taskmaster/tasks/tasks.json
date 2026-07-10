@@ -222,12 +222,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-10T13:30:00.000Z"
+      },
+      {
+        "id": "17",
+        "title": "CDP CD-2 T06 Master designer upload-to-approve journey",
+        "description": "Next highest-value CD-2 E2E after T05 Done: CD-E2E-T06 Master designer upload → anchor check → submit review → approver approve (browser-only task-completion + UIUX manifest). BDD ready: master-designer-lifecycle.md (BDD-CDP-MASTER-001). Do NOT mark wave CD-2 Done. Do NOT activate T07–T13. Out of scope: LR-C5, audit-governance.",
+        "details": "ACTIVATED 2026-07-10. Slice id: cdp-e2e-t06-master. Status: in-progress. Placement: ISOLATED D:/working/DGE-cdp-e2e-t06-master · feat/cdp-e2e-t06-master · base f67cf61 (T05 docs tip; upstream merge 895f16e). Formal phase remains None. Wave CD-2 stays In Progress (partial — T01–T05 Done; T06 In Progress; T07–T13 Not Started). Sole active CDP slice. Gate evidence: []. Acceptance: Upload (or fixture) → anchor check UI → submit review → approver approves in browser.",
+        "testStrategy": "1. Master designer upload (or fixture) → anchor check UI visible. 2. Submit review in browser. 3. Approver approves in browser (task-completion, not timeline-only). 4. Paired UIUX manifest Verdict PASS. 5. docker-deploy-queue healthz/4173 OK. 6. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "16"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T13:45:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T13:30:00.000Z",
-      "taskCount": 16,
+      "lastModified": "2026-07-10T13:45:00.000Z",
+      "taskCount": 17,
       "completedCount": 16,
       "tags": [
         "master"
