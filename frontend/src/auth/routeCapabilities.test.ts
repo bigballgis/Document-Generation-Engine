@@ -76,4 +76,118 @@ describe('routeCapabilities', () => {
 
     expect(allowed).toBe(true)
   })
+
+  it('allows template route for tester with decideTests despite authorTemplates false', () => {
+    const allowed = canAccessRouteWithCapability(
+      ROUTE_KEYS.templateManagement,
+      session({
+        roles: ['TEMPLATE_TESTER'],
+        capabilities: {
+          manageMasters: false,
+          reviewMasters: false,
+          authorTemplates: false,
+          decideTests: true,
+          decideApprovals: false,
+          publishTemplates: false,
+          stopTemplates: false,
+          restoreOrDeprecateTemplates: false,
+          deleteTemplates: false,
+          exportTemplates: false,
+          viewCollaborationWorkItems: true,
+          maintainCollaborationTimeoutConfig: false,
+          authorContentModules: false,
+          decideContentModuleReviews: false,
+          manageContentModuleLifecycle: false,
+          manageApiPolicy: false,
+          readAudit: false,
+        },
+      }),
+    )
+
+    expect(allowed).toBe(true)
+  })
+
+  it('allows template route for approver with decideApprovals', () => {
+    const allowed = canAccessRouteWithCapability(
+      ROUTE_KEYS.templateManagement,
+      session({
+        roles: ['TEMPLATE_APPROVER'],
+        capabilities: {
+          manageMasters: false,
+          reviewMasters: false,
+          authorTemplates: false,
+          decideTests: false,
+          decideApprovals: true,
+          publishTemplates: false,
+          stopTemplates: false,
+          restoreOrDeprecateTemplates: false,
+          deleteTemplates: false,
+          exportTemplates: false,
+          viewCollaborationWorkItems: true,
+          maintainCollaborationTimeoutConfig: false,
+          authorContentModules: false,
+          decideContentModuleReviews: false,
+          manageContentModuleLifecycle: false,
+          manageApiPolicy: false,
+          readAudit: false,
+        },
+      }),
+    )
+
+    expect(allowed).toBe(true)
+  })
+
+  it('allows template route for publisher with publishTemplates despite authorTemplates false', () => {
+    const allowed = canAccessRouteWithCapability(
+      ROUTE_KEYS.templateManagement,
+      session({
+        roles: ['TEMPLATE_PUBLISHER'],
+        capabilities: {
+          manageMasters: false,
+          reviewMasters: false,
+          authorTemplates: false,
+          decideTests: false,
+          decideApprovals: false,
+          publishTemplates: true,
+          stopTemplates: false,
+          restoreOrDeprecateTemplates: false,
+          deleteTemplates: false,
+          exportTemplates: false,
+          viewCollaborationWorkItems: false,
+          maintainCollaborationTimeoutConfig: false,
+          authorContentModules: false,
+          decideContentModuleReviews: false,
+          manageContentModuleLifecycle: false,
+          manageApiPolicy: false,
+          readAudit: false,
+        },
+      }),
+    )
+
+    expect(allowed).toBe(true)
+  })
+
+  it('allows template route for tester via role fallback when capabilities absent', () => {
+    const allowed = canAccessRouteWithCapability(
+      ROUTE_KEYS.templateManagement,
+      session({
+        roles: ['TEMPLATE_TESTER'],
+        capabilities: undefined,
+      }),
+    )
+
+    expect(allowed).toBe(true)
+  })
+
+  it('allows template route for approver via role fallback when capabilities absent', () => {
+    const allowed = canAccessRouteWithCapability(
+      ROUTE_KEYS.templateManagement,
+      session({
+        roles: ['TEMPLATE_APPROVER'],
+        capabilities: undefined,
+      }),
+    )
+
+    expect(allowed).toBe(true)
+  })
 })

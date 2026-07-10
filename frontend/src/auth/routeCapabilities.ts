@@ -5,10 +5,14 @@ import {
   canAccessTemplateManagement,
   canAuthorContentModules,
   canAuthorTemplates,
+  canDecideApprovals,
   canDecideContentModuleReviews,
+  canDecideTests,
   canManageContentModuleLifecycle,
+  canPublishTemplates,
   canReviewMasters,
   canUploadMasters,
+  MANAGEMENT_ROLES,
   sessionContext,
   type CapabilityContext,
 } from '@/auth/roles'
@@ -43,8 +47,24 @@ export const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContex
       [canUploadMasters, canReviewMasters],
       (roles) => canUploadMasters({ roles }) || canReviewMasters({ roles }),
     ),
+  // Testers/approvers/publishers must reach template hub + /dev decision UI even when
+  // authorTemplates is false (backend still lists route.template-management for them).
   [ROUTE_KEYS.templateManagement]: (context) =>
-    strictRouteCapability(context, [canAuthorTemplates], canAccessTemplateManagement),
+    strictRouteCapability(
+      context,
+      [canAuthorTemplates, canDecideTests, canDecideApprovals, canPublishTemplates],
+      (roles) =>
+        canAccessTemplateManagement(roles) ||
+        roles.some((role) =>
+          (
+            [
+              MANAGEMENT_ROLES.TEMPLATE_TESTER,
+              MANAGEMENT_ROLES.TEMPLATE_APPROVER,
+              MANAGEMENT_ROLES.MASTER_DESIGNER,
+            ] as string[]
+          ).includes(role),
+        ),
+    ),
   [ROUTE_KEYS.contentModuleManagement]: (context) =>
     strictRouteCapability(
       context,

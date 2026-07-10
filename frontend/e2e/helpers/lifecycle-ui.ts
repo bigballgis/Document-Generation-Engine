@@ -70,6 +70,55 @@ export async function submitForTestingFromDevWorkspace(page: Page, comment = 'CD
 
 export async function confirmTestPassFromDevWorkspace(page: Page) {
   await workspaceActions(page).getByRole('button', { name: /^confirm test pass$/i }).click()
+  await completeConfirmTestPassDialog(page)
+}
+
+/**
+ * Tester dashboard Open deep-links to hub `?tab=lifecycle`.
+ * After routeCapabilities fix, Open may land on either:
+ * - hub `#template-lifecycle-panel` (legacy / collaboration-todos path), or
+ * - `/dev/...` `#dev-workspace` (current hub redirect to approval workspace).
+ * Confirm test pass actions live on hub lifecycle actions or the testing tab.
+ */
+export async function confirmTestPassAfterTesterOpen(page: Page) {
+  await expect(page).not.toHaveURL(/\/forbidden/, { timeout: 15_000 })
+
+  const lifecyclePanel = page.locator('#template-lifecycle-panel')
+  const devWorkspace = page.locator('#dev-workspace')
+  // Wait for either destination after Open (redirect can be async).
+  await expect
+    .poll(async () => {
+      if (await lifecyclePanel.isVisible().catch(() => false)) {
+        return 'hub'
+      }
+      if (await devWorkspace.isVisible().catch(() => false)) {
+        return 'dev'
+      }
+      return 'pending'
+    }, { timeout: 30_000 })
+    .not.toBe('pending')
+
+  if (await lifecyclePanel.isVisible().catch(() => false)) {
+    const passButton = page
+      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
+      .getByRole('button', { name: /^confirm test pass$/i })
+      .first()
+    await expect(passButton).toBeVisible({ timeout: 15_000 })
+    await passButton.click()
+    await completeConfirmTestPassDialog(page)
+    return
+  }
+
+  await expect(page).toHaveURL(/\/dev\//, { timeout: 15_000 })
+  await expect(devWorkspace).toBeVisible({ timeout: 30_000 })
+  const workspace = page.locator('.workspace-tab-shell')
+  await expect(workspace).toBeVisible({ timeout: 30_000 })
+  // lifecycle deep-link opens approval tab; Confirm test pass is on testing actions.
+  await workspace.getByRole('tab', { name: /^template testing$/i }).click()
+  await confirmTestPassFromDevWorkspace(page)
+}
+
+async function completeConfirmTestPassDialog(page: Page) {
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText(/confirm test pass/i)).toBeVisible()
   await dialog.getByText(/I reviewed fidelity warnings/i).click()
@@ -161,10 +210,22 @@ export async function confirmGoLiveFromDevWorkspace(page: Page) {
 export async function saveApiRetentionPolicyFromHubTab(page: Page) {
   await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
 
-  const retentionSelect = page.locator('.retention-select').first()
+  const retentionSection = page.locator('#policy-domain-INVOCATION_RETENTION')
+  await expect(retentionSection).toBeVisible({ timeout: 30_000 })
+
+  const retentionSelect = retentionSection.locator('.retention-select').first()
   await expect(retentionSelect).toBeVisible()
+  const currentLabel = ((await retentionSelect.textContent()) ?? '').trim()
+
+  // Pick a different preset so the form becomes dirty and Save enables.
+  const candidates = [/30 days/i, /90 days/i, /180 days/i, /365 days/i]
+  const nextOption = candidates.find((pattern) => !pattern.test(currentLabel)) ?? /180 days/i
+
   await retentionSelect.click()
-  await page.getByRole('option', { name: /90 days/i }).click()
+  await page.getByRole('option', { name: nextOption }).click()
+
+  const saveButton = retentionSection.getByTestId('retention-save-button')
+  await expect(saveButton).toBeEnabled({ timeout: 15_000 })
 
   const saveResponsePromise = page.waitForResponse(
     (response) =>
@@ -173,14 +234,13 @@ export async function saveApiRetentionPolicyFromHubTab(page: Page) {
     { timeout: 30_000 },
   )
 
-  await page.getByRole('button', { name: /^save retention$/i }).click()
-  const confirmBox = page.locator('.el-message-box')
-  await expect(confirmBox).toBeVisible()
-  await confirmBox.getByRole('button', { name: /^confirm$/i }).click()
+  await saveButton.click()
+  await expect(page.locator('.el-message-box')).toBeVisible({ timeout: 10_000 })
+  await confirmPolicyChangeDialog(page)
 
   const saveResponse = await saveResponsePromise
   expect(saveResponse.ok()).toBeTruthy()
-  await expect(page.locator('.el-message').getByText(/retention settings saved|access setting saved/i)).toBeVisible({
+  await expect(page.getByTestId('retention-save-success')).toBeVisible({
     timeout: 15_000,
   })
 }
@@ -312,7 +372,7 @@ export async function submitForTestingFromLifecycleTab(page: Page, comment?: str
 }
 
 export async function confirmTestPassFromLifecycleTab(page: Page) {
-  await confirmTestPassFromDevWorkspace(page)
+  await confirmTestPassAfterTesterOpen(page)
 }
 
 export async function submitForApprovalFromLifecycleTab(page: Page) {

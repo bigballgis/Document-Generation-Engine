@@ -634,6 +634,35 @@ export async function captureUxEntityDisplayLocatorScreenshot(
   return filename
 }
 
+export const CDP_E2E_T01_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CDP-E2E-T01')
+export const CDP_E2E_T01_SCREENSHOT_DIR = path.join(CDP_E2E_T01_EVIDENCE_ROOT, 'screenshots')
+export const CDP_E2E_T01_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensureCdpE2eT01EvidenceDirs(): void {
+  fs.mkdirSync(CDP_E2E_T01_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function cdpE2eT01ScreenshotPath(filename: string): string {
+  return path.join(CDP_E2E_T01_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCdpE2eT01Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCdpE2eT01EvidenceDirs()
+  const target = cdpE2eT01ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCdpE2eT01LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCdpE2eT01EvidenceDirs()
+  const target = cdpE2eT01ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
 export const F7_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'F7')
 export const F7_SCREENSHOT_DIR = path.join(F7_EVIDENCE_ROOT, 'screenshots')
 export const F7_VIEWPORT = P14_T01_VIEWPORT

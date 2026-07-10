@@ -18,7 +18,7 @@ import { fetchTemplateDetail } from './helpers/submit-approval-gate-api'
 import {
   approveTemplateFromDevWorkspace,
   confirmGoLiveFromDevWorkspace,
-  confirmTestPassFromDevWorkspace,
+  confirmTestPassAfterTesterOpen,
   openDevEditorWorkspaceTab,
   saveApiRetentionPolicyFromHubTab,
   submitForApprovalFromDevWorkspace,
@@ -76,16 +76,17 @@ test.describe('CDP-E2E-T01 MVP golden path — browser only (BDD-CDP-MVP-001)', 
     })
     expect(testItemsBefore.some((item) => item.templateId === fixture.templateId)).toBeTruthy()
 
-    // Step 2 — TESTER: dashboard TEST queue → confirm test pass
+    // Step 2 — TESTER: dashboard TEST queue → Open → confirm test pass (hub lifecycle path)
+    // Tabbed dashboard requires ?queue=TEST to mount #tasks-section (hash alone stays on Overview).
+    // Do NOT open /dev directly for tester — use the same Open deep-link as collaboration-todos.
     await reLoginAs(page, loginAs, E2E_TEMPLATE_TESTER)
-    await page.goto('/dashboard#tasks-section')
+    await page.goto('/dashboard?queue=TEST#tasks-section')
     await filterDashboardTasksByItem(page, fixture.name)
     const testRow = await dashboardTaskRow(page, fixture.name)
     await expect(testRow).toBeVisible({ timeout: 30_000 })
     await testRow.getByRole('button', { name: /^open$/i }).click()
-    await expect(page).toHaveURL(/\/dev\//)
-    await openDevEditorWorkspaceTab(page, fixture.templateId, request, 'testing')
-    await confirmTestPassFromDevWorkspace(page)
+    await expect(page).toHaveURL(/tab=lifecycle|\/dev\//, { timeout: 15_000 })
+    await confirmTestPassAfterTesterOpen(page)
 
     detail = await fetchTemplateDetail(request, fixture.templateId)
     expect(detail.lifecycleStatus).toBe('APPROVAL')
@@ -130,7 +131,8 @@ test.describe('CDP-E2E-T01 MVP golden path — browser only (BDD-CDP-MVP-001)', 
     await page.goto(`/templates/${fixture.templateId}?tab=apiAccess`)
     await saveApiRetentionPolicyFromHubTab(page)
 
-    await expect(page.getByText(/policy version|策略版本/i).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: /external access|对外接入/i })).toBeVisible()
+    await expect(page.locator('#policy-domain-INVOCATION_RETENTION')).toBeVisible()
+    await expect(page.getByTestId('retention-save-success')).toBeVisible()
   })
 })
