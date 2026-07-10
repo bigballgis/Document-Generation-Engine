@@ -3,6 +3,7 @@ import {
   DEMO_GROUP_CODE,
   DEMO_MASTER_NAME,
   E2E_GROUP_ADMIN,
+  E2E_TEMPLATE_APPROVER,
   E2E_TEMPLATE_AUTHOR,
   E2E_TEMPLATE_TESTER,
 } from './auth'
@@ -208,6 +209,36 @@ export async function prepareTemplatePendingApprovalDecision(
   if (detail.lifecycleStatus !== 'APPROVAL' || detail.approvalSubState !== 'PENDING_DECISION') {
     throw new Error(
       `Expected APPROVAL/PENDING_DECISION, got ${detail.lifecycleStatus}/${detail.approvalSubState ?? 'null'} (${template.templateId})`,
+    )
+  }
+
+  return template
+}
+
+/**
+ * API setup only — advances a green PENDING_DECISION template to PENDING_RELEASE
+ * so browser specs can exercise team-lead Confirm go-live without UI setup clicks.
+ */
+export async function prepareTemplatePendingRelease(
+  request: APIRequestContext,
+  options?: { externalId?: string; name?: string },
+): Promise<PendingSubmitTemplateFixture> {
+  const template = await prepareTemplatePendingApprovalDecision(request, {
+    externalId: options?.externalId ?? uniqueExternalId('E2E-CDP-PUB'),
+    name: options?.name ?? `E2E CDP Publish ${Date.now().toString(36).toUpperCase()}`,
+  })
+
+  const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
+  await authorizedPost(request, approverToken, `/templates/${template.templateId}/lifecycle/approval-decision`, {
+    decision: 'APPROVED',
+    commentSummary: 'E2E CDP team-lead publish fixture — ready for PENDING_RELEASE',
+    keyEvidenceConfirmed: true,
+  })
+
+  const detail = await fetchTemplateDetail(request, template.templateId)
+  if (detail.lifecycleStatus !== 'PENDING_RELEASE') {
+    throw new Error(
+      `Expected PENDING_RELEASE, got ${detail.lifecycleStatus} (${template.templateId})`,
     )
   }
 

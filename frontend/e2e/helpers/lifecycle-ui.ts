@@ -323,6 +323,56 @@ export async function confirmGoLiveFromDevWorkspace(page: Page) {
   })
 }
 
+/**
+ * Team-lead dashboard Open → open Go-live summary dialog (does not confirm).
+ * Asserts fidelity/coverage validation summaries are visible in the dialog.
+ */
+export async function openGoLiveSummaryAfterTeamLeadOpen(page: Page) {
+  const destination = await waitForTesterOrApproverOpenDestination(page)
+
+  if (destination === 'hub') {
+    const publishButton = page
+      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
+      .getByRole('button', { name: /^confirm go-live$/i })
+      .first()
+    await expect(publishButton).toBeEnabled({ timeout: 60_000 })
+    await publishButton.click()
+  } else {
+    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template approval$/i }).click()
+    const publishButton = workspaceActions(page).getByRole('button', { name: /^confirm go-live$/i })
+    await expect(publishButton).toBeEnabled({ timeout: 60_000 })
+    await publishButton.click()
+  }
+
+  const dialog = page.locator('.el-dialog').filter({ hasText: /go-live summary/i })
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByText(/validation summaries/i)).toBeVisible()
+  await expect(dialog.getByText(/coverage/i).first()).toBeVisible()
+  await expect(dialog.getByText('Release version', { exact: true })).toBeVisible()
+  return dialog
+}
+
+/**
+ * Team-lead dashboard Open → Go-live summary → Confirm go-live (browser publish).
+ */
+export async function confirmGoLiveAfterTeamLeadOpen(page: Page) {
+  const dialog = await openGoLiveSummaryAfterTeamLeadOpen(page)
+
+  const publishResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' && response.url().includes('/lifecycle/publish'),
+    { timeout: 30_000 },
+  )
+
+  await dialog.getByRole('button', { name: /^confirm go-live$/i }).click()
+
+  const publishResponse = await publishResponsePromise
+  expect(publishResponse.ok()).toBeTruthy()
+  await expect(page.locator('.el-message').getByText(/template is now live/i)).toBeVisible({
+    timeout: 15_000,
+  })
+}
+
 export async function saveApiRetentionPolicyFromHubTab(page: Page) {
   await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
 
