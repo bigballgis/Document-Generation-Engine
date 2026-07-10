@@ -153,9 +153,10 @@ public class PreviewController {
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        String baseUrl = request.getScheme() + "://" + request.getServerName()
-                + ":" + request.getServerPort()
-                + "/api/management/v1/templates/" + templateId + "/previews";
+        // Relative stream URL so the browser stays same-origin via the frontend proxy
+        // (absolute host:port from the servlet request points at the backend container port
+        // and breaks SSE fetch with CORS / unreachable host from the UI origin).
+        String baseUrl = "/api/management/v1/templates/" + templateId + "/previews";
         AsyncPreviewStartResponse response = asyncPreviewOrchestrator.startAsync(templateId, body, session, baseUrl);
         return envelope(request, response);
     }

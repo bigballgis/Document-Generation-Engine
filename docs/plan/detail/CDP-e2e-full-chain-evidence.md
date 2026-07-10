@@ -1,11 +1,13 @@
 # CDP Wave CD-E2E — Full-Chain Browser Evidence
 
 **Program:** [competitiveness-deepening-program.md](../competitiveness-deepening-program.md)  
-**Wave:** CD-2 — **In Progress** (2026-07-10; **partial** — T01/T01b + T02/T03/T04 + T05 + **T06 Done**; T07–T12 + T13 remain Not Started)  
+**Wave:** CD-2 — **In Progress** (2026-07-10; **partial** — T01/T01b + T02/T03/T04 + T05 + **T06 Done**; **CD-E2E-T08 → In Progress**; T07 + T09–T12 + T13 remain Not Started)  
 **Owner default:** `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** Docker stack (`.\scripts\docker-deploy-queue.ps1`); read `frontend/e2e/helpers/auth.ts`, `frontend/e2e/helpers/cdp-mvp-golden-api.ts`
 
-> **Completion note (2026-07-10):** Slice `cdp-e2e-t06-master` merged to `main` (`3aed175`; feature `3aed175`; worktree **REMOVED**). **CD-E2E-T06 → Done**. Master designer upload → anchor → submit → GROUP_ADMIN approve browser journey closed (BDD-CDP-MASTER-001). Product fix: `MASTER_DESIGNER` `manageMasters` authz aligned to matrix §4 (`GroupAccessService` + `roles.ts` + permission-matrix §13.2). Playwright docker `--workers=1`: **2 passed** (functional 1 + UIUX evidence 1); UIUX Verdict **PASS** (6 screenshots @1920; REDBC+GREENBC); architecture-reviewer **PASS_WITH_SUGGESTIONS** (no Critical; merge allowed); Stage 5/10 deploy healthz/4173 **200** (compose `dge-lrp-c9-load-error-panel`; queue idle); `pnpm lint` + `type-check` PASS; backend GroupAccess/ManagementCapabilities **22**; `roles.test` **20**. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. **Next:** prefer **T08** (preview success + artifact download — closes T13 manifest gap) or **T07** (API policy). **Task Master #17 → done**.
+> **Activation note (2026-07-10):** Slice `cdp-e2e-t08-preview` — **CD-E2E-T08 → In Progress** (Preview success + artifact download UI; closes T13 preview-success manifest gap). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t08-preview` · `feat/cdp-e2e-t08-preview` · base `e0d8bef` (T06 docs tip; upstream merge `3aed175`). BDD **ready**: `docs/behavior/preview-success-artifact-download-journey.md` (BDD-CDP-PREV). **Sole active CDP slice.** Do **not** activate T07/T09–T13. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. **Task Master #18 → in-progress**.
+
+> **Completion note (2026-07-10):** Slice `cdp-e2e-t06-master` merged to `main` (`3aed175`; feature `3aed175`; worktree **REMOVED**). **CD-E2E-T06 → Done**. Master designer upload → anchor → submit → GROUP_ADMIN approve browser journey closed (BDD-CDP-MASTER-001). Product fix: `MASTER_DESIGNER` `manageMasters` authz aligned to matrix §4 (`GroupAccessService` + `roles.ts` + permission-matrix §13.2). Playwright docker `--workers=1`: **2 passed** (functional 1 + UIUX evidence 1); UIUX Verdict **PASS** (6 screenshots @1920; REDBC+GREENBC); architecture-reviewer **PASS_WITH_SUGGESTIONS** (no Critical; merge allowed); Stage 5/10 deploy healthz/4173 **200** (compose `dge-lrp-c9-load-error-panel`; queue idle); `pnpm lint` + `type-check` PASS; backend GroupAccess/ManagementCapabilities **22**; `roles.test` **20**. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Superseded scheduling: T08 activated (see activation note above). **Task Master #17 → done**.
 
 > **Activation note (2026-07-10):** Slice `cdp-e2e-t06-master` — **CD-E2E-T06 → In Progress** (Master designer upload → anchor check → submit review → approver approve). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t06-master` · `feat/cdp-e2e-t06-master` · base `f67cf61` (includes T05 docs tip; merge `895f16e` on main). BDD **ready**: `docs/behavior/master-designer-lifecycle.md` (BDD-CDP-MASTER-001). Superseded by completion note above. **Task Master #17 → in-progress** (now done).
 
@@ -134,8 +136,9 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 
 - **Owner:** `e2e-test-engineer`
 - **Fixes:** T13 manifest gap «preview success frame not captured»
+- **Read first:** `docs/behavior/preview-success-artifact-download-journey.md` (BDD-CDP-PREV **ready**)
 - **Acceptance:** Test tab shows preview complete; download link works; screenshot in manifest.
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-10 — slice `cdp-e2e-t08-preview`; `feat/cdp-e2e-t08-preview`; base `e0d8bef`)
 
 ### CD-E2E-T09 — Preview vs final comparison panel
 
