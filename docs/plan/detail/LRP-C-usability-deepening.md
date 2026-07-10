@@ -1,11 +1,11 @@
 # LRP Wave LR-C — Business Usability Deepening 「业务易用性深化」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 In Progress** 2026-07-10 — slice `lrp-c9-load-error-panel`; remaining C2–C3/C5–C8/C10–C13 Not Started)  
+**Wave status:** **In Progress** (LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; remaining C2–C3/C5–C8/C10–C13 Not Started)  
 **Owner default:** `frontend-engineer` (+ `backend-engineer` where noted); every user-facing slice pairs `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** none for most tasks; **C6 depends on LR-C5**; **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
 
-> **Activation note (2026-07-10):** **LR-C9 → In Progress** (user-scheduled quick win after Wave LR-A Done). Placement: ISOLATED `D:/working/DGE-lrp-c9-load-error-panel` · `feat/lrp-c9-load-error-panel` · base `ec1e250`. BDD expected **not-applicable** (pattern rollout). Formal phase remains **None**. Upstream: GroupManagementPanel `LoadErrorPanel` already Done via MGMT P1-2 — remaining catalog/list surfaces still in scope. Other LR-C rows untouched.
+> **Completion note (2026-07-10):** **LR-C9 → Done** (slice `lrp-c9-load-error-panel`; merge `0013615` / `001361599df61c8b2be99cf2ebe5d92b040db508` → `main`; worktree removed). Unified list states: `EmptyStatePanel` `#actions` + `AppDataTable` `#empty` forward; role-aware empty CTAs on six surfaces (`TemplateListView`, `MasterListView`, `ContentModuleListView`, `ApiPolicyHomeView`, `UserManagementListSection`, `GroupManagementPanel`); `LoadErrorPanel` + retry already present. BDD **not-applicable**. Formal phase remains **None**. **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN** (951 tests); `docker-deploy-queue.ps1` **DEPLOY_OK** (`:8080` UP, `:4173` 200); E2E `LRP-C9-list-states.spec.ts` **3/3** PASS; UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C9-uiux-manifest.md`); architecture **PASS_WITH_NOTES** (no Critical). **Task Master #14 → done**. Other LR-C rows untouched (C2/C3/C5/C7/C8/C10–C13 Not Started; C1/C4 Done).
 >
 > **Session note:** `LR-C*` tasks only. All UI work obeys `.cursor/skills/frontend-oa-design/SKILL.md` (bank OA lock, REDBC/GREENBC dual-brand) and `.cursor/rules/workspace-tab-shell-constitution.mdc`. i18n: English keys first, zh-CN additive — never literals (`.cursor/skills/i18n-english-first/SKILL.md`).
 >
@@ -215,16 +215,16 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - **UIUX:** yes
 - **Read first:** `frontend/src/components/common/LoadErrorPanel.vue`; `EmptyStatePanel.vue` (may need `#actions` slot for in-empty CTAs); the six targets below; [comprehensive-optimization-roadmap.md](../comprehensive-optimization-roadmap.md) §9; [mgmt-ui-defects-behavior-spec.md](../../requirements/mgmt-ui-defects-behavior-spec.md) P1-2 / D3.
 - **Do NOT:** Redesign `LoadErrorPanel`; change store error semantics; leave any of the six with a dead-end load-error `el-alert`; invent new empty CTAs beyond create/upload (or Browse templates on API policy home).
-- **Surface audit (2026-07-10 worktree `DGE-lrp-c9-load-error-panel`):**
+- **Surface audit (2026-07-10 — closed on Done):**
 
   | Surface | LoadErrorPanel + retry | Role-aware empty CTA | Residual for LR-C9 |
   | --- | --- | --- | --- |
-  | `TemplateListView` | Done | Missing (header create only; empty = title-only `EmptyStatePanel`) | Empty CTA in empty state; Vitest/E2E |
-  | `MasterListView` | Done | Missing (header upload only) | Empty CTA; Vitest/E2E |
-  | `ContentModuleListView` | Done | Missing (header create only) | Empty CTA; Vitest/E2E |
-  | `ApiPolicyHomeView` | Done (verify `:retryable` wiring) | Intended Browse-templates `#actions` but `EmptyStatePanel` has **no actions slot** (CTA may not render in empty body; header still has Browse) | Fix empty CTA render; confirm retryable; Vitest/E2E |
-  | `UserManagementPanel` → `UserManagementListSection` | Done | Missing (header create always shown; empty = title-only) | Empty CTA fail-closed to match who may create; Vitest/E2E |
-  | `GroupManagementPanel` | Done (MGMT P1-2) | Missing (header create gated by `canManage`; empty = title-only) | Empty CTA when `canManage`; Vitest/E2E |
+  | `TemplateListView` | Done | Done (`#actions` create) | — closed |
+  | `MasterListView` | Done | Done (`#actions` upload) | — closed |
+  | `ContentModuleListView` | Done | Done (`#actions` create) | — closed |
+  | `ApiPolicyHomeView` | Done | Done (Browse-templates via `#actions`) | — closed |
+  | `UserManagementPanel` → `UserManagementListSection` | Done | Done (fail-closed create CTA) | — closed |
+  | `GroupManagementPanel` | Done (MGMT P1-2) | Done (`canManage` empty CTA) | — closed |
 
 - **Steps:**
   1. Verify each of the six still uses `LoadErrorPanel` + working retry (re-invoke store fetch); close any residual dead-end load-error path (none of the six still use load-error `el-alert` as of audit — do not regress).
@@ -238,7 +238,7 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - **Artifacts:** six view/panel edits + tests; E2E + manifest.
 - **Done when:** All six meet Acceptance A+B + gates + UIUX PASS + doc sync + commit review.
 - **Maps:** COR-F05/F14 (pattern source); roadmap §9; MGMT P1-2 / D3.
-- **Status:** **In Progress** (2026-07-10 — slice `lrp-c9-load-error-panel`; ISOLATED `D:/working/DGE-lrp-c9-load-error-panel` · `feat/lrp-c9-load-error-panel`; GroupManagementPanel already migrated via MGMT P1-2; BDD readiness `not-applicable` confirmed)
+- **Status:** **Done** (2026-07-10 — slice `lrp-c9-load-error-panel`; merge `0013615`; BDD `not-applicable`; six surfaces closed; gates + E2E 3/3 + UIUX PASS_WITH_NOTES + architecture PASS_WITH_NOTES)
 
 ### LR-C10 — Upload UX polish
 
@@ -335,7 +335,7 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 
 - [x] LR-C1 + LR-C4 shipped via CORE-FORTRESS F7 (2026-07-09; Vitest **894**; E2E **12/12**; BDD + UIUX evidence)
 - [ ] LR-C2/C3/C5…C8 shipped with BDD specs, functional Playwright journeys, and UIUX manifests (both brands)
-- [ ] LR-C9…C13 shipped with green gates; OPT-G4/G5/G6-residual/G7 + F4-residual rows updated
+- [ ] LR-C9…C13 shipped with green gates; OPT-G4/G5/G6-residual/G7 + F4-residual rows updated *(LR-C9 Done 2026-07-10; C10–C13 remain)*
 - [ ] `api.error` parity test enforcing 145/145 active in `pnpm -C frontend test`
-- [ ] No dead-end error list remains among the six §2/LR-C9 targets
+- [x] No dead-end error list remains among the six §2/LR-C9 targets (LR-C9 Done 2026-07-10; merge `0013615`)
 - [ ] Ledger § LRP wave row updated with per-task evidence

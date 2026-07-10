@@ -185,22 +185,22 @@
         "id": "14",
         "title": "LR-C9 unified list states (LoadErrorPanel + retry)",
         "description": "Roll out LoadErrorPanel + working retry (+ role-aware empty CTA) on remaining catalog/list surfaces. Pattern already confirmed (COR-F05/F14). GroupManagementPanel already Done via MGMT P1-2. Out of scope: redesign LoadErrorPanel; reopen LR-A / A6 residuals; DGE-audit-governance; other LR-C rows.",
-        "details": "Slice id: lrp-c9-load-error-panel. Plan: LR-C9 In Progress (2026-07-10). Placement: ISOLATED D:/working/DGE-lrp-c9-load-error-panel · feat/lrp-c9-load-error-panel · base ec1e250. BDD expected not-applicable (pattern rollout). Formal phase remains None. Wave LR-A Done; other LR-C items untouched. Targets: TemplateListView, MasterListView, ContentModuleListView, ApiPolicyHomeView, UserManagementPanel (+ verify GroupManagementPanel already migrated). Gates: pnpm lint/type-check/test/build; E2E LRP-C9-list-states; UIUX; docker-deploy-queue when required.",
+        "details": "Slice id: lrp-c9-load-error-panel. Plan: LR-C9 Done (2026-07-10). Merge: 0013615 (001361599df61c8b2be99cf2ebe5d92b040db508; feat/lrp-c9-load-error-panel → main); worktree removed. Delivered: EmptyStatePanel #actions + AppDataTable #empty forward; role-aware empty CTAs on TemplateListView, MasterListView, ContentModuleListView, ApiPolicyHomeView, UserManagementListSection, GroupManagementPanel; LoadErrorPanel already present. BDD not-applicable. Formal phase remains None. Other LR-C items untouched. Gates: pnpm lint/type-check/test/build GREEN (951); docker-deploy-queue DEPLOY_OK; E2E LRP-C9-list-states 3/3 PASS; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES.",
         "testStrategy": "1. Each remaining list surface shows LoadErrorPanel with working retry on fetch failure. 2. Role-aware empty CTA when permitted; no CTA when not. 3. Vitest per view + Playwright smoke. 4. Frontend gates green; UIUX PASS. 5. Plan/ledger LR-C9 Done on closeout.",
         "priority": "high",
         "dependencies": [
           "13"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-10T10:39:00.000Z"
+        "updatedAt": "2026-07-10T12:20:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T10:39:00.000Z",
+      "lastModified": "2026-07-10T12:20:00.000Z",
       "taskCount": 14,
-      "completedCount": 13,
+      "completedCount": 14,
       "tags": [
         "master"
       ]
