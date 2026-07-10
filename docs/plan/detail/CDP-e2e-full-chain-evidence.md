@@ -1,11 +1,13 @@
 # CDP Wave CD-E2E — Full-Chain Browser Evidence
 
 **Program:** [competitiveness-deepening-program.md](../competitiveness-deepening-program.md)  
-**Wave:** CD-2 — **In Progress** (2026-07-10; **partial** — golden-path T01/T01b **Done**; T02–T12 + T13 remain Not Started)  
+**Wave:** CD-2 — **In Progress** (2026-07-10; **partial** — golden-path T01/T01b **Done**; **active slice** `cdp-e2e-cd2-t02` = **T02 In Progress** + T03/T04 this-slice scope; T05–T12 + T13 remain Not Started)  
 **Owner default:** `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** Docker stack (`.\scripts\docker-deploy-queue.ps1`); read `frontend/e2e/helpers/auth.ts`, `frontend/e2e/helpers/cdp-mvp-golden-api.ts`
 
-> **Completion note (2026-07-10):** Slice `cdp-e2e-golden` merged to `main` (`1930842`; feature `6d27c57` / `5e1c3cd`; worktree removed). **CD-E2E-T01** + **T01b Done**. Full T02–T12 matrix + T13 deferred this slice. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**.
+> **Activation note (2026-07-10):** Slice `cdp-e2e-cd2-t02` — bounded batch **CD-E2E-T02** (Tester pass) → **In Progress**; **T03** (Tester fail) + **T04** (Approver approve) = this-slice scope (Not Started until implementer starts each). Do **not** activate T05–T13. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Placement: ISOLATED `D:/working/DGE-cdp-e2e-cd2-t02` · `feat/cdp-e2e-cd2-t02`.
+
+> **Completion note (2026-07-10):** Slice `cdp-e2e-golden` merged to `main` (`1930842`; feature `6d27c57` / `5e1c3cd`; worktree removed). **CD-E2E-T01** + **T01b Done**. Full T02–T12 matrix + T13 deferred that slice. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**.
 
 ---
 
@@ -72,20 +74,24 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - **Read first:** `docs/behavior/tester-decision-journey.md`, `P21-T05-tester-journey.spec.ts`
 - **Artifacts:** `CDP-E2E-T02-tester-pass-decision.spec.ts` + UIUX manifest
 - **Acceptance:** UI clicks Pass → structured form fields → confirm → work item leaves TEST queue.
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-10 — slice `cdp-e2e-cd2-t02`; sole active CD-E2E delivery focus)
+- **Slice:** `cdp-e2e-cd2-t02` · ISOLATED `D:/working/DGE-cdp-e2e-cd2-t02` · `feat/cdp-e2e-cd2-t02`
 
 ### CD-E2E-T03 — Tester structured fail journey
 
 - **Owner:** `e2e-test-engineer`
 - **Acceptance:** Fail path requires reason category + returns template to fix state; collaboration todo visible to author.
-- **Status:** Not Started
+- **Status:** Not Started (**this-slice scope** — `cdp-e2e-cd2-t02`; start after T02 green; do not mark In Progress until implementer begins)
+- **Artifacts (planned):** `CDP-E2E-T03-tester-fail-decision.spec.ts` + UIUX manifest
+- **Read first:** `docs/behavior/tester-decision-journey.md`
 
 ### CD-E2E-T04 — Approver approve journey
 
 - **Owner:** `e2e-test-engineer`
 - **Read first:** `docs/behavior/approver-decision-journey.md`
 - **Acceptance:** Approve with evidence confirmation + risk summary viewed; extends P12-AUD-B10 (submit side only today).
-- **Status:** Not Started
+- **Status:** Not Started (**this-slice scope** — `cdp-e2e-cd2-t02`; start after T02/T03; do not mark In Progress until implementer begins)
+- **Artifacts (planned):** `CDP-E2E-T04-approver-approve-decision.spec.ts` + UIUX manifest
 
 ### CD-E2E-T05 — Team lead publish / go-live
 
@@ -170,3 +176,4 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - [x] `execution-sync-ledger.md` records T01 Playwright counts + Docker deploy (2026-07-10)
 - [x] `usability-review.md` references golden path spec as confirmed evidence (T01)
 - [ ] Full matrix + all manifests PASS before wave **Done**
+- [ ] Slice `cdp-e2e-cd2-t02`: T02 Done + T03/T04 Done (this-slice batch) — **not** wave exit

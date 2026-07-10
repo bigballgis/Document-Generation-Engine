@@ -194,12 +194,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-10T12:20:00.000Z"
+      },
+      {
+        "id": "15",
+        "title": "CDP CD-2 T02–T04 decision journeys (tester pass/fail + approver approve)",
+        "description": "Bounded CD-2 E2E batch after T01/T01b Done: CD-E2E-T02 Tester structured pass (In Progress first), then T03 Tester structured fail, then T04 Approver approve. Each task needs Playwright browser-only task-completion evidence + UIUX manifest. Do NOT activate T05–T13. Do NOT mark wave CD-2 Done. Out of scope: LR-C5/C10, audit-governance, LR-A.",
+        "details": "Slice id: cdp-e2e-cd2-t02. Placement: ISOLATED D:/working/DGE-cdp-e2e-cd2-t02 · feat/cdp-e2e-cd2-t02. Formal phase remains None. Wave CD-2 stays In Progress (partial). Sole active CD-E2E focus: T02 In Progress; T03/T04 this-slice scope (Not Started until started). BDD ready: docs/behavior/tester-decision-journey.md, docs/behavior/approver-decision-journey.md. Reuse prepareCdpMvpGoldenDraft / auth helpers for setup only — no API stage advancement in test body. Artifacts: CDP-E2E-T02-tester-pass-decision.spec.ts (+ T03/T04 specs) + UIUX manifests. Gates: docker-deploy-queue; Playwright docker green; e2e-uiux-reviewer PASS per task.",
+        "testStrategy": "1. T02: UI Pass → structured form → confirm → item leaves TEST queue (browser-only). 2. T03: Fail requires reason category; template returns to fix; author collaboration todo visible. 3. T04: Approve with evidence confirmation + risk summary viewed. 4. Each paired UIUX manifest Verdict PASS (≥8 screenshots, REDBC+GREENBC). 5. docker-deploy-queue healthz/4173 OK. 6. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "14"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T12:30:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T12:20:00.000Z",
-      "taskCount": 14,
+      "lastModified": "2026-07-10T12:30:00.000Z",
+      "taskCount": 15,
       "completedCount": 14,
       "tags": [
         "master"

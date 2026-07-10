@@ -663,6 +663,41 @@ export async function captureCdpE2eT01LocatorScreenshot(
   return filename
 }
 
+/** Shared 1920×1080 viewport for CDP CD-2 decision-journey UIUX evidence (T02–T04). */
+export const CDP_E2E_CD2_DECISION_VIEWPORT = { width: 1920, height: 1080 } as const
+
+function cdpE2eDecisionEvidenceRoot(taskId: 'CDP-E2E-T02' | 'CDP-E2E-T03' | 'CDP-E2E-T04'): string {
+  return path.join(E2E_DIR, '..', 'evidence', taskId)
+}
+
+function cdpE2eDecisionScreenshotDir(taskId: 'CDP-E2E-T02' | 'CDP-E2E-T03' | 'CDP-E2E-T04'): string {
+  return path.join(cdpE2eDecisionEvidenceRoot(taskId), 'screenshots')
+}
+
+export function ensureCdpE2eDecisionEvidenceDirs(
+  taskId: 'CDP-E2E-T02' | 'CDP-E2E-T03' | 'CDP-E2E-T04',
+): void {
+  fs.mkdirSync(cdpE2eDecisionScreenshotDir(taskId), { recursive: true })
+}
+
+export function cdpE2eDecisionScreenshotPath(
+  taskId: 'CDP-E2E-T02' | 'CDP-E2E-T03' | 'CDP-E2E-T04',
+  filename: string,
+): string {
+  return path.join(cdpE2eDecisionScreenshotDir(taskId), filename)
+}
+
+export async function captureCdpE2eDecisionScreenshot(
+  page: Page,
+  taskId: 'CDP-E2E-T02' | 'CDP-E2E-T03' | 'CDP-E2E-T04',
+  filename: string,
+): Promise<string> {
+  ensureCdpE2eDecisionEvidenceDirs(taskId)
+  const target = cdpE2eDecisionScreenshotPath(taskId, filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
 export const LRP_C9_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C9')
 export const LRP_C9_SCREENSHOT_DIR = path.join(LRP_C9_EVIDENCE_ROOT, 'screenshots')
 export const LRP_C9_VIEWPORT = P14_T01_VIEWPORT
