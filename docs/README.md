@@ -5,7 +5,7 @@
 
 **Active work in this documentation track:** **[CDP Wave CD-2 In Progress](./plan/competitiveness-deepening-program.md)** (**partial** — CD-E2E-T01/T01b **Done**; T02–T12 Not Started; task IDs **`CD-*`** only). **CD-0 Done**.
 
-**Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **LR-A3 Done** (2026-07-10; merge `e62c210`). **CDP golden path T01 Done** (2026-07-10; merge `1930842`). See [CODE-QUALITY program](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md) · [CDP](./plan/competitiveness-deepening-program.md).
+**Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **LR-A4 Done** (2026-07-10; merge `a523a09`). **CDP golden path T01 Done** (2026-07-10; merge `1930842`). See [CODE-QUALITY program](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md) · [CDP](./plan/competitiveness-deepening-program.md).
 
 **P22 Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md).
 

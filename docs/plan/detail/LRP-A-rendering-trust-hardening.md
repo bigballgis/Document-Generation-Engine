@@ -1,11 +1,11 @@
 # LRP Wave LR-A — Rendering Trust Chain & File Safety 「渲染信任链与文件安全」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3 Done**; **A4 In Progress**; A5 Partial; A6/A7 Not Started)  
+**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3/A4 Done**; A5 Partial; A6/A7 Not Started)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer` for images, `doc-keeper` for ADRs)  
 **Prerequisites:** none for A1/A2/A3/A5; **A4/A6 depend on P22-T01/T02 Done**; **A7 depends on P23 demo packages (T04+ letter-grade)** — track via [P23 detail](./P23-demo-typography-layout-excellence.md)
 
-> **Session note (2026-07-10):** **LR-A4 → In Progress** (slice `lrp-a4-fail-closed-nodes`; worktree `D:/working/DGE-lrp-a4-fail-closed-nodes`; branch `feat/lrp-a4-fail-closed-nodes`). BDD **ready** (`BDD-LRP-A4-FAIL-CLOSED-001`); locked **(b) publish-gate hard-block**; writers deferred; empty `contentModuleRef` pinned remains F1 hard-fail. **LR-A3 Done** (merge `e62c210`). Formal phase remains **None**. **Sole active LRP task:** LR-A4 (A6/A7 Not Started; A5 Partial deferred). Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
+> **Completion note (2026-07-10):** **LR-A4 → Done** (slice `lrp-a4-fail-closed-nodes`; merge `a523a09` / feature `4bccf9d`). Fail-closed publish/render for writer-unsupported nodes (`qrBarcodeRef`, `attachmentListRef`); no silent omit; full writers deferred. BDD **ready** (`BDD-LRP-A4-FAIL-CLOSED-001` A1–A9). Formal phase remains **None**. Wave LR-A remains **In Progress** (A5 Partial; A6/A7 Not Started — no sole active In Progress task). Optional follow-up (arch PASS_WITH_NOTES): pinned-module deep scan. Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
 
 ---
 
@@ -116,7 +116,10 @@
 - **Artifacts:** behavior spec (**Done**); modified writer/publish gate + tests; PRD/domain note (**Done** in BDD persist).
 - **Done when:** Scenarios green + gates green + doc sync + commit review (implementation slice).
 - **Maps:** CD-PIT-07; P18/P22; F1-A2 regression; ledger seams «Structured content DOCX write».
-- **Status:** **In Progress** (2026-07-10 — slice `lrp-a4-fail-closed-nodes`; BDD ready; implementation active; Task Master #10)
+- **Status:** **Done** (2026-07-10 — slice `lrp-a4-fail-closed-nodes`; merge `a523a09` / feature `4bccf9d`; Task Master #10)
+- **Delivered:** `WriterUnsupportedStructuredNodeTypes` + `DocxWriterHandledStructuredNodeTypes`; publish-gate hard-block; nested silent-omit closed in `StructuredContentDocxWriteSession`; A1–A9 tests green. Full QR/attachment writers **deferred**.
+- **Gates (GREEN):** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS; architecture-reviewer **PASS_WITH_NOTES**; `docker-deploy-queue.ps1` exit 0 (healthz 8080 UP; UI 4173 200; compose `documentgenerationengine`).
+- **Deferred / optional:** virus scan (non-goal); full QR/attachment writers; pinned-module deep scan (arch note); CD-E2E T02–T12; LR-A7 measurements; DGE-audit-governance.
 
 ### LR-A5 — ADR-0041/0042/0043 drafting
 
@@ -181,13 +184,14 @@
 - **Artifacts:** NFR §production rendering corpus table; ADR-0042 finalized budget; evidence PDFs referenced in ledger.
 - **Done when:** Corpus + budget merged + CD-HARD-T04 cross-referenced + doc sync + commit review.
 - **Maps:** CD-PIT-02; ADR-0042.
-- **Status:** **Not Started** (2026-07-10 — sole active LRP task is LR-A4; F4 already landed NFR corpus schema + rerun procedure; row measurements remain deferred until a dedicated Docker measurement pass — do not treat as competing In Progress)
+- **Status:** **Not Started** (2026-07-10 — F4 already landed NFR corpus schema + rerun procedure; row measurements remain deferred until a dedicated Docker measurement pass — candidate next LRP slice `lrp-a7-pagination-measure`)
 
 ---
 
 ## 2. Exit gate (Wave LR-A)
 
-- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 Done** (2026-07-10 gap-close; merge `e62c210`); LR-A5 **Partial** (0042/0043 on disk; 0041 deferred)
-- [ ] LR-A4/A6 Done once P22-T01/T02 Done; LR-A7 Done once **P23** letter-grade demo corpus measurements land
-- [ ] No structured node can silently disappear from generated DOCX (blocked or warned)
-- [ ] Ledger § LRP wave row updated with gate evidence per task
+- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 Done** (2026-07-10 gap-close; merge `e62c210`); **LR-A4 Done** (2026-07-10; merge `a523a09`); LR-A5 **Partial** (0042/0043 on disk; 0041 deferred)
+- [x] LR-A4 Done (writer-unsupported fail-closed; full writers deferred) — A6 still Not Started once scheduled
+- [ ] LR-A6 Done; LR-A7 Done once **P23** letter-grade demo corpus measurements land
+- [x] Writer-unsupported declared nodes (`qrBarcodeRef`/`attachmentListRef`) cannot silently disappear (publish hard-block + render fail-closed) — full writers still deferred
+- [ ] Ledger § LRP wave row updated with gate evidence per remaining A5/A6/A7 task

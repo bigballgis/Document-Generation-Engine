@@ -9,7 +9,7 @@ verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
 **Active formal phase / program:** **None** (2026-07-09). **CODE-QUALITY program Done** (CQ-01A…CQ-08; ArchUnit **11/11**); see [program entry](code-quality-program.md) and [task sheet](detail/CODE-QUALITY-code-hygiene.md). **CORE-FORTRESS program Done** (F1–F8; 2026-07-09; `mvn verify` **1154**). **Prior:** **CORE-FORTRESS F7 Done** (authoring UX; Vitest **894**; E2E **12/12**); **F6 Done** (frontend kernel refactor; composable **73** Vitest).
 
-**Delivery focus note (2026-07-10):** **LR-A4 In Progress** (`lrp-a4-fail-closed-nodes`; BDD [ready](../behavior/lrp-a4-fail-closed-unsupported-nodes.md)) — [LRP-A detail](detail/LRP-A-rendering-trust-hardening.md); [LRP program](launch-readiness-program.md). Formal phase remains **None**. **Sibling:** CDP Wave CD-2 **partial** (T01/T01b Done, merge `1930842`; T02–T12 Not Started) — [CDP program](competitiveness-deepening-program.md). **LRP:** LR-A3 Done (`e62c210`); Wave LR-A **In Progress** (sole active task **LR-A4**).
+**Delivery focus note (2026-07-10):** **LR-A4 Done** (`lrp-a4-fail-closed-nodes`; merge `a523a09`; BDD [ready](../behavior/lrp-a4-fail-closed-unsupported-nodes.md)) — [LRP-A detail](detail/LRP-A-rendering-trust-hardening.md); [LRP program](launch-readiness-program.md). Formal phase remains **None**. **Sibling:** CDP Wave CD-2 **partial** (T01/T01b Done, merge `1930842`; T02–T12 Not Started) — [CDP program](competitiveness-deepening-program.md). **LRP:** LR-A3/A4 Done; Wave LR-A **In Progress** (A5 Partial; A6/A7 Not Started).
 
 **Ad-hoc slice (2026-07-10):** **[MGMT-UI-DEFECTS](detail/MGMT-UI-defects.md)** — Round 2 / P0 **Done**; **Round 3 / P1 depth governance Done** (`mgmt-ui-p1`; merge `180bffb`; worktree removed).
 
@@ -88,7 +88,7 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 
 **In-flight work:**
 - **CDP Wave CD-2 In Progress** (2026-07-10) — **partial** (CD-E2E-T01/T01b **Done**; T02–T12 Not Started); **CD-0 Done** — [program](./competitiveness-deepening-program.md); [detail](detail/CDP-e2e-full-chain-evidence.md); merge `1930842`
-- **LRP Wave LR-A In Progress** — **LR-A3 Done** (2026-07-10; merge `e62c210`; upload deep validation gap-close); A4 **not** in CDP slice — [program](./launch-readiness-program.md); [detail](detail/LRP-A-rendering-trust-hardening.md)
+- **LRP Wave LR-A In Progress** — **LR-A4 Done** (2026-07-10; merge `a523a09`; fail-closed unsupported nodes); A5 Partial; A6/A7 Not Started — [program](./launch-readiness-program.md); [detail](detail/LRP-A-rendering-trust-hardening.md)
 - **CODE-QUALITY Done** (2026-07-09) — code hygiene & structural consistency ([program](code-quality-program.md); [detail](detail/CODE-QUALITY-code-hygiene.md))
 - **CORE-FORTRESS Done** (2026-07-09; F1–F8 — [program roadmap](detail/CORE-FORTRESS-program-roadmap.md))
 - **P23 Done** (2026-07-08) — demo typography & layout excellence ([plan](detail/P23-demo-typography-layout-excellence.md); T01–T16; human reviewer sign-off operational follow-up)
