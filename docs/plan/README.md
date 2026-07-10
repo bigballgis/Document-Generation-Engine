@@ -9,7 +9,7 @@ verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06
 (2026-06-27; T01–T10). **P18** structured authoring **Done** (2026-06-28; T01–T10).
 **Active formal phase / program:** **None** (2026-07-09). **CODE-QUALITY program Done** (CQ-01A…CQ-08; ArchUnit **11/11**); see [program entry](code-quality-program.md) and [task sheet](detail/CODE-QUALITY-code-hygiene.md). **CORE-FORTRESS program Done** (F1–F8; 2026-07-09; `mvn verify` **1154**). **Prior:** **CORE-FORTRESS F7 Done** (authoring UX; Vitest **894**; E2E **12/12**); **F6 Done** (frontend kernel refactor; composable **73** Vitest).
 
-**Delivery focus note (2026-07-10):** **LR-A3 Done** (`lrp-a3-upload-validation`; merge `e62c210`) — [LRP-A](detail/LRP-A-rendering-trust-hardening.md); BDD: [lrp-a3-master-docx-upload-validation.md](../behavior/lrp-a3-master-docx-upload-validation.md). Formal phase remains **None**. **Recommended next:** CDP golden path (status note only — do **not** start CDP code from this closeout).
+**Delivery focus note (2026-07-10):** **CDP Wave CD-2 In Progress** (golden-path closeout — CD-E2E-T01 + T01b; T02–T12 deferred) — [CDP program](competitiveness-deepening-program.md); [CDP-e2e detail](detail/CDP-e2e-full-chain-evidence.md). **CD-0 Done**. Formal phase remains **None**. **LRP:** LR-A3 Done (`e62c210`); Wave LR-A remains In Progress (do **not** start LR-A4 in this slice).
 
 **Ad-hoc slice (2026-07-10):** **[MGMT-UI-DEFECTS](detail/MGMT-UI-defects.md)** — Round 2 / P0 **Done**; **Round 3 / P1 depth governance Done** (`mgmt-ui-p1`; merge `180bffb`; worktree removed).
 
@@ -87,11 +87,11 @@ call runtime API → receive DOCX. Mapped to **P0–P7 (minimal sync path)** —
 | P18 | Structured authoring + fidelity engine + UI | `mvn verify` **524** tests; Vitest **250**; Playwright P18-T10 **5/5** + UIUX **1/1** |
 
 **In-flight work:**
-- **LRP Wave LR-A In Progress** — **LR-A3 Done** (2026-07-10; merge `e62c210`; upload deep validation gap-close) — [program](./launch-readiness-program.md); [detail](detail/LRP-A-rendering-trust-hardening.md)
+- **CDP Wave CD-2 In Progress** (2026-07-10) — golden-path closeout only (CD-E2E-T01 + T01b); **CD-0 Done**; T02–T12 deferred — [program](./competitiveness-deepening-program.md); [detail](detail/CDP-e2e-full-chain-evidence.md)
+- **LRP Wave LR-A In Progress** — **LR-A3 Done** (2026-07-10; merge `e62c210`; upload deep validation gap-close); A4 **not** in CDP slice — [program](./launch-readiness-program.md); [detail](detail/LRP-A-rendering-trust-hardening.md)
 - **CODE-QUALITY Done** (2026-07-09) — code hygiene & structural consistency ([program](code-quality-program.md); [detail](detail/CODE-QUALITY-code-hygiene.md))
 - **CORE-FORTRESS Done** (2026-07-09; F1–F8 — [program roadmap](detail/CORE-FORTRESS-program-roadmap.md))
 - **P23 Done** (2026-07-08) — demo typography & layout excellence ([plan](detail/P23-demo-typography-layout-excellence.md); T01–T16; human reviewer sign-off operational follow-up)
-- **CDP** (recommended next delivery focus — status note only) — doc truth, E2E golden path BDD, pitfall registry ([program](./competitiveness-deepening-program.md); Wave **CD-0**; tasks **`CD-*`**) — do **not** start CDP code from LR-A3 closeout
 
 **P21 Done** — closure evidence in [detail/P21-role-journey-frontend-redesign.md](detail/P21-role-journey-frontend-redesign.md).
 
