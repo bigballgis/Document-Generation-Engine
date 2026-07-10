@@ -10,7 +10,7 @@ verifiability/publish-gate **Done** (2026-06-25); **P20** i18n **Done** (2026-06
 **Active formal program:** **CODE-QUALITY** — Code hygiene & structural consistency — **In Progress** (2026-07-09; Wave 1 **CQ-01A** + **CQ-01B** In Progress); see [program entry](code-quality-program.md) and [task sheet](detail/CODE-QUALITY-code-hygiene.md). **CORE-FORTRESS program Done** (F1–F8; 2026-07-09; `mvn verify` **1154**). **Prior:** **CORE-FORTRESS F7 Done** (authoring UX; Vitest **894**; E2E **12/12**); **F6 Done** (frontend kernel refactor; composable **73** Vitest).
 **Active work (CDP session):** **[CDP Wave CD-0](./competitiveness-deepening-program.md)** — `CD-*` tasks only.
 
-**Ad-hoc slice (2026-07-10):** **[MGMT-UI-DEFECTS](detail/MGMT-UI-defects.md)** — Round 2 / P0 **Done**; **Round 3 / P1 depth governance In Progress** (`mgmt-ui-p1`, worktree `DGE-mgmt-ui-p1` / `feat/mgmt-ui-p1`). Formal phase remains **None**.
+**Ad-hoc slice (2026-07-10):** **[MGMT-UI-DEFECTS](detail/MGMT-UI-defects.md)** — Round 2 / P0 **Done**; **Round 3 / P1 depth governance Done** (`mgmt-ui-p1`; merge `180bffb`; worktree removed). Formal phase remains **None**.
 
 **Formal phase P23:** **[P23 Demo typography & layout excellence](detail/P23-demo-typography-layout-excellence.md)** — **Done** (2026-07-08; T01–T16; bank-grade Word output for all demo packages).
 **Formal phase P22:** **Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](detail/P22-demo-expansion-rendering-fidelity.md).

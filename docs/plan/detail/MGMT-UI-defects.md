@@ -2,10 +2,10 @@
 
 **Program / slice family:** `mgmt-ui-defects` (ad-hoc; **not** a formal P-phase)  
 **Formal plan phase:** **None** — single-active-phase discipline OK (ad-hoc slice does not occupy a P* slot)  
-**Active delivery slice:** `mgmt-ui-p1` — **Round 3 / P1 depth governance** → **In Progress** (2026-07-10)  
+**Active delivery slice:** `mgmt-ui-p1` — **Round 3 / P1 depth governance** → **Done** (2026-07-10)  
 **Prior slice:** `mgmt-ui-defects` Round 2 / P0 → **Done** (2026-07-10; snapshotted on feat as `3a616e8`)  
-**Placement (Round 3):** ISOLATED — `D:/working/DGE-mgmt-ui-p1` · branch `feat/mgmt-ui-p1` (base: `origin/main` + R2 snapshot)  
-**BDD:** [mgmt-ui-defects-behavior-spec.md](../../requirements/mgmt-ui-defects-behavior-spec.md) — Round 2 v1.1.0 **ready**; Round 3 / P1 → **v1.2.0 in progress** (`behavior-spec-author`)
+**Placement (Round 3 closeout):** MAIN — merge `180bffb` (`feat/mgmt-ui-p1` → `main`); feature commit `e70dfd0`; worktree `DGE-mgmt-ui-p1` **REMOVED**  
+**BDD:** [mgmt-ui-defects-behavior-spec.md](../../requirements/mgmt-ui-defects-behavior-spec.md) — Round 2 v1.1.0 **ready**; Round 3 / P1 → **v1.2.0 ready** (P1-1..P1-3 Done; P1-4 Deferred / non-goal; OQ-P1-3-1 → **Option B**)
 
 ---
 
@@ -23,15 +23,15 @@ Fix confirmed Docker acceptance-stack management UI defects, apply bounded front
 | D4 | Login username validation false positive | frontend | **Done** |
 | A1 | Bounded audit on touched surfaces | frontend | **Done** |
 
-### Round 3 / P1 depth governance (In Progress)
+### Round 3 / P1 depth governance (Done)
 
 | ID | Area | Owner | Status |
 | --- | --- | --- | --- |
 | P1-1 | Login password trim (mirror username trim; no false required errors from edge whitespace) | frontend | **Done** |
 | P1-2 | GroupManagementPanel — unified `LoadErrorPanel` + retry on list/load failure | frontend | **Done** |
-| P1-3 | Release Approval — read-only publish-gate checklist (`PublishGateReadOnlyPanel` or equiv.; real API only) | frontend (+ backend if API gap) | **Done** |
+| P1-3 | Release Approval — read-only publish-gate checklist (`PublishGateReadOnlyPanel`; real API only) | frontend + backend | **Done** — Option B: `GET .../releases/{rv}/publish-gate` |
 | P1-4 | API policy home empty/error UX polish — only if gaps remain after R2; else confirmed non-goal | frontend | **Deferred** — confirmed non-goal (R2 D3/alerts-first already closed gaps) |
-| P1-5 | Residual E2E journeys for D1–D4 (+ P1 scenarios) on Docker `:4173` | e2e | **In Progress** |
+| P1-5 | Residual E2E journeys for D1–D4 (+ P1 scenarios) on Docker `:4173` | e2e | **Done** — `mgmt-ui-p1-residual.spec.ts` **12/12**; UIUX **PASS** @1920 |
 
 ---
 
@@ -46,15 +46,15 @@ Fix confirmed Docker acceptance-stack management UI defects, apply bounded front
 | 3 | Backend gates for touched apimgmt | `ApiAccessAlertQueryServiceTest` + `ApiAccessControllerTest` — **9/9** (2026-07-10) |
 | 4 | Docker deploy | `docker-deploy-queue.ps1` — **GREEN** (2026-07-10) |
 
-### Round 3 / P1 (open)
+### Round 3 / P1 (met)
 
 | # | Criterion | Evidence |
 | --- | --- | --- |
-| 1 | BDD-MGMT-UI P1-1..P1-3 readiness **ready** (v1.2.0); P1-4 out of scope | P1-4 **Deferred** (confirmed non-goal) |
-| 2 | P1-1..P1-3 durable behavior + regression tests | **Done** — frontend-engineer implementation landed |
-| 3 | Frontend (and backend if P1-3 API) gates green | **GREEN** — `pnpm -C frontend lint` / `type-check` / `test` / `build` (per frontend-engineer) |
-| 4 | E2E residual D1–D4 + P1 journeys (P1-5) | **In Progress** / pending |
-| 5 | Queued Docker deploy evidence | _pending_ |
+| 1 | BDD-MGMT-UI P1-1..P1-3 readiness **ready** (v1.2.0); P1-4 out of scope | P1-4 **Deferred** (confirmed non-goal); OQ-P1-3-1 → **Option B** |
+| 2 | P1-1..P1-3 durable behavior + regression tests | **Done** — feature commit `e70dfd0`; merge `180bffb` |
+| 3 | Frontend + backend gates green | **GREEN** — `pnpm -C frontend lint` / `type-check` / `test` / `build`; `mvn -B -ntp -f backend/pom.xml verify` (worktree) |
+| 4 | E2E residual D1–D4 + P1 journeys (P1-5) | **Done** — `mgmt-ui-p1-residual.spec.ts` **12/12** PASS |
+| 5 | Queued Docker deploy + UIUX + architecture | `docker-deploy-queue.ps1` **GREEN** (:8080/:4173); UIUX **PASS** @1920 (Critical cleared after Option B); architecture-reviewer **PASS** |
 
 ---
 
@@ -76,9 +76,9 @@ Fix confirmed Docker acceptance-stack management UI defects, apply bounded front
 | --- | --- | --- |
 | P1-1 | Frontend: trim password edges on login submit; align validators with username trim | **Done** |
 | P1-2 | Frontend: GroupManagementPanel load failures → `LoadErrorPanel` + retry | **Done** |
-| P1-3 | Frontend: Approval tab publish-gate read-only checklist; add/reuse real API — no fake data | **Done** |
+| P1-3 | Frontend + backend: Approval tab publish-gate read-only checklist via release-scoped `GET .../releases/{rv}/publish-gate` (Option B) | **Done** |
 | P1-4 | Frontend: API policy home empty/error polish **or** document confirmed deferral | **Deferred** — confirmed non-goal (R2 gaps closed) |
-| P1-5 | E2E: residual D1–D4 + P1 acceptance journeys on queued Docker stack | **In Progress** |
+| P1-5 | E2E: residual D1–D4 + P1 acceptance journeys on queued Docker stack | **Done** |
 
 ---
 
@@ -87,11 +87,12 @@ Fix confirmed Docker acceptance-stack management UI defects, apply bounded front
 | Module | Files |
 | --- | --- |
 | Layout | `frontend/src/components/layout/ManagementShell.vue`, `AppPageLayout.vue` |
-| Release | `TemplateReleaseDetailView.vue`, `TemplateLifecycleAuditTimeline.vue`, `TemplateDetailOverviewTab.vue`, `api/templates.ts` |
+| Release | `TemplateReleaseDetailView.vue`, `TemplateLifecycleAuditTimeline.vue`, `TemplateDetailOverviewTab.vue`, `PublishGateReadOnlyPanel.vue`, `api/templates.ts` |
 | API policy | `frontend/src/views/api/ApiPolicyHomeView.vue` |
 | Login | `frontend/src/views/LoginView.vue` |
-| Users / groups | `frontend/src/views/identity/UserManagementView.vue`, GroupManagement surfaces |
-| Backend | `backend/.../apimgmt/service/ApiAccessAlertQueryService.java`, `web/ApiAccessController.java`; publish-gate read API if required for P1-3 |
+| Users / groups | `frontend/src/views/identity/UserManagementView.vue`, `GroupManagementPanel.vue` |
+| Backend | `ApiAccessAlertQueryService` / `ApiAccessController` (R2); `PublishGateService` + `TemplateVersionLineController` release publish-gate (P1-3 Option B) |
+| E2E / UIUX | `frontend/e2e/mgmt-ui-p1-residual.spec.ts`; `frontend/e2e/evidence/mgmt-ui-p1*` |
 
 ---
 
@@ -100,11 +101,13 @@ Fix confirmed Docker acceptance-stack management UI defects, apply bounded front
 | Field | Value |
 | --- | --- |
 | slice-id | `mgmt-ui-p1` |
-| worktree | `D:/working/DGE-mgmt-ui-p1` |
-| branch | `feat/mgmt-ui-p1` |
-| R2 continuity | Commit `3a616e8` — Round 2 P0 snapshot (MAIN had R2 uncommitted + unrelated WIP; P1 worktree excludes `.cursor/` / demo docx) |
-| Integration base | `main` (via `integration-merger` after green gates) |
-| Docker | QUEUE_ONLY — `.\scripts\docker-deploy-queue.ps1` |
+| worktree (delivery) | `D:/working/DGE-mgmt-ui-p1` — **REMOVED** after stage 11 |
+| branch | `feat/mgmt-ui-p1` (merged) |
+| feature commit | `e70dfd08caefec1602bc9a8192414369f0e215bd` |
+| merge SHA | `180bffba8595374893ea6b4d6f7b249bc3841723` (`feat/mgmt-ui-p1` → `main`) |
+| R2 continuity | Commit `3a616e8` — Round 2 P0 snapshot |
+| Doc-sync / commit | Stage 12 on **MAIN**; user **no-commit** for end gate — plan/ledger/BDD sync only |
+| Docker | QUEUE_ONLY — `.\scripts\docker-deploy-queue.ps1` **GREEN** |
 
 ---
 
@@ -118,4 +121,6 @@ Fix confirmed Docker acceptance-stack management UI defects, apply bounded front
 | 2026-07-10 | R2 gates green — targeted vitest + `pnpm build` |
 | 2026-07-10 | Round 2 / P0 **Done**; R2 snapshotted onto `feat/mgmt-ui-p1` as `3a616e8` |
 | 2026-07-10 | **Round 3 / P1 depth governance activated → In Progress** (`mgmt-ui-p1`; ISOLATED `DGE-mgmt-ui-p1`); P1-1..P1-3 In Progress; P1-4/P1-5 Not Started; BDD v1.2.0 authoring in flight |
-| 2026-07-10 | P1-1..P1-3 implementation **Done** (frontend gates **GREEN** per frontend-engineer); P1-4 **Deferred** / confirmed non-goal (R2 gaps closed); P1-5 E2E **In Progress** / pending |
+| 2026-07-10 | P1-1..P1-3 implementation **Done** (frontend gates **GREEN**); P1-4 **Deferred** / confirmed non-goal; P1-5 E2E **In Progress** |
+| 2026-07-10 | P1-5 E2E **12/12** + UIUX **PASS** @1920 + architecture-reviewer **PASS**; Docker queue **GREEN**; merge `180bffb` to MAIN; worktree removed |
+| 2026-07-10 | **Round 3 / P1 depth governance → Done** (ad-hoc; formal phase remains **None**); stage 12 doc-sync on MAIN; **no-commit** per user |

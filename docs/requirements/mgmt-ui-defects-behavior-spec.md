@@ -177,22 +177,23 @@ P1-1…P1-3 add journeys on top; P1-4 does not expand E2E beyond D3 residual.
 
 | # | Question | Impact | Default if unanswered |
 | --- | --- | --- | --- |
-| OQ-P1-3-1 | For published release Approval, must publish-gate checklist be a **historical snapshot at publish time**, or is **live** `GET .../publish-gate` at view time acceptable if labeled “current evaluation”? | Chooses Option A vs B for P1-3 | **Blocked for implementation choice only** — UX still ready: show real API data or honest error/empty. Prefer Option A (reuse live gate) **only if** labeling is explicit; otherwise implementers add minimal release-scoped read (Option B). Product owner should confirm before backend work. |
+| OQ-P1-3-1 | For published release Approval, must publish-gate checklist be a **historical snapshot at publish time**, or is **live** `GET .../publish-gate` at view time acceptable if labeled “current evaluation”? | Chooses Option A vs B for P1-3 | **Resolved (2026-07-10): Option B** — release-scoped `GET .../releases/{rv}/publish-gate` (durable read for Approval tab). Implemented and verified (E2E/UIUX/architecture PASS). |
 
-All other P1 items are unambiguous. **BDD readiness is `ready`** with OQ-P1-3-1 tracked as an implementation-choice open question (does not block scenario authorship or frontend tests that mock the chosen client API).
+All other P1 items are unambiguous. **BDD readiness is `ready`** (v1.2.0). OQ-P1-3-1 **resolved → Option B**.
 
 ---
 
 ## Traceability
 
-- Plan: [MGMT-UI-defects.md](../plan/detail/MGMT-UI-defects.md) (R2 Done; P1 depth extends slice)
-- Behavior slice: `mgmt-ui-p1` / tasks `P1-1`…`P1-4`
+- Plan: [MGMT-UI-defects.md](../plan/detail/MGMT-UI-defects.md) (R2 Done; Round 3 / P1 **Done**)
+- Behavior slice: `mgmt-ui-p1` / tasks `P1-1`…`P1-4` (P1-4 Deferred / non-goal)
 - Layout: `ManagementShell.vue`, `AppPageLayout.vue`
 - Login: `LoginView.vue` (D4 username trim; P1-1 password trim)
 - Identity: `GroupManagementPanel.vue` (P1-2), `UserManagementListSection.vue` (pattern reference)
-- Release: `TemplateReleaseDetailView.vue`, `TemplateLifecycleAuditTimeline.vue`
-- Publish gate (inventory): `templatesApi.fetchPublishGate` → `GET /templates/{templateId}/publish-gate`; lifecycle UI in `TemplateDetailApprovalTab.vue` / `useTemplateLifecycleGates.ts`
+- Release: `TemplateReleaseDetailView.vue`, `TemplateLifecycleAuditTimeline.vue`, `PublishGateReadOnlyPanel.vue`
+- Publish gate (P1-3 Option B): `templatesApi` → `GET .../releases/{rv}/publish-gate` (release-scoped); also inventory `GET /templates/{templateId}/publish-gate` for lifecycle
 - Policies: `ApiPolicyHomeView.vue` (R2; P1-4 non-goal)
+- E2E / UIUX: `frontend/e2e/mgmt-ui-p1-residual.spec.ts`; `frontend/e2e/evidence/mgmt-ui-p1*`
 
 ---
 
@@ -203,5 +204,7 @@ bdd_readiness: ready
 version: 1.2.0
 task_ids: [mgmt-ui-p1, P1-1, P1-2, P1-3, P1-4]
 owning_doc: docs/requirements/mgmt-ui-defects-behavior-spec.md
-open_questions: [OQ-P1-3-1]
+open_questions: []
+resolved: [OQ-P1-3-1 → Option B GET .../releases/{rv}/publish-gate]
+slice_status: Done (2026-07-10; merge 180bffb)
 ```
