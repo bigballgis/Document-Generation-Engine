@@ -255,22 +255,22 @@
         "id": "19",
         "title": "CDP CD-2 T07 API policy edit → impact preview → save",
         "description": "Next highest-value CD-2 E2E after T08 Done: CD-E2E-T07 API policy edit → impact preview → save (browser-only task-completion + UIUX manifest). BDD ready: api-policy-edit-save-journey.md (BDD-CDP-APIPOL-001/002). Do NOT mark wave CD-2 Done. Do NOT activate T09–T13. Out of scope: audit-governance, LR-C5.",
-        "details": "IN PROGRESS 2026-07-10. Slice id: cdp-e2e-t07-api-policy. Status: in-progress. Placement: ISOLATED D:/working/DGE-cdp-e2e-t07-api-policy · feat/cdp-e2e-t07-api-policy · base 71ee0b8 (T08 merge tip c62b1a1 on main). BDD ready: docs/behavior/api-policy-edit-save-journey.md (BDD-CDP-APIPOL-001/002). Sole active CDP E2E slice (T08 stays Done; T09–T13 Not Started). Wave CD-2 stays In Progress (partial — T01–T08 Done; T07 active). Formal phase remains None. Existing scaffold: frontend/e2e/CDP-E2E-T07-api-policy-edit-save.spec.ts (may still skip — close skip + green Docker evidence). Acceptance: one config domain edited → impact preview → save confirmed → audit entry link visible; paired UIUX manifest Verdict PASS.",
+        "details": "COMPLETED 2026-07-11. Slice id: cdp-e2e-t07-api-policy. Status: done. Merge 1eb230b; worktree DGE-cdp-e2e-t07-api-policy REMOVED (git; leftover empty dir may remain). BDD ready: docs/behavior/api-policy-edit-save-journey.md (BDD-CDP-APIPOL-001/002). Behavior: API policy edit → impact preview → save; hard-block finding UI. Wave CD-2 stays In Progress (partial — T01–T08 + T07 Done; T09–T13 Not Started; no sole-active CDP E2E slice). Formal phase remains None. Gates: frontend lint/type-check/test/build PASS (955 tests); Playwright docker --workers=1 functional 2 passed (CDP-E2E-T07-api-policy-edit-save.spec.ts); UIUX Verdict PASS (CDP-E2E-T07-uiux-manifest.md + 9 screenshots); architecture PASS_WITH_SUGGESTIONS/APPROVE (no Critical); Stage 5/10 healthz/4173 200 (final deploy MAIN @ 1eb230b). Next recommend: T09 (preview comparison) or T10/T13.",
         "testStrategy": "1. GROUP_ADMIN opens published template API management. 2. Edit one config domain (e.g. output format) → impact preview shown. 3. Confirm warnings / handle hard-block → save; policyVersion increments. 4. Audit entry link visible. 5. Paired UIUX manifest Verdict PASS. 6. docker-deploy-queue healthz/4173 OK. 7. Do not claim wave CD-2 Done.",
         "priority": "high",
         "dependencies": [
           "18"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-10T15:45:00.000Z"
+        "updatedAt": "2026-07-11T00:46:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T15:45:00.000Z",
+      "lastModified": "2026-07-11T00:46:00.000Z",
       "taskCount": 19,
-      "completedCount": 18,
+      "completedCount": 19,
       "tags": [
         "master"
       ]
