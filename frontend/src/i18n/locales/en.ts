@@ -70,6 +70,15 @@ export default {
         ready: 'No unresolved blockers detected.',
         blocked: 'Unresolved blockers remain.',
       },
+      contentModuleReferences: {
+        ready: 'Content module references are valid.',
+        blocked: 'Content module references are missing or invalid.',
+      },
+      unsupportedStructuredNodes: {
+        ready: 'Structured content nodes are supported by the DOCX writer.',
+        blocked:
+          'Structured content contains unsupported or writer-missing node types that would cause silent content loss.',
+      },
     },
     apimgmt: {
       policyImpact: {
@@ -1097,6 +1106,8 @@ export default {
         APPROVAL_SUMMARY: 'Approval summary',
         COVERAGE_THRESHOLDS: 'Coverage thresholds',
         API_POLICY: 'API access',
+        CONTENT_MODULE_REFERENCES: 'Content module references',
+        UNSUPPORTED_STRUCTURED_NODES: 'Unsupported structured nodes',
         BLOCKER_STATUS: 'Blocker status',
       },
     },

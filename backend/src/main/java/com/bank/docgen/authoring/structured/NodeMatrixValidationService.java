@@ -2,6 +2,7 @@ package com.bank.docgen.authoring.structured;
 
 import com.bank.docgen.sharedkernel.document.expression.ConditionExpressionEvaluator;
 import com.bank.docgen.sharedkernel.document.fidelity.FidelityWarningCode;
+import com.bank.docgen.sharedkernel.document.structured.WriterUnsupportedStructuredNodeTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -63,15 +64,12 @@ public class NodeMatrixValidationService {
         String rawType = node.path("type").asText("");
         StructuredContentNodeType nodeType = StructuredContentNodeType.fromJsonType(rawType).orElse(null);
         if (nodeType == null) {
-            blockers.add(new StructuredContentFidelityIssue(
-                    StructuredContentFidelitySeverity.BLOCKER,
-                    FidelityWarningCode.UNSUPPORTED_NODE,
-                    MESSAGE_KEY_UNSUPPORTED_NODE,
-                    location,
-                    "Unsupported node type '" + sanitizeForSummary(rawType) + "' at " + location + ".",
-                    "Replace the node with a supported v1 node type."
-            ));
+            blockers.add(unsupportedNodeIssue(location, rawType));
             return;
+        }
+        // LR-A4: matrix-declared types without a DOCX writer must block publish/bind early.
+        if (WriterUnsupportedStructuredNodeTypes.containsJsonType(rawType)) {
+            blockers.add(unsupportedNodeIssue(location, rawType));
         }
         if (nodeType == StructuredContentNodeType.VARIABLE) {
             String variableKey = node.path("key").asText("").trim();
@@ -153,6 +151,30 @@ public class NodeMatrixValidationService {
                 "Condition expression '" + sanitizeForSummary(expression) + "' is malformed.",
                 "Fix the condition expression syntax or remove the condition block."
         );
+    }
+
+    private StructuredContentFidelityIssue unsupportedNodeIssue(String location, String rawType) {
+        return new StructuredContentFidelityIssue(
+                StructuredContentFidelitySeverity.BLOCKER,
+                FidelityWarningCode.UNSUPPORTED_NODE,
+                MESSAGE_KEY_UNSUPPORTED_NODE,
+                location,
+                "Unsupported node type '" + sanitizeForSummary(rawType) + "' at " + location + ".",
+                "Replace the node with a supported v1 node type that has a DOCX writer."
+        );
+    }
+
+    /**
+     * Counts {@link FidelityWarningCode#UNSUPPORTED_NODE} blockers (unknown types and
+     * writer-unsupported matrix types). Used by the publish gate dedicated check.
+     */
+    public int countUnsupportedNodeBlockers(String structuredContentJson) {
+        if (structuredContentJson == null || structuredContentJson.isBlank()) {
+            return 0;
+        }
+        return (int) validate(structuredContentJson, Set.of()).blockers().stream()
+                .filter(issue -> issue.code() == FidelityWarningCode.UNSUPPORTED_NODE)
+                .count();
     }
 
     private StructuredContentFidelityIssue invalidDocumentIssue() {

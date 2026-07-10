@@ -69,6 +69,14 @@ export default {
         ready: '未检测到未解决的阻塞项。',
         blocked: '仍存在未解决的阻塞项。',
       },
+      contentModuleReferences: {
+        ready: '内容模块引用有效。',
+        blocked: '内容模块引用缺失或无效。',
+      },
+      unsupportedStructuredNodes: {
+        ready: '结构化内容节点均可由 DOCX writer 渲染。',
+        blocked: '结构化内容包含不支持或缺少 writer 的节点类型，会导致静默丢内容。',
+      },
     },
     apimgmt: {
       policyImpact: {
@@ -1123,6 +1131,8 @@ export default {
         APPROVAL_SUMMARY: '审批摘要',
         COVERAGE_THRESHOLDS: '覆盖率阈值',
         API_POLICY: 'API 接入',
+        CONTENT_MODULE_REFERENCES: '内容模块引用',
+        UNSUPPORTED_STRUCTURED_NODES: '不支持的结构化节点',
         BLOCKER_STATUS: '阻塞项状态',
       },
     },

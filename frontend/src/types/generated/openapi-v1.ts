@@ -1979,7 +1979,7 @@ export interface components {
             result: components["schemas"]["TemplateDetailView"];
         };
         /** @enum {string} */
-        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "BLOCKER_STATUS";
+        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "UNSUPPORTED_STRUCTURED_NODES" | "BLOCKER_STATUS";
         PublishGateItemView: {
             checkCode: components["schemas"]["PublishGateCheckCode"];
             ready: boolean;

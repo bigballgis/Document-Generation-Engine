@@ -357,9 +357,11 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **Blocker（阻止发布）：** 未声明变量引用（`UNRESOLVED_VARIABLE`）、不支持节点类型（`UNSUPPORTED_NODE`）等。
 
-**Warning（摘要 + 确认）：** 低风险缩放差异（`IMAGE_SCALING_ADJUSTED`）等。
+**「不支持节点」语义（LR-A4 / BDD-LRP-A4-FAIL-CLOSED-001，2026-07-10 确认）：** 包括 (1) **未知** `type`（不在 `StructuredContentNodeType`）；(2) **writer-unsupported** — 矩阵已声明但当前无 DOCX 发射分支的类型。v1 当前 writer-unsupported set = `{ qrBarcodeRef, attachmentListRef }`。此类节点必须在绑定校验与发布门禁 **硬阻断**，预览/运行时生成 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。完整 QR/附件列表 writer **不在** LR-A4 范围（另任务从 set 移除后方可发布含该节点的版本）。
 
-绑定保存与 `validateBindings` 路径通过 `TemplateService.computeBindingStatus` 合并节点 blockers → `BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE`，进而阻塞 `PublishGateService` 锚点完整性检查项。
+**Warning（摘要 + 确认）：** 低风险缩放差异（`IMAGE_SCALING_ADJUSTED`）等。Writer-unsupported **不得** 降级为可发布 warning。
+
+绑定保存与 `validateBindings` 路径通过 `TemplateService.computeBindingStatus` 合并节点 blockers → `BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE`，进而阻塞 `PublishGateService` 锚点完整性检查项；LR-A4 可另增专用 checklist 项（见行为规格 LR-A4-C5）。
 
 #### 2.6.3 母版样式目录与有限直接格式 Master style catalog & direct format（P18-T03）
 
@@ -381,7 +383,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 - **签章 `sealRef`：** `placement.withinAuthorizedArea=false` → `SEAL_OUTSIDE_AUTHORIZED_AREA` blocker；`applyScaling` → `SEAL_SCALING_NOT_ALLOWED` blocker（签章/QR 不适用图片缩放 warning）
 - **图片 `imageRef`：** `applyScaling` → `IMAGE_SCALING_ADJUSTED` warning（自 T02 迁至本服务）
-- **附件列表 `attachmentListRef`：** 有效 `referenceKey` 解析为 `AttachmentListReferenceModel`
+- **二维码/条码 `qrBarcodeRef` / 附件列表 `attachmentListRef`：** 可校验 `referenceKey` 形态；**在 writer 落地前** 另由 LR-A4 writer-unsupported 规则作为 **发布阻断**（不得因 key 合法而允许发布或静默渲染）。有效 `attachmentListRef.referenceKey` 仍可解析为 `AttachmentListReferenceModel` 供校验/清单使用，但不代表可 DOCX 发射
 
 #### 2.6.6 受控多级编号 Controlled numbering（P18-T06）
 
