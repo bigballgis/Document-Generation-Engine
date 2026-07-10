@@ -153,6 +153,34 @@ describe('templates API', () => {
     expect(checklist.ready).toBe(true)
   })
 
+  it('fetches release-scoped publish-gate checklist', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          templateId: 'tpl-1',
+          ready: true,
+          blockerCount: 0,
+          items: [
+            {
+              checkCode: 'APPROVAL_SUMMARY',
+              ready: true,
+              blocker: true,
+              messageKey: 'templates.publishGate.checkCodes.APPROVAL_SUMMARY',
+              summary: 'Approval summary',
+            },
+          ],
+        },
+      },
+    })
+
+    const checklist = await templatesApi.fetchReleasePublishGate('tpl-1', '1.0.0')
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/releases/1.0.0/publish-gate')
+    expect(checklist.ready).toBe(true)
+    expect(checklist.items).toHaveLength(1)
+  })
+
   it('lists template content module references', async () => {
     vi.mocked(http.get).mockResolvedValue({
       data: {

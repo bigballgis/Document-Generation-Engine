@@ -272,6 +272,40 @@ class TemplateVersionLineControllerTest {
 
     @Test
 
+    void getReleasePublishGateReturnsChecklistWithoutInFlightDev() throws Exception {
+
+        String masterId = uploadAndApproveMaster();
+
+        String templateId = createTemplate(masterId);
+
+        configureTemplate(templateId);
+
+        runLifecycle(templateId);
+
+
+
+        mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/releases/1.0.0/publish-gate")
+
+                        .with(authentication(new ManagementAuthentication(templateAuthor))))
+
+                .andExpect(status().isOk())
+
+                .andExpect(jsonPath("$.result.templateId").value(templateId))
+
+                .andExpect(jsonPath("$.result.items").isArray())
+
+                .andExpect(jsonPath("$.result.items.length()").value(org.hamcrest.Matchers.greaterThan(0)))
+
+                .andExpect(jsonPath("$.result.items[0].checkCode").exists())
+
+                .andExpect(jsonPath("$.result.items[0].messageKey").exists());
+
+    }
+
+
+
+    @Test
+
     void clonePublishedReleaseCreatesNewDraftDevLine() throws Exception {
 
         String masterId = uploadAndApproveMaster();

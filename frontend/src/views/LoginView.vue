@@ -24,6 +24,7 @@ const form = reactive({
 })
 
 const errorMessageKey = ref<string | null>(null)
+const passwordInlineError = ref('')
 const submitting = ref(false)
 
 const brandOptions = computed(() => [
@@ -83,9 +84,20 @@ function handleLocaleChange(locale: string) {
   void appStore.setLocale(resolveAppLocale(locale))
 }
 
+function clearPasswordInlineError() {
+  passwordInlineError.value = ''
+}
+
 async function submitLogin() {
   errorMessageKey.value = null
+  passwordInlineError.value = ''
   form.username = form.username.trim()
+  form.password = form.password.trim()
+  // Edge-only trim: whitespace-only becomes empty → same required outcome as blank.
+  if (!form.password) {
+    passwordInlineError.value = t('login.validation.passwordRequired')
+    return
+  }
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) {
     return
@@ -170,7 +182,15 @@ async function submitLogin() {
               autocomplete="current-password"
               show-password
               :aria-label="t('login.password')"
+              @input="clearPasswordInlineError"
             />
+            <p
+              v-if="passwordInlineError"
+              class="el-form-item__error"
+              data-testid="login-password-required"
+            >
+              {{ passwordInlineError }}
+            </p>
           </el-form-item>
           <el-form-item :label="t('login.brandLabel')">
             <AppSearchSelect

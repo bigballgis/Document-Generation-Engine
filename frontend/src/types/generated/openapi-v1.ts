@@ -824,6 +824,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/templates/{templateId}/releases/{releaseVersion}/publish-gate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Evaluate publish-gate checklist for a published release version
+         * @description Live publish-gate evaluation against the published release version entity (bindings, coverage, rules, previews, content-module refs scoped to that version). Does **not** require an in-flight DEV line. Reuses the same checklist item builders as `GET /templates/{templateId}/publish-gate`. Unknown release version returns `404`. This is a live evaluation against the release snapshot semantics — not a historical gate result persisted at publish time.
+         */
+        get: operations["getTemplateReleasePublishGate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/templates/{templateId}/release-versions/{releaseVersion}/clone": {
         parameters: {
             query?: never;
@@ -1957,6 +1977,26 @@ export interface components {
         TemplateDetailResponse: {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["TemplateDetailView"];
+        };
+        /** @enum {string} */
+        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "BLOCKER_STATUS";
+        PublishGateItemView: {
+            checkCode: components["schemas"]["PublishGateCheckCode"];
+            ready: boolean;
+            blocker: boolean;
+            messageKey: string;
+            summary: string;
+        };
+        PublishGateChecklistView: {
+            /** Format: uuid */
+            templateId: string;
+            ready: boolean;
+            blockerCount: number;
+            items: components["schemas"]["PublishGateItemView"][];
+        };
+        PublishGateChecklistResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PublishGateChecklistView"];
         };
         /** @enum {string} */
         MasterAnchorContentType: "TEXT" | "RICH_TEXT" | "TABLE" | "IMAGE" | "CLAUSE" | "STAMP" | "BARCODE" | "ATTACHMENT_LIST" | "UNSPECIFIED";
@@ -4580,6 +4620,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TemplateVersionLineDetailResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getTemplateReleasePublishGate: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+                /** @description Semantic release version (e.g. `1.0.0`). */
+                releaseVersion: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Publish-gate checklist for the published release version. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishGateChecklistResponse"];
                 };
             };
             401: components["responses"]["ErrorResponse"];

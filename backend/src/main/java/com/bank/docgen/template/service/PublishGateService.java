@@ -84,7 +84,50 @@ public class PublishGateService {
         CoverageSummaryView coverage = coverageComputationService.compute(templateId, session);
         ChangeDiffView changeDiff = changeDiffService.compute(templateId, session);
         TemplateRuleValidationView ruleValidation = validateCurrentRules(templateId, version, session);
+        return buildChecklist(templateId, version, phase, bindings, coverage, changeDiff, ruleValidation);
+    }
 
+    /**
+     * Live publish-gate evaluation against a published release version entity
+     * (not the in-flight DEV line). Reuses the same checklist builders as {@link #evaluate}.
+     */
+    @Transactional(readOnly = true)
+    public PublishGateChecklistView evaluateForRelease(
+            UUID templateId,
+            String releaseVersion,
+            ManagementSessionClaims session
+    ) {
+        templateService.requireReadableTemplate(templateId, session);
+        TemplateVersionEntity version = templateVersionRepository
+                .findByTemplateIdAndReleaseVersion(templateId, releaseVersion)
+                .orElseThrow(TemplateNotFoundException::new);
+        if (version.getReleaseVersion() == null || version.getReleaseVersion().isBlank()) {
+            throw new TemplateNotFoundException();
+        }
+        BindingValidationView bindings = templateService.validateBindingsForVersion(templateId, version, session);
+        CoverageSummaryView coverage = coverageComputationService.computeForVersion(templateId, version, session);
+        ChangeDiffView changeDiff = changeDiffService.computeForVersion(templateId, version, session);
+        TemplateRuleValidationView ruleValidation = validateRulesForVersion(templateId, version, session);
+        return buildChecklist(
+                templateId,
+                version,
+                PublishGatePhase.PUBLISH,
+                bindings,
+                coverage,
+                changeDiff,
+                ruleValidation
+        );
+    }
+
+    private PublishGateChecklistView buildChecklist(
+            UUID templateId,
+            TemplateVersionEntity version,
+            PublishGatePhase phase,
+            BindingValidationView bindings,
+            CoverageSummaryView coverage,
+            ChangeDiffView changeDiff,
+            TemplateRuleValidationView ruleValidation
+    ) {
         List<PublishGateItemView> items = new ArrayList<>();
         items.add(anchorIntegrityItem(bindings));
         items.add(variableSchemaItem(version.getId()));
@@ -296,7 +339,28 @@ public class PublishGateService {
             TemplateVersionEntity version,
             ManagementSessionClaims session
     ) {
-        List<TemplateRuleValidationItemRequest> rules = templateService.loadRules(version).stream()
+        return templateRuleValidationService.validateRules(
+                templateId,
+                new TemplateRuleValidationRequest(toRuleValidationItems(version)),
+                session
+        );
+    }
+
+    private TemplateRuleValidationView validateRulesForVersion(
+            UUID templateId,
+            TemplateVersionEntity version,
+            ManagementSessionClaims session
+    ) {
+        return templateRuleValidationService.validateRulesForVersion(
+                templateId,
+                version,
+                new TemplateRuleValidationRequest(toRuleValidationItems(version)),
+                session
+        );
+    }
+
+    private List<TemplateRuleValidationItemRequest> toRuleValidationItems(TemplateVersionEntity version) {
+        return templateService.loadRules(version).stream()
                 .map(rule -> new TemplateRuleValidationItemRequest(
                         rule.ruleId(),
                         rule.conditionExpression(),
@@ -305,10 +369,5 @@ public class PublishGateService {
                         rule.falseBranchRuleId()
                 ))
                 .toList();
-        return templateRuleValidationService.validateRules(
-                templateId,
-                new TemplateRuleValidationRequest(rules),
-                session
-        );
     }
 }

@@ -1,0 +1,95 @@
+{
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "captures": [
+    "01-dashboard-redbc-1920x1080.png",
+    "01-users-redbc-1920x1080.png",
+    "01-api-policies-redbc-1920x1080.png",
+    "02-dashboard-greenbc-1920x1080.png",
+    "03-users-greenbc-1920x1080.png",
+    "04-api-policies-greenbc-1920x1080.png",
+    "08-brand-header-greenbc-1920x1080.png",
+    "09-brand-header-redbc-1920x1080.png",
+    "05-release-detail-basics-redbc-1920x1080.png",
+    "06-release-detail-approval-redbc-1920x1080.png",
+    "07-release-detail-approval-greenbc-1920x1080.png",
+    "10-dashboard-mobile-375x812-note.png"
+  ],
+  "metrics": {
+    "dashboard-redbc": {
+      "ok": true,
+      "panel": true,
+      "shellW": 1660,
+      "layoutW": 1660,
+      "ratio": 1,
+      "overflowX": false,
+      "brand": "REDBC"
+    },
+    "users-redbc": {
+      "ok": true,
+      "panel": true,
+      "shellW": 1660,
+      "layoutW": 1660,
+      "ratio": 1,
+      "overflowX": false,
+      "brand": "REDBC"
+    },
+    "api-policies-redbc": {
+      "ok": true,
+      "panel": true,
+      "shellW": 1660,
+      "layoutW": 1660,
+      "ratio": 1,
+      "overflowX": false,
+      "brand": "REDBC"
+    },
+    "dashboard-greenbc": {
+      "ok": true,
+      "panel": true,
+      "shellW": 1660,
+      "layoutW": 1660,
+      "ratio": 1,
+      "overflowX": false,
+      "brand": "GREENBC"
+    },
+    "release-basics-redbc": {
+      "ok": true,
+      "panel": true,
+      "shellW": 1660,
+      "layoutW": 1660,
+      "ratio": 1,
+      "overflowX": false,
+      "brand": "REDBC"
+    },
+    "release-approval-redbc": {
+      "ok": true,
+      "panel": true,
+      "shellW": 1660,
+      "layoutW": 1660,
+      "ratio": 1,
+      "overflowX": false,
+      "brand": "REDBC"
+    }
+  },
+  "brandSwitcher": true,
+  "release": {
+    "templateId": "959fb33a-1333-4839-8395-f3019b9da6e3",
+    "releaseVersion": "1.0.0",
+    "externalId": "DEMO-FULL-FLOW-LETTER"
+  },
+  "liveChecksVisible": true,
+  "gateStatus": 200,
+  "gateItemCount": 11,
+  "templateNotFound": false,
+  "hasChecklist": true,
+  "hasHonestEmpty": false,
+  "hasLoadError": false,
+  "liveEvalCopy": true,
+  "legacyDevCopy": false,
+  "approvalSnippet": "Back to template package\nRelease 1.0.0\n\nPublished release snapshot — read-only.\n\nLive\nClone to new draft\nBasics\nTesting\nApproval\nVariables\nBindings\nRules\n\nApproval and go-live decisions are frozen in this published snapshot. No workflow actions are available here.\n\nRelease status\nLive\nApproval sub-state\nNot applicable for published releases\nCurrent pre-release checks evaluation\n\nLive evaluation of this published release version at view time — not a historical publish-time snapshot.\n\nLayout placeholder bindings are valid.\nInformational\nVariable schema is configured.\nInformational\nComposition rules are within bounds.\nInformational\nBatch test results are available.\nInformational\nSuccessful preview artifacts exist.\nInformational\nChange diff summary is available.\nInformational\nApproval decision recorded.\nInformational\nCoverage meets configured thresholds.\nInformational\nAPI access is configured.\nInformational\ninvalidReferences=0,totalReferences=0\nInformational\nNo unresolved blockers detected.\nInformational\nWorkflow audit trail\n\nRecorded workflow events for this template package (read-only). Filtered by package, not by individual release version.\n\n7/9/2026, 9:59:53 PM\n\nPUBLISH\n\nGroup Admin (10000002)\n\nPublished release 1.0.0.\n\n7/9/2026, 9:59:53 PM\n\nRECORD_APPROVAL_DECISION\n\nTemplate Approver (10000007)\n\nDemo publish-all-demos approval\n\n7/9/2026, 9:59:53 PM\n\nSUBMIT_FOR_APPROVAL\n\nTemplate Author (10000003)\n\nDemo publish-all-demos submit approval\n\n7/9/2026, 9:59:52 PM\n\nRECORD_TEST_DECISION\n\nTemplate Tester (10000006)\n\nDemo publish-all-demos test pass\n\n7/9/2026, 9:59:52 PM\n\nSUBMIT_FOR_TEST\n\nTemplate Author (10000003)\n\nDemo publish-all-demos automated submit\n\n7/9/2026, 9:57:58 PM\n\nRECORD_TEST_DECISION\n\nTemplate Tester (10000006)\n\nDemo publish-all-demos test pass\n\n7/9/2026, 9:57:58 PM\n\nSUBMIT_FOR_TEST\n\nTemplate Author (10000003)\n\nDemo publish-all-demos automated submit\n\n7/9/2026, 9:56:28 PM\n\nRECORD_TEST_DECISION\n\nTemplate Tester (10000006)\n\nDemo publish-all-demos test pass\n\n7/9/2026, 9:56:28 PM\n\nSUBMIT_FOR_TEST\n\nTemplate Author (10000003)\n\nDemo publish-all-demos automated submit\n\n7/9/2026, 9:55:08 PM\n\nRECORD_TEST_DECISION\n\nTemplate Tester (10000006)\n\nDemo publish-all-demos test pass\n\n7/9/2026, 9:55:08 PM\n\nSUBMIT_FOR_TEST\n\nTemplate Author (10000003)\n\nDemo publish-all-demos automated submit\n\n7/9/2026, 9:53:22 PM\n\nRECORD_TEST_DECISION\n\nTemplate Tester (10000006)\n\nDemo publish-all-demos test pass\n\n7/9/2026, 9:53:22 PM\n\nSUBMIT_FOR_TEST\n\nTemplate Author (10000003)\n\nDemo publ",
+  "criticalCleared": true,
+  "usersSettled": true,
+  "usersRowCount": 14
+}

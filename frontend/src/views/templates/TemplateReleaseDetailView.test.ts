@@ -5,6 +5,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import TemplateReleaseDetailView from '@/views/templates/TemplateReleaseDetailView.vue'
 import en from '@/i18n/locales/en'
+import * as templatesApi from '@/api/templates'
 import type { TemplateDetail } from '@/types/template'
 
 const routerReplace = vi.fn()
@@ -42,6 +43,15 @@ vi.mock('@/api/audit', () => ({
 vi.mock('@/api/masters', () => ({
   getMaster: vi.fn().mockResolvedValue({ name: 'Corporate letterhead' }),
 }))
+
+vi.mock('@/api/templates', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/api/templates')>()
+  return {
+    ...actual,
+    fetchPublishGate: vi.fn(),
+    fetchReleasePublishGate: vi.fn(),
+  }
+})
 
 const releaseDetail: TemplateDetail = {
   id: 'tpl-1',
@@ -84,6 +94,22 @@ describe('TemplateReleaseDetailView', () => {
     fetchReleaseVersionDetail.mockReset()
     cloneReleaseVersion.mockReset()
     fetchReleaseVersionDetail.mockResolvedValue(releaseDetail)
+    vi.mocked(templatesApi.fetchPublishGate).mockReset()
+    vi.mocked(templatesApi.fetchReleasePublishGate).mockReset()
+    vi.mocked(templatesApi.fetchReleasePublishGate).mockResolvedValue({
+      templateId: 'tpl-1',
+      ready: true,
+      blockerCount: 0,
+      items: [
+        {
+          checkCode: 'APPROVAL_SUMMARY',
+          ready: true,
+          blocker: true,
+          messageKey: 'templates.publishGate.checkCodes.APPROVAL_SUMMARY',
+          summary: 'Approval summary',
+        },
+      ],
+    })
   })
 
   it('renders read-only basics, testing, and approval workspace tabs', async () => {
@@ -100,6 +126,21 @@ describe('TemplateReleaseDetailView', () => {
     expect(wrapper.text()).toContain('Retail account open')
     expect(wrapper.text()).toContain('Bindings')
     expect(wrapper.text()).toContain('Rules')
+  })
+
+  it('P1-3: Approval tab shows release-scoped publish-gate read-only checklist', async () => {
+    routeState.query = { workspaceTab: 'approval' }
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(templatesApi.fetchReleasePublishGate).toHaveBeenCalledWith('tpl-1', '1.0.0')
+    expect(templatesApi.fetchPublishGate).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('Current pre-release checks evaluation')
+    expect(wrapper.text()).toContain('Live evaluation of this published release version')
+    expect(wrapper.text()).toContain('Approval summary')
+    const panel = wrapper.findComponent({ name: 'PublishGateReadOnlyPanel' })
+    expect(panel.exists()).toBe(true)
+    expect(panel.props('releaseVersion')).toBe('1.0.0')
   })
 
   it('shows LoadErrorPanel when release detail fetch fails', async () => {

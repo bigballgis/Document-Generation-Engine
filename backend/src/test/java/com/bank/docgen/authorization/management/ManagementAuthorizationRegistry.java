@@ -16,6 +16,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.apimgmt.web.ApiAccessController",
             "com.bank.docgen.apimgmt.web.ApiManagementController",
             "com.bank.docgen.audit.web.AuditController",
+            "com.bank.docgen.audit.web.GenerationAuditController",
             "com.bank.docgen.authorization.management.web.GroupManagementController",
             "com.bank.docgen.authorization.management.web.ManagementAuthController",
             "com.bank.docgen.authorization.management.web.UserManagementController",
@@ -54,6 +55,10 @@ final class ManagementAuthorizationRegistry {
             ),
             Map.entry(
                     "com.bank.docgen.audit.web.AuditController",
+                    Set.of("com.bank.docgen.audit.service.AuditQueryService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.audit.web.GenerationAuditController",
                     Set.of("com.bank.docgen.audit.service.AuditQueryService")
             ),
             Map.entry(
@@ -142,7 +147,10 @@ final class ManagementAuthorizationRegistry {
             ),
             Map.entry(
                     "com.bank.docgen.template.web.TemplateVersionLineController",
-                    Set.of("com.bank.docgen.template.service.TemplateVersionLineService")
+                    Set.of(
+                            "com.bank.docgen.template.service.TemplateVersionLineService",
+                            "com.bank.docgen.template.service.PublishGateService"
+                    )
             ),
             Map.entry(
                     "com.bank.docgen.template.web.TestDataSetController",

@@ -819,6 +819,12 @@ export default {
         lifecycleStatus: 'Release status',
         approvalSubState: 'Approval sub-state',
         noApprovalSubState: 'Not applicable for published releases',
+        publishGateTitle: 'Current pre-release checks evaluation',
+        publishGateSubtitle:
+          'Live evaluation of this published release version at view time — not a historical publish-time snapshot.',
+        publishGateEmptyTitle: 'No pre-release checks returned',
+        publishGateEmptyDescription:
+          'The live pre-release checks API returned no checklist items for this published release version. This is not a fabricated all-green state.',
         timelineTitle: 'Workflow audit trail',
         timelineHint:
           'Recorded workflow events for this template package (read-only). Filtered by package, not by individual release version.',

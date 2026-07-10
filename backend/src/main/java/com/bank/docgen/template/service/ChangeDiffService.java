@@ -60,7 +60,25 @@ public class ChangeDiffService {
         templateService.requireReadableTemplate(templateId, session);
         TemplateVersionEntity candidate = requireReleaseCandidate(templateId);
         TemplateVersionEntity baseline = findLastPublishedVersion(templateId).orElse(null);
+        return buildChangeDiff(templateId, candidate, baseline);
+    }
 
+    @Transactional(readOnly = true)
+    public ChangeDiffView computeForVersion(
+            UUID templateId,
+            TemplateVersionEntity candidate,
+            ManagementSessionClaims session
+    ) {
+        templateService.requireReadableTemplate(templateId, session);
+        TemplateVersionEntity baseline = findPreviousPublishedVersion(templateId, candidate).orElse(null);
+        return buildChangeDiff(templateId, candidate, baseline);
+    }
+
+    private ChangeDiffView buildChangeDiff(
+            UUID templateId,
+            TemplateVersionEntity candidate,
+            TemplateVersionEntity baseline
+    ) {
         List<ChangeDiffDimensionView> dimensions = new ArrayList<>();
         dimensions.add(diffContent(candidate, baseline));
         dimensions.add(diffAnchors(candidate.getId(), baseline == null ? null : baseline.getId()));
@@ -258,6 +276,19 @@ public class ChangeDiffService {
                 .filter(version -> version.getReleaseVersion() != null
                         && !version.getReleaseVersion().isBlank()
                         && version.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED)
+                .findFirst();
+    }
+
+    private java.util.Optional<TemplateVersionEntity> findPreviousPublishedVersion(
+            UUID templateId,
+            TemplateVersionEntity candidate
+    ) {
+        return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId).stream()
+                .filter(version -> version.getReleaseVersion() != null
+                        && !version.getReleaseVersion().isBlank()
+                        && version.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED
+                        && !version.getId().equals(candidate.getId())
+                        && version.getDevVersionNumber() < candidate.getDevVersionNumber())
                 .findFirst();
     }
 

@@ -85,4 +85,58 @@ describe('LoginView', () => {
     expect(loginMock).toHaveBeenCalledWith('10000001', 'secret')
     expect(wrapper.text()).not.toContain('Username is required.')
   })
+
+  it('P1-1-A: trims password edges before login and does not false-require password', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    loginMock.mockResolvedValue(undefined)
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(LoginView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await wrapper.find('input[autocomplete="username"]').setValue('10000001')
+    await wrapper.find('input[type="password"]').setValue(' secret ')
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    expect(loginMock).toHaveBeenCalledWith('10000001', 'secret')
+    expect(wrapper.text()).not.toContain('Password is required.')
+  })
+
+  it('P1-1-B: whitespace-only password fails required validation without auth call', async () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(LoginView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    await wrapper.find('input[autocomplete="username"]').setValue('10000001')
+    await wrapper.find('input[type="password"]').setValue('   ')
+    await wrapper.find('form').trigger('submit.prevent')
+    await flushPromises()
+
+    expect(loginMock).not.toHaveBeenCalled()
+    expect(wrapper.find('[data-testid="login-password-required"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="login-password-required"]').text()).toContain(
+      'Password is required.',
+    )
+  })
 })

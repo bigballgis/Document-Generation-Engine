@@ -77,6 +77,21 @@ public class CoverageComputationService {
     public CoverageSummaryView compute(UUID templateId, ManagementSessionClaims session) {
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
+        return computeForTemplateVersion(template, version);
+    }
+
+    @Transactional(readOnly = true)
+    public CoverageSummaryView computeForVersion(
+            UUID templateId,
+            TemplateVersionEntity version,
+            ManagementSessionClaims session
+    ) {
+        TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
+        return computeForTemplateVersion(template, version);
+    }
+
+    private CoverageSummaryView computeForTemplateVersion(TemplateEntity template, TemplateVersionEntity version) {
+        UUID templateId = template.getId();
         CoverageThresholdView threshold = coverageThresholdResolver.resolveForTemplate(template);
 
         List<TestDataSetEntity> dataSets = testDataSetRepository.findByTemplateIdOrderByUpdatedAtDesc(templateId);

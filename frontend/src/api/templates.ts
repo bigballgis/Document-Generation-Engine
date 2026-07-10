@@ -333,6 +333,16 @@ export async function fetchPublishGate(
   return unwrapEnvelope(response.data)
 }
 
+export async function fetchReleasePublishGate(
+  templateId: string,
+  releaseVersion: string,
+): Promise<PublishGateChecklist> {
+  const response = await http.get<ApiEnvelope<PublishGateChecklist>>(
+    `/templates/${templateId}/releases/${encodeURIComponent(releaseVersion)}/publish-gate`,
+  )
+  return unwrapEnvelope(response.data)
+}
+
 export async function fetchChangeDiff(templateId: string): Promise<ChangeDiffSummary> {
   const response = await http.get<ApiEnvelope<ChangeDiffSummary>>(
     `/templates/${templateId}/change-diff`,

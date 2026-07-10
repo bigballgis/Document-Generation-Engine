@@ -10,6 +10,7 @@ import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import BatchTestHistoryPanel from '@/components/template/BatchTestHistoryPanel.vue'
 import TemplateLifecycleAuditTimeline from '@/components/templates/TemplateLifecycleAuditTimeline.vue'
+import PublishGateReadOnlyPanel from '@/components/templates/PublishGateReadOnlyPanel.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import ReleaseSectionTable from '@/components/templates/ReleaseSectionTable.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
@@ -230,6 +231,10 @@ async function handleClone() {
             </div>
           </dl>
         </el-card>
+        <PublishGateReadOnlyPanel
+          :template-id="templateId"
+          :release-version="releaseVersion"
+        />
         <TemplateLifecycleAuditTimeline :template-id="templateId" />
       </template>
 

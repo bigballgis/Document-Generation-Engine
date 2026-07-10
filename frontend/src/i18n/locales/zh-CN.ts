@@ -805,6 +805,12 @@ export default {
         lifecycleStatus: '发布状态',
         approvalSubState: '审批子状态',
         noApprovalSubState: '已发布版本不适用',
+        publishGateTitle: '当前上线前检查评估',
+        publishGateSubtitle:
+          '查看时对此已发布版本的实时评估 — 并非发布时的历史快照。',
+        publishGateEmptyTitle: '未返回上线前检查项',
+        publishGateEmptyDescription:
+          '实时上线前检查 API 未返回此已发布版本的检查清单项。这不等于虚构的“全部通过”状态。',
         timelineTitle: '工作流审计轨迹',
         timelineHint: '此模板包已记录的工作流事件（只读）。按包筛选，非按单个发布版本。',
         timelineLoadError: '无法加载工作流审计轨迹。',
