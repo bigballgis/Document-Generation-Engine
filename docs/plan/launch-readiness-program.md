@@ -2,7 +2,7 @@
 
 **Program ID:** `LRP`  
 **Created:** 2026-07-03  
-**Status:** **In Progress** (Wave LR-B **Done** 2026-07-04; Wave LR-A activated 2026-07-04; Wave LR-C partial — LR-C1/C4 **Done** via CORE-FORTRESS F7 2026-07-09). **Formal phase / program:** **None**. **Delivery focus note (2026-07-10):** **LR-A3 Done** (`lrp-a3-upload-validation`; merge `e62c210`) — see [LRP-A detail](./detail/LRP-A-rendering-trust-hardening.md). **Recommended next:** CDP golden path (status note only — do **not** start CDP code). **CODE-QUALITY Done** (2026-07-09); see [code-quality-program.md](./code-quality-program.md).  
+**Status:** **In Progress** (Wave LR-B **Done** 2026-07-04; Wave LR-A activated 2026-07-04; Wave LR-C partial — LR-C1/C4 **Done** via CORE-FORTRESS F7 2026-07-09). **Formal phase / program:** **None**. **Delivery focus note (2026-07-10):** **LR-A3 Done** (`lrp-a3-upload-validation`; merge `e62c210`) — see [LRP-A detail](./detail/LRP-A-rendering-trust-hardening.md). **Sibling active focus:** CDP Wave CD-2 golden path (do **not** start LR-A4 from CDP slice). **CODE-QUALITY Done** (2026-07-09); see [code-quality-program.md](./code-quality-program.md).  
 **North star:** Lift the system from **「功能齐全」** to **「生产可靠 + 业务好用」** — absorb the industry's known production pitfalls (rendering/conversion, proxy streaming, multi-instance, session), and maximize functionality + usability **inside the confirmed v1 boundary**, before launch.
 
 **Authoritative entry for lower-tier implementers:** Read this file first, then the wave detail doc for your task ID prefix. LRP task IDs are prefixed **`LR-*`** only.
@@ -28,7 +28,7 @@
 | --- | --- | --- |
 | **P22** (P22-T01…T15, rendering + demo scaffolds) | **Done** (2026-07-04) — typography/content → **P23** | **Nothing.** Do not reopen P22. |
 | **P23** (P23-T01…T16, demo typography & layout excellence) | **Done** (2026-07-08) — track via [P23 detail](./detail/P23-demo-typography-layout-excellence.md) | **LR-A2 Done**; **LR-A7** still coordinates with P23 corpus; LRP does not own P23 package rewrites. |
-| **CDP** (CD-DOC/CD-BDD/CD-E2E/CD-HARD, `CD-*`) | **Recommended next delivery focus** (status note only) — track via [CDP program](./competitiveness-deepening-program.md) | **Nothing in this closeout.** Do **not** start CDP code from LR-A3 doc-sync. LRP references CD-2/CD-3 as sibling waves only. |
+| **CDP** (CD-DOC/CD-BDD/CD-E2E/CD-HARD, `CD-*`) | **Active sibling focus** — Wave CD-2 golden path In Progress — track via [CDP program](./competitiveness-deepening-program.md) | **Nothing in LRP.** Do not execute `CD-*` from LRP session. LRP references CD-2/CD-3 as sibling waves only. |
 | **LRP** (`LR-*` — production hardening + usability deepening) | **This program** — Wave LR-A remains In Progress | LR-A…LR-E per §2 wave map; **LR-A3 Done**; remaining A4/A5/A6/A7. |
 
 **Formal phase note:** `master-plan.md` has **no** formal phase `In Progress` (**None**, 2026-07-09+). LRP is a **cross-cutting program** at the same level as CDP — **not** a new formal phase. LRP implementers follow task IDs prefixed **`LR-*`** only.
@@ -97,7 +97,7 @@ From the 2026-07-03 full-repo inventory + industry research. Verify evidence pat
 3. Formal phase accounting: **None** (2026-07-09+); LRP wave status lives in this file + [execution-sync-ledger.md](./execution-sync-ledger.md) § LRP. Delivery focus may be a single LRP slice without promoting a formal phase.
 4. Tasks marked **BDD: required** may not start implementation until `behavior-spec-author` publishes a `ready` spec in `docs/behavior/`.
 
-**Current wave:** **LR-A** (`In Progress`, activated 2026-07-04 after LR-B closure). **LR-A3 Done** (2026-07-10 — `lrp-a3-upload-validation`; merge `e62c210`; BDD [ready](../behavior/lrp-a3-master-docx-upload-validation.md) A1–A7 green). **LR-B Done** (2026-07-04). Program status: **In Progress**. **Recommended next delivery focus:** CDP golden path (do not start from this closeout).
+**Current wave:** **LR-A** (`In Progress`, activated 2026-07-04 after LR-B closure). **LR-A3 Done** (2026-07-10 — `lrp-a3-upload-validation`; merge `e62c210`; BDD [ready](../behavior/lrp-a3-master-docx-upload-validation.md) A1–A7 green). **LR-B Done** (2026-07-04). Program status: **In Progress**. **Sibling delivery focus:** CDP Wave CD-2 golden path (A4 remains queued — not started from CDP slice).
 
 ---
 

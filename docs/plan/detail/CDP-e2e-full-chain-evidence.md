@@ -1,11 +1,11 @@
 # CDP Wave CD-E2E — Full-Chain Browser Evidence
 
 **Program:** [competitiveness-deepening-program.md](../competitiveness-deepening-program.md)  
-**Wave:** CD-2 (starts after CD-BDD specs `ready`; **no dependency on P22**)  
+**Wave:** CD-2 — **In Progress** (2026-07-10; golden-path closeout only — CD-E2E-T01 + T01b; T02–T12 deferred)  
 **Owner default:** `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** Docker stack (`.\scripts\docker-deploy.ps1`); read `frontend/e2e/helpers/auth.ts`, `frontend/e2e/helpers/demo-full-flow.ts`
 
-> **Session note:** CD-E2E runs in the **CDP session**. Lifecycle golden path uses existing demo seeds; full structured rendering fidelity is validated in the **P22 session**, not a blocker for CD-E2E-T01.
+> **Session note (2026-07-10):** Slice `cdp-e2e-golden` — close CD-2 golden-path browser evidence (CD-E2E-T01 + seed T01b if needed). Full T02–T12 matrix deferred. Do **not** mark wave CD-2 **Done** until E2E green later. Formal phase remains **None**.
 
 ---
 
@@ -54,7 +54,7 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
   - **G** Docker stack ready **W** spec runs **T** ≥1 test green end-to-end without API stage advancement for test/approve/publish.
   - **G** author submits failing gate **T** submit blocked with visible checklist (reuse AUD-B10 patterns).
 - **Gates:** Playwright green; `e2e-uiux-reviewer` PASS.
-- **Status:** Not Started
+- **Status:** In Progress (2026-07-10 — slice `cdp-e2e-golden`; BDD ready; implementation not finished — do **not** claim Done)
 
 ### CD-E2E-T01b — Golden path seed fixture (backend)
 
@@ -62,7 +62,7 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - **Depends on:** CD-BDD-T01 draft
 - **Steps:** Add `CDP-MVP-GOLDEN` template seed: DRAFT, minimal binding, one test dataset, callable after publish script.
 - **Acceptance:** Idempotent Flyway/SQL or DemoCatalogSeeder marker; documented in spec.
-- **Status:** Not Started
+- **Status:** In Progress (2026-07-10 — seed if needed for T01; not Done until fixture verified)
 
 ### CD-E2E-T02 — Tester structured pass journey
 
