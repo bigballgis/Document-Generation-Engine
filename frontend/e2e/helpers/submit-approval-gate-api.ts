@@ -186,6 +186,34 @@ export async function prepareTemplatePendingSubmitReady(
   return template
 }
 
+/**
+ * API setup only — advances a green PENDING_SUBMIT template to APPROVAL/PENDING_DECISION
+ * so browser specs can exercise Approver Approve without UI setup clicks.
+ */
+export async function prepareTemplatePendingApprovalDecision(
+  request: APIRequestContext,
+  options?: { externalId?: string; name?: string },
+): Promise<PendingSubmitTemplateFixture> {
+  const template = await prepareTemplatePendingSubmitReady(request, {
+    externalId: options?.externalId ?? uniqueExternalId('E2E-CDP-APPR'),
+    name: options?.name ?? `E2E CDP Approver ${Date.now().toString(36).toUpperCase()}`,
+  })
+
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  await authorizedPost(request, authorToken, `/templates/${template.templateId}/lifecycle/submit-approval`, {
+    commentSummary: 'E2E CDP approver decision fixture — ready for PENDING_DECISION',
+  })
+
+  const detail = await fetchTemplateDetail(request, template.templateId)
+  if (detail.lifecycleStatus !== 'APPROVAL' || detail.approvalSubState !== 'PENDING_DECISION') {
+    throw new Error(
+      `Expected APPROVAL/PENDING_DECISION, got ${detail.lifecycleStatus}/${detail.approvalSubState ?? 'null'} (${template.templateId})`,
+    )
+  }
+
+  return template
+}
+
 export async function prepareTemplatePendingSubmitBlocked(
   request: APIRequestContext,
   options?: { externalId?: string; name?: string },

@@ -80,7 +80,7 @@ export async function confirmTestPassFromDevWorkspace(page: Page) {
  * - `/dev/...` `#dev-workspace` (current hub redirect to approval workspace).
  * Confirm test pass actions live on hub lifecycle actions or the testing tab.
  */
-export async function confirmTestPassAfterTesterOpen(page: Page) {
+async function waitForTesterOrApproverOpenDestination(page: Page): Promise<'hub' | 'dev'> {
   await expect(page).not.toHaveURL(/\/forbidden/, { timeout: 15_000 })
 
   const lifecyclePanel = page.locator('#template-lifecycle-panel')
@@ -99,6 +99,18 @@ export async function confirmTestPassAfterTesterOpen(page: Page) {
     .not.toBe('pending')
 
   if (await lifecyclePanel.isVisible().catch(() => false)) {
+    return 'hub'
+  }
+  await expect(page).toHaveURL(/\/dev\//, { timeout: 15_000 })
+  await expect(devWorkspace).toBeVisible({ timeout: 30_000 })
+  await expect(page.locator('.workspace-tab-shell')).toBeVisible({ timeout: 30_000 })
+  return 'dev'
+}
+
+export async function confirmTestPassAfterTesterOpen(page: Page) {
+  const destination = await waitForTesterOrApproverOpenDestination(page)
+
+  if (destination === 'hub') {
     const passButton = page
       .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
       .getByRole('button', { name: /^confirm test pass$/i })
@@ -109,13 +121,38 @@ export async function confirmTestPassAfterTesterOpen(page: Page) {
     return
   }
 
-  await expect(page).toHaveURL(/\/dev\//, { timeout: 15_000 })
-  await expect(devWorkspace).toBeVisible({ timeout: 30_000 })
-  const workspace = page.locator('.workspace-tab-shell')
-  await expect(workspace).toBeVisible({ timeout: 30_000 })
   // lifecycle deep-link opens approval tab; Confirm test pass is on testing actions.
-  await workspace.getByRole('tab', { name: /^template testing$/i }).click()
+  await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i }).click()
   await confirmTestPassFromDevWorkspace(page)
+}
+
+/**
+ * Tester dashboard Open → Record test failure → structured fail form (reason + impact + remediation).
+ */
+export async function confirmTestFailAfterTesterOpen(
+  page: Page,
+  options?: {
+    reasonCategoryLabel?: RegExp
+    impactSummary?: string
+    remediationChecklistCode?: string
+  },
+) {
+  const destination = await waitForTesterOrApproverOpenDestination(page)
+  const failButtonName = /^record test failure$/i
+
+  if (destination === 'hub') {
+    const failButton = page
+      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
+      .getByRole('button', { name: failButtonName })
+      .first()
+    await expect(failButton).toBeVisible({ timeout: 15_000 })
+    await failButton.click()
+  } else {
+    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i }).click()
+    await workspaceActions(page).getByRole('button', { name: failButtonName }).click()
+  }
+
+  await completeConfirmTestFailDialog(page, options)
 }
 
 async function completeConfirmTestPassDialog(page: Page) {
@@ -135,6 +172,85 @@ async function completeConfirmTestPassDialog(page: Page) {
   const decisionResponse = await decisionResponsePromise
   expect(decisionResponse.ok()).toBeTruthy()
   await expect(page.locator('.el-message').getByText(/test decision recorded/i)).toBeVisible({
+    timeout: 15_000,
+  })
+}
+
+async function completeConfirmTestFailDialog(
+  page: Page,
+  options?: {
+    reasonCategoryLabel?: RegExp
+    impactSummary?: string
+    remediationChecklistCode?: string
+  },
+) {
+  const reasonCategoryLabel = options?.reasonCategoryLabel ?? /binding or layout placeholder issue/i
+  const impactSummary =
+    options?.impactSummary ??
+    'Header binding invalid — author must fix layout placeholder and re-run full test.'
+  const remediationChecklistCode = options?.remediationChecklistCode ?? 'ANCHOR_INTEGRITY'
+
+  const dialog = page.getByRole('dialog', { name: /record test failure/i })
+  await expect(dialog).toBeVisible()
+
+  await dialog.getByRole('combobox', { name: /reason category/i }).click()
+  await page.getByRole('option', { name: reasonCategoryLabel }).click()
+
+  await dialog.getByRole('textbox', { name: /impact summary/i }).fill(impactSummary)
+  await dialog
+    .getByRole('textbox', { name: /remediation checklist code/i })
+    .fill(remediationChecklistCode)
+
+  const decisionResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' && response.url().includes('/lifecycle/test-decision'),
+    { timeout: 30_000 },
+  )
+
+  await dialog.getByRole('button', { name: /^submit decision$/i }).click()
+  const decisionResponse = await decisionResponsePromise
+  expect(decisionResponse.ok()).toBeTruthy()
+  await expect(page.locator('.el-message').getByText(/test decision recorded/i)).toBeVisible({
+    timeout: 15_000,
+  })
+}
+
+/**
+ * Approver dashboard Open → Approve with rationale + key evidence confirmation.
+ */
+export async function approveTemplateAfterApproverOpen(
+  page: Page,
+  rationale = 'CDP E2E approval rationale — evidence reviewed and ready for release.',
+) {
+  const destination = await waitForTesterOrApproverOpenDestination(page)
+
+  if (destination === 'hub') {
+    const approveButton = page
+      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
+      .getByRole('button', { name: /^approve$/i })
+      .first()
+    await expect(approveButton).toBeVisible({ timeout: 15_000 })
+    await approveButton.click()
+  } else {
+    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template approval$/i }).click()
+    await workspaceActions(page).getByRole('button', { name: /^approve$/i }).click()
+  }
+
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByText(/confirm approval/i)).toBeVisible()
+  await dialog.getByRole('textbox', { name: /approval rationale/i }).fill(rationale)
+  await dialog.getByText(/I reviewed key evidence/i).click()
+
+  const decisionResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' && response.url().includes('/lifecycle/approval-decision'),
+    { timeout: 30_000 },
+  )
+
+  await dialog.getByRole('button', { name: /^submit decision$/i }).click()
+  const decisionResponse = await decisionResponsePromise
+  expect(decisionResponse.ok()).toBeTruthy()
+  await expect(page.locator('.el-message').getByText(/approval decision recorded/i)).toBeVisible({
     timeout: 15_000,
   })
 }
