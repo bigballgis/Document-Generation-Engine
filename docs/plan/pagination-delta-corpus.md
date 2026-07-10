@@ -39,7 +39,7 @@ Docker PDF page count, the change must be reviewed.
 
 **Evidence:** [`docs/evidence/lrp-a7-pagination/`](../evidence/lrp-a7-pagination/) (README + `measurement-results.json`); full PDFs under worktree `.tmp/evidence/lrp-a7-pagination/` (untracked binaries).
 
-> **Honesty note:** LR-A7 / CD-HARD-T04 close the **Docker PDF measurement gap** (≥5 letters + durable evidence). True Word-vs-LO delta validation remains a **residual follow-up** on a Word-equipped host — not a new In Progress task; do not start LR-A6 / LR-C9 for this residual.
+> **Honesty note:** LR-A7 / CD-HARD-T04 close the **Docker PDF measurement gap** (≥5 letters + durable evidence). True Word-vs-LO delta validation remains a **residual follow-up** on a Word-equipped host — not a new In Progress task; do not reopen LR-A6 for this residual. (LR-C9 is a separate usability slice, not Word residual work.)
 
 ## Budget enforcement (pending confirmation)
 

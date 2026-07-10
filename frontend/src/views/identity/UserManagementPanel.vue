@@ -2,7 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { assignableGroupCodes, assignableRoles, canDeleteUsers } from '@/auth/identityRoles'
+import { assignableGroupCodes, assignableRoles, canDeleteUsers, canManageUsers } from '@/auth/identityRoles'
 import { useRouteScopedAbortController } from '@/composables/useRouteScopedAbortController'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import UserFormDialog, { type UserFormState } from '@/views/identity/UserFormDialog.vue'
@@ -44,6 +44,7 @@ const form = reactive<UserFormState>({
 
 const actorRoles = computed(() => sessionStore.session?.roles ?? [])
 const canDelete = computed(() => canDeleteUsers(actorRoles.value))
+const canCreate = computed(() => canManageUsers(actorRoles.value))
 const roleOptions = computed(() => assignableRoles(actorRoles.value))
 const groupCatalog = computed(() => identityStore.groups.map((group) => group.groupCode))
 const groupOptions = computed(() => assignableGroupCodes(sessionStore.session, groupCatalog.value))
@@ -263,6 +264,7 @@ defineExpose({
       :error-retryable="identityStore.lastUserErrorRetryable"
       :is-filter-group-locked="isFilterGroupLocked"
       :role-options="roleOptions"
+      :can-create="canCreate"
       :can-delete="canDelete"
       :page-size="identityStore.userFilters.size ?? 20"
       :total-users="identityStore.usersTotal"

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import * as apiPolicyApi from '@/api/apiPolicy'
-import { resolveApiErrorMessageKey } from '@/api/http'
+import { resolveApiError, resolveApiErrorMessageKey } from '@/api/http'
 import type {
   ApiAccessAlert,
   ApiCredentialCreated,
@@ -46,6 +46,7 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
   const alerts = ref<ApiAccessAlert[]>([])
   const loadingAlerts = ref(false)
   const alertsErrorMessageKey = ref<string | null>(null)
+  const alertsErrorRetryable = ref(false)
 
   function entryFor(templateId: string): ApiPolicyEntry {
     if (!entries.value[templateId]) {
@@ -131,11 +132,13 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
   async function fetchAlerts(): Promise<void> {
     loadingAlerts.value = true
     alertsErrorMessageKey.value = null
+    alertsErrorRetryable.value = false
     try {
       alerts.value = await apiPolicyApi.fetchAlerts()
     } catch (error) {
       alerts.value = []
       alertsErrorMessageKey.value = resolveApiErrorMessageKey(error, 'apiPolicy.home.alerts.loadFailed')
+      alertsErrorRetryable.value = resolveApiError(error)?.error.retryable ?? false
       throw error
     } finally {
       loadingAlerts.value = false
@@ -276,6 +279,7 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
     alerts,
     loadingAlerts,
     alertsErrorMessageKey,
+    alertsErrorRetryable,
     apiPolicy,
     credentials,
     loadingPolicy,

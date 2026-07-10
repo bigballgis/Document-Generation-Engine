@@ -1,10 +1,12 @@
 # LRP Wave LR-C — Business Usability Deepening 「业务易用性深化」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; remaining C2–C3/C5–C13 Not Started)  
+**Wave status:** **In Progress** (LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 In Progress** 2026-07-10 — slice `lrp-c9-load-error-panel`; remaining C2–C3/C5–C8/C10–C13 Not Started)  
 **Owner default:** `frontend-engineer` (+ `backend-engineer` where noted); every user-facing slice pairs `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** none for most tasks; **C6 depends on LR-C5**; **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
 
+> **Activation note (2026-07-10):** **LR-C9 → In Progress** (user-scheduled quick win after Wave LR-A Done). Placement: ISOLATED `D:/working/DGE-lrp-c9-load-error-panel` · `feat/lrp-c9-load-error-panel` · base `ec1e250`. BDD expected **not-applicable** (pattern rollout). Formal phase remains **None**. Upstream: GroupManagementPanel `LoadErrorPanel` already Done via MGMT P1-2 — remaining catalog/list surfaces still in scope. Other LR-C rows untouched.
+>
 > **Session note:** `LR-C*` tasks only. All UI work obeys `.cursor/skills/frontend-oa-design/SKILL.md` (bank OA lock, REDBC/GREENBC dual-brand) and `.cursor/rules/workspace-tab-shell-constitution.mdc`. i18n: English keys first, zh-CN additive — never literals (`.cursor/skills/i18n-english-first/SKILL.md`).
 >
 > **CORE-FORTRESS F7 mirror (2026-07-09):** LR-C1 + LR-C4 delivered under [CORE-FORTRESS-f7-authoring-ux.md](./CORE-FORTRESS-f7-authoring-ux.md) — Vitest **894**; E2E CORE-FORTRESS-F7 **12/12** PASS.
@@ -209,22 +211,34 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 
 - **Owner agent:** frontend-engineer
 - **BDD:** not-applicable — rollout of the already-confirmed COR-F05/F14 `LoadErrorPanel` pattern (roadmap §9 non-negotiable patterns); no new behavior contract.
+- **BDD readiness confirmation (2026-07-10, behavior-spec-author):** **`not-applicable` confirmed.** No new product/API/permission contract. Implementers treat the Acceptance (G/W/T) below as the TDD/E2E contract. Pattern sources: COR-F05/F14 Done; roadmap §9 (async loading → empty → error+retry; permissions hide controls backend would deny); MGMT P1-2 (`GroupManagementPanel`); MGMT D3/R2 (`ApiPolicyHomeView` Browse-templates empty CTA).
 - **UIUX:** yes
-- **Read first:** `frontend/src/components/common/LoadErrorPanel.vue`; the six targets — `TemplateListView.vue` L249–256, `MasterListView.vue` L187–193, `ContentModuleListView.vue` L158–169, `ApiPolicyHomeView.vue` L56–65, `UserManagementPanel.vue` L344–348, `GroupManagementPanel.vue` L172–176; [comprehensive-optimization-roadmap.md](../comprehensive-optimization-roadmap.md) §9.
-- **Do NOT:** Redesign `LoadErrorPanel`; change store error semantics; leave any of the six with a dead-end `el-alert`.
+- **Read first:** `frontend/src/components/common/LoadErrorPanel.vue`; `EmptyStatePanel.vue` (may need `#actions` slot for in-empty CTAs); the six targets below; [comprehensive-optimization-roadmap.md](../comprehensive-optimization-roadmap.md) §9; [mgmt-ui-defects-behavior-spec.md](../../requirements/mgmt-ui-defects-behavior-spec.md) P1-2 / D3.
+- **Do NOT:** Redesign `LoadErrorPanel`; change store error semantics; leave any of the six with a dead-end load-error `el-alert`; invent new empty CTAs beyond create/upload (or Browse templates on API policy home).
+- **Surface audit (2026-07-10 worktree `DGE-lrp-c9-load-error-panel`):**
+
+  | Surface | LoadErrorPanel + retry | Role-aware empty CTA | Residual for LR-C9 |
+  | --- | --- | --- | --- |
+  | `TemplateListView` | Done | Missing (header create only; empty = title-only `EmptyStatePanel`) | Empty CTA in empty state; Vitest/E2E |
+  | `MasterListView` | Done | Missing (header upload only) | Empty CTA; Vitest/E2E |
+  | `ContentModuleListView` | Done | Missing (header create only) | Empty CTA; Vitest/E2E |
+  | `ApiPolicyHomeView` | Done (verify `:retryable` wiring) | Intended Browse-templates `#actions` but `EmptyStatePanel` has **no actions slot** (CTA may not render in empty body; header still has Browse) | Fix empty CTA render; confirm retryable; Vitest/E2E |
+  | `UserManagementPanel` → `UserManagementListSection` | Done | Missing (header create always shown; empty = title-only) | Empty CTA fail-closed to match who may create; Vitest/E2E |
+  | `GroupManagementPanel` | Done (MGMT P1-2) | Missing (header create gated by `canManage`; empty = title-only) | Empty CTA when `canManage`; Vitest/E2E |
+
 - **Steps:**
-  1. Replace the load-error `el-alert` in each of the six views/panels with `LoadErrorPanel` + working retry (re-invoke the store fetch).
-  2. Add role-aware empty states: primary CTA points to the creating/uploading action the role can perform (fail-closed: no CTA if not permitted).
-  3. i18n keys for new empty-state copy.
+  1. Verify each of the six still uses `LoadErrorPanel` + working retry (re-invoke store fetch); close any residual dead-end load-error path (none of the six still use load-error `el-alert` as of audit — do not regress).
+  2. Add role-aware empty states: primary CTA in the empty body points to the creating/uploading action the role can perform (API policy home: Browse templates per D3); fail-closed: no empty CTA if not permitted. Extend `EmptyStatePanel` with an `#actions` slot if needed (presentation only — no new behavior contract).
+  3. i18n keys for new empty-state CTA copy.
   4. Vitest per view (error → retry → success; empty → CTA visibility by role); Playwright smoke on two representative lists.
-- **Acceptance (G/W/T):**
-  - **G** a list fetch fails **W** the view renders **T** `LoadErrorPanel` with retry appears; retry after recovery loads data without page reload.
-  - **G** an empty catalog for a role with create permission **W** the view renders **T** a CTA to the create/upload action is shown; for a role without permission, no CTA.
+- **Acceptance (G/W/T) — contract for implementers:**
+  - **LR-C9-A:** **G** a list fetch fails **W** the view renders **T** `LoadErrorPanel` with retry appears; retry after recovery loads data without page reload.
+  - **LR-C9-B:** **G** an empty catalog for a role with create/upload permission (API policy: browse-templates) **W** the view renders **T** a CTA to that action is shown in the empty state; for a role without permission, no empty-state CTA.
 - **Gates:** §1 standard block; spec `frontend/e2e/LRP-C9-list-states.spec.ts`; UIUX manifest.
 - **Artifacts:** six view/panel edits + tests; E2E + manifest.
-- **Done when:** All six migrated + gates + UIUX PASS + doc sync + commit review.
-- **Maps:** COR-F05/F14 (pattern source); roadmap §9.
-- **Status:** Not Started
+- **Done when:** All six meet Acceptance A+B + gates + UIUX PASS + doc sync + commit review.
+- **Maps:** COR-F05/F14 (pattern source); roadmap §9; MGMT P1-2 / D3.
+- **Status:** **In Progress** (2026-07-10 — slice `lrp-c9-load-error-panel`; ISOLATED `D:/working/DGE-lrp-c9-load-error-panel` · `feat/lrp-c9-load-error-panel`; GroupManagementPanel already migrated via MGMT P1-2; BDD readiness `not-applicable` confirmed)
 
 ### LR-C10 — Upload UX polish
 

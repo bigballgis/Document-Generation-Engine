@@ -227,7 +227,13 @@ function handleCreated(moduleId: string) {
       v-else-if="!contentModulesStore.loadingList && !errorMessage"
       title-key="contentModules.list.empty"
       description-key="contentModules.list.emptyDescription"
-    />
+    >
+      <template v-if="canCreate" #actions>
+        <el-button type="primary" @click="createDialogOpen = true">
+          {{ t('contentModules.create.open') }}
+        </el-button>
+      </template>
+    </EmptyStatePanel>
 
     <ContentModuleCreateDialog v-model="createDialogOpen" @created="handleCreated" />
   </AppPageLayout>

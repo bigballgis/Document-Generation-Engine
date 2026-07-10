@@ -13,14 +13,19 @@ import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { ROUTE_PATH_BY_KEY, ROUTE_KEYS, templatePackageHubPath } from '@/routing/routeKeys'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
+import { useSessionStore } from '@/stores/session'
 import type { ApiAccessAlert, ApiAccessAlertKind } from '@/types/template'
 
 const { t } = useI18n()
 const router = useRouter()
 const { formatDateTime } = useLocaleFormatters()
 const apiPolicyStore = useApiPolicyStore()
+const sessionStore = useSessionStore()
 
 const alertsErrorMessageKey = computed(() => apiPolicyStore.alertsErrorMessageKey)
+const canBrowseTemplates = computed(() =>
+  sessionStore.canAccessRoute(ROUTE_KEYS.templateManagement),
+)
 
 const { reload: reloadAlerts } = useAbortableCatalogLoader(() => apiPolicyStore.fetchAlerts())
 
@@ -78,7 +83,7 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
       :description="t('apiPolicy.home.description')"
     >
       <template #actions>
-        <el-button @click="openTemplateCatalog">
+        <el-button v-if="canBrowseTemplates" @click="openTemplateCatalog">
           {{ t('apiPolicy.home.packageLinks.browseTemplates') }}
         </el-button>
       </template>
@@ -99,6 +104,7 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
       <LoadErrorPanel
         v-if="alertsErrorMessageKey && !apiPolicyStore.loadingAlerts"
         :message-key="alertsErrorMessageKey"
+        :retryable="apiPolicyStore.alertsErrorRetryable"
         @retry="reloadAlerts"
       />
 
@@ -115,7 +121,7 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
               title-key="apiPolicy.home.alerts.emptyTitle"
               description-key="apiPolicy.home.alerts.emptyDescription"
             >
-              <template #actions>
+              <template v-if="canBrowseTemplates" #actions>
                 <el-button type="primary" @click="openTemplateCatalog">
                   {{ t('apiPolicy.home.packageLinks.browseTemplates') }}
                 </el-button>

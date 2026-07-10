@@ -156,7 +156,7 @@
         "id": "12",
         "title": "LR-A6 OOXML output validation gate",
         "description": "Gap-close LR-A6 / CD-HARD-T03 — OOXML/output validation gate: invalid or structurally unsafe DOCX fail closed. Extend OoxmlOutputValidationGateTest (happy path exists) with corrupted-fixture fail proof; wire ADR-0043 runtime gate if missing. Mark CD-HARD-T03 executed-by-LR-A6 on Done. Out of scope: LR-C9, A5 Word residual, virus scan, CD-E2E T02–T12, DGE-audit-governance.",
-        "details": "Slice id: lrp-a6-ooxml-gate. Plan: LR-A6 Done (2026-07-10). Merge: 122d6d1 (122d6d1f385bb28214373c63ef29740b0d447cb3). Delivered: OoxmlOutputValidator + DocxAssembler fail-closed + runtime OOXML_VALIDATION_FAILED. CD-HARD-T03 Done executed-by-LR-A6. BDD not-applicable. Formal phase remains None. Wave LR-A remains In Progress (A5 Partial; do not start LR-C9 or expand A5 Word residual). Residuals: ECMA-376 XSD deferred; LO24 headless deferred; ADR-0043 remains Proposed. Gates: mvn verify GREEN (1208+); architecture PASS; docker-deploy-queue DEPLOY_OK (healthz UP; UI 4173 200; image contains OoxmlOutputValidator); E2E skipped (not user-facing).",
+        "details": "Slice id: lrp-a6-ooxml-gate. Plan: LR-A6 Done (2026-07-10). Merge: 122d6d1 (122d6d1f385bb28214373c63ef29740b0d447cb3). Delivered: OoxmlOutputValidator + DocxAssembler fail-closed + runtime OOXML_VALIDATION_FAILED. CD-HARD-T03 Done executed-by-LR-A6. BDD not-applicable. Formal phase remains None. Wave LR-A remains In Progress (A5 Partial; do not expand A5 Word residual). Residuals: ECMA-376 XSD deferred; LO24 headless deferred; ADR-0043 remains Proposed. Gates: mvn verify GREEN (1208+); architecture PASS; docker-deploy-queue DEPLOY_OK (healthz UP; UI 4173 200; image contains OoxmlOutputValidator); E2E skipped (not user-facing). Historical out-of-scope: LR-C9 (later Task #14).",
         "testStrategy": "1. Well-formed assembled DOCX opens via OPCPackage.open (existing happy path). 2. Deliberately corrupted fixture (e.g. unescaped &) fails the same validation — proves CD-PIT-03 detection. 3. If ADR-0043 requires runtime fail-closed, assert invalid/structurally unsafe DOCX does not pass silently. 4. mvn -B -ntp -f backend/pom.xml verify green. 5. On Done: cross-ref CD-HARD-T03 executed-by-LR-A6.",
         "priority": "high",
         "dependencies": [
@@ -170,7 +170,7 @@
         "id": "13",
         "title": "LR-A5 ADR triad closeout (0041/0042/0043)",
         "description": "Docs-first LR-A5 ADR closeout — author ADR-0041; reconcile ADR-0042 Word n/a residual; keep ADR-0043 Proposed; sync LR-A5 / Wave LR-A honestly. Out of scope: MS Word measurement; ECMA-376 XSD / LO24; LR-C9; DGE-audit-governance.",
-        "details": "Slice id: lrp-a5-adr-closeout. Merge cc9e5f6 (feat/lrp-a5-adr-closeout → main); worktree removed. ADR-0041 Accepted (architecture-reviewer PASS_WITH_NOTES 2026-07-10; LR-A2 jammy evidence). ADR-0042 Proposed (Word residual; no invented numbers). ADR-0043 Proposed (XSD/LO24 residual). LR-A5 Done; Wave LR-A Done with Word/XSD/LO24/0042-Accepted/0043-Accepted deferred out of wave exit (0041 Accepted residual closed). Formal phase None. Gate evidence: docs-only + architecture-reviewer PASS_WITH_NOTES. Do not start LR-C9.",
+        "details": "Slice id: lrp-a5-adr-closeout. Merge cc9e5f6 (feat/lrp-a5-adr-closeout → main); worktree removed. ADR-0041 Accepted (architecture-reviewer PASS_WITH_NOTES 2026-07-10; LR-A2 jammy evidence). ADR-0042 Proposed (Word residual; no invented numbers). ADR-0043 Proposed (XSD/LO24 residual). LR-A5 Done; Wave LR-A Done with Word/XSD/LO24/0042-Accepted/0043-Accepted deferred out of wave exit (0041 Accepted residual closed). Formal phase None. Gate evidence: docs-only + architecture-reviewer PASS_WITH_NOTES. Historical out-of-scope note: LR-C9 was not residual work for this slice (later scheduled separately as Task #14).",
         "testStrategy": "1. ADR-0041 exists under docs/adr/rendering-authoring/ and is Accepted + indexed. 2. ADR-0042 honestly records LR-A7 Word n/a residual (Proposed OK). 3. ADR-0043 status honest vs LR-A6 delivery (Proposed OK if XSD/LO24 deferred). 4. architecture-reviewer PASS_WITH_NOTES recorded for 0041 Accepted. 5. Plan/ledger sync LR-A5 Done; Wave LR-A Done with explicit residual deferral; merge SHA on MAIN.",
         "priority": "high",
         "dependencies": [
@@ -180,12 +180,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-10T18:12:00.000Z"
+      },
+      {
+        "id": "14",
+        "title": "LR-C9 unified list states (LoadErrorPanel + retry)",
+        "description": "Roll out LoadErrorPanel + working retry (+ role-aware empty CTA) on remaining catalog/list surfaces. Pattern already confirmed (COR-F05/F14). GroupManagementPanel already Done via MGMT P1-2. Out of scope: redesign LoadErrorPanel; reopen LR-A / A6 residuals; DGE-audit-governance; other LR-C rows.",
+        "details": "Slice id: lrp-c9-load-error-panel. Plan: LR-C9 In Progress (2026-07-10). Placement: ISOLATED D:/working/DGE-lrp-c9-load-error-panel · feat/lrp-c9-load-error-panel · base ec1e250. BDD expected not-applicable (pattern rollout). Formal phase remains None. Wave LR-A Done; other LR-C items untouched. Targets: TemplateListView, MasterListView, ContentModuleListView, ApiPolicyHomeView, UserManagementPanel (+ verify GroupManagementPanel already migrated). Gates: pnpm lint/type-check/test/build; E2E LRP-C9-list-states; UIUX; docker-deploy-queue when required.",
+        "testStrategy": "1. Each remaining list surface shows LoadErrorPanel with working retry on fetch failure. 2. Role-aware empty CTA when permitted; no CTA when not. 3. Vitest per view + Playwright smoke. 4. Frontend gates green; UIUX PASS. 5. Plan/ledger LR-C9 Done on closeout.",
+        "priority": "high",
+        "dependencies": [
+          "13"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T10:39:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T18:12:00.000Z",
-      "taskCount": 13,
+      "lastModified": "2026-07-10T10:39:00.000Z",
+      "taskCount": 14,
       "completedCount": 13,
       "tags": [
         "master"

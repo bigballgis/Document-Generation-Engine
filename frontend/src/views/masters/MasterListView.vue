@@ -270,7 +270,13 @@ async function handleUpload(payload: {
     <EmptyStatePanel
       v-else-if="!errorMessage"
       title-key="masters.list.empty"
-    />
+    >
+      <template v-if="canUpload" #actions>
+        <el-button type="primary" @click="uploadDialogOpen = true">
+          {{ t('masters.upload.open') }}
+        </el-button>
+      </template>
+    </EmptyStatePanel>
 
     <MasterUploadDialog v-model="uploadDialogOpen" @submit="handleUpload" />
   </AppPageLayout>

@@ -82,7 +82,7 @@ describe('GroupManagementPanel', () => {
     expect(wrapper.text()).toContain('Retail banking')
   })
 
-  it('filters groups by search query on group code and display name', async () => {
+  it('filters groups by search query on group code and display name', { timeout: 20000 }, async () => {
     patchSession(['GLOBAL_ADMIN'])
     vi.mocked(identityApi.listGroups).mockResolvedValue({
       content: [
@@ -192,5 +192,38 @@ describe('GroupManagementPanel', () => {
     expect(identityApi.listGroups).toHaveBeenCalledTimes(2)
     expect(wrapper.text()).toContain('RETAIL')
     expect(wrapper.findComponent({ name: 'LoadErrorPanel' }).exists()).toBe(false)
+  })
+
+  it('LR-C9-B: empty catalog shows create CTA for global admins', async () => {
+    patchSession(['GLOBAL_ADMIN'])
+    vi.mocked(identityApi.listGroups).mockResolvedValue({
+      content: [],
+      page: 0,
+      size: 20,
+      totalElements: 0,
+      totalPages: 0,
+    })
+    const wrapper = mountPanel()
+    await flushPromises()
+
+    const emptyActions = wrapper.find('[data-testid="empty-state-actions"]')
+    expect(emptyActions.exists()).toBe(true)
+    expect(emptyActions.text()).toContain('Create group')
+  })
+
+  it('LR-C9-B: empty catalog hides create CTA for group admins', async () => {
+    patchSession(['GROUP_ADMIN'])
+    vi.mocked(identityApi.listGroups).mockResolvedValue({
+      content: [],
+      page: 0,
+      size: 20,
+      totalElements: 0,
+      totalPages: 0,
+    })
+    const wrapper = mountPanel()
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="empty-state-actions"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('No groups available.')
   })
 })

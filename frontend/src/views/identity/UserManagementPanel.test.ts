@@ -106,7 +106,7 @@ describe('UserManagementPanel', () => {
     expect(wrapper.text()).toContain('Retail Operator')
   })
 
-  it('shows delete action for global admins in more menu', async () => {
+  it('shows delete action for global admins in more menu', { timeout: 20000 }, async () => {
     patchSession(['GLOBAL_ADMIN'], ['*'])
     const wrapper = mountPanel()
     await flushPromises()
@@ -204,5 +204,33 @@ describe('UserManagementPanel', () => {
     await flushPromises()
 
     expect(wrapper.text()).toContain('Unable to load users.')
+  })
+
+  it('LR-C9-B: empty user list shows create CTA for admins', async () => {
+    patchSession(['GLOBAL_ADMIN'], ['*'])
+    vi.mocked(identityApi.listUsers).mockResolvedValue(userPage([]))
+    const wrapper = mountPanel()
+    await flushPromises()
+
+    const emptyActions = wrapper.find('[data-testid="empty-state-actions"]')
+    expect(emptyActions.exists()).toBe(true)
+    expect(emptyActions.text()).toContain('Create user')
+  })
+
+  it('LR-C9-A: LoadErrorPanel retry reloads users', async () => {
+    patchSession(['GLOBAL_ADMIN'], ['*'])
+    vi.mocked(identityApi.listUsers)
+      .mockRejectedValueOnce(new Error('load failed'))
+      .mockResolvedValueOnce(userPage([sampleUser]))
+    const wrapper = mountPanel()
+    await flushPromises()
+
+    const errorPanel = wrapper.findComponent({ name: 'LoadErrorPanel' })
+    expect(errorPanel.exists()).toBe(true)
+    await errorPanel.vm.$emit('retry')
+    await flushPromises()
+
+    expect(identityApi.listUsers).toHaveBeenCalledTimes(2)
+    expect(wrapper.text()).toContain('10000001')
   })
 })

@@ -39,6 +39,9 @@ const rowClassName = computed(() => {
     v-bind="attrs"
   >
     <slot />
+    <template v-if="$slots.empty" #empty>
+      <slot name="empty" />
+    </template>
   </el-table>
 </template>
 

@@ -62,7 +62,7 @@ model, permissions, API docs, and ADRs.
 
 - Exactly **one** epic may be `Active = Yes` (status `In Progress`).
 - **Current active epic:** none — MVP epics re-earned Done.
-- **In-flight (non-epic):** **CDP** Wave CD-2 **In Progress** (**partial** — T01/T01b Done; [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** Done (other session); **LRP** launch-readiness & deep-optimization program ([launch-readiness-program.md](../plan/launch-readiness-program.md); **In Progress** — Wave LR-B **Done** 2026-07-04; Wave LR-A **Done** 2026-07-10 A1–A7 / merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred — do not start LR-C9).
+- **In-flight (non-epic):** **CDP** Wave CD-2 **In Progress** (**partial** — T01/T01b Done; [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** Done (other session); **LRP** launch-readiness & deep-optimization program ([launch-readiness-program.md](../plan/launch-readiness-program.md); **In Progress** — Wave LR-B **Done** 2026-07-04; Wave LR-A **Done** 2026-07-10 A1–A7 / merge `cc9e5f6`; **LR-C9 In Progress** (`lrp-c9-load-error-panel`); Word/XSD/LO24 residuals deferred separately).
 
 ## Recommended activation sequence
 

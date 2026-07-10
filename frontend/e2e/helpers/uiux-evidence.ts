@@ -663,6 +663,35 @@ export async function captureCdpE2eT01LocatorScreenshot(
   return filename
 }
 
+export const LRP_C9_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C9')
+export const LRP_C9_SCREENSHOT_DIR = path.join(LRP_C9_EVIDENCE_ROOT, 'screenshots')
+export const LRP_C9_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureLrpC9EvidenceDirs(): void {
+  fs.mkdirSync(LRP_C9_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function lrpC9ScreenshotPath(filename: string): string {
+  return path.join(LRP_C9_SCREENSHOT_DIR, filename)
+}
+
+export async function captureLrpC9Screenshot(page: Page, filename: string): Promise<string> {
+  ensureLrpC9EvidenceDirs()
+  const target = lrpC9ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureLrpC9LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureLrpC9EvidenceDirs()
+  const target = lrpC9ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
 export const F7_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'F7')
 export const F7_SCREENSHOT_DIR = path.join(F7_EVIDENCE_ROOT, 'screenshots')
 export const F7_VIEWPORT = P14_T01_VIEWPORT

@@ -256,7 +256,13 @@ const sortByEnabled = rowSortMethod<BusinessGroupView>((row) => row.enabled)
         />
       </template>
 
-      <EmptyStatePanel v-else title-key="identity.groups.empty" />
+      <EmptyStatePanel v-else title-key="identity.groups.empty">
+        <template v-if="canManage" #actions>
+          <el-button type="primary" @click="openCreate">
+            {{ t('identity.groups.create') }}
+          </el-button>
+        </template>
+      </EmptyStatePanel>
 
     </template>
 

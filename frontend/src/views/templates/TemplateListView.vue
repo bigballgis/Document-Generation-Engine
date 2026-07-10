@@ -368,7 +368,13 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
       <EmptyStatePanel v-else title-key="templates.list.empty" />
     </template>
 
-    <EmptyStatePanel v-else title-key="templates.list.empty" />
+    <EmptyStatePanel v-else title-key="templates.list.empty">
+      <template v-if="authorTemplates" #actions>
+        <el-button type="primary" @click="createDialogOpen = true">
+          {{ t('templates.create.open') }}
+        </el-button>
+      </template>
+    </EmptyStatePanel>
 
     <TemplateCreateDialog v-model="createDialogOpen" @created="handleCreated" />
     <TemplateImportDialog v-model="importDialogOpen" @imported="handleImported" />

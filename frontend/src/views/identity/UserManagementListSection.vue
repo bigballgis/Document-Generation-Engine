@@ -18,6 +18,7 @@ defineProps<{
   errorRetryable: boolean
   isFilterGroupLocked: boolean
   roleOptions: ManagementRole[]
+  canCreate: boolean
   canDelete: boolean
   pageSize: number
   totalUsers: number
@@ -73,7 +74,9 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
         <el-button native-type="submit">{{ t('identity.users.filters.apply') }}</el-button>
         <el-button text @click="emit('resetFilters')">{{ t('identity.users.filters.reset') }}</el-button>
       </form>
-      <el-button type="primary" @click="emit('create')">{{ t('identity.users.create') }}</el-button>
+      <el-button v-if="canCreate" type="primary" @click="emit('create')">
+        {{ t('identity.users.create') }}
+      </el-button>
     </header>
 
     <LoadErrorPanel
@@ -162,7 +165,13 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
         />
       </template>
 
-      <EmptyStatePanel v-else title-key="identity.users.empty" />
+      <EmptyStatePanel v-else title-key="identity.users.empty">
+        <template v-if="canCreate" #actions>
+          <el-button type="primary" @click="emit('create')">
+            {{ t('identity.users.create') }}
+          </el-button>
+        </template>
+      </EmptyStatePanel>
     </template>
   </section>
 </template>

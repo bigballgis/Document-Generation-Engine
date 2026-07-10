@@ -141,4 +141,76 @@ describe('ContentModuleListView', () => {
     expect(wrapper.text()).toContain('Loan disclosure')
     expect(wrapper.text()).not.toContain('Fee schedule')
   })
+
+  it('LR-C9-B: empty catalog shows create CTA for template authors', async () => {
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([])
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleListView, {
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+    await flushPromises()
+    await flushPromises()
+
+    const emptyActions = wrapper.find('[data-testid="empty-state-actions"]')
+    expect(emptyActions.exists()).toBe(true)
+    expect(emptyActions.text()).toContain('New content module')
+  })
+
+  it('LR-C9-B: empty catalog hides create CTA without author capability', async () => {
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([])
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      session: {
+        username: '10000006',
+        displayName: 'Tester',
+        email: 'tester@example.com',
+        authSource: 'LOCAL',
+        roles: ['TEMPLATE_APPROVER'],
+        authorizedGroupCodes: ['RETAIL'],
+        defaultRoute: 'route.dashboard-home',
+        visibleRoutes: ['route.dashboard-home', 'route.content-module-management'],
+        expiresAt: '2099-01-01T00:00:00Z',
+      },
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleListView, {
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="empty-state-actions"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('No standard clauses yet.')
+  })
+
+  it('LR-C9-A: retry after load failure reloads modules', async () => {
+    vi.mocked(contentModulesApi.listContentModules)
+      .mockRejectedValueOnce(new Error('network'))
+      .mockResolvedValueOnce([
+        {
+          moduleId: 'MOD-LOAN-DISCLOSURE',
+          moduleCode: 'MOD-LOAN-DISCLOSURE',
+          groupCode: 'RETAIL',
+          name: 'Loan disclosure',
+          createdAt: '2026-06-26T10:00:00Z',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ])
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleListView, {
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+    await flushPromises()
+    await flushPromises()
+
+    await wrapper.findComponent({ name: 'LoadErrorPanel' }).vm.$emit('retry')
+    await flushPromises()
+    await flushPromises()
+
+    expect(contentModulesApi.listContentModules).toHaveBeenCalledTimes(2)
+    expect(wrapper.text()).toContain('Loan disclosure')
+  })
 })
