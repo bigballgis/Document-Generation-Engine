@@ -13,7 +13,7 @@
 | [detail/CDP-e2e-full-chain-evidence.md](./detail/CDP-e2e-full-chain-evidence.md) | Wave CD-E2E — browser golden paths + UIUX evidence |
 | [detail/CDP-industry-pitfall-registry.md](./detail/CDP-industry-pitfall-registry.md) | Wave CD-PIT — industry pitfalls → ADR/NFR/test mitigations |
 | [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **Done** (2026-07-04) — rendering engine + demos (do not reopen from CDP) |
-| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — **LR-A4 Done** (2026-07-10; merge `a523a09`); Wave LR-A In Progress (A5 Partial; A6/A7 Not Started); do not execute `LR-*` from CDP session |
+| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — **LR-A7 Done** (2026-07-10; merge `abf2048`; Word delta residual); Wave LR-A In Progress (A5 Partial; A6 Not Started); do not execute `LR-*` from CDP session |
 | [comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md) | Historical COR/OPT waves (mostly Done) |
 
 ---
@@ -69,7 +69,7 @@
                  doc truth, BDD, browser E2E, post-P22 hardening specs
 ```
 
-**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). **LR-A4 Done** (2026-07-10; merge `a523a09`). CDP Wave CD-2 remains **In Progress** as a sibling program (partial — golden-path T01/T01b Done; matrix continues when scheduled). LRP Wave LR-A remains **In Progress** (A5 Partial; A6/A7 Not Started). CDP is a **parallel program** — not a phase replacement.
+**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). **LR-A7 Done** (2026-07-10; merge `abf2048`; Word delta residual). CDP Wave CD-2 remains **In Progress** as a sibling program (partial — golden-path T01/T01b Done; matrix continues when scheduled). LRP Wave LR-A remains **In Progress** (A5 Partial; A6 Not Started). CDP is a **parallel program** — not a phase replacement.
 
 ---
 
