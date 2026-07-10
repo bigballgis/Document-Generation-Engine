@@ -1,3 +1,4 @@
+import { AxiosError, AxiosHeaders } from 'axios'
 import { describe, expect, it } from 'vitest'
 import {
   parseApiEnvelopeError,
@@ -68,6 +69,35 @@ describe('errorEnvelope', () => {
   it('falls back to caller key when envelope is absent', () => {
     expect(resolveApiErrorMessageKey(new Error('network'), 'templates.error.loadList')).toBe(
       'templates.error.loadList',
+    )
+  })
+
+  it('maps nginx/HTML 413 payload-too-large to readable master upload key', () => {
+    const axiosError = new AxiosError('Request failed', '413', undefined, undefined, {
+      status: 413,
+      statusText: 'Payload Too Large',
+      headers: { 'content-type': 'text/html' },
+      config: { headers: new AxiosHeaders() },
+      data: '<html><head><title>413 Request Entity Too Large</title></head><body>nginx</body></html>',
+    })
+
+    expect(resolveApiErrorMessageKey(axiosError, 'masters.error.upload')).toBe(
+      'masters.upload.errorTooLarge',
+    )
+    expect(resolveApiErrorMessageKey(axiosError, 'masters.error.replaceFile')).toBe(
+      'masters.upload.errorTooLarge',
+    )
+  })
+
+  it('prefers envelope messageKey for Spring 413 docxTooLarge', () => {
+    const axiosError = axiosEnvelopeError(413, 'api.error.master.docxTooLarge', {
+      code: 'MASTER_VALIDATION_FAILED',
+      category: 'VALIDATION',
+      message: 'The uploaded DOCX exceeds the maximum allowed size.',
+    })
+
+    expect(resolveApiErrorMessageKey(axiosError, 'masters.error.upload')).toBe(
+      'api.error.master.docxTooLarge',
     )
   })
 

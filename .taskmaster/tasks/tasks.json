@@ -111,12 +111,24 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-09T11:45:00.000Z"
+      },
+      {
+        "id": "9",
+        "title": "LR-A3 master DOCX upload deep validation gap-close",
+        "description": "Close remaining LR-A3 gaps for master DOCX upload/replace validation: dedicated magic-byte unit test; MasterReplaceFileDialog client precheck; Spring MaxUploadSizeExceededException/MultipartException → unified envelope (docxTooLarge); nginx 413 → readable UI mapping. Keep existing validateDocxFile/multipart/nginx/i18n/create-dialog partial Done. Defaults 50MB file / 60MB request+nginx. Virus scan is a non-goal (pending Q). Do not expand to LR-A4.",
+        "details": "Slice id: lrp-a3-upload-validation. Plan: LR-A3 In Progress (gap-close, not greenfield). BDD ready: docs/behavior/lrp-a3-master-docx-upload-validation.md (BDD-LRP-A3-UPLOAD-001). Formal phase remains None; delivery focus = LRP Wave LR-A. Worktree: D:/working/DGE-lrp-a3-upload-validation · feat/lrp-a3-upload-validation. MessageKey for corrupt package: api.error.master.docxCorrupt (do not add invalidDocxContent).",
+        "testStrategy": "1. Magic-byte reject unit test green. 2. Replace dialog rejects oversize/non-docx before upload. 3. Multipart oversize returns JSON envelope with docxTooLarge (413 or 422). 4. Via 4173 proxy, oversize shows readable UI (no raw nginx HTML). 5. Happy-path Word/LibreOffice .docx unchanged. 6. mvn verify + frontend lint/type-check/test/build green.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T02:10:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-09T11:45:00.000Z",
-      "taskCount": 8,
+      "lastModified": "2026-07-10T02:10:00.000Z",
+      "taskCount": 9,
       "completedCount": 8,
       "tags": [
         "master"

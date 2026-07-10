@@ -1,11 +1,11 @@
 # LRP Wave LR-A — Rendering Trust Chain & File Safety 「渲染信任链与文件安全」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3** first — all independent of P22)  
+**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2 Done**; **A3 In Progress** 2026-07-10 — gap-close)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer` for images, `doc-keeper` for ADRs)  
 **Prerequisites:** none for A1/A2/A3/A5; **A4/A6 depend on P22-T01/T02 Done**; **A7 depends on P23 demo packages (T04+ letter-grade)** — track via [P23 detail](./P23-demo-typography-layout-excellence.md)
 
-> **Session note:** `LR-A*` tasks only. Do **not** pick up `P22-*` (rendering write path — other session) or `CD-*` (CDP session). Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
+> **Session note (2026-07-10):** Active delivery slice = **`lrp-a3-upload-validation` / LR-A3** only. Formal phase remains **None**. Do **not** pick up `P22-*`, `CD-*`, or **LR-A4**. Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
 
 ---
 
@@ -77,34 +77,34 @@
 - **Maps:** CD-PIT-01; CD-HARD-T01; ADR-0041 (drafted by LR-A5).
 - **Status:** **Done** (2026-07-08; P23-T02 / CD-HARD-T01 executed — `fonts-noto-cjk`, `fonts-crosextra-carlito`, `fonts-crosextra-caladea` in both Dockerfiles; `fc-list :lang=zh` build assertion; `RenderingFontSmokeTest` green in `mvn verify`; gates BUILD SUCCESS)
 
-### LR-A3 — Upload deep validation + size limits
+### LR-A3 — Upload deep validation + size limits (**gap-close**, not greenfield)
 
 - **Owner agent:** backend-engineer (+ deploy-engineer for nginx)
-- **BDD:** **required** — rejection behavior (422 + messageKey) is user-visible; `behavior-spec-author` must publish a `ready` spec in `docs/behavior/` first.
+- **Status:** **In Progress** (2026-07-10 — slice `lrp-a3-upload-validation`; formal phase **None**)
+- **BDD:** **ready** — [docs/behavior/lrp-a3-master-docx-upload-validation.md](../../behavior/lrp-a3-master-docx-upload-validation.md) (`BDD-LRP-A3-UPLOAD-001` v1.0.0)
+- **Nature:** **Gap-close** against partial implementation already in tree — do **not** rewrite from zero. Confirmed defaults: **50MB** file / **60MB** request + nginx. MessageKey for corrupt package: existing `api.error.master.docxCorrupt` (do **not** add `invalidDocxContent`). Virus scan = **non-goal** (pending Q).
+- **Partial Done already (keep):**
+  - `validateDocxFile`: suffix, Content-Type whitelist, service-level size (`docgen.master.max-docx-upload-bytes` 50MB), ZIP magic + OPC required entries → `docxCorrupt`
+  - Spring multipart `max-file-size: 50MB` / `max-request-size: 60MB`
+  - nginx `client_max_body_size 60m`
+  - i18n keys `docxRequired` / `docxTooLarge` / `docxCorrupt`
+  - create-dialog client precheck (`MasterUploadDialog`)
+- **Open gaps (this slice):**
+  1. Dedicated **magic-byte unit test** (corrupt fixtures today cover missing OPC entries more than signature alone)
+  2. **Replace-dialog** client precheck (`MasterReplaceFileDialog` — align with create dialog / shared composable)
+  3. Spring **multipart oversize → unified JSON envelope** handler (`MaxUploadSizeExceededException` / `MultipartException` → `docxTooLarge`, 413 or 422)
+  4. nginx **413 → readable UI** mapping (no raw HTML as primary error surface)
 - **Read first:**
-  1. `backend/src/main/java/com/bank/docgen/master/service/MasterDocumentService.java` L342–349 (`validateDocxFile`)
-  2. All `MultipartFile` entry points (inventory via search) — master upload/replace first
-  3. `backend/src/main/resources/application.yml` (no `spring.servlet.multipart` block today)
-  4. `frontend/nginx.conf` (no `client_max_body_size` today)
-  5. `.cursor/skills/i18n-english-first/SKILL.md` — messageKey workflow
-- **Do NOT:** Implement virus scanning (record as **pending question** in `docs/requirements/requirements-plan.md` open questions — do not implement); block valid `.docx` produced by Word/LibreOffice; change the upload API shape.
-- **Steps:**
-  1. Wait for BDD spec `ready` (actor: master designer; trigger: upload/replace DOCX; boundary: wrong magic bytes, oversized file, corrupt package).
-  2. Add content probing to `validateDocxFile`: ZIP magic bytes (`PK\x03\x04`) + `OPCPackage.open` probe (reject with a **new** messageKey e.g. `api.error.master.invalidDocxContent` on failure); keep existing suffix check.
-  3. Configure `spring.servlet.multipart.max-file-size` / `max-request-size` in `application.yml` (externalized via env with sane defaults, e.g. 20MB/25MB — confirm defaults in BDD spec).
-  4. Add `client_max_body_size` to `frontend/nginx.conf` `/api/` location, aligned with backend limit.
-  5. Add the new messageKey to `backend/src/main/resources/i18n/messages_en.properties` (English base) and frontend `apiErrorEn.ts` + `apiErrorZhCn.ts`.
-  6. Tests: magic-byte reject, corrupt-zip reject, oversize reject (413/422 per spec), happy-path unchanged.
-  7. Record the virus-scanning pending question with owner + date.
-- **Acceptance (G/W/T):**
-  - **G** a file renamed to `.docx` that is not a ZIP/OPC package **W** uploaded as master **T** 422 with the new messageKey; nothing stored.
-  - **G** a file larger than the configured limit **W** uploaded through the 4173 proxy **T** rejected at nginx or backend with a translated, user-readable error (no raw 413 HTML).
-  - **G** a genuine Word-produced `.docx` **W** uploaded **T** accepted exactly as before.
-- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; `pnpm -C frontend lint` / `type-check` / `test` / `build`; Docker redeploy + manual upload smoke.
-- **Artifacts:** modified `MasterDocumentService.java`, `application.yml`, `frontend/nginx.conf`, i18n catalogs; new behavior spec in `docs/behavior/`; tests.
-- **Done when:** BDD scenarios green + gates green + pending question recorded + doc sync + commit review.
-- **Maps:** program §1 finding 6.
-- **Status:** Not Started
+  1. BDD spec above (§2 current-vs-target matrix)
+  2. `MasterDocumentService.validateDocxFile` / `assertDocxPackageStructure`
+  3. `application.yml` multipart + `docgen.master.max-docx-upload-bytes`
+  4. `frontend/nginx.conf` `client_max_body_size`
+  5. `.cursor/skills/i18n-english-first/SKILL.md`
+- **Do NOT:** Implement virus scanning; expand to **LR-A4**; change upload API shape; reject valid Word/LibreOffice `.docx`; mark Done before gap scenarios green.
+- **Acceptance:** BDD scenarios in the ready spec (G/W/T) + gates below.
+- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; `pnpm -C frontend lint` / `type-check` / `test` / `build`; Docker redeploy + upload smoke when required by pipeline.
+- **Done when:** All open gaps closed + BDD scenarios green + gates green + pending virus-scan Q recorded + doc sync + commit review.
+- **Maps:** program §1 finding 6; launch-readiness-gate LR-A3 checkbox.
 
 ### LR-A4 — Unsupported-node fail-closed closure
 
@@ -134,27 +134,19 @@
 
 ### LR-A5 — ADR-0041/0042/0043 drafting
 
+- **Status:** **Partial** (2026-07-10 plan pass) — `0042-pagination-delta-budget.md` and `0043-ooxml-output-validation-gate.md` exist as **Proposed**; **`0041-rendering-font-baseline.md` is missing** (still referenced by ADR-0042). Closing the full LR-A5 triad (draft 0041 + index + architecture-reviewer) is **deferred** — not expanded in the LR-A3 delivery slice.
 - **Owner agent:** doc-keeper (+ architecture-reviewer sign-off)
 - **BDD:** not-applicable — documentation/decision records only.
 - **Read first:**
   1. [CDP-industry-pitfall-registry.md](./CDP-industry-pitfall-registry.md) §4 (ADR outlines + target paths)
   2. `docs/adr/0000-template.md` + `docs/adr/README.md` (metadata taxonomy)
-  3. [CDP program](../competitiveness-deepening-program.md) §8 (CD-0 exit gate marks these drafts «optional»)
-- **Do NOT:** Mark ADRs Accepted without architecture-reviewer review; edit accepted ADR decisions; renumber existing ADRs (0040 is the latest accepted; 0044 is reserved by LR-B1).
-- **Steps:**
-  1. Draft `docs/adr/rendering-authoring/0041-rendering-font-baseline.md` (required font bundle in deploy images; cite LR-A2 package verification).
-  2. Draft `docs/adr/rendering-authoring/0042-pagination-delta-budget.md` (acceptable Word-vs-LO page-count delta for v1; consumed by LR-A7).
-  3. Draft `docs/adr/rendering-authoring/0043-ooxml-output-validation.md` (OOXML validation gate in CI; consumed by LR-A6).
-  4. Status **Proposed**; request architecture-reviewer review; record outcome.
-  5. Update ADR index + [CDP program](../competitiveness-deepening-program.md) §8: the «optional before CD-0 close» line now reads **required for LRP launch readiness** (LR-E2 checklist input).
-- **Acceptance (G/W/T):**
-  - **G** the three drafts exist **W** ADR index is rebuilt **T** each is reachable from `docs/adr/README.md` with status Proposed and correct topic directory.
-  - **G** LR-E2 builds the launch checklist **W** it references font/pagination/OOXML gates **T** each resolves to one of these ADRs (no dangling anchor).
-- **Gates:** Doc-only — relative links resolve; architecture-reviewer review recorded.
-- **Artifacts:** three ADR drafts; ADR index row updates; CDP §8 one-line amendment.
-- **Done when:** Drafts merged + reviewed + indexed + doc sync + commit review.
+  3. Existing drafts: `docs/adr/rendering-authoring/0042-pagination-delta-budget.md`, `0043-ooxml-output-validation-gate.md`
+- **Do NOT:** Mark ADRs Accepted without architecture-reviewer review; edit accepted ADR decisions; expand into LR-A3 implementation work.
+- **Remaining steps (deferred):**
+  1. Draft missing `docs/adr/rendering-authoring/0041-rendering-font-baseline.md` (cite LR-A2 package verification).
+  2. Confirm ADR index reachability for 0041–0043.
+  3. Request architecture-reviewer review; record outcome.
 - **Maps:** CD-PIT-01/02/03; LR-A2/A6/A7 consume these decisions.
-- **Status:** Not Started
 
 ### LR-A6 — OOXML output validation gate
 
@@ -209,7 +201,7 @@
 
 ## 2. Exit gate (Wave LR-A)
 
-- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); LR-A3 schedulable; LR-A5 ADR drafts reviewed
-- [ ] LR-A4/A6 Done once P22-T01/T02 Done; LR-A7 Done once **P23** letter-grade demo corpus exists (≥5 types)
+- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 In Progress** (2026-07-10 gap-close); LR-A5 **Partial** (0042/0043 on disk; 0041 deferred)
+- [ ] LR-A4/A6 Done once P22-T01/T02 Done; LR-A7 Done once **P23** letter-grade demo corpus measurements land
 - [ ] No structured node can silently disappear from generated DOCX (blocked or warned)
 - [ ] Ledger § LRP wave row updated with gate evidence per task

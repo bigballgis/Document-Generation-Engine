@@ -1,24 +1,31 @@
 package com.bank.docgen.master.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.api.CreateMasterRequest;
+import com.bank.docgen.master.domain.MasterDocumentStatus;
 import com.bank.docgen.master.persistence.MasterAnchorRepository;
+import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.junit.jupiter.api.BeforeEach;
@@ -94,8 +101,8 @@ class MasterDocumentServiceValidationTest {
                 .extracting(ex -> ((MasterValidationException) ex).messageKey())
                 .isEqualTo("api.error.master.docxTooLarge");
 
-        verify(objectStoragePort, never()).put(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.any());
-        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(org.mockito.ArgumentMatchers.any());
+        verify(objectStoragePort, never()).put(any(), any(), any(Long.class), any());
+        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(any());
     }
 
     @Test
@@ -112,8 +119,8 @@ class MasterDocumentServiceValidationTest {
                 .extracting(ex -> ((MasterValidationException) ex).messageKey())
                 .isEqualTo("api.error.master.docxRequired");
 
-        verify(objectStoragePort, never()).put(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.any());
-        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(org.mockito.ArgumentMatchers.any());
+        verify(objectStoragePort, never()).put(any(), any(), any(Long.class), any());
+        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(any());
     }
 
     @Test
@@ -130,8 +137,27 @@ class MasterDocumentServiceValidationTest {
                 .extracting(ex -> ((MasterValidationException) ex).messageKey())
                 .isEqualTo("api.error.master.docxCorrupt");
 
-        verify(objectStoragePort, never()).put(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.any());
-        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(org.mockito.ArgumentMatchers.any());
+        verify(objectStoragePort, never()).put(any(), any(), any(Long.class), any());
+        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(any());
+    }
+
+    @Test
+    void rejectsWrongMagicBytesBeforeStorage() {
+        // A1: .docx name + OOXML MIME but plain-text / non-PK signature → docxCorrupt
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "evil.docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "not-a-zip-package".getBytes(StandardCharsets.UTF_8)
+        );
+
+        assertThatThrownBy(() -> service.create(request(), file, GLOBAL_ADMIN))
+                .isInstanceOf(MasterValidationException.class)
+                .extracting(ex -> ((MasterValidationException) ex).messageKey())
+                .isEqualTo("api.error.master.docxCorrupt");
+
+        verify(objectStoragePort, never()).put(any(), any(), any(Long.class), any());
+        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(any());
     }
 
     @Test
@@ -150,8 +176,61 @@ class MasterDocumentServiceValidationTest {
                 .extracting(ex -> ((MasterValidationException) ex).messageKey())
                 .isEqualTo("api.error.master.docxRequired");
 
-        verify(objectStoragePort, never()).put(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.any());
-        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(org.mockito.ArgumentMatchers.any());
+        verify(objectStoragePort, never()).put(any(), any(), any(Long.class), any());
+        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(any());
+    }
+
+    @Test
+    void replaceFileRejectsWrongMagicBytesWithSameContractAsCreate() {
+        // A7: replace shares validateDocxFile — wrong magic → docxCorrupt, no storage
+        UUID masterId = UUID.randomUUID();
+        MasterDocumentEntity master = new MasterDocumentEntity(
+                masterId, "RETAIL", "Retail Letter Master", "Sample",
+                "masters/" + masterId + "/file.docx", "file.docx", "admin"
+        );
+        master.setStatus(MasterDocumentStatus.DRAFT);
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)).thenReturn(Optional.of(master));
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "evil.docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "plain-text-masquerade".getBytes(StandardCharsets.UTF_8)
+        );
+
+        assertThatThrownBy(() -> service.replaceFile(masterId, file, GLOBAL_ADMIN))
+                .isInstanceOf(MasterValidationException.class)
+                .extracting(ex -> ((MasterValidationException) ex).messageKey())
+                .isEqualTo("api.error.master.docxCorrupt");
+
+        verify(objectStoragePort, never()).put(any(), any(), any(Long.class), any());
+        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(any());
+    }
+
+    @Test
+    void replaceFileRejectsOversizedDocxWithSameContractAsCreate() {
+        UUID masterId = UUID.randomUUID();
+        MasterDocumentEntity master = new MasterDocumentEntity(
+                masterId, "RETAIL", "Retail Letter Master", "Sample",
+                "masters/" + masterId + "/file.docx", "file.docx", "admin"
+        );
+        master.setStatus(MasterDocumentStatus.DRAFT);
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)).thenReturn(Optional.of(master));
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "master.docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                new byte[4097]
+        );
+
+        assertThatThrownBy(() -> service.replaceFile(masterId, file, GLOBAL_ADMIN))
+                .isInstanceOf(MasterValidationException.class)
+                .extracting(ex -> ((MasterValidationException) ex).messageKey())
+                .isEqualTo("api.error.master.docxTooLarge");
+
+        verify(objectStoragePort, never()).put(any(), any(), any(Long.class), any());
+        verify(docxAnchorExtractor, never()).extractOrderedAnchorIds(any());
     }
 
     private CreateMasterRequest request() {
