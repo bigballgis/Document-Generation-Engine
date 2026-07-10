@@ -170,8 +170,8 @@
         "id": "13",
         "title": "LR-A5 ADR triad closeout (0041/0042/0043)",
         "description": "Docs-first LR-A5 ADR closeout — author ADR-0041; reconcile ADR-0042 Word n/a residual; keep ADR-0043 Proposed; sync LR-A5 / Wave LR-A honestly. Out of scope: MS Word measurement; ECMA-376 XSD / LO24; LR-C9; DGE-audit-governance.",
-        "details": "Slice id: lrp-a5-adr-closeout. Placement: ISOLATED D:/working/DGE-lrp-a5-adr-closeout · feat/lrp-a5-adr-closeout · base b4e4632. Doc-keeper closeout 2026-07-10: ADR-0041 authored Proposed (LR-A2 jammy evidence; Accepted needs architecture-reviewer); ADR-0042 Proposed (Word residual strengthened); ADR-0043 Proposed (XSD/LO24 residual). LR-A5 Done; Wave LR-A Done with Word/XSD/LO24/0041-Accepted deferred out of wave exit. Gate evidence: docs-only.",
-        "testStrategy": "1. ADR-0041 exists under docs/adr/rendering-authoring/ and is reachable from ADR index. 2. ADR-0042 honestly records LR-A7 Word n/a residual (Proposed OK). 3. ADR-0043 status honest vs LR-A6 delivery (Proposed OK if XSD/LO24 deferred). 4. architecture-reviewer required before any Accepted promotion (0041 ready). 5. Plan/ledger sync LR-A5 Done; Wave LR-A Done with explicit residual deferral.",
+        "details": "Slice id: lrp-a5-adr-closeout. Merge cc9e5f6 (feat/lrp-a5-adr-closeout → main); worktree removed. ADR-0041 Accepted (architecture-reviewer PASS_WITH_NOTES 2026-07-10; LR-A2 jammy evidence). ADR-0042 Proposed (Word residual; no invented numbers). ADR-0043 Proposed (XSD/LO24 residual). LR-A5 Done; Wave LR-A Done with Word/XSD/LO24/0042-Accepted/0043-Accepted deferred out of wave exit (0041 Accepted residual closed). Formal phase None. Gate evidence: docs-only + architecture-reviewer PASS_WITH_NOTES. Do not start LR-C9.",
+        "testStrategy": "1. ADR-0041 exists under docs/adr/rendering-authoring/ and is Accepted + indexed. 2. ADR-0042 honestly records LR-A7 Word n/a residual (Proposed OK). 3. ADR-0043 status honest vs LR-A6 delivery (Proposed OK if XSD/LO24 deferred). 4. architecture-reviewer PASS_WITH_NOTES recorded for 0041 Accepted. 5. Plan/ledger sync LR-A5 Done; Wave LR-A Done with explicit residual deferral; merge SHA on MAIN.",
         "priority": "high",
         "dependencies": [
           "11",
@@ -179,12 +179,12 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-10T10:00:00.000Z"
+        "updatedAt": "2026-07-10T18:12:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T10:00:00.000Z",
+      "lastModified": "2026-07-10T18:12:00.000Z",
       "taskCount": 13,
       "completedCount": 13,
       "tags": [

@@ -24,7 +24,7 @@ same gate bar (backend `mvn verify` 114 tests green / JaCoCo met; frontend lint/
 
 **Active formal phase (repo-wide):** **None** (2026-07-09+). **CORE-FORTRESS Done** (F1–F8); **CODE-QUALITY Done**. See [master-plan.md](./plan/master-plan.md).
 
-**Delivery focus note (2026-07-10):** **LR-A6 Done** (merge `122d6d1`; OOXML fail-closed; CD-HARD-T03 executed-by-LR-A6); **LR-A7 Done** (merge `abf2048`; Docker PDF corpus; Word delta residual) — [launch-readiness-program.md](./plan/launch-readiness-program.md). Wave LR-A remains **In Progress** (A5 Partial). **Sibling:** CDP Wave CD-2 **partial** (T01/T01b Done). **P12 catch-all Not Started** (slices Done). **P21 Done** (2026-06-30). User sequence **P14 → P15 → P18** complete.
+**Delivery focus note (2026-07-10):** **Wave LR-A Done** (A1–A7; merge `cc9e5f6`); **LR-A5 Done** (**ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred) — [launch-readiness-program.md](./plan/launch-readiness-program.md). **Sibling:** CDP Wave CD-2 **partial** (T01/T01b Done). **P12 catch-all Not Started** (slices Done). **P21 Done** (2026-06-30). User sequence **P14 → P15 → P18** complete.
 
 **Latest gate evidence (authoritative):** backend `mvn verify` BUILD SUCCESS (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL);
 frontend **643** Vitest (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL); Playwright T13 **8+1** passed, **3** skipped (documented); UIUX manifest **PASS**; see [execution-sync-ledger.md](./plan/execution-sync-ledger.md).

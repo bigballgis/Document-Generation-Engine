@@ -14,7 +14,7 @@ be signed off. No item is skipped; a single 🔴 blocks launch.
 
 | Wave | Status | Evidence |
 | --- | --- | --- |
-| LR-A (rendering trust) | **Done** (2026-07-10) — A1–A7 Done; ADR-0041/0042/0043 **Proposed** on disk; Word-vs-LO / 0042 Accepted + 0043 slice B + 0041 Accepted promotion **deferred out of wave exit** | LR-A5 docs-only closeout; LR-A6 merge `122d6d1`; LR-A7 evidence [lrp-a7-pagination](../evidence/lrp-a7-pagination/); CD-HARD-T01/T03/T04 Done |
+| LR-A (rendering trust) | **Done** (2026-07-10) — A1–A7 Done; **ADR-0041 Accepted**; 0042/0043 remain **Proposed**; Word-vs-LO / 0042 Accepted + 0043 slice B **deferred out of wave exit** (0041 Accepted residual closed) | LR-A5 merge `cc9e5f6` (docs-only + architecture-reviewer PASS_WITH_NOTES); LR-A6 merge `122d6d1`; LR-A7 evidence [lrp-a7-pagination](../evidence/lrp-a7-pagination/); CD-HARD-T01/T03/T04 Done |
 | LR-B (multi-instance + session) | Done (2026-07-04) | ADR-0044, ShedLock V46, SSE proxy config, graceful shutdown, LR-B6 session renewal |
 | LR-C (usability deepening) | Partial — C1/C4 **Done** (F7); C2–C3/C5–C13 Not Started | F7 evidence in ledger; not current delivery focus |
 | LR-D (ops + data lifecycle) | Not Started (checklist rows may be aspirational) | Do not treat as active delivery focus |

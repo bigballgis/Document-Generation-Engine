@@ -6,7 +6,7 @@
 **Task Master mirror:** `.taskmaster/tasks/tasks.json` tasks **4–8** (foreign-bank-letter grade rewrites + publish + generate + evidence)  
 **BDD:** `docs/requirements/demo-typography-layout-behavior-spec.md` — **ready** (P23-T01 Done 2026-07-08; `BDD-DEMO-TYP-001`…`020`; see §6)
 
-> **Single-active-phase invariant:** **P23 closed Done** (2026-07-08). No formal phase `In Progress` until next activation. **P22 remains Done** with honest carry-forward note (T05–T11 scaffold-only → P23 closed). **LRP** Wave LR-A remains **In Progress** as a cross-cutting program (not a formal phase). **LR-A7** pagination corpus unblocked by P23 demo pack; LR-A7 execution remains LRP-owned.
+> **Single-active-phase invariant:** **P23 closed Done** (2026-07-08). No formal phase `In Progress` until next activation. **P22 remains Done** with honest carry-forward note (T05–T11 scaffold-only → P23 closed). **LRP** Wave LR-A **Done** (2026-07-10; A1–A7; not a formal phase). **LR-A7** pagination corpus was unblocked by P23 demo pack.
 
 ---
 

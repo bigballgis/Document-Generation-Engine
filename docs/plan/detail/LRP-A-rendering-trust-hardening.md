@@ -7,7 +7,7 @@
 
 > **Sign-off note (2026-07-10):** **ADR-0041 → Accepted** (architecture-reviewer **PASS_WITH_NOTES**; slice `lrp-a5-adr-closeout`). 0041 Accepted residual **closed**. 0042/0043 remain **Proposed**. Wave LR-A Done honesty **PASS**. Remaining deferred out of wave: Word-vs-LO + ADR-0042 Accepted; ADR-0043 slice B (XSD/LO24). Do **not** start LR-C9.
 
-> **Completion note (2026-07-10):** **LR-A5 → Done** (slice `lrp-a5-adr-closeout`; docs-only). ADR triad on disk + indexed: [ADR-0041](../../adr/rendering-authoring/0041-rendering-font-baseline.md) **Accepted** (architecture-reviewer PASS_WITH_NOTES 2026-07-10; LR-A2 evidence solid); [ADR-0042](../../adr/rendering-authoring/0042-pagination-delta-budget.md) **Proposed** (Word n/a residual strengthened — no invented Word numbers); [ADR-0043](../../adr/rendering-authoring/0043-ooxml-output-validation-gate.md) **Proposed** (A6 slice A Done; XSD/LO24 residual). BDD **not-applicable**. Formal phase remains **None**. **Wave LR-A → Done** with explicit deferrals out of wave exit: (1) Word-vs-LO page delta + ADR-0042 Accepted on Word-equipped host; (2) ADR-0043 slice B (ECMA-376 XSD + LO24 headless). ADR-0041 Accepted residual **closed** by this review. Do **not** start LR-C9 for these residuals. Gate evidence: docs-only. **Task Master #13 → done** (on MAIN post-merge).
+> **Completion note (2026-07-10):** **LR-A5 → Done** (slice `lrp-a5-adr-closeout`; docs-only; **merge `cc9e5f6`** → `main`; worktree removed). ADR triad on disk + indexed: [ADR-0041](../../adr/rendering-authoring/0041-rendering-font-baseline.md) **Accepted** (architecture-reviewer PASS_WITH_NOTES 2026-07-10; LR-A2 evidence solid); [ADR-0042](../../adr/rendering-authoring/0042-pagination-delta-budget.md) **Proposed** (Word n/a residual strengthened — no invented Word numbers); [ADR-0043](../../adr/rendering-authoring/0043-ooxml-output-validation-gate.md) **Proposed** (A6 slice A Done; XSD/LO24 residual). BDD **not-applicable**. Formal phase remains **None**. **Wave LR-A → Done** with explicit deferrals out of wave exit: (1) Word-vs-LO page delta + ADR-0042 Accepted on Word-equipped host; (2) ADR-0043 slice B (ECMA-376 XSD + LO24 headless). ADR-0041 Accepted residual **closed** by this review. Do **not** start LR-C9 for these residuals. Gate evidence: docs-only + architecture-reviewer PASS_WITH_NOTES. **Task Master #13 → done**.
 
 > **Activation note (2026-07-10):** **LR-A5 → In Progress** (slice `lrp-a5-adr-closeout`; ISOLATED `D:/working/DGE-lrp-a5-adr-closeout` · `feat/lrp-a5-adr-closeout`; base `b4e4632`). Superseded by LR-A5 completion note above.
 
@@ -137,7 +137,7 @@
 
 ### LR-A5 — ADR-0041/0042/0043 drafting
 
-- **Status:** **Done** (2026-07-10 — slice `lrp-a5-adr-closeout`; docs-only)
+- **Status:** **Done** (2026-07-10 — slice `lrp-a5-adr-closeout`; docs-only; merge `cc9e5f6`)
 - **Owner agent:** doc-keeper (+ architecture-reviewer for any Accepted promotion)
 - **BDD:** not-applicable — documentation/decision records only.
 - **Delivered:**

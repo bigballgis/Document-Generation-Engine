@@ -84,7 +84,7 @@ upstream systems invoke the dynamic API.
 > **P22 (Done 2026-07-04):** rendering engine + demo scaffolds — typography/content excellence → **P23**.
 >
 > **CDP (active delivery focus):** [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) — Wave **CD-0 Done**; Wave **CD-2 In Progress** (**partial** — T01/T01b **Done**; T02–T12 Not Started); task prefix **`CD-*`** only. Do **not** mark full CD-2 Done until remaining matrix green.
-> **LRP:** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; **LR-A3/A4/A6/A7 Done** (2026-07-10); **LR-A5 In Progress** (`lrp-a5-adr-closeout`); Wave LR-A remains **In Progress** (Word-vs-LO residual under ADR-0042 — do not invent numbers; do not start LR-C9); **LR-C1/C4 Done** via CORE-FORTRESS F7. Formal phase remains **None** — do not promote LRP/CDP to a formal phase row.
+> **LRP:** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; **Wave LR-A Done** (2026-07-10; A1–A7; merge `cc9e5f6`); **LR-A5 Done** (`lrp-a5-adr-closeout`; **ADR-0041 Accepted**; 0042/0043 remain Proposed); Word/XSD/LO24/0042-Accepted/0043-Accepted residuals deferred out of wave exit — do not invent Word numbers; do not start LR-C9; **LR-C1/C4 Done** via CORE-FORTRESS F7. Formal phase remains **None** — do not promote LRP/CDP to a formal phase row.
 
 ## Thin vertical slice (MVP chain)
 

@@ -89,7 +89,7 @@ warning/blocker enforcement of the ±1 budget) **require a Word-equipped host**:
 LR-A7 closed the Docker PDF measurement gap with a documented exception; LR-A5 records
 this residual honestly and does **not** expand into MS Word measurement or LR-C9.
 Font baseline for conversion images is [ADR-0041](./0041-rendering-font-baseline.md)
-(Proposed; LR-A2 implemented).
+(**Accepted**; LR-A2 implemented; architecture-reviewer PASS_WITH_NOTES 2026-07-10).
 ## Alternatives considered
 
 - **Zero-tolerance (exact page match)** — rejected: impossible with OSS engines; would
