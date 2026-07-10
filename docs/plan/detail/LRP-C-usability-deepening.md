@@ -1,11 +1,13 @@
 # LRP Wave LR-C — Business Usability Deepening 「业务易用性深化」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 Done** 2026-07-11 — slice `lrp-c11-api-error-i18n`; **LR-C12 In Progress** — slice `lrp-c12-keyboard-a11y`; remaining C2/C3/C5/C7/C8/C13 Not Started)  
+**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 Done** 2026-07-11 — slice `lrp-c11-api-error-i18n`; **LR-C12 Done** 2026-07-11 — slice `lrp-c12-keyboard-a11y`; remaining C2/C3/C5/C7/C8/C13 Not Started)  
 **Owner default:** `frontend-engineer` (+ `backend-engineer` where noted); every user-facing slice pairs `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** none for most tasks; **C6 depends on LR-C5**; **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
 
-> **Activation note (2026-07-11):** **LR-C12 → In Progress** (slice `lrp-c12-keyboard-a11y`; formal phase remains **None**). Sole-active LRP slice — keyboard a11y & table activation baseline: extend `useActivatableTableRow` (Enter/Space + focusable rows), shell skip-link, focus-ring audit, extend a11y-smoke axe coverage, Playwright keyboard journey. BDD **not-applicable** (COR-F21 follow-through / a11y hardening of existing interactions). Placement: ISOLATED `D:/working/DGE-lrp-c12-keyboard-a11y` · `feat/lrp-c12-keyboard-a11y` · base `ee1435d`. Gate evidence: []. **Task Master #27 → in-progress**. Other LR-C rows untouched (C2/C3/C5/C7/C8/C13 Not Started; C1/C4/C9/C10/C11 Done). Do **not** mark Wave LR-C Done. Do **not** activate C2/C3/CD-3.
+> **Completion note (2026-07-11):** **LR-C12 → Done** (slice `lrp-c12-keyboard-a11y`; merge `0357a16` / `0357a166ab2e310aed0ed25f33a5ba8dbfbab63a` → `main`; feature `e207e28`; worktree removed). Keyboard a11y & table activation: Enter/Space on activatable rows (EP store display order), skip-link, focus-ring tokens, extended a11y-smoke, keyboard journey E2E, UIUX manifest. BDD **not-applicable**. Formal phase remains **None**. **No sole-active LRP/CDP slice.** Wave LR-C remains **In Progress** (partial — C1/C4/C9/C10/C11/C12 Done; C2/C3/C5/C7/C8/C13 Not Started). Do **not** mark Wave LR-C Done. Do **not** activate C13/C2/C3/CD-3. Recommend next: **LR-C13** or pause (do not auto-activate). **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN** (983 tests); `docker-deploy-queue.ps1` **DEPLOY_OK** (`:8080` UP, `:4173` 200); E2E a11y-smoke + LRP-C12-keyboard-journey **10/10** PASS; UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C12-uiux-manifest.md`); architecture **PASS_WITH_NOTES** (Critical **0**). **Task Master #27 → done**. COR-F21 residual closed; OPT-B4 lint baseline absorbed.
+>
+> **Activation note (2026-07-11):** **LR-C12 → In Progress** (slice `lrp-c12-keyboard-a11y`; formal phase remains **None**). Sole-active LRP slice — keyboard a11y & table activation baseline: extend `useActivatableTableRow` (Enter/Space + focusable rows), shell skip-link, focus-ring audit, extend a11y-smoke axe coverage, Playwright keyboard journey. BDD **not-applicable** (COR-F21 follow-through / a11y hardening of existing interactions). Placement: ISOLATED `D:/working/DGE-lrp-c12-keyboard-a11y` · `feat/lrp-c12-keyboard-a11y` · base `ee1435d`. Gate evidence: []. **Task Master #27 → in-progress** (now **done** — see completion note above). Other LR-C rows untouched (C2/C3/C5/C7/C8/C13 Not Started; C1/C4/C9/C10/C11 Done). Do **not** mark Wave LR-C Done. Do **not** activate C2/C3/CD-3.
 >
 > **Completion note (2026-07-11):** **LR-C11 → Done** (slice `lrp-c11-api-error-i18n`; merge `44fcf40` / `44fcf4047e0f67a7116703fd60ebf6af29e2bbb4` → `main`; worktree removed). `api.error` catalog parity **159/159**; parity Vitest enforced; `logoSlotLabel` proper-noun exempt; locale formatters verified (`toLocaleString` residual closed). BDD **not-applicable**. Formal phase remains **None**. Superseded sole-active by LR-C12 activation above. Wave LR-C remains **In Progress** (partial — C1/C4/C9/C10/C11 Done; C12 activated separately). Do **not** mark Wave LR-C Done. **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN** (973 tests); architecture-reviewer **PASS_WITH_NOTES** (Critical **0**); e2e/uiux/deploy skipped (catalog-only; `e2e_required=no`). **Task Master #26 → done**. OPT-G7 residual closed; OPT-G6 locale/catalog residual closed (aria-label sweep remains).
 >
@@ -311,8 +313,8 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - **Gates:** §1 standard block; `pnpm -C frontend exec playwright test a11y-smoke.spec.ts LRP-C12-keyboard-journey.spec.ts --config playwright.docker.config.ts`; UIUX manifest.
 - **Artifacts:** composable + shell changes; extended axe smoke + keyboard spec; manifest.
 - **Done when:** Keyboard journey + axe green + gates + doc sync + commit review.
-- **Maps:** COR-F21 residual (absorbed); OPT-B4 lint baseline.
-- **Status:** **In Progress** (2026-07-11 — slice `lrp-c12-keyboard-a11y`; BDD `not-applicable`; Task Master #27; placement ISOLATED `D:/working/DGE-lrp-c12-keyboard-a11y` · `feat/lrp-c12-keyboard-a11y` · base `ee1435d`)
+- **Maps:** COR-F21 residual (absorbed / closed); OPT-B4 lint baseline (absorbed).
+- **Status:** **Done** (2026-07-11 — slice `lrp-c12-keyboard-a11y`; merge `0357a16`; feature `e207e28`; BDD `not-applicable`; Task Master #27; E2E 10/10; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES Critical 0)
 
 ### LR-C13 — Frontend engineering debt
 
@@ -343,8 +345,9 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 
 - [x] LR-C1 + LR-C4 shipped via CORE-FORTRESS F7 (2026-07-09; Vitest **894**; E2E **12/12**; BDD + UIUX evidence)
 - [ ] LR-C2/C3/C5…C8 shipped with BDD specs, functional Playwright journeys, and UIUX manifests (both brands)
-- [ ] LR-C9…C13 shipped with green gates; OPT-G4/G5/G6-residual/G7 + F4-residual rows updated *(LR-C9 Done 2026-07-10; LR-C10 Done 2026-07-11 merge `bdaf95d`; **LR-C11 Done** 2026-07-11 merge `44fcf40` — OPT-G7 + OPT-G6 locale/catalog residual closed; OPT-G6 aria-label sweep + OPT-G4/G5 + F4-residual remain via C12–C13/C5)*
+- [ ] LR-C9…C13 shipped with green gates; OPT-G4/G5/G6-residual/G7 + F4-residual rows updated *(LR-C9 Done 2026-07-10; LR-C10 Done 2026-07-11 merge `bdaf95d`; **LR-C11 Done** 2026-07-11 merge `44fcf40` — OPT-G7 + OPT-G6 locale/catalog residual closed; **LR-C12 Done** 2026-07-11 merge `0357a16` — COR-F21 residual + OPT-B4 absorbed; OPT-G6 aria-label sweep + OPT-G4/G5 + F4-residual remain via C13/C5)*
 - [x] `api.error` parity test enforcing live backend N/N (**159/159**; historically 145) active in `pnpm -C frontend test` (LR-C11 Done 2026-07-11)
 - [x] No dead-end error list remains among the six §2/LR-C9 targets (LR-C9 Done 2026-07-10; merge `0013615`)
 - [x] LR-C10 upload UX polish shipped (progress / drag hint / inline errors; merge `bdaf95d`; E2E 4/4)
-- [ ] Ledger § LRP wave row updated with per-task evidence *(LR-C10 evidence recorded 2026-07-11; wave still partial)*
+- [x] LR-C12 keyboard a11y & table activation shipped (Enter/Space, skip-link, focus-ring; merge `0357a16`; E2E 10/10; COR-F21 residual closed)
+- [ ] Ledger § LRP wave row updated with per-task evidence *(LR-C12 evidence recorded 2026-07-11; wave still partial)*

@@ -366,23 +366,23 @@
       {
         "id": "27",
         "title": "LR-C12 Keyboard a11y & table activation",
-        "description": "Sole-active LRP slice: keyboard a11y & table activation baseline — extend useActivatableTableRow (Enter/Space + focusable rows), shell skip-link, focus-ring audit, extend a11y-smoke axe coverage, Playwright keyboard journey. BDD not-applicable (COR-F21 follow-through). Do NOT mark Wave LR-C Done. Do NOT activate C2/C3/CD-3.",
-        "details": "IN PROGRESS 2026-07-11. Slice id: lrp-c12-keyboard-a11y. Status: in-progress. Placement: ISOLATED D:/working/DGE-lrp-c12-keyboard-a11y · feat/lrp-c12-keyboard-a11y · base ee1435d. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9/C10/C11 Done; C12 In Progress; C2/C3/C5/C7/C8/C13 Not Started). Acceptance: (1) keyboard-only nav — focus catalog row + Enter opens detail like click; (2) extended axe smoke on Docker 4173 — zero critical violations on covered views. Gates: pnpm lint/type-check/test/build; playwright a11y-smoke + LRP-C12-keyboard-journey; UIUX manifest. Do NOT mark Wave LR-C Done. Do NOT activate C2/C3/CD-3.",
+        "description": "COMPLETED 2026-07-11. LR-C12 keyboard a11y & table activation Done — Enter/Space on activatable rows, skip-link, focus-ring tokens, extended a11y-smoke, keyboard journey E2E, UIUX manifest. Merge 0357a16; worktree removed. Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. No sole-active. Recommend next LR-C13 or pause (do not auto-activate).",
+        "details": "DONE 2026-07-11. Slice id: lrp-c12-keyboard-a11y. Merge: 0357a166ab2e310aed0ed25f33a5ba8dbfbab63a (feat/lrp-c12-keyboard-a11y → main); feature e207e28. Status: done. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9/C10/C11/C12 Done; C2/C3/C5/C7/C8/C13 Not Started). Delivered: Enter/Space on activatable rows (EP store display order), skip-link, focus-ring tokens, extended a11y-smoke, keyboard journey E2E, UIUX manifest. COR-F21 residual closed; OPT-B4 lint baseline absorbed. Gates: pnpm lint/type-check/test/build GREEN (983 tests); docker-deploy-queue DEPLOY_OK (:8080 UP, :4173 200); E2E a11y-smoke + LRP-C12-keyboard-journey 10/10 PASS; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C12-uiux-manifest.md); architecture PASS_WITH_NOTES Critical 0. Do NOT mark Wave LR-C Done. Do NOT activate C13/C2/C3/CD-3. Next: recommend LR-C13 or pause (do not auto-activate).",
         "testStrategy": "1. Vitest for useActivatableTableRow Enter/Space + focusable rows. 2. Playwright keyboard journey: tab → skip-link → table → Enter opens detail. 3. Extended a11y-smoke axe on Docker 4173 — zero critical violations. 4. pnpm lint/type-check/test/build green. 5. UIUX a11y evidence manifest. 6. Do not claim Wave LR-C Done.",
         "priority": "high",
         "dependencies": [
           "26"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-11T06:41:00.000Z"
+        "updatedAt": "2026-07-11T07:38:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T06:41:00.000Z",
+      "lastModified": "2026-07-11T07:38:00.000Z",
       "taskCount": 27,
-      "completedCount": 26,
+      "completedCount": 27,
       "tags": [
         "master"
       ]
