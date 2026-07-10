@@ -1,11 +1,11 @@
 # LRP Wave LR-A — Rendering Trust Chain & File Safety 「渲染信任链与文件安全」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2 Done**; **A3 In Progress** 2026-07-10 — gap-close)  
+**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3 Done**; A5 Partial; A4/A6/A7 remain)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer` for images, `doc-keeper` for ADRs)  
 **Prerequisites:** none for A1/A2/A3/A5; **A4/A6 depend on P22-T01/T02 Done**; **A7 depends on P23 demo packages (T04+ letter-grade)** — track via [P23 detail](./P23-demo-typography-layout-excellence.md)
 
-> **Session note (2026-07-10):** Active delivery slice = **`lrp-a3-upload-validation` / LR-A3** only. Formal phase remains **None**. Do **not** pick up `P22-*`, `CD-*`, or **LR-A4**. Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
+> **Session note (2026-07-10):** **LR-A3 Done** (`lrp-a3-upload-validation`; merge `e62c210`). Formal phase remains **None**. Recommended next delivery focus: **CDP golden path** (status note only — do **not** start CDP code from this sync). Remaining LR-A: A4/A6/A7 + A5 (0041 deferred). Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
 
 ---
 
@@ -80,30 +80,16 @@
 ### LR-A3 — Upload deep validation + size limits (**gap-close**, not greenfield)
 
 - **Owner agent:** backend-engineer (+ deploy-engineer for nginx)
-- **Status:** **In Progress** (2026-07-10 — slice `lrp-a3-upload-validation`; formal phase **None**)
-- **BDD:** **ready** — [docs/behavior/lrp-a3-master-docx-upload-validation.md](../../behavior/lrp-a3-master-docx-upload-validation.md) (`BDD-LRP-A3-UPLOAD-001` v1.0.0)
-- **Nature:** **Gap-close** against partial implementation already in tree — do **not** rewrite from zero. Confirmed defaults: **50MB** file / **60MB** request + nginx. MessageKey for corrupt package: existing `api.error.master.docxCorrupt` (do **not** add `invalidDocxContent`). Virus scan = **non-goal** (pending Q).
-- **Partial Done already (keep):**
+- **Status:** **Done** (2026-07-10 — slice `lrp-a3-upload-validation`; merge `e62c210` / feature `9d5a270`; formal phase **None**)
+- **BDD:** **ready** — [docs/behavior/lrp-a3-master-docx-upload-validation.md](../../behavior/lrp-a3-master-docx-upload-validation.md) (`BDD-LRP-A3-UPLOAD-001` v1.0.0); scenarios A1–A7 green via unit + E2E
+- **Nature:** **Gap-close** against partial implementation already in tree. Confirmed defaults: **50MB** file / **60MB** request + nginx. MessageKey for corrupt package: `api.error.master.docxCorrupt` (no `invalidDocxContent`). Virus scan = **non-goal** (pending Q — remains open).
+- **Delivered (gap-close):**
   - `validateDocxFile`: suffix, Content-Type whitelist, service-level size (`docgen.master.max-docx-upload-bytes` 50MB), ZIP magic + OPC required entries → `docxCorrupt`
-  - Spring multipart `max-file-size: 50MB` / `max-request-size: 60MB`
-  - nginx `client_max_body_size 60m`
+  - Spring multipart `max-file-size: 50MB` / `max-request-size: 60MB` + oversize → unified envelope (`docxTooLarge`)
+  - nginx `client_max_body_size 60m` + 413 → readable UI mapping
   - i18n keys `docxRequired` / `docxTooLarge` / `docxCorrupt`
-  - create-dialog client precheck (`MasterUploadDialog`)
-- **Open gaps (this slice):**
-  1. Dedicated **magic-byte unit test** (corrupt fixtures today cover missing OPC entries more than signature alone)
-  2. **Replace-dialog** client precheck (`MasterReplaceFileDialog` — align with create dialog / shared composable)
-  3. Spring **multipart oversize → unified JSON envelope** handler (`MaxUploadSizeExceededException` / `MultipartException` → `docxTooLarge`, 413 or 422)
-  4. nginx **413 → readable UI** mapping (no raw HTML as primary error surface)
-- **Read first:**
-  1. BDD spec above (§2 current-vs-target matrix)
-  2. `MasterDocumentService.validateDocxFile` / `assertDocxPackageStructure`
-  3. `application.yml` multipart + `docgen.master.max-docx-upload-bytes`
-  4. `frontend/nginx.conf` `client_max_body_size`
-  5. `.cursor/skills/i18n-english-first/SKILL.md`
-- **Do NOT:** Implement virus scanning; expand to **LR-A4**; change upload API shape; reject valid Word/LibreOffice `.docx`; mark Done before gap scenarios green.
-- **Acceptance:** BDD scenarios in the ready spec (G/W/T) + gates below.
-- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; `pnpm -C frontend lint` / `type-check` / `test` / `build`; Docker redeploy + upload smoke when required by pipeline.
-- **Done when:** All open gaps closed + BDD scenarios green + gates green + pending virus-scan Q recorded + doc sync + commit review.
+  - create + replace dialog client precheck; dedicated magic-byte unit test
+- **Gates (GREEN):** `mvn -B -ntp -f backend/pom.xml verify`; `pnpm -C frontend lint` / `type-check` / `test` / `build`; E2E `frontend/e2e/LRP-A3-master-docx-upload-validation.spec.ts` **5/5**; UIUX PASS; architecture PASS; `docker-deploy-queue.ps1` DEPLOY_OK (:8080/:4173)
 - **Maps:** program §1 finding 6; launch-readiness-gate LR-A3 checkbox.
 
 ### LR-A4 — Unsupported-node fail-closed closure
@@ -201,7 +187,7 @@
 
 ## 2. Exit gate (Wave LR-A)
 
-- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 In Progress** (2026-07-10 gap-close); LR-A5 **Partial** (0042/0043 on disk; 0041 deferred)
+- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 Done** (2026-07-10 gap-close; merge `e62c210`); LR-A5 **Partial** (0042/0043 on disk; 0041 deferred)
 - [ ] LR-A4/A6 Done once P22-T01/T02 Done; LR-A7 Done once **P23** letter-grade demo corpus measurements land
 - [ ] No structured node can silently disappear from generated DOCX (blocked or warned)
 - [ ] Ledger § LRP wave row updated with gate evidence per task

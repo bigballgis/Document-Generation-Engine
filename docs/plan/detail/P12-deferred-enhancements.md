@@ -2,7 +2,7 @@
 
 **Phase status:** **Not Started** (2026-07-03; no active slice — **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
 
-> Formal phase: **None** (2026-07-09+). Active delivery focus: **LRP Wave LR-A / LR-A3** (`lrp-a3-upload-validation`) — not a P12 slice. Slice **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12). Prior slice **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03).
+> Formal phase: **None** (2026-07-09+). **LR-A3 Done** (2026-07-10) — not a P12 slice. Recommended next delivery focus: CDP golden path (status note only). Slice **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12). Prior slice **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03).
 > **P21 remains Done** — do not reopen P21 phase status; **P19 remains Done**
 > — corrective residual only (P19-T08/T10 group UX superseded). AUD-M02 **resolved** via **P12-AUD-M02 Done**
 > (cross-reference P21 §11.4).

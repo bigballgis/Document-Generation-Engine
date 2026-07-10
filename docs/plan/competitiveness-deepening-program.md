@@ -13,7 +13,7 @@
 | [detail/CDP-e2e-full-chain-evidence.md](./detail/CDP-e2e-full-chain-evidence.md) | Wave CD-E2E — browser golden paths + UIUX evidence |
 | [detail/CDP-industry-pitfall-registry.md](./detail/CDP-industry-pitfall-registry.md) | Wave CD-PIT — industry pitfalls → ADR/NFR/test mitigations |
 | [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **Done** (2026-07-04) — rendering engine + demos (do not reopen from CDP) |
-| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — **active delivery focus 2026-07-10** is LR-A3; do not execute `LR-*` from CDP session |
+| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — **LR-A3 Done** (2026-07-10); Wave LR-A remains In Progress (A4–A7); do not execute `LR-*` from CDP session |
 | [comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md) | Historical COR/OPT waves (mostly Done) |
 
 ---
@@ -23,10 +23,10 @@
 | Work stream | Where it runs | This CDP session owns |
 | --- | --- | --- |
 | **P22** (P22-T01…T15, rendering + demos) | **Done** (2026-07-04) — track via [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) | **Nothing.** Do not reopen P22 from CDP. |
-| **LRP** (`LR-*`, Wave LR-A / LR-A3) | **Active delivery focus (2026-07-10)** — outside CDP | **Nothing.** Do not start LR-A3 from CDP docs. |
-| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **This program when activated** | CD-0 → CD-2 → CD-3 (see §2). **Not** the current delivery focus. |
+| **LRP** (`LR-*`, Wave LR-A) | **LR-A3 Done** (2026-07-10) — outside CDP | **Nothing.** Do not reopen LR-A3 from CDP docs. |
+| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **Recommended next delivery focus** (status note only — activate before code) | CD-0 → CD-2 golden path → CD-3 (see §2). Do **not** start CDP implementation from LR-A3 closeout alone. |
 
-**Formal phase note:** `master-plan.md` has formal phase **None** (2026-07-09+). Current delivery focus is **LRP LR-A3**, not CDP. **CDP implementers follow task IDs prefixed `CD-*` only** when this program is the active focus.
+**Formal phase note:** `master-plan.md` has formal phase **None** (2026-07-09+). **LR-A3 closed**; recommended next focus is **CDP golden path** (status note). **CDP implementers follow task IDs prefixed `CD-*` only** when this program is the active focus.
 
 
 ## 0. Executive summary

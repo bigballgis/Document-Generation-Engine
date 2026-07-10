@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Context
 
-**Active formal phase:** **None** (2026-07-09). **CODE-QUALITY program Done** (CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**). **CORE-FORTRESS program Done** (F1–F8). **Prior:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08). See [docs/plan/execution-sync-ledger.md](docs/plan/execution-sync-ledger.md).
+**Active formal phase:** **None** (2026-07-09+). **CODE-QUALITY program Done** (CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**). **CORE-FORTRESS program Done** (F1–F8). **LR-A3 Done** (2026-07-10; merge `e62c210`). **Recommended next delivery focus:** CDP golden path (status note only). **Prior:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08). See [docs/plan/execution-sync-ledger.md](docs/plan/execution-sync-ledger.md).
 
 **Task source (2026-07-05):** `.taskmaster/tasks/tasks.json` (task-master-ai v0.43.1) is the source of truth for **new/active work** going forward. `docs/plan/` is the **frozen archive** for P0–P22 history + live record for LRP/CDP/SOR active programs. Project history is fully traceable from zero via `docs/plan/` (P0–P22, 23 phases, 30 detail files, 6 cross-cutting programs) and `.taskmaster/` (new work from 2026-07-05). See ADR-0053.
 

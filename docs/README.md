@@ -5,7 +5,7 @@
 
 **Active work in this documentation track:** **[CDP Wave CD-0 In Progress](./plan/competitiveness-deepening-program.md)** — doc truth, E2E BDD, pitfall registry, browser golden-path evidence (task IDs **`CD-*` only).
 
-**Active formal program:** **None** (2026-07-09). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. See [CODE-QUALITY program](./plan/code-quality-program.md) · [task sheet](./plan/detail/CODE-QUALITY-code-hygiene.md).
+**Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **LR-A3 Done** (2026-07-10; merge `e62c210`). **Recommended next:** CDP golden path (status note only). See [CODE-QUALITY program](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md).
 
 **P22 Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md).
 

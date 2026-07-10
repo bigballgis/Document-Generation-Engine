@@ -22,9 +22,9 @@ same gate bar (backend `mvn verify` 114 tests green / JaCoCo met; frontend lint/
 | Epic/milestone mirror | [docs/plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md) |
 | Gate logs | Backend `mvn verify`; frontend lint/type-check/test/build (2026-06-23) |
 
-**Active formal phase (repo-wide):** **CORE-FORTRESS F8** — see [F8 detail](./plan/detail/CORE-FORTRESS-f8-observability-slo-dr.md) and [program roadmap](./plan/detail/CORE-FORTRESS-program-roadmap.md). **Prior:** F7 Authoring UX **Done** (2026-07-09).
+**Active formal phase (repo-wide):** **None** (2026-07-09+). **CORE-FORTRESS Done** (F1–F8); **CODE-QUALITY Done**. See [master-plan.md](./plan/master-plan.md).
 
-**Active program (this session):** **CDP Wave CD-0 In Progress** — [competitiveness-deepening-program.md](./plan/competitiveness-deepening-program.md) (`CD-*` tasks). **P12 catch-all Not Started** (slices Done). **P21 Done** (2026-06-30). User sequence **P14 → P15 → P18** complete.
+**Delivery focus note (2026-07-10):** **LR-A3 Done** — [launch-readiness-program.md](./plan/launch-readiness-program.md). **Recommended next:** CDP golden path (status note only — do not start CDP code from LR-A3 closeout). **P12 catch-all Not Started** (slices Done). **P21 Done** (2026-06-30). User sequence **P14 → P15 → P18** complete.
 
 **Latest gate evidence (authoritative):** backend `mvn verify` BUILD SUCCESS (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL);
 frontend **643** Vitest (2026-07-03, P12-TEMPLATE-TESTING-OVERHAUL); Playwright T13 **8+1** passed, **3** skipped (documented); UIUX manifest **PASS**; see [execution-sync-ledger.md](./plan/execution-sync-ledger.md).
