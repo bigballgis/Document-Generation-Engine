@@ -1037,6 +1037,7 @@ Async task query response structure
 | 幂等类 | `IDEMPOTENCY` | 幂等标识缺失、冲突或幂等存储暂不可用。 |
 | 参数校验类 | `VALIDATION` | 请求体、请求标识、输出参数、变量或字段规则校验失败。 |
 | 模板契约类 | `TEMPLATE_CONTRACT` | 发布版本契约、锚点或模板内容异常。 |
+| 渲染装配类 | `RENDERING` | DOCX 装配、结构化内容渲染或装配后输出校验失败（含 OOXML 门禁）。 |
 | 生成类 | `GENERATION` | 文档生成、PDF 转换、生成任务或生成结果资源异常。 |
 | 加密类 | `ENCRYPTION` | 动态加密参数或加密处理失败。 |
 | 批量类 | `BATCH` | 批量输入、单笔标识、部分失败或整批处理失败。 |
@@ -1085,6 +1086,7 @@ Async task query response structure
 | `VALIDATION` | `VARIABLE_RULE_FAILED` | `api.error.validation.variableRuleFailed` | `false` | Variable does not satisfy a validation rule. |
 | `TEMPLATE_CONTRACT` | `TEMPLATE_CONTRACT_INVALID` | `api.error.templateContract.templateContractInvalid` | `false` | Template contract is invalid. |
 | `TEMPLATE_CONTRACT` | `TEMPLATE_ANCHOR_MISSING` | `api.error.templateContract.templateAnchorMissing` | `false` | Template anchor is missing. |
+| `RENDERING` | `OOXML_VALIDATION_FAILED` | `api.error.rendering.ooxmlValidationFailed` | `false` | Generated document failed OOXML validation. |
 | `GENERATION` | `DOCX_GENERATION_FAILED` | `api.error.generation.docxGenerationFailed` | `true` | DOCX generation failed. |
 | `GENERATION` | `PDF_CONVERSION_FAILED` | `api.error.generation.pdfConversionFailed` | `true` | PDF conversion failed. |
 | `GENERATION` | `GENERATION_TIMEOUT` | `api.error.generation.generationTimeout` | `true` | Document generation timed out. |
@@ -1116,7 +1118,7 @@ Async task query response structure
 | 404 Not Found | `RELEASE_VERSION_NOT_FOUND`、`ASYNC_TASK_NOT_FOUND`、`DOCUMENT_NOT_FOUND`。 | 授权范围内请求的发布版本、任务或文档不存在。 |
 | 409 Conflict | `RELEASE_VERSION_DISABLED`、`DEFAULT_ROUTE_NOT_CONFIGURED`、`DEFAULT_ROUTE_TARGET_UNAVAILABLE`、`TEMPLATE_DISABLED`、`TEMPLATE_DEPRECATED`、`IDEMPOTENCY_KEY_CONFLICT`、`IDEMPOTENCY_RETRY_NOT_ALLOWED`、`ASYNC_TASK_CANCELLATION_NOT_ALLOWED`。 | 请求与当前版本、模板、default 配置、幂等状态或异步任务当前状态冲突。 |
 | 410 Gone | `DOWNLOAD_URL_EXPIRED`、`RESULT_RETENTION_EXPIRED`、`ASYNC_TASK_EXPIRED`。 | 资源曾可用，但下载地址、任务或结果已过期。 |
-| 422 Unprocessable Entity | `VARIABLE_REQUIRED`、`VARIABLE_TYPE_INVALID`、`VARIABLE_FORMAT_INVALID`、`VARIABLE_RULE_FAILED`。 | 请求结构可解析，但模板变量或业务规则校验未通过。 |
+| 422 Unprocessable Entity | `VARIABLE_REQUIRED`、`VARIABLE_TYPE_INVALID`、`VARIABLE_FORMAT_INVALID`、`VARIABLE_RULE_FAILED`、`OOXML_VALIDATION_FAILED`。 | 请求结构可解析，但模板变量、业务规则校验未通过，或装配后 DOCX 未通过 OOXML 输出校验（fail-closed，不落库/不预览）。 |
 | 500 Internal Server Error | `TEMPLATE_CONTRACT_INVALID`、`TEMPLATE_ANCHOR_MISSING`、`DOCX_GENERATION_FAILED`、`PDF_CONVERSION_FAILED`、`ENCRYPTION_FAILED`、`BATCH_PROCESSING_FAILED`。 | 平台处理、模板资产、生成、转换、加密或整批处理失败。 |
 | 503 Service Unavailable | `AD_GROUP_RESOLUTION_FAILED`、`IDEMPOTENCY_STORE_UNAVAILABLE`、`GENERATION_SERVICE_UNAVAILABLE`。 | 权限依赖、幂等存储或生成服务临时不可用。 |
 | 504 Gateway Timeout | `GENERATION_TIMEOUT`。 | 文档生成超时。 |
@@ -1612,7 +1614,7 @@ HTTP/1.1 200 OK
 | --- | --- | --- | --- |
 | 错误对象 | `error` | 统一承载错误信息。 | 已确认。 |
 | 错误码 | `error.code` | 稳定机器可读细分错误码。 | v1 基线清单已确认。 |
-| 错误类别 | `error.category` | 便于上游按大类处理。 | 10 类固定集合已确认。 |
+| 错误类别 | `error.category` | 便于上游按大类处理。 | 11 类固定集合已确认（含 `RENDERING`）。 |
 | 业务可读消息 | `error.message` | 英文业务可读消息。 | 简洁可读且不泄露敏感信息已确认。 |
 | 消息键 | `error.messageKey` | 供调用方进行多语言映射。 | `api.error.<category>.<camelCaseCode>` 已确认。 |
 | 是否可重试 | `error.retryable` | 明确调用方能否重试。 | 已确认必须返回。 |
@@ -1782,7 +1784,7 @@ API 契约按角色展示 API 管理配置：
 | 请求 Schema | 模板变量、规则校验、输出格式、输出模式、批量输入、加密参数。 | 字段命名、路径/请求体边界、OpenAPI 3.1 YAML 载体和严格未知字段策略已确认；正式 OpenAPI v1 已输出，后续随契约变更维护。 |
 | 幂等策略 | `requestId`、`idempotencyKey`、`itemId`、重复提交处理、default 路径幂等、幂等保留期限。 | 生成类 API 必填范围、唯一性范围、7 天保留、过期后按新请求处理、default 变更后冲突、失败后按 `retryable` 决定、幂等状态枚举、冲突安全摘要、过期 key 复用审计标记、批量 `itemId` 必填唯一、重复 `itemId` 处理、同步批量失败幂等记录和异步失败项重试策略已确认。 |
 | 响应 Schema | 文件流、下载地址、异步任务 ID、批量成功/失败明细、通用响应元数据。 | JSON envelope、`metadata`/`result`/`error` 承载方式、字段命名和批量全量明细返回已确认；正式 OpenAPI v1 已输出，后续随契约变更维护。 |
-| 错误码 | 认证失败、AD Group 解析失败、授权失败、版本不可用、参数校验失败、锚点缺失、生成失败、加密失败、批量部分失败、异步任务、异步取消和下载取文件失败。 | v1 基线错误码清单、10 类 `error.category`、默认 `retryable`、英文 `message`、`messageKey` 命名规则、字段级 `reason` 枚举、HTTP 状态码映射、通用安全消息策略和重点场景错误响应示例已确认。 |
+| 错误码 | 认证失败、AD Group 解析失败、授权失败、版本不可用、参数校验失败、锚点缺失、渲染/OOXML 校验失败、生成失败、加密失败、批量部分失败、异步任务、异步取消和下载取文件失败。 | v1 基线错误码清单、11 类 `error.category`（含 `RENDERING`）、默认 `retryable`、英文 `message`、`messageKey` 命名规则、字段级 `reason` 枚举、HTTP 状态码映射、通用安全消息策略和重点场景错误响应示例已确认。 |
 | 异步任务 | 任务状态、查询方式、进度摘要、过期策略、取消策略。 | 查询接口、受控取消、状态命名、无百分比进度和取消后不返回结果已确认。 |
 | 下载地址 | 有效期、访问控制、一次性/多次下载、文件清理策略。 | 15 分钟固定有效期、二次授权、不重新校验发布版本可调用状态、有效期内多次下载、不可配置为一次性、过期后不重新签发、7 天结果保留、时间格式、下载地址脱敏展示和清理前不通知已确认。 |
 | 批量生成 | 默认同步 100 条、默认异步 10,000 条、API 管理可配置更低上限、失败明细。 | 上限、失败策略、`itemId` 必填唯一、重复 `itemId` 处理、同步失败明细、异步失败项重试策略、字段命名和按请求顺序全量响应明细已确认；正式 OpenAPI v1 已输出，后续随契约变更维护。 |

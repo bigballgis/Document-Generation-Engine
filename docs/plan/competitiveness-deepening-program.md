@@ -13,7 +13,7 @@
 | [detail/CDP-e2e-full-chain-evidence.md](./detail/CDP-e2e-full-chain-evidence.md) | Wave CD-E2E — browser golden paths + UIUX evidence |
 | [detail/CDP-industry-pitfall-registry.md](./detail/CDP-industry-pitfall-registry.md) | Wave CD-PIT — industry pitfalls → ADR/NFR/test mitigations |
 | [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **Done** (2026-07-04) — rendering engine + demos (do not reopen from CDP) |
-| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — **LR-A7 Done** (2026-07-10; merge `abf2048`; Word delta residual); Wave LR-A In Progress (A5 Partial; A6 Not Started); do not execute `LR-*` from CDP session |
+| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — **LR-A6 In Progress** (2026-07-10; `lrp-a6-ooxml-gate`; executes CD-HARD-T03); **LR-A7 Done** (Word delta residual); Wave LR-A In Progress (A5 Partial); do not execute `LR-*` from CDP session |
 | [comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md) | Historical COR/OPT waves (mostly Done) |
 
 ---
@@ -23,7 +23,7 @@
 | Work stream | Where it runs | This CDP session owns |
 | --- | --- | --- |
 | **P22** (P22-T01…T15, rendering + demos) | **Done** (2026-07-04) — track via [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) | **Nothing.** Do not reopen P22 from CDP. |
-| **LRP** (`LR-*`, Wave LR-A) | **LR-A4 Done** (2026-07-10) — outside CDP; Wave LR-A stays In Progress (A5/A6/A7 remain) | **Nothing.** Do not execute `LR-*` / virus scan / audit-governance from CDP session. |
+| **LRP** (`LR-*`, Wave LR-A) | **LR-A6 In Progress** (2026-07-10 — outside CDP; executes CD-HARD-T03); Wave LR-A stays In Progress (A5 Partial) | **Nothing.** Do not execute `LR-*` / virus scan / audit-governance from CDP session. |
 | **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **Sibling program** — Wave **CD-2** partial (T01/T01b Done) | CD-0 **Done** → CD-2 **In Progress** (T01/T01b **Done**; T02–T12 Not Started) → CD-3 later. |
 
 **Formal phase note:** `master-plan.md` has formal phase **None** (2026-07-09+). CDP Wave **CD-2** is the active **program wave** (not a formal phase). **CDP implementers follow task IDs prefixed `CD-*` only.**
@@ -212,7 +212,7 @@ Each task pairs: `*.spec.ts` + `evidence/*-uiux-manifest.md` + `e2e-uiux-reviewe
 | --- | --- | --- | --- | --- |
 | CD-HARD-T01 | Font bundle in Docker image + CI smoke | deploy-engineer | CD-PIT-01 | **Done** (executed-by-LR-A2 / P23-T02) |
 | CD-HARD-T02 | LibreOffice conversion pool (async) | backend-engineer | CD-PIT-06, OPT-F6 | Done (OPT-F6 / COR-P02 lineage) |
-| CD-HARD-T03 | OOXML output validation test (LO 24 open) | backend-engineer | CD-PIT-03 | Not Started (executes via LR-A6) |
+| CD-HARD-T03 | OOXML output validation test (LO 24 open) | backend-engineer | CD-PIT-03 | Not Started (executes via LR-A6 — slice `lrp-a6-ooxml-gate` **In Progress**; mark executed-by-LR-A6 on Done) |
 | CD-HARD-T04 | Pagination delta budget doc + sample corpus | doc-keeper | CD-PIT-02 | **Done** (2026-07-10 — executed-by-LR-A7; Docker PDF corpus ≥5 + FOL; Word/delta n/a — `ms-word-unavailable-on-host`; ADR-0042 remains Proposed) |
 | CD-HARD-T05 | Paste cleaning wired to binding validation OR ADR «edit-time only» | backend-engineer | P18-T07 seam | Not Started |
 | CD-HARD-T06 | List audit/export E2E | e2e-test-engineer | CD-BDD-T08 | Not Started |

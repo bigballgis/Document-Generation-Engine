@@ -107,6 +107,6 @@ Create an ADR when a decision affects future design or implementation, including
 | --- | --- | --- |
 | `rendering-authoring/0041-rendering-font-baseline.md` | **Missing** | Still referenced by ADR-0042; full draft + index row deferred to LR-A5 (not expanded in LR-A3). |
 | [0042-pagination-delta-budget.md](./rendering-authoring/0042-pagination-delta-budget.md) | **Proposed** | Exists; not yet Accepted / not promoted into the Accepted table above. |
-| [0043-ooxml-output-validation-gate.md](./rendering-authoring/0043-ooxml-output-validation-gate.md) | **Proposed** | Exists; same as 0042. |
+| [0043-ooxml-output-validation-gate.md](./rendering-authoring/0043-ooxml-output-validation-gate.md) | **Proposed** | Slice A (OPC+XML well-formedness + runtime fail-closed) is the LR-A6 Done line; full ECMA-376 XSD + LO24 headless open **deferred** — do not Accept on well-formedness alone. |
 
 Use [0000-template.md](./0000-template.md) when creating new ADRs. Place new numbered ADRs in the directory matching their `topic` frontmatter.

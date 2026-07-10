@@ -8,6 +8,7 @@ related:
   - docs/adr/rendering-authoring/0019-structured-authoring-and-rendering-boundary.md
   - docs/plan/detail/CDP-industry-pitfall-registry.md
   - docs/plan/detail/LRP-A-rendering-trust-hardening.md
+  - docs/api/contract-outline.md
 ---
 
 # ADR-0043 — OOXML output validation gate for generated DOCX
@@ -24,35 +25,50 @@ syntactically valid for POI but not strict enough for LibreOffice 24.
 
 ## Decision
 
-Adopt an **OOXML output validation gate** as a post-assembly step:
+Adopt an **OOXML output validation gate** as a post-assembly step. Scope is intentionally
+**phased** — do not treat the full list below as a single Accepted commitment.
+
+### Decision slice A — LR-A6 Done line (implemented / implementing)
 
 1. After `StructuredContentDocxWriter` assembles a DOCX, open it with POI
-   `OPCPackage.open` and run XML well-formedness checks on every part
-   (`document.xml`, `styles.xml`, `numbering.xml`, `header*.xml`, `footer*.xml`).
-2. Add a **schema validation** pass against the OOXML strict schema (ECMA-376) for the
-   main document part — at minimum, reject documents with:
-   - Unescaped `&`, `<`, `>` in text runs.
-   - Invalid XML characters (control characters outside the legal XML range).
-   - Malformed relationship targets.
-3. If validation fails, the assembly is rejected with a fidelity blocker — the document
-   must not be persisted or previewed.
-4. Add a regression test that assembles a corpus of templates with adversarial content
-   (raw `&`, CJK, emoji, control characters) and asserts the validation gate accepts
-   only the well-formed output.
-5. Centralize XML escaping in `StructuredContentDocxWriter` — never write raw user
+   `OPCPackage.open` and run **XML well-formedness** checks on Word XML parts
+   (`document.xml`, `styles.xml`, `numbering.xml`, `header*.xml`, `footer*.xml`, and
+   related package `.xml` / `.rels` parts as applicable).
+2. If validation fails, assembly is **fail-closed**: reject with
+   `OOXML_VALIDATION_FAILED` / category `RENDERING` /
+   `api.error.rendering.ooxmlValidationFailed` / HTTP **422** / `retryable=false` —
+   the document must not be persisted or previewed.
+3. Add regression coverage that asserts the gate **accepts** well-formed corpus output
+   and **rejects** corrupted / malformed fixtures (CD-PIT-03 class).
+4. Centralize XML escaping in `StructuredContentDocxWriter` — never write raw user
    text into XML without escape.
 
 The gate runs in the assembly path, not the conversion path, so it catches the defect
 before the document reaches LibreOffice.
 
+### Decision slice B — deferred (not claimed Done by LR-A6)
+
+5. **Full ECMA-376 XSD schema validation** for the main document part (strict schema
+   pass beyond well-formedness) — **deferred**.
+6. **LibreOffice 24+ headless open** as a CI/runtime proof that the package opens
+   without Word resave — **deferred** (may remain under CD-HARD-T03 residual /
+   LO-equipped host evidence).
+
+Status remains **Proposed** until slice B is decided and evidenced; LR-A6 must not
+promote this ADR to Accepted solely on well-formedness.
+
 ## Consequences
 
-- **Positive:** Generated DOCX is guaranteed well-formed OOXML; LibreOffice 24+ opens
-  it without resave; eliminates the "corrupt DOCX" failure class.
-- **Negative:** Schema validation adds ~10–50 ms per document; acceptable for a
-  non-real-time generation API.
-- **Neutral:** The gate is a test-time + runtime check; the runtime check can be
-  disabled via a property if performance becomes critical, but defaults to on.
+- **Positive (slice A):** Assembled DOCX is guaranteed **OPC-openable + XML
+  well-formed** at the gate; fail-closed prevents corrupt packages from being
+  persisted or previewed; contract documents `OOXML_VALIDATION_FAILED`.
+- **Residual honesty:** Slice A does **not** guarantee full ECMA-376 schema
+  conformance or LO24 headless open. Callers and launch gates must not equate
+  well-formedness with “strict OOXML / LO24-safe” until slice B lands.
+- **Negative (when slice B lands):** Schema validation may add ~10–50 ms per
+  document; acceptable for a non-real-time generation API.
+- **Neutral:** Runtime check defaults to on; may be disabled via property if
+  performance becomes critical (`docgen.rendering.ooxml-validation-enabled`).
 
 ## Alternatives considered
 
@@ -62,9 +78,12 @@ before the document reaches LibreOffice.
   the DOCX is already persisted and may have reached the caller.
 - **Switch to a different DOCX library** — rejected: violates the tech-stack guardrails
   (ADR-0028); POI is the accepted baseline.
+- **Accept ADR on well-formedness alone** — rejected for honesty: full Decision #2
+  (XSD) and LO24 open remain open; keep **Proposed**.
 
 ## Mapping
 
 - Pitfall: CD-PIT-03 (OOXML strictness / escaping).
-- LRP task: LR-A6 (OOXML output validation gate).
-- CDP task: CD-HARD-T03 (executed by LR-A6).
+- LRP task: LR-A6 (OOXML output validation gate) — slice A.
+- CDP task: CD-HARD-T03 (executed by LR-A6; LO24 residual may remain after slice A).
+- Contract: `docs/api/contract-outline.md` — `RENDERING` / `OOXML_VALIDATION_FAILED`.

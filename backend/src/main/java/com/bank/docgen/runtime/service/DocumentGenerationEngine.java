@@ -9,6 +9,7 @@ import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.rendering.DocxAssembler;
+import com.bank.docgen.rendering.DocxAssemblyException;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
@@ -181,6 +182,9 @@ public class DocumentGenerationEngine {
                     variables,
                     pinnedModuleStructures
             );
+        } catch (DocxAssemblyException ex) {
+            LOG.warn("Document generation assembly failed for template {}: {}", template.getId(), ex.getMessage());
+            throw ex;
         } catch (IOException | RuntimeException ex) {
             LOG.warn("Document generation assembly failed for template {}: {}", template.getId(), ex.getMessage());
             throw new RenderingOperationException("api.error.rendering.generationFailed");

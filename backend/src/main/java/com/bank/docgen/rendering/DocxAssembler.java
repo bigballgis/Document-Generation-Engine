@@ -1,5 +1,6 @@
 package com.bank.docgen.rendering;
 
+import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalogEntry;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,6 +26,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.apache.xmlbeans.XmlCursor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -39,14 +41,37 @@ public class DocxAssembler {
 
     private final MasterStyleCatalog styleCatalog;
     private final StructuredContentDocxWriter structuredContentDocxWriter;
+    private final OoxmlOutputValidator ooxmlOutputValidator;
+    private final DocgenRenderingProperties renderingProperties;
 
-    public DocxAssembler(ObjectMapper objectMapper, StructuredContentImageResolver imageResolver) {
+    @Autowired
+    public DocxAssembler(
+            ObjectMapper objectMapper,
+            StructuredContentImageResolver imageResolver,
+            OoxmlOutputValidator ooxmlOutputValidator,
+            DocgenRenderingProperties renderingProperties
+    ) {
         this.styleCatalog = loadDefaultStyleCatalog(objectMapper);
         this.structuredContentDocxWriter = new StructuredContentDocxWriter(
                 objectMapper,
                 styleCatalog,
                 imageResolver
         );
+        this.ooxmlOutputValidator = ooxmlOutputValidator;
+        this.renderingProperties = renderingProperties;
+    }
+
+    /**
+     * Test-only constructor: OOXML validation enabled with a default validator.
+     */
+    DocxAssembler(ObjectMapper objectMapper, StructuredContentImageResolver imageResolver) {
+        this(objectMapper, imageResolver, new OoxmlOutputValidator(), validationEnabledProperties());
+    }
+
+    private static DocgenRenderingProperties validationEnabledProperties() {
+        DocgenRenderingProperties properties = new DocgenRenderingProperties();
+        properties.setOoxmlValidationEnabled(true);
+        return properties;
     }
 
     public byte[] assemble(InputStream masterDocx, Map<String, String> anchorContent) {
@@ -64,7 +89,7 @@ public class DocxAssembler {
             document.getFooterList().forEach(footer -> replaceInParagraphs(footer.getParagraphs(), anchorContent));
             DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
             document.write(output);
-            return output.toByteArray();
+            return validatedBytes(output.toByteArray());
         } catch (IOException ex) {
             throw new DocxAssemblyException(ex);
         }
@@ -311,7 +336,7 @@ public class DocxAssembler {
             }
             DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
             document.write(output);
-            return output.toByteArray();
+            return validatedBytes(output.toByteArray());
         } catch (IOException ex) {
             throw new DocxAssemblyException(ex);
         }
@@ -329,6 +354,13 @@ public class DocxAssembler {
                 variables,
                 pinnedModuleStructures
         );
+    }
+
+    private byte[] validatedBytes(byte[] assembledBytes) {
+        if (renderingProperties.isOoxmlValidationEnabled()) {
+            ooxmlOutputValidator.validate(assembledBytes);
+        }
+        return assembledBytes;
     }
 
     private void replaceStructuredAnchorsInDocumentBody(

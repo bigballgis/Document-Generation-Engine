@@ -151,12 +151,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-10T07:05:00.000Z"
+      },
+      {
+        "id": "12",
+        "title": "LR-A6 OOXML output validation gate",
+        "description": "Gap-close LR-A6 / CD-HARD-T03 — OOXML/output validation gate: invalid or structurally unsafe DOCX fail closed. Extend OoxmlOutputValidationGateTest (happy path exists) with corrupted-fixture fail proof; wire ADR-0043 runtime gate if missing. Mark CD-HARD-T03 executed-by-LR-A6 on Done. Out of scope: LR-C9, A5 Word residual, virus scan, CD-E2E T02–T12, DGE-audit-governance.",
+        "details": "Slice id: lrp-a6-ooxml-gate. Plan: LR-A6 In Progress (2026-07-10). Placement: ISOLATED D:/working/DGE-lrp-a6-ooxml-gate · feat/lrp-a6-ooxml-gate · base a806b4c. BDD not-applicable. Formal phase remains None. Wave LR-A remains In Progress (A5 Partial; sole active LRP task LR-A6). CD-HARD-T03 stays Not Started until Done (executes via LR-A6). Upstream: OoxmlOutputValidationGateTest happy-path only; ADR-0043 Proposed; no production runtime gate found in main. Acceptance: G/W/T well-formed opens; G/W/T corrupted fixture fails gate.",
+        "testStrategy": "1. Well-formed assembled DOCX opens via OPCPackage.open (existing happy path). 2. Deliberately corrupted fixture (e.g. unescaped &) fails the same validation — proves CD-PIT-03 detection. 3. If ADR-0043 requires runtime fail-closed, assert invalid/structurally unsafe DOCX does not pass silently. 4. mvn -B -ntp -f backend/pom.xml verify green. 5. On Done: cross-ref CD-HARD-T03 executed-by-LR-A6.",
+        "priority": "high",
+        "dependencies": [
+          "11"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T07:29:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T07:05:00.000Z",
-      "taskCount": 11,
+      "lastModified": "2026-07-10T07:29:00.000Z",
+      "taskCount": 12,
       "completedCount": 11,
       "tags": [
         "master"

@@ -70,6 +70,8 @@ public final class ApiErrorCodes {
     public static final String INVOCATION_RECORD_EXPIRED = "INVOCATION_RECORD_EXPIRED";
     public static final String INVOCATION_VIEW_INVALID = "INVOCATION_VIEW_INVALID";
     public static final String PDF_CONVERSION_CAPACITY_EXCEEDED = "PDF_CONVERSION_CAPACITY_EXCEEDED";
+    /** LR-A6 / ADR-0043: assembled DOCX failed OOXML well-formedness validation. */
+    public static final String OOXML_VALIDATION_FAILED = "OOXML_VALIDATION_FAILED";
 
     private ApiErrorCodes() {
     }

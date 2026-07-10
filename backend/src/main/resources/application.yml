@@ -75,6 +75,8 @@ docgen:
     sse-timeout: ${SSE_TIMEOUT:PT15M}
     sse-heartbeat-interval: ${SSE_HEARTBEAT_INTERVAL:PT20S}
     demo-classpath-image-tier-enabled: ${DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED:false}
+    # LR-A6 / ADR-0043: post-assembly OOXML well-formedness gate (default ON).
+    ooxml-validation-enabled: ${DOCGEN_OOXML_VALIDATION_ENABLED:true}
   jwt:
     secret: ${JWT_SECRET:local-dev-only-change-me-please-32bytes-min}
     access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:PT30M}
