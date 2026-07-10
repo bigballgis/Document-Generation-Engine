@@ -3,7 +3,7 @@
 **Project baseline:** Restart from zero (2026-06-23); **P0–P11, P13–P21 Done**; **P12 Not Started**
 (catch-all idle; slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03).
 
-**Active work in this documentation track:** **[CDP Wave CD-2 In Progress](./plan/competitiveness-deepening-program.md)** (**partial** — CD-E2E-T01–T10 Done, merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a`; T11–T12 + T13 Not Started; task IDs **`CD-*`** only). **CD-0 Done**. Formal phase remains **None**.
+**Active work in this documentation track:** **[CDP Wave CD-2 In Progress](./plan/competitiveness-deepening-program.md)** (**partial** — CD-E2E-T01–T11 Done, merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825`; T12 + T13 Not Started; **no sole-active CDP E2E slice**; task IDs **`CD-*`** only). **CD-0 Done**. Formal phase remains **None**.
 
 **Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **LR-A4 Done** (2026-07-10; merge `a523a09`). **CDP golden path T01 Done** (2026-07-10; merge `1930842`). See [CODE-QUALITY program](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md) · [CDP](./plan/competitiveness-deepening-program.md).
 
