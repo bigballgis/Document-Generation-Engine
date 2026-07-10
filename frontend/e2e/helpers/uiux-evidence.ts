@@ -679,6 +679,7 @@ export type CdpE2eCd2DecisionTaskId =
   | 'CDP-E2E-T10'
   | 'CDP-E2E-T11'
   | 'CDP-E2E-T12'
+  | 'CDP-E2E-T13'
 
 function cdpE2eDecisionEvidenceRoot(taskId: CdpE2eCd2DecisionTaskId): string {
   return path.join(E2E_DIR, '..', 'evidence', taskId)

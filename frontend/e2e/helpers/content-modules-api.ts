@@ -1168,6 +1168,8 @@ export async function publishTemplateRelease(
   const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
   await authorizedPost(request, groupAdminToken, `/templates/${templateId}/lifecycle/publish`, {
     releaseVersion,
+    // CD-E2E-T10: publish is fail-closed without fidelity viewed confirmation
+    fidelityViewedConfirmed: true,
   })
 
   const detail = await fetchDemoFullFlowTemplateDetail(request, templateId)
@@ -1243,6 +1245,7 @@ async function advanceInFlightDevToPendingRelease(
   await authorizedPost(request, approverToken, `/templates/${templateId}/lifecycle/approval-decision`, {
     decision: 'APPROVED',
     commentSummary: 'E2E second publish approved',
+    fidelityViewedConfirmed: true,
     keyEvidenceConfirmed: true,
   })
 

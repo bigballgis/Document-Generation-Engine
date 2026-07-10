@@ -1,10 +1,13 @@
 # BDD 行为规格：包级 API 接入、约定配置与调用记录
 
 **文件状态**: `ready`  
-**版本**: 1.0.0  
+**版本**: 1.0.1  
 **编写日期**: 2026-07-03  
 **BDD ID**: `BDD-API-PACKAGE-ACCESS-INVOCATION-001`  
-**来源**: 产品讨论（包结构 API、约定大于配置、调用记录与可选文档留存）
+**来源**: 产品讨论（包结构 API、约定大于配置、调用记录与可选文档留存）  
+**CDP (S1–S3 materialize):** CD-2 → **CD-E2E-T13** — [CDP-e2e-full-chain-evidence.md](../plan/detail/CDP-e2e-full-chain-evidence.md) § deferred / T13  
+**Playwright:** `frontend/e2e/CDP-E2E-T13-api-package-materialize.spec.ts`（maps **§8 S1–S3** only; no duplicate BDD IDs）  
+**P13 historical:** P13-ESO-F01…F03 Done (2026-07-08); CDP wave T13 re-evidence closes ledger gap
 
 ---
 
@@ -203,21 +206,27 @@ L2 可早于 L3 结束（C8）；L0 可多次重签（requirements 允许在 art
 
 ### S1 — 首次发布 materialize 双 API
 
-- **Given** 包 `PENDING_RELEASE`，无 `api_policy`
+> **CD-E2E-T13 / Playwright:** `BDD S1 — first publish materializes policy and dual generate paths`
+
+- **Given** 包 `PENDING_RELEASE`，`defaultRouteReleaseVersion` 为空（**C10** 允许已有骨架 `api_policy`；E2E 断言 falsy default，不要求「无 policy 行」）
 - **When** 发布 `1.0.0`
-- **Then** 存在 policy 且 `defaultRouteReleaseVersion=1.0.0`；契约含 default 与 `versions/1.0.0` generate 路径；包 Hub 无「未配置 API」空状态
+- **Then** 存在 policy 且 `defaultRouteReleaseVersion=1.0.0`；契约含 default 与 `versions/1.0.0` generate 路径；包 Hub `?tab=apiAccess` 可见路由摘要且无「未配置 API」空状态
 
 ### S2 — 二次发布不改 default
 
+> **CD-E2E-T13 / Playwright:** `BDD S2 — second publish keeps default route on first release`
+
 - **Given** 已发布 `1.0.0`，default=`1.0.0`
 - **When** 发布 `2.0.0`
-- **Then**  callable 含 `2.0.0` explicit；default 仍解析到 `1.0.0`
+- **Then** callable 含 `2.0.0` explicit；default 仍解析到 `1.0.0`
 
 ### S3 — 显式改 default
 
-- **Given** default=`1.0.0`
-- **When** 管理员改 default→`2.0.0` 并确认影响预览
-- **Then** `policyVersion` 递增；审计 `changedAreas` 含 `DEFAULT_ROUTE_TARGET`；**无**静默变更
+> **CD-E2E-T13 / Playwright:** `BDD S3 — explicit default route change uses impact preview and bumps policyVersion`
+
+- **Given** default=`1.0.0`（且已存在 callable `2.0.0` explicit，见 S2）
+- **When** 管理员在包 Hub External access Tab 改 default→`2.0.0` 并确认影响预览
+- **Then** `policyVersion` 递增；default=`2.0.0`；审计 `changedAreas` 含 `DEFAULT_ROUTE_TARGET`（域 `#policy-domain-DEFAULT_ROUTE_TARGET` 可见）；**无**静默变更
 
 ### S4 — 约定默认 + 高级折叠
 
@@ -282,6 +291,9 @@ L2 可早于 L3 结束（C8）；L0 可多次重签（requirements 允许在 art
 - `backend/.../RuntimeGenerationAuditRecorder.java` — 审计
 - `docs/adr/api-management/0040-api-package-access-and-invocation-retention.md` — 四层时钟、auto-materialize、invocation 查询
 - `backend/.../GenerationIdempotencyEntity.java` — 幂等/artifact
+- `docs/plan/detail/CDP-e2e-full-chain-evidence.md` — **CD-E2E-T13** (S1–S3 package materialize / default route)
+- `docs/plan/detail/P13-external-services-excellence.md` — P13-ESO-F01…F03 (historical Done 2026-07-08)
+- `frontend/e2e/CDP-E2E-T13-api-package-materialize.spec.ts` — browser + management API evidence for §8 S1–S3
 
 ---
 
@@ -290,6 +302,8 @@ L2 可早于 L3 结束（C8）；L0 可多次重签（requirements 允许在 art
 **Ready for implementation** (2026-07-03) — BDD decisions C1–C15 confirmed; requirements, PRD, domain model, permission matrix, contract outline, and plan layer synced (doc-only pass; no code).
 
 **P13 Phase 1 IA redirect slice** — **BDD readiness: `ready`** (2026-07-08). See §15.
+
+**CD-E2E-T13 package materialize re-evidence** — **BDD readiness: `ready`** (2026-07-11). §8 **S1–S3** remain the sole acceptance scenarios for this slice; aligned with `CDP-E2E-T13-api-package-materialize.spec.ts`. **Do not** invent duplicate BDD IDs. Reconciliation: P13 Phase 4 historically marked F01–F03 / CD-E2E-T13 Done (Docker 3/3, 2026-07-08); CDP Wave CD-2 still lists T13 **Not Started** pending fresh ledger re-evidence — behavior itself is unchanged and ready for E2E.
 
 ---
 

@@ -311,7 +311,7 @@
         "id": "23",
         "title": "CDP CD-2 T12 zh-CN + dual-brand golden screenshots",
         "description": "Sole-active CD-2 E2E after T11 Done: CD-E2E-T12 zh-CN locale + REDBC/GREENBC dual-brand golden screenshots @1920 (browser-only UIUX evidence + functional smoke). BDD ready: zh-cn-dual-brand-golden-screenshots.md (BDD-CDP-I18N-001/002). Do NOT mark wave CD-2 Done. Do NOT activate T13 or LR-C10. Out of scope: package materialize, audit-governance, LR-*.",
-        "details": "DONE 2026-07-11. Slice id: cdp-e2e-t12-i18n-brands. Status: done. Merge: f12b193 (feat/cdp-e2e-t12-i18n-brands → main FF); worktree DGE-cdp-e2e-t12-i18n-brands REMOVED. BDD ready: docs/behavior/zh-cn-dual-brand-golden-screenshots.md (BDD-CDP-I18N-001/002). Gates: Playwright docker --workers=1 3/3 (functional 2/2 + uiux-evidence 1/1); UIUX Verdict PASS (7 screenshots @1920 zh-CN REDBC+GREENBC; CDP-E2E-T12-uiux-manifest.md); architecture-reviewer PASS_WITH_SUGGESTIONS (Critical 0); Stage 5/10 DEPLOY_OK healthz 200 + :4173 200 (E2E-only SkipBuild). Wave CD-2 stays In Progress (partial — T01-T12 Done; T13 Not Started; no sole-active CDP E2E slice). Formal phase remains None. Next recommend: T13 (package materialize). Do not mark CD-2 Done. Do not activate LR-C10. Do not start T13.",
+        "details": "DONE 2026-07-11. Slice id: cdp-e2e-t12-i18n-brands. Status: done. Merge: f12b193 (feat/cdp-e2e-t12-i18n-brands → main FF); worktree DGE-cdp-e2e-t12-i18n-brands REMOVED. BDD ready: docs/behavior/zh-cn-dual-brand-golden-screenshots.md (BDD-CDP-I18N-001/002). Gates: Playwright docker --workers=1 3/3 (functional 2/2 + uiux-evidence 1/1); UIUX Verdict PASS (7 screenshots @1920 zh-CN REDBC+GREENBC; CDP-E2E-T12-uiux-manifest.md); architecture-reviewer PASS_WITH_SUGGESTIONS (Critical 0); Stage 5/10 DEPLOY_OK healthz 200 + :4173 200 (E2E-only SkipBuild). Wave CD-2 stays In Progress (partial — T01-T12 Done; T13 activated as Task Master #24). Formal phase remains None. Next: T13 (package materialize) In Progress.",
         "testStrategy": "1. BDD-CDP-I18N-001: switch to zh-CN on ≥3 key golden surfaces; Chinese UI strings visible. 2. BDD-CDP-I18N-002: capture REDBC and GREENBC golden screenshots both @1920. 3. Paired UIUX manifest; Verdict PASS. 4. docker-deploy-queue healthz/4173 OK. 5. Do not claim wave CD-2 Done.",
         "priority": "high",
         "dependencies": [
@@ -320,12 +320,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T04:31:00.000Z"
+      },
+      {
+        "id": "24",
+        "title": "CDP CD-2 T13 package materialize re-evidence + wave closeout",
+        "description": "Sole-active CD-2 E2E after T12 Done: CD-E2E-T13 package materialize on publish / default-route stability (BDD S1–S3 re-evidence + wave closeout). Specs exist (CDP-E2E-T13-api-package-materialize.spec.ts; P13-ESO-F01–F03 historically claimed Done — CDP wave still open for honest re-evidence). Do NOT invent duplicate tasks. Do NOT mark wave CD-2 Done until T13 green + merge. Do NOT activate LR-C10. Out of scope: new product features, LR-*.",
+        "details": "ACTIVATED 2026-07-11. Slice id: cdp-e2e-t13-materialize. Status: in-progress (sole-active CDP E2E). Placement: ISOLATED D:/working/DGE-cdp-e2e-t13-materialize · feat/cdp-e2e-t13-materialize · base c83ae9d (T12 Done on main). BDD ready: docs/behavior/api-package-access-and-invocation-records.md (BDD-API-PACKAGE-ACCESS-INVOCATION-001 S1–S3). Existing spec: frontend/e2e/CDP-E2E-T13-api-package-materialize.spec.ts. Reconciliation: P13-ESO-F01–F03 historically claimed CD-E2E-T13 Done; CDP wave matrix still Not Started for T13 until re-evidence. Formal phase remains None. Wave CD-2 stays In Progress (partial — T01–T12 Done; T13 In Progress). Next: after BDD ready confirm → deploy stack → run existing CDP-E2E-T13 specs.",
+        "testStrategy": "1. BDD S1: first publish materialize + dual paths. 2. BDD S2: second publish default unchanged. 3. BDD S3: explicit default change with impact preview. 4. Playwright docker --workers=1 green on CDP-E2E-T13-api-package-materialize.spec.ts. 5. UIUX/manifest as needed for wave closeout. 6. Do not claim wave CD-2 Done until T13 green + merge.",
+        "priority": "high",
+        "dependencies": [
+          "23"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T04:37:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T04:31:00.000Z",
-      "taskCount": 23,
+      "lastModified": "2026-07-11T04:37:00.000Z",
+      "taskCount": 24,
       "completedCount": 23,
       "tags": [
         "master"
