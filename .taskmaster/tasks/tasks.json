@@ -306,12 +306,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T03:53:00.000Z"
+      },
+      {
+        "id": "23",
+        "title": "CDP CD-2 T12 zh-CN + dual-brand golden screenshots",
+        "description": "Sole-active CD-2 E2E after T11 Done: CD-E2E-T12 zh-CN locale + REDBC/GREENBC dual-brand golden screenshots @1920 (browser-only UIUX evidence + functional smoke). BDD ready: zh-cn-dual-brand-golden-screenshots.md (BDD-CDP-I18N-001/002). Do NOT mark wave CD-2 Done. Do NOT activate T13 or LR-C10. Out of scope: package materialize, audit-governance, LR-*.",
+        "details": "IN PROGRESS 2026-07-11. Slice id: cdp-e2e-t12-i18n-brands. Status: in-progress (sole-active CDP E2E slice). Placement: ISOLATED D:/working/DGE-cdp-e2e-t12-i18n-brands · feat/cdp-e2e-t12-i18n-brands. BDD ready: docs/behavior/zh-cn-dual-brand-golden-screenshots.md (BDD-CDP-I18N-001/002). Acceptance: zh-CN locale switch on ≥3 key golden surfaces; REDBC + GREENBC both captured @1920. Wave CD-2 stays In Progress (partial — T01-T11 Done; T12 In Progress; T13 Not Started). Formal phase remains None. Do not mark T12/CD-2 Done. Do not activate LR-C10. Do not start T13.",
+        "testStrategy": "1. BDD-CDP-I18N-001: switch to zh-CN on ≥3 key golden surfaces; Chinese UI strings visible. 2. BDD-CDP-I18N-002: capture REDBC and GREENBC golden screenshots both @1920. 3. Paired UIUX manifest; Verdict PASS. 4. docker-deploy-queue healthz/4173 OK. 5. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "22"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T04:02:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T03:53:00.000Z",
-      "taskCount": 22,
+      "lastModified": "2026-07-11T04:02:00.000Z",
+      "taskCount": 23,
       "completedCount": 22,
       "tags": [
         "master"

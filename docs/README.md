@@ -147,6 +147,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Preview comparison journey](./behavior/preview-comparison-journey.md) | **ready** | CD-BDD-T07 → CD-E2E-T09 |
 | **[Fidelity viewed confirmation](./behavior/fidelity-viewed-confirmation-journey.md)** | **ready** | **CD-E2E-T10** — BDD-CDP-FID-001…004 (Pass/Approve/Publish fail-closed) |
 | [Audit admin query journey](./behavior/audit-admin-query-journey.md) | **ready** | CD-BDD-T08 → CD-E2E-T11 |
+| **[zh-CN + dual-brand golden screenshots](./behavior/zh-cn-dual-brand-golden-screenshots.md)** | **ready** | **CD-E2E-T12** — BDD-CDP-I18N-001/002（≥3 key surfaces zh-CN；REDBC+GREENBC @1920） |
 | [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12 2026-07-03) | P12 template testing tab |
 | [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **Done** (P12 2026-07-03) | Package-first API access |
 | [Session renewal & revocation](./behavior/session-renewal-revocation.md) | **ready** (LR-B6 delivered 2026-07-04) | BDD-LRP-SESSION-001 → LR-B6 **Done** (sliding renewal, 30 min TTL, 8 h absolute cap, Redis revocation fail-closed; policy confirmed 2026-07-04; implementation deviations in spec §14.1) |

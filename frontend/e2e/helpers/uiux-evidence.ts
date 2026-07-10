@@ -98,9 +98,10 @@ export async function captureP14LocatorScreenshot(
   return filename
 }
 
+/** Brand switcher option labels are localized (en + zh-CN). */
 const BRAND_OPTION_NAME: Record<BrandPreset, RegExp> = {
-  REDBC: /^red bank$/i,
-  GREENBC: /^green bank$/i,
+  REDBC: /^(red bank|红色银行)$/i,
+  GREENBC: /^(green bank|绿色银行)$/i,
 }
 
 export async function switchBrand(page: Page, brand: BrandPreset): Promise<void> {
@@ -677,6 +678,7 @@ export type CdpE2eCd2DecisionTaskId =
   | 'CDP-E2E-T09'
   | 'CDP-E2E-T10'
   | 'CDP-E2E-T11'
+  | 'CDP-E2E-T12'
 
 function cdpE2eDecisionEvidenceRoot(taskId: CdpE2eCd2DecisionTaskId): string {
   return path.join(E2E_DIR, '..', 'evidence', taskId)
