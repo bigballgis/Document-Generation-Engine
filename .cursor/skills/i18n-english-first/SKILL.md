@@ -40,6 +40,7 @@ Every user-facing string is translatable; nothing is hardcoded.
 - Add the English key first; components reference keys, never literals.
 - Locale switching must not change information architecture, layout, or component structure.
 - Locale persistence: localStorage `docgen.app.locale`; registry `src/i18n/localeRegistry.ts`.
+- **Brand marks (`brands.ts` `logoSlotLabel`):** `REDBC` / `GREENBC` are proper-noun brand codes — leave as literal slot identifiers (not message keys). Human-readable brand names use `labelKey` (`brand.redbc` / `brand.greenbc`). Recorded under LR-C11 docs-first (2026-07-11).
 
 ## Default workflow when adding a string
 

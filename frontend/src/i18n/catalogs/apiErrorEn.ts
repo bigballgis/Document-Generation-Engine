@@ -105,7 +105,9 @@ export const apiErrorEn = {
     batchTestRunNotFound: "The batch test run was not found.",
     unsupportedNodeType: "The template contains a structured content node type that cannot be rendered. Remove or replace the unsupported node before publishing.",
     imageAssetNotFound: "The referenced image asset could not be found.",
-    sealAssetNotFound: "The referenced seal asset could not be found."
+    sealAssetNotFound: "The referenced seal asset could not be found.",
+    ooxmlValidationFailed:
+      "The generated document failed OOXML validation and was not saved. Regenerate after correcting structured content."
   },
   apimgmt: {
     policyNotFound: "The API policy was not found.",

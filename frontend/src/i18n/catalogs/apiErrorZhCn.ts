@@ -105,7 +105,9 @@ export const apiErrorZhCn = {
     batchTestRunNotFound: "未找到批量测试运行记录。",
     unsupportedNodeType: "模板包含无法渲染的结构化内容节点类型，请在发布前移除或替换不支持的节点。",
     imageAssetNotFound: "找不到引用的图片资源。",
-    sealAssetNotFound: "找不到引用的印章资源。"
+    sealAssetNotFound: "找不到引用的印章资源。",
+    ooxmlValidationFailed:
+      "生成的文档未通过 OOXML 校验，未予保存。请修正结构化内容后重新生成。"
   },
   apimgmt: {
     policyNotFound: "未找到 API 策略。",

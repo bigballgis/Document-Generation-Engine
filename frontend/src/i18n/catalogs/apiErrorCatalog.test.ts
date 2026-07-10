@@ -38,8 +38,15 @@ describe('api.error catalog', () => {
     expect(orphans).toEqual([])
   })
 
-  // Full backend→frontend parity (every backend key present in apiErrorEn) is LR-C11.
-  it.todo('matches every backend api.error key in the frontend English catalog (LR-C11)')
+  it('matches every backend api.error key in the frontend English catalog', () => {
+    const frontendSet = new Set(apiErrorLeafPaths)
+    const missing = backendApiErrorPaths.filter((path) => !frontendSet.has(path))
+    expect(
+      missing,
+      `Backend api.error keys missing from frontend catalog (${missing.length}): ${missing.join(', ')}`,
+    ).toEqual([])
+    expect(apiErrorLeafPaths.length).toBe(backendApiErrorPaths.length)
+  })
 
   it('mirrors en and zh-CN catalog structure', () => {
     const enPaths = collectLeafPaths(apiErrorEn as Record<string, unknown>)

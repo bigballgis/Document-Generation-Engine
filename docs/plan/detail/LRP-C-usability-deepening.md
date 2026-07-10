@@ -1,10 +1,12 @@
 # LRP Wave LR-C — Business Usability Deepening 「业务易用性深化」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; remaining C2/C3/C5/C7/C8/C11–C13 Not Started)  
+**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 In Progress** 2026-07-11 — slice `lrp-c11-api-error-i18n`; remaining C2/C3/C5/C7/C8/C12/C13 Not Started)  
 **Owner default:** `frontend-engineer` (+ `backend-engineer` where noted); every user-facing slice pairs `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** none for most tasks; **C6 depends on LR-C5**; **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
 
+> **Activation note (2026-07-11):** **LR-C11 → In Progress** (slice `lrp-c11-api-error-i18n`; formal phase remains **None**). Sole-active LRP slice — `api.error` frontend catalog parity with backend messageKeys + parity Vitest; replace raw `toLocaleString`; `logoSlotLabel` disposition; OPT-G7/G6 residual updates. BDD **not-applicable** (catalog completion per i18n constitution). Placement: ISOLATED `D:/working/DGE-lrp-c11-api-error-i18n` · `feat/lrp-c11-api-error-i18n`. **Live key baseline (activation verify):** backend `api.error.*` **159** (plan text historically cited **145** — re-baseline on Done); frontend catalog **158** leaves; missing sample `api.error.rendering.ooxmlValidationFailed`. Gate evidence: []. **Task Master #26 → in-progress**. Other LR-C rows untouched (C2/C3/C5/C7/C8/C12/C13 Not Started; C1/C4/C9/C10 Done). Do **not** mark Wave LR-C Done. Do **not** activate LR-C12 or CD-3.
+>
 > **Completion note (2026-07-11):** **LR-C10 → Done** (slice `lrp-c10-upload-ux`; merge `bdaf95d` / `bdaf95d42324a0fbd436d7d5f95eb4822dd9fa4d` → `main`; feature `ddb475e`; worktree removed). Upload UX polish: progress, drag hint, inline errors (LR-A3 messageKeys); list error isolation follow-up. BDD **not-applicable**. Formal phase remains **None**. Wave LR-C remains **In Progress** (partial). **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN**; `docker-deploy-queue.ps1` **DEPLOY_OK** (`:8080` UP, `:4173` 200); E2E LRP-C10 **4/4** PASS + LRP-A3 regression **5/5**; UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C10-uiux-manifest.md`); architecture **PASS_WITH_NOTES** (Critical **0**). **Task Master #25 → done**. Other LR-C rows untouched (C2/C3/C5/C7/C8/C11–C13 Not Started; C1/C4/C9 Done).
 >
 > **Completion note (2026-07-10):** **LR-C9 → Done** (slice `lrp-c9-load-error-panel`; merge `0013615` / `001361599df61c8b2be99cf2ebe5d92b040db508` → `main`; worktree removed). Unified list states: `EmptyStatePanel` `#actions` + `AppDataTable` `#empty` forward; role-aware empty CTAs on six surfaces (`TemplateListView`, `MasterListView`, `ContentModuleListView`, `ApiPolicyHomeView`, `UserManagementListSection`, `GroupManagementPanel`); `LoadErrorPanel` + retry already present. BDD **not-applicable**. Formal phase remains **None**. **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN** (951 tests); `docker-deploy-queue.ps1` **DEPLOY_OK** (`:8080` UP, `:4173` 200); E2E `LRP-C9-list-states.spec.ts` **3/3** PASS; UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C9-uiux-manifest.md`); architecture **PASS_WITH_NOTES** (no Critical). **Task Master #14 → done**. Other LR-C rows untouched (C2/C3/C5/C7/C8/C10–C13 Not Started; C1/C4 Done).
@@ -269,22 +271,22 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - **Owner agent:** frontend-engineer
 - **BDD:** not-applicable — catalog completion + formatting consistency mandated by the i18n constitution; no behavior contract change.
 - **UIUX:** spot-check only (zh-CN screenshots on 2 error surfaces).
-- **Read first:** `frontend/src/i18n/catalogs/apiErrorEn.ts` (**94** leaf keys) + `apiErrorZhCn.ts` + `apiErrorCatalog.test.ts` (en↔zh parity exists; backend parity missing); `backend/src/main/resources/i18n/messages_en.properties` (**145** `api.error.*` keys); raw `toLocaleString` sites — `MasterRevisionDetailView.vue` L370, `TemplateReleaseVersionHistoryPanel.vue` L57/L317, `TemplateTestDataSetPanel.vue` L40/L309; `frontend/src/composables/useLocaleFormatters.ts`; `frontend/src/config/brands.ts` (`logoSlotLabel`).
+- **Read first:** `frontend/src/i18n/catalogs/apiErrorEn.ts` (**158** leaf keys at activation — was **94** in original plan text) + `apiErrorZhCn.ts` + `apiErrorCatalog.test.ts` (en↔zh parity exists; backend parity must enforce live backend set); `backend/src/main/resources/i18n/messages_en.properties` (**159** `api.error.*` keys at activation — plan historically cited **145**; re-baseline acceptance to live count); raw `toLocaleString` sites — `MasterRevisionDetailView.vue` L370, `TemplateReleaseVersionHistoryPanel.vue` L57/L317, `TemplateTestDataSetPanel.vue` L40/L309; `frontend/src/composables/useLocaleFormatters.ts`; `frontend/src/config/brands.ts` (`logoSlotLabel`).
 - **Do NOT:** Machine-translate carelessly (zh-CN must be reviewed banking register); change backend keys; encode data into keys.
 - **Steps:**
-  1. Add the missing ~51 `api.error.*` keys to `apiErrorEn.ts` (English base, mirroring backend semantics) + zh-CN counterparts.
-  2. Add a **backend parity test**: parse `backend/src/main/resources/i18n/messages_en.properties` in Vitest (or a script wired to `pnpm -C frontend test`) and assert every backend `api.error.*` key resolves in the frontend catalog (and report frontend-only orphans).
+  1. Add any missing `api.error.*` keys to `apiErrorEn.ts` (English base, mirroring backend semantics) + zh-CN counterparts (activation gap: ≥1 — `api.error.rendering.ooxmlValidationFailed`; confirm full diff at implement).
+  2. Add/strengthen a **backend parity test**: parse `backend/src/main/resources/i18n/messages_en.properties` in Vitest (or a script wired to `pnpm -C frontend test`) and assert every backend `api.error.*` key resolves in the frontend catalog (and report frontend-only orphans). Target = **live backend count** (159 at activation), not the historical 145 figure.
   3. Replace the 3 raw `toLocaleString` call sites with `useLocaleFormatters`.
-  4. Decide + record `brands.ts` `logoSlotLabel` disposition (brand mark = proper noun exempt, or key-ified) — one-line note in the i18n skill doc or PRD brand section.
-  5. Update [optimization-plan.md](../optimization-plan.md) OPT-G7 + OPT-G6 rows.
+  4. **`logoSlotLabel` disposition (docs-first Done):** proper-noun exempt — keep `REDBC`/`GREENBC` literals in `brands.ts`; do **not** key-ify. Recorded in `.cursor/skills/i18n-english-first/SKILL.md` + PRD §6.1. Human-readable names stay on `labelKey`.
+  5. Confirm [optimization-plan.md](../optimization-plan.md) OPT-G7 + OPT-G6 residual rows point to LR-C11 (reconcile only; mark residual closed on slice Done — not now).
 - **Acceptance (G/W/T):**
-  - **G** the parity test **W** `pnpm -C frontend test` runs **T** it fails if any backend `api.error.*` key is missing from the frontend catalog — and currently passes with 145/145.
+  - **G** the parity test **W** `pnpm -C frontend test` runs **T** it fails if any backend `api.error.*` key is missing from the frontend catalog — and passes at **N/N** where N = live backend `api.error.*` count (159 at activation; was historically documented as 145/145).
   - **G** locale zh-CN **W** viewing master revision history and release version history **T** timestamps render via locale-aware formatting (no en-US default leakage).
 - **Gates:** §1 standard block (lint/type-check/test/build); zh-CN screenshot spot-check.
-- **Artifacts:** catalog additions; parity test; 3 call-site fixes; disposition note; OPT row updates.
-- **Done when:** 145/145 + parity gate active + gates green + doc sync + commit review.
+- **Artifacts:** catalog additions; parity test; 3 call-site fixes; `logoSlotLabel` disposition recorded (proper-noun exempt); OPT residual rows point to LR-C11.
+- **Done when:** N/N parity + parity gate active + gates green + doc sync + commit review.
 - **Maps:** OPT-G7 (absorbed); OPT-G6 residual (locale dates portion absorbed).
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-11 — slice `lrp-c11-api-error-i18n`; BDD `not-applicable`; Task Master #26)
 
 ### LR-C12 — Keyboard a11y & table activation
 
@@ -337,8 +339,8 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 
 - [x] LR-C1 + LR-C4 shipped via CORE-FORTRESS F7 (2026-07-09; Vitest **894**; E2E **12/12**; BDD + UIUX evidence)
 - [ ] LR-C2/C3/C5…C8 shipped with BDD specs, functional Playwright journeys, and UIUX manifests (both brands)
-- [ ] LR-C9…C13 shipped with green gates; OPT-G4/G5/G6-residual/G7 + F4-residual rows updated *(LR-C9 Done 2026-07-10; LR-C10 Done 2026-07-11 merge `bdaf95d`; C11–C13 remain)*
-- [ ] `api.error` parity test enforcing 145/145 active in `pnpm -C frontend test`
+- [ ] LR-C9…C13 shipped with green gates; OPT-G4/G5/G6-residual/G7 + F4-residual rows updated *(LR-C9 Done 2026-07-10; LR-C10 Done 2026-07-11 merge `bdaf95d`; **LR-C11 In Progress** 2026-07-11; C12–C13 remain)*
+- [ ] `api.error` parity test enforcing live backend N/N (159 at LR-C11 activation; historically 145) active in `pnpm -C frontend test`
 - [x] No dead-end error list remains among the six §2/LR-C9 targets (LR-C9 Done 2026-07-10; merge `0013615`)
 - [x] LR-C10 upload UX polish shipped (progress / drag hint / inline errors; merge `bdaf95d`; E2E 4/4)
 - [ ] Ledger § LRP wave row updated with per-task evidence *(LR-C10 evidence recorded 2026-07-11; wave still partial)*
