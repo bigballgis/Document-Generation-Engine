@@ -1,7 +1,7 @@
 # Master Plan
 
 **Baseline:** Project restart from zero — 2026-06-23  
-**Active formal phase / program:** **None** (2026-07-09+). **Delivery focus note (2026-07-10):** **LR-A6 In Progress** (`lrp-a6-ooxml-gate`; OOXML output validation gate; executes CD-HARD-T03) — [LRP-A detail](./detail/LRP-A-rendering-trust-hardening.md); [launch-readiness-program.md](./launch-readiness-program.md). Formal phase remains **None**. **Sibling:** CDP Wave CD-2 **partial** (T01/T01b Done, merge `1930842`; T02–T12 Not Started). **LRP:** LR-A3/A4/A7 Done; Wave LR-A **In Progress** (A5 Partial; **A6 In Progress**). **CODE-QUALITY program Done** — CQ-01A…CQ-08; ArchUnit **11/11**; `mvn verify` **GREEN**; `pnpm` **894** tests + build **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **Prior:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08).
+**Active formal phase / program:** **None** (2026-07-09+). **Delivery focus note (2026-07-10):** **LR-A6 Done** (`lrp-a6-ooxml-gate`; merge `122d6d1`; OOXML fail-closed gate; CD-HARD-T03 executed-by-LR-A6) — [LRP-A detail](./detail/LRP-A-rendering-trust-hardening.md); [launch-readiness-program.md](./launch-readiness-program.md). Formal phase remains **None**. **Sibling:** CDP Wave CD-2 **partial** (T01/T01b Done, merge `1930842`; T02–T12 Not Started). **LRP:** LR-A3/A4/A6/A7 Done; Wave LR-A **In Progress** (A5 Partial). **CODE-QUALITY program Done** — CQ-01A…CQ-08; ArchUnit **11/11**; `mvn verify` **GREEN**; `pnpm` **894** tests + build **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **Prior:** **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE Done** (2026-07-08).
 **P14** confirmed large domains **Done** (2026-06-27).
 **P15** Kubernetes deployment **Done** (2026-06-27; T01–T10).
 **P18** structured authoring **Done** (2026-06-28; T01–T10).
@@ -84,7 +84,7 @@ upstream systems invoke the dynamic API.
 > **P22 (Done 2026-07-04):** rendering engine + demo scaffolds — typography/content excellence → **P23**.
 >
 > **CDP (active delivery focus):** [competitiveness-deepening-program.md](./competitiveness-deepening-program.md) — Wave **CD-0 Done**; Wave **CD-2 In Progress** (**partial** — T01/T01b **Done**; T02–T12 Not Started); task prefix **`CD-*`** only. Do **not** mark full CD-2 Done until remaining matrix green.
-> **LRP:** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; **LR-A3/A4/A7 Done** (2026-07-10); **LR-A6 In Progress** (`lrp-a6-ooxml-gate`); Wave LR-A remains **In Progress** (A5 Partial; Word-vs-LO residual under ADR-0042 — do not expand in this slice); **LR-C1/C4 Done** via CORE-FORTRESS F7. Formal phase remains **None** — do not promote LRP/CDP to a formal phase row.
+> **LRP:** [launch-readiness-program.md](./launch-readiness-program.md) — Waves LR-A…LR-E; task prefix **`LR-*`** only; **LR-A3/A4/A6/A7 Done** (2026-07-10); Wave LR-A remains **In Progress** (A5 Partial; Word-vs-LO residual under ADR-0042 — do not expand; do not start LR-C9); **LR-C1/C4 Done** via CORE-FORTRESS F7. Formal phase remains **None** — do not promote LRP/CDP to a formal phase row.
 
 ## Thin vertical slice (MVP chain)
 

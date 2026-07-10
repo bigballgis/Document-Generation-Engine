@@ -1,13 +1,15 @@
 # LRP Wave LR-A — Rendering Trust Chain & File Safety 「渲染信任链与文件安全」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3/A4 Done**; **LR-A7 Done** with documented exception; A5 Partial; **LR-A6 In Progress**)  
+**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3/A4 Done**; **LR-A6 Done**; **LR-A7 Done** with documented exception; A5 Partial)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer` for images, `doc-keeper` for ADRs)  
 **Prerequisites:** none for A1/A2/A3/A5; **A4/A6 depend on P22-T01/T02 Done**; **A7 depends on P23 demo packages (T04+ letter-grade)** — track via [P23 detail](./P23-demo-typography-layout-excellence.md)
 
-> **Activation note (2026-07-10):** **LR-A6 → In Progress** (slice `lrp-a6-ooxml-gate`; ISOLATED `D:/working/DGE-lrp-a6-ooxml-gate` · `feat/lrp-a6-ooxml-gate`; base `a806b4c`). OOXML/output validation gate — invalid or structurally unsafe DOCX fail closed; gap-close existing `OoxmlOutputValidationGateTest` + ADR-0043 runtime gate if missing. Executes **CD-HARD-T03** (mark executed-by-LR-A6 on Done). BDD **not-applicable**. Formal phase remains **None**. Wave LR-A remains **In Progress** (**A5 Partial**; sole active LRP task **LR-A6**). Do **not** start LR-C9 or expand A5 Word residual in this slice. **Task Master #12 → in-progress**.
+> **Completion note (2026-07-10):** **LR-A6 → Done** (slice `lrp-a6-ooxml-gate`; merge `122d6d1` / `122d6d1f385bb28214373c63ef29740b0d447cb3`; worktree removed). OOXML output validation **fail-closed** gate delivered: `OoxmlOutputValidator` + `DocxAssembler` wiring + runtime error propagation (`OOXML_VALIDATION_FAILED`). Acceptance: structured well-formed accept; corrupt reject; corpus; runtime surfaces validation failure. **CD-HARD-T03 → Done** (executed-by-LR-A6). BDD **not-applicable**. Formal phase remains **None**. Wave LR-A remains **In Progress** (**A5 Partial** only — do **not** start LR-C9 or expand A5 Word residual). **Residuals (deferred):** ECMA-376 XSD; LO24 headless; ADR-0043 remains **Proposed**. **Gates:** `mvn verify` GREEN (1208+ tests); architecture-reviewer **PASS**; `docker-deploy-queue` DEPLOY_OK (healthz UP; UI 4173 200; image contains `OoxmlOutputValidator`); E2E skipped (not user-facing). **Task Master #12 → done**.
 
-> **Completion note (2026-07-10):** **LR-A7 → Done** (slice `lrp-a7-pagination-measure`; merge `abf2048` / base `9a40b48`; worktree removed) **with documented exception**. Docker PDF corpus measurement gap **closed** (≥5 P23 letters + optional FOL; durable evidence). MS Word authoring baseline **unavailable** on measurement host → Word pages / delta columns remain **n/a** (`method=ms-word-unavailable-on-host`; not fabricated). True Word-vs-LO delta validation + ADR-0042 **Accepted** remain a **residual follow-up** (record under LR-A5/ADR-0042 — do **not** expand A5 Word residual or start LR-C9 for this residual; not a new In Progress task). **CD-HARD-T04 → Done** (executed-by-LR-A7) with same honesty note. BDD **not-applicable**. Formal phase remains **None**. Wave LR-A remains **In Progress** (**A5 Partial**; **A6 activated** — see activation note above). Evidence: [pagination-delta-corpus.md](../pagination-delta-corpus.md); [docs/evidence/lrp-a7-pagination/](../../evidence/lrp-a7-pagination/); NFR §production rendering.
+> **Activation note (2026-07-10):** **LR-A6 → In Progress** (slice `lrp-a6-ooxml-gate`; ISOLATED `D:/working/DGE-lrp-a6-ooxml-gate` · `feat/lrp-a6-ooxml-gate`; base `a806b4c`). Superseded by LR-A6 completion note above.
+
+> **Completion note (2026-07-10):** **LR-A7 → Done** (slice `lrp-a7-pagination-measure`; merge `abf2048` / base `9a40b48`; worktree removed) **with documented exception**. Docker PDF corpus measurement gap **closed** (≥5 P23 letters + optional FOL; durable evidence). MS Word authoring baseline **unavailable** on measurement host → Word pages / delta columns remain **n/a** (`method=ms-word-unavailable-on-host`; not fabricated). True Word-vs-LO delta validation + ADR-0042 **Accepted** remain a **residual follow-up** (record under LR-A5/ADR-0042 — do **not** expand A5 Word residual or start LR-C9 for this residual; not a new In Progress task). **CD-HARD-T04 → Done** (executed-by-LR-A7) with same honesty note. BDD **not-applicable**. Formal phase remains **None**. Wave LR-A remains **In Progress** (**A5 Partial**; **LR-A6 Done** — see completion note above). Evidence: [pagination-delta-corpus.md](../pagination-delta-corpus.md); [docs/evidence/lrp-a7-pagination/](../../evidence/lrp-a7-pagination/); NFR §production rendering.
 
 > **Activation note (2026-07-10):** **LR-A7 → In Progress** (slice `lrp-a7-pagination-measure`; ISOLATED `D:/working/DGE-lrp-a7-pagination-measure` · `feat/lrp-a7-pagination-measure`; base `9a40b48`). Superseded by LR-A7 completion note above.
 
@@ -166,13 +168,10 @@
 - **Artifacts:** new validation test class + fixtures under `backend/src/test/`.
 - **Done when:** Gate active in verify + CD-HARD-T03 cross-referenced + doc sync + commit review.
 - **Maps:** CD-PIT-03; ADR-0043 (LR-A5).
-- **Status:** **In Progress** (2026-07-10 — slice `lrp-a6-ooxml-gate`; ISOLATED `D:/working/DGE-lrp-a6-ooxml-gate` · `feat/lrp-a6-ooxml-gate`; base `a806b4c`; executes CD-HARD-T03; Task Master #12)
-- **Upstream / gap-close notes for implementer:**
-  - Partial test exists: `OoxmlOutputValidationGateTest` (happy-path well-formed + CJK/emoji opens only).
-  - Missing: deliberately corrupted fixture that **fails** the gate (CD-PIT-03 detection proof).
-  - Missing: production/runtime fail-closed gate per ADR-0043 (Proposed) if not already wired — invalid/structurally unsafe DOCX must not pass silently.
-  - Optional corpus breadth: node-family cases (list/table/module/image) once writer output stable.
-  - On Done: mark CDP **CD-HARD-T03** executed-by-LR-A6 (reference, not duplicate).
+- **Status:** **Done** (2026-07-10 — slice `lrp-a6-ooxml-gate`; merge `122d6d1`; CD-HARD-T03 Done executed-by-LR-A6; Task Master #12)
+- **Delivered:** `OoxmlOutputValidator` + `DocxAssembler` fail-closed gate; runtime `OOXML_VALIDATION_FAILED` propagation; well-formed accept / corrupt reject / corpus coverage.
+- **Gates (GREEN):** `mvn -B -ntp -f backend/pom.xml verify` (1208+ tests); architecture-reviewer **PASS**; `docker-deploy-queue.ps1` DEPLOY_OK (healthz `:8080` UP; UI `:4173` 200; backend image contains `OoxmlOutputValidator`); E2E skipped (not user-facing).
+- **Residuals (deferred — not blocking Done):** ECMA-376 XSD validation; LO24 headless open proof; ADR-0043 remains **Proposed** (do not mark Accepted without architecture-reviewer).
 
 ### LR-A7 — Pagination delta budget + corpus
 
@@ -204,8 +203,8 @@
 
 ## 2. Exit gate (Wave LR-A)
 
-- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 Done** (2026-07-10 gap-close; merge `e62c210`); **LR-A4 Done** (2026-07-10; merge `a523a09`); LR-A5 **Partial** (0042/0043 on disk; 0041 deferred); **LR-A7 Done** (2026-07-10 — Docker PDF corpus; Word delta residual)
+- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 Done** (2026-07-10 gap-close; merge `e62c210`); **LR-A4 Done** (2026-07-10; merge `a523a09`); LR-A5 **Partial** (0042/0043 on disk; 0041 deferred); **LR-A6 Done** (2026-07-10 — merge `122d6d1`; CD-HARD-T03 executed-by-LR-A6); **LR-A7 Done** (2026-07-10 — Docker PDF corpus; Word delta residual)
 - [x] LR-A4 Done (writer-unsupported fail-closed; full writers deferred)
-- [ ] LR-A6 Done (**In Progress** 2026-07-10 — `lrp-a6-ooxml-gate`); Wave LR-A remains open while A5 Partial / A6 open (Word-vs-LO residual under ADR-0042 — not blocking LR-A7 Done claim; do not expand A5 Word residual in this slice)
+- [x] LR-A6 Done (2026-07-10 — `lrp-a6-ooxml-gate`; merge `122d6d1`); Wave LR-A remains open while A5 Partial (Word-vs-LO residual under ADR-0042 — do not expand A5 Word residual; do not start LR-C9)
 - [x] Writer-unsupported declared nodes (`qrBarcodeRef`/`attachmentListRef`) cannot silently disappear (publish hard-block + render fail-closed) — full writers still deferred
-- [ ] Ledger § LRP wave row updated with gate evidence per remaining A5/A6 task
+- [ ] Ledger § LRP wave row updated with gate evidence per remaining A5 task (A6 evidence recorded 2026-07-10)
