@@ -101,6 +101,7 @@ export default {
   nav: {
     login: '登录',
     logout: '退出登录',
+    skipToMainContent: '跳到主要内容',
     managementNavigation: '管理导航',
     collapseSidebar: '收起侧栏',
     expandSidebar: '展开侧栏',
@@ -2027,6 +2028,7 @@ export default {
     copyToClipboardError: '无法复制，请手动复制。',
     loadError: '页面加载失败。',
     language: '语言',
+    activatableRowOpen: '打开行详情',
     locales: {
       en: 'English',
       zhCN: '简体中文',

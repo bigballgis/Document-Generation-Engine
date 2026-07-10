@@ -14,7 +14,7 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:docker": "playwright test e2e/catalog.spec.ts e2e/role-journeys.spec.ts e2e/master-replace-docx.spec.ts e2e/content-module-lifecycle.spec.ts e2e/collaboration-todos.spec.ts e2e/a11y-smoke.spec.ts e2e/sor-a11y-axe.spec.ts e2e/sor-journey-gaps.spec.ts --config playwright.docker.config.ts",
+    "test:e2e:docker": "playwright test e2e/catalog.spec.ts e2e/role-journeys.spec.ts e2e/master-replace-docx.spec.ts e2e/content-module-lifecycle.spec.ts e2e/collaboration-todos.spec.ts e2e/a11y-smoke.spec.ts e2e/LRP-C12-keyboard-journey.spec.ts e2e/sor-a11y-axe.spec.ts e2e/sor-journey-gaps.spec.ts --config playwright.docker.config.ts",
     "test:e2e:docker:demos": "playwright test e2e/demo-runtime-generate.spec.ts --config playwright.docker.config.ts",
     "test:e2e:install": "playwright install --with-deps chromium",
     "pretest:e2e": "playwright install chromium",

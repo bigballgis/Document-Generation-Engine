@@ -48,6 +48,7 @@ const hasActiveFilter = computed(() => Boolean(filterText.value?.trim()))
           size="small"
           clearable
           :placeholder="t('table.filterPlaceholder')"
+          :aria-label="t('table.columnFilter.open', { column: label })"
         />
         <el-select
           v-else
@@ -57,6 +58,7 @@ const hasActiveFilter = computed(() => Boolean(filterText.value?.trim()))
           filterable
           class="table-column-filter-header__select"
           :placeholder="t('table.filterAll')"
+          :aria-label="t('table.columnFilter.open', { column: label })"
         >
           <el-option
             v-for="option in props.options"
@@ -112,7 +114,7 @@ const hasActiveFilter = computed(() => Boolean(filterText.value?.trim()))
   }
 
   &:focus-visible {
-    outline: 2px solid var(--brand-primary);
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
     outline-offset: 1px;
   }
 }

@@ -104,6 +104,7 @@ export default {
   nav: {
     login: 'Login',
     logout: 'Sign out',
+    skipToMainContent: 'Skip to main content',
     managementNavigation: 'Management navigation',
     collapseSidebar: 'Collapse sidebar',
     expandSidebar: 'Expand sidebar',
@@ -2056,6 +2057,7 @@ export default {
     copyToClipboardError: 'Unable to copy. Copy it manually.',
     loadError: 'Unable to load this page.',
     language: 'Language',
+    activatableRowOpen: 'Open row details',
     locales: {
       en: 'English',
       zhCN: 'Chinese (Simplified)',

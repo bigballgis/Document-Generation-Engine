@@ -70,6 +70,7 @@ function mountShell(
     accessTokenExpiresAt: string | null
     sessionAbsoluteDeadline: string | null
   }> = {},
+  mountOptions: { attachToDocument?: boolean } = {},
 ) {
   const pinia = createPinia()
   setActivePinia(pinia)
@@ -88,6 +89,7 @@ function mountShell(
 
   return mount(ManagementShell, {
     slots: { default: '<div class="content-slot">Page content</div>' },
+    attachTo: mountOptions.attachToDocument ? document.body : undefined,
     global: {
       plugins: [pinia, i18n, ElementPlus],
     },
@@ -236,6 +238,30 @@ describe('ManagementShell', () => {
       .findAll('button.nav-item')
       .find((button) => button.text().includes('approval'))
     expect(approvalButton).toBeUndefined()
+  })
+
+  it('exposes a skip-link as the first focusable control targeting main content', async () => {
+    const wrapper = mountShell(globalAdminSession(), {}, { attachToDocument: true })
+    await flushPromises()
+
+    try {
+      const skipLink = wrapper.find('a.skip-link')
+      expect(skipLink.exists()).toBe(true)
+      expect(skipLink.text()).toBe('Skip to main content')
+      expect(skipLink.attributes('href')).toBe('#main-content')
+
+      const main = wrapper.find('#main-content')
+      expect(main.exists()).toBe(true)
+      expect(main.attributes('tabindex')).toBe('-1')
+
+      const focusable = wrapper.findAll('a, button, [tabindex]:not([tabindex="-1"])')
+      expect(focusable[0].classes()).toContain('skip-link')
+
+      await skipLink.trigger('click')
+      expect(document.activeElement).toBe(main.element)
+    } finally {
+      wrapper.unmount()
+    }
   })
 
   it('shows the session limit reminder when the absolute deadline is near', async () => {

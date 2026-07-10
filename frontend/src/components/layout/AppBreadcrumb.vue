@@ -57,8 +57,8 @@ function navigate(path: string) {
   font: inherit;
 
   &:focus-visible {
-    outline: 2px solid var(--brand-primary);
-    outline-offset: 2px;
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
   }
 }
 </style>

@@ -81,18 +81,6 @@ const sortTasksBySubmitter = rowSortMethod<WorkflowTask>((row) =>
 )
 const sortTasksByAge = rowSortMethod<WorkflowTask>((row) => row.ageSeconds ?? 0)
 
-const selectedTask = ref<WorkflowTask | null>(null)
-
-function onCurrentChange(row: WorkflowTask | undefined) {
-  selectedTask.value = row ?? null
-}
-
-function onTableKeydown(event: KeyboardEvent) {
-  if (event.key === 'Enter' && selectedTask.value) {
-    emit('open', selectedTask.value.path)
-  }
-}
-
 function resolveThresholdHours(task: WorkflowTask): number | null {
   if (!isCollaboration || !task.queue) {
     return null
@@ -138,11 +126,9 @@ function openTask(path: string, event?: Event) {
         :data="paginatedRows"
         class="tasks-table"
         highlight-current-row
-        tabindex="0"
         :default-sort="{ prop: 'createdAt', order: 'descending' }"
+        :row-aria-label="(row) => (row as WorkflowTask).entityName"
         @row-click="(row: WorkflowTask) => emit('open', row.path)"
-        @current-change="onCurrentChange"
-        @keydown="onTableKeydown"
       >
         <el-table-column sortable :sort-method="sortTasksByTitle" min-width="200">
           <template #header>

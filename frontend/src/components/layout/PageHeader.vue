@@ -122,8 +122,8 @@ const titleId = computed(() => `page-title-${props.title.replace(/\s+/g, '-').to
   }
 
   &:focus-visible {
-    outline: 2px solid var(--brand-primary);
-    outline-offset: 2px;
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
     border-radius: var(--radius-sm);
   }
 }
