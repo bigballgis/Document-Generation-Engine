@@ -213,22 +213,22 @@
         "id": "16",
         "title": "CDP CD-2 T05 Team lead publish / go-live journey",
         "description": "Next highest-value CD-2 E2E after T02–T04 Done: CD-E2E-T05 Team lead publish (PENDING_RELEASE → publish summary → confirm → release version UI). Browser-only task-completion + UIUX manifest. Do NOT mark wave CD-2 Done. Alternate if blocked: T08 preview download. Out of scope: LR-*, audit-governance.",
-        "details": "ACTIVATED 2026-07-10. Slice id: cdp-e2e-t05-publish. Status: in-progress. Placement: ISOLATED D:/working/DGE-cdp-e2e-t05-publish · feat/cdp-e2e-t05-publish · base aa41b89 (includes T02–T04 merge 6821f45). Read docs/behavior/team-lead-publish-journey.md (BDD confirming in parallel). Wave CD-2 stays In Progress (partial — T01–T04 Done; T05 In Progress; T06–T13 Not Started). Formal phase remains None. Gates: docker-deploy-queue; Playwright docker green; e2e-uiux-reviewer PASS. Gate evidence: []. Next after T05: T06 (or T08 if publish fixtures blocked).",
+        "details": "COMPLETED 2026-07-10. Slice id: cdp-e2e-t05-publish. Status: done. Merge 895f16e (feature a5e5491); worktree DGE-cdp-e2e-t05-publish REMOVED. BDD ready: docs/behavior/team-lead-publish-journey.md (BDD-CDP-PUB-001/002). Wave CD-2 stays In Progress (partial — T01–T05 Done; T06–T13 Not Started). Formal phase remains None. Gates: Playwright docker --workers=1 3 passed (functional 2 + UIUX 1); UIUX Verdict PASS (4 screenshots @1920); architecture PASS_WITH_SUGGESTIONS (no Critical); Stage 5/10 deploy healthz/4173 200 (compose dge-lrp-c9-load-error-panel; queue idle). No T08 fallback. Next: T06 (or T08 if noted).",
         "testStrategy": "1. PENDING_RELEASE → publish summary dialog → confirm → release version callable (UI indicator). 2. Paired UIUX manifest Verdict PASS. 3. No API stage advancement in test body. 4. Do not claim wave CD-2 Done.",
         "priority": "high",
         "dependencies": [
           "15"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-10T13:00:00.000Z"
+        "updatedAt": "2026-07-10T13:30:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-10T13:00:00.000Z",
+      "lastModified": "2026-07-10T13:30:00.000Z",
       "taskCount": 16,
-      "completedCount": 15,
+      "completedCount": 16,
       "tags": [
         "master"
       ]

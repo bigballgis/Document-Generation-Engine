@@ -1,11 +1,13 @@
 # CDP Wave CD-E2E — Full-Chain Browser Evidence
 
 **Program:** [competitiveness-deepening-program.md](../competitiveness-deepening-program.md)  
-**Wave:** CD-2 — **In Progress** (2026-07-10; **partial** — T01/T01b + **T02/T03/T04 Done**; **CD-E2E-T05 In Progress**; T06–T12 + T13 remain Not Started)  
+**Wave:** CD-2 — **In Progress** (2026-07-10; **partial** — T01/T01b + T02/T03/T04 + **T05 Done**; T06–T12 + T13 remain Not Started)  
 **Owner default:** `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** Docker stack (`.\scripts\docker-deploy-queue.ps1`); read `frontend/e2e/helpers/auth.ts`, `frontend/e2e/helpers/cdp-mvp-golden-api.ts`
 
-> **Activation note (2026-07-10):** Slice `cdp-e2e-t05-publish` — **CD-E2E-T05 → In Progress** (Team lead publish / go-live). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t05-publish` · `feat/cdp-e2e-t05-publish` · base `aa41b89` / upstream merges `6821f45`. BDD confirming in parallel (`team-lead-publish-journey.md`). Gate evidence: []. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. T06–T13 stay Not Started (next after T05: T06 or T08 if publish fixtures blocked). Out of scope: audit-governance, LR-C5.
+> **Completion note (2026-07-10):** Slice `cdp-e2e-t05-publish` merged to `main` (`895f16e`; feature `a5e5491`; worktree **REMOVED**). **CD-E2E-T05 → Done**. Team lead publish / go-live browser journey closed (BDD-CDP-PUB-001/002). Playwright docker `--workers=1`: **3 passed** (functional 2 + UIUX evidence 1); UIUX Verdict **PASS** (4 screenshots @1920; REDBC+GREENBC queue + go-live dialog + External access); architecture-reviewer **PASS_WITH_SUGGESTIONS** (no Critical; DRY helper / PUB-002 checkbox note); Stage 5/10 deploy healthz/4173 **200** (compose `dge-lrp-c9-load-error-panel`; queue idle). No T08 fallback. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. **Next:** T06 (or T08 if noted).
+
+> **Activation note (2026-07-10):** Slice `cdp-e2e-t05-publish` — **CD-E2E-T05 → In Progress** (Team lead publish / go-live). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t05-publish` · `feat/cdp-e2e-t05-publish` · base `aa41b89` / upstream merges `6821f45`. Superseded by completion note above.
 
 > **Completion note (2026-07-10):** Slice `cdp-e2e-cd2-t02` merged to `main` (`6821f45`; feature `13e8e98`; worktree removed). **CD-E2E-T02** + **T03** + **T04 → Done**. Playwright docker `--workers=1`: functional **3 passed** + UIUX evidence **3 passed**; manifests Verdict **PASS** (T02:3 / T03:1 / T04:3 shots); architecture **PASS_WITH_SUGGESTIONS** (no Critical); deploy healthz/4173 OK (rebuild skipped, E2E-only). Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Superseded scheduling: T05 activated (see activation note above).
 
@@ -102,11 +104,11 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 ### CD-E2E-T05 — Team lead publish / go-live
 
 - **Owner:** `e2e-test-engineer`
-- **Read first:** `docs/behavior/team-lead-publish-journey.md`
+- **Read first:** `docs/behavior/team-lead-publish-journey.md` (BDD-CDP-PUB-001/002 **ready**)
 - **Acceptance:** PENDING_RELEASE → publish summary dialog → confirm → release version callable (UI indicator).
-- **Status:** **In Progress** (2026-07-10 — slice `cdp-e2e-t05-publish`; `feat/cdp-e2e-t05-publish`; worktree `DGE-cdp-e2e-t05-publish`)
-- **Placement:** ISOLATED · base `aa41b89` (main includes `6821f45` T02–T04)
-- **Gate evidence:** [] (activation)
+- **Status:** **Done** (2026-07-10 — slice `cdp-e2e-t05-publish`; merge `895f16e`; feature `a5e5491`; worktree removed)
+- **Artifacts:** `CDP-E2E-T05-team-lead-publish.spec.ts` + `CDP-E2E-T05-uiux-evidence.spec.ts` + `frontend/e2e/evidence/CDP-E2E-T05-uiux-manifest.md`
+- **Evidence:** Playwright docker `--workers=1` **3 passed** (functional 2 + UIUX 1); UIUX Verdict **PASS** (4 screenshots @1920); architecture **PASS_WITH_SUGGESTIONS** (no Critical); deploy healthz/4173 **200**; no T08 fallback
 
 ### CD-E2E-T06 — Master designer upload-to-approve
 
@@ -178,11 +180,11 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 
 ## 5. CD-2 exit gate
 
-- [x] CD-E2E-T01 Done (2026-07-10) — T05…T11 remain
+- [x] CD-E2E-T01 Done (2026-07-10) — T06…T11 remain
 - [x] CD-E2E-T02/T03/T04 Done (2026-07-10 — slice `cdp-e2e-cd2-t02`; merge `6821f45`) — **not** wave exit
-- [ ] CD-E2E-T05 In Progress (2026-07-10 — slice `cdp-e2e-t05-publish`) — **not** wave exit
+- [x] CD-E2E-T05 Done (2026-07-10 — slice `cdp-e2e-t05-publish`; merge `895f16e`) — **not** wave exit
 - [ ] CD-E2E-T01…T11 Done (T12 recommended) — **wave not closed**
-- [x] T01 paired manifest **PASS** (15 screenshots); T02/T03/T04 manifests **PASS** (3/1/3 shots)
-- [x] `execution-sync-ledger.md` records T01 + T02–T04 Playwright counts + Docker deploy (2026-07-10)
+- [x] T01 paired manifest **PASS** (15 screenshots); T02/T03/T04 manifests **PASS** (3/1/3 shots); T05 manifest **PASS** (4 shots @1920)
+- [x] `execution-sync-ledger.md` records T01 + T02–T04 + T05 Playwright counts + Docker deploy (2026-07-10)
 - [x] `usability-review.md` references golden path spec as confirmed evidence (T01)
 - [ ] Full matrix + all manifests PASS before wave **Done**
