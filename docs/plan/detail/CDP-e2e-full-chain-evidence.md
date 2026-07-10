@@ -1,13 +1,15 @@
 # CDP Wave CD-E2E — Full-Chain Browser Evidence
 
 **Program:** [competitiveness-deepening-program.md](../competitiveness-deepening-program.md)  
-**Wave:** CD-2 — **In Progress** (2026-07-11; **partial** — T01/T01b + T02/T03/T04 + T05 + T06 + T07 + T08 **Done**; **sole-active slice CD-E2E-T09 In Progress**; T10–T12 + T13 remain Not Started)
+**Wave:** CD-2 — **In Progress** (2026-07-11; **partial** — T01/T01b + T02/T03/T04 + T05 + T06 + T07 + T08 + **T09 Done**; T10–T12 + T13 remain Not Started; no sole-active CDP E2E slice)
 **Owner default:** `e2e-test-engineer` + `e2e-uiux-reviewer`
 **Prerequisites:** Docker stack (`.\scripts\docker-deploy-queue.ps1`); read `frontend/e2e/helpers/auth.ts`, `frontend/e2e/helpers/cdp-mvp-golden-api.ts`
 
-> **Activation note (2026-07-11):** Slice `cdp-e2e-t09-compare` — **CD-E2E-T09 → In Progress** (Preview vs final comparison panel; browser evidence; BDD-CDP-CMP-001). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t09-compare` · `feat/cdp-e2e-t09-compare` · base `origin/main` @ `3467f5a` (T07 merge tip `1eb230b`). BDD **ready** (confirming in parallel): `docs/behavior/preview-comparison-journey.md` (BDD-CDP-CMP-001). Do **not** activate T10–T13. Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. **Task Master #20 → in-progress**. Out of scope: audit-governance, LR-*.
+> **Completion note (2026-07-11):** Slice `cdp-e2e-t09-compare` merged to `main` (`55a6ab6`; worktree **REMOVED**). **CD-E2E-T09 → Done**. Preview vs final comparison panel E2E closed (BDD-CDP-CMP-001). E2E-only (no product src changes). Playwright docker `--workers=1`: functional **1/1** + UIUX evidence **1/1** (**2/2**); UIUX Verdict **PASS** (`CDP-E2E-T09-uiux-manifest.md` + **3** screenshots @1920 REDBC); architecture-reviewer **PASS_WITH_SUGGESTIONS** / merge allowed (no Critical); Stage 5/10 **DEPLOY_OK** healthz **200** + `:4173` **200** (E2E-only; no image rebuild; queue idle). Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Next recommend: **T10** (fidelity viewed confirmation) or **T13** (package materialize). **Task Master #20 → done**.
 
-> **Completion note (2026-07-11):** Slice `cdp-e2e-t07-api-policy` merged to `main` (`1eb230b`; worktree **REMOVED**). **CD-E2E-T07 → Done**. API policy edit → impact preview → save + hard-block finding UI closed (BDD-CDP-APIPOL-001/002). Playwright docker `--workers=1`: functional **2 passed** (`CDP-E2E-T07-api-policy-edit-save.spec.ts`); UIUX Verdict **PASS** (`CDP-E2E-T07-uiux-manifest.md` + **9** screenshots); architecture-reviewer **PASS_WITH_SUGGESTIONS** / **APPROVE** (no Critical); frontend lint/type-check/test/build **PASS** (955 tests); Stage 5/10 healthz **200** + `:4173` **200** (final deploy from MAIN `@ 1eb230b`). Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Superseded scheduling: T09 activated (see activation note above). **Task Master #19 → done**.
+> **Activation note (2026-07-11):** Slice `cdp-e2e-t09-compare` — **CD-E2E-T09 → In Progress** (Preview vs final comparison panel; browser evidence; BDD-CDP-CMP-001). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t09-compare` · `feat/cdp-e2e-t09-compare` · base `origin/main` @ `3467f5a` (T07 merge tip `1eb230b`). BDD **ready**: `docs/behavior/preview-comparison-journey.md` (BDD-CDP-CMP-001). Superseded by completion note above. **Task Master #20 → in-progress** (now done).
+
+> **Completion note (2026-07-11):** Slice `cdp-e2e-t07-api-policy` merged to `main` (`1eb230b`; worktree **REMOVED**). **CD-E2E-T07 → Done**. API policy edit → impact preview → save + hard-block finding UI closed (BDD-CDP-APIPOL-001/002). Playwright docker `--workers=1`: functional **2 passed** (`CDP-E2E-T07-api-policy-edit-save.spec.ts`); UIUX Verdict **PASS** (`CDP-E2E-T07-uiux-manifest.md` + **9** screenshots); architecture-reviewer **PASS_WITH_SUGGESTIONS** / **APPROVE** (no Critical); frontend lint/type-check/test/build **PASS** (955 tests); Stage 5/10 healthz **200** + `:4173` **200** (final deploy from MAIN `@ 1eb230b`). Do **not** mark wave CD-2 **Done**. Formal phase remains **None**. Superseded scheduling: T09 completed (see completion note above). **Task Master #19 → done**.
 
 > **Activation note (2026-07-10):** Slice `cdp-e2e-t07-api-policy` — **CD-E2E-T07 → In Progress** (API policy edit → impact preview → save; browser evidence). Placement: ISOLATED `D:/working/DGE-cdp-e2e-t07-api-policy` · `feat/cdp-e2e-t07-api-policy` · base `71ee0b8` (T08 merge tip `c62b1a1` on main). BDD **ready**: `docs/behavior/api-policy-edit-save-journey.md` (BDD-CDP-APIPOL-001/002). Superseded by completion note above. **Task Master #19 → in-progress** (now done).
 
@@ -157,8 +159,9 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - **Owner:** `e2e-test-engineer`
 - **Read first:** `docs/behavior/preview-comparison-journey.md` (BDD-CDP-CMP-001 **ready**), PRD/usability-review comparison requirements
 - **Acceptance:** Side-by-side view opens; filter by warningCode; screenshot evidence.
-- **Status:** **In Progress** (2026-07-11 — sole-active CDP E2E slice `cdp-e2e-t09-compare`; `feat/cdp-e2e-t09-compare`; worktree `D:/working/DGE-cdp-e2e-t09-compare`; base `origin/main` @ `3467f5a`)
-- **Do NOT:** activate T10–T13; mark wave CD-2 Done; touch audit-governance / LR-*
+- **Status:** **Done** (2026-07-11 — slice `cdp-e2e-t09-compare`; merge `55a6ab6`; worktree removed; E2E-only)
+- **Artifacts:** `CDP-E2E-T09-preview-comparison.spec.ts` + `CDP-E2E-T09-uiux-evidence.spec.ts` + `frontend/e2e/evidence/CDP-E2E-T09-uiux-manifest.md` + screenshots (3 @1920 REDBC)
+- **Evidence:** Playwright docker `--workers=1` functional **1/1** + UIUX **1/1** (**2/2**); UIUX Verdict **PASS**; architecture **PASS_WITH_SUGGESTIONS** (no Critical); Stage 5/10 deploy healthz/4173 **200** (E2E-only; no image rebuild)
 
 ### CD-E2E-T10 — Fidelity «viewed» confirmation on pass/approve/publish
 
@@ -208,9 +211,10 @@ pnpm -C frontend exec playwright test --config=frontend/playwright.docker.config
 - [x] CD-E2E-T06 Done (2026-07-10 — slice `cdp-e2e-t06-master`; merge `3aed175`) — **not** wave exit
 - [x] CD-E2E-T08 Done (2026-07-10 — slice `cdp-e2e-t08-preview`; merge `c62b1a1`) — **not** wave exit
 - [x] CD-E2E-T07 Done (2026-07-11 — slice `cdp-e2e-t07-api-policy`; merge `1eb230b`) — **not** wave exit
-- [ ] CD-E2E-T09 In Progress (sole-active) — T10–T13 Not Started — **wave not closed**
+- [x] CD-E2E-T09 Done (2026-07-11 — slice `cdp-e2e-t09-compare`; merge `55a6ab6`) — **not** wave exit
+- [ ] T10–T13 Not Started — **wave not closed**
 - [ ] CD-E2E-T01…T11 Done (T12 recommended) — **wave not closed**
-- [x] T01 paired manifest **PASS** (15 screenshots); T02/T03/T04 manifests **PASS** (3/1/3 shots); T05 manifest **PASS** (4 shots @1920); T06 manifest **PASS** (6 shots @1920); T07 manifest **PASS** (9 shots); T08 manifest **PASS** (3 shots @1920)
-- [x] `execution-sync-ledger.md` records T01 + T02–T04 + T05 + T06 + T07 + T08 Playwright counts + Docker deploy (2026-07-11)
+- [x] T01 paired manifest **PASS** (15 screenshots); T02/T03/T04 manifests **PASS** (3/1/3 shots); T05 manifest **PASS** (4 shots @1920); T06 manifest **PASS** (6 shots @1920); T07 manifest **PASS** (9 shots); T08 manifest **PASS** (3 shots @1920); T09 manifest **PASS** (3 shots @1920 REDBC)
+- [x] `execution-sync-ledger.md` records T01 + T02–T04 + T05 + T06 + T07 + T08 + T09 Playwright counts + Docker deploy (2026-07-11)
 - [x] `usability-review.md` references golden path spec as confirmed evidence (T01)
 - [ ] Full matrix + all manifests PASS before wave **Done**
