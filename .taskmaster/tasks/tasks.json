@@ -292,12 +292,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T03:30:00.000Z"
+      },
+      {
+        "id": "22",
+        "title": "CDP CD-2 T11 Audit admin query/export E2E",
+        "description": "Sole-active CD-2 E2E after T10 Done: CD-E2E-T11 Audit admin query/filter smoke + export + UIUX (browser-only task-completion + UIUX manifest; first audit-role manifest). BDD ready: audit-admin-query-journey.md (BDD-CDP-AUDIT-001/002). Do NOT mark wave CD-2 Done. Do NOT activate T12/T13 or LR-C10. Out of scope: DGE-audit-governance, LR-*.",
+        "details": "IN PROGRESS 2026-07-11. Slice id: cdp-e2e-t11-audit. Status: in-progress (sole-active CDP E2E). Placement: ISOLATED D:/working/DGE-cdp-e2e-t11-audit · feat/cdp-e2e-t11-audit · base 4fc88a9 (T10 docs tip; upstream merge b16e52a). BDD ready: docs/behavior/audit-admin-query-journey.md (BDD-CDP-AUDIT-001 filter date/event type; BDD-CDP-AUDIT-002 export download). Wave CD-2 stays In Progress (partial — T01-T10 Done; T11 In Progress; T12/T13 Not Started). Formal phase remains None. Do not activate LR-C10.",
+        "testStrategy": "1. BDD-CDP-AUDIT-001: AUDIT_ADMIN filters by date/event type; results update; read-only banner; no My to-dos action group. 2. BDD-CDP-AUDIT-002: export triggers download or export result (not 403). 3. Paired UIUX manifest (first for audit role); Verdict PASS. 4. docker-deploy-queue healthz/4173 OK. 5. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "21"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T03:35:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T03:30:00.000Z",
-      "taskCount": 21,
+      "lastModified": "2026-07-11T03:35:00.000Z",
+      "taskCount": 22,
       "completedCount": 21,
       "tags": [
         "master"
