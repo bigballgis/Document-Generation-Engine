@@ -264,12 +264,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T00:46:00.000Z"
+      },
+      {
+        "id": "20",
+        "title": "CDP CD-2 T09 Preview vs final comparison panel",
+        "description": "Sole-active CD-2 E2E after T07 Done: CD-E2E-T09 Preview vs final comparison panel (browser-only task-completion + UIUX manifest). BDD ready: preview-comparison-journey.md (BDD-CDP-CMP-001). Do NOT mark wave CD-2 Done. Do NOT activate T10-T13. Out of scope: audit-governance, LR-*.",
+        "details": "ACTIVATED 2026-07-11. Slice id: cdp-e2e-t09-compare. Status: in-progress (sole-active CDP E2E). Placement: ISOLATED D:/working/DGE-cdp-e2e-t09-compare · feat/cdp-e2e-t09-compare · base origin/main @ 3467f5a (T07 merge tip 1eb230b). BDD ready (confirming in parallel): docs/behavior/preview-comparison-journey.md (BDD-CDP-CMP-001). Acceptance: side-by-side preview vs final opens; filter by warningCode; screenshot evidence. Wave CD-2 stays In Progress (partial — T01-T08 + T07 Done; T10-T13 Not Started). Formal phase remains None. Gate evidence: []. Next implementer: e2e-test-engineer (after BDD confirm) + e2e-uiux-reviewer.",
+        "testStrategy": "1. Open preview vs final comparison panel from Testing/preview flow. 2. Side-by-side view visible. 3. Filter by warningCode works. 4. Paired UIUX manifest includes comparison screenshot; Verdict PASS. 5. docker-deploy-queue healthz/4173 OK. 6. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "19"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T00:55:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T00:46:00.000Z",
-      "taskCount": 19,
+      "lastModified": "2026-07-11T00:55:00.000Z",
+      "taskCount": 20,
       "completedCount": 19,
       "tags": [
         "master"
