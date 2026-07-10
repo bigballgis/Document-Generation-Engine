@@ -1,7 +1,7 @@
 # Launch Readiness Gate — LR-E2
 
 **Status:** Draft (LR-E2) — populated as each prerequisite wave closes
-**Last updated:** 2026-07-10
+**Last updated:** 2026-07-11
 **Program:** [LRP](../../plan/launch-readiness-program.md) §7
 
 ## Purpose
@@ -16,7 +16,7 @@ be signed off. No item is skipped; a single 🔴 blocks launch.
 | --- | --- | --- |
 | LR-A (rendering trust) | **Done** (2026-07-10) — A1–A7 Done; **ADR-0041 Accepted**; 0042/0043 remain **Proposed**; Word-vs-LO / 0042 Accepted + 0043 slice B **deferred out of wave exit** (0041 Accepted residual closed) | LR-A5 merge `cc9e5f6` (docs-only + architecture-reviewer PASS_WITH_NOTES); LR-A6 merge `122d6d1`; LR-A7 evidence [lrp-a7-pagination](../evidence/lrp-a7-pagination/); CD-HARD-T01/T03/T04 Done |
 | LR-B (multi-instance + session) | Done (2026-07-04) | ADR-0044, ShedLock V46, SSE proxy config, graceful shutdown, LR-B6 session renewal |
-| LR-C (usability deepening) | Partial — C1/C4 **Done** (F7); C2–C3/C5–C13 Not Started | F7 evidence in ledger; not current delivery focus |
+| LR-C (usability deepening) | **In Progress** (partial) — C1/C4/C9/C10 **Done**; C2/C3/C5/C7/C8/C11–C13 Not Started | LR-C10 merge `bdaf95d` (E2E 4/4; UIUX PASS_WITH_NOTES); LR-C9 merge `0013615`; F7 for C1/C4 |
 | LR-D (ops + data lifecycle) | Not Started (checklist rows may be aspirational) | Do not treat as active delivery focus |
 | LR-E1 (SSE-through-proxy E2E) | Scaffold in place | `LRP-E1-sse-incremental-progress.spec.ts` (full journey pending seeded template) |
 

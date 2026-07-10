@@ -334,13 +334,27 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T04:55:00.000Z"
+      },
+      {
+        "id": "25",
+        "title": "LR-C10 Upload UX polish",
+        "description": "COMPLETED 2026-07-11. LR-C10 upload UX polish (progress, drag hint, inline errors) + list error isolation follow-up. Merge bdaf95d; feature ddb475e; worktree removed. Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. Do NOT auto-activate LR-C11/C12 or CD-3.",
+        "details": "DONE 2026-07-11. Slice id: lrp-c10-upload-ux. Status: done. Merge: bdaf95d (feat/lrp-c10-upload-ux → main); feature ddb475e; worktree REMOVED. BDD readiness: not-applicable (presentation polish; rejection behavior owned by LR-A3). Gates: pnpm lint/type-check/test/build GREEN; docker-deploy-queue DEPLOY_OK (:8080 UP :4173 200); E2E LRP-C10 4/4 + LRP-A3 regression 5/5; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C10-uiux-manifest.md); architecture PASS_WITH_NOTES (Critical 0). Wave LR-C remains In Progress (partial — C1/C4/C9/C10 Done; C2/C3/C5/C7/C8/C11–C13 Not Started). Formal phase remains None. Task Master #25 → done. Next recommend: LR-C11 or LR-C12 or CD-3 — do not auto-activate any.",
+        "testStrategy": "1. E2E LRP-C10-A/B 4/4 PASS (progress, drag hint, client precheck, server inline error). 2. LRP-A3 regression 5/5. 3. UIUX manifest PASS_WITH_NOTES. 4. pnpm lint/type-check/test/build green. 5. docker-deploy-queue DEPLOY_OK. 6. Do not claim Wave LR-C Done.",
+        "priority": "high",
+        "dependencies": [
+          "9"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T06:10:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T04:55:00.000Z",
-      "taskCount": 24,
-      "completedCount": 24,
+      "lastModified": "2026-07-11T06:10:00.000Z",
+      "taskCount": 25,
+      "completedCount": 25,
       "tags": [
         "master"
       ]

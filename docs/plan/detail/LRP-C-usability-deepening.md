@@ -1,10 +1,12 @@
 # LRP Wave LR-C — Business Usability Deepening 「业务易用性深化」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; remaining C2–C3/C5–C8/C10–C13 Not Started)  
+**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; remaining C2/C3/C5/C7/C8/C11–C13 Not Started)  
 **Owner default:** `frontend-engineer` (+ `backend-engineer` where noted); every user-facing slice pairs `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** none for most tasks; **C6 depends on LR-C5**; **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
 
+> **Completion note (2026-07-11):** **LR-C10 → Done** (slice `lrp-c10-upload-ux`; merge `bdaf95d` / `bdaf95d42324a0fbd436d7d5f95eb4822dd9fa4d` → `main`; feature `ddb475e`; worktree removed). Upload UX polish: progress, drag hint, inline errors (LR-A3 messageKeys); list error isolation follow-up. BDD **not-applicable**. Formal phase remains **None**. Wave LR-C remains **In Progress** (partial). **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN**; `docker-deploy-queue.ps1` **DEPLOY_OK** (`:8080` UP, `:4173` 200); E2E LRP-C10 **4/4** PASS + LRP-A3 regression **5/5**; UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C10-uiux-manifest.md`); architecture **PASS_WITH_NOTES** (Critical **0**). **Task Master #25 → done**. Other LR-C rows untouched (C2/C3/C5/C7/C8/C11–C13 Not Started; C1/C4/C9 Done).
+>
 > **Completion note (2026-07-10):** **LR-C9 → Done** (slice `lrp-c9-load-error-panel`; merge `0013615` / `001361599df61c8b2be99cf2ebe5d92b040db508` → `main`; worktree removed). Unified list states: `EmptyStatePanel` `#actions` + `AppDataTable` `#empty` forward; role-aware empty CTAs on six surfaces (`TemplateListView`, `MasterListView`, `ContentModuleListView`, `ApiPolicyHomeView`, `UserManagementListSection`, `GroupManagementPanel`); `LoadErrorPanel` + retry already present. BDD **not-applicable**. Formal phase remains **None**. **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN** (951 tests); `docker-deploy-queue.ps1` **DEPLOY_OK** (`:8080` UP, `:4173` 200); E2E `LRP-C9-list-states.spec.ts` **3/3** PASS; UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C9-uiux-manifest.md`); architecture **PASS_WITH_NOTES** (no Critical). **Task Master #14 → done**. Other LR-C rows untouched (C2/C3/C5/C7/C8/C10–C13 Not Started; C1/C4 Done).
 >
 > **Session note:** `LR-C*` tasks only. All UI work obeys `.cursor/skills/frontend-oa-design/SKILL.md` (bank OA lock, REDBC/GREENBC dual-brand) and `.cursor/rules/workspace-tab-shell-constitution.mdc`. i18n: English keys first, zh-CN additive — never literals (`.cursor/skills/i18n-english-first/SKILL.md`).
@@ -260,7 +262,7 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - **Artifacts:** dialog component updates + tests; E2E + manifest.
 - **Done when:** Both paths green + gates + UIUX PASS + doc sync + commit review.
 - **Maps:** LR-A3 (limits + keys).
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-11 — slice `lrp-c10-upload-ux`; merge `bdaf95d`; feature `ddb475e`; BDD `not-applicable`; E2E LRP-C10 **4/4** + LRP-A3 regression **5/5**; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES Critical 0)
 
 ### LR-C11 — i18n closure
 
@@ -335,7 +337,8 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 
 - [x] LR-C1 + LR-C4 shipped via CORE-FORTRESS F7 (2026-07-09; Vitest **894**; E2E **12/12**; BDD + UIUX evidence)
 - [ ] LR-C2/C3/C5…C8 shipped with BDD specs, functional Playwright journeys, and UIUX manifests (both brands)
-- [ ] LR-C9…C13 shipped with green gates; OPT-G4/G5/G6-residual/G7 + F4-residual rows updated *(LR-C9 Done 2026-07-10; C10–C13 remain)*
+- [ ] LR-C9…C13 shipped with green gates; OPT-G4/G5/G6-residual/G7 + F4-residual rows updated *(LR-C9 Done 2026-07-10; LR-C10 Done 2026-07-11 merge `bdaf95d`; C11–C13 remain)*
 - [ ] `api.error` parity test enforcing 145/145 active in `pnpm -C frontend test`
 - [x] No dead-end error list remains among the six §2/LR-C9 targets (LR-C9 Done 2026-07-10; merge `0013615`)
-- [ ] Ledger § LRP wave row updated with per-task evidence
+- [x] LR-C10 upload UX polish shipped (progress / drag hint / inline errors; merge `bdaf95d`; E2E 4/4)
+- [ ] Ledger § LRP wave row updated with per-task evidence *(LR-C10 evidence recorded 2026-07-11; wave still partial)*

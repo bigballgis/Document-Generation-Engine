@@ -69,7 +69,7 @@
                  doc truth, BDD, browser E2E, post-P22 hardening specs
 ```
 
-**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). **Wave LR-A Done** (2026-07-10; A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred). CDP Wave **CD-2 Done** (2026-07-11; T01–T13; merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825` / `f12b193` / `b2b0899`). LRP program remains **In Progress** (**LR-C9 Done** 2026-07-10 — merge `0013615`; Wave LR-C partial; Wave LR-A Done — Word/XSD residuals deferred separately). CDP is a **parallel program** — not a phase replacement.
+**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). **Wave LR-A Done** (2026-07-10; A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred). CDP Wave **CD-2 Done** (2026-07-11; T01–T13; merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825` / `f12b193` / `b2b0899`). LRP program remains **In Progress** (**LR-C10 Done** 2026-07-11 — merge `bdaf95d`; **LR-C9 Done** 2026-07-10 — merge `0013615`; Wave LR-C partial; Wave LR-A Done — Word/XSD residuals deferred separately). CDP is a **parallel program** — not a phase replacement.
 
 ---
 
@@ -100,7 +100,7 @@ Only **one CDP wave** may be `In Progress` at a time (same discipline as phase p
 
 **Removed from CDP:** former «CD-1 = P22 code» — that work is **only** in the P22 session, not delegated via CDP task IDs.
 
-**Current wave (this session):** **CD-2** — **Done** (2026-07-11). **CD-0 Done**. **CD-E2E-T01** + **T01b** → **Done** (merge `1930842`). **CD-E2E-T02** + **T03** + **T04** → **Done** (slice `cdp-e2e-cd2-t02`; merge `6821f45`). **CD-E2E-T05 → Done** (slice `cdp-e2e-t05-publish`; merge `895f16e`). **CD-E2E-T06 → Done** (slice `cdp-e2e-t06-master`; merge `3aed175`). **CD-E2E-T08 → Done** (slice `cdp-e2e-t08-preview`; merge `c62b1a1`). **CD-E2E-T07 → Done** (slice `cdp-e2e-t07-api-policy`; merge `1eb230b`). **CD-E2E-T09 → Done** (slice `cdp-e2e-t09-compare`; merge `55a6ab6`; BDD-CDP-CMP-001). **CD-E2E-T10 → Done** (slice `cdp-e2e-t10-fidelity`; merge `b16e52a`; BDD-CDP-FID-001…004). **CD-E2E-T11 → Done** (slice `cdp-e2e-t11-audit`; merge `6e3f825`; Audit admin query/filter + export; BDD-CDP-AUDIT-001/002). **CD-E2E-T12 → Done** (slice `cdp-e2e-t12-i18n-brands`; merge `f12b193`; zh-CN + dual-brand golden screenshots; BDD-CDP-I18N-001/002). **CD-E2E-T13 → Done** (slice `cdp-e2e-t13-materialize`; merge `b2b0899`; package materialize re-evidence + wave closeout). **No sole-active CDP E2E slice.** Do **not** activate LR-C10. Do **not** start CD-3 as In Progress (recommend only).
+**Current wave (this session):** **CD-2** — **Done** (2026-07-11). **CD-0 Done**. **CD-E2E-T01** + **T01b** → **Done** (merge `1930842`). **CD-E2E-T02** + **T03** + **T04** → **Done** (slice `cdp-e2e-cd2-t02`; merge `6821f45`). **CD-E2E-T05 → Done** (slice `cdp-e2e-t05-publish`; merge `895f16e`). **CD-E2E-T06 → Done** (slice `cdp-e2e-t06-master`; merge `3aed175`). **CD-E2E-T08 → Done** (slice `cdp-e2e-t08-preview`; merge `c62b1a1`). **CD-E2E-T07 → Done** (slice `cdp-e2e-t07-api-policy`; merge `1eb230b`). **CD-E2E-T09 → Done** (slice `cdp-e2e-t09-compare`; merge `55a6ab6`; BDD-CDP-CMP-001). **CD-E2E-T10 → Done** (slice `cdp-e2e-t10-fidelity`; merge `b16e52a`; BDD-CDP-FID-001…004). **CD-E2E-T11 → Done** (slice `cdp-e2e-t11-audit`; merge `6e3f825`; Audit admin query/filter + export; BDD-CDP-AUDIT-001/002). **CD-E2E-T12 → Done** (slice `cdp-e2e-t12-i18n-brands`; merge `f12b193`; zh-CN + dual-brand golden screenshots; BDD-CDP-I18N-001/002). **CD-E2E-T13 → Done** (slice `cdp-e2e-t13-materialize`; merge `b2b0899`; package materialize re-evidence + wave closeout). **No sole-active CDP E2E slice.** Sibling LRP: **LR-C10 Done** (merge `bdaf95d`). Recommend next: **LR-C11** or **LR-C12** or **CD-3** — do **not** auto-activate any.
 
 ---
 
@@ -265,7 +265,7 @@ Mark CD-0 **Done** only when ALL true:
 
 **CD-0 status:** **Done** (2026-07-10) — required checklist met; optional ADR drafts do not block wave close.
 
-**Next wave (this session):** **CD-2 Done** (2026-07-11) — **T01/T01b Done** (merge `1930842`); **T02/T03/T04 Done** (2026-07-10; merge `6821f45`); **T05 Done** (2026-07-10; merge `895f16e`); **T06 Done** (2026-07-10; merge `3aed175`); **T08 Done** (2026-07-10; merge `c62b1a1`); **T07 Done** (2026-07-11; merge `1eb230b`); **T09 Done** (2026-07-11; merge `55a6ab6`); **T10 Done** (2026-07-11; merge `b16e52a`); **T11 Done** (2026-07-11; merge `6e3f825`); **T12 Done** (2026-07-11; merge `f12b193`); **T13 Done** (2026-07-11; merge `b2b0899`). Recommend next: **LR-C10** or **CD-3** — do **not** auto-activate either.
+**Next wave (this session):** **CD-2 Done** (2026-07-11) — **T01/T01b Done** (merge `1930842`); **T02/T03/T04 Done** (2026-07-10; merge `6821f45`); **T05 Done** (2026-07-10; merge `895f16e`); **T06 Done** (2026-07-10; merge `3aed175`); **T08 Done** (2026-07-10; merge `c62b1a1`); **T07 Done** (2026-07-11; merge `1eb230b`); **T09 Done** (2026-07-11; merge `55a6ab6`); **T10 Done** (2026-07-11; merge `b16e52a`); **T11 Done** (2026-07-11; merge `6e3f825`); **T12 Done** (2026-07-11; merge `f12b193`); **T13 Done** (2026-07-11; merge `b2b0899`). Sibling LRP: **LR-C10 Done** (2026-07-11; merge `bdaf95d`). Recommend next: **LR-C11** or **LR-C12** or **CD-3** — do **not** auto-activate any.
 
 ---
 
@@ -294,4 +294,4 @@ Mark CD-0 **Done** only when ALL true:
 
 ---
 
-**Next action (this session):** **Wave CD-2 → Done** (2026-07-11; T01–T13; merge tip `b2b0899`). Formal phase remains **None**. **Task Master #24 → done**. **No sole-active CDP E2E slice.** Recommend next: **LR-C10** (usability deepening) or **CD-3** (production pitfall hardening) — do **not** auto-activate either. Do **not** activate LR-C10 without explicit direction.
+**Next action (this session):** **Wave CD-2 → Done** (2026-07-11; T01–T13; merge tip `b2b0899`). Sibling LRP: **LR-C10 → Done** (2026-07-11; merge `bdaf95d`; Task Master #25 done). Formal phase remains **None**. **No sole-active LRP/CDP slice.** Recommend next: **LR-C11** or **LR-C12** or **CD-3** — do **not** auto-activate any.
