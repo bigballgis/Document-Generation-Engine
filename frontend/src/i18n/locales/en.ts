@@ -489,7 +489,11 @@ export default {
       description: 'Description',
       file: 'DOCX file',
       chooseFile: 'Choose file',
-      fileHint: 'Upload a .docx letterhead. Anchors are extracted on the server.',
+      dragHint: 'Drop a .docx file here, or click to choose',
+      fileHint:
+        'Accepted format: .docx only. Maximum size: {maxMb} MB. Anchors are extracted on the server.',
+      progressLabel: 'Uploading letterhead…',
+      progressPercent: 'Uploading… {percent}%',
       submit: 'Upload',
       success: 'Letterhead uploaded successfully.',
       errorTooLarge: 'The file exceeds the 50 MB upload limit. Reduce the file size and try again.',

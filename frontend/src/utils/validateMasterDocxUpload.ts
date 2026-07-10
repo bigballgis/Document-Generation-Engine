@@ -1,6 +1,9 @@
 /** Client precheck aligned with backend `docgen.master.max-docx-upload-bytes` (50 MiB). */
 export const MASTER_DOCX_MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 
+/** Display helper for UX hints (same LR-A3 default as byte limit). */
+export const MASTER_DOCX_MAX_UPLOAD_MB = Math.floor(MASTER_DOCX_MAX_UPLOAD_BYTES / (1024 * 1024))
+
 const DOCX_CONTENT_TYPES = new Set([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/octet-stream',

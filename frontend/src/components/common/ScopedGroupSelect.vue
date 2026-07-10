@@ -9,10 +9,12 @@ withDefaults(
   defineProps<{
     placeholder?: string
     clearable?: boolean
+    disabled?: boolean
     class?: string
   }>(),
   {
     clearable: true,
+    disabled: false,
   },
 )
 
@@ -46,7 +48,7 @@ defineExpose({ prepare, ensureGroupCatalog })
   <AppSearchSelect
     v-model="model"
     :class="$props.class"
-    :disabled="isGroupLocked"
+    :disabled="isGroupLocked || disabled"
     :clearable="!isGroupLocked && clearable"
     :placeholder="placeholder"
   >

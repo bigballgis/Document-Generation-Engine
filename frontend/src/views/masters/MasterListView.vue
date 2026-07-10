@@ -35,6 +35,7 @@ const mastersStore = useMastersStore()
 const { masterDetailLink } = useEntityLinkTargets()
 
 const uploadDialogOpen = ref(false)
+const uploadFailurePending = ref(false)
 const currentPage = ref(1)
 
 const allMasters = computed(() => mastersStore.masters)
@@ -126,11 +127,20 @@ const { manageMasters } = useCapabilities()
 const canUpload = computed(() => manageMasters.value)
 const errorMessage = computed(() => {
   const key = mastersStore.lastErrorMessageKey
-  if (!key) {
+  if (!key || uploadDialogOpen.value || uploadFailurePending.value) {
     return ''
   }
   return te(key) ? t(key) : t('masters.error.loadList')
 })
+
+/** List LoadErrorPanel must not share upload failures (dialog owns those inline). */
+const showListLoadError = computed(
+  () =>
+    Boolean(mastersStore.lastErrorMessageKey) &&
+    !mastersStore.loadingList &&
+    !uploadDialogOpen.value &&
+    !uploadFailurePending.value,
+)
 
 const { reload: reloadMasters } = useAbortableCatalogLoader((signal) =>
   mastersStore.fetchMasters({ signal }),
@@ -138,6 +148,16 @@ const { reload: reloadMasters } = useAbortableCatalogLoader((signal) =>
 
 onMounted(async () => {
   await reloadMasters()
+})
+
+watch(uploadDialogOpen, (open) => {
+  if (open) {
+    return
+  }
+  if (uploadFailurePending.value) {
+    mastersStore.lastErrorMessageKey = null
+    uploadFailurePending.value = false
+  }
 })
 
 function openMaster(masterId: string) {
@@ -163,12 +183,19 @@ async function handleUpload(payload: {
       },
       payload.file,
     )
+    uploadFailurePending.value = false
     uploadDialogOpen.value = false
     ElMessage.success(t('masters.upload.success'))
     router.push(`${MASTER_DETAIL_PATH_PREFIX}${created.id}`)
   } catch {
-    ElMessage.error(errorMessage.value || t('masters.error.upload'))
+    // Keep dialog open — inline translated error via serverErrorKey (LR-C10-B).
+    uploadFailurePending.value = true
   }
+}
+
+function clearUploadServerError() {
+  mastersStore.lastErrorMessageKey = null
+  uploadFailurePending.value = false
 }
 </script>
 
@@ -187,8 +214,8 @@ async function handleUpload(payload: {
     </PageHeader>
 
     <LoadErrorPanel
-      v-if="mastersStore.lastErrorMessageKey && !mastersStore.loadingList"
-      :message-key="mastersStore.lastErrorMessageKey"
+      v-if="showListLoadError"
+      :message-key="mastersStore.lastErrorMessageKey || 'masters.error.loadList'"
       :retryable="mastersStore.lastListErrorRetryable"
       @retry="reloadMasters"
     />
@@ -278,7 +305,14 @@ async function handleUpload(payload: {
       </template>
     </EmptyStatePanel>
 
-    <MasterUploadDialog v-model="uploadDialogOpen" @submit="handleUpload" />
+    <MasterUploadDialog
+      v-model="uploadDialogOpen"
+      :loading="mastersStore.submitting"
+      :upload-progress="mastersStore.uploadProgress"
+      :server-error-key="uploadDialogOpen ? mastersStore.lastErrorMessageKey : null"
+      @submit="handleUpload"
+      @clear-server-error="clearUploadServerError"
+    />
   </AppPageLayout>
 </template>
 

@@ -17,6 +17,16 @@ vi.mock('@/api/masters', () => ({
   getMasterImpactAnalysis: vi.fn(),
 }))
 
+vi.mock('@/composables/useScopedGroupOptions', () => ({
+  useScopedGroupOptions: () => ({
+    resolveDefaultGroupCode: () => 'RETAIL',
+    ensureGroupCatalog: vi.fn().mockResolvedValue(undefined),
+    groupOptions: [{ value: 'RETAIL', label: 'RETAIL' }],
+    isGroupLocked: { value: false },
+    lockedGroupCode: { value: null },
+  }),
+}))
+
 const routerPush = vi.fn()
 const manageMasters = ref(true)
 
@@ -38,6 +48,7 @@ describe('MasterListView', () => {
     routerPush.mockReset()
     manageMasters.value = true
     vi.mocked(mastersApi.listMasters).mockReset()
+    vi.mocked(mastersApi.createMaster).mockReset()
   })
 
   it('renders masters in a flat table with group column', { timeout: 20000 }, async () => {
@@ -179,5 +190,50 @@ describe('MasterListView', () => {
 
     expect(wrapper.find('[data-testid="empty-state-actions"]').exists()).toBe(false)
     expect(wrapper.text()).toContain('No letterhead packages yet.')
+  })
+
+  it('LR-C10: upload failure keeps list visible and hides LoadErrorPanel while dialog open', async () => {
+    vi.mocked(mastersApi.listMasters).mockResolvedValue([
+      {
+        id: 'master-1',
+        groupCode: 'RETAIL',
+        name: 'Retail letterhead',
+        status: 'DRAFT',
+        originalFilename: 'letterhead.docx',
+        anchorCount: 2,
+        updatedBy: '10000001',
+        updatedAt: '2026-06-23T10:00:00Z',
+      },
+    ])
+    vi.mocked(mastersApi.createMaster).mockRejectedValue(new Error('upload failed'))
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(MasterListView, {
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
+    })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Retail letterhead')
+
+    const openUpload = wrapper.findAll('button').find((button) =>
+      button.text().includes('New letterhead package'),
+    )
+    expect(openUpload).toBeTruthy()
+    await openUpload!.trigger('click')
+    await flushPromises()
+
+    const dialog = wrapper.findComponent({ name: 'MasterUploadDialog' })
+    expect(dialog.exists()).toBe(true)
+    await dialog.vm.$emit('submit', {
+      groupCode: 'RETAIL',
+      name: 'New master',
+      description: '',
+      file: new File([new Uint8Array(8)], 'new.docx'),
+    })
+    await flushPromises()
+
+    expect(wrapper.findComponent({ name: 'LoadErrorPanel' }).exists()).toBe(false)
+    expect(wrapper.text()).toContain('Retail letterhead')
+    expect(dialog.props('serverErrorKey')).toBeTruthy()
   })
 })

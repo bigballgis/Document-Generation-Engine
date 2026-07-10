@@ -31,6 +31,7 @@ export const useMastersStore = defineStore('masters', () => {
   const loadingRevisionLines = ref(false)
   const loadingRevisionLine = ref(false)
   const submitting = ref(false)
+  const uploadProgress = ref<number | null>(null)
   const lastErrorMessageKey = ref<string | null>(null)
   const lastListErrorRetryable = ref(false)
   const draftReviewHistoryByMasterId = ref<Record<string, MasterReviewRecord[]>>({})
@@ -88,9 +89,14 @@ export const useMastersStore = defineStore('masters', () => {
 
   async function uploadMaster(payload: CreateMasterPayload, file: File): Promise<MasterDocumentDetail> {
     submitting.value = true
+    uploadProgress.value = null
     lastErrorMessageKey.value = null
     try {
-      const created = await mastersApi.createMaster(payload, file)
+      const created = await mastersApi.createMaster(payload, file, {
+        onUploadProgress: (percent) => {
+          uploadProgress.value = percent
+        },
+      })
       masters.value = [toSummary(created), ...masters.value.filter((item) => item.id !== created.id)]
       selectedMaster.value = created
       return created
@@ -99,6 +105,7 @@ export const useMastersStore = defineStore('masters', () => {
       throw error
     } finally {
       submitting.value = false
+      uploadProgress.value = null
     }
   }
 
@@ -221,9 +228,14 @@ export const useMastersStore = defineStore('masters', () => {
 
   async function replaceMasterFile(masterId: string, file: File): Promise<MasterDocumentDetail> {
     submitting.value = true
+    uploadProgress.value = null
     lastErrorMessageKey.value = null
     try {
-      const updated = await mastersApi.replaceMasterFile(masterId, file)
+      const updated = await mastersApi.replaceMasterFile(masterId, file, {
+        onUploadProgress: (percent) => {
+          uploadProgress.value = percent
+        },
+      })
       applyUpdatedMaster(updated)
       return updated
     } catch (error) {
@@ -231,6 +243,7 @@ export const useMastersStore = defineStore('masters', () => {
       throw error
     } finally {
       submitting.value = false
+      uploadProgress.value = null
     }
   }
 
@@ -298,6 +311,7 @@ export const useMastersStore = defineStore('masters', () => {
     loadingRevisionLines,
     loadingRevisionLine,
     submitting,
+    uploadProgress,
     lastErrorMessageKey,
     lastListErrorRetryable,
     draftReviewHistoryByMasterId,

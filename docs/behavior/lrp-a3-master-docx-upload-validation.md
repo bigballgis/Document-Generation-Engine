@@ -28,7 +28,7 @@
 | **病毒 / 恶意软件扫描** | **Pending question** — 见 §13；不阻塞本规格 `ready` |
 | 改变上传 API 形状（路径、字段名、multipart part 名） | Out of scope |
 | 拒绝 Word / LibreOffice 产出的合法 `.docx` | 禁止回归 |
-| LR-C10 上传 UX 抛光（进度条、拖拽文案） | 另任务；本规格只锁定拒绝契约与上限数值 |
+| LR-C10 上传 UX 抛光（进度条、拖拽文案、内联错误呈现） | 另任务；本规格只锁定拒绝契约与上限数值。**2026-07-11：** LR-C10 BDD readiness **`not-applicable` confirmed**（presentation only；见 [LRP-C § LR-C10](../plan/detail/LRP-C-usability-deepening.md)） |
 
 ---
 

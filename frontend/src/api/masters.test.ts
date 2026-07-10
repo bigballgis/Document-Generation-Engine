@@ -77,6 +77,51 @@ describe('masters API', () => {
     expect(created.id).toBe('master-1')
   })
 
+  it('forwards multipart upload progress callbacks', async () => {
+    const file = new File(['docx'], 'letterhead.docx', {
+      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    })
+    const onUploadProgress = vi.fn()
+
+    vi.mocked(http.post).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          id: 'master-1',
+          groupCode: 'RETAIL',
+          name: 'Retail letterhead',
+          description: null,
+          status: 'DRAFT',
+          originalFilename: 'letterhead.docx',
+          changeSummary: null,
+          anchors: [],
+          reviewHistory: [],
+          createdAt: '2026-06-23T10:00:00Z',
+          updatedAt: '2026-06-23T10:00:00Z',
+        },
+      },
+    })
+
+    await mastersApi.createMaster({ groupCode: 'RETAIL', name: 'Retail letterhead' }, file, {
+      onUploadProgress,
+    })
+
+    expect(http.post).toHaveBeenCalledWith(
+      '/masters',
+      expect.any(FormData),
+      expect.objectContaining({
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: expect.any(Function),
+      }),
+    )
+
+    const config = vi.mocked(http.post).mock.calls[0]?.[2] as {
+      onUploadProgress?: (event: { loaded: number; total?: number }) => void
+    }
+    config.onUploadProgress?.({ loaded: 50, total: 100 })
+    expect(onUploadProgress).toHaveBeenCalledWith(50)
+  })
+
   it('lists revision lines with pagination params', async () => {
     vi.mocked(http.get).mockResolvedValue({
       data: {

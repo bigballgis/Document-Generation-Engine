@@ -1,3 +1,4 @@
+import type { AxiosProgressEvent } from 'axios'
 import { unwrapEnvelope } from '@/api/envelope'
 import { http } from '@/api/http'
 import type { ApiEnvelope } from '@/types/session'
@@ -12,6 +13,29 @@ import type {
   SubmitMasterReviewPayload,
   UpdateMasterMetadataPayload,
 } from '@/types/master'
+
+/** Optional UX callbacks for multipart master DOCX transfers (endpoints/payloads unchanged). */
+export type MasterFileUploadOptions = {
+  onUploadProgress?: (percent: number | null) => void
+}
+
+function toUploadPercent(event: AxiosProgressEvent): number | null {
+  if (!event.total || event.total <= 0) {
+    return null
+  }
+  return Math.min(100, Math.round((event.loaded / event.total) * 100))
+}
+
+function attachUploadProgress(
+  options: MasterFileUploadOptions | undefined,
+): ((event: AxiosProgressEvent) => void) | undefined {
+  if (!options?.onUploadProgress) {
+    return undefined
+  }
+  return (event) => {
+    options.onUploadProgress!(toUploadPercent(event))
+  }
+}
 
 export async function listMasters(
   options: { signal?: AbortSignal } = {},
@@ -30,6 +54,7 @@ export async function getMaster(masterId: string): Promise<MasterDocumentDetail>
 export async function createMaster(
   payload: CreateMasterPayload,
   file: File,
+  options?: MasterFileUploadOptions,
 ): Promise<MasterDocumentDetail> {
   const formData = new FormData()
   formData.append('groupCode', payload.groupCode)
@@ -41,6 +66,7 @@ export async function createMaster(
 
   const response = await http.post<ApiEnvelope<MasterDocumentDetail>>('/masters', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: attachUploadProgress(options),
   })
   return unwrapEnvelope(response.data)
 }
@@ -131,7 +157,11 @@ export async function downloadMasterRevisionLineFile(
   return { blob: response.data, filename }
 }
 
-export async function replaceMasterFile(masterId: string, file: File): Promise<MasterDocumentDetail> {
+export async function replaceMasterFile(
+  masterId: string,
+  file: File,
+  options?: MasterFileUploadOptions,
+): Promise<MasterDocumentDetail> {
   const formData = new FormData()
   formData.append('file', file)
 
@@ -140,6 +170,7 @@ export async function replaceMasterFile(masterId: string, file: File): Promise<M
     formData,
     {
       headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: attachUploadProgress(options),
     },
   )
   return unwrapEnvelope(response.data)
