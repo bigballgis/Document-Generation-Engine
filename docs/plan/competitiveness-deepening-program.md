@@ -2,7 +2,7 @@
 
 **Program ID:** `CDP`  
 **Created:** 2026-07-04  
-**Status:** **In Progress** (Wave **CD-2** — **partial**; T01/T01b + T02/T03/T04 + T05 + **T06 Done** (merges `6821f45` / `895f16e` / `3aed175`); **CD-E2E-T08 → In Progress**; T07 + T09–T12 + T13 Not Started; CD-0 **Done**)  
+**Status:** **In Progress** (Wave **CD-2** — **partial**; T01/T01b + T02/T03/T04 + T05 + T06 + **T08 Done** (merges `6821f45` / `895f16e` / `3aed175` / `c62b1a1`); T07 + T09–T12 + T13 Not Started; CD-0 **Done**)  
 **North star:** Close the gap between **「功能齐全」** and **「银行敢用、业务愿用、集成方信得过」** by making rendering fidelity, verifiable publish, role-complete journeys, and documentation truth **provably solid** before production launch.
 
 **Authoritative entry for lower-tier implementers:** Read this file first, then the wave detail doc for your task ID prefix.
@@ -24,7 +24,7 @@
 | --- | --- | --- |
 | **P22** (P22-T01…T15, rendering + demos) | **Done** (2026-07-04) — track via [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) | **Nothing.** Do not reopen P22 from CDP. |
 | **LRP** (`LR-*`, Wave LR-A) | **Wave LR-A Done** (2026-07-10 — A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed) | **Nothing.** Do not execute `LR-*` / virus scan / audit-governance from CDP session. |
-| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **Sibling program** — Wave **CD-2** partial (T01–T06 Done; **T08 In Progress**; T07 + T09–T12 Not Started) | CD-0 **Done** → CD-2 **In Progress** (T01–T06 Done; **T08 In Progress**; T07 + T09–T12 Not Started) → CD-3 later. |
+| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **Sibling program** — Wave **CD-2** partial (T01–T08 Done; T07 + T09–T12 + T13 Not Started) | CD-0 **Done** → CD-2 **In Progress** (T01–T08 Done; T07 + T09–T12 + T13 Not Started) → CD-3 later. |
 
 **Formal phase note:** `master-plan.md` has formal phase **None** (2026-07-09+). CDP Wave **CD-2** is the active **program wave** (not a formal phase). **CDP implementers follow task IDs prefixed `CD-*` only.**
 
@@ -69,7 +69,7 @@
                  doc truth, BDD, browser E2E, post-P22 hardening specs
 ```
 
-**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). **Wave LR-A Done** (2026-07-10; A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred). CDP Wave CD-2 remains **In Progress** as a sibling program (partial — T01–T06 Done, merges `1930842` / `6821f45` / `895f16e` / `3aed175`; **CD-E2E-T08 → In Progress**; T07 + T09–T12 Not Started). LRP program remains **In Progress** (**LR-C9 Done** 2026-07-10 — merge `0013615`; Wave LR-C partial; Wave LR-A Done — Word/XSD residuals deferred separately). CDP is a **parallel program** — not a phase replacement.
+**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). **Wave LR-A Done** (2026-07-10; A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred). CDP Wave CD-2 remains **In Progress** as a sibling program (partial — T01–T08 Done, merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1`; T07 + T09–T12 + T13 Not Started). LRP program remains **In Progress** (**LR-C9 Done** 2026-07-10 — merge `0013615`; Wave LR-C partial; Wave LR-A Done — Word/XSD residuals deferred separately). CDP is a **parallel program** — not a phase replacement.
 
 ---
 
@@ -100,7 +100,7 @@ Only **one CDP wave** may be `In Progress` at a time (same discipline as phase p
 
 **Removed from CDP:** former «CD-1 = P22 code» — that work is **only** in the P22 session, not delegated via CDP task IDs.
 
-**Current wave (this session):** **CD-2** — **In Progress** (2026-07-10; **partial progress**). **CD-0 Done**. **CD-E2E-T01** + **T01b** → **Done** (merge `1930842`). **CD-E2E-T02** + **T03** + **T04** → **Done** (slice `cdp-e2e-cd2-t02`; merge `6821f45`). **CD-E2E-T05 → Done** (slice `cdp-e2e-t05-publish`; merge `895f16e`). **CD-E2E-T06 → Done** (slice `cdp-e2e-t06-master`; merge `3aed175`). **CD-E2E-T08 → In Progress** (slice `cdp-e2e-t08-preview`). T07 + T09–T12 + T13 remain `Not Started`. Do **not** mark full CD-2 Done until remaining matrix green.
+**Current wave (this session):** **CD-2** — **In Progress** (2026-07-10; **partial progress**). **CD-0 Done**. **CD-E2E-T01** + **T01b** → **Done** (merge `1930842`). **CD-E2E-T02** + **T03** + **T04** → **Done** (slice `cdp-e2e-cd2-t02`; merge `6821f45`). **CD-E2E-T05 → Done** (slice `cdp-e2e-t05-publish`; merge `895f16e`). **CD-E2E-T06 → Done** (slice `cdp-e2e-t06-master`; merge `3aed175`). **CD-E2E-T08 → Done** (slice `cdp-e2e-t08-preview`; merge `c62b1a1`). T07 + T09–T12 + T13 remain `Not Started`. Do **not** mark full CD-2 Done until remaining matrix green.
 
 ---
 
@@ -265,7 +265,7 @@ Mark CD-0 **Done** only when ALL true:
 
 **CD-0 status:** **Done** (2026-07-10) — required checklist met; optional ADR drafts do not block wave close.
 
-**Next wave (this session):** **CD-2 In Progress** — **T01/T01b Done** (merge `1930842`); **T02/T03/T04 Done** (2026-07-10; merge `6821f45`); **T05 Done** (2026-07-10; merge `895f16e`); **T06 Done** (2026-07-10; merge `3aed175`); **T08 In Progress** (slice `cdp-e2e-t08-preview`). T07 + T09+ Not Started. T07/T13 deferred.
+**Next wave (this session):** **CD-2 In Progress** — **T01/T01b Done** (merge `1930842`); **T02/T03/T04 Done** (2026-07-10; merge `6821f45`); **T05 Done** (2026-07-10; merge `895f16e`); **T06 Done** (2026-07-10; merge `3aed175`); **T08 Done** (2026-07-10; merge `c62b1a1`). T07 + T09+ Not Started. T13 package materialize still Not Started (preview-success frame gap closed by T08).
 
 ---
 
@@ -294,4 +294,4 @@ Mark CD-0 **Done** only when ALL true:
 
 ---
 
-**Next action (this session):** **CD-E2E-T08 → In Progress** (2026-07-10; slice `cdp-e2e-t08-preview`; `feat/cdp-e2e-t08-preview`; base `e0d8bef`). Preview success + artifact download UI (closes T13 preview-success manifest gap). BDD **ready**: `docs/behavior/preview-success-artifact-download-journey.md` (BDD-CDP-PREV). Wave CD-2 remains **In Progress** (partial — T01–T06 Done; T08 In Progress; T07 + T09–T13 Not Started). Formal phase remains **None**. **Sole active CDP slice.** **Task Master #18 → in-progress**. Out of scope: T07/T09–T13, LR-C5/C10, audit-governance, LR-A.
+**Next action (this session):** **CD-E2E-T08 → Done** (2026-07-10; slice `cdp-e2e-t08-preview`; merge `c62b1a1`; feature `ee93c58`; worktree **REMOVED**). Preview success + artifact download UI closed (BDD-CDP-PREV-001/002/003); P12 T13 success-frame gap closed. Wave CD-2 remains **In Progress** (partial — T01–T08 Done; T07 + T09–T13 Not Started). Formal phase remains **None**. **Task Master #18 → done**. **Next:** prefer **T07** (API policy) or **T09** (comparison) — T13 package materialize still Not Started. Out of scope this sync: audit-governance, LR-A, full remaining matrix.
