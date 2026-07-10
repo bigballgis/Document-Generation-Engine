@@ -129,10 +129,32 @@ function handleLocaleChange(locale: string) {
 function handleBrandChange(brand: BrandPreset) {
   appStore.setBrand(brand)
 }
+
+// ── Skip link (LR-C12) ────────────────────────────────────────────────────────
+const mainContentRef = ref<HTMLElement | null>(null)
+
+function skipToMainContent(event: Event) {
+  event.preventDefault()
+  const main = mainContentRef.value
+  if (!main) {
+    return
+  }
+  main.focus({ preventScroll: false })
+  if (typeof main.scrollIntoView === 'function') {
+    main.scrollIntoView({ block: 'start' })
+  }
+}
 </script>
 
 <template>
   <div class="management-shell">
+    <a
+      class="skip-link"
+      href="#main-content"
+      @click="skipToMainContent"
+    >
+      {{ t('nav.skipToMainContent') }}
+    </a>
     <header class="shell-header">
       <div class="header-brand">
         <BrandLogo
@@ -250,7 +272,12 @@ function handleBrandChange(brand: BrandPreset) {
         </div>
       </aside>
 
-      <main class="shell-content">
+      <main
+        id="main-content"
+        ref="mainContentRef"
+        class="shell-content"
+        tabindex="-1"
+      >
         <AppBreadcrumb v-if="breadcrumbSegments.length > 0" class="shell-breadcrumb" />
         <div class="shell-page-root">
           <slot />
@@ -266,6 +293,29 @@ function handleBrandChange(brand: BrandPreset) {
   display: flex;
   flex-direction: column;
   background: var(--surface-page);
+}
+
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-card);
+  color: var(--brand-primary);
+  font-weight: 650;
+  text-decoration: none;
+  border: 1px solid var(--border-default);
+  border-radius: 0 0 var(--radius-sm) 0;
+  transform: translateY(-120%);
+  transition: transform var(--transition-base);
+
+  &:focus,
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+    transform: translateY(0);
+  }
 }
 
 .shell-header {
@@ -324,8 +374,8 @@ function handleBrandChange(brand: BrandPreset) {
   }
 
   &:focus-visible {
-    outline: 2px solid var(--brand-primary);
-    outline-offset: 2px;
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
   }
 }
 
@@ -417,8 +467,8 @@ nav {
   }
 
   &:focus-visible {
-    outline: 2px solid var(--brand-primary);
-    outline-offset: 2px;
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
   }
 
   &--icon-only {
@@ -481,8 +531,8 @@ nav {
   }
 
   &:focus-visible {
-    outline: 2px solid var(--brand-primary);
-    outline-offset: 2px;
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
   }
 }
 
@@ -494,6 +544,15 @@ nav {
   display: flex;
   flex-direction: column;
   background: var(--surface-page);
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(-1 * var(--focus-ring-offset));
+  }
 }
 
 .shell-breadcrumb {

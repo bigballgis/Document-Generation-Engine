@@ -1,0 +1,96 @@
+{
+  "REDBC": {
+    "skipLink": {
+      "selector": "a.skip-link",
+      "outline": "rgb(219, 0, 17) solid 2px",
+      "outlineColor": "rgb(219, 0, 17)",
+      "outlineWidth": "2px",
+      "outlineOffset": "2px",
+      "outlineStyle": "solid",
+      "matchesFocusVisible": true,
+      "tokenColor": "#DB0011",
+      "tokenWidth": "2px",
+      "tokenOffset": "2px",
+      "brandPrimary": "#DB0011",
+      "brand": "REDBC",
+      "tabindex": null
+    },
+    "nav": {
+      "selector": "button.nav-item",
+      "outline": "rgb(219, 0, 17) solid 2px",
+      "outlineColor": "rgb(219, 0, 17)",
+      "outlineWidth": "2px",
+      "outlineOffset": "2px",
+      "outlineStyle": "solid",
+      "matchesFocusVisible": true,
+      "tokenColor": "#DB0011",
+      "tokenWidth": "2px",
+      "tokenOffset": "2px",
+      "brandPrimary": "#DB0011",
+      "brand": "REDBC",
+      "tabindex": null
+    },
+    "row": {
+      "selector": "tbody tr.app-data-table__activatable-row",
+      "outline": "rgb(219, 0, 17) solid 2px",
+      "outlineColor": "rgb(219, 0, 17)",
+      "outlineWidth": "2px",
+      "outlineOffset": "-2px",
+      "outlineStyle": "solid",
+      "matchesFocusVisible": true,
+      "tokenColor": "#DB0011",
+      "tokenWidth": "2px",
+      "tokenOffset": "2px",
+      "brandPrimary": "#DB0011",
+      "brand": "REDBC",
+      "tabindex": "0"
+    }
+  },
+  "GREENBC": {
+    "skipLink": {
+      "selector": "a.skip-link",
+      "outline": "rgb(0, 132, 127) solid 2px",
+      "outlineColor": "rgb(0, 132, 127)",
+      "outlineWidth": "2px",
+      "outlineOffset": "2px",
+      "outlineStyle": "solid",
+      "matchesFocusVisible": true,
+      "tokenColor": "#00847F",
+      "tokenWidth": "2px",
+      "tokenOffset": "2px",
+      "brandPrimary": "#00847F",
+      "brand": "GREENBC",
+      "tabindex": null
+    },
+    "nav": {
+      "selector": "button.nav-item",
+      "outline": "rgb(0, 132, 127) solid 2px",
+      "outlineColor": "rgb(0, 132, 127)",
+      "outlineWidth": "2px",
+      "outlineOffset": "2px",
+      "outlineStyle": "solid",
+      "matchesFocusVisible": true,
+      "tokenColor": "#00847F",
+      "tokenWidth": "2px",
+      "tokenOffset": "2px",
+      "brandPrimary": "#00847F",
+      "brand": "GREENBC",
+      "tabindex": null
+    },
+    "row": {
+      "selector": "tbody tr.app-data-table__activatable-row",
+      "outline": "rgb(0, 132, 127) solid 2px",
+      "outlineColor": "rgb(0, 132, 127)",
+      "outlineWidth": "2px",
+      "outlineOffset": "-2px",
+      "outlineStyle": "solid",
+      "matchesFocusVisible": true,
+      "tokenColor": "#00847F",
+      "tokenWidth": "2px",
+      "tokenOffset": "2px",
+      "brandPrimary": "#00847F",
+      "brand": "GREENBC",
+      "tabindex": "0"
+    }
+  }
+}
