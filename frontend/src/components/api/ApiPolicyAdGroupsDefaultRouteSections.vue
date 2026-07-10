@@ -2,11 +2,15 @@
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
+import ApiPolicyImpactPreviewPanel from '@/components/api/ApiPolicyImpactPreviewPanel.vue'
 import { API_POLICY_DOMAIN_EDITOR_KEY } from '@/components/api/apiPolicyDomainEditorContext'
+import type { ApiPolicyImpactPreview } from '@/types/template'
 
 defineProps<{
   canEdit: boolean
   submitting: boolean
+  saveBlockedByImpact?: boolean
+  lastImpactPreview?: ApiPolicyImpactPreview | null
 }>()
 
 const emit = defineEmits<{
@@ -74,14 +78,29 @@ const { adGroupsForm, defaultRouteForm } = forms
         <el-input v-model="defaultRouteForm.defaultRouteReleaseVersion" />
       </el-form-item>
       <div class="action-row">
-        <el-button type="primary" :loading="submitting" @click="emit('saveDefaultRoute')">
+        <el-button
+          type="primary"
+          data-testid="default-route-save-button"
+          :loading="submitting"
+          :disabled="saveBlockedByImpact"
+          @click="emit('saveDefaultRoute')"
+        >
           {{ t('templates.policy.l1.saveDefaultRoute') }}
         </el-button>
       </div>
     </el-form>
+    <ApiPolicyImpactPreviewPanel
+      v-if="lastImpactPreview?.blocking && lastImpactPreview.changedAreas.includes('DEFAULT_ROUTE_TARGET')"
+      class="default-route-impact"
+      :preview="lastImpactPreview"
+    />
   </section>
 </template>
 
 <style scoped lang="scss">
 @use './apiPolicyDomainEditor.shared.scss';
+
+.default-route-impact {
+  margin-top: var(--space-4);
+}
 </style>

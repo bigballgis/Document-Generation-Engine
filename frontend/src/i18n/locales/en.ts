@@ -2146,6 +2146,25 @@ export default {
         confirmTitle: 'Confirm access change',
         confirmSave: 'Apply this domain change immediately?',
         confirmWarningsIntro: 'The following warnings require confirmation:',
+        reasonLabel: 'Reason',
+        impactLabel: 'Impact',
+        adviceLabel: 'Advice',
+        expectedErrorCodeLabel: 'Expected error code',
+        findings: {
+          defaultRouteNotCallable: {
+            reason:
+              'The candidate default route release version is not callable (not a published, non-stopped release).',
+            impact:
+              'Saving would leave the default generate path unable to resolve a callable release. Callers would receive DEFAULT_ROUTE_TARGET_UNAVAILABLE. The settings version will not change.',
+            advice:
+              'Select a published callable release version as the default route target, then run impact preview again before saving.',
+          },
+          generic: {
+            reason: 'The candidate access settings have a hard-blocking impact.',
+            impact: 'Save cannot proceed until the blocking condition is resolved. The settings version will not change.',
+            advice: 'Resolve the blocking condition shown in the impact preview, then run impact preview again before saving.',
+          },
+        },
       },
     },
   },

@@ -18,8 +18,8 @@ describe('openapi-v1 codegen parity', () => {
         stdio: 'pipe',
       })
 
-      const committed = readFileSync(committedPath, 'utf8')
-      const regenerated = readFileSync(tempOut, 'utf8')
+      const committed = readFileSync(committedPath, 'utf8').replace(/\r\n/g, '\n')
+      const regenerated = readFileSync(tempOut, 'utf8').replace(/\r\n/g, '\n')
 
       expect(regenerated).toBe(committed)
     } finally {

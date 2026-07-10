@@ -2115,6 +2115,23 @@ export default {
         confirmTitle: '确认接入变更',
         confirmSave: '立即应用此配置域变更？',
         confirmWarningsIntro: '以下警告需要确认：',
+        reasonLabel: '原因',
+        impactLabel: '影响',
+        adviceLabel: '建议',
+        expectedErrorCodeLabel: '预期错误码',
+        findings: {
+          defaultRouteNotCallable: {
+            reason: '候选默认路由发布版本不可调用（不是已发布且未停用的发布版本）。',
+            impact:
+              '若保存，默认生成路径将无法解析到可调用发布版本，调用方将收到 DEFAULT_ROUTE_TARGET_UNAVAILABLE。设置版本不会递增。',
+            advice: '请选择已发布且可调用的发布版本作为默认路由目标，重新执行影响预览后再保存。',
+          },
+          generic: {
+            reason: '候选接入设置存在硬阻断影响。',
+            impact: '在解决阻断条件前无法保存，设置版本不会递增。',
+            advice: '请按影响预览中的阻断条件处理后，重新执行影响预览再保存。',
+          },
+        },
       },
     },
   },

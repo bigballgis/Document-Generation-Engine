@@ -8,6 +8,7 @@ import {
   fetchDemoFullFlowApiPolicy,
 } from './helpers/content-modules-api'
 import {
+  attemptNonCallableDefaultRouteHardBlock,
   editOutputPolicyCandidate,
   expandApiPolicyAdvancedSettings,
   saveApiOutputPolicyFromHubTab,
@@ -32,7 +33,7 @@ async function resolveReachableFrontendBaseUrl(request: APIRequestContext): Prom
   return null
 }
 
-test.describe('CDP-E2E-T07 API policy edit save (BDD-CDP-APIPOL-001)', () => {
+test.describe('CDP-E2E-T07 API policy edit save (BDD-CDP-APIPOL-001/002)', () => {
   test.describe.configure({ mode: 'serial', timeout: 120_000 })
 
   test.beforeAll(async ({ request }) => {
@@ -40,7 +41,7 @@ test.describe('CDP-E2E-T07 API policy edit save (BDD-CDP-APIPOL-001)', () => {
     const frontendBaseUrl = await resolveReachableFrontendBaseUrl(request)
     test.skip(
       !(backendReady && frontendBaseUrl),
-      'Stack required (frontend + backend :8080). Start with .\\scripts\\docker-deploy.ps1 or pnpm dev.',
+      'Stack required (frontend + backend :8080). Start with .\\scripts\\docker-deploy-queue.ps1 or pnpm dev.',
     )
   })
 
@@ -76,5 +77,24 @@ test.describe('CDP-E2E-T07 API policy edit save (BDD-CDP-APIPOL-001)', () => {
       page.getByText(new RegExp(`settings version\\s+v${policyAfterSave.policyVersion}`, 'i')),
     ).toBeVisible()
     await expect(page.getByRole('button', { name: /^activity log$/i })).toBeVisible()
+  })
+
+  test('BDD-CDP-APIPOL-002 — non-callable default route hard-blocks save (no PUT)', async ({
+    page,
+    request,
+  }) => {
+    const fixture = await ensureDemoFullFlowPublished(request)
+    const policyBefore = await fetchDemoFullFlowApiPolicy(request, fixture.templateId)
+
+    await page.goto(`/templates/${fixture.templateId}?tab=apiAccess`)
+    await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
+    await expect(page.getByRole('tab', { name: /external access|对外接入/i })).toBeVisible()
+
+    const { defaultRoutePutCount } = await attemptNonCallableDefaultRouteHardBlock(page)
+    expect(defaultRoutePutCount).toBe(0)
+
+    const policyAfter = await fetchDemoFullFlowApiPolicy(request, fixture.templateId)
+    expect(policyAfter.policyVersion).toBe(policyBefore.policyVersion)
+    expect(policyAfter.defaultRouteReleaseVersion).toBe(policyBefore.defaultRouteReleaseVersion)
   })
 })

@@ -528,6 +528,82 @@ export async function saveDefaultRouteFromHubTab(page: Page, releaseVersion: str
   ).toBeVisible({ timeout: 15_000 })
 }
 
+/**
+ * BDD-CDP-APIPOL-002 — set DEFAULT_ROUTE_TARGET to a non-callable release, run impact preview,
+ * and assert hard-block UI (no PUT / save disabled). Does not assume a successful save.
+ */
+export async function attemptNonCallableDefaultRouteHardBlock(
+  page: Page,
+  releaseVersion = '9.9.9-non-callable',
+): Promise<{ defaultRoutePutCount: number }> {
+  await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
+
+  const routeSection = page.locator('#policy-domain-DEFAULT_ROUTE_TARGET')
+  await routeSection.scrollIntoViewIfNeeded()
+
+  const routeInput = routeSection.locator('input').first()
+  await expect(routeInput).toBeVisible()
+  await routeInput.fill(releaseVersion)
+
+  let defaultRoutePutCount = 0
+  const onRequest = (req: { method: () => string; url: () => string }) => {
+    if (req.method() === 'PUT' && req.url().includes('/api/policy/default-route')) {
+      defaultRoutePutCount += 1
+    }
+  }
+  page.on('request', onRequest)
+
+  const saveButton = routeSection.getByTestId('default-route-save-button')
+  await expect(saveButton).toBeEnabled()
+
+  const previewPromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes('/api/policy/impact-preview'),
+    { timeout: 45_000 },
+  )
+
+  await saveButton.click()
+
+  const previewResponse = await previewPromise
+  expect(previewResponse.ok()).toBeTruthy()
+  const previewBody = (await previewResponse.json()) as {
+    result?: { blocking?: boolean; warnings?: string[] }
+    blocking?: boolean
+    warnings?: string[]
+  }
+  const preview =
+    previewBody.result && typeof previewBody.result === 'object'
+      ? previewBody.result
+      : previewBody
+  expect(preview.blocking).toBe(true)
+
+  // Hard-block path must not open the warning confirm dialog used by soft warnings.
+  await expect(page.locator('.el-message-box')).toHaveCount(0)
+
+  const hardBlock = routeSection.getByTestId('api-policy-hard-block-finding')
+  await expect(hardBlock).toBeVisible({ timeout: 15_000 })
+  await expect(routeSection.getByTestId('api-policy-hard-block-reason')).not.toBeEmpty()
+  await expect(routeSection.getByTestId('api-policy-hard-block-impact')).not.toBeEmpty()
+  await expect(routeSection.getByTestId('api-policy-hard-block-advice')).not.toBeEmpty()
+  await expect(routeSection.getByTestId('api-policy-hard-block-error-code')).toHaveText(
+    'DEFAULT_ROUTE_TARGET_UNAVAILABLE',
+  )
+
+  await expect(saveButton).toBeDisabled()
+  await expect(
+    page
+      .locator('.el-message')
+      .getByText(/save is blocked until blocking impacts are resolved|保存被阻止|无法保存/i),
+  ).toBeVisible({ timeout: 10_000 })
+
+  // Allow any late PUT that would race the hard-block return path.
+  await expect.poll(() => defaultRoutePutCount, { timeout: 2_000 }).toBe(0)
+
+  page.off('request', onRequest)
+  return { defaultRoutePutCount }
+}
+
 /** @deprecated Hub deep-link redirects to dev editor; use openDevEditorWorkspaceTab. */
 export async function openTemplateLifecycleTab(page: Page, templateId: string, request: APIRequestContext) {
   await openDevEditorWorkspaceTab(page, templateId, request, 'approval')

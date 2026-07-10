@@ -16,7 +16,7 @@ import {
   type OutputPolicyDomainForm,
   type InvocationRetentionDomainForm,
 } from '@/types/apiPolicyDomain'
-import type { ApiPolicy } from '@/types/template'
+import type { ApiPolicy, ApiPolicyImpactPreview } from '@/types/template'
 
 export interface ApiPolicyDomainEditorForms {
   adGroupsForm: AdGroupsDomainForm
@@ -37,6 +37,8 @@ export function useApiPolicyDomainEditorActions(
   const apiPolicyStore = useApiPolicyStore()
 
   const retentionSaveFeedback = ref<'success' | 'error' | null>(null)
+  const lastImpactPreview = ref<ApiPolicyImpactPreview | null>(null)
+  const saveBlockedByImpact = computed(() => lastImpactPreview.value?.blocking === true)
 
   const recordRetentionOptions = computed(() =>
     INVOCATION_RECORD_RETENTION_PRESETS.map((days) => ({
@@ -129,12 +131,13 @@ export function useApiPolicyDomainEditorActions(
     form: ApiPolicyDomainFormMap[D],
     fallbackConfirmKey: string,
   ) {
-    if (!canEdit.value || !apiPolicy.value) {
+    if (!canEdit.value || !apiPolicy.value || saveBlockedByImpact.value) {
       return
     }
     try {
       const payload = buildUpsertPayloadForDomain(apiPolicy.value, domain, form)
       const preview = await apiPolicyStore.previewImpact(templateId.value, payload)
+      lastImpactPreview.value = preview
       if (preview.blocking) {
         ElMessage.error(t('apiPolicy.detail.impact.blockedSave'))
         return
@@ -158,6 +161,7 @@ export function useApiPolicyDomainEditorActions(
         return
       }
       await apiPolicyStore.savePolicyDomain(templateId.value, domain, form)
+      lastImpactPreview.value = null
       ElMessage.success(t('apiPolicy.detail.saveSuccess'))
     } catch {
       ElMessage.error(resolveErrorMessage('templates.error.savePolicy'))
@@ -230,8 +234,14 @@ export function useApiPolicyDomainEditorActions(
     retentionSaveFeedback.value = null
   }
 
+  function clearLastImpactPreview() {
+    lastImpactPreview.value = null
+  }
+
   return {
     retentionSaveFeedback,
+    lastImpactPreview,
+    saveBlockedByImpact,
     recordRetentionOptions,
     documentRetentionOptions,
     retentionDirty,
@@ -245,6 +255,7 @@ export function useApiPolicyDomainEditorActions(
     saveBatchDomain,
     saveEncryptionDomain,
     clearRetentionSaveFeedback,
+    clearLastImpactPreview,
   }
 }
 

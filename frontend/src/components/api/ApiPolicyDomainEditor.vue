@@ -64,6 +64,8 @@ const { advancedExpanded } = useApiPolicyDomainAnchor(initialDomainAnchorRef)
 
 const {
   retentionSaveFeedback,
+  lastImpactPreview,
+  saveBlockedByImpact,
   recordRetentionOptions,
   documentRetentionOptions,
   retentionDirty,
@@ -77,6 +79,7 @@ const {
   saveBatchDomain,
   saveEncryptionDomain,
   clearRetentionSaveFeedback,
+  clearLastImpactPreview,
 } = useApiPolicyDomainEditorActions(templateIdRef, apiPolicyRef, canEditRef, {
   adGroupsForm,
   defaultRouteForm,
@@ -117,6 +120,7 @@ watch(
   ],
   () => {
     clearRetentionSaveFeedback()
+    clearLastImpactPreview()
     emit('formEdited')
   },
 )
@@ -139,6 +143,8 @@ defineExpose({
     <ApiPolicyAdGroupsDefaultRouteSections
       :can-edit="canEdit"
       :submitting="submitting"
+      :save-blocked-by-impact="saveBlockedByImpact"
+      :last-impact-preview="lastImpactPreview"
       @save-ad-groups="saveAdGroupsDomain"
       @save-default-route="saveDefaultRouteDomain"
     />
@@ -173,6 +179,7 @@ defineExpose({
     :api-policy="apiPolicy"
     :can-edit="canEdit"
     :submitting="submitting"
+    :save-blocked-by-impact="saveBlockedByImpact"
     v-model:advanced-expanded="advancedExpanded"
     :policy-output-format-options="policyOutputFormatOptions"
     :policy-output-mode-options="policyOutputModeOptions"
