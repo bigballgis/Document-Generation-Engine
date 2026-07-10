@@ -210,7 +210,7 @@
 | `docs/adr/rendering-authoring/0042-pagination-delta-budget.md` | Word vs LO pagination | Acceptable page-count delta for v1 |
 | `docs/adr/rendering-authoring/0043-ooxml-output-validation.md` | OOXML output gate | LO 24 open required in CI |
 
-Status: **Proposed** until architecture-reviewer sign-off.
+Status: LR-A5 Done 2026-07-10. [ADR-0041](../../adr/rendering-authoring/0041-rendering-font-baseline.md) **Accepted** (architecture-reviewer PASS_WITH_NOTES 2026-07-10). ADR-0042/0043 remain **Proposed** (0042 blocked on Word-equipped host; 0043 blocked on slice B XSD/LO24).
 
 ---
 

@@ -6,6 +6,8 @@ date: 2026-07-05
 deciders: architecture, backend-engineer
 related:
   - docs/adr/rendering-authoring/0019-structured-authoring-and-rendering-boundary.md
+  - docs/adr/rendering-authoring/0041-rendering-font-baseline.md
+  - docs/adr/rendering-authoring/0042-pagination-delta-budget.md
   - docs/plan/detail/CDP-industry-pitfall-registry.md
   - docs/plan/detail/LRP-A-rendering-trust-hardening.md
   - docs/api/contract-outline.md
@@ -55,7 +57,10 @@ before the document reaches LibreOffice.
    LO-equipped host evidence).
 
 Status remains **Proposed** until slice B is decided and evidenced; LR-A6 must not
-promote this ADR to Accepted solely on well-formedness.
+promote this ADR to Accepted solely on well-formedness. LR-A5 closeout (2026-07-10)
+reaffirms **Proposed** — A6 delivered slice A fail-closed gate; ECMA-376 XSD and LO24
+headless residuals remain. Sibling triad: [ADR-0041](./0041-rendering-font-baseline.md)
+(font baseline), [ADR-0042](./0042-pagination-delta-budget.md) (pagination delta).
 
 ## Consequences
 

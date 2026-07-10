@@ -1,11 +1,17 @@
 # LRP Wave LR-A — Rendering Trust Chain & File Safety 「渲染信任链与文件安全」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3/A4 Done**; **LR-A6 Done**; **LR-A7 Done** with documented exception; A5 Partial)  
+**Wave status:** **Done** (activated 2026-07-04 after LR-B closure; A1–A7 **Done** 2026-07-10 — see exit gate; Word-vs-LO / ADR-0042 Accepted + ADR-0043 slice B **explicitly deferred out of wave exit**; ADR-0041 Accepted residual **closed** 2026-07-10 via architecture-reviewer)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer` for images, `doc-keeper` for ADRs)  
 **Prerequisites:** none for A1/A2/A3/A5; **A4/A6 depend on P22-T01/T02 Done**; **A7 depends on P23 demo packages (T04+ letter-grade)** — track via [P23 detail](./P23-demo-typography-layout-excellence.md)
 
-> **Completion note (2026-07-10):** **LR-A6 → Done** (slice `lrp-a6-ooxml-gate`; merge `122d6d1` / `122d6d1f385bb28214373c63ef29740b0d447cb3`; worktree removed). OOXML output validation **fail-closed** gate delivered: `OoxmlOutputValidator` + `DocxAssembler` wiring + runtime error propagation (`OOXML_VALIDATION_FAILED`). Acceptance: structured well-formed accept; corrupt reject; corpus; runtime surfaces validation failure. **CD-HARD-T03 → Done** (executed-by-LR-A6). BDD **not-applicable**. Formal phase remains **None**. Wave LR-A remains **In Progress** (**A5 Partial** only — do **not** start LR-C9 or expand A5 Word residual). **Residuals (deferred):** ECMA-376 XSD; LO24 headless; ADR-0043 remains **Proposed**. **Gates:** `mvn verify` GREEN (1208+ tests); architecture-reviewer **PASS**; `docker-deploy-queue` DEPLOY_OK (healthz UP; UI 4173 200; image contains `OoxmlOutputValidator`); E2E skipped (not user-facing). **Task Master #12 → done**.
+> **Sign-off note (2026-07-10):** **ADR-0041 → Accepted** (architecture-reviewer **PASS_WITH_NOTES**; slice `lrp-a5-adr-closeout`). 0041 Accepted residual **closed**. 0042/0043 remain **Proposed**. Wave LR-A Done honesty **PASS**. Remaining deferred out of wave: Word-vs-LO + ADR-0042 Accepted; ADR-0043 slice B (XSD/LO24). Do **not** start LR-C9.
+
+> **Completion note (2026-07-10):** **LR-A5 → Done** (slice `lrp-a5-adr-closeout`; docs-only). ADR triad on disk + indexed: [ADR-0041](../../adr/rendering-authoring/0041-rendering-font-baseline.md) **Accepted** (architecture-reviewer PASS_WITH_NOTES 2026-07-10; LR-A2 evidence solid); [ADR-0042](../../adr/rendering-authoring/0042-pagination-delta-budget.md) **Proposed** (Word n/a residual strengthened — no invented Word numbers); [ADR-0043](../../adr/rendering-authoring/0043-ooxml-output-validation-gate.md) **Proposed** (A6 slice A Done; XSD/LO24 residual). BDD **not-applicable**. Formal phase remains **None**. **Wave LR-A → Done** with explicit deferrals out of wave exit: (1) Word-vs-LO page delta + ADR-0042 Accepted on Word-equipped host; (2) ADR-0043 slice B (ECMA-376 XSD + LO24 headless). ADR-0041 Accepted residual **closed** by this review. Do **not** start LR-C9 for these residuals. Gate evidence: docs-only. **Task Master #13 → done** (on MAIN post-merge).
+
+> **Activation note (2026-07-10):** **LR-A5 → In Progress** (slice `lrp-a5-adr-closeout`; ISOLATED `D:/working/DGE-lrp-a5-adr-closeout` · `feat/lrp-a5-adr-closeout`; base `b4e4632`). Superseded by LR-A5 completion note above.
+
+> **Completion note (2026-07-10):** **LR-A6 → Done** (slice `lrp-a6-ooxml-gate`; merge `122d6d1` / `122d6d1f385bb28214373c63ef29740b0d447cb3`; worktree removed). OOXML output validation **fail-closed** gate delivered: `OoxmlOutputValidator` + `DocxAssembler` wiring + runtime error propagation (`OOXML_VALIDATION_FAILED`). Acceptance: structured well-formed accept; corrupt reject; corpus; runtime surfaces validation failure. **CD-HARD-T03 → Done** (executed-by-LR-A6). BDD **not-applicable**. Formal phase remains **None**. Wave LR-A remains **In Progress** (**A5** sole remaining — see activation note above). **Residuals (deferred):** ECMA-376 XSD; LO24 headless; ADR-0043 remains **Proposed**. **Gates:** `mvn verify` GREEN (1208+ tests); architecture-reviewer **PASS**; `docker-deploy-queue` DEPLOY_OK (healthz UP; UI 4173 200; image contains `OoxmlOutputValidator`); E2E skipped (not user-facing). **Task Master #12 → done**.
 
 > **Activation note (2026-07-10):** **LR-A6 → In Progress** (slice `lrp-a6-ooxml-gate`; ISOLATED `D:/working/DGE-lrp-a6-ooxml-gate` · `feat/lrp-a6-ooxml-gate`; base `a806b4c`). Superseded by LR-A6 completion note above.
 
@@ -70,7 +76,7 @@
   4. `.cursor/rules/tech-stack-guardrails.mdc` — dependency policy
 - **Do NOT:** Bake licensed Microsoft fonts into images; switch base image; claim pixel-identical Word parity (that is ADR-0042 / LR-A7 territory).
 - **Steps:**
-  1. Verify exact Alpine package names against the company-approved repository per dependency policy (candidates: `font-noto-cjk` for CJK; `font-carlito` Calibri-metric-compatible; Caladea/Cambria-metric equivalent if available). Record the verification result in the ADR-0041 draft (LR-A5).
+  1. Verify exact **Debian jammy** apt package names against the company-approved repository per dependency policy (shipped: `fonts-noto-cjk`, `fonts-crosextra-carlito`, `fonts-crosextra-caladea`). Early drafts mentioned Alpine names (`font-noto-cjk`, `font-carlito`) — **not** the production baseline; see ADR-0041 drift table. Record verification in ADR-0041 (LR-A5).
   2. Add the verified font packages + `fc-cache -f` to **both** `backend/Dockerfile` and `backend/Dockerfile.packaged`.
   3. Add a build-stage assertion: `fc-list :lang=zh` non-empty (fail the image build if CJK fonts are missing).
   4. Add `RenderingFontSmokeTest` (backend): render a sample DOCX containing Chinese text + Calibri-styled runs → PDF; assert expected page count and that extracted PDF text contains the Chinese sample (no tofu/`#`/empty extraction).
@@ -131,19 +137,16 @@
 
 ### LR-A5 — ADR-0041/0042/0043 drafting
 
-- **Status:** **Partial** (2026-07-10 plan pass) — `0042-pagination-delta-budget.md` and `0043-ooxml-output-validation-gate.md` exist as **Proposed**; **`0041-rendering-font-baseline.md` is missing** (still referenced by ADR-0042). Closing the full LR-A5 triad (draft 0041 + index + architecture-reviewer) is **deferred** — not expanded in the LR-A3 delivery slice.
-- **Owner agent:** doc-keeper (+ architecture-reviewer sign-off)
+- **Status:** **Done** (2026-07-10 — slice `lrp-a5-adr-closeout`; docs-only)
+- **Owner agent:** doc-keeper (+ architecture-reviewer for any Accepted promotion)
 - **BDD:** not-applicable — documentation/decision records only.
-- **Read first:**
-  1. [CDP-industry-pitfall-registry.md](./CDP-industry-pitfall-registry.md) §4 (ADR outlines + target paths)
-  2. `docs/adr/0000-template.md` + `docs/adr/README.md` (metadata taxonomy)
-  3. Existing drafts: `docs/adr/rendering-authoring/0042-pagination-delta-budget.md`, `0043-ooxml-output-validation-gate.md`
-- **Do NOT:** Mark ADRs Accepted without architecture-reviewer review; edit accepted ADR decisions; expand into LR-A3 implementation work.
-- **Remaining steps (deferred):**
-  1. Draft missing `docs/adr/rendering-authoring/0041-rendering-font-baseline.md` (cite LR-A2 package verification).
-  2. Confirm ADR index reachability for 0041–0043.
-  3. Request architecture-reviewer review; record outcome.
-  4. **Residual from LR-A7:** on a Word-equipped host, fill Word page baselines + Word-vs-LO deltas in NFR / [pagination-delta-corpus.md](../pagination-delta-corpus.md); only then consider ADR-0042 **Accepted** / enforcement (do not invent numbers; do not start LR-A6/LR-C9 for this residual alone).
+- **Delivered:**
+  1. Authored `docs/adr/rendering-authoring/0041-rendering-font-baseline.md` — **Accepted** (architecture-reviewer PASS_WITH_NOTES 2026-07-10; cites LR-A2 / P23-T02 / CD-HARD-T01 Debian jammy `fonts-noto-cjk`, `fonts-crosextra-carlito`, `fonts-crosextra-caladea`; `RenderingFontSmokeTest`; Alpine vs jammy package-name drift recorded).
+  2. Reconciled ADR-0042 — remains **Proposed**; Word-vs-LO residual strengthened (`ms-word-unavailable-on-host`; evidence paths; no invented Word numbers).
+  3. ADR-0043 — remains **Proposed** (A6 slice A Done; ECMA-376 XSD / LO24 deferred); triad cross-refs added.
+  4. ADR index + LRP-A / program / ledger synced; triad no longer Missing.
+- **Statuses decided (doc-keeper + architecture-reviewer):** 0041 **Accepted** (2026-07-10 sign-off). 0042/0043 remain **Proposed**. Do **not** Accept 0042 without Word-equipped host. Do **not** Accept 0043 on well-formedness alone.
+- **Residual (deferred out of Wave LR-A exit — not blocking A5/Wave Done):** Word page baselines + Word-vs-LO deltas on a Word-equipped host → then consider ADR-0042 Accepted / enforcement; ADR-0043 slice B (XSD/LO24). ADR-0041 Accepted residual **closed** by architecture-reviewer 2026-07-10. Do not invent numbers; do not start LR-C9 for these residuals alone.
 - **Maps:** CD-PIT-01/02/03; LR-A2/A6/A7 consume these decisions.
 
 ### LR-A6 — OOXML output validation gate
@@ -203,8 +206,9 @@
 
 ## 2. Exit gate (Wave LR-A)
 
-- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 Done** (2026-07-10 gap-close; merge `e62c210`); **LR-A4 Done** (2026-07-10; merge `a523a09`); LR-A5 **Partial** (0042/0043 on disk; 0041 deferred); **LR-A6 Done** (2026-07-10 — merge `122d6d1`; CD-HARD-T03 executed-by-LR-A6); **LR-A7 Done** (2026-07-10 — Docker PDF corpus; Word delta residual)
+- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 Done** (2026-07-10 gap-close; merge `e62c210`); **LR-A4 Done** (2026-07-10; merge `a523a09`); **LR-A5 Done** (2026-07-10 — `lrp-a5-adr-closeout`; triad on disk; **ADR-0041 Accepted** via architecture-reviewer); **LR-A6 Done** (2026-07-10 — merge `122d6d1`; CD-HARD-T03 executed-by-LR-A6); **LR-A7 Done** (2026-07-10 — Docker PDF corpus; Word delta residual deferred out of wave exit)
 - [x] LR-A4 Done (writer-unsupported fail-closed; full writers deferred)
-- [x] LR-A6 Done (2026-07-10 — `lrp-a6-ooxml-gate`; merge `122d6d1`); Wave LR-A remains open while A5 Partial (Word-vs-LO residual under ADR-0042 — do not expand A5 Word residual; do not start LR-C9)
+- [x] LR-A6 Done (2026-07-10 — `lrp-a6-ooxml-gate`; merge `122d6d1`)
 - [x] Writer-unsupported declared nodes (`qrBarcodeRef`/`attachmentListRef`) cannot silently disappear (publish hard-block + render fail-closed) — full writers still deferred
-- [ ] Ledger § LRP wave row updated with gate evidence per remaining A5 task (A6 evidence recorded 2026-07-10)
+- [x] Ledger § LRP wave row updated with A5 gate evidence (docs-only; 2026-07-10)
+- [x] **Wave LR-A Done** — Word-vs-LO / ADR-0042 Accepted and ADR-0043 slice B (XSD/LO24) are **explicitly deferred out of wave exit**; ADR-0041 Accepted residual **closed** (architecture-reviewer PASS_WITH_NOTES 2026-07-10). Post-wave follow-ups are not LR-C9; not a new In Progress task unless scheduled

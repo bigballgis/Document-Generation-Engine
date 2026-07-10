@@ -97,16 +97,17 @@ Create an ADR when a decision affects future design or implementation, including
 | [0038-sync-download-url-runtime-deferred.md](./api/0038-sync-download-url-runtime-deferred.md) | Accepted | Defer `SYNC_DOWNLOAD_URL` runtime delivery until secure download URL contract is ready (COR-B01) |
 | [0039-redisson-lock-evaluation.md](./technology-stack/0039-redisson-lock-evaluation.md) | Accepted | Redisson distributed lock evaluation — accepted single-instance risk; mandatory before multi-instance (COR-P05) |
 | [0040-api-package-access-and-invocation-retention.md](./api-management/0040-api-package-access-and-invocation-retention.md) | Accepted | Package-first API access surface, auto-materialize policy, invocation records, four-layer retention (2026-07-03) |
+| [0041-rendering-font-baseline.md](./rendering-authoring/0041-rendering-font-baseline.md) | Accepted | Rendering font baseline for DOCX→PDF conversion images — Debian jammy CJK + Carlito/Caladea (LR-A5; architecture-reviewer PASS_WITH_NOTES 2026-07-10) |
 | [0044-deployment-topology-v1.md](./operations/0044-deployment-topology-v1.md) | Accepted | v1 deployment topology — single backend replica; backend HPA disabled until scale-out prerequisites met; refines ADR-0039 (LR-B1, 2026-07-04) |
 | [0046-frontend-openapi-typescript-codegen.md](./technology-stack/0046-frontend-openapi-typescript-codegen.md) | Accepted | Frontend OpenAPI TypeScript codegen (`openapi-typescript`) for management DTO types (SOR-K03) |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
-### LR-A5 triad note (not Accepted — deferred from LR-A3 slice)
+### LR-A5 triad (0041 Accepted; 0042/0043 remain Proposed)
 
 | ADR | On-disk status | Note |
 | --- | --- | --- |
-| `rendering-authoring/0041-rendering-font-baseline.md` | **Missing** | Still referenced by ADR-0042; full draft + index row deferred to LR-A5 (not expanded in LR-A3). |
-| [0042-pagination-delta-budget.md](./rendering-authoring/0042-pagination-delta-budget.md) | **Proposed** | Exists; not yet Accepted / not promoted into the Accepted table above. |
+| [0041-rendering-font-baseline.md](./rendering-authoring/0041-rendering-font-baseline.md) | **Accepted** | architecture-reviewer **PASS_WITH_NOTES** 2026-07-10 (slice `lrp-a5-adr-closeout`); also listed in Accepted table above. |
+| [0042-pagination-delta-budget.md](./rendering-authoring/0042-pagination-delta-budget.md) | **Proposed** | Docker PDF corpus measured (LR-A7); Word pages/delta **n/a** (`ms-word-unavailable-on-host`). **Accepted** blocked until Word-equipped host confirms ±1 budget — do not invent Word numbers. |
 | [0043-ooxml-output-validation-gate.md](./rendering-authoring/0043-ooxml-output-validation-gate.md) | **Proposed** | Slice A (OPC+XML well-formedness + runtime fail-closed) is the LR-A6 Done line; full ECMA-376 XSD + LO24 headless open **deferred** — do not Accept on well-formedness alone. |
 
 Use [0000-template.md](./0000-template.md) when creating new ADRs. Place new numbered ADRs in the directory matching their `topic` frontmatter.
