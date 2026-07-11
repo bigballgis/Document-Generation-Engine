@@ -194,6 +194,86 @@ class AuditQueryServiceTest {
     }
 
     @Test
+    void auditAdminCanQueryRetentionPurgeEvidence() {
+        ManagementSessionClaims auditAdmin = session("10000004", List.of("AUDIT_ADMIN"), List.of("*"));
+        when(groupAccessService.canReadAudit(auditAdmin)).thenReturn(true);
+        ManagementAuditEventEntity purge = retentionPurgeEvent();
+        when(managementAuditEventRepository.searchPaged(
+                isNull(),
+                eq(AuditRetentionPurgeEvidenceWriter.AUDIT_RETENTION_PURGE),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                eq(0),
+                eq(20)
+        )).thenReturn(new AuditSearchPage<>(List.of(purge), 1, 1));
+
+        var result = service.queryManagementEvents(
+                auditAdmin,
+                AuditReadActorRole.AUDIT_ADMIN,
+                null,
+                AuditRetentionPurgeEvidenceWriter.AUDIT_RETENTION_PURGE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                0,
+                20
+        );
+
+        assertThat(result.events()).hasSize(1);
+        assertThat(result.events().getFirst().eventType())
+                .isEqualTo(AuditRetentionPurgeEvidenceWriter.AUDIT_RETENTION_PURGE);
+        assertThat(result.events().getFirst().templateId()).isNull();
+        assertThat(result.events().getFirst().statusSummary()).contains("deletedCount=");
+    }
+
+    @Test
+    void groupAdminQueryScopesToGroup_soPlatformPurgeRowsAreExcluded() {
+        when(groupAccessService.canReadAudit(groupAdmin)).thenReturn(true);
+        TemplateEntity template = templateEntity("RETAIL");
+        when(templateService.requireReadableTemplate(TEMPLATE_ID, groupAdmin)).thenReturn(template);
+        when(managementAuditEventRepository.searchPaged(
+                eq(TEMPLATE_ID),
+                eq(AuditRetentionPurgeEvidenceWriter.AUDIT_RETENTION_PURGE),
+                isNull(),
+                isNull(),
+                isNull(),
+                eq("RETAIL"),
+                eq(0),
+                eq(20)
+        )).thenReturn(new AuditSearchPage<>(List.of(), 0, 0));
+
+        var result = service.queryManagementEvents(
+                groupAdmin,
+                AuditReadActorRole.GROUP_ADMIN,
+                TEMPLATE_ID,
+                AuditRetentionPurgeEvidenceWriter.AUDIT_RETENTION_PURGE,
+                null,
+                null,
+                null,
+                "RETAIL",
+                null,
+                0,
+                20
+        );
+
+        assertThat(result.events()).isEmpty();
+        verify(managementAuditEventRepository).searchPaged(
+                eq(TEMPLATE_ID),
+                eq(AuditRetentionPurgeEvidenceWriter.AUDIT_RETENTION_PURGE),
+                isNull(),
+                isNull(),
+                isNull(),
+                eq("RETAIL"),
+                eq(0),
+                eq(20)
+        );
+    }
+
+    @Test
     void exportManagementEventsUsesMaskedExportFormat() {
         when(groupAccessService.canReadAudit(globalAdmin)).thenReturn(true);
         when(managementAuditEventRepository.search(
@@ -463,6 +543,27 @@ class AuditQueryServiceTest {
                 "Group Admin (10000002)",
                 "fp-CRED-ABCD1234",
                 "Policy updated",
+                "[]"
+        );
+    }
+
+    private ManagementAuditEventEntity retentionPurgeEvent() {
+        return new ManagementAuditEventEntity(
+                UUID.randomUUID(),
+                Instant.parse("2026-07-11T03:00:00Z"),
+                AuditRetentionPurgeEvidenceWriter.AUDIT_RETENTION_PURGE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "[]",
+                false,
+                null,
+                AuditRetentionPurgeEvidenceWriter.ACTOR_USERNAME,
+                AuditRetentionPurgeEvidenceWriter.ACTOR_SUMMARY,
+                null,
+                "table=management_audit_event; retentionDays=90; cutoff=2026-04-12T12:00:00Z; deletedCount=3",
                 "[]"
         );
     }

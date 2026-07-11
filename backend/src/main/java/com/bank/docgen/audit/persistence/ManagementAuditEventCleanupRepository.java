@@ -1,6 +1,7 @@
 package com.bank.docgen.audit.persistence;
 
 import java.time.Instant;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -8,17 +9,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
- * LR-D1: cleanup repository for {@link ManagementAuditEventEntity}. Deletes records older than
- * the configured retention window. Mirrors the invocation-record cleanup pattern (ADR-0040).
+ * LR-D1: hard-delete aged {@link ManagementAuditEventEntity} rows by {@code event_at}.
  */
 @Repository
-public interface ManagementAuditEventCleanupRepository extends JpaRepository<ManagementAuditEventEntity, Long> {
+public interface ManagementAuditEventCleanupRepository
+        extends JpaRepository<ManagementAuditEventEntity, UUID> {
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM ManagementAuditEventEntity e WHERE e.eventAt < :cutoff")
     int deleteOlderThan(@Param("cutoff") Instant cutoff);
-
-    default int deleteOlderThanDays(int days) {
-        return deleteOlderThan(Instant.now().minusSeconds((long) days * 86400));
-    }
 }

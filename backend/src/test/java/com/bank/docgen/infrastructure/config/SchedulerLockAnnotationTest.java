@@ -2,6 +2,7 @@ package com.bank.docgen.infrastructure.config;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bank.docgen.audit.service.AuditRetentionCleanupScheduler;
 import com.bank.docgen.collaboration.scheduler.CollaborationEscalationScheduler;
 import com.bank.docgen.rendering.scheduler.PreviewTempCleanupScheduler;
 import com.bank.docgen.runtime.scheduler.AsyncBatchTaskStaleReclaimScheduler;
@@ -24,7 +25,8 @@ class SchedulerLockAnnotationTest {
             InvocationRetentionCleanupScheduler.class,
             CollaborationEscalationScheduler.class,
             PreviewTempCleanupScheduler.class,
-            AsyncBatchTaskStaleReclaimScheduler.class
+            AsyncBatchTaskStaleReclaimScheduler.class,
+            AuditRetentionCleanupScheduler.class
     );
 
     @Test

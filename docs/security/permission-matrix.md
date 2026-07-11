@@ -11,6 +11,8 @@
 - [产品需求说明](../product/PRD.md)
 - [领域模型](../domain/domain-model.md)
 - [文档治理规则](../governance.md)
+- [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
+- [LR-D1 行为规格](../behavior/lrp-d1-audit-retention.md)
 
 ## 2. 权限设计原则
 
@@ -353,10 +355,23 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - 分组管理员只能导出被授权组范围内的审计记录。
 - 母版设计人员、模板编排人员、测试人员、审批人员、API 调用方不因该角色本身获得审计导出权限。
 
-已确认审计保留规则：
+已确认审计保留规则（Tier-1 / Tier-2 — [ADR-0048](../adr/operations/0048-audit-data-retention-policy.md) / [LR-D1 BDD](../behavior/lrp-d1-audit-retention.md)）：
 
-- 审计记录保留期限可配置，默认保留 5 年。
-- 审计保留期限可按环境、监管或业务要求配置。
+**Confirmed — Tier-1 在线热库（PostgreSQL；LR-D1 交付）：**
+
+- `management_audit_event`：默认保留 **90 天**；超龄行 **硬删除**（`event_at < cutoff`）；可通过 `docgen.audit.management-retention-days` 配置。
+- `runtime_generation_audit_event`：默认保留 **365 天**；超龄行 **硬删除**；可通过 `docgen.audit.runtime-retention-days` 配置。
+- 处置方式与 [ADR-0040](../adr/api-management/0040-api-package-access-and-invocation-retention.md) 调用记录清理一致：**硬删除**，无 soft-delete；v1 **不做**热库归档导出。
+- 平台级 purge-evidence（`AUDIT_RETENTION_PURGE`）仅 **审计管理员 / 全局管理员** 可查；**分组管理员** 不可见无 `group_code` 的平台级 purge 行。
+
+**Deferred — Tier-2 归档（对象存储；非 D1）：**
+
+- 历史表述「默认保留 **5 年**」表示 **多年合规 / 监管留存意图**，由 **Tier-2 归档**承担（待建）；**不得**将「5 年」解读为 Tier-1 PostgreSQL 热数据默认窗口。
+- [ADR-0030](../adr/operations/0030-operational-platform-baseline.md) 中「DB 180 天 + 对象存储 3 年」为平台级早期基线行；对上述两张审计表的 **Tier-1 运营窗口**以本矩阵 + ADR-0048 为准（不静默改写 ADR-0030 Accepted 决策正文）。
+
+**Pending（非阻塞）：**
+
+- Tier-2 归档格式、确切年限（5 年 / 3 年 / 7 年叙述）与取回流程 — 待未来切片确认。
 
 ## 11. 统一授权与敏感数据保护
 

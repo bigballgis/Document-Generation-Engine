@@ -132,6 +132,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Helm chart README](../deploy/helm/docgen/README.md) | Chart values, lint/template, per-env profiles |
 | [Production runbook](./operations/runbook.md) | Release gate, local prod compose profile, observability |
 | [ADR-0030 Operational Platform Baseline](./adr/operations/0030-operational-platform-baseline.md) | Accepted CD, hardening, backup, and observability decisions |
+| [ADR-0048 Audit Data Retention & Archival](./adr/operations/0048-audit-data-retention-policy.md) | **Accepted** (2026-07-11) — Tier-1 management 90d / runtime 365d hard delete; Tier-2 archival deferred (LR-D1) |
 
 ## Behavior specifications (`docs/behavior/`)
 
@@ -167,6 +168,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[CORE-FORTRESS F8 observability / SLO / DR](./behavior/core-fortress-f8-observability-slo-dr.md)** | **Done** (2026-07-09) | Micrometer SLOs; deep readiness; DR playbook; evidence bundle — `mvn verify` **1154** |
 | **[LR-A3 master DOCX upload validation](./behavior/lrp-a3-master-docx-upload-validation.md)** | **ready** (2026-07-10) | BDD-LRP-A3-UPLOAD-001 — ZIP magic + OPC probe + 50MB/60MB limits; virus scan pending Q |
 | **[LR-A4 fail-closed unsupported nodes](./behavior/lrp-a4-fail-closed-unsupported-nodes.md)** | **ready** (2026-07-10) | BDD-LRP-A4-FAIL-CLOSED-001 — publish-gate hard-block for `qrBarcodeRef`/`attachmentListRef`; no silent omit; writers deferred |
+| **[LR-D1 audit data retention & archival](./behavior/lrp-d1-audit-retention.md)** | **ready** (2026-07-11) | BDD-LRP-D1-001…010 — management 90d / runtime 365d hard delete; ShedLock; `AUDIT_RETENTION_PURGE`; **[ADR-0048 Accepted](./adr/operations/0048-audit-data-retention-policy.md)** |
 
 ## Evidence & acceptance artifacts
 

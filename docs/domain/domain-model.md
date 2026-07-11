@@ -1059,10 +1059,11 @@ API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 
 - 分组管理员只能导出被授权组范围内的审计记录。
 - 母版设计人员、模板编排人员、测试人员、审批人员、API 调用方不因该角色本身获得审计导出权限。
 
-已确认审计保留规则：
+已确认审计保留规则（Tier-1 / Tier-2 — ADR-0048 / LR-D1）：
 
-- 审计记录保留期限可配置，默认保留 5 年。
-- 审计保留期限可按环境、监管或业务要求配置。
+- **Tier-1（Confirmed）：** `management_audit_event` 默认 **90 天**硬删除；`runtime_generation_audit_event` 默认 **365 天**硬删除；窗口可配置；无 soft-delete。
+- **Tier-2（Deferred）：** 历史「默认保留 5 年」为多年合规归档意图，由对象存储归档承担（待建）；**不是** Tier-1 热库默认窗口。
+- 详见 [permission-matrix.md](../security/permission-matrix.md) §10 与 [ADR-0048](../adr/operations/0048-audit-data-retention-policy.md)。
 
 ### 2.16 授权判定 Authorization Decision
 

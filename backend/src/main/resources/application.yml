@@ -116,6 +116,12 @@ docgen:
       fixed-delay-ms: ${DOCGEN_COLLABORATION_ESCALATION_DELAY_MS:300000}
     # LR-C7: max rows returned by GET /collaboration-notifications (newest first).
     notification-list-size: ${DOCGEN_COLLABORATION_NOTIFICATION_LIST_SIZE:20}
+  # LR-D1 / ADR-0048: Tier-1 audit retention (management 90d / runtime 365d hard delete).
+  audit:
+    retention-enabled: ${DOCGEN_AUDIT_RETENTION_ENABLED:true}
+    management-retention-days: ${DOCGEN_AUDIT_MANAGEMENT_RETENTION_DAYS:90}
+    runtime-retention-days: ${DOCGEN_AUDIT_RUNTIME_RETENTION_DAYS:365}
+    retention-cron: ${DOCGEN_AUDIT_RETENTION_CRON:0 0 3 * * *}
 
 springdoc:
   api-docs:

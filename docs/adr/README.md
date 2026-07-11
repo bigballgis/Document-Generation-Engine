@@ -86,7 +86,6 @@ Create an ADR when a decision affects future design or implementation, including
 | [0028-backend-platform-stack-baseline.md](./technology-stack/0028-backend-platform-stack-baseline.md) | Accepted | Backend platform stack baseline |
 | [0029-frontend-application-stack-baseline.md](./technology-stack/0029-frontend-application-stack-baseline.md) | Accepted | Frontend application stack baseline |
 | [0030-operational-platform-baseline.md](./operations/0030-operational-platform-baseline.md) | Accepted | Operational platform baseline |
-| [0047-distributed-tracing-otlp-baseline.md](./operations/0047-distributed-tracing-otlp-baseline.md) | Accepted | Distributed tracing OTLP export and trace ID correlation baseline (SOR-A06) |
 | [0031-api-platform-hardening-baseline.md](./api/0031-api-platform-hardening-baseline.md) | Accepted | API platform hardening baseline |
 | [0032-identity-and-security-operations-baseline.md](./authorization-security/0032-identity-and-security-operations-baseline.md) | Accepted | Identity and security operations baseline |
 | [0033-async-messaging-and-task-retry-baseline.md](./async-processing/0033-async-messaging-and-task-retry-baseline.md) | Accepted | Async messaging and task retry baseline |
@@ -100,6 +99,8 @@ Create an ADR when a decision affects future design or implementation, including
 | [0041-rendering-font-baseline.md](./rendering-authoring/0041-rendering-font-baseline.md) | Accepted | Rendering font baseline for DOCX→PDF conversion images — Debian jammy CJK + Carlito/Caladea (LR-A5; architecture-reviewer PASS_WITH_NOTES 2026-07-10) |
 | [0044-deployment-topology-v1.md](./operations/0044-deployment-topology-v1.md) | Accepted | v1 deployment topology — single backend replica; backend HPA disabled until scale-out prerequisites met; refines ADR-0039 (LR-B1, 2026-07-04) |
 | [0046-frontend-openapi-typescript-codegen.md](./technology-stack/0046-frontend-openapi-typescript-codegen.md) | Accepted | Frontend OpenAPI TypeScript codegen (`openapi-typescript`) for management DTO types (SOR-K03) |
+| [0047-distributed-tracing-otlp-baseline.md](./operations/0047-distributed-tracing-otlp-baseline.md) | Accepted | Distributed tracing OTLP export and trace ID correlation baseline (SOR-A06) |
+| [0048-audit-data-retention-policy.md](./operations/0048-audit-data-retention-policy.md) | Accepted | Audit Tier-1 retention — management 90d / runtime 365d hard delete; Tier-2 archival deferred (LR-D1, 2026-07-11) |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
 ### LR-A5 triad (0041 Accepted; 0042/0043 remain Proposed)
