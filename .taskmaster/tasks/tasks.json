@@ -422,23 +422,23 @@
       {
         "id": "31",
         "title": "LR-C5 Catalog server-side pagination/filter",
-        "description": "IN PROGRESS 2026-07-11. Sole-active LRP slice: catalog server-side pagination/filter for templates/masters/content-modules (OPT-F4 residual; COR-F09 group-first semantics kept). Slice lrp-c5-catalog-pagination. Formal phase remains None. Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 Done; C5 In Progress; C6/C7/C8 Not Started). Do NOT mark Wave LR-C Done. Do NOT activate C6/C7/C8/CD-3.",
-        "details": "ACTIVATED 2026-07-11. Slice id: lrp-c5-catalog-pagination. Status: in-progress. Formal phase remains None. Placement: ISOLATED D:/working/DGE-lrp-c5-catalog-pagination · feat/lrp-c5-catalog-pagination · base e860256 (e86025624bcc11f25ce2228cf1ed69e32d7290ef). BDD readiness: in-progress (behavior-spec-author running in parallel; expect ready shortly; acceptance from LRP-C detail § LR-C5). Scope: backend pageable list endpoints (templates/masters/content-modules) + total counts + OpenAPI sync; frontend store/view migration off full-fetch + client slice; ≥500-row seed + p95 < 1 s evidence; E2E + UIUX both brands. Gate evidence: []. Do NOT: activate C6 (depends on C5)/C7/C8/CD-3; mark Wave LR-C Done; break COR-F09 group-first semantics. Maps: OPT-F4 residual; COR-F09.",
+        "description": "DONE 2026-07-11. LR-C5 catalog server-side pagination/filter for templates/masters/content-modules; COR-F09 row+group-first; dashboard/picker consumers fixed. Slice lrp-c5-catalog-pagination; merge 5543a33; feature cfab79e; worktree removed. E2E 6/6; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES; perf p95 ~75ms; OPT-F4 residual closed. Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 Done; C6/C7/C8 Not Started). No sole-active LRP slice. Do NOT mark Wave LR-C Done. Do NOT activate C6/C7/C8/CD-3. Recommend next: LR-C6 (unblocked) OR LR-C7 — do not auto-activate.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-c5-catalog-pagination. Merge: 5543a33 (5543a335c8480f7ca3e6b4d8ef2e57f26f88f003; feat/lrp-c5-catalog-pagination → main); feature cfab79e (cfab79e45f81405e5877c78097ded582ce0d41c2); worktree removed (stage 11). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 Done; C6/C7/C8 Not Started). No sole-active LRP slice. Delivered: PageView list endpoints + filters/search for templates/masters/content-modules; COR-F09 groupCode ASC, updatedAt DESC; frontend store/view migration; dashboard/picker consumers fixed; ≥500 seed (totalElements=515); p95 ~75ms. Gates: mvn verify GREEN; pnpm lint/type-check/test/build GREEN (1054+ tests); docker-deploy-queue DEPLOY_OK (:8080 UP, :4173 200); E2E LRP-C5-catalog-pagination 6/6 PASS; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C5-uiux-manifest.md); architecture PASS_WITH_NOTES (Critical 0). BDD: ready — docs/behavior/lrp-c5-catalog-pagination.md (BDD-LRP-C5-CATALOG-001; scenarios 001…015). Do NOT: activate C6/C7/C8/CD-3; mark Wave LR-C Done. Recommend next: LR-C6 (depends on C5, now unblocked) OR LR-C7 — do not auto-activate. Maps: OPT-F4 residual closed; COR-F09.",
         "testStrategy": "1. Wait for BDD ready then follow LRP-C5 acceptance (G/W/T). 2. Backend pageable + filter tests; mvn verify. 3. Vitest store/pagination migration. 4. Playwright: paginate, filter, group-first ordering; p95 list latency evidence. 5. pnpm lint/type-check/test/build + docker-deploy-queue + E2E + UIUX both brands. 6. Do not claim Wave LR-C Done; leave C6/C7/C8 Not Started.",
         "priority": "high",
         "dependencies": [
           "30"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-11T05:45:00.000Z"
+        "updatedAt": "2026-07-11T08:20:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T05:45:00.000Z",
+      "lastModified": "2026-07-11T08:20:00.000Z",
       "taskCount": 31,
-      "completedCount": 30,
+      "completedCount": 31,
       "tags": [
         "master"
       ]
