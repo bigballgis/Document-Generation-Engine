@@ -191,6 +191,7 @@ export const apiErrorEn = {
   },
   collaboration: {
     accessDenied: "You do not have permission to view collaboration work items.",
-    queueDenied: "You do not have permission to view this collaboration work item queue."
+    queueDenied: "You do not have permission to view this collaboration work item queue.",
+    workItemNotFound: "The collaboration work item was not found."
   }
 } as const

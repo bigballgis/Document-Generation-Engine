@@ -114,6 +114,8 @@ docgen:
     escalation:
       enabled: ${DOCGEN_COLLABORATION_ESCALATION_ENABLED:true}
       fixed-delay-ms: ${DOCGEN_COLLABORATION_ESCALATION_DELAY_MS:300000}
+    # LR-C7: max rows returned by GET /collaboration-notifications (newest first).
+    notification-list-size: ${DOCGEN_COLLABORATION_NOTIFICATION_LIST_SIZE:20}
 
 springdoc:
   api-docs:

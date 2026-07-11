@@ -319,6 +319,20 @@ export default {
     },
   },
   collaboration: {
+    notifications: {
+      title: '通知',
+      bellAriaLabel: '通知',
+      bellAriaLabelWithCount: '通知，{count} 条未读',
+      markAll: '全部标为已读',
+      empty: '暂无通知',
+      loading: '正在加载通知…',
+      error: {
+        loadUnread: '无法刷新未读通知数。',
+        loadList: '无法加载通知。',
+        markRead: '无法将通知标为已读。',
+        markAll: '无法将全部通知标为已读。',
+      },
+    },
     workItems: {
       empty: '当前没有待办事项。',
       ageValue: '{value}',

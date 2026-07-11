@@ -19,6 +19,7 @@ import {
 import BrandLogo from '@/components/branding/BrandLogo.vue'
 import AppBreadcrumb from '@/components/layout/AppBreadcrumb.vue'
 import CommandPalette from '@/components/layout/CommandPalette.vue'
+import NotificationBell from '@/components/layout/NotificationBell.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import SessionLimitReminder from '@/components/session/SessionLimitReminder.vue'
 import { useSessionRenewal } from '@/composables/useSessionRenewal'
@@ -190,6 +191,8 @@ function skipToMainContent(event: Event) {
             :value="option.value"
           />
         </el-select>
+
+        <NotificationBell />
 
         <el-dropdown trigger="click" @command="handleUserMenuCommand">
           <span class="user-menu-trigger">

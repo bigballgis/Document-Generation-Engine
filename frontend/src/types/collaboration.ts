@@ -8,6 +8,11 @@ export type CollaborationTimeoutScopeType = Schema<'CollaborationTimeoutScopeTyp
 
 export type CollaborationWorkItemSummary = Schema<'CollaborationWorkItemSummaryView'>
 
+export type CollaborationNotificationItem = Schema<'CollaborationNotificationItemView'>
+
+export type CollaborationNotificationUnreadCount =
+  Schema<'CollaborationNotificationUnreadCountView'>
+
 export type CollaborationTimeoutConfig = Schema<'CollaborationTimeoutConfigView'>
 
 export type UpsertCollaborationTimeoutConfigPayload = Schema<'UpsertCollaborationTimeoutConfigRequest'>

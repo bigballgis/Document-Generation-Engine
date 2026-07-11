@@ -327,6 +327,20 @@ export default {
     },
   },
   collaboration: {
+    notifications: {
+      title: 'Notifications',
+      bellAriaLabel: 'Notifications',
+      bellAriaLabelWithCount: 'Notifications, {count} unread',
+      markAll: 'Mark all as read',
+      empty: 'No notifications',
+      loading: 'Loading notifications…',
+      error: {
+        loadUnread: 'Unable to refresh notification count.',
+        loadList: 'Unable to load notifications.',
+        markRead: 'Unable to mark notification as read.',
+        markAll: 'Unable to mark all notifications as read.',
+      },
+    },
     workItems: {
       empty: 'You have no to-do items right now.',
       ageValue: '{value}',

@@ -191,6 +191,7 @@ export const apiErrorZhCn = {
   },
   collaboration: {
     accessDenied: "您无权查看协作待办事项。",
-    queueDenied: "您无权查看此协作待办队列。"
+    queueDenied: "您无权查看此协作待办队列。",
+    workItemNotFound: "未找到该协作待办事项。"
   }
 } as const

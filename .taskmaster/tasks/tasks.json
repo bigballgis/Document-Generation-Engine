@@ -446,12 +446,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T09:30:00.000Z"
+      },
+      {
+        "id": "33",
+        "title": "LR-C7 In-app notification center",
+        "description": "IN PROGRESS 2026-07-11. Sole-active LRP slice. LR-C7 in-app notification center — shell bell + unread from P14 collaboration OPEN items + escalations; server read markers; 30s poll; deep-link task hub. Slice lrp-c7-notification-center; placement ISOLATED D:/working/DGE-lrp-c7-notification-center · feat/lrp-c7-notification-center · base 2eaab40. BDD ready (docs/behavior/lrp-c7-notification-center.md; BDD-LRP-C7-001…017). Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 + C6 Done; C7 In Progress sole-active; C8 Not Started). Formal phase remains None. Do NOT mark Wave LR-C Done. Do NOT activate C8/CD-3. Next: backend-engineer then frontend-engineer.",
+        "details": "ACTIVATED 2026-07-11. Slice id: lrp-c7-notification-center. Placement: ISOLATED D:/working/DGE-lrp-c7-notification-center · branch feat/lrp-c7-notification-center · base 2eaab40 (2eaab40e5a76dd4887c2ad164a7992414b3b1897). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 + C6 Done; C7 In Progress sole-active; C8 Not Started). Scope: (1) Backend unread-count + notification-list from open collaboration to-dos + timeout escalations; per-user server read markers. (2) Frontend shell bell + unread badge + dropdown; deep-link to task hub partitions; mark-read per BDD. (3) 30s poll (pause when tab hidden). BDD: ready — docs/behavior/lrp-c7-notification-center.md (BDD-LRP-C7-001…017). Gates: mvn verify; pnpm lint/type-check/test/build; docker-deploy-queue; E2E LRP-C7-notification-center; UIUX both brands. Do NOT: email/IM/webhook; new notification domain; SSE/WebSocket; activate C8/CD-3; mark Wave LR-C Done. Maps: P14 Done; v1 boundary §0.1; depends Task Master #32 (LR-C6 Done).",
+        "testStrategy": "1. Follow BDD-LRP-C7-001…017. 2. Backend: unread count/list + read-marker persistence tests; mvn verify. 3. Vitest: bell badge, poll pause on hidden, mark-read. 4. Playwright: seed OPEN collaboration item → bell unread → open dropdown → deep-link task hub → unread clears. 5. pnpm lint/type-check/test/build + docker-deploy-queue + E2E + UIUX both brands. 6. Do not claim Wave LR-C Done; leave C8 Not Started.",
+        "priority": "high",
+        "dependencies": [
+          "32"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T09:45:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T09:30:00.000Z",
-      "taskCount": 32,
+      "lastModified": "2026-07-11T09:45:00.000Z",
+      "taskCount": 33,
       "completedCount": 32,
       "tags": [
         "master"

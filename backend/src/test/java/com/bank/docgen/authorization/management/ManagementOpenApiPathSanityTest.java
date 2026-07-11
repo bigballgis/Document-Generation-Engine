@@ -53,7 +53,8 @@ class ManagementOpenApiPathSanityTest {
             return java.util.Optional.of("com.bank.docgen.contentmodule");
         }
         if (path.startsWith("/api/management/v1/collaboration-work-items")
-                || path.startsWith("/api/management/v1/collaboration-timeout-config")) {
+                || path.startsWith("/api/management/v1/collaboration-timeout-config")
+                || path.startsWith("/api/management/v1/collaboration-notifications")) {
             return java.util.Optional.of("com.bank.docgen.collaboration");
         }
         if (path.startsWith("/api/management/v1/masters")) {

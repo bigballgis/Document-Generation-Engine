@@ -72,6 +72,8 @@ public final class ApiErrorCodes {
     public static final String PDF_CONVERSION_CAPACITY_EXCEEDED = "PDF_CONVERSION_CAPACITY_EXCEEDED";
     /** LR-A6 / ADR-0043: assembled DOCX failed OOXML well-formedness validation. */
     public static final String OOXML_VALIDATION_FAILED = "OOXML_VALIDATION_FAILED";
+    /** LR-C7: collaboration notification mark-read fail-closed (invisible / missing). */
+    public static final String WORK_ITEM_NOT_FOUND = "WORK_ITEM_NOT_FOUND";
 
     private ApiErrorCodes() {
     }

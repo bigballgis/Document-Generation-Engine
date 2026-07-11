@@ -21,6 +21,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.authorization.management.web.ManagementAuthController",
             "com.bank.docgen.authorization.management.web.UserManagementController",
             "com.bank.docgen.collaboration.web.CollaborationTimeoutConfigController",
+            "com.bank.docgen.collaboration.web.CollaborationNotificationController",
             "com.bank.docgen.collaboration.web.CollaborationWorkItemController",
             "com.bank.docgen.contentmodule.web.ContentModuleController",
             "com.bank.docgen.master.web.MasterDocumentController",
@@ -76,6 +77,10 @@ final class ManagementAuthorizationRegistry {
             Map.entry(
                     "com.bank.docgen.collaboration.web.CollaborationTimeoutConfigController",
                     Set.of("com.bank.docgen.collaboration.service.CollaborationTimeoutConfigService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.collaboration.web.CollaborationNotificationController",
+                    Set.of("com.bank.docgen.collaboration.service.CollaborationNotificationService")
             ),
             Map.entry(
                     "com.bank.docgen.collaboration.web.CollaborationWorkItemController",
@@ -253,6 +258,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.apimgmt.service.ApiPolicyRollbackService",
             "com.bank.docgen.audit.service.AuditQueryService",
             "com.bank.docgen.collaboration.service.CollaborationTimeoutConfigService",
+            "com.bank.docgen.collaboration.service.CollaborationNotificationService",
             "com.bank.docgen.collaboration.service.CollaborationWorkItemService",
             "com.bank.docgen.contentmodule.service.ContentModuleLifecycleImpactService",
             "com.bank.docgen.contentmodule.service.ContentModuleLifecycleService",

@@ -24,6 +24,16 @@ vi.mock('vue-router', () => ({
 
 vi.mock('@/api/auth')
 
+vi.mock('@/api/collaboration', () => ({
+  getCollaborationNotificationUnreadCount: vi.fn().mockResolvedValue({ unreadCount: 0 }),
+  listCollaborationNotifications: vi.fn().mockResolvedValue([]),
+  markCollaborationNotificationRead: vi.fn().mockResolvedValue({ unreadCount: 0 }),
+  markAllCollaborationNotificationsRead: vi.fn().mockResolvedValue({ unreadCount: 0 }),
+  listCollaborationWorkItems: vi.fn().mockResolvedValue([]),
+  getCollaborationTimeoutConfig: vi.fn(),
+  upsertCollaborationTimeoutConfig: vi.fn(),
+}))
+
 const globalAdminCapabilities: ManagementCapabilities = {
   manageMasters: true,
   reviewMasters: true,
@@ -306,5 +316,35 @@ describe('ManagementShell', () => {
 
     expect(useSessionStore().authenticated).toBe(false)
     expect(routerPush).toHaveBeenCalledWith({ name: 'login', query: { redirect: '/audit' } })
+  })
+
+  it('shows notification bell when session can view collaboration work items', async () => {
+    const wrapper = mountShell(globalAdminSession())
+    await flushPromises()
+    expect(wrapper.find('[data-testid="notification-bell"]').exists()).toBe(true)
+  })
+
+  it('hides notification bell when collaboration capability is absent', async () => {
+    const wrapper = mountShell({
+      username: '10000004',
+      displayName: 'Audit Only',
+      email: 'audit@example.com',
+      authSource: 'LOCAL',
+      roles: ['AUDIT_ADMIN'],
+      authorizedGroupCodes: ['*'],
+      defaultRoute: ROUTE_KEYS.auditConsole,
+      visibleRoutes: [ROUTE_KEYS.auditConsole],
+      capabilities: {
+        ...globalAdminCapabilities,
+        viewCollaborationWorkItems: false,
+        decideTests: false,
+        decideApprovals: false,
+        authorTemplates: false,
+        maintainCollaborationTimeoutConfig: false,
+      },
+      expiresAt: new Date().toISOString(),
+    })
+    await flushPromises()
+    expect(wrapper.find('[data-testid="notification-bell"]').exists()).toBe(false)
   })
 })

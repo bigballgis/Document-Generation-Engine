@@ -680,6 +680,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/collaboration-notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Unread collaboration notification count
+         * @description Returns the count of OPEN collaboration work items visible to the caller (role queues ∩ group scope) that have no per-user read marker (LR-C7). Includes ESCALATION when the session has admin collaboration visibility. Does not create a standalone notification domain. Fail-closed 403 without `viewCollaborationWorkItems`.
+         */
+        get: operations["getCollaborationNotificationUnreadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/collaboration-notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List collaboration notification projections
+         * @description Returns up to 20 newest OPEN collaboration work-item projections visible to the caller, each with a `read` flag from the per-user read marker (LR-C7). `queue` supports deep-link `/dashboard?queue={QUEUE}#tasks-section`. Excludes RESOLVED items and master review/rework. Fail-closed 403 without collaboration view.
+         */
+        get: operations["listCollaborationNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/collaboration-notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark all visible unread collaboration notifications as read
+         * @description Persists per-user read markers for every visible OPEN unread work item (LR-C7). Idempotent when none are unread. Does not resolve work items. Returns the refreshed unread count (normally 0).
+         */
+        post: operations["markAllCollaborationNotificationsRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/collaboration-notifications/{workItemId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark one collaboration notification as read
+         * @description Idempotently persists a per-user read marker for the given OPEN work item when it is visible to the caller (LR-C7). Invisible / missing / RESOLVED / out-of-scope IDs return `404 WORK_ITEM_NOT_FOUND` without leaking existence. Does not resolve the work item. Returns refreshed unread count.
+         */
+        post: operations["markCollaborationNotificationRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/collaboration-timeout-config": {
         parameters: {
             query?: never;
@@ -2476,6 +2556,39 @@ export interface components {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["CollaborationWorkItemSummaryView"][];
         };
+        CollaborationNotificationUnreadCountView: {
+            /**
+             * Format: int64
+             * @description Count of visible OPEN work items without a per-user read marker.
+             */
+            unreadCount: number;
+        };
+        CollaborationNotificationItemView: {
+            /** Format: uuid */
+            workItemId: string;
+            /** Format: uuid */
+            templateId: string;
+            templateName: string;
+            groupCode: string;
+            /** @description Queue type for deep-link construction — `/dashboard?queue={QUEUE}#tasks-section`. */
+            queue: components["schemas"]["CollaborationWorkItemQueue"];
+            triggerType: components["schemas"]["CollaborationWorkItemTriggerType"];
+            summaryText: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int64 */
+            ageSeconds: number;
+            /** @description True when the caller has a per-user read marker for this work item. */
+            read: boolean;
+        };
+        CollaborationNotificationUnreadCountResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["CollaborationNotificationUnreadCountView"];
+        };
+        CollaborationNotificationListResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["CollaborationNotificationItemView"][];
+        };
         CollaborationTimeoutConfigView: {
             scopeType: components["schemas"]["CollaborationTimeoutScopeType"];
             groupCode?: string | null;
@@ -2928,7 +3041,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED";
     };
     responses: {
         /** @description Async task accepted. */
@@ -4453,6 +4566,113 @@ export interface operations {
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
             422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getCollaborationNotificationUnreadCount: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unread count returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationNotificationUnreadCountResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listCollaborationNotifications: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Notification projections returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationNotificationListResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    markAllCollaborationNotificationsRead: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description All visible unread items marked read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationNotificationUnreadCountResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    markCollaborationNotificationRead: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                workItemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Work item marked read for the caller. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationNotificationUnreadCountResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };

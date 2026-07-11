@@ -1533,6 +1533,115 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/collaboration-notifications/unread-count:
+    get:
+      tags: [Collaboration, Admin]
+      operationId: getCollaborationNotificationUnreadCount
+      summary: Unread collaboration notification count
+      description: >-
+        Returns the count of OPEN collaboration work items visible to the caller
+        (role queues ∩ group scope) that have no per-user read marker (LR-C7).
+        Includes ESCALATION when the session has admin collaboration visibility.
+        Does not create a standalone notification domain. Fail-closed 403 without
+        `viewCollaborationWorkItems`.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Unread count returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationNotificationUnreadCountResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/collaboration-notifications:
+    get:
+      tags: [Collaboration, Admin]
+      operationId: listCollaborationNotifications
+      summary: List collaboration notification projections
+      description: >-
+        Returns up to 20 newest OPEN collaboration work-item projections visible
+        to the caller, each with a `read` flag from the per-user read marker
+        (LR-C7). `queue` supports deep-link
+        `/dashboard?queue={QUEUE}#tasks-section`. Excludes RESOLVED items and
+        master review/rework. Fail-closed 403 without collaboration view.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Notification projections returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationNotificationListResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/collaboration-notifications/read-all:
+    post:
+      tags: [Collaboration, Admin]
+      operationId: markAllCollaborationNotificationsRead
+      summary: Mark all visible unread collaboration notifications as read
+      description: >-
+        Persists per-user read markers for every visible OPEN unread work item
+        (LR-C7). Idempotent when none are unread. Does not resolve work items.
+        Returns the refreshed unread count (normally 0).
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: All visible unread items marked read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationNotificationUnreadCountResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/collaboration-notifications/{workItemId}/read:
+    post:
+      tags: [Collaboration, Admin]
+      operationId: markCollaborationNotificationRead
+      summary: Mark one collaboration notification as read
+      description: >-
+        Idempotently persists a per-user read marker for the given OPEN work item
+        when it is visible to the caller (LR-C7). Invisible / missing / RESOLVED
+        / out-of-scope IDs return `404 WORK_ITEM_NOT_FOUND` without leaking
+        existence. Does not resolve the work item. Returns refreshed unread count.
+      parameters:
+        - name: workItemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Work item marked read for the caller.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationNotificationUnreadCountResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/collaboration-timeout-config:
     get:
       tags: [Collaboration, Admin]
@@ -6112,6 +6221,82 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CollaborationWorkItemSummaryView'
+    CollaborationNotificationUnreadCountView:
+      type: object
+      additionalProperties: false
+      required: [unreadCount]
+      properties:
+        unreadCount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Count of visible OPEN work items without a per-user read marker.
+    CollaborationNotificationItemView:
+      type: object
+      additionalProperties: false
+      required:
+        - workItemId
+        - templateId
+        - templateName
+        - groupCode
+        - queue
+        - triggerType
+        - summaryText
+        - createdAt
+        - ageSeconds
+        - read
+      properties:
+        workItemId:
+          type: string
+          format: uuid
+        templateId:
+          type: string
+          format: uuid
+        templateName:
+          type: string
+        groupCode:
+          type: string
+          maxLength: 64
+        queue:
+          $ref: '#/components/schemas/CollaborationWorkItemQueue'
+          description: >-
+            Queue type for deep-link construction —
+            `/dashboard?queue={QUEUE}#tasks-section`.
+        triggerType:
+          $ref: '#/components/schemas/CollaborationWorkItemTriggerType'
+        summaryText:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        ageSeconds:
+          type: integer
+          format: int64
+          minimum: 0
+        read:
+          type: boolean
+          description: True when the caller has a per-user read marker for this work item.
+    CollaborationNotificationUnreadCountResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/CollaborationNotificationUnreadCountView'
+    CollaborationNotificationListResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/CollaborationNotificationItemView'
     CollaborationTimeoutConfigView:
       type: object
       additionalProperties: false
@@ -7246,6 +7431,7 @@ components:
         - ASYNC_TASK_EXPIRED
         - ASYNC_TASK_CANCELLATION_NOT_ALLOWED
         - DOCUMENT_NOT_FOUND
+        - WORK_ITEM_NOT_FOUND
         - ENCRYPTION_PARAMETER_INVALID
         - ENCRYPTION_FAILED
         - BATCH_ITEMS_REQUIRED
