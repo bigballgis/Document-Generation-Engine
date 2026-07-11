@@ -17,7 +17,7 @@ be signed off. No item is skipped; a single 🔴 blocks launch.
 | LR-A (rendering trust) | **Done** (2026-07-10) — A1–A7 Done; **ADR-0041 Accepted**; 0042/0043 remain **Proposed**; Word-vs-LO / 0042 Accepted + 0043 slice B **deferred out of wave exit** (0041 Accepted residual closed) | LR-A5 merge `cc9e5f6` (docs-only + architecture-reviewer PASS_WITH_NOTES); LR-A6 merge `122d6d1`; LR-A7 evidence [lrp-a7-pagination](../evidence/lrp-a7-pagination/); CD-HARD-T01/T03/T04 Done |
 | LR-B (multi-instance + session) | Done (2026-07-04) | ADR-0044, ShedLock V46, SSE proxy config, graceful shutdown, LR-B6 session renewal |
 | LR-C (usability deepening) | **Done** (2026-07-11) — C1–C13 all Done; merge tip `bf9cbeb`; **no sole-active** | **LR-C8 Done** 2026-07-11 (`lrp-c8-role-onboarding-tour`; merge `bf9cbeb`; E2E 4/4; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES; Task Master #34); LR-C7 Done 2026-07-11 (`lrp-c7-notification-center`; merge `879108c`; E2E 5/5; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES; Task Master #33); LR-C6 Done 2026-07-11 (`lrp-c6-command-palette`; merge `c0c84aa`; E2E 8/8; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES; Task Master #32); LR-C5 Done 2026-07-11 (`lrp-c5-catalog-pagination`; merge `5543a33`; E2E 6/6; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES; OPT-F4 residual closed; Task Master #31); LR-C3 Done 2026-07-11 (`lrp-c3-editor-undo-redo`; merge `0cf553b`; E2E 7/7; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES; Task Master #30); LR-C2 Done 2026-07-11 (`lrp-c2-local-draft-recovery`; merge `12a6a7e`; E2E 4/4; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES; Task Master #29); LR-C13 merge `45addd6` (OPT-G4/G5 closed; coverage 80/55/80/80; architecture PASS_WITH_NOTES; Task Master #28); LR-C12 merge `0357a16` (E2E 10/10; UIUX PASS_WITH_NOTES; COR-F21 residual closed; Task Master #27); LR-C11 merge `44fcf40` (parity **159/159**; architecture PASS_WITH_NOTES); LR-C10 merge `bdaf95d` (E2E 4/4; UIUX PASS_WITH_NOTES); LR-C9 merge `0013615`; F7 for C1/C4 |
-| LR-D (ops + data lifecycle) | **In Progress** (2026-07-11 — partial; **sole-active = LR-D7**; **LR-D1 Done**) | **LR-D7 In Progress** (`lrp-d7-durable-security-audit`; Task Master #36; BDD ready); **LR-D1 Done** (`20b2a76`; Task Master #35; ADR-0048 Accepted). D2–D6 Not Started — do not activate. |
+| LR-D (ops + data lifecycle) | **In Progress** (2026-07-11 — partial; **LR-D1+D7 Done**; **no sole-active**) | **LR-D7 Done** (`c94a356`; Task Master #36; seam «Security forbidden-route audit» closed); **LR-D1 Done** (`20b2a76`; Task Master #35; ADR-0048 Accepted). D2–D6 Not Started — do not activate. |
 | LR-E1 (SSE-through-proxy E2E) | Scaffold in place | `LRP-E1-sse-incremental-progress.spec.ts` (full journey pending seeded template) |
 
 ## Go/no-go checklist
@@ -51,11 +51,11 @@ be signed off. No item is skipped; a single 🔴 blocks launch.
 
 ### Ops + data lifecycle
 
-- [ ] LR-D1: audit retention scheduler; cleanup tested at the window edge.
+- [x] LR-D1: audit retention scheduler; cleanup tested at the window edge.
 - [ ] LR-D2: backup/restore runbook; **timed drill completed** (RPO ≤ 15 min / RTO ≤ 30 min).
 - [ ] LR-D3: metrics + alerting rules deployed; dashboards importable.
 - [ ] LR-D6: load smoke baseline (≥20 concurrent sync + SSE preview) green on Docker.
-- [ ] LR-D7: durable security audit events (login/403/download → DB).
+- [x] LR-D7: durable security audit events (login/403/download → DB) — merge `c94a356`; seam closed.
 
 ### Release gates
 

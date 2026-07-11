@@ -1,13 +1,15 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (2026-07-11 — partial: **LR-D1 Done**; **LR-D7 → In Progress** sole-active; D2–D6 remain Not Started)  
+**Wave status:** **In Progress** (2026-07-11 — partial: **LR-D1 Done**; **LR-D7 Done**; D2–D6 remain Not Started; **no sole-active**)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 is most valuable **after LR-A1/LR-B3** land; D2/D3/D4/D5 schedulable later — **do not activate D2–D6 / LR-E / CD-3** while D7 is sole-active
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 is most valuable **after LR-A1/LR-B3** land; D2/D3/D4/D5 schedulable later — **do not activate D2–D6 / LR-E / CD-3** in this between-slices state
 
-> **Activation note (2026-07-11, LR-D7):** **LR-D7 → In Progress** (sole-active LRP slice). Slice `lrp-d7-durable-security-audit`; formal phase remains **None**. Durable security audit events (login/403/download → DB); close «Security forbidden-route audit» seam; retention via ADR-0048/D1. BDD **`ready`** (`docs/behavior/lrp-d7-durable-security-audit.md`; BDD-LRP-D7-001…010). Placement: ISOLATED `D:/working/DGE-lrp-d7-durable-security-audit` · `feat/lrp-d7-durable-security-audit` · base `2bc33cf` (`2bc33cf22e103eee2cc5eecaaadb7a97bf51c438`). Gate evidence: []. **Task Master #36 → in-progress**. Wave LR-D remains **In Progress** (**D1 Done**; **D2–D6 Not Started**). Do **not** activate D2–D6/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+> **Completion note (2026-07-11, LR-D7):** **LR-D7 → Done** (slice `lrp-d7-durable-security-audit`; formal phase remains **None**). Durable `SECURITY_*` audit events (login/403/download → `management_audit_event`); route-denied API + frontend; retention via ADR-0048/D1; closes ledger seam «Security forbidden-route audit». BDD **`ready`** (`docs/behavior/lrp-d7-durable-security-audit.md`; BDD-LRP-D7-001…010). **Merge:** `c94a356` (`c94a356070dff7a9ab35ffbc0ba53b49f63270d0`); worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1294 tests); `pnpm` frontend lint/type-check/test/build **GREEN** (1144 tests); architecture **PASS_WITH_NOTES** (Critical **0**; merge_go=true); **DEPLOY_OK** 2026-07-11T23:50:03+08:00 healthz 200; E2E/UIUX skipped per BDD D7-C14. **Task Master #36 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D7 Done**; **D2–D6 Not Started**). Do **not** activate D2–D6/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
 
-> **Completion note (2026-07-11):** **LR-D1 → Done** (slice `lrp-d1-audit-retention`; formal phase remains **None**). Audit retention cleanup for management + runtime audit tables (mirror ADR-0040; closes **CD-PIT-15**; under LR-B2 ShedLock). BDD **`ready`** (`docs/behavior/lrp-d1-audit-retention.md`). **ADR-0048 Accepted**. Flyway **V54** applied. **Merge:** `20b2a76` (`feat(audit): LR-D1 audit retention cleanup with V54 and ADR-0048`); worktree removed. **Gates:** `mvn verify` **GREEN**; architecture **PASS_WITH_NOTES** (merge_go=true); **DEPLOY_OK** 2026-07-11T22:26:31+08:00 healthz 200. **Task Master #35 → done**. Superseded sole-active by **LR-D7** (see activation note above). Wave remains **In Progress**. Do **not** activate D2–D6/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+> **Activation note (2026-07-11, LR-D7):** **LR-D7 → In Progress** (now **Done** — see completion note above). Slice `lrp-d7-durable-security-audit`; formal phase remains **None**.
+
+> **Completion note (2026-07-11):** **LR-D1 → Done** (slice `lrp-d1-audit-retention`; formal phase remains **None**). Audit retention cleanup for management + runtime audit tables (mirror ADR-0040; closes **CD-PIT-15**; under LR-B2 ShedLock). BDD **`ready`** (`docs/behavior/lrp-d1-audit-retention.md`). **ADR-0048 Accepted**. Flyway **V54** applied. **Merge:** `20b2a76` (`feat(audit): LR-D1 audit retention cleanup with V54 and ADR-0048`); worktree removed. **Gates:** `mvn verify` **GREEN**; architecture **PASS_WITH_NOTES** (merge_go=true); **DEPLOY_OK** 2026-07-11T22:26:31+08:00 healthz 200. **Task Master #35 → done**. Wave remains **In Progress**. Do **not** activate D2–D6/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
 
 > **Activation note (2026-07-11):** **LR-D1 → In Progress** (now **Done** — see completion note above). Slice `lrp-d1-audit-retention`; formal phase remains **None**.
 
@@ -20,7 +22,7 @@
 2026-07-03 inventory (evidence verified in program §1):
 
 - Management/runtime audit tables (`V9__management_audit.sql`, `V17__runtime_generation_audit.sql`) grow unbounded — contrast with the invocation-record pattern (`InvocationRetentionCleanupScheduler` + `V43`/`V44`, ADR-0040) (**CD-PIT-15**, added 2026-07-03).
-- Security events (login success/failure, 403 route, download) are **log-only** (`SecurityAuditSummaryService`) — ledger seam «Security forbidden-route audit» open since 2026-06-24.
+- Security events (login success/failure, 403 route, download) were **log-only** (`SecurityAuditSummaryService`) — ledger seam «Security forbidden-route audit» **closed** by **LR-D7** (2026-07-11; merge `c94a356`; durable `SECURITY_*` on `management_audit_event`).
 - No backup/restore runbook despite Flyway forward-only + ADR-0030 RPO ≤15 min / RTO ≤30 min commitments; no alert rules or dashboards as code; no trace propagation into async/Kafka paths.
 
 ---
@@ -196,7 +198,7 @@
 - **Artifacts:** behavior spec (**ready**); persistence + query scoping + tests; seam row closure; OpenAPI if new report endpoint.
 - **Done when:** Scenarios green + seam closed + doc sync + commit review.
 - **Maps:** COR-P06 residual; permission matrix §13.3; ledger seam «Security forbidden-route audit».
-- **Status:** **In Progress** (2026-07-11 — sole-active; slice `lrp-d7-durable-security-audit`; Task Master #36; BDD **`ready`**; placement ISOLATED `D:/working/DGE-lrp-d7-durable-security-audit` · `feat/lrp-d7-durable-security-audit` · base `2bc33cf`)
+- **Status:** **Done** (2026-07-11 — merge `c94a356`; Task Master #36; BDD **`ready`**; mvn verify GREEN 1294; frontend gates GREEN 1144; architecture PASS_WITH_NOTES; DEPLOY_OK 2026-07-11T23:50:03+08:00; seam «Security forbidden-route audit» **closed**)
 
 ---
 
@@ -207,4 +209,4 @@
 - [ ] `deploy/observability/` alert rules + dashboards committed; new metric series scrapeable
 - [ ] TraceId propagation decision recorded + minimal path proven
 - [ ] NFR proposals merged as pending; load smoke baselines recorded
-- [ ] Security audit seam closed (LR-D7)
+- [x] Security audit seam closed (LR-D7 — merge `c94a356`; BDD + tests; ledger seam closed)
