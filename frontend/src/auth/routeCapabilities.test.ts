@@ -3,7 +3,7 @@ import { canAccessRouteWithCapability } from '@/auth/routeCapabilities'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import type { ManagementSession } from '@/types/session'
 
-function session(partial: Partial<ManagementSession>): ManagementSession {
+function session(partial: Partial<ManagementSession> = {}): ManagementSession {
   return {
     username: '10000001',
     displayName: 'Tester',
@@ -189,5 +189,51 @@ describe('routeCapabilities', () => {
     )
 
     expect(allowed).toBe(true)
+  })
+
+  it('fails closed on unknown route keys even when listed in visibleRoutes', () => {
+    const denied = canAccessRouteWithCapability(
+      'route.unknown-future-surface',
+      session({
+        roles: ['GLOBAL_ADMIN'],
+        visibleRoutes: ['route.unknown-future-surface', ROUTE_KEYS.dashboardHome],
+      }),
+    )
+
+    expect(denied).toBe(false)
+  })
+
+  it('denies dashboard when role matrix would not grant it despite visibleRoutes', () => {
+    const denied = canAccessRouteWithCapability(
+      ROUTE_KEYS.dashboardHome,
+      session({
+        roles: ['AUDIT_ADMIN'],
+        visibleRoutes: [ROUTE_KEYS.dashboardHome, ROUTE_KEYS.auditConsole],
+        capabilities: undefined,
+      }),
+    )
+
+    expect(denied).toBe(false)
+  })
+
+  it('denies api-policy when role cannot manage policy despite visibleRoutes', () => {
+    const denied = canAccessRouteWithCapability(
+      ROUTE_KEYS.apiPolicyManagement,
+      session({
+        roles: ['TEMPLATE_AUTHOR'],
+        visibleRoutes: [
+          ROUTE_KEYS.dashboardHome,
+          ROUTE_KEYS.templateManagement,
+          ROUTE_KEYS.apiPolicyManagement,
+        ],
+        capabilities: undefined,
+      }),
+    )
+
+    expect(denied).toBe(false)
+  })
+
+  it('allows dashboard for template author when visible and role-aligned', () => {
+    expect(canAccessRouteWithCapability(ROUTE_KEYS.dashboardHome, session())).toBe(true)
   })
 })

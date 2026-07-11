@@ -366,8 +366,8 @@
       {
         "id": "27",
         "title": "LR-C12 Keyboard a11y & table activation",
-        "description": "COMPLETED 2026-07-11. LR-C12 keyboard a11y & table activation Done — Enter/Space on activatable rows, skip-link, focus-ring tokens, extended a11y-smoke, keyboard journey E2E, UIUX manifest. Merge 0357a16; worktree removed. Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. No sole-active. Recommend next LR-C13 or pause (do not auto-activate).",
-        "details": "DONE 2026-07-11. Slice id: lrp-c12-keyboard-a11y. Merge: 0357a166ab2e310aed0ed25f33a5ba8dbfbab63a (feat/lrp-c12-keyboard-a11y → main); feature e207e28. Status: done. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9/C10/C11/C12 Done; C2/C3/C5/C7/C8/C13 Not Started). Delivered: Enter/Space on activatable rows (EP store display order), skip-link, focus-ring tokens, extended a11y-smoke, keyboard journey E2E, UIUX manifest. COR-F21 residual closed; OPT-B4 lint baseline absorbed. Gates: pnpm lint/type-check/test/build GREEN (983 tests); docker-deploy-queue DEPLOY_OK (:8080 UP, :4173 200); E2E a11y-smoke + LRP-C12-keyboard-journey 10/10 PASS; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C12-uiux-manifest.md); architecture PASS_WITH_NOTES Critical 0. Do NOT mark Wave LR-C Done. Do NOT activate C13/C2/C3/CD-3. Next: recommend LR-C13 or pause (do not auto-activate).",
+        "description": "COMPLETED 2026-07-11. LR-C12 keyboard a11y & table activation Done — Enter/Space on activatable rows, skip-link, focus-ring tokens, extended a11y-smoke, keyboard journey E2E, UIUX manifest. Merge 0357a16; worktree removed. Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. Superseded sole-active by Task #28 (LR-C13).",
+        "details": "DONE 2026-07-11. Slice id: lrp-c12-keyboard-a11y. Merge: 0357a166ab2e310aed0ed25f33a5ba8dbfbab63a (feat/lrp-c12-keyboard-a11y → main); feature e207e28. Status: done. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9/C10/C11/C12 Done; C13 activated as Task #28; C2/C3/C5/C7/C8 Not Started). Delivered: Enter/Space on activatable rows (EP store display order), skip-link, focus-ring tokens, extended a11y-smoke, keyboard journey E2E, UIUX manifest. COR-F21 residual closed; OPT-B4 lint baseline absorbed. Gates: pnpm lint/type-check/test/build GREEN (983 tests); docker-deploy-queue DEPLOY_OK (:8080 UP, :4173 200); E2E a11y-smoke + LRP-C12-keyboard-journey 10/10 PASS; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C12-uiux-manifest.md); architecture PASS_WITH_NOTES Critical 0. Do NOT mark Wave LR-C Done. Next: LR-C13 activated as Task #28.",
         "testStrategy": "1. Vitest for useActivatableTableRow Enter/Space + focusable rows. 2. Playwright keyboard journey: tab → skip-link → table → Enter opens detail. 3. Extended a11y-smoke axe on Docker 4173 — zero critical violations. 4. pnpm lint/type-check/test/build green. 5. UIUX a11y evidence manifest. 6. Do not claim Wave LR-C Done.",
         "priority": "high",
         "dependencies": [
@@ -376,12 +376,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T07:38:00.000Z"
+      },
+      {
+        "id": "28",
+        "title": "LR-C13 Frontend engineering debt",
+        "description": "Sole-active LRP slice after LR-C12 Done: LR-C13 frontend eng debt — shared unwrap, route guards, manualChunks, coverage ratchet. BDD not-applicable (refactor + build config; no intentional behavior change). Do NOT mark Wave LR-C Done. Do NOT activate C2/C3/C5/C7/C8/CD-3. Formal phase remains None.",
+        "details": "IN PROGRESS 2026-07-11. Slice id: lrp-c13-frontend-eng-debt. Status: in-progress. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9/C10/C11/C12 Done; C13 In Progress sole-active; C2/C3/C5/C7/C8 Not Started). Placement: ISOLATED D:/working/DGE-lrp-c13-frontend-eng-debt · feat/lrp-c13-frontend-eng-debt · base 51838da (fetch origin 443 failed — local main used). Scope: (1) shared unwrap/envelope helper + migrate 10 api modules (OPT-G4); (2) symmetric client route role checks + router integration tests (OPT-G5); (3) vite manualChunks vendor split + ledger sizes; (4) vitest coverage floor ratchet to measured baseline. Do NOT change API response semantics; do NOT contradict backend visibleRoutes; do NOT set coverage floors above measured reality. Gates: pnpm lint/type-check/test/build. UIUX: no. e2e_required: no (non-visual refactor). Do NOT mark Wave LR-C Done. Do NOT activate C2/C3/C5/C7/C8/CD-3.",
+        "testStrategy": "1. Grep-verify zero remaining private unwrap definitions after shared helper migration. 2. Router integration tests for unauthorized deep-link redirect. 3. pnpm lint/type-check/test/build green; vendor chunks present after build. 4. Coverage floors raised to measured baseline (document old→new). 5. Do not claim Wave LR-C Done.",
+        "priority": "high",
+        "dependencies": [
+          "27"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T01:31:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T07:38:00.000Z",
-      "taskCount": 27,
+      "lastModified": "2026-07-11T01:31:00.000Z",
+      "taskCount": 28,
       "completedCount": 27,
       "tags": [
         "master"
