@@ -1,11 +1,13 @@
 # LRP Wave LR-C — Business Usability Deepening 「业务易用性深化」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 Done** 2026-07-11 — slice `lrp-c11-api-error-i18n`; **LR-C12 Done** 2026-07-11 — slice `lrp-c12-keyboard-a11y`; **LR-C13 Done** 2026-07-11 — slice `lrp-c13-frontend-eng-debt`; **LR-C2 Done** 2026-07-11 — slice `lrp-c2-local-draft-recovery`; **LR-C3 Done** 2026-07-11 — slice `lrp-c3-editor-undo-redo`; **LR-C5 Done** 2026-07-11 — slice `lrp-c5-catalog-pagination`; remaining C6/C7/C8 Not Started)  
+**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 Done** 2026-07-11 — slice `lrp-c11-api-error-i18n`; **LR-C12 Done** 2026-07-11 — slice `lrp-c12-keyboard-a11y`; **LR-C13 Done** 2026-07-11 — slice `lrp-c13-frontend-eng-debt`; **LR-C2 Done** 2026-07-11 — slice `lrp-c2-local-draft-recovery`; **LR-C3 Done** 2026-07-11 — slice `lrp-c3-editor-undo-redo`; **LR-C5 Done** 2026-07-11 — slice `lrp-c5-catalog-pagination`; **LR-C6 In Progress** sole-active — remaining C7/C8 Not Started)  
 **Owner default:** `frontend-engineer` (+ `backend-engineer` where noted); every user-facing slice pairs `e2e-test-engineer` + `e2e-uiux-reviewer`  
-**Prerequisites:** none for most tasks; **C6 depends on LR-C5**; **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
+**Prerequisites:** none for most tasks; **C6 depends on LR-C5** (Done); **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
 
-> **Completion note (2026-07-11):** **LR-C5 → Done** (slice `lrp-c5-catalog-pagination`; merge `5543a33` / `5543a335c8480f7ca3e6b4d8ef2e57f26f88f003` → `main`; feature `cfab79e` / `cfab79e45f81405e5877c78097ded582ce0d41c2`; worktree removed). Catalog server-side pagination/filter for templates/masters/content-modules; COR-F09 row+group-first default sort; dashboard/picker consumers fixed. BDD **`ready`** (`docs/behavior/lrp-c5-catalog-pagination.md` — `BDD-LRP-C5-CATALOG-001`; scenarios BDD-LRP-C5-001…015). Formal phase remains **None**. **No sole-active LRP slice.** Wave LR-C remains **In Progress** (partial — C1/C4/C9–C13 + **C2** + **C3** + **C5** Done; C6/C7/C8 Not Started). Do **not** mark Wave LR-C Done. Do **not** activate C6/C7/C8/CD-3. **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN**; `pnpm -C frontend lint && type-check && test && build` **GREEN** (1054+ tests); `docker-deploy-queue.ps1` **DEPLOY_OK** (`:8080` UP, `:4173` 200; seed 500 LOAD-TPL; templates `totalElements=515`); E2E LRP-C5-catalog-pagination **6/6** PASS (re-smoke); UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C5-uiux-manifest.md`); perf p95 ~75ms (`frontend/e2e/evidence/LRP-C5-list-latency.json`); architecture **PASS_WITH_NOTES** (Critical **0**; Majors dashboard/pickers fixed before merge). **Task Master #31 → done**. OPT-F4 residual closed. Recommend next: **LR-C6** (depends on C5, now unblocked) **OR** **LR-C7** — do not auto-activate.
+> **Activation note (2026-07-11):** **LR-C6 → In Progress** (slice `lrp-c6-command-palette`; formal phase remains **None**). Sole-active LRP slice — global search / command palette (Ctrl+K / Cmd+K); reuses LR-C5 server `search` (no separate palette API). BDD **`ready`** (`docs/behavior/lrp-c6-command-palette.md` — `BDD-LRP-C6-PALETTE-001`; scenarios BDD-LRP-C6-001…015; recent-items v1 deferred C6-C8). Placement: ISOLATED `D:/working/DGE-lrp-c6-command-palette` · `feat/lrp-c6-command-palette` · base `cabc058` (`cabc05867383757dc3a7920811797b6c09916a30`). Gate evidence: []. **Task Master #32 → in-progress**. Other LR-C rows untouched (C7/C8 Not Started; C1–C5/C9–C13 Done). Do **not** mark Wave LR-C Done. Do **not** activate C7/C8/CD-3. User direction: 「按你建议继续」→ activate C6.
+>
+> **Completion note (2026-07-11):** **LR-C5 → Done** (slice `lrp-c5-catalog-pagination`; merge `5543a33` / `5543a335c8480f7ca3e6b4d8ef2e57f26f88f003` → `main`; feature `cfab79e` / `cfab79e45f81405e5877c78097ded582ce0d41c2`; worktree removed). Catalog server-side pagination/filter for templates/masters/content-modules; COR-F09 row+group-first default sort; dashboard/picker consumers fixed. BDD **`ready`** (`docs/behavior/lrp-c5-catalog-pagination.md` — `BDD-LRP-C5-CATALOG-001`; scenarios BDD-LRP-C5-001…015). Formal phase remains **None**. Superseded sole-active by LR-C6 activation above. Wave LR-C remains **In Progress** (partial — C1/C4/C9–C13 + **C2** + **C3** + **C5** Done; **C6 In Progress**; C7/C8 Not Started). Do **not** mark Wave LR-C Done. Do **not** activate C7/C8/CD-3. **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN**; `pnpm -C frontend lint && type-check && test && build` **GREEN** (1054+ tests); `docker-deploy-queue.ps1` **DEPLOY_OK** (`:8080` UP, `:4173` 200; seed 500 LOAD-TPL; templates `totalElements=515`); E2E LRP-C5-catalog-pagination **6/6** PASS (re-smoke); UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C5-uiux-manifest.md`); perf p95 ~75ms (`frontend/e2e/evidence/LRP-C5-list-latency.json`); architecture **PASS_WITH_NOTES** (Critical **0**; Majors dashboard/pickers fixed before merge). **Task Master #31 → done**. OPT-F4 residual closed.
 >
 > **Activation note (2026-07-11):** **LR-C5 → In Progress** (slice `lrp-c5-catalog-pagination`; formal phase remains **None**). Sole-active LRP slice — catalog server-side pagination/filter (templates/masters/content-modules); OPT-F4 residual; COR-F09 group-first semantics kept. BDD later **`ready`** (see completion note above). Placement: ISOLATED `D:/working/DGE-lrp-c5-catalog-pagination` · `feat/lrp-c5-catalog-pagination` · base `e860256` (`e86025624bcc11f25ce2228cf1ed69e32d7290ef`). Gate evidence: [] (now **done** — see completion note above). **Task Master #31 → in-progress** (now **done**). Other LR-C rows untouched at activation (C6/C7/C8 Not Started; C1/C2/C3/C4/C9–C13 Done). Do **not** mark Wave LR-C Done. Do **not** activate C6/C7/C8/CD-3 (C6 depends on C5 — leave Not Started).
 >
@@ -171,25 +173,26 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 
 ### LR-C6 — Global search / command palette (Ctrl+K)
 
-- **Owner agent:** frontend-engineer (+ backend-engineer for search endpoint)
-- **BDD:** **required**.
+- **Owner agent:** frontend-engineer (backend-engineer **not** required — no new endpoint; reuse C5 `search`)
+- **BDD:** **ready** — [`docs/behavior/lrp-c6-command-palette.md`](../../behavior/lrp-c6-command-palette.md) (`BDD-LRP-C6-PALETTE-001`; scenarios BDD-LRP-C6-001…015).
+- **BDD readiness confirmation (2026-07-11):** **`ready`** — persisted; recent-items **v1 out of scope** (C6-C8); **no new backend endpoint** (C6-C3).
 - **UIUX:** yes
-- **Depends on:** LR-C5 server-side search/filter endpoint. If sequenced earlier, ship a **client-side limited version** over already-loaded catalog data and state the limitation in the spec + UI copy.
-- **Read first:** `frontend/src/components/` shell (`ManagementShell`); `visibleRoutes` gating in session store/router; LR-C5 endpoints.
+- **Depends on:** LR-C5 server-side search/filter endpoint (**Done** 2026-07-11 — merge `5543a33`). Reuse C5 `search` param; do **not** invent a separate palette API.
+- **Read first:** `frontend/src/components/` shell (`ManagementShell`); `visibleRoutes` gating in session store/router; LR-C5 endpoints; behavior spec above.
 - **Do NOT:** Surface entities the session cannot access (search must be authorization-scoped server-side; `visibleRoutes` fail-closed for route entries); add a heavyweight search dependency.
 - **Steps:**
-  1. Wait for BDD spec `ready`.
+  1. ~~Wait for BDD spec `ready`.~~ **Done** (2026-07-11).
   2. Palette component (Ctrl+K / Cmd+K): search authorized templates/masters/content-modules + navigable routes; keyboard navigation (↑↓ Enter Esc).
   3. Server query via LR-C5 search param (scoped by session groups/roles).
-  4. i18n keys; recent-items local memory (optional per spec).
+  4. i18n keys; recent-items **deferred** (C6-C8).
   5. Vitest + Playwright: open with keyboard, search seeded template, Enter navigates to its detail; unauthorized entity absent for a restricted role.
 - **Acceptance (G/W/T):**
-  - **G** any management page **W** Ctrl+K then a template code fragment **T** matching authorized items list within the palette; Enter routes to the item.
-  - **G** a role without access to a module **W** searching its name **T** no result leaks (fail-closed).
-- **Gates:** §1 standard block (+ backend verify if endpoint changes); spec `frontend/e2e/LRP-C6-command-palette.spec.ts`; UIUX manifest.
-- **Artifacts:** palette component + shell wiring; search endpoint usage; behavior spec; tests + E2E + manifest.
+  - **G** any management page **W** Ctrl+K then a template code fragment **T** matching authorized items list within the palette; Enter routes to the item. → **BDD-LRP-C6-002**
+  - **G** a role without access to a module **W** searching its name **T** no result leaks (fail-closed). → **BDD-LRP-C6-003**
+- **Gates:** §1 standard block (backend verify **not** required unless C5 gap found); spec `frontend/e2e/LRP-C6-command-palette.spec.ts`; UIUX manifest.
+- **Artifacts:** palette component + shell wiring; C5 search usage; behavior spec; tests + E2E + manifest.
 - **Done when:** Scenarios green + gates + UIUX PASS + doc sync + commit review.
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-11 — slice `lrp-c6-command-palette`; sole-active; Task Master #32; BDD **ready**; placement ISOLATED `D:/working/DGE-lrp-c6-command-palette` · `feat/lrp-c6-command-palette`)
 
 ### LR-C7 — In-app notification center
 
