@@ -4,6 +4,27 @@ export default {
   app: {
     title: 'Document Generation System',
   },
+  commandPalette: {
+    dialogLabel: 'Command palette',
+    searchLabel: 'Search commands and resources',
+    placeholder: 'Search templates, masters, clauses, or pages…',
+    resultsLabel: 'Search results',
+    loading: 'Searching…',
+    noMatch: 'No matching pages or resources.',
+    hint: '↑↓ to move · Enter to open · Esc to close',
+    close: 'Close command palette',
+    groups: {
+      routes: 'Pages',
+      templates: 'Templates',
+      masters: 'Letterhead templates',
+      contentModules: 'Standard clauses',
+    },
+    errors: {
+      templates: 'Unable to search templates. Try again.',
+      masters: 'Unable to search letterhead templates. Try again.',
+      contentModules: 'Unable to search standard clauses. Try again.',
+    },
+  },
   login: {
     title: 'Sign in',
     subtitle: 'Sign in to continue',

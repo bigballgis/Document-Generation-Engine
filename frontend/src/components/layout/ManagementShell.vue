@@ -18,6 +18,7 @@ import {
 } from '@element-plus/icons-vue'
 import BrandLogo from '@/components/branding/BrandLogo.vue'
 import AppBreadcrumb from '@/components/layout/AppBreadcrumb.vue'
+import CommandPalette from '@/components/layout/CommandPalette.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import SessionLimitReminder from '@/components/session/SessionLimitReminder.vue'
 import { useSessionRenewal } from '@/composables/useSessionRenewal'
@@ -284,6 +285,8 @@ function skipToMainContent(event: Event) {
         </div>
       </main>
     </div>
+
+    <CommandPalette />
   </div>
 </template>
 
