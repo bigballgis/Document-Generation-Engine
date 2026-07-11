@@ -464,23 +464,23 @@
       {
         "id": "34",
         "title": "LR-C8 Role onboarding tour",
-        "description": "IN PROGRESS 2026-07-11. LR-C8 role-aware guided onboarding tour (el-tour; first-login; skippable; help replay; FE-only). Slice lrp-c8-role-onboarding-tour; sole-active LRP slice. BDD ready (docs/behavior/lrp-c8-role-onboarding-tour.md — BDD-LRP-C8-TOUR-001). Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 + C6 + C7 Done; C8 In Progress). Formal phase None. Do NOT mark Wave LR-C Done. Do NOT activate CD-3.",
-        "details": "ACTIVATED 2026-07-11. Slice id: lrp-c8-role-onboarding-tour. Placement: ISOLATED D:/working/DGE-lrp-c8-role-onboarding-tour · feat/lrp-c8-role-onboarding-tour · base 0b22716 (0b227169fedab562d7295d2489af489d68541337). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 + C6 + C7 Done; C8 In Progress sole-active). Scope: role-aware el-tour from RoleJourneyTimeline (P21); first-login trigger; skippable + dismiss-remembered; help-menu replay; i18n en+zh-CN; no new tour dependency; FE-only. BDD: ready — docs/behavior/lrp-c8-role-onboarding-tour.md (BDD-LRP-C8-TOUR-001). Gate evidence: []. Do NOT: third-party tour lib; force tour; hardcode step copy; activate CD-3; mark Wave LR-C Done. Maps: LRP-C detail LR-C8; depends Task Master #33 (LR-C7 Done).",
-        "testStrategy": "1. Follow BDD-LRP-C8-TOUR-001 + acceptance in docs/plan/detail/LRP-C-usability-deepening.md LR-C8. 2. Vitest trigger/skip/dismiss-remember/replay. 3. Playwright: first-login tour appears → skip persists; help replay works. 4. pnpm lint/type-check/test/build + docker-deploy-queue + E2E + UIUX both brands. 5. Do not claim Wave LR-C Done until C8 Done.",
+        "description": "DONE 2026-07-11. LR-C8 role-aware guided onboarding tour (el-tour; first-login; skip persist; help replay; FE-only). Slice lrp-c8-role-onboarding-tour; merge bf9cbeb; worktree removed. E2E 4/4; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES Critical 0 merge_go yes. Wave LR-C → Done (C1–C13 all Done; exit gate met). No sole-active LRP slice. Formal phase None. Do NOT activate LR-D/CD-3. Recommend next (notes only): LR-D.",
+        "details": "DONE 2026-07-11. Slice id: lrp-c8-role-onboarding-tour. Merge: bf9cbeb (bf9cbebe4aa3f6f1884786319b74f78425a6a113; feat/lrp-c8-role-onboarding-tour → main FF); worktree removed (stage 11). Formal phase remains None. Wave LR-C → Done (C1–C13 all Done). Scope delivered: role-aware el-tour from RoleJourneyTimeline (P21); first-login trigger; skippable + dismiss-remembered; help-menu replay; i18n en+zh-CN; no new tour dependency; FE-only. BDD: ready — docs/behavior/lrp-c8-role-onboarding-tour.md (BDD-LRP-C8-TOUR-001; scenarios 001…017; E2E 001…005). Gates: pnpm lint/type-check/test(1142)/build GREEN; docker-deploy-queue stage5 DEPLOY_OK 2026-07-11T19:40:54+08:00; stage10 DEPLOY_OK 2026-07-11T19:59:02+08:00; E2E LRP-C8-onboarding-tour 4/4; UIUX PASS_WITH_NOTES (10 screenshots); architecture PASS_WITH_NOTES Critical 0. Maps: LRP-C detail LR-C8.",
+        "testStrategy": "1. Follow BDD-LRP-C8-TOUR-001 + acceptance in docs/plan/detail/LRP-C-usability-deepening.md LR-C8. 2. Vitest trigger/skip/dismiss-remember/replay. 3. Playwright: first-login tour appears → skip persists; help replay works. 4. pnpm lint/type-check/test/build + docker-deploy-queue + E2E + UIUX both brands. 5. Wave LR-C Done after C8 Done (exit met).",
         "priority": "high",
         "dependencies": [
           "33"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-11T11:20:00.000Z"
+        "updatedAt": "2026-07-11T12:05:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T11:20:00.000Z",
+      "lastModified": "2026-07-11T12:05:00.000Z",
       "taskCount": 34,
-      "completedCount": 33,
+      "completedCount": 34,
       "tags": [
         "master"
       ]
