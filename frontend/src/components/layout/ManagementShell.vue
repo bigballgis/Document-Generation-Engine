@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, type Component } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowLeft,
   ArrowRight,
   ArrowDown,
+  QuestionFilled,
   SwitchButton,
   HomeFilled,
   Postcard,
@@ -20,8 +22,10 @@ import BrandLogo from '@/components/branding/BrandLogo.vue'
 import AppBreadcrumb from '@/components/layout/AppBreadcrumb.vue'
 import CommandPalette from '@/components/layout/CommandPalette.vue'
 import NotificationBell from '@/components/layout/NotificationBell.vue'
+import OnboardingTour from '@/components/layout/OnboardingTour.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import SessionLimitReminder from '@/components/session/SessionLimitReminder.vue'
+import { useOnboardingTour } from '@/composables/useOnboardingTour'
 import { useSessionRenewal } from '@/composables/useSessionRenewal'
 import { BRAND_REGISTRY } from '@/config/brands'
 import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
@@ -36,6 +40,16 @@ const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
 const sessionStore = useSessionStore()
+
+const {
+  open: onboardingTourOpen,
+  current: onboardingTourCurrent,
+  tourSteps: onboardingTourSteps,
+  canReplay: onboardingTourCanReplay,
+  targetSelectorFor: onboardingTourTargetFor,
+  dismiss: dismissOnboardingTour,
+  replay: replayOnboardingTour,
+} = useOnboardingTour({ autoOpenOnMount: true })
 
 // ── Session renewal + absolute-limit reminder (LR-B6) ────────────────────────
 const { reminderVisible } = useSessionRenewal()
@@ -123,6 +137,18 @@ function handleUserMenuCommand(command: string) {
   }
 }
 
+// ── Help menu (LR-C8 onboarding tour replay) ──────────────────────────────────
+function handleHelpMenuCommand(command: string) {
+  if (command !== 'replay-tour') {
+    return
+  }
+  if (!onboardingTourCanReplay.value) {
+    ElMessage.info(t('onboardingTour.help.replayUnavailable'))
+    return
+  }
+  void replayOnboardingTour()
+}
+
 // ── Locale / brand ────────────────────────────────────────────────────────────
 function handleLocaleChange(locale: string) {
   void appStore.setLocale(resolveAppLocale(locale))
@@ -193,6 +219,33 @@ function skipToMainContent(event: Event) {
         </el-select>
 
         <NotificationBell />
+
+        <el-dropdown
+          trigger="click"
+          data-testid="help-menu"
+          @command="handleHelpMenuCommand"
+        >
+          <button
+            type="button"
+            class="help-menu-trigger"
+            data-testid="help-menu-trigger"
+            :aria-label="t('onboardingTour.help.menuAriaLabel')"
+          >
+            <el-icon class="help-menu-icon"><QuestionFilled /></el-icon>
+            <span class="help-menu-label">{{ t('onboardingTour.help.menu') }}</span>
+          </button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                command="replay-tour"
+                data-testid="help-menu-replay-tour"
+                :disabled="!onboardingTourCanReplay"
+              >
+                {{ t('onboardingTour.help.replay') }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
 
         <el-dropdown trigger="click" @command="handleUserMenuCommand">
           <span class="user-menu-trigger">
@@ -290,6 +343,14 @@ function skipToMainContent(event: Event) {
     </div>
 
     <CommandPalette />
+
+    <OnboardingTour
+      v-model:open="onboardingTourOpen"
+      v-model:current="onboardingTourCurrent"
+      :steps="onboardingTourSteps"
+      :target-for="onboardingTourTargetFor"
+      @dismiss="dismissOnboardingTour"
+    />
   </div>
 </template>
 
@@ -388,6 +449,40 @@ function skipToMainContent(event: Event) {
 .user-menu-chevron {
   font-size: 0.75rem;
   color: var(--text-tertiary);
+}
+
+.help-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  transition: background-color var(--transition-base);
+
+  &:hover {
+    background: color-mix(in srgb, var(--brand-primary) 6%, var(--surface-card));
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+.help-menu-icon {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.help-menu-label {
+  line-height: 1.2;
 }
 
 .locale-switcher {

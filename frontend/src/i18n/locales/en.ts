@@ -25,6 +25,20 @@ export default {
       contentModules: 'Unable to search standard clauses. Try again.',
     },
   },
+  onboardingTour: {
+    skip: 'Skip',
+    next: 'Next',
+    prev: 'Back',
+    finish: 'Finish',
+    actionsLabel: 'Tour actions',
+    dontShowAgain: "Don't show again",
+    help: {
+      menu: 'Help',
+      menuAriaLabel: 'Help menu',
+      replay: 'Replay role tour',
+      replayUnavailable: 'No role tour is available for your account.',
+    },
+  },
   login: {
     title: 'Sign in',
     subtitle: 'Sign in to continue',

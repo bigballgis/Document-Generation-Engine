@@ -347,4 +347,11 @@ describe('ManagementShell', () => {
     await flushPromises()
     expect(wrapper.find('[data-testid="notification-bell"]').exists()).toBe(false)
   })
+
+  it('shows Help menu with replay entry (BDD-LRP-C8-003)', async () => {
+    const wrapper = mountShell(globalAdminSession())
+    await flushPromises()
+    expect(wrapper.find('[data-testid="help-menu"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="help-menu-trigger"]').text()).toContain('Help')
+  })
 })

@@ -140,6 +140,7 @@ function onStepKeydown(event: KeyboardEvent, index: number) {
               'is-upcoming': stepStatus(index) === 'upcoming',
             }"
             data-journey-step
+            :data-tour-anchor="step.id"
             :aria-current="stepStatus(index) === 'current' ? 'step' : undefined"
             @keydown="onStepKeydown($event, index)"
           >

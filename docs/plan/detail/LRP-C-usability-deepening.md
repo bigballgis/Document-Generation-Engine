@@ -1,10 +1,12 @@
 # LRP Wave LR-C — Business Usability Deepening 「业务易用性深化」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 Done** 2026-07-11 — slice `lrp-c11-api-error-i18n`; **LR-C12 Done** 2026-07-11 — slice `lrp-c12-keyboard-a11y`; **LR-C13 Done** 2026-07-11 — slice `lrp-c13-frontend-eng-debt`; **LR-C2 Done** 2026-07-11 — slice `lrp-c2-local-draft-recovery`; **LR-C3 Done** 2026-07-11 — slice `lrp-c3-editor-undo-redo`; **LR-C5 Done** 2026-07-11 — slice `lrp-c5-catalog-pagination`; **LR-C6 Done** 2026-07-11 — slice `lrp-c6-command-palette`; **LR-C7 Done** 2026-07-11 — slice `lrp-c7-notification-center`; C8 Not Started; **no sole-active**)  
+**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 Done** 2026-07-11 — slice `lrp-c11-api-error-i18n`; **LR-C12 Done** 2026-07-11 — slice `lrp-c12-keyboard-a11y`; **LR-C13 Done** 2026-07-11 — slice `lrp-c13-frontend-eng-debt`; **LR-C2 Done** 2026-07-11 — slice `lrp-c2-local-draft-recovery`; **LR-C3 Done** 2026-07-11 — slice `lrp-c3-editor-undo-redo`; **LR-C5 Done** 2026-07-11 — slice `lrp-c5-catalog-pagination`; **LR-C6 Done** 2026-07-11 — slice `lrp-c6-command-palette`; **LR-C7 Done** 2026-07-11 — slice `lrp-c7-notification-center`; **LR-C8 In Progress** sole-active)  
 **Owner default:** `frontend-engineer` (+ `backend-engineer` where noted); every user-facing slice pairs `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** none for most tasks; **C6 depends on LR-C5** (Done); **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
 
+> **Activation note (2026-07-11):** **LR-C8 → In Progress** (slice `lrp-c8-role-onboarding-tour`; formal phase remains **None**). Sole-active LRP slice — role-aware guided onboarding tour (`el-tour`; first-login; skippable; help replay; FE-only). BDD **`ready`** (`docs/behavior/lrp-c8-role-onboarding-tour.md` — `BDD-LRP-C8-TOUR-001`). Placement: ISOLATED `D:/working/DGE-lrp-c8-role-onboarding-tour` · `feat/lrp-c8-role-onboarding-tour` · base `0b22716` (`0b227169fedab562d7295d2489af489d68541337`). Gate evidence: []. **Task Master #34 → in-progress**. Other LR-C rows untouched (C1–C7/C9–C13 Done). Do **not** mark Wave LR-C Done. Do **not** activate CD-3. User direction: finish Wave LR-C via LR-C8.
+>
 > **Completion note (2026-07-11):** **LR-C7 → Done** (slice `lrp-c7-notification-center`; merge `879108c` / `879108c618f9cbf179cad7b8b5accae16e032d7a` → `main`; worktree removed). In-app notification center: shell bell + unread from P14 collaboration OPEN items + escalations; server read markers; 30s poll; deep-link task hub. BDD **`ready`** (`docs/behavior/lrp-c7-notification-center.md` — scenarios BDD-LRP-C7-001…017). Formal phase remains **None**. **No sole-active LRP slice**. Wave LR-C remains **In Progress** (partial — C1/C4/C9–C13 + **C2** + **C3** + **C5** + **C6** + **C7** Done; C8 Not Started). Do **not** mark Wave LR-C Done. Do **not** activate C8/CD-3. Recommend next: **LR-C8**. **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN**; `pnpm -C frontend lint && type-check && test && build` **GREEN** (~1113 tests); `docker-deploy-queue.ps1` stage5+10 **DEPLOY_OK**; E2E LRP-C7-notification-center **5/5** PASS; UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C7-uiux-manifest.md`; 14 screenshots); architecture **PASS_WITH_NOTES** (Critical **0**; merge_go yes). **Task Master #33 → done**.
 >
 > **Activation note (2026-07-11):** **LR-C7 → In Progress** (slice `lrp-c7-notification-center`; formal phase remains **None**). Sole-active LRP slice — in-app notification center (shell bell + unread from P14 collaboration OPEN items + escalations; server read markers; 30s poll; deep-link task hub). BDD **`ready`** (`docs/behavior/lrp-c7-notification-center.md` — scenarios BDD-LRP-C7-001…017). Placement: ISOLATED `D:/working/DGE-lrp-c7-notification-center` · `feat/lrp-c7-notification-center` · base `2eaab40` (`2eaab40e5a76dd4887c2ad164a7992414b3b1897`). Gate evidence: [] (now **done** — see completion note above). **Task Master #33 → in-progress** (now **done**). Other LR-C rows untouched (C8 Not Started; C1–C6/C9–C13 Done). Do **not** mark Wave LR-C Done. Do **not** activate C8/CD-3. User direction: 「按你建议继续」→ activate C7.
@@ -228,23 +230,24 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 
 - **Owner agent:** frontend-engineer
 - **BDD:** **required**.
+- **BDD readiness confirmation (2026-07-11, behavior-spec-author):** **`ready`** — [`docs/behavior/lrp-c8-role-onboarding-tour.md`](../../behavior/lrp-c8-role-onboarding-tour.md) (`BDD-LRP-C8-TOUR-001`; scenarios BDD-LRP-C8-001…017). Decisions C8-C1…C18 lock `el-tour` only, definitions reuse (no fork), per-user localStorage dismiss, Help-menu replay, Dashboard-aligned role priority + AUDIT fallback.
 - **UIUX:** yes
 - **Read first:** `frontend/src/components/journey/RoleJourneyTimeline.vue` (per-role journey step definitions — reuse, don't fork); Element Plus `el-tour` docs (built-in ≥2.4 — **no new dependency**; repo has `element-plus@^2.9.1`); shell help menu location.
 - **Do NOT:** Add a third-party tour library; force the tour (must be skippable + dismiss-remembered); hardcode step copy.
 - **Steps:**
-  1. Wait for BDD spec `ready` (per-role step lists, first-login trigger, replay entry).
+  1. Wait for BDD spec `ready` (per-role step lists, first-login trigger, replay entry). ← **done** (`ready` 2026-07-11).
   2. Build tour steps per role from the RoleJourneyTimeline journey definitions (anchor to stable element ids).
   3. First-login trigger (per-user local marker), skip button, «don't show again»; replay entry in the help menu.
   4. i18n keys (en + zh-CN) for every step.
   5. Vitest (trigger/skip logic); Playwright: fresh user login → tour appears → skip persists; help-menu replay works.
 - **Acceptance (G/W/T):**
-  - **G** a first-time TEMPLATE_AUTHOR login **W** the shell mounts **T** the tour opens on step 1 of the author journey; skip closes and persists.
-  - **G** a returning user **W** opening help menu → tour **T** the tour replays from step 1 regardless of the dismissed marker.
+  - **G** a first-time TEMPLATE_AUTHOR login **W** the shell mounts **T** the tour opens on step 1 of the author journey; skip closes and persists. → **BDD-LRP-C8-001 / 002**
+  - **G** a returning user **W** opening help menu → tour **T** the tour replays from step 1 regardless of the dismissed marker. → **BDD-LRP-C8-003**
 - **Gates:** §1 standard block; spec `frontend/e2e/LRP-C8-onboarding-tour.spec.ts`; UIUX manifest.
 - **Artifacts:** tour composable/config + shell wiring; behavior spec; tests + E2E + manifest.
 - **Done when:** Scenarios green + gates + UIUX PASS + doc sync + commit review.
 - **Maps:** P21 RoleJourneyTimeline (reused).
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-11 — sole-active; slice `lrp-c8-role-onboarding-tour`; Task Master #34; BDD **`ready`**)
 
 ### LR-C9 — Unified list states rollout
 
