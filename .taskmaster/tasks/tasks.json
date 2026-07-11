@@ -516,12 +516,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-12T01:54:00.000Z"
+      },
+      {
+        "id": "38",
+        "title": "LR-D5 NFR quantification proposals",
+        "description": "IN PROGRESS 2026-07-12. LR-D5 docs-only NFR quantification proposals (p95/SSE/capacity/availability/session caps) as pending «proposed — awaiting confirmation»; feed from LR-D6 evidence + DEF-LRP-D6-001; do NOT promote smoke numbers to confirmed SLOs. Slice lrp-d5-nfr-proposals. Formal phase None. Wave LR-D In Progress (D1+D7+D6 Done; D5 In Progress sole-active; D2–D4 Not Started). Do NOT activate D2–D4/LR-E/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "ACTIVATED 2026-07-12. Slice id: lrp-d5-nfr-proposals. Placement: ISOLATED D:/working/DGE-lrp-d5-nfr-proposals · feat/lrp-d5-nfr-proposals · base 8061e3a (8061e3af02e591d3246893a475c48fb520359d09). Formal phase remains None. Wave LR-D → In Progress (partial — D1+D7+D6 Done; D5 sole-active In Progress; D2–D4 Not Started). BDD: not-applicable. Owner: doc-keeper. Scope: draft NFR pending-section proposals linking each measured value to LR-D6 evidence (latest-summary.json + TRIAGE-pdf-422.md / DEF-LRP-D6-001); mark every value «proposed — awaiting confirmation»; never write confirmed SLOs; do not invent vendor APM. Gates: docs-only. Do NOT: activate D2–D4/LR-E/CD-3; claim Wave LR-D Done; claim LR-D5 Done before doc-keeper + merge + MAIN doc-sync; touch DGE-audit-governance.",
+        "testStrategy": "1. NFR pending section contains proposals marked «proposed — awaiting confirmation». 2. Each measured value links LR-D6 evidence (no orphan numbers). 3. D2–D4 remain Not Started. 4. No confirmed SLO promotion from smoke numbers. 5. Docs-only gate; no vendor APM invention.",
+        "priority": "high",
+        "dependencies": [
+          "37"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T02:04:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T01:54:00.000Z",
-      "taskCount": 37,
+      "lastModified": "2026-07-12T02:04:00.000Z",
+      "taskCount": 38,
       "completedCount": 37,
       "tags": [
         "master"

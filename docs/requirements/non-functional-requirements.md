@@ -64,23 +64,54 @@
 
 ## 待确认问题
 
-### LR-D5 NFR 数值提案（pending proposal — 待用户确认）
+### LR-D5 NFR 数值提案（proposed — awaiting confirmation）
 
-以下数值为 LR-D5 提案基线，按文档即代码宪法仅作 pending proposal 记录，**未确认**。
-确认前系统不会据其阻断或告警。用户确认后，这些数值将移至上方「已确认」区段并据此
-配置告警阈值（见 `deploy/observability/prometheus-alerts.yaml`）。
+> **Governance:** Every value in this section is **«proposed — awaiting confirmation»**.
+> None of these numbers are confirmed requirements, contractual SLAs, or alert-enforcement
+> thresholds. Do **not** move them into «已确认» until the user explicitly confirms.
+> Owner: doc-keeper (LR-D5 / Task Master #38). Authored: 2026-07-12.
+> Fed by LR-D6 evidence (merge `56383eb`); smoke numbers remain **inputs**, not SLOs.
 
-| 维度 | 提案基线 | 说明 |
-| --- | --- | --- |
-| 同步生成 p95 延迟 | ≤ 3s | 单文档 DOCX→PDF 生成（不含下载），99% 请求低于此值 |
-| 预览 SSE 首事件延迟 | ≤ 5s | 从发起预览到首个 progress 事件到达浏览器 |
-| 并发生成能力 | ≥ 20 | 同一时刻在途的同步生成请求数（PDF 转换池 size=2 时的稳态吞吐） |
-| 模板容量 | ≥ 500 / 租户 | 单租户可管理的模板数量上限，列表查询 p95 ≤ 2s |
-| 批量生成上限 | ≤ 50 / 请求 | 单次批量请求的最大条目数 |
-| 下载 URL 有效期 | 15 分钟 | 已确认（见 P10），此处仅归口 |
+**Related (do not conflate):** Role task-time budgets live in
+[usability-review.md](../product/usability-review.md) §CD-UX-T01 (non-SLA UX draft).
+This section covers **generation / capacity / availability** NFRs only.
+F8 draft alert thresholds:
+[CORE-FORTRESS-f8 §8](../plan/detail/CORE-FORTRESS-f8-observability-slo-dr.md#8-slo-target-reference-draft--lr-d5-pending)
+remain `draft: true` until confirmation here.
 
-**验证方式：** LR-D6 负载冒烟基线（≥20 并发同步 + SSE 预览 on Docker）将测量上述前
-三项，测量结果决定提案是否上调或下调。确认前的所有 NFR 数值不进入 SLA 承诺。
+#### Shared environment assumptions (LR-D6 measurement context)
+
+| Assumption | Value |
+| --- | --- |
+| Host | Windows host; Docker Desktop acceptance stack |
+| Ports | Backend `8080` / Management UI `4173` |
+| Stack / git | `stackVersion` **a262706** (see evidence JSON) |
+| Template | `CORP-FOL-OFFER` (FOL demo) |
+| Harness | JUnit load-smoke under `backend/src/test/.../runtime/loadsmoke/` (no vendor APM) |
+| Metrics (ops) | Micrometer `docgen.generation.duration` / `docgen.pdf.conversion.*` (F8); Prometheus rules stay draft |
+| Evidence | [latest-summary.json](../plan/evidence/lrp-d6-load-smoke/latest-summary.json); [TRIAGE-pdf-422.md](../plan/evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md) (`DEF-LRP-D6-001`) |
+
+**Evidence status legend:** `pre-measurement` = industry-norm / planning proposal, not yet measured (or not measured for that dimension); `measured-input` = LR-D6 (or named adjacent) observation used as proposal input only.
+
+#### Proposal table
+
+| Dimension | Proposed value (awaiting confirmation) | Evidence status | Measurement method | Source / notes | Launch gate (LR-E2) vs post-launch |
+| --- | --- | --- | --- | --- | --- |
+| Sync generation p95 — **with PDF** (end-to-end sync, excl. download) | **Interim observed envelope:** p95 ≈ **15939 ms**, p99 ≈ **16065 ms** under D6 FOL concurrent mix — propose confirming an ops baseline in this band **or** an explicit post-remediation target after `DEF-LRP-D6-001`. **Superseded pre-measurement industry-norm:** ≤ **3 s** — **not supported** by current smoke. F8 draft ≤10 s e2e likewise **not supported** by this FOL concurrent run. | **measured-input** (mixed-format success sample; see note) | LR-D6 Scenario A harness percentiles on successful responses | [latest-summary.json](../plan/evidence/lrp-d6-load-smoke/latest-summary.json) `scenarioA.p95Ms` / `p99Ms`; n=20 requested, success=12 | **Launch-gate:** User confirms either (a) interim ~16 s p95 envelope for FOL+PDF concurrent Docker smoke, or (b) remediation of concurrent-PDF path before treating ≤3 s / ≤10 s as launch bar. **Post-launch:** Tighten aspirational ≤3 s / ≤10 s after resilience/PDF-pool work. |
+| Sync generation p95 — **DOCX only** (no PDF conversion) | **Pre-measurement aspirational:** ≤ **3 s** (industry-norm planning). **Measured adjacent:** In Scenario A all **DOCX** requests succeeded (10/10); format-split latency **not** published separately in `latest-summary.json` — do not invent DOCX-only p95. | **pre-measurement** (latency); **measured-input** (DOCX success only) | Re-run harness with DOCX-only cohort **or** filter Micrometer `docgen.generation.duration` by format when available | D6: DOCX OK vs PDF failures in [DEF-LRP-D6-001](../plan/evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md) | **Post-launch** tuning preferred until DOCX-only percentile is measured; launch may require only “DOCX sync succeeds under concurrency” honesty note. |
+| SSE first-event latency | ≤ **5 s** from preview start to first progress/event in browser | **pre-measurement** | Playwright timing on preview journey **or** harness timestamp of first SSE event (not captured in D6 Scenario B summary) | Prior LR-D5 table; D6 did **not** record first-event ms | **Post-launch** (unless LR-E1 browser SSE proof expands measurement). |
+| SSE stream integrity (no silent drop) | **Zero dropped streams** at ≥ **5** parallel preview streams; all streams reach a terminal event | **measured-input** | LR-D6 Scenario B | [latest-summary.json](../plan/evidence/lrp-d6-load-smoke/latest-summary.json) `scenarioB`: started=5, terminal=5, dropped=0 | **Launch-gate (LR-E2 / LR-E1 adjacency):** Preserve zero silent-drop bar; re-evidence if SSE path changes. |
+| Concurrent sync generation capacity | Requested concurrency **≥ 20** in-flight sync generations (PDF pool size=2). **Measured:** n=20, success=12, **errorRate=0.4**, **poolRejections=0**; failures were concurrent **PDF** → `TEMPLATE_VALIDATION_FAILED` / `api.error.generation.serviceUnavailable` ([DEF-LRP-D6-001](../plan/evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md)). Propose: do **not** claim “20 concurrent PDF OK”; claim “20 concurrent sync attempted; PDF path needs remediation or accepted risk”. | **measured-input** | LR-D6 Scenario A | Evidence + triage above; do not tune product thresholds to green the smoke | **Launch-gate:** Disposition of `DEF-LRP-D6-001` (fix taxonomy/capacity **or** documented launch risk). **Post-launch:** Steady-state concurrent PDF SLO after fix. |
+| Availability target | ≥ **99.5%** monthly for management API + sync generation path (planning) | **pre-measurement** | Platform `healthz` / structured `readyz` (Postgres-gated per SOR-O06) + deploy/uptime records — **no** vendor APM invented | Industry-norm planning; not measured in D6 | **Post-launch** (ops maturity); launch checklist may only require health endpoints green. |
+| Max concurrent management sessions | ≤ **50** concurrent authenticated UI sessions per acceptance/single-host class (planning) | **pre-measurement** | Session/store metrics or controlled Playwright multi-session smoke (not run in D6) | Planning only | **Post-launch** capacity planning. |
+| Max concurrent SSE connections | ≥ **5** parallel preview streams (integrity proven); higher caps (e.g. 20+) **unmeasured** | **measured-input** (≥5 integrity); **pre-measurement** (higher caps) | LR-D6 Scenario B for ≥5; scale tests later via same harness class | Scenario B zero drops | **Launch-gate:** ≥5 zero-drop integrity. **Post-launch:** Raise cap after measured soak. |
+| Template capacity / catalog list p95 | ≥ **500** templates per tenant; catalog list p95 ≤ **2 s** (planning) | **pre-measurement** (as NFR); adjacent UX: LR-C5 catalog pagination evidence exists but is **not** promoted here as SLA | Catalog API timing / Playwright list journeys | Keep pending; LR-C5 p95 ~75 ms is feature evidence, not confirmed NFR | **Post-launch** / capacity; not LR-E2 blocker unless user elevates. |
+| Batch generation limit | ≤ **50** items per batch request | **pre-measurement** | Contract/config review + batch API tests | Existing API policy surface; unmeasured as NFR | **Post-launch** unless product confirms as hard product limit earlier. |
+| Download URL TTL | **15 minutes** | **already confirmed (P10)** — listed only for discoverability; **not** a LR-D5 proposal | — | P10 / confirmed reliability | N/A (confirmed elsewhere) |
+
+**Percentile note (Scenario A):** Reported p50/p95/p99 are over the **12 successful** responses in a mixed DOCX/PDF cohort. They are **not** a clean “PDF-only p95” and **not** a DOCX-only p95. Use them as concurrent FOL smoke envelope only.
+
+**Confirmation gate:** Until user confirmation, `deploy/observability/prometheus-alerts.yaml` keeps `draft: true`; F8 §8 draft thresholds that still cite ≤3 s / ≤10 s are **stale relative to D6 FOL concurrent smoke** and must be revised together with this table when confirmed.
 
 ## 已确认：生产渲染（CORE-FORTRESS F4 / LR-A7 子集）
 

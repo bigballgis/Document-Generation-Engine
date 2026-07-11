@@ -136,12 +136,15 @@ Wave 3 — Evidence + review + closeout
 
 | SLI | Metric | Draft threshold | Alert severity |
 | --- | --- | --- | --- |
-| Sync generation latency p95 | `docgen.generation.duration` | ≤ 3s (NFR proposal) | warning |
-| End-to-end generation p95 (incl. PDF) | `docgen.generation.duration` | ≤ 10s (observability README) | warning |
+| Sync generation latency p95 | `docgen.generation.duration` | ≤ 3s (stale pre-measurement NFR proposal — **not supported** by LR-D6 FOL concurrent smoke) | warning |
+| End-to-end generation p95 (incl. PDF) | `docgen.generation.duration` | ≤ 10s (observability README draft — **not supported** by LR-D6 measured p95≈15939ms) | warning |
 | PDF conversion failure rate | `rate(docgen.pdf.conversion.outcome{result="failure"}[5m])` | > 0.17/s (~10/min) | critical |
 | PDF conversion latency p95 | `docgen.pdf.conversion.duration` | ≤ 30s | warning |
 
 > **Not SLA until LR-D5 confirmed.** Rules carry `draft: true` in annotations.
+> **LR-D5 (2026-07-12):** Authoritative **pending** proposals (measured vs pre-measurement, launch-gate flags) live in
+> [non-functional-requirements.md §待确认 LR-D5](../../requirements/non-functional-requirements.md#lr-d5-nfr-数值提案proposed--awaiting-confirmation).
+> Thresholds in this table remain **draft** pending user confirmation of those proposals; do not remove `draft: true` or promote ≤3s/≤10s from smoke alone.
 
 ---
 

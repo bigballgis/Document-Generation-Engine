@@ -122,11 +122,16 @@ Implementation phases 0–4 **Done** (2026-07-08); E2E UIUX manifest **PASS** (`
 
 ## 待确认产品体验问题
 
-- 角色关键任务完成时间的量化阈值、采样窗口和分环境目标值（**CD-UX-T01 草案见下表**）。
+- 角色关键任务完成时间的量化阈值、采样窗口和分环境目标值（**CD-UX-T01 草案见下表** — 体验任务时长，非生成 SLA）。生成/容量/可用性数值提案见 [non-functional-requirements.md](../requirements/non-functional-requirements.md) §待确认 **LR-D5**（proposed — awaiting confirmation；fed by LR-D6；不升格为 confirmed SLO）。
 - `TEMPLATE_AUTHOR` 与现有“母版设计人员”在登录落地页导航上的最终融合策略（**CD-UX-T04 待 ADR/PRD 决策**）。
 - 无权访问反馈页的文案与按钮动作细节（返回上一页、回到首页、联系管理员）。
 
 ## CDP 体验指标草案（CD-UX-T01，非 SLA）
+
+> **Scope split:** This table is **role task-time UX budgets** (Playwright journey timing).
+> Generation p95 / SSE / concurrent capacity proposals live under NFR §待确认 LR-D5 —
+> [non-functional-requirements.md](../requirements/non-functional-requirements.md#lr-d5-nfr-数值提案proposed--awaiting-confirmation).
+> Neither table is a contractual SLA until user confirmation.
 
 | 角色 | 关键任务 | 目标时间（桌面） | 测量 |
 | --- | --- | --- | --- |
@@ -147,4 +152,4 @@ Implementation phases 0–4 **Done** (2026-07-08); E2E UIUX manifest **PASS** (`
 1. **CDP Wave CD-2** — continue matrix after **CD-E2E-T01 Done** (2026-07-10): browser [MVP golden path](../behavior/mvp-golden-path-browser.md) evidence in `frontend/e2e/CDP-E2E-T01-mvp-golden-path.spec.ts` (Docker **1/1**) + UIUX manifest **PASS** (15 screenshots). Next: CD-E2E-T02… (T07/T13 deferred this slice).
 2. **CD-E2E-T02…T05** — tester / approver / team-lead / master-designer task-completion journeys.
 3. **P22 demo acceptance** (other session) — eight bank letter demos + rendering write path per [demo-expansion spec](../requirements/demo-expansion-behavior-spec.md) — **P22 Done**; typography → P23 Done.
-4. Resolve **§待确认** items L87–91 (task-time budgets, landing-page fusion, forbidden-page actions) into PRD/NFR or explicit deferrals.
+4. Resolve **§待确认** items L87–91: L89 generation/capacity → [NFR §待确认 LR-D5](../requirements/non-functional-requirements.md#lr-d5-nfr-数值提案proposed--awaiting-confirmation) (awaiting user confirmation); CD-UX-T01 task-time budgets remain UX draft; L90 landing fusion + L91 forbidden-page copy → PRD/ADR or explicit deferrals.
