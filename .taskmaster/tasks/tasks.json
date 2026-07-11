@@ -548,23 +548,23 @@
       {
         "id": "40",
         "title": "LR-D3 Metrics & alerting as code",
-        "description": "IN PROGRESS 2026-07-12. LR-D3 metrics & alerting as code (Micrometer + Prometheus rules + Grafana JSON). Slice lrp-d3-metrics-alerting. Formal phase None. Wave LR-D In Progress (D1+D2+D5+D6+D7 Done; D3 In Progress sole-active; D4 Not Started). BDD not-applicable. Do NOT activate D4/LR-E/CD-3. Do NOT touch DGE-audit-governance. Do NOT mark Done.",
-        "details": "ACTIVATED 2026-07-12. Slice id: lrp-d3-metrics-alerting. Placement: ISOLATED d:\\working\\DGE-lrp-d3-metrics-alerting · feat/lrp-d3-metrics-alerting · base 694a423. Formal phase remains None. Wave LR-D → In Progress (partial — D1+D2+D5+D6+D7 Done; D3 In Progress sole-active; D4 Not Started). BDD: not-applicable (behavior-spec-author may be concurrent for readiness note). Owner: backend-engineer + deploy-engineer. Scope: Micrometer custom metrics (generation latency sync w/wo PDF, PDF pool queue/rejections, active SSE, 429 count, async DLT depth); deploy/observability/ Prometheus alert rules YAML + Grafana dashboard JSON; runbook annotations; scrape smoke /actuator/prometheus; index from deploy/README.md. F8 partial already Done 2026-07-09 (generation/PDF Micrometer + draft prometheus-alerts.yaml); SSE/DLT/429 + Grafana still open. Do NOT: add vendor APM; alert on unmeasured thresholds without draft/LR-D6 baseline note; bake credentials into dashboards; activate D4/LR-E/CD-3; claim Wave LR-D Done; touch DGE-audit-governance.",
+        "description": "DONE 2026-07-12. LR-D3 metrics & alerting as code (Micrometer + Prometheus rules + Grafana JSON). Slice lrp-d3-metrics-alerting. Merge ba5ea2e; feature tip 173ab36. Formal phase None. Wave LR-D In Progress (D1+D2+D3+D5+D6+D7 Done; D4 Not Started; no sole-active). BDD not-applicable. Do NOT activate D4/LR-E/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: lrp-d3-metrics-alerting. Merge: ba5ea2e; feature tip 173ab36; worktree removed (stage 11). Formal phase remains None. Wave LR-D -> In Progress (partial — D1+D2+D3+D5+D6+D7 Done; D4 Not Started; no sole-active). BDD: not-applicable (docs/behavior/lrp-d3-metrics-alerting.md). Owner: backend-engineer + deploy-engineer. Scope delivered: Micrometer custom metrics (generation latency, PDF pool queue/rejections, active SSE, 429 count, async DLT depth when Kafka); deploy/observability/ prometheus-alerts.yaml + grafana/docgen-ops-overview.json; runbook annotations; scrape smoke /actuator/prometheus. Gates: mvn verify GREEN 1315; architecture PASS_WITH_NOTES Critical 0 merge_go=true; DEPLOY_OK scrape 2026-07-12T03:43:07+08:00 (docgen_generation_duration_seconds count=1 pdf success; docgen_http_rate_limit_denied_total=1.0; pool rejections/sse active @0; docgen_async_dlt_depth ABSENT ASYNC_TRANSPORT=in-process); promtool unavailable — manual lint 7/7 runbook links. Do NOT: activate D4/LR-E/CD-3; claim Wave LR-D Done; touch DGE-audit-governance. Recommend next: LR-D4 (do not activate until parent directs).",
         "testStrategy": "1. mvn -B -ntp -f backend/pom.xml verify GREEN. 2. Docker scrape smoke: /actuator/prometheus exposes new counters/timers with non-zero samples after PDF generation + 429. 3. Alert rules parse (promtool or documented manual validation); every rule links a runbook section. 4. deploy/observability/ committed + indexed from deploy/README.md. 5. D4 remains Not Started. 6. Architecture review + merge + MAIN doc-sync + commit-review before Done.",
         "priority": "high",
         "dependencies": [
           "39"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-12T03:05:00.000Z"
+        "updatedAt": "2026-07-12T03:49:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T03:05:00.000Z",
+      "lastModified": "2026-07-12T03:49:00.000Z",
       "taskCount": 40,
-      "completedCount": 39,
+      "completedCount": 40,
       "tags": [
         "master"
       ]
