@@ -38,6 +38,9 @@ services:
       SESSION_ABSOLUTE_TTL: ${SESSION_ABSOLUTE_TTL:-PT8H}
       APP_ENVIRONMENT: dev
       DOCGEN_SEED_DEMO_CATALOG: ${DOCGEN_SEED_DEMO_CATALOG:-false}
+      # LR-C5: ≥500 templates for catalog pagination E2E (idempotent if LOAD-TPL-0500 exists)
+      DOCGEN_SEED_CATALOG_LOAD: ${DOCGEN_SEED_CATALOG_LOAD:-false}
+      DOCGEN_SEED_CATALOG_LOAD_COUNT: ${DOCGEN_SEED_CATALOG_LOAD_COUNT:-500}
       DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED: ${DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED:-true}
       PDF_PAGE_NUMBER_STAMPING_ENABLED: ${PDF_PAGE_NUMBER_STAMPING_ENABLED:-false}
       HOME: /tmp
@@ -49,6 +52,9 @@ services:
     # JVM heap 75% of 1536m ≈ 1.15G + LibreOffice conversion peak fits within the limit.
     mem_limit: 1536m
     cpus: 2.0
+    # Host-relative DemoMasterDocxStyleSupport path ../deploy/... resolves from WORKDIR /app → /deploy
+    volumes:
+      - ./deploy:/deploy:ro
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     depends_on:

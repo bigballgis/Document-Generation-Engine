@@ -838,3 +838,32 @@ export async function captureLrpC3LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+export const LRP_C5_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C5')
+export const LRP_C5_SCREENSHOT_DIR = path.join(LRP_C5_EVIDENCE_ROOT, 'screenshots')
+export const LRP_C5_VIEWPORT = P14_T01_VIEWPORT
+
+export function ensureLrpC5EvidenceDirs(): void {
+  fs.mkdirSync(LRP_C5_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function lrpC5ScreenshotPath(filename: string): string {
+  return path.join(LRP_C5_SCREENSHOT_DIR, filename)
+}
+
+export async function captureLrpC5Screenshot(page: Page, filename: string): Promise<string> {
+  ensureLrpC5EvidenceDirs()
+  const target = lrpC5ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureLrpC5LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureLrpC5EvidenceDirs()
+  const target = lrpC5ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

@@ -16,6 +16,7 @@ vi.mock('@/api/templates', () => ({
 
 vi.mock('@/api/contentModules', () => ({
   listContentModules: vi.fn(),
+  listAllContentModules: vi.fn(),
   getContentModule: vi.fn(),
 }))
 
@@ -25,6 +26,7 @@ describe('TemplateClauseAuthoringPanel', () => {
     vi.mocked(templatesApi.listTemplateContentModuleReferences).mockReset()
     vi.mocked(templatesApi.upsertTemplateContentModuleReference).mockReset()
     vi.mocked(contentModulesApi.listContentModules).mockReset()
+    vi.mocked(contentModulesApi.listAllContentModules).mockReset()
     vi.mocked(contentModulesApi.getContentModule).mockReset()
   })
 
@@ -37,16 +39,20 @@ describe('TemplateClauseAuthoringPanel', () => {
         locked: false,
       },
     ])
-    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([
-      {
-        moduleId: 'MOD-LOAN-DISCLOSURE',
-        moduleCode: 'MOD-LOAN-DISCLOSURE',
-        groupCode: 'RETAIL',
-        name: 'Loan disclosure',
-        createdAt: '2026-06-26T10:00:00Z',
-        updatedAt: '2026-06-26T10:00:00Z',
-      },
-    ])
+    vi.mocked(contentModulesApi.listAllContentModules).mockResolvedValue({
+      content: [
+        {
+          moduleId: 'MOD-LOAN-DISCLOSURE',
+          moduleCode: 'MOD-LOAN-DISCLOSURE',
+          groupCode: 'RETAIL',
+          name: 'Loan disclosure',
+          createdAt: '2026-06-26T10:00:00Z',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ],
+      totalElements: 1,
+      truncated: false,
+    })
 
     const pinia = createPinia()
     setActivePinia(pinia)
@@ -84,7 +90,11 @@ describe('TemplateClauseAuthoringPanel', () => {
 
   it('shows add reference control when editable', async () => {
     vi.mocked(templatesApi.listTemplateContentModuleReferences).mockResolvedValue([])
-    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([])
+    vi.mocked(contentModulesApi.listAllContentModules).mockResolvedValue({
+      content: [],
+      totalElements: 0,
+      truncated: false,
+    })
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const pinia = createPinia()
@@ -135,6 +145,6 @@ describe('TemplateClauseAuthoringPanel', () => {
 
     await flushPromises()
 
-    expect(contentModulesApi.listContentModules).not.toHaveBeenCalled()
+    expect(contentModulesApi.listAllContentModules).not.toHaveBeenCalled()
   })
 })

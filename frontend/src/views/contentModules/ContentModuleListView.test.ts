@@ -27,6 +27,16 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push: routerPush }),
 }))
 
+function pageView<T>(content: T[], totalElements = content.length) {
+  return {
+    content,
+    page: 0,
+    size: 20,
+    totalElements,
+    totalPages: totalElements === 0 ? 0 : Math.ceil(totalElements / 20),
+  }
+}
+
 function patchAuthorSession() {
   const sessionStore = useSessionStore()
   sessionStore.$patch({
@@ -57,16 +67,18 @@ describe('ContentModuleListView', () => {
   })
 
   it('renders content modules across authorized groups', async () => {
-    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([
-      {
-        moduleId: 'MOD-LOAN-DISCLOSURE',
-        moduleCode: 'MOD-LOAN-DISCLOSURE',
-        groupCode: 'RETAIL',
-        name: 'Loan disclosure',
-        createdAt: '2026-06-26T10:00:00Z',
-        updatedAt: '2026-06-26T10:00:00Z',
-      },
-    ])
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(
+      pageView([
+        {
+          moduleId: 'MOD-LOAN-DISCLOSURE',
+          moduleCode: 'MOD-LOAN-DISCLOSURE',
+          groupCode: 'RETAIL',
+          name: 'Loan disclosure',
+          createdAt: '2026-06-26T10:00:00Z',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ]),
+    )
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(ContentModuleListView, {
@@ -78,7 +90,11 @@ describe('ContentModuleListView', () => {
     await flushPromises()
     await flushPromises()
 
-    expect(contentModulesApi.listContentModules).toHaveBeenCalled()
+    expect(contentModulesApi.listContentModules).toHaveBeenCalledWith(
+      0,
+      20,
+      expect.objectContaining({ sort: 'groupCodeAsc' }),
+    )
     expect(wrapper.text()).toContain('Loan disclosure')
     expect(wrapper.text()).toContain('MOD-LOAN-DISCLOSURE')
     expect(wrapper.text()).toContain('RETAIL')
@@ -101,25 +117,22 @@ describe('ContentModuleListView', () => {
     expect(wrapper.text()).toContain('Retry')
   })
 
-  it('filters rows when a toolbar group filter is applied', async () => {
-    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([
-      {
-        moduleId: 'MOD-LOAN-DISCLOSURE',
-        moduleCode: 'MOD-LOAN-DISCLOSURE',
-        groupCode: 'RETAIL',
-        name: 'Loan disclosure',
-        createdAt: '2026-06-26T10:00:00Z',
-        updatedAt: '2026-06-26T10:00:00Z',
-      },
-      {
-        moduleId: 'MOD-FEE-SCHEDULE',
-        moduleCode: 'MOD-FEE-SCHEDULE',
-        groupCode: 'CORPORATE',
-        name: 'Fee schedule',
-        createdAt: '2026-06-26T10:00:00Z',
-        updatedAt: '2026-06-26T10:00:00Z',
-      },
-    ])
+  it('LR-C5: group filter triggers server request with groupCode', async () => {
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(
+      pageView(
+        [
+          {
+            moduleId: 'MOD-LOAN-DISCLOSURE',
+            moduleCode: 'MOD-LOAN-DISCLOSURE',
+            groupCode: 'RETAIL',
+            name: 'Loan disclosure',
+            createdAt: '2026-06-26T10:00:00Z',
+            updatedAt: '2026-06-26T10:00:00Z',
+          },
+        ],
+        25,
+      ),
+    )
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(ContentModuleListView, {
@@ -131,19 +144,21 @@ describe('ContentModuleListView', () => {
     await flushPromises()
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Loan disclosure')
-    expect(wrapper.text()).toContain('Fee schedule')
-
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(pageView([]))
     const groupFilter = wrapper.find('.catalog-filter-toolbar__control input')
     await groupFilter.setValue('RETAIL')
     await flushPromises()
+    await flushPromises()
 
-    expect(wrapper.text()).toContain('Loan disclosure')
-    expect(wrapper.text()).not.toContain('Fee schedule')
+    expect(contentModulesApi.listContentModules).toHaveBeenCalledWith(
+      0,
+      20,
+      expect.objectContaining({ groupCode: 'RETAIL', sort: 'groupCodeAsc' }),
+    )
   })
 
   it('LR-C9-B: empty catalog shows create CTA for template authors', async () => {
-    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([])
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(pageView([]))
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(ContentModuleListView, {
@@ -158,7 +173,7 @@ describe('ContentModuleListView', () => {
   })
 
   it('LR-C9-B: empty catalog hides create CTA without author capability', async () => {
-    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([])
+    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue(pageView([]))
     const sessionStore = useSessionStore()
     sessionStore.$patch({
       session: {
@@ -188,16 +203,18 @@ describe('ContentModuleListView', () => {
   it('LR-C9-A: retry after load failure reloads modules', async () => {
     vi.mocked(contentModulesApi.listContentModules)
       .mockRejectedValueOnce(new Error('network'))
-      .mockResolvedValueOnce([
-        {
-          moduleId: 'MOD-LOAN-DISCLOSURE',
-          moduleCode: 'MOD-LOAN-DISCLOSURE',
-          groupCode: 'RETAIL',
-          name: 'Loan disclosure',
-          createdAt: '2026-06-26T10:00:00Z',
-          updatedAt: '2026-06-26T10:00:00Z',
-        },
-      ])
+      .mockResolvedValueOnce(
+        pageView([
+          {
+            moduleId: 'MOD-LOAN-DISCLOSURE',
+            moduleCode: 'MOD-LOAN-DISCLOSURE',
+            groupCode: 'RETAIL',
+            name: 'Loan disclosure',
+            createdAt: '2026-06-26T10:00:00Z',
+            updatedAt: '2026-06-26T10:00:00Z',
+          },
+        ]),
+      )
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(ContentModuleListView, {

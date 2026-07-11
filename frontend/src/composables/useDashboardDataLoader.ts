@@ -148,14 +148,14 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
     const jobs: Promise<unknown>[] = []
     if (sessionStore.canAccessRoute('route.master-management')) {
       jobs.push(
-        mastersStore.fetchMasters().catch(() => {
+        mastersStore.fetchAllMasters().catch(() => {
           mastersLoadError.value = true
         }),
       )
     }
     if (sessionStore.canAccessRoute('route.template-management')) {
       jobs.push(
-        templatesStore.fetchTemplates().catch(() => {
+        templatesStore.fetchAllTemplates().catch(() => {
           templatesLoadError.value = true
         }),
       )

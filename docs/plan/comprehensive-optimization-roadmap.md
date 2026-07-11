@@ -158,7 +158,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-F09 | H | List pagination vs group sections | slice(0,10) then group by groupCode | Pagination preserves group semantics (design A or B) | **Done** (2026-06-24; group-first pagination) | — |
+| COR-F09 | H | List pagination vs group sections | slice(0,10) then group by groupCode | Pagination preserves group semantics (design A or B) | **Done** (2026-06-24; group-first pagination). **LR-C5 reaffirmation (2026-07-11):** row-based `PageView` + default sort `groupCode ASC, updatedAt DESC` (BDD C5-C3); historical Design A (paginate by group count / `useGroupedCatalogPagination`) **superseded** — do not restore. | LR-C5 |
 | COR-F10 | M | Template detail tab deep linking | activeDetailTab local only | Query/hash sync; workflow links to lifecycle tab | **Done** (2026-06-24) | COR-T11 |
 | COR-F11 | M | Workflow banner action anchor | Banner text only | CTA scrolls/opens lifecycle/review panel | **Done** (2026-06-23; banner CTA + lifecycle panel scroll) | COR-T14 |
 | COR-F12 | M | Template create dialog validation | Silent empty submit; errors not shown in dialog | el-form rules + inline/API errors | **Done** (2026-06-23; `TemplateCreateDialog` rules + alert + Vitest) | OPT-G8 |

@@ -119,11 +119,13 @@ describe('useDashboardDataLoader', () => {
     vi.spyOn(sessionStore, 'hasRole').mockReturnValue(false)
   }
 
-  it('loads templates and collaboration work items on mount for overview tab', async () => {
+  it('loads all templates (not default page size) and collaboration work items on mount', async () => {
     setupSession()
 
     const templatesStore = useTemplatesStore()
-    const fetchTemplatesSpy = vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    const fetchAllTemplatesSpy = vi
+      .spyOn(templatesStore, 'fetchAllTemplates')
+      .mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     const fetchWorkItemsSpy = vi.spyOn(collaborationStore, 'fetchWorkItems').mockResolvedValue(undefined)
@@ -131,7 +133,7 @@ describe('useDashboardDataLoader', () => {
     mountDataLoaderHarness()
     await flushPromises()
 
-    expect(fetchTemplatesSpy).toHaveBeenCalled()
+    expect(fetchAllTemplatesSpy).toHaveBeenCalled()
     expect(fetchWorkItemsSpy).toHaveBeenCalledWith(undefined)
   })
 
@@ -139,7 +141,7 @@ describe('useDashboardDataLoader', () => {
     setupSession()
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockRejectedValue(new Error('network'))
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockRejectedValue(new Error('network'))
 
     const dataLoader = mountDataLoaderHarness()
     await flushPromises()
@@ -155,7 +157,7 @@ describe('useDashboardDataLoader', () => {
     isTaskTab.value = true
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     const fetchWorkItemsSpy = vi.spyOn(collaborationStore, 'fetchWorkItems').mockResolvedValue(undefined)
@@ -178,7 +180,7 @@ describe('useDashboardDataLoader', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockReturnValue(true)
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     const fetchWorkItemsSpy = vi.spyOn(collaborationStore, 'fetchWorkItems')
@@ -189,7 +191,7 @@ describe('useDashboardDataLoader', () => {
     expect(fetchWorkItemsSpy).not.toHaveBeenCalled()
   })
 
-  it('enriches master review history for master designer after load', async () => {
+  it('enriches master review history for master designer after full masters load', async () => {
     setupSession({ manageMasters: true })
     primaryClusterOneRole.value = 'MASTER_DESIGNER'
     isOverviewTab.value = true
@@ -200,7 +202,7 @@ describe('useDashboardDataLoader', () => {
     )
 
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchMasters').mockResolvedValue(undefined)
+    vi.spyOn(mastersStore, 'fetchAllMasters').mockResolvedValue(undefined)
     const enrichSpy = vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
 
     mountDataLoaderHarness()
@@ -216,7 +218,7 @@ describe('useDashboardDataLoader', () => {
     isTaskTab.value = true
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     vi.spyOn(collaborationStore, 'fetchWorkItems').mockImplementation(async () => {
@@ -237,7 +239,7 @@ describe('useDashboardDataLoader', () => {
     isTaskTab.value = true
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     const fetchWorkItemsSpy = vi

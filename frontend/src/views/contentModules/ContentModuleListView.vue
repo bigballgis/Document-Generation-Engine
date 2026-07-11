@@ -13,12 +13,11 @@ import PageHeader from '@/components/layout/PageHeader.vue'
 import ContentModuleCreateDialog from '@/components/contentModules/ContentModuleCreateDialog.vue'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
+import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { contentModuleDetailPath } from '@/routing/routeKeys'
 import { useContentModulesStore } from '@/stores/contentModules'
 import type { ContentModuleSummary } from '@/types/contentModule'
@@ -33,13 +32,13 @@ const { contentModuleDetailLink } = useEntityLinkTargets()
 
 const createDialogOpen = ref(false)
 const currentPage = ref(1)
+const listHydrated = ref(false)
 
 const allModules = computed(() => contentModulesStore.modules)
 const {
   searchQuery,
   filters,
   activeSortKey,
-  sortedRows,
   hasAnyActive,
   activeFilterChips,
   clearAll,
@@ -58,6 +57,12 @@ const {
     },
   ],
   sortOptions: [
+    {
+      key: 'groupCodeAsc',
+      labelKey: 'table.sort.groupAsc',
+      getter: (row) => row.groupCode,
+      order: 'asc',
+    },
     {
       key: 'updatedAtDesc',
       labelKey: 'table.sort.updatedAtDesc',
@@ -83,7 +88,7 @@ const {
       order: 'asc',
     },
   ],
-  defaultSortKey: 'updatedAtDesc',
+  defaultSortKey: 'groupCodeAsc',
 })
 
 const catalogToolbarFilters = computed(() => [
@@ -95,21 +100,27 @@ const catalogToolbarFilters = computed(() => [
 ])
 
 const catalogSortOptions = computed(() => [
+  { key: 'groupCodeAsc', labelKey: 'table.sort.groupAsc' },
   { key: 'updatedAtDesc', labelKey: 'table.sort.updatedAtDesc' },
   { key: 'updatedAtAsc', labelKey: 'table.sort.updatedAtAsc' },
   { key: 'nameAsc', labelKey: 'table.sort.nameAsc' },
   { key: 'moduleCodeAsc', labelKey: 'table.sort.moduleCodeAsc' },
 ])
 
-const { paginatedRows: paginatedModules, totalRows: totalModuleRows } = useCatalogPagination(
-  sortedRows,
-  currentPage,
-  CLIENT_TABLE_PAGE_SIZE,
+const showCatalogChrome = computed(
+  () =>
+    listHydrated.value &&
+    !contentModulesStore.lastErrorMessageKey &&
+    (contentModulesStore.moduleListTotalElements > 0 || hasAnyActive.value),
 )
 
-watch(hasAnyActive, () => {
-  currentPage.value = 1
-})
+function buildListQuery() {
+  return {
+    search: searchQuery.value.trim() || undefined,
+    groupCode: filters.groupCode?.trim() || undefined,
+    sort: activeSortKey.value || 'groupCodeAsc',
+  }
+}
 
 const canCreate = computed(() => authorContentModules.value)
 const errorMessage = computed(() => {
@@ -120,8 +131,42 @@ const errorMessage = computed(() => {
   return te(key) ? t(key) : t('contentModules.error.loadList')
 })
 
-const { reload: reloadModules } = useAbortableCatalogLoader((signal) =>
-  contentModulesStore.fetchModules(undefined, { signal }),
+const { reload: reloadModules, signal: abortSignal } = useAbortableCatalogLoader(async (signal) => {
+  await contentModulesStore.fetchModules(currentPage.value - 1, SERVER_TABLE_PAGE_SIZE, {
+    signal,
+    ...buildListQuery(),
+  })
+  listHydrated.value = true
+})
+
+watch(currentPage, async (page) => {
+  const serverPage = page - 1
+  if (serverPage === contentModulesStore.moduleListPage) {
+    return
+  }
+  try {
+    await contentModulesStore.fetchModules(serverPage, SERVER_TABLE_PAGE_SIZE, {
+      signal: abortSignal.value,
+      ...buildListQuery(),
+    })
+  } catch {
+    // Error surfaced via store message key.
+  }
+})
+
+watch(
+  [searchQuery, filters, activeSortKey],
+  async () => {
+    if (!listHydrated.value) {
+      return
+    }
+    if (currentPage.value !== 1) {
+      currentPage.value = 1
+      return
+    }
+    await reloadModules()
+  },
+  { deep: true },
 )
 
 onMounted(async () => {
@@ -165,7 +210,7 @@ function handleCreated(moduleId: string) {
 
     <el-skeleton v-else-if="contentModulesStore.loadingList" :rows="6" animated />
 
-    <template v-else-if="allModules.length > 0">
+    <template v-else-if="showCatalogChrome">
       <CatalogFilterToolbar
         v-model:search-query="searchQuery"
         v-model:filter-values="filters"
@@ -178,8 +223,8 @@ function handleCreated(moduleId: string) {
         @remove-chip="removeFilterChip"
       />
 
-      <template v-if="sortedRows.length > 0">
-        <AppDataTable activatable :data="paginatedModules" @row-click="activateModuleRow">
+      <template v-if="allModules.length > 0">
+        <AppDataTable activatable :data="allModules" @row-click="activateModuleRow">
           <el-table-column
             prop="groupCode"
             :label="t('contentModules.list.columns.group')"
@@ -211,8 +256,8 @@ function handleCreated(moduleId: string) {
         </AppDataTable>
         <AppTablePagination
           v-model:current-page="currentPage"
-          :page-size="CLIENT_TABLE_PAGE_SIZE"
-          :total="totalModuleRows"
+          :page-size="contentModulesStore.moduleListSize"
+          :total="contentModulesStore.moduleListTotalElements"
         />
       </template>
 

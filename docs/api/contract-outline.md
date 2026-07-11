@@ -322,11 +322,28 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 模板导出（JSON） | 导出已通过审批或已发布模板 bundle（元数据、变量、绑定、规则、内容模块引用、API 策略快照）。 | 仅 `PENDING_RELEASE`、`PUBLISHED`、`STOPPED`、`DEPRECATED` 可导出；bundle 格式固定为 `template-export-bundle-v1-json`；不得包含 secret、API 凭证或运行时凭证；导出动作记录审计。 | `GET /api/management/v1/templates/{templateId}/export` |
 | 模板导出（ZIP） | 与 JSON 相同 bundle，封装为单文件 ZIP 附件。 | ZIP 内仅含条目 `template-export-bundle.json`；响应 `Content-Type: application/zip`；`Content-Disposition` 为 attachment。 | `GET /api/management/v1/templates/{templateId}/export?format=zip` |
 | 模板导入 | 将 bundle 导入目标环境并从草稿重新走流程。 | 导入后模板状态为 `DRAFT`；须重新执行测试→审批→发布；`masterId` 须为同 `groupCode` 下已批准母版；导入动作记录审计并返回 `importBatchId`。 | `POST /api/management/v1/templates/import` |
+| 目录列表分页（LR-C5） | 管理端 Templates / Masters / Content-modules **包列表**服务端分页与筛选。 | 见下方「目录列表分页契约（LR-C5）」；完整行为 [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md)；正式字段以 [OpenAPI v1](openapi-v1.yaml) 为准。 | `GET /api/management/v1/templates` · `GET /api/management/v1/masters` · `GET /api/management/v1/content-modules` |
 | 模板版本线列表 | 分页列出模板包下进行中 dev 行与已发布 release 行，供包 hub 导航。 | 含 `release_version IS NULL` 的当前 dev 行与全部已发布行；跨组 `403 ACCESS_DENIED`；排序为 dev 行优先、再按 dev 版本降序。 | `GET /api/management/v1/templates/{templateId}/version-lines?page=&size=` |
 | 模板版本线详情 | 只读查看指定版本线的变量、绑定与规则快照。 | 版本线须属于该模板；跨组 `403`。 | `GET /api/management/v1/templates/{templateId}/version-lines/{versionLineId}` |
 | 模板 dev 版本详情 | 获取指定 dev 行的编排详情（在途编辑）。 | 已发布 dev 行只读；变更返回 `403 TEMPLATE_VERSION_IMMUTABLE`。 | `GET /api/management/v1/templates/{templateId}/dev/{devVersionId}` |
 | 模板 release 详情 | 获取已发布 release 只读快照。 | 按语义版本 `releaseVersion` 定位；未知版本 `404`。 | `GET /api/management/v1/templates/{templateId}/releases/{releaseVersion}` |
 | 克隆已发布 release | 从已发布 release 复制快照到新的 DRAFT dev 行（`max(dev_version_number)+1`）。 | 存在进行中 dev 行时 `409 TEMPLATE_DEV_LINE_IN_FLIGHT`；成功后模板包状态为 `DRAFT`；记录 lifecycle 审计。 | `POST /api/management/v1/templates/{templateId}/release-versions/{releaseVersion}/clone` |
+
+### 目录列表分页契约（LR-C5）
+
+已确认管理端三大目录包列表统一为服务端 `PageView`（BDD-LRP-C5-CATALOG-001；OpenAPI `listTemplates` / `listMasters` / `listContentModules`）。**不**定义 LR-C6 命令面板专用 API（C6 可复用本切片的 `search` 参数）。
+
+| 项 | 已确认规则 |
+| --- | --- |
+| 响应 | `result` = `PageView`：`content` / `page` / `size` / `totalElements` / `totalPages`（字段名非 Spring `number`） |
+| 分页 | `page` 默认 **0**；`size` 默认 **20**，合法范围 **1…100**；越界/缺失规范化（不 500）；超出末页 → 空 `content`，`totalElements` 不变 |
+| 默认排序（COR-F09） | **行分页** + `groupCode ASC`，次级 `updatedAt DESC`（`sort=groupCodeAsc`）；**不**按组个数分页 |
+| 共用 query | `search`（可选，contains，空忽略）；`groupCode`（可选，精确，与会话授权求交） |
+| Templates 专有 | `lifecycleStatus`；`approvalSubState`（审批 chip：`APPROVAL` + `PENDING_DECISION`）；`sort` 另含 `externalIdAsc` |
+| Masters 专有 | `status`（`MasterDocumentReviewStatus`）；`sort` 接受 `groupAsc` 作为 `groupCodeAsc` 同义 |
+| Content-modules 专有 | 既有可选 `groupCode` 与 page/size/search/sort 共存；`sort` 另含 `moduleCodeAsc`；v1 **不**强制状态 filter |
+| 破坏性契约 | Masters / Content-modules 自裸数组升级为 `PageView`（管理端一体升级） |
+| 溯源 | OPT-F4 residual（masters/modules + 端到端 filter）；COR-F09 语义保留为默认 group-first 行排序 |
 
 ### 权限边界（对齐权限矩阵 §5）
 

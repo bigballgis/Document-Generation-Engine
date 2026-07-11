@@ -1,6 +1,10 @@
 package com.bank.docgen.contentmodule.service;
 
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
+import com.bank.docgen.authorization.management.api.CatalogPageSupport;
+import com.bank.docgen.authorization.management.api.CatalogQueryPage;
+import com.bank.docgen.authorization.management.api.CatalogSortKey;
+import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.contentmodule.api.ContentModuleDetailView;
 import com.bank.docgen.contentmodule.api.ContentModuleSummaryView;
@@ -11,13 +15,12 @@ import com.bank.docgen.contentmodule.api.UpdateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
+import com.bank.docgen.contentmodule.persistence.ContentModuleRepositoryCustom.ContentModuleCatalogFilter;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,28 +49,57 @@ public class ContentModuleService {
     }
 
     @Transactional(readOnly = true)
-    public List<ContentModuleSummaryView> listAccessible(ManagementSessionClaims session) {
+    public PageView<ContentModuleSummaryView> list(
+            ManagementSessionClaims session,
+            Integer page,
+            Integer size,
+            String search,
+            String groupCode,
+            String sort
+    ) {
         assertCatalogBrowseAllowed(session);
+        int safePage = CatalogPageSupport.normalizePage(page);
+        int safeSize = CatalogPageSupport.normalizeSize(size);
         List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
-        Map<UUID, ContentModuleEntity> modules = new LinkedHashMap<>();
-        if (groupCodes.contains("*")) {
-            moduleRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc()
-                    .forEach(module -> modules.put(module.getId(), module));
-        } else if (groupCodes.isEmpty()) {
-            return List.of();
-        } else {
-            List<String> normalizedGroups = groupCodes.stream()
-                    .map(code -> code.trim().toUpperCase(Locale.ROOT))
-                    .toList();
-            moduleRepository.findByGroupCodeInAndDeletedAtIsNullOrderByUpdatedAtDesc(normalizedGroups)
-                    .forEach(module -> modules.put(module.getId(), module));
-            moduleRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc().stream()
-                    .filter(module -> !modules.containsKey(module.getId()))
-                    .filter(module -> accessSupport.readSharedGroupCodes(module).stream()
-                            .anyMatch(normalizedGroups::contains))
-                    .forEach(module -> modules.put(module.getId(), module));
+        if (groupCodes.isEmpty()) {
+            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
         }
-        return modules.values().stream().map(this::toSummary).toList();
+
+        boolean allGroups = groupCodes.contains("*");
+        String groupFilter = CatalogPageSupport.blankToNull(groupCode);
+        if (groupFilter != null) {
+            groupFilter = groupFilter.toUpperCase(Locale.ROOT);
+            if (!groupAccessService.canAccessGroup(session, groupFilter)) {
+                return new PageView<>(List.of(), safePage, safeSize, 0, 0);
+            }
+        }
+
+        List<String> normalizedGroups = allGroups
+                ? List.of()
+                : groupCodes.stream().map(code -> code.trim().toUpperCase(Locale.ROOT)).toList();
+        CatalogSortKey sortKey = CatalogSortKey.parse(sort, CatalogSortKey.MODULE_CODE_ASC);
+        ContentModuleCatalogFilter filter = new ContentModuleCatalogFilter(
+                normalizedGroups,
+                allGroups,
+                groupFilter,
+                CatalogPageSupport.blankToNull(search),
+                sortKey
+        );
+        CatalogQueryPage<ContentModuleEntity> modulePage =
+                moduleRepository.searchCatalog(filter, safePage, safeSize);
+        List<ContentModuleSummaryView> content = modulePage.content().stream().map(this::toSummary).toList();
+        return new PageView<>(
+                content,
+                safePage,
+                safeSize,
+                modulePage.totalElements(),
+                modulePage.totalPages()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<ContentModuleSummaryView> listAccessible(ManagementSessionClaims session) {
+        return list(session, 0, CatalogPageSupport.MAX_SIZE, null, null, null).content();
     }
 
     @Transactional(readOnly = true)
@@ -79,15 +111,7 @@ public class ContentModuleService {
         if (!groupAccessService.canAccessGroup(session, groupCode)) {
             throw new ContentModuleAccessDeniedException();
         }
-        String normalizedGroup = groupCode.trim().toUpperCase(Locale.ROOT);
-        Map<UUID, ContentModuleEntity> modules = new LinkedHashMap<>();
-        moduleRepository.findByGroupCodeAndDeletedAtIsNull(normalizedGroup)
-                .forEach(module -> modules.put(module.getId(), module));
-        moduleRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc().stream()
-                .filter(module -> !modules.containsKey(module.getId()))
-                .filter(module -> accessSupport.readSharedGroupCodes(module).contains(normalizedGroup))
-                .forEach(module -> modules.put(module.getId(), module));
-        return modules.values().stream().map(this::toSummary).toList();
+        return list(session, 0, CatalogPageSupport.MAX_SIZE, null, groupCode, null).content();
     }
 
     @Transactional(readOnly = true)

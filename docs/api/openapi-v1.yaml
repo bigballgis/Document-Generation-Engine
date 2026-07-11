@@ -21,7 +21,7 @@ tags:
   - name: Invocation
     description: Caller-scoped invocation record query and parameter backup.
   - name: Admin
-    description: API management, credential lifecycle administration, template lifecycle governance, template export/import, master revision-line read paths, content-module governance, and collaboration timeout configuration.
+    description: API management, credential lifecycle administration, template lifecycle governance, template/master/content-module catalog list pagination (LR-C5 PageView), template export/import, master revision-line read paths, content-module governance, and collaboration timeout configuration.
   - name: Collaboration
     description: Collaboration work-item queues and timeout threshold administration.
 security:
@@ -1237,27 +1237,43 @@ paths:
     get:
       tags: [Admin]
       operationId: listContentModules
-      summary: List content modules scoped by group
+      summary: List content modules (server-side PageView)
       description: >-
-        Lists non-deleted content modules. When `groupCode` is omitted, returns all modules
-        accessible to the caller across authorized groups (including shared modules). When
-        `groupCode` is provided, narrows to that group scope. Requires catalog browse access
-        per permission matrix §5.1.
+        Lists non-deleted content modules as a standard `PageView` (LR-C5 /
+        BDD-LRP-C5-CATALOG-001). When `groupCode` is omitted, returns modules
+        accessible to the caller across authorized groups (including shared
+        modules). When `groupCode` is provided, exact-match filter intersected
+        with session authorization (unauthorized group → empty page). Optional
+        `search` is case-insensitive contains over `name` ∪ `moduleCode` ∪
+        `groupCode`. Default sort is group-first (`groupCodeAsc`: `groupCode ASC`,
+        then `updatedAt DESC`). Pagination unit is **rows** (not group count).
+        Requires catalog browse access per permission matrix §5.1. Breaking
+        change vs pre-LR-C5 bare array: management UI upgrades in the same slice;
+        no external runtime callers.
       parameters:
-        - name: groupCode
+        - $ref: '#/components/parameters/CatalogPageQuery'
+        - $ref: '#/components/parameters/CatalogSizeQuery'
+        - $ref: '#/components/parameters/CatalogSearchQuery'
+        - $ref: '#/components/parameters/CatalogGroupCodeQuery'
+        - name: sort
           in: query
           required: false
+          description: >-
+            Whitelist sort key. Default `groupCodeAsc`. Unknown values fall back
+            to `groupCodeAsc` (no 400). Content-modules also support
+            `moduleCodeAsc`.
           schema:
             type: string
-            minLength: 1
+            enum: [groupCodeAsc, updatedAtDesc, updatedAtAsc, nameAsc, moduleCodeAsc]
+            default: groupCodeAsc
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
         '200':
-          description: Content modules listed.
+          description: Paginated content module summaries.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContentModuleSummaryListResponse'
+                $ref: '#/components/schemas/ContentModuleSummaryPageResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
@@ -1579,6 +1595,78 @@ paths:
         '403':
           $ref: '#/components/responses/ErrorResponse'
         '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates:
+    get:
+      tags: [Admin]
+      operationId: listTemplates
+      summary: List templates (server-side PageView)
+      description: >-
+        Returns a standard management `PageView` of template package summaries
+        for the caller's authorized groups (LR-C5 / BDD-LRP-C5-CATALOG-001).
+        Pagination is **row-based** with default sort group-first
+        (`groupCode ASC`, then `updatedAt DESC` — COR-F09 semantics retained;
+        not group-count pages). Empty accessible groups yield an empty page
+        (`totalElements: 0`) without leaking other groups. Optional filters AND
+        together; changing filters/search/sort resets UI to `page=0`.
+        Normalization: missing/`size` out of 1…100 → default 20 (or clamp
+        `size>100` to 100 — implementation locks one); `page<0` → 0; page past
+        last → empty `content` with unchanged `totalElements`. Requires catalog
+        browse access per permission matrix. Traceability: BDD-LRP-C5-001…015.
+      parameters:
+        - $ref: '#/components/parameters/CatalogPageQuery'
+        - $ref: '#/components/parameters/CatalogSizeQuery'
+        - $ref: '#/components/parameters/CatalogSearchQuery'
+        - $ref: '#/components/parameters/CatalogGroupCodeQuery'
+        - name: lifecycleStatus
+          in: query
+          required: false
+          description: >-
+            Exact template lifecycle status filter (UI status / workflow chips).
+            Workflow chip mapping: awaitingTest→TESTING; awaitingPublish→PENDING_RELEASE;
+            awaitingApproval→APPROVAL (with `approvalSubState=PENDING_DECISION`).
+            Unknown enum values: empty page recommended (or 400/422 — lock in tests).
+          schema:
+            $ref: '#/components/schemas/TemplateLifecycleStatus'
+        - name: approvalSubState
+          in: query
+          required: false
+          description: >-
+            Optional approval sub-state filter (templates only). Used with
+            `lifecycleStatus=APPROVAL` for the awaiting-approval workflow chip
+            (`PENDING_DECISION`).
+          schema:
+            type: string
+            enum: [PENDING_SUBMIT, PENDING_DECISION]
+        - name: sort
+          in: query
+          required: false
+          description: >-
+            Whitelist sort key. Default `groupCodeAsc` (group-first). Unknown
+            values fall back to `groupCodeAsc` (no 400). Templates also support
+            `externalIdAsc`.
+          schema:
+            type: string
+            enum:
+              - groupCodeAsc
+              - updatedAtDesc
+              - updatedAtAsc
+              - nameAsc
+              - externalIdAsc
+            default: groupCodeAsc
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Paginated template summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSummaryPageResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -2104,6 +2192,64 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiAccessAlertListResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/masters:
+    get:
+      tags: [Admin]
+      operationId: listMasters
+      summary: List masters (server-side PageView)
+      description: >-
+        Returns a standard management `PageView` of master document package
+        summaries for the caller's authorized groups (LR-C5 /
+        BDD-LRP-C5-CATALOG-001). Breaking change vs pre-LR-C5 bare array:
+        management UI upgrades in the same slice; no external runtime callers.
+        Default sort is group-first (`groupCodeAsc`). Optional `search` is
+        case-insensitive contains over `name` ∪ `groupCode`. Optional `status`
+        is exact master review status. Pagination unit is **rows** (COR-F09).
+        Requires catalog browse / master read per permission matrix; fail-closed
+        for unauthorized groups.
+      parameters:
+        - $ref: '#/components/parameters/CatalogPageQuery'
+        - $ref: '#/components/parameters/CatalogSizeQuery'
+        - $ref: '#/components/parameters/CatalogSearchQuery'
+        - $ref: '#/components/parameters/CatalogGroupCodeQuery'
+        - name: status
+          in: query
+          required: false
+          description: >-
+            Exact master review status filter. Unknown enum: empty page
+            recommended (or 400/422 — lock in tests).
+          schema:
+            $ref: '#/components/schemas/MasterDocumentReviewStatus'
+        - name: sort
+          in: query
+          required: false
+          description: >-
+            Whitelist sort key. Default `groupCodeAsc`. `groupAsc` is accepted as
+            a synonym of `groupCodeAsc`. Unknown values fall back to
+            `groupCodeAsc` (no 400).
+          schema:
+            type: string
+            enum:
+              - groupCodeAsc
+              - groupAsc
+              - updatedAtDesc
+              - updatedAtAsc
+              - nameAsc
+            default: groupCodeAsc
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Paginated master summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterDocumentPageResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
@@ -2714,6 +2860,53 @@ components:
         minimum: 1
         maximum: 100
         default: 20
+    CatalogPageQuery:
+      name: page
+      in: query
+      required: false
+      description: >-
+        Zero-based page index (LR-C5 catalog lists). Default 0; negative values
+        normalize to 0.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    CatalogSizeQuery:
+      name: size
+      in: query
+      required: false
+      description: >-
+        Page size for catalog lists (LR-C5). Default 20; legal range 1…100.
+        Missing or out-of-range values normalize per BDD C5-C2 (default 20 or
+        clamp >100 to 100 — implementation locks one; must not 500).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    CatalogSearchQuery:
+      name: search
+      in: query
+      required: false
+      description: >-
+        Optional case-insensitive contains search. Empty/blank ignored.
+        Field coverage is entity-specific (see operation description).
+        Reusable by future LR-C6 command palette; this contract does not define
+        a separate C6 palette API.
+      schema:
+        type: string
+        minLength: 1
+    CatalogGroupCodeQuery:
+      name: groupCode
+      in: query
+      required: false
+      description: >-
+        Exact-match group filter (trim). Intersected with session-authorized
+        groups; unauthorized group yields empty page (no cross-group leak).
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
     DocumentId:
       name: documentId
       in: path
@@ -4355,9 +4548,12 @@ components:
       type: object
       additionalProperties: false
       description: >-
-        Standard management pagination wrapper. totalElements counts all persisted
-        rows for the query, not the current page length. Requesting page beyond
-        the last page returns empty content with unchanged totalElements.
+        Standard management pagination wrapper. totalElements counts all matching
+        rows for the query (after filters), not the current page length.
+        Requesting page beyond the last page returns empty content with unchanged
+        totalElements. Field names are `page` / `size` / `totalElements` /
+        `totalPages` (not Spring Data `number`). Used by catalog lists (LR-C5),
+        version-lines, revision-lines, identity, and other management pageables.
       required: [content, page, size, totalElements, totalPages]
       properties:
         content:
@@ -5798,9 +5994,34 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContentModuleVersionView'
+    ContentModuleSummaryPageResponse:
+      type: object
+      additionalProperties: false
+      description: >-
+        LR-C5 catalog list envelope. Replaces pre-LR-C5 bare-array
+        `ContentModuleSummaryListResponse` for `GET /content-modules`.
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageView'
+            - type: object
+              additionalProperties: false
+              required: [content]
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ContentModuleSummaryView'
     ContentModuleSummaryListResponse:
       type: object
       additionalProperties: false
+      deprecated: true
+      description: >-
+        Deprecated (LR-C5). Historical bare-array list envelope. Use
+        `ContentModuleSummaryPageResponse` / `PageView` instead.
       required: [metadata, result]
       properties:
         metadata:
@@ -6297,6 +6518,25 @@ components:
           description: >-
             Optional display label for updatedBy in format
             "displayName (username)"; falls back to username when user not found.
+    TemplateSummaryPageResponse:
+      type: object
+      additionalProperties: false
+      description: LR-C5 catalog list envelope for `GET /api/management/v1/templates`.
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageView'
+            - type: object
+              additionalProperties: false
+              required: [content]
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TemplateSummaryView'
     MasterDocumentSummaryView:
       type: object
       additionalProperties: false
@@ -6318,7 +6558,7 @@ components:
         name:
           type: string
         status:
-          type: string
+          $ref: '#/components/schemas/MasterDocumentReviewStatus'
         originalFilename:
           type: string
         anchorCount:
@@ -6335,6 +6575,27 @@ components:
           description: >-
             Optional display label for updatedBy in format
             "displayName (username)"; falls back to username when user not found.
+    MasterDocumentPageResponse:
+      type: object
+      additionalProperties: false
+      description: >-
+        LR-C5 catalog list envelope for `GET /api/management/v1/masters`.
+        Replaces pre-LR-C5 bare-array list response.
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageView'
+            - type: object
+              additionalProperties: false
+              required: [content]
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/MasterDocumentSummaryView'
     BatchTestRunSummaryView:
       type: object
       additionalProperties: false

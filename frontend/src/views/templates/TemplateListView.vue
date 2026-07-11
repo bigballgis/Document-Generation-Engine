@@ -15,17 +15,15 @@ import TemplateImportDialog from '@/components/templates/TemplateImportDialog.vu
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useLifecycleStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
+import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { templateDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateSummary, TemplateLifecycleStatus } from '@/types/template'
-import { isAwaitingApproverDecision } from '@/utils/templateApproverJourney'
 import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 import { ElMessage } from 'element-plus'
 
@@ -40,72 +38,56 @@ const { templateDetailLink } = useEntityLinkTargets()
 
 type WorkflowFilterKey = 'awaitingTest' | 'awaitingApproval' | 'awaitingPublish'
 
+const WORKFLOW_CHIP_QUERY: Record<
+  WorkflowFilterKey,
+  { lifecycleStatus: TemplateLifecycleStatus; approvalSubState?: string }
+> = {
+  awaitingTest: { lifecycleStatus: 'TESTING' },
+  awaitingApproval: { lifecycleStatus: 'APPROVAL', approvalSubState: 'PENDING_DECISION' },
+  awaitingPublish: { lifecycleStatus: 'PENDING_RELEASE' },
+}
+
 const activeWorkflowFilter = ref<WorkflowFilterKey | null>(null)
 const createDialogOpen = ref(false)
 const importDialogOpen = ref(false)
 const currentPage = ref(1)
+const listHydrated = ref(false)
 
 const workflowFilterChips = computed(() => {
-  const chips: Array<{
-    key: WorkflowFilterKey
-    labelKey: string
-    statuses: TemplateLifecycleStatus[]
-  }> = []
+  const chips: Array<{ key: WorkflowFilterKey; labelKey: string }> = []
   if (decideTests.value) {
     chips.push({
       key: 'awaitingTest',
       labelKey: 'templates.list.workflowFilters.awaitingTest',
-      statuses: ['TESTING'],
     })
   }
   if (decideApprovals.value) {
     chips.push({
       key: 'awaitingApproval',
       labelKey: 'templates.list.workflowFilters.awaitingApproval',
-      statuses: ['APPROVAL'],
     })
   }
   if (publishTemplates.value) {
     chips.push({
       key: 'awaitingPublish',
       labelKey: 'templates.list.workflowFilters.awaitingPublish',
-      statuses: ['PENDING_RELEASE'],
     })
   }
   return chips
 })
 
-const catalogTemplates = computed(() => {
-  if (!activeWorkflowFilter.value) {
-    return templatesStore.templates
-  }
-  if (activeWorkflowFilter.value === 'awaitingApproval') {
-    return templatesStore.templates.filter(isAwaitingApproverDecision)
-  }
-  const chip = workflowFilterChips.value.find((entry) => entry.key === activeWorkflowFilter.value)
-  if (!chip) {
-    return templatesStore.templates
-  }
-  return templatesStore.templates.filter((template) =>
-    chip.statuses.includes(template.lifecycleStatus),
-  )
-})
+const catalogTemplates = computed(() => templatesStore.templates)
 
 const {
   searchQuery,
   filters,
   activeSortKey,
-  sortedRows,
   hasAnyActive,
   activeFilterChips,
   clearAll,
   removeFilterChip,
 } = useCatalogTableControls(catalogTemplates, {
-  searchGetters: [
-    (row) => row.name,
-    (row) => row.externalId,
-    (row) => row.groupCode,
-  ],
+  searchGetters: [(row) => row.name, (row) => row.externalId, (row) => row.groupCode],
   filters: [
     {
       key: 'groupCode',
@@ -120,6 +102,12 @@ const {
     },
   ],
   sortOptions: [
+    {
+      key: 'groupCodeAsc',
+      labelKey: 'table.sort.groupAsc',
+      getter: (row) => row.groupCode,
+      order: 'asc',
+    },
     {
       key: 'updatedAtDesc',
       labelKey: 'table.sort.updatedAtDesc',
@@ -145,7 +133,7 @@ const {
       order: 'asc',
     },
   ],
-  defaultSortKey: 'updatedAtDesc',
+  defaultSortKey: 'groupCodeAsc',
 })
 
 const catalogToolbarFilters = computed(() => [
@@ -159,55 +147,88 @@ const catalogToolbarFilters = computed(() => [
 ])
 
 const catalogSortOptions = computed(() => [
+  { key: 'groupCodeAsc', labelKey: 'table.sort.groupAsc' },
   { key: 'updatedAtDesc', labelKey: 'table.sort.updatedAtDesc' },
   { key: 'updatedAtAsc', labelKey: 'table.sort.updatedAtAsc' },
   { key: 'nameAsc', labelKey: 'table.sort.nameAsc' },
   { key: 'externalIdAsc', labelKey: 'table.sort.externalIdAsc' },
 ])
 
-const serverPagingActive = computed(() => !hasAnyActive.value && !activeWorkflowFilter.value)
-
-const { paginatedRows: paginatedTemplates, totalRows: totalTemplateRows } = useCatalogPagination(
-  sortedRows,
-  currentPage,
-  CLIENT_TABLE_PAGE_SIZE,
+const hasActiveQuery = computed(
+  () => hasAnyActive.value || activeWorkflowFilter.value !== null,
 )
 
-const tableRows = computed(() =>
-  serverPagingActive.value ? sortedRows.value : paginatedTemplates.value,
+const showCatalogChrome = computed(
+  () =>
+    listHydrated.value &&
+    !templatesStore.lastErrorMessageKey &&
+    (templatesStore.templateListTotalElements > 0 || hasActiveQuery.value),
 )
 
-const displayTotal = computed(() =>
-  serverPagingActive.value ? templatesStore.templateListTotalElements : totalTemplateRows.value,
-)
+function buildListQuery() {
+  const search = searchQuery.value.trim() || undefined
+  const groupCode = filters.groupCode?.trim() || undefined
+  const statusFilter = filters.status?.trim() || undefined
+  const chip = activeWorkflowFilter.value
+    ? WORKFLOW_CHIP_QUERY[activeWorkflowFilter.value]
+    : null
 
-const displayPageSize = computed(() =>
-  serverPagingActive.value ? templatesStore.templateListSize : CLIENT_TABLE_PAGE_SIZE,
-)
+  let lifecycleStatus: string | undefined
+  let approvalSubState: string | undefined
+  if (chip && statusFilter && chip.lifecycleStatus !== statusFilter) {
+    // Impossible AND — still send both intents via chip status; backend returns empty.
+    lifecycleStatus = statusFilter
+  } else {
+    lifecycleStatus = statusFilter || chip?.lifecycleStatus
+    approvalSubState = chip?.approvalSubState
+  }
 
-const { reload: reloadTemplates, signal: abortSignal } = useAbortableCatalogLoader((signal) =>
-  templatesStore.fetchTemplates(0, templatesStore.templateListSize, { signal }),
-)
+  return {
+    search,
+    groupCode,
+    lifecycleStatus,
+    approvalSubState,
+    sort: activeSortKey.value || 'groupCodeAsc',
+  }
+}
+
+const { reload: reloadTemplates, signal: abortSignal } = useAbortableCatalogLoader(async (signal) => {
+  await templatesStore.fetchTemplates(currentPage.value - 1, SERVER_TABLE_PAGE_SIZE, {
+    signal,
+    ...buildListQuery(),
+  })
+  listHydrated.value = true
+})
 
 watch(currentPage, async (page) => {
-  if (!serverPagingActive.value) {
+  const serverPage = page - 1
+  if (serverPage === templatesStore.templateListPage) {
     return
   }
-  const serverPage = page - 1
-  if (serverPage !== templatesStore.templateListPage) {
-    try {
-      await templatesStore.fetchTemplates(serverPage, templatesStore.templateListSize, {
-        signal: abortSignal.value,
-      })
-    } catch {
-      // Error surfaced via store message key.
-    }
+  try {
+    await templatesStore.fetchTemplates(serverPage, SERVER_TABLE_PAGE_SIZE, {
+      signal: abortSignal.value,
+      ...buildListQuery(),
+    })
+  } catch {
+    // Error surfaced via store message key.
   }
 })
 
-watch([hasAnyActive, activeWorkflowFilter], () => {
-  currentPage.value = 1
-})
+watch(
+  [searchQuery, filters, activeSortKey, activeWorkflowFilter],
+  async () => {
+    if (!listHydrated.value) {
+      return
+    }
+    if (currentPage.value !== 1) {
+      currentPage.value = 1
+      return
+    }
+    await reloadTemplates()
+  },
+  { deep: true },
+)
 
 onMounted(async () => {
   await reloadTemplates()
@@ -283,7 +304,7 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
 
     <el-skeleton v-else-if="templatesStore.loadingList" :rows="6" animated />
 
-    <template v-else-if="catalogTemplates.length > 0">
+    <template v-else-if="showCatalogChrome">
       <CatalogFilterToolbar
         v-model:search-query="searchQuery"
         v-model:filter-values="filters"
@@ -296,8 +317,8 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
         @remove-chip="removeFilterChip"
       />
 
-      <template v-if="sortedRows.length > 0">
-        <AppDataTable activatable :data="tableRows" @row-click="activateTemplateRow">
+      <template v-if="catalogTemplates.length > 0">
+        <AppDataTable activatable :data="catalogTemplates" @row-click="activateTemplateRow">
           <el-table-column
             prop="groupCode"
             :label="t('templates.list.columns.group')"
@@ -360,8 +381,8 @@ const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSumma
         </AppDataTable>
         <AppTablePagination
           v-model:current-page="currentPage"
-          :page-size="displayPageSize"
-          :total="displayTotal"
+          :page-size="templatesStore.templateListSize"
+          :total="templatesStore.templateListTotalElements"
         />
       </template>
 

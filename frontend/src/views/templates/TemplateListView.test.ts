@@ -14,6 +14,7 @@ import type { ManagementSession } from '@/types/session'
 const routerPush = vi.fn()
 const authorTemplates = ref(true)
 const exportTemplates = ref(true)
+const decideApprovals = ref(false)
 
 vi.mock('@/api/templates', () => ({
   listTemplates: vi.fn(),
@@ -34,7 +35,7 @@ vi.mock('@/composables/useCapabilities', () => ({
     authorTemplates,
     exportTemplates,
     decideTests: ref(false),
-    decideApprovals: ref(false),
+    decideApprovals,
     publishTemplates: ref(false),
   }),
 }))
@@ -49,6 +50,7 @@ describe('TemplateListView', () => {
     routerPush.mockReset()
     authorTemplates.value = true
     exportTemplates.value = true
+    decideApprovals.value = false
     vi.mocked(templatesApi.listTemplates).mockReset()
   })
 
@@ -287,5 +289,74 @@ describe('TemplateListView', () => {
     expect(templatesApi.listTemplates).toHaveBeenCalledTimes(2)
     expect(wrapper.text()).toContain('Retail letter')
     expect(wrapper.findComponent({ name: 'LoadErrorPanel' }).exists()).toBe(false)
+  })
+
+  it('LR-C5: initial load requests page 0 size 20 with groupCodeAsc sort', async () => {
+    vi.mocked(templatesApi.listTemplates).mockResolvedValue({
+      content: [],
+      page: 0,
+      size: 20,
+      totalElements: 0,
+      totalPages: 0,
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    mount(TemplateListView, {
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
+    })
+    await flushPromises()
+
+    expect(templatesApi.listTemplates).toHaveBeenCalledWith(
+      0,
+      20,
+      expect.objectContaining({ sort: 'groupCodeAsc' }),
+    )
+  })
+
+  it('LR-C5: workflow chip maps to lifecycleStatus and approvalSubState on server', async () => {
+    decideApprovals.value = true
+    vi.mocked(templatesApi.listTemplates).mockResolvedValue({
+      content: [
+        {
+          id: 'tpl-1',
+          externalId: 'TPL-RETAIL-LETTER',
+          groupCode: 'RETAIL',
+          name: 'Retail letter',
+          lifecycleStatus: 'APPROVAL',
+          approvalSubState: 'PENDING_DECISION',
+          releaseVersion: null,
+          releaseVersionCount: 0,
+          masterId: 'master-1',
+          updatedBy: '10000001',
+          updatedAt: '2026-06-23T10:00:00Z',
+        },
+      ],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(TemplateListView, {
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
+    })
+    await flushPromises()
+
+    const tags = wrapper.findAllComponents({ name: 'ElCheckTag' })
+    const approvalTag = tags.find((tag) => tag.text().includes('Awaiting my approval'))
+    expect(approvalTag).toBeTruthy()
+    await approvalTag!.vm.$emit('change', true)
+    await flushPromises()
+
+    expect(templatesApi.listTemplates).toHaveBeenCalledWith(
+      0,
+      20,
+      expect.objectContaining({
+        lifecycleStatus: 'APPROVAL',
+        approvalSubState: 'PENDING_DECISION',
+        sort: 'groupCodeAsc',
+      }),
+    )
   })
 })

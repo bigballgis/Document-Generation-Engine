@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ContentModuleRepository extends JpaRepository<ContentModuleEntity, UUID> {
+public interface ContentModuleRepository extends JpaRepository<ContentModuleEntity, UUID>, ContentModuleRepositoryCustom {
 
     Optional<ContentModuleEntity> findByIdAndDeletedAtIsNull(UUID id);
 

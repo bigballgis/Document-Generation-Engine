@@ -1,5 +1,6 @@
 package com.bank.docgen.master.web;
 
+import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.master.api.CreateMasterRequest;
 import com.bank.docgen.master.api.DecideMasterReviewRequest;
 import com.bank.docgen.master.api.MasterDocumentDetailView;
@@ -16,7 +17,6 @@ import com.bank.docgen.master.service.MasterDocumentService.MasterDownloadArtifa
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -46,11 +46,18 @@ public class MasterDocumentController {
     }
 
     @GetMapping
-    public SuccessEnvelope<List<MasterDocumentSummaryView>> list(
+    public SuccessEnvelope<PageView<MasterDocumentSummaryView>> list(
             @AuthenticationPrincipal ManagementSessionClaims session,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String groupCode,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String sort,
             HttpServletRequest request
     ) {
-        return envelope(request, masterDocumentService.list(session));
+        return envelope(request, masterDocumentService.list(
+                session, page, size, search, groupCode, status, sort));
     }
 
     @GetMapping("/{masterId}")

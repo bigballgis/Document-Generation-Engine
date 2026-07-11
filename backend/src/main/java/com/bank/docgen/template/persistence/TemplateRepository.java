@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TemplateRepository extends JpaRepository<TemplateEntity, UUID> {
+public interface TemplateRepository extends JpaRepository<TemplateEntity, UUID>, TemplateRepositoryCustom {
 
     List<TemplateEntity> findByDeletedAtIsNullOrderByUpdatedAtDesc();
 

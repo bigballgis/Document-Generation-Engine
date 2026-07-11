@@ -557,6 +557,18 @@
 - 分组隔离 fail-closed：跨组 list/get/clone 返回 `403 ACCESS_DENIED`。
 - v1 每个模板同时最多一条进行中 dev 线（与包级 `devVersionId` 一致）。
 
+## 已确认：管理目录服务端分页与筛选（LR-C5 / BDD-LRP-C5-CATALOG-001，2026-07-11）
+
+- 管理端 **Templates / Masters / Content modules** 包列表必须使用服务端分页：`page`（默认 0）+ `size`（默认 **20**，上限 **100**），响应为标准 `PageView`（`content` / `page` / `size` / `totalElements` / `totalPages`）。
+- Masters 与 Content-modules 列表从「全量数组」升级为 `PageView`（管理端一体升级）。
+- 目录工具栏的 search、字段 filter，以及模板 workflow chips，必须驱动服务端查询；禁止以「全量拉取 + 客户端 slice」作为目录主路径。
+- **COR-F09 group-first：** 默认排序为 `groupCode ASC`，次级 `updatedAt DESC`（行分页；允许同组跨页；不按组个数分页）。可选 `sort` 白名单（非法值回退默认）。
+- 筛选字段：三目录均支持 `groupCode`（精确）+ `search`（contains）；Templates 另支持 `lifecycleStatus` 与 `approvalSubState`（审批 chip）；Masters 另支持审核 `status`（`MasterDocumentReviewStatus`）。Content-modules v1 不强制状态 filter。
+- API 契约：`GET /api/management/v1/templates` · `GET /api/management/v1/masters` · `GET /api/management/v1/content-modules` — 见 [openapi-v1.yaml](../api/openapi-v1.yaml) 与 [contract-outline.md](../api/contract-outline.md)「目录列表分页契约（LR-C5）」。
+- 性能：≥500 行跨组种子下，列表请求 **p95 < 1 s**，证据记入执行账本。
+- 行为规格：[LR-C5 catalog pagination](../behavior/lrp-c5-catalog-pagination.md)。
+- **非本切片：** LR-C6 命令面板（可复用 `search`；不另开 palette API）。
+
 ## 已确认：模板级退回原因配置 UX 重构（BDD-TEMPLATE-RISK-PROMPT-UX-001，2026-07-02）
 
 **BDD ID:** `BDD-TEMPLATE-RISK-PROMPT-UX-001`  

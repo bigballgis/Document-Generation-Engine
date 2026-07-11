@@ -96,6 +96,11 @@ docgen:
     max-docx-upload-bytes: ${DOCGEN_MASTER_MAX_DOCX_UPLOAD_BYTES:52428800}
   demo-catalog:
     seed-enabled: ${DOCGEN_SEED_DEMO_CATALOG:false}
+  catalog-load-seed:
+    # LR-C5: ≥500 templates across groups for pagination / p95 evidence.
+    # Enable: DOCGEN_SEED_CATALOG_LOAD=true (optional DOCGEN_SEED_CATALOG_LOAD_COUNT=500)
+    enabled: ${DOCGEN_SEED_CATALOG_LOAD:false}
+    template-count: ${DOCGEN_SEED_CATALOG_LOAD_COUNT:500}
   ad-group-resolver:
     type: config
     account-groups:

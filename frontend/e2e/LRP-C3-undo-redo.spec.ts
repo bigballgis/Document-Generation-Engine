@@ -297,7 +297,6 @@ test.describe('LR-C3 structure-level undo/redo', () => {
     await openDevBindingEditor(page, request, templateId)
 
     const undoBtn = page.getByTestId('structured-editor-undo')
-    const redoBtn = page.getByTestId('structured-editor-redo')
 
     await insertBlock(page, /^heading$/i)
     await insertBlock(page, /^list$/i)

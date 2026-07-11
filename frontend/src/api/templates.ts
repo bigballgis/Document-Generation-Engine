@@ -1,5 +1,9 @@
 import { unwrapEnvelope } from '@/api/envelope'
 import { http } from '@/api/http'
+import {
+  collectAllPageContent,
+  type CollectedCatalogPage,
+} from '@/api/catalogPageCollect'
 import type { ApiEnvelope } from '@/types/session'
 import type { PageView } from '@/types/identity'
 import type {
@@ -53,23 +57,40 @@ export interface TemplateListQuery {
   search?: string
   groupCode?: string
   lifecycleStatus?: string
+  approvalSubState?: string
   sort?: string
+}
+
+function normalizeGroupCode(groupCode: string | undefined): string | undefined {
+  const trimmed = groupCode?.trim()
+  return trimmed ? trimmed.toUpperCase() : undefined
 }
 
 export async function listTemplates(
   page = 0,
   size = 20,
-  options: { signal?: AbortSignal; search?: string; groupCode?: string; lifecycleStatus?: string; sort?: string } = {},
+  options: {
+    signal?: AbortSignal
+    search?: string
+    groupCode?: string
+    lifecycleStatus?: string
+    approvalSubState?: string
+    sort?: string
+  } = {},
 ): Promise<PageView<TemplateSummary>> {
   const params: Record<string, string | number> = { page, size }
   if (options.search) {
     params.search = options.search
   }
-  if (options.groupCode) {
-    params.groupCode = options.groupCode
+  const groupCode = normalizeGroupCode(options.groupCode)
+  if (groupCode) {
+    params.groupCode = groupCode
   }
   if (options.lifecycleStatus) {
     params.lifecycleStatus = options.lifecycleStatus
+  }
+  if (options.approvalSubState) {
+    params.approvalSubState = options.approvalSubState
   }
   if (options.sort) {
     params.sort = options.sort
@@ -79,6 +100,20 @@ export async function listTemplates(
     signal: options.signal,
   })
   return unwrapEnvelope(response.data)
+}
+
+/** Multi-page merge for dashboard / picker consumers (LR-C5 PageView). */
+export async function listAllTemplates(
+  options: {
+    signal?: AbortSignal
+    search?: string
+    groupCode?: string
+    lifecycleStatus?: string
+    approvalSubState?: string
+    sort?: string
+  } = {},
+): Promise<CollectedCatalogPage<TemplateSummary>> {
+  return collectAllPageContent((page, size) => listTemplates(page, size, options))
 }
 
 export async function getTemplate(templateId: string): Promise<TemplateDetail> {

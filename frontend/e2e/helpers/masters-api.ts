@@ -93,12 +93,25 @@ async function authorizedPost<T>(
   return body.result
 }
 
+interface MasterListPage {
+  content: MasterSummary[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 export async function findMasterByName(
   request: APIRequestContext,
   token: string,
   name: string,
 ): Promise<MasterSummary | undefined> {
-  const masters = await authorizedGet<MasterSummary[]>(request, token, '/masters')
+  const page = await authorizedGet<MasterListPage | MasterSummary[]>(
+    request,
+    token,
+    `/masters?search=${encodeURIComponent(name)}&size=100`,
+  )
+  const masters = Array.isArray(page) ? page : (page.content ?? [])
   return masters.find((master) => master.name === name)
 }
 

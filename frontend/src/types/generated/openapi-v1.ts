@@ -556,8 +556,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List content modules scoped by group
-         * @description Lists non-deleted content modules. When `groupCode` is omitted, returns all modules accessible to the caller across authorized groups (including shared modules). When `groupCode` is provided, narrows to that group scope. Requires catalog browse access per permission matrix §5.1.
+         * List content modules (server-side PageView)
+         * @description Lists non-deleted content modules as a standard `PageView` (LR-C5 / BDD-LRP-C5-CATALOG-001). When `groupCode` is omitted, returns modules accessible to the caller across authorized groups (including shared modules). When `groupCode` is provided, exact-match filter intersected with session authorization (unauthorized group → empty page). Optional `search` is case-insensitive contains over `name` ∪ `moduleCode` ∪ `groupCode`. Default sort is group-first (`groupCodeAsc`: `groupCode ASC`, then `updatedAt DESC`). Pagination unit is **rows** (not group count). Requires catalog browse access per permission matrix §5.1. Breaking change vs pre-LR-C5 bare array: management UI upgrades in the same slice; no external runtime callers.
          */
         get: operations["listContentModules"];
         put?: never;
@@ -697,6 +697,26 @@ export interface paths {
          * @description Creates or updates timeout threshold hours for GLOBAL scope (GLOBAL_ADMIN only) or GROUP scope (GROUP_ADMIN within group scope). Thresholds apply to TEST, APPROVAL, PENDING_RELEASE, and REMEDIATION queues; escalation uses these thresholds for notification-only alerts.
          */
         put: operations["upsertCollaborationTimeoutConfig"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List templates (server-side PageView)
+         * @description Returns a standard management `PageView` of template package summaries for the caller's authorized groups (LR-C5 / BDD-LRP-C5-CATALOG-001). Pagination is **row-based** with default sort group-first (`groupCode ASC`, then `updatedAt DESC` — COR-F09 semantics retained; not group-count pages). Empty accessible groups yield an empty page (`totalElements: 0`) without leaking other groups. Optional filters AND together; changing filters/search/sort resets UI to `page=0`. Normalization: missing/`size` out of 1…100 → default 20 (or clamp `size>100` to 100 — implementation locks one); `page<0` → 0; page past last → empty `content` with unchanged `totalElements`. Requires catalog browse access per permission matrix. Traceability: BDD-LRP-C5-001…015.
+         */
+        get: operations["listTemplates"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -936,6 +956,26 @@ export interface paths {
          * @description Aggregates non-sensitive alerts across authorized template packages (missing AD groups, expiring credentials, no credentials). Each item includes a hub deep-link path for remediation.
          */
         get: operations["listApiAccessAlerts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/masters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List masters (server-side PageView)
+         * @description Returns a standard management `PageView` of master document package summaries for the caller's authorized groups (LR-C5 / BDD-LRP-C5-CATALOG-001). Breaking change vs pre-LR-C5 bare array: management UI upgrades in the same slice; no external runtime callers. Default sort is group-first (`groupCodeAsc`). Optional `search` is case-insensitive contains over `name` ∪ `groupCode`. Optional `status` is exact master review status. Pagination unit is **rows** (COR-F09). Requires catalog browse / master read per permission matrix; fail-closed for unauthorized groups.
+         */
+        get: operations["listMasters"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1852,7 +1892,7 @@ export interface components {
          * @enum {string}
          */
         MasterRevisionLineLabel: "CURRENT" | "HISTORICAL";
-        /** @description Standard management pagination wrapper. totalElements counts all persisted rows for the query, not the current page length. Requesting page beyond the last page returns empty content with unchanged totalElements. */
+        /** @description Standard management pagination wrapper. totalElements counts all matching rows for the query (after filters), not the current page length. Requesting page beyond the last page returns empty content with unchanged totalElements. Field names are `page` / `size` / `totalElements` / `totalPages` (not Spring Data `number`). Used by catalog lists (LR-C5), version-lines, revision-lines, identity, and other management pageables. */
         PageView: {
             content: unknown[];
             page: number;
@@ -2389,6 +2429,17 @@ export interface components {
             sharedGroupCodes?: string[];
             versions: components["schemas"]["ContentModuleVersionView"][];
         };
+        /** @description LR-C5 catalog list envelope. Replaces pre-LR-C5 bare-array `ContentModuleSummaryListResponse` for `GET /content-modules`. */
+        ContentModuleSummaryPageResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PageView"] & {
+                content: components["schemas"]["ContentModuleSummaryView"][];
+            };
+        };
+        /**
+         * @deprecated
+         * @description Deprecated (LR-C5). Historical bare-array list envelope. Use `ContentModuleSummaryPageResponse` / `PageView` instead.
+         */
         ContentModuleSummaryListResponse: {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["ContentModuleSummaryView"][];
@@ -2584,12 +2635,19 @@ export interface components {
             /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
             updatedByDisplayName?: string | null;
         };
+        /** @description LR-C5 catalog list envelope for `GET /api/management/v1/templates`. */
+        TemplateSummaryPageResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PageView"] & {
+                content: components["schemas"]["TemplateSummaryView"][];
+            };
+        };
         MasterDocumentSummaryView: {
             /** Format: uuid */
             id: string;
             groupCode: string;
             name: string;
-            status: string;
+            status: components["schemas"]["MasterDocumentReviewStatus"];
             originalFilename: string;
             anchorCount: number;
             updatedBy: string;
@@ -2597,6 +2655,13 @@ export interface components {
             updatedAt: string;
             /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
             updatedByDisplayName?: string | null;
+        };
+        /** @description LR-C5 catalog list envelope for `GET /api/management/v1/masters`. Replaces pre-LR-C5 bare-array list response. */
+        MasterDocumentPageResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PageView"] & {
+                content: components["schemas"]["MasterDocumentSummaryView"][];
+            };
         };
         BatchTestRunSummaryView: {
             /** Format: uuid */
@@ -2903,6 +2968,14 @@ export interface components {
         InvocationRequestIdQuery: string;
         InvocationPageQuery: number;
         InvocationSizeQuery: number;
+        /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+        CatalogPageQuery: number;
+        /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+        CatalogSizeQuery: number;
+        /** @description Optional case-insensitive contains search. Empty/blank ignored. Field coverage is entity-specific (see operation description). Reusable by future LR-C6 command palette; this contract does not define a separate C6 palette API. */
+        CatalogSearchQuery: string;
+        /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
+        CatalogGroupCodeQuery: string;
         /** @example DOC-8F2N6P4Q */
         DocumentId: string;
         CredentialId: string;
@@ -4120,7 +4193,16 @@ export interface operations {
     listContentModules: {
         parameters: {
             query?: {
-                groupCode?: string;
+                /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+                page?: components["parameters"]["CatalogPageQuery"];
+                /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+                size?: components["parameters"]["CatalogSizeQuery"];
+                /** @description Optional case-insensitive contains search. Empty/blank ignored. Field coverage is entity-specific (see operation description). Reusable by future LR-C6 command palette; this contract does not define a separate C6 palette API. */
+                search?: components["parameters"]["CatalogSearchQuery"];
+                /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
+                groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
+                /** @description Whitelist sort key. Default `groupCodeAsc`. Unknown values fall back to `groupCodeAsc` (no 400). Content-modules also support `moduleCodeAsc`. */
+                sort?: "groupCodeAsc" | "updatedAtDesc" | "updatedAtAsc" | "nameAsc" | "moduleCodeAsc";
             };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
@@ -4131,13 +4213,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Content modules listed. */
+            /** @description Paginated content module summaries. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ContentModuleSummaryListResponse"];
+                    "application/json": components["schemas"]["ContentModuleSummaryPageResponse"];
                 };
             };
             401: components["responses"]["ErrorResponse"];
@@ -4431,6 +4513,47 @@ export interface operations {
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
             422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listTemplates: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+                page?: components["parameters"]["CatalogPageQuery"];
+                /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+                size?: components["parameters"]["CatalogSizeQuery"];
+                /** @description Optional case-insensitive contains search. Empty/blank ignored. Field coverage is entity-specific (see operation description). Reusable by future LR-C6 command palette; this contract does not define a separate C6 palette API. */
+                search?: components["parameters"]["CatalogSearchQuery"];
+                /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
+                groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
+                /** @description Exact template lifecycle status filter (UI status / workflow chips). Workflow chip mapping: awaitingTest→TESTING; awaitingPublish→PENDING_RELEASE; awaitingApproval→APPROVAL (with `approvalSubState=PENDING_DECISION`). Unknown enum values: empty page recommended (or 400/422 — lock in tests). */
+                lifecycleStatus?: components["schemas"]["TemplateLifecycleStatus"];
+                /** @description Optional approval sub-state filter (templates only). Used with `lifecycleStatus=APPROVAL` for the awaiting-approval workflow chip (`PENDING_DECISION`). */
+                approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION";
+                /** @description Whitelist sort key. Default `groupCodeAsc` (group-first). Unknown values fall back to `groupCodeAsc` (no 400). Templates also support `externalIdAsc`. */
+                sort?: "groupCodeAsc" | "updatedAtDesc" | "updatedAtAsc" | "nameAsc" | "externalIdAsc";
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated template summaries. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateSummaryPageResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -4817,6 +4940,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiAccessAlertListResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listMasters: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+                page?: components["parameters"]["CatalogPageQuery"];
+                /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+                size?: components["parameters"]["CatalogSizeQuery"];
+                /** @description Optional case-insensitive contains search. Empty/blank ignored. Field coverage is entity-specific (see operation description). Reusable by future LR-C6 command palette; this contract does not define a separate C6 palette API. */
+                search?: components["parameters"]["CatalogSearchQuery"];
+                /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
+                groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
+                /** @description Exact master review status filter. Unknown enum: empty page recommended (or 400/422 — lock in tests). */
+                status?: components["schemas"]["MasterDocumentReviewStatus"];
+                /** @description Whitelist sort key. Default `groupCodeAsc`. `groupAsc` is accepted as a synonym of `groupCodeAsc`. Unknown values fall back to `groupCodeAsc` (no 400). */
+                sort?: "groupCodeAsc" | "groupAsc" | "updatedAtDesc" | "updatedAtAsc" | "nameAsc";
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated master summaries. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MasterDocumentPageResponse"];
                 };
             };
             401: components["responses"]["ErrorResponse"];

@@ -48,6 +48,37 @@ describe('templates API', () => {
     expect(pageView.content[0]?.externalId).toBe('TPL-RETAIL-LETTER')
   })
 
+  it('forwards approvalSubState with lifecycle filters', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [],
+          page: 0,
+          size: 20,
+          totalElements: 0,
+          totalPages: 0,
+        },
+      },
+    })
+
+    await templatesApi.listTemplates(0, 20, {
+      lifecycleStatus: 'APPROVAL',
+      approvalSubState: 'PENDING_DECISION',
+      sort: 'groupCodeAsc',
+    })
+
+    expect(http.get).toHaveBeenCalledWith('/templates', {
+      params: {
+        page: 0,
+        size: 20,
+        lifecycleStatus: 'APPROVAL',
+        approvalSubState: 'PENDING_DECISION',
+        sort: 'groupCodeAsc',
+      },
+    })
+  })
+
   it('submits template for test', async () => {
     vi.mocked(http.post).mockResolvedValue({
       data: {
