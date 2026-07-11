@@ -24,14 +24,14 @@ export default defineConfig({
         'src/**/*.d.ts',
         'src/i18n/locales/**',
       ],
-      // OPT-B / B3 ratchet floors (non-regression, set just below the 2026-06-23
-      // baseline of lines 23.6% / functions 34.7% / branches 64.5%). Raise these
-      // toward 80% as OPT-C adds tests for the large untested views.
+      // LR-C13 / OPT-B ratchet floors — set just below the 2026-07-11 measured
+      // baseline of lines 81.46% / functions 56.58% / branches 82.41% / statements 81.46%.
+      // Previous floors (pre-LR-C13): lines 22 / functions 32 / branches 55 / statements 22.
       thresholds: {
-        lines: 22,
-        functions: 32,
-        branches: 55,
-        statements: 22,
+        lines: 80,
+        functions: 55,
+        branches: 80,
+        statements: 80,
       },
     },
   },
