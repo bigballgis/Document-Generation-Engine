@@ -8,8 +8,8 @@
 **程序发现**: [launch-readiness-program.md](../plan/launch-readiness-program.md) Wave LR-C / §1 finding 10  
 **依赖规格**: [LR-C5 catalog server-side pagination/filter](./lrp-c5-catalog-pagination.md)（`search` + `PageView` + 授权 scoped list）  
 **伴生**: LR-C12 keyboard/a11y 模式（焦点陷阱 / Esc）；ManagementShell + `visibleRoutes`  
-**Task Master / slice**: plan `LR-C6` / slice `lrp-c6-command-palette` — **Task Master #32** (`in-progress`)  
-**Worktree**: `D:/working/DGE-lrp-c6-command-palette` · `feat/lrp-c6-command-palette`
+**Task Master / slice**: plan `LR-C6` / slice `lrp-c6-command-palette` — **Task Master #32** (`done`; merge `c0c84aa`)  
+**Worktree**: merged to `main` (`c0c84aa`); feature tip `406bba1`; worktree removed
 
 ---
 

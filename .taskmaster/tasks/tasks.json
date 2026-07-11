@@ -436,23 +436,23 @@
       {
         "id": "32",
         "title": "LR-C6 Global command palette (Ctrl+K)",
-        "description": "IN PROGRESS 2026-07-11. LR-C6 sole-active LRP slice — global search / command palette (Ctrl+K / Cmd+K) in ManagementShell; reuses LR-C5 list search (no new backend endpoint); visibleRoutes fail-closed for nav entries. Slice lrp-c6-command-palette; worktree D:/working/DGE-lrp-c6-command-palette; branch feat/lrp-c6-command-palette; base cabc058. BDD ready: docs/behavior/lrp-c6-command-palette.md (BDD-LRP-C6-PALETTE-001; scenarios 001…015). Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 Done; C6 In Progress sole-active; C7/C8 Not Started). Formal phase remains None. Do NOT mark Wave LR-C Done. Do NOT activate C7/C8/CD-3. User direction: 「按你建议继续」.",
-        "details": "ACTIVATED 2026-07-11. Slice id: lrp-c6-command-palette. Placement: ISOLATED D:/working/DGE-lrp-c6-command-palette · feat/lrp-c6-command-palette · base cabc058 (cabc05867383757dc3a7920811797b6c09916a30). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 Done; C6 In Progress sole-active; C7/C8 Not Started). Scope: Ctrl+K/Cmd+K palette; search authorized templates/masters/content-modules via C5 search param + navigable visibleRoutes; keyboard ↑↓ Enter Esc; i18n; no Fuse/Algolia; no new /search API; recent-items v1 deferred (C6-C8). BDD: ready — docs/behavior/lrp-c6-command-palette.md (BDD-LRP-C6-PALETTE-001). Gates pending: pnpm lint/type-check/test/build; docker-deploy-queue; E2E LRP-C6-command-palette; UIUX both brands; architecture review. Owner: frontend-engineer (backend not required unless C5 gap). Do NOT: activate C7/C8/CD-3; mark Wave LR-C Done; invent palette API. Maps: LRP §1 finding 10; depends LR-C5 Done (#31).",
+        "description": "DONE 2026-07-11. LR-C6 global command palette (Ctrl+K/Cmd+K); C5 search reuse; visibleRoutes fail-closed; no new backend. Slice lrp-c6-command-palette; merge c0c84aa; feature 406bba1; worktree removed. E2E 8/8; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES Critical 0. Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 + C6 Done; C7/C8 Not Started). No sole-active LRP slice. Do NOT mark Wave LR-C Done. Do NOT activate C7/C8/CD-3. Recommend next: LR-C7 OR LR-C8 — do not auto-activate.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-c6-command-palette. Merge: c0c84aa (c0c84aa76415136d03c24cdd9827f1063e875a92; feat/lrp-c6-command-palette → main); feature 406bba1 (406bba1b6c7726aa43eb6d31363bd7080956f48d); worktree removed (stage 11). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 + C6 Done; C7/C8 Not Started). No sole-active LRP slice. Delivered: Ctrl+K/Cmd+K palette in ManagementShell; C5 search reuse; visibleRoutes fail-closed; keyboard ↑↓ Enter Esc; i18n; no Fuse/Algolia; no new /search API; recent-items v1 deferred (C6-C8). Gates: pnpm lint/type-check/test/build GREEN (~1078 tests); docker-deploy-queue stage5 DEPLOY_OK + stage10 SkipBuild health 200; E2E LRP-C6-command-palette 8/8 PASS; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C6-uiux-manifest.md; 13 screenshots); architecture PASS_WITH_NOTES (Critical 0). BDD: ready — docs/behavior/lrp-c6-command-palette.md (BDD-LRP-C6-PALETTE-001; scenarios 001…015). Do NOT: activate C7/C8/CD-3; mark Wave LR-C Done. Maps: LRP §1 finding 10; depends LR-C5 Done (#31).",
         "testStrategy": "1. Follow BDD-LRP-C6-001…015. 2. Vitest palette open/close, keyboard nav, route filtering by visibleRoutes. 3. Playwright: Ctrl+K → search seeded template → Enter navigates; restricted role sees no unauthorized entities. 4. pnpm lint/type-check/test/build green; docker-deploy-queue + E2E + UIUX both brands. 5. Do not claim Wave LR-C Done; leave C7/C8 Not Started.",
         "priority": "high",
         "dependencies": [
           "31"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-11T08:35:00.000Z"
+        "updatedAt": "2026-07-11T09:30:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T08:35:00.000Z",
+      "lastModified": "2026-07-11T09:30:00.000Z",
       "taskCount": 32,
-      "completedCount": 31,
+      "completedCount": 32,
       "tags": [
         "master"
       ]
