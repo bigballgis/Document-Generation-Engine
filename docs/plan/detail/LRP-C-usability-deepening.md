@@ -1,11 +1,13 @@
 # LRP Wave LR-C — Business Usability Deepening 「业务易用性深化」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 Done** 2026-07-11 — slice `lrp-c11-api-error-i18n`; **LR-C12 Done** 2026-07-11 — slice `lrp-c12-keyboard-a11y`; **LR-C13 Done** 2026-07-11 — slice `lrp-c13-frontend-eng-debt`; **LR-C2 Done** 2026-07-11 — slice `lrp-c2-local-draft-recovery`; remaining C3/C5/C7/C8 Not Started; **no sole-active LRP slice**)  
+**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 Done** 2026-07-11 — slice `lrp-c11-api-error-i18n`; **LR-C12 Done** 2026-07-11 — slice `lrp-c12-keyboard-a11y`; **LR-C13 Done** 2026-07-11 — slice `lrp-c13-frontend-eng-debt`; **LR-C2 Done** 2026-07-11 — slice `lrp-c2-local-draft-recovery`; **LR-C3 In Progress** sole-active — slice `lrp-c3-editor-undo-redo`; remaining C5/C7/C8 Not Started)  
 **Owner default:** `frontend-engineer` (+ `backend-engineer` where noted); every user-facing slice pairs `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** none for most tasks; **C6 depends on LR-C5**; **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
 
-> **Completion note (2026-07-11):** **LR-C2 → Done** (slice `lrp-c2-local-draft-recovery`; merge `12a6a7e` / `12a6a7e63f5f873f824335ee3b365e69be3f29db` → `main`; feature `12a6a7e`; worktree removed). Structured editor local draft recovery: debounced localStorage drafts keyed by template id + dev version id + user; recovery banner «Restore draft / Discard» with timestamps; clear on successful save; storage quota guard; BDD-002 soft-refresh after Critical fixes. BDD **`ready`** (`docs/behavior/lrp-c2-structured-editor-local-draft-recovery.md` — `BDD-LRP-C2-DRAFT-001`). Formal phase remains **None**. **No sole-active LRP slice.** Wave LR-C remains **In Progress** (partial — C1/C4/C9–C13 + **C2** Done; C3/C5/C7/C8 Not Started). Do **not** mark Wave LR-C Done. Do **not** activate C3/C5/C7/C8/CD-3. Recommend next: **LR-C3** (undo/redo) — do not auto-activate. **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN** (1016 tests); `docker-deploy-queue.ps1` **DEPLOY_OK** (`:8080` UP, `:4173` 200); E2E LRP-C2-draft-recovery **4/4** PASS (BDD-001/002/003/006); UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C2-uiux-manifest.md`); architecture **PASS_WITH_NOTES** (Critical **0**; merge_go yes). **Task Master #29 → done**.
+> **Activation note (2026-07-11):** **LR-C3 → In Progress** (slice `lrp-c3-editor-undo-redo`; formal phase remains **None**). Sole-active LRP slice — structure-level undo/redo (snapshot history, cap 50) in `ControlledStructuredContentEditor`; keyboard + toolbar; drafts must **NOT** include undo stack (C2 separation). BDD **`ready`** (`docs/behavior/lrp-c3-editor-undo-redo.md` — `BDD-LRP-C3-UNDO-001`; scenarios BDD-LRP-C3-001…014). Placement: ISOLATED `D:/working/DGE-lrp-c3-editor-undo-redo` · `feat/lrp-c3-editor-undo-redo` · base `32ff70a`. Gate evidence: []. **Task Master #30 → in-progress**. Other LR-C rows untouched (C5/C7/C8 Not Started; C1/C2/C4/C9–C13 Done). Do **not** mark Wave LR-C Done. Do **not** activate C5/C7/C8/CD-3.
+>
+> **Completion note (2026-07-11):** **LR-C2 → Done** (slice `lrp-c2-local-draft-recovery`; merge `12a6a7e` / `12a6a7e63f5f873f824335ee3b365e69be3f29db` → `main`; feature `12a6a7e`; worktree removed). Structured editor local draft recovery: debounced localStorage drafts keyed by template id + dev version id + user; recovery banner «Restore draft / Discard» with timestamps; clear on successful save; storage quota guard; BDD-002 soft-refresh after Critical fixes. BDD **`ready`** (`docs/behavior/lrp-c2-structured-editor-local-draft-recovery.md` — `BDD-LRP-C2-DRAFT-001`). Formal phase remains **None**. Superseded sole-active by LR-C3 activation above. Wave LR-C remains **In Progress** (partial — C1/C4/C9–C13 + **C2** Done; **C3 In Progress**; C5/C7/C8 Not Started). Do **not** mark Wave LR-C Done. Do **not** activate C5/C7/C8/CD-3. **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN** (1016 tests); `docker-deploy-queue.ps1` **DEPLOY_OK** (`:8080` UP, `:4173` 200); E2E LRP-C2-draft-recovery **4/4** PASS (BDD-001/002/003/006); UIUX **PASS_WITH_NOTES** (`frontend/e2e/evidence/LRP-C2-uiux-manifest.md`); architecture **PASS_WITH_NOTES** (Critical **0**; merge_go yes). **Task Master #29 → done**.
 >
 > **Activation note (2026-07-11):** **LR-C2 → In Progress** (slice `lrp-c2-local-draft-recovery`; formal phase remains **None**). Sole-active LRP slice — structured editor local draft recovery: debounced localStorage drafts keyed by template id + dev version id + user; recovery banner «Restore draft / Discard» with timestamps; clear on successful save; storage quota guard. BDD **`ready`** (`docs/behavior/lrp-c2-structured-editor-local-draft-recovery.md` — `BDD-LRP-C2-DRAFT-001`). Placement: ISOLATED `D:/working/DGE-lrp-c2-local-draft-recovery` · `feat/lrp-c2-local-draft-recovery` · base `24cb253`. Gate evidence: [] (now **done** — see completion note above). **Task Master #29 → in-progress** (now **done**). Other LR-C rows untouched (C3/C5/C7/C8 Not Started; C1/C4/C9–C13 Done). Do **not** mark Wave LR-C Done. Do **not** activate C3/C5/C7/C8/CD-3. User direction: highest UX value; C3 depends on not fighting C2 draft logic.
 >
@@ -99,11 +101,12 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 
 - **Owner agent:** frontend-engineer
 - **BDD:** **required**.
+- **BDD readiness confirmation (2026-07-11, behavior-spec-author):** **`ready`** — [lrp-c3-editor-undo-redo.md](../../behavior/lrp-c3-editor-undo-redo.md) (`BDD-LRP-C3-UNDO-001`; scenarios BDD-LRP-C3-001…014); structure-level snapshot history cap 50; keyboard + toolbar; C2 draft must not include undo stack.
 - **UIUX:** yes
-- **Read first:** `ControlledStructuredContentEditor.vue` (structure mutation entry points); LR-C2 draft logic (history and drafts must not fight).
-- **Do NOT:** Implement content-level (character) undo inside third-party inputs — scope is **structure-level** operations (add/remove/move/edit node); unbounded history (cap it, e.g. 50).
+- **Read first:** `ControlledStructuredContentEditor.vue` (structure mutation entry points); LR-C2 draft logic (history and drafts must not fight); `docs/behavior/lrp-c3-editor-undo-redo.md`.
+- **Do NOT:** Implement content-level (character) undo inside third-party inputs — scope is **structure-level** operations (add/remove/move/edit node); unbounded history (cap it, e.g. 50); persist undo stack into LR-C2 local drafts.
 - **Steps:**
-  1. Wait for BDD spec `ready`.
+  1. Wait for BDD spec `ready`. ✅ (2026-07-11)
   2. Bounded history stack (snapshots or inverse ops) around structure mutations.
   3. Keyboard: Ctrl+Z / Ctrl+Y (+ Cmd equivalents); toolbar undo/redo buttons with disabled states + i18n tooltips.
   4. Vitest: push/undo/redo/cap/branch-truncation; Playwright: perform 3 edits → undo ×2 → redo ×1 → structure matches expected.
@@ -113,7 +116,7 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - **Gates:** §1 standard block; spec `frontend/e2e/LRP-C3-undo-redo.spec.ts`; UIUX manifest.
 - **Artifacts:** history module + toolbar wiring + tests; behavior spec; E2E + manifest.
 - **Done when:** Scenarios green + gates + UIUX PASS + doc sync + commit review.
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-11 — slice `lrp-c3-editor-undo-redo`; Task Master #30; BDD `ready`; sole-active LRP slice)
 
 ### LR-C4 — Side-by-side authoring preview
 
@@ -360,4 +363,4 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - [x] LR-C10 upload UX polish shipped (progress / drag hint / inline errors; merge `bdaf95d`; E2E 4/4)
 - [x] LR-C12 keyboard a11y & table activation shipped (Enter/Space, skip-link, focus-ring; merge `0357a16`; E2E 10/10; COR-F21 residual closed)
 - [x] LR-C13 frontend eng debt shipped (shared unwrap confirmed; route guards + Vitest; manualChunks; coverage 80/55/80/80; merge `45addd6`; OPT-G4/G5 closed)
-- [ ] Ledger § LRP wave row updated with per-task evidence *(LR-C2 completion recorded 2026-07-11 merge `12a6a7e`; C1/C4/C9–C13 + C2 Done; wave still partial — C3/C5/C7/C8 Not Started; no sole-active LRP slice)*
+- [ ] Ledger § LRP wave row updated with per-task evidence *(LR-C2 completion recorded 2026-07-11 merge `12a6a7e`; C1/C4/C9–C13 + C2 Done; **LR-C3 In Progress** sole-active 2026-07-11; wave still partial — C5/C7/C8 Not Started)*

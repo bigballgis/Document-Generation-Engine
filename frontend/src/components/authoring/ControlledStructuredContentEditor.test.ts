@@ -331,4 +331,357 @@ describe('ControlledStructuredContentEditor', () => {
     expect(localStorage.getItem(key)).toBeNull()
     remount.unmount()
   })
+
+  it('BDD-LRP-C3-005 empty history disables undo/redo toolbar buttons', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: '{"schemaVersion":"1.0","nodes":[]}',
+        templateId: 'tpl-1',
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+
+    const undoBtn = wrapper.get('[data-testid="structured-editor-undo"]')
+    const redoBtn = wrapper.get('[data-testid="structured-editor-redo"]')
+    expect(undoBtn.attributes('disabled')).toBeDefined()
+    expect(redoBtn.attributes('disabled')).toBeDefined()
+    expect(undoBtn.attributes('aria-label')).toBe(en.templates.structuredEditor.undo)
+    expect(redoBtn.attributes('title')).toBe(en.templates.structuredEditor.redoTooltip)
+    wrapper.unmount()
+  })
+
+  it('BDD-LRP-C3-001/003 toolbar undo×2 then redo restores structure', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+
+    const baseline = '{"schemaVersion":"1.0","nodes":[]}'
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: baseline,
+        templateId: 'tpl-1',
+        baseline,
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+
+    const blockButtons = wrapper.findAll('[data-testid="insert-block-node"]')
+    await blockButtons[0]?.trigger('click') // sectionHeading
+    await blockButtons[1]?.trigger('click') // paragraph
+    await blockButtons[2]?.trigger('click') // list
+    await flushPromises()
+
+    const afterThree = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+    expect(afterThree).toContain('"type":"list"')
+
+    await wrapper.get('[data-testid="structured-editor-undo"]').trigger('click')
+    await wrapper.get('[data-testid="structured-editor-undo"]').trigger('click')
+    await flushPromises()
+
+    const afterUndo2 = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+    expect(afterUndo2).toContain('"type":"sectionHeading"')
+    expect(afterUndo2).not.toContain('"type":"list"')
+    expect(wrapper.get('[data-testid="structured-editor-redo"]').attributes('disabled')).toBeUndefined()
+
+    await wrapper.get('[data-testid="structured-editor-redo"]').trigger('click')
+    await flushPromises()
+    const afterRedo = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+    expect(afterRedo).toContain('"type":"paragraph"')
+    wrapper.unmount()
+  })
+
+  it('BDD-LRP-C3-006 Ctrl/Cmd+Z and Ctrl+Y / Cmd+Shift+Z keyboard shortcuts', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+
+    const baseline = '{"schemaVersion":"1.0","nodes":[]}'
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: baseline,
+        templateId: 'tpl-1',
+        baseline,
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    const root = wrapper.get('[data-testid="controlled-structured-content-editor"]')
+    const blockButtons = wrapper.findAll('[data-testid="insert-block-node"]')
+    await blockButtons[0]?.trigger('click')
+    await blockButtons[1]?.trigger('click')
+    await flushPromises()
+
+    await root.trigger('keydown', { key: 'z', ctrlKey: true })
+    await flushPromises()
+    let latest = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+    expect(latest).toContain('"type":"sectionHeading"')
+    expect(latest).not.toContain('"type":"paragraph"')
+
+    await root.trigger('keydown', { key: 'y', ctrlKey: true })
+    await flushPromises()
+    latest = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+    expect(latest).toContain('"type":"paragraph"')
+
+    await root.trigger('keydown', { key: 'z', ctrlKey: true })
+    await flushPromises()
+    await root.trigger('keydown', { key: 'z', metaKey: true, shiftKey: true })
+    await flushPromises()
+    latest = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+    expect(latest).toContain('"type":"paragraph"')
+    wrapper.unmount()
+  })
+
+  it('BDD-LRP-C3-012 undo to baseline clears dirty; redo sets dirty', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+
+    const baseline = '{"schemaVersion":"1.0","nodes":[]}'
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: baseline,
+        templateId: 'tpl-1',
+        baseline,
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    await wrapper.findAll('[data-testid="insert-block-node"]')[0]?.trigger('click')
+    await flushPromises()
+    expect(wrapper.emitted('dirty-change')?.at(-1)?.[0]).toBe(true)
+
+    await wrapper.get('[data-testid="structured-editor-undo"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.emitted('dirty-change')?.at(-1)?.[0]).toBe(false)
+
+    await wrapper.get('[data-testid="structured-editor-redo"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.emitted('dirty-change')?.at(-1)?.[0]).toBe(true)
+    wrapper.unmount()
+  })
+
+  it('BDD-LRP-C3-009 markPristine clears history stacks', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: '{"schemaVersion":"1.0","nodes":[]}',
+        templateId: 'tpl-1',
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    await wrapper.findAll('[data-testid="insert-block-node"]')[0]?.trigger('click')
+    await flushPromises()
+    expect(wrapper.get('[data-testid="structured-editor-undo"]').attributes('disabled')).toBeUndefined()
+
+    ;(wrapper.vm as { markPristine: () => void }).markPristine()
+    await flushPromises()
+    expect(wrapper.get('[data-testid="structured-editor-undo"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('[data-testid="structured-editor-redo"]').attributes('disabled')).toBeDefined()
+    wrapper.unmount()
+  })
+
+  it('BDD-LRP-C3-008 draft blob never contains undo/history fields', async () => {
+    vi.useFakeTimers()
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+    patchAuthorSession()
+
+    const key = buildStructuredDraftStorageKey('author-1', 'tpl-1', 'dev-1')
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: '{"schemaVersion":"1.0","nodes":[]}',
+        templateId: 'tpl-1',
+        devVersionId: 'dev-1',
+        baseline: '{"schemaVersion":"1.0","nodes":[]}',
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    await wrapper.findAll('[data-testid="insert-block-node"]')[0]?.trigger('click')
+    await wrapper.findAll('[data-testid="insert-block-node"]')[1]?.trigger('click')
+    await vi.advanceTimersByTimeAsync(500)
+    await flushPromises()
+
+    const raw = localStorage.getItem(key)
+    expect(raw).toBeTruthy()
+    const payload = JSON.parse(raw!) as Record<string, unknown>
+    expect(payload).toHaveProperty('schemaVersion')
+    expect(payload).toHaveProperty('structureJson')
+    expect(payload).toHaveProperty('draftUpdatedAt')
+    expect(payload).not.toHaveProperty('undoStack')
+    expect(payload).not.toHaveProperty('redoStack')
+    expect(payload).not.toHaveProperty('history')
+    expect(JSON.stringify(payload).toLowerCase()).not.toMatch(/undostack|redostack|"history"/)
+    wrapper.unmount()
+    vi.useRealTimers()
+  })
+
+  it('BDD-LRP-C3-010 restore draft clears history', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+    patchAuthorSession()
+
+    const server = '{"schemaVersion":"1.0","nodes":[]}'
+    const draftJson =
+      '{"schemaVersion":"1.0","nodes":[{"type":"paragraph","children":[{"type":"textRun","value":"recovered"}]}]}'
+    writeStructuredDraft(localStorage, buildStructuredDraftStorageKey('author-1', 'tpl-1', 'dev-1'), {
+      schemaVersion: 1,
+      structureJson: draftJson,
+      draftUpdatedAt: '2026-07-11T02:00:00.000Z',
+      anchorId: 'anchor-1',
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: server,
+        templateId: 'tpl-1',
+        devVersionId: 'dev-1',
+        anchorId: 'anchor-1',
+        baseline: server,
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    // Build some history before restore (banner still visible — edit under banner).
+    await wrapper.findAll('[data-testid="insert-block-node"]')[0]?.trigger('click')
+    await flushPromises()
+    expect(wrapper.get('[data-testid="structured-editor-undo"]').attributes('disabled')).toBeUndefined()
+
+    await wrapper.find('[data-testid="structured-draft-recovery-banner-restore"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[data-testid="structured-editor-undo"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('[data-testid="structured-editor-redo"]').attributes('disabled')).toBeDefined()
+    wrapper.unmount()
+  })
+
+  it('BDD-LRP-C3-011 discard draft clears history', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+    patchAuthorSession()
+
+    const server = '{"schemaVersion":"1.0","nodes":[]}'
+    writeStructuredDraft(localStorage, buildStructuredDraftStorageKey('author-1', 'tpl-1', 'dev-1'), {
+      schemaVersion: 1,
+      structureJson: '{"schemaVersion":"1.0","nodes":[{"type":"list"}]}',
+      draftUpdatedAt: '2026-07-11T02:00:00.000Z',
+      anchorId: 'anchor-1',
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: server,
+        templateId: 'tpl-1',
+        devVersionId: 'dev-1',
+        anchorId: 'anchor-1',
+        baseline: server,
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    await wrapper.findAll('[data-testid="insert-block-node"]')[0]?.trigger('click')
+    await flushPromises()
+
+    await wrapper.find('[data-testid="structured-draft-recovery-banner-discard"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[data-testid="structured-editor-undo"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('[data-testid="structured-editor-redo"]').attributes('disabled')).toBeDefined()
+    wrapper.unmount()
+  })
+
+  it('BDD-LRP-C3-013 readonly hides undo/redo toolbar', async () => {
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: '{"schemaVersion":"1.0","nodes":[]}',
+        templateId: 'tpl-1',
+        readonly: true,
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    expect(wrapper.find('[data-testid="structured-editor-undo"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="structured-editor-redo"]').exists()).toBe(false)
+
+    const root = wrapper.get('[data-testid="controlled-structured-content-editor"]')
+    await root.trigger('keydown', { key: 'z', ctrlKey: true })
+    expect(wrapper.emitted('update:modelValue')).toBeFalsy()
+    wrapper.unmount()
+  })
+
+  it('BDD-LRP-C3-014 coalesces consecutive paragraph text edits into one undo step', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+
+    const baseline =
+      '{"schemaVersion":"1.0","nodes":[{"type":"paragraph","children":[{"type":"textRun","value":""}]}]}'
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: baseline,
+        templateId: 'tpl-1',
+        baseline,
+      },
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+    const input = wrapper.get('[data-testid="paragraph-input"]')
+    await input.setValue('a')
+    await input.setValue('ab')
+    await input.setValue('abc')
+    await flushPromises()
+
+    expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toContain('"value":"abc"')
+
+    await wrapper.get('[data-testid="structured-editor-undo"]').trigger('click')
+    await flushPromises()
+    const afterUndo = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+    expect(afterUndo).toContain('"value":""')
+    expect(afterUndo).not.toContain('"value":"ab"')
+    // One undo should exhaust the coalesced field edit.
+    expect(wrapper.get('[data-testid="structured-editor-undo"]').attributes('disabled')).toBeDefined()
+    wrapper.unmount()
+  })
 })

@@ -7,7 +7,7 @@
 **来源任务**: [LRP Wave LR-C § LR-C2 — Structured editor local draft recovery](../plan/detail/LRP-C-usability-deepening.md)  
 **程序发现**: [launch-readiness-program.md](../plan/launch-readiness-program.md) Wave LR-C / finding（JWT/会话中断工作丢失）  
 **治理坑位**: [CD-PIT-13](../plan/detail/CDP-industry-pitfall-registry.md) companion（LR-B6 保会话；本切片保本地草稿）  
-**伴生**: [CORE-FORTRESS F7 / LR-C1 dirty guard](./core-fortress-f7-authoring-ux.md)（F7-B1）；LR-C3 undo/redo（未开工，见 §10 互操作）  
+**伴生**: [CORE-FORTRESS F7 / LR-C1 dirty guard](./core-fortress-f7-authoring-ux.md)（F7-B1）；[LR-C3 editor undo/redo](./lrp-c3-editor-undo-redo.md)（BDD `ready`；见 §10 互操作）  
 **Task Master**: plan `LR-C2` / Task Master **#29**（slice `lrp-c2-local-draft-recovery`）
 
 ---
@@ -198,9 +198,9 @@
 | 约束 | 说明 |
 | --- | --- |
 | **存储分离** | 草稿 blob **仅**结构快照 + 元数据；undo 栈不得写入同一 key/同一对象字段 |
-| **Restore 语义** | Restore 替换当前结构后，未来 C3 应将历史栈 **重置**为以恢复后结构为唯一基线（C3 BDD 承接；C2 实现不预建 undo API） |
-| **写入源** | 草稿监听「结构已变更」的稳定出口（现有 `structure-change` / 序列化后的 model），避免与未来 undo 内部指针耦合 |
-| **本切片禁止** | 实现任何 undo/redo UI 或历史栈 |
+| **Restore 语义** | Restore 替换当前结构后，C3 将历史栈 **重置**为以恢复后结构为唯一当前态（见 [lrp-c3-editor-undo-redo.md](./lrp-c3-editor-undo-redo.md) C3-C9；C2 实现不预建 undo API） |
+| **写入源** | 草稿监听「结构已变更」的稳定出口（现有 `structure-change` / 序列化后的 model），避免与 undo 内部指针耦合 |
+| **C2 切片禁止** | C2 实现不包含 undo/redo UI 或历史栈（由 LR-C3 交付） |
 
 ---
 

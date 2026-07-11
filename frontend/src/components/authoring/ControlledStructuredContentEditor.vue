@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import PasteCleaningSummaryDialog from '@/components/authoring/PasteCleaningSummaryDialog.vue'
 import StructuredDraftRecoveryBanner from '@/components/authoring/StructuredDraftRecoveryBanner.vue'
+import { useStructuredContentHistory } from '@/composables/useStructuredContentHistory'
 import { useStructuredContentLocalDraft } from '@/composables/useStructuredContentLocalDraft'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
@@ -64,6 +65,14 @@ const localDraft = useStructuredContentLocalDraft({
   readonly: isReadonly,
 })
 
+/** Structure-level undo/redo — session memory only; never written to C2 drafts (C3-C7). */
+const history = useStructuredContentHistory()
+const canUndo = history.canUndo
+const canRedo = history.canRedo
+let lastCommittedSnapshot = props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON
+let pendingCoalesceKey: string | null = null
+let syncingFromProps = false
+
 const recoveryDraft = ref<StructuredContentDraftPayload | null>(null)
 
 function evaluateDraftRecovery() {
@@ -94,13 +103,23 @@ function handleRestoreDraft() {
   if (!draft) {
     return
   }
-  documentModel.value = parseStructuredContent(draft.structureJson)
+  // C3-C9: restore resets history; restored structure becomes sole current state.
+  history.clear()
+  history.beginApplying()
+  try {
+    documentModel.value = parseStructuredContent(draft.structureJson)
+    lastCommittedSnapshot = serializeStructuredContent(documentModel.value)
+  } finally {
+    history.endApplying()
+  }
   recoveryDraft.value = null
 }
 
 function handleDiscardDraft() {
   localDraft.clearDraft()
   recoveryDraft.value = null
+  // C3-C10: discard draft resets history; server-loaded structure remains.
+  history.clear()
 }
 
 const loadingCatalog = ref(false)
@@ -115,6 +134,7 @@ const pasteBlocked = ref(false)
 const pendingPasteJson = ref<string | null>(null)
 const prePasteSnapshot = ref(props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON)
 const pasteInputRef = ref<HTMLInputElement | null>(null)
+const editorRootRef = ref<HTMLElement | null>(null)
 
 const blockNodeTypes: ConfirmedNodeType[] = [
   'sectionHeading',
@@ -175,14 +195,20 @@ function styleLabel(styleKey: string): string {
 watch(
   () => props.modelValue,
   (value) => {
-    const next = parseStructuredContent(value || DEFAULT_STRUCTURED_CONTENT_JSON)
-    documentModel.value = next
-    // Post-save server echo can re-enter before unmount; realign baseline and
-    // re-clear so canonicalization differences cannot revive a draft.
-    if (localDraft.areWritesSuppressed()) {
-      pristineBaseline.value = serializeStructuredContent(next)
-      emit('dirty-change', false)
-      localDraft.clearDraft({ suppressSubsequentWrites: true })
+    syncingFromProps = true
+    try {
+      const next = parseStructuredContent(value || DEFAULT_STRUCTURED_CONTENT_JSON)
+      documentModel.value = next
+      lastCommittedSnapshot = serializeStructuredContent(next)
+      // Post-save server echo can re-enter before unmount; realign baseline and
+      // re-clear so canonicalization differences cannot revive a draft.
+      if (localDraft.areWritesSuppressed()) {
+        pristineBaseline.value = lastCommittedSnapshot
+        emit('dirty-change', false)
+        localDraft.clearDraft({ suppressSubsequentWrites: true })
+      }
+    } finally {
+      syncingFromProps = false
     }
   },
 )
@@ -208,6 +234,9 @@ function markPristine() {
   // and suppresses further writes until this editor instance is gone (or allowWrites).
   localDraft.clearDraft({ suppressSubsequentWrites: true })
   recoveryDraft.value = null
+  // C3-C8: successful save clears undo/redo stacks.
+  history.clear()
+  lastCommittedSnapshot = pristineBaseline.value
 }
 
 defineExpose({ markPristine })
@@ -217,11 +246,80 @@ watch(documentModel, (value) => {
     return
   }
   const serialized = serializeStructuredContent(value)
+  if (!history.isApplying() && !syncingFromProps) {
+    history.commit(lastCommittedSnapshot, serialized, pendingCoalesceKey)
+  }
+  lastCommittedSnapshot = serialized
   emit('update:modelValue', serialized)
   emitDirtyState()
   emit('structure-change')
   scheduleLocalDraftWrite(serialized)
 }, { deep: true })
+
+function applyHistorySnapshot(snapshot: string) {
+  history.beginApplying()
+  try {
+    documentModel.value = parseStructuredContent(snapshot)
+    lastCommittedSnapshot = serializeStructuredContent(documentModel.value)
+  } finally {
+    history.endApplying()
+  }
+}
+
+function doUndo() {
+  if (isReadonly.value || !canUndo.value) {
+    return
+  }
+  const current = serializeStructuredContent(documentModel.value)
+  const previous = history.undo(current)
+  if (previous == null) {
+    return
+  }
+  pendingCoalesceKey = null
+  applyHistorySnapshot(previous)
+}
+
+function doRedo() {
+  if (isReadonly.value || !canRedo.value) {
+    return
+  }
+  const current = serializeStructuredContent(documentModel.value)
+  const next = history.redo(current)
+  if (next == null) {
+    return
+  }
+  pendingCoalesceKey = null
+  applyHistorySnapshot(next)
+}
+
+function handleEditorKeydown(event: KeyboardEvent) {
+  if (isReadonly.value) {
+    return
+  }
+  const mod = event.ctrlKey || event.metaKey
+  if (!mod) {
+    return
+  }
+  const key = event.key.toLowerCase()
+  if (key === 'z') {
+    event.preventDefault()
+    if (event.shiftKey) {
+      doRedo()
+    } else {
+      doUndo()
+    }
+    return
+  }
+  if (key === 'y') {
+    event.preventDefault()
+    doRedo()
+  }
+}
+
+function endFieldCoalesce() {
+  pendingCoalesceKey = null
+  history.endCoalesce()
+}
 
 const DEFAULT_STYLE_CATALOG: MasterStyleCatalog = {
   catalogVersion: '1.0',
@@ -232,6 +330,7 @@ const DEFAULT_STYLE_CATALOG: MasterStyleCatalog = {
 }
 
 onMounted(async () => {
+  editorRootRef.value?.addEventListener('keydown', handleEditorKeydown, true)
   evaluateDraftRecovery()
   if (!props.templateId) {
     styleCatalog.value = DEFAULT_STYLE_CATALOG
@@ -247,6 +346,10 @@ onMounted(async () => {
   } finally {
     loadingCatalog.value = false
   }
+})
+
+onUnmounted(() => {
+  editorRootRef.value?.removeEventListener('keydown', handleEditorKeydown, true)
 })
 
 watch(
@@ -265,6 +368,7 @@ function insertBlock(type: ConfirmedNodeType) {
   if (isReadonly.value) {
     return
   }
+  pendingCoalesceKey = null
   documentModel.value = insertBlockNode(documentModel.value, type, selectedStyleKey.value)
 }
 
@@ -272,6 +376,7 @@ function applySelectedStyle() {
   if (!selectedStyleKey.value || isReadonly.value) {
     return
   }
+  pendingCoalesceKey = null
   documentModel.value = applyStyleToParagraphs(documentModel.value, selectedStyleKey.value)
 }
 
@@ -286,6 +391,7 @@ function updateBlockField(index: number, field: keyof StructuredContentNode, val
   if (!node) {
     return
   }
+  pendingCoalesceKey = `field:${index}:${String(field)}`
   replaceBlock(index, { ...node, [field]: value })
 }
 
@@ -294,6 +400,7 @@ function updateInlineChild(blockIndex: number, childIndex: number, nextChild: St
   if (!node) {
     return
   }
+  pendingCoalesceKey = `inline:${blockIndex}:${childIndex}`
   const children = [...(node.children ?? [])]
   children[childIndex] = nextChild
   replaceBlock(blockIndex, { ...node, children })
@@ -304,6 +411,7 @@ function addInlineToBlock(blockIndex: number, type: ConfirmedNodeType) {
   if (!node) {
     return
   }
+  pendingCoalesceKey = null
   const children = [...(node.children ?? []), createNodeTemplate(type, selectedStyleKey.value)]
   replaceBlock(blockIndex, { ...node, children })
 }
@@ -312,6 +420,7 @@ function removeBlock(index: number) {
   if (isReadonly.value) {
     return
   }
+  pendingCoalesceKey = null
   documentModel.value = {
     ...documentModel.value,
     nodes: documentModel.value.nodes.filter((_, nodeIndex) => nodeIndex !== index),
@@ -359,12 +468,14 @@ async function runPasteClean(html: string) {
 
 function acceptPaste() {
   if (pendingPasteJson.value) {
+    pendingCoalesceKey = null
     documentModel.value = parseStructuredContent(pendingPasteJson.value)
   }
   pendingPasteJson.value = null
 }
 
 function cancelPaste() {
+  pendingCoalesceKey = null
   documentModel.value = parseStructuredContent(prePasteSnapshot.value)
   pendingPasteJson.value = null
 }
@@ -373,6 +484,7 @@ function insertInline(type: ConfirmedNodeType) {
   if (isReadonly.value) {
     return
   }
+  pendingCoalesceKey = null
   const nodes = [...documentModel.value.nodes]
   if (!nodes.length) {
     nodes.push(createNodeTemplate('paragraph', selectedStyleKey.value))
@@ -389,7 +501,12 @@ function insertInline(type: ConfirmedNodeType) {
 </script>
 
 <template>
-  <div class="structured-editor" data-testid="controlled-structured-content-editor">
+  <div
+    ref="editorRootRef"
+    class="structured-editor"
+    data-testid="controlled-structured-content-editor"
+    tabindex="-1"
+  >
     <StructuredDraftRecoveryBanner
       v-if="recoveryDraft"
       :draft-updated-at="recoveryDraft.draftUpdatedAt"
@@ -406,6 +523,30 @@ function insertInline(type: ConfirmedNodeType) {
       role="toolbar"
       :aria-label="t('templates.structuredEditor.toolbar.label')"
     >
+      <div class="toolbar-group">
+        <span class="group-label">{{ t('templates.structuredEditor.toolbar.history') }}</span>
+        <el-button
+          size="small"
+          data-testid="structured-editor-undo"
+          :disabled="!canUndo"
+          :aria-label="t('templates.structuredEditor.undo')"
+          :title="t('templates.structuredEditor.undoTooltip')"
+          @click="doUndo"
+        >
+          {{ t('templates.structuredEditor.undo') }}
+        </el-button>
+        <el-button
+          size="small"
+          data-testid="structured-editor-redo"
+          :disabled="!canRedo"
+          :aria-label="t('templates.structuredEditor.redo')"
+          :title="t('templates.structuredEditor.redoTooltip')"
+          @click="doRedo"
+        >
+          {{ t('templates.structuredEditor.redo') }}
+        </el-button>
+      </div>
+
       <div class="toolbar-group">
         <span class="group-label">{{ t('templates.structuredEditor.toolbar.blocks') }}</span>
         <el-button
@@ -496,6 +637,7 @@ function insertInline(type: ConfirmedNodeType) {
                 :readonly="isReadonly"
                 :placeholder="t('templates.structuredEditor.textPlaceholder')"
                 @update:model-value="(value: string) => updateInlineChild(index, childIndex, { ...child, type: 'textRun', value })"
+                @blur="endFieldCoalesce"
               />
               <AppSearchSelect
                 v-else-if="child.type === 'variable'"
@@ -529,6 +671,7 @@ function insertInline(type: ConfirmedNodeType) {
             :readonly="isReadonly"
             :placeholder="t('templates.structuredEditor.conditionPlaceholder')"
             @update:model-value="(value: string) => updateBlockField(index, 'conditionExpression', value)"
+            @blur="endFieldCoalesce"
           />
         </template>
 
@@ -555,6 +698,7 @@ function insertInline(type: ConfirmedNodeType) {
             :readonly="isReadonly"
             :placeholder="t('templates.structuredEditor.tableRefPlaceholder')"
             @update:model-value="(value: string) => updateBlockField(index, 'tableComponentRef', value)"
+            @blur="endFieldCoalesce"
           />
         </template>
 
@@ -580,6 +724,7 @@ function insertInline(type: ConfirmedNodeType) {
             :readonly="isReadonly"
             :placeholder="t('templates.structuredEditor.clauseRefPlaceholder')"
             @update:model-value="(value: string) => updateBlockField(index, 'referenceKey', value)"
+            @blur="endFieldCoalesce"
           />
         </template>
 

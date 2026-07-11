@@ -1267,8 +1267,13 @@ export default {
       addText: 'Add text',
       addVariable: 'Add variable',
       pasteFromFile: 'Import HTML',
+      undo: 'Undo',
+      redo: 'Redo',
+      undoTooltip: 'Undo structure change (Ctrl+Z / ⌘Z)',
+      redoTooltip: 'Redo structure change (Ctrl+Y / ⌘⇧Z)',
       toolbar: {
         label: 'Structured content toolbar',
+        history: 'History',
         blocks: 'Blocks',
         inline: 'Inline',
         style: 'Style',

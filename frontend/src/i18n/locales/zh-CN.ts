@@ -1373,8 +1373,13 @@ export default {
       addText: '添加文本',
       addVariable: '添加变量',
       pasteFromFile: '导入 HTML',
+      undo: '撤销',
+      redo: '重做',
+      undoTooltip: '撤销结构变更（Ctrl+Z / ⌘Z）',
+      redoTooltip: '重做结构变更（Ctrl+Y / ⌘⇧Z）',
       toolbar: {
         label: '结构化内容工具栏',
+        history: '历史',
         blocks: '块',
         inline: '行内',
         style: '样式',

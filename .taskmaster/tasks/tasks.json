@@ -404,12 +404,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T04:40:00.000Z"
+      },
+      {
+        "id": "30",
+        "title": "LR-C3 Editor undo/redo",
+        "description": "IN PROGRESS 2026-07-11. LR-C3 structure-level undo/redo (snapshot history, cap 50) in ControlledStructuredContentEditor; keyboard + toolbar; drafts must NOT include undo stack (C2 separation). Slice lrp-c3-editor-undo-redo; sole-active LRP slice. BDD ready (docs/behavior/lrp-c3-editor-undo-redo.md — BDD-LRP-C3-UNDO-001; scenarios 001…014). Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 Done; C3 In Progress; C5/C7/C8 Not Started). Formal phase None. Do NOT mark Wave LR-C Done. Do NOT activate C5/C7/C8/CD-3.",
+        "details": "ACTIVATED 2026-07-11. Slice id: lrp-c3-editor-undo-redo. Status: in-progress. Placement: ISOLATED D:/working/DGE-lrp-c3-editor-undo-redo · feat/lrp-c3-editor-undo-redo · base 32ff70ac9a602c34e5d94effc4499c8270d70be8. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 Done; C3 In Progress sole-active; C5/C7/C8 Not Started). BDD: ready — docs/behavior/lrp-c3-editor-undo-redo.md (BDD-LRP-C3-UNDO-001; scenarios BDD-LRP-C3-001…014). Scope: structure-level snapshot history (cap 50); Ctrl/Cmd+Z, Ctrl+Y / Cmd+Shift+Z; toolbar undo/redo + disabled + i18n; undo stack NEVER in C2 draft blob. Do NOT: character-level undo; persist undo to localStorage/server/C2 draft; activate C5/C7/C8/CD-3; mark Wave LR-C Done. Owner: frontend-engineer. Gates: pnpm lint/type-check/test/build; docker-deploy-queue; E2E LRP-C3-undo-redo.spec.ts; UIUX both brands. Maps: LRP finding 10; C2 storage separation.",
+        "testStrategy": "1. Follow BDD-LRP-C3-001…014 acceptance scenarios. 2. Vitest: push/undo/redo/cap/branch-truncation; draft blob excludes undo stack. 3. Playwright: 3 edits → undo ×2 → redo ×1 → structure matches; keyboard + toolbar paths. 4. pnpm lint/type-check/test/build green; docker-deploy-queue + E2E + UIUX both brands. 5. Do not claim Wave LR-C Done.",
+        "priority": "high",
+        "dependencies": [
+          "29"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T04:50:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T04:40:00.000Z",
-      "taskCount": 29,
+      "lastModified": "2026-07-11T04:50:00.000Z",
+      "taskCount": 30,
       "completedCount": 29,
       "tags": [
         "master"
