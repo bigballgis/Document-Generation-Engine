@@ -6,8 +6,8 @@
 | **Plan** | [LRP-D §LR-D4](../plan/detail/LRP-D-ops-observability.md#lr-d4--trace-propagation-decision--minimal-impl) |
 | **bdd_readiness** | **`not-applicable`** |
 | **Recorded** | 2026-07-12 |
-| **Formal phase** | None (Wave LR-D In Progress) |
-| **Task Master** | **#41** (`in-progress`) — plan id **LR-D4** |
+| **Formal phase** | None (Wave LR-D **Done**) |
+| **Task Master** | **#41** (`done`) — plan id **LR-D4** |
 | **ADR** | **[ADR-0049 Accepted](../adr/operations/0049-distributed-trace-propagation.md)** (2026-07-12) |
 
 ---

@@ -1,11 +1,13 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D2 Done**; **LR-D3 Done**; **LR-D7 Done**; **LR-D6 Done**; **LR-D5 Done**; **LR-D4 In Progress**; **sole-active = LR-D4**)  
+**Wave status:** **Done** (2026-07-12 — D1–D7 all Done; exit gate met; merge tip `218dcf1`; **no sole-active**)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); **D2 Done** (drill evidence → LR-E2); **D3 Done**; **D4 sole-active** — do **not** activate LR-E / CD-3; do **not** mark Wave Done until D4 Done
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); **D2 Done** (drill evidence → LR-E2); **D3 Done**; **D4 Done** — do **not** activate LR-E / CD-3 (recommend only)
 
-> **Activation note (2026-07-12, LR-D4):** **LR-D4 → In Progress** (slice `lrp-d4-trace-propagation`; formal phase remains **None**). **Sole-active** LRP slice — trace propagation decision + minimal impl (traceId → Kafka/async/MDC). BDD **not-applicable** ([behavior](../../behavior/lrp-d4-trace-propagation.md)). **[ADR-0049 Accepted](../../adr/operations/0049-distributed-trace-propagation.md)** (2026-07-12 — docs-first; indexed). Placement: ISOLATED `d:\working\DGE-lrp-d4-trace-propagation` · `feat/lrp-d4-trace-propagation` · base `19457bf` (`19457bf6b5a67d5b8c401629e5b5592574ce4c21`). Gate evidence: []. **Task Master #41 → in-progress**. Wave remains **In Progress** (**D1+D2+D3+D5+D6+D7 Done**; **D4 In Progress**). Do **not** activate LR-E/CD-3. Do **not** touch `DGE-audit-governance`. Do **not** mark Wave LR-D Done. Next: **backend-engineer** gap-close (decorator + Kafka headers + Scenarios A/B).
+> **Completion note (2026-07-12, LR-D4):** **LR-D4 → Done** (slice `lrp-d4-trace-propagation`; formal phase remains **None**). ADR-0049 Accepted; `MdcTaskDecorator`; Kafka `X-Trace-Id` propagation; Scenario A/B tests proven. BDD **not-applicable** ([behavior](../../behavior/lrp-d4-trace-propagation.md)). **Merge:** `218dcf1` (`218dcf1580f144b62747cc35a0f14ea604d31d00`); feature tip `670a683`; worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1321 tests, 0 fail, 7 skipped); architecture-reviewer **PASS_WITH_NOTES** (Critical **0**; merge_go=true); **DEPLOY_OK** 2026-07-12T04:18:13+08:00 tip `218dcf1` healthz 200; X-Trace-Id echo OK. **Task Master #41 → done**. **Wave LR-D → Done** (D1–D7 all Done; exit gate met; **no sole-active**). Recommend next (notes only): **LR-E** or **pause** — do **not** activate LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+
+> **Activation note (2026-07-12, LR-D4):** **LR-D4 → In Progress** (now **Done** — see completion note above). Slice `lrp-d4-trace-propagation`; formal phase remains **None**.
 
 > **Completion note (2026-07-12, LR-D3):** **LR-D3 → Done** (slice `lrp-d3-metrics-alerting`; formal phase remains **None**). Metrics & alerting as code (Micrometer custom series + Prometheus alert rules + Grafana dashboard JSON); scrape smoke evidence. BDD **not-applicable** ([lrp-d3-metrics-alerting.md](../../behavior/lrp-d3-metrics-alerting.md)). **Merge:** `ba5ea2e`; feature tip `173ab36`; worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1315 tests); architecture **PASS_WITH_NOTES** (Critical **0**; merge_go=true); **DEPLOY_OK** scrape 2026-07-12T03:43:07+08:00 — `docgen_generation_duration_seconds` count=1 (pdf success); `docgen_http_rate_limit_denied_total=1.0`; pool rejections / sse active present @ 0; `docgen_async_dlt_depth` ABSENT (`ASYNC_TRANSPORT=in-process`). **Artifacts:** `deploy/observability/prometheus-alerts.yaml` + `grafana/docgen-ops-overview.json`; promtool unavailable — manual lint documented (7/7 runbook links). **Task Master #40 → done**. Superseded sole-active by **LR-D4** (see activation note above). Wave remains **In Progress** (**D1+D2+D3+D5+D6+D7 Done**; **D4 In Progress**). Do **not** activate LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
 
@@ -128,21 +130,21 @@
 - **Read first:**
   1. **[ADR-0049 Accepted](../../adr/operations/0049-distributed-trace-propagation.md)** — cross-boundary `traceId` propagation (MDC + async decorator + Kafka headers); **[ADR-0047 Accepted](../../adr/operations/0047-distributed-tracing-otlp-baseline.md)** — OTLP/Micrometer **baseline** already Done (SOR-A06); do not re-decide the bridge
   2. Current trace handling (`TraceIdMdcFilter`; envelope `traceId`; `X-Trace-Id`; log `%X{traceId}`)
-  3. Async paths: `asyncTaskExecutor` (`AsyncConfig` — **no** `TaskDecorator` yet), `KafkaAsyncBatchTaskDispatcher` / `AsyncBatchTaskKafkaConsumer` (no `X-Trace-Id` header yet)
+  3. Async paths: `asyncTaskExecutor` (`AsyncConfig` + `MdcTaskDecorator`), `KafkaAsyncBatchTaskDispatcher` / `AsyncBatchTaskKafkaConsumer` (`X-Trace-Id` header)
   4. `.cursor/rules/tech-stack-guardrails.mdc` — prefer **no new deps** for D4 (reuse 0047 classpath); verify any extra artifact in approved repos before adding
 - **Do NOT:** Adopt a full tracing backend (Zipkin/Tempo) in this task; break the existing envelope `traceId` / `X-Trace-Id` contract; rewrite ADR-0047 Accepted decision text; activate LR-E/CD-3.
 - **Steps:**
   1. ~~Write ADR~~ — **Done (docs-first):** [ADR-0049 Accepted](../../adr/operations/0049-distributed-trace-propagation.md) (2026-07-12). Stale plan phrase «adopt Micrometer Tracing bridge now vs defer» is superseded by ADR-0047; D4 scope = **propagation only**.
-  2. Implement the minimal path per ADR-0049: `traceId` flows request → MDC → `asyncTaskExecutor` (`TaskDecorator`) → Kafka `X-Trace-Id` headers → consumer MDC.
-  3. Tests: async task log carries the originating traceId; Kafka round-trip preserves it (Scenarios A/B).
+  2. ~~Implement the minimal path per ADR-0049~~ — **Done:** `traceId` flows request → MDC → `asyncTaskExecutor` (`MdcTaskDecorator`) → Kafka `X-Trace-Id` headers → consumer MDC.
+  3. ~~Tests~~ — **Done:** Scenario A async MDC; Scenario B Kafka headers.
 - **Acceptance (G/W/T):**
-  - **G** a sync request with trace id T **W** it spawns an async batch task **T** worker logs for that task carry T (MDC assertion).
-  - **G** Kafka transport active **W** a message round-trips **T** the consumer-side MDC traceId equals the producer's.
+  - **G** a sync request with trace id T **W** it spawns an async batch task **T** worker logs for that task carry T (MDC assertion). ✅
+  - **G** Kafka transport active **W** a message round-trips **T** the consumer-side MDC traceId equals the producer's. ✅
 - **Gates:** `mvn -B -ntp -f backend/pom.xml verify`
 - **Artifacts:** [ADR-0049](../../adr/operations/0049-distributed-trace-propagation.md); executor decorator + Kafka header propagation + tests.
 - **Done when:** Decision recorded (**ADR Accepted**) + propagation proven + doc sync + commit review.
 - **Maps:** Program §1 finding 12.
-- **Status:** **In Progress** (2026-07-12 — slice `lrp-d4-trace-propagation`; Task Master #41; **sole-active**; BDD **not-applicable**; ADR-0049 **Accepted**; placement ISOLATED `../DGE-lrp-d4-trace-propagation` · `feat/lrp-d4-trace-propagation` · base `19457bf`; next: backend-engineer gap-close)
+- **Status:** **Done** (2026-07-12 — slice `lrp-d4-trace-propagation`; merge `218dcf1`; feature tip `670a683`; Task Master #41; BDD not-applicable; ADR-0049 Accepted; `MdcTaskDecorator` + Kafka `X-Trace-Id`; Scenario A/B proven; mvn verify GREEN 1321; architecture PASS_WITH_NOTES; DEPLOY_OK 2026-07-12T04:18:13+08:00 healthz 200; X-Trace-Id echo OK)
 
 ### LR-D5 — NFR quantification proposals
 
@@ -227,7 +229,9 @@
 - [x] Retention live for management/runtime audit tables (LR-D1, under LR-B2 mutex) with ADR-0048 Accepted (merge `20b2a76`; V54)
 - [x] Backup/restore drill executed with dated evidence vs ADR-0030 targets (LR-D2 — merge `3d78bc5`; scratch RPO≈0.933min / RTO≈4.751min; runbook SoT — **not** production compliance claim)
 - [x] `deploy/observability/` alert rules + dashboards committed; new metric series scrapeable (LR-D3 — merge `ba5ea2e`; scrape DEPLOY_OK 2026-07-12T03:43:07+08:00; promtool unavailable — manual lint 7/7)
-- [ ] TraceId propagation decision recorded + minimal path proven
+- [x] TraceId propagation decision recorded + minimal path proven (LR-D4 — merge `218dcf1`; feature tip `670a683`; Task Master #41; ADR-0049 Accepted; `MdcTaskDecorator` + Kafka `X-Trace-Id`; Scenario A/B; mvn verify GREEN 1321; DEPLOY_OK 2026-07-12T04:18:13+08:00)
 - [x] NFR proposals merged as pending (LR-D5 — merge `5b13476`; Task Master #38; fed by D6 evidence + DEF-LRP-D6-001; **not** confirmed SLOs)
 - [x] Load smoke baselines recorded (LR-D6 — merge `56383eb`; evidence + DEF-LRP-D6-001 triage)
 - [x] Security audit seam closed (LR-D7 — merge `c94a356`; BDD + tests; ledger seam closed)
+
+**Wave LR-D exit:** **met** (2026-07-12) — D1–D7 all Done; merge tip `218dcf1`; **no sole-active**. Recommend next (notes only): **LR-E** or **pause** — do **not** activate until parent directs.
