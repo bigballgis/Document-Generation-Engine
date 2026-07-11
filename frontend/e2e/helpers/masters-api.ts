@@ -8,6 +8,12 @@ import {
   E2E_ADMIN,
   E2E_GROUP_ADMIN,
 } from './auth'
+import {
+  E2E_CATALOG_PAGE_SIZE,
+  buildCatalogQuery,
+  findInCatalogPages,
+  type CatalogPageView,
+} from './catalog-query'
 
 export const E2E_API_BASE_URL =
   process.env.E2E_API_BASE_URL ?? 'http://127.0.0.1:8080/api/management/v1'
@@ -93,26 +99,22 @@ async function authorizedPost<T>(
   return body.result
 }
 
-interface MasterListPage {
-  content: MasterSummary[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
-}
-
 export async function findMasterByName(
   request: APIRequestContext,
   token: string,
   name: string,
 ): Promise<MasterSummary | undefined> {
-  const page = await authorizedGet<MasterListPage | MasterSummary[]>(
-    request,
-    token,
-    `/masters?search=${encodeURIComponent(name)}&size=100`,
+  // Server-side search over name ∪ groupCode; paginate so ≥500 catalog seed cannot hide a hit.
+  return findInCatalogPages<MasterSummary>(
+    (page, size) =>
+      authorizedGet<CatalogPageView<MasterSummary> | MasterSummary[]>(
+        request,
+        token,
+        `/masters${buildCatalogQuery({ search: name, page, size })}`,
+      ),
+    (master) => master.name === name,
+    { pageSize: E2E_CATALOG_PAGE_SIZE },
   )
-  const masters = Array.isArray(page) ? page : (page.content ?? [])
-  return masters.find((master) => master.name === name)
 }
 
 async function replaceMasterFile(

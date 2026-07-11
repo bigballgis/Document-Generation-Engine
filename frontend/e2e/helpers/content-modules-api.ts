@@ -10,6 +10,13 @@ import {
   E2E_TEMPLATE_AUTHOR,
   E2E_TEMPLATE_TESTER,
 } from './auth'
+import {
+  E2E_CATALOG_PAGE_SIZE,
+  buildCatalogQuery,
+  collectCatalogPages,
+  findInCatalogPages,
+  type CatalogPageView,
+} from './catalog-query'
 import { E2E_API_BASE_URL, ensureDemoRetailMasterApproved, findMasterByName } from './masters-api'
 import { fetchSubmitGateChecklist } from './submit-approval-gate-api'
 import { getBatchTestHistoryViaApi, runBatchTestViaApi } from './template-testing-api'
@@ -126,24 +133,25 @@ function uniqueModuleCode(prefix: string): string {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}`.replace(/[^A-Z0-9_-]/g, '-')
 }
 
-interface TemplateListPage {
-  content: TemplateSummary[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
-}
-
-async function listTemplates(request: APIRequestContext, token: string): Promise<TemplateSummary[]> {
-  const page = await authorizedGet<TemplateListPage | TemplateSummary[]>(
-    request,
-    token,
-    '/templates?size=100',
+async function listTemplates(
+  request: APIRequestContext,
+  token: string,
+  filters: {
+    search?: string
+    lifecycleStatus?: string
+    approvalSubState?: string
+    groupCode?: string
+  } = {},
+): Promise<TemplateSummary[]> {
+  return collectCatalogPages<TemplateSummary>(
+    (page, size) =>
+      authorizedGet<CatalogPageView<TemplateSummary> | TemplateSummary[]>(
+        request,
+        token,
+        `/templates${buildCatalogQuery({ ...filters, page, size })}`,
+      ),
+    { pageSize: E2E_CATALOG_PAGE_SIZE },
   )
-  if (Array.isArray(page)) {
-    return page
-  }
-  return page.content ?? []
 }
 
 export async function findTemplateByExternalId(
@@ -151,8 +159,16 @@ export async function findTemplateByExternalId(
   externalId: string,
 ): Promise<TemplateSummary | undefined> {
   const token = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
-  const templates = await listTemplates(request, token)
-  return templates.find((template) => template.externalId === externalId)
+  return findInCatalogPages<TemplateSummary>(
+    (page, size) =>
+      authorizedGet<CatalogPageView<TemplateSummary> | TemplateSummary[]>(
+        request,
+        token,
+        `/templates${buildCatalogQuery({ search: externalId, page, size })}`,
+      ),
+    (template) => template.externalId === externalId,
+    { pageSize: E2E_CATALOG_PAGE_SIZE },
+  )
 }
 
 export async function demoTemplateDetailPath(request: APIRequestContext): Promise<string> {
@@ -213,10 +229,10 @@ async function ensureDemoTemplateSubmittedForTest(
 
 export async function demoTestingTemplateDetailPath(request: APIRequestContext): Promise<string> {
   const testerToken = await apiLogin(request, E2E_TEMPLATE_TESTER)
-  const templates = await listTemplates(request, testerToken)
+  const templates = await listTemplates(request, testerToken, { lifecycleStatus: 'TESTING' })
   const testingTemplates = templates
     .filter((template) => template.lifecycleStatus === 'TESTING')
-    .sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt))
+    .sort((left, right) => Date.parse(right.updatedAt ?? '') - Date.parse(left.updatedAt ?? ''))
 
   if (testingTemplates.length > 0) {
     return `/templates/${testingTemplates[0].id}`
@@ -297,7 +313,10 @@ async function ensureDemoTemplatePendingApprovalDecision(
 
 export async function demoApprovalTemplateDetailPath(request: APIRequestContext): Promise<string> {
   const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
-  const templates = await listTemplates(request, approverToken)
+  const templates = await listTemplates(request, approverToken, {
+    lifecycleStatus: 'APPROVAL',
+    approvalSubState: 'PENDING_DECISION',
+  })
   const pendingDecisionTemplates = templates
     .filter(
       (template) =>
@@ -393,7 +412,9 @@ export async function demoPendingReleaseTemplateDetailPath(
   request: APIRequestContext,
 ): Promise<string> {
   const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
-  const templates = await listTemplates(request, groupAdminToken)
+  const templates = await listTemplates(request, groupAdminToken, {
+    lifecycleStatus: 'PENDING_RELEASE',
+  })
   const pendingReleaseTemplates = templates
     .filter((template) => template.lifecycleStatus === 'PENDING_RELEASE')
     .sort((left, right) => Date.parse(right.updatedAt ?? '') - Date.parse(left.updatedAt ?? ''))

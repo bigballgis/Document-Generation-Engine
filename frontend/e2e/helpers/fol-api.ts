@@ -8,6 +8,13 @@ import {
   FOL_GROUP_CODE,
   FOL_TEMPLATE_EXTERNAL_ID,
 } from './auth'
+import {
+  E2E_CATALOG_PAGE_SIZE,
+  buildCatalogQuery,
+  collectCatalogPages,
+  findInCatalogPages,
+  type CatalogPageView,
+} from './catalog-query'
 import { E2E_API_BASE_URL } from './masters-api'
 
 interface ApiEnvelope<T> {
@@ -69,35 +76,25 @@ async function authorizedGet<T>(
   return body.result
 }
 
-interface TemplateListPage {
-  content: TemplateDetail[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
-}
-
-async function listTemplates(
-  request: APIRequestContext,
-  token: string,
-): Promise<TemplateDetail[]> {
-  const page = await authorizedGet<TemplateListPage | TemplateDetail[]>(
-    request,
-    token,
-    '/templates?size=200',
-  )
-  if (Array.isArray(page)) {
-    return page
-  }
-  return page.content ?? []
-}
-
 export async function findFolTemplate(
   request: APIRequestContext,
 ): Promise<TemplateDetail | undefined> {
   const token = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
-  const templates = await listTemplates(request, token)
-  return templates.find((template) => template.externalId === FOL_TEMPLATE_EXTERNAL_ID)
+  return findInCatalogPages<TemplateDetail>(
+    (page, size) =>
+      authorizedGet<CatalogPageView<TemplateDetail> | TemplateDetail[]>(
+        request,
+        token,
+        `/templates${buildCatalogQuery({
+          search: FOL_TEMPLATE_EXTERNAL_ID,
+          groupCode: FOL_GROUP_CODE,
+          page,
+          size,
+        })}`,
+      ),
+    (template) => template.externalId === FOL_TEMPLATE_EXTERNAL_ID,
+    { pageSize: E2E_CATALOG_PAGE_SIZE },
+  )
 }
 
 export async function requireFolTemplate(request: APIRequestContext): Promise<FolCatalogFixture> {
@@ -122,11 +119,15 @@ export async function folTemplateDetailPath(request: APIRequestContext): Promise
 
 export async function listFolClauses(request: APIRequestContext): Promise<ContentModuleSummary[]> {
   const token = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
-  const page = await authorizedGet<
-    | { content: ContentModuleSummary[] }
-    | ContentModuleSummary[]
-  >(request, token, `/content-modules?groupCode=${FOL_GROUP_CODE}&size=100`)
-  const modules = Array.isArray(page) ? page : (page.content ?? [])
+  const modules = await collectCatalogPages<ContentModuleSummary>(
+    (page, size) =>
+      authorizedGet<CatalogPageView<ContentModuleSummary> | ContentModuleSummary[]>(
+        request,
+        token,
+        `/content-modules${buildCatalogQuery({ groupCode: FOL_GROUP_CODE, page, size })}`,
+      ),
+    { pageSize: E2E_CATALOG_PAGE_SIZE },
+  )
   return modules.filter((module) => FOL_CLAUSE_CODES.includes(module.moduleCode))
 }
 

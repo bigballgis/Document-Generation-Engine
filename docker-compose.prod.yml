@@ -52,9 +52,6 @@ services:
     # JVM heap 75% of 1536m ≈ 1.15G + LibreOffice conversion peak fits within the limit.
     mem_limit: 1536m
     cpus: 2.0
-    # Host-relative DemoMasterDocxStyleSupport path ../deploy/... resolves from WORKDIR /app → /deploy
-    volumes:
-      - ./deploy:/deploy:ro
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     depends_on:
