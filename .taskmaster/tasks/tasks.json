@@ -474,13 +474,27 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T12:05:00.000Z"
+      },
+      {
+        "id": "35",
+        "title": "LR-D1 Audit data retention & archival",
+        "description": "DONE 2026-07-11. LR-D1 audit data retention & archival for management + runtime audit tables (mirror ADR-0040; closes CD-PIT-15; under LR-B2 ShedLock mutex). Slice lrp-d1-audit-retention merged 20b2a76. BDD ready; ADR-0048 Accepted; Flyway V54. Wave LR-D remains In Progress (D1 Done; D2–D7 Not Started; no sole-active). Formal phase None. Do NOT activate D2+/LR-E/CD-3. Do NOT touch DGE-audit-governance worktree.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-d1-audit-retention. Merge: 20b2a76 (feat(audit): LR-D1 audit retention cleanup with V54 and ADR-0048). Worktree removed (stage 11). Formal phase remains None. Wave LR-D → In Progress (partial — D1 Done; D2–D7 Not Started; no sole-active between slices). BDD ready: docs/behavior/lrp-d1-audit-retention.md. ADR-0048 Accepted. Gates: mvn -B -ntp -f backend/pom.xml verify GREEN; architecture PASS_WITH_NOTES merge_go=true; DEPLOY_OK 2026-07-11T22:26:31+08:00 healthz 200; Flyway V54 applied. Maps: CD-PIT-15 closed; ADR-0040 pattern; LR-B2 Done. Do NOT: activate D2+; claim Wave LR-D Done; touch DGE-audit-governance.",
+        "testStrategy": "1. BDD ready + ADR-0048 Accepted. 2. Rows older than window purged; rows inside window untouched (edge boundary). 3. Purge-evidence row records count + window. 4. Scheduler skips without LR-B2 lock. 5. mvn verify green. 6. Do not activate D2+; do not claim Wave LR-D Done.",
+        "priority": "high",
+        "dependencies": [
+          "34"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T14:35:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T12:05:00.000Z",
-      "taskCount": 34,
-      "completedCount": 34,
+      "lastModified": "2026-07-11T14:35:00.000Z",
+      "taskCount": 35,
+      "completedCount": 35,
       "tags": [
         "master"
       ]

@@ -1,9 +1,13 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** Not Started (planned 2026-07-03)  
+**Wave status:** **In Progress** (2026-07-11 — partial: **LR-D1 Done**; D2–D7 remain Not Started; **no sole-active** between slices)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex); D6 is most valuable **after LR-A1/LR-B3** land; D2/D3/D4/D5/D7 schedulable immediately
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 is most valuable **after LR-A1/LR-B3** land; D2/D3/D4/D5/D7 schedulable later — **do not activate D2+ in this sync**
+
+> **Completion note (2026-07-11):** **LR-D1 → Done** (slice `lrp-d1-audit-retention`; formal phase remains **None**). Audit retention cleanup for management + runtime audit tables (mirror ADR-0040; closes **CD-PIT-15**; under LR-B2 ShedLock). BDD **`ready`** (`docs/behavior/lrp-d1-audit-retention.md`). **ADR-0048 Accepted**. Flyway **V54** applied. **Merge:** `20b2a76` (`feat(audit): LR-D1 audit retention cleanup with V54 and ADR-0048`); worktree removed. **Gates:** `mvn verify` **GREEN**; architecture **PASS_WITH_NOTES** (merge_go=true); **DEPLOY_OK** 2026-07-11T22:26:31+08:00 healthz 200. **Task Master #35 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D2–D7 Not Started**). Do **not** activate D2+/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+
+> **Activation note (2026-07-11):** **LR-D1 → In Progress** (now **Done** — see completion note above). Slice `lrp-d1-audit-retention`; formal phase remains **None**.
 
 > **Session note:** `LR-D*` tasks only. Retention deletes data — D1 is **BDD: required** and carries its own ADR. NFR numbers land as **pending proposals**, never silently confirmed (document-as-code constitution).
 
@@ -45,7 +49,7 @@
 - **Artifacts:** behavior spec; ADR; migration + scheduler/service + tests.
 - **Done when:** Confirmed baseline implemented + scenarios green + ADR recorded + doc sync + commit review.
 - **Maps:** CD-PIT-15; ADR-0040 pattern; LR-B2.
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-11 — slice `lrp-d1-audit-retention`; merge `20b2a76`; Task Master #35; BDD ready; ADR-0048 Accepted; V54; mvn verify GREEN; architecture PASS_WITH_NOTES; DEPLOY_OK 2026-07-11T22:26:31+08:00)
 
 ### LR-D2 — Backup/restore runbook + drill
 
@@ -195,7 +199,7 @@
 
 ## 2. Exit gate (Wave LR-D)
 
-- [ ] Retention live for management/runtime audit tables (LR-D1, under LR-B2 mutex) with ADR
+- [x] Retention live for management/runtime audit tables (LR-D1, under LR-B2 mutex) with ADR-0048 Accepted (merge `20b2a76`; V54)
 - [ ] Backup/restore drill executed with dated evidence vs ADR-0030 targets
 - [ ] `deploy/observability/` alert rules + dashboards committed; new metric series scrapeable
 - [ ] TraceId propagation decision recorded + minimal path proven

@@ -184,8 +184,8 @@
 | **Symptom** | Management/runtime audit tables grow without bound, degrading queries and backups |
 | **Root cause** | V9/V17 only create tables + indexes; no retention/archival (contrast: invocation records already have V43/V44 + a cleanup scheduler) |
 | **Detection** | Capacity reports / slow-query monitoring |
-| **Mitigation** | Retention config + scheduled cleanup/archival (mirror the invocation pattern; record the retention baseline in an ADR) |
-| **Owner wave** | **LR-D1** |
+| **Mitigation** | Retention config + scheduled cleanup/archival (mirror the invocation pattern; record the retention baseline in an ADR) — **LR-D1 Done** 2026-07-11 (merge `20b2a76`; **ADR-0048 Accepted**; Flyway V54; ShedLock under LR-B2) |
+| **Owner wave** | **LR-D1** (**Done**) |
 | **Doc anchor** | [docs/plan/detail/LRP-D-ops-observability.md](./LRP-D-ops-observability.md) |
 
 ---
