@@ -101,6 +101,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0046-frontend-openapi-typescript-codegen.md](./technology-stack/0046-frontend-openapi-typescript-codegen.md) | Accepted | Frontend OpenAPI TypeScript codegen (`openapi-typescript`) for management DTO types (SOR-K03) |
 | [0047-distributed-tracing-otlp-baseline.md](./operations/0047-distributed-tracing-otlp-baseline.md) | Accepted | Distributed tracing OTLP export and trace ID correlation baseline (SOR-A06) |
 | [0048-audit-data-retention-policy.md](./operations/0048-audit-data-retention-policy.md) | Accepted | Audit Tier-1 retention — management 90d / runtime 365d hard delete; Tier-2 archival deferred (LR-D1, 2026-07-11) |
+| [0049-distributed-trace-propagation.md](./operations/0049-distributed-trace-propagation.md) | Accepted | Cross-boundary `traceId` propagation — MDC + async `TaskDecorator` + Kafka `X-Trace-Id` headers; no Zipkin/Tempo in D4 (LR-D4, 2026-07-12) |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
 ### LR-A5 triad (0041 Accepted; 0042/0043 remain Proposed)

@@ -558,12 +558,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-12T03:49:00.000Z"
+      },
+      {
+        "id": "41",
+        "title": "LR-D4 Trace propagation decision + minimal impl",
+        "description": "IN PROGRESS 2026-07-12. LR-D4 sole-active: trace propagation decision + minimal impl (traceId → Kafka/async/MDC). Slice lrp-d4-trace-propagation. Formal phase None. Wave LR-D In Progress (D1+D2+D3+D5+D6+D7 Done; D4 In Progress sole-active). BDD not-applicable (confirming in parallel). Placement ISOLATED ../DGE-lrp-d4-trace-propagation · feat/lrp-d4-trace-propagation · base 19457bf. Do NOT activate LR-E/CD-3. Do NOT mark Wave Done. Do NOT touch DGE-audit-governance.",
+        "details": "ACTIVE 2026-07-12. Slice id: lrp-d4-trace-propagation. Formal phase remains None. Wave LR-D → In Progress (partial — D1+D2+D3+D5+D6+D7 Done; D4 In Progress; sole-active = LR-D4). BDD: not-applicable (behavior-spec-author confirming in parallel). Owner: backend-engineer (+ doc-keeper for ADR). Scope: (1) short ADR — adopt Micrometer Tracing bridge now vs defer; v1 scope = traceId propagation only (no span export); note existing ADR-0047 OTLP baseline. (2) Minimal impl per decision: traceId flows request → MDC → asyncTaskExecutor decorator → Kafka headers → consumer MDC. (3) Tests: async worker logs carry originating traceId; Kafka round-trip preserves it. Gates: mvn -B -ntp -f backend/pom.xml verify. Do NOT: adopt full Zipkin/Tempo backend in this slice; break envelope traceId contract; activate LR-E/CD-3; claim Wave LR-D Done; touch DGE-audit-governance. Placement: ISOLATED d:\\working\\DGE-lrp-d4-trace-propagation · feat/lrp-d4-trace-propagation · base 19457bf6b5a67d5b8c401629e5b5592574ce4c21. Next pipeline: doc-keeper ADR + explore existing tracing → backend-engineer.",
+        "testStrategy": "1. ADR records adopt-vs-defer decision and v1 propagation-only scope (dependency policy checked if Micrometer Tracing adopted). 2. Async task MDC assertion: sync request with trace id T spawns async batch → worker logs carry T. 3. Kafka transport active: consumer-side MDC traceId equals producer. 4. Envelope traceId contract unchanged. 5. mvn -B -ntp -f backend/pom.xml verify GREEN. 6. Architecture review + merge + MAIN doc-sync + commit-review before Done. 7. Wave LR-D exit gate item for traceId checked only after Done.",
+        "priority": "high",
+        "dependencies": [
+          "40"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T03:58:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T03:49:00.000Z",
-      "taskCount": 40,
+      "lastModified": "2026-07-12T03:58:00.000Z",
+      "taskCount": 41,
       "completedCount": 40,
       "tags": [
         "master"
