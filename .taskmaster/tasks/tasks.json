@@ -394,23 +394,23 @@
       {
         "id": "29",
         "title": "LR-C2 Structured editor local draft recovery",
-        "description": "IN PROGRESS 2026-07-11. Sole-active LRP slice LR-C2 — structured editor local draft recovery (localStorage keyed by template id + dev version id + user; recovery banner Restore/Discard; clear on successful save). Slice lrp-c2-local-draft-recovery; worktree D:/working/DGE-lrp-c2-local-draft-recovery; branch feat/lrp-c2-local-draft-recovery; base 24cb253. BDD ready (BDD-LRP-C2-DRAFT-001). Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. Do NOT activate C3/C5/C7/C8/CD-3.",
-        "details": "ACTIVATED 2026-07-11. Slice id: lrp-c2-local-draft-recovery. Placement: ISOLATED D:/working/DGE-lrp-c2-local-draft-recovery · feat/lrp-c2-local-draft-recovery · base 24cb2532ee0d2e2865a012a8c22f89560d739cdc. Status: in-progress (sole-active LRP). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 Done; C2 In Progress; C3/C5/C7/C8 Not Started). Scope: debounced localStorage draft persistence keyed by template id + dev version id + user; write on structure change; clear on successful save; on mount with newer local draft show recovery banner Restore/Discard with timestamps; i18n; storage quota guard; Vitest + Playwright LRP-C2-draft-recovery.spec.ts + UIUX manifest. BDD: ready — docs/behavior/lrp-c2-structured-editor-local-draft-recovery.md (BDD-LRP-C2-DRAFT-001); implementer may start TDD. Do NOT: change explicit-save semantics; store drafts server-side; keep drafts after successful save; activate C3/C5/C7/C8/CD-3; mark Wave LR-C Done. User direction: highest UX value; C3 depends on not fighting C2 draft logic. Maps: CD-PIT-13 companion; LR-B6.",
+        "description": "DONE 2026-07-11. LR-C2 structured editor local draft recovery (localStorage keyed by template id + dev version id + user; recovery banner Restore/Discard; clear on successful save). Slice lrp-c2-local-draft-recovery; merge 12a6a7e; worktree removed. E2E 4/4; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES. Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 Done; C3/C5/C7/C8 Not Started). No sole-active LRP slice. Do NOT mark Wave LR-C Done. Do NOT activate C3/C5/C7/C8/CD-3. Recommend next: LR-C3 (undo/redo) — do not auto-activate.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-c2-local-draft-recovery. Merge: 12a6a7e (12a6a7e63f5f873f824335ee3b365e69be3f29db; feat/lrp-c2-local-draft-recovery → main); feature 12a6a7e; worktree removed (stage 11). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 Done; C3/C5/C7/C8 Not Started). No sole-active LRP slice. Delivered: debounced localStorage draft persistence keyed by template id + dev version id + user; write on structure change; clear on successful save; on mount with newer local draft show recovery banner Restore/Discard with timestamps; i18n; storage quota guard; BDD-002 soft-refresh after Critical fixes. Gates: pnpm lint/type-check/test/build GREEN (1016 tests); docker-deploy-queue DEPLOY_OK (:8080 UP, :4173 200); E2E LRP-C2-draft-recovery 4/4 PASS (BDD-001/002/003/006); UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C2-uiux-manifest.md); architecture PASS_WITH_NOTES (Critical 0; merge_go yes). BDD: ready — docs/behavior/lrp-c2-structured-editor-local-draft-recovery.md (BDD-LRP-C2-DRAFT-001). Do NOT: activate C3/C5/C7/C8/CD-3; mark Wave LR-C Done. Recommend next: LR-C3 (undo/redo) — do not auto-activate. Maps: CD-PIT-13 companion; LR-B6.",
         "testStrategy": "1. Follow BDD-LRP-C2-DRAFT-001 acceptance scenarios. 2. Vitest: key scoping, clear-on-save, restore/discard, quota guard. 3. Playwright: edit → reload → restore → content present; discard path. 4. pnpm lint/type-check/test/build green; docker-deploy-queue + E2E + UIUX both brands. 5. Do not claim Wave LR-C Done.",
         "priority": "high",
         "dependencies": [
           "28"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-11T02:10:00.000Z"
+        "updatedAt": "2026-07-11T04:40:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T02:10:00.000Z",
+      "lastModified": "2026-07-11T04:40:00.000Z",
       "taskCount": 29,
-      "completedCount": 28,
+      "completedCount": 29,
       "tags": [
         "master"
       ]
