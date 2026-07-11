@@ -6,6 +6,8 @@
 **Scope:** Management UI navigation, master/template list and detail pages.  
 **Traceability:** BDD-MASTER-REVISION-NAV-001 (master revision two-page split); BDD-TEMPLATE-PACKAGE-NAV-001 (template package hub — **Done, P3-T06 2026-07-01**).
 
+**Package list pagination (LR-C5, 2026-07-11):** Templates / Masters / Content-modules **package lists** use server-side `PageView` pagination + filter/search (default `size=20`, max 100; default sort group-first `groupCode ASC, updatedAt DESC`). Contract: [openapi-v1.yaml](../api/openapi-v1.yaml) `listTemplates` / `listMasters` / `listContentModules`; behavior [lrp-c5-catalog-pagination.md](../behavior/lrp-c5-catalog-pagination.md). Does not change package-hub version/revision-line pagination already specified below. Does **not** define LR-C6 command-palette API.
+
 ## Design principle
 
 The management shell exposes **Masters** and **Templates** as top-level catalog entries—not “master versions” or “template versions” as menu labels.

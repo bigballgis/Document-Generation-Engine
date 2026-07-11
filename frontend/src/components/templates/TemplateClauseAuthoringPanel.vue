@@ -105,7 +105,11 @@ async function loadModuleOptions() {
     return
   }
   try {
-    moduleOptions.value = await contentModulesApi.listContentModules(props.groupCode)
+    const pageView = await contentModulesApi.listAllContentModules({
+      groupCode: props.groupCode,
+      sort: 'groupCodeAsc',
+    })
+    moduleOptions.value = pageView.content
   } catch {
     moduleOptions.value = []
   }

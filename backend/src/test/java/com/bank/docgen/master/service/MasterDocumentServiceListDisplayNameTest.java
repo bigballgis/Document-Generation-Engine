@@ -2,8 +2,11 @@ package com.bank.docgen.master.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.authorization.management.api.CatalogQueryPage;
+import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
@@ -84,14 +87,15 @@ class MasterDocumentServiceListDisplayNameTest {
                 masterId, "RETAIL", "Loan Master", "desc", "storage/key", "master.docx", "10000004");
         master.setStatus(MasterDocumentStatus.APPROVED);
         when(groupAccessService.accessibleGroupCodes(session)).thenReturn(List.of("*"));
-        when(masterDocumentRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc()).thenReturn(List.of(master));
+        when(masterDocumentRepository.searchCatalog(any(), eq(0), eq(20)))
+                .thenReturn(new CatalogQueryPage<>(List.of(master), 1, 1));
         when(masterAnchorRepository.countByMasterIdIn(any())).thenReturn(List.<Object[]>of(new Object[]{masterId, 2L}));
         when(managementUserDisplayService.lookupDisplayNames(Set.of("10000004")))
                 .thenReturn(Map.of("10000004", "Master Designer (10000004)"));
 
-        List<MasterDocumentSummaryView> summaries = service.list(session);
+        PageView<MasterDocumentSummaryView> page = service.list(session);
 
-        assertThat(summaries).hasSize(1);
-        assertThat(summaries.get(0).updatedByDisplayName()).isEqualTo("Master Designer (10000004)");
+        assertThat(page.content()).hasSize(1);
+        assertThat(page.content().get(0).updatedByDisplayName()).isEqualTo("Master Designer (10000004)");
     }
 }

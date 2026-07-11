@@ -15,6 +15,7 @@ vi.mock('@/api/templates', () => ({
 
 vi.mock('@/api/contentModules', () => ({
   listContentModules: vi.fn(),
+  listAllContentModules: vi.fn(),
   getContentModule: vi.fn(),
 }))
 
@@ -28,6 +29,7 @@ describe('TemplateContentModuleReferencesPanel', () => {
     vi.mocked(templatesApi.listTemplateContentModuleReferences).mockReset()
     vi.mocked(templatesApi.upsertTemplateContentModuleReference).mockReset()
     vi.mocked(contentModulesApi.listContentModules).mockReset()
+    vi.mocked(contentModulesApi.listAllContentModules).mockReset()
     vi.mocked(contentModulesApi.getContentModule).mockReset()
   })
 
@@ -40,16 +42,20 @@ describe('TemplateContentModuleReferencesPanel', () => {
         locked: false,
       },
     ])
-    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([
-      {
-        moduleId: 'MOD-LOAN-DISCLOSURE',
-        moduleCode: 'MOD-LOAN-DISCLOSURE',
-        groupCode: 'RETAIL',
-        name: 'Loan disclosure',
-        createdAt: '2026-06-26T10:00:00Z',
-        updatedAt: '2026-06-26T10:00:00Z',
-      },
-    ])
+    vi.mocked(contentModulesApi.listAllContentModules).mockResolvedValue({
+      content: [
+        {
+          moduleId: 'MOD-LOAN-DISCLOSURE',
+          moduleCode: 'MOD-LOAN-DISCLOSURE',
+          groupCode: 'RETAIL',
+          name: 'Loan disclosure',
+          createdAt: '2026-06-26T10:00:00Z',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ],
+      totalElements: 1,
+      truncated: false,
+    })
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(TemplateContentModuleReferencesPanel, {
@@ -72,16 +78,20 @@ describe('TemplateContentModuleReferencesPanel', () => {
 
   it('shows add reference control when editable', async () => {
     vi.mocked(templatesApi.listTemplateContentModuleReferences).mockResolvedValue([])
-    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([
-      {
-        moduleId: 'MOD-LOAN-DISCLOSURE',
-        moduleCode: 'MOD-LOAN-DISCLOSURE',
-        groupCode: 'RETAIL',
-        name: 'Loan disclosure',
-        createdAt: '2026-06-26T10:00:00Z',
-        updatedAt: '2026-06-26T10:00:00Z',
-      },
-    ])
+    vi.mocked(contentModulesApi.listAllContentModules).mockResolvedValue({
+      content: [
+        {
+          moduleId: 'MOD-LOAN-DISCLOSURE',
+          moduleCode: 'MOD-LOAN-DISCLOSURE',
+          groupCode: 'RETAIL',
+          name: 'Loan disclosure',
+          createdAt: '2026-06-26T10:00:00Z',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ],
+      totalElements: 1,
+      truncated: false,
+    })
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(TemplateContentModuleReferencesPanel, {
@@ -100,25 +110,29 @@ describe('TemplateContentModuleReferencesPanel', () => {
 
   it('requests modules for the template group when opening the picker', async () => {
     vi.mocked(templatesApi.listTemplateContentModuleReferences).mockResolvedValue([])
-    vi.mocked(contentModulesApi.listContentModules).mockResolvedValue([
-      {
-        moduleId: 'MOD-RETAIL-DISCLOSURE',
-        moduleCode: 'MOD-RETAIL-DISCLOSURE',
-        groupCode: 'RETAIL',
-        name: 'Owned module',
-        createdAt: '2026-06-26T10:00:00Z',
-        updatedAt: '2026-06-26T10:00:00Z',
-      },
-      {
-        moduleId: 'MOD-CORP-TERMS',
-        moduleCode: 'MOD-CORP-TERMS',
-        groupCode: 'CORP',
-        name: 'Shared corp terms',
-        sharedGroupCodes: ['RETAIL'],
-        createdAt: '2026-06-26T10:00:00Z',
-        updatedAt: '2026-06-26T10:00:00Z',
-      },
-    ])
+    vi.mocked(contentModulesApi.listAllContentModules).mockResolvedValue({
+      content: [
+        {
+          moduleId: 'MOD-RETAIL-DISCLOSURE',
+          moduleCode: 'MOD-RETAIL-DISCLOSURE',
+          groupCode: 'RETAIL',
+          name: 'Owned module',
+          createdAt: '2026-06-26T10:00:00Z',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+        {
+          moduleId: 'MOD-CORP-TERMS',
+          moduleCode: 'MOD-CORP-TERMS',
+          groupCode: 'CORP',
+          name: 'Shared corp terms',
+          sharedGroupCodes: ['RETAIL'],
+          createdAt: '2026-06-26T10:00:00Z',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ],
+      totalElements: 125,
+      truncated: false,
+    })
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(TemplateContentModuleReferencesPanel, {
@@ -134,7 +148,8 @@ describe('TemplateContentModuleReferencesPanel', () => {
     await wrapper.get('.panel-header .el-button--primary').trigger('click')
     await flushPromises()
 
-    expect(contentModulesApi.listContentModules).toHaveBeenCalledWith('RETAIL')
-    expect(vi.mocked(contentModulesApi.listContentModules).mock.calls.length).toBeGreaterThanOrEqual(1)
+    expect(contentModulesApi.listAllContentModules).toHaveBeenCalledWith(
+      expect.objectContaining({ groupCode: 'RETAIL', sort: 'groupCodeAsc' }),
+    )
   })
 })

@@ -1,6 +1,11 @@
 import { unwrapEnvelope } from '@/api/envelope'
 import { http } from '@/api/http'
+import {
+  collectAllPageContent,
+  type CollectedCatalogPage,
+} from '@/api/catalogPageCollect'
 import type { ApiEnvelope } from '@/types/session'
+import type { PageView } from '@/types/identity'
 import type {
   ContentModuleDetail,
   ContentModuleLifecycleImpactSummary,
@@ -14,16 +19,46 @@ import type {
   UpdateContentModuleVersionPayload,
 } from '@/types/contentModule'
 
+export type ContentModuleListQueryOptions = {
+  signal?: AbortSignal
+  search?: string
+  groupCode?: string
+  sort?: string
+}
+
+function normalizeGroupCode(groupCode: string | undefined): string | undefined {
+  const trimmed = groupCode?.trim()
+  return trimmed ? trimmed.toUpperCase() : undefined
+}
+
 export async function listContentModules(
-  groupCode?: string,
-  options: { signal?: AbortSignal } = {},
-): Promise<ContentModuleSummary[]> {
-  const trimmedGroupCode = groupCode?.trim()
-  const response = await http.get<ApiEnvelope<ContentModuleSummary[]>>('/content-modules', {
-    params: trimmedGroupCode ? { groupCode: trimmedGroupCode } : undefined,
+  page = 0,
+  size = 20,
+  options: ContentModuleListQueryOptions = {},
+): Promise<PageView<ContentModuleSummary>> {
+  const params: Record<string, string | number> = { page, size }
+  const groupCode = normalizeGroupCode(options.groupCode)
+  if (groupCode) {
+    params.groupCode = groupCode
+  }
+  if (options.search) {
+    params.search = options.search
+  }
+  if (options.sort) {
+    params.sort = options.sort
+  }
+  const response = await http.get<ApiEnvelope<PageView<ContentModuleSummary>>>('/content-modules', {
+    params,
     signal: options.signal,
   })
   return unwrapEnvelope(response.data)
+}
+
+/** Multi-page merge for authoring pickers (LR-C5 PageView; avoids silent size=100 truncate). */
+export async function listAllContentModules(
+  options: ContentModuleListQueryOptions = {},
+): Promise<CollectedCatalogPage<ContentModuleSummary>> {
+  return collectAllPageContent((page, size) => listContentModules(page, size, options))
 }
 
 export async function getContentModule(moduleId: string): Promise<ContentModuleDetail> {

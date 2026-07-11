@@ -56,7 +56,7 @@ class ManagementOpenApiPathSanityTest {
                 || path.startsWith("/api/management/v1/collaboration-timeout-config")) {
             return java.util.Optional.of("com.bank.docgen.collaboration");
         }
-        if (path.startsWith("/api/management/v1/masters/")) {
+        if (path.startsWith("/api/management/v1/masters")) {
             return java.util.Optional.of("com.bank.docgen.master");
         }
         if (path.contains("/previews") || path.contains("/batch-tests")) {

@@ -42,6 +42,16 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push: routerPush }),
 }))
 
+function pageView<T>(content: T[], totalElements = content.length) {
+  return {
+    content,
+    page: 0,
+    size: 20,
+    totalElements,
+    totalPages: totalElements === 0 ? 0 : Math.ceil(totalElements / 20),
+  }
+}
+
 describe('MasterListView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -52,18 +62,20 @@ describe('MasterListView', () => {
   })
 
   it('renders masters in a flat table with group column', { timeout: 20000 }, async () => {
-    vi.mocked(mastersApi.listMasters).mockResolvedValue([
-      {
-        id: 'master-1',
-        groupCode: 'RETAIL',
-        name: 'Retail letterhead',
-        status: 'DRAFT',
-        originalFilename: 'letterhead.docx',
-        anchorCount: 2,
-        updatedBy: '10000001',
-        updatedAt: '2026-06-23T10:00:00Z',
-      },
-    ])
+    vi.mocked(mastersApi.listMasters).mockResolvedValue(
+      pageView([
+        {
+          id: 'master-1',
+          groupCode: 'RETAIL',
+          name: 'Retail letterhead',
+          status: 'DRAFT',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 2,
+          updatedBy: '10000001',
+          updatedAt: '2026-06-23T10:00:00Z',
+        },
+      ]),
+    )
 
     const i18n = createI18n({
       legacy: false,
@@ -88,19 +100,21 @@ describe('MasterListView', () => {
   })
 
   it('shows updatedBy display name when API provides it', { timeout: 20000 }, async () => {
-    vi.mocked(mastersApi.listMasters).mockResolvedValue([
-      {
-        id: 'master-1',
-        groupCode: 'RETAIL',
-        name: 'Retail letterhead',
-        status: 'DRAFT',
-        originalFilename: 'letterhead.docx',
-        anchorCount: 2,
-        updatedBy: '10000001',
-        updatedByDisplayName: 'Bob Builder',
-        updatedAt: '2026-06-23T10:00:00Z',
-      },
-    ])
+    vi.mocked(mastersApi.listMasters).mockResolvedValue(
+      pageView([
+        {
+          id: 'master-1',
+          groupCode: 'RETAIL',
+          name: 'Retail letterhead',
+          status: 'DRAFT',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 2,
+          updatedBy: '10000001',
+          updatedByDisplayName: 'Bob Builder',
+          updatedAt: '2026-06-23T10:00:00Z',
+        },
+      ]),
+    )
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(MasterListView, {
@@ -137,18 +151,20 @@ describe('MasterListView', () => {
   it('LR-C9-A: retry after load failure reloads masters without remount', async () => {
     vi.mocked(mastersApi.listMasters)
       .mockRejectedValueOnce(new Error('network'))
-      .mockResolvedValueOnce([
-        {
-          id: 'master-1',
-          groupCode: 'RETAIL',
-          name: 'Retail letterhead',
-          status: 'DRAFT',
-          originalFilename: 'letterhead.docx',
-          anchorCount: 2,
-          updatedBy: '10000001',
-          updatedAt: '2026-06-23T10:00:00Z',
-        },
-      ])
+      .mockResolvedValueOnce(
+        pageView([
+          {
+            id: 'master-1',
+            groupCode: 'RETAIL',
+            name: 'Retail letterhead',
+            status: 'DRAFT',
+            originalFilename: 'letterhead.docx',
+            anchorCount: 2,
+            updatedBy: '10000001',
+            updatedAt: '2026-06-23T10:00:00Z',
+          },
+        ]),
+      )
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
     const wrapper = mount(MasterListView, {
@@ -164,7 +180,7 @@ describe('MasterListView', () => {
   })
 
   it('LR-C9-B: empty catalog shows upload CTA when manageMasters is true', async () => {
-    vi.mocked(mastersApi.listMasters).mockResolvedValue([])
+    vi.mocked(mastersApi.listMasters).mockResolvedValue(pageView([]))
     manageMasters.value = true
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
@@ -179,7 +195,7 @@ describe('MasterListView', () => {
   })
 
   it('LR-C9-B: empty catalog hides upload CTA when manageMasters is false', async () => {
-    vi.mocked(mastersApi.listMasters).mockResolvedValue([])
+    vi.mocked(mastersApi.listMasters).mockResolvedValue(pageView([]))
     manageMasters.value = false
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
@@ -193,18 +209,20 @@ describe('MasterListView', () => {
   })
 
   it('LR-C10: upload failure keeps list visible and hides LoadErrorPanel while dialog open', async () => {
-    vi.mocked(mastersApi.listMasters).mockResolvedValue([
-      {
-        id: 'master-1',
-        groupCode: 'RETAIL',
-        name: 'Retail letterhead',
-        status: 'DRAFT',
-        originalFilename: 'letterhead.docx',
-        anchorCount: 2,
-        updatedBy: '10000001',
-        updatedAt: '2026-06-23T10:00:00Z',
-      },
-    ])
+    vi.mocked(mastersApi.listMasters).mockResolvedValue(
+      pageView([
+        {
+          id: 'master-1',
+          groupCode: 'RETAIL',
+          name: 'Retail letterhead',
+          status: 'DRAFT',
+          originalFilename: 'letterhead.docx',
+          anchorCount: 2,
+          updatedBy: '10000001',
+          updatedAt: '2026-06-23T10:00:00Z',
+        },
+      ]),
+    )
     vi.mocked(mastersApi.createMaster).mockRejectedValue(new Error('upload failed'))
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
@@ -235,5 +253,58 @@ describe('MasterListView', () => {
     expect(wrapper.findComponent({ name: 'LoadErrorPanel' }).exists()).toBe(false)
     expect(wrapper.text()).toContain('Retail letterhead')
     expect(dialog.props('serverErrorKey')).toBeTruthy()
+  })
+
+  it('LR-C5: requests server page with default size and group-first sort', async () => {
+    vi.mocked(mastersApi.listMasters).mockResolvedValue(pageView([]))
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    mount(MasterListView, {
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
+    })
+    await flushPromises()
+
+    expect(mastersApi.listMasters).toHaveBeenCalledWith(
+      0,
+      20,
+      expect.objectContaining({ sort: 'groupCodeAsc' }),
+    )
+  })
+
+  it('LR-C5: group filter triggers server request with groupCode and resets to page 0', async () => {
+    vi.mocked(mastersApi.listMasters).mockResolvedValue(
+      pageView(
+        [
+          {
+            id: 'master-1',
+            groupCode: 'RETAIL',
+            name: 'Retail letterhead',
+            status: 'DRAFT',
+            originalFilename: 'letterhead.docx',
+            anchorCount: 2,
+            updatedBy: '10000001',
+            updatedAt: '2026-06-23T10:00:00Z',
+          },
+        ],
+        25,
+      ),
+    )
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(MasterListView, {
+      global: { plugins: [createPinia(), i18n, ElementPlus] },
+    })
+    await flushPromises()
+
+    vi.mocked(mastersApi.listMasters).mockResolvedValue(pageView([]))
+    const groupFilter = wrapper.find('.catalog-filter-toolbar__control input')
+    await groupFilter.setValue('RETAIL')
+    await flushPromises()
+
+    expect(mastersApi.listMasters).toHaveBeenCalledWith(
+      0,
+      20,
+      expect.objectContaining({ groupCode: 'RETAIL', sort: 'groupCodeAsc' }),
+    )
   })
 })

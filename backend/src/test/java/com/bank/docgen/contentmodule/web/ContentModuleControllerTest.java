@@ -82,7 +82,7 @@ class ContentModuleControllerTest {
                         .param("groupCode", "RETAIL")
                         .with(authentication(new ManagementAuthentication(author))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.length()").value(1));
+                .andExpect(jsonPath("$.result.content.length()").value(1));
 
         mockMvc.perform(put("/api/management/v1/content-modules/" + MODULE_CODE + "/versions/1.0.0")
                         .with(authentication(new ManagementAuthentication(author)))
@@ -205,8 +205,8 @@ class ContentModuleControllerTest {
         mockMvc.perform(get("/api/management/v1/content-modules")
                         .with(authentication(new ManagementAuthentication(author))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.length()").value(1))
-                .andExpect(jsonPath("$.result[0].moduleCode").value(MODULE_CODE));
+                .andExpect(jsonPath("$.result.content.length()").value(1))
+                .andExpect(jsonPath("$.result.content[0].moduleCode").value(MODULE_CODE));
     }
 
     @Test
@@ -235,9 +235,9 @@ class ContentModuleControllerTest {
                         .param("groupCode", "RETAIL")
                         .with(authentication(new ManagementAuthentication(author))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.length()").value(2))
-                .andExpect(jsonPath("$.result[?(@.moduleCode=='MOD-CORP-SHARED')]").exists())
-                .andExpect(jsonPath("$.result[?(@.moduleCode=='MOD-LOAN-DISCLOSURE')]").exists());
+                .andExpect(jsonPath("$.result.content.length()").value(2))
+                .andExpect(jsonPath("$.result.content[?(@.moduleCode=='MOD-CORP-SHARED')]").exists())
+                .andExpect(jsonPath("$.result.content[?(@.moduleCode=='MOD-LOAN-DISCLOSURE')]").exists());
     }
 
     @Test

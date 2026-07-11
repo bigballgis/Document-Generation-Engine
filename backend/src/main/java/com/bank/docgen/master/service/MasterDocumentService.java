@@ -1,5 +1,9 @@
 package com.bank.docgen.master.service;
 
+import com.bank.docgen.authorization.management.api.CatalogPageSupport;
+import com.bank.docgen.authorization.management.api.CatalogQueryPage;
+import com.bank.docgen.authorization.management.api.CatalogSortKey;
+import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
@@ -18,6 +22,7 @@ import com.bank.docgen.master.persistence.MasterAnchorEntity;
 import com.bank.docgen.master.persistence.MasterAnchorRepository;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
+import com.bank.docgen.master.persistence.MasterDocumentRepositoryCustom.MasterCatalogFilter;
 import com.bank.docgen.master.persistence.MasterReviewRecordEntity;
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineAnchorEntity;
@@ -88,20 +93,72 @@ public class MasterDocumentService {
     }
 
     @Transactional(readOnly = true)
-    public List<MasterDocumentSummaryView> list(ManagementSessionClaims session) {
+    public PageView<MasterDocumentSummaryView> list(ManagementSessionClaims session) {
+        return list(session, null, null, null, null, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public PageView<MasterDocumentSummaryView> list(
+            ManagementSessionClaims session,
+            Integer page,
+            Integer size,
+            String search,
+            String groupCode,
+            String status,
+            String sort
+    ) {
+        int safePage = CatalogPageSupport.normalizePage(page);
+        int safeSize = CatalogPageSupport.normalizeSize(size);
         List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
-        List<MasterDocumentEntity> masters;
-        if (groupCodes.contains("*")) {
-            masters = masterDocumentRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc();
-        } else if (groupCodes.isEmpty()) {
-            return List.of();
-        } else {
-            masters = masterDocumentRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(groupCodes);
+        if (groupCodes.isEmpty()) {
+            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
         }
-        Map<UUID, Long> anchorCounts = loadAnchorCounts(masters);
-        return enrichMasterSummaries(masters.stream()
+
+        boolean allGroups = groupCodes.contains("*");
+        String groupFilter = CatalogPageSupport.blankToNull(groupCode);
+        if (groupFilter != null && !groupAccessService.canAccessGroup(session, groupFilter)) {
+            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
+        }
+
+        MasterDocumentStatus statusFilter = parseStatus(status);
+        if (status != null && !status.isBlank() && statusFilter == null) {
+            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
+        }
+
+        CatalogSortKey sortKey = CatalogSortKey.parse(sort);
+        MasterCatalogFilter filter = new MasterCatalogFilter(
+                allGroups ? List.of() : List.copyOf(groupCodes),
+                allGroups,
+                groupFilter,
+                CatalogPageSupport.blankToNull(search),
+                statusFilter,
+                sortKey
+        );
+        CatalogQueryPage<MasterDocumentEntity> masterPage =
+                masterDocumentRepository.searchCatalog(filter, safePage, safeSize);
+        Map<UUID, Long> anchorCounts = loadAnchorCounts(masterPage.content());
+        List<MasterDocumentSummaryView> content = enrichMasterSummaries(masterPage.content().stream()
                 .map(master -> toSummary(master, anchorCounts.getOrDefault(master.getId(), 0L)))
                 .toList());
+        return new PageView<>(
+                content,
+                safePage,
+                safeSize,
+                masterPage.totalElements(),
+                masterPage.totalPages()
+        );
+    }
+
+    private static MasterDocumentStatus parseStatus(String raw) {
+        String value = CatalogPageSupport.blankToNull(raw);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return MasterDocumentStatus.valueOf(value.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 
     @Transactional(readOnly = true)

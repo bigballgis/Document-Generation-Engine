@@ -20,6 +20,10 @@ import type {
 
 export const useContentModulesStore = defineStore('contentModules', () => {
   const modules = ref<ContentModuleSummary[]>([])
+  const moduleListPage = ref(0)
+  const moduleListSize = ref(20)
+  const moduleListTotalElements = ref(0)
+  const moduleListTotalPages = ref(0)
   const selectedModule = ref<ContentModuleDetail | null>(null)
   const lifecycleImpactPreview = ref<ContentModuleLifecycleImpactSummary | null>(null)
   const loadingList = ref(false)
@@ -31,14 +35,24 @@ export const useContentModulesStore = defineStore('contentModules', () => {
   const activeGroupCode = ref('')
 
   async function fetchModules(
-    groupCode?: string,
-    options: AbortableRequestOptions = {},
+    page = moduleListPage.value,
+    size = moduleListSize.value,
+    options: AbortableRequestOptions & {
+      search?: string
+      groupCode?: string
+      sort?: string
+    } = {},
   ): Promise<void> {
     loadingList.value = true
     clearStoreListError(lastErrorMessageKey, lastListErrorRetryable)
-    activeGroupCode.value = groupCode?.trim() ?? ''
+    activeGroupCode.value = options.groupCode?.trim() ?? ''
     try {
-      modules.value = await contentModulesApi.listContentModules(groupCode, options)
+      const pageView = await contentModulesApi.listContentModules(page, size, options)
+      modules.value = pageView.content
+      moduleListPage.value = pageView.page
+      moduleListSize.value = pageView.size
+      moduleListTotalElements.value = pageView.totalElements
+      moduleListTotalPages.value = pageView.totalPages
     } catch (error) {
       handleStoreListFailure(
         error,
@@ -209,6 +223,10 @@ export const useContentModulesStore = defineStore('contentModules', () => {
 
   return {
     modules,
+    moduleListPage,
+    moduleListSize,
+    moduleListTotalElements,
+    moduleListTotalPages,
     selectedModule,
     lifecycleImpactPreview,
     loadingList,

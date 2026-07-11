@@ -17,6 +17,7 @@ export type TemplateListFetchOptions = AbortableRequestOptions & {
   search?: string
   groupCode?: string
   lifecycleStatus?: string
+  approvalSubState?: string
   sort?: string
 }
 import type {
@@ -84,6 +85,27 @@ export const useTemplatesStore = defineStore('templates', () => {
       templateListSize.value = pageView.size
       templateListTotalElements.value = pageView.totalElements
       templateListTotalPages.value = pageView.totalPages
+    } catch (error) {
+      handleStoreListFailure(error, 'templates.error.loadList', lastErrorMessageKey, lastListErrorRetryable)
+    } finally {
+      loadingList.value = false
+    }
+  }
+
+  /** Full catalog merge for dashboard consumers (not list-view paging). */
+  async function fetchAllTemplates(options: TemplateListFetchOptions = {}): Promise<void> {
+    loadingList.value = true
+    clearStoreListError(lastErrorMessageKey, lastListErrorRetryable)
+    try {
+      const collected = await templatesApi.listAllTemplates(options)
+      templates.value = collected.content
+      templateListPage.value = 0
+      templateListSize.value = collected.content.length || templateListSize.value
+      templateListTotalElements.value = collected.totalElements
+      templateListTotalPages.value =
+        collected.totalElements === 0
+          ? 0
+          : Math.max(1, Math.ceil(collected.totalElements / 100))
     } catch (error) {
       handleStoreListFailure(error, 'templates.error.loadList', lastErrorMessageKey, lastListErrorRetryable)
     } finally {
@@ -429,6 +451,7 @@ export const useTemplatesStore = defineStore('templates', () => {
     publishedTemplates,
     templatesByGroup,
     fetchTemplates,
+    fetchAllTemplates,
     fetchTemplate,
     createTemplate,
     importTemplate,

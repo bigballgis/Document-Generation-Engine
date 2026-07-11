@@ -105,9 +105,15 @@ public class TemplateController {
             @AuthenticationPrincipal ManagementSessionClaims session,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String groupCode,
+            @RequestParam(required = false) String lifecycleStatus,
+            @RequestParam(required = false) String approvalSubState,
+            @RequestParam(required = false) String sort,
             HttpServletRequest request
     ) {
-        return envelope(request, templateService.list(session, page, size));
+        return envelope(request, templateService.list(
+                session, page, size, search, groupCode, lifecycleStatus, approvalSubState, sort));
     }
 
     @GetMapping("/{templateId}")

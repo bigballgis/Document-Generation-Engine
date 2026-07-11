@@ -1,9 +1,12 @@
 package com.bank.docgen.template.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.authorization.management.api.CatalogQueryPage;
 import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
@@ -28,8 +31,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class TemplateServiceListDisplayNameTest {
@@ -108,8 +109,8 @@ class TemplateServiceListDisplayNameTest {
                 null
         );
         when(groupAccessService.accessibleGroupCodes(session)).thenReturn(List.of("*"));
-        when(templateRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc(PageRequest.of(0, 20)))
-                .thenReturn(new PageImpl<>(List.of(entity)));
+        when(templateRepository.searchCatalog(any(), eq(0), eq(20)))
+                .thenReturn(new CatalogQueryPage<>(List.of(entity), 1, 1));
         when(templateViewMapper.toSummary(entity)).thenReturn(summary);
         when(managementUserDisplayService.lookupDisplayNames(Set.of("10000003")))
                 .thenReturn(Map.of("10000003", "Template Author (10000003)"));

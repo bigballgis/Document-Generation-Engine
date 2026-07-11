@@ -1,5 +1,8 @@
 package com.bank.docgen.template.service;
 
+import com.bank.docgen.authorization.management.api.CatalogPageSupport;
+import com.bank.docgen.authorization.management.api.CatalogQueryPage;
+import com.bank.docgen.authorization.management.api.CatalogSortKey;
 import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
@@ -24,22 +27,23 @@ import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
+import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
+import com.bank.docgen.template.persistence.TemplateRepositoryCustom.TemplateCatalogFilter;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.event.TemplateContentChangedEvent;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,36 +88,91 @@ public class TemplateService {
         this.managementUserDisplayService = managementUserDisplayService;
     }
 
-    private static final int DEFAULT_LIST_PAGE_SIZE = 20;
-
     @Transactional(readOnly = true)
     public PageView<TemplateSummaryView> list(ManagementSessionClaims session, Integer page, Integer size) {
-        int safePage = page == null ? 0 : Math.max(page, 0);
-        int safeSize = size == null ? DEFAULT_LIST_PAGE_SIZE : (size <= 0 ? DEFAULT_LIST_PAGE_SIZE : size);
+        return list(session, page, size, null, null, null, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public PageView<TemplateSummaryView> list(
+            ManagementSessionClaims session,
+            Integer page,
+            Integer size,
+            String search,
+            String groupCode,
+            String lifecycleStatus,
+            String approvalSubState,
+            String sort
+    ) {
+        int safePage = CatalogPageSupport.normalizePage(page);
+        int safeSize = CatalogPageSupport.normalizeSize(size);
         List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
-        Page<TemplateEntity> templatePage;
-        if (groupCodes.contains("*")) {
-            templatePage = templateRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc(
-                    PageRequest.of(safePage, safeSize)
-            );
-        } else if (groupCodes.isEmpty()) {
+        if (groupCodes.isEmpty()) {
             return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-        } else {
-            templatePage = templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(
-                    groupCodes,
-                    PageRequest.of(safePage, safeSize)
-            );
         }
-        List<TemplateSummaryView> content = enrichTemplateSummaries(templatePage.getContent().stream()
+
+        boolean allGroups = groupCodes.contains("*");
+        String groupFilter = CatalogPageSupport.blankToNull(groupCode);
+        if (groupFilter != null) {
+            if (!groupAccessService.canAccessGroup(session, groupFilter)) {
+                return new PageView<>(List.of(), safePage, safeSize, 0, 0);
+            }
+        }
+
+        TemplateLifecycleStatus statusFilter = parseLifecycleStatus(lifecycleStatus);
+        if (lifecycleStatus != null && !lifecycleStatus.isBlank() && statusFilter == null) {
+            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
+        }
+        ApprovalSubState approvalFilter = parseApprovalSubState(approvalSubState);
+        if (approvalSubState != null && !approvalSubState.isBlank() && approvalFilter == null) {
+            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
+        }
+
+        CatalogSortKey sortKey = CatalogSortKey.parse(sort, CatalogSortKey.EXTERNAL_ID_ASC);
+        TemplateCatalogFilter filter = new TemplateCatalogFilter(
+                allGroups ? List.of() : List.copyOf(groupCodes),
+                allGroups,
+                groupFilter,
+                CatalogPageSupport.blankToNull(search),
+                statusFilter,
+                approvalFilter,
+                sortKey
+        );
+        CatalogQueryPage<TemplateEntity> templatePage = templateRepository.searchCatalog(filter, safePage, safeSize);
+        List<TemplateSummaryView> content = enrichTemplateSummaries(templatePage.content().stream()
                 .map(templateViewMapper::toSummary)
                 .toList());
         return new PageView<>(
                 content,
-                templatePage.getNumber(),
-                templatePage.getSize(),
-                templatePage.getTotalElements(),
-                templatePage.getTotalPages()
+                safePage,
+                safeSize,
+                templatePage.totalElements(),
+                templatePage.totalPages()
         );
+    }
+
+    private static TemplateLifecycleStatus parseLifecycleStatus(String raw) {
+        String value = CatalogPageSupport.blankToNull(raw);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return TemplateLifecycleStatus.valueOf(value.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    private static ApprovalSubState parseApprovalSubState(String raw) {
+        String value = CatalogPageSupport.blankToNull(raw);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return ApprovalSubState.valueOf(value.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 
     @Transactional(readOnly = true)

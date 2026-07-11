@@ -418,12 +418,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T05:40:00.000Z"
+      },
+      {
+        "id": "31",
+        "title": "LR-C5 Catalog server-side pagination/filter",
+        "description": "IN PROGRESS 2026-07-11. Sole-active LRP slice: catalog server-side pagination/filter for templates/masters/content-modules (OPT-F4 residual; COR-F09 group-first semantics kept). Slice lrp-c5-catalog-pagination. Formal phase remains None. Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 Done; C5 In Progress; C6/C7/C8 Not Started). Do NOT mark Wave LR-C Done. Do NOT activate C6/C7/C8/CD-3.",
+        "details": "ACTIVATED 2026-07-11. Slice id: lrp-c5-catalog-pagination. Status: in-progress. Formal phase remains None. Placement: ISOLATED D:/working/DGE-lrp-c5-catalog-pagination · feat/lrp-c5-catalog-pagination · base e860256 (e86025624bcc11f25ce2228cf1ed69e32d7290ef). BDD readiness: in-progress (behavior-spec-author running in parallel; expect ready shortly; acceptance from LRP-C detail § LR-C5). Scope: backend pageable list endpoints (templates/masters/content-modules) + total counts + OpenAPI sync; frontend store/view migration off full-fetch + client slice; ≥500-row seed + p95 < 1 s evidence; E2E + UIUX both brands. Gate evidence: []. Do NOT: activate C6 (depends on C5)/C7/C8/CD-3; mark Wave LR-C Done; break COR-F09 group-first semantics. Maps: OPT-F4 residual; COR-F09.",
+        "testStrategy": "1. Wait for BDD ready then follow LRP-C5 acceptance (G/W/T). 2. Backend pageable + filter tests; mvn verify. 3. Vitest store/pagination migration. 4. Playwright: paginate, filter, group-first ordering; p95 list latency evidence. 5. pnpm lint/type-check/test/build + docker-deploy-queue + E2E + UIUX both brands. 6. Do not claim Wave LR-C Done; leave C6/C7/C8 Not Started.",
+        "priority": "high",
+        "dependencies": [
+          "30"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T05:45:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T05:40:00.000Z",
-      "taskCount": 30,
+      "lastModified": "2026-07-11T05:45:00.000Z",
+      "taskCount": 31,
       "completedCount": 30,
       "tags": [
         "master"

@@ -122,11 +122,11 @@ export async function folTemplateDetailPath(request: APIRequestContext): Promise
 
 export async function listFolClauses(request: APIRequestContext): Promise<ContentModuleSummary[]> {
   const token = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
-  const modules = await authorizedGet<ContentModuleSummary[]>(
-    request,
-    token,
-    `/content-modules?groupCode=${FOL_GROUP_CODE}`,
-  )
+  const page = await authorizedGet<
+    | { content: ContentModuleSummary[] }
+    | ContentModuleSummary[]
+  >(request, token, `/content-modules?groupCode=${FOL_GROUP_CODE}&size=100`)
+  const modules = Array.isArray(page) ? page : (page.content ?? [])
   return modules.filter((module) => FOL_CLAUSE_CODES.includes(module.moduleCode))
 }
 

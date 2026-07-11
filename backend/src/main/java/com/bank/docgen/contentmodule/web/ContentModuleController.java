@@ -1,5 +1,6 @@
 package com.bank.docgen.contentmodule.web;
 
+import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.contentmodule.api.ContentModuleDetailView;
 import com.bank.docgen.contentmodule.api.ContentModuleLifecycleOperationApplyRequest;
 import com.bank.docgen.contentmodule.api.ContentModuleLifecycleOperationResultView;
@@ -20,7 +21,6 @@ import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,15 +56,16 @@ public class ContentModuleController {
     }
 
     @GetMapping
-    public SuccessEnvelope<List<ContentModuleSummaryView>> list(
+    public SuccessEnvelope<PageView<ContentModuleSummaryView>> list(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String search,
             @RequestParam(required = false) String groupCode,
+            @RequestParam(required = false) String sort,
             @AuthenticationPrincipal ManagementSessionClaims session,
             HttpServletRequest request
     ) {
-        if (groupCode == null || groupCode.isBlank()) {
-            return envelope(request, contentModuleService.listAccessible(session));
-        }
-        return envelope(request, contentModuleService.list(groupCode, session));
+        return envelope(request, contentModuleService.list(session, page, size, search, groupCode, sort));
     }
 
     @GetMapping("/{moduleId}")

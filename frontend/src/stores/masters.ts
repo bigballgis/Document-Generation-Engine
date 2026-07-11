@@ -22,6 +22,10 @@ import type {
 
 export const useMastersStore = defineStore('masters', () => {
   const masters = ref<MasterDocumentSummary[]>([])
+  const masterListPage = ref(0)
+  const masterListSize = ref(20)
+  const masterListTotalElements = ref(0)
+  const masterListTotalPages = ref(0)
   const selectedMaster = ref<MasterDocumentDetail | null>(null)
   const selectedRevisionLine = ref<MasterRevisionLineDetail | null>(null)
   const revisionLinesPage = ref<MasterRevisionLinePage | null>(null)
@@ -46,11 +50,59 @@ export const useMastersStore = defineStore('masters', () => {
     return grouped
   })
 
-  async function fetchMasters(options: AbortableRequestOptions = {}): Promise<void> {
+  async function fetchMasters(
+    page = masterListPage.value,
+    size = masterListSize.value,
+    options: AbortableRequestOptions & {
+      search?: string
+      groupCode?: string
+      status?: string
+      sort?: string
+    } = {},
+  ): Promise<void> {
     loadingList.value = true
     clearStoreListError(lastErrorMessageKey, lastListErrorRetryable)
     try {
-      masters.value = await mastersApi.listMasters(options)
+      const pageView = await mastersApi.listMasters(page, size, options)
+      masters.value = pageView.content
+      masterListPage.value = pageView.page
+      masterListSize.value = pageView.size
+      masterListTotalElements.value = pageView.totalElements
+      masterListTotalPages.value = pageView.totalPages
+    } catch (error) {
+      handleStoreListFailure(
+        error,
+        'masters.error.loadList',
+        lastErrorMessageKey,
+        lastListErrorRetryable,
+        { useStoreResolver: true },
+      )
+    } finally {
+      loadingList.value = false
+    }
+  }
+
+  /** Full catalog merge for dashboard / import pickers (not list-view paging). */
+  async function fetchAllMasters(
+    options: AbortableRequestOptions & {
+      search?: string
+      groupCode?: string
+      status?: string
+      sort?: string
+    } = {},
+  ): Promise<void> {
+    loadingList.value = true
+    clearStoreListError(lastErrorMessageKey, lastListErrorRetryable)
+    try {
+      const collected = await mastersApi.listAllMasters(options)
+      masters.value = collected.content
+      masterListPage.value = 0
+      masterListSize.value = collected.content.length || masterListSize.value
+      masterListTotalElements.value = collected.totalElements
+      masterListTotalPages.value =
+        collected.totalElements === 0
+          ? 0
+          : Math.max(1, Math.ceil(collected.totalElements / 100))
     } catch (error) {
       handleStoreListFailure(
         error,
@@ -302,6 +354,10 @@ export const useMastersStore = defineStore('masters', () => {
 
   return {
     masters,
+    masterListPage,
+    masterListSize,
+    masterListTotalElements,
+    masterListTotalPages,
     selectedMaster,
     selectedRevisionLine,
     revisionLinesPage,
@@ -317,6 +373,7 @@ export const useMastersStore = defineStore('masters', () => {
     draftReviewHistoryByMasterId,
     mastersByGroup,
     fetchMasters,
+    fetchAllMasters,
     fetchMaster,
     fetchImpactAnalysis,
     fetchRevisionLines,

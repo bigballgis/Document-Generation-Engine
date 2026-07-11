@@ -17,28 +17,62 @@ describe('contentModules API', () => {
     vi.mocked(http.put).mockReset()
   })
 
-  it('lists content modules for a group', async () => {
+  it('lists content modules as PageView with page/size and groupCode', async () => {
     vi.mocked(http.get).mockResolvedValue({
       data: {
         metadata: {},
-        result: [
-          {
-            moduleId: 'MOD-LOAN-DISCLOSURE',
-            moduleCode: 'MOD-LOAN-DISCLOSURE',
-            groupCode: 'RETAIL',
-            name: 'Loan disclosure',
-            createdAt: '2026-06-26T10:00:00Z',
-            updatedAt: '2026-06-26T10:00:00Z',
-          },
-        ],
+        result: {
+          content: [
+            {
+              moduleId: 'MOD-LOAN-DISCLOSURE',
+              moduleCode: 'MOD-LOAN-DISCLOSURE',
+              groupCode: 'RETAIL',
+              name: 'Loan disclosure',
+              createdAt: '2026-06-26T10:00:00Z',
+              updatedAt: '2026-06-26T10:00:00Z',
+            },
+          ],
+          page: 0,
+          size: 20,
+          totalElements: 1,
+          totalPages: 1,
+        },
       },
     })
 
-    const modules = await contentModulesApi.listContentModules('RETAIL')
+    const pageView = await contentModulesApi.listContentModules(0, 20, { groupCode: 'RETAIL' })
 
-    expect(http.get).toHaveBeenCalledWith('/content-modules', { params: { groupCode: 'RETAIL' } })
-    expect(modules).toHaveLength(1)
-    expect(modules[0]?.name).toBe('Loan disclosure')
+    expect(http.get).toHaveBeenCalledWith('/content-modules', {
+      params: { page: 0, size: 20, groupCode: 'RETAIL' },
+      signal: undefined,
+    })
+    expect(pageView.content).toHaveLength(1)
+    expect(pageView.content[0]?.name).toBe('Loan disclosure')
+  })
+
+  it('forwards search and sort query params', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [],
+          page: 0,
+          size: 20,
+          totalElements: 0,
+          totalPages: 0,
+        },
+      },
+    })
+
+    await contentModulesApi.listContentModules(0, 20, {
+      search: 'loan',
+      sort: 'moduleCodeAsc',
+    })
+
+    expect(http.get).toHaveBeenCalledWith('/content-modules', {
+      params: { page: 0, size: 20, search: 'loan', sort: 'moduleCodeAsc' },
+      signal: undefined,
+    })
   })
 
   it('creates a content module with initial draft version', async () => {

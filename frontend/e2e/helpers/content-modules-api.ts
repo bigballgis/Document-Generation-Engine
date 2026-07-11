@@ -138,7 +138,7 @@ async function listTemplates(request: APIRequestContext, token: string): Promise
   const page = await authorizedGet<TemplateListPage | TemplateSummary[]>(
     request,
     token,
-    '/templates?size=200',
+    '/templates?size=100',
   )
   if (Array.isArray(page)) {
     return page
@@ -213,7 +213,7 @@ async function ensureDemoTemplateSubmittedForTest(
 
 export async function demoTestingTemplateDetailPath(request: APIRequestContext): Promise<string> {
   const testerToken = await apiLogin(request, E2E_TEMPLATE_TESTER)
-  const templates = await authorizedGet<TemplateSummary[]>(request, testerToken, '/templates')
+  const templates = await listTemplates(request, testerToken)
   const testingTemplates = templates
     .filter((template) => template.lifecycleStatus === 'TESTING')
     .sort((left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt))
@@ -297,7 +297,7 @@ async function ensureDemoTemplatePendingApprovalDecision(
 
 export async function demoApprovalTemplateDetailPath(request: APIRequestContext): Promise<string> {
   const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
-  const templates = await authorizedGet<TemplateSummary[]>(request, approverToken, '/templates')
+  const templates = await listTemplates(request, approverToken)
   const pendingDecisionTemplates = templates
     .filter(
       (template) =>
@@ -393,7 +393,7 @@ export async function demoPendingReleaseTemplateDetailPath(
   request: APIRequestContext,
 ): Promise<string> {
   const groupAdminToken = await apiLogin(request, E2E_GROUP_ADMIN)
-  const templates = await authorizedGet<TemplateSummary[]>(request, groupAdminToken, '/templates')
+  const templates = await listTemplates(request, groupAdminToken)
   const pendingReleaseTemplates = templates
     .filter((template) => template.lifecycleStatus === 'PENDING_RELEASE')
     .sort((left, right) => Date.parse(right.updatedAt ?? '') - Date.parse(left.updatedAt ?? ''))

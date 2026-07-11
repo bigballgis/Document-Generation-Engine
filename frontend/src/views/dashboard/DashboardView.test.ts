@@ -128,7 +128,7 @@ describe('DashboardView', () => {
 
   it('shows recoverable error panel when template fetch fails without hiding tasks section', async () => {
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockRejectedValue(new Error('network'))
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockRejectedValue(new Error('network'))
 
     const wrapper = mount(DashboardView, {
       global: {
@@ -156,7 +156,7 @@ describe('DashboardView', () => {
   it('retries loading after error panel retry', async () => {
     const templatesStore = useTemplatesStore()
     const fetchSpy = vi
-      .spyOn(templatesStore, 'fetchTemplates')
+      .spyOn(templatesStore, 'fetchAllTemplates')
       .mockRejectedValueOnce(new Error('network'))
       .mockResolvedValueOnce(undefined)
 
@@ -201,7 +201,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     const fetchSpy = vi.spyOn(collaborationStore, 'fetchWorkItems').mockImplementation(async () => {
@@ -260,7 +260,7 @@ describe('DashboardView', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     const fetchSpy = vi.spyOn(collaborationStore, 'fetchWorkItems')
@@ -300,7 +300,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     vi.spyOn(collaborationStore, 'fetchWorkItems').mockImplementation(async () => {
@@ -342,7 +342,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockImplementation(async () => {
       templatesStore.templates = []
     })
 
@@ -382,7 +382,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockImplementation(async () => {
       templatesStore.templates = [
         {
           id: 'tpl-1',
@@ -426,7 +426,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockImplementation(async () => {
       templatesStore.templates = [
         {
           id: 'tpl-pending',
@@ -472,7 +472,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockImplementation(async () => {
       templatesStore.templates = [
         {
           id: 'tpl-testing',
@@ -511,7 +511,7 @@ describe('DashboardView', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
@@ -537,7 +537,7 @@ describe('DashboardView', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchMasters').mockImplementation(async () => {
+    vi.spyOn(mastersStore, 'fetchAllMasters').mockImplementation(async () => {
       mastersStore.masters = []
     })
     vi.spyOn(mastersStore, 'enrichDraftMasterReviewHistory').mockResolvedValue(undefined)
@@ -560,7 +560,7 @@ describe('DashboardView', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchMasters').mockImplementation(async () => {
+    vi.spyOn(mastersStore, 'fetchAllMasters').mockImplementation(async () => {
       mastersStore.masters = [
         {
           id: 'm1',
@@ -594,7 +594,7 @@ describe('DashboardView', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchMasters').mockImplementation(async () => {
+    vi.spyOn(mastersStore, 'fetchAllMasters').mockImplementation(async () => {
       mastersStore.masters = [
         {
           id: 'm1',
@@ -642,7 +642,7 @@ describe('DashboardView', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchMasters').mockImplementation(async () => {
+    vi.spyOn(mastersStore, 'fetchAllMasters').mockImplementation(async () => {
       mastersStore.masters = [
         {
           id: 'm1',
@@ -681,7 +681,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
@@ -705,7 +705,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockImplementation(async () => {
       templatesStore.templates = [
         {
           id: 'tpl-testing',
@@ -758,7 +758,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockImplementation(async () => {
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockImplementation(async () => {
       templatesStore.templates = [
         {
           id: 'tpl-testing',
@@ -799,7 +799,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
@@ -831,7 +831,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     collaborationStore.workItems = [
@@ -872,7 +872,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     vi.spyOn(collaborationStore, 'fetchWorkItems').mockResolvedValue(undefined)
@@ -903,9 +903,9 @@ describe('DashboardView', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchMasters').mockResolvedValue(undefined)
+    vi.spyOn(mastersStore, 'fetchAllMasters').mockResolvedValue(undefined)
 
     const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
@@ -935,7 +935,7 @@ describe('DashboardView', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchMasters').mockImplementation(async () => {
+    vi.spyOn(mastersStore, 'fetchAllMasters').mockImplementation(async () => {
       mastersStore.masters = [
         {
           id: 'm-pending',
@@ -951,7 +951,7 @@ describe('DashboardView', () => {
     })
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
@@ -979,7 +979,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     collaborationStore.workItems = [
@@ -1026,9 +1026,9 @@ describe('DashboardView', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchMasters').mockResolvedValue(undefined)
+    vi.spyOn(mastersStore, 'fetchAllMasters').mockResolvedValue(undefined)
 
     const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
@@ -1058,9 +1058,9 @@ describe('DashboardView', () => {
     vi.spyOn(sessionStore, 'canAccessRoute').mockImplementation(() => true)
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
     const mastersStore = useMastersStore()
-    vi.spyOn(mastersStore, 'fetchMasters').mockResolvedValue(undefined)
+    vi.spyOn(mastersStore, 'fetchAllMasters').mockResolvedValue(undefined)
 
     const wrapper = mountDashboardWorkflowTab()
     await flushPromises()
@@ -1089,7 +1089,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     vi.spyOn(collaborationStore, 'fetchWorkItems').mockImplementation(async () => {
@@ -1129,7 +1129,7 @@ describe('DashboardView', () => {
     )
 
     const templatesStore = useTemplatesStore()
-    vi.spyOn(templatesStore, 'fetchTemplates').mockResolvedValue(undefined)
+    vi.spyOn(templatesStore, 'fetchAllTemplates').mockResolvedValue(undefined)
 
     const collaborationStore = useCollaborationStore()
     const fetchSpy = vi.spyOn(collaborationStore, 'fetchWorkItems').mockResolvedValue(undefined)

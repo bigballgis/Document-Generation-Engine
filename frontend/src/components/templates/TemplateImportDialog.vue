@@ -79,7 +79,7 @@ watch(
     parseErrorKey.value = null
     form.masterId = ''
     form.importConflictPolicy = 'REJECT_IMPORT'
-    await mastersStore.fetchMasters()
+    await mastersStore.fetchAllMasters({ sort: 'groupCodeAsc' })
   },
 )
 

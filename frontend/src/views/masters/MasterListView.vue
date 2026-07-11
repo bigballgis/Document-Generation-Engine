@@ -14,13 +14,12 @@ import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterUploadDialog from '@/components/masters/MasterUploadDialog.vue'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useMasterStatusFilterOptions } from '@/composables/useTableFilterOptions'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
+import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { MASTER_DETAIL_PATH_PREFIX } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
 import type { MasterDocumentSummary } from '@/types/master'
@@ -37,13 +36,13 @@ const { masterDetailLink } = useEntityLinkTargets()
 const uploadDialogOpen = ref(false)
 const uploadFailurePending = ref(false)
 const currentPage = ref(1)
+const listHydrated = ref(false)
 
 const allMasters = computed(() => mastersStore.masters)
 const {
   searchQuery,
   filters,
   activeSortKey,
-  sortedRows,
   hasAnyActive,
   activeFilterChips,
   clearAll,
@@ -64,6 +63,12 @@ const {
     },
   ],
   sortOptions: [
+    {
+      key: 'groupCodeAsc',
+      labelKey: 'table.sort.groupAsc',
+      getter: (row) => row.groupCode,
+      order: 'asc',
+    },
     {
       key: 'updatedAtDesc',
       labelKey: 'table.sort.updatedAtDesc',
@@ -89,7 +94,7 @@ const {
       order: 'asc',
     },
   ],
-  defaultSortKey: 'updatedAtDesc',
+  defaultSortKey: 'groupCodeAsc',
 })
 
 const catalogToolbarFilters = computed(() => [
@@ -107,21 +112,30 @@ const catalogToolbarFilters = computed(() => [
 ])
 
 const catalogSortOptions = computed(() => [
+  { key: 'groupCodeAsc', labelKey: 'table.sort.groupAsc' },
   { key: 'updatedAtDesc', labelKey: 'table.sort.updatedAtDesc' },
   { key: 'updatedAtAsc', labelKey: 'table.sort.updatedAtAsc' },
   { key: 'nameAsc', labelKey: 'table.sort.nameAsc' },
   { key: 'groupAsc', labelKey: 'table.sort.groupAsc' },
 ])
 
-const { paginatedRows: paginatedMasters, totalRows: totalMasterRows } = useCatalogPagination(
-  sortedRows,
-  currentPage,
-  CLIENT_TABLE_PAGE_SIZE,
+const showCatalogChrome = computed(
+  () =>
+    listHydrated.value &&
+    !showListLoadError.value &&
+    (mastersStore.masterListTotalElements > 0 ||
+      hasAnyActive.value ||
+      mastersStore.masters.length > 0),
 )
 
-watch(hasAnyActive, () => {
-  currentPage.value = 1
-})
+function buildListQuery() {
+  return {
+    search: searchQuery.value.trim() || undefined,
+    groupCode: filters.groupCode?.trim() || undefined,
+    status: filters.status?.trim() || undefined,
+    sort: activeSortKey.value || 'groupCodeAsc',
+  }
+}
 
 const { manageMasters } = useCapabilities()
 const canUpload = computed(() => manageMasters.value)
@@ -142,8 +156,42 @@ const showListLoadError = computed(
     !uploadFailurePending.value,
 )
 
-const { reload: reloadMasters } = useAbortableCatalogLoader((signal) =>
-  mastersStore.fetchMasters({ signal }),
+const { reload: reloadMasters, signal: abortSignal } = useAbortableCatalogLoader(async (signal) => {
+  await mastersStore.fetchMasters(currentPage.value - 1, SERVER_TABLE_PAGE_SIZE, {
+    signal,
+    ...buildListQuery(),
+  })
+  listHydrated.value = true
+})
+
+watch(currentPage, async (page) => {
+  const serverPage = page - 1
+  if (serverPage === mastersStore.masterListPage) {
+    return
+  }
+  try {
+    await mastersStore.fetchMasters(serverPage, SERVER_TABLE_PAGE_SIZE, {
+      signal: abortSignal.value,
+      ...buildListQuery(),
+    })
+  } catch {
+    // Error surfaced via store message key.
+  }
+})
+
+watch(
+  [searchQuery, filters, activeSortKey],
+  async () => {
+    if (!listHydrated.value) {
+      return
+    }
+    if (currentPage.value !== 1) {
+      currentPage.value = 1
+      return
+    }
+    await reloadMasters()
+  },
+  { deep: true },
 )
 
 onMounted(async () => {
@@ -222,7 +270,7 @@ function clearUploadServerError() {
 
     <el-skeleton v-else-if="mastersStore.loadingList" :rows="6" animated />
 
-    <template v-else-if="allMasters.length > 0">
+    <template v-else-if="showCatalogChrome">
       <CatalogFilterToolbar
         v-model:search-query="searchQuery"
         v-model:filter-values="filters"
@@ -235,8 +283,8 @@ function clearUploadServerError() {
         @remove-chip="removeFilterChip"
       />
 
-      <template v-if="sortedRows.length > 0">
-        <AppDataTable activatable :data="paginatedMasters" @row-click="activateMasterRow">
+      <template v-if="allMasters.length > 0">
+        <AppDataTable activatable :data="allMasters" @row-click="activateMasterRow">
           <el-table-column
             prop="groupCode"
             :label="t('masters.list.columns.group')"
@@ -283,8 +331,8 @@ function clearUploadServerError() {
         </AppDataTable>
         <AppTablePagination
           v-model:current-page="currentPage"
-          :page-size="CLIENT_TABLE_PAGE_SIZE"
-          :total="totalMasterRows"
+          :page-size="mastersStore.masterListSize"
+          :total="mastersStore.masterListTotalElements"
         />
       </template>
 

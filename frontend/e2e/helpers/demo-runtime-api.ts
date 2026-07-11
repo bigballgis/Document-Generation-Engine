@@ -228,7 +228,7 @@ interface TemplateListPage {
 }
 
 async function listTemplates(request: APIRequestContext, token: string): Promise<TemplateSummary[]> {
-  const page = await authorizedGet<TemplateListPage>(request, token, '/templates?size=200')
+  const page = await authorizedGet<TemplateListPage>(request, token, '/templates?size=100')
   if (Array.isArray(page)) {
     return page
   }
