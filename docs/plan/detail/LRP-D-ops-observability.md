@@ -1,11 +1,13 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D7 Done**; **LR-D6 → In Progress** (**sole-active**); D2–D5 Not Started)  
+**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D7 Done**; **LR-D6 Done**; D2–D5 Not Started; **no sole-active**)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 is most valuable **after LR-A1/LR-B3** land (**both Done**); leave D2–D5 **Not Started** — do **not** activate D2–D5 / LR-E / CD-3 while D6 is sole-active
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); leave D2–D5 **Not Started** — do **not** activate D2–D5 / LR-E / CD-3
 
-> **Activation note (2026-07-12, LR-D6):** **LR-D6 → In Progress** (slice `lrp-d6-load-smoke`; formal phase remains **None**). **Sole-active LRP slice** — load smoke baseline (≥20 concurrent sync + SSE preview on Docker). BDD **not-applicable**. Placement: ISOLATED `D:/working/DGE-lrp-d6-load-smoke` · `feat/lrp-d6-load-smoke` · base `a262706`. **Task Master #37 → in-progress**. Wave remains **In Progress** (**D1+D7 Done**; **D6 In Progress**; **D2–D5 Not Started**). Do **not** activate D2–D5/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. Do **not** mark Done.
+> **Completion note (2026-07-12, LR-D6):** **LR-D6 → Done** (slice `lrp-d6-load-smoke`; formal phase remains **None**). Flag-gated JUnit load-smoke harness; Scenario A n=20 success=12 errorRate=0.4 triaged **DEF-LRP-D6-001** (PDF concurrent → `serviceUnavailable` mapped as `TEMPLATE_VALIDATION_FAILED`; p95≈15939ms p99≈16065ms; poolRejections=0); Scenario B 5/5 SSE completed dropped=0. BDD **not-applicable**. **Merge:** `56383eb` (`56383ebd6f4dedc5413339aabe88ac16ea857d74`); worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1303 tests, pre-merge worktree); architecture **PASS_WITH_NOTES**; **DEPLOY_OK** 2026-07-12T01:26:46+08:00. **Evidence:** [latest-summary.json](../evidence/lrp-d6-load-smoke/latest-summary.json) + [TRIAGE-pdf-422.md](../evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md). **Task Master #37 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D7+D6 Done**; **D2–D5 Not Started**). Do **not** activate D2–D5/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+
+> **Activation note (2026-07-12, LR-D6):** **LR-D6 → In Progress** (now **Done** — see completion note above). Slice `lrp-d6-load-smoke`; formal phase remains **None**.
 
 > **Completion note (2026-07-11, LR-D7):** **LR-D7 → Done** (slice `lrp-d7-durable-security-audit`; formal phase remains **None**). Durable `SECURITY_*` audit events (login/403/download → `management_audit_event`); route-denied API + frontend; retention via ADR-0048/D1; closes ledger seam «Security forbidden-route audit». BDD **`ready`** (`docs/behavior/lrp-d7-durable-security-audit.md`; BDD-LRP-D7-001…010). **Merge:** `c94a356` (`c94a356070dff7a9ab35ffbc0ba53b49f63270d0`); worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1294 tests); `pnpm` frontend lint/type-check/test/build **GREEN** (1144 tests); architecture **PASS_WITH_NOTES** (Critical **0**; merge_go=true); **DEPLOY_OK** 2026-07-11T23:50:03+08:00 healthz 200; E2E/UIUX skipped per BDD D7-C14. **Task Master #36 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D7 Done**; **D2–D6 Not Started**). Do **not** activate D2–D6/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
 
@@ -134,11 +136,11 @@
 - **Read first:**
   1. `docs/requirements/non-functional-requirements.md` (current gaps)
   2. [usability-review.md](../../product/usability-review.md) §待确认 L87–91 + CD-UX-T01 task-time budget table
-  3. LR-D6 results if already available (else mark proposals «pre-measurement»)
-- **Do NOT:** Write any number as a **confirmed** requirement — every value lands in the pending/待确认 section with rationale and measurement method; contradict CD-UX-T01 draft budgets (cross-reference them).
+  3. LR-D6 results — **available** (2026-07-12 Done): [latest-summary.json](../evidence/lrp-d6-load-smoke/latest-summary.json); named defect [DEF-LRP-D6-001](../evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md) feeds concurrent-PDF / resilience-mapping NFR inputs (proposed only)
+- **Do NOT:** Write any number as a **confirmed** requirement — every value lands in the pending/待确认 section with rationale and measurement method; contradict CD-UX-T01 draft budgets (cross-reference them); **do not activate this task from D6 completion alone**.
 - **Steps:**
   1. Draft proposal rows: p95 sync generation (with/without PDF), SSE first-event latency, concurrent generation capacity, availability target, max concurrent sessions/SSE connections.
-  2. For each: proposed value, measurement method (LR-D6 harness / Playwright timing / metrics), environment assumptions, source (industry norm vs measured).
+  2. For each: proposed value, measurement method (LR-D6 harness / Playwright timing / metrics), environment assumptions, source (industry norm vs measured). Use D6 measured p95≈15939ms / p99≈16065ms / errorRate=0.4 (PDF) + DEF-LRP-D6-001 as **proposed** inputs only.
   3. Add to the NFR pending-questions section with owner + date; cross-link CD-UX-T01 budgets and LR-D6 evidence.
   4. Flag which proposals gate launch (feeds LR-E2) vs post-launch tuning.
 - **Acceptance (G/W/T):**
@@ -147,7 +149,7 @@
 - **Gates:** Doc-only; link check.
 - **Artifacts:** NFR pending-section additions; cross-links.
 - **Done when:** Proposals merged + flagged + doc sync + commit review.
-- **Maps:** usability-review L87–91 (L89 quantification); CD-UX-T01.
+- **Maps:** usability-review L87–91 (L89 quantification); CD-UX-T01; **fed by LR-D6 Done** (DEF-LRP-D6-001 — pending consumption only).
 - **Status:** Not Started
 
 ### LR-D6 — Load smoke baseline
@@ -172,8 +174,8 @@
 - **Gates:** Harness run evidence (flagged execution); `mvn -B -ntp -f backend/pom.xml verify` unaffected.
 - **Artifacts:** harness code (flag-gated) or k6 script + policy note; results evidence; ledger row.
 - **Done when:** Both scenarios measured + evidence recorded + doc sync + commit review.
-- **Maps:** validates LR-A1/LR-B3; feeds LR-D5/LR-D3 thresholds.
-- **Status:** **In Progress** (2026-07-12 — slice `lrp-d6-load-smoke`; **sole-active**; Task Master #37; BDD not-applicable; placement ISOLATED `D:/working/DGE-lrp-d6-load-smoke` · `feat/lrp-d6-load-smoke` · base `a262706`)
+- **Maps:** validates LR-A1/LR-B3; feeds LR-D5/LR-D3 thresholds (DEF-LRP-D6-001 → D5 pending).
+- **Status:** **Done** (2026-07-12 — merge `56383eb`; Task Master #37; BDD not-applicable; Scenario A n=20 success=12 errorRate=0.4 triaged DEF-LRP-D6-001 p95≈15939ms p99≈16065ms poolRejections=0; Scenario B 5/5 SSE dropped=0; mvn verify GREEN 1303; architecture PASS_WITH_NOTES; DEPLOY_OK 2026-07-12T01:26:46+08:00; evidence [lrp-d6-load-smoke](../evidence/lrp-d6-load-smoke/))
 
 ### LR-D7 — Durable security audit events
 
@@ -210,5 +212,6 @@
 - [ ] Backup/restore drill executed with dated evidence vs ADR-0030 targets
 - [ ] `deploy/observability/` alert rules + dashboards committed; new metric series scrapeable
 - [ ] TraceId propagation decision recorded + minimal path proven
-- [ ] NFR proposals merged as pending; load smoke baselines recorded
+- [ ] NFR proposals merged as pending (LR-D5 — Not Started; fed by D6 evidence + DEF-LRP-D6-001)
+- [x] Load smoke baselines recorded (LR-D6 — merge `56383eb`; evidence + DEF-LRP-D6-001 triage)
 - [x] Security audit seam closed (LR-D7 — merge `c94a356`; BDD + tests; ledger seam closed)

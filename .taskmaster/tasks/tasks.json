@@ -506,23 +506,23 @@
       {
         "id": "37",
         "title": "LR-D6 Load smoke baseline",
-        "description": "IN PROGRESS 2026-07-12. LR-D6 load smoke baseline (≥20 concurrent sync generations + SSE preview on Docker; validates LR-A1/LR-B3). Slice lrp-d6-load-smoke. Formal phase None. Wave LR-D In Progress (D1+D7 Done; D6 sole-active In Progress; D2–D5 Not Started). Do NOT activate D2–D5/LR-E/CD-3. Do NOT touch DGE-audit-governance. Do NOT mark Done.",
-        "details": "ACTIVATED 2026-07-12. Slice id: lrp-d6-load-smoke. Placement: ISOLATED D:/working/DGE-lrp-d6-load-smoke · feat/lrp-d6-load-smoke · base a262706 (a2627068a3b19871fb4a9628db8e9c2c4fceb9fa). Formal phase remains None. Wave LR-D → In Progress (partial — D1+D7 Done; D6 In Progress sole-active; D2–D5 Not Started). BDD: not-applicable (measurement harness + evidence; no behavior change). Scope: flag-gated JUnit concurrent harness (default; no new k6 dep without policy); Scenario A ≥20 concurrent sync DOCX/PDF; Scenario B ≥5 parallel SSE previews; record p95/p99/error rate/pool rejections; feed LR-D5 proposals. Do NOT: run against shared/prod; tune thresholds to pass; activate D2–D5/LR-E/CD-3; claim Wave LR-D Done; touch DGE-audit-governance. Maps: validates LR-A1/LR-B3; feeds LR-D5/LR-D3; LRP-D detail LR-D6.",
-        "testStrategy": "1. Harness behind system-property flag — never runs in normal mvn verify. 2. ≥20 concurrent sync generations on Docker → error rate 0 (or triaged defects) + p95 recorded. 3. ≥5 parallel SSE preview streams → all receive terminal event. 4. Evidence in ledger + archive; feed LR-D5. 5. mvn verify unaffected. 6. Do not activate D2–D5; do not claim Wave LR-D Done.",
+        "description": "DONE 2026-07-12. LR-D6 load smoke baseline measured (flag-gated harness). Slice lrp-d6-load-smoke merge 56383eb. Formal phase None. Wave LR-D In Progress (D1+D7+D6 Done; D2–D5 Not Started; no sole-active). Scenario A n=20 success=12 errorRate=0.4 triaged DEF-LRP-D6-001; Scenario B 5/5 SSE. Do NOT activate D2–D5/LR-E/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: lrp-d6-load-smoke. Merge: 56383eb (56383ebd6f4dedc5413339aabe88ac16ea857d74). Formal phase remains None. Wave LR-D → In Progress (partial — D1+D7+D6 Done; D2–D5 Not Started; no sole-active). BDD: not-applicable. Evidence: docs/plan/evidence/lrp-d6-load-smoke/latest-summary.json + TRIAGE-pdf-422.md (DEF-LRP-D6-001). Scenario A: n=20 success=12 errorRate=0.4 p95≈15939ms p99≈16065ms poolRejections=0. Scenario B: 5/5 SSE completed dropped=0. Gates: mvn verify GREEN 1303; architecture PASS_WITH_NOTES; DEPLOY_OK 2026-07-12T01:26:46+08:00. Feeds LR-D5 pending only — do NOT activate D5. Do NOT: activate D2–D5/LR-E/CD-3; claim Wave LR-D Done; touch DGE-audit-governance.",
+        "testStrategy": "1. Harness behind system-property flag — never runs in normal mvn verify. 2. ≥20 concurrent sync generations on Docker → error rate 0 (or triaged defects) + p95 recorded — PASS with DEF-LRP-D6-001. 3. ≥5 parallel SSE preview streams → all receive terminal event — PASS 5/5. 4. Evidence in ledger + archive; feed LR-D5 (pending). 5. mvn verify GREEN 1303. 6. Do not activate D2–D5; do not claim Wave LR-D Done.",
         "priority": "high",
         "dependencies": [
           "36"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-12T01:14:00.000Z"
+        "updatedAt": "2026-07-12T01:54:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T01:14:00.000Z",
+      "lastModified": "2026-07-12T01:54:00.000Z",
       "taskCount": 37,
-      "completedCount": 36,
+      "completedCount": 37,
       "tags": [
         "master"
       ]
