@@ -1,0 +1,10 @@
+# Example Prometheus scrape — REFERENCE ONLY (not mounted by compose).
+# No credentials. Pair with prometheus-alerts.yaml.
+# Alert DocgenBackendDown expects job="docgen-backend".
+scrape_configs:
+  - job_name: docgen-backend
+    metrics_path: /actuator/prometheus
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+          - localhost:8080

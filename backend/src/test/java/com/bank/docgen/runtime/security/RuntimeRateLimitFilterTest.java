@@ -9,12 +9,14 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.infrastructure.config.RuntimeRateLimitProperties;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.runtime.metrics.RateLimitDeniedMetrics;
 import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bucket4j.ConsumptionProbe;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,17 +38,22 @@ class RuntimeRateLimitFilterTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final TraceIdProvider traceIdProvider = new TraceIdProvider();
+    private SimpleMeterRegistry meterRegistry;
+    private RateLimitDeniedMetrics rateLimitDeniedMetrics;
 
     private RuntimeRateLimitFilter filter;
 
     @BeforeEach
     void setUp() {
+        meterRegistry = new SimpleMeterRegistry();
+        rateLimitDeniedMetrics = new RateLimitDeniedMetrics(meterRegistry);
         filter = new RuntimeRateLimitFilter(
                 rateLimitService,
                 traceIdProvider,
                 messageResolver,
                 objectMapper,
-                runtimeGenerationAuditRecorder
+                runtimeGenerationAuditRecorder,
+                rateLimitDeniedMetrics
         );
     }
 
@@ -74,6 +81,7 @@ class RuntimeRateLimitFilterTest {
         JsonNode body = objectMapper.readTree(response.getContentAsString());
         assertThat(body.path("error").path("code").asText()).isEqualTo(ApiErrorCodes.RATE_LIMIT_EXCEEDED);
         assertThat(body.path("error").path("retryable").asBoolean()).isTrue();
+        assertThat(meterRegistry.find("docgen.http.rate_limit.denied").counter().count()).isEqualTo(1.0);
         verify(runtimeGenerationAuditRecorder).recordRateLimitDenied(
                 "dev",
                 "CRED-1",

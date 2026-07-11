@@ -111,7 +111,7 @@ remain `draft: true` until confirmation here.
 
 **Percentile note (Scenario A):** Reported p50/p95/p99 are over the **12 successful** responses in a mixed DOCX/PDF cohort. They are **not** a clean “PDF-only p95” and **not** a DOCX-only p95. Use them as concurrent FOL smoke envelope only.
 
-**Confirmation gate:** Until user confirmation, `deploy/observability/prometheus-alerts.yaml` keeps `draft: true`; F8 §8 draft thresholds that still cite ≤3 s / ≤10 s are **stale relative to D6 FOL concurrent smoke** and must be revised together with this table when confirmed.
+**Confirmation gate:** Until user confirmation, `deploy/observability/prometheus-alerts.yaml` keeps `draft: true`; F8 §8 draft thresholds that still cite ≤3 s / ≤10 s are **stale relative to D6 FOL concurrent smoke** and must be revised together with this table when confirmed. LR-D3 ops draft table + runbook annotation targets: [runbook § Draft alert thresholds](../operations/runbook.md#draft-alert-thresholds-lrd3--not-confirmed-slos) · [deploy/observability/README.md](../../deploy/observability/README.md).
 
 ## 已确认：生产渲染（CORE-FORTRESS F4 / LR-A7 子集）
 

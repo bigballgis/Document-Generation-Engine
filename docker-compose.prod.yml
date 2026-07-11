@@ -43,6 +43,9 @@ services:
       DOCGEN_SEED_CATALOG_LOAD_COUNT: ${DOCGEN_SEED_CATALOG_LOAD_COUNT:-500}
       DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED: ${DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED:-true}
       PDF_PAGE_NUMBER_STAMPING_ENABLED: ${PDF_PAGE_NUMBER_STAMPING_ENABLED:-false}
+      # Temporary LR-D3 scrape-smoke only — force low RPM so one 429 is observable without a 120-request flood.
+      RUNTIME_RATE_LIMIT_RPM: ${RUNTIME_RATE_LIMIT_RPM:-120}
+      RUNTIME_RATE_LIMIT_BURST: ${RUNTIME_RATE_LIMIT_BURST:-120}
       HOME: /tmp
       LIBREOFFICE_CONVERSION_MODE: cli
       # LR-B8: MaxRAMPercentage caps the heap at 75% of mem_limit (~1.15G of 1536m),

@@ -77,7 +77,8 @@ class LibreOfficeDocxNormalizationServiceTest {
                 properties,
                 CircuitBreakerRegistry.ofDefaults(),
                 RetryRegistry.ofDefaults(),
-                testPool
+                testPool,
+                new PdfConversionPoolRejectionMetrics(new io.micrometer.core.instrument.simple.SimpleMeterRegistry())
         );
     }
 

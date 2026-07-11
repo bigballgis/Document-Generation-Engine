@@ -1,6 +1,7 @@
 package com.bank.docgen.runtime.security;
 
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.runtime.metrics.RateLimitDeniedMetrics;
 import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
@@ -30,19 +31,22 @@ public class RuntimeRateLimitFilter extends OncePerRequestFilter {
     private final MessageResolver messageResolver;
     private final ObjectMapper objectMapper;
     private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
+    private final RateLimitDeniedMetrics rateLimitDeniedMetrics;
 
     public RuntimeRateLimitFilter(
             RuntimeRateLimitService rateLimitService,
             TraceIdProvider traceIdProvider,
             MessageResolver messageResolver,
             ObjectMapper objectMapper,
-            RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder
+            RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder,
+            RateLimitDeniedMetrics rateLimitDeniedMetrics
     ) {
         this.rateLimitService = rateLimitService;
         this.traceIdProvider = traceIdProvider;
         this.messageResolver = messageResolver;
         this.objectMapper = objectMapper;
         this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
+        this.rateLimitDeniedMetrics = rateLimitDeniedMetrics;
     }
 
     @Override
@@ -100,6 +104,7 @@ public class RuntimeRateLimitFilter extends OncePerRequestFilter {
                 traceId,
                 auditId
         );
+        rateLimitDeniedMetrics.record();
         String messageKey = "api.error.runtime.rateLimitExceeded";
         ErrorDetail error = new ErrorDetail(
                 ApiErrorCodes.RATE_LIMIT_EXCEEDED,

@@ -43,7 +43,10 @@ See also [Production runbook](../docs/operations/runbook.md) for release-gate an
 | [k8s-hpa-autoscaling.md](./k8s-hpa-autoscaling.md) | HPA CPU/memory + custom metrics (P15-T05) |
 | [k8s-network-policy.md](./k8s-network-policy.md) | Default-deny NetworkPolicy + explicit allow rules (P15-T06) |
 | [k8s-health-probes.md](./k8s-health-probes.md) | Liveness `/healthz` + readiness `/readyz` (P15-T07; F8 deep readiness checks) |
-| [observability/prometheus-alerts.yaml](./observability/prometheus-alerts.yaml) | Draft SLO alert rules (`docgen.generation.*`, `docgen.pdf.conversion.*`) |
+| **[observability/](./observability/README.md)** | **LR-D3** — metrics/alerting as code index; **draft** thresholds (D6/D5); runbook annotation map; no vendor APM; no baked credentials |
+| [observability/prometheus-alerts.yaml](./observability/prometheus-alerts.yaml) | Draft Prometheus rules (keep `draft: true`; wire `runbook` → [runbook alert sections](../docs/operations/runbook.md#observability)) |
+| [observability/prometheus-scrape.yaml](./observability/prometheus-scrape.yaml) | Reference-only example scrape job (`docgen-backend`) — no credentials; not mounted by compose |
+| [observability/grafana/docgen-ops-overview.json](./observability/grafana/docgen-ops-overview.json) | Grafana dashboard JSON (generation / PDF pool / SSE / rate-limit / DLT) |
 | [core-fortress-release-checklist.md](../docs/operations/core-fortress-release-checklist.md) | CORE-FORTRESS release evidence checklist |
 | `scripts/core-fortress-evidence-bundle.ps1` | Evidence bundle collector (`release-gate.ps1 -EvidenceBundle`) |
 | [blue-green-runbook.md](./blue-green-runbook.md) | Production cutover, manual approval, rollback (P15-T08) |
@@ -210,5 +213,6 @@ Details: [container-hardening.md](./container-hardening.md).
 - [Security view](../docs/architecture/security-view.md) — container hardening, network isolation, secret handling
 - [Data storage view](../docs/architecture/data-storage-view.md) — external data services and retention
 - [P15 detailed plan](../docs/plan/detail/P15-kubernetes-deployment-container-hardening.md) — phase tasks and exit criteria
-- [Production runbook](../docs/operations/runbook.md) — release gate and local prod compose profile
+- [Production runbook](../docs/operations/runbook.md) — release gate, local prod compose profile, **LR-D3 alert response sections**
+- [Observability as code](./observability/README.md) — LR-D3 draft alert thresholds + `runbook` annotation targets (NOT confirmed SLOs)
 - [Backup & restore runbook](../docs/operations/backup-restore-runbook.md) — LR-D2 pg/MinIO restore + confirmation gate + drill evidence (**EXECUTED** 2026-07-12; scratch ≠ production compliance)
