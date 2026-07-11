@@ -51,10 +51,14 @@ export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-edito
   })
 
   const showDetailSkeleton = computed(() => {
+    const selected = templatesStore.selectedTemplate
+    // Keep the mounted workspace during soft refresh of the same template.
+    if (selected?.id === templateId.value) {
+      return false
+    }
     if (templatesStore.loadingDetail) {
       return true
     }
-    const selected = templatesStore.selectedTemplate
     return selected !== null && selected.id !== templateId.value
   })
 

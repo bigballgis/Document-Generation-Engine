@@ -1319,6 +1319,15 @@ export default {
         loadCatalog: 'Unable to load master style catalog.',
         pasteClean: 'Unable to clean pasted content.',
       },
+      draftRecovery: {
+        title: 'Unsaved local draft found',
+        message:
+          'A local draft from {draftTimestamp} differs from the server content. Restore it or discard the draft.',
+        draftTimestamp: 'Draft saved: {timestamp}',
+        serverTimestamp: 'Server content: {timestamp}',
+        restore: 'Restore draft',
+        discard: 'Discard',
+      },
       pasteSummary: {
         title: 'Paste cleaning summary',
         intro: 'Review how pasted content was transformed before applying it to the binding.',

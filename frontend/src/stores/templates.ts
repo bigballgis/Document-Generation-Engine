@@ -92,7 +92,13 @@ export const useTemplatesStore = defineStore('templates', () => {
   }
 
   async function fetchTemplate(templateId: string): Promise<void> {
-    loadingDetail.value = true
+    // Soft-refresh: when the same template is already selected, do not flip
+    // loadingDetail. Otherwise TemplateDetailView swaps to skeleton and tears
+    // down the workspace mid-save (BDD-LRP-C2-002 clear-on-save never runs).
+    const softRefresh = selectedTemplate.value?.id === templateId
+    if (!softRefresh) {
+      loadingDetail.value = true
+    }
     lastErrorMessageKey.value = null
     try {
       selectedTemplate.value = await templatesApi.getTemplate(templateId)
@@ -100,7 +106,9 @@ export const useTemplatesStore = defineStore('templates', () => {
       lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'templates.error.loadDetail')
       throw error
     } finally {
-      loadingDetail.value = false
+      if (!softRefresh) {
+        loadingDetail.value = false
+      }
     }
   }
 

@@ -390,12 +390,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T02:05:00.000Z"
+      },
+      {
+        "id": "29",
+        "title": "LR-C2 Structured editor local draft recovery",
+        "description": "IN PROGRESS 2026-07-11. Sole-active LRP slice LR-C2 — structured editor local draft recovery (localStorage keyed by template id + dev version id + user; recovery banner Restore/Discard; clear on successful save). Slice lrp-c2-local-draft-recovery; worktree D:/working/DGE-lrp-c2-local-draft-recovery; branch feat/lrp-c2-local-draft-recovery; base 24cb253. BDD ready (BDD-LRP-C2-DRAFT-001). Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. Do NOT activate C3/C5/C7/C8/CD-3.",
+        "details": "ACTIVATED 2026-07-11. Slice id: lrp-c2-local-draft-recovery. Placement: ISOLATED D:/working/DGE-lrp-c2-local-draft-recovery · feat/lrp-c2-local-draft-recovery · base 24cb2532ee0d2e2865a012a8c22f89560d739cdc. Status: in-progress (sole-active LRP). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 Done; C2 In Progress; C3/C5/C7/C8 Not Started). Scope: debounced localStorage draft persistence keyed by template id + dev version id + user; write on structure change; clear on successful save; on mount with newer local draft show recovery banner Restore/Discard with timestamps; i18n; storage quota guard; Vitest + Playwright LRP-C2-draft-recovery.spec.ts + UIUX manifest. BDD: ready — docs/behavior/lrp-c2-structured-editor-local-draft-recovery.md (BDD-LRP-C2-DRAFT-001); implementer may start TDD. Do NOT: change explicit-save semantics; store drafts server-side; keep drafts after successful save; activate C3/C5/C7/C8/CD-3; mark Wave LR-C Done. User direction: highest UX value; C3 depends on not fighting C2 draft logic. Maps: CD-PIT-13 companion; LR-B6.",
+        "testStrategy": "1. Follow BDD-LRP-C2-DRAFT-001 acceptance scenarios. 2. Vitest: key scoping, clear-on-save, restore/discard, quota guard. 3. Playwright: edit → reload → restore → content present; discard path. 4. pnpm lint/type-check/test/build green; docker-deploy-queue + E2E + UIUX both brands. 5. Do not claim Wave LR-C Done.",
+        "priority": "high",
+        "dependencies": [
+          "28"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T02:10:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T02:05:00.000Z",
-      "taskCount": 28,
+      "lastModified": "2026-07-11T02:10:00.000Z",
+      "taskCount": 29,
       "completedCount": 28,
       "tags": [
         "master"

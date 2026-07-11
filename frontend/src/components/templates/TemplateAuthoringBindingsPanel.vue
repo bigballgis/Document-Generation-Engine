@@ -3,6 +3,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
@@ -18,6 +19,7 @@ import ControlledStructuredContentEditor from '@/components/authoring/Controlled
 import { getMaster } from '@/api/masters'
 
 import { DEFAULT_STRUCTURED_CONTENT_JSON } from '@/utils/structuredContentNodes'
+import { clearExactStructuredDraftOnSave } from '@/utils/structuredContentDraftStorage'
 
 import { buildMasterAnchorBindingRows, type MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
 
@@ -26,6 +28,7 @@ import { useDirtyGuard } from '@/composables/useDirtyGuard'
 
 import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
 
+import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
 
 import type {
@@ -90,7 +93,29 @@ const emit = defineEmits<{
 
 const { t, te } = useI18n()
 
+const route = useRoute()
+
 const templatesStore = useTemplatesStore()
+const sessionStore = useSessionStore()
+
+const draftDevVersionId = computed(() => {
+  const fromRoute = route.params.devVersionId
+  return typeof fromRoute === 'string' && fromRoute.length > 0 ? fromRoute : ''
+})
+
+/**
+ * C2-C9 / BDD-LRP-C2-005: clear local draft **only on successful save**.
+ * Exact key only (BDD-LRP-C2-004) — no templateId sweep.
+ * Editor `markPristine` / `clearDraft` already bumps writeEpoch and cancels pending debounce.
+ */
+function clearStructuredLocalDraftOnSave() {
+  clearExactStructuredDraftOnSave(
+    localStorage,
+    sessionStore.session?.username,
+    props.templateId,
+    draftDevVersionId.value,
+  )
+}
 
 
 
@@ -277,19 +302,13 @@ const {
   enabled: computed(() => panelMode.value === 'edit'),
 
   onSave: async () => {
-
     try {
-
       await saveBindingDraft()
-
       return true
-
     } catch {
-
+      // BDD-LRP-C2-005: save failure retains localStorage draft (do not clear here).
       return false
-
     }
-
   },
 
 })
@@ -508,9 +527,11 @@ async function saveBindingDraft() {
 
   await templatesStore.upsertBinding(props.templateId, bindingForm.anchorId, { ...bindingForm })
 
+  const previousRules = props.rules ?? []
+
   const mergedRules = mergeAnchorVisibilityRule(
 
-    props.rules ?? [],
+    previousRules,
 
     bindingForm.anchorId,
 
@@ -520,9 +541,15 @@ async function saveBindingDraft() {
 
   )
 
-  await templatesStore.saveRules(props.templateId, mergedRules)
+  // PUT /rules reuses a @NotEmpty validation DTO — `[]` is rejected. Skip no-op
+  // rule saves when neither the loaded template nor the merge result has rules
+  // (typical binding-structure-only edit; BDD-LRP-C2-002).
+  if (previousRules.length > 0 || mergedRules.length > 0) {
+    await templatesStore.saveRules(props.templateId, mergedRules)
+  }
 
   structuredEditorRef.value?.markPristine()
+  clearStructuredLocalDraftOnSave()
 
   captureEditSnapshot()
 
@@ -531,27 +558,24 @@ async function saveBindingDraft() {
 
 
 async function handleSaveBinding() {
-
   try {
-
     await saveBindingDraft()
 
-    ElMessage.success(t('templates.authoring.saveBindingSuccess'))
-
-    emit('updated')
-
+    // Close editor before parent refresh (`updated`) so prop-echo cannot race
+    // a debounce rewrite into localStorage after clear-on-save (BDD-LRP-C2-002).
     panelMode.value = 'list'
 
     editingAnchorId.value = null
 
     editSnapshot.value = null
 
+    ElMessage.success(t('templates.authoring.saveBindingSuccess'))
+
+    emit('updated')
   } catch {
-
+    // BDD-LRP-C2-005: retain localStorage draft on failure.
     ElMessage.error(t('templates.error.saveBinding'))
-
   }
-
 }
 
 
@@ -922,6 +946,8 @@ async function handleValidateBindings() {
                   ref="structuredEditorRef"
                   v-model="bindingForm.structuredContentJson"
                   :template-id="templateId"
+                  :dev-version-id="draftDevVersionId"
+                  :anchor-id="editingAnchorId ?? undefined"
                   :variables="variables"
                   :content-module-reference-keys="contentModuleReferenceKeys"
                   :baseline="editSnapshot?.structuredContentJson"

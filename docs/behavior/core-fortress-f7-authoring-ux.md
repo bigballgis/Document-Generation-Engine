@@ -23,7 +23,7 @@ F7 交付模板结构化编辑的 **两项核心可用性能力**：
 | --- | --- |
 | **LR-C1** Dirty-form guard | **F7-B1 完整实现**（F7 为 CORE-FORTRESS 交付入口） |
 | **LR-C4** Side-by-side preview | **F7-B2 完整实现** |
-| **LR-C2** Draft recovery | **Out of scope** — 后续 LRP 或 F7+ slice |
+| **LR-C2** Draft recovery | **Out of scope for F7** — 规格已落盘：[lrp-c2-structured-editor-local-draft-recovery.md](./lrp-c2-structured-editor-local-draft-recovery.md)（BDD-LRP-C2-DRAFT-001 `ready`） |
 | **LR-C3** Undo/redo | **Out of scope** |
 | **ADR-0051** Debounced auto-refresh | **Out of v1** — F7 v1 采用 stale badge + 显式刷新（见 F7-C4） |
 | **P19-T05** Preview-vs-final comparison | **Done** — F7 复用现有 preview API/records，不新建渲染路径 |
@@ -72,7 +72,7 @@ F7 交付模板结构化编辑的 **两项核心可用性能力**：
 - CORE-FORTRESS F1–F4 **Done**（final-chain 预览路径可靠）。
 - F5 **Done** 或至少 preview/test-generate API 稳定。
 - Docker 栈可访问：`http://localhost:4173`（E2E）。
-- `ControlledStructuredContentEditor.vue` explicit-save 语义不变（LR-C2 draft 未启用）。
+- `ControlledStructuredContentEditor.vue` explicit-save 语义不变（LR-C2 本地草稿为伴生能力，见 BDD-LRP-C2-DRAFT-001；不改变服务端权威 save）。
 
 ---
 

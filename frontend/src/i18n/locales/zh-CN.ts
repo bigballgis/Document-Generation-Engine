@@ -1425,6 +1425,14 @@ export default {
         loadCatalog: '无法加载母版样式目录。',
         pasteClean: '无法清理粘贴内容。',
       },
+      draftRecovery: {
+        title: '发现未保存的本地草稿',
+        message: '本地草稿（{draftTimestamp}）与服务器内容不一致。可恢复草稿，或丢弃草稿。',
+        draftTimestamp: '草稿时间：{timestamp}',
+        serverTimestamp: '服务器内容：{timestamp}',
+        restore: '恢复草稿',
+        discard: '丢弃',
+      },
       pasteSummary: {
         title: '粘贴清理摘要',
         intro: '应用至绑定前，请审阅粘贴内容的转换结果。',

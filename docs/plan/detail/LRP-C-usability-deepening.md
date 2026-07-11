@@ -1,11 +1,13 @@
 # LRP Wave LR-C — Business Usability Deepening 「业务易用性深化」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 Done** 2026-07-11 — slice `lrp-c11-api-error-i18n`; **LR-C12 Done** 2026-07-11 — slice `lrp-c12-keyboard-a11y`; **LR-C13 Done** 2026-07-11 — slice `lrp-c13-frontend-eng-debt`; remaining C2/C3/C5/C7/C8 Not Started)  
+**Wave status:** **In Progress** (partial — LR-C1 + LR-C4 **Done** via CORE-FORTRESS F7 2026-07-09; **LR-C9 Done** 2026-07-10 — slice `lrp-c9-load-error-panel`; **LR-C10 Done** 2026-07-11 — slice `lrp-c10-upload-ux`; **LR-C11 Done** 2026-07-11 — slice `lrp-c11-api-error-i18n`; **LR-C12 Done** 2026-07-11 — slice `lrp-c12-keyboard-a11y`; **LR-C13 Done** 2026-07-11 — slice `lrp-c13-frontend-eng-debt`; **LR-C2 In Progress** — sole-active; remaining C3/C5/C7/C8 Not Started)  
 **Owner default:** `frontend-engineer` (+ `backend-engineer` where noted); every user-facing slice pairs `e2e-test-engineer` + `e2e-uiux-reviewer`  
 **Prerequisites:** none for most tasks; **C6 depends on LR-C5**; **C7 depends on P14 (Done)**; **C10 aligns copy with LR-A3**
 
-> **Completion note (2026-07-11):** **LR-C13 → Done** (slice `lrp-c13-frontend-eng-debt`; merge `45addd6` / `45addd6d4299c94529d42ad48006a875b9fedefa` → `main`; feature `5c1d23c` / `5c1d23cc55d5239876d897ae4b00da57bf6db585`; worktree removed). OPT-G4 shared unwrap confirmed (already migrated); OPT-G5 fail-closed symmetric route guards + Vitest router tests; `manualChunks` verified (SOR-P06); coverage floors ratcheted **22/32/55/22 → 80/55/80/80**. BDD **not-applicable**. Formal phase remains **None**. **No sole-active LRP slice.** Wave LR-C remains **In Progress** (partial — C1/C4/C9–C13 Done; C2/C3/C5/C7/C8 Not Started). Do **not** mark Wave LR-C Done. Recommend next: **C2/C3/C5/C7/C8** or pause — do **not** auto-activate. **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN** (992 tests / 172 files); architecture **PASS_WITH_NOTES** (Critical **0**); E2E/deploy skipped (arch GO; BDD not-applicable). **Bundle:** without manualChunks max entry index 535.77 KB; with: index 139.12 / element-plus 756.70 / vue-vendor 108.79 / vendor 158.40 / app-vendor 65.54 KB; Total JS 1567.91 → 1913.13 (cache-friendly split). **Coverage measured:** lines 81.46% / functions 56.58% / branches 82.41% / statements 81.46%. Arch note: Medium legacy home keys (non-blocking). **Task Master #28 → done**. OPT-G4/G5 closed.
+> **Activation note (2026-07-11):** **LR-C2 → In Progress** (slice `lrp-c2-local-draft-recovery`; formal phase remains **None**). Sole-active LRP slice — structured editor local draft recovery: debounced localStorage drafts keyed by template id + dev version id + user; recovery banner «Restore draft / Discard» with timestamps; clear on successful save; storage quota guard. BDD **`ready`** (`docs/behavior/lrp-c2-structured-editor-local-draft-recovery.md` — `BDD-LRP-C2-DRAFT-001`). Placement: ISOLATED `D:/working/DGE-lrp-c2-local-draft-recovery` · `feat/lrp-c2-local-draft-recovery` · base `24cb253`. Gate evidence: []. **Task Master #29 → in-progress**. Other LR-C rows untouched (C3/C5/C7/C8 Not Started; C1/C4/C9–C13 Done). Do **not** mark Wave LR-C Done. Do **not** activate C3/C5/C7/C8/CD-3. User direction: highest UX value; C3 depends on not fighting C2 draft logic.
+>
+> **Completion note (2026-07-11):** **LR-C13 → Done** (slice `lrp-c13-frontend-eng-debt`; merge `45addd6` / `45addd6d4299c94529d42ad48006a875b9fedefa` → `main`; feature `5c1d23c` / `5c1d23cc55d5239876d897ae4b00da57bf6db585`; worktree removed). OPT-G4 shared unwrap confirmed (already migrated); OPT-G5 fail-closed symmetric route guards + Vitest router tests; `manualChunks` verified (SOR-P06); coverage floors ratcheted **22/32/55/22 → 80/55/80/80**. BDD **not-applicable**. Formal phase remains **None**. Superseded sole-active by LR-C2 activation above. Wave LR-C remains **In Progress** (partial — C1/C4/C9–C13 Done; C2 activated separately; C3/C5/C7/C8 Not Started). Do **not** mark Wave LR-C Done. **Gates:** `pnpm -C frontend lint && type-check && test && build` **GREEN** (992 tests / 172 files); architecture **PASS_WITH_NOTES** (Critical **0**); E2E/deploy skipped (arch GO; BDD not-applicable). **Bundle:** without manualChunks max entry index 535.77 KB; with: index 139.12 / element-plus 756.70 / vue-vendor 108.79 / vendor 158.40 / app-vendor 65.54 KB; Total JS 1567.91 → 1913.13 (cache-friendly split). **Coverage measured:** lines 81.46% / functions 56.58% / branches 82.41% / statements 81.46%. Arch note: Medium legacy home keys (non-blocking). **Task Master #28 → done**. OPT-G4/G5 closed.
 >
 > **Activation note (2026-07-11):** **LR-C13 → In Progress** (slice `lrp-c13-frontend-eng-debt`; formal phase remains **None**). Sole-active LRP slice — frontend eng debt: shared `unwrap`, route guards, `manualChunks`, coverage ratchet; no intentional behavior change. BDD **not-applicable** (refactor + build config). Placement: ISOLATED `D:/working/DGE-lrp-c13-frontend-eng-debt` · `feat/lrp-c13-frontend-eng-debt` · base `51838da`. Gate evidence: [] (now **done** — see completion note above). **Task Master #28 → in-progress** (now **done**). Other LR-C rows untouched at activation (C2/C3/C5/C7/C8 Not Started; C1/C4/C9/C10/C11/C12 Done). Do **not** mark Wave LR-C Done. Do **not** activate C2/C3/C5/C7/C8/CD-3.
 >
@@ -72,11 +74,12 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 
 - **Owner agent:** frontend-engineer
 - **BDD:** **required** (recovery banner is new user-visible behavior).
+- **BDD readiness confirmation (2026-07-11, behavior-spec-author):** **`ready`** — [lrp-c2-structured-editor-local-draft-recovery.md](../../behavior/lrp-c2-structured-editor-local-draft-recovery.md) (`BDD-LRP-C2-DRAFT-001`); decisions C2-C1…C2-C12 (debounce write, Restore/Discard banner, clear-on-save, quota eviction, LR-C1 complementarity, C3 storage separation).
 - **UIUX:** yes
-- **Read first:** `ControlledStructuredContentEditor.vue` + its store/model; LR-C1 spec (interplay: guard vs draft); `docs/behavior/` conventions.
+- **Read first:** `ControlledStructuredContentEditor.vue` + its store/model; LR-C1 spec (interplay: guard vs draft); `docs/behavior/lrp-c2-structured-editor-local-draft-recovery.md`.
 - **Do NOT:** Change explicit-save semantics (server save remains the only authoritative persistence); store drafts server-side; keep drafts after successful save (clear them).
 - **Steps:**
-  1. Wait for BDD spec `ready`.
+  1. Wait for BDD spec `ready`. ✅ (2026-07-11)
   2. Debounced local draft persistence (localStorage) **keyed by template id + dev version id + user**; write on structure change; clear on successful save.
   3. On editor mount with a newer local draft than server state: show a recovery banner — «Restore draft / Discard» with timestamps.
   4. i18n keys; storage quota guard (drop oldest on failure).
@@ -88,7 +91,7 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - **Artifacts:** draft composable/store logic + banner component; behavior spec; tests + E2E + manifest.
 - **Done when:** Scenarios green + gates + UIUX PASS + doc sync + commit review.
 - **Maps:** CD-PIT-13 companion (work-loss mitigation); LR-B6.
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-11 — slice `lrp-c2-local-draft-recovery`; sole-active; Task Master #29; BDD **`ready`** — implementer may start TDD)
 
 ### LR-C3 — Editor undo/redo
 
@@ -355,4 +358,4 @@ Plus: `e2e-uiux-reviewer` evidence manifest (`frontend/e2e/evidence/<TASK>-uiux-
 - [x] LR-C10 upload UX polish shipped (progress / drag hint / inline errors; merge `bdaf95d`; E2E 4/4)
 - [x] LR-C12 keyboard a11y & table activation shipped (Enter/Space, skip-link, focus-ring; merge `0357a16`; E2E 10/10; COR-F21 residual closed)
 - [x] LR-C13 frontend eng debt shipped (shared unwrap confirmed; route guards + Vitest; manualChunks; coverage 80/55/80/80; merge `45addd6`; OPT-G4/G5 closed)
-- [ ] Ledger § LRP wave row updated with per-task evidence *(LR-C13 completion recorded 2026-07-11; wave still partial — C2/C3/C5/C7/C8 Not Started)*
+- [ ] Ledger § LRP wave row updated with per-task evidence *(LR-C13 completion recorded 2026-07-11; LR-C2 activated sole-active 2026-07-11; wave still partial — C3/C5/C7/C8 Not Started)*

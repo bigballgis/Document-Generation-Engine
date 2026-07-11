@@ -4,6 +4,9 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import PasteCleaningSummaryDialog from '@/components/authoring/PasteCleaningSummaryDialog.vue'
+import StructuredDraftRecoveryBanner from '@/components/authoring/StructuredDraftRecoveryBanner.vue'
+import { useStructuredContentLocalDraft } from '@/composables/useStructuredContentLocalDraft'
+import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
 import type { MasterStyleCatalog, PasteCleaningSummary, VariableSchema } from '@/types/template'
 import { buildVariableOptionLabel } from '@/utils/variableDisplayName'
@@ -18,10 +21,17 @@ import {
   type StructuredContentDocument,
   type StructuredContentNode,
 } from '@/utils/structuredContentNodes'
+import type { StructuredContentDraftPayload } from '@/utils/structuredContentDraftStorage'
 
 const props = defineProps<{
   modelValue: string
   templateId?: string
+  /** Dev-version scope for local draft keys (LR-C2). When absent, drafts are disabled. */
+  devVersionId?: string
+  /** Optional binding anchor for draft recovery disambiguation. */
+  anchorId?: string
+  /** Optional server revision timestamp shown on the recovery banner. */
+  serverUpdatedAt?: string | null
   variableKeys?: string[]
   variables?: VariableSchema[]
   contentModuleReferenceKeys?: string[]
@@ -39,7 +49,59 @@ const emit = defineEmits<{
 const pristineBaseline = ref(props.baseline ?? (props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON))
 
 const { t, te } = useI18n()
+const sessionStore = useSessionStore()
 const templatesStore = useTemplatesStore()
+
+const draftUserId = computed(() => sessionStore.session?.username ?? null)
+const draftTemplateId = computed(() => props.templateId ?? null)
+const draftDevVersionId = computed(() => props.devVersionId ?? null)
+const isReadonly = computed(() => props.readonly === true)
+
+const localDraft = useStructuredContentLocalDraft({
+  userId: draftUserId,
+  templateId: draftTemplateId,
+  devVersionId: draftDevVersionId,
+  readonly: isReadonly,
+})
+
+const recoveryDraft = ref<StructuredContentDraftPayload | null>(null)
+
+function evaluateDraftRecovery() {
+  if (isReadonly.value) {
+    recoveryDraft.value = null
+    return
+  }
+  const serverStructure = props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON
+  recoveryDraft.value = localDraft.evaluateRecovery(serverStructure, props.anchorId ?? null)
+}
+
+function scheduleLocalDraftWrite(structureJson: string) {
+  if (isReadonly.value || structureJson === pristineBaseline.value) {
+    return
+  }
+  // Post-save suppress: ignore prop-echo / deep-watch races (BDD-LRP-C2-002).
+  if (localDraft.areWritesSuppressed()) {
+    return
+  }
+  localDraft.scheduleWrite(structureJson, {
+    serverUpdatedAt: props.serverUpdatedAt ?? null,
+    anchorId: props.anchorId ?? null,
+  })
+}
+
+function handleRestoreDraft() {
+  const draft = recoveryDraft.value
+  if (!draft) {
+    return
+  }
+  documentModel.value = parseStructuredContent(draft.structureJson)
+  recoveryDraft.value = null
+}
+
+function handleDiscardDraft() {
+  localDraft.clearDraft()
+  recoveryDraft.value = null
+}
 
 const loadingCatalog = ref(false)
 const styleCatalog = ref<MasterStyleCatalog | null>(null)
@@ -72,8 +134,6 @@ const clauseReferenceOptions = computed(() =>
     label: referenceKey,
   })),
 )
-
-const isReadonly = computed(() => props.readonly === true)
 
 const variableCatalog = computed(() => {
   if (props.variables?.length) {
@@ -115,7 +175,15 @@ function styleLabel(styleKey: string): string {
 watch(
   () => props.modelValue,
   (value) => {
-    documentModel.value = parseStructuredContent(value || DEFAULT_STRUCTURED_CONTENT_JSON)
+    const next = parseStructuredContent(value || DEFAULT_STRUCTURED_CONTENT_JSON)
+    documentModel.value = next
+    // Post-save server echo can re-enter before unmount; realign baseline and
+    // re-clear so canonicalization differences cannot revive a draft.
+    if (localDraft.areWritesSuppressed()) {
+      pristineBaseline.value = serializeStructuredContent(next)
+      emit('dirty-change', false)
+      localDraft.clearDraft({ suppressSubsequentWrites: true })
+    }
   },
 )
 
@@ -136,6 +204,10 @@ function emitDirtyState() {
 function markPristine() {
   pristineBaseline.value = serializeStructuredContent(documentModel.value)
   emit('dirty-change', false)
+  // Clear-on-save (C2-C9): successful server persistence clears the local draft
+  // and suppresses further writes until this editor instance is gone (or allowWrites).
+  localDraft.clearDraft({ suppressSubsequentWrites: true })
+  recoveryDraft.value = null
 }
 
 defineExpose({ markPristine })
@@ -148,6 +220,7 @@ watch(documentModel, (value) => {
   emit('update:modelValue', serialized)
   emitDirtyState()
   emit('structure-change')
+  scheduleLocalDraftWrite(serialized)
 }, { deep: true })
 
 const DEFAULT_STYLE_CATALOG: MasterStyleCatalog = {
@@ -159,6 +232,7 @@ const DEFAULT_STYLE_CATALOG: MasterStyleCatalog = {
 }
 
 onMounted(async () => {
+  evaluateDraftRecovery()
   if (!props.templateId) {
     styleCatalog.value = DEFAULT_STYLE_CATALOG
     selectedStyleKey.value = DEFAULT_STYLE_CATALOG.entries[0]?.styleKey ?? 'BodyText'
@@ -174,6 +248,13 @@ onMounted(async () => {
     loadingCatalog.value = false
   }
 })
+
+watch(
+  () => [props.anchorId, props.devVersionId, props.templateId, draftUserId.value] as const,
+  () => {
+    evaluateDraftRecovery()
+  },
+)
 
 function nodeLabel(type: ConfirmedNodeType | string): string {
   const key = `templates.structuredEditor.nodes.${type}`
@@ -309,6 +390,13 @@ function insertInline(type: ConfirmedNodeType) {
 
 <template>
   <div class="structured-editor" data-testid="controlled-structured-content-editor">
+    <StructuredDraftRecoveryBanner
+      v-if="recoveryDraft"
+      :draft-updated-at="recoveryDraft.draftUpdatedAt"
+      :server-updated-at="recoveryDraft.serverUpdatedAt ?? serverUpdatedAt ?? null"
+      @restore="handleRestoreDraft"
+      @discard="handleDiscardDraft"
+    />
     <p v-if="!isReadonly" class="editor-hint">{{ t('templates.structuredEditor.bindingHint') }}</p>
     <p v-else class="editor-hint">{{ t('templates.structuredEditor.readonlyHint') }}</p>
 
