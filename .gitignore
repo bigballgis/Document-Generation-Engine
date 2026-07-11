@@ -28,6 +28,7 @@ Thumbs.db
 
 # ---- Build / runtime artifacts ----
 artifacts/
+backups/
 logs/
 *.log
 .tmp/

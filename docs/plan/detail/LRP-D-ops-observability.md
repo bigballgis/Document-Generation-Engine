@@ -1,9 +1,11 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D7 Done**; **LR-D6 Done**; **LR-D5 Done**; D2–D4 Not Started; **no sole-active**)  
+**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D7 Done**; **LR-D6 Done**; **LR-D5 Done**; **LR-D2 In Progress** sole-active; **D3/D4 Not Started**)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); leave D2–D4 **Not Started** — do **not** activate D2–D4 / LR-E / CD-3
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); **D2 sole-active**; leave **D3/D4 Not Started** — do **not** activate D3/D4 / LR-E / CD-3
+
+> **Activation note (2026-07-12, LR-D2):** **LR-D2 → In Progress** (slice `lrp-d2-backup-restore`; formal phase remains **None**). Sole-active LRP slice — backup/restore runbook + timed drill vs ADR-0030 RPO≤15min/RTO≤30min (pg, MinIO, Flyway forward-only). BDD **not-applicable** (ops docs + drill; behavior-spec confirming in parallel). Placement: ISOLATED `D:/working/DGE-lrp-d2-backup-restore` · `feat/lrp-d2-backup-restore` · base `362a556` (`362a5560272d16d4986e6aa4e358feebf6d43ba0`). Gate evidence: []. **Task Master #39 → in-progress**. Wave remains **In Progress** (**D1+D5+D6+D7 Done**; **D2 In Progress** sole-active; **D3/D4 Not Started**). Do **not** activate D3/D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. Next: **doc-keeper** + **deploy-engineer** (runbook + drill — do not implement in plan-orchestrator).
 
 > **Completion note (2026-07-12, LR-D5):** **LR-D5 → Done** (slice `lrp-d5-nfr-proposals`; formal phase remains **None**). Docs-only NFR quantification proposals authored in [non-functional-requirements.md §待确认 LR-D5](../../requirements/non-functional-requirements.md#lr-d5-nfr-数值提案proposed--awaiting-confirmation); every value «proposed — awaiting confirmation»; fed by LR-D6 evidence + [DEF-LRP-D6-001](../evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md); ≤3s superseded as unsupported by smoke; **not** confirmed SLOs. BDD **not-applicable**. **Merge:** `5b13476` (`5b13476b7aa2056fbbbe2ca4acc8d1dbe4659d0c`); worktree removed (stage 11). **Gates:** docs-only; architecture-reviewer **PASS_WITH_NOTES**. **Task Master #38 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D5+D6+D7 Done**; **D2–D4 Not Started**). Do **not** activate D2–D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. Recommend next: **LR-D2** or **LR-D3** (do not activate until parent directs).
 
@@ -66,7 +68,7 @@
 ### LR-D2 — Backup/restore runbook + drill
 
 - **Owner agent:** deploy-engineer + doc-keeper
-- **BDD:** not-applicable — operational documentation + rehearsal evidence.
+- **BDD:** not-applicable — operational documentation + rehearsal evidence. Readiness note: [lrp-d2-backup-restore.md](../../behavior/lrp-d2-backup-restore.md) (`bdd_readiness: not-applicable`, 2026-07-12).
 - **Read first:**
   1. `docs/adr/operations/0030-operational-platform-baseline.md` (RPO ≤15 min / RTO ≤30 min commitments)
   2. `docs/operations/runbook.md`; `deploy/README.md`; `deploy/blue-green-runbook.md`
@@ -85,7 +87,7 @@
 - **Artifacts:** `docs/operations/backup-restore-runbook.md`; drill evidence section; index updates.
 - **Done when:** Runbook merged + drill executed + evidence recorded + doc sync + commit review.
 - **Maps:** ADR-0030; LR-E2 checklist input.
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-12 — slice `lrp-d2-backup-restore`; Task Master #39; sole-active; BDD not-applicable; base `362a556`; D3/D4 remain Not Started)
 
 ### LR-D3 — Metrics & alerting as code
 

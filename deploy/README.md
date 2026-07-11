@@ -47,6 +47,7 @@ See also [Production runbook](../docs/operations/runbook.md) for release-gate an
 | [core-fortress-release-checklist.md](../docs/operations/core-fortress-release-checklist.md) | CORE-FORTRESS release evidence checklist |
 | `scripts/core-fortress-evidence-bundle.ps1` | Evidence bundle collector (`release-gate.ps1 -EvidenceBundle`) |
 | [blue-green-runbook.md](./blue-green-runbook.md) | Production cutover, manual approval, rollback (P15-T08) |
+| [Backup & restore runbook](../docs/operations/backup-restore-runbook.md) | Postgres/MinIO backup + scratch restore drill (LR-D2; **EXECUTED** 2026-07-12 — scratch scope only; not production compliance) |
 | [ci-k8s-gates.md](./ci-k8s-gates.md) | Blocking CI manifest validation (P15-T09) |
 
 ## Local Docker: install and upgrade
@@ -210,3 +211,4 @@ Details: [container-hardening.md](./container-hardening.md).
 - [Data storage view](../docs/architecture/data-storage-view.md) — external data services and retention
 - [P15 detailed plan](../docs/plan/detail/P15-kubernetes-deployment-container-hardening.md) — phase tasks and exit criteria
 - [Production runbook](../docs/operations/runbook.md) — release gate and local prod compose profile
+- [Backup & restore runbook](../docs/operations/backup-restore-runbook.md) — LR-D2 pg/MinIO restore + confirmation gate + drill evidence (**EXECUTED** 2026-07-12; scratch ≠ production compliance)

@@ -131,6 +131,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Container hardening](../deploy/container-hardening.md) | Non-root, read-only root FS, minimal base images |
 | [Helm chart README](../deploy/helm/docgen/README.md) | Chart values, lint/template, per-env profiles |
 | [Production runbook](./operations/runbook.md) | Release gate, local prod compose profile, observability |
+| **[Backup & restore runbook](./operations/backup-restore-runbook.md)** | **LR-D2** — pg/MinIO backup + confirmation-gated scratch restore; Flyway forward-only + blue-green cross-link; drill evidence **EXECUTED** 2026-07-12 (scratch scope only — do **not** claim production ADR-0030 RPO/RTO compliance) |
 | [ADR-0030 Operational Platform Baseline](./adr/operations/0030-operational-platform-baseline.md) | Accepted CD, hardening, backup, and observability decisions |
 | [ADR-0048 Audit Data Retention & Archival](./adr/operations/0048-audit-data-retention-policy.md) | **Accepted** (2026-07-11) — Tier-1 management 90d / runtime 365d hard delete; Tier-2 archival deferred (LR-D1) |
 
@@ -171,6 +172,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[LR-D1 audit data retention & archival](./behavior/lrp-d1-audit-retention.md)** | **ready** (2026-07-11) | BDD-LRP-D1-001…010 — management 90d / runtime 365d hard delete; ShedLock; `AUDIT_RETENTION_PURGE`; **[ADR-0048 Accepted](./adr/operations/0048-audit-data-retention-policy.md)** |
 | **[LR-D7 durable security audit events](./behavior/lrp-d7-durable-security-audit.md)** | **ready** (2026-07-11) — slice **Done** (`c94a356`) | BDD-LRP-D7-001…010 — login / forbidden-route / download grant+deny → `management_audit_event`; fail-safe login; matrix §13.3; ledger 「Security forbidden-route audit」**closed**; joins ADR-0048 90d |
 | **[LR-D6 load smoke baseline](./behavior/lrp-d6-load-smoke.md)** | **not-applicable** (2026-07-12) — slice **Done** (`56383eb`) | Measurement harness + evidence — ≥20 concurrent sync gen (p95/error/pool) + ≥5 SSE previews; DEF-LRP-D6-001 triage; fed **LR-D5 Done** (`5b13476`; proposals pending confirmation) / D3 pending |
+| **[LR-D2 backup/restore runbook + drill](./behavior/lrp-d2-backup-restore.md)** | **not-applicable** (2026-07-12) | Ops docs + timed Docker/local Postgres+MinIO drill evidence; ADR-0030 RPO/RTO rehearsal; no product UI/API behavior — feeds LR-E2 checklist |
 
 ## Evidence & acceptance artifacts
 
