@@ -380,23 +380,23 @@
       {
         "id": "28",
         "title": "LR-C13 Frontend engineering debt",
-        "description": "Sole-active LRP slice after LR-C12 Done: LR-C13 frontend eng debt — shared unwrap, route guards, manualChunks, coverage ratchet. BDD not-applicable (refactor + build config; no intentional behavior change). Do NOT mark Wave LR-C Done. Do NOT activate C2/C3/C5/C7/C8/CD-3. Formal phase remains None.",
-        "details": "IN PROGRESS 2026-07-11. Slice id: lrp-c13-frontend-eng-debt. Status: in-progress. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9/C10/C11/C12 Done; C13 In Progress sole-active; C2/C3/C5/C7/C8 Not Started). Placement: ISOLATED D:/working/DGE-lrp-c13-frontend-eng-debt · feat/lrp-c13-frontend-eng-debt · base 51838da (fetch origin 443 failed — local main used). Scope: (1) shared unwrap/envelope helper + migrate 10 api modules (OPT-G4); (2) symmetric client route role checks + router integration tests (OPT-G5); (3) vite manualChunks vendor split + ledger sizes; (4) vitest coverage floor ratchet to measured baseline. Do NOT change API response semantics; do NOT contradict backend visibleRoutes; do NOT set coverage floors above measured reality. Gates: pnpm lint/type-check/test/build. UIUX: no. e2e_required: no (non-visual refactor). Do NOT mark Wave LR-C Done. Do NOT activate C2/C3/C5/C7/C8/CD-3.",
+        "description": "COMPLETED 2026-07-11. LR-C13 frontend eng debt Done — OPT-G4 shared unwrap confirmed; OPT-G5 fail-closed route guards + Vitest; manualChunks verified; coverage floors 22/32/55/22 → 80/55/80/80. Merge 45addd6; worktree removed. Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. No sole-active LRP slice.",
+        "details": "DONE 2026-07-11. Slice id: lrp-c13-frontend-eng-debt. Merge: 45addd6d4299c94529d42ad48006a875b9fedefa (feat/lrp-c13-frontend-eng-debt → main); feature 5c1d23cc55d5239876d897ae4b00da57bf6db585. Status: done. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 Done; C2/C3/C5/C7/C8 Not Started). Delivered: OPT-G4 shared unwrap confirmed (already migrated); OPT-G5 fail-closed symmetric route guards + Vitest router tests; manualChunks verified (SOR-P06); coverage floors ratcheted 22/32/55/22 → 80/55/80/80. Bundle: without manualChunks max entry index 535.77 KB; with: index 139.12 / element-plus 756.70 / vue-vendor 108.79 / vendor 158.40 / app-vendor 65.54 KB; Total JS 1567.91 → 1913.13 (cache-friendly split). Coverage measured: lines 81.46% / functions 56.58% / branches 82.41% / statements 81.46%. Gates: pnpm lint/type-check/test/build GREEN (992 tests / 172 files); architecture PASS_WITH_NOTES Critical 0; E2E/deploy skipped (arch GO; BDD not-applicable). Arch note: Medium legacy home keys (non-blocking). OPT-G4/G5 closed. Do NOT mark Wave LR-C Done. Recommend next: C2/C3/C5/C7/C8 or pause — do not auto-activate.",
         "testStrategy": "1. Grep-verify zero remaining private unwrap definitions after shared helper migration. 2. Router integration tests for unauthorized deep-link redirect. 3. pnpm lint/type-check/test/build green; vendor chunks present after build. 4. Coverage floors raised to measured baseline (document old→new). 5. Do not claim Wave LR-C Done.",
         "priority": "high",
         "dependencies": [
           "27"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-11T01:31:00.000Z"
+        "updatedAt": "2026-07-11T02:05:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T01:31:00.000Z",
+      "lastModified": "2026-07-11T02:05:00.000Z",
       "taskCount": 28,
-      "completedCount": 27,
+      "completedCount": 28,
       "tags": [
         "master"
       ]
