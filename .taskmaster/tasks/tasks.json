@@ -502,12 +502,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T15:53:00.000Z"
+      },
+      {
+        "id": "37",
+        "title": "LR-D6 Load smoke baseline",
+        "description": "IN PROGRESS 2026-07-12. LR-D6 load smoke baseline (≥20 concurrent sync generations + SSE preview on Docker; validates LR-A1/LR-B3). Slice lrp-d6-load-smoke. Formal phase None. Wave LR-D In Progress (D1+D7 Done; D6 sole-active In Progress; D2–D5 Not Started). Do NOT activate D2–D5/LR-E/CD-3. Do NOT touch DGE-audit-governance. Do NOT mark Done.",
+        "details": "ACTIVATED 2026-07-12. Slice id: lrp-d6-load-smoke. Placement: ISOLATED D:/working/DGE-lrp-d6-load-smoke · feat/lrp-d6-load-smoke · base a262706 (a2627068a3b19871fb4a9628db8e9c2c4fceb9fa). Formal phase remains None. Wave LR-D → In Progress (partial — D1+D7 Done; D6 In Progress sole-active; D2–D5 Not Started). BDD: not-applicable (measurement harness + evidence; no behavior change). Scope: flag-gated JUnit concurrent harness (default; no new k6 dep without policy); Scenario A ≥20 concurrent sync DOCX/PDF; Scenario B ≥5 parallel SSE previews; record p95/p99/error rate/pool rejections; feed LR-D5 proposals. Do NOT: run against shared/prod; tune thresholds to pass; activate D2–D5/LR-E/CD-3; claim Wave LR-D Done; touch DGE-audit-governance. Maps: validates LR-A1/LR-B3; feeds LR-D5/LR-D3; LRP-D detail LR-D6.",
+        "testStrategy": "1. Harness behind system-property flag — never runs in normal mvn verify. 2. ≥20 concurrent sync generations on Docker → error rate 0 (or triaged defects) + p95 recorded. 3. ≥5 parallel SSE preview streams → all receive terminal event. 4. Evidence in ledger + archive; feed LR-D5. 5. mvn verify unaffected. 6. Do not activate D2–D5; do not claim Wave LR-D Done.",
+        "priority": "high",
+        "dependencies": [
+          "36"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T01:14:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T15:53:00.000Z",
-      "taskCount": 36,
+      "lastModified": "2026-07-12T01:14:00.000Z",
+      "taskCount": 37,
       "completedCount": 36,
       "tags": [
         "master"

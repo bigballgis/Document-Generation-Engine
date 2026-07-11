@@ -1,9 +1,11 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (2026-07-11 — partial: **LR-D1 Done**; **LR-D7 Done**; D2–D6 remain Not Started; **no sole-active**)  
+**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D7 Done**; **LR-D6 → In Progress** (**sole-active**); D2–D5 Not Started)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 is most valuable **after LR-A1/LR-B3** land; D2/D3/D4/D5 schedulable later — **do not activate D2–D6 / LR-E / CD-3** in this between-slices state
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 is most valuable **after LR-A1/LR-B3** land (**both Done**); leave D2–D5 **Not Started** — do **not** activate D2–D5 / LR-E / CD-3 while D6 is sole-active
+
+> **Activation note (2026-07-12, LR-D6):** **LR-D6 → In Progress** (slice `lrp-d6-load-smoke`; formal phase remains **None**). **Sole-active LRP slice** — load smoke baseline (≥20 concurrent sync + SSE preview on Docker). BDD **not-applicable**. Placement: ISOLATED `D:/working/DGE-lrp-d6-load-smoke` · `feat/lrp-d6-load-smoke` · base `a262706`. **Task Master #37 → in-progress**. Wave remains **In Progress** (**D1+D7 Done**; **D6 In Progress**; **D2–D5 Not Started**). Do **not** activate D2–D5/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. Do **not** mark Done.
 
 > **Completion note (2026-07-11, LR-D7):** **LR-D7 → Done** (slice `lrp-d7-durable-security-audit`; formal phase remains **None**). Durable `SECURITY_*` audit events (login/403/download → `management_audit_event`); route-denied API + frontend; retention via ADR-0048/D1; closes ledger seam «Security forbidden-route audit». BDD **`ready`** (`docs/behavior/lrp-d7-durable-security-audit.md`; BDD-LRP-D7-001…010). **Merge:** `c94a356` (`c94a356070dff7a9ab35ffbc0ba53b49f63270d0`); worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1294 tests); `pnpm` frontend lint/type-check/test/build **GREEN** (1144 tests); architecture **PASS_WITH_NOTES** (Critical **0**; merge_go=true); **DEPLOY_OK** 2026-07-11T23:50:03+08:00 healthz 200; E2E/UIUX skipped per BDD D7-C14. **Task Master #36 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D7 Done**; **D2–D6 Not Started**). Do **not** activate D2–D6/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
 
@@ -151,7 +153,7 @@
 ### LR-D6 — Load smoke baseline
 
 - **Owner agent:** backend-engineer + e2e-test-engineer
-- **BDD:** not-applicable — measurement harness + evidence; no behavior change.
+- **BDD:** not-applicable — measurement harness + evidence; no behavior change. Readiness note: [lrp-d6-load-smoke.md](../../behavior/lrp-d6-load-smoke.md) (`bdd_readiness: not-applicable`, 2026-07-12).
 - **Depends on:** best run after LR-A1 (profile isolation) + LR-B3 (SSE hardening) so results reflect the hardened system; validates both.
 - **Read first:**
   1. Runtime generation API contract (`docs/api/openapi-v1.yaml` sync generate); demo seed credentials/templates
@@ -171,7 +173,7 @@
 - **Artifacts:** harness code (flag-gated) or k6 script + policy note; results evidence; ledger row.
 - **Done when:** Both scenarios measured + evidence recorded + doc sync + commit review.
 - **Maps:** validates LR-A1/LR-B3; feeds LR-D5/LR-D3 thresholds.
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-12 — slice `lrp-d6-load-smoke`; **sole-active**; Task Master #37; BDD not-applicable; placement ISOLATED `D:/working/DGE-lrp-d6-load-smoke` · `feat/lrp-d6-load-smoke` · base `a262706`)
 
 ### LR-D7 — Durable security audit events
 

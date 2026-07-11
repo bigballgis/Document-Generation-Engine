@@ -1,0 +1,40 @@
+{
+  "taskIds" : [ "lrp-d6-load-smoke", "TaskMaster#37", "LR-D6" ],
+  "measuredAt" : "2026-07-11T17:43:35.854227500Z",
+  "datePlaceholder" : "<date>",
+  "stackVersion" : "a262706",
+  "hardwareNote" : "Windows host; Docker Desktop acceptance stack 8080/4173",
+  "baseUrl" : "http://localhost:8080",
+  "templateExternalId" : "CORP-FOL-OFFER",
+  "syncConcurrency" : 20,
+  "sseConcurrency" : 5,
+  "scenarioA" : {
+    "requestedConcurrency" : 20,
+    "formats" : [ "DOCX", "PDF", "DOCX", "PDF", "DOCX", "PDF", "DOCX", "PDF", "DOCX", "PDF", "DOCX", "PDF", "DOCX", "PDF", "DOCX", "PDF", "DOCX", "PDF", "DOCX", "PDF" ],
+    "sampleCount" : 20,
+    "successCount" : 12,
+    "errorCount" : 8,
+    "errorRate" : 0.4,
+    "poolRejectionCount" : 0,
+    "errorCodeCounts" : {
+      "TEMPLATE_VALIDATION_FAILED" : 8
+    },
+    "errorSamples" : [ "PDF -> TEMPLATE_VALIDATION_FAILED http=422 poolRejection=false", "PDF -> TEMPLATE_VALIDATION_FAILED http=422 poolRejection=false", "PDF -> TEMPLATE_VALIDATION_FAILED http=422 poolRejection=false", "PDF -> TEMPLATE_VALIDATION_FAILED http=422 poolRejection=false", "PDF -> TEMPLATE_VALIDATION_FAILED http=422 poolRejection=false", "PDF -> TEMPLATE_VALIDATION_FAILED http=422 poolRejection=false", "PDF -> TEMPLATE_VALIDATION_FAILED http=422 poolRejection=false", "PDF -> TEMPLATE_VALIDATION_FAILED http=422 poolRejection=false" ],
+    "p50Ms" : 11497,
+    "p95Ms" : 18704,
+    "p99Ms" : 18716,
+    "summaryLine" : "n=20 success=12 errors=8 errorRate=0.4000 poolRejections=0 p50=11497ms p95=18704ms p99=18716ms",
+    "triageNote" : "Non-zero error rate — triage each errorCodeCounts entry to a named defect (do not tune product thresholds to pass)."
+  },
+  "scenarioB" : {
+    "requestedParallelStreams" : 5,
+    "startedStreams" : 5,
+    "terminalReceived" : 5,
+    "droppedStreams" : 0,
+    "terminalEvents" : [ "completed", "completed", "completed", "completed", "completed" ],
+    "startErrors" : [ ],
+    "zeroDropped" : true,
+    "metParallelTarget" : true,
+    "blockerNote" : null
+  }
+}
