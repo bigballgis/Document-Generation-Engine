@@ -1,11 +1,13 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D7 Done**; **LR-D6 Done**; **LR-D5 → In Progress** (sole-active); D2–D4 Not Started)  
+**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D7 Done**; **LR-D6 Done**; **LR-D5 Done**; D2–D4 Not Started; **no sole-active**)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence; leave D2–D4 **Not Started** — do **not** activate D2–D4 / LR-E / CD-3
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); leave D2–D4 **Not Started** — do **not** activate D2–D4 / LR-E / CD-3
 
-> **Activation note (2026-07-12, LR-D5):** **LR-D5 → In Progress** (slice `lrp-d5-nfr-proposals`; formal phase remains **None**). Sole-active LRP slice — docs-only NFR quantification proposals using LR-D6 evidence; mark every value «proposed — awaiting confirmation»; do **not** promote smoke numbers to confirmed SLOs. BDD **not-applicable**. Placement: ISOLATED `D:/working/DGE-lrp-d5-nfr-proposals` · `feat/lrp-d5-nfr-proposals` · base `8061e3a` (`8061e3af02e591d3246893a475c48fb520359d09`). Gate evidence: docs-only (doc-keeper next). **Task Master #38 → in-progress**. Wave remains **In Progress** (**D1+D7+D6 Done**; **D5 In Progress**; **D2–D4 Not Started**). Do **not** activate D2–D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+> **Completion note (2026-07-12, LR-D5):** **LR-D5 → Done** (slice `lrp-d5-nfr-proposals`; formal phase remains **None**). Docs-only NFR quantification proposals authored in [non-functional-requirements.md §待确认 LR-D5](../../requirements/non-functional-requirements.md#lr-d5-nfr-数值提案proposed--awaiting-confirmation); every value «proposed — awaiting confirmation»; fed by LR-D6 evidence + [DEF-LRP-D6-001](../evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md); ≤3s superseded as unsupported by smoke; **not** confirmed SLOs. BDD **not-applicable**. **Merge:** `5b13476` (`5b13476b7aa2056fbbbe2ca4acc8d1dbe4659d0c`); worktree removed (stage 11). **Gates:** docs-only; architecture-reviewer **PASS_WITH_NOTES**. **Task Master #38 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D5+D6+D7 Done**; **D2–D4 Not Started**). Do **not** activate D2–D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. Recommend next: **LR-D2** or **LR-D3** (do not activate until parent directs).
+
+> **Activation note (2026-07-12, LR-D5):** **LR-D5 → In Progress** (now **Done** — see completion note above). Slice `lrp-d5-nfr-proposals`; formal phase remains **None**.
 
 > **Completion note (2026-07-12, LR-D6):** **LR-D6 → Done** (slice `lrp-d6-load-smoke`; formal phase remains **None**). Flag-gated JUnit load-smoke harness; Scenario A n=20 success=12 errorRate=0.4 triaged **DEF-LRP-D6-001** (PDF concurrent → `serviceUnavailable` mapped as `TEMPLATE_VALIDATION_FAILED`; p95≈15939ms p99≈16065ms; poolRejections=0); Scenario B 5/5 SSE completed dropped=0. BDD **not-applicable**. **Merge:** `56383eb` (`56383ebd6f4dedc5413339aabe88ac16ea857d74`); worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1303 tests, pre-merge worktree); architecture **PASS_WITH_NOTES**; **DEPLOY_OK** 2026-07-12T01:26:46+08:00. **Evidence:** [latest-summary.json](../evidence/lrp-d6-load-smoke/latest-summary.json) + [TRIAGE-pdf-422.md](../evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md). **Task Master #37 → done**. Superseded sole-active by **LR-D5** (see activation note above). Wave remains **In Progress** (**D1+D7+D6 Done**; **D2–D5 were Not Started at D6 close**). Do **not** activate D2–D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
 
@@ -153,7 +155,7 @@
 - **Done when:** Proposals merged + flagged + doc sync + commit review.
 - **Maps:** usability-review L87–91 (L89 quantification → NFR §待确认 pointer); CD-UX-T01 task-time budgets (UX only); **fed by LR-D6 Done** (DEF-LRP-D6-001 — pending consumption only).
 - **Discovery:** [non-functional-requirements.md §待确认 LR-D5](../../requirements/non-functional-requirements.md#lr-d5-nfr-数值提案proposed--awaiting-confirmation) (authored 2026-07-12; every row «proposed — awaiting confirmation»; D6 evidence linked; launch-gate vs post-launch flagged).
-- **Status:** **In Progress** (2026-07-12 — slice `lrp-d5-nfr-proposals`; Task Master #38; BDD not-applicable; docs-only; do **not** promote LR-D6 smoke numbers to confirmed SLOs; do **not** mark Done here — post-task-doc-sync on MAIN after merge)
+- **Status:** **Done** (2026-07-12 — merge `5b13476`; Task Master #38; BDD not-applicable; docs-only; NFR §待确认 proposals authored — **pending user confirmation, NOT confirmed SLOs**; architecture PASS_WITH_NOTES)
 
 ### LR-D6 — Load smoke baseline
 
@@ -215,6 +217,6 @@
 - [ ] Backup/restore drill executed with dated evidence vs ADR-0030 targets
 - [ ] `deploy/observability/` alert rules + dashboards committed; new metric series scrapeable
 - [ ] TraceId propagation decision recorded + minimal path proven
-- [ ] NFR proposals merged as pending (LR-D5 — **In Progress**; fed by D6 evidence + DEF-LRP-D6-001)
+- [x] NFR proposals merged as pending (LR-D5 — merge `5b13476`; Task Master #38; fed by D6 evidence + DEF-LRP-D6-001; **not** confirmed SLOs)
 - [x] Load smoke baselines recorded (LR-D6 — merge `56383eb`; evidence + DEF-LRP-D6-001 triage)
 - [x] Security audit seam closed (LR-D7 — merge `c94a356`; BDD + tests; ledger seam closed)

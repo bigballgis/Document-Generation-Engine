@@ -132,7 +132,7 @@ Wave 3 — Evidence + review + closeout
 
 ---
 
-## 8. SLO target reference (draft — LR-D5 pending)
+## 8. SLO target reference (draft — LR-D5 proposals pending confirmation)
 
 | SLI | Metric | Draft threshold | Alert severity |
 | --- | --- | --- | --- |
