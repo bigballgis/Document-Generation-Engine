@@ -1,5 +1,6 @@
 package com.bank.docgen.infrastructure.config;
 
+import com.bank.docgen.infrastructure.async.MdcTaskDecorator;
 import java.util.concurrent.Executor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,8 @@ public class AsyncConfig {
         executor.setMaxPoolSize(4);
         executor.setQueueCapacity(100);
         executor.setThreadNamePrefix("async-batch-");
+        // LR-D4 / ADR-0049: propagate MDC traceId onto worker threads.
+        executor.setTaskDecorator(new MdcTaskDecorator());
         // LR-B5: drain in-flight async batch work below the 30s shutdown phase timeout.
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(25);
