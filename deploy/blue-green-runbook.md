@@ -132,3 +132,4 @@ Prod profile asserts blue-green labels, preview Services, and `Assert-T08BlueGre
 
 - [ADR-0030](../docs/adr/operations/0030-operational-platform-baseline.md) — CD release + approval + rollback decisions
 - [deploy/README.md](./README.md) — install/upgrade prerequisites
+- [Backup & restore runbook](../docs/operations/backup-restore-runbook.md) — data restore + Flyway forward-only / compensating migration (LR-D2)
