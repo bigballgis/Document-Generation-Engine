@@ -131,6 +131,11 @@ public class SseEmitterRegistry {
         return emitters.containsKey(operationId);
     }
 
+    /** Active connected emitters (excludes pending buffered-only operations). */
+    public int activeCount() {
+        return emitters.size();
+    }
+
     boolean isHeartbeatStopped() {
         return heartbeatExecutor.isShutdown();
     }

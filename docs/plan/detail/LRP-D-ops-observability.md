@@ -1,11 +1,13 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D2 Done**; **LR-D7 Done**; **LR-D6 Done**; **LR-D5 Done**; **D3/D4 Not Started**; **no sole-active**)  
+**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D2 Done**; **LR-D7 Done**; **LR-D6 Done**; **LR-D5 Done**; **LR-D3 → In Progress** (sole-active); **LR-D4 Not Started**)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); **D2 Done** (drill evidence → LR-E2); leave **D3/D4 Not Started** — do **not** activate D3/D4 / LR-E / CD-3
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); **D2 Done** (drill evidence → LR-E2); **D3 sole-active** — leave **D4 Not Started**; do **not** activate LR-E / CD-3
 
-> **Completion note (2026-07-12, LR-D2):** **LR-D2 → Done** (slice `lrp-d2-backup-restore`; formal phase remains **None**). Backup/restore runbook + confirmation-gated scratch drill; evidence 2026-07-12. BDD **not-applicable**. **Merge:** `3d78bc5` (`3d78bc56a535627a532485dc50fda47cf99c8248`); feature tip `880e0ca` (`880e0caa45f647c64e6c5487650182fcf88b527a`); worktree removed (stage 11). **Gates:** Drill **PASS** — RPO≈0.933min RTO≈4.751min; healthz 200; FOL regen OK; architecture **PASS_WITH_NOTES** (Critical **0**; merge_go=true); docs+scripts (no mvn/pnpm required per plan). **Evidence:** [backup-restore-runbook.md § Drill evidence](../../operations/backup-restore-runbook.md#drill-evidence-2026-07-12--executed); `artifacts/dr-drill/2026-07-12/` (local/gitignored OK; runbook SoT). **Task Master #39 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D2+D5+D6+D7 Done**; **D3/D4 Not Started**). Do **not** activate D3/D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. LR-E2 checklist input: dated drill record available — **not** Wave Done / launch go. Recommend next: **LR-D3** or **LR-D4** (do not activate until parent directs).
+> **Activation note (2026-07-12, LR-D3):** **LR-D3 → In Progress** (sole-active LRP slice). Slice `lrp-d3-metrics-alerting`; formal phase remains **None**. Metrics & alerting as code (Micrometer + Prometheus rules + Grafana JSON); F8 partial (generation/PDF series + draft alerts) remains; SSE/DLT/429 + Grafana still open. BDD **not-applicable** (behavior-spec-author may be concurrent for readiness note). Placement: ISOLATED `d:\working\DGE-lrp-d3-metrics-alerting` · `feat/lrp-d3-metrics-alerting` · base `694a423`. **Task Master #40 → in-progress**. Wave remains **In Progress** (**D1+D2+D5+D6+D7 Done**; **D3 In Progress**; **D4 Not Started**). Do **not** activate D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. Do **not** mark Done.
+
+> **Completion note (2026-07-12, LR-D2):** **LR-D2 → Done** (slice `lrp-d2-backup-restore`; formal phase remains **None**). Backup/restore runbook + confirmation-gated scratch drill; evidence 2026-07-12. BDD **not-applicable**. **Merge:** `3d78bc5` (`3d78bc56a535627a532485dc50fda47cf99c8248`); feature tip `880e0ca` (`880e0caa45f647c64e6c5487650182fcf88b527a`); worktree removed (stage 11). **Gates:** Drill **PASS** — RPO≈0.933min RTO≈4.751min; healthz 200; FOL regen OK; architecture **PASS_WITH_NOTES** (Critical **0**; merge_go=true); docs+scripts (no mvn/pnpm required per plan). **Evidence:** [backup-restore-runbook.md § Drill evidence](../../operations/backup-restore-runbook.md#drill-evidence-2026-07-12--executed); `artifacts/dr-drill/2026-07-12/` (local/gitignored OK; runbook SoT). **Task Master #39 → done**. Superseded sole-active by **LR-D3** (see activation note above). Wave remains **In Progress**. Do **not** activate D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. LR-E2 checklist input: dated drill record available — **not** Wave Done / launch go.
 
 > **Activation note (2026-07-12, LR-D2):** **LR-D2 → In Progress** (now **Done** — see completion note above). Slice `lrp-d2-backup-restore`; formal phase remains **None**.
 
@@ -105,7 +107,7 @@
   2. Create `deploy/observability/` — Prometheus alert rules YAML (backend down, p95 breach vs draft threshold, pool rejections > 0, DLT depth > 0, 429 surge) + Grafana dashboard JSON (generation, conversion pool, SSE, rate-limit panels).
   3. Each alert rule carries a `runbook` annotation linking `docs/operations/runbook.md` (add matching sections).
   4. Tests: metrics registered + incremented (unit-level); scrape smoke on Docker (`/actuator/prometheus` shows the new series).
-  5. Index `deploy/observability/` from `deploy/README.md`.
+  5. Index `deploy/observability/` from `deploy/README.md`; runbook alert sections + draft thresholds authored docs-first (see [runbook § Observability](../../operations/runbook.md#observability) · [deploy/observability/README.md](../../../deploy/observability/README.md)).
 - **Acceptance (G/W/T):**
   - **G** the Docker stack **W** one PDF generation and one 429 occur **T** `/actuator/prometheus` exposes the new counters/timers with non-zero samples.
   - **G** the alert rules file **W** validated with promtool (or documented equivalent) **T** rules parse; every rule links a runbook section.
@@ -113,7 +115,7 @@
 - **Artifacts:** metric instrumentation + tests; `deploy/observability/alert-rules.yml` + `deploy/observability/grafana-docgen.json`; runbook sections; index updates.
 - **Done when:** Series visible + rules/dashboards committed + doc sync + commit review.
 - **Maps:** Program §1 finding 12; LR-D6 (thresholds), LR-B3/B4 (series sources).
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-12 — slice `lrp-d3-metrics-alerting`; sole-active; Task Master #40; BDD not-applicable; F8 partial generation/PDF Micrometer + draft alerts remain; SSE/DLT/429 + Grafana still open; D4 Not Started)
 
 ### LR-D4 — Trace propagation decision + minimal impl
 

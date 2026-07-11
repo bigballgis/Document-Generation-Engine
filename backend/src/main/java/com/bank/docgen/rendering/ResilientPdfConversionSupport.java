@@ -21,10 +21,29 @@ public final class ResilientPdfConversionSupport {
             int conversionTimeoutSeconds,
             Supplier<DocumentArtifactPipeline.PdfConversionResult> conversion
     ) {
+        return convertWithResilience(
+                circuitBreaker,
+                retry,
+                pdfConversionExecutor,
+                conversionTimeoutSeconds,
+                conversion,
+                null
+        );
+    }
+
+    public static DocumentArtifactPipeline.PdfConversionResult convertWithResilience(
+            CircuitBreaker circuitBreaker,
+            Retry retry,
+            Executor pdfConversionExecutor,
+            int conversionTimeoutSeconds,
+            Supplier<DocumentArtifactPipeline.PdfConversionResult> conversion,
+            Runnable onPoolRejected
+    ) {
         return ResilienceSupport.execute(circuitBreaker, retry, () -> PdfConversionOffloadSupport.executeOffloaded(
                 pdfConversionExecutor,
                 conversionTimeoutSeconds,
-                conversion
+                conversion,
+                onPoolRejected
         ));
     }
 }

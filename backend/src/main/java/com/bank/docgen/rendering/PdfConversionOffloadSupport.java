@@ -22,11 +22,26 @@ public final class PdfConversionOffloadSupport {
             int conversionTimeoutSeconds,
             Supplier<T> conversion
     ) {
-        assertCapacityAvailable(executor);
+        return executeOffloaded(executor, conversionTimeoutSeconds, conversion, null);
+    }
+
+    public static <T> T executeOffloaded(
+            Executor executor,
+            int conversionTimeoutSeconds,
+            Supplier<T> conversion,
+            Runnable onRejected
+    ) {
+        try {
+            assertCapacityAvailable(executor);
+        } catch (PdfConversionCapacityExceededException ex) {
+            recordRejection(onRejected);
+            throw ex;
+        }
         Future<T> future;
         try {
             future = CompletableFuture.supplyAsync(conversion, executor);
         } catch (RejectedExecutionException ex) {
+            recordRejection(onRejected);
             throw new PdfConversionCapacityExceededException();
         }
         try {
@@ -43,6 +58,7 @@ public final class PdfConversionOffloadSupport {
                 throw validationException;
             }
             if (cause instanceof RejectedExecutionException) {
+                recordRejection(onRejected);
                 throw new PdfConversionCapacityExceededException();
             }
             throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
@@ -61,6 +77,12 @@ public final class PdfConversionOffloadSupport {
                 && taskExecutor.getThreadPoolExecutor().getActiveCount()
                 >= taskExecutor.getThreadPoolExecutor().getMaximumPoolSize()) {
             throw new PdfConversionCapacityExceededException();
+        }
+    }
+
+    private static void recordRejection(Runnable onRejected) {
+        if (onRejected != null) {
+            onRejected.run();
         }
     }
 }

@@ -160,7 +160,8 @@ class LibreOfficePdfConversionServiceTest {
                     CircuitBreakerRegistry.ofDefaults(),
                     RetryRegistry.ofDefaults(),
                     trackingExecutor,
-                    pdfConversionPostProcessor()
+                    pdfConversionPostProcessor(),
+                    new PdfConversionPoolRejectionMetrics(new io.micrometer.core.instrument.simple.SimpleMeterRegistry())
             );
 
             byte[] pdf = service.convertWithResult(minimalDocxBytes(), PdfConversionOptions.stampingDisabled()).pdfBytes();
@@ -207,7 +208,8 @@ class LibreOfficePdfConversionServiceTest {
                     CircuitBreakerRegistry.ofDefaults(),
                     RetryRegistry.ofDefaults(),
                     parallelPool,
-                    pdfConversionPostProcessor()
+                    pdfConversionPostProcessor(),
+                    new PdfConversionPoolRejectionMetrics(new io.micrometer.core.instrument.simple.SimpleMeterRegistry())
             );
             int concurrency = 4;
             List<Future<byte[]>> futures = new ArrayList<>();
@@ -328,7 +330,8 @@ class LibreOfficePdfConversionServiceTest {
                 CircuitBreakerRegistry.ofDefaults(),
                 RetryRegistry.ofDefaults(),
                 testPool,
-                pdfConversionPostProcessor()
+                pdfConversionPostProcessor(),
+                new PdfConversionPoolRejectionMetrics(new io.micrometer.core.instrument.simple.SimpleMeterRegistry())
         );
     }
 

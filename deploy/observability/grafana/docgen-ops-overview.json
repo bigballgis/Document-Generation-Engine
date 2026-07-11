@@ -1,0 +1,217 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "doc",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Runbook (observability)",
+      "tooltip": "Ops runbook — draft alert thresholds",
+      "type": "link",
+      "url": "https://github.com/local/docs/operations/runbook.md#observability"
+    }
+  ],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Generation latency p95 (sync) — draft",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(docgen_generation_duration_seconds_bucket{mode=\"sync\"}[5m])) by (le, format))",
+          "legendFormat": "p95 {{format}}",
+          "refId": "A"
+        }
+      ],
+      "description": "Draft panel. D6 interim envelope ~16s — not a confirmed SLO."
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "title": "PDF conversion duration p95",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(docgen_pdf_conversion_duration_seconds_bucket[5m])) by (le, result))",
+          "legendFormat": "p95 {{result}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "id": 3,
+      "title": "PDF conversion pool",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "docgen_pdf_conversion_pool_active",
+          "legendFormat": "active",
+          "refId": "A"
+        },
+        {
+          "expr": "docgen_pdf_conversion_pool_queue_size",
+          "legendFormat": "queue",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(docgen_pdf_conversion_pool_rejections_total[5m])",
+          "legendFormat": "rejections/s",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "id": 4,
+      "title": "Active SSE emitters",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "docgen_sse_emitters_active",
+          "legendFormat": "active",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "id": 5,
+      "title": "Rate-limit denials (429)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(docgen_http_rate_limit_denied_total[5m])",
+          "legendFormat": "429/s",
+          "refId": "A"
+        }
+      ],
+      "description": "Micrometer counter docgen.http.rate_limit.denied — draft surge threshold 1/s."
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "id": 6,
+      "title": "Async DLT depth (Kafka)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "docgen_async_dlt_depth",
+          "legendFormat": "depth",
+          "refId": "A"
+        }
+      ],
+      "description": "Present only when docgen.async.transport=kafka. Draft alert when > 0 for ≥ 5m."
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "id": 7,
+      "title": "PDF conversion outcomes",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "rate(docgen_pdf_conversion_outcome_total[5m])",
+          "legendFormat": "{{result}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["docgen", "lrp-d3", "draft"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Docgen ops overview (LR-D3 draft)",
+  "uid": "docgen-lrp-d3-ops",
+  "version": 1,
+  "weekStart": ""
+}
