@@ -19,6 +19,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.audit.web.GenerationAuditController",
             "com.bank.docgen.authorization.management.web.GroupManagementController",
             "com.bank.docgen.authorization.management.web.ManagementAuthController",
+            "com.bank.docgen.authorization.management.web.SecurityAuditController",
             "com.bank.docgen.authorization.management.web.UserManagementController",
             "com.bank.docgen.collaboration.web.CollaborationTimeoutConfigController",
             "com.bank.docgen.collaboration.web.CollaborationNotificationController",
@@ -69,6 +70,10 @@ final class ManagementAuthorizationRegistry {
             Map.entry(
                     "com.bank.docgen.authorization.management.web.ManagementAuthController",
                     Set.of("com.bank.docgen.authorization.management.service.ManagementAuthService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.authorization.management.web.SecurityAuditController",
+                    Set.of("com.bank.docgen.authorization.management.service.SecurityAuditSummaryService")
             ),
             Map.entry(
                     "com.bank.docgen.authorization.management.web.UserManagementController",
@@ -240,6 +245,10 @@ final class ManagementAuthorizationRegistry {
             Map.entry(
                     "com.bank.docgen.authorization.management.service.ManagementAuthService",
                     "Login/session endpoints; credential authentication, not capability checks"
+            ),
+            Map.entry(
+                    "com.bank.docgen.authorization.management.service.SecurityAuditSummaryService",
+                    "Authenticated self-report of route denial; session principal only, fail-safe persistence"
             ),
             Map.entry(
                     "com.bank.docgen.authorization.management.service.UserManagementService",

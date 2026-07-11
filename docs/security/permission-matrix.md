@@ -497,6 +497,7 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - 已登录但无目标路由权限时返回禁止访问结果（前端阻断 + 统一无权访问反馈），并采用 fail-closed。
 - 禁止访问响应不得泄露未授权资源存在性细节、未授权组详情或敏感配置明文。
 - 禁止访问事件必须写入安全审计摘要，包含主体摘要、入口路由标识、判定结果和拒绝原因码。
+- **耐久化（LR-D7 confirmed）：** 登录成功/失败、forbidden-route / 管理端 403、文档下载授予/拒绝须持久化为 `management_audit_event` 行（`SECURITY_*` event types），经既有 Activity log / management audit 查询按 §10 作用域可见；保留 SLF4J 摘要日志；持久化失败不得阻断登录主路径。权威场景见 [lrp-d7-durable-security-audit.md](../behavior/lrp-d7-durable-security-audit.md)。
 
 ### 13.4 已解决的前 T01 待确认项
 

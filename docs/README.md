@@ -169,6 +169,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[LR-A3 master DOCX upload validation](./behavior/lrp-a3-master-docx-upload-validation.md)** | **ready** (2026-07-10) | BDD-LRP-A3-UPLOAD-001 — ZIP magic + OPC probe + 50MB/60MB limits; virus scan pending Q |
 | **[LR-A4 fail-closed unsupported nodes](./behavior/lrp-a4-fail-closed-unsupported-nodes.md)** | **ready** (2026-07-10) | BDD-LRP-A4-FAIL-CLOSED-001 — publish-gate hard-block for `qrBarcodeRef`/`attachmentListRef`; no silent omit; writers deferred |
 | **[LR-D1 audit data retention & archival](./behavior/lrp-d1-audit-retention.md)** | **ready** (2026-07-11) | BDD-LRP-D1-001…010 — management 90d / runtime 365d hard delete; ShedLock; `AUDIT_RETENTION_PURGE`; **[ADR-0048 Accepted](./adr/operations/0048-audit-data-retention-policy.md)** |
+| **[LR-D7 durable security audit events](./behavior/lrp-d7-durable-security-audit.md)** | **ready** (2026-07-11) | BDD-LRP-D7-001…010 — login / forbidden-route / download grant+deny → `management_audit_event`; fail-safe login; matrix §13.3; closes ledger 「Security forbidden-route audit」; joins ADR-0048 90d |
 
 ## Evidence & acceptance artifacts
 

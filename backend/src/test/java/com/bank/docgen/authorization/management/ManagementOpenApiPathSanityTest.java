@@ -72,7 +72,8 @@ class ManagementOpenApiPathSanityTest {
         }
         if (path.startsWith("/api/management/v1/users")
                 || path.startsWith("/api/management/v1/groups")
-                || path.startsWith("/api/management/v1/auth")) {
+                || path.startsWith("/api/management/v1/auth")
+                || path.startsWith("/api/management/v1/security-audit")) {
             return java.util.Optional.of("com.bank.docgen.authorization.management");
         }
         if (path.startsWith("/api/management/v1/risk-prompt-config")) {

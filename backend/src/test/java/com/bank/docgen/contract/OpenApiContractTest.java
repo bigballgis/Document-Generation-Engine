@@ -26,7 +26,8 @@ class OpenApiContractTest {
     private static final Set<String> REQUIRED_ADMIN_AUDIT_OPERATIONS = Set.of(
             "getManagementAuditEvents",
             "exportManagementAuditEvents",
-            "getLifecycleAuditEvents");
+            "getLifecycleAuditEvents",
+            "reportRouteAccessDenied");
 
     private static final Set<String> REQUIRED_COLLABORATION_TIMEOUT_OPERATIONS = Set.of(
             "getCollaborationTimeoutConfig",

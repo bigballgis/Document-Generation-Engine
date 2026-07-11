@@ -1,11 +1,13 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (2026-07-11 — partial: **LR-D1 Done**; D2–D7 remain Not Started; **no sole-active** between slices)  
+**Wave status:** **In Progress** (2026-07-11 — partial: **LR-D1 Done**; **LR-D7 → In Progress** sole-active; D2–D6 remain Not Started)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 is most valuable **after LR-A1/LR-B3** land; D2/D3/D4/D5/D7 schedulable later — **do not activate D2+ in this sync**
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 is most valuable **after LR-A1/LR-B3** land; D2/D3/D4/D5 schedulable later — **do not activate D2–D6 / LR-E / CD-3** while D7 is sole-active
 
-> **Completion note (2026-07-11):** **LR-D1 → Done** (slice `lrp-d1-audit-retention`; formal phase remains **None**). Audit retention cleanup for management + runtime audit tables (mirror ADR-0040; closes **CD-PIT-15**; under LR-B2 ShedLock). BDD **`ready`** (`docs/behavior/lrp-d1-audit-retention.md`). **ADR-0048 Accepted**. Flyway **V54** applied. **Merge:** `20b2a76` (`feat(audit): LR-D1 audit retention cleanup with V54 and ADR-0048`); worktree removed. **Gates:** `mvn verify` **GREEN**; architecture **PASS_WITH_NOTES** (merge_go=true); **DEPLOY_OK** 2026-07-11T22:26:31+08:00 healthz 200. **Task Master #35 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D2–D7 Not Started**). Do **not** activate D2+/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+> **Activation note (2026-07-11, LR-D7):** **LR-D7 → In Progress** (sole-active LRP slice). Slice `lrp-d7-durable-security-audit`; formal phase remains **None**. Durable security audit events (login/403/download → DB); close «Security forbidden-route audit» seam; retention via ADR-0048/D1. BDD **`ready`** (`docs/behavior/lrp-d7-durable-security-audit.md`; BDD-LRP-D7-001…010). Placement: ISOLATED `D:/working/DGE-lrp-d7-durable-security-audit` · `feat/lrp-d7-durable-security-audit` · base `2bc33cf` (`2bc33cf22e103eee2cc5eecaaadb7a97bf51c438`). Gate evidence: []. **Task Master #36 → in-progress**. Wave LR-D remains **In Progress** (**D1 Done**; **D2–D6 Not Started**). Do **not** activate D2–D6/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+
+> **Completion note (2026-07-11):** **LR-D1 → Done** (slice `lrp-d1-audit-retention`; formal phase remains **None**). Audit retention cleanup for management + runtime audit tables (mirror ADR-0040; closes **CD-PIT-15**; under LR-B2 ShedLock). BDD **`ready`** (`docs/behavior/lrp-d1-audit-retention.md`). **ADR-0048 Accepted**. Flyway **V54** applied. **Merge:** `20b2a76` (`feat(audit): LR-D1 audit retention cleanup with V54 and ADR-0048`); worktree removed. **Gates:** `mvn verify` **GREEN**; architecture **PASS_WITH_NOTES** (merge_go=true); **DEPLOY_OK** 2026-07-11T22:26:31+08:00 healthz 200. **Task Master #35 → done**. Superseded sole-active by **LR-D7** (see activation note above). Wave remains **In Progress**. Do **not** activate D2–D6/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
 
 > **Activation note (2026-07-11):** **LR-D1 → In Progress** (now **Done** — see completion note above). Slice `lrp-d1-audit-retention`; formal phase remains **None**.
 
@@ -172,28 +174,29 @@
 ### LR-D7 — Durable security audit events
 
 - **Owner agent:** backend-engineer
-- **BDD:** **required** — audit records become queryable data with access rules (permission matrix §13.3).
+- **BDD:** **required** — **`ready`** ([lrp-d7-durable-security-audit.md](../../behavior/lrp-d7-durable-security-audit.md); BDD-LRP-D7-001…010) — audit records become queryable data with access rules (permission matrix §13.3).
 - **Read first:**
-  1. `backend/src/main/java/com/bank/docgen/authorization/management/service/SecurityAuditSummaryService.java` (log-only today)
-  2. `docs/security/permission-matrix.md` §13.3 (durable security audit expectation)
-  3. Ledger seam «Security forbidden-route audit» ([execution-sync-ledger.md](../execution-sync-ledger.md)); management audit event model (`V9`, `ManagementAuditRecorder`)
-  4. LR-D1 (new events must join the retention scheme)
-- **Do NOT:** Log passwords/tokens/PII beyond the matrix-approved fields; break existing log lines (keep them; add persistence); bypass group scoping in the query path.
+  1. `docs/behavior/lrp-d7-durable-security-audit.md` (**authoritative**)
+  2. `backend/src/main/java/com/bank/docgen/authorization/management/service/SecurityAuditSummaryService.java` + `SecurityManagementAuditRecorder` (partial SOR wiring; route-deny path unwired)
+  3. `docs/security/permission-matrix.md` §13.3 (durable security audit expectation)
+  4. Ledger seam «Security forbidden-route audit» ([execution-sync-ledger.md](../execution-sync-ledger.md)); management audit event model (`V9`)
+  5. LR-D1 / ADR-0048 (events join `management_audit_event` 90-day retention — **no dedicated table**)
+- **Do NOT:** Log passwords/tokens/PII beyond the matrix-approved fields; break existing log lines (keep them; add persistence); bypass group scoping in the query path; create a separate security-audit table; touch `DGE-audit-governance`.
 - **Steps:**
-  1. Wait for BDD spec `ready` (which events, fields, who can query, retention link).
-  2. Persist login success/failure, 403 route denials, and download grants/denials as durable audit events (extend the existing management-audit mechanism or a dedicated table via Flyway — per spec).
-  3. Keep `SecurityAuditSummaryService` log output; add the persistence write (transactional, fail-safe: persistence failure must not block login — record the decision).
-  4. Expose via the existing audit console query path with role/group scoping per matrix §13.3.
-  5. Register the new table with LR-D1 retention; tests: each event type persisted + scoped query + audit console smoke.
+  1. ~~Wait for BDD spec `ready`~~ — **done** (2026-07-11).
+  2. Persist login success/failure, 403 route denials, and download grants/denials as durable `SECURITY_*` rows on **existing** `management_audit_event` (extend `SecurityManagementAuditRecorder`; add `SECURITY_DOCUMENT_DOWNLOAD_DENIED`; wire forbidden-route report API + AccessDeniedHandler + download deny path).
+  3. Keep `SecurityAuditSummaryService` log output; persistence **fail-safe** (must not block login — D7-C9).
+  4. Expose via the existing audit console query path with role/group scoping per matrix §10 / §13.3.
+  5. Confirm LR-D1 retention covers new event types (same table); tests: each event type + scoped query + fail-safe; optional audit console smoke.
   6. Close the ledger seam «Security forbidden-route audit» row in the same change set.
 - **Acceptance (G/W/T):**
-  - **G** a failed login **W** it occurs **T** a durable audit row exists with username, outcome, traceId — queryable by an authorized auditor, invisible to unauthorized roles.
-  - **G** a 403 route denial **W** it fires **T** a durable row records user + routeKey; the seam row in the ledger is marked closed with this evidence.
-- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; audit console smoke on Docker 4173 if UI columns change (+ §LR-C gate block in that case).
-- **Artifacts:** behavior spec; migration + persistence + query scoping + tests; seam row closure.
+  - **G** a failed login **W** it occurs **T** a durable audit row exists with username, outcome, traceId — queryable by an authorized auditor, invisible to unauthorized roles. (BDD-LRP-D7-001)
+  - **G** a 403 route denial **W** it fires **T** a durable row records user + routeKey; the seam row in the ledger is marked closed with this evidence. (BDD-LRP-D7-003)
+- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; audit console smoke on Docker 4173 if UI columns change (+ §LR-C gate block in that case). Frontend E2E **not** mandatory when no new UI columns (BDD §12).
+- **Artifacts:** behavior spec (**ready**); persistence + query scoping + tests; seam row closure; OpenAPI if new report endpoint.
 - **Done when:** Scenarios green + seam closed + doc sync + commit review.
 - **Maps:** COR-P06 residual; permission matrix §13.3; ledger seam «Security forbidden-route audit».
-- **Status:** Not Started
+- **Status:** **In Progress** (2026-07-11 — sole-active; slice `lrp-d7-durable-security-audit`; Task Master #36; BDD **`ready`**; placement ISOLATED `D:/working/DGE-lrp-d7-durable-security-audit` · `feat/lrp-d7-durable-security-audit` · base `2bc33cf`)
 
 ---
 

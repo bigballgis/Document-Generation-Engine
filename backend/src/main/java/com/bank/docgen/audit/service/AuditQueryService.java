@@ -306,7 +306,11 @@ public class AuditQueryService {
                 .collect(Collectors.toSet());
         Map<UUID, TemplateDisplayInfo> templateDisplayInfo = templateService.lookupDisplayInfoByIds(templateIds);
         return entities.stream()
-                .map(entity -> toManagementView(entity, templateDisplayInfo.get(entity.getTemplateId())))
+                .map(entity -> {
+                    UUID templateId = entity.getTemplateId();
+                    TemplateDisplayInfo displayInfo = templateId == null ? null : templateDisplayInfo.get(templateId);
+                    return toManagementView(entity, displayInfo);
+                })
                 .toList();
     }
 
@@ -479,10 +483,11 @@ public class AuditQueryService {
                 .collect(Collectors.toSet());
         Map<UUID, TemplateDisplayInfo> templateDisplayInfo = templateService.lookupDisplayInfoByIds(templateIds);
         return entities.stream()
-                .map(entity -> toManagementViewFromRuntime(
-                        entity,
-                        templateDisplayInfo.get(entity.getTemplateId())
-                ))
+                .map(entity -> {
+                    UUID templateId = entity.getTemplateId();
+                    TemplateDisplayInfo displayInfo = templateId == null ? null : templateDisplayInfo.get(templateId);
+                    return toManagementViewFromRuntime(entity, displayInfo);
+                })
                 .toList();
     }
 
@@ -610,10 +615,17 @@ public class AuditQueryService {
     }
 
     private List<String> readStringList(String json) {
+        if (json == null || json.isBlank()) {
+            return List.of();
+        }
         try {
-            return objectMapper.readValue(json, new TypeReference<List<String>>() {
+            List<String> values = objectMapper.readValue(json, new TypeReference<List<String>>() {
             });
-        } catch (JsonProcessingException ex) {
+            if (values == null || values.isEmpty()) {
+                return List.of();
+            }
+            return values.stream().filter(Objects::nonNull).toList();
+        } catch (JsonProcessingException | RuntimeException ex) {
             return List.of();
         }
     }

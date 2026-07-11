@@ -190,4 +190,26 @@ class AuditRetentionCleanupServiceTest {
         assertThat(AuditRetentionCleanupService.MANAGEMENT_TABLE).isEqualTo("management_audit_event");
         assertThat(AuditRetentionCleanupService.RUNTIME_TABLE).isEqualTo("runtime_generation_audit_event");
     }
+
+    @Test
+    void purgeManagement_coversSecurityEventTypesOnSameTableCutoff() {
+        // BDD-LRP-D7-009: SECURITY_* rows live on management_audit_event and are purged by event_at
+        // cutoff with no event_type filter (ADR-0048 / LR-D1).
+        Instant cutoff = NOW.minus(90, ChronoUnit.DAYS);
+        when(managementCleanup.deleteOlderThan(cutoff)).thenReturn(2);
+
+        int deleted = service.purgeManagementAudit();
+
+        assertThat(deleted).isEqualTo(2);
+        verify(managementCleanup).deleteOlderThan(cutoff);
+        assertThat(SecurityManagementAuditRecorder.SECURITY_LOGIN_FAILURE)
+                .isEqualTo("SECURITY_LOGIN_FAILURE");
+        assertThat(SecurityManagementAuditRecorder.SECURITY_ROUTE_ACCESS_DENIED)
+                .isEqualTo("SECURITY_ROUTE_ACCESS_DENIED");
+        assertThat(SecurityManagementAuditRecorder.SECURITY_DOCUMENT_DOWNLOAD)
+                .isEqualTo("SECURITY_DOCUMENT_DOWNLOAD");
+        assertThat(SecurityManagementAuditRecorder.SECURITY_DOCUMENT_DOWNLOAD_DENIED)
+                .isEqualTo("SECURITY_DOCUMENT_DOWNLOAD_DENIED");
+        assertThat(AuditRetentionCleanupService.MANAGEMENT_TABLE).isEqualTo("management_audit_event");
+    }
 }

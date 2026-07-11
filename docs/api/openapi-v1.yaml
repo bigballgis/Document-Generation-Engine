@@ -1707,6 +1707,34 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/security-audit/route-access-denied:
+    post:
+      tags: [Admin]
+      operationId: reportRouteAccessDenied
+      summary: Report a management forbidden-route denial
+      description: >-
+        Authenticated management clients call this after a client-side route
+        guard denies access (LR-D7). Persists SECURITY_ROUTE_ACCESS_DENIED on
+        management_audit_event using the session principal. Fail-safe: returns
+        204 even when durable persistence fails. Does not accept passwords,
+        tokens, or secrets. Unauthenticated callers receive 401.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteAccessDeniedRequest'
+      responses:
+        '204':
+          description: Denial recorded (or fail-safe ignored).
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/templates:
     get:
       tags: [Admin]
@@ -3150,6 +3178,22 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
   schemas:
+    RouteAccessDeniedRequest:
+      type: object
+      additionalProperties: false
+      required: [routeKey, traceId]
+      properties:
+        routeKey:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Logical management route key (preferred) or path summary.
+          example: route.audit-console
+        traceId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Client-side denial correlation id (no secrets).
     OutputFormat:
       type: string
       enum: [DOCX, PDF]

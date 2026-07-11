@@ -2,6 +2,8 @@ package com.bank.docgen.audit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
@@ -191,6 +193,67 @@ class AuditQueryServiceTest {
                 0,
                 20
         )).isInstanceOf(AuditAccessDeniedException.class);
+    }
+
+    @Test
+    void auditAdminCanQuerySecurityLoginFailureEvents() {
+        // BDD-LRP-D7-001 — SECURITY_* visible via existing management audit query scoping.
+        ManagementSessionClaims auditAdmin = session("10000004", List.of("AUDIT_ADMIN"), List.of("*"));
+        when(groupAccessService.canReadAudit(auditAdmin)).thenReturn(true);
+        ManagementAuditEventEntity loginFailure = securityLoginFailureEvent();
+        when(managementAuditEventRepository.searchPaged(
+                isNull(),
+                eq(SecurityManagementAuditRecorder.SECURITY_LOGIN_FAILURE),
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                eq(0),
+                eq(20)
+        )).thenReturn(new AuditSearchPage<>(List.of(loginFailure), 1, 1));
+
+        var result = service.queryManagementEvents(
+                auditAdmin,
+                AuditReadActorRole.AUDIT_ADMIN,
+                null,
+                SecurityManagementAuditRecorder.SECURITY_LOGIN_FAILURE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                0,
+                20
+        );
+
+        assertThat(result.events()).hasSize(1);
+        assertThat(result.events().getFirst().eventType())
+                .isEqualTo(SecurityManagementAuditRecorder.SECURITY_LOGIN_FAILURE);
+        assertThat(result.events().getFirst().actorSummary()).contains("Security audit");
+        assertThat(result.events().getFirst().statusSummary()).containsIgnoringCase("failure");
+    }
+
+    @Test
+    void templateAuthorCannotQuerySecurityEvents() {
+        ManagementSessionClaims templateAuthor = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
+        when(groupAccessService.canReadAudit(templateAuthor)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.queryManagementEvents(
+                templateAuthor,
+                AuditReadActorRole.GLOBAL_ADMIN,
+                null,
+                SecurityManagementAuditRecorder.SECURITY_LOGIN_FAILURE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                0,
+                20
+        )).isInstanceOf(AuditAccessDeniedException.class);
+        verify(managementAuditEventRepository, never()).searchPaged(
+                any(), any(), any(), any(), any(), any(), anyInt(), anyInt()
+        );
     }
 
     @Test
@@ -565,6 +628,27 @@ class AuditQueryServiceTest {
                 null,
                 "table=management_audit_event; retentionDays=90; cutoff=2026-04-12T12:00:00Z; deletedCount=3",
                 "[]"
+        );
+    }
+
+    private ManagementAuditEventEntity securityLoginFailureEvent() {
+        return new ManagementAuditEventEntity(
+                UUID.randomUUID(),
+                Instant.parse("2026-07-11T10:00:00Z"),
+                SecurityManagementAuditRecorder.SECURITY_LOGIN_FAILURE,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "[]",
+                false,
+                null,
+                "10000001",
+                "Security audit",
+                null,
+                "Login failure",
+                "[\"trace-1\",\"AUD-1\"]"
         );
     }
 

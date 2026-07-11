@@ -488,12 +488,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-11T14:35:00.000Z"
+      },
+      {
+        "id": "36",
+        "title": "LR-D7 Durable security audit events",
+        "description": "IN PROGRESS 2026-07-11. LR-D7 durable security audit events (login/403/download → DB); close «Security forbidden-route audit» seam; retention via ADR-0048/D1. Slice lrp-d7-durable-security-audit. Sole-active LRP slice. Formal phase None. BDD ready (docs/behavior/lrp-d7-durable-security-audit.md; BDD-LRP-D7-001…010). Do NOT activate D2–D6/LR-E/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "ACTIVATED 2026-07-11. Slice id: lrp-d7-durable-security-audit. Placement: ISOLATED D:/working/DGE-lrp-d7-durable-security-audit · feat/lrp-d7-durable-security-audit · base 2bc33cf (2bc33cf22e103eee2cc5eecaaadb7a97bf51c438). Formal phase remains None. Wave LR-D → In Progress (partial — D1 Done; D7 In Progress sole-active; D2–D6 Not Started). Behavior: persist login success/failure, 403 route denials, download grants/denials as durable SECURITY_* rows on existing management_audit_event (extend SecurityManagementAuditRecorder; wire forbidden-route + AccessDeniedHandler + download deny); keep SecurityAuditSummaryService logs; fail-safe persistence (must not block login); query via audit console with matrix §13.3 scoping; confirm LR-D1 retention; close ledger seam «Security forbidden-route audit». BDD: ready — docs/behavior/lrp-d7-durable-security-audit.md (BDD-LRP-D7-001…010). Gates expected: mvn verify; audit console smoke if UI columns change. Maps: COR-P06 residual; permission matrix §13.3; ledger seam; ADR-0048/D1 retention. Do NOT: activate D2–D6; claim Wave LR-D Done; touch DGE-audit-governance; log passwords/tokens/PII beyond matrix-approved fields; create separate security-audit table.",
+        "testStrategy": "1. Follow BDD-LRP-D7-001…010. 2. Failed login → durable row (username, outcome, traceId) queryable by authorized auditor only. 3. 403 route denial → durable row (user + routeKey); ledger seam closed. 4. Events join LR-D1 retention (same management_audit_event table). 5. mvn verify green; audit console smoke if UI changes. 6. Do not activate D2–D6; do not claim Wave LR-D Done.",
+        "priority": "high",
+        "dependencies": [
+          "35"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T14:50:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-11T14:35:00.000Z",
-      "taskCount": 35,
+      "lastModified": "2026-07-11T14:50:00.000Z",
+      "taskCount": 36,
       "completedCount": 35,
       "tags": [
         "master"

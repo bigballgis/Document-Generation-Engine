@@ -1,9 +1,12 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import * as securityAuditApi from '@/api/securityAudit'
 import router from '@/router/index'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useSessionStore } from '@/stores/session'
 import type { ManagementSession } from '@/types/session'
+
+vi.mock('@/api/securityAudit')
 
 vi.mock('@/views/LoginView.vue', () => ({
   default: { name: 'LoginViewStub', template: '<div />' },
@@ -42,6 +45,7 @@ function buildSession(overrides: Partial<ManagementSession> = {}): ManagementSes
 describe('router route guards (OPT-G5)', () => {
   beforeEach(async () => {
     setActivePinia(createPinia())
+    vi.mocked(securityAuditApi.reportRouteAccessDenied).mockReset().mockResolvedValue(undefined)
     await router.push('/login')
   })
 
@@ -50,6 +54,7 @@ describe('router route guards (OPT-G5)', () => {
 
     expect(router.currentRoute.value.name).toBe('login')
     expect(router.currentRoute.value.query.redirect).toBe('/templates')
+    expect(securityAuditApi.reportRouteAccessDenied).not.toHaveBeenCalled()
   })
 
   it('allows deep-link when session role and visibleRoutes both permit', async () => {
@@ -62,6 +67,7 @@ describe('router route guards (OPT-G5)', () => {
     await router.push('/templates')
 
     expect(router.currentRoute.value.name).toBe('template-list')
+    expect(securityAuditApi.reportRouteAccessDenied).not.toHaveBeenCalled()
   })
 
   it('redirects unauthorized deep-link to forbidden with traceId', async () => {
@@ -77,6 +83,28 @@ describe('router route guards (OPT-G5)', () => {
     expect(typeof router.currentRoute.value.query.traceId).toBe('string')
     expect(String(router.currentRoute.value.query.traceId).length).toBeGreaterThan(0)
     expect(sessionStore.lastDenyTraceId).toBe(router.currentRoute.value.query.traceId)
+    expect(securityAuditApi.reportRouteAccessDenied).toHaveBeenCalledTimes(1)
+    expect(securityAuditApi.reportRouteAccessDenied).toHaveBeenCalledWith({
+      routeKey: ROUTE_KEYS.apiPolicyManagement,
+      traceId: String(router.currentRoute.value.query.traceId),
+    })
+  })
+
+  it('still navigates to forbidden when route-access-denied report fails', async () => {
+    vi.mocked(securityAuditApi.reportRouteAccessDenied).mockRejectedValue(new Error('network down'))
+
+    const sessionStore = useSessionStore()
+    sessionStore.$patch({
+      accessToken: 'token',
+      session: buildSession(),
+    })
+
+    await router.push('/api/policies')
+
+    expect(router.currentRoute.value.name).toBe('forbidden')
+    expect(typeof router.currentRoute.value.query.traceId).toBe('string')
+    expect(sessionStore.lastDenyTraceId).toBe(router.currentRoute.value.query.traceId)
+    expect(securityAuditApi.reportRouteAccessDenied).toHaveBeenCalledTimes(1)
   })
 
   it('denies api-policy when visibleRoutes is poisoned but role cannot manage policy', async () => {
@@ -95,6 +123,10 @@ describe('router route guards (OPT-G5)', () => {
     await router.push('/api/policies')
 
     expect(router.currentRoute.value.name).toBe('forbidden')
+    expect(securityAuditApi.reportRouteAccessDenied).toHaveBeenCalledWith({
+      routeKey: ROUTE_KEYS.apiPolicyManagement,
+      traceId: String(router.currentRoute.value.query.traceId),
+    })
   })
 
   it('allows audit console for audit admin', async () => {

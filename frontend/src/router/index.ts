@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, type RouteLocationGeneric } from 'vue-router'
+import { reportRouteAccessDenied } from '@/api/securityAudit'
 import { i18n } from '@/i18n'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useSessionStore } from '@/stores/session'
@@ -167,6 +168,10 @@ router.beforeEach(async (to) => {
     if (!sessionStore.canAccessRoute(logicalRoute)) {
       const traceId = crypto.randomUUID()
       sessionStore.recordRouteDeny(traceId)
+      // Fire-and-forget: durable audit must not block Forbidden navigation (D7-C11).
+      void reportRouteAccessDenied({ routeKey: logicalRoute, traceId }).catch(() => {
+        // Fail-safe: reporting errors are intentionally ignored.
+      })
       return {
         name: 'forbidden',
         query: { traceId },

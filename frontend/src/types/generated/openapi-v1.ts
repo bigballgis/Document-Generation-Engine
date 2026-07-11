@@ -784,6 +784,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/security-audit/route-access-denied": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report a management forbidden-route denial
+         * @description Authenticated management clients call this after a client-side route guard denies access (LR-D7). Persists SECURITY_ROUTE_ACCESS_DENIED on management_audit_event using the session principal. Fail-safe: returns 204 even when durable persistence fails. Does not accept passwords, tokens, or secrets. Unauthenticated callers receive 401.
+         */
+        post: operations["reportRouteAccessDenied"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/templates": {
         parameters: {
             query?: never;
@@ -1305,6 +1325,15 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        RouteAccessDeniedRequest: {
+            /**
+             * @description Logical management route key (preferred) or path summary.
+             * @example route.audit-console
+             */
+            routeKey: string;
+            /** @description Client-side denial correlation id (no secrets). */
+            traceId: string;
+        };
         /** @enum {string} */
         OutputFormat: "DOCX" | "PDF";
         /** @enum {string} */
@@ -4732,6 +4761,34 @@ export interface operations {
             };
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    reportRouteAccessDenied: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RouteAccessDeniedRequest"];
+            };
+        };
+        responses: {
+            /** @description Denial recorded (or fail-safe ignored). */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["ErrorResponse"];
             422: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };

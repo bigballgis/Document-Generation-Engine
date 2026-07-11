@@ -1,6 +1,8 @@
 package com.bank.docgen.infrastructure.config;
 
+import com.bank.docgen.authorization.management.service.SecurityAuditSummaryService;
 import com.bank.docgen.authorization.management.web.JwtAuthenticationFilter;
+import com.bank.docgen.authorization.management.web.ManagementAuthentication;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorDetail;
@@ -8,6 +10,7 @@ import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,7 +18,9 @@ import java.io.IOException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -26,15 +31,18 @@ public class ManagementSecurityHandlers implements AuthenticationEntryPoint, Acc
     private final TraceIdProvider traceIdProvider;
     private final MessageResolver messageResolver;
     private final ObjectMapper objectMapper;
+    private final SecurityAuditSummaryService securityAuditSummaryService;
 
     public ManagementSecurityHandlers(
             TraceIdProvider traceIdProvider,
             MessageResolver messageResolver,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            SecurityAuditSummaryService securityAuditSummaryService
     ) {
         this.traceIdProvider = traceIdProvider;
         this.messageResolver = messageResolver;
         this.objectMapper = objectMapper;
+        this.securityAuditSummaryService = securityAuditSummaryService;
     }
 
     @Override
@@ -88,15 +96,54 @@ public class ManagementSecurityHandlers implements AuthenticationEntryPoint, Acc
             HttpServletResponse response,
             AccessDeniedException accessDeniedException
     ) throws IOException {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        recordRouteAccessDeniedIfAuthenticated(request, auditId, traceId);
         writeError(
                 response,
-                request,
                 HttpStatus.FORBIDDEN,
                 ApiErrorCodes.ACCESS_DENIED,
                 ApiErrorCategories.AUTHORIZATION,
                 "api.error.authorization.accessDenied",
-                false
+                false,
+                auditId,
+                traceId
         );
+    }
+
+    private void recordRouteAccessDeniedIfAuthenticated(
+            HttpServletRequest request,
+            String auditId,
+            String traceId
+    ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication instanceof ManagementAuthentication managementAuthentication)) {
+            return;
+        }
+        Object principal = managementAuthentication.getPrincipal();
+        if (!(principal instanceof ManagementSessionClaims claims)) {
+            return;
+        }
+        String routeKey = summarizeRouteKey(request);
+        securityAuditSummaryService.recordRouteAccessDenied(
+                claims.username(),
+                routeKey,
+                SecurityAuditSummaryService.REASON_ACCESS_DENIED,
+                auditId,
+                traceId
+        );
+    }
+
+    private static String summarizeRouteKey(HttpServletRequest request) {
+        String path = request.getServletPath();
+        if (path == null || path.isBlank()) {
+            path = request.getRequestURI();
+        }
+        if (path == null || path.isBlank()) {
+            return "unknown";
+        }
+        int queryIndex = path.indexOf('?');
+        return queryIndex >= 0 ? path.substring(0, queryIndex) : path;
     }
 
     private void writeError(
@@ -110,6 +157,19 @@ public class ManagementSecurityHandlers implements AuthenticationEntryPoint, Acc
     ) throws IOException {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();
+        writeError(response, status, code, category, messageKey, retryable, auditId, traceId);
+    }
+
+    private void writeError(
+            HttpServletResponse response,
+            HttpStatus status,
+            String code,
+            String category,
+            String messageKey,
+            boolean retryable,
+            String auditId,
+            String traceId
+    ) throws IOException {
         ErrorDetail error = new ErrorDetail(
                 code,
                 category,
