@@ -534,23 +534,23 @@
       {
         "id": "39",
         "title": "LR-D2 Backup/restore runbook + drill",
-        "description": "IN PROGRESS 2026-07-12. LR-D2 backup/restore runbook + timed drill vs ADR-0030 RPO≤15min/RTO≤30min (pg, MinIO, Flyway forward-only). Slice lrp-d2-backup-restore. Formal phase None. Wave LR-D In Progress (D1+D5+D6+D7 Done; D2 sole-active In Progress; D3/D4 Not Started). BDD not-applicable. Do NOT activate D3/D4/LR-E/CD-3. Do NOT touch DGE-audit-governance.",
-        "details": "IN PROGRESS 2026-07-12. Slice id: lrp-d2-backup-restore. Placement: ISOLATED D:/working/DGE-lrp-d2-backup-restore · feat/lrp-d2-backup-restore · base 362a556 (362a5560272d16d4986e6aa4e358feebf6d43ba0). Formal phase remains None. Wave LR-D → In Progress (partial — D1+D5+D6+D7 Done; D2 In Progress sole-active; D3/D4 Not Started). BDD: not-applicable (ops docs + drill; behavior-spec confirming in parallel). Owner: deploy-engineer + doc-keeper. Scope: docs/operations/backup-restore-runbook.md; Flyway forward-only rollback playbook; timed drill on scratch/Docker stack; evidence vs ADR-0030 RPO/RTO in ledger. Gates: doc + drill evidence (no code gates). Do NOT: claim RPO/RTO without timed drill; activate D3/D4/LR-E/CD-3; claim Wave LR-D Done; touch DGE-audit-governance. Maps: ADR-0030; LR-E2 checklist input. Next: doc-keeper + deploy-engineer (do not implement in plan-orchestrator).",
+        "description": "DONE 2026-07-12. LR-D2 backup/restore runbook + confirmation-gated scratch drill. Slice lrp-d2-backup-restore. Merge 3d78bc5. Formal phase None. Wave LR-D In Progress (D1+D2+D5+D6+D7 Done; D3/D4 Not Started; no sole-active). BDD not-applicable. Drill PASS RPO≈0.933min RTO≈4.751min healthz 200 FOL OK. Do NOT activate D3/D4/LR-E/CD-3. Do NOT touch DGE-audit-governance. Do NOT claim Wave Done.",
+        "details": "DONE 2026-07-12. Slice id: lrp-d2-backup-restore. Merge: 3d78bc5 (3d78bc56a535627a532485dc50fda47cf99c8248); feature tip 880e0ca; worktree removed. Formal phase remains None. Wave LR-D → In Progress (partial — D1+D2+D5+D6+D7 Done; D3/D4 Not Started; no sole-active). BDD: not-applicable. Owner: deploy-engineer + doc-keeper. Delivered: docs/operations/backup-restore-runbook.md; confirmation-gated scripts; timed scratch drill. Gates: Drill PASS RPO≈0.933min RTO≈4.751min; healthz 200; FOL regen OK; architecture PASS_WITH_NOTES Critical 0 merge_go true; docs+scripts (no mvn/pnpm). Evidence: backup-restore-runbook § Drill evidence 2026-07-12; artifacts/dr-drill/2026-07-12/ (gitignored; runbook SoT). LR-E2 checklist input: dated drill record — not Wave Done / launch go. Do NOT: activate D3/D4/LR-E/CD-3; claim Wave LR-D Done; claim production ADR-0030 compliance; touch DGE-audit-governance.",
         "testStrategy": "1. Runbook exists and is indexed from docs/README.md + ops runbook. 2. Operator follows runbook on scratch stack → healthz 200 + document retrievable. 3. Drill evidence dated with measured durations vs ADR-0030 RPO≤15min/RTO≤30min. 4. D3/D4 remain Not Started. 5. Doc + drill evidence gate; no cloud-service invention. 6. Merge + MAIN doc-sync + commit-review.",
         "priority": "high",
         "dependencies": [
           "38"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-12T02:28:00.000Z"
+        "updatedAt": "2026-07-12T02:52:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T02:28:00.000Z",
+      "lastModified": "2026-07-12T02:52:00.000Z",
       "taskCount": 39,
-      "completedCount": 38,
+      "completedCount": 39,
       "tags": [
         "master"
       ]

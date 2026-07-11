@@ -1,11 +1,13 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D7 Done**; **LR-D6 Done**; **LR-D5 Done**; **LR-D2 In Progress** sole-active; **D3/D4 Not Started**)  
+**Wave status:** **In Progress** (2026-07-12 — partial: **LR-D1 Done**; **LR-D2 Done**; **LR-D7 Done**; **LR-D6 Done**; **LR-D5 Done**; **D3/D4 Not Started**; **no sole-active**)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); **D2 sole-active**; leave **D3/D4 Not Started** — do **not** activate D3/D4 / LR-E / CD-3
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); **D2 Done** (drill evidence → LR-E2); leave **D3/D4 Not Started** — do **not** activate D3/D4 / LR-E / CD-3
 
-> **Activation note (2026-07-12, LR-D2):** **LR-D2 → In Progress** (slice `lrp-d2-backup-restore`; formal phase remains **None**). Sole-active LRP slice — backup/restore runbook + timed drill vs ADR-0030 RPO≤15min/RTO≤30min (pg, MinIO, Flyway forward-only). BDD **not-applicable** (ops docs + drill; behavior-spec confirming in parallel). Placement: ISOLATED `D:/working/DGE-lrp-d2-backup-restore` · `feat/lrp-d2-backup-restore` · base `362a556` (`362a5560272d16d4986e6aa4e358feebf6d43ba0`). Gate evidence: []. **Task Master #39 → in-progress**. Wave remains **In Progress** (**D1+D5+D6+D7 Done**; **D2 In Progress** sole-active; **D3/D4 Not Started**). Do **not** activate D3/D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. Next: **doc-keeper** + **deploy-engineer** (runbook + drill — do not implement in plan-orchestrator).
+> **Completion note (2026-07-12, LR-D2):** **LR-D2 → Done** (slice `lrp-d2-backup-restore`; formal phase remains **None**). Backup/restore runbook + confirmation-gated scratch drill; evidence 2026-07-12. BDD **not-applicable**. **Merge:** `3d78bc5` (`3d78bc56a535627a532485dc50fda47cf99c8248`); feature tip `880e0ca` (`880e0caa45f647c64e6c5487650182fcf88b527a`); worktree removed (stage 11). **Gates:** Drill **PASS** — RPO≈0.933min RTO≈4.751min; healthz 200; FOL regen OK; architecture **PASS_WITH_NOTES** (Critical **0**; merge_go=true); docs+scripts (no mvn/pnpm required per plan). **Evidence:** [backup-restore-runbook.md § Drill evidence](../../operations/backup-restore-runbook.md#drill-evidence-2026-07-12--executed); `artifacts/dr-drill/2026-07-12/` (local/gitignored OK; runbook SoT). **Task Master #39 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D2+D5+D6+D7 Done**; **D3/D4 Not Started**). Do **not** activate D3/D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. LR-E2 checklist input: dated drill record available — **not** Wave Done / launch go. Recommend next: **LR-D3** or **LR-D4** (do not activate until parent directs).
+
+> **Activation note (2026-07-12, LR-D2):** **LR-D2 → In Progress** (now **Done** — see completion note above). Slice `lrp-d2-backup-restore`; formal phase remains **None**.
 
 > **Completion note (2026-07-12, LR-D5):** **LR-D5 → Done** (slice `lrp-d5-nfr-proposals`; formal phase remains **None**). Docs-only NFR quantification proposals authored in [non-functional-requirements.md §待确认 LR-D5](../../requirements/non-functional-requirements.md#lr-d5-nfr-数值提案proposed--awaiting-confirmation); every value «proposed — awaiting confirmation»; fed by LR-D6 evidence + [DEF-LRP-D6-001](../evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md); ≤3s superseded as unsupported by smoke; **not** confirmed SLOs. BDD **not-applicable**. **Merge:** `5b13476` (`5b13476b7aa2056fbbbe2ca4acc8d1dbe4659d0c`); worktree removed (stage 11). **Gates:** docs-only; architecture-reviewer **PASS_WITH_NOTES**. **Task Master #38 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D5+D6+D7 Done**; **D2–D4 Not Started**). Do **not** activate D2–D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. Recommend next: **LR-D2** or **LR-D3** (do not activate until parent directs).
 
@@ -87,7 +89,7 @@
 - **Artifacts:** `docs/operations/backup-restore-runbook.md`; drill evidence section; index updates.
 - **Done when:** Runbook merged + drill executed + evidence recorded + doc sync + commit review.
 - **Maps:** ADR-0030; LR-E2 checklist input.
-- **Status:** **In Progress** (2026-07-12 — slice `lrp-d2-backup-restore`; Task Master #39; sole-active; BDD not-applicable; base `362a556`; D3/D4 remain Not Started)
+- **Status:** **Done** (2026-07-12 — slice `lrp-d2-backup-restore`; merge `3d78bc5`; Task Master #39; BDD not-applicable; drill PASS RPO≈0.933min RTO≈4.751min; healthz 200; FOL regen OK; architecture PASS_WITH_NOTES; evidence [backup-restore-runbook § Drill evidence](../../operations/backup-restore-runbook.md#drill-evidence-2026-07-12--executed); D3/D4 remain Not Started)
 
 ### LR-D3 — Metrics & alerting as code
 
@@ -216,7 +218,7 @@
 ## 2. Exit gate (Wave LR-D)
 
 - [x] Retention live for management/runtime audit tables (LR-D1, under LR-B2 mutex) with ADR-0048 Accepted (merge `20b2a76`; V54)
-- [ ] Backup/restore drill executed with dated evidence vs ADR-0030 targets
+- [x] Backup/restore drill executed with dated evidence vs ADR-0030 targets (LR-D2 — merge `3d78bc5`; scratch RPO≈0.933min / RTO≈4.751min; runbook SoT — **not** production compliance claim)
 - [ ] `deploy/observability/` alert rules + dashboards committed; new metric series scrapeable
 - [ ] TraceId propagation decision recorded + minimal path proven
 - [x] NFR proposals merged as pending (LR-D5 — merge `5b13476`; Task Master #38; fed by D6 evidence + DEF-LRP-D6-001; **not** confirmed SLOs)
