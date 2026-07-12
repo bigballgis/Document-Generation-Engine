@@ -175,6 +175,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[LR-D2 backup/restore runbook + drill](./behavior/lrp-d2-backup-restore.md)** | **not-applicable** (2026-07-12) | Ops docs + timed Docker/local Postgres+MinIO drill evidence; ADR-0030 RPO/RTO rehearsal; no product UI/API behavior — feeds LR-E2 checklist |
 | **[LR-D3 metrics & alerting as code](./behavior/lrp-d3-metrics-alerting.md)** | **not-applicable** (2026-07-12) — slice **Done** (`ba5ea2e`) | Observability instrumentation + Prometheus/Grafana as code; scrape + rule-lint acceptance; draft thresholds from D6/D5 only — no product UI/API behavior |
 | **[LR-D4 trace propagation](./behavior/lrp-d4-trace-propagation.md)** | **not-applicable** (2026-07-12) — slice **Done** (`218dcf1`) | Internal observability plumbing — request→MDC→async→Kafka→consumer MDC; **[ADR-0049 Accepted](./adr/operations/0049-distributed-trace-propagation.md)**; `MdcTaskDecorator` + Kafka `X-Trace-Id`; Scenario A/B; no UI / no Zipkin-Tempo backend |
+| **[LR-E1 SSE-through-proxy incremental E2E](./behavior/lrp-e1-sse-proxy-e2e.md)** | **not-applicable** (2026-07-12) | Test-only evidence for **LR-B3** — Playwright on Docker 4173: ≥2 incremental SSE arrival timestamps + ≥60 s heartbeat survival through nginx; no product contract change |
 
 ## Evidence & acceptance artifacts
 

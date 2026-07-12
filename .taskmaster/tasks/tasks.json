@@ -572,12 +572,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-12T04:25:00.000Z"
+      },
+      {
+        "id": "42",
+        "title": "LR-E1 SSE-through-proxy incremental E2E",
+        "description": "IN PROGRESS 2026-07-12. LR-E1 SSE-through-proxy incremental E2E (Playwright reliability evidence for LR-B3 on Docker 4173). Slice lrp-e1-sse-proxy-e2e. Formal phase None. Wave LR-E In Progress (partial — E1 In Progress; E2 Not Started; sole-active=LR-E1). BDD not-applicable. Do NOT activate LR-E2/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "IN PROGRESS 2026-07-12. Slice id: lrp-e1-sse-proxy-e2e. Placement: ISOLATED d:\\\\working\\\\DGE-lrp-e1-sse-proxy-e2e · feat/lrp-e1-sse-proxy-e2e · base 212c327 (212c327f070ef266e46af93a11c2fb4f6f69ac51). Formal phase remains None. Wave LR-E -> In Progress (partial — E1 In Progress; E2 Not Started; sole-active=LR-E1). BDD: not-applicable (docs/behavior/lrp-e1-sse-proxy-e2e.md). Owner: e2e-test-engineer. Scope: browser-level proof of LR-B3 SSE-through-nginx reliability — Scenario A ≥2 incremental SSE arrival timestamps before completion through :4173; Scenario B stream survives ≥60s idle via heartbeat; artifacts frontend/e2e/LRP-E1-sse-incremental-progress.spec.ts + frontend/e2e/evidence/LRP-E1-sse-manifest.md. Scaffold exists. Gates target: pnpm -C frontend exec playwright test LRP-E1-sse-incremental-progress.spec.ts --config playwright.docker.config.ts green + queued Docker deploy evidence. Do NOT: activate LR-E2/CD-3; invent product SSE contracts; use API polling to fake stream assertions; weaken LR-B3 headers/nginx; touch DGE-audit-governance; claim Wave LR-E Done.",
+        "testStrategy": "1. Docker stack on 4173 with LR-B3 merged (queued docker-deploy-queue.ps1). 2. Playwright LRP-E1-sse-incremental-progress.spec.ts: Scenario A proves ≥2 distinct SSE arrival timestamps before completion (not one terminal burst) through nginx :4173. 3. Scenario B: stream open ≥60s idle via heartbeat without premature termination. 4. Evidence recorded in frontend/e2e/evidence/LRP-E1-sse-manifest.md. 5. Do not use polling substitutes or weaken LR-B3 proxy headers. 6. Architecture review as applicable + merge + MAIN doc-sync + commit-review before Done. 7. Leave LR-E2 Not Started.",
+        "priority": "high",
+        "dependencies": [
+          "41"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T00:36:05.241Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T04:25:00.000Z",
-      "taskCount": 41,
+      "lastModified": "2026-07-12T00:36:05.241Z",
+      "taskCount": 42,
       "completedCount": 41,
       "tags": [
         "master"

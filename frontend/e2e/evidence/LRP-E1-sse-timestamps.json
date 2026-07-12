@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-07-12T00:47:03.159Z",
+  "scenarioA": {
+    "verdict": "PASS",
+    "streamUrls": [
+      "/api/management/v1/templates/0ee9bffe-d60f-484e-be08-0a6cbfba9cb7/previews/5a04beae-75dc-4c9e-9a30-097b6f6a2fdd/progress-stream"
+    ],
+    "chunkCount": 2,
+    "chunkArrivalOffsetsMs": [
+      18,
+      1883
+    ],
+    "maxGapMs": 1864,
+    "minIncrementalGapMs": 100,
+    "frames": [
+      {
+        "eventType": "progress",
+        "atOffsetMs": 18,
+        "preview": "event:progress data:{\"percent\":10,\"message\":\"Starting preview generation\",\"stage\":\"GENERATING_DOCX\"}"
+      },
+      {
+        "eventType": "completed",
+        "atOffsetMs": 1883,
+        "preview": "event:completed data:{\"previewId\":\"5a04beae-75dc-4c9e-9a30-097b6f6a2fdd\",\"expiresAt\":\"2026-07-13T00:45:52.757438769Z\",\"docxDownloadUrl\":\"/api/management/v1/temp"
+      }
+    ],
+    "uiPhaseArrivals": [
+      {
+        "atMs": 371,
+        "label": "first-progress-label-visible"
+      },
+      {
+        "atMs": 2766,
+        "label": "success-download-visible"
+      }
+    ],
+    "wallClockMs": 3032
+  },
+  "batchProbe": {
+    "attempted": true,
+    "failed": false,
+    "durationMs": 2540,
+    "chunkCount": 0,
+    "exceeded60s": false,
+    "note": "Batch completed under 60s; Scenario B proof uses dedicated idle heartbeat path (LR-B3 equivalent)."
+  },
+  "scenarioB": {
+    "verdict": "PASS",
+    "mode": "dedicated-idle-progress-stream",
+    "streamUrl": "/api/management/v1/templates/0ee9bffe-d60f-484e-be08-0a6cbfba9cb7/previews/79ae6b1c-6fa6-4970-af2b-8d1829e8c14e/progress-stream",
+    "observeMs": 65000,
+    "durationMs": 65075,
+    "heartbeatOffsetsMs": [
+      68,
+      20064,
+      40062,
+      60060
+    ],
+    "heartbeatGapsMs": [
+      19996,
+      19998,
+      19998
+    ],
+    "chunkCount": 4,
+    "closedBeforeObserveEnd": false,
+    "sampleTexts": [
+      ":keep-alive\n\n",
+      ":keep-alive\n\n",
+      ":keep-alive\n\n",
+      ":keep-alive\n\n"
+    ],
+    "equivalentTo": "LR-B3 Docker curl idle survival (~20s :keep-alive cadence)"
+  }
+}

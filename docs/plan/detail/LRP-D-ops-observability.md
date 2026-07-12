@@ -3,9 +3,9 @@
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
 **Wave status:** **Done** (2026-07-12 — D1–D7 all Done; exit gate met; merge tip `218dcf1`; **no sole-active**)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); **D2 Done** (drill evidence → LR-E2); **D3 Done**; **D4 Done** — do **not** activate LR-E / CD-3 (recommend only)
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); **D2 Done** (drill evidence → LR-E2); **D3 Done**; **D4 Done** — Wave Done; sole-active moved to **LR-E1** (do **not** activate LR-E2 / CD-3)
 
-> **Completion note (2026-07-12, LR-D4):** **LR-D4 → Done** (slice `lrp-d4-trace-propagation`; formal phase remains **None**). ADR-0049 Accepted; `MdcTaskDecorator`; Kafka `X-Trace-Id` propagation; Scenario A/B tests proven. BDD **not-applicable** ([behavior](../../behavior/lrp-d4-trace-propagation.md)). **Merge:** `218dcf1` (`218dcf1580f144b62747cc35a0f14ea604d31d00`); feature tip `670a683`; worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1321 tests, 0 fail, 7 skipped); architecture-reviewer **PASS_WITH_NOTES** (Critical **0**; merge_go=true); **DEPLOY_OK** 2026-07-12T04:18:13+08:00 tip `218dcf1` healthz 200; X-Trace-Id echo OK. **Task Master #41 → done**. **Wave LR-D → Done** (D1–D7 all Done; exit gate met; **no sole-active**). Recommend next (notes only): **LR-E** or **pause** — do **not** activate LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+> **Completion note (2026-07-12, LR-D4):** **LR-D4 → Done** (slice `lrp-d4-trace-propagation`; formal phase remains **None**). ADR-0049 Accepted; `MdcTaskDecorator`; Kafka `X-Trace-Id` propagation; Scenario A/B tests proven. BDD **not-applicable** ([behavior](../../behavior/lrp-d4-trace-propagation.md)). **Merge:** `218dcf1` (`218dcf1580f144b62747cc35a0f14ea604d31d00`); feature tip `670a683`; worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1321 tests, 0 fail, 7 skipped); architecture-reviewer **PASS_WITH_NOTES** (Critical **0**; merge_go=true); **DEPLOY_OK** 2026-07-12T04:18:13+08:00 tip `218dcf1` healthz 200; X-Trace-Id echo OK. **Task Master #41 → done**. **Wave LR-D → Done** (D1–D7 all Done; exit gate met). Superseded sole-active by **LR-E1** (Task Master #42). Do **not** activate LR-E2/CD-3. Do **not** touch `DGE-audit-governance`.
 
 > **Activation note (2026-07-12, LR-D4):** **LR-D4 → In Progress** (now **Done** — see completion note above). Slice `lrp-d4-trace-propagation`; formal phase remains **None**.
 
@@ -234,4 +234,4 @@
 - [x] Load smoke baselines recorded (LR-D6 — merge `56383eb`; evidence + DEF-LRP-D6-001 triage)
 - [x] Security audit seam closed (LR-D7 — merge `c94a356`; BDD + tests; ledger seam closed)
 
-**Wave LR-D exit:** **met** (2026-07-12) — D1–D7 all Done; merge tip `218dcf1`; **no sole-active**. Recommend next (notes only): **LR-E** or **pause** — do **not** activate until parent directs.
+**Wave LR-D exit:** **met** (2026-07-12) — D1–D7 all Done; merge tip `218dcf1`. Sole-active moved to **LR-E1** (Task Master #42; Wave LR-E partial). Do **not** activate LR-E2/CD-3.
