@@ -7,6 +7,16 @@ public record AnchorBindingView(
         String anchorId,
         String declaredContentType,
         String structuredContentJson,
-        BindingValidationStatus validationStatus
+        BindingValidationStatus validationStatus,
+        PasteCleaningEvidenceView pasteCleaningEvidence
 ) {
+    public AnchorBindingView(
+            String id,
+            String anchorId,
+            String declaredContentType,
+            String structuredContentJson,
+            BindingValidationStatus validationStatus
+    ) {
+        this(id, anchorId, declaredContentType, structuredContentJson, validationStatus, null);
+    }
 }

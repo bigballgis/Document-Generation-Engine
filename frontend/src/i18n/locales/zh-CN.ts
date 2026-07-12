@@ -112,6 +112,10 @@ export default {
         ready: '结构化内容节点均可由 DOCX writer 渲染。',
         blocked: '结构化内容包含不支持或缺少 writer 的节点类型，会导致静默丢内容。',
       },
+      pasteCleaningBlockers: {
+        ready: '绑定上无未解除的粘贴清洗阻断。',
+        blocked: '一个或多个绑定存在未解除的粘贴清洗阻断，发布前必须清除。',
+      },
     },
     apimgmt: {
       policyImpact: {
@@ -1186,6 +1190,7 @@ export default {
         API_POLICY: 'API 接入',
         CONTENT_MODULE_REFERENCES: '内容模块引用',
         UNSUPPORTED_STRUCTURED_NODES: '不支持的结构化节点',
+        PASTE_CLEANING_BLOCKERS: '粘贴清洗阻断',
         BLOCKER_STATUS: '阻塞项状态',
       },
     },
@@ -1359,6 +1364,13 @@ export default {
       masterAnchorsLoadFailed: '无法加载母版占位符目录。',
       validationStatus: '校验状态',
       validationUnknown: '未校验',
+      pasteResidue: {
+        blockedTag: '粘贴阻断',
+        blockedTitle: '未解除的粘贴清洗阻断',
+        blockedDescription:
+          '此绑定存在会阻止发布的粘贴清洗残留。请接受一次干净粘贴重写，或清除残留后保存。',
+        clearAction: '保存时清除粘贴残留',
+      },
       variableKey: '变量键',
       variableType: '类型',
       required: '必填',

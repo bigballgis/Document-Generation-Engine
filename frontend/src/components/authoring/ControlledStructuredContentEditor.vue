@@ -9,7 +9,13 @@ import { useStructuredContentHistory } from '@/composables/useStructuredContentH
 import { useStructuredContentLocalDraft } from '@/composables/useStructuredContentLocalDraft'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
-import type { MasterStyleCatalog, PasteCleaningSummary, VariableSchema } from '@/types/template'
+import type {
+  MasterStyleCatalog,
+  PasteCleaningEvidence,
+  PasteCleaningSummary,
+  VariableSchema,
+} from '@/types/template'
+import { buildAcceptedPasteCleaningEvidence } from '@/utils/pasteCleaningEvidence'
 import { buildVariableOptionLabel } from '@/utils/variableDisplayName'
 import {
   DEFAULT_STRUCTURED_CONTENT_JSON,
@@ -45,6 +51,8 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
   'dirty-change': [dirty: boolean]
   'structure-change': []
+  /** Fired on Accept with non-sensitive residue for binding upsert (blockedCount=0). */
+  'paste-accepted': [evidence: PasteCleaningEvidence]
 }>()
 
 const pristineBaseline = ref(props.baseline ?? (props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON))
@@ -467,17 +475,25 @@ async function runPasteClean(html: string) {
 }
 
 function acceptPaste() {
+  if (pasteBlocked.value || !pasteSummary.value) {
+    return
+  }
   if (pendingPasteJson.value) {
     pendingCoalesceKey = null
     documentModel.value = parseStructuredContent(pendingPasteJson.value)
   }
+  emit('paste-accepted', buildAcceptedPasteCleaningEvidence(pasteSummary.value))
   pendingPasteJson.value = null
+  pasteSummary.value = null
+  pasteBlocked.value = false
 }
 
 function cancelPaste() {
   pendingCoalesceKey = null
   documentModel.value = parseStructuredContent(prePasteSnapshot.value)
   pendingPasteJson.value = null
+  pasteSummary.value = null
+  pasteBlocked.value = false
 }
 
 function insertInline(type: ConfirmedNodeType) {

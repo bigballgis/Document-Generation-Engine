@@ -684,4 +684,114 @@ describe('ControlledStructuredContentEditor', () => {
     expect(wrapper.get('[data-testid="structured-editor-undo"]').attributes('disabled')).toBeDefined()
     wrapper.unmount()
   })
+
+  it('emits paste-accepted evidence with blockedCount=0 on Accept (never source HTML)', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+    pasteClean.mockResolvedValue({
+      blocked: false,
+      cleanedStructuredContentJson:
+        '{"schemaVersion":"1.0","nodes":[{"type":"paragraph","children":[{"type":"textRun","value":"Clean"}]}]}',
+      summary: {
+        items: [
+          {
+            category: 'TRANSFORMED',
+            messageKey: 'paste.summary.transformed',
+            detectionSummary: 'Transformed paragraph.',
+          },
+        ],
+        transformedCount: 1,
+        removedCount: 0,
+        warningCount: 0,
+        blockedCount: 0,
+      },
+      prePasteSnapshotJson: '{"schemaVersion":"1.0","nodes":[]}',
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: '{"schemaVersion":"1.0","nodes":[]}',
+        templateId: 'tpl-1',
+      },
+      attachTo: document.body,
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+
+    const fileInput = wrapper.get('input[type="file"]')
+    const file = {
+      text: async () => '<p>Hello</p>',
+    } as unknown as File
+    Object.defineProperty(fileInput.element, 'files', { value: [file], configurable: true })
+    await fileInput.trigger('change')
+    await flushPromises()
+
+    await wrapper.get('[data-testid="paste-summary-accept"]').trigger('click')
+    await flushPromises()
+
+    const accepted = wrapper.emitted('paste-accepted')?.at(-1)?.[0] as {
+      blockedCount: number
+      unresolvedPasteBlockers?: boolean
+      items: unknown[]
+    }
+    expect(accepted).toBeTruthy()
+    expect(accepted.blockedCount).toBe(0)
+    expect(accepted.unresolvedPasteBlockers).toBe(false)
+    expect(JSON.stringify(accepted)).not.toMatch(/sourceHtml|<p>Hello/i)
+    wrapper.unmount()
+  })
+
+  it('keeps Accept disabled when paste-clean reports blocked=true', async () => {
+    fetchMasterStyleCatalog.mockResolvedValue({
+      catalogVersion: '1.0',
+      entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+    })
+    pasteClean.mockResolvedValue({
+      blocked: true,
+      cleanedStructuredContentJson: null,
+      summary: {
+        items: [
+          {
+            category: 'BLOCKED',
+            messageKey: 'paste.summary.blocked',
+            detectionSummary: 'Embedded object detected.',
+          },
+        ],
+        transformedCount: 0,
+        removedCount: 0,
+        warningCount: 0,
+        blockedCount: 1,
+      },
+      prePasteSnapshotJson: '{"schemaVersion":"1.0","nodes":[]}',
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ControlledStructuredContentEditor, {
+      props: {
+        modelValue: '{"schemaVersion":"1.0","nodes":[]}',
+        templateId: 'tpl-1',
+      },
+      attachTo: document.body,
+      global: { plugins: [i18n, ElementPlus] },
+    })
+
+    await flushPromises()
+
+    const fileInput = wrapper.get('input[type="file"]')
+    const file = {
+      text: async () => '<object></object>',
+    } as unknown as File
+    Object.defineProperty(fileInput.element, 'files', { value: [file], configurable: true })
+    await fileInput.trigger('change')
+    await flushPromises()
+
+    const acceptButton = wrapper.get('[data-testid="paste-summary-accept"]').element as HTMLButtonElement
+    expect(acceptButton.disabled).toBe(true)
+    expect(wrapper.emitted('paste-accepted')).toBeFalsy()
+    wrapper.unmount()
+  })
 })

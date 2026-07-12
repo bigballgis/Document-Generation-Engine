@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.authoring.structured.PasteCleaningCategory;
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import com.bank.docgen.authoring.structured.MasterStyleCatalogService;
 import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
@@ -17,13 +18,19 @@ import com.bank.docgen.authoring.structured.ReferenceNodeValidationResult;
 import com.bank.docgen.authoring.structured.StructuredContentSchemaValidator;
 import com.bank.docgen.authoring.structured.StructuredContentValidationResult;
 import com.bank.docgen.authoring.structured.TableComponentService;
+import com.bank.docgen.master.persistence.MasterAnchorEntity;
+import com.bank.docgen.master.persistence.MasterDocumentEntity;
+import com.bank.docgen.master.persistence.MasterDocumentRepository;
+import com.bank.docgen.template.api.PasteCleaningEvidenceItemView;
+import com.bank.docgen.template.api.PasteCleaningEvidenceView;
+import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
 import com.bank.docgen.template.domain.AnchorContentType;
 import com.bank.docgen.template.domain.BindingValidationStatus;
 import com.bank.docgen.template.domain.VariableType;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
-import com.bank.docgen.master.persistence.MasterDocumentRepository;
+import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
@@ -203,6 +210,225 @@ class TemplateBindingConfigurationServiceTest {
         );
 
         assertThat(status).isEqualTo(BindingValidationStatus.VALID);
+    }
+
+    @Test
+    void computeBindingStatus_unresolvedPasteBlockers_isIncompatible() {
+        // BDD-OPS-PASTE-BINDING-001 / S3 — paste residue alone is enough (fail-closed before content checks)
+        UUID masterId = UUID.randomUUID();
+        String residue = """
+                {
+                  "transformedCount":0,
+                  "removedCount":0,
+                  "warningCount":0,
+                  "blockedCount":1,
+                  "unresolvedPasteBlockers":true,
+                  "items":[
+                    {"category":"BLOCKED","messageKey":"paste.summary.blocked","detectionSummary":"Blocked embedded object in pasted HTML."}
+                  ]
+                }
+                """;
+
+        BindingValidationStatus status = service.computeBindingStatus(
+                "BODY",
+                AnchorContentType.TEXT,
+                Set.of("BODY"),
+                List.of("BODY"),
+                MINIMAL_STRUCTURED_CONTENT,
+                Set.of(),
+                masterId,
+                residue
+        );
+
+        assertThat(status).isEqualTo(BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE);
+    }
+
+    @Test
+    void computeBindingStatus_cleanPasteEvidence_remainsValid() {
+        // BDD-OPS-PASTE-BINDING-001 / S2 + S5 (paste dimension)
+        UUID masterId = UUID.randomUUID();
+        stubValidStructuredValidators(masterId);
+
+        String residue = """
+                {
+                  "transformedCount":1,
+                  "removedCount":0,
+                  "warningCount":0,
+                  "blockedCount":0,
+                  "unresolvedPasteBlockers":false,
+                  "items":[
+                    {"category":"TRANSFORMED","messageKey":"paste.summary.transformed","detectionSummary":"Transformed paragraph element into controlled structured node."}
+                  ]
+                }
+                """;
+
+        BindingValidationStatus status = service.computeBindingStatus(
+                "BODY",
+                AnchorContentType.TEXT,
+                Set.of("BODY"),
+                List.of("BODY"),
+                MINIMAL_STRUCTURED_CONTENT,
+                Set.of(),
+                masterId,
+                residue
+        );
+
+        assertThat(status).isEqualTo(BindingValidationStatus.VALID);
+    }
+
+    @Test
+    void upsertBinding_persistsNonSensitivePasteEvidence_andBlocksOnUnresolved() {
+        // BDD-OPS-PASTE-BINDING-001 / S2 + S3 (API write defense-in-depth)
+        UUID masterId = UUID.randomUUID();
+        UUID templateId = UUID.randomUUID();
+        UUID versionId = UUID.randomUUID();
+        TemplateVersionEntity version = new TemplateVersionEntity(versionId, templateId, "10000003");
+        MasterDocumentEntity master = new MasterDocumentEntity(
+                masterId, "RETAIL", "Master", null, "key", "m.docx", "10000003"
+        );
+        master.replaceAnchors(List.of(new MasterAnchorEntity(masterId, "BODY", "BODY", 1)));
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)).thenReturn(Optional.of(master));
+        when(anchorBindingRepository.findByTemplateVersionIdAndAnchorId(versionId, "BODY"))
+                .thenReturn(Optional.empty());
+        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
+                .thenReturn(List.of());
+        stubValidStructuredValidators(masterId);
+        when(templateViewMapper.toBindingView(any(AnchorBindingEntity.class))).thenAnswer(invocation -> {
+            AnchorBindingEntity entity = invocation.getArgument(0);
+            return new com.bank.docgen.template.api.AnchorBindingView(
+                    entity.getId().toString(),
+                    entity.getAnchorId(),
+                    entity.getDeclaredContentType().name(),
+                    entity.getStructuredContentJson(),
+                    entity.getValidationStatus(),
+                    PasteCleaningEvidenceSupport.read(entity.getPasteCleaningEvidenceJson(), new ObjectMapper())
+            );
+        });
+
+        PasteCleaningEvidenceView evidence = new PasteCleaningEvidenceView(
+                1, 0, 0, 0, false,
+                List.of(new PasteCleaningEvidenceItemView(
+                        PasteCleaningCategory.TRANSFORMED,
+                        "paste.summary.transformed",
+                        "Transformed paragraph element into controlled structured node."
+                ))
+        );
+        UpsertAnchorBindingRequest cleanRequest = new UpsertAnchorBindingRequest(
+                "BODY",
+                AnchorContentType.TEXT,
+                MINIMAL_STRUCTURED_CONTENT,
+                evidence,
+                null
+        );
+
+        service.upsertBinding(masterId, version, cleanRequest);
+
+        ArgumentCaptor<AnchorBindingEntity> captor = ArgumentCaptor.forClass(AnchorBindingEntity.class);
+        verify(anchorBindingRepository).save(captor.capture());
+        AnchorBindingEntity saved = captor.getValue();
+        assertThat(saved.getValidationStatus()).isEqualTo(BindingValidationStatus.VALID);
+        assertThat(saved.getPasteCleaningEvidenceJson()).doesNotContain("<");
+        assertThat(saved.getPasteCleaningEvidenceJson()).contains("\"blockedCount\":0");
+        assertThat(saved.getPasteCleaningEvidenceJson()).doesNotContain("sourceHtml");
+
+        PasteCleaningEvidenceView blocked = new PasteCleaningEvidenceView(
+                0, 0, 0, 1, true,
+                List.of(new PasteCleaningEvidenceItemView(
+                        PasteCleaningCategory.BLOCKED,
+                        "paste.summary.blocked",
+                        "Blocked absolute positioning in pasted HTML."
+                ))
+        );
+        when(anchorBindingRepository.findByTemplateVersionIdAndAnchorId(versionId, "BODY"))
+                .thenReturn(Optional.of(saved));
+        UpsertAnchorBindingRequest blockedRequest = new UpsertAnchorBindingRequest(
+                "BODY",
+                AnchorContentType.TEXT,
+                MINIMAL_STRUCTURED_CONTENT,
+                blocked,
+                null
+        );
+
+        service.upsertBinding(masterId, version, blockedRequest);
+
+        assertThat(saved.getValidationStatus()).isEqualTo(BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE);
+        assertThat(saved.getPasteCleaningEvidenceJson()).contains("\"blockedCount\":1");
+        assertThat(saved.getPasteCleaningEvidenceJson()).doesNotContain("<object");
+    }
+
+    @Test
+    void upsertBinding_clearPasteCleaningEvidence_clearsResidue() {
+        // BDD-OPS-PASTE-BINDING-001 / S5
+        UUID masterId = UUID.randomUUID();
+        UUID templateId = UUID.randomUUID();
+        UUID versionId = UUID.randomUUID();
+        TemplateVersionEntity version = new TemplateVersionEntity(versionId, templateId, "10000003");
+        MasterDocumentEntity master = new MasterDocumentEntity(
+                masterId, "RETAIL", "Master", null, "key", "m.docx", "10000003"
+        );
+        master.replaceAnchors(List.of(new MasterAnchorEntity(masterId, "BODY", "BODY", 1)));
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)).thenReturn(Optional.of(master));
+        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId))
+                .thenReturn(List.of());
+        stubValidStructuredValidators(masterId);
+        when(templateViewMapper.toBindingView(any(AnchorBindingEntity.class))).thenAnswer(invocation -> {
+            AnchorBindingEntity entity = invocation.getArgument(0);
+            return new com.bank.docgen.template.api.AnchorBindingView(
+                    entity.getId().toString(),
+                    entity.getAnchorId(),
+                    entity.getDeclaredContentType().name(),
+                    entity.getStructuredContentJson(),
+                    entity.getValidationStatus(),
+                    null
+            );
+        });
+
+        AnchorBindingEntity existing = new AnchorBindingEntity(
+                UUID.randomUUID(),
+                versionId,
+                "BODY",
+                AnchorContentType.TEXT,
+                MINIMAL_STRUCTURED_CONTENT,
+                BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE
+        );
+        existing.setPasteCleaningEvidenceJson("""
+                {"transformedCount":0,"removedCount":0,"warningCount":0,"blockedCount":1,"unresolvedPasteBlockers":true,"items":[]}
+                """);
+        when(anchorBindingRepository.findByTemplateVersionIdAndAnchorId(versionId, "BODY"))
+                .thenReturn(Optional.of(existing));
+
+        UpsertAnchorBindingRequest clearRequest = new UpsertAnchorBindingRequest(
+                "BODY",
+                AnchorContentType.TEXT,
+                MINIMAL_STRUCTURED_CONTENT,
+                null,
+                true
+        );
+        service.upsertBinding(masterId, version, clearRequest);
+
+        assertThat(existing.getPasteCleaningEvidenceJson()).isNull();
+        assertThat(existing.getValidationStatus()).isEqualTo(BindingValidationStatus.VALID);
+    }
+
+    private void stubValidStructuredValidators(UUID masterId) {
+        when(nodeMatrixValidationService.validate(eq(MINIMAL_STRUCTURED_CONTENT), any()))
+                .thenReturn(StructuredContentValidationResult.of(List.of(), List.of()));
+        when(masterStyleCatalogService.loadForMaster(masterId))
+                .thenReturn(new MasterStyleCatalog("1.0", Map.of()));
+        when(masterStyleCatalogService.validate(eq(MINIMAL_STRUCTURED_CONTENT), any()))
+                .thenReturn(StructuredContentValidationResult.of(List.of(), List.of()));
+        when(tableComponentService.validateStructuredContent(eq(MINIMAL_STRUCTURED_CONTENT), any()))
+                .thenReturn(StructuredContentValidationResult.of(List.of(), List.of()));
+        when(referenceNodeService.validateStructuredContent(MINIMAL_STRUCTURED_CONTENT))
+                .thenReturn(ReferenceNodeValidationResult.of(
+                        StructuredContentValidationResult.of(List.of(), List.of()),
+                        List.of()
+                ));
+        when(numberingService.validateStructuredContent(MINIMAL_STRUCTURED_CONTENT))
+                .thenReturn(NumberingValidationResult.of(
+                        StructuredContentValidationResult.of(List.of(), List.of()),
+                        List.of()
+                ));
     }
 
     @Test

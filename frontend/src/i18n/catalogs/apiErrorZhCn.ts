@@ -70,6 +70,7 @@ export const apiErrorZhCn = {
     structuredContentInvalid: "结构化内容定义无效。",
     structuredContentUnknownNodeType: "结构化内容包含不支持的节点类型。",
     structuredContentForbiddenConstruct: "结构化内容包含禁止使用的结构。",
+    invalidPasteCleaningEvidence: "粘贴清洗证据无法序列化。",
     publishGateBlocked: "绑定校验通过前无法发布。",
     submitForApprovalGateBlocked: "检查通过前无法提交审批。",
     decisionReasonCategoryRequired: "测试不通过或审批驳回时必须选择原因类别。",

@@ -328,6 +328,7 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | 模板 dev 版本详情 | 获取指定 dev 行的编排详情（在途编辑）。 | 已发布 dev 行只读；变更返回 `403 TEMPLATE_VERSION_IMMUTABLE`。 | `GET /api/management/v1/templates/{templateId}/dev/{devVersionId}` |
 | 模板 release 详情 | 获取已发布 release 只读快照。 | 按语义版本 `releaseVersion` 定位；未知版本 `404`。 | `GET /api/management/v1/templates/{templateId}/releases/{releaseVersion}` |
 | 克隆已发布 release | 从已发布 release 复制快照到新的 DRAFT dev 行（`max(dev_version_number)+1`）。 | 存在进行中 dev 行时 `409 TEMPLATE_DEV_LINE_IN_FLIGHT`；成功后模板包状态为 `DRAFT`；记录 lifecycle 审计。 | `POST /api/management/v1/templates/{templateId}/release-versions/{releaseVersion}/clone` |
+| 粘贴清洗（P18-T10 / ops-paste-binding-seam） | 编辑期将 Word/HTML 清洗为受控结构化 JSON + 非敏感摘要。 | SoT **ADR-0019**：script / iframe / **object** / **absolute** → `BLOCKED`（整次 `blocked=true`，无 cleaned JSON）。Accept 后绑定持久化非敏感 `pasteCleaningEvidence`；未解除阻断在 validate / `computeBindingStatus` / PublishGate **fail-closed**。**不**新增权限面（复用配置锚点内容）。行为：[ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md)；领域 §2.6.7。 | `POST /api/management/v1/templates/{templateId}/paste-clean`（管理面；OpenAPI 绑定/validate/export 已声明 `pasteCleaningEvidence`） |
 
 ### 目录列表分页契约（LR-C5）
 
@@ -363,7 +364,7 @@ GET/PUT、生命周期 impact preview、`PublishGateCheckCode.CONTENT_MODULE_REF
 | `format` | 是 | 固定 `template-export-bundle-v1-json`。 |
 | `metadata` | 是 | 源环境快照：`templateId`（内部 UUID）、`externalId`、`groupCode`、`name`、`description`、`masterId`、`lifecycleStatus`、`releaseVersion`、`devVersionId`、`devVersionNumber`、`exportedAt`。 |
 | `variables` | 是 | 变量 Schema 列表（`variableKey`、`variableType`、`required` 等）。 |
-| `bindings` | 是 | 锚点绑定列表。 |
+| `bindings` | 是 | 锚点绑定列表。每项可含可选非敏感 `pasteCleaningEvidence`（粘贴清洗 residue；**禁止**源 HTML）。未解除粘贴阻断在 validate / publish 路径 fail-closed — 见 [ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md) / domain-model §2.6.7。 |
 | `rules` | 是 | 组合规则列表。 |
 | `contentModuleReferences` | 是 | 内容模块引用列表；`locked=true` 的发布锁定引用在导入时不重新写入。 |
 | `policySnapshot` | 否 | 模板级 API 管理策略快照（AD Group、输出/批量/加密/default 路由等）；不含 API 凭证 secret。 |

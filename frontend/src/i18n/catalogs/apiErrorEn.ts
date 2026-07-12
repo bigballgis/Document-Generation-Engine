@@ -70,6 +70,7 @@ export const apiErrorEn = {
     structuredContentInvalid: "The structured content definition is invalid.",
     structuredContentUnknownNodeType: "The structured content contains an unsupported node type.",
     structuredContentForbiddenConstruct: "The structured content contains a forbidden construct.",
+    invalidPasteCleaningEvidence: "Paste-cleaning evidence could not be serialized.",
     publishGateBlocked: "Publish is blocked until binding validation passes.",
     submitForApprovalGateBlocked: "Submit for approval is blocked until pre-release checks pass.",
     decisionReasonCategoryRequired: "A reason category is required for failed or rejected decisions.",

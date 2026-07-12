@@ -9,6 +9,7 @@ import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.service.ApprovalSubStateResolver;
+import com.bank.docgen.template.service.PasteCleaningEvidenceSupport;
 import com.bank.docgen.template.service.TemplateCurrentVersionResolver;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
@@ -159,7 +160,8 @@ public class TemplateViewMapper {
                 entity.getAnchorId(),
                 entity.getDeclaredContentType().name(),
                 entity.getStructuredContentJson(),
-                entity.getValidationStatus()
+                entity.getValidationStatus(),
+                PasteCleaningEvidenceSupport.read(entity.getPasteCleaningEvidenceJson(), objectMapper)
         );
     }
 }

@@ -221,7 +221,9 @@ public class TemplateImportService {
                     new UpsertAnchorBindingRequest(
                             binding.anchorId(),
                             AnchorContentType.valueOf(binding.declaredContentType()),
-                            binding.structuredContentJson()
+                            binding.structuredContentJson(),
+                            binding.pasteCleaningEvidence(),
+                            null
                     ),
                     session
             );

@@ -956,7 +956,10 @@ paths:
         Duplicate binding means the same anchorId appears more than once in one
         payload. Returned per-binding status values are strictly limited to
         VALID, MISSING_ANCHOR, DUPLICATE_BINDING, and
-        INCOMPATIBLE_CONTENT_TYPE.
+        INCOMPATIBLE_CONTENT_TYPE. Optional non-sensitive pasteCleaningEvidence
+        on each binding is editing/release-check residue (ADR-0019 /
+        ops-paste-binding-seam); unresolved paste blockers (blockedCount > 0 or
+        BLOCKED items) must not yield VALID.
       parameters:
         - $ref: '#/components/parameters/Environment'
         - $ref: '#/components/parameters/TemplateId'
@@ -5029,6 +5032,7 @@ components:
         - API_POLICY
         - CONTENT_MODULE_REFERENCES
         - UNSUPPORTED_STRUCTURED_NODES
+        - PASTE_CLEANING_BLOCKERS
         - BLOCKER_STATUS
     PublishGateItemView:
       type: object
@@ -5363,6 +5367,18 @@ components:
         structuredContentTree:
           type: object
           additionalProperties: true
+        pasteCleaningEvidence:
+          $ref: '#/components/schemas/PasteCleaningEvidence'
+          description: >
+            Optional non-sensitive paste-cleaning residue carried with the binding
+            (ops-paste-binding-seam / ADR-0019). Must not include source HTML or
+            pasted plaintext. Unresolved blockers (blockedCount > 0 or BLOCKED
+            items) fail-closed in validate / computeBindingStatus.
+        clearPasteCleaningEvidence:
+          type: boolean
+          description: >
+            When true on binding upsert, clears persisted paste-cleaning residue
+            (ops-paste-binding-seam S5). Ignored on validate-only payloads.
     BindingValidationStatus:
       type: string
       enum: [VALID, MISSING_ANCHOR, DUPLICATE_BINDING, INCOMPATIBLE_CONTENT_TYPE]
@@ -5383,6 +5399,57 @@ components:
         structuredContentTree:
           type: object
           additionalProperties: true
+        pasteCleaningEvidence:
+          $ref: '#/components/schemas/PasteCleaningEvidence'
+          description: >
+            Non-sensitive paste-cleaning residue returned with the binding when
+            present. Unresolved paste blockers map status away from VALID
+            (typically INCOMPATIBLE_CONTENT_TYPE).
+    PasteCleaningEvidence:
+      type: object
+      additionalProperties: false
+      description: >
+        Non-sensitive paste-cleaning summary persisted on an anchor binding after
+        Accept (editing or release-check evidence per ADR-0019). Forbidden:
+        source HTML, pasted plaintext, customer data, full request bodies.
+      properties:
+        transformedCount:
+          type: integer
+          minimum: 0
+        removedCount:
+          type: integer
+          minimum: 0
+        warningCount:
+          type: integer
+          minimum: 0
+        blockedCount:
+          type: integer
+          minimum: 0
+        unresolvedPasteBlockers:
+          type: boolean
+          description: >
+            Explicit unresolved-blocker flag when present; true when blockedCount > 0
+            or any item has category BLOCKED.
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PasteCleaningEvidenceItem'
+    PasteCleaningEvidenceItem:
+      type: object
+      additionalProperties: false
+      required: [category, messageKey]
+      properties:
+        category:
+          type: string
+          enum: [TRANSFORMED, REMOVED, WARNING, BLOCKED]
+        messageKey:
+          type: string
+          minLength: 1
+          description: Stable i18n key (English-first), e.g. paste.summary.*
+        detectionSummary:
+          type: string
+          nullable: true
+          description: Non-sensitive detection note; must not contain source HTML.
     TemplateBindingValidationSummary:
       type: object
       additionalProperties: false
@@ -6527,6 +6594,12 @@ components:
         structuredContentJson:
           type: string
           nullable: true
+        pasteCleaningEvidence:
+          $ref: '#/components/schemas/PasteCleaningEvidence'
+          description: >
+            Optional non-sensitive paste-cleaning residue exported with the binding.
+            Must not include source HTML. Unresolved blockers remain fail-closed on
+            re-import / validate / publish (ops-paste-binding-seam).
         validationStatus:
           type: string
           enum: [VALID, MISSING_ANCHOR, DUPLICATE_BINDING, INCOMPATIBLE_CONTENT_TYPE]

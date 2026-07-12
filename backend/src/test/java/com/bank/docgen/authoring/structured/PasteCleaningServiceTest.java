@@ -38,7 +38,55 @@ class PasteCleaningServiceTest {
     }
 
     @Test
-    void paste_summary_categorizesTransformedRemovedWarningBlocked() {
+    void paste_iframe_isBlocked() {
+        String html = "<p>Safe</p><iframe src=\"https://example.invalid\"></iframe>";
+        PasteCleaningResult result = service.cleanPaste(html, "{\"nodes\":[]}");
+
+        assertThat(result.blocked()).isTrue();
+        assertThat(result.cleanedStructuredContentJson()).isNull();
+        assertThat(result.summary().items())
+                .anyMatch(item -> item.category() == PasteCleaningCategory.BLOCKED);
+    }
+
+    @Test
+    void paste_object_isBlocked_perAdr0019() {
+        // BDD-OPS-PASTE-BINDING-001 / S1 — embedded object must BLOCK (not REMOVED)
+        String html = "<p>Safe</p><object data=\"embed.bin\"></object>";
+        PasteCleaningResult result = service.cleanPaste(html, "{\"nodes\":[]}");
+
+        assertThat(result.blocked()).isTrue();
+        assertThat(result.cleanedStructuredContentJson()).isNull();
+        assertThat(result.summary().blockedCount()).isGreaterThanOrEqualTo(1);
+        assertThat(result.summary().items())
+                .filteredOn(item -> item.detectionSummary().toLowerCase().contains("object")
+                        || item.detectionSummary().toLowerCase().contains("embedded"))
+                .isNotEmpty()
+                .allMatch(item -> item.category() == PasteCleaningCategory.BLOCKED);
+        assertThat(result.summary().items())
+                .noneMatch(item -> item.category() == PasteCleaningCategory.REMOVED
+                        && item.detectionSummary().toLowerCase().contains("object"));
+    }
+
+    @Test
+    void paste_absolutePositioning_isBlocked_perAdr0019() {
+        // BDD-OPS-PASTE-BINDING-001 / S1 — absolute positioning must BLOCK (not WARNING)
+        String html = "<p style=\"position:absolute; top:0\">Floated</p>";
+        PasteCleaningResult result = service.cleanPaste(html, "{\"nodes\":[]}");
+
+        assertThat(result.blocked()).isTrue();
+        assertThat(result.cleanedStructuredContentJson()).isNull();
+        assertThat(result.summary().blockedCount()).isGreaterThanOrEqualTo(1);
+        assertThat(result.summary().items())
+                .filteredOn(item -> item.detectionSummary().toLowerCase().contains("absolute"))
+                .isNotEmpty()
+                .allMatch(item -> item.category() == PasteCleaningCategory.BLOCKED);
+        assertThat(result.summary().items())
+                .noneMatch(item -> item.category() == PasteCleaningCategory.WARNING
+                        && item.detectionSummary().toLowerCase().contains("absolute"));
+    }
+
+    @Test
+    void paste_objectAndAbsolute_areBlocked_notRemovedOrWarning() {
         String html = """
                 <p>Hello</p>
                 <object data="embed"></object>
@@ -49,10 +97,11 @@ class PasteCleaningServiceTest {
         PasteCleaningResult result = service.cleanPaste(html, "{\"nodes\":[]}");
 
         assertThat(result.blocked()).isTrue();
+        assertThat(result.cleanedStructuredContentJson()).isNull();
         assertThat(result.summary().transformedCount()).isGreaterThanOrEqualTo(1);
-        assertThat(result.summary().removedCount()).isGreaterThanOrEqualTo(1);
-        assertThat(result.summary().warningCount()).isGreaterThanOrEqualTo(1);
-        assertThat(result.summary().blockedCount()).isGreaterThanOrEqualTo(1);
+        assertThat(result.summary().blockedCount()).isGreaterThanOrEqualTo(3);
+        assertThat(result.summary().removedCount()).isZero();
+        assertThat(result.summary().warningCount()).isZero();
     }
 
     @Test

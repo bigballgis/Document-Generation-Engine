@@ -379,4 +379,91 @@ describe('templates API', () => {
       lifecycleStatus: 'DRAFT',
     })
   })
+
+  it('upserts binding with pasteCleaningEvidence and never sends source HTML', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          anchorId: 'body',
+          declaredContentType: 'RICH_TEXT',
+          structuredContentJson: '{"schemaVersion":"1.0","nodes":[]}',
+          validationStatus: 'VALID',
+          pasteCleaningEvidence: {
+            transformedCount: 1,
+            removedCount: 0,
+            warningCount: 0,
+            blockedCount: 0,
+            unresolvedPasteBlockers: false,
+            items: [
+              {
+                category: 'TRANSFORMED',
+                messageKey: 'paste.summary.transformed',
+                detectionSummary: 'Transformed paragraph.',
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    const evidence = {
+      transformedCount: 1,
+      removedCount: 0,
+      warningCount: 0,
+      blockedCount: 0,
+      unresolvedPasteBlockers: false,
+      items: [
+        {
+          category: 'TRANSFORMED' as const,
+          messageKey: 'paste.summary.transformed',
+          detectionSummary: 'Transformed paragraph.',
+        },
+      ],
+    }
+
+    const binding = await templatesApi.upsertBinding('tpl-1', 'body', {
+      anchorId: 'body',
+      declaredContentType: 'RICH_TEXT',
+      structuredContentJson: '{"schemaVersion":"1.0","nodes":[]}',
+      pasteCleaningEvidence: evidence,
+    })
+
+    expect(http.put).toHaveBeenCalledWith(
+      '/templates/tpl-1/bindings/body',
+      expect.objectContaining({
+        pasteCleaningEvidence: evidence,
+      }),
+    )
+    expect(JSON.stringify(vi.mocked(http.put).mock.calls[0]?.[1])).not.toMatch(/sourceHtml/i)
+    expect(binding.pasteCleaningEvidence?.blockedCount).toBe(0)
+  })
+
+  it('upserts binding with clearPasteCleaningEvidence to clear residue', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          anchorId: 'body',
+          declaredContentType: 'TEXT',
+          structuredContentJson: '{"schemaVersion":"1.0","nodes":[]}',
+          validationStatus: 'VALID',
+        },
+      },
+    })
+
+    await templatesApi.upsertBinding('tpl-1', 'body', {
+      anchorId: 'body',
+      declaredContentType: 'TEXT',
+      structuredContentJson: '{"schemaVersion":"1.0","nodes":[]}',
+      clearPasteCleaningEvidence: true,
+    })
+
+    expect(http.put).toHaveBeenCalledWith(
+      '/templates/tpl-1/bindings/body',
+      expect.objectContaining({
+        clearPasteCleaningEvidence: true,
+      }),
+    )
+  })
 })

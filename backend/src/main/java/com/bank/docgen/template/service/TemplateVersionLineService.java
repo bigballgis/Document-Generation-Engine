@@ -427,7 +427,7 @@ public class TemplateVersionLineService {
         for (AnchorBindingEntity binding : anchorBindingRepository
 
                 .findByTemplateVersionIdOrderByAnchorIdAsc(source.getId())) {
-            anchorBindingRepository.save(new AnchorBindingEntity(
+            AnchorBindingEntity copied = new AnchorBindingEntity(
                     UUID.randomUUID(),
 
                     target.getId(),
@@ -440,7 +440,9 @@ public class TemplateVersionLineService {
 
                     binding.getValidationStatus()
 
-            ));
+            );
+            copied.setPasteCleaningEvidenceJson(binding.getPasteCleaningEvidenceJson());
+            anchorBindingRepository.save(copied);
 
         }
 

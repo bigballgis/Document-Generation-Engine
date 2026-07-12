@@ -234,7 +234,9 @@ public class TemplateController {
         UpsertAnchorBindingRequest normalized = new UpsertAnchorBindingRequest(
                 anchorId,
                 body.declaredContentType(),
-                body.structuredContentJson()
+                body.structuredContentJson(),
+                body.pasteCleaningEvidence(),
+                body.clearPasteCleaningEvidence()
         );
         return envelope(request, templateService.upsertBinding(templateId, normalized, session));
     }

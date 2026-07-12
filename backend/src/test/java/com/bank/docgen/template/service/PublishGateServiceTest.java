@@ -97,7 +97,8 @@ class PublishGateServiceTest {
                 contentModuleReferenceService,
                 templateCurrentVersionResolver,
                 anchorBindingRepository,
-                nodeMatrixValidationService
+                nodeMatrixValidationService,
+                new com.fasterxml.jackson.databind.ObjectMapper()
         );
         templateId = UUID.randomUUID();
         versionId = UUID.randomUUID();
@@ -352,6 +353,74 @@ class PublishGateServiceTest {
                 .isTrue();
         assertThatThrownBy(() -> service.assertReady(templateId, admin))
                 .isInstanceOf(TemplateValidationException.class);
+    }
+
+    @Test
+    void publishGate_blocksUnresolvedPasteCleaningResidue() {
+        // BDD-OPS-PASTE-BINDING-001 / S4
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        AnchorBindingEntity binding = new AnchorBindingEntity(
+                UUID.randomUUID(),
+                versionId,
+                "BODY",
+                com.bank.docgen.template.domain.AnchorContentType.RICH_TEXT,
+                "{\"schemaVersion\":\"1.0\",\"nodes\":[]}",
+                com.bank.docgen.template.domain.BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE
+        );
+        binding.setPasteCleaningEvidenceJson("""
+                {"transformedCount":0,"removedCount":0,"warningCount":0,"blockedCount":1,"unresolvedPasteBlockers":true,"items":[{"category":"BLOCKED","messageKey":"paste.summary.blocked","detectionSummary":"Blocked embedded object in pasted HTML."}]}
+                """);
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
+                .thenReturn(List.of(binding));
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.ready()).isFalse();
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.PASTE_CLEANING_BLOCKERS)
+                .findFirst()
+                .orElseThrow())
+                .satisfies(item -> {
+                    assertThat(item.blocker()).isTrue();
+                    assertThat(item.ready()).isFalse();
+                    assertThat(item.messageKey()).isEqualTo("api.publishGate.pasteCleaningBlockers.blocked");
+                    assertThat(item.summary()).contains("unresolvedPasteBindings=1");
+                });
+        assertThatThrownBy(() -> service.assertReady(templateId, admin))
+                .isInstanceOf(TemplateValidationException.class);
+    }
+
+    @Test
+    void publishGate_pasteCleaningReadyWhenResidueCleared() {
+        // BDD-OPS-PASTE-BINDING-001 / S5 (publish dimension)
+        when(templateService.validateBindings(templateId, admin)).thenReturn(nonBlockingBindings());
+        when(coverageComputationService.compute(templateId, admin)).thenReturn(greenCoverage());
+        AnchorBindingEntity binding = new AnchorBindingEntity(
+                UUID.randomUUID(),
+                versionId,
+                "BODY",
+                com.bank.docgen.template.domain.AnchorContentType.RICH_TEXT,
+                "{\"schemaVersion\":\"1.0\",\"nodes\":[]}",
+                com.bank.docgen.template.domain.BindingValidationStatus.VALID
+        );
+        binding.setPasteCleaningEvidenceJson("""
+                {"transformedCount":1,"removedCount":0,"warningCount":0,"blockedCount":0,"unresolvedPasteBlockers":false,"items":[]}
+                """);
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId))
+                .thenReturn(List.of(binding));
+
+        PublishGateChecklistView checklist = service.evaluate(templateId, admin);
+
+        assertThat(checklist.items().stream()
+                .filter(item -> item.checkCode() == PublishGateCheckCode.PASTE_CLEANING_BLOCKERS)
+                .findFirst()
+                .orElseThrow())
+                .satisfies(item -> {
+                    assertThat(item.blocker()).isFalse();
+                    assertThat(item.ready()).isTrue();
+                    assertThat(item.messageKey()).isEqualTo("api.publishGate.pasteCleaningBlockers.ready");
+                });
     }
 
     @Test

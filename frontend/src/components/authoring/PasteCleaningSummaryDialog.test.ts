@@ -86,7 +86,17 @@ describe('PasteCleaningSummaryDialog', () => {
     const wrapper = mount(PasteCleaningSummaryDialog, {
       props: {
         modelValue: true,
-        summary: { ...summary, blockedCount: 1 },
+        summary: {
+          ...summary,
+          blockedCount: 1,
+          items: [
+            {
+              category: 'BLOCKED',
+              messageKey: 'paste.summary.blocked',
+              detectionSummary: 'Embedded object or absolute positioning detected.',
+            },
+          ],
+        },
         blocked: true,
       },
       attachTo: document.body,
@@ -97,5 +107,6 @@ describe('PasteCleaningSummaryDialog', () => {
 
     const acceptButton = wrapper.get('[data-testid="paste-summary-accept"]').element as HTMLButtonElement
     expect(acceptButton.disabled).toBe(true)
+    expect(wrapper.text()).toContain(en.templates.structuredEditor.pasteSummary.blockedTitle)
   })
 })

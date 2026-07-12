@@ -31,6 +31,12 @@ public class AnchorBindingEntity {
     @Column(name = "structured_content_json", nullable = false, columnDefinition = "TEXT")
     private String structuredContentJson;
 
+    /**
+     * Non-sensitive paste-cleaning residue JSON (counts + messageKeys). Never source HTML.
+     */
+    @Column(name = "paste_cleaning_evidence_json", columnDefinition = "TEXT")
+    private String pasteCleaningEvidenceJson;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "validation_status", nullable = false, length = 64)
     private BindingValidationStatus validationStatus;
@@ -83,6 +89,10 @@ public class AnchorBindingEntity {
         return structuredContentJson;
     }
 
+    public String getPasteCleaningEvidenceJson() {
+        return pasteCleaningEvidenceJson;
+    }
+
     public BindingValidationStatus getValidationStatus() {
         return validationStatus;
     }
@@ -100,9 +110,24 @@ public class AnchorBindingEntity {
             String structuredContentJson,
             BindingValidationStatus validationStatus
     ) {
+        update(declaredContentType, structuredContentJson, validationStatus, this.pasteCleaningEvidenceJson);
+    }
+
+    public void update(
+            AnchorContentType declaredContentType,
+            String structuredContentJson,
+            BindingValidationStatus validationStatus,
+            String pasteCleaningEvidenceJson
+    ) {
         this.declaredContentType = declaredContentType;
         this.structuredContentJson = structuredContentJson;
         this.validationStatus = validationStatus;
+        this.pasteCleaningEvidenceJson = pasteCleaningEvidenceJson;
+        this.updatedAt = Instant.now();
+    }
+
+    public void setPasteCleaningEvidenceJson(String pasteCleaningEvidenceJson) {
+        this.pasteCleaningEvidenceJson = pasteCleaningEvidenceJson;
         this.updatedAt = Instant.now();
     }
 }

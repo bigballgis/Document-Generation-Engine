@@ -114,6 +114,11 @@ export default {
         blocked:
           'Structured content contains unsupported or writer-missing node types that would cause silent content loss.',
       },
+      pasteCleaningBlockers: {
+        ready: 'No unresolved paste-cleaning blockers on bindings.',
+        blocked:
+          'One or more bindings have unresolved paste-cleaning blockers that must be cleared before publish.',
+      },
     },
     apimgmt: {
       policyImpact: {
@@ -1162,6 +1167,7 @@ export default {
         API_POLICY: 'API access',
         CONTENT_MODULE_REFERENCES: 'Content module references',
         UNSUPPORTED_STRUCTURED_NODES: 'Unsupported structured nodes',
+        PASTE_CLEANING_BLOCKERS: 'Paste cleaning blockers',
         BLOCKER_STATUS: 'Blocker status',
       },
     },
@@ -1251,6 +1257,13 @@ export default {
       masterAnchorsLoadFailed: 'Unable to load master placeholder catalog.',
       validationStatus: 'Validation',
       validationUnknown: 'Not validated',
+      pasteResidue: {
+        blockedTag: 'Paste blocked',
+        blockedTitle: 'Unresolved paste-cleaning blockers',
+        blockedDescription:
+          'This binding has paste-cleaning residue that blocks publish. Accept a clean paste rewrite, or clear the residue and save.',
+        clearAction: 'Clear paste residue on save',
+      },
       variableKey: 'Variable key',
       variableType: 'Type',
       required: 'Required',

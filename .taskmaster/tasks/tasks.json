@@ -642,12 +642,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-12T02:42:00.000Z"
+      },
+      {
+        "id": "47",
+        "title": "OPS: Wire paste cleaning ↔ binding / publish fail-closed (#5b / CD-HARD-T05)",
+        "description": "IN PROGRESS 2026-07-12. Slice ops-paste-binding-seam. Close LR-E2 checklist #5b via durable fail-closed wire path (ADR-0019): object/absolute → BLOCKED; residue on binding; computeBindingStatus + PublishGate fail-closed; clear on rewrite. CD-HARD-T05 adjacency In Progress (wire only — no edit-time-only ADR escape). Formal phase None. BDD ready (BDD-OPS-PASTE-BINDING-001 S1–S6). Do NOT claim #5b GO until post-implementation doc-sync. Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance. Overall checklist remains NO-GO (#3b).",
+        "details": "ACTIVATED 2026-07-12. Slice id: ops-paste-binding-seam. Placement: ISOLATED D:/working/DGE-ops-paste-binding-seam · feat/ops-paste-binding-seam · base b0edd2d (b0edd2daa33da2f24ddf5c47234fc5b1eb86ce50). Formal phase remains None. Sole-active delivery focus = this slice only. BDD ready: docs/behavior/ops-paste-binding-seam.md (BDD-OPS-PASTE-BINDING-001 S1–S6). Owning checklist: #5b (verdict stays NO-GO until durable evidence + post-task-doc-sync). CD-HARD-T05 adjacency: In Progress under this slice (wire path locked; forbidden to close via edit-time-only ADR). Behavior summary: Align PasteCleaningService categories to ADR-0019 (object + absolute positioning → BLOCKED); persist non-sensitive paste residue on binding Accept; computeBindingStatus fail-closed when unresolved residue; PublishGate checklist FAIL on unresolved residue; residue clears on clean rewrite; UI Accept disabled on blocked + visible binding/publish failure (messageKey en-first + zh-CN). Decomposition: (1) category align ADR-0019 → (2) residue model (no source HTML) → (3) computeBindingStatus → (4) PublishGate → (5) UI visibility → (6) tests. Orthogonal: LR-A4 unsupported-nodes seam — do not mix. Out of scope: CD-3 wave activation; #3b ADR-0042/0043+Word; LDAP/AD (#5a residual); inventing Word numbers. Gates before Done: mvn verify GREEN; frontend lint/type-check/test/build when UI in scope; E2E+UIUX if user-facing; architecture review; queued deploy evidence as required; stage 11 merge; MAIN post-task-doc-sync (#5b → GO; CD-HARD-T05 Done; ledger seam wired/closed; overall still NO-GO for #3b) + commit-review. Do NOT: claim #5b GO at activation; claim production go-live; activate CD-3; touch DGE-audit-governance.",
+        "testStrategy": "1. BDD ready before TDD/implement (docs/behavior/ops-paste-binding-seam.md). 2. Object and absolute-position paste → blocked=true / BLOCKED (S1). 3. Clean paste → Accept + non-sensitive residue only (S2). 4. Unresolved residue → computeBindingStatus ≠ VALID (S3). 5. Unresolved residue → PublishGate FAIL (S4). 6. Clean rewrite clears residue; paste dimension does not block (S5). 7. Checklist #5b → GO only after durable gates + post-task-doc-sync (S6) — not at activation. 8. No edit-time-only ADR escape. 9. mvn verify GREEN + frontend gates when UI in scope + architecture + queued deploy as required. 10. Formal phase stays None; sole-active #47 until Done; overall checklist still NO-GO (#3b).",
+        "priority": "high",
+        "dependencies": [
+          "46"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T03:30:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T02:42:00.000Z",
-      "taskCount": 46,
+      "lastModified": "2026-07-12T03:30:00.000Z",
+      "taskCount": 47,
       "completedCount": 46,
       "tags": [
         "master"

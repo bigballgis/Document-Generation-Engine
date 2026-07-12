@@ -419,7 +419,7 @@ export interface paths {
         put?: never;
         /**
          * Validate structured content-tree bindings against reviewed anchor catalog snapshot
-         * @description Validates release-candidate bindings for one template using the reviewed anchor catalog snapshot locked by sourceAnchorCatalogVersion. Duplicate binding means the same anchorId appears more than once in one payload. Returned per-binding status values are strictly limited to VALID, MISSING_ANCHOR, DUPLICATE_BINDING, and INCOMPATIBLE_CONTENT_TYPE.
+         * @description Validates release-candidate bindings for one template using the reviewed anchor catalog snapshot locked by sourceAnchorCatalogVersion. Duplicate binding means the same anchorId appears more than once in one payload. Returned per-binding status values are strictly limited to VALID, MISSING_ANCHOR, DUPLICATE_BINDING, and INCOMPATIBLE_CONTENT_TYPE. Optional non-sensitive pasteCleaningEvidence on each binding is editing/release-check residue (ADR-0019 / ops-paste-binding-seam); unresolved paste blockers (blockedCount > 0 or BLOCKED items) must not yield VALID.
          */
         post: operations["validateTemplateBindings"];
         delete?: never;
@@ -2128,7 +2128,7 @@ export interface components {
             result: components["schemas"]["TemplateDetailView"];
         };
         /** @enum {string} */
-        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "UNSUPPORTED_STRUCTURED_NODES" | "BLOCKER_STATUS";
+        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "UNSUPPORTED_STRUCTURED_NODES" | "PASTE_CLEANING_BLOCKERS" | "BLOCKER_STATUS";
         PublishGateItemView: {
             checkCode: components["schemas"]["PublishGateCheckCode"];
             ready: boolean;
@@ -2250,6 +2250,12 @@ export interface components {
             structuredContentTree: {
                 [key: string]: unknown;
             };
+            /** @description Optional non-sensitive paste-cleaning residue carried with the binding (ops-paste-binding-seam / ADR-0019). Must not include source HTML or pasted plaintext. Unresolved blockers (blockedCount > 0 or BLOCKED items) fail-closed in validate / computeBindingStatus.
+             *      */
+            pasteCleaningEvidence?: components["schemas"]["PasteCleaningEvidence"];
+            /** @description When true on binding upsert, clears persisted paste-cleaning residue (ops-paste-binding-seam S5). Ignored on validate-only payloads.
+             *      */
+            clearPasteCleaningEvidence?: boolean;
         };
         /** @enum {string} */
         BindingValidationStatus: "VALID" | "MISSING_ANCHOR" | "DUPLICATE_BINDING" | "INCOMPATIBLE_CONTENT_TYPE";
@@ -2261,6 +2267,29 @@ export interface components {
             structuredContentTree: {
                 [key: string]: unknown;
             };
+            /** @description Non-sensitive paste-cleaning residue returned with the binding when present. Unresolved paste blockers map status away from VALID (typically INCOMPATIBLE_CONTENT_TYPE).
+             *      */
+            pasteCleaningEvidence?: components["schemas"]["PasteCleaningEvidence"];
+        };
+        /** @description Non-sensitive paste-cleaning summary persisted on an anchor binding after Accept (editing or release-check evidence per ADR-0019). Forbidden: source HTML, pasted plaintext, customer data, full request bodies.
+         *      */
+        PasteCleaningEvidence: {
+            transformedCount?: number;
+            removedCount?: number;
+            warningCount?: number;
+            blockedCount?: number;
+            /** @description Explicit unresolved-blocker flag when present; true when blockedCount > 0 or any item has category BLOCKED.
+             *      */
+            unresolvedPasteBlockers?: boolean;
+            items?: components["schemas"]["PasteCleaningEvidenceItem"][];
+        };
+        PasteCleaningEvidenceItem: {
+            /** @enum {string} */
+            category: "TRANSFORMED" | "REMOVED" | "WARNING" | "BLOCKED";
+            /** @description Stable i18n key (English-first), e.g. paste.summary.* */
+            messageKey: string;
+            /** @description Non-sensitive detection note; must not contain source HTML. */
+            detectionSummary?: string | null;
         };
         TemplateBindingValidationSummary: {
             blocking: boolean;
@@ -2689,6 +2718,9 @@ export interface components {
             anchorId: string;
             declaredContentType: string;
             structuredContentJson?: string | null;
+            /** @description Optional non-sensitive paste-cleaning residue exported with the binding. Must not include source HTML. Unresolved blockers remain fail-closed on re-import / validate / publish (ops-paste-binding-seam).
+             *      */
+            pasteCleaningEvidence?: components["schemas"]["PasteCleaningEvidence"];
             /** @enum {string} */
             validationStatus?: "VALID" | "MISSING_ANCHOR" | "DUPLICATE_BINDING" | "INCOMPATIBLE_CONTENT_TYPE";
         };

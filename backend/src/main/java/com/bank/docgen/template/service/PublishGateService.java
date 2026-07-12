@@ -23,6 +23,7 @@ import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -45,6 +46,7 @@ public class PublishGateService {
     private final TemplateCurrentVersionResolver templateVersionSupport;
     private final AnchorBindingRepository anchorBindingRepository;
     private final NodeMatrixValidationService nodeMatrixValidationService;
+    private final ObjectMapper objectMapper;
 
     public PublishGateService(
             TemplateService templateService,
@@ -59,7 +61,8 @@ public class PublishGateService {
             TemplateContentModuleReferenceService contentModuleReferenceService,
             TemplateCurrentVersionResolver templateVersionSupport,
             AnchorBindingRepository anchorBindingRepository,
-            NodeMatrixValidationService nodeMatrixValidationService
+            NodeMatrixValidationService nodeMatrixValidationService,
+            ObjectMapper objectMapper
     ) {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
@@ -74,6 +77,7 @@ public class PublishGateService {
         this.templateVersionSupport = templateVersionSupport;
         this.anchorBindingRepository = anchorBindingRepository;
         this.nodeMatrixValidationService = nodeMatrixValidationService;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
@@ -149,6 +153,7 @@ public class PublishGateService {
         items.add(apiPolicyItem(templateId));
         items.add(contentModuleReferencesItem(version.getId()));
         items.add(unsupportedStructuredNodesItem(version.getId()));
+        items.add(pasteCleaningBlockersItem(version.getId()));
         items.add(blockerStatusItem(templateId, version.getId(), bindings, coverage));
 
         List<PublishGateItemView> phaseItems = filterForPhase(items, phase);
@@ -341,6 +346,28 @@ public class PublishGateService {
                         ? "api.publishGate.unsupportedStructuredNodes.blocked"
                         : "api.publishGate.unsupportedStructuredNodes.ready",
                 "unsupportedNodeCount=" + unsupportedNodeCount
+        );
+    }
+
+    private PublishGateItemView pasteCleaningBlockersItem(UUID versionId) {
+        int unresolvedBindingCount = 0;
+        for (AnchorBindingEntity binding : anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)) {
+            if (PasteCleaningEvidenceSupport.hasUnresolvedPasteBlockers(
+                    binding.getPasteCleaningEvidenceJson(),
+                    objectMapper
+            )) {
+                unresolvedBindingCount++;
+            }
+        }
+        boolean blocking = unresolvedBindingCount > 0;
+        return new PublishGateItemView(
+                PublishGateCheckCode.PASTE_CLEANING_BLOCKERS,
+                !blocking,
+                blocking,
+                blocking
+                        ? "api.publishGate.pasteCleaningBlockers.blocked"
+                        : "api.publishGate.pasteCleaningBlockers.ready",
+                "unresolvedPasteBindings=" + unresolvedBindingCount
         );
     }
 

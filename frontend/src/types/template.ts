@@ -92,6 +92,10 @@ export interface UpsertBindingPayload {
   anchorId: string
   declaredContentType: string
   structuredContentJson: string
+  /** Non-sensitive paste-cleaning residue (ops-paste-binding-seam / ADR-0019). */
+  pasteCleaningEvidence?: PasteCleaningEvidence | null
+  /** When true, clears persisted paste-cleaning residue (S5 clean rewrite). */
+  clearPasteCleaningEvidence?: boolean
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management template create). */
@@ -173,6 +177,7 @@ export type PublishGateCheckCode =
   | 'API_POLICY'
   | 'CONTENT_MODULE_REFERENCES'
   | 'UNSUPPORTED_STRUCTURED_NODES'
+  | 'PASTE_CLEANING_BLOCKERS'
   | 'BLOCKER_STATUS'
 
 /** Not yet modeled in `openapi-v1.yaml` (management publish gate). */
@@ -310,6 +315,27 @@ export interface PasteCleaningSummary {
   removedCount: number
   warningCount: number
   blockedCount: number
+}
+
+/** Non-sensitive paste-cleaning residue on a binding (ops-paste-binding-seam / ADR-0019). */
+export interface PasteCleaningEvidenceItem {
+  category: PasteCleaningCategory
+  messageKey: string
+  detectionSummary?: string | null
+}
+
+/**
+ * Non-sensitive paste-cleaning residue persisted after Accept.
+ * Forbidden: source HTML. Counts are required on Accept upsert payloads;
+ * OpenAPI response fields may omit unset counters.
+ */
+export interface PasteCleaningEvidence {
+  transformedCount?: number
+  removedCount?: number
+  warningCount?: number
+  blockedCount?: number
+  unresolvedPasteBlockers?: boolean | null
+  items?: PasteCleaningEvidenceItem[]
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management paste clean). */

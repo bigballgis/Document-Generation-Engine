@@ -361,7 +361,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **Warning（摘要 + 确认）：** 低风险缩放差异（`IMAGE_SCALING_ADJUSTED`）等。Writer-unsupported **不得** 降级为可发布 warning。
 
-绑定保存与 `validateBindings` 路径通过 `TemplateService.computeBindingStatus` 合并节点 blockers → `BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE`，进而阻塞 `PublishGateService` 锚点完整性检查项；LR-A4 可另增专用 checklist 项（见行为规格 LR-A4-C5）。
+绑定保存与 `validateBindings` 路径通过 `TemplateService.computeBindingStatus`（及 `TemplateBindingConfigurationService`）合并节点 blockers → `BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE`，进而阻塞 `PublishGateService` 锚点完整性检查项；LR-A4 可另增专用 checklist 项（见行为规格 LR-A4-C5）。**粘贴清洗未解除阻断**另见 §2.6.7（ops-paste-binding-seam / checklist #5b）— 与 LR-A4 writer-unsupported **正交**，同样汇入绑定非 `VALID` + 发布 fail-closed。
 
 #### 2.6.3 母版样式目录与有限直接格式 Master style catalog & direct format（P18-T03）
 
@@ -391,19 +391,32 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **Blocker：** 重复编号 → `DUPLICATE_NUMBER`；`numberingCrossRef.targetNumber` 无法解析 → `BROKEN_NUMBER_CROSS_REFERENCE`。
 
-#### 2.6.7 Word/HTML 粘贴清洗 Paste cleaning（P18-T07）
+#### 2.6.7 Word/HTML 粘贴清洗 Paste cleaning（P18-T07 + ops-paste-binding-seam）
 
-`PasteCleaningService` 在编辑时（粘贴前）将 Word/HTML 片段清洗为受控结构化 JSON，并返回 `PasteCleaningResult`（`blocked`、`cleanedStructuredContentJson`、`summary`、`prePasteSnapshotJson`）。
+`PasteCleaningService` 将 Word/HTML 片段清洗为受控结构化 JSON，并返回 `PasteCleaningResult`（`blocked`、`cleanedStructuredContentJson`、`summary`、`prePasteSnapshotJson`）。清洗摘要可作为**编辑或发布检查**证据（[ADR-0019](../adr/rendering-authoring/0019-structured-authoring-and-rendering-boundary.md)）；**禁止**存源 HTML、粘贴正文或客户敏感明文。
 
 **摘要分类（`PasteCleaningCategory`）：** `TRANSFORMED` / `REMOVED` / `WARNING` / `BLOCKED`；每条 `PasteCleaningSummaryItem` 含 `messageKey`（`paste.summary.*`）与不含源 HTML 敏感明文的 `detectionSummary`。
 
-**v1 转换：** `<p>` → `paragraph` + `textRun`；`<object>` → REMOVED；`position:absolute` → WARNING。
+**v1 转换（可 Accept 进入内容树）：** `<p>` → `paragraph` + `textRun`（及其它 ADR-0019 已确认可自动转换的受控节点）。`REMOVED` / `WARNING` 仅用于**非阻断**清洗结果（例如可安全丢弃的装饰噪声）；**不得**用它们放行 ADR 已要求阻断的构造。
 
-**Blocker（整次粘贴 blocked，无 cleaned JSON）：** `<script>`、`javascript:`、`<iframe>`。
+**Blocker（整次粘贴 `blocked=true`，无 cleaned JSON；UI Accept 禁用）— SoT = ADR-0019：**
 
-**取消/撤销：** `cancelToPrePaste(result)` 返回 `prePasteSnapshotJson`，恢复粘贴前内容树。
+| 构造 | 分类 |
+| --- | --- |
+| `<script>` / `javascript:` | `BLOCKED` |
+| `<iframe>` | `BLOCKED` |
+| **embedded object（`<object>`）** | **`BLOCKED`**（对齐 ADR；**禁止**再标为 `REMOVED` 后仍允许 Accept） |
+| **absolute positioning（`position:absolute`）** | **`BLOCKED`**（对齐 ADR；**禁止**再标为 `WARNING` 后仍允许 Accept） |
 
-**管理 API（P18-T10）：** `POST /api/management/v1/templates/{templateId}/paste-clean`（`sourceHtml` + `prePasteStructuredContentJson`）；`GET .../master-style-catalog` 只读返回母版样式目录。T10 UI 通过上述 API 展示粘贴摘要并支持 cancel/undo。
+可选增强：若实现已能可靠检测 ADR 所列其它构造（macros、floating layout、complex columns 等），同样 `BLOCKED`；未实现的检测器不 invent 假阳性。行为规格：[ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md)（BDD-OPS-PASTE-BINDING-001）。
+
+**粘贴清洗证据 / residue（绑定持久化）：** 用户 **Accept** 成功（`blocked=false`）后，锚点绑定须持久化**非敏感** `pasteCleaningEvidence`（或等价字段），至少含 `transformedCount` / `removedCount` / `warningCount` / `blockedCount`，以及条目级 `category` + `messageKey` + 非敏感 `detectionSummary`。**禁止**持久化源 HTML。未解除粘贴阻断定义：`blockedCount > 0`、显式 `unresolvedPasteBlockers=true`，或 residue 含 `BLOCKED` 项。
+
+**绑定 / 发布门禁（fail-closed）：** `computeBindingStatus` / `validateBindings` / 保存绑定在存在未解除粘贴阻断时**不得**返回 `VALID`（映射 `INCOMPATIBLE_CONTENT_TYPE` 或文档化等价专用状态）。`PublishGateService` 对未解除粘贴阻断 checklist 项 **FAIL**（优先专用 `PublishGateCheckCode` 如 `PASTE_CLEANING_BLOCKERS`，或汇入 `ANCHOR_INTEGRITY` / `BLOCKER_STATUS` 且详情可展示稳定 messageKey）；**禁止**静默发布。干净重写（无阻断 Accept，或等价显式清除 residue 的保存路径）须清除该绑定上的粘贴阻断 residue。此缝与 §2.6.2 **LR-A4**（writer-unsupported 节点）**正交**，不得混为一谈。
+
+**取消/撤销：** `cancelToPrePaste(result)` 返回 `prePasteSnapshotJson`，恢复粘贴前内容树；Cancel / Undo **不得**写入新的阻断 residue。
+
+**管理 API（P18-T10；本切片扩展字段、不新增权限面）：** `POST /api/management/v1/templates/{templateId}/paste-clean`（`sourceHtml` + `prePasteStructuredContentJson`）；绑定 upsert / validate 响应携带非敏感 `pasteCleaningEvidence`；`GET .../master-style-catalog` 只读返回母版样式目录。T10 UI 通过上述 API 展示粘贴摘要并支持 cancel/undo；发布 checklist 须用户可见粘贴阻断原因。
 
 #### 2.6.8 发布锁定 Render Profile Publish-locked render profile（P18-T08）
 

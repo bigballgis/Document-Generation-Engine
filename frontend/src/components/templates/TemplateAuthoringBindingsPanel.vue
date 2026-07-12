@@ -20,6 +20,10 @@ import { getMaster } from '@/api/masters'
 
 import { DEFAULT_STRUCTURED_CONTENT_JSON } from '@/utils/structuredContentNodes'
 import { clearExactStructuredDraftOnSave } from '@/utils/structuredContentDraftStorage'
+import {
+  hasUnresolvedPasteBlockers,
+  buildBindingUpsertWithPasteEvidence,
+} from '@/utils/pasteCleaningEvidence'
 
 import { buildMasterAnchorBindingRows, type MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
 
@@ -40,6 +44,8 @@ import type {
   CompositionRule,
 
   CompositionRuleInput,
+
+  PasteCleaningEvidence,
 
   PreviewRecord,
 
@@ -178,6 +184,12 @@ const bindingForm = reactive<UpsertBindingPayload>({
   structuredContentJson: DEFAULT_STRUCTURED_CONTENT_JSON,
 
 })
+
+/** Pending paste residue from Accept; sent on next binding upsert (blockedCount=0). */
+const pendingPasteEvidence = ref<PasteCleaningEvidence | null>(null)
+
+/** Explicit clear path when rewriting without new Accept evidence (S5). */
+const pendingClearPasteEvidence = ref(false)
 
 
 
@@ -427,6 +439,34 @@ function resolveConfiguredLabel(row: MasterAnchorBindingRow): string {
 
 }
 
+function bindingHasPasteBlockers(row: MasterAnchorBindingRow): boolean {
+  return hasUnresolvedPasteBlockers(row.binding?.pasteCleaningEvidence)
+}
+
+const editingPasteResidueBlocked = computed(() => {
+  if (pendingPasteEvidence.value && !hasUnresolvedPasteBlockers(pendingPasteEvidence.value)) {
+    return false
+  }
+  if (pendingClearPasteEvidence.value) {
+    return false
+  }
+  return hasUnresolvedPasteBlockers(editingRow.value?.binding?.pasteCleaningEvidence)
+})
+
+function pasteResidueItemLabel(messageKey: string): string {
+  return te(messageKey) ? t(messageKey) : messageKey
+}
+
+function handlePasteAccepted(evidence: PasteCleaningEvidence) {
+  pendingPasteEvidence.value = evidence
+  pendingClearPasteEvidence.value = false
+}
+
+function clearPendingPasteResidue() {
+  pendingPasteEvidence.value = null
+  pendingClearPasteEvidence.value = true
+}
+
 
 
 function loadVisibilityRuleForAnchor(anchorId: string) {
@@ -479,6 +519,10 @@ function openEditPanel(row: MasterAnchorBindingRow) {
 
   bindingForm.anchorId = row.anchorId
 
+  pendingPasteEvidence.value = null
+
+  pendingClearPasteEvidence.value = false
+
   if (row.binding) {
 
     bindingForm.declaredContentType = row.binding.declaredContentType
@@ -525,7 +569,22 @@ function backToList() {
 
 async function saveBindingDraft() {
 
-  await templatesStore.upsertBinding(props.templateId, bindingForm.anchorId, { ...bindingForm })
+  const payload = buildBindingUpsertWithPasteEvidence(
+    {
+      anchorId: bindingForm.anchorId,
+      declaredContentType: bindingForm.declaredContentType,
+      structuredContentJson: bindingForm.structuredContentJson,
+    },
+    {
+      pendingPasteEvidence: pendingPasteEvidence.value,
+      clearPasteCleaningEvidence: pendingClearPasteEvidence.value,
+    },
+  )
+
+  await templatesStore.upsertBinding(props.templateId, bindingForm.anchorId, payload)
+
+  pendingPasteEvidence.value = null
+  pendingClearPasteEvidence.value = false
 
   const previousRules = props.rules ?? []
 
@@ -821,11 +880,21 @@ async function handleValidateBindings() {
 
           <template #default="{ row }">
 
-            <el-tag :type="row.configured ? 'success' : 'info'" size="small">
+            <div class="binding-status-cell">
+              <el-tag :type="row.configured ? 'success' : 'info'" size="small">
 
-              {{ resolveConfiguredLabel(row) }}
+                {{ resolveConfiguredLabel(row) }}
 
-            </el-tag>
+              </el-tag>
+              <el-tag
+                v-if="bindingHasPasteBlockers(row)"
+                type="danger"
+                size="small"
+                data-testid="binding-paste-residue-tag"
+              >
+                {{ t('templates.authoring.pasteResidue.blockedTag') }}
+              </el-tag>
+            </div>
 
           </template>
 
@@ -942,6 +1011,36 @@ async function handleValidateBindings() {
               </div>
 
               <el-form-item :label="t('templates.authoring.structuredContentEditor')">
+                <el-alert
+                  v-if="editingPasteResidueBlocked"
+                  type="error"
+                  show-icon
+                  :closable="false"
+                  class="paste-residue-alert"
+                  data-testid="binding-paste-residue-alert"
+                  :title="t('templates.authoring.pasteResidue.blockedTitle')"
+                  :description="t('templates.authoring.pasteResidue.blockedDescription')"
+                />
+                <ul
+                  v-if="editingPasteResidueBlocked && editingRow?.binding?.pasteCleaningEvidence?.items?.length"
+                  class="paste-residue-items"
+                  data-testid="binding-paste-residue-items"
+                >
+                  <li
+                    v-for="(item, index) in editingRow.binding.pasteCleaningEvidence.items"
+                    :key="`${item.messageKey}-${index}`"
+                  >
+                    {{ pasteResidueItemLabel(item.messageKey) }}
+                  </li>
+                </ul>
+                <el-button
+                  v-if="editingPasteResidueBlocked"
+                  size="small"
+                  data-testid="binding-clear-paste-residue"
+                  @click="clearPendingPasteResidue"
+                >
+                  {{ t('templates.authoring.pasteResidue.clearAction') }}
+                </el-button>
                 <ControlledStructuredContentEditor
                   ref="structuredEditorRef"
                   v-model="bindingForm.structuredContentJson"
@@ -953,6 +1052,7 @@ async function handleValidateBindings() {
                   :baseline="editSnapshot?.structuredContentJson"
                   @dirty-change="handleEditorDirtyChange"
                   @structure-change="handleStructureChange"
+                  @paste-accepted="handlePasteAccepted"
                 />
               </el-form-item>
             </el-form>
@@ -1125,6 +1225,24 @@ async function handleValidateBindings() {
 
   }
 
+}
+
+.binding-status-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.paste-residue-alert {
+  margin-bottom: 0.75rem;
+}
+
+.paste-residue-items {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }
 
 </style>

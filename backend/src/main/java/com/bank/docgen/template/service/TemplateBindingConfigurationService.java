@@ -142,6 +142,14 @@ public class TemplateBindingConfigurationService {
         Set<String> masterAnchors = new HashSet<>();
         master.getAnchors().forEach(anchor -> masterAnchors.add(anchor.getAnchorId()));
         Set<String> declaredVariableKeys = loadDeclaredVariableKeys(version.getId());
+        var existing = anchorBindingRepository.findByTemplateVersionIdAndAnchorId(version.getId(), request.anchorId());
+        String existingEvidenceJson = existing.map(AnchorBindingEntity::getPasteCleaningEvidenceJson).orElse(null);
+        String evidenceJson = PasteCleaningEvidenceSupport.resolveForUpsert(
+                existingEvidenceJson,
+                request.pasteCleaningEvidence(),
+                request.clearPasteCleaningEvidence(),
+                objectMapper
+        );
         BindingValidationStatus status = computeBindingStatus(
                 request.anchorId(),
                 request.declaredContentType(),
@@ -149,13 +157,13 @@ public class TemplateBindingConfigurationService {
                 List.of(),
                 request.structuredContentJson(),
                 declaredVariableKeys,
-                masterId
+                masterId,
+                evidenceJson
         );
-        var existing = anchorBindingRepository.findByTemplateVersionIdAndAnchorId(version.getId(), request.anchorId());
         AnchorBindingEntity entity;
         if (existing.isPresent()) {
             entity = existing.get();
-            entity.update(request.declaredContentType(), request.structuredContentJson(), status);
+            entity.update(request.declaredContentType(), request.structuredContentJson(), status, evidenceJson);
         } else {
             entity = new AnchorBindingEntity(
                     UUID.randomUUID(),
@@ -165,6 +173,7 @@ public class TemplateBindingConfigurationService {
                     request.structuredContentJson(),
                     status
             );
+            entity.setPasteCleaningEvidenceJson(evidenceJson);
         }
         anchorBindingRepository.save(entity);
         return templateViewMapper.toBindingView(entity);
@@ -210,10 +219,16 @@ public class TemplateBindingConfigurationService {
                     bindings.stream().map(AnchorBindingEntity::getAnchorId).toList(),
                     binding.getStructuredContentJson(),
                     declaredVariableKeys,
-                    masterId
+                    masterId,
+                    binding.getPasteCleaningEvidenceJson()
             );
             if (status != binding.getValidationStatus()) {
-                binding.update(binding.getDeclaredContentType(), binding.getStructuredContentJson(), status);
+                binding.update(
+                        binding.getDeclaredContentType(),
+                        binding.getStructuredContentJson(),
+                        status,
+                        binding.getPasteCleaningEvidenceJson()
+                );
                 anchorBindingRepository.save(binding);
             }
             views.add(templateViewMapper.toBindingView(binding));
@@ -247,6 +262,28 @@ public class TemplateBindingConfigurationService {
             Set<String> declaredVariableKeys,
             UUID masterId
     ) {
+        return computeBindingStatus(
+                anchorId,
+                declaredContentType,
+                masterAnchors,
+                allAnchorIds,
+                structuredContentJson,
+                declaredVariableKeys,
+                masterId,
+                null
+        );
+    }
+
+    BindingValidationStatus computeBindingStatus(
+            String anchorId,
+            AnchorContentType declaredContentType,
+            Set<String> masterAnchors,
+            List<String> allAnchorIds,
+            String structuredContentJson,
+            Set<String> declaredVariableKeys,
+            UUID masterId,
+            String pasteCleaningEvidenceJson
+    ) {
         if (!masterAnchors.contains(anchorId)) {
             return BindingValidationStatus.MISSING_ANCHOR;
         }
@@ -255,6 +292,9 @@ public class TemplateBindingConfigurationService {
             return BindingValidationStatus.DUPLICATE_BINDING;
         }
         if (declaredContentType == AnchorContentType.IMAGE && anchorId.contains("TEXT")) {
+            return BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE;
+        }
+        if (PasteCleaningEvidenceSupport.hasUnresolvedPasteBlockers(pasteCleaningEvidenceJson, objectMapper)) {
             return BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE;
         }
         if (structuredContentJson != null && !structuredContentJson.isBlank()) {
