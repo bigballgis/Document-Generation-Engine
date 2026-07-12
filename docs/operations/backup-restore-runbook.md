@@ -301,6 +301,6 @@ Goal: timed rehearsal on a **scratch** stack; fill the evidence section; feed **
 | --- | --- |
 | [docs/README.md](../README.md) § Deployment & operations | Index entry |
 | [docs/operations/runbook.md](./runbook.md) | Summary + link here |
-| LR-E2 launch checklist | Dated drill row → [§ Drill evidence 2026-07-12](#drill-evidence-2026-07-12--executed) (scratch scope; Wave LR-D still In Progress — not launch go) |
+| LR-E2 launch checklist | Dated drill row → [§ Drill evidence 2026-07-12](#drill-evidence-2026-07-12--executed); linked from [launch-readiness-checklist.md](./launch-readiness-checklist.md) row #6 (**CONDITIONAL** — scratch ≠ production compliance; Wave LR-E2 In Progress — not launch go) |
 | **architecture-reviewer** | PASS_WITH_NOTES (Critical 0; merge_go true) — merge `3d78bc5` |
 | **deploy-engineer** | Scratch drill executed 2026-07-12; evidence + gated scripts; MAIN doc-sync next → commit-review |

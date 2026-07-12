@@ -4,6 +4,10 @@ Operational procedures aligned with [ADR-0030](../adr/operations/0030-operationa
 For Kubernetes rollout specifics see [deploy/README.md](../../deploy/README.md) and
 [deploy/blue-green-runbook.md](../../deploy/blue-green-runbook.md).
 
+**Launch readiness (LR-E2):** evidence-linked go/no-go rows live in
+[launch-readiness-checklist.md](./launch-readiness-checklist.md) — **not** a production go-live claim.
+Related: [backup-restore-runbook.md](./backup-restore-runbook.md) (LR-D2 drill).
+
 ## Release gate
 
 Run the automated release gate before tagging a release candidate:
