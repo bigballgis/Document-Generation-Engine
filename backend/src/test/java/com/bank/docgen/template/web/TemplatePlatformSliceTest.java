@@ -12,54 +12,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.web.ManagementAuthentication;
-import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskRepository;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyRepository;
 import com.bank.docgen.runtime.service.IdempotencyConstants;
-import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.persistence.TemplateRepository;
-import com.bank.docgen.template.persistence.TestDataSetRepository;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.ByteArrayOutputStream;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class TemplatePlatformSliceTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private MasterDocumentRepository masterDocumentRepository;
-
-    @Autowired
-    private TemplateRepository templateRepository;
-
-    @Autowired
-    private TestDataSetRepository testDataSetRepository;
+class TemplatePlatformSliceTest extends TemplateManagementWebTestSupport {
 
     @Autowired
     private GenerationIdempotencyRepository generationIdempotencyRepository;
@@ -67,33 +33,15 @@ class TemplatePlatformSliceTest {
     @Autowired
     private GenerationAsyncTaskRepository generationAsyncTaskRepository;
 
-    private byte[] sampleDocx;
-    private ManagementSessionClaims groupAdmin;
-    private ManagementSessionClaims templateAuthor;
-    private ManagementSessionClaims globalAdmin;
-    private ManagementSessionClaims tester;
-    private ManagementSessionClaims approver;
-
     @BeforeEach
-    void setUp() throws Exception {
+    void resetGenerationStores() {
         generationAsyncTaskRepository.deleteAll();
         generationIdempotencyRepository.deleteAll();
-        testDataSetRepository.deleteAll();
-        templateRepository.deleteAll();
-        masterDocumentRepository.deleteAll();
-        sampleDocx = buildSampleDocx("Dear {{anchor:HEADER}} customer");
-        groupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL", "CORP"));
-        templateAuthor = session("10000003", List.of("TEMPLATE_AUTHOR"), List.of("RETAIL"));
-        globalAdmin = session("10000001", List.of("GLOBAL_ADMIN"), List.of("*"));
-        tester = session("10000006", List.of("TEMPLATE_TESTER"), List.of("RETAIL"));
-        approver = session("10000007", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
     }
 
     @Test
     void testFailDecisionWithoutStructuredFieldsReturns422() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
+        String templateId = createConfiguredTemplate();
 
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/submit-test")
                         .with(authentication(new ManagementAuthentication(templateAuthor)))
@@ -116,9 +64,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void fullTemplateLifecyclePreviewAndRuntimeGeneration() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
+        String templateId = createConfiguredTemplate();
         String previewId = testGenerate(templateId);
         mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/previews")
                         .with(authentication(new ManagementAuthentication(templateAuthor))))
@@ -148,8 +94,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void preview_emitsRealWarnings_fromValidationEngine() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
+        String templateId = createDraftTemplate();
         configureTemplateWithImageScalingBinding(templateId);
 
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/test-generate")
@@ -168,8 +113,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void runtimeSuccess_includesFidelityWarnings() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
+        String templateId = createDraftTemplate();
         configureTemplateWithImageScalingBinding(templateId);
         runLifecycle(templateId);
         CredentialBundle credential = configureApiAndCredential(templateId);
@@ -187,9 +131,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void noHardcodedWarning_whenContentClean() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
+        String templateId = createConfiguredTemplate();
 
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/test-generate")
                         .with(authentication(new ManagementAuthentication(templateAuthor)))
@@ -203,8 +145,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void structuredAuthoring_exposesMasterStyleCatalogAndPasteClean() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
+        String templateId = createDraftTemplate();
 
         mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/master-style-catalog")
                         .with(authentication(new ManagementAuthentication(templateAuthor))))
@@ -271,8 +212,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void savesCompositionRulesAndReturnsThemOnTemplateDetail() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
+        String templateId = createDraftTemplate();
 
         mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/rules")
                         .with(authentication(new ManagementAuthentication(templateAuthor)))
@@ -301,10 +241,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void stopRestoreAndDeprecatePublishedTemplate() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         CredentialBundle credential = configureApiAndCredential(templateId);
 
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/stop")
@@ -355,10 +292,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void deactivateVersionBlocksRuntimeWhileTemplateStaysPublished() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         CredentialBundle credential = configureApiAndCredential(templateId);
 
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/versions/1.0.0/deactivate")
@@ -383,8 +317,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void patchMetadataUpdatesDraftTemplate() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
+        String templateId = createDraftTemplate();
 
         mockMvc.perform(patch("/api/management/v1/templates/" + templateId)
                         .with(authentication(new ManagementAuthentication(templateAuthor)))
@@ -399,8 +332,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void deleteTemplateLogicalDeleteExcludesTemplateFromList() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
+        String templateId = createDraftTemplate();
 
         mockMvc.perform(delete("/api/management/v1/templates/" + templateId)
                         .with(authentication(new ManagementAuthentication(globalAdmin)))
@@ -418,10 +350,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void runtimeGenerateDeniedForUnauthorizedAccessAccount() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         CredentialBundle credential = configureApiAndCredential(templateId);
 
         mockMvc.perform(post("/api/dev/v1/templates/TPL-RETAIL-LETTER/versions/1.0.0/generate")
@@ -438,10 +367,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void runtimeDownloadAfterSyncGenerate() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         CredentialBundle credential = configureApiAndCredential(templateId);
         String documentId = syncGenerateDocumentId(credential, "idem-download-success");
 
@@ -458,10 +384,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void runtimeDownloadUnknownDocumentReturns404() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         CredentialBundle credential = configureApiAndCredential(templateId);
         syncGenerateDocumentId(credential, "idem-download-404");
 
@@ -475,10 +398,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void runtimeDownloadExpiredReturns410() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         CredentialBundle credential = configureApiAndCredential(templateId);
         String documentId = syncGenerateDocumentId(credential, "idem-download-expired");
 
@@ -612,10 +532,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void runtimeSyncGenerateAppliesDocxEncryptionWhenEnabled() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -660,10 +577,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void runtimeSyncGenerateAppliesPdfEncryptionWhenEnabled() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -708,9 +622,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void testDataSetCrudAndPreviewUsesStoredVariables() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
+        String templateId = createConfiguredTemplate();
 
         MvcResult createResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/test-data-sets")
                         .with(authentication(new ManagementAuthentication(templateAuthor)))
@@ -782,9 +694,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void testDataSetMaintenanceDeniedForTesterRole() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
+        String templateId = createConfiguredTemplate();
 
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/test-data-sets")
                         .with(authentication(new ManagementAuthentication(tester)))
@@ -800,9 +710,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void batchTestOverThreeSamplesCreatesSummary() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
+        String templateId = createConfiguredTemplate();
 
         String id1 = createTestDataSet(templateId, "Sample A");
         String id2 = createTestDataSet(templateId, "Sample B");
@@ -824,9 +732,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void coverageSummaryReturnsDimensionsWithoutVariablePlaintext() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
+        String templateId = createConfiguredTemplate();
 
         mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/coverage")
                         .with(authentication(new ManagementAuthentication(templateAuthor))))
@@ -854,10 +760,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void runtimeSyncBatchGenerateAppliesPdfEncryptionWhenEnabled() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -894,10 +797,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void managementCallerContractReturnsNonSensitiveContractView() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         configureApiAndCredential(templateId);
 
         mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/api/contract")
@@ -922,10 +822,7 @@ class TemplatePlatformSliceTest {
 
     @Test
     void runtimeCallerContractExcludesManagementDetail() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         CredentialBundle credential = configureApiAndCredential(templateId);
 
         mockMvc.perform(get("/api/dev/v1/templates/TPL-RETAIL-LETTER/contract")
@@ -947,102 +844,8 @@ class TemplatePlatformSliceTest {
     }
 
     private CredentialBundle preparePublishedTemplateWithBatchPolicy() throws Exception {
-        String masterId = uploadAndApproveMaster();
-        String templateId = createTemplate(masterId);
-        configureTemplate(templateId);
-        runLifecycle(templateId);
+        String templateId = createPublishedTemplate();
         return configureBatchApiAndCredential(templateId);
-    }
-
-    private String uploadAndApproveMaster() throws Exception {
-        String masterId = uploadMaster(groupAdmin);
-        mockMvc.perform(post("/api/management/v1/masters/" + masterId + "/submit-review")
-                        .with(authentication(new ManagementAuthentication(groupAdmin)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"changeSummary":"Initial"}
-                                """))
-                .andExpect(status().isOk());
-        mockMvc.perform(post("/api/management/v1/masters/" + masterId + "/review")
-                        .with(authentication(new ManagementAuthentication(globalAdmin)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"decision":"APPROVED","commentSummary":"Approved"}
-                                """))
-                .andExpect(status().isOk());
-        return masterId;
-    }
-
-    private String uploadMaster(ManagementSessionClaims session) throws Exception {
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "master.docx",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                sampleDocx
-        );
-        MvcResult result = mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                        .multipart("/api/management/v1/masters")
-                        .file(file)
-                        .param("groupCode", "RETAIL")
-                        .param("name", "Retail Master")
-                        .with(authentication(new ManagementAuthentication(session))))
-                .andExpect(status().isOk())
-                .andReturn();
-        return objectMapper.readTree(result.getResponse().getContentAsString()).path("result").path("id").asText();
-    }
-
-    private String createTemplate(String masterId) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/management/v1/templates")
-                        .with(authentication(new ManagementAuthentication(templateAuthor)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "externalId":"TPL-RETAIL-LETTER",
-                                  "groupCode":"RETAIL",
-                                  "name":"Retail Letter",
-                                  "description":"Slice template",
-                                  "masterId":"%s"
-                                }
-                                """.formatted(masterId)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.result.lifecycleStatus").value("DRAFT"))
-                .andReturn();
-        return objectMapper.readTree(result.getResponse().getContentAsString()).path("result").path("id").asText();
-    }
-
-    private void configureTemplate(String templateId) throws Exception {
-        mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/variables/customerName")
-                        .with(authentication(new ManagementAuthentication(templateAuthor)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "variableKey":"customerName",
-                                  "variableType":"TEXT",
-                                  "required":true,
-                                  "defaultValue":"Customer",
-                                  "description":"Customer name"
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.variableType").value("TEXT"));
-
-        mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/bindings/HEADER")
-                        .with(authentication(new ManagementAuthentication(templateAuthor)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "anchorId":"HEADER",
-                                  "declaredContentType":"TEXT",
-                                  "structuredContentJson":"{\\"nodes\\":[{\\"type\\":\\"paragraph\\",\\"children\\":[{\\"type\\":\\"variable\\",\\"key\\":\\"customerName\\"}]}]}"
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.validationStatus").value("VALID"));
-
-        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/bindings/validate")
-                        .with(authentication(new ManagementAuthentication(templateAuthor))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.summary.blocking").value(false));
     }
 
     private void configureTemplateWithImageScalingBinding(String templateId) throws Exception {
@@ -1072,124 +875,6 @@ class TemplatePlatformSliceTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.validationStatus").value("VALID"));
-    }
-
-    private String testGenerate(String templateId) throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/test-generate")
-                        .with(authentication(new ManagementAuthentication(templateAuthor)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"variables":{"customerName":"Alice"}}
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.status").value("SUCCEEDED"))
-                .andReturn();
-        return objectMapper.readTree(result.getResponse().getContentAsString()).path("result").path("previewId").asText();
-    }
-
-    private void runLifecycle(String templateId) throws Exception {
-        runLifecycle(templateId, "1.0.0", true);
-    }
-
-    private void runLifecycle(String templateId, String releaseVersion, boolean configurePolicyBeforePublish) throws Exception {
-        String requiredSampleId = createRequiredTestDataSet(templateId);
-        testGenerate(templateId);
-        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/previews/batch-test")
-                        .with(authentication(new ManagementAuthentication(templateAuthor)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"testDataSetIds":["%s"]}
-                                """.formatted(requiredSampleId)))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/submit-test")
-                        .with(authentication(new ManagementAuthentication(templateAuthor)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"commentSummary":"Ready for test"}
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.lifecycleStatus").value("TESTING"));
-
-        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/test-decision")
-                        .with(authentication(new ManagementAuthentication(tester)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "decision":"PASSED",
-                                  "commentSummary":"Looks good",
-                                  "fidelityViewedConfirmed":true,
-                                  "coverageViewedConfirmed":true,
-                                  "previewViewedConfirmed":true
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.lifecycleStatus").value("APPROVAL"));
-
-        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/approval-decision")
-                        .with(authentication(new ManagementAuthentication(approver)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "decision":"APPROVED",
-                                  "commentSummary":"Approved",
-                                  "fidelityViewedConfirmed":true,
-                                  "keyEvidenceConfirmed":true
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.lifecycleStatus").value("PENDING_RELEASE"));
-
-        if (configurePolicyBeforePublish) {
-            configurePublishApiPolicy(templateId);
-        }
-
-        mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/publish")
-                        .with(authentication(new ManagementAuthentication(groupAdmin)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"releaseVersion":"%s","fidelityViewedConfirmed":true}
-                                """.formatted(releaseVersion)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.lifecycleStatus").value("PUBLISHED"))
-                .andExpect(jsonPath("$.result.releaseVersion").value(releaseVersion));
-    }
-
-    private String createRequiredTestDataSet(String templateId) throws Exception {
-        MvcResult createResult = mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/test-data-sets")
-                        .with(authentication(new ManagementAuthentication(templateAuthor)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "name":"Required sample",
-                                  "required":true,
-                                  "variables":{"customerName":"Alice"}
-                                }
-                                """))
-                .andExpect(status().isCreated())
-                .andReturn();
-        return objectMapper.readTree(createResult.getResponse().getContentAsString())
-                .path("result").path("testDataSetId").asText();
-    }
-
-    private void configurePublishApiPolicy(String templateId) throws Exception {
-        mockMvc.perform(put("/api/management/v1/templates/" + templateId + "/api/policy")
-                        .with(authentication(new ManagementAuthentication(groupAdmin)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "allowedAdGroups":["RETAIL_API"],
-                                  "defaultRouteReleaseVersion":"1.0.0",
-                                  "outputFormats":["DOCX"],
-                                  "outputModes":["SYNC_STREAM"],
-                                  "batchEnabled":false,
-                                  "maxBatchSize":10,
-                                  "docxEncryptionEnabled":false,
-                                  "pdfEncryptionEnabled":false
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.policyVersion").value(2));
     }
 
     private CredentialBundle configureApiAndCredential(String templateId) throws Exception {
@@ -1403,30 +1088,6 @@ class TemplatePlatformSliceTest {
                   "idempotencyKey":"%s"
                 }
                 """.formatted(idempotencyKey);
-    }
-
-    private byte[] buildSampleDocx(String text) throws Exception {
-        try (XWPFDocument document = new XWPFDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            XWPFParagraph paragraph = document.createParagraph();
-            XWPFRun run = paragraph.createRun();
-            run.setText(text);
-            document.write(output);
-            return output.toByteArray();
-        }
-    }
-
-    private ManagementSessionClaims session(String username, List<String> roles, List<String> groups) {
-        return new ManagementSessionClaims(
-                username,
-                username,
-                username + "@example.com",
-                AuthSource.LOCAL,
-                roles,
-                groups,
-                "route.template-authoring-home",
-                List.of("route.template-authoring-home"),
-                Instant.now().plusSeconds(3600)
-        );
     }
 
     private record CredentialBundle(String externalId, String secret) {
