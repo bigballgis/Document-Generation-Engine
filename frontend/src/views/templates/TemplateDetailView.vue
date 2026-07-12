@@ -1,28 +1,14 @@
 <script setup lang="ts">
 import { toRef } from 'vue'
-import TemplateWorkflowBanner from '@/components/templates/TemplateWorkflowBanner.vue'
-import TemplateAuthorJourneyBlock from '@/components/journey/TemplateAuthorJourneyBlock.vue'
-import TemplateTesterJourneyBlock from '@/components/journey/TemplateTesterJourneyBlock.vue'
-import TemplateApproverJourneyBlock from '@/components/journey/TemplateApproverJourneyBlock.vue'
-import TemplateTeamLeadJourneyBlock from '@/components/journey/TemplateTeamLeadJourneyBlock.vue'
-import TemplatePublishSummaryDialog from '@/components/templates/TemplatePublishSummaryDialog.vue'
-import TemplateSubmitForApprovalSummaryDialog from '@/components/templates/TemplateSubmitForApprovalSummaryDialog.vue'
-import TemplateLifecycleDecisionDialog from '@/components/templates/TemplateLifecycleDecisionDialog.vue'
 import TemplateExportActions from '@/components/templates/TemplateExportActions.vue'
-import TemplateMetadataEditDialog from '@/components/templates/TemplateMetadataEditDialog.vue'
-import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
-import TemplateDetailLifecycleTab from '@/views/templates/detail/TemplateDetailLifecycleTab.vue'
-import TemplateDetailAuthoringTab from '@/views/templates/detail/TemplateDetailAuthoringTab.vue'
 import TemplateDetailDevWorkspace from '@/views/templates/detail/TemplateDetailDevWorkspace.vue'
-import TemplateDetailReleaseVersionsTab from '@/views/templates/detail/TemplateDetailReleaseVersionsTab.vue'
-import TemplateDetailApiAccessTab from '@/views/templates/detail/TemplateDetailApiAccessTab.vue'
-import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
-import LifecycleCommentDialog from '@/components/templates/LifecycleCommentDialog.vue'
+import TemplateDetailJourneyStack from '@/views/templates/detail/TemplateDetailJourneyStack.vue'
+import TemplateDetailLegacyWorkspace from '@/views/templates/detail/TemplateDetailLegacyWorkspace.vue'
+import TemplateDetailDialogs from '@/views/templates/detail/TemplateDetailDialogs.vue'
 import TemplateWorkspaceHeader from '@/components/templates/TemplateWorkspaceHeader.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { useTemplateDetailController } from './useTemplateDetailController'
 
 const props = withDefaults(
@@ -210,56 +196,39 @@ const {
     />
 
     <template v-else-if="template">
-      <template v-if="!isDevEditor">
-        <TemplateAuthorJourneyBlock
-          v-if="showAuthorJourney && authorJourneyContext"
-          :journey-context="authorJourneyContext"
-          :template-id="templateId"
-          :can-write="authorTemplates"
-          :primary-cta-disabled="authorJourneyPrimaryCtaDisabled"
-          :show-primary-cta="false"
-          @create="handleJourneyCreate"
-          @design="handleJourneyDesign"
-          @trial-generate="handleJourneyTrialGenerate"
-          @submit-for-test="handleJourneySubmitForTest"
-          @submit-for-approval="handleJourneySubmitForApproval"
-        />
-
-        <TemplateTesterJourneyBlock
-          v-if="showTesterJourney && testerJourneyContext"
-          :journey-context="testerJourneyContext"
-          :can-decide="decideTests"
-          :show-primary-cta="false"
-          @review-request="handleJourneyReviewRequest"
-          @check-evidence="handleJourneyCheckEvidence"
-          @record-result="handleJourneyRecordResult"
-        />
-
-        <TemplateApproverJourneyBlock
-          v-if="showApproverJourney && approverJourneyContext"
-          :journey-context="approverJourneyContext"
-          :can-decide="decideApprovals"
-          :show-primary-cta="false"
-          @review-request="handleJourneyApproverReviewRequest"
-          @review-submission="handleJourneyApproverReviewSubmission"
-          @record-decision="handleJourneyApproverRecordDecision"
-        />
-
-        <TemplateTeamLeadJourneyBlock
-          v-if="showTeamLeadJourney && teamLeadJourneyContext"
-          :journey-context="teamLeadJourneyContext"
-          :can-publish="publishTemplates"
-          :show-primary-cta="false"
-          @review-go-live-request="handleJourneyTeamLeadReviewGoLiveRequest"
-          @run-pre-release-checks="handleJourneyTeamLeadRunPreReleaseChecks"
-          @confirm-go-live="handleJourneyTeamLeadConfirmGoLive"
-        />
-
-        <TemplateWorkflowBanner
-          :template="template"
-          @open-lifecycle="openLifecyclePanel"
-        />
-      </template>
+      <TemplateDetailJourneyStack
+        v-if="!isDevEditor"
+        :template="template"
+        :template-id="templateId"
+        :show-author-journey="showAuthorJourney"
+        :author-journey-context="authorJourneyContext"
+        :author-templates="authorTemplates"
+        :author-journey-primary-cta-disabled="authorJourneyPrimaryCtaDisabled"
+        :show-tester-journey="showTesterJourney"
+        :tester-journey-context="testerJourneyContext"
+        :decide-tests="decideTests"
+        :show-approver-journey="showApproverJourney"
+        :approver-journey-context="approverJourneyContext"
+        :decide-approvals="decideApprovals"
+        :show-team-lead-journey="showTeamLeadJourney"
+        :team-lead-journey-context="teamLeadJourneyContext"
+        :publish-templates="publishTemplates"
+        @create="handleJourneyCreate"
+        @design="handleJourneyDesign"
+        @trial-generate="handleJourneyTrialGenerate"
+        @submit-for-test="handleJourneySubmitForTest"
+        @submit-for-approval="handleJourneySubmitForApproval"
+        @review-request="handleJourneyReviewRequest"
+        @check-evidence="handleJourneyCheckEvidence"
+        @record-result="handleJourneyRecordResult"
+        @review-approver-request="handleJourneyApproverReviewRequest"
+        @review-submission="handleJourneyApproverReviewSubmission"
+        @record-decision="handleJourneyApproverRecordDecision"
+        @review-go-live-request="handleJourneyTeamLeadReviewGoLiveRequest"
+        @run-pre-release-checks="handleJourneyTeamLeadRunPreReleaseChecks"
+        @confirm-go-live="handleJourneyTeamLeadConfirmGoLive"
+        @open-lifecycle="openLifecyclePanel"
+      />
 
       <TemplateDetailDevWorkspace
         v-if="isDevEditor && showAuthoringSection"
@@ -320,258 +289,100 @@ const {
         @preview-refreshed="handlePreviewRefreshed"
       />
 
-      <WorkspaceTabShell
+      <TemplateDetailLegacyWorkspace
         v-if="!isDevEditor"
-        v-model="activeDetailTab"
-        :tabs="detailTabs"
-        class="detail-tabs"
-      >
-        <template #actions>
-          <template v-if="activeDetailTab === 'lifecycle'">
-            <el-button
-              v-if="showDraftActions"
-              type="primary"
-              :loading="templatesStore.submitting"
-              @click="lifecycleCommentDialogOpen = true"
-            >
-              {{ t('templates.lifecycle.submitTest') }}
-            </el-button>
-            <template v-if="showTestingDecisionActions">
-              <el-button
-                type="success"
-                :loading="templatesStore.submitting"
-                @click="handleTestDecision('PASSED')"
-              >
-                {{ t('templates.lifecycle.passTest') }}
-              </el-button>
-              <el-button
-                type="danger"
-                :loading="templatesStore.submitting"
-                @click="handleTestDecision('FAILED')"
-              >
-                {{ t('templates.lifecycle.failTest') }}
-              </el-button>
-            </template>
-            <el-button
-              v-if="showSubmitForApproval"
-              type="primary"
-              :loading="templatesStore.submitting"
-              :disabled="!submitGateReady || loadingSubmitGate"
-              @click="handleSubmitForApproval"
-            >
-              {{ t('templates.lifecycle.submitApproval') }}
-            </el-button>
-            <template v-if="showApprovalDecisionActions">
-              <el-button
-                type="success"
-                :loading="templatesStore.submitting"
-                @click="handleApprovalDecision('APPROVED')"
-              >
-                {{ t('templates.lifecycle.approve') }}
-              </el-button>
-              <el-button
-                type="danger"
-                :loading="templatesStore.submitting"
-                @click="handleApprovalDecision('REJECTED')"
-              >
-                {{ t('templates.lifecycle.reject') }}
-              </el-button>
-            </template>
-            <el-button
-              v-if="showPublishActions"
-              type="primary"
-              :loading="templatesStore.submitting"
-              :disabled="!publishGateReady || loadingPublishGate"
-              @click="handlePublish"
-            >
-              {{ t('templates.lifecycle.publish') }}
-            </el-button>
-            <el-button
-              v-if="showTestGenerate"
-              :loading="templatesStore.submitting"
-              @click="handleTestGenerate()"
-            >
-              {{ t('templates.testGenerate.action') }}
-            </el-button>
-            <el-button
-              v-if="showStopAction"
-              type="warning"
-              :loading="templatesStore.submitting"
-              @click="handleGovernanceAction('stop')"
-            >
-              {{ t('templates.governance.stop') }}
-            </el-button>
-            <el-button
-              v-if="showRestoreAction"
-              type="primary"
-              :loading="templatesStore.submitting"
-              @click="handleGovernanceAction('restore')"
-            >
-              {{ t('templates.governance.restore') }}
-            </el-button>
-            <el-button
-              v-if="showDeprecateAction"
-              type="danger"
-              :loading="templatesStore.submitting"
-              @click="handleGovernanceAction('deprecate')"
-            >
-              {{ t('templates.governance.deprecate') }}
-            </el-button>
-          </template>
-        </template>
-
-        <template #overview>
-          <TemplateDetailOverviewTab :template="template" :format-date-time="formatDateTime" />
-        </template>
-
-        <template #lifecycle>
-          <TemplateDetailLifecycleTab
-            :template-id="templateId"
-            :show-lifecycle-section="showLifecycleSection"
-            :show-governance-section="showGovernanceSection"
-            :show-submit-for-approval="showSubmitForApproval"
-            :show-publish-actions="showPublishActions"
-            :publish-gate-items="publishGateItems"
-            :loading-publish-gate="loadingPublishGate"
-            :publish-bump-level="publishBumpLevel"
-            :publish-version-conflict="publishVersionConflict"
-            :publish-gate-ready="publishGateReady"
-            :publish-bump-options="publishBumpOptions"
-            :binding-gate-result="bindingGateResult"
-            :publish-gate-load-error="publishGateLoadError"
-            :submit-gate-items="submitGateItems"
-            :loading-submit-gate="loadingSubmitGate"
-            :submit-gate-ready="submitGateReady"
-            :submit-gate-load-error="submitGateLoadError"
-            @update:publish-bump-level="publishBumpLevel = $event"
-            @retry-publish-gate="loadPublishGateData"
-            @retry-submit-gate="loadSubmitGateData"
-          />
-        </template>
-
-        <template v-if="showAuthoringSection" #authoring>
-          <TemplateDetailAuthoringTab
-            :template-id="templateId"
-            :master-id="template.masterId"
-            :variables="template.variables"
-            :bindings="template.bindings"
-            :rules="template.rules"
-            :group-code="template.groupCode"
-            :can-edit-content-module-references="canEditContentModuleReferences"
-            :coverage-refresh-token="coverageRefreshToken"
-            @updated="loadTemplate"
-          />
-        </template>
-
-        <template #releaseVersions>
-          <TemplateDetailReleaseVersionsTab
-            :template-id="templateId"
-            :template-lifecycle-status="template.lifecycleStatus"
-            @changed="loadTemplate"
-          />
-        </template>
-
-        <template v-if="showPolicyPanel" #apiAccess>
-          <TemplateDetailApiAccessTab
-            v-model:credential-column-filters="credentialColumnFilters"
-            v-model:credentials-current-page="credentialsCurrentPage"
-            v-model:selected-contract-environment="selectedContractEnvironment"
-            :template-id="templateId"
-            :show-policy-panel="showPolicyPanel"
-            :loading-policy="loadingPolicy"
-            :api-policy="apiPolicy"
-            :policy-load-failed="policyLoadFailed"
-            :policy-load-error-key="policyLoadErrorKey"
-            :paginated-credentials="paginatedCredentials"
-            :credential-status-filter-options="credentialStatusFilterOptions"
-            :page-size="CLIENT_TABLE_PAGE_SIZE"
-            :total-credential-rows="totalCredentialRows"
-            :submitting="policySubmitting"
-            :format-date-time="formatDateTime"
-            :sort-credentials-by-created-at="sortCredentialsByCreatedAt"
-            @create-credential="handleCreateCredential"
-            @rotate-credential="handleRotateCredential"
-            @revoke-credential="handleRevokeCredential"
-            @retry-policy-load="loadPolicyData"
-          />
-        </template>
-      </WorkspaceTabShell>
+        v-model:active-detail-tab="activeDetailTab"
+        v-model:publish-bump-level="publishBumpLevel"
+        v-model:credential-column-filters="credentialColumnFilters"
+        v-model:credentials-current-page="credentialsCurrentPage"
+        v-model:selected-contract-environment="selectedContractEnvironment"
+        :template="template"
+        :template-id="templateId"
+        :detail-tabs="detailTabs"
+        :format-date-time="formatDateTime"
+        :show-lifecycle-section="showLifecycleSection"
+        :show-governance-section="showGovernanceSection"
+        :show-draft-actions="showDraftActions"
+        :show-testing-decision-actions="showTestingDecisionActions"
+        :show-submit-for-approval="showSubmitForApproval"
+        :show-approval-decision-actions="showApprovalDecisionActions"
+        :show-publish-actions="showPublishActions"
+        :show-test-generate="showTestGenerate"
+        :show-stop-action="showStopAction"
+        :show-restore-action="showRestoreAction"
+        :show-deprecate-action="showDeprecateAction"
+        :show-authoring-section="showAuthoringSection"
+        :can-edit-content-module-references="canEditContentModuleReferences"
+        :show-policy-panel="showPolicyPanel"
+        :coverage-refresh-token="coverageRefreshToken"
+        :publish-gate-items="publishGateItems"
+        :loading-publish-gate="loadingPublishGate"
+        :publish-version-conflict="publishVersionConflict"
+        :publish-gate-ready="publishGateReady"
+        :publish-bump-options="publishBumpOptions"
+        :binding-gate-result="bindingGateResult"
+        :publish-gate-load-error="publishGateLoadError"
+        :submit-gate-items="submitGateItems"
+        :loading-submit-gate="loadingSubmitGate"
+        :submit-gate-ready="submitGateReady"
+        :submit-gate-load-error="submitGateLoadError"
+        :submitting="templatesStore.submitting"
+        :loading-policy="loadingPolicy"
+        :api-policy="apiPolicy"
+        :policy-load-failed="policyLoadFailed"
+        :policy-load-error-key="policyLoadErrorKey"
+        :paginated-credentials="paginatedCredentials"
+        :credential-status-filter-options="credentialStatusFilterOptions"
+        :total-credential-rows="totalCredentialRows"
+        :policy-submitting="policySubmitting"
+        :sort-credentials-by-created-at="sortCredentialsByCreatedAt"
+        @open-submit-for-test="lifecycleCommentDialogOpen = true"
+        @test-decision="handleTestDecision"
+        @submit-for-approval="handleSubmitForApproval"
+        @approval-decision="handleApprovalDecision"
+        @publish="handlePublish"
+        @test-generate="handleTestGenerate()"
+        @governance-action="handleGovernanceAction"
+        @retry-publish-gate="loadPublishGateData"
+        @retry-submit-gate="loadSubmitGateData"
+        @updated="loadTemplate"
+        @create-credential="handleCreateCredential"
+        @rotate-credential="handleRotateCredential"
+        @revoke-credential="handleRevokeCredential"
+        @retry-policy-load="loadPolicyData"
+      />
     </template>
 
-    <TemplateMetadataEditDialog
+    <TemplateDetailDialogs
       v-if="template"
-      v-model="metadataEditOpen"
-      :initial-name="template.name"
-      :initial-description="template.description ?? null"
-      :loading="templatesStore.submitting"
-      @submit="handleMetadataUpdate"
-    />
-
-    <TemplatePublishSummaryDialog
-      v-if="template"
-      v-model="publishSummaryOpen"
+      v-model:metadata-edit-open="metadataEditOpen"
+      v-model:publish-summary-open="publishSummaryOpen"
+      v-model:submit-summary-open="submitSummaryOpen"
+      v-model:decision-dialog-open="decisionDialogOpen"
+      v-model:lifecycle-comment-dialog-open="lifecycleCommentDialogOpen"
+      v-model:credential-secret-dialog-visible="credentialSecretDialogVisible"
       :template-name="template.name"
-      :release-version="publishVersion"
-      :gate-items="publishGateItems"
-      :coverage-summary="publishCoverageSummary"
-      :change-diff-summary="publishChangeDiffSummary"
-      :preview-comparison="lastPreview?.previewComparison ?? null"
-      :loading="templatesStore.submitting"
-      @confirm="confirmPublishFromSummary"
-    />
-
-    <TemplateSubmitForApprovalSummaryDialog
-      v-if="template"
-      v-model="submitSummaryOpen"
-      :template-name="template.name"
-      :gate-items="submitGateItems"
-      :coverage-summary="submitCoverageSummary"
-      :change-diff-summary="submitChangeDiffSummary"
-      :preview-comparison="lastPreview?.previewComparison ?? null"
-      :loading="templatesStore.submitting"
-      @confirm="confirmSubmitFromSummary"
-    />
-
-    <TemplateLifecycleDecisionDialog
-      v-model="decisionDialogOpen"
-      :mode="decisionDialogMode"
+      :template-description="template.description ?? null"
       :template-id="templateId"
-      :loading="templatesStore.submitting"
-      :initial-comment="lifecycleComment"
-      @submit="submitLifecycleDecision"
+      :submitting="templatesStore.submitting"
+      :publish-version="publishVersion"
+      :publish-gate-items="publishGateItems"
+      :publish-coverage-summary="publishCoverageSummary"
+      :publish-change-diff-summary="publishChangeDiffSummary"
+      :submit-gate-items="submitGateItems"
+      :submit-coverage-summary="submitCoverageSummary"
+      :submit-change-diff-summary="submitChangeDiffSummary"
+      :preview-comparison="lastPreview?.previewComparison ?? null"
+      :decision-dialog-mode="decisionDialogMode"
+      :lifecycle-comment="lifecycleComment"
+      :credential-secret-external-id="credentialSecretExternalId"
+      :displayed-credential-secret="displayedCredentialSecret"
+      :credential-secret-value="credentialSecretValue"
+      @metadata-submit="handleMetadataUpdate"
+      @confirm-publish="confirmPublishFromSummary"
+      @confirm-submit="confirmSubmitFromSummary"
+      @submit-decision="submitLifecycleDecision"
+      @submit-for-test="handleSubmitForTest"
     />
-
-    <LifecycleCommentDialog
-      v-model="lifecycleCommentDialogOpen"
-      :loading="templatesStore.submitting"
-      @confirm="handleSubmitForTest"
-    />
-
-    <el-dialog
-      v-model="credentialSecretDialogVisible"
-      :title="t('templates.policy.credentialSecretDialogTitle')"
-      width="480px"
-      :close-on-click-modal="false"
-    >
-      <p>{{ t('templates.policy.credentialSecretHint') }}</p>
-      <p>{{ t('templates.policy.credentialExternalId') }}: {{ credentialSecretExternalId }}</p>
-      <el-input
-        :model-value="displayedCredentialSecret || credentialSecretValue"
-        readonly
-        type="textarea"
-        :rows="3"
-      />
-      <template #footer>
-        <el-button type="primary" @click="credentialSecretDialogVisible = false">
-          {{ t('common.confirm') }}
-        </el-button>
-      </template>
-    </el-dialog>
   </AppPageLayout>
 </template>
-
-<style scoped lang="scss">
-.detail-tabs {
-  margin-top: var(--space-2);
-}
-</style>
