@@ -1,8 +1,5 @@
 package com.bank.docgen.template.service;
 
-import com.bank.docgen.authorization.management.api.CatalogPageSupport;
-import com.bank.docgen.authorization.management.api.CatalogQueryPage;
-import com.bank.docgen.authorization.management.api.CatalogSortKey;
 import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
@@ -27,17 +24,14 @@ import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
-import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
-import com.bank.docgen.template.persistence.TemplateRepositoryCustom.TemplateCatalogFilter;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.event.TemplateContentChangedEvent;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -60,7 +54,8 @@ public class TemplateService {
     private final TemplateViewMapper templateViewMapper;
     private final TemplateCurrentVersionResolver templateVersionSupport;
     private final ApplicationEventPublisher eventPublisher;
-    private final ManagementUserDisplayService managementUserDisplayService;
+    private final TemplateCatalogSupport catalogSupport;
+    private final TemplateDisplayEnrichmentSupport displayEnrichment;
 
     public TemplateService(
             TemplateRepository templateRepository,
@@ -85,7 +80,13 @@ public class TemplateService {
         this.templateViewMapper = templateViewMapper;
         this.templateVersionSupport = templateVersionSupport;
         this.eventPublisher = eventPublisher;
-        this.managementUserDisplayService = managementUserDisplayService;
+        this.displayEnrichment = new TemplateDisplayEnrichmentSupport(managementUserDisplayService);
+        this.catalogSupport = new TemplateCatalogSupport(
+                templateRepository,
+                groupAccessService,
+                templateViewMapper,
+                displayEnrichment
+        );
     }
 
     @Transactional(readOnly = true)
@@ -104,116 +105,12 @@ public class TemplateService {
             String approvalSubState,
             String sort
     ) {
-        int safePage = CatalogPageSupport.normalizePage(page);
-        int safeSize = CatalogPageSupport.normalizeSize(size);
-        List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
-        if (groupCodes.isEmpty()) {
-            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-        }
-
-        boolean allGroups = groupCodes.contains("*");
-        String groupFilter = CatalogPageSupport.blankToNull(groupCode);
-        if (groupFilter != null) {
-            if (!groupAccessService.canAccessGroup(session, groupFilter)) {
-                return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-            }
-        }
-
-        TemplateLifecycleStatus statusFilter = parseLifecycleStatus(lifecycleStatus);
-        if (lifecycleStatus != null && !lifecycleStatus.isBlank() && statusFilter == null) {
-            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-        }
-        ApprovalSubState approvalFilter = parseApprovalSubState(approvalSubState);
-        if (approvalSubState != null && !approvalSubState.isBlank() && approvalFilter == null) {
-            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-        }
-
-        CatalogSortKey sortKey = CatalogSortKey.parse(sort, CatalogSortKey.EXTERNAL_ID_ASC);
-        TemplateCatalogFilter filter = new TemplateCatalogFilter(
-                allGroups ? List.of() : List.copyOf(groupCodes),
-                allGroups,
-                groupFilter,
-                CatalogPageSupport.blankToNull(search),
-                statusFilter,
-                approvalFilter,
-                sortKey
-        );
-        CatalogQueryPage<TemplateEntity> templatePage = templateRepository.searchCatalog(filter, safePage, safeSize);
-        List<TemplateSummaryView> content = enrichTemplateSummaries(templatePage.content().stream()
-                .map(templateViewMapper::toSummary)
-                .toList());
-        return new PageView<>(
-                content,
-                safePage,
-                safeSize,
-                templatePage.totalElements(),
-                templatePage.totalPages()
-        );
-    }
-
-    private static TemplateLifecycleStatus parseLifecycleStatus(String raw) {
-        String value = CatalogPageSupport.blankToNull(raw);
-        if (value == null) {
-            return null;
-        }
-        try {
-            return TemplateLifecycleStatus.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
-    }
-
-    private static ApprovalSubState parseApprovalSubState(String raw) {
-        String value = CatalogPageSupport.blankToNull(raw);
-        if (value == null) {
-            return null;
-        }
-        try {
-            return ApprovalSubState.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
+        return catalogSupport.list(session, page, size, search, groupCode, lifecycleStatus, approvalSubState, sort);
     }
 
     @Transactional(readOnly = true)
     public List<TemplateSummaryView> listAll(ManagementSessionClaims session) {
-        List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
-        List<TemplateEntity> templates;
-        if (groupCodes.contains("*")) {
-            templates = templateRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc();
-        } else if (groupCodes.isEmpty()) {
-            return List.of();
-        } else {
-            templates = templateRepository.findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(groupCodes);
-        }
-        return enrichTemplateSummaries(templates.stream().map(templateViewMapper::toSummary).toList());
-    }
-
-    private List<TemplateSummaryView> enrichTemplateSummaries(List<TemplateSummaryView> summaries) {
-        if (summaries.isEmpty()) {
-            return summaries;
-        }
-        Set<String> usernames = summaries.stream()
-                .map(TemplateSummaryView::updatedBy)
-                .filter(username -> username != null && !username.isBlank())
-                .collect(Collectors.toSet());
-        Map<String, String> displayNames = managementUserDisplayService.lookupDisplayNames(usernames);
-        return summaries.stream()
-                .map(summary -> new TemplateSummaryView(
-                        summary.id(),
-                        summary.externalId(),
-                        summary.groupCode(),
-                        summary.name(),
-                        summary.lifecycleStatus(),
-                        summary.approvalSubState(),
-                        summary.releaseVersion(),
-                        summary.releaseVersionCount(),
-                        summary.masterId(),
-                        summary.updatedBy(),
-                        summary.updatedAt(),
-                        summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy())
-                ))
-                .toList();
+        return catalogSupport.listAll(session);
     }
 
     @Transactional(readOnly = true)
@@ -228,7 +125,7 @@ public class TemplateService {
         String defaultRoute = apiPolicyRepository.findByTemplateId(templateId)
                 .map(ApiPolicyEntity::getDefaultRouteReleaseVersion)
                 .orElse(null);
-        return enrichReleaseVersions(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(template.getId()).stream()
+        return displayEnrichment.enrichReleaseVersions(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(template.getId()).stream()
                 .filter(version -> version.getReleaseVersion() != null && !version.getReleaseVersion().isBlank())
                 .map(version -> new TemplateReleaseVersionView(
                         version.getReleaseVersion(),
@@ -240,28 +137,6 @@ public class TemplateService {
                         defaultRoute != null && defaultRoute.equals(version.getReleaseVersion())
                 ))
                 .toList());
-    }
-
-    private List<TemplateReleaseVersionView> enrichReleaseVersions(List<TemplateReleaseVersionView> versions) {
-        if (versions.isEmpty()) {
-            return versions;
-        }
-        Set<String> usernames = versions.stream()
-                .map(TemplateReleaseVersionView::updatedBy)
-                .filter(username -> username != null && !username.isBlank())
-                .collect(Collectors.toSet());
-        Map<String, String> displayNames = managementUserDisplayService.lookupDisplayNames(usernames);
-        return versions.stream()
-                .map(version -> new TemplateReleaseVersionView(
-                        version.releaseVersion(),
-                        version.devVersionNumber(),
-                        version.lifecycleStatus(),
-                        version.updatedAt(),
-                        version.updatedBy(),
-                        version.updatedBy() == null ? null : displayNames.get(version.updatedBy()),
-                        version.defaultRouteTarget()
-                ))
-                .toList();
     }
 
     @Transactional
