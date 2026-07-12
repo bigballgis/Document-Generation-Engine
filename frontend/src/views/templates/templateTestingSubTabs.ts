@@ -1,4 +1,4 @@
-export const TEMPLATE_TESTING_SUB_TABS = [
+const TEMPLATE_TESTING_SUB_TABS = [
   'dataSets',
   'previewRuns',
   'coverage',
@@ -9,7 +9,7 @@ export type TemplateTestingSubTab = (typeof TEMPLATE_TESTING_SUB_TABS)[number]
 
 export const DEFAULT_TEMPLATE_TESTING_SUB_TAB: TemplateTestingSubTab = 'dataSets'
 
-export const TEMPLATE_TESTING_SUB_TAB_LABEL_KEYS: Record<TemplateTestingSubTab, string> = {
+const TEMPLATE_TESTING_SUB_TAB_LABEL_KEYS: Record<TemplateTestingSubTab, string> = {
   dataSets: 'templates.devWorkspace.testing.subTabs.dataSets',
   previewRuns: 'templates.devWorkspace.testing.subTabs.previewRuns',
   coverage: 'templates.devWorkspace.testing.subTabs.coverage',

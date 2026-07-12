@@ -36,7 +36,7 @@ function strictRouteCapability(
  * defense-in-depth role checks (OPT-G5). Backend {@code visibleRoutes} remains
  * authoritative; this never widens access beyond what roles would grant.
  */
-export function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
+function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
   const roleSet = new Set(roles)
   if (roleSet.has(MANAGEMENT_ROLES.GLOBAL_ADMIN)) {
     return (
@@ -96,7 +96,7 @@ export function rolesAllowRoute(routeKey: string, roles: string[]): boolean {
  * Backend {@code visibleRoutes} remains authoritative; client checks are
  * defense-in-depth and fail closed on unknown routes.
  */
-export const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContext) => boolean> = {
+const ROUTE_CAPABILITY_GUARD: Record<RouteKey, (context: CapabilityContext) => boolean> = {
   [ROUTE_KEYS.dashboardHome]: (context) => rolesAllowRoute(ROUTE_KEYS.dashboardHome, context.roles),
   [ROUTE_KEYS.globalGovernanceHome]: (context) =>
     rolesAllowRoute(ROUTE_KEYS.globalGovernanceHome, context.roles),

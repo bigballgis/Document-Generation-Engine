@@ -1,0 +1,8 @@
+# frontend test gate — Wave 1b
+
+Command: pnpm -C frontend test
+Result: GREEN
+
+Test Files  190 passed (190)
+Tests       1154 passed (1154)
+Duration    ~158s

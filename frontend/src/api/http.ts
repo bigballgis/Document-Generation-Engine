@@ -83,13 +83,9 @@ http.interceptors.response.use(
 )
 
 export {
-  isApiError,
-  parseApiEnvelopeError,
   resolveApiError,
   resolveApiErrorMessageKey,
   resolveStoreErrorMessageKey,
-  isAuthHttpError,
-  type ResolvedApiError,
 } from './errorEnvelope'
 
 export { TOKEN_STORAGE_KEY }

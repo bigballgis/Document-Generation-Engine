@@ -1,0 +1,177 @@
+
+> docgen-frontend@0.1.0 knip D:\working\DGE-slim-hygiene\frontend
+> knip
+
+Unused exports (93)
+listRecentInvocations                  apiPolicyApi         function  src/api/apiPolicy.ts:199:23                       
+CATALOG_COLLECT_PAGE_SIZE                                             src/api/catalogPageCollect.ts:4:14                
+CATALOG_COLLECT_MAX_PAGES                                             src/api/catalogPageCollect.ts:10:14               
+isApiError                                                  function  src/api/errorEnvelope.ts:71:17                    
+isAuthHttpError                                             function  src/api/errorEnvelope.ts:97:17                    
+isApiError                                                            src/api/http.ts:86:3                              
+parseApiEnvelopeError                                                 src/api/http.ts:87:3                              
+isAuthHttpError                                                       src/api/http.ts:91:3                              
+upsertGlobalRiskPromptConfig           globalRiskPromptApi  function  src/api/riskPromptConfig.ts:11:23                 
+canManageTemplateLifecycle                                  function  src/auth/roles.ts:325:17                          
+rolesAllowRoute                                             function  src/auth/routeCapabilities.ts:39:17               
+ROUTE_CAPABILITY_GUARD                                                src/auth/routeCapabilities.ts:99:14               
+SESSION_RENEWAL_TICK_MS                                               src/composables/useSessionRenewal.ts:18:14        
+SESSION_RENEWAL_WINDOW_MS                                             src/composables/useSessionRenewal.ts:19:14        
+SESSION_REMINDER_WINDOW_MS                                            src/composables/useSessionRenewal.ts:20:14        
+SESSION_ACTIVITY_WINDOW_MS                                            src/composables/useSessionRenewal.ts:21:14        
+DEFAULT_STRUCTURED_DRAFT_DEBOUNCE_MS                                  鈥posables/useStructuredContentLocalDraft.ts:11:14
+useEnabledStatusFilterOptions                               function  src/composables/useTableFilterOptions.ts:42:17    
+useRuleValidationStatusFilterOptions                        function  src/composables/useTableFilterOptions.ts:65:17    
+COLLABORATION_QUEUES                                                  src/composables/useWorkflowTasks.ts:55:14         
+isValidCollaborationQueue                                   function  src/composables/useWorkflowTasks.ts:109:17        
+isRuntimeEnvironment                                        function  src/config/environments.ts:15:17                  
+API_POLICY_PLATFORM_DEFAULTS                                          src/constants/apiPolicyPlatformDefaults.ts:2:14   
+arraysEqual                                                 function  src/constants/apiPolicyPlatformDefaults.ts:21:17  
+ROLE_JOURNEY_DEFINITIONS                                              src/constants/roleJourneyDefinitions.ts:98:14     
+roleJourneyEmptyGuidanceKey                                 function  src/constants/roleJourneyDefinitions.ts:127:17    
+isMasterReworkState                                                   src/constants/roleJourneyDefinitions.ts:140:3     
+resolveMasterDesignerDashboardJourne鈥?                                src/constants/roleJourneyDefinitions.ts:141:3     
+resolveMasterDesignerJourneyIndex                                     src/constants/roleJourneyDefinitions.ts:142:3     
+buildOpenRemediationTemplateIds                                       src/constants/roleJourneyDefinitions.ts:146:3     
+isTemplateInRemediation                                               src/constants/roleJourneyDefinitions.ts:147:3     
+resolveTemplateAuthorDashboardJourne鈥?                                src/constants/roleJourneyDefinitions.ts:148:3     
+resolveTemplateAuthorJourneyIndex                                     src/constants/roleJourneyDefinitions.ts:149:3     
+hasAllEvidenceViewed                                                  src/constants/roleJourneyDefinitions.ts:153:3     
+hasAnyEvidenceViewed                                                  src/constants/roleJourneyDefinitions.ts:154:3     
+hasTemplatePreviewArtifact                                            src/constants/roleJourneyDefinitions.ts:155:3     
+resolveTemplateTesterDashboardJourne鈥?                                src/constants/roleJourneyDefinitions.ts:156:3     
+resolveTemplateTesterJourneyIndex                                     src/constants/roleJourneyDefinitions.ts:157:3     
+shouldShowTemplateTesterJourney                                       src/constants/roleJourneyDefinitions.ts:158:3     
+templateTesterStepCtaKey                                              src/constants/roleJourneyDefinitions.ts:159:3     
+isAwaitingApproverDecision                                            src/constants/roleJourneyDefinitions.ts:163:3     
+resolveTemplateApproverDashboardJour鈥?                                src/constants/roleJourneyDefinitions.ts:164:3     
+resolveTemplateApproverJourneyIndex                                   src/constants/roleJourneyDefinitions.ts:165:3     
+shouldShowTemplateApproverJourney                                     src/constants/roleJourneyDefinitions.ts:166:3     
+templateApproverStepCtaKey                                            src/constants/roleJourneyDefinitions.ts:167:3     
+isPendingReleaseTemplate                                              src/constants/roleJourneyDefinitions.ts:171:3     
+isPendingReviewMaster                                                 src/constants/roleJourneyDefinitions.ts:172:3     
+resolveTemplateTeamLeadDashboardJour鈥?                                src/constants/roleJourneyDefinitions.ts:173:3     
+resolveTemplateTeamLeadJourneyIndex                                   src/constants/roleJourneyDefinitions.ts:174:3     
+shouldShowTemplateTeamLeadJourney                                     src/constants/roleJourneyDefinitions.ts:175:3     
+templateTeamLeadStepCtaKey                                            src/constants/roleJourneyDefinitions.ts:176:3     
+globalAdminStepCtaKey                                                 src/constants/roleJourneyDefinitions.ts:180:3     
+resolveGlobalAdminDashboardJourneyIn鈥?                                src/constants/roleJourneyDefinitions.ts:181:3     
+shouldShowGlobalAdminJourney                                          src/constants/roleJourneyDefinitions.ts:182:3     
+auditAdminStepCtaKey                                                  src/constants/roleJourneyDefinitions.ts:186:3     
+resolveAuditAdminJourneyIndex                                         src/constants/roleJourneyDefinitions.ts:187:3     
+shouldShowAuditAdminJourney                                           src/constants/roleJourneyDefinitions.ts:188:3     
+isAppLocale                                                 function  src/i18n/localeRegistry.ts:40:17                  
+LEGACY_ROUTE_PATH_REDIRECT                                            src/routing/routeKeys.ts:17:14                    
+ROUTE_NAV_LABEL_KEY                                                   src/routing/routeKeys.ts:39:14                    
+TEMPLATE_DETAIL_PATH_PREFIX                                           src/routing/routeKeys.ts:53:14                    
+CONTENT_MODULE_DETAIL_PATH_PREFIX                                     src/routing/routeKeys.ts:54:14                    
+API_POLICY_DETAIL_PATH_PREFIX                                         src/routing/routeKeys.ts:59:14                    
+routeKeyForPath                                             function  src/routing/routeKeys.ts:77:17                    
+apiPolicyHubPath                                            function  src/routing/routeKeys.ts:124:17                   
+buildUpsertPayloadFromPolicy                                function  src/types/apiPolicyDomain.ts:60:17                
+hasMasterUploadedFile                                       function  src/utils/masterDesignerJourney.ts:31:17          
+masterPlaceholdersSatisfied                                 function  src/utils/masterDesignerJourney.ts:35:17          
+ONBOARDING_TOUR_DISMISS_KEY_PREFIX                                    src/utils/onboardingTourStorage.ts:3:14           
+STRUCTURED_DRAFT_KEY_PREFIX                                           src/utils/structuredContentDraftStorage.ts:8:14   
+STRUCTURED_DRAFT_SCHEMA_VERSION                                       src/utils/structuredContentDraftStorage.ts:10:14  
+isStructuredDraftStorageKey                                 function  src/utils/structuredContentDraftStorage.ts:29:17  
+parseStructuredDraftPayload                                 function  src/utils/structuredContentDraftStorage.ts:33:17  
+hasTemplateBindings                                         function  src/utils/templateAuthorJourney.ts:39:17          
+hasSuccessfulTrialOutput                                    function  src/utils/templateAuthorJourney.ts:43:17          
+buildOpenRemediationTemplateIds                             function  src/utils/templateAuthorJourney.ts:277:17         
+TEMPLATE_EXPORT_ELIGIBLE_STATUSES                                     src/utils/templateExportEligibility.ts:3:14       
+hasWorkflowBannerAction                                     function  src/utils/templateWorkflowBannerContext.ts:111:17 
+resolveListContainerKey                                     function  src/utils/variableSchemaTree.ts:61:17             
+CONTENT_MODULE_WORKSPACE_TABS                                         鈥ontentModules/contentModuleWorkspaceTabs.ts:3:14
+DEFAULT_CONTENT_MODULE_WORKSPACE_TAB                                  鈥ontentModules/contentModuleWorkspaceTabs.ts:7:14
+resolveContentModuleWorkspaceTab                            function  鈥ntentModules/contentModuleWorkspaceTabs.ts:15:17
+MASTER_REVISION_WORKSPACE_TABS                                        鈥iews/masters/masterRevisionWorkspaceTabs.ts:3:14
+DEFAULT_MASTER_REVISION_WORKSPACE_TAB                                 鈥iews/masters/masterRevisionWorkspaceTabs.ts:7:14
+TEMPLATE_APPROVAL_SUB_TABS                                            鈥/views/templates/templateApprovalSubTabs.ts:1:14
+TEMPLATE_APPROVAL_SUB_TAB_LABEL_KEYS                                  鈥?views/templates/templateApprovalSubTabs.ts:12:14
+TEMPLATE_AUTHORING_SUB_TAB_LABEL_KEYS                                 鈥iews/templates/templateAuthoringSubTabs.ts:12:14
+DEFAULT_TEMPLATE_DEV_WORKSPACE_TAB                                    鈥iews/templates/templateDevWorkspaceTabs.ts:27:14
+TEMPLATE_DEV_WORKSPACE_TAB_LABEL_KEYS                                 鈥iews/templates/templateDevWorkspaceTabs.ts:29:14
+TEMPLATE_RELEASE_WORKSPACE_TABS                                       鈥s/templates/templateReleaseWorkspaceTabs.ts:3:14
+DEFAULT_TEMPLATE_RELEASE_WORKSPACE_T鈥?                                鈥/templates/templateReleaseWorkspaceTabs.ts:14:14
+TEMPLATE_TESTING_SUB_TABS                                             src/views/templates/templateTestingSubTabs.ts:1:14
+TEMPLATE_TESTING_SUB_TAB_LABEL_KEYS                                   鈥/views/templates/templateTestingSubTabs.ts:12:14
+Unused exported types (66)
+ResolvedApiError                                      type       src/api/http.ts:92:8                                   
+TemplateListQuery                       templatesApi  interface  src/api/templates.ts:54:18                             
+CatalogToolbarFilter                                  interface  src/components/common/CatalogFilterToolbar.vue:7:18    
+CatalogToolbarSortOption                              interface  src/components/common/CatalogFilterToolbar.vue:14:18   
+LifecycleDecisionDialogMode                           type       鈥s/templates/TemplateLifecycleDecisionDialog.vue:16:13
+LifecycleDecisionSubmitPayload                        interface  鈥s/templates/TemplateLifecycleDecisionDialog.vue:22:18
+ApiPolicyDomainEditorActions                          type       鈥?composables/useApiPolicyDomainEditorActions.ts:262:13
+AuditEventTypeCode                                    type       src/composables/useAuditEventTypeOptions.ts:16:13      
+CatalogFilterField                                    interface  src/composables/useCatalogTableControls.ts:5:18        
+CatalogSortOption                                     interface  src/composables/useCatalogTableControls.ts:12:18       
+TableColumnFilterOption                               type       src/composables/useCatalogTableControls.ts:129:15      
+PaletteItemKind                                       type       src/composables/useCommandPalette.ts:33:13             
+PaletteNavTarget                                      interface  src/composables/useCommandPalette.ts:35:18             
+DirtyGuardDecision                                    type       src/composables/useDirtyGuard.ts:4:13                  
+WorkflowTaskSource                                    type       src/composables/useWorkflowTasks.ts:33:13              
+DashboardTaskHubMode                                  type       src/composables/useWorkflowTasks.ts:63:13              
+TaskPartitionKind                                     type       src/composables/useWorkflowTasks.ts:75:13              
+ClusterTwoRole                                        type       src/constants/roleJourneyDefinitions.ts:9:13           
+ClusterThreeRole                                      type       src/constants/roleJourneyDefinitions.ts:11:13          
+ClusterFourRole                                       type       src/constants/roleJourneyDefinitions.ts:13:13          
+ApiPolicyRotatedCredential                            interface  src/stores/apiPolicy.ts:15:18                          
+VersionLinesCache                                     interface  src/stores/templatePanelData.ts:33:18                  
+AuditReadActorRole                                    type       src/types/audit.ts:3:13                                
+AuditEventDisplayExtensions                           type       src/types/audit.ts:6:13                                
+ContentModuleReviewOperation                          type       src/types/contentModule.ts:9:13                        
+ContentModuleReviewSnapshot                           type       src/types/contentModule.ts:31:13                       
+ContentModuleLifecycleSnapshot                        type       src/types/contentModule.ts:40:13                       
+CallerContractErrorCode                               interface  src/types/contract.ts:1:18                             
+CallerContractVersion                                 interface  src/types/contract.ts:9:18                             
+CallerContractDefaultRoute                            interface  src/types/contract.ts:14:18                            
+CallerContractPolicy                                  interface  src/types/contract.ts:23:18                            
+ResetPasswordRequest                                  interface  src/types/identity.ts:67:18                            
+UpdateGroupRequest                                    interface  src/types/identity.ts:79:18                            
+MasterReviewAction                                    type       src/types/master.ts:8:13                               
+components                                            type       src/types/openapi.ts:3:15                              
+operations                                            type       src/types/openapi.ts:3:27                              
+paths                                                 type       src/types/openapi.ts:3:39                              
+OpenApiSchemaName                                     type       src/types/openapi.ts:5:13                              
+LifecycleDecision                                     type       src/types/template.ts:9:13                             
+PreviewStatus                                         type       src/types/template.ts:11:13                            
+TemplateVersionLineDetail                             type       src/types/template.ts:48:13                            
+PublishGateCheckCode                                  type       src/types/template.ts:168:13                           
+PublishGateItem                                       interface  src/types/template.ts:184:18                           
+ChangeDiffDimensionCode                               type       src/types/template.ts:200:13                           
+ChangeDiffModification                                interface  src/types/template.ts:208:18                           
+ChangeDiffDimension                                   interface  src/types/template.ts:215:18                           
+PreviewComparisonLocationType                         type       src/types/template.ts:232:13                           
+PreviewComparisonSeverity                             type       src/types/template.ts:233:13                           
+PasteCleaningCategory                                 type       src/types/template.ts:302:13                           
+PasteCleaningSummaryItem                              interface  src/types/template.ts:305:18                           
+MasterStyleCatalogEntry                               interface  src/types/template.ts:350:18                           
+RuleValidationStatus                                  type       src/types/template.ts:401:13                           
+RuleValidationItem                                    type       src/types/template.ts:405:13                           
+RuleValidationSummary                                 type       src/types/template.ts:407:13                           
+BatchTestSampleResult                                 interface  src/types/template.ts:436:18                           
+CoverageDimension                                     interface  src/types/template.ts:458:18                           
+CoverageThreshold                                     interface  src/types/template.ts:468:18                           
+ManagementInvocationAuditLinkHint                     interface  src/types/template.ts:557:18                           
+CallableRouteSummary                                  interface  src/types/template.ts:605:18                           
+TemplateExportMetadata                                type       src/types/template.ts:658:13                           
+TemplateImportSummary                                 type       src/types/template.ts:673:13                           
+BatchTestRunStatus                                    type       src/types/template.ts:704:13                           
+AuthorizedEventStreamMessage                          interface  src/utils/authorizedEventStream.ts:1:18                
+TemplateWorkflowBannerLifecycleContext                type       src/utils/templateWorkflowBannerContext.ts:17:13       
+GovernanceAction                                      type       鈥/views/templates/useTemplateDetailController.ts:27:15
+LifecycleDecisionDialogMode                           type       鈥/views/templates/useTemplateDetailController.ts:27:33
+Duplicate exports (1)
+P14_T01_VIEWPORT|P14_T02_VIEWPORT|P14_T03_VIEWPORT|P18_T10_VIEWPORT|P21_T01_VIEWPORT|P21_鈥? e2e/helpers/uiux-evidence.ts
+Configuration hints (8)
+src/auto-imports.d.ts          knip.json  Remove from ignore              
+src/components.d.ts            knip.json  Remove from ignore              
+vite.shared.ts                 knip.json  Remove redundant project pattern
+vite.config.ts                 knip.json  Remove redundant project pattern
+vitest.config.ts               knip.json  Remove redundant project pattern
+playwright.config.ts           knip.json  Remove redundant project pattern
+playwright.docker.config.ts    knip.json  Remove redundant project pattern
+eslint.config.js               knip.json  Remove redundant project pattern
+鈥塃LIFECYCLE鈥?Command failed with exit code 1.

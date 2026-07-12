@@ -14,7 +14,7 @@ export type TemplateWorkflowBannerContext = {
 
 export type WorkflowBannerActionKind = 'testing' | 'approval' | 'publish' | 'draft'
 
-export type TemplateWorkflowBannerLifecycleContext = {
+type TemplateWorkflowBannerLifecycleContext = {
   lifecycleStatus: TemplateLifecycleStatus
   approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
 }
@@ -108,12 +108,3 @@ export function resolveTemplateWorkflowBannerContext(
   }
 }
 
-export function hasWorkflowBannerAction(
-  lifecycleStatus: TemplateLifecycleStatus,
-  capabilities: TemplateWorkflowBannerCapabilities,
-  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null,
-): boolean {
-  return (
-    resolveWorkflowBannerActionKind(lifecycleStatus, capabilities, approvalSubState) !== null
-  )
-}

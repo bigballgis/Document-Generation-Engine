@@ -6,7 +6,7 @@ import type { Schema } from '@/types/openapi'
  */
 export type TemplateLifecycleStatus = Schema<'TemplateLifecycleStatus'> | 'DELETED'
 
-export type LifecycleDecision = 'PASSED' | 'FAILED' | 'APPROVED' | 'REJECTED'
+type LifecycleDecision = 'PASSED' | 'FAILED' | 'APPROVED' | 'REJECTED'
 
 export type PreviewStatus = Schema<'PreviewStatus'>
 
@@ -197,7 +197,7 @@ export interface PublishGateChecklist {
   items: PublishGateItem[]
 }
 
-export type ChangeDiffDimensionCode =
+type ChangeDiffDimensionCode =
   | 'CONTENT'
   | 'ANCHORS'
   | 'VARIABLES'
@@ -205,14 +205,14 @@ export type ChangeDiffDimensionCode =
   | 'CONTRACT_SUMMARY'
 
 /** Not yet modeled in `openapi-v1.yaml` (management change diff). */
-export interface ChangeDiffModification {
+interface ChangeDiffModification {
   key: string
   changeType: string
   summary: string
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management change diff). */
-export interface ChangeDiffDimension {
+interface ChangeDiffDimension {
   dimension: ChangeDiffDimensionCode
   added: string[]
   removed: string[]
@@ -229,8 +229,8 @@ export interface ChangeDiffSummary {
   dimensions: ChangeDiffDimension[]
 }
 
-export type PreviewComparisonLocationType = 'PAGE' | 'ANCHOR' | 'SECTION' | 'COMPONENT'
-export type PreviewComparisonSeverity = 'WARNING' | 'BLOCKER'
+type PreviewComparisonLocationType = 'PAGE' | 'ANCHOR' | 'SECTION' | 'COMPONENT'
+type PreviewComparisonSeverity = 'WARNING' | 'BLOCKER'
 
 /** Not yet modeled in `openapi-v1.yaml` (management preview comparison). */
 export interface PreviewComparisonItem {
@@ -299,10 +299,10 @@ export interface PublishTemplatePayload {
   fidelityViewedConfirmed?: boolean
 }
 
-export type PasteCleaningCategory = 'TRANSFORMED' | 'REMOVED' | 'WARNING' | 'BLOCKED'
+type PasteCleaningCategory = 'TRANSFORMED' | 'REMOVED' | 'WARNING' | 'BLOCKED'
 
 /** Not yet modeled in `openapi-v1.yaml` (management paste clean). */
-export interface PasteCleaningSummaryItem {
+interface PasteCleaningSummaryItem {
   category: PasteCleaningCategory
   messageKey: string
   detectionSummary: string
@@ -347,7 +347,7 @@ export interface PasteCleanResult {
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management master style catalog). */
-export interface MasterStyleCatalogEntry {
+interface MasterStyleCatalogEntry {
   styleKey: string
   applicableNodeTypes: string[]
   renderPurpose: string
@@ -433,7 +433,7 @@ export interface BatchTestGeneratePayload {
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management batch test sample). */
-export interface BatchTestSampleResult {
+interface BatchTestSampleResult {
   testDataSetId: string
   previewId: string
   status: PreviewStatus
@@ -455,7 +455,7 @@ export interface BatchTestSummary {
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management coverage). */
-export interface CoverageDimension {
+interface CoverageDimension {
   dimensionCode: string
   totalCount: number
   exercisedCount: number
@@ -465,7 +465,7 @@ export interface CoverageDimension {
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management coverage). */
-export interface CoverageThreshold {
+interface CoverageThreshold {
   scopeType: string
   groupCode: string | null
   minRequiredVariablePct: number
@@ -602,7 +602,7 @@ export interface ApiPolicyImpactPreview {
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management routes summary). */
-export interface CallableRouteSummary {
+interface CallableRouteSummary {
   releaseVersion: string
   explicitVersionUrl: string
 }
@@ -701,7 +701,7 @@ export interface SubmitTestEligibility {
   uncoveredVariables: string[]
 }
 
-export type BatchTestRunStatus = 'RUNNING' | 'COMPLETED' | 'FAILED' | 'INVALIDATED'
+type BatchTestRunStatus = 'RUNNING' | 'COMPLETED' | 'FAILED' | 'INVALIDATED'
 
 /** Not yet modeled in `openapi-v1.yaml` (management batch test run history). */
 export interface BatchTestRunSummary {

@@ -1,15 +1,14 @@
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
 import { compareSortValues, useDataTableFilters } from '@/composables/useDataTableFilters'
-import type { TableColumnFilterOption } from '@/composables/useTableFilterOptions'
 
-export interface CatalogFilterField<T> {
+interface CatalogFilterField<T> {
   key: string
   labelKey: string
   getValue: (row: T) => string
   matchMode?: 'contains' | 'exact'
 }
 
-export interface CatalogSortOption<T> {
+interface CatalogSortOption<T> {
   key: string
   labelKey: string
   getter: (row: T) => string | number | boolean | null | undefined
@@ -126,4 +125,3 @@ export function useCatalogTableControls<T>(
   }
 }
 
-export type { TableColumnFilterOption }

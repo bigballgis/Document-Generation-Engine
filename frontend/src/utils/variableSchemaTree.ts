@@ -58,7 +58,7 @@ export function splitVariableKeySegments(variableKey: string): string[] {
   return [variableKey]
 }
 
-export function resolveListContainerKey(
+function resolveListContainerKey(
   variableKey: string,
   listVariables: VariableSchema[],
 ): string | null {

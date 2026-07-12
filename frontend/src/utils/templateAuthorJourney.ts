@@ -36,11 +36,11 @@ const TEAM_LEAD_GO_LIVE_GUIDANCE = 'journey.roles.TEMPLATE_AUTHOR.awaitGoLive.te
 
 const TERMINAL_STATUSES: TemplateLifecycleStatus[] = ['STOPPED', 'DEPRECATED', 'DELETED']
 
-export function hasTemplateBindings(context: { bindingsCount?: number }): boolean {
+function hasTemplateBindings(context: { bindingsCount?: number }): boolean {
   return (context.bindingsCount ?? 0) > 0
 }
 
-export function hasSuccessfulTrialOutput(context: { hasSuccessfulTrialOutput?: boolean }): boolean {
+function hasSuccessfulTrialOutput(context: { hasSuccessfulTrialOutput?: boolean }): boolean {
   return context.hasSuccessfulTrialOutput === true
 }
 
@@ -274,8 +274,3 @@ export function shouldShowTemplateAuthorJourney(options: {
   return options.authorTemplates
 }
 
-export function buildOpenRemediationTemplateIds(
-  remediationItems: TemplateAuthorRemediationItem[],
-): Set<string> {
-  return new Set(remediationItems.map((item) => item.templateId))
-}

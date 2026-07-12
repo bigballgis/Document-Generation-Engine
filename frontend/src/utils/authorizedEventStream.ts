@@ -1,4 +1,4 @@
-export interface AuthorizedEventStreamMessage {
+interface AuthorizedEventStreamMessage {
   type: string
   data: string
 }

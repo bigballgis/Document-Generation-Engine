@@ -4,14 +4,14 @@ import { useI18n } from 'vue-i18n'
 import type { CatalogFilterChip } from '@/composables/useCatalogTableControls'
 import type { TableColumnFilterOption } from '@/composables/useTableFilterOptions'
 
-export interface CatalogToolbarFilter {
+interface CatalogToolbarFilter {
   key: string
   labelKey: string
   type: 'text' | 'select'
   options?: TableColumnFilterOption[]
 }
 
-export interface CatalogToolbarSortOption {
+interface CatalogToolbarSortOption {
   key: string
   labelKey: string
 }

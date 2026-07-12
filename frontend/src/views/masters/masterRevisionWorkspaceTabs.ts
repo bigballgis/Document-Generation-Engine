@@ -1,10 +1,10 @@
 import type { LocationQuery } from 'vue-router'
 
-export const MASTER_REVISION_WORKSPACE_TABS = ['design', 'approval'] as const
+const MASTER_REVISION_WORKSPACE_TABS = ['design', 'approval'] as const
 
 export type MasterRevisionWorkspaceTab = (typeof MASTER_REVISION_WORKSPACE_TABS)[number]
 
-export const DEFAULT_MASTER_REVISION_WORKSPACE_TAB: MasterRevisionWorkspaceTab = 'design'
+const DEFAULT_MASTER_REVISION_WORKSPACE_TAB: MasterRevisionWorkspaceTab = 'design'
 
 export const MASTER_REVISION_WORKSPACE_TAB_LABEL_KEYS: Record<MasterRevisionWorkspaceTab, string> = {
   design: 'masters.revisionWorkspace.tabs.design',

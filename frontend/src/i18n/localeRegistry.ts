@@ -37,7 +37,7 @@ const localeLoaders: Record<AppLocale, () => Promise<LocaleMessages>> = {
   'zh-CN': LOCALE_REGISTRY[1].loadMessages,
 }
 
-export function isAppLocale(value: string): value is AppLocale {
+function isAppLocale(value: string): value is AppLocale {
   return LOCALE_CODES.has(value)
 }
 

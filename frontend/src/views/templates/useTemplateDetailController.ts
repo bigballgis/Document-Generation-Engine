@@ -6,11 +6,7 @@ import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environme
 import { useCapabilities } from '@/composables/useCapabilities'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useTemplatesStore } from '@/stores/templates'
-import {
-  useTemplateLifecycleActions,
-  type GovernanceAction,
-  type LifecycleDecisionDialogMode,
-} from '@/views/templates/useTemplateLifecycleActions'
+import { useTemplateLifecycleActions } from '@/views/templates/useTemplateLifecycleActions'
 import { useTemplatePolicyCredentials } from '@/views/templates/useTemplatePolicyCredentials'
 import {
   resolveTemplateDetailTabFromQuery,
@@ -24,7 +20,6 @@ import { useTemplateDetailNavigation } from '@/views/templates/useTemplateDetail
 import { useTemplatePreviewActions } from '@/views/templates/useTemplatePreviewActions'
 import { useTemplateDetailVisibility } from '@/views/templates/useTemplateDetailVisibility'
 
-export type { GovernanceAction, LifecycleDecisionDialogMode }
 
 export function useTemplateDetailController(workspace: Ref<'legacy' | 'dev-editor'>) {
   const isDevEditor = computed(() => workspace.value === 'dev-editor')

@@ -12,7 +12,7 @@ import type {
 } from '@/types/template'
 import type { ApiPolicyDomain, ApiPolicyDomainFormMap, InvocationRetentionDomainForm } from '@/types/apiPolicyDomain'
 
-export interface ApiPolicyRotatedCredential {
+interface ApiPolicyRotatedCredential {
   credentialId: string
   externalId: string
   secret: string

@@ -196,16 +196,6 @@ export async function saveApiPolicyDomain<D extends ApiPolicyDomain>(
   }
 }
 
-export async function listRecentInvocations(
-  templateId: string,
-  limit = 10,
-): Promise<ManagementInvocationSummary[]> {
-  const response = await http.get<ApiEnvelope<ManagementInvocationSummary[]>>(
-    `/templates/${templateId}/api/invocations/recent`,
-    { params: { limit } },
-  )
-  return unwrapEnvelope(response.data)
-}
 
 function buildInvocationListParams(
   page: number,

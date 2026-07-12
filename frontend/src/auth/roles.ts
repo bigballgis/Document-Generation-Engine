@@ -321,7 +321,3 @@ export function canAccessLogicalRoute(
   return visibleRoutes.includes(routeKey)
 }
 
-/** @deprecated Use granular capability helpers instead. */
-export function canManageTemplateLifecycle(context: CapabilityContext): boolean {
-  return canAuthorTemplates(context)
-}

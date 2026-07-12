@@ -6,7 +6,6 @@ export type ContentModuleLifecycleState = NonNullable<
   Schema<'ContentModuleVersionView'>['lifecycleState']
 >
 
-export type ContentModuleReviewOperation = Schema<'ContentModuleReviewTransitionRequest'>['operation']
 
 export type ContentModuleLifecycleOperation =
   Schema<'ContentModuleLifecycleOperationApplyRequest'>['operationType']

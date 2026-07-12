@@ -14,7 +14,7 @@ export const ROUTE_KEYS = {
 export type RouteKey = (typeof ROUTE_KEYS)[keyof typeof ROUTE_KEYS]
 
 /** Legacy route keys from older sessions map to current landing paths. */
-export const LEGACY_ROUTE_PATH_REDIRECT: Partial<Record<string, string>> = {
+const LEGACY_ROUTE_PATH_REDIRECT: Partial<Record<string, string>> = {
   [ROUTE_KEYS.globalGovernanceHome]: '/dashboard',
   [ROUTE_KEYS.groupGovernanceHome]: '/dashboard',
   [ROUTE_KEYS.templateAuthoringHome]: '/dashboard',
@@ -36,27 +36,14 @@ export const ROUTE_PATH_BY_KEY: Record<RouteKey, string> = {
   [ROUTE_KEYS.identityAdministration]: '/entitlement/users',
 }
 
-export const ROUTE_NAV_LABEL_KEY: Record<RouteKey, string> = {
-  [ROUTE_KEYS.dashboardHome]: 'nav.items.dashboard',
-  [ROUTE_KEYS.globalGovernanceHome]: 'nav.items.dashboard',
-  [ROUTE_KEYS.groupGovernanceHome]: 'nav.items.dashboard',
-  [ROUTE_KEYS.templateAuthoringHome]: 'nav.items.dashboard',
-  [ROUTE_KEYS.apiPolicyManagement]: 'nav.items.apiPolicies',
-  [ROUTE_KEYS.auditConsole]: 'nav.items.audit',
-  [ROUTE_KEYS.masterManagement]: 'nav.items.masters',
-  [ROUTE_KEYS.templateManagement]: 'nav.items.templates',
-  [ROUTE_KEYS.contentModuleManagement]: 'nav.items.contentModules',
-  [ROUTE_KEYS.identityAdministration]: 'nav.items.users',
-}
 
 export const MASTER_DETAIL_PATH_PREFIX = '/masters/'
-export const TEMPLATE_DETAIL_PATH_PREFIX = '/templates/'
-export const CONTENT_MODULE_DETAIL_PATH_PREFIX = '/content-modules/'
+const TEMPLATE_DETAIL_PATH_PREFIX = '/templates/'
+const CONTENT_MODULE_DETAIL_PATH_PREFIX = '/content-modules/'
 
 export function contentModuleDetailPath(moduleId: string): string {
   return `${CONTENT_MODULE_DETAIL_PATH_PREFIX}${moduleId}`
 }
-export const API_POLICY_DETAIL_PATH_PREFIX = '/api/policies/'
 
 export function masterDetailPath(masterId: string): string {
   return `${MASTER_DETAIL_PATH_PREFIX}${masterId}`
@@ -74,10 +61,6 @@ export function pathForRouteKey(routeKey: string): string {
   )
 }
 
-export function routeKeyForPath(path: string): RouteKey | undefined {
-  const entry = Object.entries(ROUTE_PATH_BY_KEY).find(([, routePath]) => routePath === path)
-  return entry?.[0] as RouteKey | undefined
-}
 
 export function templatePackageHubPath(templateId: string, tab?: string): string {
   const base = `${TEMPLATE_DETAIL_PATH_PREFIX}${templateId}`
@@ -121,7 +104,7 @@ export function templateLifecyclePanelPath(templateId: string): string {
 }
 
 /** Canonical external-access surface — package hub tab (P13 IA convergence). */
-export function apiPolicyHubPath(templateId: string, domain?: string): string {
+function apiPolicyHubPath(templateId: string, domain?: string): string {
   const base = templatePackageHubPath(templateId, 'apiAccess')
   if (!domain) {
     return base

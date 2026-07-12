@@ -1,0 +1,37 @@
+
+> docgen-frontend@0.1.0 knip D:\working\DGE-slim-hygiene\frontend
+> knip
+
+Unused exported types (22)
+AuditReadActorRole                   type       src/types/audit.ts:3:13         
+ContentModuleReviewSnapshot          type       src/types/contentModule.ts:30:13
+ContentModuleLifecycleSnapshot       type       src/types/contentModule.ts:39:13
+CallerContractErrorCode              interface  src/types/contract.ts:1:18      
+CallerContractVersion                interface  src/types/contract.ts:9:18      
+CallerContractDefaultRoute           interface  src/types/contract.ts:14:18     
+CallerContractPolicy                 interface  src/types/contract.ts:23:18     
+components                           type       src/types/openapi.ts:3:15       
+operations                           type       src/types/openapi.ts:3:27       
+paths                                type       src/types/openapi.ts:3:39       
+OpenApiSchemaName                    type       src/types/openapi.ts:5:13       
+PreviewStatus                        type       src/types/template.ts:11:13     
+TemplateVersionLineDetail            type       src/types/template.ts:48:13     
+PublishGateCheckCode                 type       src/types/template.ts:168:13    
+PublishGateItem                      interface  src/types/template.ts:184:18    
+UpsertGlobalRiskPromptConfigPayload  interface  src/types/template.ts:262:18    
+RuleValidationStatus                 type       src/types/template.ts:401:13    
+RuleValidationItem                   type       src/types/template.ts:405:13    
+RuleValidationSummary                type       src/types/template.ts:407:13    
+ManagementInvocationAuditLinkHint    interface  src/types/template.ts:557:18    
+TemplateExportMetadata               type       src/types/template.ts:658:13    
+TemplateImportSummary                type       src/types/template.ts:673:13    
+Configuration hints (8)
+src/auto-imports.d.ts          knip.json  Remove from ignore              
+src/components.d.ts            knip.json  Remove from ignore              
+vite.shared.ts                 knip.json  Remove redundant project pattern
+vite.config.ts                 knip.json  Remove redundant project pattern
+vitest.config.ts               knip.json  Remove redundant project pattern
+playwright.config.ts           knip.json  Remove redundant project pattern
+playwright.docker.config.ts    knip.json  Remove redundant project pattern
+eslint.config.js               knip.json  Remove redundant project pattern
+鈥塃LIFECYCLE鈥?Command failed with exit code 1.

@@ -68,7 +68,7 @@ export function parseApiEnvelopeError(data: unknown): ResolvedApiError | null {
   }
 }
 
-export function isApiError(error: unknown): error is AxiosError<ApiEnvelope<unknown>> {
+function isApiError(error: unknown): error is AxiosError<ApiEnvelope<unknown>> {
   return axios.isAxiosError(error)
 }
 
@@ -94,7 +94,7 @@ export function resolveApiErrorMessageKey(error: unknown, fallbackKey: string): 
   return fallbackKey
 }
 
-export function isAuthHttpError(error: unknown): boolean {
+function isAuthHttpError(error: unknown): boolean {
   if (!isApiError(error)) {
     return false
   }
