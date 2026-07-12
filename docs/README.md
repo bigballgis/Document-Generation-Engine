@@ -193,6 +193,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Slim Wave 2 backend god-class](./evidence/slim-backend/README.md) | AuditRecorder/AuditQuery/VersionLine/Master extracts; `mvn verify` GREEN (merge `6dd76b3`) |
 | [Slim R-backend residual](./evidence/slim-r-backend/README.md) | ApiManagement 572→230; TemplateLifecycle 553→312; package-private supports; `mvn verify` GREEN |
 | [Slim R2-backend residual](./evidence/slim-r2-backend/README.md) | PublishGateService 429→181; CheckItem + Checklist supports; `mvn verify` GREEN |
+| [Slim R3-backend residual](./evidence/slim-r3-backend/README.md) | InvocationRecord 468→287; BatchGeneration 511→311; package-private supports; `mvn verify` GREEN |
 | [Slim Wave 3 frontend SFC](./evidence/slim-frontend/README.md) | BindingsPanel 1249→170 orchestrator; ManagementShell 671→311 (merge `2cf7cb9`) |
 | [Slim R-frontend residual](./evidence/slim-r-frontend/README.md) | CSC Editor 864→177; AuditConsole 588→155 |
 | [Slim R2-frontend residual](./evidence/slim-r2-frontend/README.md) | TemplateDetailView 577→388 orchestrator + detail shells (merge `02b299c`) |
