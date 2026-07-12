@@ -35,7 +35,7 @@
     "@axe-core/playwright": "^4.12.1",
     "@cyclonedx/cyclonedx-npm": "^5.0.0",
     "@eslint/js": "^9.17.0",
-    "@playwright/test": "^1.49.1",
+    "@playwright/test": "^1.61.1",
     "@types/node": "^26.1.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitest/coverage-v8": "2.1.9",
