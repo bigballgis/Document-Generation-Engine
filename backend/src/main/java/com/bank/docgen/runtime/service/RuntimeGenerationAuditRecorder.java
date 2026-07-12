@@ -2,17 +2,11 @@ package com.bank.docgen.runtime.service;
 
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskEntity;
-import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventEntity;
 import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventRepository;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.template.persistence.TemplateEntity;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.time.Instant;
-import java.util.HexFormat;
 import java.util.Locale;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,17 +25,15 @@ public class RuntimeGenerationAuditRecorder {
     public static final String OUTCOME_REPLAYED = "REPLAYED";
     public static final String ASYNC_ENVIRONMENT = "async";
 
-    private static final int SUMMARY_MAX = 512;
-
-    private final RuntimeGenerationAuditEventRepository repository;
+    private final RuntimeGenerationAuditPersistSupport persist;
     private final TraceIdProvider traceIdProvider;
 
     public RuntimeGenerationAuditRecorder(
             RuntimeGenerationAuditEventRepository repository,
             TraceIdProvider traceIdProvider
     ) {
-        this.repository = repository;
         this.traceIdProvider = traceIdProvider;
+        this.persist = new RuntimeGenerationAuditPersistSupport(repository, traceIdProvider);
     }
 
     @Transactional
@@ -60,7 +52,7 @@ public class RuntimeGenerationAuditRecorder {
             String outcome,
             String traceId
     ) {
-        persist(
+        persist.persist(
                 EVENT_SYNC_GENERATION,
                 template,
                 session,
@@ -77,7 +69,7 @@ public class RuntimeGenerationAuditRecorder {
                 null,
                 documentId,
                 outcome,
-                summarize("Sync generation " + outcome.toLowerCase(Locale.ROOT)),
+                persist.summarize("Sync generation " + outcome.toLowerCase(Locale.ROOT)),
                 null,
                 null,
                 traceId
@@ -101,7 +93,7 @@ public class RuntimeGenerationAuditRecorder {
             String errorSummary,
             String traceId
     ) {
-        persist(
+        persist.persist(
                 EVENT_BATCH_SYNC,
                 template,
                 session,
@@ -140,7 +132,7 @@ public class RuntimeGenerationAuditRecorder {
             String batchExternalId,
             String traceId
     ) {
-        persist(
+        persist.persist(
                 EVENT_BATCH_ASYNC_ACCEPTED,
                 template,
                 session,
@@ -157,7 +149,7 @@ public class RuntimeGenerationAuditRecorder {
                 batchExternalId,
                 null,
                 OUTCOME_SUCCESS,
-                summarize("Async batch accepted"),
+                persist.summarize("Async batch accepted"),
                 null,
                 null,
                 traceId
@@ -181,7 +173,7 @@ public class RuntimeGenerationAuditRecorder {
             String resultSummary,
             String errorSummary
     ) {
-        persist(
+        persist.persist(
                 EVENT_BATCH_ASYNC_COMPLETED,
                 template,
                 session,
@@ -214,34 +206,7 @@ public class RuntimeGenerationAuditRecorder {
             String resultSummary,
             String errorSummary
     ) {
-        repository.save(new RuntimeGenerationAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
-                EVENT_BATCH_ASYNC_COMPLETED,
-                ASYNC_ENVIRONMENT,
-                template.getId(),
-                template.getGroupCode(),
-                null,
-                null,
-                null,
-                task.getReleaseVersion(),
-                task.getReleaseVersion(),
-                task.getRouteType(),
-                request.output().format(),
-                request.output().mode(),
-                request.requestId(),
-                hashIdempotencyKey(request.idempotencyKey()),
-                null,
-                task.getTaskExternalId(),
-                task.getBatchExternalId(),
-                null,
-                outcome,
-                truncate(resultSummary),
-                truncate(errorSummary),
-                null,
-                traceIdProvider.newAuditId(),
-                traceIdProvider.currentOrNew(null)
-        ));
+        persist.persistBatchAsyncCompletedFromTask(template, task, request, outcome, resultSummary, errorSummary);
     }
 
     @Transactional
@@ -252,34 +217,7 @@ public class RuntimeGenerationAuditRecorder {
             String traceId,
             String auditId
     ) {
-        repository.save(new RuntimeGenerationAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
-                EVENT_RATE_LIMIT_DENIED,
-                environment,
-                UUID.fromString("00000000-0000-0000-0000-000000000000"),
-                null,
-                null,
-                fingerprint(credentialExternalId),
-                accessAccount,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                OUTCOME_FAILURE,
-                summarize("Rate limit denied"),
-                null,
-                null,
-                auditId,
-                traceId
-        ));
+        persist.persistRateLimitDenied(environment, credentialExternalId, accessAccount, traceId, auditId);
     }
 
     @Transactional
@@ -291,7 +229,7 @@ public class RuntimeGenerationAuditRecorder {
             String auditId,
             String traceId
     ) {
-        persist(
+        persist.persist(
                 EVENT_DOCUMENT_DOWNLOAD,
                 template,
                 session,
@@ -308,7 +246,7 @@ public class RuntimeGenerationAuditRecorder {
                 null,
                 documentId,
                 OUTCOME_SUCCESS,
-                summarize("Document download"),
+                persist.summarize("Document download"),
                 null,
                 null,
                 traceId,
@@ -316,131 +254,7 @@ public class RuntimeGenerationAuditRecorder {
         );
     }
 
-    private void persist(
-            String eventType,
-            TemplateEntity template,
-            RuntimeSessionClaims session,
-            String environment,
-            String routeType,
-            String releaseVersion,
-            String resolvedReleaseVersion,
-            String outputFormat,
-            String outputMode,
-            String requestId,
-            String idempotencyKey,
-            String idempotencyStatus,
-            String taskExternalId,
-            String batchExternalId,
-            String documentId,
-            String outcome,
-            String resultSummary,
-            String errorSummary,
-            Long durationMs,
-            String traceId
-    ) {
-        persist(
-                eventType,
-                template,
-                session,
-                environment,
-                routeType,
-                releaseVersion,
-                resolvedReleaseVersion,
-                outputFormat,
-                outputMode,
-                requestId,
-                idempotencyKey,
-                idempotencyStatus,
-                taskExternalId,
-                batchExternalId,
-                documentId,
-                outcome,
-                resultSummary,
-                errorSummary,
-                durationMs,
-                traceId,
-                traceIdProvider.newAuditId()
-        );
-    }
-
-    private void persist(
-            String eventType,
-            TemplateEntity template,
-            RuntimeSessionClaims session,
-            String environment,
-            String routeType,
-            String releaseVersion,
-            String resolvedReleaseVersion,
-            String outputFormat,
-            String outputMode,
-            String requestId,
-            String idempotencyKey,
-            String idempotencyStatus,
-            String taskExternalId,
-            String batchExternalId,
-            String documentId,
-            String outcome,
-            String resultSummary,
-            String errorSummary,
-            Long durationMs,
-            String traceId,
-            String auditId
-    ) {
-        repository.save(new RuntimeGenerationAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
-                eventType,
-                environment,
-                template.getId(),
-                template.getGroupCode(),
-                session.credentialId(),
-                fingerprint(session.credentialExternalId()),
-                session.accessAccount(),
-                releaseVersion,
-                resolvedReleaseVersion,
-                routeType,
-                outputFormat,
-                outputMode,
-                requestId,
-                hashIdempotencyKey(idempotencyKey),
-                idempotencyStatus,
-                taskExternalId,
-                batchExternalId,
-                documentId,
-                outcome,
-                truncate(resultSummary),
-                truncate(errorSummary),
-                durationMs,
-                auditId,
-                traceId
-        ));
-    }
-
     static String hashIdempotencyKey(String idempotencyKey) {
-        if (idempotencyKey == null || idempotencyKey.isBlank()) {
-            return null;
-        }
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(idempotencyKey.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
-        } catch (Exception ex) {
-            return null;
-        }
-    }
-
-    private String fingerprint(String externalId) {
-        return externalId == null ? null : "fp-" + externalId;
-    }
-
-    private String summarize(String value) {
-        return truncate(value);
-    }
-
-    private String truncate(String value) {
-        if (value == null) {
-            return null;
-        }
-        return value.length() <= SUMMARY_MAX ? value : value.substring(0, SUMMARY_MAX);
+        return RuntimeGenerationAuditPersistSupport.hashIdempotencyKey(idempotencyKey);
     }
 }
