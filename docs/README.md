@@ -199,6 +199,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Slim R5-backend](./evidence/slim-r5-backend/README.md) | MasterDocumentService 492→340; ManagementAuditRecorder 492→349; 8 package-private supports; `mvn verify` GREEN |
 | [Slim R6-frontend](./evidence/slim-r6-frontend/README.md) | Lifecycle/composables + mid-tier panels &lt;300; FE gates GREEN |
 | [Slim R6-backend](./evidence/slim-r6-backend/README.md) | TemplateController split + Collaboration/Runtime/VersionLine peels; `mvn verify` GREEN |
+| [Slim R6-render](./evidence/slim-r6-render/README.md) | WriteSession/DocxAssembler/ConditionEvaluator peels under soft warn; `mvn verify` GREEN |
 | [Slim Wave 3 frontend SFC](./evidence/slim-frontend/README.md) | BindingsPanel 1249→170 orchestrator; ManagementShell 671→311 (merge `2cf7cb9`) |
 | [Slim R-frontend residual](./evidence/slim-r-frontend/README.md) | CSC Editor 864→177; AuditConsole 588→155 |
 | [Slim R2-frontend residual](./evidence/slim-r2-frontend/README.md) | TemplateDetailView 577→388 orchestrator + detail shells (merge `02b299c`) |
