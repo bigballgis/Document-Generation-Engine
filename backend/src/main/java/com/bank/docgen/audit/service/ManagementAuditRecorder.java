@@ -4,13 +4,8 @@ import com.bank.docgen.audit.api.ContentModuleLifecycleAuditDetail;
 import com.bank.docgen.audit.api.PolicyUpdateAuditDetail;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemTriggerType;
-import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
 import com.bank.docgen.audit.persistence.ManagementAuditEventRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -49,14 +44,10 @@ public class ManagementAuditRecorder {
     public static final String TEMPLATE_EXPORTED = "TEMPLATE_EXPORTED";
     public static final String TEMPLATE_IMPORTED = "TEMPLATE_IMPORTED";
 
-    private static final int STATUS_SUMMARY_MAX = 512;
-
-    private final ManagementAuditEventRepository repository;
-    private final ObjectMapper objectMapper;
+    private final ManagementAuditEventWriter writer;
 
     public ManagementAuditRecorder(ManagementAuditEventRepository repository, ObjectMapper objectMapper) {
-        this.repository = repository;
-        this.objectMapper = objectMapper;
+        this.writer = new ManagementAuditEventWriter(repository, objectMapper);
     }
 
     @Transactional
@@ -93,45 +84,22 @@ public class ManagementAuditRecorder {
             PolicyUpdateAuditDetail detail
     ) {
         boolean rollback = detail.rollback() != null && detail.rollback();
-        persistAuditEvent(
+        writer.persist(
                 API_POLICY_UPDATED,
                 templateId,
                 groupCode,
                 null,
                 previousPolicyVersion,
                 policyVersion,
-                writeJson(changedAreas),
+                writer.writeJson(changedAreas),
                 rollback,
                 detail.rollbackSourcePolicyVersion(),
                 actorUsername,
                 actorSummary,
                 null,
-                truncate(buildStatusSummary(changedAreas, detail)),
-                writeAuditPayload(detail)
+                writer.truncate(writer.buildPolicyStatusSummary(changedAreas, detail)),
+                writer.writePolicyPayload(detail)
         );
-    }
-
-    private String buildStatusSummary(List<String> changedAreas, PolicyUpdateAuditDetail detail) {
-        if (detail.configDiffSummary().isEmpty()) {
-            return "Policy updated: " + String.join(", ", changedAreas);
-        }
-        return "Policy updated: " + String.join("; ", detail.configDiffSummary());
-    }
-
-    private String writeAuditPayload(PolicyUpdateAuditDetail detail) {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("configDiffSummary", detail.configDiffSummary());
-        payload.put("impactPreviewSummary", detail.impactPreviewSummary());
-        payload.put("hardBlockSummary", detail.hardBlockSummary());
-        payload.put("warningSummary", detail.warningSummary());
-        payload.put("confirmed", detail.confirmed());
-        payload.put("rollback", detail.rollback());
-        payload.put("rollbackSourcePolicyVersion", detail.rollbackSourcePolicyVersion());
-        try {
-            return objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException ex) {
-            return "{}";
-        }
     }
 
     @Transactional
@@ -143,21 +111,15 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        persistAuditEvent(
+        writer.persistCredential(
                 API_CREDENTIAL_CREATED,
                 templateId,
                 groupCode,
                 credentialId,
-                null,
-                null,
-                writeJson(List.of()),
-                false,
-                null,
+                credentialExternalId,
                 actorUsername,
                 actorSummary,
-                fingerprint(credentialExternalId),
-                "Credential created",
-                writeJson(List.of())
+                "Credential created"
         );
     }
 
@@ -172,22 +134,16 @@ public class ManagementAuditRecorder {
             int rotationGeneration,
             String previousCredentialFingerprint
     ) {
-        persistAuditEvent(
+        writer.persistCredential(
                 API_CREDENTIAL_ROTATED,
                 templateId,
                 groupCode,
                 credentialId,
-                null,
-                null,
-                writeJson(List.of()),
-                false,
-                null,
+                credentialExternalId,
                 actorUsername,
                 actorSummary,
-                fingerprint(credentialExternalId),
                 "Credential rotated; generation=" + rotationGeneration
-                        + "; previousFingerprint=" + previousCredentialFingerprint,
-                writeJson(List.of())
+                        + "; previousFingerprint=" + previousCredentialFingerprint
         );
     }
 
@@ -200,21 +156,15 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        persistAuditEvent(
+        writer.persistCredential(
                 API_CREDENTIAL_REVOKED,
                 templateId,
                 groupCode,
                 credentialId,
-                null,
-                null,
-                writeJson(List.of()),
-                false,
-                null,
+                credentialExternalId,
                 actorUsername,
                 actorSummary,
-                fingerprint(credentialExternalId),
-                "Credential revoked",
-                writeJson(List.of())
+                "Credential revoked"
         );
     }
 
@@ -225,7 +175,7 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        recordIdentityEvent(eventType, null, actorUsername, actorSummary, statusSummary);
+        writer.persistIdentity(eventType, null, actorUsername, actorSummary, statusSummary);
     }
 
     @Transactional
@@ -236,7 +186,7 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        recordIdentityEvent(eventType, groupCode, actorUsername, actorSummary, statusSummary);
+        writer.persistIdentity(eventType, groupCode, actorUsername, actorSummary, statusSummary);
     }
 
     @Transactional
@@ -247,7 +197,7 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        recordIdentityEvent(
+        writer.persistIdentity(
                 RISK_PROMPT_CONFIG_UPDATED,
                 groupCode,
                 actorUsername,
@@ -264,7 +214,7 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        recordIdentityEvent(
+        writer.persistIdentity(
                 COLLABORATION_TIMEOUT_CONFIG_UPDATED,
                 groupCode,
                 actorUsername,
@@ -281,21 +231,21 @@ public class ManagementAuditRecorder {
             CollaborationWorkItemQueue sourceQueue,
             String statusSummary
     ) {
-        persistAuditEvent(
+        writer.persist(
                 COLLABORATION_TIMEOUT_ESCALATION,
                 templateId,
                 groupCode,
                 null,
                 null,
                 null,
-                writeJson(List.of(sourceQueue.name(), sourceWorkItemId.toString())),
+                writer.writeJson(List.of(sourceQueue.name(), sourceWorkItemId.toString())),
                 false,
                 null,
                 COLLABORATION_ESCALATION_ACTOR_USERNAME,
                 COLLABORATION_ESCALATION_ACTOR_SUMMARY,
                 null,
-                truncate(statusSummary),
-                writeJson(List.of())
+                writer.truncate(statusSummary),
+                writer.emptyJsonArray()
         );
     }
 
@@ -309,21 +259,21 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        persistAuditEvent(
+        writer.persist(
                 COLLABORATION_WORK_ITEM_CREATED,
                 templateId,
                 groupCode,
                 null,
                 null,
                 null,
-                writeJson(List.of(queue.name(), triggerType.name(), workItemId.toString())),
+                writer.writeJson(List.of(queue.name(), triggerType.name(), workItemId.toString())),
                 false,
                 null,
                 actorUsername,
                 actorSummary,
                 null,
-                truncate("Collaboration work item created: " + queue.name() + "/" + triggerType.name()),
-                writeJson(List.of())
+                writer.truncate("Collaboration work item created: " + queue.name() + "/" + triggerType.name()),
+                writer.emptyJsonArray()
         );
     }
 
@@ -336,21 +286,21 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        persistAuditEvent(
+        writer.persist(
                 COLLABORATION_WORK_ITEM_RESOLVED,
                 templateId,
                 groupCode,
                 null,
                 null,
                 null,
-                writeJson(List.of(queue.name(), workItemId.toString())),
+                writer.writeJson(List.of(queue.name(), workItemId.toString())),
                 false,
                 null,
                 actorUsername,
                 actorSummary,
                 null,
-                truncate("Collaboration work item resolved: " + queue.name()),
-                writeJson(List.of())
+                writer.truncate("Collaboration work item resolved: " + queue.name()),
+                writer.emptyJsonArray()
         );
     }
 
@@ -362,7 +312,7 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        persistAuditEvent(
+        writer.persist(
                 TEMPLATE_EXPORTED,
                 templateId,
                 groupCode,
@@ -375,8 +325,8 @@ public class ManagementAuditRecorder {
                 actorUsername,
                 actorSummary,
                 null,
-                truncate("Template exported: " + externalId),
-                writeJson(List.of())
+                writer.truncate("Template exported: " + externalId),
+                writer.emptyJsonArray()
         );
     }
 
@@ -390,21 +340,21 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        persistAuditEvent(
+        writer.persist(
                 TEMPLATE_IMPORTED,
                 templateId,
                 groupCode,
                 null,
                 null,
                 null,
-                writeJson(List.of()),
+                writer.emptyJsonArray(),
                 false,
                 null,
                 actorUsername,
                 actorSummary,
                 null,
-                truncate("Template imported: " + externalId + " batch=" + importBatchId + " dev=" + developmentVersion),
-                writeJson(List.of())
+                writer.truncate("Template imported: " + externalId + " batch=" + importBatchId + " dev=" + developmentVersion),
+                writer.emptyJsonArray()
         );
     }
 
@@ -497,14 +447,14 @@ public class ManagementAuditRecorder {
             String actorSummary,
             ContentModuleLifecycleAuditDetail impactDetail
     ) {
-        recordContentModuleEvent(
+        writer.persistContentModule(
                 CONTENT_MODULE_LIFECYCLE_OPERATION,
                 moduleId,
                 groupCode,
                 operation + " on " + moduleCode + "@" + semanticVersion + " -> " + lifecycleState,
                 actorUsername,
                 actorSummary,
-                writeContentModuleLifecyclePayload(impactDetail)
+                writer.writeContentModuleLifecyclePayload(impactDetail)
         );
     }
 
@@ -540,54 +490,15 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        recordContentModuleEvent(eventType, moduleId, groupCode, statusSummary, actorUsername, actorSummary, writeJson(List.of()));
-    }
-
-    private void recordContentModuleEvent(
-            String eventType,
-            UUID moduleId,
-            String groupCode,
-            String statusSummary,
-            String actorUsername,
-            String actorSummary,
-            String auditPayloadJson
-    ) {
-        persistAuditEvent(
+        writer.persistContentModule(
                 eventType,
                 moduleId,
                 groupCode,
-                null,
-                null,
-                null,
-                writeJson(List.of("CONTENT_MODULE")),
-                false,
-                null,
+                statusSummary,
                 actorUsername,
                 actorSummary,
-                null,
-                truncate(statusSummary),
-                auditPayloadJson
+                writer.emptyJsonArray()
         );
-    }
-
-    private String writeContentModuleLifecyclePayload(ContentModuleLifecycleAuditDetail detail) {
-        if (detail == null) {
-            return writeJson(List.of());
-        }
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("referenceTemplateCount", detail.referenceTemplateCount());
-        payload.put("referenceTemplateListHint", detail.referenceTemplateListHint());
-        payload.put("impactedReleaseVersionsHint", detail.impactedReleaseVersionsHint());
-        payload.put("defaultRouteAffected", detail.defaultRouteAffected());
-        payload.put("recentCallSummary", detail.recentCallSummary());
-        payload.put("remediationHint", detail.remediationHint());
-        payload.put("templateStopRequired", detail.templateStopRequired());
-        payload.put("releaseStopRequired", detail.releaseStopRequired());
-        try {
-            return objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException ex) {
-            return writeJson(List.of());
-        }
     }
 
     @Transactional
@@ -597,92 +508,12 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        recordIdentityEvent(
+        writer.persistIdentity(
                 IDENTITY_ESCALATION_DENIED,
                 null,
                 actorUsername,
                 actorSummary,
                 reasonCode + ": " + statusSummary
         );
-    }
-
-    private void recordIdentityEvent(
-            String eventType,
-            String groupCode,
-            String actorUsername,
-            String actorSummary,
-            String statusSummary
-    ) {
-        persistAuditEvent(
-                eventType,
-                null,
-                groupCode,
-                null,
-                null,
-                null,
-                writeJson(List.of()),
-                false,
-                null,
-                actorUsername,
-                actorSummary,
-                null,
-                truncate(statusSummary),
-                writeJson(List.of())
-        );
-    }
-
-    private void persistAuditEvent(
-            String eventType,
-            UUID templateId,
-            String groupCode,
-            UUID credentialId,
-            Integer previousPolicyVersion,
-            Integer policyVersion,
-            String changedAreasJson,
-            boolean rollback,
-            Integer rollbackSourcePolicyVersion,
-            String actorUsername,
-            String actorSummary,
-            String credentialFingerprint,
-            String statusSummary,
-            String warningCodesJson
-    ) {
-        repository.save(new ManagementAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
-                eventType,
-                templateId,
-                groupCode,
-                credentialId,
-                previousPolicyVersion,
-                policyVersion,
-                changedAreasJson,
-                rollback,
-                rollbackSourcePolicyVersion,
-                actorUsername,
-                actorSummary,
-                credentialFingerprint,
-                statusSummary,
-                warningCodesJson
-        ));
-    }
-
-    private String truncate(String value) {
-        if (value == null) {
-            return null;
-        }
-        return value.length() <= STATUS_SUMMARY_MAX ? value : value.substring(0, STATUS_SUMMARY_MAX);
-    }
-
-    private String fingerprint(String externalId) {
-        return externalId == null ? null : "fp-" + externalId;
-    }
-
-    private String writeJson(List<String> values) {
-        try {
-            return objectMapper.writeValueAsString(values);
-        } catch (JsonProcessingException ex) {
-            return "[]";
-        }
     }
 }
