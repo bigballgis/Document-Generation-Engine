@@ -64,9 +64,6 @@ export interface UpdateUserRequest {
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
-export interface ResetPasswordRequest {
-  newPassword: string
-}
 
 /** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface CreateGroupRequest {
@@ -76,9 +73,6 @@ export interface CreateGroupRequest {
 }
 
 /** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
-export interface UpdateGroupRequest {
-  displayName: string
-}
 
 /** Not yet modeled in `openapi-v1.yaml` (management identity admin). */
 export interface UserQuery {

@@ -30,7 +30,7 @@ import type {
  * - Content module reference mutations → contentModuleReferences, coverage, changeDiff
  * - Batch test run → batchTestHistory, coverage, submitTestEligibility
  */
-export interface VersionLinesCache {
+interface VersionLinesCache {
   page: number
   size: number
   content: TemplateVersionLineSummary[]

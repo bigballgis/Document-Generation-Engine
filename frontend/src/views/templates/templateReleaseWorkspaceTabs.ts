@@ -1,6 +1,6 @@
 import type { LocationQuery } from 'vue-router'
 
-export const TEMPLATE_RELEASE_WORKSPACE_TABS = [
+const TEMPLATE_RELEASE_WORKSPACE_TABS = [
   'basics',
   'testing',
   'approval',
@@ -11,7 +11,7 @@ export const TEMPLATE_RELEASE_WORKSPACE_TABS = [
 
 export type TemplateReleaseWorkspaceTab = (typeof TEMPLATE_RELEASE_WORKSPACE_TABS)[number]
 
-export const DEFAULT_TEMPLATE_RELEASE_WORKSPACE_TAB: TemplateReleaseWorkspaceTab = 'basics'
+const DEFAULT_TEMPLATE_RELEASE_WORKSPACE_TAB: TemplateReleaseWorkspaceTab = 'basics'
 
 export const TEMPLATE_RELEASE_WORKSPACE_TAB_LABEL_KEYS: Record<
   TemplateReleaseWorkspaceTab,

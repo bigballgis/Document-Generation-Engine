@@ -25,11 +25,11 @@ export const P21_T01A_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-
 export const P21_T01A_SCREENSHOT_DIR = path.join(P21_T01A_EVIDENCE_ROOT, 'screenshots')
 
 export const P14_T01_VIEWPORT = { width: 1440, height: 900 } as const
-export const P14_T02_VIEWPORT = P14_T01_VIEWPORT
-export const P14_T03_VIEWPORT = P14_T01_VIEWPORT
-export const P18_T10_VIEWPORT = P14_T01_VIEWPORT
-export const P21_T01_VIEWPORT = P14_T01_VIEWPORT
-export const P21_T01A_VIEWPORT = P14_T01_VIEWPORT
+export const P14_T02_VIEWPORT = { width: 1440, height: 900 } as const
+export const P14_T03_VIEWPORT = { width: 1440, height: 900 } as const
+export const P18_T10_VIEWPORT = { width: 1440, height: 900 } as const
+export const P21_T01_VIEWPORT = { width: 1440, height: 900 } as const
+export const P21_T01A_VIEWPORT = { width: 1440, height: 900 } as const
 
 export type BrandPreset = 'REDBC' | 'GREENBC'
 
@@ -202,7 +202,7 @@ export async function captureP21T01aLocatorScreenshot(
 
 export const P21_T01B_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T01b')
 export const P21_T01B_SCREENSHOT_DIR = path.join(P21_T01B_EVIDENCE_ROOT, 'screenshots')
-export const P21_T01B_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T01B_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T01bEvidenceDirs(): void {
   fs.mkdirSync(P21_T01B_SCREENSHOT_DIR, { recursive: true })
@@ -231,7 +231,7 @@ export async function captureP21T01bLocatorScreenshot(
 
 export const P21_T03_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T03')
 export const P21_T03_SCREENSHOT_DIR = path.join(P21_T03_EVIDENCE_ROOT, 'screenshots')
-export const P21_T03_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T03_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T03EvidenceDirs(): void {
   fs.mkdirSync(P21_T03_SCREENSHOT_DIR, { recursive: true })
@@ -249,7 +249,7 @@ export async function captureP21T03LocatorScreenshot(
 
 export const P21_T04_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T04')
 export const P21_T04_SCREENSHOT_DIR = path.join(P21_T04_EVIDENCE_ROOT, 'screenshots')
-export const P21_T04_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T04_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T04EvidenceDirs(): void {
   fs.mkdirSync(P21_T04_SCREENSHOT_DIR, { recursive: true })
@@ -267,7 +267,7 @@ export async function captureP21T04LocatorScreenshot(
 
 export const P21_T05_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T05')
 export const P21_T05_SCREENSHOT_DIR = path.join(P21_T05_EVIDENCE_ROOT, 'screenshots')
-export const P21_T05_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T05_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T05EvidenceDirs(): void {
   fs.mkdirSync(P21_T05_SCREENSHOT_DIR, { recursive: true })
@@ -285,7 +285,7 @@ export async function captureP21T05LocatorScreenshot(
 
 export const P21_T08_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T08')
 export const P21_T08_SCREENSHOT_DIR = path.join(P21_T08_EVIDENCE_ROOT, 'screenshots')
-export const P21_T08_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T08_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T08EvidenceDirs(): void {
   fs.mkdirSync(P21_T08_SCREENSHOT_DIR, { recursive: true })
@@ -303,7 +303,7 @@ export async function captureP21T08LocatorScreenshot(
 
 export const P21_T09_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T09')
 export const P21_T09_SCREENSHOT_DIR = path.join(P21_T09_EVIDENCE_ROOT, 'screenshots')
-export const P21_T09_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T09_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T09EvidenceDirs(): void {
   fs.mkdirSync(P21_T09_SCREENSHOT_DIR, { recursive: true })
@@ -321,7 +321,7 @@ export async function captureP21T09LocatorScreenshot(
 
 export const P12_AUD_B10_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P12-AUD-B10')
 export const P12_AUD_B10_SCREENSHOT_DIR = path.join(P12_AUD_B10_EVIDENCE_ROOT, 'screenshots')
-export const P12_AUD_B10_VIEWPORT = P14_T01_VIEWPORT
+export const P12_AUD_B10_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP12AudB10EvidenceDirs(): void {
   fs.mkdirSync(P12_AUD_B10_SCREENSHOT_DIR, { recursive: true })
@@ -358,7 +358,7 @@ export const P12_RISK_PROMPT_UX_SCREENSHOT_DIR = path.join(
   P12_RISK_PROMPT_UX_EVIDENCE_ROOT,
   'screenshots',
 )
-export const P12_RISK_PROMPT_UX_VIEWPORT = P14_T01_VIEWPORT
+export const P12_RISK_PROMPT_UX_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP12RiskPromptUxEvidenceDirs(): void {
   fs.mkdirSync(P12_RISK_PROMPT_UX_SCREENSHOT_DIR, { recursive: true })
@@ -390,7 +390,7 @@ export async function captureP12RiskPromptUxLocatorScreenshot(
 
 export const P2_T06_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P2-T06')
 export const P2_T06_SCREENSHOT_DIR = path.join(P2_T06_EVIDENCE_ROOT, 'screenshots')
-export const P2_T06_VIEWPORT = P14_T01_VIEWPORT
+export const P2_T06_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP2T06EvidenceDirs(): void {
   fs.mkdirSync(P2_T06_SCREENSHOT_DIR, { recursive: true })
@@ -423,7 +423,7 @@ export async function switchLocale(page: Page, locale: AppLocale): Promise<void>
 
 export const DEMO_FULL_FLOW_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'demo-full-lifecycle')
 export const DEMO_FULL_FLOW_SCREENSHOT_DIR = path.join(DEMO_FULL_FLOW_EVIDENCE_ROOT, 'screenshots')
-export const DEMO_FULL_FLOW_VIEWPORT = P14_T01_VIEWPORT
+export const DEMO_FULL_FLOW_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureDemoFullFlowEvidenceDirs(): void {
   fs.mkdirSync(DEMO_FULL_FLOW_SCREENSHOT_DIR, { recursive: true })
@@ -456,7 +456,7 @@ export const P12_TEMPLATE_TESTING_OVERHAUL_SCREENSHOT_DIR = path.join(
   P12_TEMPLATE_TESTING_OVERHAUL_EVIDENCE_ROOT,
   'screenshots',
 )
-export const P12_TEMPLATE_TESTING_OVERHAUL_VIEWPORT = P14_T01_VIEWPORT
+export const P12_TEMPLATE_TESTING_OVERHAUL_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP12TemplateTestingOverhaulEvidenceDirs(): void {
   fs.mkdirSync(P12_TEMPLATE_TESTING_OVERHAUL_SCREENSHOT_DIR, { recursive: true })
@@ -488,7 +488,7 @@ export async function captureP12TemplateTestingOverhaulLocatorScreenshot(
 
 export const LRP_B6_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-B6')
 export const LRP_B6_SCREENSHOT_DIR = path.join(LRP_B6_EVIDENCE_ROOT, 'screenshots')
-export const LRP_B6_VIEWPORT = P14_T01_VIEWPORT
+export const LRP_B6_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureLrpB6EvidenceDirs(): void {
   fs.mkdirSync(LRP_B6_SCREENSHOT_DIR, { recursive: true })
@@ -525,7 +525,7 @@ export const P12_API_PACKAGE_ACCESS_SCREENSHOT_DIR = path.join(
   P12_API_PACKAGE_ACCESS_EVIDENCE_ROOT,
   'screenshots',
 )
-export const P12_API_PACKAGE_ACCESS_VIEWPORT = P14_T01_VIEWPORT
+export const P12_API_PACKAGE_ACCESS_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP12ApiPackageAccessEvidenceDirs(): void {
   fs.mkdirSync(P12_API_PACKAGE_ACCESS_SCREENSHOT_DIR, { recursive: true })
@@ -565,7 +565,7 @@ export const P13_EXTERNAL_SERVICES_SCREENSHOT_DIR = path.join(
   P13_EXTERNAL_SERVICES_EVIDENCE_ROOT,
   'screenshots',
 )
-export const P13_EXTERNAL_SERVICES_VIEWPORT = P14_T01_VIEWPORT
+export const P13_EXTERNAL_SERVICES_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP13ExternalServicesEvidenceDirs(): void {
   fs.mkdirSync(P13_EXTERNAL_SERVICES_SCREENSHOT_DIR, { recursive: true })
@@ -605,7 +605,7 @@ export const UX_ENTITY_DISPLAY_SCREENSHOT_DIR = path.join(
   UX_ENTITY_DISPLAY_EVIDENCE_ROOT,
   'screenshots',
 )
-export const UX_ENTITY_DISPLAY_VIEWPORT = P14_T01_VIEWPORT
+export const UX_ENTITY_DISPLAY_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureUxEntityDisplayEvidenceDirs(): void {
   fs.mkdirSync(UX_ENTITY_DISPLAY_SCREENSHOT_DIR, { recursive: true })
@@ -724,7 +724,7 @@ export async function captureCdpE2eDecisionLocatorScreenshot(
 
 export const LRP_C9_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C9')
 export const LRP_C9_SCREENSHOT_DIR = path.join(LRP_C9_EVIDENCE_ROOT, 'screenshots')
-export const LRP_C9_VIEWPORT = P14_T01_VIEWPORT
+export const LRP_C9_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureLrpC9EvidenceDirs(): void {
   fs.mkdirSync(LRP_C9_SCREENSHOT_DIR, { recursive: true })
@@ -753,7 +753,7 @@ export async function captureLrpC9LocatorScreenshot(
 
 export const F7_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'F7')
 export const F7_SCREENSHOT_DIR = path.join(F7_EVIDENCE_ROOT, 'screenshots')
-export const F7_VIEWPORT = P14_T01_VIEWPORT
+export const F7_VIEWPORT = { width: 1440, height: 900 } as const
 export const F7_NARROW_VIEWPORT = { width: 375, height: 812 } as const
 
 export function ensureF7EvidenceDirs(): void {
@@ -783,7 +783,7 @@ export async function captureF7LocatorScreenshot(
 
 export const LRP_C2_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C2')
 export const LRP_C2_SCREENSHOT_DIR = path.join(LRP_C2_EVIDENCE_ROOT, 'screenshots')
-export const LRP_C2_VIEWPORT = P14_T01_VIEWPORT
+export const LRP_C2_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureLrpC2EvidenceDirs(): void {
   fs.mkdirSync(LRP_C2_SCREENSHOT_DIR, { recursive: true })
@@ -812,7 +812,7 @@ export async function captureLrpC2LocatorScreenshot(
 
 export const LRP_C3_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C3')
 export const LRP_C3_SCREENSHOT_DIR = path.join(LRP_C3_EVIDENCE_ROOT, 'screenshots')
-export const LRP_C3_VIEWPORT = P14_T01_VIEWPORT
+export const LRP_C3_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureLrpC3EvidenceDirs(): void {
   fs.mkdirSync(LRP_C3_SCREENSHOT_DIR, { recursive: true })
@@ -841,7 +841,7 @@ export async function captureLrpC3LocatorScreenshot(
 
 export const LRP_C5_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C5')
 export const LRP_C5_SCREENSHOT_DIR = path.join(LRP_C5_EVIDENCE_ROOT, 'screenshots')
-export const LRP_C5_VIEWPORT = P14_T01_VIEWPORT
+export const LRP_C5_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureLrpC5EvidenceDirs(): void {
   fs.mkdirSync(LRP_C5_SCREENSHOT_DIR, { recursive: true })
@@ -870,7 +870,7 @@ export async function captureLrpC5LocatorScreenshot(
 
 export const LRP_C6_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C6')
 export const LRP_C6_SCREENSHOT_DIR = path.join(LRP_C6_EVIDENCE_ROOT, 'screenshots')
-export const LRP_C6_VIEWPORT = P14_T01_VIEWPORT
+export const LRP_C6_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureLrpC6EvidenceDirs(): void {
   fs.mkdirSync(LRP_C6_SCREENSHOT_DIR, { recursive: true })
@@ -899,7 +899,7 @@ export async function captureLrpC6LocatorScreenshot(
 
 export const LRP_C7_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C7')
 export const LRP_C7_SCREENSHOT_DIR = path.join(LRP_C7_EVIDENCE_ROOT, 'screenshots')
-export const LRP_C7_VIEWPORT = P14_T01_VIEWPORT
+export const LRP_C7_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureLrpC7EvidenceDirs(): void {
   fs.mkdirSync(LRP_C7_SCREENSHOT_DIR, { recursive: true })
@@ -928,7 +928,7 @@ export async function captureLrpC7LocatorScreenshot(
 
 export const LRP_C8_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C8')
 export const LRP_C8_SCREENSHOT_DIR = path.join(LRP_C8_EVIDENCE_ROOT, 'screenshots')
-export const LRP_C8_VIEWPORT = P14_T01_VIEWPORT
+export const LRP_C8_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureLrpC8EvidenceDirs(): void {
   fs.mkdirSync(LRP_C8_SCREENSHOT_DIR, { recursive: true })

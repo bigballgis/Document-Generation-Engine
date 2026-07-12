@@ -1,4 +1,4 @@
-export const TEMPLATE_APPROVAL_SUB_TABS = [
+const TEMPLATE_APPROVAL_SUB_TABS = [
   'submitApproval',
   'publishReadiness',
   'riskConfig',
@@ -9,7 +9,7 @@ export type TemplateApprovalSubTab = (typeof TEMPLATE_APPROVAL_SUB_TABS)[number]
 
 export const DEFAULT_TEMPLATE_APPROVAL_SUB_TAB: TemplateApprovalSubTab = 'submitApproval'
 
-export const TEMPLATE_APPROVAL_SUB_TAB_LABEL_KEYS: Record<TemplateApprovalSubTab, string> = {
+const TEMPLATE_APPROVAL_SUB_TAB_LABEL_KEYS: Record<TemplateApprovalSubTab, string> = {
   submitApproval: 'templates.devWorkspace.approval.subTabs.submitApproval',
   publishReadiness: 'templates.devWorkspace.approval.subTabs.publishReadiness',
   riskConfig: 'templates.devWorkspace.approval.subTabs.riskConfig',

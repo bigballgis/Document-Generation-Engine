@@ -5,9 +5,9 @@
  * Payload is a structure snapshot only — no undo history (C3 storage separation).
  */
 
-export const STRUCTURED_DRAFT_KEY_PREFIX = 'docgen.structuredDraft.v1:'
+const STRUCTURED_DRAFT_KEY_PREFIX = 'docgen.structuredDraft.v1:'
 
-export const STRUCTURED_DRAFT_SCHEMA_VERSION = 1 as const
+const STRUCTURED_DRAFT_SCHEMA_VERSION = 1 as const
 
 export interface StructuredContentDraftPayload {
   schemaVersion: typeof STRUCTURED_DRAFT_SCHEMA_VERSION
@@ -26,11 +26,11 @@ export function buildStructuredDraftStorageKey(
   return `${STRUCTURED_DRAFT_KEY_PREFIX}${userId}:${templateId}:${devVersionId}`
 }
 
-export function isStructuredDraftStorageKey(key: string): boolean {
+function isStructuredDraftStorageKey(key: string): boolean {
   return key.startsWith(STRUCTURED_DRAFT_KEY_PREFIX)
 }
 
-export function parseStructuredDraftPayload(raw: string): StructuredContentDraftPayload | null {
+function parseStructuredDraftPayload(raw: string): StructuredContentDraftPayload | null {
   try {
     const parsed = JSON.parse(raw) as Partial<StructuredContentDraftPayload>
     if (

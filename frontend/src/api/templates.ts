@@ -51,15 +51,6 @@ import type {
   PasteCleanResult,
 } from '@/types/template'
 
-export interface TemplateListQuery {
-  page?: number
-  size?: number
-  search?: string
-  groupCode?: string
-  lifecycleStatus?: string
-  approvalSubState?: string
-  sort?: string
-}
 
 function normalizeGroupCode(groupCode: string | undefined): string | undefined {
   const trimmed = groupCode?.trim()

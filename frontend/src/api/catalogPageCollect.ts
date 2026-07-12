@@ -1,13 +1,13 @@
 import type { PageView } from '@/types/identity'
 
 /** Catalog list API max page size (LR-C5 / CatalogPageSupport.MAX_SIZE). */
-export const CATALOG_COLLECT_PAGE_SIZE = 100
+const CATALOG_COLLECT_PAGE_SIZE = 100
 
 /**
  * Safety valve for multi-page consumers (dashboard / authoring pickers).
  * 50 × 100 = 5000 rows — enough for current catalog seeds without unbounded loops.
  */
-export const CATALOG_COLLECT_MAX_PAGES = 50
+const CATALOG_COLLECT_MAX_PAGES = 50
 
 export type CollectedCatalogPage<T> = {
   content: T[]

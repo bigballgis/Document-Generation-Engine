@@ -1,5 +1,5 @@
 /** Mirrors backend `ApiPolicyPlatformDefaults` — single source for UI "platform defaults" labels. */
-export const API_POLICY_PLATFORM_DEFAULTS = {
+const API_POLICY_PLATFORM_DEFAULTS = {
   outputFormats: ['DOCX', 'PDF'],
   outputModes: ['SYNC_STREAM', 'SYNC_DOWNLOAD_URL', 'ASYNC_TASK'],
   batchEnabled: true,
@@ -18,7 +18,7 @@ export const INVOCATION_RECORD_RETENTION_PRESETS = [7, 30, 90, 180, 365, 1095, 2
 /** BDD document retention presets (days) — only when saveGeneratedDocuments is true. */
 export const DOCUMENT_RETENTION_PRESETS = [7, 30, 90, 180, 365] as const
 
-export function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
+function arraysEqual<T>(left: readonly T[], right: readonly T[]): boolean {
   if (left.length !== right.length) {
     return false
   }

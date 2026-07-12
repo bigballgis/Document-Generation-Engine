@@ -9,9 +9,9 @@ import type { DeleteTemplatePayload, LifecycleGovernanceAction, TemplateDetail }
 import type { TemplateDetailTab } from '@/views/templates/templateDetailTabs'
 import type { useTemplateLifecycleGates } from '@/views/templates/useTemplateLifecycleGates'
 
-export type GovernanceAction = 'stop' | 'restore' | 'deprecate'
+type GovernanceAction = 'stop' | 'restore' | 'deprecate'
 
-export type LifecycleDecisionDialogMode =
+type LifecycleDecisionDialogMode =
   | 'test-fail'
   | 'test-pass'
   | 'approval-reject'

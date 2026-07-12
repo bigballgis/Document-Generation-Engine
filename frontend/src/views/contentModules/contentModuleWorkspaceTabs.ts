@@ -1,10 +1,10 @@
 import type { LocationQuery } from 'vue-router'
 
-export const CONTENT_MODULE_WORKSPACE_TABS = ['versions', 'content', 'lifecycle'] as const
+const CONTENT_MODULE_WORKSPACE_TABS = ['versions', 'content', 'lifecycle'] as const
 
 export type ContentModuleWorkspaceTab = (typeof CONTENT_MODULE_WORKSPACE_TABS)[number]
 
-export const DEFAULT_CONTENT_MODULE_WORKSPACE_TAB: ContentModuleWorkspaceTab = 'versions'
+const DEFAULT_CONTENT_MODULE_WORKSPACE_TAB: ContentModuleWorkspaceTab = 'versions'
 
 export const CONTENT_MODULE_WORKSPACE_TAB_LABEL_KEYS: Record<ContentModuleWorkspaceTab, string> = {
   versions: 'contentModules.workspace.tabs.versions',
@@ -12,7 +12,7 @@ export const CONTENT_MODULE_WORKSPACE_TAB_LABEL_KEYS: Record<ContentModuleWorksp
   lifecycle: 'contentModules.workspace.tabs.lifecycle',
 }
 
-export function resolveContentModuleWorkspaceTab(value: unknown): ContentModuleWorkspaceTab {
+function resolveContentModuleWorkspaceTab(value: unknown): ContentModuleWorkspaceTab {
   if (
     typeof value === 'string' &&
     (CONTENT_MODULE_WORKSPACE_TABS as readonly string[]).includes(value)

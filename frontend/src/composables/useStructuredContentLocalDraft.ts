@@ -8,7 +8,7 @@ import {
   type StructuredContentDraftPayload,
 } from '@/utils/structuredContentDraftStorage'
 
-export const DEFAULT_STRUCTURED_DRAFT_DEBOUNCE_MS = 400
+const DEFAULT_STRUCTURED_DRAFT_DEBOUNCE_MS = 400
 
 export interface UseStructuredContentLocalDraftOptions {
   userId: MaybeRef<string | null | undefined>

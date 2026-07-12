@@ -13,13 +13,13 @@ import {
   isTestPassDecisionValid,
 } from '@/utils/templateLifecycleDecisionForm'
 
-export type LifecycleDecisionDialogMode =
+type LifecycleDecisionDialogMode =
   | 'test-fail'
   | 'test-pass'
   | 'approval-reject'
   | 'approval-approve'
 
-export interface LifecycleDecisionSubmitPayload {
+interface LifecycleDecisionSubmitPayload {
   reasonCategory?: string
   impactSummary?: string
   commentSummary?: string

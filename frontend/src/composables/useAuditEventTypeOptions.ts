@@ -13,8 +13,6 @@ export const AUDIT_EVENT_TYPE_CODES = [
   'COLLABORATION_TIMEOUT_ESCALATION',
 ] as const
 
-export type AuditEventTypeCode = (typeof AUDIT_EVENT_TYPE_CODES)[number]
-
 export function useAuditEventTypeOptions() {
   const { t, te } = useI18n()
 

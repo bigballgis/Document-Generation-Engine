@@ -3,7 +3,7 @@ import type { Schema } from '@/types/openapi'
 export type AuditReadActorRole = Schema<'AuditReadActorRole'>
 
 /** Optional display fields may arrive before OpenAPI schema refresh. */
-export type AuditEventDisplayExtensions = {
+type AuditEventDisplayExtensions = {
   templateDisplayName?: string
   templateExternalId?: string
   actorDisplayName?: string

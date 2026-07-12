@@ -1,6 +1,6 @@
 /** Per-user onboarding tour dismiss marker (LR-C8 / C8-C6). */
 
-export const ONBOARDING_TOUR_DISMISS_KEY_PREFIX = 'docgen.onboardingTour.dismissed.v1:'
+const ONBOARDING_TOUR_DISMISS_KEY_PREFIX = 'docgen.onboardingTour.dismissed.v1:'
 
 export const ONBOARDING_TOUR_DISMISS_VALUE = '1'
 

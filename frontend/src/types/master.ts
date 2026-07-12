@@ -5,7 +5,6 @@ export type MasterDocumentStatus = Schema<'MasterDocumentReviewStatus'>
 
 export type MasterRevisionLineLabel = Schema<'MasterRevisionLineLabel'>
 
-export type MasterReviewAction = 'SUBMITTED' | 'APPROVED' | 'REJECTED'
 
 export type MasterReviewDecision = 'APPROVED' | 'REJECTED'
 

@@ -30,9 +30,9 @@ export const COMMAND_PALETTE_PAGE_SIZE = 8
 /** Locked by BDD C6-C7 / Vitest. */
 export const COMMAND_PALETTE_DEBOUNCE_MS = 250
 
-export type PaletteItemKind = 'route' | 'template' | 'master' | 'content-module'
+type PaletteItemKind = 'route' | 'template' | 'master' | 'content-module'
 
-export interface PaletteNavTarget {
+interface PaletteNavTarget {
   path: string
   query?: Record<string, string>
   hash?: string

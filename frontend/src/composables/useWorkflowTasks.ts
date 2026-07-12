@@ -30,7 +30,7 @@ export type WorkflowTaskKind =
   | 'template-rework'
   | 'template-escalation'
 
-export type WorkflowTaskSource = 'master' | 'collaboration'
+type WorkflowTaskSource = 'master' | 'collaboration'
 
 export interface WorkflowTask {
   id: string
@@ -52,7 +52,7 @@ export interface WorkflowTask {
   createdAt?: string
 }
 
-export const COLLABORATION_QUEUES: readonly CollaborationWorkItemQueue[] = [
+const COLLABORATION_QUEUES: readonly CollaborationWorkItemQueue[] = [
   'TEST',
   'APPROVAL',
   'REMEDIATION',
@@ -60,7 +60,7 @@ export const COLLABORATION_QUEUES: readonly CollaborationWorkItemQueue[] = [
   'ESCALATION',
 ]
 
-export type DashboardTaskHubMode = 'unfiltered' | 'queue' | 'master-review'
+type DashboardTaskHubMode = 'unfiltered' | 'queue' | 'master-review'
 
 export interface DashboardTaskScope {
   pageTitleKey: string
@@ -72,7 +72,7 @@ export interface DashboardTaskScope {
   showMasterRework: boolean
 }
 
-export type TaskPartitionKind = 'collaboration' | 'master-review' | 'master-rework'
+type TaskPartitionKind = 'collaboration' | 'master-review' | 'master-rework'
 
 export interface TaskPartition {
   id: string
@@ -106,7 +106,7 @@ function canSeeBehaviorRemediation(context: CapabilityContext): boolean {
   return canAuthorTemplates(context)
 }
 
-export function isValidCollaborationQueue(value: string): value is CollaborationWorkItemQueue {
+function isValidCollaborationQueue(value: string): value is CollaborationWorkItemQueue {
   return (COLLABORATION_QUEUES as readonly string[]).includes(value)
 }
 

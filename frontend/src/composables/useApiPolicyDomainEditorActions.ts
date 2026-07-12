@@ -259,4 +259,3 @@ export function useApiPolicyDomainEditorActions(
   }
 }
 
-export type ApiPolicyDomainEditorActions = ReturnType<typeof useApiPolicyDomainEditorActions>
