@@ -40,7 +40,7 @@
 | 6 | **LR-D2** — backup/restore drill evidence | **CONDITIONAL** | [backup-restore-runbook.md § Drill evidence 2026-07-12](./backup-restore-runbook.md#drill-evidence-2026-07-12--executed); merge `3d78bc5`; RPO≈0.933 min / RTO≈4.751 min | **GO for scratch-stack rehearsal.** **NO-GO as production ADR-0030 RPO/RTO compliance** (no WAL/PITR; runbook forbids overclaim). |
 | 7 | **LR-B8** — prod compose healthchecks + resource limits | **GO** | [LRP §4 LR-B8](../plan/launch-readiness-program.md); `docker-compose.prod.yml` healthcheck on `/healthz` (start_period 90s) + mem/cpu limits; ledger HostConfig evidence | Confirms **compose** readiness probe wiring — not a live signed production cluster attestation. |
 | 8 | **LR-E1** — SSE-through-proxy incremental E2E green | **GO** | [LRP-E1-sse-manifest.md](../../frontend/e2e/evidence/LRP-E1-sse-manifest.md); merge `575d0aa`; Playwright **2/2**; closes CD-PIT-12 browser proof | Scenario A incremental; Scenario B idle ≥60s + ~20s keep-alive. |
-| 9 | **`JWT_SECRET`** — explicitly provisioned; **no** compose default fallback | **NO-GO** | `docker-compose.prod.yml` still has `JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}`; LR-B6 security review 🟡#4 → LR-E2 prerequisite ([ledger § LRP batch 2](../plan/execution-sync-ledger.md)) | Secret must be required / fail-closed without a baked-in default before any production decision. |
+| 9 | **`JWT_SECRET`** — explicitly provisioned; **no** compose default fallback | **NO-GO** | `docker-compose.prod.yml` still has `JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}`; LR-B6 security review 🟡#4 → LR-E2 prerequisite ([ledger § LRP batch 2](../plan/execution-sync-ledger.md)). **BDD ready:** [BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md) (slice `ops-jwt-secret-no-default`) — do **not** flip this row to GO until implementation + evidence. | Secret must be required / fail-closed without a baked-in default before any production decision. Clearing #9 alone is **not** go-live. |
 | 10 | **Kafka image** — company-approved registry (not Docker Hub `bitnamilegacy`) | **NO-GO** | `docker-compose.yml` `image: bitnamilegacy/kafka:3.7` + comment mandating company registry for production; LR-B4 note in [LRP §4](../plan/launch-readiness-program.md) | Dev/local pull path fixed; **production coordinates not evidenced** in-repo. |
 
 ### Related inputs (informational — not sole launch blockers)
@@ -93,6 +93,7 @@ Fill this block for each readiness review. **Do not** change item verdicts witho
 | [execution-sync-ledger.md](../plan/execution-sync-ledger.md) | Seams + LRP/CDP evidence |
 | [runbook.md](./runbook.md) | Day-2 ops |
 | [backup-restore-runbook.md](./backup-restore-runbook.md) | LR-D2 drill SoT |
+| **[BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md)** | Checklist **#9** acceptance behavior (slice `ops-jwt-secret-no-default`) |
 | [docs/README.md](../README.md) | Index |
 
 ---
@@ -103,3 +104,5 @@ Fill this block for each readiness review. **Do not** change item verdicts witho
 | --- | --- |
 | 2026-07-12 | Initial checklist authored (LR-E2 / Task Master #43). Honest **NO-GO** overall. |
 | 2026-07-12 | LR-E2 / Wave LR-E docs exit gate **Done** (merge `ae39fbb`). Overall verdict remains **NO-GO** — **not** production go-live. |
+| 2026-07-12 | Linked [BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md) for item **#9** (slice `ops-jwt-secret-no-default`). Row remains **NO-GO** until implement + evidence. |
+| 2026-07-12 | Docs-first operator/deploy alignment for #9 (runbook, `deploy/README.md`, `k8s-config-secrets.md`, `.env.example`, container-hardening) — **still NO-GO**; no implement evidence yet. |

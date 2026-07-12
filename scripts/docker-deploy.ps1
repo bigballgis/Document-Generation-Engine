@@ -21,6 +21,50 @@ if (-not (Test-Path ".env")) {
     Write-Host "Created .env from .env.example"
 }
 
+# BDD-OPS-JWT-SECRET-001: prod/acceptance compose requires explicit non-insecure JWT_SECRET.
+# Compose substitutes from process env or project .env; refuse known insecure defaults early.
+function Get-DotEnvValue {
+    param([Parameter(Mandatory)][string]$Key)
+    if (-not (Test-Path ".env")) { return $null }
+    foreach ($line in Get-Content ".env") {
+        $trimmed = $line.Trim()
+        if ($trimmed.StartsWith('#') -or -not $trimmed.Contains('=')) { continue }
+        $name, $value = $trimmed.Split('=', 2)
+        if ($name.Trim() -eq $Key) {
+            return $value.Trim().Trim('"').Trim("'")
+        }
+    }
+    return $null
+}
+
+$jwtSecret = if (-not [string]::IsNullOrWhiteSpace($env:JWT_SECRET)) {
+    $env:JWT_SECRET.Trim()
+} else {
+    Get-DotEnvValue -Key 'JWT_SECRET'
+}
+$knownInsecureJwt = @(
+    'local-dev-only-change-me-please-32bytes-min',
+    'prod-change-me-32-bytes-minimum-secret'
+)
+if ([string]::IsNullOrWhiteSpace($jwtSecret)) {
+    Write-Error @"
+JWT_SECRET must be set for docker-compose.prod.yml (acceptance/prod).
+Set it in the environment or .env — compose no longer supplies a default.
+Example: JWT_SECRET=<unique ≥32-byte secret>
+"@
+    exit 1
+}
+if ($knownInsecureJwt -contains $jwtSecret) {
+    Write-Error @"
+JWT_SECRET in .env/environment is a known insecure default and is refused on the acceptance/prod path.
+Replace it with a unique ≥32-byte secret (do not reuse local-dev-only-… or prod-change-me-…).
+See docs/behavior/ops-jwt-secret-no-default.md (BDD-OPS-JWT-SECRET-001).
+"@
+    exit 1
+}
+# Ensure compose substitution sees the resolved value even when only present in .env.
+$env:JWT_SECRET = $jwtSecret
+
 $composeArgs = @(
     "-f", "docker-compose.yml",
     "-f", "docker-compose.prod.yml",

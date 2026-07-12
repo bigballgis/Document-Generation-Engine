@@ -55,6 +55,24 @@ See also [Production runbook](../docs/operations/runbook.md) for release-gate an
 
 ## Local Docker: install and upgrade
 
+**Acceptance / prod-shaped compose — `JWT_SECRET` required:** Before `docker-deploy.ps1`,
+`docker-deploy-queue.ps1`, or `docker compose … --profile prod`, operators must export an
+**explicit** ≥32-byte `JWT_SECRET` that is **not** a known insecure placeholder
+(`local-dev-only-change-me-please-32bytes-min`, `prod-change-me-32-bytes-minimum-secret`).
+`docker-compose.prod.yml` must **not** use `${JWT_SECRET:-…}` bake-in defaults; missing or
+known-insecure values fail closed. Local-only `.env` / `dev`/`local`/`test` may keep the
+documented test secret in [`.env.example`](../.env.example). Behavior SoT:
+[BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md). Checklist
+[#9](../docs/operations/launch-readiness-checklist.md) remains **NO-GO** until implement
+evidence — **not** go-live.
+
+```powershell
+$env:JWT_SECRET = '<explicit-non-default-≥32-bytes>'
+.\scripts\docker-deploy.ps1
+# Prefer the single-host queue on this machine:
+# .\scripts\docker-deploy-queue.ps1
+```
+
 Host-compile, then copy artifacts into runtime images:
 
 ```powershell
@@ -142,6 +160,12 @@ External Secrets Operator sync).
 | ConfigMap (`{release}-config`) | Service endpoints, ports, non-sensitive app flags | Passwords, `JWT_SECRET`, API keys |
 | Secret (`existingSecretName`) | `POSTGRES_*`, `MINIO_*`, `JWT_SECRET` | Committed in repo or baked into images |
 
+**`JWT_SECRET` (staging / prod / acceptance):** Required key in the application Secret — **never**
+ConfigMap, image, or chart plaintext. Value must be operator-generated (≥32 bytes) and **must not**
+equal known insecure defaults above. Helm keeps fail-closed `required` / `existingSecretName`
+posture ([k8s-config-secrets.md](./k8s-config-secrets.md)); compose/scripts must not reintroduce
+silent defaults ([BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md)).
+
 Default posture: **`secrets.create: false`** — operator provisions `docgen-app-secrets-<env>` before
 `helm install`. Optional `ExternalSecret` syncs from Vault or cloud Secret Manager.
 
@@ -187,13 +211,17 @@ Detailed prod rollback steps: [blue-green-runbook.md § Manual rollback](./blue-
 
 ## Container hardening
 
-Packaged images run non-root with read-only root filesystem and dropped capabilities. Validation:
+Packaged images run non-root with read-only root filesystem and dropped capabilities. Validation
+(prod-shaped smoke — **requires explicit `JWT_SECRET`**; must **not** silently fall back to
+`prod-change-me-32-bytes-minimum-secret`):
 
 ```powershell
+$env:JWT_SECRET = '<explicit-non-default-≥32-bytes>'
 .\scripts\container-hardening-smoke.ps1
 ```
 
-Details: [container-hardening.md](./container-hardening.md).
+Details: [container-hardening.md](./container-hardening.md). Behavior:
+[BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md) S4.
 
 ## Chart and script layout
 
@@ -213,6 +241,7 @@ Details: [container-hardening.md](./container-hardening.md).
 - [Security view](../docs/architecture/security-view.md) — container hardening, network isolation, secret handling
 - [Data storage view](../docs/architecture/data-storage-view.md) — external data services and retention
 - [P15 detailed plan](../docs/plan/detail/P15-kubernetes-deployment-container-hardening.md) — phase tasks and exit criteria
-- [Production runbook](../docs/operations/runbook.md) — release gate, local prod compose profile, **LR-D3 alert response sections**
+- [Production runbook](../docs/operations/runbook.md) — release gate, local prod compose profile, **LR-D3 alert response sections**, **JWT_SECRET explicit provision**
+- [BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md) — no compose JWT default; known insecure refused; checklist #9 (not go-live)
 - [Observability as code](./observability/README.md) — LR-D3 draft alert thresholds + `runbook` annotation targets (NOT confirmed SLOs)
 - [Backup & restore runbook](../docs/operations/backup-restore-runbook.md) — LR-D2 pg/MinIO restore + confirmation gate + drill evidence (**EXECUTED** 2026-07-12; scratch ≠ production compliance)

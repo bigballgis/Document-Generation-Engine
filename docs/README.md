@@ -177,6 +177,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[LR-D3 metrics & alerting as code](./behavior/lrp-d3-metrics-alerting.md)** | **not-applicable** (2026-07-12) — slice **Done** (`ba5ea2e`) | Observability instrumentation + Prometheus/Grafana as code; scrape + rule-lint acceptance; draft thresholds from D6/D5 only — no product UI/API behavior |
 | **[LR-D4 trace propagation](./behavior/lrp-d4-trace-propagation.md)** | **not-applicable** (2026-07-12) — slice **Done** (`218dcf1`) | Internal observability plumbing — request→MDC→async→Kafka→consumer MDC; **[ADR-0049 Accepted](./adr/operations/0049-distributed-trace-propagation.md)**; `MdcTaskDecorator` + Kafka `X-Trace-Id`; Scenario A/B; no UI / no Zipkin-Tempo backend |
 | **[LR-E1 SSE-through-proxy incremental E2E](./behavior/lrp-e1-sse-proxy-e2e.md)** | **not-applicable** (2026-07-12) · **Done** merge `575d0aa` | Test-only evidence for **LR-B3** — Playwright on Docker 4173: ≥2 incremental SSE arrival timestamps (maxGapMs≈1864) + ≥60 s idle heartbeat survival through nginx; closes CD-PIT-12 browser proof; [manifest](../frontend/e2e/evidence/LRP-E1-sse-manifest.md) |
+| **[JWT_SECRET explicit provision — no compose default](./behavior/ops-jwt-secret-no-default.md)** | **ready** (2026-07-12) | **BDD-OPS-JWT-SECRET-001** — checklist #9 / LR-B6 🟡#4; prod/acceptance must set `JWT_SECRET` explicitly; refuse known insecure defaults fail-closed; dev/test documented secrets OK; **not** go-live |
 
 ## Evidence & acceptance artifacts
 
