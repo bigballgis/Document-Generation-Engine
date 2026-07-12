@@ -632,23 +632,23 @@
       {
         "id": "46",
         "title": "OPS: Close or bound AD Group config stub (fail-closed + ADR)",
-        "description": "IN PROGRESS 2026-07-12. Slice ops-ad-group-stub-close. LR-E2 checklist #5a. Close or honestly bound ConfigAdGroupResolver / config-file AD Group stub with fail-closed production path + ADR. Do NOT invent LDAP/AD. Formal phase None. Sole-active Task Master delivery item. Do NOT claim Done yet. Do NOT flip checklist #5a until implement + evidence. Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
-        "details": "ACTIVATED 2026-07-12. Slice id: ops-ad-group-stub-close. Placement: ISOLATED D:/working/DGE-ops-ad-group-stub-close · feat/ops-ad-group-stub-close · base ba0f1e1 (origin/main). Formal phase remains None. Sole-active after #44/#45 Done. Target: LR-E2 checklist #5a (AD Group resolution seam — ConfigAdGroupResolver config-file stub). Scope: close the stub OR honestly bound it for v1 with fail-closed production path + ADR documenting the decision; no invented LDAP/AD adapter or fake directory hostname. BDD: required before implement (behavior-spec-author). Owner path: backend-engineer (+ doc-keeper for ADR + checklist after gates). Out of scope: inventing company LDAP; flipping checklist #5a at activation; production go-live; CD-3; DGE-audit-governance; #3b/#5b. Checklist #5a stays NO-GO until post-impl evidence. Overall checklist remains NO-GO.",
+        "description": "DONE 2026-07-12. Slice ops-ad-group-stub-close. LR-E2 checklist #5a → CONDITIONAL (not GO — real LDAP/AD + company directory evidence missing; LAB ≠ prod AD). Formal phase None. BDD ready (BDD-OPS-AD-GROUP-STUB-001). ADR-0054 Accepted. Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: ops-ad-group-stub-close. Merge: 4e51a1b (4e51a1bad0163e708cca0e7990892759fdc88bcf); feature tip 4e51a1b (fast-forward); worktree removed. Formal phase remains None. BDD ready (docs/behavior/ops-ad-group-stub-close.md; BDD-OPS-AD-GROUP-STUB-001). ADR-0054 Accepted. Delivered: ConfigAdGroupResolver/type=config local/dev/test only; AdGroupResolverGuard fail-closed prod; LAB ONLY override in docker-compose.prod.yml; checklist #5a CONDITIONAL. Gates: mvn verify GREEN; architecture PASS_WITH_NOTES Critical=0 merge_go=true; DEPLOY_OK 2026-07-12 ~10:34+08 healthz 200 UP; AdGroupResolverGuard LAB WARN in logs. Checklist #5a → CONDITIONAL residual (real LDAP/AD adapter + company directory evidence still missing; LAB override ≠ production AD — do NOT invent directory coords; not GO without company AD evidence; not a blocking NO-GO). Overall checklist NO-GO (blockers: #3b ADR-0042/0043+Word, #5b paste↔binding). no sole-active. Recommend next: #5b or pause. Do NOT: claim production go-live; activate CD-3; touch DGE-audit-governance; invent a formal plan phase.",
         "testStrategy": "1. Behavior spec ready before TDD/implement. 2. Production/acceptance path fail-closed when AD Group resolution is not production-ready (or ADR-accepted honest bound with explicit residual). 3. No invented LDAP/AD endpoint or silent permissive default. 4. ADR Accepted (or Proposed→Accepted in same change set) documents close-vs-bound decision. 5. Regression tests for resolver/authz fail-closed behavior. 6. mvn verify GREEN + architecture review + queued deploy evidence as required. 7. Checklist #5a updated only after durable evidence — never at activation. 8. Formal phase stays None; sole-active #46 until Done.",
         "priority": "high",
         "dependencies": [
           "45"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-12T02:16:00.000Z"
+        "updatedAt": "2026-07-12T02:42:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T02:16:00.000Z",
+      "lastModified": "2026-07-12T02:42:00.000Z",
       "taskCount": 46,
-      "completedCount": 45,
+      "completedCount": 46,
       "tags": [
         "master"
       ]
