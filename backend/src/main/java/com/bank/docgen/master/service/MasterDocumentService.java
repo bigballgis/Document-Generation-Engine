@@ -9,11 +9,9 @@ import com.bank.docgen.authorization.management.service.ManagementUserDisplaySer
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.api.CreateMasterRequest;
 import com.bank.docgen.master.api.DecideMasterReviewRequest;
-import com.bank.docgen.master.api.MasterAnchorView;
 import com.bank.docgen.master.api.MasterDocumentDetailView;
 import com.bank.docgen.master.api.MasterDocumentSummaryView;
 import com.bank.docgen.master.api.MasterImpactAnalysisView;
-import com.bank.docgen.master.api.MasterReviewRecordView;
 import com.bank.docgen.master.api.SubmitMasterReviewRequest;
 import com.bank.docgen.master.api.UpdateMasterRequest;
 import com.bank.docgen.master.domain.MasterDocumentStatus;
@@ -25,19 +23,15 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterDocumentRepositoryCustom.MasterCatalogFilter;
 import com.bank.docgen.master.persistence.MasterReviewRecordEntity;
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
-import com.bank.docgen.master.persistence.MasterRevisionLineAnchorEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,13 +43,14 @@ public class MasterDocumentService {
     private static final long DEFAULT_MAX_DOCX_UPLOAD_BYTES = 50L * 1024L * 1024L;
 
     private final MasterDocumentRepository masterDocumentRepository;
-    private final MasterAnchorRepository masterAnchorRepository;
     private final MasterReviewRecordRepository masterReviewRecordRepository;
     private final MasterRevisionLineRepository masterRevisionLineRepository;
     private final ObjectStoragePort objectStoragePort;
     private final GroupAccessService groupAccessService;
-    private final ManagementUserDisplayService managementUserDisplayService;
     private final MasterDocxUploadSupport docxUploadSupport;
+    private final MasterDocumentAccessSupport access;
+    private final MasterDocumentViewSupport views;
+    private final MasterRevisionPersistSupport revisions;
 
     public MasterDocumentService(
             MasterDocumentRepository masterDocumentRepository,
@@ -69,17 +64,22 @@ public class MasterDocumentService {
             @Value("${docgen.master.max-docx-upload-bytes:" + DEFAULT_MAX_DOCX_UPLOAD_BYTES + "}") long maxDocxUploadBytes
     ) {
         this.masterDocumentRepository = masterDocumentRepository;
-        this.masterAnchorRepository = masterAnchorRepository;
         this.masterReviewRecordRepository = masterReviewRecordRepository;
         this.masterRevisionLineRepository = masterRevisionLineRepository;
         this.objectStoragePort = objectStoragePort;
         this.groupAccessService = groupAccessService;
-        this.managementUserDisplayService = managementUserDisplayService;
         this.docxUploadSupport = new MasterDocxUploadSupport(
                 objectStoragePort,
                 docxAnchorExtractor,
                 maxDocxUploadBytes
         );
+        this.access = new MasterDocumentAccessSupport(masterDocumentRepository, groupAccessService);
+        this.views = new MasterDocumentViewSupport(
+                masterAnchorRepository,
+                masterReviewRecordRepository,
+                managementUserDisplayService
+        );
+        this.revisions = new MasterRevisionPersistSupport(masterRevisionLineRepository);
     }
 
     @Transactional(readOnly = true)
@@ -106,7 +106,7 @@ public class MasterDocumentService {
 
         boolean allGroups = groupCodes.contains("*");
         String groupFilter = CatalogPageSupport.blankToNull(groupCode);
-        if (groupFilter != null && !groupAccessService.canAccessGroup(session, groupFilter)) {
+        if (groupFilter != null && !access.canAccessGroup(session, groupFilter)) {
             return new PageView<>(List.of(), safePage, safeSize, 0, 0);
         }
 
@@ -126,9 +126,9 @@ public class MasterDocumentService {
         );
         CatalogQueryPage<MasterDocumentEntity> masterPage =
                 masterDocumentRepository.searchCatalog(filter, safePage, safeSize);
-        Map<UUID, Long> anchorCounts = loadAnchorCounts(masterPage.content());
-        List<MasterDocumentSummaryView> content = enrichMasterSummaries(masterPage.content().stream()
-                .map(master -> toSummary(master, anchorCounts.getOrDefault(master.getId(), 0L)))
+        Map<UUID, Long> anchorCounts = views.loadAnchorCounts(masterPage.content());
+        List<MasterDocumentSummaryView> content = views.enrichMasterSummaries(masterPage.content().stream()
+                .map(master -> views.toSummary(master, anchorCounts.getOrDefault(master.getId(), 0L)))
                 .toList());
         return new PageView<>(
                 content,
@@ -153,13 +153,13 @@ public class MasterDocumentService {
 
     @Transactional(readOnly = true)
     public MasterDocumentDetailView get(UUID masterId, ManagementSessionClaims session) {
-        MasterDocumentEntity master = requireReadableMasterWithAnchors(masterId, session);
-        return toDetail(master);
+        MasterDocumentEntity master = access.requireReadableMasterWithAnchors(masterId, session);
+        return views.toDetail(master);
     }
 
     @Transactional(readOnly = true)
     public MasterDownloadArtifact openDownload(UUID masterId, ManagementSessionClaims session) {
-        MasterDocumentEntity master = requireReadableMaster(masterId, session);
+        MasterDocumentEntity master = access.requireReadableMaster(masterId, session);
         try {
             InputStream stream = objectStoragePort.get(master.getStorageKey());
             return new MasterDownloadArtifact(
@@ -178,7 +178,7 @@ public class MasterDocumentService {
             MultipartFile docxFile,
             ManagementSessionClaims session
     ) {
-        MasterDocumentEntity master = requireWritableMaster(masterId, session);
+        MasterDocumentEntity master = access.requireWritableMaster(masterId, session);
         if (master.getStatus() == MasterDocumentStatus.PENDING_REVIEW) {
             throw new MasterValidationException("api.error.master.invalidState");
         }
@@ -198,8 +198,8 @@ public class MasterDocumentService {
                 masterId, revisionLineId, docxFile.getOriginalFilename());
         docxUploadSupport.storeDocx(revisionStorageKey, docxFile);
         int nextSequence = masterRevisionLineRepository.findMaxRevisionSequence(masterId) + 1;
-        List<MasterAnchorEntity> anchorEntities = toAnchorEntities(masterId, anchorIds);
-        MasterRevisionLineEntity currentLine = persistRevisionLine(
+        List<MasterAnchorEntity> anchorEntities = revisions.toAnchorEntities(masterId, anchorIds);
+        MasterRevisionLineEntity currentLine = revisions.persistRevisionLine(
                 revisionLineId,
                 masterId,
                 revisionStorageKey,
@@ -222,7 +222,7 @@ public class MasterDocumentService {
         }
         master.setUpdatedBy(session.username());
         masterDocumentRepository.save(master);
-        return toDetail(master);
+        return views.toDetail(master);
     }
 
     @Transactional
@@ -231,7 +231,7 @@ public class MasterDocumentService {
             MultipartFile docxFile,
             ManagementSessionClaims session
     ) {
-        assertGroupWritable(session, request.groupCode());
+        access.assertGroupWritable(session, request.groupCode());
         docxUploadSupport.validateDocxFile(docxFile);
         UUID masterId = UUID.randomUUID();
         UUID revisionLineId = UUID.randomUUID();
@@ -242,7 +242,7 @@ public class MasterDocumentService {
         if (anchorIds.isEmpty()) {
             throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
         }
-        List<MasterAnchorEntity> anchorEntities = toAnchorEntities(masterId, anchorIds);
+        List<MasterAnchorEntity> anchorEntities = revisions.toAnchorEntities(masterId, anchorIds);
         MasterDocumentEntity master = new MasterDocumentEntity(
                 masterId,
                 request.groupCode(),
@@ -256,7 +256,7 @@ public class MasterDocumentService {
         master.replaceAnchors(anchorEntities);
         master.getAnchors().forEach(anchor -> anchor.setMaster(master));
         masterDocumentRepository.save(master);
-        persistRevisionLine(
+        revisions.persistRevisionLine(
                 revisionLineId,
                 masterId,
                 revisionStorageKey,
@@ -268,7 +268,7 @@ public class MasterDocumentService {
                 null,
                 session.username()
         );
-        return toDetail(master);
+        return views.toDetail(master);
     }
 
     @Transactional
@@ -277,7 +277,7 @@ public class MasterDocumentService {
             UpdateMasterRequest request,
             ManagementSessionClaims session
     ) {
-        MasterDocumentEntity master = requireWritableMasterWithAnchors(masterId, session);
+        MasterDocumentEntity master = access.requireWritableMasterWithAnchors(masterId, session);
         if (request.name() != null && !request.name().isBlank()) {
             master.setName(request.name());
         }
@@ -285,7 +285,7 @@ public class MasterDocumentService {
             master.setDescription(request.description());
         }
         master.setUpdatedBy(session.username());
-        return toDetail(master);
+        return views.toDetail(master);
     }
 
     @Transactional
@@ -294,7 +294,7 @@ public class MasterDocumentService {
             SubmitMasterReviewRequest request,
             ManagementSessionClaims session
     ) {
-        MasterDocumentEntity master = requireWritableMasterWithAnchors(masterId, session);
+        MasterDocumentEntity master = access.requireWritableMasterWithAnchors(masterId, session);
         if (master.getStatus() != MasterDocumentStatus.DRAFT) {
             throw new MasterValidationException("api.error.master.invalidReviewTransition");
         }
@@ -311,7 +311,7 @@ public class MasterDocumentService {
                 null,
                 session.username()
         ));
-        return toDetail(master);
+        return views.toDetail(master);
     }
 
     @Transactional
@@ -320,10 +320,10 @@ public class MasterDocumentService {
             DecideMasterReviewRequest request,
             ManagementSessionClaims session
     ) {
-        if (!groupAccessService.canReviewMasters(session)) {
+        if (!access.canReviewMasters(session)) {
             throw new MasterAccessDeniedException();
         }
-        MasterDocumentEntity master = requireReadableMasterWithAnchors(masterId, session);
+        MasterDocumentEntity master = access.requireReadableMasterWithAnchors(masterId, session);
         if (master.getStatus() != MasterDocumentStatus.PENDING_REVIEW) {
             throw new MasterValidationException("api.error.master.invalidReviewTransition");
         }
@@ -341,176 +341,13 @@ public class MasterDocumentService {
                 request.commentSummary(),
                 session.username()
         ));
-        return toDetail(master);
+        return views.toDetail(master);
     }
 
     @Transactional(readOnly = true)
     public MasterImpactAnalysisView impactAnalysis(UUID masterId, ManagementSessionClaims session) {
-        requireReadableMaster(masterId, session);
+        access.requireReadableMaster(masterId, session);
         return new MasterImpactAnalysisView(masterId.toString(), List.of(), false);
-    }
-
-    private MasterDocumentEntity requireReadableMaster(UUID masterId, ManagementSessionClaims session) {
-        MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)
-                .orElseThrow(MasterNotFoundException::new);
-        if (!groupAccessService.canAccessGroup(session, master.getGroupCode())) {
-            throw new MasterAccessDeniedException();
-        }
-        return master;
-    }
-
-    private MasterDocumentEntity requireReadableMasterWithAnchors(UUID masterId, ManagementSessionClaims session) {
-        MasterDocumentEntity master = masterDocumentRepository.findWithAnchorsByIdAndDeletedAtIsNull(masterId)
-                .orElseThrow(MasterNotFoundException::new);
-        if (!groupAccessService.canAccessGroup(session, master.getGroupCode())) {
-            throw new MasterAccessDeniedException();
-        }
-        return master;
-    }
-
-    private MasterDocumentEntity requireWritableMaster(UUID masterId, ManagementSessionClaims session) {
-        MasterDocumentEntity master = requireReadableMaster(masterId, session);
-        if (!groupAccessService.canManageMasters(session)) {
-            throw new MasterAccessDeniedException();
-        }
-        return master;
-    }
-
-    private MasterDocumentEntity requireWritableMasterWithAnchors(UUID masterId, ManagementSessionClaims session) {
-        MasterDocumentEntity master = requireReadableMasterWithAnchors(masterId, session);
-        if (!groupAccessService.canManageMasters(session)) {
-            throw new MasterAccessDeniedException();
-        }
-        return master;
-    }
-
-    private void assertGroupWritable(ManagementSessionClaims session, String groupCode) {
-        if (!groupAccessService.canManageMasters(session)
-                || !groupAccessService.canAccessGroup(session, groupCode)) {
-            throw new MasterAccessDeniedException();
-        }
-    }
-
-    private List<MasterAnchorEntity> toAnchorEntities(UUID masterId, List<String> anchorIds) {
-        List<MasterAnchorEntity> anchors = new ArrayList<>();
-        for (int sequence = 0; sequence < anchorIds.size(); sequence++) {
-            String anchorId = anchorIds.get(sequence);
-            anchors.add(new MasterAnchorEntity(masterId, anchorId, anchorId, sequence));
-        }
-        return anchors;
-    }
-
-    private MasterDocumentSummaryView toSummary(MasterDocumentEntity master, long anchorCount) {
-        return new MasterDocumentSummaryView(
-                master.getId().toString(),
-                master.getGroupCode(),
-                master.getName(),
-                master.getStatus().name(),
-                master.getOriginalFilename(),
-                Math.toIntExact(anchorCount),
-                master.getUpdatedBy(),
-                master.getUpdatedAt(),
-                null
-        );
-    }
-
-    private List<MasterDocumentSummaryView> enrichMasterSummaries(List<MasterDocumentSummaryView> summaries) {
-        if (summaries.isEmpty()) {
-            return summaries;
-        }
-        Set<String> usernames = summaries.stream()
-                .map(MasterDocumentSummaryView::updatedBy)
-                .filter(username -> username != null && !username.isBlank())
-                .collect(Collectors.toSet());
-        Map<String, String> displayNames = managementUserDisplayService.lookupDisplayNames(usernames);
-        return summaries.stream()
-                .map(summary -> new MasterDocumentSummaryView(
-                        summary.id(),
-                        summary.groupCode(),
-                        summary.name(),
-                        summary.status(),
-                        summary.originalFilename(),
-                        summary.anchorCount(),
-                        summary.updatedBy(),
-                        summary.updatedAt(),
-                        summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy())
-                ))
-                .toList();
-    }
-
-    private Map<UUID, Long> loadAnchorCounts(List<MasterDocumentEntity> masters) {
-        if (masters.isEmpty()) {
-            return Map.of();
-        }
-        List<UUID> masterIds = masters.stream().map(MasterDocumentEntity::getId).toList();
-        return masterAnchorRepository.countByMasterIdIn(masterIds).stream()
-                .collect(Collectors.toMap(row -> (UUID) row[0], row -> (Long) row[1]));
-    }
-
-    private MasterDocumentDetailView toDetail(MasterDocumentEntity master) {
-        List<MasterReviewRecordEntity> reviewRecords =
-                masterReviewRecordRepository.findByMasterIdOrderByCreatedAtDesc(master.getId());
-        return new MasterDocumentDetailView(
-                master.getId().toString(),
-                master.getGroupCode(),
-                master.getName(),
-                master.getDescription(),
-                master.getStatus().name(),
-                master.getOriginalFilename(),
-                master.getChangeSummary(),
-                master.getAnchors().stream()
-                        .map(anchor -> new MasterAnchorView(anchor.getAnchorId(), anchor.getDisplayLabel()))
-                        .toList(),
-                reviewRecords.stream()
-                        .map(record -> new MasterReviewRecordView(
-                                record.getAction().name(),
-                                record.getDecision(),
-                                record.getChangeSummary(),
-                                record.getCommentSummary(),
-                                record.getActorUsername(),
-                                record.getCreatedAt()))
-                        .toList(),
-                master.getCreatedBy(),
-                master.getUpdatedBy(),
-                master.getCreatedAt(),
-                master.getUpdatedAt()
-        );
-    }
-
-    private MasterRevisionLineEntity persistRevisionLine(
-            UUID revisionLineId,
-            UUID masterId,
-            String storageKey,
-            String originalFilename,
-            List<MasterAnchorEntity> anchors,
-            MasterDocumentStatus statusSnapshot,
-            int revisionSequence,
-            boolean current,
-            String changeSummary,
-            String actor
-    ) {
-        MasterRevisionLineEntity line = new MasterRevisionLineEntity(
-                revisionLineId,
-                masterId,
-                storageKey,
-                originalFilename,
-                anchors.size(),
-                statusSnapshot,
-                revisionSequence,
-                current,
-                changeSummary,
-                actor
-        );
-        List<MasterRevisionLineAnchorEntity> snapshotAnchors = anchors.stream()
-                .map(anchor -> new MasterRevisionLineAnchorEntity(
-                        revisionLineId,
-                        anchor.getAnchorId(),
-                        anchor.getDisplayLabel(),
-                        anchor.getDocumentSequence()))
-                .toList();
-        line.replaceAnchors(snapshotAnchors);
-        line.getAnchors().forEach(anchor -> anchor.setRevisionLine(line));
-        return masterRevisionLineRepository.save(line);
     }
 
     public record MasterDownloadArtifact(InputStream contentStream, String filename, String contentType)

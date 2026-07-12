@@ -44,10 +44,19 @@ public class ManagementAuditRecorder {
     public static final String TEMPLATE_EXPORTED = "TEMPLATE_EXPORTED";
     public static final String TEMPLATE_IMPORTED = "TEMPLATE_IMPORTED";
 
-    private final ManagementAuditEventWriter writer;
+    private final ManagementAuditApiPolicySupport apiPolicy;
+    private final ManagementAuditIdentitySupport identity;
+    private final ManagementAuditCollaborationSupport collaboration;
+    private final ManagementAuditTemplateSupport template;
+    private final ManagementAuditContentModuleSupport contentModule;
 
     public ManagementAuditRecorder(ManagementAuditEventRepository repository, ObjectMapper objectMapper) {
-        this.writer = new ManagementAuditEventWriter(repository, objectMapper);
+        ManagementAuditEventWriter writer = new ManagementAuditEventWriter(repository, objectMapper);
+        this.apiPolicy = new ManagementAuditApiPolicySupport(writer);
+        this.identity = new ManagementAuditIdentitySupport(writer);
+        this.collaboration = new ManagementAuditCollaborationSupport(writer);
+        this.template = new ManagementAuditTemplateSupport(writer);
+        this.contentModule = new ManagementAuditContentModuleSupport(writer);
     }
 
     @Transactional
@@ -83,22 +92,15 @@ public class ManagementAuditRecorder {
             String actorSummary,
             PolicyUpdateAuditDetail detail
     ) {
-        boolean rollback = detail.rollback() != null && detail.rollback();
-        writer.persist(
-                API_POLICY_UPDATED,
+        apiPolicy.recordPolicyUpdated(
                 templateId,
                 groupCode,
-                null,
                 previousPolicyVersion,
                 policyVersion,
-                writer.writeJson(changedAreas),
-                rollback,
-                detail.rollbackSourcePolicyVersion(),
+                changedAreas,
                 actorUsername,
                 actorSummary,
-                null,
-                writer.truncate(writer.buildPolicyStatusSummary(changedAreas, detail)),
-                writer.writePolicyPayload(detail)
+                detail
         );
     }
 
@@ -111,16 +113,8 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        writer.persistCredential(
-                API_CREDENTIAL_CREATED,
-                templateId,
-                groupCode,
-                credentialId,
-                credentialExternalId,
-                actorUsername,
-                actorSummary,
-                "Credential created"
-        );
+        apiPolicy.recordCredentialCreated(
+                templateId, groupCode, credentialId, credentialExternalId, actorUsername, actorSummary);
     }
 
     @Transactional
@@ -134,16 +128,15 @@ public class ManagementAuditRecorder {
             int rotationGeneration,
             String previousCredentialFingerprint
     ) {
-        writer.persistCredential(
-                API_CREDENTIAL_ROTATED,
+        apiPolicy.recordCredentialRotated(
                 templateId,
                 groupCode,
                 credentialId,
                 credentialExternalId,
                 actorUsername,
                 actorSummary,
-                "Credential rotated; generation=" + rotationGeneration
-                        + "; previousFingerprint=" + previousCredentialFingerprint
+                rotationGeneration,
+                previousCredentialFingerprint
         );
     }
 
@@ -156,16 +149,8 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        writer.persistCredential(
-                API_CREDENTIAL_REVOKED,
-                templateId,
-                groupCode,
-                credentialId,
-                credentialExternalId,
-                actorUsername,
-                actorSummary,
-                "Credential revoked"
-        );
+        apiPolicy.recordCredentialRevoked(
+                templateId, groupCode, credentialId, credentialExternalId, actorUsername, actorSummary);
     }
 
     @Transactional
@@ -175,7 +160,7 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        writer.persistIdentity(eventType, null, actorUsername, actorSummary, statusSummary);
+        identity.recordUserEvent(eventType, actorUsername, actorSummary, statusSummary);
     }
 
     @Transactional
@@ -186,7 +171,7 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        writer.persistIdentity(eventType, groupCode, actorUsername, actorSummary, statusSummary);
+        identity.recordGroupEvent(eventType, groupCode, actorUsername, actorSummary, statusSummary);
     }
 
     @Transactional
@@ -197,13 +182,8 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        writer.persistIdentity(
-                RISK_PROMPT_CONFIG_UPDATED,
-                groupCode,
-                actorUsername,
-                actorSummary,
-                scopeType + ": " + statusSummary
-        );
+        identity.recordRiskPromptConfigUpdated(
+                scopeType, groupCode, actorUsername, actorSummary, statusSummary);
     }
 
     @Transactional
@@ -214,13 +194,8 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        writer.persistIdentity(
-                COLLABORATION_TIMEOUT_CONFIG_UPDATED,
-                groupCode,
-                actorUsername,
-                actorSummary,
-                scopeType + ": " + statusSummary
-        );
+        collaboration.recordCollaborationTimeoutConfigUpdated(
+                scopeType, groupCode, actorUsername, actorSummary, statusSummary);
     }
 
     @Transactional
@@ -231,22 +206,8 @@ public class ManagementAuditRecorder {
             CollaborationWorkItemQueue sourceQueue,
             String statusSummary
     ) {
-        writer.persist(
-                COLLABORATION_TIMEOUT_ESCALATION,
-                templateId,
-                groupCode,
-                null,
-                null,
-                null,
-                writer.writeJson(List.of(sourceQueue.name(), sourceWorkItemId.toString())),
-                false,
-                null,
-                COLLABORATION_ESCALATION_ACTOR_USERNAME,
-                COLLABORATION_ESCALATION_ACTOR_SUMMARY,
-                null,
-                writer.truncate(statusSummary),
-                writer.emptyJsonArray()
-        );
+        collaboration.recordCollaborationTimeoutEscalation(
+                templateId, groupCode, sourceWorkItemId, sourceQueue, statusSummary);
     }
 
     @Transactional
@@ -259,22 +220,8 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        writer.persist(
-                COLLABORATION_WORK_ITEM_CREATED,
-                templateId,
-                groupCode,
-                null,
-                null,
-                null,
-                writer.writeJson(List.of(queue.name(), triggerType.name(), workItemId.toString())),
-                false,
-                null,
-                actorUsername,
-                actorSummary,
-                null,
-                writer.truncate("Collaboration work item created: " + queue.name() + "/" + triggerType.name()),
-                writer.emptyJsonArray()
-        );
+        collaboration.recordCollaborationWorkItemCreated(
+                templateId, groupCode, workItemId, queue, triggerType, actorUsername, actorSummary);
     }
 
     @Transactional
@@ -286,22 +233,8 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        writer.persist(
-                COLLABORATION_WORK_ITEM_RESOLVED,
-                templateId,
-                groupCode,
-                null,
-                null,
-                null,
-                writer.writeJson(List.of(queue.name(), workItemId.toString())),
-                false,
-                null,
-                actorUsername,
-                actorSummary,
-                null,
-                writer.truncate("Collaboration work item resolved: " + queue.name()),
-                writer.emptyJsonArray()
-        );
+        collaboration.recordCollaborationWorkItemResolved(
+                templateId, groupCode, workItemId, queue, actorUsername, actorSummary);
     }
 
     @Transactional
@@ -312,22 +245,7 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        writer.persist(
-                TEMPLATE_EXPORTED,
-                templateId,
-                groupCode,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                actorUsername,
-                actorSummary,
-                null,
-                writer.truncate("Template exported: " + externalId),
-                writer.emptyJsonArray()
-        );
+        template.recordTemplateExported(templateId, groupCode, externalId, actorUsername, actorSummary);
     }
 
     @Transactional
@@ -340,22 +258,8 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        writer.persist(
-                TEMPLATE_IMPORTED,
-                templateId,
-                groupCode,
-                null,
-                null,
-                null,
-                writer.emptyJsonArray(),
-                false,
-                null,
-                actorUsername,
-                actorSummary,
-                null,
-                writer.truncate("Template imported: " + externalId + " batch=" + importBatchId + " dev=" + developmentVersion),
-                writer.emptyJsonArray()
-        );
+        template.recordTemplateImported(
+                templateId, groupCode, externalId, importBatchId, developmentVersion, actorUsername, actorSummary);
     }
 
     @Transactional
@@ -366,14 +270,7 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        recordContentModuleEvent(
-                CONTENT_MODULE_CREATED,
-                moduleId,
-                groupCode,
-                "Module created: " + moduleCode,
-                actorUsername,
-                actorSummary
-        );
+        contentModule.recordContentModuleCreated(moduleId, groupCode, moduleCode, actorUsername, actorSummary);
     }
 
     @Transactional
@@ -385,14 +282,8 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        recordContentModuleEvent(
-                CONTENT_MODULE_VERSION_CREATED,
-                moduleId,
-                groupCode,
-                "Version created: " + moduleCode + "@" + semanticVersion,
-                actorUsername,
-                actorSummary
-        );
+        contentModule.recordContentModuleVersionCreated(
+                moduleId, groupCode, moduleCode, semanticVersion, actorUsername, actorSummary);
     }
 
     @Transactional
@@ -404,14 +295,8 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        recordContentModuleEvent(
-                CONTENT_MODULE_VERSION_UPDATED,
-                moduleId,
-                groupCode,
-                "Draft updated: " + moduleCode + "@" + semanticVersion,
-                actorUsername,
-                actorSummary
-        );
+        contentModule.recordContentModuleVersionUpdated(
+                moduleId, groupCode, moduleCode, semanticVersion, actorUsername, actorSummary);
     }
 
     @Transactional
@@ -425,14 +310,8 @@ public class ManagementAuditRecorder {
             String actorUsername,
             String actorSummary
     ) {
-        recordContentModuleEvent(
-                CONTENT_MODULE_REVIEW_TRANSITION,
-                moduleId,
-                groupCode,
-                operation + " on " + moduleCode + "@" + semanticVersion + " -> " + reviewState,
-                actorUsername,
-                actorSummary
-        );
+        contentModule.recordContentModuleReviewTransition(
+                moduleId, groupCode, moduleCode, operation, semanticVersion, reviewState, actorUsername, actorSummary);
     }
 
     @Transactional
@@ -447,14 +326,16 @@ public class ManagementAuditRecorder {
             String actorSummary,
             ContentModuleLifecycleAuditDetail impactDetail
     ) {
-        writer.persistContentModule(
-                CONTENT_MODULE_LIFECYCLE_OPERATION,
+        contentModule.recordContentModuleLifecycleOperation(
                 moduleId,
                 groupCode,
-                operation + " on " + moduleCode + "@" + semanticVersion + " -> " + lifecycleState,
+                moduleCode,
+                operation,
+                semanticVersion,
+                lifecycleState,
                 actorUsername,
                 actorSummary,
-                writer.writeContentModuleLifecyclePayload(impactDetail)
+                impactDetail
         );
     }
 
@@ -482,25 +363,6 @@ public class ManagementAuditRecorder {
         );
     }
 
-    private void recordContentModuleEvent(
-            String eventType,
-            UUID moduleId,
-            String groupCode,
-            String statusSummary,
-            String actorUsername,
-            String actorSummary
-    ) {
-        writer.persistContentModule(
-                eventType,
-                moduleId,
-                groupCode,
-                statusSummary,
-                actorUsername,
-                actorSummary,
-                writer.emptyJsonArray()
-        );
-    }
-
     @Transactional
     public void recordEscalationDenied(
             String reasonCode,
@@ -508,12 +370,6 @@ public class ManagementAuditRecorder {
             String actorSummary,
             String statusSummary
     ) {
-        writer.persistIdentity(
-                IDENTITY_ESCALATION_DENIED,
-                null,
-                actorUsername,
-                actorSummary,
-                reasonCode + ": " + statusSummary
-        );
+        identity.recordEscalationDenied(reasonCode, actorUsername, actorSummary, statusSummary);
     }
 }
