@@ -179,6 +179,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[LR-E1 SSE-through-proxy incremental E2E](./behavior/lrp-e1-sse-proxy-e2e.md)** | **not-applicable** (2026-07-12) · **Done** merge `575d0aa` | Test-only evidence for **LR-B3** — Playwright on Docker 4173: ≥2 incremental SSE arrival timestamps (maxGapMs≈1864) + ≥60 s idle heartbeat survival through nginx; closes CD-PIT-12 browser proof; [manifest](../frontend/e2e/evidence/LRP-E1-sse-manifest.md) |
 | **[JWT_SECRET explicit provision — no compose default](./behavior/ops-jwt-secret-no-default.md)** | **ready** (2026-07-12) · slice **Done** (`587cd9a`) | **BDD-OPS-JWT-SECRET-001** — checklist **#9 → GO** (closes LR-B6 🟡#4); compose `:?` + `ProductionSecretGuard`; overall checklist still **NO-GO**; **not** go-live |
 | **[Kafka image — company registry / fail-closed KAFKA_IMAGE](./behavior/ops-kafka-company-registry.md)** | **ready** (2026-07-12) · slice **Done** (`e54d03c`; Task Master **#45**) | **BDD-OPS-KAFKA-REGISTRY-001** — checklist **#10 → CONDITIONAL** (fail-closed `${KAFKA_IMAGE:?…}`; Hub example LOCAL/DEV ONLY; operator must supply company-approved coords — **do not** invent registry hostname; not GO without company pull evidence); overall checklist still **NO-GO**; **not** go-live |
+| **[AD Group resolver — prod refuse config stub](./behavior/ops-ad-group-stub-close.md)** | **ready** (2026-07-12) · slice **In Progress** (Task Master **#46**; `ops-ad-group-stub-close`) | **BDD-OPS-AD-GROUP-STUB-001** S1–S4 — checklist **#5a stays NO-GO** until implement + guard evidence; **[ADR-0054 Accepted](./adr/authorization-security/0054-ad-group-resolver-production-boundary.md)** (docs-first; pending merge); company LDAP/AD **UNKNOWN**; overall checklist still **NO-GO**; **not** go-live |
 
 ## Evidence & acceptance artifacts
 
@@ -194,6 +195,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | Document | Purpose |
 | --- | --- |
 | [ADR index](./adr/README.md) | Decision records (Accepted = decision, not task done) |
+| [ADR-0054 AD Group resolver production boundary](./adr/authorization-security/0054-ad-group-resolver-production-boundary.md) | **Accepted** (2026-07-12) — config stub local/dev/test only; acceptance/production directory SPI **or** startup fail-closed; LDAP/AD coords UNKNOWN; does not supersede ADR-0010 |
 
 ## Governance & constitution
 

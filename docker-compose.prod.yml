@@ -39,6 +39,11 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_ACCESS_TOKEN_TTL: ${JWT_ACCESS_TOKEN_TTL:-PT30M}
       SESSION_ABSOLUTE_TTL: ${SESSION_ABSOLUTE_TTL:-PT8H}
+      # LAB ONLY — local docker acceptance E2E needs ConfigAdGroupResolver + YAML account-groups.
+      # AdGroupResolverGuard refuses type=config whenever the prod profile is active unless this
+      # flag is true (BDD-OPS-AD-GROUP-STUB-001 / ADR-0054). Claimed production MUST omit or set
+      # false — this is NOT enterprise AD/LDAP directory resolution.
+      DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE: ${DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB:-true}
       APP_ENVIRONMENT: dev
       DOCGEN_SEED_DEMO_CATALOG: ${DOCGEN_SEED_DEMO_CATALOG:-false}
       # LR-C5: ≥500 templates for catalog pagination E2E (idempotent if LOAD-TPL-0500 exists)

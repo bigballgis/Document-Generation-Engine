@@ -11,6 +11,8 @@ related:
 	- docs/security/permission-matrix.md
 	- docs/domain/domain-model.md
 	- docs/architecture/security-view.md
+	- docs/adr/authorization-security/0054-ad-group-resolver-production-boundary.md
+	- docs/behavior/ops-ad-group-stub-close.md
 ---
 
 # ADR 0010: AD Group Authorization Resolution
@@ -75,3 +77,4 @@ Logs, audit records, API contract displays, and management screens must not expo
 - [API Error Model ADR](../api/0006-api-error-model.md)
 - [API Management Configuration Change Governance ADR](../api-management/0007-api-management-change-governance.md)
 - [API Credential Lifecycle ADR](../api-management/0009-api-credential-lifecycle.md)
+- [ADR-0054 AD Group Resolver Production Boundary](./0054-ad-group-resolver-production-boundary.md) — config stub = local/dev/test only; acceptance/production requires directory adapter SPI **or** startup fail-closed; does **not** supersede this ADR’s cache / `503` rules

@@ -101,8 +101,16 @@ docgen:
     # Enable: DOCGEN_SEED_CATALOG_LOAD=true (optional DOCGEN_SEED_CATALOG_LOAD_COUNT=500)
     enabled: ${DOCGEN_SEED_CATALOG_LOAD:false}
     template-count: ${DOCGEN_SEED_CATALOG_LOAD_COUNT:500}
+  # LOCAL/TEST ONLY — ConfigAdGroupResolver + account-groups demo map.
+  # Acceptance/production must NOT use type=config silently (ADR-0054 / BDD-OPS-AD-GROUP-STUB-001):
+  # AdGroupResolverGuard fails closed on prod-shaped paths unless a configured directory adapter
+  # exists, OR (local docker acceptance LAB ONLY) allow-config-stub-on-prod-profile=true
+  # via DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE / DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB.
   ad-group-resolver:
     type: config
+    # Default false. Local docker-compose.prod.yml sets true (LAB ONLY). Claimed production must omit.
+    # Env: DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE (compose shorthand DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB).
+    allow-config-stub-on-prod-profile: ${DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE:false}
     account-groups:
       svc-caller:
         - RETAIL_API

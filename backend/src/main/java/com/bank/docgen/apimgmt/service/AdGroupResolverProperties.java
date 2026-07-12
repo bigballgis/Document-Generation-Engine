@@ -9,6 +9,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AdGroupResolverProperties {
 
     private String type = "config";
+    /**
+     * LAB ONLY — when {@code true}, allows {@code type=config} on an active {@code prod} profile
+     * (local docker acceptance). Must be unset/false in claimed production. Not a directory adapter.
+     */
+    private boolean allowConfigStubOnProdProfile = false;
     private Map<String, List<String>> accountGroups = Map.of();
 
     public String getType() {
@@ -17,6 +22,14 @@ public class AdGroupResolverProperties {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public boolean isAllowConfigStubOnProdProfile() {
+        return allowConfigStubOnProdProfile;
+    }
+
+    public void setAllowConfigStubOnProdProfile(boolean allowConfigStubOnProdProfile) {
+        this.allowConfigStubOnProdProfile = allowConfigStubOnProdProfile;
     }
 
     public Map<String, List<String>> getAccountGroups() {
