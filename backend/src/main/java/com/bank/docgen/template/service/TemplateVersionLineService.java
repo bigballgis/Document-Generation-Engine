@@ -12,9 +12,7 @@ import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateDevVersionCreatedView;
 import com.bank.docgen.template.api.TemplateVersionLineDetailView;
 import com.bank.docgen.template.api.TemplateVersionLineSummaryView;
-import com.bank.docgen.template.domain.ApprovalSubState;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
-import com.bank.docgen.template.domain.TemplateVersionLineKind;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
@@ -25,11 +23,7 @@ import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceRepository;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,11 +37,10 @@ public class TemplateVersionLineService {
     private final VariableSchemaRepository variableSchemaRepository;
     private final AnchorBindingRepository anchorBindingRepository;
     private final TemplateViewMapper templateViewMapper;
-    private final ApprovalSubStateResolver approvalSubStateResolver;
     private final GroupAccessService groupAccessService;
-    private final ManagementUserDisplayService managementUserDisplayService;
     private final ApiPolicyRepository apiPolicyRepository;
     private final TemplateVersionLineCloneSupport cloneSupport;
+    private final TemplateVersionLineViewSupport viewSupport;
 
     public TemplateVersionLineService(
             TemplateService templateService,
@@ -72,9 +65,7 @@ public class TemplateVersionLineService {
         this.variableSchemaRepository = variableSchemaRepository;
         this.anchorBindingRepository = anchorBindingRepository;
         this.templateViewMapper = templateViewMapper;
-        this.approvalSubStateResolver = approvalSubStateResolver;
         this.groupAccessService = groupAccessService;
-        this.managementUserDisplayService = managementUserDisplayService;
         this.apiPolicyRepository = apiPolicyRepository;
         this.cloneSupport = new TemplateVersionLineCloneSupport(
                 variableSchemaRepository,
@@ -82,6 +73,11 @@ public class TemplateVersionLineService {
                 contentModuleReferenceRepository,
                 lifecycleRecordRepository,
                 messageResolver
+        );
+        this.viewSupport = new TemplateVersionLineViewSupport(
+                templateCurrentVersionResolver,
+                approvalSubStateResolver,
+                managementUserDisplayService
         );
     }
 
@@ -97,37 +93,11 @@ public class TemplateVersionLineService {
         boolean canAuthor = groupAccessService.canAuthorTemplates(session);
         boolean hasInFlight = templateCurrentVersionResolver.hasInFlightDevVersion(templateId);
 
-        var rows = enrichSummaries(templateCurrentVersionResolver.listVersionLinesOrdered(templateId).stream()
-                .map(version -> toSummary(version, template, defaultRoute, canAuthor, hasInFlight))
+        var rows = viewSupport.enrichSummaries(templateCurrentVersionResolver.listVersionLinesOrdered(templateId).stream()
+                .map(version -> viewSupport.toSummary(version, template, defaultRoute, canAuthor, hasInFlight))
                 .toList());
 
         return PageView.of(rows, page, size);
-    }
-
-    private List<TemplateVersionLineSummaryView> enrichSummaries(List<TemplateVersionLineSummaryView> summaries) {
-        if (summaries.isEmpty()) {
-            return summaries;
-        }
-        Set<String> usernames = summaries.stream()
-                .map(TemplateVersionLineSummaryView::updatedBy)
-                .filter(username -> username != null && !username.isBlank())
-                .collect(Collectors.toSet());
-        Map<String, String> displayNames = managementUserDisplayService.lookupDisplayNames(usernames);
-        return summaries.stream()
-                .map(summary -> new TemplateVersionLineSummaryView(
-                        summary.devVersionId(),
-                        summary.devVersionNumber(),
-                        summary.releaseVersion(),
-                        summary.lifecycleStatus(),
-                        summary.approvalSubState(),
-                        summary.lineKind(),
-                        summary.updatedAt(),
-                        summary.updatedBy(),
-                        summary.defaultRouteTarget(),
-                        summary.cloneable(),
-                        summary.updatedBy() == null ? null : displayNames.get(summary.updatedBy())
-                ))
-                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -141,7 +111,7 @@ public class TemplateVersionLineService {
         String defaultRoute = defaultRouteReleaseVersion(templateId);
         boolean canAuthor = groupAccessService.canAuthorTemplates(session);
         boolean hasInFlight = templateCurrentVersionResolver.hasInFlightDevVersion(templateId);
-        TemplateVersionLineSummaryView summary = toSummary(
+        TemplateVersionLineSummaryView summary = viewSupport.toSummary(
                 version, template, defaultRoute, canAuthor, hasInFlight
         );
 
@@ -199,31 +169,7 @@ public class TemplateVersionLineService {
                 .orElseThrow(TemplateNotFoundException::new);
 
         TemplateDetailView detail = templateViewMapper.toDetailForVersion(template, version, true);
-        String updatedBy = version.getCreatedBy();
-        String updatedByDisplayName = updatedBy == null || updatedBy.isBlank()
-                ? null
-                : managementUserDisplayService.lookupDisplayNames(Set.of(updatedBy)).get(updatedBy);
-        return new TemplateDetailView(
-                detail.id(),
-                detail.externalId(),
-                detail.groupCode(),
-                detail.name(),
-                detail.description(),
-                detail.masterId(),
-                detail.lifecycleStatus(),
-                detail.approvalSubState(),
-                detail.releaseVersion(),
-                detail.devVersionId(),
-                detail.devVersionNumber(),
-                detail.variables(),
-                detail.bindings(),
-                detail.rules(),
-                detail.createdAt(),
-                detail.updatedAt(),
-                updatedBy,
-                updatedByDisplayName,
-                detail.readOnly()
-        );
+        return viewSupport.overlayReleaseDetailUpdatedBy(detail, version);
     }
 
     @Transactional
@@ -337,47 +283,5 @@ public class TemplateVersionLineService {
         return apiPolicyRepository.findByTemplateId(templateId)
                 .map(ApiPolicyEntity::getDefaultRouteReleaseVersion)
                 .orElse(null);
-    }
-
-    private TemplateVersionLineSummaryView toSummary(
-            TemplateVersionEntity version,
-            TemplateEntity template,
-            String defaultRouteReleaseVersion,
-            boolean canAuthor,
-            boolean hasInFlight
-    ) {
-        boolean inFlight = templateCurrentVersionResolver.isInFlight(version);
-        TemplateVersionLineKind lineKind = inFlight ? TemplateVersionLineKind.IN_FLIGHT : TemplateVersionLineKind.PUBLISHED;
-        Boolean defaultRouteTarget = null;
-        if (!inFlight && version.getReleaseVersion() != null) {
-            defaultRouteTarget = version.getReleaseVersion().equals(defaultRouteReleaseVersion);
-        }
-        ApprovalSubState approvalSubState = inFlight ? approvalSubStateResolver.resolve(template) : null;
-        boolean cloneable = !inFlight && canAuthor && !hasInFlight;
-
-        return new TemplateVersionLineSummaryView(
-                version.getId().toString(),
-                version.getDevVersionNumber(),
-                version.getReleaseVersion(),
-                resolveLifecycleStatus(version, template, inFlight),
-                approvalSubState,
-                lineKind,
-                version.getUpdatedAt(),
-                template.getUpdatedBy(),
-                defaultRouteTarget,
-                cloneable,
-                null
-        );
-    }
-
-    private TemplateLifecycleStatus resolveLifecycleStatus(
-            TemplateVersionEntity version,
-            TemplateEntity template,
-            boolean inFlight
-    ) {
-        if (inFlight) {
-            return template.getLifecycleStatus();
-        }
-        return version.getLifecycleStatus();
     }
 }
