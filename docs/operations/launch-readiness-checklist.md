@@ -2,11 +2,11 @@
 
 **Program:** [Launch Readiness & Deep-Optimization Program (LRP)](../plan/launch-readiness-program.md) §7  
 **Slice:** `lrp-e2-launch-checklist` · Task Master **#43**  
-**Checklist status:** **Authored** (2026-07-12) — Wave LR-E2 remains **In Progress** until stage 12 doc-sync  
+**Checklist status:** **Done** (2026-07-12 — merge `ae39fbb`; Task Master #43) — Wave LR-E docs exit gate closed; overall verdict remains **NO-GO**  
 **Formal phase:** **None**  
 **Purpose:** Ops go / no-go / conditional verdict template with **evidence-linked** rows.  
 
-> **This is not a production go-live claim.** Completing or signing this checklist does **not** authorize production launch by itself. Incomplete evidence for any row → mark that row **NO-GO** (or **UNKNOWN** if the docs do not prove the fact either way). Do **not** treat Wave LR-E as Done until LR-E2 closes via the delivery pipeline.
+> **This is not a production go-live claim.** Completing or signing this checklist does **not** authorize production launch by itself. Incomplete evidence for any row → mark that row **NO-GO** (or **UNKNOWN** if the docs do not prove the fact either way). Wave LR-E **Done** means the documentation release-readiness gate (checklist + E1 proof) is closed — **not** production authorization. Overall snapshot remains **NO-GO**.
 
 **Companion draft (historical checkboxes):** [launch-readiness-gate.md](../plan/launch-readiness-gate.md) — prefer **this** file for verdict + evidence links.
 
@@ -102,3 +102,4 @@ Fill this block for each readiness review. **Do not** change item verdicts witho
 | Date | Change |
 | --- | --- |
 | 2026-07-12 | Initial checklist authored (LR-E2 / Task Master #43). Honest **NO-GO** overall. |
+| 2026-07-12 | LR-E2 / Wave LR-E docs exit gate **Done** (merge `ae39fbb`). Overall verdict remains **NO-GO** — **not** production go-live. |

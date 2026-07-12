@@ -590,23 +590,23 @@
       {
         "id": "43",
         "title": "LR-E2 Launch readiness checklist",
-        "description": "IN PROGRESS 2026-07-12. LR-E2 launch readiness checklist (docs-only go/no-go). Slice lrp-e2-launch-checklist. Formal phase None. Wave LR-E In Progress (partial — E1 Done; E2 In Progress; sole-active). BDD not-applicable. Do NOT claim Wave LR-E Done / production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
-        "details": "ACTIVATED 2026-07-12. Slice id: lrp-e2-launch-checklist. Placement: ISOLATED D:/working/DGE-lrp-e2-launch-checklist · feat/lrp-e2-launch-checklist · base 2bb6fc0 (2bb6fc05d38c27af3fbccd9657012f048d009128). Formal phase remains None. Wave LR-E -> In Progress (partial — E1 Done; E2 In Progress; sole-active). BDD: not-applicable (docs-only; confirming in parallel). Owner: doc-keeper. Scope: Create docs/operations/launch-readiness-checklist.md with evidence-linked go/no-go items (P22, CD-2, LR-A/B critical, ledger seams/ADR, LR-D2 drill, LR-B8 healthchecks, LR-E1, JWT_SECRET explicit, Kafka company registry); index from docs/README.md + program §7; verdict template. Gates: doc-only link check + architecture-reviewer. Do NOT: mark checklist items green without evidence; claim Wave LR-E Done; claim production go-live; activate CD-3; touch DGE-audit-governance. Gate draft: docs/plan/launch-readiness-gate.md. Program: docs/plan/launch-readiness-program.md §7.",
-        "testStrategy": "1. Checklist artifact exists at docs/operations/launch-readiness-checklist.md. 2. Every go/no-go item links to live evidence (ledger/manifest/ADR/runbook). 3. Indexed from docs/README.md operations section + LRP program §7. 4. Verdict template present (date, verdict, sign-off, open risks); any critical red forces no-go. 5. Relative links resolve. 6. Architecture-reviewer review. 7. Do not mark Wave LR-E Done or production go-live without exit gate + evidence.",
+        "description": "DONE 2026-07-12. LR-E2 launch readiness checklist (docs-only go/no-go). Slice lrp-e2-launch-checklist. Merge ae39fbb. Formal phase None. Wave LR-E Done (E1+E2 docs exit gate — not production go-live). LRP planned waves A-E Done. Checklist overall NO-GO. No sole-active. BDD not-applicable. Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: lrp-e2-launch-checklist. Merge: ae39fbb (ae39fbb4c4d724873b45f01c62d9600a407ddbc5); feature tip 57e9133 (57e9133c462237fdb9538f69d8e353f0c0c05045); worktree removed. Formal phase remains None. Wave LR-E -> Done (E1+E2 docs exit gate; checklist artifact + E1 proof — NOT production go-live). LRP planned waves A-E -> Done; no sole-active. BDD: not-applicable (docs-only). Owner: doc-keeper. Delivered: docs/operations/launch-readiness-checklist.md (indexed); companion docs/plan/launch-readiness-gate.md. Overall snapshot NO-GO (blockers: ADR-0042/0043+Word, AD Group stub, paste-binding, JWT_SECRET compose default, Kafka company registry). Gates: docs-only; architecture PASS_WITH_NOTES Critical=0. Do NOT: claim production go-live; activate CD-3; touch DGE-audit-governance. Recommend next (notes only): pause.",
+        "testStrategy": "1. Checklist artifact exists at docs/operations/launch-readiness-checklist.md. 2. Every go/no-go item links to live evidence (ledger/manifest/ADR/runbook). 3. Indexed from docs/README.md operations section + LRP program §7. 4. Verdict template present; overall NO-GO when critical gaps remain. 5. Relative links resolve. 6. Architecture-reviewer PASS_WITH_NOTES + merge ae39fbb + MAIN doc-sync + commit-review. 7. Wave LR-E Done = docs gate only — never equate to production go-live.",
         "priority": "high",
         "dependencies": [
           "42"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-12T09:10:00.000Z"
+        "updatedAt": "2026-07-12T09:25:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T09:10:00.000Z",
+      "lastModified": "2026-07-12T09:25:00.000Z",
       "taskCount": 43,
-      "completedCount": 42,
+      "completedCount": 43,
       "tags": [
         "master"
       ]
