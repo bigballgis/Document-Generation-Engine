@@ -1,23 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import LifecycleCommentDialog from '@/components/common/LifecycleCommentDialog.vue'
 import BatchTestProgressDialog from '@/components/template/BatchTestProgressDialog.vue'
 import TemplateDetailDesignTab from '@/views/templates/detail/TemplateDetailDesignTab.vue'
 import TemplateDetailTestingTab from '@/views/templates/detail/TemplateDetailTestingTab.vue'
 import TemplateDetailApprovalTab from '@/views/templates/detail/TemplateDetailApprovalTab.vue'
-import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
-import { useSubmitTestEligibility } from '@/composables/useSubmitTestEligibility'
-import {
-  TEMPLATE_DEV_WORKSPACE_TABS,
-  buildDevWorkspaceQuery,
-  resolveTemplateDevWorkspaceTabFromQuery,
-  templateDevWorkspaceTabLabelKey,
-  type TemplateDevWorkspaceTab,
-} from '@/views/templates/templateDevWorkspaceTabs'
+import TemplateDetailDevWorkspaceActions from '@/views/templates/detail/TemplateDetailDevWorkspaceActions.vue'
+import { useTemplateDetailDevWorkspace } from '@/views/templates/detail/useTemplateDetailDevWorkspace'
 import type { SemverBumpLevel } from '@/utils/semver'
 import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
 import type {
@@ -98,237 +88,67 @@ const emit = defineEmits<{
   'preview-refreshed': [preview: PreviewRecord]
 }>()
 
-const { t } = useI18n()
-const route = useRoute()
-const router = useRouter()
-const panelDataStore = useTemplatePanelDataStore()
-
-const activeWorkspaceTab = ref<TemplateDevWorkspaceTab>(
-  resolveTemplateDevWorkspaceTabFromQuery(route.query),
-)
-const testDataSetCount = ref(0)
-const submitForTestDialogOpen = ref(false)
-
-// T09: Batch test dialog state
-const batchDialogVisible = ref(false)
-const batchDialogRunId = ref('')
-const batchDialogStreamUrl = ref('')
-const batchRunning = ref(false)
-
-// T10: Submit eligibility composable (only load when templateId is known)
-  const { isEligible, tooltipContent, refresh: refreshEligibility } = useSubmitTestEligibility(
-  props.templateId,
-)
-
-const submitTooltipContent = computed(() => {
-  if (testDataSetCount.value === 0) {
-    return t('templates.testPreview.workflow.noDataSetsTooltip')
-  }
-  return tooltipContent.value
-})
-
-const submitTooltipDisabled = computed(() => isEligible.value && testDataSetCount.value > 0)
-
-const workspaceTabs = computed(() =>
-  TEMPLATE_DEV_WORKSPACE_TABS.map((name) => ({
-    name,
-    labelKey: templateDevWorkspaceTabLabelKey(name),
-  })),
-)
-
-watch(
-  () => route.query,
-  () => {
-    const resolved = resolveTemplateDevWorkspaceTabFromQuery(route.query)
-    if (activeWorkspaceTab.value !== resolved) {
-      activeWorkspaceTab.value = resolved
-    }
-  },
-  { deep: true },
-)
-
-watch(activeWorkspaceTab, (tab) => {
-  if (resolveTemplateDevWorkspaceTabFromQuery(route.query) === tab) {
-    return
-  }
-  void router.replace({ query: buildDevWorkspaceQuery(route.query, tab) })
-})
-
-watch(
-  () => props.openSubmitForTestDialog,
-  (requested) => {
-    if (requested) {
-      activeWorkspaceTab.value = 'testing'
-      submitForTestDialogOpen.value = true
-      emit('update:openSubmitForTestDialog', false)
-    }
-  },
-)
-
-function handleSubmitForTestConfirm(comment: string) {
-  submitForTestDialogOpen.value = false
-  emit('submit-for-test', comment)
-}
-
-function requestSubmitForTestDialog() {
-  submitForTestDialogOpen.value = true
-}
-
-async function handleRunFullTest() {
-  try {
-    await ElMessageBox.confirm(
-      t('templates.batchTest.confirmMessage', { count: testDataSetCount.value }),
-      t('templates.batchTest.confirmTitle'),
-      {
-        confirmButtonText: t('templates.batchTest.confirmButton'),
-        cancelButtonText: t('templates.batchTest.cancelButton'),
-        type: 'info',
-      },
-    )
-  } catch {
-    return
-  }
-
-  batchRunning.value = true
-  try {
-    const result = await panelDataStore.runBatchTest(props.templateId)
-    batchDialogRunId.value = result.runId
-    batchDialogStreamUrl.value = result.streamUrl
-    batchDialogVisible.value = true
-  } catch {
-    ElMessage.error(t('templates.batchTest.error.start'))
-  } finally {
-    batchRunning.value = false
-  }
-}
-
-function handleBatchCompleted() {
-  emit('test-generate-batch')
-  void refreshEligibility()
-}
-
-watch(batchDialogVisible, (visible, wasVisible) => {
-  if (wasVisible && !visible) {
-    void refreshEligibility()
-  }
-})
-
-watch(
+const {
   activeWorkspaceTab,
-  (tab) => {
-    if (tab === 'testing') {
-      void refreshEligibility()
-    }
-  },
-  { immediate: false },
-)
+  workspaceTabs,
+  testDataSetCount,
+  submitForTestDialogOpen,
+  batchDialogVisible,
+  batchDialogRunId,
+  batchDialogStreamUrl,
+  batchRunning,
+  isEligible,
+  submitTooltipContent,
+  submitTooltipDisabled,
+  handleSubmitForTestConfirm,
+  requestSubmitForTestDialog,
+  handleRunFullTest,
+  handleBatchCompleted,
+} = useTemplateDetailDevWorkspace({
+  templateId: () => props.templateId,
+  openSubmitForTestDialog: () => props.openSubmitForTestDialog,
+  onClearOpenSubmitForTestDialog: () => emit('update:openSubmitForTestDialog', false),
+  onSubmitForTest: (comment) => emit('submit-for-test', comment),
+  onBatchCompleted: () => emit('test-generate-batch'),
+})
+
+const { t } = useI18n()
 </script>
 
 <template>
   <section id="dev-workspace" class="dev-workspace">
     <WorkspaceTabShell v-model="activeWorkspaceTab" :tabs="workspaceTabs">
       <template #actions>
-        <template v-if="activeWorkspaceTab === 'testing'">
-          <el-tooltip
-            v-if="showTestGenerate"
-            :content="testDataSetCount === 0 ? t('templates.testPreview.workflow.noDataSetsTooltip') : ''"
-            :disabled="testDataSetCount > 0"
-            placement="bottom"
-          >
-            <span>
-              <el-button
-                type="primary"
-                :loading="batchRunning"
-                :disabled="testDataSetCount === 0"
-                @click="handleRunFullTest"
-              >
-                {{ t('templates.testPreview.workflow.runAll') }}
-              </el-button>
-            </span>
-          </el-tooltip>
-
-          <el-tooltip
-            v-if="showDraftActions"
-            :content="submitTooltipContent"
-            :disabled="submitTooltipDisabled"
-            placement="bottom"
-            effect="light"
-            popper-class="submit-test-tooltip"
-          >
-            <span>
-              <el-button
-                type="success"
-                :loading="submitting"
-                :disabled="!isEligible || testDataSetCount === 0"
-                @click="requestSubmitForTestDialog"
-              >
-                {{ t('templates.lifecycle.submitTest') }}
-              </el-button>
-            </span>
-          </el-tooltip>
-
-          <template v-if="showTestingDecisionActions">
-            <el-button type="success" :loading="submitting" @click="emit('test-decision', 'PASSED')">
-              {{ t('templates.lifecycle.passTest') }}
-            </el-button>
-            <el-button type="danger" :loading="submitting" @click="emit('test-decision', 'FAILED')">
-              {{ t('templates.lifecycle.failTest') }}
-            </el-button>
-          </template>
-        </template>
-
-        <template v-else-if="activeWorkspaceTab === 'approval'">
-          <el-button
-            v-if="showSubmitForApproval"
-            type="primary"
-            :loading="submitting"
-            :disabled="!submitGateReady || loadingSubmitGate || Boolean(submitGateLoadError)"
-            @click="emit('submitForApproval')"
-          >
-            {{ t('templates.lifecycle.submitApproval') }}
-          </el-button>
-          <template v-if="showApprovalDecisionActions">
-            <el-button type="success" :loading="submitting" @click="emit('approvalDecision', 'APPROVED')">
-              {{ t('templates.lifecycle.approve') }}
-            </el-button>
-            <el-button type="danger" :loading="submitting" @click="emit('approvalDecision', 'REJECTED')">
-              {{ t('templates.lifecycle.reject') }}
-            </el-button>
-          </template>
-          <el-button
-            v-if="showPublishActions"
-            type="primary"
-            :loading="submitting"
-            :disabled="!publishGateReady || loadingPublishGate"
-            @click="emit('publish')"
-          >
-            {{ t('templates.lifecycle.publish') }}
-          </el-button>
-          <el-button
-            v-if="showStopAction"
-            type="warning"
-            :loading="submitting"
-            @click="emit('governanceAction', 'stop')"
-          >
-            {{ t('templates.governance.stop') }}
-          </el-button>
-          <el-button
-            v-if="showRestoreAction"
-            type="primary"
-            :loading="submitting"
-            @click="emit('governanceAction', 'restore')"
-          >
-            {{ t('templates.governance.restore') }}
-          </el-button>
-          <el-button
-            v-if="showDeprecateAction"
-            type="danger"
-            :loading="submitting"
-            @click="emit('governanceAction', 'deprecate')"
-          >
-            {{ t('templates.governance.deprecate') }}
-          </el-button>
-        </template>
+        <TemplateDetailDevWorkspaceActions
+          :active-workspace-tab="activeWorkspaceTab"
+          :show-test-generate="showTestGenerate"
+          :show-draft-actions="showDraftActions"
+          :show-testing-decision-actions="showTestingDecisionActions"
+          :show-submit-for-approval="showSubmitForApproval"
+          :show-approval-decision-actions="showApprovalDecisionActions"
+          :show-publish-actions="showPublishActions"
+          :show-stop-action="showStopAction"
+          :show-restore-action="showRestoreAction"
+          :show-deprecate-action="showDeprecateAction"
+          :test-data-set-count="testDataSetCount"
+          :batch-running="batchRunning"
+          :submitting="submitting"
+          :is-eligible="isEligible"
+          :submit-tooltip-content="submitTooltipContent"
+          :submit-tooltip-disabled="submitTooltipDisabled"
+          :submit-gate-ready="submitGateReady"
+          :loading-submit-gate="loadingSubmitGate"
+          :submit-gate-load-error="submitGateLoadError"
+          :publish-gate-ready="publishGateReady"
+          :loading-publish-gate="loadingPublishGate"
+          @run-full-test="handleRunFullTest"
+          @request-submit-for-test="requestSubmitForTestDialog"
+          @test-decision="emit('test-decision', $event)"
+          @submit-for-approval="emit('submitForApproval')"
+          @approval-decision="emit('approvalDecision', $event)"
+          @publish="emit('publish')"
+          @governance-action="emit('governanceAction', $event)"
+        />
       </template>
 
       <template #design>
