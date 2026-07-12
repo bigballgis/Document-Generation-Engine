@@ -15,10 +15,12 @@ export interface UseTemplatePolicyCredentialsOptions {
   templateId: ComputedRef<string>
   template: ComputedRef<TemplateDetail | null>
   errorMessage: ComputedRef<string>
+  /** When set, secrets are revealed via this callback instead of the local secret dialog. */
+  revealSecret?: (externalId: string, secret: string) => void
 }
 
 export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentialsOptions) {
-  const { templateId, template } = options
+  const { templateId, template, revealSecret } = options
 
   const { t, te } = useI18n()
   const { formatDateTime } = useLocaleFormatters()
@@ -94,10 +96,18 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
     credentialSecretDialogVisible.value = true
   }
 
+  function revealCredentialSecret(externalId: string, secret: string) {
+    if (revealSecret) {
+      revealSecret(externalId, secret)
+      return
+    }
+    openCredentialSecretDialog(externalId, secret)
+  }
+
   async function handleCreateCredential() {
     try {
       const created = await apiPolicyStore.createCredential(templateId.value)
-      openCredentialSecretDialog(created.externalId, created.secret)
+      revealCredentialSecret(created.externalId, created.secret)
       ElMessage.success(t('templates.policy.createCredentialSuccess'))
     } catch {
       ElMessage.error(resolvePolicyErrorMessage('templates.error.createCredential'))
@@ -115,7 +125,7 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
     }
     try {
       const rotated = await apiPolicyStore.rotateCredential(templateId.value, credentialId)
-      openCredentialSecretDialog(externalId, rotated.secret)
+      revealCredentialSecret(externalId, rotated.secret)
       ElMessage.success(t('templates.policy.rotateCredentialSuccess'))
     } catch {
       ElMessage.error(resolvePolicyErrorMessage('templates.error.rotateCredential'))
