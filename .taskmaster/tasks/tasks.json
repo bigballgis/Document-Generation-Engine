@@ -600,12 +600,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-12T09:25:00.000Z"
+      },
+      {
+        "id": "44",
+        "title": "OPS: Remove JWT_SECRET compose default (fail-closed)",
+        "description": "IN PROGRESS 2026-07-12. Slice ops-jwt-secret-no-default. Remove JWT_SECRET default fallback from docker-compose.prod.yml; require explicit provision for prod/acceptance (fail-closed). Closes LR-E2 checklist #9 NO-GO root cause (LR-B6 security review 🟡#4). Formal phase remains None. Sole-active Task Master task. Do NOT activate CD-3. Do NOT touch DGE-audit-governance. Do NOT claim production go-live.",
+        "details": "IN PROGRESS 2026-07-12. Slice id: ops-jwt-secret-no-default. Worktree: D:/working/DGE-ops-jwt-secret-no-default; branch feat/ops-jwt-secret-no-default; base d599a47 (origin/main). Formal phase remains None. LRP A–E Done with overall checklist NO-GO; user 「自动继续」 preferred JWT_SECRET fix first. Upstream: docs/operations/launch-readiness-checklist.md #9 NO-GO — docker-compose.prod.yml has `JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}`; ledger § LRP batch 2 (LR-B6 🟡#4). Scope: remove compose default; fail-closed when unset in prod/acceptance; update runbook/deploy docs as needed; regression coverage for missing secret. BDD required before implement (behavior-spec-author). Do NOT: mark Done until gates + merge + MAIN doc-sync; activate CD-3; touch DGE-audit-governance; claim production go-live / flip checklist overall GO. Later doc-sync pointers (do not edit to Done yet): docs/plan/master-plan.md delivery focus; docs/plan/execution-sync-ledger.md; docs/operations/launch-readiness-checklist.md #9; docs/plan/launch-readiness-program.md next-action; CLAUDE.md delivery focus.",
+        "testStrategy": "1. docker-compose.prod.yml has no JWT_SECRET:-default fallback. 2. Prod/acceptance start without JWT_SECRET fails closed (clear error / non-start). 3. Explicit JWT_SECRET (≥32 bytes) allows healthy backend start + management login. 4. Dev/local path remains documented if intentionally different. 5. Runbook/deploy secrets docs list JWT_SECRET as required. 6. Backend/deploy gates green as applicable; architecture review; merge + MAIN post-task-doc-sync + commit-review. 7. Checklist #9 may move GO only after durable evidence — overall checklist may still be NO-GO for other blockers.",
+        "priority": "high",
+        "dependencies": [
+          "43"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T01:25:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T09:25:00.000Z",
-      "taskCount": 43,
+      "lastModified": "2026-07-12T01:25:00.000Z",
+      "taskCount": 44,
       "completedCount": 43,
       "tags": [
         "master"

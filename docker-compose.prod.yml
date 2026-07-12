@@ -33,7 +33,10 @@ services:
       ASYNC_TRANSPORT: ${ASYNC_TRANSPORT:-in-process}
       KAFKA_BOOTSTRAP_SERVERS: docgen-kafka:9092
       DOCGEN_ASYNC_KAFKA_CONSUMER_GROUP: ${DOCGEN_ASYNC_KAFKA_CONSUMER_GROUP:-docgen-async-batch-worker}
-      JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}
+      # BDD-OPS-JWT-SECRET-001 / JWT-C1: must be explicitly provisioned — no :-default fallback.
+      # ProductionSecretGuard rejects known insecure JWT values whenever the prod profile is active
+      # (even if APP_ENVIRONMENT remains dev for acceptance convenience below).
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_ACCESS_TOKEN_TTL: ${JWT_ACCESS_TOKEN_TTL:-PT30M}
       SESSION_ABSOLUTE_TTL: ${SESSION_ABSOLUTE_TTL:-PT8H}
       APP_ENVIRONMENT: dev

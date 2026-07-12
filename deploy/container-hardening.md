@@ -62,9 +62,14 @@ Static assets and NGINX config are baked into the image and remain read-only at 
 
 ## Local verification
 
-After host compile + image build:
+After host compile + image build, export an **explicit** ≥32-byte `JWT_SECRET` that is **not**
+a known insecure default (`local-dev-only-change-me-please-32bytes-min`,
+`prod-change-me-32-bytes-minimum-secret`). The smoke script is prod-shaped: it must **not**
+silently fall back to `prod-change-me-32-bytes-minimum-secret` when unset
+([BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md) S4).
 
 ```powershell
+$env:JWT_SECRET = '<explicit-non-default-≥32-bytes>'
 .\scripts\container-hardening-smoke.ps1
 ```
 
