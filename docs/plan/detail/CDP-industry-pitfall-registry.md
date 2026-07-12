@@ -97,7 +97,7 @@
 | **Root cause** | Rich text field asked to carry structure (headless CMS anti-pattern) |
 | **Detection** | Paste E2E + binding validator flags; count of `CONTROLLED_STYLE_FALLBACK` |
 | **Mitigation** | Enforce node matrix in UI; paste cleaning summary; block publish on disallowed nodes |
-| **Owner wave** | P18 (Done UI) + CD-HARD-T05 binding wire |
+| **Owner wave** | P18 (Done UI) + **CD-HARD-T05 Done** (binding wire; merge `f1f00da`; checklist #5b → GO) |
 | **Doc anchor** | authoring-first-principles §4; usability-review L82 |
 
 ### CD-PIT-08 — Edit preview mistaken for legal evidence

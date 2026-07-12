@@ -7,7 +7,7 @@
 **来源**: LR-E2 checklist item **#5b** · Ledger seam「Paste cleaning ↔ binding validation」· **ADR-0019**（Accepted — paste must be cleaned; script / embedded object / iframe / absolute positioning **block**; summary as editing **or** release-check evidence）· CD-HARD-T05 adjacency  
 **程序 / 清单**: [launch-readiness-checklist.md](../operations/launch-readiness-checklist.md) · [launch-readiness-program.md](../plan/launch-readiness-program.md) · [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)（CD-HARD-T05）  
 **Task / slice**: `ops-paste-binding-seam`  
-**Worktree**: `D:/working/DGE-ops-paste-binding-seam` · `feat/ops-paste-binding-seam`  
+**Worktree**: merged to MAIN (`f1f00da`); feature worktree removed  
 **授权依据**: 本会话用户 / parent 明确方向（2026-07-12）— 关闭缝隙使无效粘贴**不能**静默通过绑定/发布；偏好 **durable fail-closed / 用户可见门禁**；**禁止**以「ADR 接受 edit-time-only」逃逸；「自动继续」  
 **完成声明约束**: 本切片**仅**处理 checklist **#5b** 与 CD-HARD-T05「wire」路径；**禁止**据此宣称 production go-live。整体清单在 **#3b** 等未关闭前仍为 **NO-GO**。清除 #5b alone ≠ go-live。
 
@@ -112,9 +112,9 @@ Word/HTML 粘贴清洗（P18-T07/T10）今日**仅**在编辑时运行：`PasteC
 | 无 binding residue | 绑定实体 / `computeBindingStatus` **不**读 paste summary |
 | computeBindingStatus 范围 | 节点矩阵 / 样式 / 表 / 引用 / 编号 blockers → `INCOMPATIBLE_CONTENT_TYPE`；**无** paste |
 | domain-model 松弛描述 | §2.6.7 记录 REMOVED/WARNING 为「v1」——与 ADR-0019 冲突 |
-| 清单 #5b | **NO-GO** — Not wired / no edit-time-only ADR |
-| CD-HARD-T05 | **In Progress** (2026-07-12) — adjacency under Task Master **#47** / this slice (**wire** path; **no** edit-time-only escape) |
-| Ledger seam | P18-T07 edit-time only；退出标准含 wire **或** ADR |
+| 清单 #5b | **GO** — Wired to publish gate (merge `f1f00da`; wire path — not edit-time-only ADR) |
+| CD-HARD-T05 | **Done** (2026-07-12) — Task Master **#47** / this slice (**wire** path; **no** edit-time-only escape) |
+| Ledger seam | **closed** — residue → `computeBindingStatus` + PublishGate fail-closed |
 
 ---
 
@@ -291,7 +291,7 @@ Then #5b verdict 为 GO（wired to publish gate — 非 edit-time-only ADR）
 | [domain-model.md](../domain/domain-model.md) §2.6.7 | **冲突（松弛现状）** — 交付时对齐为 BLOCKED + binding/publish 接线 |
 | [launch-readiness-checklist.md](../operations/launch-readiness-checklist.md) **#5b** | 本 BDD 验收规格；交付后 → GO |
 | [execution-sync-ledger.md](../plan/execution-sync-ledger.md) seams「Paste cleaning ↔ binding validation」 | 退出标准：wire（本切片） |
-| [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md) **CD-HARD-T05** | In Progress (wire under #47) → Done at post-task-doc-sync |
+| [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md) **CD-HARD-T05** | **Done** (wire under #47; merge `f1f00da`) |
 | [lrp-a4-fail-closed-unsupported-nodes.md](./lrp-a4-fail-closed-unsupported-nodes.md) | **正交缝** — 勿混 |
 | P18-T07 / P18-T10 | 既有 edit-time 清洗与 UI；本切片扩展 |
 | [ops-ad-group-stub-close.md](./ops-ad-group-stub-close.md) 等 | 同族 ops checklist 诚实关闭模式（本项预期 **GO** 而非 CONDITIONAL） |
@@ -328,3 +328,4 @@ Then #5b verdict 为 GO（wired to publish gate — 非 edit-time-only ADR）
 | --- | --- |
 | 2026-07-12 | Initial BDD authored (`ready`) for slice `ops-paste-binding-seam` (BDD-OPS-PASTE-BINDING-001 S1–S6); SoT conflict domain-model vs ADR-0019 resolved toward ADR-0019; wire path locked (no edit-time-only escape). |
 | 2026-07-12 | Plan activation: Task Master **#47** in-progress; sole-active = this slice; CD-HARD-T05 adjacency In Progress (wire); checklist #5b remains NO-GO until implement + doc-sync. |
+| 2026-07-12 | Slice **Done** (merge `f1f00da`); checklist #5b → **GO**; CD-HARD-T05 → **Done**; ledger seam closed; Task Master **#47** → done; sole-active cleared; overall checklist still **NO-GO** (#3b). |

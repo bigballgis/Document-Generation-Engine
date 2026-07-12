@@ -214,7 +214,7 @@ Each task pairs: `*.spec.ts` + `evidence/*-uiux-manifest.md` + `e2e-uiux-reviewe
 | CD-HARD-T02 | LibreOffice conversion pool (async) | backend-engineer | CD-PIT-06, OPT-F6 | Done (OPT-F6 / COR-P02 lineage) |
 | CD-HARD-T03 | OOXML output validation test (LO 24 open) | backend-engineer | CD-PIT-03 | **Done** (2026-07-10 — executed-by-LR-A6; merge `122d6d1`; `OoxmlOutputValidator` fail-closed; LO24 / ECMA-376 XSD deferred; ADR-0043 remains Proposed) |
 | CD-HARD-T04 | Pagination delta budget doc + sample corpus | doc-keeper | CD-PIT-02 | **Done** (2026-07-10 — executed-by-LR-A7; Docker PDF corpus ≥5 + FOL; Word/delta n/a — `ms-word-unavailable-on-host`; ADR-0042 remains Proposed) |
-| CD-HARD-T05 | Paste cleaning **wired** to binding / publish fail-closed (edit-time-only ADR escape **rejected**) | backend-engineer | P18-T07 seam; checklist #5b; [ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md) | **In Progress** (2026-07-12) — Task Master **#47** / `ops-paste-binding-seam`; docs-first aligned to ADR-0019 (domain §2.6.7 + OpenAPI residue); **not Done** until code + gates + post-task-doc-sync flip #5b → GO; do **not** activate CD-3 wave |
+| CD-HARD-T05 | Paste cleaning **wired** to binding / publish fail-closed (edit-time-only ADR escape **rejected**) | backend-engineer | P18-T07 seam; checklist #5b; [ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md) | **Done** (2026-07-12) — Task Master **#47** / `ops-paste-binding-seam`; merge `f1f00da`; checklist #5b → **GO**; wire path (ADR-0019 residue + PublishGate); do **not** activate CD-3 wave |
 | CD-HARD-T06 | List audit/export E2E | e2e-test-engineer | CD-BDD-T08 | Not Started |
 
 ---
@@ -294,4 +294,4 @@ Mark CD-0 **Done** only when ALL true:
 
 ---
 
-**Next action (this session):** **Wave CD-2 → Done** (2026-07-11; T01–T13; merge tip `b2b0899`). **CD-HARD-T05 adjacency:** **In Progress** under Task Master **#47** / slice `ops-paste-binding-seam` (wire path; **not** CD-3 wave activation). Formal phase remains **None**. **Sole-active** delivery focus is the OPS paste↔binding slice (not a CDP E2E slice). Do **not** auto-activate CD-3.
+**Next action (this session):** **Wave CD-2 → Done** (2026-07-11; T01–T13; merge tip `b2b0899`). **CD-HARD-T05 → Done** under Task Master **#47** / slice `ops-paste-binding-seam` (merge `f1f00da`; wire path; checklist #5b → **GO**; **not** CD-3 wave activation). Formal phase remains **None**. **no sole-active**. Do **not** auto-activate CD-3.
