@@ -1,19 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { toRef } from 'vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import PreviewProgressDialog from '@/components/template/PreviewProgressDialog.vue'
-import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
-import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import { useConfirmAction } from '@/composables/useConfirmAction'
-import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
+import { useTemplateTestDataSetPanel } from '@/components/templates/useTemplateTestDataSetPanel'
 import type { TestDataSet } from '@/types/template'
-import { ElMessage } from 'element-plus'
 
 const props = defineProps<{
   templateId: string
@@ -27,225 +20,45 @@ const emit = defineEmits<{
   loaded: [count: number]
 }>()
 
-const { t } = useI18n()
-const { confirmAction } = useConfirmAction()
-const { formatDateTime } = useLocaleFormatters()
-const panelDataStore = useTemplatePanelDataStore()
-const saving = ref(false)
-const dataSets = computed(() => panelDataStore.getEntry(props.templateId).testDataSets)
-const loading = computed(() => panelDataStore.getEntry(props.templateId).loadingTestDataSets)
-const dataSetsSource = computed(() => dataSets.value)
-const { filters: columnFilters, filteredRows: filteredDataSets } = useDataTableFilters(
-  dataSetsSource,
-  [
-    { key: 'name', getValue: (row) => row.name },
-    { key: 'testDataSetId', getValue: (row) => row.testDataSetId },
-    { key: 'updatedAt', getValue: (row) => formatDateTime(row.updatedAt) },
-  ],
-)
-const dataSetsCurrentPage = ref(1)
-const { paginatedRows: paginatedDataSets, totalRows: totalDataSetRows } = useCatalogPagination(
-  filteredDataSets,
-  dataSetsCurrentPage,
+const {
+  t,
+  formatDateTime,
   CLIENT_TABLE_PAGE_SIZE,
-)
-const sortByUpdatedAt = rowSortMethod<TestDataSet>((row) => row.updatedAt)
-const selectedId = ref<string | null>(null)
-const dialogVisible = ref(false)
-const editingId = ref<string | null>(null)
-
-// T08: Preview progress dialog state
-const previewDialogVisible = ref(false)
-const previewDialogPreviewId = ref('')
-const previewDialogStreamUrl = ref('')
-const previewDialogDataSetName = ref('')
-
-const form = reactive({
-  name: '',
-  description: '',
-  required: false,
-  scenarioName: '',
+  saving,
+  loading,
+  columnFilters,
+  paginatedDataSets,
+  totalDataSetRows,
+  dataSetsCurrentPage,
+  sortByUpdatedAt,
+  dialogVisible,
+  editingId,
+  previewDialogVisible,
+  previewDialogPreviewId,
+  previewDialogStreamUrl,
+  previewDialogDataSetName,
+  form,
+  variablesJson,
+  coverageTagsText,
+  loadDataSets,
+  dataSets,
+  openCreateDialog,
+  openEditDialog,
+  handleSave,
+  handleDerive,
+  handleDelete,
+  handleSelect,
+  handleRunPreview,
+  handlePreviewRetry,
+  rowClassName,
+} = useTemplateTestDataSetPanel({
+  templateId: toRef(props, 'templateId'),
+  refreshToken: toRef(props, 'refreshToken'),
+  emitSelected: (id) => emit('selected', id),
+  emitLoaded: (count) => emit('loaded', count),
 })
-const variablesJson = ref('{\n  "customerName": "Sample"\n}')
-const coverageTagsText = ref('')
-
-function resetForm() {
-  form.name = ''
-  form.description = ''
-  form.required = false
-  form.scenarioName = ''
-  variablesJson.value = '{\n  "customerName": "Sample"\n}'
-  coverageTagsText.value = ''
-  editingId.value = null
-}
-
-function parseCoverageTags(): string[] {
-  return coverageTagsText.value
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter((tag) => tag.length > 0)
-}
-
-async function loadDataSets() {
-  try {
-    await panelDataStore.fetchTestDataSets(props.templateId)
-    emit('loaded', dataSets.value.length)
-  } catch {
-    ElMessage.error(t('templates.testDataSets.error.load'))
-  }
-}
-
-watch(
-  () => props.refreshToken,
-  () => {
-    void loadDataSets()
-  },
-)
 
 defineExpose({ reload: loadDataSets, dataSets })
-
-function openCreateDialog() {
-  resetForm()
-  dialogVisible.value = true
-}
-
-function openEditDialog(row: TestDataSet) {
-  if (row.locked) {
-    return
-  }
-  editingId.value = row.testDataSetId
-  form.name = row.name
-  form.description = row.description ?? ''
-  form.required = row.required
-  form.scenarioName = row.scenarioName ?? ''
-  variablesJson.value = JSON.stringify(row.variables, null, 2)
-  coverageTagsText.value = row.coverageTags.join(', ')
-  dialogVisible.value = true
-}
-
-function parseVariables(): Record<string, unknown> | null {
-  try {
-    const parsed: unknown = JSON.parse(variablesJson.value)
-    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      return null
-    }
-    return parsed as Record<string, unknown>
-  } catch {
-    return null
-  }
-}
-
-function buildPayload() {
-  const variables = parseVariables()
-  if (!form.name.trim() || variables === null) {
-    return null
-  }
-  return {
-    name: form.name.trim(),
-    description: form.description.trim() || undefined,
-    variables,
-    required: form.required,
-    scenarioName: form.scenarioName.trim() || undefined,
-    coverageTags: parseCoverageTags(),
-  }
-}
-
-async function handleSave() {
-  const payload = buildPayload()
-  if (!payload) {
-    ElMessage.error(t('templates.testDataSets.error.invalidForm'))
-    return
-  }
-  saving.value = true
-  try {
-    if (editingId.value) {
-      await panelDataStore.updateTestDataSet(props.templateId, editingId.value, payload)
-      ElMessage.success(t('templates.testDataSets.updateSuccess'))
-    } else {
-      const created = await panelDataStore.createTestDataSet(props.templateId, payload)
-      selectedId.value = created.testDataSetId
-      emit('selected', created.testDataSetId)
-      ElMessage.success(t('templates.testDataSets.createSuccess'))
-    }
-    dialogVisible.value = false
-  } catch {
-    ElMessage.error(t('templates.testDataSets.error.save'))
-  } finally {
-    saving.value = false
-  }
-}
-
-async function handleDerive(testDataSetId: string) {
-  try {
-    const derived = await panelDataStore.deriveTestDataSet(props.templateId, testDataSetId)
-    selectedId.value = derived.testDataSetId
-    emit('selected', derived.testDataSetId)
-    ElMessage.success(t('templates.testDataSets.deriveSuccess'))
-  } catch {
-    ElMessage.error(t('templates.testDataSets.error.save'))
-  }
-}
-
-async function handleDelete(testDataSetId: string) {
-  const confirmed = await confirmAction({
-    titleKey: 'templates.testDataSets.confirmDeleteTitle',
-    messageKey: 'templates.testDataSets.confirmDeleteMessage',
-    type: 'warning',
-  })
-  if (!confirmed) {
-    return
-  }
-  try {
-    await panelDataStore.deleteTestDataSet(props.templateId, testDataSetId)
-    if (selectedId.value === testDataSetId) {
-      selectedId.value = null
-      emit('selected', null)
-    }
-    ElMessage.success(t('templates.testDataSets.deleteSuccess'))
-  } catch {
-    ElMessage.error(t('templates.testDataSets.error.delete'))
-  }
-}
-
-function handleSelect(testDataSetId: string) {
-  selectedId.value = testDataSetId
-  emit('selected', testDataSetId)
-}
-
-async function handleRunPreview(row: TestDataSet) {
-  selectedId.value = row.testDataSetId
-  emit('selected', row.testDataSetId)
-  try {
-    const result = await panelDataStore.startAsyncPreview(props.templateId, {
-      testDataSetId: row.testDataSetId,
-    })
-    previewDialogPreviewId.value = result.previewId
-    previewDialogStreamUrl.value = result.streamUrl
-    previewDialogDataSetName.value = row.name
-    previewDialogVisible.value = true
-  } catch (err: unknown) {
-    const axiosError = err as { response?: { status?: number } }
-    if (axiosError?.response?.status === 429) {
-      ElMessage.error(t('templates.previewProgress.error.concurrencyLimit'))
-    } else {
-      ElMessage.error(t('templates.previewProgress.error.generic'))
-    }
-  }
-}
-
-function handlePreviewRetry() {
-  const row = dataSets.value.find((dataSet) => dataSet.testDataSetId === selectedId.value)
-  if (row) {
-    void handleRunPreview(row)
-  }
-}
-
-onMounted(() => {
-  void loadDataSets()
-})
-function rowClassName({ row }: { row: TestDataSet }): string {
-  return row.testDataSetId === selectedId.value ? 'is-selected-row' : ''
-}
 </script>
 
 <template>

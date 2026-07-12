@@ -20,17 +20,14 @@ import {
   shouldShowTemplateTeamLeadJourney,
   type TemplateTeamLeadJourneyContext,
 } from '@/utils/templateTeamLeadJourney'
-import { ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import type { PreviewRecord, TemplateDetail } from '@/types/template'
 import type { TemplateDevWorkspaceTab } from '@/views/templates/templateDevWorkspaceTabs'
+import {
+  useTemplateJourneyHandlers,
+  type TemplateJourneyLifecycleDeps,
+} from '@/views/templates/useTemplateJourneyHandlers'
 
-export interface TemplateJourneyLifecycleDeps {
-  publishGateReady: ComputedRef<boolean>
-  submitForTestDialogOpen: Ref<boolean>
-  handleSubmitForApproval: () => Promise<void>
-  loadPublishGateData: () => Promise<void>
-  handlePublish: () => Promise<void>
-}
+export type { TemplateJourneyLifecycleDeps }
 
 export interface UseTemplateJourneyContextOptions {
   isDevEditor: ComputedRef<boolean>
@@ -198,137 +195,17 @@ export function useTemplateJourneyContext(options: UseTemplateJourneyContextOpti
     }
   })
 
-  function handleJourneyDesign() {
-    openDevWorkspaceTab('design')
-  }
-
-  function handleJourneyCreate() {
-    router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
-  }
-
-  async function handleJourneyTrialGenerate() {
-    openLifecyclePanel()
-    await handleTestGenerate()
-  }
-
-  async function handleJourneySubmitForTest() {
-    openDevWorkspaceTab('testing')
-    lifecycle.submitForTestDialogOpen.value = true
-  }
-
-  async function handleJourneySubmitForApproval() {
-    openLifecyclePanel()
-    await lifecycle.handleSubmitForApproval()
-  }
-
-  function handleJourneyReviewRequest() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('testing')
-      return
-    }
-    openLifecyclePanel()
-  }
-
-  function handleJourneyCheckEvidence() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('testing')
-    } else {
-      openLifecyclePanel()
-    }
-    testerEvidenceViewed.value = {
-      fidelityViewedConfirmed: true,
-      coverageViewedConfirmed: true,
-      previewViewedConfirmed: false,
-    }
-  }
-
-  function handleJourneyRecordResult() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('testing')
-    } else {
-      openLifecyclePanel()
-    }
-    testerEvidenceViewed.value = {
-      fidelityViewedConfirmed: true,
-      coverageViewedConfirmed: true,
-      previewViewedConfirmed: true,
-    }
-  }
-
-  function handleJourneyApproverReviewRequest() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('approval')
-      return
-    }
-    openLifecyclePanel()
-  }
-
-  function handleJourneyApproverReviewSubmission() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('approval')
-    } else {
-      openLifecyclePanel()
-    }
-    approverEvidenceViewed.value = {
-      ...approverEvidenceViewed.value,
-      submissionReviewedConfirmed: true,
-    }
-  }
-
-  function handleJourneyApproverRecordDecision() {
-    if (isDevEditor.value) {
-      openDevWorkspaceTab('approval')
-    } else {
-      openLifecyclePanel()
-    }
-    approverEvidenceViewed.value = {
-      submissionReviewedConfirmed: true,
-      keyEvidenceViewedConfirmed: true,
-    }
-  }
-
-  function handleJourneyTeamLeadReviewGoLiveRequest() {
-    openLifecyclePanel()
-    teamLeadGoLiveViewed.value = {
-      ...teamLeadGoLiveViewed.value,
-      goLiveRequestReviewedConfirmed: true,
-    }
-  }
-
-  async function handleJourneyTeamLeadRunPreReleaseChecks() {
-    openLifecyclePanel()
-    await lifecycle.loadPublishGateData()
-    teamLeadGoLiveViewed.value = {
-      ...teamLeadGoLiveViewed.value,
-      goLiveRequestReviewedConfirmed: true,
-      preReleaseChecksViewed: true,
-    }
-  }
-
-  async function handleJourneyTeamLeadConfirmGoLive() {
-    openLifecyclePanel()
-    teamLeadGoLiveViewed.value = {
-      goLiveRequestReviewedConfirmed: true,
-      preReleaseChecksViewed: true,
-    }
-    await lifecycle.handlePublish()
-  }
-
-  function resetJourneyEvidenceState() {
-    testerEvidenceViewed.value = {
-      fidelityViewedConfirmed: false,
-      coverageViewedConfirmed: false,
-      previewViewedConfirmed: false,
-    }
-    approverEvidenceViewed.value = {
-      submissionReviewedConfirmed: false,
-      keyEvidenceViewedConfirmed: false,
-    }
-    teamLeadGoLiveViewed.value = {
-      goLiveRequestReviewedConfirmed: false,
-      preReleaseChecksViewed: false,
-    }
-  }
+  const handlers = useTemplateJourneyHandlers({
+    isDevEditor,
+    router,
+    lifecycle,
+    openDevWorkspaceTab,
+    openLifecyclePanel,
+    handleTestGenerate,
+    testerEvidenceViewed,
+    approverEvidenceViewed,
+    teamLeadGoLiveViewed,
+  })
 
   return {
     showAuthorJourney,
@@ -341,20 +218,6 @@ export function useTemplateJourneyContext(options: UseTemplateJourneyContextOpti
     teamLeadJourneyContext,
     testerEvidenceViewed,
     approverEvidenceViewed,
-    handleJourneyCreate,
-    handleJourneyDesign,
-    handleJourneyTrialGenerate,
-    handleJourneySubmitForTest,
-    handleJourneySubmitForApproval,
-    handleJourneyReviewRequest,
-    handleJourneyCheckEvidence,
-    handleJourneyRecordResult,
-    handleJourneyApproverReviewRequest,
-    handleJourneyApproverReviewSubmission,
-    handleJourneyApproverRecordDecision,
-    handleJourneyTeamLeadReviewGoLiveRequest,
-    handleJourneyTeamLeadRunPreReleaseChecks,
-    handleJourneyTeamLeadConfirmGoLive,
-    resetJourneyEvidenceState,
+    ...handlers,
   }
 }

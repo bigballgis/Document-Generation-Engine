@@ -1,4 +1,4 @@
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -8,21 +8,16 @@ import { useCapabilities } from '@/composables/useCapabilities'
 import { useConfirmAction } from '@/composables/useConfirmAction'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import {
-  ROUTE_PATH_BY_KEY,
-  ROUTE_KEYS,
-  templateDevVersionPath,
-  templatePackageHubPath,
-} from '@/routing/routeKeys'
+import { ROUTE_PATH_BY_KEY, ROUTE_KEYS } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import { isTemplateExportEligible } from '@/utils/templateExportEligibility'
 import { templateDetailTabLabelKey } from '@/views/templates/templateDetailTabs'
 import { useTemplatePolicyCredentials } from '@/views/templates/useTemplatePolicyCredentials'
-import type { TemplateDevWorkspaceTab } from '@/views/templates/templateDevWorkspaceTabs'
 import type { DeleteTemplatePayload } from '@/types/template'
-
-const HUB_SECONDARY_TABS = ['overview', 'apiAccess'] as const
-type HubSecondaryTab = (typeof HUB_SECONDARY_TABS)[number]
+import {
+  useTemplatePackageHubRouting,
+  type HubSecondaryTab,
+} from '@/views/templates/useTemplatePackageHubRouting'
 
 type HubWorkspaceExpose = {
   reloadVersionLines: () => Promise<void> | undefined
@@ -135,131 +130,17 @@ export function useTemplatePackageHub() {
     },
   })
 
-  function resolveSecondaryTab(value: unknown): HubSecondaryTab | undefined {
-    if (typeof value === 'string' && (HUB_SECONDARY_TABS as readonly string[]).includes(value)) {
-      return value as HubSecondaryTab
-    }
-    return undefined
-  }
-
-  function syncSecondaryTabFromRoute() {
-    if (route.query.tab === 'authoring') {
-      void redirectAuthoringDeepLink()
-      return
-    }
-    if (route.query.tab === 'lifecycle' || route.query.focus === 'lifecycle') {
-      void redirectLifecycleDeepLink()
-      return
-    }
-    if (route.query.tab === 'releaseVersions') {
-      secondaryTab.value = undefined
-      void router.replace(templatePackageHubPath(templateId.value))
-      return
-    }
-    secondaryTab.value = resolveSecondaryTab(route.query.tab)
-  }
-
-  async function redirectLifecycleDeepLink() {
-    try {
-      if (!template.value) {
-        await templatesStore.fetchTemplate(templateId.value)
-      }
-      openDevEditor('approval')
-    } catch {
-      await router.replace(templatePackageHubPath(templateId.value))
-    }
-  }
-
-  async function redirectAuthoringDeepLink() {
-    try {
-      if (!template.value) {
-        await templatesStore.fetchTemplate(templateId.value)
-      }
-      const devVersionId = templatesStore.selectedTemplate?.devVersionId
-      if (devVersionId) {
-        await router.replace(templateDevVersionPath(templateId.value, devVersionId))
-      }
-    } catch {
-      await router.replace(templatePackageHubPath(templateId.value))
-    }
-  }
-
-  onMounted(async () => {
-    syncSecondaryTabFromRoute()
-    if (
-      route.query.tab === 'authoring' ||
-      route.query.tab === 'lifecycle' ||
-      route.query.focus === 'lifecycle'
-    ) {
-      return
-    }
-    await loadTemplate()
+  const { loadTemplate } = useTemplatePackageHubRouting({
+    templateId,
+    template,
+    secondaryTab,
+    showPolicyPanel,
+    loadPolicyData,
+    loadFailed,
   })
-
-  onUnmounted(() => {
-    templatesStore.clearSelected()
-  })
-
-  watch(
-    () => templateId.value,
-    () => {
-      void loadTemplate()
-    },
-  )
-
-  watch(
-    () => route.query,
-    () => {
-      syncSecondaryTabFromRoute()
-    },
-    { deep: true },
-  )
-
-  watch(secondaryTab, (tab) => {
-    const queryTab = resolveSecondaryTab(route.query.tab)
-    if (queryTab === tab) {
-      return
-    }
-    if (!tab) {
-      const query = { ...route.query }
-      delete query.tab
-      delete query.focus
-      void router.replace({ query })
-      return
-    }
-    void router.replace({ query: { ...route.query, tab } })
-  })
-
-  async function loadTemplate() {
-    loadFailed.value = false
-    try {
-      await templatesStore.fetchTemplate(templateId.value)
-      if (showPolicyPanel.value) {
-        await loadPolicyData()
-      }
-    } catch {
-      loadFailed.value = true
-    }
-  }
 
   function backToList() {
     router.push(ROUTE_PATH_BY_KEY[ROUTE_KEYS.templateManagement])
-  }
-
-  function openDevEditor(
-    workspaceTab: TemplateDevWorkspaceTab = 'design',
-    extraQuery?: Record<string, string>,
-  ) {
-    const devVersionId = template.value?.devVersionId
-    if (!devVersionId) {
-      return
-    }
-    router.push(
-      templateDevVersionPath(templateId.value, devVersionId, undefined, {
-        workspaceTab,
-        ...extraQuery,
-      }),
-    )
   }
 
   async function handleMetadataUpdate(payload: { name: string; description: string | null }) {

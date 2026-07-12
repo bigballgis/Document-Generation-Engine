@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
+import { useTemplateReleaseVersionActions } from '@/components/templates/useTemplateReleaseVersionActions'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
 import { useCatalogPagination } from '@/composables/useCatalogPagination'
@@ -16,7 +16,6 @@ import { useCapabilities } from '@/composables/useCapabilities'
 import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { useTemplatesStore } from '@/stores/templates'
 import type {
-  LifecycleGovernanceAction,
   TemplateLifecycleStatus,
   TemplateReleaseVersion,
 } from '@/types/template'
@@ -108,102 +107,12 @@ watch(
   },
 )
 
-async function buildImpactPreviewMessage(
-  action: LifecycleGovernanceAction,
-  releaseVersion: string,
-): Promise<string> {
-  const preview = await templatesStore.fetchLifecycleImpactPreview(props.templateId, {
-    action,
-    releaseVersion,
-  })
-  const summary = te(preview.summaryMessageKey)
-    ? t(preview.summaryMessageKey)
-    : t(`templates.governance.impactSummary.${action}`)
-  const callable = preview.callableReleaseVersions.length
-    ? t('templates.governance.impactCallableVersions', {
-        versions: preview.callableReleaseVersions.join(', '),
-      })
-    : t('templates.governance.impactNoCallableVersions')
-  const defaultRoute = preview.defaultRouteReleaseVersion
-    ? t('templates.governance.impactDefaultRoute', {
-        version: preview.defaultRouteReleaseVersion,
-      })
-    : ''
-  const routeImpact = preview.defaultRouteImpacted
-    ? t('templates.governance.impactDefaultRouteAffected')
-    : ''
-  return [summary, callable, defaultRoute, routeImpact, t('templates.governance.impactConfirmPrompt')]
-    .filter(Boolean)
-    .join('\n\n')
-}
-
-async function handleVersionAction(
-  releaseVersion: string,
-  action: 'deactivate' | 'restore',
-) {
-  const previewAction: LifecycleGovernanceAction =
-    action === 'deactivate' ? 'DEACTIVATE_VERSION' : 'RESTORE_VERSION'
-  const reasonKey =
-    action === 'deactivate'
-      ? 'templates.versions.deactivateReasonPrompt'
-      : 'templates.versions.restoreReasonPrompt'
-  const titleKey =
-    action === 'deactivate'
-      ? 'templates.versions.deactivateTitle'
-      : 'templates.versions.restoreTitle'
-  const confirmTitleKey =
-    action === 'deactivate'
-      ? 'templates.versions.confirmDeactivateTitle'
-      : 'templates.versions.confirmRestoreTitle'
-  const confirmMessageKey =
-    action === 'deactivate'
-      ? 'templates.versions.confirmDeactivateMessage'
-      : 'templates.versions.confirmRestoreMessage'
-  const successKey =
-    action === 'deactivate'
-      ? 'templates.versions.deactivateSuccess'
-      : 'templates.versions.restoreSuccess'
-
-  let reason = ''
-  try {
-    const result = await ElMessageBox.prompt(t(reasonKey), t(titleKey), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      inputValidator: (value) =>
-        value.trim().length > 0 ? true : t('templates.lifecycle.reasonRequired'),
-    })
-    reason = result.value.trim()
-  } catch {
-    return
-  }
-
-  try {
-    const impactMessage = await buildImpactPreviewMessage(previewAction, releaseVersion)
-    const confirmBody = [impactMessage, t(confirmMessageKey)].join('\n\n')
-    await ElMessageBox.confirm(confirmBody, t(confirmTitleKey), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning',
-    })
-  } catch {
-    return
-  }
-
-  const payload = { reason, confirmed: true }
-  try {
-    if (action === 'deactivate') {
-      await templatesStore.deactivateTemplateVersion(props.templateId, releaseVersion, payload)
-    } else {
-      await templatesStore.restoreTemplateVersion(props.templateId, releaseVersion, payload)
-    }
-    ElMessage.success(t(successKey))
-    panelDataStore.invalidateVersionLineDomains(props.templateId)
-    await loadVersions()
-    emit('changed')
-  } catch {
-    ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
-  }
-}
+const { handleVersionAction } = useTemplateReleaseVersionActions({
+  templateId: toRef(props, 'templateId'),
+  errorMessage,
+  loadVersions,
+  onChanged: () => emit('changed'),
+})
 
 const sortByDevVersion = rowSortMethod<TemplateReleaseVersion>((row) => row.devVersionNumber)
 const sortByLifecycleStatus = rowSortMethod<TemplateReleaseVersion>((row) => row.lifecycleStatus)
