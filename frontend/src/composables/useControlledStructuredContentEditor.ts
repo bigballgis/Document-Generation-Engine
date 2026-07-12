@@ -1,73 +1,32 @@
 import { computed, onMounted, onUnmounted, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { useStructuredContentHistory } from '@/composables/useStructuredContentHistory'
+import {
+  DEFAULT_STYLE_CATALOG,
+  STRUCTURED_BLOCK_NODE_TYPES,
+  type ControlledStructuredContentEditorEmit,
+  type ControlledStructuredContentEditorProps,
+} from '@/composables/controlledStructuredContentEditorTypes'
+import { useStructuredContentDocumentModel } from '@/composables/useStructuredContentDocumentModel'
 import { useStructuredContentLocalDraft } from '@/composables/useStructuredContentLocalDraft'
+import { useStructuredContentPasteFlow } from '@/composables/useStructuredContentPasteFlow'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
-import type {
-  MasterStyleCatalog,
-  PasteCleaningEvidence,
-  PasteCleaningSummary,
-  VariableSchema,
-} from '@/types/template'
-import { buildAcceptedPasteCleaningEvidence } from '@/utils/pasteCleaningEvidence'
+import type { MasterStyleCatalog, VariableSchema } from '@/types/template'
 import { buildVariableOptionLabel } from '@/utils/variableDisplayName'
 import {
   DEFAULT_STRUCTURED_CONTENT_JSON,
-  applyStyleToParagraphs,
-  createNodeTemplate,
-  insertBlockNode,
   parseStructuredContent,
   serializeStructuredContent,
   type ConfirmedNodeType,
-  type StructuredContentDocument,
-  type StructuredContentNode,
 } from '@/utils/structuredContentNodes'
 import type { StructuredContentDraftPayload } from '@/utils/structuredContentDraftStorage'
 
-export interface ControlledStructuredContentEditorProps {
-  modelValue: string
-  templateId?: string
-  /** Dev-version scope for local draft keys (LR-C2). When absent, drafts are disabled. */
-  devVersionId?: string
-  /** Optional binding anchor for draft recovery disambiguation. */
-  anchorId?: string
-  /** Optional server revision timestamp shown on the recovery banner. */
-  serverUpdatedAt?: string | null
-  variableKeys?: string[]
-  variables?: VariableSchema[]
-  contentModuleReferenceKeys?: string[]
-  readonly?: boolean
-  /** Saved baseline JSON; when omitted, initial modelValue is the baseline. */
-  baseline?: string
-}
-
-export type ControlledStructuredContentEditorEmit = {
-  (event: 'update:modelValue', value: string): void
-  (event: 'dirty-change', dirty: boolean): void
-  (event: 'structure-change'): void
-  /** Fired on Accept with non-sensitive residue for binding upsert (blockedCount=0). */
-  (event: 'paste-accepted', evidence: PasteCleaningEvidence): void
-}
-
-const DEFAULT_STYLE_CATALOG: MasterStyleCatalog = {
-  catalogVersion: '1.0',
-  entries: [
-    { styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' },
-    { styleKey: 'Heading1', applicableNodeTypes: ['sectionHeading'], renderPurpose: 'HEADING' },
-  ],
-}
-
-export const STRUCTURED_BLOCK_NODE_TYPES: ConfirmedNodeType[] = [
-  'sectionHeading',
-  'paragraph',
-  'list',
-  'conditionBlock',
-  'loopBlock',
-  'tableComponentRef',
-  'contentModuleRef',
-]
+export {
+  STRUCTURED_BLOCK_NODE_TYPES,
+  type ControlledStructuredContentEditorEmit,
+  type ControlledStructuredContentEditorProps,
+} from '@/composables/controlledStructuredContentEditorTypes'
 
 export function useControlledStructuredContentEditor(
   props: ControlledStructuredContentEditorProps,
@@ -91,13 +50,10 @@ export function useControlledStructuredContentEditor(
     readonly: isReadonly,
   })
 
-  /** Structure-level undo/redo — session memory only; never written to C2 drafts (C3-C7). */
-  const history = useStructuredContentHistory()
-  const canUndo = history.canUndo
-  const canRedo = history.canRedo
-  let lastCommittedSnapshot = props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON
-  let pendingCoalesceKey: string | null = null
-  let syncingFromProps = false
+  const doc = useStructuredContentDocumentModel({
+    initialModelValue: props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON,
+    isReadonly: () => isReadonly.value,
+  })
 
   const recoveryDraft = ref<StructuredContentDraftPayload | null>(null)
 
@@ -130,14 +86,7 @@ export function useControlledStructuredContentEditor(
       return
     }
     // C3-C9: restore resets history; restored structure becomes sole current state.
-    history.clear()
-    history.beginApplying()
-    try {
-      documentModel.value = parseStructuredContent(draft.structureJson)
-      lastCommittedSnapshot = serializeStructuredContent(documentModel.value)
-    } finally {
-      history.endApplying()
-    }
+    doc.resetHistoryWithStructure(draft.structureJson)
     recoveryDraft.value = null
   }
 
@@ -145,20 +94,12 @@ export function useControlledStructuredContentEditor(
     localDraft.clearDraft()
     recoveryDraft.value = null
     // C3-C10: discard draft resets history; server-loaded structure remains.
-    history.clear()
+    doc.clearHistoryOnly()
   }
 
   const loadingCatalog = ref(false)
   const styleCatalog = ref<MasterStyleCatalog | null>(null)
   const selectedStyleKey = ref('')
-  const documentModel = ref<StructuredContentDocument>(
-    parseStructuredContent(props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON),
-  )
-  const pasteSummaryOpen = ref(false)
-  const pasteSummary = ref<PasteCleaningSummary | null>(null)
-  const pasteBlocked = ref(false)
-  const pendingPasteJson = ref<string | null>(null)
-  const prePasteSnapshot = ref(props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON)
   const editorRootRef = ref<HTMLElement | null>(null)
 
   const blockNodeTypes = STRUCTURED_BLOCK_NODE_TYPES
@@ -212,20 +153,20 @@ export function useControlledStructuredContentEditor(
   watch(
     () => props.modelValue,
     (value) => {
-      syncingFromProps = true
+      doc.setSyncingFromProps(true)
       try {
         const next = parseStructuredContent(value || DEFAULT_STRUCTURED_CONTENT_JSON)
-        documentModel.value = next
-        lastCommittedSnapshot = serializeStructuredContent(next)
+        doc.documentModel.value = next
+        doc.setLastCommittedSnapshot(serializeStructuredContent(next))
         // Post-save server echo can re-enter before unmount; realign baseline and
         // re-clear so canonicalization differences cannot revive a draft.
         if (localDraft.areWritesSuppressed()) {
-          pristineBaseline.value = lastCommittedSnapshot
+          pristineBaseline.value = doc.getLastCommittedSnapshot()
           emit('dirty-change', false)
           localDraft.clearDraft({ suppressSubsequentWrites: true })
         }
       } finally {
-        syncingFromProps = false
+        doc.setSyncingFromProps(false)
       }
     },
   )
@@ -240,33 +181,37 @@ export function useControlledStructuredContentEditor(
   )
 
   function emitDirtyState() {
-    const current = serializeStructuredContent(documentModel.value)
+    const current = serializeStructuredContent(doc.documentModel.value)
     emit('dirty-change', current !== pristineBaseline.value)
   }
 
   function markPristine() {
-    pristineBaseline.value = serializeStructuredContent(documentModel.value)
+    pristineBaseline.value = serializeStructuredContent(doc.documentModel.value)
     emit('dirty-change', false)
     // Clear-on-save (C2-C9): successful server persistence clears the local draft
     // and suppresses further writes until this editor instance is gone (or allowWrites).
     localDraft.clearDraft({ suppressSubsequentWrites: true })
     recoveryDraft.value = null
     // C3-C8: successful save clears undo/redo stacks.
-    history.clear()
-    lastCommittedSnapshot = pristineBaseline.value
+    doc.clearHistoryOnly()
+    doc.setLastCommittedSnapshot(pristineBaseline.value)
   }
 
   watch(
-    documentModel,
+    doc.documentModel,
     (value) => {
       if (isReadonly.value) {
         return
       }
       const serialized = serializeStructuredContent(value)
-      if (!history.isApplying() && !syncingFromProps) {
-        history.commit(lastCommittedSnapshot, serialized, pendingCoalesceKey)
+      if (!doc.history.isApplying() && !doc.isSyncingFromProps()) {
+        doc.history.commit(
+          doc.getLastCommittedSnapshot(),
+          serialized,
+          doc.getPendingCoalesceKey(),
+        )
       }
-      lastCommittedSnapshot = serialized
+      doc.setLastCommittedSnapshot(serialized)
       emit('update:modelValue', serialized)
       emitDirtyState()
       emit('structure-change')
@@ -275,73 +220,16 @@ export function useControlledStructuredContentEditor(
     { deep: true },
   )
 
-  function applyHistorySnapshot(snapshot: string) {
-    history.beginApplying()
-    try {
-      documentModel.value = parseStructuredContent(snapshot)
-      lastCommittedSnapshot = serializeStructuredContent(documentModel.value)
-    } finally {
-      history.endApplying()
-    }
-  }
-
-  function doUndo() {
-    if (isReadonly.value || !canUndo.value) {
-      return
-    }
-    const current = serializeStructuredContent(documentModel.value)
-    const previous = history.undo(current)
-    if (previous == null) {
-      return
-    }
-    pendingCoalesceKey = null
-    applyHistorySnapshot(previous)
-  }
-
-  function doRedo() {
-    if (isReadonly.value || !canRedo.value) {
-      return
-    }
-    const current = serializeStructuredContent(documentModel.value)
-    const next = history.redo(current)
-    if (next == null) {
-      return
-    }
-    pendingCoalesceKey = null
-    applyHistorySnapshot(next)
-  }
-
-  function handleEditorKeydown(event: KeyboardEvent) {
-    if (isReadonly.value) {
-      return
-    }
-    const mod = event.ctrlKey || event.metaKey
-    if (!mod) {
-      return
-    }
-    const key = event.key.toLowerCase()
-    if (key === 'z') {
-      event.preventDefault()
-      if (event.shiftKey) {
-        doRedo()
-      } else {
-        doUndo()
-      }
-      return
-    }
-    if (key === 'y') {
-      event.preventDefault()
-      doRedo()
-    }
-  }
-
-  function endFieldCoalesce() {
-    pendingCoalesceKey = null
-    history.endCoalesce()
-  }
+  const paste = useStructuredContentPasteFlow({
+    templateId: () => props.templateId,
+    isReadonly: () => isReadonly.value,
+    documentModel: doc.documentModel,
+    setPendingCoalesceKey: doc.setPendingCoalesceKey,
+    emitPasteAccepted: (evidence) => emit('paste-accepted', evidence),
+  })
 
   onMounted(async () => {
-    editorRootRef.value?.addEventListener('keydown', handleEditorKeydown, true)
+    editorRootRef.value?.addEventListener('keydown', doc.handleEditorKeydown, true)
     evaluateDraftRecovery()
     if (!props.templateId) {
       styleCatalog.value = DEFAULT_STYLE_CATALOG
@@ -360,7 +248,7 @@ export function useControlledStructuredContentEditor(
   })
 
   onUnmounted(() => {
-    editorRootRef.value?.removeEventListener('keydown', handleEditorKeydown, true)
+    editorRootRef.value?.removeEventListener('keydown', doc.handleEditorKeydown, true)
   })
 
   watch(
@@ -375,156 +263,21 @@ export function useControlledStructuredContentEditor(
     return te(key) ? t(key) : type
   }
 
-  function insertBlock(type: ConfirmedNodeType) {
-    if (isReadonly.value) {
-      return
-    }
-    pendingCoalesceKey = null
-    documentModel.value = insertBlockNode(documentModel.value, type, selectedStyleKey.value)
-  }
-
-  function applySelectedStyle() {
-    if (!selectedStyleKey.value || isReadonly.value) {
-      return
-    }
-    pendingCoalesceKey = null
-    documentModel.value = applyStyleToParagraphs(documentModel.value, selectedStyleKey.value)
-  }
-
-  function replaceBlock(index: number, next: StructuredContentNode) {
-    const nodes = [...documentModel.value.nodes]
-    nodes[index] = next
-    documentModel.value = { ...documentModel.value, nodes }
-  }
-
-  function updateBlockField(index: number, field: keyof StructuredContentNode, value: string) {
-    const node = documentModel.value.nodes[index]
-    if (!node) {
-      return
-    }
-    pendingCoalesceKey = `field:${index}:${String(field)}`
-    replaceBlock(index, { ...node, [field]: value })
-  }
-
-  function updateInlineChild(blockIndex: number, childIndex: number, nextChild: StructuredContentNode) {
-    const node = documentModel.value.nodes[blockIndex]
-    if (!node) {
-      return
-    }
-    pendingCoalesceKey = `inline:${blockIndex}:${childIndex}`
-    const children = [...(node.children ?? [])]
-    children[childIndex] = nextChild
-    replaceBlock(blockIndex, { ...node, children })
-  }
-
-  function addInlineToBlock(blockIndex: number, type: ConfirmedNodeType) {
-    const node = documentModel.value.nodes[blockIndex]
-    if (!node) {
-      return
-    }
-    pendingCoalesceKey = null
-    const children = [...(node.children ?? []), createNodeTemplate(type, selectedStyleKey.value)]
-    replaceBlock(blockIndex, { ...node, children })
-  }
-
-  function removeBlock(index: number) {
-    if (isReadonly.value) {
-      return
-    }
-    pendingCoalesceKey = null
-    documentModel.value = {
-      ...documentModel.value,
-      nodes: documentModel.value.nodes.filter((_, nodeIndex) => nodeIndex !== index),
-    }
-  }
-
-  async function handlePasteFile(event: Event) {
-    const input = event.target as HTMLInputElement
-    const file = input.files?.[0]
-    if (!file) {
-      return
-    }
-    const html = await file.text()
-    await runPasteClean(html)
-    input.value = ''
-  }
-
-  async function runPasteClean(html: string) {
-    if (!html.trim() || isReadonly.value || !props.templateId) {
-      return
-    }
-    prePasteSnapshot.value = serializeStructuredContent(documentModel.value)
-    try {
-      const result = await templatesStore.pasteClean(props.templateId, {
-        sourceHtml: html,
-        prePasteStructuredContentJson: prePasteSnapshot.value,
-      })
-      pasteSummary.value = result.summary
-      pasteBlocked.value = result.blocked
-      pendingPasteJson.value = result.cleanedStructuredContentJson
-      prePasteSnapshot.value = result.prePasteSnapshotJson
-      pasteSummaryOpen.value = true
-    } catch {
-      ElMessage.error(t('templates.structuredEditor.error.pasteClean'))
-    }
-  }
-
-  function acceptPaste() {
-    if (pasteBlocked.value || !pasteSummary.value) {
-      return
-    }
-    if (pendingPasteJson.value) {
-      pendingCoalesceKey = null
-      documentModel.value = parseStructuredContent(pendingPasteJson.value)
-    }
-    emit('paste-accepted', buildAcceptedPasteCleaningEvidence(pasteSummary.value))
-    pendingPasteJson.value = null
-    pasteSummary.value = null
-    pasteBlocked.value = false
-  }
-
-  function cancelPaste() {
-    pendingCoalesceKey = null
-    documentModel.value = parseStructuredContent(prePasteSnapshot.value)
-    pendingPasteJson.value = null
-    pasteSummary.value = null
-    pasteBlocked.value = false
-  }
-
-  function insertInline(type: ConfirmedNodeType) {
-    if (isReadonly.value) {
-      return
-    }
-    pendingCoalesceKey = null
-    const nodes = [...documentModel.value.nodes]
-    if (!nodes.length) {
-      nodes.push(createNodeTemplate('paragraph', selectedStyleKey.value))
-    }
-    const lastIndex = nodes.length - 1
-    const target = nodes[lastIndex]
-    if (!target) {
-      return
-    }
-    const children = [...(target.children ?? []), createNodeTemplate(type, selectedStyleKey.value)]
-    nodes[lastIndex] = { ...target, children }
-    documentModel.value = { ...documentModel.value, nodes }
-  }
-
   return {
     t,
     isReadonly,
     recoveryDraft,
     editorRootRef: editorRootRef as Ref<HTMLElement | null>,
-    canUndo,
-    canRedo,
+    canUndo: doc.canUndo,
+    canRedo: doc.canRedo,
     blockNodeTypes,
     styleOptions,
     selectedStyleKey,
     loadingCatalog,
-    documentModel,
-    pasteSummaryOpen,
-    pasteSummary,
-    pasteBlocked,
+    documentModel: doc.documentModel,
+    pasteSummaryOpen: paste.pasteSummaryOpen,
+    pasteSummary: paste.pasteSummary,
+    pasteBlocked: paste.pasteBlocked,
     variableSelectOptions,
     listVariableOptions,
     clauseReferenceOptions,
@@ -533,19 +286,20 @@ export function useControlledStructuredContentEditor(
     markPristine,
     handleRestoreDraft,
     handleDiscardDraft,
-    doUndo,
-    doRedo,
-    insertBlock,
-    insertInline,
-    applySelectedStyle,
-    handlePasteFile,
-    removeBlock,
-    updateInlineChild,
-    addInlineToBlock,
-    updateBlockField,
-    endFieldCoalesce,
-    acceptPaste,
-    cancelPaste,
+    doUndo: doc.doUndo,
+    doRedo: doc.doRedo,
+    insertBlock: (type: ConfirmedNodeType) => doc.insertBlock(type, selectedStyleKey.value),
+    insertInline: (type: ConfirmedNodeType) => doc.insertInline(type, selectedStyleKey.value),
+    applySelectedStyle: () => doc.applySelectedStyle(selectedStyleKey.value),
+    handlePasteFile: paste.handlePasteFile,
+    removeBlock: doc.removeBlock,
+    updateInlineChild: doc.updateInlineChild,
+    addInlineToBlock: (blockIndex: number, type: ConfirmedNodeType) =>
+      doc.addInlineToBlock(blockIndex, type, selectedStyleKey.value),
+    updateBlockField: doc.updateBlockField,
+    endFieldCoalesce: doc.endFieldCoalesce,
+    acceptPaste: paste.acceptPaste,
+    cancelPaste: paste.cancelPaste,
     serializeStructuredContent,
   }
 }
