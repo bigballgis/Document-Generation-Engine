@@ -78,6 +78,35 @@ if (-not (Test-Path ".env")) {
     Write-Host "Created .env from .env.example"
 }
 
+# BDD-OPS-KAFKA-REGISTRY-001: docgen-kafka requires explicit KAFKA_IMAGE (compose fail-closed; no Hub silent default).
+# Prefer process env; else read from .env (copied from .env.example for local/scratch).
+function Get-DotEnvValue {
+    param([Parameter(Mandatory)][string]$Key)
+    if (-not (Test-Path ".env")) { return $null }
+    foreach ($line in Get-Content ".env") {
+        $trimmed = $line.Trim()
+        if ($trimmed.StartsWith('#') -or -not $trimmed.Contains('=')) { continue }
+        $name, $value = $trimmed.Split('=', 2)
+        if ($name.Trim() -eq $Key) {
+            return $value.Trim().Trim('"').Trim("'")
+        }
+    }
+    return $null
+}
+$kafkaImage = if (-not [string]::IsNullOrWhiteSpace($env:KAFKA_IMAGE)) {
+    $env:KAFKA_IMAGE.Trim()
+} else {
+    Get-DotEnvValue -Key 'KAFKA_IMAGE'
+}
+if ([string]::IsNullOrWhiteSpace($kafkaImage)) {
+    Write-Error @"
+KAFKA_IMAGE must be set before bringing up docgen-kafka (scratch drill).
+Set it in the environment or .env — see .env.example (LOCAL/DEV ONLY Hub example) or runbook for company-approved coords.
+"@
+    exit 1
+}
+$env:KAFKA_IMAGE = $kafkaImage
+
 $dumpHost = Join-Path $BackupRoot "docgen-$Stamp.dump"
 $minioTarHost = Join-Path $BackupRoot "minio-$Stamp.tgz"
 if (-not (Test-Path $dumpHost)) { throw "Missing dump: $dumpHost — run backup-stack.ps1 first" }

@@ -41,7 +41,7 @@
 | 7 | **LR-B8** — prod compose healthchecks + resource limits | **GO** | [LRP §4 LR-B8](../plan/launch-readiness-program.md); `docker-compose.prod.yml` healthcheck on `/healthz` (start_period 90s) + mem/cpu limits; ledger HostConfig evidence | Confirms **compose** readiness probe wiring — not a live signed production cluster attestation. |
 | 8 | **LR-E1** — SSE-through-proxy incremental E2E green | **GO** | [LRP-E1-sse-manifest.md](../../frontend/e2e/evidence/LRP-E1-sse-manifest.md); merge `575d0aa`; Playwright **2/2**; closes CD-PIT-12 browser proof | Scenario A incremental; Scenario B idle ≥60s + ~20s keep-alive. |
 | 9 | **`JWT_SECRET`** — explicitly provisioned; **no** compose default fallback | **GO** | Slice `ops-jwt-secret-no-default` (Task Master **#44**); merge `587cd9a` (`587cd9a6258d375ab43280339d58edf6c3430319`); feature tip `283233e` (`283233efc18ea080335c89c42bac3507d62aacb0`). Compose: `docker-compose.prod.yml` uses `${JWT_SECRET:?JWT_SECRET must be set}` (no `:-` default). Guard: `ProductionSecretGuard` + `ProductionSecretGuardTest`. BDD: [BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md). Gates: `mvn verify` **GREEN**; architecture **PASS_WITH_NOTES** (Critical **0**); **DEPLOY_OK** (queued deploy; healthz **200** UP); S2a compose config **fails** without `JWT_SECRET`. Closes LR-B6 🟡#4. | Clearing #9 alone is **not** go-live. Overall checklist remains **NO-GO** (other blockers). |
-| 10 | **Kafka image** — company-approved registry (not Docker Hub `bitnamilegacy`) | **NO-GO** | `docker-compose.yml` `image: bitnamilegacy/kafka:3.7` + comment mandating company registry for production; LR-B4 note in [LRP §4](../plan/launch-readiness-program.md) | Dev/local pull path fixed; **production coordinates not evidenced** in-repo. |
+| 10 | **Kafka image** — company-approved registry (not Docker Hub `bitnamilegacy`) | **CONDITIONAL** | Slice `ops-kafka-company-registry` (Task Master **#45**); BDD [BDD-OPS-KAFKA-REGISTRY-001](../behavior/ops-kafka-company-registry.md) (S1–S4). Compose contract: `docker-compose.yml` `docgen-kafka.image: ${KAFKA_IMAGE:?KAFKA_IMAGE must be set}` (fail-closed; **no** `:-bitnamilegacy…` silent default). Ops SoT: [runbook.md](./runbook.md) § Required environment variables + local Kafka note; [`.env.example`](../../.env.example) documents `bitnamilegacy/kafka:3.7` as **LOCAL/DEV ONLY**. Implementer lands compose wiring in the same change set. | **Path remediated** (operator-supplied `KAFKA_IMAGE`). **Residual:** operator **must** set company-approved full image ref (`<company-registry>/<kafka-image>:<tag>` — hostname **UNKNOWN**; do **not** invent). Local Hub example is **non-prod only**. **Not GO** — no company registry pull evidence in-repo. Clearing #10 residual alone is **not** go-live. |
 
 ### Related inputs (informational — not sole launch blockers)
 
@@ -64,8 +64,8 @@ Fill this block for each readiness review. **Do not** change item verdicts witho
 | Reviewer / role | _name · architecture / ops / eng_ |
 | Git tip reviewed | _SHA_ |
 | **Overall verdict** | **NO-GO** _(snapshot 2026-07-12 — see blockers below)_ / GO / CONDITIONAL |
-| Blocking **NO-GO** items | #3b ADR-0042/0043+Word; #5a AD Group stub; #5b paste↔binding; #10 Kafka company registry (#9 `JWT_SECRET` cleared **GO** — merge `587cd9a`) |
-| Accepted **CONDITIONAL** residuals (if any) | _list item # + accepted residual text — or “none”_ |
+| Blocking **NO-GO** items | #3b ADR-0042/0043+Word; #5a AD Group stub; #5b paste↔binding (#9 `JWT_SECRET` **GO** — merge `587cd9a`; #10 Kafka path → **CONDITIONAL** — not a blocking NO-GO) |
+| Accepted **CONDITIONAL** residuals (if any) | #10 Kafka: fail-closed `KAFKA_IMAGE` path remediated; operator must supply company-approved coords (no invent registry hostname); no company pull evidence → not GO |
 | Open risks | _e.g. ledger CDP table drift; NFR unconfirmed; D6 errorRate_ |
 | Sign-off | _signature / “not signed — docs-only snapshot”_ |
 
@@ -74,11 +74,11 @@ Fill this block for each readiness review. **Do not** change item verdicts witho
 | Field | Value |
 | --- | --- |
 | Review date | 2026-07-12 |
-| Reviewer | doc-keeper (LR-E2 stage 3 — docs-only) |
-| Git tip | worktree `feat/lrp-e2-launch-checklist` (pre-merge) |
+| Reviewer | doc-keeper (slice `ops-kafka-company-registry` — docs-first #10) |
+| Git tip | worktree `feat/ops-kafka-company-registry` (pre-merge) |
 | **Overall verdict** | **NO-GO** |
-| Blocking items | **#10** Kafka not on company registry; **#3b** ADR-0042/0043 + Word delta; **#5a** AD Group stub; **#5b** paste↔binding seam (**#9** JWT_SECRET → **GO** 2026-07-12 merge `587cd9a` — not a go-live claim) |
-| Conditionals (not flipped to GO) | **#5** mixed seams; **#6** scratch drill ≠ production compliance; NFR/D6 residuals |
+| Blocking items | **#3b** ADR-0042/0043 + Word delta; **#5a** AD Group stub; **#5b** paste↔binding seam (**#9** JWT_SECRET → **GO** 2026-07-12 merge `587cd9a`; **#10** Kafka → **CONDITIONAL** 2026-07-12 — not a go-live claim) |
+| Conditionals (not flipped to GO) | **#10** Kafka fail-closed `KAFKA_IMAGE` path remediated; operator must supply company-approved coords; no company registry pull evidence; **#5** mixed seams; **#6** scratch drill ≠ production compliance; NFR/D6 residuals |
 | Production go-live claim | **None — forbidden by this checklist** |
 | Sign-off | Docs snapshot only — **not** a launch authorization |
 
@@ -94,6 +94,7 @@ Fill this block for each readiness review. **Do not** change item verdicts witho
 | [runbook.md](./runbook.md) | Day-2 ops |
 | [backup-restore-runbook.md](./backup-restore-runbook.md) | LR-D2 drill SoT |
 | **[BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md)** | Checklist **#9** acceptance behavior (slice `ops-jwt-secret-no-default`) |
+| **[BDD-OPS-KAFKA-REGISTRY-001](../behavior/ops-kafka-company-registry.md)** | Checklist **#10** acceptance behavior (slice `ops-kafka-company-registry`) — fail-closed `KAFKA_IMAGE`; no invented company registry hostname |
 | [docs/README.md](../README.md) | Index |
 
 ---
@@ -107,3 +108,4 @@ Fill this block for each readiness review. **Do not** change item verdicts witho
 | 2026-07-12 | Linked [BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md) for item **#9** (slice `ops-jwt-secret-no-default`). Row remains **NO-GO** until implement + evidence. |
 | 2026-07-12 | Docs-first operator/deploy alignment for #9 (runbook, `deploy/README.md`, `k8s-config-secrets.md`, `.env.example`, container-hardening) — **still NO-GO**; no implement evidence yet. |
 | 2026-07-12 | Item **#9** → **GO** (slice `ops-jwt-secret-no-default`; merge `587cd9a`; Task Master #44). Compose `:?` + `ProductionSecretGuard`; `mvn verify` GREEN; DEPLOY_OK + healthz; S2a refuse missing secret; architecture PASS_WITH_NOTES. Overall checklist remains **NO-GO** — **not** production go-live. |
+| 2026-07-12 | Item **#10** → **CONDITIONAL** (slice `ops-kafka-company-registry`; Task Master #45; BDD [ops-kafka-company-registry.md](../behavior/ops-kafka-company-registry.md)). Fail-closed `${KAFKA_IMAGE:?…}` path + runbook / `.env.example` LOCAL/DEV ONLY Hub example; **not GO** (no company registry pull evidence; operator must supply coords — do not invent hostname). Removed #10 from blocking NO-GO list. Overall checklist remains **NO-GO**. |

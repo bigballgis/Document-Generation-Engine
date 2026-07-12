@@ -53,6 +53,25 @@ function Remove-SmokeContainers {
 }
 
 Write-Host "==> Ensuring infrastructure (postgres, redis, minio)..."
+# Compose loads the full docker-compose.yml (including docgen-kafka image ${KAFKA_IMAGE:?…}).
+# Ensure KAFKA_IMAGE is present even though this smoke does not start Kafka.
+if ([string]::IsNullOrWhiteSpace($env:KAFKA_IMAGE)) {
+    if (Test-Path ".env") {
+        foreach ($line in Get-Content ".env") {
+            $trimmed = $line.Trim()
+            if ($trimmed.StartsWith('#') -or -not $trimmed.Contains('=')) { continue }
+            $name, $value = $trimmed.Split('=', 2)
+            if ($name.Trim() -eq 'KAFKA_IMAGE') {
+                $env:KAFKA_IMAGE = $value.Trim().Trim('"').Trim("'")
+                break
+            }
+        }
+    }
+}
+if ([string]::IsNullOrWhiteSpace($env:KAFKA_IMAGE)) {
+    Write-Error "KAFKA_IMAGE must be set (env or .env) before docker compose — docgen-kafka uses `${KAFKA_IMAGE:?…}` fail-closed. See .env.example (LOCAL/DEV ONLY) or runbook."
+    exit 1
+}
 docker compose up -d docgen-postgres docgen-redis docgen-minio
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 

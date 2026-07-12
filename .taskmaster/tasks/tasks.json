@@ -605,7 +605,7 @@
         "id": "44",
         "title": "OPS: Remove JWT_SECRET compose default (fail-closed)",
         "description": "DONE 2026-07-12. Slice ops-jwt-secret-no-default. Explicit JWT_SECRET for prod/acceptance (compose :?, ProductionSecretGuard fail-closed). Checklist #9 → GO. Overall checklist remains NO-GO. Formal phase None. No sole-active. Merge 587cd9a. Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
-        "details": "DONE 2026-07-12. Slice id: ops-jwt-secret-no-default. Merge: 587cd9a (587cd9a6258d375ab43280339d58edf6c3430319); feature tip 283233e (283233efc18ea080335c89c42bac3507d62aacb0); worktree removed. Formal phase remains None. BDD ready (docs/behavior/ops-jwt-secret-no-default.md; BDD-OPS-JWT-SECRET-001). Delivered: docker-compose.prod.yml ${JWT_SECRET:?…}; ProductionSecretGuard + ProductionSecretGuardTest; deploy/runbook docs. Gates: mvn verify GREEN; architecture PASS_WITH_NOTES Critical=0; DEPLOY_OK healthz 200 UP; S2a compose refuse missing secret. Checklist #9 → GO (closes LR-B6 🟡#4). Overall checklist NO-GO (Kafka registry, ADR-0042/0043+Word, AD Group stub, paste↔binding). no sole-active. Do NOT: claim production go-live; activate CD-3; touch DGE-audit-governance. Recommend next (notes only): Kafka company registry (#10) or pause.",
+        "details": "DONE 2026-07-12. Slice id: ops-jwt-secret-no-default. Merge: 587cd9a (587cd9a6258d375ab43280339d58edf6c3430319); feature tip 283233e (283233efc18ea080335c89c42bac3507d62aacb0); worktree removed. Formal phase remains None. BDD ready (docs/behavior/ops-jwt-secret-no-default.md; BDD-OPS-JWT-SECRET-001). Delivered: docker-compose.prod.yml ${JWT_SECRET:?…}; ProductionSecretGuard + ProductionSecretGuardTest; deploy/runbook docs. Gates: mvn verify GREEN; architecture PASS_WITH_NOTES Critical=0; DEPLOY_OK healthz 200 UP; S2a compose refuse missing secret. Checklist #9 → GO (closes LR-B6 🟡#4). Overall checklist NO-GO (Kafka registry, ADR-0042/0043+Word, AD Group stub, paste↔binding). Superseded sole Task Master active by #45 (ops-kafka-company-registry). Do NOT: claim production go-live; activate CD-3; touch DGE-audit-governance.",
         "testStrategy": "1. docker-compose.prod.yml has no JWT_SECRET:-default fallback (uses :?). 2. Prod/acceptance start without JWT_SECRET fails closed (S2a proven). 3. Explicit JWT_SECRET (≥32 bytes) allows healthy backend start (DEPLOY_OK healthz 200). 4. Dev/local path remains documented. 5. Runbook/deploy secrets docs list JWT_SECRET as required. 6. mvn verify GREEN + architecture PASS_WITH_NOTES + merge 587cd9a + MAIN post-task-doc-sync + commit-review. 7. Checklist #9 GO — overall checklist still NO-GO for other blockers.",
         "priority": "high",
         "dependencies": [
@@ -614,12 +614,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-12T09:50:00.000Z"
+      },
+      {
+        "id": "45",
+        "title": "OPS: Kafka company registry (fail-closed KAFKA_IMAGE)",
+        "description": "IN PROGRESS 2026-07-12. Slice ops-kafka-company-registry. Remove bitnamilegacy as the only Kafka image path; require ${KAFKA_IMAGE:?…} fail-closed; ops docs; checklist #10 honest CONDITIONAL/GO. Formal phase None. Sole Task Master active (#45). BDD ready (BDD-OPS-KAFKA-REGISTRY-001). Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "IN PROGRESS 2026-07-12. Slice id: ops-kafka-company-registry. Placement: ISOLATED D:/working/DGE-ops-kafka-company-registry · feat/ops-kafka-company-registry · base 5350ced. Formal phase remains None (delivery focus via Task Master only — single-active-phase OK with phase None). BDD ready (docs/behavior/ops-kafka-company-registry.md; BDD-OPS-KAFKA-REGISTRY-001). Scope: stop hard-coding Docker Hub bitnamilegacy/kafka as the sole path; compose uses ${KAFKA_IMAGE:?…} fail-closed when unset; document company-approved registry coordinates + local/dev override; update launch-readiness checklist #10 to honest CONDITIONAL or GO with evidence (never fake GO; never invent private registry hostnames). Prior: OPS-JWT-SECRET #44 Done (checklist #9 GO). Overall checklist remains NO-GO until other blockers clear. Do NOT: claim production go-live; activate CD-3; touch DGE-audit-governance; invent a formal plan phase.",
+        "testStrategy": "1. Compose / deploy path does not treat bitnamilegacy as the only production Kafka image. 2. Missing KAFKA_IMAGE fails closed (${KAFKA_IMAGE:?…} or equivalent). 3. Explicit company-approved (or documented override) image allows stack bring-up. 4. Ops/runbook/deploy docs document KAFKA_IMAGE. 5. Checklist #10 is CONDITIONAL or GO only with honest evidence. 6. Gates + architecture review + merge + MAIN post-task-doc-sync + commit-review before Done. 7. Formal phase stays None.",
+        "priority": "high",
+        "dependencies": [
+          "44"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T01:52:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T09:50:00.000Z",
-      "taskCount": 44,
+      "lastModified": "2026-07-12T01:52:00.000Z",
+      "taskCount": 45,
       "completedCount": 44,
       "tags": [
         "master"

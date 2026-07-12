@@ -31,9 +31,11 @@ services:
       retries: 10
 
   docgen-kafka:
-    # LR-B4 (2026-07): Bitnami moved legacy tags to the bitnamilegacy namespace — the original bitnami/kafka:3.7 manifest is delisted from Docker Hub.
-    # Production must use company-approved registry coordinates instead (dependency policy, tech-stack-guardrails).
-    image: bitnamilegacy/kafka:3.7
+    # Kafka image is operator-supplied (BDD-OPS-KAFKA-REGISTRY-001). Fail-closed — no :-bitnamilegacy silent default.
+    # Production / acceptance: company-approved registry full ref (hostname UNKNOWN in-repo — do not invent).
+    # Local/dev: .env.example may document bitnamilegacy/kafka:3.7 as LOCAL/DEV ONLY (never a claimed prod coordinate).
+    # Healthcheck path below assumes a bitnami-shaped image layout; company images must remain compatible or update the probe.
+    image: ${KAFKA_IMAGE:?KAFKA_IMAGE must be set to a full image ref (company-approved for prod; see docs/operations/runbook.md)}
     container_name: docgen-kafka
     environment:
       KAFKA_CFG_NODE_ID: 0

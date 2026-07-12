@@ -55,19 +55,28 @@ See also [Production runbook](../docs/operations/runbook.md) for release-gate an
 
 ## Local Docker: install and upgrade
 
-**Acceptance / prod-shaped compose — `JWT_SECRET` required:** Before `docker-deploy.ps1`,
-`docker-deploy-queue.ps1`, or `docker compose … --profile prod`, operators must export an
-**explicit** ≥32-byte `JWT_SECRET` that is **not** a known insecure placeholder
-(`local-dev-only-change-me-please-32bytes-min`, `prod-change-me-32-bytes-minimum-secret`).
-`docker-compose.prod.yml` must **not** use `${JWT_SECRET:-…}` bake-in defaults; missing or
-known-insecure values fail closed. Local-only `.env` / `dev`/`local`/`test` may keep the
-documented test secret in [`.env.example`](../.env.example). Behavior SoT:
-[BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md). Checklist
-[#9](../docs/operations/launch-readiness-checklist.md) remains **NO-GO** until implement
-evidence — **not** go-live.
+**Acceptance / prod-shaped compose — `JWT_SECRET` + `KAFKA_IMAGE` required:** Before `docker-deploy.ps1`,
+`docker-deploy-queue.ps1`, or `docker compose … --profile prod`, operators must export:
+
+1. An **explicit** ≥32-byte `JWT_SECRET` that is **not** a known insecure placeholder
+   (`local-dev-only-change-me-please-32bytes-min`, `prod-change-me-32-bytes-minimum-secret`).
+   `docker-compose.prod.yml` must **not** use `${JWT_SECRET:-…}` bake-in defaults; missing or
+   known-insecure values fail closed. Local-only `.env` / `dev`/`local`/`test` may keep the
+   documented test secret in [`.env.example`](../.env.example). Behavior SoT:
+   [BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md). Checklist
+   [#9](../docs/operations/launch-readiness-checklist.md) is **GO** (merge `587cd9a`) — **not** go-live.
+2. An **explicit** `KAFKA_IMAGE` full image ref. Compose uses `${KAFKA_IMAGE:?…}` (**no**
+   `:-bitnamilegacy…` silent default). Production / acceptance must use a **company-approved**
+   coordinate (`<company-registry>/<kafka-image>:<tag>`). Company registry hostname is **UNKNOWN**
+   in-repo — **do not** invent one. Local/dev may use the Hub example in `.env.example`
+   (**LOCAL/DEV ONLY**). Behavior SoT:
+   [BDD-OPS-KAFKA-REGISTRY-001](../docs/behavior/ops-kafka-company-registry.md). Checklist
+   [#10](../docs/operations/launch-readiness-checklist.md) is **CONDITIONAL** — **not** go-live;
+   overall checklist remains **NO-GO**.
 
 ```powershell
 $env:JWT_SECRET = '<explicit-non-default-≥32-bytes>'
+$env:KAFKA_IMAGE = '<company-registry>/<kafka-image>:<tag>'
 .\scripts\docker-deploy.ps1
 # Prefer the single-host queue on this machine:
 # .\scripts\docker-deploy-queue.ps1
@@ -241,7 +250,8 @@ Details: [container-hardening.md](./container-hardening.md). Behavior:
 - [Security view](../docs/architecture/security-view.md) — container hardening, network isolation, secret handling
 - [Data storage view](../docs/architecture/data-storage-view.md) — external data services and retention
 - [P15 detailed plan](../docs/plan/detail/P15-kubernetes-deployment-container-hardening.md) — phase tasks and exit criteria
-- [Production runbook](../docs/operations/runbook.md) — release gate, local prod compose profile, **LR-D3 alert response sections**, **JWT_SECRET explicit provision**
-- [BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md) — no compose JWT default; known insecure refused; checklist #9 (not go-live)
+- [Production runbook](../docs/operations/runbook.md) — release gate, local prod compose profile, **LR-D3 alert response sections**, **JWT_SECRET** + **KAFKA_IMAGE** explicit provision
+- [BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md) — no compose JWT default; known insecure refused; checklist #9 **GO** (not go-live)
+- [BDD-OPS-KAFKA-REGISTRY-001](../docs/behavior/ops-kafka-company-registry.md) — fail-closed `KAFKA_IMAGE`; Hub example LOCAL/DEV ONLY; checklist #10 **CONDITIONAL** (not go-live)
 - [Observability as code](./observability/README.md) — LR-D3 draft alert thresholds + `runbook` annotation targets (NOT confirmed SLOs)
 - [Backup & restore runbook](../docs/operations/backup-restore-runbook.md) — LR-D2 pg/MinIO restore + confirmation gate + drill evidence (**EXECUTED** 2026-07-12; scratch ≠ production compliance)

@@ -10,6 +10,11 @@ Related: [backup-restore-runbook.md](./backup-restore-runbook.md) (LR-D2 drill).
 **JWT_SECRET:** [BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md) — explicit
 provision for acceptance/prod; checklist [#9](./launch-readiness-checklist.md) is **GO**
 (merge `587cd9a`) — overall checklist remains **NO-GO**; **not** a go-live claim.
+**KAFKA_IMAGE:** [BDD-OPS-KAFKA-REGISTRY-001](../behavior/ops-kafka-company-registry.md) — explicit
+company-approved Kafka image ref for any compose path that defines `docgen-kafka`; checklist
+[#10](./launch-readiness-checklist.md) is **CONDITIONAL** (path remediated; operator must supply
+coords; no invented registry hostname; **not** GO without company pull evidence) — overall
+checklist remains **NO-GO**; **not** a go-live claim.
 
 ## Release gate
 
@@ -32,9 +37,15 @@ Evidence is written to `artifacts/release-gate/<timestamp>/`.
 
 **JWT_SECRET (acceptance / prod compose):** Export a ≥32-byte secret that is **not** a known insecure default before bringing up the prod profile. Compose uses `${JWT_SECRET:?…}` (no `:-` fallback); missing or known-insecure values fail closed. See [Required environment variables](#required-environment-variables-production) and [BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md). Checklist [#9](./launch-readiness-checklist.md) is **GO** (merge `587cd9a`) — clearing #9 alone is **not** go-live; overall checklist remains **NO-GO**.
 
+**KAFKA_IMAGE (any compose with `docgen-kafka`):** Export a full image reference before `docker compose config` / `up`. Compose uses `${KAFKA_IMAGE:?KAFKA_IMAGE must be set}` (**no** `:-bitnamilegacy…` silent default). Production / acceptance **must** use an operator-supplied **company-approved** registry coordinate shaped like `<company-registry>/<kafka-image>:<tag>` — the company registry hostname is **UNKNOWN** in-repo; **do not** invent a private registry hostname as a production fact. Local/dev may copy the Hub example from [`.env.example`](../../.env.example) (`bitnamilegacy/kafka:3.7`) — **LOCAL/DEV ONLY**, never a claimed production coordinate. Behavior SoT: [BDD-OPS-KAFKA-REGISTRY-001](../behavior/ops-kafka-company-registry.md). Checklist [#10](./launch-readiness-checklist.md) is **CONDITIONAL** — clearing the Hub-hardcode path alone is **not** go-live; overall checklist remains **NO-GO**.
+
 ```powershell
 # Example — operator-generated secret (never commit; never reuse local-dev / prod-change-me placeholders)
 $env:JWT_SECRET = '<explicit-non-default-≥32-bytes>'
+# Production / acceptance — set company-approved Kafka image (placeholder form only; do not invent hostname)
+$env:KAFKA_IMAGE = '<company-registry>/<kafka-image>:<tag>'
+# Local/dev only — may use the documented Hub example from .env.example (never claim as production)
+# $env:KAFKA_IMAGE = 'bitnamilegacy/kafka:3.7'
 ```
 
 Build backend JAR first, then start the prod compose profile:
@@ -48,6 +59,7 @@ Queued single-host acceptance deploy (preferred on this machine):
 
 ```powershell
 $env:JWT_SECRET = '<explicit-non-default-≥32-bytes>'
+$env:KAFKA_IMAGE = '<company-registry>/<kafka-image>:<tag>'
 .\scripts\docker-deploy-queue.ps1
 ```
 
@@ -222,6 +234,7 @@ Expect `# HELP` lines for JVM and HTTP metrics. After LR-D3 instrumentation, als
 | Variable | Purpose |
 | --- | --- |
 | `JWT_SECRET` | Management JWT signing (**min 32 bytes**). **Must be explicitly provisioned** (env / `.env` / Secret Manager / cluster Secret) for acceptance/prod compose, queued Docker deploy, and prod-shaped scripts (e.g. `container-hardening-smoke.ps1`) — compose uses `${JWT_SECRET:?…}` (**no** `:-` default) and scripts must **not** silently fall back. Known insecure values (`local-dev-only-change-me-please-32bytes-min`, `prod-change-me-32-bytes-minimum-secret`) are **refused fail-closed** on acceptance/prod paths (logs must not print the secret). Local `dev`/`local`/`test` may use documented test secrets (see [`.env.example`](../../.env.example)). Behavior SoT: [BDD-OPS-JWT-SECRET-001](../behavior/ops-jwt-secret-no-default.md). Checklist [#9](./launch-readiness-checklist.md) is **GO** (merge `587cd9a`) — **overall checklist remains NO-GO**; **not** a go-live claim. |
+| `KAFKA_IMAGE` | Full Kafka container image reference for `docgen-kafka` (registry/repo/tag). **Required** for any compose file set that defines `docgen-kafka` (including prod overlay that `depends_on` it). Compose uses `${KAFKA_IMAGE:?KAFKA_IMAGE must be set}` (**no** `:-bitnamilegacy…` silent default; **no** hardcoded Hub image as the sole prod path). **Production / acceptance:** operator must supply a **company-approved** coordinate (`<company-registry>/<kafka-image>:<tag>`). Company registry hostname is **UNKNOWN** in this repository — **do not** invent a private registry hostname and treat it as production fact. **Local/dev only:** [`.env.example`](../../.env.example) may document `bitnamilegacy/kafka:3.7` as a non-production example — never claim it as the production coordinate. Behavior SoT: [BDD-OPS-KAFKA-REGISTRY-001](../behavior/ops-kafka-company-registry.md). Checklist [#10](./launch-readiness-checklist.md) is **CONDITIONAL** (path remediated; no company pull evidence → not GO) — **overall checklist remains NO-GO**; **not** a go-live claim. |
 | `POSTGRES_*` | Database connection |
 | `MINIO_*` | Object storage |
 | `APP_ENVIRONMENT` | Runtime environment label |

@@ -65,6 +65,29 @@ See docs/behavior/ops-jwt-secret-no-default.md (BDD-OPS-JWT-SECRET-001).
 # Ensure compose substitution sees the resolved value even when only present in .env.
 $env:JWT_SECRET = $jwtSecret
 
+# BDD-OPS-KAFKA-REGISTRY-001: any compose file set with docgen-kafka requires explicit KAFKA_IMAGE.
+# No :-bitnamilegacy silent default; do not invent a company registry hostname.
+$kafkaImage = if (-not [string]::IsNullOrWhiteSpace($env:KAFKA_IMAGE)) {
+    $env:KAFKA_IMAGE.Trim()
+} else {
+    Get-DotEnvValue -Key 'KAFKA_IMAGE'
+}
+if ([string]::IsNullOrWhiteSpace($kafkaImage)) {
+    Write-Error @"
+KAFKA_IMAGE must be set for docker-compose.yml (docgen-kafka) / acceptance/prod overlay.
+Set it in the environment or .env — compose no longer hardcodes a Hub image.
+Production / acceptance: company-approved full ref (<company-registry>/<kafka-image>:<tag>).
+Local/dev: copy KAFKA_IMAGE from .env.example (bitnamilegacy example is LOCAL/DEV ONLY).
+See docs/behavior/ops-kafka-company-registry.md (BDD-OPS-KAFKA-REGISTRY-001).
+"@
+    exit 1
+}
+if ($kafkaImage -match '(?i)bitnamilegacy') {
+    Write-Warning "KAFKA_IMAGE looks like a Hub bitnamilegacy tag — LOCAL/DEV ONLY; not a claimed production coordinate."
+}
+# Ensure compose substitution sees the resolved value even when only present in .env.
+$env:KAFKA_IMAGE = $kafkaImage
+
 $composeArgs = @(
     "-f", "docker-compose.yml",
     "-f", "docker-compose.prod.yml",
