@@ -194,7 +194,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Slim R-backend residual](./evidence/slim-r-backend/README.md) | ApiManagement 572→230; TemplateLifecycle 553→312; package-private supports; `mvn verify` GREEN |
 | [Slim R2-backend residual](./evidence/slim-r2-backend/README.md) | PublishGateService 429→181; CheckItem + Checklist supports; `mvn verify` GREEN |
 | [Slim Wave 3 frontend SFC](./evidence/slim-frontend/README.md) | BindingsPanel 1249→170 orchestrator; ManagementShell 671→311 (merge `2cf7cb9`) |
-| [Slim R-frontend residual](./evidence/slim-r-frontend/README.md) | CSC Editor 864→177; AuditConsole 588→155; TemplateDetailView residual (~577) |
+| [Slim R-frontend residual](./evidence/slim-r-frontend/README.md) | CSC Editor 864→177; AuditConsole 588→155 |
+| [Slim R2-frontend residual](./evidence/slim-r2-frontend/README.md) | TemplateDetailView 577→388 orchestrator + detail shells (merge `02b299c`) |
 | [Slim Wave 4 test DRY](./evidence/slim-tests/README.md) | Platform/VersionLine/Dashboard fixtures DRY; net **−1033** LOC; gates GREEN (merge `b7e279e`) |
 | [Slim R-tests residual](./evidence/slim-r-tests/README.md) | AuditQueryServiceTest 746→318; shared `AuditQueryServiceTestSupport`; `mvn verify` GREEN |
 | [Demo typography review checklist](./evidence/demo-typography-review-checklist.md) | Human reviewer checklist — fonts, styles, margins, headers/footers, tables, signatures (**P23-T16**; ≥2 CORP + ≥2 RETAIL mandatory samples) |
