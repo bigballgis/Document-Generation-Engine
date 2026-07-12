@@ -9,20 +9,13 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.IBody;
-import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.apache.xmlbeans.XmlCursor;
 
 /**
@@ -42,6 +35,9 @@ class StructuredContentDocxWriteSession {
     private final Map<String, Object> variables;
     private final Map<String, String> pinnedModuleStructures;
     private final int[] numberingCounters;
+    private final StructuredContentDocxStyleSupport styles;
+    private final StructuredContentDocxTableSupport tableSupport;
+    private final StructuredContentDocxInlineSupport inlineSupport;
 
     @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     StructuredContentDocxWriteSession(
@@ -64,6 +60,14 @@ class StructuredContentDocxWriteSession {
         this.variables = variables;
         this.pinnedModuleStructures = pinnedModuleStructures;
         this.numberingCounters = numberingCounters;
+        this.styles = new StructuredContentDocxStyleSupport(styleCatalog);
+        this.tableSupport = new StructuredContentDocxTableSupport(styles);
+        this.inlineSupport = new StructuredContentDocxInlineSupport(
+                variables,
+                styles,
+                imageResolver,
+                this::rejectIfUnrenderable
+        );
     }
 
     void writeBlockNodes(JsonNode nodes, XWPFParagraph firstParagraph, boolean reuseFirstParagraph) {
@@ -81,7 +85,7 @@ class StructuredContentDocxWriteSession {
                     StructuredContentDocxWriter.clearParagraph(currentParagraph);
                 }
                 XWPFTable table = insertTableAfter(currentParagraph);
-                populateTable(tableDefinition, table);
+                tableSupport.populateTable(tableDefinition, table, variables);
                 continue;
             }
             if ("list".equals(type)) {
@@ -94,7 +98,7 @@ class StructuredContentDocxWriteSession {
                 if (!paragraphAvailable) {
                     currentParagraph = insertParagraphAfter(currentParagraph);
                 }
-                writeReferenceNode(node, currentParagraph);
+                inlineSupport.writeReferenceNode(node, currentParagraph);
                 paragraphAvailable = false;
                 continue;
             }
@@ -142,27 +146,27 @@ class StructuredContentDocxWriteSession {
             return;
         }
         if ("sectionHeading".equals(type)) {
-            applyParagraphStyle(paragraph, resolveStyleRef(node, "Heading1"));
+            styles.applyParagraphStyle(paragraph, styles.resolveStyleRef(node, "Heading1"));
             writeSectionHeading(node, paragraph);
             return;
         }
         if ("paragraph".equals(type)) {
             JsonNode legacyText = node.get("text");
             if (legacyText != null && legacyText.isTextual()) {
-                applyParagraphStyle(paragraph, resolveStyleRef(node, "BodyText"));
-                writeRunText(paragraph, legacyText.asText(""), false, false, false);
+                styles.applyParagraphStyle(paragraph, styles.resolveStyleRef(node, "BodyText"));
+                styles.writeRunText(paragraph, legacyText.asText(""), false, false, false);
                 return;
             }
-            applyParagraphStyle(paragraph, resolveStyleRef(node, "BodyText"));
-            writeInlineChildren(node, paragraph);
+            styles.applyParagraphStyle(paragraph, styles.resolveStyleRef(node, "BodyText"));
+            inlineSupport.writeInlineChildren(node, paragraph);
             return;
         }
         if ("text".equals(type) || "textRun".equals(type)) {
-            applyParagraphStyle(paragraph, resolveStyleRef(node, "BodyText"));
-            writeRunText(paragraph, node.path("value").asText(""), false, false, false);
+            styles.applyParagraphStyle(paragraph, styles.resolveStyleRef(node, "BodyText"));
+            styles.writeRunText(paragraph, node.path("value").asText(""), false, false, false);
             return;
         }
-        writeInlineChildren(node, paragraph);
+        inlineSupport.writeInlineChildren(node, paragraph);
     }
 
     private void writeLoopBlock(JsonNode node, XWPFParagraph paragraph) {
@@ -174,7 +178,7 @@ class StructuredContentDocxWriteSession {
         }
         XWPFParagraph current = paragraph;
         for (int itemIndex = 0; itemIndex < items.size(); itemIndex++) {
-            Map<String, Object> scoped = scopedVariables(variables, items.get(itemIndex));
+            Map<String, Object> scoped = StructuredContentDocxTableSupport.scopedVariables(variables, items.get(itemIndex));
             StructuredContentDocxWriteSession scopedSession = new StructuredContentDocxWriteSession(
                     objectMapper,
                     styleCatalog,
@@ -230,9 +234,9 @@ class StructuredContentDocxWriteSession {
             }
             listSupport.applyListFormatting(current, ordered);
             if ("paragraph".equals(item.path("type").asText(""))) {
-                writeInlineChildren(item, current);
+                inlineSupport.writeInlineChildren(item, current);
             } else {
-                writeInlineNode(item, current, false, false, false);
+                inlineSupport.writeInlineNode(item, current, false, false, false);
             }
             current = null;
         }
@@ -241,9 +245,9 @@ class StructuredContentDocxWriteSession {
     private void writeSectionHeading(JsonNode node, XWPFParagraph paragraph) {
         String prefix = resolveNumberingPrefix(node);
         if (!prefix.isBlank()) {
-            writeRunText(paragraph, prefix + " ", true, false, false);
+            styles.writeRunText(paragraph, prefix + " ", true, false, false);
         }
-        writeInlineChildren(node, paragraph);
+        inlineSupport.writeInlineChildren(node, paragraph);
     }
 
     private String resolveNumberingPrefix(JsonNode node) {
@@ -287,195 +291,8 @@ class StructuredContentDocxWriteSession {
                     writeBlockNode(child, insertParagraphAfter(paragraph));
                 }
             } else {
-                writeInlineNode(child, paragraph, false, false, false);
+                inlineSupport.writeInlineNode(child, paragraph, false, false, false);
             }
-        }
-    }
-
-    private void writeInlineChildren(JsonNode node, XWPFParagraph paragraph) {
-        JsonNode children = node.path("children");
-        if (!children.isArray()) {
-            return;
-        }
-        for (JsonNode child : children) {
-            writeInlineNode(child, paragraph, false, false, false);
-        }
-    }
-
-    private void writeInlineNode(
-            JsonNode node,
-            XWPFParagraph paragraph,
-            boolean bold,
-            boolean italic,
-            boolean underline
-    ) {
-        String type = node.path("type").asText("");
-        if ("text".equals(type) || "textRun".equals(type)) {
-            writeRunText(paragraph, node.path("value").asText(""), bold, italic, underline);
-            return;
-        }
-        if ("variable".equals(type)) {
-            String key = node.path("key").asText("");
-            Object value = variables.get(key);
-            writeRunText(paragraph, value == null ? "" : String.valueOf(value), bold, italic, underline);
-            return;
-        }
-        if ("lineBreak".equals(type)) {
-            XWPFRun run = paragraph.createRun();
-            applyDefaultRunStyle(run);
-            run.addBreak();
-            return;
-        }
-        if ("emphasis".equals(type)) {
-            EmphasisStyle emphasisStyle = resolveEmphasis(node);
-            writeInlineChildrenWithStyle(node, paragraph, emphasisStyle.bold(), emphasisStyle.italic(), underline);
-            return;
-        }
-        if ("underline".equals(type)) {
-            writeInlineChildrenWithStyle(node, paragraph, bold, italic, true);
-            return;
-        }
-        if ("styleRef".equals(type)) {
-            String styleKey = node.path("styleRef").asText("");
-            if (styleCatalog.find(styleKey) != null) {
-                applyParagraphStyle(paragraph, styleKey);
-            }
-            return;
-        }
-        if ("imageRef".equals(type) || "sealRef".equals(type)) {
-            writeReferenceNode(node, paragraph);
-            return;
-        }
-        rejectIfUnrenderable(type);
-    }
-
-    private void writeInlineChildrenWithStyle(
-            JsonNode node,
-            XWPFParagraph paragraph,
-            boolean bold,
-            boolean italic,
-            boolean underline
-    ) {
-        JsonNode children = node.path("children");
-        if (!children.isArray()) {
-            return;
-        }
-        for (JsonNode child : children) {
-            writeInlineNode(child, paragraph, bold, italic, underline);
-        }
-    }
-
-    private void writeReferenceNode(JsonNode node, XWPFParagraph paragraph) {
-        StructuredContentImageResolver.ResolvedImage image;
-        if ("sealRef".equals(node.path("type").asText(""))) {
-            image = imageResolver.resolveSealRef(node.path("referenceKey").asText(""));
-        } else {
-            image = imageResolver.resolveImageRef(node.path("imageRef").asText(""));
-        }
-        try {
-            XWPFRun run = paragraph.createRun();
-            applyDefaultRunStyle(run);
-            run.addPicture(
-                    new java.io.ByteArrayInputStream(image.bytes()),
-                    XWPFDocument.PICTURE_TYPE_PNG,
-                    image.fileName(),
-                    Units.toEMU(48),
-                    Units.toEMU(48)
-            );
-        } catch (Exception ex) {
-            throw new DocxAssemblyException(ex);
-        }
-    }
-
-    private void writeRunText(
-            XWPFParagraph paragraph,
-            String text,
-            boolean bold,
-            boolean italic,
-            boolean underline
-    ) {
-        if (text == null || text.isEmpty()) {
-            return;
-        }
-        XWPFRun run = paragraph.createRun();
-        applyDefaultRunStyle(run);
-        run.setBold(bold);
-        run.setItalic(italic);
-        if (underline) {
-            run.setUnderline(UnderlinePatterns.SINGLE);
-        }
-        run.setText(text);
-    }
-
-    private void populateTable(JsonNode tableDefinition, XWPFTable table) {
-        List<String> columnKeys = new ArrayList<>();
-        JsonNode columnSchema = tableDefinition.path("columnSchema");
-        if (columnSchema.isArray()) {
-            for (JsonNode column : columnSchema) {
-                columnKeys.add(column.path("columnKey").asText(""));
-            }
-        }
-        if (columnKeys.isEmpty()) {
-            return;
-        }
-        int rowIndex = 0;
-        JsonNode headerRows = tableDefinition.path("headerRows");
-        if (headerRows.isArray() && !headerRows.isEmpty()) {
-            JsonNode headerRow = headerRows.get(0);
-            writeTableRow(table, rowIndex++, headerRow, columnKeys, variables, true);
-        }
-        JsonNode loopRow = tableDefinition.path("loopRow");
-        String loopVariable = loopRow.path("loopVariable").asText("");
-        Object rawItems = variables.get(loopVariable);
-        if (rawItems instanceof List<?> items) {
-            for (Object item : items) {
-                writeTableRow(
-                        table,
-                        rowIndex++,
-                        loopRow.path("cells"),
-                        columnKeys,
-                        scopedVariables(variables, item),
-                        false
-                );
-            }
-        }
-        JsonNode footerRows = tableDefinition.path("footerRows");
-        if (footerRows.isArray()) {
-            for (JsonNode footerRow : footerRows) {
-                writeTableRow(table, rowIndex++, footerRow, columnKeys, variables, false);
-            }
-        }
-    }
-
-    private void writeTableRow(
-            XWPFTable table,
-            int rowIndex,
-            JsonNode cellsNode,
-            List<String> columnKeys,
-            Map<String, Object> scopedVariables,
-            boolean header
-    ) {
-        XWPFTableRow row = rowIndex < table.getNumberOfRows() ? table.getRow(rowIndex) : table.createRow();
-        while (row.getTableCells().size() < columnKeys.size()) {
-            row.addNewTableCell();
-        }
-        Map<String, String> valuesByColumn = new LinkedHashMap<>();
-        if (cellsNode.isArray()) {
-            for (JsonNode cell : cellsNode) {
-                valuesByColumn.put(cell.path("columnKey").asText(""), resolveCellValue(cell, scopedVariables));
-            }
-        }
-        for (int columnIndex = 0; columnIndex < columnKeys.size(); columnIndex++) {
-            String columnKey = columnKeys.get(columnIndex);
-            XWPFTableCell cell = row.getCell(columnIndex);
-            XWPFParagraph paragraph = cell.getParagraphs().isEmpty()
-                    ? cell.addParagraph()
-                    : cell.getParagraphs().getFirst();
-            StructuredContentDocxWriter.clearParagraph(paragraph);
-            if (header) {
-                applyParagraphStyle(paragraph, "TableHeader");
-            }
-            writeRunText(paragraph, valuesByColumn.getOrDefault(columnKey, ""), header, false, false);
         }
     }
 
@@ -495,63 +312,11 @@ class StructuredContentDocxWriteSession {
         }
     }
 
-    private String resolveStyleRef(JsonNode node, String fallback) {
-        if (node.has("styleRef") && !node.get("styleRef").isNull()) {
-            String styleRef = node.get("styleRef").asText("").trim();
-            if (!styleRef.isBlank() && styleCatalog.find(styleRef) != null) {
-                return styleRef;
-            }
-        }
-        return fallback;
-    }
-
-    private void applyParagraphStyle(XWPFParagraph paragraph, String styleKey) {
-        paragraph.setStyle(DocxMasterStyleRegistry.resolveWordStyleId(styleKey));
-    }
-
-    private EmphasisStyle resolveEmphasis(JsonNode node) {
-        String variant = node.path("variant").asText("bold").trim().toLowerCase(Locale.ROOT);
-        return switch (variant) {
-            case "italic" -> new EmphasisStyle(false, true);
-            case "bolditalic", "bold_italic" -> new EmphasisStyle(true, true);
-            default -> new EmphasisStyle(true, false);
-        };
-    }
-
     private boolean isBlockLevelType(String type) {
         return switch (type) {
             case "paragraph", "sectionHeading", "conditionBlock", "loopBlock", "tableComponentRef",
                     "tableComponent", "contentModuleRef", "list" -> true;
             default -> false;
         };
-    }
-
-    private static String resolveCellValue(JsonNode cell, Map<String, Object> scopedVariables) {
-        if (cell.has("value")) {
-            return cell.path("value").asText("");
-        }
-        String variableKey = cell.path("variableKey").asText("");
-        if (variableKey.isBlank()) {
-            return "";
-        }
-        Object value = scopedVariables.get(variableKey);
-        return value == null ? "" : String.valueOf(value);
-    }
-
-    private static Map<String, Object> scopedVariables(Map<String, Object> base, Object item) {
-        Map<String, Object> scoped = new LinkedHashMap<>(base);
-        if (item instanceof Map<?, ?> mapItem) {
-            mapItem.forEach((key, value) -> scoped.put(String.valueOf(key), value));
-        }
-        return scoped;
-    }
-
-    private static void applyDefaultRunStyle(XWPFRun run) {
-        run.setFontFamily("Calibri");
-        run.setFontSize(10);
-        run.setColor("000000");
-    }
-
-    private record EmphasisStyle(boolean bold, boolean italic) {
     }
 }
