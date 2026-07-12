@@ -151,7 +151,7 @@
 | **Symptom** | On Docker 4173, preview/batch-test progress does not arrive incrementally (whole batch bursts at once) or the stream drops silently |
 | **Root cause** | `frontend/nginx.conf` has no SSE location (nginx defaults `proxy_buffering on`, `proxy_read_timeout 60s`); backend sends no `X-Accel-Buffering: no` / `Cache-Control: no-cache`; `SseEmitterRegistry` 3-min timeout without heartbeat |
 | **Detection** | LR-E1 incremental-arrival E2E (4173) |
-| **Mitigation** | Heartbeat comment ~20s + response headers + nginx SSE location (buffering off, raised read_timeout) (LR-B3 landed 2026-07-04 — heartbeat + anti-buffering headers + nginx SSE location + Docker curl smoke; browser-level incremental proof → LR-E1) |
+| **Mitigation** | Heartbeat comment ~20s + response headers + nginx SSE location (buffering off, raised read_timeout) (LR-B3 landed 2026-07-04 — heartbeat + anti-buffering headers + nginx SSE location + Docker curl smoke; **browser-level incremental + idle heartbeat proof → LR-E1 Done** 2026-07-12 — merge `575d0aa`; Playwright 2/2; [manifest](../../../frontend/e2e/evidence/LRP-E1-sse-manifest.md)) |
 | **Owner wave** | **LR-B3 / LR-E1** |
 | **Doc anchor** | [docs/plan/detail/LRP-B-runtime-scaleout-session.md](./LRP-B-runtime-scaleout-session.md) |
 

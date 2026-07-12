@@ -5,9 +5,11 @@
 | **Slice** | `lrp-e1-sse-proxy-e2e` |
 | **Plan** | [launch-readiness-program.md §7 LR-E1](../plan/launch-readiness-program.md#lr-e1--sse-through-proxy-incremental-e2e) |
 | **bdd_readiness** | **`not-applicable`** |
+| **Status** | **Done** (2026-07-12 — merge `575d0aa`) |
 | **Recorded** | 2026-07-12 |
-| **Formal phase** | None (Wave LR-E — release readiness gate) |
-| **Task Master** | **#42** (`in-progress`) · plan id **LR-E1** |
+| **Formal phase** | None (Wave LR-E — release readiness gate; partial — E1 Done; E2 Not Started; **no sole-active**) |
+| **Task Master** | **#42** (`done`) · plan id **LR-E1** |
+| **Evidence** | [LRP-E1-sse-manifest.md](../../frontend/e2e/evidence/LRP-E1-sse-manifest.md) |
 
 ---
 
@@ -22,7 +24,7 @@ LR-E1 delivers **browser-level reliability evidence** for already-shipped **LR-B
 
 Plan authority: [launch-readiness-program.md](../plan/launch-readiness-program.md) §7 LR-E1 — **BDD: not-applicable — test-only evidence for LR-B3 (reliability, no behavior contract change).**
 
-Upstream transport ownership: [LRP-B §LR-B3](../plan/detail/LRP-B-runtime-scaleout-session.md#lr-b3--sse-production-readiness) — **Done** (heartbeat, anti-buffering headers, nginx SSE location, Docker curl smoke); **browser-level incremental proof stays LR-E1**.
+Upstream transport ownership: [LRP-B §LR-B3](../plan/detail/LRP-B-runtime-scaleout-session.md#lr-b3--sse-production-readiness) — **Done** (heartbeat, anti-buffering headers, nginx SSE location, Docker curl smoke); **browser-level incremental proof completed by LR-E1** (merge `575d0aa`).
 
 ---
 
@@ -30,9 +32,9 @@ Upstream transport ownership: [LRP-B §LR-B3](../plan/detail/LRP-B-runtime-scale
 
 | Deliverable | Intent |
 | --- | --- |
-| **Playwright Docker E2E** | Drive preview (and one long batch-test run) through UI on `http://localhost:4173`; assert SSE progress events with **arrival timestamps** |
+| **Playwright Docker E2E** | Drive preview through UI on `http://localhost:4173`; assert SSE progress events with arrival timestamps (ReadableStream tee) |
 | **Incremental proof** | ≥2 distinct arrival times before completion (not one terminal burst) — proves nginx does not buffer the stream into a single flush |
-| **Heartbeat survival** | Stream open ≥60 s through proxy without premature termination; heartbeat keeps the connection alive |
+| **Heartbeat survival** | Idle progress-stream open ≥60 s through proxy without premature termination; `:keep-alive` ~20 s cadence (LR-B3-equivalent when batch finishes too fast) |
 | **Evidence manifest** | `frontend/e2e/evidence/LRP-E1-sse-manifest.md` recording timestamps / pass evidence |
 
 **Environment / policy constraints (from program §7):**
@@ -42,7 +44,7 @@ Upstream transport ownership: [LRP-B §LR-B3](../plan/detail/LRP-B-runtime-scale
 - Do **not** weaken LR-B3 headers / nginx SSE config to make the test pass.
 - Do **not** execute `CD-E2E-*` tasks from this slice (cross-link only).
 - Do **not** invent new product SSE contracts or change event payloads.
-- Leave **LR-E2** to its own checklist slice — this note only feeds E2 as a go/no-go input when E1 is green.
+- Leave **LR-E2** to its own checklist slice — this note only feeds E2 as a go/no-go input (E1 evidence is green).
 - Formal phase remains **None**; do **not** touch `DGE-audit-governance`.
 
 **Upstream product journeys (reused, not re-specified):**
@@ -62,12 +64,14 @@ These are **test evidence criteria** for Playwright reliability proof through th
 - **Given** the Docker stack on **4173** with **LR-B3** merged
 - **When** a preview with multi-step progress runs through the UI
 - **Then** the spec proves **≥2 incremental arrival timestamps** before completion (events are not delivered as a single terminal burst)
+- **Durable proof:** maxGapMs≈1864 ms; `chunkCount=2` — [manifest](../../frontend/e2e/evidence/LRP-E1-sse-manifest.md)
 
-### Scenario B — Long-lived stream + heartbeat through proxy
+### Scenario B — Idle stream + heartbeat through proxy (when batch finishes too fast)
 
-- **Given** a batch test run exceeding **60 s**
-- **When** the stream is open through the nginx proxy
-- **Then** there is no premature termination; heartbeat keeps the connection alive
+- **Given** the Docker stack on **4173** with **LR-B3** merged; a batch probe may finish too fast (<60 s)
+- **When** an idle progress-stream (LR-B3-equivalent dedicated idle path) remains open through the nginx proxy
+- **Then** there is no premature termination; `:keep-alive` heartbeats keep the connection alive ≥60 s at ~20 s cadence
+- **Durable proof:** durationMs≈65075; keep-alive gaps ≈19996–19998 ms; batch probe ~2540 ms noted as too fast — [manifest](../../frontend/e2e/evidence/LRP-E1-sse-manifest.md)
 
 ---
 
@@ -78,7 +82,7 @@ These are **test evidence criteria** for Playwright reliability proof through th
 - No relaxing LR-B3 anti-buffering / heartbeat / nginx SSE location to green the gate.
 - No re-running or owning **CD-E2E-T08** (or other `CD-E2E-*`) from this slice.
 - No activating or expanding **LR-E2** beyond a cross-link that E1 evidence feeds the launch checklist.
-- No marking LR-E1 **Done** in this readiness record alone — Done requires Playwright green + manifest + doc sync + commit review (program §7).
+- No marking Wave LR-E **Done** while LR-E2 remains Not Started.
 
 ---
 
@@ -90,11 +94,14 @@ These are **test evidence criteria** for Playwright reliability proof through th
 | [LRP-B §LR-B3](../plan/detail/LRP-B-runtime-scaleout-session.md#lr-b3--sse-production-readiness) | Shipped transport hardening under test |
 | [P12 template testing overhaul](./template-testing-overhaul.md) | Existing product SSE progress semantics |
 | [CD-E2E-T08 preview success journey](./preview-success-artifact-download-journey.md) | Adjacent browser success path (terminal UX; not incremental timing) |
-| CD-PIT-12 | Original finding: SSE buffered through frontend nginx |
+| CD-PIT-12 | Original finding: SSE buffered through frontend nginx — **browser proof closed by LR-E1** |
 | [LR-D6 Scenario B](./lrp-d6-load-smoke.md) | Prior concurrent SSE integrity smoke (API harness; not browser-through-proxy incremental) |
 | Program §7 LR-E2 | Downstream go/no-go checklist consumer of E1 green evidence |
+| [LRP-E1-sse-manifest.md](../../frontend/e2e/evidence/LRP-E1-sse-manifest.md) | Durable Playwright evidence |
 
 ```
 bdd_readiness: not-applicable
-task_ids: [LR-E1 / lrp-e1-sse-proxy-e2e]  # Task Master id: allocate via plan-orchestrator
+task_ids: [LR-E1 / lrp-e1-sse-proxy-e2e]  # Task Master #42 → done
+status: Done
+merge: 575d0aa
 ```

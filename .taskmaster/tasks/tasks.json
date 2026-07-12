@@ -576,23 +576,23 @@
       {
         "id": "42",
         "title": "LR-E1 SSE-through-proxy incremental E2E",
-        "description": "IN PROGRESS 2026-07-12. LR-E1 SSE-through-proxy incremental E2E (Playwright reliability evidence for LR-B3 on Docker 4173). Slice lrp-e1-sse-proxy-e2e. Formal phase None. Wave LR-E In Progress (partial — E1 In Progress; E2 Not Started; sole-active=LR-E1). BDD not-applicable. Do NOT activate LR-E2/CD-3. Do NOT touch DGE-audit-governance.",
-        "details": "IN PROGRESS 2026-07-12. Slice id: lrp-e1-sse-proxy-e2e. Placement: ISOLATED d:\\\\working\\\\DGE-lrp-e1-sse-proxy-e2e · feat/lrp-e1-sse-proxy-e2e · base 212c327 (212c327f070ef266e46af93a11c2fb4f6f69ac51). Formal phase remains None. Wave LR-E -> In Progress (partial — E1 In Progress; E2 Not Started; sole-active=LR-E1). BDD: not-applicable (docs/behavior/lrp-e1-sse-proxy-e2e.md). Owner: e2e-test-engineer. Scope: browser-level proof of LR-B3 SSE-through-nginx reliability — Scenario A ≥2 incremental SSE arrival timestamps before completion through :4173; Scenario B stream survives ≥60s idle via heartbeat; artifacts frontend/e2e/LRP-E1-sse-incremental-progress.spec.ts + frontend/e2e/evidence/LRP-E1-sse-manifest.md. Scaffold exists. Gates target: pnpm -C frontend exec playwright test LRP-E1-sse-incremental-progress.spec.ts --config playwright.docker.config.ts green + queued Docker deploy evidence. Do NOT: activate LR-E2/CD-3; invent product SSE contracts; use API polling to fake stream assertions; weaken LR-B3 headers/nginx; touch DGE-audit-governance; claim Wave LR-E Done.",
-        "testStrategy": "1. Docker stack on 4173 with LR-B3 merged (queued docker-deploy-queue.ps1). 2. Playwright LRP-E1-sse-incremental-progress.spec.ts: Scenario A proves ≥2 distinct SSE arrival timestamps before completion (not one terminal burst) through nginx :4173. 3. Scenario B: stream open ≥60s idle via heartbeat without premature termination. 4. Evidence recorded in frontend/e2e/evidence/LRP-E1-sse-manifest.md. 5. Do not use polling substitutes or weaken LR-B3 proxy headers. 6. Architecture review as applicable + merge + MAIN doc-sync + commit-review before Done. 7. Leave LR-E2 Not Started.",
+        "description": "DONE 2026-07-12. LR-E1 SSE-through-proxy incremental E2E (Playwright reliability evidence for LR-B3 on Docker 4173). Slice lrp-e1-sse-proxy-e2e. Merge 575d0aa. Formal phase None. Wave LR-E In Progress (partial — E1 Done; E2 Not Started; no sole-active). BDD not-applicable. Closes CD-PIT-12 browser proof. Do NOT activate LR-E2/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: lrp-e1-sse-proxy-e2e. Merge 575d0aa (575d0aa0b33eb53eb3c0dae998d500c00f3d585e); worktree removed. Formal phase remains None. Wave LR-E -> In Progress (partial — E1 Done; E2 Not Started; no sole-active). BDD: not-applicable (docs/behavior/lrp-e1-sse-proxy-e2e.md). Owner: e2e-test-engineer. Evidence: Scenario A maxGapMs≈1864ms; Scenario B idle heartbeat 65075ms + ~20s keep-alive (batch too fast ~2.5s → dedicated idle progress-stream). Artifacts: frontend/e2e/LRP-E1-sse-incremental-progress.spec.ts + frontend/e2e/evidence/LRP-E1-sse-manifest.md + LRP-E1-uiux-manifest.md. Gates: stage5 DEPLOY_OK 2026-07-12T08:41:50+08:00; Playwright 2/2 PASS; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES Critical=0 merge_go=yes; stage10 DEPLOY_OK 2026-07-12T08:58:49+08:00. Do NOT: activate LR-E2/CD-3; claim Wave LR-E Done; touch DGE-audit-governance. Recommend next (notes only): LR-E2 launch checklist.",
+        "testStrategy": "1. Docker stack on 4173 with LR-B3 merged (queued docker-deploy-queue.ps1). 2. Playwright LRP-E1-sse-incremental-progress.spec.ts: Scenario A proves ≥2 distinct SSE arrival timestamps before completion (not one terminal burst) through nginx :4173 — PASS maxGapMs≈1864. 3. Scenario B: idle progress-stream open ≥60s via heartbeat when batch finishes too fast — PASS durationMs≈65075 ~20s keep-alive. 4. Evidence recorded in frontend/e2e/evidence/LRP-E1-sse-manifest.md. 5. Architecture PASS_WITH_NOTES + merge 575d0aa + MAIN doc-sync + commit-review. 6. Leave LR-E2 Not Started.",
         "priority": "high",
         "dependencies": [
           "41"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-12T00:36:05.241Z"
+        "updatedAt": "2026-07-12T09:05:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T00:36:05.241Z",
+      "lastModified": "2026-07-12T09:05:00.000Z",
       "taskCount": 42,
-      "completedCount": 41,
+      "completedCount": 42,
       "tags": [
         "master"
       ]
