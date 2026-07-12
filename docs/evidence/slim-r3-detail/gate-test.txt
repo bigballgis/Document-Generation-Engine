@@ -1,0 +1,13 @@
+pnpm -C frontend test
+
+Test Files  191 passed (191)
+     Tests  1159 passed (1159)
+Duration  436.21s
+
+Coverage summary (v8):
+Statements   : 82.85% ( 26170/31586 )
+Branches     : 83.32% ( 4408/5290 )
+Functions    : 57.91% ( 1017/1756 )
+Lines        : 82.85% ( 26170/31586 )
+
+EXIT=0

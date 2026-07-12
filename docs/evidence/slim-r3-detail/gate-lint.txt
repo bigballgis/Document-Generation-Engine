@@ -1,0 +1,4 @@
+
+> docgen-frontend@0.1.0 lint D:\working\DGE-slim-r3-detail\frontend
+> eslint .
+
