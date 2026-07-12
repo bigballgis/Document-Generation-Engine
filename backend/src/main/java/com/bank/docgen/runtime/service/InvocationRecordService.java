@@ -2,7 +2,6 @@ package com.bank.docgen.runtime.service;
 
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
-import com.bank.docgen.runtime.api.BatchResultItemView;
 import com.bank.docgen.runtime.api.BatchResultView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.domain.InvocationKind;
@@ -15,9 +14,6 @@ import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -26,15 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class InvocationRecordService {
 
-    private static final List<InvocationKind> ROOT_INVOCATION_KINDS = List.of(
-            InvocationKind.SINGLE,
-            InvocationKind.BATCH_ROOT,
-            InvocationKind.ASYNC_TASK
-    );
-
     private final ApiInvocationRecordRepository repository;
     private final InvocationParameterSanitizer parameterSanitizer;
     private final IdempotencyService idempotencyService;
+    private final InvocationRecordMetadataSupport metadata;
+    private final InvocationBatchItemPersistenceSupport batchItems;
 
     public InvocationRecordService(
             ApiInvocationRecordRepository repository,
@@ -44,6 +36,8 @@ public class InvocationRecordService {
         this.repository = repository;
         this.parameterSanitizer = parameterSanitizer;
         this.idempotencyService = idempotencyService;
+        this.metadata = new InvocationRecordMetadataSupport(repository, idempotencyService);
+        this.batchItems = new InvocationBatchItemPersistenceSupport(repository, parameterSanitizer, metadata);
     }
 
     @Transactional(readOnly = true)
@@ -52,7 +46,7 @@ public class InvocationRecordService {
             UUID credentialId,
             String idempotencyKey
     ) {
-        return findLiveRootRecord(templateId, credentialId, idempotencyKey)
+        return metadata.findLiveRootRecord(templateId, credentialId, idempotencyKey)
                 .map(ApiInvocationRecordEntity::getInvocationExternalId);
     }
 
@@ -73,7 +67,7 @@ public class InvocationRecordService {
     ) {
         Instant now = Instant.now();
         boolean hasArtifact = documentId != null && !documentId.isBlank();
-        UUID idempotencyRecordId = resolveIdempotencyRecordId(request.idempotencyKey(), template.getId());
+        UUID idempotencyRecordId = metadata.resolveIdempotencyRecordId(request.idempotencyKey(), template.getId());
         String resolvedArtifactStorageKey = artifactStorageKey;
         if (resolvedArtifactStorageKey == null && hasArtifact) {
             resolvedArtifactStorageKey = idempotencyService.findLiveRecord(request.idempotencyKey(), template.getId())
@@ -83,9 +77,9 @@ public class InvocationRecordService {
         boolean artifactSaved = policy.isSaveGeneratedDocuments() && hasArtifact;
         ApiInvocationRecordEntity entity = new ApiInvocationRecordEntity(
                 UUID.randomUUID(),
-                newInvocationExternalId(),
+                metadata.newInvocationExternalId(),
                 InvocationKind.SINGLE,
-                mapOutcomeToStatus(outcome),
+                InvocationStatusMappingSupport.mapOutcomeToStatus(outcome),
                 environment,
                 template.getId(),
                 template.getExternalId(),
@@ -104,8 +98,8 @@ public class InvocationRecordService {
                 documentId,
                 artifactSaved ? resolvedArtifactStorageKey : null,
                 artifactSaved,
-                recordExpiresAt(policy, now),
-                documentExpiresAt(policy, artifactSaved, now),
+                metadata.recordExpiresAt(policy, now),
+                metadata.documentExpiresAt(policy, artifactSaved, now),
                 null,
                 null,
                 null,
@@ -135,9 +129,9 @@ public class InvocationRecordService {
             String auditId
     ) {
         Instant now = Instant.now();
-        UUID idempotencyRecordId = resolveIdempotencyRecordId(request.idempotencyKey(), template.getId());
-        String rootInvocationId = newInvocationExternalId();
-        InvocationStatus rootStatus = mapBatchRootStatus(batchResult);
+        UUID idempotencyRecordId = metadata.resolveIdempotencyRecordId(request.idempotencyKey(), template.getId());
+        String rootInvocationId = metadata.newInvocationExternalId();
+        InvocationStatus rootStatus = InvocationStatusMappingSupport.mapBatchRootStatus(batchResult);
         ApiInvocationRecordEntity root = new ApiInvocationRecordEntity(
                 UUID.randomUUID(),
                 rootInvocationId,
@@ -161,7 +155,7 @@ public class InvocationRecordService {
                 null,
                 null,
                 false,
-                recordExpiresAt(policy, now),
+                metadata.recordExpiresAt(policy, now),
                 null,
                 batchResult.batchId(),
                 null,
@@ -174,7 +168,7 @@ public class InvocationRecordService {
                 now
         );
         repository.save(root);
-        persistBatchItems(
+        batchItems.persistBatchItems(
                 template,
                 policy,
                 session.credentialId(),
@@ -210,10 +204,10 @@ public class InvocationRecordService {
             String auditId
     ) {
         Instant now = Instant.now();
-        UUID idempotencyRecordId = resolveIdempotencyRecordId(request.idempotencyKey(), template.getId());
+        UUID idempotencyRecordId = metadata.resolveIdempotencyRecordId(request.idempotencyKey(), template.getId());
         ApiInvocationRecordEntity entity = new ApiInvocationRecordEntity(
                 UUID.randomUUID(),
-                newInvocationExternalId(),
+                metadata.newInvocationExternalId(),
                 InvocationKind.ASYNC_TASK,
                 InvocationStatus.ACCEPTED,
                 environment,
@@ -234,7 +228,7 @@ public class InvocationRecordService {
                 null,
                 null,
                 false,
-                recordExpiresAt(policy, now),
+                metadata.recordExpiresAt(policy, now),
                 null,
                 batchExternalId,
                 null,
@@ -271,9 +265,9 @@ public class InvocationRecordService {
             return;
         }
         ApiInvocationRecordEntity record = asyncRecord.get();
-        record.updateTerminalStatus(mapTaskStatus(taskStatus), outcome, now);
+        record.updateTerminalStatus(InvocationStatusMappingSupport.mapTaskStatus(taskStatus), outcome, now);
         repository.save(record);
-        persistBatchItemsFromRecord(
+        batchItems.persistBatchItemsFromRecord(
                 template,
                 policy,
                 record,
@@ -289,180 +283,5 @@ public class InvocationRecordService {
                 auditId,
                 now
         );
-    }
-
-    private void persistBatchItemsFromRecord(
-            TemplateEntity template,
-            ApiPolicyEntity policy,
-            ApiInvocationRecordEntity parentRecord,
-            String environment,
-            String routeType,
-            String requestedReleaseVersion,
-            String resolvedReleaseVersion,
-            BatchGenerateRequestBody request,
-            BatchResultView batchResult,
-            String parentInvocationExternalId,
-            String batchExternalId,
-            String taskExternalId,
-            String auditId,
-            Instant now
-    ) {
-        persistBatchItems(
-                template,
-                policy,
-                parentRecord.getCredentialId(),
-                parentRecord.getAccessAccount(),
-                environment,
-                routeType,
-                requestedReleaseVersion,
-                resolvedReleaseVersion,
-                request,
-                batchResult,
-                parentInvocationExternalId,
-                batchExternalId,
-                taskExternalId,
-                parentRecord.getIdempotencyRecordId(),
-                auditId,
-                now
-        );
-    }
-
-    private void persistBatchItems(
-            TemplateEntity template,
-            ApiPolicyEntity policy,
-            UUID credentialId,
-            String accessAccount,
-            String environment,
-            String routeType,
-            String requestedReleaseVersion,
-            String resolvedReleaseVersion,
-            BatchGenerateRequestBody request,
-            BatchResultView batchResult,
-            String parentInvocationExternalId,
-            String batchExternalId,
-            String taskExternalId,
-            UUID idempotencyRecordId,
-            String auditId,
-            Instant now
-    ) {
-        for (BatchResultItemView item : batchResult.items()) {
-            BatchGenerateRequestBody.BatchGenerateItemBody itemBody = request.items().stream()
-                    .filter(candidate -> candidate.itemId().equals(item.itemId()))
-                    .findFirst()
-                    .orElseThrow();
-            boolean hasArtifact = item.documentId() != null && !item.documentId().isBlank();
-            boolean artifactSaved = policy.isSaveGeneratedDocuments() && hasArtifact;
-            ApiInvocationRecordEntity itemRecord = new ApiInvocationRecordEntity(
-                    UUID.randomUUID(),
-                    newInvocationExternalId(),
-                    InvocationKind.BATCH_ITEM,
-                    mapItemStatus(item.status()),
-                    environment,
-                    template.getId(),
-                    template.getExternalId(),
-                    credentialId,
-                    accessAccount,
-                    request.requestId(),
-                    request.idempotencyKey(),
-                    routeType,
-                    requestedReleaseVersion,
-                    resolvedReleaseVersion,
-                    item.output().format(),
-                    item.output().mode(),
-                    item.status(),
-                    null,
-                    parameterSanitizer.sanitizeBatchItem(itemBody, request, resolvedReleaseVersion),
-                    item.documentId(),
-                    null,
-                    artifactSaved,
-                    recordExpiresAt(policy, now),
-                    documentExpiresAt(policy, artifactSaved, now),
-                    batchExternalId,
-                    parentInvocationExternalId,
-                    item.itemId(),
-                    taskExternalId,
-                    idempotencyRecordId,
-                    auditId,
-                    true,
-                    now,
-                    now
-            );
-            repository.save(itemRecord);
-        }
-    }
-
-    private Optional<ApiInvocationRecordEntity> findLiveRootRecord(
-            UUID templateId,
-            UUID credentialId,
-            String idempotencyKey
-    ) {
-        return repository.findFirstByIdempotencyKeyAndTemplateIdAndCredentialIdAndInvocationKindInAndRecordExpiresAtAfterOrderByCreatedAtDesc(
-                idempotencyKey,
-                templateId,
-                credentialId,
-                ROOT_INVOCATION_KINDS,
-                Instant.now()
-        );
-    }
-
-    private UUID resolveIdempotencyRecordId(String idempotencyKey, UUID templateId) {
-        return idempotencyService.findLiveRecord(idempotencyKey, templateId)
-                .map(GenerationIdempotencyEntity::getId)
-                .orElse(null);
-    }
-
-    private Instant recordExpiresAt(ApiPolicyEntity policy, Instant now) {
-        return now.plus(policy.getInvocationRecordRetentionDays(), ChronoUnit.DAYS);
-    }
-
-    private Instant documentExpiresAt(ApiPolicyEntity policy, boolean artifactSaved, Instant now) {
-        if (!artifactSaved) {
-            return null;
-        }
-        return now.plus(policy.getDocumentRetentionDays(), ChronoUnit.DAYS);
-    }
-
-    private String newInvocationExternalId() {
-        return "INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
-    }
-
-    private InvocationStatus mapOutcomeToStatus(String outcome) {
-        if (RuntimeGenerationAuditRecorder.OUTCOME_FAILURE.equals(outcome)) {
-            return InvocationStatus.FAILED;
-        }
-        return InvocationStatus.SUCCEEDED;
-    }
-
-    private InvocationStatus mapItemStatus(String itemStatus) {
-        if ("FAILED".equalsIgnoreCase(itemStatus)) {
-            return InvocationStatus.FAILED;
-        }
-        return InvocationStatus.SUCCEEDED;
-    }
-
-    private InvocationStatus mapBatchRootStatus(BatchResultView batchResult) {
-        boolean anyFailed = batchResult.items().stream()
-                .anyMatch(item -> "FAILED".equalsIgnoreCase(item.status()));
-        boolean anySucceeded = batchResult.items().stream()
-                .anyMatch(item -> "SUCCEEDED".equalsIgnoreCase(item.status()));
-        if (anyFailed && anySucceeded) {
-            return InvocationStatus.PARTIAL_SUCCEEDED;
-        }
-        if (anyFailed) {
-            return InvocationStatus.FAILED;
-        }
-        return InvocationStatus.SUCCEEDED;
-    }
-
-    private InvocationStatus mapTaskStatus(TaskStatus taskStatus) {
-        return switch (taskStatus) {
-            case ACCEPTED -> InvocationStatus.ACCEPTED;
-            case PROCESSING -> InvocationStatus.PROCESSING;
-            case SUCCEEDED -> InvocationStatus.SUCCEEDED;
-            case FAILED -> InvocationStatus.FAILED;
-            case PARTIAL_SUCCEEDED -> InvocationStatus.PARTIAL_SUCCEEDED;
-            case EXPIRED -> InvocationStatus.EXPIRED;
-            case CANCELLED -> InvocationStatus.CANCELLED;
-        };
     }
 }
