@@ -1,6 +1,5 @@
 package com.bank.docgen.template.service;
 
-import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
 import com.bank.docgen.template.port.PreviewEvidencePort;
@@ -9,22 +8,16 @@ import com.bank.docgen.template.api.BindingValidationView;
 import com.bank.docgen.template.api.ChangeDiffView;
 import com.bank.docgen.template.api.CoverageSummaryView;
 import com.bank.docgen.template.api.PublishGateChecklistView;
-import com.bank.docgen.template.api.PublishGateItemView;
 import com.bank.docgen.template.api.TemplateRuleValidationItemRequest;
 import com.bank.docgen.template.api.TemplateRuleValidationRequest;
 import com.bank.docgen.template.api.TemplateRuleValidationView;
-import com.bank.docgen.template.domain.LifecycleAction;
-import com.bank.docgen.template.domain.LifecycleDecision;
-import com.bank.docgen.template.domain.PublishGateCheckCode;
 import com.bank.docgen.template.domain.PublishGatePhase;
-import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -35,18 +28,11 @@ public class PublishGateService {
 
     private final TemplateService templateService;
     private final TemplateVersionRepository templateVersionRepository;
-    private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
-    private final ApiPolicyRepository apiPolicyRepository;
-    private final PreviewEvidencePort previewEvidencePort;
     private final CoverageComputationService coverageComputationService;
     private final ChangeDiffService changeDiffService;
     private final TemplateRuleValidationService templateRuleValidationService;
-    private final VariableSchemaRepository variableSchemaRepository;
-    private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final TemplateCurrentVersionResolver templateVersionSupport;
-    private final AnchorBindingRepository anchorBindingRepository;
-    private final NodeMatrixValidationService nodeMatrixValidationService;
-    private final ObjectMapper objectMapper;
+    private final PublishGateChecklistSupport checklist;
 
     public PublishGateService(
             TemplateService templateService,
@@ -66,18 +52,21 @@ public class PublishGateService {
     ) {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
-        this.lifecycleRecordRepository = lifecycleRecordRepository;
-        this.apiPolicyRepository = apiPolicyRepository;
-        this.previewEvidencePort = previewEvidencePort;
         this.coverageComputationService = coverageComputationService;
         this.changeDiffService = changeDiffService;
         this.templateRuleValidationService = templateRuleValidationService;
-        this.variableSchemaRepository = variableSchemaRepository;
-        this.contentModuleReferenceService = contentModuleReferenceService;
         this.templateVersionSupport = templateVersionSupport;
-        this.anchorBindingRepository = anchorBindingRepository;
-        this.nodeMatrixValidationService = nodeMatrixValidationService;
-        this.objectMapper = objectMapper;
+        PublishGateCheckItemSupport checkItems = new PublishGateCheckItemSupport(
+                lifecycleRecordRepository,
+                apiPolicyRepository,
+                previewEvidencePort,
+                variableSchemaRepository,
+                contentModuleReferenceService,
+                anchorBindingRepository,
+                nodeMatrixValidationService,
+                objectMapper
+        );
+        this.checklist = new PublishGateChecklistSupport(checkItems);
     }
 
     @Transactional(readOnly = true)
@@ -97,7 +86,7 @@ public class PublishGateService {
         CoverageSummaryView coverage = coverageComputationService.compute(templateId, session);
         ChangeDiffView changeDiff = changeDiffService.compute(templateId, session);
         TemplateRuleValidationView ruleValidation = validateCurrentRules(templateId, version, session);
-        return buildChecklist(templateId, version, phase, bindings, coverage, changeDiff, ruleValidation);
+        return checklist.buildChecklist(templateId, version, phase, bindings, coverage, changeDiff, ruleValidation);
     }
 
     /**
@@ -121,7 +110,7 @@ public class PublishGateService {
         CoverageSummaryView coverage = coverageComputationService.computeForVersion(templateId, version, session);
         ChangeDiffView changeDiff = changeDiffService.computeForVersion(templateId, version, session);
         TemplateRuleValidationView ruleValidation = validateRulesForVersion(templateId, version, session);
-        return buildChecklist(
+        return checklist.buildChecklist(
                 templateId,
                 version,
                 PublishGatePhase.PUBLISH,
@@ -132,36 +121,6 @@ public class PublishGateService {
         );
     }
 
-    private PublishGateChecklistView buildChecklist(
-            UUID templateId,
-            TemplateVersionEntity version,
-            PublishGatePhase phase,
-            BindingValidationView bindings,
-            CoverageSummaryView coverage,
-            ChangeDiffView changeDiff,
-            TemplateRuleValidationView ruleValidation
-    ) {
-        List<PublishGateItemView> items = new ArrayList<>();
-        items.add(anchorIntegrityItem(bindings));
-        items.add(variableSchemaItem(version.getId()));
-        items.add(ruleBoundsItem(ruleValidation));
-        items.add(testResultsItem(templateId));
-        items.add(previewPresentItem(templateId, version.getId()));
-        items.add(changeDiffItem(changeDiff));
-        items.add(approvalSummaryItem(templateId));
-        items.add(coverageThresholdsItem(coverage));
-        items.add(apiPolicyItem(templateId));
-        items.add(contentModuleReferencesItem(version.getId()));
-        items.add(unsupportedStructuredNodesItem(version.getId()));
-        items.add(pasteCleaningBlockersItem(version.getId()));
-        items.add(blockerStatusItem(templateId, version.getId(), bindings, coverage));
-
-        List<PublishGateItemView> phaseItems = filterForPhase(items, phase);
-        int blockerCount = (int) phaseItems.stream().filter(PublishGateItemView::blocker).count();
-        boolean ready = blockerCount == 0;
-        return new PublishGateChecklistView(templateId.toString(), ready, blockerCount, phaseItems);
-    }
-
     @Transactional(readOnly = true)
     public void assertReady(UUID templateId, ManagementSessionClaims session) {
         assertReady(templateId, session, PublishGatePhase.PUBLISH);
@@ -169,8 +128,8 @@ public class PublishGateService {
 
     @Transactional(readOnly = true)
     public void assertReady(UUID templateId, ManagementSessionClaims session, PublishGatePhase phase) {
-        PublishGateChecklistView checklist = evaluate(templateId, session, phase);
-        if (!checklist.ready()) {
+        PublishGateChecklistView gateChecklist = evaluate(templateId, session, phase);
+        if (!gateChecklist.ready()) {
             String messageKey = phase == PublishGatePhase.SUBMIT_FOR_APPROVAL
                     ? "api.error.template.submitForApprovalGateBlocked"
                     : "api.error.template.publishGateBlocked";
@@ -181,213 +140,6 @@ public class PublishGateService {
     @Transactional(readOnly = true)
     public void assertReadyForSubmitForApproval(UUID templateId, ManagementSessionClaims session) {
         assertReady(templateId, session, PublishGatePhase.SUBMIT_FOR_APPROVAL);
-    }
-
-    private List<PublishGateItemView> filterForPhase(List<PublishGateItemView> items, PublishGatePhase phase) {
-        if (phase == PublishGatePhase.PUBLISH) {
-            return items;
-        }
-        return items.stream()
-                .filter(item -> item.checkCode() != PublishGateCheckCode.APPROVAL_SUMMARY
-                        && item.checkCode() != PublishGateCheckCode.API_POLICY)
-                .toList();
-    }
-
-    private PublishGateItemView anchorIntegrityItem(BindingValidationView bindings) {
-        boolean blocking = bindings.summary().blocking();
-        return new PublishGateItemView(
-                PublishGateCheckCode.ANCHOR_INTEGRITY,
-                !blocking,
-                blocking,
-                blocking ? "api.publishGate.anchorIntegrity.blocked" : "api.publishGate.anchorIntegrity.ready",
-                "blocking=" + bindings.summary().blocking()
-        );
-    }
-
-    private PublishGateItemView variableSchemaItem(UUID versionId) {
-        int variableCount = variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId).size();
-        boolean ready = variableCount > 0;
-        return new PublishGateItemView(
-                PublishGateCheckCode.VARIABLE_SCHEMA,
-                ready,
-                !ready,
-                ready ? "api.publishGate.variableSchema.ready" : "api.publishGate.variableSchema.missing",
-                "variableCount=" + variableCount
-        );
-    }
-
-    private PublishGateItemView ruleBoundsItem(TemplateRuleValidationView ruleValidation) {
-        boolean blocking = ruleValidation.summary().blocking();
-        return new PublishGateItemView(
-                PublishGateCheckCode.RULE_BOUNDS,
-                !blocking,
-                blocking,
-                blocking ? "api.publishGate.ruleBounds.blocked" : "api.publishGate.ruleBounds.ready",
-                "invalidRules=" + (ruleValidation.summary().totalRules() - ruleValidation.summary().validCount())
-        );
-    }
-
-    private PublishGateItemView testResultsItem(UUID templateId) {
-        var latest = previewEvidencePort.latestBatchTestRun(templateId);
-        boolean hasRun = latest.isPresent();
-        int blockerCount = latest.map(snapshot -> snapshot.blockerCount()).orElse(0);
-        boolean blocking = !hasRun || blockerCount > 0;
-        return new PublishGateItemView(
-                PublishGateCheckCode.TEST_RESULTS,
-                hasRun && blockerCount == 0,
-                blocking,
-                hasRun ? "api.publishGate.testResults.ready" : "api.publishGate.testResults.missing",
-                hasRun ? "blockerCount=" + blockerCount : "noBatchRun"
-        );
-    }
-
-    private PublishGateItemView previewPresentItem(UUID templateId, UUID versionId) {
-        int previewCount = previewEvidencePort.countSuccessfulPreviews(templateId, versionId);
-        boolean ready = previewCount > 0;
-        return new PublishGateItemView(
-                PublishGateCheckCode.PREVIEW_PRESENT,
-                ready,
-                !ready,
-                ready ? "api.publishGate.previewPresent.ready" : "api.publishGate.previewPresent.missing",
-                "successfulPreviews=" + previewCount
-        );
-    }
-
-    private PublishGateItemView changeDiffItem(ChangeDiffView changeDiff) {
-        return new PublishGateItemView(
-                PublishGateCheckCode.CHANGE_DIFF,
-                true,
-                false,
-                "api.publishGate.changeDiff.ready",
-                "changeCount=" + changeDiff.totalChangeCount()
-        );
-    }
-
-    private PublishGateItemView approvalSummaryItem(UUID templateId) {
-        boolean approved = lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(templateId).stream()
-                .anyMatch(record -> record.getAction() == LifecycleAction.RECORD_APPROVAL_DECISION
-                        && record.getDecision() == LifecycleDecision.APPROVED);
-        return new PublishGateItemView(
-                PublishGateCheckCode.APPROVAL_SUMMARY,
-                approved,
-                !approved,
-                approved ? "api.publishGate.approvalSummary.ready" : "api.publishGate.approvalSummary.missing",
-                approved ? "approved=true" : "approved=false"
-        );
-    }
-
-    private PublishGateItemView coverageThresholdsItem(CoverageSummaryView coverage) {
-        boolean blocking = coverage.belowThreshold();
-        return new PublishGateItemView(
-                PublishGateCheckCode.COVERAGE_THRESHOLDS,
-                !blocking,
-                blocking,
-                blocking ? "api.publishGate.coverageThresholds.blocked" : "api.publishGate.coverageThresholds.ready",
-                "aggregatePct=" + coverage.aggregatePercentage()
-        );
-    }
-
-    private PublishGateItemView apiPolicyItem(UUID templateId) {
-        return apiPolicyRepository.findByTemplateId(templateId)
-                .map(this::callableReadyApiPolicyItem)
-                .orElseGet(() -> new PublishGateItemView(
-                        PublishGateCheckCode.API_POLICY,
-                        false,
-                        true,
-                        "api.error.runtime.policyNotConfigured",
-                        "skeletonPresent=false"
-                ));
-    }
-
-    private PublishGateItemView callableReadyApiPolicyItem(ApiPolicyEntity policy) {
-        // Skeleton presence is sufficient for publish; empty AD groups do not block (runtime fail-closed).
-        return new PublishGateItemView(
-                PublishGateCheckCode.API_POLICY,
-                true,
-                false,
-                "api.publishGate.apiPolicy.ready",
-                "skeletonPresent=true,adGroupsConfigured=" + hasConfiguredAdGroups(policy)
-        );
-    }
-
-    private boolean hasConfiguredAdGroups(ApiPolicyEntity policy) {
-        String json = policy.getAllowedAdGroupsJson();
-        return json != null && !json.isBlank() && !"[]".equals(json.trim());
-    }
-
-    private PublishGateItemView contentModuleReferencesItem(UUID versionId) {
-        var validation = contentModuleReferenceService.validateReferences(versionId);
-        boolean blocking = validation.blocking();
-        return new PublishGateItemView(
-                PublishGateCheckCode.CONTENT_MODULE_REFERENCES,
-                !blocking,
-                blocking,
-                blocking
-                        ? "api.publishGate.contentModuleReferences.blocked"
-                        : "api.publishGate.contentModuleReferences.ready",
-                "invalidReferences=" + validation.invalidReferences()
-                        + ",totalReferences=" + validation.totalReferences()
-        );
-    }
-
-    private PublishGateItemView unsupportedStructuredNodesItem(UUID versionId) {
-        int unsupportedNodeCount = 0;
-        for (AnchorBindingEntity binding : anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)) {
-            unsupportedNodeCount += nodeMatrixValidationService.countUnsupportedNodeBlockers(
-                    binding.getStructuredContentJson()
-            );
-        }
-        boolean blocking = unsupportedNodeCount > 0;
-        return new PublishGateItemView(
-                PublishGateCheckCode.UNSUPPORTED_STRUCTURED_NODES,
-                !blocking,
-                blocking,
-                blocking
-                        ? "api.publishGate.unsupportedStructuredNodes.blocked"
-                        : "api.publishGate.unsupportedStructuredNodes.ready",
-                "unsupportedNodeCount=" + unsupportedNodeCount
-        );
-    }
-
-    private PublishGateItemView pasteCleaningBlockersItem(UUID versionId) {
-        int unresolvedBindingCount = 0;
-        for (AnchorBindingEntity binding : anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)) {
-            if (PasteCleaningEvidenceSupport.hasUnresolvedPasteBlockers(
-                    binding.getPasteCleaningEvidenceJson(),
-                    objectMapper
-            )) {
-                unresolvedBindingCount++;
-            }
-        }
-        boolean blocking = unresolvedBindingCount > 0;
-        return new PublishGateItemView(
-                PublishGateCheckCode.PASTE_CLEANING_BLOCKERS,
-                !blocking,
-                blocking,
-                blocking
-                        ? "api.publishGate.pasteCleaningBlockers.blocked"
-                        : "api.publishGate.pasteCleaningBlockers.ready",
-                "unresolvedPasteBindings=" + unresolvedBindingCount
-        );
-    }
-
-    private PublishGateItemView blockerStatusItem(
-            UUID templateId,
-            UUID versionId,
-            BindingValidationView bindings,
-            CoverageSummaryView coverage
-    ) {
-        int previewBlockers = previewEvidencePort.countFailedPreviews(templateId, versionId);
-        boolean blocking = bindings.summary().blocking()
-                || coverage.belowThreshold()
-                || previewBlockers > 0;
-        return new PublishGateItemView(
-                PublishGateCheckCode.BLOCKER_STATUS,
-                !blocking,
-                blocking,
-                blocking ? "api.publishGate.blockerStatus.blocked" : "api.publishGate.blockerStatus.ready",
-                "previewFailures=" + previewBlockers
-        );
     }
 
     private TemplateRuleValidationView validateCurrentRules(
