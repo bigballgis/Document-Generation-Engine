@@ -40,7 +40,7 @@ Prerequisite-wave summary supporting the ops **[launch-readiness-checklist.md](.
 - [x] LR-B6: sliding session renewal + revocation fail-closed; Playwright Part A/B green — **Done** 2026-07-04.
 - [x] LR-B8: prod compose `/healthz` healthcheck + mem/cpu limits — **Done** 2026-07-04 (see [launch-readiness-checklist.md](../operations/launch-readiness-checklist.md) row #7).
 
-> Prefer [launch-readiness-checklist.md](../operations/launch-readiness-checklist.md) for overall **NO-GO** / blockers (`JWT_SECRET`, Kafka registry, open seams, ADR-0042/0043).
+> Prefer [launch-readiness-checklist.md](../operations/launch-readiness-checklist.md) for overall **NO-GO** / blockers (Kafka registry, open seams, ADR-0042/0043; **#9 JWT_SECRET cleared GO** merge `587cd9a`).
 
 ### Usability
 
