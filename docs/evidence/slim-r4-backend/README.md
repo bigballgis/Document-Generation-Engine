@@ -14,9 +14,11 @@ Date: 2026-07-13
 
 | File | Before | After | Delta |
 |------|-------:|------:|------:|
-| `TemplateService.java` | 431 | 341 | −90 |
-| `ContractAssemblyService.java` | 211 | 59 | −152 |
-| `RuntimeGenerationAuditRecorder.java` | 426 | 260 | −166 |
+| `TemplateService.java` | 466 | 341 | −125 |
+| `ContractAssemblyService.java` | 451 | 59 | −392 |
+| `RuntimeGenerationAuditRecorder.java` | 446 | 260 | −186 |
+
+(ContractAssembly before includes sparse blank-line formatting already present on tree; logical content shrink is ~211→59.)
 
 ## Extracted collaborators (new)
 
@@ -35,5 +37,5 @@ Date: 2026-07-13
 
 ## Verify
 
-- Targeted: `ContractAssemblyService*Test` + `RuntimeGenerationAuditRecorderTest` + `ModuleBoundaryArchTest` — GREEN (19 tests)
-- Full: `mvn -B -ntp -f backend/pom.xml verify` — see commit message / CI for final counts
+- Targeted: `ContractAssemblyService*Test` + `RuntimeGenerationAuditRecorderTest` + `TemplateServiceCatalog*` + `ModuleBoundaryArchTest` — GREEN (26 tests)
+- Full: `mvn -B -ntp -f backend/pom.xml verify` — **BUILD SUCCESS** (Tests run: 1347, Failures: 0, Errors: 0, Skipped: 7; PMD/SpotBugs clean)
