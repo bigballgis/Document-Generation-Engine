@@ -41,12 +41,14 @@ Scope: behavior-preserving CQ-05 fixture / assertion helper extraction; no produ
 
 | Gate | Result |
 | --- | --- |
-| `mvn -B -ntp -f backend/pom.xml verify` | GREEN (see `gate-backend-verify.txt`) |
+| `mvn -B -ntp -f backend/pom.xml verify` | GREEN (1347 tests, 7 skipped) |
 | Targeted template web tests | GREEN — 41 tests (`TemplatePlatformSliceTest` 32 + `TemplateVersionLineControllerTest` 9) |
-| `pnpm -C frontend lint` | GREEN (`gate-lint.txt`) |
-| `pnpm -C frontend type-check` | GREEN (`gate-type-check.txt`) |
-| `pnpm -C frontend test` | GREEN — 191 files / 1159 tests (`gate-test.txt`) |
-| `pnpm -C frontend build` | GREEN (`gate-build.txt`) |
+| `pnpm -C frontend lint` | GREEN |
+| `pnpm -C frontend type-check` | GREEN |
+| `pnpm -C frontend test` | GREEN — 191 files / 1159 tests |
+| `pnpm -C frontend build` | GREEN |
+
+Full Maven/Vitest console dumps are intentionally **not** retained in git (noise); gate outcomes recorded here only.
 
 ## Residuals
 

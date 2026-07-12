@@ -192,6 +192,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Slim Wave 1b unused exports](./evidence/slim-hygiene/README.md) | Knip unused exports **93→0**; duplicate exports **1→0**; 22 OpenAPI/contract types retained (merge `b7cbc07`) |
 | [Slim Wave 2 backend god-class](./evidence/slim-backend/README.md) | AuditRecorder/AuditQuery/VersionLine/Master extracts; `mvn verify` GREEN (merge `6dd76b3`) |
 | [Slim Wave 3 frontend SFC](./evidence/slim-frontend/README.md) | BindingsPanel 1249→170 orchestrator; ManagementShell 671→311 (merge `2cf7cb9`) |
+| [Slim Wave 4 test DRY](./evidence/slim-tests/README.md) | Platform/VersionLine/Dashboard fixtures DRY; net **−1033** LOC; gates GREEN (merge `b7e279e`) |
 | [Demo typography review checklist](./evidence/demo-typography-review-checklist.md) | Human reviewer checklist — fonts, styles, margins, headers/footers, tables, signatures (**P23-T16**; ≥2 CORP + ≥2 RETAIL mandatory samples) |
 | [Fundraising demo summary](./evidence/fundraising-demo-summary.md) | 13-template evidence matrix — generate script, E2E, POI tests, manifest paths (**P23-T16**) |
 | [Security evidence index](./evidence/security/README.md) | SCA runbook and execution logs |
