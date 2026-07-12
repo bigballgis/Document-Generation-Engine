@@ -181,12 +181,14 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[Kafka image — company registry / fail-closed KAFKA_IMAGE](./behavior/ops-kafka-company-registry.md)** | **ready** (2026-07-12) · slice **Done** (`e54d03c`; Task Master **#45**) | **BDD-OPS-KAFKA-REGISTRY-001** — checklist **#10 → CONDITIONAL** (fail-closed `${KAFKA_IMAGE:?…}`; Hub example LOCAL/DEV ONLY; operator must supply company-approved coords — **do not** invent registry hostname; not GO without company pull evidence); overall checklist still **NO-GO**; **not** go-live |
 | **[AD Group resolver — prod refuse config stub](./behavior/ops-ad-group-stub-close.md)** | **ready** (2026-07-12) · slice **Done** (`4e51a1b`; Task Master **#46**) | **BDD-OPS-AD-GROUP-STUB-001** S1–S4 — checklist **#5a → CONDITIONAL** (honest-bound config stub + fail-closed prod; LAB ONLY ≠ production AD; real LDAP/AD + company directory evidence still missing — **not GO**); **[ADR-0054 Accepted](./adr/authorization-security/0054-ad-group-resolver-production-boundary.md)**; company LDAP/AD **UNKNOWN**; overall checklist still **NO-GO**; **not** go-live |
 | **[Paste cleaning ↔ binding / publish fail-closed](./behavior/ops-paste-binding-seam.md)** | **ready** (2026-07-12) · slice **Done** (`f1f00da`; Task Master **#47**) | **BDD-OPS-PASTE-BINDING-001** S1–S6 — checklist **#5b → GO** (wire path; ADR-0019 SoT: object + absolute → BLOCKED; residue on Accept; `computeBindingStatus` + PublishGate fail-closed; **CD-HARD-T05 Done**; **no** edit-time-only ADR escape); LR-A4 orthogonal; overall checklist still **NO-GO** (#3b); **not** go-live |
+| **[Knip dead-code scan tooling](./behavior/slim-knip-scan.md)** | **not-applicable** (2026-07-12) | Frontend Knip ^6.26 + evidence under [evidence/slim-knip-scan](./evidence/slim-knip-scan/README.md); optional Wave-1 orphan-file delete gated by frontend regression only — **no** product actor journey; Task Master **#48** (`in-progress`); **not** go-live |
 
 ## Evidence & acceptance artifacts
 
 | Document | Purpose |
 | --- | --- |
 | [LR-A7 pagination measurement](./evidence/lrp-a7-pagination/README.md) | Docker PDF page-count corpus (2026-07-10 / merge `abf2048`); Word baseline n/a on host; slim JSON + README (PDFs untracked under `.tmp/`) |
+| [Knip dead-code scan](./evidence/slim-knip-scan/README.md) | Frontend Knip 6.26 baseline (2026-07-12) — unused files/exports/deps; `pnpm -C frontend knip` / `.\scripts\knip-scan.ps1` |
 | [Demo typography review checklist](./evidence/demo-typography-review-checklist.md) | Human reviewer checklist — fonts, styles, margins, headers/footers, tables, signatures (**P23-T16**; ≥2 CORP + ≥2 RETAIL mandatory samples) |
 | [Fundraising demo summary](./evidence/fundraising-demo-summary.md) | 13-template evidence matrix — generate script, E2E, POI tests, manifest paths (**P23-T16**) |
 | [Security evidence index](./evidence/security/README.md) | SCA runbook and execution logs |

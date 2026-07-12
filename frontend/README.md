@@ -9,9 +9,14 @@ pnpm install
 pnpm dev
 pnpm lint
 pnpm type-check
+pnpm knip          # unused files / exports / deps (Knip)
+pnpm knip:prod     # production-entry scan only
 pnpm test
 pnpm build
 ```
+
+Dead-code scan evidence: [`docs/evidence/slim-knip-scan/`](../docs/evidence/slim-knip-scan/README.md).
+Repo helper: `.\scripts\knip-scan.ps1`.
 
 ## P0 scope
 
