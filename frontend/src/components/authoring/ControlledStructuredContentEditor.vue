@@ -1,51 +1,15 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
-import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import PasteCleaningSummaryDialog from '@/components/authoring/PasteCleaningSummaryDialog.vue'
+import StructuredContentBlockCard from '@/components/authoring/StructuredContentBlockCard.vue'
+import StructuredContentEditorToolbar from '@/components/authoring/StructuredContentEditorToolbar.vue'
 import StructuredDraftRecoveryBanner from '@/components/authoring/StructuredDraftRecoveryBanner.vue'
-import { useStructuredContentHistory } from '@/composables/useStructuredContentHistory'
-import { useStructuredContentLocalDraft } from '@/composables/useStructuredContentLocalDraft'
-import { useSessionStore } from '@/stores/session'
-import { useTemplatesStore } from '@/stores/templates'
-import type {
-  MasterStyleCatalog,
-  PasteCleaningEvidence,
-  PasteCleaningSummary,
-  VariableSchema,
-} from '@/types/template'
-import { buildAcceptedPasteCleaningEvidence } from '@/utils/pasteCleaningEvidence'
-import { buildVariableOptionLabel } from '@/utils/variableDisplayName'
 import {
-  DEFAULT_STRUCTURED_CONTENT_JSON,
-  applyStyleToParagraphs,
-  createNodeTemplate,
-  insertBlockNode,
-  parseStructuredContent,
-  serializeStructuredContent,
-  type ConfirmedNodeType,
-  type StructuredContentDocument,
-  type StructuredContentNode,
-} from '@/utils/structuredContentNodes'
-import type { StructuredContentDraftPayload } from '@/utils/structuredContentDraftStorage'
+  useControlledStructuredContentEditor,
+  type ControlledStructuredContentEditorProps,
+} from '@/composables/useControlledStructuredContentEditor'
+import type { PasteCleaningEvidence } from '@/types/template'
 
-const props = defineProps<{
-  modelValue: string
-  templateId?: string
-  /** Dev-version scope for local draft keys (LR-C2). When absent, drafts are disabled. */
-  devVersionId?: string
-  /** Optional binding anchor for draft recovery disambiguation. */
-  anchorId?: string
-  /** Optional server revision timestamp shown on the recovery banner. */
-  serverUpdatedAt?: string | null
-  variableKeys?: string[]
-  variables?: VariableSchema[]
-  contentModuleReferenceKeys?: string[]
-  readonly?: boolean
-  /** Saved baseline JSON; when omitted, initial modelValue is the baseline. */
-  baseline?: string
-}>()
+const props = defineProps<ControlledStructuredContentEditorProps>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
@@ -55,465 +19,46 @@ const emit = defineEmits<{
   'paste-accepted': [evidence: PasteCleaningEvidence]
 }>()
 
-const pristineBaseline = ref(props.baseline ?? (props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON))
-
-const { t, te } = useI18n()
-const sessionStore = useSessionStore()
-const templatesStore = useTemplatesStore()
-
-const draftUserId = computed(() => sessionStore.session?.username ?? null)
-const draftTemplateId = computed(() => props.templateId ?? null)
-const draftDevVersionId = computed(() => props.devVersionId ?? null)
-const isReadonly = computed(() => props.readonly === true)
-
-const localDraft = useStructuredContentLocalDraft({
-  userId: draftUserId,
-  templateId: draftTemplateId,
-  devVersionId: draftDevVersionId,
-  readonly: isReadonly,
-})
-
-/** Structure-level undo/redo — session memory only; never written to C2 drafts (C3-C7). */
-const history = useStructuredContentHistory()
-const canUndo = history.canUndo
-const canRedo = history.canRedo
-let lastCommittedSnapshot = props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON
-let pendingCoalesceKey: string | null = null
-let syncingFromProps = false
-
-const recoveryDraft = ref<StructuredContentDraftPayload | null>(null)
-
-function evaluateDraftRecovery() {
-  if (isReadonly.value) {
-    recoveryDraft.value = null
-    return
-  }
-  const serverStructure = props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON
-  recoveryDraft.value = localDraft.evaluateRecovery(serverStructure, props.anchorId ?? null)
-}
-
-function scheduleLocalDraftWrite(structureJson: string) {
-  if (isReadonly.value || structureJson === pristineBaseline.value) {
-    return
-  }
-  // Post-save suppress: ignore prop-echo / deep-watch races (BDD-LRP-C2-002).
-  if (localDraft.areWritesSuppressed()) {
-    return
-  }
-  localDraft.scheduleWrite(structureJson, {
-    serverUpdatedAt: props.serverUpdatedAt ?? null,
-    anchorId: props.anchorId ?? null,
-  })
-}
-
-function handleRestoreDraft() {
-  const draft = recoveryDraft.value
-  if (!draft) {
-    return
-  }
-  // C3-C9: restore resets history; restored structure becomes sole current state.
-  history.clear()
-  history.beginApplying()
-  try {
-    documentModel.value = parseStructuredContent(draft.structureJson)
-    lastCommittedSnapshot = serializeStructuredContent(documentModel.value)
-  } finally {
-    history.endApplying()
-  }
-  recoveryDraft.value = null
-}
-
-function handleDiscardDraft() {
-  localDraft.clearDraft()
-  recoveryDraft.value = null
-  // C3-C10: discard draft resets history; server-loaded structure remains.
-  history.clear()
-}
-
-const loadingCatalog = ref(false)
-const styleCatalog = ref<MasterStyleCatalog | null>(null)
-const selectedStyleKey = ref('')
-const documentModel = ref<StructuredContentDocument>(
-  parseStructuredContent(props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON),
-)
-const pasteSummaryOpen = ref(false)
-const pasteSummary = ref<PasteCleaningSummary | null>(null)
-const pasteBlocked = ref(false)
-const pendingPasteJson = ref<string | null>(null)
-const prePasteSnapshot = ref(props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON)
-const pasteInputRef = ref<HTMLInputElement | null>(null)
-const editorRootRef = ref<HTMLElement | null>(null)
-
-const blockNodeTypes: ConfirmedNodeType[] = [
-  'sectionHeading',
-  'paragraph',
-  'list',
-  'conditionBlock',
-  'loopBlock',
-  'tableComponentRef',
-  'contentModuleRef',
-]
-
-const styleOptions = computed(() => styleCatalog.value?.entries ?? [])
-
-const clauseReferenceOptions = computed(() =>
-  (props.contentModuleReferenceKeys ?? []).map((referenceKey) => ({
-    value: referenceKey,
-    label: referenceKey,
-  })),
-)
-
-const variableCatalog = computed(() => {
-  if (props.variables?.length) {
-    return props.variables
-  }
-  return (props.variableKeys ?? []).map(
-    (variableKey): VariableSchema => ({
-      variableKey,
-      variableType: 'TEXT',
-      required: false,
-      defaultValue: null,
-      enumValues: null,
-      description: null,
-    }),
-  )
-})
-
-const variableSelectOptions = computed(() =>
-  variableCatalog.value.map((variable) => ({
-    value: variable.variableKey,
-    label: buildVariableOptionLabel(variable),
-  })),
-)
-
-const listVariableOptions = computed(() =>
-  variableCatalog.value
-    .filter((variable) => variable.variableType === 'LIST' || variable.variableType === 'OBJECT')
-    .map((variable) => ({
-      value: variable.variableKey,
-      label: buildVariableOptionLabel(variable),
-    })),
-)
-
-function styleLabel(styleKey: string): string {
-  const key = `templates.structuredEditor.styleCatalog.keys.${styleKey}`
-  return te(key) ? t(key) : styleKey
-}
-
-watch(
-  () => props.modelValue,
-  (value) => {
-    syncingFromProps = true
-    try {
-      const next = parseStructuredContent(value || DEFAULT_STRUCTURED_CONTENT_JSON)
-      documentModel.value = next
-      lastCommittedSnapshot = serializeStructuredContent(next)
-      // Post-save server echo can re-enter before unmount; realign baseline and
-      // re-clear so canonicalization differences cannot revive a draft.
-      if (localDraft.areWritesSuppressed()) {
-        pristineBaseline.value = lastCommittedSnapshot
-        emit('dirty-change', false)
-        localDraft.clearDraft({ suppressSubsequentWrites: true })
-      }
-    } finally {
-      syncingFromProps = false
-    }
-  },
-)
-
-watch(
-  () => props.baseline,
-  (value) => {
-    if (value !== undefined) {
-      pristineBaseline.value = value
-    }
-  },
-)
-
-function emitDirtyState() {
-  const current = serializeStructuredContent(documentModel.value)
-  emit('dirty-change', current !== pristineBaseline.value)
-}
-
-function markPristine() {
-  pristineBaseline.value = serializeStructuredContent(documentModel.value)
-  emit('dirty-change', false)
-  // Clear-on-save (C2-C9): successful server persistence clears the local draft
-  // and suppresses further writes until this editor instance is gone (or allowWrites).
-  localDraft.clearDraft({ suppressSubsequentWrites: true })
-  recoveryDraft.value = null
-  // C3-C8: successful save clears undo/redo stacks.
-  history.clear()
-  lastCommittedSnapshot = pristineBaseline.value
-}
+const {
+  t,
+  isReadonly,
+  recoveryDraft,
+  editorRootRef,
+  canUndo,
+  canRedo,
+  blockNodeTypes,
+  styleOptions,
+  selectedStyleKey,
+  loadingCatalog,
+  documentModel,
+  pasteSummaryOpen,
+  pasteSummary,
+  pasteBlocked,
+  variableSelectOptions,
+  listVariableOptions,
+  clauseReferenceOptions,
+  styleLabel,
+  nodeLabel,
+  markPristine,
+  handleRestoreDraft,
+  handleDiscardDraft,
+  doUndo,
+  doRedo,
+  insertBlock,
+  insertInline,
+  applySelectedStyle,
+  handlePasteFile,
+  removeBlock,
+  updateInlineChild,
+  addInlineToBlock,
+  updateBlockField,
+  endFieldCoalesce,
+  acceptPaste,
+  cancelPaste,
+  serializeStructuredContent,
+} = useControlledStructuredContentEditor(props, emit)
 
 defineExpose({ markPristine })
-
-watch(documentModel, (value) => {
-  if (isReadonly.value) {
-    return
-  }
-  const serialized = serializeStructuredContent(value)
-  if (!history.isApplying() && !syncingFromProps) {
-    history.commit(lastCommittedSnapshot, serialized, pendingCoalesceKey)
-  }
-  lastCommittedSnapshot = serialized
-  emit('update:modelValue', serialized)
-  emitDirtyState()
-  emit('structure-change')
-  scheduleLocalDraftWrite(serialized)
-}, { deep: true })
-
-function applyHistorySnapshot(snapshot: string) {
-  history.beginApplying()
-  try {
-    documentModel.value = parseStructuredContent(snapshot)
-    lastCommittedSnapshot = serializeStructuredContent(documentModel.value)
-  } finally {
-    history.endApplying()
-  }
-}
-
-function doUndo() {
-  if (isReadonly.value || !canUndo.value) {
-    return
-  }
-  const current = serializeStructuredContent(documentModel.value)
-  const previous = history.undo(current)
-  if (previous == null) {
-    return
-  }
-  pendingCoalesceKey = null
-  applyHistorySnapshot(previous)
-}
-
-function doRedo() {
-  if (isReadonly.value || !canRedo.value) {
-    return
-  }
-  const current = serializeStructuredContent(documentModel.value)
-  const next = history.redo(current)
-  if (next == null) {
-    return
-  }
-  pendingCoalesceKey = null
-  applyHistorySnapshot(next)
-}
-
-function handleEditorKeydown(event: KeyboardEvent) {
-  if (isReadonly.value) {
-    return
-  }
-  const mod = event.ctrlKey || event.metaKey
-  if (!mod) {
-    return
-  }
-  const key = event.key.toLowerCase()
-  if (key === 'z') {
-    event.preventDefault()
-    if (event.shiftKey) {
-      doRedo()
-    } else {
-      doUndo()
-    }
-    return
-  }
-  if (key === 'y') {
-    event.preventDefault()
-    doRedo()
-  }
-}
-
-function endFieldCoalesce() {
-  pendingCoalesceKey = null
-  history.endCoalesce()
-}
-
-const DEFAULT_STYLE_CATALOG: MasterStyleCatalog = {
-  catalogVersion: '1.0',
-  entries: [
-    { styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' },
-    { styleKey: 'Heading1', applicableNodeTypes: ['sectionHeading'], renderPurpose: 'HEADING' },
-  ],
-}
-
-onMounted(async () => {
-  editorRootRef.value?.addEventListener('keydown', handleEditorKeydown, true)
-  evaluateDraftRecovery()
-  if (!props.templateId) {
-    styleCatalog.value = DEFAULT_STYLE_CATALOG
-    selectedStyleKey.value = DEFAULT_STYLE_CATALOG.entries[0]?.styleKey ?? 'BodyText'
-    return
-  }
-  loadingCatalog.value = true
-  try {
-    styleCatalog.value = await templatesStore.fetchMasterStyleCatalog(props.templateId)
-    selectedStyleKey.value = styleCatalog.value.entries[0]?.styleKey ?? 'BodyText'
-  } catch {
-    ElMessage.error(t('templates.structuredEditor.error.loadCatalog'))
-  } finally {
-    loadingCatalog.value = false
-  }
-})
-
-onUnmounted(() => {
-  editorRootRef.value?.removeEventListener('keydown', handleEditorKeydown, true)
-})
-
-watch(
-  () => [props.anchorId, props.devVersionId, props.templateId, draftUserId.value] as const,
-  () => {
-    evaluateDraftRecovery()
-  },
-)
-
-function nodeLabel(type: ConfirmedNodeType | string): string {
-  const key = `templates.structuredEditor.nodes.${type}`
-  return te(key) ? t(key) : type
-}
-
-function insertBlock(type: ConfirmedNodeType) {
-  if (isReadonly.value) {
-    return
-  }
-  pendingCoalesceKey = null
-  documentModel.value = insertBlockNode(documentModel.value, type, selectedStyleKey.value)
-}
-
-function applySelectedStyle() {
-  if (!selectedStyleKey.value || isReadonly.value) {
-    return
-  }
-  pendingCoalesceKey = null
-  documentModel.value = applyStyleToParagraphs(documentModel.value, selectedStyleKey.value)
-}
-
-function replaceBlock(index: number, next: StructuredContentNode) {
-  const nodes = [...documentModel.value.nodes]
-  nodes[index] = next
-  documentModel.value = { ...documentModel.value, nodes }
-}
-
-function updateBlockField(index: number, field: keyof StructuredContentNode, value: string) {
-  const node = documentModel.value.nodes[index]
-  if (!node) {
-    return
-  }
-  pendingCoalesceKey = `field:${index}:${String(field)}`
-  replaceBlock(index, { ...node, [field]: value })
-}
-
-function updateInlineChild(blockIndex: number, childIndex: number, nextChild: StructuredContentNode) {
-  const node = documentModel.value.nodes[blockIndex]
-  if (!node) {
-    return
-  }
-  pendingCoalesceKey = `inline:${blockIndex}:${childIndex}`
-  const children = [...(node.children ?? [])]
-  children[childIndex] = nextChild
-  replaceBlock(blockIndex, { ...node, children })
-}
-
-function addInlineToBlock(blockIndex: number, type: ConfirmedNodeType) {
-  const node = documentModel.value.nodes[blockIndex]
-  if (!node) {
-    return
-  }
-  pendingCoalesceKey = null
-  const children = [...(node.children ?? []), createNodeTemplate(type, selectedStyleKey.value)]
-  replaceBlock(blockIndex, { ...node, children })
-}
-
-function removeBlock(index: number) {
-  if (isReadonly.value) {
-    return
-  }
-  pendingCoalesceKey = null
-  documentModel.value = {
-    ...documentModel.value,
-    nodes: documentModel.value.nodes.filter((_, nodeIndex) => nodeIndex !== index),
-  }
-}
-
-function conditionExpression(node: StructuredContentNode): string {
-  return node.conditionExpression ?? node.key ?? ''
-}
-
-function loopVariable(node: StructuredContentNode): string {
-  return node.loopVariable ?? node.key ?? ''
-}
-
-async function handlePasteFile(event: Event) {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) {
-    return
-  }
-  const html = await file.text()
-  await runPasteClean(html)
-  input.value = ''
-}
-
-async function runPasteClean(html: string) {
-  if (!html.trim() || isReadonly.value || !props.templateId) {
-    return
-  }
-  prePasteSnapshot.value = serializeStructuredContent(documentModel.value)
-  try {
-    const result = await templatesStore.pasteClean(props.templateId, {
-      sourceHtml: html,
-      prePasteStructuredContentJson: prePasteSnapshot.value,
-    })
-    pasteSummary.value = result.summary
-    pasteBlocked.value = result.blocked
-    pendingPasteJson.value = result.cleanedStructuredContentJson
-    prePasteSnapshot.value = result.prePasteSnapshotJson
-    pasteSummaryOpen.value = true
-  } catch {
-    ElMessage.error(t('templates.structuredEditor.error.pasteClean'))
-  }
-}
-
-function acceptPaste() {
-  if (pasteBlocked.value || !pasteSummary.value) {
-    return
-  }
-  if (pendingPasteJson.value) {
-    pendingCoalesceKey = null
-    documentModel.value = parseStructuredContent(pendingPasteJson.value)
-  }
-  emit('paste-accepted', buildAcceptedPasteCleaningEvidence(pasteSummary.value))
-  pendingPasteJson.value = null
-  pasteSummary.value = null
-  pasteBlocked.value = false
-}
-
-function cancelPaste() {
-  pendingCoalesceKey = null
-  documentModel.value = parseStructuredContent(prePasteSnapshot.value)
-  pendingPasteJson.value = null
-  pasteSummary.value = null
-  pasteBlocked.value = false
-}
-
-function insertInline(type: ConfirmedNodeType) {
-  if (isReadonly.value) {
-    return
-  }
-  pendingCoalesceKey = null
-  const nodes = [...documentModel.value.nodes]
-  if (!nodes.length) {
-    nodes.push(createNodeTemplate('paragraph', selectedStyleKey.value))
-  }
-  const lastIndex = nodes.length - 1
-  const target = nodes[lastIndex]
-  if (!target) {
-    return
-  }
-  const children = [...(target.children ?? []), createNodeTemplate(type, selectedStyleKey.value)]
-  nodes[lastIndex] = { ...target, children }
-  documentModel.value = { ...documentModel.value, nodes }
-}
 </script>
 
 <template>
@@ -533,219 +78,42 @@ function insertInline(type: ConfirmedNodeType) {
     <p v-if="!isReadonly" class="editor-hint">{{ t('templates.structuredEditor.bindingHint') }}</p>
     <p v-else class="editor-hint">{{ t('templates.structuredEditor.readonlyHint') }}</p>
 
-    <div
+    <StructuredContentEditorToolbar
       v-if="!isReadonly"
-      class="toolbar"
-      role="toolbar"
-      :aria-label="t('templates.structuredEditor.toolbar.label')"
-    >
-      <div class="toolbar-group">
-        <span class="group-label">{{ t('templates.structuredEditor.toolbar.history') }}</span>
-        <el-button
-          size="small"
-          data-testid="structured-editor-undo"
-          :disabled="!canUndo"
-          :aria-label="t('templates.structuredEditor.undo')"
-          :title="t('templates.structuredEditor.undoTooltip')"
-          @click="doUndo"
-        >
-          {{ t('templates.structuredEditor.undo') }}
-        </el-button>
-        <el-button
-          size="small"
-          data-testid="structured-editor-redo"
-          :disabled="!canRedo"
-          :aria-label="t('templates.structuredEditor.redo')"
-          :title="t('templates.structuredEditor.redoTooltip')"
-          @click="doRedo"
-        >
-          {{ t('templates.structuredEditor.redo') }}
-        </el-button>
-      </div>
-
-      <div class="toolbar-group">
-        <span class="group-label">{{ t('templates.structuredEditor.toolbar.blocks') }}</span>
-        <el-button
-          v-for="type in blockNodeTypes"
-          :key="type"
-          size="small"
-          data-testid="insert-block-node"
-          @click="insertBlock(type)"
-        >
-          {{ nodeLabel(type) }}
-        </el-button>
-      </div>
-
-      <div class="toolbar-group">
-        <span class="group-label">{{ t('templates.structuredEditor.toolbar.inline') }}</span>
-        <el-button size="small" data-testid="insert-variable" @click="insertInline('variable')">
-          {{ nodeLabel('variable') }}
-        </el-button>
-        <el-button size="small" @click="insertInline('emphasis')">
-          {{ nodeLabel('emphasis') }}
-        </el-button>
-        <el-button size="small" @click="insertInline('lineBreak')">
-          {{ nodeLabel('lineBreak') }}
-        </el-button>
-      </div>
-
-      <div class="toolbar-group">
-        <span class="group-label">{{ t('templates.structuredEditor.toolbar.style') }}</span>
-        <el-select
-          v-model="selectedStyleKey"
-          size="small"
-          :loading="loadingCatalog"
-          data-testid="style-picker"
-          :placeholder="t('templates.structuredEditor.stylePicker.placeholder')"
-        >
-          <el-option
-            v-for="entry in styleOptions"
-            :key="entry.styleKey"
-            :label="styleLabel(entry.styleKey)"
-            :value="entry.styleKey"
-          />
-        </el-select>
-        <el-button size="small" @click="applySelectedStyle">
-          {{ t('templates.structuredEditor.stylePicker.apply') }}
-        </el-button>
-      </div>
-
-      <div class="toolbar-group">
-        <span class="group-label">{{ t('templates.structuredEditor.toolbar.paste') }}</span>
-        <input
-          ref="pasteInputRef"
-          type="file"
-          accept=".html,.htm,.txt"
-          hidden
-          :aria-label="t('templates.structuredEditor.pasteFromFile')"
-          @change="handlePasteFile"
-        />
-        <el-button size="small" @click="pasteInputRef?.click()">
-          {{ t('templates.structuredEditor.pasteFromFile') }}
-        </el-button>
-      </div>
-    </div>
+      :can-undo="canUndo"
+      :can-redo="canRedo"
+      :block-node-types="blockNodeTypes"
+      :style-options="styleOptions"
+      :selected-style-key="selectedStyleKey"
+      :loading-catalog="loadingCatalog"
+      :style-label="styleLabel"
+      :node-label="nodeLabel"
+      @undo="doUndo"
+      @redo="doRedo"
+      @insert-block="insertBlock"
+      @insert-inline="insertInline"
+      @update:selected-style-key="selectedStyleKey = $event"
+      @apply-style="applySelectedStyle"
+      @paste-file="handlePasteFile"
+    />
 
     <div class="editor-surface" data-testid="editor-paste-area">
-      <article
+      <StructuredContentBlockCard
         v-for="(node, index) in documentModel.nodes"
         :key="`${node.type}-${index}`"
-        class="block-card"
-      >
-        <header class="block-card__header">
-          <el-tag size="small" type="info">{{ nodeLabel(node.type) }}</el-tag>
-          <el-button v-if="!isReadonly" link type="danger" size="small" @click="removeBlock(index)">
-            {{ t('common.delete') }}
-          </el-button>
-        </header>
-
-        <template v-if="node.type === 'paragraph' || node.type === 'sectionHeading'">
-          <div class="inline-row">
-            <div
-              v-for="(child, childIndex) in node.children ?? []"
-              :key="`${child.type}-${childIndex}`"
-              class="inline-item"
-            >
-              <el-input
-                v-if="child.type === 'textRun' || child.type === 'text'"
-                :model-value="child.value ?? ''"
-                data-testid="paragraph-input"
-                :readonly="isReadonly"
-                :placeholder="t('templates.structuredEditor.textPlaceholder')"
-                @update:model-value="(value: string) => updateInlineChild(index, childIndex, { ...child, type: 'textRun', value })"
-                @blur="endFieldCoalesce"
-              />
-              <AppSearchSelect
-                v-else-if="child.type === 'variable'"
-                :model-value="child.key ?? ''"
-                filterable
-                :disabled="isReadonly"
-                :placeholder="t('templates.structuredEditor.variablePlaceholder')"
-                @update:model-value="(value: string) => updateInlineChild(index, childIndex, { ...child, type: 'variable', key: value })"
-              >
-                <el-option
-                  v-for="option in variableSelectOptions"
-                  :key="option.value"
-                  :label="option.label"
-                  :value="option.value"
-                />
-              </AppSearchSelect>
-              <el-tag v-else size="small">{{ nodeLabel(child.type) }}</el-tag>
-            </div>
-            <el-button v-if="!isReadonly" size="small" plain @click="addInlineToBlock(index, 'textRun')">
-              {{ t('templates.structuredEditor.addText') }}
-            </el-button>
-            <el-button v-if="!isReadonly" size="small" plain @click="addInlineToBlock(index, 'variable')">
-              {{ t('templates.structuredEditor.addVariable') }}
-            </el-button>
-          </div>
-        </template>
-
-        <template v-else-if="node.type === 'conditionBlock'">
-          <el-input
-            :model-value="conditionExpression(node)"
-            :readonly="isReadonly"
-            :placeholder="t('templates.structuredEditor.conditionPlaceholder')"
-            @update:model-value="(value: string) => updateBlockField(index, 'conditionExpression', value)"
-            @blur="endFieldCoalesce"
-          />
-        </template>
-
-        <template v-else-if="node.type === 'loopBlock'">
-          <AppSearchSelect
-            :model-value="loopVariable(node)"
-            filterable
-            :disabled="isReadonly"
-            :placeholder="t('templates.structuredEditor.loopVariablePlaceholder')"
-            @update:model-value="(value: string) => updateBlockField(index, 'loopVariable', value)"
-          >
-            <el-option
-              v-for="option in listVariableOptions"
-              :key="option.value"
-              :label="option.label"
-              :value="option.value"
-            />
-          </AppSearchSelect>
-        </template>
-
-        <template v-else-if="node.type === 'tableComponentRef'">
-          <el-input
-            :model-value="node.tableComponentRef ?? ''"
-            :readonly="isReadonly"
-            :placeholder="t('templates.structuredEditor.tableRefPlaceholder')"
-            @update:model-value="(value: string) => updateBlockField(index, 'tableComponentRef', value)"
-            @blur="endFieldCoalesce"
-          />
-        </template>
-
-        <template v-else-if="node.type === 'contentModuleRef'">
-          <AppSearchSelect
-            v-if="clauseReferenceOptions.length"
-            :model-value="node.referenceKey ?? ''"
-            filterable
-            :disabled="isReadonly"
-            :placeholder="t('templates.structuredEditor.clauseRefPlaceholder')"
-            @update:model-value="(value: string) => updateBlockField(index, 'referenceKey', value)"
-          >
-            <el-option
-              v-for="option in clauseReferenceOptions"
-              :key="option.value"
-              :label="option.label"
-              :value="option.value"
-            />
-          </AppSearchSelect>
-          <el-input
-            v-else
-            :model-value="node.referenceKey ?? ''"
-            :readonly="isReadonly"
-            :placeholder="t('templates.structuredEditor.clauseRefPlaceholder')"
-            @update:model-value="(value: string) => updateBlockField(index, 'referenceKey', value)"
-            @blur="endFieldCoalesce"
-          />
-        </template>
-
-        <p v-else class="node-meta">{{ node.type }}</p>
-      </article>
+        :node="node"
+        :index="index"
+        :readonly="isReadonly"
+        :variable-select-options="variableSelectOptions"
+        :list-variable-options="listVariableOptions"
+        :clause-reference-options="clauseReferenceOptions"
+        :node-label="nodeLabel"
+        @remove="removeBlock"
+        @update-inline-child="updateInlineChild"
+        @add-inline="addInlineToBlock"
+        @update-block-field="updateBlockField"
+        @end-field-coalesce="endFieldCoalesce"
+      />
 
       <el-empty
         v-if="!documentModel.nodes.length"
@@ -782,67 +150,12 @@ function insertInline(type: ConfirmedNodeType) {
   font-size: 0.875rem;
 }
 
-.toolbar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--surface-muted);
-}
-
-.toolbar-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.group-label {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  min-width: 4.5rem;
-}
-
 .editor-surface {
   min-height: 8rem;
   padding: 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   background: var(--surface-color);
-}
-
-.block-card {
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  background: var(--surface-muted);
-}
-
-.block-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.inline-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.inline-item {
-  flex: 1 1 12rem;
-  min-width: 10rem;
-}
-
-.node-meta {
-  font-size: 0.85rem;
-  color: var(--text-muted);
 }
 
 .json-preview {
