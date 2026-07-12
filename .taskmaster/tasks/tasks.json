@@ -660,23 +660,23 @@
       {
         "id": "48",
         "title": "SLIM: Knip dead-code scan tooling + baseline evidence",
-        "description": "IN PROGRESS 2026-07-12. Slice slim-knip-scan. Frontend Knip ^6.26 dead-code scan tooling + indexed baseline evidence; optional Wave-1 delete of 2 orphan files (TemplateRuleConfigurator.vue, auditEventColumnFilters.ts) if gates green. Formal phase None. Sole-active Task Master item. BDD not-applicable. Checklist overall NO-GO unchanged (#3b). Do NOT activate CD-3. Do NOT claim go-live. Do NOT touch DGE-audit-governance.",
-        "details": "IN PROGRESS 2026-07-12 (stage 2 plan activation). Slice id: slim-knip-scan. Placement: ISOLATED D:/working/DGE-slim-knip-scan · feat/slim-knip-scan. Formal phase remains None. BDD not-applicable (docs/behavior/slim-knip-scan.md). Owner: frontend-engineer (tooling + optional hygiene). Scope: Knip ^6.26 in frontend/package.json + frontend/knip.json; pnpm knip / knip:prod; scripts/knip-scan.ps1; evidence under docs/evidence/slim-knip-scan/ + docs/README.md index; declare missing @eslint/js if needed; optional Wave-1 delete of two Knip-confirmed unused files only if frontend lint/type-check/test/build stay green. Out of scope: mass unused-export/type deletes; enabling Knip as blocking CI; product UI/API/permission/audit behavior; CD-3; go-live; DGE-audit-governance. Acceptance: knip runnable; evidence indexed; frontend gates green; optional Wave-1 orphans deleted safely. Gate evidence: n/a at activation (WIP tooling uncommitted in worktree). Do NOT: invent formal phase; activate CD-3; claim production go-live; touch DGE-audit-governance. Recommend after Done: pause unless more automatable — remaining NO-GO #3b; CONDITIONAL #10/#5a.",
-        "testStrategy": "1. pnpm -C frontend knip (or .\\scripts\\knip-scan.ps1) runs with project config; exit 1 with findings OK until CI gate enabled. 2. docs/evidence/slim-knip-scan/ README + report/summary present and linked from docs/README.md. 3. pnpm -C frontend lint && type-check && test && build GREEN (with or without Wave-1 deletes). 4. If Wave-1 deletes TemplateRuleConfigurator.vue + auditEventColumnFilters.ts: zero remaining importers; gates stay green. 5. Formal phase stays None; sole-active #48 until Done. 6. Architecture review + merge + MAIN doc-sync + commit-review before Done. 7. Checklist overall still NO-GO (#3b).",
+        "description": "DONE 2026-07-12. Slice slim-knip-scan. Knip ^6.26 tooling + indexed baseline evidence + Wave-1 delete of 2 orphan files. Merge ea7db64; worktree removed. Formal phase None. BDD not-applicable. Checklist overall NO-GO unchanged (#3b). no sole-active. Recommend next: pause. Do NOT activate CD-3. Do NOT claim go-live. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: slim-knip-scan. Merge: ea7db64 (ea7db649866458386c46134b91c83417d1563c0a); feature tip ea7db64 (fast-forward); worktree removed (stage 11). Formal phase remains None. BDD not-applicable (docs/behavior/slim-knip-scan.md). Delivered: Knip ^6.26 in frontend/package.json + frontend/knip.json; pnpm knip / knip:prod; scripts/knip-scan.ps1; evidence under docs/evidence/slim-knip-scan/ (README + report/summary/json) indexed from docs/README.md; @eslint/js declared; Wave-1 deleted TemplateRuleConfigurator.vue + auditEventColumnFilters.ts (unused files → 0). Gates: pnpm -C frontend lint && type-check && test && build GREEN; knip exit 1 expected (informational unused exports 93 / types 66 / duplicate 1 remain — not CI-blocking); architecture PASS_WITH_NOTES Critical=0 merge_go=true; E2E skipped (not user-facing); deploy skipped (devDep only). Overall checklist NO-GO (blocking: #3b ADR-0042/0043+Word only; #5a/#10 CONDITIONAL residuals). no sole-active. Recommend next: pause unless more automatable. Do NOT: invent formal phase; activate CD-3; claim production go-live; touch DGE-audit-governance.",
+        "testStrategy": "1. pnpm -C frontend knip (or .\\scripts\\knip-scan.ps1) runs with project config; exit 1 with findings OK until CI gate enabled. 2. docs/evidence/slim-knip-scan/ README + report/summary present and linked from docs/README.md. 3. pnpm -C frontend lint && type-check && test && build GREEN (with Wave-1 deletes). 4. Wave-1 deletes TemplateRuleConfigurator.vue + auditEventColumnFilters.ts: zero remaining importers; unused files 0; gates stay green. 5. Formal phase stays None; #48 done; no sole-active. 6. Architecture review + merge + MAIN doc-sync + commit-review before Done. 7. Checklist overall still NO-GO (#3b).",
         "priority": "medium",
         "dependencies": [
           "47"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-12T07:26:00.000Z"
+        "updatedAt": "2026-07-12T07:45:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-12T07:26:00.000Z",
+      "lastModified": "2026-07-12T07:45:00.000Z",
       "taskCount": 48,
-      "completedCount": 47,
+      "completedCount": 48,
       "tags": [
         "master"
       ]

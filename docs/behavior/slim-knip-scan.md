@@ -6,9 +6,10 @@
 | **bdd_readiness** | **`not-applicable`** |
 | **Recorded** | 2026-07-12 |
 | **Formal phase** | **None** (no sole-active) |
-| **Task Master** | **#48** (`in-progress`; sole-active) |
+| **Task Master** | **#48** (`done`) |
 | **Evidence** | [docs/evidence/slim-knip-scan/](../evidence/slim-knip-scan/README.md) |
-| **Placement** | `D:/working/DGE-slim-knip-scan` · `feat/slim-knip-scan` |
+| **Merge** | `ea7db64` (`ea7db649866458386c46134b91c83417d1563c0a`) |
+| **Placement** | merged to `main`; worktree removed |
 
 ---
 
@@ -33,7 +34,7 @@ Analogous readiness: [LR-D6 load smoke](./lrp-d6-load-smoke.md) / [LR-E1 SSE evi
 | **Scripts** | `pnpm -C frontend knip` · `pnpm -C frontend knip:prod` · `.\scripts\knip-scan.ps1` |
 | **Hygiene** | Declare missing `@eslint/js` (eslint config import was unlisted) |
 | **Evidence** | `docs/evidence/slim-knip-scan/` (`README`, report txt/json, summary) + `docs/README.md` index |
-| **Optional Wave-1** | Delete **only** the two Knip-confirmed unused files if low-risk + gates green (see below) |
+| **Wave-1** | **Done** — deleted the two Knip-confirmed unused files; gates green |
 
 ### Optional Wave-1 (hygiene, not product BDD)
 
@@ -90,11 +91,11 @@ These are **delivery acceptance** criteria for the engineering slice — not pro
 | [docs/evidence/slim-knip-scan/README.md](../evidence/slim-knip-scan/README.md) | Baseline scan evidence + re-run instructions |
 | `frontend/knip.json` | Knip project config |
 | `scripts/knip-scan.ps1` | Host runner writing evidence folder |
-| Task Master **#48** | Allocated / `in-progress` (slice id `slim-knip-scan`) |
+| Task Master **#48** | **done** (slice id `slim-knip-scan`; merge `ea7db64`) |
 | Launch checklist | Unchanged overall **NO-GO** — this slice is not a go-live closer |
 
 ```
 bdd_readiness: not-applicable
-task_ids: [48]  # slim-knip-scan; in-progress sole-active
+task_ids: [48]  # slim-knip-scan; done; no sole-active
 owning_doc: docs/behavior/slim-knip-scan.md
 ```

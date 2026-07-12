@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-12  
 **Tool:** [Knip](https://knip.dev) **6.26.0** (frontend dead files / exports / deps)  
-**Worktree:** `D:/working/DGE-slim-knip-scan` · `feat/slim-knip-scan`  
+**Merge:** `ea7db64` (`ea7db649866458386c46134b91c83417d1563c0a`) · Task Master **#48** **done**  
 **Command:** `pnpm -C frontend knip`  
 **BDD readiness:** [`not-applicable`](../../behavior/slim-knip-scan.md) — tooling + evidence; no product actor journey  
 **Wave-1:** **Done** — deleted 2 orphan unused files (zero importers); evidence refreshed post-delete
