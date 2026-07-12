@@ -30,9 +30,11 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.rendering.web.BatchTestController",
             "com.bank.docgen.rendering.web.PreviewController",
             "com.bank.docgen.template.web.RiskPromptConfigController",
+            "com.bank.docgen.template.web.TemplateAuthoringController",
             "com.bank.docgen.template.web.TemplateController",
             "com.bank.docgen.template.web.TemplateExportController",
             "com.bank.docgen.template.web.TemplateImportController",
+            "com.bank.docgen.template.web.TemplateLifecycleController",
             "com.bank.docgen.template.web.TemplateRiskPromptConfigController",
             "com.bank.docgen.template.web.TemplateVersionLineController",
             "com.bank.docgen.template.web.TestDataSetController"
@@ -130,17 +132,21 @@ final class ManagementAuthorizationRegistry {
                     Set.of("com.bank.docgen.template.service.RiskPromptConfigService")
             ),
             Map.entry(
+                    "com.bank.docgen.template.web.TemplateAuthoringController",
+                    Set.of(
+                            "com.bank.docgen.template.service.TemplateService",
+                            "com.bank.docgen.template.service.TemplateRuleValidationService",
+                            "com.bank.docgen.template.service.TemplateContentModuleReferenceService"
+                    )
+            ),
+            Map.entry(
                     "com.bank.docgen.template.web.TemplateController",
                     Set.of(
                             "com.bank.docgen.template.service.TemplateService",
-                            "com.bank.docgen.template.service.TemplateLifecycleService",
                             "com.bank.docgen.template.service.TemplateDeleteService",
-                            "com.bank.docgen.template.service.RiskPromptConfigService",
                             "com.bank.docgen.template.service.ChangeDiffService",
                             "com.bank.docgen.template.service.CoverageComputationService",
-                            "com.bank.docgen.template.service.PublishGateService",
-                            "com.bank.docgen.template.service.TemplateContentModuleReferenceService",
-                            "com.bank.docgen.template.service.TemplateRuleValidationService"
+                            "com.bank.docgen.template.service.PublishGateService"
                     )
             ),
             Map.entry(
@@ -150,6 +156,13 @@ final class ManagementAuthorizationRegistry {
             Map.entry(
                     "com.bank.docgen.template.web.TemplateImportController",
                     Set.of("com.bank.docgen.template.service.TemplateImportService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.template.web.TemplateLifecycleController",
+                    Set.of(
+                            "com.bank.docgen.template.service.TemplateLifecycleService",
+                            "com.bank.docgen.template.service.RiskPromptConfigService"
+                    )
             ),
             Map.entry(
                     "com.bank.docgen.template.web.TemplateRiskPromptConfigController",
