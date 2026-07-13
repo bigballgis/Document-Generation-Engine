@@ -6,7 +6,6 @@ import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
-import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
@@ -25,7 +24,6 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,11 +42,11 @@ public class TemplateLifecycleService {
     private final CollaborationWorkItemWriter collaborationWorkItemWriter;
     private final RenderProfileService renderProfileService;
     private final ApiPolicyMaterializationService apiPolicyMaterializationService;
-    private final ApiPolicyRepository apiPolicyRepository;
     private final VersionFidelityWarningService versionFidelityWarningService;
     private final TemplateLifecycleTransitionSupport transitions;
     private final TemplateLifecycleDecisionCommentSupport decisionComments;
     private final TemplateLifecycleEligibilitySupport eligibility;
+    private final TemplateLifecycleVersionSupport versionSupport;
 
     public TemplateLifecycleService(
             TemplateService templateService,
@@ -81,7 +79,6 @@ public class TemplateLifecycleService {
         this.collaborationWorkItemWriter = collaborationWorkItemWriter;
         this.renderProfileService = renderProfileService;
         this.apiPolicyMaterializationService = apiPolicyMaterializationService;
-        this.apiPolicyRepository = apiPolicyRepository;
         this.versionFidelityWarningService = versionFidelityWarningService;
         this.transitions = new TemplateLifecycleTransitionSupport(
                 templateRepository,
@@ -94,6 +91,12 @@ public class TemplateLifecycleService {
                 templateVersionRepository,
                 this.groupAccessService,
                 approvalSubStateResolver
+        );
+        this.versionSupport = new TemplateLifecycleVersionSupport(
+                templateVersionRepository,
+                apiPolicyRepository,
+                transitions,
+                eligibility
         );
     }
 
@@ -237,37 +240,8 @@ public class TemplateLifecycleService {
             LifecycleGovernanceRequest request,
             ManagementSessionClaims session
     ) {
-        eligibility.requireGovernanceConfirmed(request);
-        TemplateEntity template = eligibility.requireVersionEligibleTemplate(templateId, session);
-        eligibility.requireStatus(template, TemplateLifecycleStatus.PUBLISHED);
-        TemplateVersionEntity version = templateVersionRepository
-                .findByTemplateIdAndReleaseVersion(templateId, releaseVersion)
-                .orElseThrow(TemplateNotFoundException::new);
-        if (version.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED) {
-            throw new TemplateValidationException("api.error.template.invalidState");
-        }
-        apiPolicyRepository.findByTemplateId(templateId).ifPresent(policy -> {
-            if (releaseVersion.equals(policy.getDefaultRouteReleaseVersion())) {
-                throw new TemplateGovernanceException(
-                        ApiErrorCodes.TEMPLATE_DEFAULT_ROUTE_TARGET,
-                        "api.error.template.defaultRouteTargetCannotDeactivate",
-                        HttpStatus.CONFLICT
-                );
-            }
-        });
-        version.setLifecycleStatus(TemplateLifecycleStatus.STOPPED);
-        templateVersionRepository.save(version);
-        transitions.recordLifecycle(
-                template,
-                LifecycleAction.DEACTIVATE_VERSION,
-                TemplateLifecycleStatus.PUBLISHED,
-                TemplateLifecycleStatus.STOPPED,
-                null,
-                request.reason(),
-                releaseVersion,
-                session
-        );
-        return templateService.toDetail(template);
+        return templateService.toDetail(
+                versionSupport.deactivateVersion(templateId, releaseVersion, request, session));
     }
 
     @Transactional
@@ -277,28 +251,8 @@ public class TemplateLifecycleService {
             LifecycleGovernanceRequest request,
             ManagementSessionClaims session
     ) {
-        eligibility.requireGovernanceConfirmed(request);
-        TemplateEntity template = eligibility.requireVersionEligibleTemplate(templateId, session);
-        eligibility.requireStatus(template, TemplateLifecycleStatus.PUBLISHED);
-        TemplateVersionEntity version = templateVersionRepository
-                .findByTemplateIdAndReleaseVersion(templateId, releaseVersion)
-                .orElseThrow(TemplateNotFoundException::new);
-        if (version.getLifecycleStatus() != TemplateLifecycleStatus.STOPPED) {
-            throw new TemplateValidationException("api.error.template.invalidState");
-        }
-        version.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
-        templateVersionRepository.save(version);
-        transitions.recordLifecycle(
-                template,
-                LifecycleAction.RESTORE_VERSION,
-                TemplateLifecycleStatus.STOPPED,
-                TemplateLifecycleStatus.PUBLISHED,
-                null,
-                request.reason(),
-                releaseVersion,
-                session
-        );
-        return templateService.toDetail(template);
+        return templateService.toDetail(
+                versionSupport.restoreVersion(templateId, releaseVersion, request, session));
     }
 
     @Transactional(readOnly = true)

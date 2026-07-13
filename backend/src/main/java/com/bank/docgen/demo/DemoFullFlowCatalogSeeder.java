@@ -1,6 +1,5 @@
 package com.bank.docgen.demo;
 
-import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
 import com.bank.docgen.apimgmt.service.ApiManagementService;
 import com.bank.docgen.master.api.CreateMasterRequest;
 import com.bank.docgen.master.api.DecideMasterReviewRequest;
@@ -8,30 +7,17 @@ import com.bank.docgen.master.api.MasterDocumentDetailView;
 import com.bank.docgen.master.api.SubmitMasterReviewRequest;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.service.MasterDocumentService;
-import com.bank.docgen.rendering.api.BatchTestGenerateRequest;
-import com.bank.docgen.rendering.api.TestGenerateRequest;
 import com.bank.docgen.rendering.service.BatchTestGenerationService;
 import com.bank.docgen.rendering.service.PreviewGenerationService;
-import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CreateTemplateRequest;
-import com.bank.docgen.template.api.LifecycleCommentRequest;
-import com.bank.docgen.template.api.LifecycleDecisionRequest;
-import com.bank.docgen.template.api.PublishTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
-import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
-import com.bank.docgen.template.api.UpsertTestDataSetRequest;
-import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
-import com.bank.docgen.template.domain.AnchorContentType;
-import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
-import com.bank.docgen.template.domain.VariableType;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.service.TemplateLifecycleService;
 import com.bank.docgen.template.service.TemplateService;
 import com.bank.docgen.template.service.TestDataSetService;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,11 +46,7 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
     private final MasterDocumentService masterDocumentService;
     private final TemplateRepository templateRepository;
     private final TemplateService templateService;
-    private final TestDataSetService testDataSetService;
-    private final PreviewGenerationService previewGenerationService;
-    private final BatchTestGenerationService batchTestGenerationService;
-    private final TemplateLifecycleService templateLifecycleService;
-    private final ApiManagementService apiManagementService;
+    private final DemoFullFlowPublishSupport publishSupport;
 
     DemoFullFlowCatalogSeeder(
             MasterDocumentRepository masterDocumentRepository,
@@ -81,11 +63,16 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
         this.masterDocumentService = masterDocumentService;
         this.templateRepository = templateRepository;
         this.templateService = templateService;
-        this.testDataSetService = testDataSetService;
-        this.previewGenerationService = previewGenerationService;
-        this.batchTestGenerationService = batchTestGenerationService;
-        this.templateLifecycleService = templateLifecycleService;
-        this.apiManagementService = apiManagementService;
+        this.publishSupport = new DemoFullFlowPublishSupport(
+                templateService,
+                testDataSetService,
+                previewGenerationService,
+                batchTestGenerationService,
+                templateLifecycleService,
+                apiManagementService,
+                STRUCTURED_BINDING_JSON,
+                DEMO_FULL_FLOW_RELEASE_VERSION
+        );
     }
 
     @Override
@@ -106,7 +93,7 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
 
         String masterId = ensureApprovedDemoMaster();
         UUID templateId = existing.map(TemplateEntity::getId).orElseGet(() -> createFullFlowTemplate(masterId));
-        publishFullFlowTemplate(templateId);
+        publishSupport.publishFullFlowTemplate(templateId);
         log.info(
                 "Seeded demo full-flow catalog: published template '{}' release {} with API policy.",
                 DEMO_FULL_FLOW_EXTERNAL_ID,
@@ -126,130 +113,6 @@ public class DemoFullFlowCatalogSeeder implements ApplicationRunner {
                 DemoCatalogSessions.templateAuthorSession()
         );
         return UUID.fromString(created.id());
-    }
-
-    private void publishFullFlowTemplate(UUID templateId) {
-        ManagementSessionClaims author = DemoCatalogSessions.templateAuthorSession();
-        configurePublishableTemplate(templateId, author);
-
-        var testDataSet = testDataSetService.create(
-                templateId,
-                new UpsertTestDataSetRequest(
-                        "Demo full-flow required sample",
-                        "Automated demo catalog seed",
-                        Map.of("customerName", "Alice"),
-                        true,
-                        null,
-                        null
-                ),
-                author
-        );
-
-        previewGenerationService.testGenerate(
-                templateId,
-                new TestGenerateRequest(Map.of("customerName", "Alice"), testDataSet.testDataSetId()),
-                author
-        );
-        batchTestGenerationService.runBatch(
-                templateId,
-                new BatchTestGenerateRequest(List.of(testDataSet.testDataSetId())),
-                author
-        );
-
-        templateLifecycleService.submitForTest(
-                templateId,
-                new LifecycleCommentRequest("Demo full-flow seed ready for test"),
-                author
-        );
-
-        templateLifecycleService.recordTestDecision(
-                templateId,
-                new LifecycleDecisionRequest(
-                        LifecycleDecision.PASSED,
-                        "Demo full-flow seed test passed",
-                        null,
-                        null,
-                        true,
-                        true,
-                        true,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
-                ),
-                DemoCatalogSessions.templateTesterSession()
-        );
-
-        templateLifecycleService.recordApprovalDecision(
-                templateId,
-                new LifecycleDecisionRequest(
-                        LifecycleDecision.APPROVED,
-                        "Demo full-flow seed approved",
-                        null,
-                        null,
-                        true,
-                        null,
-                        null,
-                        true,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
-                ),
-                DemoCatalogSessions.templateApproverSession()
-        );
-
-        apiManagementService.upsertPolicy(
-                templateId,
-                new UpsertApiPolicyRequest(
-                        List.of("RETAIL_API"),
-                        DEMO_FULL_FLOW_RELEASE_VERSION,
-                        List.of("DOCX"),
-                        List.of("SYNC_STREAM"),
-                        false,
-                        10,
-                        false,
-                        false
-                ),
-                DemoCatalogSessions.groupAdminSession()
-        );
-
-        templateLifecycleService.publish(
-                templateId,
-                new PublishTemplateRequest(DEMO_FULL_FLOW_RELEASE_VERSION, true),
-                DemoCatalogSessions.groupAdminSession()
-        );
-    }
-
-    private void configurePublishableTemplate(UUID templateId, ManagementSessionClaims author) {
-        templateService.upsertVariable(
-                templateId,
-                new UpsertVariableSchemaRequest(
-                        "customerName",
-                        VariableType.TEXT,
-                        true,
-                        "Customer",
-                        null,
-                        "Customer name",
-                        null
-                ),
-                author
-        );
-        templateService.upsertBinding(
-                templateId,
-                new UpsertAnchorBindingRequest(
-                        DemoCatalogSeeder.DEMO_ANCHOR_ID,
-                        AnchorContentType.TEXT,
-                        STRUCTURED_BINDING_JSON
-                ),
-                author
-        );
-        templateService.validateBindings(templateId, author);
     }
 
     private String ensureApprovedDemoMaster() {

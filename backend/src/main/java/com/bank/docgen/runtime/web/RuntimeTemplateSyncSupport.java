@@ -15,22 +15,69 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Package-private sync-generation invocation recording and HTTP response writing.
+ * Package-private sync-generation audit, invocation recording, and HTTP response writing.
  */
 final class RuntimeTemplateSyncSupport {
 
     private final InvocationRecordService invocationRecordService;
     private final ApiPolicyRepository apiPolicyRepository;
     private final TraceIdProvider traceIdProvider;
+    private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
 
     RuntimeTemplateSyncSupport(
             InvocationRecordService invocationRecordService,
             ApiPolicyRepository apiPolicyRepository,
-            TraceIdProvider traceIdProvider
+            TraceIdProvider traceIdProvider,
+            RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder
     ) {
         this.invocationRecordService = invocationRecordService;
         this.apiPolicyRepository = apiPolicyRepository;
         this.traceIdProvider = traceIdProvider;
+        this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
+    }
+
+    void auditRecordAndWrite(
+            TemplateEntity template,
+            RuntimeSessionClaims session,
+            String environment,
+            String routeType,
+            String requestedReleaseVersion,
+            String templateExternalId,
+            GenerateRequestBody body,
+            SyncGenerateResult result,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        runtimeGenerationAuditRecorder.recordSyncGeneration(
+                template,
+                session,
+                environment,
+                routeType,
+                result.resolvedReleaseVersion(),
+                body.output().format(),
+                body.output().mode(),
+                body.requestId(),
+                body.idempotencyKey(),
+                result.idempotencyStatus(),
+                result.documentId(),
+                IdempotencyConstants.STATUS_REPLAYED.equals(result.idempotencyStatus())
+                        ? RuntimeGenerationAuditRecorder.OUTCOME_REPLAYED
+                        : RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
+                traceId
+        );
+        String invocationId = resolveOrRecordSingleInvocation(
+                template,
+                session,
+                environment,
+                routeType,
+                requestedReleaseVersion,
+                result,
+                body,
+                auditId
+        );
+        writeSyncResponse(request, response, templateExternalId, routeType, body, result, invocationId);
     }
 
     String resolveOrRecordSingleInvocation(

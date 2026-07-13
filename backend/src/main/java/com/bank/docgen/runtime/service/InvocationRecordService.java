@@ -4,13 +4,10 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
 import com.bank.docgen.runtime.api.BatchResultView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
-import com.bank.docgen.runtime.domain.InvocationKind;
-import com.bank.docgen.runtime.domain.InvocationStatus;
 import com.bank.docgen.runtime.domain.TaskStatus;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordEntity;
 import com.bank.docgen.runtime.persistence.ApiInvocationRecordRepository;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskEntity;
-import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import java.time.Instant;
@@ -23,10 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class InvocationRecordService {
 
     private final ApiInvocationRecordRepository repository;
-    private final InvocationParameterSanitizer parameterSanitizer;
-    private final IdempotencyService idempotencyService;
     private final InvocationRecordMetadataSupport metadata;
     private final InvocationBatchItemPersistenceSupport batchItems;
+    private final InvocationRecordEntitySupport entities;
 
     public InvocationRecordService(
             ApiInvocationRecordRepository repository,
@@ -34,10 +30,9 @@ public class InvocationRecordService {
             IdempotencyService idempotencyService
     ) {
         this.repository = repository;
-        this.parameterSanitizer = parameterSanitizer;
-        this.idempotencyService = idempotencyService;
         this.metadata = new InvocationRecordMetadataSupport(repository, idempotencyService);
         this.batchItems = new InvocationBatchItemPersistenceSupport(repository, parameterSanitizer, metadata);
+        this.entities = new InvocationRecordEntitySupport(parameterSanitizer, idempotencyService, metadata);
     }
 
     @Transactional(readOnly = true)
@@ -66,48 +61,19 @@ public class InvocationRecordService {
             String auditId
     ) {
         Instant now = Instant.now();
-        boolean hasArtifact = documentId != null && !documentId.isBlank();
-        UUID idempotencyRecordId = metadata.resolveIdempotencyRecordId(request.idempotencyKey(), template.getId());
-        String resolvedArtifactStorageKey = artifactStorageKey;
-        if (resolvedArtifactStorageKey == null && hasArtifact) {
-            resolvedArtifactStorageKey = idempotencyService.findLiveRecord(request.idempotencyKey(), template.getId())
-                    .map(GenerationIdempotencyEntity::getResponseStorageKey)
-                    .orElse(null);
-        }
-        boolean artifactSaved = policy.isSaveGeneratedDocuments() && hasArtifact;
-        ApiInvocationRecordEntity entity = new ApiInvocationRecordEntity(
-                UUID.randomUUID(),
-                metadata.newInvocationExternalId(),
-                InvocationKind.SINGLE,
-                InvocationStatusMappingSupport.mapOutcomeToStatus(outcome),
+        ApiInvocationRecordEntity entity = entities.buildSingleSync(
+                template,
+                policy,
+                session,
                 environment,
-                template.getId(),
-                template.getExternalId(),
-                session.credentialId(),
-                session.accessAccount(),
-                request.requestId(),
-                request.idempotencyKey(),
                 routeType,
                 requestedReleaseVersion,
                 resolvedReleaseVersion,
-                request.output().format(),
-                request.output().mode(),
-                outcome,
-                null,
-                parameterSanitizer.sanitizeSingleRequest(request, resolvedReleaseVersion),
+                request,
                 documentId,
-                artifactSaved ? resolvedArtifactStorageKey : null,
-                artifactSaved,
-                metadata.recordExpiresAt(policy, now),
-                metadata.documentExpiresAt(policy, artifactSaved, now),
-                null,
-                null,
-                null,
-                null,
-                idempotencyRecordId,
+                artifactStorageKey,
+                outcome,
                 auditId,
-                false,
-                now,
                 now
         );
         repository.save(entity);
@@ -131,40 +97,20 @@ public class InvocationRecordService {
         Instant now = Instant.now();
         UUID idempotencyRecordId = metadata.resolveIdempotencyRecordId(request.idempotencyKey(), template.getId());
         String rootInvocationId = metadata.newInvocationExternalId();
-        InvocationStatus rootStatus = InvocationStatusMappingSupport.mapBatchRootStatus(batchResult);
-        ApiInvocationRecordEntity root = new ApiInvocationRecordEntity(
-                UUID.randomUUID(),
-                rootInvocationId,
-                InvocationKind.BATCH_ROOT,
-                rootStatus,
+        ApiInvocationRecordEntity root = entities.buildBatchRoot(
+                template,
+                policy,
+                session,
                 environment,
-                template.getId(),
-                template.getExternalId(),
-                session.credentialId(),
-                session.accessAccount(),
-                request.requestId(),
-                request.idempotencyKey(),
                 routeType,
                 requestedReleaseVersion,
                 resolvedReleaseVersion,
-                request.output().format(),
-                request.output().mode(),
+                request,
+                batchResult,
                 outcome,
-                null,
-                parameterSanitizer.sanitizeBatchRequest(request, resolvedReleaseVersion),
-                null,
-                null,
-                false,
-                metadata.recordExpiresAt(policy, now),
-                null,
-                batchResult.batchId(),
-                null,
-                null,
-                null,
-                idempotencyRecordId,
                 auditId,
-                true,
-                now,
+                rootInvocationId,
+                idempotencyRecordId,
                 now
         );
         repository.save(root);
@@ -205,39 +151,19 @@ public class InvocationRecordService {
     ) {
         Instant now = Instant.now();
         UUID idempotencyRecordId = metadata.resolveIdempotencyRecordId(request.idempotencyKey(), template.getId());
-        ApiInvocationRecordEntity entity = new ApiInvocationRecordEntity(
-                UUID.randomUUID(),
-                metadata.newInvocationExternalId(),
-                InvocationKind.ASYNC_TASK,
-                InvocationStatus.ACCEPTED,
+        ApiInvocationRecordEntity entity = entities.buildAsyncAccepted(
+                template,
+                policy,
+                session,
                 environment,
-                template.getId(),
-                template.getExternalId(),
-                session.credentialId(),
-                session.accessAccount(),
-                request.requestId(),
-                request.idempotencyKey(),
                 routeType,
                 requestedReleaseVersion,
                 resolvedReleaseVersion,
-                request.output().format(),
-                request.output().mode(),
-                RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
-                null,
-                parameterSanitizer.sanitizeBatchRequest(request, resolvedReleaseVersion),
-                null,
-                null,
-                false,
-                metadata.recordExpiresAt(policy, now),
-                null,
-                batchExternalId,
-                null,
-                null,
+                request,
                 taskExternalId,
-                idempotencyRecordId,
+                batchExternalId,
                 auditId,
-                true,
-                now,
+                idempotencyRecordId,
                 now
         );
         repository.save(entity);
