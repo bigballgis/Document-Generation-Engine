@@ -171,38 +171,4 @@ const {
   </section>
 </template>
 
-<style scoped lang="scss">
-.group-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.panel-header__leading {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 0.5rem;
-  min-width: 0;
-}
-
-.panel-search {
-  max-width: 320px;
-}
-
-.read-only-hint {
-  margin: 0;
-  color: var(--text-muted);
-}
-
-.full-width {
-  width: 100%;
-}
-</style>
+<style scoped lang="scss" src="./GroupManagementPanel.scss"></style>

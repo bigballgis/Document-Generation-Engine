@@ -9,20 +9,15 @@ import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
 import { SERVER_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { templateDetailPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
-import type { TemplateSummary, TemplateLifecycleStatus } from '@/types/template'
+import type { TemplateSummary } from '@/types/template'
 import { ElMessage } from 'element-plus'
 import { createTemplateListCatalogControls } from '@/views/templates/createTemplateListCatalogControls'
+import {
+  buildTemplateListQuery,
+  type WorkflowFilterKey,
+} from '@/views/templates/templateListCatalogQuery'
 
-export type WorkflowFilterKey = 'awaitingTest' | 'awaitingApproval' | 'awaitingPublish'
-
-const WORKFLOW_CHIP_QUERY: Record<
-  WorkflowFilterKey,
-  { lifecycleStatus: TemplateLifecycleStatus; approvalSubState?: string }
-> = {
-  awaitingTest: { lifecycleStatus: 'TESTING' },
-  awaitingApproval: { lifecycleStatus: 'APPROVAL', approvalSubState: 'PENDING_DECISION' },
-  awaitingPublish: { lifecycleStatus: 'PENDING_RELEASE' },
-}
+export type { WorkflowFilterKey }
 
 export function useTemplateListCatalog() {
   const { t } = useI18n()
@@ -42,10 +37,7 @@ export function useTemplateListCatalog() {
   const workflowFilterChips = computed(() => {
     const chips: Array<{ key: WorkflowFilterKey; labelKey: string }> = []
     if (decideTests.value) {
-      chips.push({
-        key: 'awaitingTest',
-        labelKey: 'templates.list.workflowFilters.awaitingTest',
-      })
+      chips.push({ key: 'awaitingTest', labelKey: 'templates.list.workflowFilters.awaitingTest' })
     }
     if (decideApprovals.value) {
       chips.push({
@@ -63,23 +55,10 @@ export function useTemplateListCatalog() {
   })
 
   const catalogTemplates = computed(() => templatesStore.templates)
-
-  const {
-    searchQuery,
-    filters,
-    activeSortKey,
-    hasAnyActive,
-    activeFilterChips,
-    clearAll,
-    removeFilterChip,
-    catalogToolbarFilters,
-    catalogSortOptions,
-  } = createTemplateListCatalogControls(catalogTemplates, lifecycleStatusFilterOptions)
-
+  const controls = createTemplateListCatalogControls(catalogTemplates, lifecycleStatusFilterOptions)
   const hasActiveQuery = computed(
-    () => hasAnyActive.value || activeWorkflowFilter.value !== null,
+    () => controls.hasAnyActive.value || activeWorkflowFilter.value !== null,
   )
-
   const showCatalogChrome = computed(
     () =>
       listHydrated.value &&
@@ -88,45 +67,28 @@ export function useTemplateListCatalog() {
   )
 
   function buildListQuery() {
-    const search = searchQuery.value.trim() || undefined
-    const groupCode = filters.groupCode?.trim() || undefined
-    const statusFilter = filters.status?.trim() || undefined
-    const chip = activeWorkflowFilter.value
-      ? WORKFLOW_CHIP_QUERY[activeWorkflowFilter.value]
-      : null
-
-    let lifecycleStatus: string | undefined
-    let approvalSubState: string | undefined
-    if (chip && statusFilter && chip.lifecycleStatus !== statusFilter) {
-      // Impossible AND — still send both intents via chip status; backend returns empty.
-      lifecycleStatus = statusFilter
-    } else {
-      lifecycleStatus = statusFilter || chip?.lifecycleStatus
-      approvalSubState = chip?.approvalSubState
-    }
-
-    return {
-      search,
-      groupCode,
-      lifecycleStatus,
-      approvalSubState,
-      sort: activeSortKey.value || 'groupCodeAsc',
-    }
+    return buildTemplateListQuery({
+      searchQuery: controls.searchQuery.value,
+      groupCode: controls.filters.groupCode,
+      statusFilter: controls.filters.status,
+      activeWorkflowFilter: activeWorkflowFilter.value,
+      activeSortKey: controls.activeSortKey.value,
+    })
   }
 
-  const { reload: reloadTemplates, signal: abortSignal } = useAbortableCatalogLoader(async (signal) => {
-    await templatesStore.fetchTemplates(currentPage.value - 1, SERVER_TABLE_PAGE_SIZE, {
-      signal,
-      ...buildListQuery(),
-    })
-    listHydrated.value = true
-  })
+  const { reload: reloadTemplates, signal: abortSignal } = useAbortableCatalogLoader(
+    async (signal) => {
+      await templatesStore.fetchTemplates(currentPage.value - 1, SERVER_TABLE_PAGE_SIZE, {
+        signal,
+        ...buildListQuery(),
+      })
+      listHydrated.value = true
+    },
+  )
 
   watch(currentPage, async (page) => {
     const serverPage = page - 1
-    if (serverPage === templatesStore.templateListPage) {
-      return
-    }
+    if (serverPage === templatesStore.templateListPage) return
     try {
       await templatesStore.fetchTemplates(serverPage, SERVER_TABLE_PAGE_SIZE, {
         signal: abortSignal.value,
@@ -138,11 +100,9 @@ export function useTemplateListCatalog() {
   })
 
   watch(
-    [searchQuery, filters, activeSortKey, activeWorkflowFilter],
+    [controls.searchQuery, controls.filters, controls.activeSortKey, activeWorkflowFilter],
     async () => {
-      if (!listHydrated.value) {
-        return
-      }
+      if (!listHydrated.value) return
       if (currentPage.value !== 1) {
         currentPage.value = 1
         return
@@ -156,31 +116,9 @@ export function useTemplateListCatalog() {
     await reloadTemplates()
   })
 
-  function clearWorkflowFilter() {
-    activeWorkflowFilter.value = null
-  }
-
-  function onWorkflowFilterChange(key: WorkflowFilterKey, checked: boolean) {
-    activeWorkflowFilter.value = checked ? key : null
-  }
-
-  function handleCreated(templateId: string) {
-    ElMessage.success(t('templates.create.success'))
-    router.push(templateDetailPath(templateId))
-  }
-
-  function handleImported(templateId: string) {
-    ElMessage.success(t('templates.import.success'))
-    router.push(templateDetailPath(templateId))
-  }
-
-  function openTemplate(templateId: string) {
-    router.push(templateDetailPath(templateId))
-  }
-
-  const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSummary>((row) =>
-    openTemplate(row.id),
-  )
+  const { onRowClick: activateTemplateRow } = useActivatableTableRow<TemplateSummary>((row) => {
+    router.push(templateDetailPath(row.id))
+  })
 
   return {
     t,
@@ -194,21 +132,31 @@ export function useTemplateListCatalog() {
     currentPage,
     workflowFilterChips,
     catalogTemplates,
-    searchQuery,
-    filters,
-    activeSortKey,
-    hasAnyActive,
-    activeFilterChips,
-    clearAll,
-    removeFilterChip,
-    catalogToolbarFilters,
-    catalogSortOptions,
+    searchQuery: controls.searchQuery,
+    filters: controls.filters,
+    activeSortKey: controls.activeSortKey,
+    hasAnyActive: controls.hasAnyActive,
+    activeFilterChips: controls.activeFilterChips,
+    clearAll: controls.clearAll,
+    removeFilterChip: controls.removeFilterChip,
+    catalogToolbarFilters: controls.catalogToolbarFilters,
+    catalogSortOptions: controls.catalogSortOptions,
     showCatalogChrome,
     reloadTemplates,
-    clearWorkflowFilter,
-    onWorkflowFilterChange,
-    handleCreated,
-    handleImported,
+    clearWorkflowFilter: () => {
+      activeWorkflowFilter.value = null
+    },
+    onWorkflowFilterChange: (key: WorkflowFilterKey, checked: boolean) => {
+      activeWorkflowFilter.value = checked ? key : null
+    },
+    handleCreated: (templateId: string) => {
+      ElMessage.success(t('templates.create.success'))
+      router.push(templateDetailPath(templateId))
+    },
+    handleImported: (templateId: string) => {
+      ElMessage.success(t('templates.import.success'))
+      router.push(templateDetailPath(templateId))
+    },
     activateTemplateRow,
   }
 }

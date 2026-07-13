@@ -9,62 +9,9 @@ import TemplateDetailLifecycleActions from '@/views/templates/detail/TemplateDet
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import type { RuntimeEnvironment } from '@/config/environments'
 import type { SemverBumpLevel } from '@/utils/semver'
-import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
-import type {
-  ApiCredentialSummary,
-  ApiPolicy,
-  BindingValidationResult,
-  TemplateDetail,
-} from '@/types/template'
+import type { TemplateDetailLegacyWorkspaceProps } from '@/views/templates/detail/templateDetailLegacyWorkspaceProps'
 
-type PublishBumpOption = {
-  level: SemverBumpLevel
-  label: string
-  version: string
-}
-
-defineProps<{
-  template: TemplateDetail
-  templateId: string
-  detailTabs: Array<{ name: string; labelKey: string }>
-  formatDateTime: (value: string) => string
-  showLifecycleSection: boolean
-  showGovernanceSection: boolean
-  showDraftActions: boolean
-  showTestingDecisionActions: boolean
-  showSubmitForApproval: boolean
-  showApprovalDecisionActions: boolean
-  showPublishActions: boolean
-  showTestGenerate: boolean
-  showStopAction: boolean
-  showRestoreAction: boolean
-  showDeprecateAction: boolean
-  showAuthoringSection: boolean
-  canEditContentModuleReferences: boolean
-  showPolicyPanel: boolean
-  coverageRefreshToken: number
-  publishGateItems: PublishGateDisplayItem[]
-  loadingPublishGate: boolean
-  publishVersionConflict: boolean
-  publishGateReady: boolean
-  publishBumpOptions: PublishBumpOption[]
-  bindingGateResult: BindingValidationResult | null
-  publishGateLoadError: string | null
-  submitGateItems: PublishGateDisplayItem[]
-  loadingSubmitGate: boolean
-  submitGateReady: boolean
-  submitGateLoadError: string | null
-  submitting: boolean
-  loadingPolicy: boolean
-  apiPolicy: ApiPolicy | null
-  policyLoadFailed: boolean
-  policyLoadErrorKey: string | null
-  paginatedCredentials: ApiCredentialSummary[]
-  credentialStatusFilterOptions: Array<{ label: string; value: string }>
-  totalCredentialRows: number
-  policySubmitting: boolean
-  sortCredentialsByCreatedAt: (a: ApiCredentialSummary, b: ApiCredentialSummary) => number
-}>()
+defineProps<TemplateDetailLegacyWorkspaceProps>()
 
 const activeDetailTab = defineModel<string>('activeDetailTab', { required: true })
 const publishBumpLevel = defineModel<SemverBumpLevel>('publishBumpLevel', { required: true })
@@ -206,8 +153,5 @@ const emit = defineEmits<{
   </WorkspaceTabShell>
 </template>
 
-<style scoped lang="scss">
-.detail-tabs {
-  margin-top: var(--space-2);
-}
-</style>
+<style scoped lang="scss" src="./TemplateDetailLegacyWorkspace.scss"></style>
+

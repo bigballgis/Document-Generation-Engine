@@ -8,12 +8,12 @@ import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { createAuditConsoleSorts } from '@/composables/createAuditConsoleSorts'
 import { createAuditConsoleDisplayHelpers } from '@/composables/createAuditConsoleDisplayHelpers'
+import { createAuditConsoleFilterActions } from '@/composables/createAuditConsoleFilterActions'
 import { isGroupScopedAuditRole } from '@/auth/roles'
 import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useAuditStore } from '@/stores/audit'
 import { useSessionStore } from '@/stores/session'
 import { shouldShowAuditAdminJourney } from '@/utils/auditAdminJourney'
-import { validateGroupAdminAuditFilters } from '@/views/audit/auditFilterValidation'
 import { useAuditConsoleExport } from '@/composables/useAuditConsoleExport'
 
 export function useAuditConsole() {
@@ -27,51 +27,36 @@ export function useAuditConsole() {
   const loadFailed = ref(false)
   const filterValidationKey = ref<string | null>(null)
 
-  const { reload: reloadActiveTab, signal: auditAbortSignal } = useAbortableCatalogLoader(async (signal) => {
-    if (activeTab.value === 'management') {
-      await auditStore.fetchManagementEvents(auditStore.managementPage, { signal })
-      return
-    }
-    await auditStore.fetchLifecycleEvents(auditStore.lifecyclePage, { signal })
-  })
+  const { reload: reloadActiveTab, signal: auditAbortSignal } = useAbortableCatalogLoader(
+    async (signal) => {
+      if (activeTab.value === 'management') {
+        await auditStore.fetchManagementEvents(auditStore.managementPage, { signal })
+        return
+      }
+      await auditStore.fetchLifecycleEvents(auditStore.lifecyclePage, { signal })
+    },
+  )
 
   const showAuditAdminJourney = computed(() =>
     shouldShowAuditAdminJourney({ roles: sessionStore.session?.roles ?? [] }),
   )
-
-  const loadErrorMessageKey = computed(() => {
-    if (auditStore.lastErrorMessageKey) {
-      return auditStore.lastErrorMessageKey
-    }
-    return activeTab.value === 'management'
-      ? 'audit.error.loadManagement'
-      : 'audit.error.loadLifecycle'
-  })
-
-  const errorMessage = computed(() => {
-    const key = auditStore.lastErrorMessageKey
-    if (!key) {
-      return ''
-    }
-    return te(key) ? t(key) : t('audit.error.loadManagement')
-  })
-
+  const loadErrorMessageKey = computed(() =>
+    auditStore.lastErrorMessageKey ??
+    (activeTab.value === 'management' ? 'audit.error.loadManagement' : 'audit.error.loadLifecycle'),
+  )
   const showGroupFilters = computed(() => isGroupScopedAuditRole(auditStore.actorRole))
   const { isGroupLocked: isAuditGroupLocked } = useScopedGroupOptions()
   const auditEventTypeOptions = useAuditEventTypeOptions()
   const { templateOptions, loadingTemplates, searchTemplates } = useAuditTemplateFilterOptions()
   const canLinkTemplates = computed(() => sessionStore.canAccessRoute(ROUTE_KEYS.templateManagement))
-
   const managementSource = computed(() => auditStore.managementEvents)
   const lifecycleSource = computed(() => auditStore.lifecycleEvents)
-
   const managementUiPage = computed({
     get: () => auditStore.managementPage + 1,
     set: (page: number) => {
       void auditStore.fetchManagementEvents(page - 1, { signal: auditAbortSignal.value })
     },
   })
-
   const lifecycleUiPage = computed({
     get: () => auditStore.lifecyclePage + 1,
     set: (page: number) => {
@@ -79,116 +64,51 @@ export function useAuditConsole() {
     },
   })
 
-  const {
-    formatLifecycleState,
-    formatDate,
-    formatEventType,
-    formatActor,
-    resolveTemplateCell,
-  } = createAuditConsoleDisplayHelpers({
+  const display = createAuditConsoleDisplayHelpers({
     t,
     te,
     formatDateTime,
     canLinkTemplates: () => canLinkTemplates.value,
   })
 
-  function handleTemplateFilterSearch(query: string) {
-    void searchTemplates(query)
-  }
+  const filterActions = createAuditConsoleFilterActions({
+    auditStore,
+    activeTab,
+    filterValidationKey,
+    loadFailed,
+    showGroupFilters: () => showGroupFilters.value,
+    reloadActiveTab,
+    auditAbortSignal,
+  })
 
-  function applyRequestIdFromRouteQuery() {
+  onMounted(async () => {
+    auditStore.initializeFiltersFromSession()
     const raw = route.query.requestId
     const requestId = Array.isArray(raw) ? raw[0] : raw
     if (typeof requestId === 'string' && requestId.trim().length > 0) {
       auditStore.filters.requestId = requestId.trim()
     }
-  }
-
-  onMounted(async () => {
-    auditStore.initializeFiltersFromSession()
-    applyRequestIdFromRouteQuery()
     if (showGroupFilters.value) {
       await searchTemplates('')
     }
-    await refreshActiveTab()
+    await filterActions.refreshActiveTab()
   })
 
   watch(activeTab, () => {
-    void refreshActiveTab()
+    void filterActions.refreshActiveTab()
   })
 
-  async function refreshActiveTab() {
-    if (showGroupFilters.value) {
-      filterValidationKey.value = validateGroupAdminAuditFilters(auditStore.filters)
-      if (filterValidationKey.value) {
-        return
-      }
-    } else {
-      filterValidationKey.value = null
-    }
-
-    loadFailed.value = false
-    try {
-      await reloadActiveTab()
-    } catch {
-      loadFailed.value = true
-    }
-  }
-
-  async function handleTabChange(tab: string | number | boolean) {
-    activeTab.value = tab as 'management' | 'lifecycle'
-  }
-
-  async function applyFilters() {
-    if (showGroupFilters.value) {
-      filterValidationKey.value = validateGroupAdminAuditFilters(auditStore.filters)
-      if (filterValidationKey.value) {
-        return
-      }
-    } else {
-      filterValidationKey.value = null
-    }
-
-    loadFailed.value = false
-    try {
-      if (activeTab.value === 'management') {
-        await auditStore.fetchManagementEvents(0, { signal: auditAbortSignal.value })
-      } else {
-        await auditStore.fetchLifecycleEvents(0, { signal: auditAbortSignal.value })
-      }
-    } catch {
-      loadFailed.value = true
-    }
-  }
-
-  async function resetFilters() {
-    auditStore.resetFilters()
-    filterValidationKey.value = null
-    await applyFilters()
-  }
+  const errorMessage = computed(() => {
+    const key = auditStore.lastErrorMessageKey
+    if (!key) return ''
+    return te(key) ? t(key) : t('audit.error.loadManagement')
+  })
 
   const { handleExport } = useAuditConsoleExport({
     t,
     auditStore,
     activeTab,
-    errorMessage,
-  })
-
-  const {
-    sortManagementByActor,
-    sortManagementByTemplate,
-    sortLifecycleByActor,
-    sortLifecycleByTemplate,
-    sortManagementByEventType,
-    sortManagementByEventAt,
-    sortLifecycleByEventType,
-    sortLifecycleByEventAt,
-    sortLifecycleFromState,
-    sortLifecycleToState,
-  } = createAuditConsoleSorts({
-    formatActor,
-    formatEventType,
-    formatLifecycleState,
+    errorMessage: errorMessage as unknown as import('vue').Ref<string>,
   })
 
   return {
@@ -208,26 +128,16 @@ export function useAuditConsole() {
     lifecycleSource,
     managementUiPage,
     lifecycleUiPage,
-    formatLifecycleState,
-    formatDate,
-    formatEventType,
-    formatActor,
-    resolveTemplateCell,
-    handleTemplateFilterSearch,
-    refreshActiveTab,
-    handleTabChange,
-    applyFilters,
-    resetFilters,
+    ...display,
+    handleTemplateFilterSearch: (query: string) => {
+      void searchTemplates(query)
+    },
+    ...filterActions,
     handleExport,
-    sortManagementByActor,
-    sortManagementByTemplate,
-    sortLifecycleByActor,
-    sortLifecycleByTemplate,
-    sortManagementByEventType,
-    sortManagementByEventAt,
-    sortLifecycleByEventType,
-    sortLifecycleByEventAt,
-    sortLifecycleFromState,
-    sortLifecycleToState,
+    ...createAuditConsoleSorts({
+      formatActor: display.formatActor,
+      formatEventType: display.formatEventType,
+      formatLifecycleState: display.formatLifecycleState,
+    }),
   }
 }

@@ -11,7 +11,10 @@ const duplicatedUnwrapModules = [
   'templatesDetailPanels.ts',
   'templatesLifecycle.ts',
   'templatesBindings.ts',
-  'apiPolicy.ts',
+  // apiPolicy.ts is a facade barrel; domain modules own HTTP + unwrapEnvelope.
+  'apiPolicyAccess.ts',
+  'apiPolicyDomains.ts',
+  'apiPolicyInvocations.ts',
   'masters.ts',
   'identity.ts',
   'audit.ts',

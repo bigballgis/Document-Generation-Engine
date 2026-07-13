@@ -1,16 +1,10 @@
-import type { FormInstance, FormRules } from 'element-plus'
+import type { FormInstance } from 'element-plus'
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { MANAGEMENT_ROLES } from '@/auth/roles'
 import * as templateRiskPromptApi from '@/api/templateRiskPromptConfig'
-import {
-  TEMPLATE_DECISION_REASON_CATEGORIES,
-  isApprovalPassDecisionValid,
-  isLifecycleDecisionFormValid,
-  isRejectDecisionValid,
-  isTestPassDecisionValid,
-} from '@/utils/templateLifecycleDecisionForm'
+import { TEMPLATE_DECISION_REASON_CATEGORIES } from '@/utils/templateLifecycleDecisionForm'
 import {
   buildLifecycleDecisionSubmitPayload,
   resetLifecycleDecisionForm,
@@ -18,6 +12,10 @@ import {
   type LifecycleDecisionDialogProps,
   type LifecycleDecisionFormState,
 } from '@/components/templates/lifecycleDecisionDialogTypes'
+import {
+  createLifecycleDecisionDialogDerived,
+  submitLifecycleDecisionForm,
+} from '@/components/templates/createLifecycleDecisionDialogDerived'
 
 export type {
   LifecycleDecisionDialogMode,
@@ -70,71 +68,12 @@ export function useLifecycleDecisionDialog(
       context.value.roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN) ||
       context.value.roles.includes(MANAGEMENT_ROLES.GLOBAL_ADMIN),
   )
-  const isNegativeMode = computed(
-    () => props.mode === 'test-fail' || props.mode === 'approval-reject',
-  )
-  const isTestPassMode = computed(() => props.mode === 'test-pass')
-  const isApprovalPassMode = computed(() => props.mode === 'approval-approve')
 
-  const dialogTitle = computed(() => {
-    switch (props.mode) {
-      case 'test-fail':
-        return t('templates.lifecycle.decisionForm.failTestTitle')
-      case 'test-pass':
-        return t('templates.lifecycle.decisionForm.passTestTitle')
-      case 'approval-reject':
-        return t('templates.lifecycle.decisionForm.rejectTitle')
-      case 'approval-approve':
-        return t('templates.lifecycle.decisionForm.approveTitle')
-      default:
-        return t('templates.lifecycle.decisionForm.submit')
-    }
-  })
-
-  const rules = computed<FormRules>(() => {
-    if (isTestPassMode.value) {
-      return {}
-    }
-    if (isApprovalPassMode.value) {
-      return {
-        commentSummary: [
-          {
-            required: true,
-            message: t('templates.lifecycle.decisionForm.validation.rationaleRequired'),
-            trigger: 'blur',
-          },
-        ],
-      }
-    }
-    return {
-      reasonCategory: [
-        {
-          required: true,
-          message: t('templates.lifecycle.decisionForm.validation.reasonCategoryRequired'),
-          trigger: 'change',
-        },
-      ],
-      impactSummary: [
-        {
-          required: true,
-          message: t('templates.lifecycle.decisionForm.validation.impactSummaryRequired'),
-          trigger: 'blur',
-        },
-      ],
-    }
-  })
-
-  const submitDisabled = computed(() => {
-    if (isTestPassMode.value) {
-      return !isTestPassDecisionValid(form)
-    }
-    if (isApprovalPassMode.value) {
-      return !isApprovalPassDecisionValid(form)
-    }
-    if (props.mode === 'approval-reject' || props.mode === 'test-fail') {
-      return !isRejectDecisionValid(form)
-    }
-    return !isLifecycleDecisionFormValid(form)
+  const derived = createLifecycleDecisionDialogDerived({
+    t,
+    mode: () => props.mode,
+    form,
+    canConfirmOnBehalf,
   })
 
   watch(
@@ -175,29 +114,17 @@ export function useLifecycleDecisionDialog(
   }
 
   async function submitForm() {
-    if (submitDisabled.value) {
-      return
-    }
-    const payload = buildLifecycleDecisionSubmitPayload(props.mode, form)
-    if (isNegativeMode.value && formRef.value) {
-      await formRef.value.validate((valid) => {
-        if (!valid) {
-          return
-        }
-        emit('submit', payload)
-      })
-      return
-    }
-    if (isApprovalPassMode.value && formRef.value) {
-      await formRef.value.validate((valid) => {
-        if (!valid || !isApprovalPassDecisionValid(form)) {
-          return
-        }
-        emit('submit', payload)
-      })
-      return
-    }
-    emit('submit', payload)
+    await submitLifecycleDecisionForm({
+      submitDisabled: derived.submitDisabled,
+      isNegativeMode: derived.isNegativeMode,
+      isApprovalPassMode: derived.isApprovalPassMode,
+      formRef,
+      form,
+      mode: props.mode,
+      buildPayload: () => buildLifecycleDecisionSubmitPayload(props.mode, form),
+      emitSubmit: (payload) =>
+        emit('submit', payload as ReturnType<typeof buildLifecycleDecisionSubmitPayload>),
+    })
   }
 
   return {
@@ -207,12 +134,12 @@ export function useLifecycleDecisionDialog(
     selectedReasonPrompt,
     visible,
     canConfirmOnBehalf,
-    isTestPassMode,
-    isApprovalPassMode,
+    isTestPassMode: derived.isTestPassMode,
+    isApprovalPassMode: derived.isApprovalPassMode,
     form,
-    dialogTitle,
-    rules,
-    submitDisabled,
+    dialogTitle: derived.dialogTitle,
+    rules: derived.rules,
+    submitDisabled: derived.submitDisabled,
     closeDialog,
     submitForm,
   }

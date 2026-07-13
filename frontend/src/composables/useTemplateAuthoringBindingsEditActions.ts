@@ -1,6 +1,5 @@
 import { computed, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
 import { useDirtyGuard } from '@/composables/useDirtyGuard'
 import { useTemplateAuthoringBindingsPasteResidue } from '@/composables/useTemplateAuthoringBindingsPasteResidue'
 import { createTemplateAuthoringBindingsSaveFlow } from '@/composables/createTemplateAuthoringBindingsSaveFlow'
@@ -14,6 +13,7 @@ import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
 import type { MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
 import type { PasteCleaningEvidence, UpsertBindingPayload } from '@/types/template'
+import { createTemplateAuthoringBindingsEditHandlers } from '@/composables/createTemplateAuthoringBindingsEditHandlers'
 
 export function useTemplateAuthoringBindingsEditActions(options: {
   props: TemplateAuthoringBindingsPanelProps
@@ -110,13 +110,7 @@ export function useTemplateAuthoringBindingsEditActions(options: {
     },
   })
 
-  const {
-    bindingHasPasteBlockers,
-    editingPasteResidueBlocked,
-    pasteResidueItemLabel,
-    handlePasteAccepted,
-    clearPendingPasteResidue,
-  } = useTemplateAuthoringBindingsPasteResidue({
+  const paste = useTemplateAuthoringBindingsPasteResidue({
     pendingPasteEvidence,
     pendingClearPasteEvidence,
     editingRow,
@@ -124,56 +118,26 @@ export function useTemplateAuthoringBindingsEditActions(options: {
     t,
   })
 
-  function backToList() {
-    void dirtyGuardRequestLeave(() => {
-      panelMode.value = 'list'
-      editingAnchorId.value = null
-      editSnapshot.value = null
-    })
-  }
-
-  async function handleSaveBinding() {
-    try {
-      await saveBindingDraft()
-      panelMode.value = 'list'
-      editingAnchorId.value = null
-      editSnapshot.value = null
-      ElMessage.success(t('templates.authoring.saveBindingSuccess'))
-      emit('updated')
-    } catch {
-      ElMessage.error(t('templates.error.saveBinding'))
-    }
-  }
-
-  async function handlePreviewRefresh() {
-    if (previewRefreshing.value) {
-      return
-    }
-    localPreviewRefreshing.value = true
-    try {
-      const preview = await templatesStore.testGenerate(props.templateId, {
-        testDataSetId: props.selectedTestDataSetId ?? undefined,
-      })
-      previewSyncedRevision.value = structureRevision.value
-      emit('preview-refreshed', preview)
-      ElMessage.success(t('templates.testGenerate.success', { previewId: preview.previewId }))
-    } catch {
-      ElMessage.error(t('templates.error.testGenerate'))
-    } finally {
-      localPreviewRefreshing.value = false
-    }
-  }
-
-  function handleEditorDirtyChange(dirty: boolean) {
-    editorDirty.value = dirty
-  }
-
-  function handleStructureChange() {
-    if (suppressStructureBump.value) {
-      return
-    }
-    structureRevision.value += 1
-  }
+  const handlers = createTemplateAuthoringBindingsEditHandlers({
+    t,
+    props,
+    emit,
+    panelMode,
+    editingAnchorId,
+    editSnapshot,
+    editorDirty,
+    structureRevision,
+    previewSyncedRevision,
+    suppressStructureBump,
+    bindingForm,
+    visibilityEnabled,
+    visibilityExpression,
+    previewRefreshing,
+    localPreviewRefreshing,
+    templatesStore,
+    saveBindingDraft,
+    dirtyGuardRequestLeave,
+  })
 
   watch(
     () => [bindingForm.declaredContentType, visibilityEnabled.value, visibilityExpression.value],
@@ -191,16 +155,12 @@ export function useTemplateAuthoringBindingsEditActions(options: {
     dirtyGuardStay,
     dirtyGuardDiscard,
     dirtyGuardSave,
-    editingPasteResidueBlocked,
-    bindingHasPasteBlockers,
-    pasteResidueItemLabel,
-    handlePasteAccepted,
-    clearPendingPasteResidue,
+    editingPasteResidueBlocked: paste.editingPasteResidueBlocked,
+    bindingHasPasteBlockers: paste.bindingHasPasteBlockers,
+    pasteResidueItemLabel: paste.pasteResidueItemLabel,
+    handlePasteAccepted: paste.handlePasteAccepted,
+    clearPendingPasteResidue: paste.clearPendingPasteResidue,
     openEditPanel,
-    backToList,
-    handleSaveBinding,
-    handlePreviewRefresh,
-    handleEditorDirtyChange,
-    handleStructureChange,
+    ...handlers,
   }
 }

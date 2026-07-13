@@ -6,14 +6,12 @@ import {
   handleStoreListFailure,
   type AbortableRequestOptions,
 } from '@/stores/storeRequestSupport'
-import { applyUpdatedMaster, toMasterSummary } from '@/stores/mastersStoreHelpers'
+import { createMastersCatalogMutationActions } from '@/stores/createMastersCatalogMutationActions'
+import { toMasterSummary } from '@/stores/mastersStoreHelpers'
 import type {
   CreateMasterPayload,
-  DecideMasterReviewPayload,
   MasterDocumentDetail,
   MasterDocumentSummary,
-  SubmitMasterReviewPayload,
-  UpdateMasterMetadataPayload,
 } from '@/types/master'
 
 export function createMastersCatalogActions(deps: {
@@ -146,67 +144,18 @@ export function createMastersCatalogActions(deps: {
     }
   }
 
-  async function submitReview(
-    masterId: string,
-    payload: SubmitMasterReviewPayload,
-  ): Promise<MasterDocumentDetail> {
-    submitting.value = true
-    lastErrorMessageKey.value = null
-    try {
-      const updated = await mastersApi.submitMasterReview(masterId, payload)
-      applyUpdatedMaster(selectedMaster, masters, updated)
-      return updated
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.submitReview')
-      throw error
-    } finally {
-      submitting.value = false
-    }
-  }
-
-  async function decideReview(
-    masterId: string,
-    payload: DecideMasterReviewPayload,
-  ): Promise<MasterDocumentDetail> {
-    submitting.value = true
-    lastErrorMessageKey.value = null
-    try {
-      const updated = await mastersApi.decideMasterReview(masterId, payload)
-      applyUpdatedMaster(selectedMaster, masters, updated)
-      return updated
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.decideReview')
-      throw error
-    } finally {
-      submitting.value = false
-    }
-  }
-
-  async function updateMasterMetadata(
-    masterId: string,
-    payload: UpdateMasterMetadataPayload,
-  ): Promise<MasterDocumentDetail> {
-    submitting.value = true
-    lastErrorMessageKey.value = null
-    try {
-      const updated = await mastersApi.updateMasterMetadata(masterId, payload)
-      applyUpdatedMaster(selectedMaster, masters, updated)
-      return updated
-    } catch (error) {
-      lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'masters.error.updateMetadata')
-      throw error
-    } finally {
-      submitting.value = false
-    }
-  }
+  const mutationActions = createMastersCatalogMutationActions({
+    masters,
+    selectedMaster,
+    submitting,
+    lastErrorMessageKey,
+  })
 
   return {
     fetchMasters,
     fetchAllMasters,
     fetchMaster,
     uploadMaster,
-    submitReview,
-    decideReview,
-    updateMasterMetadata,
+    ...mutationActions,
   }
 }

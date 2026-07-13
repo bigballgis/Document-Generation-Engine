@@ -2,10 +2,6 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import {
-  hasApprovedActiveVersion,
-  hasApprovedStoppedVersion,
-  latestDraftVersion,
-  latestSubmittedVersion,
   resolveContentModuleApproverActorRole,
   resolveContentModuleAuthorActorRole,
   resolveContentModuleLifecycleActorRole,
@@ -17,14 +13,13 @@ import type {
   ContentModuleLifecycleOperation,
   ContentModuleVersion,
 } from '@/types/contentModule'
-import { DEFAULT_STRUCTURED_CONTENT_JSON, serializeStructuredContent } from '@/utils/structuredContentNodes'
-import { normalizeStructuredContentJson } from '@/utils/structuredContentCompat'
 import {
   CONTENT_MODULE_WORKSPACE_TAB_LABEL_KEYS,
   buildContentModuleWorkspaceQuery,
   resolveContentModuleWorkspaceTabFromQuery,
   type ContentModuleWorkspaceTab,
 } from '@/views/contentModules/contentModuleWorkspaceTabs'
+import { createContentModuleDetailDerived } from '@/views/contentModules/createContentModuleDetailDerived'
 import { useContentModuleDetailActions } from '@/views/contentModules/useContentModuleDetailActions'
 
 export function useContentModuleDetailController() {
@@ -83,61 +78,14 @@ export function useContentModuleDetailController() {
     resolveContentModuleLifecycleActorRole(sessionStore.session?.roles ?? []),
   )
 
-  const canSubmitReview = computed(
-    () => authorContentModules.value && Boolean(latestDraftVersion(versions.value)),
-  )
-  const canApproveReview = computed(
-    () => decideContentModuleReviews.value && Boolean(latestSubmittedVersion(versions.value)),
-  )
-  const canCreateVersion = computed(() => authorContentModules.value)
-  const canEditDraft = computed(
-    () => authorContentModules.value && Boolean(latestDraftVersion(versions.value)),
-  )
-  const canStop = computed(
-    () => manageContentModuleLifecycle.value && hasApprovedActiveVersion(versions.value),
-  )
-  const canRecover = computed(
-    () => manageContentModuleLifecycle.value && hasApprovedStoppedVersion(versions.value),
-  )
-  const canDeprecate = canRecover
-
-  const previewVersion = computed(() => {
-    const draft = latestDraftVersion(versions.value)
-    if (draft) {
-      return draft as ContentModuleVersion
-    }
-    return (
-      versions.value.find(
-        (version) =>
-          version.reviewState === 'APPROVED' && (version.lifecycleState ?? 'ACTIVE') === 'ACTIVE',
-      ) ?? null
-    )
-  })
-
-  const previewContentJson = computed(() => {
-    const version = previewVersion.value
-    if (!version?.contentStructureJson) {
-      return DEFAULT_STRUCTURED_CONTENT_JSON
-    }
-    return serializeStructuredContent(normalizeStructuredContentJson(version.contentStructureJson))
-  })
-
-  const previewVersionLabel = computed(() => {
-    if (!previewVersion.value) {
-      return ''
-    }
-    return t('contentModules.detail.contentPreviewVersion', {
-      version: previewVersion.value.semanticVersion,
-      state: previewVersion.value.reviewState,
-    })
-  })
-
-  const errorMessage = computed(() => {
-    const key = contentModulesStore.lastErrorMessageKey
-    if (!key) {
-      return ''
-    }
-    return te(key) ? t(key) : t('contentModules.error.loadDetail')
+  const derived = createContentModuleDetailDerived({
+    versions,
+    authorContentModules,
+    decideContentModuleReviews,
+    manageContentModuleLifecycle,
+    t,
+    getLastErrorMessageKey: () => contentModulesStore.lastErrorMessageKey,
+    te,
   })
 
   const lifecycleOperationLabelKey = computed(() => {
@@ -177,7 +125,7 @@ export function useContentModuleDetailController() {
   const actions = useContentModuleDetailActions({
     moduleId,
     versions,
-    errorMessage,
+    errorMessage: derived.errorMessage,
     authorActorRole,
     approverActorRole,
     lifecycleActorRole,
@@ -202,16 +150,16 @@ export function useContentModuleDetailController() {
     moduleId,
     detail,
     versions,
-    canSubmitReview,
-    canApproveReview,
-    canCreateVersion,
-    canEditDraft,
-    canStop,
-    canRecover,
-    canDeprecate,
-    previewVersion,
-    previewContentJson,
-    previewVersionLabel,
+    canSubmitReview: derived.canSubmitReview,
+    canApproveReview: derived.canApproveReview,
+    canCreateVersion: derived.canCreateVersion,
+    canEditDraft: derived.canEditDraft,
+    canStop: derived.canStop,
+    canRecover: derived.canRecover,
+    canDeprecate: derived.canDeprecate,
+    previewVersion: derived.previewVersion,
+    previewContentJson: derived.previewContentJson,
+    previewVersionLabel: derived.previewVersionLabel,
     lifecycleOperationLabelKey,
     reloadPage,
     goBackToList,
