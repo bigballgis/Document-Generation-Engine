@@ -149,11 +149,11 @@ Done 时平台应满足：
 - K06c：`attachmentListRef` writer（结构化附件清单 → 编号列表段落）；PDF 页码 stamp 策略进 render profile（按包配置而非全局布尔）。
 **依赖：** K02（样式来源）先行为佳；资产/图片依赖 CE-E02 的键名约定但不阻塞。
 
-### CE-K07 金标语料回归体系 — P1 · M · `In Progress`
+### CE-K07 金标语料回归体系 — P1 · M · `Done`
 
 **目标：** `backend/src/test/resources/golden-corpus/` 固化 ≥8 个基准包（双字体母版、跨页表格、嵌套条款、compute 变量、中文大写金额、水印 SPECIMEN、加密 PDF、极限长条款），每个含输入（母版+模板 JSON+变量）与期望产出断言（DOCX XML 关键路径断言 + PDF 文本抽取断言，不做像素比对）；接入 `mvn verify`。K01–K06 每片交付时必须往语料库加对应样本。
 **依赖：** 骨架先行，可与 K01 并行启动。
-**状态（2026-07-14）：** 骨架先行切片 `ce-k07-golden-corpus-skeleton` 实现完成于隔离 worktree `D:/working/DGE-ce-k07-golden-corpus-skeleton`（分支 `feat/ce-k07-golden-corpus-skeleton`）。8 主题包骨架就位（`nested-clauses`/`encrypted-pdf` = ACTIVE，其余 6 = PLACEHOLDER）；harness `GoldenCorpusScanner`/`GoldenCorpusActiveRunner`/`GoldenCorpusStructureTest`/`GoldenCorpusHarnessTest` 接入 `mvn verify`；`mvn -B -ntp -f backend/pom.xml verify` **GREEN**（455+ 测试 0 失败；golden-corpus 套件 11/11 绿；Checkstyle/PMD/SpotBugs/JaCoCo 通过）。BDD-CE-K07-001…019 覆盖。**未合并 main**——待 `integration-merger` + MAIN doc-sync。正式 phase 仍为 None；不宣称 Done；不激活 CD-3。
+**状态（2026-07-14）：** **Done** — 骨架先行切片 `ce-k07-golden-corpus-skeleton`（Task Master **#54**）。**Merge:** `e8f996a0` (`e8f996a000fcf3845fa4c1dc66295e2b0c0f5282`); feature tip `91455ca3`。8 主题包骨架就位（`nested-clauses`/`encrypted-pdf` = ACTIVE，其余 6 = PLACEHOLDER）；harness `GoldenCorpusScanner`/`GoldenCorpusActiveRunner`/`GoldenCorpusStructureTest`/`GoldenCorpusHarnessTest` 接入 `mvn verify`。**Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (**1379** / 0 fail / 0 error / 7 skipped；golden-corpus 套件绿；Checkstyle/PMD/SpotBugs/JaCoCo 通过）。Architecture **PASS_WITH_NOTES** (Critical=0; review `7bc4b23f`)。BDD **ready** ([ce-k07-golden-corpus-skeleton.md](../behavior/ce-k07-golden-corpus-skeleton.md); **BDD-CE-K07-001…019**)。PLACEHOLDER 充实由后续 K01–K06 / CE-G02 拥有。正式 phase 仍为 **None**；**not** go-live；不激活 CD-3。
 
 ### CE-K08 条款治理元数据 — P2 · M · `Not Started`
 
@@ -371,6 +371,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-14):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). First batch **In Progress:** #54 CE-K07 (`ce-k07-golden-corpus-skeleton`), #55 CE-U03 (`ce-u03-testdata-schema-form`), #56 CE-C01+C02 (`ce-c01-c02-contract-strictness`). Formal phase remains **None**.
+**Task Master registry (2026-07-14):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **#54 CE-K07 → Done** (merge `e8f996a0`). Batch 1 residual **In Progress:** #55 CE-U03 (`ce-u03-testdata-schema-form`), #56 CE-C01+C02 (`ce-c01-c02-contract-strictness`). Formal phase remains **None**.
 
-**Last reviewed:** 2026-07-14（D1–D7 confirmed；Task Master registered；首批三泳道 `In Progress`）
+**Last reviewed:** 2026-07-14（CE-K07 skeleton merged `e8f996a0`；#54 Done；Batch 1 residual #55/#56）

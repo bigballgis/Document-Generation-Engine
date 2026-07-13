@@ -730,26 +730,26 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-14. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md (commit b82c1e61). Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. First batch slices in-progress: #54 CE-K07, #55 CE-U03, #56 CE-C01+C02. Prior #52 api-ops-discoverability → done (merge b57ba3d9). CE-O02 skipped (D5 deferred).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md (commit b82c1e61). Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). First batch (3 worktrees): ce-k07-golden-corpus-skeleton, ce-u03-testdata-schema-form, ce-c01-c02-contract-strictness. Second batch after first merges: ce-k01-release-bundle-pinning, ce-u01-nested-editor, ce-g01-self-approval-block. D1–D7 locked 2026-07-14 (no four-eye; immediate-only; no webhook; SYNC_DOWNLOAD_URL deferred; no addressBlock; PDF/A-2b for O01; release-locked async).",
-        "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #54–#97 open.",
+        "description": "IN PROGRESS 2026-07-14. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. #54 CE-K07 → done (merge e8f996a0). Batch 1 residual in-progress: #55 CE-U03, #56 CE-C01+C02. Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). First batch: ce-k07-golden-corpus-skeleton Done; residual ce-u03-testdata-schema-form, ce-c01-c02-contract-strictness. Second batch after first merges: ce-k01-release-bundle-pinning, ce-u01-nested-editor, ce-g01-self-approval-block. D1–D7 locked 2026-07-14.",
+        "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:50:00Z"
+        "updatedAt": "2026-07-14T05:20:00Z"
       },
       {
         "id": "54",
         "title": "CE-K07: Golden corpus regression skeleton",
-        "description": "IN PROGRESS 2026-07-14. Slice ce-k07-golden-corpus-skeleton. Skeleton for backend/src/test/resources/golden-corpus/ (≥8 baseline packages planned across K01–K06); wire into mvn verify. Lane1 first. Formal phase None.",
-        "details": "CE-K07 P1·M. Create golden-corpus layout + harness + initial placeholder/skeleton packages so later K01–K06 add samples. BDD as needed. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan card: core-excellence-program-2026-07.md §3 CE-K07.",
-        "testStrategy": "1. golden-corpus/ present with harness. 2. mvn verify runs corpus tests (skeleton may be minimal). 3. Doc/ledger note for K07 skeleton.",
+        "description": "DONE 2026-07-14. Slice ce-k07-golden-corpus-skeleton. Merge e8f996a0; feature tip 91455ca3. golden-corpus/ ≥8 packages + harness in mvn verify. Formal phase None.",
+        "details": "Completed 2026-07-14. Slice id: ce-k07-golden-corpus-skeleton. Merge e8f996a0 (e8f996a000fcf3845fa4c1dc66295e2b0c0f5282); feature tip 91455ca3. 8 theme packages (2 ACTIVE / 6 PLACEHOLDER); GoldenCorpus* harness; mvn verify GREEN 1379/0/0/7; architecture PASS_WITH_NOTES (Critical=0, review 7bc4b23f). PLACEHOLDER enrichment owned by later K01–K06/G02. Formal phase remains None. Plan card: core-excellence-program-2026-07.md §3 CE-K07 Done.",
+        "testStrategy": "1. golden-corpus/ present with harness. 2. mvn verify runs corpus tests GREEN 1379/0/0/7. 3. Doc/ledger note for K07 skeleton Done.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T05:20:00Z"
       },
       {
         "id": "55",
