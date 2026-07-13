@@ -84,7 +84,7 @@ Architecture views describe current architectural facts, boundaries, responsibil
 | [Checkstyle Baseline Governance Plan](checkstyle-baseline-governance-plan.md) | Confirmed staged checkstyle baseline debt closure governance with explicit transition thresholds | Accepted baseline |
 | [Playwright E2E Stabilization and Agent Plan](e2e-stabilization-and-agent-plan.md) | Documentation-first non-blocking E2E stabilization policy, smoke coverage, cadence, evidence, promotion criteria, and E2E/E2E UIUX/deployment agent rollout mapping (T01-T09) | Proposed baseline |
 | [Fixed TDD Delivery Workflow](tdd-delivery-workflow.md) | Mandatory implementation workflow from task generation through review, commit, and push | Accepted baseline |
-| [Quality Gate Threshold Baseline](quality-gate-threshold-baseline.md) | Fixed default quality thresholds for complexity, dependency, test coverage, and maintainability gates | Accepted baseline |
+| [Quality Gate Threshold Baseline](quality-gate-threshold-baseline.md) | Fixed default quality thresholds for complexity, dependency, test coverage, and maintainability gates; includes Task Master **#49** hygiene upgrade constraints (Boot 3.3.x / ShedLock 6.x / no major Vue·Vite without ADR) | Accepted baseline |
 | [Runtime View](runtime-view.md) | Runtime components, deployment shape, and execution responsibilities | Accepted baseline |
 | [Data and Storage View](data-storage-view.md) | Durable data, cache, object storage, retention, and storage ownership | Accepted baseline |
 | [Async Messaging View](async-messaging-view.md) | Kafka usage, message boundaries, asynchronous processing, retries, and DLQ expectations | Accepted baseline |
