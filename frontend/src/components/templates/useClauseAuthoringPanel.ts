@@ -4,10 +4,9 @@ import * as contentModulesApi from '@/api/contentModules'
 import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
 import { canAccessContentModuleManagement } from '@/auth/roles'
 import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
-import { useContentModulesStore } from '@/stores/contentModules'
 import { useSessionStore } from '@/stores/session'
-import { DEFAULT_STRUCTURED_CONTENT_JSON, serializeStructuredContent } from '@/utils/structuredContentNodes'
-import { normalizeStructuredContentJson } from '@/utils/structuredContentCompat'
+import { DEFAULT_STRUCTURED_CONTENT_JSON } from '@/utils/structuredContentNodes'
+import { useClauseAuthoringEditors } from '@/components/templates/useClauseAuthoringEditors'
 import type { ContentModuleSummary, ContentModuleVersion } from '@/types/contentModule'
 import type { TemplateContentModuleReference } from '@/types/template'
 import { ElMessage } from 'element-plus'
@@ -30,7 +29,6 @@ export function useClauseAuthoringPanel(
 ) {
   const { t, te } = useI18n()
   const sessionStore = useSessionStore()
-  const contentModulesStore = useContentModulesStore()
   const panelDataStore = useTemplatePanelDataStore()
 
   const saving = ref(false)
@@ -188,70 +186,18 @@ export function useClauseAuthoringPanel(
     }
   }
 
-  async function resolveReferencedVersion(
-    reference: TemplateContentModuleReference,
-  ): Promise<ContentModuleVersion | null> {
-    const detail = await contentModulesApi.getContentModule(reference.moduleId)
-    return detail.versions.find((version) => version.semanticVersion === reference.semanticVersion) ?? null
-  }
-
-  async function openPreviewDialog(reference: TemplateContentModuleReference) {
-    try {
-      const version = await resolveReferencedVersion(reference)
-      if (!version?.contentStructureJson) {
-        ElMessage.warning(t('templates.clauseAuthoring.noContentStructure'))
-        return
-      }
-      previewContentJson.value = serializeStructuredContent(
-        normalizeStructuredContentJson(version.contentStructureJson),
-      )
-      previewDialogOpen.value = true
-    } catch {
-      ElMessage.error(t('templates.clauseAuthoring.error.loadContent'))
-    }
-  }
-
-  async function openClauseEditor(reference: TemplateContentModuleReference) {
-    if (!props.editable) {
-      return
-    }
-    try {
-      const version = await resolveReferencedVersion(reference)
-      if (!version) {
-        ElMessage.warning(t('templates.clauseAuthoring.versionNotFound'))
-        return
-      }
-      clauseEditVersion.value = version
-      clauseEditModuleId.value = reference.moduleId
-      clauseEditContentJson.value = version.contentStructureJson
-        ? serializeStructuredContent(normalizeStructuredContentJson(version.contentStructureJson))
-        : DEFAULT_STRUCTURED_CONTENT_JSON
-      clauseEditReadonly.value = version.reviewState !== 'DRAFT'
-      clauseEditDialogOpen.value = true
-    } catch {
-      ElMessage.error(t('templates.clauseAuthoring.error.loadContent'))
-    }
-  }
-
-  async function handleSaveClauseContent() {
-    const version = clauseEditVersion.value
-    if (!version || clauseEditReadonly.value) {
-      return
-    }
-    savingClause.value = true
-    try {
-      await contentModulesStore.updateDraftVersion(clauseEditModuleId.value, version.semanticVersion, {
-        contentStructureJson: clauseEditContentJson.value,
-      })
-      ElMessage.success(t('templates.clauseAuthoring.saveClauseSuccess'))
-      clauseEditDialogOpen.value = false
-      emit('updated')
-    } catch {
-      ElMessage.error(t('templates.clauseAuthoring.error.saveClause'))
-    } finally {
-      savingClause.value = false
-    }
-  }
+  const { openPreviewDialog, openClauseEditor, handleSaveClauseContent } = useClauseAuthoringEditors({
+    editable: () => props.editable,
+    previewDialogOpen,
+    previewContentJson,
+    clauseEditDialogOpen,
+    clauseEditContentJson,
+    clauseEditReadonly,
+    clauseEditVersion,
+    clauseEditModuleId,
+    savingClause,
+    emitUpdated: () => emit('updated'),
+  })
 
   onMounted(async () => {
     await loadModuleOptions()
