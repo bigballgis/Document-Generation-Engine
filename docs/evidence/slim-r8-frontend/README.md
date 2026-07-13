@@ -3,7 +3,7 @@
 Branch: `feat/slim-r8-frontend`  
 Base: `main` @ `9df16f5`  
 Date: 2026-07-13  
-HEAD (pre-commit working tree; commit SHA after push): see git log after commit
+HEAD: `bffc291510b1be546de6213476baf0ebf4d3a8ea`
 
 ## Scope completed
 
