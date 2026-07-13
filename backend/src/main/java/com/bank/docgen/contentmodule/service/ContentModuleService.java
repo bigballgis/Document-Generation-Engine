@@ -2,20 +2,16 @@ package com.bank.docgen.contentmodule.service;
 
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.authorization.management.api.CatalogPageSupport;
-import com.bank.docgen.authorization.management.api.CatalogQueryPage;
-import com.bank.docgen.authorization.management.api.CatalogSortKey;
 import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.contentmodule.api.ContentModuleDetailView;
 import com.bank.docgen.contentmodule.api.ContentModuleSummaryView;
-import com.bank.docgen.contentmodule.api.ContentModuleVersionView;
 import com.bank.docgen.contentmodule.api.CreateContentModuleRequest;
 import com.bank.docgen.contentmodule.api.CreateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.api.UpdateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
-import com.bank.docgen.contentmodule.persistence.ContentModuleRepositoryCustom.ContentModuleCatalogFilter;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -33,6 +29,7 @@ public class ContentModuleService {
     private final GroupAccessService groupAccessService;
     private final ContentModuleAccessService accessSupport;
     private final ManagementAuditRecorder auditRecorder;
+    private final ContentModuleCatalogSupport catalog;
 
     public ContentModuleService(
             ContentModuleRepository moduleRepository,
@@ -46,6 +43,8 @@ public class ContentModuleService {
         this.groupAccessService = groupAccessService;
         this.accessSupport = accessSupport;
         this.auditRecorder = auditRecorder;
+        this.catalog = new ContentModuleCatalogSupport(
+                moduleRepository, versionRepository, groupAccessService, accessSupport);
     }
 
     @Transactional(readOnly = true)
@@ -57,44 +56,7 @@ public class ContentModuleService {
             String groupCode,
             String sort
     ) {
-        assertCatalogBrowseAllowed(session);
-        int safePage = CatalogPageSupport.normalizePage(page);
-        int safeSize = CatalogPageSupport.normalizeSize(size);
-        List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
-        if (groupCodes.isEmpty()) {
-            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-        }
-
-        boolean allGroups = groupCodes.contains("*");
-        String groupFilter = CatalogPageSupport.blankToNull(groupCode);
-        if (groupFilter != null) {
-            groupFilter = groupFilter.toUpperCase(Locale.ROOT);
-            if (!groupAccessService.canAccessGroup(session, groupFilter)) {
-                return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-            }
-        }
-
-        List<String> normalizedGroups = allGroups
-                ? List.of()
-                : groupCodes.stream().map(code -> code.trim().toUpperCase(Locale.ROOT)).toList();
-        CatalogSortKey sortKey = CatalogSortKey.parse(sort, CatalogSortKey.MODULE_CODE_ASC);
-        ContentModuleCatalogFilter filter = new ContentModuleCatalogFilter(
-                normalizedGroups,
-                allGroups,
-                groupFilter,
-                CatalogPageSupport.blankToNull(search),
-                sortKey
-        );
-        CatalogQueryPage<ContentModuleEntity> modulePage =
-                moduleRepository.searchCatalog(filter, safePage, safeSize);
-        List<ContentModuleSummaryView> content = modulePage.content().stream().map(this::toSummary).toList();
-        return new PageView<>(
-                content,
-                safePage,
-                safeSize,
-                modulePage.totalElements(),
-                modulePage.totalPages()
-        );
+        return catalog.list(session, page, size, search, groupCode, sort);
     }
 
     @Transactional(readOnly = true)
@@ -104,21 +66,14 @@ public class ContentModuleService {
 
     @Transactional(readOnly = true)
     public List<ContentModuleSummaryView> list(String groupCode, ManagementSessionClaims session) {
-        assertCatalogBrowseAllowed(session);
-        if (groupCode == null || groupCode.isBlank()) {
-            throw new ContentModuleValidationException("api.error.contentModule.groupCodeRequired");
-        }
-        if (!groupAccessService.canAccessGroup(session, groupCode)) {
-            throw new ContentModuleAccessDeniedException();
-        }
-        return list(session, 0, CatalogPageSupport.MAX_SIZE, null, groupCode, null).content();
+        return catalog.listByGroup(groupCode, session);
     }
 
     @Transactional(readOnly = true)
     public ContentModuleDetailView get(String moduleId, ManagementSessionClaims session) {
-        assertCatalogBrowseAllowed(session);
+        catalog.assertCatalogBrowseAllowed(session);
         ContentModuleEntity module = accessSupport.requireReadableModule(moduleId, session);
-        return toDetail(module, session);
+        return catalog.toDetail(module, session);
     }
 
     @Transactional
@@ -165,7 +120,7 @@ public class ContentModuleService {
                 session.username(),
                 accessSupport.actorSummary(session)
         );
-        return toDetail(module, session);
+        return catalog.toDetail(module, session);
     }
 
     @Transactional
@@ -199,7 +154,7 @@ public class ContentModuleService {
                 session.username(),
                 accessSupport.actorSummary(session)
         );
-        return toDetail(module, session);
+        return catalog.toDetail(module, session);
     }
 
     @Transactional
@@ -234,66 +189,12 @@ public class ContentModuleService {
                 session.username(),
                 accessSupport.actorSummary(session)
         );
-        return toDetail(module, session);
-    }
-
-    private void assertCatalogBrowseAllowed(ManagementSessionClaims session) {
-        if (!groupAccessService.canBrowseContentModuleCatalog(session)) {
-            throw new ContentModuleAccessDeniedException();
-        }
+        return catalog.toDetail(module, session);
     }
 
     private void validateContentStructureJson(String contentStructureJson) {
         if (contentStructureJson == null || contentStructureJson.isBlank()) {
             throw new ContentModuleValidationException("api.error.contentModule.contentStructureRequired");
         }
-    }
-
-    private ContentModuleSummaryView toSummary(ContentModuleEntity module) {
-        return new ContentModuleSummaryView(
-                accessSupport.publicModuleId(module),
-                module.getModuleCode(),
-                module.getGroupCode(),
-                module.getName(),
-                module.getDescription(),
-                accessSupport.readSharedGroupCodes(module),
-                module.getCreatedAt(),
-                module.getUpdatedAt()
-        );
-    }
-
-    private ContentModuleDetailView toDetail(ContentModuleEntity module, ManagementSessionClaims session) {
-        List<ContentModuleVersionView> versions = versionRepository
-                .findByModuleIdOrderBySemanticVersionDesc(module.getId()).stream()
-                .map(version -> toVersionView(version, session))
-                .toList();
-        return new ContentModuleDetailView(
-                accessSupport.publicModuleId(module),
-                module.getModuleCode(),
-                module.getGroupCode(),
-                module.getName(),
-                module.getDescription(),
-                accessSupport.readSharedGroupCodes(module),
-                versions
-        );
-    }
-
-    private ContentModuleVersionView toVersionView(
-            ContentModuleVersionEntity version,
-            ManagementSessionClaims session
-    ) {
-        String contentStructureJson = groupAccessService.canViewContentModuleStructure(session)
-                ? version.getContentStructureJson()
-                : null;
-        return new ContentModuleVersionView(
-                version.getId().toString(),
-                version.getSemanticVersion(),
-                version.getReviewState(),
-                version.getLifecycleState(),
-                version.getChangeDescription(),
-                contentStructureJson,
-                version.getCreatedAt(),
-                version.getUpdatedAt()
-        );
     }
 }

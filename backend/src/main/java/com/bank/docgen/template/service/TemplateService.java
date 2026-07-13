@@ -5,10 +5,7 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
-import com.bank.docgen.master.domain.MasterDocumentStatus;
-import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
-import com.bank.docgen.master.service.MasterNotFoundException;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.AnchorBindingView;
 import com.bank.docgen.template.api.BindingValidationView;
@@ -24,7 +21,6 @@ import com.bank.docgen.template.api.UpdateTemplateRequest;
 import com.bank.docgen.template.api.UpsertAnchorBindingRequest;
 import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
-import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
@@ -46,7 +42,6 @@ public class TemplateService {
 
     private final TemplateRepository templateRepository;
     private final TemplateVersionRepository templateVersionRepository;
-    private final MasterDocumentRepository masterDocumentRepository;
     private final ApiPolicyRepository apiPolicyRepository;
     private final GroupAccessService groupAccessService;
     private final TemplateStructuredAuthoringService structuredAuthoringService;
@@ -57,6 +52,7 @@ public class TemplateService {
     private final TemplateCatalogSupport catalogSupport;
     private final TemplateDisplayEnrichmentSupport displayEnrichment;
     private final TemplateAccessGuardSupport access;
+    private final TemplateMetadataMutationSupport metadataMutations;
 
     public TemplateService(
             TemplateRepository templateRepository,
@@ -73,7 +69,6 @@ public class TemplateService {
     ) {
         this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
-        this.masterDocumentRepository = masterDocumentRepository;
         this.apiPolicyRepository = apiPolicyRepository;
         this.groupAccessService = groupAccessService;
         this.structuredAuthoringService = structuredAuthoringService;
@@ -82,13 +77,21 @@ public class TemplateService {
         this.templateVersionSupport = templateVersionSupport;
         this.eventPublisher = eventPublisher;
         this.displayEnrichment = new TemplateDisplayEnrichmentSupport(managementUserDisplayService);
+        this.access = new TemplateAccessGuardSupport(templateRepository, groupAccessService);
         this.catalogSupport = new TemplateCatalogSupport(
                 templateRepository,
                 groupAccessService,
                 templateViewMapper,
                 displayEnrichment
         );
-        this.access = new TemplateAccessGuardSupport(templateRepository, groupAccessService);
+        this.metadataMutations = new TemplateMetadataMutationSupport(
+                templateRepository,
+                templateVersionRepository,
+                masterDocumentRepository,
+                groupAccessService,
+                templateViewMapper,
+                access
+        );
     }
 
     @Transactional(readOnly = true)
@@ -142,36 +145,7 @@ public class TemplateService {
 
     @Transactional
     public TemplateDetailView create(CreateTemplateRequest request, ManagementSessionClaims session) {
-        access.assertCanAuthorTemplates(session);
-        if (!groupAccessService.canAccessGroup(session, request.groupCode())) {
-            throw new TemplateAccessDeniedException();
-        }
-        UUID masterId = UUID.fromString(request.masterId());
-        MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)
-                .orElseThrow(MasterNotFoundException::new);
-        if (master.getStatus() != MasterDocumentStatus.APPROVED) {
-            throw new TemplateValidationException("api.error.template.masterNotApproved");
-        }
-        if (!master.getGroupCode().equals(request.groupCode())) {
-            throw new TemplateValidationException("api.error.template.masterGroupMismatch");
-        }
-        if (templateRepository.findByExternalIdAndDeletedAtIsNull(request.externalId()).isPresent()) {
-            throw new TemplateValidationException("api.error.template.externalIdExists");
-        }
-        UUID templateId = UUID.randomUUID();
-        TemplateEntity template = new TemplateEntity(
-                templateId,
-                request.externalId(),
-                request.groupCode(),
-                request.name(),
-                request.description(),
-                masterId,
-                session.username()
-        );
-        templateRepository.save(template);
-        TemplateVersionEntity version = new TemplateVersionEntity(UUID.randomUUID(), templateId, session.username());
-        templateVersionRepository.save(version);
-        return templateViewMapper.toDetail(template);
+        return metadataMutations.create(request, session);
     }
 
     @Transactional
@@ -180,21 +154,7 @@ public class TemplateService {
             UpdateTemplateRequest request,
             ManagementSessionClaims session
     ) {
-        TemplateEntity template = requireWritableTemplate(templateId, session);
-        if (template.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED
-                || template.getLifecycleStatus() == TemplateLifecycleStatus.STOPPED
-                || template.getLifecycleStatus() == TemplateLifecycleStatus.DEPRECATED) {
-            throw new TemplateValidationException("api.error.template.invalidState");
-        }
-        if (request.name() != null && !request.name().isBlank()) {
-            template.setName(request.name());
-        }
-        if (request.description() != null) {
-            template.setDescription(request.description());
-        }
-        template.setUpdatedBy(session.username());
-        templateRepository.save(template);
-        return templateViewMapper.toDetail(template);
+        return metadataMutations.updateMetadata(templateId, request, session);
     }
 
     @Transactional

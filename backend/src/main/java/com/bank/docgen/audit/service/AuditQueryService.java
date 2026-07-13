@@ -10,7 +10,6 @@ import com.bank.docgen.audit.api.ManagementAuditExportEventView;
 import com.bank.docgen.audit.api.ManagementAuditExportResult;
 import com.bank.docgen.audit.api.ManagementAuditQueryResult;
 import com.bank.docgen.audit.domain.AuditReadActorRole;
-import com.bank.docgen.audit.api.LifecycleAuditEventView;
 import com.bank.docgen.audit.persistence.AuditSearchPage;
 import com.bank.docgen.audit.persistence.ManagementAuditEventEntity;
 import com.bank.docgen.audit.persistence.ManagementAuditEventRepository;
@@ -20,7 +19,6 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventEntity;
 import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
-import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.service.TemplateService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,11 +36,11 @@ public class AuditQueryService {
 
     private final ManagementAuditEventRepository managementAuditEventRepository;
     private final RuntimeGenerationAuditEventRepository runtimeGenerationAuditEventRepository;
-    private final TemplateLifecycleRecordRepository lifecycleRecordRepository;
     private final TemplateService templateService;
     private final GroupAccessService groupAccessService;
     private final AuditQueryAccessSupport accessSupport;
     private final AuditEventViewMapper viewMapper;
+    private final AuditQueryLifecycleSupport lifecycleSupport;
 
     public AuditQueryService(
             ManagementAuditEventRepository managementAuditEventRepository,
@@ -56,7 +54,6 @@ public class AuditQueryService {
     ) {
         this.managementAuditEventRepository = managementAuditEventRepository;
         this.runtimeGenerationAuditEventRepository = runtimeGenerationAuditEventRepository;
-        this.lifecycleRecordRepository = lifecycleRecordRepository;
         this.templateService = templateService;
         this.groupAccessService = groupAccessService;
         this.accessSupport = new AuditQueryAccessSupport(groupAccessService, templateService);
@@ -65,6 +62,11 @@ public class AuditQueryService {
                 managementUserDisplayService,
                 auditMaskingService,
                 objectMapper
+        );
+        this.lifecycleSupport = new AuditQueryLifecycleSupport(
+                lifecycleRecordRepository,
+                accessSupport,
+                viewMapper
         );
     }
 
@@ -220,32 +222,8 @@ public class AuditQueryService {
             Integer page,
             Integer size
     ) {
-        accessSupport.validateTimeWindow(eventAtFrom, eventAtTo);
-        accessSupport.requireCanReadAudit(session);
-        accessSupport.validateActorRole(session, actorRole);
-
-        int safePage = AuditPagedResult.normalizePage(page);
-        int safeSize = AuditPagedResult.normalizeSize(size);
-        if (AuditQueryAccessSupport.normalizeRequestId(requestId) != null) {
-            return new LifecycleAuditQueryResult(List.of(), safePage, safeSize, 0, 0);
-        }
-        UUID scopedTemplateId = accessSupport.resolveLifecycleTemplateId(session, actorRole, templateId, groupScope);
-        AuditSearchPage<TemplateLifecycleRecordEntity> searchPage = lifecycleRecordRepository.searchPaged(
-                scopedTemplateId,
-                eventType,
-                eventAtFrom,
-                eventAtTo,
-                safePage,
-                safeSize
-        );
-        List<LifecycleAuditEventView> events = viewMapper.toLifecycleViews(searchPage.content());
-        return new LifecycleAuditQueryResult(
-                events,
-                safePage,
-                safeSize,
-                searchPage.totalElements(),
-                searchPage.totalPages()
-        );
+        return lifecycleSupport.queryLifecycleEvents(
+                session, actorRole, templateId, eventType, eventAtFrom, eventAtTo, groupScope, requestId, page, size);
     }
 
     @Transactional(readOnly = true)
@@ -259,42 +237,7 @@ public class AuditQueryService {
             String groupScope,
             String requestId
     ) {
-        accessSupport.validateTimeWindow(eventAtFrom, eventAtTo);
-        accessSupport.requireCanReadAudit(session);
-        accessSupport.validateActorRole(session, actorRole);
-        if (AuditQueryAccessSupport.normalizeRequestId(requestId) != null) {
-            return new LifecycleAuditExportResult(LIFECYCLE_EXPORT_FORMAT, List.of());
-        }
-        List<LifecycleAuditEventView> events = queryAllLifecycleEvents(
-                session,
-                actorRole,
-                templateId,
-                eventType,
-                eventAtFrom,
-                eventAtTo,
-                groupScope
-        );
-        return new LifecycleAuditExportResult(LIFECYCLE_EXPORT_FORMAT, events);
-    }
-
-    private List<LifecycleAuditEventView> queryAllLifecycleEvents(
-            ManagementSessionClaims session,
-            AuditReadActorRole actorRole,
-            UUID templateId,
-            String eventType,
-            Instant eventAtFrom,
-            Instant eventAtTo,
-            String groupScope
-    ) {
-        UUID scopedTemplateId = accessSupport.resolveLifecycleTemplateId(session, actorRole, templateId, groupScope);
-        List<TemplateLifecycleRecordEntity> records = scopedTemplateId != null
-                ? lifecycleRecordRepository.findByTemplateIdOrderByCreatedAtDesc(scopedTemplateId)
-                : lifecycleRecordRepository.findAllByOrderByCreatedAtDesc();
-        List<TemplateLifecycleRecordEntity> filtered = records.stream()
-                .filter(record -> eventType == null || record.getAction().name().equals(eventType))
-                .filter(record -> eventAtFrom == null || !record.getCreatedAt().isBefore(eventAtFrom))
-                .filter(record -> eventAtTo == null || !record.getCreatedAt().isAfter(eventAtTo))
-                .toList();
-        return viewMapper.toLifecycleViews(filtered);
+        return lifecycleSupport.exportLifecycleEvents(
+                session, actorRole, templateId, eventType, eventAtFrom, eventAtTo, groupScope, requestId);
     }
 }

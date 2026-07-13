@@ -1,11 +1,13 @@
 package com.bank.docgen.runtime.service;
 
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
+import com.bank.docgen.runtime.api.BatchGenerateResultView;
 import com.bank.docgen.runtime.api.BatchResultView;
 import com.bank.docgen.runtime.api.TaskSummaryView;
 import com.bank.docgen.runtime.domain.TaskStatus;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskEntity;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskRepository;
+import com.bank.docgen.template.persistence.TemplateEntity;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -82,6 +84,49 @@ final class BatchAsyncTaskPersistenceSupport {
         return asyncTaskRepository.findByIdempotencyKeyAndTemplateId(request.idempotencyKey(), templateId)
                 .filter(task -> task.getRequestHash().equals(requestHash))
                 .filter(task -> task.getExpiresAt().isAfter(Instant.now()));
+    }
+
+    GenerationAsyncTaskEntity createAcceptedTask(
+            TemplateEntity template,
+            String routeType,
+            String resolvedVersion,
+            BatchGenerateRequestBody request,
+            String requestHash,
+            AsyncBatchTaskDispatcher dispatcher
+    ) {
+        String taskId = "TASK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(java.util.Locale.ROOT);
+        String batchId = "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(java.util.Locale.ROOT);
+        GenerationAsyncTaskEntity task = new GenerationAsyncTaskEntity(
+                UUID.randomUUID(),
+                taskId,
+                batchId,
+                template.getId(),
+                TaskStatus.ACCEPTED,
+                routeType,
+                resolvedVersion,
+                request.requestId(),
+                request.idempotencyKey(),
+                requestHash,
+                json.writeRequestPayload(request),
+                Instant.now().plusSeconds(IdempotencyConstants.RETENTION_SECONDS)
+        );
+        asyncTaskRepository.save(task);
+        dispatcher.dispatch(task.getId());
+        return task;
+    }
+
+    Optional<BatchGenerateResultView> resolveSyncReplay(Optional<GenerationAsyncTaskEntity> existing) {
+        if (existing.isEmpty()) {
+            return Optional.empty();
+        }
+        GenerationAsyncTaskEntity replay = existing.get();
+        if (replay.getStatus() == TaskStatus.FAILED && replay.getBatchResultJson() != null) {
+            throw new SyncBatchFailureException(json.readBatchResult(replay.getBatchResultJson()));
+        }
+        if (replay.getBatchResultJson() != null) {
+            return Optional.of(new BatchGenerateResultView(json.readBatchResult(replay.getBatchResultJson())));
+        }
+        return Optional.empty();
     }
 
     TaskSummaryView toTaskSummary(
