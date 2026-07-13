@@ -3,7 +3,7 @@
 Branch: `feat/slim-r8-frontend`  
 Base: `main` @ `9df16f5`  
 Date: 2026-07-13  
-HEAD: `bffc291510b1be546de6213476baf0ebf4d3a8ea`
+HEAD: `28f286c`
 
 ## Scope completed
 
@@ -67,12 +67,12 @@ See operator report `_slim_r8_report.txt` for full scan. MUST/SHOULD peel target
 
 ## Gates
 
-`	ext
+```text
 pnpm -C frontend lint        # GREEN (exit 0)
 pnpm -C frontend type-check  # GREEN (exit 0; fixed saveRules CompositionRuleInput typing in createTemplateAuthoringBindingsSaveFlow.ts)
 pnpm -C frontend test        # GREEN — Test Files 191 passed; Tests 1159 passed; Duration ~173s
 pnpm -C frontend build       # GREEN (vue-tsc --noEmit && vite build; built in ~53s)
-`
+```
 
 Fix during gates: `createTemplateAuthoringBindingsSaveFlow` `saveRules` callback typed as `CompositionRuleInput[]` (was incorrectly `CompositionRule[]` via panel props).
 
