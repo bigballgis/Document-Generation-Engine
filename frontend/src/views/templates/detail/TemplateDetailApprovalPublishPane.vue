@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { SemverBumpLevel } from '@/utils/semver'
 import type { BindingGateIssueItem } from '@/utils/templateBindingGateDisplay'
@@ -11,7 +12,7 @@ type PublishBumpOption = {
   version: string
 }
 
-defineProps<{
+const props = defineProps<{
   bindingGateResult: BindingValidationResult | null
   bindingGateIssues: BindingGateIssueItem[]
   bindingGateIssueMessageKey: Record<BindingGateIssueItem['issueKey'], string>
@@ -29,6 +30,12 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+const showAdGroupsNotConfiguredWarning = computed(() =>
+  props.publishGateItems.some(
+    (item) => item.key === 'API_POLICY' && item.adGroupsConfigured === false,
+  ),
+)
 </script>
 
 <template>
@@ -63,17 +70,29 @@ const { t } = useI18n()
     <h3>{{ t('templates.publishGate.title') }}</h3>
     <p>{{ t('templates.publishGate.description') }}</p>
     <el-skeleton v-if="loadingPublishGate" :rows="2" animated />
-    <ul v-else class="gate-list">
-      <li v-for="item in publishGateItems" :key="item.key">
-        <span>{{ item.label }}</span>
-        <el-tag v-if="item.informational" type="info" size="small">
-          {{ t('templates.publishGate.informational') }}
-        </el-tag>
-        <el-tag v-else :type="item.ready ? 'success' : 'warning'" size="small">
-          {{ item.ready ? t('templates.publishGate.ready') : t('templates.publishGate.pending') }}
-        </el-tag>
-      </li>
-    </ul>
+    <template v-else>
+      <el-alert
+        v-if="showAdGroupsNotConfiguredWarning"
+        class="ad-groups-warning"
+        type="warning"
+        :title="t('templates.publishGate.adGroupsNotConfiguredTitle')"
+        :description="t('templates.publishGate.adGroupsNotConfiguredDescription')"
+        show-icon
+        :closable="false"
+        data-testid="publish-gate-ad-groups-warning"
+      />
+      <ul class="gate-list">
+        <li v-for="item in publishGateItems" :key="item.key">
+          <span>{{ item.label }}</span>
+          <el-tag v-if="item.informational" type="info" size="small">
+            {{ t('templates.publishGate.informational') }}
+          </el-tag>
+          <el-tag v-else :type="item.ready ? 'success' : 'warning'" size="small">
+            {{ item.ready ? t('templates.publishGate.ready') : t('templates.publishGate.pending') }}
+          </el-tag>
+        </li>
+      </ul>
+    </template>
     <el-radio-group
       :model-value="publishBumpLevel"
       class="publish-bump-picker publish-bump-picker--wrap"
@@ -109,6 +128,10 @@ const { t } = useI18n()
     margin: 0 0 0.75rem;
     color: var(--text-muted);
   }
+}
+
+.ad-groups-warning {
+  margin-bottom: 0.75rem;
 }
 
 .gate-list {

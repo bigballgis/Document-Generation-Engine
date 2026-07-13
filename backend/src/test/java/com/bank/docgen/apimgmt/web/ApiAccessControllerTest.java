@@ -52,6 +52,19 @@ class ApiAccessControllerTest {
                 .andExpect(jsonPath("$.metadata.traceId").isNotEmpty());
     }
 
+    @Test
+    void readinessSummaryOnCanonicalPathReturnsOkEnvelope() throws Exception {
+        String token = loginAsGlobalAdmin();
+
+        mockMvc.perform(get("/api/management/v1/api-access/summary")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.publishedInScopeCount").isNumber())
+                .andExpect(jsonPath("$.result.attentionCount").isNumber())
+                .andExpect(jsonPath("$.result.pendingReleaseNeedingSetupCount").isNumber())
+                .andExpect(jsonPath("$.metadata.traceId").isNotEmpty());
+    }
+
     private String loginAsGlobalAdmin() throws Exception {
         MvcResult result = mockMvc.perform(post("/api/management/v1/auth/login")
                         .contentType(APPLICATION_JSON)

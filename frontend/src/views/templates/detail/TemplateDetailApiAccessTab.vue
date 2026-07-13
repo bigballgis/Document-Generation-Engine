@@ -12,6 +12,7 @@ import { DEFAULT_ENVIRONMENT, type RuntimeEnvironment } from '@/config/environme
 import { useCapabilities } from '@/composables/useCapabilities'
 import { API_POLICY_DOMAINS, type ApiPolicyDomain } from '@/types/apiPolicyDomain'
 import type { ApiCredentialSummary, ApiPolicy } from '@/types/template'
+import { hasConfiguredAdGroups } from '@/utils/apiAccessDiagnostics'
 
 const props = defineProps<{
   templateId: string
@@ -54,6 +55,10 @@ const contractExpanded = ref<string[]>([])
 
 const canEditPolicy = computed(() => manageApiPolicy.value && Boolean(props.apiPolicy))
 
+const showAdGroupsNotConfiguredWarning = computed(
+  () => Boolean(props.apiPolicy) && !hasConfiguredAdGroups(props.apiPolicy),
+)
+
 function resolveDomainAnchor(value: unknown): ApiPolicyDomain | null {
   if (typeof value !== 'string' || value.length === 0) {
     return null
@@ -85,6 +90,26 @@ defineExpose({ revealCredentialSecret })
 <template>
   <div class="api-access-layout">
     <RouteSummaryPanel :template-id="templateId" />
+
+    <el-alert
+      v-if="showAdGroupsNotConfiguredWarning"
+      class="runtime-callable-warning"
+      type="warning"
+      :title="t('templates.policy.runtimeCallable.warningTitle')"
+      :description="t('templates.policy.runtimeCallable.warningDescription')"
+      show-icon
+      :closable="false"
+      data-testid="ad-groups-not-configured-warning"
+    />
+    <el-alert
+      v-if="showAdGroupsNotConfiguredWarning"
+      class="runtime-callable-hint"
+      type="info"
+      :title="t('templates.policy.runtimeCallable.publishedVsCallableHint')"
+      show-icon
+      :closable="false"
+      data-testid="published-vs-callable-hint"
+    />
 
     <el-card shadow="never" class="section-card">
       <div class="section-header">
@@ -152,6 +177,11 @@ defineExpose({ revealCredentialSecret })
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+}
+
+.runtime-callable-warning,
+.runtime-callable-hint {
+  margin: 0;
 }
 
 .section-card {

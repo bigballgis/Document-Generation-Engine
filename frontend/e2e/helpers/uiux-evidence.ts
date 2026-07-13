@@ -954,3 +954,43 @@ export async function captureLrpC8LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+export const API_OPS_DISCOVERABILITY_EVIDENCE_ROOT = path.join(
+  E2E_DIR,
+  '..',
+  'evidence',
+  'API-OPS-DISCOVERABILITY',
+)
+export const API_OPS_DISCOVERABILITY_SCREENSHOT_DIR = path.join(
+  API_OPS_DISCOVERABILITY_EVIDENCE_ROOT,
+  'screenshots',
+)
+export const API_OPS_DISCOVERABILITY_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureApiOpsDiscoverabilityEvidenceDirs(): void {
+  fs.mkdirSync(API_OPS_DISCOVERABILITY_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function apiOpsDiscoverabilityScreenshotPath(filename: string): string {
+  return path.join(API_OPS_DISCOVERABILITY_SCREENSHOT_DIR, filename)
+}
+
+export async function captureApiOpsDiscoverabilityScreenshot(
+  page: Page,
+  filename: string,
+): Promise<string> {
+  ensureApiOpsDiscoverabilityEvidenceDirs()
+  const target = apiOpsDiscoverabilityScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureApiOpsDiscoverabilityLocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureApiOpsDiscoverabilityEvidenceDirs()
+  const target = apiOpsDiscoverabilityScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}

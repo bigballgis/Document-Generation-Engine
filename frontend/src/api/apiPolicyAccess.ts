@@ -3,6 +3,7 @@ import { http } from '@/api/http'
 import type { ApiEnvelope } from '@/types/session'
 import type {
   ApiAccessAlert,
+  ApiAccessReadinessSummary,
   ApiCredentialCreated,
   ApiCredentialSummary,
   RoutesSummary,
@@ -67,6 +68,11 @@ export async function fetchRoutesSummary(templateId: string): Promise<RoutesSumm
 export async function fetchAlerts(): Promise<ApiAccessAlert[]> {
   const response = await http.get<ApiEnvelope<ApiAccessAlertApiView[]>>('/api-access/alerts')
   return unwrapEnvelope(response.data).map(mapApiAccessAlert)
+}
+
+export async function fetchReadinessSummary(): Promise<ApiAccessReadinessSummary> {
+  const response = await http.get<ApiEnvelope<ApiAccessReadinessSummary>>('/api-access/summary')
+  return unwrapEnvelope(response.data)
 }
 
 export async function listCredentials(templateId: string): Promise<ApiCredentialSummary[]> {

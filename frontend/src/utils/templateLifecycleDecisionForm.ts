@@ -1,3 +1,5 @@
+import { parseAdGroupsConfiguredFromSummary } from '@/utils/apiAccessDiagnostics'
+
 export const TEMPLATE_DECISION_REASON_CATEGORIES = [
   'BINDING_ISSUE',
   'VARIABLE_SCHEMA_ISSUE',
@@ -106,6 +108,8 @@ export interface PublishGateDisplayItem {
   ready: boolean
   informational?: boolean
   blocker?: boolean
+  /** Parsed from API_POLICY summary (`adGroupsConfigured=`); null when absent. */
+  adGroupsConfigured?: boolean | null
 }
 
 export function mapPublishGateChecklistItems(
@@ -118,6 +122,10 @@ export function mapPublishGateChecklistItems(
     ready: item.ready,
     informational: !item.blocker,
     blocker: item.blocker,
+    adGroupsConfigured:
+      item.checkCode === 'API_POLICY'
+        ? parseAdGroupsConfiguredFromSummary(item.summary)
+        : undefined,
   }))
 }
 

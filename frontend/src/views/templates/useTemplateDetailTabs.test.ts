@@ -17,7 +17,7 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ replace: routerReplace }),
 }))
 
-function mountTabs(isDevEditor = false) {
+function mountTabs(isDevEditor = false, showPolicyPanel = false) {
   const activeDetailTab = ref<TemplateDetailTab>('overview')
   const activeDevWorkspaceTab = ref<TemplateDevWorkspaceTab>('design')
   const Comp = defineComponent({
@@ -25,7 +25,7 @@ function mountTabs(isDevEditor = false) {
       const tabs = useTemplateDetailTabs({
         isDevEditor: computed(() => isDevEditor),
         showAuthoringSection: computed(() => true),
-        showPolicyPanel: computed(() => false),
+        showPolicyPanel: computed(() => showPolicyPanel),
         activeDetailTab,
         activeDevWorkspaceTab,
       })
@@ -56,6 +56,13 @@ describe('useTemplateDetailTabs', () => {
     expect(names).toContain('overview')
     expect(names).toContain('lifecycle')
     expect(names).toContain('authoring')
+    expect(names).not.toContain('apiAccess')
+    wrapper.unmount()
+  })
+
+  it('SCEN-AOD-03: detailTabs registers apiAccess when showPolicyPanel is true', () => {
+    const { tabs, wrapper } = mountTabs(false, true)
+    expect(tabs.detailTabs.value.map((t) => t.name)).toContain('apiAccess')
     wrapper.unmount()
   })
 

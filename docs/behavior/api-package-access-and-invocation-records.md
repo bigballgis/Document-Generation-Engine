@@ -319,7 +319,7 @@ L2 可早于 L3 结束（C8）；L0 可多次重签（requirements 允许在 art
 | --- | --- | --- |
 | `/api/policies/:templateId` | `/templates/:templateId?tab=apiAccess` | Vue Router `redirect`；无 duplicate editor |
 | `/api/policies/:templateId?domain=OUTPUT_POLICY` | 同上 + `#domain=OUTPUT_POLICY` | `domain` query 转为 hash anchor；Hub 展开高级设置并滚动至对应域 |
-| `/api/policies`（overview） | **保留** | 跨包监控概览；深链至 Hub `?tab=apiAccess` |
+| `/api/policies`（overview） | **保留** | 跨包监控概览（摘要卡可选 + 告警表；非 catalog；ADR-0040）；深链至 Hub `?tab=apiAccess`；`PENDING_RELEASE` 预配见 C10 / [api-ops-discoverability.md](./api-ops-discoverability.md) |
 
 **不变约束：** 包级 `api_policy` 语义不变；管理端 invocation API 本阶段不变（Phase 2）。
 

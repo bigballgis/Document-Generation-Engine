@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import * as apiPolicyApi from '@/api/apiPolicy'
 import { resolveApiError, resolveApiErrorMessageKey } from '@/api/http'
-import type { ApiAccessAlert } from '@/types/template'
+import type { ApiAccessAlert, ApiAccessReadinessSummary } from '@/types/template'
 import {
   createEmptyApiPolicyEntry,
   type ApiPolicyEntry,
@@ -11,6 +11,12 @@ import { createApiPolicyMutationActions } from '@/stores/createApiPolicyMutation
 
 export type { ApiPolicyEntry } from '@/stores/apiPolicyStoreTypes'
 
+const EMPTY_READINESS_SUMMARY: ApiAccessReadinessSummary = {
+  publishedInScopeCount: 0,
+  attentionCount: 0,
+  pendingReleaseNeedingSetupCount: 0,
+}
+
 export const useApiPolicyStore = defineStore('apiPolicy', () => {
   const entries = ref<Record<string, ApiPolicyEntry>>({})
   const activeTemplateId = ref<string | null>(null)
@@ -18,6 +24,10 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
   const loadingAlerts = ref(false)
   const alertsErrorMessageKey = ref<string | null>(null)
   const alertsErrorRetryable = ref(false)
+  const readinessSummary = ref<ApiAccessReadinessSummary>({ ...EMPTY_READINESS_SUMMARY })
+  const loadingSummary = ref(false)
+  const summaryErrorMessageKey = ref<string | null>(null)
+  const summaryErrorRetryable = ref(false)
 
   function entryFor(templateId: string): ApiPolicyEntry {
     if (!entries.value[templateId]) {
@@ -116,6 +126,25 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
     }
   }
 
+  async function fetchReadinessSummary(): Promise<void> {
+    loadingSummary.value = true
+    summaryErrorMessageKey.value = null
+    summaryErrorRetryable.value = false
+    try {
+      readinessSummary.value = await apiPolicyApi.fetchReadinessSummary()
+    } catch (error) {
+      readinessSummary.value = { ...EMPTY_READINESS_SUMMARY }
+      summaryErrorMessageKey.value = resolveApiErrorMessageKey(
+        error,
+        'apiPolicy.home.summary.loadFailed',
+      )
+      summaryErrorRetryable.value = resolveApiError(error)?.error.retryable ?? false
+      throw error
+    } finally {
+      loadingSummary.value = false
+    }
+  }
+
   const mutationActions = createApiPolicyMutationActions({
     entryFor,
     fetchCredentials,
@@ -128,6 +157,10 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
     loadingAlerts,
     alertsErrorMessageKey,
     alertsErrorRetryable,
+    readinessSummary,
+    loadingSummary,
+    summaryErrorMessageKey,
+    summaryErrorRetryable,
     apiPolicy,
     credentials,
     loadingPolicy,
@@ -141,6 +174,7 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
     fetchPolicy,
     fetchCredentials,
     fetchAlerts,
+    fetchReadinessSummary,
     ...mutationActions,
   }
 })

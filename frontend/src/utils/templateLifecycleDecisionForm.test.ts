@@ -9,6 +9,7 @@ import {
   isSubmitGateReady,
   isRejectDecisionValid,
   isTestPassDecisionValid,
+  mapPublishGateChecklistItems,
 } from '@/utils/templateLifecycleDecisionForm'
 
 describe('templateLifecycleDecisionForm', () => {
@@ -156,5 +157,30 @@ describe('templateLifecycleDecisionForm', () => {
   it('blocks submit-for-approval when submit-phase checklist is not ready', () => {
     expect(isSubmitGateReady({ checklistReady: true })).toBe(true)
     expect(isSubmitGateReady({ checklistReady: false })).toBe(false)
+  })
+
+  it('SCEN-AOD-13: maps API_POLICY summary adGroupsConfigured into display items', () => {
+    const items = mapPublishGateChecklistItems(
+      [
+        {
+          checkCode: 'API_POLICY',
+          ready: true,
+          blocker: false,
+          messageKey: 'api.publishGate.apiPolicy.ready',
+          summary: 'skeletonPresent=true,adGroupsConfigured=false',
+        },
+        {
+          checkCode: 'ANCHOR_INTEGRITY',
+          ready: true,
+          blocker: true,
+          messageKey: 'api.publishGate.anchorIntegrity.ready',
+          summary: '',
+        },
+      ],
+      (item) => item.checkCode,
+    )
+
+    expect(items[0]?.adGroupsConfigured).toBe(false)
+    expect(items[1]?.adGroupsConfigured).toBeUndefined()
   })
 })

@@ -1155,6 +1155,9 @@ export default {
       ready: 'Ready',
       pending: 'Pending',
       informational: 'Informational',
+      adGroupsNotConfiguredTitle: 'Authorized AD groups not configured',
+      adGroupsNotConfiguredDescription:
+        'Go-live is still allowed, but runtime callers will be denied until at least one AD group is configured. Published status is not the same as runtime-callable.',
       checkCodes: {
         ANCHOR_INTEGRITY: 'Layout placeholder check',
         VARIABLE_SCHEMA: 'Variable schema',
@@ -1881,6 +1884,13 @@ export default {
         editDefaultRoute: 'Default release version',
         saveDefaultRoute: 'Save default route',
       },
+      runtimeCallable: {
+        warningTitle: 'Not yet runtime-callable',
+        warningDescription:
+          'Authorized AD groups are not configured. Go-live may still proceed, but runtime callers are fail-closed until at least one AD group is saved. Published status alone does not make the package callable.',
+        publishedVsCallableHint:
+          'Published status is not the same as runtime-callable. Runtime access requires authorized AD groups (and other access settings).',
+      },
       retention: {
         title: 'Retention',
         hint: 'Applies to new invocations and saved documents only.',
@@ -2153,16 +2163,31 @@ export default {
       groupCode: 'Group',
       monitoringHint:
         'External access is configured per template package. Open a package hub External access tab to edit settings.',
+      summary: {
+        title: 'API readiness summary',
+        description:
+          'Counts for packages in your authorized scope. This overview is monitoring only — it is not a template catalog.',
+        loadFailed: 'Unable to load API readiness summary.',
+        publishedInScope: 'Published in scope',
+        publishedInScopeDescription: 'Packages with published status in your authorized groups.',
+        attention: 'Need attention',
+        attentionDescription: 'Distinct packages with at least one attention alert.',
+        pendingReleaseNeedingSetup: 'Pending release needing setup',
+        pendingReleaseNeedingSetupDescription:
+          'Pending-release packages that still need authorized AD groups before runtime callers can succeed.',
+      },
       alerts: {
         title: 'Attention items',
         description: 'Cross-package alerts for packages that need attention before runtime callers are blocked.',
         loadFailed: 'Unable to load external access alerts.',
         emptyTitle: 'No attention items',
-        emptyDescription: 'Published packages in your scope are configured for external access.',
+        emptyDescription: 'Packages in your scope are configured for external access.',
         missingAdGroup: 'Missing authorized AD group',
+        missingAdGroupDetail: '{externalId} has no authorized AD groups configured.',
         expiringCredential: 'Access key expiring soon',
         expiringCredentialDetail: '{externalId} expires {expiresAt}',
         noCredentials: 'No access keys configured',
+        noCredentialsDetail: '{externalId} has no active access keys.',
         columns: {
           issue: 'Issue',
           package: 'Package',

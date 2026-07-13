@@ -154,4 +154,30 @@ describe('TemplateDetailApiAccessTab', () => {
     expect(wrapper.text()).toContain('Default route')
     expect(wrapper.text()).not.toContain('API access not configured')
   })
+
+  it('SCEN-AOD-13/14: shows runtime-callable warning when AD groups are empty', () => {
+    const wrapper = mountTab({
+      apiPolicy: {
+        ...samplePolicy,
+        allowedAdGroups: [],
+      },
+    })
+
+    expect(wrapper.find('[data-testid="ad-groups-not-configured-warning"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="published-vs-callable-hint"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Not yet runtime-callable')
+    expect(wrapper.text()).toContain('Published status is not the same as runtime-callable')
+  })
+
+  it('SCEN-AOD-15: hides runtime-callable warning when AD groups are configured', () => {
+    const wrapper = mountTab({
+      apiPolicy: {
+        ...samplePolicy,
+        allowedAdGroups: ['RETAIL-API'],
+      },
+    })
+
+    expect(wrapper.find('[data-testid="ad-groups-not-configured-warning"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="published-vs-callable-hint"]').exists()).toBe(false)
+  })
 })

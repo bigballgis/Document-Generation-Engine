@@ -11,6 +11,7 @@ vi.mock('@/api/apiPolicy', () => ({
   saveInvocationRetentionDomain: vi.fn(),
   fetchApiPolicyImpactPreview: vi.fn(),
   fetchAlerts: vi.fn(),
+  fetchReadinessSummary: vi.fn(),
   createCredential: vi.fn(),
   rotateCredential: vi.fn(),
   revokeCredential: vi.fn(),
@@ -216,5 +217,23 @@ describe('apiPolicy store', () => {
     await expect(store.fetchAlerts()).rejects.toBeTruthy()
     expect(store.alertsErrorMessageKey).toBe('apiPolicy.home.alerts.loadFailed')
     expect(store.alertsErrorRetryable).toBe(true)
+  })
+
+  it('fetchReadinessSummary stores published/attention/pending setup counts', async () => {
+    vi.mocked(apiPolicyApi.fetchReadinessSummary).mockResolvedValue({
+      publishedInScopeCount: 5,
+      attentionCount: 3,
+      pendingReleaseNeedingSetupCount: 2,
+    })
+    const store = useApiPolicyStore()
+
+    await store.fetchReadinessSummary()
+
+    expect(store.readinessSummary).toEqual({
+      publishedInScopeCount: 5,
+      attentionCount: 3,
+      pendingReleaseNeedingSetupCount: 2,
+    })
+    expect(store.loadingSummary).toBe(false)
   })
 })

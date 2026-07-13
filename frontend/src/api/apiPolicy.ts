@@ -3,6 +3,7 @@ export type { RotatedCredential } from '@/api/apiPolicyAccess'
 export {
   fetchRoutesSummary,
   fetchAlerts,
+  fetchReadinessSummary,
   listCredentials,
   createCredential,
   rotateCredential,

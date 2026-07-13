@@ -146,12 +146,13 @@ Package-level surface (BDD-TEMPLATE-PACKAGE-NAV-001). **Default primary surface:
 3. **Version lines** — paginated table: dev version number, release version (when published), lifecycle status, approval sub-state (when `APPROVAL`), updated at/by, **default-route indicator** (published only), **explicit generate path summary** (published only)
 4. **Secondary tabs (hub-retained)** — overview, **External access** (primary API configuration surface per BDD-API-PACKAGE-ACCESS-INVOCATION-001), workflow/journey panels as needed
 
-**External access tab (target IA, 2026-07-03):**
+**External access tab (target IA, 2026-07-03; C10 / api-ops-discoverability 2026-07-14):**
 
 - L1: package `externalId`; default + explicit route summary; AD Group; default route selector (governed change); retention presets (save documents, record/doc days); credentials; read-only recent invocation summary for admins.
 - Advanced (collapsed): output formats/modes, batch limits, encryption overrides.
 - **No** «API not configured» empty state once skeleton policy exists from `PENDING_RELEASE`.
-- Standalone sidebar «API management» template catalog **deprecated** → dashboard cross-package alerts (missing AD Group, expiring credentials).
+- **Pre-publish setup (C10):** with `canManageApiPolicy`, the tab is registered and editable for **`PENDING_RELEASE` ∪ `PUBLISHED`** (skeleton AD Group / access pre-config before go-live). Other lifecycle statuses stay hub-authoring only — not an External access editor.
+- Standalone sidebar «API management» template catalog **deprecated**. Cross-package home `/api/policies` remains **package-first monitoring only** (ADR-0040): optional readiness **summary cards** + **alerts** table + hub deep links — **not** a second paginated template catalog (see [api-ops-discoverability.md](../behavior/api-ops-discoverability.md), SCEN-ALERT-04).
 
 Does **not** host full authoring (variables, bindings, structured content editor); those live on the dev version route.
 
