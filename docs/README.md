@@ -208,6 +208,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Slim R9-backend](./evidence/slim-r9-backend/README.md) | ApiManagement split + near-250 peels; `mvn verify` GREEN |
 | [Slim R10-backend](./evidence/slim-r10-backend/README.md) | Near-240 services &lt;220; `mvn verify` GREEN |
 | [Slim R10-frontend](./evidence/slim-r10-frontend/README.md) | stores/api/types barrels + DetailViewBody peel; FE gates GREEN |
+| [Slim R11-backend](./evidence/slim-r11-backend/README.md) | Near-220 services &lt;200; `mvn verify` GREEN |
 | [Slim Wave 3 frontend SFC](./evidence/slim-frontend/README.md) | BindingsPanel 1249→170 orchestrator; ManagementShell 671→311 (merge `2cf7cb9`) |
 | [Slim R-frontend residual](./evidence/slim-r-frontend/README.md) | CSC Editor 864→177; AuditConsole 588→155 |
 | [Slim R2-frontend residual](./evidence/slim-r2-frontend/README.md) | TemplateDetailView 577→388 orchestrator + detail shells (merge `02b299c`) |
