@@ -1,0 +1,10 @@
+{
+  "id": "cross-page-table",
+  "theme": "Cross-page table header repetition (tblHeader)",
+  "maturity": "PLACEHOLDER",
+  "title": "Cross-page table — placeholder (CE-K06a)",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "LIBREOFFICE",
+  "description": "Placeholder skeleton. Cross-page table header repetition (<w:tblHeader/>) assertions are owned by CE-K06a and will be enriched here.",
+  "owningFutureSlice": "CE-K06a"
+}

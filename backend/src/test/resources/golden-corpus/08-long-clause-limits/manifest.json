@@ -1,0 +1,10 @@
+{
+  "id": "long-clause-limits",
+  "theme": "Long clause limits (extreme length clause rendering)",
+  "maturity": "PLACEHOLDER",
+  "title": "Long clause limits — placeholder (future CE-K slice)",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "LIBREOFFICE",
+  "description": "Placeholder skeleton. Long-clause-limits business assertions (extreme length clause truncation vs full retention) are deferred to a later CE-K slice. K07-C5 leaves this PLACEHOLDER in the skeleton; the implementing slice must write concrete expected assertions consistent with confirmed product thresholds (not invented here).",
+  "owningFutureSlice": "future CE-K slice (not assigned in this skeleton)"
+}

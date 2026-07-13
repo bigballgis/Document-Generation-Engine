@@ -149,10 +149,11 @@ Done 时平台应满足：
 - K06c：`attachmentListRef` writer（结构化附件清单 → 编号列表段落）；PDF 页码 stamp 策略进 render profile（按包配置而非全局布尔）。
 **依赖：** K02（样式来源）先行为佳；资产/图片依赖 CE-E02 的键名约定但不阻塞。
 
-### CE-K07 金标语料回归体系 — P1 · M · `Not Started`
+### CE-K07 金标语料回归体系 — P1 · M · `In Progress`
 
 **目标：** `backend/src/test/resources/golden-corpus/` 固化 ≥8 个基准包（双字体母版、跨页表格、嵌套条款、compute 变量、中文大写金额、水印 SPECIMEN、加密 PDF、极限长条款），每个含输入（母版+模板 JSON+变量）与期望产出断言（DOCX XML 关键路径断言 + PDF 文本抽取断言，不做像素比对）；接入 `mvn verify`。K01–K06 每片交付时必须往语料库加对应样本。
 **依赖：** 骨架先行，可与 K01 并行启动。
+**状态（2026-07-14）：** 骨架先行切片 `ce-k07-golden-corpus-skeleton` 实现完成于隔离 worktree `D:/working/DGE-ce-k07-golden-corpus-skeleton`（分支 `feat/ce-k07-golden-corpus-skeleton`）。8 主题包骨架就位（`nested-clauses`/`encrypted-pdf` = ACTIVE，其余 6 = PLACEHOLDER）；harness `GoldenCorpusScanner`/`GoldenCorpusActiveRunner`/`GoldenCorpusStructureTest`/`GoldenCorpusHarnessTest` 接入 `mvn verify`；`mvn -B -ntp -f backend/pom.xml verify` **GREEN**（455+ 测试 0 失败；golden-corpus 套件 11/11 绿；Checkstyle/PMD/SpotBugs/JaCoCo 通过）。BDD-CE-K07-001…019 覆盖。**未合并 main**——待 `integration-merger` + MAIN doc-sync。正式 phase 仍为 None；不宣称 Done；不激活 CD-3。
 
 ### CE-K08 条款治理元数据 — P2 · M · `Not Started`
 

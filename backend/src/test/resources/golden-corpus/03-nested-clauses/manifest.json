@@ -1,0 +1,10 @@
+{
+  "id": "nested-clauses",
+  "theme": "Nested clause rendering (paragraph + conditionBlock + nested paragraphs)",
+  "maturity": "ACTIVE",
+  "title": "Nested clauses — minimal ACTIVE sample",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "SYNTHETIC",
+  "description": "Minimal nested-clauses sample rendered through the existing StructuredContentDocxWriter. DOCX keypath assertions verify the clause body and conditional notice text are present in word/document.xml. PDF half synthesizes a PDF from the assembled DOCX text so it always runs (no soffice dependency for this minimal sample).",
+  "owningFutureSlice": "CORE-FORTRESS F1 (writer shipped) — minimal ACTIVE sample; enriched by CE-K02/K03 if needed"
+}

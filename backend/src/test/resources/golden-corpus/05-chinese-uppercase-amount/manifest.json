@@ -1,0 +1,10 @@
+{
+  "id": "chinese-uppercase-amount",
+  "theme": "Chinese uppercase amount (SPELL_AMOUNT) rendering",
+  "maturity": "PLACEHOLDER",
+  "title": "Chinese uppercase amount — placeholder (CE-K03)",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "LIBREOFFICE",
+  "description": "Placeholder skeleton. Chinese uppercase amount (SPELL_AMOUNT) text assertions are owned by CE-K03 and will be enriched here.",
+  "owningFutureSlice": "CE-K03"
+}

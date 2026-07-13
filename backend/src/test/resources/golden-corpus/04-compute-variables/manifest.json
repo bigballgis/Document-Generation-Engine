@@ -1,0 +1,10 @@
+{
+  "id": "compute-variables",
+  "theme": "Computed variables (computeExpression evaluation)",
+  "maturity": "PLACEHOLDER",
+  "title": "Compute variables — placeholder (CE-K03)",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "LIBREOFFICE",
+  "description": "Placeholder skeleton. Computed variable (computeExpression) evaluation assertions are owned by CE-K03 and will be enriched here.",
+  "owningFutureSlice": "CE-K03"
+}

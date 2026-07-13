@@ -1,0 +1,7 @@
+{
+  "deferred": false,
+  "requireEncrypted": true,
+  "assertions": [
+    {"type": "TEXT_CONTAINS", "substring": "Encrypted sample body"}
+  ]
+}
