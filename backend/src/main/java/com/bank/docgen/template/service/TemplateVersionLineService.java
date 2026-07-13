@@ -12,7 +12,6 @@ import com.bank.docgen.template.api.TemplateDetailView;
 import com.bank.docgen.template.api.TemplateDevVersionCreatedView;
 import com.bank.docgen.template.api.TemplateVersionLineDetailView;
 import com.bank.docgen.template.api.TemplateVersionLineSummaryView;
-import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
@@ -22,7 +21,6 @@ import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceRepository;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
-import java.time.Instant;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TemplateVersionLineService {
     private final TemplateService templateService;
-    private final TemplateRepository templateRepository;
     private final TemplateVersionRepository templateVersionRepository;
     private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
     private final VariableSchemaRepository variableSchemaRepository;
@@ -39,8 +36,8 @@ public class TemplateVersionLineService {
     private final TemplateViewMapper templateViewMapper;
     private final GroupAccessService groupAccessService;
     private final ApiPolicyRepository apiPolicyRepository;
-    private final TemplateVersionLineCloneSupport cloneSupport;
     private final TemplateVersionLineViewSupport viewSupport;
+    private final TemplateVersionLineMutationSupport mutations;
 
     public TemplateVersionLineService(
             TemplateService templateService,
@@ -59,7 +56,6 @@ public class TemplateVersionLineService {
             ManagementUserDisplayService managementUserDisplayService
     ) {
         this.templateService = templateService;
-        this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
         this.templateCurrentVersionResolver = templateCurrentVersionResolver;
         this.variableSchemaRepository = variableSchemaRepository;
@@ -67,7 +63,7 @@ public class TemplateVersionLineService {
         this.templateViewMapper = templateViewMapper;
         this.groupAccessService = groupAccessService;
         this.apiPolicyRepository = apiPolicyRepository;
-        this.cloneSupport = new TemplateVersionLineCloneSupport(
+        TemplateVersionLineCloneSupport cloneSupport = new TemplateVersionLineCloneSupport(
                 variableSchemaRepository,
                 anchorBindingRepository,
                 contentModuleReferenceRepository,
@@ -78,6 +74,12 @@ public class TemplateVersionLineService {
                 templateCurrentVersionResolver,
                 approvalSubStateResolver,
                 managementUserDisplayService
+        );
+        this.mutations = new TemplateVersionLineMutationSupport(
+                templateRepository,
+                templateVersionRepository,
+                templateCurrentVersionResolver,
+                cloneSupport
         );
     }
 
@@ -179,48 +181,7 @@ public class TemplateVersionLineService {
             ManagementSessionClaims session
     ) {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
-
-        if (templateCurrentVersionResolver.hasInFlightDevVersion(templateId)) {
-            throw new TemplateGovernanceException(
-                    ApiErrorCodes.TEMPLATE_DEV_LINE_IN_FLIGHT,
-                    "api.error.template.devLineInFlight",
-                    HttpStatus.CONFLICT
-            );
-        }
-        TemplateVersionEntity source = templateVersionRepository
-                .findByTemplateIdAndReleaseVersion(templateId, releaseVersion)
-                .orElseThrow(TemplateNotFoundException::new);
-
-        if (source.getReleaseVersion() == null || source.getReleaseVersion().isBlank()) {
-            throw new TemplateNotFoundException();
-        }
-        TemplateVersionEntity target = new TemplateVersionEntity(UUID.randomUUID(), templateId, session.username());
-        target.setDevVersionNumber(templateCurrentVersionResolver.maxDevVersionNumber(templateId) + 1);
-        target.setMasterCatalogVersion(source.getMasterCatalogVersion());
-        target.setRulesJson(source.getRulesJson());
-        target.setRenderProfileVersion(source.getRenderProfileVersion());
-        target.setRenderProfileJson(source.getRenderProfileJson());
-        templateVersionRepository.save(target);
-
-        cloneSupport.copyVersionGraph(source, target);
-        TemplateLifecycleStatus fromStatus = template.getLifecycleStatus();
-        template.setLifecycleStatus(TemplateLifecycleStatus.DRAFT);
-        template.setUpdatedBy(session.username());
-        templateRepository.save(template);
-
-        cloneSupport.recordCloneLifecycle(
-                template,
-                fromStatus,
-                releaseVersion,
-                target.getId(),
-                target.getDevVersionNumber(),
-                session
-        );
-
-        return new TemplateDevVersionCreatedView(
-                target.getId().toString(),
-                target.getDevVersionNumber()
-        );
+        return mutations.cloneReleaseVersion(template, releaseVersion, session);
     }
 
     @Transactional
@@ -231,35 +192,14 @@ public class TemplateVersionLineService {
     ) {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = requireActiveDevVersionLine(templateId, devVersionId);
-
-        if (!templateCurrentVersionResolver.isInFlight(version)) {
-            throw new TemplateGovernanceException(
-                    ApiErrorCodes.TEMPLATE_VERSION_IMMUTABLE,
-                    "api.error.template.versionImmutable",
-                    HttpStatus.FORBIDDEN
-            );
-        }
-        TemplateLifecycleStatus fromStatus = template.getLifecycleStatus();
-
-        version.setDeletedAt(Instant.now());
-        templateVersionRepository.save(version);
-        TemplateLifecycleStatus toStatus = templateCurrentVersionResolver.findLatestPublishedVersion(templateId)
-                .map(TemplateVersionEntity::getLifecycleStatus)
-                .orElse(TemplateLifecycleStatus.DRAFT);
-        template.setLifecycleStatus(toStatus);
-        template.setUpdatedBy(session.username());
-        templateRepository.save(template);
-
-        cloneSupport.recordAbandonLifecycle(
+        return mutations.abandonInFlightDev(
                 template,
-                fromStatus,
-                toStatus,
-                version.getDevVersionNumber(),
+                templateId,
                 devVersionId,
-                session
+                version,
+                session,
+                (entity, ignored) -> templateService.toDetail(entity)
         );
-
-        return templateService.toDetail(template);
     }
 
     private TemplateVersionEntity requireDevVersionLine(UUID templateId, UUID devVersionId) {

@@ -15,12 +15,8 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.audit.api.PolicyUpdateAuditDetail;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
-import com.bank.docgen.template.domain.TemplateLifecycleStatus;
-import com.bank.docgen.template.persistence.TemplateEntity;
-import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateValidationException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
@@ -31,14 +27,11 @@ import java.util.UUID;
 final class ApiPolicyDomainSaveSupport {
 
     private final ApiPolicyRepository apiPolicyRepository;
-    private final ManagementAuditRecorder managementAuditRecorder;
     private final ObjectMapper objectMapper;
-    private final ApiPolicyVersionSnapshotService apiPolicyVersionSnapshotService;
-    private final TemplateVersionRepository templateVersionRepository;
     private final TemplateAdGroupAuthorizationCache templateAdGroupAuthorizationCache;
     private final ApiPolicyImpactPreviewService apiPolicyImpactPreviewService;
-    private final ApiPolicyViewMapper apiPolicyViewMapper;
     private final ApiManagementAccessSupport access;
+    private final ApiPolicyDomainSaveExecutorSupport executor;
 
     ApiPolicyDomainSaveSupport(
             ApiPolicyRepository apiPolicyRepository,
@@ -52,22 +45,23 @@ final class ApiPolicyDomainSaveSupport {
             ApiManagementAccessSupport access
     ) {
         this.apiPolicyRepository = apiPolicyRepository;
-        this.managementAuditRecorder = managementAuditRecorder;
         this.objectMapper = objectMapper;
-        this.apiPolicyVersionSnapshotService = apiPolicyVersionSnapshotService;
-        this.templateVersionRepository = templateVersionRepository;
         this.templateAdGroupAuthorizationCache = templateAdGroupAuthorizationCache;
         this.apiPolicyImpactPreviewService = apiPolicyImpactPreviewService;
-        this.apiPolicyViewMapper = apiPolicyViewMapper;
         this.access = access;
+        this.executor = new ApiPolicyDomainSaveExecutorSupport(
+                apiPolicyRepository,
+                managementAuditRecorder,
+                objectMapper,
+                apiPolicyVersionSnapshotService,
+                templateVersionRepository,
+                apiPolicyViewMapper,
+                access
+        );
     }
 
     String writeJson(List<String> values) {
-        try {
-            return objectMapper.writeValueAsString(values);
-        } catch (JsonProcessingException ex) {
-            return "[]";
-        }
+        return executor.writeJson(values);
     }
 
     ApiPolicyView saveAdGroupsDomain(UUID templateId, SaveAdGroupsRequest request, ManagementSessionClaims session) {
@@ -80,11 +74,11 @@ final class ApiPolicyDomainSaveSupport {
                 request.confirmed(),
                 List.of("AD_GROUP_AUTHORIZATION: groupCount=" + request.allowedAdGroups().size())
         );
-        ApiPolicyView view = saveSingleDomain(
+        ApiPolicyView view = executor.saveSingleDomain(
                 templateId,
                 session,
                 List.of("AD_GROUP_AUTHORIZATION"),
-                existing -> existing.updateAdGroupsDomain(writeJson(request.allowedAdGroups()), session.username()),
+                existing -> existing.updateAdGroupsDomain(executor.writeJson(request.allowedAdGroups()), session.username()),
                 auditDetail
         );
         templateAdGroupAuthorizationCache.invalidate(templateId);
@@ -98,13 +92,13 @@ final class ApiPolicyDomainSaveSupport {
         ApiPolicySaveGate.requireSaveAllowed(preview, request.confirmed());
         PolicyUpdateAuditDetail auditDetail = ApiPolicySaveGate.auditDetailFromPreview(
                 preview, request.confirmed(), List.of());
-        return saveSingleDomain(
+        return executor.saveSingleDomain(
                 templateId,
                 session,
                 List.of("OUTPUT_POLICY"),
                 existing -> existing.updateOutputDomain(
-                        writeJson(request.outputFormats()),
-                        writeJson(request.outputModes()),
+                        executor.writeJson(request.outputFormats()),
+                        executor.writeJson(request.outputModes()),
                         session.username()
                 ),
                 auditDetail
@@ -125,7 +119,7 @@ final class ApiPolicyDomainSaveSupport {
                 request.confirmed(),
                 List.of("BATCH_LIMIT: syncMax=" + request.syncMaxItems() + ", asyncMax=" + request.asyncMaxItems())
         );
-        return saveSingleDomain(
+        return executor.saveSingleDomain(
                 templateId,
                 session,
                 List.of("BATCH_LIMIT"),
@@ -150,7 +144,7 @@ final class ApiPolicyDomainSaveSupport {
         ApiPolicySaveGate.requireSaveAllowed(preview, request.confirmed());
         PolicyUpdateAuditDetail auditDetail = ApiPolicySaveGate.auditDetailFromPreview(
                 preview, request.confirmed(), List.of());
-        return saveSingleDomain(
+        return executor.saveSingleDomain(
                 templateId,
                 session,
                 List.of("ENCRYPTION_CAPABILITY"),
@@ -174,7 +168,7 @@ final class ApiPolicyDomainSaveSupport {
                 request.invocationRecordRetentionDays(),
                 request.documentRetentionDays()
         );
-        if (retentionChanged(policy, request) && !request.confirmed()) {
+        if (ApiPolicyDomainSaveExecutorSupport.retentionChanged(policy, request) && !request.confirmed()) {
             throw new TemplateValidationException("api.error.apimgmt.policyImpactConfirmationRequired");
         }
         PolicyUpdateAuditDetail auditDetail = new PolicyUpdateAuditDetail(
@@ -186,7 +180,7 @@ final class ApiPolicyDomainSaveSupport {
                 false,
                 null
         );
-        return saveSingleDomain(
+        return executor.saveSingleDomain(
                 templateId,
                 session,
                 List.of("INVOCATION_RETENTION"),
@@ -208,7 +202,7 @@ final class ApiPolicyDomainSaveSupport {
         access.requirePublishedTemplate(templateId, session);
         ApiPolicyEntity policy = apiPolicyRepository.findByTemplateId(templateId)
                 .orElseThrow(ApiManagementNotFoundException::new);
-        assertDefaultRouteTargetCallable(templateId, request.defaultRouteReleaseVersion());
+        executor.assertDefaultRouteTargetCallable(templateId, request.defaultRouteReleaseVersion());
         String currentTarget = policy.getDefaultRouteReleaseVersion();
         UpsertApiPolicyRequest candidate = ApiPolicyCandidateBuilder.withDefaultRoute(policy, request, objectMapper);
         ApiPolicyImpactPreviewView preview = apiPolicyImpactPreviewService.preview(templateId, candidate, session);
@@ -218,57 +212,12 @@ final class ApiPolicyDomainSaveSupport {
                 request.confirmed(),
                 List.of("DEFAULT_ROUTE_TARGET: " + currentTarget + " -> " + request.defaultRouteReleaseVersion())
         );
-        return saveSingleDomain(
+        return executor.saveSingleDomain(
                 templateId,
                 session,
                 List.of("DEFAULT_ROUTE_TARGET"),
                 existing -> existing.updateDefaultRouteDomain(request.defaultRouteReleaseVersion(), session.username()),
                 auditDetail
         );
-    }
-
-    private void assertDefaultRouteTargetCallable(UUID templateId, String targetVersion) {
-        if (targetVersion == null || targetVersion.isBlank()) {
-            throw new TemplateValidationException("api.error.apimgmt.defaultRouteTargetNotCallable");
-        }
-        TemplateVersionEntity version = templateVersionRepository
-                .findByTemplateIdAndReleaseVersion(templateId, targetVersion)
-                .orElseThrow(() -> new TemplateValidationException("api.error.apimgmt.defaultRouteTargetNotCallable"));
-        if (version.getLifecycleStatus() != TemplateLifecycleStatus.PUBLISHED) {
-            throw new TemplateValidationException("api.error.apimgmt.defaultRouteTargetNotCallable");
-        }
-    }
-
-    private static boolean retentionChanged(ApiPolicyEntity policy, SaveInvocationRetentionRequest request) {
-        return policy.isSaveGeneratedDocuments() != request.saveGeneratedDocuments()
-                || policy.getInvocationRecordRetentionDays() != request.invocationRecordRetentionDays()
-                || policy.getDocumentRetentionDays() != request.documentRetentionDays();
-    }
-
-    private ApiPolicyView saveSingleDomain(
-            UUID templateId,
-            ManagementSessionClaims session,
-            List<String> changedAreas,
-            java.util.function.Consumer<ApiPolicyEntity> domainUpdater,
-            PolicyUpdateAuditDetail auditDetail
-    ) {
-        TemplateEntity template = access.requirePublishedTemplate(templateId, session);
-        ApiPolicyEntity policy = apiPolicyRepository.findByTemplateId(templateId)
-                .orElseThrow(ApiManagementNotFoundException::new);
-        int previousVersion = policy.getPolicyVersion();
-        domainUpdater.accept(policy);
-        apiPolicyRepository.save(policy);
-        apiPolicyVersionSnapshotService.snapshot(policy, changedAreas);
-        managementAuditRecorder.recordPolicyUpdated(
-                templateId,
-                template.getGroupCode(),
-                previousVersion,
-                policy.getPolicyVersion(),
-                changedAreas,
-                session.username(),
-                access.actorSummary(session),
-                auditDetail
-        );
-        return apiPolicyViewMapper.toPolicyView(policy);
     }
 }

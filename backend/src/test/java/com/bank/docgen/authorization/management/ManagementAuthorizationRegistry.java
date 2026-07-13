@@ -14,7 +14,9 @@ final class ManagementAuthorizationRegistry {
 
     static final Set<String> MANAGEMENT_CONTROLLERS = Set.of(
             "com.bank.docgen.apimgmt.web.ApiAccessController",
-            "com.bank.docgen.apimgmt.web.ApiManagementController",
+            "com.bank.docgen.apimgmt.web.ApiManagementCredentialController",
+            "com.bank.docgen.apimgmt.web.ApiManagementInvocationController",
+            "com.bank.docgen.apimgmt.web.ApiManagementPolicyController",
             "com.bank.docgen.audit.web.AuditController",
             "com.bank.docgen.audit.web.GenerationAuditController",
             "com.bank.docgen.authorization.management.web.GroupManagementController",
@@ -49,12 +51,19 @@ final class ManagementAuthorizationRegistry {
                     Set.of("com.bank.docgen.apimgmt.service.ApiAccessAlertQueryService")
             ),
             Map.entry(
-                    "com.bank.docgen.apimgmt.web.ApiManagementController",
+                    "com.bank.docgen.apimgmt.web.ApiManagementCredentialController",
+                    Set.of("com.bank.docgen.apimgmt.service.ApiManagementService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.apimgmt.web.ApiManagementInvocationController",
+                    Set.of("com.bank.docgen.apimgmt.service.ManagementInvocationQueryService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.apimgmt.web.ApiManagementPolicyController",
                     Set.of(
                             "com.bank.docgen.apimgmt.service.ApiManagementService",
                             "com.bank.docgen.apimgmt.service.ApiPolicyImpactPreviewService",
-                            "com.bank.docgen.apimgmt.service.ApiPolicyRollbackService",
-                            "com.bank.docgen.apimgmt.service.ManagementInvocationQueryService"
+                            "com.bank.docgen.apimgmt.service.ApiPolicyRollbackService"
                     )
             ),
             Map.entry(

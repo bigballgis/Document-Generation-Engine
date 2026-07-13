@@ -20,7 +20,6 @@ import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.TemplateRepository;
-import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
@@ -31,22 +30,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class TemplateLifecycleService {
 
     private final TemplateService templateService;
-    private final TemplateRepository templateRepository;
-    private final TemplateVersionRepository templateVersionRepository;
-    private final GroupAccessService groupAccessService;
     private final LifecycleImpactPreviewService lifecycleImpactPreviewService;
-    private final MessageResolver messageResolver;
-    private final PublishGateService publishGateService;
     private final DecisionFormService decisionFormService;
-    private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final CollaborationWorkItemWriter collaborationWorkItemWriter;
-    private final RenderProfileService renderProfileService;
-    private final ApiPolicyMaterializationService apiPolicyMaterializationService;
-    private final VersionFidelityWarningService versionFidelityWarningService;
     private final TemplateLifecycleTransitionSupport transitions;
     private final TemplateLifecycleDecisionCommentSupport decisionComments;
     private final TemplateLifecycleEligibilitySupport eligibility;
     private final TemplateLifecycleVersionSupport versionSupport;
+    private final TemplateLifecycleApprovalFlowSupport approvalFlow;
+    private final GroupAccessService groupAccessService;
 
     public TemplateLifecycleService(
             TemplateService templateService,
@@ -68,18 +60,10 @@ public class TemplateLifecycleService {
             ObjectMapper objectMapper
     ) {
         this.templateService = templateService;
-        this.templateRepository = templateRepository;
-        this.templateVersionRepository = templateVersionRepository;
         this.groupAccessService = groupAccessService;
         this.lifecycleImpactPreviewService = lifecycleImpactPreviewService;
-        this.messageResolver = messageResolver;
-        this.publishGateService = publishGateService;
         this.decisionFormService = decisionFormService;
-        this.contentModuleReferenceService = contentModuleReferenceService;
         this.collaborationWorkItemWriter = collaborationWorkItemWriter;
-        this.renderProfileService = renderProfileService;
-        this.apiPolicyMaterializationService = apiPolicyMaterializationService;
-        this.versionFidelityWarningService = versionFidelityWarningService;
         this.transitions = new TemplateLifecycleTransitionSupport(
                 templateRepository,
                 templateVersionRepository,
@@ -89,13 +73,29 @@ public class TemplateLifecycleService {
         this.eligibility = new TemplateLifecycleEligibilitySupport(
                 templateService,
                 templateVersionRepository,
-                this.groupAccessService,
+                groupAccessService,
                 approvalSubStateResolver
         );
         this.versionSupport = new TemplateLifecycleVersionSupport(
                 templateVersionRepository,
                 apiPolicyRepository,
                 transitions,
+                eligibility
+        );
+        this.approvalFlow = new TemplateLifecycleApprovalFlowSupport(
+                templateService,
+                templateRepository,
+                templateVersionRepository,
+                publishGateService,
+                decisionFormService,
+                contentModuleReferenceService,
+                collaborationWorkItemWriter,
+                renderProfileService,
+                apiPolicyMaterializationService,
+                versionFidelityWarningService,
+                messageResolver,
+                transitions,
+                decisionComments,
                 eligibility
         );
     }
@@ -136,14 +136,7 @@ public class TemplateLifecycleService {
 
     @Transactional
     public TemplateDetailView submitForApproval(UUID templateId, LifecycleCommentRequest request, ManagementSessionClaims session) {
-        TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
-        eligibility.requireStatus(template, TemplateLifecycleStatus.APPROVAL);
-        eligibility.requirePendingSubmitForApproval(template);
-        publishGateService.assertReadyForSubmitForApproval(templateId, session);
-        transitions.transition(template, TemplateLifecycleStatus.APPROVAL, LifecycleAction.SUBMIT_FOR_APPROVAL,
-                null, decisionComments.normalizeComment(request.commentSummary()), session);
-        collaborationWorkItemWriter.upsertSubmitForApprovalWorkItem(template, session);
-        return templateService.toDetail(template);
+        return approvalFlow.submitForApproval(templateId, request, session);
     }
 
     @Transactional
@@ -152,52 +145,12 @@ public class TemplateLifecycleService {
             LifecycleDecisionRequest request,
             ManagementSessionClaims session
     ) {
-        TemplateEntity template = eligibility.requireApprovableTemplate(templateId, session);
-        eligibility.requireStatus(template, TemplateLifecycleStatus.APPROVAL);
-        decisionFormService.validateApprovalDecision(request, session);
-        String persistedComment = decisionComments.formatDecisionComment(request, session);
-        if (request.decision() == LifecycleDecision.APPROVED) {
-            transitions.transition(template, TemplateLifecycleStatus.PENDING_RELEASE, LifecycleAction.RECORD_APPROVAL_DECISION,
-                    request.decision(), persistedComment, session);
-            apiPolicyMaterializationService.ensureApiPolicySkeleton(templateId, session.username());
-            String orchestrator = collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, session)
-                    .orElseGet(template::getCreatedBy);
-            collaborationWorkItemWriter.upsertPendingReleaseWorkItem(template, orchestrator, session);
-        } else {
-            transitions.transition(template, TemplateLifecycleStatus.DRAFT, LifecycleAction.RECORD_APPROVAL_DECISION,
-                    request.decision(), persistedComment, session);
-            String orchestrator = collaborationWorkItemWriter.resolveOpenApprovalWorkItems(template, session)
-                    .orElseGet(template::getCreatedBy);
-            collaborationWorkItemWriter.upsertApprovalFailureRemediationWorkItem(template, orchestrator, session);
-        }
-        return templateService.toDetail(template);
+        return approvalFlow.recordApprovalDecision(templateId, request, session);
     }
 
     @Transactional
     public TemplateDetailView publish(UUID templateId, PublishTemplateRequest request, ManagementSessionClaims session) {
-        TemplateEntity template = eligibility.requirePublishableTemplate(templateId, session);
-        eligibility.requireStatus(template, TemplateLifecycleStatus.PENDING_RELEASE);
-        decisionFormService.validatePublishConfirmation(request.fidelityViewedConfirmed());
-        apiPolicyMaterializationService.ensureApiPolicyOnPublish(
-                templateId, request.releaseVersion(), session.username());
-        publishGateService.assertReady(templateId, session);
-        template.setReleaseVersion(request.releaseVersion());
-        template.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
-        template.setUpdatedBy(session.username());
-        templateRepository.save(template);
-        TemplateVersionEntity version = eligibility.requireReleaseCandidateVersion(templateId);
-        version.setReleaseVersion(request.releaseVersion());
-        version.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
-        renderProfileService.lockForPublish(version);
-        versionFidelityWarningService.snapshotOnPublish(version, template.getMasterId());
-        templateVersionRepository.save(version);
-        contentModuleReferenceService.lockReferencesForPublish(version.getId());
-        transitions.recordLifecycle(template, LifecycleAction.PUBLISH, TemplateLifecycleStatus.PENDING_RELEASE,
-                TemplateLifecycleStatus.PUBLISHED, null,
-                messageResolver.resolve("api.audit.lifecycle.publishedRelease", request.releaseVersion()),
-                request.releaseVersion(), session);
-        collaborationWorkItemWriter.resolveOpenPendingReleaseWorkItems(template, session);
-        return templateService.toDetail(template);
+        return approvalFlow.publish(templateId, request, session);
     }
 
     @Transactional

@@ -11,13 +11,10 @@ import com.bank.docgen.master.api.MasterDocumentSummaryView;
 import com.bank.docgen.master.api.MasterImpactAnalysisView;
 import com.bank.docgen.master.api.SubmitMasterReviewRequest;
 import com.bank.docgen.master.api.UpdateMasterRequest;
-import com.bank.docgen.master.domain.MasterDocumentStatus;
-import com.bank.docgen.master.persistence.MasterAnchorEntity;
 import com.bank.docgen.master.persistence.MasterAnchorRepository;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
-import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -34,16 +31,13 @@ public class MasterDocumentService {
 
     private static final long DEFAULT_MAX_DOCX_UPLOAD_BYTES = 50L * 1024L * 1024L;
 
-    private final MasterDocumentRepository masterDocumentRepository;
-    private final MasterRevisionLineRepository masterRevisionLineRepository;
     private final ObjectStoragePort objectStoragePort;
-    private final GroupAccessService groupAccessService;
-    private final MasterDocxUploadSupport docxUploadSupport;
     private final MasterDocumentAccessSupport access;
     private final MasterDocumentViewSupport views;
-    private final MasterRevisionPersistSupport revisions;
     private final MasterDocumentCatalogSupport catalog;
     private final MasterDocumentReviewSupport reviews;
+    private final MasterDocumentFileMutationSupport fileMutations;
+    private final GroupAccessService groupAccessService;
 
     public MasterDocumentService(
             MasterDocumentRepository masterDocumentRepository,
@@ -56,11 +50,9 @@ public class MasterDocumentService {
             ManagementUserDisplayService managementUserDisplayService,
             @Value("${docgen.master.max-docx-upload-bytes:" + DEFAULT_MAX_DOCX_UPLOAD_BYTES + "}") long maxDocxUploadBytes
     ) {
-        this.masterDocumentRepository = masterDocumentRepository;
-        this.masterRevisionLineRepository = masterRevisionLineRepository;
         this.objectStoragePort = objectStoragePort;
         this.groupAccessService = groupAccessService;
-        this.docxUploadSupport = new MasterDocxUploadSupport(
+        MasterDocxUploadSupport docxUploadSupport = new MasterDocxUploadSupport(
                 objectStoragePort,
                 docxAnchorExtractor,
                 maxDocxUploadBytes
@@ -71,11 +63,19 @@ public class MasterDocumentService {
                 masterReviewRecordRepository,
                 managementUserDisplayService
         );
-        this.revisions = new MasterRevisionPersistSupport(masterRevisionLineRepository);
+        MasterRevisionPersistSupport revisions = new MasterRevisionPersistSupport(masterRevisionLineRepository);
         this.catalog = new MasterDocumentCatalogSupport(
-                masterDocumentRepository, this.groupAccessService, access, views);
+                masterDocumentRepository, groupAccessService, access, views);
         this.reviews = new MasterDocumentReviewSupport(
                 masterReviewRecordRepository, docxUploadSupport, access, views);
+        this.fileMutations = new MasterDocumentFileMutationSupport(
+                masterDocumentRepository,
+                masterRevisionLineRepository,
+                docxUploadSupport,
+                access,
+                views,
+                revisions
+        );
     }
 
     @Transactional(readOnly = true)
@@ -123,51 +123,7 @@ public class MasterDocumentService {
             MultipartFile docxFile,
             ManagementSessionClaims session
     ) {
-        MasterDocumentEntity master = access.requireWritableMaster(masterId, session);
-        if (master.getStatus() == MasterDocumentStatus.PENDING_REVIEW) {
-            throw new MasterValidationException("api.error.master.invalidState");
-        }
-        docxUploadSupport.validateDocxFile(docxFile);
-        List<String> anchorIds = docxUploadSupport.extractAnchors(docxFile);
-        if (anchorIds.isEmpty()) {
-            throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
-        }
-        masterRevisionLineRepository.findByMasterIdAndCurrentTrueAndDeletedAtIsNull(masterId)
-                .ifPresent(previousLine -> {
-                    previousLine.markSuperseded();
-                    masterRevisionLineRepository.save(previousLine);
-                });
-        MasterDocumentStatus statusSnapshot = master.getStatus();
-        UUID revisionLineId = UUID.randomUUID();
-        String revisionStorageKey = docxUploadSupport.revisionStorageKey(
-                masterId, revisionLineId, docxFile.getOriginalFilename());
-        docxUploadSupport.storeDocx(revisionStorageKey, docxFile);
-        int nextSequence = masterRevisionLineRepository.findMaxRevisionSequence(masterId) + 1;
-        List<MasterAnchorEntity> anchorEntities = revisions.toAnchorEntities(masterId, anchorIds);
-        MasterRevisionLineEntity currentLine = revisions.persistRevisionLine(
-                revisionLineId,
-                masterId,
-                revisionStorageKey,
-                docxFile.getOriginalFilename(),
-                anchorEntities,
-                statusSnapshot,
-                nextSequence,
-                true,
-                master.getChangeSummary(),
-                session.username()
-        );
-        master.setStorageKey(revisionStorageKey);
-        master.setOriginalFilename(docxFile.getOriginalFilename());
-        master.replaceAnchors(anchorEntities);
-        master.getAnchors().forEach(anchor -> anchor.setMaster(master));
-        master.setCurrentRevisionLineId(currentLine.getId());
-        if (master.getStatus() != MasterDocumentStatus.DRAFT) {
-            master.setStatus(MasterDocumentStatus.DRAFT);
-            master.setChangeSummary(null);
-        }
-        master.setUpdatedBy(session.username());
-        masterDocumentRepository.save(master);
-        return views.toDetail(master);
+        return fileMutations.replaceFile(masterId, docxFile, session);
     }
 
     @Transactional
@@ -176,44 +132,7 @@ public class MasterDocumentService {
             MultipartFile docxFile,
             ManagementSessionClaims session
     ) {
-        access.assertGroupWritable(session, request.groupCode());
-        docxUploadSupport.validateDocxFile(docxFile);
-        UUID masterId = UUID.randomUUID();
-        UUID revisionLineId = UUID.randomUUID();
-        String revisionStorageKey = docxUploadSupport.revisionStorageKey(
-                masterId, revisionLineId, docxFile.getOriginalFilename());
-        docxUploadSupport.storeDocx(revisionStorageKey, docxFile);
-        List<String> anchorIds = docxUploadSupport.extractAnchors(docxFile);
-        if (anchorIds.isEmpty()) {
-            throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
-        }
-        List<MasterAnchorEntity> anchorEntities = revisions.toAnchorEntities(masterId, anchorIds);
-        MasterDocumentEntity master = new MasterDocumentEntity(
-                masterId,
-                request.groupCode(),
-                request.name(),
-                request.description(),
-                revisionStorageKey,
-                docxFile.getOriginalFilename(),
-                session.username()
-        );
-        master.setCurrentRevisionLineId(revisionLineId);
-        master.replaceAnchors(anchorEntities);
-        master.getAnchors().forEach(anchor -> anchor.setMaster(master));
-        masterDocumentRepository.save(master);
-        revisions.persistRevisionLine(
-                revisionLineId,
-                masterId,
-                revisionStorageKey,
-                docxFile.getOriginalFilename(),
-                anchorEntities,
-                MasterDocumentStatus.DRAFT,
-                1,
-                true,
-                null,
-                session.username()
-        );
-        return views.toDetail(master);
+        return fileMutations.create(request, docxFile, session);
     }
 
     @Transactional

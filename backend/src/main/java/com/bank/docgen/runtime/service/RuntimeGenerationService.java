@@ -14,19 +14,15 @@ import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.apimgmt.persistence.ApiCredentialEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.template.service.VersionFidelityWarningService;
-import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateCallabilitySupport;
 import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,8 +37,9 @@ public class RuntimeGenerationService {
     private final EncryptionParameterValidator encryptionParameterValidator;
     private final ContractAssemblyService contractAssemblyService;
     private final DocumentGenerationEngine documentGenerationEngine;
-    private final ObjectMapper objectMapper;
     private final VersionFidelityWarningService versionFidelityWarningService;
+    private final RuntimeGenerationIdempotencySupport idempotencySupport;
+    private final RuntimeGenerateRequestSupport requestSupport;
 
     public RuntimeGenerationService(
             TemplateVersionRepository templateVersionRepository,
@@ -64,8 +61,12 @@ public class RuntimeGenerationService {
         this.encryptionParameterValidator = encryptionParameterValidator;
         this.contractAssemblyService = contractAssemblyService;
         this.documentGenerationEngine = documentGenerationEngine;
-        this.objectMapper = objectMapper;
         this.versionFidelityWarningService = versionFidelityWarningService;
+        this.idempotencySupport = new RuntimeGenerationIdempotencySupport(
+                idempotencyService,
+                templateVersionRepository
+        );
+        this.requestSupport = new RuntimeGenerateRequestSupport(objectMapper);
     }
 
     @Transactional(readOnly = true)
@@ -114,7 +115,7 @@ public class RuntimeGenerationService {
         assertTemplateAccess(template, session);
         ApiPolicyEntity policy = apiPolicyRepository.findByTemplateId(template.getId())
                 .orElseThrow(() -> new TemplateValidationException("api.error.runtime.policyNotConfigured"));
-        validateGenerateRequest(request, policy);
+        requestSupport.validateGenerateRequest(request, policy);
         encryptionParameterValidator.validate(request.encryption(), policy, request.output().format());
         String resolvedVersion = releaseVersion != null ? releaseVersion : policy.getDefaultRouteReleaseVersion();
         if (resolvedVersion == null) {
@@ -124,13 +125,14 @@ public class RuntimeGenerationService {
                 .findByTemplateIdAndReleaseVersion(template.getId(), resolvedVersion)
                 .orElseThrow(TemplateNotFoundException::new);
         TemplateCallabilitySupport.assertReleaseVersionCallable(template, version, resolvedVersion);
-        String requestHash = idempotencyService.hashRequest(writeRequest(request, resolvedVersion));
-        Optional<GenerationIdempotencyEntity> existing = findExistingIdempotency(
+        String requestHash = idempotencyService.hashRequest(requestSupport.writeRequest(request, resolvedVersion));
+        Optional<GenerationIdempotencyEntity> existing = idempotencySupport.findExistingIdempotency(
                 request,
                 template,
                 releaseVersion,
                 resolvedVersion,
-                requestHash
+                requestHash,
+                requestSupport::writeRequest
         );
         if (existing.isPresent()) {
             GenerationIdempotencyEntity existingRecord = existing.get();
@@ -139,7 +141,7 @@ public class RuntimeGenerationService {
                 return new SyncGenerateResult(
                         null,
                         replayStream,
-                        contentTypeForFormat(request.output().format()),
+                        requestSupport.contentTypeForFormat(request.output().format()),
                         existingRecord.getDocumentId(),
                         resolvedVersion,
                         versionFidelityWarningService.resolveWarningCodes(
@@ -175,107 +177,9 @@ public class RuntimeGenerationService {
         );
     }
 
-    private Optional<GenerationIdempotencyEntity> findExistingIdempotency(
-            GenerateRequestBody request,
-            TemplateEntity template,
-            String explicitReleaseVersion,
-            String resolvedVersion,
-            String requestHash
-    ) {
-        try {
-            return idempotencyService.findExisting(request.idempotencyKey(), template.getId(), requestHash);
-        } catch (IdempotencyConflictException ex) {
-            if (explicitReleaseVersion != null) {
-                throw ex;
-            }
-            Optional<GenerationIdempotencyEntity> stored = idempotencyService.findLiveRecord(
-                    request.idempotencyKey(),
-                    template.getId()
-            );
-            if (stored.isPresent()) {
-                String originalVersion = findMatchingReleaseVersion(request, stored.get(), template.getId());
-                if (originalVersion != null && !originalVersion.equals(resolvedVersion)) {
-                    throw IdempotencyConflictException.defaultRouteChanged(
-                            request.idempotencyKey(),
-                            originalVersion
-                    );
-                }
-            }
-            throw ex;
-        }
-    }
-
-    private String findMatchingReleaseVersion(
-            GenerateRequestBody request,
-            GenerationIdempotencyEntity stored,
-            UUID templateId
-    ) {
-        String cached = stored.getResolvedReleaseVersion();
-        if (cached != null && !cached.isBlank()) {
-            return cached;
-        }
-        return templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(templateId).stream()
-                .filter(version -> version.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED)
-                .map(TemplateVersionEntity::getReleaseVersion)
-                .filter(releaseVersion -> releaseVersion != null && !releaseVersion.isBlank())
-                .filter(releaseVersion -> idempotencyService.hashRequest(writeRequest(request, releaseVersion))
-                        .equals(stored.getRequestHash()))
-                .findFirst()
-                .orElse(null);
-    }
-
-    private String contentTypeForFormat(String outputFormat) {
-        if ("PDF".equalsIgnoreCase(outputFormat)) {
-            return "application/pdf";
-        }
-        return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-    }
-
     private void assertTemplateAccess(TemplateEntity template, RuntimeSessionClaims session) {
         if (!template.getId().equals(session.templateId())) {
             throw new TemplateValidationException("api.error.runtime.templateCredentialMismatch");
-        }
-    }
-
-    private void validateGenerateRequest(GenerateRequestBody request, ApiPolicyEntity policy) {
-        if (request.output() == null || request.variables() == null) {
-            throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
-        }
-        String format = request.output().format();
-        if (!"DOCX".equalsIgnoreCase(format) && !"PDF".equalsIgnoreCase(format)) {
-            throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
-        }
-        if (readStringList(policy.getOutputFormatsJson()).stream().noneMatch(item -> item.equalsIgnoreCase(format))) {
-            throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
-        }
-        if (request.idempotencyKey() == null || request.idempotencyKey().isBlank()) {
-            throw new TemplateValidationException("api.error.runtime.idempotencyKeyRequired");
-        }
-        OutputModePolicyValidator.validateSyncGenerate(
-                request.output().mode(),
-                readStringList(policy.getOutputModesJson())
-        );
-    }
-
-    private List<String> readStringList(String json) {
-        try {
-            return objectMapper.readValue(json, new TypeReference<>() {
-            });
-        } catch (Exception ex) {
-            throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
-        }
-    }
-
-    private String writeRequest(GenerateRequestBody request, String releaseVersion) {
-        try {
-            java.util.LinkedHashMap<String, Object> payload = new java.util.LinkedHashMap<>();
-            payload.put("releaseVersion", releaseVersion);
-            payload.put("variables", request.variables());
-            payload.put("output", request.output());
-            payload.put("encryption", request.encryption());
-            return objectMapper.writeValueAsString(payload);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
-            return releaseVersion;
         }
     }
 }
