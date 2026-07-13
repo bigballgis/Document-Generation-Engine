@@ -1,7 +1,9 @@
 package com.bank.docgen.master.web;
 
 import com.bank.docgen.master.service.MasterAccessDeniedException;
+import com.bank.docgen.master.service.MasterCurrentRevisionUnavailableException;
 import com.bank.docgen.master.service.MasterNotFoundException;
+import com.bank.docgen.master.service.MasterRevisionInUseException;
 import com.bank.docgen.master.service.MasterValidationException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
@@ -53,6 +55,28 @@ public class MasterExceptionAdvice {
     public ResponseEntity<ErrorEnvelope> handleMasterValidation(
             HttpServletRequest request,
             MasterValidationException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorCodes.MASTER_VALIDATION_FAILED,
+                ApiErrorCategories.MASTER,
+                ex.messageKey()
+        );
+    }
+
+    @ExceptionHandler(MasterRevisionInUseException.class)
+    public ResponseEntity<ErrorEnvelope> handleRevisionInUse(
+            HttpServletRequest request,
+            MasterRevisionInUseException ex
+    ) {
+        return errorEnvelopeFactory.masterRevisionInUse(request, ex);
+    }
+
+    @ExceptionHandler(MasterCurrentRevisionUnavailableException.class)
+    public ResponseEntity<ErrorEnvelope> handleCurrentRevisionUnavailable(
+            HttpServletRequest request,
+            MasterCurrentRevisionUnavailableException ex
     ) {
         return errorEnvelopeFactory.domainError(
                 request,

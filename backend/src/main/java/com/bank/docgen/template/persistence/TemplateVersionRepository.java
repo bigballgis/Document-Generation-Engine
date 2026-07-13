@@ -18,6 +18,14 @@ public interface TemplateVersionRepository extends JpaRepository<TemplateVersion
 
     Optional<TemplateVersionEntity> findByTemplateIdAndReleaseVersion(UUID templateId, String releaseVersion);
 
+    List<TemplateVersionEntity> findByMasterRevisionIdAndDeletedAtIsNull(UUID masterRevisionId);
+
+    List<TemplateVersionEntity> findByLifecycleStatusAndMasterRevisionIdNotNullAndDeletedAtIsNull(
+            TemplateLifecycleStatus lifecycleStatus);
+
+    List<TemplateVersionEntity> findByLifecycleStatusAndMasterRevisionIdIsNullAndDeletedAtIsNull(
+            TemplateLifecycleStatus lifecycleStatus);
+
     @Modifying
     @Query("""
             UPDATE TemplateVersionEntity v

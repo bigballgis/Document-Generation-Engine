@@ -1,5 +1,6 @@
 package com.bank.docgen.template.web;
 
+import com.bank.docgen.master.service.MasterCurrentRevisionUnavailableException;
 import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.ErrorEnvelope;
@@ -101,6 +102,25 @@ public class TemplateExceptionAdvice {
                 HttpStatus.UNPROCESSABLE_ENTITY,
                 ApiErrorCodes.TEMPLATE_VALIDATION_FAILED,
                 ApiErrorCategories.TEMPLATE,
+                ex.messageKey()
+        );
+    }
+
+    /**
+     * CE-K01: publish fails closed when the current master revision cannot be pinned.
+     * Mapped here so template lifecycle endpoints return a stable envelope (also handled
+     * globally by {@code MasterExceptionAdvice}).
+     */
+    @ExceptionHandler(MasterCurrentRevisionUnavailableException.class)
+    public ResponseEntity<ErrorEnvelope> handleCurrentRevisionUnavailable(
+            HttpServletRequest request,
+            MasterCurrentRevisionUnavailableException ex
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ApiErrorCodes.MASTER_VALIDATION_FAILED,
+                ApiErrorCategories.MASTER,
                 ex.messageKey()
         );
     }

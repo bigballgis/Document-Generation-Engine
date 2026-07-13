@@ -6,6 +6,9 @@ import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
+import com.bank.docgen.master.persistence.MasterDocumentRepository;
+import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.LifecycleCommentRequest;
 import com.bank.docgen.template.api.LifecycleDecisionRequest;
@@ -57,7 +60,10 @@ public class TemplateLifecycleService {
             ApiPolicyMaterializationService apiPolicyMaterializationService,
             ApiPolicyRepository apiPolicyRepository,
             VersionFidelityWarningService versionFidelityWarningService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            MasterDocumentRepository masterDocumentRepository,
+            MasterRevisionLineRepository masterRevisionLineRepository,
+            ObjectStoragePort objectStoragePort
     ) {
         this.templateService = templateService;
         this.groupAccessService = groupAccessService;
@@ -96,7 +102,11 @@ public class TemplateLifecycleService {
                 messageResolver,
                 transitions,
                 decisionComments,
-                eligibility
+                eligibility,
+                masterDocumentRepository,
+                masterRevisionLineRepository,
+                objectStoragePort,
+                objectMapper
         );
     }
 

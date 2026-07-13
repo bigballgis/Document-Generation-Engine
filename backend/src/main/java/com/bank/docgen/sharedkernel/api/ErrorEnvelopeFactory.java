@@ -180,6 +180,28 @@ public class ErrorEnvelopeFactory {
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 
+    public ResponseEntity<ErrorEnvelope> masterRevisionInUse(
+            HttpServletRequest request,
+            com.bank.docgen.master.service.MasterRevisionInUseException ex
+    ) {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        String messageKey = "api.error.master.revisionInUseByPublishedRelease";
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("referencedReleases", ex.references());
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.MASTER_REVISION_IN_USE_BY_PUBLISHED_RELEASE,
+                ApiErrorCategories.CONFLICT,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                false,
+                null,
+                details
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
+    }
+
     public ResponseEntity<ErrorEnvelope> unexpectedError(HttpServletRequest request) {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();

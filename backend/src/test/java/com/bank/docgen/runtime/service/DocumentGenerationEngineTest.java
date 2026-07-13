@@ -57,6 +57,8 @@ class DocumentGenerationEngineTest {
     @Mock
     private MasterDocumentRepository masterDocumentRepository;
     @Mock
+    private com.bank.docgen.master.persistence.MasterRevisionLineRepository masterRevisionLineRepository;
+    @Mock
     private ObjectStoragePort objectStoragePort;
     @Mock
     private DocxAssembler docxAssembler;
@@ -80,6 +82,7 @@ class DocumentGenerationEngineTest {
                 templateVersionRepository,
                 anchorBindingRepository,
                 masterDocumentRepository,
+                masterRevisionLineRepository,
                 objectStoragePort,
                 docxAssembler,
                 documentArtifactPipeline,
@@ -180,19 +183,18 @@ class DocumentGenerationEngineTest {
 
     @Test
     void generate_usesCachedFidelityWarningsForPublishedVersion() throws Exception {
+        UUID pinnedRevisionId = UUID.fromString("55555555-5555-5555-5555-555555555555");
         TemplateVersionEntity version = new TemplateVersionEntity(VERSION_ID, TEMPLATE_ID, "10000001");
         version.setReleaseVersion("1.0.0");
         version.setLifecycleStatus(com.bank.docgen.template.domain.TemplateLifecycleStatus.PUBLISHED);
         version.setFidelityWarningCodesJson("[\"CACHED_WARNING\"]");
-        MasterDocumentEntity master = new MasterDocumentEntity(
-                MASTER_ID,
-                "RETAIL",
-                "Retail Master",
-                "Retail master document",
-                "masters/master.docx",
-                "master.docx",
-                "10000001"
-        );
+        version.setMasterRevisionId(pinnedRevisionId);
+        com.bank.docgen.master.persistence.MasterRevisionLineEntity pinnedRevision =
+                new com.bank.docgen.master.persistence.MasterRevisionLineEntity(
+                        pinnedRevisionId, MASTER_ID, "masters/master.docx", "master.docx",
+                        1, com.bank.docgen.master.domain.MasterDocumentStatus.APPROVED,
+                        1, true, "initial", "10000001"
+                );
         byte[] docx = new byte[]{1, 2, 3};
         byte[] finalBytes = new byte[]{9, 8, 7};
         GeneratedArtifactSizeGuard sizeGuard = new GeneratedArtifactSizeGuard(
@@ -207,7 +209,8 @@ class DocumentGenerationEngineTest {
 
         when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, "1.0.0"))
                 .thenReturn(Optional.of(version));
-        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(MASTER_ID)).thenReturn(Optional.of(master));
+        when(masterRevisionLineRepository.findByIdAndMasterIdAndDeletedAtIsNull(pinnedRevisionId, MASTER_ID))
+                .thenReturn(Optional.of(pinnedRevision));
         when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(VERSION_ID)).thenReturn(List.of());
         when(contentModuleReferenceService.resolvePinnedContentStructures(VERSION_ID)).thenReturn(java.util.Map.of());
         when(objectStoragePort.get("masters/master.docx")).thenReturn(new ByteArrayInputStream(docx));

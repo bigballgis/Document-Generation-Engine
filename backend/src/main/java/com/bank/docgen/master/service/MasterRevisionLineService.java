@@ -8,6 +8,7 @@ import com.bank.docgen.master.api.MasterAnchorView;
 import com.bank.docgen.master.api.MasterRevisionLineDetailView;
 import com.bank.docgen.master.api.MasterRevisionLineSummaryView;
 import com.bank.docgen.master.api.MasterReviewRecordView;
+import com.bank.docgen.master.api.PinnedReleaseReference;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterReviewRecordEntity;
@@ -15,6 +16,8 @@ import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
+import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
@@ -22,6 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MasterRevisionLineService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MasterRevisionLineService.class);
 
     static final String CURRENT_LINE_LABEL = "CURRENT";
     static final String HISTORICAL_LINE_LABEL = "HISTORICAL";
@@ -43,6 +50,7 @@ public class MasterRevisionLineService {
     private final ObjectStoragePort objectStoragePort;
     private final GroupAccessService groupAccessService;
     private final ManagementUserDisplayService managementUserDisplayService;
+    private final TemplateVersionRepository templateVersionRepository;
 
     public MasterRevisionLineService(
             MasterDocumentRepository masterDocumentRepository,
@@ -50,7 +58,8 @@ public class MasterRevisionLineService {
             MasterReviewRecordRepository masterReviewRecordRepository,
             ObjectStoragePort objectStoragePort,
             GroupAccessService groupAccessService,
-            ManagementUserDisplayService managementUserDisplayService
+            ManagementUserDisplayService managementUserDisplayService,
+            TemplateVersionRepository templateVersionRepository
     ) {
         this.masterDocumentRepository = masterDocumentRepository;
         this.masterRevisionLineRepository = masterRevisionLineRepository;
@@ -58,6 +67,7 @@ public class MasterRevisionLineService {
         this.objectStoragePort = objectStoragePort;
         this.groupAccessService = groupAccessService;
         this.managementUserDisplayService = managementUserDisplayService;
+        this.templateVersionRepository = templateVersionRepository;
     }
 
     @Transactional(readOnly = true)
@@ -111,6 +121,44 @@ public class MasterRevisionLineService {
         } catch (Exception ex) {
             throw new MasterValidationException("api.error.master.downloadFailed");
         }
+    }
+
+    /**
+     * CE-K01: delete a master revision line (soft-delete + object-storage cleanup). Fail-closed
+     * with {@link MasterRevisionInUseException} (409) when any non-deleted published-lifecycle
+     * template version pins this revision. Stopping/deprecating a release does not release the
+     * pin (BDD-CE-K01-013), so the guard checks all referenced versions regardless of their
+     * published-lifecycle status.
+     */
+    @Transactional
+    public void deleteRevisionLine(UUID masterId, UUID revisionLineId, ManagementSessionClaims session) {
+        requireReadableMaster(masterId, session);
+        MasterRevisionLineEntity line = requireRevisionLine(masterId, revisionLineId);
+        List<TemplateVersionEntity> referencingVersions =
+                templateVersionRepository.findByMasterRevisionIdAndDeletedAtIsNull(revisionLineId);
+        if (!referencingVersions.isEmpty()) {
+            throw new MasterRevisionInUseException(buildReferences(referencingVersions));
+        }
+        line.setDeletedAt(Instant.now());
+        masterRevisionLineRepository.save(line);
+        if (objectStoragePort.exists(line.getStorageKey())) {
+            try {
+                objectStoragePort.delete(line.getStorageKey());
+            } catch (RuntimeException ex) {
+                LOG.warn("CE-K01 revision {} object storage cleanup failed: {}", revisionLineId, ex.getMessage());
+            }
+        }
+    }
+
+    private List<PinnedReleaseReference> buildReferences(List<TemplateVersionEntity> versions) {
+        return versions.stream()
+                .map(version -> {
+                    String templateId = version.getTemplateId() == null ? null : version.getTemplateId().toString();
+                    String releaseVersion = version.getReleaseVersion();
+                    String status = version.getLifecycleStatus() == null ? null : version.getLifecycleStatus().name();
+                    return new PinnedReleaseReference(templateId, releaseVersion, status);
+                })
+                .toList();
     }
 
     private MasterDocumentEntity requireReadableMaster(UUID masterId, ManagementSessionClaims session) {

@@ -158,6 +158,15 @@ public class MasterRevisionLineEntity {
         this.current = false;
     }
 
+    public Instant getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(Instant deletedAt) {
+        this.deletedAt = deletedAt;
+        this.updatedAt = Instant.now();
+    }
+
     public void replaceAnchors(List<MasterRevisionLineAnchorEntity> snapshotAnchors) {
         anchors.clear();
         anchors.addAll(snapshotAnchors);

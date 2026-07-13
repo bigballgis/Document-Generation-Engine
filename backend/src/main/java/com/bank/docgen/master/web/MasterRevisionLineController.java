@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.UUID;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,6 +74,19 @@ public class MasterRevisionLineController {
             );
             artifact.contentStream().transferTo(response.getOutputStream());
         }
+    }
+
+    @DeleteMapping("/{revisionLineId}")
+    public SuccessEnvelope<Void> delete(
+            @PathVariable UUID masterId,
+            @PathVariable UUID revisionLineId,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        masterRevisionLineService.deleteRevisionLine(masterId, revisionLineId, session);
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        return new SuccessEnvelope<>(Metadata.minimal(auditId, traceId), null);
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

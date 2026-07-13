@@ -73,6 +73,12 @@ class TemplateLifecycleGovernanceServiceTest {
     private ApiPolicyRepository apiPolicyRepository;
     @Mock
     private VersionFidelityWarningService versionFidelityWarningService;
+    @Mock
+    private com.bank.docgen.master.persistence.MasterDocumentRepository masterDocumentRepository;
+    @Mock
+    private com.bank.docgen.master.persistence.MasterRevisionLineRepository masterRevisionLineRepository;
+    @Mock
+    private com.bank.docgen.infrastructure.storage.ObjectStoragePort objectStoragePort;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
@@ -99,7 +105,10 @@ class TemplateLifecycleGovernanceServiceTest {
                 apiPolicyMaterializationService,
                 apiPolicyRepository,
                 versionFidelityWarningService,
-                new ObjectMapper()
+                new ObjectMapper(),
+                masterDocumentRepository,
+                masterRevisionLineRepository,
+                objectStoragePort
         );
         groupAdmin = session(List.of("GROUP_ADMIN"), List.of("RETAIL"));
         templateId = UUID.randomUUID();

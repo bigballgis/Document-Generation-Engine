@@ -45,6 +45,17 @@ public class TemplateVersionEntity {
     @Column(name = "fidelity_warning_codes_json", columnDefinition = "TEXT")
     private String fidelityWarningCodesJson;
 
+    // CE-K01: immutable release-bundle pinning. Populated on publish or by the
+    // retroactive backfill service. Nullable for non-PUBLISHED / pre-migration rows.
+    @Column(name = "master_revision_id")
+    private UUID masterRevisionId;
+
+    @Column(name = "master_file_hash", length = 64)
+    private String masterFileHash;
+
+    @Column(name = "pin_metadata_json", columnDefinition = "TEXT")
+    private String pinMetadataJson;
+
     @Column(name = "created_by", nullable = false, length = 8)
     private String createdBy;
 
@@ -172,6 +183,33 @@ public class TemplateVersionEntity {
 
     public void setLifecycleStatus(TemplateLifecycleStatus lifecycleStatus) {
         this.lifecycleStatus = lifecycleStatus;
+        this.updatedAt = Instant.now();
+    }
+
+    public UUID getMasterRevisionId() {
+        return masterRevisionId;
+    }
+
+    public void setMasterRevisionId(UUID masterRevisionId) {
+        this.masterRevisionId = masterRevisionId;
+        this.updatedAt = Instant.now();
+    }
+
+    public String getMasterFileHash() {
+        return masterFileHash;
+    }
+
+    public void setMasterFileHash(String masterFileHash) {
+        this.masterFileHash = masterFileHash;
+        this.updatedAt = Instant.now();
+    }
+
+    public String getPinMetadataJson() {
+        return pinMetadataJson;
+    }
+
+    public void setPinMetadataJson(String pinMetadataJson) {
+        this.pinMetadataJson = pinMetadataJson;
         this.updatedAt = Instant.now();
     }
 }
