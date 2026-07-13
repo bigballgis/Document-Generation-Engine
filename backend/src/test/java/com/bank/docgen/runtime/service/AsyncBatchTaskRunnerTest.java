@@ -202,7 +202,9 @@ class AsyncBatchTaskRunnerTest {
                 List.of(new BatchGenerateRequestBody.BatchGenerateItemBody("item-1", variables, null, null)),
                 null,
                 "req-1",
-                "idem-1"
+                "idem-1",
+                null,
+                null
         );
     }
 

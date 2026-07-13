@@ -10,7 +10,8 @@ public record GenerateRequestBody(
         Map<String, Object> variables,
         EncryptionOptionsView encryption,
         String requestId,
-        String idempotencyKey
+        String idempotencyKey,
+        ContextView context
 ) {
     public GenerateRequestBody {
         variables = DefensiveCopies.copyMap(variables);

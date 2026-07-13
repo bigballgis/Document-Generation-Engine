@@ -69,7 +69,9 @@ class BatchExecutionServiceTest {
                 ),
                 new EncryptionOptionsView(false, null, null, List.of()),
                 "req-1",
-                "idem-1"
+                "idem-1",
+                null,
+                null
         );
     }
 

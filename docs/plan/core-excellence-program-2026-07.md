@@ -223,8 +223,8 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 
 | ID | 标题 | 级/量 | 要点（证据见 R3 报告） | 依赖 |
 | --- | --- | --- | --- | --- |
-| CE-C01 | `context` 白名单落地 | P0·S · `In Progress` | DTO 加 `context`（6 字段 record）；未知子字段 400；`InvocationParameterSanitizer` 写 `contextSummary` | 无 |
-| CE-C02 | unknown-field 严格校验 | P0·S · `In Progress` | runtime DTO 专用 ObjectMapper `fail-on-unknown-properties` → 统一 `400 REQUEST_BODY_INVALID`；**不**动管理端 DTO | C01 同链 |
+| CE-C01 | `context` 白名单落地 | P0·S · `Done` | DTO 加 `context`（6 字段 record）；未知子字段 400；`InvocationParameterSanitizer` 写 `contextSummary`。Slice `ce-c01-c02-contract-strictness` · `mvn verify` GREEN | 无 |
+| CE-C02 | unknown-field 严格校验 | P0·S · `Done` | runtime DTO 专用 ObjectMapper `fail-on-unknown-properties` → 统一 `400 REQUEST_BODY_INVALID`；**不**动管理端 DTO。Slice `ce-c01-c02-contract-strictness` · `mvn verify` GREEN | C01 同链 |
 | CE-C03 | fidelityWarnings 契约对齐 | P1·S | 批量项/任务查询返回完整 `FidelityWarning[]`；同步流保留头摘要并在契约注明 | 无 |
 | CE-C04 | 凭证 `expires_at` 持久化 + 暴露 | P1·M | 结束 `ApiCredentialLifecycleSupport` 过渡态（R1 项）：Flyway 加列 + 发放/轮换写入；`RuntimeCredentialSummaryView` 加 `expiresAt`/`EXPIRING_SOON`；契约页 callable versions 加可选 `deprecated`/`sunsetAt`（需轻量修订 ADR-0003/0017 展示边界） | 无 |
 | CE-C05 | `originalBatchId` 重试血缘 | P1·M | 请求字段 + 校验（原批次存在且属同凭证）+ 审计关联 + 契约文档 | 无 |

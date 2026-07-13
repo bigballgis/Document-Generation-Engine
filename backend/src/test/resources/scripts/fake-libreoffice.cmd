@@ -19,10 +19,13 @@ if "%~1"=="--convert-to" (
   goto parse
 )
 if not "%~1"=="" (
-  echo %~1 | findstr /B "-env:UserInstallation=" >nul && (
+  echo.%~1| findstr /B /C:"-env:UserInstallation=" >nul && (
     set PROFILE=%~1
     set PROFILE=!PROFILE:-env:UserInstallation=!
+    set PROFILE=!PROFILE:file:///=!
     set PROFILE=!PROFILE:file://=!
+    set PROFILE=!PROFILE:%%3A=:!
+    set PROFILE=!PROFILE:%%20= !
   )
   if exist "%~1" set INPUT=%~1
 )

@@ -260,7 +260,8 @@ class DefaultRouteGovernanceTest {
                         java.util.Map.of("customerName", "Alice"),
                         new com.bank.docgen.sharedkernel.api.EncryptionOptionsView(false, null, null, List.of()),
                         "req-1",
-                        "idem-route"
+                        "idem-route",
+                        null
                 )
         ))
                 .isInstanceOf(IdempotencyConflictException.class)

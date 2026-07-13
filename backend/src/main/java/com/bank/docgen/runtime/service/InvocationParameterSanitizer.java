@@ -1,6 +1,7 @@
 package com.bank.docgen.runtime.service;
 
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
+import com.bank.docgen.runtime.api.ContextView;
 import com.bank.docgen.runtime.api.EncryptionSummaryView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
@@ -30,6 +31,7 @@ public class InvocationParameterSanitizer {
         payload.put("variablesHash", VariableHashSupport.hashVariables(objectMapper, request.variables()));
         payload.put("output", request.output());
         payload.put("encryption", sanitizeEncryption(request.encryption(), request.output().format()));
+        putContextSummary(payload, request.context());
         return writeJson(payload);
     }
 
@@ -41,6 +43,7 @@ public class InvocationParameterSanitizer {
         payload.put("itemsCount", request.items().size());
         payload.put("itemsHash", hashBatchItems(request));
         payload.put("items", request.items().stream().map(this::sanitizeBatchItem).toList());
+        putContextSummary(payload, request.context());
         return writeJson(payload);
     }
 
@@ -95,6 +98,33 @@ public class InvocationParameterSanitizer {
     private EncryptionSummaryView sanitizeEncryption(EncryptionOptionsView encryption, String outputFormat) {
         String format = outputFormat == null ? "DOCX" : outputFormat;
         return EncryptionSummaryView.fromRequest(format, encryption);
+    }
+
+    private void putContextSummary(Map<String, Object> payload, ContextView context) {
+        Map<String, String> summary = contextSummary(context);
+        if (!summary.isEmpty()) {
+            payload.put("contextSummary", summary);
+        }
+    }
+
+    private Map<String, String> contextSummary(ContextView context) {
+        Map<String, String> summary = new LinkedHashMap<>();
+        if (context == null) {
+            return summary;
+        }
+        putIfNonBlank(summary, "sourceSystem", context.sourceSystem());
+        putIfNonBlank(summary, "channel", context.channel());
+        putIfNonBlank(summary, "businessRequestId", context.businessRequestId());
+        putIfNonBlank(summary, "upstreamTraceId", context.upstreamTraceId());
+        putIfNonBlank(summary, "scenario", context.scenario());
+        putIfNonBlank(summary, "locale", context.locale());
+        return summary;
+    }
+
+    private static void putIfNonBlank(Map<String, String> target, String key, String value) {
+        if (value != null && !value.isBlank()) {
+            target.put(key, value);
+        }
     }
 
     private void sanitizeItemsArray(JsonNode itemsNode) {

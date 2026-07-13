@@ -116,14 +116,10 @@ public class LibreOfficePdfConversionService implements PdfConversionService {
         } catch (IOException ex) {
             throw new RenderingOperationException("api.error.generation.pdfConversionFailed");
         } finally {
+            // Recursive delete: on Windows, non-empty temp dirs (or briefly locked children)
+            // make Files.deleteIfExists(tempDir) a silent no-op and flake cleanup asserts.
             if (tempDir != null) {
-                try {
-                    Files.deleteIfExists(tempDir.resolve("input.docx"));
-                    Files.deleteIfExists(tempDir.resolve("input.pdf"));
-                    Files.deleteIfExists(tempDir);
-                } catch (IOException ignored) {
-                    // Best-effort temp cleanup.
-                }
+                deleteProfileTree(tempDir);
             }
             if (profileDir != null) {
                 deleteProfileTree(profileDir);
