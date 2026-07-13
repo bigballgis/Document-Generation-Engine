@@ -3,7 +3,6 @@ package com.bank.docgen.collaboration.persistence;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemQueue;
 import com.bank.docgen.collaboration.domain.CollaborationWorkItemStatus;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,11 +35,10 @@ public interface CollaborationWorkItemRepository extends JpaRepository<Collabora
             Collection<CollaborationWorkItemQueue> queues,
             Collection<String> groupCodes
     ) {
-        boolean wildcardScope = groupCodes.size() == 1 && groupCodes.contains("*");
         return findOpenByQueuesAndGroupsInternal(
                 CollaborationWorkItemStatus.OPEN,
                 queues,
-                wildcardScope,
+                CollaborationWorkItemQuerySupport.isWildcardScope(groupCodes),
                 groupCodes
         );
     }
@@ -60,12 +58,7 @@ public interface CollaborationWorkItemRepository extends JpaRepository<Collabora
     default List<CollaborationWorkItemEntity> findOpenEscalationCandidates() {
         return findOpenEscalationCandidatesInternal(
                 CollaborationWorkItemStatus.OPEN,
-                EnumSet.of(
-                        CollaborationWorkItemQueue.TEST,
-                        CollaborationWorkItemQueue.APPROVAL,
-                        CollaborationWorkItemQueue.PENDING_RELEASE,
-                        CollaborationWorkItemQueue.REMEDIATION
-                )
+                CollaborationWorkItemQuerySupport.escalationCandidateQueues()
         );
     }
 
@@ -140,11 +133,10 @@ public interface CollaborationWorkItemRepository extends JpaRepository<Collabora
             Collection<String> groupCodes,
             Pageable pageable
     ) {
-        boolean wildcardScope = groupCodes.size() == 1 && groupCodes.contains("*");
         return findOpenByQueuesAndGroupsNewestFirstInternal(
                 CollaborationWorkItemStatus.OPEN,
                 queues,
-                wildcardScope,
+                CollaborationWorkItemQuerySupport.isWildcardScope(groupCodes),
                 groupCodes,
                 pageable
         );
@@ -178,11 +170,10 @@ public interface CollaborationWorkItemRepository extends JpaRepository<Collabora
             Collection<String> groupCodes,
             String userId
     ) {
-        boolean wildcardScope = groupCodes.size() == 1 && groupCodes.contains("*");
         return countOpenUnreadByQueuesAndGroupsInternal(
                 CollaborationWorkItemStatus.OPEN,
                 queues,
-                wildcardScope,
+                CollaborationWorkItemQuerySupport.isWildcardScope(groupCodes),
                 groupCodes,
                 userId
         );
@@ -216,11 +207,10 @@ public interface CollaborationWorkItemRepository extends JpaRepository<Collabora
             Collection<String> groupCodes,
             String userId
     ) {
-        boolean wildcardScope = groupCodes.size() == 1 && groupCodes.contains("*");
         return findOpenUnreadIdsByQueuesAndGroupsInternal(
                 CollaborationWorkItemStatus.OPEN,
                 queues,
-                wildcardScope,
+                CollaborationWorkItemQuerySupport.isWildcardScope(groupCodes),
                 groupCodes,
                 userId
         );
@@ -250,12 +240,11 @@ public interface CollaborationWorkItemRepository extends JpaRepository<Collabora
             Collection<CollaborationWorkItemQueue> queues,
             Collection<String> groupCodes
     ) {
-        boolean wildcardScope = groupCodes.size() == 1 && groupCodes.contains("*");
         return findVisibleOpenByIdInternal(
                 workItemId,
                 CollaborationWorkItemStatus.OPEN,
                 queues,
-                wildcardScope,
+                CollaborationWorkItemQuerySupport.isWildcardScope(groupCodes),
                 groupCodes
         );
     }
