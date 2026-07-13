@@ -702,23 +702,23 @@
       {
         "id": "51",
         "title": "BOOT-4-1-UPGRADE: Java 25 + Spring Boot parent 4.1.0 platform baseline",
-        "description": "IN PROGRESS 2026-07-13. Slice boot-4-1-upgrade. Upgrade Spring Boot Maven parent 3.3.x → 4.1.0 (user said \"4.10\" → 4.1.0) and fold Java 21 → 25 (user said \"25\") into the same slice. Amend ADR-0028 to Java 25 + Boot 4.x/4.1.0. BDD not-applicable (platform/ops). Formal phase None. No sole-active formal phase. Do NOT activate CD-3. Do NOT claim go-live. Do NOT touch DGE-audit-governance. Prior #49 left Boot on 3.3.13 / Java 21.",
-        "details": "Allocated 2026-07-13 (plan-orchestrator stage 2). Slice id: boot-4-1-upgrade. Placement: ISOLATED D:/working/DGE-boot-4-1-upgrade · branch feat/boot-4-1-upgrade. Formal phase remains None (do NOT invent P-phase; do NOT activate CD-3). BDD readiness: not-applicable — docs/behavior/boot-4-1-upgrade.md. Scope: spring-boot-starter-parent → 4.1.0; Maven compile release 25; Temurin 25 runtime images; companion Boot 4 / Spring Framework 7-compatible pins; config property renames as required; amend ADR-0028 to Java 25 + Boot 4.x (pin 4.1.0); sync stack/ops docs. Acceptance: mvn verify GREEN; app starts; GET /healthz OK; ADR+docs synced. Docs-first (2026-07-13 second amendment): Java 25 folded into #51 — pom.xml/Dockerfile toolchain pins remain backend-engineer. Backend stage-4 pins (in flight): parent 4.1.0; springdoc 3.0.3; ShedLock 7.7.0; resilience4j-spring-boot4 2.4.0; starters webmvc/kafka/flyway + jackson2 transitional; test APIs → AutoConfigureMockMvc/DataJpaTest/MockitoBean packages; Java 25 release pin still pending. Rollback: restore Boot 3.3.13 + Java 21 / Temurin 21; redeploy prior image via docker-deploy-queue. Related: Task #49 Done; Task #50 pending. Overall checklist remains NO-GO (#3b). Do NOT: claim production go-live; activate CD-3; invent formal phase; touch DGE-audit-governance.",
-        "testStrategy": "1. BDD not-applicable (platform/ops baseline — docs/behavior/boot-4-1-upgrade.md). 2. ADR-0028 amended to Java 25 + Boot 4.x with pin 4.1.0 in same change set as upgrade. 3. mvn -B -ntp -f backend/pom.xml verify GREEN (release 25). 4. Application starts; GET /healthz success. 5. Stack/tech-log/ops docs mirroring ADR-0028 updated; Temurin 25 documented; no unrelated stack switches. 6. Formal phase stays None; #51 in-progress until merge + MAIN post-task-doc-sync + commit-review. 7. Do NOT activate CD-3. 8. Checklist overall still NO-GO (#3b).",
+        "description": "DONE 2026-07-14. Slice boot-4-1-upgrade merged to main (993c287; tip e9bf43c; worktree removed). Spring Boot parent 3.3.x → 4.1.0 + Java 21 → 25; ADR-0028 amended. BDD not-applicable. Formal phase None. mvn verify GREEN 1357/0/0/7 (Temurin 25); architecture PASS_WITH_NOTES; DEPLOY_OK_WITH_NOTES healthz 200 Boot 4.1.0 + Java 25.0.3. Push to GitHub blocked (443) at merger — local main ahead. Do NOT activate CD-3. Do NOT claim go-live. Do NOT touch DGE-audit-governance.",
+        "details": "Completed 2026-07-14 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: boot-4-1-upgrade. Placement was ISOLATED D:/working/DGE-boot-4-1-upgrade · feat/boot-4-1-upgrade (removed). Merge 993c287; feature tip e9bf43c. Delivered: spring-boot-starter-parent 4.1.0; Maven release 25; Temurin 25 images; companion Boot 4 pins (springdoc 3.0.3; ShedLock 7.7.0; resilience4j-spring-boot4 2.4.0; spring-boot-jackson2 transitional); ADR-0028 Java 25 + Boot 4.x/4.1.0. Acceptance met: mvn verify GREEN; GET /healthz 200. Jackson 3 deferred (seam open). Related: Task #49 Done; Task #50 pending. Overall checklist remains NO-GO (#3b). Do NOT: claim production go-live; activate CD-3; invent formal phase; touch DGE-audit-governance.",
+        "testStrategy": "1. BDD not-applicable (platform/ops baseline — docs/behavior/boot-4-1-upgrade.md). 2. ADR-0028 amended to Java 25 + Boot 4.x with pin 4.1.0. 3. mvn -B -ntp -f backend/pom.xml verify GREEN (1357/0/0/7; release 25). 4. Application starts; GET /healthz 200 (Boot 4.1.0 + Java 25.0.3). 5. Stack/ops docs + Temurin 25 documented. 6. Formal phase stays None; #51 done after merge + MAIN post-task-doc-sync + commit-review. 7. Do NOT activate CD-3. 8. Checklist overall still NO-GO (#3b).",
         "priority": "high",
         "dependencies": [
           "49"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-13T14:55:00.000Z"
+        "updatedAt": "2026-07-14T00:20:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-13T14:55:00.000Z",
+      "lastModified": "2026-07-14T00:20:00.000Z",
       "taskCount": 51,
-      "completedCount": 49,
+      "completedCount": 50,
       "tags": [
         "master"
       ]

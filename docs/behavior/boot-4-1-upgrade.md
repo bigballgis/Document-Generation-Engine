@@ -5,10 +5,12 @@
 | **Slice** | `boot-4-1-upgrade` |
 | **bdd_readiness** | **`not-applicable`** |
 | **Recorded** | 2026-07-13 |
+| **Status** | **Done** (2026-07-14) — merge `993c287`; feature tip `e9bf43c`; worktree removed |
 | **Formal phase** | **None** (no sole-active) |
-| **Task Master** | **#51** (`in-progress`) |
-| **Placement** | **ISOLATED** — `D:/working/DGE-boot-4-1-upgrade` · branch `feat/boot-4-1-upgrade` |
-| **ADR baseline** | [ADR-0028](../adr/technology-stack/0028-backend-platform-stack-baseline.md) — **amended 2026-07-13** (Boot **3.x → 4.x**, pin **4.1.0**; second amendment **Java 21 → 25**, user said “25”). Docs-first stage; toolchain/image pins remain backend-engineer. |
+| **Task Master** | **#51** (`done`) |
+| **Placement** | Was **ISOLATED** — `D:/working/DGE-boot-4-1-upgrade` · `feat/boot-4-1-upgrade` (removed after stage 11 merge to `main`) |
+| **ADR baseline** | [ADR-0028](../adr/technology-stack/0028-backend-platform-stack-baseline.md) — **amended 2026-07-13** (Boot **3.x → 4.x**, pin **4.1.0**; second amendment **Java 21 → 25**, user said “25”). Implemented on `main` at merge `993c287`. |
+| **Gate evidence** | `mvn verify` **GREEN** 1357/0/0/7 (Temurin 25); architecture **PASS_WITH_NOTES**; **DEPLOY_OK_WITH_NOTES** — `GET /healthz` **200**; runtime Boot **4.1.0** + Java **25.0.3** |
 
 ---
 
@@ -121,7 +123,7 @@ These are **delivery / ops acceptance** criteria for the platform slice — **no
 | [ADR-0044](../adr/operations/0044-deployment-topology-v1.md) appendix | LR-B2 ShedLock **6.10.0** record preserved; historical note for #51 co-upgrade to **7.7.0** |
 | [technology-stack-decisions.md](../architecture/technology-stack-decisions.md) | Architecture stack log mirroring ADR-0028 (runtime row updated 2026-07-13) |
 | User confirmation (2026-07-13) | Upgrade target **4.1.0** (from “4.10”); Java **25** (user said “25”) |
-| Task Master **#51** | Owning task for this slice (`in-progress`) |
+| Task Master **#51** | Owning task for this slice (`done` — merge `993c287`) |
 | Task Master **#49** | Prior deps/security refresh — left Boot on **3.3.13** / Java **21**; does **not** close Boot 4 / Java 25 migration |
 | `backend/pom.xml` + Dockerfiles | Implementation surface for parent + Java **25** toolchain + Temurin **25** images (backend-engineer) |
 
