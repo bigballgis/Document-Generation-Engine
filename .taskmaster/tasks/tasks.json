@@ -712,12 +712,26 @@
         "status": "done",
         "subtasks": [],
         "updatedAt": "2026-07-14T00:20:00.000Z"
+      },
+      {
+        "id": "52",
+        "title": "API-OPS-DISCOVERABILITY: C10 FE align + Overview summary + PENDING_RELEASE alerts",
+        "description": "IN PROGRESS 2026-07-14. Slice api-ops-discoverability. Close C10 skeleton policy discoverability gap: PENDING_RELEASE External access Tab + deep link; Overview lightweight readiness summary; MISSING_AD_GROUP alerts for PENDING_RELEASE; publish vs runtime-callable warnings. Formal phase None (not a P-phase). no sole-active formal phase. BDD ready (docs/behavior/api-ops-discoverability.md; BDD-API-OPS-DISCOVERABILITY-001; SCEN-AOD-01…15). Implementation order: P1 → P3 → P2 → P4. Do NOT invent formal phase. Do NOT activate CD-3. Do NOT claim go-live. Do NOT reopen #3b / Boot 4.1.",
+        "details": "Allocated 2026-07-14 (plan-orchestrator stage 2). Slice id: api-ops-discoverability. Placement: ISOLATED D:/working/DGE-api-ops-discoverability · feat/api-ops-discoverability. Formal phase remains None — delivery-focus Task Master only; do NOT invent sole-active P-phase. BDD ready: docs/behavior/api-ops-discoverability.md (AOD-C1…C10; SCEN-AOD-01…15).\n\nImplementation order (BDD handoff): **P1 Critical → P3 → P2 → P4** (P2 can consume P3 alert aggregates).\n\nP1 (Critical — FE): showPolicyPanel / Hub External access / loadPolicyData for PENDING_RELEASE + canManageApiPolicy; register ?tab=apiAccess deep link (SCEN-AOD-01…05).\nP3 (BE): ApiAccessAlertQueryService MISSING_AD_GROUP covers PENDING_RELEASE ∪ PUBLISHED with empty allowedAdGroups; GROUP_ADMIN scope; credential alerts stay PUBLISHED-only (AOD-C6) (SCEN-AOD-09…12).\nP2 (FE ± optional BE summary): ApiPolicyHomeView lightweight readiness summary — published-in-scope / attention / pending-release needing setup; NOT a paginated catalog (SCEN-ALERT-04 / SCEN-AOD-06…08).\nP4 (FE): surface adGroupsConfigured=false as visible warning; Published ≠ Runtime callable copy (SCEN-AOD-13…15).\n\nOut of scope: independent API catalog; #3b; Boot 4.1; changing runtime fail-closed; production go-live / CD-3.\n\nGates: frontend lint/type-check/test/build; backend mvn verify; E2E + UIUX for user-facing FE; queued docker-deploy evidence; architecture review; merge + MAIN doc-sync + commit-review.",
+        "testStrategy": "1. BDD ready — SCEN-AOD-01…15 are acceptance keys; prioritize Critical AOD-01/02/03. 2. FE unit: showPolicyPanel true for PENDING_RELEASE + canManageApiPolicy; false for DRAFT/TESTING/APPROVAL and no-capability. 3. BE unit: ApiAccessAlertQueryServiceTest — PENDING_RELEASE missing AD Group → MISSING_AD_GROUP; configured AD Group → no MISSING; GROUP_ADMIN no cross-group; PUBLISHED regression. 4. Overview: summary counts + alerts table; no paginated template catalog. 5. P4: adGroupsConfigured warning visible in Hub External access and/or publish gate (i18n English-first + zh-CN). 6. Frontend gates GREEN + mvn verify GREEN. 7. E2E docker: PENDING_RELEASE Hub apiAccess + Overview alert deep link (as scoped). 8. Formal phase stays None; #52 in-progress until merge + MAIN post-task-doc-sync + commit-review. 9. Do NOT activate CD-3 / claim go-live / invent P-phase.",
+        "priority": "high",
+        "dependencies": [
+          "51"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2026-07-14T01:03:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-14T00:20:00.000Z",
-      "taskCount": 51,
+      "lastModified": "2026-07-14T01:03:00.000Z",
+      "taskCount": 52,
       "completedCount": 50,
       "tags": [
         "master"

@@ -885,7 +885,8 @@ Asynchronous accepted response draft
 | GET | `/api/management/v1/templates/{templateId}/api/routes-summary` | 包 externalId、默认 generate 路径、explicit 路径列表 |
 | GET | `/api/management/v1/templates/{templateId}/api/invocations` | 分页列表；筛选 `status`、`invocationKind`、`requestId`、`createdAfter`/`createdBefore`、`credentialId` |
 | GET | `/api/management/v1/templates/{templateId}/api/invocations/{invocationId}` | 单条摘要详情（无 parameters） |
-| GET | `/api/management/v1/api-access/alerts` | 跨包待关注项（缺 AD 组、凭证即将过期、无凭证） |
+| GET | `/api/management/v1/api-access/alerts` | 跨包待关注项（缺 AD 组含 PENDING_RELEASE；凭证类仍仅 PUBLISHED） |
+| GET | `/api/management/v1/api-access/summary` | Overview 轻量就绪计数（published / attention / pending-setup；非 catalog） |
 
 ## 异步任务查询与取消接口确认
 

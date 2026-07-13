@@ -53,9 +53,12 @@ export function useTemplatePolicyCredentials(options: UseTemplatePolicyCredentia
 
   const canPolicy = computed(() => manageApiPolicy.value)
 
-  const showPolicyPanel = computed(
-    () => template.value?.lifecycleStatus === 'PUBLISHED' && canPolicy.value,
-  )
+  const showPolicyPanel = computed(() => {
+    const status = template.value?.lifecycleStatus
+    return (
+      canPolicy.value && (status === 'PUBLISHED' || status === 'PENDING_RELEASE')
+    )
+  })
 
   const displayedCredentialSecret = computed(() => {
     if (apiPolicyStore.lastCreatedCredential?.secret) {

@@ -414,4 +414,26 @@ describe('apiPolicy API', () => {
     expect(alerts).toHaveLength(1)
     expect(alerts[0]?.alertKind).toBe('NO_CREDENTIALS')
   })
+
+  it('loads API readiness summary counts', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          publishedInScopeCount: 4,
+          attentionCount: 2,
+          pendingReleaseNeedingSetupCount: 1,
+        },
+      },
+    })
+
+    const summary = await apiPolicyApi.fetchReadinessSummary()
+
+    expect(http.get).toHaveBeenCalledWith('/api-access/summary')
+    expect(summary).toEqual({
+      publishedInScopeCount: 4,
+      attentionCount: 2,
+      pendingReleaseNeedingSetupCount: 1,
+    })
+  })
 })

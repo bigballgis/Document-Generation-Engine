@@ -2,10 +2,12 @@ package com.bank.docgen.apimgmt.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.apimgmt.api.ApiAccessAlertView;
+import com.bank.docgen.apimgmt.api.ApiAccessReadinessSummaryView;
 import com.bank.docgen.apimgmt.domain.ApiAccessAlertType;
 import com.bank.docgen.apimgmt.domain.ApiCredentialLifecycleSupport;
 import com.bank.docgen.apimgmt.domain.ApiCredentialStatus;
@@ -81,10 +83,7 @@ class ApiAccessAlertQueryServiceTest {
                 NOW.minus(ApiCredentialLifecycleSupport.DEFAULT_EXPIRY_DAYS - 5, ChronoUnit.DAYS)
         );
 
-        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
-                List.of("RETAIL"),
-                TemplateLifecycleStatus.PUBLISHED
-        )).thenReturn(List.of(template));
+        stubScopedTemplates(List.of("RETAIL"), List.of(template), List.of());
         when(apiPolicyRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(policy));
         when(apiCredentialRepository.findByTemplateIdIn(List.of(templateId)))
                 .thenReturn(List.of(expiringCredential));
@@ -120,10 +119,7 @@ class ApiAccessAlertQueryServiceTest {
         ApiCredentialEntity revoked = credential(templateId, "CRED-REV", NOW.minus(10, ChronoUnit.DAYS));
         revoked.revoke();
 
-        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
-                List.of("RETAIL"),
-                TemplateLifecycleStatus.PUBLISHED
-        )).thenReturn(List.of(template));
+        stubScopedTemplates(List.of("RETAIL"), List.of(template), List.of());
         when(apiPolicyRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(policy));
         when(apiCredentialRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(revoked));
 
@@ -149,10 +145,7 @@ class ApiAccessAlertQueryServiceTest {
                 NOW.plus(1, ChronoUnit.HOURS)
         );
 
-        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
-                List.of("WHOLESALE"),
-                TemplateLifecycleStatus.PUBLISHED
-        )).thenReturn(List.of());
+        stubScopedTemplates(List.of("WHOLESALE"), List.of(), List.of());
 
         assertThat(service.listAlerts(wholesaleAdmin)).isEmpty();
         verifyNoInteractions(apiPolicyRepository, apiCredentialRepository);
@@ -183,10 +176,7 @@ class ApiAccessAlertQueryServiceTest {
         TemplateEntity template = publishedTemplate(templateId, "RETAIL", "Retail Statement", "TPL-RETAIL");
         ApiPolicyEntity policy = new ApiPolicyEntity(UUID.randomUUID(), templateId, "not-json", "10000001");
 
-        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
-                List.of("RETAIL"),
-                TemplateLifecycleStatus.PUBLISHED
-        )).thenReturn(List.of(template));
+        stubScopedTemplates(List.of("RETAIL"), List.of(template), List.of());
         when(apiPolicyRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(policy));
         when(apiCredentialRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of());
 
@@ -205,10 +195,7 @@ class ApiAccessAlertQueryServiceTest {
         TemplateEntity template = publishedTemplate(templateId, "RETAIL", null, "TPL-RETAIL");
         ApiPolicyEntity policy = new ApiPolicyEntity(UUID.randomUUID(), templateId, "[\"G1\"]", "10000001");
 
-        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
-                List.of("RETAIL"),
-                TemplateLifecycleStatus.PUBLISHED
-        )).thenReturn(List.of(template));
+        stubScopedTemplates(List.of("RETAIL"), List.of(template), List.of());
         when(apiPolicyRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(policy));
         when(apiCredentialRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of());
 
@@ -227,10 +214,7 @@ class ApiAccessAlertQueryServiceTest {
         );
         setCredentialStatus(credential, ApiCredentialStatus.EXPIRING_SOON);
 
-        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
-                List.of("RETAIL"),
-                TemplateLifecycleStatus.PUBLISHED
-        )).thenReturn(List.of(template));
+        stubScopedTemplates(List.of("RETAIL"), List.of(template), List.of());
         when(apiPolicyRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(policy));
         when(apiCredentialRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(credential));
 
@@ -240,13 +224,165 @@ class ApiAccessAlertQueryServiceTest {
                 .contains(ApiAccessAlertType.EXPIRING_CREDENTIAL);
     }
 
+    @Test
+    void listAlerts_includesMissingAdGroupForPendingReleaseTemplate() {
+        UUID templateId = UUID.randomUUID();
+        TemplateEntity pending = pendingReleaseTemplate(templateId, "RETAIL", "Pending Package", "TPL-PENDING");
+        ApiPolicyEntity policy = new ApiPolicyEntity(UUID.randomUUID(), templateId, "[]", "10000001");
+
+        stubScopedTemplates(List.of("RETAIL"), List.of(), List.of(pending));
+        when(apiPolicyRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(policy));
+        when(apiCredentialRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of());
+
+        List<ApiAccessAlertView> alerts = service.listAlerts(groupAdmin);
+
+        assertThat(alerts).extracting(ApiAccessAlertView::alertType)
+                .containsExactly(ApiAccessAlertType.MISSING_AD_GROUP);
+        ApiAccessAlertView missingAdGroup = alerts.getFirst();
+        assertThat(missingAdGroup.templateId()).isEqualTo(templateId);
+        assertThat(missingAdGroup.templateExternalId()).isEqualTo("TPL-PENDING");
+        assertThat(missingAdGroup.hubDeepLinkPath())
+                .isEqualTo("/templates/" + templateId + "?tab=apiAccess#domain=AD_GROUP_AUTHORIZATION");
+    }
+
+    @Test
+    void listAlerts_skipsMissingAdGroupWhenPendingReleaseHasAdGroupsConfigured() {
+        UUID templateId = UUID.randomUUID();
+        TemplateEntity pending = pendingReleaseTemplate(templateId, "RETAIL", "Pending Ready", "TPL-READY");
+        ApiPolicyEntity policy = new ApiPolicyEntity(UUID.randomUUID(), templateId, "[\"RETAIL-API\"]", "10000001");
+
+        stubScopedTemplates(List.of("RETAIL"), List.of(), List.of(pending));
+        when(apiPolicyRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(policy));
+        when(apiCredentialRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of());
+
+        assertThat(service.listAlerts(groupAdmin)).isEmpty();
+    }
+
+    @Test
+    void listAlerts_doesNotEmitCredentialAlertsForPendingRelease() {
+        UUID templateId = UUID.randomUUID();
+        TemplateEntity pending = pendingReleaseTemplate(templateId, "RETAIL", "Pending Package", "TPL-PENDING");
+        ApiPolicyEntity policy = new ApiPolicyEntity(UUID.randomUUID(), templateId, "[\"G1\"]", "10000001");
+
+        stubScopedTemplates(List.of("RETAIL"), List.of(), List.of(pending));
+        when(apiPolicyRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(policy));
+        when(apiCredentialRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of());
+
+        assertThat(service.listAlerts(groupAdmin)).isEmpty();
+    }
+
+    @Test
+    void listAlerts_excludesPendingReleaseOutsideAuthorizedGroups() {
+        ManagementSessionClaims wholesaleAdmin = new ManagementSessionClaims(
+                "10000003",
+                "Admin",
+                "admin@example.com",
+                AuthSource.LOCAL,
+                List.of("GROUP_ADMIN"),
+                List.of("WHOLESALE"),
+                "/",
+                List.of(),
+                NOW.plus(1, ChronoUnit.HOURS)
+        );
+
+        stubScopedTemplates(List.of("WHOLESALE"), List.of(), List.of());
+
+        assertThat(service.listAlerts(wholesaleAdmin)).isEmpty();
+        verifyNoInteractions(apiPolicyRepository, apiCredentialRepository);
+    }
+
+    @Test
+    void readinessSummary_returnsPublishedAttentionAndPendingSetupCounts() {
+        UUID publishedId = UUID.randomUUID();
+        UUID pendingMissingId = UUID.randomUUID();
+        UUID pendingReadyId = UUID.randomUUID();
+        TemplateEntity published = publishedTemplate(publishedId, "RETAIL", "Published", "TPL-PUB");
+        TemplateEntity pendingMissing = pendingReleaseTemplate(
+                pendingMissingId, "RETAIL", "Pending Missing", "TPL-PEND-MISS");
+        TemplateEntity pendingReady = pendingReleaseTemplate(
+                pendingReadyId, "RETAIL", "Pending Ready", "TPL-PEND-READY");
+
+        stubScopedTemplates(List.of("RETAIL"), List.of(published), List.of(pendingMissing, pendingReady));
+        when(apiPolicyRepository.findByTemplateIdIn(anyList()))
+                .thenReturn(List.of(
+                        new ApiPolicyEntity(UUID.randomUUID(), publishedId, "[]", "10000001"),
+                        new ApiPolicyEntity(UUID.randomUUID(), pendingMissingId, "[]", "10000001"),
+                        new ApiPolicyEntity(UUID.randomUUID(), pendingReadyId, "[\"G1\"]", "10000001")
+                ));
+        when(apiCredentialRepository.findByTemplateIdIn(anyList()))
+                .thenReturn(List.of());
+
+        ApiAccessReadinessSummaryView summary = service.readinessSummary(groupAdmin);
+
+        assertThat(summary.publishedInScopeCount()).isEqualTo(1);
+        assertThat(summary.attentionCount()).isEqualTo(2);
+        assertThat(summary.pendingReleaseNeedingSetupCount()).isEqualTo(1);
+    }
+
+    @Test
+    void readinessSummary_scopesCountsToAuthorizedGroups() {
+        ManagementSessionClaims wholesaleAdmin = new ManagementSessionClaims(
+                "10000003",
+                "Admin",
+                "admin@example.com",
+                AuthSource.LOCAL,
+                List.of("GROUP_ADMIN"),
+                List.of("WHOLESALE"),
+                "/",
+                List.of(),
+                NOW.plus(1, ChronoUnit.HOURS)
+        );
+
+        stubScopedTemplates(List.of("WHOLESALE"), List.of(), List.of());
+
+        ApiAccessReadinessSummaryView summary = service.readinessSummary(wholesaleAdmin);
+
+        assertThat(summary.publishedInScopeCount()).isZero();
+        assertThat(summary.attentionCount()).isZero();
+        assertThat(summary.pendingReleaseNeedingSetupCount()).isZero();
+    }
+
+    private void stubScopedTemplates(
+            List<String> groupCodes,
+            List<TemplateEntity> published,
+            List<TemplateEntity> pendingRelease
+    ) {
+        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
+                groupCodes,
+                TemplateLifecycleStatus.PUBLISHED
+        )).thenReturn(published);
+        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
+                groupCodes,
+                TemplateLifecycleStatus.PENDING_RELEASE
+        )).thenReturn(pendingRelease);
+    }
+
     private static TemplateEntity publishedTemplate(
             UUID templateId,
             String groupCode,
             String name,
             String externalId
     ) {
-        TemplateEntity template = new TemplateEntity(
+        return template(templateId, groupCode, name, externalId, TemplateLifecycleStatus.PUBLISHED);
+    }
+
+    private static TemplateEntity pendingReleaseTemplate(
+            UUID templateId,
+            String groupCode,
+            String name,
+            String externalId
+    ) {
+        return template(templateId, groupCode, name, externalId, TemplateLifecycleStatus.PENDING_RELEASE);
+    }
+
+    private static TemplateEntity template(
+            UUID templateId,
+            String groupCode,
+            String name,
+            String externalId,
+            TemplateLifecycleStatus lifecycleStatus
+    ) {
+        TemplateEntity entity = new TemplateEntity(
                 templateId,
                 externalId,
                 groupCode,
@@ -255,8 +391,8 @@ class ApiAccessAlertQueryServiceTest {
                 UUID.randomUUID(),
                 "10000001"
         );
-        template.setLifecycleStatus(TemplateLifecycleStatus.PUBLISHED);
-        return template;
+        entity.setLifecycleStatus(lifecycleStatus);
+        return entity;
     }
 
     private static ApiCredentialEntity credential(UUID templateId, String externalId, Instant createdAt) {

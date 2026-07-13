@@ -10,13 +10,15 @@
 
 ## Goal
 
-External services overview surfaces **actionable cross-package alerts** — not a second template catalog.
+External services overview (`/api/policies`) surfaces **actionable cross-package alerts** (and optional readiness summary cards) — not a second template catalog. Still ADR-0040 package-first: edit on hub **External access**, overview = monitor only.
+
+**Extension (2026-07-14):** [api-ops-discoverability.md](./api-ops-discoverability.md) — `MISSING_AD_GROUP` also covers in-scope **`PENDING_RELEASE`** (empty AD Group); credential alerts remain **PUBLISHED**-scoped; overview may show lightweight summary counts without becoming a catalog.
 
 ## Acceptance scenarios
 
 ### SCEN-ALERT-01 — Missing AD Group (required)
 
-- **Given** a published template with empty `allowedAdGroups`
+- **Given** an in-scope `PUBLISHED` or `PENDING_RELEASE` template with empty `allowedAdGroups` (policy row present)
 - **When** administrator opens `/api/policies`
 - **Then** warning alert row with template name, external ID, deep link to `?tab=apiAccess`
 
@@ -34,9 +36,9 @@ External services overview surfaces **actionable cross-package alerts** — not 
 
 ### SCEN-ALERT-04 — No false catalog (boundary)
 
-- **Given** many published templates in scope
+- **Given** many published / pending-release templates in scope
 - **When** overview opens
-- **Then** alerts table + deep links only; not a full paginated catalog duplicate
+- **Then** optional readiness summary cards + alerts table + deep links only; **not** a full paginated catalog duplicate («Browse templates» is exit navigation only)
 
 ### SCEN-ALERT-05 — Group scope (boundary)
 

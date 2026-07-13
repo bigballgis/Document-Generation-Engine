@@ -1,6 +1,7 @@
 package com.bank.docgen.apimgmt.service;
 
 import com.bank.docgen.apimgmt.api.ApiAccessAlertView;
+import com.bank.docgen.apimgmt.api.ApiAccessReadinessSummaryView;
 import com.bank.docgen.apimgmt.domain.ApiAccessAlertSeverity;
 import com.bank.docgen.apimgmt.domain.ApiAccessAlertType;
 import com.bank.docgen.apimgmt.domain.ApiCredentialLifecycleSupport;
@@ -20,8 +21,10 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -61,24 +64,53 @@ public class ApiAccessAlertQueryService {
     @Transactional(readOnly = true)
     public List<ApiAccessAlertView> listAlerts(ManagementSessionClaims session) {
         requireApiAdmin(session);
-        List<TemplateEntity> publishedTemplates = listPublishedTemplatesInScope(session);
-        if (publishedTemplates.isEmpty()) {
+        return buildAlerts(loadScopedPublishedAndPending(session));
+    }
+
+    @Transactional(readOnly = true)
+    public ApiAccessReadinessSummaryView readinessSummary(ManagementSessionClaims session) {
+        requireApiAdmin(session);
+        ScopedTemplates scoped = loadScopedPublishedAndPending(session);
+        List<ApiAccessAlertView> alerts = buildAlerts(scoped);
+        Set<UUID> attentionTemplateIds = new HashSet<>();
+        Set<UUID> pendingIds = scoped.pendingRelease().stream()
+                .map(TemplateEntity::getId)
+                .collect(Collectors.toSet());
+        Set<UUID> pendingNeedingSetupIds = new HashSet<>();
+        for (ApiAccessAlertView alert : alerts) {
+            attentionTemplateIds.add(alert.templateId());
+            if (alert.alertType() == ApiAccessAlertType.MISSING_AD_GROUP
+                    && pendingIds.contains(alert.templateId())) {
+                pendingNeedingSetupIds.add(alert.templateId());
+            }
+        }
+        return new ApiAccessReadinessSummaryView(
+                scoped.published().size(),
+                attentionTemplateIds.size(),
+                pendingNeedingSetupIds.size()
+        );
+    }
+
+    private List<ApiAccessAlertView> buildAlerts(ScopedTemplates scoped) {
+        List<TemplateEntity> candidates = scoped.all();
+        if (candidates.isEmpty()) {
             return List.of();
         }
-        List<UUID> templateIds = publishedTemplates.stream().map(TemplateEntity::getId).toList();
-        Map<UUID, ApiPolicyEntity> policiesByTemplateId = apiPolicyRepository.findByTemplateIdIn(templateIds).stream()
-                .collect(Collectors.toMap(ApiPolicyEntity::getTemplateId, Function.identity()));
+        List<UUID> templateIds = scoped.allTemplateIds();
+        Map<UUID, ApiPolicyEntity> policiesByTemplateId = loadPolicies(templateIds);
         Map<UUID, List<ApiCredentialEntity>> credentialsByTemplateId = apiCredentialRepository
                 .findByTemplateIdIn(templateIds).stream()
                 .collect(Collectors.groupingBy(ApiCredentialEntity::getTemplateId));
 
         Instant now = clock.instant();
         List<ApiAccessAlertView> alerts = new ArrayList<>();
-        for (TemplateEntity template : publishedTemplates) {
+        for (TemplateEntity template : candidates) {
             UUID templateId = template.getId();
             ApiPolicyEntity policy = policiesByTemplateId.get(templateId);
             List<ApiCredentialEntity> credentials = credentialsByTemplateId.getOrDefault(templateId, List.of());
+            boolean published = template.getLifecycleStatus() == TemplateLifecycleStatus.PUBLISHED;
 
+            // AOD-C6: MISSING_AD_GROUP covers PUBLISHED ∪ PENDING_RELEASE
             if (policy != null && readStringList(policy.getAllowedAdGroupsJson()).isEmpty()) {
                 alerts.add(new ApiAccessAlertView(
                         ApiAccessAlertType.MISSING_AD_GROUP,
@@ -92,6 +124,11 @@ public class ApiAccessAlertQueryService {
                         null,
                         null
                 ));
+            }
+
+            // AOD-C6: credential alerts remain PUBLISHED-only
+            if (!published) {
+                continue;
             }
 
             List<ApiCredentialEntity> activeCredentials = credentials.stream()
@@ -135,19 +172,38 @@ public class ApiAccessAlertQueryService {
         return List.copyOf(alerts);
     }
 
-    private List<TemplateEntity> listPublishedTemplatesInScope(ManagementSessionClaims session) {
+    private Map<UUID, ApiPolicyEntity> loadPolicies(List<UUID> templateIds) {
+        if (templateIds.isEmpty()) {
+            return Map.of();
+        }
+        return apiPolicyRepository.findByTemplateIdIn(templateIds).stream()
+                .collect(Collectors.toMap(ApiPolicyEntity::getTemplateId, Function.identity()));
+    }
+
+    private ScopedTemplates loadScopedPublishedAndPending(ManagementSessionClaims session) {
         List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
         if (groupCodes.contains("*")) {
-            return templateRepository.findByDeletedAtIsNullAndLifecycleStatusOrderByUpdatedAtDesc(
-                    TemplateLifecycleStatus.PUBLISHED
+            return new ScopedTemplates(
+                    templateRepository.findByDeletedAtIsNullAndLifecycleStatusOrderByUpdatedAtDesc(
+                            TemplateLifecycleStatus.PUBLISHED
+                    ),
+                    templateRepository.findByDeletedAtIsNullAndLifecycleStatusOrderByUpdatedAtDesc(
+                            TemplateLifecycleStatus.PENDING_RELEASE
+                    )
             );
         }
         if (groupCodes.isEmpty()) {
-            return List.of();
+            return ScopedTemplates.empty();
         }
-        return templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
-                groupCodes,
-                TemplateLifecycleStatus.PUBLISHED
+        return new ScopedTemplates(
+                templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
+                        groupCodes,
+                        TemplateLifecycleStatus.PUBLISHED
+                ),
+                templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
+                        groupCodes,
+                        TemplateLifecycleStatus.PENDING_RELEASE
+                )
         );
     }
 
@@ -176,6 +232,32 @@ public class ApiAccessAlertQueryService {
         } catch (JsonProcessingException ex) {
             // Alert aggregation is best-effort: malformed policy JSON must not 500 the home surface.
             return List.of();
+        }
+    }
+
+    private record ScopedTemplates(
+            List<TemplateEntity> published,
+            List<TemplateEntity> pendingRelease
+    ) {
+        static ScopedTemplates empty() {
+            return new ScopedTemplates(List.of(), List.of());
+        }
+
+        List<TemplateEntity> all() {
+            if (published.isEmpty()) {
+                return List.copyOf(pendingRelease);
+            }
+            if (pendingRelease.isEmpty()) {
+                return List.copyOf(published);
+            }
+            List<TemplateEntity> combined = new ArrayList<>(published.size() + pendingRelease.size());
+            combined.addAll(published);
+            combined.addAll(pendingRelease);
+            return List.copyOf(combined);
+        }
+
+        List<UUID> allTemplateIds() {
+            return all().stream().map(TemplateEntity::getId).toList();
         }
     }
 }

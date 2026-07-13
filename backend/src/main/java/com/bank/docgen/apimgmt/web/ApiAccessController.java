@@ -1,6 +1,7 @@
 package com.bank.docgen.apimgmt.web;
 
 import com.bank.docgen.apimgmt.api.ApiAccessAlertView;
+import com.bank.docgen.apimgmt.api.ApiAccessReadinessSummaryView;
 import com.bank.docgen.apimgmt.service.ApiAccessAlertQueryService;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
@@ -41,6 +42,23 @@ public class ApiAccessController {
         return new SuccessEnvelope<>(
                 Metadata.minimal(auditId, traceId),
                 apiAccessAlertQueryService.listAlerts(session)
+        );
+    }
+
+    /**
+     * Lightweight Overview readiness counts (SCEN-AOD-06 / AOD-C4).
+     * Counts only — not a paginated template catalog (SCEN-ALERT-04).
+     */
+    @GetMapping("/summary")
+    public SuccessEnvelope<ApiAccessReadinessSummaryView> readinessSummary(
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        return new SuccessEnvelope<>(
+                Metadata.minimal(auditId, traceId),
+                apiAccessAlertQueryService.readinessSummary(session)
         );
     }
 }

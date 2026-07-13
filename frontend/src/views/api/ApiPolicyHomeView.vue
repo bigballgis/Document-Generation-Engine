@@ -23,14 +23,38 @@ const apiPolicyStore = useApiPolicyStore()
 const sessionStore = useSessionStore()
 
 const alertsErrorMessageKey = computed(() => apiPolicyStore.alertsErrorMessageKey)
+const summaryErrorMessageKey = computed(() => apiPolicyStore.summaryErrorMessageKey)
 const canBrowseTemplates = computed(() =>
   sessionStore.canAccessRoute(ROUTE_KEYS.templateManagement),
 )
 
-const { reload: reloadAlerts } = useAbortableCatalogLoader(() => apiPolicyStore.fetchAlerts())
+const summaryCards = computed(() => [
+  {
+    key: 'publishedInScope',
+    count: apiPolicyStore.readinessSummary.publishedInScopeCount,
+    titleKey: 'apiPolicy.home.summary.publishedInScope',
+    descriptionKey: 'apiPolicy.home.summary.publishedInScopeDescription',
+  },
+  {
+    key: 'attention',
+    count: apiPolicyStore.readinessSummary.attentionCount,
+    titleKey: 'apiPolicy.home.summary.attention',
+    descriptionKey: 'apiPolicy.home.summary.attentionDescription',
+  },
+  {
+    key: 'pendingReleaseNeedingSetup',
+    count: apiPolicyStore.readinessSummary.pendingReleaseNeedingSetupCount,
+    titleKey: 'apiPolicy.home.summary.pendingReleaseNeedingSetup',
+    descriptionKey: 'apiPolicy.home.summary.pendingReleaseNeedingSetupDescription',
+  },
+])
+
+const { reload: reloadOverview } = useAbortableCatalogLoader(async () => {
+  await Promise.all([apiPolicyStore.fetchAlerts(), apiPolicyStore.fetchReadinessSummary()])
+})
 
 onMounted(async () => {
-  await reloadAlerts()
+  await reloadOverview()
 })
 
 function openPackageAccess(templateId: string) {
@@ -97,6 +121,34 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
       :closable="false"
     />
 
+    <section class="summary-section" data-testid="api-readiness-summary" aria-labelledby="api-readiness-summary-title">
+      <h2 id="api-readiness-summary-title">{{ t('apiPolicy.home.summary.title') }}</h2>
+      <p class="section-description">{{ t('apiPolicy.home.summary.description') }}</p>
+
+      <LoadErrorPanel
+        v-if="summaryErrorMessageKey && !apiPolicyStore.loadingSummary"
+        :message-key="summaryErrorMessageKey"
+        :retryable="apiPolicyStore.summaryErrorRetryable"
+        @retry="reloadOverview"
+      />
+
+      <el-skeleton v-else-if="apiPolicyStore.loadingSummary" :rows="2" animated />
+
+      <div v-else class="summary-grid">
+        <el-card
+          v-for="card in summaryCards"
+          :key="card.key"
+          shadow="never"
+          class="summary-card"
+          :data-testid="`summary-card-${card.key}`"
+        >
+          <p class="summary-count">{{ card.count }}</p>
+          <h3>{{ t(card.titleKey) }}</h3>
+          <p class="summary-card-description">{{ t(card.descriptionKey) }}</p>
+        </el-card>
+      </div>
+    </section>
+
     <el-card shadow="never" class="section-card alerts-card">
       <h2>{{ t('apiPolicy.home.alerts.title') }}</h2>
       <p class="section-description">{{ t('apiPolicy.home.alerts.description') }}</p>
@@ -105,7 +157,7 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
         v-if="alertsErrorMessageKey && !apiPolicyStore.loadingAlerts"
         :message-key="alertsErrorMessageKey"
         :retryable="apiPolicyStore.alertsErrorRetryable"
-        @retry="reloadAlerts"
+        @retry="reloadOverview"
       />
 
       <el-skeleton v-else-if="apiPolicyStore.loadingAlerts" :rows="4" animated />
@@ -165,6 +217,43 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
   margin-bottom: var(--space-6);
 }
 
+.summary-section {
+  margin-bottom: var(--space-6);
+
+  h2 {
+    margin: 0 0 0.35rem;
+    font-size: var(--font-size-lg);
+  }
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.summary-card {
+  h3 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+  }
+}
+
+.summary-count {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.summary-card-description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
 .section-card {
   h2 {
     margin: 0 0 0.35rem;
@@ -176,5 +265,11 @@ const { onRowClick: activateAlertRow } = useActivatableTableRow<ApiAccessAlert>(
   margin: 0 0 var(--space-4);
   color: var(--text-muted);
   font-size: var(--font-size-sm);
+}
+
+@media (max-width: 960px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

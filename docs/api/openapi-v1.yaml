@@ -2321,8 +2321,10 @@ paths:
       summary: List cross-package API access attention items
       description: >-
         Aggregates non-sensitive alerts across authorized template packages
-        (missing AD groups, expiring credentials, no credentials). Each item
-        includes a hub deep-link path for remediation.
+        (missing AD groups on PUBLISHED ∪ PENDING_RELEASE; expiring credentials
+        and no credentials on PUBLISHED only — AOD-C6). Each item includes a hub
+        deep-link path for remediation. GROUP_ADMIN is scoped to authorized
+        groupCodes (SCEN-ALERT-05 / SCEN-AOD-11).
       parameters:
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
@@ -2332,6 +2334,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiAccessAlertListResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/api-access/summary:
+    get:
+      tags: [Admin]
+      operationId: getApiAccessReadinessSummary
+      summary: Lightweight Overview API readiness counts
+      description: >-
+        Returns scoped counts for ApiPolicyHomeView (SCEN-AOD-06 / AOD-C4):
+        publishedInScopeCount, attentionCount (distinct templates with alerts),
+        and pendingReleaseNeedingSetupCount (PENDING_RELEASE missing AD Group).
+        Counts only — not a paginated template catalog (SCEN-ALERT-04 / AOD-C5).
+        Same authorization as alerts (canManageApiPolicy + group scope).
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Readiness summary returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiAccessReadinessSummaryResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
@@ -4297,6 +4325,37 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ApiAccessAlertView'
+    ApiAccessReadinessSummaryView:
+      type: object
+      additionalProperties: false
+      required:
+        - publishedInScopeCount
+        - attentionCount
+        - pendingReleaseNeedingSetupCount
+      properties:
+        publishedInScopeCount:
+          type: integer
+          format: int64
+          description: Count of PUBLISHED packages in the caller's authorized scope.
+        attentionCount:
+          type: integer
+          format: int64
+          description: Distinct template packages that currently have at least one alert.
+        pendingReleaseNeedingSetupCount:
+          type: integer
+          format: int64
+          description: >-
+            PENDING_RELEASE packages in scope with empty allowedAdGroups
+            (MISSING_AD_GROUP).
+    ApiAccessReadinessSummaryResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/ApiAccessReadinessSummaryView'
     CredentialSummary:
       type: object
       additionalProperties: false

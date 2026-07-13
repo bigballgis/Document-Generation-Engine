@@ -117,6 +117,16 @@ export interface ApiAccessAlert {
   credentialExpiresAt?: string | null
 }
 
+/**
+ * Lightweight cross-package readiness counts (SCEN-AOD-06).
+ * Field names aligned with backend `ApiAccessReadinessSummaryView`.
+ */
+export interface ApiAccessReadinessSummary {
+  publishedInScopeCount: number
+  attentionCount: number
+  pendingReleaseNeedingSetupCount: number
+}
+
 /** Not yet modeled in `openapi-v1.yaml` (management API credential). */
 export interface ApiCredentialSummary {
   credentialId: string

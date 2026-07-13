@@ -19,6 +19,7 @@ vi.mock('vue-router', () => ({
 
 vi.mock('@/api/apiPolicy', () => ({
   fetchAlerts: vi.fn(),
+  fetchReadinessSummary: vi.fn(),
 }))
 
 const sampleAlerts = [
@@ -39,6 +40,12 @@ const sampleAlerts = [
     credentialExpiresAt: '2026-07-20T00:00:00Z',
   },
 ]
+
+const sampleSummary = {
+  publishedInScopeCount: 12,
+  attentionCount: 2,
+  pendingReleaseNeedingSetupCount: 1,
+}
 
 function patchSession(visibleRoutes: string[]) {
   const sessionStore = useSessionStore()
@@ -75,6 +82,34 @@ describe('ApiPolicyHomeView', () => {
   beforeEach(() => {
     routerPush.mockReset()
     vi.mocked(apiPolicyApi.fetchAlerts).mockReset()
+    vi.mocked(apiPolicyApi.fetchReadinessSummary).mockReset()
+    vi.mocked(apiPolicyApi.fetchReadinessSummary).mockResolvedValue(sampleSummary)
+  })
+
+  it('SCEN-AOD-06: renders readiness summary cards above alerts', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockResolvedValue(sampleAlerts)
+    const wrapper = mountHome()
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="api-readiness-summary"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="summary-card-publishedInScope"]').text()).toContain('12')
+    expect(wrapper.find('[data-testid="summary-card-attention"]').text()).toContain('2')
+    expect(wrapper.find('[data-testid="summary-card-pendingReleaseNeedingSetup"]').text()).toContain(
+      '1',
+    )
+    expect(wrapper.text()).toContain('Published in scope')
+    expect(wrapper.text()).toContain('Need attention')
+    expect(wrapper.text()).toContain('Pending release needing setup')
+  })
+
+  it('SCEN-AOD-07: does not render a paginated template catalog', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockResolvedValue(sampleAlerts)
+    const wrapper = mountHome()
+    await flushPromises()
+
+    expect(wrapper.findComponent({ name: 'ElPagination' }).exists()).toBe(false)
+    expect(wrapper.findAllComponents({ name: 'AppDataTable' })).toHaveLength(1)
+    expect(wrapper.find('[data-testid="api-readiness-summary"]').exists()).toBe(true)
   })
 
   it('renders alerts table instead of coming soon placeholder', async () => {

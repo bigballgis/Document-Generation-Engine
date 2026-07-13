@@ -1053,9 +1053,29 @@ export interface paths {
         };
         /**
          * List cross-package API access attention items
-         * @description Aggregates non-sensitive alerts across authorized template packages (missing AD groups, expiring credentials, no credentials). Each item includes a hub deep-link path for remediation.
+         * @description Aggregates non-sensitive alerts across authorized template packages (missing AD groups on PUBLISHED ∪ PENDING_RELEASE; expiring credentials and no credentials on PUBLISHED only — AOD-C6). Each item includes a hub deep-link path for remediation. GROUP_ADMIN is scoped to authorized groupCodes (SCEN-ALERT-05 / SCEN-AOD-11).
          */
         get: operations["listApiAccessAlerts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/api-access/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lightweight Overview API readiness counts
+         * @description Returns scoped counts for ApiPolicyHomeView (SCEN-AOD-06 / AOD-C4): publishedInScopeCount, attentionCount (distinct templates with alerts), and pendingReleaseNeedingSetupCount (PENDING_RELEASE missing AD Group). Counts only — not a paginated template catalog (SCEN-ALERT-04 / AOD-C5). Same authorization as alerts (canManageApiPolicy + group scope).
+         */
+        get: operations["getApiAccessReadinessSummary"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1798,6 +1818,27 @@ export interface components {
         ApiAccessAlertListResponse: {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["ApiAccessAlertView"][];
+        };
+        ApiAccessReadinessSummaryView: {
+            /**
+             * Format: int64
+             * @description Count of PUBLISHED packages in the caller's authorized scope.
+             */
+            publishedInScopeCount: number;
+            /**
+             * Format: int64
+             * @description Distinct template packages that currently have at least one alert.
+             */
+            attentionCount: number;
+            /**
+             * Format: int64
+             * @description PENDING_RELEASE packages in scope with empty allowedAdGroups (MISSING_AD_GROUP).
+             */
+            pendingReleaseNeedingSetupCount: number;
+        };
+        ApiAccessReadinessSummaryResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["ApiAccessReadinessSummaryView"];
         };
         CredentialSummary: {
             credentialId?: string;
@@ -5291,6 +5332,32 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiAccessAlertListResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getApiAccessReadinessSummary: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Readiness summary returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiAccessReadinessSummaryResponse"];
                 };
             };
             401: components["responses"]["ErrorResponse"];

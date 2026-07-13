@@ -1178,6 +1178,9 @@ export default {
       ready: '就绪',
       pending: '待完成',
       informational: '参考项',
+      adGroupsNotConfiguredTitle: '尚未配置授权 AD 组',
+      adGroupsNotConfiguredDescription:
+        '仍可上线，但在配置至少一个 AD 组之前，运行时调用将被失败关闭。生命周期「已发布」不等于运行时可调用。',
       checkCodes: {
         ANCHOR_INTEGRITY: '版式占位符检查',
         VARIABLE_SCHEMA: '变量架构',
@@ -1841,6 +1844,13 @@ export default {
         editDefaultRoute: '默认发布版本',
         saveDefaultRoute: '保存默认路由',
       },
+      runtimeCallable: {
+        warningTitle: '尚不可运行时调用',
+        warningDescription:
+          '尚未配置授权 AD 组。生命周期发布仍可进行，但在保存至少一个 AD 组之前，运行时调用将失败关闭。「已发布」状态本身并不等于可调用。',
+        publishedVsCallableHint:
+          '「已发布」（生命周期）与「运行时可调用」不同。运行时访问至少需要已配置的授权 AD 组（及其他接入设置）。',
+      },
       retention: {
         title: '留存',
         hint: '仅对新产生的调用记录与保存文档生效。',
@@ -2121,16 +2131,30 @@ export default {
       empty: '授权范围内暂无已发布模板。',
       groupCode: '分组',
       monitoringHint: '对外接入按模板包配置。请打开包 Hub 的「对外接入」页签进行编辑。',
+      summary: {
+        title: 'API 就绪摘要',
+        description: '仅统计您授权范围内的包。本页为监控视图，不是模板目录。',
+        loadFailed: '无法加载 API 就绪摘要。',
+        publishedInScope: '范围内已发布',
+        publishedInScopeDescription: '您授权分组内处于已发布状态的包数量。',
+        attention: '需关注',
+        attentionDescription: '至少存在一条告警的包数量（去重）。',
+        pendingReleaseNeedingSetup: '待发布待配置',
+        pendingReleaseNeedingSetupDescription:
+          '处于待发布且尚未配置授权 AD 组的包；运行时调用在配置前将失败关闭。',
+      },
       alerts: {
         title: '待关注项',
         description: '跨包告警，提示需在运行态调用受阻前处理的对外接入问题。',
         loadFailed: '无法加载对外接入告警。',
         emptyTitle: '暂无待关注项',
-        emptyDescription: '授权范围内已发布包的对外接入配置正常。',
+        emptyDescription: '授权范围内包的对外接入配置正常。',
         missingAdGroup: '缺少授权 AD 组',
+        missingAdGroupDetail: '{externalId} 尚未配置授权 AD 组。',
         expiringCredential: '访问密钥即将过期',
         expiringCredentialDetail: '{externalId} 将于 {expiresAt} 过期',
         noCredentials: '未配置访问密钥',
+        noCredentialsDetail: '{externalId} 尚无有效访问密钥。',
         columns: {
           issue: '问题',
           package: '包',

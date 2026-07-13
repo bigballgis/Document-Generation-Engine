@@ -117,11 +117,31 @@ describe('useTemplatePolicyCredentials', () => {
     wrapper.unmount()
   })
 
-  it('showPolicyPanel is false when template is not PUBLISHED', () => {
-    const templateRef = ref(makeTemplate({ lifecycleStatus: 'DRAFT' }))
+  it('SCEN-AOD-01: showPolicyPanel is true when template is PENDING_RELEASE and user can manage API policy', () => {
+    const templateRef = ref(makeTemplate({ lifecycleStatus: 'PENDING_RELEASE' }))
     const { policy, wrapper } = mountPolicyCredentials(templateRef, pinia)
-    expect(policy.showPolicyPanel.value).toBe(false)
+    expect(policy.showPolicyPanel.value).toBe(true)
     wrapper.unmount()
+  })
+
+  it('SCEN-AOD-05: showPolicyPanel is false for non-target lifecycles even with canManageApiPolicy', () => {
+    for (const lifecycleStatus of ['DRAFT', 'TESTING', 'APPROVAL'] as const) {
+      const templateRef = ref(makeTemplate({ lifecycleStatus }))
+      const { policy, wrapper } = mountPolicyCredentials(templateRef, pinia)
+      expect(policy.showPolicyPanel.value).toBe(false)
+      wrapper.unmount()
+    }
+  })
+
+  it('SCEN-AOD-04: showPolicyPanel is false when user cannot manage API policy', () => {
+    capabilityRefs.manageApiPolicy.value = false
+    for (const lifecycleStatus of ['PUBLISHED', 'PENDING_RELEASE'] as const) {
+      const templateRef = ref(makeTemplate({ lifecycleStatus }))
+      const { policy, wrapper } = mountPolicyCredentials(templateRef, pinia)
+      expect(policy.showPolicyPanel.value).toBe(false)
+      expect(policy.canPolicy.value).toBe(false)
+      wrapper.unmount()
+    }
   })
 
   it('canPolicy reflects manageApiPolicy capability', () => {
