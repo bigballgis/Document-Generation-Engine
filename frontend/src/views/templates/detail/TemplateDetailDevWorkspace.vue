@@ -120,6 +120,7 @@ const { t } = useI18n()
       <template #testing>
         <TemplateDetailTestingTab
           :template-id="templateId"
+          :variables="variables"
           :bindings="bindings"
           :coverage-refresh-token="coverageRefreshToken"
           :last-preview="lastPreview"

@@ -55,6 +55,7 @@ export const apiErrorZhCn = {
     notFound: "未找到模板。",
     testDataSetNotFound: "未找到测试数据集。",
     testDataSetLocked: "测试数据集已被测试证据锁定，无法修改。",
+    testDataSetSchemaInvalid: "测试数据集变量与模板变量 schema 不匹配。",
     accessDenied: "您无权访问此模板。",
     confirmationRequired: "此操作需要二次确认。",
     invalidState: "模板当前状态不允许执行此操作。",

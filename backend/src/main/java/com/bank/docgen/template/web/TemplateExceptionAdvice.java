@@ -10,6 +10,7 @@ import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
 import com.bank.docgen.template.service.TestDataSetImmutableException;
 import com.bank.docgen.template.service.TestDataSetNotFoundException;
+import com.bank.docgen.template.service.TestDataSetSchemaValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -88,6 +89,19 @@ public class TemplateExceptionAdvice {
                 ApiErrorCodes.ACCESS_DENIED,
                 ApiErrorCategories.TEMPLATE,
                 "api.error.template.accessDenied"
+        );
+    }
+
+    @ExceptionHandler(TestDataSetSchemaValidationException.class)
+    public ResponseEntity<ErrorEnvelope> handleTestDataSetSchemaValidation(
+            HttpServletRequest request,
+            TestDataSetSchemaValidationException ex
+    ) {
+        return errorEnvelopeFactory.validationError(
+                request,
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                ex.messageKey(),
+                ex.fieldErrors()
         );
     }
 

@@ -10,9 +10,13 @@ import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.UpsertTestDataSetRequest;
+import com.bank.docgen.template.domain.VariableType;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
+import com.bank.docgen.template.persistence.VariableSchemaEntity;
+import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
@@ -35,9 +39,14 @@ class TestDataSetGovernanceServiceTest {
     private TestDataSetRepository testDataSetRepository;
     @Mock
     private GroupAccessService groupAccessService;
+    @Mock
+    private TemplateCurrentVersionResolver templateCurrentVersionResolver;
+    @Mock
+    private VariableSchemaRepository variableSchemaRepository;
 
     private TestDataSetService service;
     private UUID templateId;
+    private UUID versionId;
     private ManagementSessionClaims author;
     private ManagementSessionClaims tester;
     private TemplateEntity template;
@@ -48,9 +57,12 @@ class TestDataSetGovernanceServiceTest {
                 templateService,
                 testDataSetRepository,
                 groupAccessService,
-                new ObjectMapper()
+                new ObjectMapper(),
+                templateCurrentVersionResolver,
+                variableSchemaRepository
         );
         templateId = UUID.randomUUID();
+        versionId = UUID.randomUUID();
         template = new TemplateEntity(
                 templateId,
                 "TPL-1",
@@ -68,6 +80,7 @@ class TestDataSetGovernanceServiceTest {
     void create_withRequiredFlagAndScenario_persists() {
         when(templateService.requireReadableTemplate(templateId, author)).thenReturn(template);
         when(groupAccessService.canAuthorTemplates(author)).thenReturn(true);
+        stubCustomerNameSchema();
         when(testDataSetRepository.save(any(TestDataSetEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         var view = service.create(
@@ -151,8 +164,26 @@ class TestDataSetGovernanceServiceTest {
         )).isInstanceOf(TemplateAccessDeniedException.class);
     }
 
+    private void stubCustomerNameSchema() {
+        TemplateVersionEntity version = new TemplateVersionEntity(versionId, templateId, "10000001");
+        when(templateCurrentVersionResolver.findInFlightDevVersion(templateId)).thenReturn(Optional.of(version));
+        when(variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(versionId)).thenReturn(List.of(
+                new VariableSchemaEntity(
+                        UUID.randomUUID(),
+                        versionId,
+                        "customerName",
+                        VariableType.TEXT,
+                        true,
+                        null,
+                        null,
+                        null,
+                        null
+                )
+        ));
+    }
+
     private TestDataSetEntity dataSet(String externalId, boolean required) {
-        TestDataSetEntity entity = new TestDataSetEntity(
+        return new TestDataSetEntity(
                 UUID.randomUUID(),
                 templateId,
                 externalId,
@@ -166,7 +197,6 @@ class TestDataSetGovernanceServiceTest {
                 false,
                 null
         );
-        return entity;
     }
 
     private ManagementSessionClaims session(String username, List<String> roles) {

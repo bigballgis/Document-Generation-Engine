@@ -55,6 +55,7 @@ export const apiErrorEn = {
     notFound: "The template was not found.",
     testDataSetNotFound: "The test data set was not found.",
     testDataSetLocked: "The test data set is locked by test evidence and cannot be modified.",
+    testDataSetSchemaInvalid: "The test data set variables do not match the template variable schema.",
     accessDenied: "You do not have permission to access this template.",
     confirmationRequired: "Secondary confirmation is required for this operation.",
     invalidState: "The template is not in a valid state for this operation.",

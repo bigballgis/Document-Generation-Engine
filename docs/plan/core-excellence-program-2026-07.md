@@ -170,8 +170,10 @@ R4 审查结论：平台是"专家路径"——功能在但闭环断。以下按
 **CE-U01 结构化编辑器嵌套子树编辑 — P0 · L**
 condition/loop 块 `children` 数组已在 schema 中但 `StructuredContentBlockCard` 无递归 UI，嵌套内容只能靠导入 HTML 或改 JSON。目标：块卡片递归渲染子编辑器（限深 3 层），子块增删改与 undo/redo（LR-C3 历史栈）兼容。测试：Vitest 递归渲染 + E2E 在 condition 内新增段落并预览。禁止：本片不做拖拽（U02）。
 
-**CE-U03 测试数据集 schema 驱动 — P0 · M**
+**CE-U03 测试数据集 schema 驱动 — P0 · M · In Progress**
 现状 8 行 textarea 手写 JSON、默认值硬编码 `{"customerName":"Sample"}`、保存仅 `JSON.parse`、后端不对照 schema 校验。目标：按 `VariableSchema` 生成动态表单（类型/必填即时校验）+ "从 schema 生成骨架"按钮 + 大 payload 折叠编辑；后端 `TestDataSetService` 保存时按 schema 校验并返回字段级错误。依赖：无（compute 变量出现后表单跳过 compute 字段——与 K03 弱耦合）。
+**Slice:** `ce-u03-testdata-schema-form` · branch `feat/ce-u03-testdata-schema-form` · BDD [ce-u03-testdata-schema-form.md](../behavior/ce-u03-testdata-schema-form.md) (`ready`, 18 scenarios).
+**Status (2026-07-14):** Backend schema validation + `TestDataSetSchemaValidationException` (422 / VALIDATION / fieldErrors) + 6 JUnit scenarios implemented (S11–S16); frontend schema-driven form + skeleton button + collapsible JSON + i18n en/zh-CN + Vitest implemented (S1–S5, S7–S9). **Host gates GREEN (worktree `DGE-ce-u03-testdata-schema-form`):** FE `pnpm lint` ✓ · `type-check` ✓ · `test` ✓ (194 files / 1190 tests; coverage stmts 80.15% · branches 80.1% · funcs 64.68% · lines 80.15%) · `build` ✓ (`✓ built in 2m 45s`); BE `mvn -B -ntp verify` ✓ **BUILD SUCCESS** 21:38 min — Tests 1374/0/0/7, Checkstyle 0, PMD 0, SpotBugs 0, JaCoCo ratchet green; `TestDataSetSchemaValidationServiceTest` 6/6 + `TestDataSetGovernanceServiceTest` 4/6 green. Committed + pushed `feat/ce-u03-testdata-schema-form` (no merge). **Remaining before Done:** E2E functional + UIUX (Docker 4173, staged to parent after docker queue), integration-merger, MAIN doc-sync + commit review. Not go-live; formal phase None.
 
 ### P1 组
 

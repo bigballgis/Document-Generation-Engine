@@ -6,6 +6,9 @@ import com.bank.docgen.template.api.TestDataSetView;
 import com.bank.docgen.template.api.UpsertTestDataSetRequest;
 import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
+import com.bank.docgen.template.persistence.TemplateVersionEntity;
+import com.bank.docgen.template.persistence.VariableSchemaEntity;
+import com.bank.docgen.template.persistence.VariableSchemaRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,17 +26,23 @@ public class TestDataSetService {
     private final TestDataSetRepository testDataSetRepository;
     private final GroupAccessService groupAccessService;
     private final ObjectMapper objectMapper;
+    private final TemplateCurrentVersionResolver templateCurrentVersionResolver;
+    private final VariableSchemaRepository variableSchemaRepository;
 
     public TestDataSetService(
             TemplateService templateService,
             TestDataSetRepository testDataSetRepository,
             GroupAccessService groupAccessService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            TemplateCurrentVersionResolver templateCurrentVersionResolver,
+            VariableSchemaRepository variableSchemaRepository
     ) {
         this.templateService = templateService;
         this.testDataSetRepository = testDataSetRepository;
         this.groupAccessService = groupAccessService;
         this.objectMapper = objectMapper;
+        this.templateCurrentVersionResolver = templateCurrentVersionResolver;
+        this.variableSchemaRepository = variableSchemaRepository;
     }
 
     @Transactional(readOnly = true)
@@ -60,6 +69,7 @@ public class TestDataSetService {
     @Transactional
     public TestDataSetView create(UUID templateId, UpsertTestDataSetRequest request, ManagementSessionClaims session) {
         assertCanMaintain(templateId, session);
+        Map<String, Object> variables = validateAndSanitizeVariables(templateId, request.variables());
         String externalId = "TDS-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         TestDataSetEntity entity = new TestDataSetEntity(
                 UUID.randomUUID(),
@@ -67,7 +77,7 @@ public class TestDataSetService {
                 externalId,
                 request.name(),
                 request.description(),
-                writeVariables(request.variables()),
+                writeVariables(variables),
                 Boolean.TRUE.equals(request.required()),
                 request.scenarioName(),
                 writeCoverageTags(request.coverageTags()),
@@ -87,10 +97,11 @@ public class TestDataSetService {
     ) {
         assertCanMaintain(templateId, session);
         TestDataSetEntity entity = requireMutableDataSet(templateId, externalId);
+        Map<String, Object> variables = validateAndSanitizeVariables(templateId, request.variables());
         entity.update(
                 request.name(),
                 request.description(),
-                writeVariables(request.variables()),
+                writeVariables(variables),
                 Boolean.TRUE.equals(request.required()),
                 request.scenarioName(),
                 writeCoverageTags(request.coverageTags())
@@ -135,6 +146,23 @@ public class TestDataSetService {
                 testDataSetRepository.save(entity);
             }
         });
+    }
+
+    private Map<String, Object> validateAndSanitizeVariables(UUID templateId, Map<String, Object> requestVariables) {
+        List<VariableSchemaEntity> schema = loadCurrentVariableSchema(templateId);
+        Map<String, Object> stripped = TestDataSetVariablesSchemaValidator.stripComputeKeys(schema, requestVariables);
+        TestDataSetVariablesSchemaValidator.validateOrThrow(schema, stripped);
+        return stripped;
+    }
+
+    private List<VariableSchemaEntity> loadCurrentVariableSchema(UUID templateId) {
+        TemplateVersionEntity version = templateCurrentVersionResolver.findInFlightDevVersion(templateId)
+                .or(() -> templateCurrentVersionResolver.findLatestPublishedVersion(templateId))
+                .orElse(null);
+        if (version == null) {
+            return List.of();
+        }
+        return variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(version.getId());
     }
 
     private void assertCanMaintain(UUID templateId, ManagementSessionClaims session) {

@@ -18,10 +18,11 @@ import {
   templateTestingSubTabLabelKey,
   type TemplateTestingSubTab,
 } from '@/views/templates/templateTestingSubTabs'
-import type { AnchorBinding, PreviewRecord, TemplateLifecycleStatus } from '@/types/template'
+import type { AnchorBinding, PreviewRecord, TemplateLifecycleStatus, VariableSchema } from '@/types/template'
 
 const props = defineProps<{
   templateId: string
+  variables: VariableSchema[]
   bindings: AnchorBinding[]
   coverageRefreshToken: number
   lastPreview: PreviewRecord | null
@@ -85,6 +86,7 @@ watch(
 
         <TemplateTestDataSetPanel
           :template-id="templateId"
+          :variables="variables"
           :generating-preview-id="generatingPreviewId"
           :refresh-token="coverageRefreshToken"
           @selected="emit('update:selectedTestDataSetId', $event)"
