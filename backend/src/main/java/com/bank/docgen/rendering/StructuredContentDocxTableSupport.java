@@ -33,7 +33,8 @@ final class StructuredContentDocxTableSupport {
         JsonNode headerRows = tableDefinition.path("headerRows");
         if (headerRows.isArray() && !headerRows.isEmpty()) {
             JsonNode headerRow = headerRows.get(0);
-            writeTableRow(table, rowIndex++, headerRow, columnKeys, variables, true);
+            writeTableRow(table, rowIndex, headerRow, columnKeys, variables, true);
+            rowIndex++;
         }
         JsonNode loopRow = tableDefinition.path("loopRow");
         String loopVariable = loopRow.path("loopVariable").asText("");
@@ -42,18 +43,20 @@ final class StructuredContentDocxTableSupport {
             for (Object item : items) {
                 writeTableRow(
                         table,
-                        rowIndex++,
+                        rowIndex,
                         loopRow.path("cells"),
                         columnKeys,
                         scopedVariables(variables, item),
                         false
                 );
+                rowIndex++;
             }
         }
         JsonNode footerRows = tableDefinition.path("footerRows");
         if (footerRows.isArray()) {
             for (JsonNode footerRow : footerRows) {
-                writeTableRow(table, rowIndex++, footerRow, columnKeys, variables, false);
+                writeTableRow(table, rowIndex, footerRow, columnKeys, variables, false);
+                rowIndex++;
             }
         }
     }

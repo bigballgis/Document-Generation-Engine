@@ -6,6 +6,7 @@
     <description>
         Lean, high-signal PMD ruleset for the docgen backend (OPT-B / B1 ratchet).
         Focus on likely defects and error-prone constructs; expand over time.
+        Task #51 / Java 25: PMD 7.25.0 — exclude new category noise that was not part of the prior green ratchet.
     </description>
 
     <rule ref="category/java/errorprone.xml">
@@ -13,11 +14,11 @@
         <exclude name="AvoidLiteralsInIfCondition"/>
         <exclude name="AvoidFieldNameMatchingMethodName"/>
         <exclude name="AvoidDuplicateLiterals"/>
-        <exclude name="DataflowAnomalyAnalysis"/>
         <exclude name="NullAssignment"/>
         <exclude name="AvoidCatchingThrowable"/>
+        <!-- PMD 7.x rename / sibling of AvoidCatchingThrowable — high-volume RuntimeException catch noise -->
+        <exclude name="AvoidCatchingGenericException"/>
         <exclude name="MissingSerialVersionUID"/>
-        <exclude name="BeanMembersShouldSerialize"/>
         <exclude name="CompareObjectsWithEquals"/>
         <!-- False positive on main-source classes named Test* (e.g. TestDataSetEntity) -->
         <exclude name="TestClassWithoutTestCases"/>
@@ -30,13 +31,14 @@
     <rule ref="category/java/bestpractices.xml">
         <exclude name="GuardLogStatement"/>
         <exclude name="JUnitTestContainsTooManyAsserts"/>
-        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
         <exclude name="UseVarargs"/>
         <exclude name="AbstractClassWithoutAbstractMethod"/>
         <exclude name="LooseCoupling"/>
         <exclude name="PreserveStackTrace"/>
-        <!-- False positive: domain classes named Test*/...TestData... are not JUnit tests -->
-        <exclude name="JUnitTestsShouldIncludeAssert"/>
+        <!-- PMD 7.17+ noise when bumping for Java 25 (Task #51) — not defect signal for this codebase -->
+        <exclude name="ImplicitFunctionalInterface"/>
+        <exclude name="ExhaustiveSwitchHasDefault"/>
+        <exclude name="UnnecessaryWarningSuppression"/>
     </rule>
 
     <rule ref="category/java/multithreading.xml">

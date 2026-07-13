@@ -95,7 +95,10 @@ $composeArgs = @(
 )
 
 $runtimeImages = @(
-    "eclipse-temurin:21-jre-alpine",
+    # Task #51 / ADR-0028: Temurin 25 (docs: deploy/container-hardening.md).
+    # Packaged backend runtime uses 25-jre-jammy (LibreOffice/fonts); alpine is the minimal pin.
+    "eclipse-temurin:25-jre-alpine",
+    "eclipse-temurin:25-jre-jammy",
     "nginx:1.27-alpine"
 )
 foreach ($image in $runtimeImages) {

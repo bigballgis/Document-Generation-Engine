@@ -219,6 +219,16 @@ targets Boot 3.4+/Spring 6.2):
 | Company intranet repository availability | **Open checkpoint** — intranet SCA verification via the M9 submission flow is still pending and **must be closed before launch** |
 | Fallback if unavailable | Flyway-managed lock table + `SELECT … FOR UPDATE SKIP LOCKED` guard (LR-B2 task sheet) |
 
+### Historical note — ShedLock pin after Boot 4 (2026-07-13)
+
+The table above is the **original LR-B2 verification record** and is **not** rewritten.
+
+| Field | Value |
+| --- | --- |
+| **LR-B2 pin (2026-07-04)** | ShedLock **6.10.0** (Boot **3.3** line) — as recorded above |
+| **Co-upgrade (Task Master #51)** | Slice `boot-4-1-upgrade` co-upgraded ShedLock to **7.7.0** for Spring Boot **4.1** / Spring Framework **7** compatibility (`shedlock-spring` + `shedlock-provider-jdbc-template`) |
+| **Does not change** | Topology decision body (single serving replica, scale-out prerequisites, blue-green scheduler mutex requirement) — mutex technology remains ShedLock JDBC; only the **dependency major line** moved with the Boot parent |
+
 ## Related Documents
 
 - [ADR 0039: Redisson Distributed Lock Evaluation](../technology-stack/0039-redisson-lock-evaluation.md) — single-instance assumption refined by this ADR

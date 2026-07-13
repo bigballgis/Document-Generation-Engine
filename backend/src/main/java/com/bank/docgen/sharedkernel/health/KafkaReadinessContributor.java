@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,7 @@ public class KafkaReadinessContributor implements ComponentReadinessContributor 
             return new ComponentCheck("SKIPPED", "async transport is not kafka");
         }
         Properties config = new Properties();
-        config.putAll(kafkaProperties.buildAdminProperties(null));
+        config.putAll(kafkaProperties.buildAdminProperties());
         config.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, String.valueOf(TIMEOUT.toMillis()));
         config.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, String.valueOf(TIMEOUT.toMillis()));
         try (AdminClient adminClient = AdminClient.create(config)) {

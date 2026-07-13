@@ -120,7 +120,7 @@ Do **not** edit Accepted ADR decision text to reflect hygiene progress. If a fin
 | [m9-t02-closure-plan.md](../architecture/m9-t02-closure-plan.md) | Step 3 related remediation via #49 |
 | [docs/evidence/security/README.md](../evidence/security/README.md) | SBOM / SCA evidence index |
 | [system-optimization-review-2026-07.md](../plan/system-optimization-review-2026-07.md) | SOR-C05 Done — feeds M9-T02; #49 related only |
-| [ADR-0028](../adr/technology-stack/0028-backend-platform-stack-baseline.md) | Backend stack baseline (Java 21 + Spring Boot 3.x + Maven) |
+| [ADR-0028](../adr/technology-stack/0028-backend-platform-stack-baseline.md) | Backend stack baseline at #49: Java 21 + Spring Boot **3.x**; **amended 2026-07-13** to Java **25** + Boot **4.x** / **4.1.0** (Task **#51**) |
 | [ADR-0029](../adr/technology-stack/0029-frontend-application-stack-baseline.md) | Frontend stack baseline (Vue 3 / Vite / pnpm) |
 | `.cursor/rules/tech-stack-guardrails.mdc` | No ad-hoc framework/runtime switches |
 | Task Master **#49** | **Done** (2026-07-13) — in-repo hygiene; residual exception → **#50** |

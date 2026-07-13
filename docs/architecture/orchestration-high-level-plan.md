@@ -39,7 +39,7 @@ model, permissions, API docs, and ADRs.
 | --- | --- |
 | Requirements, PRD, domain, permissions, OpenAPI v1 | Documented — preserved |
 | Accepted ADRs & architecture views | Documented — preserved |
-| Backend (`backend/`) | **Present** — Spring Boot 3, module-first packages |
+| Backend (`backend/`) | **Present** — Spring Boot 4, module-first packages |
 | Frontend (`frontend/`) | **Present** — Vue 3 + TS management UI |
 | Infrastructure (compose, CI scripts) | **Present** — docker-compose, gate scripts |
 | Quality gates (2026-06-23) | Backend `mvn verify` + frontend lint/type-check/test/build green |

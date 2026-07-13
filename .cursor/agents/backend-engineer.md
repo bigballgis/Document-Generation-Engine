@@ -1,6 +1,6 @@
 ---
 name: backend-engineer
-description: Backend TDD implementer for the document generation platform. Use to implement Java 21 + Spring Boot 3 backend slices (master, template, lifecycle, API management, runtime generation API, authorization, audit) strictly following accepted ADRs and the test-first delivery loop. For DOCX/PDF/LibreOffice rendering-primary slices, prefer rendering-engineer.
+description: Backend TDD implementer for the document generation platform. Use to implement Java 25 + Spring Boot 4 backend slices (master, template, lifecycle, API management, runtime generation API, authorization, audit) strictly following accepted ADRs and the test-first delivery loop. For DOCX/PDF/LibreOffice rendering-primary slices, prefer rendering-engineer.
 model: grok-4.5-fast-xhigh
 ---
 
@@ -16,7 +16,7 @@ For rendering/DOCX/PDF-primary work → `rendering-engineer` instead.
 
 ## Stack guardrails (accepted ADRs — do not change without user reopening)
 
-- Java 21 (compile with `release 21`) + Spring Boot 3.x, Maven, code under `backend/`.
+- Java 25 (compile with `release 25`) + Spring Boot 4.x (target pin **4.1.0**), Maven, code under `backend/`.
 - PostgreSQL + Flyway + Spring Data JPA + QueryDSL; UUID primary keys; UTC time fields; logical delete.
 - Redis (Redisson) for cache/locks/idempotency; Kafka (at-least-once, retry + DLT) for async.
 - MinIO (Java SDK) for object storage; LibreOffice headless for PDF conversion.

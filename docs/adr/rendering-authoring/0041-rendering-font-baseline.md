@@ -42,10 +42,18 @@ boxes and Calibri/Cambria runs reflow — page counts and line breaks drift vers
 author's Word view (**CD-PIT-01**).
 
 Early LRP-A planning text assumed **Alpine** package names (`font-noto-cjk`,
-`font-carlito`, …). The runtime images are **Debian jammy** (`eclipse-temurin:21-jre-jammy`),
+`font-carlito`, …). The runtime images are **Debian jammy** (`eclipse-temurin:21-jre-jammy`
+at the time of this ADR’s acceptance),
 not Alpine, because Alpine 3.23 lacks `fonts-crosextra-caladea` (Carlito + Caladea are
 required metric-compatible substitutes). Build stages may still use Alpine Maven images;
 **font packages apply only to the jammy runtime stage**.
+
+> **Historical note (2026-07-13, Task Master #51):** The **runtime JRE pin** moves from
+> Temurin **21** to Temurin **25** with the Boot **4.1.0** upgrade slice
+> ([ADR-0028](../technology-stack/0028-backend-platform-stack-baseline.md);
+> [boot-4-1-upgrade](../../behavior/boot-4-1-upgrade.md); prefer
+> `eclipse-temurin:25-jre-jammy` for jammy conversion images). This note does **not**
+> change the font package decision above — only the JRE major line.
 
 Licensed Microsoft fonts must not be baked into images (tech-stack / dependency policy).
 

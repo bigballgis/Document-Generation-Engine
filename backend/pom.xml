@@ -7,8 +7,8 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <!-- Task #49: latest OSS 3.3.x patch (do NOT jump to 3.4+/3.5/4.x — ADR baseline). -->
-        <version>3.3.13</version>
+        <!-- Task #51 / ADR-0028 amended: Spring Boot 4.x platform pin + Java 25. -->
+        <version>4.1.0</version>
         <relativePath/>
     </parent>
 
@@ -19,11 +19,11 @@
     <description>Document Generation Platform backend</description>
 
     <properties>
-        <java.version>21</java.version>
-        <maven.compiler.release>21</maven.compiler.release>
+        <java.version>25</java.version>
+        <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- springdoc 2.6.x is the Boot 3.3 compatibility line (2.7+/2.8+ → Boot 3.4+; 3.x → Boot 4). -->
-        <springdoc.version>2.6.0</springdoc.version>
+        <!-- springdoc 3.x is the Boot 4.x compatibility line (2.6.x was Boot 3.3). -->
+        <springdoc.version>3.0.3</springdoc.version>
         <swagger-parser.version>2.1.45</swagger-parser.version>
         <jjwt.version>0.12.7</jjwt.version>
         <minio.version>8.5.17</minio.version>
@@ -32,9 +32,8 @@
         <logstash-logback.version>8.1</logstash-logback.version>
         <querydsl.version>5.1.0</querydsl.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <!-- LR-B2 / Task #49: latest 6.x line; 6.x is the ShedLock line tested with Spring Boot 3.3
-             (7.x targets Boot 3.4+/Spring 6.2). Pre-verification: ADR-0044 appendix. -->
-        <shedlock.version>6.10.0</shedlock.version>
+        <!-- ShedLock 7.x targets Spring Framework 7 / Boot 4 (6.x was Boot 3.3 line). -->
+        <shedlock.version>7.7.0</shedlock.version>
         <resilience4j.version>2.4.0</resilience4j.version>
         <pdfbox.version>3.0.8</pdfbox.version>
         <bouncycastle.version>1.85</bouncycastle.version>
@@ -46,10 +45,13 @@
         <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
         <!-- Stay on Checkstyle 10.x; 12+/13.x needs ruleset migration (deferred). -->
         <checkstyle.version>10.23.0</checkstyle.version>
-        <!-- Keep PMD/SpotBugs plugin lines that already pass repo ruleset; newer PMD 7.17 via 3.28.0
-             surfaces ImplicitFunctionalInterface / ExhaustiveSwitchHasDefault noise (not CVE remediations). -->
-        <pmd.plugin.version>3.26.0</pmd.plugin.version>
-        <spotbugs.plugin.version>4.8.6.4</spotbugs.plugin.version>
+        <!-- Task #51 / Java 25: maven-pmd-plugin 3.28.0 + PMD 7.25.0 (Java 25 + SOE fix #5721).
+             Exclude noisy new rules in ruleset if they fire (ImplicitFunctionalInterface / ExhaustiveSwitchHasDefault). -->
+        <pmd.plugin.version>3.28.0</pmd.plugin.version>
+        <pmd.version>7.25.0</pmd.version>
+        <spotbugs.plugin.version>4.9.8.1</spotbugs.plugin.version>
+        <!-- SpotBugs core 4.10.2 required to analyze Java 25 class files (Task #51). -->
+        <spotbugs.version>4.10.2</spotbugs.version>
         <surefire.forkCount>1</surefire.forkCount>
         <surefire.argLine>-Xmx512m -XX:+ExitOnOutOfMemoryError</surefire.argLine>
         <spotbugs.effort>Max</spotbugs.effort>
@@ -58,7 +60,12 @@
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <!-- Transitional Jackson 2 bridge — codebase still on com.fasterxml.jackson (Jackson 3 deferred). -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-jackson2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -81,12 +88,12 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-kafka</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -122,12 +129,22 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -139,11 +156,6 @@
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit-junit5</artifactId>
             <version>${archunit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -211,7 +223,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
-            <artifactId>resilience4j-spring-boot3</artifactId>
+            <artifactId>resilience4j-spring-boot4</artifactId>
             <version>${resilience4j.version}</version>
         </dependency>
         <dependency>
@@ -359,7 +371,30 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
                 <version>${pmd.plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-core</artifactId>
+                        <version>${pmd.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-java</artifactId>
+                        <version>${pmd.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-javascript</artifactId>
+                        <version>${pmd.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-jsp</artifactId>
+                        <version>${pmd.version}</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
+                    <targetJdk>${java.version}</targetJdk>
                     <rulesets>
                         <ruleset>config/pmd/ruleset.xml</ruleset>
                     </rulesets>
@@ -395,6 +430,13 @@
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>${spotbugs.plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs</artifactId>
+                        <version>${spotbugs.version}</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
                     <effort>${spotbugs.effort}</effort>
                     <threshold>Medium</threshold>

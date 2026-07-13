@@ -18,7 +18,7 @@ Active/new tasks: [.taskmaster/tasks/tasks.json](.taskmaster/tasks/tasks.json) (
 
 text
 
-backend/          Java 21 + Spring Boot 3 (Maven)
+backend/          Java 25 + Spring Boot 4 (Maven)
 
 frontend/         Vue 3 + TypeScript + Vite + Element Plus
 
