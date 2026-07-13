@@ -201,6 +201,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [Slim R6-backend](./evidence/slim-r6-backend/README.md) | TemplateController split + Collaboration/Runtime/VersionLine peels; `mvn verify` GREEN |
 | [Slim R6-render](./evidence/slim-r6-render/README.md) | WriteSession/DocxAssembler/ConditionEvaluator peels under soft warn; `mvn verify` GREEN |
 | [Slim R7-frontend](./evidence/slim-r7-frontend/README.md) | MUST Vue mid-tier &lt;260; SHOULD peels; FE gates GREEN |
+| [Slim R7-backend](./evidence/slim-r7-backend/README.md) | All Java ≥300 hotspots &lt;300; 8 supports; `mvn verify` GREEN |
 | [Slim Wave 3 frontend SFC](./evidence/slim-frontend/README.md) | BindingsPanel 1249→170 orchestrator; ManagementShell 671→311 (merge `2cf7cb9`) |
 | [Slim R-frontend residual](./evidence/slim-r-frontend/README.md) | CSC Editor 864→177; AuditConsole 588→155 |
 | [Slim R2-frontend residual](./evidence/slim-r2-frontend/README.md) | TemplateDetailView 577→388 orchestrator + detail shells (merge `02b299c`) |
