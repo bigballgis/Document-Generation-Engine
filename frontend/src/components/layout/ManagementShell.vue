@@ -1,171 +1,41 @@
 <script setup lang="ts">
-import { computed, ref, type Component } from 'vue'
-import { ElMessage } from 'element-plus'
-import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
-import {
-  HomeFilled,
-  Postcard,
-  Document,
-  Collection,
-  Connection,
-  Histogram,
-  User,
-  UserFilled,
-} from '@element-plus/icons-vue'
 import AppBreadcrumb from '@/components/layout/AppBreadcrumb.vue'
 import CommandPalette from '@/components/layout/CommandPalette.vue'
 import ManagementShellHeader from '@/components/layout/ManagementShellHeader.vue'
 import ManagementShellNav from '@/components/layout/ManagementShellNav.vue'
 import OnboardingTour from '@/components/layout/OnboardingTour.vue'
 import SessionLimitReminder from '@/components/session/SessionLimitReminder.vue'
-import { useOnboardingTour } from '@/composables/useOnboardingTour'
-import { useSessionRenewal } from '@/composables/useSessionRenewal'
-import { BRAND_REGISTRY } from '@/config/brands'
-import { LOCALE_REGISTRY, resolveAppLocale } from '@/i18n/localeRegistry'
-import { buildBreadcrumbTrail } from '@/navigation/breadcrumbTrail'
-import { buildVisibleNavGroups, resolveNavItemTarget, type NavItemDefinition } from '@/navigation/navStructure'
-import { useAppStore } from '@/stores/app'
-import { useSessionStore } from '@/stores/session'
-import type { BrandPreset } from '@/theme/tokens'
-
-const { t } = useI18n()
-const route = useRoute()
-const router = useRouter()
-const appStore = useAppStore()
-const sessionStore = useSessionStore()
+import { useManagementShell } from '@/components/layout/useManagementShell'
 
 const {
-  open: onboardingTourOpen,
-  current: onboardingTourCurrent,
-  tourSteps: onboardingTourSteps,
-  canReplay: onboardingTourCanReplay,
-  targetSelectorFor: onboardingTourTargetFor,
-  dismiss: dismissOnboardingTour,
-  replay: replayOnboardingTour,
-} = useOnboardingTour({ autoOpenOnMount: true })
-
-// ── Session renewal + absolute-limit reminder (LR-B6) ────────────────────────
-const { reminderVisible } = useSessionRenewal()
-
-async function handleSessionReminderAction() {
-  await sessionStore.logout()
-  await router.push({ name: 'login', query: { redirect: route.fullPath } })
-}
-
-// ── Sidebar collapse ──────────────────────────────────────────────────────────
-const COLLAPSED_KEY = 'docgen.nav.collapsed'
-const navCollapsed = ref(localStorage.getItem(COLLAPSED_KEY) === 'true')
-
-function toggleCollapsed() {
-  navCollapsed.value = !navCollapsed.value
-  localStorage.setItem(COLLAPSED_KEY, String(navCollapsed.value))
-}
-
-// ── Nav icons ─────────────────────────────────────────────────────────────────
-const NAV_ICON_MAP: Record<string, Component> = {
-  dashboard: HomeFilled,
-  users: User,
-  groups: UserFilled,
-  masters: Postcard,
-  templates: Document,
-  'content-modules': Collection,
-  'api-policies': Connection,
-  audit: Histogram,
-}
-
-function getNavIcon(itemId: string): Component | undefined {
-  return NAV_ICON_MAP[itemId]
-}
-
-// ── Brand / locale ────────────────────────────────────────────────────────────
-const brandConfig = computed(
-  () => BRAND_REGISTRY.find((entry) => entry.code === appStore.brand) ?? BRAND_REGISTRY[0],
-)
-const brandLabel = computed(() => t(brandConfig.value.labelKey))
-const localeOptions = computed(() =>
-  LOCALE_REGISTRY.map((entry) => ({
-    value: entry.code,
-    label: t(entry.labelKey),
-  })),
-)
-const brandOptions = computed(() =>
-  BRAND_REGISTRY.map((entry) => ({
-    value: entry.code as BrandPreset,
-    label: t(entry.labelKey),
-  })),
-)
-
-// ── Navigation ────────────────────────────────────────────────────────────────
-const navGroups = computed(() => {
-  const session = sessionStore.session
-  if (!session) {
-    return []
-  }
-  return buildVisibleNavGroups(session.visibleRoutes, session.roles, session.capabilities)
-})
-
-// Breadcrumb hidden on top-level list pages (see breadcrumbTrail.ts).
-const breadcrumbSegments = computed(() => buildBreadcrumbTrail(route.path))
-
-function isNavItemActive(item: NavItemDefinition): boolean {
-  if (item.path === route.path) {
-    return true
-  }
-  return route.path.startsWith(`${item.path}/`)
-}
-
-function navigateToItem(item: NavItemDefinition) {
-  router.push(resolveNavItemTarget(item))
-}
-
-// ── User menu ─────────────────────────────────────────────────────────────────
-async function handleLogout() {
-  await sessionStore.logout()
-  router.push('/login')
-}
-
-function handleUserMenuCommand(command: string) {
-  if (command === 'logout') {
-    void handleLogout()
-  }
-}
-
-// ── Help menu (LR-C8 onboarding tour replay) ──────────────────────────────────
-function handleHelpMenuCommand(command: string) {
-  if (command !== 'replay-tour') {
-    return
-  }
-  if (!onboardingTourCanReplay.value) {
-    ElMessage.info(t('onboardingTour.help.replayUnavailable'))
-    return
-  }
-  void replayOnboardingTour()
-}
-
-// ── Locale / brand ────────────────────────────────────────────────────────────
-function handleLocaleChange(locale: string) {
-  void appStore.setLocale(resolveAppLocale(locale))
-}
-
-function handleBrandChange(brand: BrandPreset) {
-  appStore.setBrand(brand)
-}
-
-// ── Skip link (LR-C12) ────────────────────────────────────────────────────────
-const mainContentRef = ref<HTMLElement | null>(null)
-
-function skipToMainContent(event: Event) {
-  event.preventDefault()
-  const main = mainContentRef.value
-  if (!main) {
-    return
-  }
-  main.focus({ preventScroll: false })
-  if (typeof main.scrollIntoView === 'function') {
-    main.scrollIntoView({ block: 'start' })
-  }
-}
+  t,
+  appStore,
+  sessionStore,
+  onboardingTourOpen,
+  onboardingTourCurrent,
+  onboardingTourSteps,
+  onboardingTourCanReplay,
+  onboardingTourTargetFor,
+  dismissOnboardingTour,
+  reminderVisible,
+  handleSessionReminderAction,
+  navCollapsed,
+  toggleCollapsed,
+  getNavIcon,
+  brandLabel,
+  localeOptions,
+  brandOptions,
+  navGroups,
+  breadcrumbSegments,
+  isNavItemActive,
+  navigateToItem,
+  handleUserMenuCommand,
+  handleHelpMenuCommand,
+  handleLocaleChange,
+  handleBrandChange,
+  mainContentRef,
+  skipToMainContent,
+} = useManagementShell()
 </script>
 
 <template>

@@ -11,41 +11,20 @@ import {
   isRejectDecisionValid,
   isTestPassDecisionValid,
 } from '@/utils/templateLifecycleDecisionForm'
+import {
+  buildLifecycleDecisionSubmitPayload,
+  resetLifecycleDecisionForm,
+  type LifecycleDecisionDialogEmit,
+  type LifecycleDecisionDialogProps,
+  type LifecycleDecisionFormState,
+} from '@/components/templates/lifecycleDecisionDialogTypes'
 
-export type LifecycleDecisionDialogMode =
-  | 'test-fail'
-  | 'test-pass'
-  | 'approval-reject'
-  | 'approval-approve'
-
-export interface LifecycleDecisionSubmitPayload {
-  reasonCategory?: string
-  impactSummary?: string
-  commentSummary?: string
-  fidelityViewedConfirmed?: boolean
-  coverageViewedConfirmed?: boolean
-  previewViewedConfirmed?: boolean
-  keyEvidenceConfirmed?: boolean
-  remediationTestRecordId?: string
-  remediationChangeDiffRef?: string
-  remediationChecklistCode?: string
-  exceptionIntervention?: boolean
-  exceptionReason?: string
-  secondaryConfirmed?: boolean
-}
-
-export type LifecycleDecisionDialogProps = {
-  modelValue: boolean
-  mode: LifecycleDecisionDialogMode
-  templateId?: string
-  loading?: boolean
-  initialComment?: string
-}
-
-export type LifecycleDecisionDialogEmit = {
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'submit', payload: LifecycleDecisionSubmitPayload): void
-}
+export type {
+  LifecycleDecisionDialogMode,
+  LifecycleDecisionSubmitPayload,
+  LifecycleDecisionDialogProps,
+  LifecycleDecisionDialogEmit,
+} from '@/components/templates/lifecycleDecisionDialogTypes'
 
 export function useLifecycleDecisionDialog(
   props: LifecycleDecisionDialogProps,
@@ -57,6 +36,22 @@ export function useLifecycleDecisionDialog(
   const availableReasonCategories = ref<string[]>([...TEMPLATE_DECISION_REASON_CATEGORIES])
   const reasonPromptCopy = ref<Record<string, string>>({})
   const loadingConfig = ref(false)
+
+  const form = reactive<LifecycleDecisionFormState>({
+    reasonCategory: '',
+    impactSummary: '',
+    commentSummary: '',
+    fidelityViewedConfirmed: false,
+    coverageViewedConfirmed: false,
+    previewViewedConfirmed: false,
+    keyEvidenceConfirmed: false,
+    remediationTestRecordId: '',
+    remediationChangeDiffRef: '',
+    remediationChecklistCode: '',
+    exceptionIntervention: false,
+    exceptionReason: '',
+    secondaryConfirmed: false,
+  })
 
   const selectedReasonPrompt = computed(() => {
     if (!form.reasonCategory) {
@@ -80,22 +75,6 @@ export function useLifecycleDecisionDialog(
   )
   const isTestPassMode = computed(() => props.mode === 'test-pass')
   const isApprovalPassMode = computed(() => props.mode === 'approval-approve')
-
-  const form = reactive({
-    reasonCategory: '',
-    impactSummary: '',
-    commentSummary: '',
-    fidelityViewedConfirmed: false,
-    coverageViewedConfirmed: false,
-    previewViewedConfirmed: false,
-    keyEvidenceConfirmed: false,
-    remediationTestRecordId: '',
-    remediationChangeDiffRef: '',
-    remediationChecklistCode: '',
-    exceptionIntervention: false,
-    exceptionReason: '',
-    secondaryConfirmed: false,
-  })
 
   const dialogTitle = computed(() => {
     switch (props.mode) {
@@ -162,19 +141,7 @@ export function useLifecycleDecisionDialog(
     () => props.modelValue,
     (open) => {
       if (open) {
-        form.reasonCategory = ''
-        form.impactSummary = ''
-        form.commentSummary = props.initialComment ?? ''
-        form.fidelityViewedConfirmed = false
-        form.coverageViewedConfirmed = false
-        form.previewViewedConfirmed = false
-        form.keyEvidenceConfirmed = false
-        form.remediationTestRecordId = ''
-        form.remediationChangeDiffRef = ''
-        form.remediationChecklistCode = ''
-        form.exceptionIntervention = false
-        form.exceptionReason = ''
-        form.secondaryConfirmed = false
+        resetLifecycleDecisionForm(form, props.initialComment)
         formRef.value?.clearValidate()
         void loadDecisionFormConfig()
       }
@@ -207,48 +174,17 @@ export function useLifecycleDecisionDialog(
     visible.value = false
   }
 
-  function buildSubmitPayload(): LifecycleDecisionSubmitPayload {
-    if (isTestPassMode.value) {
-      return {
-        fidelityViewedConfirmed: form.fidelityViewedConfirmed,
-        coverageViewedConfirmed: form.coverageViewedConfirmed,
-        previewViewedConfirmed: form.previewViewedConfirmed,
-        commentSummary: form.commentSummary.trim() || undefined,
-        exceptionIntervention: form.exceptionIntervention || undefined,
-        exceptionReason: form.exceptionIntervention ? form.exceptionReason.trim() : undefined,
-        secondaryConfirmed: form.exceptionIntervention ? form.secondaryConfirmed : undefined,
-      }
-    }
-    if (isApprovalPassMode.value) {
-      return {
-        commentSummary: form.commentSummary.trim(),
-        fidelityViewedConfirmed: form.fidelityViewedConfirmed,
-        keyEvidenceConfirmed: form.keyEvidenceConfirmed,
-        exceptionIntervention: form.exceptionIntervention || undefined,
-        exceptionReason: form.exceptionIntervention ? form.exceptionReason.trim() : undefined,
-        secondaryConfirmed: form.exceptionIntervention ? form.secondaryConfirmed : undefined,
-      }
-    }
-    return {
-      reasonCategory: form.reasonCategory.trim(),
-      impactSummary: form.impactSummary.trim(),
-      commentSummary: form.commentSummary.trim() || undefined,
-      remediationTestRecordId: form.remediationTestRecordId.trim() || undefined,
-      remediationChangeDiffRef: form.remediationChangeDiffRef.trim() || undefined,
-      remediationChecklistCode: form.remediationChecklistCode.trim() || undefined,
-    }
-  }
-
   async function submitForm() {
     if (submitDisabled.value) {
       return
     }
+    const payload = buildLifecycleDecisionSubmitPayload(props.mode, form)
     if (isNegativeMode.value && formRef.value) {
       await formRef.value.validate((valid) => {
         if (!valid) {
           return
         }
-        emit('submit', buildSubmitPayload())
+        emit('submit', payload)
       })
       return
     }
@@ -257,11 +193,11 @@ export function useLifecycleDecisionDialog(
         if (!valid || !isApprovalPassDecisionValid(form)) {
           return
         }
-        emit('submit', buildSubmitPayload())
+        emit('submit', payload)
       })
       return
     }
-    emit('submit', buildSubmitPayload())
+    emit('submit', payload)
   }
 
   return {

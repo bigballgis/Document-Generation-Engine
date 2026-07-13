@@ -2,6 +2,8 @@ import { computed, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { useDirtyGuard } from '@/composables/useDirtyGuard'
+import { useTemplateAuthoringBindingsPasteResidue } from '@/composables/useTemplateAuthoringBindingsPasteResidue'
+import { createTemplateAuthoringBindingsSaveFlow } from '@/composables/createTemplateAuthoringBindingsSaveFlow'
 import {
   type BindingPanelMode,
   type EditSnapshot,
@@ -11,13 +13,6 @@ import {
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
 import type { MasterAnchorBindingRow } from '@/utils/masterAnchorBindingRows'
-import { mergeAnchorVisibilityRule } from '@/utils/mergeAnchorVisibilityRule'
-import {
-  buildBindingUpsertWithPasteEvidence,
-  hasUnresolvedPasteBlockers,
-} from '@/utils/pasteCleaningEvidence'
-import { clearExactStructuredDraftOnSave } from '@/utils/structuredContentDraftStorage'
-import { DEFAULT_STRUCTURED_CONTENT_JSON } from '@/utils/structuredContentNodes'
 import type { PasteCleaningEvidence, UpsertBindingPayload } from '@/types/template'
 
 export function useTemplateAuthoringBindingsEditActions(options: {
@@ -72,14 +67,27 @@ export function useTemplateAuthoringBindingsEditActions(options: {
   const templatesStore = useTemplatesStore()
   const sessionStore = useSessionStore()
 
-  function clearStructuredLocalDraftOnSave() {
-    clearExactStructuredDraftOnSave(
-      localStorage,
-      sessionStore.session?.username,
-      props.templateId,
-      draftDevVersionId.value,
-    )
-  }
+  const { openEditPanel, saveBindingDraft } = createTemplateAuthoringBindingsSaveFlow({
+    props,
+    structuredEditorRef,
+    panelMode,
+    editingAnchorId,
+    visibilityEnabled,
+    visibilityExpression,
+    editorDirty,
+    structureRevision,
+    previewSyncedRevision,
+    editSnapshot,
+    suppressStructureBump,
+    bindingForm,
+    pendingPasteEvidence,
+    pendingClearPasteEvidence,
+    draftDevVersionId,
+    sessionUsername: () => sessionStore.session?.username,
+    upsertBinding: (templateId, anchorId, payload) =>
+      templatesStore.upsertBinding(templateId, anchorId, payload),
+    saveRules: (templateId, rules) => templatesStore.saveRules(templateId, rules),
+  })
 
   const {
     dialogVisible: dirtyGuardDialogVisible,
@@ -102,75 +110,19 @@ export function useTemplateAuthoringBindingsEditActions(options: {
     },
   })
 
-  function bindingHasPasteBlockers(row: MasterAnchorBindingRow): boolean {
-    return hasUnresolvedPasteBlockers(row.binding?.pasteCleaningEvidence)
-  }
-
-  const editingPasteResidueBlocked = computed(() => {
-    if (pendingPasteEvidence.value && !hasUnresolvedPasteBlockers(pendingPasteEvidence.value)) {
-      return false
-    }
-    if (pendingClearPasteEvidence.value) {
-      return false
-    }
-    return hasUnresolvedPasteBlockers(editingRow.value?.binding?.pasteCleaningEvidence)
+  const {
+    bindingHasPasteBlockers,
+    editingPasteResidueBlocked,
+    pasteResidueItemLabel,
+    handlePasteAccepted,
+    clearPendingPasteResidue,
+  } = useTemplateAuthoringBindingsPasteResidue({
+    pendingPasteEvidence,
+    pendingClearPasteEvidence,
+    editingRow,
+    te,
+    t,
   })
-
-  function pasteResidueItemLabel(messageKey: string): string {
-    return te(messageKey) ? t(messageKey) : messageKey
-  }
-
-  function handlePasteAccepted(evidence: PasteCleaningEvidence) {
-    pendingPasteEvidence.value = evidence
-    pendingClearPasteEvidence.value = false
-  }
-
-  function clearPendingPasteResidue() {
-    pendingPasteEvidence.value = null
-    pendingClearPasteEvidence.value = true
-  }
-
-  function loadVisibilityRuleForAnchor(anchorId: string) {
-    const rule = (props.rules ?? []).find((item) => item.targetAnchorId === anchorId)
-    if (rule) {
-      visibilityEnabled.value = true
-      visibilityExpression.value = rule.conditionExpression
-    } else {
-      visibilityEnabled.value = false
-      visibilityExpression.value = ''
-    }
-  }
-
-  function captureEditSnapshot() {
-    editSnapshot.value = {
-      declaredContentType: bindingForm.declaredContentType,
-      structuredContentJson: bindingForm.structuredContentJson,
-      visibilityEnabled: visibilityEnabled.value,
-      visibilityExpression: visibilityExpression.value,
-    }
-    editorDirty.value = false
-  }
-
-  function openEditPanel(row: MasterAnchorBindingRow) {
-    suppressStructureBump.value = true
-    editingAnchorId.value = row.anchorId
-    bindingForm.anchorId = row.anchorId
-    pendingPasteEvidence.value = null
-    pendingClearPasteEvidence.value = false
-    if (row.binding) {
-      bindingForm.declaredContentType = row.binding.declaredContentType
-      bindingForm.structuredContentJson =
-        row.binding.structuredContentJson ?? DEFAULT_STRUCTURED_CONTENT_JSON
-    } else {
-      bindingForm.declaredContentType = 'TEXT'
-      bindingForm.structuredContentJson = DEFAULT_STRUCTURED_CONTENT_JSON
-    }
-    loadVisibilityRuleForAnchor(row.anchorId)
-    panelMode.value = 'edit'
-    captureEditSnapshot()
-    previewSyncedRevision.value = structureRevision.value
-    suppressStructureBump.value = false
-  }
 
   function backToList() {
     void dirtyGuardRequestLeave(() => {
@@ -178,41 +130,6 @@ export function useTemplateAuthoringBindingsEditActions(options: {
       editingAnchorId.value = null
       editSnapshot.value = null
     })
-  }
-
-  async function saveBindingDraft() {
-    const payload = buildBindingUpsertWithPasteEvidence(
-      {
-        anchorId: bindingForm.anchorId,
-        declaredContentType: bindingForm.declaredContentType,
-        structuredContentJson: bindingForm.structuredContentJson,
-      },
-      {
-        pendingPasteEvidence: pendingPasteEvidence.value,
-        clearPasteCleaningEvidence: pendingClearPasteEvidence.value,
-      },
-    )
-
-    await templatesStore.upsertBinding(props.templateId, bindingForm.anchorId, payload)
-
-    pendingPasteEvidence.value = null
-    pendingClearPasteEvidence.value = false
-
-    const previousRules = props.rules ?? []
-    const mergedRules = mergeAnchorVisibilityRule(
-      previousRules,
-      bindingForm.anchorId,
-      visibilityEnabled.value,
-      visibilityExpression.value,
-    )
-
-    if (previousRules.length > 0 || mergedRules.length > 0) {
-      await templatesStore.saveRules(props.templateId, mergedRules)
-    }
-
-    structuredEditorRef.value?.markPristine()
-    clearStructuredLocalDraftOnSave()
-    captureEditSnapshot()
   }
 
   async function handleSaveBinding() {
