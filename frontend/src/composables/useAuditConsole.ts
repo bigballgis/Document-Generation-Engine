@@ -1,23 +1,18 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
-import type { RouteLocationRaw } from 'vue-router'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useAuditEventTypeOptions } from '@/composables/useAuditEventTypeOptions'
 import { useAuditTemplateFilterOptions } from '@/composables/useAuditTemplateFilterOptions'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { createAuditConsoleSorts } from '@/composables/createAuditConsoleSorts'
+import { createAuditConsoleDisplayHelpers } from '@/composables/createAuditConsoleDisplayHelpers'
 import { isGroupScopedAuditRole } from '@/auth/roles'
-import { ROUTE_KEYS, templatePackageHubPath } from '@/routing/routeKeys'
+import { ROUTE_KEYS } from '@/routing/routeKeys'
 import { useAuditStore } from '@/stores/audit'
 import { useSessionStore } from '@/stores/session'
-import type { ManagementAuditEvent } from '@/types/audit'
-import type { TemplateLifecycleStatus } from '@/types/template'
-import { resolveAuditActorDisplay, resolveAuditTemplateDisplay } from '@/utils/auditEntityDisplay'
-import type { AuditActorDisplayFields } from '@/utils/auditEntityDisplay'
 import { shouldShowAuditAdminJourney } from '@/utils/auditAdminJourney'
-import { formatAuditEventType } from '@/utils/auditEventLabels'
 import { validateGroupAdminAuditFilters } from '@/views/audit/auditFilterValidation'
 import { useAuditConsoleExport } from '@/composables/useAuditConsoleExport'
 
@@ -43,11 +38,6 @@ export function useAuditConsole() {
   const showAuditAdminJourney = computed(() =>
     shouldShowAuditAdminJourney({ roles: sessionStore.session?.roles ?? [] }),
   )
-
-  const eventLabelTranslator = computed(() => ({
-    translate: t,
-    hasKey: te,
-  }))
 
   const loadErrorMessageKey = computed(() => {
     if (auditStore.lastErrorMessageKey) {
@@ -89,42 +79,18 @@ export function useAuditConsole() {
     },
   })
 
-  function formatLifecycleState(state?: string) {
-    if (!state) {
-      return '—'
-    }
-    const key = `templates.status.${state as TemplateLifecycleStatus}`
-    return te(key) ? t(key) : state
-  }
-
-  function formatDate(value: string) {
-    return formatDateTime(value)
-  }
-
-  function formatEventType(eventType?: string) {
-    if (!eventType) {
-      return '—'
-    }
-    return formatAuditEventType(eventType, eventLabelTranslator.value)
-  }
-
-  function formatActor(event: AuditActorDisplayFields) {
-    return resolveAuditActorDisplay(event)
-  }
-
-  function resolveTemplateCell(
-    event: Pick<
-      ManagementAuditEvent,
-      'templateId' | 'templateDisplayName' | 'templateExternalId'
-    >,
-  ) {
-    const display = resolveAuditTemplateDisplay(event)
-    const to: RouteLocationRaw | undefined =
-      event.templateId && canLinkTemplates.value
-        ? templatePackageHubPath(event.templateId)
-        : undefined
-    return { ...display, to }
-  }
+  const {
+    formatLifecycleState,
+    formatDate,
+    formatEventType,
+    formatActor,
+    resolveTemplateCell,
+  } = createAuditConsoleDisplayHelpers({
+    t,
+    te,
+    formatDateTime,
+    canLinkTemplates: () => canLinkTemplates.value,
+  })
 
   function handleTemplateFilterSearch(query: string) {
     void searchTemplates(query)
