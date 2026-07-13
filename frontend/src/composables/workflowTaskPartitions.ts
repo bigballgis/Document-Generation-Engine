@@ -1,77 +1,20 @@
+import type { CapabilityContext } from '@/auth/roles'
 import {
-  canViewEscalationQueue,
-  canAuthorTemplates,
-  canDecideApprovals,
-  canDecideTests,
-  canPublishTemplates,
-  MANAGEMENT_ROLES,
-  type CapabilityContext,
-} from '@/auth/roles'
-import type {
-  CollaborationWorkItemQueue,
-  CollaborationWorkItemTriggerType,
-} from '@/types/collaboration'
+  getVisibleCollaborationQueues,
+  isValidCollaborationQueue,
+  type DashboardTaskScope,
+  type TaskPartition,
+  type WorkflowTask,
+} from '@/composables/workflowTaskPartitionTypes'
 
-export type WorkflowTaskKind =
-  | 'master-review'
-  | 'master-rework'
-  | 'template-test'
-  | 'template-approval'
-  | 'template-publish'
-  | 'template-rework'
-  | 'template-escalation'
+export type {
+  WorkflowTask,
+  WorkflowTaskKind,
+  DashboardTaskScope,
+  TaskPartition,
+} from '@/composables/workflowTaskPartitionTypes'
 
-type WorkflowTaskSource = 'master' | 'collaboration'
-
-export interface WorkflowTask {
-  id: string
-  kind: WorkflowTaskKind
-  titleKey: string
-  descriptionKey: string
-  path: string
-  groupCode?: string
-  entityName: string
-  source?: WorkflowTaskSource
-  workItemId?: string
-  templateId?: string
-  queue?: CollaborationWorkItemQueue
-  triggerType?: CollaborationWorkItemTriggerType
-  submitterUserId?: string
-  submitterDisplayName?: string
-  summaryText?: string
-  ageSeconds?: number
-  createdAt?: string
-}
-
-const COLLABORATION_QUEUES: readonly CollaborationWorkItemQueue[] = [
-  'TEST',
-  'APPROVAL',
-  'REMEDIATION',
-  'PENDING_RELEASE',
-  'ESCALATION',
-]
-
-type DashboardTaskHubMode = 'unfiltered' | 'queue' | 'master-review'
-
-export interface DashboardTaskScope {
-  pageTitleKey: string
-  pageDescriptionKey: string
-  mode: DashboardTaskHubMode
-  queueFilter: CollaborationWorkItemQueue | null
-  fetchCollaboration: boolean
-  showMasterReview: boolean
-  showMasterRework: boolean
-}
-
-type TaskPartitionKind = 'collaboration' | 'master-review' | 'master-rework'
-
-export interface TaskPartition {
-  id: string
-  headingKey: string
-  kind: TaskPartitionKind
-  queue?: CollaborationWorkItemQueue
-  tasks: WorkflowTask[]
-}
+export { getVisibleCollaborationQueues } from '@/composables/workflowTaskPartitionTypes'
 
 export function sortTasksNewestFirst(items: WorkflowTask[]): WorkflowTask[] {
   return [...items].sort((left, right) => {
@@ -79,46 +22,6 @@ export function sortTasksNewestFirst(items: WorkflowTask[]): WorkflowTask[] {
     const rightTime = right.createdAt ? Date.parse(right.createdAt) : 0
     return rightTime - leftTime
   })
-}
-
-function canSeeBehaviorRemediation(context: CapabilityContext): boolean {
-  const hasEligibleRole = context.roles.some((role) =>
-    (
-      [
-        MANAGEMENT_ROLES.GLOBAL_ADMIN,
-        MANAGEMENT_ROLES.GROUP_ADMIN,
-        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
-      ] as string[]
-    ).includes(role),
-  )
-  if (!hasEligibleRole) {
-    return false
-  }
-  return canAuthorTemplates(context)
-}
-
-function isValidCollaborationQueue(value: string): value is CollaborationWorkItemQueue {
-  return (COLLABORATION_QUEUES as readonly string[]).includes(value)
-}
-
-export function getVisibleCollaborationQueues(context: CapabilityContext): CollaborationWorkItemQueue[] {
-  const queues: CollaborationWorkItemQueue[] = []
-  if (canDecideTests(context)) {
-    queues.push('TEST')
-  }
-  if (canDecideApprovals(context)) {
-    queues.push('APPROVAL')
-  }
-  if (canSeeBehaviorRemediation(context)) {
-    queues.push('REMEDIATION')
-  }
-  if (canPublishTemplates(context)) {
-    queues.push('PENDING_RELEASE')
-  }
-  if (canViewEscalationQueue(context)) {
-    queues.push('ESCALATION')
-  }
-  return queues
 }
 
 export function parseDashboardTaskScope(

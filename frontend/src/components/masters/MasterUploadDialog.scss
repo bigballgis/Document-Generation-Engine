@@ -1,0 +1,21 @@
+.upload-tip {
+  margin-top: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.upload-error {
+  margin-top: 0.25rem;
+  color: var(--color-danger, #c45656);
+  font-size: 0.875rem;
+}
+
+.upload-progress {
+  margin-top: 0.75rem;
+}
+
+.upload-progress__label {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}

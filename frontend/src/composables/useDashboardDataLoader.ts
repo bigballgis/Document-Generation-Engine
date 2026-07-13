@@ -1,16 +1,19 @@
-import { computed, nextTick, onMounted, reactive, ref, watch, type ComputedRef } from 'vue'
+import { computed, onMounted, watch, type ComputedRef } from 'vue'
 import { useRoute } from 'vue-router'
 import { parseDashboardTaskScope } from '@/composables/useWorkflowTasks'
-import { canViewCollaborationWorkItems, MANAGEMENT_ROLES } from '@/auth/roles'
+import { canViewCollaborationWorkItems } from '@/auth/roles'
 import { useCapabilities } from '@/composables/useCapabilities'
 import type { ClusterOneRole } from '@/constants/roleJourneyDefinitions'
-import * as collaborationApi from '@/api/collaboration'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
-import type { CollaborationTimeoutConfig, CollaborationWorkItemQueue } from '@/types/collaboration'
+import {
+  createDashboardCollaborationLoader,
+  scrollToTasksIfRequested,
+} from '@/composables/createDashboardCollaborationLoader'
+import { ref } from 'vue'
 
 export interface UseDashboardDataLoaderOptions {
   isOverviewTab: ComputedRef<boolean>
@@ -35,9 +38,6 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
   const loading = ref(false)
   const mastersLoadError = ref(false)
   const templatesLoadError = ref(false)
-
-  const globalTimeoutConfig = ref<CollaborationTimeoutConfig | null>(null)
-  const groupTimeoutConfigs = reactive<Record<string, CollaborationTimeoutConfig | null>>({})
 
   const canViewWorkItems = computed(() => canViewCollaborationWorkItems(context.value))
 
@@ -77,68 +77,14 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
     () => taskScope.value.fetchCollaboration && collaborationStore.loadingWorkItems,
   )
 
-  function resolveCollaborationFetchParams():
-    | { queue: CollaborationWorkItemQueue }
-    | undefined {
-    if (!taskScope.value.fetchCollaboration) {
-      return undefined
-    }
-    if (taskScope.value.queueFilter) {
-      return { queue: taskScope.value.queueFilter }
-    }
-    return undefined
-  }
-
-  async function loadTimeoutConfigsForWorkItems() {
-    if (!shouldLoadCollaborationWorkItems.value) {
-      globalTimeoutConfig.value = null
-      return
-    }
-
-    if (sessionStore.hasRole(MANAGEMENT_ROLES.GLOBAL_ADMIN)) {
-      try {
-        globalTimeoutConfig.value = await collaborationApi.getCollaborationTimeoutConfig()
-      } catch {
-        globalTimeoutConfig.value = null
-      }
-    } else {
-      globalTimeoutConfig.value = null
-    }
-
-    if (!showTimeoutConfig.value) {
-      return
-    }
-
-    const groupCodes = [
-      ...new Set(
-        collaborationStore.workItems
-          .map((item) => item.groupCode)
-          .filter((code): code is string => Boolean(code)),
-      ),
-    ]
-
-    await Promise.all(
-      groupCodes.map(async (groupCode) => {
-        if (groupCode in groupTimeoutConfigs) {
-          return
-        }
-        try {
-          groupTimeoutConfigs[groupCode] = await collaborationApi.getCollaborationTimeoutConfig(groupCode)
-        } catch {
-          groupTimeoutConfigs[groupCode] = null
-        }
-      }),
-    )
-  }
-
-  async function fetchCollaborationWorkItems() {
-    if (!shouldLoadCollaborationWorkItems.value) {
-      return
-    }
-    const params = resolveCollaborationFetchParams()
-    await collaborationStore.fetchWorkItems(params)
-    await loadTimeoutConfigsForWorkItems()
-  }
+  const { globalTimeoutConfig, groupTimeoutConfigs, fetchCollaborationWorkItems } =
+    createDashboardCollaborationLoader({
+      shouldLoadCollaborationWorkItems,
+      taskScope,
+      showTimeoutConfig,
+      sessionStore,
+      collaborationStore,
+    })
 
   async function loadDashboardData() {
     loading.value = true
@@ -196,23 +142,15 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
     }
   }
 
-  async function scrollToTasksIfRequested() {
-    if (route.hash !== '#tasks-section') {
-      return
-    }
-    await nextTick()
-    document.getElementById('tasks-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
   onMounted(() => {
     void loadDashboardData()
-    void scrollToTasksIfRequested()
+    void scrollToTasksIfRequested(route.hash)
   })
 
   watch(
     () => [route.hash, route.query.queue, route.query.filter, route.query.tab] as const,
     () => {
-      void scrollToTasksIfRequested()
+      void scrollToTasksIfRequested(route.hash)
     },
   )
 

@@ -1,13 +1,9 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { toRef } from 'vue'
 import { UploadFilled } from '@element-plus/icons-vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
-import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
-import {
-  MASTER_DOCX_MAX_UPLOAD_MB,
-  validateMasterDocxUploadFile,
-} from '@/utils/validateMasterDocxUpload'
+import { useMasterUploadDialog } from '@/components/masters/useMasterUploadDialog'
+import { MASTER_DOCX_MAX_UPLOAD_MB } from '@/utils/validateMasterDocxUpload'
 
 const props = defineProps<{
   modelValue: boolean
@@ -22,109 +18,30 @@ const emit = defineEmits<{
   'clear-server-error': []
 }>()
 
-const { t, te } = useI18n()
-const { resolveDefaultGroupCode, ensureGroupCatalog } = useScopedGroupOptions()
-
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value: boolean) => emit('update:modelValue', value),
+const {
+  t,
+  visible,
+  form,
+  fileList,
+  inlineErrorKey,
+  inlineErrorText,
+  progressPercent,
+  progressIndeterminate,
+  canSubmit,
+  onFileChange,
+  onFileRemove,
+  resetForm,
+  closeDialog,
+  submitUpload,
+} = useMasterUploadDialog({
+  modelValue: toRef(props, 'modelValue'),
+  loading: toRef(props, 'loading'),
+  uploadProgress: toRef(props, 'uploadProgress'),
+  serverErrorKey: toRef(props, 'serverErrorKey'),
+  emitModelValue: (value) => emit('update:modelValue', value),
+  emitSubmit: (payload) => emit('submit', payload),
+  emitClearServerError: () => emit('clear-server-error'),
 })
-
-const form = reactive({
-  groupCode: '',
-  name: '',
-  description: '',
-})
-
-const selectedFile = ref<File | null>(null)
-const fileList = ref<{ name: string }[]>([])
-const fileErrorKey = ref<string | null>(null)
-
-const inlineErrorKey = computed(() => fileErrorKey.value ?? props.serverErrorKey ?? null)
-const inlineErrorText = computed(() => {
-  const key = inlineErrorKey.value
-  if (!key) {
-    return ''
-  }
-  return te(key) ? t(key) : t('masters.error.upload')
-})
-
-const progressPercent = computed(() => {
-  if (props.uploadProgress == null) {
-    return 0
-  }
-  return Math.min(100, Math.max(0, props.uploadProgress))
-})
-
-const progressIndeterminate = computed(() => props.loading === true && props.uploadProgress == null)
-
-watch(
-  () => props.modelValue,
-  async (open) => {
-    if (!open) {
-      return
-    }
-    await ensureGroupCatalog()
-    form.groupCode = resolveDefaultGroupCode()
-  },
-)
-
-function onFileChange(uploadFile: { raw?: File }) {
-  const file = uploadFile.raw ?? null
-  fileErrorKey.value = null
-  emit('clear-server-error')
-  if (file) {
-    const validation = validateMasterDocxUploadFile(file)
-    if (!validation.ok) {
-      fileErrorKey.value = validation.messageKey
-      selectedFile.value = null
-      fileList.value = []
-      return
-    }
-  }
-  selectedFile.value = file
-  fileList.value = file ? [{ name: file.name }] : []
-}
-
-function onFileRemove() {
-  selectedFile.value = null
-  fileList.value = []
-  fileErrorKey.value = null
-  emit('clear-server-error')
-}
-
-function resetForm() {
-  form.groupCode = resolveDefaultGroupCode()
-  form.name = ''
-  form.description = ''
-  selectedFile.value = null
-  fileList.value = []
-  fileErrorKey.value = null
-}
-
-function closeDialog() {
-  if (props.loading) {
-    return
-  }
-  visible.value = false
-  resetForm()
-}
-
-function submitUpload() {
-  if (props.loading || !selectedFile.value || !form.groupCode || !form.name.trim()) {
-    return
-  }
-  emit('submit', {
-    groupCode: form.groupCode,
-    name: form.name.trim(),
-    description: form.description.trim(),
-    file: selectedFile.value,
-  })
-}
-
-const canSubmit = computed(
-  () => Boolean(!props.loading && form.groupCode && form.name.trim() && selectedFile.value),
-)
 </script>
 
 <template>
@@ -211,26 +128,4 @@ const canSubmit = computed(
   </el-dialog>
 </template>
 
-<style scoped lang="scss">
-.upload-tip {
-  margin-top: 0.5rem;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-
-.upload-error {
-  margin-top: 0.25rem;
-  color: var(--color-danger, #c45656);
-  font-size: 0.875rem;
-}
-
-.upload-progress {
-  margin-top: 0.75rem;
-}
-
-.upload-progress__label {
-  margin: 0.5rem 0 0;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-</style>
+<style scoped lang="scss" src="./MasterUploadDialog.scss"></style>

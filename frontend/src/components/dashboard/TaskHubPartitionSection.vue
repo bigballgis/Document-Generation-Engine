@@ -3,6 +3,7 @@ import { toRef } from 'vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
+import TaskHubCollaborationColumns from '@/components/dashboard/TaskHubCollaborationColumns.vue'
 import { useTaskHubPartitionSection } from '@/components/dashboard/useTaskHubPartitionSection'
 import type { TaskPartition, WorkflowTask } from '@/composables/useWorkflowTasks'
 import type { CollaborationTimeoutConfig } from '@/types/collaboration'
@@ -101,73 +102,25 @@ const {
           </template>
         </el-table-column>
 
-        <template v-if="isCollaboration">
-          <el-table-column sortable :sort-method="sortTasksByTrigger" min-width="240">
-            <template #header>
-              <TableColumnHeader
-                :label="t('collaboration.workItems.columns.trigger')"
-                v-model="columnFilters.trigger"
-              />
-            </template>
-            <template #default="{ row }">
-              {{
-                row.triggerType
-                  ? t(`collaboration.workItem.trigger.${row.triggerType}.description`)
-                  : '—'
-              }}
-            </template>
-          </el-table-column>
-
-          <el-table-column sortable :sort-method="sortTasksBySummary" min-width="220">
-            <template #header>
-              <TableColumnHeader
-                :label="t('collaboration.workItems.columns.summary')"
-                v-model="columnFilters.summary"
-              />
-            </template>
-            <template #default="{ row }">
-              <span class="summary-cell" :title="row.summaryText">{{ row.summaryText ?? '—' }}</span>
-            </template>
-          </el-table-column>
-
-          <el-table-column sortable :sort-method="sortTasksByAge" width="160">
-            <template #header>
-              <TableColumnHeader
-                :label="t('collaboration.workItems.columns.age')"
-                v-model="columnFilters.age"
-              />
-            </template>
-            <template #default="{ row }">
-              <span class="age-cell">
-                {{
-                  row.ageSeconds !== undefined
-                    ? formatCollaborationAgeSeconds(row.ageSeconds)
-                    : '—'
-                }}
-                <el-tag
-                  v-if="showOverdueBadge(row)"
-                  type="danger"
-                  size="small"
-                  class="overdue-badge"
-                >
-                  {{ t('collaboration.workItems.badge.overdue') }}
-                </el-tag>
-              </span>
-            </template>
-          </el-table-column>
-
-          <el-table-column sortable :sort-method="sortTasksBySubmitter" width="140">
-            <template #header>
-              <TableColumnHeader
-                :label="t('collaboration.workItems.columns.submitter')"
-                v-model="columnFilters.submitter"
-              />
-            </template>
-            <template #default="{ row }">
-              {{ resolveSubmitterDisplay(row.submitterUserId, row.submitterDisplayName) }}
-            </template>
-          </el-table-column>
-        </template>
+        <TaskHubCollaborationColumns
+          v-if="isCollaboration"
+          :t="t"
+          :trigger-filter="columnFilters.trigger"
+          :summary-filter="columnFilters.summary"
+          :age-filter="columnFilters.age"
+          :submitter-filter="columnFilters.submitter"
+          :sort-tasks-by-trigger="sortTasksByTrigger"
+          :sort-tasks-by-summary="sortTasksBySummary"
+          :sort-tasks-by-age="sortTasksByAge"
+          :sort-tasks-by-submitter="sortTasksBySubmitter"
+          :show-overdue-badge="showOverdueBadge"
+          :format-collaboration-age-seconds="formatCollaborationAgeSeconds"
+          :resolve-submitter-display="resolveSubmitterDisplay"
+          @update:trigger-filter="columnFilters.trigger = $event"
+          @update:summary-filter="columnFilters.summary = $event"
+          @update:age-filter="columnFilters.age = $event"
+          @update:submitter-filter="columnFilters.submitter = $event"
+        />
 
         <el-table-column v-else sortable :sort-method="sortTasksByHint" min-width="260">
           <template #header>
@@ -202,46 +155,4 @@ const {
   </section>
 </template>
 
-<style scoped lang="scss">
-.task-partition {
-  margin-bottom: 1.5rem;
-}
-
-.partition-header {
-  margin-bottom: 0.75rem;
-
-  h3 {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 600;
-  }
-}
-
-.tasks-table {
-  cursor: pointer;
-}
-
-.tasks-table-wrap {
-  outline: none;
-}
-
-.summary-cell {
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: bottom;
-}
-
-.age-cell {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-}
-
-.overdue-badge {
-  flex-shrink: 0;
-}
-</style>
+<style scoped lang="scss" src="./TaskHubPartitionSection.scss"></style>

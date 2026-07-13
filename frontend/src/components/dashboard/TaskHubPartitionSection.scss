@@ -1,0 +1,41 @@
+.task-partition {
+  margin-bottom: 1.5rem;
+}
+
+.partition-header {
+  margin-bottom: 0.75rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+}
+
+.tasks-table {
+  cursor: pointer;
+}
+
+.tasks-table-wrap {
+  outline: none;
+}
+
+.summary-cell {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+.age-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.overdue-badge {
+  flex-shrink: 0;
+}
