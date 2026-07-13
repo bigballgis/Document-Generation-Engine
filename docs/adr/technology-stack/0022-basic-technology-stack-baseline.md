@@ -58,6 +58,8 @@ The following implementation choices are recommended candidates but are not fina
 | Deployment | Docker and Kubernetes where available | Confirm whether the target runtime is Kubernetes, virtual machines, or an internal PaaS. |
 | Document engine | Separate POC for DOCX assembly, PDF conversion, encryption, and fidelity checks | Confirm whether commercial components such as Aspose are allowed, or whether open-source/internal components are required. |
 
+> **Historical note (2026-07-13):** Backend runtime was later accepted in [ADR-0028](./0028-backend-platform-stack-baseline.md) and **amended** from Spring Boot **3.x** to **4.x** (target pin **4.1.0**), then Java **21 → 25** (user said “25”; same Task **#51**). The candidate row above is the original 2026-06 session note and is **not** the live baseline — see ADR-0028 + Task Master **#51** / [boot-4-1-upgrade](../../behavior/boot-4-1-upgrade.md).
+
 No framework-specific source tree, build configuration, deployment configuration, or local environment template should be added until the pending implementation choices above are confirmed or covered by follow-up ADRs.
 
 ## Consequences

@@ -83,10 +83,9 @@ Create an ADR when a decision affects future design or implementation, including
 | [0025-architecture-documentation-layer.md](./architecture/0025-architecture-documentation-layer.md) | Accepted | Architecture documentation layer |
 | [0026-adr-metadata-taxonomy-and-migration-plan.md](./documentation-governance/0026-adr-metadata-taxonomy-and-migration-plan.md) | Accepted | ADR metadata, topic taxonomy, and migration plan |
 | [0027-adr-topic-directory-organization.md](./documentation-governance/0027-adr-topic-directory-organization.md) | Accepted | ADR topic directory organization |
-| [0028-backend-platform-stack-baseline.md](./technology-stack/0028-backend-platform-stack-baseline.md) | Accepted | Backend platform stack baseline |
+| [0028-backend-platform-stack-baseline.md](./technology-stack/0028-backend-platform-stack-baseline.md) | Accepted (amended 2026-07-13) | Backend platform stack baseline — Java **25** + Spring Boot **4.x** (target pin **4.1.0**); Task Master **#51** / [boot-4-1-upgrade](../behavior/boot-4-1-upgrade.md) |
 | [0029-frontend-application-stack-baseline.md](./technology-stack/0029-frontend-application-stack-baseline.md) | Accepted | Frontend application stack baseline |
 | [0030-operational-platform-baseline.md](./operations/0030-operational-platform-baseline.md) | Accepted | Operational platform baseline |
-| [0047-distributed-tracing-otlp-baseline.md](./operations/0047-distributed-tracing-otlp-baseline.md) | Accepted | Distributed tracing OTLP export and trace ID correlation baseline (SOR-A06) |
 | [0031-api-platform-hardening-baseline.md](./api/0031-api-platform-hardening-baseline.md) | Accepted | API platform hardening baseline |
 | [0032-identity-and-security-operations-baseline.md](./authorization-security/0032-identity-and-security-operations-baseline.md) | Accepted | Identity and security operations baseline |
 | [0033-async-messaging-and-task-retry-baseline.md](./async-processing/0033-async-messaging-and-task-retry-baseline.md) | Accepted | Async messaging and task retry baseline |
@@ -97,8 +96,21 @@ Create an ADR when a decision affects future design or implementation, including
 | [0038-sync-download-url-runtime-deferred.md](./api/0038-sync-download-url-runtime-deferred.md) | Accepted | Defer `SYNC_DOWNLOAD_URL` runtime delivery until secure download URL contract is ready (COR-B01) |
 | [0039-redisson-lock-evaluation.md](./technology-stack/0039-redisson-lock-evaluation.md) | Accepted | Redisson distributed lock evaluation — accepted single-instance risk; mandatory before multi-instance (COR-P05) |
 | [0040-api-package-access-and-invocation-retention.md](./api-management/0040-api-package-access-and-invocation-retention.md) | Accepted | Package-first API access surface, auto-materialize policy, invocation records, four-layer retention (2026-07-03) |
+| [0041-rendering-font-baseline.md](./rendering-authoring/0041-rendering-font-baseline.md) | Accepted | Rendering font baseline for DOCX→PDF conversion images — Debian jammy CJK + Carlito/Caladea (LR-A5; architecture-reviewer PASS_WITH_NOTES 2026-07-10) |
 | [0044-deployment-topology-v1.md](./operations/0044-deployment-topology-v1.md) | Accepted | v1 deployment topology — single backend replica; backend HPA disabled until scale-out prerequisites met; refines ADR-0039 (LR-B1, 2026-07-04) |
 | [0046-frontend-openapi-typescript-codegen.md](./technology-stack/0046-frontend-openapi-typescript-codegen.md) | Accepted | Frontend OpenAPI TypeScript codegen (`openapi-typescript`) for management DTO types (SOR-K03) |
+| [0047-distributed-tracing-otlp-baseline.md](./operations/0047-distributed-tracing-otlp-baseline.md) | Accepted | Distributed tracing OTLP export and trace ID correlation baseline (SOR-A06) |
+| [0048-audit-data-retention-policy.md](./operations/0048-audit-data-retention-policy.md) | Accepted | Audit Tier-1 retention — management 90d / runtime 365d hard delete; Tier-2 archival deferred (LR-D1, 2026-07-11) |
+| [0049-distributed-trace-propagation.md](./operations/0049-distributed-trace-propagation.md) | Accepted | Cross-boundary `traceId` propagation — MDC + async `TaskDecorator` + Kafka `X-Trace-Id` headers; no Zipkin/Tempo in D4 (LR-D4, 2026-07-12) |
+| [0054-ad-group-resolver-production-boundary.md](./authorization-security/0054-ad-group-resolver-production-boundary.md) | Accepted | AD Group resolver production boundary — `ConfigAdGroupResolver` / `type=config` = local/dev/test only; acceptance/production requires directory adapter SPI **or** startup fail-closed; company LDAP/AD coords UNKNOWN; does not supersede ADR-0010 cache/`503` (ops-ad-group-stub-close / Task Master #46, 2026-07-12) |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
+
+### LR-A5 triad (0041 Accepted; 0042/0043 remain Proposed)
+
+| ADR | On-disk status | Note |
+| --- | --- | --- |
+| [0041-rendering-font-baseline.md](./rendering-authoring/0041-rendering-font-baseline.md) | **Accepted** | architecture-reviewer **PASS_WITH_NOTES** 2026-07-10 (slice `lrp-a5-adr-closeout`); also listed in Accepted table above. |
+| [0042-pagination-delta-budget.md](./rendering-authoring/0042-pagination-delta-budget.md) | **Proposed** | Docker PDF corpus measured (LR-A7); Word pages/delta **n/a** (`ms-word-unavailable-on-host`). **Accepted** blocked until Word-equipped host confirms ±1 budget — do not invent Word numbers. |
+| [0043-ooxml-output-validation-gate.md](./rendering-authoring/0043-ooxml-output-validation-gate.md) | **Proposed** | Slice A (OPC+XML well-formedness + runtime fail-closed) is the LR-A6 Done line; full ECMA-376 XSD + LO24 headless open **deferred** — do not Accept on well-formedness alone. |
 
 Use [0000-template.md](./0000-template.md) when creating new ADRs. Place new numbered ADRs in the directory matching their `topic` frontmatter.

@@ -74,16 +74,16 @@ public class PasteCleaningService {
         }
         if (OBJECT_PATTERN.matcher(sourceHtml).find()) {
             items.add(summaryItem(
-                    PasteCleaningCategory.REMOVED,
-                    MESSAGE_KEY_REMOVED,
-                    "Removed embedded object from pasted HTML."
+                    PasteCleaningCategory.BLOCKED,
+                    MESSAGE_KEY_BLOCKED,
+                    "Blocked embedded object in pasted HTML."
             ));
         }
         if (ABSOLUTE_POSITION_PATTERN.matcher(sourceHtml).find()) {
             items.add(summaryItem(
-                    PasteCleaningCategory.WARNING,
-                    MESSAGE_KEY_WARNING,
-                    "Warning: absolute positioning detected in pasted HTML."
+                    PasteCleaningCategory.BLOCKED,
+                    MESSAGE_KEY_BLOCKED,
+                    "Blocked absolute positioning in pasted HTML."
             ));
         }
         Matcher paragraphMatcher = PARAGRAPH_PATTERN.matcher(sourceHtml);

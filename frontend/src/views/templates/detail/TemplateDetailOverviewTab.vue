@@ -34,6 +34,14 @@ async function loadMasterName() {
     <h2>{{ t('templates.detail.summaryTitle') }}</h2>
     <dl class="summary-grid">
       <div>
+        <dt>{{ t('templates.detail.name') }}</dt>
+        <dd>{{ template.name }}</dd>
+      </div>
+      <div>
+        <dt>{{ t('templates.detail.groupCode') }}</dt>
+        <dd>{{ template.groupCode }}</dd>
+      </div>
+      <div>
         <dt>{{ t('templates.detail.externalId') }}</dt>
         <dd>{{ template.externalId }}</dd>
       </div>

@@ -105,6 +105,7 @@ class ManagementAuthorizationContractTest {
                 .containsOnlyKeys(
                         "com.bank.docgen.authorization.management.service.BusinessGroupService",
                         "com.bank.docgen.authorization.management.service.ManagementAuthService",
+                        "com.bank.docgen.authorization.management.service.SecurityAuditSummaryService",
                         "com.bank.docgen.authorization.management.service.UserManagementService",
                         "com.bank.docgen.template.service.RiskPromptConfigService"
                 );

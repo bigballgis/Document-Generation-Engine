@@ -10,7 +10,13 @@ import { useMastersStore } from '@/stores/masters'
 import { useTemplatesStore } from '@/stores/templates'
 
 vi.mock('@/api/masters', () => ({
-  listMasters: vi.fn().mockResolvedValue([]),
+  listMasters: vi.fn().mockResolvedValue({
+    content: [],
+    page: 0,
+    size: 100,
+    totalElements: 0,
+    totalPages: 0,
+  }),
 }))
 
 vi.mock('@/utils/parseTemplateExportBundleFile', async () => {

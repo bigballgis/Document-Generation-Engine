@@ -39,14 +39,6 @@ export function useMasterStatusFilterOptions() {
   )
 }
 
-export function useEnabledStatusFilterOptions() {
-  const { t } = useI18n()
-  return computed<TableColumnFilterOption[]>(() => [
-    { value: t('identity.status.enabled'), label: t('identity.status.enabled') },
-    { value: t('identity.status.disabled'), label: t('identity.status.disabled') },
-  ])
-}
-
 export function useYesNoFilterOptions() {
   const { t } = useI18n()
   return computed<TableColumnFilterOption[]>(() => [
@@ -59,12 +51,5 @@ export function useCredentialStatusFilterOptions() {
   return computed<TableColumnFilterOption[]>(() => [
     { value: 'ACTIVE', label: 'ACTIVE' },
     { value: 'REVOKED', label: 'REVOKED' },
-  ])
-}
-
-export function useRuleValidationStatusFilterOptions() {
-  return computed<TableColumnFilterOption[]>(() => [
-    { value: 'VALID', label: 'VALID' },
-    { value: 'INVALID', label: 'INVALID' },
   ])
 }

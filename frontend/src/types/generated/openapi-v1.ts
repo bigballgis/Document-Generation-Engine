@@ -419,7 +419,7 @@ export interface paths {
         put?: never;
         /**
          * Validate structured content-tree bindings against reviewed anchor catalog snapshot
-         * @description Validates release-candidate bindings for one template using the reviewed anchor catalog snapshot locked by sourceAnchorCatalogVersion. Duplicate binding means the same anchorId appears more than once in one payload. Returned per-binding status values are strictly limited to VALID, MISSING_ANCHOR, DUPLICATE_BINDING, and INCOMPATIBLE_CONTENT_TYPE.
+         * @description Validates release-candidate bindings for one template using the reviewed anchor catalog snapshot locked by sourceAnchorCatalogVersion. Duplicate binding means the same anchorId appears more than once in one payload. Returned per-binding status values are strictly limited to VALID, MISSING_ANCHOR, DUPLICATE_BINDING, and INCOMPATIBLE_CONTENT_TYPE. Optional non-sensitive pasteCleaningEvidence on each binding is editing/release-check residue (ADR-0019 / ops-paste-binding-seam); unresolved paste blockers (blockedCount > 0 or BLOCKED items) must not yield VALID.
          */
         post: operations["validateTemplateBindings"];
         delete?: never;
@@ -556,8 +556,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List content modules scoped by group
-         * @description Lists non-deleted content modules. When `groupCode` is omitted, returns all modules accessible to the caller across authorized groups (including shared modules). When `groupCode` is provided, narrows to that group scope. Requires catalog browse access per permission matrix §5.1.
+         * List content modules (server-side PageView)
+         * @description Lists non-deleted content modules as a standard `PageView` (LR-C5 / BDD-LRP-C5-CATALOG-001). When `groupCode` is omitted, returns modules accessible to the caller across authorized groups (including shared modules). When `groupCode` is provided, exact-match filter intersected with session authorization (unauthorized group → empty page). Optional `search` is case-insensitive contains over `name` ∪ `moduleCode` ∪ `groupCode`. Default sort is group-first (`groupCodeAsc`: `groupCode ASC`, then `updatedAt DESC`). Pagination unit is **rows** (not group count). Requires catalog browse access per permission matrix §5.1. Breaking change vs pre-LR-C5 bare array: management UI upgrades in the same slice; no external runtime callers.
          */
         get: operations["listContentModules"];
         put?: never;
@@ -680,6 +680,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/collaboration-notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Unread collaboration notification count
+         * @description Returns the count of OPEN collaboration work items visible to the caller (role queues ∩ group scope) that have no per-user read marker (LR-C7). Includes ESCALATION when the session has admin collaboration visibility. Does not create a standalone notification domain. Fail-closed 403 without `viewCollaborationWorkItems`.
+         */
+        get: operations["getCollaborationNotificationUnreadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/collaboration-notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List collaboration notification projections
+         * @description Returns up to 20 newest OPEN collaboration work-item projections visible to the caller, each with a `read` flag from the per-user read marker (LR-C7). `queue` supports deep-link `/dashboard?queue={QUEUE}#tasks-section`. Excludes RESOLVED items and master review/rework. Fail-closed 403 without collaboration view.
+         */
+        get: operations["listCollaborationNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/collaboration-notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark all visible unread collaboration notifications as read
+         * @description Persists per-user read markers for every visible OPEN unread work item (LR-C7). Idempotent when none are unread. Does not resolve work items. Returns the refreshed unread count (normally 0).
+         */
+        post: operations["markAllCollaborationNotificationsRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/collaboration-notifications/{workItemId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark one collaboration notification as read
+         * @description Idempotently persists a per-user read marker for the given OPEN work item when it is visible to the caller (LR-C7). Invisible / missing / RESOLVED / out-of-scope IDs return `404 WORK_ITEM_NOT_FOUND` without leaking existence. Does not resolve the work item. Returns refreshed unread count.
+         */
+        post: operations["markCollaborationNotificationRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/collaboration-timeout-config": {
         parameters: {
             query?: never;
@@ -697,6 +777,46 @@ export interface paths {
          * @description Creates or updates timeout threshold hours for GLOBAL scope (GLOBAL_ADMIN only) or GROUP scope (GROUP_ADMIN within group scope). Thresholds apply to TEST, APPROVAL, PENDING_RELEASE, and REMEDIATION queues; escalation uses these thresholds for notification-only alerts.
          */
         put: operations["upsertCollaborationTimeoutConfig"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/security-audit/route-access-denied": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report a management forbidden-route denial
+         * @description Authenticated management clients call this after a client-side route guard denies access (LR-D7). Persists SECURITY_ROUTE_ACCESS_DENIED on management_audit_event using the session principal. Fail-safe: returns 204 even when durable persistence fails. Does not accept passwords, tokens, or secrets. Unauthenticated callers receive 401.
+         */
+        post: operations["reportRouteAccessDenied"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List templates (server-side PageView)
+         * @description Returns a standard management `PageView` of template package summaries for the caller's authorized groups (LR-C5 / BDD-LRP-C5-CATALOG-001). Pagination is **row-based** with default sort group-first (`groupCode ASC`, then `updatedAt DESC` — COR-F09 semantics retained; not group-count pages). Empty accessible groups yield an empty page (`totalElements: 0`) without leaking other groups. Optional filters AND together; changing filters/search/sort resets UI to `page=0`. Normalization: missing/`size` out of 1…100 → default 20 (or clamp `size>100` to 100 — implementation locks one); `page<0` → 0; page past last → empty `content` with unchanged `totalElements`. Requires catalog browse access per permission matrix. Traceability: BDD-LRP-C5-001…015.
+         */
+        get: operations["listTemplates"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -824,6 +944,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/templates/{templateId}/releases/{releaseVersion}/publish-gate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Evaluate publish-gate checklist for a published release version
+         * @description Live publish-gate evaluation against the published release version entity (bindings, coverage, rules, previews, content-module refs scoped to that version). Does **not** require an in-flight DEV line. Reuses the same checklist item builders as `GET /templates/{templateId}/publish-gate`. Unknown release version returns `404`. This is a live evaluation against the release snapshot semantics — not a historical gate result persisted at publish time.
+         */
+        get: operations["getTemplateReleasePublishGate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/templates/{templateId}/release-versions/{releaseVersion}/clone": {
         parameters: {
             query?: never;
@@ -916,6 +1056,26 @@ export interface paths {
          * @description Aggregates non-sensitive alerts across authorized template packages (missing AD groups, expiring credentials, no credentials). Each item includes a hub deep-link path for remediation.
          */
         get: operations["listApiAccessAlerts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/masters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List masters (server-side PageView)
+         * @description Returns a standard management `PageView` of master document package summaries for the caller's authorized groups (LR-C5 / BDD-LRP-C5-CATALOG-001). Breaking change vs pre-LR-C5 bare array: management UI upgrades in the same slice; no external runtime callers. Default sort is group-first (`groupCodeAsc`). Optional `search` is case-insensitive contains over `name` ∪ `groupCode`. Optional `status` is exact master review status. Pagination unit is **rows** (COR-F09). Requires catalog browse / master read per permission matrix; fail-closed for unauthorized groups.
+         */
+        get: operations["listMasters"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1185,6 +1345,15 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        RouteAccessDeniedRequest: {
+            /**
+             * @description Logical management route key (preferred) or path summary.
+             * @example route.audit-console
+             */
+            routeKey: string;
+            /** @description Client-side denial correlation id (no secrets). */
+            traceId: string;
+        };
         /** @enum {string} */
         OutputFormat: "DOCX" | "PDF";
         /** @enum {string} */
@@ -1874,7 +2043,7 @@ export interface components {
          * @enum {string}
          */
         MasterRevisionLineLabel: "CURRENT" | "HISTORICAL";
-        /** @description Standard management pagination wrapper. totalElements counts all persisted rows for the query, not the current page length. Requesting page beyond the last page returns empty content with unchanged totalElements. */
+        /** @description Standard management pagination wrapper. totalElements counts all matching rows for the query (after filters), not the current page length. Requesting page beyond the last page returns empty content with unchanged totalElements. Field names are `page` / `size` / `totalElements` / `totalPages` (not Spring Data `number`). Used by catalog lists (LR-C5), version-lines, revision-lines, identity, and other management pageables. */
         PageView: {
             content: unknown[];
             page: number;
@@ -2001,6 +2170,26 @@ export interface components {
             result: components["schemas"]["TemplateDetailView"];
         };
         /** @enum {string} */
+        PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "UNSUPPORTED_STRUCTURED_NODES" | "PASTE_CLEANING_BLOCKERS" | "BLOCKER_STATUS";
+        PublishGateItemView: {
+            checkCode: components["schemas"]["PublishGateCheckCode"];
+            ready: boolean;
+            blocker: boolean;
+            messageKey: string;
+            summary: string;
+        };
+        PublishGateChecklistView: {
+            /** Format: uuid */
+            templateId: string;
+            ready: boolean;
+            blockerCount: number;
+            items: components["schemas"]["PublishGateItemView"][];
+        };
+        PublishGateChecklistResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PublishGateChecklistView"];
+        };
+        /** @enum {string} */
         MasterAnchorContentType: "TEXT" | "RICH_TEXT" | "TABLE" | "IMAGE" | "CLAUSE" | "STAMP" | "BARCODE" | "ATTACHMENT_LIST" | "UNSPECIFIED";
         MasterSourceAnchorDescriptor: {
             sourceAnchorKey: string;
@@ -2103,6 +2292,12 @@ export interface components {
             structuredContentTree: {
                 [key: string]: unknown;
             };
+            /** @description Optional non-sensitive paste-cleaning residue carried with the binding (ops-paste-binding-seam / ADR-0019). Must not include source HTML or pasted plaintext. Unresolved blockers (blockedCount > 0 or BLOCKED items) fail-closed in validate / computeBindingStatus.
+             *      */
+            pasteCleaningEvidence?: components["schemas"]["PasteCleaningEvidence"];
+            /** @description When true on binding upsert, clears persisted paste-cleaning residue (ops-paste-binding-seam S5). Ignored on validate-only payloads.
+             *      */
+            clearPasteCleaningEvidence?: boolean;
         };
         /** @enum {string} */
         BindingValidationStatus: "VALID" | "MISSING_ANCHOR" | "DUPLICATE_BINDING" | "INCOMPATIBLE_CONTENT_TYPE";
@@ -2114,6 +2309,29 @@ export interface components {
             structuredContentTree: {
                 [key: string]: unknown;
             };
+            /** @description Non-sensitive paste-cleaning residue returned with the binding when present. Unresolved paste blockers map status away from VALID (typically INCOMPATIBLE_CONTENT_TYPE).
+             *      */
+            pasteCleaningEvidence?: components["schemas"]["PasteCleaningEvidence"];
+        };
+        /** @description Non-sensitive paste-cleaning summary persisted on an anchor binding after Accept (editing or release-check evidence per ADR-0019). Forbidden: source HTML, pasted plaintext, customer data, full request bodies.
+         *      */
+        PasteCleaningEvidence: {
+            transformedCount?: number;
+            removedCount?: number;
+            warningCount?: number;
+            blockedCount?: number;
+            /** @description Explicit unresolved-blocker flag when present; true when blockedCount > 0 or any item has category BLOCKED.
+             *      */
+            unresolvedPasteBlockers?: boolean;
+            items?: components["schemas"]["PasteCleaningEvidenceItem"][];
+        };
+        PasteCleaningEvidenceItem: {
+            /** @enum {string} */
+            category: "TRANSFORMED" | "REMOVED" | "WARNING" | "BLOCKED";
+            /** @description Stable i18n key (English-first), e.g. paste.summary.* */
+            messageKey: string;
+            /** @description Non-sensitive detection note; must not contain source HTML. */
+            detectionSummary?: string | null;
         };
         TemplateBindingValidationSummary: {
             blocking: boolean;
@@ -2391,6 +2609,17 @@ export interface components {
             sharedGroupCodes?: string[];
             versions: components["schemas"]["ContentModuleVersionView"][];
         };
+        /** @description LR-C5 catalog list envelope. Replaces pre-LR-C5 bare-array `ContentModuleSummaryListResponse` for `GET /content-modules`. */
+        ContentModuleSummaryPageResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PageView"] & {
+                content: components["schemas"]["ContentModuleSummaryView"][];
+            };
+        };
+        /**
+         * @deprecated
+         * @description Deprecated (LR-C5). Historical bare-array list envelope. Use `ContentModuleSummaryPageResponse` / `PageView` instead.
+         */
         ContentModuleSummaryListResponse: {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["ContentModuleSummaryView"][];
@@ -2426,6 +2655,39 @@ export interface components {
         CollaborationWorkItemListResponse: {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["CollaborationWorkItemSummaryView"][];
+        };
+        CollaborationNotificationUnreadCountView: {
+            /**
+             * Format: int64
+             * @description Count of visible OPEN work items without a per-user read marker.
+             */
+            unreadCount: number;
+        };
+        CollaborationNotificationItemView: {
+            /** Format: uuid */
+            workItemId: string;
+            /** Format: uuid */
+            templateId: string;
+            templateName: string;
+            groupCode: string;
+            /** @description Queue type for deep-link construction — `/dashboard?queue={QUEUE}#tasks-section`. */
+            queue: components["schemas"]["CollaborationWorkItemQueue"];
+            triggerType: components["schemas"]["CollaborationWorkItemTriggerType"];
+            summaryText: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int64 */
+            ageSeconds: number;
+            /** @description True when the caller has a per-user read marker for this work item. */
+            read: boolean;
+        };
+        CollaborationNotificationUnreadCountResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["CollaborationNotificationUnreadCountView"];
+        };
+        CollaborationNotificationListResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["CollaborationNotificationItemView"][];
         };
         CollaborationTimeoutConfigView: {
             scopeType: components["schemas"]["CollaborationTimeoutScopeType"];
@@ -2498,6 +2760,9 @@ export interface components {
             anchorId: string;
             declaredContentType: string;
             structuredContentJson?: string | null;
+            /** @description Optional non-sensitive paste-cleaning residue exported with the binding. Must not include source HTML. Unresolved blockers remain fail-closed on re-import / validate / publish (ops-paste-binding-seam).
+             *      */
+            pasteCleaningEvidence?: components["schemas"]["PasteCleaningEvidence"];
             /** @enum {string} */
             validationStatus?: "VALID" | "MISSING_ANCHOR" | "DUPLICATE_BINDING" | "INCOMPATIBLE_CONTENT_TYPE";
         };
@@ -2586,12 +2851,19 @@ export interface components {
             /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
             updatedByDisplayName?: string | null;
         };
+        /** @description LR-C5 catalog list envelope for `GET /api/management/v1/templates`. */
+        TemplateSummaryPageResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PageView"] & {
+                content: components["schemas"]["TemplateSummaryView"][];
+            };
+        };
         MasterDocumentSummaryView: {
             /** Format: uuid */
             id: string;
             groupCode: string;
             name: string;
-            status: string;
+            status: components["schemas"]["MasterDocumentReviewStatus"];
             originalFilename: string;
             anchorCount: number;
             updatedBy: string;
@@ -2599,6 +2871,13 @@ export interface components {
             updatedAt: string;
             /** @description Optional display label for updatedBy in format "displayName (username)"; falls back to username when user not found. */
             updatedByDisplayName?: string | null;
+        };
+        /** @description LR-C5 catalog list envelope for `GET /api/management/v1/masters`. Replaces pre-LR-C5 bare-array list response. */
+        MasterDocumentPageResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["PageView"] & {
+                content: components["schemas"]["MasterDocumentSummaryView"][];
+            };
         };
         BatchTestRunSummaryView: {
             /** Format: uuid */
@@ -2865,7 +3144,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED";
     };
     responses: {
         /** @description Async task accepted. */
@@ -2905,6 +3184,14 @@ export interface components {
         InvocationRequestIdQuery: string;
         InvocationPageQuery: number;
         InvocationSizeQuery: number;
+        /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+        CatalogPageQuery: number;
+        /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+        CatalogSizeQuery: number;
+        /** @description Optional case-insensitive contains search. Empty/blank ignored. Field coverage is entity-specific (see operation description). Reusable by future LR-C6 command palette; this contract does not define a separate C6 palette API. */
+        CatalogSearchQuery: string;
+        /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
+        CatalogGroupCodeQuery: string;
         /** @example DOC-8F2N6P4Q */
         DocumentId: string;
         CredentialId: string;
@@ -4122,7 +4409,16 @@ export interface operations {
     listContentModules: {
         parameters: {
             query?: {
-                groupCode?: string;
+                /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+                page?: components["parameters"]["CatalogPageQuery"];
+                /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+                size?: components["parameters"]["CatalogSizeQuery"];
+                /** @description Optional case-insensitive contains search. Empty/blank ignored. Field coverage is entity-specific (see operation description). Reusable by future LR-C6 command palette; this contract does not define a separate C6 palette API. */
+                search?: components["parameters"]["CatalogSearchQuery"];
+                /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
+                groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
+                /** @description Whitelist sort key. Default `groupCodeAsc`. Unknown values fall back to `groupCodeAsc` (no 400). Content-modules also support `moduleCodeAsc`. */
+                sort?: "groupCodeAsc" | "updatedAtDesc" | "updatedAtAsc" | "nameAsc" | "moduleCodeAsc";
             };
             header?: {
                 /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
@@ -4133,13 +4429,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Content modules listed. */
+            /** @description Paginated content module summaries. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ContentModuleSummaryListResponse"];
+                    "application/json": components["schemas"]["ContentModuleSummaryPageResponse"];
                 };
             };
             401: components["responses"]["ErrorResponse"];
@@ -4376,6 +4672,113 @@ export interface operations {
             default: components["responses"]["ErrorResponse"];
         };
     };
+    getCollaborationNotificationUnreadCount: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unread count returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationNotificationUnreadCountResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listCollaborationNotifications: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Notification projections returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationNotificationListResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    markAllCollaborationNotificationsRead: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description All visible unread items marked read. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationNotificationUnreadCountResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    markCollaborationNotificationRead: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                workItemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Work item marked read for the caller. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CollaborationNotificationUnreadCountResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
     getCollaborationTimeoutConfig: {
         parameters: {
             query?: {
@@ -4433,6 +4836,75 @@ export interface operations {
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
             422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    reportRouteAccessDenied: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RouteAccessDeniedRequest"];
+            };
+        };
+        responses: {
+            /** @description Denial recorded (or fail-safe ignored). */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listTemplates: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+                page?: components["parameters"]["CatalogPageQuery"];
+                /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+                size?: components["parameters"]["CatalogSizeQuery"];
+                /** @description Optional case-insensitive contains search. Empty/blank ignored. Field coverage is entity-specific (see operation description). Reusable by future LR-C6 command palette; this contract does not define a separate C6 palette API. */
+                search?: components["parameters"]["CatalogSearchQuery"];
+                /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
+                groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
+                /** @description Exact template lifecycle status filter (UI status / workflow chips). Workflow chip mapping: awaitingTest→TESTING; awaitingPublish→PENDING_RELEASE; awaitingApproval→APPROVAL (with `approvalSubState=PENDING_DECISION`). Unknown enum values: empty page recommended (or 400/422 — lock in tests). */
+                lifecycleStatus?: components["schemas"]["TemplateLifecycleStatus"];
+                /** @description Optional approval sub-state filter (templates only). Used with `lifecycleStatus=APPROVAL` for the awaiting-approval workflow chip (`PENDING_DECISION`). */
+                approvalSubState?: "PENDING_SUBMIT" | "PENDING_DECISION";
+                /** @description Whitelist sort key. Default `groupCodeAsc` (group-first). Unknown values fall back to `groupCodeAsc` (no 400). Templates also support `externalIdAsc`. */
+                sort?: "groupCodeAsc" | "updatedAtDesc" | "updatedAtAsc" | "nameAsc" | "externalIdAsc";
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated template summaries. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemplateSummaryPageResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };
@@ -4630,6 +5102,37 @@ export interface operations {
             default: components["responses"]["ErrorResponse"];
         };
     };
+    getTemplateReleasePublishGate: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+                /** @description Semantic release version (e.g. `1.0.0`). */
+                releaseVersion: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Publish-gate checklist for the published release version. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishGateChecklistResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
     cloneTemplateReleaseVersion: {
         parameters: {
             query?: never;
@@ -4788,6 +5291,45 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiAccessAlertListResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listMasters: {
+        parameters: {
+            query?: {
+                /** @description Zero-based page index (LR-C5 catalog lists). Default 0; negative values normalize to 0. */
+                page?: components["parameters"]["CatalogPageQuery"];
+                /** @description Page size for catalog lists (LR-C5). Default 20; legal range 1…100. Missing or out-of-range values normalize per BDD C5-C2 (default 20 or clamp >100 to 100 — implementation locks one; must not 500). */
+                size?: components["parameters"]["CatalogSizeQuery"];
+                /** @description Optional case-insensitive contains search. Empty/blank ignored. Field coverage is entity-specific (see operation description). Reusable by future LR-C6 command palette; this contract does not define a separate C6 palette API. */
+                search?: components["parameters"]["CatalogSearchQuery"];
+                /** @description Exact-match group filter (trim). Intersected with session-authorized groups; unauthorized group yields empty page (no cross-group leak). */
+                groupCode?: components["parameters"]["CatalogGroupCodeQuery"];
+                /** @description Exact master review status filter. Unknown enum: empty page recommended (or 400/422 — lock in tests). */
+                status?: components["schemas"]["MasterDocumentReviewStatus"];
+                /** @description Whitelist sort key. Default `groupCodeAsc`. `groupAsc` is accepted as a synonym of `groupCodeAsc`. Unknown values fall back to `groupCodeAsc` (no 400). */
+                sort?: "groupCodeAsc" | "groupAsc" | "updatedAtDesc" | "updatedAtAsc" | "nameAsc";
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated master summaries. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MasterDocumentPageResponse"];
                 };
             };
             401: components["responses"]["ErrorResponse"];

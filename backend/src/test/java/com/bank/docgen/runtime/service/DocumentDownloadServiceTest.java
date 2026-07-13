@@ -2,9 +2,14 @@ package com.bank.docgen.runtime.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bank.docgen.authorization.management.service.SecurityAuditSummaryService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyEntity;
 import com.bank.docgen.runtime.persistence.GenerationIdempotencyRepository;
@@ -27,6 +32,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+/**
+ * Includes BDD-LRP-D7-005/006 — management security download grant/deny audits.
+ */
 @ExtendWith(MockitoExtension.class)
 class DocumentDownloadServiceTest {
 
@@ -41,6 +49,8 @@ class DocumentDownloadServiceTest {
     private TemplateRepository templateRepository;
     @Mock
     private RuntimeGenerationAuditEventRepository runtimeGenerationAuditEventRepository;
+    @Mock
+    private SecurityAuditSummaryService securityAuditSummaryService;
 
     private DocumentDownloadService service;
     private RuntimeSessionClaims session;
@@ -57,7 +67,8 @@ class DocumentDownloadServiceTest {
                 objectStoragePort,
                 templateRepository,
                 auditRecorder,
-                new TraceIdProvider()
+                new TraceIdProvider(),
+                securityAuditSummaryService
         );
         session = new RuntimeSessionClaims(
                 UUID.randomUUID(),
@@ -74,9 +85,24 @@ class DocumentDownloadServiceTest {
     void crossTemplateAccessDenied() {
         GenerationIdempotencyEntity record = completedRecord(UUID.randomUUID(), "generated/DOC-1/output.docx");
         when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
+        when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(templateEntity()));
 
         assertThatThrownBy(() -> service.resolveDownload(DOCUMENT_ID, "dev", session, request))
                 .isInstanceOf(RuntimeAccessDeniedException.class);
+
+        verify(securityAuditSummaryService).recordDocumentDownloadDenied(
+                eq("CRED-1"),
+                eq("svc-caller"),
+                eq(DOCUMENT_ID),
+                eq("TPL-001"),
+                eq(TEMPLATE_ID),
+                eq("RETAIL"),
+                eq(SecurityAuditSummaryService.REASON_DOWNLOAD_ACCESS_DENIED),
+                anyString(),
+                anyString()
+        );
+        verify(securityAuditSummaryService, never()).recordDocumentDownload(
+                anyString(), anyString(), anyString(), anyString(), any(), any(), anyString(), anyString());
     }
 
     @Test
@@ -84,9 +110,43 @@ class DocumentDownloadServiceTest {
         GenerationIdempotencyEntity record = completedRecord(TEMPLATE_ID, "generated/DOC-1/output.docx");
         record.markDownloadExpired(Instant.now().minusSeconds(30));
         when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.of(record));
+        when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(templateEntity()));
 
         assertThatThrownBy(() -> service.resolveDownload(DOCUMENT_ID, "dev", session, request))
                 .isInstanceOf(RuntimeDownloadExpiredException.class);
+
+        verify(securityAuditSummaryService).recordDocumentDownloadDenied(
+                eq("CRED-1"),
+                eq("svc-caller"),
+                eq(DOCUMENT_ID),
+                eq("TPL-001"),
+                eq(TEMPLATE_ID),
+                eq("RETAIL"),
+                eq(SecurityAuditSummaryService.REASON_DOWNLOAD_EXPIRED),
+                anyString(),
+                anyString()
+        );
+    }
+
+    @Test
+    void missingDocumentRecordsNotAvailableDenial() {
+        when(generationIdempotencyRepository.findByDocumentId(DOCUMENT_ID)).thenReturn(Optional.empty());
+        when(templateRepository.findByIdAndDeletedAtIsNull(TEMPLATE_ID)).thenReturn(Optional.of(templateEntity()));
+
+        assertThatThrownBy(() -> service.resolveDownload(DOCUMENT_ID, "dev", session, request))
+                .isInstanceOf(RuntimeDocumentNotFoundException.class);
+
+        verify(securityAuditSummaryService).recordDocumentDownloadDenied(
+                eq("CRED-1"),
+                eq("svc-caller"),
+                eq(DOCUMENT_ID),
+                eq("TPL-001"),
+                eq(TEMPLATE_ID),
+                eq("RETAIL"),
+                eq(SecurityAuditSummaryService.REASON_DOWNLOAD_NOT_AVAILABLE),
+                anyString(),
+                anyString()
+        );
     }
 
     @Test
@@ -128,6 +188,17 @@ class DocumentDownloadServiceTest {
         assertThat(captor.getValue().getEventType())
                 .isEqualTo(RuntimeGenerationAuditRecorder.EVENT_DOCUMENT_DOWNLOAD);
         assertThat(captor.getValue().getEnvironment()).isEqualTo("dev");
+
+        verify(securityAuditSummaryService).recordDocumentDownload(
+                eq("CRED-1"),
+                eq("svc-caller"),
+                eq(DOCUMENT_ID),
+                eq("TPL-001"),
+                eq(TEMPLATE_ID),
+                eq("RETAIL"),
+                anyString(),
+                anyString()
+        );
     }
 
     @Test

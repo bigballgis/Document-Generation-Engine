@@ -178,6 +178,44 @@ class ApiAccessAlertQueryServiceTest {
     }
 
     @Test
+    void listAlerts_treatsMalformedAllowedAdGroupsJsonAsEmpty() {
+        UUID templateId = UUID.randomUUID();
+        TemplateEntity template = publishedTemplate(templateId, "RETAIL", "Retail Statement", "TPL-RETAIL");
+        ApiPolicyEntity policy = new ApiPolicyEntity(UUID.randomUUID(), templateId, "not-json", "10000001");
+
+        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
+                List.of("RETAIL"),
+                TemplateLifecycleStatus.PUBLISHED
+        )).thenReturn(List.of(template));
+        when(apiPolicyRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(policy));
+        when(apiCredentialRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of());
+
+        List<ApiAccessAlertView> alerts = service.listAlerts(groupAdmin);
+
+        assertThat(alerts).extracting(ApiAccessAlertView::alertType)
+                .containsExactlyInAnyOrder(
+                        ApiAccessAlertType.MISSING_AD_GROUP,
+                        ApiAccessAlertType.NO_CREDENTIALS
+                );
+    }
+
+    @Test
+    void listAlerts_sortsWhenTemplateNameIsNull() {
+        UUID templateId = UUID.randomUUID();
+        TemplateEntity template = publishedTemplate(templateId, "RETAIL", null, "TPL-RETAIL");
+        ApiPolicyEntity policy = new ApiPolicyEntity(UUID.randomUUID(), templateId, "[\"G1\"]", "10000001");
+
+        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
+                List.of("RETAIL"),
+                TemplateLifecycleStatus.PUBLISHED
+        )).thenReturn(List.of(template));
+        when(apiPolicyRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of(policy));
+        when(apiCredentialRepository.findByTemplateIdIn(List.of(templateId))).thenReturn(List.of());
+
+        assertThat(service.listAlerts(groupAdmin)).isNotEmpty();
+    }
+
+    @Test
     void listAlerts_honorsExplicitExpiringSoonStatus() {
         UUID templateId = UUID.randomUUID();
         TemplateEntity template = publishedTemplate(templateId, "RETAIL", "Retail Statement", "TPL-RETAIL");

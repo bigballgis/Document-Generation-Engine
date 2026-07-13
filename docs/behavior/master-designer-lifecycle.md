@@ -17,6 +17,7 @@
 ## 边界
 
 - 替换已批准母版 → 回到 draft（已有 `master-replace-docx.spec.ts` 可复用片段）
+- **上传深度校验与体积上限**（magic / 损坏包 / 超限 / 合法 DOCX）→ 见 [LR-A3 upload validation](./lrp-a3-master-docx-upload-validation.md)（`BDD-LRP-A3-UPLOAD-001`）
 
 ## 证据
 

@@ -37,6 +37,19 @@ public class DocxAssemblyException extends RuntimeException {
         this.messageKey = messageKey;
     }
 
+    public DocxAssemblyException(
+            String errorCode,
+            String category,
+            String messageKey,
+            String message,
+            Throwable cause
+    ) {
+        super(message, cause);
+        this.errorCode = errorCode;
+        this.category = category;
+        this.messageKey = messageKey;
+    }
+
     public String messageKey() {
         return messageKey;
     }

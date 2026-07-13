@@ -21,6 +21,73 @@ if (-not (Test-Path ".env")) {
     Write-Host "Created .env from .env.example"
 }
 
+# BDD-OPS-JWT-SECRET-001: prod/acceptance compose requires explicit non-insecure JWT_SECRET.
+# Compose substitutes from process env or project .env; refuse known insecure defaults early.
+function Get-DotEnvValue {
+    param([Parameter(Mandatory)][string]$Key)
+    if (-not (Test-Path ".env")) { return $null }
+    foreach ($line in Get-Content ".env") {
+        $trimmed = $line.Trim()
+        if ($trimmed.StartsWith('#') -or -not $trimmed.Contains('=')) { continue }
+        $name, $value = $trimmed.Split('=', 2)
+        if ($name.Trim() -eq $Key) {
+            return $value.Trim().Trim('"').Trim("'")
+        }
+    }
+    return $null
+}
+
+$jwtSecret = if (-not [string]::IsNullOrWhiteSpace($env:JWT_SECRET)) {
+    $env:JWT_SECRET.Trim()
+} else {
+    Get-DotEnvValue -Key 'JWT_SECRET'
+}
+$knownInsecureJwt = @(
+    'local-dev-only-change-me-please-32bytes-min',
+    'prod-change-me-32-bytes-minimum-secret'
+)
+if ([string]::IsNullOrWhiteSpace($jwtSecret)) {
+    Write-Error @"
+JWT_SECRET must be set for docker-compose.prod.yml (acceptance/prod).
+Set it in the environment or .env — compose no longer supplies a default.
+Example: JWT_SECRET=<unique ≥32-byte secret>
+"@
+    exit 1
+}
+if ($knownInsecureJwt -contains $jwtSecret) {
+    Write-Error @"
+JWT_SECRET in .env/environment is a known insecure default and is refused on the acceptance/prod path.
+Replace it with a unique ≥32-byte secret (do not reuse local-dev-only-… or prod-change-me-…).
+See docs/behavior/ops-jwt-secret-no-default.md (BDD-OPS-JWT-SECRET-001).
+"@
+    exit 1
+}
+# Ensure compose substitution sees the resolved value even when only present in .env.
+$env:JWT_SECRET = $jwtSecret
+
+# BDD-OPS-KAFKA-REGISTRY-001: any compose file set with docgen-kafka requires explicit KAFKA_IMAGE.
+# No :-bitnamilegacy silent default; do not invent a company registry hostname.
+$kafkaImage = if (-not [string]::IsNullOrWhiteSpace($env:KAFKA_IMAGE)) {
+    $env:KAFKA_IMAGE.Trim()
+} else {
+    Get-DotEnvValue -Key 'KAFKA_IMAGE'
+}
+if ([string]::IsNullOrWhiteSpace($kafkaImage)) {
+    Write-Error @"
+KAFKA_IMAGE must be set for docker-compose.yml (docgen-kafka) / acceptance/prod overlay.
+Set it in the environment or .env — compose no longer hardcodes a Hub image.
+Production / acceptance: company-approved full ref (<company-registry>/<kafka-image>:<tag>).
+Local/dev: copy KAFKA_IMAGE from .env.example (bitnamilegacy example is LOCAL/DEV ONLY).
+See docs/behavior/ops-kafka-company-registry.md (BDD-OPS-KAFKA-REGISTRY-001).
+"@
+    exit 1
+}
+if ($kafkaImage -match '(?i)bitnamilegacy') {
+    Write-Warning "KAFKA_IMAGE looks like a Hub bitnamilegacy tag — LOCAL/DEV ONLY; not a claimed production coordinate."
+}
+# Ensure compose substitution sees the resolved value even when only present in .env.
+$env:KAFKA_IMAGE = $kafkaImage
+
 $composeArgs = @(
     "-f", "docker-compose.yml",
     "-f", "docker-compose.prod.yml",
@@ -28,7 +95,10 @@ $composeArgs = @(
 )
 
 $runtimeImages = @(
-    "eclipse-temurin:21-jre-alpine",
+    # Task #51 / ADR-0028: Temurin 25 (docs: deploy/container-hardening.md).
+    # Packaged backend runtime uses 25-jre-jammy (LibreOffice/fonts); alpine is the minimal pin.
+    "eclipse-temurin:25-jre-alpine",
+    "eclipse-temurin:25-jre-jammy",
     "nginx:1.27-alpine"
 )
 foreach ($image in $runtimeImages) {

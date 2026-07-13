@@ -57,6 +57,39 @@ not block or warn.
 - **Neutral:** The budget is a configuration property, not hardcoded — can be tuned per
   deployment.
 
+### Measurement note (2026-07-10 — LR-A7 / CD-HARD-T04)
+
+Docker PDF corpus measured on git SHA `9a40b48` (runtime `SYNC_STREAM` + host `pypdf`):
+
+| externalId | Docker PDF pages | Word pages | Delta |
+| --- | --- | --- | --- |
+| `DEMO-CREDIT-LIMIT-CONFIRM` | 6 | n/a | n/a |
+| `DEMO-MORTGAGE-APPROVAL` | 6 | n/a | n/a |
+| `DEMO-TRADE-LC-NOTICE` | 9 | n/a | n/a |
+| `DEMO-OVERDUE-COLLECTION` | 8 | n/a | n/a |
+| `DEMO-RETAIL-ACCOUNT-OPEN` | 8 | n/a | n/a |
+| `CORP-FOL-OFFER` (optional) | 86 | n/a | n/a |
+
+Required corpus aggregates: **max = 9** / **median = 8** Docker PDF pages. Word method =
+`ms-word-unavailable-on-host` — Word pages and deltas remain **n/a** (not fabricated).
+
+### Residual — Word-vs-LO delta (blocks Accepted)
+
+**This ADR stays `Proposed`.** Do **not** invent Word page counts or deltas.
+
+True Word-vs-LibreOffice page delta and any promotion to **Accepted** (or runtime
+warning/blocker enforcement of the ±1 budget) **require a Word-equipped host**:
+
+1. Open each corpus DOCX in Microsoft Word on that host and record authoring page counts.
+2. Compare against the Docker PDF pages already archived under
+   [docs/evidence/lrp-a7-pagination/](../../evidence/lrp-a7-pagination/) (and the
+   procedure in [pagination-delta-corpus.md](../../plan/pagination-delta-corpus.md)).
+3. Only then fill Word / Delta columns and consider Accepted + enforcement.
+
+LR-A7 closed the Docker PDF measurement gap with a documented exception; LR-A5 records
+this residual honestly and does **not** expand into MS Word measurement or LR-C9.
+Font baseline for conversion images is [ADR-0041](./0041-rendering-font-baseline.md)
+(**Accepted**; LR-A2 implemented; architecture-reviewer PASS_WITH_NOTES 2026-07-10).
 ## Alternatives considered
 
 - **Zero-tolerance (exact page match)** — rejected: impossible with OSS engines; would

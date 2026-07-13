@@ -21,7 +21,7 @@ tags:
   - name: Invocation
     description: Caller-scoped invocation record query and parameter backup.
   - name: Admin
-    description: API management, credential lifecycle administration, template lifecycle governance, template export/import, master revision-line read paths, content-module governance, and collaboration timeout configuration.
+    description: API management, credential lifecycle administration, template lifecycle governance, template/master/content-module catalog list pagination (LR-C5 PageView), template export/import, master revision-line read paths, content-module governance, and collaboration timeout configuration.
   - name: Collaboration
     description: Collaboration work-item queues and timeout threshold administration.
 security:
@@ -956,7 +956,10 @@ paths:
         Duplicate binding means the same anchorId appears more than once in one
         payload. Returned per-binding status values are strictly limited to
         VALID, MISSING_ANCHOR, DUPLICATE_BINDING, and
-        INCOMPATIBLE_CONTENT_TYPE.
+        INCOMPATIBLE_CONTENT_TYPE. Optional non-sensitive pasteCleaningEvidence
+        on each binding is editing/release-check residue (ADR-0019 /
+        ops-paste-binding-seam); unresolved paste blockers (blockedCount > 0 or
+        BLOCKED items) must not yield VALID.
       parameters:
         - $ref: '#/components/parameters/Environment'
         - $ref: '#/components/parameters/TemplateId'
@@ -1237,27 +1240,43 @@ paths:
     get:
       tags: [Admin]
       operationId: listContentModules
-      summary: List content modules scoped by group
+      summary: List content modules (server-side PageView)
       description: >-
-        Lists non-deleted content modules. When `groupCode` is omitted, returns all modules
-        accessible to the caller across authorized groups (including shared modules). When
-        `groupCode` is provided, narrows to that group scope. Requires catalog browse access
-        per permission matrix §5.1.
+        Lists non-deleted content modules as a standard `PageView` (LR-C5 /
+        BDD-LRP-C5-CATALOG-001). When `groupCode` is omitted, returns modules
+        accessible to the caller across authorized groups (including shared
+        modules). When `groupCode` is provided, exact-match filter intersected
+        with session authorization (unauthorized group → empty page). Optional
+        `search` is case-insensitive contains over `name` ∪ `moduleCode` ∪
+        `groupCode`. Default sort is group-first (`groupCodeAsc`: `groupCode ASC`,
+        then `updatedAt DESC`). Pagination unit is **rows** (not group count).
+        Requires catalog browse access per permission matrix §5.1. Breaking
+        change vs pre-LR-C5 bare array: management UI upgrades in the same slice;
+        no external runtime callers.
       parameters:
-        - name: groupCode
+        - $ref: '#/components/parameters/CatalogPageQuery'
+        - $ref: '#/components/parameters/CatalogSizeQuery'
+        - $ref: '#/components/parameters/CatalogSearchQuery'
+        - $ref: '#/components/parameters/CatalogGroupCodeQuery'
+        - name: sort
           in: query
           required: false
+          description: >-
+            Whitelist sort key. Default `groupCodeAsc`. Unknown values fall back
+            to `groupCodeAsc` (no 400). Content-modules also support
+            `moduleCodeAsc`.
           schema:
             type: string
-            minLength: 1
+            enum: [groupCodeAsc, updatedAtDesc, updatedAtAsc, nameAsc, moduleCodeAsc]
+            default: groupCodeAsc
         - $ref: '#/components/parameters/TraceIdHeader'
       responses:
         '200':
-          description: Content modules listed.
+          description: Paginated content module summaries.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContentModuleSummaryListResponse'
+                $ref: '#/components/schemas/ContentModuleSummaryPageResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
@@ -1517,6 +1536,115 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/collaboration-notifications/unread-count:
+    get:
+      tags: [Collaboration, Admin]
+      operationId: getCollaborationNotificationUnreadCount
+      summary: Unread collaboration notification count
+      description: >-
+        Returns the count of OPEN collaboration work items visible to the caller
+        (role queues ∩ group scope) that have no per-user read marker (LR-C7).
+        Includes ESCALATION when the session has admin collaboration visibility.
+        Does not create a standalone notification domain. Fail-closed 403 without
+        `viewCollaborationWorkItems`.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Unread count returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationNotificationUnreadCountResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/collaboration-notifications:
+    get:
+      tags: [Collaboration, Admin]
+      operationId: listCollaborationNotifications
+      summary: List collaboration notification projections
+      description: >-
+        Returns up to 20 newest OPEN collaboration work-item projections visible
+        to the caller, each with a `read` flag from the per-user read marker
+        (LR-C7). `queue` supports deep-link
+        `/dashboard?queue={QUEUE}#tasks-section`. Excludes RESOLVED items and
+        master review/rework. Fail-closed 403 without collaboration view.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Notification projections returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationNotificationListResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/collaboration-notifications/read-all:
+    post:
+      tags: [Collaboration, Admin]
+      operationId: markAllCollaborationNotificationsRead
+      summary: Mark all visible unread collaboration notifications as read
+      description: >-
+        Persists per-user read markers for every visible OPEN unread work item
+        (LR-C7). Idempotent when none are unread. Does not resolve work items.
+        Returns the refreshed unread count (normally 0).
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: All visible unread items marked read.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationNotificationUnreadCountResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/collaboration-notifications/{workItemId}/read:
+    post:
+      tags: [Collaboration, Admin]
+      operationId: markCollaborationNotificationRead
+      summary: Mark one collaboration notification as read
+      description: >-
+        Idempotently persists a per-user read marker for the given OPEN work item
+        when it is visible to the caller (LR-C7). Invisible / missing / RESOLVED
+        / out-of-scope IDs return `404 WORK_ITEM_NOT_FOUND` without leaking
+        existence. Does not resolve the work item. Returns refreshed unread count.
+      parameters:
+        - name: workItemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Work item marked read for the caller.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollaborationNotificationUnreadCountResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/collaboration-timeout-config:
     get:
       tags: [Collaboration, Admin]
@@ -1579,6 +1707,106 @@ paths:
         '403':
           $ref: '#/components/responses/ErrorResponse'
         '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/security-audit/route-access-denied:
+    post:
+      tags: [Admin]
+      operationId: reportRouteAccessDenied
+      summary: Report a management forbidden-route denial
+      description: >-
+        Authenticated management clients call this after a client-side route
+        guard denies access (LR-D7). Persists SECURITY_ROUTE_ACCESS_DENIED on
+        management_audit_event using the session principal. Fail-safe: returns
+        204 even when durable persistence fails. Does not accept passwords,
+        tokens, or secrets. Unauthenticated callers receive 401.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteAccessDeniedRequest'
+      responses:
+        '204':
+          description: Denial recorded (or fail-safe ignored).
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates:
+    get:
+      tags: [Admin]
+      operationId: listTemplates
+      summary: List templates (server-side PageView)
+      description: >-
+        Returns a standard management `PageView` of template package summaries
+        for the caller's authorized groups (LR-C5 / BDD-LRP-C5-CATALOG-001).
+        Pagination is **row-based** with default sort group-first
+        (`groupCode ASC`, then `updatedAt DESC` — COR-F09 semantics retained;
+        not group-count pages). Empty accessible groups yield an empty page
+        (`totalElements: 0`) without leaking other groups. Optional filters AND
+        together; changing filters/search/sort resets UI to `page=0`.
+        Normalization: missing/`size` out of 1…100 → default 20 (or clamp
+        `size>100` to 100 — implementation locks one); `page<0` → 0; page past
+        last → empty `content` with unchanged `totalElements`. Requires catalog
+        browse access per permission matrix. Traceability: BDD-LRP-C5-001…015.
+      parameters:
+        - $ref: '#/components/parameters/CatalogPageQuery'
+        - $ref: '#/components/parameters/CatalogSizeQuery'
+        - $ref: '#/components/parameters/CatalogSearchQuery'
+        - $ref: '#/components/parameters/CatalogGroupCodeQuery'
+        - name: lifecycleStatus
+          in: query
+          required: false
+          description: >-
+            Exact template lifecycle status filter (UI status / workflow chips).
+            Workflow chip mapping: awaitingTest→TESTING; awaitingPublish→PENDING_RELEASE;
+            awaitingApproval→APPROVAL (with `approvalSubState=PENDING_DECISION`).
+            Unknown enum values: empty page recommended (or 400/422 — lock in tests).
+          schema:
+            $ref: '#/components/schemas/TemplateLifecycleStatus'
+        - name: approvalSubState
+          in: query
+          required: false
+          description: >-
+            Optional approval sub-state filter (templates only). Used with
+            `lifecycleStatus=APPROVAL` for the awaiting-approval workflow chip
+            (`PENDING_DECISION`).
+          schema:
+            type: string
+            enum: [PENDING_SUBMIT, PENDING_DECISION]
+        - name: sort
+          in: query
+          required: false
+          description: >-
+            Whitelist sort key. Default `groupCodeAsc` (group-first). Unknown
+            values fall back to `groupCodeAsc` (no 400). Templates also support
+            `externalIdAsc`.
+          schema:
+            type: string
+            enum:
+              - groupCodeAsc
+              - updatedAtDesc
+              - updatedAtAsc
+              - nameAsc
+              - externalIdAsc
+            default: groupCodeAsc
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Paginated template summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateSummaryPageResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
@@ -1846,6 +2074,48 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/releases/{releaseVersion}/publish-gate:
+    get:
+      tags: [Admin]
+      operationId: getTemplateReleasePublishGate
+      summary: Evaluate publish-gate checklist for a published release version
+      description: >-
+        Live publish-gate evaluation against the published release version entity
+        (bindings, coverage, rules, previews, content-module refs scoped to that
+        version). Does **not** require an in-flight DEV line. Reuses the same
+        checklist item builders as `GET /templates/{templateId}/publish-gate`.
+        Unknown release version returns `404`. This is a live evaluation against
+        the release snapshot semantics — not a historical gate result persisted
+        at publish time.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: releaseVersion
+          in: path
+          required: true
+          description: Semantic release version (e.g. `1.0.0`).
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Publish-gate checklist for the published release version.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishGateChecklistResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/templates/{templateId}/release-versions/{releaseVersion}/clone:
     post:
       tags: [Admin]
@@ -2062,6 +2332,64 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiAccessAlertListResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/masters:
+    get:
+      tags: [Admin]
+      operationId: listMasters
+      summary: List masters (server-side PageView)
+      description: >-
+        Returns a standard management `PageView` of master document package
+        summaries for the caller's authorized groups (LR-C5 /
+        BDD-LRP-C5-CATALOG-001). Breaking change vs pre-LR-C5 bare array:
+        management UI upgrades in the same slice; no external runtime callers.
+        Default sort is group-first (`groupCodeAsc`). Optional `search` is
+        case-insensitive contains over `name` ∪ `groupCode`. Optional `status`
+        is exact master review status. Pagination unit is **rows** (COR-F09).
+        Requires catalog browse / master read per permission matrix; fail-closed
+        for unauthorized groups.
+      parameters:
+        - $ref: '#/components/parameters/CatalogPageQuery'
+        - $ref: '#/components/parameters/CatalogSizeQuery'
+        - $ref: '#/components/parameters/CatalogSearchQuery'
+        - $ref: '#/components/parameters/CatalogGroupCodeQuery'
+        - name: status
+          in: query
+          required: false
+          description: >-
+            Exact master review status filter. Unknown enum: empty page
+            recommended (or 400/422 — lock in tests).
+          schema:
+            $ref: '#/components/schemas/MasterDocumentReviewStatus'
+        - name: sort
+          in: query
+          required: false
+          description: >-
+            Whitelist sort key. Default `groupCodeAsc`. `groupAsc` is accepted as
+            a synonym of `groupCodeAsc`. Unknown values fall back to
+            `groupCodeAsc` (no 400).
+          schema:
+            type: string
+            enum:
+              - groupCodeAsc
+              - groupAsc
+              - updatedAtDesc
+              - updatedAtAsc
+              - nameAsc
+            default: groupCodeAsc
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Paginated master summaries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterDocumentPageResponse'
         '401':
           $ref: '#/components/responses/ErrorResponse'
         '403':
@@ -2719,6 +3047,53 @@ components:
         minimum: 1
         maximum: 100
         default: 20
+    CatalogPageQuery:
+      name: page
+      in: query
+      required: false
+      description: >-
+        Zero-based page index (LR-C5 catalog lists). Default 0; negative values
+        normalize to 0.
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    CatalogSizeQuery:
+      name: size
+      in: query
+      required: false
+      description: >-
+        Page size for catalog lists (LR-C5). Default 20; legal range 1…100.
+        Missing or out-of-range values normalize per BDD C5-C2 (default 20 or
+        clamp >100 to 100 — implementation locks one; must not 500).
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    CatalogSearchQuery:
+      name: search
+      in: query
+      required: false
+      description: >-
+        Optional case-insensitive contains search. Empty/blank ignored.
+        Field coverage is entity-specific (see operation description).
+        Reusable by future LR-C6 command palette; this contract does not define
+        a separate C6 palette API.
+      schema:
+        type: string
+        minLength: 1
+    CatalogGroupCodeQuery:
+      name: groupCode
+      in: query
+      required: false
+      description: >-
+        Exact-match group filter (trim). Intersected with session-authorized
+        groups; unauthorized group yields empty page (no cross-group leak).
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
     DocumentId:
       name: documentId
       in: path
@@ -2853,6 +3228,22 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorEnvelope'
   schemas:
+    RouteAccessDeniedRequest:
+      type: object
+      additionalProperties: false
+      required: [routeKey, traceId]
+      properties:
+        routeKey:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Logical management route key (preferred) or path summary.
+          example: route.audit-console
+        traceId:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Client-side denial correlation id (no secrets).
     OutputFormat:
       type: string
       enum: [DOCX, PDF]
@@ -4418,9 +4809,12 @@ components:
       type: object
       additionalProperties: false
       description: >-
-        Standard management pagination wrapper. totalElements counts all persisted
-        rows for the query, not the current page length. Requesting page beyond
-        the last page returns empty content with unchanged totalElements.
+        Standard management pagination wrapper. totalElements counts all matching
+        rows for the query (after filters), not the current page length.
+        Requesting page beyond the last page returns empty content with unchanged
+        totalElements. Field names are `page` / `size` / `totalElements` /
+        `totalPages` (not Spring Data `number`). Used by catalog lists (LR-C5),
+        version-lines, revision-lines, identity, and other management pageables.
       required: [content, page, size, totalElements, totalPages]
       properties:
         content:
@@ -4729,6 +5123,63 @@ components:
           $ref: '#/components/schemas/Metadata'
         result:
           $ref: '#/components/schemas/TemplateDetailView'
+    PublishGateCheckCode:
+      type: string
+      enum:
+        - ANCHOR_INTEGRITY
+        - VARIABLE_SCHEMA
+        - RULE_BOUNDS
+        - TEST_RESULTS
+        - PREVIEW_PRESENT
+        - CHANGE_DIFF
+        - APPROVAL_SUMMARY
+        - COVERAGE_THRESHOLDS
+        - API_POLICY
+        - CONTENT_MODULE_REFERENCES
+        - UNSUPPORTED_STRUCTURED_NODES
+        - PASTE_CLEANING_BLOCKERS
+        - BLOCKER_STATUS
+    PublishGateItemView:
+      type: object
+      additionalProperties: false
+      required: [checkCode, ready, blocker, messageKey, summary]
+      properties:
+        checkCode:
+          $ref: '#/components/schemas/PublishGateCheckCode'
+        ready:
+          type: boolean
+        blocker:
+          type: boolean
+        messageKey:
+          type: string
+        summary:
+          type: string
+    PublishGateChecklistView:
+      type: object
+      additionalProperties: false
+      required: [templateId, ready, blockerCount, items]
+      properties:
+        templateId:
+          type: string
+          format: uuid
+        ready:
+          type: boolean
+        blockerCount:
+          type: integer
+          minimum: 0
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublishGateItemView'
+    PublishGateChecklistResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/PublishGateChecklistView'
     MasterAnchorContentType:
       type: string
       enum: [TEXT, RICH_TEXT, TABLE, IMAGE, CLAUSE, STAMP, BARCODE, ATTACHMENT_LIST, UNSPECIFIED]
@@ -5021,6 +5472,18 @@ components:
         structuredContentTree:
           type: object
           additionalProperties: true
+        pasteCleaningEvidence:
+          $ref: '#/components/schemas/PasteCleaningEvidence'
+          description: >
+            Optional non-sensitive paste-cleaning residue carried with the binding
+            (ops-paste-binding-seam / ADR-0019). Must not include source HTML or
+            pasted plaintext. Unresolved blockers (blockedCount > 0 or BLOCKED
+            items) fail-closed in validate / computeBindingStatus.
+        clearPasteCleaningEvidence:
+          type: boolean
+          description: >
+            When true on binding upsert, clears persisted paste-cleaning residue
+            (ops-paste-binding-seam S5). Ignored on validate-only payloads.
     BindingValidationStatus:
       type: string
       enum: [VALID, MISSING_ANCHOR, DUPLICATE_BINDING, INCOMPATIBLE_CONTENT_TYPE]
@@ -5041,6 +5504,57 @@ components:
         structuredContentTree:
           type: object
           additionalProperties: true
+        pasteCleaningEvidence:
+          $ref: '#/components/schemas/PasteCleaningEvidence'
+          description: >
+            Non-sensitive paste-cleaning residue returned with the binding when
+            present. Unresolved paste blockers map status away from VALID
+            (typically INCOMPATIBLE_CONTENT_TYPE).
+    PasteCleaningEvidence:
+      type: object
+      additionalProperties: false
+      description: >
+        Non-sensitive paste-cleaning summary persisted on an anchor binding after
+        Accept (editing or release-check evidence per ADR-0019). Forbidden:
+        source HTML, pasted plaintext, customer data, full request bodies.
+      properties:
+        transformedCount:
+          type: integer
+          minimum: 0
+        removedCount:
+          type: integer
+          minimum: 0
+        warningCount:
+          type: integer
+          minimum: 0
+        blockedCount:
+          type: integer
+          minimum: 0
+        unresolvedPasteBlockers:
+          type: boolean
+          description: >
+            Explicit unresolved-blocker flag when present; true when blockedCount > 0
+            or any item has category BLOCKED.
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PasteCleaningEvidenceItem'
+    PasteCleaningEvidenceItem:
+      type: object
+      additionalProperties: false
+      required: [category, messageKey]
+      properties:
+        category:
+          type: string
+          enum: [TRANSFORMED, REMOVED, WARNING, BLOCKED]
+        messageKey:
+          type: string
+          minLength: 1
+          description: Stable i18n key (English-first), e.g. paste.summary.*
+        detectionSummary:
+          type: string
+          nullable: true
+          description: Non-sensitive detection note; must not contain source HTML.
     TemplateBindingValidationSummary:
       type: object
       additionalProperties: false
@@ -5805,9 +6319,34 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContentModuleVersionView'
+    ContentModuleSummaryPageResponse:
+      type: object
+      additionalProperties: false
+      description: >-
+        LR-C5 catalog list envelope. Replaces pre-LR-C5 bare-array
+        `ContentModuleSummaryListResponse` for `GET /content-modules`.
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageView'
+            - type: object
+              additionalProperties: false
+              required: [content]
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ContentModuleSummaryView'
     ContentModuleSummaryListResponse:
       type: object
       additionalProperties: false
+      deprecated: true
+      description: >-
+        Deprecated (LR-C5). Historical bare-array list envelope. Use
+        `ContentModuleSummaryPageResponse` / `PageView` instead.
       required: [metadata, result]
       properties:
         metadata:
@@ -5898,6 +6437,82 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CollaborationWorkItemSummaryView'
+    CollaborationNotificationUnreadCountView:
+      type: object
+      additionalProperties: false
+      required: [unreadCount]
+      properties:
+        unreadCount:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Count of visible OPEN work items without a per-user read marker.
+    CollaborationNotificationItemView:
+      type: object
+      additionalProperties: false
+      required:
+        - workItemId
+        - templateId
+        - templateName
+        - groupCode
+        - queue
+        - triggerType
+        - summaryText
+        - createdAt
+        - ageSeconds
+        - read
+      properties:
+        workItemId:
+          type: string
+          format: uuid
+        templateId:
+          type: string
+          format: uuid
+        templateName:
+          type: string
+        groupCode:
+          type: string
+          maxLength: 64
+        queue:
+          $ref: '#/components/schemas/CollaborationWorkItemQueue'
+          description: >-
+            Queue type for deep-link construction —
+            `/dashboard?queue={QUEUE}#tasks-section`.
+        triggerType:
+          $ref: '#/components/schemas/CollaborationWorkItemTriggerType'
+        summaryText:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        ageSeconds:
+          type: integer
+          format: int64
+          minimum: 0
+        read:
+          type: boolean
+          description: True when the caller has a per-user read marker for this work item.
+    CollaborationNotificationUnreadCountResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/CollaborationNotificationUnreadCountView'
+    CollaborationNotificationListResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/CollaborationNotificationItemView'
     CollaborationTimeoutConfigView:
       type: object
       additionalProperties: false
@@ -6084,6 +6699,12 @@ components:
         structuredContentJson:
           type: string
           nullable: true
+        pasteCleaningEvidence:
+          $ref: '#/components/schemas/PasteCleaningEvidence'
+          description: >
+            Optional non-sensitive paste-cleaning residue exported with the binding.
+            Must not include source HTML. Unresolved blockers remain fail-closed on
+            re-import / validate / publish (ops-paste-binding-seam).
         validationStatus:
           type: string
           enum: [VALID, MISSING_ANCHOR, DUPLICATE_BINDING, INCOMPATIBLE_CONTENT_TYPE]
@@ -6304,6 +6925,25 @@ components:
           description: >-
             Optional display label for updatedBy in format
             "displayName (username)"; falls back to username when user not found.
+    TemplateSummaryPageResponse:
+      type: object
+      additionalProperties: false
+      description: LR-C5 catalog list envelope for `GET /api/management/v1/templates`.
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageView'
+            - type: object
+              additionalProperties: false
+              required: [content]
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TemplateSummaryView'
     MasterDocumentSummaryView:
       type: object
       additionalProperties: false
@@ -6325,7 +6965,7 @@ components:
         name:
           type: string
         status:
-          type: string
+          $ref: '#/components/schemas/MasterDocumentReviewStatus'
         originalFilename:
           type: string
         anchorCount:
@@ -6342,6 +6982,27 @@ components:
           description: >-
             Optional display label for updatedBy in format
             "displayName (username)"; falls back to username when user not found.
+    MasterDocumentPageResponse:
+      type: object
+      additionalProperties: false
+      description: >-
+        LR-C5 catalog list envelope for `GET /api/management/v1/masters`.
+        Replaces pre-LR-C5 bare-array list response.
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageView'
+            - type: object
+              additionalProperties: false
+              required: [content]
+              properties:
+                content:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/MasterDocumentSummaryView'
     BatchTestRunSummaryView:
       type: object
       additionalProperties: false
@@ -6992,6 +7653,7 @@ components:
         - ASYNC_TASK_EXPIRED
         - ASYNC_TASK_CANCELLATION_NOT_ALLOWED
         - DOCUMENT_NOT_FOUND
+        - WORK_ITEM_NOT_FOUND
         - ENCRYPTION_PARAMETER_INVALID
         - ENCRYPTION_FAILED
         - BATCH_ITEMS_REQUIRED

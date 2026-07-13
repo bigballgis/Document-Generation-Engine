@@ -1,0 +1,7 @@
+.meta-tag {
+  margin-left: 0.35rem;
+}
+
+:deep(.is-selected-row) {
+  background-color: var(--el-color-primary-light-9);
+}

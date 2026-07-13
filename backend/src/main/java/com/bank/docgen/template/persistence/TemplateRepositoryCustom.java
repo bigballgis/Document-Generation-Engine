@@ -1,0 +1,23 @@
+package com.bank.docgen.template.persistence;
+
+import com.bank.docgen.authorization.management.api.CatalogQueryPage;
+import com.bank.docgen.authorization.management.api.CatalogSortKey;
+import com.bank.docgen.template.domain.ApprovalSubState;
+import com.bank.docgen.template.domain.TemplateLifecycleStatus;
+import java.util.List;
+
+public interface TemplateRepositoryCustom {
+
+    CatalogQueryPage<TemplateEntity> searchCatalog(TemplateCatalogFilter filter, int page, int size);
+
+    record TemplateCatalogFilter(
+            List<String> accessibleGroupCodes,
+            boolean allGroups,
+            String groupCodeExact,
+            String search,
+            TemplateLifecycleStatus lifecycleStatus,
+            ApprovalSubState approvalSubState,
+            CatalogSortKey sort
+    ) {
+    }
+}

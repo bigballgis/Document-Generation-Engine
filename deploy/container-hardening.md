@@ -8,13 +8,19 @@ and Helm wiring are delivered in P15-T02+.
 
 | Workload | Base image | Runtime user | Listen port |
 | --- | --- | --- | --- |
-| Backend | `eclipse-temurin:21-jre-alpine` (minimal; UID 65532 matches distroless `nonroot`) | UID/GID 65532 | 8080 |
+| Backend | `eclipse-temurin:25-jre-alpine` (minimal; UID 65532 matches distroless `nonroot`; jammy equivalent `eclipse-temurin:25-jre-jammy` for font/LibreOffice stages) | UID/GID 65532 | 8080 |
 | Frontend | `nginx:1.27-alpine` (non-root master via `nginx-main.conf`) | `nginx` (UID 101) | 8080 |
 
 ADR-0030 names **distroless/minimal** bases. Packaged Dockerfiles use the minimal alpine
 variants above with the same non-root UID and read-only-root + tmpfs contract. Operators with
-registry access may swap to `gcr.io/distroless/java21-debian12:nonroot` and
+registry access may swap to a Temurin **25**-aligned distroless/nonroot Java image (e.g.
+`gcr.io/distroless/java25-debian12:nonroot` when available in the approved registry) and
 `nginxinc/nginx-unprivileged:1.27-alpine` without changing mount requirements.
+
+> **Baseline note (2026-07-13, Task Master #51):** Runtime JRE pin moves **21 → 25** with
+> [ADR-0028](../docs/adr/technology-stack/0028-backend-platform-stack-baseline.md) / slice
+> [boot-4-1-upgrade](../docs/behavior/boot-4-1-upgrade.md). Dockerfiles are owned by
+> **backend-engineer** — this doc records the accepted target image line.
 
 Build artifacts are copied on the host (`scripts/docker-deploy.ps1`); Dockerfiles under
 `backend/Dockerfile.packaged` and `frontend/Dockerfile.packaged` only assemble runtime layers.
@@ -62,9 +68,14 @@ Static assets and NGINX config are baked into the image and remain read-only at 
 
 ## Local verification
 
-After host compile + image build:
+After host compile + image build, export an **explicit** ≥32-byte `JWT_SECRET` that is **not**
+a known insecure default (`local-dev-only-change-me-please-32bytes-min`,
+`prod-change-me-32-bytes-minimum-secret`). The smoke script is prod-shaped: it must **not**
+silently fall back to `prod-change-me-32-bytes-minimum-secret` when unset
+([BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md) S4).
 
 ```powershell
+$env:JWT_SECRET = '<explicit-non-default-≥32-bytes>'
 .\scripts\container-hardening-smoke.ps1
 ```
 

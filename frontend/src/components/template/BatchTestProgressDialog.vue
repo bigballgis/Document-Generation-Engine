@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { TOKEN_STORAGE_KEY } from '@/api/http'
-import {
-  connectAuthorizedEventStream,
-  type AuthorizedEventStreamConnection,
-} from '@/utils/authorizedEventStream'
+import { useBatchTestProgressStream } from '@/components/template/useBatchTestProgressStream'
 
 const props = defineProps<{
   modelValue: boolean
@@ -22,195 +17,27 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-type BatchPhase = 'running' | 'completed' | 'failed'
-
-interface SampleResult {
-  sampleIndex: number
-  dataSetExternalId: string
-  success: boolean
-  errorDetail?: string
-}
-
-const phase = ref<BatchPhase>('running')
-const completedCount = ref(0)
-const samples = ref<SampleResult[]>([])
-const currentSample = ref<{ index: number; total: number; externalId: string } | null>(null)
-const summarySuccessCount = ref(0)
-const summaryFailedCount = ref(0)
-const anchorCoveragePct = ref<number | null>(null)
-const variableCoveragePct = ref<number | null>(null)
-const sampleCoveragePct = ref<number | null>(null)
-const gatePassed = ref<boolean | null>(null)
-const errorMessage = ref('')
-
-let eventStream: AuthorizedEventStreamConnection | null = null
-let streamSessionId = 0
-
-function disconnectSse() {
-  streamSessionId += 1
-  if (eventStream) {
-    eventStream.close()
-    eventStream = null
-  }
-}
-
-function resetState() {
-  phase.value = 'running'
-  completedCount.value = 0
-  samples.value = []
-  currentSample.value = null
-  summarySuccessCount.value = 0
-  summaryFailedCount.value = 0
-  anchorCoveragePct.value = null
-  variableCoveragePct.value = null
-  sampleCoveragePct.value = null
-  gatePassed.value = null
-  errorMessage.value = ''
-}
-
-function connectSse() {
-  disconnectSse()
-  resetState()
-  const sessionId = streamSessionId
-
-  void connectAuthorizedEventStream({
-    url: props.streamUrl,
-    token: localStorage.getItem(TOKEN_STORAGE_KEY),
-    onMessage: (event) => {
-      if (sessionId !== streamSessionId) {
-        return
-      }
-
-      switch (event.type) {
-        case 'sample_started': {
-          const data = JSON.parse(event.data) as {
-            sampleIndex: number
-            totalSamples: number
-            dataSetExternalId: string
-          }
-          currentSample.value = {
-            index: data.sampleIndex,
-            total: data.totalSamples,
-            externalId: data.dataSetExternalId,
-          }
-          break
-        }
-        case 'sample_done': {
-          const data = JSON.parse(event.data) as {
-            sampleIndex: number
-            success: boolean
-            dataSetExternalId: string
-            errorDetail?: string
-          }
-          completedCount.value = data.sampleIndex
-          samples.value = [
-            ...samples.value,
-            {
-              sampleIndex: data.sampleIndex,
-              dataSetExternalId: data.dataSetExternalId,
-              success: data.success,
-              errorDetail: data.errorDetail,
-            },
-          ]
-          break
-        }
-        case 'batch_completed': {
-          const data = JSON.parse(event.data) as {
-            runId: string
-            successCount: number
-            failedCount: number
-            anchorCoveragePct: number
-            variableCoveragePct: number
-            sampleCoveragePct: number
-            gatePassed: boolean
-          }
-          disconnectSse()
-          phase.value = 'completed'
-          summarySuccessCount.value = data.successCount
-          summaryFailedCount.value = data.failedCount
-          anchorCoveragePct.value = data.anchorCoveragePct
-          variableCoveragePct.value = data.variableCoveragePct
-          sampleCoveragePct.value = data.sampleCoveragePct
-          gatePassed.value = data.gatePassed
-          emit('completed')
-          break
-        }
-        case 'batch_failed': {
-          const data = JSON.parse(event.data) as { error: string }
-          disconnectSse()
-          phase.value = 'failed'
-          errorMessage.value = data.error
-          break
-        }
-        default:
-          break
-      }
-    },
-    onError: () => {
-      if (sessionId !== streamSessionId) {
-        return
-      }
-      disconnectSse()
-      phase.value = 'failed'
-      errorMessage.value = t('templates.batchTest.error.stream')
-    },
-  })
-    .then((stream) => {
-      if (sessionId !== streamSessionId) {
-        stream.close()
-        return
-      }
-      eventStream = stream
-    })
-    .catch(() => {
-      if (sessionId !== streamSessionId) {
-        return
-      }
-      disconnectSse()
-      phase.value = 'failed'
-      errorMessage.value = t('templates.batchTest.error.stream')
-    })
-
-  setTimeout(() => {
-    if (sessionId === streamSessionId && phase.value === 'running') {
-      disconnectSse()
-      phase.value = 'failed'
-      errorMessage.value = t('templates.batchTest.error.timeout')
-    }
-  }, 10 * 60 * 1000)
-}
-
-watch(
-  () => props.modelValue,
-  (visible) => {
-    if (visible) {
-      connectSse()
-    } else {
-      disconnectSse()
-    }
-  },
-  { immediate: true },
-)
-
-onUnmounted(() => {
-  disconnectSse()
-})
-
-function handleClose() {
-  disconnectSse()
-  emit('update:modelValue', false)
-}
-
-const progressPercent = computed(() => {
-  if (props.dataSetCount === 0) return 0
-  if (phase.value === 'completed') return 100
-  return Math.round((completedCount.value / props.dataSetCount) * 100)
-})
-
-const progressStatus = computed(() => {
-  if (phase.value === 'failed') return 'exception'
-  if (phase.value === 'completed') return 'success'
-  return undefined
+const {
+  phase,
+  completedCount,
+  samples,
+  currentSample,
+  summarySuccessCount,
+  summaryFailedCount,
+  anchorCoveragePct,
+  variableCoveragePct,
+  sampleCoveragePct,
+  gatePassed,
+  errorMessage,
+  progressPercent,
+  progressStatus,
+  handleClose,
+} = useBatchTestProgressStream({
+  modelValue: () => props.modelValue,
+  streamUrl: () => props.streamUrl,
+  dataSetCount: () => props.dataSetCount,
+  onCompleted: () => emit('completed'),
+  onClose: () => emit('update:modelValue', false),
 })
 </script>
 
@@ -305,88 +132,4 @@ const progressStatus = computed(() => {
   </el-dialog>
 </template>
 
-<style scoped lang="scss">
-.batch-progress {
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
-
-  &__counter {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-  }
-
-  &__bar {
-    width: 100%;
-  }
-
-  &__current {
-    margin: 0;
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-  }
-
-  &__results {
-    max-height: 220px;
-    overflow-y: auto;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-  }
-
-  &__result-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8125rem;
-  }
-
-  &__result-name {
-    font-weight: 500;
-  }
-
-  &__result-error {
-    color: var(--el-color-danger);
-    font-size: 0.75rem;
-  }
-
-  &__summary {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  &__summary-title {
-    margin: 0;
-    font-size: 0.9375rem;
-    font-weight: 600;
-  }
-
-  &__summary-counts {
-    display: flex;
-    gap: 1rem;
-
-    .is-success {
-      color: var(--el-color-success);
-    }
-
-    .is-failed {
-      color: var(--el-color-danger);
-    }
-  }
-
-  &__coverage {
-    display: flex;
-    gap: 1rem;
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-  }
-
-  &__error {
-    margin-top: 0.5rem;
-  }
-}
-</style>
+<style scoped lang="scss" src="./BatchTestProgressDialog.scss"></style>

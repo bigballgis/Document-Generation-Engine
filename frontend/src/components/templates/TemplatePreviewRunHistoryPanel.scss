@@ -1,0 +1,11 @@
+.preview-run-history {
+  margin-bottom: 1rem;
+
+  &__table {
+    width: 100%;
+  }
+
+  :deep(.preview-run-row.is-selected > td) {
+    background: var(--brand-accent-soft);
+  }
+}

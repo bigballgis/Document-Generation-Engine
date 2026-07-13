@@ -6,7 +6,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ApiPolicyHomeView from '@/views/api/ApiPolicyHomeView.vue'
 import * as apiPolicyApi from '@/api/apiPolicy'
 import en from '@/i18n/locales/en'
-import { useTemplatesStore } from '@/stores/templates'
+import { ROUTE_KEYS } from '@/routing/routeKeys'
+import { useSessionStore } from '@/stores/session'
+import type { ManagementSession } from '@/types/session'
+import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 
 const routerPush = vi.fn()
 
@@ -17,14 +20,6 @@ vi.mock('vue-router', () => ({
 vi.mock('@/api/apiPolicy', () => ({
   fetchAlerts: vi.fn(),
 }))
-
-vi.mock('@/stores/templates', async () => {
-  const actual = await vi.importActual<typeof import('@/stores/templates')>('@/stores/templates')
-  return {
-    ...actual,
-    useTemplatesStore: vi.fn(),
-  }
-})
 
 const sampleAlerts = [
   {
@@ -45,12 +40,33 @@ const sampleAlerts = [
   },
 ]
 
-function mountHome() {
-  setActivePinia(createPinia())
+function patchSession(visibleRoutes: string[]) {
+  const sessionStore = useSessionStore()
+  const session: ManagementSession = {
+    username: '10000000',
+    displayName: 'Admin',
+    email: 'admin@example.com',
+    authSource: 'LOCAL',
+    roles: ['GLOBAL_ADMIN'],
+    authorizedGroupCodes: ['*'],
+    defaultRoute: ROUTE_KEYS.apiPolicyManagement,
+    visibleRoutes,
+    expiresAt: new Date().toISOString(),
+  }
+  sessionStore.$patch({ accessToken: 'token', session })
+}
+
+function mountHome(visibleRoutes: string[] = [
+  ROUTE_KEYS.apiPolicyManagement,
+  ROUTE_KEYS.templateManagement,
+]) {
+  const pinia = createPinia()
+  setActivePinia(pinia)
+  patchSession(visibleRoutes)
   const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
   return mount(ApiPolicyHomeView, {
     global: {
-      plugins: [createPinia(), i18n, ElementPlus],
+      plugins: [pinia, i18n, ElementPlus],
     },
   })
 }
@@ -59,14 +75,6 @@ describe('ApiPolicyHomeView', () => {
   beforeEach(() => {
     routerPush.mockReset()
     vi.mocked(apiPolicyApi.fetchAlerts).mockReset()
-    vi.mocked(useTemplatesStore).mockReturnValue({
-      publishedTemplates: [],
-      loadingList: false,
-      lastErrorMessageKey: null,
-      lastListErrorRetryable: false,
-      templateListSize: 50,
-      fetchTemplates: vi.fn().mockResolvedValue(undefined),
-    } as unknown as ReturnType<typeof useTemplatesStore>)
   })
 
   it('renders alerts table instead of coming soon placeholder', async () => {
@@ -89,5 +97,66 @@ describe('ApiPolicyHomeView', () => {
     await table.vm.$emit('row-click', sampleAlerts[0])
 
     expect(routerPush).toHaveBeenCalledWith('/templates/tpl-1?tab=apiAccess')
+  })
+
+  it('shows LoadErrorPanel instead of empty alerts table when fetch fails', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockRejectedValue({
+      response: { status: 500, data: { error: { code: 'INTERNAL_ERROR' } } },
+    })
+    const wrapper = mountHome()
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('No attention items')
+    expect(wrapper.findComponent({ name: 'LoadErrorPanel' }).exists()).toBe(true)
+  })
+
+  it('offers browse templates when alerts are empty', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockResolvedValue([])
+    const wrapper = mountHome()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Browse templates')
+    expect(wrapper.find('[data-testid="empty-state-actions"]').exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'ElCollapse' }).exists()).toBe(false)
+  })
+
+  it('LR-C9-B: empty alerts hide browse CTA without template route access', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockResolvedValue([])
+    const wrapper = mountHome([ROUTE_KEYS.apiPolicyManagement])
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="empty-state-actions"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('No attention items')
+  })
+
+  it('navigates to template catalog from header action', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockResolvedValue([])
+    const wrapper = mountHome()
+    await flushPromises()
+
+    const browseButton = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Browse templates'))
+    expect(browseButton).toBeDefined()
+    await browseButton!.trigger('click')
+
+    expect(routerPush).toHaveBeenCalledWith('/templates')
+  })
+
+  it('LR-C9-A: retryable load failure wires retryable hint on LoadErrorPanel', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockRejectedValue(
+      axiosEnvelopeError(500, 'apiPolicy.home.alerts.loadFailed', {
+        code: 'INTERNAL_ERROR',
+        category: 'SYSTEM',
+        retryable: true,
+        message: 'Unable to load external access alerts.',
+      }),
+    )
+    const wrapper = mountHome()
+    await flushPromises()
+
+    const errorPanel = wrapper.findComponent({ name: 'LoadErrorPanel' })
+    expect(errorPanel.exists()).toBe(true)
+    expect(errorPanel.props('retryable')).toBe(true)
   })
 })

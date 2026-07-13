@@ -59,7 +59,8 @@ class LibreOfficeParallelConversionIntegrationTest {
                 CircuitBreakerRegistry.ofDefaults(),
                 RetryRegistry.ofDefaults(),
                 pool,
-                new PdfConversionPostProcessor(properties, new DocxPdfConversionPreprocessor())
+                new PdfConversionPostProcessor(properties, new DocxPdfConversionPreprocessor()),
+                new PdfConversionPoolRejectionMetrics(new io.micrometer.core.instrument.simple.SimpleMeterRegistry())
         );
 
         long profileDirsBefore = countDocgenLoProfileDirs();

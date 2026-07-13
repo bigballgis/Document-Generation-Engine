@@ -2,7 +2,7 @@
 
 **Phase status:** **Not Started** (2026-07-03; no active slice — **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03) | **Depends on:** P0–P11 (MVP chain), P19 (publish-gate checklist), P21 (lifecycle UI)
 
-> Single-active-phase invariant: **P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE In Progress** (sole formal phase; activated 2026-07-08). Slice **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12). Prior slice **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03).
+> Formal phase: **None** (2026-07-09+). **LR-A3 Done** (2026-07-10) — not a P12 slice. Recommended next delivery focus: CDP golden path (status note only). Slice **P12-API-PACKAGE-ACCESS-INVOCATION Done** (2026-07-03 — T01–T12). Prior slice **P12-TEMPLATE-TESTING-OVERHAUL Done** (2026-07-03).
 > **P21 remains Done** — do not reopen P21 phase status; **P19 remains Done**
 > — corrective residual only (P19-T08/T10 group UX superseded). AUD-M02 **resolved** via **P12-AUD-M02 Done**
 > (cross-reference P21 §11.4).
@@ -25,7 +25,7 @@ Each slice is activated individually via `plan-orchestrator`; only one slice sho
 | **P12-API-PACKAGE-ACCESS-INVOCATION** | 包级 API 接入重构 + 调用记录 — auto-materialize policy、约定大于配置 Hub UI、invocation records + 留存（12 tasks T01–T12） | **Done** (2026-07-03 — T01–T12; Playwright **10/10** + UIUX **PASS**; `2e61dc3`) | BDD: `docs/behavior/api-package-access-and-invocation-records.md`; plan: [P12-api-package-access-invocation-records.md](./P12-api-package-access-invocation-records.md) |
 | **P13-EXTERNAL-SERVICES-EXCELLENCE** | External services excellence — IA convergence (single hub edit surface), full management invocation history, cross-package alerts, unified impact preview, OpenAPI completion, BDD S1–S8 + CD-E2E-T07/T13 (28 tasks, groups A–F) | **In Progress** (2026-07-08 — Phase 1 A01–A06 Done; Phase 2 next) | Gap audit 2026-07-07; plan: [P13-external-services-excellence.md](./P13-external-services-excellence.md); extends P12 BDD + new `management-invocation-history.md`, `api-access-cross-package-alerts.md` |
 
-**Active slice:** **None** (P23-DEMO-TYPOGRAPHY-LAYOUT-EXCELLENCE is the sole formal phase In Progress). **Last completed:** **P12-API-PACKAGE-ACCESS-INVOCATION** (T01–T12 Done 2026-07-03).
+**Active slice:** **None** (formal phase **None**; delivery focus is LRP LR-A3 outside P12). **Last completed:** **P12-API-PACKAGE-ACCESS-INVOCATION** (T01–T12 Done 2026-07-03).
 
 ### P12-UIUX-DEEP-REFACTOR — Frontend UIUX deep refactor
 

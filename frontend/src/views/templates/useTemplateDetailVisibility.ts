@@ -10,7 +10,14 @@ export interface UseTemplateDetailVisibilityOptions {
 
 export function useTemplateDetailVisibility(options: UseTemplateDetailVisibilityOptions) {
   const { isDevEditor, template } = options
-  const { authorTemplates, decideTests, exportTemplates, editTemplateMetadata } = useCapabilities()
+  const {
+    authorTemplates,
+    decideTests,
+    decideApprovals,
+    publishTemplates,
+    exportTemplates,
+    editTemplateMetadata,
+  } = useCapabilities()
 
   const showMetadataEdit = computed(() => {
     const status = template.value?.lifecycleStatus
@@ -27,6 +34,8 @@ export function useTemplateDetailVisibility(options: UseTemplateDetailVisibility
       isTemplateExportEligible(template.value!.lifecycleStatus),
   )
 
+  // Dev workspace shell (#dev-workspace) must render for decision roles, not only authors.
+  // Testers: DRAFT/TESTING; Approvers: APPROVAL; Publishers: PENDING_RELEASE.
   const showAuthoringSection = computed(() => {
     const status = template.value?.lifecycleStatus
     if (
@@ -40,11 +49,19 @@ export function useTemplateDetailVisibility(options: UseTemplateDetailVisibility
     if (authorTemplates.value) {
       return true
     }
-    return (
-      isDevEditor.value &&
-      decideTests.value &&
-      (status === 'DRAFT' || status === 'TESTING')
-    )
+    if (!isDevEditor.value) {
+      return false
+    }
+    if (decideTests.value && (status === 'DRAFT' || status === 'TESTING')) {
+      return true
+    }
+    if (decideApprovals.value && status === 'APPROVAL') {
+      return true
+    }
+    if (publishTemplates.value && status === 'PENDING_RELEASE') {
+      return true
+    }
+    return false
   })
 
   const canEditContentModuleReferences = computed(

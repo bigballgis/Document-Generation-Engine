@@ -97,7 +97,7 @@
 | **Root cause** | Rich text field asked to carry structure (headless CMS anti-pattern) |
 | **Detection** | Paste E2E + binding validator flags; count of `CONTROLLED_STYLE_FALLBACK` |
 | **Mitigation** | Enforce node matrix in UI; paste cleaning summary; block publish on disallowed nodes |
-| **Owner wave** | P18 (Done UI) + CD-HARD-T05 binding wire |
+| **Owner wave** | P18 (Done UI) + **CD-HARD-T05 Done** (binding wire; merge `f1f00da`; checklist #5b → GO) |
 | **Doc anchor** | authoring-first-principles §4; usability-review L82 |
 
 ### CD-PIT-08 — Edit preview mistaken for legal evidence
@@ -151,7 +151,7 @@
 | **Symptom** | On Docker 4173, preview/batch-test progress does not arrive incrementally (whole batch bursts at once) or the stream drops silently |
 | **Root cause** | `frontend/nginx.conf` has no SSE location (nginx defaults `proxy_buffering on`, `proxy_read_timeout 60s`); backend sends no `X-Accel-Buffering: no` / `Cache-Control: no-cache`; `SseEmitterRegistry` 3-min timeout without heartbeat |
 | **Detection** | LR-E1 incremental-arrival E2E (4173) |
-| **Mitigation** | Heartbeat comment ~20s + response headers + nginx SSE location (buffering off, raised read_timeout) (LR-B3 landed 2026-07-04 — heartbeat + anti-buffering headers + nginx SSE location + Docker curl smoke; browser-level incremental proof → LR-E1) |
+| **Mitigation** | Heartbeat comment ~20s + response headers + nginx SSE location (buffering off, raised read_timeout) (LR-B3 landed 2026-07-04 — heartbeat + anti-buffering headers + nginx SSE location + Docker curl smoke; **browser-level incremental + idle heartbeat proof → LR-E1 Done** 2026-07-12 — merge `575d0aa`; Playwright 2/2; [manifest](../../../frontend/e2e/evidence/LRP-E1-sse-manifest.md)) |
 | **Owner wave** | **LR-B3 / LR-E1** |
 | **Doc anchor** | [docs/plan/detail/LRP-B-runtime-scaleout-session.md](./LRP-B-runtime-scaleout-session.md) |
 
@@ -184,8 +184,8 @@
 | **Symptom** | Management/runtime audit tables grow without bound, degrading queries and backups |
 | **Root cause** | V9/V17 only create tables + indexes; no retention/archival (contrast: invocation records already have V43/V44 + a cleanup scheduler) |
 | **Detection** | Capacity reports / slow-query monitoring |
-| **Mitigation** | Retention config + scheduled cleanup/archival (mirror the invocation pattern; record the retention baseline in an ADR) |
-| **Owner wave** | **LR-D1** |
+| **Mitigation** | Retention config + scheduled cleanup/archival (mirror the invocation pattern; record the retention baseline in an ADR) — **LR-D1 Done** 2026-07-11 (merge `20b2a76`; **ADR-0048 Accepted**; Flyway V54; ShedLock under LR-B2) |
+| **Owner wave** | **LR-D1** (**Done**) |
 | **Doc anchor** | [docs/plan/detail/LRP-D-ops-observability.md](./LRP-D-ops-observability.md) |
 
 ---
@@ -210,7 +210,7 @@
 | `docs/adr/rendering-authoring/0042-pagination-delta-budget.md` | Word vs LO pagination | Acceptable page-count delta for v1 |
 | `docs/adr/rendering-authoring/0043-ooxml-output-validation.md` | OOXML output gate | LO 24 open required in CI |
 
-Status: **Proposed** until architecture-reviewer sign-off.
+Status: LR-A5 Done 2026-07-10. [ADR-0041](../../adr/rendering-authoring/0041-rendering-font-baseline.md) **Accepted** (architecture-reviewer PASS_WITH_NOTES 2026-07-10). ADR-0042/0043 remain **Proposed** (0042 blocked on Word-equipped host; 0043 blocked on slice B XSD/LO24).
 
 ---
 

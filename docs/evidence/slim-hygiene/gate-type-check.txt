@@ -1,0 +1,4 @@
+
+> docgen-frontend@0.1.0 type-check D:\working\DGE-slim-hygiene\frontend
+> vue-tsc --noEmit
+

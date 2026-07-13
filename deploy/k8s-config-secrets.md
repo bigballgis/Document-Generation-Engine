@@ -41,7 +41,14 @@ Expected keys (consumed by Spring Boot via `envFrom`):
 
 - `POSTGRES_USER`, `POSTGRES_PASSWORD`
 - `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`
-- `JWT_SECRET`
+- `JWT_SECRET` — **required**, operator-generated, **≥32 bytes**. **Never** place in ConfigMap.
+  Do **not** use known insecure placeholders:
+  `local-dev-only-change-me-please-32bytes-min`, `prod-change-me-32-bytes-minimum-secret`
+  (acceptance/prod paths refuse these fail-closed). Compose must not bake `${JWT_SECRET:-…}`
+  defaults either — see [BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md)
+  and [runbook § Required environment variables](../docs/operations/runbook.md#required-environment-variables-production).
+  Checklist [#9](../docs/operations/launch-readiness-checklist.md) stays **NO-GO** until
+  implement evidence; clearing #9 alone is **not** go-live.
 
 Per-environment `existingSecretName` (name only — no plaintext in repo):
 
@@ -72,6 +79,11 @@ renders `templates/secret.yaml`. **Never commit** `--set` values or plaintext in
    The app does not start with blank credentials.
 3. **Missing Secret keys:** Spring Boot fails fast on startup when required env vars are absent
    (e.g. database connection failure during context initialization).
+4. **Known insecure `JWT_SECRET` (acceptance / prod path):** Application secret guard refuses
+   known insecure JWT defaults (and empty/blank) fail-closed — error semantics indicate
+   default/insecure secrets **without** logging the secret value
+   ([BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md) S2b). Helm contract
+   already requires the key; operators must still supply a **non-placeholder** value.
 
 Validation (render-only, no cluster):
 
@@ -96,5 +108,8 @@ install.
 
 - [Helm chart README](./helm/docgen/README.md)
 - [Deployment guide](./README.md)
+- [Production runbook — JWT_SECRET](../docs/operations/runbook.md#required-environment-variables-production)
+- [BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md) — explicit JWT provision; no compose default
+- [Launch readiness checklist #9](../docs/operations/launch-readiness-checklist.md) — **NO-GO** until implement evidence
 - [ADR-0030](../docs/adr/operations/0030-operational-platform-baseline.md) — env + Secret Manager baseline
 - [P15 plan](../docs/plan/detail/P15-kubernetes-deployment-container-hardening.md) — P15-T03 acceptance

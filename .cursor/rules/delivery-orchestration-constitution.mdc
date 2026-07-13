@@ -26,18 +26,19 @@ plan-status updates, or Done claims — only orchestration and synthesis.
 ## Fixed pipeline order (authoritative)
 
 ```
-0 worktree-router → 1 behavior-spec-author → 2 plan-orchestrator → 3 doc-keeper(if docs)
- → 4 backend-engineer | frontend-engineer | rendering-engineer
+0 worktree-router (MANDATORY ISOLATED for delivery) → 1 behavior-spec-author → 2 plan-orchestrator → 3 doc-keeper(if docs)
+ → 4 backend-engineer | frontend-engineer | rendering-engineer   [all in feature worktree]
  → 5 build-deploy-agent (E2E stack prep, queued)
  → 6 e2e-test-engineer → 7 e2e-uiux-reviewer   (frontend user-facing)
  → 8 architecture-reviewer → 9 code-quality-reviewer (optional)
  → 10 build-deploy-agent (deploy evidence, queued)
- → 11 integration-merger (if isolated) → 12 post-task-doc-sync → 13 post-task-commit-review → Done
+ → 11 integration-merger (MANDATORY — merge to main + remove worktree)
+ → 12 post-task-doc-sync → 13 post-task-commit-review → Done   [on MAIN only]
 ```
 
 **Review order:** architecture (8) then optional code-quality (9). Do not reverse.
 
-**Isolated worktrees:** code in feature tree; merge at 11; doc-sync+commit (12–13) on **main**.
+**Session worktree:** code only in `../DGE-<slice-id>`; merge at 11; doc-sync+commit (12–13) on **main**.
 
 ## Non-negotiables
 
@@ -47,22 +48,24 @@ plan-status updates, or Done claims — only orchestration and synthesis.
 3. Frontend E2E mandatory for user-facing changes (stages 5–7).
 4. Bank OA style lock + English-first i18n.
 5. Docker deploy gated and **queued** (`docker-deploy-queue.ps1`); single host.
-6. Worktree placement via `worktree-router`; cleanup via `integration-merger`.
+6. **Mandatory session worktree** via `worktree-router` (stage 0); merge + cleanup via `integration-merger` (stage 11). See `worktree-and-deploy-queue-constitution.mdc`.
 7. End gates 12 then 13 before Done (honor `no-commit` / `no-push`).
 8. Single active plan phase (or explicit Task Master active task).
 9. Behavior-changing acceptance surfaces require queued deploy evidence (stage 5 and/or 10).
 
 ## Forbidden
 
+- Skipping **stage 0** worktree for delivery writes (MAIN is not the implementation sandbox).
+- Running `mvn verify` / full frontend gates on **MAIN** for active delivery slices.
 - Skipping behavior spec for behavior-changing work.
 - Frontend Done without E2E functional + UIUX.
 - Deploy on red gates; secrets in images; parallel compose stacks.
 - Reordering/skipping end gates; leaving worktrees after merge.
 - Parent implementing delivery slices inline when a specialist exists.
-- Claiming Done from an isolated worktree without merge + main doc-sync.
+- Claiming Done from a feature worktree without stage 11 merge + MAIN doc-sync.
 
 ## Done definition
 
 Done = durable behavior + green gates + (frontend) E2E + UIUX + queued deploy evidence
-when required + worktree cleaned if isolated + post-task doc sync + post-task commit
-review (or explicit `no-commit`) + updated plan/Task Master status.
+when required + **worktree merged and removed** + post-task doc sync + post-task commit
+review (or explicit `no-commit`) + updated plan/Task Master status — all on **MAIN** after merge.

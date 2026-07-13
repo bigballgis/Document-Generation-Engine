@@ -51,13 +51,14 @@ class ManagementCapabilitiesServiceTest {
     }
 
     @Test
-    void masterDesignerCanAuthorTemplatesOnly() {
+    void masterDesignerCanManageMastersAndAuthorTemplates() {
         var capabilities = service.resolve(Set.of(ManagementRole.MASTER_DESIGNER));
 
         assertThat(capabilities.authorTemplates()).isTrue();
         assertThat(capabilities.stopTemplates()).isTrue();
         assertThat(capabilities.restoreOrDeprecateTemplates()).isFalse();
-        assertThat(capabilities.manageMasters()).isFalse();
+        assertThat(capabilities.manageMasters()).isTrue();
+        assertThat(capabilities.reviewMasters()).isFalse();
         assertThat(capabilities.manageApiPolicy()).isFalse();
         assertThat(capabilities.deleteTemplates()).isFalse();
         assertThat(capabilities.decideTests()).isFalse();

@@ -28,11 +28,11 @@ const WAITING_REVIEW_GUIDANCE = 'journey.roles.MASTER_DESIGNER.waitingReview.gui
 const COMPLETE_GUIDANCE = 'journey.roles.MASTER_DESIGNER.complete.guidance'
 const EMPTY_GUIDANCE = 'journey.roles.MASTER_DESIGNER.empty.guidance'
 
-export function hasMasterUploadedFile(originalFilename?: string | null): boolean {
+function hasMasterUploadedFile(originalFilename?: string | null): boolean {
   return Boolean(originalFilename && originalFilename.trim().length > 0)
 }
 
-export function masterPlaceholdersSatisfied(context: {
+function masterPlaceholdersSatisfied(context: {
   anchorCount?: number
   anchorsLength?: number
 }): boolean {

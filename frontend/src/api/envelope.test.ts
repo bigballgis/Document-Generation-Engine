@@ -5,8 +5,16 @@ import type { ApiEnvelope } from '@/types/session'
 import { unwrapEnvelope } from '@/api/envelope'
 
 const duplicatedUnwrapModules = [
-  'templates.ts',
-  'apiPolicy.ts',
+  // templates.ts is a facade barrel; domain modules own HTTP + unwrapEnvelope.
+  'templatesList.ts',
+  'templatesDetail.ts',
+  'templatesDetailPanels.ts',
+  'templatesLifecycle.ts',
+  'templatesBindings.ts',
+  // apiPolicy.ts is a facade barrel; domain modules own HTTP + unwrapEnvelope.
+  'apiPolicyAccess.ts',
+  'apiPolicyDomains.ts',
+  'apiPolicyInvocations.ts',
   'masters.ts',
   'identity.ts',
   'audit.ts',

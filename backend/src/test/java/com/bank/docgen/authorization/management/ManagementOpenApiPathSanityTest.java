@@ -53,10 +53,11 @@ class ManagementOpenApiPathSanityTest {
             return java.util.Optional.of("com.bank.docgen.contentmodule");
         }
         if (path.startsWith("/api/management/v1/collaboration-work-items")
-                || path.startsWith("/api/management/v1/collaboration-timeout-config")) {
+                || path.startsWith("/api/management/v1/collaboration-timeout-config")
+                || path.startsWith("/api/management/v1/collaboration-notifications")) {
             return java.util.Optional.of("com.bank.docgen.collaboration");
         }
-        if (path.startsWith("/api/management/v1/masters/")) {
+        if (path.startsWith("/api/management/v1/masters")) {
             return java.util.Optional.of("com.bank.docgen.master");
         }
         if (path.contains("/previews") || path.contains("/batch-tests")) {
@@ -71,7 +72,8 @@ class ManagementOpenApiPathSanityTest {
         }
         if (path.startsWith("/api/management/v1/users")
                 || path.startsWith("/api/management/v1/groups")
-                || path.startsWith("/api/management/v1/auth")) {
+                || path.startsWith("/api/management/v1/auth")
+                || path.startsWith("/api/management/v1/security-audit")) {
             return java.util.Optional.of("com.bank.docgen.authorization.management");
         }
         if (path.startsWith("/api/management/v1/risk-prompt-config")) {

@@ -3,9 +3,9 @@
 **Project baseline:** Restart from zero (2026-06-23); **P0–P11, P13–P21 Done**; **P12 Not Started**
 (catch-all idle; slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03).
 
-**Active work in this documentation track:** **[CDP Wave CD-0 In Progress](./plan/competitiveness-deepening-program.md)** — doc truth, E2E BDD, pitfall registry, browser golden-path evidence (task IDs **`CD-*` only).
+**Active work in this documentation track:** **OPS-PASTE-BINDING-SEAM Done** (slice `ops-paste-binding-seam`; Task Master **#47**; merge `f1f00da`; BDD **ready** [ops-paste-binding-seam.md](./behavior/ops-paste-binding-seam.md); checklist [#5b](./operations/launch-readiness-checklist.md) → **GO**; **CD-HARD-T05 → Done** wire; ledger seam closed). Formal phase remains **None**. **no sole-active**. Overall checklist remains **NO-GO** (blocking: **#3b** only; #5a/#10 **CONDITIONAL**). Recommend next (notes only): **pause**. Do **not** claim production go-live. Do **not** activate CD-3. Do **not** touch `DGE-audit-governance`. **Prior:** **[OPS-AD-GROUP-STUB-CLOSE Done](./behavior/ops-ad-group-stub-close.md)** (Task Master **#46**; merge `4e51a1b`; #5a **CONDITIONAL**). **Prior:** **[LR-E2 Done](./plan/launch-readiness-program.md)** (slice `lrp-e2-launch-checklist`; merge `ae39fbb`; Task Master #43; BDD not-applicable; artifact [launch-readiness-checklist.md](./operations/launch-readiness-checklist.md); overall snapshot **NO-GO** — not a production go-live claim). **[Wave LR-E Done](./plan/launch-readiness-program.md)** (E1+E2 docs exit gate — **not** production go-live). **LRP planned waves A–E → Done**. **Prior:** **[LR-E1 Done](./behavior/lrp-e1-sse-proxy-e2e.md)** (slice `lrp-e1-sse-proxy-e2e`; merge `575d0aa`; Task Master #42; evidence [LRP-E1-sse-manifest.md](../frontend/e2e/evidence/LRP-E1-sse-manifest.md)). **Prior:** **[Wave LR-D Done](./plan/detail/LRP-D-ops-observability.md)** (2026-07-12 — D1–D7 all Done; merge tip `218dcf1`). **[Wave LR-C Done](./plan/detail/LRP-C-usability-deepening.md)** (2026-07-11 — C1–C13; merge tip `bf9cbeb`). **[CDP Wave CD-2 Done](./plan/competitiveness-deepening-program.md)** (2026-07-11 — T01–T13; merge tip `b2b0899`).
 
-**Active formal program:** **None** (2026-07-09). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. See [CODE-QUALITY program](./plan/code-quality-program.md) · [task sheet](./plan/detail/CODE-QUALITY-code-hygiene.md).
+**Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **LR-A4 Done** (2026-07-10; merge `a523a09`). **CDP golden path T01 Done** (2026-07-10; merge `1930842`). See [CODE-QUALITY program](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md) · [CDP](./plan/competitiveness-deepening-program.md).
 
 **P22 Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md).
 
@@ -19,7 +19,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | --- | --- | --- |
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
 | 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P23) |
-| 2a | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **This session** — doc truth, E2E golden paths, pitfall registry ( **`CD-*` tasks** ) |
+| 2a | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **Program In Progress** — CD-2 **Done** (T01–T13); CD-3 Not Started; E2E matrix + pitfall registry ( **`CD-*` tasks** ) |
 | 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
 | 2c | **[Deployment guide](../deploy/README.md)** | **Canonical** install/upgrade/cutover/rollback — Docker Compose + Kubernetes (ADR-0030) |
 | 3 | [Orchestration high-level plan](./architecture/orchestration-high-level-plan.md) | Epic ordering and active epic rules |
@@ -130,21 +130,27 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[Deployment guide](../deploy/README.md)** | **Start here for operators** — Docker Compose + Kubernetes install, upgrade, blue-green cutover, rollback, secrets (ADR-0030 / P15) |
 | [Container hardening](../deploy/container-hardening.md) | Non-root, read-only root FS, minimal base images |
 | [Helm chart README](../deploy/helm/docgen/README.md) | Chart values, lint/template, per-env profiles |
-| [Production runbook](./operations/runbook.md) | Release gate, local prod compose profile, observability |
+| [Production runbook](./operations/runbook.md) | Release gate, local prod compose profile, observability + **LR-D3 draft alert response sections** |
+| **[Launch readiness checklist (LR-E2)](./operations/launch-readiness-checklist.md)** | **LR-E2 Done** — evidence-linked go/no-go / conditional rows + verdict template; snapshot **NO-GO** (2026-07-12); **#9 GO** / **#10 CONDITIONAL** (Kafka `KAFKA_IMAGE`); Wave LR-E docs gate **Done** — **not** a production go-live claim; companion [launch-readiness-gate.md](./plan/launch-readiness-gate.md) |
+| **[Backup & restore runbook](./operations/backup-restore-runbook.md)** | **LR-D2** — pg/MinIO backup + confirmation-gated scratch restore; Flyway forward-only + blue-green cross-link; drill evidence **EXECUTED** 2026-07-12 (scratch scope only — do **not** claim production ADR-0030 RPO/RTO compliance) |
 | [ADR-0030 Operational Platform Baseline](./adr/operations/0030-operational-platform-baseline.md) | Accepted CD, hardening, backup, and observability decisions |
+| [ADR-0048 Audit Data Retention & Archival](./adr/operations/0048-audit-data-retention-policy.md) | **Accepted** (2026-07-11) — Tier-1 management 90d / runtime 365d hard delete; Tier-2 archival deferred (LR-D1) |
 
 ## Behavior specifications (`docs/behavior/`)
 
 | Document | Status | Purpose |
 | --- | --- | --- |
-| **[MVP golden path (browser)](./behavior/mvp-golden-path-browser.md)** | **ready** | CD-BDD-T01 → CD-E2E-T01 |
+| **[MVP golden path (browser)](./behavior/mvp-golden-path-browser.md)** | **ready** | CD-BDD-T01 → **CD-E2E-T01 Done** (2026-07-10; Docker 1/1) |
 | [Tester decision journey](./behavior/tester-decision-journey.md) | **ready** | CD-BDD-T02 → CD-E2E-T02/T03 |
 | [Approver decision journey](./behavior/approver-decision-journey.md) | **ready** | CD-BDD-T03 → CD-E2E-T04 |
 | [Team lead publish journey](./behavior/team-lead-publish-journey.md) | **ready** | CD-BDD-T04 → CD-E2E-T05 |
-| [Master designer lifecycle](./behavior/master-designer-lifecycle.md) | **ready** | CD-BDD-T05 → CD-E2E-T06 |
+| [Master designer lifecycle](./behavior/master-designer-lifecycle.md) | **ready** | CD-BDD-T05 → **CD-E2E-T06 Done** (2026-07-10; merge `3aed175`) |
 | [API policy edit-save journey](./behavior/api-policy-edit-save-journey.md) | **ready** | CD-BDD-T06 → CD-E2E-T07 |
+| **[Preview success + artifact download](./behavior/preview-success-artifact-download-journey.md)** | **ready** | CD-BDD-T08 → **CD-E2E-T08** (closes P12 T13 preview-success manifest gap; CD-PIT-08 final-path download) |
 | [Preview comparison journey](./behavior/preview-comparison-journey.md) | **ready** | CD-BDD-T07 → CD-E2E-T09 |
+| **[Fidelity viewed confirmation](./behavior/fidelity-viewed-confirmation-journey.md)** | **ready** | **CD-E2E-T10** — BDD-CDP-FID-001…004 (Pass/Approve/Publish fail-closed) |
 | [Audit admin query journey](./behavior/audit-admin-query-journey.md) | **ready** | CD-BDD-T08 → CD-E2E-T11 |
+| **[zh-CN + dual-brand golden screenshots](./behavior/zh-cn-dual-brand-golden-screenshots.md)** | **ready** | **CD-E2E-T12** — BDD-CDP-I18N-001/002（≥3 key surfaces zh-CN；REDBC+GREENBC @1920） |
 | [Template testing overhaul](./behavior/template-testing-overhaul.md) | **Done** (P12 2026-07-03) | P12 template testing tab |
 | [API package access & invocation records](./behavior/api-package-access-and-invocation-records.md) | **Done** (P12 2026-07-03) | Package-first API access |
 | [Session renewal & revocation](./behavior/session-renewal-revocation.md) | **ready** (LR-B6 delivered 2026-07-04) | BDD-LRP-SESSION-001 → LR-B6 **Done** (sliding renewal, 30 min TTL, 8 h absolute cap, Redis revocation fail-closed; policy confirmed 2026-07-04; implementation deviations in spec §14.1) |
@@ -155,12 +161,69 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[CORE-FORTRESS F5 async durability + security depth](./behavior/core-fortress-f5-async-durability-security.md)** | **Done** (2026-07-09) | Stale reclaim, Kafka DLT, payload scrub, 429 audit, credential rotation — **F5 closed** (full `mvn verify` env follow-up) |
 | **[CORE-FORTRESS F6 frontend kernel refactor](./behavior/core-fortress-f6-frontend-kernel-refactor.md)** | **Done** (2026-07-09) | Composable decomposition — controller **243** lines; **73** composable Vitest; F6-T08 E2E env blocker documented |
 | **[CORE-FORTRESS F7 authoring UX](./behavior/core-fortress-f7-authoring-ux.md)** | **Done** (2026-07-09) | Dirty guard + side-by-side preview; LR-C1/C4 mirrored Done — Vitest **894**; E2E **12/12** |
+| **[LR-C2 structured editor local draft recovery](./behavior/lrp-c2-structured-editor-local-draft-recovery.md)** | **ready** (2026-07-11) | BDD-LRP-C2-DRAFT-001 — debounced localStorage draft; Restore/Discard banner; clear-on-save; LR-C1 interplay; C3 storage separation |
+| **[LR-C3 editor undo/redo](./behavior/lrp-c3-editor-undo-redo.md)** | **ready** (2026-07-11) | BDD-LRP-C3-UNDO-001 — structure-level snapshot history (cap 50); Ctrl/Cmd+Z/Y; toolbar; draft/history separation; dirty interplay |
+| **[LR-C5 catalog server-side pagination/filter](./behavior/lrp-c5-catalog-pagination.md)** | **ready** (2026-07-11) | BDD-LRP-C5-CATALOG-001 — templates/masters/content-modules `PageView`; filters/search; COR-F09 group-first row sort; ≥500 p95 under 1s |
+| **[LR-C6 global command palette](./behavior/lrp-c6-command-palette.md)** | **ready** (2026-07-11) | BDD-LRP-C6-PALETTE-001 — Ctrl/Cmd+K; C5 `search` + `visibleRoutes`; keyboard nav; authz fail-closed; no new backend endpoint |
+| **[LR-C7 in-app notification center](./behavior/lrp-c7-notification-center.md)** | **ready** (2026-07-11) | BDD-LRP-C7-NOTIFY-001 — shell bell + unread badge; P14 work-item projection + per-user read marker; 30s poll; deep-link `/dashboard?queue={QUEUE}#tasks-section`; no email/IM/SSE |
+| **[LR-C8 role onboarding tour](./behavior/lrp-c8-role-onboarding-tour.md)** | **ready** (2026-07-11) | BDD-LRP-C8-TOUR-001 — role-aware `el-tour` (no new dep); first-login + skip/dismiss local marker; help-menu replay; reuses P21 `roleJourneyDefinitions` |
 | **[CORE-FORTRESS F8 observability / SLO / DR](./behavior/core-fortress-f8-observability-slo-dr.md)** | **Done** (2026-07-09) | Micrometer SLOs; deep readiness; DR playbook; evidence bundle — `mvn verify` **1154** |
+| **[LR-A3 master DOCX upload validation](./behavior/lrp-a3-master-docx-upload-validation.md)** | **ready** (2026-07-10) | BDD-LRP-A3-UPLOAD-001 — ZIP magic + OPC probe + 50MB/60MB limits; virus scan pending Q |
+| **[LR-A4 fail-closed unsupported nodes](./behavior/lrp-a4-fail-closed-unsupported-nodes.md)** | **ready** (2026-07-10) | BDD-LRP-A4-FAIL-CLOSED-001 — publish-gate hard-block for `qrBarcodeRef`/`attachmentListRef`; no silent omit; writers deferred |
+| **[LR-D1 audit data retention & archival](./behavior/lrp-d1-audit-retention.md)** | **ready** (2026-07-11) | BDD-LRP-D1-001…010 — management 90d / runtime 365d hard delete; ShedLock; `AUDIT_RETENTION_PURGE`; **[ADR-0048 Accepted](./adr/operations/0048-audit-data-retention-policy.md)** |
+| **[LR-D7 durable security audit events](./behavior/lrp-d7-durable-security-audit.md)** | **ready** (2026-07-11) — slice **Done** (`c94a356`) | BDD-LRP-D7-001…010 — login / forbidden-route / download grant+deny → `management_audit_event`; fail-safe login; matrix §13.3; ledger 「Security forbidden-route audit」**closed**; joins ADR-0048 90d |
+| **[LR-D6 load smoke baseline](./behavior/lrp-d6-load-smoke.md)** | **not-applicable** (2026-07-12) — slice **Done** (`56383eb`) | Measurement harness + evidence — ≥20 concurrent sync gen (p95/error/pool) + ≥5 SSE previews; DEF-LRP-D6-001 triage; fed **LR-D5 Done** (`5b13476`; proposals pending confirmation) / D3 pending |
+| **[LR-D2 backup/restore runbook + drill](./behavior/lrp-d2-backup-restore.md)** | **not-applicable** (2026-07-12) | Ops docs + timed Docker/local Postgres+MinIO drill evidence; ADR-0030 RPO/RTO rehearsal; no product UI/API behavior — feeds LR-E2 checklist |
+| **[LR-D3 metrics & alerting as code](./behavior/lrp-d3-metrics-alerting.md)** | **not-applicable** (2026-07-12) — slice **Done** (`ba5ea2e`) | Observability instrumentation + Prometheus/Grafana as code; scrape + rule-lint acceptance; draft thresholds from D6/D5 only — no product UI/API behavior |
+| **[LR-D4 trace propagation](./behavior/lrp-d4-trace-propagation.md)** | **not-applicable** (2026-07-12) — slice **Done** (`218dcf1`) | Internal observability plumbing — request→MDC→async→Kafka→consumer MDC; **[ADR-0049 Accepted](./adr/operations/0049-distributed-trace-propagation.md)**; `MdcTaskDecorator` + Kafka `X-Trace-Id`; Scenario A/B; no UI / no Zipkin-Tempo backend |
+| **[LR-E1 SSE-through-proxy incremental E2E](./behavior/lrp-e1-sse-proxy-e2e.md)** | **not-applicable** (2026-07-12) · **Done** merge `575d0aa` | Test-only evidence for **LR-B3** — Playwright on Docker 4173: ≥2 incremental SSE arrival timestamps (maxGapMs≈1864) + ≥60 s idle heartbeat survival through nginx; closes CD-PIT-12 browser proof; [manifest](../frontend/e2e/evidence/LRP-E1-sse-manifest.md) |
+| **[JWT_SECRET explicit provision — no compose default](./behavior/ops-jwt-secret-no-default.md)** | **ready** (2026-07-12) · slice **Done** (`587cd9a`) | **BDD-OPS-JWT-SECRET-001** — checklist **#9 → GO** (closes LR-B6 🟡#4); compose `:?` + `ProductionSecretGuard`; overall checklist still **NO-GO**; **not** go-live |
+| **[Kafka image — company registry / fail-closed KAFKA_IMAGE](./behavior/ops-kafka-company-registry.md)** | **ready** (2026-07-12) · slice **Done** (`e54d03c`; Task Master **#45**) | **BDD-OPS-KAFKA-REGISTRY-001** — checklist **#10 → CONDITIONAL** (fail-closed `${KAFKA_IMAGE:?…}`; Hub example LOCAL/DEV ONLY; operator must supply company-approved coords — **do not** invent registry hostname; not GO without company pull evidence); overall checklist still **NO-GO**; **not** go-live |
+| **[AD Group resolver — prod refuse config stub](./behavior/ops-ad-group-stub-close.md)** | **ready** (2026-07-12) · slice **Done** (`4e51a1b`; Task Master **#46**) | **BDD-OPS-AD-GROUP-STUB-001** S1–S4 — checklist **#5a → CONDITIONAL** (honest-bound config stub + fail-closed prod; LAB ONLY ≠ production AD; real LDAP/AD + company directory evidence still missing — **not GO**); **[ADR-0054 Accepted](./adr/authorization-security/0054-ad-group-resolver-production-boundary.md)**; company LDAP/AD **UNKNOWN**; overall checklist still **NO-GO**; **not** go-live |
+| **[Paste cleaning ↔ binding / publish fail-closed](./behavior/ops-paste-binding-seam.md)** | **ready** (2026-07-12) · slice **Done** (`f1f00da`; Task Master **#47**) | **BDD-OPS-PASTE-BINDING-001** S1–S6 — checklist **#5b → GO** (wire path; ADR-0019 SoT: object + absolute → BLOCKED; residue on Accept; `computeBindingStatus` + PublishGate fail-closed; **CD-HARD-T05 Done**; **no** edit-time-only ADR escape); LR-A4 orthogonal; overall checklist still **NO-GO** (#3b); **not** go-live |
+| **[Knip dead-code scan tooling](./behavior/slim-knip-scan.md)** | **not-applicable** (2026-07-12) · slice **Done** (`ea7db64`; Task Master **#48**) | Frontend Knip ^6.26 + evidence under [evidence/slim-knip-scan](./evidence/slim-knip-scan/README.md); Wave-1 orphan-file delete Done (unused files → 0); residual unused exports/types informational — **no** product actor journey; overall checklist still **NO-GO** (#3b); **not** go-live |
+| **[Spring Boot 4.1.0 + Java 25 platform upgrade](./behavior/boot-4-1-upgrade.md)** | **not-applicable** (2026-07-13) · Task Master **#51** · slice **Done** (`993c287`; tip `e9bf43c`) | Platform/ops baseline — Boot parent **3.3.x → 4.1.0** + Java **21 → 25**; [ADR-0028](./adr/technology-stack/0028-backend-platform-stack-baseline.md) amended; `mvn verify` **GREEN** 1357/0/0/7; healthz **200** Boot 4.1.0 + Java 25.0.3; **no** product UI/API journey; formal phase **None**; **not** go-live; do **not** activate CD-3 |
+| **[Dependency security refresh](./behavior/deps-security-refresh.md)** | **not-applicable** (2026-07-13) · Task Master **#49** · slice **Done** (`08c7d56`) | Maven + pnpm CVE/hygiene audit + baseline-safe upgrades (Boot **3.3.13**, ShedLock **6.x**, no major Vue/Vite without ADR); Vitest Critical exception → **#50** expires 2026-10-13; gates green — **no** product actor journey; does **not** close M9-T02; formal phase **None**; **not** go-live; do **not** activate CD-3 |
 
 ## Evidence & acceptance artifacts
 
 | Document | Purpose |
 | --- | --- |
+| [LR-A7 pagination measurement](./evidence/lrp-a7-pagination/README.md) | Docker PDF page-count corpus (2026-07-10 / merge `abf2048`); Word baseline n/a on host; slim JSON + README (PDFs untracked under `.tmp/`) |
+| [Knip dead-code scan](./evidence/slim-knip-scan/README.md) | Frontend Knip 6.26 baseline (2026-07-12) — unused files/exports/deps; `pnpm -C frontend knip` / `.\scripts\knip-scan.ps1` |
+| [Dependency security refresh](./evidence/deps-security-refresh/README.md) | Task #49 Maven audit + SBOM regen (2026-07-13; merge `08c7d56`); frontend audit [operations/deps-security-refresh-frontend-audit.md](./operations/deps-security-refresh-frontend-audit.md) |
+| [Slim Wave 1b unused exports](./evidence/slim-hygiene/README.md) | Knip unused exports **93→0**; duplicate exports **1→0**; 22 OpenAPI/contract types retained (merge `b7cbc07`) |
+| [Slim Wave 2 backend god-class](./evidence/slim-backend/README.md) | AuditRecorder/AuditQuery/VersionLine/Master extracts; `mvn verify` GREEN (merge `6dd76b3`) |
+| [Slim R-backend residual](./evidence/slim-r-backend/README.md) | ApiManagement 572→230; TemplateLifecycle 553→312; package-private supports; `mvn verify` GREEN |
+| [Slim R2-backend residual](./evidence/slim-r2-backend/README.md) | PublishGateService 429→181; CheckItem + Checklist supports; `mvn verify` GREEN |
+| [Slim R3-backend residual](./evidence/slim-r3-backend/README.md) | InvocationRecord 468→287; BatchGeneration 511→311; package-private supports; `mvn verify` GREEN |
+| [Slim R4-backend](./evidence/slim-r4-backend/README.md) | TemplateService 466→341; ContractAssembly 451→59; RuntimeGenerationAudit 446→260; package-private supports; `mvn verify` GREEN |
+| [Slim R5-frontend](./evidence/slim-r5-frontend/README.md) | DevWorkspace 416→236; NotificationBell 400→201; useDashboardJourney 387→142; four FE gates GREEN |
+| [Slim R5-backend](./evidence/slim-r5-backend/README.md) | MasterDocumentService 492→340; ManagementAuditRecorder 492→349; 8 package-private supports; `mvn verify` GREEN |
+| [Slim R6-frontend](./evidence/slim-r6-frontend/README.md) | Lifecycle/composables + mid-tier panels &lt;300; FE gates GREEN |
+| [Slim R6-backend](./evidence/slim-r6-backend/README.md) | TemplateController split + Collaboration/Runtime/VersionLine peels; `mvn verify` GREEN |
+| [Slim R6-render](./evidence/slim-r6-render/README.md) | WriteSession/DocxAssembler/ConditionEvaluator peels under soft warn; `mvn verify` GREEN |
+| [Slim R7-frontend](./evidence/slim-r7-frontend/README.md) | MUST Vue mid-tier &lt;260; SHOULD peels; FE gates GREEN |
+| [Slim R7-backend](./evidence/slim-r7-backend/README.md) | All Java ≥300 hotspots &lt;300; 8 supports; `mvn verify` GREEN |
+| [Slim R8-backend](./evidence/slim-r8-backend/README.md) | Near-line services &lt;260; entities skipped; `mvn verify` GREEN |
+| [Slim R8-frontend](./evidence/slim-r8-frontend/README.md) | Near-line Vue/TS &lt;260; FE gates GREEN |
+| [Slim R9-frontend](./evidence/slim-r9-frontend/README.md) | Near-250 panels/composables &lt;240; FE gates GREEN |
+| [Slim R9-backend](./evidence/slim-r9-backend/README.md) | ApiManagement split + near-250 peels; `mvn verify` GREEN |
+| [Slim R10-backend](./evidence/slim-r10-backend/README.md) | Near-240 services &lt;220; `mvn verify` GREEN |
+| [Slim R10-frontend](./evidence/slim-r10-frontend/README.md) | stores/api/types barrels + DetailViewBody peel; FE gates GREEN |
+| [Slim R11-backend](./evidence/slim-r11-backend/README.md) | Near-220 services &lt;200; `mvn verify` GREEN |
+| [Slim R12-frontend](./evidence/slim-r12-frontend/README.md) | Near-190 panels/api/stores peels; FE gates GREEN |
+| [Slim R12-backend](./evidence/slim-r12-backend/README.md) | Near-200 services peels; `mvn verify` GREEN |
+| [Slim R11-frontend](./evidence/slim-r11-frontend/README.md) | Near-210 panels &lt;200; stores &lt;250; FE gates GREEN |
+| [Slim Wave 3 frontend SFC](./evidence/slim-frontend/README.md) | BindingsPanel 1249→170 orchestrator; ManagementShell 671→311 (merge `2cf7cb9`) |
+| [Slim R-frontend residual](./evidence/slim-r-frontend/README.md) | CSC Editor 864→177; AuditConsole 588→155 |
+| [Slim R2-frontend residual](./evidence/slim-r2-frontend/README.md) | TemplateDetailView 577→388 orchestrator + detail shells (merge `02b299c`) |
+| [Slim R3-hubs](./evidence/slim-r3-hubs/README.md) | TemplatePackageHub 501→145; MasterPackageHub 508→112 (merge `23ec86b`) |
+| [Slim R3-detail](./evidence/slim-r3-detail/README.md) | ContentModuleDetail 477→110; TemplateList 416→107; MasterRevisionDetail 458→145 (merge `536ea6d`) |
+| [Slim R4-composables](./evidence/slim-r4-composables/README.md) | CommandPalette 549→264; CSC editor 551→305; BindingsPanel composable 462→155 |
+| [Slim R4-panels](./evidence/slim-r4-panels/README.md) | Clause/VersionLines/DecisionDialog panel peels (merge `2573bc1`) |
+| [Slim Wave 4 test DRY](./evidence/slim-tests/README.md) | Platform/VersionLine/Dashboard fixtures DRY; net **−1033** LOC; gates GREEN (merge `b7e279e`) |
+| [Slim R-tests residual](./evidence/slim-r-tests/README.md) | AuditQueryServiceTest 746→318; shared `AuditQueryServiceTestSupport`; `mvn verify` GREEN |
 | [Demo typography review checklist](./evidence/demo-typography-review-checklist.md) | Human reviewer checklist — fonts, styles, margins, headers/footers, tables, signatures (**P23-T16**; ≥2 CORP + ≥2 RETAIL mandatory samples) |
 | [Fundraising demo summary](./evidence/fundraising-demo-summary.md) | 13-template evidence matrix — generate script, E2E, POI tests, manifest paths (**P23-T16**) |
 | [Security evidence index](./evidence/security/README.md) | SCA runbook and execution logs |
@@ -170,6 +233,7 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | Document | Purpose |
 | --- | --- |
 | [ADR index](./adr/README.md) | Decision records (Accepted = decision, not task done) |
+| [ADR-0054 AD Group resolver production boundary](./adr/authorization-security/0054-ad-group-resolver-production-boundary.md) | **Accepted** (2026-07-12) — config stub local/dev/test only; acceptance/production directory SPI **or** startup fail-closed; LDAP/AD coords UNKNOWN; does not supersede ADR-0010 |
 
 ## Governance & constitution
 

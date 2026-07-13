@@ -4,14 +4,14 @@ import { useI18n } from 'vue-i18n'
 import type { CatalogFilterChip } from '@/composables/useCatalogTableControls'
 import type { TableColumnFilterOption } from '@/composables/useTableFilterOptions'
 
-export interface CatalogToolbarFilter {
+interface CatalogToolbarFilter {
   key: string
   labelKey: string
   type: 'text' | 'select'
   options?: TableColumnFilterOption[]
 }
 
-export interface CatalogToolbarSortOption {
+interface CatalogToolbarSortOption {
   key: string
   labelKey: string
 }
@@ -43,6 +43,7 @@ const { t } = useI18n()
         class="catalog-filter-toolbar__search"
         clearable
         :placeholder="t('table.searchPlaceholder')"
+        :aria-label="t('table.searchPlaceholder')"
         :prefix-icon="Search"
       />
 
@@ -53,6 +54,7 @@ const { t } = useI18n()
           class="catalog-filter-toolbar__control"
           clearable
           :placeholder="t(filter.labelKey)"
+          :aria-label="t(filter.labelKey)"
         />
         <el-select
           v-else
@@ -61,6 +63,7 @@ const { t } = useI18n()
           clearable
           filterable
           :placeholder="t(filter.labelKey)"
+          :aria-label="t(filter.labelKey)"
         >
           <el-option
             v-for="option in filter.options ?? []"
@@ -75,6 +78,7 @@ const { t } = useI18n()
         v-model="activeSortKey"
         class="catalog-filter-toolbar__sort"
         :placeholder="t('table.sortBy')"
+        :aria-label="t('table.sortBy')"
       >
         <el-option
           v-for="option in props.sortOptions"

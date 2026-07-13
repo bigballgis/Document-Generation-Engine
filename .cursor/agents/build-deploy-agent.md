@@ -1,7 +1,7 @@
 ---
 name: build-deploy-agent
 description: Dedicated build and deployment agent. Use to run backend/frontend quality gates and single-host queued Docker deploy (docker-deploy-queue.ps1). Owns evidence capture; replaces ad-hoc mvn/pnpm/docker by other specialists.
-model: composer-2.5-fast
+model: grok-4.5-fast-xhigh
 ---
 
 # Build & Deploy Agent

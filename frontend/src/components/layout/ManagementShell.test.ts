@@ -24,6 +24,16 @@ vi.mock('vue-router', () => ({
 
 vi.mock('@/api/auth')
 
+vi.mock('@/api/collaboration', () => ({
+  getCollaborationNotificationUnreadCount: vi.fn().mockResolvedValue({ unreadCount: 0 }),
+  listCollaborationNotifications: vi.fn().mockResolvedValue([]),
+  markCollaborationNotificationRead: vi.fn().mockResolvedValue({ unreadCount: 0 }),
+  markAllCollaborationNotificationsRead: vi.fn().mockResolvedValue({ unreadCount: 0 }),
+  listCollaborationWorkItems: vi.fn().mockResolvedValue([]),
+  getCollaborationTimeoutConfig: vi.fn(),
+  upsertCollaborationTimeoutConfig: vi.fn(),
+}))
+
 const globalAdminCapabilities: ManagementCapabilities = {
   manageMasters: true,
   reviewMasters: true,
@@ -70,6 +80,7 @@ function mountShell(
     accessTokenExpiresAt: string | null
     sessionAbsoluteDeadline: string | null
   }> = {},
+  mountOptions: { attachToDocument?: boolean } = {},
 ) {
   const pinia = createPinia()
   setActivePinia(pinia)
@@ -88,6 +99,7 @@ function mountShell(
 
   return mount(ManagementShell, {
     slots: { default: '<div class="content-slot">Page content</div>' },
+    attachTo: mountOptions.attachToDocument ? document.body : undefined,
     global: {
       plugins: [pinia, i18n, ElementPlus],
     },
@@ -150,6 +162,7 @@ describe('ManagementShell', () => {
     expect(wrapper.text()).toContain('Templates')
     expect(wrapper.text()).toContain('Activity log')
     expect(wrapper.text()).toContain('Page content')
+    expect(wrapper.find('.shell-page-root').exists()).toBe(true)
   })
 
   it('does not render myTodos behavior entries in the sidebar', async () => {
@@ -237,6 +250,30 @@ describe('ManagementShell', () => {
     expect(approvalButton).toBeUndefined()
   })
 
+  it('exposes a skip-link as the first focusable control targeting main content', async () => {
+    const wrapper = mountShell(globalAdminSession(), {}, { attachToDocument: true })
+    await flushPromises()
+
+    try {
+      const skipLink = wrapper.find('a.skip-link')
+      expect(skipLink.exists()).toBe(true)
+      expect(skipLink.text()).toBe('Skip to main content')
+      expect(skipLink.attributes('href')).toBe('#main-content')
+
+      const main = wrapper.find('#main-content')
+      expect(main.exists()).toBe(true)
+      expect(main.attributes('tabindex')).toBe('-1')
+
+      const focusable = wrapper.findAll('a, button, [tabindex]:not([tabindex="-1"])')
+      expect(focusable[0].classes()).toContain('skip-link')
+
+      await skipLink.trigger('click')
+      expect(document.activeElement).toBe(main.element)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   it('shows the session limit reminder when the absolute deadline is near', async () => {
     const wrapper = mountShell(globalAdminSession(), {
       accessTokenExpiresAt: new Date(Date.now() + 5 * 60_000).toISOString(),
@@ -279,5 +316,42 @@ describe('ManagementShell', () => {
 
     expect(useSessionStore().authenticated).toBe(false)
     expect(routerPush).toHaveBeenCalledWith({ name: 'login', query: { redirect: '/audit' } })
+  })
+
+  it('shows notification bell when session can view collaboration work items', async () => {
+    const wrapper = mountShell(globalAdminSession())
+    await flushPromises()
+    expect(wrapper.find('[data-testid="notification-bell"]').exists()).toBe(true)
+  })
+
+  it('hides notification bell when collaboration capability is absent', async () => {
+    const wrapper = mountShell({
+      username: '10000004',
+      displayName: 'Audit Only',
+      email: 'audit@example.com',
+      authSource: 'LOCAL',
+      roles: ['AUDIT_ADMIN'],
+      authorizedGroupCodes: ['*'],
+      defaultRoute: ROUTE_KEYS.auditConsole,
+      visibleRoutes: [ROUTE_KEYS.auditConsole],
+      capabilities: {
+        ...globalAdminCapabilities,
+        viewCollaborationWorkItems: false,
+        decideTests: false,
+        decideApprovals: false,
+        authorTemplates: false,
+        maintainCollaborationTimeoutConfig: false,
+      },
+      expiresAt: new Date().toISOString(),
+    })
+    await flushPromises()
+    expect(wrapper.find('[data-testid="notification-bell"]').exists()).toBe(false)
+  })
+
+  it('shows Help menu with replay entry (BDD-LRP-C8-003)', async () => {
+    const wrapper = mountShell(globalAdminSession())
+    await flushPromises()
+    expect(wrapper.find('[data-testid="help-menu"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="help-menu-trigger"]').text()).toContain('Help')
   })
 })

@@ -48,3 +48,15 @@ Master revision-line read routes (management UI — P2-T05 Phase A / P2-T06 Phas
 - `GET /api/management/v1/masters/{masterId}/revision-lines/{revisionLineId}/download` — historical or current DOCX bytes
 
 Traceability: BDD-MASTER-REVISION-NAV-001 — [catalog-navigation-ux.md](../product/catalog-navigation-ux.md).
+
+### Management master DOCX upload validation (LR-A3)
+
+Management write paths `POST /api/management/v1/masters` and `PUT /api/management/v1/masters/{id}/file` share deep DOCX validation + size limits. These are **management-API** keys (not entries in the runtime OpenAPI v1 baseline error catalog in [contract-outline.md](contract-outline.md)):
+
+| Condition | HTTP (service path) | `error.messageKey` |
+| --- | --- | --- |
+| Missing / non-`.docx` / disallowed Content-Type | 422 | `api.error.master.docxRequired` |
+| File bytes above service limit (default 50MB) | 422 | `api.error.master.docxTooLarge` |
+| Bad ZIP magic or missing OPC required entries | 422 | `api.error.master.docxCorrupt` |
+
+Do **not** introduce `api.error.master.invalidDocxContent`. Multipart / nginx oversize must still surface a readable, localizable error (JSON envelope and/or UI mapping). Virus scanning is **pending**, not confirmed. Full scenarios: [LR-A3 upload validation](../behavior/lrp-a3-master-docx-upload-validation.md).

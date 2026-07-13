@@ -1,6 +1,6 @@
 # Backend
 
-Java 21 + Spring Boot 3 module-first layout under `com.bank.docgen`.
+Java 25 + Spring Boot 4 module-first layout under `com.bank.docgen`.
 
 ## Packages
 

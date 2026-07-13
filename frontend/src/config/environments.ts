@@ -12,7 +12,7 @@ export const ENVIRONMENT_LABEL_KEY: Record<RuntimeEnvironment, string> = {
 
 const ENVIRONMENTS = new Set<string>(ALLOWED_ENVIRONMENTS)
 
-export function isRuntimeEnvironment(value: string): value is RuntimeEnvironment {
+function isRuntimeEnvironment(value: string): value is RuntimeEnvironment {
   return ENVIRONMENTS.has(value)
 }
 

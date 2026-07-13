@@ -48,7 +48,7 @@ Source-of-truth boundary:
 | Coverage gate baseline | JaCoCo >= 85% changed lines, >= 90% core/security-critical modules | ADR Accepted | ADR 0035 | 2026-06-09 |
 | Frontend quality command baseline | Fix now: pnpm lint/type-check/test/build | ADR Accepted | ADR 0035 | 2026-06-09 |
 | Error handling + response envelope | Unified error codes + unified response envelope | ADR Accepted | ADR 0006, ADR 0011 | 2026-06-08 |
-| Backend runtime | Java 21 + Spring Boot 3.x | ADR Accepted | ADR 0028 | 2026-06-08 |
+| Backend runtime | Java 25 + Spring Boot 4.x (target pin **4.1.0**) | ADR Accepted (amended 2026-07-13) | ADR 0028; Task Master **#51**; [boot-4-1-upgrade](../behavior/boot-4-1-upgrade.md) | 2026-07-13 |
 | Database | PostgreSQL | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Cache | Redis | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Object storage | MinIO | ADR Accepted | ADR 0028 | 2026-06-08 |
@@ -63,7 +63,7 @@ Source-of-truth boundary:
 | Backend observability | Micrometer + Prometheus + Grafana + OpenTelemetry | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Logging stack | Logback + JSON structured logs | ADR Accepted | ADR 0028 | 2026-06-08 |
 | API docs and debug tooling | springdoc-openapi + Swagger UI | ADR Accepted | ADR 0028 | 2026-06-08 |
-| JSON serialization | Jackson | ADR Accepted | ADR 0028 | 2026-06-08 |
+| JSON serialization | Jackson (runtime **2.x** via `spring-boot-jackson2` on Boot 4.1; Jackson **3** deferred) | ADR Accepted (amended 2026-07-13) | ADR 0028; Task Master **#51**; [boot-4-1-upgrade](../behavior/boot-4-1-upgrade.md) | 2026-07-13 |
 | Object mapping | MapStruct (incremental; apimgmt `ApiPolicyViewMapper` landed 2026-06-25) | ADR Accepted (amended) | ADR 0028, ADR 0037 | 2026-06-25 |
 | Input validation | Jakarta Bean Validation (Hibernate Validator) | ADR Accepted | ADR 0028 | 2026-06-08 |
 | Distributed lock | Redis (Redisson) — mandated, **deferred** (ADR-0039 evaluation; single-instance Lettuce sufficient for now) | ADR Accepted | ADR 0028, ADR 0037, ADR 0039 | 2026-06-24 |

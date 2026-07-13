@@ -2,7 +2,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import ElementPlus from 'element-plus'
 import { createPinia, setActivePinia } from 'pinia'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import ApiPolicyDomainEditor from '@/components/api/ApiPolicyDomainEditor.vue'
 import en from '@/i18n/locales/en'
 import type { ApiPolicy } from '@/types/template'
@@ -69,6 +69,12 @@ function mountEditor(props: Partial<InstanceType<typeof ApiPolicyDomainEditor>['
 }
 
 describe('ApiPolicyDomainEditor', () => {
+  beforeEach(() => {
+    previewImpact.mockReset()
+    savePolicyDomain.mockReset()
+    saveInvocationRetentionDomain.mockReset()
+  })
+
   it('renders L1 retention controls in tab-sections variant', () => {
     const wrapper = mountEditor()
     expect(wrapper.text()).toContain('Retention')
@@ -163,5 +169,47 @@ describe('ApiPolicyDomainEditor', () => {
 
     expect(previewImpact).toHaveBeenCalled()
     expect(savePolicyDomain).toHaveBeenCalledWith('tpl-1', 'OUTPUT_POLICY', expect.any(Object))
+  })
+
+  it('blocks DEFAULT_ROUTE_TARGET save and shows reason/impact/advice on hard-block', async () => {
+    previewImpact.mockResolvedValue({
+      changedAreas: ['DEFAULT_ROUTE_TARGET'],
+      blocking: true,
+      warnings: [
+        'api.apimgmt.policyImpact.defaultRouteChanged',
+        'api.apimgmt.policyImpact.defaultRouteNotCallable',
+      ],
+      defaultRouteImpacted: true,
+      currentPolicyVersion: 1,
+      nextPolicyVersion: 2,
+      summaryMessageKey: 'api.apimgmt.policyImpact.blocking',
+      contractDiffSummary: 'currentTarget=1.0.0,candidateTarget=9.9.9',
+      idempotencyImpactSummary: 'api.apimgmt.policyImpact.idempotencyDefaultRouteGuard',
+    })
+
+    const wrapper = mountEditor()
+    await flushPromises()
+
+    const exposed = wrapper.vm as unknown as {
+      defaultRouteForm: { defaultRouteReleaseVersion: string }
+    }
+    exposed.defaultRouteForm.defaultRouteReleaseVersion = '9.9.9-non-callable'
+    await flushPromises()
+
+    const saveButton = wrapper.find('[data-testid="default-route-save-button"]')
+    expect(saveButton.exists()).toBe(true)
+    await saveButton.trigger('click')
+    await flushPromises()
+
+    expect(previewImpact).toHaveBeenCalled()
+    expect(savePolicyDomain).not.toHaveBeenCalled()
+
+    const hardBlock = wrapper.find('[data-testid="api-policy-hard-block-finding"]')
+    expect(hardBlock.exists()).toBe(true)
+    expect(hardBlock.text()).toMatch(/Reason/i)
+    expect(hardBlock.text()).toMatch(/Impact/i)
+    expect(hardBlock.text()).toMatch(/Advice/i)
+    expect(hardBlock.text()).toContain('DEFAULT_ROUTE_TARGET_UNAVAILABLE')
+    expect(saveButton.attributes('disabled')).toBeDefined()
   })
 })

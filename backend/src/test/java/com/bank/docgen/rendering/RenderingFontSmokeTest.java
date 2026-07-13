@@ -47,7 +47,8 @@ class RenderingFontSmokeTest {
                 CircuitBreakerRegistry.ofDefaults(),
                 RetryRegistry.ofDefaults(),
                 conversionPool(),
-                new PdfConversionPostProcessor(properties, new DocxPdfConversionPreprocessor())
+                new PdfConversionPostProcessor(properties, new DocxPdfConversionPreprocessor()),
+                new PdfConversionPoolRejectionMetrics(new io.micrometer.core.instrument.simple.SimpleMeterRegistry())
         );
 
         byte[] docx = mixedScriptDocx();

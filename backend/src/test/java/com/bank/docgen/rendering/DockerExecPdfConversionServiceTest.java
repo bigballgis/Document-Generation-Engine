@@ -109,7 +109,8 @@ class DockerExecPdfConversionServiceTest {
                     CircuitBreakerRegistry.ofDefaults(),
                     RetryRegistry.ofDefaults(),
                     parallelPool,
-                    new PdfConversionPostProcessor(properties, new DocxPdfConversionPreprocessor())
+                    new PdfConversionPostProcessor(properties, new DocxPdfConversionPreprocessor()),
+                    new PdfConversionPoolRejectionMetrics(new io.micrometer.core.instrument.simple.SimpleMeterRegistry())
             );
             int concurrency = 2;
             List<Future<byte[]>> futures = new ArrayList<>();
@@ -151,7 +152,8 @@ class DockerExecPdfConversionServiceTest {
                 CircuitBreakerRegistry.ofDefaults(),
                 RetryRegistry.ofDefaults(),
                 testPool,
-                new PdfConversionPostProcessor(properties, new DocxPdfConversionPreprocessor())
+                new PdfConversionPostProcessor(properties, new DocxPdfConversionPreprocessor()),
+                new PdfConversionPoolRejectionMetrics(new io.micrometer.core.instrument.simple.SimpleMeterRegistry())
         );
     }
 

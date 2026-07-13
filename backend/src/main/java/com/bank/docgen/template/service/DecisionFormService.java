@@ -35,11 +35,16 @@ public class DecisionFormService {
             if (isBlank(request.commentSummary())) {
                 throw new TemplateValidationException("api.error.template.decisionRationaleRequired");
             }
+            requireConfirmed(request.fidelityViewedConfirmed(), "api.error.template.decisionFidelityConfirmationRequired");
             requireConfirmed(request.keyEvidenceConfirmed(), "api.error.template.decisionKeyEvidenceConfirmationRequired");
         } else if (request.decision() == LifecycleDecision.REJECTED) {
             requireStructuredNegativeFields(request);
             requireRemediationLinks(request);
         }
+    }
+
+    public void validatePublishConfirmation(Boolean fidelityViewedConfirmed) {
+        requireConfirmed(fidelityViewedConfirmed, "api.error.template.decisionFidelityConfirmationRequired");
     }
 
     private void validateExceptionIntervention(LifecycleDecisionRequest request, ManagementSessionClaims session) {

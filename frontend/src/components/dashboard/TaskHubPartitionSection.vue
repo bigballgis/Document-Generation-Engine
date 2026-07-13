@@ -1,22 +1,11 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { toRef } from 'vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
-import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
+import TaskHubCollaborationColumns from '@/components/dashboard/TaskHubCollaborationColumns.vue'
+import { useTaskHubPartitionSection } from '@/components/dashboard/useTaskHubPartitionSection'
 import type { TaskPartition, WorkflowTask } from '@/composables/useWorkflowTasks'
-import {
-  formatCollaborationAgeSeconds,
-} from '@/utils/collaborationWorkItems'
-import { resolveSubmitterDisplay } from '@/utils/userDisplay'
-import {
-  isAgeOverdueForQueue,
-  resolveEffectiveTimeoutConfig,
-  resolveThresholdHoursForQueue,
-} from '@/utils/collaborationTimeoutThreshold'
 import type { CollaborationTimeoutConfig } from '@/types/collaboration'
 
 const props = defineProps<{
@@ -29,96 +18,31 @@ const emit = defineEmits<{
   open: [path: string]
 }>()
 
-const { t } = useI18n()
-
-const isCollaboration = props.partition.kind === 'collaboration'
-
-const filterDefs = isCollaboration
-  ? [
-      { key: 'action', getValue: (row: WorkflowTask) => t(row.titleKey) },
-      { key: 'item', getValue: (row: WorkflowTask) => row.entityName },
-      { key: 'group', getValue: (row: WorkflowTask) => row.groupCode ?? '' },
-      {
-        key: 'trigger',
-        getValue: (row: WorkflowTask) =>
-          row.triggerType ? t(`collaboration.workItem.trigger.${row.triggerType}.description`) : '',
-      },
-      { key: 'summary', getValue: (row: WorkflowTask) => row.summaryText ?? '' },
-      {
-        key: 'age',
-        getValue: (row: WorkflowTask) =>
-          row.ageSeconds !== undefined ? formatCollaborationAgeSeconds(row.ageSeconds) : '',
-      },
-      { key: 'submitter', getValue: (row: WorkflowTask) => resolveSubmitterDisplay(row.submitterUserId, row.submitterDisplayName) },
-    ]
-  : [
-      { key: 'action', getValue: (row: WorkflowTask) => t(row.titleKey) },
-      { key: 'item', getValue: (row: WorkflowTask) => row.entityName },
-      { key: 'group', getValue: (row: WorkflowTask) => row.groupCode ?? '' },
-      { key: 'hint', getValue: (row: WorkflowTask) => t(row.descriptionKey) },
-    ]
-
-const partitionTasks = computed(() => props.partition.tasks)
-
-const { filters: columnFilters, filteredRows } = useDataTableFilters(partitionTasks, filterDefs)
-
-const currentPage = ref(1)
-const { paginatedRows, totalRows } = useCatalogPagination(
-  filteredRows,
-  currentPage,
+const {
+  t,
   CLIENT_TABLE_PAGE_SIZE,
-)
-
-const sortTasksByTitle = rowSortMethod<WorkflowTask>((row) => t(row.titleKey))
-const sortTasksByGroup = rowSortMethod<WorkflowTask>((row) => row.groupCode ?? '')
-const sortTasksByHint = rowSortMethod<WorkflowTask>((row) => t(row.descriptionKey))
-const sortTasksByTrigger = rowSortMethod<WorkflowTask>((row) =>
-  row.triggerType ? t(`collaboration.workItem.trigger.${row.triggerType}.description`) : '',
-)
-const sortTasksBySummary = rowSortMethod<WorkflowTask>((row) => row.summaryText ?? '')
-const sortTasksBySubmitter = rowSortMethod<WorkflowTask>((row) =>
-  resolveSubmitterDisplay(row.submitterUserId, row.submitterDisplayName),
-)
-const sortTasksByAge = rowSortMethod<WorkflowTask>((row) => row.ageSeconds ?? 0)
-
-const selectedTask = ref<WorkflowTask | null>(null)
-
-function onCurrentChange(row: WorkflowTask | undefined) {
-  selectedTask.value = row ?? null
-}
-
-function onTableKeydown(event: KeyboardEvent) {
-  if (event.key === 'Enter' && selectedTask.value) {
-    emit('open', selectedTask.value.path)
-  }
-}
-
-function resolveThresholdHours(task: WorkflowTask): number | null {
-  if (!isCollaboration || !task.queue) {
-    return null
-  }
-  const groupCode = task.groupCode ?? ''
-  const effectiveConfig = resolveEffectiveTimeoutConfig(
-    props.globalTimeoutConfig,
-    groupCode ? props.groupTimeoutConfigs[groupCode] : null,
-  )
-  if (!effectiveConfig) {
-    return null
-  }
-  return resolveThresholdHoursForQueue(task.queue, effectiveConfig)
-}
-
-function showOverdueBadge(task: WorkflowTask): boolean {
-  if (!isCollaboration || task.queue === undefined || task.ageSeconds === undefined) {
-    return false
-  }
-  return isAgeOverdueForQueue(task.queue, task.ageSeconds, resolveThresholdHours(task))
-}
-
-function openTask(path: string, event?: Event) {
-  event?.stopPropagation()
-  emit('open', path)
-}
+  isCollaboration,
+  columnFilters,
+  currentPage,
+  paginatedRows,
+  totalRows,
+  sortTasksByTitle,
+  sortTasksByGroup,
+  sortTasksByHint,
+  sortTasksByTrigger,
+  sortTasksBySummary,
+  sortTasksBySubmitter,
+  sortTasksByAge,
+  showOverdueBadge,
+  openTask,
+  formatCollaborationAgeSeconds,
+  resolveSubmitterDisplay,
+} = useTaskHubPartitionSection({
+  partition: toRef(props, 'partition'),
+  globalTimeoutConfig: toRef(props, 'globalTimeoutConfig'),
+  groupTimeoutConfigs: toRef(props, 'groupTimeoutConfigs'),
+  emitOpen: (path) => emit('open', path),
+})
 </script>
 
 <template>
@@ -138,11 +62,9 @@ function openTask(path: string, event?: Event) {
         :data="paginatedRows"
         class="tasks-table"
         highlight-current-row
-        tabindex="0"
         :default-sort="{ prop: 'createdAt', order: 'descending' }"
+        :row-aria-label="(row) => (row as WorkflowTask).entityName"
         @row-click="(row: WorkflowTask) => emit('open', row.path)"
-        @current-change="onCurrentChange"
-        @keydown="onTableKeydown"
       >
         <el-table-column sortable :sort-method="sortTasksByTitle" min-width="200">
           <template #header>
@@ -180,73 +102,25 @@ function openTask(path: string, event?: Event) {
           </template>
         </el-table-column>
 
-        <template v-if="isCollaboration">
-          <el-table-column sortable :sort-method="sortTasksByTrigger" min-width="240">
-            <template #header>
-              <TableColumnHeader
-                :label="t('collaboration.workItems.columns.trigger')"
-                v-model="columnFilters.trigger"
-              />
-            </template>
-            <template #default="{ row }">
-              {{
-                row.triggerType
-                  ? t(`collaboration.workItem.trigger.${row.triggerType}.description`)
-                  : '—'
-              }}
-            </template>
-          </el-table-column>
-
-          <el-table-column sortable :sort-method="sortTasksBySummary" min-width="220">
-            <template #header>
-              <TableColumnHeader
-                :label="t('collaboration.workItems.columns.summary')"
-                v-model="columnFilters.summary"
-              />
-            </template>
-            <template #default="{ row }">
-              <span class="summary-cell" :title="row.summaryText">{{ row.summaryText ?? '—' }}</span>
-            </template>
-          </el-table-column>
-
-          <el-table-column sortable :sort-method="sortTasksByAge" width="160">
-            <template #header>
-              <TableColumnHeader
-                :label="t('collaboration.workItems.columns.age')"
-                v-model="columnFilters.age"
-              />
-            </template>
-            <template #default="{ row }">
-              <span class="age-cell">
-                {{
-                  row.ageSeconds !== undefined
-                    ? formatCollaborationAgeSeconds(row.ageSeconds)
-                    : '—'
-                }}
-                <el-tag
-                  v-if="showOverdueBadge(row)"
-                  type="danger"
-                  size="small"
-                  class="overdue-badge"
-                >
-                  {{ t('collaboration.workItems.badge.overdue') }}
-                </el-tag>
-              </span>
-            </template>
-          </el-table-column>
-
-          <el-table-column sortable :sort-method="sortTasksBySubmitter" width="140">
-            <template #header>
-              <TableColumnHeader
-                :label="t('collaboration.workItems.columns.submitter')"
-                v-model="columnFilters.submitter"
-              />
-            </template>
-            <template #default="{ row }">
-              {{ resolveSubmitterDisplay(row.submitterUserId, row.submitterDisplayName) }}
-            </template>
-          </el-table-column>
-        </template>
+        <TaskHubCollaborationColumns
+          v-if="isCollaboration"
+          :t="t"
+          :trigger-filter="columnFilters.trigger"
+          :summary-filter="columnFilters.summary"
+          :age-filter="columnFilters.age"
+          :submitter-filter="columnFilters.submitter"
+          :sort-tasks-by-trigger="sortTasksByTrigger"
+          :sort-tasks-by-summary="sortTasksBySummary"
+          :sort-tasks-by-age="sortTasksByAge"
+          :sort-tasks-by-submitter="sortTasksBySubmitter"
+          :show-overdue-badge="showOverdueBadge"
+          :format-collaboration-age-seconds="formatCollaborationAgeSeconds"
+          :resolve-submitter-display="resolveSubmitterDisplay"
+          @update:trigger-filter="columnFilters.trigger = $event"
+          @update:summary-filter="columnFilters.summary = $event"
+          @update:age-filter="columnFilters.age = $event"
+          @update:submitter-filter="columnFilters.submitter = $event"
+        />
 
         <el-table-column v-else sortable :sort-method="sortTasksByHint" min-width="260">
           <template #header>
@@ -281,46 +155,4 @@ function openTask(path: string, event?: Event) {
   </section>
 </template>
 
-<style scoped lang="scss">
-.task-partition {
-  margin-bottom: 1.5rem;
-}
-
-.partition-header {
-  margin-bottom: 0.75rem;
-
-  h3 {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 600;
-  }
-}
-
-.tasks-table {
-  cursor: pointer;
-}
-
-.tasks-table-wrap {
-  outline: none;
-}
-
-.summary-cell {
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: bottom;
-}
-
-.age-cell {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-}
-
-.overdue-badge {
-  flex-shrink: 0;
-}
-</style>
+<style scoped lang="scss" src="./TaskHubPartitionSection.scss"></style>

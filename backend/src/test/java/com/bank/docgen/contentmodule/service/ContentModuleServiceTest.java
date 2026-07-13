@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
+import com.bank.docgen.authorization.management.api.CatalogQueryPage;
 import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.contentmodule.api.CreateContentModuleRequest;
@@ -31,6 +32,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class ContentModuleServiceTest {
@@ -92,8 +95,10 @@ class ContentModuleServiceTest {
     void list_returnsSummariesForAccessibleGroup() {
         when(groupAccessService.canBrowseContentModuleCatalog(author)).thenReturn(true);
         when(groupAccessService.canAccessGroup(author, "retail")).thenReturn(true);
-        when(moduleRepository.findByGroupCodeAndDeletedAtIsNull("RETAIL")).thenReturn(List.of(module));
-        when(moduleRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc()).thenReturn(List.of(module));
+        when(groupAccessService.accessibleGroupCodes(author)).thenReturn(List.of("RETAIL"));
+        when(groupAccessService.canAccessGroup(author, "RETAIL")).thenReturn(true);
+        when(moduleRepository.searchCatalog(any(), eq(0), eq(100)))
+                .thenReturn(new CatalogQueryPage<>(List.of(module), 1, 1));
 
         var result = service.list("retail", author);
 
@@ -114,8 +119,9 @@ class ContentModuleServiceTest {
         );
         when(groupAccessService.canBrowseContentModuleCatalog(author)).thenReturn(true);
         when(groupAccessService.canAccessGroup(author, "RETAIL")).thenReturn(true);
-        when(moduleRepository.findByGroupCodeAndDeletedAtIsNull("RETAIL")).thenReturn(List.of(module));
-        when(moduleRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc()).thenReturn(List.of(sharedModule, module));
+        when(groupAccessService.accessibleGroupCodes(author)).thenReturn(List.of("RETAIL"));
+        when(moduleRepository.searchCatalog(any(), eq(0), eq(100)))
+                .thenReturn(new CatalogQueryPage<>(List.of(module, sharedModule), 2, 1));
 
         var result = service.list("RETAIL", author);
 
@@ -133,9 +139,8 @@ class ContentModuleServiceTest {
     void listAccessible_returnsModulesAcrossAuthorizedGroups() {
         when(groupAccessService.canBrowseContentModuleCatalog(author)).thenReturn(true);
         when(groupAccessService.accessibleGroupCodes(author)).thenReturn(List.of("RETAIL", "WHOLESALE"));
-        when(moduleRepository.findByGroupCodeInAndDeletedAtIsNullOrderByUpdatedAtDesc(List.of("RETAIL", "WHOLESALE")))
-                .thenReturn(List.of(module));
-        when(moduleRepository.findByDeletedAtIsNullOrderByUpdatedAtDesc()).thenReturn(List.of(module));
+        when(moduleRepository.searchCatalog(any(), eq(0), eq(100)))
+                .thenReturn(new CatalogQueryPage<>(List.of(module), 1, 1));
 
         var result = service.listAccessible(author);
 

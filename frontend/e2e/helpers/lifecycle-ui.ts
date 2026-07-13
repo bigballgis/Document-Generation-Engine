@@ -70,9 +70,104 @@ export async function submitForTestingFromDevWorkspace(page: Page, comment = 'CD
 
 export async function confirmTestPassFromDevWorkspace(page: Page) {
   await workspaceActions(page).getByRole('button', { name: /^confirm test pass$/i }).click()
+  await completeConfirmTestPassDialog(page)
+}
+
+/**
+ * Tester dashboard Open deep-links to hub `?tab=lifecycle`.
+ * After routeCapabilities fix, Open may land on either:
+ * - hub `#template-lifecycle-panel` (legacy / collaboration-todos path), or
+ * - `/dev/...` `#dev-workspace` (current hub redirect to approval workspace).
+ * Confirm test pass actions live on hub lifecycle actions or the testing tab.
+ */
+async function waitForTesterOrApproverOpenDestination(page: Page): Promise<'hub' | 'dev'> {
+  await expect(page).not.toHaveURL(/\/forbidden/, { timeout: 15_000 })
+
+  const lifecyclePanel = page.locator('#template-lifecycle-panel')
+  const devWorkspace = page.locator('#dev-workspace')
+  // Wait for either destination after Open (redirect can be async).
+  await expect
+    .poll(async () => {
+      if (await lifecyclePanel.isVisible().catch(() => false)) {
+        return 'hub'
+      }
+      if (await devWorkspace.isVisible().catch(() => false)) {
+        return 'dev'
+      }
+      return 'pending'
+    }, { timeout: 30_000 })
+    .not.toBe('pending')
+
+  if (await lifecyclePanel.isVisible().catch(() => false)) {
+    return 'hub'
+  }
+  await expect(page).toHaveURL(/\/dev\//, { timeout: 15_000 })
+  await expect(devWorkspace).toBeVisible({ timeout: 30_000 })
+  await expect(page.locator('.workspace-tab-shell')).toBeVisible({ timeout: 30_000 })
+  return 'dev'
+}
+
+/**
+ * Tester dashboard Open → open Confirm test pass dialog (does not submit).
+ */
+export async function openConfirmTestPassDialogAfterTesterOpen(page: Page) {
+  const destination = await waitForTesterOrApproverOpenDestination(page)
+
+  if (destination === 'hub') {
+    const passButton = page
+      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
+      .getByRole('button', { name: /^confirm test pass$/i })
+      .first()
+    await expect(passButton).toBeVisible({ timeout: 15_000 })
+    await passButton.click()
+  } else {
+    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i }).click()
+    await workspaceActions(page).getByRole('button', { name: /^confirm test pass$/i }).click()
+  }
+
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText(/confirm test pass/i)).toBeVisible()
-  await dialog.getByText(/I reviewed fidelity warnings/i).click()
+  return dialog
+}
+
+export async function confirmTestPassAfterTesterOpen(page: Page) {
+  await openConfirmTestPassDialogAfterTesterOpen(page)
+  await completeConfirmTestPassDialog(page)
+}
+
+/**
+ * Tester dashboard Open → Record test failure → structured fail form (reason + impact + remediation).
+ */
+export async function confirmTestFailAfterTesterOpen(
+  page: Page,
+  options?: {
+    reasonCategoryLabel?: RegExp
+    impactSummary?: string
+    remediationChecklistCode?: string
+  },
+) {
+  const destination = await waitForTesterOrApproverOpenDestination(page)
+  const failButtonName = /^record test failure$/i
+
+  if (destination === 'hub') {
+    const failButton = page
+      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
+      .getByRole('button', { name: failButtonName })
+      .first()
+    await expect(failButton).toBeVisible({ timeout: 15_000 })
+    await failButton.click()
+  } else {
+    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template testing$/i }).click()
+    await workspaceActions(page).getByRole('button', { name: failButtonName }).click()
+  }
+
+  await completeConfirmTestFailDialog(page, options)
+}
+
+async function completeConfirmTestPassDialog(page: Page) {
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByText(/confirm test pass/i)).toBeVisible()
+  await dialog.getByTestId('confirm-fidelity-viewed').click()
   await dialog.getByText(/I reviewed the coverage summary/i).click()
   await dialog.getByText(/I reviewed the structured preview comparison/i).click()
 
@@ -86,6 +181,98 @@ export async function confirmTestPassFromDevWorkspace(page: Page) {
   const decisionResponse = await decisionResponsePromise
   expect(decisionResponse.ok()).toBeTruthy()
   await expect(page.locator('.el-message').getByText(/test decision recorded/i)).toBeVisible({
+    timeout: 15_000,
+  })
+}
+
+async function completeConfirmTestFailDialog(
+  page: Page,
+  options?: {
+    reasonCategoryLabel?: RegExp
+    impactSummary?: string
+    remediationChecklistCode?: string
+  },
+) {
+  const reasonCategoryLabel = options?.reasonCategoryLabel ?? /binding or layout placeholder issue/i
+  const impactSummary =
+    options?.impactSummary ??
+    'Header binding invalid — author must fix layout placeholder and re-run full test.'
+  const remediationChecklistCode = options?.remediationChecklistCode ?? 'ANCHOR_INTEGRITY'
+
+  const dialog = page.getByRole('dialog', { name: /record test failure/i })
+  await expect(dialog).toBeVisible()
+
+  await dialog.getByRole('combobox', { name: /reason category/i }).click()
+  await page.getByRole('option', { name: reasonCategoryLabel }).click()
+
+  await dialog.getByRole('textbox', { name: /impact summary/i }).fill(impactSummary)
+  await dialog
+    .getByRole('textbox', { name: /remediation checklist code/i })
+    .fill(remediationChecklistCode)
+
+  const decisionResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' && response.url().includes('/lifecycle/test-decision'),
+    { timeout: 30_000 },
+  )
+
+  await dialog.getByRole('button', { name: /^submit decision$/i }).click()
+  const decisionResponse = await decisionResponsePromise
+  expect(decisionResponse.ok()).toBeTruthy()
+  await expect(page.locator('.el-message').getByText(/test decision recorded/i)).toBeVisible({
+    timeout: 15_000,
+  })
+}
+
+/**
+ * Approver dashboard Open → open Confirm approval dialog (does not submit).
+ */
+export async function openApproveDialogAfterApproverOpen(page: Page) {
+  const destination = await waitForTesterOrApproverOpenDestination(page)
+
+  if (destination === 'hub') {
+    const approveButton = page
+      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
+      .getByRole('button', { name: /^approve$/i })
+      .first()
+    await expect(approveButton).toBeVisible({ timeout: 15_000 })
+    await approveButton.click()
+  } else {
+    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template approval$/i }).click()
+    await workspaceActions(page).getByRole('button', { name: /^approve$/i }).click()
+  }
+
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByText(/confirm approval/i)).toBeVisible()
+  return dialog
+}
+
+/**
+ * Approver dashboard Open → Approve with rationale + key evidence confirmation.
+ * When a fidelity-viewed checkbox is present (CD-E2E-T10), it is checked as well.
+ */
+export async function approveTemplateAfterApproverOpen(
+  page: Page,
+  rationale = 'CDP E2E approval rationale — evidence reviewed and ready for release.',
+) {
+  const dialog = await openApproveDialogAfterApproverOpen(page)
+  await dialog.getByRole('textbox', { name: /approval rationale/i }).fill(rationale)
+  const fidelityConfirm = dialog.getByTestId('confirm-fidelity-viewed')
+  if ((await fidelityConfirm.count()) > 0) {
+    await fidelityConfirm.click()
+  }
+  await dialog.getByText(/I reviewed key evidence/i).click()
+
+  const decisionResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' && response.url().includes('/lifecycle/approval-decision'),
+    { timeout: 30_000 },
+  )
+
+  await dialog.getByRole('button', { name: /^submit decision$/i }).click()
+  const decisionResponse = await decisionResponsePromise
+  expect(decisionResponse.ok()).toBeTruthy()
+  await expect(page.locator('.el-message').getByText(/approval decision recorded/i)).toBeVisible({
     timeout: 15_000,
   })
 }
@@ -120,6 +307,10 @@ export async function approveTemplateFromDevWorkspace(
   const dialog = page.getByRole('dialog')
   await expect(dialog.getByText(/confirm approval/i)).toBeVisible()
   await dialog.getByRole('textbox', { name: /approval rationale/i }).fill(rationale)
+  const fidelityConfirm = dialog.getByTestId('confirm-fidelity-viewed')
+  if ((await fidelityConfirm.count()) > 0) {
+    await fidelityConfirm.click()
+  }
   await dialog.getByText(/I reviewed key evidence/i).click()
 
   const decisionResponsePromise = page.waitForResponse(
@@ -149,6 +340,64 @@ export async function confirmGoLiveFromDevWorkspace(page: Page) {
   await publishButton.click()
   const dialog = page.locator('.el-dialog').filter({ hasText: /go-live summary/i })
   await expect(dialog).toBeVisible()
+  const fidelityConfirm = dialog.getByTestId('confirm-fidelity-viewed')
+  if ((await fidelityConfirm.count()) > 0) {
+    await fidelityConfirm.click()
+  }
+  await dialog.getByRole('button', { name: /^confirm go-live$/i }).click()
+
+  const publishResponse = await publishResponsePromise
+  expect(publishResponse.ok()).toBeTruthy()
+  await expect(page.locator('.el-message').getByText(/template is now live/i)).toBeVisible({
+    timeout: 15_000,
+  })
+}
+
+/**
+ * Team-lead dashboard Open → open Go-live summary dialog (does not confirm).
+ * Asserts fidelity/coverage validation summaries are visible in the dialog.
+ */
+export async function openGoLiveSummaryAfterTeamLeadOpen(page: Page) {
+  const destination = await waitForTesterOrApproverOpenDestination(page)
+
+  if (destination === 'hub') {
+    const publishButton = page
+      .locator('.workspace-tab-shell__actions, #template-lifecycle-panel')
+      .getByRole('button', { name: /^confirm go-live$/i })
+      .first()
+    await expect(publishButton).toBeEnabled({ timeout: 60_000 })
+    await publishButton.click()
+  } else {
+    await page.locator('.workspace-tab-shell').getByRole('tab', { name: /^template approval$/i }).click()
+    const publishButton = workspaceActions(page).getByRole('button', { name: /^confirm go-live$/i })
+    await expect(publishButton).toBeEnabled({ timeout: 60_000 })
+    await publishButton.click()
+  }
+
+  const dialog = page.locator('.el-dialog').filter({ hasText: /go-live summary/i })
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByText(/validation summaries/i)).toBeVisible()
+  await expect(dialog.getByText(/coverage/i).first()).toBeVisible()
+  await expect(dialog.getByText('Release version', { exact: true })).toBeVisible()
+  return dialog
+}
+
+/**
+ * Team-lead dashboard Open → Go-live summary → Confirm go-live (browser publish).
+ */
+export async function confirmGoLiveAfterTeamLeadOpen(page: Page) {
+  const dialog = await openGoLiveSummaryAfterTeamLeadOpen(page)
+  const fidelityConfirm = dialog.getByTestId('confirm-fidelity-viewed')
+  if ((await fidelityConfirm.count()) > 0) {
+    await fidelityConfirm.click()
+  }
+
+  const publishResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' && response.url().includes('/lifecycle/publish'),
+    { timeout: 30_000 },
+  )
+
   await dialog.getByRole('button', { name: /^confirm go-live$/i }).click()
 
   const publishResponse = await publishResponsePromise
@@ -161,10 +410,22 @@ export async function confirmGoLiveFromDevWorkspace(page: Page) {
 export async function saveApiRetentionPolicyFromHubTab(page: Page) {
   await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
 
-  const retentionSelect = page.locator('.retention-select').first()
+  const retentionSection = page.locator('#policy-domain-INVOCATION_RETENTION')
+  await expect(retentionSection).toBeVisible({ timeout: 30_000 })
+
+  const retentionSelect = retentionSection.locator('.retention-select').first()
   await expect(retentionSelect).toBeVisible()
+  const currentLabel = ((await retentionSelect.textContent()) ?? '').trim()
+
+  // Pick a different preset so the form becomes dirty and Save enables.
+  const candidates = [/30 days/i, /90 days/i, /180 days/i, /365 days/i]
+  const nextOption = candidates.find((pattern) => !pattern.test(currentLabel)) ?? /180 days/i
+
   await retentionSelect.click()
-  await page.getByRole('option', { name: /90 days/i }).click()
+  await page.getByRole('option', { name: nextOption }).click()
+
+  const saveButton = retentionSection.getByTestId('retention-save-button')
+  await expect(saveButton).toBeEnabled({ timeout: 15_000 })
 
   const saveResponsePromise = page.waitForResponse(
     (response) =>
@@ -173,14 +434,13 @@ export async function saveApiRetentionPolicyFromHubTab(page: Page) {
     { timeout: 30_000 },
   )
 
-  await page.getByRole('button', { name: /^save retention$/i }).click()
-  const confirmBox = page.locator('.el-message-box')
-  await expect(confirmBox).toBeVisible()
-  await confirmBox.getByRole('button', { name: /^confirm$/i }).click()
+  await saveButton.click()
+  await expect(page.locator('.el-message-box')).toBeVisible({ timeout: 10_000 })
+  await confirmPolicyChangeDialog(page)
 
   const saveResponse = await saveResponsePromise
   expect(saveResponse.ok()).toBeTruthy()
-  await expect(page.locator('.el-message').getByText(/retention settings saved|access setting saved/i)).toBeVisible({
+  await expect(page.getByTestId('retention-save-success')).toBeVisible({
     timeout: 15_000,
   })
 }
@@ -302,6 +562,82 @@ export async function saveDefaultRouteFromHubTab(page: Page, releaseVersion: str
   ).toBeVisible({ timeout: 15_000 })
 }
 
+/**
+ * BDD-CDP-APIPOL-002 — set DEFAULT_ROUTE_TARGET to a non-callable release, run impact preview,
+ * and assert hard-block UI (no PUT / save disabled). Does not assume a successful save.
+ */
+export async function attemptNonCallableDefaultRouteHardBlock(
+  page: Page,
+  releaseVersion = '9.9.9-non-callable',
+): Promise<{ defaultRoutePutCount: number }> {
+  await expect(page.locator('.el-skeleton')).toHaveCount(0, { timeout: 30_000 })
+
+  const routeSection = page.locator('#policy-domain-DEFAULT_ROUTE_TARGET')
+  await routeSection.scrollIntoViewIfNeeded()
+
+  const routeInput = routeSection.locator('input').first()
+  await expect(routeInput).toBeVisible()
+  await routeInput.fill(releaseVersion)
+
+  let defaultRoutePutCount = 0
+  const onRequest = (req: { method: () => string; url: () => string }) => {
+    if (req.method() === 'PUT' && req.url().includes('/api/policy/default-route')) {
+      defaultRoutePutCount += 1
+    }
+  }
+  page.on('request', onRequest)
+
+  const saveButton = routeSection.getByTestId('default-route-save-button')
+  await expect(saveButton).toBeEnabled()
+
+  const previewPromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === 'POST' &&
+      response.url().includes('/api/policy/impact-preview'),
+    { timeout: 45_000 },
+  )
+
+  await saveButton.click()
+
+  const previewResponse = await previewPromise
+  expect(previewResponse.ok()).toBeTruthy()
+  const previewBody = (await previewResponse.json()) as {
+    result?: { blocking?: boolean; warnings?: string[] }
+    blocking?: boolean
+    warnings?: string[]
+  }
+  const preview =
+    previewBody.result && typeof previewBody.result === 'object'
+      ? previewBody.result
+      : previewBody
+  expect(preview.blocking).toBe(true)
+
+  // Hard-block path must not open the warning confirm dialog used by soft warnings.
+  await expect(page.locator('.el-message-box')).toHaveCount(0)
+
+  const hardBlock = routeSection.getByTestId('api-policy-hard-block-finding')
+  await expect(hardBlock).toBeVisible({ timeout: 15_000 })
+  await expect(routeSection.getByTestId('api-policy-hard-block-reason')).not.toBeEmpty()
+  await expect(routeSection.getByTestId('api-policy-hard-block-impact')).not.toBeEmpty()
+  await expect(routeSection.getByTestId('api-policy-hard-block-advice')).not.toBeEmpty()
+  await expect(routeSection.getByTestId('api-policy-hard-block-error-code')).toHaveText(
+    'DEFAULT_ROUTE_TARGET_UNAVAILABLE',
+  )
+
+  await expect(saveButton).toBeDisabled()
+  await expect(
+    page
+      .locator('.el-message')
+      .getByText(/save is blocked until blocking impacts are resolved|保存被阻止|无法保存/i),
+  ).toBeVisible({ timeout: 10_000 })
+
+  // Allow any late PUT that would race the hard-block return path.
+  await expect.poll(() => defaultRoutePutCount, { timeout: 2_000 }).toBe(0)
+
+  page.off('request', onRequest)
+  return { defaultRoutePutCount }
+}
+
 /** @deprecated Hub deep-link redirects to dev editor; use openDevEditorWorkspaceTab. */
 export async function openTemplateLifecycleTab(page: Page, templateId: string, request: APIRequestContext) {
   await openDevEditorWorkspaceTab(page, templateId, request, 'approval')
@@ -312,7 +648,7 @@ export async function submitForTestingFromLifecycleTab(page: Page, comment?: str
 }
 
 export async function confirmTestPassFromLifecycleTab(page: Page) {
-  await confirmTestPassFromDevWorkspace(page)
+  await confirmTestPassAfterTesterOpen(page)
 }
 
 export async function submitForApprovalFromLifecycleTab(page: Page) {

@@ -158,7 +158,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 
 | ID | Pri | Title | Evidence | Acceptance | Status | Maps |
 | --- | --- | --- | --- | --- | --- | --- |
-| COR-F09 | H | List pagination vs group sections | slice(0,10) then group by groupCode | Pagination preserves group semantics (design A or B) | **Done** (2026-06-24; group-first pagination) | — |
+| COR-F09 | H | List pagination vs group sections | slice(0,10) then group by groupCode | Pagination preserves group semantics (design A or B) | **Done** (2026-06-24; group-first pagination). **LR-C5 reaffirmation (2026-07-11):** row-based `PageView` + default sort `groupCode ASC, updatedAt DESC` (BDD C5-C3); historical Design A (paginate by group count / `useGroupedCatalogPagination`) **superseded** — do not restore. | LR-C5 |
 | COR-F10 | M | Template detail tab deep linking | activeDetailTab local only | Query/hash sync; workflow links to lifecycle tab | **Done** (2026-06-24) | COR-T11 |
 | COR-F11 | M | Workflow banner action anchor | Banner text only | CTA scrolls/opens lifecycle/review panel | **Done** (2026-06-23; banner CTA + lifecycle panel scroll) | COR-T14 |
 | COR-F12 | M | Template create dialog validation | Silent empty submit; errors not shown in dialog | el-form rules + inline/API errors | **Done** (2026-06-23; `TemplateCreateDialog` rules + alert + Vitest) | OPT-G8 |
@@ -180,7 +180,7 @@ Aligned with `.cursor/skills/frontend-oa-design/SKILL.md` and `management-ui-con
 | --- | --- | --- | --- | --- | --- | --- |
 | COR-F19 | H | zh-CN parity + api.error catalog | en 939 lines vs zh-CN 184; 2 api.error keys | P20-T06 complete; locale switch no mass English fallback | **Done** (2026-06-25; api.error en/zh + primary journey zh-CN bundles) | P20-T06, OPT-G7 |
 | COR-F20 | M | Locale-aware date/number formatting | toLocaleString() without app locale | Shared format helpers bound to i18n locale | **Done** (2026-06-24; `useLocaleFormatters` + audit/template detail) | P20 |
-| COR-F21 | M | Table a11y baseline | row-click only navigation | Focus rings, keyboard row activation, sortable columns | **Done** (2026-06-24; AppDataTable + master/template list activatable rows) | OPT-B4 |
+| COR-F21 | M | Table a11y baseline | row-click only navigation | Focus rings, keyboard row activation, sortable columns | **Done** (2026-06-24; AppDataTable + master/template list activatable rows; **LR-C12 residual closed** 2026-07-11 — Enter/Space + skip-link + focus-ring tokens; merge `0357a16`) | OPT-B4 |
 | COR-F22 | M | Design token cleanup in shell | Hardcoded hex in ManagementShell | CSS variables only; dual-brand check | **Done** (2026-06-25; shell/layout use design tokens only) | P20 |
 | COR-F23 | L | Forbidden / error traceId copy | traceId text only | Copy reference control | **Done** (2026-06-24) | — |
 | COR-F24 | L | Login locale + client validation | No locale on login; no username format check | Locale switch + inline validation | **Done** (2026-06-24) | P1 |

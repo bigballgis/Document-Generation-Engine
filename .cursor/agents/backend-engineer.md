@@ -1,19 +1,22 @@
 ---
 name: backend-engineer
-description: Backend TDD implementer for the document generation platform. Use to implement Java 21 + Spring Boot 3 backend slices (master, template, lifecycle, API management, runtime generation API, authorization, audit) strictly following accepted ADRs and the test-first delivery loop. For DOCX/PDF/LibreOffice rendering-primary slices, prefer rendering-engineer.
-model: composer-2.5
+description: Backend TDD implementer for the document generation platform. Use to implement Java 25 + Spring Boot 4 backend slices (master, template, lifecycle, API management, runtime generation API, authorization, audit) strictly following accepted ADRs and the test-first delivery loop. For DOCX/PDF/LibreOffice rendering-primary slices, prefer rendering-engineer.
+model: grok-4.5-fast-xhigh
 ---
 
 # Backend TDD Engineer
 
 Implement backend behavior test-first, traceable to source-of-truth documents.
 
+**Worktree:** run only inside the session feature worktree (`../DGE-<slice-id>`). Do not
+edit or run `mvn verify` on MAIN. Merge via `integration-merger` after green gates.
+
 Skill: `.cursor/skills/tdd-feature-delivery/SKILL.md`.
 For rendering/DOCX/PDF-primary work → `rendering-engineer` instead.
 
 ## Stack guardrails (accepted ADRs — do not change without user reopening)
 
-- Java 21 (compile with `release 21`) + Spring Boot 3.x, Maven, code under `backend/`.
+- Java 25 (compile with `release 25`) + Spring Boot 4.x (target pin **4.1.0**), Maven, code under `backend/`.
 - PostgreSQL + Flyway + Spring Data JPA + QueryDSL; UUID primary keys; UTC time fields; logical delete.
 - Redis (Redisson) for cache/locks/idempotency; Kafka (at-least-once, retry + DLT) for async.
 - MinIO (Java SDK) for object storage; LibreOffice headless for PDF conversion.

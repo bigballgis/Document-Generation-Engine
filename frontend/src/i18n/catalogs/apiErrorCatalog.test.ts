@@ -32,8 +32,20 @@ const backendApiErrorPaths = readFileSync(
   .map((key) => key.slice('api.error.'.length))
 
 describe('api.error catalog', () => {
+  it('frontend catalog keys are a subset of backend api.error keys (no orphans)', () => {
+    const backendSet = new Set(backendApiErrorPaths)
+    const orphans = apiErrorLeafPaths.filter((path) => !backendSet.has(path))
+    expect(orphans).toEqual([])
+  })
+
   it('matches every backend api.error key in the frontend English catalog', () => {
-    expect(apiErrorLeafPaths.slice().sort()).toEqual(backendApiErrorPaths.slice().sort())
+    const frontendSet = new Set(apiErrorLeafPaths)
+    const missing = backendApiErrorPaths.filter((path) => !frontendSet.has(path))
+    expect(
+      missing,
+      `Backend api.error keys missing from frontend catalog (${missing.length}): ${missing.join(', ')}`,
+    ).toEqual([])
+    expect(apiErrorLeafPaths.length).toBe(backendApiErrorPaths.length)
   })
 
   it('mirrors en and zh-CN catalog structure', () => {

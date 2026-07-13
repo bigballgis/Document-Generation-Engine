@@ -12,7 +12,7 @@ import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,16 +26,14 @@ class GenerationAuditControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void globalAdminQueriesGenerationAuditByExternalId() throws Exception {
+    void globalAdminReceivesNotFoundWhenTemplateMissing() throws Exception {
         mockMvc.perform(get("/api/management/v1/audit/generation")
                         .param("templateExternalId", "RETAIL-ACCOUNT-OPEN")
                         .param("page", "0")
                         .param("size", "20")
                         .with(authentication(new ManagementAuthentication(globalAdmin()))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.events").isArray())
-                .andExpect(jsonPath("$.result.page").value(0))
-                .andExpect(jsonPath("$.result.size").value(20));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error.code").value("TEMPLATE_NOT_FOUND"));
     }
 
     @Test

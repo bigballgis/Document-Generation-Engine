@@ -1,0 +1,167 @@
+{
+  "slice": "LR-C5",
+  "bdd": "BDD-LRP-C5-001 / C5-C11",
+  "capturedAt": "2026-07-11T08:11:17.677Z",
+  "sampleCount": 30,
+  "latenciesMs": [
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 54.674,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 57.074,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=1&size=20&sort=groupCodeAsc",
+      "durationMs": 58.738,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 75.006,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=1&size=20&sort=groupCodeAsc",
+      "durationMs": 59.447,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&groupCode=CORP&sort=groupCodeAsc",
+      "durationMs": 59.616,
+      "totalElements": 254
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&search=LOAD-TPL&groupCode=CORP&sort=groupCodeAsc",
+      "durationMs": 68.408,
+      "totalElements": 250
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&groupCode=CORP&sort=groupCodeAsc",
+      "durationMs": 59.817,
+      "totalElements": 254
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=1&size=20&groupCode=CORP&sort=groupCodeAsc",
+      "durationMs": 65.201,
+      "totalElements": 254
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 57.408,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&lifecycleStatus=APPROVAL&approvalSubState=PENDING_DECISION&sort=groupCodeAsc",
+      "durationMs": 24.14,
+      "totalElements": 0
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/masters?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 29.118,
+      "totalElements": 29
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/masters?page=1&size=20&sort=groupCodeAsc",
+      "durationMs": 41.598,
+      "totalElements": 29
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/content-modules?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 22.25,
+      "totalElements": 125
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/content-modules?page=1&size=20&sort=groupCodeAsc",
+      "durationMs": 25.539,
+      "totalElements": 125
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 378.515,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 348.27,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=1&size=20&sort=groupCodeAsc",
+      "durationMs": 140.469,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 200.779,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=1&size=20&sort=groupCodeAsc",
+      "durationMs": 106.731,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&groupCode=CORP&sort=groupCodeAsc",
+      "durationMs": 124.403,
+      "totalElements": 254
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&search=LOAD-TPL&groupCode=CORP&sort=groupCodeAsc",
+      "durationMs": 138.915,
+      "totalElements": 250
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&groupCode=CORP&sort=groupCodeAsc",
+      "durationMs": 122.091,
+      "totalElements": 254
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=1&size=20&groupCode=CORP&sort=groupCodeAsc",
+      "durationMs": 215.551,
+      "totalElements": 254
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 124.953,
+      "totalElements": 515
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/templates?page=0&size=20&lifecycleStatus=APPROVAL&approvalSubState=PENDING_DECISION&sort=groupCodeAsc",
+      "durationMs": 51.417,
+      "totalElements": 0
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/masters?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 47.384,
+      "totalElements": 29
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/masters?page=1&size=20&sort=groupCodeAsc",
+      "durationMs": 88.886,
+      "totalElements": 29
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/content-modules?page=0&size=20&sort=groupCodeAsc",
+      "durationMs": 48.137,
+      "totalElements": 125
+    },
+    {
+      "url": "http://127.0.0.1:4173/api/management/v1/content-modules?page=1&size=20&sort=groupCodeAsc",
+      "durationMs": 30.407,
+      "totalElements": 125
+    }
+  ],
+  "summary": {
+    "minMs": 22.25,
+    "maxMs": 378.515,
+    "avgMs": 97.5,
+    "p95Ms": 348.3,
+    "gateMs": 1000,
+    "sampleCount": 30,
+    "pass": true
+  }
+}

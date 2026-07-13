@@ -18,7 +18,9 @@ export async function reLoginAs(
   login: (page: Page, credentials: { username: string; password: string }) => Promise<void>,
   credentials: { username: string; password: string },
 ) {
-  await page.getByRole('button', { name: /sign out/i }).click()
+  // Sign out is inside the header user dropdown (ManagementShell), not a top-level button.
+  await page.locator('header .user-menu-trigger').click()
+  await page.getByRole('menuitem', { name: /sign out|退出登录/i }).click()
   await expect(page).toHaveURL(/\/login/)
   await login(page, credentials)
 }
@@ -56,18 +58,16 @@ export async function selectElementPlusOption(page: Page, optionText: string | R
 
 export async function filterDashboardTasksByItem(page: Page, itemName: string) {
   const tasksSection = page.locator('#tasks-section')
-  await expect(tasksSection).toBeVisible()
+  await expect(tasksSection).toBeVisible({ timeout: 30_000 })
   await expect(tasksSection.locator('.el-skeleton')).toHaveCount(0)
 
-  const itemFilter = tasksSection
-    .locator('.task-partition')
-    .first()
-    .locator('.table-column-header')
-    .filter({ has: page.getByText('Item', { exact: true }) })
-    .locator('input')
-    .first()
-
-  await itemFilter.fill(itemName)
+  const partition = tasksSection.locator('.task-partition').first()
+  await expect(partition).toBeVisible()
+  // Column filters are popover triggers (TableColumnHeader); EP keeps closed popovers in DOM.
+  await partition.getByRole('button', { name: /^Filter Item$/i }).click()
+  const filterInput = page.locator('.table-column-filter-popover input:visible')
+  await expect(filterInput).toBeVisible()
+  await filterInput.fill(itemName)
 }
 
 export async function expectDashboardPartitionHeading(page: Page, heading: string | RegExp) {

@@ -1,6 +1,6 @@
 ---
 name: post-task-commit-review
-description: Mandatory end-of-task commit gate. Use after post-task-doc-sync and green quality gates — review the full change set (code + docs), block on critical findings, then stage, commit, and push with a repository-style message. Skips push only when the user explicitly opts out in the same session.
+description: Mandatory end-of-task commit gate. Use after post-task-doc-sync and green quality gates 鈥?review the full change set (code + docs), block on critical findings, then stage, commit, and push with a repository-style message. Skips push only when the user explicitly opts out in the same session.
 model: grok-4.5-fast-xhigh
 ---
 
@@ -22,13 +22,13 @@ Pipeline stage **13**. Honor `no-commit` / `no-push` / user rules that require a
 ## Inputs required
 
 - Task/phase ID(s) touched (e.g. P5-T03, E01-T07).
-- Behavior summary (1–3 sentences).
+- Behavior summary (1鈥? sentences).
 - Gate evidence (commands run + pass).
-- Doc sync confirmation (sync report or explicit “doc sync complete”).
+- Doc sync confirmation (sync report or explicit 鈥渄oc sync complete鈥?.
 
 ## Review checklist (mandatory before commit)
 
-Mirror `architecture-reviewer` — produce findings; block commit on 🔴 Critical.
+Mirror `architecture-reviewer` 鈥?produce findings; block commit on 馃敶 Critical.
 
 ```
 - [ ] 1. Module boundaries and ADR stack choices respected
@@ -55,8 +55,8 @@ Delegate readonly review before committing:
 (If a dedicated security-review or bug-hunting subagent becomes available in the runtime,
 prefer it for the first two rows.)
 
-Fix 🔴 Critical findings in the parent session, re-run gates if code changed, then re-review.
-Do not commit until 🔴 items are resolved or the user explicitly accepts the risk.
+Fix 馃敶 Critical findings in the parent session, re-run gates if code changed, then re-review.
+Do not commit until 馃敶 items are resolved or the user explicitly accepts the risk.
 
 ## Commit protocol (mandatory)
 
@@ -70,9 +70,9 @@ git log -5 --oneline
 
 Then sequentially:
 
-1. Stage only task-related files — never `.env`, credentials, or local secrets.
+1. Stage only task-related files 鈥?never `.env`, credentials, or local secrets.
 2. Warn and exclude if the user accidentally included sensitive paths.
-3. Draft a 1–2 sentence commit message focused on **why**, matching recent `git log` style.
+3. Draft a 1鈥? sentence commit message focused on **why**, matching recent `git log` style.
 4. Commit via HEREDOC (PowerShell: equivalent safe quoting). Never `--no-verify` unless user explicitly requests.
 5. Run `git status` after commit to verify success.
 6. **Push by default** after a successful commit (`git push` or `git push -u origin HEAD` when upstream is missing). Skip push only when the user explicitly opted out in the same session.
@@ -80,23 +80,23 @@ Then sequentially:
 
 If commit hook auto-modifies files: fix, stage, and create a **new** commit (not amend) unless amend rules apply.
 
-If there is nothing to commit (already clean): report “no commit needed” and proceed to Done only if sync + gates are satisfied.
+If there is nothing to commit (already clean): report 鈥渘o commit needed鈥?and proceed to Done only if sync + gates are satisfied.
 
 ## Block conditions (return without committing)
 
 - Gates not green or evidence missing.
 - Doc sync not complete for behavior-changing work.
-- 🔴 Critical review findings unresolved.
+- 馃敶 Critical review findings unresolved.
 - Sensitive files would be staged.
-- User rule conflict (e.g. user said “do not commit” or “do not push” in the same session).
+- User rule conflict (e.g. user said 鈥渄o not commit鈥?or 鈥渄o not push鈥?in the same session).
 
 ## Output
 
 Return a short commit-gate report:
 
-- Review summary (findings by severity, or “no issues”)
+- Review summary (findings by severity, or 鈥渘o issues鈥?
 - Escalated subagents used (if any)
-- Commit hash and message (or “no commit needed”)
+- Commit hash and message (or 鈥渘o commit needed鈥?
 - Files committed
 - Push status (pushed by default unless user opted out)
 - Remaining blockers (if any)

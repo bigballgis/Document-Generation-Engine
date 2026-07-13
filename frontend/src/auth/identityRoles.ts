@@ -21,6 +21,13 @@ export function canManageGroups(roles: string[]): boolean {
   return isGlobalAdmin(roles)
 }
 
+/** Fail-closed: only global/group admins may create or edit users. */
+export function canManageUsers(roles: string[]): boolean {
+  return (
+    isGlobalAdmin(roles) || roles.includes(MANAGEMENT_ROLES.GROUP_ADMIN)
+  )
+}
+
 export function assignableRoles(actorRoles: string[]): ManagementRole[] {
   if (isGlobalAdmin(actorRoles)) {
     return [...MANAGEMENT_ROLE_VALUES]

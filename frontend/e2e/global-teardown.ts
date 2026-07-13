@@ -3,6 +3,12 @@
  * Skipped when E2E_SKIP_CATALOG_CLEANUP=true (e.g. debugging a single fixture).
  */
 import { E2E_ADMIN, FOL_TEMPLATE_EXTERNAL_ID } from './helpers/auth'
+import {
+  E2E_CATALOG_PAGE_SIZE,
+  buildCatalogQuery,
+  collectCatalogPages,
+  type CatalogPageView,
+} from './helpers/catalog-query'
 
 const API_BASE =
   process.env.E2E_API_BASE_URL ?? `http://127.0.0.1:${process.env.BACKEND_PORT ?? '8080'}/api/management/v1`
@@ -42,20 +48,16 @@ async function authorizedGet<T>(token: string, pathSuffix: string): Promise<T> {
   return body.result
 }
 
-interface TemplateListPage {
-  content: TemplateSummary[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
-}
-
-async function listTemplates(token: string): Promise<TemplateSummary[]> {
-  const page = await authorizedGet<TemplateListPage | TemplateSummary[]>(token, '/templates?size=200')
-  if (Array.isArray(page)) {
-    return page
-  }
-  return page.content ?? []
+async function listE2eFixtureTemplates(token: string): Promise<TemplateSummary[]> {
+  // search=E2E- hits externalId contains; paginate so catalog-load seed cannot hide fixtures.
+  return collectCatalogPages<TemplateSummary>(
+    (page, size) =>
+      authorizedGet<CatalogPageView<TemplateSummary> | TemplateSummary[]>(
+        token,
+        `/templates${buildCatalogQuery({ search: E2E_FIXTURE_PREFIX, page, size })}`,
+      ),
+    { pageSize: E2E_CATALOG_PAGE_SIZE },
+  )
 }
 
 async function deleteTemplate(token: string, templateId: string, externalId: string): Promise<void> {
@@ -80,7 +82,7 @@ export default async function globalTeardown(): Promise<void> {
 
   try {
     const token = await apiLogin()
-    const templates = await listTemplates(token)
+    const templates = await listE2eFixtureTemplates(token)
     const e2eTemplates = templates.filter(
       (template) =>
         template.externalId.startsWith(E2E_FIXTURE_PREFIX) &&

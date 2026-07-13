@@ -3,7 +3,6 @@ import { expect, test } from '@playwright/test'
 import { requireDockerStack } from './helpers/stack-readiness'
 
 import {
-  CDP_MVP_GOLDEN_NAME,
   prepareCdpMvpGoldenDraft,
   type CdpMvpGoldenFixture,
 } from './helpers/cdp-mvp-golden-api'
@@ -19,7 +18,7 @@ import { fetchTemplateDetail } from './helpers/submit-approval-gate-api'
 import {
   approveTemplateFromDevWorkspace,
   confirmGoLiveFromDevWorkspace,
-  confirmTestPassFromDevWorkspace,
+  confirmTestPassAfterTesterOpen,
   openDevEditorWorkspaceTab,
   saveApiRetentionPolicyFromHubTab,
   submitForApprovalFromDevWorkspace,
@@ -33,10 +32,8 @@ import {
   runFullTestFromUi,
 } from './helpers/template-testing-api'
 
-const dockerTarget =
-  process.env.E2E_TARGET === 'docker' || process.env.FRONTEND_PORT === '4173'
-const defaultPort = dockerTarget ? 4173 : 5173
-const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${defaultPort}`
+/** This acceptance spec targets the Docker UI on :4173 (override with E2E_BASE_URL). */
+const FRONTEND_BASE_URL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:4173'
 
 test.describe('CDP-E2E-T01 MVP golden path — browser only (BDD-CDP-MVP-001)', () => {
   test.describe.configure({ mode: 'serial', timeout: 600_000 })
@@ -44,17 +41,22 @@ test.describe('CDP-E2E-T01 MVP golden path — browser only (BDD-CDP-MVP-001)', 
   let fixture: CdpMvpGoldenFixture
 
   test.beforeAll(async ({ request }) => {
-    await requireDockerStack(request, { frontendBaseUrl: FRONTEND_BASE_URL, skipMessage: `Docker stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Start with .\\scripts\\docker-deploy.ps1` })
+    await requireDockerStack(request, {
+      frontendBaseUrl: FRONTEND_BASE_URL,
+      skipMessage: `Docker stack required (${FRONTEND_BASE_URL} + ${E2E_API_BASE_URL}). Start with .\\scripts\\docker-deploy.ps1`,
+    })
 
     await assertDemoCatalogSeeded(request)
     fixture = await prepareCdpMvpGoldenDraft(request)
+    if (fixture.lifecycleStatus !== 'DRAFT') {
+      throw new Error(
+        `prepareCdpMvpGoldenDraft must yield DRAFT (got ${fixture.lifecycleStatus} for ${fixture.externalId})`,
+      )
+    }
   })
 
   test('full lifecycle chain without API lifecycle helpers', async ({ page, request }) => {
-    test.skip(
-      fixture.lifecycleStatus !== 'DRAFT',
-      `CDP-MVP-GOLDEN already at ${fixture.lifecycleStatus}; reset Docker volume or use a fresh DB to rerun the golden path.`,
-    )
+    expect(fixture.lifecycleStatus).toBe('DRAFT')
 
     // Step 1 — AUTHOR: full test + submit for testing (dev workspace / testing tab)
     await loginAs(page, E2E_TEMPLATE_AUTHOR)
@@ -74,16 +76,17 @@ test.describe('CDP-E2E-T01 MVP golden path — browser only (BDD-CDP-MVP-001)', 
     })
     expect(testItemsBefore.some((item) => item.templateId === fixture.templateId)).toBeTruthy()
 
-    // Step 2 — TESTER: dashboard TEST queue → confirm test pass
+    // Step 2 — TESTER: dashboard TEST queue → Open → confirm test pass (hub lifecycle path)
+    // Tabbed dashboard requires ?queue=TEST to mount #tasks-section (hash alone stays on Overview).
+    // Do NOT open /dev directly for tester — use the same Open deep-link as collaboration-todos.
     await reLoginAs(page, loginAs, E2E_TEMPLATE_TESTER)
-    await page.goto('/dashboard#tasks-section')
-    await filterDashboardTasksByItem(page, CDP_MVP_GOLDEN_NAME)
-    const testRow = await dashboardTaskRow(page, CDP_MVP_GOLDEN_NAME)
+    await page.goto('/dashboard?queue=TEST#tasks-section')
+    await filterDashboardTasksByItem(page, fixture.name)
+    const testRow = await dashboardTaskRow(page, fixture.name)
     await expect(testRow).toBeVisible({ timeout: 30_000 })
     await testRow.getByRole('button', { name: /^open$/i }).click()
-    await expect(page).toHaveURL(/\/dev\//)
-    await openDevEditorWorkspaceTab(page, fixture.templateId, request, 'testing')
-    await confirmTestPassFromDevWorkspace(page)
+    await expect(page).toHaveURL(/tab=lifecycle|\/dev\//, { timeout: 15_000 })
+    await confirmTestPassAfterTesterOpen(page)
 
     detail = await fetchTemplateDetail(request, fixture.templateId)
     expect(detail.lifecycleStatus).toBe('APPROVAL')
@@ -128,7 +131,8 @@ test.describe('CDP-E2E-T01 MVP golden path — browser only (BDD-CDP-MVP-001)', 
     await page.goto(`/templates/${fixture.templateId}?tab=apiAccess`)
     await saveApiRetentionPolicyFromHubTab(page)
 
-    await expect(page.getByText(/policy version|策略版本/i).first()).toBeVisible()
     await expect(page.getByRole('heading', { name: /external access|对外接入/i })).toBeVisible()
+    await expect(page.locator('#policy-domain-INVOCATION_RETENTION')).toBeVisible()
+    await expect(page.getByTestId('retention-save-success')).toBeVisible()
   })
 })

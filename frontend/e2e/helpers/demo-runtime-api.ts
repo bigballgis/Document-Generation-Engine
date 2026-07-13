@@ -13,6 +13,12 @@ import wealthDemoVariables from '../fixtures/demo/wealth-demo-test-variables.jso
 import folDemoTestVariables from '../fixtures/fol-demo-test-variables.json' with { type: 'json' }
 import { DEMO_FULL_FLOW_EXTERNAL_ID, E2E_GROUP_ADMIN, E2E_TEMPLATE_AUTHOR, FOL_TEMPLATE_EXTERNAL_ID } from './auth'
 import {
+  E2E_CATALOG_PAGE_SIZE,
+  buildCatalogQuery,
+  findInCatalogPages,
+  type CatalogPageView,
+} from './catalog-query'
+import {
   createTemplateApiCredential,
   RUNTIME_API_BASE_URL,
   type RuntimeCredentialBundle,
@@ -219,29 +225,21 @@ function runtimeCredentialHeaders(credential: RuntimeCredentialBundle): Record<s
   }
 }
 
-interface TemplateListPage {
-  content: TemplateSummary[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
-}
-
-async function listTemplates(request: APIRequestContext, token: string): Promise<TemplateSummary[]> {
-  const page = await authorizedGet<TemplateListPage>(request, token, '/templates?size=200')
-  if (Array.isArray(page)) {
-    return page
-  }
-  return page.content ?? []
-}
-
 export async function findTemplateByExternalId(
   request: APIRequestContext,
   externalId: string,
 ): Promise<TemplateSummary | undefined> {
   const token = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
-  const templates = await listTemplates(request, token)
-  return templates.find((template) => template.externalId === externalId)
+  return findInCatalogPages<TemplateSummary>(
+    (page, size) =>
+      authorizedGet<CatalogPageView<TemplateSummary> | TemplateSummary[]>(
+        request,
+        token,
+        `/templates${buildCatalogQuery({ search: externalId, page, size })}`,
+      ),
+    (template) => template.externalId === externalId,
+    { pageSize: E2E_CATALOG_PAGE_SIZE },
+  )
 }
 
 async function fetchTemplateApiPolicy(

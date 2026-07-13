@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 @Order(Ordered.LOWEST_PRECEDENCE)
@@ -37,6 +38,24 @@ public class GlobalExceptionHandler {
                 request,
                 "api.error.validation.requestBodyInvalid",
                 fieldErrors
+        );
+    }
+
+    /**
+     * LR-A3: Spring multipart oversize must return a translated JSON envelope
+     * ({@code api.error.master.docxTooLarge}), never a raw Tomcat/HTML error page.
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorEnvelope> handleMaxUploadSizeExceeded(
+            HttpServletRequest request,
+            MaxUploadSizeExceededException ignored
+    ) {
+        return errorEnvelopeFactory.domainError(
+                request,
+                HttpStatus.PAYLOAD_TOO_LARGE,
+                ApiErrorCodes.MASTER_VALIDATION_FAILED,
+                ApiErrorCategories.MASTER,
+                "api.error.master.docxTooLarge"
         );
     }
 

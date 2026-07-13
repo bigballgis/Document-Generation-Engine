@@ -82,7 +82,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-08T06:55:00.000Z"
+        "updatedAt": "2026-07-08T06:55:00Z"
       },
       {
         "id": "7",
@@ -96,7 +96,7 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-08T07:17:00.000Z"
+        "updatedAt": "2026-07-08T07:17:00Z"
       },
       {
         "id": "8",
@@ -110,14 +110,615 @@
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-09T11:45:00.000Z"
+        "updatedAt": "2026-07-09T11:45:00Z"
+      },
+      {
+        "id": "9",
+        "title": "LR-A3 master DOCX upload deep validation gap-close",
+        "description": "Close remaining LR-A3 gaps for master DOCX upload/replace validation: dedicated magic-byte unit test; MasterReplaceFileDialog client precheck; Spring MaxUploadSizeExceededException/MultipartException → unified envelope (docxTooLarge); nginx 413 → readable UI mapping. Keep existing validateDocxFile/multipart/nginx/i18n/create-dialog partial Done. Defaults 50MB file / 60MB request+nginx. Virus scan is a non-goal (pending Q). Do not expand to LR-A4.",
+        "details": "Slice id: lrp-a3-upload-validation. Plan: LR-A3 Done (2026-07-10 gap-close). Merge e62c210 / feature 9d5a270. BDD ready: docs/behavior/lrp-a3-master-docx-upload-validation.md (BDD-LRP-A3-UPLOAD-001) A1–A7 green. Formal phase remains None. Virus scan non-goal (pending Q). MessageKey: api.error.master.docxCorrupt.",
+        "testStrategy": "1. Magic-byte reject unit test green. 2. Replace dialog rejects oversize/non-docx before upload. 3. Multipart oversize returns JSON envelope with docxTooLarge (413 or 422). 4. Via 4173 proxy, oversize shows readable UI (no raw nginx HTML). 5. Happy-path Word/LibreOffice .docx unchanged. 6. mvn verify + frontend lint/type-check/test/build green. 7. E2E LRP-A3-master-docx-upload-validation.spec.ts 5/5.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T02:57:00Z"
+      },
+      {
+        "id": "10",
+        "title": "LR-A4 fail-closed unsupported structured nodes",
+        "description": "Fail-closed publish/render for writer-unsupported structured nodes (qrBarcodeRef, attachmentListRef): no silent omit at any nesting depth; hard-block at publish gate (option b); full QR/attachment writers deferred; empty contentModuleRef pinned remains F1 hard-fail (CONTENT_MODULE_STRUCTURE_MISSING). Out of scope: virus scan, CD-E2E T02–T12, LR-A7 measurements, DGE-audit-governance.",
+        "details": "Slice id: lrp-a4-fail-closed-nodes. Plan: LR-A4 Done (2026-07-10). Merge a523a09 / feature 4bccf9d. BDD ready: docs/behavior/lrp-a4-fail-closed-unsupported-nodes.md (BDD-LRP-A4-FAIL-CLOSED-001) A1–A9. Locked: publish-gate hard-block; writers deferred. Writer-unsupported set: [qrBarcodeRef, attachmentListRef]. Formal phase remains None. Wave LR-A remains In Progress (A5 Partial; A6/A7 Not Started). Gates: mvn verify BUILD SUCCESS; architecture PASS_WITH_NOTES; docker-deploy-queue exit 0 (:8080/:4173).",
+        "testStrategy": "1. A1–A9 per BDD-LRP-A4-FAIL-CLOSED-001. 2. Publish with qrBarcodeRef/attachmentListRef → checklist FAIL; cannot PUBLISHED. 3. Nested condition/loop/module/inline paths throw unsupportedNodeType (no silent omit). 4. Empty contentModuleRef pinned still CONTENT_MODULE_STRUCTURE_MISSING. 5. Unknown type still UNSUPPORTED_NODE. 6. mvn -B -ntp -f backend/pom.xml verify green. 7. Docker redeploy + manual checklist when implementing.",
+        "priority": "high",
+        "dependencies": [
+          "9"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T05:55:00Z"
+      },
+      {
+        "id": "11",
+        "title": "LR-A7 pagination delta corpus measurements",
+        "description": "Close LR-A7 measurement gap — Docker page-count / pagination-delta for ≥5 P23 demo corpus; fill NFR table; update ADR-0042 proposal with measured data; mark CD-HARD-T04 executed-by-LR-A7 on Done. Do NOT expand A5/A6 full closeout unless trivial doc-only. Out of scope: virus scan, CD-E2E T02–T12, DGE-audit-governance.",
+        "details": "Slice id: lrp-a7-pagination-measure. Plan: LR-A7 Done (2026-07-10) with documented exception — Docker PDF corpus closed (≥5 + FOL; max 9 / median 8); Word pages/delta n/a (ms-word-unavailable-on-host; not fabricated); ADR-0042 remains Proposed; CD-HARD-T04 Done executed-by-LR-A7. Placement: ISOLATED D:/working/DGE-lrp-a7-pagination-measure · feat/lrp-a7-pagination-measure · base 9a40b48. BDD not-applicable. Formal phase remains None. Wave LR-A remains In Progress (A5 Partial; A6 Not Started). Residual: Word-vs-LO delta on Word-equipped host under LR-A5/ADR-0042 (not a new In Progress task; do not start LR-A6/LR-C9). Evidence: docs/evidence/lrp-a7-pagination/; NFR corpus; pagination-delta-corpus.md.",
+        "testStrategy": "1. Assemble ≥5 P23 demo letters; generate PDFs via Docker stack; record page counts. 2. Fill NFR §production rendering corpus table (Word/delta n/a when Word unavailable — document method). 3. Update ADR-0042 proposal with measured Docker PDF summary (Proposed OK until Word confirm). 4. Cross-ref CD-HARD-T04 executed-by-LR-A7 on Done. 5. docker-deploy-queue evidence when measuring.",
+        "priority": "high",
+        "dependencies": [
+          "10"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T07:05:00Z"
+      },
+      {
+        "id": "12",
+        "title": "LR-A6 OOXML output validation gate",
+        "description": "Gap-close LR-A6 / CD-HARD-T03 — OOXML/output validation gate: invalid or structurally unsafe DOCX fail closed. Extend OoxmlOutputValidationGateTest (happy path exists) with corrupted-fixture fail proof; wire ADR-0043 runtime gate if missing. Mark CD-HARD-T03 executed-by-LR-A6 on Done. Out of scope: LR-C9, A5 Word residual, virus scan, CD-E2E T02–T12, DGE-audit-governance.",
+        "details": "Slice id: lrp-a6-ooxml-gate. Plan: LR-A6 Done (2026-07-10). Merge: 122d6d1 (122d6d1f385bb28214373c63ef29740b0d447cb3). Delivered: OoxmlOutputValidator + DocxAssembler fail-closed + runtime OOXML_VALIDATION_FAILED. CD-HARD-T03 Done executed-by-LR-A6. BDD not-applicable. Formal phase remains None. Wave LR-A remains In Progress (A5 Partial; do not expand A5 Word residual). Residuals: ECMA-376 XSD deferred; LO24 headless deferred; ADR-0043 remains Proposed. Gates: mvn verify GREEN (1208+); architecture PASS; docker-deploy-queue DEPLOY_OK (healthz UP; UI 4173 200; image contains OoxmlOutputValidator); E2E skipped (not user-facing). Historical out-of-scope: LR-C9 (later Task #14).",
+        "testStrategy": "1. Well-formed assembled DOCX opens via OPCPackage.open (existing happy path). 2. Deliberately corrupted fixture (e.g. unescaped &) fails the same validation — proves CD-PIT-03 detection. 3. If ADR-0043 requires runtime fail-closed, assert invalid/structurally unsafe DOCX does not pass silently. 4. mvn -B -ntp -f backend/pom.xml verify green. 5. On Done: cross-ref CD-HARD-T03 executed-by-LR-A6.",
+        "priority": "high",
+        "dependencies": [
+          "11"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T09:45:00Z"
+      },
+      {
+        "id": "13",
+        "title": "LR-A5 ADR triad closeout (0041/0042/0043)",
+        "description": "Docs-first LR-A5 ADR closeout — author ADR-0041; reconcile ADR-0042 Word n/a residual; keep ADR-0043 Proposed; sync LR-A5 / Wave LR-A honestly. Out of scope: MS Word measurement; ECMA-376 XSD / LO24; LR-C9; DGE-audit-governance.",
+        "details": "Slice id: lrp-a5-adr-closeout. Merge cc9e5f6 (feat/lrp-a5-adr-closeout → main); worktree removed. ADR-0041 Accepted (architecture-reviewer PASS_WITH_NOTES 2026-07-10; LR-A2 jammy evidence). ADR-0042 Proposed (Word residual; no invented numbers). ADR-0043 Proposed (XSD/LO24 residual). LR-A5 Done; Wave LR-A Done with Word/XSD/LO24/0042-Accepted/0043-Accepted deferred out of wave exit (0041 Accepted residual closed). Formal phase None. Gate evidence: docs-only + architecture-reviewer PASS_WITH_NOTES. Historical out-of-scope note: LR-C9 was not residual work for this slice (later scheduled separately as Task #14).",
+        "testStrategy": "1. ADR-0041 exists under docs/adr/rendering-authoring/ and is Accepted + indexed. 2. ADR-0042 honestly records LR-A7 Word n/a residual (Proposed OK). 3. ADR-0043 status honest vs LR-A6 delivery (Proposed OK if XSD/LO24 deferred). 4. architecture-reviewer PASS_WITH_NOTES recorded for 0041 Accepted. 5. Plan/ledger sync LR-A5 Done; Wave LR-A Done with explicit residual deferral; merge SHA on MAIN.",
+        "priority": "high",
+        "dependencies": [
+          "11",
+          "12"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T18:12:00Z"
+      },
+      {
+        "id": "14",
+        "title": "LR-C9 unified list states (LoadErrorPanel + retry)",
+        "description": "Roll out LoadErrorPanel + working retry (+ role-aware empty CTA) on remaining catalog/list surfaces. Pattern already confirmed (COR-F05/F14). GroupManagementPanel already Done via MGMT P1-2. Out of scope: redesign LoadErrorPanel; reopen LR-A / A6 residuals; DGE-audit-governance; other LR-C rows.",
+        "details": "Slice id: lrp-c9-load-error-panel. Plan: LR-C9 Done (2026-07-10). Merge: 0013615 (001361599df61c8b2be99cf2ebe5d92b040db508; feat/lrp-c9-load-error-panel → main); worktree removed. Delivered: EmptyStatePanel #actions + AppDataTable #empty forward; role-aware empty CTAs on TemplateListView, MasterListView, ContentModuleListView, ApiPolicyHomeView, UserManagementListSection, GroupManagementPanel; LoadErrorPanel already present. BDD not-applicable. Formal phase remains None. Other LR-C items untouched. Gates: pnpm lint/type-check/test/build GREEN (951); docker-deploy-queue DEPLOY_OK; E2E LRP-C9-list-states 3/3 PASS; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES.",
+        "testStrategy": "1. Each remaining list surface shows LoadErrorPanel with working retry on fetch failure. 2. Role-aware empty CTA when permitted; no CTA when not. 3. Vitest per view + Playwright smoke. 4. Frontend gates green; UIUX PASS. 5. Plan/ledger LR-C9 Done on closeout.",
+        "priority": "high",
+        "dependencies": [
+          "13"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T12:20:00Z"
+      },
+      {
+        "id": "15",
+        "title": "CDP CD-2 T02–T04 decision journeys (tester pass/fail + approver approve)",
+        "description": "Bounded CD-2 E2E batch after T01/T01b Done: CD-E2E-T02 Tester structured pass (In Progress first), then T03 Tester structured fail, then T04 Approver approve. Each task needs Playwright browser-only task-completion evidence + UIUX manifest. Do NOT activate T05–T13. Do NOT mark wave CD-2 Done. Out of scope: LR-C5/C10, audit-governance, LR-A.",
+        "details": "Slice id: cdp-e2e-cd2-t02. COMPLETED 2026-07-10. Merge 6821f45 (feature 13e8e98); worktree removed. Formal phase remains None. Wave CD-2 stays In Progress (partial — T01–T04 Done; T05–T13 Not Started). Artifacts: CDP-E2E-T02/T03/T04-*-decision.spec.ts + UIUX evidence + manifests. Gates: Playwright docker --workers=1 functional 3 passed + UIUX evidence 3 passed; manifests Verdict PASS (T02:3 / T03:1 / T04:3); architecture PASS_WITH_SUGGESTIONS; deploy healthz/4173 OK (rebuild skipped).",
+        "testStrategy": "1. T02: UI Pass → structured form → confirm → item leaves TEST queue (browser-only). 2. T03: Fail requires reason category; template returns to fix; author collaboration todo visible. 3. T04: Approve with evidence confirmation + risk summary viewed. 4. Each paired UIUX manifest Verdict PASS. 5. docker-deploy-queue healthz/4173 OK. 6. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "14"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T12:51:00Z"
+      },
+      {
+        "id": "16",
+        "title": "CDP CD-2 T05 Team lead publish / go-live journey",
+        "description": "Next highest-value CD-2 E2E after T02–T04 Done: CD-E2E-T05 Team lead publish (PENDING_RELEASE → publish summary → confirm → release version UI). Browser-only task-completion + UIUX manifest. Do NOT mark wave CD-2 Done. Alternate if blocked: T08 preview download. Out of scope: LR-*, audit-governance.",
+        "details": "COMPLETED 2026-07-10. Slice id: cdp-e2e-t05-publish. Status: done. Merge 895f16e (feature a5e5491); worktree DGE-cdp-e2e-t05-publish REMOVED. BDD ready: docs/behavior/team-lead-publish-journey.md (BDD-CDP-PUB-001/002). Wave CD-2 stays In Progress (partial — T01–T05 Done; T06–T13 Not Started). Formal phase remains None. Gates: Playwright docker --workers=1 3 passed (functional 2 + UIUX 1); UIUX Verdict PASS (4 screenshots @1920); architecture PASS_WITH_SUGGESTIONS (no Critical); Stage 5/10 deploy healthz/4173 200 (compose dge-lrp-c9-load-error-panel; queue idle). No T08 fallback. Next: T06 (or T08 if noted).",
+        "testStrategy": "1. PENDING_RELEASE → publish summary dialog → confirm → release version callable (UI indicator). 2. Paired UIUX manifest Verdict PASS. 3. No API stage advancement in test body. 4. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "15"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T13:30:00Z"
+      },
+      {
+        "id": "17",
+        "title": "CDP CD-2 T06 Master designer upload-to-approve journey",
+        "description": "Next highest-value CD-2 E2E after T05 Done: CD-E2E-T06 Master designer upload → anchor check → submit review → approver approve (browser-only task-completion + UIUX manifest). BDD ready: master-designer-lifecycle.md (BDD-CDP-MASTER-001). Do NOT mark wave CD-2 Done. Do NOT activate T07–T13. Out of scope: LR-C5, audit-governance.",
+        "details": "COMPLETED 2026-07-10. Slice id: cdp-e2e-t06-master. Status: done. Merge 3aed175 (3aed17584325bc3edeb39d726d59dd3c82fb2ae9); worktree DGE-cdp-e2e-t06-master REMOVED. BDD ready: docs/behavior/master-designer-lifecycle.md (BDD-CDP-MASTER-001). Product fix: MASTER_DESIGNER manageMasters authz aligned to matrix §4 (GroupAccessService + roles.ts + permission-matrix §13.2). Wave CD-2 stays In Progress (partial — T01–T06 Done; T07–T13 Not Started). Formal phase remains None. Gates: Playwright docker --workers=1 2 passed (functional 1 + UIUX 1); UIUX Verdict PASS (6 screenshots @1920 REDBC+GREENBC); architecture PASS_WITH_SUGGESTIONS (no Critical); Stage 5/10 DEPLOY_OK healthz/4173 200 (compose dge-lrp-c9-load-error-panel; queue idle); pnpm lint + type-check PASS; backend GroupAccess/ManagementCapabilities 22; roles.test 20. Next: prefer T08 (preview success + artifact download — closes T13 manifest gap) or T07 (API policy).",
+        "testStrategy": "1. Master designer upload (or fixture) → anchor check UI visible. 2. Submit review in browser. 3. Approver approves in browser (task-completion, not timeline-only). 4. Paired UIUX manifest Verdict PASS. 5. docker-deploy-queue healthz/4173 OK. 6. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "16"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T14:15:00Z"
+      },
+      {
+        "id": "18",
+        "title": "CDP CD-2 T08 Preview success + artifact download UI",
+        "description": "Next highest-value CD-2 E2E after T06 Done: CD-E2E-T08 Preview success + artifact download UI (closes T13 preview-success manifest gap). Browser-only task-completion + UIUX manifest with preview success screenshot. BDD ready: preview-success-artifact-download-journey.md (BDD-CDP-PREV). Do NOT mark wave CD-2 Done. Do NOT activate T07/T09–T13. Out of scope: audit-governance, LR-*.",
+        "details": "COMPLETED 2026-07-10. Slice id: cdp-e2e-t08-preview. Status: done. Merge c62b1a1; feature ee93c58; worktree DGE-cdp-e2e-t08-preview REMOVED. BDD ready: docs/behavior/preview-success-artifact-download-journey.md (BDD-CDP-PREV-001/002/003). Product fixes: previewId alignment + relative SSE streamUrl; helper import fix. Wave CD-2 stays In Progress (partial — T01–T08 Done; T07 activated separately as Task Master #19; T09–T13 Not Started). Formal phase remains None. Gates: AsyncPreviewOrchestratorTest 5/5; Playwright docker :4173 --workers=1 3/3; UIUX Verdict PASS (3 screenshots @1920 REDBC; P12 T13 success-frame gap closed); architecture PASS_WITH_SUGGESTIONS (no Critical); Stage 5/10 DEPLOY_OK healthz/4173 200 (compose dge-lrp-c9-load-error-panel; queue idle). Next: T07 (API policy) activated.",
+        "testStrategy": "1. Testing Tab Run preview → SSE success complete state. 2. Download DOCX and/or PDF from success dialog triggers valid download. 3. Paired UIUX manifest includes preview success screenshot (closes T13 gap). 4. Verdict PASS. 5. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "17"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-10T15:30:00Z"
+      },
+      {
+        "id": "19",
+        "title": "CDP CD-2 T07 API policy edit → impact preview → save",
+        "description": "Next highest-value CD-2 E2E after T08 Done: CD-E2E-T07 API policy edit → impact preview → save (browser-only task-completion + UIUX manifest). BDD ready: api-policy-edit-save-journey.md (BDD-CDP-APIPOL-001/002). Do NOT mark wave CD-2 Done. Do NOT activate T09–T13. Out of scope: audit-governance, LR-C5.",
+        "details": "COMPLETED 2026-07-11. Slice id: cdp-e2e-t07-api-policy. Status: done. Merge 1eb230b; worktree DGE-cdp-e2e-t07-api-policy REMOVED (git; leftover empty dir may remain). BDD ready: docs/behavior/api-policy-edit-save-journey.md (BDD-CDP-APIPOL-001/002). Behavior: API policy edit → impact preview → save; hard-block finding UI. Wave CD-2 stays In Progress (partial — T01–T08 + T07 Done; T09–T13 Not Started; no sole-active CDP E2E slice). Formal phase remains None. Gates: frontend lint/type-check/test/build PASS (955 tests); Playwright docker --workers=1 functional 2 passed (CDP-E2E-T07-api-policy-edit-save.spec.ts); UIUX Verdict PASS (CDP-E2E-T07-uiux-manifest.md + 9 screenshots); architecture PASS_WITH_SUGGESTIONS/APPROVE (no Critical); Stage 5/10 healthz/4173 200 (final deploy MAIN @ 1eb230b). Next recommend: T09 (preview comparison) or T10/T13.",
+        "testStrategy": "1. GROUP_ADMIN opens published template API management. 2. Edit one config domain (e.g. output format) → impact preview shown. 3. Confirm warnings / handle hard-block → save; policyVersion increments. 4. Audit entry link visible. 5. Paired UIUX manifest Verdict PASS. 6. docker-deploy-queue healthz/4173 OK. 7. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "18"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T00:46:00Z"
+      },
+      {
+        "id": "20",
+        "title": "CDP CD-2 T09 Preview vs final comparison panel",
+        "description": "Sole-active CD-2 E2E after T07 Done: CD-E2E-T09 Preview vs final comparison panel (browser-only task-completion + UIUX manifest). BDD ready: preview-comparison-journey.md (BDD-CDP-CMP-001). Do NOT mark wave CD-2 Done. Do NOT activate T10-T13. Out of scope: audit-governance, LR-*.",
+        "details": "DONE 2026-07-11. Slice id: cdp-e2e-t09-compare. Status: done. Merge: 55a6ab6 (feat/cdp-e2e-t09-compare → main); worktree DGE-cdp-e2e-t09-compare REMOVED. BDD ready: docs/behavior/preview-comparison-journey.md (BDD-CDP-CMP-001). Gates: Playwright docker --workers=1 functional 1/1 + UIUX 1/1 (2/2); UIUX Verdict PASS (CDP-E2E-T09-uiux-manifest.md + 3 screenshots @1920 REDBC); architecture-reviewer PASS_WITH_SUGGESTIONS (no Critical); Stage 5/10 DEPLOY_OK healthz 200 + :4173 200 (E2E-only; no image rebuild). E2E-only — no product src changes. Wave CD-2 stays In Progress (partial — T01-T09 Done; T10-T13 Not Started). Formal phase remains None. Next recommend: T10 (fidelity viewed confirmation) or T13 (package materialize).",
+        "testStrategy": "1. Open preview vs final comparison panel from Testing/preview flow. 2. Side-by-side view visible. 3. Filter by warningCode works. 4. Paired UIUX manifest includes comparison screenshot; Verdict PASS. 5. docker-deploy-queue healthz/4173 OK. 6. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "19"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T01:12:00Z"
+      },
+      {
+        "id": "21",
+        "title": "CDP CD-2 T10 Fidelity viewed confirmation E2E",
+        "description": "Sole-active CD-2 E2E after T09 Done: CD-E2E-T10 Fidelity «viewed» confirmation on pass/approve/publish (browser-only task-completion + UIUX manifest). BDD ready: fidelity-viewed-confirmation-journey.md (BDD-CDP-FID-001…004). Do NOT mark wave CD-2 Done. Do NOT activate T11-T13 or LR-C10. Out of scope: audit-governance, LR-*.",
+        "details": "DONE 2026-07-11. Slice id: cdp-e2e-t10-fidelity. Status: done. Merge: b16e52a (feat/cdp-e2e-t10-fidelity → main FF; includes 0bf7a08 UIUX + product/E2E); worktree DGE-cdp-e2e-t10-fidelity REMOVED. BDD ready: docs/behavior/fidelity-viewed-confirmation-journey.md (BDD-CDP-FID-001…004). Gates: backend mvn -Pdev-fast test 1216 passed; frontend lint/type-check/test 960 passed; Playwright docker --workers=1 functional 6/6; UIUX 3/3 + 6 screenshots @1920 REDBC; Verdict PASS (CDP-E2E-T10-uiux-manifest.md); architecture-reviewer PASS_WITH_SUGGESTIONS (no Critical); Stage 5/10 DEPLOY_OK healthz 200 + :4173 200. Wave CD-2 stays In Progress (partial — T01-T10 Done; T11-T13 Not Started; no sole-active CDP E2E slice). Formal phase remains None. Next recommend: T11 (audit admin query smoke) or T13 (package materialize).",
+        "testStrategy": "1. BDD-CDP-FID-001 Pass blocked without fidelity ack. 2. BDD-CDP-FID-002 Approve blocked. 3. BDD-CDP-FID-003 Publish blocked. 4. BDD-CDP-FID-004 ack then proceed smoke. 5. Paired UIUX manifest; Verdict PASS. 6. docker-deploy-queue healthz/4173 OK. 7. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "20"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T03:30:00Z"
+      },
+      {
+        "id": "22",
+        "title": "CDP CD-2 T11 Audit admin query/export E2E",
+        "description": "Sole-active CD-2 E2E after T10 Done: CD-E2E-T11 Audit admin query/filter smoke + export + UIUX (browser-only task-completion + UIUX manifest; first audit-role manifest). BDD ready: audit-admin-query-journey.md (BDD-CDP-AUDIT-001/002). Do NOT mark wave CD-2 Done. Do NOT activate T12/T13 or LR-C10. Out of scope: DGE-audit-governance, LR-*.",
+        "details": "DONE 2026-07-11. Slice id: cdp-e2e-t11-audit. Status: done. Merge: 6e3f825 (feat/cdp-e2e-t11-audit → main FF); worktree DGE-cdp-e2e-t11-audit REMOVED. BDD ready: docs/behavior/audit-admin-query-journey.md (BDD-CDP-AUDIT-001/002). Gates: Playwright docker --workers=1 functional 2/2 (CDP-E2E-T11-audit-query.spec.ts); UIUX 1/1 + 5 screenshots @1920 REDBC; Verdict PASS (CDP-E2E-T11-uiux-manifest.md); architecture-reviewer PASS_WITH_SUGGESTIONS (Critical 0; seed ID fixed); Stage 5/10 DEPLOY_OK healthz 200 + :4173 200 (E2E-only no rebuild). Wave CD-2 stays In Progress (partial — T01-T11 Done; T12/T13 Not Started; no sole-active CDP E2E slice). Formal phase remains None. Next recommend: T12 (zh-CN + dual-brand) or T13 (package materialize).",
+        "testStrategy": "1. BDD-CDP-AUDIT-001: AUDIT_ADMIN filters by date/event type; results update; read-only banner; no My to-dos action group. 2. BDD-CDP-AUDIT-002: export triggers download or export result (not 403). 3. Paired UIUX manifest (first for audit role); Verdict PASS. 4. docker-deploy-queue healthz/4173 OK. 5. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "21"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T03:53:00Z"
+      },
+      {
+        "id": "23",
+        "title": "CDP CD-2 T12 zh-CN + dual-brand golden screenshots",
+        "description": "Sole-active CD-2 E2E after T11 Done: CD-E2E-T12 zh-CN locale + REDBC/GREENBC dual-brand golden screenshots @1920 (browser-only UIUX evidence + functional smoke). BDD ready: zh-cn-dual-brand-golden-screenshots.md (BDD-CDP-I18N-001/002). Do NOT mark wave CD-2 Done. Do NOT activate T13 or LR-C10. Out of scope: package materialize, audit-governance, LR-*.",
+        "details": "DONE 2026-07-11. Slice id: cdp-e2e-t12-i18n-brands. Status: done. Merge: f12b193 (feat/cdp-e2e-t12-i18n-brands → main FF); worktree DGE-cdp-e2e-t12-i18n-brands REMOVED. BDD ready: docs/behavior/zh-cn-dual-brand-golden-screenshots.md (BDD-CDP-I18N-001/002). Gates: Playwright docker --workers=1 3/3 (functional 2/2 + uiux-evidence 1/1); UIUX Verdict PASS (7 screenshots @1920 zh-CN REDBC+GREENBC; CDP-E2E-T12-uiux-manifest.md); architecture-reviewer PASS_WITH_SUGGESTIONS (Critical 0); Stage 5/10 DEPLOY_OK healthz 200 + :4173 200 (E2E-only SkipBuild). Wave CD-2 stays In Progress (partial — T01-T12 Done; T13 activated as Task Master #24). Formal phase remains None. Next: T13 (package materialize) In Progress.",
+        "testStrategy": "1. BDD-CDP-I18N-001: switch to zh-CN on ≥3 key golden surfaces; Chinese UI strings visible. 2. BDD-CDP-I18N-002: capture REDBC and GREENBC golden screenshots both @1920. 3. Paired UIUX manifest; Verdict PASS. 4. docker-deploy-queue healthz/4173 OK. 5. Do not claim wave CD-2 Done.",
+        "priority": "high",
+        "dependencies": [
+          "22"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T04:31:00Z"
+      },
+      {
+        "id": "24",
+        "title": "CDP CD-2 T13 package materialize re-evidence + wave closeout",
+        "description": "COMPLETED 2026-07-11. CD-E2E-T13 package materialize re-evidence + Wave CD-2 closeout. Merge b2b0899; worktree removed. Wave CD-2 → Done (T01–T13). Do NOT activate LR-C10. Do NOT start CD-3 as In Progress (recommend only).",
+        "details": "DONE 2026-07-11. Slice id: cdp-e2e-t13-materialize. Status: done. Merge: b2b0899 (feat/cdp-e2e-t13-materialize → main FF); worktree DGE-cdp-e2e-t13-materialize REMOVED. BDD ready: docs/behavior/api-package-access-and-invocation-records.md (BDD-API-PACKAGE-ACCESS-INVOCATION-001 S1–S3). Reconciliation: P13-ESO-F01–F03 historically claimed Done; CDP wave re-evidence closed after T10 fixture fix (fidelityViewedConfirmed) + CD-2 UIUX. Gates: Playwright docker --workers=1 functional 3/3 + uiux 1/1; UIUX Verdict PASS (5 screenshots @1920 REDBC; CDP-E2E-T13-uiux-manifest.md); architecture-reviewer PASS_WITH_SUGGESTIONS (Critical 0); Stage 5/10 DEPLOY_OK healthz 200 + :4173 200. Wave CD-2 → Done (T01–T13 all Done). Formal phase remains None. Do NOT activate LR-C10. Do NOT start CD-3 as In Progress (recommend only). Next recommend: LR-C10 or CD-3.",
+        "testStrategy": "1. BDD S1: first publish materialize + dual paths. 2. BDD S2: second publish default unchanged. 3. BDD S3: explicit default change with impact preview. 4. Playwright docker --workers=1 green on CDP-E2E-T13-api-package-materialize.spec.ts. 5. UIUX/manifest as needed for wave closeout. 6. Do not claim wave CD-2 Done until T13 green + merge.",
+        "priority": "high",
+        "dependencies": [
+          "23"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T04:55:00Z"
+      },
+      {
+        "id": "25",
+        "title": "LR-C10 Upload UX polish",
+        "description": "COMPLETED 2026-07-11. LR-C10 upload UX polish (progress, drag hint, inline errors) + list error isolation follow-up. Merge bdaf95d; feature ddb475e; worktree removed. Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. Superseded sole-active by Task #26 (LR-C11).",
+        "details": "DONE 2026-07-11. Slice id: lrp-c10-upload-ux. Status: done. Merge: bdaf95d (feat/lrp-c10-upload-ux → main); feature ddb475e; worktree REMOVED. BDD readiness: not-applicable (presentation polish; rejection behavior owned by LR-A3). Gates: pnpm lint/type-check/test/build GREEN; docker-deploy-queue DEPLOY_OK (:8080 UP :4173 200); E2E LRP-C10 4/4 + LRP-A3 regression 5/5; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C10-uiux-manifest.md); architecture PASS_WITH_NOTES (Critical 0). Wave LR-C remains In Progress (partial — C1/C4/C9/C10 Done; C2/C3/C5/C7/C8/C11–C13 Not Started at closeout). Formal phase remains None. Task Master #25 → done. Next: LR-C11 activated as Task #26.",
+        "testStrategy": "1. E2E LRP-C10-A/B 4/4 PASS (progress, drag hint, client precheck, server inline error). 2. LRP-A3 regression 5/5. 3. UIUX manifest PASS_WITH_NOTES. 4. pnpm lint/type-check/test/build green. 5. docker-deploy-queue DEPLOY_OK. 6. Do not claim Wave LR-C Done.",
+        "priority": "high",
+        "dependencies": [
+          "9"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T06:10:00Z"
+      },
+      {
+        "id": "26",
+        "title": "LR-C11 api.error i18n closure",
+        "description": "COMPLETED 2026-07-11. LR-C11 api.error catalog parity 159/159 + parity Vitest. Merge 44fcf40; worktree removed. Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. Superseded sole-active by Task #27 (LR-C12).",
+        "details": "DONE 2026-07-11. Slice id: lrp-c11-api-error-i18n. Merge: 44fcf4047e0f67a7116703fd60ebf6af29e2bbb4 (feat/lrp-c11-api-error-i18n → main). Status: done. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9/C10/C11 Done; C12 activated as Task #27; C2/C3/C5/C7/C8/C13 Not Started). Delivered: api.error catalog parity 159/159; parity Vitest enforced; logoSlotLabel proper-noun exempt; toLocaleString residual closed (useLocaleFormatters already compliant). OPT-G7 residual closed; OPT-G6 locale/catalog residual closed (aria-label sweep remains). Gates: pnpm lint/type-check/test/build GREEN (973 tests); architecture PASS_WITH_NOTES Critical 0; e2e/uiux/deploy skipped (catalog-only). Next: LR-C12 activated as Task #27.",
+        "testStrategy": "1. Parity Vitest fails if any backend api.error.* missing from frontend catalog; passes at N/N (N=live backend count; 159/159 Done). 2. zh-CN timestamps on master revision / release version history use locale-aware formatters. 3. pnpm lint/type-check/test/build green. 4. zh-CN screenshot spot-check on 2 error surfaces. 5. Do not claim Wave LR-C Done.",
+        "priority": "high",
+        "dependencies": [
+          "25"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T06:35:00Z"
+      },
+      {
+        "id": "27",
+        "title": "LR-C12 Keyboard a11y & table activation",
+        "description": "COMPLETED 2026-07-11. LR-C12 keyboard a11y & table activation Done — Enter/Space on activatable rows, skip-link, focus-ring tokens, extended a11y-smoke, keyboard journey E2E, UIUX manifest. Merge 0357a16; worktree removed. Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. Superseded sole-active by Task #28 (LR-C13).",
+        "details": "DONE 2026-07-11. Slice id: lrp-c12-keyboard-a11y. Merge: 0357a166ab2e310aed0ed25f33a5ba8dbfbab63a (feat/lrp-c12-keyboard-a11y → main); feature e207e28. Status: done. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9/C10/C11/C12 Done; C13 activated as Task #28; C2/C3/C5/C7/C8 Not Started). Delivered: Enter/Space on activatable rows (EP store display order), skip-link, focus-ring tokens, extended a11y-smoke, keyboard journey E2E, UIUX manifest. COR-F21 residual closed; OPT-B4 lint baseline absorbed. Gates: pnpm lint/type-check/test/build GREEN (983 tests); docker-deploy-queue DEPLOY_OK (:8080 UP, :4173 200); E2E a11y-smoke + LRP-C12-keyboard-journey 10/10 PASS; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C12-uiux-manifest.md); architecture PASS_WITH_NOTES Critical 0. Do NOT mark Wave LR-C Done. Next: LR-C13 activated as Task #28.",
+        "testStrategy": "1. Vitest for useActivatableTableRow Enter/Space + focusable rows. 2. Playwright keyboard journey: tab → skip-link → table → Enter opens detail. 3. Extended a11y-smoke axe on Docker 4173 — zero critical violations. 4. pnpm lint/type-check/test/build green. 5. UIUX a11y evidence manifest. 6. Do not claim Wave LR-C Done.",
+        "priority": "high",
+        "dependencies": [
+          "26"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T07:38:00Z"
+      },
+      {
+        "id": "28",
+        "title": "LR-C13 Frontend engineering debt",
+        "description": "COMPLETED 2026-07-11. LR-C13 frontend eng debt Done — OPT-G4 shared unwrap confirmed; OPT-G5 fail-closed route guards + Vitest; manualChunks verified; coverage floors 22/32/55/22 → 80/55/80/80. Merge 45addd6; worktree removed. Wave LR-C stays In Progress (partial). Do NOT mark Wave LR-C Done. No sole-active LRP slice.",
+        "details": "DONE 2026-07-11. Slice id: lrp-c13-frontend-eng-debt. Merge: 45addd6d4299c94529d42ad48006a875b9fedefa (feat/lrp-c13-frontend-eng-debt → main); feature 5c1d23cc55d5239876d897ae4b00da57bf6db585. Status: done. BDD readiness: not-applicable. Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 Done; C2/C3/C5/C7/C8 Not Started). Delivered: OPT-G4 shared unwrap confirmed (already migrated); OPT-G5 fail-closed symmetric route guards + Vitest router tests; manualChunks verified (SOR-P06); coverage floors ratcheted 22/32/55/22 → 80/55/80/80. Bundle: without manualChunks max entry index 535.77 KB; with: index 139.12 / element-plus 756.70 / vue-vendor 108.79 / vendor 158.40 / app-vendor 65.54 KB; Total JS 1567.91 → 1913.13 (cache-friendly split). Coverage measured: lines 81.46% / functions 56.58% / branches 82.41% / statements 81.46%. Gates: pnpm lint/type-check/test/build GREEN (992 tests / 172 files); architecture PASS_WITH_NOTES Critical 0; E2E/deploy skipped (arch GO; BDD not-applicable). Arch note: Medium legacy home keys (non-blocking). OPT-G4/G5 closed. Do NOT mark Wave LR-C Done. Recommend next: C2/C3/C5/C7/C8 or pause — do not auto-activate.",
+        "testStrategy": "1. Grep-verify zero remaining private unwrap definitions after shared helper migration. 2. Router integration tests for unauthorized deep-link redirect. 3. pnpm lint/type-check/test/build green; vendor chunks present after build. 4. Coverage floors raised to measured baseline (document old→new). 5. Do not claim Wave LR-C Done.",
+        "priority": "high",
+        "dependencies": [
+          "27"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T02:05:00Z"
+      },
+      {
+        "id": "29",
+        "title": "LR-C2 Structured editor local draft recovery",
+        "description": "DONE 2026-07-11. LR-C2 structured editor local draft recovery (localStorage keyed by template id + dev version id + user; recovery banner Restore/Discard; clear on successful save). Slice lrp-c2-local-draft-recovery; merge 12a6a7e; worktree removed. E2E 4/4; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES. Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 Done; C3/C5/C7/C8 Not Started). No sole-active LRP slice. Do NOT mark Wave LR-C Done. Do NOT activate C3/C5/C7/C8/CD-3. Recommend next: LR-C3 (undo/redo) — do not auto-activate.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-c2-local-draft-recovery. Merge: 12a6a7e (12a6a7e63f5f873f824335ee3b365e69be3f29db; feat/lrp-c2-local-draft-recovery → main); feature 12a6a7e; worktree removed (stage 11). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 Done; C3/C5/C7/C8 Not Started). No sole-active LRP slice. Delivered: debounced localStorage draft persistence keyed by template id + dev version id + user; write on structure change; clear on successful save; on mount with newer local draft show recovery banner Restore/Discard with timestamps; i18n; storage quota guard; BDD-002 soft-refresh after Critical fixes. Gates: pnpm lint/type-check/test/build GREEN (1016 tests); docker-deploy-queue DEPLOY_OK (:8080 UP, :4173 200); E2E LRP-C2-draft-recovery 4/4 PASS (BDD-001/002/003/006); UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C2-uiux-manifest.md); architecture PASS_WITH_NOTES (Critical 0; merge_go yes). BDD: ready — docs/behavior/lrp-c2-structured-editor-local-draft-recovery.md (BDD-LRP-C2-DRAFT-001). Do NOT: activate C3/C5/C7/C8/CD-3; mark Wave LR-C Done. Recommend next: LR-C3 (undo/redo) — do not auto-activate. Maps: CD-PIT-13 companion; LR-B6.",
+        "testStrategy": "1. Follow BDD-LRP-C2-DRAFT-001 acceptance scenarios. 2. Vitest: key scoping, clear-on-save, restore/discard, quota guard. 3. Playwright: edit → reload → restore → content present; discard path. 4. pnpm lint/type-check/test/build green; docker-deploy-queue + E2E + UIUX both brands. 5. Do not claim Wave LR-C Done.",
+        "priority": "high",
+        "dependencies": [
+          "28"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T04:40:00Z"
+      },
+      {
+        "id": "30",
+        "title": "LR-C3 Editor undo/redo",
+        "description": "DONE 2026-07-11. LR-C3 structure-level undo/redo (snapshot history cap 50) in ControlledStructuredContentEditor; keyboard + toolbar; C2 draft separation. Slice lrp-c3-editor-undo-redo; merge 0cf553b; worktree removed. E2E 7/7; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES. Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 Done; C5/C7/C8 Not Started). No sole-active LRP slice. Do NOT mark Wave LR-C Done. Do NOT activate C5/C7/C8/CD-3. Recommend next: LR-C5 (catalog pagination) — do not auto-activate.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-c3-editor-undo-redo. Merge: 0cf553b (0cf553bef5dc17cda17bca4a824427b2a1ca2031; feat/lrp-c3-editor-undo-redo → main FF); worktree removed (stage 11). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 + C3 Done; C5/C7/C8 Not Started). No sole-active LRP slice. Delivered: structure-level snapshot history (cap 50); Ctrl/Cmd+Z, Ctrl+Y / Cmd+Shift+Z; toolbar undo/redo + disabled + i18n; undo stack NEVER in C2 draft blob. Gates: pnpm lint/type-check/test/build GREEN (1036 tests); docker-deploy-queue DEPLOY_OK (:8080 UP, :4173 200); E2E LRP-C3-undo-redo 7/7 PASS; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C3-uiux-manifest.md); architecture PASS_WITH_NOTES (Critical 0). BDD: ready — docs/behavior/lrp-c3-editor-undo-redo.md (BDD-LRP-C3-UNDO-001; scenarios 001…014). Do NOT: activate C5/C7/C8/CD-3; mark Wave LR-C Done. Recommend next: LR-C5 (catalog pagination) — do not auto-activate. Maps: LRP finding 10; C2 storage separation.",
+        "testStrategy": "1. Follow BDD-LRP-C3-001…014 acceptance scenarios. 2. Vitest: push/undo/redo/cap/branch-truncation; draft blob excludes undo stack. 3. Playwright: 3 edits → undo ×2 → redo ×1 → structure matches; keyboard + toolbar paths. 4. pnpm lint/type-check/test/build green; docker-deploy-queue + E2E + UIUX both brands. 5. Do not claim Wave LR-C Done.",
+        "priority": "high",
+        "dependencies": [
+          "29"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T05:40:00Z"
+      },
+      {
+        "id": "31",
+        "title": "LR-C5 Catalog server-side pagination/filter",
+        "description": "DONE 2026-07-11. LR-C5 catalog server-side pagination/filter for templates/masters/content-modules; COR-F09 row+group-first; dashboard/picker consumers fixed. Slice lrp-c5-catalog-pagination; merge 5543a33; feature cfab79e; worktree removed. E2E 6/6; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES; perf p95 ~75ms; OPT-F4 residual closed. Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 Done; C6/C7/C8 Not Started). No sole-active LRP slice. Do NOT mark Wave LR-C Done. Do NOT activate C6/C7/C8/CD-3. Recommend next: LR-C6 (unblocked) OR LR-C7 — do not auto-activate.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-c5-catalog-pagination. Merge: 5543a33 (5543a335c8480f7ca3e6b4d8ef2e57f26f88f003; feat/lrp-c5-catalog-pagination → main); feature cfab79e (cfab79e45f81405e5877c78097ded582ce0d41c2); worktree removed (stage 11). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 Done; C6/C7/C8 Not Started). No sole-active LRP slice. Delivered: PageView list endpoints + filters/search for templates/masters/content-modules; COR-F09 groupCode ASC, updatedAt DESC; frontend store/view migration; dashboard/picker consumers fixed; ≥500 seed (totalElements=515); p95 ~75ms. Gates: mvn verify GREEN; pnpm lint/type-check/test/build GREEN (1054+ tests); docker-deploy-queue DEPLOY_OK (:8080 UP, :4173 200); E2E LRP-C5-catalog-pagination 6/6 PASS; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C5-uiux-manifest.md); architecture PASS_WITH_NOTES (Critical 0). BDD: ready — docs/behavior/lrp-c5-catalog-pagination.md (BDD-LRP-C5-CATALOG-001; scenarios 001…015). Do NOT: activate C6/C7/C8/CD-3; mark Wave LR-C Done. Recommend next: LR-C6 (depends on C5, now unblocked) OR LR-C7 — do not auto-activate. Maps: OPT-F4 residual closed; COR-F09.",
+        "testStrategy": "1. Wait for BDD ready then follow LRP-C5 acceptance (G/W/T). 2. Backend pageable + filter tests; mvn verify. 3. Vitest store/pagination migration. 4. Playwright: paginate, filter, group-first ordering; p95 list latency evidence. 5. pnpm lint/type-check/test/build + docker-deploy-queue + E2E + UIUX both brands. 6. Do not claim Wave LR-C Done; leave C6/C7/C8 Not Started.",
+        "priority": "high",
+        "dependencies": [
+          "30"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T08:20:00Z"
+      },
+      {
+        "id": "32",
+        "title": "LR-C6 Global command palette (Ctrl+K)",
+        "description": "DONE 2026-07-11. LR-C6 global command palette (Ctrl+K/Cmd+K); C5 search reuse; visibleRoutes fail-closed; no new backend. Slice lrp-c6-command-palette; merge c0c84aa; feature 406bba1; worktree removed. E2E 8/8; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES Critical 0. Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 + C6 Done; C7/C8 Not Started). No sole-active LRP slice. Do NOT mark Wave LR-C Done. Do NOT activate C7/C8/CD-3. Recommend next: LR-C7 OR LR-C8 — do not auto-activate.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-c6-command-palette. Merge: c0c84aa (c0c84aa76415136d03c24cdd9827f1063e875a92; feat/lrp-c6-command-palette → main); feature 406bba1 (406bba1b6c7726aa43eb6d31363bd7080956f48d); worktree removed (stage 11). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 + C6 Done; C7/C8 Not Started). No sole-active LRP slice. Delivered: Ctrl+K/Cmd+K palette in ManagementShell; C5 search reuse; visibleRoutes fail-closed; keyboard ↑↓ Enter Esc; i18n; no Fuse/Algolia; no new /search API; recent-items v1 deferred (C6-C8). Gates: pnpm lint/type-check/test/build GREEN (~1078 tests); docker-deploy-queue stage5 DEPLOY_OK + stage10 SkipBuild health 200; E2E LRP-C6-command-palette 8/8 PASS; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C6-uiux-manifest.md; 13 screenshots); architecture PASS_WITH_NOTES (Critical 0). BDD: ready — docs/behavior/lrp-c6-command-palette.md (BDD-LRP-C6-PALETTE-001; scenarios 001…015). Do NOT: activate C7/C8/CD-3; mark Wave LR-C Done. Maps: LRP §1 finding 10; depends LR-C5 Done (#31).",
+        "testStrategy": "1. Follow BDD-LRP-C6-001…015. 2. Vitest palette open/close, keyboard nav, route filtering by visibleRoutes. 3. Playwright: Ctrl+K → search seeded template → Enter navigates; restricted role sees no unauthorized entities. 4. pnpm lint/type-check/test/build green; docker-deploy-queue + E2E + UIUX both brands. 5. Do not claim Wave LR-C Done; leave C7/C8 Not Started.",
+        "priority": "high",
+        "dependencies": [
+          "31"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T09:30:00Z"
+      },
+      {
+        "id": "33",
+        "title": "LR-C7 In-app notification center",
+        "description": "DONE 2026-07-11. LR-C7 in-app notification center — shell bell + unread from P14 collaboration OPEN items + escalations; server read markers; 30s poll; deep-link task hub. Slice lrp-c7-notification-center; merge 879108c; worktree removed. E2E 5/5; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES Critical 0 merge_go yes. Wave LR-C stays In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 + C6 + C7 Done; C8 Not Started). No sole-active LRP slice. Do NOT mark Wave LR-C Done. Do NOT activate C8/CD-3. Recommend next: LR-C8 — do not auto-activate.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-c7-notification-center. Merge: 879108c (879108c618f9cbf179cad7b8b5accae16e032d7a; feat/lrp-c7-notification-center → main); worktree removed (stage 11). Formal phase remains None. Wave LR-C remains In Progress (partial — C1/C4/C9–C13 + C2 + C3 + C5 + C6 + C7 Done; C8 Not Started). No sole-active LRP slice. Delivered: backend unread-count + notification-list from open collaboration to-dos + timeout escalations; per-user server read markers; frontend shell bell + unread badge + dropdown; deep-link task hub; mark-read; 30s poll (pause when tab hidden). Gates: mvn verify GREEN; pnpm lint/type-check/test/build GREEN (~1113 tests); docker-deploy-queue stage5+10 DEPLOY_OK; E2E LRP-C7-notification-center 5/5 PASS; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/LRP-C7-uiux-manifest.md; 14 screenshots); architecture PASS_WITH_NOTES (Critical 0; merge_go yes). BDD: ready — docs/behavior/lrp-c7-notification-center.md (BDD-LRP-C7-001…017). Do NOT: email/IM/webhook; new notification domain; SSE/WebSocket; activate C8/CD-3; mark Wave LR-C Done. Maps: P14 Done; v1 boundary §0.1; depends Task Master #32 (LR-C6 Done).",
+        "testStrategy": "1. Follow BDD-LRP-C7-001…017. 2. Backend: unread count/list + read-marker persistence tests; mvn verify. 3. Vitest: bell badge, poll pause on hidden, mark-read. 4. Playwright: seed OPEN collaboration item → bell unread → open dropdown → deep-link task hub → unread clears. 5. pnpm lint/type-check/test/build + docker-deploy-queue + E2E + UIUX both brands. 6. Do not claim Wave LR-C Done; leave C8 Not Started.",
+        "priority": "high",
+        "dependencies": [
+          "32"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T11:00:00Z"
+      },
+      {
+        "id": "34",
+        "title": "LR-C8 Role onboarding tour",
+        "description": "DONE 2026-07-11. LR-C8 role-aware guided onboarding tour (el-tour; first-login; skip persist; help replay; FE-only). Slice lrp-c8-role-onboarding-tour; merge bf9cbeb; worktree removed. E2E 4/4; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES Critical 0 merge_go yes. Wave LR-C → Done (C1–C13 all Done; exit gate met). No sole-active LRP slice. Formal phase None. Do NOT activate LR-D/CD-3. Recommend next (notes only): LR-D.",
+        "details": "DONE 2026-07-11. Slice id: lrp-c8-role-onboarding-tour. Merge: bf9cbeb (bf9cbebe4aa3f6f1884786319b74f78425a6a113; feat/lrp-c8-role-onboarding-tour → main FF); worktree removed (stage 11). Formal phase remains None. Wave LR-C → Done (C1–C13 all Done). Scope delivered: role-aware el-tour from RoleJourneyTimeline (P21); first-login trigger; skippable + dismiss-remembered; help-menu replay; i18n en+zh-CN; no new tour dependency; FE-only. BDD: ready — docs/behavior/lrp-c8-role-onboarding-tour.md (BDD-LRP-C8-TOUR-001; scenarios 001…017; E2E 001…005). Gates: pnpm lint/type-check/test(1142)/build GREEN; docker-deploy-queue stage5 DEPLOY_OK 2026-07-11T19:40:54+08:00; stage10 DEPLOY_OK 2026-07-11T19:59:02+08:00; E2E LRP-C8-onboarding-tour 4/4; UIUX PASS_WITH_NOTES (10 screenshots); architecture PASS_WITH_NOTES Critical 0. Maps: LRP-C detail LR-C8.",
+        "testStrategy": "1. Follow BDD-LRP-C8-TOUR-001 + acceptance in docs/plan/detail/LRP-C-usability-deepening.md LR-C8. 2. Vitest trigger/skip/dismiss-remember/replay. 3. Playwright: first-login tour appears → skip persists; help replay works. 4. pnpm lint/type-check/test/build + docker-deploy-queue + E2E + UIUX both brands. 5. Wave LR-C Done after C8 Done (exit met).",
+        "priority": "high",
+        "dependencies": [
+          "33"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T12:05:00.000Z"
+      },
+      {
+        "id": "35",
+        "title": "LR-D1 Audit data retention & archival",
+        "description": "DONE 2026-07-11. LR-D1 audit data retention & archival for management + runtime audit tables (mirror ADR-0040; closes CD-PIT-15; under LR-B2 ShedLock mutex). Slice lrp-d1-audit-retention merged 20b2a76. BDD ready; ADR-0048 Accepted; Flyway V54. Wave LR-D remains In Progress (D1 Done; D2–D7 Not Started; no sole-active). Formal phase None. Do NOT activate D2+/LR-E/CD-3. Do NOT touch DGE-audit-governance worktree.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-d1-audit-retention. Merge: 20b2a76 (feat(audit): LR-D1 audit retention cleanup with V54 and ADR-0048). Worktree removed (stage 11). Formal phase remains None. Wave LR-D → In Progress (partial — D1 Done; D2–D7 Not Started; no sole-active between slices). BDD ready: docs/behavior/lrp-d1-audit-retention.md. ADR-0048 Accepted. Gates: mvn -B -ntp -f backend/pom.xml verify GREEN; architecture PASS_WITH_NOTES merge_go=true; DEPLOY_OK 2026-07-11T22:26:31+08:00 healthz 200; Flyway V54 applied. Maps: CD-PIT-15 closed; ADR-0040 pattern; LR-B2 Done. Do NOT: activate D2+; claim Wave LR-D Done; touch DGE-audit-governance.",
+        "testStrategy": "1. BDD ready + ADR-0048 Accepted. 2. Rows older than window purged; rows inside window untouched (edge boundary). 3. Purge-evidence row records count + window. 4. Scheduler skips without LR-B2 lock. 5. mvn verify green. 6. Do not activate D2+; do not claim Wave LR-D Done.",
+        "priority": "high",
+        "dependencies": [
+          "34"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T14:35:00.000Z"
+      },
+      {
+        "id": "36",
+        "title": "LR-D7 Durable security audit events",
+        "description": "DONE 2026-07-11. LR-D7 durable SECURITY_* audit events (login/403/download → management_audit_event); route-denied API + frontend; retention via ADR-0048/D1; closes «Security forbidden-route audit» seam. Slice lrp-d7-durable-security-audit. Merge c94a356. Formal phase None. Wave LR-D In Progress (D1+D7 Done; D2–D6 Not Started; no sole-active). Do NOT activate D2–D6/LR-E/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "COMPLETED 2026-07-11. Slice id: lrp-d7-durable-security-audit. Merge: c94a356 (c94a356070dff7a9ab35ffbc0ba53b49f63270d0) → main; worktree removed. Formal phase remains None. Wave LR-D → In Progress (partial — D1+D7 Done; D2–D6 Not Started; no sole-active). Behavior delivered: persist login success/failure, 403 route denials, download grants/denials as durable SECURITY_* rows on existing management_audit_event; route-denied API + frontend; keep SecurityAuditSummaryService logs; fail-safe persistence; query via audit console with matrix §13.3 scoping; LR-D1 retention confirmed; ledger seam «Security forbidden-route audit» closed. BDD: ready — docs/behavior/lrp-d7-durable-security-audit.md (BDD-LRP-D7-001…010). Gates: mvn verify GREEN (1294); pnpm frontend lint/type-check/test/build GREEN (1144); architecture PASS_WITH_NOTES (Critical 0, merge_go=true); DEPLOY_OK 2026-07-11T23:50:03+08:00; E2E/UIUX skipped per BDD D7-C14. Maps: COR-P06 residual; permission matrix §13.3; ledger seam; ADR-0048/D1 retention.",
+        "testStrategy": "1. Follow BDD-LRP-D7-001…010. 2. Failed login → durable row (username, outcome, traceId) queryable by authorized auditor only. 3. 403 route denial → durable row (user + routeKey); ledger seam closed. 4. Events join LR-D1 retention (same management_audit_event table). 5. mvn verify green; frontend gates green. 6. Do not activate D2–D6; do not claim Wave LR-D Done.",
+        "priority": "high",
+        "dependencies": [
+          "35"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-11T15:53:00.000Z"
+      },
+      {
+        "id": "37",
+        "title": "LR-D6 Load smoke baseline",
+        "description": "DONE 2026-07-12. LR-D6 load smoke baseline measured (flag-gated harness). Slice lrp-d6-load-smoke merge 56383eb. Formal phase None. Wave LR-D In Progress (D1+D7+D6 Done; D2–D5 Not Started; no sole-active). Scenario A n=20 success=12 errorRate=0.4 triaged DEF-LRP-D6-001; Scenario B 5/5 SSE. Do NOT activate D2–D5/LR-E/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: lrp-d6-load-smoke. Merge: 56383eb (56383ebd6f4dedc5413339aabe88ac16ea857d74). Formal phase remains None. Wave LR-D → In Progress (partial — D1+D7+D6 Done; D2–D5 Not Started; no sole-active). BDD: not-applicable. Evidence: docs/plan/evidence/lrp-d6-load-smoke/latest-summary.json + TRIAGE-pdf-422.md (DEF-LRP-D6-001). Scenario A: n=20 success=12 errorRate=0.4 p95≈15939ms p99≈16065ms poolRejections=0. Scenario B: 5/5 SSE completed dropped=0. Gates: mvn verify GREEN 1303; architecture PASS_WITH_NOTES; DEPLOY_OK 2026-07-12T01:26:46+08:00. Feeds LR-D5 pending only — do NOT activate D5. Do NOT: activate D2–D5/LR-E/CD-3; claim Wave LR-D Done; touch DGE-audit-governance.",
+        "testStrategy": "1. Harness behind system-property flag — never runs in normal mvn verify. 2. ≥20 concurrent sync generations on Docker → error rate 0 (or triaged defects) + p95 recorded — PASS with DEF-LRP-D6-001. 3. ≥5 parallel SSE preview streams → all receive terminal event — PASS 5/5. 4. Evidence in ledger + archive; feed LR-D5 (pending). 5. mvn verify GREEN 1303. 6. Do not activate D2–D5; do not claim Wave LR-D Done.",
+        "priority": "high",
+        "dependencies": [
+          "36"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T01:54:00.000Z"
+      },
+      {
+        "id": "38",
+        "title": "LR-D5 NFR quantification proposals",
+        "description": "DONE 2026-07-12. LR-D5 docs-only NFR quantification proposals (p95/SSE/capacity/availability/session caps) authored as pending «proposed — awaiting confirmation»; fed from LR-D6 evidence + DEF-LRP-D6-001; do NOT promote smoke numbers to confirmed SLOs. Slice lrp-d5-nfr-proposals. Merge 5b13476. Formal phase None. Wave LR-D In Progress (D1+D5+D6+D7 Done; D2–D4 Not Started; no sole-active). Do NOT activate D2–D4/LR-E/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: lrp-d5-nfr-proposals. Merge: 5b13476 (5b13476b7aa2056fbbbe2ca4acc8d1dbe4659d0c). Formal phase remains None. Wave LR-D → In Progress (partial — D1+D5+D6+D7 Done; D2–D4 Not Started; no sole-active). BDD: not-applicable. Owner: doc-keeper. Scope delivered: NFR pending-section proposals linking each measured value to LR-D6 evidence (latest-summary.json + TRIAGE-pdf-422.md / DEF-LRP-D6-001); every value «proposed — awaiting confirmation»; never confirmed SLOs; ≤3s superseded as unsupported by smoke; usability-review L89 pointer; F8 draft thresholds remain stale pending confirmation. Gates: docs-only; architecture PASS_WITH_NOTES. Do NOT: activate D2–D4/LR-E/CD-3; claim Wave LR-D Done; claim NFR numbers confirmed; touch DGE-audit-governance. Recommend next: LR-D2 or LR-D3 (do not activate until parent directs).",
+        "testStrategy": "1. NFR pending section contains proposals marked «proposed — awaiting confirmation». 2. Each measured value links LR-D6 evidence (no orphan numbers). 3. D2–D4 remain Not Started. 4. No confirmed SLO promotion from smoke numbers. 5. Docs-only gate; no vendor APM invention. 6. Merge + MAIN doc-sync + commit-review.",
+        "priority": "high",
+        "dependencies": [
+          "37"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T02:15:00.000Z"
+      },
+      {
+        "id": "39",
+        "title": "LR-D2 Backup/restore runbook + drill",
+        "description": "DONE 2026-07-12. LR-D2 backup/restore runbook + confirmation-gated scratch drill. Slice lrp-d2-backup-restore. Merge 3d78bc5. Formal phase None. Wave LR-D In Progress (D1+D2+D5+D6+D7 Done; D3/D4 Not Started; no sole-active). BDD not-applicable. Drill PASS RPO≈0.933min RTO≈4.751min healthz 200 FOL OK. Do NOT activate D3/D4/LR-E/CD-3. Do NOT touch DGE-audit-governance. Do NOT claim Wave Done.",
+        "details": "DONE 2026-07-12. Slice id: lrp-d2-backup-restore. Merge: 3d78bc5 (3d78bc56a535627a532485dc50fda47cf99c8248); feature tip 880e0ca; worktree removed. Formal phase remains None. Wave LR-D → In Progress (partial — D1+D2+D5+D6+D7 Done; D3/D4 Not Started; no sole-active). BDD: not-applicable. Owner: deploy-engineer + doc-keeper. Delivered: docs/operations/backup-restore-runbook.md; confirmation-gated scripts; timed scratch drill. Gates: Drill PASS RPO≈0.933min RTO≈4.751min; healthz 200; FOL regen OK; architecture PASS_WITH_NOTES Critical 0 merge_go true; docs+scripts (no mvn/pnpm). Evidence: backup-restore-runbook § Drill evidence 2026-07-12; artifacts/dr-drill/2026-07-12/ (gitignored; runbook SoT). LR-E2 checklist input: dated drill record — not Wave Done / launch go. Do NOT: activate D3/D4/LR-E/CD-3; claim Wave LR-D Done; claim production ADR-0030 compliance; touch DGE-audit-governance.",
+        "testStrategy": "1. Runbook exists and is indexed from docs/README.md + ops runbook. 2. Operator follows runbook on scratch stack → healthz 200 + document retrievable. 3. Drill evidence dated with measured durations vs ADR-0030 RPO≤15min/RTO≤30min. 4. D3/D4 remain Not Started. 5. Doc + drill evidence gate; no cloud-service invention. 6. Merge + MAIN doc-sync + commit-review.",
+        "priority": "high",
+        "dependencies": [
+          "38"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T02:52:00.000Z"
+      },
+      {
+        "id": "40",
+        "title": "LR-D3 Metrics & alerting as code",
+        "description": "DONE 2026-07-12. LR-D3 metrics & alerting as code (Micrometer + Prometheus rules + Grafana JSON). Slice lrp-d3-metrics-alerting. Merge ba5ea2e; feature tip 173ab36. Formal phase None. Wave LR-D In Progress (D1+D2+D3+D5+D6+D7 Done; D4 Not Started; no sole-active). BDD not-applicable. Do NOT activate D4/LR-E/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: lrp-d3-metrics-alerting. Merge: ba5ea2e; feature tip 173ab36; worktree removed (stage 11). Formal phase remains None. Wave LR-D -> In Progress (partial — D1+D2+D3+D5+D6+D7 Done; D4 Not Started; no sole-active). BDD: not-applicable (docs/behavior/lrp-d3-metrics-alerting.md). Owner: backend-engineer + deploy-engineer. Scope delivered: Micrometer custom metrics (generation latency, PDF pool queue/rejections, active SSE, 429 count, async DLT depth when Kafka); deploy/observability/ prometheus-alerts.yaml + grafana/docgen-ops-overview.json; runbook annotations; scrape smoke /actuator/prometheus. Gates: mvn verify GREEN 1315; architecture PASS_WITH_NOTES Critical 0 merge_go=true; DEPLOY_OK scrape 2026-07-12T03:43:07+08:00 (docgen_generation_duration_seconds count=1 pdf success; docgen_http_rate_limit_denied_total=1.0; pool rejections/sse active @0; docgen_async_dlt_depth ABSENT ASYNC_TRANSPORT=in-process); promtool unavailable — manual lint 7/7 runbook links. Do NOT: activate D4/LR-E/CD-3; claim Wave LR-D Done; touch DGE-audit-governance. Recommend next: LR-D4 (do not activate until parent directs).",
+        "testStrategy": "1. mvn -B -ntp -f backend/pom.xml verify GREEN. 2. Docker scrape smoke: /actuator/prometheus exposes new counters/timers with non-zero samples after PDF generation + 429. 3. Alert rules parse (promtool or documented manual validation); every rule links a runbook section. 4. deploy/observability/ committed + indexed from deploy/README.md. 5. D4 remains Not Started. 6. Architecture review + merge + MAIN doc-sync + commit-review before Done.",
+        "priority": "high",
+        "dependencies": [
+          "39"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T03:49:00.000Z"
+      },
+      {
+        "id": "41",
+        "title": "LR-D4 Trace propagation decision + minimal impl",
+        "description": "DONE 2026-07-12. LR-D4 trace propagation decision + minimal impl. Slice lrp-d4-trace-propagation. Merge 218dcf1; feature tip 670a683. Formal phase None. Wave LR-D Done (D1-D7; no sole-active). BDD not-applicable. ADR-0049 Accepted. MdcTaskDecorator + Kafka X-Trace-Id; Scenario A/B. Recommend next (notes only): LR-E or pause — do NOT activate LR-E/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: lrp-d4-trace-propagation. Merge: 218dcf1 (218dcf1580f144b62747cc35a0f14ea604d31d00); feature tip 670a683; worktree removed (stage 11); origin/main pushed. Formal phase remains None. Wave LR-D -> Done (D1-D7 exit gate met; no sole-active). BDD: not-applicable (docs/behavior/lrp-d4-trace-propagation.md). Owner: backend-engineer. Scope delivered: ADR-0049 Accepted; MdcTaskDecorator on asyncTaskExecutor; Kafka X-Trace-Id producer/consumer MDC; Scenario A async MDC + Scenario B Kafka headers proven. Gates: mvn verify GREEN 1321 (0 fail, 7 skipped); architecture PASS_WITH_NOTES Critical 0 merge_go=true; DEPLOY_OK 2026-07-12T04:18:13+08:00 tip 218dcf1 healthz 200; X-Trace-Id echo OK. Do NOT: activate LR-E/CD-3; touch DGE-audit-governance. Recommend next (notes only): LR-E or pause.",
+        "testStrategy": "1. ADR records adopt-vs-defer decision and v1 propagation-only scope (dependency policy checked if Micrometer Tracing adopted). 2. Async task MDC assertion: sync request with trace id T spawns async batch → worker logs carry T. 3. Kafka transport active: consumer-side MDC traceId equals producer. 4. Envelope traceId contract unchanged. 5. mvn -B -ntp -f backend/pom.xml verify GREEN. 6. Architecture review + merge + MAIN doc-sync + commit-review before Done. 7. Wave LR-D exit gate item for traceId checked only after Done.",
+        "priority": "high",
+        "dependencies": [
+          "40"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T04:25:00.000Z"
+      },
+      {
+        "id": "42",
+        "title": "LR-E1 SSE-through-proxy incremental E2E",
+        "description": "DONE 2026-07-12. LR-E1 SSE-through-proxy incremental E2E (Playwright reliability evidence for LR-B3 on Docker 4173). Slice lrp-e1-sse-proxy-e2e. Merge 575d0aa. Formal phase None. Wave LR-E In Progress (partial — E1 Done; E2 Not Started; no sole-active). BDD not-applicable. Closes CD-PIT-12 browser proof. Do NOT activate LR-E2/CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: lrp-e1-sse-proxy-e2e. Merge 575d0aa (575d0aa0b33eb53eb3c0dae998d500c00f3d585e); worktree removed. Formal phase remains None. Wave LR-E -> In Progress (partial — E1 Done; E2 Not Started; no sole-active). BDD: not-applicable (docs/behavior/lrp-e1-sse-proxy-e2e.md). Owner: e2e-test-engineer. Evidence: Scenario A maxGapMs≈1864ms; Scenario B idle heartbeat 65075ms + ~20s keep-alive (batch too fast ~2.5s → dedicated idle progress-stream). Artifacts: frontend/e2e/LRP-E1-sse-incremental-progress.spec.ts + frontend/e2e/evidence/LRP-E1-sse-manifest.md + LRP-E1-uiux-manifest.md. Gates: stage5 DEPLOY_OK 2026-07-12T08:41:50+08:00; Playwright 2/2 PASS; UIUX PASS_WITH_NOTES; architecture PASS_WITH_NOTES Critical=0 merge_go=yes; stage10 DEPLOY_OK 2026-07-12T08:58:49+08:00. Do NOT: activate LR-E2/CD-3; claim Wave LR-E Done; touch DGE-audit-governance. Recommend next (notes only): LR-E2 launch checklist.",
+        "testStrategy": "1. Docker stack on 4173 with LR-B3 merged (queued docker-deploy-queue.ps1). 2. Playwright LRP-E1-sse-incremental-progress.spec.ts: Scenario A proves ≥2 distinct SSE arrival timestamps before completion (not one terminal burst) through nginx :4173 — PASS maxGapMs≈1864. 3. Scenario B: idle progress-stream open ≥60s via heartbeat when batch finishes too fast — PASS durationMs≈65075 ~20s keep-alive. 4. Evidence recorded in frontend/e2e/evidence/LRP-E1-sse-manifest.md. 5. Architecture PASS_WITH_NOTES + merge 575d0aa + MAIN doc-sync + commit-review. 6. Leave LR-E2 Not Started.",
+        "priority": "high",
+        "dependencies": [
+          "41"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T09:05:00.000Z"
+      },
+      {
+        "id": "43",
+        "title": "LR-E2 Launch readiness checklist",
+        "description": "DONE 2026-07-12. LR-E2 launch readiness checklist (docs-only go/no-go). Slice lrp-e2-launch-checklist. Merge ae39fbb. Formal phase None. Wave LR-E Done (E1+E2 docs exit gate — not production go-live). LRP planned waves A-E Done. Checklist overall NO-GO. No sole-active. BDD not-applicable. Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: lrp-e2-launch-checklist. Merge: ae39fbb (ae39fbb4c4d724873b45f01c62d9600a407ddbc5); feature tip 57e9133 (57e9133c462237fdb9538f69d8e353f0c0c05045); worktree removed. Formal phase remains None. Wave LR-E -> Done (E1+E2 docs exit gate; checklist artifact + E1 proof — NOT production go-live). LRP planned waves A-E -> Done; no sole-active. BDD: not-applicable (docs-only). Owner: doc-keeper. Delivered: docs/operations/launch-readiness-checklist.md (indexed); companion docs/plan/launch-readiness-gate.md. Overall snapshot NO-GO (blockers: ADR-0042/0043+Word, AD Group stub, paste-binding, JWT_SECRET compose default, Kafka company registry). Gates: docs-only; architecture PASS_WITH_NOTES Critical=0. Do NOT: claim production go-live; activate CD-3; touch DGE-audit-governance. Recommend next (notes only): pause.",
+        "testStrategy": "1. Checklist artifact exists at docs/operations/launch-readiness-checklist.md. 2. Every go/no-go item links to live evidence (ledger/manifest/ADR/runbook). 3. Indexed from docs/README.md operations section + LRP program §7. 4. Verdict template present; overall NO-GO when critical gaps remain. 5. Relative links resolve. 6. Architecture-reviewer PASS_WITH_NOTES + merge ae39fbb + MAIN doc-sync + commit-review. 7. Wave LR-E Done = docs gate only — never equate to production go-live.",
+        "priority": "high",
+        "dependencies": [
+          "42"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T09:25:00.000Z"
+      },
+      {
+        "id": "44",
+        "title": "OPS: Remove JWT_SECRET compose default (fail-closed)",
+        "description": "DONE 2026-07-12. Slice ops-jwt-secret-no-default. Explicit JWT_SECRET for prod/acceptance (compose :?, ProductionSecretGuard fail-closed). Checklist #9 → GO. Overall checklist remains NO-GO. Formal phase None. No sole-active. Merge 587cd9a. Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: ops-jwt-secret-no-default. Merge: 587cd9a (587cd9a6258d375ab43280339d58edf6c3430319); feature tip 283233e (283233efc18ea080335c89c42bac3507d62aacb0); worktree removed. Formal phase remains None. BDD ready (docs/behavior/ops-jwt-secret-no-default.md; BDD-OPS-JWT-SECRET-001). Delivered: docker-compose.prod.yml ${JWT_SECRET:?…}; ProductionSecretGuard + ProductionSecretGuardTest; deploy/runbook docs. Gates: mvn verify GREEN; architecture PASS_WITH_NOTES Critical=0; DEPLOY_OK healthz 200 UP; S2a compose refuse missing secret. Checklist #9 → GO (closes LR-B6 🟡#4). Overall checklist NO-GO (Kafka registry, ADR-0042/0043+Word, AD Group stub, paste↔binding). Prior sole-active #45 (ops-kafka-company-registry) now Done (merge e54d03c). Do NOT: claim production go-live; activate CD-3; touch DGE-audit-governance.",
+        "testStrategy": "1. docker-compose.prod.yml has no JWT_SECRET:-default fallback (uses :?). 2. Prod/acceptance start without JWT_SECRET fails closed (S2a proven). 3. Explicit JWT_SECRET (≥32 bytes) allows healthy backend start (DEPLOY_OK healthz 200). 4. Dev/local path remains documented. 5. Runbook/deploy secrets docs list JWT_SECRET as required. 6. mvn verify GREEN + architecture PASS_WITH_NOTES + merge 587cd9a + MAIN post-task-doc-sync + commit-review. 7. Checklist #9 GO — overall checklist still NO-GO for other blockers.",
+        "priority": "high",
+        "dependencies": [
+          "43"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T09:50:00.000Z"
+      },
+      {
+        "id": "45",
+        "title": "OPS: Kafka company registry (fail-closed KAFKA_IMAGE)",
+        "description": "DONE 2026-07-12. Slice ops-kafka-company-registry. Fail-closed ${KAFKA_IMAGE:?…}; checklist #10 CONDITIONAL (not GO — no company registry evidence). Formal phase None. BDD ready (BDD-OPS-KAFKA-REGISTRY-001). Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: ops-kafka-company-registry. Merge: e54d03c (e54d03cd9778ae5a6a7f7bdcd5e6b92f47dae3ed); feature tip e54d03c (fast-forward); worktree removed. Formal phase remains None. BDD ready (docs/behavior/ops-kafka-company-registry.md; BDD-OPS-KAFKA-REGISTRY-001 S1–S4). Delivered: compose ${KAFKA_IMAGE:?…} fail-closed (no :-bitnamilegacy silent default); runbook/.env.example LOCAL/DEV ONLY Hub example; checklist #10 CONDITIONAL. Gates: architecture PASS_WITH_NOTES Critical=0; DEPLOY_OK (docker-deploy-queue; healthz 200 UP; docgen-kafka healthy; KAFKA_IMAGE local Hub example only); compose config fails without KAFKA_IMAGE / succeeds with explicit. Checklist #10 → CONDITIONAL residual (operator must supply company-approved coords — do NOT invent registry hostname; not GO without company pull evidence; not a blocking NO-GO). Overall checklist NO-GO (blockers: #3b ADR-0042/0043+Word, #5a AD Group stub, #5b paste↔binding). no sole-active. Do NOT: claim production go-live; activate CD-3; touch DGE-audit-governance; invent a formal plan phase.",
+        "testStrategy": "1. Compose / deploy path does not treat bitnamilegacy as the only production Kafka image. 2. Missing KAFKA_IMAGE fails closed (${KAFKA_IMAGE:?…} or equivalent). 3. Explicit company-approved (or documented override) image allows stack bring-up. 4. Ops/runbook/deploy docs document KAFKA_IMAGE. 5. Checklist #10 is CONDITIONAL or GO only with honest evidence. 6. Gates + architecture review + merge + MAIN post-task-doc-sync + commit-review before Done. 7. Formal phase stays None.",
+        "priority": "high",
+        "dependencies": [
+          "44"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T02:10:00.000Z"
+      },
+      {
+        "id": "46",
+        "title": "OPS: Close or bound AD Group config stub (fail-closed + ADR)",
+        "description": "DONE 2026-07-12. Slice ops-ad-group-stub-close. LR-E2 checklist #5a → CONDITIONAL (not GO — real LDAP/AD + company directory evidence missing; LAB ≠ prod AD). Formal phase None. BDD ready (BDD-OPS-AD-GROUP-STUB-001). ADR-0054 Accepted. Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: ops-ad-group-stub-close. Merge: 4e51a1b (4e51a1bad0163e708cca0e7990892759fdc88bcf); feature tip 4e51a1b (fast-forward); worktree removed. Formal phase remains None. BDD ready (docs/behavior/ops-ad-group-stub-close.md; BDD-OPS-AD-GROUP-STUB-001). ADR-0054 Accepted. Delivered: ConfigAdGroupResolver/type=config local/dev/test only; AdGroupResolverGuard fail-closed prod; LAB ONLY override in docker-compose.prod.yml; checklist #5a CONDITIONAL. Gates: mvn verify GREEN; architecture PASS_WITH_NOTES Critical=0 merge_go=true; DEPLOY_OK 2026-07-12 ~10:34+08 healthz 200 UP; AdGroupResolverGuard LAB WARN in logs. Checklist #5a → CONDITIONAL residual (real LDAP/AD adapter + company directory evidence still missing; LAB override ≠ production AD — do NOT invent directory coords; not GO without company AD evidence; not a blocking NO-GO). Overall checklist NO-GO (blockers: #3b ADR-0042/0043+Word, #5b paste↔binding). no sole-active. Recommend next: #5b or pause. Do NOT: claim production go-live; activate CD-3; touch DGE-audit-governance; invent a formal plan phase.",
+        "testStrategy": "1. Behavior spec ready before TDD/implement. 2. Production/acceptance path fail-closed when AD Group resolution is not production-ready (or ADR-accepted honest bound with explicit residual). 3. No invented LDAP/AD endpoint or silent permissive default. 4. ADR Accepted (or Proposed→Accepted in same change set) documents close-vs-bound decision. 5. Regression tests for resolver/authz fail-closed behavior. 6. mvn verify GREEN + architecture review + queued deploy evidence as required. 7. Checklist #5a updated only after durable evidence — never at activation. 8. Formal phase stays None; sole-active #46 until Done.",
+        "priority": "high",
+        "dependencies": [
+          "45"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T02:42:00.000Z"
+      },
+      {
+        "id": "47",
+        "title": "OPS: Wire paste cleaning ↔ binding / publish fail-closed (#5b / CD-HARD-T05)",
+        "description": "DONE 2026-07-12. Slice ops-paste-binding-seam. Checklist #5b → GO (wire path). CD-HARD-T05 → Done. Ledger seam closed. Formal phase None. No sole-active. Merge f1f00da. Overall checklist remains NO-GO (#3b). Do NOT claim production go-live. Do NOT activate CD-3. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: ops-paste-binding-seam. Merge: f1f00da (f1f00daa73ae4dfea4444c04bcde409994b36491); feature tip f1f00da; worktree removed. Formal phase remains None. BDD ready (docs/behavior/ops-paste-binding-seam.md; BDD-OPS-PASTE-BINDING-001 S1–S6). Delivered: ADR-0019 fail-closed wire — object/absolute BLOCKED; pasteCleaningEvidence residue on Accept; computeBindingStatus + PublishGate PASTE_CLEANING_BLOCKERS; clean rewrite clears; Flyway V55; UI Accept disabled on blocked. Gates: mvn verify GREEN (~1347 tests); frontend lint/type-check/test/build GREEN; E2E 6/6 ops-paste-binding-seam.spec.ts docker; UIUX PASS_WITH_NOTES (frontend/e2e/evidence/OPS-PASTE-BINDING-SEAM-uiux-manifest.md); architecture PASS_WITH_NOTES Critical=0 merge_go=true; stage 5+10 DEPLOY_OK 2026-07-12. Checklist #5b → GO (wire — not edit-time-only ADR). CD-HARD-T05 → Done. Ledger seam «Paste cleaning ↔ binding validation» → closed. Overall checklist NO-GO (blocking: #3b ADR-0042/0043+Word only; #5a/#10 CONDITIONAL residuals). no sole-active. Recommend next: pause unless more automatable. Do NOT: claim production go-live; activate CD-3; touch DGE-audit-governance; invent a formal plan phase.",
+        "testStrategy": "1. BDD ready before TDD/implement (docs/behavior/ops-paste-binding-seam.md). 2. Object and absolute-position paste → blocked=true / BLOCKED (S1). 3. Clean paste → Accept + non-sensitive residue only (S2). 4. Unresolved residue → computeBindingStatus ≠ VALID (S3). 5. Unresolved residue → PublishGate FAIL (S4). 6. Clean rewrite clears residue; paste dimension does not block (S5). 7. Checklist #5b → GO after durable gates + post-task-doc-sync (S6). 8. No edit-time-only ADR escape. 9. mvn verify GREEN + frontend gates + E2E 6/6 + UIUX + architecture + queued deploy. 10. Formal phase stays None; #47 done; overall checklist still NO-GO (#3b).",
+        "priority": "high",
+        "dependencies": [
+          "46"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T04:30:00.000Z"
+      },
+      {
+        "id": "48",
+        "title": "SLIM: Knip dead-code scan tooling + baseline evidence",
+        "description": "DONE 2026-07-12. Slice slim-knip-scan. Knip ^6.26 tooling + indexed baseline evidence + Wave-1 delete of 2 orphan files. Merge ea7db64; worktree removed. Formal phase None. BDD not-applicable. Checklist overall NO-GO unchanged (#3b). no sole-active. Recommend next: pause. Do NOT activate CD-3. Do NOT claim go-live. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-12. Slice id: slim-knip-scan. Merge: ea7db64 (ea7db649866458386c46134b91c83417d1563c0a); feature tip ea7db64 (fast-forward); worktree removed (stage 11). Formal phase remains None. BDD not-applicable (docs/behavior/slim-knip-scan.md). Delivered: Knip ^6.26 in frontend/package.json + frontend/knip.json; pnpm knip / knip:prod; scripts/knip-scan.ps1; evidence under docs/evidence/slim-knip-scan/ (README + report/summary/json) indexed from docs/README.md; @eslint/js declared; Wave-1 deleted TemplateRuleConfigurator.vue + auditEventColumnFilters.ts (unused files → 0). Gates: pnpm -C frontend lint && type-check && test && build GREEN; knip exit 1 expected (informational unused exports 93 / types 66 / duplicate 1 remain — not CI-blocking); architecture PASS_WITH_NOTES Critical=0 merge_go=true; E2E skipped (not user-facing); deploy skipped (devDep only). Overall checklist NO-GO (blocking: #3b ADR-0042/0043+Word only; #5a/#10 CONDITIONAL residuals). no sole-active. Recommend next: pause unless more automatable. Do NOT: invent formal phase; activate CD-3; claim production go-live; touch DGE-audit-governance.",
+        "testStrategy": "1. pnpm -C frontend knip (or .\\scripts\\knip-scan.ps1) runs with project config; exit 1 with findings OK until CI gate enabled. 2. docs/evidence/slim-knip-scan/ README + report/summary present and linked from docs/README.md. 3. pnpm -C frontend lint && type-check && test && build GREEN (with Wave-1 deletes). 4. Wave-1 deletes TemplateRuleConfigurator.vue + auditEventColumnFilters.ts: zero remaining importers; unused files 0; gates stay green. 5. Formal phase stays None; #48 done; no sole-active. 6. Architecture review + merge + MAIN doc-sync + commit-review before Done. 7. Checklist overall still NO-GO (#3b).",
+        "priority": "medium",
+        "dependencies": [
+          "47"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-12T07:45:00.000Z"
+      },
+      {
+        "id": "49",
+        "title": "OPS: Third-party dependency security audit + baseline-safe upgrades",
+        "description": "DONE 2026-07-13. Slice deps-security-refresh. Baseline-safe Maven + pnpm dependency security refresh. Merge 08c7d56; feature tip cb28237; worktree removed. Formal phase None. BDD not-applicable. M9-T02 remains In Progress (org SCA — NOT closed). Vitest Critical exception → cleanup #50 expires 2026-10-13. Checklist overall NO-GO unchanged (#3b). no sole-active. Do NOT activate CD-3. Do NOT claim go-live. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-13. Slice id: deps-security-refresh. Merge: 08c7d56 (08c7d5641ff96fbb1e8e533df55d58900310289c); feature tip cb28237 (cb28237c4ef46ce49648ee9bf164dc83faef89d4); worktree removed (stage 11). Formal phase remains None. BDD not-applicable (docs/behavior/deps-security-refresh.md). Delivered: Boot 3.3.13 + baseline-safe Maven pins; frontend floors + pnpm.overrides.vite=6.4.3; SBOM regenerated; evidence under docs/evidence/deps-security-refresh/ + docs/operations/deps-security-refresh-frontend-audit.md. Exception: GHSA-5xrq-8626-4rwp Vitest 2.1.9 Critical (dev-only) — cleanup Task Master #50 expires 2026-10-13. Gates: mvn verify GREEN; pnpm lint/type-check/test/build GREEN; prod audit 0; architecture PASS_WITH_NOTES; E2E/UIUX/deploy not-applicable. Related: M9-T01 Done; M9-T02 remains In Progress; M9-T03 Not Started; SOR-C05 Done. Overall checklist NO-GO (blocking: #3b; #5a/#10 CONDITIONAL). no sole-active. Session opt-out: no-commit / no-push. Do NOT: invent formal phase; activate CD-3; close M9-T02; claim production go-live; touch DGE-audit-governance.",
+        "testStrategy": "1. BDD not-applicable (ops hygiene). 2. Produce audit evidence (SBOM refresh and/or approved advisory scan notes) under docs/evidence/security/ or slice evidence path. 3. Any critical/high in changed dependency scope remediated or exception documented (owner + expiry). 4. mvn -B -ntp -f backend/pom.xml verify GREEN after upgrades. 5. pnpm -C frontend lint && type-check && test && build GREEN after upgrades. 6. No ad-hoc stack/runtime switches outside tech-stack guardrails. 7. Formal phase stays None; #49 done after merge + MAIN doc-sync; M9-T02 status unchanged unless org SCA evidence lands. 8. Do NOT activate CD-3. 9. Checklist overall still NO-GO (#3b).",
+        "priority": "high",
+        "dependencies": [
+          "48"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-13T11:45:00.000Z"
+      },
+      {
+        "id": "50",
+        "title": "Frontend: Vitest 3.2.6+ upgrade (GHSA-5xrq-8626-4rwp cleanup)",
+        "description": "PENDING 2026-07-13. Cleanup for deps-security-refresh (#49) Critical exception GHSA-5xrq-8626-4rwp. Upgrade vitest + @vitest/coverage-v8 from 2.1.9 to >=3.2.6 after ADR confirmation for Vitest 2→3 major. Exception expires 2026-10-13. Formal phase None. Do NOT activate CD-3. Do NOT claim go-live.",
+        "details": "Allocated 2026-07-13 as Exception Handling cleanup task for #49 frontend audit residual Critical (GHSA-5xrq-8626-4rwp). Blocked on: user confirmation + ADR update allowing Vitest 3 major (session #49 stayed on Vitest 2 baseline). Scope when unblocked: bump vitest / @vitest/coverage-v8 to >=3.2.6; adjust configs/tests as needed; clear pnpm audit Critical; refresh exception docs or close exception; keep frontend lint/type-check/test/build green. Evidence: docs/operations/deps-security-refresh-frontend-audit.md Exception section. Owner: frontend platform. Expiration of open exception: 2026-10-13.",
+        "testStrategy": "1. ADR / user confirmation recorded before major bump. 2. vitest >= 3.2.6 and coverage peer aligned. 3. pnpm -C frontend audit shows GHSA-5xrq-8626-4rwp remediated (or exception closed). 4. pnpm -C frontend lint && type-check && test && build GREEN. 5. Exception row in deps-security-refresh-frontend-audit.md closed or renewed with new expiry. 6. Formal phase stays None unless plan-orchestrator activates otherwise.",
+        "priority": "medium",
+        "dependencies": [
+          "49"
+        ],
+        "status": "pending",
+        "subtasks": [],
+        "updatedAt": "2026-07-13T11:40:00.000Z"
+      },
+      {
+        "id": "51",
+        "title": "BOOT-4-1-UPGRADE: Java 25 + Spring Boot parent 4.1.0 platform baseline",
+        "description": "DONE 2026-07-14. Slice boot-4-1-upgrade merged to main (993c287; tip e9bf43c; worktree removed). Spring Boot parent 3.3.x → 4.1.0 + Java 21 → 25; ADR-0028 amended. BDD not-applicable. Formal phase None. mvn verify GREEN 1357/0/0/7 (Temurin 25); architecture PASS_WITH_NOTES; DEPLOY_OK_WITH_NOTES healthz 200 Boot 4.1.0 + Java 25.0.3. Push to GitHub blocked (443) at merger — local main ahead. Do NOT activate CD-3. Do NOT claim go-live. Do NOT touch DGE-audit-governance.",
+        "details": "Completed 2026-07-14 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: boot-4-1-upgrade. Placement was ISOLATED D:/working/DGE-boot-4-1-upgrade · feat/boot-4-1-upgrade (removed). Merge 993c287; feature tip e9bf43c. Delivered: spring-boot-starter-parent 4.1.0; Maven release 25; Temurin 25 images; companion Boot 4 pins (springdoc 3.0.3; ShedLock 7.7.0; resilience4j-spring-boot4 2.4.0; spring-boot-jackson2 transitional); ADR-0028 Java 25 + Boot 4.x/4.1.0. Acceptance met: mvn verify GREEN; GET /healthz 200. Jackson 3 deferred (seam open). Related: Task #49 Done; Task #50 pending. Overall checklist remains NO-GO (#3b). Do NOT: claim production go-live; activate CD-3; invent formal phase; touch DGE-audit-governance.",
+        "testStrategy": "1. BDD not-applicable (platform/ops baseline — docs/behavior/boot-4-1-upgrade.md). 2. ADR-0028 amended to Java 25 + Boot 4.x with pin 4.1.0. 3. mvn -B -ntp -f backend/pom.xml verify GREEN (1357/0/0/7; release 25). 4. Application starts; GET /healthz 200 (Boot 4.1.0 + Java 25.0.3). 5. Stack/ops docs + Temurin 25 documented. 6. Formal phase stays None; #51 done after merge + MAIN post-task-doc-sync + commit-review. 7. Do NOT activate CD-3. 8. Checklist overall still NO-GO (#3b).",
+        "priority": "high",
+        "dependencies": [
+          "49"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2026-07-14T00:20:00.000Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-09T11:45:00.000Z",
-      "taskCount": 8,
-      "completedCount": 8,
+      "lastModified": "2026-07-14T00:20:00.000Z",
+      "taskCount": 51,
+      "completedCount": 50,
       "tags": [
         "master"
       ]

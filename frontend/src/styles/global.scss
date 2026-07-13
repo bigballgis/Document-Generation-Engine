@@ -76,6 +76,11 @@
 
   --transition-base: 150ms ease;
 
+  /* Focus ring (LR-C12 — tokenized; use instead of ad-hoc hex/px) */
+  --focus-ring-color: var(--brand-primary);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+
   /* Dialog widths */
   --dialog-width-sm: 480px;
   --dialog-width-md: 640px;
@@ -165,8 +170,29 @@ p {
 }
 
 .el-button:focus-visible {
-  outline: 2px solid var(--brand-primary);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.el-tabs__item:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.el-dialog__headerbtn:focus-visible,
+.el-drawer__close-btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.el-dropdown-menu__item:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: calc(-1 * var(--focus-ring-offset));
+}
+
+.el-textarea__inner:focus-visible,
+.el-input__wrapper:focus-within {
+  box-shadow: 0 0 0 1px var(--focus-ring-color) inset;
 }
 
 .el-card {

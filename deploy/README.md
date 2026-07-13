@@ -43,13 +43,44 @@ See also [Production runbook](../docs/operations/runbook.md) for release-gate an
 | [k8s-hpa-autoscaling.md](./k8s-hpa-autoscaling.md) | HPA CPU/memory + custom metrics (P15-T05) |
 | [k8s-network-policy.md](./k8s-network-policy.md) | Default-deny NetworkPolicy + explicit allow rules (P15-T06) |
 | [k8s-health-probes.md](./k8s-health-probes.md) | Liveness `/healthz` + readiness `/readyz` (P15-T07; F8 deep readiness checks) |
-| [observability/prometheus-alerts.yaml](./observability/prometheus-alerts.yaml) | Draft SLO alert rules (`docgen.generation.*`, `docgen.pdf.conversion.*`) |
+| **[observability/](./observability/README.md)** | **LR-D3** — metrics/alerting as code index; **draft** thresholds (D6/D5); runbook annotation map; no vendor APM; no baked credentials |
+| [observability/prometheus-alerts.yaml](./observability/prometheus-alerts.yaml) | Draft Prometheus rules (keep `draft: true`; wire `runbook` → [runbook alert sections](../docs/operations/runbook.md#observability)) |
+| [observability/prometheus-scrape.yaml](./observability/prometheus-scrape.yaml) | Reference-only example scrape job (`docgen-backend`) — no credentials; not mounted by compose |
+| [observability/grafana/docgen-ops-overview.json](./observability/grafana/docgen-ops-overview.json) | Grafana dashboard JSON (generation / PDF pool / SSE / rate-limit / DLT) |
 | [core-fortress-release-checklist.md](../docs/operations/core-fortress-release-checklist.md) | CORE-FORTRESS release evidence checklist |
 | `scripts/core-fortress-evidence-bundle.ps1` | Evidence bundle collector (`release-gate.ps1 -EvidenceBundle`) |
 | [blue-green-runbook.md](./blue-green-runbook.md) | Production cutover, manual approval, rollback (P15-T08) |
+| [Backup & restore runbook](../docs/operations/backup-restore-runbook.md) | Postgres/MinIO backup + scratch restore drill (LR-D2; **EXECUTED** 2026-07-12 — scratch scope only; not production compliance) |
 | [ci-k8s-gates.md](./ci-k8s-gates.md) | Blocking CI manifest validation (P15-T09) |
 
 ## Local Docker: install and upgrade
+
+**Acceptance / prod-shaped compose — `JWT_SECRET` + `KAFKA_IMAGE` required:** Before `docker-deploy.ps1`,
+`docker-deploy-queue.ps1`, or `docker compose … --profile prod`, operators must export:
+
+1. An **explicit** ≥32-byte `JWT_SECRET` that is **not** a known insecure placeholder
+   (`local-dev-only-change-me-please-32bytes-min`, `prod-change-me-32-bytes-minimum-secret`).
+   `docker-compose.prod.yml` must **not** use `${JWT_SECRET:-…}` bake-in defaults; missing or
+   known-insecure values fail closed. Local-only `.env` / `dev`/`local`/`test` may keep the
+   documented test secret in [`.env.example`](../.env.example). Behavior SoT:
+   [BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md). Checklist
+   [#9](../docs/operations/launch-readiness-checklist.md) is **GO** (merge `587cd9a`) — **not** go-live.
+2. An **explicit** `KAFKA_IMAGE` full image ref. Compose uses `${KAFKA_IMAGE:?…}` (**no**
+   `:-bitnamilegacy…` silent default). Production / acceptance must use a **company-approved**
+   coordinate (`<company-registry>/<kafka-image>:<tag>`). Company registry hostname is **UNKNOWN**
+   in-repo — **do not** invent one. Local/dev may use the Hub example in `.env.example`
+   (**LOCAL/DEV ONLY**). Behavior SoT:
+   [BDD-OPS-KAFKA-REGISTRY-001](../docs/behavior/ops-kafka-company-registry.md). Checklist
+   [#10](../docs/operations/launch-readiness-checklist.md) is **CONDITIONAL** — **not** go-live;
+   overall checklist remains **NO-GO**.
+
+```powershell
+$env:JWT_SECRET = '<explicit-non-default-≥32-bytes>'
+$env:KAFKA_IMAGE = '<company-registry>/<kafka-image>:<tag>'
+.\scripts\docker-deploy.ps1
+# Prefer the single-host queue on this machine:
+# .\scripts\docker-deploy-queue.ps1
+```
 
 Host-compile, then copy artifacts into runtime images:
 
@@ -138,6 +169,12 @@ External Secrets Operator sync).
 | ConfigMap (`{release}-config`) | Service endpoints, ports, non-sensitive app flags | Passwords, `JWT_SECRET`, API keys |
 | Secret (`existingSecretName`) | `POSTGRES_*`, `MINIO_*`, `JWT_SECRET` | Committed in repo or baked into images |
 
+**`JWT_SECRET` (staging / prod / acceptance):** Required key in the application Secret — **never**
+ConfigMap, image, or chart plaintext. Value must be operator-generated (≥32 bytes) and **must not**
+equal known insecure defaults above. Helm keeps fail-closed `required` / `existingSecretName`
+posture ([k8s-config-secrets.md](./k8s-config-secrets.md)); compose/scripts must not reintroduce
+silent defaults ([BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md)).
+
 Default posture: **`secrets.create: false`** — operator provisions `docgen-app-secrets-<env>` before
 `helm install`. Optional `ExternalSecret` syncs from Vault or cloud Secret Manager.
 
@@ -183,13 +220,17 @@ Detailed prod rollback steps: [blue-green-runbook.md § Manual rollback](./blue-
 
 ## Container hardening
 
-Packaged images run non-root with read-only root filesystem and dropped capabilities. Validation:
+Packaged images run non-root with read-only root filesystem and dropped capabilities. Validation
+(prod-shaped smoke — **requires explicit `JWT_SECRET`**; must **not** silently fall back to
+`prod-change-me-32-bytes-minimum-secret`):
 
 ```powershell
+$env:JWT_SECRET = '<explicit-non-default-≥32-bytes>'
 .\scripts\container-hardening-smoke.ps1
 ```
 
-Details: [container-hardening.md](./container-hardening.md).
+Details: [container-hardening.md](./container-hardening.md). Behavior:
+[BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md) S4.
 
 ## Chart and script layout
 
@@ -209,4 +250,8 @@ Details: [container-hardening.md](./container-hardening.md).
 - [Security view](../docs/architecture/security-view.md) — container hardening, network isolation, secret handling
 - [Data storage view](../docs/architecture/data-storage-view.md) — external data services and retention
 - [P15 detailed plan](../docs/plan/detail/P15-kubernetes-deployment-container-hardening.md) — phase tasks and exit criteria
-- [Production runbook](../docs/operations/runbook.md) — release gate and local prod compose profile
+- [Production runbook](../docs/operations/runbook.md) — release gate, local prod compose profile, **LR-D3 alert response sections**, **JWT_SECRET** + **KAFKA_IMAGE** explicit provision
+- [BDD-OPS-JWT-SECRET-001](../docs/behavior/ops-jwt-secret-no-default.md) — no compose JWT default; known insecure refused; checklist #9 **GO** (not go-live)
+- [BDD-OPS-KAFKA-REGISTRY-001](../docs/behavior/ops-kafka-company-registry.md) — fail-closed `KAFKA_IMAGE`; Hub example LOCAL/DEV ONLY; checklist #10 **CONDITIONAL** (not go-live)
+- [Observability as code](./observability/README.md) — LR-D3 draft alert thresholds + `runbook` annotation targets (NOT confirmed SLOs)
+- [Backup & restore runbook](../docs/operations/backup-restore-runbook.md) — LR-D2 pg/MinIO restore + confirmation gate + drill evidence (**EXECUTED** 2026-07-12; scratch ≠ production compliance)

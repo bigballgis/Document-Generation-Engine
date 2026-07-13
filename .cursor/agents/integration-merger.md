@@ -12,11 +12,10 @@ You own **bringing an isolated worktree branch back** into the integration line 
 Skill: `.cursor/skills/worktree-isolation/SKILL.md`.
 Queue / Docker: `.cursor/skills/docker-deploy-queue/SKILL.md`.
 
-## When to invoke
+## When to invoke (mandatory for delivery)
 
-- After an isolated-slice engineer reports green gates.
+- **Stage 11** — after implementers report green gates in the feature worktree.
 - When the user asks to merge a feature worktree / branch and delete the worktree.
-- When `delivery-orchestrator` reaches stage **11** (integrate isolated slice).
 
 **Doc-sync / commit** run on **main after** successful merge (stages 12–13) — do not
 leave plan Done claims only in the feature worktree.

@@ -14,13 +14,17 @@ final class ManagementAuthorizationRegistry {
 
     static final Set<String> MANAGEMENT_CONTROLLERS = Set.of(
             "com.bank.docgen.apimgmt.web.ApiAccessController",
-            "com.bank.docgen.apimgmt.web.ApiManagementController",
+            "com.bank.docgen.apimgmt.web.ApiManagementCredentialController",
+            "com.bank.docgen.apimgmt.web.ApiManagementInvocationController",
+            "com.bank.docgen.apimgmt.web.ApiManagementPolicyController",
             "com.bank.docgen.audit.web.AuditController",
             "com.bank.docgen.audit.web.GenerationAuditController",
             "com.bank.docgen.authorization.management.web.GroupManagementController",
             "com.bank.docgen.authorization.management.web.ManagementAuthController",
+            "com.bank.docgen.authorization.management.web.SecurityAuditController",
             "com.bank.docgen.authorization.management.web.UserManagementController",
             "com.bank.docgen.collaboration.web.CollaborationTimeoutConfigController",
+            "com.bank.docgen.collaboration.web.CollaborationNotificationController",
             "com.bank.docgen.collaboration.web.CollaborationWorkItemController",
             "com.bank.docgen.contentmodule.web.ContentModuleController",
             "com.bank.docgen.master.web.MasterDocumentController",
@@ -28,9 +32,11 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.rendering.web.BatchTestController",
             "com.bank.docgen.rendering.web.PreviewController",
             "com.bank.docgen.template.web.RiskPromptConfigController",
+            "com.bank.docgen.template.web.TemplateAuthoringController",
             "com.bank.docgen.template.web.TemplateController",
             "com.bank.docgen.template.web.TemplateExportController",
             "com.bank.docgen.template.web.TemplateImportController",
+            "com.bank.docgen.template.web.TemplateLifecycleController",
             "com.bank.docgen.template.web.TemplateRiskPromptConfigController",
             "com.bank.docgen.template.web.TemplateVersionLineController",
             "com.bank.docgen.template.web.TestDataSetController"
@@ -45,12 +51,19 @@ final class ManagementAuthorizationRegistry {
                     Set.of("com.bank.docgen.apimgmt.service.ApiAccessAlertQueryService")
             ),
             Map.entry(
-                    "com.bank.docgen.apimgmt.web.ApiManagementController",
+                    "com.bank.docgen.apimgmt.web.ApiManagementCredentialController",
+                    Set.of("com.bank.docgen.apimgmt.service.ApiManagementService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.apimgmt.web.ApiManagementInvocationController",
+                    Set.of("com.bank.docgen.apimgmt.service.ManagementInvocationQueryService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.apimgmt.web.ApiManagementPolicyController",
                     Set.of(
                             "com.bank.docgen.apimgmt.service.ApiManagementService",
                             "com.bank.docgen.apimgmt.service.ApiPolicyImpactPreviewService",
-                            "com.bank.docgen.apimgmt.service.ApiPolicyRollbackService",
-                            "com.bank.docgen.apimgmt.service.ManagementInvocationQueryService"
+                            "com.bank.docgen.apimgmt.service.ApiPolicyRollbackService"
                     )
             ),
             Map.entry(
@@ -70,12 +83,20 @@ final class ManagementAuthorizationRegistry {
                     Set.of("com.bank.docgen.authorization.management.service.ManagementAuthService")
             ),
             Map.entry(
+                    "com.bank.docgen.authorization.management.web.SecurityAuditController",
+                    Set.of("com.bank.docgen.authorization.management.service.SecurityAuditSummaryService")
+            ),
+            Map.entry(
                     "com.bank.docgen.authorization.management.web.UserManagementController",
                     Set.of("com.bank.docgen.authorization.management.service.UserManagementService")
             ),
             Map.entry(
                     "com.bank.docgen.collaboration.web.CollaborationTimeoutConfigController",
                     Set.of("com.bank.docgen.collaboration.service.CollaborationTimeoutConfigService")
+            ),
+            Map.entry(
+                    "com.bank.docgen.collaboration.web.CollaborationNotificationController",
+                    Set.of("com.bank.docgen.collaboration.service.CollaborationNotificationService")
             ),
             Map.entry(
                     "com.bank.docgen.collaboration.web.CollaborationWorkItemController",
@@ -120,17 +141,21 @@ final class ManagementAuthorizationRegistry {
                     Set.of("com.bank.docgen.template.service.RiskPromptConfigService")
             ),
             Map.entry(
+                    "com.bank.docgen.template.web.TemplateAuthoringController",
+                    Set.of(
+                            "com.bank.docgen.template.service.TemplateService",
+                            "com.bank.docgen.template.service.TemplateRuleValidationService",
+                            "com.bank.docgen.template.service.TemplateContentModuleReferenceService"
+                    )
+            ),
+            Map.entry(
                     "com.bank.docgen.template.web.TemplateController",
                     Set.of(
                             "com.bank.docgen.template.service.TemplateService",
-                            "com.bank.docgen.template.service.TemplateLifecycleService",
                             "com.bank.docgen.template.service.TemplateDeleteService",
-                            "com.bank.docgen.template.service.RiskPromptConfigService",
                             "com.bank.docgen.template.service.ChangeDiffService",
                             "com.bank.docgen.template.service.CoverageComputationService",
-                            "com.bank.docgen.template.service.PublishGateService",
-                            "com.bank.docgen.template.service.TemplateContentModuleReferenceService",
-                            "com.bank.docgen.template.service.TemplateRuleValidationService"
+                            "com.bank.docgen.template.service.PublishGateService"
                     )
             ),
             Map.entry(
@@ -142,12 +167,22 @@ final class ManagementAuthorizationRegistry {
                     Set.of("com.bank.docgen.template.service.TemplateImportService")
             ),
             Map.entry(
+                    "com.bank.docgen.template.web.TemplateLifecycleController",
+                    Set.of(
+                            "com.bank.docgen.template.service.TemplateLifecycleService",
+                            "com.bank.docgen.template.service.RiskPromptConfigService"
+                    )
+            ),
+            Map.entry(
                     "com.bank.docgen.template.web.TemplateRiskPromptConfigController",
                     Set.of("com.bank.docgen.template.service.RiskPromptConfigService")
             ),
             Map.entry(
                     "com.bank.docgen.template.web.TemplateVersionLineController",
-                    Set.of("com.bank.docgen.template.service.TemplateVersionLineService")
+                    Set.of(
+                            "com.bank.docgen.template.service.TemplateVersionLineService",
+                            "com.bank.docgen.template.service.PublishGateService"
+                    )
             ),
             Map.entry(
                     "com.bank.docgen.template.web.TestDataSetController",
@@ -234,6 +269,10 @@ final class ManagementAuthorizationRegistry {
                     "Login/session endpoints; credential authentication, not capability checks"
             ),
             Map.entry(
+                    "com.bank.docgen.authorization.management.service.SecurityAuditSummaryService",
+                    "Authenticated self-report of route denial; session principal only, fail-safe persistence"
+            ),
+            Map.entry(
                     "com.bank.docgen.authorization.management.service.UserManagementService",
                     "Identity admin; enforces session role checks directly (requireUserAdministrator, guardScopeSubset)"
             ),
@@ -250,6 +289,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.apimgmt.service.ApiPolicyRollbackService",
             "com.bank.docgen.audit.service.AuditQueryService",
             "com.bank.docgen.collaboration.service.CollaborationTimeoutConfigService",
+            "com.bank.docgen.collaboration.service.CollaborationNotificationService",
             "com.bank.docgen.collaboration.service.CollaborationWorkItemService",
             "com.bank.docgen.contentmodule.service.ContentModuleLifecycleImpactService",
             "com.bank.docgen.contentmodule.service.ContentModuleLifecycleService",

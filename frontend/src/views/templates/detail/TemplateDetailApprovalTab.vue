@@ -1,26 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { toRef } from 'vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
 import TemplateRiskPromptConfigPanel from '@/components/templates/TemplateRiskPromptConfigPanel.vue'
 import type { SemverBumpLevel } from '@/utils/semver'
-import {
-  listInvalidBindings,
-  mapBindingGateIssueItems,
-  type BindingGateIssueItem,
-} from '@/utils/templateBindingGateDisplay'
 import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
 import type { BindingValidationResult } from '@/types/template'
-import {
-  buildDevWorkspaceQuery,
-  resolveApprovalSubTabFromQuery,
-} from '@/views/templates/templateDevWorkspaceTabs'
-import {
-  templateApprovalSubTabLabelKey,
-  type TemplateApprovalSubTab,
-} from '@/views/templates/templateApprovalSubTabs'
+import { templateApprovalSubTabLabelKey } from '@/views/templates/templateApprovalSubTabs'
+import TemplateDetailApprovalPublishPane from '@/views/templates/detail/TemplateDetailApprovalPublishPane.vue'
+import { useTemplateDetailApprovalTab } from '@/views/templates/detail/useTemplateDetailApprovalTab'
 
 type PublishBumpOption = {
   level: SemverBumpLevel
@@ -51,49 +39,16 @@ const emit = defineEmits<{
   retrySubmitGate: []
 }>()
 
-const { t, te } = useI18n()
-const route = useRoute()
-const router = useRouter()
-
-const activeSubTab = ref<TemplateApprovalSubTab>(resolveApprovalSubTabFromQuery(route.query))
-
-watch(
-  () => [route.query.approvalTab, route.query.focus],
-  () => {
-    activeSubTab.value = resolveApprovalSubTabFromQuery(route.query)
-  },
-)
-
-watch(activeSubTab, (tab) => {
-  if (resolveApprovalSubTabFromQuery(route.query) === tab) {
-    return
-  }
-  void router.replace({
-    query: buildDevWorkspaceQuery(route.query, 'approval', tab),
-  })
+const {
+  t,
+  activeSubTab,
+  bindingGateIssues,
+  bindingGateIssueMessageKey,
+  invalidBindings,
+  resolveBindingStatusLabel,
+} = useTemplateDetailApprovalTab({
+  bindingGateResult: toRef(props, 'bindingGateResult'),
 })
-
-const bindingGateIssues = computed(() =>
-  props.bindingGateResult ? mapBindingGateIssueItems(props.bindingGateResult.summary) : [],
-)
-
-const bindingGateIssueMessageKey: Record<BindingGateIssueItem['issueKey'], string> = {
-  missingAnchor: 'templates.bindingGate.issueMissingAnchor',
-  duplicateBinding: 'templates.bindingGate.issueDuplicateBinding',
-  incompatibleContentType: 'templates.bindingGate.issueIncompatibleContentType',
-}
-
-const invalidBindings = computed(() =>
-  props.bindingGateResult ? listInvalidBindings(props.bindingGateResult.bindings) : [],
-)
-
-function resolveBindingStatusLabel(status: string | undefined): string {
-  if (!status) {
-    return status ?? ''
-  }
-  const key = `templates.bindingGate.status.${status}`
-  return te(key) ? t(key) : status
-}
 </script>
 
 <template>
@@ -144,68 +99,20 @@ function resolveBindingStatusLabel(status: string | undefined): string {
           class="gate-error"
           @retry="emit('retryPublishGate')"
         />
-        <template v-else-if="showPublishActions">
-          <el-card v-if="bindingGateResult" shadow="never" class="gate-card">
-            <h3>{{ t('templates.bindingGate.title') }}</h3>
-            <p>
-              {{
-                t('templates.bindingGate.summary', {
-                  valid: bindingGateResult.summary.validCount,
-                  total: bindingGateResult.summary.totalBindings,
-                })
-              }}
-            </p>
-            <ul v-if="bindingGateIssues.length" class="gate-list">
-              <li v-for="issue in bindingGateIssues" :key="issue.issueKey">
-                {{ t(bindingGateIssueMessageKey[issue.issueKey], { count: issue.count }) }}
-              </li>
-            </ul>
-            <ul v-if="invalidBindings.length" class="gate-list">
-              <li v-for="binding in invalidBindings" :key="`${binding.anchorId}-${binding.validationStatus}`">
-                {{
-                  t('templates.bindingGate.invalidBindingLine', {
-                    anchorId: binding.anchorId,
-                    statusLabel: resolveBindingStatusLabel(binding.validationStatus),
-                  })
-                }}
-              </li>
-            </ul>
-          </el-card>
-
-          <el-card shadow="never" class="gate-card">
-            <h3>{{ t('templates.publishGate.title') }}</h3>
-            <p>{{ t('templates.publishGate.description') }}</p>
-            <el-skeleton v-if="loadingPublishGate" :rows="2" animated />
-            <ul v-else class="gate-list">
-              <li v-for="item in publishGateItems" :key="item.key">
-                <span>{{ item.label }}</span>
-                <el-tag v-if="item.informational" type="info" size="small">
-                  {{ t('templates.publishGate.informational') }}
-                </el-tag>
-                <el-tag v-else :type="item.ready ? 'success' : 'warning'" size="small">
-                  {{ item.ready ? t('templates.publishGate.ready') : t('templates.publishGate.pending') }}
-                </el-tag>
-              </li>
-            </ul>
-            <el-radio-group
-              :model-value="publishBumpLevel"
-              class="publish-bump-picker publish-bump-picker--wrap"
-              @update:model-value="emit('update:publishBumpLevel', $event)"
-            >
-              <el-radio-button v-for="option in publishBumpOptions" :key="option.level" :value="option.level">
-                {{ option.label }} ({{ option.version }})
-              </el-radio-button>
-            </el-radio-group>
-            <el-alert
-              v-if="publishVersionConflict"
-              class="publish-conflict-alert"
-              type="warning"
-              :title="t('templates.lifecycle.releaseVersionConflict')"
-              show-icon
-              :closable="false"
-            />
-          </el-card>
-        </template>
+        <TemplateDetailApprovalPublishPane
+          v-else-if="showPublishActions"
+          :binding-gate-result="bindingGateResult"
+          :binding-gate-issues="bindingGateIssues"
+          :binding-gate-issue-message-key="bindingGateIssueMessageKey"
+          :invalid-bindings="invalidBindings"
+          :resolve-binding-status-label="resolveBindingStatusLabel"
+          :publish-gate-items="publishGateItems"
+          :loading-publish-gate="loadingPublishGate"
+          :publish-bump-level="publishBumpLevel"
+          :publish-version-conflict="publishVersionConflict"
+          :publish-bump-options="publishBumpOptions"
+          @update:publish-bump-level="emit('update:publishBumpLevel', $event)"
+        />
         <p v-else class="empty-hint">{{ t('templates.devWorkspace.approval.publishReadinessEmpty') }}</p>
       </el-tab-pane>
 
@@ -277,27 +184,6 @@ function resolveBindingStatusLabel(status: string | undefined): string {
     gap: 0.5rem;
     margin-bottom: 0.35rem;
   }
-}
-
-.publish-bump-picker--wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  height: auto;
-
-  :deep(.el-radio-button) {
-    margin-left: 0;
-  }
-
-  :deep(.el-radio-button__inner) {
-    border-left: 1px solid var(--el-border-color);
-    border-radius: var(--el-border-radius-base);
-  }
-}
-
-.publish-conflict-alert {
-  margin-top: 0.75rem;
 }
 
 .governance-title {

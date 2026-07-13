@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ApiPolicyImpactPreview } from '@/types/template'
+import { buildApiPolicyImpactFindings } from '@/utils/apiPolicyImpactFindings'
 
 const props = defineProps<{
   preview: ApiPolicyImpactPreview | null
@@ -24,6 +25,10 @@ const warningMessages = computed(() =>
   (props.preview?.warnings ?? []).map((key) => (te(key) ? t(key) : key)),
 )
 
+const hardBlockFindings = computed(() =>
+  props.preview ? buildApiPolicyImpactFindings(props.preview) : [],
+)
+
 const changedAreasText = computed(() => {
   const areas = props.preview?.changedAreas ?? []
   if (areas.length === 0) {
@@ -36,7 +41,7 @@ const changedAreasText = computed(() => {
 </script>
 
 <template>
-  <section class="impact-panel" aria-live="polite">
+  <section class="impact-panel" aria-live="polite" data-testid="api-policy-impact-preview-panel">
     <header class="impact-panel__header">
       <h3>{{ t('apiPolicy.detail.impact.title') }}</h3>
       <el-tag v-if="preview?.blocking" type="danger" effect="plain">
@@ -85,7 +90,38 @@ const changedAreasText = computed(() => {
         </div>
       </dl>
 
-      <ul v-if="warningMessages.length > 0" class="impact-panel__warnings">
+      <ul
+        v-if="hardBlockFindings.length > 0"
+        class="impact-panel__findings"
+        data-testid="api-policy-hard-block-finding"
+      >
+        <li
+          v-for="finding in hardBlockFindings"
+          :key="finding.code"
+          class="impact-panel__finding"
+        >
+          <dl>
+            <div>
+              <dt>{{ t('apiPolicy.detail.impact.reasonLabel') }}</dt>
+              <dd data-testid="api-policy-hard-block-reason">{{ t(finding.reasonKey) }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('apiPolicy.detail.impact.impactLabel') }}</dt>
+              <dd data-testid="api-policy-hard-block-impact">{{ t(finding.impactKey) }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('apiPolicy.detail.impact.adviceLabel') }}</dt>
+              <dd data-testid="api-policy-hard-block-advice">{{ t(finding.adviceKey) }}</dd>
+            </div>
+            <div>
+              <dt>{{ t('apiPolicy.detail.impact.expectedErrorCodeLabel') }}</dt>
+              <dd data-testid="api-policy-hard-block-error-code">{{ finding.expectedErrorCode }}</dd>
+            </div>
+          </dl>
+        </li>
+      </ul>
+
+      <ul v-else-if="warningMessages.length > 0" class="impact-panel__warnings">
         <li v-for="(message, index) in warningMessages" :key="`${message}-${index}`">
           {{ message }}
         </li>
@@ -105,63 +141,4 @@ const changedAreasText = computed(() => {
   </section>
 </template>
 
-<style scoped lang="scss">
-.impact-panel {
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 1rem 1.25rem;
-  background: var(--surface-muted);
-}
-
-.impact-panel__header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-
-  h3 {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-  }
-}
-
-.impact-panel__summary {
-  margin: 0 0 0.75rem;
-  color: var(--text-primary);
-}
-
-.impact-panel__meta {
-  display: grid;
-  gap: 0.5rem;
-  margin: 0 0 0.75rem;
-
-  div {
-    display: grid;
-    grid-template-columns: 10rem 1fr;
-    gap: 0.75rem;
-  }
-
-  dt {
-    margin: 0;
-    color: var(--text-muted);
-    font-weight: 500;
-  }
-
-  dd {
-    margin: 0;
-  }
-}
-
-.impact-panel__warnings {
-  margin: 0 0 0.75rem;
-  padding-left: 1.25rem;
-  color: var(--warning-text, #b88230);
-}
-
-.impact-panel__detail {
-  margin: 0.25rem 0 0;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-</style>
+<style scoped lang="scss" src="./ApiPolicyImpactPreviewPanel.scss"></style>

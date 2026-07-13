@@ -14,10 +14,10 @@ Skill: `.cursor/skills/plan-status-tracking/SKILL.md`.
 
 ## Plan layer
 
-- Overall plan: `docs/plan/master-plan.md` — current phase list and active phase.
+- Overall plan: `docs/plan/master-plan.md` 鈥?current phase list and active phase.
 - Detailed plans: `docs/plan/detail/<phase>.md`.
 - Index: `docs/plan/README.md`.
-- **Active/new work:** `.taskmaster/tasks/tasks.json` (ADR-0053) — read/update when
+- **Active/new work:** `.taskmaster/tasks/tasks.json` (ADR-0053) 鈥?read/update when
   the request maps to Task Master tasks; mirror into plan/ledger when a formal phase applies.
 
 ## Rules

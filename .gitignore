@@ -28,6 +28,7 @@ Thumbs.db
 
 # ---- Build / runtime artifacts ----
 artifacts/
+backups/
 logs/
 *.log
 .tmp/
@@ -79,3 +80,7 @@ node_modules/
 .taskmaster/logs/
 .taskmaster/report*.json
 .taskmaster/.taskmaster-config.local.json
+
+# LR-D6 local-only override (copy from .example; never auto-loaded by docker-deploy)
+docker-compose.load-smoke.override.yml
+

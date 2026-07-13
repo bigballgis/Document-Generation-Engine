@@ -53,6 +53,25 @@ function Remove-SmokeContainers {
 }
 
 Write-Host "==> Ensuring infrastructure (postgres, redis, minio)..."
+# Compose loads the full docker-compose.yml (including docgen-kafka image ${KAFKA_IMAGE:?…}).
+# Ensure KAFKA_IMAGE is present even though this smoke does not start Kafka.
+if ([string]::IsNullOrWhiteSpace($env:KAFKA_IMAGE)) {
+    if (Test-Path ".env") {
+        foreach ($line in Get-Content ".env") {
+            $trimmed = $line.Trim()
+            if ($trimmed.StartsWith('#') -or -not $trimmed.Contains('=')) { continue }
+            $name, $value = $trimmed.Split('=', 2)
+            if ($name.Trim() -eq 'KAFKA_IMAGE') {
+                $env:KAFKA_IMAGE = $value.Trim().Trim('"').Trim("'")
+                break
+            }
+        }
+    }
+}
+if ([string]::IsNullOrWhiteSpace($env:KAFKA_IMAGE)) {
+    Write-Error "KAFKA_IMAGE must be set (env or .env) before docker compose — docgen-kafka uses `${KAFKA_IMAGE:?…}` fail-closed. See .env.example (LOCAL/DEV ONLY) or runbook."
+    exit 1
+}
 docker compose up -d docgen-postgres docgen-redis docgen-minio
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
@@ -100,6 +119,20 @@ $frontendName = "docgen-hardening-frontend-smoke"
 
 Remove-SmokeContainers -Names @($backendName, $frontendName)
 
+# BDD-OPS-JWT-SECRET-001 / S4: require explicit JWT_SECRET — no silent insecure fallback.
+$knownInsecureJwt = @(
+    'local-dev-only-change-me-please-32bytes-min',
+    'prod-change-me-32-bytes-minimum-secret'
+)
+if ([string]::IsNullOrWhiteSpace($env:JWT_SECRET)) {
+    Write-Error "JWT_SECRET must be explicitly set before running container-hardening-smoke.ps1 (no insecure default fallback). Example: `$env:JWT_SECRET = '<≥32-byte non-default secret>'"
+    exit 1
+}
+if ($knownInsecureJwt -contains $env:JWT_SECRET.Trim()) {
+    Write-Error "JWT_SECRET must not be a known insecure default (local-dev-only-… / prod-change-me-…). Set a unique ≥32-byte secret."
+    exit 1
+}
+
 Write-Host "==> Smoke: backend (read-only + non-root UID 65532 + /tmp tmpfs)..."
 docker run -d --name $backendName `
     --network $networkName `
@@ -117,7 +150,7 @@ docker run -d --name $backendName `
     -e REDIS_HOST=docgen-redis `
     -e REDIS_PORT=6379 `
     -e MINIO_ENDPOINT=http://docgen-minio:9000 `
-    -e JWT_SECRET=$(if ($env:JWT_SECRET) { $env:JWT_SECRET } else { 'prod-change-me-32-bytes-minimum-secret' }) `
+    -e JWT_SECRET=$env:JWT_SECRET `
     -e APP_ENVIRONMENT=prod `
     -e DOCGEN_SEED_DEMO_CATALOG=false `
     -e JAVA_TOOL_OPTIONS=-Djava.io.tmpdir=/tmp `

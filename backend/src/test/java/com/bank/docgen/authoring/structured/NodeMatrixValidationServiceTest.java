@@ -54,6 +54,74 @@ class NodeMatrixValidationServiceTest {
     }
 
     @Test
+    void writerUnsupportedQrBarcodeRef_isBlocker() {
+        // A3 — binding-time BLOCKER for writer-unsupported qrBarcodeRef
+        String json = """
+                {"nodes":[{"type":"qrBarcodeRef","referenceKey":"PAYMENT-QR"}]}
+                """;
+
+        StructuredContentValidationResult result = service.validate(json, Set.of());
+
+        assertThat(result.blockers()).hasSize(1);
+        assertThat(result.blockers().getFirst().severity()).isEqualTo(StructuredContentFidelitySeverity.BLOCKER);
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.UNSUPPORTED_NODE);
+        assertThat(result.blockers().getFirst().messageKey())
+                .isEqualTo(NodeMatrixValidationService.MESSAGE_KEY_UNSUPPORTED_NODE);
+        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0]");
+    }
+
+    @Test
+    void writerUnsupportedAttachmentListRef_isBlocker() {
+        // A3 — binding-time BLOCKER for writer-unsupported attachmentListRef
+        String json = """
+                {"nodes":[{"type":"attachmentListRef","referenceKey":"ATTACHMENTS"}]}
+                """;
+
+        StructuredContentValidationResult result = service.validate(json, Set.of());
+
+        assertThat(result.blockers()).hasSize(1);
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.UNSUPPORTED_NODE);
+        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0]");
+    }
+
+    @Test
+    void writerUnsupportedNestedInCondition_isBlocker() {
+        // A3 + B2 — static tree detection even when nested under conditionBlock
+        String json = """
+                {
+                  "nodes": [
+                    {
+                      "type": "conditionBlock",
+                      "conditionExpression": "${show} == true",
+                      "children": [
+                        { "type": "qrBarcodeRef", "referenceKey": "PAYMENT-QR" }
+                      ]
+                    }
+                  ]
+                }
+                """;
+
+        StructuredContentValidationResult result = service.validate(json, Set.of("show"));
+
+        assertThat(result.blockers()).hasSize(1);
+        assertThat(result.blockers().getFirst().code()).isEqualTo(FidelityWarningCode.UNSUPPORTED_NODE);
+        assertThat(result.blockers().getFirst().location()).isEqualTo("nodes[0].children[0]");
+    }
+
+    @Test
+    void countUnsupportedNodeBlockers_countsWriterUnsupportedAndUnknown() {
+        assertThat(service.countUnsupportedNodeBlockers(
+                "{\"nodes\":[{\"type\":\"qrBarcodeRef\",\"referenceKey\":\"QR-1\"}]}"))
+                .isEqualTo(1);
+        assertThat(service.countUnsupportedNodeBlockers(
+                "{\"nodes\":[{\"type\":\"rawHtml\",\"value\":\"x\"}]}"))
+                .isEqualTo(1);
+        assertThat(service.countUnsupportedNodeBlockers(
+                "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"ok\"}]}]}"))
+                .isZero();
+    }
+
+    @Test
     void validation_excludesSensitiveData() {
         String sensitivePlaintext = "secret-value-12345";
         String json = """

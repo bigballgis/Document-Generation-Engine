@@ -1,102 +1,38 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
+import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
+import BatchTestHistoryPanel from '@/components/template/BatchTestHistoryPanel.vue'
+import TemplateLifecycleAuditTimeline from '@/components/templates/TemplateLifecycleAuditTimeline.vue'
+import PublishGateReadOnlyPanel from '@/components/templates/PublishGateReadOnlyPanel.vue'
 import TemplateStatusBadge from '@/components/templates/TemplateStatusBadge.vue'
 import ReleaseSectionTable from '@/components/templates/ReleaseSectionTable.vue'
-import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { useCapabilities } from '@/composables/useCapabilities'
-import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
-import {
-  templateDevVersionPath,
-  templatePackageHubPath,
-} from '@/routing/routeKeys'
-import type { TemplateVersionLineDetail } from '@/types/template'
-import { versionLineDisplayLabel } from '@/utils/templateVersionLine'
-import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
+import TemplateDetailOverviewTab from '@/views/templates/detail/TemplateDetailOverviewTab.vue'
+import { useTemplateReleaseDetailView } from '@/views/templates/useTemplateReleaseDetailView'
 
-const { t } = useI18n()
-const { formatDateTime } = useLocaleFormatters()
-const route = useRoute()
-const router = useRouter()
-const { authorTemplates } = useCapabilities()
-const panelDataStore = useTemplatePanelDataStore()
-
-const loading = ref(false)
-const loadFailed = ref(false)
-const cloning = ref(false)
-const releaseDetail = ref<TemplateVersionLineDetail | null>(null)
-
-const templateId = computed(() => String(route.params.templateId ?? ''))
-const releaseVersion = computed(() => String(route.params.releaseVersion ?? ''))
-
-const lineLabel = computed(() => {
-  if (!releaseDetail.value) {
-    return ''
-  }
-  return versionLineDisplayLabel(t, releaseDetail.value)
-})
-
-const variableColumns = computed(() => [
-  { prop: 'variableKey', label: t('templates.releaseDetail.columns.variableKey') },
-  { prop: 'variableType', label: t('templates.releaseDetail.columns.variableType') },
-  { prop: 'required', label: t('templates.releaseDetail.columns.required') },
-])
-
-const bindingColumns = computed(() => [
-  { prop: 'anchorId', label: t('templates.releaseDetail.columns.anchorId') },
-  { prop: 'declaredContentType', label: t('templates.releaseDetail.columns.contentType') },
-])
-
-const ruleColumns = computed(() => [
-  { prop: 'ruleId', label: t('templates.releaseDetail.columns.ruleId') },
-  { prop: 'targetAnchorId', label: t('templates.releaseDetail.columns.targetAnchor') },
-])
-
-onMounted(async () => {
-  await loadReleaseDetail()
-})
-
-async function loadReleaseDetail() {
-  loading.value = true
-  loadFailed.value = false
-  try {
-    releaseDetail.value = await panelDataStore.fetchReleaseVersionDetail(
-      templateId.value,
-      releaseVersion.value,
-    )
-  } catch {
-    loadFailed.value = true
-    releaseDetail.value = null
-  } finally {
-    loading.value = false
-  }
-}
-
-function backToHub() {
-  router.push(templatePackageHubPath(templateId.value))
-}
-
-async function handleClone() {
-  if (!releaseVersion.value) {
-    return
-  }
-  cloning.value = true
-  try {
-    const created = await panelDataStore.cloneReleaseVersion(templateId.value, releaseVersion.value)
-    ElMessage.success(t('templates.versionLines.cloneSuccess'))
-    router.push(templateDevVersionPath(templateId.value, created.devVersionId))
-  } catch {
-    ElMessage.error(t('templates.versionLines.cloneError'))
-  } finally {
-    cloning.value = false
-  }
-}
+const {
+  t,
+  formatDateTime,
+  authorTemplates,
+  loading,
+  loadFailed,
+  cloning,
+  releaseDetail,
+  activeWorkspaceTab,
+  templateId,
+  releaseVersion,
+  workspaceTabs,
+  lineLabel,
+  variableColumns,
+  bindingColumns,
+  ruleColumns,
+  approvalSubStateLabel,
+  loadReleaseDetail,
+  backToHub,
+  handleClone,
+} = useTemplateReleaseDetailView()
 </script>
 
 <template>
@@ -114,7 +50,7 @@ async function handleClone() {
           :approval-sub-state="releaseDetail.approvalSubState"
         />
         <el-button
-          v-if="authorTemplates && releaseDetail.cloneable !== false"
+          v-if="authorTemplates"
           type="primary"
           :loading="cloning"
           @click="handleClone"
@@ -138,52 +74,76 @@ async function handleClone() {
       description-key="templates.releaseDetail.notFoundDescription"
     />
 
-    <template v-else>
-      <el-card shadow="never" class="summary-card">
-        <dl class="summary-grid">
-          <div>
-            <dt>{{ t('templates.releaseDetail.devVersionNumber') }}</dt>
-            <dd>{{ releaseDetail.devVersionNumber }}</dd>
-          </div>
-          <div>
-            <dt>{{ t('templates.releaseDetail.updatedAt') }}</dt>
-            <dd>{{ formatDateTime(releaseDetail.updatedAt) }}</dd>
-          </div>
-          <div>
-            <dt>{{ t('templates.releaseDetail.updatedBy') }}</dt>
-            <dd>
-              {{
-                resolveUpdatedByDisplay(
-                  releaseDetail.updatedBy ?? '',
-                  releaseDetail.updatedByDisplayName,
-                )
-              }}
-            </dd>
-          </div>
-        </dl>
-      </el-card>
+    <WorkspaceTabShell
+      v-else
+      v-model="activeWorkspaceTab"
+      :tabs="workspaceTabs"
+    >
+      <template #basics>
+        <TemplateDetailOverviewTab
+          :template="releaseDetail"
+          :format-date-time="formatDateTime"
+        />
+      </template>
 
-      <ReleaseSectionTable
-        :title="t('templates.releaseDetail.variablesTitle')"
-        :columns="variableColumns"
-        :data="releaseDetail.variables"
-        :empty-text="t('templates.releaseDetail.noVariables')"
-      />
+      <template #testing>
+        <p class="read-only-hint">{{ t('templates.releaseDetail.testing.readOnlySummary') }}</p>
+        <BatchTestHistoryPanel :template-id="templateId" />
+      </template>
 
-      <ReleaseSectionTable
-        :title="t('templates.releaseDetail.bindingsTitle')"
-        :columns="bindingColumns"
-        :data="releaseDetail.bindings"
-        :empty-text="t('templates.releaseDetail.noBindings')"
-      />
+      <template #approval>
+        <el-card shadow="never" class="summary-card">
+          <p class="read-only-hint">{{ t('templates.releaseDetail.approval.readOnlySummary') }}</p>
+          <dl class="summary-grid">
+            <div>
+              <dt>{{ t('templates.releaseDetail.approval.lifecycleStatus') }}</dt>
+              <dd>
+                <TemplateStatusBadge
+                  :status="releaseDetail.lifecycleStatus"
+                  :approval-sub-state="releaseDetail.approvalSubState"
+                />
+              </dd>
+            </div>
+            <div>
+              <dt>{{ t('templates.releaseDetail.approval.approvalSubState') }}</dt>
+              <dd>{{ approvalSubStateLabel }}</dd>
+            </div>
+          </dl>
+        </el-card>
+        <PublishGateReadOnlyPanel
+          :template-id="templateId"
+          :release-version="releaseVersion"
+        />
+        <TemplateLifecycleAuditTimeline :template-id="templateId" />
+      </template>
 
-      <ReleaseSectionTable
-        :title="t('templates.releaseDetail.rulesTitle')"
-        :columns="ruleColumns"
-        :data="releaseDetail.rules"
-        :empty-text="t('templates.releaseDetail.noRules')"
-      />
-    </template>
+      <template #variables>
+        <ReleaseSectionTable
+          :title="t('templates.releaseDetail.variablesTitle')"
+          :columns="variableColumns"
+          :data="releaseDetail.variables"
+          :empty-text="t('templates.releaseDetail.noVariables')"
+        />
+      </template>
+
+      <template #bindings>
+        <ReleaseSectionTable
+          :title="t('templates.releaseDetail.bindingsTitle')"
+          :columns="bindingColumns"
+          :data="releaseDetail.bindings"
+          :empty-text="t('templates.releaseDetail.noBindings')"
+        />
+      </template>
+
+      <template #rules>
+        <ReleaseSectionTable
+          :title="t('templates.releaseDetail.rulesTitle')"
+          :columns="ruleColumns"
+          :data="releaseDetail.rules"
+          :empty-text="t('templates.releaseDetail.noRules')"
+        />
+      </template>
+    </WorkspaceTabShell>
   </AppPageLayout>
 </template>
 
@@ -208,5 +168,11 @@ async function handleClone() {
     margin: 0.25rem 0 0;
     font-weight: 500;
   }
+}
+
+.read-only-hint {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
 }
 </style>

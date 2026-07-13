@@ -43,6 +43,14 @@ class GroupAccessServiceTest {
         assertThat(service.canReviewMasters(author)).isFalse();
         assertThat(service.canManageMasters(author)).isFalse();
         assertThat(service.canReviewMasters(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
+        assertThat(service.canManageMasters(session(List.of("GROUP_ADMIN"), List.of()))).isTrue();
+    }
+
+    @Test
+    void masterDesignerCanManageMastersButNotReview() {
+        ManagementSessionClaims designer = session(List.of("MASTER_DESIGNER"), List.of("G1"));
+        assertThat(service.canManageMasters(designer)).isTrue();
+        assertThat(service.canReviewMasters(designer)).isFalse();
     }
 
     @Test

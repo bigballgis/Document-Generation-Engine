@@ -33,13 +33,27 @@ services:
       ASYNC_TRANSPORT: ${ASYNC_TRANSPORT:-in-process}
       KAFKA_BOOTSTRAP_SERVERS: docgen-kafka:9092
       DOCGEN_ASYNC_KAFKA_CONSUMER_GROUP: ${DOCGEN_ASYNC_KAFKA_CONSUMER_GROUP:-docgen-async-batch-worker}
-      JWT_SECRET: ${JWT_SECRET:-prod-change-me-32-bytes-minimum-secret}
+      # BDD-OPS-JWT-SECRET-001 / JWT-C1: must be explicitly provisioned — no :-default fallback.
+      # ProductionSecretGuard rejects known insecure JWT values whenever the prod profile is active
+      # (even if APP_ENVIRONMENT remains dev for acceptance convenience below).
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_ACCESS_TOKEN_TTL: ${JWT_ACCESS_TOKEN_TTL:-PT30M}
       SESSION_ABSOLUTE_TTL: ${SESSION_ABSOLUTE_TTL:-PT8H}
+      # LAB ONLY — local docker acceptance E2E needs ConfigAdGroupResolver + YAML account-groups.
+      # AdGroupResolverGuard refuses type=config whenever the prod profile is active unless this
+      # flag is true (BDD-OPS-AD-GROUP-STUB-001 / ADR-0054). Claimed production MUST omit or set
+      # false — this is NOT enterprise AD/LDAP directory resolution.
+      DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE: ${DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB:-true}
       APP_ENVIRONMENT: dev
       DOCGEN_SEED_DEMO_CATALOG: ${DOCGEN_SEED_DEMO_CATALOG:-false}
+      # LR-C5: ≥500 templates for catalog pagination E2E (idempotent if LOAD-TPL-0500 exists)
+      DOCGEN_SEED_CATALOG_LOAD: ${DOCGEN_SEED_CATALOG_LOAD:-false}
+      DOCGEN_SEED_CATALOG_LOAD_COUNT: ${DOCGEN_SEED_CATALOG_LOAD_COUNT:-500}
       DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED: ${DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED:-true}
       PDF_PAGE_NUMBER_STAMPING_ENABLED: ${PDF_PAGE_NUMBER_STAMPING_ENABLED:-false}
+      # Temporary LR-D3 scrape-smoke only — force low RPM so one 429 is observable without a 120-request flood.
+      RUNTIME_RATE_LIMIT_RPM: ${RUNTIME_RATE_LIMIT_RPM:-120}
+      RUNTIME_RATE_LIMIT_BURST: ${RUNTIME_RATE_LIMIT_BURST:-120}
       HOME: /tmp
       LIBREOFFICE_CONVERSION_MODE: cli
       # LR-B8: MaxRAMPercentage caps the heap at 75% of mem_limit (~1.15G of 1536m),

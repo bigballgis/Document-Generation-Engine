@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import CatalogFilterToolbar from '@/components/common/CatalogFilterToolbar.vue'
@@ -12,164 +9,35 @@ import AppPageLayout from '@/components/layout/AppPageLayout.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import MasterStatusBadge from '@/components/masters/MasterStatusBadge.vue'
 import MasterUploadDialog from '@/components/masters/MasterUploadDialog.vue'
-import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
-import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
-import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
-import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { useMasterStatusFilterOptions } from '@/composables/useTableFilterOptions'
-import { useCapabilities } from '@/composables/useCapabilities'
-import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import { MASTER_DETAIL_PATH_PREFIX } from '@/routing/routeKeys'
-import { useMastersStore } from '@/stores/masters'
-import type { MasterDocumentSummary } from '@/types/master'
-import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
-import { ElMessage } from 'element-plus'
+import { useMasterListView } from '@/views/masters/useMasterListView'
 
-const { t, te } = useI18n()
-const { formatDateTime } = useLocaleFormatters()
-const masterStatusFilterOptions = useMasterStatusFilterOptions()
-const router = useRouter()
-const mastersStore = useMastersStore()
-const { masterDetailLink } = useEntityLinkTargets()
-
-const uploadDialogOpen = ref(false)
-const currentPage = ref(1)
-
-const allMasters = computed(() => mastersStore.masters)
 const {
+  t,
+  formatDateTime,
+  mastersStore,
+  masterDetailLink,
+  uploadDialogOpen,
+  currentPage,
+  allMasters,
   searchQuery,
   filters,
   activeSortKey,
-  sortedRows,
   hasAnyActive,
   activeFilterChips,
   clearAll,
   removeFilterChip,
-} = useCatalogTableControls(allMasters, {
-  searchGetters: [(row) => row.name, (row) => row.groupCode],
-  filters: [
-    {
-      key: 'groupCode',
-      labelKey: 'masters.list.columns.group',
-      getValue: (row) => row.groupCode,
-    },
-    {
-      key: 'status',
-      labelKey: 'masters.list.columns.status',
-      getValue: (row) => row.status,
-      matchMode: 'exact',
-    },
-  ],
-  sortOptions: [
-    {
-      key: 'updatedAtDesc',
-      labelKey: 'table.sort.updatedAtDesc',
-      getter: (row) => row.updatedAt,
-      order: 'desc',
-    },
-    {
-      key: 'updatedAtAsc',
-      labelKey: 'table.sort.updatedAtAsc',
-      getter: (row) => row.updatedAt,
-      order: 'asc',
-    },
-    {
-      key: 'nameAsc',
-      labelKey: 'table.sort.nameAsc',
-      getter: (row) => row.name,
-      order: 'asc',
-    },
-    {
-      key: 'groupAsc',
-      labelKey: 'table.sort.groupAsc',
-      getter: (row) => row.groupCode,
-      order: 'asc',
-    },
-  ],
-  defaultSortKey: 'updatedAtDesc',
-})
-
-const catalogToolbarFilters = computed(() => [
-  {
-    key: 'groupCode',
-    labelKey: 'masters.list.columns.group',
-    type: 'text' as const,
-  },
-  {
-    key: 'status',
-    labelKey: 'masters.list.columns.status',
-    type: 'select' as const,
-    options: masterStatusFilterOptions.value,
-  },
-])
-
-const catalogSortOptions = computed(() => [
-  { key: 'updatedAtDesc', labelKey: 'table.sort.updatedAtDesc' },
-  { key: 'updatedAtAsc', labelKey: 'table.sort.updatedAtAsc' },
-  { key: 'nameAsc', labelKey: 'table.sort.nameAsc' },
-  { key: 'groupAsc', labelKey: 'table.sort.groupAsc' },
-])
-
-const { paginatedRows: paginatedMasters, totalRows: totalMasterRows } = useCatalogPagination(
-  sortedRows,
-  currentPage,
-  CLIENT_TABLE_PAGE_SIZE,
-)
-
-watch(hasAnyActive, () => {
-  currentPage.value = 1
-})
-
-const { manageMasters } = useCapabilities()
-const canUpload = computed(() => manageMasters.value)
-const errorMessage = computed(() => {
-  const key = mastersStore.lastErrorMessageKey
-  if (!key) {
-    return ''
-  }
-  return te(key) ? t(key) : t('masters.error.loadList')
-})
-
-const { reload: reloadMasters } = useAbortableCatalogLoader((signal) =>
-  mastersStore.fetchMasters({ signal }),
-)
-
-onMounted(async () => {
-  await reloadMasters()
-})
-
-function openMaster(masterId: string) {
-  router.push(`${MASTER_DETAIL_PATH_PREFIX}${masterId}`)
-}
-
-const { onRowClick: activateMasterRow } = useActivatableTableRow<MasterDocumentSummary>((row) =>
-  openMaster(row.id),
-)
-
-async function handleUpload(payload: {
-  groupCode: string
-  name: string
-  description: string
-  file: File
-}) {
-  try {
-    const created = await mastersStore.uploadMaster(
-      {
-        groupCode: payload.groupCode,
-        name: payload.name,
-        description: payload.description || undefined,
-      },
-      payload.file,
-    )
-    uploadDialogOpen.value = false
-    ElMessage.success(t('masters.upload.success'))
-    router.push(`${MASTER_DETAIL_PATH_PREFIX}${created.id}`)
-  } catch {
-    ElMessage.error(errorMessage.value || t('masters.error.upload'))
-  }
-}
+  catalogToolbarFilters,
+  catalogSortOptions,
+  showCatalogChrome,
+  canUpload,
+  errorMessage,
+  showListLoadError,
+  reloadMasters,
+  activateMasterRow,
+  handleUpload,
+  clearUploadServerError,
+  resolveUpdatedByDisplay,
+} = useMasterListView()
 </script>
 
 <template>
@@ -187,15 +55,15 @@ async function handleUpload(payload: {
     </PageHeader>
 
     <LoadErrorPanel
-      v-if="mastersStore.lastErrorMessageKey && !mastersStore.loadingList"
-      :message-key="mastersStore.lastErrorMessageKey"
+      v-if="showListLoadError"
+      :message-key="mastersStore.lastErrorMessageKey || 'masters.error.loadList'"
       :retryable="mastersStore.lastListErrorRetryable"
       @retry="reloadMasters"
     />
 
     <el-skeleton v-else-if="mastersStore.loadingList" :rows="6" animated />
 
-    <template v-else-if="allMasters.length > 0">
+    <template v-else-if="showCatalogChrome">
       <CatalogFilterToolbar
         v-model:search-query="searchQuery"
         v-model:filter-values="filters"
@@ -208,8 +76,8 @@ async function handleUpload(payload: {
         @remove-chip="removeFilterChip"
       />
 
-      <template v-if="sortedRows.length > 0">
-        <AppDataTable activatable :data="paginatedMasters" @row-click="activateMasterRow">
+      <template v-if="allMasters.length > 0">
+        <AppDataTable activatable :data="allMasters" @row-click="activateMasterRow">
           <el-table-column
             prop="groupCode"
             :label="t('masters.list.columns.group')"
@@ -256,8 +124,8 @@ async function handleUpload(payload: {
         </AppDataTable>
         <AppTablePagination
           v-model:current-page="currentPage"
-          :page-size="CLIENT_TABLE_PAGE_SIZE"
-          :total="totalMasterRows"
+          :page-size="mastersStore.masterListSize"
+          :total="mastersStore.masterListTotalElements"
         />
       </template>
 
@@ -270,9 +138,22 @@ async function handleUpload(payload: {
     <EmptyStatePanel
       v-else-if="!errorMessage"
       title-key="masters.list.empty"
-    />
+    >
+      <template v-if="canUpload" #actions>
+        <el-button type="primary" @click="uploadDialogOpen = true">
+          {{ t('masters.upload.open') }}
+        </el-button>
+      </template>
+    </EmptyStatePanel>
 
-    <MasterUploadDialog v-model="uploadDialogOpen" @submit="handleUpload" />
+    <MasterUploadDialog
+      v-model="uploadDialogOpen"
+      :loading="mastersStore.submitting"
+      :upload-progress="mastersStore.uploadProgress"
+      :server-error-key="uploadDialogOpen ? mastersStore.lastErrorMessageKey : null"
+      @submit="handleUpload"
+      @clear-server-error="clearUploadServerError"
+    />
   </AppPageLayout>
 </template>
 

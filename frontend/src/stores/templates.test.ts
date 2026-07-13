@@ -6,6 +6,7 @@ import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 
 vi.mock('@/api/templates', () => ({
   listTemplates: vi.fn(),
+  listAllTemplates: vi.fn(),
   getTemplate: vi.fn(),
   submitForTest: vi.fn(),
   recordTestDecision: vi.fn(),
@@ -21,6 +22,10 @@ describe('templates store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.mocked(templatesApi.listTemplates).mockReset()
+    vi.mocked(templatesApi.listAllTemplates).mockReset()
+    vi.mocked(templatesApi.getTemplate).mockReset()
+    vi.mocked(templatesApi.createTemplate).mockReset()
+    vi.mocked(templatesApi.publishTemplate).mockReset()
   })
 
   it('loads templates from paginated API', async () => {
@@ -50,6 +55,46 @@ describe('templates store', () => {
 
     expect(store.templates).toHaveLength(1)
     expect(store.templateListTotalElements).toBe(1)
+  })
+
+  it('fetchAllTemplates merges every page into the store list', async () => {
+    vi.mocked(templatesApi.listAllTemplates).mockResolvedValue({
+      content: [
+        {
+          id: 'tpl-1',
+          externalId: 'TPL-A',
+          groupCode: 'RETAIL',
+          name: 'Draft template',
+          lifecycleStatus: 'DRAFT',
+          releaseVersion: null,
+          releaseVersionCount: 0,
+          masterId: 'master-1',
+          updatedBy: '10000001',
+          updatedAt: '2026-06-23T10:00:00Z',
+        },
+        {
+          id: 'tpl-2',
+          externalId: 'TPL-B',
+          groupCode: 'CORPORATE',
+          name: 'Second template',
+          lifecycleStatus: 'PUBLISHED',
+          releaseVersion: '1.0.0',
+          releaseVersionCount: 1,
+          masterId: 'master-2',
+          updatedBy: '10000002',
+          updatedAt: '2026-06-24T10:00:00Z',
+        },
+      ],
+      totalElements: 125,
+      truncated: false,
+    })
+
+    const store = useTemplatesStore()
+    await store.fetchAllTemplates({ sort: 'groupCodeAsc' })
+
+    expect(templatesApi.listAllTemplates).toHaveBeenCalledWith({ sort: 'groupCodeAsc' })
+    expect(store.templates).toHaveLength(2)
+    expect(store.templateListTotalElements).toBe(125)
   })
 
   it('records list retryable flag on template load failure', async () => {
@@ -169,5 +214,103 @@ describe('templates store', () => {
     await expect(store.publishTemplate('tpl-1', { releaseVersion: '1.0.0' })).rejects.toBeTruthy()
 
     expect(store.lastErrorMessageKey).toBe('templates.error.lifecycle')
+  })
+
+  it('BDD-LRP-C2-002 soft-refresh fetchTemplate does not flip loadingDetail for selected template', async () => {
+    const detail = {
+      id: 'tpl-1',
+      externalId: 'TPL-A',
+      groupCode: 'RETAIL',
+      name: 'Draft template',
+      description: null,
+      lifecycleStatus: 'DRAFT',
+      releaseVersion: null,
+      masterId: 'master-1',
+      masterRevisionId: null,
+      variables: [],
+      bindings: [],
+      rules: [],
+      createdBy: '10000001',
+      createdAt: '2026-06-23T10:00:00Z',
+      updatedBy: '10000001',
+      updatedAt: '2026-06-23T10:00:00Z',
+      devVersionId: null,
+      devVersionNumber: null,
+      contentModuleReferences: [],
+    } as unknown as Awaited<ReturnType<typeof templatesApi.getTemplate>>
+
+    vi.mocked(templatesApi.getTemplate).mockImplementation(async () => {
+      // Soft refresh must not expose loadingDetail mid-flight (workspace teardown).
+      expect(useTemplatesStore().loadingDetail).toBe(false)
+      return { ...detail, name: 'Draft template refreshed' }
+    })
+
+    const store = useTemplatesStore()
+    store.$patch({ selectedTemplate: detail, loadingDetail: false })
+
+    await store.fetchTemplate('tpl-1')
+
+    expect(store.loadingDetail).toBe(false)
+    expect(store.selectedTemplate?.name).toBe('Draft template refreshed')
+    expect(templatesApi.getTemplate).toHaveBeenCalledWith('tpl-1')
+  })
+
+  it('fetchTemplate sets loadingDetail for cold load of a different template', async () => {
+    let sawLoading = false
+    vi.mocked(templatesApi.getTemplate).mockImplementation(async () => {
+      sawLoading = useTemplatesStore().loadingDetail
+      return {
+        id: 'tpl-2',
+        externalId: 'TPL-B',
+        groupCode: 'RETAIL',
+        name: 'Other',
+        description: null,
+        lifecycleStatus: 'DRAFT',
+        releaseVersion: null,
+        masterId: 'master-2',
+        masterRevisionId: null,
+        variables: [],
+        bindings: [],
+        rules: [],
+        createdBy: '10000001',
+        createdAt: '2026-06-23T10:00:00Z',
+        updatedBy: '10000001',
+        updatedAt: '2026-06-23T10:00:00Z',
+        devVersionId: null,
+        devVersionNumber: null,
+        contentModuleReferences: [],
+      } as unknown as Awaited<ReturnType<typeof templatesApi.getTemplate>>
+    })
+
+    const store = useTemplatesStore()
+    store.$patch({ selectedTemplate: null, loadingDetail: false })
+
+    await store.fetchTemplate('tpl-2')
+
+    expect(sawLoading).toBe(true)
+    expect(store.loadingDetail).toBe(false)
+  })
+
+  it('forwards approvalSubState when fetching templates', async () => {
+    vi.mocked(templatesApi.listTemplates).mockResolvedValue({
+      content: [],
+      page: 0,
+      size: 20,
+      totalElements: 0,
+      totalPages: 0,
+    })
+    const store = useTemplatesStore()
+
+    await store.fetchTemplates(0, 20, {
+      lifecycleStatus: 'APPROVAL',
+      approvalSubState: 'PENDING_DECISION',
+      sort: 'groupCodeAsc',
+    })
+
+    expect(templatesApi.listTemplates).toHaveBeenCalledWith(0, 20, {
+      lifecycleStatus: 'APPROVAL',
+      approvalSubState: 'PENDING_DECISION',
+      sort: 'groupCodeAsc',
+    })
   })
 })

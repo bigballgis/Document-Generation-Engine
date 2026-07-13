@@ -9,3 +9,5 @@ Record each SBOM submission cycle. **Do not mark Pass without ticket/scan refere
 **Bundle preparation (in-repo):** `.\scripts\prepare-sca-submission-bundle.ps1`
 
 **Runbook:** [intranet-sca-submission-runbook.md](./intranet-sca-submission-runbook.md)
+
+**Related:** Task Master **#49** (`deps-security-refresh`) → **Done** (merge `08c7d56`) for in-repo Critical/High remediation + exception — see [deps-security-refresh.md](../../behavior/deps-security-refresh.md). Org submission rows above remain required for M9-T02 Done.

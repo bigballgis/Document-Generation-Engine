@@ -1,9 +1,37 @@
 # LRP Wave LR-D — Ops Observability & Data Lifecycle 「运维可观测与数据生命周期」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** Not Started (planned 2026-07-03)  
+**Wave status:** **Done** (2026-07-12 — D1–D7 all Done; exit gate met; merge tip `218dcf1`; **no sole-active**)  
 **Owner default:** `backend-engineer` + `deploy-engineer` (+ `doc-keeper` for runbook/NFR)  
-**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex); D6 is most valuable **after LR-A1/LR-B3** land; D2/D3/D4/D5/D7 schedulable immediately
+**Prerequisites:** **D1 depends on LR-B2** (scheduler mutex — **Done**); D6 validates LR-A1/LR-B3 (**both Done**); D5 fed by D6 evidence (**Done** — proposals pending confirmation, not confirmed SLOs); **D2 Done** (drill evidence → LR-E2); **D3 Done**; **D4 Done** — Wave Done; sole-active moved to **LR-E1** (do **not** activate LR-E2 / CD-3)
+
+> **Completion note (2026-07-12, LR-D4):** **LR-D4 → Done** (slice `lrp-d4-trace-propagation`; formal phase remains **None**). ADR-0049 Accepted; `MdcTaskDecorator`; Kafka `X-Trace-Id` propagation; Scenario A/B tests proven. BDD **not-applicable** ([behavior](../../behavior/lrp-d4-trace-propagation.md)). **Merge:** `218dcf1` (`218dcf1580f144b62747cc35a0f14ea604d31d00`); feature tip `670a683`; worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1321 tests, 0 fail, 7 skipped); architecture-reviewer **PASS_WITH_NOTES** (Critical **0**; merge_go=true); **DEPLOY_OK** 2026-07-12T04:18:13+08:00 tip `218dcf1` healthz 200; X-Trace-Id echo OK. **Task Master #41 → done**. **Wave LR-D → Done** (D1–D7 all Done; exit gate met). Superseded sole-active by **LR-E1** (Task Master #42 — now **Done** merge `575d0aa`; **no sole-active**). Do **not** activate LR-E2/CD-3. Do **not** touch `DGE-audit-governance`.
+
+> **Activation note (2026-07-12, LR-D4):** **LR-D4 → In Progress** (now **Done** — see completion note above). Slice `lrp-d4-trace-propagation`; formal phase remains **None**.
+
+> **Completion note (2026-07-12, LR-D3):** **LR-D3 → Done** (slice `lrp-d3-metrics-alerting`; formal phase remains **None**). Metrics & alerting as code (Micrometer custom series + Prometheus alert rules + Grafana dashboard JSON); scrape smoke evidence. BDD **not-applicable** ([lrp-d3-metrics-alerting.md](../../behavior/lrp-d3-metrics-alerting.md)). **Merge:** `ba5ea2e`; feature tip `173ab36`; worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1315 tests); architecture **PASS_WITH_NOTES** (Critical **0**; merge_go=true); **DEPLOY_OK** scrape 2026-07-12T03:43:07+08:00 — `docgen_generation_duration_seconds` count=1 (pdf success); `docgen_http_rate_limit_denied_total=1.0`; pool rejections / sse active present @ 0; `docgen_async_dlt_depth` ABSENT (`ASYNC_TRANSPORT=in-process`). **Artifacts:** `deploy/observability/prometheus-alerts.yaml` + `grafana/docgen-ops-overview.json`; promtool unavailable — manual lint documented (7/7 runbook links). **Task Master #40 → done**. Superseded sole-active by **LR-D4** (see activation note above). Wave remains **In Progress** (**D1+D2+D3+D5+D6+D7 Done**; **D4 In Progress**). Do **not** activate LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+
+> **Activation note (2026-07-12, LR-D3):** **LR-D3 → In Progress** (now **Done** — see completion note above). Slice `lrp-d3-metrics-alerting`; formal phase remains **None**.
+
+> **Completion note (2026-07-12, LR-D2):** **LR-D2 → Done** (slice `lrp-d2-backup-restore`; formal phase remains **None**). Backup/restore runbook + confirmation-gated scratch drill; evidence 2026-07-12. BDD **not-applicable**. **Merge:** `3d78bc5` (`3d78bc56a535627a532485dc50fda47cf99c8248`); feature tip `880e0ca` (`880e0caa45f647c64e6c5487650182fcf88b527a`); worktree removed (stage 11). **Gates:** Drill **PASS** — RPO≈0.933min RTO≈4.751min; healthz 200; FOL regen OK; architecture **PASS_WITH_NOTES** (Critical **0**; merge_go=true); docs+scripts (no mvn/pnpm required per plan). **Evidence:** [backup-restore-runbook.md § Drill evidence](../../operations/backup-restore-runbook.md#drill-evidence-2026-07-12--executed); `artifacts/dr-drill/2026-07-12/` (local/gitignored OK; runbook SoT). **Task Master #39 → done**. Sole-active later moved to **LR-D3** (now **Done** — see completion note above). Wave remains **In Progress**. Do **not** activate D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. LR-E2 checklist input: dated drill record available — **not** Wave Done / launch go.
+
+> **Activation note (2026-07-12, LR-D2):** **LR-D2 → In Progress** (now **Done** — see completion note above). Slice `lrp-d2-backup-restore`; formal phase remains **None**.
+
+> **Completion note (2026-07-12, LR-D5):** **LR-D5 → Done** (slice `lrp-d5-nfr-proposals`; formal phase remains **None**). Docs-only NFR quantification proposals authored in [non-functional-requirements.md §待确认 LR-D5](../../requirements/non-functional-requirements.md#lr-d5-nfr-数值提案proposed--awaiting-confirmation); every value «proposed — awaiting confirmation»; fed by LR-D6 evidence + [DEF-LRP-D6-001](../evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md); ≤3s superseded as unsupported by smoke; **not** confirmed SLOs. BDD **not-applicable**. **Merge:** `5b13476` (`5b13476b7aa2056fbbbe2ca4acc8d1dbe4659d0c`); worktree removed (stage 11). **Gates:** docs-only; architecture-reviewer **PASS_WITH_NOTES**. **Task Master #38 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D5+D6+D7 Done**; **D2–D4 Not Started**). Do **not** activate D2–D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`. Recommend next: **LR-D2** or **LR-D3** (do not activate until parent directs).
+
+> **Activation note (2026-07-12, LR-D5):** **LR-D5 → In Progress** (now **Done** — see completion note above). Slice `lrp-d5-nfr-proposals`; formal phase remains **None**.
+
+> **Completion note (2026-07-12, LR-D6):** **LR-D6 → Done** (slice `lrp-d6-load-smoke`; formal phase remains **None**). Flag-gated JUnit load-smoke harness; Scenario A n=20 success=12 errorRate=0.4 triaged **DEF-LRP-D6-001** (PDF concurrent → `serviceUnavailable` mapped as `TEMPLATE_VALIDATION_FAILED`; p95≈15939ms p99≈16065ms; poolRejections=0); Scenario B 5/5 SSE completed dropped=0. BDD **not-applicable**. **Merge:** `56383eb` (`56383ebd6f4dedc5413339aabe88ac16ea857d74`); worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1303 tests, pre-merge worktree); architecture **PASS_WITH_NOTES**; **DEPLOY_OK** 2026-07-12T01:26:46+08:00. **Evidence:** [latest-summary.json](../evidence/lrp-d6-load-smoke/latest-summary.json) + [TRIAGE-pdf-422.md](../evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md). **Task Master #37 → done**. Superseded sole-active by **LR-D5** (see activation note above). Wave remains **In Progress** (**D1+D7+D6 Done**; **D2–D5 were Not Started at D6 close**). Do **not** activate D2–D4/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+
+> **Activation note (2026-07-12, LR-D6):** **LR-D6 → In Progress** (now **Done** — see completion note above). Slice `lrp-d6-load-smoke`; formal phase remains **None**.
+
+> **Completion note (2026-07-11, LR-D7):** **LR-D7 → Done** (slice `lrp-d7-durable-security-audit`; formal phase remains **None**). Durable `SECURITY_*` audit events (login/403/download → `management_audit_event`); route-denied API + frontend; retention via ADR-0048/D1; closes ledger seam «Security forbidden-route audit». BDD **`ready`** (`docs/behavior/lrp-d7-durable-security-audit.md`; BDD-LRP-D7-001…010). **Merge:** `c94a356` (`c94a356070dff7a9ab35ffbc0ba53b49f63270d0`); worktree removed (stage 11). **Gates:** `mvn -B -ntp -f backend/pom.xml verify` **GREEN** (1294 tests); `pnpm` frontend lint/type-check/test/build **GREEN** (1144 tests); architecture **PASS_WITH_NOTES** (Critical **0**; merge_go=true); **DEPLOY_OK** 2026-07-11T23:50:03+08:00 healthz 200; E2E/UIUX skipped per BDD D7-C14. **Task Master #36 → done**. **No sole-active LRP slice**. Wave remains **In Progress** (**D1+D7 Done**; **D2–D6 Not Started**). Do **not** activate D2–D6/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+
+> **Activation note (2026-07-11, LR-D7):** **LR-D7 → In Progress** (now **Done** — see completion note above). Slice `lrp-d7-durable-security-audit`; formal phase remains **None**.
+
+> **Completion note (2026-07-11):** **LR-D1 → Done** (slice `lrp-d1-audit-retention`; formal phase remains **None**). Audit retention cleanup for management + runtime audit tables (mirror ADR-0040; closes **CD-PIT-15**; under LR-B2 ShedLock). BDD **`ready`** (`docs/behavior/lrp-d1-audit-retention.md`). **ADR-0048 Accepted**. Flyway **V54** applied. **Merge:** `20b2a76` (`feat(audit): LR-D1 audit retention cleanup with V54 and ADR-0048`); worktree removed. **Gates:** `mvn verify` **GREEN**; architecture **PASS_WITH_NOTES** (merge_go=true); **DEPLOY_OK** 2026-07-11T22:26:31+08:00 healthz 200. **Task Master #35 → done**. Wave remains **In Progress**. Do **not** activate D2–D6/LR-E/CD-3. Do **not** touch `DGE-audit-governance`.
+
+> **Activation note (2026-07-11):** **LR-D1 → In Progress** (now **Done** — see completion note above). Slice `lrp-d1-audit-retention`; formal phase remains **None**.
 
 > **Session note:** `LR-D*` tasks only. Retention deletes data — D1 is **BDD: required** and carries its own ADR. NFR numbers land as **pending proposals**, never silently confirmed (document-as-code constitution).
 
@@ -14,7 +42,7 @@
 2026-07-03 inventory (evidence verified in program §1):
 
 - Management/runtime audit tables (`V9__management_audit.sql`, `V17__runtime_generation_audit.sql`) grow unbounded — contrast with the invocation-record pattern (`InvocationRetentionCleanupScheduler` + `V43`/`V44`, ADR-0040) (**CD-PIT-15**, added 2026-07-03).
-- Security events (login success/failure, 403 route, download) are **log-only** (`SecurityAuditSummaryService`) — ledger seam «Security forbidden-route audit» open since 2026-06-24.
+- Security events (login success/failure, 403 route, download) were **log-only** (`SecurityAuditSummaryService`) — ledger seam «Security forbidden-route audit» **closed** by **LR-D7** (2026-07-11; merge `c94a356`; durable `SECURITY_*` on `management_audit_event`).
 - No backup/restore runbook despite Flyway forward-only + ADR-0030 RPO ≤15 min / RTO ≤30 min commitments; no alert rules or dashboards as code; no trace propagation into async/Kafka paths.
 
 ---
@@ -45,12 +73,12 @@
 - **Artifacts:** behavior spec; ADR; migration + scheduler/service + tests.
 - **Done when:** Confirmed baseline implemented + scenarios green + ADR recorded + doc sync + commit review.
 - **Maps:** CD-PIT-15; ADR-0040 pattern; LR-B2.
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-11 — slice `lrp-d1-audit-retention`; merge `20b2a76`; Task Master #35; BDD ready; ADR-0048 Accepted; V54; mvn verify GREEN; architecture PASS_WITH_NOTES; DEPLOY_OK 2026-07-11T22:26:31+08:00)
 
 ### LR-D2 — Backup/restore runbook + drill
 
 - **Owner agent:** deploy-engineer + doc-keeper
-- **BDD:** not-applicable — operational documentation + rehearsal evidence.
+- **BDD:** not-applicable — operational documentation + rehearsal evidence. Readiness note: [lrp-d2-backup-restore.md](../../behavior/lrp-d2-backup-restore.md) (`bdd_readiness: not-applicable`, 2026-07-12).
 - **Read first:**
   1. `docs/adr/operations/0030-operational-platform-baseline.md` (RPO ≤15 min / RTO ≤30 min commitments)
   2. `docs/operations/runbook.md`; `deploy/README.md`; `deploy/blue-green-runbook.md`
@@ -69,7 +97,7 @@
 - **Artifacts:** `docs/operations/backup-restore-runbook.md`; drill evidence section; index updates.
 - **Done when:** Runbook merged + drill executed + evidence recorded + doc sync + commit review.
 - **Maps:** ADR-0030; LR-E2 checklist input.
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-12 — slice `lrp-d2-backup-restore`; merge `3d78bc5`; Task Master #39; BDD not-applicable; drill PASS RPO≈0.933min RTO≈4.751min; healthz 200; FOL regen OK; architecture PASS_WITH_NOTES; evidence [backup-restore-runbook § Drill evidence](../../operations/backup-restore-runbook.md#drill-evidence-2026-07-12--executed); D3/D4 remain Not Started)
 
 ### LR-D3 — Metrics & alerting as code
 
@@ -85,7 +113,7 @@
   2. Create `deploy/observability/` — Prometheus alert rules YAML (backend down, p95 breach vs draft threshold, pool rejections > 0, DLT depth > 0, 429 surge) + Grafana dashboard JSON (generation, conversion pool, SSE, rate-limit panels).
   3. Each alert rule carries a `runbook` annotation linking `docs/operations/runbook.md` (add matching sections).
   4. Tests: metrics registered + incremented (unit-level); scrape smoke on Docker (`/actuator/prometheus` shows the new series).
-  5. Index `deploy/observability/` from `deploy/README.md`.
+  5. Index `deploy/observability/` from `deploy/README.md`; runbook alert sections + draft thresholds authored docs-first (see [runbook § Observability](../../operations/runbook.md#observability) · [deploy/observability/README.md](../../../deploy/observability/README.md)).
 - **Acceptance (G/W/T):**
   - **G** the Docker stack **W** one PDF generation and one 429 occur **T** `/actuator/prometheus` exposes the new counters/timers with non-zero samples.
   - **G** the alert rules file **W** validated with promtool (or documented equivalent) **T** rules parse; every rule links a runbook section.
@@ -93,29 +121,30 @@
 - **Artifacts:** metric instrumentation + tests; `deploy/observability/alert-rules.yml` + `deploy/observability/grafana-docgen.json`; runbook sections; index updates.
 - **Done when:** Series visible + rules/dashboards committed + doc sync + commit review.
 - **Maps:** Program §1 finding 12; LR-D6 (thresholds), LR-B3/B4 (series sources).
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-12 — slice `lrp-d3-metrics-alerting`; merge `ba5ea2e`; feature tip `173ab36`; Task Master #40; BDD not-applicable; mvn verify GREEN 1315; architecture PASS_WITH_NOTES; DEPLOY_OK scrape 2026-07-12T03:43:07+08:00; artifacts `deploy/observability/prometheus-alerts.yaml` + `grafana/docgen-ops-overview.json`; promtool unavailable — manual lint 7/7 runbook links; D4 now sole-active)
 
 ### LR-D4 — Trace propagation decision + minimal impl
 
 - **Owner agent:** backend-engineer
-- **BDD:** not-applicable — internal observability plumbing.
+- **BDD:** not-applicable — internal observability plumbing ([behavior note](../../behavior/lrp-d4-trace-propagation.md)).
 - **Read first:**
-  1. Current trace handling (`X-Trace-Id` in `frontend/nginx.conf`; envelope `traceId`; MDC usage in logging config)
-  2. Async paths: `asyncTaskExecutor` (`AsyncConfig`), Kafka producer/consumer for batch tasks
-  3. `.cursor/rules/tech-stack-guardrails.mdc` dependency policy (Micrometer Tracing bridge is a **new dependency**)
-- **Do NOT:** Adopt a full tracing backend (Zipkin/Tempo) in this task — decision first, minimal propagation second; break the existing envelope `traceId` contract.
+  1. **[ADR-0049 Accepted](../../adr/operations/0049-distributed-trace-propagation.md)** — cross-boundary `traceId` propagation (MDC + async decorator + Kafka headers); **[ADR-0047 Accepted](../../adr/operations/0047-distributed-tracing-otlp-baseline.md)** — OTLP/Micrometer **baseline** already Done (SOR-A06); do not re-decide the bridge
+  2. Current trace handling (`TraceIdMdcFilter`; envelope `traceId`; `X-Trace-Id`; log `%X{traceId}`)
+  3. Async paths: `asyncTaskExecutor` (`AsyncConfig` + `MdcTaskDecorator`), `KafkaAsyncBatchTaskDispatcher` / `AsyncBatchTaskKafkaConsumer` (`X-Trace-Id` header)
+  4. `.cursor/rules/tech-stack-guardrails.mdc` — prefer **no new deps** for D4 (reuse 0047 classpath); verify any extra artifact in approved repos before adding
+- **Do NOT:** Adopt a full tracing backend (Zipkin/Tempo) in this task; break the existing envelope `traceId` / `X-Trace-Id` contract; rewrite ADR-0047 Accepted decision text; activate LR-E/CD-3.
 - **Steps:**
-  1. Write a short ADR (next free number): adopt Micrometer Tracing bridge now vs defer; scope v1 to **traceId propagation** (no span export) — verify dependency availability per policy if adopted.
-  2. Implement the minimal path per decision: traceId flows request → MDC → `asyncTaskExecutor` tasks (decorator) → Kafka headers → consumer MDC.
-  3. Tests: async task log carries the originating traceId; Kafka round-trip preserves it.
+  1. ~~Write ADR~~ — **Done (docs-first):** [ADR-0049 Accepted](../../adr/operations/0049-distributed-trace-propagation.md) (2026-07-12). Stale plan phrase «adopt Micrometer Tracing bridge now vs defer» is superseded by ADR-0047; D4 scope = **propagation only**.
+  2. ~~Implement the minimal path per ADR-0049~~ — **Done:** `traceId` flows request → MDC → `asyncTaskExecutor` (`MdcTaskDecorator`) → Kafka `X-Trace-Id` headers → consumer MDC.
+  3. ~~Tests~~ — **Done:** Scenario A async MDC; Scenario B Kafka headers.
 - **Acceptance (G/W/T):**
-  - **G** a sync request with trace id T **W** it spawns an async batch task **T** worker logs for that task carry T (MDC assertion).
-  - **G** Kafka transport active **W** a message round-trips **T** the consumer-side MDC traceId equals the producer's.
+  - **G** a sync request with trace id T **W** it spawns an async batch task **T** worker logs for that task carry T (MDC assertion). ✅
+  - **G** Kafka transport active **W** a message round-trips **T** the consumer-side MDC traceId equals the producer's. ✅
 - **Gates:** `mvn -B -ntp -f backend/pom.xml verify`
-- **Artifacts:** ADR; executor decorator + Kafka header propagation + tests.
-- **Done when:** Decision recorded + propagation proven + doc sync + commit review.
+- **Artifacts:** [ADR-0049](../../adr/operations/0049-distributed-trace-propagation.md); executor decorator + Kafka header propagation + tests.
+- **Done when:** Decision recorded (**ADR Accepted**) + propagation proven + doc sync + commit review.
 - **Maps:** Program §1 finding 12.
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-12 — slice `lrp-d4-trace-propagation`; merge `218dcf1`; feature tip `670a683`; Task Master #41; BDD not-applicable; ADR-0049 Accepted; `MdcTaskDecorator` + Kafka `X-Trace-Id`; Scenario A/B proven; mvn verify GREEN 1321; architecture PASS_WITH_NOTES; DEPLOY_OK 2026-07-12T04:18:13+08:00 healthz 200; X-Trace-Id echo OK)
 
 ### LR-D5 — NFR quantification proposals
 
@@ -124,11 +153,11 @@
 - **Read first:**
   1. `docs/requirements/non-functional-requirements.md` (current gaps)
   2. [usability-review.md](../../product/usability-review.md) §待确认 L87–91 + CD-UX-T01 task-time budget table
-  3. LR-D6 results if already available (else mark proposals «pre-measurement»)
-- **Do NOT:** Write any number as a **confirmed** requirement — every value lands in the pending/待确认 section with rationale and measurement method; contradict CD-UX-T01 draft budgets (cross-reference them).
+  3. LR-D6 results — **available** (2026-07-12 Done): [latest-summary.json](../evidence/lrp-d6-load-smoke/latest-summary.json); named defect [DEF-LRP-D6-001](../evidence/lrp-d6-load-smoke/TRIAGE-pdf-422.md) feeds concurrent-PDF / resilience-mapping NFR inputs (proposed only)
+- **Do NOT:** Write any number as a **confirmed** requirement — every value lands in the pending/待确认 section with rationale and measurement method; contradict CD-UX-T01 draft budgets (cross-reference them); **do not activate this task from D6 completion alone**.
 - **Steps:**
   1. Draft proposal rows: p95 sync generation (with/without PDF), SSE first-event latency, concurrent generation capacity, availability target, max concurrent sessions/SSE connections.
-  2. For each: proposed value, measurement method (LR-D6 harness / Playwright timing / metrics), environment assumptions, source (industry norm vs measured).
+  2. For each: proposed value, measurement method (LR-D6 harness / Playwright timing / metrics), environment assumptions, source (industry norm vs measured). Use D6 measured p95≈15939ms / p99≈16065ms / errorRate=0.4 (PDF) + DEF-LRP-D6-001 as **proposed** inputs only.
   3. Add to the NFR pending-questions section with owner + date; cross-link CD-UX-T01 budgets and LR-D6 evidence.
   4. Flag which proposals gate launch (feeds LR-E2) vs post-launch tuning.
 - **Acceptance (G/W/T):**
@@ -137,13 +166,14 @@
 - **Gates:** Doc-only; link check.
 - **Artifacts:** NFR pending-section additions; cross-links.
 - **Done when:** Proposals merged + flagged + doc sync + commit review.
-- **Maps:** usability-review L87–91 (L89 quantification); CD-UX-T01.
-- **Status:** Not Started
+- **Maps:** usability-review L87–91 (L89 quantification → NFR §待确认 pointer); CD-UX-T01 task-time budgets (UX only); **fed by LR-D6 Done** (DEF-LRP-D6-001 — pending consumption only).
+- **Discovery:** [non-functional-requirements.md §待确认 LR-D5](../../requirements/non-functional-requirements.md#lr-d5-nfr-数值提案proposed--awaiting-confirmation) (authored 2026-07-12; every row «proposed — awaiting confirmation»; D6 evidence linked; launch-gate vs post-launch flagged).
+- **Status:** **Done** (2026-07-12 — merge `5b13476`; Task Master #38; BDD not-applicable; docs-only; NFR §待确认 proposals authored — **pending user confirmation, NOT confirmed SLOs**; architecture PASS_WITH_NOTES)
 
 ### LR-D6 — Load smoke baseline
 
 - **Owner agent:** backend-engineer + e2e-test-engineer
-- **BDD:** not-applicable — measurement harness + evidence; no behavior change.
+- **BDD:** not-applicable — measurement harness + evidence; no behavior change. Readiness note: [lrp-d6-load-smoke.md](../../behavior/lrp-d6-load-smoke.md) (`bdd_readiness: not-applicable`, 2026-07-12).
 - **Depends on:** best run after LR-A1 (profile isolation) + LR-B3 (SSE hardening) so results reflect the hardened system; validates both.
 - **Read first:**
   1. Runtime generation API contract (`docs/api/openapi-v1.yaml` sync generate); demo seed credentials/templates
@@ -162,42 +192,46 @@
 - **Gates:** Harness run evidence (flagged execution); `mvn -B -ntp -f backend/pom.xml verify` unaffected.
 - **Artifacts:** harness code (flag-gated) or k6 script + policy note; results evidence; ledger row.
 - **Done when:** Both scenarios measured + evidence recorded + doc sync + commit review.
-- **Maps:** validates LR-A1/LR-B3; feeds LR-D5/LR-D3 thresholds.
-- **Status:** Not Started
+- **Maps:** validates LR-A1/LR-B3; feeds LR-D5/LR-D3 thresholds (DEF-LRP-D6-001 → D5 pending).
+- **Status:** **Done** (2026-07-12 — merge `56383eb`; Task Master #37; BDD not-applicable; Scenario A n=20 success=12 errorRate=0.4 triaged DEF-LRP-D6-001 p95≈15939ms p99≈16065ms poolRejections=0; Scenario B 5/5 SSE dropped=0; mvn verify GREEN 1303; architecture PASS_WITH_NOTES; DEPLOY_OK 2026-07-12T01:26:46+08:00; evidence [lrp-d6-load-smoke](../evidence/lrp-d6-load-smoke/))
 
 ### LR-D7 — Durable security audit events
 
 - **Owner agent:** backend-engineer
-- **BDD:** **required** — audit records become queryable data with access rules (permission matrix §13.3).
+- **BDD:** **required** — **`ready`** ([lrp-d7-durable-security-audit.md](../../behavior/lrp-d7-durable-security-audit.md); BDD-LRP-D7-001…010) — audit records become queryable data with access rules (permission matrix §13.3).
 - **Read first:**
-  1. `backend/src/main/java/com/bank/docgen/authorization/management/service/SecurityAuditSummaryService.java` (log-only today)
-  2. `docs/security/permission-matrix.md` §13.3 (durable security audit expectation)
-  3. Ledger seam «Security forbidden-route audit» ([execution-sync-ledger.md](../execution-sync-ledger.md)); management audit event model (`V9`, `ManagementAuditRecorder`)
-  4. LR-D1 (new events must join the retention scheme)
-- **Do NOT:** Log passwords/tokens/PII beyond the matrix-approved fields; break existing log lines (keep them; add persistence); bypass group scoping in the query path.
+  1. `docs/behavior/lrp-d7-durable-security-audit.md` (**authoritative**)
+  2. `backend/src/main/java/com/bank/docgen/authorization/management/service/SecurityAuditSummaryService.java` + `SecurityManagementAuditRecorder` (partial SOR wiring; route-deny path unwired)
+  3. `docs/security/permission-matrix.md` §13.3 (durable security audit expectation)
+  4. Ledger seam «Security forbidden-route audit» ([execution-sync-ledger.md](../execution-sync-ledger.md)); management audit event model (`V9`)
+  5. LR-D1 / ADR-0048 (events join `management_audit_event` 90-day retention — **no dedicated table**)
+- **Do NOT:** Log passwords/tokens/PII beyond the matrix-approved fields; break existing log lines (keep them; add persistence); bypass group scoping in the query path; create a separate security-audit table; touch `DGE-audit-governance`.
 - **Steps:**
-  1. Wait for BDD spec `ready` (which events, fields, who can query, retention link).
-  2. Persist login success/failure, 403 route denials, and download grants/denials as durable audit events (extend the existing management-audit mechanism or a dedicated table via Flyway — per spec).
-  3. Keep `SecurityAuditSummaryService` log output; add the persistence write (transactional, fail-safe: persistence failure must not block login — record the decision).
-  4. Expose via the existing audit console query path with role/group scoping per matrix §13.3.
-  5. Register the new table with LR-D1 retention; tests: each event type persisted + scoped query + audit console smoke.
+  1. ~~Wait for BDD spec `ready`~~ — **done** (2026-07-11).
+  2. Persist login success/failure, 403 route denials, and download grants/denials as durable `SECURITY_*` rows on **existing** `management_audit_event` (extend `SecurityManagementAuditRecorder`; add `SECURITY_DOCUMENT_DOWNLOAD_DENIED`; wire forbidden-route report API + AccessDeniedHandler + download deny path).
+  3. Keep `SecurityAuditSummaryService` log output; persistence **fail-safe** (must not block login — D7-C9).
+  4. Expose via the existing audit console query path with role/group scoping per matrix §10 / §13.3.
+  5. Confirm LR-D1 retention covers new event types (same table); tests: each event type + scoped query + fail-safe; optional audit console smoke.
   6. Close the ledger seam «Security forbidden-route audit» row in the same change set.
 - **Acceptance (G/W/T):**
-  - **G** a failed login **W** it occurs **T** a durable audit row exists with username, outcome, traceId — queryable by an authorized auditor, invisible to unauthorized roles.
-  - **G** a 403 route denial **W** it fires **T** a durable row records user + routeKey; the seam row in the ledger is marked closed with this evidence.
-- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; audit console smoke on Docker 4173 if UI columns change (+ §LR-C gate block in that case).
-- **Artifacts:** behavior spec; migration + persistence + query scoping + tests; seam row closure.
+  - **G** a failed login **W** it occurs **T** a durable audit row exists with username, outcome, traceId — queryable by an authorized auditor, invisible to unauthorized roles. (BDD-LRP-D7-001)
+  - **G** a 403 route denial **W** it fires **T** a durable row records user + routeKey; the seam row in the ledger is marked closed with this evidence. (BDD-LRP-D7-003)
+- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; audit console smoke on Docker 4173 if UI columns change (+ §LR-C gate block in that case). Frontend E2E **not** mandatory when no new UI columns (BDD §12).
+- **Artifacts:** behavior spec (**ready**); persistence + query scoping + tests; seam row closure; OpenAPI if new report endpoint.
 - **Done when:** Scenarios green + seam closed + doc sync + commit review.
 - **Maps:** COR-P06 residual; permission matrix §13.3; ledger seam «Security forbidden-route audit».
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-11 — merge `c94a356`; Task Master #36; BDD **`ready`**; mvn verify GREEN 1294; frontend gates GREEN 1144; architecture PASS_WITH_NOTES; DEPLOY_OK 2026-07-11T23:50:03+08:00; seam «Security forbidden-route audit» **closed**)
 
 ---
 
 ## 2. Exit gate (Wave LR-D)
 
-- [ ] Retention live for management/runtime audit tables (LR-D1, under LR-B2 mutex) with ADR
-- [ ] Backup/restore drill executed with dated evidence vs ADR-0030 targets
-- [ ] `deploy/observability/` alert rules + dashboards committed; new metric series scrapeable
-- [ ] TraceId propagation decision recorded + minimal path proven
-- [ ] NFR proposals merged as pending; load smoke baselines recorded
-- [ ] Security audit seam closed (LR-D7)
+- [x] Retention live for management/runtime audit tables (LR-D1, under LR-B2 mutex) with ADR-0048 Accepted (merge `20b2a76`; V54)
+- [x] Backup/restore drill executed with dated evidence vs ADR-0030 targets (LR-D2 — merge `3d78bc5`; scratch RPO≈0.933min / RTO≈4.751min; runbook SoT — **not** production compliance claim)
+- [x] `deploy/observability/` alert rules + dashboards committed; new metric series scrapeable (LR-D3 — merge `ba5ea2e`; scrape DEPLOY_OK 2026-07-12T03:43:07+08:00; promtool unavailable — manual lint 7/7)
+- [x] TraceId propagation decision recorded + minimal path proven (LR-D4 — merge `218dcf1`; feature tip `670a683`; Task Master #41; ADR-0049 Accepted; `MdcTaskDecorator` + Kafka `X-Trace-Id`; Scenario A/B; mvn verify GREEN 1321; DEPLOY_OK 2026-07-12T04:18:13+08:00)
+- [x] NFR proposals merged as pending (LR-D5 — merge `5b13476`; Task Master #38; fed by D6 evidence + DEF-LRP-D6-001; **not** confirmed SLOs)
+- [x] Load smoke baselines recorded (LR-D6 — merge `56383eb`; evidence + DEF-LRP-D6-001 triage)
+- [x] Security audit seam closed (LR-D7 — merge `c94a356`; BDD + tests; ledger seam closed)
+
+**Wave LR-D exit:** **met** (2026-07-12) — D1–D7 all Done; merge tip `218dcf1`. Sole-active moved to **LR-E1** (Task Master #42; Wave LR-E partial). Do **not** activate LR-E2/CD-3.

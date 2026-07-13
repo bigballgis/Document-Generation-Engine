@@ -1,0 +1,113 @@
+import type { Schema } from '@/types/openapi'
+import type { PasteCleaningEvidence } from '@/types/templatePaste'
+
+/**
+ * OpenAPI-backed management DTO aliases. Types without a matching schema remain
+ * hand-written below with a short comment when not yet in `openapi-v1.yaml`.
+ */
+export type TemplateLifecycleStatus = Schema<'TemplateLifecycleStatus'> | 'DELETED'
+
+export type PreviewStatus = Schema<'PreviewStatus'>
+
+/** Not yet modeled in `openapi-v1.yaml` (management template list). */
+export interface TemplateSummary {
+  id: string
+  externalId: string
+  groupCode: string
+  name: string
+  lifecycleStatus: TemplateLifecycleStatus
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  releaseVersion: string | null
+  releaseVersionCount: number
+  masterId: string
+  updatedBy: string
+  updatedByDisplayName?: string | null
+  updatedAt: string
+}
+
+/** Not yet modeled in `openapi-v1.yaml` (management release version history). */
+export interface TemplateReleaseVersion {
+  releaseVersion: string
+  devVersionNumber: number
+  lifecycleStatus: TemplateLifecycleStatus
+  updatedAt: string
+  updatedBy: string
+  updatedByDisplayName?: string | null
+  defaultRouteTarget: boolean
+}
+
+export type TemplateVersionLineSummary = Omit<
+  Schema<'TemplateVersionLineSummaryView'>,
+  'lifecycleStatus'
+> & {
+  lifecycleStatus: TemplateLifecycleStatus
+  updatedByDisplayName?: string | null
+}
+
+export type TemplateVersionLineDetail = Omit<
+  Schema<'TemplateVersionLineDetailView'>,
+  'lifecycleStatus'
+> & {
+  lifecycleStatus: TemplateLifecycleStatus
+  updatedByDisplayName?: string | null
+}
+
+export type TemplateDetail = Omit<
+  Schema<'TemplateDetailView'>,
+  'lifecycleStatus' | 'approvalSubState' | 'releaseVersion'
+> & {
+  lifecycleStatus: TemplateLifecycleStatus
+  approvalSubState?: 'PENDING_SUBMIT' | 'PENDING_DECISION' | null
+  releaseVersion: string | null
+  updatedBy?: string | null
+  updatedByDisplayName?: string | null
+}
+
+export type TemplateDevVersionCreated = Schema<'TemplateDevVersionCreatedView'> & {
+  lifecycleStatus?: TemplateLifecycleStatus
+}
+
+export type VariableSchema = Schema<'TemplateExportVariableSchemaView'> & {
+  computeExpression?: string | null
+}
+
+export type AnchorBinding = Schema<'TemplateExportAnchorBindingView'>
+
+export type CompositionRule = Schema<'TemplateExportCompositionRuleView'>
+
+/** Not yet modeled in `openapi-v1.yaml` (management variable upsert). */
+export interface UpsertVariablePayload {
+  variableKey: string
+  variableType: string
+  required: boolean
+  defaultValue?: string | null
+  enumValues?: string | null
+  description?: string | null
+  computeExpression?: string | null
+}
+
+/** Not yet modeled in `openapi-v1.yaml` (management binding upsert). */
+export interface UpsertBindingPayload {
+  anchorId: string
+  declaredContentType: string
+  structuredContentJson: string
+  /** Non-sensitive paste-cleaning residue (ops-paste-binding-seam / ADR-0019). */
+  pasteCleaningEvidence?: PasteCleaningEvidence | null
+  /** When true, clears persisted paste-cleaning residue (S5 clean rewrite). */
+  clearPasteCleaningEvidence?: boolean
+}
+
+/** Not yet modeled in `openapi-v1.yaml` (management template create). */
+export interface CreateTemplatePayload {
+  externalId: string
+  groupCode: string
+  name: string
+  masterId: string
+  description?: string
+}
+
+/** Not yet modeled in `openapi-v1.yaml` (management template metadata update). */
+export interface UpdateTemplateMetadataPayload {
+  name?: string
+  description?: string | null
+}

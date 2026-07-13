@@ -1,5 +1,6 @@
 package com.bank.docgen.rendering;
 
+import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalogEntry;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -51,7 +52,14 @@ public final class StructuredContentDocxWriterTestSupport {
     }
 
     public static DocxAssembler createAssembler(ObjectMapper objectMapper) {
-        return new DocxAssembler(objectMapper, demoTierResolver());
+        DocgenRenderingProperties properties = new DocgenRenderingProperties();
+        properties.setOoxmlValidationEnabled(true);
+        return new DocxAssembler(
+                objectMapper,
+                demoTierResolver(),
+                new OoxmlOutputValidator(),
+                properties
+        );
     }
 
     private static final com.bank.docgen.infrastructure.storage.ObjectStoragePort EMPTY_OBJECT_STORAGE =
@@ -77,7 +85,7 @@ public final class StructuredContentDocxWriterTestSupport {
                 }
             };
 
-    static byte[] renderAnchorParagraph(
+    public static byte[] renderAnchorParagraph(
             StructuredContentDocxWriter writer,
             String structuredJson,
             Map<String, Object> variables,

@@ -1,6 +1,6 @@
 ---
 name: tdd-feature-delivery
-description: Test-first, behavior-driven delivery loop for backend (Java 21 + Spring Boot) and frontend (Vue 3 + TS) slices in this project. Use when implementing any feature slice, fixing a bug with a regression test, or before claiming a task done.
+description: Test-first, behavior-driven delivery loop for backend (Java 25 + Spring Boot) and frontend (Vue 3 + TS) slices in this project. Use when implementing any feature slice, fixing a bug with a regression test, or before claiming a task done.
 ---
 
 # TDD Feature Delivery

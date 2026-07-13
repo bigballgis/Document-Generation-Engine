@@ -1,7 +1,6 @@
 import { computed, onMounted, onUnmounted, ref, unref, type MaybeRef } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 
-export type DirtyGuardDecision = 'stay' | 'discard' | 'save'
 
 export type DirtyGuardPendingAction = () => void | Promise<void>
 

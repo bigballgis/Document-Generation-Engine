@@ -39,7 +39,7 @@ model, permissions, API docs, and ADRs.
 | --- | --- |
 | Requirements, PRD, domain, permissions, OpenAPI v1 | Documented — preserved |
 | Accepted ADRs & architecture views | Documented — preserved |
-| Backend (`backend/`) | **Present** — Spring Boot 3, module-first packages |
+| Backend (`backend/`) | **Present** — Spring Boot 4, module-first packages |
 | Frontend (`frontend/`) | **Present** — Vue 3 + TS management UI |
 | Infrastructure (compose, CI scripts) | **Present** — docker-compose, gate scripts |
 | Quality gates (2026-06-23) | Backend `mvn verify` + frontend lint/type-check/test/build green |
@@ -62,7 +62,7 @@ model, permissions, API docs, and ADRs.
 
 - Exactly **one** epic may be `Active = Yes` (status `In Progress`).
 - **Current active epic:** none — MVP epics re-earned Done.
-- **In-flight (non-epic):** **CDP** Wave CD-0 ([competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** formal phase (other session); **LRP** launch-readiness & deep-optimization program ([launch-readiness-program.md](../plan/launch-readiness-program.md); **In Progress** — Wave LR-B **Done** 2026-07-04 (B1–B8); Wave LR-A activated 2026-07-04).
+- **In-flight (non-epic):** **CDP** Wave CD-2 **Done** (2026-07-11 — T01–T13, merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825` / `f12b193` / `b2b0899`; CD-3 Not Started — recommend only; [competitiveness-deepening-program.md](../plan/competitiveness-deepening-program.md)); **P22** Done (other session); **LRP** launch-readiness & deep-optimization program ([launch-readiness-program.md](../plan/launch-readiness-program.md); **In Progress** — Wave LR-B **Done** 2026-07-04; Wave LR-A **Done** 2026-07-10 A1–A7 / merge `cc9e5f6`; **Wave LR-C Done** 2026-07-11 — C1–C13 / merge tip `bf9cbeb`; **Wave LR-D Done** (2026-07-12 — D1–D7; merge tip `218dcf1`; **no sole-active**); **LR-D4 Done** merge `218dcf1` / Task Master #41 / ADR-0049 Accepted; **LR-D3 Done** merge `ba5ea2e` / #40; **LR-D2 Done** merge `3d78bc5` / #39; **LR-D5 Done** merge `5b13476` / #38 (NFR proposals pending — **not** confirmed SLOs); **LR-D6 Done** merge `56383eb` / #37; **LR-D7 Done** merge `c94a356` / #36; **LR-D1 Done** merge `20b2a76` / #35 / ADR-0048 Accepted; LR-E Not Started — recommend only; Word/XSD/LO24 residuals deferred separately).
 
 ## Recommended activation sequence
 

@@ -58,6 +58,12 @@ public class DocgenRenderingProperties {
      */
     private boolean demoClasspathImageTierEnabled = false;
 
+    /**
+     * LR-A6 / ADR-0043: post-assembly OOXML well-formedness gate. Defaults to {@code true}
+     * (fail-closed). Disable only for emergency diagnostics — never in production acceptance.
+     */
+    private boolean ooxmlValidationEnabled = true;
+
     public String getLibreOfficeCommand() {
         return libreOfficeCommand;
     }
@@ -144,6 +150,14 @@ public class DocgenRenderingProperties {
 
     public void setDemoClasspathImageTierEnabled(boolean demoClasspathImageTierEnabled) {
         this.demoClasspathImageTierEnabled = demoClasspathImageTierEnabled;
+    }
+
+    public boolean isOoxmlValidationEnabled() {
+        return ooxmlValidationEnabled;
+    }
+
+    public void setOoxmlValidationEnabled(boolean ooxmlValidationEnabled) {
+        this.ooxmlValidationEnabled = ooxmlValidationEnabled;
     }
 
     public Duration getSseTimeout() {

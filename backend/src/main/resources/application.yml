@@ -75,6 +75,8 @@ docgen:
     sse-timeout: ${SSE_TIMEOUT:PT15M}
     sse-heartbeat-interval: ${SSE_HEARTBEAT_INTERVAL:PT20S}
     demo-classpath-image-tier-enabled: ${DOCGEN_DEMO_CLASSPATH_IMAGE_TIER_ENABLED:false}
+    # LR-A6 / ADR-0043: post-assembly OOXML well-formedness gate (default ON).
+    ooxml-validation-enabled: ${DOCGEN_OOXML_VALIDATION_ENABLED:true}
   jwt:
     secret: ${JWT_SECRET:local-dev-only-change-me-please-32bytes-min}
     access-token-ttl: ${JWT_ACCESS_TOKEN_TTL:PT30M}
@@ -94,8 +96,21 @@ docgen:
     max-docx-upload-bytes: ${DOCGEN_MASTER_MAX_DOCX_UPLOAD_BYTES:52428800}
   demo-catalog:
     seed-enabled: ${DOCGEN_SEED_DEMO_CATALOG:false}
+  catalog-load-seed:
+    # LR-C5: ≥500 templates across groups for pagination / p95 evidence.
+    # Enable: DOCGEN_SEED_CATALOG_LOAD=true (optional DOCGEN_SEED_CATALOG_LOAD_COUNT=500)
+    enabled: ${DOCGEN_SEED_CATALOG_LOAD:false}
+    template-count: ${DOCGEN_SEED_CATALOG_LOAD_COUNT:500}
+  # LOCAL/TEST ONLY — ConfigAdGroupResolver + account-groups demo map.
+  # Acceptance/production must NOT use type=config silently (ADR-0054 / BDD-OPS-AD-GROUP-STUB-001):
+  # AdGroupResolverGuard fails closed on prod-shaped paths unless a configured directory adapter
+  # exists, OR (local docker acceptance LAB ONLY) allow-config-stub-on-prod-profile=true
+  # via DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE / DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB.
   ad-group-resolver:
     type: config
+    # Default false. Local docker-compose.prod.yml sets true (LAB ONLY). Claimed production must omit.
+    # Env: DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE (compose shorthand DOCGEN_AD_GROUP_ALLOW_CONFIG_STUB).
+    allow-config-stub-on-prod-profile: ${DOCGEN_AD_GROUP_RESOLVER_ALLOW_CONFIG_STUB_ON_PROD_PROFILE:false}
     account-groups:
       svc-caller:
         - RETAIL_API
@@ -107,6 +122,14 @@ docgen:
     escalation:
       enabled: ${DOCGEN_COLLABORATION_ESCALATION_ENABLED:true}
       fixed-delay-ms: ${DOCGEN_COLLABORATION_ESCALATION_DELAY_MS:300000}
+    # LR-C7: max rows returned by GET /collaboration-notifications (newest first).
+    notification-list-size: ${DOCGEN_COLLABORATION_NOTIFICATION_LIST_SIZE:20}
+  # LR-D1 / ADR-0048: Tier-1 audit retention (management 90d / runtime 365d hard delete).
+  audit:
+    retention-enabled: ${DOCGEN_AUDIT_RETENTION_ENABLED:true}
+    management-retention-days: ${DOCGEN_AUDIT_MANAGEMENT_RETENTION_DAYS:90}
+    runtime-retention-days: ${DOCGEN_AUDIT_RUNTIME_RETENTION_DAYS:365}
+    retention-cron: ${DOCGEN_AUDIT_RETENTION_CRON:0 0 3 * * *}
 
 springdoc:
   api-docs:

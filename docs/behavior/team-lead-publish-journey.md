@@ -19,6 +19,8 @@
 - **When** 关闭对话框或未勾选确认
 - **Then** 状态不变；无 release version 新增
 
+> **Fail-closed（保真未查看）：** 见 [fidelity-viewed-confirmation-journey.md](./fidelity-viewed-confirmation-journey.md) **BDD-CDP-FID-003**（CD-E2E-T10）— 保真摘要「已查看」未满足时不得 Publish（与本场景二次确认互补）。
+
 ## 证据
 
 `frontend/e2e/CDP-E2E-T05-team-lead-publish.spec.ts`；manifest PASS。

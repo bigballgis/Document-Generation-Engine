@@ -17,7 +17,8 @@ export const FORBIDDEN_L1_PATTERN =
   /\b(policy|credential|lifecycle|semver|gate|anchor integrity|governance overview|audit console)\b/i
 
 export function managementNav(page: Page): Locator {
-  return page.getByRole('navigation', { name: /management navigation/i })
+  // en + zh-CN (P20 locale switcher / CD-E2E-T12)
+  return page.getByRole('navigation', { name: /management navigation|管理导航/i })
 }
 
 export function myTodosNavSection(page: Page): Locator {

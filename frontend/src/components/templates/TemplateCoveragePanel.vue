@@ -187,47 +187,4 @@ watch(
   </div>
 </template>
 
-<style scoped lang="scss">
-.coverage-panel__toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 0.5rem;
-}
-
-.coverage-alert {
-  margin: 1rem 0;
-}
-
-.threshold-hint {
-  margin: 0 0 1rem;
-  color: var(--text-muted);
-
-  &--compact {
-    margin: 0.5rem 0 0.75rem;
-    font-size: var(--font-size-sm);
-    line-height: 1.4;
-  }
-}
-
-.coverage-table {
-  width: 100%;
-}
-
-.coverage-uncovered {
-  margin-top: 1rem;
-
-  &__list {
-    margin: 0;
-    padding: 0 0 0 1.25rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  &__item {
-    font-size: 0.875rem;
-    font-family: var(--font-mono, monospace);
-    color: var(--text-default);
-  }
-}
-</style>
+<style scoped lang="scss" src="./TemplateCoveragePanel.scss"></style>

@@ -26,6 +26,8 @@ export const CDP_MVP_GOLDEN_EXTERNAL_ID = 'CDP-MVP-GOLDEN'
 export const CDP_MVP_GOLDEN_NAME = 'CDP MVP Golden Path Letter'
 export const CDP_MVP_GOLDEN_RELEASE_VERSION = '1.0.0'
 export const CDP_MVP_DATASET_NAME = 'CDP-MVP-DATASET-01'
+/** Prefix for fresh DRAFT clones when the stable golden id is no longer DRAFT (global teardown cleans `E2E-`). */
+export const CDP_MVP_GOLDEN_E2E_EXTERNAL_ID_PREFIX = 'E2E-CDP-MVP-GOLDEN'
 
 export interface CdpMvpGoldenFixture {
   templateId: string
@@ -33,6 +35,18 @@ export interface CdpMvpGoldenFixture {
   name: string
   releaseVersion: string
   lifecycleStatus: string
+}
+
+function uniqueGoldenExternalId(): string {
+  return `${CDP_MVP_GOLDEN_E2E_EXTERNAL_ID_PREFIX}-${Date.now().toString(36).toUpperCase()}`.replace(
+    /[^A-Z0-9_-]/g,
+    '-',
+  )
+}
+
+function uniqueGoldenName(externalId: string): string {
+  const suffix = externalId.replace(`${CDP_MVP_GOLDEN_E2E_EXTERNAL_ID_PREFIX}-`, '')
+  return `${CDP_MVP_GOLDEN_NAME} (${suffix})`
 }
 
 async function apiLogin(
@@ -160,29 +174,11 @@ async function fetchTemplateLifecycleStatus(
   return detail.lifecycleStatus
 }
 
-/**
- * CD-E2E-T01b — idempotent DRAFT seed for browser MVP golden path.
- * Uses approved Demo Retail Letterhead (master approval skipped in UI).
- * API setup only; lifecycle transitions happen in the browser spec.
- */
-export async function prepareCdpMvpGoldenDraft(
+async function createGoldenDraftTemplate(
   request: APIRequestContext,
+  externalId: string,
+  name: string,
 ): Promise<CdpMvpGoldenFixture> {
-  const existing = await findTemplateByExternalId(request, CDP_MVP_GOLDEN_EXTERNAL_ID)
-  if (existing) {
-    if (existing.lifecycleStatus === 'DRAFT') {
-      await configurePublishableTemplate(request, existing.id)
-      await ensureGoldenTestDataSet(request, existing.id)
-    }
-    return {
-      templateId: existing.id,
-      externalId: CDP_MVP_GOLDEN_EXTERNAL_ID,
-      name: CDP_MVP_GOLDEN_NAME,
-      releaseVersion: CDP_MVP_GOLDEN_RELEASE_VERSION,
-      lifecycleStatus: existing.lifecycleStatus,
-    }
-  }
-
   const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
   const master = await ensureDemoRetailMasterApproved(request)
 
@@ -191,9 +187,9 @@ export async function prepareCdpMvpGoldenDraft(
     authorToken,
     '/templates',
     {
-      externalId: CDP_MVP_GOLDEN_EXTERNAL_ID,
+      externalId,
       groupCode: DEMO_GROUP_CODE,
-      name: CDP_MVP_GOLDEN_NAME,
+      name,
       description: 'CDP browser MVP golden path template (setup seed only)',
       masterId: master.id,
     },
@@ -203,11 +199,51 @@ export async function prepareCdpMvpGoldenDraft(
   await configurePublishableTemplate(request, createdTemplate.id)
   await ensureGoldenTestDataSet(request, createdTemplate.id)
 
+  const lifecycleStatus = await fetchTemplateLifecycleStatus(request, createdTemplate.id)
+  if (lifecycleStatus !== 'DRAFT') {
+    throw new Error(
+      `Expected newly created CDP golden template ${externalId} to be DRAFT, got ${lifecycleStatus}`,
+    )
+  }
+
   return {
     templateId: createdTemplate.id,
-    externalId: CDP_MVP_GOLDEN_EXTERNAL_ID,
-    name: CDP_MVP_GOLDEN_NAME,
+    externalId: createdTemplate.externalId,
+    name,
     releaseVersion: CDP_MVP_GOLDEN_RELEASE_VERSION,
-    lifecycleStatus: await fetchTemplateLifecycleStatus(request, createdTemplate.id),
+    lifecycleStatus,
   }
+}
+
+/**
+ * CD-E2E-T01b — idempotent DRAFT seed for browser MVP golden path.
+ * Uses approved Demo Retail Letterhead (master approval skipped in UI).
+ * API setup only; lifecycle transitions happen in the browser spec.
+ *
+ * When the stable `CDP-MVP-GOLDEN` id already exists past DRAFT, creates a fresh
+ * `E2E-CDP-MVP-GOLDEN-*` DRAFT clone so the browser golden path can rerun without
+ * resetting Docker volumes.
+ */
+export async function prepareCdpMvpGoldenDraft(
+  request: APIRequestContext,
+): Promise<CdpMvpGoldenFixture> {
+  const existing = await findTemplateByExternalId(request, CDP_MVP_GOLDEN_EXTERNAL_ID)
+  if (existing?.lifecycleStatus === 'DRAFT') {
+    await configurePublishableTemplate(request, existing.id)
+    await ensureGoldenTestDataSet(request, existing.id)
+    return {
+      templateId: existing.id,
+      externalId: CDP_MVP_GOLDEN_EXTERNAL_ID,
+      name: CDP_MVP_GOLDEN_NAME,
+      releaseVersion: CDP_MVP_GOLDEN_RELEASE_VERSION,
+      lifecycleStatus: 'DRAFT',
+    }
+  }
+
+  if (existing) {
+    const externalId = uniqueGoldenExternalId()
+    return createGoldenDraftTemplate(request, externalId, uniqueGoldenName(externalId))
+  }
+
+  return createGoldenDraftTemplate(request, CDP_MVP_GOLDEN_EXTERNAL_ID, CDP_MVP_GOLDEN_NAME)
 }

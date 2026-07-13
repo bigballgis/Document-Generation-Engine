@@ -252,6 +252,7 @@ AD Group 用于 API 调用授权。
 - 母版审核通过后形成可供模板引用的 DOCX 母版样式目录。
 - 母版样式目录需要标明可用样式名称、适用节点类型和渲染用途。
 - 母版样式目录变更后，不自动影响已发布模板；模板升级母版样式目录或调整样式映射时，必须执行影响分析，并重新经过测试、审批和发布流程。
+- **DOCX 上传校验（LR-A3）：** 创建与替换文件共用同一校验契约；仅接受可识别为 OOXML Word 包的 `.docx`（后缀 + ZIP magic + OPC 必需条目探测；Content-Type 为辅助白名单，非唯一真相）。默认业务文件上限 **50MB**（`>` 拒绝；恰好等于上限接受）；Spring 整请求与 nginx 默认 **60MB**。失败不得写入对象存储、不得抽取锚点；`messageKey`：`api.error.master.docxRequired` / `docxTooLarge` / `docxCorrupt`。病毒扫描未确认（pending）。Traceability: [BDD-LRP-A3-UPLOAD-001](../behavior/lrp-a3-master-docx-upload-validation.md)。
 
 已确认修订线导航规则（P2-T05 Phase A + P2-T06 Phase B，见 [catalog-navigation-ux.md](../product/catalog-navigation-ux.md) § Master revision history）：
 
@@ -356,9 +357,11 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **Blocker（阻止发布）：** 未声明变量引用（`UNRESOLVED_VARIABLE`）、不支持节点类型（`UNSUPPORTED_NODE`）等。
 
-**Warning（摘要 + 确认）：** 低风险缩放差异（`IMAGE_SCALING_ADJUSTED`）等。
+**「不支持节点」语义（LR-A4 / BDD-LRP-A4-FAIL-CLOSED-001，2026-07-10 确认）：** 包括 (1) **未知** `type`（不在 `StructuredContentNodeType`）；(2) **writer-unsupported** — 矩阵已声明但当前无 DOCX 发射分支的类型。v1 当前 writer-unsupported set = `{ qrBarcodeRef, attachmentListRef }`。此类节点必须在绑定校验与发布门禁 **硬阻断**，预览/运行时生成 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。完整 QR/附件列表 writer **不在** LR-A4 范围（另任务从 set 移除后方可发布含该节点的版本）。
 
-绑定保存与 `validateBindings` 路径通过 `TemplateService.computeBindingStatus` 合并节点 blockers → `BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE`，进而阻塞 `PublishGateService` 锚点完整性检查项。
+**Warning（摘要 + 确认）：** 低风险缩放差异（`IMAGE_SCALING_ADJUSTED`）等。Writer-unsupported **不得** 降级为可发布 warning。
+
+绑定保存与 `validateBindings` 路径通过 `TemplateService.computeBindingStatus`（及 `TemplateBindingConfigurationService`）合并节点 blockers → `BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE`，进而阻塞 `PublishGateService` 锚点完整性检查项；LR-A4 可另增专用 checklist 项（见行为规格 LR-A4-C5）。**粘贴清洗未解除阻断**另见 §2.6.7（ops-paste-binding-seam / checklist #5b）— 与 LR-A4 writer-unsupported **正交**，同样汇入绑定非 `VALID` + 发布 fail-closed。
 
 #### 2.6.3 母版样式目录与有限直接格式 Master style catalog & direct format（P18-T03）
 
@@ -380,7 +383,7 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 - **签章 `sealRef`：** `placement.withinAuthorizedArea=false` → `SEAL_OUTSIDE_AUTHORIZED_AREA` blocker；`applyScaling` → `SEAL_SCALING_NOT_ALLOWED` blocker（签章/QR 不适用图片缩放 warning）
 - **图片 `imageRef`：** `applyScaling` → `IMAGE_SCALING_ADJUSTED` warning（自 T02 迁至本服务）
-- **附件列表 `attachmentListRef`：** 有效 `referenceKey` 解析为 `AttachmentListReferenceModel`
+- **二维码/条码 `qrBarcodeRef` / 附件列表 `attachmentListRef`：** 可校验 `referenceKey` 形态；**在 writer 落地前** 另由 LR-A4 writer-unsupported 规则作为 **发布阻断**（不得因 key 合法而允许发布或静默渲染）。有效 `attachmentListRef.referenceKey` 仍可解析为 `AttachmentListReferenceModel` 供校验/清单使用，但不代表可 DOCX 发射
 
 #### 2.6.6 受控多级编号 Controlled numbering（P18-T06）
 
@@ -388,19 +391,32 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 **Blocker：** 重复编号 → `DUPLICATE_NUMBER`；`numberingCrossRef.targetNumber` 无法解析 → `BROKEN_NUMBER_CROSS_REFERENCE`。
 
-#### 2.6.7 Word/HTML 粘贴清洗 Paste cleaning（P18-T07）
+#### 2.6.7 Word/HTML 粘贴清洗 Paste cleaning（P18-T07 + ops-paste-binding-seam）
 
-`PasteCleaningService` 在编辑时（粘贴前）将 Word/HTML 片段清洗为受控结构化 JSON，并返回 `PasteCleaningResult`（`blocked`、`cleanedStructuredContentJson`、`summary`、`prePasteSnapshotJson`）。
+`PasteCleaningService` 将 Word/HTML 片段清洗为受控结构化 JSON，并返回 `PasteCleaningResult`（`blocked`、`cleanedStructuredContentJson`、`summary`、`prePasteSnapshotJson`）。清洗摘要可作为**编辑或发布检查**证据（[ADR-0019](../adr/rendering-authoring/0019-structured-authoring-and-rendering-boundary.md)）；**禁止**存源 HTML、粘贴正文或客户敏感明文。
 
 **摘要分类（`PasteCleaningCategory`）：** `TRANSFORMED` / `REMOVED` / `WARNING` / `BLOCKED`；每条 `PasteCleaningSummaryItem` 含 `messageKey`（`paste.summary.*`）与不含源 HTML 敏感明文的 `detectionSummary`。
 
-**v1 转换：** `<p>` → `paragraph` + `textRun`；`<object>` → REMOVED；`position:absolute` → WARNING。
+**v1 转换（可 Accept 进入内容树）：** `<p>` → `paragraph` + `textRun`（及其它 ADR-0019 已确认可自动转换的受控节点）。`REMOVED` / `WARNING` 仅用于**非阻断**清洗结果（例如可安全丢弃的装饰噪声）；**不得**用它们放行 ADR 已要求阻断的构造。
 
-**Blocker（整次粘贴 blocked，无 cleaned JSON）：** `<script>`、`javascript:`、`<iframe>`。
+**Blocker（整次粘贴 `blocked=true`，无 cleaned JSON；UI Accept 禁用）— SoT = ADR-0019：**
 
-**取消/撤销：** `cancelToPrePaste(result)` 返回 `prePasteSnapshotJson`，恢复粘贴前内容树。
+| 构造 | 分类 |
+| --- | --- |
+| `<script>` / `javascript:` | `BLOCKED` |
+| `<iframe>` | `BLOCKED` |
+| **embedded object（`<object>`）** | **`BLOCKED`**（对齐 ADR；**禁止**再标为 `REMOVED` 后仍允许 Accept） |
+| **absolute positioning（`position:absolute`）** | **`BLOCKED`**（对齐 ADR；**禁止**再标为 `WARNING` 后仍允许 Accept） |
 
-**管理 API（P18-T10）：** `POST /api/management/v1/templates/{templateId}/paste-clean`（`sourceHtml` + `prePasteStructuredContentJson`）；`GET .../master-style-catalog` 只读返回母版样式目录。T10 UI 通过上述 API 展示粘贴摘要并支持 cancel/undo。
+可选增强：若实现已能可靠检测 ADR 所列其它构造（macros、floating layout、complex columns 等），同样 `BLOCKED`；未实现的检测器不 invent 假阳性。行为规格：[ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md)（BDD-OPS-PASTE-BINDING-001）。
+
+**粘贴清洗证据 / residue（绑定持久化）：** 用户 **Accept** 成功（`blocked=false`）后，锚点绑定须持久化**非敏感** `pasteCleaningEvidence`（或等价字段），至少含 `transformedCount` / `removedCount` / `warningCount` / `blockedCount`，以及条目级 `category` + `messageKey` + 非敏感 `detectionSummary`。**禁止**持久化源 HTML。未解除粘贴阻断定义：`blockedCount > 0`、显式 `unresolvedPasteBlockers=true`，或 residue 含 `BLOCKED` 项。
+
+**绑定 / 发布门禁（fail-closed）：** `computeBindingStatus` / `validateBindings` / 保存绑定在存在未解除粘贴阻断时**不得**返回 `VALID`（映射 `INCOMPATIBLE_CONTENT_TYPE` 或文档化等价专用状态）。`PublishGateService` 对未解除粘贴阻断 checklist 项 **FAIL**（优先专用 `PublishGateCheckCode` 如 `PASTE_CLEANING_BLOCKERS`，或汇入 `ANCHOR_INTEGRITY` / `BLOCKER_STATUS` 且详情可展示稳定 messageKey）；**禁止**静默发布。干净重写（无阻断 Accept，或等价显式清除 residue 的保存路径）须清除该绑定上的粘贴阻断 residue。此缝与 §2.6.2 **LR-A4**（writer-unsupported 节点）**正交**，不得混为一谈。
+
+**取消/撤销：** `cancelToPrePaste(result)` 返回 `prePasteSnapshotJson`，恢复粘贴前内容树；Cancel / Undo **不得**写入新的阻断 residue。
+
+**管理 API（P18-T10；本切片扩展字段、不新增权限面）：** `POST /api/management/v1/templates/{templateId}/paste-clean`（`sourceHtml` + `prePasteStructuredContentJson`）；绑定 upsert / validate 响应携带非敏感 `pasteCleaningEvidence`；`GET .../master-style-catalog` 只读返回母版样式目录。T10 UI 通过上述 API 展示粘贴摘要并支持 cancel/undo；发布 checklist 须用户可见粘贴阻断原因。
 
 #### 2.6.8 发布锁定 Render Profile Publish-locked render profile（P18-T08）
 
@@ -1056,10 +1072,11 @@ API 管理配置变更统一使用审计事件 `API_POLICY_UPDATED`，并通过 
 - 分组管理员只能导出被授权组范围内的审计记录。
 - 母版设计人员、模板编排人员、测试人员、审批人员、API 调用方不因该角色本身获得审计导出权限。
 
-已确认审计保留规则：
+已确认审计保留规则（Tier-1 / Tier-2 — ADR-0048 / LR-D1）：
 
-- 审计记录保留期限可配置，默认保留 5 年。
-- 审计保留期限可按环境、监管或业务要求配置。
+- **Tier-1（Confirmed）：** `management_audit_event` 默认 **90 天**硬删除；`runtime_generation_audit_event` 默认 **365 天**硬删除；窗口可配置；无 soft-delete。
+- **Tier-2（Deferred）：** 历史「默认保留 5 年」为多年合规归档意图，由对象存储归档承担（待建）；**不是** Tier-1 热库默认窗口。
+- 详见 [permission-matrix.md](../security/permission-matrix.md) §10 与 [ADR-0048](../adr/operations/0048-audit-data-retention-policy.md)。
 
 ### 2.16 授权判定 Authorization Decision
 

@@ -130,18 +130,123 @@ async function configureCustomerVariable(request: APIRequestContext, templateId:
   })
 }
 
+export interface PasteCleaningEvidencePayload {
+  transformedCount: number
+  removedCount: number
+  warningCount: number
+  blockedCount: number
+  unresolvedPasteBlockers: boolean
+  items: Array<{
+    category: 'BLOCKED' | 'TRANSFORMED' | 'REMOVED' | 'WARNING'
+    messageKey: string
+    detectionSummary?: string | null
+  }>
+}
+
+export interface AnchorBindingResult {
+  anchorId: string
+  declaredContentType: string
+  structuredContentJson: string
+  validationStatus: string
+  pasteCleaningEvidence?: PasteCleaningEvidencePayload | null
+}
+
+export interface PublishGateChecklistResult {
+  ready: boolean
+  items: Array<{
+    checkCode: string
+    ready: boolean
+    blocker: boolean
+    messageKey: string
+    summary: string
+  }>
+}
+
+/** Defense-in-depth fixture: unresolved paste residue (BDD S3/S4 inject). */
+export const UNRESOLVED_PASTE_CLEANING_EVIDENCE: PasteCleaningEvidencePayload = {
+  transformedCount: 0,
+  removedCount: 0,
+  warningCount: 0,
+  blockedCount: 1,
+  unresolvedPasteBlockers: true,
+  items: [
+    {
+      category: 'BLOCKED',
+      messageKey: 'paste.summary.blocked',
+      detectionSummary: 'Blocked embedded object in pasted HTML.',
+    },
+  ],
+}
+
+export const CLEAN_PASTE_CLEANING_EVIDENCE: PasteCleaningEvidencePayload = {
+  transformedCount: 1,
+  removedCount: 0,
+  warningCount: 0,
+  blockedCount: 0,
+  unresolvedPasteBlockers: false,
+  items: [
+    {
+      category: 'TRANSFORMED',
+      messageKey: 'paste.summary.transformed',
+      detectionSummary: 'Transformed paragraph element into controlled structured node.',
+    },
+  ],
+}
+
 export async function upsertBindingViaApi(
   request: APIRequestContext,
   templateId: string,
   anchorId: string,
   structuredContentJson: string,
-): Promise<void> {
+  options?: {
+    pasteCleaningEvidence?: PasteCleaningEvidencePayload | null
+    clearPasteCleaningEvidence?: boolean
+  },
+): Promise<AnchorBindingResult> {
   const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
-  await authorizedPut(request, authorToken, `/templates/${templateId}/bindings/${anchorId}`, {
+  const payload: Record<string, unknown> = {
     anchorId,
     declaredContentType: 'TEXT',
     structuredContentJson,
+  }
+  if (options?.pasteCleaningEvidence) {
+    payload.pasteCleaningEvidence = options.pasteCleaningEvidence
+  }
+  if (options?.clearPasteCleaningEvidence) {
+    payload.clearPasteCleaningEvidence = true
+  }
+  return authorizedPut<AnchorBindingResult>(
+    request,
+    authorToken,
+    `/templates/${templateId}/bindings/${anchorId}`,
+    payload,
+  )
+}
+
+export async function fetchPublishGateViaApi(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<PublishGateChecklistResult> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const response = await request.get(`${E2E_API_BASE_URL}/templates/${templateId}/publish-gate`, {
+    headers: { Authorization: `Bearer ${authorToken}` },
   })
+  if (!response.ok()) {
+    throw new Error(`GET publish-gate failed (${response.status()}): ${await response.text()}`)
+  }
+  const body = (await response.json()) as ApiEnvelope<PublishGateChecklistResult>
+  return body.result
+}
+
+export async function validateBindingsViaApi(
+  request: APIRequestContext,
+  templateId: string,
+): Promise<{
+  summary: { validCount: number; totalBindings: number; blocking: boolean }
+  bindings: Array<{ anchorId: string; validationStatus: string }>
+}> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  return authorizedPost(request, authorToken, `/templates/${templateId}/bindings/validate`, {})
 }
 
 export async function prepareDraftTemplateWithCleanBinding(
@@ -181,4 +286,27 @@ export async function prepareDraftTemplateWithImageScalingBinding(
     {},
   )
   return fixture
+}
+
+/**
+ * Draft template whose HEADER binding carries unresolved paste-cleaning residue
+ * (BDD-OPS-PASTE-BINDING-001 / S3–S5 inject path).
+ */
+export async function prepareDraftTemplateWithUnresolvedPasteResidue(
+  request: APIRequestContext,
+): Promise<StructuredAuthoringFixture & { binding: AnchorBindingResult }> {
+  const fixture = await createDraftTemplate(request, {
+    externalId: uniqueExternalId('E2E-OPS-PASTE'),
+    name: `E2E OPS Paste Residue ${Date.now()}`,
+  })
+  await configureCustomerVariable(request, fixture.templateId)
+  const binding = await upsertBindingViaApi(
+    request,
+    fixture.templateId,
+    'HEADER',
+    CLEAN_STRUCTURED_CONTENT_JSON,
+    { pasteCleaningEvidence: UNRESOLVED_PASTE_CLEANING_EVIDENCE },
+  )
+  await validateBindingsViaApi(request, fixture.templateId)
+  return { ...fixture, binding }
 }

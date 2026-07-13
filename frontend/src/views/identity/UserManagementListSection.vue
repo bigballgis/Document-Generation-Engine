@@ -18,6 +18,7 @@ defineProps<{
   errorRetryable: boolean
   isFilterGroupLocked: boolean
   roleOptions: ManagementRole[]
+  canCreate: boolean
   canDelete: boolean
   pageSize: number
   totalUsers: number
@@ -73,7 +74,9 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
         <el-button native-type="submit">{{ t('identity.users.filters.apply') }}</el-button>
         <el-button text @click="emit('resetFilters')">{{ t('identity.users.filters.reset') }}</el-button>
       </form>
-      <el-button type="primary" @click="emit('create')">{{ t('identity.users.create') }}</el-button>
+      <el-button v-if="canCreate" type="primary" @click="emit('create')">
+        {{ t('identity.users.create') }}
+      </el-button>
     </header>
 
     <LoadErrorPanel
@@ -162,41 +165,15 @@ const sortUsersByEnabled = rowSortMethod<ManagementUserView>((row) => row.enable
         />
       </template>
 
-      <EmptyStatePanel v-else title-key="identity.users.empty" />
+      <EmptyStatePanel v-else title-key="identity.users.empty">
+        <template v-if="canCreate" #actions>
+          <el-button type="primary" @click="emit('create')">
+            {{ t('identity.users.create') }}
+          </el-button>
+        </template>
+      </EmptyStatePanel>
     </template>
   </section>
 </template>
 
-<style scoped lang="scss">
-.user-list-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.filters {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex: 1;
-  flex-wrap: wrap;
-}
-
-.filter-control {
-  flex: 1 1 12rem;
-  min-width: 0;
-  max-width: 20rem;
-}
-
-.role-tag {
-  margin-right: 0.25rem;
-}
-</style>
+<style scoped lang="scss" src="./UserManagementListSection.scss"></style>

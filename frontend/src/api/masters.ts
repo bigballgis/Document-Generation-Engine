@@ -1,6 +1,12 @@
+import type { AxiosProgressEvent } from 'axios'
 import { unwrapEnvelope } from '@/api/envelope'
 import { http } from '@/api/http'
+import {
+  collectAllPageContent,
+  type CollectedCatalogPage,
+} from '@/api/catalogPageCollect'
 import type { ApiEnvelope } from '@/types/session'
+import type { PageView } from '@/types/identity'
 import type {
   CreateMasterPayload,
   DecideMasterReviewPayload,
@@ -13,13 +19,73 @@ import type {
   UpdateMasterMetadataPayload,
 } from '@/types/master'
 
+/** Optional UX callbacks for multipart master DOCX transfers (endpoints/payloads unchanged). */
+export type MasterFileUploadOptions = {
+  onUploadProgress?: (percent: number | null) => void
+}
+
+export type MasterListQueryOptions = {
+  signal?: AbortSignal
+  search?: string
+  groupCode?: string
+  status?: string
+  sort?: string
+}
+
+function normalizeGroupCode(groupCode: string | undefined): string | undefined {
+  const trimmed = groupCode?.trim()
+  return trimmed ? trimmed.toUpperCase() : undefined
+}
+
+function toUploadPercent(event: AxiosProgressEvent): number | null {
+  if (!event.total || event.total <= 0) {
+    return null
+  }
+  return Math.min(100, Math.round((event.loaded / event.total) * 100))
+}
+
+function attachUploadProgress(
+  options: MasterFileUploadOptions | undefined,
+): ((event: AxiosProgressEvent) => void) | undefined {
+  if (!options?.onUploadProgress) {
+    return undefined
+  }
+  return (event) => {
+    options.onUploadProgress!(toUploadPercent(event))
+  }
+}
+
 export async function listMasters(
-  options: { signal?: AbortSignal } = {},
-): Promise<MasterDocumentSummary[]> {
-  const response = await http.get<ApiEnvelope<MasterDocumentSummary[]>>('/masters', {
+  page = 0,
+  size = 20,
+  options: MasterListQueryOptions = {},
+): Promise<PageView<MasterDocumentSummary>> {
+  const params: Record<string, string | number> = { page, size }
+  if (options.search) {
+    params.search = options.search
+  }
+  const groupCode = normalizeGroupCode(options.groupCode)
+  if (groupCode) {
+    params.groupCode = groupCode
+  }
+  if (options.status) {
+    params.status = options.status
+  }
+  if (options.sort) {
+    params.sort = options.sort
+  }
+  const response = await http.get<ApiEnvelope<PageView<MasterDocumentSummary>>>('/masters', {
+    params,
     signal: options.signal,
   })
   return unwrapEnvelope(response.data)
+}
+
+/** Multi-page merge for dashboard / picker consumers (LR-C5 PageView). */
+export async function listAllMasters(
+  options: MasterListQueryOptions = {},
+): Promise<CollectedCatalogPage<MasterDocumentSummary>> {
+  return collectAllPageContent((page, size) => listMasters(page, size, options))
 }
 
 export async function getMaster(masterId: string): Promise<MasterDocumentDetail> {
@@ -30,6 +96,7 @@ export async function getMaster(masterId: string): Promise<MasterDocumentDetail>
 export async function createMaster(
   payload: CreateMasterPayload,
   file: File,
+  options?: MasterFileUploadOptions,
 ): Promise<MasterDocumentDetail> {
   const formData = new FormData()
   formData.append('groupCode', payload.groupCode)
@@ -41,6 +108,7 @@ export async function createMaster(
 
   const response = await http.post<ApiEnvelope<MasterDocumentDetail>>('/masters', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    onUploadProgress: attachUploadProgress(options),
   })
   return unwrapEnvelope(response.data)
 }
@@ -131,7 +199,11 @@ export async function downloadMasterRevisionLineFile(
   return { blob: response.data, filename }
 }
 
-export async function replaceMasterFile(masterId: string, file: File): Promise<MasterDocumentDetail> {
+export async function replaceMasterFile(
+  masterId: string,
+  file: File,
+  options?: MasterFileUploadOptions,
+): Promise<MasterDocumentDetail> {
   const formData = new FormData()
   formData.append('file', file)
 
@@ -140,6 +212,7 @@ export async function replaceMasterFile(masterId: string, file: File): Promise<M
     formData,
     {
       headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: attachUploadProgress(options),
     },
   )
   return unwrapEnvelope(response.data)

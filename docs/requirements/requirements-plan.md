@@ -313,7 +313,7 @@
 - 全局管理员和审计管理员可导出全部审计记录。
 - 分组管理员只能导出被授权组范围内的审计记录。
 - 母版设计人员、模板编排人员、测试人员、审批人员、API 调用方不因该角色本身获得审计导出权限。
-- 审计记录保留期限可配置，默认保留 5 年；可按环境、监管或业务要求配置。
+- 审计保留分 Tier-1 / Tier-2（ADR-0048 / LR-D1）：Tier-1 管理审计默认 **90 天**、运行时生成审计默认 **365 天**硬删除（可配置）；历史「默认保留 5 年」为 Tier-2 归档意图（Deferred，非热库默认）。详见权限矩阵 §10。
 
 ## 已确认：系统角色与分组
 
@@ -355,6 +355,7 @@
 - 母版审核通过后才允许被新建或更新模板引用；草稿、待审核和审核不通过的母版不得被模板引用。
 - 母版审核不通过后回到草稿，并保留审核记录；修改后可重新提交审核并生成新的审核记录。
 - 母版更新后不自动影响已有模板；母版变更需要影响分析，影响分析至少包含引用模板清单和重新测试提示。
+- **母版 DOCX 上传深度校验与体积上限（LR-A3，2026-07-10 确认）：** 创建母版与替换母版文件（`POST /api/management/v1/masters`、`PUT /api/management/v1/masters/{id}/file`）在持久化与锚点抽取之前，必须校验后缀 `.docx`、可选 Content-Type 白名单、服务内体积上限、ZIP magic（`PK\x03\x04`）与 OPC 必需条目（`[Content_Types].xml`、`_rels/.rels`、`word/document.xml`）。默认上限：**50MB** 文件（`docgen.master.max-docx-upload-bytes` / Spring `max-file-size`）与 **60MB** 整请求（Spring `max-request-size` + nginx `client_max_body_size 60m`）。校验失败返回统一错误信封；稳定 `messageKey` 为 `api.error.master.docxRequired`、`api.error.master.docxTooLarge`、`api.error.master.docxCorrupt`（**不**采用 `invalidDocxContent`）。边界层超限（nginx / Spring multipart）须对用户可读、可翻译，不得以原始 HTML 错误页为唯一反馈。合法 Word/LibreOffice `.docx` 不得被误拒。病毒/恶意软件扫描**不是**本条确认范围（见待确认）。行为规格：[LR-A3 upload validation](../behavior/lrp-a3-master-docx-upload-validation.md)。
 - 模板编排负责锚点内容编排。
 - 普通模板基础信息更新由全局管理员和分组管理员执行；全局管理员可更新全部普通模板基础信息，分组管理员可更新被授权组范围内普通模板基础信息。
 - 分组管理员可在被授权组范围内执行模板常规操作，包括选择母版创建模板、配置锚点内容、配置模板变量、配置条件/循环规则、测试生成 DOCX/PDF、提交测试/审批、发布/停用模板。
@@ -388,6 +389,7 @@
 - v1 明确不支持任意 HTML/CSS、脚本、绝对定位、浮动、复杂分栏、在线任意修改页眉页脚/页边距/全局版式，以及未被平台模型识别的 Word 脏样式进入发布版本。
 - Word 或 HTML 粘贴内容必须清洗并转换为受控结构化节点后才能进入模板；不可识别内容不得作为原始格式直接进入发布契约，应按风险进入阻断项或警告项。
 - 已确认发布阻断项包括不支持节点、变量引用缺失、样式引用缺失、条款或内容模块引用缺失、表格组件引用缺失、母版锚点引用缺失、编号断裂且影响条款语义、表格无法可靠渲染、签章/盖章位置异常和 PDF 转换失败。
+- **LR-A4（2026-07-10 确认）：**「不支持节点」= 未知 `type` ∪ **writer-unsupported**（矩阵已声明但当前无 DOCX 发射：`qrBarcodeRef`、`attachmentListRef`）。对此类节点 **发布门禁硬阻断**；预览/运行时 **显式失败**（`api.error.rendering.unsupportedNodeType`）；**禁止** 静默省略。本切片不实现完整 QR/附件 writer。规格：[BDD-LRP-A4-FAIL-CLOSED-001](../behavior/lrp-a4-fail-closed-unsupported-nodes.md)。
 - 警告项用于提示不直接破坏文档语义或合规结果的较低风险保真问题；v1 不设置静默忽略阈值，任一已确认低风险保真问题都必须形成警告。
 - 警告项不会仅因数量自动阻断发布；如果问题影响文档语义、合规结果、签章/盖章、二维码/条码、附件完整性、变量或引用合法性、关键表格可读性或条款编号语义，则应归为阻断项。
 - v1 已确认警告项包括：可选章节、段落或表格因条件/循环为空但已完整隐藏或配置空状态且不影响编号和语义；预览、DOCX 和 PDF 之间存在不影响语义、签章、附件和表格可读性的低风险分页或换行差异；表格跨页但表头、行内容和阅读顺序保持完整且不影响关键金额或条款；使用已批准替代字体/样式或受控格式归一化且不影响语义、页眉页脚或签章区；普通图片为适配容器发生轻微等比缩放且不适用于二维码、条码、签章或盖章。
@@ -555,6 +557,18 @@
 - 分组隔离 fail-closed：跨组 list/get/clone 返回 `403 ACCESS_DENIED`。
 - v1 每个模板同时最多一条进行中 dev 线（与包级 `devVersionId` 一致）。
 
+## 已确认：管理目录服务端分页与筛选（LR-C5 / BDD-LRP-C5-CATALOG-001，2026-07-11）
+
+- 管理端 **Templates / Masters / Content modules** 包列表必须使用服务端分页：`page`（默认 0）+ `size`（默认 **20**，上限 **100**），响应为标准 `PageView`（`content` / `page` / `size` / `totalElements` / `totalPages`）。
+- Masters 与 Content-modules 列表从「全量数组」升级为 `PageView`（管理端一体升级）。
+- 目录工具栏的 search、字段 filter，以及模板 workflow chips，必须驱动服务端查询；禁止以「全量拉取 + 客户端 slice」作为目录主路径。
+- **COR-F09 group-first：** 默认排序为 `groupCode ASC`，次级 `updatedAt DESC`（行分页；允许同组跨页；不按组个数分页）。可选 `sort` 白名单（非法值回退默认）。
+- 筛选字段：三目录均支持 `groupCode`（精确）+ `search`（contains）；Templates 另支持 `lifecycleStatus` 与 `approvalSubState`（审批 chip）；Masters 另支持审核 `status`（`MasterDocumentReviewStatus`）。Content-modules v1 不强制状态 filter。
+- API 契约：`GET /api/management/v1/templates` · `GET /api/management/v1/masters` · `GET /api/management/v1/content-modules` — 见 [openapi-v1.yaml](../api/openapi-v1.yaml) 与 [contract-outline.md](../api/contract-outline.md)「目录列表分页契约（LR-C5）」。
+- 性能：≥500 行跨组种子下，列表请求 **p95 < 1 s**，证据记入执行账本。
+- 行为规格：[LR-C5 catalog pagination](../behavior/lrp-c5-catalog-pagination.md)。
+- **非本切片：** LR-C6 命令面板（可复用 `search`；不另开 palette API）。
+
 ## 已确认：模板级退回原因配置 UX 重构（BDD-TEMPLATE-RISK-PROMPT-UX-001，2026-07-02）
 
 **BDD ID:** `BDD-TEMPLATE-RISK-PROMPT-UX-001`  
@@ -702,6 +716,7 @@
 
 - 已登录但无路由权限时，前端必须阻断进入目标路由并展示统一的无权访问反馈，不返回敏感页面数据。
 - 路由守卫拒绝需要保留 `traceId` 或 `auditId` 关联信息以支撑排查，并记录安全审计摘要。
+- **耐久化（LR-D7）：** 安全审计摘要须持久化为 `management_audit_event`（见 [lrp-d7-durable-security-audit.md](../behavior/lrp-d7-durable-security-audit.md)）；不得仅依赖日志。
 - 禁止路由阻断不改变当前账号权限，不隐式授予降级访问。
 - 在新旧导航并行期间，特性开关关闭时按既有导航规则执行，不将新路由可见性规则错误外溢到旧导航。
 
@@ -824,4 +839,5 @@
 以下议题来自文档一致性、可行性和可用性审查，不作为已确认需求。
 
 - 动态 API 契约已输出正式 OpenAPI Schema 和正式示例，后续需要随契约变更持续维护，详见 [API 文档索引](../api/README.md) 与 [OpenAPI v1](../api/openapi-v1.yaml)。
+- **母版 DOCX 上传病毒 / 恶意软件扫描**（引擎选型、同步 vs 异步、失败策略）— **Pending**（owner: 安全/产品；recorded 2026-07-10 with LR-A3）。LR-A3 仅交付 ZIP magic + OPC 结构探测 + 体积上限，**不**实现杀毒。行为规格：[LR-A3 upload validation](../behavior/lrp-a3-master-docx-upload-validation.md) §13 Q-LR-A3-01。
 

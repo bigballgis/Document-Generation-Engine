@@ -29,13 +29,16 @@ Optional stage **14** = `verifier`.
 
 ## Agents (18)
 
-| Tier | Model | Agents |
-| --- | --- | --- |
-| Governance | `grok-4.5-fast-xhigh` | delivery-orchestrator, plan-orchestrator, architecture-reviewer, code-quality-reviewer (`is_background`), integration-merger, post-task-commit-review |
-| Delivery | `composer-2.5` | behavior-spec-author, doc-keeper, backend-engineer, frontend-engineer, rendering-engineer, e2e-*, post-task-doc-sync |
-| Execution | `composer-2.5-fast` | worktree-router, build-deploy-agent, deploy-engineer (rollback), **verifier** |
+**Canonical model (all specialists):** `grok-4.5-fast-xhigh`  
+Tiers below are **pipeline roles only** — model pin is identical. `inherit` forbidden.
 
-`inherit` is forbidden — `.cursor/agents/MODEL-STRATEGY.md`.
+| Tier | Agents |
+| --- | --- |
+| Governance | delivery-orchestrator, plan-orchestrator, architecture-reviewer, code-quality-reviewer (`is_background`), integration-merger, post-task-commit-review |
+| Delivery | behavior-spec-author, doc-keeper, backend-engineer, frontend-engineer, rendering-engineer, e2e-*, post-task-doc-sync |
+| Execution | worktree-router, build-deploy-agent, deploy-engineer (rollback), **verifier** |
+
+See `.cursor/agents/MODEL-STRATEGY.md`.
 
 ## Built-in (no project file)
 

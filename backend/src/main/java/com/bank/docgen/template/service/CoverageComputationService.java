@@ -5,33 +5,23 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.CoverageDimensionView;
 import com.bank.docgen.template.api.CoverageSummaryView;
 import com.bank.docgen.template.api.CoverageThresholdView;
-import com.bank.docgen.template.domain.BindingValidationStatus;
-import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.persistence.TestDataSetEntity;
 import com.bank.docgen.template.persistence.TestDataSetRepository;
-import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CoverageComputationService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CoverageComputationService.class);
 
     public static final String DIMENSION_REQUIRED_VARIABLES = "REQUIRED_VARIABLES";
     public static final String DIMENSION_REQUIRED_SAMPLES = "REQUIRED_SAMPLES";
@@ -43,13 +33,11 @@ public class CoverageComputationService {
 
     private final TemplateService templateService;
     private final TemplateVersionRepository templateVersionRepository;
-    private final VariableSchemaRepository variableSchemaRepository;
     private final TestDataSetRepository testDataSetRepository;
     private final PreviewEvidencePort previewEvidencePort;
-    private final AnchorBindingRepository anchorBindingRepository;
     private final CoverageThresholdResolver coverageThresholdResolver;
-    private final ObjectMapper objectMapper;
     private final TemplateCurrentVersionResolver templateVersionSupport;
+    private final CoverageDimensionComputeSupport dimensions;
 
     public CoverageComputationService(
             TemplateService templateService,
@@ -64,45 +52,62 @@ public class CoverageComputationService {
     ) {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
-        this.variableSchemaRepository = variableSchemaRepository;
         this.testDataSetRepository = testDataSetRepository;
         this.previewEvidencePort = previewEvidencePort;
-        this.anchorBindingRepository = anchorBindingRepository;
         this.coverageThresholdResolver = coverageThresholdResolver;
-        this.objectMapper = objectMapper;
         this.templateVersionSupport = templateVersionSupport;
+        this.dimensions = new CoverageDimensionComputeSupport(
+                variableSchemaRepository,
+                anchorBindingRepository,
+                objectMapper
+        );
     }
 
     @Transactional(readOnly = true)
     public CoverageSummaryView compute(UUID templateId, ManagementSessionClaims session) {
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
+        return computeForTemplateVersion(template, version);
+    }
+
+    @Transactional(readOnly = true)
+    public CoverageSummaryView computeForVersion(
+            UUID templateId,
+            TemplateVersionEntity version,
+            ManagementSessionClaims session
+    ) {
+        TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
+        return computeForTemplateVersion(template, version);
+    }
+
+    private CoverageSummaryView computeForTemplateVersion(TemplateEntity template, TemplateVersionEntity version) {
+        UUID templateId = template.getId();
         CoverageThresholdView threshold = coverageThresholdResolver.resolveForTemplate(template);
 
         List<TestDataSetEntity> dataSets = testDataSetRepository.findByTemplateIdOrderByUpdatedAtDesc(templateId);
-        Set<String> exercisedVariableKeys = collectExercisedVariableKeys(dataSets);
+        Set<String> exercisedVariableKeys = dimensions.collectExercisedVariableKeys(dataSets);
         Set<String> testedSampleIds = previewEvidencePort.successfulPreviewTestDataSetExternalIds(
                 templateId,
                 version.getId()
         );
 
-        CoverageDimensionView requiredVariables = computeRequiredVariables(
+        CoverageDimensionView requiredVariables = dimensions.computeRequiredVariables(
                 version.getId(),
                 exercisedVariableKeys,
                 threshold.minRequiredVariablePct()
         );
-        CoverageDimensionView requiredSamples = computeRequiredSamples(
+        CoverageDimensionView requiredSamples = dimensions.computeRequiredSamples(
                 dataSets,
                 testedSampleIds,
                 threshold.minRequiredSamplePct()
         );
-        CoverageDimensionView anchorBindings = computeAnchorBindings(
+        CoverageDimensionView anchorBindings = dimensions.computeAnchorBindings(
                 version.getId(),
                 threshold.minAnchorBindingPct()
         );
 
-        List<CoverageDimensionView> dimensions = List.of(requiredVariables, requiredSamples, anchorBindings);
-        int aggregatePercentage = dimensions.stream()
+        List<CoverageDimensionView> dimensionViews = List.of(requiredVariables, requiredSamples, anchorBindings);
+        int aggregatePercentage = dimensionViews.stream()
                 .mapToInt(CoverageDimensionView::percentage)
                 .min()
                 .orElse(100);
@@ -122,100 +127,8 @@ public class CoverageComputationService {
                 aggregatePercentage,
                 !blockerCodes.isEmpty(),
                 blockerCodes,
-                dimensions,
+                dimensionViews,
                 threshold
         );
-    }
-
-    private CoverageDimensionView computeRequiredVariables(
-            UUID versionId,
-            Set<String> exercisedVariableKeys,
-            int thresholdPercentage
-    ) {
-        List<VariableSchemaEntity> requiredVariables = variableSchemaRepository
-                .findByTemplateVersionIdOrderByVariableKeyAsc(versionId)
-                .stream()
-                .filter(VariableSchemaEntity::isRequired)
-                .toList();
-        int total = requiredVariables.size();
-        int exercised = (int) requiredVariables.stream()
-                .filter(variable -> exercisedVariableKeys.contains(variable.getVariableKey()))
-                .count();
-        int percentage = percentage(exercised, total);
-        return new CoverageDimensionView(
-                DIMENSION_REQUIRED_VARIABLES,
-                total,
-                exercised,
-                percentage,
-                thresholdPercentage,
-                total > 0 && percentage < thresholdPercentage
-        );
-    }
-
-    private CoverageDimensionView computeRequiredSamples(
-            List<TestDataSetEntity> dataSets,
-            Set<String> testedSampleIds,
-            int thresholdPercentage
-    ) {
-        List<TestDataSetEntity> requiredSamples = dataSets.stream().filter(TestDataSetEntity::isRequired).toList();
-        int total = requiredSamples.size();
-        int exercised = (int) requiredSamples.stream()
-                .filter(sample -> testedSampleIds.contains(sample.getExternalId()))
-                .count();
-        int percentage = percentage(exercised, total);
-        return new CoverageDimensionView(
-                DIMENSION_REQUIRED_SAMPLES,
-                total,
-                exercised,
-                percentage,
-                thresholdPercentage,
-                total > 0 && percentage < thresholdPercentage
-        );
-    }
-
-    private CoverageDimensionView computeAnchorBindings(UUID versionId, int thresholdPercentage) {
-        List<AnchorBindingEntity> bindings = anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId);
-        int total = bindings.size();
-        int exercised = (int) bindings.stream()
-                .filter(binding -> binding.getValidationStatus() == BindingValidationStatus.VALID)
-                .count();
-        int percentage = percentage(exercised, total);
-        return new CoverageDimensionView(
-                DIMENSION_ANCHOR_BINDINGS,
-                total,
-                exercised,
-                percentage,
-                thresholdPercentage,
-                total > 0 && percentage < thresholdPercentage
-        );
-    }
-
-    private Set<String> collectExercisedVariableKeys(List<TestDataSetEntity> dataSets) {
-        Set<String> keys = new HashSet<>();
-        for (TestDataSetEntity dataSet : dataSets) {
-            keys.addAll(readVariableKeys(dataSet.getVariablesJson()));
-        }
-        return keys;
-    }
-
-    private List<String> readVariableKeys(String variablesJson) {
-        if (variablesJson == null || variablesJson.isBlank()) {
-            return List.of();
-        }
-        try {
-            java.util.Map<String, Object> variables = objectMapper.readValue(variablesJson, new TypeReference<>() {
-            });
-            return new ArrayList<>(variables.keySet());
-        } catch (JsonProcessingException ex) {
-            LOG.debug("Failed to parse test data set variables JSON: {}", ex.getMessage());
-            return List.of();
-        }
-    }
-
-    private int percentage(int exercised, int total) {
-        if (total == 0) {
-            return 100;
-        }
-        return (int) Math.floor((exercised * 100.0) / total);
     }
 }

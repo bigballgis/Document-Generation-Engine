@@ -48,6 +48,37 @@ describe('templates API', () => {
     expect(pageView.content[0]?.externalId).toBe('TPL-RETAIL-LETTER')
   })
 
+  it('forwards approvalSubState with lifecycle filters', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          content: [],
+          page: 0,
+          size: 20,
+          totalElements: 0,
+          totalPages: 0,
+        },
+      },
+    })
+
+    await templatesApi.listTemplates(0, 20, {
+      lifecycleStatus: 'APPROVAL',
+      approvalSubState: 'PENDING_DECISION',
+      sort: 'groupCodeAsc',
+    })
+
+    expect(http.get).toHaveBeenCalledWith('/templates', {
+      params: {
+        page: 0,
+        size: 20,
+        lifecycleStatus: 'APPROVAL',
+        approvalSubState: 'PENDING_DECISION',
+        sort: 'groupCodeAsc',
+      },
+    })
+  })
+
   it('submits template for test', async () => {
     vi.mocked(http.post).mockResolvedValue({
       data: {
@@ -151,6 +182,34 @@ describe('templates API', () => {
       params: { phase: 'SUBMIT_FOR_APPROVAL' },
     })
     expect(checklist.ready).toBe(true)
+  })
+
+  it('fetches release-scoped publish-gate checklist', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          templateId: 'tpl-1',
+          ready: true,
+          blockerCount: 0,
+          items: [
+            {
+              checkCode: 'APPROVAL_SUMMARY',
+              ready: true,
+              blocker: true,
+              messageKey: 'templates.publishGate.checkCodes.APPROVAL_SUMMARY',
+              summary: 'Approval summary',
+            },
+          ],
+        },
+      },
+    })
+
+    const checklist = await templatesApi.fetchReleasePublishGate('tpl-1', '1.0.0')
+
+    expect(http.get).toHaveBeenCalledWith('/templates/tpl-1/releases/1.0.0/publish-gate')
+    expect(checklist.ready).toBe(true)
+    expect(checklist.items).toHaveLength(1)
   })
 
   it('lists template content module references', async () => {
@@ -319,5 +378,92 @@ describe('templates API', () => {
       devVersionNumber: 3,
       lifecycleStatus: 'DRAFT',
     })
+  })
+
+  it('upserts binding with pasteCleaningEvidence and never sends source HTML', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          anchorId: 'body',
+          declaredContentType: 'RICH_TEXT',
+          structuredContentJson: '{"schemaVersion":"1.0","nodes":[]}',
+          validationStatus: 'VALID',
+          pasteCleaningEvidence: {
+            transformedCount: 1,
+            removedCount: 0,
+            warningCount: 0,
+            blockedCount: 0,
+            unresolvedPasteBlockers: false,
+            items: [
+              {
+                category: 'TRANSFORMED',
+                messageKey: 'paste.summary.transformed',
+                detectionSummary: 'Transformed paragraph.',
+              },
+            ],
+          },
+        },
+      },
+    })
+
+    const evidence = {
+      transformedCount: 1,
+      removedCount: 0,
+      warningCount: 0,
+      blockedCount: 0,
+      unresolvedPasteBlockers: false,
+      items: [
+        {
+          category: 'TRANSFORMED' as const,
+          messageKey: 'paste.summary.transformed',
+          detectionSummary: 'Transformed paragraph.',
+        },
+      ],
+    }
+
+    const binding = await templatesApi.upsertBinding('tpl-1', 'body', {
+      anchorId: 'body',
+      declaredContentType: 'RICH_TEXT',
+      structuredContentJson: '{"schemaVersion":"1.0","nodes":[]}',
+      pasteCleaningEvidence: evidence,
+    })
+
+    expect(http.put).toHaveBeenCalledWith(
+      '/templates/tpl-1/bindings/body',
+      expect.objectContaining({
+        pasteCleaningEvidence: evidence,
+      }),
+    )
+    expect(JSON.stringify(vi.mocked(http.put).mock.calls[0]?.[1])).not.toMatch(/sourceHtml/i)
+    expect(binding.pasteCleaningEvidence?.blockedCount).toBe(0)
+  })
+
+  it('upserts binding with clearPasteCleaningEvidence to clear residue', async () => {
+    vi.mocked(http.put).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: {
+          anchorId: 'body',
+          declaredContentType: 'TEXT',
+          structuredContentJson: '{"schemaVersion":"1.0","nodes":[]}',
+          validationStatus: 'VALID',
+        },
+      },
+    })
+
+    await templatesApi.upsertBinding('tpl-1', 'body', {
+      anchorId: 'body',
+      declaredContentType: 'TEXT',
+      structuredContentJson: '{"schemaVersion":"1.0","nodes":[]}',
+      clearPasteCleaningEvidence: true,
+    })
+
+    expect(http.put).toHaveBeenCalledWith(
+      '/templates/tpl-1/bindings/body',
+      expect.objectContaining({
+        clearPasteCleaningEvidence: true,
+      }),
+    )
   })
 })

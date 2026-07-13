@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/management/v1/api-access")
+@RequestMapping({
+        "/api/management/v1/api-access",
+        "/api/management/v1/api-policies"
+})
 public class ApiAccessController {
 
     private final ApiAccessAlertQueryService apiAccessAlertQueryService;

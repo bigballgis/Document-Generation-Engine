@@ -2,7 +2,7 @@
 
 **Program ID:** `CDP`  
 **Created:** 2026-07-04  
-**Status:** **In Progress** (Wave CD-0 non-code)  
+**Status:** **In Progress** (Wave **CD-2 Done** 2026-07-11 — T01/T01b + T02–T13; merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825` / `f12b193` / `b2b0899`; CD-0 **Done**; CD-3 **Not Started** — recommend only, do not auto-activate)  
 **North star:** Close the gap between **「功能齐全」** and **「银行敢用、业务愿用、集成方信得过」** by making rendering fidelity, verifiable publish, role-complete journeys, and documentation truth **provably solid** before production launch.
 
 **Authoritative entry for lower-tier implementers:** Read this file first, then the wave detail doc for your task ID prefix.
@@ -12,8 +12,8 @@
 | [detail/CDP-doc-truth-reconciliation.md](./detail/CDP-doc-truth-reconciliation.md) | Wave CD-DOC — documentation drift fixes |
 | [detail/CDP-e2e-full-chain-evidence.md](./detail/CDP-e2e-full-chain-evidence.md) | Wave CD-E2E — browser golden paths + UIUX evidence |
 | [detail/CDP-industry-pitfall-registry.md](./detail/CDP-industry-pitfall-registry.md) | Wave CD-PIT — industry pitfalls → ADR/NFR/test mitigations |
-| [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **External session** — formal phase P22 rendering + eight demos (do not execute here) |
-| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — production hardening + usability deepening; do not execute `LR-*` from CDP session |
+| [detail/P22-demo-expansion-rendering-fidelity.md](./detail/P22-demo-expansion-rendering-fidelity.md) | **Done** (2026-07-04) — rendering engine + demos (do not reopen from CDP) |
+| [launch-readiness-program.md](./launch-readiness-program.md) | **Sibling program (LRP)** — **Wave LR-A Done** (2026-07-10; A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred); do not execute `LR-*` from CDP session |
 | [comprehensive-optimization-roadmap.md](./comprehensive-optimization-roadmap.md) | Historical COR/OPT waves (mostly Done) |
 
 ---
@@ -22,10 +22,11 @@
 
 | Work stream | Where it runs | This CDP session owns |
 | --- | --- | --- |
-| **P22** (P22-T01…T15, rendering + demos) | **Another session** — track via [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) + `execution-sync-ledger.md` | **Nothing.** Do not start P22 tasks from CDP docs unless user explicitly moves session. |
-| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD after P22) | **This session** | CD-0 → CD-2 → CD-3 (see §2). |
+| **P22** (P22-T01…T15, rendering + demos) | **Done** (2026-07-04) — track via [P22 detail](./detail/P22-demo-expansion-rendering-fidelity.md) | **Nothing.** Do not reopen P22 from CDP. |
+| **LRP** (`LR-*`, Wave LR-A) | **Wave LR-A Done** (2026-07-10 — A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed) | **Nothing.** Do not execute `LR-*` / virus scan / audit-governance from CDP session. |
+| **CDP** (doc truth, BDD, E2E, pitfall specs, CD-HARD) | **Sibling program** — Wave **CD-2 Done** (T01–T13); CD-3 Not Started | CD-0 **Done** → CD-2 **Done** → CD-3 later (recommend only). |
 
-**Formal phase note:** `master-plan.md` may still show **P22 In Progress** for repo-wide phase accounting. That does **not** mean every agent/session should execute P22. **CDP implementers follow task IDs prefixed `CD-*` only.**
+**Formal phase note:** `master-plan.md` has formal phase **None** (2026-07-09+). CDP Wave **CD-2** is **Done** (2026-07-11). No CDP wave currently `In Progress`. **CDP implementers follow task IDs prefixed `CD-*` only.**
 
 
 ## 0. Executive summary
@@ -68,7 +69,7 @@
                  doc truth, BDD, browser E2E, post-P22 hardening specs
 ```
 
-**Repo phase accounting:** `master-plan.md` may list P22 as the sole formal phase `In Progress`. CDP is a **parallel program** — not a phase replacement and not a mandate to run P22 in every session.
+**Repo phase accounting:** `master-plan.md` formal phase is **None** (2026-07-09+). **Wave LR-A Done** (2026-07-10; A1–A7; merge `cc9e5f6`; **ADR-0041 Accepted**; 0042/0043 Proposed; Word/XSD/LO24 deferred). CDP Wave **CD-2 Done** (2026-07-11; T01–T13; merges `1930842` / `6821f45` / `895f16e` / `3aed175` / `c62b1a1` / `1eb230b` / `55a6ab6` / `b16e52a` / `6e3f825` / `f12b193` / `b2b0899`). LRP program remains **In Progress** (**LR-C11 Done** 2026-07-11 — merge `44fcf40`; **no sole-active** LRP slice; **LR-C10 Done** 2026-07-11 — merge `bdaf95d`; **LR-C9 Done** 2026-07-10 — merge `0013615`; Wave LR-C partial; Wave LR-A Done — Word/XSD residuals deferred separately). CDP is a **parallel program** — not a phase replacement.
 
 ---
 
@@ -93,13 +94,13 @@ Only **one CDP wave** may be `In Progress` at a time (same discipline as phase p
 | Wave | Name | Type | Depends on | Exit gate | Session |
 | --- | --- | --- | --- | --- | --- |
 | **CD-0** | Doc truth + pitfall specs + E2E BDD drafts | **Non-code** | — | CD-DOC batch Done; pitfall ADR drafts ready; CD-BDD specs `ready` | **This** |
-| **CD-2** | Full-chain E2E + UIUX evidence | Test + frontend | CD-0 BDD `ready` | CD-E2E-T01…T12 Done; manifests PASS | **This** |
+| **CD-2** | Full-chain E2E + UIUX evidence | Test + frontend | CD-0 BDD `ready` | CD-E2E-T01…T13 Done; manifests PASS | **This** |
 | **CD-3** | Production pitfall hardening | Code + infra | P22 Done (external) | CD-HARD-T01…T06; NFR §production rendering | **This** (after P22) |
 | *(P22)* | *(Rendering + demos)* | *(Code)* | *(P22 plan)* | *(P22 phase Done)* | ***Other session*** |
 
 **Removed from CDP:** former «CD-1 = P22 code» — that work is **only** in the P22 session, not delegated via CDP task IDs.
 
-**Current wave (this session):** **CD-0** — **CD-DOC Done** (2026-07-04); **CD-BDD-T01…T08 `ready`**; CD-UX-T01/T03/T17 Done; CD-UX-T04 pending ADR.
+**Current wave (this session):** **CD-2** — **Done** (2026-07-11). **CD-0 Done**. **CD-E2E-T01** + **T01b** → **Done** (merge `1930842`). **CD-E2E-T02** + **T03** + **T04** → **Done** (slice `cdp-e2e-cd2-t02`; merge `6821f45`). **CD-E2E-T05 → Done** (slice `cdp-e2e-t05-publish`; merge `895f16e`). **CD-E2E-T06 → Done** (slice `cdp-e2e-t06-master`; merge `3aed175`). **CD-E2E-T08 → Done** (slice `cdp-e2e-t08-preview`; merge `c62b1a1`). **CD-E2E-T07 → Done** (slice `cdp-e2e-t07-api-policy`; merge `1eb230b`). **CD-E2E-T09 → Done** (slice `cdp-e2e-t09-compare`; merge `55a6ab6`; BDD-CDP-CMP-001). **CD-E2E-T10 → Done** (slice `cdp-e2e-t10-fidelity`; merge `b16e52a`; BDD-CDP-FID-001…004). **CD-E2E-T11 → Done** (slice `cdp-e2e-t11-audit`; merge `6e3f825`; Audit admin query/filter + export; BDD-CDP-AUDIT-001/002). **CD-E2E-T12 → Done** (slice `cdp-e2e-t12-i18n-brands`; merge `f12b193`; zh-CN + dual-brand golden screenshots; BDD-CDP-I18N-001/002). **CD-E2E-T13 → Done** (slice `cdp-e2e-t13-materialize`; merge `b2b0899`; package materialize re-evidence + wave closeout). **No sole-active CDP E2E slice.** Sibling LRP: **LR-C10 Done** (merge `bdaf95d`). Recommend next: **LR-C11** or **LR-C12** or **CD-3** — do **not** auto-activate any.
 
 ---
 
@@ -207,14 +208,14 @@ Each task pairs: `*.spec.ts` + `evidence/*-uiux-manifest.md` + `e2e-uiux-reviewe
 
 ## 6. Wave CD-3 — Production hardening (post-P22)
 
-| ID | Task | Owner | Maps |
-| --- | --- | --- | --- |
-| CD-HARD-T01 | Font bundle in Docker image + CI smoke | deploy-engineer | CD-PIT-01 |
-| CD-HARD-T02 | LibreOffice conversion pool (async) | backend-engineer | CD-PIT-06, OPT-F6 |
-| CD-HARD-T03 | OOXML output validation test (LO 24 open) | backend-engineer | CD-PIT-03 |
-| CD-HARD-T04 | Pagination delta budget doc + sample corpus | doc-keeper | CD-PIT-02 |
-| CD-HARD-T05 | Paste cleaning wired to binding validation OR ADR «edit-time only» | backend-engineer | P18-T07 seam |
-| CD-HARD-T06 | List audit/export E2E | e2e-test-engineer | CD-BDD-T08 |
+| ID | Task | Owner | Maps | Status |
+| --- | --- | --- | --- | --- |
+| CD-HARD-T01 | Font bundle in Docker image + CI smoke | deploy-engineer | CD-PIT-01 | **Done** (executed-by-LR-A2 / P23-T02) |
+| CD-HARD-T02 | LibreOffice conversion pool (async) | backend-engineer | CD-PIT-06, OPT-F6 | Done (OPT-F6 / COR-P02 lineage) |
+| CD-HARD-T03 | OOXML output validation test (LO 24 open) | backend-engineer | CD-PIT-03 | **Done** (2026-07-10 — executed-by-LR-A6; merge `122d6d1`; `OoxmlOutputValidator` fail-closed; LO24 / ECMA-376 XSD deferred; ADR-0043 remains Proposed) |
+| CD-HARD-T04 | Pagination delta budget doc + sample corpus | doc-keeper | CD-PIT-02 | **Done** (2026-07-10 — executed-by-LR-A7; Docker PDF corpus ≥5 + FOL; Word/delta n/a — `ms-word-unavailable-on-host`; ADR-0042 remains Proposed) |
+| CD-HARD-T05 | Paste cleaning **wired** to binding / publish fail-closed (edit-time-only ADR escape **rejected**) | backend-engineer | P18-T07 seam; checklist #5b; [ops-paste-binding-seam.md](../behavior/ops-paste-binding-seam.md) | **Done** (2026-07-12) — Task Master **#47** / `ops-paste-binding-seam`; merge `f1f00da`; checklist #5b → **GO**; wire path (ADR-0019 residue + PublishGate); do **not** activate CD-3 wave |
+| CD-HARD-T06 | List audit/export E2E | e2e-test-engineer | CD-BDD-T08 | Not Started |
 
 ---
 
@@ -260,9 +261,11 @@ Mark CD-0 **Done** only when ALL true:
 - [x] CD-UX-T01/T03 merged into usability-review; T04 pending
 - [x] `docs/README.md` indexes CDP + behavior specs
 - [x] `execution-sync-ledger.md` CDP section added
-- [ ] Proposed ADR drafts 0041–0043 (CD-PIT §4) — optional before CD-0 close
+- [x] Proposed ADR drafts 0041–0043 (CD-PIT §4) — **optional**; deferred / non-blocking (0041 deferred; 0042/0043 Proposed under LRP-A5)
 
-**Next wave (this session):** **CD-2** — `e2e-test-engineer` implements CD-E2E-T01 from [mvp-golden-path-browser.md](../behavior/mvp-golden-path-browser.md).
+**CD-0 status:** **Done** (2026-07-10) — required checklist met; optional ADR drafts do not block wave close.
+
+**Next wave (this session):** **CD-2 Done** (2026-07-11) — **T01/T01b Done** (merge `1930842`); **T02/T03/T04 Done** (2026-07-10; merge `6821f45`); **T05 Done** (2026-07-10; merge `895f16e`); **T06 Done** (2026-07-10; merge `3aed175`); **T08 Done** (2026-07-10; merge `c62b1a1`); **T07 Done** (2026-07-11; merge `1eb230b`); **T09 Done** (2026-07-11; merge `55a6ab6`); **T10 Done** (2026-07-11; merge `b16e52a`); **T11 Done** (2026-07-11; merge `6e3f825`); **T12 Done** (2026-07-11; merge `f12b193`); **T13 Done** (2026-07-11; merge `b2b0899`). Sibling LRP: **LR-C11 Done** (2026-07-11; merge `44fcf40`; **no sole-active**). Recommend next: **LR-C12** or **CD-3** or pause (do **not** auto-activate).
 
 ---
 
@@ -270,7 +273,7 @@ Mark CD-0 **Done** only when ALL true:
 
 | Metric | Baseline (2026-07-04) | CDP target | P22 session (external) |
 | --- | --- | --- | --- |
-| Browser MVP golden path E2E | **None** (API hybrid) | 1 spec green on Docker 4173 | — |
+| Browser MVP golden path E2E | **None** (API hybrid) | **Met** — `CDP-E2E-T01` Docker **1/1** PASS (2026-07-10) | — |
 | Structured node DOCX fidelity | Plain-text downgrade | Doc + pitfall specs Done | 8 demos, 0 false fallback |
 | Playwright skipped scenarios (T13) | 3 skipped | 0 skipped OR documented fixtures (CD-2) | — |
 | Doc status contradictions | ≥6 critical | 0 | — |
@@ -291,4 +294,4 @@ Mark CD-0 **Done** only when ALL true:
 
 ---
 
-**Next action (this session):** Execute **CD-DOC-T07…T20**, then **CD-BDD-T02…T08**, then **CD-E2E-T01** after BDD ready. **Do not** start P22-T01 here.
+**Next action (this session):** **Wave CD-2 → Done** (2026-07-11; T01–T13; merge tip `b2b0899`). **CD-HARD-T05 → Done** under Task Master **#47** / slice `ops-paste-binding-seam` (merge `f1f00da`; wire path; checklist #5b → **GO**; **not** CD-3 wave activation). Formal phase remains **None**. **no sole-active**. Do **not** auto-activate CD-3.

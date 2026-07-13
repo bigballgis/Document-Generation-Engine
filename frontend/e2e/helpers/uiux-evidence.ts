@@ -25,11 +25,11 @@ export const P21_T01A_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-
 export const P21_T01A_SCREENSHOT_DIR = path.join(P21_T01A_EVIDENCE_ROOT, 'screenshots')
 
 export const P14_T01_VIEWPORT = { width: 1440, height: 900 } as const
-export const P14_T02_VIEWPORT = P14_T01_VIEWPORT
-export const P14_T03_VIEWPORT = P14_T01_VIEWPORT
-export const P18_T10_VIEWPORT = P14_T01_VIEWPORT
-export const P21_T01_VIEWPORT = P14_T01_VIEWPORT
-export const P21_T01A_VIEWPORT = P14_T01_VIEWPORT
+export const P14_T02_VIEWPORT = { width: 1440, height: 900 } as const
+export const P14_T03_VIEWPORT = { width: 1440, height: 900 } as const
+export const P18_T10_VIEWPORT = { width: 1440, height: 900 } as const
+export const P21_T01_VIEWPORT = { width: 1440, height: 900 } as const
+export const P21_T01A_VIEWPORT = { width: 1440, height: 900 } as const
 
 export type BrandPreset = 'REDBC' | 'GREENBC'
 
@@ -98,9 +98,10 @@ export async function captureP14LocatorScreenshot(
   return filename
 }
 
+/** Brand switcher option labels are localized (en + zh-CN). */
 const BRAND_OPTION_NAME: Record<BrandPreset, RegExp> = {
-  REDBC: /^red bank$/i,
-  GREENBC: /^green bank$/i,
+  REDBC: /^(red bank|红色银行)$/i,
+  GREENBC: /^(green bank|绿色银行)$/i,
 }
 
 export async function switchBrand(page: Page, brand: BrandPreset): Promise<void> {
@@ -201,7 +202,7 @@ export async function captureP21T01aLocatorScreenshot(
 
 export const P21_T01B_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T01b')
 export const P21_T01B_SCREENSHOT_DIR = path.join(P21_T01B_EVIDENCE_ROOT, 'screenshots')
-export const P21_T01B_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T01B_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T01bEvidenceDirs(): void {
   fs.mkdirSync(P21_T01B_SCREENSHOT_DIR, { recursive: true })
@@ -230,7 +231,7 @@ export async function captureP21T01bLocatorScreenshot(
 
 export const P21_T03_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T03')
 export const P21_T03_SCREENSHOT_DIR = path.join(P21_T03_EVIDENCE_ROOT, 'screenshots')
-export const P21_T03_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T03_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T03EvidenceDirs(): void {
   fs.mkdirSync(P21_T03_SCREENSHOT_DIR, { recursive: true })
@@ -248,7 +249,7 @@ export async function captureP21T03LocatorScreenshot(
 
 export const P21_T04_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T04')
 export const P21_T04_SCREENSHOT_DIR = path.join(P21_T04_EVIDENCE_ROOT, 'screenshots')
-export const P21_T04_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T04_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T04EvidenceDirs(): void {
   fs.mkdirSync(P21_T04_SCREENSHOT_DIR, { recursive: true })
@@ -266,7 +267,7 @@ export async function captureP21T04LocatorScreenshot(
 
 export const P21_T05_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T05')
 export const P21_T05_SCREENSHOT_DIR = path.join(P21_T05_EVIDENCE_ROOT, 'screenshots')
-export const P21_T05_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T05_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T05EvidenceDirs(): void {
   fs.mkdirSync(P21_T05_SCREENSHOT_DIR, { recursive: true })
@@ -284,7 +285,7 @@ export async function captureP21T05LocatorScreenshot(
 
 export const P21_T08_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T08')
 export const P21_T08_SCREENSHOT_DIR = path.join(P21_T08_EVIDENCE_ROOT, 'screenshots')
-export const P21_T08_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T08_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T08EvidenceDirs(): void {
   fs.mkdirSync(P21_T08_SCREENSHOT_DIR, { recursive: true })
@@ -302,7 +303,7 @@ export async function captureP21T08LocatorScreenshot(
 
 export const P21_T09_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P21-T09')
 export const P21_T09_SCREENSHOT_DIR = path.join(P21_T09_EVIDENCE_ROOT, 'screenshots')
-export const P21_T09_VIEWPORT = P14_T01_VIEWPORT
+export const P21_T09_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP21T09EvidenceDirs(): void {
   fs.mkdirSync(P21_T09_SCREENSHOT_DIR, { recursive: true })
@@ -320,7 +321,7 @@ export async function captureP21T09LocatorScreenshot(
 
 export const P12_AUD_B10_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P12-AUD-B10')
 export const P12_AUD_B10_SCREENSHOT_DIR = path.join(P12_AUD_B10_EVIDENCE_ROOT, 'screenshots')
-export const P12_AUD_B10_VIEWPORT = P14_T01_VIEWPORT
+export const P12_AUD_B10_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP12AudB10EvidenceDirs(): void {
   fs.mkdirSync(P12_AUD_B10_SCREENSHOT_DIR, { recursive: true })
@@ -357,7 +358,7 @@ export const P12_RISK_PROMPT_UX_SCREENSHOT_DIR = path.join(
   P12_RISK_PROMPT_UX_EVIDENCE_ROOT,
   'screenshots',
 )
-export const P12_RISK_PROMPT_UX_VIEWPORT = P14_T01_VIEWPORT
+export const P12_RISK_PROMPT_UX_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP12RiskPromptUxEvidenceDirs(): void {
   fs.mkdirSync(P12_RISK_PROMPT_UX_SCREENSHOT_DIR, { recursive: true })
@@ -389,7 +390,7 @@ export async function captureP12RiskPromptUxLocatorScreenshot(
 
 export const P2_T06_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'P2-T06')
 export const P2_T06_SCREENSHOT_DIR = path.join(P2_T06_EVIDENCE_ROOT, 'screenshots')
-export const P2_T06_VIEWPORT = P14_T01_VIEWPORT
+export const P2_T06_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP2T06EvidenceDirs(): void {
   fs.mkdirSync(P2_T06_SCREENSHOT_DIR, { recursive: true })
@@ -422,7 +423,7 @@ export async function switchLocale(page: Page, locale: AppLocale): Promise<void>
 
 export const DEMO_FULL_FLOW_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'demo-full-lifecycle')
 export const DEMO_FULL_FLOW_SCREENSHOT_DIR = path.join(DEMO_FULL_FLOW_EVIDENCE_ROOT, 'screenshots')
-export const DEMO_FULL_FLOW_VIEWPORT = P14_T01_VIEWPORT
+export const DEMO_FULL_FLOW_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureDemoFullFlowEvidenceDirs(): void {
   fs.mkdirSync(DEMO_FULL_FLOW_SCREENSHOT_DIR, { recursive: true })
@@ -455,7 +456,7 @@ export const P12_TEMPLATE_TESTING_OVERHAUL_SCREENSHOT_DIR = path.join(
   P12_TEMPLATE_TESTING_OVERHAUL_EVIDENCE_ROOT,
   'screenshots',
 )
-export const P12_TEMPLATE_TESTING_OVERHAUL_VIEWPORT = P14_T01_VIEWPORT
+export const P12_TEMPLATE_TESTING_OVERHAUL_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP12TemplateTestingOverhaulEvidenceDirs(): void {
   fs.mkdirSync(P12_TEMPLATE_TESTING_OVERHAUL_SCREENSHOT_DIR, { recursive: true })
@@ -487,7 +488,7 @@ export async function captureP12TemplateTestingOverhaulLocatorScreenshot(
 
 export const LRP_B6_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-B6')
 export const LRP_B6_SCREENSHOT_DIR = path.join(LRP_B6_EVIDENCE_ROOT, 'screenshots')
-export const LRP_B6_VIEWPORT = P14_T01_VIEWPORT
+export const LRP_B6_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureLrpB6EvidenceDirs(): void {
   fs.mkdirSync(LRP_B6_SCREENSHOT_DIR, { recursive: true })
@@ -524,7 +525,7 @@ export const P12_API_PACKAGE_ACCESS_SCREENSHOT_DIR = path.join(
   P12_API_PACKAGE_ACCESS_EVIDENCE_ROOT,
   'screenshots',
 )
-export const P12_API_PACKAGE_ACCESS_VIEWPORT = P14_T01_VIEWPORT
+export const P12_API_PACKAGE_ACCESS_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP12ApiPackageAccessEvidenceDirs(): void {
   fs.mkdirSync(P12_API_PACKAGE_ACCESS_SCREENSHOT_DIR, { recursive: true })
@@ -564,7 +565,7 @@ export const P13_EXTERNAL_SERVICES_SCREENSHOT_DIR = path.join(
   P13_EXTERNAL_SERVICES_EVIDENCE_ROOT,
   'screenshots',
 )
-export const P13_EXTERNAL_SERVICES_VIEWPORT = P14_T01_VIEWPORT
+export const P13_EXTERNAL_SERVICES_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureP13ExternalServicesEvidenceDirs(): void {
   fs.mkdirSync(P13_EXTERNAL_SERVICES_SCREENSHOT_DIR, { recursive: true })
@@ -604,7 +605,7 @@ export const UX_ENTITY_DISPLAY_SCREENSHOT_DIR = path.join(
   UX_ENTITY_DISPLAY_EVIDENCE_ROOT,
   'screenshots',
 )
-export const UX_ENTITY_DISPLAY_VIEWPORT = P14_T01_VIEWPORT
+export const UX_ENTITY_DISPLAY_VIEWPORT = { width: 1440, height: 900 } as const
 
 export function ensureUxEntityDisplayEvidenceDirs(): void {
   fs.mkdirSync(UX_ENTITY_DISPLAY_SCREENSHOT_DIR, { recursive: true })
@@ -634,9 +635,125 @@ export async function captureUxEntityDisplayLocatorScreenshot(
   return filename
 }
 
+export const CDP_E2E_T01_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CDP-E2E-T01')
+export const CDP_E2E_T01_SCREENSHOT_DIR = path.join(CDP_E2E_T01_EVIDENCE_ROOT, 'screenshots')
+export const CDP_E2E_T01_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensureCdpE2eT01EvidenceDirs(): void {
+  fs.mkdirSync(CDP_E2E_T01_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function cdpE2eT01ScreenshotPath(filename: string): string {
+  return path.join(CDP_E2E_T01_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCdpE2eT01Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCdpE2eT01EvidenceDirs()
+  const target = cdpE2eT01ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCdpE2eT01LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCdpE2eT01EvidenceDirs()
+  const target = cdpE2eT01ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+/** Shared 1920×1080 viewport for CDP CD-2 decision/publish UIUX evidence (T02–T05). */
+export const CDP_E2E_CD2_DECISION_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export type CdpE2eCd2DecisionTaskId =
+  | 'CDP-E2E-T02'
+  | 'CDP-E2E-T03'
+  | 'CDP-E2E-T04'
+  | 'CDP-E2E-T05'
+  | 'CDP-E2E-T06'
+  | 'CDP-E2E-T07'
+  | 'CDP-E2E-T08'
+  | 'CDP-E2E-T09'
+  | 'CDP-E2E-T10'
+  | 'CDP-E2E-T11'
+  | 'CDP-E2E-T12'
+  | 'CDP-E2E-T13'
+
+function cdpE2eDecisionEvidenceRoot(taskId: CdpE2eCd2DecisionTaskId): string {
+  return path.join(E2E_DIR, '..', 'evidence', taskId)
+}
+
+function cdpE2eDecisionScreenshotDir(taskId: CdpE2eCd2DecisionTaskId): string {
+  return path.join(cdpE2eDecisionEvidenceRoot(taskId), 'screenshots')
+}
+
+export function ensureCdpE2eDecisionEvidenceDirs(taskId: CdpE2eCd2DecisionTaskId): void {
+  fs.mkdirSync(cdpE2eDecisionScreenshotDir(taskId), { recursive: true })
+}
+
+export function cdpE2eDecisionScreenshotPath(
+  taskId: CdpE2eCd2DecisionTaskId,
+  filename: string,
+): string {
+  return path.join(cdpE2eDecisionScreenshotDir(taskId), filename)
+}
+
+export async function captureCdpE2eDecisionScreenshot(
+  page: Page,
+  taskId: CdpE2eCd2DecisionTaskId,
+  filename: string,
+): Promise<string> {
+  ensureCdpE2eDecisionEvidenceDirs(taskId)
+  const target = cdpE2eDecisionScreenshotPath(taskId, filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCdpE2eDecisionLocatorScreenshot(
+  locator: Locator,
+  taskId: CdpE2eCd2DecisionTaskId,
+  filename: string,
+): Promise<string> {
+  ensureCdpE2eDecisionEvidenceDirs(taskId)
+  const target = cdpE2eDecisionScreenshotPath(taskId, filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export const LRP_C9_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C9')
+export const LRP_C9_SCREENSHOT_DIR = path.join(LRP_C9_EVIDENCE_ROOT, 'screenshots')
+export const LRP_C9_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureLrpC9EvidenceDirs(): void {
+  fs.mkdirSync(LRP_C9_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function lrpC9ScreenshotPath(filename: string): string {
+  return path.join(LRP_C9_SCREENSHOT_DIR, filename)
+}
+
+export async function captureLrpC9Screenshot(page: Page, filename: string): Promise<string> {
+  ensureLrpC9EvidenceDirs()
+  const target = lrpC9ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureLrpC9LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureLrpC9EvidenceDirs()
+  const target = lrpC9ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
 export const F7_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'F7')
 export const F7_SCREENSHOT_DIR = path.join(F7_EVIDENCE_ROOT, 'screenshots')
-export const F7_VIEWPORT = P14_T01_VIEWPORT
+export const F7_VIEWPORT = { width: 1440, height: 900 } as const
 export const F7_NARROW_VIEWPORT = { width: 375, height: 812 } as const
 
 export function ensureF7EvidenceDirs(): void {
@@ -660,6 +777,180 @@ export async function captureF7LocatorScreenshot(
 ): Promise<string> {
   ensureF7EvidenceDirs()
   const target = f7ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export const LRP_C2_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C2')
+export const LRP_C2_SCREENSHOT_DIR = path.join(LRP_C2_EVIDENCE_ROOT, 'screenshots')
+export const LRP_C2_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureLrpC2EvidenceDirs(): void {
+  fs.mkdirSync(LRP_C2_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function lrpC2ScreenshotPath(filename: string): string {
+  return path.join(LRP_C2_SCREENSHOT_DIR, filename)
+}
+
+export async function captureLrpC2Screenshot(page: Page, filename: string): Promise<string> {
+  ensureLrpC2EvidenceDirs()
+  const target = lrpC2ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureLrpC2LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureLrpC2EvidenceDirs()
+  const target = lrpC2ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export const LRP_C3_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C3')
+export const LRP_C3_SCREENSHOT_DIR = path.join(LRP_C3_EVIDENCE_ROOT, 'screenshots')
+export const LRP_C3_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureLrpC3EvidenceDirs(): void {
+  fs.mkdirSync(LRP_C3_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function lrpC3ScreenshotPath(filename: string): string {
+  return path.join(LRP_C3_SCREENSHOT_DIR, filename)
+}
+
+export async function captureLrpC3Screenshot(page: Page, filename: string): Promise<string> {
+  ensureLrpC3EvidenceDirs()
+  const target = lrpC3ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureLrpC3LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureLrpC3EvidenceDirs()
+  const target = lrpC3ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export const LRP_C5_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C5')
+export const LRP_C5_SCREENSHOT_DIR = path.join(LRP_C5_EVIDENCE_ROOT, 'screenshots')
+export const LRP_C5_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureLrpC5EvidenceDirs(): void {
+  fs.mkdirSync(LRP_C5_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function lrpC5ScreenshotPath(filename: string): string {
+  return path.join(LRP_C5_SCREENSHOT_DIR, filename)
+}
+
+export async function captureLrpC5Screenshot(page: Page, filename: string): Promise<string> {
+  ensureLrpC5EvidenceDirs()
+  const target = lrpC5ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureLrpC5LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureLrpC5EvidenceDirs()
+  const target = lrpC5ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export const LRP_C6_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C6')
+export const LRP_C6_SCREENSHOT_DIR = path.join(LRP_C6_EVIDENCE_ROOT, 'screenshots')
+export const LRP_C6_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureLrpC6EvidenceDirs(): void {
+  fs.mkdirSync(LRP_C6_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function lrpC6ScreenshotPath(filename: string): string {
+  return path.join(LRP_C6_SCREENSHOT_DIR, filename)
+}
+
+export async function captureLrpC6Screenshot(page: Page, filename: string): Promise<string> {
+  ensureLrpC6EvidenceDirs()
+  const target = lrpC6ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureLrpC6LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureLrpC6EvidenceDirs()
+  const target = lrpC6ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export const LRP_C7_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C7')
+export const LRP_C7_SCREENSHOT_DIR = path.join(LRP_C7_EVIDENCE_ROOT, 'screenshots')
+export const LRP_C7_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureLrpC7EvidenceDirs(): void {
+  fs.mkdirSync(LRP_C7_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function lrpC7ScreenshotPath(filename: string): string {
+  return path.join(LRP_C7_SCREENSHOT_DIR, filename)
+}
+
+export async function captureLrpC7Screenshot(page: Page, filename: string): Promise<string> {
+  ensureLrpC7EvidenceDirs()
+  const target = lrpC7ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureLrpC7LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureLrpC7EvidenceDirs()
+  const target = lrpC7ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
+
+export const LRP_C8_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'LRP-C8')
+export const LRP_C8_SCREENSHOT_DIR = path.join(LRP_C8_EVIDENCE_ROOT, 'screenshots')
+export const LRP_C8_VIEWPORT = { width: 1440, height: 900 } as const
+
+export function ensureLrpC8EvidenceDirs(): void {
+  fs.mkdirSync(LRP_C8_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function lrpC8ScreenshotPath(filename: string): string {
+  return path.join(LRP_C8_SCREENSHOT_DIR, filename)
+}
+
+export async function captureLrpC8Screenshot(page: Page, filename: string): Promise<string> {
+  ensureLrpC8EvidenceDirs()
+  const target = lrpC8ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureLrpC8LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureLrpC8EvidenceDirs()
+  const target = lrpC8ScreenshotPath(filename)
   await locator.screenshot({ path: target })
   return filename
 }

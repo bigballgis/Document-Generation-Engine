@@ -201,4 +201,20 @@ describe('apiPolicy store', () => {
     expect(store.alerts).toHaveLength(1)
     expect(store.loadingAlerts).toBe(false)
   })
+
+  it('fetchAlerts records retryable flag from envelope', async () => {
+    vi.mocked(apiPolicyApi.fetchAlerts).mockRejectedValue(
+      axiosEnvelopeError(500, 'apiPolicy.home.alerts.loadFailed', {
+        code: 'INTERNAL_ERROR',
+        category: 'SYSTEM',
+        retryable: true,
+        message: 'Unable to load external access alerts.',
+      }),
+    )
+    const store = useApiPolicyStore()
+
+    await expect(store.fetchAlerts()).rejects.toBeTruthy()
+    expect(store.alertsErrorMessageKey).toBe('apiPolicy.home.alerts.loadFailed')
+    expect(store.alertsErrorRetryable).toBe(true)
+  })
 })

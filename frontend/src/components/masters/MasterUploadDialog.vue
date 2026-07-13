@@ -1,117 +1,47 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { toRef } from 'vue'
+import { UploadFilled } from '@element-plus/icons-vue'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
-import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
+import { useMasterUploadDialog } from '@/components/masters/useMasterUploadDialog'
+import { MASTER_DOCX_MAX_UPLOAD_MB } from '@/utils/validateMasterDocxUpload'
 
 const props = defineProps<{
   modelValue: boolean
+  loading?: boolean
+  uploadProgress?: number | null
+  serverErrorKey?: string | null
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   submit: [payload: { groupCode: string; name: string; description: string; file: File }]
+  'clear-server-error': []
 }>()
 
-const { t } = useI18n()
-const { resolveDefaultGroupCode, ensureGroupCatalog } = useScopedGroupOptions()
-
-// LR-A3: client-side file size + type guard mirroring the backend limit (50MB) and the
-// nginx client_max_body_size. Rejects oversized/masquerading files before upload starts.
-const MAX_UPLOAD_BYTES = 50 * 1024 * 1024
-const DOCX_CONTENT_TYPES = new Set([
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/octet-stream',
-])
-
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value: boolean) => emit('update:modelValue', value),
+const {
+  t,
+  visible,
+  form,
+  fileList,
+  inlineErrorKey,
+  inlineErrorText,
+  progressPercent,
+  progressIndeterminate,
+  canSubmit,
+  onFileChange,
+  onFileRemove,
+  resetForm,
+  closeDialog,
+  submitUpload,
+} = useMasterUploadDialog({
+  modelValue: toRef(props, 'modelValue'),
+  loading: toRef(props, 'loading'),
+  uploadProgress: toRef(props, 'uploadProgress'),
+  serverErrorKey: toRef(props, 'serverErrorKey'),
+  emitModelValue: (value) => emit('update:modelValue', value),
+  emitSubmit: (payload) => emit('submit', payload),
+  emitClearServerError: () => emit('clear-server-error'),
 })
-
-const form = reactive({
-  groupCode: '',
-  name: '',
-  description: '',
-})
-
-const selectedFile = ref<File | null>(null)
-const fileList = ref<{ name: string }[]>([])
-const fileErrorKey = ref<string | null>(null)
-
-watch(
-  () => props.modelValue,
-  async (open) => {
-    if (!open) {
-      return
-    }
-    await ensureGroupCatalog()
-    form.groupCode = resolveDefaultGroupCode()
-  },
-)
-
-function onFileChange(uploadFile: { raw?: File }) {
-  const file = uploadFile.raw ?? null
-  fileErrorKey.value = null
-  if (file) {
-    if (file.size > MAX_UPLOAD_BYTES) {
-      fileErrorKey.value = 'masters.upload.errorTooLarge'
-      selectedFile.value = null
-      fileList.value = []
-      return
-    }
-    const lowerName = file.name.toLowerCase()
-    if (!lowerName.endsWith('.docx')) {
-      fileErrorKey.value = 'masters.upload.errorDocxOnly'
-      selectedFile.value = null
-      fileList.value = []
-      return
-    }
-    if (file.type && !DOCX_CONTENT_TYPES.has(file.type)) {
-      fileErrorKey.value = 'masters.upload.errorDocxOnly'
-      selectedFile.value = null
-      fileList.value = []
-      return
-    }
-  }
-  selectedFile.value = file
-  fileList.value = file ? [{ name: file.name }] : []
-}
-
-function onFileRemove() {
-  selectedFile.value = null
-  fileList.value = []
-  fileErrorKey.value = null
-}
-
-function resetForm() {
-  form.groupCode = resolveDefaultGroupCode()
-  form.name = ''
-  form.description = ''
-  selectedFile.value = null
-  fileList.value = []
-}
-
-function closeDialog() {
-  visible.value = false
-  resetForm()
-}
-
-function submitUpload() {
-  if (!selectedFile.value || !form.groupCode || !form.name.trim()) {
-    return
-  }
-  emit('submit', {
-    groupCode: form.groupCode,
-    name: form.name.trim(),
-    description: form.description.trim(),
-    file: selectedFile.value,
-  })
-}
-
-const canSubmit = computed(
-  () => Boolean(form.groupCode && form.name.trim() && selectedFile.value),
-)
 </script>
 
 <template>
@@ -120,6 +50,8 @@ const canSubmit = computed(
     :title="t('masters.upload.title')"
     width="520px"
     destroy-on-close
+    :close-on-click-modal="!loading"
+    :close-on-press-escape="!loading"
     @closed="resetForm"
   >
     <el-form label-position="top">
@@ -127,52 +59,73 @@ const canSubmit = computed(
         <ScopedGroupSelect
           v-model="form.groupCode"
           :placeholder="t('masters.upload.groupCodePlaceholder')"
+          :disabled="loading"
         />
       </el-form-item>
       <el-form-item :label="t('masters.upload.name')" required>
-        <el-input v-model="form.name" maxlength="256" />
+        <el-input v-model="form.name" maxlength="256" :disabled="loading" />
       </el-form-item>
       <el-form-item :label="t('masters.upload.description')">
-        <el-input v-model="form.description" type="textarea" maxlength="1024" :rows="3" />
+        <el-input
+          v-model="form.description"
+          type="textarea"
+          maxlength="1024"
+          :rows="3"
+          :disabled="loading"
+        />
       </el-form-item>
       <el-form-item :label="t('masters.upload.file')" required>
         <el-upload
+          drag
           :auto-upload="false"
           :limit="1"
           accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           :file-list="fileList"
+          :disabled="loading"
           @change="onFileChange"
           @remove="onFileRemove"
         >
-          <el-button>{{ t('masters.upload.chooseFile') }}</el-button>
+          <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+          <div class="el-upload__text">{{ t('masters.upload.dragHint') }}</div>
           <template #tip>
-            <div class="upload-tip">{{ t('masters.upload.fileHint') }}</div>
-            <div v-if="fileErrorKey" class="upload-error" role="alert">
-              {{ t(fileErrorKey) }}
+            <div class="upload-tip">
+              {{ t('masters.upload.fileHint', { maxMb: MASTER_DOCX_MAX_UPLOAD_MB }) }}
+            </div>
+            <div v-if="inlineErrorKey" class="upload-error" role="alert">
+              {{ inlineErrorText }}
             </div>
           </template>
         </el-upload>
+        <div
+          v-if="loading"
+          data-testid="master-upload-progress"
+          class="upload-progress"
+          aria-live="polite"
+        >
+          <el-progress
+            :percentage="progressPercent"
+            :indeterminate="progressIndeterminate"
+            :striped="true"
+            :striped-flow="true"
+          />
+          <p class="upload-progress__label">
+            <template v-if="uploadProgress != null">
+              {{ t('masters.upload.progressPercent', { percent: progressPercent }) }}
+            </template>
+            <template v-else>
+              {{ t('masters.upload.progressLabel') }}
+            </template>
+          </p>
+        </div>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="closeDialog">{{ t('masters.actions.cancel') }}</el-button>
-      <el-button type="primary" :disabled="!canSubmit" @click="submitUpload">
+      <el-button :disabled="loading" @click="closeDialog">{{ t('masters.actions.cancel') }}</el-button>
+      <el-button type="primary" :loading="loading" :disabled="!canSubmit" @click="submitUpload">
         {{ t('masters.upload.submit') }}
       </el-button>
     </template>
   </el-dialog>
 </template>
 
-<style scoped lang="scss">
-.upload-tip {
-  margin-top: 0.5rem;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-
-.upload-error {
-  margin-top: 0.25rem;
-  color: var(--color-danger, #f56c6c);
-  font-size: 0.875rem;
-}
-</style>
+<style scoped lang="scss" src="./MasterUploadDialog.scss"></style>

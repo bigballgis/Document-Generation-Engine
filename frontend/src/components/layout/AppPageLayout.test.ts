@@ -10,7 +10,9 @@ describe('AppPageLayout', () => {
       },
     })
 
-    expect(wrapper.find('.app-page-layout').attributes('style')).toContain('max-width: 1440px')
+    const inner = wrapper.find('.app-page-layout__inner')
+    expect(inner.exists()).toBe(true)
+    expect(inner.attributes('style')).toContain('max-width: 1440px')
   })
 
   it('omits max width for fluid layout variant', () => {
@@ -23,7 +25,29 @@ describe('AppPageLayout', () => {
       },
     })
 
-    const style = wrapper.find('.app-page-layout').attributes('style')
-    expect(style ?? '').not.toContain('max-width')
+    const root = wrapper.find('.app-page-layout')
+    expect(root.classes()).toContain('app-page-layout--fluid')
+    expect(root.attributes('style') ?? '').not.toContain('max-width')
+  })
+
+  it('uses inner container for contained layout variant', () => {
+    const wrapper = mount(AppPageLayout, {
+      slots: {
+        default: '<div class="content">Page</div>',
+      },
+    })
+
+    expect(wrapper.find('.app-page-layout').classes()).toContain('app-page-layout--contained')
+    expect(wrapper.find('.app-page-layout__inner').exists()).toBe(true)
+  })
+
+  it('applies panel surface by default for full-width white workspace', () => {
+    const wrapper = mount(AppPageLayout, {
+      slots: {
+        default: '<div class="content">Page</div>',
+      },
+    })
+
+    expect(wrapper.find('.app-page-layout').classes()).toContain('app-page-layout--panel')
   })
 })

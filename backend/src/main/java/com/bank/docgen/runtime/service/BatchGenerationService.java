@@ -7,30 +7,18 @@ import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
 import com.bank.docgen.runtime.api.BatchGenerateResultView;
 import com.bank.docgen.runtime.api.BatchResultView;
 import com.bank.docgen.runtime.api.CancelledTaskResultView;
-import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.runtime.api.TaskQueryResultView;
-import com.bank.docgen.runtime.api.TaskSummaryView;
 import com.bank.docgen.runtime.domain.TaskStatus;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskEntity;
 import com.bank.docgen.runtime.persistence.GenerationAsyncTaskRepository;
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
-import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.template.persistence.TemplateEntity;
-import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
-import com.bank.docgen.template.service.TemplateCallabilitySupport;
-import com.bank.docgen.template.service.TemplateNotFoundException;
 import com.bank.docgen.template.service.TemplateValidationException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,17 +26,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BatchGenerationService {
 
-    private final ApiPolicyRepository apiPolicyRepository;
     private final GenerationAsyncTaskRepository asyncTaskRepository;
     private final IdempotencyService idempotencyService;
     private final AsyncBatchTaskDispatcher asyncBatchTaskDispatcher;
-    private final EncryptionParameterValidator encryptionParameterValidator;
-    private final ObjectMapper objectMapper;
-    private final TemplateVersionRepository templateVersionRepository;
     private final BatchExecutionService batchExecutionService;
-    private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
     private final TraceIdProvider traceIdProvider;
-    private final InvocationRecordService invocationRecordService;
+    private final BatchGenerationJsonSupport json;
+    private final BatchGenerationPolicySupport policySupport;
+    private final BatchAsyncTaskPersistenceSupport tasks;
+    private final BatchGenerationOutcomeSupport outcomes;
 
     public BatchGenerationService(
             ApiPolicyRepository apiPolicyRepository,
@@ -63,17 +49,25 @@ public class BatchGenerationService {
             TraceIdProvider traceIdProvider,
             InvocationRecordService invocationRecordService
     ) {
-        this.apiPolicyRepository = apiPolicyRepository;
         this.asyncTaskRepository = asyncTaskRepository;
         this.idempotencyService = idempotencyService;
         this.asyncBatchTaskDispatcher = asyncBatchTaskDispatcher;
-        this.encryptionParameterValidator = encryptionParameterValidator;
-        this.objectMapper = objectMapper;
-        this.templateVersionRepository = templateVersionRepository;
         this.batchExecutionService = batchExecutionService;
-        this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
         this.traceIdProvider = traceIdProvider;
-        this.invocationRecordService = invocationRecordService;
+        this.json = new BatchGenerationJsonSupport(objectMapper);
+        this.policySupport = new BatchGenerationPolicySupport(
+                apiPolicyRepository,
+                encryptionParameterValidator,
+                templateVersionRepository,
+                json
+        );
+        this.tasks = new BatchAsyncTaskPersistenceSupport(asyncTaskRepository, json);
+        this.outcomes = new BatchGenerationOutcomeSupport(
+                runtimeGenerationAuditRecorder,
+                invocationRecordService,
+                traceIdProvider,
+                tasks
+        );
     }
 
     @Transactional
@@ -87,21 +81,16 @@ public class BatchGenerationService {
             String traceId
     ) {
         assertTemplateAccess(template, session);
-        ApiPolicyEntity policy = requireBatchPolicy(template, request);
-        requireSyncMode(request, policy);
-        String resolvedVersion = resolveVersion(template, policy, releaseVersion);
-        validateBatchRequest(request, policy);
+        ApiPolicyEntity policy = policySupport.requireBatchPolicy(template, request);
+        policySupport.requireSyncMode(request, policy);
+        String resolvedVersion = policySupport.resolveVersion(template, policy, releaseVersion);
+        policySupport.validateBatchRequest(request, policy);
 
-        String requestHash = idempotencyService.hashRequest(writeRequest(request, resolvedVersion));
-        Optional<GenerationAsyncTaskEntity> existing = findReplayTask(request, template.getId(), requestHash);
-        if (existing.isPresent()) {
-            GenerationAsyncTaskEntity replay = existing.get();
-            if (replay.getStatus() == TaskStatus.FAILED && replay.getBatchResultJson() != null) {
-                throw new SyncBatchFailureException(readBatchResult(replay.getBatchResultJson()));
-            }
-            if (replay.getBatchResultJson() != null) {
-                return new BatchGenerateResultView(readBatchResult(replay.getBatchResultJson()));
-            }
+        String requestHash = idempotencyService.hashRequest(json.writeRequest(request, resolvedVersion));
+        Optional<BatchGenerateResultView> replay =
+                tasks.resolveSyncReplay(tasks.findReplayTask(request, template.getId(), requestHash));
+        if (replay.isPresent()) {
+            return replay.get();
         }
 
         String auditId = traceIdProvider.newAuditId();
@@ -113,87 +102,18 @@ public class BatchGenerationService {
                     "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT),
                     false
             );
-            persistBatchTask(
-                    template.getId(),
-                    null,
-                    outcome.batchResult().batchId(),
-                    TaskStatus.SUCCEEDED,
-                    routeType,
-                    resolvedVersion,
-                    request,
-                    requestHash,
-                    outcome.batchResult()
-            );
-            runtimeGenerationAuditRecorder.recordBatchSync(
-                    template,
-                    session,
-                    environment,
-                    routeType,
-                    resolvedVersion,
-                    request.output().format(),
-                    request.output().mode(),
-                    request.requestId(),
-                    request.idempotencyKey(),
-                    outcome.batchResult().batchId(),
-                    RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
-                    "Batch succeeded",
-                    null,
-                    traceId
-            );
-            invocationRecordService.recordBatchSync(
-                    template,
-                    policy,
-                    session,
-                    environment,
-                    routeType,
-                    releaseVersion,
-                    resolvedVersion,
-                    request,
-                    outcome.batchResult(),
-                    RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
-                    auditId
+            outcomes.persistAndRecordSync(
+                    template, policy, session, environment, routeType, releaseVersion, resolvedVersion,
+                    request, requestHash, outcome.batchResult(), TaskStatus.SUCCEEDED,
+                    RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS, "Batch succeeded", null, traceId, auditId
             );
             return new BatchGenerateResultView(outcome.batchResult());
         } catch (SyncBatchFailureException ex) {
-            persistBatchTask(
-                    template.getId(),
-                    null,
-                    ex.batchResult().batchId(),
-                    TaskStatus.FAILED,
-                    routeType,
-                    resolvedVersion,
-                    request,
-                    requestHash,
-                    ex.batchResult()
-            );
-            runtimeGenerationAuditRecorder.recordBatchSync(
-                    template,
-                    session,
-                    environment,
-                    routeType,
-                    resolvedVersion,
-                    request.output().format(),
-                    request.output().mode(),
-                    request.requestId(),
-                    request.idempotencyKey(),
-                    ex.batchResult().batchId(),
-                    RuntimeGenerationAuditRecorder.OUTCOME_FAILURE,
-                    "Batch failed",
-                    ex.batchResult().batchId(),
-                    traceId
-            );
-            invocationRecordService.recordBatchSync(
-                    template,
-                    policy,
-                    session,
-                    environment,
-                    routeType,
-                    releaseVersion,
-                    resolvedVersion,
-                    request,
-                    ex.batchResult(),
-                    RuntimeGenerationAuditRecorder.OUTCOME_FAILURE,
-                    auditId
+            outcomes.persistAndRecordSync(
+                    template, policy, session, environment, routeType, releaseVersion, resolvedVersion,
+                    request, requestHash, ex.batchResult(), TaskStatus.FAILED,
+                    RuntimeGenerationAuditRecorder.OUTCOME_FAILURE, "Batch failed",
+                    ex.batchResult().batchId(), traceId, auditId
             );
             throw ex;
         }
@@ -209,65 +129,25 @@ public class BatchGenerationService {
             String environment
     ) {
         assertTemplateAccess(template, session);
-        ApiPolicyEntity policy = requireBatchPolicy(template, request);
-        requireAsyncMode(request, policy);
-        String resolvedVersion = resolveVersion(template, policy, releaseVersion);
-        validateBatchRequest(request, policy);
+        ApiPolicyEntity policy = policySupport.requireBatchPolicy(template, request);
+        policySupport.requireAsyncMode(request, policy);
+        String resolvedVersion = policySupport.resolveVersion(template, policy, releaseVersion);
+        policySupport.validateBatchRequest(request, policy);
 
-        String requestHash = idempotencyService.hashRequest(writeRequest(request, resolvedVersion));
-        Optional<GenerationAsyncTaskEntity> existing = findReplayTask(request, template.getId(), requestHash);
+        String requestHash = idempotencyService.hashRequest(json.writeRequest(request, resolvedVersion));
+        Optional<GenerationAsyncTaskEntity> existing = tasks.findReplayTask(request, template.getId(), requestHash);
         if (existing.isPresent()) {
-            return new AsyncAcceptedResultView(toTaskSummary(existing.get(), template.getExternalId(), environment));
+            return new AsyncAcceptedResultView(tasks.toTaskSummary(existing.get(), template.getExternalId(), environment));
         }
 
-        String taskId = "TASK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
-        String batchId = "BATCH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
-        GenerationAsyncTaskEntity task = new GenerationAsyncTaskEntity(
-                UUID.randomUUID(),
-                taskId,
-                batchId,
-                template.getId(),
-                TaskStatus.ACCEPTED,
-                routeType,
-                resolvedVersion,
-                request.requestId(),
-                request.idempotencyKey(),
-                requestHash,
-                writeRequestPayload(request),
-                Instant.now().plusSeconds(IdempotencyConstants.RETENTION_SECONDS)
-        );
-        asyncTaskRepository.save(task);
-        asyncBatchTaskDispatcher.dispatch(task.getId());
-        String auditId = traceIdProvider.newAuditId();
-        runtimeGenerationAuditRecorder.recordBatchAsyncAccepted(
-                template,
-                session,
-                environment,
-                routeType,
-                resolvedVersion,
-                request.output().format(),
-                request.output().mode(),
-                request.requestId(),
-                request.idempotencyKey(),
-                taskId,
-                batchId,
-                traceIdProvider.currentOrNew(null)
-        );
-        invocationRecordService.recordAsyncAccepted(
-                template,
-                policy,
-                session,
-                environment,
-                routeType,
-                releaseVersion,
-                resolvedVersion,
-                request,
-                taskId,
-                batchId,
-                auditId
+        GenerationAsyncTaskEntity task = tasks.createAcceptedTask(
+                template, routeType, resolvedVersion, request, requestHash, asyncBatchTaskDispatcher);
+        outcomes.recordAsyncAccepted(
+                template, policy, session, environment, routeType, releaseVersion, resolvedVersion,
+                request, task.getTaskExternalId(), task.getBatchExternalId()
         );
         GenerationAsyncTaskEntity refreshed = asyncTaskRepository.findById(task.getId()).orElseThrow();
-        return new AsyncAcceptedResultView(toTaskSummary(refreshed, template.getExternalId(), environment));
+        return new AsyncAcceptedResultView(tasks.toTaskSummary(refreshed, template.getExternalId(), environment));
     }
 
     @Transactional
@@ -281,11 +161,11 @@ public class BatchGenerationService {
         GenerationAsyncTaskEntity task = asyncTaskRepository
                 .findByTaskExternalIdAndTemplateId(taskId, template.getId())
                 .orElseThrow(AsyncTaskNotFoundException::new);
-        ensureTaskQueryable(task);
+        tasks.ensureTaskQueryable(task);
         BatchResultView batch = task.getBatchResultJson() == null
                 ? null
-                : readBatchResult(task.getBatchResultJson());
-        return new TaskQueryResultView(toTaskSummary(task, template.getExternalId(), environment), batch);
+                : json.readBatchResult(task.getBatchResultJson());
+        return new TaskQueryResultView(tasks.toTaskSummary(task, template.getExternalId(), environment), batch);
     }
 
     @Transactional
@@ -299,213 +179,25 @@ public class BatchGenerationService {
         GenerationAsyncTaskEntity task = asyncTaskRepository
                 .findByTaskExternalIdAndTemplateId(taskId, template.getId())
                 .orElseThrow(AsyncTaskNotFoundException::new);
-        if (task.getStatus() == TaskStatus.SUCCEEDED
-                || task.getStatus() == TaskStatus.FAILED
-                || task.getStatus() == TaskStatus.PARTIAL_SUCCEEDED
-                || task.getStatus() == TaskStatus.CANCELLED
-                || task.getStatus() == TaskStatus.EXPIRED) {
+        if (isTerminal(task.getStatus())) {
             throw new AsyncTaskCancellationNotAllowedException();
         }
         task.markCancelled();
         asyncTaskRepository.save(task);
-        return new CancelledTaskResultView(toTaskSummary(task, template.getExternalId(), environment));
+        return new CancelledTaskResultView(tasks.toTaskSummary(task, template.getExternalId(), environment));
     }
 
-    private void ensureTaskQueryable(GenerationAsyncTaskEntity task) {
-        if (task.getStatus() == TaskStatus.EXPIRED) {
-            throw new AsyncTaskExpiredException();
-        }
-        if (task.getExpiresAt().isAfter(Instant.now())) {
-            return;
-        }
-        if (task.getStatus() == TaskStatus.ACCEPTED || task.getStatus() == TaskStatus.PROCESSING) {
-            task.markExpired();
-            asyncTaskRepository.save(task);
-            throw new AsyncTaskExpiredException();
-        }
-    }
-
-    private void persistBatchTask(
-            UUID templateId,
-            String taskExternalId,
-            String batchExternalId,
-            TaskStatus status,
-            String routeType,
-            String releaseVersion,
-            BatchGenerateRequestBody request,
-            String requestHash,
-            BatchResultView batchResult
-    ) {
-        GenerationAsyncTaskEntity entity = new GenerationAsyncTaskEntity(
-                UUID.randomUUID(),
-                taskExternalId,
-                batchExternalId,
-                templateId,
-                status,
-                routeType,
-                releaseVersion,
-                request.requestId(),
-                request.idempotencyKey(),
-                requestHash,
-                writeRequestPayload(request),
-                Instant.now().plusSeconds(IdempotencyConstants.RETENTION_SECONDS)
-        );
-        String batchResultJson = writeBatchResult(batchResult);
-        if (status == TaskStatus.FAILED) {
-            entity.markFailed(batchResultJson);
-        } else {
-            entity.markSucceeded(batchResultJson);
-        }
-        asyncTaskRepository.save(entity);
-    }
-
-    private Optional<GenerationAsyncTaskEntity> findReplayTask(
-            BatchGenerateRequestBody request,
-            UUID templateId,
-            String requestHash
-    ) {
-        return asyncTaskRepository.findByIdempotencyKeyAndTemplateId(request.idempotencyKey(), templateId)
-                .filter(task -> task.getRequestHash().equals(requestHash))
-                .filter(task -> task.getExpiresAt().isAfter(Instant.now()));
-    }
-
-    private ApiPolicyEntity requireBatchPolicy(TemplateEntity template, BatchGenerateRequestBody request) {
-        String format = request.output().format();
-        if (!"DOCX".equalsIgnoreCase(format) && !"PDF".equalsIgnoreCase(format)) {
-            throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
-        }
-        ApiPolicyEntity policy = apiPolicyRepository.findByTemplateId(template.getId())
-                .orElseThrow(() -> new TemplateValidationException("api.error.runtime.policyNotConfigured"));
-        if (readStringList(policy.getOutputFormatsJson()).stream().noneMatch(item -> item.equalsIgnoreCase(format))) {
-            throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
-        }
-        if (!policy.isBatchEnabled()) {
-            throw new RuntimeBatchValidationException(
-                    ApiErrorCodes.OUTPUT_MODE_NOT_ALLOWED,
-                    "api.error.runtime.batchNotEnabled"
-            );
-        }
-        return policy;
-    }
-
-    private List<String> readStringList(String json) {
-        try {
-            return objectMapper.readValue(json, new TypeReference<>() {
-            });
-        } catch (Exception ex) {
-            throw new TemplateValidationException("api.error.runtime.outputFormatUnsupported");
-        }
-    }
-
-    private void requireSyncMode(BatchGenerateRequestBody request, ApiPolicyEntity policy) {
-        OutputModePolicyValidator.validateBatchEndpoint(
-                request.output().mode(),
-                readStringList(policy.getOutputModesJson()),
-                true
-        );
-    }
-
-    private void requireAsyncMode(BatchGenerateRequestBody request, ApiPolicyEntity policy) {
-        OutputModePolicyValidator.validateBatchEndpoint(
-                request.output().mode(),
-                readStringList(policy.getOutputModesJson()),
-                false
-        );
-    }
-
-    private void validateBatchRequest(BatchGenerateRequestBody request, ApiPolicyEntity policy) {
-        encryptionParameterValidator.validate(request.encryption(), policy, request.output().format());
-        for (BatchGenerateRequestBody.BatchGenerateItemBody item : request.items()) {
-            EncryptionOptionsView itemEncryption = item.encryption() != null ? item.encryption() : request.encryption();
-            String outputFormat = item.output() != null ? item.output().format() : request.output().format();
-            encryptionParameterValidator.validate(itemEncryption, policy, outputFormat);
-        }
-        if (request.items().size() > policy.getMaxBatchSize()) {
-            throw new RuntimeBatchValidationException(
-                    ApiErrorCodes.BATCH_LIMIT_EXCEEDED,
-                    "api.error.runtime.batchLimitExceeded"
-            );
-        }
-        Set<String> itemIds = new HashSet<>();
-        for (BatchGenerateRequestBody.BatchGenerateItemBody item : request.items()) {
-            if (!itemIds.add(item.itemId())) {
-                throw new RuntimeBatchValidationException(
-                        ApiErrorCodes.ITEM_ID_DUPLICATED,
-                        "api.error.runtime.itemIdDuplicated"
-                );
-            }
-        }
-    }
-
-    private String resolveVersion(TemplateEntity template, ApiPolicyEntity policy, String releaseVersion) {
-        String resolvedVersion = releaseVersion != null ? releaseVersion : policy.getDefaultRouteReleaseVersion();
-        if (resolvedVersion == null) {
-            throw new TemplateValidationException("api.error.runtime.releaseVersionRequired");
-        }
-        TemplateVersionEntity version = templateVersionRepository
-                .findByTemplateIdAndReleaseVersion(template.getId(), resolvedVersion)
-                .orElseThrow(TemplateNotFoundException::new);
-        TemplateCallabilitySupport.assertReleaseVersionCallable(template, version, resolvedVersion);
-        return resolvedVersion;
+    private static boolean isTerminal(TaskStatus status) {
+        return status == TaskStatus.SUCCEEDED
+                || status == TaskStatus.FAILED
+                || status == TaskStatus.PARTIAL_SUCCEEDED
+                || status == TaskStatus.CANCELLED
+                || status == TaskStatus.EXPIRED;
     }
 
     private void assertTemplateAccess(TemplateEntity template, RuntimeSessionClaims session) {
         if (!template.getId().equals(session.templateId())) {
             throw new TemplateValidationException("api.error.runtime.templateCredentialMismatch");
-        }
-    }
-
-    private TaskSummaryView toTaskSummary(
-            GenerationAsyncTaskEntity task,
-            String templateExternalId,
-            String environment
-    ) {
-        String queryPath = task.getTaskExternalId() == null ? null
-                : "/api/" + environment + "/v1/templates/" + templateExternalId + "/tasks/" + task.getTaskExternalId();
-        return new TaskSummaryView(
-                task.getTaskExternalId(),
-                task.getStatus().name(),
-                queryPath,
-                task.getCreatedAt(),
-                task.getUpdatedAt(),
-                task.getExpiresAt()
-        );
-    }
-
-    private String writeBatchResult(BatchResultView batchResult) {
-        try {
-            return objectMapper.writeValueAsString(batchResult);
-        } catch (JsonProcessingException ex) {
-            throw new TemplateValidationException("api.error.rendering.generationFailed");
-        }
-    }
-
-    private BatchResultView readBatchResult(String json) {
-        try {
-            return objectMapper.readValue(json, BatchResultView.class);
-        } catch (JsonProcessingException ex) {
-            throw new TemplateValidationException("api.error.rendering.generationFailed");
-        }
-    }
-
-    private String writeRequest(BatchGenerateRequestBody request, String releaseVersion) {
-        try {
-            java.util.LinkedHashMap<String, Object> payload = new java.util.LinkedHashMap<>();
-            payload.put("releaseVersion", releaseVersion);
-            payload.put("items", request.items());
-            payload.put("output", request.output());
-            payload.put("encryption", request.encryption());
-            return objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException ex) {
-            return releaseVersion;
-        }
-    }
-
-    private String writeRequestPayload(BatchGenerateRequestBody request) {
-        try {
-            return objectMapper.writeValueAsString(request);
-        } catch (JsonProcessingException ex) {
-            throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
         }
     }
 }

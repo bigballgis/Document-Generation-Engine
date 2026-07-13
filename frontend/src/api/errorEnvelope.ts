@@ -68,7 +68,7 @@ export function parseApiEnvelopeError(data: unknown): ResolvedApiError | null {
   }
 }
 
-export function isApiError(error: unknown): error is AxiosError<ApiEnvelope<unknown>> {
+function isApiError(error: unknown): error is AxiosError<ApiEnvelope<unknown>> {
   return axios.isAxiosError(error)
 }
 
@@ -79,11 +79,22 @@ export function resolveApiError(error: unknown): ResolvedApiError | null {
   return parseApiEnvelopeError(error.response?.data)
 }
 
+/**
+ * Prefer envelope `messageKey`. For gateway/nginx 413 HTML (or empty body) with no
+ * JSON envelope, map to a readable master upload size key so UI never surfaces raw HTML.
+ */
 export function resolveApiErrorMessageKey(error: unknown, fallbackKey: string): string {
-  return resolveApiError(error)?.error.messageKey ?? fallbackKey
+  const fromEnvelope = resolveApiError(error)?.error.messageKey
+  if (fromEnvelope) {
+    return fromEnvelope
+  }
+  if (isApiError(error) && error.response?.status === 413) {
+    return 'masters.upload.errorTooLarge'
+  }
+  return fallbackKey
 }
 
-export function isAuthHttpError(error: unknown): boolean {
+function isAuthHttpError(error: unknown): boolean {
   if (!isApiError(error)) {
     return false
   }

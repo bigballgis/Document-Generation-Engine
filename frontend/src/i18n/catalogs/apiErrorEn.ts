@@ -70,6 +70,7 @@ export const apiErrorEn = {
     structuredContentInvalid: "The structured content definition is invalid.",
     structuredContentUnknownNodeType: "The structured content contains an unsupported node type.",
     structuredContentForbiddenConstruct: "The structured content contains a forbidden construct.",
+    invalidPasteCleaningEvidence: "Paste-cleaning evidence could not be serialized.",
     publishGateBlocked: "Publish is blocked until binding validation passes.",
     submitForApprovalGateBlocked: "Submit for approval is blocked until pre-release checks pass.",
     decisionReasonCategoryRequired: "A reason category is required for failed or rejected decisions.",
@@ -105,7 +106,9 @@ export const apiErrorEn = {
     batchTestRunNotFound: "The batch test run was not found.",
     unsupportedNodeType: "The template contains a structured content node type that cannot be rendered. Remove or replace the unsupported node before publishing.",
     imageAssetNotFound: "The referenced image asset could not be found.",
-    sealAssetNotFound: "The referenced seal asset could not be found."
+    sealAssetNotFound: "The referenced seal asset could not be found.",
+    ooxmlValidationFailed:
+      "The generated document failed OOXML validation and was not saved. Regenerate after correcting structured content."
   },
   apimgmt: {
     policyNotFound: "The API policy was not found.",
@@ -189,6 +192,7 @@ export const apiErrorEn = {
   },
   collaboration: {
     accessDenied: "You do not have permission to view collaboration work items.",
-    queueDenied: "You do not have permission to view this collaboration work item queue."
+    queueDenied: "You do not have permission to view this collaboration work item queue.",
+    workItemNotFound: "The collaboration work item was not found."
   }
 } as const

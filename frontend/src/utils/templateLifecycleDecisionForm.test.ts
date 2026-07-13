@@ -5,6 +5,7 @@ import {
   isApprovalPassDecisionValid,
   isLifecycleDecisionFormValid,
   isPublishGateReady,
+  isPublishSummaryConfirmReady,
   isSubmitGateReady,
   isRejectDecisionValid,
   isTestPassDecisionValid,
@@ -49,13 +50,55 @@ describe('templateLifecycleDecisionForm', () => {
     ).toBe(true)
   })
 
-  it('requires rationale and key evidence for approval pass', () => {
-    expect(isApprovalPassDecisionValid({ commentSummary: 'Ready', keyEvidenceConfirmed: true })).toBe(
-      true,
-    )
-    expect(isApprovalPassDecisionValid({ commentSummary: '', keyEvidenceConfirmed: true })).toBe(
-      false,
-    )
+  it('requires rationale, fidelity viewed, and key evidence for approval pass (BDD-CDP-FID-002)', () => {
+    expect(
+      isApprovalPassDecisionValid({
+        commentSummary: 'Ready',
+        keyEvidenceConfirmed: true,
+        fidelityViewedConfirmed: true,
+      }),
+    ).toBe(true)
+    expect(
+      isApprovalPassDecisionValid({
+        commentSummary: 'Ready',
+        keyEvidenceConfirmed: true,
+        fidelityViewedConfirmed: false,
+      }),
+    ).toBe(false)
+    expect(
+      isApprovalPassDecisionValid({
+        commentSummary: 'Ready',
+        keyEvidenceConfirmed: true,
+      }),
+    ).toBe(false)
+    expect(
+      isApprovalPassDecisionValid({
+        commentSummary: '',
+        keyEvidenceConfirmed: true,
+        fidelityViewedConfirmed: true,
+      }),
+    ).toBe(false)
+  })
+
+  it('requires fidelity viewed confirmation before publish summary confirm (BDD-CDP-FID-003)', () => {
+    expect(
+      isPublishSummaryConfirmReady({
+        hasBlockers: false,
+        fidelityViewedConfirmed: true,
+      }),
+    ).toBe(true)
+    expect(
+      isPublishSummaryConfirmReady({
+        hasBlockers: false,
+        fidelityViewedConfirmed: false,
+      }),
+    ).toBe(false)
+    expect(
+      isPublishSummaryConfirmReady({
+        hasBlockers: true,
+        fidelityViewedConfirmed: true,
+      }),
+    ).toBe(false)
   })
 
   it('requires remediation link for reject decisions', () => {

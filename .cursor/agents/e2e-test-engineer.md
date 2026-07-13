@@ -1,7 +1,7 @@
 ---
 name: e2e-test-engineer
 description: Frontend end-to-end functional test engineer. Use to author and run Playwright user-journey tests for the management UI (login, role-aware navigation, lifecycle/API/audit consoles, forbidden states), derived from BDD acceptance scenarios. Produces traces/artifacts as durable evidence; does not assert visual polish (that is e2e-uiux-reviewer).
-model: composer-2.5
+model: grok-4.5-fast-xhigh
 ---
 
 # E2E Functional Test Engineer

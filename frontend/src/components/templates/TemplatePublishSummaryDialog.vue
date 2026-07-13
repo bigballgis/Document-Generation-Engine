@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import type { ChangeDiffSummary, CoverageSummary, PreviewComparison } from '@/types/template'
 import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
+import { useTemplatePublishSummaryDialog } from '@/components/templates/useTemplatePublishSummaryDialog'
 
 const props = defineProps<{
   modelValue: boolean
@@ -17,59 +16,31 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  confirm: []
+  confirm: [payload: { fidelityViewedConfirmed: boolean }]
 }>()
 
-const { t } = useI18n()
-
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value: boolean) => emit('update:modelValue', value),
+const {
+  t,
+  fidelityViewedConfirmed,
+  visible,
+  readyCount,
+  requiredCount,
+  hasBlockers,
+  confirmDisabled,
+  coverageStatusKey,
+  changeDiffStatusKey,
+  previewComparisonStatusKey,
+  close,
+  confirm,
+} = useTemplatePublishSummaryDialog({
+  modelValue: () => props.modelValue,
+  gateItems: () => props.gateItems,
+  coverageSummary: () => props.coverageSummary,
+  changeDiffSummary: () => props.changeDiffSummary,
+  previewComparison: () => props.previewComparison,
+  emitUpdateModelValue: (value) => emit('update:modelValue', value),
+  emitConfirm: (payload) => emit('confirm', payload),
 })
-
-const requiredItems = computed(() => props.gateItems.filter((item) => !item.informational))
-const readyCount = computed(() => requiredItems.value.filter((item) => item.ready).length)
-const requiredCount = computed(() => requiredItems.value.length)
-const hasBlockers = computed(() => requiredItems.value.some((item) => !item.ready))
-
-const coverageStatusKey = computed(() => {
-  if (!props.coverageSummary) {
-    return 'templates.publishSummary.coverageUnavailable'
-  }
-  return props.coverageSummary.belowThreshold
-    ? 'templates.publishSummary.coverageBelowThreshold'
-    : 'templates.publishSummary.coverageMeetsThreshold'
-})
-
-const changeDiffStatusKey = computed(() => {
-  if (!props.changeDiffSummary) {
-    return 'templates.publishSummary.changeDiffUnavailable'
-  }
-  return props.changeDiffSummary.hasChanges
-    ? 'templates.publishSummary.changeDiffHasChanges'
-    : 'templates.publishSummary.changeDiffNoChanges'
-})
-
-const previewComparisonStatusKey = computed(() => {
-  if (!props.previewComparison) {
-    return 'templates.publishSummary.previewComparisonUnavailable'
-  }
-  if (props.previewComparison.blockerCount > 0) {
-    return 'templates.publishSummary.previewComparisonHasBlockers'
-  }
-  if (props.previewComparison.totalDiffCount > 0) {
-    return 'templates.publishSummary.previewComparisonHasWarnings'
-  }
-  return 'templates.publishSummary.previewComparisonClean'
-})
-
-function close() {
-  visible.value = false
-}
-
-function confirm() {
-  emit('confirm')
-}
 </script>
 
 <template>
@@ -139,9 +110,18 @@ function confirm() {
       </p>
     </section>
 
+    <section class="publish-summary-section">
+      <el-checkbox
+        v-model="fidelityViewedConfirmed"
+        data-testid="confirm-fidelity-viewed"
+      >
+        {{ t('templates.lifecycle.decisionForm.confirmFidelityViewed') }}
+      </el-checkbox>
+    </section>
+
     <template #footer>
       <el-button @click="close">{{ t('common.cancel') }}</el-button>
-      <el-button type="primary" :loading="loading" :disabled="hasBlockers" @click="confirm">
+      <el-button type="primary" :loading="loading" :disabled="confirmDisabled" @click="confirm">
         {{ t('templates.publishSummary.confirm') }}
       </el-button>
     </template>

@@ -4,10 +4,10 @@
 # LR-A2 / ADR-0041: rendering font baseline — CJK + metric-compatible substitutes for
 # Calibri/Cambria so bank correspondence renders without tofu or layout drift (CD-PIT-01).
 #
-# Base switched from eclipse-temurin:21-jre-alpine to eclipse-temurin:21-jre-jammy (Debian 22.04)
-# because Alpine 3.23 has no font-crosextra-caladea package; Debian carries the full
-# fonts-crosextra-caladea / fonts-crosextra-carlito set required by the rendering font baseline.
-FROM eclipse-temurin:21-jre-jammy
+# Base uses eclipse-temurin:25-jre-jammy (Debian 22.04) for LibreOffice + font packages
+# (Alpine lacks fonts-crosextra-caladea). Task #51 / ADR-0028: Temurin 25 (was 21).
+# Minimal alpine pin for non-font stages: eclipse-temurin:25-jre-alpine (see container-hardening.md).
+FROM eclipse-temurin:25-jre-jammy
 WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

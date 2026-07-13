@@ -77,12 +77,13 @@ export function isApprovalPassDecisionValid(fields: LifecyclePositiveDecisionFie
   }
   if (fields.exceptionIntervention) {
     return (
+      Boolean(fields.fidelityViewedConfirmed) &&
       Boolean(fields.keyEvidenceConfirmed) &&
       Boolean(fields.exceptionReason?.trim()) &&
       Boolean(fields.secondaryConfirmed)
     )
   }
-  return Boolean(fields.keyEvidenceConfirmed)
+  return Boolean(fields.fidelityViewedConfirmed) && Boolean(fields.keyEvidenceConfirmed)
 }
 
 export function hasRejectRemediationLink(fields: LifecycleRejectRemediationFields): boolean {
@@ -130,6 +131,14 @@ export function isPublishGateReady(params: {
     Boolean(params.releaseVersion.trim()) &&
     !params.versionConflict
   )
+}
+
+/** Confirm go-live in the publish summary dialog (BDD-CDP-FID-003). */
+export function isPublishSummaryConfirmReady(params: {
+  hasBlockers: boolean
+  fidelityViewedConfirmed: boolean
+}): boolean {
+  return !params.hasBlockers && Boolean(params.fidelityViewedConfirmed)
 }
 
 export function isSubmitGateReady(params: { checklistReady: boolean }): boolean {

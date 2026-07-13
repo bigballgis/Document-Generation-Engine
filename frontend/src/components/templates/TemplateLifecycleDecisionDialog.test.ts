@@ -148,9 +148,12 @@ describe('TemplateLifecycleDecisionDialog', () => {
     ).toBeUndefined()
   })
 
-  it('requires approval rationale and key evidence before enabling submit', async () => {
+  it('requires approval rationale, fidelity viewed, and key evidence before enabling submit (BDD-CDP-FID-002)', async () => {
     const wrapper = mountDialog('approval-approve')
     await flushPromises()
+
+    expect(wrapper.text()).toContain('I reviewed fidelity warnings')
+    expect(wrapper.find('[data-testid="confirm-fidelity-viewed"]').exists()).toBe(true)
 
     const submitButton = wrapper
       .findAll('button')
@@ -158,8 +161,18 @@ describe('TemplateLifecycleDecisionDialog', () => {
     expect(submitButton?.attributes('disabled')).toBeDefined()
 
     await wrapper.find('textarea').setValue('Approved after evidence review.')
-    const checkbox = wrapper.findComponent({ name: 'ElCheckbox' })
-    await checkbox.setValue(true)
+    const checkboxes = wrapper.findAllComponents({ name: 'ElCheckbox' })
+    // Key evidence only — fidelity still unchecked → submit stays disabled
+    await checkboxes[1]?.setValue(true)
+    await flushPromises()
+    expect(
+      wrapper
+        .findAll('button')
+        .find((button) => button.text().includes('Submit decision'))
+        ?.attributes('disabled'),
+    ).toBeDefined()
+
+    await checkboxes[0]?.setValue(true)
     await flushPromises()
 
     expect(
@@ -168,6 +181,29 @@ describe('TemplateLifecycleDecisionDialog', () => {
         .find((button) => button.text().includes('Submit decision'))
         ?.attributes('disabled'),
     ).toBeUndefined()
+  })
+
+  it('emits fidelityViewedConfirmed on approval approve submit', async () => {
+    const wrapper = mountDialog('approval-approve')
+    await flushPromises()
+
+    await wrapper.find('textarea').setValue('Approved after fidelity review.')
+    const checkboxes = wrapper.findAllComponents({ name: 'ElCheckbox' })
+    await checkboxes[0]?.setValue(true)
+    await checkboxes[1]?.setValue(true)
+    await flushPromises()
+
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Submit decision'))
+      ?.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.emitted('submit')?.[0]?.[0]).toMatchObject({
+      commentSummary: 'Approved after fidelity review.',
+      fidelityViewedConfirmed: true,
+      keyEvidenceConfirmed: true,
+    })
   })
 
   it('shows confirm-on-behalf block for GROUP_ADMIN on test pass', async () => {

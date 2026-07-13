@@ -22,7 +22,7 @@ import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -113,13 +113,13 @@ class MasterDocumentControllerTest {
 
         mockMvc.perform(get("/api/management/v1/masters").with(authentication(new ManagementAuthentication(retailGroupAdmin))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.length()").value(1))
-                .andExpect(jsonPath("$.result[0].anchorCount").value(1));
+                .andExpect(jsonPath("$.result.content.length()").value(1))
+                .andExpect(jsonPath("$.result.content[0].anchorCount").value(1));
 
         ManagementSessionClaims corpOnlyAdmin = session("10000004", List.of("GROUP_ADMIN"), List.of("CORP"));
         mockMvc.perform(get("/api/management/v1/masters").with(authentication(new ManagementAuthentication(corpOnlyAdmin))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.length()").value(0));
+                .andExpect(jsonPath("$.result.content.length()").value(0));
     }
 
     @Test

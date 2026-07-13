@@ -1,4 +1,4 @@
-FROM maven:3.9.9-eclipse-temurin-21-alpine AS build
+FROM maven:3.9.9-eclipse-temurin-25-alpine AS build
 WORKDIR /app
 COPY docker/maven-settings.xml /root/.m2/settings.xml
 COPY pom.xml .
@@ -8,7 +8,8 @@ RUN --mount=type=cache,target=/root/.m2/repository \
 
 # Runtime uses Debian jammy (not Alpine) because Alpine 3.23 lacks fonts-crosextra-caladea;
 # Carlito + Caladea metric-compatible substitutes are required by LR-A2 / ADR-0041 (CD-PIT-01).
-FROM eclipse-temurin:21-jre-jammy AS runtime
+# Task #51 / ADR-0028: Temurin 25 (was 21).
+FROM eclipse-temurin:25-jre-jammy AS runtime
 WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

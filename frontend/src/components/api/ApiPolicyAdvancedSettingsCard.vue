@@ -21,6 +21,7 @@ const props = defineProps<{
   advancedExpanded: string[]
   policyOutputFormatOptions: string[]
   policyOutputModeOptions: string[]
+  saveBlockedByImpact?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -92,7 +93,12 @@ const encryptionUsesPlatformDefaults = computed(() =>
               </AppSearchSelect>
             </el-form-item>
             <div class="action-row">
-              <el-button :loading="submitting" @click="emit('saveOutput')">
+              <el-button
+                data-testid="output-policy-save-button"
+                :loading="submitting"
+                :disabled="saveBlockedByImpact"
+                @click="emit('saveOutput')"
+              >
                 {{ t('templates.policy.advanced.saveOutput') }}
               </el-button>
             </div>

@@ -57,7 +57,7 @@ export function resolveBatchAsyncMaxItems(policy: ApiPolicy): number {
   return policy.batchAsyncMaxItems ?? 10_000
 }
 
-export function buildUpsertPayloadFromPolicy(policy: ApiPolicy): UpsertApiPolicyPayload {
+function buildUpsertPayloadFromPolicy(policy: ApiPolicy): UpsertApiPolicyPayload {
   return {
     allowedAdGroups: [...policy.allowedAdGroups],
     defaultRouteReleaseVersion: policy.defaultRouteReleaseVersion,

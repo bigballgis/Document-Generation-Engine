@@ -1,0 +1,39 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "index.html",
+    "vite.shared.ts",
+    "build/**/*.{js,ts}",
+    "src/**/*.test.ts",
+    "tests/**/*.test.ts",
+    "e2e/**/*.{ts,js}"
+  ],
+  "project": [
+    "src/**/*.{js,ts,vue}",
+    "tests/**/*.{js,ts,vue}",
+    "e2e/**/*.{js,ts}",
+    "build/**/*.{js,ts}",
+    "vite.shared.ts",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "playwright.docker.config.ts",
+    "eslint.config.js"
+  ],
+  "ignore": [
+    "src/types/generated/**",
+    "src/auto-imports.d.ts",
+    "src/components.d.ts"
+  ],
+  "ignoreBinaries": [],
+  "ignoreDependencies": [],
+  "vite": {
+    "config": ["vite.config.ts", "vitest.config.ts"]
+  },
+  "vitest": {
+    "config": ["vitest.config.ts"]
+  },
+  "playwright": {
+    "config": ["playwright.config.ts", "playwright.docker.config.ts"]
+  }
+}

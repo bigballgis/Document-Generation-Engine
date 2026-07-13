@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface MasterDocumentRepository extends JpaRepository<MasterDocumentEntity, UUID> {
+public interface MasterDocumentRepository extends JpaRepository<MasterDocumentEntity, UUID>, MasterDocumentRepositoryCustom {
 
     List<MasterDocumentEntity> findByDeletedAtIsNullAndGroupCodeInOrderByUpdatedAtDesc(List<String> groupCodes);
 

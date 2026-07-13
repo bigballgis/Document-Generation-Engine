@@ -10,7 +10,7 @@ Authoritative stage table (matches `delivery-orchestrator` and
 
 | # | Stage | Agent |
 | --- | --- | --- |
-| 0 | Placement | `worktree-router` |
+| 0 | Placement | `worktree-router` (**mandatory** for delivery) |
 | 1 | Behavior spec | `behavior-spec-author` |
 | 2 | Plan / Task Master | `plan-orchestrator` |
 | 3 | Docs-first | `doc-keeper` |
@@ -21,8 +21,8 @@ Authoritative stage table (matches `delivery-orchestrator` and
 | 8 | Architecture | `architecture-reviewer` |
 | 9 | Code quality | `code-quality-reviewer` (optional) |
 | 10 | Deploy evidence | `build-deploy-agent` (queue) |
-| 11 | Integrate | `integration-merger` (isolated only) |
-| 12 | Doc sync | `post-task-doc-sync` (on **main** after merge) |
+| 11 | Integrate | `integration-merger` (**mandatory** — merge + remove worktree) |
+| 12 | Doc sync | `post-task-doc-sync` (on **MAIN** after stage 11) |
 | 13 | Commit | `post-task-commit-review` |
 | 14 | Verify (optional) | `verifier` |
 
@@ -31,7 +31,7 @@ Authoritative stage table (matches `delivery-orchestrator` and
 ```
 task_ids:
 bdd_readiness: ready | blocked | not-applicable
-placement: MAIN | ISOLATED
+placement: ISOLATED   # mandatory for delivery; MAIN only for read-only / main-only opt-out
 worktree_path:
 branch:
 behavior_summary:
@@ -41,9 +41,9 @@ upstream_findings:
 stage_done_definition:
 ```
 
-## Isolated worktree rule
+## Session worktree rule (mandatory)
 
-Code in feature worktree → merge via `integration-merger` → **doc-sync + commit on main**.
+Every delivery session: stage 0 → code in `../DGE-<slice-id>` → merge via `integration-merger` → **doc-sync + commit on MAIN**.
 
 ## Docker
 

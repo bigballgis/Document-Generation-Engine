@@ -30,19 +30,22 @@ public class DockerExecPdfConversionService implements PdfConversionService {
     private final Retry retry;
     private final Executor pdfConversionExecutor;
     private final PdfConversionPostProcessor pdfConversionPostProcessor;
+    private final PdfConversionPoolRejectionMetrics poolRejectionMetrics;
 
     public DockerExecPdfConversionService(
             DocgenRenderingProperties renderingProperties,
             CircuitBreakerRegistry circuitBreakerRegistry,
             RetryRegistry retryRegistry,
             @Qualifier("pdfConversionExecutor") Executor pdfConversionExecutor,
-            PdfConversionPostProcessor pdfConversionPostProcessor
+            PdfConversionPostProcessor pdfConversionPostProcessor,
+            PdfConversionPoolRejectionMetrics poolRejectionMetrics
     ) {
         this.renderingProperties = renderingProperties;
         this.circuitBreaker = circuitBreakerRegistry.circuitBreaker(RESILIENCE_INSTANCE);
         this.retry = retryRegistry.retry(RESILIENCE_INSTANCE);
         this.pdfConversionExecutor = pdfConversionExecutor;
         this.pdfConversionPostProcessor = pdfConversionPostProcessor;
+        this.poolRejectionMetrics = poolRejectionMetrics;
     }
 
     @Override
@@ -58,7 +61,8 @@ public class DockerExecPdfConversionService implements PdfConversionService {
                 retry,
                 pdfConversionExecutor,
                 renderingProperties.getConversionTimeoutSeconds(),
-                () -> convertInternal(docxBytes, resolvedOptions)
+                () -> convertInternal(docxBytes, resolvedOptions),
+                poolRejectionMetrics::record
         );
     }
 

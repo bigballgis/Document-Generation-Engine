@@ -1,6 +1,7 @@
 package com.bank.docgen.runtime.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -17,9 +18,12 @@ import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.rendering.ArtifactSpoolService;
 import com.bank.docgen.rendering.DocxAssembler;
+import com.bank.docgen.rendering.DocxAssemblyException;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.rendering.GeneratedArtifactSizeGuard;
 import com.bank.docgen.rendering.SpooledArtifact;
+import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
@@ -239,5 +243,62 @@ class DocumentGenerationEngineTest {
 
         assertThat(generated.fidelityWarningCodes()).containsExactly("CACHED_WARNING");
         verify(versionFidelityWarningService).resolveWarningCodes(version, MASTER_ID);
+    }
+
+    @Test
+    void generate_propagatesOoxmlValidationFailedFromAssembler() throws Exception {
+        TemplateVersionEntity version = new TemplateVersionEntity(VERSION_ID, TEMPLATE_ID, "10000001");
+        version.setReleaseVersion("1.0.0");
+        MasterDocumentEntity master = new MasterDocumentEntity(
+                MASTER_ID,
+                "RETAIL",
+                "Retail Master",
+                "Retail master document",
+                "masters/master.docx",
+                "master.docx",
+                "10000001"
+        );
+
+        when(templateVersionRepository.findByTemplateIdAndReleaseVersion(TEMPLATE_ID, "1.0.0"))
+                .thenReturn(Optional.of(version));
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(MASTER_ID)).thenReturn(Optional.of(master));
+        when(anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(VERSION_ID)).thenReturn(List.of());
+        when(contentModuleReferenceService.resolvePinnedContentStructures(VERSION_ID)).thenReturn(java.util.Map.of());
+        when(objectStoragePort.get("masters/master.docx")).thenReturn(new ByteArrayInputStream(new byte[]{1}));
+        when(renderProfileService.resolveEffectiveProfile(any(), any()))
+                .thenReturn(new com.bank.docgen.sharedkernel.document.RenderProfile(
+                        "rp-v1",
+                        "MASTER_CATALOG_LOCKED",
+                        "CONTROLLED_MULTILEVEL",
+                        "REPEAT_HEADER",
+                        "PROPORTIONAL_FIT",
+                        "SEMANTIC_FIDELITY",
+                        "BLOCKERS_PREVENT_PUBLISH",
+                        false
+                ));
+        when(docxAssembler.assembleStructured(any(), any(), any(), any())).thenThrow(
+                new DocxAssemblyException(
+                        ApiErrorCodes.OOXML_VALIDATION_FAILED,
+                        ApiErrorCategories.RENDERING,
+                        "api.error.rendering.ooxmlValidationFailed",
+                        "Malformed XML part: word/document.xml"
+                )
+        );
+
+        assertThatThrownBy(() -> engine.generate(
+                template,
+                "1.0.0",
+                java.util.Map.of("customerName", "Alice"),
+                "DOCX",
+                new EncryptionOptionsView(false, null, null, null)
+        ))
+                .isInstanceOf(DocxAssemblyException.class)
+                .satisfies(ex -> {
+                    DocxAssemblyException assemblyException = (DocxAssemblyException) ex;
+                    assertThat(assemblyException.errorCode()).isEqualTo(ApiErrorCodes.OOXML_VALIDATION_FAILED);
+                    assertThat(assemblyException.category()).isEqualTo(ApiErrorCategories.RENDERING);
+                    assertThat(assemblyException.messageKey())
+                            .isEqualTo("api.error.rendering.ooxmlValidationFailed");
+                });
     }
 }

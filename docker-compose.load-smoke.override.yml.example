@@ -1,0 +1,25 @@
+# Opt-in Docker Compose override for LR-D6 load smoke ONLY.
+#
+# NOT used by scripts/docker-deploy.ps1 / docker-deploy-queue.ps1 by default.
+# Operators must pass this file explicitly (extra -f) when preparing Scenario B.
+#
+# Enables:
+# - docgen.preview.max-concurrent=8 (≥5 required for parallel SSE Scenario B)
+# - X-Access-Account mapping for harness default `lrp-d6-load-smoke` → CORP_API + RETAIL_API
+#   (seed application.yml already maps svc-caller / e2e-runtime-caller; this adds the smoke account)
+#
+# Example (from repo / worktree root, after normal queued deploy images exist):
+#
+#   docker compose `
+#     -f docker-compose.yml `
+#     -f docker-compose.prod.yml `
+#     -f docker-compose.load-smoke.override.yml `
+#     --profile prod up -d --no-deps docgen-backend
+#
+# Or set SPRING_APPLICATION_JSON in the shell before docker-deploy-queue.ps1 (same JSON payload).
+# Prefer the explicit -f override so normal deploys stay untouched.
+
+services:
+  docgen-backend:
+    environment:
+      SPRING_APPLICATION_JSON: '{"docgen":{"preview":{"max-concurrent":8},"ad-group-resolver":{"account-groups":{"lrp-d6-load-smoke":["RETAIL_API","CORP_API"],"svc-caller":["RETAIL_API","CORP_API"],"e2e-runtime-caller":["RETAIL_API","CORP_API"]}}}}'

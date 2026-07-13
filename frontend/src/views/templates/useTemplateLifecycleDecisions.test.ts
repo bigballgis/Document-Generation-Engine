@@ -179,6 +179,33 @@ describe('useTemplateLifecycleDecisions', () => {
     wrapper.unmount()
   })
 
+  it('BDD-CDP-FID-002: submitLifecycleDecision sends fidelityViewedConfirmed on approve', async () => {
+    const templateRef = ref(
+      makeTemplate({ lifecycleStatus: 'APPROVAL', approvalSubState: 'PENDING_DECISION' }),
+    )
+    vi.mocked(templatesApi.recordApprovalDecision).mockResolvedValue(templateRef.value)
+    const { decisions, wrapper } = mountDecisions(templateRef, pinia)
+    decisions.decisionDialogMode.value = 'approval-approve'
+    decisions.decisionDialogOpen.value = true
+    await decisions.submitLifecycleDecision({
+      commentSummary: 'Approved',
+      fidelityViewedConfirmed: true,
+      keyEvidenceConfirmed: true,
+    })
+    await flushPromises()
+    expect(templatesApi.recordApprovalDecision).toHaveBeenCalledWith('tpl-1', {
+      decision: 'APPROVED',
+      commentSummary: 'Approved',
+      fidelityViewedConfirmed: true,
+      keyEvidenceConfirmed: true,
+      exceptionIntervention: undefined,
+      exceptionReason: undefined,
+      secondaryConfirmed: undefined,
+    })
+    expect(decisions.decisionDialogOpen.value).toBe(false)
+    wrapper.unmount()
+  })
+
   it('BDD-F6-A2-002: handleSubmitForApproval opens summary when gate ready', async () => {
     const templateRef = ref(makeTemplate({ lifecycleStatus: 'APPROVAL', approvalSubState: 'PENDING_SUBMIT' }))
     const { decisions, gates, wrapper } = mountDecisions(templateRef, pinia)
@@ -195,9 +222,12 @@ describe('useTemplateLifecycleDecisions', () => {
     const { decisions, gates, loadTemplate, activeDetailTab, wrapper } = mountDecisions(templateRef, pinia)
     gates.publishVersion.value = '2.0.0'
     decisions.publishSummaryOpen.value = true
-    await decisions.confirmPublishFromSummary()
+    await decisions.confirmPublishFromSummary({ fidelityViewedConfirmed: true })
     await flushPromises()
-    expect(templatesApi.publishTemplate).toHaveBeenCalledWith('tpl-1', { releaseVersion: '2.0.0' })
+    expect(templatesApi.publishTemplate).toHaveBeenCalledWith('tpl-1', {
+      releaseVersion: '2.0.0',
+      fidelityViewedConfirmed: true,
+    })
     expect(loadTemplate).toHaveBeenCalled()
     expect(activeDetailTab.value).toBe('releaseVersions')
     wrapper.unmount()

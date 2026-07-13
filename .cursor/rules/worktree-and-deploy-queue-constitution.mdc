@@ -1,38 +1,82 @@
 ---
-description: Hard constraint — isolated git worktrees for parallel slices; single-Docker-host deploy queue; merge then cleanup.
+description: Hard constraint — mandatory per-session git worktree before any delivery writes; merge to main only after green gates; single-Docker-host deploy queue.
 alwaysApply: true
 ---
 
 # Worktree & Deploy Queue Constitution
+
+## Mandatory session worktree (non-negotiable)
+
+**Every delivery session that will write files MUST start in a new isolated worktree.**
+Do not implement, test, or build on the MAIN working tree.
+
+| Session type | Placement |
+| --- | --- |
+| Read-only Q&A (no file writes) | **MAIN** — orchestration only |
+| Single mechanical edit (one line/typo; no behavior/API/plan change) | **MAIN** |
+| Any behavior-changing or multi-file delivery | **ISOLATED** — **mandatory** |
+| `mvn verify` / `pnpm build` / TDD inner loop | **ISOLATED only** — never on MAIN while slices are in flight |
+| Doc-sync + commit after slice Done | **MAIN** — only after stage 11 merge |
+
+### Session bootstrap (before first write)
+
+1. **`worktree-router`** — allocate `slice-id`, path, branch; create worktree.
+2. **`move_agent_to_root`** — parent and implementers operate in the feature path.
+3. Implement → gates → reviews → **`integration-merger`** (stage 11) → merge to `main`.
+4. **`post-task-doc-sync`** + **`post-task-commit-review`** on **MAIN** after merge.
+5. **`git worktree remove`** + **`prune`** — mandatory cleanup after successful merge.
+
+User same-session opt-out: `main-only`, `no-worktree` (honor immediately; state reason in placement record).
+
+## Naming
+
+| Item | Pattern | Example |
+| --- | --- | --- |
+| Directory | `../DGE-<slice-id>` | `../DGE-mgmt-ui-defects` |
+| Branch | `feat/<slice-id>` | `feat/mgmt-ui-defects` |
+| Base | `origin/main` | unless orchestrator names another integration base |
+
+Create (PowerShell, from **MAIN** repo root — MAIN must be clean or stash-first):
+
+```powershell
+git fetch origin
+git worktree add "..\DGE-<slice-id>" -b feat/<slice-id> origin/main
+```
+
+Skill: `.cursor/skills/worktree-isolation/SKILL.md`.
+
+## MAIN worktree role
+
+MAIN is the **integration line**, not the implementation sandbox:
+
+- Orchestration, read-only exploration, merge target.
+- Plan/doc-sync/commit **after** `integration-merger`.
+- **Forbidden on MAIN during active delivery:** feature code edits, `backend/target` builds, demo docx regeneration, parallel slice WIP.
+
+Shared OK across trees: Git object DB, `~/.m2`, pnpm store.
+**Not shared:** working tree, `backend/target/`, `frontend/dist/`, uncommitted files.
 
 ## Single Docker host
 
 This machine runs **one** Docker acceptance stack (`8080` / `4173`).
 
 - All deploys use `.\scripts\docker-deploy-queue.ps1` (mutex around `docker-deploy.ps1`).
-- Do **not** create a second compose project, `COMPOSE_PROJECT_NAME`, or port offsets for
-  “parallel acceptance”.
-- If the lock is held: wait or report `DEPLOY_QUEUED` / timeout — never bypass.
+- Do **not** create a second compose project, port offsets, or parallel stacks.
+- If the lock is held: wait or report `DEPLOY_QUEUED` — never bypass.
 
 Skill: `.cursor/skills/docker-deploy-queue/SKILL.md`.
 
-## Worktree isolation
-
-- Parallel agents or build-contending slices: decide via `worktree-router` before writes.
-- Naming: directory `../DGE-<slice-id>`, branch `feat/<slice-id>`.
-- Shared OK: Git objects, `~/.m2`, pnpm store. Not shared: working tree, `target/`, `dist/`.
-- After an isolated slice is green: `integration-merger` merges (or opens PR) then
-  **removes** the worktree (`git worktree remove` + `prune`).
-
-Skill: `.cursor/skills/worktree-isolation/SKILL.md`.
-
 ## Pipeline hooks
 
-`delivery-orchestrator` includes placement (start) and integration-merger (before doc sync)
-when the slice used an isolated worktree. See `delivery-orchestration-constitution.mdc`.
+`delivery-orchestrator` stage **0** = provision worktree (always for delivery).
+Stage **11** = `integration-merger` (merge + remove worktree) **before** doc-sync on MAIN.
+See `delivery-orchestration-constitution.mdc`.
 
 ## Forbidden
 
-- Two sessions writing the same worktree path for different slices.
+- Implementing delivery slices on MAIN (except read-only / single-line exceptions above).
+- Two sessions writing the same worktree for different slices.
+- Running `mvn verify` or full frontend gates on MAIN while a feature worktree is active.
 - Parallel `docker-deploy` from two worktrees.
-- Leaving feature worktrees after successful merge without cleanup (unless user opts out).
+- Claiming Done from a feature worktree without merge + MAIN doc-sync.
+- Leaving feature worktrees after successful merge without cleanup.

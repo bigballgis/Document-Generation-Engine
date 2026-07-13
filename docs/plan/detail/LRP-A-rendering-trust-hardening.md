@@ -1,11 +1,25 @@
 # LRP Wave LR-A — Rendering Trust Chain & File Safety 「渲染信任链与文件安全」
 
 **Program:** [launch-readiness-program.md](../launch-readiness-program.md)  
-**Wave status:** **In Progress** (activated 2026-07-04 after LR-B closure; core **A1/A2/A3** first — all independent of P22)  
+**Wave status:** **Done** (activated 2026-07-04 after LR-B closure; A1–A7 **Done** 2026-07-10 — see exit gate; Word-vs-LO / ADR-0042 Accepted + ADR-0043 slice B **explicitly deferred out of wave exit**; ADR-0041 Accepted residual **closed** 2026-07-10 via architecture-reviewer)  
 **Owner default:** `backend-engineer` (+ `deploy-engineer` for images, `doc-keeper` for ADRs)  
 **Prerequisites:** none for A1/A2/A3/A5; **A4/A6 depend on P22-T01/T02 Done**; **A7 depends on P23 demo packages (T04+ letter-grade)** — track via [P23 detail](./P23-demo-typography-layout-excellence.md)
 
-> **Session note:** `LR-A*` tasks only. Do **not** pick up `P22-*` (rendering write path — other session) or `CD-*` (CDP session). Where a task executes a CD-HARD task (A2→CD-HARD-T01, A6→CD-HARD-T03, A7→CD-HARD-T04), update the CDP row by reference — do not fork status.
+> **Sign-off note (2026-07-10):** **ADR-0041 → Accepted** (architecture-reviewer **PASS_WITH_NOTES**; slice `lrp-a5-adr-closeout`). 0041 Accepted residual **closed**. 0042/0043 remain **Proposed**. Wave LR-A Done honesty **PASS**. Remaining deferred out of wave: Word-vs-LO + ADR-0042 Accepted; ADR-0043 slice B (XSD/LO24). Do **not** treat those residuals as LR-C9 scope (LR-C9 separately scheduled 2026-07-10 as usability quick win).
+
+> **Completion note (2026-07-10):** **LR-A5 → Done** (slice `lrp-a5-adr-closeout`; docs-only; **merge `cc9e5f6`** → `main`; worktree removed). ADR triad on disk + indexed: [ADR-0041](../../adr/rendering-authoring/0041-rendering-font-baseline.md) **Accepted** (architecture-reviewer PASS_WITH_NOTES 2026-07-10; LR-A2 evidence solid); [ADR-0042](../../adr/rendering-authoring/0042-pagination-delta-budget.md) **Proposed** (Word n/a residual strengthened — no invented Word numbers); [ADR-0043](../../adr/rendering-authoring/0043-ooxml-output-validation-gate.md) **Proposed** (A6 slice A Done; XSD/LO24 residual). BDD **not-applicable**. Formal phase remains **None**. **Wave LR-A → Done** with explicit deferrals out of wave exit: (1) Word-vs-LO page delta + ADR-0042 Accepted on Word-equipped host; (2) ADR-0043 slice B (ECMA-376 XSD + LO24 headless). ADR-0041 Accepted residual **closed** by this review. Do **not** start LR-C9 *for these residuals* (LR-C9 later scheduled separately as usability quick win — not residual work). Gate evidence: docs-only + architecture-reviewer PASS_WITH_NOTES. **Task Master #13 → done**.
+
+> **Activation note (2026-07-10):** **LR-A5 → In Progress** (slice `lrp-a5-adr-closeout`; ISOLATED `D:/working/DGE-lrp-a5-adr-closeout` · `feat/lrp-a5-adr-closeout`; base `b4e4632`). Superseded by LR-A5 completion note above.
+
+> **Completion note (2026-07-10):** **LR-A6 → Done** (slice `lrp-a6-ooxml-gate`; merge `122d6d1` / `122d6d1f385bb28214373c63ef29740b0d447cb3`; worktree removed). OOXML output validation **fail-closed** gate delivered: `OoxmlOutputValidator` + `DocxAssembler` wiring + runtime error propagation (`OOXML_VALIDATION_FAILED`). Acceptance: structured well-formed accept; corrupt reject; corpus; runtime surfaces validation failure. **CD-HARD-T03 → Done** (executed-by-LR-A6). BDD **not-applicable**. Formal phase remains **None**. Wave LR-A remains **In Progress** (**A5** sole remaining — see activation note above). **Residuals (deferred):** ECMA-376 XSD; LO24 headless; ADR-0043 remains **Proposed**. **Gates:** `mvn verify` GREEN (1208+ tests); architecture-reviewer **PASS**; `docker-deploy-queue` DEPLOY_OK (healthz UP; UI 4173 200; image contains `OoxmlOutputValidator`); E2E skipped (not user-facing). **Task Master #12 → done**.
+
+> **Activation note (2026-07-10):** **LR-A6 → In Progress** (slice `lrp-a6-ooxml-gate`; ISOLATED `D:/working/DGE-lrp-a6-ooxml-gate` · `feat/lrp-a6-ooxml-gate`; base `a806b4c`). Superseded by LR-A6 completion note above.
+
+> **Completion note (2026-07-10):** **LR-A7 → Done** (slice `lrp-a7-pagination-measure`; merge `abf2048` / base `9a40b48`; worktree removed) **with documented exception**. Docker PDF corpus measurement gap **closed** (≥5 P23 letters + optional FOL; durable evidence). MS Word authoring baseline **unavailable** on measurement host → Word pages / delta columns remain **n/a** (`method=ms-word-unavailable-on-host`; not fabricated). True Word-vs-LO delta validation + ADR-0042 **Accepted** remain a **residual follow-up** (record under LR-A5/ADR-0042 — do **not** expand A5 Word residual or start LR-C9 for this residual; not a new In Progress task). **CD-HARD-T04 → Done** (executed-by-LR-A7) with same honesty note. BDD **not-applicable**. Formal phase remains **None**. Wave LR-A remains **In Progress** (**A5 Partial**; **LR-A6 Done** — see completion note above). Evidence: [pagination-delta-corpus.md](../pagination-delta-corpus.md); [docs/evidence/lrp-a7-pagination/](../../evidence/lrp-a7-pagination/); NFR §production rendering.
+
+> **Activation note (2026-07-10):** **LR-A7 → In Progress** (slice `lrp-a7-pagination-measure`; ISOLATED `D:/working/DGE-lrp-a7-pagination-measure` · `feat/lrp-a7-pagination-measure`; base `9a40b48`). Superseded by LR-A7 completion note above.
+
+> **Completion note (2026-07-10):** **LR-A4 → Done** (slice `lrp-a4-fail-closed-nodes`; merge `a523a09` / feature `4bccf9d`). Fail-closed publish/render for writer-unsupported nodes (`qrBarcodeRef`, `attachmentListRef`); no silent omit; full writers deferred. BDD **ready** (`BDD-LRP-A4-FAIL-CLOSED-001` A1–A9). Formal phase remains **None**. Optional follow-up (arch PASS_WITH_NOTES): pinned-module deep scan.
 
 ---
 
@@ -62,7 +76,7 @@
   4. `.cursor/rules/tech-stack-guardrails.mdc` — dependency policy
 - **Do NOT:** Bake licensed Microsoft fonts into images; switch base image; claim pixel-identical Word parity (that is ADR-0042 / LR-A7 territory).
 - **Steps:**
-  1. Verify exact Alpine package names against the company-approved repository per dependency policy (candidates: `font-noto-cjk` for CJK; `font-carlito` Calibri-metric-compatible; Caladea/Cambria-metric equivalent if available). Record the verification result in the ADR-0041 draft (LR-A5).
+  1. Verify exact **Debian jammy** apt package names against the company-approved repository per dependency policy (shipped: `fonts-noto-cjk`, `fonts-crosextra-carlito`, `fonts-crosextra-caladea`). Early drafts mentioned Alpine names (`font-noto-cjk`, `font-carlito`) — **not** the production baseline; see ADR-0041 drift table. Record verification in ADR-0041 (LR-A5).
   2. Add the verified font packages + `fc-cache -f` to **both** `backend/Dockerfile` and `backend/Dockerfile.packaged`.
   3. Add a build-stage assertion: `fc-list :lang=zh` non-empty (fail the image build if CJK fonts are missing).
   4. Add `RenderingFontSmokeTest` (backend): render a sample DOCX containing Chinese text + Calibri-styled runs → PDF; assert expected page count and that extracted PDF text contains the Chinese sample (no tofu/`#`/empty extraction).
@@ -77,84 +91,63 @@
 - **Maps:** CD-PIT-01; CD-HARD-T01; ADR-0041 (drafted by LR-A5).
 - **Status:** **Done** (2026-07-08; P23-T02 / CD-HARD-T01 executed — `fonts-noto-cjk`, `fonts-crosextra-carlito`, `fonts-crosextra-caladea` in both Dockerfiles; `fc-list :lang=zh` build assertion; `RenderingFontSmokeTest` green in `mvn verify`; gates BUILD SUCCESS)
 
-### LR-A3 — Upload deep validation + size limits
+### LR-A3 — Upload deep validation + size limits (**gap-close**, not greenfield)
 
 - **Owner agent:** backend-engineer (+ deploy-engineer for nginx)
-- **BDD:** **required** — rejection behavior (422 + messageKey) is user-visible; `behavior-spec-author` must publish a `ready` spec in `docs/behavior/` first.
-- **Read first:**
-  1. `backend/src/main/java/com/bank/docgen/master/service/MasterDocumentService.java` L342–349 (`validateDocxFile`)
-  2. All `MultipartFile` entry points (inventory via search) — master upload/replace first
-  3. `backend/src/main/resources/application.yml` (no `spring.servlet.multipart` block today)
-  4. `frontend/nginx.conf` (no `client_max_body_size` today)
-  5. `.cursor/skills/i18n-english-first/SKILL.md` — messageKey workflow
-- **Do NOT:** Implement virus scanning (record as **pending question** in `docs/requirements/requirements-plan.md` open questions — do not implement); block valid `.docx` produced by Word/LibreOffice; change the upload API shape.
-- **Steps:**
-  1. Wait for BDD spec `ready` (actor: master designer; trigger: upload/replace DOCX; boundary: wrong magic bytes, oversized file, corrupt package).
-  2. Add content probing to `validateDocxFile`: ZIP magic bytes (`PK\x03\x04`) + `OPCPackage.open` probe (reject with a **new** messageKey e.g. `api.error.master.invalidDocxContent` on failure); keep existing suffix check.
-  3. Configure `spring.servlet.multipart.max-file-size` / `max-request-size` in `application.yml` (externalized via env with sane defaults, e.g. 20MB/25MB — confirm defaults in BDD spec).
-  4. Add `client_max_body_size` to `frontend/nginx.conf` `/api/` location, aligned with backend limit.
-  5. Add the new messageKey to `backend/src/main/resources/i18n/messages_en.properties` (English base) and frontend `apiErrorEn.ts` + `apiErrorZhCn.ts`.
-  6. Tests: magic-byte reject, corrupt-zip reject, oversize reject (413/422 per spec), happy-path unchanged.
-  7. Record the virus-scanning pending question with owner + date.
-- **Acceptance (G/W/T):**
-  - **G** a file renamed to `.docx` that is not a ZIP/OPC package **W** uploaded as master **T** 422 with the new messageKey; nothing stored.
-  - **G** a file larger than the configured limit **W** uploaded through the 4173 proxy **T** rejected at nginx or backend with a translated, user-readable error (no raw 413 HTML).
-  - **G** a genuine Word-produced `.docx` **W** uploaded **T** accepted exactly as before.
-- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; `pnpm -C frontend lint` / `type-check` / `test` / `build`; Docker redeploy + manual upload smoke.
-- **Artifacts:** modified `MasterDocumentService.java`, `application.yml`, `frontend/nginx.conf`, i18n catalogs; new behavior spec in `docs/behavior/`; tests.
-- **Done when:** BDD scenarios green + gates green + pending question recorded + doc sync + commit review.
-- **Maps:** program §1 finding 6.
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-10 — slice `lrp-a3-upload-validation`; merge `e62c210` / feature `9d5a270`; formal phase **None**)
+- **BDD:** **ready** — [docs/behavior/lrp-a3-master-docx-upload-validation.md](../../behavior/lrp-a3-master-docx-upload-validation.md) (`BDD-LRP-A3-UPLOAD-001` v1.0.0); scenarios A1–A7 green via unit + E2E
+- **Nature:** **Gap-close** against partial implementation already in tree. Confirmed defaults: **50MB** file / **60MB** request + nginx. MessageKey for corrupt package: `api.error.master.docxCorrupt` (no `invalidDocxContent`). Virus scan = **non-goal** (pending Q — remains open).
+- **Delivered (gap-close):**
+  - `validateDocxFile`: suffix, Content-Type whitelist, service-level size (`docgen.master.max-docx-upload-bytes` 50MB), ZIP magic + OPC required entries → `docxCorrupt`
+  - Spring multipart `max-file-size: 50MB` / `max-request-size: 60MB` + oversize → unified envelope (`docxTooLarge`)
+  - nginx `client_max_body_size 60m` + 413 → readable UI mapping
+  - i18n keys `docxRequired` / `docxTooLarge` / `docxCorrupt`
+  - create + replace dialog client precheck; dedicated magic-byte unit test
+- **Gates (GREEN):** `mvn -B -ntp -f backend/pom.xml verify`; `pnpm -C frontend lint` / `type-check` / `test` / `build`; E2E `frontend/e2e/LRP-A3-master-docx-upload-validation.spec.ts` **5/5**; UIUX PASS; architecture PASS; `docker-deploy-queue.ps1` DEPLOY_OK (:8080/:4173)
+- **Maps:** program §1 finding 6; launch-readiness-gate LR-A3 checkbox.
 
 ### LR-A4 — Unsupported-node fail-closed closure
 
 - **Owner agent:** backend-engineer
-- **BDD:** **required** — publish-gate blocking and fidelity warnings are user-visible behavior.
+- **BDD:** **ready** (2026-07-10) — [docs/behavior/lrp-a4-fail-closed-unsupported-nodes.md](../../behavior/lrp-a4-fail-closed-unsupported-nodes.md) (`BDD-LRP-A4-FAIL-CLOSED-001` v1.0.0)
+- **Locked decision (user 2026-07-10):** **(b) hard-block at publish gate** for writer-unsupported declared types (`qrBarcodeRef`, `attachmentListRef`); **do not** implement full writers in this slice; **no silent omit** at publish/render (incl. nested paths). Empty `contentModuleRef` pinned remains F1 fail-closed (`CONTENT_MODULE_STRUCTURE_MISSING`) — not “warning-only”.
 - **Depends on:** **P22-T01/T02 Done** (writer + style catalog stabilized) — verify in [P22 detail](./P22-demo-expansion-rendering-fidelity.md) before starting.
 - **Read first:**
   1. `backend/src/main/java/com/bank/docgen/authoring/structured/StructuredContentNodeType.java` (`qrBarcodeRef`, `attachmentListRef`)
-  2. `backend/src/main/java/com/bank/docgen/rendering/StructuredContentDocxWriter.java` (esp. `expandContentModule` L222–234 silent return)
-  3. P18 node matrix + fidelity warning model ([P18 detail](./P18-structured-authoring-fidelity-engine.md))
-  4. [CDP-industry-pitfall-registry.md](./CDP-industry-pitfall-registry.md) — CD-PIT-07
-- **Do NOT:** Invent new node types; reopen P18/P22 phase status; weaken existing UNSUPPORTED_NODE validation to make rendering pass.
-- **Steps:**
-  1. Wait for BDD spec `ready` covering both decisions (render vs hard-block; warning vs silence).
-  2. Decide per node with the user via spec: `qrBarcodeRef`/`attachmentListRef` either (a) get a writer implementation, or (b) are **hard-blocked at the publish gate** when present (fail-closed) — record the decision in the spec + PRD note.
-  3. Implement the chosen path; if (b), extend `PublishGateService` checks + gate UI copy (existing pattern, COR-T01).
-  4. Change `StructuredContentDocxWriter.expandContentModule`: missing/blank pinned structure emits a **fidelity warning** (existing warning channel) instead of silent return.
-  5. Tests: publish blocked (or node rendered), fidelity warning emitted, regression on existing module expansion.
-- **Acceptance (G/W/T):**
-  - **G** a template whose structure contains a node with no writer support **W** publish is attempted **T** publish is blocked with a visible checklist reason (or the node renders correctly, per recorded decision) — never silent loss.
-  - **G** a `contentModuleRef` whose pinned structure is absent **W** DOCX is generated **T** output carries a fidelity warning naming the reference key; generation does not silently omit content without trace.
-- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; Docker redeploy + one manual generation showing the warning surface.
-- **Artifacts:** behavior spec; modified writer/publish gate + tests; PRD/domain note for the decision.
-- **Done when:** Decision recorded + scenarios green + gates green + doc sync + commit review.
-- **Maps:** CD-PIT-07; P18/P22; ledger seams «Structured content DOCX write» adjacency (closure itself stays with P22).
-- **Status:** Not Started
+  2. `backend/src/main/java/com/bank/docgen/rendering/StructuredContentDocxWriteSession.java` (top-level unsupported throw; nested silent-omit gap)
+  3. `PublishGateService` + `NodeMatrixValidationService` + `ReferenceNodeService`
+  4. P18 node matrix + fidelity warning model ([P18 detail](./P18-structured-authoring-fidelity-engine.md))
+  5. [CDP-industry-pitfall-registry.md](./CDP-industry-pitfall-registry.md) — CD-PIT-07
+  6. Behavior spec above (A1–A9)
+- **Do NOT:** Invent new node types; reopen P18/P22/F1 phase status; weaken existing UNSUPPORTED_NODE validation; implement QR/attachment writers here; allow warning-only publish for writer-unsupported nodes.
+- **Steps (implementation — after this BDD):**
+  1. Single authoritative writer-unsupported set shared by validation + writer.
+  2. Binding / node-matrix blockers for that set; extend `PublishGateService` (dedicated check **or** equivalent ANCHOR_INTEGRITY/BLOCKER_STATUS surfacing — see LR-A4-C5).
+  3. Close nested silent-omit in `StructuredContentDocxWriteSession` (condition/loop/module/inline paths).
+  4. Keep top-level render throw + F1 empty-pinned fail-closed; add A1–A9 tests.
+- **Acceptance (G/W/T):** see behavior spec §10 (A1–A9).
+- **Gates:** `mvn -B -ntp -f backend/pom.xml verify`; Docker redeploy + manual checklist evidence when implementing.
+- **Artifacts:** behavior spec (**Done**); modified writer/publish gate + tests; PRD/domain note (**Done** in BDD persist).
+- **Done when:** Scenarios green + gates green + doc sync + commit review (implementation slice).
+- **Maps:** CD-PIT-07; P18/P22; F1-A2 regression; ledger seams «Structured content DOCX write».
+- **Status:** **Done** (2026-07-10 — slice `lrp-a4-fail-closed-nodes`; merge `a523a09` / feature `4bccf9d`; Task Master #10)
+- **Delivered:** `WriterUnsupportedStructuredNodeTypes` + `DocxWriterHandledStructuredNodeTypes`; publish-gate hard-block; nested silent-omit closed in `StructuredContentDocxWriteSession`; A1–A9 tests green. Full QR/attachment writers **deferred**.
+- **Gates (GREEN):** `mvn -B -ntp -f backend/pom.xml verify` BUILD SUCCESS; architecture-reviewer **PASS_WITH_NOTES**; `docker-deploy-queue.ps1` exit 0 (healthz 8080 UP; UI 4173 200; compose `documentgenerationengine`).
+- **Deferred / optional:** virus scan (non-goal); full QR/attachment writers; pinned-module deep scan (arch note); CD-E2E T02–T12; Word-vs-LO delta on Word-equipped host (LR-A7 residual under ADR-0042); DGE-audit-governance.
 
 ### LR-A5 — ADR-0041/0042/0043 drafting
 
-- **Owner agent:** doc-keeper (+ architecture-reviewer sign-off)
+- **Status:** **Done** (2026-07-10 — slice `lrp-a5-adr-closeout`; docs-only; merge `cc9e5f6`)
+- **Owner agent:** doc-keeper (+ architecture-reviewer for any Accepted promotion)
 - **BDD:** not-applicable — documentation/decision records only.
-- **Read first:**
-  1. [CDP-industry-pitfall-registry.md](./CDP-industry-pitfall-registry.md) §4 (ADR outlines + target paths)
-  2. `docs/adr/0000-template.md` + `docs/adr/README.md` (metadata taxonomy)
-  3. [CDP program](../competitiveness-deepening-program.md) §8 (CD-0 exit gate marks these drafts «optional»)
-- **Do NOT:** Mark ADRs Accepted without architecture-reviewer review; edit accepted ADR decisions; renumber existing ADRs (0040 is the latest accepted; 0044 is reserved by LR-B1).
-- **Steps:**
-  1. Draft `docs/adr/rendering-authoring/0041-rendering-font-baseline.md` (required font bundle in deploy images; cite LR-A2 package verification).
-  2. Draft `docs/adr/rendering-authoring/0042-pagination-delta-budget.md` (acceptable Word-vs-LO page-count delta for v1; consumed by LR-A7).
-  3. Draft `docs/adr/rendering-authoring/0043-ooxml-output-validation.md` (OOXML validation gate in CI; consumed by LR-A6).
-  4. Status **Proposed**; request architecture-reviewer review; record outcome.
-  5. Update ADR index + [CDP program](../competitiveness-deepening-program.md) §8: the «optional before CD-0 close» line now reads **required for LRP launch readiness** (LR-E2 checklist input).
-- **Acceptance (G/W/T):**
-  - **G** the three drafts exist **W** ADR index is rebuilt **T** each is reachable from `docs/adr/README.md` with status Proposed and correct topic directory.
-  - **G** LR-E2 builds the launch checklist **W** it references font/pagination/OOXML gates **T** each resolves to one of these ADRs (no dangling anchor).
-- **Gates:** Doc-only — relative links resolve; architecture-reviewer review recorded.
-- **Artifacts:** three ADR drafts; ADR index row updates; CDP §8 one-line amendment.
-- **Done when:** Drafts merged + reviewed + indexed + doc sync + commit review.
+- **Delivered:**
+  1. Authored `docs/adr/rendering-authoring/0041-rendering-font-baseline.md` — **Accepted** (architecture-reviewer PASS_WITH_NOTES 2026-07-10; cites LR-A2 / P23-T02 / CD-HARD-T01 Debian jammy `fonts-noto-cjk`, `fonts-crosextra-carlito`, `fonts-crosextra-caladea`; `RenderingFontSmokeTest`; Alpine vs jammy package-name drift recorded).
+  2. Reconciled ADR-0042 — remains **Proposed**; Word-vs-LO residual strengthened (`ms-word-unavailable-on-host`; evidence paths; no invented Word numbers).
+  3. ADR-0043 — remains **Proposed** (A6 slice A Done; ECMA-376 XSD / LO24 deferred); triad cross-refs added.
+  4. ADR index + LRP-A / program / ledger synced; triad no longer Missing.
+- **Statuses decided (doc-keeper + architecture-reviewer):** 0041 **Accepted** (2026-07-10 sign-off). 0042/0043 remain **Proposed**. Do **not** Accept 0042 without Word-equipped host. Do **not** Accept 0043 on well-formedness alone.
+- **Residual (deferred out of Wave LR-A exit — not blocking A5/Wave Done):** Word page baselines + Word-vs-LO deltas on a Word-equipped host → then consider ADR-0042 Accepted / enforcement; ADR-0043 slice B (XSD/LO24). ADR-0041 Accepted residual **closed** by architecture-reviewer 2026-07-10. Do not invent numbers; do not treat these residuals as LR-C9 scope (LR-C9 is a separate usability slice).
 - **Maps:** CD-PIT-01/02/03; LR-A2/A6/A7 consume these decisions.
-- **Status:** Not Started
 
 ### LR-A6 — OOXML output validation gate
 
@@ -178,7 +171,10 @@
 - **Artifacts:** new validation test class + fixtures under `backend/src/test/`.
 - **Done when:** Gate active in verify + CD-HARD-T03 cross-referenced + doc sync + commit review.
 - **Maps:** CD-PIT-03; ADR-0043 (LR-A5).
-- **Status:** Not Started
+- **Status:** **Done** (2026-07-10 — slice `lrp-a6-ooxml-gate`; merge `122d6d1`; CD-HARD-T03 Done executed-by-LR-A6; Task Master #12)
+- **Delivered:** `OoxmlOutputValidator` + `DocxAssembler` fail-closed gate; runtime `OOXML_VALIDATION_FAILED` propagation; well-formed accept / corrupt reject / corpus coverage.
+- **Gates (GREEN):** `mvn -B -ntp -f backend/pom.xml verify` (1208+ tests); architecture-reviewer **PASS**; `docker-deploy-queue.ps1` DEPLOY_OK (healthz `:8080` UP; UI `:4173` 200; backend image contains `OoxmlOutputValidator`); E2E skipped (not user-facing).
+- **Residuals (deferred — not blocking Done):** ECMA-376 XSD validation; LO24 headless open proof; ADR-0043 remains **Proposed** (do not mark Accepted without architecture-reviewer).
 
 ### LR-A7 — Pagination delta budget + corpus
 
@@ -203,13 +199,16 @@
 - **Artifacts:** NFR §production rendering corpus table; ADR-0042 finalized budget; evidence PDFs referenced in ledger.
 - **Done when:** Corpus + budget merged + CD-HARD-T04 cross-referenced + doc sync + commit review.
 - **Maps:** CD-PIT-02; ADR-0042.
-- **Status:** **In Progress** (2026-07-09 — **F4 subset Done**: NFR §production rendering corpus schema + rerun procedure; row measurements _待测_ until Docker redeploy)
+- **Status:** **Done** (2026-07-10 — documented exception: Docker PDF corpus closed; Word pages/delta n/a until Word-equipped host; ADR-0042 remains Proposed; CD-HARD-T04 Done executed-by-LR-A7)
+- **Residual (not a new In Progress task):** Re-measure Word baselines + Word-vs-LO deltas on a Word-equipped host; only then consider ADR-0042 Accepted / enforcement. Track under LR-A5 / ADR-0042 notes — do not expand LR-A6 or LR-C9 for this residual.
 
 ---
 
 ## 2. Exit gate (Wave LR-A)
 
-- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); LR-A3 schedulable; LR-A5 ADR drafts reviewed
-- [ ] LR-A4/A6 Done once P22-T01/T02 Done; LR-A7 Done once **P23** letter-grade demo corpus exists (≥5 types)
-- [ ] No structured node can silently disappear from generated DOCX (blocked or warned)
-- [ ] Ledger § LRP wave row updated with gate evidence per task
+- [x] LR-A1 Done (2026-07-09 — F4); LR-A2 Done (2026-07-08 — P23); **LR-A3 Done** (2026-07-10 gap-close; merge `e62c210`); **LR-A4 Done** (2026-07-10; merge `a523a09`); **LR-A5 Done** (2026-07-10 — `lrp-a5-adr-closeout`; triad on disk; **ADR-0041 Accepted** via architecture-reviewer); **LR-A6 Done** (2026-07-10 — merge `122d6d1`; CD-HARD-T03 executed-by-LR-A6); **LR-A7 Done** (2026-07-10 — Docker PDF corpus; Word delta residual deferred out of wave exit)
+- [x] LR-A4 Done (writer-unsupported fail-closed; full writers deferred)
+- [x] LR-A6 Done (2026-07-10 — `lrp-a6-ooxml-gate`; merge `122d6d1`)
+- [x] Writer-unsupported declared nodes (`qrBarcodeRef`/`attachmentListRef`) cannot silently disappear (publish hard-block + render fail-closed) — full writers still deferred
+- [x] Ledger § LRP wave row updated with A5 gate evidence (docs-only; 2026-07-10)
+- [x] **Wave LR-A Done** — Word-vs-LO / ADR-0042 Accepted and ADR-0043 slice B (XSD/LO24) are **explicitly deferred out of wave exit**; ADR-0041 Accepted residual **closed** (architecture-reviewer PASS_WITH_NOTES 2026-07-10). Post-wave follow-ups are not LR-C9; not a new In Progress task unless scheduled

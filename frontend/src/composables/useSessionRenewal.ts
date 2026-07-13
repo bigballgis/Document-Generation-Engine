@@ -15,10 +15,10 @@ import { useSessionStore } from '@/stores/session'
  * (spec B9). Cross-tab renewal races are accepted behavior handled by the
  * shared 401 flow (spec SCEN-CONCURRENT-01, COR-F03).
  */
-export const SESSION_RENEWAL_TICK_MS = 60_000
-export const SESSION_RENEWAL_WINDOW_MS = 5 * 60_000
-export const SESSION_REMINDER_WINDOW_MS = 10 * 60_000
-export const SESSION_ACTIVITY_WINDOW_MS = 5 * 60_000
+const SESSION_RENEWAL_TICK_MS = 60_000
+const SESSION_RENEWAL_WINDOW_MS = 5 * 60_000
+const SESSION_REMINDER_WINDOW_MS = 10 * 60_000
+const SESSION_ACTIVITY_WINDOW_MS = 5 * 60_000
 
 const ACTIVITY_THROTTLE_MS = 5_000
 const ACTIVITY_EVENTS = ['pointerdown', 'pointermove', 'keydown'] as const

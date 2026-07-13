@@ -70,6 +70,7 @@ export const apiErrorZhCn = {
     structuredContentInvalid: "结构化内容定义无效。",
     structuredContentUnknownNodeType: "结构化内容包含不支持的节点类型。",
     structuredContentForbiddenConstruct: "结构化内容包含禁止使用的结构。",
+    invalidPasteCleaningEvidence: "粘贴清洗证据无法序列化。",
     publishGateBlocked: "绑定校验通过前无法发布。",
     submitForApprovalGateBlocked: "检查通过前无法提交审批。",
     decisionReasonCategoryRequired: "测试不通过或审批驳回时必须选择原因类别。",
@@ -105,7 +106,9 @@ export const apiErrorZhCn = {
     batchTestRunNotFound: "未找到批量测试运行记录。",
     unsupportedNodeType: "模板包含无法渲染的结构化内容节点类型，请在发布前移除或替换不支持的节点。",
     imageAssetNotFound: "找不到引用的图片资源。",
-    sealAssetNotFound: "找不到引用的印章资源。"
+    sealAssetNotFound: "找不到引用的印章资源。",
+    ooxmlValidationFailed:
+      "生成的文档未通过 OOXML 校验，未予保存。请修正结构化内容后重新生成。"
   },
   apimgmt: {
     policyNotFound: "未找到 API 策略。",
@@ -189,6 +192,7 @@ export const apiErrorZhCn = {
   },
   collaboration: {
     accessDenied: "您无权查看协作待办事项。",
-    queueDenied: "您无权查看此协作待办队列。"
+    queueDenied: "您无权查看此协作待办队列。",
+    workItemNotFound: "未找到该协作待办事项。"
   }
 } as const

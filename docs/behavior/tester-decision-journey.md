@@ -20,6 +20,8 @@
 - **When** Fail test → 原因分类 + 影响范围 + 修复建议（必填）
 - **Then** 模板回到需作者修复状态；作者 Dashboard 出现整改待办
 
+> **Fail-closed（保真未查看）：** 见 [fidelity-viewed-confirmation-journey.md](./fidelity-viewed-confirmation-journey.md) **BDD-CDP-FID-001**（CD-E2E-T10）— 未勾选保真「已查看」不得 Pass。
+
 ## 证据
 
 `frontend/e2e/CDP-E2E-T02-tester-pass-decision.spec.ts`；manifest PASS。

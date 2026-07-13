@@ -4,7 +4,6 @@ import com.bank.docgen.authoring.structured.MasterStyleCatalogService;
 import com.bank.docgen.authoring.structured.NodeMatrixValidationService;
 import com.bank.docgen.authoring.structured.NumberingService;
 import com.bank.docgen.authoring.structured.ReferenceNodeService;
-import com.bank.docgen.authoring.structured.StructuredContentSchemaException;
 import com.bank.docgen.authoring.structured.StructuredContentSchemaValidator;
 import com.bank.docgen.authoring.structured.TableComponentService;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
@@ -19,15 +18,12 @@ import com.bank.docgen.template.api.UpsertVariableSchemaRequest;
 import com.bank.docgen.template.api.VariableSchemaView;
 import com.bank.docgen.template.domain.AnchorContentType;
 import com.bank.docgen.template.domain.BindingValidationStatus;
-import com.bank.docgen.template.domain.VariableType;
 import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
-import com.bank.docgen.template.persistence.VariableSchemaEntity;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,27 +32,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TemplateBindingConfigurationService {
 
-    private static final Set<VariableType> SUPPORTED_TYPES = Set.of(VariableType.values());
-
-    private final VariableSchemaRepository variableSchemaRepository;
     private final AnchorBindingRepository anchorBindingRepository;
-    private final TemplateVersionRepository templateVersionRepository;
     private final MasterDocumentRepository masterDocumentRepository;
-    private final ObjectMapper objectMapper;
-    private final StructuredContentSchemaValidator structuredContentSchemaValidator;
-    private final NodeMatrixValidationService nodeMatrixValidationService;
-    private final MasterStyleCatalogService masterStyleCatalogService;
-    private final TableComponentService tableComponentService;
-    private final ReferenceNodeService referenceNodeService;
-    private final NumberingService numberingService;
     private final TemplateViewMapper templateViewMapper;
+    private final TemplateBindingStatusSupport statusSupport;
+    private final TemplateBindingMutationSupport mutations;
 
     public TemplateBindingConfigurationService(
             VariableSchemaRepository variableSchemaRepository,
@@ -72,18 +58,28 @@ public class TemplateBindingConfigurationService {
             NumberingService numberingService,
             TemplateViewMapper templateViewMapper
     ) {
-        this.variableSchemaRepository = variableSchemaRepository;
         this.anchorBindingRepository = anchorBindingRepository;
-        this.templateVersionRepository = templateVersionRepository;
         this.masterDocumentRepository = masterDocumentRepository;
-        this.objectMapper = objectMapper;
-        this.structuredContentSchemaValidator = structuredContentSchemaValidator;
-        this.nodeMatrixValidationService = nodeMatrixValidationService;
-        this.masterStyleCatalogService = masterStyleCatalogService;
-        this.tableComponentService = tableComponentService;
-        this.referenceNodeService = referenceNodeService;
-        this.numberingService = numberingService;
         this.templateViewMapper = templateViewMapper;
+        this.statusSupport = new TemplateBindingStatusSupport(
+                variableSchemaRepository,
+                objectMapper,
+                structuredContentSchemaValidator,
+                nodeMatrixValidationService,
+                masterStyleCatalogService,
+                tableComponentService,
+                referenceNodeService,
+                numberingService
+        );
+        this.mutations = new TemplateBindingMutationSupport(
+                variableSchemaRepository,
+                anchorBindingRepository,
+                templateVersionRepository,
+                masterDocumentRepository,
+                objectMapper,
+                templateViewMapper,
+                statusSupport
+        );
     }
 
     @Transactional
@@ -91,43 +87,12 @@ public class TemplateBindingConfigurationService {
             TemplateVersionEntity version,
             UpsertVariableSchemaRequest request
     ) {
-        validateVariableRequest(request);
-        var existing = variableSchemaRepository.findByTemplateVersionIdAndVariableKey(
-                version.getId(),
-                request.variableKey()
-        );
-        VariableSchemaEntity entity;
-        if (existing.isPresent()) {
-            entity = existing.get();
-            entity.update(
-                    request.variableType(),
-                    request.required(),
-                    request.defaultValue(),
-                    request.enumValues(),
-                    request.description(),
-                    request.computeExpression()
-            );
-        } else {
-            entity = new VariableSchemaEntity(
-                    UUID.randomUUID(),
-                    version.getId(),
-                    request.variableKey(),
-                    request.variableType(),
-                    request.required(),
-                    request.defaultValue(),
-                    request.enumValues(),
-                    request.description(),
-                    request.computeExpression()
-            );
-        }
-        variableSchemaRepository.save(entity);
-        return templateViewMapper.toVariableView(entity);
+        return mutations.upsertVariable(version, request);
     }
 
     @Transactional
     public void deleteVariable(UUID templateVersionId, String variableKey) {
-        variableSchemaRepository.findByTemplateVersionIdAndVariableKey(templateVersionId, variableKey)
-                .ifPresent(variableSchemaRepository::delete);
+        mutations.deleteVariable(templateVersionId, variableKey);
     }
 
     @Transactional
@@ -136,38 +101,7 @@ public class TemplateBindingConfigurationService {
             TemplateVersionEntity version,
             UpsertAnchorBindingRequest request
     ) {
-        validateStructuredContent(request.structuredContentJson());
-        MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(masterId)
-                .orElseThrow(MasterNotFoundException::new);
-        Set<String> masterAnchors = new HashSet<>();
-        master.getAnchors().forEach(anchor -> masterAnchors.add(anchor.getAnchorId()));
-        Set<String> declaredVariableKeys = loadDeclaredVariableKeys(version.getId());
-        BindingValidationStatus status = computeBindingStatus(
-                request.anchorId(),
-                request.declaredContentType(),
-                masterAnchors,
-                List.of(),
-                request.structuredContentJson(),
-                declaredVariableKeys,
-                masterId
-        );
-        var existing = anchorBindingRepository.findByTemplateVersionIdAndAnchorId(version.getId(), request.anchorId());
-        AnchorBindingEntity entity;
-        if (existing.isPresent()) {
-            entity = existing.get();
-            entity.update(request.declaredContentType(), request.structuredContentJson(), status);
-        } else {
-            entity = new AnchorBindingEntity(
-                    UUID.randomUUID(),
-                    version.getId(),
-                    request.anchorId(),
-                    request.declaredContentType(),
-                    request.structuredContentJson(),
-                    status
-            );
-        }
-        anchorBindingRepository.save(entity);
-        return templateViewMapper.toBindingView(entity);
+        return mutations.upsertBinding(masterId, version, request);
     }
 
     @Transactional
@@ -175,13 +109,7 @@ public class TemplateBindingConfigurationService {
             TemplateVersionEntity version,
             List<CompositionRuleView> rules
     ) {
-        try {
-            version.setRulesJson(objectMapper.writeValueAsString(rules));
-        } catch (JsonProcessingException exception) {
-            throw new TemplateValidationException("api.error.template.invalidRulesJson");
-        }
-        templateVersionRepository.save(version);
-        return templateViewMapper.loadRules(version);
+        return mutations.saveRules(version, rules);
     }
 
     @Transactional
@@ -201,7 +129,7 @@ public class TemplateBindingConfigurationService {
         int missing = 0;
         int duplicate = 0;
         int incompatible = 0;
-        Set<String> declaredVariableKeys = loadDeclaredVariableKeys(version.getId());
+        Set<String> declaredVariableKeys = statusSupport.loadDeclaredVariableKeys(version.getId());
         for (AnchorBindingEntity binding : bindings) {
             BindingValidationStatus status = computeBindingStatus(
                     binding.getAnchorId(),
@@ -210,10 +138,16 @@ public class TemplateBindingConfigurationService {
                     bindings.stream().map(AnchorBindingEntity::getAnchorId).toList(),
                     binding.getStructuredContentJson(),
                     declaredVariableKeys,
-                    masterId
+                    masterId,
+                    binding.getPasteCleaningEvidenceJson()
             );
             if (status != binding.getValidationStatus()) {
-                binding.update(binding.getDeclaredContentType(), binding.getStructuredContentJson(), status);
+                binding.update(
+                        binding.getDeclaredContentType(),
+                        binding.getStructuredContentJson(),
+                        status,
+                        binding.getPasteCleaningEvidenceJson()
+                );
                 anchorBindingRepository.save(binding);
             }
             views.add(templateViewMapper.toBindingView(binding));
@@ -247,55 +181,41 @@ public class TemplateBindingConfigurationService {
             Set<String> declaredVariableKeys,
             UUID masterId
     ) {
-        if (!masterAnchors.contains(anchorId)) {
-            return BindingValidationStatus.MISSING_ANCHOR;
-        }
-        long count = allAnchorIds.stream().filter(id -> id.equals(anchorId)).count();
-        if (count > 1) {
-            return BindingValidationStatus.DUPLICATE_BINDING;
-        }
-        if (declaredContentType == AnchorContentType.IMAGE && anchorId.contains("TEXT")) {
-            return BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE;
-        }
-        if (structuredContentJson != null && !structuredContentJson.isBlank()) {
-            var fidelity = nodeMatrixValidationService.validate(structuredContentJson, declaredVariableKeys);
-            var styleCatalog = masterStyleCatalogService.loadForMaster(masterId);
-            var styleFidelity = masterStyleCatalogService.validate(structuredContentJson, styleCatalog);
-            var tableFidelity = tableComponentService.validateStructuredContent(structuredContentJson, declaredVariableKeys);
-            var referenceFidelity = referenceNodeService.validateStructuredContent(structuredContentJson);
-            var numberingFidelity = numberingService.validateStructuredContent(structuredContentJson);
-            if (fidelity.hasBlockers()
-                    || styleFidelity.hasBlockers()
-                    || tableFidelity.hasBlockers()
-                    || referenceFidelity.fidelity().hasBlockers()
-                    || numberingFidelity.fidelity().hasBlockers()) {
-                return BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE;
-            }
-        }
-        return BindingValidationStatus.VALID;
+        return computeBindingStatus(
+                anchorId,
+                declaredContentType,
+                masterAnchors,
+                allAnchorIds,
+                structuredContentJson,
+                declaredVariableKeys,
+                masterId,
+                null
+        );
     }
 
-    private Set<String> loadDeclaredVariableKeys(UUID templateVersionId) {
-        return variableSchemaRepository.findByTemplateVersionIdOrderByVariableKeyAsc(templateVersionId).stream()
-                .map(VariableSchemaEntity::getVariableKey)
-                .collect(Collectors.toSet());
+    BindingValidationStatus computeBindingStatus(
+            String anchorId,
+            AnchorContentType declaredContentType,
+            Set<String> masterAnchors,
+            List<String> allAnchorIds,
+            String structuredContentJson,
+            Set<String> declaredVariableKeys,
+            UUID masterId,
+            String pasteCleaningEvidenceJson
+    ) {
+        return statusSupport.computeBindingStatus(
+                anchorId,
+                declaredContentType,
+                masterAnchors,
+                allAnchorIds,
+                structuredContentJson,
+                declaredVariableKeys,
+                masterId,
+                pasteCleaningEvidenceJson
+        );
     }
 
     void validateVariableRequest(UpsertVariableSchemaRequest request) {
-        if (request.variableType() == null || !SUPPORTED_TYPES.contains(request.variableType())) {
-            throw new TemplateValidationException("api.error.template.variableTypeUnsupported");
-        }
-        if (request.variableType() == VariableType.ENUM
-                && (request.enumValues() == null || request.enumValues().isBlank())) {
-            throw new TemplateValidationException("api.error.template.enumValuesRequired");
-        }
-    }
-
-    private void validateStructuredContent(String json) {
-        try {
-            structuredContentSchemaValidator.validate(json);
-        } catch (StructuredContentSchemaException ex) {
-            throw new TemplateValidationException(ex.messageKey());
-        }
+        statusSupport.validateVariableRequest(request);
     }
 }

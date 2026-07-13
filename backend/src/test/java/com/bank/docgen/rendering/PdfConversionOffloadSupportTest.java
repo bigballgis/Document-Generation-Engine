@@ -152,6 +152,29 @@ class PdfConversionOffloadSupportTest {
                 .isInstanceOf(PdfConversionCapacityExceededException.class);
     }
 
+    @Test
+    void recordsRejectionCallbackWhenPoolSaturated() {
+        executor = boundedExecutor(1);
+        executor.execute(() -> {
+            try {
+                Thread.sleep(2_000);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        awaitActiveWorker(executor);
+        java.util.concurrent.atomic.AtomicInteger rejections = new java.util.concurrent.atomic.AtomicInteger();
+
+        assertThatThrownBy(() -> PdfConversionOffloadSupport.executeOffloaded(
+                executor,
+                5,
+                () -> new byte[]{1},
+                rejections::incrementAndGet
+        ))
+                .isInstanceOf(PdfConversionCapacityExceededException.class);
+        assertThat(rejections.get()).isEqualTo(1);
+    }
+
     private void awaitActiveWorker(ThreadPoolTaskExecutor taskExecutor) {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
         while (System.nanoTime() < deadline) {

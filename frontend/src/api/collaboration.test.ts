@@ -6,6 +6,7 @@ vi.mock('@/api/http', () => ({
   http: {
     get: vi.fn(),
     put: vi.fn(),
+    post: vi.fn(),
   },
 }))
 
@@ -13,6 +14,7 @@ describe('collaboration API', () => {
   beforeEach(() => {
     vi.mocked(http.get).mockReset()
     vi.mocked(http.put).mockReset()
+    vi.mocked(http.post).mockReset()
   })
 
   it('lists collaboration work items with optional filters', async () => {
@@ -102,5 +104,76 @@ describe('collaboration API', () => {
     }))
     expect(saved.groupCode).toBe('RETAIL')
     expect(saved.testThresholdHours).toBe(24)
+  })
+
+  it('fetches collaboration notification unread count', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: { unreadCount: 3 },
+      },
+    })
+
+    const result = await collaborationApi.getCollaborationNotificationUnreadCount()
+
+    expect(http.get).toHaveBeenCalledWith('/collaboration-notifications/unread-count')
+    expect(result.unreadCount).toBe(3)
+  })
+
+  it('lists collaboration notifications', async () => {
+    vi.mocked(http.get).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: [
+          {
+            workItemId: 'wi-1',
+            templateId: 'tpl-1',
+            templateName: 'Loan Notice',
+            groupCode: 'RETAIL',
+            queue: 'TEST',
+            triggerType: 'SUBMIT_FOR_TEST',
+            summaryText: 'Template submitted for testing',
+            createdAt: '2026-06-26T10:00:00Z',
+            ageSeconds: 120,
+            read: false,
+          },
+        ],
+      },
+    })
+
+    const items = await collaborationApi.listCollaborationNotifications()
+
+    expect(http.get).toHaveBeenCalledWith('/collaboration-notifications')
+    expect(items).toHaveLength(1)
+    expect(items[0]?.workItemId).toBe('wi-1')
+    expect(items[0]?.read).toBe(false)
+  })
+
+  it('marks one collaboration notification read', async () => {
+    vi.mocked(http.post).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: { unreadCount: 1 },
+      },
+    })
+
+    const result = await collaborationApi.markCollaborationNotificationRead('wi-1')
+
+    expect(http.post).toHaveBeenCalledWith('/collaboration-notifications/wi-1/read')
+    expect(result.unreadCount).toBe(1)
+  })
+
+  it('marks all collaboration notifications read', async () => {
+    vi.mocked(http.post).mockResolvedValue({
+      data: {
+        metadata: {},
+        result: { unreadCount: 0 },
+      },
+    })
+
+    const result = await collaborationApi.markAllCollaborationNotificationsRead()
+
+    expect(http.post).toHaveBeenCalledWith('/collaboration-notifications/read-all')
+    expect(result.unreadCount).toBe(0)
   })
 })

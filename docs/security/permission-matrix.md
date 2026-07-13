@@ -11,6 +11,8 @@
 - [产品需求说明](../product/PRD.md)
 - [领域模型](../domain/domain-model.md)
 - [文档治理规则](../governance.md)
+- [ADR-0048 Audit Data Retention & Archival Policy](../adr/operations/0048-audit-data-retention-policy.md)（Accepted — Tier-1 90/365）
+- [LR-D1 行为规格](../behavior/lrp-d1-audit-retention.md)
 
 ## 2. 权限设计原则
 
@@ -69,7 +71,7 @@
 | 操作 | 全局管理员 | 分组管理员 | 母版设计人员 | 模板编排人员 | 测试人员 | 审批人员 | 说明 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 选择母版创建模板 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 分组管理员可在被授权组范围内执行模板常规操作；母版设计人员可以完整参与模板创建与编排；模板编排人员负责选择母版创建模板；只能选择审核通过的母版创建或更新模板；非主责角色不获得额外模板编辑权限。 |
-| 配置锚点内容 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 分组管理员可在被授权组范围内配置锚点内容；母版设计人员可以完整参与模板创建与编排；模板编排人员负责配置锚点内容；非主责角色不获得额外模板编辑权限。 |
+| 配置锚点内容 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 分组管理员可在被授权组范围内配置锚点内容；母版设计人员可以完整参与模板创建与编排；模板编排人员负责配置锚点内容；非主责角色不获得额外模板编辑权限。粘贴清洗 `POST .../paste-clean` 与绑定 upsert/validate 携带非敏感 `pasteCleaningEvidence` **复用本行权限**（`authorTemplates` / 配置锚点内容），**不**新增独立端点或角色位（ops-paste-binding-seam）。 |
 | 配置模板变量 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 分组管理员可在被授权组范围内配置模板变量；母版设计人员可以完整参与模板创建与编排；模板编排人员负责配置模板变量；非主责角色不获得额外模板编辑权限。 |
 | 配置条件/循环规则 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 分组管理员可在被授权组范围内配置条件/循环规则；母版设计人员可以完整参与模板创建与编排；模板编排人员负责配置条件/循环规则；非主责角色不获得额外模板编辑权限。 |
 | 维护模板测试数据集 | 是 | 被授权组范围内 | 是 | 是 | 否 | 否 | 模板测试数据集用于测试生成、生成预览、变量 Schema 校验、规则校验和覆盖率计算；同一模板或发布候选可保存多组命名测试样例，并标记场景名称、必选或可选、覆盖标签和数据集版本；全局管理员、分组管理员、母版设计人员和模板编排人员可按范围创建、编辑、复制、派生和删除；测试人员和审批人员只能在测试、审批材料中查看和判定，不获得维护权限；数据集进入测试生成、测试记录、审批材料或发布证据后锁定不可变，修改需复制或派生新版本并重新执行测试生成、测试判定和后续审批发布流程。 |
@@ -354,10 +356,23 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - 分组管理员只能导出被授权组范围内的审计记录。
 - 母版设计人员、模板编排人员、测试人员、审批人员、API 调用方不因该角色本身获得审计导出权限。
 
-已确认审计保留规则：
+已确认审计保留规则（Tier-1 / Tier-2 — [ADR-0048](../adr/operations/0048-audit-data-retention-policy.md) / [LR-D1 BDD](../behavior/lrp-d1-audit-retention.md)）：
 
-- 审计记录保留期限可配置，默认保留 5 年。
-- 审计保留期限可按环境、监管或业务要求配置。
+**Confirmed — Tier-1 在线热库（PostgreSQL；LR-D1 交付）：**
+
+- `management_audit_event`：默认保留 **90 天**；超龄行 **硬删除**（`event_at < cutoff`）；可通过 `docgen.audit.management-retention-days` 配置。
+- `runtime_generation_audit_event`：默认保留 **365 天**；超龄行 **硬删除**；可通过 `docgen.audit.runtime-retention-days` 配置。
+- 处置方式与 [ADR-0040](../adr/api-management/0040-api-package-access-and-invocation-retention.md) 调用记录清理一致：**硬删除**，无 soft-delete；v1 **不做**热库归档导出。
+- 平台级 purge-evidence（`AUDIT_RETENTION_PURGE`）仅 **审计管理员 / 全局管理员** 可查；**分组管理员** 不可见无 `group_code` 的平台级 purge 行。
+
+**Deferred — Tier-2 归档（对象存储；非 D1）：**
+
+- 历史表述「默认保留 **5 年**」表示 **多年合规 / 监管留存意图**，由 **Tier-2 归档**承担（待建）；**不得**将「5 年」解读为 Tier-1 PostgreSQL 热数据默认窗口。
+- [ADR-0030](../adr/operations/0030-operational-platform-baseline.md) 中「DB 180 天 + 对象存储 3 年」为平台级早期基线行；对上述两张审计表的 **Tier-1 运营窗口**以本矩阵 + ADR-0048 为准（不静默改写 ADR-0030 Accepted 决策正文）。
+
+**Pending（非阻塞）：**
+
+- Tier-2 归档格式、确切年限（5 年 / 3 年 / 7 年叙述）与取回流程 — 待未来切片确认。
 
 ## 11. 统一授权与敏感数据保护
 
@@ -463,7 +478,7 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 
 | capability | 角色 |
 | --- | --- |
-| `manageMasters` | GLOBAL, GROUP |
+| `manageMasters` | GLOBAL, GROUP, MASTER_DESIGNER |
 | `reviewMasters` | GLOBAL, GROUP |
 | `authorTemplates` | GLOBAL, GROUP, MASTER_DESIGNER, TEMPLATE_AUTHOR |
 | `decideTests` | GLOBAL, GROUP, TEMPLATE_TESTER |
@@ -483,6 +498,7 @@ AD Group 解析、缓存命中、缓存失效、解析失败和授权拒绝需�
 - 已登录但无目标路由权限时返回禁止访问结果（前端阻断 + 统一无权访问反馈），并采用 fail-closed。
 - 禁止访问响应不得泄露未授权资源存在性细节、未授权组详情或敏感配置明文。
 - 禁止访问事件必须写入安全审计摘要，包含主体摘要、入口路由标识、判定结果和拒绝原因码。
+- **耐久化（LR-D7 confirmed）：** 登录成功/失败、forbidden-route / 管理端 403、文档下载授予/拒绝须持久化为 `management_audit_event` 行（`SECURITY_*` event types），经既有 Activity log / management audit 查询按 §10 作用域可见；保留 SLF4J 摘要日志；持久化失败不得阻断登录主路径。权威场景见 [lrp-d7-durable-security-audit.md](../behavior/lrp-d7-durable-security-audit.md)。
 
 ### 13.4 已解决的前 T01 待确认项
 

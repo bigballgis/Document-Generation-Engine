@@ -33,6 +33,8 @@ class DocgenRenderingPropertiesBindingTest {
                 .isEqualTo("${PDF_CONVERSION_QUEUE_CAPACITY:0}");
         assertThat(properties.getProperty("docgen.rendering.pagination-delta-budget-pages"))
                 .isEqualTo("${PAGINATION_DELTA_BUDGET_PAGES:1}");
+        assertThat(properties.getProperty("docgen.rendering.ooxml-validation-enabled"))
+                .isEqualTo("${DOCGEN_OOXML_VALIDATION_ENABLED:true}");
     }
 
     @Test
@@ -71,6 +73,15 @@ class DocgenRenderingPropertiesBindingTest {
     }
 
     @Test
+    void bindsOoxmlValidationEnabledFromProperties() {
+        DocgenRenderingProperties properties = bind(Map.of(
+                "docgen.rendering.ooxml-validation-enabled", "false"
+        ));
+
+        assertThat(properties.isOoxmlValidationEnabled()).isFalse();
+    }
+
+    @Test
     void renderingPropertiesDefaultsMatchCorP02AndSorP03() {
         DocgenRenderingProperties properties = new DocgenRenderingProperties();
 
@@ -78,6 +89,7 @@ class DocgenRenderingPropertiesBindingTest {
         assertThat(properties.getConversionTimeoutSeconds()).isEqualTo(120);
         assertThat(properties.getConversionQueueCapacity()).isEqualTo(0);
         assertThat(properties.getPaginationDeltaBudgetPages()).isEqualTo(1);
+        assertThat(properties.isOoxmlValidationEnabled()).isTrue();
     }
 
     private static DocgenRenderingProperties bind(Map<String, String> source) {

@@ -17,7 +17,11 @@ related:
   - .github/skills/long-term-maintainability-fences/SKILL.md
   - .github/skills/code-review-static-scan/SKILL.md
   - .github/skills/task-auto-workflow/SKILL.md
-   - docs/adr/technology-stack/0035-implementation-realization-and-quality-gate-baseline.md
+  - docs/adr/technology-stack/0035-implementation-realization-and-quality-gate-baseline.md
+  - docs/behavior/deps-security-refresh.md
+  - docs/architecture/m9-task-sheet.md
+  - docs/architecture/m9-t02-closure-plan.md
+  - docs/evidence/security/README.md
 ---
 
 # Quality Gate Threshold Baseline
@@ -49,6 +53,14 @@ The following are blocking for commit and push:
 2. Dependency governance:
    - New dependency requires explicit rationale in task/review summary.
    - Unpinned dependency for production path is blocking unless toolchain requires range pinning with lockfile.
+3. Hygiene slice constraints (Task Master **#49** / `deps-security-refresh`, **Done** 2026-07-13) — **confirmed session constraints** remain durable policy (ops hygiene; not product requirements):
+   - Remediations stay inside accepted stack ADRs and tech-stack guardrails; company-approved repositories only.
+   - Spring Boot remains on the **3.3.x** line (current pin `3.3.13`); no Boot **3.4+ / 3.5** major-line jump without explicit user confirmation + ADR update.
+   - ShedLock remains on the **6.x** line (current pin `6.10.0`; see ADR-0044 appendix); no **7.x** jump without confirmation + ADR update.
+   - No major **Vue / Vite** line jump without explicit user confirmation + ADR update ([ADR-0022](../adr/technology-stack/0022-basic-technology-stack-baseline.md) / [ADR-0029](../adr/technology-stack/0029-frontend-application-stack-baseline.md)).
+   - Critical/High in changed dependency scope: remediate via baseline-safe bump **or** record an exception with the metadata in [Exception Handling](#exception-handling) (aligns with M9-T03 pattern: owner + expiry + cleanup task). Open #49 exception: Vitest GHSA-5xrq-8626-4rwp → cleanup **#50** expires **2026-10-13**.
+   - This slice does **not** close M9-T02 org intranet SCA upload; SBOM/SCA evidence ownership remains [docs/evidence/security/](../evidence/security/README.md) + [m9-t02-closure-plan.md](./m9-t02-closure-plan.md).
+   - Behavior readiness: [deps-security-refresh.md](../behavior/deps-security-refresh.md) (`bdd_readiness: not-applicable`; Task Master **#49** **done**).
 
 ## Complexity and Size
 

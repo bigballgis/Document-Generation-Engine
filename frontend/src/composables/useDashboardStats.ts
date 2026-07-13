@@ -102,7 +102,7 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
       },
       {
         key: 'catalogMasters',
-        count: masters.length,
+        count: mastersStore.masterListTotalElements,
         titleKey: 'dashboard.stats.catalogMasters.title',
         descriptionKey: 'dashboard.stats.catalogMasters.description',
         actionKey: 'dashboard.stats.catalogMasters.action',
@@ -110,7 +110,7 @@ export function useDashboardStats(visibleRoutes: Ref<string[]> | string[] = []) 
       },
       {
         key: 'catalogTemplates',
-        count: templates.length,
+        count: templatesStore.templateListTotalElements,
         titleKey: 'dashboard.stats.catalogTemplates.title',
         descriptionKey: 'dashboard.stats.catalogTemplates.description',
         actionKey: 'dashboard.stats.catalogTemplates.action',

@@ -3,6 +3,7 @@ import {
   DEMO_GROUP_CODE,
   DEMO_MASTER_NAME,
   E2E_GROUP_ADMIN,
+  E2E_TEMPLATE_APPROVER,
   E2E_TEMPLATE_AUTHOR,
   E2E_TEMPLATE_TESTER,
 } from './auth'
@@ -180,6 +181,65 @@ export async function prepareTemplatePendingSubmitReady(
     const pending = gate.items.filter((item) => item.blocker && !item.ready).map((item) => item.checkCode)
     throw new Error(
       `Expected green submit gate for ${template.templateId}, pending blockers: ${pending.join(', ') || 'unknown'}`,
+    )
+  }
+
+  return template
+}
+
+/**
+ * API setup only — advances a green PENDING_SUBMIT template to APPROVAL/PENDING_DECISION
+ * so browser specs can exercise Approver Approve without UI setup clicks.
+ */
+export async function prepareTemplatePendingApprovalDecision(
+  request: APIRequestContext,
+  options?: { externalId?: string; name?: string },
+): Promise<PendingSubmitTemplateFixture> {
+  const template = await prepareTemplatePendingSubmitReady(request, {
+    externalId: options?.externalId ?? uniqueExternalId('E2E-CDP-APPR'),
+    name: options?.name ?? `E2E CDP Approver ${Date.now().toString(36).toUpperCase()}`,
+  })
+
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  await authorizedPost(request, authorToken, `/templates/${template.templateId}/lifecycle/submit-approval`, {
+    commentSummary: 'E2E CDP approver decision fixture — ready for PENDING_DECISION',
+  })
+
+  const detail = await fetchTemplateDetail(request, template.templateId)
+  if (detail.lifecycleStatus !== 'APPROVAL' || detail.approvalSubState !== 'PENDING_DECISION') {
+    throw new Error(
+      `Expected APPROVAL/PENDING_DECISION, got ${detail.lifecycleStatus}/${detail.approvalSubState ?? 'null'} (${template.templateId})`,
+    )
+  }
+
+  return template
+}
+
+/**
+ * API setup only — advances a green PENDING_DECISION template to PENDING_RELEASE
+ * so browser specs can exercise team-lead Confirm go-live without UI setup clicks.
+ */
+export async function prepareTemplatePendingRelease(
+  request: APIRequestContext,
+  options?: { externalId?: string; name?: string },
+): Promise<PendingSubmitTemplateFixture> {
+  const template = await prepareTemplatePendingApprovalDecision(request, {
+    externalId: options?.externalId ?? uniqueExternalId('E2E-CDP-PUB'),
+    name: options?.name ?? `E2E CDP Publish ${Date.now().toString(36).toUpperCase()}`,
+  })
+
+  const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
+  await authorizedPost(request, approverToken, `/templates/${template.templateId}/lifecycle/approval-decision`, {
+    decision: 'APPROVED',
+    commentSummary: 'E2E CDP team-lead publish fixture — ready for PENDING_RELEASE',
+    fidelityViewedConfirmed: true,
+    keyEvidenceConfirmed: true,
+  })
+
+  const detail = await fetchTemplateDetail(request, template.templateId)
+  if (detail.lifecycleStatus !== 'PENDING_RELEASE') {
+    throw new Error(
+      `Expected PENDING_RELEASE, got ${detail.lifecycleStatus} (${template.templateId})`,
     )
   }
 

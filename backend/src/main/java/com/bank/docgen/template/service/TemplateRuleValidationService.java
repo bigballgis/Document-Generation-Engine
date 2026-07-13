@@ -61,6 +61,25 @@ public class TemplateRuleValidationService {
     ) {
         TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
+        return validateRulesAgainstVersion(template, version, request);
+    }
+
+    @Transactional(readOnly = true)
+    public TemplateRuleValidationView validateRulesForVersion(
+            java.util.UUID templateId,
+            TemplateVersionEntity version,
+            TemplateRuleValidationRequest request,
+            ManagementSessionClaims session
+    ) {
+        TemplateEntity template = templateService.requireReadableTemplate(templateId, session);
+        return validateRulesAgainstVersion(template, version, request);
+    }
+
+    private TemplateRuleValidationView validateRulesAgainstVersion(
+            TemplateEntity template,
+            TemplateVersionEntity version,
+            TemplateRuleValidationRequest request
+    ) {
         Set<String> variableKeys = loadVariableKeys(version.getId());
         Set<String> anchorIds = loadAnchorIds(template, version.getId());
         Set<String> ruleIds = request.rules().stream()

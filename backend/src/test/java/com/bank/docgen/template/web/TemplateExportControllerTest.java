@@ -21,7 +21,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -272,6 +272,7 @@ class TemplateExportControllerTest {
                                 {
                                   "decision":"APPROVED",
                                   "commentSummary":"Approved",
+                                  "fidelityViewedConfirmed":true,
                                   "keyEvidenceConfirmed":true
                                 }
                                 """))
@@ -295,7 +296,7 @@ class TemplateExportControllerTest {
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/lifecycle/publish")
                         .with(authentication(new ManagementAuthentication(groupAdmin)))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"releaseVersion\":\"1.0.0\"}"))
+                        .content("{\"releaseVersion\":\"1.0.0\",\"fidelityViewedConfirmed\":true}"))
                 .andExpect(status().isOk());
     }
 

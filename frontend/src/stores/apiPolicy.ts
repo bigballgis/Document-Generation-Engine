@@ -1,44 +1,15 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import * as apiPolicyApi from '@/api/apiPolicy'
-import { resolveApiErrorMessageKey } from '@/api/http'
-import type {
-  ApiAccessAlert,
-  ApiCredentialCreated,
-  ApiCredentialSummary,
-  ApiPolicyImpactPreview,
-  ApiPolicy,
-  UpsertApiPolicyPayload,
-} from '@/types/template'
-import type { ApiPolicyDomain, ApiPolicyDomainFormMap, InvocationRetentionDomainForm } from '@/types/apiPolicyDomain'
+import { resolveApiError, resolveApiErrorMessageKey } from '@/api/http'
+import type { ApiAccessAlert } from '@/types/template'
+import {
+  createEmptyApiPolicyEntry,
+  type ApiPolicyEntry,
+} from '@/stores/apiPolicyStoreTypes'
+import { createApiPolicyMutationActions } from '@/stores/createApiPolicyMutationActions'
 
-export interface ApiPolicyRotatedCredential {
-  credentialId: string
-  externalId: string
-  secret: string
-}
-
-export interface ApiPolicyEntry {
-  policy: ApiPolicy | null
-  credentials: ApiCredentialSummary[]
-  lastCreatedCredential: ApiCredentialCreated | null
-  lastRotatedCredential: ApiPolicyRotatedCredential | null
-  loadingPolicy: boolean
-  submitting: boolean
-  lastErrorMessageKey: string | null
-}
-
-function createEmptyEntry(): ApiPolicyEntry {
-  return {
-    policy: null,
-    credentials: [],
-    lastCreatedCredential: null,
-    lastRotatedCredential: null,
-    loadingPolicy: false,
-    submitting: false,
-    lastErrorMessageKey: null,
-  }
-}
+export type { ApiPolicyEntry } from '@/stores/apiPolicyStoreTypes'
 
 export const useApiPolicyStore = defineStore('apiPolicy', () => {
   const entries = ref<Record<string, ApiPolicyEntry>>({})
@@ -46,10 +17,11 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
   const alerts = ref<ApiAccessAlert[]>([])
   const loadingAlerts = ref(false)
   const alertsErrorMessageKey = ref<string | null>(null)
+  const alertsErrorRetryable = ref(false)
 
   function entryFor(templateId: string): ApiPolicyEntry {
     if (!entries.value[templateId]) {
-      entries.value = { ...entries.value, [templateId]: createEmptyEntry() }
+      entries.value = { ...entries.value, [templateId]: createEmptyApiPolicyEntry() }
     }
     return entries.value[templateId]!
   }
@@ -131,144 +103,23 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
   async function fetchAlerts(): Promise<void> {
     loadingAlerts.value = true
     alertsErrorMessageKey.value = null
+    alertsErrorRetryable.value = false
     try {
       alerts.value = await apiPolicyApi.fetchAlerts()
     } catch (error) {
       alerts.value = []
       alertsErrorMessageKey.value = resolveApiErrorMessageKey(error, 'apiPolicy.home.alerts.loadFailed')
+      alertsErrorRetryable.value = resolveApiError(error)?.error.retryable ?? false
       throw error
     } finally {
       loadingAlerts.value = false
     }
   }
 
-  async function savePolicy(
-    templateId: string,
-    payload: UpsertApiPolicyPayload,
-  ): Promise<ApiPolicy> {
-    const entry = entryFor(templateId)
-    entry.submitting = true
-    entry.lastErrorMessageKey = null
-    try {
-      entry.policy = await apiPolicyApi.upsertApiPolicy(templateId, payload)
-      return entry.policy
-    } catch (error) {
-      entry.lastErrorMessageKey = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
-      throw error
-    } finally {
-      entry.submitting = false
-    }
-  }
-
-  async function previewImpact(
-    templateId: string,
-    payload: UpsertApiPolicyPayload,
-  ): Promise<ApiPolicyImpactPreview> {
-    const entry = entryFor(templateId)
-    entry.submitting = true
-    entry.lastErrorMessageKey = null
-    try {
-      return await apiPolicyApi.fetchApiPolicyImpactPreview(templateId, payload)
-    } catch (error) {
-      entry.lastErrorMessageKey = resolveApiErrorMessageKey(error, 'templates.error.previewPolicyImpact')
-      throw error
-    } finally {
-      entry.submitting = false
-    }
-  }
-
-  async function savePolicyDomain<D extends ApiPolicyDomain>(
-    templateId: string,
-    domain: D,
-    payload: ApiPolicyDomainFormMap[D],
-    confirmed = true,
-  ): Promise<ApiPolicy> {
-    const entry = entryFor(templateId)
-    entry.submitting = true
-    entry.lastErrorMessageKey = null
-    try {
-      entry.policy = await apiPolicyApi.saveApiPolicyDomain(templateId, domain, payload, confirmed)
-      return entry.policy
-    } catch (error) {
-      entry.lastErrorMessageKey = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
-      throw error
-    } finally {
-      entry.submitting = false
-    }
-  }
-
-  async function saveInvocationRetentionDomain(
-    templateId: string,
-    payload: InvocationRetentionDomainForm,
-    confirmed = true,
-  ): Promise<ApiPolicy> {
-    const entry = entryFor(templateId)
-    entry.submitting = true
-    entry.lastErrorMessageKey = null
-    try {
-      entry.policy = await apiPolicyApi.saveInvocationRetentionDomain(templateId, payload, confirmed)
-      return entry.policy
-    } catch (error) {
-      entry.lastErrorMessageKey = resolveApiErrorMessageKey(error, 'templates.error.savePolicy')
-      throw error
-    } finally {
-      entry.submitting = false
-    }
-  }
-
-  async function createCredential(templateId: string): Promise<ApiCredentialCreated> {
-    const entry = entryFor(templateId)
-    entry.submitting = true
-    entry.lastErrorMessageKey = null
-    try {
-      entry.lastCreatedCredential = await apiPolicyApi.createCredential(templateId)
-      entry.lastRotatedCredential = null
-      await fetchCredentials(templateId)
-      return entry.lastCreatedCredential
-    } catch (error) {
-      entry.lastErrorMessageKey = resolveApiErrorMessageKey(error, 'templates.error.createCredential')
-      throw error
-    } finally {
-      entry.submitting = false
-    }
-  }
-
-  async function rotateCredential(templateId: string, credentialId: string) {
-    const entry = entryFor(templateId)
-    entry.submitting = true
-    entry.lastErrorMessageKey = null
-    try {
-      const rotated = await apiPolicyApi.rotateCredential(templateId, credentialId)
-      entry.lastRotatedCredential = {
-        credentialId: rotated.credentialId,
-        externalId: rotated.externalId,
-        secret: rotated.secret,
-      }
-      entry.lastCreatedCredential = null
-      await fetchCredentials(templateId)
-      return rotated
-    } catch (error) {
-      entry.lastErrorMessageKey = resolveApiErrorMessageKey(error, 'templates.error.rotateCredential')
-      throw error
-    } finally {
-      entry.submitting = false
-    }
-  }
-
-  async function revokeCredential(templateId: string, credentialId: string) {
-    const entry = entryFor(templateId)
-    entry.submitting = true
-    entry.lastErrorMessageKey = null
-    try {
-      await apiPolicyApi.revokeCredential(templateId, credentialId)
-      await fetchCredentials(templateId)
-    } catch (error) {
-      entry.lastErrorMessageKey = resolveApiErrorMessageKey(error, 'templates.error.revokeCredential')
-      throw error
-    } finally {
-      entry.submitting = false
-    }
-  }
+  const mutationActions = createApiPolicyMutationActions({
+    entryFor,
+    fetchCredentials,
+  })
 
   return {
     entries,
@@ -276,6 +127,7 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
     alerts,
     loadingAlerts,
     alertsErrorMessageKey,
+    alertsErrorRetryable,
     apiPolicy,
     credentials,
     loadingPolicy,
@@ -289,12 +141,6 @@ export const useApiPolicyStore = defineStore('apiPolicy', () => {
     fetchPolicy,
     fetchCredentials,
     fetchAlerts,
-    savePolicy,
-    previewImpact,
-    savePolicyDomain,
-    saveInvocationRetentionDomain,
-    createCredential,
-    rotateCredential,
-    revokeCredential,
+    ...mutationActions,
   }
 })

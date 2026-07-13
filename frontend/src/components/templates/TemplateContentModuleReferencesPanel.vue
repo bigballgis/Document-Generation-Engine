@@ -1,16 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { toRef } from 'vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import EmptyStatePanel from '@/components/common/EmptyStatePanel.vue'
 import EntityLinkCell from '@/components/common/EntityLinkCell.vue'
-import * as contentModulesApi from '@/api/contentModules'
-import { useEntityLinkTargets } from '@/composables/useEntityLinkTargets'
-import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
-import { resolveApiErrorMessageKey } from '@/api/errorEnvelope'
-import type { ContentModuleSummary, ContentModuleVersion } from '@/types/contentModule'
-import type { TemplateContentModuleReference } from '@/types/template'
-import { ElMessage } from 'element-plus'
+import { useTemplateContentModuleReferencesPanel } from '@/components/templates/useTemplateContentModuleReferencesPanel'
 
 const props = defineProps<{
   templateId: string
@@ -23,163 +16,32 @@ const emit = defineEmits<{
   updated: []
 }>()
 
-const { t, te } = useI18n()
-const { contentModuleDetailLink } = useEntityLinkTargets()
-const panelDataStore = useTemplatePanelDataStore()
-
-const saving = ref(false)
-const dialogOpen = ref(false)
-const entry = computed(() => panelDataStore.getEntry(props.templateId))
-const loading = computed(() => entry.value.loadingContentModuleReferences)
-const references = computed(() => entry.value.contentModuleReferences)
-const moduleOptions = ref<ContentModuleSummary[]>([])
-const versionOptions = ref<ContentModuleVersion[]>([])
-const editingReferenceKey = ref<string | null>(null)
-
-const form = reactive({
-  referenceKey: '',
-  moduleId: '',
-  semanticVersion: '',
+const {
+  t,
+  contentModuleDetailLink,
+  saving,
+  dialogOpen,
+  loading,
+  references,
+  moduleOptions,
+  versionOptions,
+  editingReferenceKey,
+  form,
+  dialogTitle,
+  moduleOptionLabel,
+  resolveModuleName,
+  resolveModuleSubtitle,
+  openCreateDialog,
+  openEditDialog,
+  handleModuleChange,
+  handleSubmit,
+} = useTemplateContentModuleReferencesPanel({
+  templateId: toRef(props, 'templateId'),
+  groupCode: toRef(props, 'groupCode'),
+  editable: toRef(props, 'editable'),
+  refreshToken: toRef(props, 'refreshToken'),
+  emitUpdated: () => emit('updated'),
 })
-
-const dialogTitle = computed(() =>
-  editingReferenceKey.value
-    ? t('templates.contentModuleReferences.editTitle', {
-        referenceKey: editingReferenceKey.value,
-      })
-    : t('templates.contentModuleReferences.addTitle'),
-)
-
-function moduleOptionLabel(module: ContentModuleSummary): string {
-  const base = `${module.moduleCode} — ${module.name}`
-  if (module.groupCode === props.groupCode) {
-    return base
-  }
-  return `${base} (${module.groupCode})`
-}
-
-function resolveModuleName(moduleId: string): string {
-  const module = moduleOptions.value.find((item) => item.moduleId === moduleId)
-  return module?.name ?? moduleId
-}
-
-function resolveModuleSubtitle(moduleId: string): string | undefined {
-  const module = moduleOptions.value.find((item) => item.moduleId === moduleId)
-  return module?.moduleCode
-}
-
-function approvedReferencableVersions(versions: ContentModuleVersion[]): ContentModuleVersion[] {
-  return versions.filter(
-    (version) =>
-      version.reviewState === 'APPROVED' && (version.lifecycleState ?? 'ACTIVE') === 'ACTIVE',
-  )
-}
-
-async function loadReferences() {
-  try {
-    await panelDataStore.fetchContentModuleReferences(props.templateId)
-  } catch (error) {
-    const key = resolveApiErrorMessageKey(error, 'templates.contentModuleReferences.error.load')
-    ElMessage.error(te(key) ? t(key) : t('templates.contentModuleReferences.error.load'))
-  }
-}
-
-async function loadModuleOptions() {
-  if (!props.groupCode) {
-    moduleOptions.value = []
-    return
-  }
-  try {
-    moduleOptions.value = await contentModulesApi.listContentModules(props.groupCode)
-  } catch {
-    moduleOptions.value = []
-  }
-}
-
-async function loadVersionOptions(moduleId: string) {
-  if (!moduleId) {
-    versionOptions.value = []
-    return
-  }
-  try {
-    const detail = await contentModulesApi.getContentModule(moduleId)
-    versionOptions.value = approvedReferencableVersions(detail.versions)
-  } catch {
-    versionOptions.value = []
-  }
-}
-
-function resetForm() {
-  form.referenceKey = ''
-  form.moduleId = ''
-  form.semanticVersion = ''
-  versionOptions.value = []
-}
-
-function openCreateDialog() {
-  editingReferenceKey.value = null
-  resetForm()
-  dialogOpen.value = true
-  void loadModuleOptions()
-}
-
-function openEditDialog(reference: TemplateContentModuleReference) {
-  if (reference.locked || !props.editable) {
-    return
-  }
-  editingReferenceKey.value = reference.referenceKey
-  form.referenceKey = reference.referenceKey
-  form.moduleId = reference.moduleId
-  form.semanticVersion = reference.semanticVersion
-  dialogOpen.value = true
-  void loadModuleOptions()
-  void loadVersionOptions(reference.moduleId)
-}
-
-async function handleModuleChange(moduleId: string) {
-  form.moduleId = moduleId
-  form.semanticVersion = ''
-  await loadVersionOptions(moduleId)
-}
-
-async function handleSubmit() {
-  const referenceKey = form.referenceKey.trim()
-  const moduleId = form.moduleId.trim()
-  const semanticVersion = form.semanticVersion.trim()
-  if (!referenceKey || !moduleId || !semanticVersion) {
-    ElMessage.warning(t('templates.contentModuleReferences.validation.required'))
-    return
-  }
-
-  saving.value = true
-  try {
-    const upsertKey = editingReferenceKey.value ?? referenceKey
-    await panelDataStore.upsertContentModuleReference(props.templateId, upsertKey, {
-      referenceKey,
-      moduleId,
-      semanticVersion,
-    })
-    dialogOpen.value = false
-    ElMessage.success(t('templates.contentModuleReferences.saveSuccess'))
-    emit('updated')
-  } catch (error) {
-    const key = resolveApiErrorMessageKey(error, 'templates.contentModuleReferences.error.save')
-    ElMessage.error(te(key) ? t(key) : t('templates.contentModuleReferences.error.save'))
-  } finally {
-    saving.value = false
-  }
-}
-
-onMounted(() => {
-  void Promise.all([loadReferences(), loadModuleOptions()])
-})
-
-watch(
-  () => props.refreshToken,
-  () => {
-    void loadReferences()
-  },
-)
 </script>
 
 <template>
@@ -306,37 +168,4 @@ watch(
   </div>
 </template>
 
-<style scoped lang="scss">
-.content-module-references-panel {
-  margin-top: 1.5rem;
-}
-
-.panel-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-
-  h3 {
-    margin: 0 0 0.25rem;
-    font-size: 1rem;
-    font-weight: 650;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-}
-
-.read-only-hint {
-  margin: 0 0 0.75rem;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-
-.references-table {
-  margin-top: 0.5rem;
-}
-</style>
+<style scoped lang="scss" src="./TemplateContentModuleReferencesPanel.scss"></style>

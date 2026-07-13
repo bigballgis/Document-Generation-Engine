@@ -2,13 +2,7 @@ import { type ComputedRef, type Ref } from 'vue'
 import type { TemplateDetail } from '@/types/template'
 import type { TemplateDetailTab } from '@/views/templates/templateDetailTabs'
 import { useTemplateLifecycleGates } from '@/views/templates/useTemplateLifecycleGates'
-import {
-  useTemplateLifecycleDecisions,
-  type GovernanceAction,
-  type LifecycleDecisionDialogMode,
-} from '@/views/templates/useTemplateLifecycleDecisions'
-
-export type { GovernanceAction, LifecycleDecisionDialogMode }
+import { useTemplateLifecycleDecisions } from '@/views/templates/useTemplateLifecycleDecisions'
 
 export interface UseTemplateLifecycleActionsOptions {
   templateId: ComputedRef<string>

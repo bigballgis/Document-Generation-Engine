@@ -1,0 +1,39 @@
+=== SUMMARY ===
+Unused files: 0
+Unused exports: 93
+Unused exported types: 66
+Duplicate exports: 1
+
+=== Unused files ===
+(none - Wave-1 orphans deleted 2026-07-12)
+
+=== Unused / unlisted deps ===
+
+=== Unused exports by file (top 15) ===
+ 33  src/constants/roleJourneyDefinitions.ts
+  7  src/routing/routeKeys.ts
+  4  src/composables/useSessionRenewal.ts
+  4  src/utils/structuredContentDraftStorage.ts
+  3  src/utils/templateAuthorJourney.ts
+  3  src/api/http.ts
+  2  src/composables/useWorkflowTasks.ts
+  2  src/api/catalogPageCollect.ts
+  2  src/auth/routeCapabilities.ts
+  2  src/composables/useTableFilterOptions.ts
+  2  src/utils/masterDesignerJourney.ts
+  2  src/api/errorEnvelope.ts
+  2  src/constants/apiPolicyPlatformDefaults.ts
+  1  src/types/apiPolicyDomain.ts
+  1  src/utils/templateWorkflowBannerContext.ts
+
+=== Unused exported types by file (top 10) ===
+ 24  src/types/template.ts
+  4  src/types/openapi.ts
+  4  src/types/contract.ts
+  3  src/constants/roleJourneyDefinitions.ts
+  3  src/composables/useCatalogTableControls.ts
+  3  src/types/contentModule.ts
+  3  src/composables/useWorkflowTasks.ts
+  2  src/types/identity.ts
+  2  src/types/audit.ts
+  2  src/components/common/CatalogFilterToolbar.vue

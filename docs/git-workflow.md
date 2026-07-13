@@ -32,6 +32,20 @@ Mandatory order:
 
 Do not skip, reorder, or merge stages in a way that bypasses quality gates.
 
+## Mandatory session worktree (agent delivery)
+
+Every implementing session uses an isolated git worktree — **not** the MAIN working tree:
+
+| Item | Convention |
+| --- | --- |
+| Directory | `../DGE-<slice-id>` (sibling of repo root) |
+| Branch | `feat/<slice-id>` |
+| Merge | `integration-merger` after green gates → doc-sync/commit on **main** |
+| Cleanup | `git worktree remove` + `prune` after merge |
+
+Agent source of truth: `.cursor/rules/worktree-and-deploy-queue-constitution.mdc`,
+`.cursor/skills/worktree-isolation/SKILL.md`.
+
 ## Relationship With Documentation Governance
 
 Use the documentation governance workflow before committing documentation changes.

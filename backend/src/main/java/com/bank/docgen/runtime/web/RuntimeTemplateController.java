@@ -1,24 +1,20 @@
 package com.bank.docgen.runtime.web;
 
-import com.bank.docgen.runtime.api.AsyncAcceptedResultView;
-import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
-import com.bank.docgen.runtime.api.BatchGenerateResultView;
 import com.bank.docgen.runtime.api.CallableVersionsResultView;
 import com.bank.docgen.runtime.api.ContractResultView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
-import com.bank.docgen.runtime.api.SyncGenerateResult;
-import com.bank.docgen.runtime.security.RuntimeSessionClaims;
-import com.bank.docgen.runtime.service.BatchGenerationService;
-import com.bank.docgen.runtime.service.IdempotencyConstants;
 import com.bank.docgen.runtime.api.InvocationDetailResultView;
 import com.bank.docgen.runtime.api.InvocationDetailView;
 import com.bank.docgen.runtime.api.InvocationListResultView;
+import com.bank.docgen.runtime.api.SyncGenerateResult;
+import com.bank.docgen.runtime.security.RuntimeSessionClaims;
+import com.bank.docgen.runtime.service.BatchGenerationService;
 import com.bank.docgen.runtime.service.InvocationQueryService;
 import com.bank.docgen.runtime.service.InvocationRecordService;
 import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.runtime.service.RuntimeGenerationService;
-import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
+import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.RouteType;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
@@ -28,7 +24,6 @@ import com.bank.docgen.template.service.TemplateService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,12 +40,10 @@ public class RuntimeTemplateController {
 
     private final TemplateService templateService;
     private final RuntimeGenerationService runtimeGenerationService;
-    private final BatchGenerationService batchGenerationService;
     private final TraceIdProvider traceIdProvider;
-    private final RuntimeGenerationAuditRecorder runtimeGenerationAuditRecorder;
-    private final InvocationRecordService invocationRecordService;
     private final InvocationQueryService invocationQueryService;
-    private final ApiPolicyRepository apiPolicyRepository;
+    private final RuntimeTemplateSyncSupport syncSupport;
+    private final RuntimeTemplateBatchSupport batchSupport;
 
     public RuntimeTemplateController(
             TemplateService templateService,
@@ -64,12 +57,11 @@ public class RuntimeTemplateController {
     ) {
         this.templateService = templateService;
         this.runtimeGenerationService = runtimeGenerationService;
-        this.batchGenerationService = batchGenerationService;
         this.traceIdProvider = traceIdProvider;
-        this.runtimeGenerationAuditRecorder = runtimeGenerationAuditRecorder;
-        this.invocationRecordService = invocationRecordService;
         this.invocationQueryService = invocationQueryService;
-        this.apiPolicyRepository = apiPolicyRepository;
+        this.syncSupport = new RuntimeTemplateSyncSupport(
+                invocationRecordService, apiPolicyRepository, traceIdProvider, runtimeGenerationAuditRecorder);
+        this.batchSupport = new RuntimeTemplateBatchSupport(batchGenerationService, traceIdProvider);
     }
 
     @GetMapping("/invocations")
@@ -154,36 +146,18 @@ public class RuntimeTemplateController {
                 releaseVersion,
                 body
         );
-        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
-        String auditId = traceIdProvider.newAuditId();
-        runtimeGenerationAuditRecorder.recordSyncGeneration(
-                template,
-                session,
-                environment,
-                RouteType.EXPLICIT_VERSION,
-                result.resolvedReleaseVersion(),
-                body.output().format(),
-                body.output().mode(),
-                body.requestId(),
-                body.idempotencyKey(),
-                result.idempotencyStatus(),
-                result.documentId(),
-                IdempotencyConstants.STATUS_REPLAYED.equals(result.idempotencyStatus())
-                        ? RuntimeGenerationAuditRecorder.OUTCOME_REPLAYED
-                        : RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
-                traceId
-        );
-        String invocationId = resolveOrRecordSingleInvocation(
+        syncSupport.auditRecordAndWrite(
                 template,
                 session,
                 environment,
                 RouteType.EXPLICIT_VERSION,
                 releaseVersion,
-                result,
+                templateExternalId,
                 body,
-                auditId
+                result,
+                request,
+                response
         );
-        writeSyncResponse(request, response, templateExternalId, RouteType.EXPLICIT_VERSION, body, result, invocationId);
     }
 
     @PostMapping("/versions/{releaseVersion}/batch-generate")
@@ -196,27 +170,8 @@ public class RuntimeTemplateController {
             HttpServletRequest request
     ) {
         TemplateEntity template = templateService.requireTemplateByExternalId(templateExternalId);
-        if ("ASYNC_TASK".equalsIgnoreCase(body.output().mode())) {
-            AsyncAcceptedResultView result = batchGenerationService.batchGenerateAsync(
-                    template,
-                    session,
-                    releaseVersion,
-                    RouteType.EXPLICIT_VERSION,
-                    body,
-                    environment
-            );
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(envelope(request, result));
-        }
-        BatchGenerateResultView result = batchGenerationService.batchGenerateSync(
-                template,
-                session,
-                environment,
-                releaseVersion,
-                RouteType.EXPLICIT_VERSION,
-                body,
-                traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"))
-        );
-        return ResponseEntity.ok(envelope(request, result));
+        return batchSupport.batchGenerate(
+                template, session, environment, releaseVersion, RouteType.EXPLICIT_VERSION, body, request);
     }
 
     @PostMapping("/default/batch-generate")
@@ -228,27 +183,8 @@ public class RuntimeTemplateController {
             HttpServletRequest request
     ) {
         TemplateEntity template = templateService.requireTemplateByExternalId(templateExternalId);
-        if ("ASYNC_TASK".equalsIgnoreCase(body.output().mode())) {
-            AsyncAcceptedResultView result = batchGenerationService.batchGenerateAsync(
-                    template,
-                    session,
-                    null,
-                    RouteType.DEFAULT_ROUTE,
-                    body,
-                    environment
-            );
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(envelope(request, result));
-        }
-        BatchGenerateResultView result = batchGenerationService.batchGenerateSync(
-                template,
-                session,
-                environment,
-                null,
-                RouteType.DEFAULT_ROUTE,
-                body,
-                traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"))
-        );
-        return ResponseEntity.ok(envelope(request, result));
+        return batchSupport.batchGenerate(
+                template, session, environment, null, RouteType.DEFAULT_ROUTE, body, request);
     }
 
     @PostMapping("/default/generate")
@@ -262,111 +198,18 @@ public class RuntimeTemplateController {
     ) throws java.io.IOException {
         TemplateEntity template = templateService.requireTemplateByExternalId(templateExternalId);
         SyncGenerateResult result = runtimeGenerationService.generateSync(template, session, null, body);
-        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
-        String auditId = traceIdProvider.newAuditId();
-        runtimeGenerationAuditRecorder.recordSyncGeneration(
-                template,
-                session,
-                environment,
-                RouteType.DEFAULT_ROUTE,
-                result.resolvedReleaseVersion(),
-                body.output().format(),
-                body.output().mode(),
-                body.requestId(),
-                body.idempotencyKey(),
-                result.idempotencyStatus(),
-                result.documentId(),
-                IdempotencyConstants.STATUS_REPLAYED.equals(result.idempotencyStatus())
-                        ? RuntimeGenerationAuditRecorder.OUTCOME_REPLAYED
-                        : RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
-                traceId
-        );
-        String invocationId = resolveOrRecordSingleInvocation(
+        syncSupport.auditRecordAndWrite(
                 template,
                 session,
                 environment,
                 RouteType.DEFAULT_ROUTE,
                 null,
+                templateExternalId,
+                body,
                 result,
-                body,
-                auditId
+                request,
+                response
         );
-        writeSyncResponse(request, response, templateExternalId, RouteType.DEFAULT_ROUTE, body, result, invocationId);
-    }
-
-    private String resolveOrRecordSingleInvocation(
-            TemplateEntity template,
-            RuntimeSessionClaims session,
-            String environment,
-            String routeType,
-            String requestedReleaseVersion,
-            SyncGenerateResult result,
-            GenerateRequestBody body,
-            String auditId
-    ) {
-        if (IdempotencyConstants.STATUS_REPLAYED.equals(result.idempotencyStatus())) {
-            return invocationRecordService.findExistingInvocationId(
-                    template.getId(),
-                    session.credentialId(),
-                    body.idempotencyKey()
-            ).orElse(null);
-        }
-        ApiPolicyEntity policy = apiPolicyRepository.findByTemplateId(template.getId()).orElse(null);
-        if (policy == null) {
-            return null;
-        }
-        return invocationRecordService.recordSingleSync(
-                template,
-                policy,
-                session,
-                environment,
-                routeType,
-                requestedReleaseVersion,
-                result.resolvedReleaseVersion(),
-                body,
-                result.documentId(),
-                null,
-                RuntimeGenerationAuditRecorder.OUTCOME_SUCCESS,
-                auditId
-        );
-    }
-
-    private void writeSyncResponse(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            String templateExternalId,
-            String routeType,
-            GenerateRequestBody body,
-            SyncGenerateResult result,
-            String invocationId
-    ) throws java.io.IOException {
-        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
-        String auditId = traceIdProvider.newAuditId();
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType(result.contentType());
-        response.setHeader("auditId", auditId);
-        response.setHeader("traceId", traceId);
-        response.setHeader("requestId", body.requestId());
-        response.setHeader("idempotencyKey", body.idempotencyKey());
-        response.setHeader("idempotencyStatus", result.idempotencyStatus());
-        if (invocationId != null) {
-            response.setHeader("invocationId", invocationId);
-        }
-        response.setHeader("documentId", result.documentId());
-        response.setHeader("templateId", templateExternalId);
-        response.setHeader("routeType", routeType);
-        response.setHeader("resolvedReleaseVersion", result.resolvedReleaseVersion());
-        response.setHeader("output.format", body.output().format());
-        response.setHeader("output.mode", body.output().mode());
-        response.setHeader("fidelityWarningCount", String.valueOf(result.fidelityWarningCodes().size()));
-        response.setHeader("fidelityWarningCodes", String.join(",", result.fidelityWarningCodes()));
-        if (result.artifactStream() != null) {
-            try (var artifactStream = result.artifactStream()) {
-                artifactStream.transferTo(response.getOutputStream());
-            }
-            return;
-        }
-        response.getOutputStream().write(result.artifactBytes());
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

@@ -4,6 +4,41 @@ export default {
   app: {
     title: '文档生成系统',
   },
+  commandPalette: {
+    dialogLabel: '命令面板',
+    searchLabel: '搜索命令与资源',
+    placeholder: '搜索模板、信头、条款或页面…',
+    resultsLabel: '搜索结果',
+    loading: '正在搜索…',
+    noMatch: '没有匹配的页面或资源。',
+    hint: '↑↓ 移动 · Enter 打开 · Esc 关闭',
+    close: '关闭命令面板',
+    groups: {
+      routes: '页面',
+      templates: '模板',
+      masters: '信头模板',
+      contentModules: '标准条款',
+    },
+    errors: {
+      templates: '无法搜索模板，请重试。',
+      masters: '无法搜索信头模板，请重试。',
+      contentModules: '无法搜索标准条款，请重试。',
+    },
+  },
+  onboardingTour: {
+    skip: '跳过',
+    next: '下一步',
+    prev: '上一步',
+    finish: '完成',
+    actionsLabel: '引导操作',
+    dontShowAgain: '不再显示',
+    help: {
+      menu: '帮助',
+      menuAriaLabel: '帮助菜单',
+      replay: '重播角色引导',
+      replayUnavailable: '当前账号没有可用的角色引导。',
+    },
+  },
   login: {
     title: '登录',
     subtitle: '登录以继续',
@@ -69,6 +104,18 @@ export default {
         ready: '未检测到未解决的阻塞项。',
         blocked: '仍存在未解决的阻塞项。',
       },
+      contentModuleReferences: {
+        ready: '内容模块引用有效。',
+        blocked: '内容模块引用缺失或无效。',
+      },
+      unsupportedStructuredNodes: {
+        ready: '结构化内容节点均可由 DOCX writer 渲染。',
+        blocked: '结构化内容包含不支持或缺少 writer 的节点类型，会导致静默丢内容。',
+      },
+      pasteCleaningBlockers: {
+        ready: '绑定上无未解除的粘贴清洗阻断。',
+        blocked: '一个或多个绑定存在未解除的粘贴清洗阻断，发布前必须清除。',
+      },
     },
     apimgmt: {
       policyImpact: {
@@ -93,6 +140,7 @@ export default {
   nav: {
     login: '登录',
     logout: '退出登录',
+    skipToMainContent: '跳到主要内容',
     managementNavigation: '管理导航',
     collapseSidebar: '收起侧栏',
     expandSidebar: '展开侧栏',
@@ -289,6 +337,20 @@ export default {
     },
   },
   collaboration: {
+    notifications: {
+      title: '通知',
+      bellAriaLabel: '通知',
+      bellAriaLabelWithCount: '通知，{count} 条未读',
+      markAll: '全部标为已读',
+      empty: '暂无通知',
+      loading: '正在加载通知…',
+      error: {
+        loadUnread: '无法刷新未读通知数。',
+        loadList: '无法加载通知。',
+        markRead: '无法将通知标为已读。',
+        markAll: '无法将全部通知标为已读。',
+      },
+    },
     workItems: {
       empty: '当前没有待办事项。',
       ageValue: '{value}',
@@ -472,7 +534,10 @@ export default {
       description: '描述',
       file: 'DOCX 文件',
       chooseFile: '选择文件',
-      fileHint: '上传 .docx 母版，锚点将在服务端提取。',
+      dragHint: '将 .docx 文件拖放到此处，或点击选择',
+      fileHint: '仅支持 .docx，最大 {maxMb} MB。锚点将在服务端提取。',
+      progressLabel: '正在上传母版…',
+      progressPercent: '正在上传… {percent}%',
       submit: '上传',
       success: '母版上传成功。',
       errorTooLarge: '文件超过 50 MB 上传上限，请压缩后重试。',
@@ -677,6 +742,8 @@ export default {
         apiAccess: '对外服务',
       },
       summaryTitle: '摘要',
+      name: '模板名称',
+      groupCode: '分组',
       externalId: '外部 ID',
       masterId: '母版 ID',
       releaseVersion: '发布版本',
@@ -780,6 +847,41 @@ export default {
       devVersionNumber: '发布时开发版本',
       updatedAt: '最后更新',
       updatedBy: '最后更新人',
+      tabs: {
+        basics: '基础信息',
+        testing: '测试',
+        approval: '审批',
+        variables: '变量',
+        bindings: '锚点绑定',
+        rules: '组合规则',
+      },
+      basics: {
+        lineKind: '版本线类型',
+        defaultRoute: '默认 API 路由',
+        defaultRouteYes: '是 — 默认路由目标',
+        defaultRouteNo: '否',
+      },
+      testing: {
+        readOnlySummary: '此已发布版本在上线前已完成测试工作流。下方快照数据为只读。',
+        lifecycleStatus: '发布时状态',
+      },
+      approval: {
+        readOnlySummary: '审批与上线决策已冻结在此发布快照中，此处不提供工作流操作。',
+        lifecycleStatus: '发布状态',
+        approvalSubState: '审批子状态',
+        noApprovalSubState: '已发布版本不适用',
+        publishGateTitle: '当前上线前检查评估',
+        publishGateSubtitle:
+          '查看时对此已发布版本的实时评估 — 并非发布时的历史快照。',
+        publishGateEmptyTitle: '未返回上线前检查项',
+        publishGateEmptyDescription:
+          '实时上线前检查 API 未返回此已发布版本的检查清单项。这不等于虚构的“全部通过”状态。',
+        timelineTitle: '工作流审计轨迹',
+        timelineHint: '此模板包已记录的工作流事件（只读）。按包筛选，非按单个发布版本。',
+        timelineLoadError: '无法加载工作流审计轨迹。',
+        timelineEmptyTitle: '暂无工作流事件',
+        timelineEmptyDescription: '此模板包尚未记录审批或发布活动。',
+      },
       variablesTitle: '变量',
       bindingsTitle: '锚点绑定',
       rulesTitle: '组合规则',
@@ -1086,6 +1188,9 @@ export default {
         APPROVAL_SUMMARY: '审批摘要',
         COVERAGE_THRESHOLDS: '覆盖率阈值',
         API_POLICY: 'API 接入',
+        CONTENT_MODULE_REFERENCES: '内容模块引用',
+        UNSUPPORTED_STRUCTURED_NODES: '不支持的结构化节点',
+        PASTE_CLEANING_BLOCKERS: '粘贴清洗阻断',
         BLOCKER_STATUS: '阻塞项状态',
       },
     },
@@ -1259,6 +1364,13 @@ export default {
       masterAnchorsLoadFailed: '无法加载母版占位符目录。',
       validationStatus: '校验状态',
       validationUnknown: '未校验',
+      pasteResidue: {
+        blockedTag: '粘贴阻断',
+        blockedTitle: '未解除的粘贴清洗阻断',
+        blockedDescription:
+          '此绑定存在会阻止发布的粘贴清洗残留。请接受一次干净粘贴重写，或清除残留后保存。',
+        clearAction: '保存时清除粘贴残留',
+      },
       variableKey: '变量键',
       variableType: '类型',
       required: '必填',
@@ -1322,8 +1434,13 @@ export default {
       addText: '添加文本',
       addVariable: '添加变量',
       pasteFromFile: '导入 HTML',
+      undo: '撤销',
+      redo: '重做',
+      undoTooltip: '撤销结构变更（Ctrl+Z / ⌘Z）',
+      redoTooltip: '重做结构变更（Ctrl+Y / ⌘⇧Z）',
       toolbar: {
         label: '结构化内容工具栏',
+        history: '历史',
         blocks: '块',
         inline: '行内',
         style: '样式',
@@ -1373,6 +1490,14 @@ export default {
       error: {
         loadCatalog: '无法加载母版样式目录。',
         pasteClean: '无法清理粘贴内容。',
+      },
+      draftRecovery: {
+        title: '发现未保存的本地草稿',
+        message: '本地草稿（{draftTimestamp}）与服务器内容不一致。可恢复草稿，或丢弃草稿。',
+        draftTimestamp: '草稿时间：{timestamp}',
+        serverTimestamp: '服务器内容：{timestamp}',
+        restore: '恢复草稿',
+        discard: '丢弃',
       },
       pasteSummary: {
         title: '粘贴清理摘要',
@@ -1977,6 +2102,7 @@ export default {
     copyToClipboardError: '无法复制，请手动复制。',
     loadError: '页面加载失败。',
     language: '语言',
+    activatableRowOpen: '打开行详情',
     locales: {
       en: 'English',
       zhCN: '简体中文',
@@ -2068,6 +2194,23 @@ export default {
         confirmTitle: '确认接入变更',
         confirmSave: '立即应用此配置域变更？',
         confirmWarningsIntro: '以下警告需要确认：',
+        reasonLabel: '原因',
+        impactLabel: '影响',
+        adviceLabel: '建议',
+        expectedErrorCodeLabel: '预期错误码',
+        findings: {
+          defaultRouteNotCallable: {
+            reason: '候选默认路由发布版本不可调用（不是已发布且未停用的发布版本）。',
+            impact:
+              '若保存，默认生成路径将无法解析到可调用发布版本，调用方将收到 DEFAULT_ROUTE_TARGET_UNAVAILABLE。设置版本不会递增。',
+            advice: '请选择已发布且可调用的发布版本作为默认路由目标，重新执行影响预览后再保存。',
+          },
+          generic: {
+            reason: '候选接入设置存在硬阻断影响。',
+            impact: '在解决阻断条件前无法保存，设置版本不会递增。',
+            advice: '请按影响预览中的阻断条件处理后，重新执行影响预览再保存。',
+          },
+        },
       },
     },
   },

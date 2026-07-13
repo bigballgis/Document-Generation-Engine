@@ -4,6 +4,41 @@ export default {
   app: {
     title: 'Document Generation System',
   },
+  commandPalette: {
+    dialogLabel: 'Command palette',
+    searchLabel: 'Search commands and resources',
+    placeholder: 'Search templates, masters, clauses, or pages…',
+    resultsLabel: 'Search results',
+    loading: 'Searching…',
+    noMatch: 'No matching pages or resources.',
+    hint: '↑↓ to move · Enter to open · Esc to close',
+    close: 'Close command palette',
+    groups: {
+      routes: 'Pages',
+      templates: 'Templates',
+      masters: 'Letterhead templates',
+      contentModules: 'Standard clauses',
+    },
+    errors: {
+      templates: 'Unable to search templates. Try again.',
+      masters: 'Unable to search letterhead templates. Try again.',
+      contentModules: 'Unable to search standard clauses. Try again.',
+    },
+  },
+  onboardingTour: {
+    skip: 'Skip',
+    next: 'Next',
+    prev: 'Back',
+    finish: 'Finish',
+    actionsLabel: 'Tour actions',
+    dontShowAgain: "Don't show again",
+    help: {
+      menu: 'Help',
+      menuAriaLabel: 'Help menu',
+      replay: 'Replay role tour',
+      replayUnavailable: 'No role tour is available for your account.',
+    },
+  },
   login: {
     title: 'Sign in',
     subtitle: 'Sign in to continue',
@@ -70,6 +105,20 @@ export default {
         ready: 'No unresolved blockers detected.',
         blocked: 'Unresolved blockers remain.',
       },
+      contentModuleReferences: {
+        ready: 'Content module references are valid.',
+        blocked: 'Content module references are missing or invalid.',
+      },
+      unsupportedStructuredNodes: {
+        ready: 'Structured content nodes are supported by the DOCX writer.',
+        blocked:
+          'Structured content contains unsupported or writer-missing node types that would cause silent content loss.',
+      },
+      pasteCleaningBlockers: {
+        ready: 'No unresolved paste-cleaning blockers on bindings.',
+        blocked:
+          'One or more bindings have unresolved paste-cleaning blockers that must be cleared before publish.',
+      },
     },
     apimgmt: {
       policyImpact: {
@@ -95,6 +144,7 @@ export default {
   nav: {
     login: 'Login',
     logout: 'Sign out',
+    skipToMainContent: 'Skip to main content',
     managementNavigation: 'Management navigation',
     collapseSidebar: 'Collapse sidebar',
     expandSidebar: 'Expand sidebar',
@@ -296,6 +346,20 @@ export default {
     },
   },
   collaboration: {
+    notifications: {
+      title: 'Notifications',
+      bellAriaLabel: 'Notifications',
+      bellAriaLabelWithCount: 'Notifications, {count} unread',
+      markAll: 'Mark all as read',
+      empty: 'No notifications',
+      loading: 'Loading notifications…',
+      error: {
+        loadUnread: 'Unable to refresh notification count.',
+        loadList: 'Unable to load notifications.',
+        markRead: 'Unable to mark notification as read.',
+        markAll: 'Unable to mark all notifications as read.',
+      },
+    },
     workItems: {
       empty: 'You have no to-do items right now.',
       ageValue: '{value}',
@@ -480,7 +544,11 @@ export default {
       description: 'Description',
       file: 'DOCX file',
       chooseFile: 'Choose file',
-      fileHint: 'Upload a .docx letterhead. Anchors are extracted on the server.',
+      dragHint: 'Drop a .docx file here, or click to choose',
+      fileHint:
+        'Accepted format: .docx only. Maximum size: {maxMb} MB. Anchors are extracted on the server.',
+      progressLabel: 'Uploading letterhead…',
+      progressPercent: 'Uploading… {percent}%',
       submit: 'Upload',
       success: 'Letterhead uploaded successfully.',
       errorTooLarge: 'The file exceeds the 50 MB upload limit. Reduce the file size and try again.',
@@ -686,6 +754,8 @@ export default {
         apiAccess: 'External access',
       },
       summaryTitle: 'Summary',
+      name: 'Template name',
+      groupCode: 'Group',
       externalId: 'External ID',
       masterId: 'Master ID',
       releaseVersion: 'Release version',
@@ -792,6 +862,45 @@ export default {
       devVersionNumber: 'Dev version at publish',
       updatedAt: 'Last updated',
       updatedBy: 'Last updated by',
+      tabs: {
+        basics: 'Basics',
+        testing: 'Testing',
+        approval: 'Approval',
+        variables: 'Variables',
+        bindings: 'Bindings',
+        rules: 'Rules',
+      },
+      basics: {
+        lineKind: 'Line kind',
+        defaultRoute: 'Default API route',
+        defaultRouteYes: 'Yes — default route target',
+        defaultRouteNo: 'No',
+      },
+      testing: {
+        readOnlySummary:
+          'This published release completed the testing workflow before go-live. Snapshot data below is read-only.',
+        lifecycleStatus: 'Status at publish',
+      },
+      approval: {
+        readOnlySummary:
+          'Approval and go-live decisions are frozen in this published snapshot. No workflow actions are available here.',
+        lifecycleStatus: 'Release status',
+        approvalSubState: 'Approval sub-state',
+        noApprovalSubState: 'Not applicable for published releases',
+        publishGateTitle: 'Current pre-release checks evaluation',
+        publishGateSubtitle:
+          'Live evaluation of this published release version at view time — not a historical publish-time snapshot.',
+        publishGateEmptyTitle: 'No pre-release checks returned',
+        publishGateEmptyDescription:
+          'The live pre-release checks API returned no checklist items for this published release version. This is not a fabricated all-green state.',
+        timelineTitle: 'Workflow audit trail',
+        timelineHint:
+          'Recorded workflow events for this template package (read-only). Filtered by package, not by individual release version.',
+        timelineLoadError: 'Unable to load workflow audit trail.',
+        timelineEmptyTitle: 'No workflow events yet',
+        timelineEmptyDescription:
+          'No approval or publish activity has been recorded for this template package yet.',
+      },
       variablesTitle: 'Variables',
       bindingsTitle: 'Binding summary',
       rulesTitle: 'Composition rules',
@@ -1056,6 +1165,9 @@ export default {
         APPROVAL_SUMMARY: 'Approval summary',
         COVERAGE_THRESHOLDS: 'Coverage thresholds',
         API_POLICY: 'API access',
+        CONTENT_MODULE_REFERENCES: 'Content module references',
+        UNSUPPORTED_STRUCTURED_NODES: 'Unsupported structured nodes',
+        PASTE_CLEANING_BLOCKERS: 'Paste cleaning blockers',
         BLOCKER_STATUS: 'Blocker status',
       },
     },
@@ -1145,6 +1257,13 @@ export default {
       masterAnchorsLoadFailed: 'Unable to load master placeholder catalog.',
       validationStatus: 'Validation',
       validationUnknown: 'Not validated',
+      pasteResidue: {
+        blockedTag: 'Paste blocked',
+        blockedTitle: 'Unresolved paste-cleaning blockers',
+        blockedDescription:
+          'This binding has paste-cleaning residue that blocks publish. Accept a clean paste rewrite, or clear the residue and save.',
+        clearAction: 'Clear paste residue on save',
+      },
       variableKey: 'Variable key',
       variableType: 'Type',
       required: 'Required',
@@ -1210,8 +1329,13 @@ export default {
       addText: 'Add text',
       addVariable: 'Add variable',
       pasteFromFile: 'Import HTML',
+      undo: 'Undo',
+      redo: 'Redo',
+      undoTooltip: 'Undo structure change (Ctrl+Z / ⌘Z)',
+      redoTooltip: 'Redo structure change (Ctrl+Y / ⌘⇧Z)',
       toolbar: {
         label: 'Structured content toolbar',
+        history: 'History',
         blocks: 'Blocks',
         inline: 'Inline',
         style: 'Style',
@@ -1261,6 +1385,15 @@ export default {
       error: {
         loadCatalog: 'Unable to load master style catalog.',
         pasteClean: 'Unable to clean pasted content.',
+      },
+      draftRecovery: {
+        title: 'Unsaved local draft found',
+        message:
+          'A local draft from {draftTimestamp} differs from the server content. Restore it or discard the draft.',
+        draftTimestamp: 'Draft saved: {timestamp}',
+        serverTimestamp: 'Server content: {timestamp}',
+        restore: 'Restore draft',
+        discard: 'Discard',
       },
       pasteSummary: {
         title: 'Paste cleaning summary',
@@ -2000,6 +2133,7 @@ export default {
     copyToClipboardError: 'Unable to copy. Copy it manually.',
     loadError: 'Unable to load this page.',
     language: 'Language',
+    activatableRowOpen: 'Open row details',
     locales: {
       en: 'English',
       zhCN: 'Chinese (Simplified)',
@@ -2094,6 +2228,25 @@ export default {
         confirmTitle: 'Confirm access change',
         confirmSave: 'Apply this domain change immediately?',
         confirmWarningsIntro: 'The following warnings require confirmation:',
+        reasonLabel: 'Reason',
+        impactLabel: 'Impact',
+        adviceLabel: 'Advice',
+        expectedErrorCodeLabel: 'Expected error code',
+        findings: {
+          defaultRouteNotCallable: {
+            reason:
+              'The candidate default route release version is not callable (not a published, non-stopped release).',
+            impact:
+              'Saving would leave the default generate path unable to resolve a callable release. Callers would receive DEFAULT_ROUTE_TARGET_UNAVAILABLE. The settings version will not change.',
+            advice:
+              'Select a published callable release version as the default route target, then run impact preview again before saving.',
+          },
+          generic: {
+            reason: 'The candidate access settings have a hard-blocking impact.',
+            impact: 'Save cannot proceed until the blocking condition is resolved. The settings version will not change.',
+            advice: 'Resolve the blocking condition shown in the impact preview, then run impact preview again before saving.',
+          },
+        },
       },
     },
   },

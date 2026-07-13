@@ -63,7 +63,7 @@ Creates `artifacts/sca-submission/<timestamp>/` with:
 
 ## Step 4 — Triage findings (Step 3 in closure plan)
 
-Per quality gate baseline:
+Per quality gate baseline ([quality-gate-threshold-baseline.md](../../architecture/quality-gate-threshold-baseline.md)):
 
 | Severity | Action |
 | --- | --- |
@@ -76,6 +76,8 @@ Remediation options (prefer in order):
 1. Bump dependency to patched version (company-approved repo).
 2. Remove unused dependency.
 3. Security exception with expiry and compensating control (M9-T03).
+
+**Related in-repo hygiene:** Task Master **#49** / [deps-security-refresh.md](../../behavior/deps-security-refresh.md) → **Done** (merge `08c7d56`) — baseline-safe bumps + Vitest Critical exception (**#50**, expires 2026-10-13; Boot **3.3.x**, ShedLock **6.x**, no major Vue/Vite without ADR). That work does **not** replace org upload (Step 3 above) and does **not** mark M9-T02 Done.
 
 ## Step 5 — Re-verify gates (Step 4 in closure plan)
 
