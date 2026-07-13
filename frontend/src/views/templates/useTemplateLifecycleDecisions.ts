@@ -2,12 +2,12 @@ import { ref, type ComputedRef, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { templatePackageHubPath } from '@/routing/routeKeys'
 import { useTemplatesStore } from '@/stores/templates'
 import type { TemplateDetail } from '@/types/template'
 import type { TemplateDetailTab } from '@/views/templates/templateDetailTabs'
 import type { useTemplateLifecycleGates } from '@/views/templates/useTemplateLifecycleGates'
 import { useTemplateLifecycleGovernance } from '@/views/templates/useTemplateLifecycleGovernance'
+import { createTemplateLifecycleDecisionSubmitters } from '@/views/templates/createTemplateLifecycleDecisionSubmitters'
 
 type LifecycleDecisionDialogMode =
   | 'test-fail'
@@ -45,6 +45,23 @@ export function useTemplateLifecycleDecisions(options: UseTemplateLifecycleDecis
     errorMessage,
   })
 
+  const submitters = createTemplateLifecycleDecisionSubmitters({
+    t,
+    router,
+    templatesStore,
+    templateId,
+    errorMessage,
+    isDevEditor,
+    loadTemplate,
+    activeDetailTab,
+    gates,
+    decisionDialogMode,
+    decisionDialogOpen,
+    lifecycleComment,
+    publishSummaryOpen,
+    submitSummaryOpen,
+  })
+
   function resetDecisionState() {
     lifecycleComment.value = ''
     gates.resetGateState()
@@ -75,76 +92,6 @@ export function useTemplateLifecycleDecisions(options: UseTemplateLifecycleDecis
     decisionDialogOpen.value = true
   }
 
-  async function submitLifecycleDecision(payload: {
-    reasonCategory?: string
-    impactSummary?: string
-    commentSummary?: string
-    remediationTestRecordId?: string
-    remediationChangeDiffRef?: string
-    remediationChecklistCode?: string
-    fidelityViewedConfirmed?: boolean
-    coverageViewedConfirmed?: boolean
-    previewViewedConfirmed?: boolean
-    exceptionIntervention?: boolean
-    exceptionReason?: string
-    secondaryConfirmed?: boolean
-    keyEvidenceConfirmed?: boolean
-  }) {
-    const mode = decisionDialogMode.value
-    try {
-      if (mode === 'test-fail') {
-        await templatesStore.recordTestDecision(templateId.value, {
-          decision: 'FAILED',
-          reasonCategory: payload.reasonCategory,
-          impactSummary: payload.impactSummary,
-          commentSummary: payload.commentSummary,
-          remediationTestRecordId: payload.remediationTestRecordId,
-          remediationChangeDiffRef: payload.remediationChangeDiffRef,
-          remediationChecklistCode: payload.remediationChecklistCode,
-        })
-        ElMessage.success(t('templates.lifecycle.testDecisionSuccess'))
-      } else if (mode === 'test-pass') {
-        await templatesStore.recordTestDecision(templateId.value, {
-          decision: 'PASSED',
-          commentSummary: payload.commentSummary,
-          fidelityViewedConfirmed: payload.fidelityViewedConfirmed,
-          coverageViewedConfirmed: payload.coverageViewedConfirmed,
-          previewViewedConfirmed: payload.previewViewedConfirmed,
-          exceptionIntervention: payload.exceptionIntervention,
-          exceptionReason: payload.exceptionReason,
-          secondaryConfirmed: payload.secondaryConfirmed,
-        })
-        ElMessage.success(t('templates.lifecycle.testDecisionSuccess'))
-      } else if (mode === 'approval-reject') {
-        await templatesStore.recordApprovalDecision(templateId.value, {
-          decision: 'REJECTED',
-          reasonCategory: payload.reasonCategory,
-          impactSummary: payload.impactSummary,
-          commentSummary: payload.commentSummary,
-          remediationTestRecordId: payload.remediationTestRecordId,
-          remediationChangeDiffRef: payload.remediationChangeDiffRef,
-          remediationChecklistCode: payload.remediationChecklistCode,
-        })
-        ElMessage.success(t('templates.lifecycle.approvalDecisionSuccess'))
-      } else if (mode === 'approval-approve') {
-        await templatesStore.recordApprovalDecision(templateId.value, {
-          decision: 'APPROVED',
-          commentSummary: payload.commentSummary,
-          fidelityViewedConfirmed: payload.fidelityViewedConfirmed,
-          keyEvidenceConfirmed: payload.keyEvidenceConfirmed,
-          exceptionIntervention: payload.exceptionIntervention,
-          exceptionReason: payload.exceptionReason,
-          secondaryConfirmed: payload.secondaryConfirmed,
-        })
-        ElMessage.success(t('templates.lifecycle.approvalDecisionSuccess'))
-      }
-      decisionDialogOpen.value = false
-      lifecycleComment.value = ''
-    } catch {
-      ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
-    }
-  }
-
   async function handleSubmitForApproval() {
     if (gates.submitGateLoadError.value) {
       ElMessage.error(t('templates.submitGate.loadError'))
@@ -158,19 +105,6 @@ export function useTemplateLifecycleDecisions(options: UseTemplateLifecycleDecis
       return
     }
     submitSummaryOpen.value = true
-  }
-
-  async function confirmSubmitFromSummary() {
-    submitSummaryOpen.value = false
-    try {
-      await templatesStore.submitForApproval(templateId.value, {
-        commentSummary: lifecycleComment.value,
-      })
-      lifecycleComment.value = ''
-      ElMessage.success(t('templates.lifecycle.submitApprovalSuccess'))
-    } catch {
-      ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
-    }
   }
 
   async function handleApprovalDecision(decision: 'APPROVED' | 'REJECTED') {
@@ -189,25 +123,6 @@ export function useTemplateLifecycleDecisions(options: UseTemplateLifecycleDecis
     publishSummaryOpen.value = true
   }
 
-  async function confirmPublishFromSummary(payload?: { fidelityViewedConfirmed?: boolean }) {
-    publishSummaryOpen.value = false
-    try {
-      await templatesStore.publishTemplate(templateId.value, {
-        releaseVersion: gates.publishVersion.value,
-        fidelityViewedConfirmed: payload?.fidelityViewedConfirmed,
-      })
-      await loadTemplate()
-      if (isDevEditor.value) {
-        router.push(templatePackageHubPath(templateId.value))
-      } else {
-        activeDetailTab.value = 'releaseVersions'
-      }
-      ElMessage.success(t('templates.lifecycle.publishSuccess'))
-    } catch {
-      ElMessage.error(errorMessage.value || t('templates.error.lifecycle'))
-    }
-  }
-
   return {
     lifecycleComment,
     lifecycleCommentDialogOpen,
@@ -219,12 +134,10 @@ export function useTemplateLifecycleDecisions(options: UseTemplateLifecycleDecis
     handleSubmitForTest,
     handleTestDecision,
     openApprovalRejectDialog,
-    submitLifecycleDecision,
+    ...submitters,
     handleSubmitForApproval,
-    confirmSubmitFromSummary,
     handleApprovalDecision,
     handlePublish,
-    confirmPublishFromSummary,
     handleGovernanceAction,
     handleDeleteTemplate,
     resetDecisionState,

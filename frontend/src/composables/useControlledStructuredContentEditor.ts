@@ -1,8 +1,6 @@
-import { computed, onMounted, onUnmounted, ref, watch, type Ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
 import {
-  DEFAULT_STYLE_CATALOG,
   STRUCTURED_BLOCK_NODE_TYPES,
   type ControlledStructuredContentEditorEmit,
   type ControlledStructuredContentEditorProps,
@@ -12,12 +10,12 @@ import { useControlledStructuredContentCatalogOptions } from '@/composables/useC
 import { useStructuredContentDocumentModel } from '@/composables/useStructuredContentDocumentModel'
 import { useStructuredContentLocalDraft } from '@/composables/useStructuredContentLocalDraft'
 import { useStructuredContentPasteFlow } from '@/composables/useStructuredContentPasteFlow'
+import { bindControlledStructuredContentEditorLifecycle } from '@/composables/bindControlledStructuredContentEditorLifecycle'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
 import type { MasterStyleCatalog } from '@/types/template'
 import {
   DEFAULT_STRUCTURED_CONTENT_JSON,
-  parseStructuredContent,
   serializeStructuredContent,
   type ConfirmedNodeType,
 } from '@/utils/structuredContentNodes'
@@ -95,62 +93,6 @@ export function useControlledStructuredContentEditor(
     t,
   })
 
-  watch(
-    () => props.modelValue,
-    (value) => {
-      doc.setSyncingFromProps(true)
-      try {
-        const next = parseStructuredContent(value || DEFAULT_STRUCTURED_CONTENT_JSON)
-        doc.documentModel.value = next
-        doc.setLastCommittedSnapshot(serializeStructuredContent(next))
-        if (localDraft.areWritesSuppressed()) {
-          pristineBaseline.value = doc.getLastCommittedSnapshot()
-          emit('dirty-change', false)
-          localDraft.clearDraft({ suppressSubsequentWrites: true })
-        }
-      } finally {
-        doc.setSyncingFromProps(false)
-      }
-    },
-  )
-
-  watch(
-    () => props.baseline,
-    (value) => {
-      if (value !== undefined) {
-        pristineBaseline.value = value
-      }
-    },
-  )
-
-  function emitDirtyState() {
-    const current = serializeStructuredContent(doc.documentModel.value)
-    emit('dirty-change', current !== pristineBaseline.value)
-  }
-
-  watch(
-    doc.documentModel,
-    (value) => {
-      if (isReadonly.value) {
-        return
-      }
-      const serialized = serializeStructuredContent(value)
-      if (!doc.history.isApplying() && !doc.isSyncingFromProps()) {
-        doc.history.commit(
-          doc.getLastCommittedSnapshot(),
-          serialized,
-          doc.getPendingCoalesceKey(),
-        )
-      }
-      doc.setLastCommittedSnapshot(serialized)
-      emit('update:modelValue', serialized)
-      emitDirtyState()
-      emit('structure-change')
-      scheduleLocalDraftWrite(serialized)
-    },
-    { deep: true },
-  )
-
   const paste = useStructuredContentPasteFlow({
     templateId: () => props.templateId,
     isReadonly: () => isReadonly.value,
@@ -159,35 +101,23 @@ export function useControlledStructuredContentEditor(
     emitPasteAccepted: (evidence) => emit('paste-accepted', evidence),
   })
 
-  onMounted(async () => {
-    editorRootRef.value?.addEventListener('keydown', doc.handleEditorKeydown, true)
-    evaluateDraftRecovery()
-    if (!props.templateId) {
-      styleCatalog.value = DEFAULT_STYLE_CATALOG
-      selectedStyleKey.value = DEFAULT_STYLE_CATALOG.entries[0]?.styleKey ?? 'BodyText'
-      return
-    }
-    loadingCatalog.value = true
-    try {
-      styleCatalog.value = await templatesStore.fetchMasterStyleCatalog(props.templateId)
-      selectedStyleKey.value = styleCatalog.value.entries[0]?.styleKey ?? 'BodyText'
-    } catch {
-      ElMessage.error(t('templates.structuredEditor.error.loadCatalog'))
-    } finally {
-      loadingCatalog.value = false
-    }
+  bindControlledStructuredContentEditorLifecycle({
+    props,
+    emit,
+    doc,
+    localDraft,
+    pristineBaseline,
+    styleCatalog,
+    selectedStyleKey,
+    loadingCatalog,
+    editorRootRef,
+    draftUserId,
+    isReadonly: () => isReadonly.value,
+    evaluateDraftRecovery,
+    scheduleLocalDraftWrite,
+    fetchMasterStyleCatalog: (templateId) => templatesStore.fetchMasterStyleCatalog(templateId),
+    t,
   })
-
-  onUnmounted(() => {
-    editorRootRef.value?.removeEventListener('keydown', doc.handleEditorKeydown, true)
-  })
-
-  watch(
-    () => [props.anchorId, props.devVersionId, props.templateId, draftUserId.value] as const,
-    () => {
-      evaluateDraftRecovery()
-    },
-  )
 
   function nodeLabel(type: ConfirmedNodeType | string): string {
     const key = `templates.structuredEditor.nodes.${type}`

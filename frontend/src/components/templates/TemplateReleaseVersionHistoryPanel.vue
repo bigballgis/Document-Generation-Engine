@@ -196,30 +196,4 @@ const {
   </div>
 </template>
 
-<style scoped lang="scss">
-.release-version-history {
-  padding: 0.25rem 0;
-}
-
-.panel-header {
-  margin-bottom: 1rem;
-
-  h2 {
-    margin: 0 0 0.25rem;
-    font-size: 1.125rem;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-muted);
-  }
-}
-
-.workflow-hint {
-  margin-bottom: 1rem;
-}
-
-.table-toolbar {
-  margin-bottom: 0.75rem;
-}
-</style>
+<style scoped lang="scss" src="./TemplateReleaseVersionHistoryPanel.scss"></style>
