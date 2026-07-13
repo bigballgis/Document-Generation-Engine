@@ -1,9 +1,7 @@
 import { ref, type Ref } from 'vue'
 import { useStructuredContentHistory } from '@/composables/useStructuredContentHistory'
+import { createStructuredContentDocumentMutations } from '@/composables/createStructuredContentDocumentMutations'
 import {
-  applyStyleToParagraphs,
-  createNodeTemplate,
-  insertBlockNode,
   parseStructuredContent,
   serializeStructuredContent,
   type ConfirmedNodeType,
@@ -148,95 +146,11 @@ export function useStructuredContentDocumentModel(options: {
     history.endCoalesce()
   }
 
-  function insertBlock(type: ConfirmedNodeType, selectedStyleKey: string) {
-    if (options.isReadonly()) {
-      return
-    }
-    pendingCoalesceKey = null
-    documentModel.value = insertBlockNode(documentModel.value, type, selectedStyleKey)
-  }
-
-  function applySelectedStyle(selectedStyleKey: string) {
-    if (!selectedStyleKey || options.isReadonly()) {
-      return
-    }
-    pendingCoalesceKey = null
-    documentModel.value = applyStyleToParagraphs(documentModel.value, selectedStyleKey)
-  }
-
-  function replaceBlock(index: number, next: StructuredContentNode) {
-    const nodes = [...documentModel.value.nodes]
-    nodes[index] = next
-    documentModel.value = { ...documentModel.value, nodes }
-  }
-
-  function updateBlockField(index: number, field: keyof StructuredContentNode, value: string) {
-    const node = documentModel.value.nodes[index]
-    if (!node) {
-      return
-    }
-    pendingCoalesceKey = `field:${index}:${String(field)}`
-    replaceBlock(index, { ...node, [field]: value })
-  }
-
-  function updateInlineChild(
-    blockIndex: number,
-    childIndex: number,
-    nextChild: StructuredContentNode,
-  ) {
-    const node = documentModel.value.nodes[blockIndex]
-    if (!node) {
-      return
-    }
-    pendingCoalesceKey = `inline:${blockIndex}:${childIndex}`
-    const children = [...(node.children ?? [])]
-    children[childIndex] = nextChild
-    replaceBlock(blockIndex, { ...node, children })
-  }
-
-  function addInlineToBlock(
-    blockIndex: number,
-    type: ConfirmedNodeType,
-    selectedStyleKey: string,
-  ) {
-    const node = documentModel.value.nodes[blockIndex]
-    if (!node) {
-      return
-    }
-    pendingCoalesceKey = null
-    const children = [...(node.children ?? []), createNodeTemplate(type, selectedStyleKey)]
-    replaceBlock(blockIndex, { ...node, children })
-  }
-
-  function removeBlock(index: number) {
-    if (options.isReadonly()) {
-      return
-    }
-    pendingCoalesceKey = null
-    documentModel.value = {
-      ...documentModel.value,
-      nodes: documentModel.value.nodes.filter((_, nodeIndex) => nodeIndex !== index),
-    }
-  }
-
-  function insertInline(type: ConfirmedNodeType, selectedStyleKey: string) {
-    if (options.isReadonly()) {
-      return
-    }
-    pendingCoalesceKey = null
-    const nodes = [...documentModel.value.nodes]
-    if (!nodes.length) {
-      nodes.push(createNodeTemplate('paragraph', selectedStyleKey))
-    }
-    const lastIndex = nodes.length - 1
-    const target = nodes[lastIndex]
-    if (!target) {
-      return
-    }
-    const children = [...(target.children ?? []), createNodeTemplate(type, selectedStyleKey)]
-    nodes[lastIndex] = { ...target, children }
-    documentModel.value = { ...documentModel.value, nodes }
-  }
+  const mutations = createStructuredContentDocumentMutations({
+    documentModel,
+    isReadonly: options.isReadonly,
+    setPendingCoalesceKey,
+  })
 
   function resetHistoryWithStructure(structureJson: string) {
     history.clear()
@@ -269,13 +183,7 @@ export function useStructuredContentDocumentModel(options: {
     doRedo,
     handleEditorKeydown,
     endFieldCoalesce,
-    insertBlock,
-    insertInline,
-    applySelectedStyle,
-    updateBlockField,
-    updateInlineChild,
-    addInlineToBlock,
-    removeBlock,
+    ...mutations,
     resetHistoryWithStructure,
     clearHistoryOnly,
   }

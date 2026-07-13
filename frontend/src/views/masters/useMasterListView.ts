@@ -2,7 +2,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
-import { useCatalogTableControls } from '@/composables/useCatalogTableControls'
 import { useActivatableTableRow } from '@/composables/useActivatableTableRow'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useMasterStatusFilterOptions } from '@/composables/useTableFilterOptions'
@@ -14,6 +13,7 @@ import { useMastersStore } from '@/stores/masters'
 import type { MasterDocumentSummary } from '@/types/master'
 import { resolveUpdatedByDisplay } from '@/utils/userDisplay'
 import { ElMessage } from 'element-plus'
+import { createMasterListCatalogControls } from '@/views/masters/createMasterListCatalogControls'
 
 export function useMasterListView() {
   const { t, te } = useI18n()
@@ -37,77 +37,9 @@ export function useMasterListView() {
     activeFilterChips,
     clearAll,
     removeFilterChip,
-  } = useCatalogTableControls(allMasters, {
-    searchGetters: [(row) => row.name, (row) => row.groupCode],
-    filters: [
-      {
-        key: 'groupCode',
-        labelKey: 'masters.list.columns.group',
-        getValue: (row) => row.groupCode,
-      },
-      {
-        key: 'status',
-        labelKey: 'masters.list.columns.status',
-        getValue: (row) => row.status,
-        matchMode: 'exact',
-      },
-    ],
-    sortOptions: [
-      {
-        key: 'groupCodeAsc',
-        labelKey: 'table.sort.groupAsc',
-        getter: (row) => row.groupCode,
-        order: 'asc',
-      },
-      {
-        key: 'updatedAtDesc',
-        labelKey: 'table.sort.updatedAtDesc',
-        getter: (row) => row.updatedAt,
-        order: 'desc',
-      },
-      {
-        key: 'updatedAtAsc',
-        labelKey: 'table.sort.updatedAtAsc',
-        getter: (row) => row.updatedAt,
-        order: 'asc',
-      },
-      {
-        key: 'nameAsc',
-        labelKey: 'table.sort.nameAsc',
-        getter: (row) => row.name,
-        order: 'asc',
-      },
-      {
-        key: 'groupAsc',
-        labelKey: 'table.sort.groupAsc',
-        getter: (row) => row.groupCode,
-        order: 'asc',
-      },
-    ],
-    defaultSortKey: 'groupCodeAsc',
-  })
-
-  const catalogToolbarFilters = computed(() => [
-    {
-      key: 'groupCode',
-      labelKey: 'masters.list.columns.group',
-      type: 'text' as const,
-    },
-    {
-      key: 'status',
-      labelKey: 'masters.list.columns.status',
-      type: 'select' as const,
-      options: masterStatusFilterOptions.value,
-    },
-  ])
-
-  const catalogSortOptions = computed(() => [
-    { key: 'groupCodeAsc', labelKey: 'table.sort.groupAsc' },
-    { key: 'updatedAtDesc', labelKey: 'table.sort.updatedAtDesc' },
-    { key: 'updatedAtAsc', labelKey: 'table.sort.updatedAtAsc' },
-    { key: 'nameAsc', labelKey: 'table.sort.nameAsc' },
-    { key: 'groupAsc', labelKey: 'table.sort.groupAsc' },
-  ])
+    catalogToolbarFilters,
+    catalogSortOptions,
+  } = createMasterListCatalogControls(allMasters, masterStatusFilterOptions)
 
   const showCatalogChrome = computed(
     () =>

@@ -7,6 +7,10 @@ import {
   handleStoreListFailure,
   type AbortableRequestOptions,
 } from '@/stores/storeRequestSupport'
+import {
+  applyUpdatedContentModule,
+  toContentModuleSummary,
+} from '@/stores/contentModuleStoreHelpers'
 import type {
   ContentModuleDetail,
   ContentModuleLifecycleImpactSummary,
@@ -87,9 +91,9 @@ export const useContentModulesStore = defineStore('contentModules', () => {
     lastErrorMessageKey.value = null
     try {
       const created = await contentModulesApi.createContentModule(payload)
-      applyUpdatedModule(created)
+      applyUpdatedContentModule(selectedModule, modules, created)
       if (!activeGroupCode.value || activeGroupCode.value === payload.groupCode) {
-        modules.value = [toSummary(created), ...modules.value.filter((item) => item.moduleId !== created.moduleId)]
+        modules.value = [toContentModuleSummary(created), ...modules.value.filter((item) => item.moduleId !== created.moduleId)]
       }
       return created
     } catch (error) {
@@ -108,7 +112,7 @@ export const useContentModulesStore = defineStore('contentModules', () => {
     lastErrorMessageKey.value = null
     try {
       const updated = await contentModulesApi.createContentModuleVersion(moduleId, payload)
-      applyUpdatedModule(updated)
+      applyUpdatedContentModule(selectedModule, modules, updated)
       return updated
     } catch (error) {
       lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'contentModules.error.createVersion')
@@ -131,7 +135,7 @@ export const useContentModulesStore = defineStore('contentModules', () => {
         semanticVersion,
         payload,
       )
-      applyUpdatedModule(updated)
+      applyUpdatedContentModule(selectedModule, modules, updated)
       return updated
     } catch (error) {
       lastErrorMessageKey.value = resolveApiErrorMessageKey(error, 'contentModules.error.updateVersion')
@@ -186,29 +190,6 @@ export const useContentModulesStore = defineStore('contentModules', () => {
       throw error
     } finally {
       submitting.value = false
-    }
-  }
-
-  function applyUpdatedModule(updated: ContentModuleDetail) {
-    selectedModule.value = updated
-    modules.value = modules.value.map((item) =>
-      item.moduleId === updated.moduleId ? toSummary(updated) : item,
-    )
-  }
-
-  function toSummary(detail: ContentModuleDetail): ContentModuleSummary {
-    return {
-      moduleId: detail.moduleId,
-      moduleCode: detail.moduleCode,
-      groupCode: detail.groupCode,
-      name: detail.name,
-      description: detail.description,
-      sharedGroupCodes: detail.sharedGroupCodes,
-      createdAt: detail.versions[0]?.createdAt ?? '',
-      updatedAt: detail.versions.reduce(
-        (latest, version) => (version.updatedAt > latest ? version.updatedAt : latest),
-        detail.versions[0]?.updatedAt ?? '',
-      ),
     }
   }
 

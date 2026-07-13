@@ -1,123 +1,30 @@
 import {
-  canViewEscalationQueue,
-  canAuthorTemplates,
-  canDecideApprovals,
-  canDecideTests,
-  canPublishTemplates,
-  canReviewMasters,
   canAccessContentModuleManagement,
-  MANAGEMENT_ROLES,
   type CapabilityContext,
 } from '@/auth/roles'
-import { ROUTE_KEYS, type RouteKey } from '@/routing/routeKeys'
+import { ROUTE_KEYS } from '@/routing/routeKeys'
+import {
+  BEHAVIOR_NAV_ITEM_SPECS,
+  type BehaviorNavItemSpec,
+  type NavGroupDefinition,
+  type NavItemDefinition,
+  type NavItemTarget,
+} from '@/navigation/navCatalog'
+import { NAV_GROUPS } from '@/navigation/navGroupsCatalog'
 
-export interface NavItemDefinition {
-  id: string
-  routeKey: RouteKey
-  path: string
-  labelKey: string
-  query?: Record<string, string>
-  hash?: string
-}
+export type {
+  BehaviorNavItemSpec,
+  NavGroupDefinition,
+  NavItemDefinition,
+  NavItemTarget,
+} from '@/navigation/navCatalog'
 
-export interface NavGroupDefinition {
-  id: string
-  labelKey: string
-  items: NavItemDefinition[]
-}
-
-export interface NavItemTarget {
-  path: string
-  query?: Record<string, string>
-  hash?: string
-}
-
-export interface BehaviorNavItemSpec {
-  id: string
-  labelKey: string
-  query?: Record<string, string>
-  hash: string
-  isVisible: (context: CapabilityContext, visibleRoutes: string[]) => boolean
-}
-
-function canSeeBehaviorMasterReview(
-  context: CapabilityContext,
-  visibleRoutes: string[],
-): boolean {
-  if (canReviewMasters(context)) {
-    return true
-  }
-  return (
-    context.roles.includes(MANAGEMENT_ROLES.MASTER_DESIGNER) &&
-    visibleRoutes.includes(ROUTE_KEYS.masterManagement)
-  )
-}
+export { BEHAVIOR_NAV_ITEM_SPECS } from '@/navigation/navCatalog'
+export { NAV_GROUPS } from '@/navigation/navGroupsCatalog'
 
 function hasDashboardHomeAccess(visibleRoutes: string[]): boolean {
   return visibleRoutes.includes(ROUTE_KEYS.dashboardHome)
 }
-
-function canSeeBehaviorRemediation(context: CapabilityContext): boolean {
-  const hasEligibleRole = context.roles.some((role) =>
-    (
-      [
-        MANAGEMENT_ROLES.GLOBAL_ADMIN,
-        MANAGEMENT_ROLES.GROUP_ADMIN,
-        MANAGEMENT_ROLES.TEMPLATE_AUTHOR,
-      ] as string[]
-    ).includes(role),
-  )
-  if (!hasEligibleRole) {
-    return false
-  }
-  return canAuthorTemplates(context)
-}
-
-/** Behavior-typed nav catalog — visibility driven by capabilities + roles (P21 §12.2). */
-export const BEHAVIOR_NAV_ITEM_SPECS: BehaviorNavItemSpec[] = [
-  {
-    id: 'behavior-testing',
-    labelKey: 'nav.behaviorItems.testing',
-    query: { queue: 'TEST' },
-    hash: '#tasks-section',
-    isVisible: (context) => canDecideTests(context),
-  },
-  {
-    id: 'behavior-approval',
-    labelKey: 'nav.behaviorItems.approval',
-    query: { queue: 'APPROVAL' },
-    hash: '#tasks-section',
-    isVisible: (context) => canDecideApprovals(context),
-  },
-  {
-    id: 'behavior-remediation',
-    labelKey: 'nav.behaviorItems.remediation',
-    query: { queue: 'REMEDIATION' },
-    hash: '#tasks-section',
-    isVisible: (context) => canSeeBehaviorRemediation(context),
-  },
-  {
-    id: 'behavior-pending-release',
-    labelKey: 'nav.behaviorItems.pendingRelease',
-    query: { queue: 'PENDING_RELEASE' },
-    hash: '#tasks-section',
-    isVisible: (context) => canPublishTemplates(context),
-  },
-  {
-    id: 'behavior-escalation',
-    labelKey: 'nav.behaviorItems.escalation',
-    query: { queue: 'ESCALATION' },
-    hash: '#tasks-section',
-    isVisible: (context) => canViewEscalationQueue(context),
-  },
-  {
-    id: 'behavior-master-review',
-    labelKey: 'nav.behaviorItems.masterReview',
-    query: { filter: 'master-review' },
-    hash: '#tasks-section',
-    isVisible: (context, visibleRoutes) => canSeeBehaviorMasterReview(context, visibleRoutes),
-  },
-]
 
 function behaviorSpecToNavItem(spec: BehaviorNavItemSpec): NavItemDefinition {
   return {
@@ -152,88 +59,6 @@ export function resolveNavItemTarget(item: NavItemDefinition): NavItemTarget {
   }
   return target
 }
-
-/** User-facing navigation catalog. Order and grouping are fixed in the UI. */
-export const NAV_GROUPS: NavGroupDefinition[] = [
-  {
-    id: 'overview',
-    labelKey: 'nav.groups.overview',
-    items: [
-      {
-        id: 'dashboard',
-        routeKey: ROUTE_KEYS.dashboardHome,
-        path: '/dashboard',
-        labelKey: 'nav.items.dashboard',
-      },
-    ],
-  },
-  {
-    id: 'entitlement',
-    labelKey: 'nav.groups.entitlement',
-    items: [
-      {
-        id: 'users',
-        routeKey: ROUTE_KEYS.identityAdministration,
-        path: '/entitlement/users',
-        labelKey: 'nav.items.users',
-      },
-      {
-        id: 'groups',
-        routeKey: ROUTE_KEYS.identityAdministration,
-        path: '/entitlement/groups',
-        labelKey: 'nav.items.groups',
-      },
-    ],
-  },
-  {
-    id: 'documentContent',
-    labelKey: 'nav.groups.content',
-    items: [
-      {
-        id: 'masters',
-        routeKey: ROUTE_KEYS.masterManagement,
-        path: '/masters',
-        labelKey: 'nav.items.masters',
-      },
-      {
-        id: 'templates',
-        routeKey: ROUTE_KEYS.templateManagement,
-        path: '/templates',
-        labelKey: 'nav.items.templates',
-      },
-      {
-        id: 'content-modules',
-        routeKey: ROUTE_KEYS.contentModuleManagement,
-        path: '/content-modules',
-        labelKey: 'nav.items.contentModules',
-      },
-    ],
-  },
-  {
-    id: 'api',
-    labelKey: 'nav.groups.apiAccess',
-    items: [
-      {
-        id: 'api-policies',
-        routeKey: ROUTE_KEYS.apiPolicyManagement,
-        path: '/api/policies',
-        labelKey: 'nav.items.apiPolicies',
-      },
-    ],
-  },
-  {
-    id: 'security',
-    labelKey: 'nav.groups.security',
-    items: [
-      {
-        id: 'audit',
-        routeKey: ROUTE_KEYS.auditConsole,
-        path: '/audit',
-        labelKey: 'nav.items.audit',
-      },
-    ],
-  },
-]
 
 export function buildVisibleNavGroups(
   visibleRouteKeys: string[],

@@ -3,7 +3,6 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useDataTableFilters } from '@/composables/useDataTableFilters'
 import { canReviewMasters, sessionContext } from '@/auth/roles'
-import { masterDetailPath } from '@/routing/routeKeys'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useCapabilities } from '@/composables/useCapabilities'
@@ -14,9 +13,9 @@ import {
   resolveMasterRevisionWorkspaceTabFromQuery,
   type MasterRevisionWorkspaceTab,
 } from '@/views/masters/masterRevisionWorkspaceTabs'
-import type { MasterDocumentDetail, MasterReviewDecision } from '@/types/master'
+import type { MasterDocumentDetail } from '@/types/master'
 import { formatMasterRevisionLineLabel } from '@/utils/masterRevisionLineLabel'
-import { ElMessage } from 'element-plus'
+import { createMasterRevisionDetailActions } from '@/views/masters/createMasterRevisionDetailActions'
 
 export function useMasterRevisionDetailController() {
   const { t, te } = useI18n()
@@ -28,7 +27,6 @@ export function useMasterRevisionDetailController() {
 
   const submitReviewOpen = ref(false)
   const reviewDialogOpen = ref(false)
-  const reviewMode = ref<MasterReviewDecision>('APPROVED')
   const loadFailed = ref(false)
   const downloading = ref(false)
   const activeWorkspaceTab = ref<MasterRevisionWorkspaceTab>(
@@ -149,86 +147,34 @@ export function useMasterRevisionDetailController() {
     ),
   )
 
+  const actions = createMasterRevisionDetailActions({
+    t,
+    te,
+    mastersStore,
+    masterId,
+    revisionLineId,
+    router,
+    loadFailed,
+    downloading,
+    submitReviewOpen,
+    reviewDialogOpen,
+    errorMessage,
+  })
+
   onMounted(async () => {
-    await reloadPage()
+    await actions.reloadPage()
   })
 
   onUnmounted(() => {
     mastersStore.clearSelected()
   })
 
-  async function reloadPage() {
-    loadFailed.value = false
-    try {
-      await mastersStore.fetchMaster(masterId.value)
-      await mastersStore.fetchRevisionLine(masterId.value, revisionLineId.value)
-    } catch {
-      loadFailed.value = true
-    }
-  }
-
-  function goBackToPackage() {
-    router.push(masterDetailPath(masterId.value))
-  }
-
-  async function handleSubmitReview(payload: { changeSummary: string }) {
-    try {
-      await mastersStore.submitReview(masterId.value, payload)
-      submitReviewOpen.value = false
-      ElMessage.success(t('masters.submitReview.success'))
-      await reloadPage()
-    } catch {
-      ElMessage.error(errorMessage.value || t('masters.error.submitReview'))
-    }
-  }
-
-  function openReviewDialog(mode: MasterReviewDecision) {
-    reviewMode.value = mode
-    reviewDialogOpen.value = true
-  }
-
-  async function handleReviewDecision(payload: {
-    decision: MasterReviewDecision
-    commentSummary: string
-  }) {
-    try {
-      await mastersStore.decideReview(masterId.value, {
-        decision: payload.decision,
-        commentSummary: payload.commentSummary || undefined,
-      })
-      reviewDialogOpen.value = false
-      ElMessage.success(
-        t(payload.decision === 'APPROVED' ? 'masters.review.approveSuccess' : 'masters.review.rejectSuccess'),
-      )
-      await reloadPage()
-    } catch {
-      ElMessage.error(errorMessage.value || t('masters.error.decideReview'))
-    }
-  }
-
-  async function handleDownload() {
-    downloading.value = true
-    try {
-      await mastersStore.downloadRevisionLineFile(masterId.value, revisionLineId.value)
-      ElMessage.success(t('masters.download.success'))
-    } catch {
-      ElMessage.error(errorMessage.value || t('masters.error.download'))
-    } finally {
-      downloading.value = false
-    }
-  }
-
-  function formatReviewAction(action: string): string {
-    const key = `masters.reviewHistory.action.${action}`
-    return te(key) ? t(key) : action
-  }
-
   return {
     t,
     mastersStore,
     submitReviewOpen,
     reviewDialogOpen,
-    reviewMode,
+    reviewMode: actions.reviewMode,
     loadFailed,
     downloading,
     activeWorkspaceTab,
@@ -247,12 +193,12 @@ export function useMasterRevisionDetailController() {
     journeyContext,
     canWriteJourney,
     revisionLineTitle,
-    reloadPage,
-    goBackToPackage,
-    handleSubmitReview,
-    openReviewDialog,
-    handleReviewDecision,
-    handleDownload,
-    formatReviewAction,
+    reloadPage: actions.reloadPage,
+    goBackToPackage: actions.goBackToPackage,
+    handleSubmitReview: actions.handleSubmitReview,
+    openReviewDialog: actions.openReviewDialog,
+    handleReviewDecision: actions.handleReviewDecision,
+    handleDownload: actions.handleDownload,
+    formatReviewAction: actions.formatReviewAction,
   }
 }

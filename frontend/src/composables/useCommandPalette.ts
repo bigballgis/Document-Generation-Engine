@@ -8,18 +8,16 @@ import {
 import {
   COMMAND_PALETTE_DEBOUNCE_MS,
   COMMAND_PALETTE_PAGE_SIZE,
-  type PaletteGroupView,
   type PaletteItem,
   type UseCommandPaletteOptions,
 } from '@/composables/commandPaletteTypes'
 import {
   buildPaletteRouteItems,
-  canQueryCatalog,
   filterPaletteRouteItems,
   moveHighlightIndex,
 } from '@/composables/commandPaletteHelpers'
 import { useCommandPaletteCatalog } from '@/composables/useCommandPaletteCatalog'
-import { ROUTE_KEYS } from '@/routing/routeKeys'
+import { createCommandPaletteDerivedState } from '@/composables/createCommandPaletteDerivedState'
 
 export {
   COMMAND_PALETTE_DEBOUNCE_MS,
@@ -66,71 +64,11 @@ export function useCommandPalette(options: UseCommandPaletteOptions) {
     filterPaletteRouteItems(allRouteItems.value, query.value),
   )
 
-  const groups = computed((): PaletteGroupView[] => {
-    const trimmed = query.value.trim()
-    const result: PaletteGroupView[] = [
-      {
-        id: 'routes',
-        labelKey: 'commandPalette.groups.routes',
-        items: filteredRouteItems.value,
-        errorMessageKey: null,
-        loading: false,
-      },
-    ]
-    if (trimmed) {
-      if (canQueryCatalog(options.visibleRoutes.value, ROUTE_KEYS.templateManagement)) {
-        result.push({
-          id: 'templates',
-          labelKey: 'commandPalette.groups.templates',
-          items: catalog.templateItems.value,
-          errorMessageKey: catalog.templateErrorKey.value,
-          loading: catalog.templateLoading.value,
-        })
-      }
-      if (canQueryCatalog(options.visibleRoutes.value, ROUTE_KEYS.masterManagement)) {
-        result.push({
-          id: 'masters',
-          labelKey: 'commandPalette.groups.masters',
-          items: catalog.masterItems.value,
-          errorMessageKey: catalog.masterErrorKey.value,
-          loading: catalog.masterLoading.value,
-        })
-      }
-      if (canQueryCatalog(options.visibleRoutes.value, ROUTE_KEYS.contentModuleManagement)) {
-        result.push({
-          id: 'content-modules',
-          labelKey: 'commandPalette.groups.contentModules',
-          items: catalog.contentModuleItems.value,
-          errorMessageKey: catalog.contentModuleErrorKey.value,
-          loading: catalog.contentModuleLoading.value,
-        })
-      }
-    }
-    return result
-  })
-
-  const flatItems = computed(() => groups.value.flatMap((group) => group.items))
-
-  const hasAnyError = computed(() =>
-    groups.value.some((group) => Boolean(group.errorMessageKey)),
-  )
-
-  const showNoMatch = computed(() => {
-    const trimmed = query.value.trim()
-    if (!trimmed) {
-      return false
-    }
-    if (catalog.loading.value || groups.value.some((g) => g.loading)) {
-      return false
-    }
-    if (flatItems.value.length > 0) {
-      return false
-    }
-    // Errors must not be disguised as no-match (C6-C15 / C6-C16).
-    if (hasAnyError.value) {
-      return false
-    }
-    return true
+  const { groups, flatItems, hasAnyError, showNoMatch } = createCommandPaletteDerivedState({
+    query,
+    filteredRouteItems,
+    catalog,
+    visibleRoutes: () => options.visibleRoutes.value,
   })
 
   function openPalette() {

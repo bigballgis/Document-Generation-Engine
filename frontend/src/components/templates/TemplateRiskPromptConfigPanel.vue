@@ -1,16 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
+import { toRef } from 'vue'
 import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
-import * as globalRiskPromptApi from '@/api/riskPromptConfig'
-import * as templateRiskPromptApi from '@/api/templateRiskPromptConfig'
 import {
   TEMPLATE_DECISION_REASON_CATEGORIES,
-  type TemplateDecisionReasonCategory,
 } from '@/utils/templateLifecycleDecisionForm'
 import type { TemplateRiskPromptFormState } from '@/types/template'
+import { useTemplateRiskPromptConfigPanel } from '@/components/templates/useTemplateRiskPromptConfigPanel'
 
 const props = withDefaults(
   defineProps<{
@@ -33,131 +29,22 @@ const formState = defineModel<TemplateRiskPromptFormState>('formState', {
   }),
 })
 
-const { t } = useI18n()
-
-const loading = ref(false)
-const saving = ref(false)
-const updatedAt = ref<string | null>(null)
-
-const editableCategories = computed(() =>
-  TEMPLATE_DECISION_REASON_CATEGORIES.filter((category) =>
-    formState.value.reasonCategories.includes(category),
-  ),
-)
-
-function categoryLabel(category: TemplateDecisionReasonCategory): string {
-  return t(`templates.lifecycle.decisionForm.reasonCategories.${category}`)
-}
-
-function initializeCopyDefaults(categories: string[]) {
-  for (const category of categories) {
-    if (!formState.value.riskPromptCopy[category]) {
-      formState.value.riskPromptCopy[category] = categoryLabel(
-        category as TemplateDecisionReasonCategory,
-      )
-    }
-  }
-}
-
-function applyLoadedConfig(useDefault: boolean, reasonCategories: string[], riskPromptCopy: Record<string, string>) {
-  formState.value.customize = !useDefault
-  formState.value.reasonCategories = [...reasonCategories]
-  formState.value.riskPromptCopy = { ...riskPromptCopy }
-  initializeCopyDefaults(formState.value.reasonCategories)
-}
-
-async function loadGlobalDefaults() {
-  const config = await globalRiskPromptApi.getGlobalRiskPromptConfig()
-  applyLoadedConfig(true, config.reasonCategories, config.riskPromptCopy)
-  updatedAt.value = config.updatedAt
-}
-
-async function loadTemplateConfig() {
-  if (!props.templateId) {
-    return
-  }
-  loading.value = true
-  try {
-    const config = await templateRiskPromptApi.getTemplateRiskPromptConfig(props.templateId)
-    applyLoadedConfig(config.useDefault, config.reasonCategories, config.riskPromptCopy)
-    updatedAt.value = config.updatedAt
-  } catch {
-    ElMessage.error(t('templates.riskPrompt.error.load'))
-  } finally {
-    loading.value = false
-  }
-}
-
-async function loadConfig() {
-  if (props.createMode || !props.templateId) {
-    loading.value = true
-    try {
-      await loadGlobalDefaults()
-    } catch {
-      ElMessage.error(t('templates.riskPrompt.error.load'))
-    } finally {
-      loading.value = false
-    }
-    return
-  }
-  await loadTemplateConfig()
-}
-
-function toggleCategory(category: TemplateDecisionReasonCategory, enabled: boolean) {
-  if (enabled) {
-    if (!formState.value.reasonCategories.includes(category)) {
-      formState.value.reasonCategories.push(category)
-      initializeCopyDefaults([category])
-    }
-    return
-  }
-  formState.value.reasonCategories = formState.value.reasonCategories.filter(
-    (entry) => entry !== category,
-  )
-  delete formState.value.riskPromptCopy[category]
-}
-
-function handleCustomizeChange(customize: boolean) {
-  formState.value.customize = customize
-  if (!customize) {
-    void loadGlobalDefaults()
-  }
-}
-
-async function saveConfig() {
-  if (!props.templateId) {
-    return
-  }
-  if (formState.value.customize && !formState.value.reasonCategories.length) {
-    ElMessage.warning(t('templates.riskPrompt.validation.categoriesRequired'))
-    return
-  }
-  saving.value = true
-  try {
-    const config = await templateRiskPromptApi.upsertTemplateRiskPromptConfig(props.templateId, {
-      useDefault: !formState.value.customize,
-      reasonCategories: formState.value.customize ? formState.value.reasonCategories : undefined,
-      riskPromptCopy: formState.value.customize ? formState.value.riskPromptCopy : undefined,
-    })
-    applyLoadedConfig(config.useDefault, config.reasonCategories, config.riskPromptCopy)
-    updatedAt.value = config.updatedAt
-    ElMessage.success(t('templates.riskPrompt.saveSuccess'))
-  } catch {
-    ElMessage.error(t('templates.riskPrompt.error.save'))
-  } finally {
-    saving.value = false
-  }
-}
-
-watch(
-  () => props.templateId,
-  () => {
-    void loadConfig()
-  },
-)
-
-onMounted(() => {
-  void loadConfig()
+const {
+  t,
+  TEMPLATE_DECISION_REASON_CATEGORIES: categories,
+  loading,
+  saving,
+  updatedAt,
+  editableCategories,
+  categoryLabel,
+  toggleCategory,
+  handleCustomizeChange,
+  loadConfig,
+  saveConfig,
+} = useTemplateRiskPromptConfigPanel({
+  templateId: toRef(props, 'templateId'),
+  createMode: toRef(props, 'createMode'),
+  formState,
 })
 
 defineExpose({ loadConfig, saveConfig })
@@ -194,7 +81,7 @@ defineExpose({ loadConfig, saveConfig })
         <el-form-item :label="t('templates.riskPrompt.reasonCategories')">
           <div class="category-grid">
             <div
-              v-for="category in TEMPLATE_DECISION_REASON_CATEGORIES"
+              v-for="category in categories"
               :key="category"
               class="category-row"
             >

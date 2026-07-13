@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import type { ChangeDiffSummary, CoverageSummary, PreviewComparison } from '@/types/template'
-import {
-  isPublishSummaryConfirmReady,
-  type PublishGateDisplayItem,
-} from '@/utils/templateLifecycleDecisionForm'
+import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
+import { useTemplatePublishSummaryDialog } from '@/components/templates/useTemplatePublishSummaryDialog'
 
 const props = defineProps<{
   modelValue: boolean
@@ -23,78 +19,28 @@ const emit = defineEmits<{
   confirm: [payload: { fidelityViewedConfirmed: boolean }]
 }>()
 
-const { t } = useI18n()
-
-const fidelityViewedConfirmed = ref(false)
-
-const visible = computed({
-  get: () => props.modelValue,
-  set: (value: boolean) => emit('update:modelValue', value),
+const {
+  t,
+  fidelityViewedConfirmed,
+  visible,
+  readyCount,
+  requiredCount,
+  hasBlockers,
+  confirmDisabled,
+  coverageStatusKey,
+  changeDiffStatusKey,
+  previewComparisonStatusKey,
+  close,
+  confirm,
+} = useTemplatePublishSummaryDialog({
+  modelValue: () => props.modelValue,
+  gateItems: () => props.gateItems,
+  coverageSummary: () => props.coverageSummary,
+  changeDiffSummary: () => props.changeDiffSummary,
+  previewComparison: () => props.previewComparison,
+  emitUpdateModelValue: (value) => emit('update:modelValue', value),
+  emitConfirm: (payload) => emit('confirm', payload),
 })
-
-const requiredItems = computed(() => props.gateItems.filter((item) => !item.informational))
-const readyCount = computed(() => requiredItems.value.filter((item) => item.ready).length)
-const requiredCount = computed(() => requiredItems.value.length)
-const hasBlockers = computed(() => requiredItems.value.some((item) => !item.ready))
-
-const confirmDisabled = computed(
-  () =>
-    !isPublishSummaryConfirmReady({
-      hasBlockers: hasBlockers.value,
-      fidelityViewedConfirmed: fidelityViewedConfirmed.value,
-    }),
-)
-
-const coverageStatusKey = computed(() => {
-  if (!props.coverageSummary) {
-    return 'templates.publishSummary.coverageUnavailable'
-  }
-  return props.coverageSummary.belowThreshold
-    ? 'templates.publishSummary.coverageBelowThreshold'
-    : 'templates.publishSummary.coverageMeetsThreshold'
-})
-
-const changeDiffStatusKey = computed(() => {
-  if (!props.changeDiffSummary) {
-    return 'templates.publishSummary.changeDiffUnavailable'
-  }
-  return props.changeDiffSummary.hasChanges
-    ? 'templates.publishSummary.changeDiffHasChanges'
-    : 'templates.publishSummary.changeDiffNoChanges'
-})
-
-const previewComparisonStatusKey = computed(() => {
-  if (!props.previewComparison) {
-    return 'templates.publishSummary.previewComparisonUnavailable'
-  }
-  if (props.previewComparison.blockerCount > 0) {
-    return 'templates.publishSummary.previewComparisonHasBlockers'
-  }
-  if (props.previewComparison.totalDiffCount > 0) {
-    return 'templates.publishSummary.previewComparisonHasWarnings'
-  }
-  return 'templates.publishSummary.previewComparisonClean'
-})
-
-watch(
-  () => props.modelValue,
-  (open) => {
-    if (open) {
-      fidelityViewedConfirmed.value = false
-    }
-  },
-)
-
-function close() {
-  visible.value = false
-}
-
-function confirm() {
-  if (confirmDisabled.value) {
-    return
-  }
-  emit('confirm', { fidelityViewedConfirmed: fidelityViewedConfirmed.value })
-}
 </script>
 
 <template>
