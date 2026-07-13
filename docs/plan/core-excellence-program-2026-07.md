@@ -149,7 +149,7 @@ Done 时平台应满足：
 - K06c：`attachmentListRef` writer（结构化附件清单 → 编号列表段落）；PDF 页码 stamp 策略进 render profile（按包配置而非全局布尔）。
 **依赖：** K02（样式来源）先行为佳；资产/图片依赖 CE-E02 的键名约定但不阻塞。
 
-### CE-K07 金标语料回归体系 — P1 · M · `Not Started`
+### CE-K07 金标语料回归体系 — P1 · M · `In Progress`
 
 **目标：** `backend/src/test/resources/golden-corpus/` 固化 ≥8 个基准包（双字体母版、跨页表格、嵌套条款、compute 变量、中文大写金额、水印 SPECIMEN、加密 PDF、极限长条款），每个含输入（母版+模板 JSON+变量）与期望产出断言（DOCX XML 关键路径断言 + PDF 文本抽取断言，不做像素比对）；接入 `mvn verify`。K01–K06 每片交付时必须往语料库加对应样本。
 **依赖：** 骨架先行，可与 K01 并行启动。
@@ -170,7 +170,7 @@ R4 审查结论：平台是"专家路径"——功能在但闭环断。以下按
 **CE-U01 结构化编辑器嵌套子树编辑 — P0 · L**
 condition/loop 块 `children` 数组已在 schema 中但 `StructuredContentBlockCard` 无递归 UI，嵌套内容只能靠导入 HTML 或改 JSON。目标：块卡片递归渲染子编辑器（限深 3 层），子块增删改与 undo/redo（LR-C3 历史栈）兼容。测试：Vitest 递归渲染 + E2E 在 condition 内新增段落并预览。禁止：本片不做拖拽（U02）。
 
-**CE-U03 测试数据集 schema 驱动 — P0 · M**
+**CE-U03 测试数据集 schema 驱动 — P0 · M · `In Progress`**
 现状 8 行 textarea 手写 JSON、默认值硬编码 `{"customerName":"Sample"}`、保存仅 `JSON.parse`、后端不对照 schema 校验。目标：按 `VariableSchema` 生成动态表单（类型/必填即时校验）+ "从 schema 生成骨架"按钮 + 大 payload 折叠编辑；后端 `TestDataSetService` 保存时按 schema 校验并返回字段级错误。依赖：无（compute 变量出现后表单跳过 compute 字段——与 K03 弱耦合）。
 
 ### P1 组
@@ -223,8 +223,8 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 
 | ID | 标题 | 级/量 | 要点（证据见 R3 报告） | 依赖 |
 | --- | --- | --- | --- | --- |
-| CE-C01 | `context` 白名单落地 | P0·S | DTO 加 `context`（6 字段 record）；未知子字段 400；`InvocationParameterSanitizer` 写 `contextSummary` | 无 |
-| CE-C02 | unknown-field 严格校验 | P0·S | runtime DTO 专用 ObjectMapper `fail-on-unknown-properties` → 统一 `400 REQUEST_BODY_INVALID`；**不**动管理端 DTO | C01 同链 |
+| CE-C01 | `context` 白名单落地 | P0·S · `In Progress` | DTO 加 `context`（6 字段 record）；未知子字段 400；`InvocationParameterSanitizer` 写 `contextSummary` | 无 |
+| CE-C02 | unknown-field 严格校验 | P0·S · `In Progress` | runtime DTO 专用 ObjectMapper `fail-on-unknown-properties` → 统一 `400 REQUEST_BODY_INVALID`；**不**动管理端 DTO | C01 同链 |
 | CE-C03 | fidelityWarnings 契约对齐 | P1·S | 批量项/任务查询返回完整 `FidelityWarning[]`；同步流保留头摘要并在契约注明 | 无 |
 | CE-C04 | 凭证 `expires_at` 持久化 + 暴露 | P1·M | 结束 `ApiCredentialLifecycleSupport` 过渡态（R1 项）：Flyway 加列 + 发放/轮换写入；`RuntimeCredentialSummaryView` 加 `expiresAt`/`EXPIRING_SOON`；契约页 callable versions 加可选 `deprecated`/`sunsetAt`（需轻量修订 ADR-0003/0017 展示边界） | 无 |
 | CE-C05 | `originalBatchId` 重试血缘 | P1·M | 请求字段 + 校验（原批次存在且属同凭证）+ 审计关联 + 契约文档 | 无 |
@@ -370,4 +370,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Last reviewed:** 2026-07-13（创建；全部任务 `Not Started`）
+**Task Master registry (2026-07-14):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). First batch **In Progress:** #54 CE-K07 (`ce-k07-golden-corpus-skeleton`), #55 CE-U03 (`ce-u03-testdata-schema-form`), #56 CE-C01+C02 (`ce-c01-c02-contract-strictness`). Formal phase remains **None**.
+
+**Last reviewed:** 2026-07-14（D1–D7 confirmed；Task Master registered；首批三泳道 `In Progress`）
