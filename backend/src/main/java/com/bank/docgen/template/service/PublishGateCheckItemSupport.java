@@ -12,7 +12,6 @@ import com.bank.docgen.template.api.TemplateRuleValidationView;
 import com.bank.docgen.template.domain.LifecycleAction;
 import com.bank.docgen.template.domain.LifecycleDecision;
 import com.bank.docgen.template.domain.PublishGateCheckCode;
-import com.bank.docgen.template.persistence.AnchorBindingEntity;
 import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordRepository;
 import com.bank.docgen.template.persistence.VariableSchemaRepository;
@@ -28,10 +27,7 @@ final class PublishGateCheckItemSupport {
     private final ApiPolicyRepository apiPolicyRepository;
     private final PreviewEvidencePort previewEvidencePort;
     private final VariableSchemaRepository variableSchemaRepository;
-    private final TemplateContentModuleReferenceService contentModuleReferenceService;
-    private final AnchorBindingRepository anchorBindingRepository;
-    private final NodeMatrixValidationService nodeMatrixValidationService;
-    private final ObjectMapper objectMapper;
+    private final PublishGateCheckItemContentSupport contentItems;
 
     PublishGateCheckItemSupport(
             TemplateLifecycleRecordRepository lifecycleRecordRepository,
@@ -47,10 +43,13 @@ final class PublishGateCheckItemSupport {
         this.apiPolicyRepository = apiPolicyRepository;
         this.previewEvidencePort = previewEvidencePort;
         this.variableSchemaRepository = variableSchemaRepository;
-        this.contentModuleReferenceService = contentModuleReferenceService;
-        this.anchorBindingRepository = anchorBindingRepository;
-        this.nodeMatrixValidationService = nodeMatrixValidationService;
-        this.objectMapper = objectMapper;
+        this.contentItems = new PublishGateCheckItemContentSupport(
+                previewEvidencePort,
+                contentModuleReferenceService,
+                anchorBindingRepository,
+                nodeMatrixValidationService,
+                objectMapper
+        );
     }
 
     PublishGateItemView anchorIntegrityItem(BindingValidationView bindings) {
@@ -176,59 +175,15 @@ final class PublishGateCheckItemSupport {
     }
 
     PublishGateItemView contentModuleReferencesItem(UUID versionId) {
-        var validation = contentModuleReferenceService.validateReferences(versionId);
-        boolean blocking = validation.blocking();
-        return new PublishGateItemView(
-                PublishGateCheckCode.CONTENT_MODULE_REFERENCES,
-                !blocking,
-                blocking,
-                blocking
-                        ? "api.publishGate.contentModuleReferences.blocked"
-                        : "api.publishGate.contentModuleReferences.ready",
-                "invalidReferences=" + validation.invalidReferences()
-                        + ",totalReferences=" + validation.totalReferences()
-        );
+        return contentItems.contentModuleReferencesItem(versionId);
     }
 
     PublishGateItemView unsupportedStructuredNodesItem(UUID versionId) {
-        int unsupportedNodeCount = 0;
-        for (AnchorBindingEntity binding : anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)) {
-            unsupportedNodeCount += nodeMatrixValidationService.countUnsupportedNodeBlockers(
-                    binding.getStructuredContentJson()
-            );
-        }
-        boolean blocking = unsupportedNodeCount > 0;
-        return new PublishGateItemView(
-                PublishGateCheckCode.UNSUPPORTED_STRUCTURED_NODES,
-                !blocking,
-                blocking,
-                blocking
-                        ? "api.publishGate.unsupportedStructuredNodes.blocked"
-                        : "api.publishGate.unsupportedStructuredNodes.ready",
-                "unsupportedNodeCount=" + unsupportedNodeCount
-        );
+        return contentItems.unsupportedStructuredNodesItem(versionId);
     }
 
     PublishGateItemView pasteCleaningBlockersItem(UUID versionId) {
-        int unresolvedBindingCount = 0;
-        for (AnchorBindingEntity binding : anchorBindingRepository.findByTemplateVersionIdOrderByAnchorIdAsc(versionId)) {
-            if (PasteCleaningEvidenceSupport.hasUnresolvedPasteBlockers(
-                    binding.getPasteCleaningEvidenceJson(),
-                    objectMapper
-            )) {
-                unresolvedBindingCount++;
-            }
-        }
-        boolean blocking = unresolvedBindingCount > 0;
-        return new PublishGateItemView(
-                PublishGateCheckCode.PASTE_CLEANING_BLOCKERS,
-                !blocking,
-                blocking,
-                blocking
-                        ? "api.publishGate.pasteCleaningBlockers.blocked"
-                        : "api.publishGate.pasteCleaningBlockers.ready",
-                "unresolvedPasteBindings=" + unresolvedBindingCount
-        );
+        return contentItems.pasteCleaningBlockersItem(versionId);
     }
 
     PublishGateItemView blockerStatusItem(
@@ -237,16 +192,6 @@ final class PublishGateCheckItemSupport {
             BindingValidationView bindings,
             CoverageSummaryView coverage
     ) {
-        int previewBlockers = previewEvidencePort.countFailedPreviews(templateId, versionId);
-        boolean blocking = bindings.summary().blocking()
-                || coverage.belowThreshold()
-                || previewBlockers > 0;
-        return new PublishGateItemView(
-                PublishGateCheckCode.BLOCKER_STATUS,
-                !blocking,
-                blocking,
-                blocking ? "api.publishGate.blockerStatus.blocked" : "api.publishGate.blockerStatus.ready",
-                "previewFailures=" + previewBlockers
-        );
+        return contentItems.blockerStatusItem(templateId, versionId, bindings, coverage);
     }
 }

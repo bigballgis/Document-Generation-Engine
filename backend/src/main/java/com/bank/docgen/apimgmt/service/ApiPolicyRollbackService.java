@@ -7,7 +7,6 @@ import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
 import com.bank.docgen.apimgmt.mapping.ApiPolicyViewMapper;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
-import com.bank.docgen.apimgmt.persistence.ApiPolicyVersionEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyVersionRepository;
 import com.bank.docgen.audit.api.PolicyUpdateAuditDetail;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
@@ -17,8 +16,6 @@ import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.service.TemplateService;
 import com.bank.docgen.template.service.TemplateValidationException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -33,14 +30,13 @@ public class ApiPolicyRollbackService {
 
     private final TemplateService templateService;
     private final ApiPolicyRepository apiPolicyRepository;
-    private final ApiPolicyVersionRepository apiPolicyVersionRepository;
     private final ApiPolicyImpactPreviewService apiPolicyImpactPreviewService;
     private final ApiPolicyVersionSnapshotService apiPolicyVersionSnapshotService;
     private final ManagementAuditRecorder managementAuditRecorder;
     private final TemplateAdGroupAuthorizationCache templateAdGroupAuthorizationCache;
     private final GroupAccessService groupAccessService;
-    private final ObjectMapper objectMapper;
     private final ApiPolicyViewMapper apiPolicyViewMapper;
+    private final ApiPolicyRollbackSnapshotSupport snapshots;
 
     public ApiPolicyRollbackService(
             TemplateService templateService,
@@ -56,14 +52,13 @@ public class ApiPolicyRollbackService {
     ) {
         this.templateService = templateService;
         this.apiPolicyRepository = apiPolicyRepository;
-        this.apiPolicyVersionRepository = apiPolicyVersionRepository;
         this.apiPolicyImpactPreviewService = apiPolicyImpactPreviewService;
         this.apiPolicyVersionSnapshotService = apiPolicyVersionSnapshotService;
         this.managementAuditRecorder = managementAuditRecorder;
         this.templateAdGroupAuthorizationCache = templateAdGroupAuthorizationCache;
         this.groupAccessService = groupAccessService;
-        this.objectMapper = objectMapper;
         this.apiPolicyViewMapper = apiPolicyViewMapper;
+        this.snapshots = new ApiPolicyRollbackSnapshotSupport(apiPolicyVersionRepository, objectMapper);
     }
 
     @Transactional(readOnly = true)
@@ -75,7 +70,7 @@ public class ApiPolicyRollbackService {
         requirePublishedTemplate(templateId, session);
         apiPolicyRepository.findByTemplateId(templateId)
                 .orElseThrow(ApiManagementNotFoundException::new);
-        UpsertApiPolicyRequest candidate = loadCandidateRequest(templateId, targetPolicyVersion);
+        UpsertApiPolicyRequest candidate = snapshots.loadCandidateRequest(templateId, targetPolicyVersion);
         return apiPolicyImpactPreviewService.preview(templateId, candidate, session);
     }
 
@@ -90,7 +85,7 @@ public class ApiPolicyRollbackService {
                 .orElseThrow(ApiManagementNotFoundException::new);
         int previousVersion = policy.getPolicyVersion();
         int sourceVersion = request.policyVersion();
-        UpsertApiPolicyRequest candidate = loadCandidateRequest(templateId, sourceVersion);
+        UpsertApiPolicyRequest candidate = snapshots.loadCandidateRequest(templateId, sourceVersion);
         ApiPolicyImpactPreviewView preview = apiPolicyImpactPreviewService.preview(templateId, candidate, session);
 
         if (preview.blocking()) {
@@ -100,16 +95,16 @@ public class ApiPolicyRollbackService {
             throw new TemplateValidationException("api.error.apimgmt.policyImpactConfirmationRequired");
         }
 
-        JsonNode snapshot = loadSnapshotNode(templateId, sourceVersion);
+        JsonNode snapshot = snapshots.loadSnapshotNode(templateId, sourceVersion);
         String previousAdGroups = policy.getAllowedAdGroupsJson();
         policy.applyRollbackConfiguration(
-                writeJson(readStringList(snapshot, "allowedAdGroups")),
-                textOrNull(snapshot, "defaultRouteReleaseVersion"),
-                writeJson(readStringList(snapshot, "outputFormats")),
-                writeJson(readStringList(snapshot, "outputModes")),
+                snapshots.writeJson(snapshots.readStringList(snapshot, "allowedAdGroups")),
+                snapshots.textOrNull(snapshot, "defaultRouteReleaseVersion"),
+                snapshots.writeJson(snapshots.readStringList(snapshot, "outputFormats")),
+                snapshots.writeJson(snapshots.readStringList(snapshot, "outputModes")),
                 snapshot.path("batchEnabled").asBoolean(false),
-                batchSyncMaxItems(snapshot),
-                batchAsyncMaxItems(snapshot),
+                snapshots.batchSyncMaxItems(snapshot),
+                snapshots.batchAsyncMaxItems(snapshot),
                 snapshot.path("docxEncryptionEnabled").asBoolean(false),
                 snapshot.path("pdfEncryptionEnabled").asBoolean(false),
                 session.username()
@@ -142,45 +137,6 @@ public class ApiPolicyRollbackService {
                 auditDetail
         );
         return apiPolicyViewMapper.toPolicyView(policy);
-    }
-
-    private UpsertApiPolicyRequest loadCandidateRequest(UUID templateId, int targetPolicyVersion) {
-        JsonNode snapshot = loadSnapshotNode(templateId, targetPolicyVersion);
-        return new UpsertApiPolicyRequest(
-                readStringList(snapshot, "allowedAdGroups"),
-                textOrNull(snapshot, "defaultRouteReleaseVersion"),
-                readStringList(snapshot, "outputFormats"),
-                readStringList(snapshot, "outputModes"),
-                snapshot.path("batchEnabled").asBoolean(false),
-                batchSyncMaxItems(snapshot),
-                snapshot.path("docxEncryptionEnabled").asBoolean(false),
-                snapshot.path("pdfEncryptionEnabled").asBoolean(false)
-        );
-    }
-
-    private JsonNode loadSnapshotNode(UUID templateId, int targetPolicyVersion) {
-        ApiPolicyVersionEntity history = apiPolicyVersionRepository
-                .findByTemplateIdAndPolicyVersion(templateId, targetPolicyVersion)
-                .orElseThrow(() -> new TemplateValidationException("api.error.apimgmt.policyVersionNotFound"));
-        try {
-            return objectMapper.readTree(history.getConfigSnapshotJson());
-        } catch (JsonProcessingException ex) {
-            throw new TemplateValidationException("api.error.apimgmt.policyVersionNotFound");
-        }
-    }
-
-    private int batchSyncMaxItems(JsonNode snapshot) {
-        if (snapshot.has("batchSyncMaxItems")) {
-            return snapshot.path("batchSyncMaxItems").asInt(100);
-        }
-        return snapshot.path("maxBatchSize").asInt(100);
-    }
-
-    private int batchAsyncMaxItems(JsonNode snapshot) {
-        if (snapshot.has("batchAsyncMaxItems")) {
-            return snapshot.path("batchAsyncMaxItems").asInt(10000);
-        }
-        return snapshot.path("maxBatchSize").asInt(10000);
     }
 
     private List<String> buildConfigDiffSummary(
@@ -219,34 +175,5 @@ public class ApiPolicyRollbackService {
 
     private String actorSummary(ManagementSessionClaims session) {
         return session.displayName() + " (" + session.username() + ")";
-    }
-
-    private String textOrNull(JsonNode snapshot, String field) {
-        JsonNode node = snapshot.get(field);
-        if (node == null || node.isNull()) {
-            return null;
-        }
-        return node.asText();
-    }
-
-    private List<String> readStringList(JsonNode snapshot, String field) {
-        JsonNode node = snapshot.get(field);
-        if (node == null || node.isNull()) {
-            return List.of();
-        }
-        try {
-            return objectMapper.convertValue(node, new TypeReference<List<String>>() {
-            });
-        } catch (IllegalArgumentException ex) {
-            return List.of();
-        }
-    }
-
-    private String writeJson(List<String> values) {
-        try {
-            return objectMapper.writeValueAsString(values);
-        } catch (JsonProcessingException ex) {
-            return "[]";
-        }
     }
 }

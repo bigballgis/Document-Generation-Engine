@@ -131,6 +131,7 @@ final class RuntimeGenerationAuditPersistSupport {
         ));
     }
 
+
     void persistBatchAsyncCompletedFromTask(
             TemplateEntity template,
             GenerationAsyncTaskEntity task,
@@ -204,6 +205,10 @@ final class RuntimeGenerationAuditPersistSupport {
                 auditId,
                 traceId
         ));
+    }
+
+    String currentTraceId() {
+        return traceIdProvider.currentOrNew(null);
     }
 
     String summarize(String value) {

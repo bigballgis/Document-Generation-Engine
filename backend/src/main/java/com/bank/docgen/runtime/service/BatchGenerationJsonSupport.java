@@ -57,6 +57,14 @@ final class BatchGenerationJsonSupport {
         }
     }
 
+    BatchGenerateRequestBody readRequestPayload(String json) {
+        try {
+            return objectMapper.readValue(json, BatchGenerateRequestBody.class);
+        } catch (JsonProcessingException ex) {
+            throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
+        }
+    }
+
     List<String> readStringList(String json) {
         try {
             return objectMapper.readValue(json, new TypeReference<>() {

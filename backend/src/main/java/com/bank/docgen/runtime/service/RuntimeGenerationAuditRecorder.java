@@ -6,7 +6,6 @@ import com.bank.docgen.runtime.persistence.RuntimeGenerationAuditEventRepository
 import com.bank.docgen.runtime.security.RuntimeSessionClaims;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.template.persistence.TemplateEntity;
-import java.util.Locale;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,15 +24,15 @@ public class RuntimeGenerationAuditRecorder {
     public static final String OUTCOME_REPLAYED = "REPLAYED";
     public static final String ASYNC_ENVIRONMENT = "async";
 
+    private final RuntimeGenerationAuditRecordSupport records;
     private final RuntimeGenerationAuditPersistSupport persist;
-    private final TraceIdProvider traceIdProvider;
 
     public RuntimeGenerationAuditRecorder(
             RuntimeGenerationAuditEventRepository repository,
             TraceIdProvider traceIdProvider
     ) {
-        this.traceIdProvider = traceIdProvider;
-        this.persist = new RuntimeGenerationAuditPersistSupport(repository, traceIdProvider);
+        this.records = new RuntimeGenerationAuditRecordSupport(repository, traceIdProvider);
+        this.persist = records.persist();
     }
 
     @Transactional
@@ -52,27 +51,10 @@ public class RuntimeGenerationAuditRecorder {
             String outcome,
             String traceId
     ) {
-        persist.persist(
-                EVENT_SYNC_GENERATION,
-                template,
-                session,
-                environment,
-                routeType,
-                resolvedReleaseVersion,
-                resolvedReleaseVersion,
-                outputFormat,
-                outputMode,
-                requestId,
-                idempotencyKey,
-                idempotencyStatus,
-                null,
-                null,
-                documentId,
-                outcome,
-                persist.summarize("Sync generation " + outcome.toLowerCase(Locale.ROOT)),
-                null,
-                null,
-                traceId
+        records.persistSyncGeneration(
+                template, session, environment, routeType, resolvedReleaseVersion,
+                outputFormat, outputMode, requestId, idempotencyKey, idempotencyStatus,
+                documentId, outcome, traceId
         );
     }
 
@@ -93,27 +75,10 @@ public class RuntimeGenerationAuditRecorder {
             String errorSummary,
             String traceId
     ) {
-        persist.persist(
-                EVENT_BATCH_SYNC,
-                template,
-                session,
-                environment,
-                routeType,
-                resolvedReleaseVersion,
-                resolvedReleaseVersion,
-                outputFormat,
-                outputMode,
-                requestId,
-                idempotencyKey,
-                null,
-                null,
-                batchExternalId,
-                null,
-                outcome,
-                resultSummary,
-                errorSummary,
-                null,
-                traceId
+        records.persistBatchSync(
+                template, session, environment, routeType, resolvedReleaseVersion,
+                outputFormat, outputMode, requestId, idempotencyKey, batchExternalId,
+                outcome, resultSummary, errorSummary, traceId
         );
     }
 
@@ -132,27 +97,10 @@ public class RuntimeGenerationAuditRecorder {
             String batchExternalId,
             String traceId
     ) {
-        persist.persist(
-                EVENT_BATCH_ASYNC_ACCEPTED,
-                template,
-                session,
-                environment,
-                routeType,
-                resolvedReleaseVersion,
-                resolvedReleaseVersion,
-                outputFormat,
-                outputMode,
-                requestId,
-                idempotencyKey,
-                null,
-                taskExternalId,
-                batchExternalId,
-                null,
-                OUTCOME_SUCCESS,
-                persist.summarize("Async batch accepted"),
-                null,
-                null,
-                traceId
+        records.persistBatchAsyncAccepted(
+                template, session, environment, routeType, resolvedReleaseVersion,
+                outputFormat, outputMode, requestId, idempotencyKey, taskExternalId,
+                batchExternalId, traceId
         );
     }
 
@@ -173,27 +121,10 @@ public class RuntimeGenerationAuditRecorder {
             String resultSummary,
             String errorSummary
     ) {
-        persist.persist(
-                EVENT_BATCH_ASYNC_COMPLETED,
-                template,
-                session,
-                environment,
-                routeType,
-                resolvedReleaseVersion,
-                resolvedReleaseVersion,
-                outputFormat,
-                outputMode,
-                requestId,
-                idempotencyKey,
-                null,
-                taskExternalId,
-                batchExternalId,
-                null,
-                outcome,
-                resultSummary,
-                errorSummary,
-                null,
-                traceIdProvider.currentOrNew(null)
+        records.persistBatchAsyncCompleted(
+                template, session, environment, routeType, resolvedReleaseVersion,
+                outputFormat, outputMode, requestId, idempotencyKey, taskExternalId,
+                batchExternalId, outcome, resultSummary, errorSummary
         );
     }
 
@@ -229,29 +160,7 @@ public class RuntimeGenerationAuditRecorder {
             String auditId,
             String traceId
     ) {
-        persist.persist(
-                EVENT_DOCUMENT_DOWNLOAD,
-                template,
-                session,
-                environment,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                documentId,
-                OUTCOME_SUCCESS,
-                persist.summarize("Document download"),
-                null,
-                null,
-                traceId,
-                auditId
-        );
+        records.persistDocumentDownload(template, session, environment, documentId, auditId, traceId);
     }
 
     static String hashIdempotencyKey(String idempotencyKey) {

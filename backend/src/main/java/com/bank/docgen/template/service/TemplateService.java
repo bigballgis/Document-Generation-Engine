@@ -1,7 +1,6 @@
 package com.bank.docgen.template.service;
 
 import com.bank.docgen.authorization.management.api.PageView;
-import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
@@ -28,10 +27,8 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,19 +36,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TemplateService {
 
-    private final TemplateRepository templateRepository;
-    private final TemplateVersionRepository templateVersionRepository;
-    private final ApiPolicyRepository apiPolicyRepository;
     private final GroupAccessService groupAccessService;
-    private final TemplateStructuredAuthoringService structuredAuthoringService;
-    private final TemplateBindingConfigurationService bindingConfigurationService;
     private final TemplateViewMapper templateViewMapper;
-    private final TemplateCurrentVersionResolver templateVersionSupport;
     private final TemplateCatalogSupport catalogSupport;
-    private final TemplateDisplayEnrichmentSupport displayEnrichment;
     private final TemplateAccessGuardSupport access;
     private final TemplateMetadataMutationSupport metadataMutations;
     private final TemplateInFlightContentMutationSupport contentMutations;
+    private final TemplateReleaseVersionListSupport releaseVersions;
+    private final TemplateDisplayLookupSupport displayLookup;
+    private final TemplateReadQuerySupport readQueries;
 
     public TemplateService(
             TemplateRepository templateRepository,
@@ -66,37 +59,22 @@ public class TemplateService {
             ApplicationEventPublisher eventPublisher,
             ManagementUserDisplayService managementUserDisplayService
     ) {
-        this.templateRepository = templateRepository;
-        this.templateVersionRepository = templateVersionRepository;
-        this.apiPolicyRepository = apiPolicyRepository;
         this.groupAccessService = groupAccessService;
-        this.structuredAuthoringService = structuredAuthoringService;
-        this.bindingConfigurationService = bindingConfigurationService;
         this.templateViewMapper = templateViewMapper;
-        this.templateVersionSupport = templateVersionSupport;
-        this.displayEnrichment = new TemplateDisplayEnrichmentSupport(managementUserDisplayService);
+        var displayEnrichment = new TemplateDisplayEnrichmentSupport(managementUserDisplayService);
         this.access = new TemplateAccessGuardSupport(templateRepository, groupAccessService);
         this.catalogSupport = new TemplateCatalogSupport(
-                templateRepository,
-                groupAccessService,
-                templateViewMapper,
-                displayEnrichment
-        );
+                templateRepository, groupAccessService, templateViewMapper, displayEnrichment);
         this.metadataMutations = new TemplateMetadataMutationSupport(
-                templateRepository,
-                templateVersionRepository,
-                masterDocumentRepository,
-                groupAccessService,
-                templateViewMapper,
-                access
-        );
+                templateRepository, templateVersionRepository, masterDocumentRepository,
+                groupAccessService, templateViewMapper, access);
         this.contentMutations = new TemplateInFlightContentMutationSupport(
-                this,
-                templateVersionSupport,
-                access,
-                bindingConfigurationService,
-                eventPublisher
-        );
+                this, templateVersionSupport, access, bindingConfigurationService, eventPublisher);
+        this.releaseVersions = new TemplateReleaseVersionListSupport(
+                templateVersionRepository, apiPolicyRepository, displayEnrichment, access);
+        this.displayLookup = new TemplateDisplayLookupSupport(templateRepository);
+        this.readQueries = new TemplateReadQuerySupport(
+                access, templateVersionSupport, bindingConfigurationService, structuredAuthoringService);
     }
 
     @Transactional(readOnly = true)
@@ -106,14 +84,8 @@ public class TemplateService {
 
     @Transactional(readOnly = true)
     public PageView<TemplateSummaryView> list(
-            ManagementSessionClaims session,
-            Integer page,
-            Integer size,
-            String search,
-            String groupCode,
-            String lifecycleStatus,
-            String approvalSubState,
-            String sort
+            ManagementSessionClaims session, Integer page, Integer size, String search, String groupCode,
+            String lifecycleStatus, String approvalSubState, String sort
     ) {
         return catalogSupport.list(session, page, size, search, groupCode, lifecycleStatus, approvalSubState, sort);
     }
@@ -130,22 +102,7 @@ public class TemplateService {
 
     @Transactional(readOnly = true)
     public List<TemplateReleaseVersionView> listReleaseVersions(UUID templateId, ManagementSessionClaims session) {
-        TemplateEntity template = requireReadableTemplate(templateId, session);
-        String defaultRoute = apiPolicyRepository.findByTemplateId(templateId)
-                .map(ApiPolicyEntity::getDefaultRouteReleaseVersion)
-                .orElse(null);
-        return displayEnrichment.enrichReleaseVersions(templateVersionRepository.findByTemplateIdOrderByDevVersionNumberDesc(template.getId()).stream()
-                .filter(version -> version.getReleaseVersion() != null && !version.getReleaseVersion().isBlank())
-                .map(version -> new TemplateReleaseVersionView(
-                        version.getReleaseVersion(),
-                        version.getDevVersionNumber(),
-                        version.getLifecycleStatus(),
-                        version.getUpdatedAt(),
-                        version.getCreatedBy(),
-                        null,
-                        defaultRoute != null && defaultRoute.equals(version.getReleaseVersion())
-                ))
-                .toList());
+        return releaseVersions.listReleaseVersions(templateId, session);
     }
 
     @Transactional
@@ -155,18 +112,14 @@ public class TemplateService {
 
     @Transactional
     public TemplateDetailView updateMetadata(
-            UUID templateId,
-            UpdateTemplateRequest request,
-            ManagementSessionClaims session
+            UUID templateId, UpdateTemplateRequest request, ManagementSessionClaims session
     ) {
         return metadataMutations.updateMetadata(templateId, request, session);
     }
 
     @Transactional
     public VariableSchemaView upsertVariable(
-            UUID templateId,
-            UpsertVariableSchemaRequest request,
-            ManagementSessionClaims session
+            UUID templateId, UpsertVariableSchemaRequest request, ManagementSessionClaims session
     ) {
         return contentMutations.upsertVariable(templateId, request, session);
     }
@@ -178,53 +131,40 @@ public class TemplateService {
 
     @Transactional
     public AnchorBindingView upsertBinding(
-            UUID templateId,
-            UpsertAnchorBindingRequest request,
-            ManagementSessionClaims session
+            UUID templateId, UpsertAnchorBindingRequest request, ManagementSessionClaims session
     ) {
         return contentMutations.upsertBinding(templateId, request, session);
     }
 
     @Transactional
     public List<CompositionRuleView> saveRules(
-            UUID templateId,
-            List<CompositionRuleView> rules,
-            ManagementSessionClaims session
+            UUID templateId, List<CompositionRuleView> rules, ManagementSessionClaims session
     ) {
         return contentMutations.saveRules(templateId, rules, session);
     }
 
     @Transactional(readOnly = true)
     public BindingValidationView validateBindings(UUID templateId, ManagementSessionClaims session) {
-        TemplateEntity template = requireReadableTemplate(templateId, session);
-        TemplateVersionEntity version = templateVersionSupport.requireInFlightDevVersion(templateId);
-        return bindingConfigurationService.validateBindings(template.getMasterId(), version);
+        return readQueries.validateBindings(templateId, session);
     }
 
     @Transactional(readOnly = true)
     public BindingValidationView validateBindingsForVersion(
-            UUID templateId,
-            TemplateVersionEntity version,
-            ManagementSessionClaims session
+            UUID templateId, TemplateVersionEntity version, ManagementSessionClaims session
     ) {
-        TemplateEntity template = requireReadableTemplate(templateId, session);
-        return bindingConfigurationService.validateBindings(template.getMasterId(), version);
+        return readQueries.validateBindingsForVersion(templateId, version, session);
     }
 
     @Transactional(readOnly = true)
     public MasterStyleCatalogView getMasterStyleCatalog(UUID templateId, ManagementSessionClaims session) {
-        TemplateEntity template = requireReadableTemplate(templateId, session);
-        return structuredAuthoringService.getMasterStyleCatalog(template.getMasterId());
+        return readQueries.getMasterStyleCatalog(templateId, session);
     }
 
     @Transactional(readOnly = true)
     public PasteCleanResultView pasteClean(
-            UUID templateId,
-            PasteCleanRequest request,
-            ManagementSessionClaims session
+            UUID templateId, PasteCleanRequest request, ManagementSessionClaims session
     ) {
-        requireWritableTemplate(templateId, session);
-        return structuredAuthoringService.pasteClean(request);
+        return readQueries.pasteClean(templateId, request, session);
     }
 
     public TemplateEntity requireReadableTemplate(UUID templateId, ManagementSessionClaims session) {
@@ -244,18 +184,7 @@ public class TemplateService {
 
     @Transactional(readOnly = true)
     public Map<UUID, TemplateDisplayInfo> lookupDisplayInfoByIds(Set<UUID> templateIds) {
-        if (templateIds == null || templateIds.isEmpty()) {
-            return Map.of();
-        }
-        List<UUID> distinctIds = templateIds.stream().filter(Objects::nonNull).distinct().toList();
-        if (distinctIds.isEmpty()) {
-            return Map.of();
-        }
-        return templateRepository.findByIdInAndDeletedAtIsNull(distinctIds).stream()
-                .collect(Collectors.toMap(
-                        TemplateEntity::getId,
-                        template -> new TemplateDisplayInfo(template.getName(), template.getExternalId())
-                ));
+        return displayLookup.lookupDisplayInfoByIds(templateIds);
     }
 
     TemplateDetailView toDetail(TemplateEntity template) {

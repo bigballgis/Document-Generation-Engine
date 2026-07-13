@@ -9,6 +9,9 @@ import org.apache.poi.xwpf.usermodel.IBodyElement;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.apache.xmlbeans.XmlCursor;
 
 final class DocxPlainAnchorParagraphSupport {
@@ -65,6 +68,24 @@ final class DocxPlainAnchorParagraphSupport {
                 writeParagraphText(paragraph, replaced);
             }
         }
+    }
+
+    static void replaceInTablesHeadersAndFooters(
+            XWPFDocument document,
+            Map<String, String> anchorContent,
+            Pattern anchorPattern
+    ) {
+        for (XWPFTable table : document.getTables()) {
+            for (XWPFTableRow row : table.getRows()) {
+                for (XWPFTableCell cell : row.getTableCells()) {
+                    replaceInParagraphs(cell.getParagraphs(), anchorContent, anchorPattern);
+                }
+            }
+        }
+        document.getHeaderList().forEach(header ->
+                replaceInParagraphs(header.getParagraphs(), anchorContent, anchorPattern));
+        document.getFooterList().forEach(footer ->
+                replaceInParagraphs(footer.getParagraphs(), anchorContent, anchorPattern));
     }
 
     static void expandAnchorParagraph(XWPFDocument document, int paragraphIndex, String content) {
