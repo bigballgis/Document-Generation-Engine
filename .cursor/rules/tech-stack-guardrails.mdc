@@ -10,7 +10,7 @@ switches; confirm with the user before changing a baseline choice.
 
 ## Backend (`backend/`)
 
-- Java 21 (compile `release 21`) + Spring Boot 3.x + Maven.
+- Java 25 (compile `release 25`) + Spring Boot 4.x (target pin **4.1.0**) + Maven.
 - PostgreSQL + Flyway + Spring Data JPA + QueryDSL. UUID PKs, UTC times, logical delete.
 - Redis (Redisson): cache, distributed lock, idempotency. Kafka: async (at-least-once, retry + DLT).
 - MinIO (Java SDK) object storage. LibreOffice headless for PDF. DOCX template engine for rendering.

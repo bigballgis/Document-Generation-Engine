@@ -45,7 +45,7 @@ waves**. Product behavior remains in PRD/domain/API docs.
 ## Repository layout (target)
 
 ```text
-backend/          Java 21 + Spring Boot 3, module-first packages
+backend/          Java 25 + Spring Boot 4, module-first packages
 frontend/         Vue 3 + TS + Vite + Element Plus
 docker-compose.yml
 docs/

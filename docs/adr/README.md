@@ -83,7 +83,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0025-architecture-documentation-layer.md](./architecture/0025-architecture-documentation-layer.md) | Accepted | Architecture documentation layer |
 | [0026-adr-metadata-taxonomy-and-migration-plan.md](./documentation-governance/0026-adr-metadata-taxonomy-and-migration-plan.md) | Accepted | ADR metadata, topic taxonomy, and migration plan |
 | [0027-adr-topic-directory-organization.md](./documentation-governance/0027-adr-topic-directory-organization.md) | Accepted | ADR topic directory organization |
-| [0028-backend-platform-stack-baseline.md](./technology-stack/0028-backend-platform-stack-baseline.md) | Accepted | Backend platform stack baseline |
+| [0028-backend-platform-stack-baseline.md](./technology-stack/0028-backend-platform-stack-baseline.md) | Accepted (amended 2026-07-13) | Backend platform stack baseline — Java **25** + Spring Boot **4.x** (target pin **4.1.0**); Task Master **#51** / [boot-4-1-upgrade](../behavior/boot-4-1-upgrade.md) |
 | [0029-frontend-application-stack-baseline.md](./technology-stack/0029-frontend-application-stack-baseline.md) | Accepted | Frontend application stack baseline |
 | [0030-operational-platform-baseline.md](./operations/0030-operational-platform-baseline.md) | Accepted | Operational platform baseline |
 | [0031-api-platform-hardening-baseline.md](./api/0031-api-platform-hardening-baseline.md) | Accepted | API platform hardening baseline |

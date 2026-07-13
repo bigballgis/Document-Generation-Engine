@@ -13,7 +13,7 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
@@ -35,7 +35,7 @@ class AsyncBatchTaskKafkaConsumerTest {
     @Autowired
     private KafkaTemplate<String, AsyncBatchTaskMessage> asyncBatchTaskKafkaTemplate;
 
-    @MockBean
+    @MockitoBean
     private AsyncBatchTaskRunner asyncBatchTaskRunner;
 
     @Test

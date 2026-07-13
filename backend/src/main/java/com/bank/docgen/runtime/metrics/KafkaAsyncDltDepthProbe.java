@@ -16,7 +16,7 @@ import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 
 /**
  * Polls Kafka AdminClient for approximate DLT topic end-offset sum (message depth proxy).
@@ -55,7 +55,7 @@ public class KafkaAsyncDltDepthProbe implements LongSupplier {
     private long queryDepth() throws Exception {
         String topic = asyncProperties.getKafka().getDeadLetterTopic();
         Properties config = new Properties();
-        config.putAll(kafkaProperties.buildAdminProperties(null));
+        config.putAll(kafkaProperties.buildAdminProperties());
         config.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, String.valueOf(TIMEOUT.toMillis()));
         config.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, String.valueOf(TIMEOUT.toMillis()));
         try (AdminClient adminClient = AdminClient.create(config)) {

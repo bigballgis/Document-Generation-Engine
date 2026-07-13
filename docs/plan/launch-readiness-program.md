@@ -45,7 +45,7 @@
 - **No customer-facing generation portal** — v1 confirmed: upstream systems invoke the runtime API (PRD scope).
 - **No email/IM outbound notifications** — v1 confirmed in-app only; LR-C7 is a bell + unread count on existing collaboration data.
 - **No free-form Word editor** — controlled structured authoring stays the contract (ADR-0019, P18 node matrix).
-- **No stack replacement** — Java 21/Spring Boot/Vue 3/Element Plus/LibreOffice/PostgreSQL per accepted ADRs; new libraries (ShedLock, bucket4j-redis, etc.) enter only via dependency policy verification + ADR.
+- **No stack replacement** — Java 25/Spring Boot 4/Vue 3/Element Plus/LibreOffice/PostgreSQL per accepted ADRs; new libraries (ShedLock, bucket4j-redis, etc.) enter only via dependency policy verification + ADR.
 
 ### 0.2 What we ARE doing (five deepening axes)
 
