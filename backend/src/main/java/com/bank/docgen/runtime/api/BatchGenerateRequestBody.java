@@ -15,7 +15,9 @@ public record BatchGenerateRequestBody(
         @NotEmpty List<@Valid BatchGenerateItemBody> items,
         EncryptionOptionsView encryption,
         @NotBlank String requestId,
-        @NotBlank String idempotencyKey
+        @NotBlank String idempotencyKey,
+        String originalBatchId,
+        ContextView context
 ) {
     public BatchGenerateRequestBody {
         items = DefensiveCopies.copyList(items);

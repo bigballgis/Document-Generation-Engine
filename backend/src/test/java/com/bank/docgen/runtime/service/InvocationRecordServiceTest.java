@@ -118,7 +118,8 @@ class InvocationRecordServiceTest {
                 Map.of("name", "Bob"),
                 new EncryptionOptionsView(true, "open-secret", "owner-secret", List.of("PRINT")),
                 "req-1",
-                "idem-1"
+                "idem-1",
+                null
         );
 
         String invocationId = service.recordSingleSync(
@@ -205,7 +206,9 @@ class InvocationRecordServiceTest {
                 )),
                 null,
                 "req-async",
-                "idem-async"
+                "idem-async",
+                null,
+                null
         );
         when(idempotencyService.findLiveRecord("idem-async", TEMPLATE_ID)).thenReturn(Optional.empty());
         when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -305,7 +308,9 @@ class InvocationRecordServiceTest {
                 ),
                 null,
                 "req-batch",
-                "idem-batch"
+                "idem-batch",
+                null,
+                null
         );
     }
 

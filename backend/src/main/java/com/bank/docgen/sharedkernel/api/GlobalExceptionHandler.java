@@ -1,11 +1,19 @@
 package com.bank.docgen.sharedkernel.api;
 
+import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,13 +25,16 @@ public class GlobalExceptionHandler {
 
     private final ErrorEnvelopeFactory errorEnvelopeFactory;
     private final ValidationErrorFieldMapper validationErrorFieldMapper;
+    private final MessageResolver messageResolver;
 
     public GlobalExceptionHandler(
             ErrorEnvelopeFactory errorEnvelopeFactory,
-            ValidationErrorFieldMapper validationErrorFieldMapper
+            ValidationErrorFieldMapper validationErrorFieldMapper,
+            MessageResolver messageResolver
     ) {
         this.errorEnvelopeFactory = errorEnvelopeFactory;
         this.validationErrorFieldMapper = validationErrorFieldMapper;
+        this.messageResolver = messageResolver;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -38,6 +49,49 @@ public class GlobalExceptionHandler {
                 request,
                 "api.error.validation.requestBodyInvalid",
                 fieldErrors
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorEnvelope> handleMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request
+    ) {
+        Throwable cause = ex.getMostSpecificCause();
+        if (cause instanceof UnrecognizedPropertyException unrecognized) {
+            String field = fieldPath(unrecognized);
+            return errorEnvelopeFactory.validationError(
+                    request,
+                    "api.error.validation.requestBodyInvalid",
+                    List.of(new FieldError(
+                            field,
+                            "UNKNOWN_FIELD",
+                            messageResolver.resolveOrDefault(
+                                    "api.error.validation.fieldUnknown",
+                                    "Unknown field."
+                            )
+                    ))
+            );
+        }
+        if (cause instanceof InvalidFormatException || cause instanceof MismatchedInputException) {
+            String field = fieldPathFromMapping((JsonMappingException) cause);
+            return errorEnvelopeFactory.validationError(
+                    request,
+                    "api.error.validation.requestBodyInvalid",
+                    List.of(new FieldError(
+                            field,
+                            "INVALID_TYPE",
+                            messageResolver.resolveOrDefault(
+                                    "api.error.validation.fieldInvalid",
+                                    "This field is invalid."
+                            )
+                    ))
+            );
+        }
+        return errorEnvelopeFactory.validationError(
+                request,
+                "api.error.validation.requestBodyInvalid",
+                List.of()
         );
     }
 
@@ -73,5 +127,32 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorEnvelope> handleUnexpected(HttpServletRequest request, Exception ignored) {
         return errorEnvelopeFactory.unexpectedError(request);
+    }
+
+    private static String fieldPath(UnrecognizedPropertyException ex) {
+        String fromPath = pathPrefix(ex);
+        String property = ex.getPropertyName();
+        if (fromPath == null || fromPath.isBlank()) {
+            return property == null ? "body" : property;
+        }
+        if (property == null || property.isBlank()) {
+            return fromPath;
+        }
+        if (fromPath.endsWith("." + property) || fromPath.equals(property)) {
+            return fromPath;
+        }
+        return fromPath + "." + property;
+    }
+
+    private static String fieldPathFromMapping(JsonMappingException ex) {
+        String fromPath = pathPrefix(ex);
+        return fromPath == null || fromPath.isBlank() ? "body" : fromPath;
+    }
+
+    private static String pathPrefix(JsonMappingException ex) {
+        return ex.getPath().stream()
+                .map(JsonMappingException.Reference::getFieldName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining("."));
     }
 }

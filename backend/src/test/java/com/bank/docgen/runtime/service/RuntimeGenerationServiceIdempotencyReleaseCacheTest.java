@@ -162,7 +162,8 @@ class RuntimeGenerationServiceIdempotencyReleaseCacheTest {
                 Map.of("customerName", "Alice"),
                 new com.bank.docgen.sharedkernel.api.EncryptionOptionsView(false, null, null, List.of()),
                 "req-1",
-                idempotencyKey
+                idempotencyKey,
+                null
         );
     }
 }

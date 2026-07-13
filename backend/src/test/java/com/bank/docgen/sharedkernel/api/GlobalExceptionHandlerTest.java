@@ -12,10 +12,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
@@ -34,7 +38,8 @@ class GlobalExceptionHandlerTest {
         );
         handler = new GlobalExceptionHandler(
                 errorEnvelopeFactory,
-                new ValidationErrorFieldMapper(messageResolver)
+                new ValidationErrorFieldMapper(messageResolver),
+                messageResolver
         );
         request = new MockHttpServletRequest("POST", "/api/management/v1/groups");
     }
@@ -113,5 +118,38 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().error().message())
                 .isEqualTo("The uploaded DOCX exceeds the maximum allowed size.");
         assertThat(response.getBody().error().retryable()).isFalse();
+    }
+
+    @Test
+    void unrecognizedPropertyMapsToRequestBodyInvalidWithUnknownField() throws Exception {
+        when(messageResolver.resolve("api.error.validation.requestBodyInvalid"))
+                .thenReturn("The request body is invalid.");
+        when(messageResolver.resolveOrDefault("api.error.validation.fieldUnknown", "Unknown field."))
+                .thenReturn("Unknown field.");
+
+        ObjectMapper mapper = new ObjectMapper();
+        UnrecognizedPropertyException unrecognized = UnrecognizedPropertyException.from(
+                mapper.createParser("{}"),
+                Object.class,
+                "foo",
+                java.util.Set.of("output", "variables")
+        );
+        HttpMessageNotReadableException ex = new HttpMessageNotReadableException(
+                "JSON parse error",
+                unrecognized,
+                null
+        );
+
+        ResponseEntity<ErrorEnvelope> response = handler.handleMessageNotReadable(ex, request);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().error().code()).isEqualTo(ApiErrorCodes.REQUEST_BODY_INVALID);
+        assertThat(response.getBody().error().category()).isEqualTo(ApiErrorCategories.VALIDATION);
+        assertThat(response.getBody().error().messageKey()).isEqualTo("api.error.validation.requestBodyInvalid");
+        assertThat(response.getBody().error().retryable()).isFalse();
+        assertThat(response.getBody().error().fieldErrors()).hasSize(1);
+        assertThat(response.getBody().error().fieldErrors().getFirst().field()).isEqualTo("foo");
+        assertThat(response.getBody().error().fieldErrors().getFirst().reason()).isEqualTo("UNKNOWN_FIELD");
     }
 }

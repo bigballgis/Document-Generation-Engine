@@ -300,7 +300,8 @@ class RuntimeGenerationServiceGenerateTest {
                 Map.of("customerName", "Alice"),
                 new EncryptionOptionsView(false, null, null, List.of()),
                 "req-1",
-                "idem-download-url"
+                "idem-download-url",
+                null
         );
 
         assertThatThrownBy(() -> service.generateSync(template, session, RELEASE_VERSION, request))
@@ -329,7 +330,8 @@ class RuntimeGenerationServiceGenerateTest {
                 Map.of("customerName", "Alice"),
                 new EncryptionOptionsView(false, null, null, List.of()),
                 "req-1",
-                "idem-async-on-sync"
+                "idem-async-on-sync",
+                null
         );
 
         assertThatThrownBy(() -> service.generateSync(template, session, RELEASE_VERSION, request))
@@ -389,7 +391,8 @@ class RuntimeGenerationServiceGenerateTest {
                 Map.of("customerName", "Alice"),
                 new EncryptionOptionsView(true, "user", null, List.of("OPEN_PASSWORD")),
                 "req-enc",
-                "idem-enc"
+                "idem-enc",
+                null
         );
 
         service.generateSync(template, session, RELEASE_VERSION, request);
@@ -418,7 +421,8 @@ class RuntimeGenerationServiceGenerateTest {
                 Map.of("customerName", "Alice"),
                 new EncryptionOptionsView(false, null, null, List.of()),
                 "req-1",
-                idempotencyKey
+                idempotencyKey,
+                null
         );
     }
 

@@ -3,6 +3,7 @@ package com.bank.docgen.runtime.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
+import com.bank.docgen.runtime.api.ContextView;
 import com.bank.docgen.runtime.api.GenerateRequestBody;
 import com.bank.docgen.runtime.api.OutputOptionsView;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
@@ -31,7 +32,8 @@ class InvocationParameterSanitizerTest {
                 Map.of("name", "Alice"),
                 new EncryptionOptionsView(true, "secret-open", "secret-owner", List.of("PRINT")),
                 "req-1",
-                "idem-1"
+                "idem-1",
+                null
         );
 
         String json = sanitizer.sanitizeSingleRequest(request, "1.0.0");
@@ -44,6 +46,45 @@ class InvocationParameterSanitizerTest {
         assertThat(root.get("encryption").get("ownerPasswordProvided").asBoolean()).isTrue();
         assertThat(root.has("variables")).isFalse();
         assertThat(root.get("variablesHash").asText()).hasSize(64);
+        assertThat(root.has("contextSummary")).isFalse();
+    }
+
+    @Test
+    void sanitizeSingleRequest_writesContextSummaryForNonBlankWhitelistKeys() throws Exception {
+        GenerateRequestBody request = new GenerateRequestBody(
+                new OutputOptionsView("DOCX", "SYNC_STREAM"),
+                Map.of("ssn", "should-not-appear"),
+                new EncryptionOptionsView(false, null, null, List.of()),
+                "req-1",
+                "idem-1",
+                new ContextView("LOS", "API", "BR-1", "tr-1", "onboarding", "en-US")
+        );
+
+        String json = sanitizer.sanitizeSingleRequest(request, "1.0.0");
+        JsonNode root = objectMapper.readTree(json);
+
+        assertThat(root.get("contextSummary").get("sourceSystem").asText()).isEqualTo("LOS");
+        assertThat(root.get("contextSummary").get("channel").asText()).isEqualTo("API");
+        assertThat(root.get("contextSummary").get("locale").asText()).isEqualTo("en-US");
+        assertThat(root.toString()).doesNotContain("should-not-appear");
+        assertThat(root.toString()).doesNotContain("secret");
+    }
+
+    @Test
+    void sanitizeSingleRequest_omitsBlankContextKeysFromSummary() throws Exception {
+        GenerateRequestBody request = new GenerateRequestBody(
+                new OutputOptionsView("DOCX", "SYNC_STREAM"),
+                Map.of("name", "Alice"),
+                null,
+                "req-1",
+                "idem-1",
+                new ContextView("", "API", null, "  ", null, "en-US")
+        );
+
+        JsonNode root = objectMapper.readTree(sanitizer.sanitizeSingleRequest(request, "1.0.0"));
+
+        assertThat(root.get("contextSummary").fieldNames()).toIterable()
+                .containsExactlyInAnyOrder("channel", "locale");
     }
 
     @Test
@@ -58,7 +99,9 @@ class InvocationParameterSanitizerTest {
                 )),
                 new EncryptionOptionsView(true, "batch-open", "batch-owner", List.of("COPY")),
                 "req-batch",
-                "idem-batch"
+                "idem-batch",
+                null,
+                new ContextView(null, "BATCH", null, null, null, null)
         );
 
         String json = sanitizer.sanitizeBatchRequest(request, "2.0.0");
@@ -71,6 +114,7 @@ class InvocationParameterSanitizerTest {
         assertThat(root.get("itemsHash").asText()).hasSize(64);
         assertThat(root.get("items").get(0).has("variables")).isFalse();
         assertThat(root.get("items").get(0).get("variablesHash").asText()).hasSize(64);
+        assertThat(root.get("contextSummary").get("channel").asText()).isEqualTo("BATCH");
     }
 
     @Test

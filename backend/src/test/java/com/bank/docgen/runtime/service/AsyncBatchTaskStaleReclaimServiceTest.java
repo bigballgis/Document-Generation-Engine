@@ -105,7 +105,9 @@ class AsyncBatchTaskStaleReclaimServiceTest {
                 )),
                 null,
                 "req-1",
-                "idem-1"
+                "idem-1",
+                null,
+                null
         );
         GenerationAsyncTaskEntity task = new GenerationAsyncTaskEntity(
                 TASK_ID,
