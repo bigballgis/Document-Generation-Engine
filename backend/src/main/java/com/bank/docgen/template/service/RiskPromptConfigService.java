@@ -13,8 +13,6 @@ import com.bank.docgen.template.persistence.RiskPromptConfigRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRiskPromptOverrideEntity;
 import com.bank.docgen.template.persistence.TemplateRiskPromptOverrideRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.bank.docgen.sharedkernel.api.DefensiveCopies;
 import java.util.List;
@@ -33,7 +31,7 @@ public class RiskPromptConfigService {
     private final TemplateRiskPromptOverrideRepository templateRiskPromptOverrideRepository;
     private final TemplateService templateService;
     private final ManagementAuditRecorder auditRecorder;
-    private final ObjectMapper objectMapper;
+    private final RiskPromptConfigMappingSupport mapping;
 
     public RiskPromptConfigService(
             RiskPromptConfigRepository riskPromptConfigRepository,
@@ -46,20 +44,24 @@ public class RiskPromptConfigService {
         this.templateRiskPromptOverrideRepository = templateRiskPromptOverrideRepository;
         this.templateService = templateService;
         this.auditRecorder = auditRecorder;
-        this.objectMapper = objectMapper;
+        this.mapping = new RiskPromptConfigMappingSupport(
+                riskPromptConfigRepository,
+                templateRiskPromptOverrideRepository,
+                objectMapper
+        );
     }
 
     @Transactional(readOnly = true)
     public RiskPromptConfigView getGlobal(ManagementSessionClaims session) {
-        return toGlobalView(loadGlobalEntity());
+        return mapping.toGlobalView(mapping.loadGlobalEntity());
     }
 
     @Transactional
     public RiskPromptConfigView upsertGlobal(UpsertGlobalRiskPromptConfigRequest request, ManagementSessionClaims session) {
         requireGlobalAdmin(session);
 
-        String categoriesJson = writeJson(request.reasonCategories());
-        String copyJson = writeJson(request.riskPromptCopy());
+        String categoriesJson = mapping.writeJson(request.reasonCategories());
+        String copyJson = mapping.writeJson(request.riskPromptCopy());
         RiskPromptConfigEntity entity = riskPromptConfigRepository
                 .findByScopeTypeAndGroupCode(RiskPromptScope.GLOBAL, null)
                 .orElseGet(() -> new RiskPromptConfigEntity(
@@ -79,13 +81,13 @@ public class RiskPromptConfigService {
                 session.displayName(),
                 "reasonCategories=" + request.reasonCategories().size()
         );
-        return toGlobalView(entity);
+        return mapping.toGlobalView(entity);
     }
 
     @Transactional(readOnly = true)
     public TemplateRiskPromptConfigView getTemplateConfig(UUID templateId, ManagementSessionClaims session) {
         templateService.requireReadableTemplate(templateId, session);
-        return buildTemplateView(templateId);
+        return mapping.buildTemplateView(templateId);
     }
 
     @Transactional
@@ -100,12 +102,12 @@ public class RiskPromptConfigService {
                 templateRiskPromptOverrideRepository.delete(existing);
                 auditTemplateOverrideCleared(template, session);
             });
-            return buildTemplateView(templateId);
+            return mapping.buildTemplateView(templateId);
         }
 
         validateOverrideCategories(request.reasonCategories());
-        String categoriesJson = writeJson(request.reasonCategories());
-        String copyJson = writeJson(normalizeCopy(request.riskPromptCopy()));
+        String categoriesJson = mapping.writeJson(request.reasonCategories());
+        String copyJson = mapping.writeJson(normalizeCopy(request.riskPromptCopy()));
         TemplateRiskPromptOverrideEntity entity = templateRiskPromptOverrideRepository
                 .findById(templateId)
                 .orElseGet(() -> new TemplateRiskPromptOverrideEntity(templateId, categoriesJson, copyJson));
@@ -119,7 +121,7 @@ public class RiskPromptConfigService {
                 session.displayName(),
                 "templateId=" + templateId + ",reasonCategories=" + request.reasonCategories().size()
         );
-        return buildTemplateView(templateId);
+        return mapping.buildTemplateView(templateId);
     }
 
     @Transactional(readOnly = true)
@@ -130,44 +132,7 @@ public class RiskPromptConfigService {
     }
 
     EffectiveRiskPromptConfig resolveEffective(UUID templateId) {
-        return templateRiskPromptOverrideRepository.findById(templateId)
-                .map(override -> new EffectiveRiskPromptConfig(
-                        readList(override.getReasonCategoriesJson()),
-                        readMap(override.getRiskPromptCopyJson()),
-                        override.getUpdatedAt().toString()
-                ))
-                .orElseGet(() -> {
-                    RiskPromptConfigEntity global = loadGlobalEntity();
-                    return new EffectiveRiskPromptConfig(
-                            readList(global.getReasonCategoriesJson()),
-                            readMap(global.getRiskPromptCopyJson()),
-                            global.getUpdatedAt().toString()
-                    );
-                });
-    }
-
-    private TemplateRiskPromptConfigView buildTemplateView(UUID templateId) {
-        return templateRiskPromptOverrideRepository.findById(templateId)
-                .map(override -> new TemplateRiskPromptConfigView(
-                        false,
-                        readList(override.getReasonCategoriesJson()),
-                        readMap(override.getRiskPromptCopyJson()),
-                        override.getUpdatedAt().toString()
-                ))
-                .orElseGet(() -> {
-                    RiskPromptConfigEntity global = loadGlobalEntity();
-                    return new TemplateRiskPromptConfigView(
-                            true,
-                            readList(global.getReasonCategoriesJson()),
-                            readMap(global.getRiskPromptCopyJson()),
-                            global.getUpdatedAt().toString()
-                    );
-                });
-    }
-
-    private RiskPromptConfigEntity loadGlobalEntity() {
-        return riskPromptConfigRepository.findByScopeTypeAndGroupCode(RiskPromptScope.GLOBAL, null)
-                .orElseThrow(() -> new TemplateValidationException("api.error.validation.requestBodyInvalid"));
+        return mapping.resolveEffective(templateId);
     }
 
     private void validateOverrideCategories(List<String> reasonCategories) {
@@ -194,42 +159,6 @@ public class RiskPromptConfigService {
                 session.displayName(),
                 "templateId=" + template.getId() + ",inheritGlobal=true"
         );
-    }
-
-    private RiskPromptConfigView toGlobalView(RiskPromptConfigEntity entity) {
-        return new RiskPromptConfigView(
-                RiskPromptScope.GLOBAL.name(),
-                null,
-                readList(entity.getReasonCategoriesJson()),
-                readMap(entity.getRiskPromptCopyJson()),
-                entity.getUpdatedAt().toString()
-        );
-    }
-
-    private List<String> readList(String json) {
-        try {
-            return objectMapper.readValue(json, new TypeReference<List<String>>() {
-            });
-        } catch (JsonProcessingException ex) {
-            return List.of();
-        }
-    }
-
-    private Map<String, String> readMap(String json) {
-        try {
-            return objectMapper.readValue(json, new TypeReference<Map<String, String>>() {
-            });
-        } catch (JsonProcessingException ex) {
-            return Map.of();
-        }
-    }
-
-    private String writeJson(Object value) {
-        try {
-            return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException ex) {
-            throw new TemplateValidationException("api.error.validation.requestBodyInvalid");
-        }
     }
 
     public record EffectiveRiskPromptConfig(

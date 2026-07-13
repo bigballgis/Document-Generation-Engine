@@ -1,6 +1,5 @@
 package com.bank.docgen.apimgmt.service;
 
-import com.bank.docgen.apimgmt.api.ApiPolicyImpactPreviewView;
 import com.bank.docgen.apimgmt.api.ApiPolicyView;
 import com.bank.docgen.apimgmt.api.SaveAdGroupsRequest;
 import com.bank.docgen.apimgmt.api.SaveBatchLimitsRequest;
@@ -8,15 +7,11 @@ import com.bank.docgen.apimgmt.api.SaveDefaultRouteRequest;
 import com.bank.docgen.apimgmt.api.SaveEncryptionPolicyRequest;
 import com.bank.docgen.apimgmt.api.SaveInvocationRetentionRequest;
 import com.bank.docgen.apimgmt.api.SaveOutputPolicyRequest;
-import com.bank.docgen.apimgmt.api.UpsertApiPolicyRequest;
 import com.bank.docgen.apimgmt.mapping.ApiPolicyViewMapper;
-import com.bank.docgen.apimgmt.persistence.ApiPolicyEntity;
 import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
-import com.bank.docgen.audit.api.PolicyUpdateAuditDetail;
 import com.bank.docgen.audit.service.ManagementAuditRecorder;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
-import com.bank.docgen.template.service.TemplateValidationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
@@ -26,12 +21,11 @@ import java.util.UUID;
  */
 final class ApiPolicyDomainSaveSupport {
 
-    private final ApiPolicyRepository apiPolicyRepository;
     private final ObjectMapper objectMapper;
     private final TemplateAdGroupAuthorizationCache templateAdGroupAuthorizationCache;
-    private final ApiPolicyImpactPreviewService apiPolicyImpactPreviewService;
-    private final ApiManagementAccessSupport access;
     private final ApiPolicyDomainSaveExecutorSupport executor;
+    private final ApiPolicyDomainPreviewSaveSupport previewSave;
+    private final ApiPolicyDomainSpecialSaveSupport specialSave;
 
     ApiPolicyDomainSaveSupport(
             ApiPolicyRepository apiPolicyRepository,
@@ -44,11 +38,8 @@ final class ApiPolicyDomainSaveSupport {
             ApiPolicyViewMapper apiPolicyViewMapper,
             ApiManagementAccessSupport access
     ) {
-        this.apiPolicyRepository = apiPolicyRepository;
         this.objectMapper = objectMapper;
         this.templateAdGroupAuthorizationCache = templateAdGroupAuthorizationCache;
-        this.apiPolicyImpactPreviewService = apiPolicyImpactPreviewService;
-        this.access = access;
         this.executor = new ApiPolicyDomainSaveExecutorSupport(
                 apiPolicyRepository,
                 managementAuditRecorder,
@@ -58,6 +49,10 @@ final class ApiPolicyDomainSaveSupport {
                 apiPolicyViewMapper,
                 access
         );
+        this.previewSave = new ApiPolicyDomainPreviewSaveSupport(
+                apiPolicyImpactPreviewService, access, executor);
+        this.specialSave = new ApiPolicyDomainSpecialSaveSupport(
+                apiPolicyRepository, objectMapper, apiPolicyImpactPreviewService, access, executor);
     }
 
     String writeJson(List<String> values) {
@@ -65,159 +60,59 @@ final class ApiPolicyDomainSaveSupport {
     }
 
     ApiPolicyView saveAdGroupsDomain(UUID templateId, SaveAdGroupsRequest request, ManagementSessionClaims session) {
-        ApiPolicyEntity policy = access.requirePolicyHead(templateId, session);
-        UpsertApiPolicyRequest candidate = ApiPolicyCandidateBuilder.withAdGroups(policy, request, objectMapper);
-        ApiPolicyImpactPreviewView preview = apiPolicyImpactPreviewService.preview(templateId, candidate, session);
-        ApiPolicySaveGate.requireSaveAllowed(preview, request.confirmed());
-        PolicyUpdateAuditDetail auditDetail = ApiPolicySaveGate.auditDetailFromPreview(
-                preview,
-                request.confirmed(),
-                List.of("AD_GROUP_AUTHORIZATION: groupCount=" + request.allowedAdGroups().size())
-        );
-        ApiPolicyView view = executor.saveSingleDomain(
-                templateId,
-                session,
+        ApiPolicyView view = previewSave.saveWithPreview(
+                templateId, session, request.confirmed(),
+                policy -> ApiPolicyCandidateBuilder.withAdGroups(policy, request, objectMapper),
                 List.of("AD_GROUP_AUTHORIZATION"),
-                existing -> existing.updateAdGroupsDomain(executor.writeJson(request.allowedAdGroups()), session.username()),
-                auditDetail
+                List.of("AD_GROUP_AUTHORIZATION: groupCount=" + request.allowedAdGroups().size()),
+                existing -> existing.updateAdGroupsDomain(executor.writeJson(request.allowedAdGroups()), session.username())
         );
         templateAdGroupAuthorizationCache.invalidate(templateId);
         return view;
     }
 
     ApiPolicyView saveOutputDomain(UUID templateId, SaveOutputPolicyRequest request, ManagementSessionClaims session) {
-        ApiPolicyEntity policy = access.requirePolicyHead(templateId, session);
-        UpsertApiPolicyRequest candidate = ApiPolicyCandidateBuilder.withOutput(policy, request, objectMapper);
-        ApiPolicyImpactPreviewView preview = apiPolicyImpactPreviewService.preview(templateId, candidate, session);
-        ApiPolicySaveGate.requireSaveAllowed(preview, request.confirmed());
-        PolicyUpdateAuditDetail auditDetail = ApiPolicySaveGate.auditDetailFromPreview(
-                preview, request.confirmed(), List.of());
-        return executor.saveSingleDomain(
-                templateId,
-                session,
-                List.of("OUTPUT_POLICY"),
+        return previewSave.saveWithPreview(
+                templateId, session, request.confirmed(),
+                policy -> ApiPolicyCandidateBuilder.withOutput(policy, request, objectMapper),
+                List.of("OUTPUT_POLICY"), List.of(),
                 existing -> existing.updateOutputDomain(
                         executor.writeJson(request.outputFormats()),
                         executor.writeJson(request.outputModes()),
-                        session.username()
-                ),
-                auditDetail
+                        session.username())
         );
     }
 
     ApiPolicyView saveBatchLimitsDomain(
-            UUID templateId,
-            SaveBatchLimitsRequest request,
-            ManagementSessionClaims session
-    ) {
-        ApiPolicyEntity policy = access.requirePolicyHead(templateId, session);
-        UpsertApiPolicyRequest candidate = ApiPolicyCandidateBuilder.withBatchLimits(policy, request, objectMapper);
-        ApiPolicyImpactPreviewView preview = apiPolicyImpactPreviewService.preview(templateId, candidate, session);
-        ApiPolicySaveGate.requireSaveAllowed(preview, request.confirmed());
-        PolicyUpdateAuditDetail auditDetail = ApiPolicySaveGate.auditDetailFromPreview(
-                preview,
-                request.confirmed(),
-                List.of("BATCH_LIMIT: syncMax=" + request.syncMaxItems() + ", asyncMax=" + request.asyncMaxItems())
-        );
-        return executor.saveSingleDomain(
-                templateId,
-                session,
+            UUID templateId, SaveBatchLimitsRequest request, ManagementSessionClaims session) {
+        return previewSave.saveWithPreview(
+                templateId, session, request.confirmed(),
+                policy -> ApiPolicyCandidateBuilder.withBatchLimits(policy, request, objectMapper),
                 List.of("BATCH_LIMIT"),
+                List.of("BATCH_LIMIT: syncMax=" + request.syncMaxItems() + ", asyncMax=" + request.asyncMaxItems()),
                 existing -> existing.updateBatchLimitsDomain(
-                        request.batchEnabled(),
-                        request.syncMaxItems(),
-                        request.asyncMaxItems(),
-                        session.username()
-                ),
-                auditDetail
+                        request.batchEnabled(), request.syncMaxItems(), request.asyncMaxItems(), session.username())
         );
     }
 
     ApiPolicyView saveEncryptionDomain(
-            UUID templateId,
-            SaveEncryptionPolicyRequest request,
-            ManagementSessionClaims session
-    ) {
-        ApiPolicyEntity policy = access.requirePolicyHead(templateId, session);
-        UpsertApiPolicyRequest candidate = ApiPolicyCandidateBuilder.withEncryption(policy, request, objectMapper);
-        ApiPolicyImpactPreviewView preview = apiPolicyImpactPreviewService.preview(templateId, candidate, session);
-        ApiPolicySaveGate.requireSaveAllowed(preview, request.confirmed());
-        PolicyUpdateAuditDetail auditDetail = ApiPolicySaveGate.auditDetailFromPreview(
-                preview, request.confirmed(), List.of());
-        return executor.saveSingleDomain(
-                templateId,
-                session,
-                List.of("ENCRYPTION_CAPABILITY"),
+            UUID templateId, SaveEncryptionPolicyRequest request, ManagementSessionClaims session) {
+        return previewSave.saveWithPreview(
+                templateId, session, request.confirmed(),
+                policy -> ApiPolicyCandidateBuilder.withEncryption(policy, request, objectMapper),
+                List.of("ENCRYPTION_CAPABILITY"), List.of(),
                 existing -> existing.updateEncryptionDomain(
-                        request.docxEncryptionEnabled(),
-                        request.pdfEncryptionEnabled(),
-                        session.username()
-                ),
-                auditDetail
+                        request.docxEncryptionEnabled(), request.pdfEncryptionEnabled(), session.username())
         );
     }
 
     ApiPolicyView saveInvocationRetentionDomain(
-            UUID templateId,
-            SaveInvocationRetentionRequest request,
-            ManagementSessionClaims session
-    ) {
-        ApiPolicyEntity policy = access.requirePolicyHead(templateId, session);
-        ApiPolicyRetentionValidator.validate(
-                request.saveGeneratedDocuments(),
-                request.invocationRecordRetentionDays(),
-                request.documentRetentionDays()
-        );
-        if (ApiPolicyDomainSaveExecutorSupport.retentionChanged(policy, request) && !request.confirmed()) {
-            throw new TemplateValidationException("api.error.apimgmt.policyImpactConfirmationRequired");
-        }
-        PolicyUpdateAuditDetail auditDetail = new PolicyUpdateAuditDetail(
-                List.of("INVOCATION_RETENTION: affects new invocations only"),
-                List.of(),
-                List.of(),
-                List.of("Retention changes apply to new invocations only"),
-                request.confirmed(),
-                false,
-                null
-        );
-        return executor.saveSingleDomain(
-                templateId,
-                session,
-                List.of("INVOCATION_RETENTION"),
-                existing -> existing.updateRetentionDomain(
-                        request.saveGeneratedDocuments(),
-                        request.invocationRecordRetentionDays(),
-                        request.documentRetentionDays(),
-                        session.username()
-                ),
-                auditDetail
-        );
+            UUID templateId, SaveInvocationRetentionRequest request, ManagementSessionClaims session) {
+        return specialSave.saveInvocationRetentionDomain(templateId, request, session);
     }
 
     ApiPolicyView saveDefaultRouteDomain(
-            UUID templateId,
-            SaveDefaultRouteRequest request,
-            ManagementSessionClaims session
-    ) {
-        access.requirePublishedTemplate(templateId, session);
-        ApiPolicyEntity policy = apiPolicyRepository.findByTemplateId(templateId)
-                .orElseThrow(ApiManagementNotFoundException::new);
-        executor.assertDefaultRouteTargetCallable(templateId, request.defaultRouteReleaseVersion());
-        String currentTarget = policy.getDefaultRouteReleaseVersion();
-        UpsertApiPolicyRequest candidate = ApiPolicyCandidateBuilder.withDefaultRoute(policy, request, objectMapper);
-        ApiPolicyImpactPreviewView preview = apiPolicyImpactPreviewService.preview(templateId, candidate, session);
-        ApiPolicySaveGate.requireSaveAllowed(preview, request.confirmed());
-        PolicyUpdateAuditDetail auditDetail = ApiPolicySaveGate.auditDetailFromPreview(
-                preview,
-                request.confirmed(),
-                List.of("DEFAULT_ROUTE_TARGET: " + currentTarget + " -> " + request.defaultRouteReleaseVersion())
-        );
-        return executor.saveSingleDomain(
-                templateId,
-                session,
-                List.of("DEFAULT_ROUTE_TARGET"),
-                existing -> existing.updateDefaultRouteDomain(request.defaultRouteReleaseVersion(), session.username()),
-                auditDetail
-        );
+            UUID templateId, SaveDefaultRouteRequest request, ManagementSessionClaims session) {
+        return specialSave.saveDefaultRouteDomain(templateId, request, session);
     }
 }

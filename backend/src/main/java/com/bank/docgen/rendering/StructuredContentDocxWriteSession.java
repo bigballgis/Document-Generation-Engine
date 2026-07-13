@@ -1,13 +1,9 @@
 package com.bank.docgen.rendering;
 
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
-import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
-import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.apache.poi.xwpf.usermodel.IBody;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -18,8 +14,6 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
  * Mutable write state for {@link StructuredContentDocxWriter} anchor replacement.
  */
 class StructuredContentDocxWriteSession {
-
-    private static final int MAX_NUMBERING_LEVELS = 4;
 
     private final ObjectMapper objectMapper;
     private final MasterStyleCatalog styleCatalog;
@@ -35,6 +29,7 @@ class StructuredContentDocxWriteSession {
     private final StructuredContentDocxInlineSupport inlineSupport;
     private final StructuredContentDocxCursorSupport cursor;
     private final StructuredContentDocxBlockDispatchSupport blockDispatch;
+    private final StructuredContentDocxExpandSupport expandSupport;
 
     @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     StructuredContentDocxWriteSession(
@@ -66,14 +61,26 @@ class StructuredContentDocxWriteSession {
                 this::rejectIfUnrenderable
         );
         this.cursor = new StructuredContentDocxCursorSupport(document);
+        this.expandSupport = new StructuredContentDocxExpandSupport(
+                objectMapper,
+                document,
+                listSupport,
+                inlineSupport,
+                styles,
+                cursor,
+                pinnedModuleStructures,
+                numberingCounters,
+                (nodes, paragraph) -> writeBlockNodes(nodes, paragraph, true),
+                this::writeBlockNode
+        );
         this.blockDispatch = new StructuredContentDocxBlockDispatchSupport(
                 styles,
                 inlineSupport,
                 variables,
                 this::writeLoopBlock,
-                this::expandContentModule,
-                this::writeSectionHeading,
-                this::writeInlineOrBlockChildren
+                expandSupport::expandContentModule,
+                expandSupport::writeSectionHeading,
+                expandSupport::writeInlineOrBlockChildren
         );
     }
 
@@ -96,7 +103,7 @@ class StructuredContentDocxWriteSession {
                 continue;
             }
             if ("list".equals(type)) {
-                writeList(node, paragraphAvailable ? currentParagraph : null);
+                expandSupport.writeList(node, paragraphAvailable ? currentParagraph : null);
                 paragraphAvailable = false;
                 currentParagraph = body.getParagraphs().get(body.getParagraphs().size() - 1);
                 continue;
@@ -132,7 +139,7 @@ class StructuredContentDocxWriteSession {
         String loopVariable = node.path("loopVariable").asText("");
         Object rawItems = variables.get(loopVariable);
         if (!(rawItems instanceof List<?> items) || items.isEmpty()) {
-            writeInlineOrBlockChildren(node, paragraph);
+            expandSupport.writeInlineOrBlockChildren(node, paragraph);
             return;
         }
         XWPFParagraph current = paragraph;
@@ -150,81 +157,11 @@ class StructuredContentDocxWriteSession {
                     numberingCounters
             );
             if (itemIndex == 0) {
-                scopedSession.writeInlineOrBlockChildren(node, current);
+                scopedSession.expandSupport.writeInlineOrBlockChildren(node, current);
             } else {
                 XWPFParagraph next = cursor.insertParagraphAfter(current);
-                scopedSession.writeInlineOrBlockChildren(node, next);
+                scopedSession.expandSupport.writeInlineOrBlockChildren(node, next);
                 current = next;
-            }
-        }
-    }
-
-    private void expandContentModule(JsonNode node, XWPFParagraph paragraph) {
-        String referenceKey = node.path("referenceKey").asText("").trim().toUpperCase(Locale.ROOT);
-        String pinnedStructure = pinnedModuleStructures.get(referenceKey);
-        if (pinnedStructure == null || pinnedStructure.isBlank()) {
-            throw new DocxAssemblyException(
-                    ApiErrorCodes.CONTENT_MODULE_STRUCTURE_MISSING,
-                    ApiErrorCategories.VALIDATION,
-                    "api.error.validation.contentModuleStructureMissing",
-                    "Content module pinned structure is missing for reference: " + referenceKey
-            );
-        }
-        try {
-            JsonNode root = objectMapper.readTree(pinnedStructure);
-            writeBlockNodes(StructuredContentDocxWriter.resolveRootNodes(root), paragraph, true);
-        } catch (IOException ex) {
-            throw new DocxAssemblyException(ex);
-        }
-    }
-
-    private void writeList(JsonNode listNode, XWPFParagraph firstParagraph) {
-        boolean ordered = listNode.path("ordered").asBoolean(false)
-                || "ordered".equalsIgnoreCase(listNode.path("listStyle").asText(""));
-        JsonNode children = listNode.path("children");
-        if (!children.isArray()) {
-            return;
-        }
-        XWPFParagraph current = firstParagraph;
-        for (int index = 0; index < children.size(); index++) {
-            JsonNode item = children.get(index);
-            if (current == null) {
-                current = document.createParagraph();
-            }
-            listSupport.applyListFormatting(current, ordered);
-            if ("paragraph".equals(item.path("type").asText(""))) {
-                inlineSupport.writeInlineChildren(item, current);
-            } else {
-                inlineSupport.writeInlineNode(item, current, false, false, false);
-            }
-            current = null;
-        }
-    }
-
-    private void writeSectionHeading(JsonNode node, XWPFParagraph paragraph) {
-        String prefix = StructuredContentDocxCursorSupport.resolveNumberingPrefix(
-                node, numberingCounters, MAX_NUMBERING_LEVELS);
-        if (!prefix.isBlank()) {
-            styles.writeRunText(paragraph, prefix + " ", true, false, false);
-        }
-        inlineSupport.writeInlineChildren(node, paragraph);
-    }
-
-    private void writeInlineOrBlockChildren(JsonNode node, XWPFParagraph paragraph) {
-        JsonNode children = node.path("children");
-        if (!children.isArray()) {
-            return;
-        }
-        for (int index = 0; index < children.size(); index++) {
-            JsonNode child = children.get(index);
-            if (StructuredContentDocxCursorSupport.isBlockLevelType(child.path("type").asText(""))) {
-                if (index == 0) {
-                    writeBlockNode(child, paragraph);
-                } else {
-                    writeBlockNode(child, cursor.insertParagraphAfter(paragraph));
-                }
-            } else {
-                inlineSupport.writeInlineNode(child, paragraph, false, false, false);
             }
         }
     }
