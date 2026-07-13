@@ -1,6 +1,6 @@
 ﻿# M9-T02 Closure Plan (Frontend Dependency Security)
 
-> **Sync status (2026-07-02):** Re-aligned — split **in-repo automation** vs **org intranet SCA gate**. Mirror: [execution-sync-ledger.md](../plan/execution-sync-ledger.md).
+> **Sync status (2026-07-13):** Re-aligned — split **in-repo automation** vs **org intranet SCA gate**. Related delivery focus **DEPS-SECURITY-REFRESH** (Task Master **#49** / slice `deps-security-refresh`) may advance Step 3 remediation in-repo; **M9-T02 remains In Progress** until org SCA Steps 2–4 complete. Mirror: [execution-sync-ledger.md](../plan/execution-sync-ledger.md).
 
 ## Task
 
@@ -23,10 +23,14 @@ Close frontend dependency security baseline: SBOM generation + intranet SCA + re
 | 1 | Generate frontend CycloneDX SBOM (script or CI job) | **Done** (2026-07-02) — `pnpm -C frontend sbom` / `.\scripts\generate-sbom.ps1` |
 | 1b | Generate backend CycloneDX SBOM | **Done** (2026-07-02) — `mvn -f backend/pom.xml -Psbom package -DskipTests` via same script |
 | 2 | Submit to approved intranet SCA | **Procedure ready** (2026-07-02) — [intranet-sca-submission-runbook.md](../../evidence/security/intranet-sca-submission-runbook.md) + `prepare-sca-submission-bundle.ps1`; **org upload pending owner** |
-| 3 | Remediate or exception-track high/critical | Not Started |
-| 4 | Re-run `pnpm -C frontend lint/type-check/test/build` | Not Started |
+| 3 | Remediate or exception-track high/critical | **In Progress (related)** — Task Master **#49** / slice `deps-security-refresh` (2026-07-13) may land baseline-safe bumps + exceptions; **does not** mark M9-T02 Done |
+| 4 | Re-run `pnpm -C frontend lint/type-check/test/build` | Pending — after Step 3 remediation in #49 / org SCA triage |
 
 ## Related
 
-- [m9-task-sheet.md](./m9-task-sheet.md) — M9-T01 backend SBOM (parallel track)
+- [m9-task-sheet.md](./m9-task-sheet.md) — M9-T01 backend SBOM (parallel track); M9-T03 exception metadata (Not Started — #49 may emit exceptions without closing M9-T03)
+- [deps-security-refresh.md](../behavior/deps-security-refresh.md) — Task Master **#49** in-repo hygiene (`bdd_readiness: not-applicable`)
+- [quality-gate-threshold-baseline.md](./quality-gate-threshold-baseline.md) — block critical/high in changed deps; Boot **3.3.x** / ShedLock **6.x** / no major Vue·Vite jump without ADR
+- [docs/evidence/security/README.md](../evidence/security/README.md) — SBOM paths + SCA evidence index
+- SOR-C05 (Done) — CI SBOM/SCA automation wiring **feeds** this plan; #49 does **not** reopen SOR-C05 ([system-optimization-review-2026-07.md](../plan/system-optimization-review-2026-07.md) §3 / §10)
 - Tech stack guardrails — company-approved repositories only; no ad-hoc dependency switches
