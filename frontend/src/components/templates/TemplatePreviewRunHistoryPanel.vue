@@ -1,15 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { ElMessage } from 'element-plus'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import SectionPanelHeader from '@/components/common/SectionPanelHeader.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
-import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFilters'
-import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
-import { downloadBlobExport } from '@/utils/downloadExport'
-import type { PreviewRunSummary } from '@/types/template'
+import { useTemplatePreviewRunHistoryPanelFromProps } from '@/components/templates/useTemplatePreviewRunHistoryPanel'
 
 const props = defineProps<{
   templateId: string
@@ -21,89 +14,19 @@ const emit = defineEmits<{
   selected: [previewId: string | null]
 }>()
 
-const { t } = useI18n()
-const { formatDateTime } = useLocaleFormatters()
-const panelDataStore = useTemplatePanelDataStore()
-const downloadingKey = ref<string | null>(null)
-const entry = computed(() => panelDataStore.getEntry(props.templateId))
-const loading = computed(() => entry.value.loadingPreviewRuns)
-const runs = computed(() => entry.value.previewRuns)
-const runsSource = computed(() => runs.value)
-
-const { filteredRows: filteredRuns } = useDataTableFilters(runsSource, [
-  { key: 'previewId', getValue: (row) => row.previewId },
-  { key: 'testDataSetId', getValue: (row) => row.testDataSetId ?? '' },
-  { key: 'createdAt', getValue: (row) => formatDateTime(row.createdAt) },
-])
-
-const sortByCreatedAt = rowSortMethod<PreviewRunSummary>((row) => row.createdAt)
-
-async function loadRuns() {
-  try {
-    await panelDataStore.fetchPreviewRuns(props.templateId)
-    if (props.selectedPreviewId) {
-      const stillExists = runs.value.some((row) => row.previewId === props.selectedPreviewId)
-      if (!stillExists) {
-        emit('selected', null)
-      }
-    }
-  } catch {
-    ElMessage.error(t('templates.previewHistory.error.load'))
-  }
-}
-
-async function downloadArtifact(row: PreviewRunSummary, format: 'docx' | 'pdf') {
-  const key = `${row.previewId}-${format}`
-  downloadingKey.value = key
-  try {
-    const { blob, filename } = await panelDataStore.downloadPreviewArtifact(
-      props.templateId,
-      row.previewId,
-      format,
-    )
-    downloadBlobExport(filename, blob)
-  } catch {
-    ElMessage.error(t('templates.previewHistory.error.download'))
-  } finally {
-    downloadingKey.value = null
-  }
-}
-
-function selectRow(row: PreviewRunSummary) {
-  emit('selected', row.previewId)
-}
-
-function statusTagType(status: PreviewRunSummary['status']): 'success' | 'warning' | 'danger' | 'info' {
-  if (status === 'SUCCEEDED') {
-    return 'success'
-  }
-  if (status === 'FAILED') {
-    return 'danger'
-  }
-  if (status === 'PROCESSING') {
-    return 'warning'
-  }
-  return 'info'
-}
-
-function isSelected(row: PreviewRunSummary): boolean {
-  return props.selectedPreviewId === row.previewId
-}
-
-function rowClassName({ row }: { row: PreviewRunSummary }) {
-  return isSelected(row) ? 'preview-run-row is-selected' : 'preview-run-row'
-}
-
-onMounted(() => {
-  void loadRuns()
-})
-
-watch(
-  () => props.refreshToken,
-  () => {
-    void loadRuns()
-  },
-)
+const {
+  t,
+  formatDateTime,
+  downloadingKey,
+  loading,
+  filteredRuns,
+  sortByCreatedAt,
+  loadRuns,
+  downloadArtifact,
+  selectRow,
+  statusTagType,
+  rowClassName,
+} = useTemplatePreviewRunHistoryPanelFromProps(props, (id) => emit('selected', id))
 
 defineExpose({ reload: loadRuns })
 </script>
@@ -202,16 +125,4 @@ defineExpose({ reload: loadRuns })
   </section>
 </template>
 
-<style scoped lang="scss">
-.preview-run-history {
-  margin-bottom: 1rem;
-
-  &__table {
-    width: 100%;
-  }
-
-  :deep(.preview-run-row.is-selected > td) {
-    background: var(--brand-accent-soft);
-  }
-}
-</style>
+<style scoped lang="scss" src="./TemplatePreviewRunHistoryPanel.scss"></style>
