@@ -44,7 +44,7 @@
         <jacoco.branch.min>0.45</jacoco.branch.min>
         <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
         <!-- Stay on Checkstyle 10.x; 12+/13.x needs ruleset migration (deferred). -->
-        <checkstyle.version>10.23.0</checkstyle.version>
+        <checkstyle.version>13.8.0</checkstyle.version>
         <!-- Task #51 / Java 25: maven-pmd-plugin 3.28.0 + PMD 7.25.0 (Java 25 + SOE fix #5721).
              Exclude noisy new rules in ruleset if they fire (ImplicitFunctionalInterface / ExhaustiveSwitchHasDefault). -->
         <pmd.plugin.version>3.28.0</pmd.plugin.version>
