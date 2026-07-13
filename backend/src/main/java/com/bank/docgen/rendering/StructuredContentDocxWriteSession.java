@@ -16,7 +16,6 @@ import org.apache.poi.xwpf.usermodel.IBody;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.xmlbeans.XmlCursor;
 
 /**
  * Mutable write state for {@link StructuredContentDocxWriter} anchor replacement.
@@ -38,6 +37,7 @@ class StructuredContentDocxWriteSession {
     private final StructuredContentDocxStyleSupport styles;
     private final StructuredContentDocxTableSupport tableSupport;
     private final StructuredContentDocxInlineSupport inlineSupport;
+    private final StructuredContentDocxCursorSupport cursor;
 
     @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     StructuredContentDocxWriteSession(
@@ -68,6 +68,7 @@ class StructuredContentDocxWriteSession {
                 imageResolver,
                 this::rejectIfUnrenderable
         );
+        this.cursor = new StructuredContentDocxCursorSupport(document);
     }
 
     void writeBlockNodes(JsonNode nodes, XWPFParagraph firstParagraph, boolean reuseFirstParagraph) {
@@ -79,12 +80,12 @@ class StructuredContentDocxWriteSession {
             if ("tableComponentRef".equals(type) || "tableComponent".equals(type)) {
                 JsonNode tableDefinition = node.has("tableComponent") ? node.get("tableComponent") : node;
                 if (!paragraphAvailable) {
-                    currentParagraph = insertParagraphAfter(currentParagraph);
+                    currentParagraph = cursor.insertParagraphAfter(currentParagraph);
                 } else {
                     paragraphAvailable = false;
                     StructuredContentDocxWriter.clearParagraph(currentParagraph);
                 }
-                XWPFTable table = insertTableAfter(currentParagraph);
+                XWPFTable table = cursor.insertTableAfter(currentParagraph);
                 tableSupport.populateTable(tableDefinition, table, variables);
                 continue;
             }
@@ -96,7 +97,7 @@ class StructuredContentDocxWriteSession {
             }
             if ("imageRef".equals(type) || "sealRef".equals(type)) {
                 if (!paragraphAvailable) {
-                    currentParagraph = insertParagraphAfter(currentParagraph);
+                    currentParagraph = cursor.insertParagraphAfter(currentParagraph);
                 }
                 inlineSupport.writeReferenceNode(node, currentParagraph);
                 paragraphAvailable = false;
@@ -106,7 +107,7 @@ class StructuredContentDocxWriteSession {
             // Never silently drop content from published letters.
             rejectIfUnrenderable(type);
             if (!paragraphAvailable) {
-                currentParagraph = insertParagraphAfter(currentParagraph);
+                currentParagraph = cursor.insertParagraphAfter(currentParagraph);
             }
             writeBlockNode(node, currentParagraph);
             paragraphAvailable = false;
@@ -193,7 +194,7 @@ class StructuredContentDocxWriteSession {
             if (itemIndex == 0) {
                 scopedSession.writeInlineOrBlockChildren(node, current);
             } else {
-                XWPFParagraph next = insertParagraphAfter(current);
+                XWPFParagraph next = cursor.insertParagraphAfter(current);
                 scopedSession.writeInlineOrBlockChildren(node, next);
                 current = next;
             }
@@ -243,38 +244,12 @@ class StructuredContentDocxWriteSession {
     }
 
     private void writeSectionHeading(JsonNode node, XWPFParagraph paragraph) {
-        String prefix = resolveNumberingPrefix(node);
+        String prefix = StructuredContentDocxCursorSupport.resolveNumberingPrefix(
+                node, numberingCounters, MAX_NUMBERING_LEVELS);
         if (!prefix.isBlank()) {
             styles.writeRunText(paragraph, prefix + " ", true, false, false);
         }
         inlineSupport.writeInlineChildren(node, paragraph);
-    }
-
-    private String resolveNumberingPrefix(JsonNode node) {
-        JsonNode numbering = node.get("numbering");
-        if (numbering == null || !numbering.isObject()) {
-            return "";
-        }
-        String explicit = numbering.path("displayNumber").asText("").trim();
-        if (!explicit.isBlank()) {
-            return explicit;
-        }
-        int level = numbering.path("level").asInt(1);
-        if (level < 1 || level > MAX_NUMBERING_LEVELS) {
-            return "";
-        }
-        numberingCounters[level - 1]++;
-        for (int deeper = level; deeper < MAX_NUMBERING_LEVELS; deeper++) {
-            numberingCounters[deeper] = 0;
-        }
-        StringBuilder builder = new StringBuilder();
-        for (int index = 0; index < level; index++) {
-            if (index > 0) {
-                builder.append('.');
-            }
-            builder.append(numberingCounters[index]);
-        }
-        return builder.toString();
     }
 
     private void writeInlineOrBlockChildren(JsonNode node, XWPFParagraph paragraph) {
@@ -284,39 +259,15 @@ class StructuredContentDocxWriteSession {
         }
         for (int index = 0; index < children.size(); index++) {
             JsonNode child = children.get(index);
-            if (isBlockLevelType(child.path("type").asText(""))) {
+            if (StructuredContentDocxCursorSupport.isBlockLevelType(child.path("type").asText(""))) {
                 if (index == 0) {
                     writeBlockNode(child, paragraph);
                 } else {
-                    writeBlockNode(child, insertParagraphAfter(paragraph));
+                    writeBlockNode(child, cursor.insertParagraphAfter(paragraph));
                 }
             } else {
                 inlineSupport.writeInlineNode(child, paragraph, false, false, false);
             }
         }
-    }
-
-    private XWPFParagraph insertParagraphAfter(XWPFParagraph paragraph) {
-        try (XmlCursor cursor = paragraph.getCTP().newCursor()) {
-            cursor.toEndToken();
-            cursor.toNextToken();
-            return document.insertNewParagraph(cursor);
-        }
-    }
-
-    private XWPFTable insertTableAfter(XWPFParagraph paragraph) {
-        try (XmlCursor cursor = paragraph.getCTP().newCursor()) {
-            cursor.toEndToken();
-            cursor.toNextToken();
-            return document.insertNewTbl(cursor);
-        }
-    }
-
-    private boolean isBlockLevelType(String type) {
-        return switch (type) {
-            case "paragraph", "sectionHeading", "conditionBlock", "loopBlock", "tableComponentRef",
-                    "tableComponent", "contentModuleRef", "list" -> true;
-            default -> false;
-        };
     }
 }

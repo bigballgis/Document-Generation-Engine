@@ -1,8 +1,5 @@
 package com.bank.docgen.master.service;
 
-import com.bank.docgen.authorization.management.api.CatalogPageSupport;
-import com.bank.docgen.authorization.management.api.CatalogQueryPage;
-import com.bank.docgen.authorization.management.api.CatalogSortKey;
 import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.authorization.management.service.ManagementUserDisplayService;
@@ -15,13 +12,10 @@ import com.bank.docgen.master.api.MasterImpactAnalysisView;
 import com.bank.docgen.master.api.SubmitMasterReviewRequest;
 import com.bank.docgen.master.api.UpdateMasterRequest;
 import com.bank.docgen.master.domain.MasterDocumentStatus;
-import com.bank.docgen.master.domain.MasterReviewAction;
 import com.bank.docgen.master.persistence.MasterAnchorEntity;
 import com.bank.docgen.master.persistence.MasterAnchorRepository;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
-import com.bank.docgen.master.persistence.MasterDocumentRepositoryCustom.MasterCatalogFilter;
-import com.bank.docgen.master.persistence.MasterReviewRecordEntity;
 import com.bank.docgen.master.persistence.MasterReviewRecordRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
@@ -29,8 +23,6 @@ import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -43,7 +35,6 @@ public class MasterDocumentService {
     private static final long DEFAULT_MAX_DOCX_UPLOAD_BYTES = 50L * 1024L * 1024L;
 
     private final MasterDocumentRepository masterDocumentRepository;
-    private final MasterReviewRecordRepository masterReviewRecordRepository;
     private final MasterRevisionLineRepository masterRevisionLineRepository;
     private final ObjectStoragePort objectStoragePort;
     private final GroupAccessService groupAccessService;
@@ -51,6 +42,8 @@ public class MasterDocumentService {
     private final MasterDocumentAccessSupport access;
     private final MasterDocumentViewSupport views;
     private final MasterRevisionPersistSupport revisions;
+    private final MasterDocumentCatalogSupport catalog;
+    private final MasterDocumentReviewSupport reviews;
 
     public MasterDocumentService(
             MasterDocumentRepository masterDocumentRepository,
@@ -64,7 +57,6 @@ public class MasterDocumentService {
             @Value("${docgen.master.max-docx-upload-bytes:" + DEFAULT_MAX_DOCX_UPLOAD_BYTES + "}") long maxDocxUploadBytes
     ) {
         this.masterDocumentRepository = masterDocumentRepository;
-        this.masterReviewRecordRepository = masterReviewRecordRepository;
         this.masterRevisionLineRepository = masterRevisionLineRepository;
         this.objectStoragePort = objectStoragePort;
         this.groupAccessService = groupAccessService;
@@ -80,6 +72,10 @@ public class MasterDocumentService {
                 managementUserDisplayService
         );
         this.revisions = new MasterRevisionPersistSupport(masterRevisionLineRepository);
+        this.catalog = new MasterDocumentCatalogSupport(
+                masterDocumentRepository, this.groupAccessService, access, views);
+        this.reviews = new MasterDocumentReviewSupport(
+                masterReviewRecordRepository, docxUploadSupport, access, views);
     }
 
     @Transactional(readOnly = true)
@@ -97,58 +93,7 @@ public class MasterDocumentService {
             String status,
             String sort
     ) {
-        int safePage = CatalogPageSupport.normalizePage(page);
-        int safeSize = CatalogPageSupport.normalizeSize(size);
-        List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
-        if (groupCodes.isEmpty()) {
-            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-        }
-
-        boolean allGroups = groupCodes.contains("*");
-        String groupFilter = CatalogPageSupport.blankToNull(groupCode);
-        if (groupFilter != null && !access.canAccessGroup(session, groupFilter)) {
-            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-        }
-
-        MasterDocumentStatus statusFilter = parseStatus(status);
-        if (status != null && !status.isBlank() && statusFilter == null) {
-            return new PageView<>(List.of(), safePage, safeSize, 0, 0);
-        }
-
-        CatalogSortKey sortKey = CatalogSortKey.parse(sort);
-        MasterCatalogFilter filter = new MasterCatalogFilter(
-                allGroups ? List.of() : List.copyOf(groupCodes),
-                allGroups,
-                groupFilter,
-                CatalogPageSupport.blankToNull(search),
-                statusFilter,
-                sortKey
-        );
-        CatalogQueryPage<MasterDocumentEntity> masterPage =
-                masterDocumentRepository.searchCatalog(filter, safePage, safeSize);
-        Map<UUID, Long> anchorCounts = views.loadAnchorCounts(masterPage.content());
-        List<MasterDocumentSummaryView> content = views.enrichMasterSummaries(masterPage.content().stream()
-                .map(master -> views.toSummary(master, anchorCounts.getOrDefault(master.getId(), 0L)))
-                .toList());
-        return new PageView<>(
-                content,
-                safePage,
-                safeSize,
-                masterPage.totalElements(),
-                masterPage.totalPages()
-        );
-    }
-
-    private static MasterDocumentStatus parseStatus(String raw) {
-        String value = CatalogPageSupport.blankToNull(raw);
-        if (value == null) {
-            return null;
-        }
-        try {
-            return MasterDocumentStatus.valueOf(value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
+        return catalog.list(session, page, size, search, groupCode, status, sort);
     }
 
     @Transactional(readOnly = true)
@@ -294,24 +239,7 @@ public class MasterDocumentService {
             SubmitMasterReviewRequest request,
             ManagementSessionClaims session
     ) {
-        MasterDocumentEntity master = access.requireWritableMasterWithAnchors(masterId, session);
-        if (master.getStatus() != MasterDocumentStatus.DRAFT) {
-            throw new MasterValidationException("api.error.master.invalidReviewTransition");
-        }
-        docxUploadSupport.assertAnchorIntegrity(master);
-        master.setChangeSummary(request.changeSummary());
-        master.setStatus(MasterDocumentStatus.PENDING_REVIEW);
-        master.setUpdatedBy(session.username());
-        masterReviewRecordRepository.save(new MasterReviewRecordEntity(
-                UUID.randomUUID(),
-                masterId,
-                MasterReviewAction.SUBMITTED,
-                null,
-                request.changeSummary(),
-                null,
-                session.username()
-        ));
-        return views.toDetail(master);
+        return reviews.submitReview(masterId, request, session);
     }
 
     @Transactional
@@ -320,28 +248,7 @@ public class MasterDocumentService {
             DecideMasterReviewRequest request,
             ManagementSessionClaims session
     ) {
-        if (!access.canReviewMasters(session)) {
-            throw new MasterAccessDeniedException();
-        }
-        MasterDocumentEntity master = access.requireReadableMasterWithAnchors(masterId, session);
-        if (master.getStatus() != MasterDocumentStatus.PENDING_REVIEW) {
-            throw new MasterValidationException("api.error.master.invalidReviewTransition");
-        }
-        MasterDocumentStatus nextStatus = "APPROVED".equals(request.decision())
-                ? MasterDocumentStatus.APPROVED
-                : MasterDocumentStatus.DRAFT;
-        master.setStatus(nextStatus);
-        master.setUpdatedBy(session.username());
-        masterReviewRecordRepository.save(new MasterReviewRecordEntity(
-                UUID.randomUUID(),
-                masterId,
-                "APPROVED".equals(request.decision()) ? MasterReviewAction.APPROVED : MasterReviewAction.REJECTED,
-                request.decision(),
-                master.getChangeSummary(),
-                request.commentSummary(),
-                session.username()
-        ));
-        return views.toDetail(master);
+        return reviews.decideReview(masterId, request, session);
     }
 
     @Transactional(readOnly = true)

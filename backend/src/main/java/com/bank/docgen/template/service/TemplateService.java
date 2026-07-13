@@ -56,6 +56,7 @@ public class TemplateService {
     private final ApplicationEventPublisher eventPublisher;
     private final TemplateCatalogSupport catalogSupport;
     private final TemplateDisplayEnrichmentSupport displayEnrichment;
+    private final TemplateAccessGuardSupport access;
 
     public TemplateService(
             TemplateRepository templateRepository,
@@ -87,6 +88,7 @@ public class TemplateService {
                 templateViewMapper,
                 displayEnrichment
         );
+        this.access = new TemplateAccessGuardSupport(templateRepository, groupAccessService);
     }
 
     @Transactional(readOnly = true)
@@ -115,8 +117,7 @@ public class TemplateService {
 
     @Transactional(readOnly = true)
     public TemplateDetailView get(UUID templateId, ManagementSessionClaims session) {
-        TemplateEntity template = requireReadableTemplate(templateId, session);
-        return templateViewMapper.toDetail(template);
+        return templateViewMapper.toDetail(requireReadableTemplate(templateId, session));
     }
 
     @Transactional(readOnly = true)
@@ -141,7 +142,7 @@ public class TemplateService {
 
     @Transactional
     public TemplateDetailView create(CreateTemplateRequest request, ManagementSessionClaims session) {
-        assertCanAuthorTemplates(session);
+        access.assertCanAuthorTemplates(session);
         if (!groupAccessService.canAccessGroup(session, request.groupCode())) {
             throw new TemplateAccessDeniedException();
         }
@@ -204,7 +205,7 @@ public class TemplateService {
     ) {
         TemplateEntity template = requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        assertDraft(template);
+        access.assertDraft(template);
         VariableSchemaView result = bindingConfigurationService.upsertVariable(version, request);
         eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
         return result;
@@ -214,7 +215,7 @@ public class TemplateService {
     public void deleteVariable(UUID templateId, String variableKey, ManagementSessionClaims session) {
         TemplateEntity template = requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        assertDraft(template);
+        access.assertDraft(template);
         bindingConfigurationService.deleteVariable(version.getId(), variableKey);
         eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
     }
@@ -227,7 +228,7 @@ public class TemplateService {
     ) {
         TemplateEntity template = requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        assertDraft(template);
+        access.assertDraft(template);
         AnchorBindingView result = bindingConfigurationService.upsertBinding(template.getMasterId(), version, request);
         eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
         return result;
@@ -241,7 +242,7 @@ public class TemplateService {
     ) {
         TemplateEntity template = requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        assertDraft(template);
+        access.assertDraft(template);
         List<CompositionRuleView> result = bindingConfigurationService.saveRules(version, rules);
         eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
         return result;
@@ -280,36 +281,16 @@ public class TemplateService {
         return structuredAuthoringService.pasteClean(request);
     }
 
-    private void assertDraft(TemplateEntity template) {
-        if (template.getLifecycleStatus() != TemplateLifecycleStatus.DRAFT) {
-            throw new TemplateValidationException("api.error.template.invalidState");
-        }
-    }
-
-    private void assertCanAuthorTemplates(ManagementSessionClaims session) {
-        if (!groupAccessService.canAuthorTemplates(session)) {
-            throw new TemplateAccessDeniedException();
-        }
-    }
-
     public TemplateEntity requireReadableTemplate(UUID templateId, ManagementSessionClaims session) {
-        TemplateEntity template = templateRepository.findByIdAndDeletedAtIsNull(templateId)
-                .orElseThrow(TemplateNotFoundException::new);
-        if (!groupAccessService.canAccessGroup(session, template.getGroupCode())) {
-            throw new TemplateAccessDeniedException();
-        }
-        return template;
+        return access.requireReadable(templateId, session);
     }
 
     TemplateEntity requireWritableTemplate(UUID templateId, ManagementSessionClaims session) {
-        TemplateEntity template = requireReadableTemplate(templateId, session);
-        assertCanAuthorTemplates(session);
-        return template;
+        return access.requireWritable(templateId, session);
     }
 
     public TemplateEntity requireTemplateByExternalId(String externalId) {
-        return templateRepository.findByExternalIdAndDeletedAtIsNull(externalId)
-                .orElseThrow(TemplateNotFoundException::new);
+        return access.requireByExternalId(externalId);
     }
 
     public record TemplateDisplayInfo(String name, String externalId) {

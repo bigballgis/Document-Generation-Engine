@@ -61,315 +61,161 @@ public class ManagementAuditRecorder {
 
     @Transactional
     public void recordPolicyUpdated(
-            UUID templateId,
-            String groupCode,
-            int previousPolicyVersion,
-            int policyVersion,
-            List<String> changedAreas,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID templateId, String groupCode, int previousPolicyVersion, int policyVersion,
+            List<String> changedAreas, String actorUsername, String actorSummary) {
         recordPolicyUpdated(
-                templateId,
-                groupCode,
-                previousPolicyVersion,
-                policyVersion,
-                changedAreas,
-                actorUsername,
-                actorSummary,
-                PolicyUpdateAuditDetail.empty()
-        );
+                templateId, groupCode, previousPolicyVersion, policyVersion,
+                changedAreas, actorUsername, actorSummary, PolicyUpdateAuditDetail.empty());
     }
 
     @Transactional
     public void recordPolicyUpdated(
-            UUID templateId,
-            String groupCode,
-            int previousPolicyVersion,
-            int policyVersion,
-            List<String> changedAreas,
-            String actorUsername,
-            String actorSummary,
-            PolicyUpdateAuditDetail detail
-    ) {
+            UUID templateId, String groupCode, int previousPolicyVersion, int policyVersion,
+            List<String> changedAreas, String actorUsername, String actorSummary, PolicyUpdateAuditDetail detail) {
         apiPolicy.recordPolicyUpdated(
-                templateId,
-                groupCode,
-                previousPolicyVersion,
-                policyVersion,
-                changedAreas,
-                actorUsername,
-                actorSummary,
-                detail
-        );
+                templateId, groupCode, previousPolicyVersion, policyVersion,
+                changedAreas, actorUsername, actorSummary, detail);
     }
 
     @Transactional
     public void recordCredentialCreated(
-            UUID templateId,
-            String groupCode,
-            UUID credentialId,
-            String credentialExternalId,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID templateId, String groupCode, UUID credentialId, String credentialExternalId,
+            String actorUsername, String actorSummary) {
         apiPolicy.recordCredentialCreated(
                 templateId, groupCode, credentialId, credentialExternalId, actorUsername, actorSummary);
     }
 
     @Transactional
     public void recordCredentialRotated(
-            UUID templateId,
-            String groupCode,
-            UUID credentialId,
-            String credentialExternalId,
-            String actorUsername,
-            String actorSummary,
-            int rotationGeneration,
-            String previousCredentialFingerprint
-    ) {
+            UUID templateId, String groupCode, UUID credentialId, String credentialExternalId,
+            String actorUsername, String actorSummary, int rotationGeneration, String previousCredentialFingerprint) {
         apiPolicy.recordCredentialRotated(
-                templateId,
-                groupCode,
-                credentialId,
-                credentialExternalId,
-                actorUsername,
-                actorSummary,
-                rotationGeneration,
-                previousCredentialFingerprint
-        );
+                templateId, groupCode, credentialId, credentialExternalId,
+                actorUsername, actorSummary, rotationGeneration, previousCredentialFingerprint);
     }
 
     @Transactional
     public void recordCredentialRevoked(
-            UUID templateId,
-            String groupCode,
-            UUID credentialId,
-            String credentialExternalId,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID templateId, String groupCode, UUID credentialId, String credentialExternalId,
+            String actorUsername, String actorSummary) {
         apiPolicy.recordCredentialRevoked(
                 templateId, groupCode, credentialId, credentialExternalId, actorUsername, actorSummary);
     }
 
     @Transactional
-    public void recordUserEvent(
-            String eventType,
-            String actorUsername,
-            String actorSummary,
-            String statusSummary
-    ) {
+    public void recordUserEvent(String eventType, String actorUsername, String actorSummary, String statusSummary) {
         identity.recordUserEvent(eventType, actorUsername, actorSummary, statusSummary);
     }
 
     @Transactional
     public void recordGroupEvent(
-            String eventType,
-            String groupCode,
-            String actorUsername,
-            String actorSummary,
-            String statusSummary
-    ) {
+            String eventType, String groupCode, String actorUsername, String actorSummary, String statusSummary) {
         identity.recordGroupEvent(eventType, groupCode, actorUsername, actorSummary, statusSummary);
     }
 
     @Transactional
     public void recordRiskPromptConfigUpdated(
-            String scopeType,
-            String groupCode,
-            String actorUsername,
-            String actorSummary,
-            String statusSummary
-    ) {
-        identity.recordRiskPromptConfigUpdated(
-                scopeType, groupCode, actorUsername, actorSummary, statusSummary);
+            String scopeType, String groupCode, String actorUsername, String actorSummary, String statusSummary) {
+        identity.recordRiskPromptConfigUpdated(scopeType, groupCode, actorUsername, actorSummary, statusSummary);
     }
 
     @Transactional
     public void recordCollaborationTimeoutConfigUpdated(
-            String scopeType,
-            String groupCode,
-            String actorUsername,
-            String actorSummary,
-            String statusSummary
-    ) {
+            String scopeType, String groupCode, String actorUsername, String actorSummary, String statusSummary) {
         collaboration.recordCollaborationTimeoutConfigUpdated(
                 scopeType, groupCode, actorUsername, actorSummary, statusSummary);
     }
 
     @Transactional
     public void recordCollaborationTimeoutEscalation(
-            UUID templateId,
-            String groupCode,
-            UUID sourceWorkItemId,
-            CollaborationWorkItemQueue sourceQueue,
-            String statusSummary
-    ) {
+            UUID templateId, String groupCode, UUID sourceWorkItemId,
+            CollaborationWorkItemQueue sourceQueue, String statusSummary) {
         collaboration.recordCollaborationTimeoutEscalation(
                 templateId, groupCode, sourceWorkItemId, sourceQueue, statusSummary);
     }
 
     @Transactional
     public void recordCollaborationWorkItemCreated(
-            UUID templateId,
-            String groupCode,
-            UUID workItemId,
-            CollaborationWorkItemQueue queue,
-            CollaborationWorkItemTriggerType triggerType,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID templateId, String groupCode, UUID workItemId, CollaborationWorkItemQueue queue,
+            CollaborationWorkItemTriggerType triggerType, String actorUsername, String actorSummary) {
         collaboration.recordCollaborationWorkItemCreated(
                 templateId, groupCode, workItemId, queue, triggerType, actorUsername, actorSummary);
     }
 
     @Transactional
     public void recordCollaborationWorkItemResolved(
-            UUID templateId,
-            String groupCode,
-            UUID workItemId,
-            CollaborationWorkItemQueue queue,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID templateId, String groupCode, UUID workItemId, CollaborationWorkItemQueue queue,
+            String actorUsername, String actorSummary) {
         collaboration.recordCollaborationWorkItemResolved(
                 templateId, groupCode, workItemId, queue, actorUsername, actorSummary);
     }
 
     @Transactional
     public void recordTemplateExported(
-            UUID templateId,
-            String groupCode,
-            String externalId,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID templateId, String groupCode, String externalId, String actorUsername, String actorSummary) {
         template.recordTemplateExported(templateId, groupCode, externalId, actorUsername, actorSummary);
     }
 
     @Transactional
     public void recordTemplateImported(
-            UUID templateId,
-            String groupCode,
-            String externalId,
-            String importBatchId,
-            int developmentVersion,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID templateId, String groupCode, String externalId, String importBatchId,
+            int developmentVersion, String actorUsername, String actorSummary) {
         template.recordTemplateImported(
                 templateId, groupCode, externalId, importBatchId, developmentVersion, actorUsername, actorSummary);
     }
 
     @Transactional
     public void recordContentModuleCreated(
-            UUID moduleId,
-            String groupCode,
-            String moduleCode,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID moduleId, String groupCode, String moduleCode, String actorUsername, String actorSummary) {
         contentModule.recordContentModuleCreated(moduleId, groupCode, moduleCode, actorUsername, actorSummary);
     }
 
     @Transactional
     public void recordContentModuleVersionCreated(
-            UUID moduleId,
-            String groupCode,
-            String moduleCode,
-            String semanticVersion,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID moduleId, String groupCode, String moduleCode, String semanticVersion,
+            String actorUsername, String actorSummary) {
         contentModule.recordContentModuleVersionCreated(
                 moduleId, groupCode, moduleCode, semanticVersion, actorUsername, actorSummary);
     }
 
     @Transactional
     public void recordContentModuleVersionUpdated(
-            UUID moduleId,
-            String groupCode,
-            String moduleCode,
-            String semanticVersion,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID moduleId, String groupCode, String moduleCode, String semanticVersion,
+            String actorUsername, String actorSummary) {
         contentModule.recordContentModuleVersionUpdated(
                 moduleId, groupCode, moduleCode, semanticVersion, actorUsername, actorSummary);
     }
 
     @Transactional
     public void recordContentModuleReviewTransition(
-            UUID moduleId,
-            String groupCode,
-            String moduleCode,
-            String operation,
-            String semanticVersion,
-            String reviewState,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID moduleId, String groupCode, String moduleCode, String operation, String semanticVersion,
+            String reviewState, String actorUsername, String actorSummary) {
         contentModule.recordContentModuleReviewTransition(
                 moduleId, groupCode, moduleCode, operation, semanticVersion, reviewState, actorUsername, actorSummary);
     }
 
     @Transactional
     public void recordContentModuleLifecycleOperation(
-            UUID moduleId,
-            String groupCode,
-            String moduleCode,
-            String operation,
-            String semanticVersion,
-            String lifecycleState,
-            String actorUsername,
-            String actorSummary,
-            ContentModuleLifecycleAuditDetail impactDetail
-    ) {
+            UUID moduleId, String groupCode, String moduleCode, String operation, String semanticVersion,
+            String lifecycleState, String actorUsername, String actorSummary,
+            ContentModuleLifecycleAuditDetail impactDetail) {
         contentModule.recordContentModuleLifecycleOperation(
-                moduleId,
-                groupCode,
-                moduleCode,
-                operation,
-                semanticVersion,
-                lifecycleState,
-                actorUsername,
-                actorSummary,
-                impactDetail
-        );
+                moduleId, groupCode, moduleCode, operation, semanticVersion,
+                lifecycleState, actorUsername, actorSummary, impactDetail);
     }
 
     @Transactional
     public void recordContentModuleLifecycleOperation(
-            UUID moduleId,
-            String groupCode,
-            String moduleCode,
-            String operation,
-            String semanticVersion,
-            String lifecycleState,
-            String actorUsername,
-            String actorSummary
-    ) {
+            UUID moduleId, String groupCode, String moduleCode, String operation, String semanticVersion,
+            String lifecycleState, String actorUsername, String actorSummary) {
         recordContentModuleLifecycleOperation(
-                moduleId,
-                groupCode,
-                moduleCode,
-                operation,
-                semanticVersion,
-                lifecycleState,
-                actorUsername,
-                actorSummary,
-                null
-        );
+                moduleId, groupCode, moduleCode, operation, semanticVersion,
+                lifecycleState, actorUsername, actorSummary, null);
     }
 
     @Transactional
     public void recordEscalationDenied(
-            String reasonCode,
-            String actorUsername,
-            String actorSummary,
-            String statusSummary
-    ) {
+            String reasonCode, String actorUsername, String actorSummary, String statusSummary) {
         identity.recordEscalationDenied(reasonCode, actorUsername, actorSummary, statusSummary);
     }
 }
