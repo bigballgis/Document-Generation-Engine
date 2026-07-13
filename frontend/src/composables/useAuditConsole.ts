@@ -2,25 +2,24 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import type { RouteLocationRaw } from 'vue-router'
-import { rowSortMethod } from '@/composables/useDataTableFilters'
 import { useAbortableCatalogLoader } from '@/composables/useAbortableCatalogLoader'
 import { useAuditEventTypeOptions } from '@/composables/useAuditEventTypeOptions'
 import { useAuditTemplateFilterOptions } from '@/composables/useAuditTemplateFilterOptions'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
+import { createAuditConsoleSorts } from '@/composables/createAuditConsoleSorts'
 import { isGroupScopedAuditRole } from '@/auth/roles'
 import { ROUTE_KEYS, templatePackageHubPath } from '@/routing/routeKeys'
 import { useAuditStore } from '@/stores/audit'
 import { useSessionStore } from '@/stores/session'
-import type { LifecycleAuditEvent, ManagementAuditEvent } from '@/types/audit'
+import type { ManagementAuditEvent } from '@/types/audit'
 import type { TemplateLifecycleStatus } from '@/types/template'
 import { resolveAuditActorDisplay, resolveAuditTemplateDisplay } from '@/utils/auditEntityDisplay'
 import type { AuditActorDisplayFields } from '@/utils/auditEntityDisplay'
-import { downloadJsonExport } from '@/utils/downloadExport'
 import { shouldShowAuditAdminJourney } from '@/utils/auditAdminJourney'
 import { formatAuditEventType } from '@/utils/auditEventLabels'
 import { validateGroupAdminAuditFilters } from '@/views/audit/auditFilterValidation'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { useAuditConsoleExport } from '@/composables/useAuditConsoleExport'
 
 export function useAuditConsole() {
   const { t, te } = useI18n()
@@ -131,32 +130,6 @@ export function useAuditConsole() {
     void searchTemplates(query)
   }
 
-  function exportScopeSummary(): string {
-    const parts: string[] = []
-    if (auditStore.filters.eventType?.trim()) {
-      parts.push(`${t('audit.filters.eventType')}: ${auditStore.filters.eventType.trim()}`)
-    }
-    if (auditStore.filters.eventAtFrom?.trim()) {
-      parts.push(`${t('audit.filters.eventAtFrom')}: ${auditStore.filters.eventAtFrom.trim()}`)
-    }
-    if (auditStore.filters.eventAtTo?.trim()) {
-      parts.push(`${t('audit.filters.eventAtTo')}: ${auditStore.filters.eventAtTo.trim()}`)
-    }
-    if (auditStore.filters.groupScope?.trim()) {
-      parts.push(`${t('audit.filters.groupScope')}: ${auditStore.filters.groupScope.trim()}`)
-    }
-    if (auditStore.filters.templateId?.trim()) {
-      parts.push(`${t('audit.filters.templateId')}: ${auditStore.filters.templateId.trim()}`)
-    }
-    if (auditStore.filters.requestId?.trim()) {
-      parts.push(`${t('audit.filters.requestId')}: ${auditStore.filters.requestId.trim()}`)
-    }
-    if (parts.length === 0) {
-      return t('audit.export.scopeAll')
-    }
-    return parts.join('\n')
-  }
-
   function applyRequestIdFromRouteQuery() {
     const raw = route.query.requestId
     const requestId = Array.isArray(raw) ? raw[0] : raw
@@ -228,58 +201,29 @@ export function useAuditConsole() {
     await applyFilters()
   }
 
-  async function handleExport() {
-    const isManagement = activeTab.value === 'management'
-    try {
-      await ElMessageBox.confirm(exportScopeSummary(), t('audit.export.confirmTitle'), {
-        type: 'info',
-        confirmButtonText: t('audit.export.confirmAction'),
-        cancelButtonText: t('audit.export.cancelAction'),
-      })
-    } catch {
-      return
-    }
-    try {
-      const result = isManagement
-        ? await auditStore.exportManagementEvents()
-        : await auditStore.exportLifecycleEvents()
-      downloadJsonExport(
-        t(isManagement ? 'audit.export.managementFilename' : 'audit.export.lifecycleFilename'),
-        result,
-      )
-      ElMessage.success(
-        t(isManagement ? 'audit.export.success' : 'audit.export.lifecycleSuccess'),
-      )
-    } catch {
-      ElMessage.error(
-        errorMessage.value ||
-          t(isManagement ? 'audit.error.export' : 'audit.error.exportLifecycle'),
-      )
-    }
-  }
+  const { handleExport } = useAuditConsoleExport({
+    t,
+    auditStore,
+    activeTab,
+    errorMessage,
+  })
 
-  const sortManagementByActor = rowSortMethod<ManagementAuditEvent>((row) => formatActor(row))
-  const sortManagementByTemplate = rowSortMethod<ManagementAuditEvent>(
-    (row) => resolveAuditTemplateDisplay(row).label,
-  )
-  const sortLifecycleByActor = rowSortMethod<LifecycleAuditEvent>((row) => formatActor(row))
-  const sortLifecycleByTemplate = rowSortMethod<LifecycleAuditEvent>(
-    (row) => resolveAuditTemplateDisplay(row).label,
-  )
-  const sortManagementByEventType = rowSortMethod<ManagementAuditEvent>((row) =>
-    formatEventType(row.eventType),
-  )
-  const sortManagementByEventAt = rowSortMethod<ManagementAuditEvent>((row) => row.eventAt)
-  const sortLifecycleByEventType = rowSortMethod<LifecycleAuditEvent>((row) =>
-    formatEventType(row.eventType),
-  )
-  const sortLifecycleByEventAt = rowSortMethod<LifecycleAuditEvent>((row) => row.eventAt)
-  const sortLifecycleFromState = rowSortMethod<LifecycleAuditEvent>((row) =>
-    formatLifecycleState(row.fromState),
-  )
-  const sortLifecycleToState = rowSortMethod<LifecycleAuditEvent>((row) =>
-    formatLifecycleState(row.toState),
-  )
+  const {
+    sortManagementByActor,
+    sortManagementByTemplate,
+    sortLifecycleByActor,
+    sortLifecycleByTemplate,
+    sortManagementByEventType,
+    sortManagementByEventAt,
+    sortLifecycleByEventType,
+    sortLifecycleByEventAt,
+    sortLifecycleFromState,
+    sortLifecycleToState,
+  } = createAuditConsoleSorts({
+    formatActor,
+    formatEventType,
+    formatLifecycleState,
+  })
 
   return {
     t,

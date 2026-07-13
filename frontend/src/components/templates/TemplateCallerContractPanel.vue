@@ -1,22 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { toRef } from 'vue'
 import AppDataTable from '@/components/common/AppDataTable.vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import AppTablePagination from '@/components/common/AppTablePagination.vue'
 import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
-import { useDataTableFilters } from '@/composables/useDataTableFilters'
-import { useCatalogPagination } from '@/composables/useCatalogPagination'
-import { useYesNoFilterOptions } from '@/composables/useTableFilterOptions'
-import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
-import { getCallerContract } from '@/api/contract'
-import {
-  ALLOWED_ENVIRONMENTS,
-  ENVIRONMENT_LABEL_KEY,
-  resolveRuntimeEnvironment,
-  type RuntimeEnvironment,
-} from '@/config/environments'
-import type { CallerContract } from '@/types/contract'
+import { useTemplateCallerContractPanel } from '@/components/templates/useTemplateCallerContractPanel'
+import type { RuntimeEnvironment } from '@/config/environments'
 
 const props = defineProps<{
   templateId: string
@@ -26,117 +15,29 @@ const emit = defineEmits<{
   'update:environment': [environment: RuntimeEnvironment]
 }>()
 
-const { t, te } = useI18n()
-const loading = ref(false)
-const errorMessageKey = ref<string | null>(null)
-const contract = ref<CallerContract | null>(null)
-
-const selectedEnvironment = ref<RuntimeEnvironment>(resolveRuntimeEnvironment(props.environment))
-const environmentOptions = computed(() =>
-  ALLOWED_ENVIRONMENTS.map((environment) => ({
-    value: environment,
-    label: t(ENVIRONMENT_LABEL_KEY[environment]),
-  })),
-)
-const currentEnvironment = computed(() => selectedEnvironment.value)
-
-const versionComparison = computed(() => {
-  if (!contract.value) {
-    return []
-  }
-  const defaultVersion = contract.value.defaultRoute.currentTargetReleaseVersion
-  return contract.value.callableVersions.map((version) => ({
-    releaseVersion: version.releaseVersion,
-    explicitVersionUrl: version.explicitVersionUrl,
-    isDefaultRouteTarget: version.releaseVersion === defaultVersion,
-  }))
-})
-
-const versionComparisonSource = computed(() => versionComparison.value)
-const { filters: versionColumnFilters, filteredRows: filteredVersionComparison } =
-  useDataTableFilters(versionComparisonSource, [
-    { key: 'releaseVersion', getValue: (row) => row.releaseVersion },
-    { key: 'explicitVersionUrl', getValue: (row) => row.explicitVersionUrl },
-    {
-      key: 'defaultRoute',
-      getValue: (row) =>
-        row.isDefaultRouteTarget ? t('common.yes') : t('common.no'),
-      matchMode: 'exact',
-    },
-  ])
-
-const versionComparisonCurrentPage = ref(1)
-const { paginatedRows: paginatedVersionComparison, totalRows: totalVersionComparisonRows } =
-  useCatalogPagination(filteredVersionComparison, versionComparisonCurrentPage, CLIENT_TABLE_PAGE_SIZE)
-
-const yesNoFilterOptions = useYesNoFilterOptions()
-
-const errorCodesSource = computed(() => contract.value?.errorCodes ?? [])
-const { filters: errorColumnFilters, filteredRows: filteredErrorCodes } = useDataTableFilters(
-  errorCodesSource,
-  [
-    { key: 'code', getValue: (row) => row.code },
-    { key: 'category', getValue: (row) => row.category },
-    { key: 'message', getValue: (row) => row.message },
-    {
-      key: 'retryable',
-      getValue: (row) => (row.retryable ? t('common.yes') : t('common.no')),
-      matchMode: 'exact',
-    },
-  ],
-)
-
-const errorCodesCurrentPage = ref(1)
-const { paginatedRows: paginatedErrorCodes, totalRows: totalErrorCodeRows } = useCatalogPagination(
-  filteredErrorCodes,
-  errorCodesCurrentPage,
+const {
+  t,
   CLIENT_TABLE_PAGE_SIZE,
-)
-
-async function loadContract() {
-  loading.value = true
-  errorMessageKey.value = null
-  try {
-    contract.value = await getCallerContract(props.templateId, currentEnvironment.value)
-  } catch {
-    errorMessageKey.value = 'templates.contract.error.load'
-  } finally {
-    loading.value = false
-  }
-}
-
-watch(
-  () => props.environment,
-  (value) => {
-    const resolved = resolveRuntimeEnvironment(value)
-    if (selectedEnvironment.value !== resolved) {
-      selectedEnvironment.value = resolved
-    }
-  },
-  { immediate: true },
-)
-
-watch(
+  loading,
+  errorMessageKey,
+  contract,
   selectedEnvironment,
-  (value) => {
-    emit('update:environment', value)
-  },
-)
-
-watch(
-  [() => props.templateId, currentEnvironment],
-  () => {
-    void loadContract()
-  },
-  { immediate: true },
-)
-
-function errorMessage(key: string | null): string {
-  if (!key) {
-    return ''
-  }
-  return te(key) ? t(key) : t('templates.contract.error.load')
-}
+  environmentOptions,
+  versionColumnFilters,
+  paginatedVersionComparison,
+  versionComparisonCurrentPage,
+  totalVersionComparisonRows,
+  yesNoFilterOptions,
+  errorColumnFilters,
+  paginatedErrorCodes,
+  errorCodesCurrentPage,
+  totalErrorCodeRows,
+  errorMessage,
+} = useTemplateCallerContractPanel({
+  templateId: toRef(props, 'templateId'),
+  environment: toRef(props, 'environment'),
+  emitEnvironment: (environment) => emit('update:environment', environment),
+})
 </script>
 
 <template>

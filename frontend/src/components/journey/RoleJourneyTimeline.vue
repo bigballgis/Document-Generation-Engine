@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, useId } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { toRef, useId } from 'vue'
 import ContextHelpTrigger from '@/components/common/ContextHelpTrigger.vue'
-import {
-  emptyGuidanceKeyFromStepLabel,
-  stepGuidanceKeyFromLabel,
-  type RoleJourneyStep,
-} from '@/constants/roleJourneyDefinitions'
+import { type RoleJourneyStep } from '@/constants/roleJourneyDefinitions'
+import { useRoleJourneyTimeline } from '@/components/journey/useRoleJourneyTimeline'
 
 const props = withDefaults(
   defineProps<{
@@ -24,85 +20,12 @@ const props = withDefaults(
   },
 )
 
-const { t } = useI18n()
 const guidanceId = useId()
-const stepRefs = ref<(HTMLElement | null)[]>([])
-
-const effectiveCurrentIndex = computed<number | null>(() => {
-  if (props.steps.length === 0) {
-    return null
-  }
-  if (props.currentStepIndex === null) {
-    return null
-  }
-  if (props.currentStepIndex < 0 || props.currentStepIndex >= props.steps.length) {
-    if (import.meta.env.DEV) {
-      console.warn(
-        `[RoleJourneyTimeline] currentStepIndex ${props.currentStepIndex} out of range; clamped.`,
-      )
-    }
-    return Math.min(Math.max(props.currentStepIndex, 0), props.steps.length - 1)
-  }
-  return props.currentStepIndex
+const { t, stepRefs, stepStatus, resolvedGuidanceKey, onStepKeydown } = useRoleJourneyTimeline({
+  steps: toRef(props, 'steps'),
+  currentStepIndex: toRef(props, 'currentStepIndex'),
+  guidanceKey: toRef(props, 'guidanceKey'),
 })
-
-type StepVisualStatus = 'completed' | 'current' | 'upcoming'
-
-function stepStatus(index: number): StepVisualStatus {
-  const current = effectiveCurrentIndex.value
-  if (current === null) {
-    return 'upcoming'
-  }
-  if (index < current) {
-    return 'completed'
-  }
-  if (index === current) {
-    return 'current'
-  }
-  return 'upcoming'
-}
-
-const resolvedGuidanceKey = computed(() => {
-  if (props.guidanceKey) {
-    return props.guidanceKey
-  }
-  const current = effectiveCurrentIndex.value
-  if (current !== null) {
-    const currentStep = props.steps[current]
-    if (currentStep) {
-      return stepGuidanceKeyFromLabel(currentStep.labelKey)
-    }
-  }
-  const firstStep = props.steps[0]
-  if (firstStep) {
-    return emptyGuidanceKeyFromStepLabel(firstStep.labelKey)
-  }
-  return ''
-})
-
-function focusStep(index: number) {
-  stepRefs.value[index]?.focus()
-}
-
-function onStepKeydown(event: KeyboardEvent, index: number) {
-  let targetIndex: number | null = null
-  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-    targetIndex = Math.min(index + 1, props.steps.length - 1)
-  } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-    targetIndex = Math.max(index - 1, 0)
-  } else if (event.key === 'Home') {
-    targetIndex = 0
-  } else if (event.key === 'End') {
-    targetIndex = props.steps.length - 1
-  }
-
-  if (targetIndex === null || targetIndex === index) {
-    return
-  }
-
-  event.preventDefault()
-  focusStep(targetIndex)
-}
 </script>
 
 <template>
