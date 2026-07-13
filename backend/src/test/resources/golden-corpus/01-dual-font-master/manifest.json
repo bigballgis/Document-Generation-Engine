@@ -1,0 +1,10 @@
+{
+  "id": "dual-font-master",
+  "theme": "Dual-font master (no Calibri in CJK runs; master style catalog authority)",
+  "maturity": "PLACEHOLDER",
+  "title": "Dual-font master — placeholder (CE-K02)",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "LIBREOFFICE",
+  "description": "Placeholder skeleton. Dual-font master fidelity assertions (no Calibri in CJK runs, master style catalog as authoritative source) are owned by CE-K02 and will be enriched here.",
+  "owningFutureSlice": "CE-K02"
+}

@@ -1,0 +1,11 @@
+{
+  "bindings": {
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"Encrypted sample body\"}]}]}"
+  },
+  "encryption": {
+    "enabled": true,
+    "openPassword": "FixtureOpenPass1234",
+    "ownerPassword": "FixtureOwnerPass1234",
+    "permissions": ["ALLOW_PRINT"]
+  }
+}

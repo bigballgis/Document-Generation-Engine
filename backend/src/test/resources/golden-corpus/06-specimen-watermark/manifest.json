@@ -1,0 +1,10 @@
+{
+  "id": "specimen-watermark",
+  "theme": "SPECIMEN watermark on preview / test-generate artifacts",
+  "maturity": "PLACEHOLDER",
+  "title": "Specimen watermark — placeholder (CE-G02)",
+  "renderMode": "STRUCTURED_ASSEMBLE",
+  "pdfSource": "LIBREOFFICE",
+  "description": "Placeholder skeleton. SPECIMEN watermark assertions on preview / test-generate artifacts are owned by CE-G02 and will be enriched here.",
+  "owningFutureSlice": "CE-G02"
+}

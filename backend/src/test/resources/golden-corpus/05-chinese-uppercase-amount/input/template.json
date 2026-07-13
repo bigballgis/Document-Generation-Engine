@@ -1,0 +1,5 @@
+{
+  "bindings": {
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"placeholder\"}]}]}"
+  }
+}
