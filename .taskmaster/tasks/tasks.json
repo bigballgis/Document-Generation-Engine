@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-14. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. #54 CE-K07 → done (merge e8f996a0). Batch 1 residual in-progress: #55 CE-U03, #56 CE-C01+C02. Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). First batch: ce-k07-golden-corpus-skeleton Done; residual ce-u03-testdata-schema-form, ce-c01-c02-contract-strictness. Second batch after first merges: ce-k01-release-bundle-pinning, ce-u01-nested-editor, ce-g01-self-approval-block. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-14. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. #54 CE-K07 → done (merge e8f996a0). #56 CE-C01+C02 → done (merge da08f3fe). Batch 1 residual in-progress: #55 CE-U03 only. Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). First batch: ce-k07-golden-corpus-skeleton Done; ce-c01-c02-contract-strictness Done; residual ce-u03-testdata-schema-form. Second batch after Batch 1 merges: ce-k01-release-bundle-pinning, ce-u01-nested-editor, ce-g01-self-approval-block. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T05:20:00Z"
+        "updatedAt": "2026-07-14T05:35:00Z"
       },
       {
         "id": "54",
@@ -766,14 +766,14 @@
       {
         "id": "56",
         "title": "CE-C01+C02: Runtime contract context + unknown-field strictness",
-        "description": "IN PROGRESS 2026-07-14. Slice ce-c01-c02-contract-strictness. Land context whitelist (6 fields) + runtime DTO fail-on-unknown-properties → 400 REQUEST_BODY_INVALID. Single PR chain. Lane3 first. Formal phase None.",
-        "details": "CE-C01 P0·S + CE-C02 P0·S combined. DTO context record; unknown child fields 400; InvocationParameterSanitizer contextSummary; runtime ObjectMapper fail-on-unknown only (do NOT change management DTOs). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §5 CE-C01/C02.",
-        "testStrategy": "1. context accepted + sanitized. 2. Unknown fields → 400 REQUEST_BODY_INVALID. 3. Management DTOs unchanged. 4. mvn verify + OpenAPI align.",
+        "description": "DONE 2026-07-14. Slice ce-c01-c02-contract-strictness. Merge da08f3fe; feature tip c942da13. Context whitelist + runtime FAIL_ON_UNKNOWN → REQUEST_BODY_INVALID. Formal phase None. C03–C06 out of scope.",
+        "details": "Completed 2026-07-14. Slice id: ce-c01-c02-contract-strictness. Merge da08f3fe; feature tip c942da13. CE-C01 ContextView + context on GenerateRequestBody/BatchGenerateRequestBody; InvocationParameterSanitizer contextSummary. CE-C02 RuntimeStrictJacksonHttpMessageConverter + RuntimeWebMvcConfig; GlobalExceptionHandler UNKNOWN_FIELD/INVALID_TYPE → REQUEST_BODY_INVALID. originalBatchId accepted without CE-C05 lineage. Collateral LibreOffice recursive temp cleanup + fake-libreoffice.cmd findstr. BDD ready docs/behavior/ce-c01-c02-contract-strictness.md. mvn verify GREEN (Java 25) pre-merge; architecture PASS_WITH_NOTES. Formal phase remains None. Plan §5 CE-C01/C02 Done.",
+        "testStrategy": "1. context accepted + sanitized. 2. Unknown fields → 400 REQUEST_BODY_INVALID. 3. Management DTOs unchanged. 4. mvn verify GREEN. 5. Formal phase stays None; #56 done after merge + MAIN doc-sync.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T05:35:00Z"
       },
       {
         "id": "57",
