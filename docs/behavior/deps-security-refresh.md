@@ -6,9 +6,9 @@
 | **bdd_readiness** | **`not-applicable`** |
 | **Recorded** | 2026-07-13 |
 | **Formal phase** | **None** (no sole-active; do **not** activate CD-3) |
-| **Task Master** | **#49** (`in-progress`) |
-| **Placement** | ISOLATED — `D:/working/DGE-deps-security-refresh` · `feat/deps-security-refresh` |
-| **Evidence** | pending implementer audit notes / exception log (same change set or `docs/evidence/` if retained) |
+| **Task Master** | **#49** (`done`) |
+| **Placement** | Merged to `main` — was ISOLATED `D:/working/DGE-deps-security-refresh` · `feat/deps-security-refresh` (removed stage 11) |
+| **Evidence** | [docs/evidence/deps-security-refresh](../evidence/deps-security-refresh/README.md); [deps-security-refresh-frontend-audit.md](../operations/deps-security-refresh-frontend-audit.md); merge `08c7d56` / tip `cb28237` |
 
 ---
 
@@ -51,14 +51,13 @@ Analogous readiness: [slim-knip-scan](./slim-knip-scan.md) / [LR-D6 load smoke](
 | This slice does **not** close M9-T02 org intranet SCA upload | Confirmed |
 | This slice does **not** reopen SOR-C05 (Done) | Confirmed |
 
-### Pending (not confirmed product requirements)
+### Pending residuals (post-#49)
 
 | Item | Notes |
 | --- | --- |
-| Concrete CVE / advisory list + chosen bumps | Owned by implementer audit in this worktree |
-| Exception rows (if any Critical/High left open) | Must use Exception Handling metadata; may feed M9-T03 later without claiming M9-T03 Done |
+| Vitest GHSA-5xrq-8626-4rwp Critical | Documented exception — cleanup Task Master **#50**; expires **2026-10-13** |
 | Org SCA upload ticket / scan ID | Remains M9-T02 org-gate pending — out of scope for #49 Done |
-| Any major-line stack shift (Boot 3.4+, ShedLock 7.x, Vue/Vite major) | **Deferred** — requires user confirmation + ADR; do not invent |
+| Any major-line stack shift (Boot 3.4+, ShedLock 7.x, Vue/Vite/Vitest major) | **Deferred** — requires user confirmation + ADR; do not invent |
 
 ---
 
@@ -124,7 +123,7 @@ Do **not** edit Accepted ADR decision text to reflect hygiene progress. If a fin
 | [ADR-0028](../adr/technology-stack/0028-backend-platform-stack-baseline.md) | Backend stack baseline (Java 21 + Spring Boot 3.x + Maven) |
 | [ADR-0029](../adr/technology-stack/0029-frontend-application-stack-baseline.md) | Frontend stack baseline (Vue 3 / Vite / pnpm) |
 | `.cursor/rules/tech-stack-guardrails.mdc` | No ad-hoc framework/runtime switches |
-| Task Master **#49** | Active ops-hygiene slice |
+| Task Master **#49** | **Done** (2026-07-13) — in-repo hygiene; residual exception → **#50** |
 | Launch checklist | Unchanged overall **NO-GO** — this slice is not a go-live closer |
 
 ```

@@ -77,7 +77,7 @@ Remediation options (prefer in order):
 2. Remove unused dependency.
 3. Security exception with expiry and compensating control (M9-T03).
 
-**Related in-repo hygiene:** Task Master **#49** / [deps-security-refresh.md](../../behavior/deps-security-refresh.md) may land baseline-safe bumps or exception notes (Boot **3.3.x**, ShedLock **6.x**, no major Vue/Vite without ADR). That work does **not** replace org upload (Step 3 above) and does **not** mark M9-T02 Done.
+**Related in-repo hygiene:** Task Master **#49** / [deps-security-refresh.md](../../behavior/deps-security-refresh.md) → **Done** (merge `08c7d56`) — baseline-safe bumps + Vitest Critical exception (**#50**, expires 2026-10-13; Boot **3.3.x**, ShedLock **6.x**, no major Vue/Vite without ADR). That work does **not** replace org upload (Step 3 above) and does **not** mark M9-T02 Done.
 
 ## Step 5 — Re-verify gates (Step 4 in closure plan)
 

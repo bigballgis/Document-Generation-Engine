@@ -10,4 +10,4 @@ Record each SBOM submission cycle. **Do not mark Pass without ticket/scan refere
 
 **Runbook:** [intranet-sca-submission-runbook.md](./intranet-sca-submission-runbook.md)
 
-**Related:** Task Master **#49** (`deps-security-refresh`) may remediate Critical/High in-repo before or beside org cycles — see [deps-security-refresh.md](../../behavior/deps-security-refresh.md). Org submission rows above remain required for M9-T02 Done.
+**Related:** Task Master **#49** (`deps-security-refresh`) → **Done** (merge `08c7d56`) for in-repo Critical/High remediation + exception — see [deps-security-refresh.md](../../behavior/deps-security-refresh.md). Org submission rows above remain required for M9-T02 Done.

@@ -674,16 +674,16 @@
       {
         "id": "49",
         "title": "OPS: Third-party dependency security audit + baseline-safe upgrades",
-        "description": "IN PROGRESS 2026-07-13. Slice deps-security-refresh. Ops hygiene — third-party dependency security audit and baseline-safe upgrades. Formal phase None. BDD not-applicable. Related: M9-T01 Done (backend CycloneDX); M9-T02 remains In Progress (org intranet SCA — this slice does NOT close M9-T02); SOR-C05 Done; quality-gate-threshold-baseline blocks critical/high in changed deps. Do NOT activate CD-3. Do NOT claim go-live. Do NOT touch DGE-audit-governance.",
-        "details": "ACTIVATED 2026-07-13. Slice id: deps-security-refresh. Placement: ISOLATED D:/working/DGE-deps-security-refresh · feat/deps-security-refresh · base c0be0ba. Formal phase remains None. BDD not-applicable (ops hygiene). Scope: audit third-party deps (Maven + pnpm) against available approved evidence; apply baseline-safe upgrades within company-approved repositories / tech-stack guardrails; remediate critical/high in changed dependency scope or document exception with owner+expiry (M9-T03 pattern); keep mvn verify + frontend lint/type-check/test/build green. Does NOT: invent formal phase; activate CD-3; close M9-T02 org SCA gate; claim production go-live; touch DGE-audit-governance; ad-hoc stack switches. Cross-refs: docs/architecture/quality-gate-threshold-baseline.md; docs/architecture/m9-task-sheet.md (M9-T01 Done; M9-T02 In Progress); docs/architecture/m9-t02-closure-plan.md Step 3 remediation loop; SOR-C05 Done (feeds M9-T02). User opt-out this session: no-commit / no-push until explicitly requested.",
-        "testStrategy": "1. BDD not-applicable (ops hygiene). 2. Produce audit evidence (SBOM refresh and/or approved advisory scan notes) under docs/evidence/security/ or slice evidence path. 3. Any critical/high in changed dependency scope remediated or exception documented (owner + expiry). 4. mvn -B -ntp -f backend/pom.xml verify GREEN after upgrades. 5. pnpm -C frontend lint && type-check && test && build GREEN after upgrades. 6. No ad-hoc stack/runtime switches outside tech-stack guardrails. 7. Formal phase stays None; #49 in-progress → done only after merge + MAIN doc-sync; M9-T02 status unchanged unless org SCA evidence lands. 8. Do NOT activate CD-3. 9. Checklist overall still NO-GO (#3b).",
+        "description": "DONE 2026-07-13. Slice deps-security-refresh. Baseline-safe Maven + pnpm dependency security refresh. Merge 08c7d56; feature tip cb28237; worktree removed. Formal phase None. BDD not-applicable. M9-T02 remains In Progress (org SCA — NOT closed). Vitest Critical exception → cleanup #50 expires 2026-10-13. Checklist overall NO-GO unchanged (#3b). no sole-active. Do NOT activate CD-3. Do NOT claim go-live. Do NOT touch DGE-audit-governance.",
+        "details": "DONE 2026-07-13. Slice id: deps-security-refresh. Merge: 08c7d56 (08c7d5641ff96fbb1e8e533df55d58900310289c); feature tip cb28237 (cb28237c4ef46ce49648ee9bf164dc83faef89d4); worktree removed (stage 11). Formal phase remains None. BDD not-applicable (docs/behavior/deps-security-refresh.md). Delivered: Boot 3.3.13 + baseline-safe Maven pins; frontend floors + pnpm.overrides.vite=6.4.3; SBOM regenerated; evidence under docs/evidence/deps-security-refresh/ + docs/operations/deps-security-refresh-frontend-audit.md. Exception: GHSA-5xrq-8626-4rwp Vitest 2.1.9 Critical (dev-only) — cleanup Task Master #50 expires 2026-10-13. Gates: mvn verify GREEN; pnpm lint/type-check/test/build GREEN; prod audit 0; architecture PASS_WITH_NOTES; E2E/UIUX/deploy not-applicable. Related: M9-T01 Done; M9-T02 remains In Progress; M9-T03 Not Started; SOR-C05 Done. Overall checklist NO-GO (blocking: #3b; #5a/#10 CONDITIONAL). no sole-active. Session opt-out: no-commit / no-push. Do NOT: invent formal phase; activate CD-3; close M9-T02; claim production go-live; touch DGE-audit-governance.",
+        "testStrategy": "1. BDD not-applicable (ops hygiene). 2. Produce audit evidence (SBOM refresh and/or approved advisory scan notes) under docs/evidence/security/ or slice evidence path. 3. Any critical/high in changed dependency scope remediated or exception documented (owner + expiry). 4. mvn -B -ntp -f backend/pom.xml verify GREEN after upgrades. 5. pnpm -C frontend lint && type-check && test && build GREEN after upgrades. 6. No ad-hoc stack/runtime switches outside tech-stack guardrails. 7. Formal phase stays None; #49 done after merge + MAIN doc-sync; M9-T02 status unchanged unless org SCA evidence lands. 8. Do NOT activate CD-3. 9. Checklist overall still NO-GO (#3b).",
         "priority": "high",
         "dependencies": [
           "48"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-13T11:05:00.000Z"
+        "updatedAt": "2026-07-13T11:45:00.000Z"
       },
       {
         "id": "50",
@@ -702,9 +702,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-13T11:40:00.000Z",
+      "lastModified": "2026-07-13T11:45:00.000Z",
       "taskCount": 50,
-      "completedCount": 48,
+      "completedCount": 49,
       "tags": [
         "master"
       ]
