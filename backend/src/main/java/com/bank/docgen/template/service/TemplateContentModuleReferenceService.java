@@ -1,11 +1,9 @@
 package com.bank.docgen.template.service;
 
-import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.contentmodule.service.ContentModuleAccessService;
-import com.bank.docgen.contentmodule.service.ContentModuleNotFoundException;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
@@ -19,7 +17,6 @@ import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -31,10 +28,9 @@ public class TemplateContentModuleReferenceService {
     private final TemplateService templateService;
     private final TemplateVersionRepository templateVersionRepository;
     private final TemplateContentModuleReferenceRepository referenceRepository;
-    private final ContentModuleRepository contentModuleRepository;
     private final ContentModuleVersionRepository contentModuleVersionRepository;
-    private final ContentModuleAccessService ContentModuleAccessService;
     private final TemplateCurrentVersionResolver templateVersionSupport;
+    private final TemplateContentModuleReferenceSupport referenceSupport;
 
     public TemplateContentModuleReferenceService(
             TemplateService templateService,
@@ -48,10 +44,13 @@ public class TemplateContentModuleReferenceService {
         this.templateService = templateService;
         this.templateVersionRepository = templateVersionRepository;
         this.referenceRepository = referenceRepository;
-        this.contentModuleRepository = contentModuleRepository;
         this.contentModuleVersionRepository = contentModuleVersionRepository;
-        this.ContentModuleAccessService = ContentModuleAccessService;
         this.templateVersionSupport = templateVersionSupport;
+        this.referenceSupport = new TemplateContentModuleReferenceSupport(
+                contentModuleRepository,
+                contentModuleVersionRepository,
+                ContentModuleAccessService
+        );
     }
 
     @Transactional(readOnly = true)
@@ -59,7 +58,7 @@ public class TemplateContentModuleReferenceService {
         templateService.requireReadableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireExportableVersion(templateId);
         return referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(version.getId()).stream()
-                .map(this::toView)
+                .map(referenceSupport::toView)
                 .toList();
     }
 
@@ -72,12 +71,12 @@ public class TemplateContentModuleReferenceService {
         TemplateEntity template = templateService.requireWritableTemplate(templateId, session);
         TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
         assertDraft(template);
-        String referenceKey = normalizeReferenceKey(request.referenceKey());
+        String referenceKey = referenceSupport.normalizeReferenceKey(request.referenceKey());
         var existing = referenceRepository.findByTemplateVersionIdAndReferenceKey(version.getId(), referenceKey);
         if (existing.isPresent() && existing.get().isLockedFlag()) {
             throw new TemplateValidationException("api.error.template.contentModuleReferenceLocked");
         }
-        ContentModuleVersionEntity moduleVersion = resolveReferencableVersion(
+        ContentModuleVersionEntity moduleVersion = referenceSupport.resolveReferencableVersion(
                 template,
                 request.moduleId(),
                 request.semanticVersion(),
@@ -96,7 +95,7 @@ public class TemplateContentModuleReferenceService {
             );
         }
         referenceRepository.save(entity);
-        return toView(entity);
+        return referenceSupport.toView(entity);
     }
 
     @Transactional(readOnly = true)
@@ -105,7 +104,7 @@ public class TemplateContentModuleReferenceService {
                 referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(templateVersionId);
         int invalid = 0;
         for (TemplateContentModuleReferenceEntity reference : references) {
-            if (!isReferenceValidForPublish(reference)) {
+            if (!referenceSupport.isReferenceValidForPublish(reference)) {
                 invalid++;
             }
         }
@@ -152,79 +151,9 @@ public class TemplateContentModuleReferenceService {
         return pinnedStructures;
     }
 
-    private boolean isReferenceValidForPublish(TemplateContentModuleReferenceEntity reference) {
-        return contentModuleVersionRepository.findById(reference.getContentModuleVersionId())
-                .map(version -> isReferenceVersionValidForPublish(reference, version))
-                .orElse(false);
-    }
-
-    private boolean isReferenceVersionValidForPublish(
-            TemplateContentModuleReferenceEntity reference,
-            ContentModuleVersionEntity version
-    ) {
-        if (isPinnedStructureMissing(version)) {
-            return false;
-        }
-        if (reference.isLockedFlag()) {
-            return true;
-        }
-        return version.isReferencable();
-    }
-
-    private boolean isPinnedStructureMissing(ContentModuleVersionEntity version) {
-        String structure = version.getContentStructureJson();
-        return structure == null || structure.isBlank();
-    }
-
-    private ContentModuleVersionEntity resolveReferencableVersion(
-            TemplateEntity template,
-            String moduleId,
-            String semanticVersion,
-            ManagementSessionClaims session
-    ) {
-        ContentModuleEntity module = ContentModuleAccessService.requireReadableModule(moduleId, session);
-        assertTemplateCanReferenceModule(template, module);
-        ContentModuleVersionEntity version = contentModuleVersionRepository
-                .findByModuleIdAndSemanticVersion(module.getId(), semanticVersion.trim())
-                .orElseThrow(() -> new TemplateValidationException("api.error.template.contentModuleReferenceMissing"));
-        if (!version.isReferencable()) {
-            throw new TemplateValidationException("api.error.template.contentModuleReferenceInvalid");
-        }
-        return version;
-    }
-
-    private void assertTemplateCanReferenceModule(TemplateEntity template, ContentModuleEntity module) {
-        if (template.getGroupCode().equalsIgnoreCase(module.getGroupCode())) {
-            return;
-        }
-        boolean shared = ContentModuleAccessService.readSharedGroupCodes(module).stream()
-                .anyMatch(code -> code.equalsIgnoreCase(template.getGroupCode()));
-        if (!shared) {
-            throw new TemplateValidationException("api.error.template.contentModuleReferenceInvalid");
-        }
-    }
-
-    private ContentModuleReferenceView toView(TemplateContentModuleReferenceEntity reference) {
-        ContentModuleVersionEntity version = contentModuleVersionRepository
-                .findById(reference.getContentModuleVersionId())
-                .orElseThrow(ContentModuleNotFoundException::new);
-        ContentModuleEntity module = contentModuleRepository.findByIdAndDeletedAtIsNull(version.getModuleId())
-                .orElseThrow(ContentModuleNotFoundException::new);
-        return new ContentModuleReferenceView(
-                reference.getReferenceKey(),
-                ContentModuleAccessService.publicModuleId(module),
-                version.getSemanticVersion(),
-                reference.isLockedFlag()
-        );
-    }
-
     private void assertDraft(TemplateEntity template) {
         if (template.getLifecycleStatus() != TemplateLifecycleStatus.DRAFT) {
             throw new TemplateValidationException("api.error.template.invalidState");
         }
-    }
-
-    private String normalizeReferenceKey(String referenceKey) {
-        return referenceKey.trim().toUpperCase(Locale.ROOT);
     }
 }

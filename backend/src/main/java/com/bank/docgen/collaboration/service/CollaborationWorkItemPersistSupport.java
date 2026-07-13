@@ -20,134 +20,95 @@ final class CollaborationWorkItemPersistSupport {
     private final ManagementAuditRecorder auditRecorder;
 
     CollaborationWorkItemPersistSupport(
-            CollaborationWorkItemRepository workItemRepository,
-            ManagementAuditRecorder auditRecorder
-    ) {
+            CollaborationWorkItemRepository workItemRepository, ManagementAuditRecorder auditRecorder) {
         this.workItemRepository = workItemRepository;
         this.auditRecorder = auditRecorder;
     }
 
     CollaborationWorkItemEntity refreshSubmitForTest(
-            CollaborationWorkItemEntity existing,
-            TemplateEntity template,
-            ManagementSessionClaims session,
-            String summary,
-            Instant now
-    ) {
-        existing.setTemplateName(template.getName());
-        existing.setSubmitterUserId(session.username());
-        existing.setSummaryText(summary);
-        existing.setTriggerType(CollaborationWorkItemTriggerType.SUBMIT_FOR_TEST);
-        existing.setCreatedAt(now);
-        existing.setUpdatedAt(now);
-        return workItemRepository.save(existing);
+            CollaborationWorkItemEntity existing, TemplateEntity template,
+            ManagementSessionClaims session, String summary, Instant now) {
+        return refresh(existing, template, session.username(), summary,
+                CollaborationWorkItemTriggerType.SUBMIT_FOR_TEST, now, true);
     }
 
     CollaborationWorkItemEntity createSubmitForTest(
-            TemplateEntity template,
-            ManagementSessionClaims session,
-            String summary,
-            Instant now,
-            String actorSummary
-    ) {
-        CollaborationWorkItemEntity created = new CollaborationWorkItemEntity(
-                UUID.randomUUID(),
-                template.getId(),
-                template.getExternalId(),
-                template.getName(),
-                template.getGroupCode(),
+            TemplateEntity template, ManagementSessionClaims session,
+            String summary, Instant now, String actorSummary) {
+        return create(template, session.username(), session, summary,
                 CollaborationWorkItemQueue.TEST,
-                CollaborationWorkItemTriggerType.SUBMIT_FOR_TEST,
-                CollaborationWorkItemStatus.OPEN,
-                session.username(),
-                summary
-        );
-        created.setCreatedAt(now);
-        created.setUpdatedAt(now);
-        CollaborationWorkItemEntity saved = workItemRepository.save(created);
-        auditRecorder.recordCollaborationWorkItemCreated(
-                template.getId(),
-                template.getGroupCode(),
-                saved.getId(),
-                CollaborationWorkItemQueue.TEST,
-                CollaborationWorkItemTriggerType.SUBMIT_FOR_TEST,
-                session.username(),
-                actorSummary
-        );
-        return saved;
+                CollaborationWorkItemTriggerType.SUBMIT_FOR_TEST, now, actorSummary);
     }
 
     CollaborationWorkItemEntity refreshSubmitForApproval(
-            CollaborationWorkItemEntity existing,
-            TemplateEntity template,
-            ManagementSessionClaims session,
-            String summary,
-            Instant now
-    ) {
-        existing.setTemplateName(template.getName());
-        existing.setSubmitterUserId(session.username());
-        existing.setSummaryText(summary);
-        existing.setTriggerType(CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL);
-        existing.setCreatedAt(now);
-        existing.setUpdatedAt(now);
-        return workItemRepository.save(existing);
+            CollaborationWorkItemEntity existing, TemplateEntity template,
+            ManagementSessionClaims session, String summary, Instant now) {
+        return refresh(existing, template, session.username(), summary,
+                CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL, now, true);
     }
 
     CollaborationWorkItemEntity createSubmitForApproval(
-            TemplateEntity template,
-            ManagementSessionClaims session,
-            String summary,
-            Instant now,
-            String actorSummary
-    ) {
-        CollaborationWorkItemEntity created = new CollaborationWorkItemEntity(
-                UUID.randomUUID(),
-                template.getId(),
-                template.getExternalId(),
-                template.getName(),
-                template.getGroupCode(),
+            TemplateEntity template, ManagementSessionClaims session,
+            String summary, Instant now, String actorSummary) {
+        return create(template, session.username(), session, summary,
                 CollaborationWorkItemQueue.APPROVAL,
-                CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL,
-                CollaborationWorkItemStatus.OPEN,
-                session.username(),
-                summary
-        );
-        created.setCreatedAt(now);
-        created.setUpdatedAt(now);
-        CollaborationWorkItemEntity saved = workItemRepository.save(created);
-        auditRecorder.recordCollaborationWorkItemCreated(
-                template.getId(),
-                template.getGroupCode(),
-                saved.getId(),
-                CollaborationWorkItemQueue.APPROVAL,
-                CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL,
-                session.username(),
-                actorSummary
-        );
-        return saved;
+                CollaborationWorkItemTriggerType.SUBMIT_FOR_APPROVAL, now, actorSummary);
     }
 
     CollaborationWorkItemEntity refreshRemediation(
+            CollaborationWorkItemEntity existing, TemplateEntity template, String submitterUserId,
+            String summary, CollaborationWorkItemTriggerType triggerType, Instant now) {
+        return refresh(existing, template, submitterUserId, summary, triggerType, now, false);
+    }
+
+    CollaborationWorkItemEntity createRemediation(
+            TemplateEntity template, String submitterUserId, ManagementSessionClaims session,
+            String summary, CollaborationWorkItemTriggerType triggerType, Instant now, String actorSummary) {
+        return create(template, submitterUserId, session, summary,
+                CollaborationWorkItemQueue.REMEDIATION, triggerType, now, actorSummary);
+    }
+
+    CollaborationWorkItemEntity refreshPendingRelease(
+            CollaborationWorkItemEntity existing, TemplateEntity template,
+            String submitterUserId, String summary, Instant now) {
+        return refresh(existing, template, submitterUserId, summary,
+                CollaborationWorkItemTriggerType.APPROVAL_PENDING_RELEASE, now, false);
+    }
+
+    CollaborationWorkItemEntity createPendingRelease(
+            TemplateEntity template, String submitterUserId, ManagementSessionClaims session,
+            String summary, Instant now, String actorSummary) {
+        return create(template, submitterUserId, session, summary,
+                CollaborationWorkItemQueue.PENDING_RELEASE,
+                CollaborationWorkItemTriggerType.APPROVAL_PENDING_RELEASE, now, actorSummary);
+    }
+
+    private CollaborationWorkItemEntity refresh(
             CollaborationWorkItemEntity existing,
             TemplateEntity template,
             String submitterUserId,
             String summary,
             CollaborationWorkItemTriggerType triggerType,
-            Instant now
+            Instant now,
+            boolean resetCreatedAt
     ) {
         existing.setTemplateName(template.getName());
         existing.setSubmitterUserId(submitterUserId);
         existing.setSummaryText(summary);
         existing.setTriggerType(triggerType);
+        if (resetCreatedAt) {
+            existing.setCreatedAt(now);
+        }
         existing.setUpdatedAt(now);
         return workItemRepository.save(existing);
     }
 
-    CollaborationWorkItemEntity createRemediation(
+    private CollaborationWorkItemEntity create(
             TemplateEntity template,
             String submitterUserId,
             ManagementSessionClaims session,
             String summary,
+            CollaborationWorkItemQueue queue,
             CollaborationWorkItemTriggerType triggerType,
             Instant now,
             String actorSummary
@@ -158,7 +119,7 @@ final class CollaborationWorkItemPersistSupport {
                 template.getExternalId(),
                 template.getName(),
                 template.getGroupCode(),
-                CollaborationWorkItemQueue.REMEDIATION,
+                queue,
                 triggerType,
                 CollaborationWorkItemStatus.OPEN,
                 submitterUserId,
@@ -171,58 +132,8 @@ final class CollaborationWorkItemPersistSupport {
                 template.getId(),
                 template.getGroupCode(),
                 saved.getId(),
-                CollaborationWorkItemQueue.REMEDIATION,
+                queue,
                 triggerType,
-                session.username(),
-                actorSummary
-        );
-        return saved;
-    }
-
-    CollaborationWorkItemEntity refreshPendingRelease(
-            CollaborationWorkItemEntity existing,
-            TemplateEntity template,
-            String submitterUserId,
-            String summary,
-            Instant now
-    ) {
-        existing.setTemplateName(template.getName());
-        existing.setSubmitterUserId(submitterUserId);
-        existing.setSummaryText(summary);
-        existing.setTriggerType(CollaborationWorkItemTriggerType.APPROVAL_PENDING_RELEASE);
-        existing.setUpdatedAt(now);
-        return workItemRepository.save(existing);
-    }
-
-    CollaborationWorkItemEntity createPendingRelease(
-            TemplateEntity template,
-            String submitterUserId,
-            ManagementSessionClaims session,
-            String summary,
-            Instant now,
-            String actorSummary
-    ) {
-        CollaborationWorkItemEntity created = new CollaborationWorkItemEntity(
-                UUID.randomUUID(),
-                template.getId(),
-                template.getExternalId(),
-                template.getName(),
-                template.getGroupCode(),
-                CollaborationWorkItemQueue.PENDING_RELEASE,
-                CollaborationWorkItemTriggerType.APPROVAL_PENDING_RELEASE,
-                CollaborationWorkItemStatus.OPEN,
-                submitterUserId,
-                summary
-        );
-        created.setCreatedAt(now);
-        created.setUpdatedAt(now);
-        CollaborationWorkItemEntity saved = workItemRepository.save(created);
-        auditRecorder.recordCollaborationWorkItemCreated(
-                template.getId(),
-                template.getGroupCode(),
-                saved.getId(),
-                CollaborationWorkItemQueue.PENDING_RELEASE,
-                CollaborationWorkItemTriggerType.APPROVAL_PENDING_RELEASE,
                 session.username(),
                 actorSummary
         );

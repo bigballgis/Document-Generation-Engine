@@ -1,6 +1,5 @@
 package com.bank.docgen.sharedkernel.document.expression;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,20 +7,19 @@ final class ConditionExpressionParser {
 
     private static final String[] COMPARISON_OPERATORS = {"==", "!=", ">=", "<=", ">", "<"};
 
-    private final String input;
-    private int pos;
+    private final ConditionExpressionLexSupport lex;
 
     ConditionExpressionParser(String input) {
-        this.input = input;
+        this.lex = new ConditionExpressionLexSupport(input);
     }
 
     int position() {
-        return pos;
+        return lex.position();
     }
 
     void parseExpression() {
         parseOrExpr();
-        skipWhitespace();
+        lex.skipWhitespace();
     }
 
     ConditionExpressionAst.Expr parseExpressionTree() {
@@ -29,14 +27,14 @@ final class ConditionExpressionParser {
     }
 
     boolean isAtEnd() {
-        skipWhitespace();
-        return pos >= input.length();
+        lex.skipWhitespace();
+        return lex.position() >= lex.input().length();
     }
 
     private ConditionExpressionAst.Expr parseOrExpr() {
         List<ConditionExpressionAst.Expr> operands = new ArrayList<>();
         operands.add(parseAndExpr());
-        while (tryConsume("||")) {
+        while (lex.tryConsume("||")) {
             operands.add(parseAndExpr());
         }
         return operands.size() == 1 ? operands.getFirst() : new ConditionExpressionAst.OrExpr(List.copyOf(operands));
@@ -45,16 +43,16 @@ final class ConditionExpressionParser {
     private ConditionExpressionAst.Expr parseAndExpr() {
         List<ConditionExpressionAst.Expr> operands = new ArrayList<>();
         operands.add(parseUnaryExpr());
-        while (tryConsume("&&")) {
+        while (lex.tryConsume("&&")) {
             operands.add(parseUnaryExpr());
         }
         return operands.size() == 1 ? operands.getFirst() : new ConditionExpressionAst.AndExpr(List.copyOf(operands));
     }
 
     private ConditionExpressionAst.Expr parseUnaryExpr() {
-        skipWhitespace();
-        if (tryConsume("!")) {
-            skipWhitespace();
+        lex.skipWhitespace();
+        if (lex.tryConsume("!")) {
+            lex.skipWhitespace();
             if (startsVariableReference()) {
                 return new ConditionExpressionAst.NotExpr(new ConditionExpressionAst.BooleanVariableExpr(parseVariableReference()));
             }
@@ -64,23 +62,23 @@ final class ConditionExpressionParser {
     }
 
     private boolean startsVariableReference() {
-        skipWhitespace();
-        return pos + 2 <= input.length() && input.startsWith("${", pos);
+        lex.skipWhitespace();
+        return lex.position() + 2 <= lex.input().length() && lex.input().startsWith("${", lex.position());
     }
 
     private ConditionExpressionAst.Expr parsePrimary() {
-        skipWhitespace();
-        if (tryConsume("(")) {
+        lex.skipWhitespace();
+        if (lex.tryConsume("(")) {
             ConditionExpressionAst.Expr inner = parseOrExpr();
-            expect(")");
+            lex.expect(")");
             return inner;
         }
         if (startsVariableReference()) {
-            int savedPosition = pos;
+            int savedPosition = lex.position();
             String variableName = parseVariableReference();
-            skipWhitespace();
+            lex.skipWhitespace();
             if (hasComparisonOperatorAhead()) {
-                pos = savedPosition;
+                lex.setPosition(savedPosition);
                 return parseComparison();
             }
             return new ConditionExpressionAst.BooleanVariableExpr(variableName);
@@ -89,9 +87,9 @@ final class ConditionExpressionParser {
     }
 
     private boolean hasComparisonOperatorAhead() {
-        skipWhitespace();
+        lex.skipWhitespace();
         for (String operator : COMPARISON_OPERATORS) {
-            if (input.regionMatches(pos, operator, 0, operator.length())) {
+            if (lex.input().regionMatches(lex.position(), operator, 0, operator.length())) {
                 return true;
             }
         }
@@ -106,11 +104,13 @@ final class ConditionExpressionParser {
     }
 
     private String parseVariableReference() {
-        skipWhitespace();
-        expect("${");
-        int start = pos;
+        lex.skipWhitespace();
+        lex.expect("${");
+        int start = lex.position();
+        String input = lex.input();
+        int pos = start;
         if (pos >= input.length() || !Character.isLetter(input.charAt(pos))) {
-            throw error("Expected variable name after '${'");
+            throw lex.error("Expected variable name after '${'");
         }
         pos++;
         while (pos < input.length()) {
@@ -120,118 +120,37 @@ final class ConditionExpressionParser {
             }
             pos++;
         }
+        lex.setPosition(pos);
         String variableName = input.substring(start, pos);
-        expect("}");
+        lex.expect("}");
         return variableName;
     }
 
     private String parseComparisonOperator() {
-        skipWhitespace();
+        lex.skipWhitespace();
         for (String operator : COMPARISON_OPERATORS) {
-            if (tryConsume(operator)) {
+            if (lex.tryConsume(operator)) {
                 return operator;
             }
         }
-        throw error("Expected comparison operator");
+        throw lex.error("Expected comparison operator");
     }
 
     private ConditionExpressionAst.RhsLiteral parseRhsLiteral() {
-        skipWhitespace();
-        if (tryConsume("null")) {
+        lex.skipWhitespace();
+        if (lex.tryConsume("null")) {
             return ConditionExpressionAst.RhsLiteral.nullLiteral();
         }
-        if (tryConsume("true")) {
+        if (lex.tryConsume("true")) {
             return ConditionExpressionAst.RhsLiteral.booleanLiteral(true);
         }
-        if (tryConsume("false")) {
+        if (lex.tryConsume("false")) {
             return ConditionExpressionAst.RhsLiteral.booleanLiteral(false);
         }
-        if (pos < input.length() && input.charAt(pos) == '\'') {
-            return ConditionExpressionAst.RhsLiteral.stringLiteral(parseQuotedString());
+        if (lex.position() < lex.input().length() && lex.input().charAt(lex.position()) == '\'') {
+            return ConditionExpressionAst.RhsLiteral.stringLiteral(lex.parseQuotedString());
         }
-        return ConditionExpressionAst.RhsLiteral.numberLiteral(parseNumber());
-    }
-
-    private String parseQuotedString() {
-        expect("'");
-        StringBuilder builder = new StringBuilder();
-        String result = null;
-        while (pos < input.length()) {
-            char ch = input.charAt(pos);
-            if (ch == '\'') {
-                if (pos + 1 < input.length() && input.charAt(pos + 1) == '\'') {
-                    builder.append('\'');
-                    pos += 2;
-                    continue;
-                }
-                pos++;
-                result = builder.toString();
-                break;
-            }
-            builder.append(ch);
-            pos++;
-        }
-        if (result != null) {
-            return result;
-        }
-        throw error("Unterminated string literal");
-    }
-
-    private BigDecimal parseNumber() {
-        skipWhitespace();
-        int start = pos;
-        if (pos >= input.length() || !Character.isDigit(input.charAt(pos))) {
-            throw error("Expected number or string literal");
-        }
-        while (pos < input.length() && Character.isDigit(input.charAt(pos))) {
-            pos++;
-        }
-        if (pos < input.length() && input.charAt(pos) == '.') {
-            pos++;
-            while (pos < input.length() && Character.isDigit(input.charAt(pos))) {
-                pos++;
-            }
-        }
-        String numberText = input.substring(start, pos);
-        try {
-            return new BigDecimal(numberText);
-        } catch (NumberFormatException ex) {
-            throw error("Invalid number literal");
-        }
-    }
-
-    private void skipWhitespace() {
-        while (pos < input.length() && Character.isWhitespace(input.charAt(pos))) {
-            pos++;
-        }
-    }
-
-    private boolean tryConsume(String token) {
-        skipWhitespace();
-        if (input.regionMatches(pos, token, 0, token.length())) {
-            if (token.chars().allMatch(Character::isLetter)) {
-                int end = pos + token.length();
-                if (end < input.length()) {
-                    char next = input.charAt(end);
-                    if (Character.isLetterOrDigit(next) || next == '_') {
-                        return false;
-                    }
-                }
-            }
-            pos += token.length();
-            return true;
-        }
-        return false;
-    }
-
-    private void expect(String token) {
-        if (!tryConsume(token)) {
-            throw error("Expected '" + token + "'");
-        }
-    }
-
-    private ParseException error(String message) {
-        return new ParseException(message + " at position " + pos);
+        return ConditionExpressionAst.RhsLiteral.numberLiteral(lex.parseNumber());
     }
 
     static final class ParseException extends RuntimeException {
