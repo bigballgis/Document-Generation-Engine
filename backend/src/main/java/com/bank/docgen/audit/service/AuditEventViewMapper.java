@@ -11,12 +11,9 @@ import com.bank.docgen.runtime.service.RuntimeGenerationAuditRecorder;
 import com.bank.docgen.template.persistence.TemplateLifecycleRecordEntity;
 import com.bank.docgen.template.service.TemplateService;
 import com.bank.docgen.template.service.TemplateService.TemplateDisplayInfo;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,7 +26,7 @@ final class AuditEventViewMapper {
     private final TemplateService templateService;
     private final ManagementUserDisplayService managementUserDisplayService;
     private final AuditMaskingService auditMaskingService;
-    private final ObjectMapper objectMapper;
+    private final AuditManagementEventViewSupport managementViews;
 
     AuditEventViewMapper(
             TemplateService templateService,
@@ -40,45 +37,21 @@ final class AuditEventViewMapper {
         this.templateService = templateService;
         this.managementUserDisplayService = managementUserDisplayService;
         this.auditMaskingService = auditMaskingService;
-        this.objectMapper = objectMapper;
+        this.managementViews = new AuditManagementEventViewSupport(
+                templateService,
+                auditMaskingService,
+                objectMapper
+        );
     }
 
     List<ManagementAuditEventView> toManagementViews(List<ManagementAuditEventEntity> entities) {
-        if (entities.isEmpty()) {
-            return List.of();
-        }
-        Set<UUID> templateIds = entities.stream()
-                .map(ManagementAuditEventEntity::getTemplateId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        Map<UUID, TemplateDisplayInfo> templateDisplayInfo = templateService.lookupDisplayInfoByIds(templateIds);
-        return entities.stream()
-                .map(entity -> {
-                    UUID templateId = entity.getTemplateId();
-                    TemplateDisplayInfo displayInfo = templateId == null ? null : templateDisplayInfo.get(templateId);
-                    return toManagementView(entity, displayInfo);
-                })
-                .toList();
+        return managementViews.toManagementViews(entities);
     }
 
     List<ManagementAuditEventView> toManagementViewsFromRuntime(
             List<RuntimeGenerationAuditEventEntity> entities
     ) {
-        if (entities.isEmpty()) {
-            return List.of();
-        }
-        Set<UUID> templateIds = entities.stream()
-                .map(RuntimeGenerationAuditEventEntity::getTemplateId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        Map<UUID, TemplateDisplayInfo> templateDisplayInfo = templateService.lookupDisplayInfoByIds(templateIds);
-        return entities.stream()
-                .map(entity -> {
-                    UUID templateId = entity.getTemplateId();
-                    TemplateDisplayInfo displayInfo = templateId == null ? null : templateDisplayInfo.get(templateId);
-                    return toManagementViewFromRuntime(entity, displayInfo);
-                })
-                .toList();
+        return managementViews.toManagementViewsFromRuntime(entities);
     }
 
     List<LifecycleAuditEventView> toLifecycleViews(List<TemplateLifecycleRecordEntity> records) {
@@ -105,39 +78,11 @@ final class AuditEventViewMapper {
     }
 
     ManagementAuditExportEventView toExportView(ManagementAuditEventEntity entity) {
-        return new ManagementAuditExportEventView(
-                entity.getEventAt(),
-                entity.getEventType(),
-                entity.getTemplateId() == null ? null : entity.getTemplateId().toString(),
-                entity.getCredentialId() == null ? null : entity.getCredentialId().toString(),
-                entity.getPreviousPolicyVersion(),
-                entity.getPolicyVersion(),
-                readStringList(entity.getChangedAreasJson()),
-                entity.isRollback(),
-                entity.getRollbackSourcePolicyVersion(),
-                auditMaskingService.maskActorSummary(entity.getActorSummary()),
-                auditMaskingService.maskCredentialFingerprint(entity.getCredentialFingerprint()),
-                entity.getStatusSummary(),
-                readStringList(entity.getWarningCodesJson())
-        );
+        return managementViews.toExportView(entity);
     }
 
     ManagementAuditExportEventView toRuntimeExportView(RuntimeGenerationAuditEventEntity entity) {
-        return new ManagementAuditExportEventView(
-                entity.getEventAt(),
-                entity.getEventType(),
-                entity.getTemplateId() == null ? null : entity.getTemplateId().toString(),
-                entity.getCredentialId() == null ? null : entity.getCredentialId().toString(),
-                null,
-                null,
-                List.of(),
-                false,
-                null,
-                auditMaskingService.maskActorSummary(entity.getAccessAccount()),
-                auditMaskingService.maskCredentialFingerprint(entity.getCredentialFingerprint()),
-                resolveRuntimeStatusSummary(entity),
-                List.of()
-        );
+        return managementViews.toRuntimeExportView(entity);
     }
 
     GenerationAuditEventView toGenerationAuditEventView(
@@ -152,54 +97,6 @@ final class AuditEventViewMapper {
                 entity.getOutcome(),
                 mapGenerationAuditStatus(entity.getOutcome()),
                 auditMaskingService.maskActorSummary(entity.getAccessAccount())
-        );
-    }
-
-    private ManagementAuditEventView toManagementView(
-            ManagementAuditEventEntity entity,
-            TemplateDisplayInfo templateDisplayInfo
-    ) {
-        return new ManagementAuditEventView(
-                entity.getEventAt(),
-                entity.getEventType(),
-                entity.getTemplateId() == null ? null : entity.getTemplateId().toString(),
-                templateDisplayInfo == null ? null : templateDisplayInfo.name(),
-                templateDisplayInfo == null ? null : templateDisplayInfo.externalId(),
-                entity.getCredentialId() == null ? null : entity.getCredentialId().toString(),
-                entity.getPreviousPolicyVersion(),
-                entity.getPolicyVersion(),
-                readStringList(entity.getChangedAreasJson()),
-                entity.isRollback(),
-                entity.getRollbackSourcePolicyVersion(),
-                entity.getActorSummary(),
-                entity.getCredentialFingerprint(),
-                entity.getStatusSummary(),
-                readStringList(entity.getWarningCodesJson()),
-                null
-        );
-    }
-
-    private ManagementAuditEventView toManagementViewFromRuntime(
-            RuntimeGenerationAuditEventEntity entity,
-            TemplateDisplayInfo templateDisplayInfo
-    ) {
-        return new ManagementAuditEventView(
-                entity.getEventAt(),
-                entity.getEventType(),
-                entity.getTemplateId() == null ? null : entity.getTemplateId().toString(),
-                templateDisplayInfo == null ? null : templateDisplayInfo.name(),
-                templateDisplayInfo == null ? null : templateDisplayInfo.externalId(),
-                entity.getCredentialId() == null ? null : entity.getCredentialId().toString(),
-                null,
-                null,
-                List.of(),
-                false,
-                null,
-                entity.getAccessAccount(),
-                entity.getCredentialFingerprint(),
-                resolveRuntimeStatusSummary(entity),
-                List.of(),
-                entity.getRequestId()
         );
     }
 
@@ -225,14 +122,6 @@ final class AuditEventViewMapper {
         );
     }
 
-    private static String resolveRuntimeStatusSummary(RuntimeGenerationAuditEventEntity entity) {
-        String statusSummary = entity.getResultSummary();
-        if (statusSummary == null || statusSummary.isBlank()) {
-            return entity.getOutcome();
-        }
-        return statusSummary;
-    }
-
     private static String resolveActorDisplayName(String username, Map<String, String> actorDisplayNames) {
         if (username == null || username.isBlank()) {
             return null;
@@ -249,21 +138,5 @@ final class AuditEventViewMapper {
             return "FAILED";
         }
         return outcome;
-    }
-
-    private List<String> readStringList(String json) {
-        if (json == null || json.isBlank()) {
-            return List.of();
-        }
-        try {
-            List<String> values = objectMapper.readValue(json, new TypeReference<List<String>>() {
-            });
-            if (values == null || values.isEmpty()) {
-                return List.of();
-            }
-            return values.stream().filter(Objects::nonNull).toList();
-        } catch (JsonProcessingException | RuntimeException ex) {
-            return List.of();
-        }
     }
 }

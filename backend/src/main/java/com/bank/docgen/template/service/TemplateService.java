@@ -25,7 +25,6 @@ import com.bank.docgen.template.mapping.TemplateViewMapper;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
-import com.bank.docgen.template.event.TemplateContentChangedEvent;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.List;
 import java.util.Map;
@@ -48,11 +47,11 @@ public class TemplateService {
     private final TemplateBindingConfigurationService bindingConfigurationService;
     private final TemplateViewMapper templateViewMapper;
     private final TemplateCurrentVersionResolver templateVersionSupport;
-    private final ApplicationEventPublisher eventPublisher;
     private final TemplateCatalogSupport catalogSupport;
     private final TemplateDisplayEnrichmentSupport displayEnrichment;
     private final TemplateAccessGuardSupport access;
     private final TemplateMetadataMutationSupport metadataMutations;
+    private final TemplateInFlightContentMutationSupport contentMutations;
 
     public TemplateService(
             TemplateRepository templateRepository,
@@ -75,7 +74,6 @@ public class TemplateService {
         this.bindingConfigurationService = bindingConfigurationService;
         this.templateViewMapper = templateViewMapper;
         this.templateVersionSupport = templateVersionSupport;
-        this.eventPublisher = eventPublisher;
         this.displayEnrichment = new TemplateDisplayEnrichmentSupport(managementUserDisplayService);
         this.access = new TemplateAccessGuardSupport(templateRepository, groupAccessService);
         this.catalogSupport = new TemplateCatalogSupport(
@@ -91,6 +89,13 @@ public class TemplateService {
                 groupAccessService,
                 templateViewMapper,
                 access
+        );
+        this.contentMutations = new TemplateInFlightContentMutationSupport(
+                this,
+                templateVersionSupport,
+                access,
+                bindingConfigurationService,
+                eventPublisher
         );
     }
 
@@ -163,21 +168,12 @@ public class TemplateService {
             UpsertVariableSchemaRequest request,
             ManagementSessionClaims session
     ) {
-        TemplateEntity template = requireWritableTemplate(templateId, session);
-        TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        access.assertDraft(template);
-        VariableSchemaView result = bindingConfigurationService.upsertVariable(version, request);
-        eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
-        return result;
+        return contentMutations.upsertVariable(templateId, request, session);
     }
 
     @Transactional
     public void deleteVariable(UUID templateId, String variableKey, ManagementSessionClaims session) {
-        TemplateEntity template = requireWritableTemplate(templateId, session);
-        TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        access.assertDraft(template);
-        bindingConfigurationService.deleteVariable(version.getId(), variableKey);
-        eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
+        contentMutations.deleteVariable(templateId, variableKey, session);
     }
 
     @Transactional
@@ -186,12 +182,7 @@ public class TemplateService {
             UpsertAnchorBindingRequest request,
             ManagementSessionClaims session
     ) {
-        TemplateEntity template = requireWritableTemplate(templateId, session);
-        TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        access.assertDraft(template);
-        AnchorBindingView result = bindingConfigurationService.upsertBinding(template.getMasterId(), version, request);
-        eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
-        return result;
+        return contentMutations.upsertBinding(templateId, request, session);
     }
 
     @Transactional
@@ -200,12 +191,7 @@ public class TemplateService {
             List<CompositionRuleView> rules,
             ManagementSessionClaims session
     ) {
-        TemplateEntity template = requireWritableTemplate(templateId, session);
-        TemplateVersionEntity version = templateVersionSupport.requireMutableInFlightDevVersion(templateId);
-        access.assertDraft(template);
-        List<CompositionRuleView> result = bindingConfigurationService.saveRules(version, rules);
-        eventPublisher.publishEvent(new TemplateContentChangedEvent(this, templateId));
-        return result;
+        return contentMutations.saveRules(templateId, rules, session);
     }
 
     @Transactional(readOnly = true)
