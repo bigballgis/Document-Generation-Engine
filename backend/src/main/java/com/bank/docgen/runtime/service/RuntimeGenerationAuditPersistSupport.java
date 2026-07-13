@@ -18,10 +18,11 @@ import java.util.UUID;
  */
 final class RuntimeGenerationAuditPersistSupport {
 
-    private static final int SUMMARY_MAX = 512;
+    static final int SUMMARY_MAX = 512;
 
     private final RuntimeGenerationAuditEventRepository repository;
     private final TraceIdProvider traceIdProvider;
+    private final RuntimeGenerationAuditSpecialPersistSupport special;
 
     RuntimeGenerationAuditPersistSupport(
             RuntimeGenerationAuditEventRepository repository,
@@ -29,6 +30,7 @@ final class RuntimeGenerationAuditPersistSupport {
     ) {
         this.repository = repository;
         this.traceIdProvider = traceIdProvider;
+        this.special = new RuntimeGenerationAuditSpecialPersistSupport(repository, traceIdProvider);
     }
 
     void persist(
@@ -131,7 +133,6 @@ final class RuntimeGenerationAuditPersistSupport {
         ));
     }
 
-
     void persistBatchAsyncCompletedFromTask(
             TemplateEntity template,
             GenerationAsyncTaskEntity task,
@@ -140,34 +141,7 @@ final class RuntimeGenerationAuditPersistSupport {
             String resultSummary,
             String errorSummary
     ) {
-        repository.save(new RuntimeGenerationAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
-                RuntimeGenerationAuditRecorder.EVENT_BATCH_ASYNC_COMPLETED,
-                RuntimeGenerationAuditRecorder.ASYNC_ENVIRONMENT,
-                template.getId(),
-                template.getGroupCode(),
-                null,
-                null,
-                null,
-                task.getReleaseVersion(),
-                task.getReleaseVersion(),
-                task.getRouteType(),
-                request.output().format(),
-                request.output().mode(),
-                request.requestId(),
-                hashIdempotencyKey(request.idempotencyKey()),
-                null,
-                task.getTaskExternalId(),
-                task.getBatchExternalId(),
-                null,
-                outcome,
-                truncate(resultSummary),
-                truncate(errorSummary),
-                null,
-                traceIdProvider.newAuditId(),
-                traceIdProvider.currentOrNew(null)
-        ));
+        special.persistBatchAsyncCompletedFromTask(template, task, request, outcome, resultSummary, errorSummary);
     }
 
     void persistRateLimitDenied(
@@ -177,34 +151,7 @@ final class RuntimeGenerationAuditPersistSupport {
             String traceId,
             String auditId
     ) {
-        repository.save(new RuntimeGenerationAuditEventEntity(
-                UUID.randomUUID(),
-                Instant.now(),
-                RuntimeGenerationAuditRecorder.EVENT_RATE_LIMIT_DENIED,
-                environment,
-                UUID.fromString("00000000-0000-0000-0000-000000000000"),
-                null,
-                null,
-                fingerprint(credentialExternalId),
-                accessAccount,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                RuntimeGenerationAuditRecorder.OUTCOME_FAILURE,
-                summarize("Rate limit denied"),
-                null,
-                null,
-                auditId,
-                traceId
-        ));
+        special.persistRateLimitDenied(environment, credentialExternalId, accessAccount, traceId, auditId);
     }
 
     String currentTraceId() {
@@ -228,11 +175,11 @@ final class RuntimeGenerationAuditPersistSupport {
         }
     }
 
-    private String fingerprint(String externalId) {
+    static String fingerprint(String externalId) {
         return externalId == null ? null : "fp-" + externalId;
     }
 
-    private String truncate(String value) {
+    static String truncate(String value) {
         if (value == null) {
             return null;
         }
