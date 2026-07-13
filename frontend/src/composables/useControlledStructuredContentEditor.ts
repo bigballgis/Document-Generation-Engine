@@ -7,13 +7,14 @@ import {
   type ControlledStructuredContentEditorEmit,
   type ControlledStructuredContentEditorProps,
 } from '@/composables/controlledStructuredContentEditorTypes'
+import { createStructuredContentDraftHandlers } from '@/composables/createStructuredContentDraftHandlers'
+import { useControlledStructuredContentCatalogOptions } from '@/composables/useControlledStructuredContentCatalogOptions'
 import { useStructuredContentDocumentModel } from '@/composables/useStructuredContentDocumentModel'
 import { useStructuredContentLocalDraft } from '@/composables/useStructuredContentLocalDraft'
 import { useStructuredContentPasteFlow } from '@/composables/useStructuredContentPasteFlow'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
-import type { MasterStyleCatalog, VariableSchema } from '@/types/template'
-import { buildVariableOptionLabel } from '@/utils/variableDisplayName'
+import type { MasterStyleCatalog } from '@/types/template'
 import {
   DEFAULT_STRUCTURED_CONTENT_JSON,
   parseStructuredContent,
@@ -57,98 +58,42 @@ export function useControlledStructuredContentEditor(
 
   const recoveryDraft = ref<StructuredContentDraftPayload | null>(null)
 
-  function evaluateDraftRecovery() {
-    if (isReadonly.value) {
-      recoveryDraft.value = null
-      return
-    }
-    const serverStructure = props.modelValue || DEFAULT_STRUCTURED_CONTENT_JSON
-    recoveryDraft.value = localDraft.evaluateRecovery(serverStructure, props.anchorId ?? null)
-  }
-
-  function scheduleLocalDraftWrite(structureJson: string) {
-    if (isReadonly.value || structureJson === pristineBaseline.value) {
-      return
-    }
-    // Post-save suppress: ignore prop-echo / deep-watch races (BDD-LRP-C2-002).
-    if (localDraft.areWritesSuppressed()) {
-      return
-    }
-    localDraft.scheduleWrite(structureJson, {
-      serverUpdatedAt: props.serverUpdatedAt ?? null,
-      anchorId: props.anchorId ?? null,
-    })
-  }
-
-  function handleRestoreDraft() {
-    const draft = recoveryDraft.value
-    if (!draft) {
-      return
-    }
-    // C3-C9: restore resets history; restored structure becomes sole current state.
-    doc.resetHistoryWithStructure(draft.structureJson)
-    recoveryDraft.value = null
-  }
-
-  function handleDiscardDraft() {
-    localDraft.clearDraft()
-    recoveryDraft.value = null
-    // C3-C10: discard draft resets history; server-loaded structure remains.
-    doc.clearHistoryOnly()
-  }
+  const {
+    evaluateDraftRecovery,
+    scheduleLocalDraftWrite,
+    handleRestoreDraft,
+    handleDiscardDraft,
+    markPristine,
+  } = createStructuredContentDraftHandlers({
+    isReadonly: () => isReadonly.value,
+    modelValue: () => props.modelValue,
+    baselineAnchorId: () => props.anchorId ?? null,
+    serverUpdatedAt: () => props.serverUpdatedAt ?? null,
+    pristineBaseline,
+    recoveryDraft,
+    localDraft,
+    doc,
+    emitDirtyChange: (dirty) => emit('dirty-change', dirty),
+  })
 
   const loadingCatalog = ref(false)
   const styleCatalog = ref<MasterStyleCatalog | null>(null)
   const selectedStyleKey = ref('')
   const editorRootRef = ref<HTMLElement | null>(null)
-
   const blockNodeTypes = STRUCTURED_BLOCK_NODE_TYPES
 
-  const styleOptions = computed(() => styleCatalog.value?.entries ?? [])
-
-  const clauseReferenceOptions = computed(() =>
-    (props.contentModuleReferenceKeys ?? []).map((referenceKey) => ({
-      value: referenceKey,
-      label: referenceKey,
-    })),
-  )
-
-  const variableCatalog = computed(() => {
-    if (props.variables?.length) {
-      return props.variables
-    }
-    return (props.variableKeys ?? []).map(
-      (variableKey): VariableSchema => ({
-        variableKey,
-        variableType: 'TEXT',
-        required: false,
-        defaultValue: null,
-        enumValues: null,
-        description: null,
-      }),
-    )
+  const {
+    styleOptions,
+    clauseReferenceOptions,
+    variableSelectOptions,
+    listVariableOptions,
+    styleLabel,
+  } = useControlledStructuredContentCatalogOptions({
+    props,
+    styleCatalog,
+    te,
+    t,
   })
-
-  const variableSelectOptions = computed(() =>
-    variableCatalog.value.map((variable) => ({
-      value: variable.variableKey,
-      label: buildVariableOptionLabel(variable),
-    })),
-  )
-
-  const listVariableOptions = computed(() =>
-    variableCatalog.value
-      .filter((variable) => variable.variableType === 'LIST' || variable.variableType === 'OBJECT')
-      .map((variable) => ({
-        value: variable.variableKey,
-        label: buildVariableOptionLabel(variable),
-      })),
-  )
-
-  function styleLabel(styleKey: string): string {
-    const key = `templates.structuredEditor.styleCatalog.keys.${styleKey}`
-    return te(key) ? t(key) : styleKey
-  }
 
   watch(
     () => props.modelValue,
@@ -158,8 +103,6 @@ export function useControlledStructuredContentEditor(
         const next = parseStructuredContent(value || DEFAULT_STRUCTURED_CONTENT_JSON)
         doc.documentModel.value = next
         doc.setLastCommittedSnapshot(serializeStructuredContent(next))
-        // Post-save server echo can re-enter before unmount; realign baseline and
-        // re-clear so canonicalization differences cannot revive a draft.
         if (localDraft.areWritesSuppressed()) {
           pristineBaseline.value = doc.getLastCommittedSnapshot()
           emit('dirty-change', false)
@@ -183,18 +126,6 @@ export function useControlledStructuredContentEditor(
   function emitDirtyState() {
     const current = serializeStructuredContent(doc.documentModel.value)
     emit('dirty-change', current !== pristineBaseline.value)
-  }
-
-  function markPristine() {
-    pristineBaseline.value = serializeStructuredContent(doc.documentModel.value)
-    emit('dirty-change', false)
-    // Clear-on-save (C2-C9): successful server persistence clears the local draft
-    // and suppresses further writes until this editor instance is gone (or allowWrites).
-    localDraft.clearDraft({ suppressSubsequentWrites: true })
-    recoveryDraft.value = null
-    // C3-C8: successful save clears undo/redo stacks.
-    doc.clearHistoryOnly()
-    doc.setLastCommittedSnapshot(pristineBaseline.value)
   }
 
   watch(
