@@ -879,16 +879,16 @@
       {
         "id": "64",
         "title": "CE-U01: Nested structured editor",
-        "description": "PENDING. Slice ce-u01-nested-editor. Recursive children edit for condition/loop (depth 3); undo/redo compatible. P0·L. No drag (U02).",
+        "description": "DONE. Slice ce-u01-nested-editor. Recursive children edit for condition/loop (depth 3); undo/redo compatible. P0·L. No drag (U02).",
         "details": "Depends U03 (#55) per lane2. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U01.",
         "testStrategy": "1. Vitest recursive render. 2. E2E add paragraph inside condition + preview. 3. FE gates + UIUX.",
         "priority": "high",
         "dependencies": [
           "55"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T04:15:00.000Z"
       },
       {
         "id": "65",

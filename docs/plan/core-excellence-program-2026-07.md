@@ -168,8 +168,10 @@ R4 审查结论：平台是"专家路径"——功能在但闭环断。以下按
 
 ### P0 组
 
-**CE-U01 结构化编辑器嵌套子树编辑 — P0 · L**
+**CE-U01 结构化编辑器嵌套子树编辑 — P0 · L · `Done`**
 condition/loop 块 `children` 数组已在 schema 中但 `StructuredContentBlockCard` 无递归 UI，嵌套内容只能靠导入 HTML 或改 JSON。目标：块卡片递归渲染子编辑器（限深 3 层），子块增删改与 undo/redo（LR-C3 历史栈）兼容。测试：Vitest 递归渲染 + E2E 在 condition 内新增段落并预览。禁止：本片不做拖拽（U02）。
+**Slice:** `ce-u01-nested-editor` · branch `feat/ce-u01-nested-editor` · BDD [ce-u01-nested-editor.md](../behavior/ce-u01-nested-editor.md) (`ready`, NE-01…NE-05).
+**Status (2026-07-14):** **Done** — recursive `StructuredContentBlockCard` + path-based mutations (`structuredContentNodePath.ts`, max depth 3); nested toolbar; undo/redo compatible; i18n en/zh-CN; Vitest **4/4** CE-U01 + path utils **5/5**; E2E **2/2** + UIUX **2/2** @1920 dual-brand; `mvn verify` GREEN; frontend gates GREEN. Formal phase **None**; **not** go-live.
 
 **CE-U03 测试数据集 schema 驱动 — P0 · M · `Done`**
 现状 8 行 textarea 手写 JSON、默认值硬编码 `{"customerName":"Sample"}`、保存仅 `JSON.parse`、后端不对照 schema 校验。目标：按 `VariableSchema` 生成动态表单（类型/必填即时校验）+ "从 schema 生成骨架"按钮 + 大 payload 折叠编辑；后端 `TestDataSetService` 保存时按 schema 校验并返回字段级错误。依赖：无（compute 变量出现后表单跳过 compute 字段——与 K03 弱耦合）。

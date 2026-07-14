@@ -794,4 +794,89 @@ describe('ControlledStructuredContentEditor', () => {
     expect(wrapper.emitted('paste-accepted')).toBeFalsy()
     wrapper.unmount()
   })
+
+  describe('CE-U01 nested structured editor', () => {
+    const conditionWithChild =
+      '{"schemaVersion":"1.0","nodes":[{"type":"conditionBlock","conditionExpression":"${flag}","children":[{"type":"paragraph","children":[{"type":"textRun","value":"nested"}]}]}]}'
+
+    async function mountEditor(modelValue: string) {
+      fetchMasterStyleCatalog.mockResolvedValue({
+        catalogVersion: '1.0',
+        entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+      })
+      const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+      const wrapper = mount(ControlledStructuredContentEditor, {
+        props: {
+          modelValue,
+          templateId: 'tpl-1',
+          baseline: modelValue,
+        },
+        global: { plugins: [i18n, ElementPlus] },
+      })
+      await flushPromises()
+      return wrapper
+    }
+
+    it('BDD-CE-U01-NE-01 renders nested paragraph inside conditionBlock', async () => {
+      const wrapper = await mountEditor(conditionWithChild)
+      expect(wrapper.find('[data-testid="nested-block-children-0"]').exists()).toBe(true)
+      expect(wrapper.find('[data-testid="structured-block-card-0-0"]').exists()).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('BDD-CE-U01-NE-02 inserts paragraph into empty condition children', async () => {
+      const baseline =
+        '{"schemaVersion":"1.0","nodes":[{"type":"conditionBlock","conditionExpression":"x","children":[]}]}'
+      const wrapper = await mountEditor(baseline)
+
+      const nestedButtons = wrapper.findAll('[data-testid="insert-nested-block-node"]')
+      const paragraphBtn = nestedButtons.find((btn) => btn.text().includes('Paragraph'))
+      await paragraphBtn?.trigger('click')
+      await flushPromises()
+
+      const emitted = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+      expect(emitted).toContain('"type":"paragraph"')
+      expect(emitted).toMatch(/"children":\[.*"type":"paragraph"/s)
+      wrapper.unmount()
+    })
+
+    it('BDD-CE-U01-NE-03 hides nested add toolbar at max depth', async () => {
+      const deep =
+        '{"schemaVersion":"1.0","nodes":[{"type":"conditionBlock","conditionExpression":"a","children":[{"type":"loopBlock","loopVariable":"items","children":[{"type":"conditionBlock","conditionExpression":"b","children":[]}]}]}]}'
+      const wrapper = await mountEditor(deep)
+
+      expect(wrapper.find('[data-testid="nested-depth-limit"]').exists()).toBe(true)
+      const deepestToolbar = wrapper.find('[data-testid="nested-block-children-0-0-0"]')
+      expect(deepestToolbar.find('[data-testid="insert-nested-block-node"]').exists()).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('BDD-CE-U01-NE-04 undo/redo nested block insert', async () => {
+      const baseline =
+        '{"schemaVersion":"1.0","nodes":[{"type":"conditionBlock","conditionExpression":"x","children":[]}]}'
+      const wrapper = await mountEditor(baseline)
+
+      const paragraphBtn = wrapper
+        .findAll('[data-testid="insert-nested-block-node"]')
+        .find((btn) => btn.text().includes('Paragraph'))
+      await paragraphBtn?.trigger('click')
+      await flushPromises()
+
+      const afterInsert = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+      expect(afterInsert).toContain('"type":"paragraph"')
+
+      await wrapper.get('[data-testid="structured-editor-undo"]').trigger('click')
+      await flushPromises()
+
+      const afterUndo = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+      expect(afterUndo).not.toContain('"type":"paragraph"')
+
+      await wrapper.get('[data-testid="structured-editor-redo"]').trigger('click')
+      await flushPromises()
+
+      const afterRedo = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+      expect(afterRedo).toContain('"type":"paragraph"')
+      wrapper.unmount()
+    })
+  })
 })

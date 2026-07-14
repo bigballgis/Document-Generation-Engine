@@ -1384,6 +1384,10 @@ export default {
       },
       editorSurface: 'Structured content editor — paste Word or HTML here',
       emptyDocument: 'Insert a block node to begin authoring.',
+      nestedChildrenLabel: 'Nested content blocks',
+      nestedChildrenEmpty: 'No nested blocks yet — add a block below.',
+      nestedAddBlock: 'Add nested block',
+      nestedDepthLimit: 'Maximum nesting depth ({max} layers) reached.',
       jsonPreview: 'Structured JSON preview',
       error: {
         loadCatalog: 'Unable to load master style catalog.',

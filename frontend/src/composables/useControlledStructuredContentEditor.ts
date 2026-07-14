@@ -150,13 +150,15 @@ export function useControlledStructuredContentEditor(
     doUndo: doc.doUndo,
     doRedo: doc.doRedo,
     insertBlock: (type: ConfirmedNodeType) => doc.insertBlock(type, selectedStyleKey.value),
+    insertNestedBlock: (parentPath: number[], type: ConfirmedNodeType) =>
+      doc.insertNestedBlock(parentPath, type, selectedStyleKey.value),
     insertInline: (type: ConfirmedNodeType) => doc.insertInline(type, selectedStyleKey.value),
     applySelectedStyle: () => doc.applySelectedStyle(selectedStyleKey.value),
     handlePasteFile: paste.handlePasteFile,
     removeBlock: doc.removeBlock,
     updateInlineChild: doc.updateInlineChild,
-    addInlineToBlock: (blockIndex: number, type: ConfirmedNodeType) =>
-      doc.addInlineToBlock(blockIndex, type, selectedStyleKey.value),
+    addInlineToBlock: (path: number[], type: ConfirmedNodeType) =>
+      doc.addInlineToBlock(path, type, selectedStyleKey.value),
     updateBlockField: doc.updateBlockField,
     endFieldCoalesce: doc.endFieldCoalesce,
     acceptPaste: paste.acceptPaste,

@@ -1,5 +1,14 @@
 import type { Ref } from 'vue'
 import {
+  appendChildBlockAtPath,
+  canAddNestedBlockChildren,
+  getNodeAtPath,
+  pathKey,
+  removeNodeAtPath,
+  updateNodeAtPath,
+  type NodePath,
+} from '@/utils/structuredContentNodePath'
+import {
   applyStyleToParagraphs,
   createNodeTemplate,
   insertBlockNode,
@@ -15,10 +24,8 @@ export function createStructuredContentDocumentMutations(options: {
 }) {
   const { documentModel, isReadonly, setPendingCoalesceKey } = options
 
-  function replaceBlock(index: number, next: StructuredContentNode) {
-    const nodes = [...documentModel.value.nodes]
-    nodes[index] = next
-    documentModel.value = { ...documentModel.value, nodes }
+  function replaceNodeAtPath(path: NodePath, next: StructuredContentNode) {
+    documentModel.value = updateNodeAtPath(documentModel.value, path, () => next)
   }
 
   function insertBlock(type: ConfirmedNodeType, selectedStyleKey: string) {
@@ -29,6 +36,22 @@ export function createStructuredContentDocumentMutations(options: {
     documentModel.value = insertBlockNode(documentModel.value, type, selectedStyleKey)
   }
 
+  function insertNestedBlock(
+    parentPath: NodePath,
+    type: ConfirmedNodeType,
+    selectedStyleKey: string,
+  ) {
+    if (isReadonly() || !canAddNestedBlockChildren(parentPath)) {
+      return
+    }
+    setPendingCoalesceKey(null)
+    documentModel.value = appendChildBlockAtPath(
+      documentModel.value,
+      parentPath,
+      createNodeTemplate(type, selectedStyleKey),
+    )
+  }
+
   function applySelectedStyle(selectedStyleKey: string) {
     if (!selectedStyleKey || isReadonly()) {
       return
@@ -37,53 +60,46 @@ export function createStructuredContentDocumentMutations(options: {
     documentModel.value = applyStyleToParagraphs(documentModel.value, selectedStyleKey)
   }
 
-  function updateBlockField(index: number, field: keyof StructuredContentNode, value: string) {
-    const node = documentModel.value.nodes[index]
+  function updateBlockField(path: NodePath, field: keyof StructuredContentNode, value: string) {
+    const node = getNodeAtPath(documentModel.value, path)
     if (!node) {
       return
     }
-    setPendingCoalesceKey(`field:${index}:${String(field)}`)
-    replaceBlock(index, { ...node, [field]: value })
+    setPendingCoalesceKey(`field:${pathKey(path)}:${String(field)}`)
+    replaceNodeAtPath(path, { ...node, [field]: value })
   }
 
   function updateInlineChild(
-    blockIndex: number,
+    path: NodePath,
     childIndex: number,
     nextChild: StructuredContentNode,
   ) {
-    const node = documentModel.value.nodes[blockIndex]
+    const node = getNodeAtPath(documentModel.value, path)
     if (!node) {
       return
     }
-    setPendingCoalesceKey(`inline:${blockIndex}:${childIndex}`)
+    setPendingCoalesceKey(`inline:${pathKey(path)}:${childIndex}`)
     const children = [...(node.children ?? [])]
     children[childIndex] = nextChild
-    replaceBlock(blockIndex, { ...node, children })
+    replaceNodeAtPath(path, { ...node, children })
   }
 
-  function addInlineToBlock(
-    blockIndex: number,
-    type: ConfirmedNodeType,
-    selectedStyleKey: string,
-  ) {
-    const node = documentModel.value.nodes[blockIndex]
+  function addInlineToBlock(path: NodePath, type: ConfirmedNodeType, selectedStyleKey: string) {
+    const node = getNodeAtPath(documentModel.value, path)
     if (!node) {
       return
     }
     setPendingCoalesceKey(null)
     const children = [...(node.children ?? []), createNodeTemplate(type, selectedStyleKey)]
-    replaceBlock(blockIndex, { ...node, children })
+    replaceNodeAtPath(path, { ...node, children })
   }
 
-  function removeBlock(index: number) {
+  function removeBlock(path: NodePath) {
     if (isReadonly()) {
       return
     }
     setPendingCoalesceKey(null)
-    documentModel.value = {
-      ...documentModel.value,
-      nodes: documentModel.value.nodes.filter((_, nodeIndex) => nodeIndex !== index),
-    }
+    documentModel.value = removeNodeAtPath(documentModel.value, path)
   }
 
   function insertInline(type: ConfirmedNodeType, selectedStyleKey: string) {
@@ -107,6 +123,7 @@ export function createStructuredContentDocumentMutations(options: {
 
   return {
     insertBlock,
+    insertNestedBlock,
     insertInline,
     applySelectedStyle,
     updateBlockField,

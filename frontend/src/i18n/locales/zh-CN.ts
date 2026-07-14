@@ -1504,6 +1504,10 @@ export default {
       },
       editorSurface: '结构化内容编辑器 — 在此粘贴 Word 或 HTML',
       emptyDocument: '插入块节点以开始编写。',
+      nestedChildrenLabel: '嵌套内容块',
+      nestedChildrenEmpty: '尚无嵌套块 — 请在下方添加。',
+      nestedAddBlock: '添加嵌套块',
+      nestedDepthLimit: '已达最大嵌套深度（{max} 层）。',
       jsonPreview: '结构化 JSON 预览',
       error: {
         loadCatalog: '无法加载母版样式目录。',

@@ -19,6 +19,7 @@ export const apiErrorZhCn = {
     fieldInvalid: "此字段无效。",
     fieldSizeInvalid: "此字段长度无效。",
     fieldPatternInvalid: "此字段格式无效。",
+    fieldUnknown: "未知字段。",
     contentModuleStructureMissing: "引用的内容模块没有固定的结构。"
   },
   storage: {
@@ -49,7 +50,10 @@ export const apiErrorZhCn = {
     anchorExtractionFailed: "无法从上传的 DOCX 中提取锚点。",
     storageFailed: "无法存储上传的母版。",
     downloadFailed: "无法下载母版文件。",
-    invalidReviewTransition: "母版当前状态不允许执行此审核操作。"
+    invalidReviewTransition: "母版当前状态不允许执行此审核操作。",
+    currentRevisionUnavailable: "无法解析用于固定的当前母版修订版本。",
+    revisionInUseByPublishedRelease: "母版修订版本已被一个或多个已发布版本固定，无法删除。",
+    revisionDeleteFailed: "无法删除母版修订版本。"
   },
   template: {
     notFound: "未找到模板。",
@@ -109,7 +113,14 @@ export const apiErrorZhCn = {
     imageAssetNotFound: "找不到引用的图片资源。",
     sealAssetNotFound: "找不到引用的印章资源。",
     ooxmlValidationFailed:
-      "生成的文档未通过 OOXML 校验，未予保存。请修正结构化内容后重新生成。"
+      "生成的文档未通过 OOXML 校验，未予保存。请修正结构化内容后重新生成。",
+    pinnedMasterUnavailable: "此发布版本固定的母版修订版本不可用。"
+  },
+  lifecycle: {
+    selfApprovalForbidden: "不允许自我审批；决策人必须与最近一次提交人不同。",
+    exceptionInterventionNotAllowed: "仅组管理员或全局管理员可进行例外干预。",
+    exceptionReasonRequired: "干预决策必须填写例外原因。",
+    exceptionSecondaryConfirmRequired: "例外干预需要二次确认。"
   },
   apimgmt: {
     policyNotFound: "未找到 API 策略。",

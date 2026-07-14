@@ -19,6 +19,7 @@ export const apiErrorEn = {
     fieldInvalid: "This field is invalid.",
     fieldSizeInvalid: "This field length is invalid.",
     fieldPatternInvalid: "This field format is invalid.",
+    fieldUnknown: "Unknown field.",
     contentModuleStructureMissing: "The referenced content module has no pinned structure."
   },
   storage: {
@@ -49,7 +50,11 @@ export const apiErrorEn = {
     anchorExtractionFailed: "Unable to extract anchors from the uploaded DOCX.",
     storageFailed: "Unable to store the uploaded letterhead.",
     downloadFailed: "Unable to download the letterhead file.",
-    invalidReviewTransition: "The letterhead is not in a valid state for this review action."
+    invalidReviewTransition: "The letterhead is not in a valid state for this review action.",
+    currentRevisionUnavailable: "The current letterhead revision could not be resolved for pinning.",
+    revisionInUseByPublishedRelease:
+      "The letterhead revision is pinned by one or more published releases and cannot be deleted.",
+    revisionDeleteFailed: "Unable to delete the letterhead revision."
   },
   template: {
     notFound: "The template was not found.",
@@ -109,7 +114,16 @@ export const apiErrorEn = {
     imageAssetNotFound: "The referenced image asset could not be found.",
     sealAssetNotFound: "The referenced seal asset could not be found.",
     ooxmlValidationFailed:
-      "The generated document failed OOXML validation and was not saved. Regenerate after correcting structured content."
+      "The generated document failed OOXML validation and was not saved. Regenerate after correcting structured content.",
+    pinnedMasterUnavailable: "The pinned letterhead revision for this release is unavailable."
+  },
+  lifecycle: {
+    selfApprovalForbidden:
+      "Self-approval is not permitted; the decision actor must differ from the most recent submitter.",
+    exceptionInterventionNotAllowed:
+      "Exception intervention is only allowed for group or global administrators.",
+    exceptionReasonRequired: "An exception reason is required for intervention decisions.",
+    exceptionSecondaryConfirmRequired: "Secondary confirmation is required for exception intervention."
   },
   apimgmt: {
     policyNotFound: "The API policy was not found.",

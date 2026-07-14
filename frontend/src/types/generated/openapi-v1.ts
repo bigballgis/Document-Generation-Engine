@@ -1983,6 +1983,10 @@ export interface components {
             actorDisplayName?: string;
             summary?: string;
             warningCodes: string[];
+            /** @description CE-G01: true when the lifecycle decision was allowed via GROUP_ADMIN / GLOBAL_ADMIN exception intervention despite decisionActor == lastSubmitActor. */
+            selfApprovalException?: boolean;
+            /** @description Persisted reason text when selfApprovalException is true. */
+            exceptionReason?: string;
         };
         ManagementAuditExportResponse: {
             /**
@@ -2057,6 +2061,19 @@ export interface components {
             anchorValidationPassed: boolean;
             /** @description Required when operation is REJECT_REVIEW. */
             rejectionReason?: string;
+            /** @description CE-G01: when true, GROUP_ADMIN / GLOBAL_ADMIN may bypass the self-approval block for APPROVE_REVIEW / REJECT_REVIEW. */
+            exceptionIntervention?: boolean;
+            exceptionReason?: string;
+            secondaryConfirmed?: boolean;
+        };
+        /** @description Management UI master review decision payload (POST /api/management/v1/masters/{masterId}/review). CE-G01 adds optional exception-intervention fields for GROUP_ADMIN / GLOBAL_ADMIN. */
+        DecideMasterReviewRequest: {
+            /** @enum {string} */
+            decision: "APPROVED" | "REJECTED";
+            commentSummary?: string;
+            exceptionIntervention?: boolean;
+            exceptionReason?: string;
+            secondaryConfirmed?: boolean;
         };
         MasterReviewSnapshot: {
             targetId: string;
@@ -2126,6 +2143,9 @@ export interface components {
             actorUsername: string;
             /** Format: date-time */
             createdAt: string;
+            /** @description CE-G01 durable exception marker on the review decision row. */
+            selfApprovalException?: boolean;
+            exceptionReason?: string;
         };
         MasterRevisionLineDetailView: {
             /** Format: uuid */
@@ -2591,6 +2611,12 @@ export interface components {
             changeDescription?: string;
             /** @description Required when operation is REJECT_REVIEW. */
             rejectionReason?: string;
+            /** @description CE-G01: when true, GROUP_ADMIN / GLOBAL_ADMIN may bypass the self-approval block for APPROVE_REVIEW / REJECT_REVIEW. Requires exceptionReason and secondaryConfirmed=true. */
+            exceptionIntervention?: boolean;
+            /** @description Required when exceptionIntervention is true. */
+            exceptionReason?: string;
+            /** @description Must be true when exceptionIntervention is true. */
+            secondaryConfirmed?: boolean;
         };
         CreateContentModuleRequest: {
             /** @description Stable business identifier (e.g. MOD-LOAN-DISCLOSURE). */
@@ -3185,7 +3211,7 @@ export interface components {
         /** @enum {string} */
         ErrorCategory: "AUTHENTICATION" | "AUTHORIZATION" | "VERSION_ROUTING" | "API_POLICY" | "IDEMPOTENCY" | "VALIDATION" | "TEMPLATE_CONTRACT" | "GENERATION" | "ENCRYPTION" | "BATCH";
         /** @enum {string} */
-        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED";
+        ErrorCode: "API_CREDENTIAL_REQUIRED" | "API_CREDENTIAL_INVALID" | "API_CREDENTIAL_EXPIRED" | "API_CREDENTIAL_REVOKED" | "ACCESS_ACCOUNT_REQUIRED" | "AD_GROUP_RESOLUTION_FAILED" | "AD_GROUP_NOT_AUTHORIZED" | "TEMPLATE_ACCESS_DENIED" | "ENVIRONMENT_MISMATCH" | "RELEASE_VERSION_REQUIRED" | "RELEASE_VERSION_FORMAT_INVALID" | "RELEASE_VERSION_NOT_FOUND" | "RELEASE_VERSION_DISABLED" | "DEFAULT_ROUTE_NOT_CONFIGURED" | "DEFAULT_ROUTE_TARGET_UNAVAILABLE" | "TEMPLATE_DISABLED" | "TEMPLATE_DEPRECATED" | "OUTPUT_FORMAT_NOT_ALLOWED" | "OUTPUT_MODE_NOT_ALLOWED" | "BATCH_LIMIT_EXCEEDED" | "ENCRYPTION_NOT_ALLOWED" | "DOWNLOAD_URL_EXPIRED" | "RESULT_RETENTION_EXPIRED" | "IDEMPOTENCY_KEY_REQUIRED" | "IDEMPOTENCY_KEY_CONFLICT" | "IDEMPOTENCY_RETRY_NOT_ALLOWED" | "IDEMPOTENCY_STORE_UNAVAILABLE" | "REQUEST_BODY_INVALID" | "REQUEST_ID_REQUIRED" | "OUTPUT_FORMAT_REQUIRED" | "OUTPUT_MODE_REQUIRED" | "VARIABLES_REQUIRED" | "VARIABLE_REQUIRED" | "VARIABLE_TYPE_INVALID" | "VARIABLE_FORMAT_INVALID" | "VARIABLE_RULE_FAILED" | "TEMPLATE_CONTRACT_INVALID" | "TEMPLATE_ANCHOR_MISSING" | "DOCX_GENERATION_FAILED" | "PDF_CONVERSION_FAILED" | "GENERATION_TIMEOUT" | "GENERATION_SERVICE_UNAVAILABLE" | "ASYNC_TASK_NOT_FOUND" | "ASYNC_TASK_EXPIRED" | "ASYNC_TASK_CANCELLATION_NOT_ALLOWED" | "DOCUMENT_NOT_FOUND" | "WORK_ITEM_NOT_FOUND" | "ENCRYPTION_PARAMETER_INVALID" | "ENCRYPTION_FAILED" | "BATCH_ITEMS_REQUIRED" | "BATCH_ITEM_COUNT_INVALID" | "ITEM_ID_REQUIRED" | "ITEM_ID_DUPLICATED" | "BATCH_PARTIAL_FAILED" | "BATCH_PROCESSING_FAILED" | "SELF_APPROVAL_FORBIDDEN" | "EXCEPTION_INTERVENTION_NOT_ALLOWED" | "EXCEPTION_REASON_REQUIRED" | "EXCEPTION_SECONDARY_CONFIRM_REQUIRED";
     };
     responses: {
         /** @description Async task accepted. */

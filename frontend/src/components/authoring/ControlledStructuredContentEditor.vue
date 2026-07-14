@@ -45,6 +45,7 @@ const {
   doUndo,
   doRedo,
   insertBlock,
+  insertNestedBlock,
   insertInline,
   applySelectedStyle,
   handlePasteFile,
@@ -102,7 +103,7 @@ defineExpose({ markPristine })
         v-for="(node, index) in documentModel.nodes"
         :key="`${node.type}-${index}`"
         :node="node"
-        :index="index"
+        :path="[index]"
         :readonly="isReadonly"
         :variable-select-options="variableSelectOptions"
         :list-variable-options="listVariableOptions"
@@ -112,6 +113,7 @@ defineExpose({ markPristine })
         @update-inline-child="updateInlineChild"
         @add-inline="addInlineToBlock"
         @update-block-field="updateBlockField"
+        @insert-nested-block="insertNestedBlock"
         @end-field-coalesce="endFieldCoalesce"
       />
 

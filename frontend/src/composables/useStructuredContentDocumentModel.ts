@@ -1,6 +1,7 @@
 import { ref, type Ref } from 'vue'
 import { useStructuredContentHistory } from '@/composables/useStructuredContentHistory'
 import { createStructuredContentDocumentMutations } from '@/composables/createStructuredContentDocumentMutations'
+import type { NodePath } from '@/utils/structuredContentNodePath'
 import {
   parseStructuredContent,
   serializeStructuredContent,
@@ -27,16 +28,17 @@ export interface StructuredContentDocumentModelApi {
   handleEditorKeydown: (event: KeyboardEvent) => void
   endFieldCoalesce: () => void
   insertBlock: (type: ConfirmedNodeType, selectedStyleKey: string) => void
+  insertNestedBlock: (parentPath: NodePath, type: ConfirmedNodeType, selectedStyleKey: string) => void
   insertInline: (type: ConfirmedNodeType, selectedStyleKey: string) => void
   applySelectedStyle: (selectedStyleKey: string) => void
-  updateBlockField: (index: number, field: keyof StructuredContentNode, value: string) => void
+  updateBlockField: (path: NodePath, field: keyof StructuredContentNode, value: string) => void
   updateInlineChild: (
-    blockIndex: number,
+    path: NodePath,
     childIndex: number,
     nextChild: StructuredContentNode,
   ) => void
-  addInlineToBlock: (blockIndex: number, type: ConfirmedNodeType, selectedStyleKey: string) => void
-  removeBlock: (index: number) => void
+  addInlineToBlock: (path: NodePath, type: ConfirmedNodeType, selectedStyleKey: string) => void
+  removeBlock: (path: NodePath) => void
   resetHistoryWithStructure: (structureJson: string) => void
   clearHistoryOnly: () => void
 }
