@@ -34,22 +34,11 @@ logs/
 .tmp/
 
 # ---- Agent / tooling workspace (machine-local state, do not commit) ----
-# Claude Code auto-commits working changes locally to prevent loss (see
-# .claude/settings.json Stop hook + hourly cron). The hook/settings source IS
-# committed, but per-machine runtime state stays local.
-.claude/projects/
-.claude/worktrees/
-.claude/scheduled_tasks.json
-.claude/*.log
-
 # Cursor agent runtime (deploy queue lock, worktree tickets)
 .cursor/runtime/
 
 # Copilot Plus machine-local workspace
 .copilotPlus/
-
-# Auto-generated MCP/skills awareness report (refreshed on each toolbox scan)
-.claude/cloude-code-toolbox-mcp-skills-awareness.md
 
 # Logs
 logs

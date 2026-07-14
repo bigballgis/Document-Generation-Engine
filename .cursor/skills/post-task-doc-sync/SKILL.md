@@ -32,13 +32,14 @@ Any of: feature slice, bug fix with regression test, phase completion, epic/mile
 | 4 | `docs/architecture/*task-sheet*.md` | Epic/milestone task moved |
 | 5 | `docs/architecture/orchestration-high-level-plan.md` | Epic backlog changed |
 | 6 | `docs/architecture/implementation-task-plan.md` | Wave status changed |
-| 7 | `docs/README.md` / `docs/plan/README.md` | Index or new doc |
+| 7 | `docs/README.md` / `docs/plan/README.md` | Index or new doc; **required** when delivery focus, Start Here rows, or indexable behavior specs change |
 
 ## Hard rules
 
 - Do not claim Done without completing this sync and post-task-commit-review in the same change set.
 - Do not edit accepted ADR decisions for progress tracking.
 - Exactly one phase `In Progress` at a time.
+- **Refresh `docs/README.md` banner / Start Here** whenever delivery focus moves or a new behavior spec should be indexed — do not leave the hub stale.
 - Use agent: `.cursor/agents/post-task-doc-sync.md` for full checklist.
 
 ## Related

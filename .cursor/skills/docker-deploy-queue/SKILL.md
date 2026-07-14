@@ -22,6 +22,15 @@ go through the queue helper:
 .\scripts\docker-deploy-queue.ps1 -EnqueueOnly -Reason "F5 acceptance"
 ```
 
+Linux / agents without Windows PowerShell — use PowerShell Core:
+
+```bash
+pwsh ./scripts/docker-deploy-queue.ps1
+pwsh ./scripts/docker-deploy-queue.ps1 -SkipBuild
+pwsh ./scripts/docker-deploy-queue.ps1 -Status
+```
+
+Do **not** invent a second compose project or alternate ports.
 ## Lock file
 
 - Path: `.cursor/runtime/docker-deploy.lock` (gitignored)

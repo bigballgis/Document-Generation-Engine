@@ -25,12 +25,11 @@ When using this template to **create** a PRD (not parse it), use **code-context-
 **Why?** The AI needs to understand your existing codebase to make good architectural decisions about modules, dependencies, and integration points.
 
 **Recommended tools:**
-- **Claude Code** (claude-code CLI) - Best for structured reasoning and large contexts
-- **Cursor/Windsurf** - IDE integration with full codebase context
-- **Gemini CLI** (gemini-cli) - Massive context window for large codebases
-- **Codex/Grok CLI** - Strong code generation with context awareness
+- **Cursor** — primary IDE agent for this repo (supervisor mode + Task specialists)
+- Other code-context assistants only if needed outside this project's Cursor pipeline
 
-**Note:** Once your PRD is created, `task-master parse-prd` works with any configured AI model - it just needs to read the PRD text itself, not your codebase.
+**Note:** Once your PRD is created, `task-master parse-prd` (or Cursor MCP `task-master-ai`)
+works with any configured model — it needs the PRD text, not a second agent stack.
 </rpg-method>
 
 ---
