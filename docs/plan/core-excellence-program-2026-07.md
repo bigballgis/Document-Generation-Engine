@@ -191,6 +191,9 @@ condition/loop 块 `children` 数组已在 schema 中但 `StructuredContentBlock
 **CE-U05 fidelity viewed 持久化 + 修复动线 — P1 · M**
 `markViewed` 仅本地 state、父组件未监听、后端无 API——发布勾选"已查看 fidelity"与真实浏览完全脱钩。目标：viewed 落库（per warning per preview run）、publish gate 校验未 viewed 数、警告默认人话文案（技术码收进展开区）、警告行链接到对应绑定编辑位。
 
+**Slice:** `ce-u05-fidelity-viewed-persist` · branch `feat/ce-u05-fidelity-viewed-persist` · BDD [ce-u05-fidelity-viewed-persist.md](../behavior/ce-u05-fidelity-viewed-persist.md) (`ready`, FVP-01…FVP-04).
+**Status (2026-07-14):** **Done** — per-warning viewed persistence in `preview_record.fidelity_warnings_json`; `PUT …/fidelity-warnings/viewed`; publish gate `FIDELITY_WARNINGS_VIEWED`; human-readable warning UI + Edit binding deep link. **Gates:** `mvn verify` **GREEN**; frontend lint/type-check/test/build **GREEN** (1213 Vitest); E2E **4/4** + UIUX **PASS_WITH_NOTES** (4 screenshots @1920); deploy **DEPLOY_OK_WITH_NOTES** (JWT env + backend healthcheck wget flake; stack @8080/:5173). **Merge:** `12741d69`; Task Master **#66**. Formal phase **None**; **not** go-live.
+
 **CE-U07 条款升版提醒 + 一键 bump — P1 · M**
 引用表只显示 pinned 版本，条款升版后模板侧零感知。目标：模板详情条款面板对"有更新已批准版本"的引用显示 out-of-date 徽标 + 一键升 pin（走既有 upsertReference）+ 批量升级确认；Dashboard 作者待办加"引用条款有新版"项。
 

@@ -907,16 +907,16 @@
       {
         "id": "66",
         "title": "CE-U05: Fidelity viewed persistence + fix path",
-        "description": "PENDING. Slice ce-u05-fidelity-viewed-persist. Persist viewed per warning/run; publish gate; humanized warnings + deep link. P1·M.",
+        "description": "Done. Slice ce-u05-fidelity-viewed-persist. Persist viewed per warning/run; publish gate FIDELITY_WARNINGS_VIEWED; humanized warnings + deep link. P1·M.",
         "details": "Lane after U02 (#65). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U05.",
         "testStrategy": "1. viewed durable. 2. Publish blocks unviewed. 3. E2E+UIUX. 4. Gates green.",
         "priority": "medium",
         "dependencies": [
           "65"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T10:50:00.000Z"
       },
       {
         "id": "67",
