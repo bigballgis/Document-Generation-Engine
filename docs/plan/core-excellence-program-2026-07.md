@@ -200,6 +200,9 @@ condition/loop 块 `children` 数组已在 schema 中但 `StructuredContentBlock
 **CE-U07 条款升版提醒 + 一键 bump — P1 · M**
 引用表只显示 pinned 版本，条款升版后模板侧零感知。目标：模板详情条款面板对"有更新已批准版本"的引用显示 out-of-date 徽标 + 一键升 pin（走既有 upsertReference）+ 批量升级确认；Dashboard 作者待办加"引用条款有新版"项。
 
+**Slice:** `ce-u07-clause-outdated-bump` · branch `feat/ce-u07-clause-outdated-bump` · BDD [ce-u07-clause-outdated-bump.md](../behavior/ce-u07-clause-outdated-bump.md) (`ready`, COB-001…004).
+**Status (2026-07-15):** **Done** — out-of-date badge + one-click bump (`upsertReference`) + bulk upgrade confirm + Dashboard author todo deep link. **Gates:** `mvn verify` **GREEN** (1481 tests); frontend lint/type-check/test/build **GREEN**; E2E **3/3** (COB-001/002, COB-004, UIUX); UIUX **PASS_WITH_NOTES** ([CE-U07-uiux-manifest.md](../../frontend/e2e/evidence/CE-U07-uiux-manifest.md)); architecture **PASS_WITH_NOTES** Critical=0 (Majors: export-schema coupling, soft deny empty list — follow-ups OK). **Merge:** `fde9342a` (`fde9342a4c70fc141fdf7c054422472f38387a71`); Task Master **#82**. Formal phase **None**; **not** go-live.
+
 **CE-U08 条款审核闭环 — P1 · M**
 后端 review 完整但：Dashboard 无条款审核待办、驳回原因不回显、无审核时间线。目标：`useWorkflowTasks` 增加 content module 待审/返工任务；版本表展示 `rejectionReason`；对齐母版的 `el-timeline` 审核历史。
 

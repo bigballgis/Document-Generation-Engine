@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-14. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1 Done (#54/#55/#56). Batch 2 Done (#57/#72). Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1 Done: ce-k07-golden-corpus-skeleton, ce-c01-c02-contract-strictness, ce-u03-testdata-schema-form. Batch 2 Done: ce-k01-release-bundle-pinning, ce-g01-self-approval-block. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1 Done (#54/#55/#56). Batch 2 Done (#57/#72). Batch 3 lane-2: #64/#65/#66/#67/#82 Done; residual CE-U08+ (#83…). Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1 Done: ce-k07-golden-corpus-skeleton, ce-c01-c02-contract-strictness, ce-u03-testdata-schema-form. Batch 2 Done: ce-k01-release-bundle-pinning, ce-g01-self-approval-block. Batch 3 lane-2 progress: ce-u01/u02/u05/u04/u07 Done (#64/#65/#66/#67/#82 merge fde9342a). D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T05:35:00Z"
+        "updatedAt": "2026-07-15T01:52:00.000Z"
       },
       {
         "id": "54",
@@ -921,17 +921,17 @@
       {
         "id": "67",
         "title": "CE-U04: In-app PDF preview (pdf.js)",
-        "description": "PENDING. Slice ce-u04-inline-pdf-preview. pdf.js read-only in preview panel (SPECIMEN watermarked). P1·M.",
-        "details": "Lane after U05 (#66); soft-depends G02 (#73) for watermarked artifact. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U04.",
+        "description": "DONE 2026-07-14. Slice ce-u04-inline-pdf-preview. Merge 4468894f. pdf.js read-only in preview panel. E2E 3/3 + UIUX PASS_WITH_NOTES. Formal phase None.",
+        "details": "Completed 2026-07-14. Slice id: ce-u04-inline-pdf-preview. Merge 4468894f; feature tip 4468894f. pdfjs-dist@4.10.38 + InlinePdfPreviewViewer / useInlinePdfPreview; page toolbar; nginx .mjs MIME. Soft-depends G02 (#73) for watermarked artifact. Gates: frontend lint/type-check/test/build GREEN (1235 Vitest); E2E 3/3 + UIUX 1/1; DEPLOY_OK_WITH_NOTES. Formal phase remains None. Plan §4 CE-U04 Done. Synced on MAIN during CE-U07 post-task-doc-sync (was Done in ledger; Task Master status had lagged).",
         "testStrategy": "1. Preview without download. 2. E2E page 1 visible. 3. FE gates + UIUX.",
         "priority": "medium",
         "dependencies": [
           "66",
           "73"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T01:52:00.000Z"
       },
       {
         "id": "68",
@@ -1135,16 +1135,16 @@
       {
         "id": "82",
         "title": "CE-U07: Clause upgrade badge + one-click bump",
-        "description": "PENDING. Slice ce-u07-clause-upgrade-bump. Out-of-date badge + bump pin + Dashboard author todo. P1·M.",
-        "details": "Lane after U04 (#67). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U07.",
-        "testStrategy": "1. Badge when newer approved. 2. One-click bump. 3. E2E+UIUX.",
+        "description": "DONE 2026-07-15. Slice ce-u07-clause-outdated-bump. Merge fde9342a. Out-of-date badge + one-click bump + bulk upgrade + Dashboard author todo. E2E 3/3 + UIUX PASS_WITH_NOTES. Formal phase None.",
+        "details": "Completed 2026-07-15 (stage 12 MAIN post-task-doc-sync after stage 11 merge). Slice id: ce-u07-clause-outdated-bump. Placement was ISOLATED · feat/ce-u07-clause-outdated-bump (worktree removed). Merge fde9342a (fde9342a4c70fc141fdf7c054422472f38387a71). BDD ready docs/behavior/ce-u07-clause-outdated-bump.md (BDD-CE-U07-COB-001…004). Gates: mvn verify GREEN (1481); frontend lint/type-check/test/build GREEN; E2E 3/3; UIUX PASS_WITH_NOTES (CE-U07-uiux-manifest.md); architecture PASS_WITH_NOTES Critical=0. Formal phase remains None. Plan §4 CE-U07 Done. Do NOT activate CD-3 / claim go-live.",
+        "testStrategy": "1. Badge when newer approved. 2. One-click bump. 3. Bulk upgrade confirm. 4. Dashboard author todo deep link. 5. E2E 3/3 + UIUX PASS_WITH_NOTES. 6. Gates green.",
         "priority": "medium",
         "dependencies": [
           "67"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T01:52:00.000Z"
       },
       {
         "id": "83",
