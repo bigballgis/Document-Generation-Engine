@@ -3,8 +3,12 @@ import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { type FormInstance, type FormRules } from 'element-plus'
 import ScopedGroupSelect from '@/components/common/ScopedGroupSelect.vue'
+import { useCapabilities } from '@/composables/useCapabilities'
 import { useScopedGroupOptions } from '@/composables/useScopedGroupOptions'
 import { useContentModulesStore } from '@/stores/contentModules'
+import {
+  excludeOwnerFromSharedGroupCodes,
+} from '@/utils/contentModuleSharedGroups'
 
 const props = defineProps<{
   modelValue: boolean
@@ -17,7 +21,8 @@ const emit = defineEmits<{
 
 const { t, te } = useI18n()
 const contentModulesStore = useContentModulesStore()
-const { resolveDefaultGroupCode, ensureGroupCatalog } = useScopedGroupOptions()
+const { resolveDefaultGroupCode, ensureGroupCatalog, groupOptions } = useScopedGroupOptions()
+const { configureContentModuleSharedGroups } = useCapabilities()
 
 const formRef = ref<FormInstance>()
 const groupSelectRef = ref<InstanceType<typeof ScopedGroupSelect> | null>(null)
@@ -35,7 +40,16 @@ const form = reactive({
   semanticVersion: '1.0.0',
   contentStructureJson: '{\n  "blocks": []\n}',
   changeDescription: '',
+  sharedGroupCodes: [] as string[],
 })
+
+const canConfigureSharedGroups = computed(() => configureContentModuleSharedGroups.value)
+
+const sharedGroupSelectOptions = computed(() =>
+  groupOptions.value.filter(
+    (option) => option.value.toUpperCase() !== form.groupCode.trim().toUpperCase(),
+  ),
+)
 
 const formRules = computed<FormRules>(() => ({
   groupCode: [
@@ -92,6 +106,16 @@ watch(visible, async (open) => {
   form.groupCode = resolveDefaultGroupCode(form.groupCode)
 })
 
+watch(
+  () => form.groupCode,
+  () => {
+    form.sharedGroupCodes = excludeOwnerFromSharedGroupCodes(
+      form.sharedGroupCodes,
+      form.groupCode,
+    )
+  },
+)
+
 function resetForm() {
   form.groupCode = resolveDefaultGroupCode('')
   form.moduleCode = ''
@@ -100,6 +124,7 @@ function resetForm() {
   form.semanticVersion = '1.0.0'
   form.contentStructureJson = '{\n  "blocks": []\n}'
   form.changeDescription = ''
+  form.sharedGroupCodes = []
 }
 
 async function handleSubmit() {
@@ -114,6 +139,9 @@ async function handleSubmit() {
   }
   try {
     await ensureGroupCatalog()
+    const sharedGroupCodes = canConfigureSharedGroups.value
+      ? excludeOwnerFromSharedGroupCodes(form.sharedGroupCodes, form.groupCode)
+      : []
     const created = await contentModulesStore.createModule({
       groupCode: form.groupCode,
       moduleCode: form.moduleCode.trim(),
@@ -122,6 +150,7 @@ async function handleSubmit() {
       semanticVersion: form.semanticVersion.trim(),
       contentStructureJson: form.contentStructureJson,
       changeDescription: form.changeDescription.trim() || undefined,
+      sharedGroupCodes,
     })
     visible.value = false
     resetForm()
@@ -130,6 +159,13 @@ async function handleSubmit() {
     // Store surfaces message key.
   }
 }
+
+defineExpose({
+  form,
+  sharedGroupSelectOptions,
+  canConfigureSharedGroups,
+  handleSubmit,
+})
 </script>
 
 <template>
@@ -152,11 +188,37 @@ async function handleSubmit() {
       <el-form-item :label="t('contentModules.create.groupCode')" prop="groupCode">
         <ScopedGroupSelect ref="groupSelectRef" v-model="form.groupCode" />
       </el-form-item>
+      <el-form-item
+        v-if="canConfigureSharedGroups"
+        :label="t('contentModules.create.sharedGroupCodes')"
+        prop="sharedGroupCodes"
+      >
+        <el-select
+          v-model="form.sharedGroupCodes"
+          data-testid="content-module-shared-groups-select"
+          multiple
+          filterable
+          clearable
+          class="shared-groups-select"
+          :placeholder="t('contentModules.create.sharedGroupCodesPlaceholder')"
+        >
+          <el-option
+            v-for="option in sharedGroupSelectOptions"
+            :key="option.value"
+            :label="option.label"
+            :value="option.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item :label="t('contentModules.create.moduleCode')" prop="moduleCode">
-        <el-input v-model="form.moduleCode" :placeholder="t('contentModules.create.moduleCodePlaceholder')" />
+        <el-input
+          v-model="form.moduleCode"
+          data-testid="module-code-input"
+          :placeholder="t('contentModules.create.moduleCodePlaceholder')"
+        />
       </el-form-item>
       <el-form-item :label="t('contentModules.create.name')" prop="name">
-        <el-input v-model="form.name" />
+        <el-input v-model="form.name" data-testid="module-name-input" />
       </el-form-item>
       <el-form-item :label="t('contentModules.create.description')" prop="description">
         <el-input v-model="form.description" type="textarea" :rows="2" />
@@ -183,5 +245,9 @@ async function handleSubmit() {
 <style scoped lang="scss">
 .dialog-alert {
   margin-bottom: 1rem;
+}
+
+.shared-groups-select {
+  width: 100%;
 }
 </style>

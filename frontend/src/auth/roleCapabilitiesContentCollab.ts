@@ -37,6 +37,15 @@ export function canManageContentModuleLifecycle(context: CapabilityContext): boo
   )
 }
 
+/**
+ * Permission-matrix §5.1「配置共享范围」— GLOBAL_ADMIN / GROUP_ADMIN.
+ * Until session exposes a dedicated capability key, reuse manageContentModuleLifecycle
+ * (same role set) when capabilities are present.
+ */
+export function canConfigureContentModuleSharedGroups(context: CapabilityContext): boolean {
+  return canManageContentModuleLifecycle(context)
+}
+
 export function canAccessContentModuleManagement(roles: string[]): boolean {
   return roles.some((role) =>
     (

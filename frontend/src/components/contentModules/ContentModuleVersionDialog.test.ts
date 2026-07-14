@@ -11,6 +11,7 @@ vi.mock('@/api/contentModules', () => ({
   listContentModules: vi.fn(),
   getContentModule: vi.fn(),
   createContentModule: vi.fn(),
+  updateContentModuleSharedGroupCodes: vi.fn(),
   createContentModuleVersion: vi.fn(),
   updateContentModuleDraftVersion: vi.fn(),
   transitionContentModuleReview: vi.fn(),

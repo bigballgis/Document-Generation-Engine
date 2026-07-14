@@ -37,6 +37,7 @@ export {
   canAuthorContentModules,
   canDecideContentModuleReviews,
   canManageContentModuleLifecycle,
+  canConfigureContentModuleSharedGroups,
   canAccessContentModuleManagement,
   canViewCollaborationWorkItems,
   canMaintainCollaborationTimeoutConfig,
