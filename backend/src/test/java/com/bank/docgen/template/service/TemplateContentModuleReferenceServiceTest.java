@@ -22,6 +22,7 @@ import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceEntity;
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,6 +59,8 @@ class TemplateContentModuleReferenceServiceTest {
     @Mock
     private GroupAccessService groupAccessService;
     @Mock
+    private TemplateRepository templateRepository;
+    @Mock
     private TemplateCurrentVersionResolver templateCurrentVersionResolver;
 
     private TemplateContentModuleReferenceService service;
@@ -73,12 +76,14 @@ class TemplateContentModuleReferenceServiceTest {
         );
         service = new TemplateContentModuleReferenceService(
                 templateService,
+                templateRepository,
                 templateVersionRepository,
                 referenceRepository,
                 contentModuleRepository,
                 contentModuleVersionRepository,
                 accessSupport,
-                templateCurrentVersionResolver
+                templateCurrentVersionResolver,
+                groupAccessService
         );
         template = new TemplateEntity(
                 TEMPLATE_ID,
@@ -340,6 +345,96 @@ class TemplateContentModuleReferenceServiceTest {
 
         assertThat(summary.blocking()).isFalse();
         assertThat(summary.invalidReferences()).isZero();
+    }
+
+    @Test
+    void listReferences_marksOutOfDateWhenNewerApprovedVersionExists() {
+        when(templateService.requireReadableTemplate(TEMPLATE_ID, author)).thenReturn(template);
+        lenient().when(templateCurrentVersionResolver.requireExportableVersion(TEMPLATE_ID))
+                .thenReturn(new TemplateVersionEntity(VERSION_ID, TEMPLATE_ID, "10000003"));
+        TemplateContentModuleReferenceEntity reference = new TemplateContentModuleReferenceEntity(
+                UUID.randomUUID(),
+                VERSION_ID,
+                "CLAUSE-1",
+                MODULE_VERSION_V1
+        );
+        when(referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(VERSION_ID))
+                .thenReturn(List.of(reference));
+        ContentModuleVersionEntity pinned = version(
+                MODULE_VERSION_V1,
+                "1.0.0",
+                ContentModuleReviewState.APPROVED,
+                ContentModuleLifecycleState.ACTIVE
+        );
+        ContentModuleVersionEntity newer = version(
+                MODULE_VERSION_V2,
+                "1.1.0",
+                ContentModuleReviewState.APPROVED,
+                ContentModuleLifecycleState.ACTIVE
+        );
+        when(contentModuleVersionRepository.findById(MODULE_VERSION_V1)).thenReturn(Optional.of(pinned));
+        when(contentModuleRepository.findByIdAndDeletedAtIsNull(MODULE_ID))
+                .thenReturn(Optional.of(module(MODULE_ID, "MOD-LOAN-DISCLOSURE", "RETAIL", "[]")));
+        when(contentModuleVersionRepository
+                .findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
+                        MODULE_ID,
+                        ContentModuleReviewState.APPROVED,
+                        ContentModuleLifecycleState.ACTIVE
+                ))
+                .thenReturn(List.of(newer));
+
+        var views = service.listReferences(TEMPLATE_ID, author);
+
+        assertThat(views).hasSize(1);
+        assertThat(views.getFirst().outOfDate()).isTrue();
+        assertThat(views.getFirst().latestApprovedSemanticVersion()).isEqualTo("1.1.0");
+    }
+
+    @Test
+    void listOutdatedClauseReferenceAuthorTasks_returnsDraftTemplatesWithOutdatedPins() {
+        when(groupAccessService.canAuthorTemplates(author)).thenReturn(true);
+        when(groupAccessService.accessibleGroupCodes(author)).thenReturn(List.of("RETAIL"));
+        when(templateRepository.findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
+                List.of("RETAIL"),
+                TemplateLifecycleStatus.DRAFT
+        )).thenReturn(List.of(template));
+        when(templateCurrentVersionResolver.findInFlightDevVersion(TEMPLATE_ID))
+                .thenReturn(Optional.of(new TemplateVersionEntity(VERSION_ID, TEMPLATE_ID, "10000003")));
+        TemplateContentModuleReferenceEntity reference = new TemplateContentModuleReferenceEntity(
+                UUID.randomUUID(),
+                VERSION_ID,
+                "CLAUSE-1",
+                MODULE_VERSION_V1
+        );
+        when(referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(VERSION_ID))
+                .thenReturn(List.of(reference));
+        ContentModuleVersionEntity pinned = version(
+                MODULE_VERSION_V1,
+                "1.0.0",
+                ContentModuleReviewState.APPROVED,
+                ContentModuleLifecycleState.ACTIVE
+        );
+        ContentModuleVersionEntity newer = version(
+                MODULE_VERSION_V2,
+                "1.1.0",
+                ContentModuleReviewState.APPROVED,
+                ContentModuleLifecycleState.ACTIVE
+        );
+        when(contentModuleVersionRepository.findById(MODULE_VERSION_V1)).thenReturn(Optional.of(pinned));
+        when(contentModuleVersionRepository
+                .findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
+                        MODULE_ID,
+                        ContentModuleReviewState.APPROVED,
+                        ContentModuleLifecycleState.ACTIVE
+                ))
+                .thenReturn(List.of(newer));
+
+        var tasks = service.listOutdatedClauseReferenceAuthorTasks(author);
+
+        assertThat(tasks).hasSize(1);
+        assertThat(tasks.getFirst().templateId()).isEqualTo(TEMPLATE_ID.toString());
+        assertThat(tasks.getFirst().inFlightDevVersionId()).isEqualTo(VERSION_ID.toString());
+        assertThat(tasks.getFirst().outdatedReferenceCount()).isEqualTo(1);
     }
 
     @Test

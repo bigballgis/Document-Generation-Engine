@@ -317,6 +317,12 @@ export default {
         description:
           'Address test or approval feedback, then submit for testing again.',
       },
+      clauseOutdatedBump: {
+        title: 'Clause references to update',
+        itemTitle: 'Update pinned clause versions',
+        description:
+          'One or more clause references are pinned to an older approved version. Bump pins on the template clause panel.',
+      },
     },
     journey: {
       openWorkspace: 'Open workspace',
@@ -1801,6 +1807,15 @@ export default {
         'This clause revision is approved. Create a new draft in the standard clauses workspace to edit content.',
       lockedYes: 'Locked',
       lockedNo: 'Open',
+      outdatedBadge: 'Out of date',
+      bumpToLatest: 'Bump to latest',
+      bumpAllOutdated: 'Bump all outdated',
+      bumpSuccess: 'Clause reference bumped to the latest approved version.',
+      bumpAllSuccess: 'All outdated clause references were bumped.',
+      bumpAllConfirmTitle: 'Bump all outdated references?',
+      bumpAllConfirmMessage:
+        'Upgrade {count} clause reference(s) to each module’s latest approved version?',
+      bumpAllConfirmAction: 'Bump all',
       empty: 'No clause references configured.',
       emptyDescription: 'Add approved module versions to bind reusable clause content in this template.',
       noContentStructure: 'This version has no structured content yet.',

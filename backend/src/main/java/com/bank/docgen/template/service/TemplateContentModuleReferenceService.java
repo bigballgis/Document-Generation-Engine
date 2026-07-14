@@ -1,5 +1,6 @@
 package com.bank.docgen.template.service;
 
+import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
@@ -7,11 +8,13 @@ import com.bank.docgen.contentmodule.service.ContentModuleAccessService;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.ContentModuleReferenceValidationSummaryView;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
+import com.bank.docgen.template.api.OutdatedClauseReferenceAuthorTaskView;
 import com.bank.docgen.template.api.UpsertContentModuleReferenceRequest;
 import com.bank.docgen.template.domain.TemplateLifecycleStatus;
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceEntity;
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import com.bank.docgen.template.persistence.TemplateRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import java.util.ArrayList;
@@ -26,31 +29,86 @@ import org.springframework.transaction.annotation.Transactional;
 public class TemplateContentModuleReferenceService {
 
     private final TemplateService templateService;
+    private final TemplateRepository templateRepository;
     private final TemplateVersionRepository templateVersionRepository;
     private final TemplateContentModuleReferenceRepository referenceRepository;
     private final ContentModuleVersionRepository contentModuleVersionRepository;
     private final TemplateCurrentVersionResolver templateVersionSupport;
     private final TemplateContentModuleReferenceSupport referenceSupport;
+    private final GroupAccessService groupAccessService;
 
     public TemplateContentModuleReferenceService(
             TemplateService templateService,
+            TemplateRepository templateRepository,
             TemplateVersionRepository templateVersionRepository,
             TemplateContentModuleReferenceRepository referenceRepository,
             ContentModuleRepository contentModuleRepository,
             ContentModuleVersionRepository contentModuleVersionRepository,
             ContentModuleAccessService ContentModuleAccessService,
-            TemplateCurrentVersionResolver templateVersionSupport
+            TemplateCurrentVersionResolver templateVersionSupport,
+            GroupAccessService groupAccessService
     ) {
         this.templateService = templateService;
+        this.templateRepository = templateRepository;
         this.templateVersionRepository = templateVersionRepository;
         this.referenceRepository = referenceRepository;
         this.contentModuleVersionRepository = contentModuleVersionRepository;
         this.templateVersionSupport = templateVersionSupport;
+        this.groupAccessService = groupAccessService;
         this.referenceSupport = new TemplateContentModuleReferenceSupport(
                 contentModuleRepository,
                 contentModuleVersionRepository,
                 ContentModuleAccessService
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<OutdatedClauseReferenceAuthorTaskView> listOutdatedClauseReferenceAuthorTasks(
+            ManagementSessionClaims session
+    ) {
+        if (!groupAccessService.canAuthorTemplates(session)) {
+            return List.of();
+        }
+        List<String> groupCodes = groupAccessService.accessibleGroupCodes(session);
+        if (groupCodes.isEmpty()) {
+            return List.of();
+        }
+        List<TemplateEntity> draftTemplates;
+        if (groupCodes.contains("*")) {
+            draftTemplates = templateRepository.findByDeletedAtIsNullAndLifecycleStatusOrderByUpdatedAtDesc(
+                    TemplateLifecycleStatus.DRAFT
+            );
+        } else {
+            draftTemplates = templateRepository
+                    .findByDeletedAtIsNullAndGroupCodeInAndLifecycleStatusOrderByUpdatedAtDesc(
+                            groupCodes,
+                            TemplateLifecycleStatus.DRAFT
+                    );
+        }
+        List<OutdatedClauseReferenceAuthorTaskView> tasks = new ArrayList<>();
+        for (TemplateEntity template : draftTemplates) {
+            TemplateVersionEntity devVersion = templateVersionSupport.findInFlightDevVersion(template.getId())
+                    .orElse(null);
+            if (devVersion == null) {
+                continue;
+            }
+            List<TemplateContentModuleReferenceEntity> references =
+                    referenceRepository.findByTemplateVersionIdOrderByReferenceKeyAsc(devVersion.getId());
+            int outdatedCount = referenceSupport.countOutdatedUnlockedReferences(references);
+            if (outdatedCount <= 0) {
+                continue;
+            }
+            tasks.add(new OutdatedClauseReferenceAuthorTaskView(
+                    template.getId().toString(),
+                    template.getExternalId(),
+                    template.getGroupCode(),
+                    template.getName(),
+                    devVersion.getId().toString(),
+                    outdatedCount,
+                    template.getUpdatedAt()
+            ));
+        }
+        return tasks;
     }
 
     @Transactional(readOnly = true)

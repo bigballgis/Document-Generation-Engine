@@ -36,7 +36,19 @@ const capabilityRefs = {
   context: ref({ roles: ['TEMPLATE_TESTER'] }),
   reviewMasters: ref(false),
   manageMasters: ref(false),
+  authorTemplates: ref(false),
 }
+
+const fetchOutdatedClauseReferenceTasks = vi.fn().mockResolvedValue(undefined)
+
+vi.mock('@/stores/authorWorkflow', () => ({
+  useAuthorWorkflowStore: () => ({
+    fetchOutdatedClauseReferenceTasks,
+    outdatedClauseTasks: ref([]),
+    loadingOutdatedClauseTasks: ref(false),
+    outdatedClauseTasksError: ref(false),
+  }),
+}))
 
 vi.mock('@/composables/useCapabilities', () => ({
   useCapabilities: () => capabilityRefs,
@@ -102,6 +114,8 @@ describe('useDashboardDataLoader', () => {
     capabilityRefs.context.value = { roles: ['TEMPLATE_TESTER'] }
     capabilityRefs.reviewMasters.value = false
     capabilityRefs.manageMasters.value = false
+    capabilityRefs.authorTemplates.value = false
+    fetchOutdatedClauseReferenceTasks.mockClear()
     vi.mocked(collaborationApi.getCollaborationTimeoutConfig).mockClear()
   })
 

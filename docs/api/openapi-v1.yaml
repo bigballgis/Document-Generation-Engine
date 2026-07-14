@@ -1498,6 +1498,37 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/author-workflow/outdated-clause-references:
+    get:
+      tags: [Admin]
+      operationId: listOutdatedClauseReferenceAuthorTasks
+      summary: List draft templates with outdated clause references for the author
+      description: >-
+        Returns draft templates writable by the caller where at least one unlocked
+        content-module reference is pinned to an older approved version than the
+        module's latest referencable release (CE-U07).
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Author workflow tasks for outdated clause pins.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [metadata, result]
+                properties:
+                  metadata:
+                    $ref: '#/components/schemas/Metadata'
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OutdatedClauseReferenceAuthorTaskView'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/collaboration-work-items:
     get:
       tags: [Collaboration, Admin]
@@ -6847,7 +6878,7 @@ components:
     TemplateExportContentModuleReferenceView:
       type: object
       additionalProperties: false
-      required: [referenceKey, moduleId, semanticVersion, locked]
+      required: [referenceKey, moduleId, semanticVersion, locked, outOfDate]
       properties:
         referenceKey:
           type: string
@@ -6858,6 +6889,37 @@ components:
         locked:
           type: boolean
           description: Locked references from published templates are preserved but not re-applied on import.
+        outOfDate:
+          type: boolean
+          description: True when a newer approved active module version exists than the pinned semantic version.
+        latestApprovedSemanticVersion:
+          type: string
+          nullable: true
+          description: Latest referencable approved version when outOfDate is true; otherwise null.
+    OutdatedClauseReferenceAuthorTaskView:
+      type: object
+      additionalProperties: false
+      required: [templateId, externalId, groupCode, name, inFlightDevVersionId, outdatedReferenceCount, updatedAt]
+      properties:
+        templateId:
+          type: string
+          format: uuid
+        externalId:
+          type: string
+        groupCode:
+          type: string
+        name:
+          type: string
+        inFlightDevVersionId:
+          type: string
+          format: uuid
+          description: In-flight draft version id for deep-linking into the template design workspace.
+        outdatedReferenceCount:
+          type: integer
+          minimum: 1
+        updatedAt:
+          type: string
+          format: date-time
     TemplateExportApiPolicySnapshot:
       type: object
       additionalProperties: false

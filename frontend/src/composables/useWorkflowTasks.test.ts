@@ -8,6 +8,7 @@ import {
   useWorkflowTasks,
 } from '@/composables/useWorkflowTasks'
 import { useCollaborationStore } from '@/stores/collaboration'
+import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import type { ManagementCapabilities } from '@/types/session'
@@ -40,6 +41,13 @@ const reviewerCapabilities: ManagementCapabilities = {
 const managerCapabilities: ManagementCapabilities = {
   ...testerCapabilities,
   manageMasters: true,
+}
+
+const authorCapabilities: ManagementCapabilities = {
+  ...testerCapabilities,
+  authorTemplates: true,
+  viewCollaborationWorkItems: false,
+  decideTests: false,
 }
 
 describe('useWorkflowTasks', () => {
@@ -95,6 +103,44 @@ describe('useWorkflowTasks', () => {
 
     const { tasks } = useWorkflowTasks()
     expect(tasks.value.some((task) => task.kind === 'master-review')).toBe(true)
+  })
+
+  it('builds clause outdated bump tasks for template authors', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      ...sessionStore.session,
+      roles: ['TEMPLATE_AUTHOR'],
+      capabilities: authorCapabilities,
+    } as never
+
+    const authorWorkflowStore = useAuthorWorkflowStore()
+    authorWorkflowStore.outdatedClauseTasks = [
+      {
+        templateId: 'tpl-1',
+        externalId: 'TPL-1',
+        groupCode: 'RETAIL',
+        name: 'Loan Notice',
+        inFlightDevVersionId: 'dev-1',
+        outdatedReferenceCount: 2,
+        updatedAt: '2026-07-14T10:00:00Z',
+      },
+    ]
+
+    const { tasks } = useWorkflowTasks()
+    const clauseTask = tasks.value.find((task) => task.kind === 'clause-outdated-bump')
+    expect(clauseTask).toBeDefined()
+    expect(clauseTask?.path).toContain('/templates/tpl-1/dev/dev-1')
+    expect(clauseTask?.path).toContain('designTab=contentModules')
+    expect(clauseTask?.templateId).toBe('tpl-1')
+
+    const scope = parseDashboardTaskScope({}, { reviewMasters: false, manageMasters: false })
+    const partitions = buildTaskPartitions(scope, tasks.value, {
+      roles: ['TEMPLATE_AUTHOR'],
+      capabilities: authorCapabilities,
+    })
+    const clausePartition = partitions.find((partition) => partition.kind === 'clause-outdated-bump')
+    expect(clausePartition?.tasks).toHaveLength(1)
+    expect(clausePartition?.headingKey).toBe('dashboard.tasks.clauseOutdatedBump.title')
   })
 
   it('builds master rework tasks for rejected masters when upload is allowed', () => {

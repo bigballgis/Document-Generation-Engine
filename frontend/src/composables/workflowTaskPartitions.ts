@@ -1,4 +1,5 @@
 import type { CapabilityContext } from '@/auth/roles'
+import { canAuthorTemplates } from '@/auth/roles'
 import {
   getVisibleCollaborationQueues,
   isValidCollaborationQueue,
@@ -135,6 +136,20 @@ export function buildTaskPartitions(
       kind: 'master-rework',
       tasks: sortTasksNewestFirst(tasks.filter((task) => task.kind === 'master-rework')),
     })
+  }
+
+  if (canAuthorTemplates(context)) {
+    const clauseTasks = sortTasksNewestFirst(
+      tasks.filter((task) => task.kind === 'clause-outdated-bump'),
+    )
+    if (clauseTasks.length > 0) {
+      partitions.push({
+        id: 'clause-outdated-bump',
+        headingKey: 'dashboard.tasks.clauseOutdatedBump.title',
+        kind: 'clause-outdated-bump',
+        tasks: clauseTasks,
+      })
+    }
   }
 
   return partitions

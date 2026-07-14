@@ -7,6 +7,7 @@ import { useClauseAuthoringEditors } from '@/components/templates/useClauseAutho
 import type { ContentModuleSummary, ContentModuleVersion } from '@/types/contentModule'
 import type { TemplateContentModuleReference } from '@/types/template'
 import { createClauseAuthoringReferenceActions } from '@/components/templates/createClauseAuthoringReferenceActions'
+import { useClauseOutdatedBumpActions } from '@/components/templates/useClauseOutdatedBumpActions'
 
 export type ClauseAuthoringPanelProps = {
   templateId: string
@@ -30,6 +31,7 @@ export function useClauseAuthoringPanel(
 
   const saving = ref(false)
   const savingClause = ref(false)
+  const bumping = ref(false)
   const referenceDialogOpen = ref(false)
   const previewDialogOpen = ref(false)
   const clauseEditDialogOpen = ref(false)
@@ -88,6 +90,16 @@ export function useClauseAuthoringPanel(
     emitUpdated: () => emit('updated'),
   })
 
+  const bumpActions = useClauseOutdatedBumpActions({
+    t,
+    te,
+    templateId: props.templateId,
+    editable: () => props.editable,
+    references,
+    bumping,
+    emitUpdated: () => emit('updated'),
+  })
+
   onMounted(async () => {
     await referenceActions.loadModuleOptions()
     await referenceActions.loadReferences()
@@ -103,6 +115,8 @@ export function useClauseAuthoringPanel(
   return {
     saving,
     savingClause,
+    bumping,
+    hasOutdatedUnlockedReferences: bumpActions.hasOutdatedUnlockedReferences,
     referenceDialogOpen,
     previewDialogOpen,
     clauseEditDialogOpen,
@@ -122,6 +136,8 @@ export function useClauseAuthoringPanel(
     openEditReferenceDialog: referenceActions.openEditReferenceDialog,
     handleModuleChange: referenceActions.handleModuleChange,
     handleSubmitReference: referenceActions.handleSubmitReference,
+    bumpReference: bumpActions.bumpReference,
+    bumpAllOutdatedReferences: bumpActions.bumpAllOutdatedReferences,
     openPreviewDialog,
     openClauseEditor,
     handleSaveClauseContent,

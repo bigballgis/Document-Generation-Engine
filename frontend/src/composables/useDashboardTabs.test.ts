@@ -89,6 +89,16 @@ describe('useDashboardTabs', () => {
     expect(tabs.isTaskTab.value).toBe(false)
   })
 
+  it('forces task list view when hash is #tasks-section (author deep-link)', () => {
+    routeHash.value = '#tasks-section'
+
+    const tabs = mountTabsHarness()
+
+    expect(tabs.activeTab.value).toBe('overview')
+    expect(tabs.isOverviewTab.value).toBe(false)
+    expect(tabs.isTaskTab.value).toBe(true)
+  })
+
   it('resolves workflow tab from query when journey section is visible', () => {
     routeQuery.value = { tab: 'workflow' }
 

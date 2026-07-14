@@ -72,9 +72,16 @@ export function useDashboardTabs(options: UseDashboardTabsOptions) {
     return 'overview'
   })
 
-  const isOverviewTab = computed(() => activeTab.value === 'overview')
+  /** Authors often have only Overview; `#tasks-section` still opens the task list (CE-U07). */
+  const forceTasksFromHash = computed(() => route.hash === '#tasks-section')
+
+  const isOverviewTab = computed(
+    () => activeTab.value === 'overview' && !forceTasksFromHash.value,
+  )
   const isWorkflowTab = computed(() => activeTab.value === 'workflow')
-  const isTaskTab = computed(() => !isOverviewTab.value && !isWorkflowTab.value)
+  const isTaskTab = computed(
+    () => (!isOverviewTab.value && !isWorkflowTab.value) || forceTasksFromHash.value,
+  )
 
   function tabLabel(tab: DashboardTab): string {
     if (tab.useJourneyTitle && journeyTitleKey.value) {

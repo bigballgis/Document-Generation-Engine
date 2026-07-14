@@ -4,6 +4,8 @@ public record ContentModuleReferenceView(
         String referenceKey,
         String moduleId,
         String semanticVersion,
-        boolean locked
+        boolean locked,
+        boolean outOfDate,
+        String latestApprovedSemanticVersion
 ) {
 }

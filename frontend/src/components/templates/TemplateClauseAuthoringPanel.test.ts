@@ -37,6 +37,8 @@ describe('TemplateClauseAuthoringPanel', () => {
         moduleId: 'MOD-LOAN-DISCLOSURE',
         semanticVersion: '1.0.0',
         locked: false,
+        outOfDate: true,
+        latestApprovedSemanticVersion: '1.1.0',
       },
     ])
     vi.mocked(contentModulesApi.listAllContentModules).mockResolvedValue({
@@ -85,7 +87,34 @@ describe('TemplateClauseAuthoringPanel', () => {
 
     expect(wrapper.text()).toContain('LOAN_DISCLOSURE')
     expect(wrapper.text()).toContain('Loan disclosure')
+    expect(wrapper.text()).toContain('Out of date')
     expect(wrapper.text()).toContain('Preview')
+  })
+
+  it('shows bump control for outdated unlocked references when editable', async () => {
+    vi.mocked(templatesApi.listTemplateContentModuleReferences).mockResolvedValue([
+      {
+        referenceKey: 'LOAN_DISCLOSURE',
+        moduleId: 'MOD-LOAN-DISCLOSURE',
+        semanticVersion: '1.0.0',
+        locked: false,
+        outOfDate: true,
+        latestApprovedSemanticVersion: '1.1.0',
+      },
+    ])
+    vi.mocked(contentModulesApi.listAllContentModules).mockResolvedValue({ content: [], totalElements: 0, truncated: false })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const wrapper = mount(TemplateClauseAuthoringPanel, {
+      props: { templateId: 'tpl-1', groupCode: 'RETAIL', editable: true },
+      global: { plugins: [pinia, i18n, ElementPlus] },
+    })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="clause-reference-bump-button"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="clause-bump-all-outdated"]').exists()).toBe(true)
   })
 
   it('shows add reference control when editable', async () => {

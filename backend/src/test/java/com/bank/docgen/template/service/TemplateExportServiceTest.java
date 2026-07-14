@@ -107,7 +107,7 @@ class TemplateExportServiceTest {
         when(apiPolicyRepository.findByTemplateId(templateId)).thenReturn(Optional.of(policyEntity));
         when(apiPolicyViewMapper.toPolicyView(policyEntity)).thenReturn(policyView());
         when(contentModuleReferenceService.listReferences(templateId, groupAdmin)).thenReturn(List.of(
-                new ContentModuleReferenceView("clause-a", "MOD-1", "1.0.0", true)
+                new ContentModuleReferenceView("clause-a", "MOD-1", "1.0.0", true, false, null)
         ));
 
         TemplateExportResult result = service.exportJson(templateId, groupAdmin);

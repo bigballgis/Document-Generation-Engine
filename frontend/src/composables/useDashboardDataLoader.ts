@@ -4,6 +4,7 @@ import { parseDashboardTaskScope } from '@/composables/useWorkflowTasks'
 import { canViewCollaborationWorkItems } from '@/auth/roles'
 import { useCapabilities } from '@/composables/useCapabilities'
 import type { ClusterOneRole } from '@/constants/roleJourneyDefinitions'
+import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useMastersStore } from '@/stores/masters'
@@ -33,7 +34,8 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
   const templatesStore = useTemplatesStore()
   const apiPolicyStore = useApiPolicyStore()
   const collaborationStore = useCollaborationStore()
-  const { context, reviewMasters, manageMasters } = useCapabilities()
+  const authorWorkflowStore = useAuthorWorkflowStore()
+  const { context, reviewMasters, manageMasters, authorTemplates } = useCapabilities()
 
   const loading = ref(false)
   const mastersLoadError = ref(false)
@@ -106,6 +108,13 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
         }),
       )
     }
+    if (authorTemplates.value && sessionStore.canAccessRoute('route.template-management')) {
+      jobs.push(
+        authorWorkflowStore.fetchOutdatedClauseReferenceTasks().catch(() => {
+          /* degrade to empty clause-outdated partition */
+        }),
+      )
+    }
     if (shouldLoadCollaborationWorkItems.value) {
       jobs.push(
         fetchCollaborationWorkItems().catch(() => {
@@ -142,6 +151,15 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
     }
   }
 
+  function refreshAuthorWorkflowTasks() {
+    if (!(authorTemplates.value && sessionStore.canAccessRoute('route.template-management'))) {
+      return
+    }
+    void authorWorkflowStore.fetchOutdatedClauseReferenceTasks().catch(() => {
+      /* degrade to empty clause-outdated partition */
+    })
+  }
+
   onMounted(() => {
     void loadDashboardData()
     void scrollToTasksIfRequested(route.hash)
@@ -151,6 +169,11 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
     () => [route.hash, route.query.queue, route.query.filter, route.query.tab] as const,
     () => {
       void scrollToTasksIfRequested(route.hash)
+      // Hash-only navigations (e.g. /dashboard → /dashboard#tasks-section) skip remount;
+      // refresh author todos so fixtures created after first paint still appear (CE-U07).
+      if (route.hash === '#tasks-section' || isTaskTab.value) {
+        refreshAuthorWorkflowTasks()
+      }
     },
   )
 

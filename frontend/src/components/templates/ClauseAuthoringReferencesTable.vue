@@ -15,6 +15,7 @@ const emit = defineEmits<{
   preview: [reference: TemplateContentModuleReference]
   editPin: [reference: TemplateContentModuleReference]
   editClause: [reference: TemplateContentModuleReference]
+  bump: [reference: TemplateContentModuleReference]
 }>()
 
 const { t } = useI18n()
@@ -36,10 +37,22 @@ const { t } = useI18n()
       </template>
     </el-table-column>
     <el-table-column
-      prop="semanticVersion"
       :label="t('templates.clauseAuthoring.columns.semanticVersion')"
-      width="120"
-    />
+      width="180"
+    >
+      <template #default="{ row }">
+        <span>{{ row.semanticVersion }}</span>
+        <el-tag
+          v-if="row.outOfDate"
+          type="warning"
+          size="small"
+          class="outdated-tag"
+          data-testid="clause-reference-outdated-badge"
+        >
+          {{ t('templates.clauseAuthoring.outdatedBadge') }}
+        </el-tag>
+      </template>
+    </el-table-column>
     <el-table-column
       :label="t('templates.clauseAuthoring.columns.locked')"
       width="100"
@@ -54,12 +67,21 @@ const { t } = useI18n()
     </el-table-column>
     <el-table-column
       :label="t('templates.clauseAuthoring.columns.actions')"
-      width="280"
+      width="360"
       fixed="right"
     >
       <template #default="{ row }">
         <el-button link type="primary" @click="emit('preview', row)">
           {{ t('templates.clauseAuthoring.preview') }}
+        </el-button>
+        <el-button
+          v-if="editable && row.outOfDate && !row.locked && row.latestApprovedSemanticVersion"
+          link
+          type="warning"
+          data-testid="clause-reference-bump-button"
+          @click="emit('bump', row)"
+        >
+          {{ t('templates.clauseAuthoring.bumpToLatest') }}
         </el-button>
         <el-button
           v-if="editable"
@@ -92,5 +114,9 @@ const { t } = useI18n()
 <style scoped lang="scss">
 .references-table {
   margin-top: 0.5rem;
+}
+
+.outdated-tag {
+  margin-left: 0.5rem;
 }
 </style>

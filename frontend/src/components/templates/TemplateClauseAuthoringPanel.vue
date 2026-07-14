@@ -23,6 +23,8 @@ const { t } = useI18n()
 const {
   saving,
   savingClause,
+  bumping,
+  hasOutdatedUnlockedReferences,
   referenceDialogOpen,
   previewDialogOpen,
   clauseEditDialogOpen,
@@ -42,6 +44,8 @@ const {
   openEditReferenceDialog,
   handleModuleChange,
   handleSubmitReference,
+  bumpReference,
+  bumpAllOutdatedReferences,
   openPreviewDialog,
   openClauseEditor,
   handleSaveClauseContent,
@@ -56,6 +60,16 @@ const {
       :help-content="t('templates.clauseAuthoring.helpContent')"
     >
       <template #actions>
+        <el-button
+          v-if="editable && hasOutdatedUnlockedReferences"
+          type="warning"
+          plain
+          :loading="bumping"
+          data-testid="clause-bump-all-outdated"
+          @click="bumpAllOutdatedReferences"
+        >
+          {{ t('templates.clauseAuthoring.bumpAllOutdated') }}
+        </el-button>
         <el-button v-if="editable" type="primary" @click="openCreateDialog">
           {{ t('templates.clauseAuthoring.addReference') }}
         </el-button>
@@ -74,6 +88,7 @@ const {
       @preview="openPreviewDialog"
       @edit-pin="openEditReferenceDialog"
       @edit-clause="openClauseEditor"
+      @bump="bumpReference"
     />
 
     <ClauseAuthoringDialogs

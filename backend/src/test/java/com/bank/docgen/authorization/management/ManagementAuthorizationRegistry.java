@@ -33,6 +33,7 @@ final class ManagementAuthorizationRegistry {
             "com.bank.docgen.rendering.web.PreviewController",
             "com.bank.docgen.template.web.RiskPromptConfigController",
             "com.bank.docgen.template.web.TemplateAuthoringController",
+            "com.bank.docgen.template.web.TemplateAuthorWorkflowController",
             "com.bank.docgen.template.web.TemplateController",
             "com.bank.docgen.template.web.TemplateExportController",
             "com.bank.docgen.template.web.TemplateImportController",
@@ -147,6 +148,10 @@ final class ManagementAuthorizationRegistry {
                             "com.bank.docgen.template.service.TemplateRuleValidationService",
                             "com.bank.docgen.template.service.TemplateContentModuleReferenceService"
                     )
+            ),
+            Map.entry(
+                    "com.bank.docgen.template.web.TemplateAuthorWorkflowController",
+                    Set.of("com.bank.docgen.template.service.TemplateContentModuleReferenceService")
             ),
             Map.entry(
                     "com.bank.docgen.template.web.TemplateController",

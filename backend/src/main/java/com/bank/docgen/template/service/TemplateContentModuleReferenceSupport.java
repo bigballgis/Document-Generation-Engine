@@ -1,5 +1,7 @@
 package com.bank.docgen.template.service;
 
+import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
+import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
@@ -10,7 +12,10 @@ import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.persistence.TemplateContentModuleReferenceEntity;
 import com.bank.docgen.template.persistence.TemplateEntity;
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Package-private resolve / validate / view helpers for template content-module references.
@@ -60,12 +65,60 @@ final class TemplateContentModuleReferenceSupport {
                 .orElseThrow(ContentModuleNotFoundException::new);
         ContentModuleEntity module = contentModuleRepository.findByIdAndDeletedAtIsNull(version.getModuleId())
                 .orElseThrow(ContentModuleNotFoundException::new);
+        Optional<ContentModuleVersionEntity> latestReferencable =
+                findLatestReferencableApprovedVersion(version.getModuleId());
+        boolean outOfDate = isOutOfDate(version, latestReferencable);
+        String latestApprovedSemanticVersion = outOfDate
+                ? latestReferencable.map(ContentModuleVersionEntity::getSemanticVersion).orElse(null)
+                : null;
         return new ContentModuleReferenceView(
                 reference.getReferenceKey(),
                 contentModuleAccessService.publicModuleId(module),
                 version.getSemanticVersion(),
-                reference.isLockedFlag()
+                reference.isLockedFlag(),
+                outOfDate,
+                latestApprovedSemanticVersion
         );
+    }
+
+    int countOutdatedUnlockedReferences(List<TemplateContentModuleReferenceEntity> references) {
+        int count = 0;
+        for (TemplateContentModuleReferenceEntity reference : references) {
+            if (reference.isLockedFlag()) {
+                continue;
+            }
+            ContentModuleVersionEntity pinned = contentModuleVersionRepository
+                    .findById(reference.getContentModuleVersionId())
+                    .orElse(null);
+            if (pinned == null) {
+                continue;
+            }
+            Optional<ContentModuleVersionEntity> latestReferencable =
+                    findLatestReferencableApprovedVersion(pinned.getModuleId());
+            if (isOutOfDate(pinned, latestReferencable)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    Optional<ContentModuleVersionEntity> findLatestReferencableApprovedVersion(UUID moduleId) {
+        List<ContentModuleVersionEntity> versions = contentModuleVersionRepository
+                .findByModuleIdAndReviewStateAndLifecycleStateOrderBySemanticVersionDesc(
+                        moduleId,
+                        ContentModuleReviewState.APPROVED,
+                        ContentModuleLifecycleState.ACTIVE
+                );
+        return versions.isEmpty() ? Optional.empty() : Optional.of(versions.getFirst());
+    }
+
+    private boolean isOutOfDate(
+            ContentModuleVersionEntity pinnedVersion,
+            Optional<ContentModuleVersionEntity> latestReferencable
+    ) {
+        return latestReferencable
+                .map(latest -> !latest.getId().equals(pinnedVersion.getId()))
+                .orElse(false);
     }
 
     String normalizeReferenceKey(String referenceKey) {

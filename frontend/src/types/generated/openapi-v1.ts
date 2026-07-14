@@ -660,6 +660,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/author-workflow/outdated-clause-references": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List draft templates with outdated clause references for the author
+         * @description Returns draft templates writable by the caller where at least one unlocked content-module reference is pinned to an older approved version than the module's latest referencable release (CE-U07).
+         */
+        get: operations["listOutdatedClauseReferenceAuthorTasks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/collaboration-work-items": {
         parameters: {
             query?: never;
@@ -2846,6 +2866,25 @@ export interface components {
             semanticVersion: string;
             /** @description Locked references from published templates are preserved but not re-applied on import. */
             locked: boolean;
+            /** @description True when a newer approved active module version exists than the pinned semantic version. */
+            outOfDate: boolean;
+            /** @description Latest referencable approved version when outOfDate is true; otherwise null. */
+            latestApprovedSemanticVersion?: string | null;
+        };
+        OutdatedClauseReferenceAuthorTaskView: {
+            /** Format: uuid */
+            templateId: string;
+            externalId: string;
+            groupCode: string;
+            name: string;
+            /**
+             * Format: uuid
+             * @description In-flight draft version id for deep-linking into the template design workspace.
+             */
+            inFlightDevVersionId: string;
+            outdatedReferenceCount: number;
+            /** Format: date-time */
+            updatedAt: string;
         };
         TemplateExportApiPolicySnapshot: {
             templateId: string;
@@ -4706,6 +4745,34 @@ export interface operations {
             404: components["responses"]["ErrorResponse"];
             409: components["responses"]["ErrorResponse"];
             422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listOutdatedClauseReferenceAuthorTasks: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Author workflow tasks for outdated clause pins. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        metadata: components["schemas"]["Metadata"];
+                        result: components["schemas"]["OutdatedClauseReferenceAuthorTaskView"][];
+                    };
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };

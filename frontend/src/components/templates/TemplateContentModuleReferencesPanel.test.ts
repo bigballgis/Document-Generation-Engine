@@ -40,6 +40,7 @@ describe('TemplateContentModuleReferencesPanel', () => {
         moduleId: 'MOD-LOAN-DISCLOSURE',
         semanticVersion: '1.0.0',
         locked: false,
+        outOfDate: false,
       },
     ])
     vi.mocked(contentModulesApi.listAllContentModules).mockResolvedValue({

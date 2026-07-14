@@ -20,7 +20,7 @@ import {
 import { E2E_API_BASE_URL, ensureDemoRetailMasterApproved, findMasterByName } from './masters-api'
 import { fetchSubmitGateChecklist } from './submit-approval-gate-api'
 import { getBatchTestHistoryViaApi, runBatchTestViaApi } from './template-testing-api'
-import { cloneReleaseVersion } from './template-version-lines-api'
+import { cloneReleaseVersion, listTemplateVersionLines } from './template-version-lines-api'
 
 interface ApiEnvelope<T> {
   result: T
@@ -552,6 +552,109 @@ export async function upsertTemplateContentModuleReference(
       semanticVersion,
     },
   )
+}
+
+export async function createAndApproveAdditionalContentModuleVersion(
+  request: APIRequestContext,
+  moduleId: string,
+  semanticVersion: string,
+): Promise<void> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
+
+  await authorizedPost(
+    request,
+    authorToken,
+    `/content-modules/${moduleId}/versions`,
+    {
+      semanticVersion,
+      contentStructureJson: '{"blocks":[{"type":"paragraph","text":"E2E clause v2"}]}',
+      changeDescription: `E2E version ${semanticVersion}`,
+    },
+  )
+
+  await authorizedPost(
+    request,
+    authorToken,
+    `/content-modules/${moduleId}/review/transition`,
+    {
+      operation: 'SUBMIT_FOR_REVIEW',
+      actorRole: 'TEMPLATE_AUTHOR',
+      actorId: E2E_TEMPLATE_AUTHOR.username,
+      changeDescription: `Ready for E2E approval ${semanticVersion}`,
+    },
+  )
+
+  await authorizedPost(
+    request,
+    approverToken,
+    `/content-modules/${moduleId}/review/transition`,
+    {
+      operation: 'APPROVE_REVIEW',
+      actorRole: 'APPROVER',
+      actorId: E2E_TEMPLATE_APPROVER.username,
+    },
+  )
+}
+
+export interface OutdatedClauseReferenceFixture {
+  templateId: string
+  externalId: string
+  inFlightDevVersionId: string
+  referenceKey: string
+  moduleId: string
+  pinnedVersion: string
+  latestVersion: string
+}
+
+export async function prepareDraftTemplateWithOutdatedClauseReference(
+  request: APIRequestContext,
+): Promise<OutdatedClauseReferenceFixture> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const master = await ensureDemoRetailMasterApproved(request)
+  const module = await createApprovedContentModule(request, { semanticVersion: '1.0.0' })
+  const externalId = uniqueModuleCode('E2E-COB')
+  const referenceKey = 'E2E_OUTDATED_REF'
+
+  const createdTemplate = await authorizedPost<{ id: string; externalId: string }>(
+    request,
+    authorToken,
+    '/templates',
+    {
+      externalId,
+      groupCode: DEMO_GROUP_CODE,
+      name: `E2E outdated clause ${externalId}`,
+      description: 'CE-U07 outdated clause Playwright fixture',
+      masterId: master.id,
+    },
+    201,
+  )
+
+  await upsertTemplateContentModuleReference(
+    request,
+    createdTemplate.id,
+    referenceKey,
+    module.moduleId,
+    '1.0.0',
+  )
+
+  await createAndApproveAdditionalContentModuleVersion(request, module.moduleId, '1.1.0')
+
+  const lines = await listTemplateVersionLines(request, createdTemplate.id)
+  const inFlight = lines.find((line) => line.lineKind === 'IN_FLIGHT')
+  if (!inFlight) {
+    throw new Error(`No in-flight dev version for template ${createdTemplate.id}`)
+  }
+
+  return {
+    templateId: createdTemplate.id,
+    externalId,
+    inFlightDevVersionId: inFlight.devVersionId,
+    referenceKey,
+    moduleId: module.moduleId,
+    pinnedVersion: '1.0.0',
+    latestVersion: '1.1.0',
+  }
 }
 
 async function configurePublishableTemplate(request: APIRequestContext, templateId: string): Promise<void> {
