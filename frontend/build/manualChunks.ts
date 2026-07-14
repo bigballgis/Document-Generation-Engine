@@ -20,5 +20,8 @@ export function resolveManualChunk(id: string): string | undefined {
   if (id.includes('axios') || id.includes('vue-i18n')) {
     return 'app-vendor'
   }
+  if (id.includes('pdfjs-dist')) {
+    return 'pdfjs-vendor'
+  }
   return 'vendor'
 }

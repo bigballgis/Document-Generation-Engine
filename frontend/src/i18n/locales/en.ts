@@ -1319,6 +1319,7 @@ export default {
         'Run a test generation or refresh to load the final-chain DOCX/PDF artifact beside the editor.',
       previewCollapse: 'Hide preview',
       previewExpand: 'Show preview',
+      inlinePdfTitle: 'PDF preview',
     },
     structuredEditor: {
       bindingHint:
@@ -1491,6 +1492,16 @@ export default {
         },
       },
       empty: 'Run preview on a test data set to generate downloadable DOCX and PDF artifacts.',
+      inlinePdf: {
+        ariaLabel: 'Inline PDF preview',
+        title: 'PDF preview',
+        loading: 'Loading PDF preview…',
+        loadFailed: 'Unable to load the PDF preview.',
+        renderFailed: 'Unable to render the PDF preview.',
+        previousPage: 'Previous page',
+        nextPage: 'Next page',
+        pageLabel: 'Page {current} of {total}',
+      },
       locationTypes: {
         PAGE: 'Page',
         ANCHOR: 'Layout placeholder',

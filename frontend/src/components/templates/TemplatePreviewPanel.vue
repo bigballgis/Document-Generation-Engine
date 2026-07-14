@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { toRef } from 'vue'
 import FidelityWarningList from '@/components/authoring/FidelityWarningList.vue'
+import InlinePdfPreviewViewer from '@/components/templates/InlinePdfPreviewViewer.vue'
+import { useInlinePdfPreview } from '@/components/templates/useInlinePdfPreview'
 import { useTemplatePreviewPanel } from '@/components/templates/useTemplatePreviewPanel'
 import type { AnchorBinding, PreviewRecord } from '@/types/template'
 
@@ -34,6 +36,16 @@ const {
   canDownloadPdf,
   downloadArtifact,
 } = useTemplatePreviewPanel({
+  templateId: toRef(props, 'templateId'),
+  preview: toRef(props, 'preview'),
+})
+
+const {
+  loading: inlinePdfLoading,
+  errorMessage: inlinePdfError,
+  pdfBlob,
+  canShowInlinePdf,
+} = useInlinePdfPreview({
   templateId: toRef(props, 'templateId'),
   preview: toRef(props, 'preview'),
 })
@@ -77,6 +89,15 @@ const {
           {{ t('templates.previewHistory.downloadPdf') }}
         </el-button>
       </div>
+
+      <section v-if="canShowInlinePdf" class="preview-inline-pdf" data-testid="preview-inline-pdf-section">
+        <h3>{{ t('templates.preview.inlinePdf.title') }}</h3>
+        <InlinePdfPreviewViewer
+          :blob="pdfBlob"
+          :loading="inlinePdfLoading || loading"
+          :error-message="inlinePdfError"
+        />
+      </section>
 
       <el-button :loading="loading" @click="refreshPreview">
         {{ t('templates.preview.refresh') }}

@@ -1,6 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
+import { ref } from 'vue'
 import ElementPlus from 'element-plus'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import en from '@/i18n/locales/en'
@@ -13,6 +14,28 @@ vi.mock('@/components/templates/TemplatePreviewPanel.vue', () => ({
     props: ['templateId', 'bindings', 'preview', 'compact'],
     template: '<div data-testid="template-preview-panel-stub" />',
   },
+}))
+
+vi.mock('@/components/templates/InlinePdfPreviewViewer.vue', () => ({
+  default: {
+    name: 'InlinePdfPreviewViewer',
+    props: ['blob', 'loading', 'errorMessage'],
+    template: '<div data-testid="inline-pdf-preview-viewer-stub" />',
+  },
+}))
+
+const mockUseInlinePdfPreview = vi.hoisted(() =>
+  vi.fn(() => ({
+    loading: ref(false),
+    errorMessage: ref<string | null>(null),
+    pdfBlob: ref<Blob | null>(new Blob(['%PDF'], { type: 'application/pdf' })),
+    canShowInlinePdf: ref(true),
+    reloadPdf: vi.fn(),
+  })),
+)
+
+vi.mock('@/components/templates/useInlinePdfPreview', () => ({
+  useInlinePdfPreview: mockUseInlinePdfPreview,
 }))
 
 describe('AuthoringPreviewPane', () => {
@@ -97,5 +120,28 @@ describe('AuthoringPreviewPane', () => {
     await flushPromises()
 
     expect(wrapper.find('[data-testid="template-preview-panel-stub"]').exists()).toBe(true)
+  })
+
+  it('BDD-CE-U04-IPP-001 shows inline PDF viewer when preview succeeded', async () => {
+    const wrapper = mountPane({ preview })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="authoring-inline-pdf-section"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="inline-pdf-preview-viewer-stub"]').exists()).toBe(true)
+  })
+
+  it('hides inline PDF section when preview cannot be shown inline', async () => {
+    mockUseInlinePdfPreview.mockReturnValueOnce({
+      loading: ref(false),
+      errorMessage: ref<string | null>(null),
+      pdfBlob: ref<Blob | null>(null),
+      canShowInlinePdf: ref(false),
+      reloadPdf: vi.fn(),
+    })
+
+    const wrapper = mountPane({ preview: { ...preview, status: 'FAILED' } })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="authoring-inline-pdf-section"]').exists()).toBe(false)
   })
 })

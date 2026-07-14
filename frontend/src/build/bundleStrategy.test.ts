@@ -24,4 +24,8 @@ describe('bundleStrategy (SOR-P06)', () => {
   it('returns undefined for application source', () => {
     expect(resolveManualChunk('/workspace/frontend/src/main.ts')).toBeUndefined()
   })
+
+  it('splits pdfjs into pdfjs-vendor chunk', () => {
+    expect(resolveManualChunk('/workspace/node_modules/pdfjs-dist/build/pdf.mjs')).toBe('pdfjs-vendor')
+  })
 })

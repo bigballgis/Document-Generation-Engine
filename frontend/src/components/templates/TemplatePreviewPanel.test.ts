@@ -11,6 +11,16 @@ import type { PreviewRecord } from '@/types/template'
 
 vi.mock('@/api/templates', () => ({
   getPreview: vi.fn(),
+  downloadPreviewArtifact: vi.fn(),
+}))
+
+vi.mock('@/components/templates/InlinePdfPreviewViewer.vue', () => ({
+  default: {
+    name: 'InlinePdfPreviewViewer',
+    props: ['blob', 'loading', 'errorMessage'],
+    template:
+      '<div data-testid="inline-pdf-preview-viewer"><span data-testid="inline-pdf-preview-page-label">Page 1 of 1</span><canvas data-testid="inline-pdf-preview-canvas" /></div>',
+  },
 }))
 
 describe('TemplatePreviewPanel', () => {
@@ -21,6 +31,7 @@ describe('TemplatePreviewPanel', () => {
   afterEach(() => {
     document.body.innerHTML = ''
     vi.mocked(templatesApi.getPreview).mockReset()
+    vi.mocked(templatesApi.downloadPreviewArtifact).mockReset()
   })
 
   function createTestRouter() {
@@ -73,6 +84,11 @@ describe('TemplatePreviewPanel', () => {
   }
 
   it('renders preview comparison summary and structured diff rows', async () => {
+    vi.mocked(templatesApi.downloadPreviewArtifact).mockResolvedValue({
+      blob: new Blob(['%PDF'], { type: 'application/pdf' }),
+      filename: 'preview.pdf',
+    })
+
     const i18n = createI18n({
       legacy: false,
       locale: 'en',
@@ -86,8 +102,10 @@ describe('TemplatePreviewPanel', () => {
         preview,
       },
       global: { plugins: [createPinia(), i18n, ElementPlus, createTestRouter()] },
+      attachTo: document.body,
     })
 
+    await flushPromises()
     await flushPromises()
 
     expect(wrapper.text()).toContain('2 difference(s): 1 blocker(s), 1 warning(s)')
@@ -100,6 +118,57 @@ describe('TemplatePreviewPanel', () => {
     await flushPromises()
     expect(wrapper.text()).toContain('LAYOUT_SHIFT')
     expect(wrapper.find('[data-testid="fidelity-warning-edit-binding"]').exists()).toBe(true)
+  })
+
+  it('BDD-CE-U04-IPP-001 shows inline PDF preview section', async () => {
+    vi.mocked(templatesApi.downloadPreviewArtifact).mockResolvedValue({
+      blob: new Blob(['%PDF'], { type: 'application/pdf' }),
+      filename: 'preview.pdf',
+    })
+
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(TemplatePreviewPanel, {
+      props: {
+        templateId: 'tpl-1',
+        bindings: [],
+        preview,
+      },
+      global: { plugins: [createPinia(), i18n, ElementPlus, createTestRouter()] },
+      attachTo: document.body,
+    })
+
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="preview-inline-pdf-section"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="inline-pdf-preview-viewer"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="inline-pdf-preview-page-label"]').text()).toContain('Page 1 of 1')
+  })
+
+  it('hides inline PDF preview when preview run failed', async () => {
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'en',
+      messages: { en },
+    })
+
+    const wrapper = mount(TemplatePreviewPanel, {
+      props: {
+        templateId: 'tpl-1',
+        bindings: [],
+        preview: { ...preview, status: 'FAILED' },
+      },
+      global: { plugins: [createPinia(), i18n, ElementPlus, createTestRouter()] },
+    })
+
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="preview-inline-pdf-section"]').exists()).toBe(false)
   })
 
   it('shows empty state when no preview record exists', async () => {
