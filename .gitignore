@@ -84,3 +84,6 @@ node_modules/
 # LR-D6 local-only override (copy from .example; never auto-loaded by docker-deploy)
 docker-compose.load-smoke.override.yml
 
+# Local toolchains downloaded into the worktree (e.g. Temurin JDK for agents)
+.tools/
+

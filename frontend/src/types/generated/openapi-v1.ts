@@ -2760,7 +2760,7 @@ export interface components {
         /** @enum {string} */
         TemplateLifecycleStatus: "DRAFT" | "TESTING" | "APPROVAL" | "PENDING_RELEASE" | "PUBLISHED" | "STOPPED" | "DEPRECATED";
         /** @enum {string} */
-        TemplateVariableType: "TEXT" | "NUMBER" | "AMOUNT" | "DATE" | "ENUM" | "BOOLEAN" | "LIST" | "OBJECT";
+        TemplateVariableType: "TEXT" | "NUMBER" | "AMOUNT" | "DATE" | "ENUM" | "BOOLEAN" | "LIST" | "OBJECT" | "COMPUTED";
         /**
          * @description Conflict resolution when bundle metadata `templateId` (internal UUID) already exists. Defaults to `REJECT_IMPORT` when omitted. Conflicting `externalId` always rejects import regardless of policy.
          * @enum {string}

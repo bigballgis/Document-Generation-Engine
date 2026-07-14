@@ -7,10 +7,11 @@ import TableColumnHeader from '@/components/common/TableColumnHeader.vue'
 import PreviewProgressDialog from '@/components/template/PreviewProgressDialog.vue'
 import TemplateTestDataSetEditDialog from '@/components/templates/TemplateTestDataSetEditDialog.vue'
 import { useTemplateTestDataSetPanel } from '@/components/templates/useTemplateTestDataSetPanel'
-import type { TestDataSet } from '@/types/template'
+import type { TestDataSet, VariableSchema } from '@/types/template'
 
 const props = defineProps<{
   templateId: string
+  variables?: VariableSchema[]
   generatingPreviewId?: string | null
   refreshToken?: number
 }>()
@@ -25,6 +26,7 @@ const api = reactive(
   useTemplateTestDataSetPanel({
     templateId: toRef(props, 'templateId'),
     refreshToken: toRef(props, 'refreshToken'),
+    variables: () => props.variables ?? [],
     emitSelected: (id) => emit('selected', id),
     emitLoaded: (count) => emit('loaded', count),
   }),
@@ -101,11 +103,14 @@ defineExpose({ reload: api.loadDataSets, dataSets: api.dataSets })
     <TemplateTestDataSetEditDialog
       v-model="api.dialogVisible"
       v-model:coverage-tags-text="api.coverageTagsText"
-      v-model:variables-json="api.variablesJson"
       :editing-id="api.editingId"
       :saving="api.saving"
       :form="api.form"
+      :variables="variables ?? []"
+      :initial-variables="api.initialVariables"
+      :server-field-errors="api.serverFieldErrors"
       @save="api.handleSave"
+      @clear-server-errors="api.clearServerErrors"
     />
     <PreviewProgressDialog
       v-model="api.previewDialogVisible"

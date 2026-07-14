@@ -6666,7 +6666,7 @@ components:
         - DEPRECATED
     TemplateVariableType:
       type: string
-      enum: [TEXT, NUMBER, AMOUNT, DATE, ENUM, BOOLEAN, LIST, OBJECT]
+      enum: [TEXT, NUMBER, AMOUNT, DATE, ENUM, BOOLEAN, LIST, OBJECT, COMPUTED]
     TemplateImportConflictPolicy:
       type: string
       enum: [KEEP_TEMPLATE_ID, REJECT_IMPORT]

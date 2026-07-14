@@ -78,6 +78,15 @@ public class ErrorEnvelopeFactory {
             String messageKey,
             List<FieldError> fieldErrors
     ) {
+        return validationError(request, HttpStatus.BAD_REQUEST, messageKey, fieldErrors);
+    }
+
+    public ResponseEntity<ErrorEnvelope> validationError(
+            HttpServletRequest request,
+            HttpStatus status,
+            String messageKey,
+            List<FieldError> fieldErrors
+    ) {
         String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
         String auditId = traceIdProvider.newAuditId();
         ErrorDetail error = new ErrorDetail(
@@ -88,7 +97,7 @@ public class ErrorEnvelopeFactory {
                 false,
                 fieldErrors
         );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(status)
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 

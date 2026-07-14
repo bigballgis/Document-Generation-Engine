@@ -1,8 +1,11 @@
 import { reactive, ref, type Ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useConfirmAction } from '@/composables/useConfirmAction'
+import { resolveApiError } from '@/api/http'
 import type { useTemplatePanelDataStore } from '@/stores/templatePanelData'
-import type { TestDataSet } from '@/types/template'
+import type { ApiFieldError } from '@/types/session'
+import type { TestDataSet, VariableSchema } from '@/types/template'
+import { buildSchemaSkeleton } from '@/utils/testDataSetSchemaForm'
 
 type PanelDataStore = ReturnType<typeof useTemplatePanelDataStore>
 type Translate = (key: string) => string
@@ -11,10 +14,11 @@ export function createTemplateTestDataSetPanelActions(options: {
   t: Translate
   panelDataStore: PanelDataStore
   templateId: () => string
+  variables: () => VariableSchema[]
   selectedId: Ref<string | null>
   emitSelected: (testDataSetId: string | null) => void
 }) {
-  const { t, panelDataStore, templateId, selectedId, emitSelected } = options
+  const { t, panelDataStore, templateId, variables, selectedId, emitSelected } = options
   const { confirmAction } = useConfirmAction()
 
   const saving = ref(false)
@@ -24,6 +28,8 @@ export function createTemplateTestDataSetPanelActions(options: {
   const previewDialogPreviewId = ref('')
   const previewDialogStreamUrl = ref('')
   const previewDialogDataSetName = ref('')
+  const initialVariables = ref<Record<string, unknown>>({})
+  const serverFieldErrors = ref<ApiFieldError[] | undefined>(undefined)
 
   const form = reactive({
     name: '',
@@ -31,7 +37,6 @@ export function createTemplateTestDataSetPanelActions(options: {
     required: false,
     scenarioName: '',
   })
-  const variablesJson = ref('{\n  "customerName": "Sample"\n}')
   const coverageTagsText = ref('')
 
   function resetForm() {
@@ -39,9 +44,10 @@ export function createTemplateTestDataSetPanelActions(options: {
     form.description = ''
     form.required = false
     form.scenarioName = ''
-    variablesJson.value = '{\n  "customerName": "Sample"\n}'
     coverageTagsText.value = ''
     editingId.value = null
+    initialVariables.value = buildSchemaSkeleton(variables())
+    serverFieldErrors.value = undefined
   }
 
   function parseCoverageTags(): string[] {
@@ -65,45 +71,31 @@ export function createTemplateTestDataSetPanelActions(options: {
     form.description = row.description ?? ''
     form.required = row.required
     form.scenarioName = row.scenarioName ?? ''
-    variablesJson.value = JSON.stringify(row.variables, null, 2)
+    initialVariables.value = { ...(row.variables as Record<string, unknown>) }
     coverageTagsText.value = row.coverageTags.join(', ')
+    serverFieldErrors.value = undefined
     dialogVisible.value = true
   }
 
-  function parseVariables(): Record<string, unknown> | null {
-    try {
-      const parsed: unknown = JSON.parse(variablesJson.value)
-      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        return null
-      }
-      return parsed as Record<string, unknown>
-    } catch {
-      return null
-    }
+  function clearServerErrors() {
+    serverFieldErrors.value = undefined
   }
 
-  function buildPayload() {
-    const variables = parseVariables()
-    if (!form.name.trim() || variables === null) {
-      return null
+  async function handleSave(variablesPayload: Record<string, unknown>) {
+    if (!form.name.trim()) {
+      ElMessage.error(t('templates.testDataSets.error.invalidForm'))
+      return
     }
-    return {
+    const payload = {
       name: form.name.trim(),
       description: form.description.trim() || undefined,
-      variables,
+      variables: variablesPayload,
       required: form.required,
       scenarioName: form.scenarioName.trim() || undefined,
       coverageTags: parseCoverageTags(),
     }
-  }
-
-  async function handleSave() {
-    const payload = buildPayload()
-    if (!payload) {
-      ElMessage.error(t('templates.testDataSets.error.invalidForm'))
-      return
-    }
     saving.value = true
+    serverFieldErrors.value = undefined
     try {
       const id = templateId()
       if (editingId.value) {
@@ -116,8 +108,14 @@ export function createTemplateTestDataSetPanelActions(options: {
         ElMessage.success(t('templates.testDataSets.createSuccess'))
       }
       dialogVisible.value = false
-    } catch {
-      ElMessage.error(t('templates.testDataSets.error.save'))
+    } catch (error: unknown) {
+      const resolved = resolveApiError(error)
+      if (resolved?.error.fieldErrors?.length) {
+        serverFieldErrors.value = resolved.error.fieldErrors
+        ElMessage.error(t(resolved.error.messageKey || 'templates.testDataSets.error.save'))
+      } else {
+        ElMessage.error(t('templates.testDataSets.error.save'))
+      }
     } finally {
       saving.value = false
     }
@@ -190,11 +188,13 @@ export function createTemplateTestDataSetPanelActions(options: {
     previewDialogStreamUrl,
     previewDialogDataSetName,
     form,
-    variablesJson,
     coverageTagsText,
+    initialVariables,
+    serverFieldErrors,
     openCreateDialog,
     openEditDialog,
     handleSave,
+    clearServerErrors,
     handleDerive,
     handleDelete,
     handleSelect,

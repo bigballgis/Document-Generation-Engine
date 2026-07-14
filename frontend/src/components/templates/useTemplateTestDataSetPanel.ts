@@ -6,12 +6,13 @@ import { rowSortMethod, useDataTableFilters } from '@/composables/useDataTableFi
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
 import { CLIENT_TABLE_PAGE_SIZE } from '@/constants/tablePagination'
 import { useTemplatePanelDataStore } from '@/stores/templatePanelData'
-import type { TestDataSet } from '@/types/template'
+import type { TestDataSet, VariableSchema } from '@/types/template'
 import { createTemplateTestDataSetPanelActions } from '@/components/templates/createTemplateTestDataSetPanelActions'
 
 export interface UseTemplateTestDataSetPanelOptions {
   templateId: Ref<string> | (() => string)
   refreshToken: Ref<number | undefined> | (() => number | undefined)
+  variables: Ref<VariableSchema[]> | (() => VariableSchema[])
   emitSelected: (testDataSetId: string | null) => void
   emitLoaded: (count: number) => void
 }
@@ -48,6 +49,7 @@ export function useTemplateTestDataSetPanel(options: UseTemplateTestDataSetPanel
     t,
     panelDataStore,
     templateId: () => readValue(options.templateId),
+    variables: () => readValue(options.variables),
     selectedId,
     emitSelected: options.emitSelected,
   })
