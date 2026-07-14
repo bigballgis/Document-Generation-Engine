@@ -1,22 +1,30 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Rank } from '@element-plus/icons-vue'
 import AppSearchSelect from '@/components/common/AppSearchSelect.vue'
 import StructuredContentBlockCard from '@/components/authoring/StructuredContentBlockCard.vue'
 import {
   STRUCTURED_BLOCK_NODE_TYPES,
 } from '@/composables/controlledStructuredContentEditorTypes'
 import {
+  areSiblingPaths,
   canAddNestedBlockChildren,
   isNestedContainerType,
   pathTestId,
   type NodePath,
 } from '@/utils/structuredContentNodePath'
+import {
+  getStructuredBlockDragPathKey,
+  setStructuredBlockDragPathKey,
+} from '@/utils/structuredContentDragState'
 import type { ConfirmedNodeType, StructuredContentNode } from '@/utils/structuredContentNodes'
 
 const props = defineProps<{
   node: StructuredContentNode
   path: NodePath
+  siblingIndex: number
+  siblingCount: number
   readonly: boolean
   variableSelectOptions: Array<{ value: string; label: string }>
   listVariableOptions: Array<{ value: string; label: string }>
@@ -30,6 +38,8 @@ const emit = defineEmits<{
   'add-inline': [path: NodePath, type: ConfirmedNodeType]
   'update-block-field': [path: NodePath, field: keyof StructuredContentNode, value: string]
   'insert-nested-block': [parentPath: NodePath, type: ConfirmedNodeType]
+  'reorder-block': [path: NodePath, toIndex: number]
+  'copy-block': [path: NodePath]
   'end-field-coalesce': []
 }>()
 
@@ -40,6 +50,8 @@ const canAddChildren = computed(() => canAddNestedBlockChildren(props.path))
 const showNestedPanel = computed(() => isNestedContainerType(props.node.type))
 const nestedChildren = computed(() => props.node.children ?? [])
 const nestedPathKey = computed(() => pathTestId(props.path))
+const canReorder = computed(() => !props.readonly && props.siblingCount > 1)
+const dragOver = ref(false)
 
 function conditionExpression(node: StructuredContentNode): string {
   return node.conditionExpression ?? node.key ?? ''
@@ -52,22 +64,116 @@ function loopVariable(node: StructuredContentNode): string {
 function childPath(childIndex: number): NodePath {
   return [...props.path, childIndex]
 }
+
+function onDragStart(event: DragEvent) {
+  if (!canReorder.value) {
+    event.preventDefault()
+    return
+  }
+  setStructuredBlockDragPathKey(pathTestId(props.path))
+  event.dataTransfer?.setData('text/plain', pathTestId(props.path))
+  event.dataTransfer!.effectAllowed = 'move'
+}
+
+function onDragOver(event: DragEvent) {
+  if (!canReorder.value) {
+    return
+  }
+  const sourcePathKey = getStructuredBlockDragPathKey()
+  if (!sourcePathKey) {
+    return
+  }
+  const sourceSegments = sourcePathKey.split('-').map((segment) => Number.parseInt(segment, 10))
+  if (!areSiblingPaths(sourceSegments, props.path)) {
+    return
+  }
+  event.preventDefault()
+  dragOver.value = true
+}
+
+function onDragLeave() {
+  dragOver.value = false
+}
+
+function onDrop(event: DragEvent) {
+  dragOver.value = false
+  if (!canReorder.value) {
+    return
+  }
+  const sourcePathKey = getStructuredBlockDragPathKey() ?? event.dataTransfer?.getData('text/plain')
+  if (!sourcePathKey) {
+    return
+  }
+  const sourceSegments = sourcePathKey.split('-').map((segment) => Number.parseInt(segment, 10))
+  if (!areSiblingPaths(sourceSegments, props.path)) {
+    return
+  }
+  const fromIndex = sourceSegments[sourceSegments.length - 1]
+  const toIndex = props.siblingIndex
+  if (fromIndex !== undefined && fromIndex !== toIndex) {
+    emit('reorder-block', sourceSegments, toIndex)
+  }
+  setStructuredBlockDragPathKey(null)
+}
+
+function onDragEnd() {
+  dragOver.value = false
+  setStructuredBlockDragPathKey(null)
+}
 </script>
 
 <template>
-  <article class="block-card" :data-testid="`structured-block-card-${nestedPathKey}`">
+  <div
+    class="block-card"
+    :class="{ 'block-card--drag-over': dragOver }"
+    :data-testid="`structured-block-card-${nestedPathKey}`"
+  >
+    <!-- Drop target wraps card for same-layer reorder (CE-U02). -->
+    <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -- drag-and-drop reorder is pointer-driven; handle has aria-label -->
+    <div
+      class="block-card__drop-target"
+      role="group"
+      :aria-label="nodeLabel(node.type)"
+      @dragover="onDragOver"
+      @dragleave="onDragLeave"
+      @drop="onDrop"
+    >
     <header class="block-card__header">
-      <el-tag size="small" type="info">{{ nodeLabel(node.type) }}</el-tag>
-      <el-button
-        v-if="!readonly"
-        link
-        type="danger"
-        size="small"
-        data-testid="structured-block-remove"
-        @click="emit('remove', path)"
-      >
-        {{ t('common.delete') }}
-      </el-button>
+      <div class="block-card__title">
+        <button
+          v-if="canReorder"
+          type="button"
+          class="block-card__drag-handle"
+          draggable="true"
+          :aria-label="t('templates.structuredEditor.dragHandle')"
+          data-testid="structured-block-drag-handle"
+          @dragstart="onDragStart"
+          @dragend="onDragEnd"
+        >
+          <el-icon><Rank /></el-icon>
+        </button>
+        <el-tag size="small" type="info">{{ nodeLabel(node.type) }}</el-tag>
+      </div>
+      <div v-if="!readonly" class="block-card__actions">
+        <el-button
+          link
+          type="primary"
+          size="small"
+          data-testid="structured-block-copy"
+          @click="emit('copy-block', path)"
+        >
+          {{ t('templates.structuredEditor.copyBlock') }}
+        </el-button>
+        <el-button
+          link
+          type="danger"
+          size="small"
+          data-testid="structured-block-remove"
+          @click="emit('remove', path)"
+        >
+          {{ t('common.delete') }}
+        </el-button>
+      </div>
     </header>
 
     <template v-if="node.type === 'paragraph' || node.type === 'sectionHeading'">
@@ -191,6 +297,8 @@ function childPath(childIndex: number): NodePath {
         :key="`${child.type}-${childIndex}-${nestedPathKey}`"
         :node="child"
         :path="childPath(childIndex)"
+        :sibling-index="childIndex"
+        :sibling-count="nestedChildren.length"
         :readonly="readonly"
         :variable-select-options="variableSelectOptions"
         :list-variable-options="listVariableOptions"
@@ -201,6 +309,8 @@ function childPath(childIndex: number): NodePath {
         @add-inline="(childPathValue, type) => emit('add-inline', childPathValue, type)"
         @update-block-field="(childPathValue, field, value) => emit('update-block-field', childPathValue, field, value)"
         @insert-nested-block="(parentPath, type) => emit('insert-nested-block', parentPath, type)"
+        @reorder-block="(childPathValue, toIndex) => emit('reorder-block', childPathValue, toIndex)"
+        @copy-block="(childPathValue) => emit('copy-block', childPathValue)"
         @end-field-coalesce="emit('end-field-coalesce')"
       />
 
@@ -227,16 +337,31 @@ function childPath(childIndex: number): NodePath {
         {{ t('templates.structuredEditor.nestedDepthLimit', { max: 3 }) }}
       </p>
     </section>
-  </article>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">
 .block-card {
-  padding: 0.75rem;
   margin-bottom: 0.75rem;
+}
+
+.block-card__drop-target {
+  padding: 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   background: var(--surface-muted);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.block-card--drag-over .block-card__drop-target {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.block-card--highlight .block-card__drop-target {
+  border-color: var(--color-warning);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-warning) 35%, transparent);
 }
 
 .block-card__header {
@@ -244,6 +369,35 @@ function childPath(childIndex: number): NodePath {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0.5rem;
+  gap: 0.5rem;
+}
+
+.block-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.block-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.block-card__drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .inline-row {

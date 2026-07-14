@@ -1508,6 +1508,11 @@ export default {
       nestedChildrenEmpty: '尚无嵌套块 — 请在下方添加。',
       nestedAddBlock: '添加嵌套块',
       nestedDepthLimit: '已达最大嵌套深度（{max} 层）。',
+      dragHandle: '在同层内拖拽排序',
+      copyBlock: '复制块',
+      validateStructure: '校验结构',
+      validationIssuesTitle: '发现 {count} 个结构问题 — 点击定位到块',
+      validationPassed: '结构校验通过。',
       jsonPreview: '结构化 JSON 预览',
       error: {
         loadCatalog: '无法加载母版样式目录。',

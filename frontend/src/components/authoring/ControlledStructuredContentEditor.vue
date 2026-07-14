@@ -21,6 +21,7 @@ const emit = defineEmits<{
 
 const {
   t,
+  te,
   isReadonly,
   recoveryDraft,
   editorRootRef,
@@ -50,6 +51,8 @@ const {
   applySelectedStyle,
   handlePasteFile,
   removeBlock,
+  reorderBlock,
+  copyBlock,
   updateInlineChild,
   addInlineToBlock,
   updateBlockField,
@@ -57,9 +60,14 @@ const {
   acceptPaste,
   cancelPaste,
   serializeStructuredContent,
+  validationIssues,
+  validationRan,
+  validateStructure,
+  scrollToBlock,
+  handleScrollToIssue,
 } = useControlledStructuredContentEditor(props, emit)
 
-defineExpose({ markPristine })
+defineExpose({ markPristine, validateStructure, scrollToBlock })
 </script>
 
 <template>
@@ -98,18 +106,64 @@ defineExpose({ markPristine })
       @paste-file="handlePasteFile"
     />
 
+    <div v-if="!isReadonly" class="validation-panel">
+      <el-button
+        size="small"
+        data-testid="structured-editor-validate-structure"
+        @click="validateStructure"
+      >
+        {{ t('templates.structuredEditor.validateStructure') }}
+      </el-button>
+      <el-alert
+        v-if="validationIssues.length"
+        type="warning"
+        show-icon
+        :closable="false"
+        class="validation-panel__alert"
+        :title="t('templates.structuredEditor.validationIssuesTitle', { count: validationIssues.length })"
+      >
+        <ul class="validation-panel__issues" data-testid="structured-editor-validation-issues">
+          <li v-for="(issue, index) in validationIssues" :key="`${issue.location}-${index}`">
+            <button
+              type="button"
+              class="validation-panel__issue-link"
+              data-testid="structured-editor-validation-issue"
+              @click="handleScrollToIssue(issue)"
+            >
+              <span class="validation-panel__issue-location">{{ issue.location }}</span>
+              <span class="validation-panel__issue-message">
+                {{ te(issue.messageKey) ? t(issue.messageKey) : issue.messageKey }}
+              </span>
+            </button>
+          </li>
+        </ul>
+      </el-alert>
+      <el-alert
+        v-else-if="validationRan"
+        type="success"
+        show-icon
+        :closable="false"
+        class="validation-panel__alert"
+        :title="t('templates.structuredEditor.validationPassed')"
+      />
+    </div>
+
     <div class="editor-surface" data-testid="editor-paste-area">
       <StructuredContentBlockCard
         v-for="(node, index) in documentModel.nodes"
         :key="`${node.type}-${index}`"
         :node="node"
         :path="[index]"
+        :sibling-index="index"
+        :sibling-count="documentModel.nodes.length"
         :readonly="isReadonly"
         :variable-select-options="variableSelectOptions"
         :list-variable-options="listVariableOptions"
         :clause-reference-options="clauseReferenceOptions"
         :node-label="nodeLabel"
         @remove="removeBlock"
+        @reorder-block="reorderBlock"
+        @copy-block="copyBlock"
         @update-inline-child="updateInlineChild"
         @add-inline="addInlineToBlock"
         @update-block-field="updateBlockField"
@@ -150,6 +204,44 @@ defineExpose({ markPristine })
   margin: 0;
   color: var(--text-muted);
   font-size: 0.875rem;
+}
+
+.validation-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.validation-panel__alert {
+  margin: 0;
+}
+
+.validation-panel__issues {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.validation-panel__issue-link {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.15rem 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.validation-panel__issue-location {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 .editor-surface {

@@ -4,8 +4,10 @@ import {
   STRUCTURED_CONTENT_MAX_NEST_DEPTH,
   appendChildBlockAtPath,
   canAddNestedBlockChildren,
+  duplicateBlockAtPath,
   getNodeAtPath,
   removeNodeAtPath,
+  reorderBlockAtPath,
   updateNodeAtPath,
 } from '@/utils/structuredContentNodePath'
 import type { StructuredContentDocument } from '@/utils/structuredContentNodes'
@@ -66,5 +68,40 @@ describe('structuredContentNodePath', () => {
     })
     expect(getNodeAtPath(updated, [0])?.children).toHaveLength(2)
     expect(getNodeAtPath(updated, [0, 1])?.type).toBe('paragraph')
+  })
+
+  it('reorders siblings at root and nested layers only', () => {
+    const twoRoot: StructuredContentDocument = {
+      schemaVersion: '1.0',
+      nodes: [
+        { type: 'paragraph', children: [{ type: 'textRun', value: 'A' }] },
+        { type: 'paragraph', children: [{ type: 'textRun', value: 'B' }] },
+      ],
+    }
+    const reordered = reorderBlockAtPath(twoRoot, [1], 0)
+    expect(getNodeAtPath(reordered, [0])?.children?.[0]?.value).toBe('B')
+    expect(getNodeAtPath(reordered, [1])?.children?.[0]?.value).toBe('A')
+
+    const nestedReordered = reorderBlockAtPath(
+      appendChildBlockAtPath(nestedDoc, [0], {
+        type: 'paragraph',
+        children: [{ type: 'textRun', value: 'sibling' }],
+      }),
+      [0, 1],
+      0,
+    )
+    expect(getNodeAtPath(nestedReordered, [0, 0])?.type).toBe('paragraph')
+    expect(getNodeAtPath(nestedReordered, [0, 0])?.children?.[0]?.value).toBe('sibling')
+  })
+
+  it('duplicates a block as the next sibling', () => {
+    const duplicated = duplicateBlockAtPath(nestedDoc, [0, 0, 0])
+    expect(getNodeAtPath(duplicated, [0, 0, 0])?.children?.[0]?.value).toBe('deep')
+    expect(getNodeAtPath(duplicated, [0, 0, 1])?.children?.[0]?.value).toBe('deep')
+  })
+
+  it('no-ops reorder and duplicate on invalid paths', () => {
+    expect(reorderBlockAtPath(nestedDoc, [9], 0)).toEqual(nestedDoc)
+    expect(duplicateBlockAtPath(nestedDoc, [9])).toEqual(nestedDoc)
   })
 })

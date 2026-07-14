@@ -1388,6 +1388,11 @@ export default {
       nestedChildrenEmpty: 'No nested blocks yet — add a block below.',
       nestedAddBlock: 'Add nested block',
       nestedDepthLimit: 'Maximum nesting depth ({max} layers) reached.',
+      dragHandle: 'Drag to reorder within the same level',
+      copyBlock: 'Copy block',
+      validateStructure: 'Validate structure',
+      validationIssuesTitle: '{count} structure issue(s) found — click to locate block',
+      validationPassed: 'Structure validation passed.',
       jsonPreview: 'Structured JSON preview',
       error: {
         loadCatalog: 'Unable to load master style catalog.',

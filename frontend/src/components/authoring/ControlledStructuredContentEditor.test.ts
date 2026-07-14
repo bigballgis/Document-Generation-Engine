@@ -879,4 +879,84 @@ describe('ControlledStructuredContentEditor', () => {
       wrapper.unmount()
     })
   })
+
+  describe('CE-U02 block sort / copy / validate scroll', () => {
+    const twoParagraphs =
+      '{"schemaVersion":"1.0","nodes":[{"type":"paragraph","children":[{"type":"textRun","value":"A"}]},{"type":"paragraph","children":[{"type":"textRun","value":"B"}]}]}'
+
+    async function mountEditor(modelValue: string, extraProps: Record<string, unknown> = {}) {
+      fetchMasterStyleCatalog.mockResolvedValue({
+        catalogVersion: '1.0',
+        entries: [{ styleKey: 'BodyText', applicableNodeTypes: ['paragraph'], renderPurpose: 'BODY' }],
+      })
+      const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+      const wrapper = mount(ControlledStructuredContentEditor, {
+        props: {
+          modelValue,
+          templateId: 'tpl-1',
+          baseline: modelValue,
+          ...extraProps,
+        },
+        global: { plugins: [i18n, ElementPlus] },
+        attachTo: document.body,
+      })
+      await flushPromises()
+      return wrapper
+    }
+
+    it('BDD-CE-U02-BS-02 copies a block as adjacent sibling', async () => {
+      const wrapper = await mountEditor(twoParagraphs)
+      await wrapper.get('[data-testid="structured-block-copy"]').trigger('click')
+      await flushPromises()
+
+      const latest = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+      const parsed = JSON.parse(latest) as { nodes: Array<{ children?: Array<{ value?: string }> }> }
+      expect(parsed.nodes).toHaveLength(3)
+      expect(parsed.nodes[1]?.children?.[0]?.value).toBe('A')
+      wrapper.unmount()
+    })
+
+    it('BDD-CE-U02-BS-04 undo restores copied block removal', async () => {
+      const wrapper = await mountEditor(twoParagraphs)
+      await wrapper.get('[data-testid="structured-block-copy"]').trigger('click')
+      await flushPromises()
+      await wrapper.get('[data-testid="structured-editor-undo"]').trigger('click')
+      await flushPromises()
+      const latest = wrapper.emitted('update:modelValue')?.at(-1)?.[0] as string
+      const parsed = JSON.parse(latest) as { nodes: unknown[] }
+      expect(parsed.nodes).toHaveLength(2)
+      wrapper.unmount()
+    })
+
+    it('BDD-CE-U02-BS-03 validate structure lists issues and scrolls to block', async () => {
+      const invalidVariable =
+        '{"schemaVersion":"1.0","nodes":[{"type":"paragraph","children":[{"type":"variable","key":"ghostVar"}]}]}'
+      const wrapper = await mountEditor(invalidVariable, {
+        variables: [{ variableKey: 'customerName', variableType: 'TEXT', required: false, defaultValue: null, enumValues: null, description: null }],
+      })
+
+      await wrapper.get('[data-testid="structured-editor-validate-structure"]').trigger('click')
+      await flushPromises()
+
+      const issues = wrapper.findAll('[data-testid="structured-editor-validation-issue"]')
+      expect(issues.length).toBeGreaterThan(0)
+
+      const scrollIntoView = vi.fn()
+      Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+        configurable: true,
+        value: scrollIntoView,
+      })
+      await issues[0]?.trigger('click')
+      expect(scrollIntoView).toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('BDD-CE-U02-BS-05 hides reorder/copy/validate controls when readonly', async () => {
+      const wrapper = await mountEditor(twoParagraphs, { readonly: true })
+      expect(wrapper.find('[data-testid="structured-block-drag-handle"]').exists()).toBe(false)
+      expect(wrapper.find('[data-testid="structured-block-copy"]').exists()).toBe(false)
+      expect(wrapper.find('[data-testid="structured-editor-validate-structure"]').exists()).toBe(false)
+      wrapper.unmount()
+    })
+  })
 })
