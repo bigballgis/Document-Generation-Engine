@@ -730,8 +730,8 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-14. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1 Done (#54/#55/#56). Batch 2 in-progress: #57 CE-K01, #72 CE-G01. Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1 Done: ce-k07-golden-corpus-skeleton, ce-c01-c02-contract-strictness, ce-u03-testdata-schema-form. Batch 2 in flight: ce-k01-release-bundle-pinning, ce-g01-self-approval-block. D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-14. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1 Done (#54/#55/#56). Batch 2 Done (#57/#72). Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1 Done: ce-k07-golden-corpus-skeleton, ce-c01-c02-contract-strictness, ce-u03-testdata-schema-form. Batch 2 Done: ce-k01-release-bundle-pinning, ce-g01-self-approval-block. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
@@ -992,16 +992,16 @@
       {
         "id": "72",
         "title": "CE-G01: Self-approval block",
-        "description": "IN PROGRESS. Slice ce-g01-self-approval-block. decisionActor != lastSubmitActor on template/master/content-module; GROUP_ADMIN/GLOBAL_ADMIN override with reason+audit. P0·S.",
-        "details": "Lane3 after C01+C02 (#56). Worktree D:/working/DGE-ce-g01-self-approval-block · feat/ce-g01-self-approval-block. BDD ready docs/behavior/ce-g01-self-approval-block.md (22 scenarios). Gates before Done: mvn verify; worktree merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G01. Do NOT claim Done until merge.",
+        "description": "Done 2026-07-14. Slice ce-g01-self-approval-block. SelfApprovalGuard on template/master/content-module; GROUP_ADMIN/GLOBAL_ADMIN override with reason+audit. P0·S.",
+        "details": "Lane3 after C01+C02 (#56). Merge c187a230 on main (fast-forward from fecb5507). BDD ready docs/behavior/ce-g01-self-approval-block.md (22 scenarios). Gates: mvn verify GREEN (1470/0/0/7). E2E/UIUX/deploy not-applicable. Formal phase stays None. Plan §6 CE-G01.",
         "testStrategy": "1. Three modules block self-approval. 2. Override path audited. 3. Regression tests each module + X-001..X-008. 4. mvn verify.",
         "priority": "high",
         "dependencies": [
           "56"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T05:55:00.000Z"
+        "updatedAt": "2026-07-14T11:05:00.000Z"
       },
       {
         "id": "73",
