@@ -7,7 +7,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 import { requireDockerStack } from './helpers/stack-readiness'
-import { E2E_TEMPLATE_AUTHOR, E2E_TEMPLATE_TESTER, loginAs } from './helpers/auth'
+import { E2E_TEMPLATE_AUTHOR, loginAs } from './helpers/auth'
 import { E2E_API_BASE_URL } from './helpers/masters-api'
 import {
   createTestDataSetAsTester,

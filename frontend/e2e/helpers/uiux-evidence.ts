@@ -994,3 +994,33 @@ export async function captureApiOpsDiscoverabilityLocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** CE-U03 schema-driven test data dialog — 1920×1080 dual-brand evidence. */
+export const CE_U03_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-U03-testdata-schema-form')
+export const CE_U03_SCREENSHOT_DIR = path.join(CE_U03_EVIDENCE_ROOT, 'screenshots')
+export const CE_U03_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensureCeU03EvidenceDirs(): void {
+  fs.mkdirSync(CE_U03_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceU03ScreenshotPath(filename: string): string {
+  return path.join(CE_U03_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeU03Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeU03EvidenceDirs()
+  const target = ceU03ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeU03LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeU03EvidenceDirs()
+  const target = ceU03ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
