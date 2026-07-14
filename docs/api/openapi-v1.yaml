@@ -1411,6 +1411,47 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/content-modules/{moduleId}/shared-group-codes:
+    put:
+      tags: [Admin]
+      operationId: updateContentModuleSharedGroupCodes
+      summary: Update content module shared group codes
+      description: >-
+        CE-U10 / U10-C4: replaces module-level sharedGroupCodes for GLOBAL_ADMIN /
+        GROUP_ADMIN within the owning group (fail-closed). Owning groupCode is
+        dropped from the persisted list (owner access is implicit). Empty list
+        clears external sharing.
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContentModuleSharedGroupCodesRequest'
+      responses:
+        '200':
+          description: Shared group codes updated; returns module detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentModuleDetailResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/content-modules/{moduleId}/versions/{semanticVersion}:
     put:
       tags: [Admin]
@@ -6833,6 +6874,20 @@ components:
         changeDescription:
           type: string
           maxLength: 2048
+    UpdateContentModuleSharedGroupCodesRequest:
+      type: object
+      additionalProperties: false
+      required: [sharedGroupCodes]
+      properties:
+        sharedGroupCodes:
+          type: array
+          description: >
+            Target groups that may read this module outside the owning group.
+            Normalized to upper-case, distinct, sorted; owning groupCode is ignored.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
     ContentModuleVersionView:
       type: object
       additionalProperties: false

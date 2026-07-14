@@ -14,6 +14,7 @@ import com.bank.docgen.authorization.management.domain.AuthSource;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.contentmodule.api.CreateContentModuleRequest;
 import com.bank.docgen.contentmodule.api.CreateContentModuleVersionRequest;
+import com.bank.docgen.contentmodule.api.UpdateContentModuleSharedGroupCodesRequest;
 import com.bank.docgen.contentmodule.api.UpdateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
@@ -477,6 +478,71 @@ class ContentModuleServiceTest {
         ArgumentCaptor<ContentModuleEntity> captor = ArgumentCaptor.forClass(ContentModuleEntity.class);
         verify(moduleRepository).save(captor.capture());
         assertThat(captor.getValue().getSharedGroupCodesJson()).isEqualTo("[\"WHOLESALE\"]");
+    }
+
+    @Test
+    void updateSharedGroupCodes_persistsForGroupAdmin() {
+        ManagementSessionClaims groupAdmin = session("10000002", List.of("GROUP_ADMIN"), List.of("RETAIL"));
+        module.setSharedGroupCodesJson("[\"RETAIL\"]");
+        when(groupAccessService.canManageContentModuleLifecycle(groupAdmin)).thenReturn(true);
+        when(groupAccessService.canAccessGroup(groupAdmin, "RETAIL")).thenReturn(true);
+        when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
+                .thenReturn(Optional.of(module));
+        when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(versionRepository.findByModuleIdOrderBySemanticVersionDesc(MODULE_ID)).thenReturn(List.of(draftVersion));
+        when(groupAccessService.canViewContentModuleStructure(groupAdmin)).thenReturn(true);
+
+        var result = service.updateSharedGroupCodes(
+                "MOD-LOAN-DISCLOSURE",
+                new UpdateContentModuleSharedGroupCodesRequest(List.of("RETAIL", "WEALTH")),
+                groupAdmin
+        );
+
+        assertThat(result.sharedGroupCodes()).containsExactly("WEALTH");
+        ArgumentCaptor<ContentModuleEntity> captor = ArgumentCaptor.forClass(ContentModuleEntity.class);
+        verify(moduleRepository).save(captor.capture());
+        assertThat(captor.getValue().getSharedGroupCodesJson()).isEqualTo("[\"WEALTH\"]");
+        assertThat(captor.getValue().getUpdatedBy()).isEqualTo("10000002");
+        verify(auditRecorder).recordContentModuleSharedGroupCodesUpdated(
+                eq(MODULE_ID),
+                eq("RETAIL"),
+                eq("MOD-LOAN-DISCLOSURE"),
+                eq("10000002"),
+                any()
+        );
+    }
+
+    @Test
+    void updateSharedGroupCodes_rejectsTemplateAuthor() {
+        when(groupAccessService.canManageContentModuleLifecycle(author)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.updateSharedGroupCodes(
+                "MOD-LOAN-DISCLOSURE",
+                new UpdateContentModuleSharedGroupCodesRequest(List.of("WEALTH")),
+                author
+        ))
+                .isInstanceOf(ContentModuleAccessDeniedException.class);
+        verify(moduleRepository, never()).save(any());
+        verify(auditRecorder, never()).recordContentModuleSharedGroupCodesUpdated(
+                any(), any(), any(), any(), any()
+        );
+    }
+
+    @Test
+    void updateSharedGroupCodes_rejectsWhenOwningGroupInaccessible() {
+        ManagementSessionClaims wealthAdmin = session("10000009", List.of("GROUP_ADMIN"), List.of("WEALTH"));
+        when(groupAccessService.canManageContentModuleLifecycle(wealthAdmin)).thenReturn(true);
+        when(moduleRepository.findByModuleCodeAndDeletedAtIsNull("MOD-LOAN-DISCLOSURE"))
+                .thenReturn(Optional.of(module));
+        when(groupAccessService.canAccessGroup(wealthAdmin, "RETAIL")).thenReturn(false);
+
+        assertThatThrownBy(() -> service.updateSharedGroupCodes(
+                "MOD-LOAN-DISCLOSURE",
+                new UpdateContentModuleSharedGroupCodesRequest(List.of("WEALTH")),
+                wealthAdmin
+        ))
+                .isInstanceOf(ContentModuleAccessDeniedException.class);
+        verify(moduleRepository, never()).save(any());
     }
 
     private ManagementSessionClaims session(String username, List<String> roles, List<String> groups) {

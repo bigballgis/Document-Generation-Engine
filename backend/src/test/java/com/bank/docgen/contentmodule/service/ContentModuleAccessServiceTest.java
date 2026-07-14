@@ -136,6 +136,23 @@ class ContentModuleAccessServiceTest {
     }
 
     @Test
+    void writeSharedGroupCodes_sortsForStableOrder() {
+        String json = accessSupport.writeSharedGroupCodes(List.of("WEALTH", "CORP"));
+
+        assertThat(json).isEqualTo("[\"CORP\",\"WEALTH\"]");
+    }
+
+    @Test
+    void writeSharedGroupCodesExcludingOwner_dropsOwningGroup() {
+        String json = accessSupport.writeSharedGroupCodesExcludingOwner(
+                List.of("RETAIL", "WEALTH", "retail"),
+                "RETAIL"
+        );
+
+        assertThat(json).isEqualTo("[\"WEALTH\"]");
+    }
+
+    @Test
     void assertActorSession_matchesSessionRole() {
         ManagementSessionClaims approver = session("10000005", List.of("TEMPLATE_APPROVER"), List.of("RETAIL"));
 
