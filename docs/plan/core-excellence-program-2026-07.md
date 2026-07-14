@@ -94,7 +94,9 @@ Done 时平台应满足：
 **禁止：** 不改锚点提取逻辑；不动预览路径语义（预览允许跟随 dev 母版）。
 **依赖：** 无（最先做，K04/G06/E01 都依赖它）。
 
-### CE-K02 母版样式权威 — P0 · L · `Not Started`
+### CE-K02 母版样式权威 — P0 · L · `Done`
+
+**Status (2026-07-15):** **Done** — Batch 4; Task Master **#58**; slice `ce-k02-master-style-authority`. BDD **ready** ([ce-k02-master-style-authority.md](../behavior/ce-k02-master-style-authority.md); **BDD-CE-K02-001…018**). **Merge:** `2f6792eb` (HEAD after Batch 4; after G02 `2ea74018`). **Gates:** post-rebase `mvn verify` **GREEN** (**1501** / 0 fail / 0 error / 8 skipped); architecture **PASS_WITH_NOTES** (Critical=0; residuals: authoring→master DI, `MASTER_STYLE_FALLBACK` runtime envelope — non-blocking); **DEPLOY_OK_WITH_NOTES** (Flyway **v58**). Golden `dual-font-master` ACTIVE. Formal phase **None**; **not** go-live.
 
 **痛点：** 渲染硬编码 Calibri/10pt，母版设计师改字体不生效，中文信函字体错误。
 **现状证据：** `DocxWordCompatibilitySupport.DEFAULT_FONT="Calibri"`、
@@ -251,7 +253,7 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 | ID | 标题 | 级/量 | 要点 | 依赖 |
 | --- | --- | --- | --- | --- |
 | CE-G01 | 同人审批阻断 | P0·S · `Done` | 模板/母版/条款三处 decision service 统一 `decisionActor != lastSubmitActor` → `api.error.lifecycle.selfApprovalForbidden`；GROUP_ADMIN/GLOBAL_ADMIN 例外干预（强制 reason+secondary+审计）；Flyway V56；BDD ready ([ce-g01-self-approval-block.md](../behavior/ce-g01-self-approval-block.md); 22 scenarios)。Slice `ce-g01-self-approval-block` · Task Master **#72** · merge `c187a230`. **Gates:** `mvn verify` GREEN (1470/0/0/7). | 无 |
-| CE-G02 | SPECIMEN 水印 | P0·M | 预览/test-generate 路径 DOCX 页眉页脚 + PDF 对角水印（复用 `PdfPageNumberStamper` 的 PDFBox 后处理模式）；**正式 runtime 路径零改动**（金标护栏断言正式产物 bitwise 不变） | K07 骨架 |
+| CE-G02 | SPECIMEN 水印 | P0·M · `Done` | 预览/test-generate 路径 DOCX 页眉页脚 + PDF 对角水印（复用 `PdfPageNumberStamper` 的 PDFBox 后处理模式）；**正式 runtime 路径零改动**（金标护栏断言正式产物 bitwise 不变）。**Status (2026-07-15):** **Done** — Task Master **#73**; slice `ce-g02-specimen-watermark`; BDD **ready** ([ce-g02-specimen-watermark.md](../behavior/ce-g02-specimen-watermark.md)). **Merge:** `2ea74018`. **Gates:** `mvn verify` **GREEN** (**1492** / 0 / 0 / 8); architecture **PASS_WITH_NOTES** (Critical=0; residual golden HF asserts — non-blocking); **DEPLOY_OK_WITH_NOTES**. Golden `06-specimen-watermark` ACTIVE. Soft-dep of CE-U04 (#67) satisfied. Formal phase **None**; **not** go-live. | K07 骨架 |
 | CE-G03 | 测试数据 PII 治理 | P1·M | 变量 schema `piiCategory` 标签；标记字段保存测试集时强制合成值或显式确认+审计；关闭 `data-storage-view.md` 挂起问题 | U03 先行 |
 | CE-G04 | Legal hold 最小实现 | P2·M | hold 实体（模板+时间窗 / invocation 集合）；两个 retention 清理调度器删除前查豁免；GLOBAL_ADMIN 专属管理页 | 无 |
 | CE-G06 | 审计可复现最小集 | P2·M | invocation 记录发布包快照 ID + bundle hash；管理端"按 invocation 受控再生"API（需权限 + 审计 + SPECIMEN 水印标记再生件） | K01 |
@@ -386,6 +388,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-14):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1 Done:** **#54** CE-K07 (merge `e8f996a0`); **#55** CE-U03 (merge `22bb391f`; tip `0565e1ae`); **#56** CE-C01+C02 (merge `da08f3fe`). **Batch 2 Done:** **#57** CE-K01 (merge `f2db3346`; tip `720a75bd`); **#72** CE-G01 (merge `c187a230`). Formal phase remains **None**. Do **not** implement C03–C06 in this sync.
+**Task Master registry (2026-07-15):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1 Done:** **#54** CE-K07 (merge `e8f996a0`); **#55** CE-U03 (merge `22bb391f`; tip `0565e1ae`); **#56** CE-C01+C02 (merge `da08f3fe`). **Batch 2 Done:** **#57** CE-K01 (merge `f2db3346`; tip `720a75bd`); **#72** CE-G01 (merge `c187a230`). **Batch 3 lane-2 Done:** **#64/#65/#66/#67/#82**; residual **CE-U08+** (#83…). **Batch 4 Done:** **#73** CE-G02 (merge `2ea74018`); **#58** CE-K02 (merge `2f6792eb` HEAD). Residual per §9: **CE-K03+** / **CE-C03+** / **CE-U08+**. Formal phase remains **None**. Do **not** activate CD-3. Do **not** claim go-live.
 
-**Last reviewed:** 2026-07-14（CE-G01 Done #72；Batch 2 complete #57+#72）
+**Last reviewed:** 2026-07-15（Batch 4 Done: #73 CE-G02 `2ea74018` + #58 CE-K02 `2f6792eb`）

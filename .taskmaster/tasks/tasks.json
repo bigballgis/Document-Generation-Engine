@@ -730,14 +730,14 @@
       {
         "id": "53",
         "title": "CE: Core Excellence Program (umbrella)",
-        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1 Done (#54/#55/#56). Batch 2 Done (#57/#72). Batch 3 lane-2: #64/#65/#66/#67/#82 Done; residual CE-U08+ (#83…). Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
-        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1 Done: ce-k07-golden-corpus-skeleton, ce-c01-c02-contract-strictness, ce-u03-testdata-schema-form. Batch 2 Done: ce-k01-release-bundle-pinning, ce-g01-self-approval-block. Batch 3 lane-2 progress: ce-u01/u02/u05/u04/u07 Done (#64/#65/#66/#67/#82 merge fde9342a). D1–D7 locked 2026-07-14.",
+        "description": "IN PROGRESS 2026-07-15. Program registry for Core Excellence (CE-K/U/C/G/E/O). Plan: docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Batch 1 Done (#54/#55/#56). Batch 2 Done (#57/#72). Batch 3 lane-2: #64/#65/#66/#67/#82 Done; residual CE-U08+ (#83…). Batch 4 Done (#58 CE-K02 merge 2f6792eb; #73 CE-G02 merge 2ea74018). Prior #52 api-ops-discoverability → done (merge b57ba3d9).",
+        "details": "Program epic only — no implementation in this task. Traceability: Task Master #54–#97 map to CE-* IDs in docs/plan/core-excellence-program-2026-07.md. Formal phase remains None — optimization-backlog program, NOT a P-phase. ADR D1–D7 confirmed 2026-07-14. Skip CE-O02 (D5 deferred). Do NOT claim go-live. Do NOT activate CD-3. Execution: 3 parallel swimlanes (K / U / C+G). Batch 1 Done: ce-k07-golden-corpus-skeleton, ce-c01-c02-contract-strictness, ce-u03-testdata-schema-form. Batch 2 Done: ce-k01-release-bundle-pinning, ce-g01-self-approval-block. Batch 3 lane-2: ce-u01/u02/u05/u04/u07 Done (#64/#65/#66/#67/#82 merge fde9342a). Batch 4 Done: ce-k02-master-style-authority (#58 merge 2f6792eb) + ce-g02-specimen-watermark (#73 merge 2ea74018). Residual: CE-K03+ / CE-U08+ / CE-C03+ per plan §9. D1–D7 locked 2026-07-14.",
         "testStrategy": "N/A — umbrella. Close when all CE leaf tasks Done or explicitly cancelled/deferred. Do not mark Done while #55–#97 open.",
         "priority": "high",
         "dependencies": [],
         "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-15T01:52:00.000Z"
+        "updatedAt": "2026-07-15T03:36:00.000Z"
       },
       {
         "id": "54",
@@ -792,16 +792,16 @@
       {
         "id": "58",
         "title": "CE-K02: Master style authority",
-        "description": "PENDING. Slice ce-k02-master-style-authority. Parse styles.xml → per-master catalog; remove Calibri/10pt hardcodes; styleRef inheritance. P0·L.",
-        "details": "Lane after K01 (#57). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §3 CE-K02.",
+        "description": "DONE 2026-07-15. Slice ce-k02-master-style-authority. Merge 2f6792eb (HEAD). Parse styles.xml → per-revision catalog; styleRef > master style > docDefaults; no Calibri hardcode; MASTER_STYLE_FALLBACK. P0·L.",
+        "details": "Completed 2026-07-15. Slice id: ce-k02-master-style-authority. Merge 2f6792eb on main (Batch 4; after G02 2ea74018). BDD ready docs/behavior/ce-k02-master-style-authority.md (BDD-CE-K02-001…018). Gates: post-rebase mvn verify GREEN (1501/0/0/8); architecture PASS_WITH_NOTES (Critical=0; residuals: authoring→master DI, MASTER_STYLE_FALLBACK runtime envelope — non-blocking); DEPLOY_OK_WITH_NOTES Flyway v58. Golden dual-font-master ACTIVE. Formal phase remains None. Plan §3 CE-K02 Done.",
         "testStrategy": "1. Master upload persists style catalog. 2. Generated DOCX uses master fonts (no Calibri when master has 宋体). 3. GOLDEN sample. 4. mvn verify.",
         "priority": "high",
         "dependencies": [
           "57"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T03:36:00.000Z"
       },
       {
         "id": "59",
@@ -1006,17 +1006,17 @@
       {
         "id": "73",
         "title": "CE-G02: SPECIMEN watermark on preview/test",
-        "description": "PENDING. Slice ce-g02-specimen-watermark. DOCX header/footer + PDF diagonal watermark on preview/test-generate only; runtime bitwise unchanged. P0·M.",
-        "details": "Depends K07 (#54) + after G01 (#72). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §6 CE-G02.",
+        "description": "DONE 2026-07-15. Slice ce-g02-specimen-watermark. Merge 2ea74018. DOCX header/footer + PDF diagonal SPECIMEN on preview/test-generate only; runtime bitwise unchanged. P0·M.",
+        "details": "Completed 2026-07-15. Slice id: ce-g02-specimen-watermark. Merge 2ea74018 on main (Batch 4; before K02 2f6792eb). BDD ready docs/behavior/ce-g02-specimen-watermark.md. Gates: mvn verify GREEN (1492/0/0/8); architecture PASS_WITH_NOTES (Critical=0; residual: golden HF asserts — non-blocking); DEPLOY_OK_WITH_NOTES. Golden 06-specimen-watermark ACTIVE. Soft-dep of CE-U04 (#67) satisfied. Formal phase remains None. Plan §6 CE-G02 Done.",
         "testStrategy": "1. Preview/test watermarked. 2. Runtime golden bitwise stable. 3. mvn verify.",
         "priority": "high",
         "dependencies": [
           "54",
           "72"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-15T03:36:00.000Z"
       },
       {
         "id": "74",
@@ -1360,9 +1360,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-07-14T02:45:00.000Z",
+      "lastModified": "2026-07-14T18:04:52.779Z",
       "taskCount": 97,
-      "completedCount": 50,
+      "completedCount": 61,
       "tags": [
         "master"
       ]
