@@ -80,14 +80,24 @@ class GoldenCorpusStructureTest {
                 .map(GoldenCorpusPackage::id)
                 .collect(Collectors.toSet());
 
-        assertThat(active).contains("dual-font-master", "nested-clauses", "encrypted-pdf", "specimen-watermark");
+        assertThat(active).contains(
+                "dual-font-master",
+                "nested-clauses",
+                "encrypted-pdf",
+                "specimen-watermark",
+                "compute-variables",
+                "chinese-uppercase-amount"
+        );
         assertThat(placeholders).contains(
                 "cross-page-table",
-                "compute-variables",
-                "chinese-uppercase-amount",
                 "long-clause-limits"
         );
-        assertThat(placeholders).doesNotContain("specimen-watermark", "dual-font-master");
+        assertThat(placeholders).doesNotContain(
+                "specimen-watermark",
+                "dual-font-master",
+                "compute-variables",
+                "chinese-uppercase-amount"
+        );
     }
 
     @Test

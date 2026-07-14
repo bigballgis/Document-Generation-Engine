@@ -56,7 +56,8 @@ public class TemplateBindingConfigurationService {
             TableComponentService tableComponentService,
             ReferenceNodeService referenceNodeService,
             NumberingService numberingService,
-            TemplateViewMapper templateViewMapper
+            TemplateViewMapper templateViewMapper,
+            VariableComputeService variableComputeService
     ) {
         this.anchorBindingRepository = anchorBindingRepository;
         this.masterDocumentRepository = masterDocumentRepository;
@@ -78,7 +79,8 @@ public class TemplateBindingConfigurationService {
                 masterDocumentRepository,
                 objectMapper,
                 templateViewMapper,
-                statusSupport
+                statusSupport,
+                variableComputeService
         );
     }
 

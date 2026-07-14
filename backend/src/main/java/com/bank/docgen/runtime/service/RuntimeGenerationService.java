@@ -162,7 +162,10 @@ public class RuntimeGenerationService {
                 resolvedVersion,
                 request.variables(),
                 request.output().format(),
-                request.encryption()
+                request.encryption(),
+                com.bank.docgen.authoring.structured.CallerRenderOverride.empty(),
+                "sync",
+                request.context() == null ? null : request.context().locale()
         );
         idempotencyService.complete(idempotency, generated.storageKey(), generated.documentId());
         InputStream artifactStream = objectStoragePort.get(generated.storageKey());

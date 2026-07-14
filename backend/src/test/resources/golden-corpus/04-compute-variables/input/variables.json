@@ -1,1 +1,8 @@
-{}
+{
+  "principal": 1234.5,
+  "items": [
+    {"amount": 10},
+    {"amount": -5},
+    {"amount": 20}
+  ]
+}

@@ -21,6 +21,7 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
 import com.bank.docgen.template.service.TemplateNotFoundException;
+import com.bank.docgen.template.service.VariableComputeService;
 import com.bank.docgen.template.service.VersionFidelityWarningService;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +52,7 @@ final class DocumentGenerationAssemblySupport {
     private final TemplateContentModuleReferenceService contentModuleReferenceService;
     private final RenderProfileService renderProfileService;
     private final VersionFidelityWarningService versionFidelityWarningService;
+    private final VariableComputeService variableComputeService;
 
     DocumentGenerationAssemblySupport(
             TemplateVersionRepository templateVersionRepository,
@@ -62,7 +64,8 @@ final class DocumentGenerationAssemblySupport {
             DocumentArtifactPipeline documentArtifactPipeline,
             TemplateContentModuleReferenceService contentModuleReferenceService,
             RenderProfileService renderProfileService,
-            VersionFidelityWarningService versionFidelityWarningService
+            VersionFidelityWarningService versionFidelityWarningService,
+            VariableComputeService variableComputeService
     ) {
         this.templateVersionRepository = templateVersionRepository;
         this.anchorBindingRepository = anchorBindingRepository;
@@ -74,6 +77,7 @@ final class DocumentGenerationAssemblySupport {
         this.contentModuleReferenceService = contentModuleReferenceService;
         this.renderProfileService = renderProfileService;
         this.versionFidelityWarningService = versionFidelityWarningService;
+        this.variableComputeService = variableComputeService;
     }
 
     DocumentGenerationEngine.GeneratedDocument generate(
@@ -84,9 +88,27 @@ final class DocumentGenerationAssemblySupport {
             EncryptionOptionsView encryption,
             CallerRenderOverride callerRenderOverride
     ) {
+        return generate(template, releaseVersion, variables, outputFormat, encryption, callerRenderOverride, null);
+    }
+
+    DocumentGenerationEngine.GeneratedDocument generate(
+            TemplateEntity template,
+            String releaseVersion,
+            Map<String, Object> variables,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            CallerRenderOverride callerRenderOverride,
+            String localeTag
+    ) {
         TemplateVersionEntity version = templateVersionRepository
                 .findByTemplateIdAndReleaseVersion(template.getId(), releaseVersion)
                 .orElseThrow(TemplateNotFoundException::new);
+        // CE-K03: evaluate compute expressions before DOCX assembly (fail-closed).
+        Map<String, Object> resolvedVariables = variableComputeService.applyCompute(
+                version.getId(),
+                variables,
+                localeTag
+        );
         RenderProfile renderProfile = renderProfileService.resolveEffectiveProfile(
                 version,
                 callerRenderOverride == null ? CallerRenderOverride.empty() : callerRenderOverride
@@ -103,7 +125,7 @@ final class DocumentGenerationAssemblySupport {
             docx = docxAssembler.assembleStructured(
                     masterStream,
                     bindingJson,
-                    variables,
+                    resolvedVariables,
                     pinnedModuleStructures
             );
         } catch (DocxAssemblyException | RenderingOperationException ex) {

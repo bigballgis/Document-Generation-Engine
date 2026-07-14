@@ -62,3 +62,19 @@
   display: inline-flex;
   gap: 0.25rem;
 }
+
+.compute-sample-actions {
+  margin-bottom: 0.75rem;
+}
+
+.compute-sample-result {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.compute-sample-error {
+  margin: 0.25rem 0 0;
+  color: var(--el-color-danger);
+  font-size: 0.875rem;
+}

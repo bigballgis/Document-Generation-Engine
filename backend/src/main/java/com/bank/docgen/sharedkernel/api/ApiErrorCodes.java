@@ -84,6 +84,8 @@ public final class ApiErrorCodes {
     public static final String EXCEPTION_REASON_REQUIRED = "EXCEPTION_REASON_REQUIRED";
     /** CE-G01: exception intervention missing secondary confirmation. */
     public static final String EXCEPTION_SECONDARY_CONFIRM_REQUIRED = "EXCEPTION_SECONDARY_CONFIRM_REQUIRED";
+    /** CE-K03: whitelist compute DSL evaluation failed (fail-closed). */
+    public static final String VARIABLE_COMPUTE_FAILED = "VARIABLE_COMPUTE_FAILED";
 
     private ApiErrorCodes() {
     }

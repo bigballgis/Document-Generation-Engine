@@ -1,10 +1,10 @@
 {
   "id": "chinese-uppercase-amount",
   "theme": "Chinese uppercase amount (SPELL_AMOUNT) rendering",
-  "maturity": "PLACEHOLDER",
-  "title": "Chinese uppercase amount — placeholder (CE-K03)",
+  "maturity": "ACTIVE",
+  "title": "Chinese uppercase amount — ACTIVE (CE-K03)",
   "renderMode": "STRUCTURED_ASSEMBLE",
-  "pdfSource": "LIBREOFFICE",
-  "description": "Placeholder skeleton. Chinese uppercase amount (SPELL_AMOUNT) text assertions are owned by CE-K03 and will be enriched here.",
+  "pdfSource": "SYNTHETIC",
+  "description": "ACTIVE CE-K03 package: SPELL_AMOUNT evaluated before assemble; DOCX asserts RMB uppercase text.",
   "owningFutureSlice": "CE-K03"
 }

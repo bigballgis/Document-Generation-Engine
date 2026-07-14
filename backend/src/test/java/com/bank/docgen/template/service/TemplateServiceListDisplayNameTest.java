@@ -74,7 +74,8 @@ class TemplateServiceListDisplayNameTest {
                 templateViewMapper,
                 templateCurrentVersionResolver,
                 eventPublisher,
-                managementUserDisplayService
+                managementUserDisplayService,
+                org.mockito.Mockito.mock(com.bank.docgen.template.service.VariableComputeService.class)
         );
         session = new ManagementSessionClaims(
                 "10000001",

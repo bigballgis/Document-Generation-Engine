@@ -1897,6 +1897,94 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/compute-expressions/validate:
+    post:
+      tags: [Admin]
+      operationId: validateComputeExpression
+      summary: Validate a whitelist compute expression (syntax + references)
+      description: >-
+        CE-K03 author-time validation for `computeExpression` values. Checks
+        whitelist DSL syntax, length/nesting bounds, and that `${path}` roots
+        exist in `knownVariableKeys`. Returns `valid`/`message` in the success
+        envelope (does not throw for invalid expressions). Does not evaluate
+        sample data or produce a document. Traceability: BDD-CE-K03-024…025;
+        ADR-0056.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          description: Internal template resource UUID (management path).
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputeExpressionValidateRequest'
+      responses:
+        '200':
+          description: Compute expression validation completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputeExpressionValidateResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/compute-expressions/evaluate:
+    post:
+      tags: [Admin]
+      operationId: evaluateComputeExpression
+      summary: Evaluate a compute expression against sample variables (author preview)
+      description: >-
+        CE-K03 author-time sample evaluation for compute preview. Evaluates the
+        whitelist expression against `sampleVariables` (optional `locale`) and
+        returns a non-sensitive result summary. Failures surface as
+        `VARIABLE_COMPUTE_FAILED` (422) with `variableKey` + `expressionSummary`
+        — never as a successful document. Does not assemble DOCX/PDF.
+        Traceability: BDD-CE-K03-026…027; ADR-0056.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          description: Internal template resource UUID (management path).
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComputeExpressionEvaluateRequest'
+      responses:
+        '200':
+          description: Sample compute evaluation succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputeExpressionEvaluateResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/templates/import:
     post:
       tags: [Admin]
@@ -5998,6 +6086,106 @@ components:
           $ref: '#/components/schemas/TemplateVariableValidationSummary'
         auditSummary:
           $ref: '#/components/schemas/TemplateVariableValidationAuditSummary'
+    ComputeExpressionValidateRequest:
+      type: object
+      additionalProperties: false
+      required: [expression, knownVariableKeys]
+      description: >-
+        CE-K03 author-time compute expression validation payload
+        (`POST …/compute-expressions/validate`).
+      properties:
+        variableKey:
+          type: string
+          description: Optional variable key being authored (for error context).
+          maxLength: 128
+        expression:
+          type: string
+          description: Whitelist compute DSL expression to validate.
+          minLength: 1
+          maxLength: 2048
+        knownVariableKeys:
+          type: array
+          description: Variable keys available for `${path}` reference checks.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 128
+    ComputeExpressionValidateView:
+      type: object
+      additionalProperties: false
+      required: [valid]
+      description: CE-K03 compute expression validation result body.
+      properties:
+        valid:
+          type: boolean
+        message:
+          type: string
+          nullable: true
+          description: Non-sensitive validation failure reason when `valid` is false.
+    ComputeExpressionValidateResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/ComputeExpressionValidateView'
+    ComputeExpressionEvaluateRequest:
+      type: object
+      additionalProperties: false
+      required: [expression, sampleVariables]
+      description: >-
+        CE-K03 author-time sample evaluation payload
+        (`POST …/compute-expressions/evaluate`).
+      properties:
+        variableKey:
+          type: string
+          description: Optional variable key being previewed (for error context).
+          maxLength: 128
+        expression:
+          type: string
+          description: Whitelist compute DSL expression to evaluate.
+          minLength: 1
+          maxLength: 2048
+        sampleVariables:
+          type: object
+          additionalProperties: true
+          description: >-
+            Sample variable map for preview evaluation. Must not include
+            secrets; values are author-supplied fixtures only.
+        locale:
+          type: string
+          description: Optional BCP-47 locale tag (default zh-CN for FORMAT_* / SPELL_AMOUNT).
+          maxLength: 32
+    ComputeExpressionEvaluateView:
+      type: object
+      additionalProperties: false
+      required: [success, result]
+      description: CE-K03 sample compute evaluation result body.
+      properties:
+        success:
+          type: boolean
+        result:
+          description: Evaluated value (number, string, boolean, or structured).
+          nullable: true
+        variableKey:
+          type: string
+          nullable: true
+        expressionSummary:
+          type: string
+          nullable: true
+          description: Truncated expression summary (≤128 chars); never full secrets.
+          maxLength: 128
+    ComputeExpressionEvaluateResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/ComputeExpressionEvaluateView'
     TemplateRuleValidationItemRequest:
       type: object
       additionalProperties: false
@@ -7902,3 +8090,6 @@ components:
         - EXCEPTION_INTERVENTION_NOT_ALLOWED
         - EXCEPTION_REASON_REQUIRED
         - EXCEPTION_SECONDARY_CONFIRM_REQUIRED
+        - VARIABLE_COMPUTE_FAILED
+        - TEMPLATE_VALIDATION_FAILED
+        - OOXML_VALIDATION_FAILED

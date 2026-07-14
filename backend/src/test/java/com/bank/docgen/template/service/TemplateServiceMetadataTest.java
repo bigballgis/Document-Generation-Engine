@@ -94,7 +94,8 @@ class TemplateServiceMetadataTest {
                 viewMapper,
                 templateCurrentVersionResolver,
                 eventPublisher,
-                managementUserDisplayService
+                managementUserDisplayService,
+                org.mockito.Mockito.mock(com.bank.docgen.template.service.VariableComputeService.class)
         );
         author = new ManagementSessionClaims(
                 "10000003",

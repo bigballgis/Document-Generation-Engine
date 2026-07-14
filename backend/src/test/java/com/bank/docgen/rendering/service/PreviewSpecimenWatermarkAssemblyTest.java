@@ -27,6 +27,7 @@ import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.port.RenderableTemplateSnapshot;
 import com.bank.docgen.template.port.TemplateRenderContextPort;
+import com.bank.docgen.template.port.VariableComputePort;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -74,12 +75,22 @@ class PreviewSpecimenWatermarkAssemblyTest {
     private RenderProfileService renderProfileService;
     @Mock
     private FidelityValidationService fidelityValidationService;
+    @Mock
+    private VariableComputePort variableComputePort;
 
     private PreviewGenerationAssemblySupport assembly;
     private ArtifactSpoolService artifactSpoolService;
 
     @BeforeEach
     void setUp() {
+        org.mockito.Mockito.lenient().when(variableComputePort.applyCompute(
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any()
+        )).thenAnswer(invocation -> {
+            java.util.Map<String, Object> input = invocation.getArgument(1);
+            return input == null ? java.util.Map.of() : new java.util.LinkedHashMap<>(input);
+        });
         assembly = new PreviewGenerationAssemblySupport(
                 anchorBindingRepository,
                 masterDocumentRepository,
@@ -88,7 +99,8 @@ class PreviewSpecimenWatermarkAssemblyTest {
                 documentArtifactPipeline,
                 renderContextPort,
                 renderProfileService,
-                fidelityValidationService
+                fidelityValidationService,
+                variableComputePort
         );
         artifactSpoolService = new ArtifactSpoolService(new GeneratedArtifactSizeGuard(new DocgenRenderingProperties()));
     }

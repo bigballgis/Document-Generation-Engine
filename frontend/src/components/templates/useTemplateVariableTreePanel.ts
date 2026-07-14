@@ -9,6 +9,11 @@ import {
   filterVariableTree,
   type VariableTreeNode,
 } from '@/utils/variableSchemaTree'
+import { validateComputeExpressionClient } from '@/utils/computeExpressionValidate'
+import {
+  evaluateComputeExpression,
+  validateComputeExpression,
+} from '@/api/templatesBindings'
 import { ElMessage } from 'element-plus'
 
 export interface UseTemplateVariableTreePanelOptions {
@@ -26,6 +31,11 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
   const variableDialogOpen = ref(false)
   const editingVariableKey = ref<string | null>(null)
   const treeRef = ref<{ filter: (value: string) => void } | null>(null)
+  const computeValidationError = ref<string | null>(null)
+  const sampleJson = ref('{\n  "principal": 100\n}')
+  const sampleResult = ref<string | null>(null)
+  const sampleError = ref<string | null>(null)
+  const sampleEvaluating = ref(false)
 
   const variableTypes = ['TEXT', 'NUMBER', 'AMOUNT', 'DATE', 'ENUM', 'BOOLEAN', 'LIST', 'OBJECT', 'COMPUTED']
 
@@ -46,9 +56,34 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
   )
   const totalVariableCount = computed(() => options.variables.value.length)
 
+  const knownVariableKeys = computed(() => {
+    const keys = options.variables.value.map((item) => item.variableKey)
+    if (variableForm.variableKey.trim()) {
+      keys.push(variableForm.variableKey.trim())
+    }
+    return [...new Set(keys)]
+  })
+
   watch(searchQuery, (value) => {
     treeRef.value?.filter(value.trim())
   })
+
+  watch(
+    () => [variableForm.variableType, variableForm.computeExpression, knownVariableKeys.value] as const,
+    () => {
+      if (variableForm.variableType !== 'COMPUTED') {
+        computeValidationError.value = null
+        return
+      }
+      const client = validateComputeExpressionClient(
+        variableForm.computeExpression ?? '',
+        knownVariableKeys.value,
+      )
+      computeValidationError.value = client.valid
+        ? null
+        : t(client.messageKey ?? 'templates.authoring.computeExpressionInvalid')
+    },
+  )
 
   function resetVariableForm() {
     variableForm.variableKey = ''
@@ -58,6 +93,9 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     variableForm.description = ''
     variableForm.computeExpression = ''
     editingVariableKey.value = null
+    computeValidationError.value = null
+    sampleResult.value = null
+    sampleError.value = null
   }
 
   function openAddVariable() {
@@ -73,10 +111,41 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     variableForm.defaultValue = variable.defaultValue ?? ''
     variableForm.description = variable.description ?? ''
     variableForm.computeExpression = variable.computeExpression ?? ''
+    sampleResult.value = null
+    sampleError.value = null
     variableDialogOpen.value = true
   }
 
   async function handleSaveVariable() {
+    if (variableForm.variableType === 'COMPUTED') {
+      const client = validateComputeExpressionClient(
+        variableForm.computeExpression ?? '',
+        knownVariableKeys.value,
+      )
+      if (!client.valid) {
+        computeValidationError.value = t(
+          client.messageKey ?? 'templates.authoring.computeExpressionInvalid',
+        )
+        ElMessage.error(computeValidationError.value)
+        return
+      }
+      try {
+        const server = await validateComputeExpression(options.templateId.value, {
+          variableKey: variableForm.variableKey,
+          expression: variableForm.computeExpression ?? '',
+          knownVariableKeys: knownVariableKeys.value,
+        })
+        if (!server.valid) {
+          computeValidationError.value =
+            server.message || t('templates.authoring.computeExpressionInvalid')
+          ElMessage.error(computeValidationError.value)
+          return
+        }
+      } catch {
+        ElMessage.error(t('templates.error.saveVariable'))
+        return
+      }
+    }
     try {
       await templatesStore.upsertVariable(options.templateId.value, variableForm.variableKey, {
         variableKey: variableForm.variableKey,
@@ -94,6 +163,42 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
       options.onUpdated()
     } catch {
       ElMessage.error(t('templates.error.saveVariable'))
+    }
+  }
+
+  async function handleSampleEvaluate() {
+    sampleResult.value = null
+    sampleError.value = null
+    let sampleVariables: Record<string, unknown>
+    try {
+      sampleVariables = JSON.parse(sampleJson.value) as Record<string, unknown>
+    } catch {
+      sampleError.value = t('templates.authoring.computeSampleJsonInvalid')
+      return
+    }
+    sampleEvaluating.value = true
+    try {
+      const result = await evaluateComputeExpression(options.templateId.value, {
+        variableKey: variableForm.variableKey || 'preview',
+        expression: variableForm.computeExpression ?? '',
+        sampleVariables,
+        locale: 'zh-CN',
+      })
+      sampleResult.value = String(result.result ?? '')
+    } catch (error: unknown) {
+      const axiosError = error as {
+        response?: { data?: { error?: { fieldErrors?: { message?: string }[]; message?: string } } }
+      }
+      const fieldMessages = axiosError.response?.data?.error?.fieldErrors
+        ?.map((item) => item.message)
+        .filter(Boolean)
+        .join(', ')
+      sampleError.value =
+        fieldMessages ||
+        axiosError.response?.data?.error?.message ||
+        t('templates.authoring.computeSampleFailed')
+    } finally {
+      sampleEvaluating.value = false
     }
   }
 
@@ -142,9 +247,15 @@ export function useTemplateVariableTreePanel(options: UseTemplateVariableTreePan
     treeRenderKey,
     searchExpandedKeys,
     totalVariableCount,
+    computeValidationError,
+    sampleJson,
+    sampleResult,
+    sampleError,
+    sampleEvaluating,
     openAddVariable,
     openEditVariable,
     handleSaveVariable,
+    handleSampleEvaluate,
     handleDeleteVariable,
     filterTreeNode,
   }

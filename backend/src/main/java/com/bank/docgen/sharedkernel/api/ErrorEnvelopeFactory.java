@@ -189,6 +189,33 @@ public class ErrorEnvelopeFactory {
                 .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
     }
 
+    public ResponseEntity<ErrorEnvelope> variableComputeFailed(
+            HttpServletRequest request,
+            com.bank.docgen.sharedkernel.document.compute.VariableComputeException ex
+    ) {
+        String traceId = traceIdProvider.currentOrNew(request.getHeader("X-Trace-Id"));
+        String auditId = traceIdProvider.newAuditId();
+        String messageKey = ex.messageKey();
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("variableKey", ex.variableKey());
+        details.put("expressionSummary", ex.expressionSummary());
+        List<FieldError> fieldErrors = List.of(
+                new FieldError("variableKey", "COMPUTE_FAILED", ex.variableKey()),
+                new FieldError("expressionSummary", "COMPUTE_FAILED", ex.expressionSummary())
+        );
+        ErrorDetail error = new ErrorDetail(
+                ApiErrorCodes.VARIABLE_COMPUTE_FAILED,
+                ApiErrorCategories.GENERATION,
+                messageResolver.resolve(messageKey),
+                messageKey,
+                false,
+                fieldErrors,
+                details
+        );
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorEnvelope(Metadata.minimal(auditId, traceId), error));
+    }
+
     public ResponseEntity<ErrorEnvelope> masterRevisionInUse(
             HttpServletRequest request,
             com.bank.docgen.master.service.MasterRevisionInUseException ex

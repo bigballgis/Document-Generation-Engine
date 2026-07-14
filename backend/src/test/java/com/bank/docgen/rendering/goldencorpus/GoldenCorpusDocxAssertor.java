@@ -46,8 +46,13 @@ public final class GoldenCorpusDocxAssertor {
         }
         String xml = readZipPartAsString(docxBytes, part);
         if (!xml.contains(substring)) {
+            String plain = xml.replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim();
+            if (plain.length() > 400) {
+                plain = plain.substring(0, 400);
+            }
             throw new GoldenCorpusException(
-                    "DOCX assertion failed: part '" + part + "' does not contain expected substring"
+                    "DOCX assertion failed: part '" + part + "' does not contain expected substring '"
+                            + substring + "'. Plain text snippet: " + plain
             );
         }
     }

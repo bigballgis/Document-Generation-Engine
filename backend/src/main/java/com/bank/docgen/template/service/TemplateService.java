@@ -8,6 +8,10 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.AnchorBindingView;
 import com.bank.docgen.template.api.BindingValidationView;
+import com.bank.docgen.template.api.ComputeExpressionEvaluateRequest;
+import com.bank.docgen.template.api.ComputeExpressionEvaluateView;
+import com.bank.docgen.template.api.ComputeExpressionValidateRequest;
+import com.bank.docgen.template.api.ComputeExpressionValidateView;
 import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.CreateTemplateRequest;
 import com.bank.docgen.template.api.MasterStyleCatalogView;
@@ -45,6 +49,7 @@ public class TemplateService {
     private final TemplateReleaseVersionListSupport releaseVersions;
     private final TemplateDisplayLookupSupport displayLookup;
     private final TemplateReadQuerySupport readQueries;
+    private final VariableComputeService variableComputeService;
 
     public TemplateService(
             TemplateRepository templateRepository,
@@ -57,10 +62,12 @@ public class TemplateService {
             TemplateViewMapper templateViewMapper,
             TemplateCurrentVersionResolver templateVersionSupport,
             ApplicationEventPublisher eventPublisher,
-            ManagementUserDisplayService managementUserDisplayService
+            ManagementUserDisplayService managementUserDisplayService,
+            VariableComputeService variableComputeService
     ) {
         this.groupAccessService = groupAccessService;
         this.templateViewMapper = templateViewMapper;
+        this.variableComputeService = variableComputeService;
         var displayEnrichment = new TemplateDisplayEnrichmentSupport(managementUserDisplayService);
         this.access = new TemplateAccessGuardSupport(templateRepository, groupAccessService);
         this.catalogSupport = new TemplateCatalogSupport(
@@ -165,6 +172,51 @@ public class TemplateService {
             UUID templateId, PasteCleanRequest request, ManagementSessionClaims session
     ) {
         return readQueries.pasteClean(templateId, request, session);
+    }
+
+    @Transactional(readOnly = true)
+    public ComputeExpressionValidateView validateComputeExpression(
+            UUID templateId,
+            ComputeExpressionValidateRequest request,
+            ManagementSessionClaims session
+    ) {
+        requireReadableTemplate(templateId, session);
+        try {
+            Set<String> known = request.knownVariableKeys() == null
+                    ? Set.of()
+                    : Set.copyOf(request.knownVariableKeys());
+            variableComputeService.validateExpressionAgainstKeys(
+                    request.variableKey(),
+                    request.expression(),
+                    known
+            );
+            return new ComputeExpressionValidateView(true, null);
+        } catch (com.bank.docgen.sharedkernel.document.compute.VariableComputeException ex) {
+            return new ComputeExpressionValidateView(false, ex.getMessage());
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public ComputeExpressionEvaluateView evaluateComputeExpression(
+            UUID templateId,
+            ComputeExpressionEvaluateRequest request,
+            ManagementSessionClaims session
+    ) {
+        requireReadableTemplate(templateId, session);
+        Object result = variableComputeService.evaluateSample(
+                request.variableKey() == null ? "preview" : request.variableKey(),
+                request.expression(),
+                request.sampleVariables(),
+                request.locale()
+        );
+        return new ComputeExpressionEvaluateView(
+                true,
+                result,
+                request.variableKey(),
+                com.bank.docgen.sharedkernel.document.compute.ComputeDslLimits.summarizeExpression(
+                        request.expression()
+                )
+        );
     }
 
     public TemplateEntity requireReadableTemplate(UUID templateId, ManagementSessionClaims session) {

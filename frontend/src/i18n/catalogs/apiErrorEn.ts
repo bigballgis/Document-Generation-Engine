@@ -54,7 +54,8 @@ export const apiErrorEn = {
     currentRevisionUnavailable: "The current letterhead revision could not be resolved for pinning.",
     revisionInUseByPublishedRelease:
       "The letterhead revision is pinned by one or more published releases and cannot be deleted.",
-    revisionDeleteFailed: "Unable to delete the letterhead revision."
+    revisionDeleteFailed: "Unable to delete the letterhead revision.",
+    styleCatalogParseFailed: "Unable to parse the letterhead style catalog from styles.xml."
   },
   template: {
     notFound: "The template was not found.",
@@ -100,7 +101,11 @@ export const apiErrorEn = {
     importBundleUnsupportedFormat: "The template import bundle format is not supported.",
     importBundleContainsSecrets: "The template import bundle must not contain secrets or credentials.",
     importConflict: "The template import conflicts with an existing template.",
-    importFailed: "The template import could not be completed."
+    importFailed: "The template import could not be completed.",
+    computeExpressionInvalid: "The compute expression is invalid."
+  },
+  variable: {
+    computeFailed: "Variable compute evaluation failed."
   },
   rendering: {
     previewNotFound: "The preview record was not found.",

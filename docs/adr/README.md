@@ -105,6 +105,7 @@ Create an ADR when a decision affects future design or implementation, including
 | [0053-task-master-ai-adoption.md](./documentation-governance/0053-task-master-ai-adoption.md) | Accepted | task-master-ai as task source for new/active work; `docs/plan/` archive + live programs (2026-07-05) |
 | [0054-ad-group-resolver-production-boundary.md](./authorization-security/0054-ad-group-resolver-production-boundary.md) | Accepted | AD Group resolver production boundary — `ConfigAdGroupResolver` / `type=config` = local/dev/test only; acceptance/production requires directory adapter SPI **or** startup fail-closed; company LDAP/AD coords UNKNOWN; does not supersede ADR-0010 cache/`503` (ops-ad-group-stub-close / Task Master #46, 2026-07-12) |
 | [0055-cursor-sole-parent-agent.md](./documentation-governance/0055-cursor-sole-parent-agent.md) | Accepted | Cursor sole parent agent; MCP canonical `.cursor/mcp.json`; Claude dual-stack removed; amends ADR-0053 tooling (2026-07-14) |
+| [0056-whitelist-variable-compute-dsl-bounds.md](./rendering-authoring/0056-whitelist-variable-compute-dsl-bounds.md) | Accepted | Whitelist compute DSL bounds; forbid Groovy/JS/SpEL; FILTER form; locale default zh-CN; SPELL_AMOUNT CNY-only (CE-K03) |
 | [0001-management-api-service-layer-authorization.md](./authorization/0001-management-api-service-layer-authorization.md) | Accepted | Management API service-layer authorization — `ManagementRoute` UI-only; `GroupAccessService` for API (COR-P06) |
 
 ### LR-A5 triad (0041 Accepted; 0042/0043 remain Proposed)
