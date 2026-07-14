@@ -18,6 +18,7 @@ import com.bank.docgen.contentmodule.api.UpdateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
+import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -46,6 +47,8 @@ class ContentModuleServiceTest {
     @Mock
     private ContentModuleVersionRepository versionRepository;
     @Mock
+    private ContentModuleReviewRecordRepository reviewRecordRepository;
+    @Mock
     private GroupAccessService groupAccessService;
     @Mock
     private ManagementAuditRecorder auditRecorder;
@@ -63,6 +66,7 @@ class ContentModuleServiceTest {
         service = new ContentModuleService(
                 moduleRepository,
                 versionRepository,
+                reviewRecordRepository,
                 groupAccessService,
                 accessSupport,
                 auditRecorder
@@ -89,6 +93,7 @@ class ContentModuleServiceTest {
         lenient().when(groupAccessService.canBrowseContentModuleCatalog(author)).thenReturn(true);
         lenient().when(groupAccessService.canViewContentModuleStructure(author)).thenReturn(true);
         lenient().when(groupAccessService.canBrowseContentModuleCatalog(tester)).thenReturn(false);
+        lenient().when(reviewRecordRepository.findByModuleIdOrderByCreatedAtAsc(any())).thenReturn(List.of());
     }
 
     @Test

@@ -12,6 +12,7 @@ import type {
   ContentModuleDetail,
   ContentModuleLifecycleImpactSummary,
   ContentModuleSummary,
+  ContentModuleWorkflowTask,
 } from '@/types/contentModule'
 
 export const useContentModulesStore = defineStore('contentModules', () => {
@@ -22,9 +23,12 @@ export const useContentModulesStore = defineStore('contentModules', () => {
   const moduleListTotalPages = ref(0)
   const selectedModule = ref<ContentModuleDetail | null>(null)
   const lifecycleImpactPreview = ref<ContentModuleLifecycleImpactSummary | null>(null)
+  const workflowTasks = ref<ContentModuleWorkflowTask[]>([])
   const loadingList = ref(false)
   const loadingDetail = ref(false)
   const loadingImpactPreview = ref(false)
+  const loadingWorkflowTasks = ref(false)
+  const workflowTasksError = ref(false)
   const submitting = ref(false)
   const lastErrorMessageKey = ref<string | null>(null)
   const lastListErrorRetryable = ref(false)
@@ -78,6 +82,24 @@ export const useContentModulesStore = defineStore('contentModules', () => {
     }
   }
 
+  async function fetchWorkflowTasks(): Promise<void> {
+    loadingWorkflowTasks.value = true
+    workflowTasksError.value = false
+    try {
+      workflowTasks.value = await contentModulesApi.listContentModuleWorkflowTasks()
+    } catch {
+      workflowTasks.value = []
+      workflowTasksError.value = true
+    } finally {
+      loadingWorkflowTasks.value = false
+    }
+  }
+
+  function clearWorkflowTasks(): void {
+    workflowTasks.value = []
+    workflowTasksError.value = false
+  }
+
   const mutationActions = createContentModulesMutationActions({
     modules,
     selectedModule,
@@ -106,15 +128,20 @@ export const useContentModulesStore = defineStore('contentModules', () => {
     moduleListTotalPages,
     selectedModule,
     lifecycleImpactPreview,
+    workflowTasks,
     loadingList,
     loadingDetail,
     loadingImpactPreview,
+    loadingWorkflowTasks,
+    workflowTasksError,
     submitting,
     lastErrorMessageKey,
     lastListErrorRetryable,
     activeGroupCode,
     fetchModules,
     fetchModule,
+    fetchWorkflowTasks,
+    clearWorkflowTasks,
     ...mutationActions,
     clearSelected,
     clearListError,

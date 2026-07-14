@@ -6,11 +6,14 @@ import com.bank.docgen.authorization.management.api.CatalogSortKey;
 import com.bank.docgen.authorization.management.api.PageView;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.contentmodule.api.ContentModuleDetailView;
+import com.bank.docgen.contentmodule.api.ContentModuleReviewRecordView;
 import com.bank.docgen.contentmodule.api.ContentModuleSummaryView;
 import com.bank.docgen.contentmodule.api.ContentModuleVersionView;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepositoryCustom.ContentModuleCatalogFilter;
+import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordEntity;
+import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -24,17 +27,20 @@ final class ContentModuleCatalogSupport {
 
     private final ContentModuleRepository moduleRepository;
     private final ContentModuleVersionRepository versionRepository;
+    private final ContentModuleReviewRecordRepository reviewRecordRepository;
     private final GroupAccessService groupAccessService;
     private final ContentModuleAccessService accessSupport;
 
     ContentModuleCatalogSupport(
             ContentModuleRepository moduleRepository,
             ContentModuleVersionRepository versionRepository,
+            ContentModuleReviewRecordRepository reviewRecordRepository,
             GroupAccessService groupAccessService,
             ContentModuleAccessService accessSupport
     ) {
         this.moduleRepository = moduleRepository;
         this.versionRepository = versionRepository;
+        this.reviewRecordRepository = reviewRecordRepository;
         this.groupAccessService = groupAccessService;
         this.accessSupport = accessSupport;
     }
@@ -103,6 +109,10 @@ final class ContentModuleCatalogSupport {
                 .findByModuleIdOrderBySemanticVersionDesc(module.getId()).stream()
                 .map(version -> toVersionView(version, session))
                 .toList();
+        List<ContentModuleReviewRecordView> reviewHistory = reviewRecordRepository
+                .findByModuleIdOrderByCreatedAtAsc(module.getId()).stream()
+                .map(this::toReviewRecordView)
+                .toList();
         return new ContentModuleDetailView(
                 accessSupport.publicModuleId(module),
                 module.getModuleCode(),
@@ -110,7 +120,8 @@ final class ContentModuleCatalogSupport {
                 module.getName(),
                 module.getDescription(),
                 accessSupport.readSharedGroupCodes(module),
-                versions
+                versions,
+                reviewHistory
         );
     }
 
@@ -147,8 +158,23 @@ final class ContentModuleCatalogSupport {
                 version.getLifecycleState(),
                 version.getChangeDescription(),
                 contentStructureJson,
+                version.getRejectionReason(),
                 version.getCreatedAt(),
                 version.getUpdatedAt()
+        );
+    }
+
+    private ContentModuleReviewRecordView toReviewRecordView(ContentModuleReviewRecordEntity record) {
+        return new ContentModuleReviewRecordView(
+                record.getAction().name(),
+                record.getDecision(),
+                record.getChangeSummary(),
+                record.getCommentSummary(),
+                record.getActorUsername(),
+                record.getCreatedAt(),
+                record.getSemanticVersion(),
+                record.isSelfApprovalException() ? Boolean.TRUE : null,
+                record.getExceptionReason()
         );
     }
 }

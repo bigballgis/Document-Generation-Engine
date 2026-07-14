@@ -6,6 +6,7 @@ import { axiosEnvelopeError } from '@/test/axiosEnvelopeError'
 
 vi.mock('@/api/contentModules', () => ({
   listContentModules: vi.fn(),
+  listContentModuleWorkflowTasks: vi.fn(),
   getContentModule: vi.fn(),
   createContentModule: vi.fn(),
 }))

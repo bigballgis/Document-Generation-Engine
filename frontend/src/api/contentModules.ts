@@ -14,6 +14,7 @@ import type {
   ContentModuleReviewTransitionPayload,
   ContentModuleReviewTransitionResult,
   ContentModuleSummary,
+  ContentModuleWorkflowTask,
   CreateContentModulePayload,
   CreateContentModuleVersionPayload,
   UpdateContentModuleVersionPayload,
@@ -59,6 +60,13 @@ export async function listAllContentModules(
   options: ContentModuleListQueryOptions = {},
 ): Promise<CollectedCatalogPage<ContentModuleSummary>> {
   return collectAllPageContent((page, size) => listContentModules(page, size, options))
+}
+
+export async function listContentModuleWorkflowTasks(): Promise<ContentModuleWorkflowTask[]> {
+  const response = await http.get<ApiEnvelope<ContentModuleWorkflowTask[]>>(
+    '/content-modules/workflow-tasks',
+  )
+  return response.data.result ?? []
 }
 
 export async function getContentModule(moduleId: string): Promise<ContentModuleDetail> {

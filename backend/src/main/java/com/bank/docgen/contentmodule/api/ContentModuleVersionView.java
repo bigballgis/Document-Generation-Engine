@@ -11,6 +11,7 @@ public record ContentModuleVersionView(
         ContentModuleLifecycleState lifecycleState,
         String changeDescription,
         String contentStructureJson,
+        String rejectionReason,
         Instant createdAt,
         Instant updatedAt
 ) {

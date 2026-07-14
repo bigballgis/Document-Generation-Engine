@@ -12,6 +12,7 @@ import com.bank.docgen.contentmodule.api.UpdateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
+import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
@@ -34,6 +35,7 @@ public class ContentModuleService {
     public ContentModuleService(
             ContentModuleRepository moduleRepository,
             ContentModuleVersionRepository versionRepository,
+            ContentModuleReviewRecordRepository reviewRecordRepository,
             GroupAccessService groupAccessService,
             ContentModuleAccessService accessSupport,
             ManagementAuditRecorder auditRecorder
@@ -44,7 +46,12 @@ public class ContentModuleService {
         this.accessSupport = accessSupport;
         this.auditRecorder = auditRecorder;
         this.catalog = new ContentModuleCatalogSupport(
-                moduleRepository, versionRepository, groupAccessService, accessSupport);
+                moduleRepository,
+                versionRepository,
+                reviewRecordRepository,
+                groupAccessService,
+                accessSupport
+        );
     }
 
     @Transactional(readOnly = true)

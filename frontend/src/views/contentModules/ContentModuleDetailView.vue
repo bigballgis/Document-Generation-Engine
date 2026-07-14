@@ -19,6 +19,8 @@ const {
   moduleId,
   detail,
   versions,
+  reviewHistory,
+  formatReviewAction,
   canSubmitReview,
   canApproveReview,
   canCreateVersion,
@@ -68,6 +70,7 @@ const {
         v-model="activeWorkspaceTab"
         :workspace-tabs="workspaceTabs"
         :versions="versions"
+        :review-history="reviewHistory"
         :preview-version="previewVersion"
         :preview-content-json="previewContentJson"
         :preview-version-label="previewVersionLabel"
@@ -78,6 +81,7 @@ const {
         :can-stop="canStop"
         :can-recover="canRecover"
         :can-deprecate="canDeprecate"
+        :format-review-action="formatReviewAction"
         @edit-draft="openEditDraftDialog"
         @create-version="openCreateVersionDialog"
         @submit-review="handleSubmitReview"

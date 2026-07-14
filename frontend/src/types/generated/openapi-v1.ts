@@ -569,6 +569,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/content-modules/workflow-tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List content-module review and rework workflow tasks
+         * @description Returns dashboard workflow tasks for content modules visible to the caller (CE-U08). PENDING_REVIEW tasks require decideContentModuleReviews; REWORK tasks require authorContentModules. Fail-closed: callers without catalog browse access receive 403; tasks for inaccessible groups are omitted.
+         */
+        get: operations["listContentModuleWorkflowTasks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/content-modules/{moduleId}": {
         parameters: {
             query?: never;
@@ -576,7 +596,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get content module detail with versions */
+        /**
+         * Get content module detail with versions
+         * @description Returns module header, versions (including optional rejectionReason), and reviewHistory timeline records for CE-U08 lifecycle display.
+         */
         get: operations["getContentModule"];
         put?: never;
         post?: never;
@@ -2754,8 +2777,38 @@ export interface components {
             /** @description Module content structure JSON. Optional on read responses; populated only when the caller holds structure-view permission per permission-matrix section 5.1 (GLOBAL_ADMIN, GROUP_ADMIN, MASTER_DESIGNER, TEMPLATE_AUTHOR, or TEMPLATE_APPROVER). Omitted or null when the caller may browse the catalog but lacks structure-view permission (fail-closed). TEMPLATE_TESTER receives 403 on catalog list/detail and never receives this field.
              *      */
             contentStructureJson?: string;
+            /** @description Present when the version is DRAFT after REJECT_REVIEW. Cleared on SUBMIT_FOR_REVIEW and APPROVE_REVIEW (CE-U08).
+             *      */
+            rejectionReason?: string;
             /** Format: date-time */
             createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ContentModuleReviewRecordView: {
+            /** @description Master-aligned action code — SUBMITTED, APPROVED, or REJECTED. */
+            action: string;
+            decision?: string;
+            /** @description Change description captured on SUBMIT_FOR_REVIEW. */
+            changeSummary?: string;
+            /** @description Rejection reason captured on REJECT_REVIEW. */
+            commentSummary?: string;
+            actorUsername: string;
+            /** Format: date-time */
+            createdAt: string;
+            semanticVersion?: string;
+            selfApprovalException?: boolean;
+            exceptionReason?: string;
+        };
+        ContentModuleWorkflowTaskView: {
+            moduleId: string;
+            moduleCode: string;
+            name: string;
+            groupCode: string;
+            /** @enum {string} */
+            kind: "PENDING_REVIEW" | "REWORK";
+            semanticVersion?: string;
+            rejectionReason?: string;
             /** Format: date-time */
             updatedAt: string;
         };
@@ -2780,6 +2833,9 @@ export interface components {
             description?: string;
             sharedGroupCodes?: string[];
             versions: components["schemas"]["ContentModuleVersionView"][];
+            /** @description Chronological review timeline (SUBMITTED / APPROVED / REJECTED) for the lifecycle Tab el-timeline (CE-U08; master-aligned).
+             *      */
+            reviewHistory: components["schemas"]["ContentModuleReviewRecordView"][];
         };
         /** @description LR-C5 catalog list envelope. Replaces pre-LR-C5 bare-array `ContentModuleSummaryListResponse` for `GET /content-modules`. */
         ContentModuleSummaryPageResponse: {
@@ -4662,6 +4718,35 @@ export interface operations {
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
             422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    listContentModuleWorkflowTasks: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Workflow tasks returned. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        metadata: components["schemas"]["Metadata"];
+                        result: components["schemas"]["ContentModuleWorkflowTaskView"][];
+                    };
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };

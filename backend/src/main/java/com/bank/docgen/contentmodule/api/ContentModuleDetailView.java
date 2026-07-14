@@ -11,11 +11,13 @@ public record ContentModuleDetailView(
         String name,
         String description,
         List<String> sharedGroupCodes,
-        List<ContentModuleVersionView> versions
+        List<ContentModuleVersionView> versions,
+        List<ContentModuleReviewRecordView> reviewHistory
 ) {
     public ContentModuleDetailView {
         sharedGroupCodes = DefensiveCopies.copyStringList(sharedGroupCodes);
         versions = DefensiveCopies.copyList(versions);
+        reviewHistory = DefensiveCopies.copyList(reviewHistory);
     }
 
 }

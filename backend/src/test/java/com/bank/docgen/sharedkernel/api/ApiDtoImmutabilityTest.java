@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.bank.docgen.apimgmt.api.ApiPolicyView;
 import com.bank.docgen.audit.api.ManagementAuditEventView;
 import com.bank.docgen.contentmodule.api.ContentModuleDetailView;
+import com.bank.docgen.contentmodule.api.ContentModuleReviewRecordView;
 import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.master.api.MasterAnchorView;
@@ -208,10 +209,12 @@ class ApiDtoImmutabilityTest {
                         ContentModuleLifecycleState.ACTIVE,
                         "Initial",
                         "{}",
+                        null,
                         Instant.parse("2026-01-01T00:00:00Z"),
                         Instant.parse("2026-01-02T00:00:00Z")
                 )
         ));
+        List<ContentModuleReviewRecordView> history = new ArrayList<>();
 
         ContentModuleDetailView view = new ContentModuleDetailView(
                 "module-1",
@@ -220,7 +223,8 @@ class ApiDtoImmutabilityTest {
                 "Module",
                 "Desc",
                 sharedGroups,
-                versions
+                versions,
+                history
         );
 
         sharedGroups.add("CORP");
@@ -231,12 +235,25 @@ class ApiDtoImmutabilityTest {
                 ContentModuleLifecycleState.ACTIVE,
                 "Update",
                 "{}",
+                null,
                 Instant.parse("2026-01-03T00:00:00Z"),
                 Instant.parse("2026-01-04T00:00:00Z")
+        ));
+        history.add(new ContentModuleReviewRecordView(
+                "SUBMITTED",
+                null,
+                "Initial",
+                null,
+                "10000003",
+                Instant.parse("2026-01-01T00:00:00Z"),
+                "1.0.0",
+                null,
+                null
         ));
 
         assertThat(view.sharedGroupCodes()).containsExactly("RETAIL");
         assertThat(view.versions()).hasSize(1);
+        assertThat(view.reviewHistory()).isEmpty();
     }
 
     @Test

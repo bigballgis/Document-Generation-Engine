@@ -17,6 +17,7 @@ import com.bank.docgen.contentmodule.domain.ContentModuleReviewOperation;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
+import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
@@ -43,6 +44,8 @@ class ContentModuleReviewServiceTest {
     @Mock
     private ContentModuleVersionRepository versionRepository;
     @Mock
+    private ContentModuleReviewRecordRepository reviewRecordRepository;
+    @Mock
     private GroupAccessService groupAccessService;
     @Mock
     private ManagementAuditRecorder auditRecorder;
@@ -60,6 +63,7 @@ class ContentModuleReviewServiceTest {
         reviewService = new ContentModuleReviewService(
                 moduleRepository,
                 versionRepository,
+                reviewRecordRepository,
                 groupAccessService,
                 accessSupport,
                 auditRecorder,
@@ -97,6 +101,7 @@ class ContentModuleReviewServiceTest {
         when(groupAccessService.canAuthorContentModules(author)).thenReturn(true);
         when(versionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reviewRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = reviewService.transition(
                 "MOD-LOAN-DISCLOSURE",
@@ -151,6 +156,7 @@ class ContentModuleReviewServiceTest {
         when(groupAccessService.canDecideContentModuleReviews(approver)).thenReturn(true);
         when(versionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reviewRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = reviewService.transition(
                 "MOD-LOAN-DISCLOSURE",
@@ -180,6 +186,7 @@ class ContentModuleReviewServiceTest {
         when(groupAccessService.canDecideContentModuleReviews(approver)).thenReturn(true);
         when(versionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reviewRecordRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = reviewService.transition(
                 "MOD-LOAN-DISCLOSURE",

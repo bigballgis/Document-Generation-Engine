@@ -39,3 +39,7 @@ export type ContentModuleLifecycleOperationPayload =
 export type ContentModuleLifecycleSnapshot = Schema<'ContentModuleLifecycleSnapshot'>
 
 export type ContentModuleLifecycleOperationResult = Schema<'ContentModuleLifecycleOperationResult'>
+
+export type ContentModuleReviewRecord = Schema<'ContentModuleReviewRecordView'>
+
+export type ContentModuleWorkflowTask = Schema<'ContentModuleWorkflowTaskView'>

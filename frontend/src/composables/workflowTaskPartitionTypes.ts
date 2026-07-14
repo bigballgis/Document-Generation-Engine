@@ -21,8 +21,10 @@ export type WorkflowTaskKind =
   | 'template-rework'
   | 'template-escalation'
   | 'clause-outdated-bump'
+  | 'content-module-review'
+  | 'content-module-rework'
 
-type WorkflowTaskSource = 'master' | 'collaboration' | 'template'
+type WorkflowTaskSource = 'master' | 'collaboration' | 'template' | 'content-module'
 
 export interface WorkflowTask {
   id: string
@@ -64,7 +66,13 @@ export interface DashboardTaskScope {
   showMasterRework: boolean
 }
 
-type TaskPartitionKind = 'collaboration' | 'master-review' | 'master-rework' | 'clause-outdated-bump'
+type TaskPartitionKind =
+  | 'collaboration'
+  | 'master-review'
+  | 'master-rework'
+  | 'clause-outdated-bump'
+  | 'content-module-review'
+  | 'content-module-rework'
 
 export interface TaskPartition {
   id: string
