@@ -10,10 +10,15 @@ import static org.mockito.Mockito.when;
 
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.runtime.api.BatchGenerateRequestBody;
+import com.bank.docgen.runtime.api.BatchResultItemView;
 import com.bank.docgen.runtime.api.BatchSummaryView;
 import com.bank.docgen.runtime.api.OutputOptionsView;
 import com.bank.docgen.runtime.domain.TaskStatus;
+import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
+import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.api.ErrorDetail;
+import com.bank.docgen.sharedkernel.document.compute.VariableComputeException;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.service.TemplateValidationException;
 import java.util.List;
@@ -118,6 +123,39 @@ class BatchExecutionServiceTest {
                 });
 
         verify(idempotencyService, never()).registerDownloadableDocument(any(), anyString(), anyString());
+    }
+
+    @Test
+    void execute_emitsVariableComputeFailedNotRenderingFailed() {
+        when(messageResolver.resolve("api.error.variable.computeFailed"))
+                .thenReturn("Variable compute failed.");
+        when(documentGenerationEngine.generate(any(), anyString(), any(), anyString(), any(), any(), anyString(), any()))
+                .thenThrow(new VariableComputeException(
+                        "principalCn",
+                        "SPELL_AMOUNT(${principal})",
+                        "unknown function"
+                ));
+
+        BatchExecutionService.BatchExecutionOutcome outcome = service.execute(
+                template,
+                "1.0.0",
+                request,
+                "BATCH-COMPUTE",
+                true
+        );
+
+        assertThat(outcome.taskStatus()).isEqualTo(TaskStatus.FAILED);
+        BatchResultItemView failed = outcome.batchResult().items().getFirst();
+        ErrorDetail error = failed.error();
+        assertThat(error).isNotNull();
+        assertThat(error.code()).isEqualTo(ApiErrorCodes.VARIABLE_COMPUTE_FAILED);
+        assertThat(error.category()).isEqualTo(ApiErrorCategories.GENERATION);
+        assertThat(error.messageKey()).isEqualTo("api.error.variable.computeFailed");
+        assertThat(error.retryable()).isFalse();
+        assertThat(error.idempotencyConflict())
+                .containsEntry("variableKey", "principalCn")
+                .containsKey("expressionSummary");
+        assertThat(error.code()).isNotEqualTo(ApiErrorCodes.RENDERING_FAILED);
     }
 
     private DocumentGenerationEngine.GeneratedDocument generated(String documentId) {

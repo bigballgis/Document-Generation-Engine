@@ -11,12 +11,16 @@ import com.bank.docgen.sharedkernel.api.ApiErrorCategories;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
 import com.bank.docgen.sharedkernel.api.ErrorDetail;
+import com.bank.docgen.sharedkernel.api.FieldError;
+import com.bank.docgen.sharedkernel.document.compute.VariableComputeException;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
 import com.bank.docgen.rendering.RenderingOperationException;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.service.TemplateValidationException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -154,6 +158,26 @@ public class BatchExecutionService {
     }
 
     private ErrorDetail toItemError(RuntimeException ex) {
+        VariableComputeException compute = findVariableCompute(ex);
+        if (compute != null) {
+            String messageKey = compute.messageKey();
+            Map<String, Object> details = new LinkedHashMap<>();
+            details.put("variableKey", compute.variableKey());
+            details.put("expressionSummary", compute.expressionSummary());
+            List<FieldError> fieldErrors = List.of(
+                    new FieldError("variableKey", "COMPUTE_FAILED", compute.variableKey()),
+                    new FieldError("expressionSummary", "COMPUTE_FAILED", compute.expressionSummary())
+            );
+            return new ErrorDetail(
+                    ApiErrorCodes.VARIABLE_COMPUTE_FAILED,
+                    ApiErrorCategories.GENERATION,
+                    messageResolver.resolve(messageKey),
+                    messageKey,
+                    false,
+                    fieldErrors,
+                    details
+            );
+        }
         String messageKey = ex instanceof TemplateValidationException validation
                 ? validation.messageKey()
                 : ex instanceof RenderingOperationException rendering
@@ -167,5 +191,16 @@ public class BatchExecutionService {
                 false,
                 null
         );
+    }
+
+    private static VariableComputeException findVariableCompute(Throwable ex) {
+        Throwable current = ex;
+        while (current != null) {
+            if (current instanceof VariableComputeException compute) {
+                return compute;
+            }
+            current = current.getCause();
+        }
+        return null;
     }
 }

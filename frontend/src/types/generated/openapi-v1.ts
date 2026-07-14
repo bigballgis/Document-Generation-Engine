@@ -864,6 +864,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/templates/{templateId}/compute-expressions/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validate a whitelist compute expression (syntax + references)
+         * @description CE-K03 author-time validation for `computeExpression` values. Checks whitelist DSL syntax, length/nesting bounds, and that `${path}` roots exist in `knownVariableKeys`. Returns `valid`/`message` in the success envelope (does not throw for invalid expressions). Does not evaluate sample data or produce a document. Traceability: BDD-CE-K03-024…025; ADR-0056.
+         */
+        post: operations["validateComputeExpression"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates/{templateId}/compute-expressions/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Evaluate a compute expression against sample variables (author preview)
+         * @description CE-K03 author-time sample evaluation for compute preview. Evaluates the whitelist expression against `sampleVariables` (optional `locale`) and returns a non-sensitive result summary. Failures surface as `VARIABLE_COMPUTE_FAILED` (422) with `variableKey` + `expressionSummary` — never as a successful document. Does not assemble DOCX/PDF. Traceability: BDD-CE-K03-026…027; ADR-0056.
+         */
+        post: operations["evaluateComputeExpression"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/templates/import": {
         parameters: {
             query?: never;
@@ -2493,6 +2533,51 @@ export interface components {
             definitions: components["schemas"]["TemplateVariableValidationDefinitionResponse"][];
             summary?: components["schemas"]["TemplateVariableValidationSummary"];
             auditSummary?: components["schemas"]["TemplateVariableValidationAuditSummary"];
+        };
+        /** @description CE-K03 author-time compute expression validation payload (`POST …/compute-expressions/validate`). */
+        ComputeExpressionValidateRequest: {
+            /** @description Optional variable key being authored (for error context). */
+            variableKey?: string;
+            /** @description Whitelist compute DSL expression to validate. */
+            expression: string;
+            /** @description Variable keys available for `${path}` reference checks. */
+            knownVariableKeys: string[];
+        };
+        /** @description CE-K03 compute expression validation result body. */
+        ComputeExpressionValidateView: {
+            valid: boolean;
+            /** @description Non-sensitive validation failure reason when `valid` is false. */
+            message?: string | null;
+        };
+        ComputeExpressionValidateResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["ComputeExpressionValidateView"];
+        };
+        /** @description CE-K03 author-time sample evaluation payload (`POST …/compute-expressions/evaluate`). */
+        ComputeExpressionEvaluateRequest: {
+            /** @description Optional variable key being previewed (for error context). */
+            variableKey?: string;
+            /** @description Whitelist compute DSL expression to evaluate. */
+            expression: string;
+            /** @description Sample variable map for preview evaluation. Must not include secrets; values are author-supplied fixtures only. */
+            sampleVariables: {
+                [key: string]: unknown;
+            };
+            /** @description Optional BCP-47 locale tag (default zh-CN for FORMAT_* / SPELL_AMOUNT). */
+            locale?: string;
+        };
+        /** @description CE-K03 sample compute evaluation result body. */
+        ComputeExpressionEvaluateView: {
+            success: boolean;
+            /** @description Evaluated value (number, string, boolean, or structured). */
+            result: unknown;
+            variableKey?: string | null;
+            /** @description Truncated expression summary (≤128 chars); never full secrets. */
+            expressionSummary?: string | null;
+        };
+        ComputeExpressionEvaluateResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["ComputeExpressionEvaluateView"];
         };
         TemplateRuleValidationItemRequest: {
             ruleId: string;
@@ -5068,6 +5153,76 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["TemplateExportResponse"];
                     "application/zip": string;
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    validateComputeExpression: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                /** @description Internal template resource UUID (management path). */
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ComputeExpressionValidateRequest"];
+            };
+        };
+        responses: {
+            /** @description Compute expression validation completed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComputeExpressionValidateResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    evaluateComputeExpression: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                /** @description Internal template resource UUID (management path). */
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ComputeExpressionEvaluateRequest"];
+            };
+        };
+        responses: {
+            /** @description Sample compute evaluation succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComputeExpressionEvaluateResponse"];
                 };
             };
             401: components["responses"]["ErrorResponse"];
