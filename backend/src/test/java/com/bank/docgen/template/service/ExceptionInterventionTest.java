@@ -65,6 +65,12 @@ class ExceptionInterventionTest {
     private ApiPolicyRepository apiPolicyRepository;
     @Mock
     private VersionFidelityWarningService versionFidelityWarningService;
+    @Mock
+    private com.bank.docgen.master.persistence.MasterDocumentRepository masterDocumentRepository;
+    @Mock
+    private com.bank.docgen.master.persistence.MasterRevisionLineRepository masterRevisionLineRepository;
+    @Mock
+    private com.bank.docgen.infrastructure.storage.ObjectStoragePort objectStoragePort;
 
     private DecisionFormService decisionFormService;
     private TemplateLifecycleService lifecycleService;
@@ -93,7 +99,10 @@ class ExceptionInterventionTest {
                 apiPolicyMaterializationService,
                 apiPolicyRepository,
                 versionFidelityWarningService,
-                new ObjectMapper()
+                new ObjectMapper(),
+                masterDocumentRepository,
+                masterRevisionLineRepository,
+                objectStoragePort
         );
         templateId = UUID.randomUUID();
         template = new TemplateEntity(

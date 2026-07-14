@@ -4,6 +4,7 @@ import com.bank.docgen.authoring.structured.CallerRenderOverride;
 import com.bank.docgen.authoring.structured.RenderProfileService;
 import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
+import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.rendering.DocxAssembler;
 import com.bank.docgen.rendering.DocumentArtifactPipeline;
 import com.bank.docgen.runtime.metrics.GenerationMetrics;
@@ -30,6 +31,7 @@ public class DocumentGenerationEngine {
             TemplateVersionRepository templateVersionRepository,
             AnchorBindingRepository anchorBindingRepository,
             MasterDocumentRepository masterDocumentRepository,
+            MasterRevisionLineRepository masterRevisionLineRepository,
             ObjectStoragePort objectStoragePort,
             DocxAssembler docxAssembler,
             DocumentArtifactPipeline documentArtifactPipeline,
@@ -42,6 +44,7 @@ public class DocumentGenerationEngine {
                 templateVersionRepository,
                 anchorBindingRepository,
                 masterDocumentRepository,
+                masterRevisionLineRepository,
                 objectStoragePort,
                 docxAssembler,
                 documentArtifactPipeline,

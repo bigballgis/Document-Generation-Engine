@@ -62,6 +62,12 @@ class TemplateLifecyclePublishGateTest {
     private ApiPolicyRepository apiPolicyRepository;
     @Mock
     private VersionFidelityWarningService versionFidelityWarningService;
+    @Mock
+    private com.bank.docgen.master.persistence.MasterDocumentRepository masterDocumentRepository;
+    @Mock
+    private com.bank.docgen.master.persistence.MasterRevisionLineRepository masterRevisionLineRepository;
+    @Mock
+    private com.bank.docgen.infrastructure.storage.ObjectStoragePort objectStoragePort;
 
     private TemplateLifecycleService service;
     private DecisionFormService decisionFormService;
@@ -91,7 +97,10 @@ class TemplateLifecyclePublishGateTest {
                 apiPolicyMaterializationService,
                 apiPolicyRepository,
                 versionFidelityWarningService,
-                new ObjectMapper()
+                new ObjectMapper(),
+                masterDocumentRepository,
+                masterRevisionLineRepository,
+                objectStoragePort
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",

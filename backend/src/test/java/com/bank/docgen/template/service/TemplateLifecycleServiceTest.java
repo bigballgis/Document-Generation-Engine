@@ -72,6 +72,12 @@ class TemplateLifecycleServiceTest {
     private ApiPolicyRepository apiPolicyRepository;
     @Mock
     private VersionFidelityWarningService versionFidelityWarningService;
+    @Mock
+    private com.bank.docgen.master.persistence.MasterDocumentRepository masterDocumentRepository;
+    @Mock
+    private com.bank.docgen.master.persistence.MasterRevisionLineRepository masterRevisionLineRepository;
+    @Mock
+    private com.bank.docgen.infrastructure.storage.ObjectStoragePort objectStoragePort;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims author;
@@ -97,7 +103,10 @@ class TemplateLifecycleServiceTest {
                 apiPolicyMaterializationService,
                 apiPolicyRepository,
                 versionFidelityWarningService,
-                new ObjectMapper()
+                new ObjectMapper(),
+                masterDocumentRepository,
+                masterRevisionLineRepository,
+                objectStoragePort
         );
         author = new ManagementSessionClaims(
                 "10000003",

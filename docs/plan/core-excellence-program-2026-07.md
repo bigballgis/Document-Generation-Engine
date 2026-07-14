@@ -79,7 +79,7 @@ Done 时平台应满足：
 
 ## 3. Wave CE-K — 信函内核正确性
 
-### CE-K01 发布包不可变快照（钉扎）— P0 · XL · `Not Started`
+### CE-K01 发布包不可变快照（钉扎）— P0 · XL · `Done`
 
 **痛点：** 已发布模板的产出会随母版文件替换、条款改动而漂移；审计无法复现历史产出。
 **现状证据：** `DocumentGenerationAssemblySupport` 运行时经
@@ -373,6 +373,6 @@ examples 只是 token 字符串。目标：契约页生成完整 curl（含 Auth
 完成任一 CE-* 任务时：更新本文件状态 → 更新 `execution-sync-ledger.md` 证据行 →
 若与 SOR/OPT/LRP 条目重叠，在对方文件标注 `superseded by CE-*` → 走 post-task-doc-sync。
 
-**Task Master registry (2026-07-14):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1 Done:** **#54** CE-K07 (merge `e8f996a0`); **#55** CE-U03 (merge `22bb391f`; tip `0565e1ae`); **#56** CE-C01+C02 (merge `da08f3fe`). **Batch 2 In Progress:** #57 CE-K01, #72 CE-G01. Formal phase remains **None**. Do **not** implement C03–C06 in this sync.
+**Task Master registry (2026-07-14):** umbrella **#53**; leaves **#54–#97** (CE-O02 skipped per D5). **Batch 1 Done:** **#54** CE-K07 (merge `e8f996a0`); **#55** CE-U03 (merge `22bb391f`; tip `0565e1ae`); **#56** CE-C01+C02 (merge `da08f3fe`). **Batch 2:** **#57** CE-K01 **Done** (merge pending; tip `720a75bd`); **#72** CE-G01 **In Progress**. Formal phase remains **None**. Do **not** implement C03–C06 in this sync.
 
-**Last reviewed:** 2026-07-14（CE-U03 merged `22bb391f`；#55 Done；Batch 1 complete；Batch 2 #57/#72 in flight）
+**Last reviewed:** 2026-07-14（CE-K01 merged；#57 Done；Batch 2 residual #72 G01）

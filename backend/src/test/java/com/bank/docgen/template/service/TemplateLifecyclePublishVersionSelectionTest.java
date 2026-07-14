@@ -10,6 +10,12 @@ import com.bank.docgen.apimgmt.persistence.ApiPolicyRepository;
 import com.bank.docgen.apimgmt.service.ApiPolicyMaterializationService;
 import com.bank.docgen.authorization.management.service.GroupAccessService;
 import com.bank.docgen.infrastructure.i18n.MessageResolver;
+import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
+import com.bank.docgen.master.domain.MasterDocumentStatus;
+import com.bank.docgen.master.persistence.MasterDocumentEntity;
+import com.bank.docgen.master.persistence.MasterDocumentRepository;
+import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
+import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.PublishTemplateRequest;
 import com.bank.docgen.template.api.TemplateDetailView;
@@ -21,8 +27,10 @@ import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.collaboration.service.CollaborationWorkItemWriter;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayInputStream;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,10 +73,17 @@ class TemplateLifecyclePublishVersionSelectionTest {
     private ApiPolicyRepository apiPolicyRepository;
     @Mock
     private VersionFidelityWarningService versionFidelityWarningService;
+    @Mock
+    private MasterDocumentRepository masterDocumentRepository;
+    @Mock
+    private MasterRevisionLineRepository masterRevisionLineRepository;
+    @Mock
+    private ObjectStoragePort objectStoragePort;
 
     private TemplateLifecycleService service;
     private ManagementSessionClaims groupAdmin;
     private UUID templateId;
+    private UUID revisionId;
     private TemplateEntity template;
 
     @BeforeEach
@@ -90,7 +105,10 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 apiPolicyMaterializationService,
                 apiPolicyRepository,
                 versionFidelityWarningService,
-                new ObjectMapper()
+                new ObjectMapper(),
+                masterDocumentRepository,
+                masterRevisionLineRepository,
+                objectStoragePort
         );
         groupAdmin = new ManagementSessionClaims(
                 "10000002",
@@ -104,6 +122,7 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 Instant.now().plusSeconds(3600)
         );
         templateId = UUID.randomUUID();
+        revisionId = UUID.randomUUID();
         template = new TemplateEntity(
                 templateId,
                 "TPL-001",
@@ -128,16 +147,43 @@ class TemplateLifecyclePublishVersionSelectionTest {
                 .thenReturn(List.of(candidateVersion, publishedVersion));
         when(templateService.toDetail(template)).thenReturn(detail());
         when(messageResolver.resolve(any(), any())).thenReturn("Published release 2.0.0");
+        stubApprovedMasterPin();
 
         service.publish(templateId, new PublishTemplateRequest("2.0.0", true), groupAdmin);
 
         assertThat(candidateVersion.getReleaseVersion()).isEqualTo("2.0.0");
         assertThat(candidateVersion.getLifecycleStatus()).isEqualTo(TemplateLifecycleStatus.PUBLISHED);
+        assertThat(candidateVersion.getMasterRevisionId()).isEqualTo(revisionId);
         assertThat(publishedVersion.getReleaseVersion()).isEqualTo("1.0.0");
         verify(templateVersionRepository).save(candidateVersion);
         verify(contentModuleReferenceService).lockReferencesForPublish(candidateVersion.getId());
         verify(renderProfileService).lockForPublish(candidateVersion);
         verify(collaborationWorkItemWriter).resolveOpenPendingReleaseWorkItems(template, groupAdmin);
+    }
+
+    private void stubApprovedMasterPin() {
+        MasterDocumentEntity master = new MasterDocumentEntity(
+                template.getMasterId(), "RETAIL", "Retail Master", "desc",
+                "masters/live.docx", "master.docx", "10000002"
+        );
+        master.setStatus(MasterDocumentStatus.APPROVED);
+        try {
+            java.lang.reflect.Field f = MasterDocumentEntity.class.getDeclaredField("currentRevisionLineId");
+            f.setAccessible(true);
+            f.set(master, revisionId);
+        } catch (ReflectiveOperationException ex) {
+            throw new RuntimeException(ex);
+        }
+        MasterRevisionLineEntity revision = new MasterRevisionLineEntity(
+                revisionId, template.getMasterId(), "masters/R1.docx", "master.docx",
+                1, MasterDocumentStatus.APPROVED, 1, true, "initial", "10000002"
+        );
+        when(masterDocumentRepository.findByIdAndDeletedAtIsNull(template.getMasterId()))
+                .thenReturn(Optional.of(master));
+        when(masterRevisionLineRepository.findByIdAndMasterIdAndDeletedAtIsNull(revisionId, template.getMasterId()))
+                .thenReturn(Optional.of(revision));
+        when(objectStoragePort.get("masters/R1.docx"))
+                .thenReturn(new ByteArrayInputStream(new byte[]{1, 2, 3}));
     }
 
     private TemplateVersionEntity version(

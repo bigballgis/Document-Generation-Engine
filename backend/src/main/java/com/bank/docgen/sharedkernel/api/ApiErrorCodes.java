@@ -15,6 +15,8 @@ public final class ApiErrorCodes {
     public static final String MASTER_INVALID_STATE = "MASTER_INVALID_STATE";
     public static final String MASTER_ANCHOR_INTEGRITY_FAILED = "MASTER_ANCHOR_INTEGRITY_FAILED";
     public static final String MASTER_INVALID_FILE = "MASTER_INVALID_FILE";
+    public static final String MASTER_REVISION_IN_USE_BY_PUBLISHED_RELEASE = "MASTER_REVISION_IN_USE_BY_PUBLISHED_RELEASE";
+    public static final String MASTER_REVISION_DELETE_FAILED = "MASTER_REVISION_DELETE_FAILED";
     public static final String TEMPLATE_NOT_FOUND = "TEMPLATE_NOT_FOUND";
     public static final String TEST_DATA_SET_NOT_FOUND = "TEST_DATA_SET_NOT_FOUND";
     public static final String TEMPLATE_VALIDATION_FAILED = "TEMPLATE_VALIDATION_FAILED";

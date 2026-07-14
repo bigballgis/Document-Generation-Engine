@@ -778,16 +778,16 @@
       {
         "id": "57",
         "title": "CE-K01: Immutable release bundle pinning",
-        "description": "PENDING. Slice ce-k01-release-bundle-pinning. Pin master revision + file hash + render profile on publish; runtime assembly reads pins only. P0·XL.",
-        "details": "Depends CE-K07 skeleton (#54). Flyway + template_version pins; master delete protection; retroactive PINNED_RETROACTIVELY for legacy. Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §3 CE-K01.",
+        "description": "IN PROGRESS. Slice ce-k01-release-bundle-pinning. Pin master revision + file hash + render profile on publish; runtime assembly reads pins only. P0·XL. Feature tip ready; not merged.",
+        "details": "Depends CE-K07 skeleton (#54). Flyway V57 + template_version pins; master delete protection; ReleaseBundleBackfillRunner PINNED_RETROACTIVELY. Gates: mvn verify GREEN 1432/0/0/7 (Java 25). E2E/UIUX/deploy N/A. Worktree D:/working/DGE-ce-k01-release-bundle-pinning · feat/ce-k01-release-bundle-pinning. Await architecture review + integration-merger. Formal phase stays None. Plan §3 CE-K01.",
         "testStrategy": "1. Publish persists pins. 2. Post-publish master replace does not change release output. 3. Migration backfill + tests. 4. mvn verify.",
         "priority": "high",
         "dependencies": [
           "54"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T06:15:00.000Z"
       },
       {
         "id": "58",
