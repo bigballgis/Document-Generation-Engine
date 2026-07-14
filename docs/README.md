@@ -3,9 +3,9 @@
 **Project baseline:** Restart from zero (2026-06-23); **P0–P11, P13–P21 Done**; **P12 Not Started**
 (catch-all idle; slices **P12-TEMPLATE-TESTING-OVERHAUL Done**, **P12-API-PACKAGE-ACCESS-INVOCATION Done** 2026-07-03).
 
-**Active work in this documentation track:** **OPS-PASTE-BINDING-SEAM Done** (slice `ops-paste-binding-seam`; Task Master **#47**; merge `f1f00da`; BDD **ready** [ops-paste-binding-seam.md](./behavior/ops-paste-binding-seam.md); checklist [#5b](./operations/launch-readiness-checklist.md) → **GO**; **CD-HARD-T05 → Done** wire; ledger seam closed). Formal phase remains **None**. **no sole-active**. Overall checklist remains **NO-GO** (blocking: **#3b** only; #5a/#10 **CONDITIONAL**). Recommend next (notes only): **pause**. Do **not** claim production go-live. Do **not** activate CD-3. Do **not** touch `DGE-audit-governance`. **Prior:** **[OPS-AD-GROUP-STUB-CLOSE Done](./behavior/ops-ad-group-stub-close.md)** (Task Master **#46**; merge `4e51a1b`; #5a **CONDITIONAL**). **Prior:** **[LR-E2 Done](./plan/launch-readiness-program.md)** (slice `lrp-e2-launch-checklist`; merge `ae39fbb`; Task Master #43; BDD not-applicable; artifact [launch-readiness-checklist.md](./operations/launch-readiness-checklist.md); overall snapshot **NO-GO** — not a production go-live claim). **[Wave LR-E Done](./plan/launch-readiness-program.md)** (E1+E2 docs exit gate — **not** production go-live). **LRP planned waves A–E → Done**. **Prior:** **[LR-E1 Done](./behavior/lrp-e1-sse-proxy-e2e.md)** (slice `lrp-e1-sse-proxy-e2e`; merge `575d0aa`; Task Master #42; evidence [LRP-E1-sse-manifest.md](../frontend/e2e/evidence/LRP-E1-sse-manifest.md)). **Prior:** **[Wave LR-D Done](./plan/detail/LRP-D-ops-observability.md)** (2026-07-12 — D1–D7 all Done; merge tip `218dcf1`). **[Wave LR-C Done](./plan/detail/LRP-C-usability-deepening.md)** (2026-07-11 — C1–C13; merge tip `bf9cbeb`). **[CDP Wave CD-2 Done](./plan/competitiveness-deepening-program.md)** (2026-07-11 — T01–T13; merge tip `b2b0899`).
+**Delivery focus:** **CORE-EXCELLENCE (CE) Batch 3 → In Progress** — umbrella Task Master **#53**; plan [core-excellence-program-2026-07.md](./plan/core-excellence-program-2026-07.md). **CE-U07 → Done** (merge `fde9342a`; slice `ce-u07-clause-outdated-bump`; [ce-u07-clause-outdated-bump.md](./behavior/ce-u07-clause-outdated-bump.md)). Batch 1+2 Done (#54/#55/#56/#57/#72); prior Batch 3 lane-2 **#64/#65/#66/#67** Done. Residual Batch 3: **CE-U08+** (#83…) per plan §9. Formal phase remains **None**; **not** go-live. Overall checklist remains **NO-GO** (blocking: **#3b**; #5a/#10 **CONDITIONAL**). Do **not** activate CD-3. Do **not** invent a formal P-phase.
 
-**Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08; ArchUnit **11/11**; gates **GREEN**. **CORE-FORTRESS program Done** — F1–F8 complete. **LR-A4 Done** (2026-07-10; merge `a523a09`). **CDP golden path T01 Done** (2026-07-10; merge `1930842`). See [CODE-QUALITY program](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md) · [CDP](./plan/competitiveness-deepening-program.md).
+**Active formal program:** **None** (2026-07-09+). **CODE-QUALITY Done** — CQ-01A…CQ-08. **CORE-FORTRESS Done** — F1–F8. **CDP Wave CD-2 Done** (T01–T13; merge tip `b2b0899`; **no CDP wave In Progress**; CD-3 Not Started). **LRP waves A–E → Done**. See [CORE-EXCELLENCE](./plan/core-excellence-program-2026-07.md) · [CODE-QUALITY](./plan/code-quality-program.md) · [LRP](./plan/launch-readiness-program.md) · [CDP](./plan/competitiveness-deepening-program.md) · [execution-sync-ledger](./plan/execution-sync-ledger.md).
 
 **P22 Done** (2026-07-04) — rendering engine + demo scaffolds; [P22 detail](./plan/detail/P22-demo-expansion-rendering-fidelity.md).
 
@@ -19,7 +19,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | --- | --- | --- |
 | 1 | [Master plan](./plan/master-plan.md) | Overall phase roadmap and status |
 | 2 | [Plan layer index](./plan/README.md) | Detailed plans per phase (P0–P23) |
-| 2a | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **Program In Progress** — CD-2 **Done** (T01–T13); CD-3 Not Started; E2E matrix + pitfall registry ( **`CD-*` tasks** ) |
+| 2a | **[CORE-EXCELLENCE (CE)](./plan/core-excellence-program-2026-07.md)** | **Delivery focus** — Batch 3 In Progress (umbrella **#53**); CE-U07 Done; not a formal P-phase |
+| 2a′ | **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **CD-2 Done** (T01–T13); **no wave In Progress**; CD-3 Not Started; E2E matrix + pitfall registry (`CD-*`) |
 | 2b | [Execution sync ledger](./plan/execution-sync-ledger.md) | Epic/milestone mirror + gate evidence + **transitional seams index** |
 | 2c | **[Deployment guide](../deploy/README.md)** | **Canonical** install/upgrade/cutover/rollback — Docker Compose + Kubernetes (ADR-0030) |
 | 3 | [Orchestration high-level plan](./architecture/orchestration-high-level-plan.md) | Epic ordering and active epic rules |
@@ -53,7 +54,8 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | [System optimization review 2026-07](./plan/system-optimization-review-2026-07.md) | **Consolidated optimization program** (SOR-0…7, 2026-07-04 closeout) — actionable backlog complete except P22-blocked A02/A03 |
 | [SpotBugs exclusion ratchet](./plan/spotbugs-exclusion-ratchet.md) | Ongoing EI_EXPOSE_REP reduction plan (SOR-A05 slice 1+; post-SOR program) |
 | [Comprehensive optimization roadmap](./plan/comprehensive-optimization-roadmap.md) | **Unified execution map** — docs, API contract, template workflow, frontend UX, performance, E2E (COR-0…6, 2026-06-23) |
-| **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **Launch readiness** — doc truth, E2E golden paths, pitfall registry (`CD-*` tasks) |
+| **[CORE-EXCELLENCE (CE)](./plan/core-excellence-program-2026-07.md)** | **Delivery focus** — Batch 3 In Progress (umbrella **#53**); CE-U07 Done; not a formal P-phase |
+| **[Competitiveness Deepening Program (CDP)](./plan/competitiveness-deepening-program.md)** | **CD-2 Done** — doc truth, E2E golden paths, pitfall registry (`CD-*`); CD-3 Not Started |
 | **[Code Quality Program (CODE-QUALITY)](./plan/code-quality-program.md)** | **Done** (2026-07-09) — behavior-preserving hygiene: module boundaries, god-class extraction, DRY infra (`CQ-*` all slices) |
 | [Launch Readiness & Deep-Optimization Program (LRP)](./plan/launch-readiness-program.md) | Production pitfalls + usability deepening — Waves LR-A…LR-E (`LR-*` tasks; sibling program; LR-C1/C4 Done via F7) |
 | [P12 Deferred enhancements](./plan/detail/P12-deferred-enhancements.md) | Catch-all slice registry (testing overhaul, API package, UIUX refactor — Done slices) |
@@ -192,7 +194,12 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 | **[CE-U05 fidelity viewed persistence + fix path](./behavior/ce-u05-fidelity-viewed-persist.md)** | **ready** (2026-07-14) · Task Master **#66** · slice **Done** (`12741d69`) | **BDD-CE-U05-FVP-001…004** — per-warning viewed persistence; publish gate `FIDELITY_WARNINGS_VIEWED`; human-readable warnings + Edit binding deep link; E2E 4/4 + UIUX PASS_WITH_NOTES; formal phase **None**; **not** go-live |
 | **[CE-U04 inline PDF preview (pdf.js)](./behavior/ce-u04-inline-pdf-preview.md)** | **ready** (2026-07-14) · Task Master **#67** · slice **Done** (`feat/ce-u04-inline-pdf-preview`) | **BDD-CE-U04-IPP-001…004** — in-app PDF in `AuthoringPreviewPane` / preview tab; page nav; nginx `.mjs` worker MIME; E2E **3/3** + UIUX **PASS_WITH_NOTES**; CE-G02 watermark soft-dep; formal phase **None**; **not** go-live |
 | **[CE-U07 clause outdated bump](./behavior/ce-u07-clause-outdated-bump.md)** | **ready** (2026-07-15) · Task Master **#82** · slice **Done** (`fde9342a`) | **BDD-CE-U07-COB-001…004** — out-of-date badge + one-click bump + dashboard author todo deep link; E2E **3/3** + UIUX **PASS_WITH_NOTES**; formal phase **None**; **not** go-live |
+| **[CE-U01 nested editor](./behavior/ce-u01-nested-editor.md)** | **ready** (2026-07-14) · Task Master **#64** · slice **Done** | **BDD-CE-U01-NE-01…NE-05** — recursive nested blocks (max depth 3); path-based mutations; undo/redo compatible |
+| **[CE-G01 self-approval block](./behavior/ce-g01-self-approval-block.md)** | **ready** (2026-07-14) · Task Master **#72** · slice **Done** (`c187a230`) | **BDD-CE-G01-001…022** — `SelfApprovalGuard` fail-closed; admin exception + audit; Flyway **V56** |
 | **[CE-K01 release-bundle pinning](./behavior/ce-k01-release-bundle-pinning.md)** | **ready** (2026-07-14) · Task Master **#57** · slice **Done** | **BDD-CE-K01-001…022** — publish pins master revision + SHA-256 + pin metadata; runtime reads pinned storage_key; delete protection 409; Flyway **V57** + backfill `PINNED_RETROACTIVELY`; `mvn verify` **GREEN**; formal phase **None**; **not** go-live |
+| **[Management invocation history](./behavior/management-invocation-history.md)** | **ready** | Management-plane invocation history / records journey |
+| **[API access cross-package alerts](./behavior/api-access-cross-package-alerts.md)** | **ready** | Cross-package API access alert surfaces |
+| **[Cursor scaffold hygiene](./behavior/cursor-scaffold-hygiene.md)** | **not-applicable** (2026-07-14) | Ops/docs agent scaffold — Cursor-only; no product E2E |
 
 ## Evidence & acceptance artifacts
 
@@ -287,11 +294,13 @@ and [plan/execution-sync-ledger.md](./plan/execution-sync-ledger.md).
 ## Source-of-truth order (on conflict)
 
 1. Latest explicit user confirmation  
-2. [Requirements plan](./requirements/requirements-plan.md)  
-3. [PRD](./product/PRD.md)  
-4. [Domain model](./domain/domain-model.md)  
-5. [Permission matrix](./security/permission-matrix.md)  
-6. [ADRs](./adr/)
+2. [`.taskmaster/tasks/tasks.json`](../.taskmaster/tasks/tasks.json) (active work)  
+3. [`docs/plan/`](./plan/)  
+4. [Requirements plan](./requirements/requirements-plan.md)  
+5. [PRD](./product/PRD.md)  
+6. [Domain model](./domain/domain-model.md)  
+7. [Permission matrix](./security/permission-matrix.md)  
+8. [ADRs](./adr/)
 
 ## Status vocabulary (project / epic / task)
 

@@ -34,11 +34,13 @@ plan-status updates, or Done claims — only orchestration and synthesis.
  → 10 build-deploy-agent (deploy evidence, queued)
  → 11 integration-merger (MANDATORY — merge to main + remove worktree)
  → 12 post-task-doc-sync → 13 post-task-commit-review → Done   [on MAIN only]
+ → 14 verifier (optional — independent PASS/FAIL before user handoff)
 ```
 
 **Review order:** architecture (8) then optional code-quality (9). Do not reverse.
 
 **Session worktree:** code only in `../DGE-<slice-id>`; merge at 11; doc-sync+commit (12–13) on **main**.
+Optional stage **14** `verifier` matches `.cursor/skills/delivery-pipeline/SKILL.md`.
 
 ## Non-negotiables
 

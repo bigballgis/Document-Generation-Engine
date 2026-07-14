@@ -30,7 +30,7 @@ Skill: `.cursor/skills/code-quality-review/SKILL.md` (load before reviewing).
 - Periodic full-repo or per-module quality sweep.
 - Before large refactors 鈥?establish baseline findings.
 - `post-task-commit-review` escalation when diff is large but governance is clean.
-- After feature delivery, **before** `architecture-reviewer` when structural debt is the risk.
+- After feature delivery, **after** `architecture-reviewer` (pipeline stage **9**; architecture is stage **8**). Rare exception: standalone cleanliness audit with no architecture risk — document the exception in the handoff.
 
 ## Inputs
 

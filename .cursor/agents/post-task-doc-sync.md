@@ -38,7 +38,7 @@ Also sync `.taskmaster/tasks/tasks.json` status when the work was tracked there.
 - [ ] 4. Update docs/plan/execution-sync-ledger.md epic/milestone mirror + evidence
 - [ ] 5. Update owning epic/milestone task sheet(s) under docs/architecture/
 - [ ] 6. Update orchestration-high-level-plan.md / implementation-task-plan.md if backlog order or wave status changed
-- [ ] 7. Update docs/README.md and docs/plan/README.md if new docs or index changes
+- [ ] 7. Update docs/README.md and docs/plan/README.md if new docs or index changes — **required** when delivery focus or indexable behavior specs change (refresh banner / Start Here)
 - [ ] 8. Update root README.md Active phase section if phase activation changed
 - [ ] 9. Confirm PROJECT-STATUS-RESET.md re-earned section still accurate
 - [ ] 10. Verify single active phase invariant (only one In Progress)

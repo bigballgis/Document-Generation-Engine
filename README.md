@@ -52,11 +52,11 @@ new chat per pipeline stage.
 
 | Index | [AGENTS.md](AGENTS.md) |
 
-| Agents (17) | [.cursor/agents/](.cursor/agents/) |
+| Agents (18) | [.cursor/agents/](.cursor/agents/) |
 
 | Model pins | [.cursor/agents/MODEL-STRATEGY.md](.cursor/agents/MODEL-STRATEGY.md) |
 
-| Pipeline stages 0–13 | [.cursor/skills/delivery-pipeline/SKILL.md](.cursor/skills/delivery-pipeline/SKILL.md) |
+| Pipeline stages 0–14 | [.cursor/skills/delivery-pipeline/SKILL.md](.cursor/skills/delivery-pipeline/SKILL.md) |
 
 | Routing rules | [.cursor/rules/subagent-routing-mandate.mdc](.cursor/rules/subagent-routing-mandate.mdc) |
 
@@ -162,15 +162,19 @@ Built-in Cursor types (no project file): explore, bugbot.
 
 - This machine has **one** Docker acceptance stack — always use the deploy queue (or /deploy-queue):
 
-
-
-powershell
-
+```powershell
 .\scripts\docker-deploy-queue.ps1 -Status
-
 .\scripts\docker-deploy-queue.ps1
-
 .\scripts\docker-deploy-queue.ps1 -SkipBuild
+```
+
+Linux / cloud agents:
+
+```bash
+pwsh ./scripts/docker-deploy-queue.ps1 -Status
+pwsh ./scripts/docker-deploy-queue.ps1
+pwsh ./scripts/docker-deploy-queue.ps1 -SkipBuild
+```
 
 
 

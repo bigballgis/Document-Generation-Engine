@@ -39,11 +39,13 @@ Persist confirmed behavior into the owning document BEFORE implementation-ready 
 respecting the source-of-truth order:
 
 1. Latest explicit user confirmation
-2. `docs/requirements/requirements-plan.md`
-3. `docs/product/PRD.md`
-4. `docs/domain/domain-model.md`
-5. `docs/security/permission-matrix.md`
-6. ADRs under `docs/adr/`
+2. `.taskmaster/tasks/tasks.json` (active work)
+3. `docs/plan/`
+4. `docs/requirements/requirements-plan.md`
+5. `docs/product/PRD.md`
+6. `docs/domain/domain-model.md`
+7. `docs/security/permission-matrix.md`
+8. ADRs under `docs/adr/`
 
 Keep confirmed requirements separate from pending questions. Never promote an assumption
 into a confirmed requirement. Delegate the actual document edit to `doc-keeper` when the

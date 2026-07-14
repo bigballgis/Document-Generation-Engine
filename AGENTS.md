@@ -51,4 +51,23 @@ See `.cursor/agents/MODEL-STRATEGY.md`.
 
 ## Docker
 
-Always `.\scripts\docker-deploy-queue.ps1` on this single host.
+## Docker
+
+Always queue on this single host:
+
+```powershell
+# Windows / pwsh
+.\scripts\docker-deploy-queue.ps1
+.\scripts\docker-deploy-queue.ps1 -SkipBuild
+.\scripts\docker-deploy-queue.ps1 -Status
+```
+
+```bash
+# Linux (PowerShell Core)
+pwsh ./scripts/docker-deploy-queue.ps1
+pwsh ./scripts/docker-deploy-queue.ps1 -SkipBuild
+pwsh ./scripts/docker-deploy-queue.ps1 -Status
+```
+
+Never invent a second compose project or port offsets.
+

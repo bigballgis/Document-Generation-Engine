@@ -40,9 +40,13 @@ section). Large multi-doc edits → delegate `doc-keeper`.
 ## Source-of-truth order
 
 1. Latest explicit user confirmation  
-2. `.taskmaster/tasks/tasks.json` (active work since 2026-07-05)  
-3. `docs/plan/` (phase history + LRP/CDP/SOR live programs)  
-4. requirements → PRD → domain → permission matrix → ADRs  
+2. `.taskmaster/tasks/tasks.json` (active work)  
+3. `docs/plan/`  
+4. `docs/requirements/requirements-plan.md`  
+5. `docs/product/PRD.md`  
+6. `docs/domain/domain-model.md`  
+7. `docs/security/permission-matrix.md`  
+8. ADRs
 
 ## Related
 
