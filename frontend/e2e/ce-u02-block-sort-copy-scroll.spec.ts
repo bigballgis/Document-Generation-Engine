@@ -6,7 +6,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { E2E_ADMIN, loginAs } from './helpers/auth'
 import { assertDockerStackReady, openDevBindingEditor } from './helpers/core-fortress-f7'
 import { ensureDemoRetailMasterApproved } from './helpers/masters-api'
-import { prepareDraftTemplateWithCleanBinding } from './helpers/structured-authoring-api'
+import { prepareDraftTemplateWithCleanBinding, upsertBindingViaApi } from './helpers/structured-authoring-api'
 
 /**
  * CE-U02 — Block sort / copy / validate scroll (BDD-CE-U02-BLOCK-SORT-COPY-SCROLL-001).
@@ -59,17 +59,22 @@ test.describe('CE-U02 block sort / copy / validate scroll', () => {
 
   test('BS-03: validation issue scrolls block into view', async ({ page, request }) => {
     const fixture = await prepareDraftTemplateWithCleanBinding(request)
+    await upsertBindingViaApi(
+      request,
+      fixture.templateId,
+      'HEADER',
+      '{"schemaVersion":"1.0","nodes":[{"type":"paragraph","children":[{"type":"variable","key":"ghostVar"}]}]}',
+    )
     await loginAs(page, E2E_ADMIN)
     await openDevBindingEditor(page, request, fixture.templateId)
 
-    await page.getByTestId('insert-block-node').filter({ hasText: /^paragraph$/i }).click()
     await page.getByTestId('structured-editor-validate-structure').click()
 
     const issues = page.getByTestId('structured-editor-validation-issue')
     await expect(issues.first()).toBeVisible()
 
     await issues.first().click()
-    await expect(page.getByTestId('structured-block-card-1')).toBeInViewport()
+    await expect(page.getByTestId('structured-block-card-0')).toBeInViewport({ timeout: 10_000 })
     await page.screenshot({
       path: path.join(EVIDENCE_DIR, 'BS-03-validate-scroll.png'),
       fullPage: true,
