@@ -180,8 +180,10 @@ condition/loop 块 `children` 数组已在 schema 中但 `StructuredContentBlock
 
 ### P1 组
 
-**CE-U02 块排序/复制/校验定位 — P1 · M**
+**CE-U02 块排序/复制/校验定位 — P1 · M · `Done`**
 拖拽排序（限同层）、块复制、绑定校验失败条目一键滚动到出错块（blockPath → scrollIntoView）。依赖 U01。
+**Slice:** `ce-u02-block-sort-copy-scroll` · branch `feat/ce-u02-block-sort-copy-scroll` · BDD [ce-u02-block-sort-copy-scroll.md](../behavior/ce-u02-block-sort-copy-scroll.md) (`ready`, BS-01…BS-05).
+**Status (2026-07-14):** **Done** — same-layer drag reorder + copy + client validation scroll (`structuredContentBindingValidation.ts`, `structuredContentDragState.ts`); Vitest CE-U02 + validation utils; E2E **2/2** + UIUX **2/2** @1920 dual-brand; frontend gates **GREEN** (1211 tests); merge `50b7d04d`; Task Master **#65**. Formal phase **None**; **not** go-live.
 
 **CE-U04 站内 PDF 预览 — P1 · M**
 全库无 iframe/pdf.js，预览产物只能下载外部打开。目标：预览面板嵌 pdf.js 只读视图（带 SPECIMEN 水印后的产物，见 CE-G02）；split view（LR-C 已有 `AuthoringSideBySideLayout`）内直接翻页。E2E：预览刷新后无需下载即可看到第 1 页。

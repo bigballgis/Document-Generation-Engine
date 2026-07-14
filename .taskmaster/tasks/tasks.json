@@ -893,16 +893,16 @@
       {
         "id": "65",
         "title": "CE-U02: Block sort / copy / validate scroll",
-        "description": "PENDING. Slice ce-u02-block-sort-copy-scroll. Same-level drag sort, copy, scrollIntoView on bind errors. P1·M.",
-        "details": "Depends U01 (#64). Gates before Done: mvn verify + frontend lint/type-check/test/build as applicable; E2E+UIUX for user-facing FE; queued docker-deploy when acceptance surface changes; worktree ../DGE-<slice-id>; merge + MAIN doc-sync + commit-review. Formal phase stays None. Plan §4 CE-U02.",
+        "description": "Done. Slice ce-u02-block-sort-copy-scroll. Same-level drag sort, copy, scrollIntoView on bind errors. P1·M.",
+        "details": "Depends U01 (#64). Merge 50b7d04d; feature tip a9c98f0f. E2E 2/2 + UIUX 2/2 @1920; frontend gates GREEN (1211 Vitest); mvn verify GREEN; DEPLOY_OK_WITH_NOTES. Formal phase None. Plan §4 CE-U02.",
         "testStrategy": "1. Drag reorder same layer. 2. Copy block. 3. E2E scroll to error. 4. FE gates + UIUX.",
         "priority": "medium",
         "dependencies": [
           "64"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2026-07-14T02:45:00.000Z"
+        "updatedAt": "2026-07-14T05:20:00.000Z"
       },
       {
         "id": "66",
