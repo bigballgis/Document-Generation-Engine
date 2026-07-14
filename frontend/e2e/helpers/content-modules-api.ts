@@ -534,6 +534,114 @@ export async function createDraftContentModule(
   }
 }
 
+/** CE-U08: module with a SUBMITTED version (Dashboard PENDING_REVIEW task). */
+export async function createSubmittedContentModuleForReview(
+  request: APIRequestContext,
+  options?: { moduleCode?: string; name?: string; semanticVersion?: string },
+): Promise<ApprovedContentModuleFixture> {
+  const authorToken = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  const moduleCode = options?.moduleCode ?? uniqueModuleCode('E2E-CMRL-SUB')
+  const name = options?.name ?? `E2E CMRL Submitted ${moduleCode}`
+  const semanticVersion = options?.semanticVersion ?? '1.0.0'
+
+  const created = await authorizedPost<ContentModuleDetail>(
+    request,
+    authorToken,
+    '/content-modules',
+    {
+      moduleCode,
+      groupCode: DEMO_GROUP_CODE,
+      name,
+      description: 'CE-U08 Playwright submitted fixture',
+      sharedGroupCodes: [],
+      semanticVersion,
+      contentStructureJson: '{"blocks":[{"type":"paragraph","text":"E2E CMRL submitted clause"}]}',
+      changeDescription: 'Initial E2E CMRL draft',
+    },
+  )
+
+  await authorizedPost(
+    request,
+    authorToken,
+    `/content-modules/${created.moduleId}/review/transition`,
+    {
+      operation: 'SUBMIT_FOR_REVIEW',
+      actorRole: 'TEMPLATE_AUTHOR',
+      actorId: E2E_TEMPLATE_AUTHOR.username,
+      changeDescription: 'Ready for CE-U08 review E2E',
+    },
+  )
+
+  return {
+    moduleId: created.moduleId,
+    moduleCode,
+    name,
+    semanticVersion,
+  }
+}
+
+export interface RejectedContentModuleFixture extends ApprovedContentModuleFixture {
+  rejectionReason: string
+}
+
+/** CE-U08: module rejected back to DRAFT with non-empty rejectionReason (REWORK task). */
+export async function createRejectedContentModuleForRework(
+  request: APIRequestContext,
+  options?: {
+    moduleCode?: string
+    name?: string
+    semanticVersion?: string
+    rejectionReason?: string
+  },
+): Promise<RejectedContentModuleFixture> {
+  const submitted = await createSubmittedContentModuleForReview(request, options)
+  const rejectionReason = options?.rejectionReason ?? 'Wording not acceptable'
+  const approverToken = await apiLogin(request, E2E_TEMPLATE_APPROVER)
+
+  await authorizedPost(
+    request,
+    approverToken,
+    `/content-modules/${submitted.moduleId}/review/transition`,
+    {
+      operation: 'REJECT_REVIEW',
+      actorRole: 'APPROVER',
+      actorId: E2E_TEMPLATE_APPROVER.username,
+      rejectionReason,
+    },
+  )
+
+  return {
+    ...submitted,
+    rejectionReason,
+  }
+}
+
+export interface ContentModuleDetailFixture {
+  moduleId: string
+  moduleCode: string
+  name: string
+  versions: Array<{
+    semanticVersion: string
+    reviewState: string
+    rejectionReason?: string | null
+  }>
+  reviewHistory: Array<{
+    action: string
+    actorUsername: string
+    createdAt: string
+    changeSummary?: string | null
+    commentSummary?: string | null
+  }>
+}
+
+export async function getContentModuleDetailViaApi(
+  request: APIRequestContext,
+  moduleId: string,
+): Promise<ContentModuleDetailFixture> {
+  const token = await apiLogin(request, E2E_TEMPLATE_AUTHOR)
+  return authorizedGet<ContentModuleDetailFixture>(request, token, `/content-modules/${moduleId}`)
+}
+
 export async function upsertTemplateContentModuleReference(
   request: APIRequestContext,
   templateId: string,
