@@ -26,15 +26,18 @@ public class BatchExecutionService {
     private final DocumentGenerationEngine documentGenerationEngine;
     private final IdempotencyService idempotencyService;
     private final MessageResolver messageResolver;
+    private final RuntimeFidelityWarningMapper fidelityWarningMapper;
 
     public BatchExecutionService(
             DocumentGenerationEngine documentGenerationEngine,
             @Lazy IdempotencyService idempotencyService,
-            MessageResolver messageResolver
+            MessageResolver messageResolver,
+            RuntimeFidelityWarningMapper fidelityWarningMapper
     ) {
         this.documentGenerationEngine = documentGenerationEngine;
         this.idempotencyService = idempotencyService;
         this.messageResolver = messageResolver;
+        this.fidelityWarningMapper = fidelityWarningMapper;
     }
 
     public record BatchExecutionOutcome(BatchResultView batchResult, TaskStatus taskStatus) {
@@ -97,7 +100,7 @@ public class BatchExecutionService {
                         output,
                         EncryptionSummaryView.fromRequest(output.format(), encryption),
                         generated.documentId(),
-                        generated.fidelityWarningCodes()
+                        fidelityWarningMapper.toWarnings(generated.fidelityWarningCodes())
                 ));
                 successCount++;
             } catch (RuntimeException ex) {
