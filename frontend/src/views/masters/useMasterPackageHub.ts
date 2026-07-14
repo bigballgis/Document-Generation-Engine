@@ -7,6 +7,7 @@ import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useCapabilities } from '@/composables/useCapabilities'
 import { shouldShowMasterDesignerJourney } from '@/utils/masterDesignerJourney'
+import type { MasterReviewDecision } from '@/types/master'
 
 type HubBodyExpose = {
   reloadRevisionLines: () => Promise<void> | undefined
@@ -23,6 +24,8 @@ export function useMasterPackageHub() {
   const metadataEditOpen = ref(false)
   const replaceFileOpen = ref(false)
   const submitReviewOpen = ref(false)
+  const reviewDialogOpen = ref(false)
+  const reviewMode = ref<MasterReviewDecision>('APPROVED')
   const loadFailed = ref(false)
   const downloading = ref(false)
   const currentRevisionLineId = ref<string | undefined>(undefined)
@@ -48,6 +51,20 @@ export function useMasterPackageHub() {
     }
     return master.value.status !== 'PENDING_REVIEW'
   })
+
+  const canSubmitForReview = computed(
+    () =>
+      Boolean(
+        manageMasters.value &&
+          master.value &&
+          (master.value.status === 'DRAFT' || master.value.status === 'REJECTED'),
+      ),
+  )
+
+  const canDecideReview = computed(
+    () =>
+      Boolean(reviewMasters.value && master.value && master.value.status === 'PENDING_REVIEW'),
+  )
 
   const showDesignerJourney = computed(() => {
     if (!master.value) {
@@ -165,12 +182,38 @@ export function useMasterPackageHub() {
     }
   }
 
+  function openReviewDialog(mode: MasterReviewDecision) {
+    reviewMode.value = mode
+    reviewDialogOpen.value = true
+  }
+
+  async function handleReviewDecision(payload: {
+    decision: MasterReviewDecision
+    commentSummary: string
+  }) {
+    try {
+      await mastersStore.decideReview(masterId.value, {
+        decision: payload.decision,
+        commentSummary: payload.commentSummary || undefined,
+      })
+      reviewDialogOpen.value = false
+      ElMessage.success(
+        t(payload.decision === 'APPROVED' ? 'masters.review.approveSuccess' : 'masters.review.rejectSuccess'),
+      )
+      await reloadMaster()
+    } catch {
+      ElMessage.error(errorMessage.value || t('masters.error.decideReview'))
+    }
+  }
+
   return {
     t,
     mastersStore,
     metadataEditOpen,
     replaceFileOpen,
     submitReviewOpen,
+    reviewDialogOpen,
+    reviewMode,
     loadFailed,
     downloading,
     currentRevisionLineId,
@@ -179,6 +222,8 @@ export function useMasterPackageHub() {
     master,
     canEditMetadata,
     canReplaceFile,
+    canSubmitForReview,
+    canDecideReview,
     showDesignerJourney,
     journeyContext,
     canWriteJourney,
@@ -189,5 +234,7 @@ export function useMasterPackageHub() {
     handleReplaceFile,
     clearReplaceServerError,
     handleSubmitReview,
+    openReviewDialog,
+    handleReviewDecision,
   }
 }

@@ -54,7 +54,7 @@ export const apiErrorZhCn = {
     invalidReviewTransition: "母版当前状态不允许执行此审核操作。",
     currentRevisionUnavailable: "无法解析用于固定的当前母版修订版本。",
     revisionInUseByPublishedRelease: "母版修订版本已被一个或多个已发布版本固定，无法删除。",
-    revisionDeleteFailed: "无法删除母版修订版本。"
+    revisionDeleteFailed: "无法删除母版修订版本。",
   },
   template: {
     notFound: "未找到模板。",

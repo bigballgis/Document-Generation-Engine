@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import MasterMetadataEditDialog from '@/components/masters/MasterMetadataEditDialog.vue'
 import MasterReplaceFileDialog from '@/components/masters/MasterReplaceFileDialog.vue'
+import MasterReviewDialog from '@/components/masters/MasterReviewDialog.vue'
 import MasterSubmitReviewDialog from '@/components/masters/MasterSubmitReviewDialog.vue'
+import type { MasterReviewDecision } from '@/types/master'
 
 defineProps<{
   masterName: string
@@ -10,17 +12,20 @@ defineProps<{
   submitting: boolean
   uploadProgress: number | null
   replaceServerErrorKey: string | null
+  reviewMode: MasterReviewDecision
 }>()
 
 const metadataEditOpen = defineModel<boolean>('metadataEditOpen', { required: true })
 const replaceFileOpen = defineModel<boolean>('replaceFileOpen', { required: true })
 const submitReviewOpen = defineModel<boolean>('submitReviewOpen', { required: true })
+const reviewDialogOpen = defineModel<boolean>('reviewDialogOpen', { required: true })
 
 const emit = defineEmits<{
   metadataSubmit: [payload: { name: string; description: string | null }]
   replaceSubmit: [file: File]
   clearServerError: []
   submitReview: [payload: { changeSummary: string }]
+  decideReview: [payload: { decision: MasterReviewDecision; commentSummary: string }]
 }>()
 </script>
 
@@ -42,4 +47,9 @@ const emit = defineEmits<{
     @clear-server-error="emit('clearServerError')"
   />
   <MasterSubmitReviewDialog v-model="submitReviewOpen" @submit="emit('submitReview', $event)" />
+  <MasterReviewDialog
+    v-model="reviewDialogOpen"
+    :mode="reviewMode"
+    @submit="emit('decideReview', $event)"
+  />
 </template>

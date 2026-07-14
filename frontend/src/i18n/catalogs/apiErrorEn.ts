@@ -55,7 +55,7 @@ export const apiErrorEn = {
     currentRevisionUnavailable: "The current letterhead revision could not be resolved for pinning.",
     revisionInUseByPublishedRelease:
       "The letterhead revision is pinned by one or more published releases and cannot be deleted.",
-    revisionDeleteFailed: "Unable to delete the letterhead revision."
+    revisionDeleteFailed: "Unable to delete the letterhead revision.",
   },
   template: {
     notFound: "The template was not found.",

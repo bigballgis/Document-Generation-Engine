@@ -31,6 +31,7 @@ export const useMastersStore = defineStore('masters', () => {
   const lastErrorMessageKey = ref<string | null>(null)
   const lastListErrorRetryable = ref(false)
   const draftReviewHistoryByMasterId = ref<Record<string, MasterReviewRecord[]>>({})
+  const currentRevisionLineIdByMasterId = ref<Record<string, string>>({})
 
   const mastersByGroup = computed(() => {
     const grouped = new Map<string, MasterDocumentSummary[]>()
@@ -96,10 +97,37 @@ export const useMastersStore = defineStore('masters', () => {
           if (!current) {
             return
           }
+          currentRevisionLineIdByMasterId.value[master.id] = current.id
           const detail = await mastersApi.getMasterRevisionLine(master.id, current.id)
           draftReviewHistoryByMasterId.value[master.id] = detail.reviewHistory
         } catch {
           /* degrade to summary-only mapping */
+        }
+      }),
+    )
+  }
+
+  /** Resolve current revision line ids for dashboard master-review deep links (CE-U09). */
+  async function enrichCurrentRevisionLineIdsForWorkflow(): Promise<void> {
+    const candidates = masters.value.filter(
+      (master) =>
+        master.status === 'PENDING_REVIEW' ||
+        master.status === 'REJECTED' ||
+        master.status === 'DRAFT',
+    )
+    await Promise.all(
+      candidates.map(async (master) => {
+        if (currentRevisionLineIdByMasterId.value[master.id]) {
+          return
+        }
+        try {
+          const page = await mastersApi.listMasterRevisionLines(master.id, 0, 5)
+          const current = page.content.find((line) => line.current) ?? page.content[0]
+          if (current) {
+            currentRevisionLineIdByMasterId.value[master.id] = current.id
+          }
+        } catch {
+          /* degrade to Hub fallback path */
         }
       }),
     )
@@ -124,6 +152,7 @@ export const useMastersStore = defineStore('masters', () => {
     lastErrorMessageKey,
     lastListErrorRetryable,
     draftReviewHistoryByMasterId,
+    currentRevisionLineIdByMasterId,
     mastersByGroup,
     ...catalogActions,
     ...revisionActions,
@@ -131,5 +160,6 @@ export const useMastersStore = defineStore('masters', () => {
     clearListError,
     getDraftReviewHistory,
     enrichDraftMasterReviewHistory,
+    enrichCurrentRevisionLineIdsForWorkflow,
   }
 })
