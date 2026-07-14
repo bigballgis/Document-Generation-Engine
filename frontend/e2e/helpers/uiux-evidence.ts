@@ -1024,3 +1024,33 @@ export async function captureCeU03LocatorScreenshot(
   await locator.screenshot({ path: target })
   return filename
 }
+
+/** CE-U08 content-module review loop — 1920×1080 dual-brand evidence. */
+export const CE_U08_EVIDENCE_ROOT = path.join(E2E_DIR, '..', 'evidence', 'CE-U08')
+export const CE_U08_SCREENSHOT_DIR = path.join(CE_U08_EVIDENCE_ROOT, 'screenshots')
+export const CE_U08_VIEWPORT = { width: 1920, height: 1080 } as const
+
+export function ensureCeU08EvidenceDirs(): void {
+  fs.mkdirSync(CE_U08_SCREENSHOT_DIR, { recursive: true })
+}
+
+export function ceU08ScreenshotPath(filename: string): string {
+  return path.join(CE_U08_SCREENSHOT_DIR, filename)
+}
+
+export async function captureCeU08Screenshot(page: Page, filename: string): Promise<string> {
+  ensureCeU08EvidenceDirs()
+  const target = ceU08ScreenshotPath(filename)
+  await page.screenshot({ path: target, fullPage: false })
+  return filename
+}
+
+export async function captureCeU08LocatorScreenshot(
+  locator: Locator,
+  filename: string,
+): Promise<string> {
+  ensureCeU08EvidenceDirs()
+  const target = ceU08ScreenshotPath(filename)
+  await locator.screenshot({ path: target })
+  return filename
+}
