@@ -1,7 +1,6 @@
 package com.bank.docgen.runtime.api;
 
 import com.bank.docgen.sharedkernel.api.DefensiveCopies;
-
 import com.bank.docgen.sharedkernel.api.ErrorDetail;
 import java.util.List;
 
@@ -11,7 +10,7 @@ public record BatchResultItemView(
         OutputOptionsView output,
         EncryptionSummaryView encryptionSummary,
         String documentId,
-        List<String> fidelityWarnings,
+        List<FidelityWarning> fidelityWarnings,
         ErrorDetail error
 ) {
     public BatchResultItemView {
@@ -24,7 +23,7 @@ public record BatchResultItemView(
             OutputOptionsView output,
             EncryptionSummaryView encryptionSummary,
             String documentId,
-            List<String> fidelityWarnings
+            List<FidelityWarning> fidelityWarnings
     ) {
         this(itemId, status, output, encryptionSummary, documentId, fidelityWarnings, null);
     }

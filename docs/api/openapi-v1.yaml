@@ -3267,10 +3267,20 @@ components:
       schema:
         $ref: '#/components/schemas/OutputMode'
     FidelityWarningCount:
+      description: >-
+        SYNC_STREAM header summary only. Count of fidelity warnings for this generation
+        (equals JSON-path `fidelityWarnings` array length when the same generation is returned as JSON).
+        Full warning objects are never placed in the SYNC_STREAM response body; see contract-outline
+        «保真警告响应确认» / CE-C03.
       schema:
         type: integer
         minimum: 0
     FidelityWarningCodes:
+      description: >-
+        SYNC_STREAM header summary only. Comma-separated `FidelityWarningCode` values in generation
+        order (empty string when count is 0). Same code set as JSON-path `fidelityWarnings[].warningCode`.
+        Full `FidelityWarning` objects are returned only on JSON batch/task/`DownloadUrlResponse` success
+        paths — not in the file-stream body.
       schema:
         type: string
   responses:
@@ -3314,7 +3324,35 @@ components:
       enum: [EXPLICIT_VERSION, DEFAULT_ROUTE]
     FidelityWarningCode:
       type: string
-      enum: [OPTIONAL_CONTENT_EMPTY, LOW_RISK_PAGINATION_DIFFERENCE, LOW_RISK_TABLE_PAGE_BREAK, CONTROLLED_STYLE_FALLBACK, IMAGE_SCALING_ADJUSTED]
+      description: >-
+        Caller-visible fidelity warning codes for runtime success paths (JSON `fidelityWarnings[].warningCode`
+        and SYNC_STREAM `fidelityWarningCodes` header). Baseline ADR-0019 codes plus engine-emitted codes
+        that may appear on the formal runtime success path (CE-C03 honest enum).
+      enum:
+        - OPTIONAL_CONTENT_EMPTY
+        - LOW_RISK_PAGINATION_DIFFERENCE
+        - LOW_RISK_TABLE_PAGE_BREAK
+        - CONTROLLED_STYLE_FALLBACK
+        - IMAGE_SCALING_ADJUSTED
+        - MASTER_STYLE_FALLBACK
+        - PARTIAL_TABLE_LAYOUT_ADJUSTMENT
+        - UNRESOLVED_VARIABLE
+        - INVALID_CONDITION_EXPRESSION
+        - MISSING_ANCHOR_CONTENT
+        - UNSUPPORTED_NODE
+        - MISSING_STYLE_REFERENCE
+        - INAPPLICABLE_STYLE
+        - DIRECT_FORMAT_OUT_OF_WHITELIST
+        - DIRECT_FORMAT_GLOBAL_LAYOUT
+        - NESTED_TABLE
+        - UNRELIABLE_TABLE_LAYOUT
+        - INVALID_TABLE_COMPONENT
+        - SEAL_OUTSIDE_AUTHORIZED_AREA
+        - SEAL_SCALING_NOT_ALLOWED
+        - MISSING_REFERENCE_KEY
+        - DUPLICATE_NUMBER
+        - BROKEN_NUMBER_CROSS_REFERENCE
+        - PDF_PAGE_NUMBER_STAMP_FAILED
     IdempotencyStatus:
       type: string
       enum: [IDEMPOTENCY_NEW, IDEMPOTENCY_REPLAYED, IDEMPOTENCY_CONFLICTED]
@@ -3506,6 +3544,9 @@ components:
               type: string
             fidelityWarnings:
               type: array
+              description: >-
+                Full FidelityWarning objects for SYNC_DOWNLOAD_URL JSON success (empty when none).
+                Never string[] codes. Distinct from SYNC_STREAM header-only summary.
               items:
                 $ref: '#/components/schemas/FidelityWarning'
     DownloadInfo:
@@ -3558,6 +3599,10 @@ components:
               type: string
             fidelityWarnings:
               type: array
+              description: >-
+                Full FidelityWarning objects when a single-item JSON result layer is present
+                (empty array when none). Batch completions use result.batch.items[].fidelityWarnings
+                instead. Never string[] codes. SYNC_STREAM uses headers only.
               items:
                 $ref: '#/components/schemas/FidelityWarning'
             batch:
@@ -3800,6 +3845,11 @@ components:
           $ref: '#/components/schemas/ErrorDetail'
         fidelityWarnings:
           type: array
+          description: >-
+            Full FidelityWarning objects for this succeeded batch item (empty array when none).
+            Never a string[] of codes. SYNC_STREAM file responses use header summaries instead
+            (fidelityWarningCount / fidelityWarningCodes); see components.headers and contract-outline
+            «保真警告响应确认».
           items:
             $ref: '#/components/schemas/FidelityWarning'
     AuditContextLinkage:
@@ -3819,6 +3869,11 @@ components:
     FidelityWarning:
       type: object
       additionalProperties: false
+      description: >-
+        Full fidelity warning object for JSON success paths (batch items, task query result layers,
+        and DownloadUrlResponse when that mode is delivered). SYNC_STREAM responses do not embed this
+        array in the body — they return only fidelityWarningCount / fidelityWarningCodes headers;
+        complete non-sensitive detail enters the audit summary (CE-C03).
       required: [warningCode, messageKey, message, locationSummary, detectedSummary, recommendation, sensitiveDataExcluded]
       properties:
         warningCode:

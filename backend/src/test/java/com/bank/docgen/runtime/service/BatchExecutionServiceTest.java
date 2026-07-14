@@ -41,7 +41,12 @@ class BatchExecutionServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new BatchExecutionService(documentGenerationEngine, idempotencyService, messageResolver);
+        service = new BatchExecutionService(
+                documentGenerationEngine,
+                idempotencyService,
+                messageResolver,
+                new RuntimeFidelityWarningMapper(messageResolver)
+        );
         template = new TemplateEntity(
                 UUID.randomUUID(),
                 "TPL-1",

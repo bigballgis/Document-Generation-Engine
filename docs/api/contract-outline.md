@@ -678,15 +678,28 @@ default 路径特殊规则：首次请求创建幂等记录时，应记录当时
 
 已发布模板运行期生成对外只返回生成成功警告或生成失败错误。API 契约和响应不得暴露内部渲染诊断明文、模板变量原值、客户数据、完整请求体或完整生成内容。
 
+### 承载分流（JSON 全量对象 vs SYNC_STREAM 头摘要）— CE-C03
+
+| 路径 | 保真警告承载 | 说明 |
+| --- | --- | --- |
+| JSON 批量成功项 | `result.batch.items[].fidelityWarnings[]` 为完整 `FidelityWarning` **对象**数组 | 禁止 `string[]` 仅警告码；无警告时为 `[]` |
+| 异步任务查询完成态 | 与批量相同：成功项在 `result.batch.items[].fidelityWarnings[]`；若单笔结果层暴露 `result.fidelityWarnings[]`，同样为完整对象数组 | 形态与 OpenAPI `TaskResponse` / `BatchResultItem` 一致 |
+| `SYNC_DOWNLOAD_URL`（契约声明） | `result.fidelityWarnings[]` 为完整对象数组 | 运行时重签下载仍 defer（ADR-0038）；schema 形态保持一致 |
+| **`SYNC_STREAM` 同步文件流** | **响应体 = 文件字节 only**；响应头 `fidelityWarningCount` + `fidelityWarningCodes`（逗号分隔码） | **不**把完整 `FidelityWarning[]` 写入流响应体；完整非敏感明细进入**审计摘要** |
+
+对照 OpenAPI：`components.schemas.FidelityWarning` / `BatchResultItem.fidelityWarnings`（JSON 全量）与 `components.headers.FidelityWarningCount` / `FidelityWarningCodes`（流头摘要）。头中的码集合与同次生成若走 JSON 路径时的 `warningCode` 集合一致；`fidelityWarningCount` = 警告条数。
+
 `fidelityWarnings[]` 中每个对象必须包含：
 
-- `warningCode`：稳定警告码，v1 取值为 `OPTIONAL_CONTENT_EMPTY`、`LOW_RISK_PAGINATION_DIFFERENCE`、`LOW_RISK_TABLE_PAGE_BREAK`、`CONTROLLED_STYLE_FALLBACK` 和 `IMAGE_SCALING_ADJUSTED`。
+- `warningCode`：稳定警告码。v1 调用方可见枚举以 OpenAPI `FidelityWarningCode` 为准（基线 ADR-0019 五码：`OPTIONAL_CONTENT_EMPTY`、`LOW_RISK_PAGINATION_DIFFERENCE`、`LOW_RISK_TABLE_PAGE_BREAK`、`CONTROLLED_STYLE_FALLBACK`、`IMAGE_SCALING_ADJUSTED`；另含运行时成功路径可发出的引擎码，如 `MASTER_STYLE_FALLBACK`、`PDF_PAGE_NUMBER_STAMP_FAILED` 等 — 见 OpenAPI 枚举，诚实契约）。
 - `messageKey`：用于本地化和前端展示的稳定文案键。
 - `message`：默认可读提示。
 - `locationSummary`：影响位置摘要，例如锚点、章节、组件或页码范围摘要，不返回敏感正文。
 - `detectedSummary`：检测结果摘要，不返回变量原值、客户数据、粘贴原文或完整生成内容。
 - `recommendation`：处理建议。
 - `sensitiveDataExcluded`：固定为 `true`，表达该警告明细已经过敏感数据排除处理。
+
+失败批量项（`status` ∈ {`FAILED`,`SKIPPED`}）以 `error` 为准；`fidelityWarnings` 可省略或为 `[]`，不得回退为字符串码列表。
 
 单笔 JSON 成功响应在 `result.fidelityWarnings[]` 返回保真警告；批量成功项在 `result.batch.items[].fidelityWarnings[]` 返回保真警告；异步任务查询在生成完成后按单笔或批量结果层级返回保真警告。同步文件流响应使用 `fidelityWarningCount` 和 `fidelityWarningCodes` 响应头返回摘要，完整明细进入审计摘要。
 

@@ -394,7 +394,7 @@ class DomainDtoImmutabilityTest {
     @Test
     void batchExecutionOutcomeDefensivelyCopiesBatchResultItems() {
         List<BatchResultItemView> items = new ArrayList<>(List.of(
-                new BatchResultItemView("item-1", "SUCCESS", null, null, "doc-1", List.of("WARN-1"), null)
+                new BatchResultItemView("item-1", "SUCCESS", null, null, "doc-1", List.of(), null)
         ));
         BatchResultView batchResult = new BatchResultView(
                 "batch-1",
