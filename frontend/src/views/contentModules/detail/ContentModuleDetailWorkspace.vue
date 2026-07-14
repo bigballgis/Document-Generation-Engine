@@ -6,12 +6,17 @@ import WorkspaceTabShell from '@/components/common/WorkspaceTabShell.vue'
 import ContentModuleStatusBadge from '@/components/contentModules/ContentModuleStatusBadge.vue'
 import ControlledStructuredContentEditor from '@/components/authoring/ControlledStructuredContentEditor.vue'
 import { useLocaleFormatters } from '@/composables/useLocaleFormatters'
-import type { ContentModuleLifecycleOperation, ContentModuleVersion } from '@/types/contentModule'
+import type {
+  ContentModuleLifecycleOperation,
+  ContentModuleReviewRecord,
+  ContentModuleVersion,
+} from '@/types/contentModule'
 import type { ContentModuleWorkspaceTab } from '@/views/contentModules/contentModuleWorkspaceTabs'
 
 defineProps<{
   workspaceTabs: Array<{ name: ContentModuleWorkspaceTab; labelKey: string }>
   versions: ContentModuleVersion[]
+  reviewHistory: ContentModuleReviewRecord[]
   previewVersion: ContentModuleVersion | null
   previewContentJson: string
   previewVersionLabel: string
@@ -22,6 +27,7 @@ defineProps<{
   canStop: boolean
   canRecover: boolean
   canDeprecate: boolean
+  formatReviewAction: (action: string) => string
 }>()
 
 const activeWorkspaceTab = defineModel<ContentModuleWorkspaceTab>({ required: true })
@@ -90,7 +96,19 @@ const { formatDateTime } = useLocaleFormatters()
             />
           </template>
         </el-table-column>
-        <el-table-column prop="changeDescription" :label="t('contentModules.detail.columns.changeDescription')" min-width="220" />
+        <el-table-column
+          prop="changeDescription"
+          :label="t('contentModules.detail.columns.changeDescription')"
+          min-width="200"
+        />
+        <el-table-column
+          :label="t('contentModules.detail.columns.rejectionReason')"
+          min-width="200"
+        >
+          <template #default="{ row }">
+            {{ row.rejectionReason?.trim() ? row.rejectionReason : '—' }}
+          </template>
+        </el-table-column>
         <el-table-column :label="t('contentModules.detail.columns.updatedAt')" width="200">
           <template #default="{ row }">
             {{ formatDateTime(row.updatedAt) }}
@@ -121,6 +139,30 @@ const { formatDateTime } = useLocaleFormatters()
 
     <template #lifecycle>
       <p class="lifecycle-hint">{{ t('contentModules.workspace.lifecycleHint') }}</p>
+      <el-card shadow="never" class="history-card">
+        <template #header>
+          <span>{{ t('contentModules.detail.reviewHistoryTitle') }}</span>
+        </template>
+        <el-timeline v-if="reviewHistory.length > 0">
+          <el-timeline-item
+            v-for="(record, index) in reviewHistory"
+            :key="`${record.createdAt}-${index}`"
+            :timestamp="formatDateTime(record.createdAt)"
+          >
+            <p class="history-action">{{ formatReviewAction(record.action) }}</p>
+            <p v-if="record.changeSummary" class="history-text">
+              {{ t('contentModules.detail.changeSummary') }}: {{ record.changeSummary }}
+            </p>
+            <p v-if="record.commentSummary" class="history-text">
+              {{ t('contentModules.detail.commentSummary') }}: {{ record.commentSummary }}
+            </p>
+            <p class="history-actor">
+              {{ t('contentModules.detail.actorLabel', { username: record.actorUsername }) }}
+            </p>
+          </el-timeline-item>
+        </el-timeline>
+        <el-empty v-else :description="t('contentModules.detail.noReviewHistory')" />
+      </el-card>
     </template>
   </WorkspaceTabShell>
 </template>
@@ -131,5 +173,20 @@ const { formatDateTime } = useLocaleFormatters()
   margin: 0 0 var(--space-3);
   color: var(--text-muted);
   font-size: var(--font-size-sm);
+}
+
+.history-card {
+  margin-top: 0;
+}
+
+.history-action {
+  margin: 0;
+  font-weight: 600;
+}
+
+.history-text,
+.history-actor {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
 }
 </style>

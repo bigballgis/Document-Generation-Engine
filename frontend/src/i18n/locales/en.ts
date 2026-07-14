@@ -323,6 +323,16 @@ export default {
         description:
           'One or more clause references are pinned to an older approved version. Bump pins on the template clause panel.',
       },
+      contentModuleReview: {
+        title: 'Standard clauses to review',
+        itemTitle: 'Review standard clause',
+        description: 'Approve or reject the submitted standard clause version.',
+      },
+      contentModuleRework: {
+        title: 'Standard clauses to fix',
+        itemTitle: 'Fix standard clause and resubmit',
+        description: 'Update the draft using the rejection reason, then submit again for review.',
+      },
     },
     journey: {
       openWorkspace: 'Open workspace',
@@ -2376,8 +2386,14 @@ export default {
         version: 'Version',
         status: 'Status',
         changeDescription: 'Change description',
+        rejectionReason: 'Rejection reason',
         updatedAt: 'Last updated',
       },
+      reviewHistoryTitle: 'Review history',
+      noReviewHistory: 'No review activity yet.',
+      changeSummary: 'Change summary',
+      commentSummary: 'Review comment',
+      actorLabel: 'By {username}',
     },
     workspace: {
       tabs: {
@@ -2386,6 +2402,13 @@ export default {
         lifecycle: 'Review & release',
       },
       lifecycleHint: 'Use the action buttons above to submit, approve, reject, or apply post-approval changes.',
+    },
+    reviewHistory: {
+      action: {
+        SUBMITTED: 'Submitted for review',
+        APPROVED: 'Approved',
+        REJECTED: 'Rejected',
+      },
     },
     reviewState: {
       DRAFT: 'Draft',

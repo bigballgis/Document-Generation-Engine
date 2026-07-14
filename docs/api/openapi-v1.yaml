@@ -1310,11 +1310,48 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/content-modules/workflow-tasks:
+    get:
+      tags: [Admin]
+      operationId: listContentModuleWorkflowTasks
+      summary: List content-module review and rework workflow tasks
+      description: >-
+        Returns dashboard workflow tasks for content modules visible to the caller
+        (CE-U08). PENDING_REVIEW tasks require decideContentModuleReviews;
+        REWORK tasks require authorContentModules. Fail-closed: callers without
+        catalog browse access receive 403; tasks for inaccessible groups are omitted.
+      parameters:
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Workflow tasks returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [metadata, result]
+                properties:
+                  metadata:
+                    $ref: '#/components/schemas/Metadata'
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContentModuleWorkflowTaskView'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/content-modules/{moduleId}:
     get:
       tags: [Admin]
       operationId: getContentModule
       summary: Get content module detail with versions
+      description: >-
+        Returns module header, versions (including optional rejectionReason), and
+        reviewHistory timeline records for CE-U08 lifecycle display.
       parameters:
         - name: moduleId
           in: path
@@ -6657,9 +6694,66 @@ components:
             Omitted or null when the caller may browse the catalog but lacks structure-view
             permission (fail-closed). TEMPLATE_TESTER receives 403 on catalog list/detail and
             never receives this field.
+        rejectionReason:
+          type: string
+          description: >
+            Present when the version is DRAFT after REJECT_REVIEW. Cleared on SUBMIT_FOR_REVIEW
+            and APPROVE_REVIEW (CE-U08).
+          maxLength: 2048
         createdAt:
           type: string
           format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ContentModuleReviewRecordView:
+      type: object
+      additionalProperties: false
+      required: [action, actorUsername, createdAt]
+      properties:
+        action:
+          type: string
+          description: Master-aligned action code — SUBMITTED, APPROVED, or REJECTED.
+        decision:
+          type: string
+        changeSummary:
+          type: string
+          description: Change description captured on SUBMIT_FOR_REVIEW.
+        commentSummary:
+          type: string
+          description: Rejection reason captured on REJECT_REVIEW.
+        actorUsername:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        semanticVersion:
+          type: string
+        selfApprovalException:
+          type: boolean
+        exceptionReason:
+          type: string
+          maxLength: 2048
+    ContentModuleWorkflowTaskView:
+      type: object
+      additionalProperties: false
+      required: [moduleId, moduleCode, name, groupCode, kind, updatedAt]
+      properties:
+        moduleId:
+          type: string
+        moduleCode:
+          type: string
+        name:
+          type: string
+        groupCode:
+          type: string
+        kind:
+          type: string
+          enum: [PENDING_REVIEW, REWORK]
+        semanticVersion:
+          type: string
+        rejectionReason:
+          type: string
         updatedAt:
           type: string
           format: date-time
@@ -6692,7 +6786,7 @@ components:
     ContentModuleDetailView:
       type: object
       additionalProperties: false
-      required: [moduleId, moduleCode, groupCode, name, versions]
+      required: [moduleId, moduleCode, groupCode, name, versions, reviewHistory]
       properties:
         moduleId:
           type: string
@@ -6712,6 +6806,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ContentModuleVersionView'
+        reviewHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentModuleReviewRecordView'
+          description: >
+            Chronological review timeline (SUBMITTED / APPROVED / REJECTED) for the
+            lifecycle Tab el-timeline (CE-U08; master-aligned).
     ContentModuleSummaryPageResponse:
       type: object
       additionalProperties: false

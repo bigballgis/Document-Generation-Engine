@@ -7,6 +7,7 @@ import type { ClusterOneRole } from '@/constants/roleJourneyDefinitions'
 import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
 import { useApiPolicyStore } from '@/stores/apiPolicy'
 import { useCollaborationStore } from '@/stores/collaboration'
+import { useContentModulesStore } from '@/stores/contentModules'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import { useTemplatesStore } from '@/stores/templates'
@@ -35,7 +36,9 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
   const apiPolicyStore = useApiPolicyStore()
   const collaborationStore = useCollaborationStore()
   const authorWorkflowStore = useAuthorWorkflowStore()
-  const { context, reviewMasters, manageMasters, authorTemplates } = useCapabilities()
+  const contentModulesStore = useContentModulesStore()
+  const { context, reviewMasters, manageMasters, authorTemplates, authorContentModules, decideContentModuleReviews } =
+    useCapabilities()
 
   const loading = ref(false)
   const mastersLoadError = ref(false)
@@ -115,6 +118,16 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
         }),
       )
     }
+    if (
+      (authorContentModules.value || decideContentModuleReviews.value) &&
+      sessionStore.canAccessRoute('route.content-module-management')
+    ) {
+      jobs.push(
+        contentModulesStore.fetchWorkflowTasks().catch(() => {
+          /* degrade to empty content-module review/rework partitions */
+        }),
+      )
+    }
     if (shouldLoadCollaborationWorkItems.value) {
       jobs.push(
         fetchCollaborationWorkItems().catch(() => {
@@ -160,6 +173,20 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
     })
   }
 
+  function refreshContentModuleWorkflowTasks() {
+    if (
+      !(
+        (authorContentModules.value || decideContentModuleReviews.value) &&
+        sessionStore.canAccessRoute('route.content-module-management')
+      )
+    ) {
+      return
+    }
+    void contentModulesStore.fetchWorkflowTasks().catch(() => {
+      /* degrade to empty content-module review/rework partitions */
+    })
+  }
+
   onMounted(() => {
     void loadDashboardData()
     void scrollToTasksIfRequested(route.hash)
@@ -173,6 +200,7 @@ export function useDashboardDataLoader(options: UseDashboardDataLoaderOptions) {
       // refresh author todos so fixtures created after first paint still appear (CE-U07).
       if (route.hash === '#tasks-section' || isTaskTab.value) {
         refreshAuthorWorkflowTasks()
+        refreshContentModuleWorkflowTasks()
       }
     },
   )

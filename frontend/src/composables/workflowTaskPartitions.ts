@@ -1,5 +1,5 @@
 import type { CapabilityContext } from '@/auth/roles'
-import { canAuthorTemplates } from '@/auth/roles'
+import { canAuthorContentModules, canAuthorTemplates, canDecideContentModuleReviews } from '@/auth/roles'
 import {
   getVisibleCollaborationQueues,
   isValidCollaborationQueue,
@@ -148,6 +148,34 @@ export function buildTaskPartitions(
         headingKey: 'dashboard.tasks.clauseOutdatedBump.title',
         kind: 'clause-outdated-bump',
         tasks: clauseTasks,
+      })
+    }
+  }
+
+  if (canDecideContentModuleReviews(context)) {
+    const reviewTasks = sortTasksNewestFirst(
+      tasks.filter((task) => task.kind === 'content-module-review'),
+    )
+    if (reviewTasks.length > 0) {
+      partitions.push({
+        id: 'content-module-review',
+        headingKey: 'dashboard.tasks.contentModuleReview.title',
+        kind: 'content-module-review',
+        tasks: reviewTasks,
+      })
+    }
+  }
+
+  if (canAuthorContentModules(context)) {
+    const reworkTasks = sortTasksNewestFirst(
+      tasks.filter((task) => task.kind === 'content-module-rework'),
+    )
+    if (reworkTasks.length > 0) {
+      partitions.push({
+        id: 'content-module-rework',
+        headingKey: 'dashboard.tasks.contentModuleRework.title',
+        kind: 'content-module-rework',
+        tasks: reworkTasks,
       })
     }
   }

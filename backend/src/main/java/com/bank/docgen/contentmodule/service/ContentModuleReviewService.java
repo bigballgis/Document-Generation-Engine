@@ -7,10 +7,13 @@ import com.bank.docgen.contentmodule.api.ContentModuleReviewTransitionRequest;
 import com.bank.docgen.contentmodule.api.ContentModuleReviewTransitionResultView;
 import com.bank.docgen.contentmodule.domain.ContentModuleGovernanceActorRole;
 import com.bank.docgen.contentmodule.domain.ContentModuleLifecycleState;
+import com.bank.docgen.contentmodule.domain.ContentModuleReviewAction;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewOperation;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
+import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordEntity;
+import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
@@ -26,6 +29,7 @@ public class ContentModuleReviewService {
 
     private final ContentModuleRepository moduleRepository;
     private final ContentModuleVersionRepository versionRepository;
+    private final ContentModuleReviewRecordRepository reviewRecordRepository;
     private final GroupAccessService groupAccessService;
     private final ContentModuleAccessService accessSupport;
     private final ManagementAuditRecorder auditRecorder;
@@ -34,6 +38,7 @@ public class ContentModuleReviewService {
     public ContentModuleReviewService(
             ContentModuleRepository moduleRepository,
             ContentModuleVersionRepository versionRepository,
+            ContentModuleReviewRecordRepository reviewRecordRepository,
             GroupAccessService groupAccessService,
             ContentModuleAccessService accessSupport,
             ManagementAuditRecorder auditRecorder,
@@ -41,6 +46,7 @@ public class ContentModuleReviewService {
     ) {
         this.moduleRepository = moduleRepository;
         this.versionRepository = versionRepository;
+        this.reviewRecordRepository = reviewRecordRepository;
         this.groupAccessService = groupAccessService;
         this.accessSupport = accessSupport;
         this.auditRecorder = auditRecorder;
@@ -64,6 +70,7 @@ public class ContentModuleReviewService {
         versionRepository.save(version);
         module.setUpdatedBy(session.username());
         moduleRepository.save(module);
+        persistReviewRecord(module, version, request, session.username(), outcome);
 
         auditRecorder.recordContentModuleReviewTransition(
                 module.getId(),
@@ -206,6 +213,7 @@ public class ContentModuleReviewService {
                 }
                 version.setReviewState(ContentModuleReviewState.SUBMITTED);
                 version.setChangeDescription(request.changeDescription().trim());
+                version.setRejectionReason(null);
                 version.setSubmittedBy(actorUsername);
             }
             case APPROVE_REVIEW -> {
@@ -226,6 +234,44 @@ public class ContentModuleReviewService {
             default -> throw stateDenied();
         }
         version.setUpdatedBy(actorUsername);
+    }
+
+    private void persistReviewRecord(
+            ContentModuleEntity module,
+            ContentModuleVersionEntity version,
+            ContentModuleReviewTransitionRequest request,
+            String actorUsername,
+            SelfApprovalGuard.EnforceOutcome outcome
+    ) {
+        ContentModuleReviewAction action = switch (request.operation()) {
+            case SUBMIT_FOR_REVIEW -> ContentModuleReviewAction.SUBMITTED;
+            case APPROVE_REVIEW -> ContentModuleReviewAction.APPROVED;
+            case REJECT_REVIEW -> ContentModuleReviewAction.REJECTED;
+        };
+        String changeSummary = request.operation() == ContentModuleReviewOperation.SUBMIT_FOR_REVIEW
+                ? request.changeDescription().trim()
+                : null;
+        String commentSummary = request.operation() == ContentModuleReviewOperation.REJECT_REVIEW
+                ? request.rejectionReason().trim()
+                : null;
+        String decision = switch (action) {
+            case APPROVED -> "APPROVED";
+            case REJECTED -> "REJECTED";
+            case SUBMITTED -> null;
+        };
+        reviewRecordRepository.save(new ContentModuleReviewRecordEntity(
+                UUID.randomUUID(),
+                module.getId(),
+                version.getId(),
+                version.getSemanticVersion(),
+                action,
+                decision,
+                changeSummary,
+                commentSummary,
+                actorUsername,
+                outcome.selfApprovalException(),
+                outcome.exceptionReason()
+        ));
     }
 
     private ContentModuleGovernanceException stateDenied() {

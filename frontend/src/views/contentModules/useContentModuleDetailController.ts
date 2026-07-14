@@ -67,6 +67,12 @@ export function useContentModuleDetailController() {
   const moduleId = computed(() => String(route.params.moduleId ?? ''))
   const detail = computed(() => contentModulesStore.selectedModule)
   const versions = computed(() => detail.value?.versions ?? [])
+  const reviewHistory = computed(() => detail.value?.reviewHistory ?? [])
+
+  function formatReviewAction(action: string): string {
+    const key = `contentModules.reviewHistory.action.${action}`
+    return te(key) ? t(key) : action
+  }
 
   const authorActorRole = computed(() =>
     resolveContentModuleAuthorActorRole(sessionStore.session?.roles ?? []),
@@ -150,6 +156,8 @@ export function useContentModuleDetailController() {
     moduleId,
     detail,
     versions,
+    reviewHistory,
+    formatReviewAction,
     canSubmitReview: derived.canSubmitReview,
     canApproveReview: derived.canApproveReview,
     canCreateVersion: derived.canCreateVersion,

@@ -18,6 +18,7 @@ import com.bank.docgen.contentmodule.domain.ContentModuleReviewOperation;
 import com.bank.docgen.contentmodule.domain.ContentModuleReviewState;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
+import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.api.ApiErrorCodes;
@@ -46,6 +47,7 @@ class ContentModuleSelfApprovalBlockTest {
 
     @Mock private ContentModuleRepository moduleRepository;
     @Mock private ContentModuleVersionRepository versionRepository;
+    @Mock private ContentModuleReviewRecordRepository reviewRecordRepository;
     @Mock private GroupAccessService groupAccessService;
     @Mock private ManagementAuditRecorder auditRecorder;
 
@@ -58,8 +60,8 @@ class ContentModuleSelfApprovalBlockTest {
     void setUp() {
         accessSupport = new ContentModuleAccessService(moduleRepository, groupAccessService, new ObjectMapper());
         reviewService = new ContentModuleReviewService(
-                moduleRepository, versionRepository, groupAccessService, accessSupport, auditRecorder,
-                new SelfApprovalGuard());
+                moduleRepository, versionRepository, reviewRecordRepository, groupAccessService, accessSupport,
+                auditRecorder, new SelfApprovalGuard());
         module = new ContentModuleEntity(MODULE_ID, "MOD-LOAN", "RETAIL", "Loan", "desc", "[]", "10000003");
         submittedVersion = new ContentModuleVersionEntity(VERSION_ID, MODULE_ID, "1.0.0",
                 "{\"blocks\":[]}", "Initial", "10000003");
@@ -96,6 +98,7 @@ class ContentModuleSelfApprovalBlockTest {
         stubReadableAndDecide(alice);
         when(versionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(reviewRecordRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         reviewService.transition("MOD-LOAN",
                 new ContentModuleReviewTransitionRequest(
@@ -117,6 +120,7 @@ class ContentModuleSelfApprovalBlockTest {
         stubReadableAndDecide(bob);
         when(versionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(moduleRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(reviewRecordRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         reviewService.transition("MOD-LOAN",
                 new ContentModuleReviewTransitionRequest(

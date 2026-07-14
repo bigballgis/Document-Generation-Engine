@@ -16,6 +16,7 @@ import com.bank.docgen.contentmodule.api.ContentModuleSummaryView;
 import com.bank.docgen.contentmodule.persistence.ContentModuleEntity;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleRepositoryCustom.ContentModuleCatalogFilter;
+import com.bank.docgen.contentmodule.persistence.ContentModuleReviewRecordRepository;
 import com.bank.docgen.contentmodule.persistence.ContentModuleVersionRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +40,8 @@ class ContentModuleServiceCatalogPaginationTest {
     @Mock
     private ContentModuleVersionRepository versionRepository;
     @Mock
+    private ContentModuleReviewRecordRepository reviewRecordRepository;
+    @Mock
     private GroupAccessService groupAccessService;
     @Mock
     private ManagementAuditRecorder auditRecorder;
@@ -54,6 +57,7 @@ class ContentModuleServiceCatalogPaginationTest {
         service = new ContentModuleService(
                 moduleRepository,
                 versionRepository,
+                reviewRecordRepository,
                 groupAccessService,
                 accessSupport,
                 auditRecorder

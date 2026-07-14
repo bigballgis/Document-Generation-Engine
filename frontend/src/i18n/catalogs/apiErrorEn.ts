@@ -48,6 +48,7 @@ export const apiErrorEn = {
     docxTooLarge: "The uploaded DOCX exceeds the maximum allowed size.",
     docxCorrupt: "The uploaded DOCX package is invalid or corrupt.",
     anchorExtractionFailed: "Unable to extract anchors from the uploaded DOCX.",
+    styleCatalogParseFailed: "Unable to parse the letterhead style catalog from styles.xml.",
     storageFailed: "Unable to store the uploaded letterhead.",
     downloadFailed: "Unable to download the letterhead file.",
     invalidReviewTransition: "The letterhead is not in a valid state for this review action.",

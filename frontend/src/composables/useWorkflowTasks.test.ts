@@ -9,6 +9,7 @@ import {
 } from '@/composables/useWorkflowTasks'
 import { useCollaborationStore } from '@/stores/collaboration'
 import { useAuthorWorkflowStore } from '@/stores/authorWorkflow'
+import { useContentModulesStore } from '@/stores/contentModules'
 import { useMastersStore } from '@/stores/masters'
 import { useSessionStore } from '@/stores/session'
 import type { ManagementCapabilities } from '@/types/session'
@@ -205,6 +206,92 @@ describe('useWorkflowTasks', () => {
     expect(tasks.value.some((task) => task.kind === 'master-rework' && task.id === 'master-rework-m3')).toBe(
       true,
     )
+  })
+
+  it('builds content-module review and rework tasks with lifecycle deep links', () => {
+    const sessionStore = useSessionStore()
+    sessionStore.session = {
+      ...sessionStore.session,
+      roles: ['TEMPLATE_APPROVER', 'TEMPLATE_AUTHOR'],
+      capabilities: {
+        ...testerCapabilities,
+        decideContentModuleReviews: true,
+        authorContentModules: true,
+        decideTests: false,
+        viewCollaborationWorkItems: false,
+      },
+    } as never
+
+    const contentModulesStore = useContentModulesStore()
+    contentModulesStore.workflowTasks = [
+      {
+        moduleId: 'MOD-A',
+        moduleCode: 'MOD-A',
+        name: 'Disclosure A',
+        groupCode: 'RETAIL',
+        kind: 'PENDING_REVIEW',
+        semanticVersion: '1.0.0',
+        updatedAt: '2026-07-15T10:00:00Z',
+      },
+      {
+        moduleId: 'MOD-B',
+        moduleCode: 'MOD-B',
+        name: 'Disclosure B',
+        groupCode: 'RETAIL',
+        kind: 'REWORK',
+        semanticVersion: '1.1.0',
+        rejectionReason: 'Wording not acceptable',
+        updatedAt: '2026-07-15T09:00:00Z',
+      },
+    ]
+
+    const { tasks } = useWorkflowTasks()
+    const reviewTask = tasks.value.find((task) => task.kind === 'content-module-review')
+    const reworkTask = tasks.value.find((task) => task.kind === 'content-module-rework')
+    expect(reviewTask?.entityName).toBe('Disclosure A')
+    expect(reviewTask?.path).toBe('/content-modules/MOD-A?workspaceTab=lifecycle')
+    expect(reworkTask?.entityName).toBe('Disclosure B')
+    expect(reworkTask?.path).toBe('/content-modules/MOD-B?workspaceTab=lifecycle')
+    expect(reworkTask?.summaryText).toBe('Wording not acceptable')
+
+    const scope = parseDashboardTaskScope({}, { reviewMasters: false, manageMasters: false })
+    const partitions = buildTaskPartitions(scope, tasks.value, {
+      roles: ['TEMPLATE_APPROVER', 'TEMPLATE_AUTHOR'],
+      capabilities: {
+        ...testerCapabilities,
+        decideContentModuleReviews: true,
+        authorContentModules: true,
+      },
+    })
+    expect(partitions.find((partition) => partition.kind === 'content-module-review')?.tasks).toHaveLength(1)
+    expect(partitions.find((partition) => partition.kind === 'content-module-rework')?.tasks).toHaveLength(1)
+  })
+
+  it('hides content-module review/rework tasks without matching capabilities', () => {
+    const contentModulesStore = useContentModulesStore()
+    contentModulesStore.workflowTasks = [
+      {
+        moduleId: 'MOD-A',
+        moduleCode: 'MOD-A',
+        name: 'Disclosure A',
+        groupCode: 'RETAIL',
+        kind: 'PENDING_REVIEW',
+        updatedAt: '2026-07-15T10:00:00Z',
+      },
+      {
+        moduleId: 'MOD-B',
+        moduleCode: 'MOD-B',
+        name: 'Disclosure B',
+        groupCode: 'RETAIL',
+        kind: 'REWORK',
+        rejectionReason: 'Fix wording',
+        updatedAt: '2026-07-15T09:00:00Z',
+      },
+    ]
+
+    const { tasks } = useWorkflowTasks()
+    expect(tasks.value.some((task) => task.kind === 'content-module-review')).toBe(false)
+    expect(tasks.value.some((task) => task.kind === 'content-module-rework')).toBe(false)
   })
 
   it('filters quick links by visible routes without legacy workbench shortcuts', () => {

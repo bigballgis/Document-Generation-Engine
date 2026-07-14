@@ -48,6 +48,7 @@ export const apiErrorZhCn = {
     docxTooLarge: "上传的 DOCX 超过允许的最大大小。",
     docxCorrupt: "上传的 DOCX 包无效或已损坏。",
     anchorExtractionFailed: "无法从上传的 DOCX 中提取锚点。",
+    styleCatalogParseFailed: "无法从 styles.xml 解析母版样式目录。",
     storageFailed: "无法存储上传的母版。",
     downloadFailed: "无法下载母版文件。",
     invalidReviewTransition: "母版当前状态不允许执行此审核操作。",

@@ -7,6 +7,7 @@ import com.bank.docgen.contentmodule.api.ContentModuleLifecycleOperationResultVi
 import com.bank.docgen.contentmodule.api.ContentModuleReviewTransitionRequest;
 import com.bank.docgen.contentmodule.api.ContentModuleReviewTransitionResultView;
 import com.bank.docgen.contentmodule.api.ContentModuleSummaryView;
+import com.bank.docgen.contentmodule.api.ContentModuleWorkflowTaskView;
 import com.bank.docgen.contentmodule.api.CreateContentModuleRequest;
 import com.bank.docgen.contentmodule.api.CreateContentModuleVersionRequest;
 import com.bank.docgen.contentmodule.api.UpdateContentModuleVersionRequest;
@@ -15,12 +16,14 @@ import com.bank.docgen.contentmodule.service.ContentModuleLifecycleImpactService
 import com.bank.docgen.contentmodule.service.ContentModuleLifecycleService;
 import com.bank.docgen.contentmodule.service.ContentModuleReviewService;
 import com.bank.docgen.contentmodule.service.ContentModuleService;
+import com.bank.docgen.contentmodule.service.ContentModuleWorkflowService;
 import com.bank.docgen.sharedkernel.api.Metadata;
 import com.bank.docgen.sharedkernel.api.SuccessEnvelope;
 import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +42,7 @@ public class ContentModuleController {
     private final ContentModuleReviewService reviewService;
     private final ContentModuleLifecycleService lifecycleService;
     private final ContentModuleLifecycleImpactService lifecycleImpactService;
+    private final ContentModuleWorkflowService workflowService;
     private final TraceIdProvider traceIdProvider;
 
     public ContentModuleController(
@@ -46,12 +50,14 @@ public class ContentModuleController {
             ContentModuleReviewService reviewService,
             ContentModuleLifecycleService lifecycleService,
             ContentModuleLifecycleImpactService lifecycleImpactService,
+            ContentModuleWorkflowService workflowService,
             TraceIdProvider traceIdProvider
     ) {
         this.contentModuleService = contentModuleService;
         this.reviewService = reviewService;
         this.lifecycleService = lifecycleService;
         this.lifecycleImpactService = lifecycleImpactService;
+        this.workflowService = workflowService;
         this.traceIdProvider = traceIdProvider;
     }
 
@@ -66,6 +72,14 @@ public class ContentModuleController {
             HttpServletRequest request
     ) {
         return envelope(request, contentModuleService.list(session, page, size, search, groupCode, sort));
+    }
+
+    @GetMapping("/workflow-tasks")
+    public SuccessEnvelope<List<ContentModuleWorkflowTaskView>> listWorkflowTasks(
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, workflowService.listWorkflowTasks(session));
     }
 
     @GetMapping("/{moduleId}")

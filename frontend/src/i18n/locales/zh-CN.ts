@@ -313,6 +313,16 @@ export default {
         itemTitle: '升级引用的条款版本',
         description: '模板中存在固定于旧版已批准条款的引用，请在条款面板一键升 pin。',
       },
+      contentModuleReview: {
+        title: '待审标准条款',
+        itemTitle: '审核标准条款',
+        description: '批准或驳回已提交的标准条款版本。',
+      },
+      contentModuleRework: {
+        title: '待返工标准条款',
+        itemTitle: '修改标准条款并重新提交',
+        description: '根据驳回原因修改草稿后再次提交审核。',
+      },
     },
     journey: {
       openWorkspace: '打开工作区',
@@ -2335,8 +2345,14 @@ export default {
         version: '版本',
         status: '状态',
         changeDescription: '变更说明',
+        rejectionReason: '驳回原因',
         updatedAt: '最后更新',
       },
+      reviewHistoryTitle: '审核历史',
+      noReviewHistory: '暂无审核记录。',
+      changeSummary: '变更摘要',
+      commentSummary: '审核意见',
+      actorLabel: '操作人 {username}',
     },
     workspace: {
       tabs: {
@@ -2345,6 +2361,13 @@ export default {
         lifecycle: '审批与发布',
       },
       lifecycleHint: '使用上方操作按钮提交、审批、驳回或执行发布后变更。',
+    },
+    reviewHistory: {
+      action: {
+        SUBMITTED: '已提交审核',
+        APPROVED: '已批准',
+        REJECTED: '已驳回',
+      },
     },
     reviewState: {
       DRAFT: '编写中',

@@ -10,6 +10,7 @@ import { useSessionStore } from '@/stores/session'
 
 vi.mock('@/api/contentModules', () => ({
   listContentModules: vi.fn(),
+  listContentModuleWorkflowTasks: vi.fn(),
   getContentModule: vi.fn(),
   createContentModule: vi.fn(),
   createContentModuleVersion: vi.fn(),
@@ -72,6 +73,7 @@ describe('ContentModuleDetailView', () => {
           updatedAt: '2026-06-26T10:00:00Z',
         },
       ],
+      reviewHistory: [],
     })
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
@@ -107,6 +109,7 @@ describe('ContentModuleDetailView', () => {
           updatedAt: '2026-06-26T10:00:00Z',
         },
       ],
+      reviewHistory: [],
     })
 
     const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
@@ -121,5 +124,93 @@ describe('ContentModuleDetailView', () => {
 
     await wrapper.find('.workspace-tab-shell').findAll('.el-tabs__item')[2].trigger('click')
     expect(wrapper.find('.workspace-tab-shell__actions').text()).toContain('Stop module')
+  })
+
+  it('shows rejection reason column and review timeline on detail workspace', async () => {
+    vi.mocked(contentModulesApi.getContentModule).mockResolvedValue({
+      moduleId: 'MOD-LOAN-DISCLOSURE',
+      moduleCode: 'MOD-LOAN-DISCLOSURE',
+      groupCode: 'RETAIL',
+      name: 'Loan disclosure',
+      versions: [
+        {
+          versionId: 'v1',
+          semanticVersion: '1.0.0',
+          reviewState: 'DRAFT',
+          lifecycleState: 'ACTIVE',
+          changeDescription: 'Rework wording',
+          rejectionReason: 'Wording not acceptable',
+          createdAt: '2026-06-26T10:00:00Z',
+          updatedAt: '2026-06-26T12:00:00Z',
+        },
+      ],
+      reviewHistory: [
+        {
+          action: 'SUBMITTED',
+          changeSummary: 'Ready for review',
+          actorUsername: '10000003',
+          createdAt: '2026-06-26T10:00:00Z',
+          semanticVersion: '1.0.0',
+        },
+        {
+          action: 'REJECTED',
+          commentSummary: 'Wording not acceptable',
+          actorUsername: '10000005',
+          createdAt: '2026-06-26T11:00:00Z',
+          semanticVersion: '1.0.0',
+        },
+      ],
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleDetailView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    patchSession(['TEMPLATE_AUTHOR'])
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Wording not acceptable')
+    await wrapper.find('.workspace-tab-shell').findAll('.el-tabs__item')[2].trigger('click')
+    await flushPromises()
+    expect(wrapper.find('.el-timeline').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Submitted for review')
+    expect(wrapper.text()).toContain('Rejected')
+    expect(wrapper.text()).toContain('By 10000005')
+  })
+
+  it('shows empty review history state when no transitions exist', async () => {
+    vi.mocked(contentModulesApi.getContentModule).mockResolvedValue({
+      moduleId: 'MOD-LOAN-DISCLOSURE',
+      moduleCode: 'MOD-LOAN-DISCLOSURE',
+      groupCode: 'RETAIL',
+      name: 'Loan disclosure',
+      versions: [
+        {
+          versionId: 'v1',
+          semanticVersion: '1.0.0',
+          reviewState: 'DRAFT',
+          createdAt: '2026-06-26T10:00:00Z',
+          updatedAt: '2026-06-26T10:00:00Z',
+        },
+      ],
+      reviewHistory: [],
+    })
+
+    const i18n = createI18n({ legacy: false, locale: 'en', messages: { en } })
+    const wrapper = mount(ContentModuleDetailView, {
+      global: {
+        plugins: [pinia, i18n, ElementPlus],
+      },
+    })
+
+    patchSession(['TEMPLATE_AUTHOR'])
+    await flushPromises()
+    await wrapper.find('.workspace-tab-shell').findAll('.el-tabs__item')[2].trigger('click')
+    await flushPromises()
+    expect(wrapper.find('.el-timeline').exists()).toBe(false)
+    expect(wrapper.text()).toContain('No review activity yet.')
   })
 })
