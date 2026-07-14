@@ -219,7 +219,15 @@ describe('TemplateDetailView', () => {
       items: [],
     } as never)
     vi.mocked(templatesApi.getTemplateCoverage).mockResolvedValue({} as never)
-    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({} as never)
+    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({
+      templateId: 'tpl-1',
+      baselineReleaseVersion: null,
+      candidateVersionId: 'dev-1',
+      hasChanges: false,
+      totalChangeCount: 0,
+      dimensions: [],
+      humanReadableEntries: [],
+    } as never)
     vi.mocked(templatesApi.fetchReleaseVersions).mockResolvedValue([])
 
     const wrapper = mountView()
@@ -239,7 +247,15 @@ describe('TemplateDetailView', () => {
       items: [{ checkCode: 'ANCHOR_INTEGRITY', ready: true, blocker: true, messageKey: '', summary: '' }],
     } as never)
     vi.mocked(templatesApi.getTemplateCoverage).mockResolvedValue({} as never)
-    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({} as never)
+    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({
+      templateId: 'tpl-1',
+      baselineReleaseVersion: null,
+      candidateVersionId: 'dev-1',
+      hasChanges: false,
+      totalChangeCount: 0,
+      dimensions: [],
+      humanReadableEntries: [],
+    } as never)
 
     mountView()
     await flushPromises()
@@ -259,7 +275,15 @@ describe('TemplateDetailView', () => {
       items: [{ checkCode: 'ANCHOR_INTEGRITY', ready: true, blocker: true, messageKey: '', summary: '' }],
     } as never)
     vi.mocked(templatesApi.getTemplateCoverage).mockResolvedValue({} as never)
-    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({} as never)
+    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({
+      templateId: 'tpl-1',
+      baselineReleaseVersion: null,
+      candidateVersionId: 'dev-1',
+      hasChanges: false,
+      totalChangeCount: 0,
+      dimensions: [],
+      humanReadableEntries: [],
+    } as never)
 
     const wrapper = mountView()
     await flushPromises()
@@ -287,7 +311,15 @@ describe('TemplateDetailView', () => {
       items: [{ checkCode: 'ANCHOR_INTEGRITY', ready: true, blocker: true, messageKey: '', summary: '' }],
     } as never)
     vi.mocked(templatesApi.getTemplateCoverage).mockResolvedValue({} as never)
-    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({} as never)
+    vi.mocked(templatesApi.fetchChangeDiff).mockResolvedValue({
+      templateId: 'tpl-1',
+      baselineReleaseVersion: null,
+      candidateVersionId: 'dev-1',
+      hasChanges: false,
+      totalChangeCount: 0,
+      dimensions: [],
+      humanReadableEntries: [],
+    } as never)
     vi.mocked(templatesApi.submitForApproval).mockResolvedValue({
       ...makeTemplate('tpl-b', 'Pending Submit Template'),
       lifecycleStatus: 'APPROVAL',

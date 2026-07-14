@@ -1088,6 +1088,14 @@ export default {
       deactivateSuccess: 'Release version deactivated.',
       restoreSuccess: 'Release version restored.',
       empty: 'No published release versions yet.',
+      compare: 'Compare',
+      compareTitle: 'Release comparison',
+      compareDescription: 'Semantic changes between release {a} and {b}.',
+      compareLoadError: 'Unable to load release comparison.',
+      compareHintNone: 'Select exactly two release versions to compare.',
+      compareHintOne: 'Select one more release version to enable Compare.',
+      compareHintTooMany: 'Select exactly two release versions (clear extras to compare).',
+      compareHintReady: 'Ready to compare the selected releases.',
     },
     metadata: {
       edit: 'Edit metadata',
@@ -1893,6 +1901,9 @@ export default {
       error: {
         load: 'Unable to load change diff.',
       },
+      humanReadableTitle: 'Semantic changes',
+      humanReadableUnavailable: 'Semantic change details are unavailable.',
+      humanReadableEmpty: 'No semantic content changes detected.',
     },
     riskPrompt: {
       title: 'Test and approval return reasons',

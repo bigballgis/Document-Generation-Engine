@@ -119,5 +119,19 @@ export async function fetchChangeDiff(templateId: string): Promise<ChangeDiffSum
   return unwrapEnvelope(response.data)
 }
 
+export async function fetchReleaseChangeDiff(
+  templateId: string,
+  releaseVersionA: string,
+  releaseVersionB: string,
+): Promise<ChangeDiffSummary> {
+  const response = await http.get<ApiEnvelope<ChangeDiffSummary>>(
+    `/templates/${templateId}/change-diff/releases`,
+    {
+      params: { releaseVersionA, releaseVersionB },
+    },
+  )
+  return unwrapEnvelope(response.data)
+}
+
 /** Re-export panel APIs so the detail domain remains one import surface. */
 export * from '@/api/templatesDetailPanels'

@@ -2192,6 +2192,82 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         default:
           $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/change-diff:
+    get:
+      tags: [Admin]
+      operationId: getTemplateChangeDiff
+      summary: Compute change-diff for the in-flight release candidate vs last published
+      description: >-
+        Compares the current in-flight release candidate against the latest
+        PUBLISHED release. CONTENT includes semantic structured-content entries
+        (anchor → block path) plus clause reference version changes.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Change-diff summary with human-readable semantic entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeDiffResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
+  /api/management/v1/templates/{templateId}/change-diff/releases:
+    get:
+      tags: [Admin]
+      operationId: getTemplateReleaseChangeDiff
+      summary: Compute semantic change-diff between two published releases
+      description: >-
+        Compares two published release versions (A = baseline, B = candidate)
+        for the same template. When A equals B, returns an empty diff.
+        Missing release versions return `404`. Requires template read access.
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: releaseVersionA
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: releaseVersionB
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TraceIdHeader'
+      responses:
+        '200':
+          description: Release A/B change-diff with human-readable semantic entries.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeDiffResponse'
+        '401':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/ErrorResponse'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
   /api/management/v1/templates/{templateId}/releases/{releaseVersion}:
     get:
       tags: [Admin]
@@ -5440,6 +5516,95 @@ components:
           $ref: '#/components/schemas/Metadata'
         result:
           $ref: '#/components/schemas/TemplateDetailView'
+    ChangeDiffDimensionCode:
+      type: string
+      enum: [CONTENT, ANCHORS, VARIABLES, RULES, CONTRACT_SUMMARY]
+    ChangeDiffModificationView:
+      type: object
+      additionalProperties: false
+      required: [key, changeType, summary]
+      properties:
+        key:
+          type: string
+        changeType:
+          type: string
+        summary:
+          type: string
+    ChangeDiffDimensionView:
+      type: object
+      additionalProperties: false
+      required: [dimension, added, removed, modified]
+      properties:
+        dimension:
+          $ref: '#/components/schemas/ChangeDiffDimensionCode'
+        added:
+          type: array
+          items:
+            type: string
+        removed:
+          type: array
+          items:
+            type: string
+        modified:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeDiffModificationView'
+    ChangeDiffHumanReadableEntry:
+      type: object
+      additionalProperties: false
+      required: [changeType, path, summary]
+      properties:
+        changeType:
+          type: string
+          description: ADDED, REMOVED, MODIFIED, or MOVED
+        path:
+          type: string
+        summary:
+          type: string
+    ChangeDiffView:
+      type: object
+      additionalProperties: false
+      required:
+        - templateId
+        - candidateVersionId
+        - hasChanges
+        - totalChangeCount
+        - dimensions
+        - humanReadableEntries
+      properties:
+        templateId:
+          type: string
+          format: uuid
+        baselineReleaseVersion:
+          type: string
+          nullable: true
+        candidateVersionId:
+          type: string
+          format: uuid
+        candidateReleaseVersion:
+          type: string
+          nullable: true
+        hasChanges:
+          type: boolean
+        totalChangeCount:
+          type: integer
+        dimensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeDiffDimensionView'
+        humanReadableEntries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeDiffHumanReadableEntry'
+    ChangeDiffResponse:
+      type: object
+      additionalProperties: false
+      required: [metadata, result]
+      properties:
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        result:
+          $ref: '#/components/schemas/ChangeDiffView'
     PublishGateCheckCode:
       type: string
       enum:

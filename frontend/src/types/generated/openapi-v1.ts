@@ -1007,6 +1007,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/management/v1/templates/{templateId}/change-diff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Compute change-diff for the in-flight release candidate vs last published
+         * @description Compares the current in-flight release candidate against the latest PUBLISHED release. CONTENT includes semantic structured-content entries (anchor → block path) plus clause reference version changes.
+         */
+        get: operations["getTemplateChangeDiff"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/management/v1/templates/{templateId}/change-diff/releases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Compute semantic change-diff between two published releases
+         * @description Compares two published release versions (A = baseline, B = candidate) for the same template. When A equals B, returns an empty diff. Missing release versions return `404`. Requires template read access.
+         */
+        get: operations["getTemplateReleaseChangeDiff"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/management/v1/templates/{templateId}/releases/{releaseVersion}": {
         parameters: {
             query?: never;
@@ -1463,8 +1503,11 @@ export interface components {
         OutputMode: "SYNC_STREAM" | "SYNC_DOWNLOAD_URL" | "ASYNC_TASK";
         /** @enum {string} */
         RouteType: "EXPLICIT_VERSION" | "DEFAULT_ROUTE";
-        /** @enum {string} */
-        FidelityWarningCode: "OPTIONAL_CONTENT_EMPTY" | "LOW_RISK_PAGINATION_DIFFERENCE" | "LOW_RISK_TABLE_PAGE_BREAK" | "CONTROLLED_STYLE_FALLBACK" | "IMAGE_SCALING_ADJUSTED";
+        /**
+         * @description Caller-visible fidelity warning codes for runtime success paths (JSON `fidelityWarnings[].warningCode` and SYNC_STREAM `fidelityWarningCodes` header). Baseline ADR-0019 codes plus engine-emitted codes that may appear on the formal runtime success path (CE-C03 honest enum).
+         * @enum {string}
+         */
+        FidelityWarningCode: "OPTIONAL_CONTENT_EMPTY" | "LOW_RISK_PAGINATION_DIFFERENCE" | "LOW_RISK_TABLE_PAGE_BREAK" | "CONTROLLED_STYLE_FALLBACK" | "IMAGE_SCALING_ADJUSTED" | "MASTER_STYLE_FALLBACK" | "PARTIAL_TABLE_LAYOUT_ADJUSTMENT" | "UNRESOLVED_VARIABLE" | "INVALID_CONDITION_EXPRESSION" | "MISSING_ANCHOR_CONTENT" | "UNSUPPORTED_NODE" | "MISSING_STYLE_REFERENCE" | "INAPPLICABLE_STYLE" | "DIRECT_FORMAT_OUT_OF_WHITELIST" | "DIRECT_FORMAT_GLOBAL_LAYOUT" | "NESTED_TABLE" | "UNRELIABLE_TABLE_LAYOUT" | "INVALID_TABLE_COMPONENT" | "SEAL_OUTSIDE_AUTHORIZED_AREA" | "SEAL_SCALING_NOT_ALLOWED" | "MISSING_REFERENCE_KEY" | "DUPLICATE_NUMBER" | "BROKEN_NUMBER_CROSS_REFERENCE" | "PDF_PAGE_NUMBER_STAMP_FAILED";
         /** @enum {string} */
         IdempotencyStatus: "IDEMPOTENCY_NEW" | "IDEMPOTENCY_REPLAYED" | "IDEMPOTENCY_CONFLICTED";
         /** @enum {string} */
@@ -1541,6 +1584,7 @@ export interface components {
             result: {
                 download: components["schemas"]["DownloadInfo"];
                 documentId: string;
+                /** @description Full FidelityWarning objects for SYNC_DOWNLOAD_URL JSON success (empty when none). Never string[] codes. Distinct from SYNC_STREAM header-only summary. */
                 fidelityWarnings?: components["schemas"]["FidelityWarning"][];
             };
         };
@@ -1565,6 +1609,7 @@ export interface components {
                 task: components["schemas"]["TaskSummary"];
                 download?: components["schemas"]["DownloadInfo"];
                 documentId?: string;
+                /** @description Full FidelityWarning objects when a single-item JSON result layer is present (empty array when none). Batch completions use result.batch.items[].fidelityWarnings instead. Never string[] codes. SYNC_STREAM uses headers only. */
                 fidelityWarnings?: components["schemas"]["FidelityWarning"][];
                 batch?: components["schemas"]["BatchResult"];
                 error?: components["schemas"]["ErrorDetail"];
@@ -1677,6 +1722,7 @@ export interface components {
             documentId?: string;
             download?: components["schemas"]["DownloadInfo"];
             error?: components["schemas"]["ErrorDetail"];
+            /** @description Full FidelityWarning objects for this succeeded batch item (empty array when none). Never a string[] of codes. SYNC_STREAM file responses use header summaries instead (fidelityWarningCount / fidelityWarningCodes); see components.headers and contract-outline «保真警告响应确认». */
             fidelityWarnings?: components["schemas"]["FidelityWarning"][];
         };
         AuditContextLinkage: {
@@ -1685,6 +1731,7 @@ export interface components {
             batchId?: string;
             itemId?: string;
         };
+        /** @description Full fidelity warning object for JSON success paths (batch items, task query result layers, and DownloadUrlResponse when that mode is delivered). SYNC_STREAM responses do not embed this array in the body — they return only fidelityWarningCount / fidelityWarningCodes headers; complete non-sensitive detail enters the audit summary (CE-C03). */
         FidelityWarning: {
             warningCode: components["schemas"]["FidelityWarningCode"];
             messageKey: string;
@@ -2312,6 +2359,41 @@ export interface components {
         TemplateDetailResponse: {
             metadata: components["schemas"]["Metadata"];
             result: components["schemas"]["TemplateDetailView"];
+        };
+        /** @enum {string} */
+        ChangeDiffDimensionCode: "CONTENT" | "ANCHORS" | "VARIABLES" | "RULES" | "CONTRACT_SUMMARY";
+        ChangeDiffModificationView: {
+            key: string;
+            changeType: string;
+            summary: string;
+        };
+        ChangeDiffDimensionView: {
+            dimension: components["schemas"]["ChangeDiffDimensionCode"];
+            added: string[];
+            removed: string[];
+            modified: components["schemas"]["ChangeDiffModificationView"][];
+        };
+        ChangeDiffHumanReadableEntry: {
+            /** @description ADDED, REMOVED, MODIFIED, or MOVED */
+            changeType: string;
+            path: string;
+            summary: string;
+        };
+        ChangeDiffView: {
+            /** Format: uuid */
+            templateId: string;
+            baselineReleaseVersion?: string | null;
+            /** Format: uuid */
+            candidateVersionId: string;
+            candidateReleaseVersion?: string | null;
+            hasChanges: boolean;
+            totalChangeCount: number;
+            dimensions: components["schemas"]["ChangeDiffDimensionView"][];
+            humanReadableEntries: components["schemas"]["ChangeDiffHumanReadableEntry"][];
+        };
+        ChangeDiffResponse: {
+            metadata: components["schemas"]["Metadata"];
+            result: components["schemas"]["ChangeDiffView"];
         };
         /** @enum {string} */
         PublishGateCheckCode: "ANCHOR_INTEGRITY" | "VARIABLE_SCHEMA" | "RULE_BOUNDS" | "TEST_RESULTS" | "PREVIEW_PRESENT" | "CHANGE_DIFF" | "APPROVAL_SUMMARY" | "COVERAGE_THRESHOLDS" | "API_POLICY" | "CONTENT_MODULE_REFERENCES" | "UNSUPPORTED_STRUCTURED_NODES" | "PASTE_CLEANING_BLOCKERS" | "BLOCKER_STATUS";
@@ -3470,7 +3552,9 @@ export interface components {
         ResolvedReleaseVersion: string;
         OutputFormat: components["schemas"]["OutputFormat"];
         OutputMode: components["schemas"]["OutputMode"];
+        /** @description SYNC_STREAM header summary only. Count of fidelity warnings for this generation (equals JSON-path `fidelityWarnings` array length when the same generation is returned as JSON). Full warning objects are never placed in the SYNC_STREAM response body; see contract-outline «保真警告响应确认» / CE-C03. */
         FidelityWarningCount: number;
+        /** @description SYNC_STREAM header summary only. Comma-separated `FidelityWarningCode` values in generation order (empty string when count is 0). Same code set as JSON-path `fidelityWarnings[].warningCode`. Full `FidelityWarning` objects are returned only on JSON batch/task/`DownloadUrlResponse` success paths — not in the file-stream body. */
         FidelityWarningCodes: string;
     };
     pathItems: never;
@@ -5442,6 +5526,68 @@ export interface operations {
             401: components["responses"]["ErrorResponse"];
             403: components["responses"]["ErrorResponse"];
             404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getTemplateChangeDiff: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Change-diff summary with human-readable semantic entries. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeDiffResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            default: components["responses"]["ErrorResponse"];
+        };
+    };
+    getTemplateReleaseChangeDiff: {
+        parameters: {
+            query: {
+                releaseVersionA: string;
+                releaseVersionB: string;
+            };
+            header?: {
+                /** @description Optional caller trace ID. If omitted, the platform generates traceId. */
+                "X-Trace-Id"?: components["parameters"]["TraceIdHeader"];
+            };
+            path: {
+                templateId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Release A/B change-diff with human-readable semantic entries. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeDiffResponse"];
+                };
+            };
+            401: components["responses"]["ErrorResponse"];
+            403: components["responses"]["ErrorResponse"];
+            404: components["responses"]["ErrorResponse"];
+            422: components["responses"]["ErrorResponse"];
             default: components["responses"]["ErrorResponse"];
         };
     };

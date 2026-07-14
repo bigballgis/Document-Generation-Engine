@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toRef } from 'vue'
 import LoadErrorPanel from '@/components/common/LoadErrorPanel.vue'
+import TemplateReleaseChangeDiffDialog from '@/components/templates/TemplateReleaseChangeDiffDialog.vue'
 import TemplateReleaseVersionHistoryTable from '@/components/templates/TemplateReleaseVersionHistoryTable.vue'
 import { useTemplateReleaseVersionHistoryPanel } from '@/components/templates/useTemplateReleaseVersionHistoryPanel'
 import type { TemplateLifecycleStatus } from '@/types/template'
@@ -37,6 +38,13 @@ const {
   sortByUpdatedAt,
   resolveUpdatedByDisplay,
   CLIENT_TABLE_PAGE_SIZE,
+  canCompareReleases,
+  compareHintKey,
+  compareReleaseA,
+  compareReleaseB,
+  compareDialogVisible,
+  onSelectionChange,
+  openCompareDialog,
 } = useTemplateReleaseVersionHistoryPanel({
   templateId: toRef(props, 'templateId'),
   templateLifecycleStatus: toRef(props, 'templateLifecycleStatus'),
@@ -70,8 +78,20 @@ const {
     <el-skeleton v-else-if="loading" :rows="4" animated />
 
     <template v-else>
-      <div v-if="hasActiveFilters" class="table-toolbar">
-        <el-button size="small" text @click="clearFilters">{{ t('table.clearFilters') }}</el-button>
+      <div class="table-toolbar">
+        <el-button
+          type="primary"
+          size="small"
+          data-testid="compare-releases"
+          :disabled="!canCompareReleases"
+          @click="openCompareDialog"
+        >
+          {{ t('templates.versions.compare') }}
+        </el-button>
+        <span class="compare-hint" data-testid="compare-releases-hint">{{ t(compareHintKey) }}</span>
+        <el-button v-if="hasActiveFilters" size="small" text @click="clearFilters">
+          {{ t('table.clearFilters') }}
+        </el-button>
       </div>
       <TemplateReleaseVersionHistoryTable
         v-model:versions-current-page="versionsCurrentPage"
@@ -90,8 +110,16 @@ const {
         :resolve-updated-by-display="resolveUpdatedByDisplay"
         :t="t"
         @version-action="handleVersionAction"
+        @selection-change="onSelectionChange"
       />
     </template>
+
+    <TemplateReleaseChangeDiffDialog
+      v-model="compareDialogVisible"
+      :template-id="templateId"
+      :release-version-a="compareReleaseA"
+      :release-version-b="compareReleaseB"
+    />
   </div>
 </template>
 

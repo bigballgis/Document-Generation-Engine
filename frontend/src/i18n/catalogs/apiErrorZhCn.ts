@@ -54,8 +54,7 @@ export const apiErrorZhCn = {
     invalidReviewTransition: "母版当前状态不允许执行此审核操作。",
     currentRevisionUnavailable: "无法解析用于固定的当前母版修订版本。",
     revisionInUseByPublishedRelease: "母版修订版本已被一个或多个已发布版本固定，无法删除。",
-    revisionDeleteFailed: "无法删除母版修订版本。",
-    styleCatalogParseFailed: "无法从 styles.xml 解析母版样式目录。"
+    revisionDeleteFailed: "无法删除母版修订版本。"
   },
   template: {
     notFound: "未找到模板。",
@@ -63,6 +62,7 @@ export const apiErrorZhCn = {
     testDataSetLocked: "测试数据集已被测试证据锁定，无法修改。",
     testDataSetSchemaInvalid: "测试数据集变量与模板变量 schema 不匹配。",
     accessDenied: "您无权访问此模板。",
+    changeDiffReleaseVersionsRequired: "发布版本对比需要同时提供 releaseVersionA 与 releaseVersionB。",
     confirmationRequired: "此操作需要二次确认。",
     invalidState: "模板当前状态不允许执行此操作。",
     devLineInFlight: "已有进行中的开发版本线。请先完成或放弃后，再克隆已发布版本。",

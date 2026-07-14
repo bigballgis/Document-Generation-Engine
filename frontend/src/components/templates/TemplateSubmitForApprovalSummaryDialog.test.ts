@@ -60,6 +60,15 @@ describe('TemplateSubmitForApprovalSummaryDialog', () => {
                 hasChanges: options.changeDiffHasChanges,
                 totalChangeCount: options.changeDiffHasChanges ? 3 : 0,
                 dimensions: [],
+                humanReadableEntries: options.changeDiffHasChanges
+                  ? [
+                      {
+                        changeType: 'MODIFIED',
+                        path: 'BODY/nodes[0]',
+                        summary: "BODY/nodes[0]: '贷款利率 4.9%' → '贷款利率 5.2%'",
+                      },
+                    ]
+                  : [],
               },
         previewComparison:
           options.previewComparison === undefined
@@ -104,6 +113,8 @@ describe('TemplateSubmitForApprovalSummaryDialog', () => {
 
     expect(wrapper.text()).toContain('Coverage meets thresholds (90%)')
     expect(wrapper.text()).toContain('Change diff reports 3 change(s) from baseline.')
+    expect(wrapper.text()).toContain("贷款利率 4.9%")
+    expect(wrapper.text()).toContain("贷款利率 5.2%")
   })
 
   it('enables confirm when all required gate items are ready including informational items', async () => {

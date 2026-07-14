@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ChangeDiffHumanReadableList from '@/components/templates/ChangeDiffHumanReadableList.vue'
 import type { ChangeDiffSummary, CoverageSummary, PreviewComparison } from '@/types/template'
 import type { PublishGateDisplayItem } from '@/utils/templateLifecycleDecisionForm'
 import { useTemplatePublishSummaryDialog } from '@/components/templates/useTemplatePublishSummaryDialog'
@@ -47,7 +48,7 @@ const {
   <el-dialog
     v-model="visible"
     :title="t('templates.publishSummary.title')"
-    width="560px"
+    width="640px"
     :close-on-click-modal="false"
     @close="close"
   >
@@ -94,6 +95,7 @@ const {
             : t('templates.publishSummary.changeDiffUnavailable')
         }}
       </p>
+      <ChangeDiffHumanReadableList :change-diff-summary="changeDiffSummary" />
       <p>
         {{
           previewComparison

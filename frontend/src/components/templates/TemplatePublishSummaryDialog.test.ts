@@ -61,6 +61,15 @@ describe('TemplatePublishSummaryDialog', () => {
                 hasChanges: options.changeDiffHasChanges,
                 totalChangeCount: options.changeDiffHasChanges ? 3 : 0,
                 dimensions: [],
+                humanReadableEntries: options.changeDiffHasChanges
+                  ? [
+                      {
+                        changeType: 'MODIFIED',
+                        path: 'BODY/nodes[0]',
+                        summary: "BODY/nodes[0]: '利率 4.9%' → '利率 5.2%'",
+                      },
+                    ]
+                  : [],
               },
         previewComparison:
           options.previewComparison === undefined
@@ -105,6 +114,8 @@ describe('TemplatePublishSummaryDialog', () => {
 
     expect(wrapper.text()).toContain('Coverage meets thresholds (90%)')
     expect(wrapper.text()).toContain('Change diff reports 3 change(s) from baseline.')
+    expect(wrapper.text()).toContain('利率 4.9%')
+    expect(wrapper.text()).toContain('利率 5.2%')
   })
 
   it('shows preview comparison summary when provided', async () => {

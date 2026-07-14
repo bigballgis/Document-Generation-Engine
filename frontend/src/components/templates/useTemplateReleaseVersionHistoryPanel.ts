@@ -36,9 +36,31 @@ export function useTemplateReleaseVersionHistoryPanel(
   const { manageReleaseVersionState } = useCapabilities()
 
   const loadError = ref(false)
+  const selectedReleaseVersions = ref<TemplateReleaseVersion[]>([])
+  const compareDialogVisible = ref(false)
   const entry = computed(() => panelDataStore.getEntry(options.templateId.value))
   const loading = computed(() => entry.value.loadingReleaseVersions)
   const versions = computed(() => entry.value.releaseVersions)
+  const canCompareReleases = computed(() => selectedReleaseVersions.value.length === 2)
+  const compareHintKey = computed(() => {
+    const count = selectedReleaseVersions.value.length
+    if (count === 0) {
+      return 'templates.versions.compareHintNone'
+    }
+    if (count === 1) {
+      return 'templates.versions.compareHintOne'
+    }
+    if (count > 2) {
+      return 'templates.versions.compareHintTooMany'
+    }
+    return 'templates.versions.compareHintReady'
+  })
+  const compareReleaseA = computed(() =>
+    selectedReleaseVersions.value.length === 2 ? selectedReleaseVersions.value[0]?.releaseVersion ?? null : null,
+  )
+  const compareReleaseB = computed(() =>
+    selectedReleaseVersions.value.length === 2 ? selectedReleaseVersions.value[1]?.releaseVersion ?? null : null,
+  )
 
   const versionsSource = computed(() => versions.value)
   const { filters: columnFilters, filteredRows: filteredVersions, hasActiveFilters, clearFilters } =
@@ -112,6 +134,17 @@ export function useTemplateReleaseVersionHistoryPanel(
   const sortByLifecycleStatus = rowSortMethod<TemplateReleaseVersion>((row) => row.lifecycleStatus)
   const sortByUpdatedAt = rowSortMethod<TemplateReleaseVersion>((row) => row.updatedAt)
 
+  function onSelectionChange(rows: TemplateReleaseVersion[]) {
+    selectedReleaseVersions.value = rows
+  }
+
+  function openCompareDialog() {
+    if (!canCompareReleases.value) {
+      return
+    }
+    compareDialogVisible.value = true
+  }
+
   return {
     t,
     formatDateTime,
@@ -135,5 +168,13 @@ export function useTemplateReleaseVersionHistoryPanel(
     sortByUpdatedAt,
     resolveUpdatedByDisplay,
     CLIENT_TABLE_PAGE_SIZE,
+    selectedReleaseVersions,
+    canCompareReleases,
+    compareHintKey,
+    compareReleaseA,
+    compareReleaseB,
+    compareDialogVisible,
+    onSelectionChange,
+    openCompareDialog,
   }
 }
