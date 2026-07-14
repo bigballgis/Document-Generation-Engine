@@ -109,6 +109,9 @@ public class RenderingExceptionAdvice {
             PreviewGenerationException ex
     ) {
         Throwable cause = ex.getCause();
+        if (cause instanceof com.bank.docgen.sharedkernel.document.compute.VariableComputeException computeEx) {
+            return errorEnvelopeFactory.variableComputeFailed(request, computeEx);
+        }
         if (cause instanceof DocxAssemblyException assemblyException) {
             return errorEnvelopeFactory.domainError(
                     request,
@@ -124,6 +127,14 @@ public class RenderingExceptionAdvice {
                 ApiErrorCodes.RENDERING_FAILED,
                 ex.messageKey()
         );
+    }
+
+    @ExceptionHandler(com.bank.docgen.sharedkernel.document.compute.VariableComputeException.class)
+    public ResponseEntity<ErrorEnvelope> handleVariableComputeFailed(
+            HttpServletRequest request,
+            com.bank.docgen.sharedkernel.document.compute.VariableComputeException ex
+    ) {
+        return errorEnvelopeFactory.variableComputeFailed(request, ex);
     }
 
     @ExceptionHandler(DocxAssemblyException.class)

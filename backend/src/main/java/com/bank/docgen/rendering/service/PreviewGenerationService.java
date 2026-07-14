@@ -19,6 +19,7 @@ import com.bank.docgen.template.port.RenderableTemplateSnapshot;
 import com.bank.docgen.template.port.TemplatePreviewAuthorizationPort;
 import com.bank.docgen.template.port.TemplateRenderContextPort;
 import com.bank.docgen.template.port.TestDataSetEvidencePort;
+import com.bank.docgen.template.port.VariableComputePort;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
@@ -58,7 +59,8 @@ public class PreviewGenerationService {
             PreviewComparisonService previewComparisonService,
             RenderProfileService renderProfileService,
             FidelityValidationService fidelityValidationService,
-            FidelityWarningJsonSupport fidelityWarningJsonSupport
+            FidelityWarningJsonSupport fidelityWarningJsonSupport,
+            VariableComputePort variableComputePort
     ) {
         this.previewAuthorizationPort = previewAuthorizationPort;
         this.testDataSetEvidencePort = testDataSetEvidencePort;
@@ -81,7 +83,8 @@ public class PreviewGenerationService {
                 documentArtifactPipeline,
                 renderContextPort,
                 renderProfileService,
-                fidelityValidationService
+                fidelityValidationService,
+                variableComputePort
         );
     }
 
@@ -163,6 +166,14 @@ public class PreviewGenerationService {
                 testDataSetEvidencePort.lockForEvidence(templateId, request.testDataSetId());
             }
             return mapping.toView(preview, assembled.warnings(), assembled.bindings());
+        } catch (com.bank.docgen.sharedkernel.document.compute.VariableComputeException computeEx) {
+            LOG.warn("Preview compute failed for template {} preview {}: {}", templateId, preview.getId(), computeEx.getMessage());
+            preview.markFailed();
+            previewRecordRepository.save(preview);
+            if (throwOnFailure) {
+                throw computeEx;
+            }
+            return mapping.toView(preview, List.of(), List.of());
         } catch (IOException | RuntimeException ex) {
             LOG.warn("Preview generation failed for template {} preview {}: {}", templateId, preview.getId(), ex.getMessage());
             preview.markFailed();

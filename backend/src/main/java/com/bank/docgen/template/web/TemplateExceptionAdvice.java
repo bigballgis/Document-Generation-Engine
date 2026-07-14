@@ -120,6 +120,14 @@ public class TemplateExceptionAdvice {
         );
     }
 
+    @ExceptionHandler(com.bank.docgen.sharedkernel.document.compute.VariableComputeException.class)
+    public ResponseEntity<ErrorEnvelope> handleVariableComputeFailed(
+            HttpServletRequest request,
+            com.bank.docgen.sharedkernel.document.compute.VariableComputeException ex
+    ) {
+        return errorEnvelopeFactory.variableComputeFailed(request, ex);
+    }
+
     /**
      * CE-K01: publish fails closed when the current master revision cannot be pinned.
      * Mapped here so template lifecycle endpoints return a stable envelope (also handled

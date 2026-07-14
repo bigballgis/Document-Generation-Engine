@@ -19,6 +19,7 @@ import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.port.RenderableTemplateSnapshot;
 import com.bank.docgen.template.port.TemplateRenderContextPort;
+import com.bank.docgen.template.port.VariableComputePort;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +44,7 @@ final class PreviewGenerationAssemblySupport {
     private final TemplateRenderContextPort renderContextPort;
     private final RenderProfileService renderProfileService;
     private final FidelityValidationService fidelityValidationService;
+    private final VariableComputePort variableComputePort;
 
     PreviewGenerationAssemblySupport(
             AnchorBindingRepository anchorBindingRepository,
@@ -52,7 +54,8 @@ final class PreviewGenerationAssemblySupport {
             DocumentArtifactPipeline documentArtifactPipeline,
             TemplateRenderContextPort renderContextPort,
             RenderProfileService renderProfileService,
-            FidelityValidationService fidelityValidationService
+            FidelityValidationService fidelityValidationService,
+            VariableComputePort variableComputePort
     ) {
         this.anchorBindingRepository = anchorBindingRepository;
         this.masterDocumentRepository = masterDocumentRepository;
@@ -62,6 +65,7 @@ final class PreviewGenerationAssemblySupport {
         this.renderContextPort = renderContextPort;
         this.renderProfileService = renderProfileService;
         this.fidelityValidationService = fidelityValidationService;
+        this.variableComputePort = variableComputePort;
     }
 
     record AssembledPreview(
@@ -78,8 +82,23 @@ final class PreviewGenerationAssemblySupport {
             UUID previewId,
             Map<String, Object> variables
     ) throws IOException {
+        return assembleAndStore(template, version, previewId, variables, null);
+    }
+
+    AssembledPreview assembleAndStore(
+            RenderableTemplateSnapshot template,
+            TemplateVersionEntity version,
+            UUID previewId,
+            Map<String, Object> variables,
+            String localeTag
+    ) throws IOException {
         MasterDocumentEntity master = masterDocumentRepository.findByIdAndDeletedAtIsNull(template.masterId())
                 .orElseThrow(MasterNotFoundException::new);
+        Map<String, Object> resolvedVariables = variableComputePort.applyCompute(
+                version.getId(),
+                variables,
+                localeTag
+        );
         List<AnchorBindingEntity> bindings = anchorBindingRepository
                 .findByTemplateVersionIdOrderByAnchorIdAsc(version.getId());
         Map<String, String> bindingJson = new LinkedHashMap<>();
@@ -91,7 +110,7 @@ final class PreviewGenerationAssemblySupport {
             docx = docxAssembler.assembleStructured(
                     masterStream,
                     bindingJson,
-                    variables,
+                    resolvedVariables,
                     pinnedModuleStructures
             );
         }

@@ -83,7 +83,9 @@ public class BatchExecutionService {
                         item.variables(),
                         output.format(),
                         encryption,
-                        mode
+                        com.bank.docgen.authoring.structured.CallerRenderOverride.empty(),
+                        mode,
+                        request.context() == null ? null : request.context().locale()
                 );
                 if (continueOnItemFailure) {
                     idempotencyService.registerDownloadableDocument(

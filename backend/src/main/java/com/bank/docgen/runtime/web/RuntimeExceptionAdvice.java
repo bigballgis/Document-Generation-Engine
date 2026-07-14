@@ -167,4 +167,12 @@ public class RuntimeExceptionAdvice {
                 ex.messageKey()
         );
     }
+
+    @ExceptionHandler(com.bank.docgen.sharedkernel.document.compute.VariableComputeException.class)
+    public ResponseEntity<ErrorEnvelope> handleVariableComputeFailed(
+            HttpServletRequest request,
+            com.bank.docgen.sharedkernel.document.compute.VariableComputeException ex
+    ) {
+        return errorEnvelopeFactory.variableComputeFailed(request, ex);
+    }
 }

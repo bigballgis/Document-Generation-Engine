@@ -1,4 +1,6 @@
 {
-  "deferred": true,
-  "assertions": []
+  "deferred": false,
+  "assertions": [
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "壹佰元整"}
+  ]
 }

@@ -6,6 +6,10 @@ import com.bank.docgen.sharedkernel.api.TraceIdProvider;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.bank.docgen.template.api.AnchorBindingView;
 import com.bank.docgen.template.api.BindingValidationView;
+import com.bank.docgen.template.api.ComputeExpressionEvaluateRequest;
+import com.bank.docgen.template.api.ComputeExpressionEvaluateView;
+import com.bank.docgen.template.api.ComputeExpressionValidateRequest;
+import com.bank.docgen.template.api.ComputeExpressionValidateView;
 import com.bank.docgen.template.api.CompositionRuleView;
 import com.bank.docgen.template.api.ContentModuleReferenceView;
 import com.bank.docgen.template.api.MasterStyleCatalogView;
@@ -185,6 +189,26 @@ public class TemplateAuthoringController {
             HttpServletRequest request
     ) {
         return envelope(request, templateRuleValidationService.validateRules(templateId, body, session));
+    }
+
+    @PostMapping("/{templateId}/compute-expressions/validate")
+    public SuccessEnvelope<ComputeExpressionValidateView> validateComputeExpression(
+            @PathVariable UUID templateId,
+            @RequestBody ComputeExpressionValidateRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateService.validateComputeExpression(templateId, body, session));
+    }
+
+    @PostMapping("/{templateId}/compute-expressions/evaluate")
+    public SuccessEnvelope<ComputeExpressionEvaluateView> evaluateComputeExpression(
+            @PathVariable UUID templateId,
+            @RequestBody ComputeExpressionEvaluateRequest body,
+            @AuthenticationPrincipal ManagementSessionClaims session,
+            HttpServletRequest request
+    ) {
+        return envelope(request, templateService.evaluateComputeExpression(templateId, body, session));
     }
 
     private <T> SuccessEnvelope<T> envelope(HttpServletRequest request, T result) {

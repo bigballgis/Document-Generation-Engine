@@ -10,6 +10,8 @@ import com.bank.docgen.rendering.PdfConversionPostProcessor;
 import com.bank.docgen.rendering.PdfEncryptionService;
 import com.bank.docgen.rendering.StructuredContentDocxWriterTestSupport;
 import com.bank.docgen.sharedkernel.api.EncryptionOptionsView;
+import com.bank.docgen.sharedkernel.document.compute.ComputeVariableDefinition;
+import com.bank.docgen.sharedkernel.document.compute.VariableComputeEngine;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -78,6 +81,7 @@ public final class GoldenCorpusActiveRunner {
         if (variables == null) {
             variables = Map.of();
         }
+        variables = applyComputeIfPresent(template, variables);
 
         byte[] masterBytes = Files.readAllBytes(
                 corpusPackage.directory().resolve(GoldenCorpusPackageLayout.INPUT_MASTER)
@@ -196,6 +200,29 @@ public final class GoldenCorpusActiveRunner {
         } finally {
             executor.shutdown();
         }
+    }
+
+    private Map<String, Object> applyComputeIfPresent(JsonNode template, Map<String, Object> variables) {
+        JsonNode schemas = template.get("variableSchemas");
+        if (schemas == null || !schemas.isArray() || schemas.isEmpty()) {
+            return variables;
+        }
+        List<ComputeVariableDefinition> definitions = new ArrayList<>();
+        for (JsonNode schema : schemas) {
+            String key = schema.path("variableKey").asText(null);
+            if (key == null || key.isBlank()) {
+                continue;
+            }
+            String type = schema.path("variableType").asText("");
+            String expression = schema.path("computeExpression").asText(null);
+            definitions.add(new ComputeVariableDefinition(
+                    key,
+                    expression,
+                    "COMPUTED".equalsIgnoreCase(type)
+            ));
+        }
+        String locale = template.path("locale").asText(null);
+        return VariableComputeEngine.INSTANCE.evaluateAll(definitions, variables, locale);
     }
 
     private Map<String, String> extractBindings(JsonNode template) {

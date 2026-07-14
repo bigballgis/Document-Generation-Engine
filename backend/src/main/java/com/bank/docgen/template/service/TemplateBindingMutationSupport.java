@@ -35,6 +35,7 @@ final class TemplateBindingMutationSupport {
     private final ObjectMapper objectMapper;
     private final TemplateViewMapper templateViewMapper;
     private final TemplateBindingStatusSupport statusSupport;
+    private final VariableComputeService variableComputeService;
 
     TemplateBindingMutationSupport(
             VariableSchemaRepository variableSchemaRepository,
@@ -43,7 +44,8 @@ final class TemplateBindingMutationSupport {
             MasterDocumentRepository masterDocumentRepository,
             ObjectMapper objectMapper,
             TemplateViewMapper templateViewMapper,
-            TemplateBindingStatusSupport statusSupport
+            TemplateBindingStatusSupport statusSupport,
+            VariableComputeService variableComputeService
     ) {
         this.variableSchemaRepository = variableSchemaRepository;
         this.anchorBindingRepository = anchorBindingRepository;
@@ -52,10 +54,19 @@ final class TemplateBindingMutationSupport {
         this.objectMapper = objectMapper;
         this.templateViewMapper = templateViewMapper;
         this.statusSupport = statusSupport;
+        this.variableComputeService = variableComputeService;
     }
 
     VariableSchemaView upsertVariable(TemplateVersionEntity version, UpsertVariableSchemaRequest request) {
         statusSupport.validateVariableRequest(request);
+        if (request.computeExpression() != null && !request.computeExpression().isBlank()) {
+            variableComputeService.validateComputeExpression(
+                    version.getId(),
+                    request.variableKey(),
+                    request.computeExpression(),
+                    request.variableKey()
+            );
+        }
         var existing = variableSchemaRepository.findByTemplateVersionIdAndVariableKey(
                 version.getId(),
                 request.variableKey()

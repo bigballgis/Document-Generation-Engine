@@ -27,9 +27,15 @@ const {
   treeRenderKey,
   searchExpandedKeys,
   totalVariableCount,
+  computeValidationError,
+  sampleJson,
+  sampleResult,
+  sampleError,
+  sampleEvaluating,
   openAddVariable,
   openEditVariable,
   handleSaveVariable,
+  handleSampleEvaluate,
   handleDeleteVariable,
   filterTreeNode,
 } = useTemplateVariableTreePanel({
@@ -134,12 +140,29 @@ const {
         <el-form-item
           v-if="variableForm.variableType === 'COMPUTED'"
           :label="t('templates.authoring.computeExpression')"
+          :error="computeValidationError || undefined"
         >
           <el-input
             v-model="variableForm.computeExpression"
+            type="textarea"
+            :rows="3"
             :placeholder="t('templates.authoring.computeExpressionPlaceholder')"
           />
         </el-form-item>
+        <template v-if="variableForm.variableType === 'COMPUTED'">
+          <el-form-item :label="t('templates.authoring.computeSampleJson')">
+            <el-input v-model="sampleJson" type="textarea" :rows="4" />
+          </el-form-item>
+          <div class="compute-sample-actions">
+            <el-button :loading="sampleEvaluating" @click="handleSampleEvaluate">
+              {{ t('templates.authoring.computeSampleEvaluate') }}
+            </el-button>
+          </div>
+          <p v-if="sampleResult !== null" class="compute-sample-result">
+            {{ t('templates.authoring.computeSampleResult') }}: {{ sampleResult }}
+          </p>
+          <p v-if="sampleError" class="compute-sample-error">{{ sampleError }}</p>
+        </template>
       </el-form>
       <template #footer>
         <el-button @click="variableDialogOpen = false">{{ t('common.cancel') }}</el-button>

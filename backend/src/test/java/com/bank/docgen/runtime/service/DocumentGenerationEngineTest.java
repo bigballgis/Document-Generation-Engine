@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +31,7 @@ import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
+import com.bank.docgen.template.service.VariableComputeService;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -70,6 +72,8 @@ class DocumentGenerationEngineTest {
     private RenderProfileService renderProfileService;
     @Mock
     private VersionFidelityWarningService versionFidelityWarningService;
+    @Mock
+    private VariableComputeService variableComputeService;
 
     private GenerationMetrics generationMetrics;
     private DocumentGenerationEngine engine;
@@ -78,6 +82,10 @@ class DocumentGenerationEngineTest {
     @BeforeEach
     void setUp() {
         generationMetrics = new GenerationMetrics(new SimpleMeterRegistry());
+        lenient().when(variableComputeService.applyCompute(any(), any(), any())).thenAnswer(invocation -> {
+            java.util.Map<String, Object> input = invocation.getArgument(1);
+            return input == null ? java.util.Map.of() : new java.util.LinkedHashMap<>(input);
+        });
         engine = new DocumentGenerationEngine(
                 templateVersionRepository,
                 anchorBindingRepository,
@@ -89,6 +97,7 @@ class DocumentGenerationEngineTest {
                 contentModuleReferenceService,
                 renderProfileService,
                 versionFidelityWarningService,
+                variableComputeService,
                 generationMetrics
         );
         template = new TemplateEntity(

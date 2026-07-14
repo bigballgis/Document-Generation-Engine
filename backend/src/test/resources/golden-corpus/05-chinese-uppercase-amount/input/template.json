@@ -1,5 +1,17 @@
 {
+  "locale": "zh-CN",
+  "variableSchemas": [
+    {
+      "variableKey": "principal",
+      "variableType": "AMOUNT"
+    },
+    {
+      "variableKey": "principalCn",
+      "variableType": "COMPUTED",
+      "computeExpression": "SPELL_AMOUNT(${principal})"
+    }
+  ],
   "bindings": {
-    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"placeholder\"}]}]}"
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"Amount in words: \"},{\"type\":\"variable\",\"key\":\"principalCn\"}]}]}"
   }
 }

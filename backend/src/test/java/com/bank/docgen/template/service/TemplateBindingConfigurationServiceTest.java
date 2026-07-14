@@ -92,7 +92,8 @@ class TemplateBindingConfigurationServiceTest {
                 tableComponentService,
                 referenceNodeService,
                 numberingService,
-                templateViewMapper
+                templateViewMapper,
+                org.mockito.Mockito.mock(com.bank.docgen.template.service.VariableComputeService.class)
         );
     }
 
@@ -458,7 +459,8 @@ class TemplateBindingConfigurationServiceTest {
                 new TableComponentService(objectMapper),
                 referenceNodeService,
                 numberingService,
-                templateViewMapper
+                templateViewMapper,
+                org.mockito.Mockito.mock(com.bank.docgen.template.service.VariableComputeService.class)
         );
         when(masterStyleCatalogService.loadForMaster(masterId))
                 .thenReturn(new MasterStyleCatalog("1.0", Map.of()));

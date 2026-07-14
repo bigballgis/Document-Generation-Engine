@@ -1,5 +1,35 @@
 {
+  "locale": "zh-CN",
+  "variableSchemas": [
+    {
+      "variableKey": "principal",
+      "variableType": "AMOUNT"
+    },
+    {
+      "variableKey": "missingLabel",
+      "variableType": "TEXT"
+    },
+    {
+      "variableKey": "items",
+      "variableType": "LIST"
+    },
+    {
+      "variableKey": "fallbackLabel",
+      "variableType": "COMPUTED",
+      "computeExpression": "COALESCE(${missingLabel}, 'N/A')"
+    },
+    {
+      "variableKey": "formattedAmount",
+      "variableType": "COMPUTED",
+      "computeExpression": "FORMAT_AMOUNT(${principal})"
+    },
+    {
+      "variableKey": "itemsSum",
+      "variableType": "COMPUTED",
+      "computeExpression": "SUM(FILTER(${items}, amount, GT, 0))"
+    }
+  ],
   "bindings": {
-    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"placeholder\"}]}]}"
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"Label: \"},{\"type\":\"variable\",\"key\":\"fallbackLabel\"},{\"type\":\"textRun\",\"value\":\" Amount: \"},{\"type\":\"variable\",\"key\":\"formattedAmount\"},{\"type\":\"textRun\",\"value\":\" Sum: \"},{\"type\":\"variable\",\"key\":\"itemsSum\"}]}]}"
   }
 }

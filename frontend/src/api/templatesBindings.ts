@@ -73,6 +73,46 @@ export async function upsertVariable(
   return unwrapEnvelope(response.data)
 }
 
+export async function validateComputeExpression(
+  templateId: string,
+  payload: {
+    variableKey?: string
+    expression: string
+    knownVariableKeys: string[]
+  },
+): Promise<{ valid: boolean; message?: string | null }> {
+  const response = await http.post<ApiEnvelope<{ valid: boolean; message?: string | null }>>(
+    `/templates/${templateId}/compute-expressions/validate`,
+    payload,
+  )
+  return unwrapEnvelope(response.data)
+}
+
+export async function evaluateComputeExpression(
+  templateId: string,
+  payload: {
+    variableKey?: string
+    expression: string
+    sampleVariables: Record<string, unknown>
+    locale?: string
+  },
+): Promise<{
+  success: boolean
+  result: unknown
+  variableKey?: string | null
+  expressionSummary?: string | null
+}> {
+  const response = await http.post<
+    ApiEnvelope<{
+      success: boolean
+      result: unknown
+      variableKey?: string | null
+      expressionSummary?: string | null
+    }>
+  >(`/templates/${templateId}/compute-expressions/evaluate`, payload)
+  return unwrapEnvelope(response.data)
+}
+
 export async function deleteVariable(templateId: string, variableKey: string): Promise<void> {
   await http.delete(`/templates/${templateId}/variables/${encodeURIComponent(variableKey)}`)
 }

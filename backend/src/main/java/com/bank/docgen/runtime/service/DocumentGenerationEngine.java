@@ -14,6 +14,7 @@ import com.bank.docgen.template.persistence.AnchorBindingRepository;
 import com.bank.docgen.template.persistence.TemplateEntity;
 import com.bank.docgen.template.persistence.TemplateVersionRepository;
 import com.bank.docgen.template.service.TemplateContentModuleReferenceService;
+import com.bank.docgen.template.service.VariableComputeService;
 import com.bank.docgen.template.service.VersionFidelityWarningService;
 import java.time.Duration;
 import java.time.Instant;
@@ -38,6 +39,7 @@ public class DocumentGenerationEngine {
             TemplateContentModuleReferenceService contentModuleReferenceService,
             RenderProfileService renderProfileService,
             VersionFidelityWarningService versionFidelityWarningService,
+            VariableComputeService variableComputeService,
             GenerationMetrics generationMetrics
     ) {
         this.assembly = new DocumentGenerationAssemblySupport(
@@ -50,7 +52,8 @@ public class DocumentGenerationEngine {
                 documentArtifactPipeline,
                 contentModuleReferenceService,
                 renderProfileService,
-                versionFidelityWarningService
+                versionFidelityWarningService,
+                variableComputeService
         );
         this.generationMetrics = generationMetrics;
     }
@@ -62,7 +65,7 @@ public class DocumentGenerationEngine {
             String outputFormat,
             EncryptionOptionsView encryption
     ) {
-        return generate(template, releaseVersion, variables, outputFormat, encryption, CallerRenderOverride.empty(), "sync");
+        return generate(template, releaseVersion, variables, outputFormat, encryption, CallerRenderOverride.empty(), "sync", null);
     }
 
     public GeneratedDocument generate(
@@ -80,7 +83,8 @@ public class DocumentGenerationEngine {
                 outputFormat,
                 encryption,
                 callerRenderOverride,
-                "sync"
+                "sync",
+                null
         );
     }
 
@@ -99,7 +103,8 @@ public class DocumentGenerationEngine {
                 outputFormat,
                 encryption,
                 CallerRenderOverride.empty(),
-                mode
+                mode,
+                null
         );
     }
 
@@ -112,6 +117,28 @@ public class DocumentGenerationEngine {
             CallerRenderOverride callerRenderOverride,
             String mode
     ) {
+        return generate(
+                template,
+                releaseVersion,
+                variables,
+                outputFormat,
+                encryption,
+                callerRenderOverride,
+                mode,
+                null
+        );
+    }
+
+    public GeneratedDocument generate(
+            TemplateEntity template,
+            String releaseVersion,
+            Map<String, Object> variables,
+            String outputFormat,
+            EncryptionOptionsView encryption,
+            CallerRenderOverride callerRenderOverride,
+            String mode,
+            String localeTag
+    ) {
         Instant start = Instant.now();
         String format = GenerationMetrics.normalizeFormat(outputFormat);
         String invocationMode = mode == null || mode.isBlank() ? "sync" : mode;
@@ -122,7 +149,8 @@ public class DocumentGenerationEngine {
                     variables,
                     outputFormat,
                     encryption,
-                    callerRenderOverride
+                    callerRenderOverride,
+                    localeTag
             );
             generationMetrics.record(Duration.between(start, Instant.now()), "success", format, invocationMode);
             return result;
