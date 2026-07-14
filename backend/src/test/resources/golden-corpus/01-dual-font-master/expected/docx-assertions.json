@@ -1,4 +1,11 @@
 {
-  "deferred": true,
-  "assertions": []
+  "deferred": false,
+  "assertions": [
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "双字体母版正文"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "继承母版 docDefaults"},
+    {"type": "XML_CONTAINS", "part": "word/document.xml", "substring": "ClauseBody"},
+    {"type": "XML_CONTAINS", "part": "word/styles.xml", "substring": "仿宋"},
+    {"type": "XML_CONTAINS", "part": "word/styles.xml", "substring": "宋体"},
+    {"type": "XML_NOT_CONTAINS", "part": "word/document.xml", "substring": "Calibri"}
+  ]
 }

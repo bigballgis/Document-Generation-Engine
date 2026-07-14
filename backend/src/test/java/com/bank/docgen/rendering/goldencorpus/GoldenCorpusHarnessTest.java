@@ -48,8 +48,8 @@ class GoldenCorpusHarnessTest {
                 .map(GoldenCorpusPackage::id)
                 .collect(Collectors.toSet());
 
-        assertThat(active).contains("nested-clauses", "encrypted-pdf", "specimen-watermark");
-        assertThat(placeholders).doesNotContain("nested-clauses", "encrypted-pdf", "specimen-watermark");
+        assertThat(active).contains("nested-clauses", "encrypted-pdf", "specimen-watermark", "dual-font-master");
+        assertThat(placeholders).doesNotContain("nested-clauses", "encrypted-pdf", "specimen-watermark", "dual-font-master");
         assertThat(active.size()).isGreaterThanOrEqualTo(3);
     }
 

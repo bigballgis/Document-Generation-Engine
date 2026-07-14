@@ -363,9 +363,13 @@ MasterRevisionLine 表示母版 DOCX 的一次上传或替换所产生的不可�
 
 绑定保存与 `validateBindings` 路径通过 `TemplateService.computeBindingStatus`（及 `TemplateBindingConfigurationService`）合并节点 blockers → `BindingValidationStatus.INCOMPATIBLE_CONTENT_TYPE`，进而阻塞 `PublishGateService` 锚点完整性检查项；LR-A4 可另增专用 checklist 项（见行为规格 LR-A4-C5）。**粘贴清洗未解除阻断**另见 §2.6.7（ops-paste-binding-seam / checklist #5b）— 与 LR-A4 writer-unsupported **正交**，同样汇入绑定非 `VALID` + 发布 fail-closed。
 
-#### 2.6.3 母版样式目录与有限直接格式 Master style catalog & direct format（P18-T03）
+#### 2.6.3 母版样式目录与有限直接格式 Master style catalog & direct format（P18-T03 + CE-K02）
 
-`MasterStyleCatalogService` 从已批准母版样式目录（v1 过渡实现：`authoring/default-master-style-catalog-v1.json`）加载可用样式（`styleKey`、适用节点类型、渲染用途）。内容树中的 `styleRef` 必须解析到目录条目且适用于当前节点类型；缺失/未批准/不适用 → blocker（`MISSING_STYLE_REFERENCE` / `INAPPLICABLE_STYLE`）。
+`MasterStyleCatalogService.loadForMaster(masterId)` 返回该母版**当前 revision** 持久化的样式目录（上传时解析 `word/styles.xml` + theme 字体 + `docDefaults`，挂在 `master_revision_line.style_catalog_json`；存量 revision 惰性 hydrate）。Classpath `authoring/default-master-style-catalog-v1.json` 仅作平台元数据（`applicableNodeTypes` / `renderPurpose`）合并源，**不再**作为运行时 typography 权威。
+
+目录条目含 `styleKey`、`styleType`、typography（分槽字体/字号等）、以及合并后的适用节点类型与渲染用途。内容树中的 `styleRef` 必须解析到该母版目录且适用于当前节点类型；缺失/不适用 → blocker（`MISSING_STYLE_REFERENCE` / `INAPPLICABLE_STYLE`）。
+
+**渲染继承链：** `styleRef` → 母版默认段落样式 → 母版 `docDefaults` → **仅当完全无 docDefaults** 时系统基线 Calibri/10pt/#000000 并产生 `MASTER_STYLE_FALLBACK` warning（与 `CONTROLLED_STYLE_FALLBACK` 并存、不合并）。结构化/明文锚点写入路径不得在母版已有 docDefaults 时硬编码 Calibri 覆盖。
 
 **有限直接格式白名单：** `fontFamily`、`fontSize`、`textColor`、`lineSpacing`、`spacingBefore`、`spacingAfter`、`firstLineIndent`、`leftIndent`、`rightIndent`。白名单外字段 → `DIRECT_FORMAT_OUT_OF_WHITELIST`；页边距/页眉页脚/纸张/分栏等全局版式字段 → `DIRECT_FORMAT_GLOBAL_LAYOUT`。
 

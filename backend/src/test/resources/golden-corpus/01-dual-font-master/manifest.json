@@ -1,10 +1,10 @@
 {
   "id": "dual-font-master",
   "theme": "Dual-font master (no Calibri in CJK runs; master style catalog authority)",
-  "maturity": "PLACEHOLDER",
-  "title": "Dual-font master — placeholder (CE-K02)",
+  "maturity": "ACTIVE",
+  "title": "Dual-font master — Songti docDefaults + Fangsong ClauseBody (CE-K02)",
   "renderMode": "STRUCTURED_ASSEMBLE",
   "pdfSource": "LIBREOFFICE",
-  "description": "Placeholder skeleton. Dual-font master fidelity assertions (no Calibri in CJK runs, master style catalog as authoritative source) are owned by CE-K02 and will be enriched here.",
+  "description": "ACTIVE CE-K02 sample: master styles.xml declares 宋体 docDefaults and 仿宋 ClauseBody. Structured assemble applies styleRef=ClauseBody without hard-coding Calibri on runs. DOCX assertions require Fangsong style presence and forbid Calibri overlays in styles/document parts.",
   "owningFutureSlice": "CE-K02"
 }

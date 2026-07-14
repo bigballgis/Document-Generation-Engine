@@ -1,12 +1,17 @@
 package com.bank.docgen.rendering;
 
 import com.bank.docgen.infrastructure.config.DocgenRenderingProperties;
+import com.bank.docgen.sharedkernel.document.style.MasterDocxStyleCatalogParseException;
+import com.bank.docgen.sharedkernel.document.style.MasterDocxStyleCatalogParser;
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalogMergeSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -20,10 +25,12 @@ public class DocxAssembler {
     private static final String MASTER_FILLER_MARKER =
             "Section-level anchor in the master layout container";
 
-    private final MasterStyleCatalog styleCatalog;
-    private final StructuredContentDocxWriter structuredContentDocxWriter;
+    private final ObjectMapper objectMapper;
+    private final MasterStyleCatalog platformMetadataCatalog;
+    private final StructuredContentImageResolver imageResolver;
     private final OoxmlOutputValidator ooxmlOutputValidator;
     private final DocgenRenderingProperties renderingProperties;
+    private final List<String> lastAssemblyFidelityWarnings = new ArrayList<>();
 
     @Autowired
     public DocxAssembler(
@@ -32,12 +39,9 @@ public class DocxAssembler {
             OoxmlOutputValidator ooxmlOutputValidator,
             DocgenRenderingProperties renderingProperties
     ) {
-        this.styleCatalog = DocxMasterStyleCatalogSupport.loadDefault(objectMapper);
-        this.structuredContentDocxWriter = new StructuredContentDocxWriter(
-                objectMapper,
-                styleCatalog,
-                imageResolver
-        );
+        this.objectMapper = objectMapper;
+        this.platformMetadataCatalog = DocxMasterStyleCatalogSupport.loadDefault(objectMapper);
+        this.imageResolver = imageResolver;
         this.ooxmlOutputValidator = ooxmlOutputValidator;
         this.renderingProperties = renderingProperties;
     }
@@ -55,14 +59,25 @@ public class DocxAssembler {
         return properties;
     }
 
+    /**
+     * CE-K02: fidelity warning codes from the most recent structured assembly (e.g. MASTER_STYLE_FALLBACK).
+     */
+    public List<String> lastAssemblyFidelityWarnings() {
+        return List.copyOf(lastAssemblyFidelityWarnings);
+    }
+
     public byte[] assemble(InputStream masterDocx, Map<String, String> anchorContent) {
-        try (XWPFDocument document = new XWPFDocument(masterDocx); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            DocxMasterLayoutFillerSupport.removeFillerParagraphs(document, MASTER_FILLER_MARKER);
-            DocxPlainAnchorParagraphSupport.replaceAnchorsInDocumentBody(document, anchorContent, ANCHOR_PATTERN);
-            DocxPlainAnchorParagraphSupport.replaceInTablesHeadersAndFooters(document, anchorContent, ANCHOR_PATTERN);
-            DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
-            document.write(output);
-            return validatedBytes(output.toByteArray());
+        try {
+            byte[] masterBytes = masterDocx.readAllBytes();
+            try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(masterBytes));
+                    ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+                DocxMasterLayoutFillerSupport.removeFillerParagraphs(document, MASTER_FILLER_MARKER);
+                DocxPlainAnchorParagraphSupport.replaceAnchorsInDocumentBody(document, anchorContent, ANCHOR_PATTERN);
+                DocxPlainAnchorParagraphSupport.replaceInTablesHeadersAndFooters(document, anchorContent, ANCHOR_PATTERN);
+                DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
+                document.write(output);
+                return validatedBytes(output.toByteArray());
+            }
         } catch (IOException ex) {
             throw new DocxAssemblyException(ex);
         }
@@ -77,7 +92,12 @@ public class DocxAssembler {
             Map<String, Object> variables,
             Map<String, String> pinnedModuleStructures
     ) {
-        return structuredContentDocxWriter.renderPlainTextProjection(
+        StructuredContentDocxWriter writer = new StructuredContentDocxWriter(
+                objectMapper,
+                platformMetadataCatalog,
+                imageResolver
+        );
+        return writer.renderPlainTextProjection(
                 structuredContentJson,
                 variables,
                 pinnedModuleStructures
@@ -113,27 +133,9 @@ public class DocxAssembler {
             Map<String, Object> variables,
             Map<String, String> pinnedModuleStructures
     ) {
-        try (XWPFDocument document = new XWPFDocument(masterDocx); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            DocxMasterLayoutFillerSupport.removeFillerParagraphs(document, MASTER_FILLER_MARKER);
-            DocxStructuredAnchorSupport.replaceInDocumentBody(
-                    document,
-                    bindingJsonByAnchor,
-                    variables,
-                    pinnedModuleStructures,
-                    structuredContentDocxWriter,
-                    ANCHOR_PATTERN
-            );
-            DocxStructuredAnchorSupport.replaceInTablesHeadersAndFooters(
-                    document,
-                    bindingJsonByAnchor,
-                    variables,
-                    pinnedModuleStructures,
-                    structuredContentDocxWriter,
-                    ANCHOR_PATTERN
-            );
-            DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
-            document.write(output);
-            return validatedBytes(output.toByteArray());
+        try {
+            byte[] masterBytes = masterDocx.readAllBytes();
+            return assembleStructuredFromBytes(masterBytes, bindingJsonByAnchor, variables, pinnedModuleStructures);
         } catch (IOException ex) {
             throw new DocxAssemblyException(ex);
         }
@@ -145,12 +147,56 @@ public class DocxAssembler {
             Map<String, Object> variables,
             Map<String, String> pinnedModuleStructures
     ) {
-        return assembleStructured(
-                new ByteArrayInputStream(masterBytes),
-                bindingJsonByAnchor,
-                variables,
-                pinnedModuleStructures
+        lastAssemblyFidelityWarnings.clear();
+        MasterStyleCatalog assemblyCatalog = resolveAssemblyCatalog(masterBytes);
+        StructuredContentDocxWriter writer = new StructuredContentDocxWriter(
+                objectMapper,
+                assemblyCatalog,
+                imageResolver
         );
+        try (XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(masterBytes));
+                ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            DocxMasterLayoutFillerSupport.removeFillerParagraphs(document, MASTER_FILLER_MARKER);
+            DocxStructuredAnchorSupport.replaceInDocumentBody(
+                    document,
+                    bindingJsonByAnchor,
+                    variables,
+                    pinnedModuleStructures,
+                    writer,
+                    ANCHOR_PATTERN
+            );
+            DocxStructuredAnchorSupport.replaceInTablesHeadersAndFooters(
+                    document,
+                    bindingJsonByAnchor,
+                    variables,
+                    pinnedModuleStructures,
+                    writer,
+                    ANCHOR_PATTERN
+            );
+            DocxWordCompatibilitySupport.ensureWordCompatiblePackage(document);
+            if (!assemblyCatalog.hasDocDefaults()) {
+                lastAssemblyFidelityWarnings.add("MASTER_STYLE_FALLBACK");
+            }
+            document.write(output);
+            return validatedBytes(output.toByteArray());
+        } catch (IOException ex) {
+            throw new DocxAssemblyException(ex);
+        }
+    }
+
+    /**
+     * CE-K02: assembly catalog is parsed from the master package opened for this render
+     * (pinned revision bytes for published generation; current revision for preview / golden).
+     */
+    private MasterStyleCatalog resolveAssemblyCatalog(byte[] masterBytes) {
+        try {
+            MasterStyleCatalog parsed = MasterDocxStyleCatalogParser.parse(masterBytes);
+            return MasterStyleCatalogMergeSupport.mergeWithPlatformMetadata(parsed, platformMetadataCatalog);
+        } catch (MasterDocxStyleCatalogParseException ex) {
+            // Masters without styles.xml (legacy golden skeletons): platform metadata + no docDefaults
+            // → system baseline path + MASTER_STYLE_FALLBACK (K02-C6/C7).
+            return platformMetadataCatalog;
+        }
     }
 
     private byte[] validatedBytes(byte[] assembledBytes) {

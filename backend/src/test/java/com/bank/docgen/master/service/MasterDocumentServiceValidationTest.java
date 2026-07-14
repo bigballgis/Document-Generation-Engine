@@ -20,6 +20,7 @@ import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -85,6 +86,7 @@ class MasterDocumentServiceValidationTest {
                 new GroupAccessService(),
                 managementUserDisplayService,
                 new SelfApprovalGuard(),
+                new ObjectMapper(),
                 4096
         );
     }

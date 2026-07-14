@@ -8,7 +8,10 @@ import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.master.persistence.MasterRevisionLineEntity;
 import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalogJsonCodec;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +27,7 @@ final class MasterDocumentFileMutationSupport {
     private final MasterDocumentAccessSupport access;
     private final MasterDocumentViewSupport views;
     private final MasterRevisionPersistSupport revisions;
+    private final ObjectMapper objectMapper;
 
     MasterDocumentFileMutationSupport(
             MasterDocumentRepository masterDocumentRepository,
@@ -31,7 +35,8 @@ final class MasterDocumentFileMutationSupport {
             MasterDocxUploadSupport docxUploadSupport,
             MasterDocumentAccessSupport access,
             MasterDocumentViewSupport views,
-            MasterRevisionPersistSupport revisions
+            MasterRevisionPersistSupport revisions,
+            ObjectMapper objectMapper
     ) {
         this.masterDocumentRepository = masterDocumentRepository;
         this.masterRevisionLineRepository = masterRevisionLineRepository;
@@ -39,6 +44,7 @@ final class MasterDocumentFileMutationSupport {
         this.access = access;
         this.views = views;
         this.revisions = revisions;
+        this.objectMapper = objectMapper;
     }
 
     MasterDocumentDetailView replaceFile(
@@ -55,6 +61,8 @@ final class MasterDocumentFileMutationSupport {
         if (anchorIds.isEmpty()) {
             throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
         }
+        MasterStyleCatalog styleCatalog = docxUploadSupport.parseStyleCatalog(docxFile);
+        String styleCatalogJson = MasterStyleCatalogJsonCodec.write(objectMapper, styleCatalog);
         masterRevisionLineRepository.findByMasterIdAndCurrentTrueAndDeletedAtIsNull(masterId)
                 .ifPresent(previousLine -> {
                     previousLine.markSuperseded();
@@ -77,7 +85,8 @@ final class MasterDocumentFileMutationSupport {
                 nextSequence,
                 true,
                 master.getChangeSummary(),
-                session.username()
+                session.username(),
+                styleCatalogJson
         );
         master.setStorageKey(revisionStorageKey);
         master.setOriginalFilename(docxFile.getOriginalFilename());
@@ -100,15 +109,17 @@ final class MasterDocumentFileMutationSupport {
     ) {
         access.assertGroupWritable(session, request.groupCode());
         docxUploadSupport.validateDocxFile(docxFile);
+        List<String> anchorIds = docxUploadSupport.extractAnchors(docxFile);
+        if (anchorIds.isEmpty()) {
+            throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
+        }
+        MasterStyleCatalog styleCatalog = docxUploadSupport.parseStyleCatalog(docxFile);
+        String styleCatalogJson = MasterStyleCatalogJsonCodec.write(objectMapper, styleCatalog);
         UUID masterId = UUID.randomUUID();
         UUID revisionLineId = UUID.randomUUID();
         String revisionStorageKey = docxUploadSupport.revisionStorageKey(
                 masterId, revisionLineId, docxFile.getOriginalFilename());
         docxUploadSupport.storeDocx(revisionStorageKey, docxFile);
-        List<String> anchorIds = docxUploadSupport.extractAnchors(docxFile);
-        if (anchorIds.isEmpty()) {
-            throw new MasterValidationException("api.error.master.anchorIntegrityFailed");
-        }
         List<MasterAnchorEntity> anchorEntities = revisions.toAnchorEntities(masterId, anchorIds);
         MasterDocumentEntity master = new MasterDocumentEntity(
                 masterId,
@@ -133,7 +144,8 @@ final class MasterDocumentFileMutationSupport {
                 1,
                 true,
                 null,
-                session.username()
+                session.username(),
+                styleCatalogJson
         );
         return views.toDetail(master);
     }

@@ -25,11 +25,15 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
 /**
  * Ensures POI-generated DOCX packages include the minimum Word-compatible styles and settings
  * parts so Microsoft Word can render body text instead of showing a blank page.
+ *
+ * <p>CE-K02: when the master package already has styles / docDefaults, those fonts are preserved
+ * — Calibri baseline is only applied for empty/missing styles parts (system fallback path).
  */
 public final class DocxWordCompatibilitySupport {
 
-    private static final BigInteger DOC_DEFAULT_FONT_HALF_POINTS = BigInteger.valueOf(22);
-    private static final String DEFAULT_FONT = "Calibri";
+    /** System baseline half-points (10pt) — only for missing docDefaults (K02-C7). */
+    public static final BigInteger SYSTEM_FALLBACK_FONT_HALF_POINTS = BigInteger.valueOf(20);
+    public static final String SYSTEM_FALLBACK_FONT = "Calibri";
     private static final String DEFAULT_TEXT_COLOR = "000000";
     private static final String DEFAULT_LANGUAGE = "en-US";
     private static final String NORMAL_STYLE_ID = "Normal";
@@ -50,15 +54,23 @@ public final class DocxWordCompatibilitySupport {
             styles.setStyles(buildBaselineCtStyles());
             return;
         }
-        if (styles.getNumberOfStyles() == 0) {
+        if (styles.getNumberOfStyles() == 0 && !hasDocDefaults(styles)) {
             styles.setStyles(buildBaselineCtStyles());
             return;
         }
-        styles.setDefaultFonts(buildCalibriFonts());
+        // CE-K02: preserve master docDefaults / default fonts — do not overwrite with Calibri.
         styles.setSpellingLanguage(DEFAULT_LANGUAGE);
-        applyDocDefaultSizeAndColor(styles);
         if (!styles.styleExist(NORMAL_STYLE_ID)) {
-            styles.addStyle(createNormalStyle());
+            styles.addStyle(createNormalStyleWithoutHardcodedFonts());
+        }
+    }
+
+    private static boolean hasDocDefaults(XWPFStyles styles) {
+        try {
+            XWPFDefaultRunStyle defaultRunStyle = styles.getDefaultRunStyle();
+            return defaultRunStyle != null;
+        } catch (RuntimeException ex) {
+            return false;
         }
     }
 
@@ -97,20 +109,15 @@ public final class DocxWordCompatibilitySupport {
 
         CTDocDefaults docDefaults = styles.addNewDocDefaults();
         CTRPr defaultRunProperties = docDefaults.addNewRPrDefault().addNewRPr();
-        applyDefaultRunProperties(defaultRunProperties);
+        applySystemFallbackRunProperties(defaultRunProperties);
         docDefaults.addNewPPrDefault().addNewPPr();
 
-        populateNormalStyle(styles.addNewStyle());
+        populateNormalStyleWithFallback(styles.addNewStyle());
         return styles;
     }
 
-    private static XWPFStyle createNormalStyle() {
+    private static XWPFStyle createNormalStyleWithoutHardcodedFonts() {
         CTStyle normal = CTStyle.Factory.newInstance();
-        populateNormalStyle(normal);
-        return new XWPFStyle(normal);
-    }
-
-    private static void populateNormalStyle(CTStyle normal) {
         normal.setType(STStyleType.PARAGRAPH);
         normal.setStyleId(NORMAL_STYLE_ID);
         normal.setDefault(Boolean.TRUE);
@@ -118,30 +125,36 @@ public final class DocxWordCompatibilitySupport {
         name.setVal(NORMAL_STYLE_ID);
         normal.setName(name);
         normal.addNewQFormat();
-        applyDefaultRunProperties(normal.addNewRPr());
+        return new XWPFStyle(normal);
     }
 
-    private static void applyDocDefaultSizeAndColor(XWPFStyles styles) {
-        XWPFDefaultRunStyle defaultRunStyle = styles.getDefaultRunStyle();
-        if (defaultRunStyle == null) {
-            return;
-        }
-        applyDefaultRunProperties(defaultRunProperties(defaultRunStyle));
+    private static void populateNormalStyleWithFallback(CTStyle normal) {
+        normal.setType(STStyleType.PARAGRAPH);
+        normal.setStyleId(NORMAL_STYLE_ID);
+        normal.setDefault(Boolean.TRUE);
+        CTString name = CTString.Factory.newInstance();
+        name.setVal(NORMAL_STYLE_ID);
+        normal.setName(name);
+        normal.addNewQFormat();
+        applySystemFallbackRunProperties(normal.addNewRPr());
     }
 
-    private static void applyDefaultRunProperties(CTRPr runProperties) {
+    private static void applySystemFallbackRunProperties(CTRPr runProperties) {
         CTFonts fonts = runProperties.sizeOfRFontsArray() > 0
                 ? runProperties.getRFontsArray(0)
                 : runProperties.addNewRFonts();
-        applyCalibriFonts(fonts);
+        fonts.setAscii(SYSTEM_FALLBACK_FONT);
+        fonts.setHAnsi(SYSTEM_FALLBACK_FONT);
+        fonts.setCs(SYSTEM_FALLBACK_FONT);
+        fonts.setEastAsia(SYSTEM_FALLBACK_FONT);
 
         if (runProperties.sizeOfSzArray() == 0) {
             CTHpsMeasure size = runProperties.addNewSz();
-            size.setVal(DOC_DEFAULT_FONT_HALF_POINTS);
+            size.setVal(SYSTEM_FALLBACK_FONT_HALF_POINTS);
         }
         if (runProperties.sizeOfSzCsArray() == 0) {
             CTHpsMeasure complexScriptSize = runProperties.addNewSzCs();
-            complexScriptSize.setVal(DOC_DEFAULT_FONT_HALF_POINTS);
+            complexScriptSize.setVal(SYSTEM_FALLBACK_FONT_HALF_POINTS);
         }
         if (runProperties.sizeOfColorArray() == 0) {
             CTColor color = runProperties.addNewColor();
@@ -153,20 +166,10 @@ public final class DocxWordCompatibilitySupport {
         }
     }
 
-    private static CTFonts buildCalibriFonts() {
-        CTFonts fonts = CTFonts.Factory.newInstance();
-        applyCalibriFonts(fonts);
-        return fonts;
-    }
-
-    private static void applyCalibriFonts(CTFonts fonts) {
-        fonts.setAscii(DEFAULT_FONT);
-        fonts.setHAnsi(DEFAULT_FONT);
-        fonts.setCs(DEFAULT_FONT);
-        fonts.setEastAsia(DEFAULT_FONT);
-    }
-
-    private static CTRPr defaultRunProperties(XWPFDefaultRunStyle defaultRunStyle) {
+    /**
+     * Exposed for tests that need to read private default run properties via the same path.
+     */
+    static CTRPr defaultRunProperties(XWPFDefaultRunStyle defaultRunStyle) {
         try {
             MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(
                     XWPFDefaultRunStyle.class,

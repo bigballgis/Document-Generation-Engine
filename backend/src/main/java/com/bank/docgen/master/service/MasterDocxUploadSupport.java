@@ -4,6 +4,9 @@ import com.bank.docgen.infrastructure.storage.ObjectStoragePort;
 import com.bank.docgen.master.persistence.MasterAnchorEntity;
 import com.bank.docgen.master.persistence.MasterDocumentEntity;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
+import com.bank.docgen.sharedkernel.document.style.MasterDocxStyleCatalogParseException;
+import com.bank.docgen.sharedkernel.document.style.MasterDocxStyleCatalogParser;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,6 +88,33 @@ final class MasterDocxUploadSupport {
         } catch (IOException ex) {
             LOG.warn("Failed to extract anchors from uploaded DOCX: {}", ex.getMessage());
             throw new MasterValidationException("api.error.master.anchorExtractionFailed");
+        }
+    }
+
+    /**
+     * CE-K02: parse {@code word/styles.xml} (+ theme) before revision persist — fail-closed.
+     */
+    MasterStyleCatalog parseStyleCatalog(MultipartFile docxFile) {
+        try (InputStream inputStream = docxFile.getInputStream()) {
+            return MasterDocxStyleCatalogParser.parse(inputStream.readAllBytes());
+        } catch (MasterDocxStyleCatalogParseException ex) {
+            LOG.warn("Failed to parse master style catalog from uploaded DOCX: {}", ex.getMessage());
+            throw new MasterValidationException("api.error.master.styleCatalogParseFailed");
+        } catch (IOException ex) {
+            LOG.warn("Failed to read uploaded DOCX for style catalog parse: {}", ex.getMessage());
+            throw new MasterValidationException("api.error.master.styleCatalogParseFailed");
+        }
+    }
+
+    MasterStyleCatalog parseStyleCatalogFromStorage(String storageKey) {
+        try (InputStream inputStream = objectStoragePort.get(storageKey)) {
+            return MasterDocxStyleCatalogParser.parse(inputStream.readAllBytes());
+        } catch (MasterDocxStyleCatalogParseException ex) {
+            LOG.warn("Failed to parse master style catalog from storage {}: {}", storageKey, ex.getMessage());
+            throw new MasterValidationException("api.error.master.styleCatalogParseFailed");
+        } catch (IOException | RuntimeException ex) {
+            LOG.warn("Failed to read master DOCX for style catalog hydrate {}: {}", storageKey, ex.getMessage());
+            throw new MasterValidationException("api.error.master.styleCatalogParseFailed");
         }
     }
 

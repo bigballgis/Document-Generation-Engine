@@ -5,6 +5,7 @@ package com.bank.docgen.sharedkernel.document.fidelity;
  */
 public enum FidelityWarningCode {
     CONTROLLED_STYLE_FALLBACK,
+    MASTER_STYLE_FALLBACK,
     LOW_RISK_PAGINATION_DIFFERENCE,
     PARTIAL_TABLE_LAYOUT_ADJUSTMENT,
     UNRESOLVED_VARIABLE,

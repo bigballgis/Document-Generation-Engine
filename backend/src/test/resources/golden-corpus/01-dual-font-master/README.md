@@ -1,8 +1,14 @@
-# 01-dual-font-master (PLACEHOLDER)
+# 01-dual-font-master (ACTIVE — CE-K02)
 
-Placeholder skeleton for CE-K02 (dual-font master fidelity).
+Dual-font master fidelity sample for master style authority.
 
-- **Maturity:** `PLACEHOLDER` — skeleton validated by harness; business assertions
-  deferred until CE-K02 enriches this package.
-- **Enrichment scope (CE-K02, NOT this slice):** assert no Calibri runs survive in
-  CJK paragraphs and that the master style catalog is the authoritative style source.
+- **Maturity:** `ACTIVE`
+- **Master fonts:** docDefaults eastAsia=`宋体`; `ClauseBody` eastAsia=`仿宋`
+- **DOCX assertions:** styleId `ClauseBody` applied; styles contain 宋体/仿宋; `word/document.xml` must not contain hard-coded `Calibri`
+- **PDF:** deferred (LibreOffice optional per K07)
+
+Rebuild master package:
+
+```bash
+python backend/src/test/resources/golden-corpus/01-dual-font-master/_build_master.py
+```

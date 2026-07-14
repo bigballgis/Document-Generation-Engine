@@ -150,8 +150,8 @@ class TemplatePlatformSliceTest extends TemplateManagementWebTestSupport {
         mockMvc.perform(get("/api/management/v1/templates/" + templateId + "/master-style-catalog")
                         .with(authentication(new ManagementAuthentication(templateAuthor))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.catalogVersion").value("1.1"))
-                .andExpect(jsonPath("$.result.entries[0].styleKey").value("BodyText"));
+                .andExpect(jsonPath("$.result.catalogVersion").value(org.hamcrest.Matchers.startsWith("master-styles-")))
+                .andExpect(jsonPath("$.result.entries[?(@.styleKey == 'BodyText')]").exists());
 
         mockMvc.perform(post("/api/management/v1/templates/" + templateId + "/paste-clean")
                         .with(authentication(new ManagementAuthentication(templateAuthor)))

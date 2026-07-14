@@ -6,11 +6,23 @@ import java.util.Set;
 public record MasterStyleCatalogEntry(
         String styleKey,
         Set<String> applicableNodeTypes,
-        String renderPurpose
+        String renderPurpose,
+        MasterStyleType styleType,
+        MasterStyleTypography typography
 ) {
 
     public MasterStyleCatalogEntry {
         applicableNodeTypes = DefensiveCopies.copySet(applicableNodeTypes);
+        if (styleType == null) {
+            styleType = MasterStyleType.UNKNOWN;
+        }
+    }
+
+    /**
+     * Backward-compatible constructor for platform metadata entries without typography.
+     */
+    public MasterStyleCatalogEntry(String styleKey, Set<String> applicableNodeTypes, String renderPurpose) {
+        this(styleKey, applicableNodeTypes, renderPurpose, MasterStyleType.UNKNOWN, null);
     }
 
     public boolean appliesToNodeType(String nodeTypeJson) {

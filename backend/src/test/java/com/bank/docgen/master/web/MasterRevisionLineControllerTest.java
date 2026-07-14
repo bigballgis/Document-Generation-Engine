@@ -14,13 +14,9 @@ import com.bank.docgen.master.persistence.MasterDocumentRepository;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.ByteArrayOutputStream;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -338,13 +334,7 @@ class MasterRevisionLineControllerTest {
     }
 
     private byte[] buildSampleDocx(String text) throws Exception {
-        try (XWPFDocument document = new XWPFDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            XWPFParagraph paragraph = document.createParagraph();
-            XWPFRun run = paragraph.createRun();
-            run.setText(text);
-            document.write(output);
-            return output.toByteArray();
-        }
+        return com.bank.docgen.master.support.TestMasterDocxFactory.buildWithAnchorText(text);
     }
 
     private ManagementSessionClaims session(

@@ -71,6 +71,7 @@ class MasterDocumentServiceCatalogPaginationTest {
                 groupAccessService,
                 managementUserDisplayService,
                 new SelfApprovalGuard(),
+                new com.fasterxml.jackson.databind.ObjectMapper(),
                 50L * 1024L * 1024L
         );
         session = new ManagementSessionClaims(

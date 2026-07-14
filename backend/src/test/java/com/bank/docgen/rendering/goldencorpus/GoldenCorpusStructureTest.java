@@ -58,7 +58,7 @@ class GoldenCorpusStructureTest {
 
     @Test
     void placeholderMissingSkeletonFileFails(@TempDir Path tempDir) throws Exception {
-        Path packageDir = copyPackageToTemp("dual-font-master", tempDir);
+        Path packageDir = copyPackageToTemp("cross-page-table", tempDir);
         Files.delete(packageDir.resolve("input/template.json"));
 
         GoldenCorpusPackage loaded = scanner.loadPackage(packageDir);
@@ -75,15 +75,19 @@ class GoldenCorpusStructureTest {
                 .filter(pkg -> pkg.maturity() == GoldenCorpusMaturity.PLACEHOLDER)
                 .map(GoldenCorpusPackage::id)
                 .collect(Collectors.toSet());
+        Set<String> active = packages.stream()
+                .filter(pkg -> pkg.maturity() == GoldenCorpusMaturity.ACTIVE)
+                .map(GoldenCorpusPackage::id)
+                .collect(Collectors.toSet());
 
+        assertThat(active).contains("dual-font-master", "nested-clauses", "encrypted-pdf", "specimen-watermark");
         assertThat(placeholders).contains(
-                "dual-font-master",
                 "cross-page-table",
                 "compute-variables",
                 "chinese-uppercase-amount",
                 "long-clause-limits"
         );
-        assertThat(placeholders).doesNotContain("specimen-watermark");
+        assertThat(placeholders).doesNotContain("specimen-watermark", "dual-font-master");
     }
 
     @Test

@@ -301,14 +301,9 @@ class TemplateExportControllerTest {
     }
 
     private byte[] minimalDocx() throws Exception {
-        try (var document = new org.apache.poi.xwpf.usermodel.XWPFDocument();
-                var output = new java.io.ByteArrayOutputStream()) {
-            org.apache.poi.xwpf.usermodel.XWPFParagraph paragraph = document.createParagraph();
-            org.apache.poi.xwpf.usermodel.XWPFRun run = paragraph.createRun();
-            run.setText("Dear {{anchor:HEADER}} customer");
-            document.write(output);
-            return output.toByteArray();
-        }
+        return com.bank.docgen.master.support.TestMasterDocxFactory.buildWithAnchorText(
+                "Dear {{anchor:HEADER}} customer"
+        );
     }
 
     private ManagementSessionClaims session(String username, List<String> roles, List<String> groups) {

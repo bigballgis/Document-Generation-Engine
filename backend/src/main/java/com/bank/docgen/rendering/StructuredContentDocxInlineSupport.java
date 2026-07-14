@@ -47,7 +47,7 @@ final class StructuredContentDocxInlineSupport {
         }
         if ("lineBreak".equals(type)) {
             XWPFRun run = paragraph.createRun();
-            StructuredContentDocxStyleSupport.applyDefaultRunStyle(run);
+            styles.applyDefaultRunStyle(run);
             run.addBreak();
             return;
         }
@@ -109,7 +109,7 @@ final class StructuredContentDocxInlineSupport {
         }
         try {
             XWPFRun run = paragraph.createRun();
-            StructuredContentDocxStyleSupport.applyDefaultRunStyle(run);
+            styles.applyDefaultRunStyle(run);
             run.addPicture(
                     new java.io.ByteArrayInputStream(image.bytes()),
                     XWPFDocument.PICTURE_TYPE_PNG,

@@ -48,6 +48,13 @@ public class MasterRevisionLineEntity {
     @Column(name = "change_summary", length = 2048)
     private String changeSummary;
 
+    /**
+     * CE-K02: JSON-serialized {@link com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog}
+     * for this revision (styles.xml + theme + docDefaults).
+     */
+    @Column(name = "style_catalog_json", columnDefinition = "TEXT")
+    private String styleCatalogJson;
+
     @Column(name = "created_by", nullable = false, length = 8)
     private String createdBy;
 
@@ -132,6 +139,15 @@ public class MasterRevisionLineEntity {
 
     public String getChangeSummary() {
         return changeSummary;
+    }
+
+    public String getStyleCatalogJson() {
+        return styleCatalogJson;
+    }
+
+    public void setStyleCatalogJson(String styleCatalogJson) {
+        this.styleCatalogJson = styleCatalogJson;
+        this.updatedAt = Instant.now();
     }
 
     public String getCreatedBy() {

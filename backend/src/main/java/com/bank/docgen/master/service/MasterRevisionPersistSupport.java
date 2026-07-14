@@ -41,6 +41,34 @@ final class MasterRevisionPersistSupport {
             String changeSummary,
             String actor
     ) {
+        return persistRevisionLine(
+                revisionLineId,
+                masterId,
+                storageKey,
+                originalFilename,
+                anchors,
+                statusSnapshot,
+                revisionSequence,
+                current,
+                changeSummary,
+                actor,
+                null
+        );
+    }
+
+    MasterRevisionLineEntity persistRevisionLine(
+            UUID revisionLineId,
+            UUID masterId,
+            String storageKey,
+            String originalFilename,
+            List<MasterAnchorEntity> anchors,
+            MasterDocumentStatus statusSnapshot,
+            int revisionSequence,
+            boolean current,
+            String changeSummary,
+            String actor,
+            String styleCatalogJson
+    ) {
         MasterRevisionLineEntity line = new MasterRevisionLineEntity(
                 revisionLineId,
                 masterId,
@@ -53,6 +81,9 @@ final class MasterRevisionPersistSupport {
                 changeSummary,
                 actor
         );
+        if (styleCatalogJson != null && !styleCatalogJson.isBlank()) {
+            line.setStyleCatalogJson(styleCatalogJson);
+        }
         List<MasterRevisionLineAnchorEntity> snapshotAnchors = anchors.stream()
                 .map(anchor -> new MasterRevisionLineAnchorEntity(
                         revisionLineId,

@@ -2,6 +2,7 @@ package com.bank.docgen.rendering;
 
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalog;
 import com.bank.docgen.sharedkernel.document.style.MasterStyleCatalogEntry;
+import com.bank.docgen.sharedkernel.document.style.MasterStyleTypography;
 import java.math.BigInteger;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFStyle;
@@ -12,6 +13,9 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STStyleType;
 
 /**
  * Registers paragraph styles from the approved master style catalog into a DOCX package.
+ *
+ * <p>CE-K02: fonts/sizes come from per-master catalog typography — never hard-coded Calibri
+ * heuristics when catalog typography is present.
  */
 public final class DocxMasterStyleRegistry {
 
@@ -28,12 +32,16 @@ public final class DocxMasterStyleRegistry {
             return;
         }
         for (MasterStyleCatalogEntry entry : catalog.stylesByKey().values()) {
+            MasterStyleTypography typography = entry.typography();
+            String fontFamily = resolveFontFamily(typography, catalog);
+            int fontSizeHalfPoints = resolveFontSizeHalfPoints(typography, catalog);
+            boolean bold = typography != null && Boolean.TRUE.equals(typography.bold());
             registerBankParagraphStyle(
                     styles,
                     entry.styleKey(),
-                    resolveDefaultFontSizeHalfPoints(entry.styleKey()),
-                    "Calibri",
-                    isBoldStyle(entry.styleKey())
+                    fontSizeHalfPoints,
+                    fontFamily,
+                    bold
             );
         }
     }
@@ -48,8 +56,12 @@ public final class DocxMasterStyleRegistry {
         registerParagraphStyle(styles, styleKey, fontSizeHalfPoints, fontFamily, bold);
     }
 
+    /**
+     * @deprecated CE-K02: style-key heuristics removed from production path; kept for demo asset generators.
+     */
+    @Deprecated
     public static int resolveDefaultFontSizeHalfPoints(String styleKey) {
-        return resolveHeadingSize(styleKey);
+        return 20;
     }
 
     public static String resolveWordStyleId(String styleKey) {
@@ -57,6 +69,40 @@ public final class DocxMasterStyleRegistry {
             return "Normal";
         }
         return styleKey.trim();
+    }
+
+    private static String resolveFontFamily(MasterStyleTypography typography, MasterStyleCatalog catalog) {
+        if (typography != null) {
+            if (typography.eastAsia() != null && !typography.eastAsia().isBlank()) {
+                return typography.eastAsia();
+            }
+            if (typography.ascii() != null && !typography.ascii().isBlank()) {
+                return typography.ascii();
+            }
+            if (typography.hAnsi() != null && !typography.hAnsi().isBlank()) {
+                return typography.hAnsi();
+            }
+        }
+        if (catalog != null && catalog.hasDocDefaults()) {
+            if (catalog.docDefaults().eastAsia() != null) {
+                return catalog.docDefaults().eastAsia();
+            }
+            if (catalog.docDefaults().ascii() != null) {
+                return catalog.docDefaults().ascii();
+            }
+        }
+        // Only when catalog lacks typography + docDefaults (K02-C7 path for registration).
+        return null;
+    }
+
+    private static int resolveFontSizeHalfPoints(MasterStyleTypography typography, MasterStyleCatalog catalog) {
+        if (typography != null && typography.hasFontSize()) {
+            return typography.fontSizeHalfPoints();
+        }
+        if (catalog != null && catalog.hasDocDefaults() && catalog.docDefaults().hasFontSize()) {
+            return catalog.docDefaults().fontSizeHalfPoints();
+        }
+        return 0;
     }
 
     private static void registerParagraphStyle(
@@ -86,31 +132,11 @@ public final class DocxMasterStyleRegistry {
             fonts.setAscii(fontFamily);
             fonts.setHAnsi(fontFamily);
             fonts.setCs(fontFamily);
+            fonts.setEastAsia(fontFamily);
         }
         if (bold) {
             runProperties.addNewB();
         }
         styles.addStyle(new XWPFStyle(ctStyle));
-    }
-
-    private static boolean isBoldStyle(String styleKey) {
-        return switch (styleKey) {
-            case "Heading1", "Heading2", "Heading3", "ScheduleTitle", "TableHeader", "DefinedTerm" -> true;
-            default -> false;
-        };
-    }
-
-    private static int resolveHeadingSize(String styleKey) {
-        return switch (styleKey) {
-            case "Heading1" -> 32;
-            case "Heading2" -> 28;
-            case "Heading3" -> 24;
-            case "ScheduleTitle" -> 26;
-            case "TableHeader" -> 20;
-            case "DefinedTerm" -> 20;
-            case "SignatureBlock" -> 20;
-            case "ClauseBody", "BodyText" -> 20;
-            default -> 20;
-        };
     }
 }

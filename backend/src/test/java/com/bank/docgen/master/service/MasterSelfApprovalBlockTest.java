@@ -69,6 +69,7 @@ class MasterSelfApprovalBlockTest {
                 groupAccessService,
                 managementUserDisplayService,
                 new SelfApprovalGuard(),
+                new com.fasterxml.jackson.databind.ObjectMapper(),
                 4096L
         );
         masterId = UUID.randomUUID();

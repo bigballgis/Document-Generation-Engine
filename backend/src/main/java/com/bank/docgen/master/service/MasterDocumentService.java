@@ -19,6 +19,7 @@ import com.bank.docgen.master.persistence.MasterRevisionLineRepository;
 import com.bank.docgen.master.rendering.DocxAnchorExtractor;
 import com.bank.docgen.sharedkernel.lifecycle.SelfApprovalGuard;
 import com.bank.docgen.sharedkernel.security.ManagementSessionClaims;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
@@ -50,6 +51,7 @@ public class MasterDocumentService {
             GroupAccessService groupAccessService,
             ManagementUserDisplayService managementUserDisplayService,
             SelfApprovalGuard selfApprovalGuard,
+            ObjectMapper objectMapper,
             @Value("${docgen.master.max-docx-upload-bytes:" + DEFAULT_MAX_DOCX_UPLOAD_BYTES + "}") long maxDocxUploadBytes
     ) {
         this.objectStoragePort = objectStoragePort;
@@ -76,7 +78,8 @@ public class MasterDocumentService {
                 docxUploadSupport,
                 access,
                 views,
-                revisions
+                revisions,
+                objectMapper
         );
     }
 

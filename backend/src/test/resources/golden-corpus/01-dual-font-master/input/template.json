@@ -1,5 +1,5 @@
 {
   "bindings": {
-    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"placeholder\"}]}]}"
+    "BODY": "{\"nodes\":[{\"type\":\"paragraph\",\"styleRef\":\"ClauseBody\",\"children\":[{\"type\":\"textRun\",\"value\":\"双字体母版正文 — Fangsong clause body\"}]},{\"type\":\"paragraph\",\"children\":[{\"type\":\"textRun\",\"value\":\"继承母版 docDefaults 宋体段落\"}]}]}"
   }
 }

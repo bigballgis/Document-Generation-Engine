@@ -161,10 +161,8 @@ final class DocxPlainAnchorParagraphSupport {
             return;
         }
         String[] lines = sanitized.split("\n", -1);
+        // CE-K02: do not hard-code Calibri/10pt/black — inherit master docDefaults / paragraph style.
         XWPFRun run = paragraph.createRun();
-        run.setFontFamily("Calibri");
-        run.setFontSize(10);
-        run.setColor("000000");
         run.setText(lines[0], 0);
         for (int lineIndex = 1; lineIndex < lines.length; lineIndex++) {
             run.addBreak();
